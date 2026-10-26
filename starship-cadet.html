@@ -56646,6 +56646,110 @@ if (P5_CASES5) {
   if (typeof WORK_MECH !== 'undefined') WORK_MECH.p4 = { open() { p4Stage(); } };
   if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip) p4Stage(); });
 }
+// P5. Follow the line (Day 18, Calder; M9's harder stages). A part fault on a line (water, heat, air; power once section
+// 17 has a power line and its fault tables, read with the conduit tester once M19 is trained): the card names the
+// symptom where it's felt (P1's card), never the machine. Its suspects are the cause and one line cause on each of
+// 3-4 other machines along the line, before it and after it (never its twin on the same step); the clues are the flow
+// at each suspect's panel (the pipe kit's gauge), read from section 17's line shares when the case is posted (the
+// same rule as lineFlow, from the recorded conditions: nothing here runs the machines). Full at a machine crosses out
+// it and everything above it; low crosses out everything below it, so the cause is where full turns to low: read the
+// middle and halve the line, and fewer walks is a clever fix. Posted only when the readings are honest (the solver
+// rejects a line with a second drop). The first (when the p5 row opens: 3-pump-1's seal, a drip under the shaft and
+// low all day, slot 29, held a week) shows with Calder's word. Flag case.p5.first.
+const P5_BAND = { sus: [4, 5], clues: [4, 5], fewest: 2, decks: 3 }, P5_SLOT = 29;
+const P5_FIRST = { machine: '3-pump-1', cause: 'seal', decoys: ['3-recycler-1:membrane', '3-filter-1:cartridge', '5-pump-1:pump', '5-valve-2:valve'] };
+const p5Tool = line => line === 'power' ? 'tester' : 'pipekit';
+const p5Line = (m, f) => (f && f.line && typeof MACHINE_LINKS !== 'undefined' && MACHINE_LINKS[f.line] && typeof lineOn === 'function' && lineOn(f.line)) ? caseLine(m.id, f.line) : null;
+// the step each machine is on (the line's order: parallel machines share one), along the path through machine id
+function p5Steps(line, ids) { const p = typeof linePath === 'function' ? linePath(line, ids[ids.length - 1]) : null, out = {}; (p || []).forEach((s, i) => s.forEach(x => { out[x] = i; })); return out; }
+// the flow read at a machine (section 17's lineFlow, but from the machines' recorded conditions: no machinesNow)
+function p5Flow(line, id) {
+  const p = linePath(line, id); if (!p) return null;
+  const c = {}; for (const k in SHIP.machines) c[k] = machEff(SHIP.machines[k]);
+  let f = 1; for (const s of p) f *= Math.min(...s.map(x => lineShare(line, x, c)));
+  return Math.round(f * 1000) / 1000;
+}
+function p5Pick(j, seed, band, prefer) {
+  const m = machineById(j.machine), f = caseCauses(m).find(x => x.id === j.cause), ids = p5Line(m, f) || [], st = p5Steps(f.line, ids), n = caseBandOf('p5', band).sus[1] - 1;
+  const pool = [];
+  for (const id of ids) {
+    const x = id !== m.id && st[id] !== st[m.id] && machineById(id), pp = x && panelPlace(id);
+    if (!pp || placeTier(pp) > caseTier()) continue;
+    const fs = caseCauses(x).filter(g => g.part && g.line === f.line && !g.load);
+    if (fs.length) pool.push({ id, fs, after: st[id] > st[m.id], pre: prefer ? prefer.findIndex(s => s.startsWith(id + ':')) : -1 });
+  }
+  const order = pool.map((x, i) => [x.pre >= 0 ? x.pre - 9 : schedU(seed, i, 892), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  const out = [], take = x => { const g = x.pre >= 0 && x.fs.find(y => prefer[x.pre] === x.id + ':' + y.id) || x.fs[Math.floor(schedU(seed, out.length + 7, 892) * x.fs.length)]; out.push(x.id + ':' + g.id); };
+  const first = [order.find(x => !x.after), order.find(x => x.after)].filter(Boolean);   // one each side of it, where the line has them
+  for (const x of first) if (out.length < n) take(x);
+  for (const x of order) if (out.length < n && !first.includes(x)) take(x);
+  return out;
+}
+// one reading per suspect's machine, at its panel: full (.8+) crosses out the suspects at or above it, low those below
+function p5Clues(j, cause, sus) {
+  const m = machineById(j.machine), f = caseCauses(m).find(x => x.id === cause), ids = p5Line(m, f) || [], st = p5Steps(f.line, ids), at = s => caseSusAt(s) || m.id;
+  return sus.map((s, i) => { const id = at(s), fl = p5Flow(f.line, id), full = fl != null && fl >= .8;
+    return { id: 'r' + i, type: 'gauge', src: { m: id, line: f.line, flow: fl, tool: p5Tool(f.line) }, at: panelPlace(id),
+      kills: sus.filter(x => full ? st[at(x)] <= st[id] : st[at(x)] > st[id]) }; });
+}
+function p5Text(c, k) {
+  if (k.type !== 'gauge' || !k.src || !k.src.m || k.src.flow == null) return null;
+  const w = typeof flowWord === 'function' ? flowWord(k.src.flow) : k.src.flow >= .8 ? 'full' : 'low';
+  return caseText('case.p5.read', '{machine}: flow {word}.', { machine: caseMachName({ machine: k.src.m }), word: w });
+}
+function p5View(c) {                                     // the line in order, each reading filled in as you take it
+  const j = caseJob(c), m = j && machineById(j.machine), f = m && caseCauses(m).find(x => x.id === c.cause), ids = (m && p5Line(m, f)) || [];
+  const read = {}; for (const k of c.clues) if (c.got.includes(k.id) && k.src && k.src.m) read[k.src.m] = k;
+  const rows = ids.filter(id => c.clues.some(k => k.src && k.src.m === id) || ids.indexOf(id) === 0).map(id => ({ text: caseMachName({ machine: id }), sub: read[id] ? (flowWord(read[id].src.flow)) : '?', ...(read[id] && read[id].src.flow < .8 ? { mark: 'hot' } : {}) }));
+  return [{ kind: 'text', text: caseText('case.p5.head', 'The line, top to bottom (the flow where you\'ve read it)') }, { kind: 'list', rows }];
+}
+function p5Tick(c, j) {
+  if (!c.wait || !c.train) return;
+  const now = shipNow(), d = caseDay(now), mn = now % 1440;
+  if (!caseOpened('p5') || !playerShiftOn(d) || mn < DAY_SHIFT[0] || mn >= 900) return;
+  const row = ladderRow('p5'); c.by = (row && ladderTeacher(row, d)) || 'calder';
+  caseShow(c, j);
+  const said = typeof worksVoice === 'function' && worksVoice(c.by, 'train.p5.word');
+  if (said && typeof worksSayAll === 'function') worksSayAll(c.by, said);
+  else worksSay(c.by, 'Here\'s a long one. ' + c.title.replace(/^Head-scratcher: /, '') + '. Follow the line: read the middle, then halve it. Where full turns to low, that\'s your fault.');
+}
+// staged when the row opens (retried each ship hour): 3-pump-1's seal (its machine faulty now, as a reserved job's
+// would be within the hour, so the readings are honest); none fair: the first roll case is your first
+function p5Stage() {
+  if (flag('case.p5.first') !== undefined || !SHIP.works || !caseOpened('p5')) return;
+  const W = SHIP.works, C = caseState(); if (!C) return;
+  if (W.tr && W.tr.p5 !== undefined) { flagSet('case.p5.first', 'none'); return; }
+  const m = machineById(P5_FIRST.machine), f = m && caseCauses(m).find(x => x.id === P5_FIRST.cause);
+  if (!f || !p5Line(m, f) || SHIP.jobs.some(j => j.machine === m.id && j.status !== 'done' && (j.claimedBy || j.case || j.reserved))) { flagSet('case.p5.first', 'none'); return; }
+  const now = shipNow(), d = caseDay(now), id = jobReserve(m.id, d, now % 1440, P5_SLOT, { train: 'p5', tier: 2, until: now + 7 * 1440, cause: f.id }), j = id && SHIP.jobs.find(x => x.id === id);
+  if (!j) return;
+  delete j.make; delete j.makeMins; j.cause = f.id; j.parts = [f.part]; j.train = 'p5';
+  const s = SHIP.machines[m.id]; if (s) { s.cond = Math.min(s.cond, 40); s.state = machineState(s.cond); j.faulted = true; }
+  const seed = machSeed('p5-first'), sus = [f.id].concat(p5Pick(j, seed, 'T3', P5_FIRST.decoys)).map((x, i) => [schedU(seed, i, 893), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  const clues = p5Clues(j, f.id, sus), r = caseSolve(sus, clues, 'T3', f.id, 'p5');
+  if (r.why) { flagSet('case.p5.first', 'none'); jobRelease(P5_SLOT); return; }
+  const c = { id: 'c' + j.id, job: j.id, kind: 'p5', k: 0, band: 'T3', cause: f.id, sus, fewest: r.fewest, clues, got: [], crossed: [], known: [], calls: [], fits: 0, posted: now, until: 0,
+    wait: true, taken: false, talk: false, long: false, train: true, told: false, title: '' };
+  C.open.push(c); j.case = c.id; C.n++; flagSet('case.p5.first', c.id);
+  MACH_REV++;
+}
+if (P5_CASES5) {
+  CASE_KINDS.p5 = { name: 'Follow the line', ladder: 'p5', noScan: true,
+    fits: (cause, m) => !!cause.part && !!cause.line && !cause.load && /^T[34]$/.test(caseBand(caseRank())) && (p5Line(m, cause) || []).length >= 4
+      && (cause.line !== 'power' || !!(SHIP.works && SHIP.works.tr && SHIP.works.tr.m19 !== undefined)),   // the power stage waits for M19 (the conduit tester)
+    suspects: (j, seed, band) => { if (j.symptom) throw new Error('traced');   // a traced fault (M9) stays 24i's
+      return [j.cause].concat(p5Pick(j, seed, band)); },
+    clues: (j, cause, sus) => p5Clues(j, cause, sus),
+    bands: { T3: P5_BAND, T4: P5_BAND },
+    sus: p1Sus, title: (c, j) => caseText('case.title.p5', '{machine} {shows}', { machine: p1Where(c).where, shows: p1Where(c).shows }), card: p1Card, start: p1Start, wrong: p1Wrong,
+    text: p5Text, view: p5View, tick: p5Tick,
+    hint: c => caseText('case.hint.p5.1', 'Read the flow in the middle of the line. Full there? The fault\'s further down. Low? Further up.') };
+  CHIEF_NOTES.p5 = { title: 'Follow the line', key: 'chief.p5', lines: [
+    'Full at a machine: it and everything above it are fine.',
+    'Low at a machine: the fault is there or above it. Read the middle and halve the line.'] };
+  if (typeof WORK_MECH !== 'undefined') WORK_MECH.p5 = { open() { p5Stage(); } };
+  if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip) p5Stage(); });
+}
 // ---- end of slot: Puzzles seat ----
 
 // ---------------------------------------------------------------------
