@@ -4,6 +4,20 @@
 Read CLAUDE.md, this note, then the bottom of TEAM.md on claude/lead-37 (from "LEAD 37 started", incl. the "CURRENT SEATS" line ~00:12 UTC Oct 26). plans/handover-lead36.md has older background and gotchas.
 Lead 37 = session_019GcNZ4GGEqfiuYDYnue7nX, branch claude/lead-37, hourly check-in trig_01Wyf6MPuWdJCXF7DMdQoixq (57 * * * *): disable it when you take over and make your own.
 
+## Latest (~04:45 UTC Oct 26, 12:45 AM Eastern) READ THIS FIRST
+- LIVE: 0.93.1 on Playtest 3HqM5XiXaHXzgrpq7JbesJ v5 + Dev 9ZWAgqiZCvkJvVjjhjVkEr v5; claude/integration = b957b92d. User's current-save link 6daNCLCJAcsLCZn27CEthq (0.92.2): NEVER publish over it. User learned Dev links share one save slot (starship-cadet-save-dev) and Playtest links another; offered "save slots / download-load my save" for 0.93.2: ANSWER PENDING.
+- 0.93.2 is being built (no round yet). Merge set for BM18 (session_01A3S2VBMYmTt2wCZa8ej7XR), all reviewed by RV18 (session_01PMfvrCN6StPzwVSPGX7ijH):
+  1. FX24 claude/trad-0932 (TRAD_0932_ON, ON): six take turns, 14 new traditions, tasting table rework, tea retired. Done, waiting RV18 final. FX24-2 (walking time) known-old for 0.93.2.
+  2. FX22b claude/event-swap (EV_SWAP_ON, OFF in 0.93.2: visit not built): calendar swap, Basil beat 4 welcome dinner (outside switch, needed), fridays_check excuse; one long Day 26 swap line to shorten. FX22b ~52%, handover-fx22b.md 9ab920c8.
+  3. FX25 claude/comet (EV_COMET_ON, ON, standalone Monday Day 22 21:30-22:40, from EP1 Part A) + SD1 claude/sound-comet b6569d19 (comet track + turn swell). FX25 building c.1-c.4; must also make old Friday/Mail comet-day lines agree with Day 22.
+  4. FX20 claude/inspection (INSPECT_ON, ON): bunk inspection walk; waiting SW2 words; FX20 ~58% (handover-fx20.md d712a821).
+  5. FX26 claude/storm-sat (STORM_SAT_ON, ON): Captain stage clipping fix; storm Saturday Day 13 work shift 09:00-17:00, storm-only board, Works called in, lantern supper replaces dinner, "Storm stories by torchlight" (Oduya, 21:00, CS1 words plans/storm-stories-words.txt c7e67663).
+  6. FX24 claude/tray-seat: "Take a seat" button above "Put down" with a tray in the mess.
+  Then: HUD 0.93.2, full six-runner round (hire fresh CR3 first, plans/handover-cr3.md), PUB1 (session_01GnpjFR6oumvuvTrmcXSqeg) publishes BOTH links on GO; ask the user before fast-forwarding integration.
+- Events plan page https://claude.ai/artifact/7w7UgrR71rk5VknPhBExSc (EP1 session_01LjeoeX6qpCuwTV5UNVNwV5, claude/events-plan-2 4d31bde2): user answered all 10 = recommended (db answers/user). Visit (Days 16-19) and Veyli vessel (Days 27-30) are built AFTER 0.93.2; turning EV_SWAP_ON on goes with the visit.
+- Traditions pages: round 1 DfXQg3Ff4eX2hfoiTA86Jh, round 2 EFioZPqoM6X6BT7obruTgx (answered). User rule for every tradition/event moment: a host you tap to join, a simple fitting pose, unique dialogue.
+- Retired: CS1 (handover-cs1.md a0e6cae4), FX17, BM17, old CR6, SD1 idle (handover-sound.md 7c6bb0e5; farewell song for the visit later). Writers: SW2 session_017dLaLFBnRUQin3PQEQq6so (small), fresh CS2 for big writing.
+
 ## State (~02:00 UTC Oct 26, 10 PM Eastern Oct 25)
 - LIVE: 0.93.1 on Playtest 3HqM5XiXaHXzgrpq7JbesJ v5 + Dev 9ZWAgqiZCvkJvVjjhjVkEr v5 (claude/staging-0.93.1 b957b92d, game 6cd54ab9...8eee). claude/integration = b957b92d. User's current-save link 6daNCLCJAcsLCZn27CEthq (0.92.2): NEVER publish over it.
 - 0.93.0 = sound + music (SD1 core, FX20 activities, FX22b music + Music app) + reserved-job fix (FX17). 0.93.1 = promo-arrow fix (RV16).

@@ -1323,3 +1323,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~04:36 UTC: **USER request**: with a tray in the mess hall near an empty seat, a 'Take a seat' button (same size, just above 'Put down') sits you at the nearest mess seat → FX24 (claude/tray-seat from b957b92d, HUD 0.93.2-y.N), RV18 reviews. Into 0.93.2.
 - ~04:37 UTC: CS1 storm stories words → FX26 (plans/storm-stories-words.txt c7e67663). CS1 ~55% handed over (plans/handover-cs1.md a0e6cae4); idle for good. Next writer: fresh CS2 from that note when needed (or SW2 for small words).
 - ~04:38 UTC: CR6 fridays on event-swap 4e13d5e3: OFF OK; ON 1 real FAIL: Day 26 swap line too long (>90 chars, friFill drops it) → FX22b shortens (swap is off in 0.93.2 anyway).
+- ~04:45 UTC: **Lead 37 handing over (memory)**; user reminded. handover-lead37.md 'Latest' rewritten; starting lead 38.
