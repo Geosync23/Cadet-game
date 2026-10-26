@@ -4,6 +4,21 @@ Check runner 5. Share (plans/testing-guide.md, six-way split): `day_check` Days 
 career. Own `CADET_WORK=/tmp/work-cr5`, `CADET_CHROME=/opt/pw-browsers/chromium`, one browser check at a time, each
 on a copy of the game in `/tmp/work-cr5/new.html` (sha256 checked after copying).
 
+## 0.93.3 full round (2026-10-26, ~21:42-22:24 UTC, for BM18, lead 40)
+
+- Fresh CR5 session_01UH1U1UpsoL7viYaRRBu2bZ. `claude/staging-0.93.3` 19400976; checks from a worktree of 19400976.
+  `starship-cadet.html` sha256 `ec93b94dfe01d8a9f392257bb1f026ea8b1ca1c0cc24bce3d154ea3d2bcad085` (matches BM18).
+- OLD: d9c7e5f0 (0.93.2, `c99ea59c...d5d3`); not needed (no new FAILs).
+- Share rebalanced by BM18 for this round: interactions_check (whole) and career only. Run side by side, each in its
+  own CADET_WORK (`/tmp/work-cr5`, `/tmp/work-cr5b`).
+
+| Check | Result | Exit | Time | Key lines |
+|---|---|---|---|---|
+| `interactions_check.py BUILD` | OK | 0 | 2449 s | `INTERACTIONS CHECK OK` |
+| `career_check.py BUILD` | FAIL (known-old only) | 1 | 243 s | only FAIL: `busy: "Relied on" before Day 5` (backlog 12 / FX28-1) |
+
+No NEW FAILs. Setup proof before the round: sound_check on staging acbb52e0 (game e95cfe76...edd7) OK, 228 s.
+
 ## Early job for lead 39: FX24's doors change (2026-10-26, 19:09 UTC, for FX24, RV18, BM18, lead 39)
 
 - `claude/doors-3way` 3051de4e ("Handover note: the Doors setting (FX24)"); checks from a worktree of 3051de4e.
