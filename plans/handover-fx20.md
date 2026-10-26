@@ -86,3 +86,10 @@ Branch claude/inspection, head after this note. Tell lead 38 (session_01G2y9crUv
   by 07:15. Live part (Deck 4's run): the walker inside each room in order, room a by 06:31, 2+ minutes each, done by 07:15.
 - Measured (i.6): day_check 4, 11, 18 live: a@06:20-06:23, e 06:36, b 06:41, g 06:45, c 06:49, h 07:01, f 07:07, d 07:12,
   2-3 minutes inside each.
+
+## FX20b: after RV19's PASS (i.7-i.9, all in 0.93.2, live with INSPECT_ON on)
+- i.7 (e45b7fe, RV18 PASS): a junior hosting an early rec tradition that day (recHostEarly: Rina's Dawn swim, Tue/Thu 06:15) hosts it and doesn't stand; the bar rota's juniors keep their lie-in (Madsen was under 6 h after the 23:00 close). events_check's cake test reads every pop-up after the second tap (the birthday's thanks could cover "You've had your slice").
+- i.8 (1872153): the planner's inspection lines only from Day 1 (the machines' wear history was planning the Thursday before boarding). cadet_test 0.93.1 vs on: Oona's repair remark differs in f/g/h, EXPECTED: machNorm averages the plans of Days 1-7, which includes Day 4's inspection, so Deck 4's light relays wear a little slower.
+- i.9 (5793626, RV18 PASS): when the officer gives your result in person, a player lying in their bunk gets up first (arrows_check week: the follower tapped the bunk under the berth's arrow at 06:29 and lay there all day).
+- Found, not mine, reported to lead 38/BM18: on staging, the chore "Fix an extractor hose clamp" points at the Deck 5 workbench (5-shop-5), and a tap there starts the hobby craft, not the chore (arrows_check week Day 8).
+- Gotchas: run cadet_test alone (under heavy load f/g/h showed false differences); `pkill -f` with the name in the same shell line kills the shell itself; use each check's own branch version (staging's events_check differs).
