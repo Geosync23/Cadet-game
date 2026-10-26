@@ -4788,6 +4788,9 @@ DECKS[5] = {
     // utility closet: the deck's power junction and its light relays
     place('u', 'breakerCabinet', 1.66, 1.5, 'e', { w: .7, it: IT('Breaker cabinet', 'Deck 5\'s power junction. The Works bay alone has its own row.') });
     wallFixed('w', 'extBracket', 's', 5.5, { hitW: .4, it: { ...IT('Fire extinguisher', 'Red, full, and checked every week: the tag says so. It comes off the bracket for the fire drill.'), drill: 'ext' } });   // 0.47.0: the drill (m3)
+    // Step 5 (VB2 for B5, P5_STEP5 only; place and the chair kit draw no R(), so nothing after it changes): a visitor chair at the east end of
+    // Calder's desk, facing her (5-office-visit-sit, beside the standing 5-office-visit-1); the chair kit blocks nothing
+    if (typeof P5_STEP5 !== 'undefined' && P5_STEP5) place('o', 'chair', 2.45, 1.35, 'w', { it: IT('Visitor chair', 'The chair across the corner of the Chief\'s desk. Nobody sits in it unless she says so.') });
     wallFixed('w', 'bulkheadWheel', 's', 8.5, { hitW: .5, it: { ...IT('Bulkhead wheel', 'Four turns closes and dogs the bulkhead door by the bay. You turn it for the pressure drill, and hope never for real.'), drill: 'door' } });
     wallFixed('u', 'liftBrake', 'w', .5, { hitW: .6, it: { ...IT('Lift brake', 'The main lift\'s manual brake release, by the ladder. Turn it to let a stuck car down to the next deck.'), brake: true } });   // 0.47.0: incidents (m6)
     wallFixed('=', 'valvePanel', 'n', VALVE_PANELS[5].along, { hitW: 1.5, it: { ...IT('Pipe valves', 'Three valves on the main water line, numbered from upstream. Close the one before a leak.'), valves: 5 } });
@@ -7411,6 +7414,7 @@ DECKS[4].keepsakes = { room: 'a', bed: '4-B1-4', place: '4-B1-4-keepsake', slots
 DECKS[5].places.push(
   { id: '5-office-visit-1', type: 'event', event: 'office', at: [12, 1], xy: [12.4, 1.35], face: 'w', pose: 'stand', room: 'o' },
   { id: '5-office-stand-1', type: 'event', event: 'office', at: [10, 1], xy: [10.6, 1.35], face: 'e', pose: 'stand', room: 'o' },
+  { id: '5-office-visit-sit', type: 'event', event: 'office', at: [12, 1], xy: [12.45, 1.35], face: 'w', pose: 'sit', y: .5, room: 'o' },   // Step 5 (VB2 for B5): the visitor chair's seat, facing Calder (the chair itself only with P5_STEP5)
 );
 {
   const fx = 2.95, fz = 2.5, at = (c, r, x, z) => ({ at: [c, r], xy: [x, z], face: Math.round(Math.atan2(fx - x, fz - z) * 180 / Math.PI) });
@@ -60256,7 +60260,8 @@ function makeCharacter(spec, finish = bake) {          // finish: what to do wit
   }
   if (s.pin && !plain) part(rig.chest, cylG(.022, .022, .014, 14), gold, -.085 * bw, .21, .168 * bw, 1, 1, 1, Math.PI / 2, 0, 0);   // 24l (E2): the fault-finder pin, right breast opposite the badge (merged in the chest)
   part(rig.chest, cylG(.075, .085, .05, 16), uniDk, 0, .33, 0);
-  for (let i = 0; i < (plain ? 0 : Math.min(4, s.rank + 1)); i++) { const a = .55 + i * .32; part(rig.chest, GEO.sph, gold, Math.sin(a) * .083, .33, Math.cos(a) * .083, .011, .011, .011); }
+  for (let i = 0; i < (plain ? 0 : Math.min(s.bar ? 2 : 4, s.rank + 1)); i++) { const a = .55 + i * .32; part(rig.chest, GEO.sph, gold, Math.sin(a) * .083, .33, Math.cos(a) * .083, .011, .011, .011); }
+  if (s.bar && !plain) { const a = .55 + 2 * .32; part(rig.chest, GEO.box, gold, Math.sin(a) * .084, .33, Math.cos(a) * .084, .036, .013, .011, 0, a, 0); }   // Step 5 (VB2 for B5): a Senior Officer's bar in place of the third pip (spec.bar; merged with the collar, no draw call)
   part(rig.chest, cylG(.05, .055, .08, 12), skin, 0, .37, 0);
   // head and face
   const h = rig.head = pv(rig.chest, 0, .4, 0);
