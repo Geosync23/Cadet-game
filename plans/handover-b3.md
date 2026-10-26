@@ -10,16 +10,16 @@
 - Job slots reserved: 42 (the training's job), 43 (jobs marked for a shutdown).
 
 ## Judgement calls (overrule any)
-- Branches: galley (Galley + Mess, keep Galley), gym (Gym + Laundry, keep Laundry) on 6-junction-1; junior (Junior common room + Music room, keep Music) and lounge (Bow lounge + Call booths, keep booths) on 6-junction-2; science (Survey lab, Sample lab, Observatory; keep Sample lab, Observatory) on 2-breaker-1 (and 2-junction-1); bridge (Observation room + Ready room, keep Ready room) on 1-junction-1; works (Tea corner + Machine shop, keep shop) on 5-inverter-1 (and Deck 5's batteries). Not yet agreed with the deck architect.
+- Branches: galley (Galley + Mess, keep Galley), gym (Gym + Laundry, keep Laundry) on 6-junction-1; junior (Junior common room + Music room, keep Music) and lounge (Bow lounge + Call booths, keep booths) on 6-junction-2; science (Survey lab, Sample lab, Observatory; keep Sample lab, Observatory) on 2-breaker-1 (and 2-junction-1); bridge (Observation room + Ready room, keep Ready room) on 1-junction-1; works (Tea corner + Machine shop, keep shop) on 5-inverter-1 (and Deck 5's batteries). Confirmed by B3 (no deck architect seat, lead 39): every room exists in its deck's map (checked in the game: DECKS[n].rooms), each junction is in its own utility room, and no branch holds a cabin, a washroom or a work station's own room except the galley (cooks keep working).
 - Bookable starts 08:00-20:00 (there is no lunch; breakfast and dinner are the meal clashes). One hour long.
 - A shutdown closes only places taken through `take()` (leisure, meals, traditions' crowd spots); people working there (the cooks) carry on.
-- Question 3 (unanswered): "allowed, marked plainly, crew grumble". `SD_MEALS_OK = false` refuses clashing hours instead.
+- Question 3 (answered by the user, as recommended): "allowed, marked plainly, crew grumble". `SD_MEALS_OK = false` refuses clashing hours instead.
 - The training is self-led (no "watch" step): Calder's talk at the junction, then the screen; she doesn't walk beside you to the device (worksEscort is 24 core's, and S5-2 owns its one line there).
 - More than six affected: one "Post a ship notice" button warns all (kept as `all: true` on the booking).
 - Reputation: done +2; Brennan not told in person -1; a meal/tradition hour -1; missed -3.
 
 ## Loose ends
-- Not built: the junction room going dark (needs per-room lighting; draw-call and pixel risk; the performance engineer's call).
+- Not built: the junction room going dark (lead 39: skipped for Step 5, later polish).
 - Words: every line is a stand-in through `worksText` keys `sd.*` and Calder's `train.m18.*` work lines; the head writer's `content/works/m18.lines` and a `train.m18` meeting replace them (the stand-in meeting is only made when neither exists).
 - No Dev-mode preset yet (section 25 is the Dev mode seat's); controller_check and saves_check set the state up on paper instead.
 - S5-6's P9 (a shutdown clash) can read `SHIP.works.sd` and `sdBranches()`.

@@ -205,7 +205,7 @@ The bottom of the ship: short, narrow and warm, with a hum you feel through your
 - **The engine watch room** sits at the end of the overlook with its own window onto the coils: two armchairs, a tea table, a kettle, a stack of old engine logs and a heater nobody needs.
 - **Engine control** runs the reactor and the drive, with glass onto the lobby and the reactor. Tier 3.
 - **The reactor** fills the bow in its shielded drum. Its shielded door opens off the lift lobby. Tier 4.
-- **Service layer:** two power junctions by the spine, where the reactor's output splits for every deck above (tier 3; some jobs need a shutdown, so you pick a quiet hour and warn whoever loses power), and the lowest crawlways along both hulls from the engine room to the reactor (tier 3).
+- **Service layer:** two power junctions by the spine, where the reactor's output splits for every deck above (tier 3; some jobs need a shutdown, so you pick a quiet hour and warn whoever loses power), and the lowest crawlways along both hulls from the engine room to the reactor (tier 3). Shutdowns (Step 5, M18): a shutdown cuts one branch of one to three rooms, never a deck; it's booked the day before and settles at 22:00. A meal or event hour may be booked: the planning screen marks it plainly and the crew grumble (the user's answer to Step 5's question 3, 2026-10-26).
 - No windows to space anywhere. The spine ends here.
 
 

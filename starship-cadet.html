@@ -58541,7 +58541,7 @@ onSim('job', n => {                                      // B: Torres comes by a
 // The tables are built on first use (sdBranches), so a plan made while the file is still loading never meets an
 // uninitialised name; the save's sd is read back below and any plan already made for a settled day is dropped.
 const SD_SLOT = 43, SD_TRAIN_SLOT = 42, SD_SETTLE = 1320, SD_LEN = 60, SD_HOURS = [480, 1200];   // settles at 22:00; an hour; bookable from 08:00 to 20:00 starts (breakfast and dinner included: question 3)
-const SD_MEALS_OK = true;                                // question 3 (unanswered; the spec's recommendation): meal and tradition hours may be booked, marked plainly, and the crew grumble. false: those hours can't be picked
+const SD_MEALS_OK = true;                                // question 3 (the user's answer, the spec's recommendation): meal and tradition hours may be booked, marked plainly, and the crew grumble. false: those hours can't be picked
 const SD_KINDS = new Set(['junction', 'powerjunction', 'inverter', 'battery']);
 var SD_B = null;                                         // var: read by sdBranches before this line has run
 function sdBranches() {                                  // { id: { junction, name, rooms: [[deck, room]], keep: [[deck, room]] } } (rooms agreed with the deck architect: to confirm)
