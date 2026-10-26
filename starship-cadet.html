@@ -20569,6 +20569,7 @@ const flowWord = f => f >= .8 ? 'full' : f >= .5 ? 'low' : 'very low';
 // is a repair on m, posted in hour h, traced? (a line machine, the line real, you an Officer trained in tracing, at your tier, about half)
 function traceFor(m, h) {
   const line = lineOf(m.id), d = Math.floor(h / 24) + 1;
+  if (line === 'power') return null;                   // (B2, lead 39) the power line (24v, P5_M19) is read with the conduit tester (S5-6's P5), never the pipe kit's trace
   return !!line && lineOn(line) && playerTier() >= 2 && !!(SHIP.works && SHIP.works.tr && SHIP.works.tr.m9 !== undefined) && jobTier({ machine: m.id }) <= playerTier()
     && (FAULT_CAUSES[m.kind] || []).some(c => c.line === line) && schedU(machSeed(m.id), d, 878) < .5 ? line : null;
 }
@@ -36247,6 +36248,68 @@ const LINES = JSON.parse([
   '{"text":"Logged. Calder will read it. She reads everything.","id":"1c7698u"}]',
   ',"log.serviced":[',
   '{"text":"{machine} serviced","id":"1gorptk"}]',
+  ',"m19.ask.say":[',
+  '{"text":"{time}, the bridge\'s {where}. Power and relays. I\'ll meet you there.","id":"mev86a"}]',
+  ',"m19.card.run":[',
+  '{"text":"Test the conduit run: {where} crawlway","id":"1tsn01g"}]',
+  ',"m19.drill.ans.0":[',
+  '{"text":"Works team at stations.","id":"pwjaum"}]',
+  ',"m19.drill.ans.1.fire":[',
+  '{"text":"Extinguishers out. Hatch covered.","id":"1vjzikm"}]',
+  ',"m19.drill.ans.1.power":[',
+  '{"text":"Junior wing on reserve.","id":"wcnpha"}]',
+  ',"m19.drill.ans.1.pressure":[',
+  '{"text":"Bulkhead dogged. Four turns.","id":"s8xbon"}]',
+  ',"m19.drill.ans.2":[',
+  '{"text":"Bridge copies. Good.","id":"14e7h8u"}]',
+  ',"m19.drill.card":[',
+  '{"text":"The drill: run the Works calls","id":"13sehg2"}]',
+  ',"m19.drill.clean":[',
+  '{"text":"Clean calls. That\'s how it\'s done.","id":"gf1j94"}]',
+  ',"m19.drill.fire":[',
+  '{"text":"Fire teams to the hatch, extinguishers out","id":"em6517"}]',
+  ',"m19.drill.missed":[',
+  '{"text":"We ran it without your calls. Next Wednesday, they\'re yours.","id":"1k30o8h"}]',
+  ',"m19.drill.muster":[',
+  '{"text":"Muster: Works team to stations","id":"1seq7my"}]',
+  ',"m19.drill.ok":[',
+  '{"text":"Muster, act, report. Next time in that order first go.","id":"1b2f7cl"}]',
+  ',"m19.drill.order":[',
+  '{"text":"Muster, then the action, then the bridge. In that order.","id":"9cm8a2"}]',
+  ',"m19.drill.power":[',
+  '{"text":"The junior wing to reserve power","id":"13cyrvt"}]',
+  ',"m19.drill.pressure":[',
+  '{"text":"Dog the bulkhead doors","id":"4poc4c"}]',
+  ',"m19.drill.report":[',
+  '{"text":"Report to the bridge: Works ready","id":"poq1p9"}]',
+  ',"m19.drill.ring":[',
+  '{"text":"Run the Works part of the drill","id":"1ne1qxx"}]',
+  ',"m19.drill.text":[',
+  '{"text":"The bay\'s waiting on you. What\'s the call?","id":"1tu6yas"}]',
+  ',"m19.drill.title":[',
+  '{"text":"Your call, {n} of 3","id":"1n7quhi"}]',
+  ',"m19.drill.toast":[',
+  '{"text":"Drill in ten minutes. You run the Works calls today. Muster hatch, Works bay.","id":"1jrkb4b"}]',
+  ',"m19.run.done":[',
+  '{"text":"Feed tagged and logged. The run\'s sound again.","id":"1h2d5z9"}]',
+  ',"m19.run.feed":[',
+  '{"text":"Deck {deck}: {n}","id":"1o8w933"}]',
+  ',"m19.run.open":[',
+  '{"text":"The inspection box. A feed for each deck above: {text}.","id":"1foexmz"}]',
+  ',"m19.run.option":[',
+  '{"text":"Deck {deck}","id":"g8ri3a"}]',
+  ',"m19.run.pick":[',
+  '{"text":"Which feed reads low?","id":"178bhav"}]',
+  ',"m19.run.tester":[',
+  '{"text":"The tester on each feed:","id":"1w7lzbi"}]',
+  ',"m19.run.wrong":[',
+  '{"text":"That one reads normal. Look at the numbers again.","id":"mkwoa0"}]',
+  ',"m19.side.port":[',
+  '{"text":"port","id":"1256hqp"}]',
+  ',"m19.side.stbd":[',
+  '{"text":"starboard","id":"zebfo8"}]',
+  ',"m19.stage2":[',
+  '{"text":"You\'ve got relays. Next: the conduit runs under Deck 6. Bring your tester.","id":"1i6fifk"}]',
   ',"mail.favour.clock":[',
   '{"text":"My clock | My clock loses a few minutes every day. I\'ve been late twice. Could you take a look?","id":"8uk2v5"}]',
   ',"mail.favour.cold":[',
@@ -58713,14 +58776,14 @@ function runJob(kind, id, t, o = {}) {
   const j = pwrJob('relayswap', id, t, o); if (!j) return null;   // the same shape, then made a conduit run
   const n = runFeeds(id).length;
   Object.assign(j, { id: j.id.replace(/^relayswap/, 'conduitrun'), kind: 'conduitrun', bad: Math.floor(schedU(pwrSeed(), o.key !== undefined ? o.key : worksDay(t), 1061) * n) % n, key: o.key !== undefined ? o.key : worksDay(t),
-    title: worksText('m19.card.run', 'Test the conduit run: {side} crawlway', { side: /-2$/.test(id) ? worksText('m19.side.stbd', 'starboard') : worksText('m19.side.port', 'port') }) });
+    title: worksText('m19.card.run', 'Test the conduit run: {where} crawlway', { where: /-2$/.test(id) ? worksText('m19.side.stbd', 'starboard') : worksText('m19.side.port', 'port') }) });
   j.stops = runStops(j).map(plainStop);
   return j;
 }
 function runStops(j) {
   const m = machineById(j.mach), pp = m && panelPlace(m.id); if (!pp) return [];
-  const F = runFeeds(j.mach), read = F.map((d, i) => worksText('m19.run.feed', 'Deck {deck}: {v}', { deck: d, v: runVolts(j, i) })).join(' · ');
-  return [{ deck: m.deck, placeId: pp, mins: 1, tag: 'open', how: 'look', opts: { secs: 3, text: worksText('m19.run.open', 'The inspection box. A feed for each deck above: {decks}.', { decks: F.join(', ') }) } },
+  const F = runFeeds(j.mach), read = F.map((d, i) => worksText('m19.run.feed', 'Deck {deck}: {n}', { deck: d, n: runVolts(j, i) })).join(' · ');
+  return [{ deck: m.deck, placeId: pp, mins: 1, tag: 'open', how: 'look', opts: { secs: 3, text: worksText('m19.run.open', 'The inspection box. A feed for each deck above: {text}.', { text: F.join(', ') }) } },
     { deck: m.deck, placeId: pp, mins: 1, tag: 'test', how: 'choose', opts: { tool: 'tester', title: worksText('m19.run.pick', 'Which feed reads low?'), text: worksText('m19.run.tester', 'The tester on each feed:') + ' ' + read,
       options: F.map((d, i) => ({ id: 'x' + i, label: worksText('m19.run.option', 'Deck {deck}', { deck: d }) })) } },
     { deck: m.deck, placeId: pp, mins: 2, tag: 'tag', how: 'hold' }];
@@ -58753,7 +58816,7 @@ function pdrillCalls(j) {                                // the three calls, lis
 function pdrillStops(j) {
   const pl = typeof drillPlace === 'function' ? drillPlace('hatch') : null; if (!pl) return [];
   const opts = pdrillCalls(j);
-  return [0, 1, 2].map(k => ({ deck: 5, placeId: pl, mins: 1, tag: 'call', how: 'choose', opts: { title: worksText('m19.drill.title', 'Your call {n} of 3', { n: k + 1 }), text: worksText('m19.drill.text', 'The bay\'s waiting on you. What\'s the call?'), options: opts } }));
+  return [0, 1, 2].map(k => ({ deck: 5, placeId: pl, mins: 1, tag: 'call', how: 'choose', opts: { title: worksText('m19.drill.title', 'Your call, {n} of 3', { n: k + 1 }), text: worksText('m19.drill.text', 'The bay\'s waiting on you. What\'s the call?'), options: opts } }));
 }
 function pdrillStepDone(j, k, res) {
   if (!Number.isFinite(j.wrongs)) j.wrongs = 0;
@@ -58782,7 +58845,7 @@ if (P5_M19 && typeof jobKindAdd === 'function') {
     crew: { can: () => false, mins: 0 } });
   WORK_TICKS.push((now, skip) => {                       // stage 2's word, once; the drill's 14:50 word and arrow, and the all-clear
     const W = SHIP.works; if (!W) return;
-    if (!skip && W.tr.m19 !== undefined && worksStage('m19') >= 1 && hasTool('tester') && !flag('m19.stage2')) { flagSet('m19.stage2', worksDay(now)); worksTeach('m19', 'calder', 'stage2', ['You\'ve got relays. Next: the conduit runs under Deck 6. Bring your tester.']); }
+    if (!skip && W.tr.m19 !== undefined && worksStage('m19') >= 1 && hasTool('tester') && !flag('m19.stage2')) { flagSet('m19.stage2', worksDay(now)); worksTeach('m19', 'calder', 'stage2', [worksText('m19.stage2', 'You\'ve got relays. Next: the conduit runs under Deck 6. Bring your tester.')]); }
     for (const x of SHIP.jobs) if (x.kind === 'pwrdrill' && x.status !== 'done' && now >= x.until) pdrillClose(x, now, skip || worksDay(now) !== x.day);
     const d = worksDay(now), m = now - (d - 1) * 1440, j = weekday(d) === 2 ? pdrillJobOf(d) : null; if (!j || j.status === 'done' || skip) return;
     if (m >= DRILL_TOAST && m < DRILL_END && !j.told) {
