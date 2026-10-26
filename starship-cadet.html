@@ -57011,20 +57011,23 @@ function teamPost(P, w, t) {                             // a plan entry posted 
 const teamYours = j => j.claimedBy === 'you' && !j.youOut;
 const teamStepMins = (j, s) => Math.ceil(s.mins * (j.late ? TEAM_SLOW : 1));
 const teamLabel = j => teamText('team.name.' + j.team_kind, TEAM_NAME[j.team_kind]);
+// your turn's arrow carries the job's id (team: j.id) and goes when the step moves on, when the lead starts without you
+// and at the end (B2 for lead 40, RV20's S2: it stayed for hours after "started without you"); another section's never
+const teamGoalOff = j => { if (typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.team === j.id && typeof clearGoal === 'function') clearGoal(); };
 function teamNext(j, t) {                                // the next step (or the end)
-  j.cur++; j.stepAt = t;
+  j.cur++; j.stepAt = t; teamGoalOff(j);
   if (j.cur >= j.seq.length) return teamEnd(j, t);
   const s = j.seq[j.cur];
   simNote('team', { id: j.id, step: j.cur, by: s.who, kind: s.who === 'you' ? 'turn' : 'step' });
   if (s.who === 'you') {
     try { toast(teamLabel(j), teamText('team.turn.' + s.part, 'Your turn: ' + TEAM_PART[s.part] + '.', { job: teamLabel(j) })); } catch (e) { /* no UI */ }
-    const pl = placeById(j.spots && j.spots.you); if (pl && typeof setGoal === 'function') setGoal({ deck: pl.deck, room: pl.room, label: TEAM_PART[s.part] });
+    const pl = placeById(j.spots && j.spots.you); if (pl && typeof setGoal === 'function') setGoal({ deck: pl.deck, room: pl.room, label: TEAM_PART[s.part], team: j.id });
   } else if (teamYours(j)) worksTeach('m8', j.lead, 'call.' + s.part, null);
   return true;
 }
 // the sequence done: the other machines right, then section 17's finish (yours if you were in it: your stops are done)
 function teamEnd(j, t) {
-  j.cur = j.seq.length; teamOthersRight(j, t);
+  j.cur = j.seq.length; teamOthersRight(j, t); teamGoalOff(j);
   const you = teamYours(j);
   simNote('team', { id: j.id, step: j.seq.length, by: you ? 'you' : j.lead, kind: 'done' });
   if (you) worksTeach('m8', j.lead, 'done', [teamText('team.done', 'That\'s it. Good work, all.')]);
@@ -57037,6 +57040,7 @@ function teamEnd(j, t) {
 function teamLate(j, t) {
   if (!j.youOut && typeof teamYouOut === 'function') teamYouOut(j.id);
   j.late = true; for (const s of j.seq) if (s.who === 'you') s.who = j.lead;
+  teamGoalOff(j);
   simNote('team', { id: j.id, step: j.cur, by: j.lead, kind: 'late' });
   try { toast(teamLabel(j), teamText('team.late', '{name} started without you.', { name: worksFirst(j.lead) })); } catch (e) { /* no UI */ }
 }

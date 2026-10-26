@@ -1875,6 +1875,24 @@ def part_wstap(pw):
         if g.errors: fail('wstap: page errors: ' + ' | '.join(g.errors[:3]))
     finally: g.close()
 
+# ---- a team job's turn arrow (B2 for lead 40, RV20's S2): your turn's arrow goes when the lead starts without you, when
+# the step moves on and at the end; another section's arrow is never cleared (24h's teamGoalOff)
+TEAMGOAL = r"""(() => { setShipNow(22 * 1440 + 540); machinesNow(); const W = worksInit(); W.tier = 2; W.rank = 'officer'; if (typeof GUIDE_ON !== 'undefined') GUIDE.key = '';
+  clearGoal(); const part = Object.keys(TEAM_PART)[0], pl = (DECKS[4].places || []).find(p => p.machine) || DECKS[4].places[0], t = shipNow();
+  const j = { id: 'repro-team', kind: 'team', team_kind: Object.keys(TEAM_NAME)[0], machine: pl.machine || null, deck: 4, status: 'claimed', claimedBy: 'you', lead: 'torres-zeke', team: ['torres-zeke', 'halloran-emeka'],
+    seq: [{ who: 'torres-zeke', part, mins: 5 }, { who: 'you', part, mins: 5 }, { who: 'halloran-emeka', part, mins: 5 }], cur: 0, stepAt: t, start: t, spots: { you: pl.id }, title: 'Repro team job', parts: [], stepsDone: [], mins: 15, done: t + 15, end: t + 15, segsBy: { 'torres-zeke': [], 'halloran-emeka': [] }, machines: [] };
+  SHIP.jobs.push(j);
+  teamNext(j, t); const turn = IX_GOAL ? IX_GOAL.label : null;
+  teamLate(j, t + 16); const late = IX_GOAL ? IX_GOAL.label : null;
+  for (let k = 0; k < 4 && j.cur < j.seq.length; k++) teamNext(j, t + 20 + k); const end = IX_GOAL ? IX_GOAL.label : null;
+  // another section's arrow is never cleared by the team job
+  setGoal({ deck: 3, place: '3-grab-1', label: 'Food, Deck 3' }); const j2 = { ...j, id: 'repro-team-2', cur: 0, seq: j.seq.map(s => ({ ...s, who: s.who === 'torres-zeke' ? s.who : 'you' })), status: 'claimed', claimedBy: 'you', youOut: false, late: false, workDone: null, segsBy: { 'torres-zeke': [], 'halloran-emeka': [] } }; SHIP.jobs.push(j2); teamLate(j2, t + 30); const other = IX_GOAL ? IX_GOAL.label : null;
+  SHIP.jobs = SHIP.jobs.filter(x => !/^repro-team/.test(x.id)); clearGoal();
+  return { turn, late, end, other }; })()"""
+def part_teamgoal(g):
+    a = g.ev(TEAMGOAL); print('  team turn arrow:', a)
+    check(a['turn'] and a['late'] is None and a['end'] is None and a['other'] == 'Food, Deck 3', f"m8: your turn's arrow goes when the lead starts without you and at the end, never another's ({a})")
+
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
@@ -1913,6 +1931,7 @@ with sync_playwright() as pw:
     if not only or 'fix2' in only: print('fix2 (the notes\' words):'); part_fix2_c(g)
     if not only or 't24' in only: part_t24(g)
     if not only or 'fx3' in only: print('fx3 (Making it safe\'s flow, the small lessons):'); part_fx3(g)
+    if (not only or only & {'m8', 'teamgoal'}) and ev("typeof teamGoalOff === 'function' || typeof teamNext === 'function'"): print('teamgoal (a team job\'s turn arrow):'); part_teamgoal(g)
     if not only or 'p925' in only: part_p925(g)
     if not only or 'p925l' in only: part_p925l(g)
     ev("SHIP.works = null")
