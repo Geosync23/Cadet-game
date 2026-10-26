@@ -62023,9 +62023,8 @@ function tap(cx, cy) {
   if (near && atPin && typeof ixPinBooth === 'function' && ixPinBooth()) return;   // FX5: the call booth's pin, over someone in the next booth
   if (tapCrew(cx, cy)) return;                           // a crew member (section 10)
   if (typeof shelfGlowTap === 'function' && shelfGlowTap(cx, cy)) return;   // the shelf lit up for the part you need (section 17, FX3): after the crew, so a tap on someone in front of it is still theirs (RV11)
-  const h = pick(cx, cy);
-  if (!atPin && !(h && (h.object.userData.item || h.object.userData.walker)) && adoorOnMe(cx, cy) && adoorTapSelf()) return;   // a tap on yourself right by a door shut to you is a tap on the door (RV18: low cut-away walls); someone, something or the arrow's pin there first (FX29: pick() never returns you)
-  if (!h) return;
+  const h = pick(cx, cy), meDoor = () => !atPin && adoorOnMe(cx, cy) && (h && typeof jobSpotTap === 'function' && jobSpotTap(h.point) || adoorTapSelf());   // a tap on yourself right by a door shut to you is a tap on the door (RV18: low cut-away walls), where it would only walk you over the floor: anyone, anything, a job's stop or the arrow's pin there first (FX29: pick() never returns you)
+  if (!h) { meDoor(); return; }
   const ud = h.object.userData;
   if (ud.walker && ud.walker.active) {
     const who = ud.walker, s = who.spec;
@@ -62055,6 +62054,7 @@ function tap(cx, cy) {
   }
   if (ud.door && adoorTap(ud.door)) return;             // 0.93.2: Auto doors off, a tap on a door opens it (15b)
   if (typeof playerFloorTap === 'function' && playerFloorTap(h.point)) return;   // section 15: a treadmill, seat or booth with no description of its own
+  if (meDoor()) return;
   const to = nearestOpen(h.point.x, h.point.z, player); playerGo(typeof tapBeside === 'function' ? tapBeside(to) : to);   // the patch (#17): not onto someone standing there
 }
 
