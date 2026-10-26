@@ -482,3 +482,23 @@ Commit `claude/staging-0.93.2` d9c7e5f05e09bf8ad8ee20fe85d0d1cd9a3deca3; game sh
 | p926_check (taken from CR2) | OK (677 s) | P926 CHECK OK, 65 ok lines (its p926_check.py is CR3's 6a527c10 fix, sha256 8886859c) |
 
 No FAILs. CR3: OK.
+
+## 0.93.3
+
+2026-10-26 ~21:45-22:42 UTC, from a worktree of the commit, CADET_WORK=/tmp/work-cr3, one at a time.
+Commit `claude/staging-0.93.3` 1940097643c6e6b5792fe449ef6d31e6227c72e8; game sha256 ec93b94dfe01d8a9f392257bb1f026ea8b1ca1c0cc24bce3d154ea3d2bcad085 (matches BM18's).
+Lead 40 (session_01NXybH7NNqM8M4ngiyidq6m, TEAM b568b165) took over from lead 39 during the round.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | OK (262 s) | DAY CHECK OK |
+| day_check 1 | OK (247 s) | DAY CHECK OK |
+| day_check 5 | OK (240 s) | DAY CHECK OK |
+| day_check 7 | OK (247 s) | DAY CHECK OK |
+| weekend_check | OK (499 s) | WEEKEND CHECK OK |
+| arrows_d_check | OK (56 s) | arrows_d_check: OK |
+| arrows_f_check | OK (28 s) | arrows_f_check: OK |
+| controller_check (all but reach; now incl. "door") | OK (~2010 s) | CONTROLLER CHECK OK, 0 FAIL lines (its loop was stopped to drop the queue; result from the log, not an exit code) |
+| promo_sight_check, sound_check | handed to CR1 (BM18) before they started | CR1: PROMO SIGHT CHECK OK (15 s), SOUND CHECK OK (177 s) |
+
+No FAILs. CR3: OK.
