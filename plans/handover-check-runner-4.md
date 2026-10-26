@@ -32,7 +32,7 @@ One of six check runners. The build master sends a candidate commit + game sha25
 
 ## Loose ends
 - **saves_check migrate, NEW intermittent FAIL on 0.93.2 41c8a7e0** (1 of 4 runs: `window.__first` null then a TypeError at saves_check.py:95; 3 re-runs OK). Reported to BM18 + lead 38 for saves_check's owner. Full output in plans/checks-cr4.md. Watch it in the second pass.
-- Second 0.93.2 pass pending (after FX26's fix for CR6's mech m9 FAIL). If I didn't finish it, start from the build master's newest message.
+- Second 0.93.2 pass DONE (d9c7e5f0, all 8 OK, incl. saves_check over http). The saves_check migrate race was the check's tab switch (FX27's fix b6701992, then served over http); watch it once more next round.
 
 ## How to report
 One line to the build master and the lead: "CR4: OK. <build> <commit>, sha256 <full>. <checks with seconds>. Notes: claude/checks-cr4 <sha>." Any FAIL not on the known list: at once, with the FAIL lines and the OLD run.

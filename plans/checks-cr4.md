@@ -1,5 +1,25 @@
 # Check runner CR4: results
 
+## 0.93.2 round 2 (2026-10-26; after FX26's fix for CR6's mech m9)
+
+- **Candidate:** `claude/staging-0.93.2` d9c7e5f0
+- **starship-cadet.html sha256:** `c99ea59cc753e58b98f06f7fbc0d51eb8cac1da39849f881533adb96917dd5d3` (matches BM18's)
+- **OLD:** b957b92d (0.93.1); not needed, no FAIL
+- **Share:** day_check Days 6, 8, 12, 13, 16, 19; appt_check; saves_check (now serves the game over http). One at a time, alone, at d9c7e5f0, `CADET_WORK=/tmp/work-cr4`. Reported to BM18 and lead 38.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 6 | OK (exit 0, 280 s) | `DAY CHECK OK`; plans the same twice; nobody stuck; 0 arrivals drawn elsewhere; draw calls peak 278 / 450 |
+| day_check 8 | OK (exit 0, 271 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 278 / 450 |
+| day_check 12 | OK (exit 0, 263 s) | `DAY CHECK OK`; plans the same twice; storm skip as designed; draw calls peak 249 / 450 |
+| day_check 13 (storm Saturday) | OK (exit 0, 265 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 262 / 450 |
+| day_check 16 | OK (exit 0, 269 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 281 / 450 |
+| day_check 19 | OK (exit 0, 266 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 247 / 450 |
+| appt_check | OK (exit 0, 569 s) | `APPT CHECK OK`; FAIL lines only inside its planted self-tests |
+| saves_check | OK (exit 0, 117 s) | `SAVES CHECK OK`; no FAIL lines (the migrate race from round 1 didn't show) |
+
+**CR4: OK.** No FAILs. Last round by this CR4 session: handing over (plans/handover-check-runner-4.md).
+
 ## 0.93.2 full round, first pass (2026-10-26)
 
 - **Candidate:** `claude/staging-0.93.2` 41c8a7e0 (HUD 0.93.2; ON: TRAD_0932, EV_COMET, INSPECT, STORM_SAT, SAVE_SLOTS, AUTO_DOORS, PROMO_BEATS; EV_SWAP off)
