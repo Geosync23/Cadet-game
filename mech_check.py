@@ -1838,14 +1838,14 @@ WSTAP_SETUP = r"""(() => { const d = 23; skipTo((d - 1) * 1440 + 570); machinesN
   const W = worksInit(); W.tier = Math.max(W.tier, 2); W.rank = W.rank === 'junior' ? 'officer' : W.rank; W.tr.t2 = W.tr.t2 || 10; W.tr.m15 = W.tr.m15 || 17;
   SHIP.jobs = SHIP.jobs.filter(x => x.claimedBy !== 'you'); SHIP.machines['4-junction-1'].cond = 40;
   const j = rewJob('4-junction-1', shipNow(), { key: 77 }); SHIP.jobs.push(j); if (!claimJob(j.id)) return null;
-  return { id: j.id, mach: '4-junction-1' }; })()"""
+  if (ACT && typeof actEnd === 'function') actEnd(true); if (DEV.choose) devChosen(-1); goToDeck(4); return { id: j.id, mach: '4-junction-1' }; })()"""
 WSTAP_PICK = "((j, k) => { const want = rewRight(j, k); return jobStops(j)[k].opts.options.findIndex(o => o.id === want); })"
-WSTAP_TAP = r"""((id) => { const m = machineById(id), p = cellPos(...m.at), v = new THREE.Vector3(); if (deckDef.num !== m.deck) goToDeck(m.deck);
+WSTAP_TAP = r"""((id) => { const m = machineById(id), p = cellPos(...m.at), v = new THREE.Vector3(); if (deckDef.num !== m.deck) return ['not on its deck', false];
   let best = null, bd = 1e9; for (const it of ITEMS) { if (!it.hit) continue; it.hit.getWorldPosition(v); const dd = Math.hypot(v.x - p.x, v.z - p.z); if (dd < bd) { bd = dd; best = it; } }
   player.obj.position.copy(cellPos(...m.panel)); player.stop(); const at = new THREE.Vector3(p.x, 0.8, p.z); return [best && best.t, playerTap(best, at, at.clone())]; })"""
 WSTAP_NOW = "((id) => { const j = SHIP.jobs.find(x => x.id === id) || {}; return { done: (j.stepsDone || []).slice(), n: jobStops(j).length, work: !!j.workDone, act: ACT ? ACT.kind : null, ws: ACT && ACT.o ? ACT.o.ws : null, card: !!DEV.choose }; })"
 def wstap_play(g, setup, pick, tag):
-    s = g.ev(setup); g.step(10)
+    s = g.ev(setup); g.step(40)   # the deck's things in place before the first tap
     if not check(s, f'{tag}: the job could not be set up'): return None
     acts, taps = set(), 0
     for n in range(60):
