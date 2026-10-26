@@ -315,6 +315,11 @@ def s5_bands(ev, SUM):
     st, bz = runs['steady'], runs['busy']
     check(st['works'] and st['works']['tier'] == 3, f"s5: the steady run ends as Tier 3: {st['works'] and st['works']['tier']}")
     print('  Power safety trained:', {k: runs[k]['trained'].get('ps') for k in runs})
+    op = opened_on(st); print('  steady opened:', {k: op.get(k) for k in ('m15', 'm17', 'm19', 'm18', 'm20')}, 'm15 trained', st['works']['tr'].get('m15'), 'm19 trained', st['trained'].get('m19'))
+    check([op.get('m19'), op.get('m18'), op.get('m20')] == [17, 18, 19], f"s5: the ladder's order, higher tier first: a steady Senior opens m19, m18, m20 on Days 17, 18, 19 ({op.get('m19')}, {op.get('m18')}, {op.get('m20')})")
+    check(op.get('m15') is None or op.get('m15') == st['trained'].get('m19'), f"s5: m15 folds into m19 (no lesson of its own for a Senior): opened {op.get('m15')}")
+    check(st['trained'].get('m19') is not None and st['works']['tr'].get('m15') == st['trained'].get('m19'), f"s5: m19's training sets m15 trained the same day ({st['works']['tr'].get('m15')}, {st['trained'].get('m19')})")
+    check(op.get('m17') is None, f"s5: the lift roof (a lower tier's big row) waits for a clear day, not by Day 21 ({op.get('m17')})")
     check((st['trained'].get('ps') or 99) <= 12, f"s5: a steady Officer has Power safety on Day 12, for the Tier 3 offer on Day 14 ({st['trained'].get('ps')})")
     check(day(st, 14).get('band') == 'relied', f"s5: a steady Officer is \"Relied on\" by the end of Day 14 (Day 13 {day(st, 13).get('xp')} {day(st, 13).get('band')}, Day 14 {day(st, 14).get('xp')} {day(st, 14).get('band')})")
     check(day(bz, 10).get('band') != 'relied', f"s5: a very busy Officer is \"Relied on\" on the promotion day (Day 10 {day(bz, 10).get('xp')})")   # the spec's "not before Day 12" can't hold with the steady target (busy 52 by the end of Day 11, steady 45 by Day 13): EP2 and lead 39 asked

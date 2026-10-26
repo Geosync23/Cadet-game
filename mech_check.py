@@ -1855,6 +1855,14 @@ PS_RUN = r"""(() => {
   }
   out.opened = (W.op[d] || []).slice(); out.trained = W.tr.ps; out.brief = flag('works.brief.ps');
   out.jobs = SHIP.jobs.filter(j => j.train === 'ps').length; out.mail = SHIP.mail.filter(m => /Calder/.test(m.from)).map(m => m.subject);
+  { const r = SHIP.occasions.find(x => x.id === 'works.ps'); out.told = r && r.f ? r.f.told || null : null; }
+  { // in person (the user's rule): Calder walks over (worksEscort's 24u part) and says it when she reaches you; the Mail after
+    SHIP.occasions = SHIP.occasions.filter(x => x.id !== 'works.ps'); SHIP.mail = []; const t1 = (d + 2) * 1440 + 400; setShipNow(t1); psAsk(d + 3, t1);
+    const r = SHIP.occasions.find(x => x.id === 'works.ps'); const P = player.obj.position, fake = { p: { id: r.by }, h: {}, x: P.x, z: P.z }, said = [], keep = worksSayAll;
+    out.escort = [JSON.stringify(worksEscort({ id: r.by }, t1)), SHIP.mail.length];
+    DECK_CREW.push(fake); worksSayAll = (id, l) => said.push([id, l[0]]); try { psTellTick(t1); } finally { worksSayAll = keep; DECK_CREW.splice(DECK_CREW.indexOf(fake), 1); }
+    out.inPerson = [r.f.told, said.length ? said[0][0] : null, said.length && /Power safety/.test(said[0][1]), SHIP.mail.map(m => m.subject), JSON.stringify(worksEscort({ id: r.by }, t1))];
+    SHIP.occasions = SHIP.occasions.filter(x => x.id !== 'works.ps'); }
   out.script = OCCASIONS['works.ps'] ? OCCASIONS['works.ps'].script : null; out.cur = W.cur && W.cur.id === 'ps' ? 'ps:' + W.cur.st : null;
   return out;
 })()"""
@@ -1871,6 +1879,10 @@ def part_ps(g):
     check(any('Power safety' in s for s in a['mail']), f"ps: Calder's Mail for the lesson ({a['mail']})")
     if guide: check(a['arrow'] and a['arrow'][0] == 1 and a['arrow'][2:4] == [6, 'j'], f"ps: the level 1 arrow to the junction before the talk ({a['arrow']})")
     check(a['trained'] == 12 and a['jobs'] == 0 and a['brief'] and a['cur'] is None, f"ps: trained at the talk on Day 12, no job of yours, the after-word marked given ({a['trained']}, {a['jobs']}, {a['brief']}, {a['cur']})")
+    check(a.get('told') == 'notice', f"ps: not reached, told by the notice 20 minutes before ({a.get('told')})")
+    ip = a.get('inPerson') or []
+    check(a.get('escort') and '"follow"' in (a['escort'][0] or '') and a['escort'][1] == 0, f"ps: Calder walks over to you before she's said it, no Mail yet ({a.get('escort')})")
+    check(ip[:3] == ['met', 'calder', True] and ip[3] == ['Power safety'] and ip[4] == 'null', f"ps: in person, Calder says it, then the Mail as the record, and she stops walking over ({ip})")
     check(a['script'] == 'train.ps.calder', f"ps: the talk is train.ps.calder ({a['script']})")
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'ps: differs the second time')
     ms = g.ev(PS_RUN.replace("if (m >= r.at) { r.met = true; worksCareerTick(m + 1); } }", "if (window.__psMiss ? false : m >= r.at) { r.met = true; worksCareerTick(m + 1); } }")

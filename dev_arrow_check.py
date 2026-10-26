@@ -179,7 +179,7 @@ def part_s5(b):
     check('Power safety' not in (g.get('label') or ''), f"s5: trained, the arrow moves on: {g}")
     rows = pg.ev("(devmodeCareerSet(14, shipNow()), JSON.parse(JSON.stringify(puCheck())))")
     flat = ' | '.join((r.get('text') or '') + ' ' + ' '.join(x['text'] + ':' + x.get('sub', '') for x in r.get('rows', [])) for r in rows)
-    check('Your promotion: the Tier 3 test' in flat and 'Relied on' in flat and 'Power safety:Done' in flat and "you're Relied on):Done" in flat, f"s5: the Day 14 preset's Training tab rows: {flat}")
+    check('Your promotion: the Tier 3 test' in flat and 'Relied on' in flat and 'Power safety' in flat and ':Done' in flat.split('Power safety', 1)[1][:40] and "you're Relied on):Done" in flat, f"s5: the Day 14 preset's Training tab rows: {flat}")
     c = pg.ev("[16, 21].map(n => { const c = devmodeCareerFor(n); return [c.tier, c.rank, !!(c.pu && c.pu.t3 && c.pu.t3.passed), c.ms.some(m => m[0] === 'senior'), Object.keys(c.tr).filter(k => ['t3', 'm19', 'm18', 'm20', 'mys'].includes(k)).length, c.xp, (WORK_BANDS[c.tier].filter(b => c.xp >= b[0]).pop() || [])[1]]; })")
     check(c[0][:4] == [3, 'senior', True, True] and c[1][4] == 5 and c[1][6] == 'trusted', f"s5: the Day 16 and 21 presets, a Senior Officer (Trusted by Day 21): {c}")
     check(not pg.errors, f's5: errors {pg.errors[:3]}')

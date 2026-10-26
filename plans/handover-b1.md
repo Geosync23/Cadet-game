@@ -10,9 +10,15 @@
 - **Turn 2:** `WORK_BANDS[2] = [0, 10, 22, 32, 42]`, `WORK_BANDS[3] = [0, 14, 30, 55, 75]` (career_check part s5). Power safety in 24u: `psTick`/`psAsk` (a small row has no lesson in 24 core, so ps makes its own appointment: occasion `works.ps`, Deck 6 port junction 6/j, 09:00 or 09:15, 20 minutes, Mail + toast, level 1 arrow, talk `train.ps.calder` (stand-in in code until the head writer's words), trained when met, asked again the next workday if missed). mech_check part `ps`.
 - **Turn 3:** 24u `puCheck()` (Training tab "Your promotion: the Tier 3 test"; 24 core's tab asks it in one typeof line); 24u `psDevNext()` (Dev arrow for ps; section 25's dvCareerNext asks it and leaves ps out of its small rows); section 25's DM_CAREER Step 5 rows (`test3` on Day 15, `promo3` on Day 16 = Tier 3, rank senior, `pu.t3` passed, milestone `senior`) and devmodeCareerFor reading them; event days 15 and 16 in tools/affected.py (+ cov_run.sh, the testing guide's table); dev_arrow_check part `s5`; bigevents_check's guard samples follow the new hours with the switch on.
 
-## Open (asked, not answered when written)
-- **Tier 2 bands:** the spec's "steady Relied on by Day 13/14" and "very busy not before Day 12" can't both hold on paper (steady 45 by the end of the storm Saturday, very busy 52 by the end of Day 11). I kept the steady target (42); the other choice is 54 (busy Day 12, steady Monday Day 15). Asked EP2 and lead 39. Backlog 12 already says the user parked the very busy pace for a later balance pass.
-- The user's question 2 (Power safety) is still open; ps is the recommended answer.
+- **Last items (0.93.4-s.4):** merged SW3's words (claude/p5s5-words fbee2b23); the ladder's order with the switch on (24u `ladderBigP5`, `ladderClearDay`, the m15-into-m19 fold; one line in 24 core's ladderTick); Power safety asked in person (`psAsk` books, `p5Escort` walks Calder over through worksEscort's new 24u hook, `psTellTick` says it, then the Mail; the notice 20 minutes before if she couldn't reach you); the comet's Senior line reads `event.comet.captain.senior` with the switch on; puCheck reads SW3's `pu3.check.*`.
+- **For S5-2:** add the promotion's escorts to `p5Escort` (24u), not a new line in 24 core. Job slots (EP2): t3 25, m19 32, m18 33, m20 34; Step 6 t4 26, m23-m25 35-37; 27 the Veyli vessel; B3 holds 42 and 43. SW3's keys for S5-2 are in content/works/keys-p5.md ("Step 5", the S5-2 table): pu3.* texts, scenes pu3.offer / .offer.monday / .offer.party, pu3.result / .result.fri, pu3.bar, pu3.toast.
+- **Small, not done:** WORK_TOOLS.logger still says mech 'p5' (an old plan; nothing gives it from the new p5 row; B4's note). RV20's find (the teacher isn't at a lesson's meeting place before it starts, M19/M18) was offered to me by session_01NXybH7NNqM8M4ngiyidq6m; I asked lead 39 first; not done when this was written.
+
+## Decided
+- Tier 2 bands: lead 39's call and EP2's: keep 42 (a steady player Relied on by the storm Saturday; the offer never comes before Day 14, so a very busy player reaching it on Day 11 changes nothing). The user said yes to the Power safety lesson and to an early Dev link once S5-2 passes RV20.
+
+## Open
+- None of mine.
 
 ## Judgement calls
 - Stages: m19 [0, 3, 6] uses, m20 [0, 2, 4]; ps `needs: null`; m20 `by: ['mori', 'calder']`; mys `by: ['calder']`; engineSpecialist's hold kind `'captain'`.
