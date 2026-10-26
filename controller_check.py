@@ -1345,6 +1345,96 @@ MY_BUNK = r"""(() => { const id = playerBed(), bed = (DECKS[deckOf(id)].places |
 FREE_SEAT = r"""(() => { const held = id => typeof heldBy === 'function' ? !!heldBy(id) : false, pp = player.obj.position; let best = null, bd = 1e9;
   for (const [pl, sp] of padPlaces()) { if (pl.pose !== 'sit' || held(pl.id)) continue; const w = sp.walk ? cellPos(...sp.walk) : sp, d = Math.hypot(w.x - pp.x, w.z - pp.z); if (d < bd) { bd = d; best = [w.x, w.z, pl.id]; } }
   return best; })()"""
+# ---- (S5-2, B5) the Senior Officer promotion by pad (24u, with P5_STEP5 on in a copy): each beat's panel and thing
+# reached by the D-pad and A, nothing tapped: the offer's scene (Next, a reply), the board's Take it for the Tier 3 test,
+# a step at the junction by the ring, "About the shutdown" on someone to warn (the ring on them, then the chat card's
+# button), the result in Calder's office and the Captain's bar (each scene read through by pad, its replies), Brennan's
+# cake (walked to by the stick). Then Day 16 played by pad: the stick and the lift to her office for 08:15, the scene;
+# the lift to the observation room for the bar, the scene. "not yet" in a build without it
+PU3_SW = "const P5_STEP5 = URL_FLAGS.has('p5s5');"
+PU3_SETUP = r"""((day, min) => { introSkip(); const W = worksInit(Math.max(shipNow(), WORKS_START)); W.tier = 2; W.rank = 'officer'; W.xp = 60;
+  for (const r of CAREER_LADDER) if (r.id !== 't3' && r.tier <= 2) { W.tr[r.id] = W.tr[r.id] || 9; (W.op[9] = W.op[9] || []).push(r.id); }
+  W.tr.ps = 12; skipTo((day - 1) * 1440 + min); machinesNow(); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; return true; })"""
+def pu3_read(r, fails, scene, pick=0):
+    # a scene in the device's dialogue panel, through by pad: Next, and a reply on a choice (the pick-th)
+    for k in range(80):
+        if not r.ev("!!DIALOGUE"): return True
+        ch = r.ev("(() => { const l = DIALOGUE.queue[DIALOGUE.i]; return !!(l && l.choice); })()")
+        res = press_in_panel(r, f"document.querySelectorAll('#devDlg button.act')[{pick}]" if ch else "document.querySelector('#devDlg button.next')")
+        if res != 'ok': fails.append(f'{scene}: the scene\'s {"reply" if ch else "Next"}: {res}'); return False
+        r.step(4)
+    fails.append(f'{scene}: the scene never ended by pad'); return False
+def pu3_beside(r, who):
+    # stand beside someone (their deck, the tile next to them), as a player walking up would
+    return r.ev(f"""(() => {{ const p = evPerson('{who}'), w = whereIs(p, Math.floor(shipNow())); if (!w || !Number.isInteger(w.deck)) return null; if (deckDef.num !== w.deck) goToDeck(w.deck);
+      const a = DECK_CREW.find(x => x.p && x.p.id === '{who}'); if (!a) return 'not on the deck'; const c = nearestOpen(a.x + .9, a.z, player); player.obj.position.copy(cellPos(...c)); player.stop(); return [a.x, a.z]; }})()""")
+def part_promo3(pw, src, tag):
+    on = src.replace(PU3_SW, 'const P5_STEP5 = true;', 1)
+    if on == src or 'function puPromote' not in src: return ['not yet: no P5_STEP5 switch line or no Senior Officer promotion in this build']
+    fails = []
+    r = Run(pw, on, f'{tag}_pu3', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    # the offer: Day 14 in the Works bay, Calder beside you: her scene, by pad
+    r.ev(f"({PU3_SETUP})(14, 600)"); r.ev("goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0]))"); r.step(10)
+    r.ev("(() => { const k = puNearMe, pp = puPartyAt; puNearMe = id => id === 'calder' ? true : k(id); puPartyAt = () => null; setTimeout(() => { puPartyAt = pp; }, 0); PU_LIVE.seek = { by: 'calder', at: Math.floor(shipNow()), d: 14 }; puOfferTick(shipNow(), false); puNearMe = k; })()"); r.step(6)
+    if not r.ev("!!DIALOGUE"): fails.append('offer: her scene did not open')
+    else: pu3_read(r, fails, 'offer', 1)
+    t3 = r.ev("puT3()"); print(f'  the offer by pad: {t3}')
+    if not (t3 and t3['day'] == 15): fails.append(f'offer: the test not set by the scene read by pad ({t3})')
+    # the board, Day 15 09:01: the stick to the board, the ring, the test's Take it
+    r.ev("(() => { setShipNow(14 * 1440 + 541); machinesNow(); careerClock(shipNow(), true); worksCareerTick(shipNow()); for (const f of WORK_TICKS) f(shipNow(), false); })()"); r.step(10)
+    jid = r.ev("(() => { const c = SHIP.works.cur; return c && c.id === 't3' ? c.j : null; })()")
+    bd = r.ev(f"({WHERE_IS})('job board')")
+    if not jid: fails.append('board: the test job not held for you at 09:00')
+    elif not bd or not walk_to(r, bd[0], bd[1]): fails.append(f'board: could not walk to the job board by the stick ({bd})')
+    else:
+        h = ring_and_A(r, ['board', 'job']); r.step(10)
+        res = press_in_panel(r, "[...document.querySelectorAll('#ixBoard [data-job]')].filter(x => x.dataset.job === " + json.dumps(jid) + ").map(x => x.querySelector('button'))[0]") if r.ev("typeof ixBoard !== 'undefined' && ixBoard.isOpen") else 'the board never opened'
+        took = r.ev(f"(() => {{ try {{ return myJob() && myJob().id === {json.dumps(jid)}; }} catch (e) {{ return false; }} }})()")
+        print(f'  the board by pad: ring "{h}", Take it {res}, taken {took}')
+        if not took: fails.append(f'board: the Tier 3 test not taken by pad (ring {h}, {res})')
+        r.ev("typeof ixBoard !== 'undefined' && ixBoard.isOpen && ixBoard.close()"); r.step(3)
+    # a step at the junction by the ring (the plan), with the breaker in hand
+    if jid:
+        r.ev(f"(() => {{ const j = SHIP.jobs.find(x => x.id === {json.dumps(jid)}); SHIP.player.carry.push('breaker'); jobStepDone(j.id, 0); goToDeck(6); const s = placeSpot(jobStops(j)[1].places[0]); player.obj.position.copy(cellPos(...nearestOpen(s.x, s.z, player))); player.stop(); }})()"); r.step(10)
+        h = ring_and_A(r, ['junction', 'plan', 'tier 3', 'job']); r.step(120)
+        planned = r.ev(f"(() => {{ const j = SHIP.jobs.find(x => x.id === {json.dumps(jid)}); return !!(j.t3 && j.t3.planAt); }})()")
+        print(f'  the plan by the ring: "{h}", done {planned}')
+        if not planned: fails.append(f'junction: the plan step not done by the ring and A ({h})')
+        who = r.ev(f"(() => {{ const j = SHIP.jobs.find(x => x.id === {json.dumps(jid)}); return (j.t3 && j.t3.who || [])[0] || null; }})()")
+        at = pu3_beside(r, who) if who else None; r.step(10)
+        if not isinstance(at, list): fails.append(f'warn: could not stand beside {who} ({at})')
+        else:
+            first = r.ev(f"guideWho('{who}')").lower()
+            h = ring_and_A(r, ['talk', first]); r.step(10)
+            res = press_in_panel(r, "[...document.querySelectorAll('#chat button')].find(b => /About the shutdown/.test(b.textContent))") if r.ev("!document.getElementById('chat').hidden") else 'their card never opened'
+            told = r.ev(f"(() => {{ const j = SHIP.jobs.find(x => x.id === {json.dumps(jid)}); return (j.t3.told || []).includes('{who}'); }})()")
+            print(f'  warning {who} by pad: ring "{h}", About the shutdown {res}, told {told}')
+            if not told: fails.append(f'warn: "About the shutdown" not reached by pad ({h}, {res})')
+            r.ev("typeof chatClose === 'function' && chatClose()"); r.step(3)
+    # Day 16 played by pad: the stick and the lift to Calder's office for 08:15; the scene; then the lift to Deck 1 for the bar
+    r.ev("(() => { const T = puT3(); if (T) { T.passed = true; T.day = 15; } SHIP.works.cur = null; SHIP.works.tr.t3 = 15; skipTo(15 * 1440 + 486); machinesNow(); for (const f of WORK_TICKS) f(shipNow(), false); goToDeck(4); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; })()"); r.step(20)
+    if ride(r, 5, fails, 'result'):
+        off = r.ev("(() => { const s = placeSpot('5-office-visit-1'); return s ? [s.x, s.z] : null; })()")
+        if not off or not walk_to(r, off[0], off[1]): fails.append(f'result: could not walk into her office by the stick ({off})')
+        r.ev("(() => { setShipNow(15 * 1440 + 496); occasionsTick(shipNow()); meetingsTick(shipNow()); })()"); r.step(10)
+        if not r.ev("!!DIALOGUE"): fails.append(f'result: her scene did not open in her office ({r.ev("[deckDef.num, roomAt(...player.here())]")})')
+        else: pu3_read(r, fails, 'result', 0)
+    w = r.ev("[SHIP.works.tier, SHIP.works.rank]"); print(f'  the result by pad: {w}')
+    if w != [3, 'senior']: fails.append(f'result: not a Senior Officer after her scene by pad ({w})')
+    r.ev("(() => { skipTo(15 * 1440 + 975); machinesNow(); for (const f of WORK_TICKS) f(shipNow(), false); })()"); r.step(20)
+    if ride(r, 1, fails, 'bar'):
+        sp = r.ev("(() => { const s = placeSpot('1-ceremony-you'); return s ? [s.x, s.z] : null; })()")
+        if not sp or not walk_to(r, sp[0], sp[1]): fails.append(f'bar: could not walk to your spot by the stick ({sp})')
+        r.ev("(() => { setShipNow(15 * 1440 + 991); occasionsTick(shipNow()); meetingsTick(shipNow()); })()"); r.step(10)
+        if not r.ev("!!DIALOGUE"): fails.append('bar: the Captain\'s scene did not open')
+        else: pu3_read(r, fails, 'bar', 0)
+    b = r.ev("[(puT3() || {}).bar, PLAYER_SPEC.rank]"); print(f'  the bar by pad: {b}')
+    if b != [16, 2]: fails.append(f'bar: not given after the scene by pad ({b})')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close()
+    return fails
+
 def part_day(pw, src, tag):
     fails = []
     r = Run(pw, src, f'{tag}_day', mode='pad', plug={}, w=390, h=844)
@@ -2556,6 +2646,7 @@ const PAD_BUILT = ['base', 'deck', 'marks', 'panels', 'games'];
 })();
 """
 
+PART_FN['promo3'] = part_promo3; NEEDS['promo3'] = ['panels']; ALL_PARTS.append('promo3')   # (S5-2: PARTS is ALL_PARTS itself when none are named)
 # ---- run ----------------------------------------------------------------------------------------------------------
 if '--selftest' in FLAGS:
     if pad_switch(SRC) is not None: print('--selftest is for a build without section 26 (it plants its own PAD_ON)'); sys.exit(1)

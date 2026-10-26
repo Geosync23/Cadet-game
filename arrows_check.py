@@ -312,7 +312,7 @@ FOLLOW = r"""(() => {
   }
   // the phone left open (the Scanner opens it by itself): closed after a moment, as a player would (FX3's gap 2)
   if (DEV.open && !DEV.choose && !ACT) { window.__devN = (window.__devN || 0) + 1; if (window.__devN >= 3) { window.__devN = 0; deviceClose(); return 'close the device'; } } else window.__devN = 0;
-  { const gq = typeof GUIDE_ON !== 'undefined' && GUIDE_ON ? goalNow() : null, call = IX_GOAL && /^career:/.test(IX_GOAL.trk || '') ? IX_GOAL : gq && /^(inc|promo):/.test(gq.guide || '') ? gq : null;   // DV1: and the promotion's beats (the queue's promo:*)   // FX10 (backlog 15): with the arrows on, Calder's call is the queue's level-1 'inc:m6', not IX_GOAL
+  { const gq = typeof GUIDE_ON !== 'undefined' && GUIDE_ON ? goalNow() : null, call = IX_GOAL && /^career:/.test(IX_GOAL.trk || '') ? IX_GOAL : gq && /^(inc|promo|pu3):/.test(gq.guide || '') && !/^pu3:step/.test(gq.guide || '') ? gq : null;   // S5-2: the Senior Officer's beats (pu3:*; not the test's own steps)   // DV1: and the promotion's beats (the queue's promo:*)   // FX10 (backlog 15): with the arrows on, Calder's call is the queue's level-1 'inc:m6', not IX_GOAL
     if (ACT && ACT.phase !== 'walk' && call) { const l = call.label; actEnd(true); return 'leave it for: ' + l; } }   // an urgent career arrow (Calder's call) over your work: you stop and go, as a player would (the repair's time is kept; FX4)
   { const c = SHIP.works && SHIP.works.cur, r = c && c.st === 'meet' && SHIP.occasions.find(x => x.key === c.occ), n = shipNow(); if (r && !r.met && r.status === 'asked' && n >= r.at && n < r.at + r.len && deckDef.num === r.deck && roomAt(...player.here()) === r.room && !DIALOGUE && !ACT) return null; }   // in a training meeting's room while it's on: stay a moment for it to start (FX4)
   if (ACT) { if (IX_ACTS[ACT.kind] && ACT.phase !== 'walk' && (ACT.done || 0) >= ((ACT.def && ACT.def.mins) || 0)) { const k = ACT.kind; actEnd(); return 'stand up: ' + k; } return null; }   // a sit-down (tea, a lounge) once its minutes are in: up again, as a player would (AC2)
@@ -327,8 +327,13 @@ FOLLOW = r"""(() => {
   const bd = document.getElementById('ixBoard');
   if (bd && !bd.hidden) { const bs = [...bd.querySelectorAll('#ixBoardL button')], b = bs.find(b => /turn it in/i.test(b.textContent)) || bs.find(b => /take/i.test(b.textContent) && /asked for you/i.test((b.closest('.ixjob') || b.parentNode).textContent)) || bs.find(b => /take/i.test(b.textContent));   // a job held for you first (your turn at a lesson), as a player reading the arrow would (AC2)
     const t = b ? b.textContent + ': ' + ((b.closest('.ixjob') || b.parentNode).querySelector('b') || { textContent: '' }).textContent : 'nothing to take'; if (b) b.click(); else document.getElementById('ixBoardC').click(); return 'board: ' + t; }
+  { const ch = document.getElementById('chat'); if (ch && !ch.hidden) {   // S5-2: a chat card open: the button the arrow names (the Tier 3 test's "About the shutdown"), else close it
+      const gl = ((goalNow() || {}).label || '').toLowerCase(), bs = [...ch.querySelectorAll('button')], b = /about the shutdown|warn /.test(gl) ? bs.find(x => /about the shutdown/i.test(x.textContent)) : null;
+      if (b) { b.click(); return 'chat: ' + b.textContent; } const x = ch.querySelector('button.x') || bs.find(x => /bye|close|later/i.test(x.textContent)); if (x) { x.click(); return 'chat: close'; } } }
   const g = goalNow(); if (!g) return null;
   if (deckDef.num !== g.deck) { goToDeck(g.deck); return 'lift to Deck ' + g.deck; }
+  if (g.crew && typeof DECK_CREW !== 'undefined') { const a = DECK_CREW.find(x => x.p && x.p.id === g.crew), p0 = player.obj.position;   // S5-2: someone to talk to (the person to warn): beside them, then a tap on them opens their card
+    if (a && Math.hypot(a.x - p0.x, a.z - p0.z) <= 2.2 && typeof chatOpen === 'function' && !(typeof CHAT !== 'undefined' && CHAT)) { chatOpen(a.p); return 'talk to: ' + a.p.id; } }
   const w = ixGoalWorld(g); if (!w) return 'arrow with no spot: ' + g.label;
   const p = player.obj.position;
   if (Math.hypot(w.x - p.x, w.z - p.z) > 2.2) { const gl = nearestOpen(w.x, w.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return 'walk to: ' + g.label; }
@@ -489,6 +494,43 @@ def part_promo(ctx, path):
     check(not pg.errors, f'promo: page errors {pg.errors[:3]}')
     pg.page.close()
 
+# Part "step5" (S5-2, B5 for lead 39; plans/p5-step5-spec.html, "The arrow-follower check"): from a career set to the end
+# of Day 13 (an Officer, Relied on, Power safety done), Days 14-17 following only the arrows and the rings: the Tier 3
+# offer said in person (Calder's scene, not the Mail), the test taken and passed on its day at the first try, the result
+# met with her (in her office, or where she found you; not by Mail), the bar and the toast met; a Senior Officer with the
+# bar and the toast by Day 17; each beat led by a level 1 arrow (pu3:*). Add teachoff (Teaching arrows Off) or track
+# (a Tracked place of your own each morning) for the other two ways. The other Step 5 pieces add their beats here.
+def part_step5(ctx, path):
+    pg = Page(ctx, path)
+    if not pg.ev("typeof P5_PROMO3 !== 'undefined' && P5_PROMO3"): print('  step5: P5_PROMO3 off in this build: skipped (a copy with P5_STEP5 = true)'); pg.page.close(); return
+    real_game(pg, 14); f = Follower(pg); N = {}
+    for d in range(14, 18):
+        if TRACK: pg.ev("setGoal({ deck: 3, room: 'M', label: 'Tracked: the mess hall', trk: 'place:arrows-check' })")   # your own Tracked place, every morning
+        f.run((d - 1) * 1440 + 21 * 60 + 30)
+        for n in pg.ev("simNotes('pu3', 0)") or []: N[str(n.get('t')) + n.get('step', '')] = n
+        s = pg.ev("(() => { const W = SHIP.works; return { tier: W.tier, rank: W.rank, t3: W.pu ? W.pu.t3 : null, cur: W.cur ? W.cur.id + ':' + W.cur.st : null, offer: flag('pu3.offer.at') || null }; })()")
+        print(f'  step5: Day {d}: {s}')
+        f.night(d)
+    W = pg.ev("(() => { const W = SHIP.works, T = W.pu && W.pu.t3; return { tier: W.tier, rank: W.rank, T, offer: flag('pu3.offer.at') || null, late: SHIP.mail.filter(m => /I came to find you|You weren't about|We missed you|We kept your chair/.test(m.body)).map(m => m.subject), pip: PLAYER_SPEC.rank }; })()")
+    steps = [n.get('step') + ':' + str(n.get('how') or '') for n in N.values()]
+    print(f"  step5: {W}; notes {steps}; queue {sorted(g for g in f.guides if g.startswith('pu3'))}")
+    T = W['T'] or {}
+    check(W['offer'] and not any('find you' in x for x in W['late']), f"step5: the offer not said in person (flag pu3.offer.at {W['offer']}, late Mail {W['late']})")
+    check(T.get('passed') and T.get('tries') == 1 and T.get('day') == 15, f"step5: the Tier 3 test not passed on Day 15 at the first try: {T}")
+    check(W['tier'] == 3 and W['rank'] == 'senior' and T.get('res') == 16, f"step5: not a Senior Officer on Day 16: {W['tier']}, {W['rank']}, {T}")
+    check(T.get('bar') == 16 and T.get('toast') == 17 and W['pip'] == 2, f"step5: the bar (Day 16) and the toast (Day 17) not both given, or no third pip: {T}, pip {W['pip']}")
+    check(not W['late'], f"step5: a beat came only by Mail (missed): {W['late']}")
+    for how in ('set:person', 'bar:met', 'toast:met'):
+        check(how in steps, f"step5: {how} not seen (notes {steps})")
+    for k in ('pu3:testday', 'pu3:test:', 'pu3:step', 'pu3:result', 'pu3:bar', 'pu3:toast'):
+        check(any(g.startswith(k) for g in f.guides), f"step5: the level 1 arrow {k} never led; seen {sorted(g for g in f.guides if g.startswith('pu3'))}")
+    LAB = re.compile(r'Tier 3|shutdown|breaker|Switch it off|Bring it back|result|bar|toast|slice', re.I)
+    for t, lab, dk in f.stuck:
+        if LAB.search(lab): fail(f'step5: stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk})')
+        else: print(f'  step5: (not Step 5) stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk})')
+    check(not pg.errors, f'step5: page errors {pg.errors[:3]}')
+    pg.page.close()
+
 def part_clockin(ctx, path):                              # patch 0.92.3 item 6 (AC3; RV12's lines): Days 1-3, into the Works bay before clocking in
     pg = Page(ctx, path)
     pg.ev("localStorage.clear()"); pg.ev("newGameStart(true)"); pg.step(5)
@@ -511,8 +553,9 @@ def part_clockin(ctx, path):                              # patch 0.92.3 item 6 
     pg.page.close()
 
 GUIDE = 'guide' in sys.argv[2:]                       # run shift and week with the arrow queue switched on
-TEACHOFF = 'teachoff' in sys.argv[2:]                 # with 'guide': Settings' Teaching arrows set to Off
-PARTS = set(a for a in sys.argv[2:] if a not in ('guide', 'teachoff')) or {'queue', 'clockin', 'shift', 'week', 'promo'}
+TEACHOFF = 'teachoff' in sys.argv[2:]                 # with 'guide': Settings' Teaching arrows set to Off (and step5's second way)
+TRACK = 'track' in sys.argv[2:]                       # step5's third way: a Tracked place of your own each morning
+PARTS = set(a for a in sys.argv[2:] if a not in ('guide', 'teachoff', 'track')) or {'queue', 'clockin', 'shift', 'week', 'promo'}   # step5 by name (S5-2: a build with P5_STEP5 on)
 with sync_playwright() as pw:
     path = sys.argv[1]; src = pathlib.Path(path).read_text(); off = arrows_off(src)
     if off != src: (WORK / 'test' / ('_off_' + RUN_ID + pathlib.Path(path).name)).write_text(off)
@@ -534,10 +577,10 @@ with sync_playwright() as pw:
         print('== clockin (patch 0.92.3 item 6)')
         try: part_clockin(ctx, path)
         except Exception as e: fail(f'clockin: stopped: {str(e)[:300]}')
-    for name, part in (('shift', part_shift), ('week', part_week), ('promo', part_promo)):
+    for name, part in (('shift', part_shift), ('week', part_week), ('promo', part_promo), ('step5', part_step5)):
         if name not in PARTS: continue
         print(f'== {name} (following only the arrow)')
-        try: part(ctx, path if GUIDE or name == 'promo' else off_path)   # promo: always the build as shipped (the arrows on)
+        try: part(ctx, path if GUIDE or name in ('promo', 'step5') else off_path)   # promo, step5: always the build as shipped (the arrows on)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
     b.close()
 

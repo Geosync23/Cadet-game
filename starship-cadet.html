@@ -59848,6 +59848,30 @@ function puEscort2(p, t) {                               // worksEscort's 24u pa
   return null;
 }
 if (P5_PROMO3) WORK_TICKS.push((now, skip) => { puResultTick(now, skip); puBarTick(now, skip); puToastTick(now, skip); if (!skip) { puCakeTick(now); puBeatsGuide(now); if (puRank()) promoPip(); } });
+// ---- S5-2 turn 4: Dev mode. Its promotion list (section 25's devmodePromoSteps asks puDevSteps: the Tier 3 steps after
+// the first promotion's) and its career arrow (dvCareerNext asks puDevNext: the next Senior Officer beat, where and when)
+function puDevSteps() {                                  // [{ label, at (absolute minutes), done }], in order
+  const T = P5_PROMO3 && puT3(); if (!T) return [];
+  const abs = (d, m) => (d - 1) * 1440 + m, out = [{ label: 'Your Tier 3 test', at: abs(T.day, PU_T.jobAt), done: !!T.passed }];
+  const rd = T.res || puResultDay(); if (!rd) return out;
+  out.push({ label: 'Your Tier 3 result', at: abs(rd, PU_R.at), done: !!T.res }, { label: 'Your bar, from the Captain', at: abs(rd, promoCerTimes(rd).at), done: !!T.bar });
+  const td = puToastDay() || rd + 1; out.push({ label: 'The Captain\'s toast', at: abs(td, PU_R.toastAt), done: !!T.toast });
+  return out;
+}
+function puDevNext() {                                   // the Dev career arrow's next Senior Officer beat: { when, soon, g } or null
+  const W = SHIP.works, T = puT3(); if (!P5_PROMO3 || !W) return null;
+  const now = Math.floor(shipNow()), d = worksDay(now), abs = (dd, m) => (dd - 1) * 1440 + m;
+  if (!T) { if (W.tier !== 2 || !ladderNeeds((ladderRow('t3') || {}).needs, W)) return null;
+    const dd = Math.max(d, PU.offerFrom), p = puPartyAt(dd), at = p !== null ? p + 5 : PU.seekAt;
+    return { when: Math.max(now, abs(dd, at)), soon: 15, g: { deck: 5, room: 'w', label: 'The Tier 3 offer: Calder comes to find you' } }; }
+  if (!T.passed) { const j = puTestJob(); if (j && j.claimedBy === 'you') { let g = null; try { g = typeof ixJobGoal !== 'undefined' && ixJobGoal ? { ...ixJobGoal } : null; } catch (e) { g = null; } return { when: now, g: g ? { ...g, label: 'Your Tier 3 test · ' + g.label } : { deck: 6, room: (machineById(j.mach) || {}).room, label: 'Your Tier 3 test' } }; }
+    return { when: abs(T.day, PU_T.jobAt), soon: 30, g: { deck: 5, item: /job board/i, room: 'w', label: 'Your Tier 3 test job, at the board' } }; }
+  const rd = T.res || puResultDay(); if (!rd) return null;
+  if (!T.res) return { when: abs(rd, PU_R.at), soon: 15, g: { deck: 5, place: '5-office-visit-1', room: 'o', label: 'Your Tier 3 result, Calder\'s office' } };
+  if (!T.bar) return { when: abs(rd, promoCerTimes(rd).at), soon: 15, g: { deck: 1, place: '1-ceremony-you', room: 'O', label: 'Your bar, the observation room' } };
+  if (!T.toast) { const td = puToastDay(); return td ? { when: abs(td, PU_R.toastAt), soon: 15, g: { deck: 2, place: '2-captable-1', room: 'C', label: 'The Captain\'s toast, her quarters' } } : null; }
+  return null;
+}
 // ---- end of slot: Later promotions ----
 
 // ---------------------------------------------------------------------
@@ -64379,6 +64403,7 @@ function devmodePromoSteps() {                           // the promotion's beat
     out.push({ label: 'Your cabin', at: abs(P.move.day, P.move.at), done: promoDone('move2') });
     out.push({ label: 'The ceremony', at: abs(P.ceremony.day, P.ceremony.at), done: promoDone('ceremony2') });
   }
+  try { if (typeof puDevSteps === 'function') out.push(...puDevSteps()); } catch (e) { /* none */ }   // Pillar 5 Step 5's Senior Officer (24u, S5-2), after the first promotion's
   return promoBeatsOn() ? out.sort((a, b) => a.at - b.at) : out;   // FX28: the pip before the cake and your cabin
 }
 function devmodePromoNext() {
@@ -64425,7 +64450,7 @@ function devmodeCareer(body) {
   devmodeRow(body, [['− ' + DM_XP + ' xp', () => devmodeXp(-DM_XP, 'xp −' + DM_XP)], [nb ? 'To ' + BAND_WORD[nb[1]] : 'Top band', () => devmodeXp(w => (devmodeBandNext(w) || [w.xp])[0], 'next band'), { off: !nb }], ['+ ' + DM_XP + ' xp', () => devmodeXp(DM_XP, 'xp +' + DM_XP)]]);
   const next = CAREER_LADDER.find(r => W.tr[r.id] === undefined && r.tier <= W.tier && r.id !== 't2');
   devmodeRow(body, [[next ? 'Train: ' + mechName(next.id) : 'All trained', devmodeNextTraining, { off: !next }], ['Rank: Junior', () => devmodeRank('junior'), { off: W.rank === 'junior', ask: W.rank === 'junior' }], ['Rank: Officer', () => devmodeRank('officer'), { off: W.rank === 'officer', ask: W.rank === 'officer' }]]);
-  devmodeText(body, 'Senior Officer and Engine Specialist aren\'t built yet. A rank set by hand is approximate.');
+  devmodeText(body, (typeof P5_PROMO3 !== 'undefined' && P5_PROMO3 ? 'Engine Specialist isn\'t' : 'Senior Officer and Engine Specialist aren\'t') + ' built yet. A rank set by hand is approximate.');   // (S5-2: the Senior Officer is, with P5_PROMO3)
   if (W.tier === 1) {
     devmodeHead(body, 'The promotion test');
     const needs = devmodeTestNeeds(W);
@@ -64637,12 +64662,13 @@ function dvCareerNext() {                                // the next career step
     for (const id of ['m3d', 'm3i']) try { add(dvFixed(W, id), id); } catch (e) { /* none */ }
     const small = CAREER_LADDER.find(r => r.size === 'small' && !r.fixed && r.id !== 'ps' && W.tr[r.id] === undefined && WORK_MECH[r.id] && r.tier <= W.tier && (!r.needs || !r.needs.trained || W.tr[r.needs.trained] !== undefined));   // (ps: its own lesson, psDevNext below)
     try { if (typeof psDevNext === 'function') add(psDevNext(), 'ps'); } catch (e) { /* none */ }   // Pillar 5 Step 5's Power safety (24u, S5-1)
+    try { if (typeof puDevNext === 'function') add(puDevNext(), 'pu3'); } catch (e) { /* none */ }   // the Senior Officer promotion's next beat (24u, S5-2)
     try { if (small) add(ladderNeeds(small.needs, W) ? dvWork(dvName(small.id) + ': it comes with a job', small.day) : dvNeed(small, W), 'small:' + small.id); } catch (e) { /* none */ }
     try { if (STORIES_ON && typeof storyDevNext === 'function') add(storyDevNext(now), 'story'); } catch (e) { /* none */ }   // a crew story's next step (FX21, section 20c's slot)
     try { if (W.test && W.test.passed) { const s = devmodePromoSteps().find(x => !x.done && DV_PROMO[x.label]); if (s) add({ when: s.at, soon: 15, g: { ...DV_PROMO[s.label], label: s.label } }, 'promo'); } } catch (e) { /* none */ }
   }
   if (!C.length) return null;
-  if (C.some(x => x.k === 'promo')) for (let i = C.length - 1; i >= 0; i--) if (/^(row|small):/.test(C[i].k)) C.splice(i, 1);   // lead 34: the promotion's beats before the next row's ask
+  if (C.some(x => x.k === 'promo' || x.k === 'pu3')) for (let i = C.length - 1; i >= 0; i--) if (/^(row|small):/.test(C[i].k) || /^train:t3:/.test(C[i].k) && C.some(x => x.k === 'pu3')) C.splice(i, 1);   // (S5-2: the Tier 3 test's own entry, not the ladder's)   // lead 34: the promotion's beats before the next row's ask
   const score = x => x.when <= now || x.soon && x.when - x.soon <= now ? now - 1 + C.indexOf(x) / 100 : x.when + C.indexOf(x) / 100;   // started or close: now, in the order above; else by its time
   const best = C.slice().sort((a, b) => score(a) - score(b))[0];
   return { ...best.g, when: best.when, key: best.k, label: best.g.label + (best.when > now ? ', ' + dvWhen(best.when) : '') };

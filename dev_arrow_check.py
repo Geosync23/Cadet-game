@@ -8,6 +8,7 @@
 #          Hauling); the round done (Hauling training: Yara asks you, tomorrow 06:00); and it still points with the
 #          Teaching arrows Off and tracking off, and on another deck it points at the lift with the deck named
 #   s5:    Pillar 5 Step 5 with P5_STEP5 on (B1): Power safety's arrow, the Tier 3 rows, the Senior Officer presets
+#   pu3:   the Senior Officer promotion with P5_STEP5 on (S5-2, B5): the offer, the test at the board, the result, the bar, the toast
 #   look:  the arrow is drawn (its own element, the DEV tag), holds still over frames, its pin never on the game's pin
 #          when both point at the same thing; Hide it and Show it from the Quick tab, the choice kept over a reload
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
@@ -185,9 +186,40 @@ def part_s5(b):
     ctx.close()
     print(f"  s5: Power safety's arrow (ask, appointment {asked}), the Tier 3 rows on Day 14, Senior Officer presets {c}")
 
+# pu3 (S5-2, B5): with P5_STEP5 on, the Dev arrow through the Senior Officer promotion: Day 14 (the Day 13 preset), the
+# offer (Calder comes to find you); the test set, the board at 09:00; passed, Calder's office at 08:15; promoted, the
+# observation room for the bar; the bar given, the Captain's quarters for the toast; all done, nothing of it. Off: "not yet".
+def part_pu3(b):
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = Page(ctx, '#dev'); pg.sign()
+    if not pg.ev("typeof P5_PROMO3 !== 'undefined' && P5_PROMO3"):
+        print('  pu3: not yet (P5_PROMO3 off)'); ctx.close(); return
+    pg.ev('newGameStart(false); introSkip(); careerInit(); SHIP.career.gs = DM_SEED; devmodeState().ex = []; devmodeState().note = ""'); pg.step(10)
+    pg.ev("(devmodeSkipTo(13 * 1440 + 300), devmodeCareerSet(13, shipNow()))"); pg.step(5)
+    out = {}
+    out['offer'] = pg.next()
+    pg.ev("(puSet(15), setShipNow(14 * 1440 + 400), machinesNow())"); out['test'] = pg.next()
+    pg.ev("(puT3().passed = true, SHIP.works.tr.t3 = 15, setShipNow(15 * 1440 + 400), machinesNow())"); out['result'] = pg.next()
+    pg.ev("(puPromote(15 * 1440 + 500, 'met'), setShipNow(15 * 1440 + 900), machinesNow())"); out['bar'] = pg.next()
+    pg.ev("(puBar(15 * 1440 + 1000, 'met'), setShipNow(16 * 1440 + 900), machinesNow())"); out['toast'] = pg.next()
+    steps = pg.ev("devmodePromoSteps().filter(s => /Tier 3|bar|toast/.test(s.label)).map(s => s.label + ' ' + (Math.floor(s.at / 1440) + 1) + ' ' + hhmm(s.at % 1440) + (s.done ? ' done' : ''))")
+    pg.ev("puToasted(16 * 1440 + 1200, 'met')"); out['after'] = pg.next()
+    for k, v in out.items(): print('   ', k, {x: v.get(x) for x in ('label', 'deck', 'room', 'place')})
+    print('    steps', steps)
+    L = lambda k: out[k].get('label') or ''
+    check('Tier 3 offer' in L('offer'), f"pu3: Day 14, the arrow names the Tier 3 offer: {out['offer']}")
+    check('Tier 3 test' in L('test') and out['test'].get('deck') == 5, f"pu3: the test set, the board: {out['test']}")
+    check('result' in L('result') and 'office' in L('result') and out['result'].get('deck') == 5, f"pu3: passed, Calder's office: {out['result']}")
+    check('bar' in L('bar') and out['bar'].get('deck') == 1, f"pu3: promoted, the observation room: {out['bar']}")
+    check('toast' in L('toast') and out['toast'].get('deck') == 2, f"pu3: the bar given, her quarters: {out['toast']}")
+    check(not any(w in L('after') for w in ('Tier 3', 'result', 'bar,', 'toast')), f"pu3: all done, nothing of it: {out['after']}")
+    check(len(steps) == 4 and all(x.endswith('done') for x in steps[:3]), f"pu3: Dev mode's promotion list: {steps}")
+    check(not pg.errors, f'pu3: errors {pg.errors[:3]}')
+    ctx.close()
+
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
-    for name, part in (('off', part_off), ('walk', part_walk), ('look', part_look), ('s5', part_s5)):
+    for name, part in (('off', part_off), ('walk', part_walk), ('look', part_look), ('s5', part_s5), ('pu3', part_pu3)):
         if ONLY and name not in ONLY: continue
         try: part(b)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
