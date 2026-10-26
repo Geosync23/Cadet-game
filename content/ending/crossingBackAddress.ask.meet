@@ -12,7 +12,7 @@ marrow: Four weeks ago we crossed into the reach as guests. We were good ones. I
 marrow: A few days ago, Concord headquarters wrote to me. They asked for one of ours. A post at headquarters.   [nod]
 marrow > you: {me}, I said you could take until now. It's now. I'm sorry. I did warn you.   [listen]
 torres-zeke: Take a breath. Whatever you say, we're all still here.
-marrow > you: Stay with the Wren, or go to headquarters? Either is a good answer.
+marrow > you: Stay with the Wren, or go to headquarters? Either is a good answer. This one's for keeps.
 ? choice
 * I'm staying.   flavour:share flag:end.stay
   marrow: Then we're keeping you.   [laugh]
