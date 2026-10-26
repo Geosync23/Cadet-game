@@ -536,3 +536,19 @@ nobody yet)`; `week: the arrow "A toilet" stayed up over 3 ship hours from Day 7
 So the doors change is clear. The week guide FAIL is **older, in the live 0.93.2**: week guide last ran in a round on
 0.92.6 (b78e1e22, OK). It came in somewhere between 0.92.6 and 0.93.2. Not on the known list; backlog row suggested.
 Not fixed or bisected (check runner).
+
+## Doors follow-ups (claude/doors-3way, 2026-10-26)
+
+| Commit (game sha256) | Run | Result |
+|---|---|---|
+| 329ad201 (13740483…2c28f78) | arrows_check week | OK (554 s) |
+| 329ad201 | arrows_check week guide | FAIL, unchanged (the same 3 lines) |
+| 329ad201 | arrows_check all parts | stopped unfinished when 1dc48251 came (no result) |
+| **1dc48251** (`b0dd6aaa9cdeb1d29e05620a7a0433bba668c94b254d9bc6992a3f61c87399d9`) | arrows_check all parts incl. week | **OK** (1128 s; same arrows_check.py as 329ad201) |
+| 1dc48251 | week guide, scratch debug copy (prints actions and position) | FAIL, unchanged; action lines sent to FX30 |
+
+(FX29 wrote "1dc4825e"; the commit is 1dc48251.) The week guide stalls, from the debug copy: Day 6 20:10 the follower
+reaches Deck 4 at 20,9 and every 3 minutes taps "Spine trunks" (false) and the floor at the pin "Theo wants a word",
+never moving, not busy. Day 7 18:20 it stands at 5,1 on Deck 4 and every 3 minutes taps "Toilet" (true) and the floor
+at the pin "A toilet"; nothing starts and the arrow never clears. The week guide stall is known-old (also on d9c7e5f0),
+now with FX30.
