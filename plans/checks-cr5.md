@@ -4,6 +4,28 @@ Check runner 5. Share (plans/testing-guide.md, six-way split): `day_check` Days 
 career. Own `CADET_WORK=/tmp/work-cr5`, `CADET_CHROME=/opt/pw-browsers/chromium`, one browser check at a time, each
 on a copy of the game in `/tmp/work-cr5/new.html` (sha256 checked after copying).
 
+## 0.93.1 full round (2026-10-26, started 00:09 UTC, for BM18 and lead 37)
+
+- Candidate: `claude/staging-0.93.1` 0a2fc617 (0.93.1: RV16's promo-arrow fix; boardLesson/promoTestDay, the Tier 2
+  test arrow names the job only once it's on the board). Checks run from a worktree of 0a2fc617 (its own scripts).
+- `starship-cadet.html` sha256 `6cd54ab97f4290aa5665ff40b5db35d0abc485dc8401d011084dfaa2f35a8eee`: matches BM18's.
+- OLD: 0.93.0 df8d58b9 (`97f21893...f6a8`, the file of my 0.93.0 round).
+- Order changed: interactions first, events and sound last. CR1 finished early and took **events_check and
+  sound_check** (00:49 UTC, cc BM18 and lead 37); neither was started here (both scripts moved out of my worktree
+  first, logged as "can't open file", exit 2, 0 s; put back afterwards).
+
+| Check | Result | Exit | Time | Key lines |
+|---|---|---|---|---|
+| `interactions_check.py BUILD` | OK | 0 | 2413 s | `INTERACTIONS CHECK OK` |
+| `day_check.py BUILD 21` | OK | 0 | 269 s | `DAY CHECK OK`; draw calls peak 225 / 195 / 295 / 237 on Decks 1-4 (budget 450; same as 0.93.0) |
+| `day_check.py BUILD 27` | OK | 0 | 264 s | `DAY CHECK OK` |
+| `career_check.py BUILD` | **known (backlog 12)** | 1 | 130 s | only `FAIL busy: "Relied on" before Day 5`; identical busy-player numbers to my 0.93.0 run on OLD's file (30, 28, 28, 25, 24 jobs; xp 4, 16, 32, 40 relied, 59); ship.works 2571 bytes |
+| `promo_sight_check.py BUILD` | OK | 0 | 16 s | `PROMO SIGHT CHECK OK` |
+| `events_check.py BUILD` | run by CR1 | | | (CR1's result to follow) |
+| `sound_check.py BUILD` | run by CR1 | | | (CR1's result to follow) |
+
+**CR5's own part: OK** (interactions, day 21, 27, promo_sight OK; career the known backlog 12 line only).
+
 ## 0.93.0 full round (2026-10-25, started 21:13 UTC, for BM18 and lead 37)
 
 - Candidate: `claude/staging-0.93.0` 4f1e52bf (0.93.0: sound and music, section 27, silent under webdriver; FX17's
