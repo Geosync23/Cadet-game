@@ -136,13 +136,15 @@
 - "Bag all right? Right, onward. Up you go. Get a window seat. Every time."
 == ending.endpage.close
 - The Wren goes on without you, and keeps a seat for you at breakfast.
-// the one button (the user, 2026-10-26: no way back from the end page; the ended save shows this page again)
+// the two buttons (the user, 2026-10-26: no way back from the end page; Keep this ending, or Start a new game)
+== ending.endpage.btn.keep
+- Keep this ending
+== ending.endpage.btn.keep.sub
+- This save stays ended. Loading it brings you back to this page.
 == ending.endpage.btn.new
 - Start a new game
 == ending.endpage.btn.new.sub
 - Choose a save slot and come aboard again.
-== ending.endpage.kept.note
-- This save keeps your ending. Loading it brings you back to this page.
 // the Saves app: the ended save's label
 == ending.saves.ended
 - Ended: you left on the Tern
