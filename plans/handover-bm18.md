@@ -21,8 +21,8 @@ Read this first if you take over as build master (BM19). Before me: `plans/hando
 
 All six shares done, no new FAIL:
 - CR1 all 11 OK (+ promo_sight, sound for CR3). CR2 cadet = expected only (Bunk 1's door shut at the start; walk 1-unit diffs), path, arc, lines (69 warnings = 0.93.2), lines --day, intro, p926, day 21, 22 OK. CR3 day 0/1/5/7, weekend, arrows_d, arrows_f, controller (incl. the new door part) OK. CR4 day 6/8/12/13/16/19, appt, saves OK; perf (moved from CR2, alone). CR5 interactions OK (2449 s), career known-old only, join OK (rerun for CR6). CR6 check_fast, stories, promo_beats, mech, bigevents, tiles, disc, food x2, clothes, day 27, fridays OK; events known-old FX24-2 only; its first join crashed on a page-load timeout (overload), CR5's alone rerun OK.
-- perf: "3 problem(s)", all one-scene js-time flags (backlog 32 pattern): Sunday dinner mess portrait 2.82->4.31 ms; storm all-clear party landscape 1.73->2.74; garden picnic trifold-open-turned 1.09->2.51. No draw-call or memory problem (round trips 521->521->521; week 521->522). CR4 re-measured those 3 scenes: RESULT_HERE.
-- GO/NO-GO sent to lead 40 and PUB1: GO_HERE.
+- perf: "3 problem(s)", all one-scene js-time flags (backlog 32 pattern): Sunday dinner mess portrait 2.82->4.31 ms; storm all-clear party landscape 1.73->2.74; garden picnic trifold-open-turned 1.09->2.51. No draw-call or memory problem (round trips 521->521->521; week 521->522). CR4 re-measured those 3 scenes alone, twice: none repeated (run 1 OK; run 2 one flag in a different shape, storm party trifold-open 2.25->3.54, 2.24 in run 1) = backlog 32 noise.
+- **GO from testing** sent to lead 40 and PUB1 together, 2026-10-26 ~23:46 UTC. Publish and the integration fast-forward are the lead's/PUB1's (not done by me before stopping).
 
 ## The 0.93.4 plan (lead 40; NOT started, the user stopped here)
 
