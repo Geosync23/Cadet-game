@@ -435,3 +435,17 @@ Commit `claude/staging-0.93.2` 41c8a7e0f9aff576bbc071e6f6ffeebba01e408c; game sh
 | controller_check (all but reach) | OK (2042 s) | CONTROLLER CHECK OK |
 
 No FAILs. CR3: OK.
+
+### 0.93.2 extra: arrows_check week on switch-off copies (taken from CR1, for BM18)
+
+41c8a7e0's arrows_check.py, CADET_WORK=/tmp/work-cr3, one at a time.
+
+| Copy | sha256 | Result |
+|---|---|---|
+| TRAD_0932_ON = false | f9e82d26...803f | FAIL (598 s) |
+| STORM_SAT_ON = false | bb21756c...0eaf | FAIL (615 s) |
+
+Both logs identical line for line, the same 7 FAILs as CR1's NEW: from Day 4 the follower stays in training m5:ask and
+never clocks in (Days 4, 5, 8), m5 / m7 / p3 not learned, scanner unused by Day 8. So neither switch is the cause.
+OLD 0.93.1 passes (CR1); BM18's INSPECT_ON-off copy passes, so it is the bunk inspection (the follower lies down on the
+bunk the inspection arrow points at and never gets up). FX20b is fixing it; the full round runs again on the new sha.
