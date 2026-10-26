@@ -16815,7 +16815,7 @@ function turnInShow(j, a) {
 // a doorway leaves that door open until you're clear of it. AUTO_DOORS_ON: the feature's switch (on in 0.93.2); with it
 // off or the setting on, adoorShut is false and nothing changes. SHIP.device.settings.autoDoors (false when off, saved)
 var AUTO_DOORS_ON = true;
-const ADOOR_WORDS = 'Auto doors: doors open as you walk up to them. Off: tap a door, or somewhere in the room beyond, to open it.';
+const ADOOR_WORDS = 'Auto doors: doors open as you walk up to them. Off: tap a door, or somewhere in the room beyond, to open it. Lift doors always open.';
 const ADOOR = { tap: null, here: null, route: new Set() };
 const autoDoors = () => !AUTO_DOORS_ON || !(typeof SHIP !== 'undefined' && SHIP.device && SHIP.device.settings && SHIP.device.settings.autoDoors === false);
 function adoorNear(key, m) { const e = EDGES.get(key); if (!e || typeof player === 'undefined') return false; const p = player.obj.position; return Math.hypot(p.x - e.cx, p.z - e.cz) < m; }
