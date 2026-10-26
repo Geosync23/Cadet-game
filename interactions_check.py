@@ -1779,6 +1779,35 @@ with sync_playwright() as pw:
         check(op[0] and op[1], f'a tap on the Lift button opens the lift panel, and the button hides while it is open (0.92.6 #16): {op}')
         g.ev("closeLiftPanel(); LIFT_BTN_ON = false")
     else: check(False, 'no liftBtnShow (0.92.6 #16)')
+    # Auto doors (0.93.2, the user's): with the setting off, for you only, a door stays shut to your own steering; a tap on
+    # the door opens it; a tap in the room beyond walks you through (it opens as you reach it); on, as always; the crew
+    # never asked; the setting saved only when off, and loaded back
+    if g.ev("typeof adoorShut === 'function' && AUTO_DOORS_ON"):
+        AD = r"""(() => { goToDeck(3); actEnd(true); player.stop(); adoorSet(false); const ds = DOOR_OBJS.filter(o => o.e.type === 'door').map(o => [o, doorSides(o.e)]).filter(([o, s]) => s.length === 2 && s.every(([i, j]) => free(i, j)));
+          const [o, s] = ds[0]; window.__door = { key: o.e.key, a: s[0], b: s[1] }; player.obj.position.copy(cellPos(...s[0])); player.stop(); return o.e.key; })()"""
+        STEER = r"""(() => { const { a, b } = window.__door, A = cellPos(...a), B = cellPos(...b), dx = B.x - A.x, dz = B.z - A.z, d = Math.hypot(dx, dz); player.steer = { x: dx / d, z: dz / d, k: 1 }; return true; })()"""
+        AT = r"""(() => { const { a, b, key } = window.__door, h = player.here(), o = DOOR_OBJS.find(x => x.e.key === key); return [h[0] === a[0] && h[1] === a[1], h[0] === b[0] && h[1] === b[1] || Math.hypot(player.obj.position.x - cellPos(...a).x, player.obj.position.z - cellPos(...a).z) > 1.5, +o.open.toFixed(2)]; })()"""
+        BACK = "(() => { endSteer(); ADOOR.tap = null; player.obj.position.copy(cellPos(...window.__door.a)); player.stop(); return true; })()"
+        ad = {'door': g.ev(AD)}
+        g.ev(STEER); g.step(60); ad['steerOff'] = g.ev(AT); g.ev(BACK); g.step(20)
+        g.ev("adoorTap(window.__door.key)"); g.step(40); g.ev(STEER); g.step(60); ad['afterTap'] = g.ev(AT); g.ev(BACK); g.step(20)
+        ad['self'] = g.ev("(() => { const ok = adoorTapSelf(); return [ok, ADOOR.tap === window.__door.key]; })()"); g.ev(BACK); g.step(20)   # a tap on yourself by the shut door is the door's (RV18)
+        g.ev("playerGo(window.__door.b)"); mx = 0
+        for i in range(12): g.step(10); mx = max(mx, g.ev(AT)[2])
+        ad['walkIn'] = g.ev(AT); ad['walkOpen'] = mx; g.ev(BACK); g.step(20)
+        ad['crew'] = g.ev("(() => { const e = EDGES.get(window.__door.key), a = DECK_CREW.find(c => c.p); return [!!a && adoorShut(e, a), !!a && edgeBlocks(e, a.p)]; })()")
+        ad['saved'] = g.ev("(() => { const d = deviceLoad({ device: JSON.parse(JSON.stringify(SHIP.device)) }); return [SHIP.device.settings.autoDoors, d.settings.autoDoors]; })()")
+        g.ev("adoorSet(true)"); g.ev(STEER); g.step(60); ad['steerOn'] = g.ev(AT); g.ev(BACK)
+        ad['savedOn'] = g.ev("'autoDoors' in deviceLoad({ device: JSON.parse(JSON.stringify(SHIP.device)) }).settings")
+        print('  Auto doors:', ad)
+        check(ad['steerOff'][0] and ad['steerOff'][2] < .05, f"Auto doors off: walking into a shut door yourself, you stop at it and it stays shut (0.93.2): {ad['steerOff']}")
+        check(ad['afterTap'][1], f"Auto doors off: a tap on the door opens it and you can walk through (0.93.2): {ad['afterTap']}")
+        check(ad['walkIn'][1] and ad['walkOpen'] > .5, f"Auto doors off: a tap in the room beyond walks you through, the door opening as you reach it (0.93.2): {ad['walkIn']} {ad['walkOpen']}")
+        check(ad.get('self') == [True, True], f"Auto doors off: a tap on yourself right by a shut door opens it (0.93.2, RV18): {ad.get('self')}")
+        check(ad['steerOn'][1], f"Auto doors on: you walk straight through, as always (0.93.2): {ad['steerOn']}")
+        check(ad['crew'] == [False, False], f"Auto doors: the crew are never stopped (0.93.2): {ad['crew']}")
+        check(ad['saved'] == [False, False] and ad['savedOn'] is False, f"Auto doors: saved as off, loaded back; nothing saved when on (0.93.2): {ad['saved']} {ad['savedOn']}")
+    else: check(False, 'no Auto doors (0.93.2)')
     check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 

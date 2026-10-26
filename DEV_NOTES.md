@@ -830,6 +830,8 @@ What section 17's `jobKindAdd` kinds and section 24's mechanics give a stop, and
 
 ## Player interactions (section 15b, the interactions engineer, 0.37.x)
 
+- **Auto doors** (0.93.2-a.1, FX24, the user's; switch `AUTO_DOORS_ON`, on): 15b's slot (`adoorShut`, `adoorRoute`, `adoorTap`, `adoorSet`, `ADOOR`), the setting `SHIP.device.settings.autoDoors` (saved only as `false`). Hooks: section 4's `collide` (free steering only: planned walks never collide) asks `adoorShut` for each door edge; the door-leaf loop doesn't count you as near a door adoorShut keeps shut; `goTo` hands the player's route to `adoorRoute` (the doors it crosses open as you reach them); `tap` sends a tap on a door's hit box (`userData.door`) to `adoorTap` (open, walk up to it; open while you're within 3 m); Settings' 'doors' verb. Off at `adoorSet` in a doorway (< .55 m): that door stays open till you're 1.6 m clear. Crew paths and `crewNearDoor` never ask. interactions_check has its part.
+
 Section `// 15b. PLAYER INTERACTIONS` sits right after section 15. It owns more things to use, the job board's list and the goal pointer. It reuses section 15's activity loop, so every rule there (the minutes, the gains, walking away to stop, `needEffects` and the ship's effects) applies to these too.
 
 - **The hook.** Section 15 declares `PLAYER_TAPS = []` above `playerTap`, and `playerTap` tries each `f(item, itemPos, tapPoint)` right after `jobTap`. Agreed with the player engineer; the line is the same on both branches. 15b pushes `ixTap`.
