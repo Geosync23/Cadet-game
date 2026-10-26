@@ -168,3 +168,8 @@ Game byte-identical to staging-0.93.0 4f1e52bf (97f21893...). New check: promo O
 arrow naming it (shift:job:9, Day 9 09:15), not promo:test"; the old check on the same game FAILs "never led with
 promo:test". The new condition still needs the label to name the Tier 2 test job AND the job to be takeable (guideTakeable),
 so 08:01-09:00 (label up, job not yet on the board) doesn't count; the other three beats unchanged.
+
+### RV16 0.93.1 game fix: PASS at claude/fix-promo-arrow 8cbcd6f0 (game 6cd54ab9...)
+boardLesson's first branch now waits for the job's found time like its second branch already did; promoTestDay's open()
+counts the test only once found. cadet_test vs 0.93.0 df8d58b9 ALL IDENTICAL; day_check 9 OK; arrows_check all parts OK
+(promo queue now leads with promo:testday:9 and promo:test:9; test passed first try).
