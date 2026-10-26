@@ -1450,3 +1450,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~19:56 UTC: **USER answered vessel C1 yes (commendation), C2 yes (ship outside), C3 WAIT (Taavek and Calder wait at the ramp up to an hour; Zeke only after)**. VB1 + EP2 told. Step 5/6 page questions still unanswered (builders on recommended).
 - ~19:52 UTC: SW2 swap fix in progress (claude/sw2-swap-fix-0933): Day 26 guests line + friday-d26 Mail header (both modes) + friday-d19 header drops the comet; lines_check PASS; check_fast/fridays running.
 - ~19:53 UTC: SW2 at 59%: finishes swap fix + handover, then idle. **Hired SW4 session_01DgMynb62u2rTUA9RocZi65** for the vessel words (claude/vessel-words). VB1 told.
+- ~19:54 UTC: B1 band conflict (Tier 2 Relied on): lead call 42 (steady by storm Saturday; busy Day 11 harmless since the offer waits for Day 14).
