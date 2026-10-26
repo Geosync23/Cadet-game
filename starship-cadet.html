@@ -58575,11 +58575,12 @@ if (P5_M18) (() => { const s = SAVED && SAVED.ship && SAVED.ship.works; if (SHIP
 // minutes a and b of day d? Reads only sd.set[d] (settled at 22:00 the evening before), cached on the day's occ
 // p: the person being planned. WORKS_PLAN_RULES (others' rules on this same hook, e.g. 24k's P9 moving a routine: each
 // (d, occ, pl, a, b, p) -> true to pass that place by; it must read only records settled at 22:00, as this does)
-var WORKS_PLAN_RULES = [];                               // var: the planner may ask before this line has run
-var WORKS_SETTLE = [];                                   // others' 22:00 settles: fn(day) -> true if day's record changed (its plans are then made again)
+var WORKS_PLAN_RULES = WORKS_PLAN_RULES || [];           // var: the planner may ask before this line has run (and a section loaded before this one may have made it)
+var WORKS_SETTLE = WORKS_SETTLE || [];                                   // others' 22:00 settles: fn(day) -> true if day's record changed (its plans are then made again)
 function sdPlanShut(d, occ, pl, a, b, p) {
   if (!pl) return false;
-  for (const f of WORKS_PLAN_RULES) { try { if (f(d, occ, pl, a, b, p)) return true; } catch (e) { /* a rule's own fault: not closed */ } }
+  if (typeof p9PlanRule === 'function' && p9PlanRule(d, occ, pl, a, b, p)) return true;   // 24k's P9 (B4): a routine moved by the clash's fix, its record settled at 22:00
+  for (const f of WORKS_PLAN_RULES || []) { try { if (f(d, occ, pl, a, b, p)) return true; } catch (e) { /* a rule's own fault: not closed */ } }
   if (!P5_M18) return false;
   let L = occ && occ.sdShut;
   if (L === undefined) { L = sdShutList(d); if (occ) occ.sdShut = L; }
@@ -58612,7 +58613,8 @@ function sdSettle(t) {
 }
 function worksSettleOthers(t) {                        // the others' 22:00 records (WORKS_SETTLE), on the same clock as sdSettle
   const d = worksDay(t); if (t - (d - 1) * 1440 < SD_SETTLE) return;
-  for (const f of WORKS_SETTLE) { let ch = false; try { ch = !!f(d + 1); } catch (e) { ch = false; } if (ch) { SHIP_DAYS.delete(d + 1); MACH_USE.delete(d + 1); } }
+  const fs = (typeof p9Settle === 'function' ? [p9Settle] : []).concat(WORKS_SETTLE || []);   // 24k's P9 by name (it loads before this section)
+  for (const f of fs) { let ch = false; try { ch = !!f(d + 1); } catch (e) { ch = false; } if (ch) { SHIP_DAYS.delete(d + 1); MACH_USE.delete(d + 1); } }
 }
 // book a shutdown for job jobId on day `day` at minute `at` (from midnight): returns the booking or null. Only for a
 // day not yet settled (tomorrow before 22:00, else the day after), an hour in SD_HOURS, one of the job's branches
