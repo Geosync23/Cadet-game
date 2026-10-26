@@ -28,3 +28,4 @@ BM18 session_01A3S2VBMYmTt2wCZa8ej7XR (fine). Runners CR1, CR2, CR4, CR5, new CR
 - Retired sessions still get messages; keep TEAM.md "CURRENT SEATS" current.
 - cadet_test pixel noise on a busy machine: rerun alone; must be 0 px.
 - Checks that move with a game change (arrows promo, arrows_d S3) were stale, not game bugs; still trace each one.
+- Events plan page: https://claude.ai/artifact/7w7UgrR71rk5VknPhBExSc (republish from scratchpad events-plan-2.html after EP1's update).
