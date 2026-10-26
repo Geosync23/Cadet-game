@@ -1543,3 +1543,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~22:23 UTC: **RV20 PASS B4 p5s5-puzzles 4e5c878f** (P4, P5, board, in-person/words; off identical; 390x844). Board arrow finding withdrawn (setup). B4 next P9 + t6.
 - ~22:23 UTC: **CR5 0.93.3 OK** (interactions OK 2449 s; career known-old backlog 12 only; claude/checks-cr5 54b1e52d). 2 of 6 runners done (CR4, CR5).
 - ~22:24 UTC: B2 workstep-tap-fix c79a66dc fully checked (interactions OK too); waits on RV20 jobTap verdict -> 0.93.4.
+- ~22:28 UTC: **RV21 FIXES NEEDED VB1 V-2 73942e8a**: MUST vesselLights 47 going for 44 places (bigevents on-copy); shoulds: ramp crowd (~20, SW4 rampCrowd unused), Taavek goodbye missable (15-min window), round-one fallback, Saturday sheet Calder comes to you, doubled pilot toast, setTimeout, merge 3fb8eac7. Live beats/arrows/ramp replies OK.
