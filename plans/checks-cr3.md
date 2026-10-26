@@ -417,3 +417,21 @@ sha256 **6cd54ab97f4290aa5665ff40b5db35d0abc485dc8401d011084dfaa2f35a8eee** (BM1
 
 No FAIL in my part. (Offer went to CR4 and CR6 at once and both took it; CR6 was first, CR4 stopped its arrows_d after
 ~40 s and kept nothing. Next time: offer to one runner at a time.)
+
+## 0.93.2
+
+Run by the fresh CR3 (session_01Pw3EQ24pSz4gjsFcLBMjUF), 2026-10-26 ~11:27-12:35 UTC, from a worktree of the commit, CADET_WORK=/tmp/work-cr3, one at a time.
+Commit `claude/staging-0.93.2` 41c8a7e0f9aff576bbc071e6f6ffeebba01e408c; game sha256 89eafdc1cc2f2cbcc77db9168b009cb19561b9efe9067aeedf6386947a704960 (matches BM18's).
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | OK (241 s) | DAY CHECK OK |
+| day_check 1 | OK (238 s) | DAY CHECK OK |
+| day_check 5 | OK (214 s) | DAY CHECK OK |
+| day_check 7 | OK (225 s) | DAY CHECK OK (FX24-2, the known Farouk reading-corner FAIL, did not show) |
+| weekend_check | OK (496 s) | WEEKEND CHECK OK |
+| arrows_d_check | OK (66 s) | arrows_d_check: OK |
+| arrows_f_check | OK (30 s) | arrows_f_check: OK |
+| controller_check (all but reach) | OK (2042 s) | CONTROLLER CHECK OK |
+
+No FAILs. CR3: OK.
