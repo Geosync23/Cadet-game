@@ -41,6 +41,7 @@ writers SW5 session_01FFW8ZfuaUqiPPqqhruwZhX (endgame pool), SW6 session_01Gy3XC
 | claude/ending (EN1) | new keys' words | PASS | 319b7739 |
 | claude/vessel-sky (VB2) | v.6 bench places | PASS | 3fb8eac7 |
 | claude/vessel (VB1) | V-2a + V-2b | FIXES NEEDED (1 must) | 73942e8a |
+| claude/vessel (VB1) | V-3 + V-4 + lights fix | PASS (V-2 shoulds open) | 6d4b5192 |
 | claude/ending (EN1) | E-2 turn 1 skeleton | PASS (1 should: docs) | 1c72a28d |
 
 ## Log
@@ -123,3 +124,9 @@ writers SW5 session_01FFW8ZfuaUqiPPqqhruwZhX (endgame pool), SW6 session_01Gy3XC
   OK; phone probe: level-1 arrows at each beat, the ramp scene at 09:33 with replies. Shoulds: no ramp crowd (rampCrowd
   unused); goodbye window 15 min; round one no fallback; sheet: Calder should come to you; doubled pilot toast;
   setTimeout; merge VB2 3fb8eac7.
+- ~23:00 UTC: **VB1 6d4b5192 (V-3 chain + V-4 making + lights fix): PASS.** bigevents on-copy OK; cadet vs 8a91f1dc ALL
+  IDENTICAL; events only FX24-2; V-3/V-4 live OK; phone probe (v34_probe.py): Join the chain level 1 from 12:50, tap Zeke
+  joins, ring Pass the crate, Deck 5 30 crew ~210 calls; Mon 09:22 Pick two helpers level 1. V-2 shoulds still open (ramp
+  crowd, goodbye window, round-one fallback, sheet fetch, doubled toast, setTimeout x7, VB2 3fb8eac7 not merged).
+- EN2 b77733eb (the combined ending: EN1 395fe62e + oath fetch + notice key) received; lead 40 says EN2 hands over; fixes to
+  EN2, else VB2. Checks running.
