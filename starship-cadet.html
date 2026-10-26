@@ -14038,7 +14038,7 @@ function actEnd(abort) {
   if (A.kind === 'tidy' && A.done >= A.def.mins) { SHIP.player.untidy = false; toast('Your locker', 'All put away. Tidy.'); }
   if (typeof A.def.onDone === 'function' && A.done >= A.def.mins) try { A.def.onDone(A); } catch (e) { console.error(e); }   // a sub-block's own timed hold (24m's bench, 0.45.11)
   player.face = player.obj.rotation.y = A.face;
-  if (A.def.done) toast(A.def.title, A.def.done + (A.kind === 'eat' && A.o.company ? ' Good company, too.' : '') + (A.def.need ? ' ' + NEED_LABEL[A.def.need] + ' ' + Math.round(SHIP.player.needs[A.def.need]) + '.' : ''));
+  if (A.def.done) toast(/^tj:/.test(A.kind) && A.o.title || A.def.title, A.def.done + (A.kind === 'eat' && A.o.company ? ' Good company, too.' : '') + (A.def.need ? ' ' + NEED_LABEL[A.def.need] + ' ' + Math.round(SHIP.player.needs[A.def.need]) + '.' : ''));
   if (A.kind === 'browse') {
     basket = storePick(A.o.shelf || 'snack');
     toast(A.def.title, 'You pick out ' + basket.name + ' (' + basket.price + ' credits; you have ' + SHIP.player.credits + '). Pay at the counter.');
@@ -15985,7 +15985,7 @@ function ixSide(A) {
     if (A.o.company && d.with) side.social = (side.social || 0) + d.with * mult * (A.o.company === true ? 1 : A.o.company);   // by the best bond there (0.28.43)
     if (side[d.need]) { d.gain += side[d.need]; delete side[d.need]; }   // more of the main need: section 15 spreads d.gain over the minutes
     A.o.ixSide = side; A.o.ixGiven = {};
-    if (A.o.company && d.with) d.done = (d.done || '') + ' The company helped.';
+    if (A.o.company && d.with) d.done = (d.done ? d.done + ' ' : '') + 'The company helped.';   // FX26 (RV19): no leading space when it's the only words (a joined tradition's end toast, titled by the tradition's name, not its id, in actEnd)
   }
   const fx = typeof playerFx === 'function' ? playerFx() : null, n = SHIP.player.needs;
   for (const k in A.o.ixSide) {
