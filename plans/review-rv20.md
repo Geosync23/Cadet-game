@@ -115,3 +115,70 @@ chips (Seal, Temperature sensor, Compressor, Bearing), "Where next?" with its po
   B4 wires SW3's words next turn: agree one set with SW3.
 - Notes: the clue reading at the panel wasn't played by tap (puzzle_check reads them through caseClue); it's 24k's
   existing path, played since P1. Controller reach and the Day 21 preset are later turns.
+
+## Lead change
+~22:00 UTC: lead 40 (session_01NXybH7NNqM8M4ngiyidq6m) took over from lead 39. Verdicts go to lead 40; when B5's S5-2
+promotion passes, tell lead 40 at once (an early Dev link for the user). Side review for lead 40 and RV21: EN1's careerOff
+hook (claude/ending cd4196d5): OK (one more OR term, typeof-guarded, false unless EV_ENDING_ON and a settled 'go' on the
+leave day: no c.on, no missed shift, no ladder lesson; read live like booked leave).
+
+## B3, M18 shutdowns: 386c9ef6, then ac6eb9e4 and 5ad090ff (S5-4, from 5957d244)
+Diff read (386c9ef6, then the two later commits): 24w's slot (sdBranches / SHUT_BRANCHES, the save sd with sdClean,
+sdBook / sdCancel, sdSettle at 22:00 dropping that day's plans, sdMark, sdPlanShut, the planning screen sdView / sdAct,
+sdWarn, Brennan's chat option, the training WORK_MECH.m18 (self-led), sdTrainBeats, the day sdDayTick, sdItems); one line
+each in section 14 schedBuild's take(), 15 devDay, 20 chatShow / chatDo. ac6eb9e4: sdBook's j.why line (it had been
+inside a comment: I found it too), the section 14 line shared with P9 (WORKS_PLAN_RULES), Calder's 22:00 Mail.
+5ad090ff: content/works/shutdowns.lines (B3's own words, lead 39's ask). The planner reads only sd.set (settled at 22:00);
+nothing reads a booking live. No R(); schedU 853.
+
+| Check | Build | Result |
+|---|---|---|
+| cadet_test vs 5957d244 | 386c9ef6 off | ALL IDENTICAL |
+| mech_check m18 | 386c9ef6 on copy | OK (diners in the mess 18:00-19:00 on Day 19: 69 before the settle, 0 after; fresh plan the same) |
+| saves_check shut | 386c9ef6 | OK |
+| controller_check shut | 386c9ef6 | CONTROLLER CHECK OK (21 of 21 by D-pad) |
+| day_check 19, DAY_SD=1080:galley | 386c9ef6 on copy | DAY CHECK OK |
+| food_check 19 2, DAY_SD=1080:galley | 386c9ef6 on copy | FAILED: cake, garden good, garden carry: the same three on the base 5957d244 with no shutdown (old) |
+| check_fast | 386c9ef6 | my run stopped at names (my CADET_WORK lacked acorn: mine); B3 reports OK on 5ad090ff; rerun pending |
+| played, 390 x 844, ?p5s5 (plans/rv20-sd-live.py) | 5ad090ff | below |
+
+Played (a Senior on Day 18 with m19 and everything before done):
+- 06:00 the ask (Mail and toast, 09:15 at the port power junction) and the urgent notice "Today: shutdowns with Calder,
+  09:15, the port power junction on Deck 6." Good. (The notice's toast shows twice, 06:00 and 06:01.)
+- At the junction from 08:50: **Calder is in her office (Deck 5) at 08:46 and never on Deck 6.** The meeting card
+  plays at 09:15 with nobody there; her "Here's one for tomorrow. Open Works, Shutdowns" comes as a toast.
+- The Shutdowns tab opens by itself: readable at phone size, numbered steps (job, branch, keep, hour, warn, book).
+  Quietest hour moved 10:00 (4 people) to 14:00 (2 people); Warn gave each person's reply; Book: "Booked: the galley
+  circuit, Day 19 at 14:00. It settles at 22:00 tonight." and Calder's line and trained. The job row says "shutdown
+  booked: Day 19, 14:00" (the j.why fix). 22:00: Calder's Mail "Settled. the galley circuit, 14:00." (a lower-case
+  "the" after the full stop) and sd.set holds it.
+- Day 19 13:20: **Brennan's grumble "Nobody told me about the galley going dark today" and a reputation dip.** The
+  screen never asked me to tell him: at 14:00 he wasn't one of the affected, so his "tell him in person before 22:00"
+  line never showed. sdGalley counts the galley circuit with the Galley not kept, whoever is there.
+- 13:30 the urgent notice; 13:47 the level 1 arrow over the job board, "Your shutdown, 14:00: switch it off", with the
+  GO THERE banner. Good. Took the job at 14:01: "The galley circuit: power off." At the junction the panel says "needs
+  a breaker and a bracket. Make the bracket in the machine shop on Deck 5": the power stays off while you fetch and make
+  parts (it comes back only when the work is done), and nothing beforehand said to bring them.
+- After a Dev clock jump to 21:55 some lines came again ("Trained: shutdowns" a second time; Calder's "One: the
+  branch..." and "Three: ... book it before 22:00" after the booking). Possibly the jump; worth a look.
+
+### Findings
+**Must**
+- M1. Calder must be at the junction for her 09:15 training talk (the user's staged-scene rule; the beats table: "Calder
+  beside you at the screen"). She stays in her office. Bring her there before the meeting and keep her beside you while
+  the screen is open (same as B2's M2; worksEscort's line is S5-2's, so agree the hook with B1/B5 or use a 24w ask).
+- M2. No hidden penalty: Brennan's grumble and the dip must only follow a booking where the screen asked you to tell
+  him. Either show "tell Brennan in person" whenever the galley circuit goes off with the Galley not kept, or grumble
+  only when he's among the affected.
+- M3. Parts before the hour. A shutdown job that needs parts (a breaker, a made bracket) must say so when you book and
+  in the morning notice, or the power is off for as long as fetching and making take. Also bound the off time (back on
+  at the hour's end, or a word from Calder) so the crew's closed hour and the power agree.
+
+**Should**
+- S1. The notice toast twice at 06:00 / 06:01; the lines repeated after a clock jump (check sdTrainBeats / worksSayAll
+  with a Dev jump; the hourly reminder after you're trained).
+- S2. "Settled. the galley circuit": capitalise the branch name at the start (sd.settle mail).
+- S3. The day's grumble fired at 13:20 in my run (the Dev jump); with live play it's 06:00 once you're up: fine.
+
+**Verdict on 5ad090ff: FIXES NEEDED (M1-M3).** The planner rule, the save, the screen and the day's arrow and notice are
+solid; off is identical.
