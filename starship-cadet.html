@@ -17163,11 +17163,12 @@ function adoorTap(key) {                                  // a tap on a door wit
   ADOOR.tap = key; approach(new THREE.Vector3(e.cx, 0, e.cz), reachableSide(e)[2], 0, () => {});
   return true;
 }
-function adoorTapSelf() {                                // a tap on you, within .9 m of a door that's shut to you: that door (your body covers its low strip)
-  if (autoDoors() || typeof DOOR_OBJS === 'undefined') return false;
+function adoorSelfKey() {                                // the door shut to you within .9 m of you (your body covers its low strip), or null
+  if (autoDoors() || typeof DOOR_OBJS === 'undefined') return null;
   const p = player.obj.position, d = DOOR_OBJS.filter(o => o.e.type === 'door' && adoorShut(o.e, player)).map(o => [o, Math.hypot(o.cx - p.x, o.cz - p.z)]).filter(([, m]) => m < .9).sort((x, y) => x[1] - y[1])[0];
-  return !!d && adoorTap(d[0].e.key);
+  return d ? d[0].e.key : null;
 }
+function adoorTapSelf() { const k = adoorSelfKey(); return !!k && adoorTap(k); }   // a tap on you right by a shut door: that door
 function adoorSet(mode) {                                 // the Settings row: 'all' | 'private' | 'none' (true / false: 0.93.2's on / off)
   mode = mode === true ? 'all' : mode === false ? 'none' : ADOOR_CHOICES.some(([k]) => k === mode) ? mode : 'private';
   const st = SHIP.device.settings; delete st.autoDoors; if (mode === 'private') delete st.doors; else st.doors = mode;
@@ -63456,6 +63457,7 @@ function padWhat(cx, cy, want) {                           // what a tap at (cx,
   const a = PAD_PICK.cs ? padCrewAt(cx, cy) : crewAtScreen(cx, cy); if (a) return 'crew:' + a.p.id;
   const h = pick(cx, cy); if (!h) return null;
   const ud = h.object.userData;
+  if (ud.walker && ud.walker.isPlayer && typeof adoorSelfKey === 'function' && adoorSelfKey()) return 'door:' + adoorSelfKey();   // you, right by a door shut to you: that door, as tap() takes it (the Doors setting, 0.93.3)
   if (ud.walker && ud.walker.active) return 'walker:' + ud.walker.spec.name;
   if (typeof ladderAimed === 'function' && ladderAimed(h)) return 'ladder';   // tap()'s next step (follow-up 1, CTT3's find): a point in line with the Spine ladder goes to the ladder, not the lift behind it
   if (ud.item) return ud.item.lift ? 'lift' : 'item:' + ITEMS.indexOf(ud.item);
@@ -63549,7 +63551,7 @@ function padRaw() {                                       // what's in reach, be
   for (const [key, x, z, ys] of PAD_PICK.items) add(key, x, z, ys, .25);
   for (const dobj of DOOR_OBJS) {                         // the lift and shut doors (an open doorway is only somewhere to walk)
     const hit = dobj.g.children.find(o => o.userData.liftDoor || o.userData.youLock || o.userData.closedDoor || o.userData.door && typeof adoorShut === 'function' && adoorShut(dobj.e, player)), ud = hit ? hit.userData : null; if (!ud) continue;   // and a door shut to you (the Doors setting, 0.93.3)
-    add(ud.liftDoor ? 'lift' : ud.youLock ? 'lock:' + ud.youLock : 'door:' + (ud.closedDoor || ud.door), dobj.cx, dobj.cz, [1, .5, 1.5], .2);
+    add(ud.liftDoor ? 'lift' : ud.youLock ? 'lock:' + ud.youLock : 'door:' + (ud.closedDoor || ud.door), dobj.cx, dobj.cz, ud.door && !ud.closedDoor ? [1.1, .55, 1.65].map(y => y * (dobj.g.scale.y || 1)) : [1, .5, 1.5], .2);   // a door shut to you (0.93.3): at its height now, cut down near the camera
   }
   if (typeof jobHere === 'function' && jobsOn() && typeof ixChore === 'function') { const j = ixChore(), nx = j && !j.workDone && ixNextStop(j), pid = nx && nx.s.deck === deckDef.num && nx.s.places[0], sp = pid && PLACE_OF.has(pid) && placeSpot(pid); if (sp) add('job', sp.x, sp.z, [.05, .4, .8], .2); }
   const cr = SHIP.player.crate; if (cr && cr.deck === deckDef.num) add('crate', cr.x, cr.z, [.05, .3], .15);

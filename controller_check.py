@@ -1188,7 +1188,8 @@ DOOR_SET = r"""(() => { goToDeck(4, null); actEnd(true); player.stop(); adoorSet
   if (!ds.length) return 'no private door';
   const [o, s] = ds[0]; window.__door = { key: o.e.key, a: s[0], b: s[1] }; const A = cellPos(...s[0]); player.obj.position.copy(A); player.stop(); target.copy(A).setY(.7);
   return o.e.key; })()"""
-DOOR_A = r"""(() => { const P = PAD_PICK, k = 'door:' + window.__door.key, L = padTargets(), t = L.find(o => o.key === k); if (!t) return 'not offered: ' + L.map(o => o.key).join(', ');
+DOOR_A = r"""(() => { actEnd(true); const A = cellPos(...window.__door.a); player.obj.position.copy(A); player.stop(); target.copy(A).setY(.7); placeCam();   // (the arrival may have walked you on; the camera with you, as in play)
+  const P = PAD_PICK, k = 'door:' + window.__door.key, L = padTargets(), t = L.find(o => o.key === k); if (!t) { const o = DOOR_OBJS.find(x => x.e.key === window.__door.key), p = player.obj.position; return 'not offered: ' + L.map(o => o.key).join(', ') + ' [mode ' + doorsMode() + ', shut ' + (o && adoorShut(o.e, player)) + ', deck ' + deckDef.num + ', at ' + (o && Math.hypot(o.cx - p.x, o.cz - p.z).toFixed(2)) + '] ' + JSON.stringify([1, .5, 1.5].map(y => { const v = new THREE.Vector3(o.cx, y, o.cz).project(camera), cx = (v.x + 1) / 2 * innerWidth, cy = (1 - v.y) / 2 * innerHeight, h = pick(cx, cy); return [Math.round(cx), Math.round(cy), padWhat(cx, cy, k), h && Object.keys(h.object.userData).join('/')]; })) + ' pp ' + JSON.stringify([+p.x.toFixed(1), +p.z.toFixed(1), +target.x.toFixed(1), +target.z.toFixed(1)]); }
   P.list = L; P.sel = t; P.chosen = true; P.n = 99; padFire('a'); return 'pressed'; })()"""
 def part_door(pw, src, tag):
     """0.93.3 (FX24, the Doors setting; the user: every new piece works with a game controller): with 'private' (the
