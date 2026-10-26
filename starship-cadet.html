@@ -33538,7 +33538,7 @@ const LINES = JSON.parse([
   ',"event.veyliVessel.tap.sketch.bench":[',
   '{"text":"Taavek\'s sketch of the part, every blade numbered. Someone has added IMPELLER.","id":"1fi6ae"}]',
   ',"event.veyliVessel.tap.sketch.shelf":[',
-  '{"text":"Taavek\'s sketch of your favourite machine, labelled in Veyli: \\"The one who meets.\\"","id":"184cgmk"}]',
+  '{"text":"Taavek\'s sketch of you at the foot of the Tern\'s ramp, the round one in your hands. Underneath, in careful letters: \\"For you. The one who meets.\\"","id":"4d660f"}]',
   ',"event.veyliVessel.tap.sketch.wall":[',
   '{"text":"Taavek\'s sketch of the Works bay, pinned by the tool wall. Calder is in it, hovering.","id":"chxc9v"}]',
   ',"event.veyliVessel.testfit.bramwell-basil":[',
@@ -47106,7 +47106,7 @@ function vesselDress() {
       const cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = cab ? 'W' : 'a', along = cab ? .5 : 2.5;
       const s = dressAt(g, room, 'n', along - .235), c = new THREE.Group(); c.position.set(0, 2.17, .03); c.rotation.x = -.13; s.add(c);   // its foot on the shelf (top 2.17), leaning back
       vesselCard(c, .1, 0, 'you', .16, .19);
-      return { t: vesselW('tap.sketchShelf.t', 'Taavek\'s sketch'), x: vesselW('tap.sketch.shelf', 'Taavek\'s sketch of you at the foot of the Tern\'s ramp. Underneath, in careful letters: For the one who meets.'), wall: [room, 'n', along - .235], y: 2.27, w: .2, h: .24 };
+      return { t: vesselW('tap.sketchShelf.t', 'Taavek\'s sketch'), x: vesselW('tap.sketch.shelf', 'Taavek\'s sketch of you at the foot of the Tern\'s ramp, the round one in your hands. Underneath, in careful letters: "For you. The one who meets."'), wall: [room, 'n', along - .235], y: 2.27, w: .2, h: .24 };
     } },
   });
 }
