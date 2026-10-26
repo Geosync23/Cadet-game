@@ -1956,6 +1956,51 @@ def part_fx3(g):
     check(b['m3iOpen'] and b['tomas'] and b['tomasStays'] and not b['again'], f"m3i: his talk before the walk, readable, and not again after it ({b})")
     check(b['m2'] and b['m2Stays'], f"m2: Torres's word stays to be read ({b})")
 
+# ---- the work steps by tap (B2 for lead 39, RV20's M3): a registered job kind on a machine with more than one stop (24q's
+# rewiring) is played stop by stop when you tap its machine at phone size, never section 15's plain timed repair: the look,
+# each wire's card (the right terminal picked), the test; then turned in, the junction put right. JOB_TAP_EXTRA lets a later
+# piece add its own kinds (24v's relay swap) as [setup JS returning { id, deck }, pick JS (j, k) -> option index]
+WSTAP_SETUP = r"""(() => { const d = 23; skipTo((d - 1) * 1440 + 570); machinesNow(); if (DIALOGUE) dialogueEnd(true);
+  const W = worksInit(); W.tier = Math.max(W.tier, 2); W.rank = W.rank === 'junior' ? 'officer' : W.rank; W.tr.t2 = W.tr.t2 || 10; W.tr.m15 = W.tr.m15 || 17;
+  SHIP.jobs = SHIP.jobs.filter(x => x.claimedBy !== 'you'); SHIP.machines['4-junction-1'].cond = 40;
+  const j = rewJob('4-junction-1', shipNow(), { key: 77 }); SHIP.jobs.push(j); if (!claimJob(j.id)) return null;
+  return { id: j.id, mach: '4-junction-1' }; })()"""
+WSTAP_PICK = "((j, k) => { const want = rewRight(j, k); return jobStops(j)[k].opts.options.findIndex(o => o.id === want); })"
+WSTAP_TAP = r"""((id) => { const m = machineById(id), p = cellPos(...m.at), v = new THREE.Vector3(); if (deckDef.num !== m.deck) goToDeck(m.deck);
+  let best = null, bd = 1e9; for (const it of ITEMS) { if (!it.hit) continue; it.hit.getWorldPosition(v); const dd = Math.hypot(v.x - p.x, v.z - p.z); if (dd < bd) { bd = dd; best = it; } }
+  player.obj.position.copy(cellPos(...m.panel)); player.stop(); const at = new THREE.Vector3(p.x, 0.8, p.z); return [best && best.t, playerTap(best, at, at.clone())]; })"""
+WSTAP_NOW = "((id) => { const j = SHIP.jobs.find(x => x.id === id) || {}; return { done: (j.stepsDone || []).slice(), n: jobStops(j).length, work: !!j.workDone, act: ACT ? ACT.kind : null, ws: ACT && ACT.o ? ACT.o.ws : null, card: !!DEV.choose }; })"
+def wstap_play(g, setup, pick, tag):
+    s = g.ev(setup); g.step(10)
+    if not check(s, f'{tag}: the job could not be set up'): return None
+    acts, taps = set(), 0
+    for n in range(60):
+        st = g.ev(f"({WSTAP_NOW})({json.dumps(s['id'])})")
+        if st['act']: acts.add(st['act'])
+        if st['work']: break
+        if st['card'] and st['ws'] is not None:
+            i = g.ev(f"(() => {{ const j = SHIP.jobs.find(x => x.id === {json.dumps(s['id'])}); return ({pick})(j, {st['ws']}); }})()")
+            g.ev(f"devChosen({i})"); g.step(10); continue
+        if not st['act']: g.ev(f"({WSTAP_TAP})({json.dumps(s['mach'])})"); taps += 1
+        g.step(30)
+    st = g.ev(f"({WSTAP_NOW})({json.dumps(s['id'])})")
+    turned = g.ev(f"turnInJob({json.dumps(s['id'])})") if st['work'] else False
+    print(f'  {tag}: {taps} taps, stops done {st["done"]} of {st["n"]}, work done {st["work"]}, turned in {turned}, activities {sorted(acts)}')
+    check('job' not in acts, f'{tag}: a tap on its machine ran section 15\'s plain repair (activity "job"), not its steps ({sorted(acts)})')
+    check(st['work'] and len(st['done']) == st['n'] and 'workStep' in acts, f'{tag}: its steps should play by tap to the end ({st})')
+    return st
+JOB_TAP_EXTRA = {}
+def part_wstap(pw):
+    g = Game(pw, sys.argv[1], 390, 844)
+    try:
+        if g.ev("typeof rewJob === 'function' && !!JOB_KINDS.rewire"): wstap_play(g, WSTAP_SETUP, WSTAP_PICK, 'rewiring (24q) by tap')
+        else: print('  rewiring not in this build')
+        for k, (setup, pick) in JOB_TAP_EXTRA.items():
+            if g.ev(f"!!JOB_KINDS[{json.dumps(k)}]"): wstap_play(g, setup, pick, k + ' by tap')
+            else: print(f'  {k}: not in this build (not yet)')
+        if g.errors: fail('wstap: page errors: ' + ' | '.join(g.errors[:3]))
+    finally: g.close()
+
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
@@ -2001,6 +2046,8 @@ with sync_playwright() as pw:
     g.close()
     if not only or only & {'m13', 'm14', 'm15', 'fcase', 'ff', 'side', 'tparts'}:
         print('side (E2\'s saved parts):'); side_save(pw)
+    if not only or only & {'wstap', 'm15', 'm19'}:
+        print('wstap (the work steps by tap, at phone size):'); part_wstap(pw)
 
 print('MECH CHECK OK' if ok else 'MECH CHECK FAILED')
 sys.exit(0 if ok else 1)

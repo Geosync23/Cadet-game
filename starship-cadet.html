@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.2
+   STARSHIP CADET: CSV Wren                           build 0.93.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9310,7 +9310,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.2';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.3';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -9445,7 +9445,7 @@ const SHORT_FRIDAY = true;                               // Short Fridays and th
 const WEEKEND_ON = true, WEEKEND_TRADS = new Set(['saturday-run', 'every-song', 'night-owls-cocoa', 'sunday-story', 'gerald-clinic', 'garden-picnic', 'bread-day', 'big-jigsaw']);   // the weekend traditions (0.92.5 item 16, FX14; plans/handover-fx14.md): on in the game from 0.92.5 (the user, 2026-10-25: "ship them switched on, no preview"; FX16); false = the game before them. Their .trad files load only with it (section 18's loader)
 const weekendTag = tag => typeof tag === 'string' && tag.startsWith('ev-') && [...WEEKEND_TRADS].some(id => tag === 'ev-' + id || tag.startsWith('ev-' + id + '-'));   // a weekend tradition's plan tag (FX9: their hosts stay to its end)
 const P926_TRADS = true, P926_NEW = new Set(['six-weeks-aboard', 'twelve-weeks-aboard', 'tool-night', 'route-night', 'window-sketch', 'open-house', 'garden-walk', 'spoon-band', 'card-night', 'worst-joke']);               // 0.92.6 (FX17, plans/patch-0.92.6.md items 2-5, 7, 8, 13, 15): the traditions that come alive (spoken talks, hosts, the swap, the guessing, the stands); off: 0.92.5. `?p926` previews
-const EV_SWAP_ON = URL_FLAGS.has('evswap');            // 0.93.2 (FX22b; plans/trad-variety-pitch.html section 5, option A): the diplomatic visit before the comet (section 18's 'event swap' block); off: the order as before
+const EV_SWAP_ON = true;                                             // 0.93.2 (FX22b; plans/trad-variety-pitch.html section 5, option A): the diplomatic visit before the comet (section 18's 'event swap' block); off: the order as before
 const EV_COMET_ON = true;                                 // 0.93.2 (FX25; plans/events-plan-2.html Part A, the user's yes): the comet viewing on Monday Day 22, 21:30-22:40 (section 18's 'comet' block, with the events base on); false: the game before it
 const P5_STEP5 = URL_FLAGS.has('p5s5');                // Pillar 5 Step 5, Senior Officer (B1 for lead 39; plans/p5-step5-spec.html on claude/p5-specs, plan v3.1): the master; off: the game before it (?p5s5 previews it while it's built, as ?evswap does)
 const P5_PROMO3 = P5_STEP5 && true;                       // S5-2: the Senior Officer promotion (section 24u)
@@ -15003,6 +15003,7 @@ function jobTap(it, at) {
   if (!jobsOn() || typeof deckDef === 'undefined') return false;
   if (typeof traceHidden === 'function' && traceTap(it, at)) return true;   // 24i: a traced job not yet found: the pipe kit's reading (Pillar 5, M3)
   const P = SHIP.player, mw = myWork(), c = cellAt(at.x, at.z);
+  if (mw && typeof ixStepwise === 'function' && ixStepwise(mw.j)) return false;   // a registered kind stepped stop by stop (15b's ixChoreTap: 24q's rewiring), not the plain repair (B2, RV20's M3)
   if (!mw && deckDef.num === 5 && roomAt(...c) === 'f' && typeof jobSpotTap === 'function' && jobSpotTap(at)) return true;   // a chore whose stop is this bench (a small repair: Fix an extractor hose clamp at 5-shop-5): the job, not the bench's crafting or tinkering (FX20b's arrows_check week, Day 8; lead 38)
   if (typeof shopTap === 'function' && shopTap(it, at, mw)) return true;   // 24j: the order board, your order's stops, tinkering (Pillar 5, M10)
   if (deckDef.num === 5 && roomAt(...c) === 'r' && !/tarp/i.test(it.t)) {      // main storage, Deck 5: a shelf or the counter
@@ -16299,7 +16300,11 @@ function ixTheirs(it, at) {
 const IX_STOP = { lamp: ['Replacing the lamp', 'work'], vent: ['Cleaning the vent', 'work'], pickup: ['Picking it up', 'browse'], drop: ['Dropping it off', 'browse'],
   inspect: ['Inspecting', 'work'], fault: ['Clearing the fault', 'work'], fetch: ['Main storage', 'browse'], fix: ['Small repair', 'work'] };   // fix: FX10's small repairs
 Object.assign(PLAYER_ACTS, { ixStop: { mins: 10, pose: 'work', title: 'Your job' } });
-const ixChore = () => { const j = typeof myJob === 'function' && typeof jobStepDone === 'function' && typeof jobStops === 'function' ? myJob() : null; return j && (j.kind === 'chore' || typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind]) && !j.machine ? j : null; };   // a registered kind (17's jobKindAdd) walks like a chore (Pillar 5)
+const ixChore = () => { const j = typeof myJob === 'function' && typeof jobStepDone === 'function' && typeof jobStops === 'function' ? myJob() : null; return j && (j.kind === 'chore' || typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind]) && (!j.machine || ixStepwise(j)) ? j : null; };   // a registered kind (17's jobKindAdd) walks like a chore (Pillar 5)
+// (B2 for lead 39, RV20's M3) a registered kind on a machine whose stops are more than the panel's one 'job' stop (24q's rewiring:
+// open, check, wire, test) walks stop by stop too; before, its panel tap took section 15's plain repair (jobBegin found no 'job'
+// stop: "Repairing" for the job's minutes, then done) and its steps never came up. One 'job' stop (24e's tuning) stays jobBegin's
+const ixStepwise = j => !!(j && j.machine && typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind] && typeof kindStops === 'function' && kindStops(j).some(x => (x.tag || 'job') !== 'job'));
 // a side job of yours (17's mySideJobs: the drill), beside any board job: its stops are tapped like a chore's, before the
 // board job's (it's only on for a few minutes); none once its work is done (p5-fix2: myJob leaves side jobs out, so the drill's taps did nothing)
 const ixSides = () => typeof mySideJobs === 'function' && typeof jobStops === 'function' ? mySideJobs().filter(j => typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind] && !j.machine && !j.workDone && !(j.found > shipNow())) : [];   // only once it's announced (the drill: 14:50, AR2's A1)
@@ -40935,7 +40940,7 @@ const FRI_ADDRESSES = {
       {"id": "1eitiu9", "who": "marrow", "text": "Dinner's at five. Enjoy your weekend, those of you who have one.", "pose": "gesture"},
     ]},
   ]},
-  "friday-d19": {"day": 19, "from": "Captain Odile Marrow", "mail": ["All hands: the Captain's Friday address", "The storm's tally and my thanks, the comet, this week's commendations and ranks, and the weekend ahead. To the night watch tonight: good watch."], "beats": [
+  "friday-d19": {"day": 19, "from": "Captain Odile Marrow", "mail": ["All hands: the Captain's Friday address", "The storm's tally and my thanks, this week's commendations and ranks, and the weekend ahead. To the night watch tonight: good watch."], "beats": [
     {"id": "lines", "pick": 1, "lines": [
       {"id": "17i8haf", "who": "vance", "text": "Settle, please. The Captain.", "pose": "nod"},
       {"id": "1n7xzsa", "who": "marrow", "text": "Afternoon, everyone. Full lights all week. I'd forgotten how bright this room is.", "tone": "funny"},
@@ -40964,7 +40969,7 @@ const FRI_ADDRESSES = {
       {"id": "xap3x6", "who": "marrow", "text": "Dinner's at five. Enjoy your weekend, those of you who have one.", "pose": "gesture"},
     ]},
   ]},
-  "friday-d26": {"day": 26, "from": "Captain Odile Marrow", "mail": ["All hands: the Captain's Friday address", "Four Fridays, a storm and a comet behind us. Tomorrow at ten a Veyli delegation comes aboard, led by Speaker Teshavi: line the shuttle bay with me if you're free. Commander Vance's Mail tonight has the details."], "beats": [
+  "friday-d26": {"day": 26, "from": "Captain Odile Marrow", "mail": ["All hands: the Captain's Friday address", "Four Fridays, a storm and a comet behind us, and a month of good work. My thanks, all of you. Four weeks aboard is tonight, in the Works tea corner."], "beats": [
     {"id": "lines", "pick": 1, "lines": [
       {"id": "1m1aw7p", "who": "vance", "text": "Settle, please. The Captain.", "pose": "nod"},
       {"id": "85elit", "who": "marrow", "text": "Afternoon, everyone. Our fourth Friday. For some of you, that's every Friday you've had."},
@@ -40979,7 +40984,7 @@ const FRI_ADDRESSES = {
       {"id": "1akj2fh", "who": "marrow", "text": "Jobs on the Works board with your name on them: {myjobs}. The ship runs better for it."},
       {"id": "3mv77c", "who": "marrow", "text": "Rank is nice. The people you sit with at dinner matter more. Find them. Keep them."},
       {"id": "j1gnfw", "who": "marrow", "text": "On Monday night, the comet. Half the ship at the windows, and not a word said.", "pose": "gesture", "if": ["swap"]},
-      {"id": "1mjqzq", "who": "marrow", "text": "After a storm and a week of guests, I think the sky owed us that one.", "tone": "warm", "if": ["swap"]},
+      {"id": "1ioeyfk", "who": "marrow", "text": "After a storm and three days of guests, I think the sky owed us that one.", "tone": "warm", "if": ["swap"]},
       {"id": "1b58nnb", "who": "marrow", "text": "What I ask: keep looking up. Out here there's nearly always something worth seeing.", "tone": "warm", "if": ["swap"]},
       {"id": "j1gnfw", "who": "marrow", "text": "On Monday night, the comet. Half the ship at the windows, and not a word said.", "pose": "gesture", "if": ["!swap", "comet"]},
       {"id": "euhh6a", "who": "marrow", "text": "Now, guests. Tomorrow at ten, a Veyli delegation comes aboard, led by Speaker Teshavi.", "if": ["!swap"]},
