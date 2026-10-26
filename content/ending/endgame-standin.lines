@@ -1,0 +1,16 @@
+@bank all
+// The endgame's stand-ins (E-4, EN2 for lead 39; plans/ending-spec.html section 9). Only after you stay: the condition
+// endgame (section 29c) holds from the first morning after the crossing back, every hour for 14 days, then about 4 hours
+// in 10. SW5's content/ending/endgame.lines replaces these: delete this file when it lands. They/them for you, or your name.
+
+== greet
+? endgame
+- {hi}. Still here, then. Good.
+- Morning, {me}. Glad you didn't take that post.
+- There's our stayer. {hi}.
+
+== smalltalk
+? endgame
+- Heard you turned down headquarters. Their loss.
+- The Wren's quieter than a comet week. I like it.
+- No more promotions for you. Just the work. Lucky.

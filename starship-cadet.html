@@ -9448,6 +9448,7 @@ const P926_TRADS = true, P926_NEW = new Set(['six-weeks-aboard', 'twelve-weeks-a
 const EV_SWAP_ON = URL_FLAGS.has('evswap');            // 0.93.2 (FX22b; plans/trad-variety-pitch.html section 5, option A): the diplomatic visit before the comet (section 18's 'event swap' block); off: the order as before
 const EV_COMET_ON = true;                                 // 0.93.2 (FX25; plans/events-plan-2.html Part A, the user's yes): the comet viewing on Monday Day 22, 21:30-22:40 (section 18's 'comet' block, with the events base on); false: the game before it
 const P926_APPT = true;                 // 0.92.6 item 9 (FX22; plans/patch-0.92.6.md): appointments as small traditions, each with its scene, and a real talk at every appointment; off: none of it (the game as 0.92.5)
+const EV_ENDING_ON = URL_FLAGS.has('ending');        // the ending (lead 39; plans/ending-spec.html on claude/p5-specs): the crossing back, the offer, the goodbye and the endgame (section 29, section 18's 'Ending builder' block); off: the game before it (?ending or #ending previews it)
 // save slots (0.93.2, FX27; the user's yes, 2026-10-26; the Saves app, section 19): three games per link type (Playtest,
 // Dev) and browser. Slot 1 is the save's old name (SAVE_BASE), so a save from before slots is Slot 1, untouched; slots 2
 // and 3 add '-2' and '-3'. The slot being played is kept under SAVE_BASE + '-slot' (read here, once: switching reloads
@@ -11742,6 +11743,7 @@ function devDay(d) {
     if (b.day === d && DEV_BEATS[b.id] && b.where && Number.isInteger(b.where.deck))
       out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckIn(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room, ...(b.stand ? { place: b.stand } : {}) }); } catch (e) { /* not yet */ }   // place: where you stand for it (item 81: the room's middle was the Chief's own seat, under her)
   try { if (typeof promoBeatsItems === 'function') out.push(...promoBeatsItems(d)); } catch (e) { /* not yet */ }   // FX28: the promotion's steps (24p), with PROMO_BEATS_ON
+  try { if (typeof endingItems === 'function') out.push(...endingItems(d)); } catch (e) { /* not yet */ }   // the ending's beats (section 29), with EV_ENDING_ON
   return out.sort((x, y) => x.from - y.from);
 }
 const DEV_BEATS = { 'd1-briefing': 'Morning briefing with the Chief', 'd2-solo': 'The Chief\'s office: your first solo job', 'd2-booths': 'Calling home', 'd3-store': 'The crew store' };   // titles (stand-ins; the beats' own words are section 21's)
@@ -35606,7 +35608,10 @@ const LINES = JSON.parse([
   '{"text":"{hi}, {nick}. Hand me that spanner? The other one. {thanks}.","id":"1xucebf","act":"work","dept":"works","tier":[1,4]},',
   '{"text":"{hi}, {nick}. Good to have another pair of hands on the board.","id":"dltvgd","dept":"works","tier":[2,4]},',
   '{"text":"{hi}, {nick}. Saw your turn-in. Clean. Calder will have noticed.","id":"bevbwy","dept":"works","tier":[2,4]},',
-  '{"text":"{hi}, {nick}. Saved you a mug at the tea corner.","id":"1ws23f4","tone":"warm","dept":"works","tier":[3,4]}]',
+  '{"text":"{hi}, {nick}. Saved you a mug at the tea corner.","id":"1ws23f4","tone":"warm","dept":"works","tier":[3,4]},',
+  '{"text":"{hi}. Still here, then. Good.","id":"1rbvagf","endgame":"true"},',
+  '{"text":"Morning, {me}. Glad you didn\'t take that post.","id":"1u41w29","endgame":"true"},',
+  '{"text":"There\'s our stayer. {hi}.","id":"cp9zlf","endgame":"true"}]',
   ',"gym.member":[',
   '{"text":"You\'re a Gym club member: this machine is yours.","id":"1fyvyre"}]',
   ',"gym.yield":[',
@@ -38090,7 +38095,10 @@ const LINES = JSON.parse([
   '{"text":"Has anyone seen the seal kit?","id":"1dn3igx","act":"work","dept":"works"},',
   '{"text":"Half the board\'s scrubbers today.","id":"1ltuxon","act":"breakfast","dept":"works"},',
   '{"text":"Tea first. Board second.","id":"1jhqc37","act":"breakfast","dept":"works"},',
-  '{"text":"Nearly tea. Nearly.","id":"9cmxpn","dept":"works","time":"afternoon"}]',
+  '{"text":"Nearly tea. Nearly.","id":"9cmxpn","dept":"works","time":"afternoon"},',
+  '{"text":"Heard you turned down headquarters. Their loss.","id":"7n6ci1","endgame":"true"},',
+  '{"text":"The Wren\'s quieter than a comet week. I like it.","id":"1sqsoo7","endgame":"true"},',
+  '{"text":"No more promotions for you. Just the work. Lucky.","id":"1rqulbm","endgame":"true"}]',
   ',"spice.ask":[',
   '{"text":"Go on, love. Taste the {spice}. Whose jar is it?","id":"1q66uwc"},',
   '{"text":"You\'ve not guessed yet. That {spice}: whose is it?","id":"1wy1pyt"}]',
@@ -40060,6 +40068,7 @@ const MEETINGS_BAKED = {
   "careerLetGo": {"title": "The Chief's office", "from": "Chief Ines Calder", "gist": "Chief Calder: the Wren is letting you go. The Tern leaves tomorrow.", "lines": [{"who": "calder", "text": "Sit. Please."}, {"who": "calder", "text": "I'll say it straight, because you'd want that. The Wren is letting you go.", "to": "you"}, {"who": "calder", "text": "The Tern leaves tomorrow. You'll be on it."}, {"who": "calder", "text": "This isn't about who you are. It's the shifts. Only the shifts."}, {"who": "calder", "text": "I keep a note on every tech I've trained. Yours isn't finished. That's the part I mind."}, {"who": "calder", "text": "Anything you want to say?", "pose": "listen", "to": "you"}, {"choice": [{"text": "I'm sorry.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "I know. So am I."}}, {"text": "Thank you for trying.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "You're welcome. I'd try again."}}, {"text": "(Say nothing)", "reply": {"who": "calder", "text": "Fine. Quiet's fine."}}]}, {"who": "calder", "text": "Wherever you go next, turn up. That's most of it. The rest you can learn."}, {"who": "calder", "text": "Go and say your goodbyes. People will want to.", "pose": "nod"}]},
   "careerSendoff": {"title": "The shuttle bay", "from": "Zeke Torres", "gist": "The Tern's ramp is down. Your friends came to see you off.", "lines": [{"who": "torres-zeke", "text": "Right where we started. Ramp down, Tern ticking over.", "pose": "gesture"}, {"who": "torres-zeke", "text": "I walked you up from here. Feels wrong walking you back.", "to": "you"}, {"who": "pell", "text": "Brought you a screw from the Wren. For your tin, when you start one. Every ship gets one.", "to": "you"}, {"who": "calder", "text": "The Tern's on time. It always is.", "pose": "nod"}, {"who": "torres-zeke", "text": "She came. She never comes to these."}, {"who": "calder", "text": "I came to check the ramp seals."}, {"who": "calder", "text": "Look after yourself, {me}.", "to": "you"}, {"choice": [{"text": "I'll miss this ship.", "flavour": "share", "reply": {"who": "torres-zeke", "text": "She'll miss you. Coil three most of all. She won't say so."}}, {"text": "Thank you. All of you.", "reply": {"who": "pell", "text": "Don't. You'll set me off.", "pose": "laugh"}}, {"text": "(Wave)", "reply": {"who": "torres-zeke", "text": "That'll do. That says it.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Go on, then. Get a window seat. Every time."}, {"who": "pell", "text": "And write. I'll actually read it."}]},
   "crossingCeremony": {"title": "The Line oath", "from": "Captain Odile Marrow", "gist": "You crossed the Line into the Veyli reach. The Captain read the old oath, you answered for the first-timers, and you drank Brennan's Line punch. Your certificate is on your shelf.", "lines": [{"who": "marrow", "text": "Thank you all for coming. I'm off duty, so this is unofficial. Very old, and unofficial.", "pose": "gesture"}, {"who": "marrow", "text": "First-timers, step forward. Don't be shy. Everyone here stood where you're standing once."}, {"who": "first1", "text": "Do we have to say anything?"}, {"who": "marrow", "text": "One of you does, at the end. I do the hard part. Listen.", "pose": "laugh"}, {"who": "marrow", "text": "Past this point the stars have other names, and help is a long way off. We go as guests."}, {"who": "marrow", "text": "So we make each other a promise. Here it is.", "pose": "gesture"}, {"who": "marrow", "text": "\"We have crossed the Line. We left the near stars behind us, and we did not go alone.\""}, {"who": "marrow", "text": "\"Whatever is out here, we meet it as one crew, and we bring each other home.\"", "pose": "gesture"}, {"who": "marrow", "text": "\"From today, this reach knows our names.\" There. That's the oath. It's older than the ship."}, {"who": "marrow", "text": "Now. Who answers for the first-timers?", "pose": "listen"}, {"who": "first2", "text": "Not me. Don't look at me."}, {"who": "first1", "text": "{me}'ll do it. Won't you?", "pose": "laugh", "to": "you"}, {"choice": [{"text": "We came a long way. We're glad we did.", "rel": {"marrow": 1}, "flavour": "share", "flag": "line.answer.proud", "reply": {"who": "marrow", "text": "So are we. Write that down, somebody. It's going on the plaque.", "pose": "nod"}}, {"text": "We crossed together, all of us. Even the ones on watch.", "rel": {"marrow": 1}, "flavour": "warm", "flag": "line.answer.watch", "reply": {"who": "marrow", "text": "Even the ones on watch. Yes. That's going on the plaque.", "pose": "nod"}}, {"text": "Is this the part with the punch?", "rel": {"marrow": 1, "brennan": 1}, "flavour": "funny", "flag": "line.answer.punch", "reply": {"who": "marrow", "text": "It is. I'm so sorry. And yes, that's going on the plaque too.", "pose": "laugh"}}]}, {"who": "brennan", "text": "Line punch. One mug each. You drink it all. That's the dunking. No complaints.", "pose": "gesture"}, {"who": "first2", "text": "It's... green. Why is it green?"}, {"who": "brennan", "text": "Tradition. Drink.", "pose": "nod"}, {"who": "marrow", "text": "There. You're Line-crossers now. Supper's at six. Something to take the taste away.", "pose": "laugh"}]},
+  "endFirstMorning": {"title": "Breakfast with the Captain", "from": "Captain Odile Marrow", "gist": "The Captain looked for you at breakfast: the Wren is back on her course, and she's glad you stayed.", "lines": [{"who": "marrow", "text": "Is this seat taken? It is now.", "pose": "gesture", "to": "you"}, {"who": "marrow", "text": "Back on our own side of the Line. Course laid in, nothing on the long-range. A quiet week, Vance promises."}, {"who": "marrow", "text": "He promises that every week."}, {"who": "marrow", "text": "I wrote to headquarters last night. Told them you're spoken for.", "to": "you"}, {"choice": [{"text": "Thank you, Captain.", "rel": {"marrow": 1}, "reply": {"who": "marrow", "text": "Don't. It was the easiest letter I've written all year."}}, {"text": "What happens now?", "rel": {"marrow": 1}, "reply": {"who": "marrow", "text": "Now? Breakfast. Then the board, then dinner. Then tomorrow. That's the whole secret of a ship."}}, {"text": "(Raise your mug)", "rel": {"marrow": 2}, "reply": {"who": "marrow", "text": "To the Wren. And to the people who stay with her."}}]}, {"who": "marrow", "text": "The Admiral sends his regards. I'm told."}, {"who": "marrow", "text": "Eat up. The ship's not going anywhere without you. Not any more.", "pose": "nod", "to": "you"}]},
   "firstLightCocoa": {"title": "First Light Cocoa", "from": "Dev Raman", "gist": "First Light Cocoa: Dev Raman showed everyone where the Wren has been and where she's heading, the old hands gave their first-day tips, and you said what you've noticed.", "lines": [{"who": "raman", "text": "Lights down, please. Thank you. Right. Mugs up, everyone got one?", "pose": "gesture"}, {"who": "raman", "text": "Out there, port side. That smudge is the Pale Shoals. We left them six weeks ago."}, {"who": "raman", "text": "Dead ahead, too faint to see yet: Tavessa. The Veyli named it. That's where we're bound.", "pose": "gesture"}, {"who": "raman", "text": "And somewhere behind us, the little shuttle that brought you. I flew it. Gently.", "pose": "laugh", "to": "you"}, {"who": "raman", "text": "Old hands. One thing you wish you'd known on your first day. Go on."}, {"who": "holt", "text": "Never sit in my chair. Bridge lobby, by the door. That's the whole tip.", "pose": "nod"}, {"who": "kowalczyk", "text": "Track what matters. Tap it on your device and an arrow takes you there. Saved me years."}, {"who": "brennan", "text": "Breakfast is seven till nine. Miss it and the grab shelf's always open. Nobody goes hungry on my ship."}, {"who": "halloran-emeka", "text": "Write your jobs up in the Works log. You're quicker at them next time. Ask me how I know."}, {"who": "sato", "text": "The big windows on the promenade. Five minutes there and the day sits better."}, {"who": "raman", "text": "Now the new faces. One thing you've noticed about her. Tomas?", "pose": "listen"}, {"who": "tomas", "text": "The lift hums a different note on every deck. Deck 4's is the friendliest.", "pose": "laugh"}, {"who": "raman", "text": "{me}. Your turn. What have you noticed?", "pose": "listen", "to": "you"}, {"choice": [{"text": "She never stops. Even at night you can feel her going.", "rel": {"raman": 1}, "flavour": "share", "mem": "firstlight.going", "reply": {"who": "raman", "text": "That's the drive. Zeke'll tell you it's coil three. It's always coil three.", "pose": "laugh"}}, {"text": "Everyone says hello. Even the ones who look busy.", "rel": {"raman": 1, "tomas": 1}, "flavour": "warm", "mem": "firstlight.hello", "reply": {"who": "raman", "text": "That's the Wren. Small ship, long way from anywhere. We look after each other."}}, {"text": "The cocoa's better than the coffee.", "rel": {"raman": 1}, "flavour": "funny", "mem": "firstlight.cocoa", "reply": {"who": "raman", "text": "Don't let Brennan hear you. Actually, do. She'll be thrilled.", "pose": "laugh"}}]}, {"who": "raman", "text": "Right. To the next season, and the new faces in it. Drink up, it's going cold.", "pose": "gesture"}]},
   "introAsk": {"title": "Ask Zeke", "from": "Zeke Torres", "gist": "You asked Zeke Torres about himself, Works and where the Wren is going.", "lines": [{"who": "torres-zeke", "text": "Go on, ask. Questions are the best bit.", "pose": "nod", "to": "you"}, {"choice": [{"text": "Who are you, then?", "flavour": "listen", "reply": {"who": "torres-zeke", "text": "Zeke. Engine officer, days. I mind the drive coils on Deck 6. And I'm your trainer this week. I talk a lot.", "pose": "laugh"}}, {"text": "What does Works do?", "flavour": "practical", "reply": {"who": "torres-zeke", "text": "Keeps her running. Air, water, lights, the lift, the engines. Faults go on the board; we fix them properly.", "pose": "gesture"}}, {"text": "Where's the ship going?", "flavour": "share", "reply": {"who": "torres-zeke", "text": "Out along the frontier, mapping. Survey picks the stars; we get her there. The Veyli share it. Their Envoy's aboard.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Anything else, just tap me. Right, onward."}]},
   "introBriefing": {"title": "Monday briefing", "from": "Chief Ines Calder", "gist": "The Monday briefing: Calder put you with Torres for the day, gave three rules for the bay, and told you to join in aboard.", "lines": [{"who": "calder", "text": "Ten to nine. Good. Everyone's here.", "pose": "nod"}, {"who": "calder", "text": "Board's at twelve. Two scrubbers, a lamp on Deck 4, the dish pit. A usual Monday."}, {"who": "calder", "text": "{me}. Arrived last night. Works, from today.", "to": "you"}, {"who": "tech1", "text": "Morning, new hand.", "pose": "gesture", "to": "you"}, {"who": "tech2", "text": "Welcome to Works. Tea and biscuits at one. That's the important bit.", "to": "you"}, {"who": "calder", "text": "Torres. One job, end to end. Board to turn-in. Their hands, not yours."}, {"who": "torres-zeke", "text": "Their hands. Got it, Chief."}, {"who": "calder", "text": "Torres shadows you today. Every step. He'll talk you through it. He talks a lot. Listen anyway.", "to": "you"}, {"who": "torres-zeke", "text": "I do talk a lot. It's mostly useful.", "pose": "laugh"}, {"who": "calder", "text": "Three things. Gloves on before the panel comes off. Not after.", "to": "you"}, {"who": "calder", "text": "If you don't know, ask. Asking takes a minute. Guessing takes a shift.", "to": "you"}, {"who": "calder", "text": "And put tools back where you found them. The wall has outlines. Use them.", "to": "you"}, {"who": "tech2", "text": "She means it about the wall.", "pose": "gesture"}, {"who": "calder", "text": "Last thing. Work ends at five. The ship doesn't.", "to": "you"}, {"who": "calder", "text": "Sunday dinner at the long tables. Music on Fridays. Quiz nights. Observatory nights.", "to": "you"}, {"who": "calder", "text": "The garden, the lounge. Knitters, rowers, whoever's learning the guitar this month. Find your lot.", "to": "you"}, {"who": "calder", "text": "People who join in settle in. I've watched it for years. Go to things.", "to": "you"}, {"choice": [{"text": "Ready when you are.", "rel": {"torres-zeke": 1}, "flavour": "cheer", "reply": {"who": "torres-zeke", "text": "That's the spirit. Right, onward.", "pose": "laugh"}}, {"text": "What if I get something wrong?", "rel": {"calder": 1}, "flavour": "listen", "reply": {"who": "calder", "text": "Then you say so, and we fix it. That's the job."}}, {"text": "(Nod)", "reply": {"who": "calder", "text": "Good. Quiet's fine."}}]}, {"who": "calder", "text": "Right. Board's there. Back to it."}]},
@@ -41155,7 +41164,9 @@ function lineCond(k, v, p, ctx) {
     case 'pair': return linePair(v, p, ctx.other && linesWho(ctx.other));
     case 'thread': { const c = lineQ('voiceOf', id), th = (c && c.thread) || p.thread || ''; return any(v, x => th === x); }   // their story theme (section 20's voice card, else the roster's): the Talk a while pack
     case 'day': { const d = Math.floor(t / 1440) + 1; return any(v, x => { if (/^\d+(,\d+)+$/.test(x)) return x.split(',').map(Number).includes(d); const m = /^(\d*)(-?)(\d*)$/.exec(x); if (!m || !(m[1] || m[3])) return false; const lo = m[1] ? +m[1] : 1, hi = m[2] ? (m[3] ? +m[3] : Infinity) : lo; return d >= lo && d <= hi; }); }   // crew stories (FX21): day:21, day:19,26, day:3-21, day:15-, day:-20
-    case 'here': return any(v, x => !!lineQ('storyHere', x, p, ctx));   // crew stories (FX21): that crew member is in the scene with the speaker (section 20c's storyHere)
+    case 'here': return any(v, x => !!lineQ('storyHere', x, p, ctx));
+    case 'endgame': { const d = typeof endgameDay === 'function' ? endgameDay() : null, n = Math.floor(t / 1440) + 1, on = d !== null && n >= d;   // the ending (29c): you stayed (lineFor adds 250 to such a line: a shared one is heard over someone's own everyday line). 'true' every hour for the endgame's first 14 days,
+      return any(v, x => x === 'false' ? !on : on && (n - d < 14 || schedU(p.seed || 0, Math.floor(t / 60), 798) < .4)); }   // then about 4 hours in 10 (k 798), so the old lines come back; 'false': not stayed   // crew stories (FX21): that crew member is in the scene with the speaker (section 20c's storyHere)
   }
   return false;
 }
@@ -41246,7 +41257,7 @@ function lineFor(who, kind, ctx = {}) {
   const v = VOICE[p.id], tp = VOICE_TEMPLATES[(v && v.tpl) || p.tpl];
   let off = 0; const pool = [], only = kind.startsWith('talk.') && typeof talkOnlyOwn === 'function' && talkOnlyOwn(p);   // Talk a while with an "only: own" person: their own talk.* lines, never the shared ones (item 15)
   for (const [src, list] of [['own', v && v.lines && v.lines[kind]], ['tpl', !only && tp && tp.lines && tp.lines[kind]], ['bank', !only && LINES[kind]]])
-    { (list || []).forEach((e, i) => { if ((!ctx.keep || ctx.keep(e)) && lineQuick(e, p, c) && linesOk(e, p, c)) pool.push({ e, sc: LINE_SRC[src] + 10 * lineSpec(e), n: off + i }); }); off += (list || []).length; }   // n: its place in their whole pool (lineFresh)
+    { (list || []).forEach((e, i) => { if ((!ctx.keep || ctx.keep(e)) && lineQuick(e, p, c) && linesOk(e, p, c)) pool.push({ e, sc: LINE_SRC[src] + 10 * lineSpec(e) + (e.endgame === 'true' ? 250 : 0), n: off + i }); }); off += (list || []).length; }   // n: its place in their whole pool (lineFresh)
   if (!pool.length) return null;
   const fresh = lineFreshFor(p, kind);                     // the chat card's everyday lines: none they've said again till they're all said (item 5)
   if (fresh) { const left = pool.filter(x => !freshHas(fresh.m, x.n)); if (left.length) pool.splice(0, pool.length, ...left); else if (!ctx.peek) fresh.clear(pool); }
@@ -44591,6 +44602,7 @@ function evCalPlan() {
   const out = []; let end = 0;
   for (const r of EV_CALENDAR) {
     const def = SHIP_EVENTS[r.id]; if (!def || def.draft || EV_SKIPPED.has(r.id)) continue;
+    if (typeof endCalClosed === 'function' && endCalClosed(r)) continue;   // the ending (29c): you stayed, so nothing after the crossing back
     const day = Math.max(r.day, end); out.push({ id: r.id, day, kind: r.kind }); end = day + def.days;
   }
   return out;
@@ -53679,6 +53691,7 @@ function worksNoticed(jobId, who) {                      // someone noticed a jo
 // a word for where you stand (next.band.<band>)
 function worksNext() {
   const W = SHIP.works, k = Math.floor(schedU(851, SHIP.time.day, 851) * 8);
+  if (typeof endWorksNext === 'function') { const en = endWorksNext(k); if (en) return en; }   // the ending (29c): you stayed, the ladder's done
   if (!W) return worksText('next.band.new', 'Keep at it: Calder\'s watching your work.', null, k);
   const c = W.cur, row = c && ladderRow(c.id), low = s => s.replace(/^./, x => x.toLowerCase());
   if (row) { const who = worksFirst(c.by || row.by[0]), r = c.occ && SHIP.occasions.find(x => x.key === c.occ), v = { name: worksName(c.by || row.by[0]), first: who, mech: low(mechName(row.id)) };
@@ -58457,6 +58470,96 @@ onSim('job', n => {                                      // B: Torres comes by a
     if (a && a.h && Math.hypot(a.x - P.x, a.z - P.z) <= CHATTER_NEAR) { const l = worksVoice('torres-zeke', 'train.t2.torres'); if (l) simTimeout(() => worksSayAll('torres-zeke', l), 5600); } } catch (e) { /* not in play */ }
 });
 // ---- end of slot: Works career engineer ----
+
+// =====================================================================
+// 29. THE ENDING (lead 39; plans/ending-spec.html on claude/p5-specs, EP2). After the Veyli vessel the Wren crosses back
+// over the Line (section 18's 'Ending builder' block, SHIP_EVENTS.crossingBack); on Thursday Day 32 the Captain offers you
+// a transfer to Concord headquarters (29a); Go: the goodbye at the Tern's ramp and the end page (29b); Stay: the endgame
+// (29c). Everything behind EV_ENDING_ON (section 13); off: nothing here changes the game.
+// =====================================================================
+
+// ---------------------------------------------------------------------
+// 29c THE ENDGAME (E-4, EN2 for lead 39; plans/ending-spec.html section 2). You stayed: from the first morning after
+// the crossing back (Monday Day 36) the game goes on for good.
+//   endStaySet(day)  the Captain's address settles Stay: flag end.stay = the endgame's first day (Day 36 at the earliest)
+//   endgameDay()     that day, or null (the switch off, or not stayed); endgameOn(t) from that day on. Readers ask
+//                    these, never the flag (both are function declarations: sections 18 and 22 ask before this runs)
+//   endCalClosed(r)  section 18's evCalPlan passes over a calendar row after the crossing back once you've stayed:
+//                    no new ship-wide event, ever. No more promotions either: the ladder is done (Step 6 is its end)
+//   the 'endgame' line condition (section 22's lineCond): the endgame pool (content/ending/endgame.lines) only after
+//                    you stay; every hour for the first 14 days, then about 4 hours in 10, so the old lines come back
+//   endWorksNext(k)  "What's next" (worksNext's hook): the Wren is home; the Works app's last page (tab 'home')
+//   the first morning: the Captain sits with you at breakfast (OCCASIONS.endFirstMorning, a chance meeting like Vance's
+//                    bridge invite, script endFirstMorning), with a notice once you're up, a level 1 arrow to the mess
+//                    and a Schedule row (endingItems, devDay's hook; 29a and 29b push their rows to END_ITEMS too)
+// Saved: flags only (end.stay; end.fm.* the first morning's). Nothing calls R(); nothing runs at load while off.
+// ---------------------------------------------------------------------
+
+// ---- slot: Ending builder EN2 (section 29c). New code of this seat's goes here, above the end line (plans/owners.md) ----
+function endgameDay() {                                  // the endgame's first day, or null
+  if (typeof EV_ENDING_ON === 'undefined' || !EV_ENDING_ON || typeof flag !== 'function') return null;
+  const d = flag('end.stay'); return Number.isInteger(d) && d > 0 ? d : null;
+}
+function endgameOn(t) { const d = endgameDay(); if (d === null) return false; return Math.floor((t == null ? shipNow() : t) / 1440) + 1 >= d; }
+function endStaySet(day) {                               // Stay, settled (the address): the endgame from `day` (36 at the earliest)
+  if (typeof EV_ENDING_ON === 'undefined' || !EV_ENDING_ON || typeof flagSet !== 'function') return false;
+  flagSet('end.stay', Math.max(36, Math.floor(day) || 36)); return true;
+}
+function endCalClosed(r) { return !!r && endgameDay() !== null && r.id !== 'crossingBack' && r.day > 35; }   // Day 35: the crossing back
+function endWorksNext(k) { return endgameOn() ? worksText('next.end.home', 'The Wren is home. Live in it.', null, k) : null; }
+// the Schedule's and Tracked's rows of the ending (devDay asks endingItems(d)): END_ITEMS holds a function per piece,
+// f(d) -> [{ from, to, title, where, kind, deck?, room? }] in minutes of day d
+var END_ITEMS = [];                                      // var: devDay may ask before this line has run
+function endingItems(d) {
+  if (typeof EV_ENDING_ON === 'undefined' || !EV_ENDING_ON || !Array.isArray(END_ITEMS)) return [];
+  const out = []; for (const f of END_ITEMS) try { out.push(...(f(d) || [])); } catch (e) { /* not yet */ }
+  return out;
+}
+if (EV_ENDING_ON) {
+  // the Works app's last page, from the endgame's first day (added and taken away by endHomeTab: tabs aren't saved)
+  const endHomeView = () => {
+    const W = SHIP.works, B = [], d = SHIP.time.day, st = endgameDay();
+    B.push({ kind: 'text', mark: 'head', text: worksText('end.works.title', 'The Wren is home') });
+    B.push({ kind: 'text', text: worksText('end.works.body', 'No more tests and no more ranks: the ladder\'s done. The board, the traditions and the crew go on, and so do you.') });
+    const rows = [{ text: worksRankTitle(W), sub: worksText('end.works.rank', 'Your rank') },
+      { text: worksText('end.works.days', '{n} days aboard', { n: d }), sub: worksText('end.works.since', 'Since the Tern brought you, Day 0') },
+      { text: worksText('end.works.stayed', 'You stayed'), sub: worksText('end.works.stayedDay', 'The crossing back, Day {n}', { n: Math.max(35, (st || 36) - 1) }) }];
+    const jobs = W && Array.isArray(W.log) ? W.log.length : 0, com = Array.isArray(SHIP.commendations) ? SHIP.commendations.length : 0;
+    rows.push({ text: worksText('end.works.jobs', '{n} jobs turned in', { n: jobs }) });
+    if (com) rows.push({ text: worksText('end.works.commended', 'Commended {n} times', { n: com }) });
+    B.push({ kind: 'list', rows });
+    return B;
+  };
+  const endHomeTab = () => {
+    const on = endgameOn(), i = Array.isArray(WORKS_TABS) ? WORKS_TABS.findIndex(x => x.id === 'home') : -1;
+    if (on && i < 0) worksTabAdd({ id: 'home', title: worksText('end.works.tab', 'Home'), order: 90, view: endHomeView });
+    else if (!on && i >= 0) { WORKS_TABS.splice(i, 1); if (WORKS_TAB === 'home') WORKS_TAB = 'training'; }
+  };
+  endHomeTab();
+  if (typeof onSim === 'function') onSim('newGame', () => endHomeTab());
+  // the first morning: the Captain at your table at breakfast (her own breakfast in the mess, else 07:30)
+  const endFmSlot = d => (typeof occMealSlot === 'function' && occMealSlot('marrow', d, '3-mess-', 300, 600)) || { at: 450, len: 40 };
+  OCCASIONS.endFirstMorning = { title: 'Breakfast with the Captain', kind: 'meeting', by: 'marrow', deck: 3, room: 'M', at: 450, len: 40, script: 'endFirstMorning',
+    once: true, chance: true, flag: 'end.fm.done', due: d => endgameDay() === d, slot: endFmSlot };
+  const endFmRec = () => (SHIP.occasions || []).find(x => x.id === 'endFirstMorning') || null;
+  END_ITEMS.push(d => { const r = endFmRec(); if (endgameDay() !== d || (r && r.status !== 'asked')) return [];
+    const s = r ? { at: r.at % 1440, len: r.len } : endFmSlot(d);
+    return [{ from: s.at, to: s.at + s.len, title: worksText('end.fm.row', 'Breakfast with the Captain'), where: 'the mess, Deck 3', kind: 'beat', deck: 3, room: 'M' }]; });
+  const endFmTick = (now, skip) => {
+    const d = endgameDay(); if (d === null) return;
+    endHomeTab();
+    if (skip || worksDay(now) !== d || now < shipNow() - 1 || (typeof sleeping !== 'undefined' && sleeping)) return;
+    const r = endFmRec(); if (!r || r.status !== 'asked' || r.met) return;
+    if (!flag('end.fm.notice')) { flagSet('end.fm.notice', d);   // once you're up
+      const text = worksText('end.fm.notice', 'The Wren is back on her course. The Captain is at breakfast in the mess.');
+      if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'works', text, urgent: true }); } catch (e) { /* no device */ }
+      else try { toast('The Wren', text); } catch (e) { /* no UI */ } }
+    if (typeof guideAsk === 'function') guideAsk({ id: 'end:fm', level: 1, owner: '29c (EN2)', from: r.at - 30, until: r.at + r.len,
+      goal: () => ({ deck: 3, room: 'M', label: worksText('end.fm.arrow', 'Breakfast: the Captain is waiting') }), done: () => { const x = endFmRec(); return !x || !!x.met || x.status !== 'asked'; } });
+  };
+  WORK_TICKS.push(endFmTick);
+}
+// ---- end of slot: Ending builder EN2 ----
 
 
 // =====================================================================

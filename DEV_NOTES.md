@@ -967,6 +967,16 @@ gives way to clock-out at the shift's end. Test: `python3 arrows_d_check.py BUIL
 - **Words:** `content/works/promo-beats.lines` (notices, rows, Mails: `mail.pb.*` keys for the 400 limit, `{time}` and `{day}`), `content/banks/promo-beats.lines` (the crew's bubbles, kinds `pb.soon|luck|watch|passed|officer`), Calder's `work` lines under `flag:pb.promo.*`, `content/meetings/promo.result.meet`.
 - **Test:** `promo_beats_check.py BUILD [off pointer before passed result cabin talk]` (about 2 minutes). promo_sight_check's `move` part runs with the switch off (FX19's 17:00 walk).
 
+## The ending: the endgame (section 29c, EN2 for lead 39; plans/ending-spec.html; switch `EV_ENDING_ON`, `?ending`)
+- **What:** you stayed aboard (the spec's "If you stay"): from the first morning after the crossing back (Monday Day 36) the game goes on for good, with no new ship-wide event, no more promotions, and the endgame's own lines.
+- **The flag:** `endStaySet(day)` sets `end.stay` to the endgame's first day (36 at the earliest); the Captain's address calls it when the answer is Stay (E-1). Read it through `endgameDay()` / `endgameOn(t)` only (function declarations, so sections 18 and 22 can ask before section 29 has run; both are null/false with the switch off whatever the flag says).
+- **Hooks in others' sections (one line each):** section 22 `lineCond` case `endgame` (holds every hour for the endgame's first 14 days, then about 4 hours in 10, schedU k 798; `endgame:false` the other way) and `lineFor`'s score +250 for an endgame line (heard over the speaker's own everyday lines); section 18 `evCalPlan` asks `endCalClosed(r)` (no row after Day 35 once you've stayed); section 24 `worksNext` asks `endWorksNext(k)`; section 19 `devDay` adds `endingItems(d)` (the ending's Schedule and Tracked rows: each piece pushes `f(d) -> rows` to `END_ITEMS`).
+- **The Works app's last page:** tab `home` ("The Wren is home"), added from the endgame's first day by a WORK_TICKS function (tabs aren't saved) and taken away on a New game.
+- **The first morning:** `OCCASIONS.endFirstMorning` (the Captain, the mess, at her own breakfast, else 07:30; a chance meeting like the bridge invite; script `endFirstMorning`), a notice once you're up, a level 1 arrow to the mess from 30 minutes before (cleared when met), a Schedule row.
+- **Words:** writers use the condition `endgame` (content/README.md); the stand-ins are `content/ending/endgame-standin.lines` and `content/meetings/endFirstMorning.meet`; keys `next.end.home`, `end.works.*`, `end.fm.*` (worksText fallbacks).
+- **Saved:** flags only (`end.stay`, `end.fm.notice`, `end.fm.done`).
+- **Test:** `python3 ending_check.py BUILD.html [off endgame]` (about 1 minute; it switches the ending on in a copy).
+
 ## Hook register
 
 One-line, `typeof`-guarded calls from one section into another (plans/pillar4-plan.md, "Keeping the one file from colliding"). The lead keeps this list; owners add their rows.

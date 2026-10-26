@@ -46,6 +46,7 @@ COND_KEYS = {
     'came': 'lines', 'friend': 'lines',
     'thread': 'lines',                       # the speaker's roster thread (the struggle theme): the Talk a while pack's
     'day': 'lines', 'here': 'lines',         # crew stories (FX21, 0.92.6): the ship day (21, 3-21, 15-, -20), and someone in the scene
+    'endgame': 'lines',                      # the ending (section 29c): you stayed (endgame, endgame:false; !endgame is endgame:false)
 }
 NUM_KEYS = ('w', 'odds')                     # numbers, not conditions: a weight, and a seeded chance
 TONES = ('light', 'funny', 'warm', 'serious')
@@ -96,6 +97,10 @@ def parse_conds(text, where):
             tok = 'beatIs:' + tok[5:]
         if tok == 'newhere':                       # a bare word: arrived within the last 7 days
             tok = 'newhere:true'
+        if tok in ('endgame', 'endgame:true', 'endgame:false'):   # the ending (29c): a bare word; !endgame means "not stayed",
+            v = (tok != 'endgame:false') != neg        # never "an hour the endgame lines rest" (the game's 'true' settles after 14 days)
+            c['endgame'] = 'true' if v else 'false'
+            continue
         if ':' not in tok:
             raise GenError(f'{where}: "{tok}" is not a condition (key:value or tier>=...)')
         k, v = tok.split(':', 1)
@@ -115,6 +120,8 @@ def parse_conds(text, where):
             dst[k] = (dst[k] if isinstance(dst[k], list) else [dst[k]]) + [v]
         else:
             dst[k] = v
+    if c.get('not') == {}:                     # only a !endgame (made positive above)
+        del c['not']
     return c
 
 
