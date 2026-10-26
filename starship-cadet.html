@@ -8117,6 +8117,16 @@ const DECK_DRESS = {
     dressLantern(s, 11.83, SILL + .052, 4.3, glow);
     return { t: 'Storm lantern', x: (typeof evWord === 'function' && evWord('event.ionStorm.trace.lantern')) || 'A storm lantern on the galley pass. Nobody\'s moved it since the lantern supper.', floor: ['M', 11.83, 4.3], y: SILL + .18, w: .25, h: .35, d: .25 };
   } },
+  // stormTorches (FX26, 0.93.2; lead 38's ask for Storm stories by torchlight, section 18's dressing on the storm's
+  // Saturday 20:55-21:45): four storm lanterns in the junior common room, one on the coffee table and three on the rug
+  // round it (their feet just into the table top and the rug), while the room goes to low light (stormSupperDim). The
+  // supper's lantern kit: 2 draw calls, no shadows. Only with the storm's Saturday switched on
+  stormTorches: { deck: 4, what: 'storm stories: lanterns by the junior common room\'s coffee table, the lights down', on: () => STORM_SAT_ON, make(g) {
+    const s = dressAt(g, 'j', 'floor', 0, 0), glow = new THREE.MeshBasicMaterial({ color: col('#ffc46b'), toneMapped: false });
+    dressLantern(s, 3.38, .4, 4.16, glow);
+    for (const [x, z] of [[2.3, 3.0], [4.3, 5.1], [2.3, 5.2]]) dressLantern(s, x, .02, z, glow);
+    return { t: 'Torches', x: 'Storm lanterns round the coffee table and the main lights off. Tonight everyone tells the worst storm they\'ve been in, a torch under the chin.', floor: ['j', 3.38, 4.16], y: .55, w: .3, h: .35, d: .3 };
+  } },
   // framedMenu (EV4, the storm update's S9, the deck architect's stand-in; lead 23's call): the Captain's table's trace
   // ({ id, day }, from the occasion): its menu card, signed, in a dark frame on the wall above your keepsake shelf: the
   // bunk's, or your officer cabin's once SHIP.works.home is '4-23' (moved with the next deck build). Shown only while the
@@ -42697,6 +42707,7 @@ if (EV_STORM_ON) {
     if (ls) ls.who = () => 1;
     // tap Oduya to join (the user's rule for traditions: a host to tap, a fitting pose, its own words): sat in the circle,
     // listening and telling (CS1's join lines are the toast, join.storm-stories.notice)
+    S.dressing.escalation.push({ id: 'stormTorches', title: 'Storm stories', at: [2, 1255, 1305] });   // the lanterns and the low light, 20:55-21:45 (DECK_DRESS.stormTorches)
     TRAD_JOIN['storm-stories'] = { host: 'oduya', pose: 'sit:talk', need: 'social', gain: 15, also: { leisure: 6 }, verb: 'tell storm stories with them', what: 'storm stories by torchlight' };
   }
 }
@@ -44473,7 +44484,7 @@ function stormStoryTick(now) {
 // second): .85 while the lantern supper's lanterns are out (DECK_DRESS.lanternMess, drawn only on Deck 3) and you're in
 // the mess hall, else 0, so the rest of Deck 3 keeps its light (the plan; lead 23 on PR4's props review), as First Light
 // Cocoa dims only the bow lounge. Visual only; 0 while the storm update is off
-function stormSupperDim(n) { return EV_STORM_ON && n === 3 && typeof DRESS !== 'undefined' && DRESS.on.has('lanternMess') && roomAt(...player.here()) === 'M' ? .85 : 0; }
+function stormSupperDim(n) { return EV_STORM_ON && typeof DRESS !== 'undefined' && (n === 3 && DRESS.on.has('lanternMess') && roomAt(...player.here()) === 'M' || n === 4 && DRESS.on.has('stormTorches') && roomAt(...player.here()) === 'j') ? .85 : 0; }   // FX26: and the storm stories' low light in the junior common room
 // S2 (EV4): the window [from, to] (minutes of day d) someone on a ship-wide event's double shift is let off it that
 // day (the rule's except: [{ id, day (the event's day), at }]: the storm's Captain and Commander for the Friday address),
 // else null. Pure: the planner's own evAt. The windows start at or after the short Friday's 15:30 (friCrewEnd), so
