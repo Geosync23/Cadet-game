@@ -1,0 +1,37 @@
+@tradition whodunnit-club
+// Round 2: Lars Achterberg reads a short mystery aloud in three parts; after each, everyone writes down who did it. Every 4 weeks from week 6 (Days 38, 66...).
+// Rules: FX24 (0.93.2, behind TRAD_0932_ON in section 13). Words: CS1 (plans/trad-0932-words.txt, claude/crew-stories-pitch 7b1e7300).
+k: 1306
+title: Whodunnit club
+when: every 4 weeks wednesday week 2 from day 36
+at: 19:30-20:30
+min: 20
+where: 3 room Bow lounge: lounge-seat
+hold: 1
+who: achterberg-lars always, moreau-signe always, quist-ilse always, quiet-corner 40%, everyone 10%
+anim: read
+host: achterberg-lars
+from: achterberg-lars
+invite: host=achterberg-lars odds=25% line="Whodunnit club. Three parts, one culprit. Write your guess. Don't guess early."
+
+== mail
+- Whodunnit club tomorrow, {time}, the bow lounge. I read a short mystery in three parts; after each, you write who did it. Somebody always guesses too early.
+
+== ask
+- Whodunnit club in the bow lounge. Lars reads. Everyone accuses everyone.   #funny
+- Mystery night. I already know who did it. I always already know.   #funny
+- Coming to whodunnit club? Bring a pencil and a suspicious mind.
+
+== here
+- It's the gardener. It's always the gardener.   #funny
+- Write it down. No changing it later.
+- Wait. Read that bit again.
+- I knew it! No. I didn't know it.   #funny
+
+== thanks
+- Lars reads a short mystery aloud in three parts, and after each one everybody writes down who did it. Somebody guesses too early, and is right.   #funny
+
+== chatter
+- Somebody guessed the culprit in the first five minutes at whodunnit club. Again.   #funny
+- Lars reads the clues in a very flat voice. It makes them worse. Better. Worse.   #funny
+- Whodunnit club. I was wrong three times in one evening. A record.   #funny
