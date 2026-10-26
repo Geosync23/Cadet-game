@@ -271,20 +271,24 @@ with sync_playwright() as pw:
         g.ev("goToDeck(5)"); g.step(3)
         pl = g.ev(PLACES)
         vc = g.ev("(() => { const V = DECKS[5].vesselChain, ps = V.spots.map(id => deckDef.places.find(p => p.id === id)); return { n: ps.filter(Boolean).length, call: !!deckDef.places.find(p => p.id === V.call), you: V.spots.includes(V.you), gap: Math.max(...ps.slice(1).map((p, k) => Math.hypot(p.xy[0] - ps[k].xy[0], p.xy[1] - ps[k].xy[1]))) }; })()")
-        bad = [b for b in pl['bad'] if b.startswith('5-vchain')]
+        bad = [b for b in pl['bad'] if re.match(r'5-v(chain|bench|shop)', b)]
+        nb = g.ev("deckDef.places.filter(p => /^5-v(bench|shop)-/.test(p.id)).length")
+        print(f"The Veyli vessel: the bench spots (Works bay and machine shop): {nb} (want 6)")
+        if nb != 6: ok = False
         print(f"The Veyli vessel: the chain's spots on Deck 5: {vc['n']} (Zeke's {vc['call']}, yours in the line {vc['you']}), the widest gap {vc['gap']:.2f} tiles; bad: {bad}")
         if vc['n'] != 40 or not vc['call'] or not vc['you'] or vc['gap'] > 1.0 or bad: ok = False; print('  the chain spots: not 40, a spot missing, a gap over a tile, or a bad place')
         if g.ev("!!SHIP_EVENTS.veyliVessel"):
             g.ev("skipTo(27 * 1440 + 780); if (!SHIP.event || SHIP.event.id !== 'veyliVessel') eventStart('veyliVessel', 27)")
             for name, deck, room, day, m in (('the parts chain, Works bay, Sunday 13:30', 5, 'w', 28, 810), ('the engine lights, the bow lounge, Monday 17:41', 3, 'L', 29, 1061)):
                 g.ev(f"for (let t = Math.max(shipNow() + 1, {day - 1} * 1440 + {m - 6}); t <= {day - 1} * 1440 + {m}; t++) {{ setShipNow(t); EV_MIN = -1; eventsTick(); }}")
-                g.ev(f"(() => {{ goToDeck({deck}); deckCrewFill(); const tl = ROOM_TILES['{room}'], c = cellPos(...tl[Math.floor(tl.length / 2)]); player.obj.position.copy(cellPos(...nearestOpen(c.x, c.z, player))); player.stop(); target.copy(player.obj.position).setY(.7); eventsDress(shipNow()); }})()")
+                # the Works bay: its middle; the bow lounge: its bow-most open tile, at the glass (RV21's should 3: the ship on screen from there)
+                g.ev(f"(() => {{ goToDeck({deck}); deckCrewFill(); const tl = ROOM_TILES['{room}'], bow = {str(deck == 3).lower()} ? tl.filter(([i, j]) => free(i, j)).sort((a, b) => b[0] - a[0] || Math.abs(a[1] - 11) - Math.abs(b[1] - 11))[0] : null, c = cellPos(...(bow || tl[Math.floor(tl.length / 2)])); player.obj.position.copy(cellPos(...nearestOpen(c.x, c.z, player))); player.stop(); target.copy(player.obj.position).setY(.7); eventsDress(shipNow()); }})()")
                 g.step(40)
-                c = g.ev("({ calls: renderer.info.render.calls, crew: DECK_CREW.length, sky: !!VSKY.m, dress: [...DRESS.on.keys()].filter(k => /^vessel/.test(k)) })")
+                c = g.ev("({ calls: renderer.info.render.calls, crew: DECK_CREW.length, sky: !!VSKY.m, dress: [...DRESS.on.keys()].filter(k => /^vessel/.test(k)), onScreen: !!VSKY.m && (p => p.x >= 0 && p.x <= innerWidth && p.y >= 0 && p.y <= innerHeight)(VSKY.m.material.uniforms.uP.value) })")
                 if c['sky']: g.ev("VSKY.m.visible = false"); g.step(1); c['noSky'] = g.ev("renderer.info.render.calls"); g.ev("VSKY.m.visible = true")
                 else: c['noSky'] = c['calls']
-                print(f"The Veyli vessel, {name}, phone size: draw calls {c['calls']} ({c['noSky']} without the ship outside), {c['crew']} on the deck, the ship outside {c['sky']}, dressing {c['dress']}")
-                if c['calls'] >= 450 or c['calls'] - c['noSky'] > 1 or (deck == 3 and not c['sky']): ok = False; print('  the vessel scene: over budget, no ship outside at the glass, or more than one call for it')
+                print(f"The Veyli vessel, {name}, phone size: draw calls {c['calls']} ({c['noSky']} without the ship outside), {c['crew']} on the deck, the ship outside {c['sky']} (on screen {c['onScreen']}), dressing {c['dress']}")
+                if c['calls'] >= 450 or c['calls'] - c['noSky'] > 1 or (deck == 3 and not (c['sky'] and c['onScreen'])): ok = False; print('  the vessel scene: over budget, no ship outside on screen at the glass, or more than one call for it')
         else: print("The Veyli vessel: its event isn't in this build yet (VB1's block): the scenes wait")
         if g.errors: ok = False; print('errors (the Veyli vessel)', g.errors[:4])
     else: print('The Veyli vessel: not in this build')

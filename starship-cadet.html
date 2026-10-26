@@ -33541,7 +33541,7 @@ const LINES = JSON.parse([
   ',"event.veyliVessel.tap.sketch.bench":[',
   '{"text":"Taavek\'s sketch of the part, every blade numbered. Someone has added IMPELLER.","id":"1fi6ae"}]',
   ',"event.veyliVessel.tap.sketch.shelf":[',
-  '{"text":"Taavek\'s sketch of your favourite machine, labelled in Veyli: \\"The one who meets.\\"","id":"184cgmk"}]',
+  '{"text":"Taavek\'s sketch of you at the foot of the Tern\'s ramp, the round one in your hands. Underneath, in careful letters: \\"For you. The one who meets.\\"","id":"4d660f"}]',
   ',"event.veyliVessel.tap.sketch.wall":[',
   '{"text":"Taavek\'s sketch of the Works bay, pinned by the tool wall. Calder is in it, hovering.","id":"chxc9v"}]',
   ',"event.veyliVessel.testfit.bramwell-basil":[',
@@ -47711,22 +47711,29 @@ function vesselPlaces() {
   if (DECKS[5].vesselChain) return;
   const spots = vesselChainSpots(), call = { id: '5-vchain-call', type: 'event', event: 'vessel-chain-call', at: [17, 4], xy: [17.5, 4.45], face: 0, pose: 'stand', anim: 'talk', room: 'w' };
   const you = spots.reduce((b, p) => Math.hypot(p.xy[0] - call.xy[0], p.xy[1] - call.xy[1]) < Math.hypot(b.xy[0] - call.xy[0], b.xy[1] - call.xy[1]) ? p : b);
-  DECKS[5].places.push(...spots, call);
+  // VB1's ask: Taavek and the helpers at the two benches (type 'event', nobody's day to day; facing the work): the Works
+  // bay's second bench (Taavek and Calder at its front, Zeke across it from the wall side), and the machine shop (Taavek
+  // between the lathe and the bench, the two helpers at the bench's east end; 5-shop-lathe stays yours)
+  const ev = (id, event, at, xy, face, room) => ({ id, type: 'event', event, at, xy, face, pose: 'stand', anim: 'talk', room });
+  const bench = [ev('5-vbench-1', 'vessel-bench', [18, 3], [18.35, 3.3], 'n', 'w'), ev('5-vbench-2', 'vessel-bench', [19, 3], [19.45, 3.35], 'n', 'w'), ev('5-vbench-3', 'vessel-bench', [18, 1], [18.9, 1.6], 's', 'w'),
+    ev('5-vshop-1', 'vessel-shop', [23, 11], [23.2, 11.55], 'w', 'f'), ev('5-vshop-2', 'vessel-shop', [25, 13], [25.0, 13.35], 'n', 'f'), ev('5-vshop-3', 'vessel-shop', [25, 12], [25.55, 12.5], 'w', 'f')];
+  DECKS[5].places.push(...spots, call, ...bench);
   DECKS[5].vesselChain = { spots: spots.map(p => p.id), call: call.id, you: you.id, path: VCHAIN_PATH };
   if (typeof SCHED_DATA !== 'undefined' && SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // planned before the spots: planned again
 }
 // ---- the small props (section 4d's DECK_DRESS shape, all behind the switch by `on`; dressShow merges each by colour, no
 // shadows). Shown through SHIP_EVENTS.veyliVessel.dressing (vesselLooksInit adds them to every phase, each with its own
 // window [event day, from, to], so they never hang on VB1's phase times), and the two sketches as lasting traces.
-// The round one (the Veyli coolant pump's impeller): a shroud disc, a hub and seven swept blades, lying flat; the broken
-// one tarnished bronze with a blade snapped off and one cracked short, the new one bright steel
+// The round one (the Veyli coolant pump's impeller): a shroud disc, a hub and twelve swept blades, lying flat; the broken
+// one tarnished bronze, cracked through the hub, a blade snapped off and one short; the new one bright steel
 function vesselImpeller(s, x, y, z, broken) {
   const m = dressMat(broken ? '#8a7650' : '#c9d2da'), dk = dressMat(broken ? '#4a4036' : '#8f9ba6');
   const disc = new THREE.Mesh(new THREE.CylinderGeometry(.11, .11, .014, 20), m); disc.position.set(x, y + .007, z); s.add(disc);
   const hub = new THREE.Mesh(new THREE.CylinderGeometry(.034, .04, .05, 12), dk); hub.position.set(x, y + .03, z); s.add(hub);
-  for (let k = 0; k < 7; k++) {
-    if (broken && k === 2) continue;                       // snapped off
-    const a = k * Math.PI * 2 / 7, l = broken && k === 5 ? .045 : .075, b = new THREE.Mesh(new THREE.BoxGeometry(l, .032, .011), m);
+  if (broken) { const c = new THREE.Mesh(new THREE.BoxGeometry(.09, .056, .007), dressMat('#1e1a16')); c.position.set(x, y + .03, z); c.rotation.y = .4; s.add(c); }   // the crack through the hub, out to the disc
+  for (let k = 0; k < 12; k++) {
+    if (broken && k === 3) continue;                       // snapped off
+    const a = k * Math.PI * 2 / 12, l = broken && k === 8 ? .045 : .075, b = new THREE.Mesh(new THREE.BoxGeometry(l, .032, .008), m);
     b.position.set(x + Math.cos(a) * (.036 + l / 2), y + .03, z - Math.sin(a) * (.036 + l / 2)); b.rotation.y = a + .5; s.add(b);   // swept: turned off the radius
   }
 }
@@ -47771,23 +47778,23 @@ function vesselDress() {
   Object.assign(DECK_DRESS, {
     vesselCrate: { deck: 5, on, what: 'Taavek\'s crate by the Works bay bench', make(g) {
       const [room, a, b, turn] = VPROPS.crate, s = dressAt(g, room, 'floor', a, b); vesselCrate(s, 0, 0, 0, turn);
-      return { t: vesselW('tap.crate.t', 'Taavek\'s crate'), x: vesselW('tap.crate', 'Taavek\'s travelling crate: Veyli tools in cord loops, a sketchbook, and a tin of sweets that is emptier every time you look.'), floor: [room, a, b], y: .3, w: .55, h: .4, d: .45 };
+      return { t: vesselW('tap.taavekCrate.t', 'Taavek\'s crate'), x: vesselW('tap.taavekCrate', 'Taavek\'s travelling crate: Veyli tools in cord loops, a sketchbook, and a tin of sweets that is emptier every time you look.'), floor: [room, a, b], y: .3, w: .55, h: .4, d: .45 };
     } },
     // the broken round one: on the Works bay bench from Sunday's meeting, then on the machine shop's bench while you make the new one
     vesselPartOld: { deck: 5, on, what: 'the broken round one on a bench', make(g, o) {
       const [room, a, b] = o.shop ? VPROPS.shopOld : VPROPS.works, s = dressAt(g, room, 'floor', a, b); vesselImpeller(s, 0, VPROPS.top, 0, true);
-      return { t: vesselW('tap.partOld.t', 'The round one'), x: vesselW('tap.partOld', 'The Veyli ship\'s coolant pump impeller. One blade is gone and another is cracked short. Taavek calls it the round one, and pats it like a sick animal.'), floor: [room, a, b], y: VPROPS.top + .04, w: .3, h: .12, d: .3 };
+      return { t: vesselW('tap.partOld.t', 'The round one'), x: vesselW('tap.part', 'The Veyli ship\'s coolant pump impeller. One blade is gone and another is cracked short. Taavek calls it the round one, and pats it like a sick animal.'), floor: [room, a, b], y: VPROPS.top + .04, w: .3, h: .12, d: .3 };
     } },
     // the new round one, on the machine shop's bench once it's made (VB1's SHIP.event.mine['vessel:part']), till Taavek takes it at 15:00
     vesselPartNew: { deck: 5, on: () => vesselOn() && vesselPartMade(), what: 'the new round one, made in the machine shop', make(g) {
       const [room, a, b] = VPROPS.shop, s = dressAt(g, room, 'floor', a, b); vesselImpeller(s, 0, VPROPS.top, 0, false);
-      return { t: vesselW('tap.partNew.t', 'The new round one'), x: vesselW('tap.partNew', 'The new impeller, turned on the Wren\'s lathe and balanced by hand. It spins true. Taavek has already sketched it twice.'), floor: [room, a, b], y: VPROPS.top + .04, w: .3, h: .12, d: .3 };
+      return { t: vesselW('tap.partNew.t', 'The new round one'), x: vesselW('tap.newpart', 'The new impeller, turned on the Wren\'s lathe and balanced by hand. It spins true. Taavek has already sketched it twice.'), floor: [room, a, b], y: VPROPS.top + .04, w: .3, h: .12, d: .3 };
     } },
     // Taavek's sketch of the Works bay, pinned to the top right corner of the tool wall's pegboard (the board's face at .05),
     // from Monday 15:20 (Taavek's goodbye), for good: a trace from the all-clear (settleTraces)
     vesselSketchWorks: { deck: 5, on, what: 'Taavek\'s sketch of the Works bay, pinned to the tool wall', make(g) {
       const s = dressAt(g, 'w', 'n', 9.3 + .55); vesselCard(s, 1.74, .057, 'works');   // .007 off the pegboard
-      return { t: vesselW('tap.sketchWorks.t', 'Taavek\'s sketch'), x: vesselW('tap.sketchWorks', 'Taavek\'s pencil sketch of the Works bay: the tool wall, a bench, two heads bent over the round one. Signed with a blue loop. Calder pinned it up herself.'), wall: ['w', 'n', 9.3 + .55], y: 1.74, w: .4, h: .32 };
+      return { t: vesselW('tap.sketchWorks.t', 'Taavek\'s sketch'), x: vesselW('tap.sketch.wall', 'Taavek\'s pencil sketch of the Works bay: the tool wall, a bench, two heads bent over the round one. Signed with a blue loop. Calder pinned it up herself.'), wall: ['w', 'n', 9.3 + .55], y: 1.74, w: .4, h: .32 };
     } },
     // Calder's parts chain sheet (VB1's ask): pinned to the bottom corner of the Works job board, where the storm's sign-up
     // sheet goes (signupWorks; never out at once), Saturday 09:30 to Sunday 14:00; o.lines the names signed so far. Its item
@@ -47801,11 +47808,11 @@ function vesselDress() {
     // the chain's two stacks: Main storage's, by its door, going down; the bay's, beside the ramp's foot, going up (o.n)
     vesselChainFrom: { deck: 5, on, what: 'crates of parts for the Veyli ship, by Main storage\'s door', make(g, o) {
       const r = ROOM_BOX.r, a = 25.6 - r.i0, b = 5.45 - r.j0, s = dressAt(g, 'r', 'floor', a, b); vesselStack(s, o.n == null ? VCHAIN.n : o.n);
-      return { t: vesselW('tap.stack.t', 'Crates for the Veyli ship'), x: vesselW('tap.stackFrom', 'Parts, seals and a spare pump body for the Veyli ship, packed by Zeke and labelled in two languages, one of them by Taavek.'), floor: ['r', a, b], y: .5, w: .9, h: 1, d: .7 };
+      return { t: vesselW('tap.stack.t', 'Crates for the Veyli ship'), x: vesselW('tap.crate', 'Parts, seals and a spare pump body for the Veyli ship, packed by Zeke and labelled in two languages, one of them by Taavek.'), floor: ['r', a, b], y: .5, w: .9, h: 1, d: .7 };
     } },
     vesselChainTo: { deck: 5, on, what: 'the crates waiting by the Tern\'s ramp', make(g, o) {
       const r = ROOM_BOX.S, a = 7.3 - r.i0, b = 11.55 - r.j0, s = dressAt(g, 'S', 'floor', a, b); vesselStack(s, o.n || 0);
-      return { t: vesselW('tap.stack.t', 'Crates for the Veyli ship'), x: vesselW('tap.stackTo', 'The crates from the chain, waiting at the foot of the Tern\'s ramp. Zeke has counted them twice.'), floor: ['S', a, b], y: .5, w: .9, h: 1, d: .7 };
+      return { t: vesselW('tap.stack.t', 'Crates for the Veyli ship'), x: vesselW('tap.crate', 'The crates from the chain, waiting at the foot of the Tern\'s ramp. Zeke has counted them twice.'), floor: ['S', a, b], y: .5, w: .9, h: 1, d: .7 };
     } },
     // the sketch Taavek gives you, leaning at the back of your keepsake shelf (the bunk's, or 4-23's once SHIP.works.home is
     // '4-23'), between the Line certificate and the framed menu: a trace { id: 'vesselSketchShelf', day } (vesselShelve)
@@ -47813,7 +47820,7 @@ function vesselDress() {
       const cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = cab ? 'W' : 'a', along = cab ? .5 : 2.5;
       const s = dressAt(g, room, 'n', along - .235), c = new THREE.Group(); c.position.set(0, 2.17, .03); c.rotation.x = -.13; s.add(c);   // its foot on the shelf (top 2.17), leaning back
       vesselCard(c, .1, 0, 'you', .16, .19);
-      return { t: vesselW('tap.sketchShelf.t', 'Taavek\'s sketch'), x: vesselW('tap.sketchShelf', 'Taavek\'s sketch of you at the foot of the Tern\'s ramp. Underneath, in careful letters: For the one who meets.'), wall: [room, 'n', along - .235], y: 2.27, w: .2, h: .24 };
+      return { t: vesselW('tap.sketchShelf.t', 'Taavek\'s sketch'), x: vesselW('tap.sketch.shelf', 'Taavek\'s sketch of you at the foot of the Tern\'s ramp, the round one in your hands. Underneath, in careful letters: "For you. The one who meets."'), wall: [room, 'n', along - .235], y: 2.27, w: .2, h: .24 };
     } },
   });
 }

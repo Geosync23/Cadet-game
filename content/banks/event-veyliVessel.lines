@@ -474,7 +474,7 @@
 - Put Taavek's sketch on your shelf
 // the sketch, on your shelf (VB2's prop)
 == event.veyliVessel.tap.sketch.shelf
-- Taavek's sketch of your favourite machine, labelled in Veyli: "The one who meets."
+- Taavek's sketch of you at the foot of the Tern's ramp, the round one in your hands. Underneath, in careful letters: "For you. The one who meets."
 // Taavek's sketch of the Works bay, pinned by the tool wall for good (VB2's prop)
 == event.veyliVessel.tap.sketch.wall
 - Taavek's sketch of the Works bay, pinned by the tool wall. Calder is in it, hovering.
