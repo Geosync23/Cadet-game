@@ -1,0 +1,21 @@
+@meeting pu3.offer.party
+// SW3: the offer at the storm's all-clear party (Day 14, Sunday, bow lounge, 19:00-21:00). Calder walks up to you
+// through the party; the lounge turns to look; Halloran and Tomas are there (if one isn't, 24u can drop his lines, as
+// the FLC does with a missing cast member). Same two replies in the same order as pu3.offer. Friends' luck (pu3.luck,
+// the raised cups) follows it in bubbles.
+title: Your next test
+from: Chief Ines Calder
+gist: At the storm party, Calder told you in front of the lounge: your Tier 3 test is tomorrow, Monday, at 09:00. Pass it and you're a Senior Officer.
+== lines
+calder > you: Don't put your cup down. This won't take long.   [gesture]
+calder: Relied on. And the storm counted. Every repair of it.
+calder: Monday. Tomorrow, then. Your Tier 3 test, nine o'clock, on the board.
+halloran-emeka: Tier 3? At two weeks aboard? Some of us took a year.   [laugh]
+halloran-emeka: I'm not bitter. I'm a little bitter. Well done, you.
+? choice
+* Tomorrow, then. I'll be ready.   rel:calder+2
+  calder: I know. One more cup of tea, then bed. Not two.   [nod]
+* At a party? You couldn't wait till morning?   rel:calder+2
+  calder: No. I wanted to see your face. There it is. Good.   [nod]
+tomas > you: Tomorrow's the big one? Go to bed early. Not yet. After this song.   [laugh]
+calder: Pass it and you're a Senior Officer. Enjoy the party. Not too much.

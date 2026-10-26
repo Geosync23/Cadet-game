@@ -1,0 +1,21 @@
+@meeting train.ps.calder
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-1 turn 2; spec question 2): Power safety, a watch-only lesson at the Deck 6 port
+// junction (room j), about 20 minutes, offered from Day 12 to an Officer. Calder shows you; you only watch. Why a
+// junction is the one thing you never rush; one reply; her close line. Trained: works.trained follows it.
+title: Power safety
+from: Chief Ines Calder
+gist: Calder showed you the Deck 6 port junction: what it feeds, how to make it safe, and why a junction is the one job you never rush.
+== lines
+calder > you: Stand there. Behind the line on the floor. Watch my hands.   [gesture]
+calder: This junction feeds three rooms and a corridor. Everything you can hear from here.
+calder: Most jobs, a mistake costs a part. Here, a mistake costs a person. So we never rush it.
+calder: Four steps. Tell people. Switch it off. Test it's dead. Lock it, so nobody switches it back.
+calder: Dead is a number on the tester. Never a guess. Never "it should be".
+? choice
+* What if someone needs the power back in a hurry?   rel:calder+2
+  calder: Then they wait, and you tell them why. Nobody has ever thanked me for rushing a junction.   [nod]
+* Have you ever been caught by one?   rel:calder+2
+  calder: Once. My first ship. A small one. I tested the next one twice. I still do.   [nod]
+* (Just watch)
+  calder: Good. Watching is most of it.   [nod]
+calder: Your Tier 3 test is a junction like this. You'll do it. I'll watch. That's Power safety.
