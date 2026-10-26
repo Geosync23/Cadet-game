@@ -339,7 +339,7 @@ def part_p925l(g):
     t2 = g.ev(f"(() => {{ ({P925L_T2})('t2'); const c = SHIP.works.cur, j = c && SHIP.jobs.find(x => x.id === c.j); if (j && j.found > shipNow()) setShipNow(j.found); return c && c.st === 'do' ? c.j : null; }})()")
     a = g.ev(f"({P925L_LOOK})({json.dumps(t2)}, null)") if t2 else None
     print(f'  the Tier 2 test job: {a}')
-    check(bool(a) and a['marked'] and 'Your Tier 2 test job: take this one' in (a['row'] or '') and 'lesson' not in (a['row'] or '').split('Your Tier 2 test job')[1][:8] and a['pointer'] and a['pointer'].endswith('Take this one: your Tier 2 test job'),
+    check(bool(a) and a['marked'] and 'Your Tier 2 test job: take this one' in (a['row'] or '') and 'lesson' not in (a['row'] or '').split('Your Tier 2 test job')[1][:8] and a['pointer'] and (a['pointer'].endswith('Take this one: your Tier 2 test job') or a['pointer'].endswith('Your Tier 2 test: take it')),   # (FX28's words with PROMO_BEATS_ON)
           f'#22: the Tier 2 test job is named as itself on the board and by the pointer, not "tier 2 test job lesson" ({a})')
     cj = g.ev(P925L_CASE)
     b = g.ev(f"({P925L_LOOK})({json.dumps(cj)}, 'train:board:')") if cj else None
@@ -1795,7 +1795,8 @@ FX3PROMO = r"""(() => {
   const now = Math.floor(shipNow()), p = player.obj.position, fake = { p: { id: 'calder' }, x: p.x, z: p.z }, say = worksSayAll;
   SHIP.occasions.push({ id: 'promoSummons', key: 'promoSummons@' + worksDay(now), at: now - 20, len: 30, deck: 5, room: 'o', by: 'calder', kind: 'meeting', status: 'asked', f: { seek: now - 5 } });
   DECK_CREW.push(fake); worksSayAll = () => {}; let out = null;
-  try { promoSeekTick(now); const a = !!(DIALOGUE && DIALOGUE.id === 'promo.officer'); meetingsTick(now); meetingsTick(now + 1); out = [a, !!(DIALOGUE && DIALOGUE.id === 'promo.officer')]; }
+  const sid = OCCASIONS.promoSummons.script;   // promo.result with PROMO_BEATS_ON (FX28)
+  try { promoSeekTick(now); const a = !!(DIALOGUE && DIALOGUE.id === sid); meetingsTick(now); meetingsTick(now + 1); out = [a, !!(DIALOGUE && DIALOGUE.id === sid)]; }
   finally { worksSayAll = say; DECK_CREW.splice(DECK_CREW.indexOf(fake), 1); DIALOGUE = null; if (typeof deviceDialogue === 'function') deviceDialogue(null); SHIP.occasions.length = 0; SHIP.works = null; }
   return out;
 })()"""
