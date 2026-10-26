@@ -282,3 +282,55 @@ Note N1: in my run the result card took about 30 ship minutes (my probe's slow t
 "(notes)" Mail at 08:45 while the card was still open; at a normal reading pace the card ends well before.
 
 **Verdict on 44a4565f: PASS.**
+
+## FX26, Storm Saturday (claude/storm-sat), from RV18's queue (agreed with RV18 and lead 38, 08:40)
+Final: 402899bd (0.93.2-w.5, game sha256 c799f15eeccbe7f1...7cd). Steps: w.1 7091043 (the Captain's stage fix, not switched;
+the call-in, storm-only board, Calder's Mail behind STORM_SAT_ON; leave_check's day off moved to Day 14), w.2 ea0ace07
+(the lantern supper is that day's dinner; Storm stories by torchlight), w.3 41d891b9 (lanterns and low light), w.4
+67e918f2 (the stories said aloud, a seat kept for you, Oduya's close, chatter hushed), 4774b7f1 (section 15's actEnd: a
+joinable tradition's end toast titled with its name, not its id, for every tradition), w.5 402899bd (the supper's sittings
+35-50 min so nobody eats standing). STORM_SAT_ON = EV_STORM_ON, so it is on as pushed; "off" = a copy with it false.
+Lead calls already made: a missed call-in costs reputation like a missed shift but not toward being let go; repairs count
+to the commendation; not a double; leave_check's sample day 13 -> 14.
+
+Diff read: section 18's slot 'Storm Saturday' (stormSatDay from the calendar plan and the storm's phases only, cached;
+stormCalledIn, playerCalledIn, playerOnDuty, stormBoardJob / stormBoardHide; stormSay / stormStoriesFrame), the storm's
+`if (STORM_SAT_ON)` block (seven storm repairs in three waves, the Mail, S.stormSat, dayDress, keep, stayIn's gap, the
+supper for everyone, the dressing, TRAD_JOIN), section 14's isWorkDay (+ stormCalledIn), playerShiftOn -> playerOnDuty in
+13, 15, 15b, 19, 20, 25 (time clock, arrows, tea, Schedule, alarms), the board's filters (15b, 17), devDay's row and no
+second dinner, DECK_DRESS.stormTorches and stormSupperDim, the rec deck's floorY and 8b's CrowdPerson fy and bubbles'
+stage height, the storm-stories tradition (content/traditions/storm-stories.trad). Nothing new calls R() at load.
+
+| Check | Build | Where | Result |
+|---|---|---|---|
+| cadet_test vs b957b92d, alone | 402899bd, STORM_SAT_ON false | RV19 | ALL IDENTICAL |
+| cadet_test vs b957b92d, alone | 402899bd as pushed | RV19 | ALL IDENTICAL |
+| check_fast | 402899bd | FX26 (and 41d891b9 RV19) | QUICK CHECK OK |
+| day_check 12, 13, 14 | 402899bd | RV19 | DAY CHECK OK, all three; schedules 0/0/0/0/0 |
+| weekend_check, player_check | 402899bd | RV19 | OK, OK |
+| career_check | 402899bd | RV19 | only the known-old "busy: Relied on before Day 5" (backlog FX28-1) |
+| events_check, join_check (alone), devmode_check, bigevents_check | 402899bd | CR5 | all OK |
+| fridays_check, arrows_check | 402899bd | CR6 | FRIDAYS CHECK OK, ARROWS CHECK OK |
+| events_check, devmode_check, day_check 13 | 41d891b9 | RV19 | OK |
+
+Played at 390 x 844 (plans/rv19-storm-live.py, Dev mode on a Dev save):
+- Friday Day 12, 18:00: Calder's "You're needed tomorrow" Mail and Oduya's invite to the storm stories.
+- Saturday Day 13: the Schedule "09:00 On shift: called in for storm repairs"; the board (shot): only "Storm repair: ..."
+  jobs, plus two power jobs the crew already hold; 4 other jobs hidden; at 10:00, 15 of 18 Works day crew at work.
+- 18:00 the lantern supper on the Schedule, no second dinner; in the mess "You squeeze in at a long table in the lamp light".
+- 21:05 the storm stories (67e918f2 and 402899bd): tap Oduya, you sit in the circle in the junior common room (no longer
+  walked out to the corridor, as RV18 and I saw on 41d891b9); the room dark with the lanterns on the rug (shot); the
+  tellers' storms in turn ("Hailstones the size of eggs on the farm moon..."), the asides, Oduya's prompts, his close at
+  21:36 and 21:38; no page errors. Meets the user's rule: a host to tap, a pose, its own words.
+- Not checked by me: the Captain's stage fix (RV18 played it: standing on the stage, the bubble above her head).
+
+Notes (not blocking):
+- N1. The asides rotate over four lines: "And then the window just... went" came 3 times in 30 minutes.
+- N2. The join toast shows twice (once on the tap, once as the activity starts) and its "About N minutes" ignores a late
+  join; FX26 says every joinable tradition does this (old).
+- N3. 4774b7f1 changes section 15's actEnd (the player engineer's) for every joinable tradition's end toast: worth the
+  owner's look at merge time; join_check and player_check are OK on it.
+- N4. stormSatDay is cached the first time it's asked (STORM_SAT_D) and a Saturday only; a calendar that moves the storm
+  within one page (a new game without a reload) would keep the old day. New game reloads today, so no effect.
+
+**Verdict on 402899bd: PASS.**
