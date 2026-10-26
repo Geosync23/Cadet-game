@@ -487,3 +487,24 @@ Cause, found by FX20b (the inspection's builder): at 06:29 on Day 4 the arrow sa
 and points at the bunk itself; the follower taps the bunk and lies down, the 'lie' activity never ends, so it counts
 itself busy all day and misses Calder's Tuning meeting and the clock-in. FX20b's game fix (the officer's result gets you
 up from the bunk) is in testing; the full round runs again on the new sha. Not fixed here (check runner).
+
+## Round 2: 0.93.2 (claude/staging-0.93.2 d9c7e5f0)
+
+**sha256 of starship-cadet.html: `c99ea59cc753e58b98f06f7fbc0d51eb8cac1da39849f881533adb96917dd5d3`** (matches BM18's;
+the storm board fix, the inspection fixes incl. up off your bunk, the workbench tap). One at a time, CADET_WORK=/tmp/work-cr1.
+
+| Check | Result | Time | Key lines |
+|---|---|---|---|
+| player_check | **OK** | 383 s | PLAYER CHECK OK |
+| devmode_check | **OK** | 260 s | DEVMODE CHECK OK |
+| bubble_check | **OK** | 403 s | BUBBLE CHECK OK |
+| puzzle_check | **OK** | 72 s | PUZZLE CHECK OK |
+| social_check | **OK** | 30 s | SOCIAL CHECK OK |
+| talk_check | **OK** | 38 s | TALK CHECK OK |
+| arrows_check (all parts) | **OK** | 1215 s | ARROWS CHECK OK; week: m5 learned Day 4 (clocked 550 min), by Day 8 m2, m5, m6, m7, p3 (round 1's FAIL fixed) |
+| arrows_pointer_check | **OK** | 134 s | arrows_pointer_check: OK |
+| dev_arrow_check | **OK** | 38 s | DEV ARROW CHECK OK |
+| day_check 4 | **OK** | 246 s | DAY CHECK OK |
+| day_check 11 | **OK** | 266 s | DAY CHECK OK |
+
+No FAILs, so no OLD runs were needed.
