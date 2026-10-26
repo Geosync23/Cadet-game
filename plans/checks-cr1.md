@@ -517,3 +517,22 @@ Extras for CR6 (agreed with CR6, BM18's ask; CR6 cancelled its own runs first), 
 - `events_check.py starship-cadet.html` (CR5's, default args): exit 1, 738 s, EVENTS CHECK FAILED with **one** FAIL line,
   the known-old **FX24-2**: `reading-corner day 7, Deck 3: 2/3 reached ... FAIL not reached: ['farouk-olu>3-lounge-28 16:00']`.
   No other FAIL (the other "not reached" lines are notes, not FAILs).
+
+# Early check: the doors change (claude/doors-3way 3051de4e, 2026-10-26; lead 39's ask, for FX24)
+
+Game sha256 `008d3bd66fc74637ac054422b95553ad0cf3488cf5d037eb801b285299552a23` (matches FX24's). OLD = d9c7e5f0
+(0.93.2 live, c99ea59c…). 3051de4e's arrows_check.py, each run alone.
+
+| Run | Result | Key lines |
+|---|---|---|
+| arrows_check (all parts incl. week), NEW | **OK** (1159 s) | week: m5 Day 4, m6 by Day 8; promo test passed |
+| arrows_check week guide, NEW | FAIL (twice, identical) | below |
+| arrows_check week guide, OLD d9c7e5f0 | FAIL, identical | below |
+
+The week guide FAIL lines: `week: stuck from Day 6 20:10 at "Theo wants a word" (Deck 4) (fix: FX1 (arrows and
+tracking) or FX3 (the lift))`; `week: stuck from Day 7 18:20 at "A toilet" (Deck 4) (fix: section 15 (the needs arrow):
+nobody yet)`; `week: the arrow "A toilet" stayed up over 3 ship hours from Day 7 18:20 (fix: FX1 (arrows that never clear))`.
+
+So the doors change is clear. The week guide FAIL is **older, in the live 0.93.2**: week guide last ran in a round on
+0.92.6 (b78e1e22, OK). It came in somewhere between 0.92.6 and 0.93.2. Not on the known list; backlog row suggested.
+Not fixed or bisected (check runner).
