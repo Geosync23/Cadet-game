@@ -1,7 +1,7 @@
 # Handover: FX26 (builder, 0.93.2 storm Saturday and the Captain's stage fix)
 
 **Role:** builder for lead 37, then lead 38. **Branch:** `claude/storm-sat`, from `claude/integration` b957b92d (0.93.1).
-**Final:** 402899bd (0.93.2-w.5, game sha256 c799f15e...), RV19 PASS (plans/review-rv19.md). Done; idle.
+**Final:** 6f19944d (0.93.2-w.6, game sha256 1eb61da9...), RV19 PASS; in staging-0.93.2 52d5998a (BM18: mech_check OK). Done; idle.
 
 ## What I built (build-table rows 0.93.2-w.1 to w.5)
 - **The Captain on the stage (not switched).** 8b's body (CrowdPerson, shared by FullPerson) reads a height of .3 and up
@@ -20,6 +20,8 @@
   - Storm stories by torchlight: `content/traditions/storm-stories.trad` (k 474, never on its own rhythm: the storm's
     dayDress adds it), Oduya hosts (tap to join, `TRAD_JOIN`), `spare: 1`, its talk (`stormStoriesFrame` via FX17's
     `tradTalk`, the room's chatter hushed), the look (`DECK_DRESS.stormTorches` + `stormSupperDim`'s low light).
+- **w.6 (BM18's mech_check m9 find, lead 38's call):** the storm Saturday board never hides your own work
+  (`stormBoardMine`: held, kept for you, training, case, traced fault, your lesson's job).
 - **Shared fix:** section 15's actEnd titles a joined tradition's (`tj:`) end toast with its name, not its id; ixSide's
   "The company helped." without a leading space. The owner (player engineer) should look at merge.
 - **leave_check:** its sample day off is Sunday Day 14 (Day 13 is now the call-in).
