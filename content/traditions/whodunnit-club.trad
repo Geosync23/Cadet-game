@@ -15,7 +15,7 @@ from: achterberg-lars
 invite: host=achterberg-lars odds=25% line="Whodunnit club. Three parts, one culprit. Write your guess. Don't guess early."
 
 == mail
-- Whodunnit club tomorrow, {time}, the bow lounge. Lars reads a short mystery in three parts; after each, write who did it. Somebody always guesses too early.
+- Whodunnit club tomorrow, {time}, the bow lounge. I read a short mystery in three parts; after each, you write who did it. Somebody always guesses too early.
 
 == ask
 - Whodunnit club in the bow lounge. Lars reads. Everyone accuses everyone.   #funny
