@@ -1,9 +1,10 @@
 # RV18 review: 0.93.2 (event order swap and traditions)
 
-Reviewer RV18 (session_01PMfvrCN6StPzwVSPGX7ijH), hired by lead 37 (session_019GcNZ4GGEqfiuYDYnue7nX). Notes only,
+Reviewer RV18 (session_01PMfvrCN6StPzwVSPGX7ijH), hired by lead 37 (session_019GcNZ4GGEqfiuYDYnue7nX); lead 38
+(session_01G2y9crUv6vDiiEB2q6Yo9W) from 04:40. Every PASS goes to lead 38 and BM18 (session_01A3S2VBMYmTt2wCZa8ej7XR) with the exact sha. Notes only,
 branch `claude/review-rv18`. Base: claude/integration b957b92d (0.93.1, game sha256 6cd54ab9...8eee).
 
-1. FX22b (session_01Lzi6Fe2HQJsVbaJBFxXtyx), `claude/event-swap`, switch `EV_SWAP_ON` (off). Not pushed yet.
+1. FX22b (session_01Lzi6Fe2HQJsVbaJBFxXtyx), `claude/event-swap`, switch `EV_SWAP_ON` (off; the URL flag ?evswap).
 2. FX24 (session_017zuWxNJfppnVwkQDtiwnb6), `claude/trad-0932`, switch `TRAD_0932_ON` (off).
 
 The user's rule for every tradition: "a host you click to join, then a simple pose or animation to reflect the event,
@@ -75,3 +76,33 @@ All 15 meet the user's rule in shape. But see M1: the card closes by itself.
   the check walk it. Not FX24's code; blocks the switch-on until fixed or accepted (lead's call).
 
 **Verdict on 0524738d: FIXES NEEDED (M1-M4).** Sent to FX24 and lead 37.
+
+### Lead calls (lead 37, then lead 38)
+- M4: lead 37 approved the galley fix outside the switch; FX24 then put it behind TRAD_0932_ON; lead 38: keep it there
+  (the switch is on in 0.93.2). Proof it's right: 0.93.1 fails day_check 32 (`double: 3-galley-5 walsh-esme/madsen-ivo@16:30`);
+  149fed5b (ungated) passes day_check 32, food 1 7 and events_check off, and cadet_test is ALL IDENTICAL. On paper over Days
+  1-60 only Esme's last 2 minutes on Day 32 change (16:30-16:32 at 3-galley-5 become off), and that was the only galley
+  double booking in those 60 days.
+- S7 (reading corner Day 7, FX24-2): accepted as known-old for 0.93.2 (lead 37).
+- Tray-seat outside a switch: accepted (lead 38; the user asked for it).
+
+## FX22b, the event swap
+Step 1 56fa0ca5 (9387754f...222a), step 2 49cf5dc5 (0d0fb87c...68b6), step 3 4e13d5e3 (eb999383...b853), step 4 05a9e7db
+(e8768136...d7be). Diff read: section 13's switch (a URL flag), one `if (EV_SWAP_ON)` block in section 18 (calendar, order,
+EV_BEATS, the visit reshaped, the comet's draft, the address Mail), the tea not loaded with it on, friCond's `swap`,
+eventGuestDays' guestStay; step 2 Basil's beat 4 as a welcome dinner (outside the switch: lead 37's call) and the comet on
+Monday Day 22; steps 3-4 the address lines and fridays_check's swap excuse. Nothing calls R() at load.
+
+| Check | Build | Result |
+|---|---|---|
+| friSpeech Days 12, 19, 26, EV_CALENDAR, eventsOn 16-26 | 56fa0ca5 off vs b957b92d | identical, word for word |
+| the same with the swap on | 56fa0ca5 on | Day 19 "this morning we saw our Veyli guests off"; Day 26 the comet lines; calendar storm 11, visit 16, comet 26 |
+| cadet_test vs b957b92d, alone | 49cf5dc5 off | ALL IDENTICAL |
+| names_check off and on, content_gen --check, lines_check | 49cf5dc5 | OK, up to date, PASS (0 errors, 66 warnings) |
+| fridays_check (CR6) | 56fa0ca5 off / on | one FAIL each: the never-fill excuse missing for swap lines (fixed in 4e13d5e3) |
+| fridays_check (CR6) | 4e13d5e3 off / on | OK / FAIL: Day 26 swap line 91 characters, over friFill's 90 (fixed in 05a9e7db) |
+
+## FX24, Take a seat (claude/tray-seat-0932 44ba88d5, game 47b0e1d0...0074)
+Diff read (section 15: seatBtnSeat, seatBtnGo, the button, one handTick line). Played at 390 x 844: with a tray in the mess
+hall by a free seat the button shows straight above Put down at its size; a real tap sat me at 3-mess-8 and I ate the tray
+(ACT eat, fed); the button goes; none on Deck 4 with a tray. No page errors.
