@@ -135,6 +135,11 @@
 - Taavek and Chief Calder are waiting for you at the foot of the Tern's ramp.
 == event.veyliVessel.notice.rampWait.late
 - Taavek is still waiting at the ramp. The Chief has fetched them a coffee.
+// 09:45, if you're still not there: Calder comes to find you, wherever you are, and says it in person (then the
+// arrow back to the ramp); Taavek waits at the foot with a coffee
+== event.veyliVessel.talk.rampFind
+- calder: {me}. There you are. Taavek's at the foot of the ramp. Waiting.
+- calder: They're not cross. I'm not either. Much. Come on.
 == event.veyliVessel.talk.rampWait
 - calder: Five minutes. They're coming.
 - taavek: We wait. Good. Waiting is also a kind of meeting.
@@ -181,7 +186,7 @@
 == event.veyliVessel.gather.chain.here
 - Find a gap in the line. Face the next person. I'll call the count.
 == event.veyliVessel.gather.chain.thanks
-- Zeke waves you into a gap between Pell and Kovac. The first crate is already coming down the line toward you.
+- Zeke waves you into a gap in the line. The first crate is already coming down it toward you.
 == event.veyliVessel.ring.chain
 - Join the chain
 == event.veyliVessel.ring.crate
@@ -306,32 +311,48 @@
 - taavek: Ah! Too deep. Small. Not bad. We go again, slower. The round one forgives.
 == event.veyliVessel.taavek.stepDone
 - taavek: Good. Next.
-// your helpers' lines, one per step for each (steps 1-5; their own way)
+// your helpers' lines, one per step for each of the four (steps 1-5; their own way)
 == event.veyliVessel.help.kovac-zainab.step.1
 - kovac-zainab: Twelve on the sketch. Twelve on the part. Sorry. Counted again. Twelve.
+== event.veyliVessel.help.kovac-zainab.step.2
+- kovac-zainab: Not that one. Sorry. That one's got a flaw. There. This bar. It's lovely.
 == event.veyliVessel.help.kovac-zainab.step.3
 - kovac-zainab: Feed's a touch quick. Just a touch. Sorry. There. Lovely.
 == event.veyliVessel.help.kovac-zainab.step.4
 - kovac-zainab: Hold it there. Don't breathe. You can breathe. Just not on it.
+== event.veyliVessel.help.kovac-zainab.step.5
+- kovac-zainab: Nearly. A hair heavy on blade seven. Sorry. Seven. There. Balanced.
 == event.veyliVessel.help.pell.step.1
 - pell: Right, so. It's a fan that does its job underwater. I've met worse.
+== event.veyliVessel.help.pell.step.2
+- pell: That bar. It's the one I'd pick, and I'm never wrong about bars.
 == event.veyliVessel.help.pell.step.3
 - pell: Lathe always pulls a bit left on this one. Lean on it. There you go.
 == event.veyliVessel.help.pell.step.4
 - pell: Checked. True to a hair. A thin hair. Don't tell Calder I said a hair.
+== event.veyliVessel.help.pell.step.5
+- pell: Wobbles a bit, see? Shave the heavy side. Little bit. Oi oi, there she spins.
 == event.veyliVessel.help.bramwell-basil.step.1
 - bramwell-basil: What's it for? Is it hot? Does it spin? It spins. Brilliant.
+== event.veyliVessel.help.bramwell-basil.step.2
+- bramwell-basil: Why that one? Because it rings? Does metal ring? It rings. Brilliant.
 == event.veyliVessel.help.bramwell-basil.step.3
 - bramwell-basil: How do you know it's slow enough? Oh. You listen. Brilliant.
 == event.veyliVessel.help.bramwell-basil.step.4
 - bramwell-basil: I'm holding it. Look. Holding. Told you I was good at this.
+== event.veyliVessel.help.bramwell-basil.step.5
+- bramwell-basil: How can you tell it's balanced? It's not wobbling. Oh. Brilliant.
 == event.veyliVessel.help.torres-zeke.step.1
 - torres-zeke: Look at that curve. It wants to spin. You can see it wanting to.
+== event.veyliVessel.help.torres-zeke.step.2
+- torres-zeke: That's the bar. Good grain. It'll turn sweet as anything.
 == event.veyliVessel.help.torres-zeke.step.3
 - torres-zeke: Hear that? That's a happy lathe. Don't push her and she'll do anything.
 == event.veyliVessel.help.torres-zeke.step.4
 - torres-zeke: Checked. It's true. Coil three would be jealous.
 // a short exchange between the two you picked, once, while the lathe runs (by pair: help.pair.<a>.<b>, ids in alphabetical order)
+== event.veyliVessel.help.torres-zeke.step.5
+- torres-zeke: Spin it. Watch the tips. Steady as coil one on a good day. Lovely.
 == event.veyliVessel.help.pair.kovac-zainab.pell
 - pell: Counted them again, Zainab?
 - kovac-zainab: Three times. I said twice. I lied. Sorry.
@@ -443,7 +464,7 @@
 
 // ---- Tuesday 09:30, your commendation (from the Captain; question C1: two of its jobs, or one job and a meeting)
 == event.veyliVessel.mail.commendation
-- Commendation: The Veyli ship | For your work with the Veyli ship's engineer, noted on your record with thanks. You met Taavek at the ramp and made their part. Chief Calder says it ran true first time. I'd like to say so in person this week; Commander Vance will find a time.
+- Commendation: The Veyli ship | For your work while we kept the Veyli ship company, noted on your record with thanks. You helped their engineer, Taavek, and their part went home with them. Chief Calder says it ran true first time. Well done.
 // Tuesday 12:00, Taavek's letter (from Taavek; a few careful words, about the sketch you were given at the ramp)
 == event.veyliVessel.mail.letter
 - From Taavek | {me}. Good day. The round one goes round. Our ship is warm. I write this with help, so the words are good, but they are mine. The sketch I give you, put it on a shelf. On my shelf, your ship. Coffee next time. Go well. Taavek.
