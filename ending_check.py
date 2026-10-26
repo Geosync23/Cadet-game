@@ -12,6 +12,11 @@
 #            nothing open after; a save and a reload keep it all
 #   reload:  a real save between the offer and the answer (served from a web address, as saves_check does), reloaded:
 #            SHIP.end the same, the offer's scene and "About the transfer" still there
+#   keep:    (the same web page) the kept copy: made at the first Go, from just before it, never again (Stay then Go keeps
+#            the first); only this slot's key; the Saves app's "Before the goodbye"; the end page marks the save ended and
+#            a reload shows it again with its three buttons; "Back to before my choice" brings the copy back: the choice
+#            open, the page gone. With ?nosave no copy is made
+#   endpage: the end page on paper: its rows (name and rank, days, ranks, friends, Zeke), its buttons, the page's focus
 #   week:    Friday: the friends come to you one at a time (seek asks), each with "About the transfer" and their own take;
 #            Zeke after dinner (arrow level 1 "Talk to Zeke", he finds you, the scene); a call home plays your family's
 #            scene once; the Schedule's rows (your answer by Saturday 20:00, Zeke); the Record's lines
@@ -137,6 +142,18 @@ def part_answers(g):
       const back = endClean(JSON.parse(JSON.stringify(s.ship.end))); return { same: JSON.stringify(back) === JSON.stringify(keep), saved: s.ship.end }; })()""")
     check(r['same'], f"answers: SHIP.end saved and read back the same ({r})")
 
+def part_endpage(g):
+    print('(endpage) the end page on paper; no kept copy with ?nosave:')
+    made(g)
+    r = g.ev("""(() => { const p = __marrow(); setShipNow(32 * 1440 + 600); endChatDo(p, 'tell'); __lines(); dialogueChoose(1); __run(0);
+      const keys = Object.keys(localStorage).filter(k => /before-end/.test(k)); SHIP.player.name = 'Ada'; SHIP.rel = SHIP.rel || {}; endPage(true);
+      const el = document.getElementById('endPage'); const r = { keys, made: endKeepCopy(), shown: !el.hidden, text: el.innerText, btns: [...el.querySelectorAll('button')].map(b => b.dataset.end), role: el.getAttribute('role'), focus: document.activeElement && document.activeElement.dataset.end };
+      endPage(false); return r; })()""")
+    print('   ', {k: r[k] for k in ('keys', 'made', 'btns', 'role', 'focus')}); print('   ', r['text'][:300].replace('\n', ' | '))
+    check(r['keys'] == [] and r['made'] is False, f"endpage: no kept copy with ?nosave ({r['keys']})")
+    check(r['shown'] and 'Ada' in r['text'] and 'Days aboard' in r['text'] and 'Zeke' in r['text'] and r['role'] == 'dialog', f"endpage: the rows ({r['text'][:200]})")
+    check(r['btns'] == ['keep', 'new'] and r['focus'] == 'keep', f"endpage: with no kept copy, Keep this ending and Start a new game, the first focused ({r})")
+
 def part_week(g):
     print('(week) the friends, Zeke, the call home, the rows, the Record:')
     made(g)
@@ -176,6 +193,7 @@ def part_reload(b, on):
         pg.wait_for_function('window.__sc !== undefined', timeout=90000)
         pg.evaluate("s => window.__sc(s)", "(() => { const rr = renderer.render.bind(renderer); renderer.render = () => {}; })()")
         pg.evaluate('window.__step(20, 33)')
+        pg.evaluate('s => window.__sc(s)', SETUP)
     ev = lambda src: pg.evaluate('s => window.__sc(s)', src)
     pg.goto(ORIGIN + 'game.html', timeout=120000); ready()
     if pg.locator('text=Sign and go aboard').count():
@@ -189,6 +207,24 @@ def part_reload(b, on):
     A, R = json.loads(a), json.loads(r['end'])
     check(all(A[k] == R[k] for k in ('offer', 'said', 'settled')) and all(R['f'].get(k) == v for k, v in A['f'].items()) and r['day'] == 33 and r['said'] == 'go', f"reload: SHIP.end the same after a reload (the clock may add Friday's bookings) ({r})")
     check(r['script'] and r['btn'] and r['btn']['label'] == 'About the transfer', f"reload: the offer's scene and \"About the transfer\" still there ({r})")
+    print('(keep) the kept copy, the ended save, back to before your choice:')
+    st = lambda: pg.evaluate('() => Object.fromEntries(Object.keys(localStorage).map(k => [k, localStorage.getItem(k)]))')
+    S = st(); K = 'starship-cadet-save-before-end'; kc = S.get(K)
+    check(kc and json.loads(kc)['ship']['end']['said'] == [] and [k for k in S if 'before-end' in k] == [K], f"keep: made at the first Go, from just before it, under this slot's key only ({[k for k in S]})")
+    ev("""(() => { const p = __marrow(); for (const k of [0, 1]) { endChatDo(p, 'tell'); __lines(); dialogueChoose(k); __run(0); } saveGame(); })()""")
+    check(st().get(K) == kc, 'keep: a second Go leaves the copy as it was')
+    rows = ev("JSON.stringify(endKeptRows(1))")
+    check('Before the goodbye' in rows and 'endback' in rows, f"keep: the Saves app's row under the slot ({rows[:160]})")
+    ev("endTheEnd()")
+    pg.reload(timeout=120000); ready()
+    r = ev("""(() => { const el = document.getElementById('endPage'); return { shown: !!el && !el.hidden, btns: el ? [...el.querySelectorAll('button')].map(b => b.dataset.end) : [], focus: document.activeElement && document.activeElement.dataset.end, ended: !!SHIP.end.ended }; })()""")
+    print('    ended, reloaded:', r)
+    check(r['shown'] and r['btns'] == ['back', 'keep', 'new'] and r['focus'] == 'back' and r['ended'], f"keep: an ended save shows the end page again, its three buttons, the first focused ({r})")
+    with pg.expect_navigation(timeout=90000): pg.click('#endPage button[data-end="back"]')
+    ready()
+    r = ev("""(() => { const el = document.getElementById('endPage'); return { shown: !!el && !el.hidden, said: SHIP.end.said, ended: SHIP.end.ended || null, open: endOpen(), btn: !!endChatButton(__marrow()) }; })()""")
+    print('    back:', r)
+    check(not r['shown'] and r['said'] == [] and r['ended'] is None and r['open'] and r['btn'], f"keep: back to before your choice: the choice open, no page ({r})")
     check(not errs, f'reload: page errors {errs[:3]}')
     ctx.close()
 
@@ -210,13 +246,13 @@ with sync_playwright() as pw:
         g = Game(pw, str(on))
         g.step(2)
         check(g.ev(SETUP), 'setup (on)')
-        for name, fn in [('offer', part_offer), ('answers', part_answers), ('week', part_week)]:
+        for name, fn in [('offer', part_offer), ('answers', part_answers), ('week', part_week), ('endpage', part_endpage)]:
             if ONLY and name not in ONLY: continue
             try: fn(g)
             except Exception as e: fail(f'{name}: {e}')
         if g.errors: fail('page errors (on): ' + ' | '.join(g.errors[:5]))
         g.close()
-        if not ONLY or 'reload' in ONLY:
+        if not ONLY or 'reload' in ONLY or 'keep' in ONLY:
             sv = WORK / 'test' / ('ending_save_' + pathlib.Path(sys.argv[1]).name); sv.write_text(instrument(src.replace(SWITCH, "const EV_ENDING_ON = true;")))
             b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
             try: part_reload(b, sv)

@@ -13139,6 +13139,7 @@ function slotsAct(verb, arg) {
   else if (verb === 'download') slotDownload();
   else if (verb === 'copy') slotCopy();
   else if (verb === 'load') { SLOT_UI.msg = ''; slotPick(); }
+  else if (typeof endSlotsAct === 'function') endSlotsAct(verb, arg);   // 29b: back to before the goodbye (EN1)
   slotFresh();
 }
 function slotsView() {
@@ -13147,6 +13148,7 @@ function slotsView() {
     const me = x.n === SAVE_SLOT, line = me ? clockText() + ', ' + deckWord(player.deck) : x.line;
     const sub = me ? line + '. Playing now.' : x.ok ? line + '. Build ' + (x.build || '?') + (slotWhen(x.at) ? '. Last played ' + slotWhen(x.at) : '') + '.' : x.used ? 'A save this build can\'t read.' : 'Empty';
     B.push({ kind: 'list', rows: [{ text: 'Slot ' + x.n + (me ? ' (playing)' : ''), sub, mark: me ? 'new' : null }] });
+    if (typeof endKeptRows === 'function') B.push(...endKeptRows(x.n));   // 29b: its kept copy, "Before the goodbye" (the ending, EN1; none with EV_ENDING_ON off)
     if (me) continue;
     if (SLOT_UI.sure === x.n) B.push({ kind: 'text', text: 'Delete Slot ' + x.n + '? That game will be lost.', mark: 'urgent' },
       { kind: 'buttons', items: [{ label: 'Delete it', action: { app: 'saves', do: 'delgo', arg: x.n } }, { label: 'Keep it', action: { app: 'saves', do: 'keep' } }] });
@@ -65535,11 +65537,11 @@ function endClean(e) {                                   // a saved SHIP.end, ch
   const said = Array.isArray(o.said) ? o.said.filter(x => Array.isArray(x) && Number.isInteger(x[0]) && END_CHOICES.includes(x[1])).slice(-40).map(x => [x[0], x[1]]) : [];
   const settled = o.settled && Number.isInteger(o.settled.day) && (o.settled.choice === 'stay' || o.settled.choice === 'go') ? { day: o.settled.day, choice: o.settled.choice } : null;
   const f = {}; if (o.f && typeof o.f === 'object') for (const k of Object.keys(o.f).slice(0, 80)) if (typeof k === 'string' && k.length < 40 && (Number.isFinite(o.f[k]) || o.f[k] === true)) f[k] = o.f[k];
-  return { offer: off, said, settled, f };
+  return { offer: off, said, settled, f, ...(Number.isInteger(o.ended) ? { ended: o.ended } : {}) };
 }
 if (EV_ENDING_ON) {                                      // off: SHIP has no end, the save no ship.end
   SHIP.end = SAVED && SAVED.ship && SAVED.ship.end ? endClean(SAVED.ship.end) : null;
-  SAVE_EXTRA.push(s => { if (SHIP.end) s.ship.end = { offer: SHIP.end.offer, said: SHIP.end.said.slice(-40), settled: SHIP.end.settled, f: { ...SHIP.end.f } }; });
+  SAVE_EXTRA.push(s => { if (SHIP.end) s.ship.end = { offer: SHIP.end.offer, said: SHIP.end.said.slice(-40), settled: SHIP.end.settled, f: { ...SHIP.end.f }, ...(SHIP.end.ended ? { ended: SHIP.end.ended } : {}) }; });
   onSim('newGame', () => { SHIP.end = null; if (typeof crewSceneEnd === 'function') { crewSceneEnd('marrow'); crewSceneEnd('calder'); } });
 }
 const endState = () => SHIP.end || (SHIP.end = endClean(null));
@@ -65670,8 +65672,8 @@ const endingAsk = () => endOpen() && !endFirm() ? endAnswerShow('ask') : false; 
 function endSay(choice, t = Math.floor(shipNow())) {      // you told her: kept with the day; the first "Go" makes the kept copy (29b)
   const E = endState(); if (!END_CHOICES.includes(choice) || E.settled) return false;
   const firstGo = choice === 'go' && !E.said.some(x => x[1] === 'go');
+  if (firstGo && END_WAY_BACK && typeof endKeepCopy === 'function') try { endKeepCopy(); } catch (e) { /* 29b's */ }   // before it's said: the copy has the choice open
   E.said.push([endDayOf(t), choice]); if (E.said.length > 40) E.said.splice(0, E.said.length - 40);
-  if (firstGo && END_WAY_BACK && typeof endKeepCopy === 'function') try { endKeepCopy(); } catch (e) { /* 29b's */ }
   if (typeof simNote === 'function') simNote('endingSaid', { choice, day: endDayOf(t) });
   if (t >= endSettleAt() && (choice === 'stay' || choice === 'go')) endSettle(t);
   return true;
@@ -65856,6 +65858,93 @@ function endRecord() {
 // ---------------------------------------------------------------------
 
 // ---- slot: Ending goodbye (section 29b). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// E-3 (EN1). The kept copy: the moment you first tell the Captain "Go", this game as it stood just before is copied once to
+// its own key beside its slot (END_KEPT: SAVE_KEY + '-before-end'; Dev mode's SAVE_KEY has its '-dev', so Dev and Playtest
+// keep theirs apart), never into another slot and never with ?nosave. A new game in this slot clears it. "Back to before
+// my choice" (the end page) and the Saves app's "Before the goodbye" row (section 19's hooks endKeptRows / endSlotsAct)
+// put it back in the slot and reload: the choice open again. The end page (endPage): a full-screen panel over the deck,
+// the page's real focus (a screen reader reads it; the pad's panels package reaches its buttons); the save is marked
+// ended (SHIP.end.ended) when it opens, so loading it shows the page again. Its buttons: Back to before my choice (only
+// with END_WAY_BACK and a kept copy), Keep this ending, Start a new game (the Saves app's slots; without them, New game).
+const END_KEPT = SAVE_KEY + '-before-end';
+const endKeptKey = n => slotKey(n) + '-before-end';
+function endKeepCopy() {                                 // -> true when the copy was made now
+  if (!EV_ENDING_ON || !END_WAY_BACK || NOSAVE) return false;
+  try { if (localStorage.getItem(END_KEPT) !== null) return false; saveGame(); const t = localStorage.getItem(SAVE_KEY); if (!t) return false; localStorage.setItem(END_KEPT, t); return true; }
+  catch (e) { return false; }
+}
+function endKeptRead(key = END_KEPT) { let s = null; try { const t = slotRead(key); s = t ? JSON.parse(t) : null; } catch (e) { s = null; } return s && saveOk(s) ? s : null; }
+function endBack(n = SAVE_SLOT) {                         // the kept copy back into slot n, then played
+  const s = endKeptRead(endKeptKey(n)); if (!s || NOSAVE) return false;
+  if (typeof slotPut === 'function' && SAVE_SLOTS_ON) return slotPut(n, s);
+  SLOT_HOLD = true; try { localStorage.setItem(slotKey(n), JSON.stringify(s)); location.reload(); } catch (e) { SLOT_HOLD = false; return false; }
+  return true;
+}
+if (EV_ENDING_ON) onSim('newGame', () => { if (!NOSAVE) try { localStorage.removeItem(END_KEPT); } catch (e) { /* no storage */ } endPage(false); });
+function endKeptRows(n) {                                // the Saves app: under slot n, its kept copy (a used slot only)
+  if (!EV_ENDING_ON || !END_WAY_BACK || NOSAVE) return [];
+  const used = slotRead(slotKey(n)) !== null, s = used && endKeptRead(endKeptKey(n)); if (!s) return [];
+  return [{ kind: 'list', rows: [{ text: endText('end.saves.row', 'Before the goodbye'), sub: slotLine(s) + '. ' + endText('end.saves.sub', 'Kept when you first told the Captain you\'d go.') }] },
+    { kind: 'buttons', items: [{ label: endText('end.saves.btn', 'Go back to before the goodbye'), action: { app: 'saves', do: 'endback', arg: n } }] }];
+}
+function endSlotsAct(verb, arg) { if (verb === 'endback' && EV_ENDING_ON) { endBack(arg); return true; } return false; }
+// the end page's rows
+function endPageRows() {
+  const out = [], W = SHIP.works || {}, name = (SHIP.player && SHIP.player.name) || 'Cadet';
+  out.push(['', name + ', ' + ({ junior: 'Cadet', officer: 'Officer, Technician', senior: 'Senior Officer', specialist: 'Senior Officer, Engine Specialist' })[typeof playerRank === 'function' ? playerRank() : 'junior']]);
+  out.push([endText('end.page.days', 'Days aboard'), String(Math.max(0, SHIP.time.day))]);
+  const ms = Array.isArray(W.ms) ? W.ms : [], RK = { officer: 'Officer', senior: 'Senior Officer', specialist: 'Engine Specialist' };
+  out.push([endText('end.page.ranks', 'Your ranks'), ['Cadet, Day 0'].concat(ms.filter(x => RK[x[0]]).map(x => RK[x[0]] + ', Day ' + x[1])).join('; ')]);
+  const cm = (SHIP.commendations || []).map(c => ((typeof SHIP_EVENTS !== 'undefined' && SHIP_EVENTS[c.event]) || { title: c.event }).title + ', Day ' + c.day);
+  out.push([endText('end.page.comm', 'Commendations'), cm.length ? cm.join('; ') : endText('end.page.none', 'None, and nobody minded')]);
+  let fr = []; try { fr = Object.keys(SHIP.rel || {}).filter(id => typeof evPerson === 'function' && evPerson(id)).sort((a, b) => (SHIP.rel[b].pts || 0) - (SHIP.rel[a].pts || 0) || (a < b ? -1 : 1)).slice(0, 3).map(id => evPerson(id).name); } catch (e) { fr = []; }
+  if (fr.length) out.push([endText('end.page.friends', 'Your closest friends'), fr.join(', ')]);
+  const kept = (SHIP.traces || []).map(t => String(t).replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()); if (kept.length) out.push([endText('end.page.kept', 'What you kept'), kept.join(', ')]);
+  const c = endCareerEnd(); if (c && c.answer) out.push([endText('end.page.calder', 'What you told Calder you wanted'), String(c.answer)]);
+  out.push([endText('end.page.zeke', 'Zeke, at the ramp'), '"' + endText('end.zeke.last', 'Mind the step. Everyone trips on it, going either way.') + '"']);
+  return out;
+}
+const END_PAGE = { kept: false };
+function endPage(on) {
+  let el = document.getElementById('endPage');
+  if (!on) { if (el) el.hidden = true; return false; }
+  if (!el) {
+    const st = document.createElement('style');
+    st.textContent = '#endPage{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(4,10,14,.95);color:#e6f0f1;overflow:auto}'
+      + '#endPage[hidden]{display:none}#endPage .in{max-width:460px;width:100%}#endPage h2{margin:0 0 4px;font-weight:600;font-size:22px;text-align:center}#endPage .sub{margin:0 0 16px;text-align:center;color:#8fa6ab;font-size:13px}'
+      + '#endPage dl{margin:0 0 18px;font-size:13.5px;line-height:1.45}#endPage dt{color:#8fa6ab;font-size:12px;margin-top:8px}#endPage dd{margin:0}#endPage .who{font-size:15px;color:#bdeee6;text-align:center;margin-bottom:6px}'
+      + '#endPage .btns{display:flex;flex-direction:column;gap:8px}#endPage button{font:inherit;min-height:44px;padding:10px 18px;border-radius:10px;border:1px solid #6fa8b0;background:#16323a;color:#e6f0f1}#endPage .note{text-align:center;color:#a9bcc0;font-size:12.5px;margin:10px 0 0}';
+    document.head.appendChild(st);
+    el = document.createElement('div'); el.id = 'endPage'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-labelledby', 'endPageH');
+    el.addEventListener('pointerdown', e => e.stopPropagation());
+    document.body.appendChild(el);
+  }
+  const rows = endPageRows(), back = END_WAY_BACK && !NOSAVE && !!endKeptRead() && !END_PAGE.kept;
+  el.innerHTML = '<div class="in"><h2 id="endPageH"></h2><p class="sub"></p><div class="who"></div><dl></dl><div class="btns"></div><p class="note"></p></div>';
+  el.querySelector('h2').textContent = endText('end.page.title', 'The Tern pulls away from the Wren');
+  el.querySelector('.sub').textContent = endText('end.page.sub', 'Concord headquarters, and whatever comes next.');
+  el.querySelector('.who').textContent = rows[0][1];
+  const dl = el.querySelector('dl');
+  for (const [k, v] of rows.slice(1)) { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = k; dd.textContent = v; dl.appendChild(dt); dl.appendChild(dd); }
+  const btns = el.querySelector('.btns'), add = (id, label, fn) => { const b = document.createElement('button'); b.type = 'button'; b.dataset.end = id; b.textContent = label; b.onclick = fn; btns.appendChild(b); return b; };
+  if (back) add('back', endText('end.page.back', 'Back to before my choice'), () => endBack());
+  if (!END_PAGE.kept) add('keep', endText('end.page.keep', 'Keep this ending'), () => { END_PAGE.kept = true; endPage(true); });
+  add('new', endText('end.page.new', 'Start a new game'), () => {
+    endPage(false);
+    if (SAVE_SLOTS_ON && !NOSAVE && typeof deviceDo === 'function' && typeof DEVICE_APPS !== 'undefined' && DEVICE_APPS.has('saves')) { try { deviceDo({ app: 'saves' }); } catch (e) { /* below */ } return; }
+    if (typeof newGameStart === 'function') newGameStart(!NOSAVE && typeof introArrived === 'function');
+  });
+  el.querySelector('.note').textContent = END_PAGE.kept ? endText('end.page.kept.note', 'This ending is kept. Opening this game shows this page again.') : '';
+  el.hidden = false;
+  try { (btns.querySelector('button') || el).focus(); } catch (e) { /* no focus */ }
+  return true;
+}
+function endTheEnd() {                                   // after the Tern: the save marked ended, then the page
+  const E = endState(); if (E.ended) return endPage(true);
+  E.ended = Math.floor(shipNow()); if (typeof simNote === 'function') simNote('endingEnd', { day: endDayOf(E.ended) });
+  saveGame(); return endPage(true);
+}
+if (EV_ENDING_ON && SHIP.end && SHIP.end.ended) endPage(true);   // a save that ended: the page again
 // ---- end of slot: Ending goodbye ----
 
 // ---------------------------------------------------------------------
