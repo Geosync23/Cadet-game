@@ -89,7 +89,7 @@ No slot for the crew designer (section 9's roster is generated). A new feature (
 | Taps, toasts, the lift, the clock on screen | `11` | `tap`, `toast`, `goToDeck`, `updateClock` |
 | The main loop: rides, doors, spins, cutaway, fades | `12` | |
 | Dev mode: the hidden testing panel (`#dev`), its save, Undo, Mark, the Dev clock, Take me to | `25` | `DEVMODE` (13), `devmodeHold`, `devmodeRun`, `devmodeSkipTo`, `devmodeMove` |
-| The ending: the offer, your answer, the goodbye, the end page, the kept copy, the endgame (`EV_ENDING_ON`) | `29` (29a-29c) | `SHIP.end`; the crossing back itself is section 18's |
+| The ending: the offer, your answer, the goodbye, the end page, the endgame (`EV_ENDING_ON`) | `29` (29a-29c) | `SHIP.end`; the crossing back itself is section 18's |
 
 ## Outside the game file
 

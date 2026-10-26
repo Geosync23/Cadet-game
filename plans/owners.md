@@ -68,7 +68,7 @@ Section ids are the file's own headings (`// 19. DEVICE`, `// 24a ROUNDS`). Line
 | `26` | Controller: game controller support (`PAD`, `PAD_ON`, `padOn`, `padTick`); plans/controller-plan.html | (new, after 25) | controller engineer CT1 | Controller engineer |
 | `29` | the ending (`EV_ENDING_ON`; plans/ending-spec.html on claude/p5-specs): `SHIP.end`, shared helpers | (new, after 27, before 12) | ending engineer EN1 | Ending engineer |
 | `29a` | the offer and your answer (E-2): the ready room, Calder's walk, "About the transfer", the answer, the 19:30 search | (new, after 29) | ending engineer EN1 | Ending engineer |
-| `29b` | the goodbye and the end page (E-3): the crowd, the farewells, the end page, the kept copy (`SAVE_KEY + '-before-end'`; FX27's saves owner reviews), the ended save | (new, after 29a) | ending engineer EN1 | Ending engineer (the HUD seat reviews the page) |
+| `29b` | the goodbye and the end page (E-3): the crowd, the farewells, the end page, the ended save (no kept copy: the user, 2026-10-26, no way back; that code parked off) | (new, after 29a) | ending engineer EN1 | Ending engineer (the HUD seat reviews the page) |
 | `29c` | the endgame (E-4): the `end.stay` flag, "What's next", the calendar closed | (new, after 29b) | dialogue engineer (the gate), Works career engineer | Ending engineer |
 | `12` | the main loop | 49707-49830 | deck architects | HUD seat |
 

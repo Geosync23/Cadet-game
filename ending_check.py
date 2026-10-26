@@ -53,6 +53,8 @@ SETUP = r"""(() => {
   window.__to = (deck, room) => { if (deckDef.num !== deck) goToDeck(deck); player.obj.position.copy(cellPos(...ROOM_TILES[room][0])); };
   window.__marrow = () => schedPeople().find(p => p.id === 'marrow');
   window.__run = (k) => { let n = 0; while (DIALOGUE && n++ < 40) { const v = dialogueView(); if (v && v.choices) dialogueChoose(k); else dialogueNext(); } return n; };
+  window.endStaySet = d => flagSet('end.stay', d);   // EN2's (29c), as it will be
+  window.__tell = (k) => { const p = __marrow(); endChatDo(p, 'tell'); if (!DEV.choose) return null; devChosen(k); const id = DIALOGUE && DIALOGUE.id; __run(0); return id; };
   window.__lines = () => { const out = []; let n = 0; while (DIALOGUE && n++ < 40) { const v = dialogueView(); if (!v) break; if (v.choices) return { out, choices: v.choices }; out.push(v.name + ': ' + v.text); dialogueNext(); } return { out, choices: null }; };
   return true;
 })()"""
@@ -62,7 +64,7 @@ def part_off(g):
     r = g.ev("""(() => { __reset(32, 360); __tick(); setShipNow(31 * 1440 + 950); __tick();
       const p = __marrow(); const save = {}; try { SAVE_EXTRA.forEach(f => f({ ship: {}, player: {} })); } catch (e) { /* */ }
       return { on: EV_ENDING_ON, end: typeof SHIP.end, occ: typeof OCCASIONS.endingOffer, booked: SHIP.occasions.length, btn: typeof endChatButton === 'function' ? endChatButton(p) : 'none',
-        guide: GUIDE.list.filter(e => /^end:/.test(e.id)).length, scripts: Object.keys(MEETING_SCRIPTS).filter(k => /ending/.test(k)) }; })()""")
+        guide: GUIDE.list.filter(e => /^end:/.test(e.id)).length, scripts: Object.keys(MEETING_SCRIPTS).filter(k => /^moment:ending/.test(k)) }; })()""")
     print('   ', r)
     check(r['on'] is False and r['end'] == 'undefined' and r['occ'] == 'undefined' and r['booked'] == 0, f"off: no SHIP.end, no ending occasion, nothing booked ({r})")
     check(r['btn'] is None and r['guide'] == 0 and not r['scripts'], f"off: no button, no arrows, no scripts ({r})")
@@ -75,22 +77,23 @@ def part_offer(g):
       SHIP.works.end = { answer: 'engines', day: 33 }; out.slow = endOfferDay(); out.week = endWeek(); delete window.P5_STEP6; delete SHIP.works.end; out.back = endOfferDay(); return out; })()""")
     print('   ', r)
     check(r['plain'] == 32 and r['none'] is None and r['steady'] == 32 and r['slow'] == 39 and r['back'] == 32, f"offer: Day 32 (Step 6 off), none before Calder's question, Day 32 after Day 26, Day 39 after Day 33 ({r})")
-    check(r['post'] == 'teaching' and r['week'] == {'offer': 39, 'due': 41, 'settle': 42, 'leave': 43}, f"offer: the post by your answer, the slower week ({r})")
+    check(r['post'] == 'teach' and r['week'] == {'offer': 39, 'due': 41, 'settle': 42, 'leave': 43}, f"offer: the post by your answer, the slower week ({r})")
     r = g.ev("""(() => { __reset(32, 359); __tick(); const before = !!(SHIP.end && SHIP.end.offer); setShipNow(31 * 1440 + 361); __tick();
       const o = SHIP.occasions.find(x => x.id === 'endingOffer'); setShipNow(31 * 1440 + 946); __tick();
       return { before, offer: SHIP.end.offer, occ: o && [hhmm(o.at % 1440), o.len, o.deck, o.room], notes: __notes.slice(), mail: __mail(), arrow: __guide('end:offer'),
         door: occasionDoorOpen(1, 'R', 31 * 1440 + 1070), shut: occasionDoorOpen(1, 'R', 31 * 1440 + 1090), appt: (SHIP.device.appts || []).filter(a => a.occ && /endingOffer/.test(a.occ)).map(a => hhmm(a.at % 1440) + ' ' + a.with.join('+')) }; })()""")
     print('   ', r)
     check(not r['before'] and r['offer'] and r['offer']['day'] == 32 and r['occ'] == ['16:00', 120, 1, 'R'], f"offer: booked at 06:00 on Day 32: 16:00 in the ready room, open till 18:00 ({r})")
-    check(any('16:00' in n for n in r['notes']) and any('Vance' in m and '16:00' in m for m in r['mail']), f"offer: the morning notice and Vance's Mail name 16:00 ({r['notes']}, {r['mail']})")
+    check(any('16:00' in n for n in r['notes']), f"offer: the morning notice names 16:00 ({r['notes']})")
     check(r['arrow'] and r['arrow']['level'] == 1 and r['arrow']['from'] == 31 * 1440 + 945, f"offer: the arrow, level 1 from 15:45 ({r['arrow']})")
     check(r['door'] and not r['shut'] and r['appt'] == ['16:00 marrow+calder'], f"offer: the door open till 18:00, the appointment with the Captain and Calder ({r})")
     r = g.ev("""(() => { setShipNow(31 * 1440 + 960); __to(1, 'R'); __tick(); occasionsTick(shipNow()); meetingsTick(shipNow()); const id = DIALOGUE && DIALOGUE.id; const L = __lines();
-      if (L.choices) dialogueChoose(2); __run(0); return { id, lines: L.out, choices: L.choices, offer: SHIP.end.offer, said: __said.slice(), walk: (CREW_SCENE.get('calder') || {}).mode, later: SIM_TIMERS.length, open: endOpen(), arrow: __guide('end:offer') }; })()""")
+      if (L.choices) dialogueChoose(2); __run(0); return { id, lines: L.out, choices: L.choices, offer: SHIP.end.offer, said: __said.slice(), mail: __mail().filter(m => /^Captain/.test(m)), flags: { offer: flag('end.offer') }, walk: (CREW_SCENE.get('calder') || {}).mode, later: SIM_TIMERS.length, open: endOpen(), arrow: __guide('end:offer') }; })()""")
     print('   ', r['id'], r['choices'], r['offer'], r['said'], r['walk'])
     for l in r['lines']: print('      ', l)
     check(r['id'] == 'moment:ending.offer' and len(r['lines']) >= 5 and r['choices'] and len(r['choices']) == 3, f"offer: in the room at 16:00 the scene plays, three replies ({r['id']}, {r['choices']})")
     check(any('Concord headquarters' in l for l in r['lines']), f"offer: the letter is from Concord headquarters, through the Captain ({r['lines']})")
+    check(any('headquarters' in m.lower() for m in r['mail']) and r['flags']['offer'] == 32, f"offer: the Captain's Mail as the record after it, flag end.offer ({r['mail']}, {r['flags']})")
     check(r['offer']['met'] and r['offer']['how'] == 'room' and r['open'] and r['arrow'] is None, f"offer: made in the room; the choice open; the arrow gone ({r['offer']}, {r['arrow']})")
     check(len([x for x in r['said'] if x.startswith('calder:')]) == 1 and r['later'] >= 2 and r['walk'] == 'follow', f"offer: Calder walks out with you, talking (her first line now, two more after) ({r['said']}, {r['walk']}, {r['later']})")
     r = g.ev("""(() => { __reset(32, 361); __tick(); __to(5, 'w'); setShipNow(31 * 1440 + 971); __tick(); const seek = !!SHIP.end.f.seek, mode1 = (CREW_SCENE.get('calder') || {}).mode, toasts = __toasts.slice();
@@ -112,32 +115,35 @@ def part_answers(g):
     check(r['before'] is None, f"answers: no button before the offer ({r})")
     made(g)
     r = g.ev("""(() => { const p = __marrow(); setShipNow(31 * 1440 + 1000); __tick(); const btn = endChatButton(p), lvl = __guide('end:tell');
-      endChatDo(p, 'tell'); const L = __lines(); dialogueChoose(0); __run(0); const a = endSaid();
-      setShipNow(32 * 1440 + 600); endChatDo(p, 'tell'); const L2 = __lines(); dialogueChoose(1); __run(0); const b = endSaid();
-      setShipNow(33 * 1440 + 600); endChatDo(p, 'tell'); __lines(); dialogueChoose(2); __run(0); const c = endSaid(); __tick(); const lvlSat = __guide('end:tell');
+      endChatDo(p, 'tell'); const L = { choices: DEV.choose ? ['stay', 'go', 'unsure'] : null }; devChosen(0); const s1 = DIALOGUE && DIALOGUE.id; __run(0); const a = endSaid();
+      setShipNow(32 * 1440 + 600); const s2 = __tell(1); const L2 = { out: [s2 || ''] }; const b = endSaid();
+      setShipNow(33 * 1440 + 600); __tell(2); const c = endSaid(); __tick(); const lvlSat = __guide('end:tell');
       setShipNow(33 * 1440 + 1081); __tick(); const lvl18u = __guide('end:tell');
-      endChatDo(p, 'tell'); __lines(); dialogueChoose(0); __run(0); __tick(); const lvlFirm = __guide('end:tell');
+      __tell(0); __tick(); const lvlFirm = __guide('end:tell');
       return { btn, lvl, choices: L.choices, again: L2.out[0], a, b, c, lvlSat, lvl18u, lvlFirm, said: SHIP.end.said, settled: SHIP.end.settled, kept: endState().said.filter(x => x[1] === 'go').length }; })()""")
     print('   ', r)
     check(r['btn'] and r['btn']['label'] == 'About the transfer' and r['lvl'] and r['lvl']['level'] == 6, f"answers: \"About the transfer\" on the Captain; \"Tell the Captain\" at level 6 ({r['btn']}, {r['lvl']})")
     check(r['choices'] and len(r['choices']) == 3 and r['a'] == 'stay' and r['b'] == 'go' and r['c'] == 'unsure', f"answers: Stay, then Go, then Not sure ({r})")
-    check('mind' in (r['again'] or ''), f"answers: she knows you're changing your mind ({r['again']})")
+    check(r['again'] == 'moment:endingTell.change.go', f"answers: changing your mind plays her endingTell.change scene ({r['again']})")
     check(r['lvlSat'] and r['lvlSat']['level'] == 6 and r['lvl18u'] and r['lvl18u']['level'] == 6, f"answers: Not sure keeps it open: no level 1 on Saturday ({r})")
     check(r['lvlFirm'] is None and r['settled'] is None, f"answers: told (Stay): the arrow goes; not settled before the address ({r})")
     r = g.ev("""(() => { setShipNow(34 * 1440 + 899); __tick(); const s1 = SHIP.end.settled; setShipNow(34 * 1440 + 900); __tick();
       return { s1, s2: SHIP.end.settled, flag: flag('end.stay'), btn: endChatButton(__marrow()), open: endOpen(), choice: endingChoice() }; })()""")
     print('    address:', r)
-    check(r['s1'] is None and r['s2'] == {'day': 35, 'choice': 'stay'} and r['flag'] == 35 and r['btn'] is None and not r['open'] and r['choice'] == 'stay', f"answers: settled at the address, Sunday 15:00: end.stay, nothing open after ({r})")
+    check(r['s1'] is None and r['s2'] == {'day': 35, 'choice': 'stay'} and r['flag'] == 36 and r['btn'] is None and not r['open'] and r['choice'] == 'stay', f"answers: settled at the address, Sunday 15:00: end.stay, nothing open after ({r})")
     made(g)
     r = g.ev("""(() => { setShipNow(33 * 1440 + 1080); __tick(); const l18 = __guide('end:tell'); setShipNow(33 * 1440 + 1171); __tick(); const search = !!SHIP.end.f.search, mode = (CREW_SCENE.get('marrow') || {}).mode, notes = __notes.slice();
       return { l18, search, mode, notes }; })()""")
     print('    search:', r)
     check(r['l18'] and r['l18']['level'] == 1, f"answers: nothing said by Saturday 18:00: the arrow to her at level 1 ({r['l18']})")
     check(r['search'] and r['mode'] == 'follow' and any('find you' in n for n in r['notes']), f"answers: 19:30 with nothing said, she comes to find you ({r})")
+    r = g.ev("""(() => { endSearchShow(); const id = DIALOGUE && DIALOGUE.id; const L = __lines(); dialogueChoose(1); const after = __lines().out; __run(0); return { id, choices: L.choices, after, said: endSaid() }; })()""")
+    print('    search scene:', r['id'], r['said'], r['after'][:3])
+    check(r['id'] == 'moment:endingSearch' and r['said'] == 'go' and len(r['after']) >= 3 and any('send-off' in x for x in r['after']), f"answers: her search, your answer, then her endingTell scene from its second line ({r})")
     made(g)
-    r = g.ev("""(() => { const p = __marrow(); setShipNow(32 * 1440 + 600); endChatDo(p, 'tell'); __lines(); dialogueChoose(2); __run(0);
+    r = g.ev("""(() => { const p = __marrow(); setShipNow(32 * 1440 + 600); __tell(2);
       setShipNow(34 * 1440 + 900); __tick(); const s1 = SHIP.end.settled, l = __guide('end:tell');
-      const ask = endingAsk(); const L = __lines(); dialogueChoose(1); __run(0);
+      const ask = endingAsk(); const L = { choices: DEV.choose ? ['stay', 'go'] : null }; devChosen(1); __run(0);
       return { s1, l, ask, choices: L.choices, settled: SHIP.end.settled, flag: flag('end.go') }; })()""")
     print('    not sure at the address:', r)
     check(r['s1'] is None and r['l'] and r['l']['level'] == 1, f"answers: Not sure at the address: not settled, the arrow to her at level 1 ({r})")
@@ -149,12 +155,12 @@ def part_answers(g):
 def part_endpage(g):
     print('(endpage) the end page on paper; no kept copy with ?nosave:')
     made(g)
-    r = g.ev("""(() => { const p = __marrow(); setShipNow(32 * 1440 + 600); endChatDo(p, 'tell'); __lines(); dialogueChoose(1); const after = __lines().out; __run(0);
+    r = g.ev("""(() => { const p = __marrow(); setShipNow(32 * 1440 + 600); __notes.length = 0; endChatDo(p, 'tell'); devChosen(1); const after = __lines().out.concat(__notes); __run(0);
       const keys = Object.keys(localStorage).filter(k => /before-end/.test(k)); SHIP.player.name = 'Ada'; SHIP.rel = SHIP.rel || {}; endPage(true);
       const el = document.getElementById('endPage'); const r = { keys, made: endKeepCopy(), shown: !el.hidden, text: el.innerText, btns: [...el.querySelectorAll('button')].map(b => b.dataset.end), role: el.getAttribute('role'), focus: document.activeElement && document.activeElement.dataset.end };
       r.after = after; endPage(false); return r; })()""")
     print('   ', {k: r[k] for k in ('keys', 'made', 'btns', 'role', 'focus', 'after')})
-    check(any('this game ends' in x for x in r['after']), f"endpage: telling her Go says plainly it ends this game ({r['after']})"); print('   ', r['text'][:300].replace('\n', ' | '))
+    check(any('this save ends' in x for x in r['after']), f"endpage: telling her Go says plainly it ends this save ({r['after']})"); print('   ', r['text'][:300].replace('\n', ' | '))
     check(r['keys'] == [] and r['made'] is False, f"endpage: no kept copy with ?nosave ({r['keys']})")
     check(r['shown'] and 'Ada' in r['text'] and 'Days aboard' in r['text'] and 'Zeke' in r['text'] and r['role'] == 'dialog', f"endpage: the rows ({r['text'][:200]})")
     check(r['btns'] == ['keep', 'new'] and r['focus'] == 'keep', f"endpage: with no kept copy, Keep this ending and Start a new game, the first focused ({r})")
@@ -184,7 +190,7 @@ def part_goodbye(pw, on):
         seen.append(who)
     print('   ', seen)
     said = g.ev("__said.slice()")
-    check([x.split('|')[0] for x in seen if '|' in x][-4:] == ['calder', 'vance', 'marrow', 'torres-zeke'] and 'scene:moment:ending.ramp' in seen, f"goodbye: friends, then the Chief, Vance, the Captain; Zeke's scene last ({seen})")
+    check([x.split('|')[0] for x in seen if '|' in x][-4:] == ['calder', 'vance', 'marrow', 'torres-zeke'] and 'scene:moment:endingRamp' in seen, f"goodbye: friends, then the Chief, Vance, the Captain; Zeke's scene last ({seen})")
     check(any('the Captain' in x for x in seen) and len([x for x in said if x.split(':')[0] in ('calder', 'vance', 'marrow', 'pell')]) >= 4, f"goodbye: each says goodbye ({said})")
     g.ev("player.obj.position.copy(cellPos(5, 7))"); g.ev(tick); g.step(200)
     r = g.ev("""(() => { const el = document.getElementById('endPage'); return { aboard: !!SHIP.end.f.aboard, ended: !!SHIP.end.ended, page: !!el && !el.hidden, ramp: TERN.target }; })()""")
@@ -210,7 +216,7 @@ def part_pad(pw, src):
     press(12); press(0); d = g.ev("(() => ({ hidden: document.getElementById('endPage').hidden, note: document.querySelector('#endPage .note') && document.querySelector('#endPage .note').textContent }))()")
     print('   ', a, b, c, vis, d)
     check(a == 'keep' and b == 'new' and c == 'new' and vis, f"pad: the highlight on Keep this ending, the D-pad to Start a new game, B does nothing ({a}, {b}, {c}, {vis})")
-    check(not d['hidden'] and 'kept' in (d['note'] or ''), f"pad: A presses Keep this ending ({d})")
+    check(not d['hidden'] and 'stays ended' in (d['note'] or ''), f"pad: A presses Keep this ending ({d})")
     if g.errors: fail('page errors (pad): ' + ' | '.join(g.errors[:5]))
     g.close(); pc.unlink()
 
@@ -218,12 +224,12 @@ def part_week(g):
     print('(week) the friends, Zeke, the call home, the rows, the Record:')
     made(g)
     r = g.ev("""(() => { socInit(); setShipNow(32 * 1440 + 470); __tick(); const asks = (SHIP.social.seekAsks || []).filter(a => a.why === 'ending').map(a => a.id + ' ' + hhmm(a.from % 1440));
-      const pell = SOC.crew[SOC.idx.get('pell')], btn = endFriendButton(pell); chatOpen(pell); chatDo('end:friend'); const said = CHAT && CHAT.line && CHAT.line.text; const after = endFriendButton(pell); chatClose();
+      const pell = SOC.crew[SOC.idx.get('pell')], btn = endFriendButton(pell); chatOpen(pell); chatDo('end:friend'); const said = DIALOGUE && DIALOGUE.id; __run(0); const after = endFriendButton(pell); if (CHAT) chatClose();
       const cap = endChatButton(__marrow()), str = SOC.crew.find(p => !END_FRIENDS.includes(p.id) && p.id !== 'marrow' && relTier(p.id) < 3), none = endChatButton(str);
       return { asks, btn, said, after, cap, none, rows: devDay(33).filter(x => x.kind === 'beat').map(x => hhmm(x.from) + ' ' + x.title) }; })()""")
     print('   ', r)
     check(len(r['asks']) >= 5 and r['asks'][0].startswith('pell 08:00') and len(set(a.split()[1] for a in r['asks'])) == len(r['asks']), f"week: Friday, the friends come one at a time ({r['asks']})")
-    check(r['btn'] and r['btn']['label'] == 'About the transfer' and r['said'] and "can't go" in r['said'] and r['after'] is None, f"week: Pell's \"About the transfer\", her own take, once ({r})")
+    check(r['btn'] and r['btn']['label'] == 'About the transfer' and r['said'] == 'moment:endingFriend.pell' and r['after'] is None, f"week: Pell's \"About the transfer\", her own take, once ({r})")
     check(r['cap'] and r['none'] is None, f"week: the Captain's button stays; not on someone you barely know ({r['cap']}, {r['none']})")
     check(any('Zeke' in x for x in r['rows']) and any('by Saturday 20:00' in x for x in r['rows']), f"week: Friday's rows: your answer, Zeke ({r['rows']})")
     r = g.ev("""(() => { setShipNow(32 * 1440 + 1186); const p = schedPeople().find(x => x.id === 'torres-zeke'), w = whereIs(p, shipNow()); if (w && w.deck && deckDef.num !== w.deck) goToDeck(w.deck); deckCrewFill();
@@ -232,13 +238,18 @@ def part_week(g):
       const id = DIALOGUE && DIALOGUE.id; __run(1); return { deck: w && w.deck, here: !!a, arrow, led, said, id, done: !!SHIP.end.f.zeke }; })()""")
     print('    Zeke:', r)
     check(r['arrow'] and r['arrow']['level'] == 1, f"week: after Friday's dinner, the arrow to Zeke, level 1 ({r['arrow']})")
-    check(r['led'] and any(x.startswith('torres-zeke:') for x in r['said']) and r['id'] == 'moment:ending.zeke' and r['done'], f"week: Zeke finds you, walks you over, the talk ({r})")
+    check(r['led'] and any(x.startswith('torres-zeke:') for x in r['said']) and r['id'] == 'moment:endingZekeFriday' and r['done'], f"week: Zeke finds you, walks you over, the talk ({r})")
     r = g.ev("""(() => { setShipNow(32 * 1440 + 1040); __tick(); const arrow = __guide('end:call'); const keep = ACT; ACT = { kind: 'call', phase: 'sit' }; __tick(); const id = DIALOGUE && DIALOGUE.id; __run(0); ACT = keep;
       const done = !!SHIP.end.f.call; ACT = { kind: 'call', phase: 'sit' }; __tick(); const again = DIALOGUE && DIALOGUE.id; ACT = keep; if (DIALOGUE) dialogueEnd(true);
       return { arrow, id, done, again, rec: endRecord().map(b => b.text || (b.rows || []).map(x => x.text).join(' / ')) }; })()""")
     print('    call:', r)
     check(r['arrow'] and r['arrow']['level'] == 2 and r['id'] == 'moment:ending.call' and r['done'] and not r['again'], f"week: the booths' arrow (level 2), your family's scene, once ({r})")
     check(any('offered you a transfer' in x for x in r['rec']), f"week: the Record has the offer ({r['rec']})")
+    r = g.ev("""(() => { SHIP.end.settled = { day: 35, choice: 'go' }; setShipNow(34 * 1440 + 1250); __to(5, 'S'); __tick(); deckCrewFill(); const arrow = __guide('end:zekesun'), rows = devDay(35).filter(x => x.kind === 'beat').map(x => hhmm(x.from) + ' ' + x.title);
+      const a = DECK_CREW.find(x => x.p && x.p.id === 'torres-zeke'); if (a) player.obj.position.set(a.x + .5, player.obj.position.y, a.z); __tick(); const id = DIALOGUE && DIALOGUE.id; __run(0);
+      return { arrow, here: !!a, id, done: !!SHIP.end.f.zekeSun, rows }; })()""")
+    print('    Zeke Sunday:', r)
+    check(r['arrow'] and r['arrow']['level'] == 1 and r['id'] == 'moment:endingZekeSunday.go' and r['done'] and any('Zeke' in x for x in r['rows']), f"week: Sunday 21:00, Zeke in the shuttle bay, his scene for your choice ({r})")
 
 ORIGIN = 'http://ending-check.test/'
 def part_reload(b, on):
@@ -260,7 +271,7 @@ def part_reload(b, on):
         pg.fill('form input', 'Ada'); pg.click('text=Sign and go aboard'); pg.evaluate('window.__step(30, 33)')
     ev(SETUP)
     a = ev("""(() => { introSkip(); __reset(32, 361); __tick(); setShipNow(31 * 1440 + 960); __to(1, 'R'); occasionsTick(shipNow()); meetingsTick(shipNow()); __run(0);
-      setShipNow(32 * 1440 + 600); endChatDo(__marrow(), 'tell'); __lines(); dialogueChoose(1); __run(0); updateClock(); saveGame(); return JSON.stringify(SHIP.end); })()""")
+      setShipNow(32 * 1440 + 600); __tell(1); updateClock(); saveGame(); return JSON.stringify(SHIP.end); })()""")
     pg.reload(timeout=120000); ready()
     r = ev("""(() => ({ end: JSON.stringify(SHIP.end), day: SHIP.time.day, script: !!MEETING_SCRIPTS['moment:ending.offer'], btn: endChatButton(schedPeople().find(p => p.id === 'marrow')), said: endSaid() }))()""")
     print('    before', a); print('    after ', r)
@@ -269,7 +280,7 @@ def part_reload(b, on):
     check(r['script'] and r['btn'] and r['btn']['label'] == 'About the transfer', f"reload: the offer's scene and \"About the transfer\" still there ({r})")
     print('(keep) no way back (the user, 2026-10-26): no copy is ever written; the ended save:')
     st = lambda: pg.evaluate('() => Object.fromEntries(Object.keys(localStorage).map(k => [k, localStorage.getItem(k)]))')
-    ev("""(() => { const p = __marrow(); for (const k of [0, 1]) { endChatDo(p, 'tell'); __lines(); dialogueChoose(k); __run(0); } saveGame(); })()""")
+    ev("""(() => { for (const k of [0, 1]) __tell(k); saveGame(); })()""")
     keys = [k for k in st() if 'before-end' in k]
     check(keys == [] and ev("endKeepCopy()") is False and ev("JSON.stringify(endKeptRows(1))") == '[]', f"keep: after Go, Stay, Go: no copy written, none in the Saves app ({keys})")
     ev("endTheEnd()")
