@@ -1,5 +1,13 @@
 # CR6 check results
 
+## Side job for lead 37 (2026-10-26): fridays_check on claude/event-swap 56fa0ca5 (game sha 9387754f...222a)
+
+- OFF (file as is): exit 1 (1617 s), `FRIDAYS CHECK FAILED (1)`: "on: lines that never fill", the 7 Friday lines tagged `swap`.
+- ON (copy, line 9395 `const EV_SWAP_ON = true;`; the check takes no URL flag): exit 1 (1618 s), `FRIDAYS CHECK FAILED (1)`:
+  the same check, the 11 lines tagged `!swap`.
+- Everything else passes in both. The check's never-fill filter (~line 289) excuses the storm's other side but not the
+  swap's; it needs a `swap` / `!swap` excuse. Reported to lead 37, FX22b and RV18.
+
 ## 0.93.1 full round (2026-10-26): all 11 OK, plus CR3's 3 (OK after RV16's check fix)
 
 - **Build:** `claude/staging-0.93.1` 0a2fc617 (RV16's promo-arrow fix; the Tier 2 test arrow names the job only once
