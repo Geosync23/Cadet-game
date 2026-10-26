@@ -1,10 +1,10 @@
 # Handover: check runner CR2
 
 **Role:** CR2, one of six check runners in the full round (plans/testing-guide.md). Never changes the game or the
-checks; pushes only results notes to `claude/checks-cr2`. Reports to the lead (now lead 35,
-session_01VQkkt8RXcvvGs1Dmzn2emM) and the build master (now BM16, session_01MB7n4yvCAeGyWN4WZCAGPh).
+checks; pushes only results notes to `claude/checks-cr2`. Reports to the lead (now lead 39,
+session_019V68fz33UFv4cK5Z4iCDvi) and the build master (now BM18, session_01A3S2VBMYmTt2wCZa8ej7XR).
 
-**Results so far:** `plans/checks-cr2.md` on `claude/checks-cr2` (rounds 1-12 and 0.92.4, each with the commit,
+**Results so far:** `plans/checks-cr2.md` on `claude/checks-cr2` (rounds 1-12, 0.92.4 to 0.93.2, each with the commit,
 sha256, a Check | Result | Key lines table, and any FAIL's proof).
 
 ## The share
