@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.1
+   STARSHIP CADET: CSV Wren                           build 0.93.2-f.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9257,7 +9257,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.1';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.2-f.1';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -62530,7 +62530,7 @@ const SND = (() => {
     const verbOut = c.createGain(); verbOut.gain.value = 0.9; verb.connect(verbOut); verbOut.connect(master);
     const g = {};
     // fixed trims set by measuring each layer against the hum (plans/sound, the mockups' __measure)
-    const TRIM = { hum: 0.4, steps: 1.0, ui: 1, music: 1 };   // music: the music module applies its own level
+    const TRIM = { hum: 0.4, steps: 0.5, ui: 1, music: 1 };   // music: the music module applies its own level; steps 0.5: the player's footsteps half as loud (the user, 2026-10-26)
     for (const k of ['hum', 'steps', 'ui', 'music']) { g[k] = c.createGain(); const tr = c.createGain(); tr.gain.value = TRIM[k]; g[k].connect(tr); tr.connect(master); }
     return { buf, comp, master, verb, ...g };
   }
