@@ -934,6 +934,14 @@ turn-in and its Training tab when your reputation reaches a new word (once each,
 `guideGoal` passes over an entry with nothing to show now (T3 while you hold another job) to the next live one; T3
 gives way to clock-out at the shift's end. Test: `python3 arrows_d_check.py BUILD.html` (about 1 minute).
 
+## The promotion's beats (24p's slot, FX28, 2026-10-26; switch `PROMO_BEATS_ON`, needs `PROMO_SIGHT_ON`)
+- **What:** the user's playtest notes: the Tier 2 test and promotion must be very hard to miss. Design in design-doc.md, "The promotion's beats". Off: 0.93.1 exactly (cadet_test identical either way at the start).
+- **Times:** `PB_TIMES` (summons 08:15, warn 08:00, seek 08:30, latest 09:15, gather 08:40-08:55, move nominal 19:00, walk by 20:00, wake Mail 06:00). `promoBeatsApply()` (each ship minute and at load) swaps PROMO's summons times and `OCCASIONS.promoSummons` (at, script `promo.result`, title) and puts them back when the switch goes off, so a check can flip it at run time. `promoCerTimes(d)` is the ceremony's at/seek/late/by/mail for day d (PROMO's when off; 16:30, or 17:15 on a Friday, booked at once, when on); `promoCerDay`, `promoPlan` and `promoCakeWin(od)` follow it. `promoBK(key)` swaps the old words' keys for the new times (`PB_KEYS`).
+- **Hooks in others' sections (small, owner review):** section 19 `pointLimit`/`pointAsk` take `force` (a career beat's pointer, whatever Teaching arrows says); 15b `guideShift`'s lesson pointer asks `promoBeatsPtr(key)` (forced and named for t2 only); 15 `devDay` adds `promoBeatsItems(d)` (the test, result, pip, cabin rows: Schedule and Tracked); 25 `devmodePromoSteps` uses `promoCakeWin` and sorts by time when on; 24p's own: promoGuide's test arrow is level 1 when on, `promoPassed` calls `promoBeatsPassed`, `promoMoveTick` asks `promoBeatsWalkWait(now)`.
+- **Saved:** only flags (`pb.*`, `mail.pb.*`, the day they fired). The talk (`PB_TALK`) is live only.
+- **Words:** `content/works/promo-beats.lines` (notices, rows, Mails: `mail.pb.*` keys for the 400 limit, `{time}` and `{day}`), `content/banks/promo-beats.lines` (the crew's bubbles, kinds `pb.soon|luck|watch|passed|officer`), Calder's `work` lines under `flag:pb.promo.*`, `content/meetings/promo.result.meet`.
+- **Test:** `promo_beats_check.py BUILD [off pointer before passed result cabin talk]` (about 2 minutes). promo_sight_check's `move` part runs with the switch off (FX19's 17:00 walk).
+
 ## Hook register
 
 One-line, `typeof`-guarded calls from one section into another (plans/pillar4-plan.md, "Keeping the one file from colliding"). The lead keeps this list; owners add their rows.

@@ -11636,6 +11636,7 @@ function devDay(d) {
   try { if (typeof introOn === 'function' && introOn() && typeof INTRO_WEEK !== 'undefined') for (const b of INTRO_WEEK)
     if (b.day === d && DEV_BEATS[b.id] && b.where && Number.isInteger(b.where.deck))
       out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckIn(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room, ...(b.stand ? { place: b.stand } : {}) }); } catch (e) { /* not yet */ }   // place: where you stand for it (item 81: the room's middle was the Chief's own seat, under her)
+  try { if (typeof promoBeatsItems === 'function') out.push(...promoBeatsItems(d)); } catch (e) { /* not yet */ }   // FX28: the promotion's steps (24p), with PROMO_BEATS_ON
   return out.sort((x, y) => x.from - y.from);
 }
 const DEV_BEATS = { 'd1-briefing': 'Morning briefing with the Chief', 'd2-solo': 'The Chief\'s office: your first solo job', 'd2-booths': 'Calling home', 'd3-store': 'The crew store' };   // titles (stand-ins; the beats' own words are section 21's)
@@ -12937,12 +12938,12 @@ const pointToApp = (app, label) => [pointDevice(), pointApp(app, label)];
 const pointBoard = (id, label) => [{ open: () => typeof ixBoard !== 'undefined' && ixBoard.isOpen, el: () => null }, { el: () => boardButton(id), label }];
 const pointClock = (want, label) => [{ open: () => { const c = document.getElementById('clockScreen'); return !!c && !c.hidden; }, el: () => null }, { el: () => clockButton(want), label }];
 const pointCard = (k, label, title) => [{ open: () => !!DEV.choose, el: () => null }, { el: () => chooseButton(k, title), label }];
-function pointLimit(p) { const m = teachMode(); return m === 'off' ? 0 : m === 'all' ? Infinity : p.once === true || p.once == null ? 1 : Math.max(0, p.once | 0); }
+function pointLimit(p) { const m = teachMode(); return p.force ? Infinity : m === 'off' ? 0 : m === 'all' ? Infinity : p.once === true || p.once == null ? 1 : Math.max(0, p.once | 0); }
 const pointSeenN = id => (SHIP.device.pointsSeen && SHIP.device.pointsSeen[id]) || 0;
 function pointAsk(p) {
   if (!POINT_ON || !p || typeof p.id !== 'string' || p.id.length >= 60 || !Array.isArray(p.path) || !p.path.length) return false;
   if (pointSeenN(p.id) >= pointLimit(p)) return false;
-  const e = { id: p.id, path: p.path, done: typeof p.done === 'function' ? p.done : null, until: Number.isFinite(p.until) ? p.until : null, once: p.once, shown: false };
+  const e = { id: p.id, path: p.path, done: typeof p.done === 'function' ? p.done : null, until: Number.isFinite(p.until) ? p.until : null, once: p.once, shown: false, ...(p.force ? { force: true } : {}) };   // force: FX28's career beat, whatever Teaching arrows says
   const i = POINT_Q.findIndex(x => x.id === p.id); if (i >= 0) { e.shown = POINT_Q[i].shown; POINT_Q[i] = e; } else POINT_Q.push(e);
   if (!POINT.raf) POINT.raf = requestAnimationFrame(pointFrame);
   return true;
@@ -17032,7 +17033,7 @@ function guideShift() {
   }
   { let mn = null; try { mn = myJob(); } catch (e) { mn = null; }   // (DS1, patch 0.92.5 #12) your lesson's job on the board: the pointer rings its Take it each time it waits, clocked in or not (FX10's, once)
     const les = !mn && m < E && boardLesson(), cur = SHIP.works && SHIP.works.cur, lj = les && SHIP.jobs.find(x => x.id === les), key = lj && (cur && cur.j === les ? cur.id : lj.train || 'intro' + lj.reserved);   // (FX15: a training job no lesson put up, by its own name)
-    if (P && les && guideTakeable().some(o => o.id === les)) pointAsk({ id: 'p:board:lesson:' + key, once: 99, path: pointBoard(les, 'Take this one: your ' + boardLessonName(les)), until: now + 120, done: () => { try { return !!myJob() || boardLesson() !== les; } catch (e) { return true; } } }); }
+    if (P && les && guideTakeable().some(o => o.id === les)) pointAsk({ id: 'p:board:lesson:' + key, once: 99, ...promoBeatsPtr(key), path: pointBoard(les, promoBeatsPtr(key).label || 'Take this one: your ' + boardLessonName(les)), until: now + 120, done: () => { try { return !!myJob() || boardLesson() !== les; } catch (e) { return true; } } }); }
   if (intro || !inn || out) return;
   let mine = null; try { mine = myJob(); } catch (e) { mine = null; }
   if (m < E) {                                           // S3 (S6, the empty board's word: FX1's boardEmptySay, from ixWorkStep)
@@ -23160,6 +23161,12 @@ const VOICE = JSON.parse([
   '{"text":"People will ask you over. Go. Ask them back.","id":"hvzs7r","flag":"promo.walk.corridor"},',
   '{"text":"Your name\'s already up. Don\'t make me change it.","id":"3g40wc","flag":"promo.walk.door"},',
   '{"text":"Your things. Your key. Your cabin. Goodnight, Officer.","id":"fhj6el","flag":"promo.walk.inside"},',
+  '{"text":"Morning. Nine o\'clock it goes on the board. Eat something first.","id":"wt5uov","flag":"pb.promo.morning"},',
+  '{"text":"That\'s the test. Filter in, fan settled.","id":"9zdltt","flag":"pb.promo.passed"},',
+  '{"text":"Result tomorrow, first thing. My office, 08:15. Not before.","id":"1hxvbw2","flag":"pb.promo.passed"},',
+  '{"text":"Observation room. The Captain doesn\'t wait. Neither do I.","id":"1oxt1sm","flag":"pb.promo.pip"},',
+  '{"text":"Dinner\'s done, then. Walk with me.","id":"1do97k2","flag":"pb.promo.fetch.move"},',
+  '{"text":"Your things went up an hour ago. With me.","id":"14ye09f","flag":"pb.promo.walk.start"},',
   '{"text":"Spots. Nobody moves until I say.","id":"13nugxo","flag":"team.call.start"},',
   '{"text":"Brace. Hold it there.","id":"1l68xk7","flag":"team.call.brace"},',
   '{"text":"Pass it. Both hands.","id":"k3jf09","flag":"team.call.pass"},',
@@ -35730,6 +35737,21 @@ const LINES = JSON.parse([
   '{"text":"My door | My door squeaks, but only at night. In the day it\'s silent. Am I imagining it?","id":"us2rse"}]',
   ',"mail.fri.week1":[',
   '{"text":"Tomorrow\'s a short Friday. The day shift stops at half past three; I\'ll see all of you in the auditorium at four. Dinner at five. Our new hands especially.","id":"1s3rh01"}]',
+  ',"mail.pb.cabin":[',
+  '{"text":"Your cabin | After dinner I\'ll walk you to 4-23. Eat first. Your things are on their way.","id":"1ddsoh5"}]',
+  ',"mail.pb.captain":[',
+  '{"text":"Congratulations | Chief Calder tells me you\'ve passed. I\'d like to pin your pip myself: this afternoon, in the observation room on Deck 1. Bring one honest answer: what should an officer never forget? I\'ll ask.","id":"1xo1crq"}]',
+  ',"mail.pb.invite":[',
+  '{"text":"Your pip, {time} | Today at {time}, the observation room, Deck 1. The Captain pins your pip. Clean uniform. It takes ten minutes. There will be tea.","id":"ahqu5i"}]',
+  ',"mail.pb.luck":[',
+  '{"text":"Good luck | Big day tomorrow. You\'ll be fine. You\'ve done harder jobs than this one with half the bay watching.","id":"1vd75pp"},',
+  '{"text":"Tomorrow | Heard about your test. Get some sleep and eat a proper breakfast. Brennan\'s orders as well as mine.","id":"ji4qkv"}]',
+  ',"mail.pb.passed":[',
+  '{"text":"Your test | Done. Your result {day}, {time}, my office. Not before.","id":"1616at3"}]',
+  ',"mail.pb.promo":[',
+  '{"text":"Your result | You weren\'t about, so you\'ll read it instead. You passed. As of today you\'re an Officer: Technician, Tier 2. Your badge is on my desk. The Captain pins your pip this afternoon, observation room. Clean uniform. Ten minutes early.","id":"16qr920"}]',
+  ',"mail.pb.result":[',
+  '{"text":"Your result | My office, {time}. Before your shift. Clock in on the way if you like.","id":"gxim7k"}]',
   ',"mail.promo.ceremony":[',
   '{"text":"Your commission, 17:15 | The officer ceremony is today at 17:15, observation room, Deck 1. Clean uniform. It takes ten minutes. There will be tea.","id":"5dlca3"}]',
   ',"mail.promo.friend":[',
@@ -36338,6 +36360,77 @@ const LINES = JSON.parse([
   '{"text":"Your test job is on the board. Calder\'s watching. Take it.","id":"1pe9j16"}]',
   ',"noz.plant":[',
   '{"text":"The irrigation plant hums along. You check its filter and the pressure while you\'re here.","id":"zvce1x"}]',
+  ',"pb.busy.notice":[',
+  '{"text":"Your Tier 2 test is waiting on the job board, till {time}. Turn this job in first, or drop it.","id":"dxv6lk"}]',
+  ',"pb.luck":[',
+  '{"text":"Good luck tomorrow. Not that you need it.","id":"bnntxn","tone":"warm","tier":[3,4]},',
+  '{"text":"Sleep early tonight. You\'ve got a test.","id":"17ssbzl","tier":[3,4]},',
+  '{"text":"Tomorrow\'s the day, then. You\'ll be fine.","id":"145hc04","tone":"warm","tier":[3,4]},',
+  '{"text":"Today\'s the day. You\'ve got this.","id":"10mwbod","tone":"warm","tier":[3,4],"time":"morning"},',
+  '{"text":"Eat something. Tests go better on porridge.","id":"mm09tc","tone":"funny","tier":[3,4],"time":"morning"},',
+  '{"text":"Good luck. I\'ll want to hear all about it.","id":"1sq85ym","tone":"warm","tier":[3,4],"time":"morning"}]',
+  ',"pb.morning.notice":[',
+  '{"text":"Today: your Tier 2 test, 09:00. It goes up on the job board in the Works bay.","id":"ip8fws"}]',
+  ',"pb.morning.say":[',
+  '{"text":"Morning. Nine o\'clock, it goes on the board. Take it when you\'re ready.","id":"1jhki5c"}]',
+  ',"pb.officer":[',
+  '{"text":"Officer! I knew it. I said so. Ask anyone.","id":"3o7k24","tone":"warm","tier":[3,4]},',
+  '{"text":"Your own cabin tonight. I\'m coming to see it.","id":"1e4efdb","tone":"funny","tier":[3,4]},',
+  '{"text":"Congratulations, Officer.","id":"1h56kbq"},',
+  '{"text":"The pip\'s this afternoon, I hear. With the Captain.","id":"6w66mr"},',
+  '{"text":"Your own cabin tonight, I hear. Lucky you.","id":"cfbz6c","time":"evening"}]',
+  ',"pb.passed":[',
+  '{"text":"Done? How did it go? Tell me everything.","id":"765821","tone":"warm","tier":[3,4]},',
+  '{"text":"I bet you passed. I\'d bet my dessert on it.","id":"1r7ojx7","tone":"funny","tier":[3,4]},',
+  '{"text":"Results tomorrow? I\'ll be waiting. Tell me first.","id":"14nxhg6","tone":"warm","tier":[3,4]},',
+  '{"text":"Heard you did your Tier 2 test. How\'d it go?","id":"1qb7t3v"},',
+  '{"text":"Calder\'s face gives nothing away, does it?","id":"ph2nzx","tone":"funny"},',
+  '{"text":"Tidy job on that scrubber. Saw it on the board.","id":"1fuhctm","dept":"works"},',
+  '{"text":"She\'ll tell you tomorrow. She likes to make you wait.","id":"5n95ri","tone":"funny","dept":"works"}]',
+  ',"pb.passed.notice":[',
+  '{"text":"Your Tier 2 test is done. Your result: {day}, {time}, the Chief\'s office.","id":"1x4xaou"}]',
+  ',"pb.passed.say":[',
+  '{"text":"That\'s the test done. Your result {day}, first thing. My office, {time}.","id":"y9nauc"}]',
+  ',"pb.pip.notice":[',
+  '{"text":"The Captain pins your pip at {time}: the observation room, Deck 1. Go now.","id":"1e3skci"}]',
+  ',"pb.pip.say":[',
+  '{"text":"Observation room. The Captain doesn\'t wait. Go.","id":"xxd5q9"}]',
+  ',"pb.promo.summons":[',
+  '{"text":"Chief Calder: My office, 08:15. Your result. — C.","id":"1rsw8ni"}]',
+  ',"pb.ptr.test":[',
+  '{"text":"Your Tier 2 test: take it","id":"1kv7bct"}]',
+  ',"pb.result.notice":[',
+  '{"text":"Your Tier 2 result: {time}, the Chief\'s office, Works bay. Before your shift.","id":"dd1hqi"}]',
+  ',"pb.row.cabin":[',
+  '{"text":"Your new cabin, after dinner","id":"12d50nn"}]',
+  ',"pb.row.pip":[',
+  '{"text":"Your pip, from the Captain","id":"e96dx0"}]',
+  ',"pb.row.result":[',
+  '{"text":"Your result with the Chief","id":"1mkimi7"}]',
+  ',"pb.row.test":[',
+  '{"text":"Your Tier 2 test","id":"1msqbs7"}]',
+  ',"pb.soon":[',
+  '{"text":"Your Tier 2 test? You\'ve been aboard nine days.","id":"144wdat","day":"-9"},',
+  '{"text":"Nine days and up for Tier 2. Took me three months.","id":"c6gahy","tone":"funny","day":"-9"},',
+  '{"text":"Not even ten days aboard. Calder must rate you.","id":"3ml1a9","day":"-9"},',
+  '{"text":"Up for Tier 2 inside two weeks. That\'s quick.","id":"iihawb","day":"10-14"},',
+  '{"text":"Under two weeks aboard and a Tier 2 test. Not bad.","id":"cyjk7m","day":"10-14"},',
+  '{"text":"Two weeks? Calder doesn\'t hurry for anyone. Usually.","id":"i623k3","tone":"funny","day":"10-14"},',
+  '{"text":"Tier 2 test, then. About time, if you ask me.","id":"1i55j3a","day":"15-"},',
+  '{"text":"Heard Calder\'s put you up for Tier 2. Good.","id":"1hwakuw","day":"15-"},',
+  '{"text":"Heard you\'ve got your Tier 2 test. Already?","id":"hrdzgt"},',
+  '{"text":"A Tier 2 test. Don\'t let anyone tell you it\'s hard.","id":"5v0ilk","tone":"funny"},',
+  '{"text":"Calder doesn\'t put just anyone up for Tier 2.","id":"pmnm1w"},',
+  '{"text":"Your test\'s a scrubber, I bet. It\'s always a scrubber.","id":"ul4zbt","tone":"funny","dept":"works"},',
+  '{"text":"Tier 2 means the scrubbers. You\'ll hear them in your sleep.","id":"1zlan1","dept":"works"},',
+  '{"text":"Eat up. Big day coming, I hear.","id":"qwlnwx","act":"meal"},',
+  '{"text":"So you\'re the one with the Tier 2 test. Everyone\'s saying.","id":"s7u0cr","act":"meal"}]',
+  ',"pb.watch":[',
+  '{"text":"Don\'t mind us. We\'re not watching. Much.","id":"1ds5aep","tone":"funny","dept":"works"},',
+  '{"text":"Steady hands. You\'re doing fine.","id":"brxurq","dept":"works"},',
+  '{"text":"Calder\'s watching. Don\'t look at Calder.","id":"1g22f1t","tone":"funny","dept":"works"},',
+  '{"text":"That\'s the test job, isn\'t it? Good luck.","id":"s9axqa"},',
+  '{"text":"Quiet, everyone. Test in progress.","id":"h7h4wl","tone":"funny"}]',
   ',"postcard.sent":[',
   '{"text":"Your card is in the box. It goes out with the next mail run.","id":"rl5rez"}]',
   ',"postcard.write":[',
@@ -39315,6 +39408,7 @@ const MEETINGS_BAKED = {
   "lineTomasSat": {"title": "Tomas, the night before", "from": "Tomas Lind", "gist": "Tomas is on watch all day tomorrow, so he'll miss his first Line.", "lines": [{"who": "tomas", "text": "Hey. Can I complain at you for a minute? A small complaint. Medium.", "pose": "sigh"}, {"who": "tomas", "text": "I'm on watch tomorrow. All day. My first Line, and I'll be watching a corridor screen."}, {"who": "tomas", "text": "Everyone keeps saying it's the best bit of being out here. The horn, the gold, the oath.", "pose": "listen", "to": "you"}, {"choice": [{"text": "I'll bring you some punch.", "rel": {"tomas": 1}, "flavour": "practical", "flag": "line.promised", "reply": {"who": "tomas", "text": "Would you? Even if it's awful? Especially if it's awful. I want the whole thing.", "pose": "laugh"}}, {"text": "I'll tell you every bit of it.", "rel": {"tomas": 1}, "flavour": "cheer", "reply": {"who": "tomas", "text": "Every bit. Who cries, who spills, what the Captain says. I'll want it twice.", "pose": "laugh"}}, {"text": "Can't you swap?", "rel": {"tomas": 1}, "flavour": "listen", "reply": {"who": "tomas", "text": "Not on a crossing. Someone has to watch her cross.", "pose": "nod"}}]}, {"who": "tomas", "text": "Why does it matter, anyway? It's just a line. Pell says past it we're guests in someone else's sky."}, {"who": "tomas", "text": "Help a long way off, every star with somebody else's name. So the oath's about each other. Huh.", "pose": "nod"}, {"who": "tomas", "text": "Right. Climbing wall, then bed. Early start. Cross well for me, {me}."}]},
   "promo.ceremony": {"title": "Your commission", "from": "Captain Odile Marrow", "gist": "The Captain commissioned you as an Officer of the Wren. The framed commission is on your cabin shelf.", "lines": [{"who": "vance", "text": "Attention, please. The Captain.", "pose": "nod"}, {"who": "marrow", "text": "Thank you, Teo. Sit, everyone, if there are chairs. There never are.", "pose": "laugh"}, {"who": "marrow", "text": "Cadet. Chief Calder tells me you're ready. The Chief doesn't say that often.", "to": "you"}, {"who": "marrow", "text": "By the Survey Service, I commission you an Officer of the Wren. With all that comes with it."}, {"who": "marrow", "text": "Hold still. Pins are not my strong point.", "pin": true, "pose": "gesture"}, {"who": "marrow", "text": "There. Now, my question. What should an officer never forget?", "to": "you"}, {"choice": [{"text": "The people. Everyone aboard.", "rel": {"marrow": 2}, "mem": "promo.answer.people", "reply": {"who": "marrow", "text": "Good answer. The ship is the people in it. The rest is metal.", "pose": "nod"}}, {"text": "To ask when I don't know.", "rel": {"marrow": 2}, "mem": "promo.answer.ask", "reply": {"who": "marrow", "text": "Good answer. The ones who stop asking are the ones who worry me.", "pose": "nod"}}, {"text": "To mind the step in the ready room.", "rel": {"marrow": 1}, "mem": "promo.answer.step", "reply": {"who": "marrow", "text": "Ha. Calder warned me about you. Also correct.", "pose": "laugh"}}]}, {"who": "calder", "text": "Tier 2. On the day I said. Good.", "pose": "nod"}, {"who": "torres-zeke", "text": "Told everyone. Didn't I tell everyone?", "pose": "laugh"}, {"who": "marrow", "text": "Tea, then. Mine's the good stuff. Don't tell the galley."}, {"who": "marrow", "text": "Welcome, Officer. My door is open. Mind the step.", "to": "you"}]},
   "promo.officer": {"title": "My office, 11:00", "from": "Chief Ines Calder", "gist": "Calder promoted you to Officer: Technician, Tier 2. A badge, a collar pip, and your own cabin from tonight.", "lines": [{"who": "calder", "text": "Sit. No, stay standing. This won't take long.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "The scrubber. Filter in, fan settled, nobody had to tell you twice."}, {"who": "calder", "text": "You've passed. As of now you're an Officer. Technician, Tier 2."}, {"who": "calder", "text": "The badge. And the pip. Collar, left side. Straight, please."}, {"choice": [{"text": "Thank you, Chief. I won't let you down.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "I know. That's why you're standing here.", "pose": "nod"}}, {"text": "Me? Already?", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Already. I don't promote people to be kind. I promote them because they're ready."}}, {"text": "About time, honestly.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Hm. Torres said you'd say that. He owes me a biscuit.", "pose": "laugh"}}]}, {"who": "calder", "text": "The board leaves you Tier 2 work from tomorrow. Harder faults. Fewer carts."}, {"who": "calder", "text": "Tonight you move to 4-23. Your own cabin. I'll walk you there at five."}, {"who": "calder", "text": "The Captain commissions you tomorrow. Clean uniform. Go on, then. They're waiting outside."}]},
+  "promo.result": {"title": "Your result", "from": "Chief Ines Calder", "gist": "Calder gave you your result: you passed. You're a Works Officer now, Technician, Tier 2. The Captain pins your pip this afternoon.", "lines": [{"who": "calder", "text": "Door. Thank you. This won't take long.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "Your scrubber. Filter in, fan settled, nothing I had to say twice."}, {"who": "calder", "text": "You passed. As of now you're an Officer. Technician, Tier 2."}, {"who": "calder", "text": "The badge. Left side. Straight, please."}, {"choice": [{"text": "Thank you, Chief. I won't let you down.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "I know. That's why you're standing here.", "pose": "nod"}}, {"text": "Me? Already?", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Already. I don't promote people to be kind. I promote them because they're ready."}}, {"text": "About time, honestly.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Hm. Torres said you'd say that. He owes me a biscuit.", "pose": "laugh"}}]}, {"who": "calder", "text": "The pip isn't mine to give. The Captain pins it this afternoon, observation room. Clean uniform."}, {"who": "calder", "text": "Tier 2 work on the board from tomorrow. Tonight, after dinner, I walk you to your cabin. 4-23."}, {"who": "calder", "text": "Go on, then. They're waiting outside."}]},
   "rec.talent.you": {"title": "Talent night: your act", "from": "Lucia Ferreira", "gist": "You did an act at talent night, and the crowd cheered.", "lines": [{"who": "ferreira", "text": "And now, a first-timer. Be kind, everyone. Here's {me}!", "pose": "gesture"}, {"choice": [{"text": "(Play a tune on the piano)", "flavour": "share", "mem": "talent.tune", "reply": {"who": "ferreira", "text": "Lovely! Not a single wrong note. Well, one. It was the best one.", "pose": "laugh"}}, {"text": "(Tell a ship joke)", "flavour": "cheer", "mem": "talent.joke", "reply": {"who": "ferreira", "text": "Oh, that's terrible. They're all laughing. That's a win, {me}.", "pose": "laugh"}}, {"text": "(Do a Works trick with a spanner)", "flavour": "practical", "mem": "talent.trick", "reply": {"who": "ferreira", "text": "Spinning a spanner on one finger! Chief Calder's clapping. Mark the day.", "pose": "laugh"}}]}, {"who": "ferreira", "text": "Give it up for {me}, everybody!", "pose": "gesture"}]},
   "sickExam1": {"title": "The infirmary", "from": "Rina Deshi", "gist": "Rina in the infirmary: a ship cold, some medicine, and orders to drink water.", "lines": [{"who": "rina", "text": "Sit. On the bed, not the stool. The stool's mine.", "pose": "gesture"}, {"who": "rina", "text": "Open. Say \"ah\". Longer. Fine, that'll do.", "to": "you"}, {"who": "rina", "text": "Your temperature's up. Your throat's red. You've got a ship cold. Everyone gets one. Recycled air."}, {"who": "rina", "text": "It's not serious. It's just rubbish. I've had three this year."}, {"who": "rina", "text": "Two of these, with water. All the water. The whole cup.", "pose": "nod", "to": "you"}, {"choice": [{"text": "Thanks, Rina.", "rel": {"rina": 1}, "reply": {"who": "rina", "text": "Don't thank me. Drink the water."}}, {"text": "Do I have to go back to shift?", "rel": {"rina": 1}, "reply": {"who": "rina", "text": "You're excused. It's on the board. Calder knows. She said \"Fine.\" Twice."}}]}, {"who": "rina", "text": "You'll feel better in an hour. If you don't, come back and I'll be smug about something else."}]},
   "sickExam2": {"title": "The infirmary", "from": "Rina Deshi", "gist": "Rina in the infirmary: a bug going round Deck 4, some medicine, and the rest of the day off.", "lines": [{"who": "rina", "text": "Oh, look. Another one. You're the fourth from Deck 4 this week.", "pose": "sigh"}, {"who": "rina", "text": "Light in your eyes. Follow my finger. Good. Now the other way. Good.", "to": "you"}, {"who": "rina", "text": "It's the bug going round. Someone sneezed in the lift and now here we are."}, {"who": "rina", "text": "Medicine. Here. It tastes like a boot. That's how you know it's working."}, {"who": "rina", "text": "Drink it. All of it. I'm watching.", "pose": "listen", "to": "you"}, {"who": "rina", "text": "Good. You're excused today. It doesn't touch your leave. It's not your fault you've got a body."}, {"who": "rina", "text": "Go and lie down. If I see you at the Tiles table tonight, I'm winning by default."}]},
@@ -56305,7 +56399,7 @@ function promoPassed(t) {                                // the test job turned 
   const W = SHIP.works, c = W && W.cur; if (!W || !W.test || W.test.passed) return false;
   const by = (c && c.by) || 'calder';
   W.test.passed = true; W.test.day = worksDay(t); W.tr.t2 = worksDay(t); if (c && c.id === 't2') W.cur = null;
-  promoSay(by, 'test.passed', 'Good. That\'s the test. Go and have your tea; I\'ll be in touch.');
+  if (promoBeatsOn()) promoBeatsPassed(t, by); else promoSay(by, 'test.passed', 'Good. That\'s the test. Go and have your tea; I\'ll be in touch.');   // FX28: the result held till the next shift
   simNote('promoTest', { step: 'passed', day: worksDay(t) });
   return true;
 }
@@ -56347,7 +56441,7 @@ function promoPlan() {                                   // pure, from the save:
   const W = SHIP.works, sd = promoSummonsDay(); if (!W || !sd) return null;
   const ms = d => (W.ms.find(x => x[0] === d) || [])[1];
   const od = ms('officer') || sd;
-  return { summons: { day: sd, at: PROMO.summonsAt }, gather: { day: od, from: PROMO.gather[0], to: PROMO.gather[1] }, move: { day: od, at: DAY_SHIFT[1] }, ceremony: { day: od + 1, at: 1035 }, done: W.done.slice() };
+  return { summons: { day: sd, at: PROMO.summonsAt }, gather: { day: od, from: PROMO.gather[0], to: PROMO.gather[1] }, move: { day: od, at: promoBeatsOn() ? PB_TIMES.moveAt : DAY_SHIFT[1] }, ceremony: { day: od + (promoBeatsOn() ? 0 : 1), at: promoCerTimes(od + (promoBeatsOn() ? 0 : 1)).at }, done: W.done.slice() };
 }
 function promoScript() {                                 // the writer's scene, or a stand-in; either way our hooks on it
   if (!MEETING_SCRIPTS['promo.officer']) MEETING_SCRIPTS['promo.officer'] = { title: 'The Chief\'s office', from: 'Chief Ines Calder', stub: true,
@@ -56362,7 +56456,7 @@ function promoScript() {                                 // the writer's scene, 
       ] },
       { who: 'calder', text: 'The bay\'s waiting for you. Go on.' },
     ] };
-  const sc = MEETING_SCRIPTS['promo.officer'];
+  const sc = MEETING_SCRIPTS[OCCASIONS.promoSummons.script] || MEETING_SCRIPTS['promo.officer'];   // FX28: promo.result with PROMO_BEATS_ON
   if (!sc.promoHooked) { const pick = sc.onPick, end = sc.onEnd; sc.promoHooked = true;
     sc.onPick = (k, c) => { if (typeof flagSet === 'function') flagSet('promo.reply', k + 1); if (pick) pick(k, c); };
     sc.onEnd = finished => { if (end) end(finished); promoPromote(shipNow(), finished ? 'met' : 'left'); }; }
@@ -56374,10 +56468,10 @@ function promoPromote(now, how) {                        // you're an officer
   const d = worksDay(now), r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked'); if (r) r.met = true;
   W.tier = 2; W.rank = 'officer'; W.xp = 0;
   if (!W.done.includes('summons2')) W.done.push('summons2'); if (!W.ms.some(x => x[0] === 'officer')) W.ms.push(['officer', d]);
-  if (how === 'mail' && typeof mailSend === 'function') { const t = worksText('promo.mail', 'You\'re an officer | You passed your test job: you\'re a Works Officer now, Technician, Tier 2. Your badge and pip are waiting in my office. Well done. — C.'), i = t.indexOf(' | ');
+  if (how === 'mail' && typeof mailSend === 'function') { const t = worksText(promoBK('promo.mail'), 'You\'re an officer | You passed your test job: you\'re a Works Officer now, Technician, Tier 2. Your badge and pip are waiting in my office. Well done. — C.'), i = t.indexOf(' | ');
     mailSend({ at: now, from: 'Chief Ines Calder', subject: i > 0 ? t.slice(0, i) : 'You\'re an officer', body: i > 0 ? t.slice(i + 3) : t }); }
   if (typeof newsAdd === 'function') try { newsAdd({ id: 'promo.officer', about: 'you', lines: [worksText('promo.news', '{me}\'s been made a Works Officer. Calder says it was about time.')], seed: ['dept:works'], kind: 'gossip' }); } catch (e) { /* no social */ }
-  if (typeof mailSend === 'function') { const t = worksText('promo.captain', 'Congratulations | Chief Calder tells me you\'ve passed your Tier 2 test. Congratulations, Officer. I look forward to the ceremony. — O. Marrow'), i = t.indexOf(' | ');
+  if (typeof mailSend === 'function') { const t = worksText(promoBK('promo.captain'), 'Congratulations | Chief Calder tells me you\'ve passed your Tier 2 test. Congratulations, Officer. I look forward to the ceremony. — O. Marrow'), i = t.indexOf(' | ');
     mailSend({ at: now + 30, from: 'Captain Odile Marrow', subject: i > 0 ? t.slice(0, i) : 'Congratulations', body: i > 0 ? t.slice(i + 3) : t, quiet: true }); }
   promoFriendMail(now);
   if (typeof MACH_REV !== 'undefined') MACH_REV++;       // the board: Tier 2 jobs for you now, junior ones no longer held (forYou)
@@ -56399,7 +56493,7 @@ function promoSummonsTick(now) {                         // book it, warn at 10:
   if (!r) return;
   const f = r.f || (r.f = {});
   if (m >= PROMO.warnAt && !f.warn && now >= shipNow() - 1) { f.warn = 1;
-    const text = worksText('promo.summons', 'Chief Calder: My office, 11:00. — C.');
+    const text = worksText(promoBK('promo.summons'), 'Chief Calder: My office, 11:00. — C.');
     if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'calendar', text, urgent: true }); } catch (e) { /* no device */ }
     try { toast('Chief Calder', text); } catch (e) { /* no UI */ }
     if (typeof setGoal === 'function' && !promoQueue()) setGoal({ deck: 5, room: 'o', label: 'The Chief\'s office, 11:00', trk: 'career:summons', trkFrom: r.at, trkTo: r.at + (r.len || 30) });   // FX1: gone once it's begun with you there, or it's over
@@ -56410,7 +56504,7 @@ function promoSeekTick(now) {                            // she's found you: the
   const r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked'); if (!r || !r.f || !r.f.seek || r.met || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return;
   try { const a = DECK_CREW.find(x => x.p && x.p.id === r.by), p = player.obj.position;
     if (a && Math.hypot(a.x - p.x, a.z - p.z) < 2.2) { worksSayAll(r.by, worksVoice(r.by, 'promo.fetch.summons') || ['There you are. My office was the idea, but this will do.']);   // her word as she reaches you, then the scene
-      promoScript(); r.met = true; dialogueShow('promo.officer', { id: r.key, who: [r.by], at: now, where: { any: true } }); } } catch (e) { /* not in play */ }   // where you are: readable, not closed by section 18's meetings tick (FX3)
+      promoScript(); r.met = true; dialogueShow(OCCASIONS.promoSummons.script, { id: r.key, who: [r.by], at: now, where: { any: true } }); } } catch (e) { /* not in play */ }   // where you are: readable, not closed by section 18's meetings tick (FX3)
 }
 function promoEscort(p, t) {                             // worksEscort's 24p part: Calder walking over to find you
   const r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked');
@@ -56423,9 +56517,9 @@ WORK_TICKS.push((now, skip) => { promoSummonsTick(now); if (!skip) promoSeekTick
 Object.assign(PROMO, { cake: [990, 1020], cakeAt: '5-tea-3' });
 function promoCakeTick(now) {
   const W = SHIP.works, od = W && (W.ms.find(x => x[0] === 'officer') || [])[1]; if (!od || promoDone('cake2')) return;
-  const d = worksDay(now), m = now - (d - 1) * 1440; if (d > od || (d === od && m >= PROMO.cake[1])) { W.done.push('cake2'); return; }
-  if (d < od || m < PROMO.cake[0]) return;
-  if (!W.cake) { W.cake = 1; if (typeof crewScene === 'function') try { crewScene('brennan', { mode: 'wait', to: PROMO.cakeAt, until: (d - 1) * 1440 + PROMO.cake[1], hold: 'tray' }); } catch (e) { /* no scene */ }
+  const d = worksDay(now), m = now - (d - 1) * 1440; const K = promoCakeWin(od); if (d > od || (d === od && m >= K[1])) { W.done.push('cake2'); return; }
+  if (d < od || m < K[0]) return;
+  if (!W.cake) { W.cake = 1; if (typeof crewScene === 'function') try { crewScene('brennan', { mode: 'wait', to: PROMO.cakeAt, until: (d - 1) * 1440 + K[1], hold: 'tray' }); } catch (e) { /* no scene */ }
     try { toast('Chef Auda Brennan', worksText('promo.cake.toast', 'There\'s cake at the Works tea corner. Your cake, Officer.')); } catch (e) { /* no UI */ } }
   try { const a = DECK_CREW.find(x => x.p && x.p.id === 'brennan'), p = player.obj.position;
     if (a && Math.hypot(a.x - p.x, a.z - p.z) < 3) { W.done.push('cake2'); worksSayAll('brennan', worksVoice('brennan', 'promo.cake') || ['Lemon, because Calder said you liked it. Don\'t tell her I asked.']); } } catch (e) { /* not in play */ }
@@ -56455,14 +56549,14 @@ function promoMoveTick(now, skip) {
   const d = worksDay(now), m = now - (d - 1) * 1440;
   const by = typeof PROMO_SIGHT_ON !== 'undefined' && PROMO_SIGHT_ON ? PROMO.moveLate : PROMO.moveBy;   // FX19 (0.92.6): open till 22:00 with the switch on
   if (d > od || m >= by) { promoMoved(Math.min(now, (od - 1) * 1440 + by), W.mv ? 'late' : 'mail'); return; }   // never missed: by 17:30 it's done (a skip past it: at 17:30)
-  if (d < od || m < DAY_SHIFT[1]) return;
+  if (d < od || m < DAY_SHIFT[1] || promoBeatsWalkWait(now)) return;   // FX28: after your dinner
   if (!W.mv && typeof promoMoveWait === 'function' && promoMoveWait(now, skip)) return;   // FX19: she waits till you're free
   if (!W.mv) {
     // DV1 (lead 34): no more waiting while you're mid-job (a working player was moved by the 17:30 fallback, no walk): she comes
     // at 17:00 and your job waits, as Calder's call does
     W.mv = { by: promoMoveBy(), at: Math.floor(now), s: [] };
-    if (!promoInBay()) promoWalkSay('promo.fetch.move', 'There you are. Come on: your cabin.');
-    promoWalkSay('promo.walk.start', 'Right, Officer. Your cabin. Follow me.');
+    if (!promoInBay()) promoWalkSay(promoBK('promo.fetch.move'), 'There you are. Come on: your cabin.');
+    promoWalkSay(promoBK('promo.walk.start'), 'Right, Officer. Your cabin. Follow me.');
     simNote('moveStart', { by: W.mv.by });   // the sim engineer's box carry (Tomas and Pell at 4-23's door)
     if (typeof setGoal === 'function' && !promoQueue()) setGoal({ deck: PROMO.homeRoom.deck, room: PROMO.homeRoom.room, label: 'Your cabin, ' + PROMO.home, trk: 'career:move', trkTo: Math.floor(now / 1440) * 1440 + 1440 });   // FX1: gone once you're there (or at midnight)
   }
@@ -56500,7 +56594,7 @@ WORK_TICKS.push((now, skip) => promoMoveTick(now, skip));
 // from the Captain), the Record's line, simNote('commissioned', { day }).
 Object.assign(PROMO, { cerAt: 1035, cerLen: 25, cerSeek: 1050, cerLate: 1110, cerBy: 1140, cerMailAt: 480, guests: ['marrow', 'vance', 'calder', 'torres-zeke'], friends: 3 });
 OCCASIONS.promoCeremony = { title: 'Your commission', kind: 'meeting', by: 'marrow', with: ['vance', 'calder', 'torres-zeke'], deck: 1, room: 'O', at: PROMO.cerAt, len: PROMO.cerLen, script: 'promo.ceremony', due: () => false, mail: null };
-const promoCerDay = () => { const W = SHIP.works, od = W && (W.ms.find(x => x[0] === 'officer') || [])[1]; return od ? od + 1 : null; };
+const promoCerDay = () => { const W = SHIP.works, od = W && (W.ms.find(x => x[0] === 'officer') || [])[1]; return od ? od + (promoBeatsOn() ? 0 : 1) : null; };   // FX28: the same day
 function promoGuests(d = promoCerDay()) {                // who stands with you: the four, and up to three friends
   if (!d) return [];
   let fr = []; try { fr = (typeof SOC !== 'undefined' && typeof socInit === 'function' ? (socInit(), SOC.crew) : []).filter(p => !PROMO.guests.includes(p.id) && relTier(p.id) >= 2 && (typeof socAboard !== 'function' || socAboard(p)))
@@ -56555,16 +56649,17 @@ function promoCerTick(now) {
   const d0 = promoCerDay(); if (!d0 || promoDone('ceremony2')) return;
   const d = worksDay(now), m = now - (d - 1) * 1440;
   let r = SHIP.occasions.find(x => x.id === 'promoCeremony');
-  if (d > d0 || (d === d0 && m >= PROMO.cerBy)) { promoCommission(Math.min(now, (d0 - 1) * 1440 + PROMO.cerBy), 'mail'); return; }
+  const T = promoCerTimes(d0);                           // FX28: PROMO's times, or the same day's with PROMO_BEATS_ON
+  if (d > d0 || (d === d0 && m >= T.by)) { promoCommission(Math.min(now, (d0 - 1) * 1440 + T.by), 'mail'); return; }
   if (d < d0) return;
-  if (!r && m >= PROMO.cerMailAt - 60) { promoCerScript(); OCCASIONS.promoCeremony.with = promoGuests(d).filter(id => id !== 'marrow'); r = occasionAdd('promoCeremony', (d - 1) * 1440 + PROMO.cerAt, true, PROMO.cerLen); }
+  if (!r && m >= T.mail - 60) { promoCerScript(); OCCASIONS.promoCeremony.with = promoGuests(d).filter(id => id !== 'marrow'); r = occasionAdd('promoCeremony', (d - 1) * 1440 + T.at, true, PROMO.cerLen); }
   if (!r) return;
   const f = r.f || (r.f = {});
-  if (m >= PROMO.cerMailAt && !f.mail && typeof mailSend === 'function') { f.mail = 1; const t = worksText('promo.ceremony.invite', 'Your commissioning | This evening at 17:15, the observation room, Deck 1. A clean uniform, please. — The Captain\'s office'), i = t.indexOf(' | ');
-    mailSend({ at: Math.max(now, (d - 1) * 1440 + PROMO.cerMailAt), from: 'The Captain\'s office', subject: i > 0 ? t.slice(0, i) : 'Your commissioning', body: i > 0 ? t.slice(i + 3) : t }); }
+  if (m >= T.mail && !f.mail && typeof mailSend === 'function') { f.mail = 1; const t = worksText(promoBK('promo.ceremony.invite'), 'Your commissioning | This evening at 17:15, the observation room, Deck 1. A clean uniform, please. — The Captain\'s office', { time: hhmm(T.at) }), i = t.indexOf(' | ');
+    mailSend({ at: Math.max(now, (d - 1) * 1440 + T.mail), from: 'The Captain\'s office', subject: i > 0 ? t.slice(0, i) : 'Your commissioning', body: i > 0 ? t.slice(i + 3) : t }); }
   try { if (!f.gr && r.status === 'asked' && now >= r.at - 10 && deckDef.num === r.deck && roomAt(...player.here()) === r.room && typeof uniformState === 'function' && uniformState() === 'grubby') {
     f.gr = 1; worksSayAll('calder', worksVoice('calder', 'promo.grubby') || ['(Calder looks at your uniform, then at you, and says nothing.)']); } } catch (e) { /* not in play */ }   // a clean uniform matters (M2): her look, nothing else
-  if (m >= PROMO.cerSeek && !f.seek && !r.met && r.status === 'asked') { f.seek = now; r.len = PROMO.cerLate - PROMO.cerAt + 20;   // 17:30: Calder walks you up; the room waits for you
+  if (m >= T.seek && !f.seek && !r.met && r.status === 'asked') { f.seek = now; r.len = T.late - T.at + 20;   // 17:30: Calder walks you up; the room waits for you
     worksSayAll('calder', worksVoice('calder', 'promo.fetch.ceremony') || ['There you are. The Captain\'s waiting. Come on.']);
     if (typeof setGoal === 'function' && !promoQueue()) setGoal({ deck: 1, room: 'O', label: 'Your commission, the observation room', trk: 'career:ceremony', trkFrom: r.at, trkTo: r.at + r.len }); }   // FX1: gone once you're there, or it's over
 }
@@ -56601,12 +56696,12 @@ function promoGuide(now) {
     const j = SHIP.jobs.find(x => x.id === c.j);
     let take = false; try { take = typeof guideTakeable === 'function' && guideTakeable().some(o => o.id === c.j); } catch (e) { take = false; }
     { let mj = null; try { mj = typeof myJob === 'function' ? myJob() : null; } catch (e) { mj = null; } if (mj && mj.id !== c.j && !jobSide(mj) && !mj.workDone) take = false; }   // FX19 (0.92.6): holding another job, the board has no Take it for the test: that job's own arrow first, ours once it's only to turn in (the follower stood at the board all Day 9)   // once it's on the board for you (clocked in): the shift's clock-in arrow first
-    if (j && j.status !== 'done' && j.claimedBy !== 'you' && take) guideAsk({ id: 'promo:test:' + worksDay(now), level: 3, everyday: true, owner, until: j.until || now + 360,
+    if (j && j.status !== 'done' && j.claimedBy !== 'you' && take) guideAsk({ id: 'promo:test:' + worksDay(now), level: promoBeatsOn() ? 1 : 3, everyday: true, owner, until: j.until || now + 360,
       goal: () => ({ deck: 5, item: /job board/i, room: 'w', label: 'Your Tier 2 test job: take it at the board' }), done: () => guideTaken(c.j) });
   }
   const sm = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked' && !x.met);
   if (sm && now >= sm.at - 30) guideAsk({ id: 'promo:summons', level: 2, owner, from: sm.at - 30, until: sm.at + (sm.len || 30),
-    goal: () => ({ deck: 5, room: 'o', label: 'The Chief\'s office, ' + hhmm(sm.at % 1440) }), done: () => sm.met || sm.status !== 'asked' || promoDone('summons2') });
+    goal: () => ({ deck: 5, room: 'o', label: (promoBeatsOn() ? 'Your result: the Chief\'s office, ' : 'The Chief\'s office, ') + hhmm(sm.at % 1440) }), done: () => sm.met || sm.status !== 'asked' || promoDone('summons2') });
   if (W.mv && !promoDone('move2')) guideAsk({ id: 'promo:move', level: 1, owner, until: Math.floor(now / 1440) * 1440 + 1440,
     goal: () => ({ deck: PROMO.homeRoom.deck, room: PROMO.homeRoom.room, label: 'Your cabin, ' + PROMO.home + ': follow ' + guideWho(W.mv.by) }), done: () => promoDone('move2') });
   const cr = SHIP.occasions.find(x => x.id === 'promoCeremony' && x.status === 'asked' && !x.met);
@@ -56800,16 +56895,167 @@ function promoWalkAgainTick(now, skip) {
   }
   if (skip || d <= miss || now < shipNow() - 1 || W.mv || promoBusy() || m >= PROMO.moveLate) return;
   const P = typeof promoPlan === 'function' ? promoPlan() : null;
-  if (P && P.ceremony && P.ceremony.day === d && !promoDone('ceremony2') && m < PROMO.cerAt + PROMO.cerLen + 15) return;   // her ceremony first
+  if (P && P.ceremony && P.ceremony.day === d && !promoDone('ceremony2') && m < P.ceremony.at + PROMO.cerLen + 15) return;   // her ceremony first
   if (m < (playerShiftOn(d) ? DAY_SHIFT[1] : 540)) return;
   W.mv = { by: promoMoveBy(), at: Math.floor(now), s: [], again: true };
   const text = worksText('promo.move.notice', 'Your cabin, 4-23: {name} is taking you there now.', { name: worksName(W.mv.by) });
   if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'works', text, urgent: true }); } catch (e) { /* no device */ }
-  promoWalkSay('promo.fetch.move', 'There you are. Come on: your cabin.'); promoWalkSay('promo.walk.start', 'Right, Officer. Your cabin. Follow me.');
+  promoWalkSay(promoBK('promo.fetch.move'), 'There you are. Come on: your cabin.'); promoWalkSay(promoBK('promo.walk.start'), 'Right, Officer. Your cabin. Follow me.');
   if (!promoQueue() && typeof setGoal === 'function') setGoal({ deck: M.deck, room: M.room, label: 'Your cabin, ' + PROMO.home, trk: 'career:move', trkTo: (d - 1) * 1440 + PROMO.moveLate });
   promoWalkAgainTick(now, skip);                         // the arrow (and her lines) from this minute
 }
 WORK_TICKS.push((now, skip) => promoWalkAgainTick(now, skip));
+// ---- FX28 (the user's playtest notes, 2026-10-26: the Tier 2 test and the promotion "very very hard to miss"; lead 38's
+// plan A-G). With PROMO_BEATS_ON (and FX19's PROMO_SIGHT_ON), every step is said, tracked and arrowed:
+//   A before: from the offer, the crew talk about it in the Works bay and at meals (bank kind pb.soon, by days aboard:
+//     how fast you got it); friends wish you luck the evening before and at breakfast (pb.luck, and up to two by Mail at
+//     20:00); Calder's morning word in the bay; the Schedule and Tracked have "Your Tier 2 test" from the evening before.
+//   B during: the board's pointer on the test's Take it is forced (Teaching arrows Off too) and says "Your Tier 2 test";
+//     the world arrow to the board is level 1 (over a Tracked goal, tracking off too); passers-by in the bay (pb.watch);
+//     Torres's word at the end (train.t2.torres) when he's near.
+//   C passing: Calder holds the result ("first thing tomorrow, my office"), a Mail and a notice; the bay and your friends
+//     that evening (pb.passed).
+//   D results: the next workday at 08:15 in her office (OCCASIONS.promoSummons, script promo.result: you passed, the
+//     badge; the pip is the Captain's), a Mail at 06:00 and an urgent notice once you're up, Tracked and arrowed.
+//   E the pip: the Captain's ceremony the same day, 16:30 in the observation room (17:15 on a Friday, after the
+//     address's hold), booked the moment you're promoted; Brennan's cake after it.
+//   F your cabin after dinner: the walk starts when you've eaten and left the mess (flag pb.ate), or at 20:00.
+//   G a Mail and a Tracked row for each step.
+// Off: PROMO as it was, every reader as before (promoBK gives the old keys, promoCerTimes PROMO's times).
+var PROMO_BEATS_ON = true;                               // var: devDay, promoPlan and guideShift ask before this line has run
+function promoBeatsOn() { return !!PROMO_BEATS_ON && typeof PROMO_SIGHT_ON !== 'undefined' && !!PROMO_SIGHT_ON; }
+const PB_TIMES = { summonsAt: 495, warnAt: 480, seekAt: 510, latest: 555, gather: [520, 535], moveAt: 1140, walkBy: 1200, wakeAt: 360 };
+const PB_KEYS = { 'promo.mail': 'mail.pb.promo', 'promo.captain': 'mail.pb.captain', 'promo.summons': 'pb.promo.summons', 'promo.ceremony.invite': 'mail.pb.invite', 'promo.fetch.move': 'pb.promo.fetch.move', 'promo.walk.start': 'pb.promo.walk.start' };
+const promoBK = k => promoBeatsOn() && PB_KEYS[k] || k;   // the words for the new times (content/works/promo-beats.lines; Calder's flags pb.promo.*)
+function promoCerTimes(d) {                              // the ceremony's times on day d: { at, seek, late, by, mail } (ship minutes of that day)
+  if (!promoBeatsOn()) return { at: PROMO.cerAt, seek: PROMO.cerSeek, late: PROMO.cerLate, by: PROMO.cerBy, mail: PROMO.cerMailAt };
+  let fri = false; try { fri = weekday(d) === 4; } catch (e) { fri = false; }
+  const at = fri ? 1035 : 990; return { at, seek: at + 15, late: at + 75, by: at + 105, mail: 0 };   // a Friday: after the Captain's address (held 15:30-17:00)
+}
+const promoCakeWin = od => promoBeatsOn() ? [promoCerTimes(od).at + 30, promoCerTimes(od).at + 60] : PROMO.cake;   // after the pip
+const PB_KEEP = {};
+function promoBeatsApply() {                             // PROMO's summons times and the summons' script follow the switch (asked each ship minute: a check may flip it)
+  const on = promoBeatsOn(), O = OCCASIONS.promoSummons;
+  if (on && !PB_KEEP.on) { Object.assign(PB_KEEP, { on: true, P: { summonsAt: PROMO.summonsAt, warnAt: PROMO.warnAt, seekAt: PROMO.seekAt, latest: PROMO.latest, gather: PROMO.gather }, at: O.at, script: O.script, title: O.title });
+    Object.assign(PROMO, { summonsAt: PB_TIMES.summonsAt, warnAt: PB_TIMES.warnAt, seekAt: PB_TIMES.seekAt, latest: PB_TIMES.latest, gather: PB_TIMES.gather }); Object.assign(O, { at: PB_TIMES.summonsAt, script: 'promo.result', title: 'Your result: the Chief\'s office' }); }
+  else if (!on && PB_KEEP.on) { Object.assign(PROMO, PB_KEEP.P); Object.assign(O, { at: PB_KEEP.at, script: PB_KEEP.script, title: PB_KEEP.title }); PB_KEEP.on = false; }
+}
+promoBeatsApply();
+if (SHIP.occasions.some(r => r.id === 'promoSummons')) promoScript();   // a reload with the summons booked: promo.result hooked too
+function promoBeatsPtr(key) {                            // guideShift's pointer on the test's Take it: forced and named (else nothing added)
+  return key === 't2' && promoBeatsOn() ? { force: true, label: worksText('pb.ptr.test', 'Your Tier 2 test: take it') } : {};
+}
+function promoNotice(text, from) {                       // an urgent device notice (its own pop-up), else a toast
+  if (!text) return; if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'works', text, urgent: true }); return; } catch (e) { /* no device */ }
+  try { toast(from || 'Works', text); } catch (e) { /* no UI */ }
+}
+function promoBeatsPassed(t, by) {                       // promoPassed with the switch on: the result's held till the next shift
+  const sd = promoSummonsDay(), day = sd === worksDay(t) + 1 ? 'tomorrow' : sd ? dayName(sd) : 'your next workday', at = hhmm(PB_TIMES.summonsAt);
+  worksSayAll(by, day === 'tomorrow' && worksVoice(by, 'pb.promo.passed') || [worksText('pb.passed.say', 'That\'s the test done. You\'ll have your result {day}, first thing: my office, {time}.', { day, time: at })]);
+  flagSet('pb.passed', worksDay(t));
+  promoMail('mail.pb.passed', 'Your test | Done. Your result {day}, {time}, my office. Not before.', { day, time: at }, t);
+  if (t >= shipNow() - 1) promoNotice(worksText('pb.passed.notice', 'Your Tier 2 test is done. Your result: {day}, {time}, the Chief\'s office.', { day, time: at }), worksName(by));
+}
+function promoBeatsItems(d) {                            // devDay's rows on day d: the test, your result, the pip, your cabin (until each is booked or done)
+  const W = SHIP.works; if (!promoBeatsOn() || !W || !W.test) return [];
+  const out = [], has = id => SHIP.occasions.some(r => r.id === id && Math.floor(r.at / 1440) + 1 === d);
+  if (!W.test.passed && W.tier === 1 && W.test.day === d) out.push({ from: PROMO.jobAt, to: PROMO.until, title: worksText('pb.row.test', 'Your Tier 2 test'), where: 'the job board, the Works bay, Deck 5', kind: 'beat', deck: 5, room: 'w' });
+  const sd = W.test.passed ? promoSummonsDay() : null, od = (W.ms.find(x => x[0] === 'officer') || [])[1] || (W.tier === 1 ? sd : null);
+  if (sd === d && W.tier === 1 && !has('promoSummons')) out.push({ from: PB_TIMES.summonsAt, to: PB_TIMES.summonsAt + 30, title: worksText('pb.row.result', 'Your result with the Chief'), where: 'the Chief\'s office, the Works bay, Deck 5', kind: 'beat', deck: 5, room: 'o' });
+  if (od === d && !promoDone('ceremony2') && !has('promoCeremony')) { const T = promoCerTimes(d); out.push({ from: T.at, to: T.at + PROMO.cerLen, title: worksText('pb.row.pip', 'Your pip, from the Captain'), where: 'the observation room, Deck 1', kind: 'beat', deck: 1, room: 'O' }); }
+  if (od === d && !promoDone('move2')) out.push({ from: PB_TIMES.moveAt, to: PROMO.moveLate, title: worksText('pb.row.cabin', 'Your new cabin, after dinner'), where: PROMO.home + ', the officers\' corridor, Deck 4', kind: 'beat', deck: PROMO.homeRoom.deck, room: PROMO.homeRoom.room });
+  return out;
+}
+function promoBeatsWalkWait(now) {                       // promoMoveTick: true = not yet (the pip first, then your dinner and out of the mess; 20:00 at the latest)
+  if (!promoBeatsOn()) return false;
+  const d = worksDay(now), m = now - (d - 1) * 1440; if (m >= PB_TIMES.walkBy) return false;
+  if (!promoDone('ceremony2') || m < promoCakeWin(d)[1]) return true;
+  if (flag('pb.ate') !== d) return true;
+  if (typeof ACT !== 'undefined' && ACT && ACT.kind === 'eat') return true;
+  try { if (deckDef.num === 3 && roomAt(...player.here()) === 'M') return true; } catch (e) { /* on paper: out of the mess */ }
+  return false;
+}
+// the crew's talk (live only, nothing saved but the beats' flags): one line every few ship minutes at most, never over a
+// chat card, a dialogue or the other chatter's gap, from someone near you (CHATTER_NEAR, on screen), each once a beat a day
+const PB_TALK = { at: -1e9, said: new Set() };
+function promoTalkKind(now) {                            // -> [kind, who ('any' | 'friend' | 'works'), place ('any' | 'bay' | 'meal')] for now, or null
+  const W = SHIP.works; if (!W || !W.test) return null;
+  const d = worksDay(now), m = now - (d - 1) * 1440, eve = m >= DAY_SHIFT[1], od = (W.ms.find(x => x[0] === 'officer') || [])[1];
+  if (W.tier === 1 && !W.test.passed) {
+    const c = W.cur, j = c && c.id === 't2' && c.j && SHIP.jobs.find(x => x.id === c.j);
+    if (j && j.claimedBy === 'you') return ['pb.watch', 'any', 'bay'];
+    if (W.test.day === d + 1 && eve || W.test.day === d && m < PROMO.jobAt) return ['pb.luck', 'friend', 'any'];
+    return W.test.day >= d ? ['pb.soon', 'any', W.test.day === d ? 'bay' : 'any'] : null;
+  }
+  if (W.tier === 1 && W.test.passed) return ['pb.passed', 'any', 'any'];
+  if (od === d && promoDone('summons2')) return ['pb.officer', 'any', 'any'];
+  return null;
+}
+function promoTalkTick(now) {
+  if (!promoBeatsOn() || typeof bubbleSay !== 'function' || typeof DECK_CREW === 'undefined' || typeof SOC === 'undefined') return;
+  if (typeof CHAT !== 'undefined' && CHAT || typeof sleeping !== 'undefined' && sleeping || typeof DIALOGUE !== 'undefined' && DIALOGUE) return;
+  const m = Math.floor(now); if (m - PB_TALK.at < 3 || typeof CHATTER_AT !== 'undefined' && simNow() - CHATTER_AT < CHATTER_GAP * 1000) return;
+  const k = promoTalkKind(m); if (!k) return;
+  const [kind, who, where] = k, d = worksDay(m), here = promoInBay();
+  if (where === 'bay' && !here) return;
+  let P; try { P = player.obj.position; } catch (e) { return; }
+  const near = DECK_CREW.filter(a => a.h && a.p && SOC.idx.has(a.p.id) && a.p.id !== 'calder' && Math.hypot(a.x - P.x, a.z - P.z) <= CHATTER_NEAR && !PB_TALK.said.has(kind + '@' + d + ':' + a.p.id))
+    .sort((a, b) => Math.hypot(a.x - P.x, a.z - P.z) - Math.hypot(b.x - P.x, b.z - P.z));
+  for (const a of near) {
+    const w = whereIs(a.p, m), act = w && w.act; if (!act || act === 'sleep' || act === 'wash') continue;
+    const meal = act === 'breakfast' || act === 'dinner', tier = relTier(a.p.id);
+    const kd = who === 'friend' && tier < 2 ? 'pb.soon' : kind;   // the evening before: friends wish you luck, the rest say how fast it came
+    if (!here && !meal && kd !== 'pb.passed' && kd !== 'pb.officer') continue;   // the bay and the mess (the evening's talk anywhere)
+    const l = socLine(a.p, kd, { t: m, act, tier, bubble: true, flags: { [kd]: true } }); if (!l) continue;
+    if (bubbleSay(a.h, l.text, 5) === false) continue;
+    PB_TALK.said.add(kind + '@' + d + ':' + a.p.id); PB_TALK.at = m; if (typeof CHATTER_AT !== 'undefined') CHATTER_AT = simNow();
+    return l.text;
+  }
+}
+function promoBeatsTick(now, skip) {                     // once a ship minute (hourly while time skips): the Mails, notices and words of each step
+  promoBeatsApply();
+  const W = SHIP.works; if (!promoBeatsOn() || !W || !W.test) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, B = (d - 1) * 1440, live = !skip && now >= shipNow() - 1, od = (W.ms.find(x => x[0] === 'officer') || [])[1];
+  if (W.tier === 1 && !W.test.passed) {
+    if (W.test.day === d + 1 && m >= 1200 && flag('mail.pb.luck') !== d) { flagSet('mail.pb.luck', d);   // A: the evening before, a word from up to two friends
+      promoGuests(W.test.day).slice(PROMO.guests.length, PROMO.guests.length + 2).forEach((id, k) => {
+        const t = worksText('mail.pb.luck', 'Good luck | Tomorrow\'s the big one, then. You\'ll be fine. Eat a proper breakfast.', null, k), i = t.indexOf(' | ');
+        mailSend({ at: Math.max(now, B + 1200) + 10 * k, from: worksName(id), subject: i > 0 ? t.slice(0, i) : 'Good luck', body: i > 0 ? t.slice(i + 3) : t, quiet: true }); }); }
+    if (W.test.day === d && m >= 360 && m < PROMO.jobAt && live && flag('pb.morning') !== d) {   // A: the test morning, once you're up
+      flagSet('pb.morning', d); promoNotice(worksText('pb.morning.notice', 'Today: your Tier 2 test, 09:00. It goes up on the job board in the Works bay.')); }
+    if (W.test.day === d && m < PROMO.jobAt + 30 && live && promoInBay() && flag('pb.morning.calder') !== d) {   // her word as you come into the bay
+      flagSet('pb.morning.calder', d); worksSayAll('calder', worksVoice('calder', 'pb.promo.morning') || [worksText('pb.morning.say', 'Morning. Nine o\'clock, it goes on the board. Take it when you\'re ready.')]); }
+    const c = W.cur, tj = c && c.id === 't2' && c.st === 'do' && c.j && SHIP.jobs.find(x => x.id === c.j);   // B: holding another job while the test waits on the board: said once an hour
+    let mj = null; try { mj = live && tj && !tj.claimedBy && !(tj.found > now) ? myJob() : null; } catch (e) { mj = null; }
+    if (mj && mj.id !== tj.id && flag('pb.busy') !== Math.floor(now / 60)) { flagSet('pb.busy', Math.floor(now / 60));
+      promoNotice(worksText('pb.busy.notice', 'Your Tier 2 test is waiting on the job board, till {time}. Turn this job in first, or drop it.', { time: hhmm(PROMO.until) }), worksName('calder')); }
+  }
+  if (W.tier === 1 && W.test.passed) {                   // D: the result, first thing
+    const sd = promoSummonsDay();
+    if (sd === d && m >= PB_TIMES.wakeAt && flag('mail.pb.result') !== d) { flagSet('mail.pb.result', d);
+      promoMail('mail.pb.result', 'Your result | My office, {time}. Before your shift. Clock in on the way if you like.', { time: hhmm(PB_TIMES.summonsAt) }, Math.max(now, B + PB_TIMES.wakeAt)); }
+    if (sd === d && m >= PB_TIMES.wakeAt && m < PB_TIMES.summonsAt && live && flag('pb.result.told') !== d) { flagSet('pb.result.told', d);
+      promoNotice(worksText('pb.result.notice', 'Your Tier 2 result: {time}, the Chief\'s office, Works bay. Before your shift.', { time: hhmm(PB_TIMES.summonsAt) }), worksName('calder')); }
+  }
+  if (od === d && promoDone('summons2') && !promoDone('ceremony2')) {   // E: the pip, from the Captain
+    const T = promoCerTimes(d);
+    if (m >= T.at - 30 && m < T.at && live && flag('pb.pip.told') !== d) { flagSet('pb.pip.told', d);
+      promoNotice(worksText('pb.pip.notice', 'The Captain pins your pip at {time}: the observation room, Deck 1. Go now.', { time: hhmm(T.at) }), 'Captain Odile Marrow');
+      if (promoInBay()) worksSayAll('calder', worksVoice('calder', 'pb.promo.pip') || [worksText('pb.pip.say', 'Observation room. The Captain doesn\'t wait. Go.')]); }
+  }
+  if (od === d && promoDone('summons2') && !promoDone('move2')) {   // F: your cabin after dinner
+    if (m >= DAY_SHIFT[1] && flag('mail.pb.cabin') !== d) { flagSet('mail.pb.cabin', d);
+      promoMail('mail.pb.cabin', 'Your cabin | After dinner I\'ll walk you to 4-23. Eat first. Your things are on their way.', null, Math.max(now, B + DAY_SHIFT[1])); }
+    if (!skip && typeof ACT !== 'undefined' && ACT && ACT.kind === 'eat' && ACT.o && ACT.o.fed && m >= MEALS.dinner[0] && flag('pb.ate') !== d) flagSet('pb.ate', d);
+  }
+  if (!skip) promoTalkTick(now);
+}
+WORK_TICKS.push((now, skip) => promoBeatsTick(now, skip));
+onSim('job', n => {                                      // B: Torres comes by at the end of your test job (his train.t2.torres), if he's near
+  const c = SHIP.works && SHIP.works.cur; if (!promoBeatsOn() || !n || !c || c.id !== 't2' || c.st !== 'do' || n.id !== c.j || n.step !== 'done') return;
+  try { const a = DECK_CREW.find(x => x.p && x.p.id === 'torres-zeke'), P = player.obj.position;
+    if (a && a.h && Math.hypot(a.x - P.x, a.z - P.z) <= CHATTER_NEAR) { const l = worksVoice('torres-zeke', 'train.t2.torres'); if (l) simTimeout(() => worksSayAll('torres-zeke', l), 5600); } } catch (e) { /* not in play */ }
+});
 // ---- end of slot: Works career engineer ----
 
 
@@ -61282,11 +61528,11 @@ function devmodePromoSteps() {                           // the promotion's beat
   if (W.test) out.push({ label: 'Your test job', at: abs(W.test.day, PROMO.jobAt), done: !!W.test.passed });
   if (P) {
     out.push({ label: 'The summons', at: abs(P.summons.day, P.summons.at), done: promoDone('summons2') });
-    out.push({ label: 'Cake in the tea corner', at: abs(P.gather.day, PROMO.cake[0]), done: promoDone('cake2') });
+    out.push({ label: 'Cake in the tea corner', at: abs(P.gather.day, promoCakeWin(P.gather.day)[0]), done: promoDone('cake2') });
     out.push({ label: 'Your cabin', at: abs(P.move.day, P.move.at), done: promoDone('move2') });
     out.push({ label: 'The ceremony', at: abs(P.ceremony.day, P.ceremony.at), done: promoDone('ceremony2') });
   }
-  return out;
+  return promoBeatsOn() ? out.sort((a, b) => a.at - b.at) : out;   // FX28: the pip before the cake and your cabin
 }
 function devmodePromoNext() {
   const s = devmodePromoSteps().find(x => !x.done && x.at - 5 > shipNow());
