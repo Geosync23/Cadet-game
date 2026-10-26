@@ -1195,7 +1195,7 @@ if re.search(r'^const EV_COMET_ON = true;', _src, re.M):
 VESSEL_JS = r"""(() => {
   if (typeof EV_VESSEL_ON === 'undefined' || !EV_VESSEL_ON || !SHIP_EVENTS.veyliVessel) return { off: true, has: !!SHIP_EVENTS.veyliVessel, plan: evCalPlan().map(r => r.id), sw: EV_SHIPWIDE.filter(e => /^vessel/.test(e.id)).length, day28: eventsOn(28).map(e => e.id).filter(id => /^vessel/.test(id)) };
   const run = jobs => {
-    const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice(), m: MEETINGS.splice(0), com: (SHIP.commendations || []).slice() };
+    const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice(), m: MEETINGS.splice(0), com: (SHIP.commendations || []).slice(), t: shipNow() };
     SHIP.event = null; SHIP.eventLog.length = 0; SHIP.eventLog.push(...EV_BEFORE('veyliVessel')); EV_DAYS.clear(); SHIP_DAYS.clear();
     const due = eventDueDay(), d = due ? due.day : 27, B = (d - 1) * 1440, tv = schedPeople().find(p => p.id === 'taavek');
     const away = (p, t) => { const w = whereIs(p, t); return w.act === 'away' || !w.deck; };
@@ -1214,7 +1214,7 @@ VESSEL_JS = r"""(() => {
       meets: MEETINGS.filter(m => m.event === 'veyliVessel').map(m => m.id + ' ' + (Math.floor(m.at / 1440) + 1 - d) + ' ' + hhmm(m.at % 1440)), log, com, left: SHIP.event && SHIP.event.id,
       late: [vesselLate(27, [], null), vesselLate(28, [], null), vesselLate(28, [{ id: 'veyliVessel' }], null), vesselLate(28, [], { id: 'veyliVessel' })] };
     ADDRESSES.length = a0;
-    SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr); MEETINGS.length = 0; MEETINGS.push(...keep.m); SHIP.commendations.length = 0; SHIP.commendations.push(...keep.com); EV_DAYS.clear(); SHIP_DAYS.clear();
+    SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr); MEETINGS.length = 0; MEETINGS.push(...keep.m); SHIP.commendations.length = 0; SHIP.commendations.push(...keep.com); EV_DAYS.clear(); SHIP_DAYS.clear(); setShipNow(keep.t);   // the clock back (the live part goes forward from here)
     return R;
   };
   const a = run(0), b = run(0), c = run(2);
@@ -1246,12 +1246,50 @@ if _von or _vline:
         if a['addr'] != ['0 08:00', '3 09:15']: fail(f"the Captain's addresses: {a['addr']}")
         if not any(x.startswith('0 18:00 Commander Teo Vance') for x in a['mails']) or not any(x.startswith('3 12:00 Taavek') for x in a['mails']): fail(f"the Veyli vessel's Mail: {a['mails']}")
         if a['aboardAt'] != ['1 09:20 away', '1 09:35 aboard', '2 14:50 aboard', '2 15:05 away', '0 12:00 away', '3 10:00 away']: fail(f"Taavek aboard only Sunday 09:30 to Monday 15:00: {a['aboardAt']}")
-        if a['called'] != ['marrow 0', 'calder 1', 'lindqvist-isak 2']: fail(f"called in: {a['called']}")
-        if a['meets'] != ['vesselCall 0 09:00', 'vesselRamp 1 09:30', 'vesselHome 2 15:00']: fail(f"the Veyli vessel's meetings: {a['meets']}")
+        if a['called'] != ['marrow 0', 'calder 0,1', 'lindqvist-isak 2']: fail(f"called in: {a['called']}")
+        if a['meets'] != ['vesselCall 0 09:00', 'vesselSheet 0 10:00', 'vesselRamp 1 09:30', 'vesselHome 2 15:00']: fail(f"the Veyli vessel's meetings: {a['meets']}")
         if a['log'] != ['smooth {}'] or a['com']: fail(f"the Veyli vessel's end with nothing done: {a['log']} commendation {a['com']}")
         if c['com'] != [3] or not any('3 09:30' in x and 'Commendation' in x for x in c['mails']): fail(f"the commendation rule (C1): two jobs, a commendation Tuesday 09:30: {c['com']} {c['mails']}")
         if a['late'] != [False, True, False, False]: fail(f"the late-save rule: {a['late']}")
         if not VS['same']: fail('the Veyli vessel ran differently the second time')
+        # V-2 live: Saturday 10:00 Calder's sheet in the Works bay (the arrow at Calder, the scene, the arrow at the sheet,
+        # signing, the parts list by Mail); Sunday the ramp three ways: at its foot at 09:30 (vesselRamp), late at 09:50 with
+        # Taavek and Calder waiting (vesselRamp.late), and after 10:30 at the Works bay bench, Zeke having met them
+        # (vesselRamp.bench); each time Taavek's at the bench afterwards and the Record says you met them
+        g.ev("""window.__vmins = n => { for (let k = 0; k < n * 50; k++) window.__step(1, 1000 / 30); };
+          window.__vfresh = t => { SHIP.event = null; SHIP.eventLog.length = 0; for (const r of evCalPlan()) if (r.id !== 'veyliVessel') SHIP.eventLog.push({ id: r.id, startDay: r.day, endDay: r.day + SHIP_EVENTS[r.id].days, band: 'smooth', threads: {}, mine: {} });
+            MEETINGS.length = 0; EV_DAYS.clear(); SHIP_DAYS.clear(); if (DIALOGUE) dialogueEnd(true); skipTo(t); };
+          window.__vplay = () => { const seen = []; for (let k = 0; k < 30 && DIALOGUE; k++) { const v = dialogueView(); if (!v) break; seen.push(v.choices ? '[choice]' : v.id); dialogueStep(v.choices ? 0 : undefined); } return seen; };
+          window.__vat = (c, r) => { goToDeck(5); player.obj.position.copy(cellPos(c, r)); target.copy(player.obj.position).setY(.7); }; 'ok'""")
+        def vmins(n):
+            for _ in range(n): g.step(50)
+        g.ev("__vfresh(26 * 1440 + 590); __vat(15, 3)"); vmins(14)
+        L = g.ev("({ t: hhmm(shipNow() % 1440), dlg: DIALOGUE && DIALOGUE.id, arrow: guideList().filter(x => x.id === 'vessel:sheet').map(x => x.level + (x.shown ? ' shown' : '')), row: vesselItems(27).map(x => x.title) })")
+        L['lines'] = g.ev("__vplay()")
+        g.ev("const it = ITEMS.find(i => i.vesselSheet); const p = new THREE.Vector3(); it.hit.getWorldPosition(p); window.__vmail = []; const ms = mailSend; window.__vms = ms; mailSend = m => { __vmail.push(m.from + ': ' + m.subject); ms(m); }; vesselSign(it, p)")
+        for _ in range(12):
+            vmins(1)
+            if g.ev("!!SHIP.event.mine['vessel:signed']"): break
+        L.update(g.ev("({ told: SHIP.event.mine['vessel:told'], signed: SHIP.event.mine['vessel:signed'], mail: __vmail.slice(), arrows: guideList().filter(x => /^vessel:/.test(x.id)).map(x => x.id) })")); g.ev("mailSend = __vms")
+        print('  V-2 live, the sheet:', L)
+        if L['dlg'] != 'vesselSheet' or '[choice]' not in L['lines'] or not L['told'] or not L['signed'] or not any('Calder' in x for x in L['mail']) or L['arrow'] != ['1 shown'] or not L['row']: fail(f"the sheet (Calder's scene, the arrow, signing, the parts list): {L}")
+        for how, t0, at, want in [('on time', 27 * 1440 + 560, (5, 11), 'vesselRamp'), ('find', 27 * 1440 + 584, None, None), ('late', 27 * 1440 + 597, (5, 11), 'vesselRamp.late'), ('Zeke stood in', 27 * 1440 + 640, (16, 3), 'vesselRamp.bench')]:
+            if how == 'find':   # C3: at 09:45, not at the ramp (in the mess on Deck 3), Calder comes to find you, in person (the clock only runs forward: between the others)
+                g.ev(f"__vfresh({t0}); goToDeck(3); player.obj.position.copy(cellPos(30, 6)); target.copy(player.obj.position).setY(.7)"); vmins(4)
+                F = g.ev("({ t: hhmm(shipNow() % 1440), found: SHIP.event.mine['vessel:found'], coming: COME_TO.has('calder'), where: whereIs(schedPeople().find(p => p.id === 'calder'), shipNow()).deck })")
+                print('  V-2 live, Calder comes to find you at 09:45:', F)
+                if not F['found'] or not F['coming'] or F['where'] != 3: fail(f"Calder didn't come to find you at 09:45: {F}")
+                continue
+            g.ev(f"__vfresh({t0}); __vat({at[0]}, {at[1]})"); r = None
+            arrow = g.ev("(vmin => { __vmins(vmin); return guideList().filter(x => /^vessel:ramp/.test(x.id)).map(x => x.id + (x.shown ? '*' : '')); })(1)")
+            for _ in range(16):
+                vmins(1)
+                if g.ev("!!DIALOGUE"): break
+            r = g.ev("({ t: hhmm(shipNow() % 1440), dlg: DIALOGUE && DIALOGUE.id })"); r['arrow'] = arrow; r['lines'] = g.ev("__vplay()"); vmins(5)
+            r.update(g.ev("({ met: SHIP.event.mine['vessel:met'], by: SHIP.event.mine['vessel:metBy'], taavek: (() => { const a = DECK_CREW.find(a => a.p.id === 'taavek'); return a && a.goalId; })(), rec: vesselRecord({ mine: SHIP.event.mine, startDay: 27 }) })"))
+            print(f'  V-2 live, the ramp ({how}):', r)
+            if r['dlg'] != want or not r['met'] or 'Taavek' not in (r['rec'] or '') or not r['arrow'] or not any(x.endswith('*') for x in r['arrow']): fail(f"the ramp ({how}): {r}")
+            if how != 'Zeke stood in' and not str(r['taavek'] or '').startswith(('5-works-bay', '5-vbench')): fail(f"the ramp ({how}): Taavek not on the way to the bench: {r['taavek']}")
         if g.errors: fail(f"console (vessel): {g.errors[:4]}")
         g.close()
 
