@@ -54313,7 +54313,7 @@ onSim('caseCalled', n => { const c = SHIP.works && SHIP.works.cur; if (n && n.tr
 // the teacher's walk (section 14's escortPlanOf asks): lead you to the training job while you watch, follow you while you do one
 function worksEscort(p, t) {
   { const pe = p && typeof promoEscort === 'function' ? promoEscort(p, t) || promoMoveEscort(p, t) || promoCerEscort(p, t) : null; if (pe) return pe; }   // 24p: Calder comes to find you for the summons; the walk to your cabin; up to the ceremony
-  { const ue = p && typeof puEscort === 'function' ? puEscort(p, t) : null; if (ue) return ue; }   // 24u (S5-2): Calder comes to find you (the Tier 3 offer, your result)
+  { const ue = p && typeof puEscort === 'function' ? puEscort(p, t) || puEscort2(p, t) : null; if (ue) return ue; }   // 24u (S5-2): Calder comes to find you (the Tier 3 offer, your result)
   const W = SHIP.works, c = W && W.cur; if (!c || !p || p.id !== c.by || (c.st !== 'watch' && c.st !== 'do' && c.st !== 'held') || worksDay(t) !== c.d) return null;
   const j = SHIP.jobs.find(x => x.id === c.j), spot = trainSpot(j);
   if (c.st === 'held') return spot ? { mode: 'follow', to: { deck: spot.deck, tile: spot.tile } } : null;   // they stay with you
@@ -54455,9 +54455,9 @@ function worksNext() {
 function worksRecordHead() {                             // null before SHIP.works (Days 0-1 keep the Record's old line)
   const W = SHIP.works; if (!W) return null; const tier = W.tier, v = { title: worksText('works.title.t' + tier, 'tier ' + tier), rank: worksRankTitle(W), band: worksBandWord(), next: worksNext() };
   if (W.rank !== 'junior') v.title += ' · ' + v.rank;   // the title and rank together, never "Junior Technician · Junior Officer" (FX3, AR1)
-  const com = (W.ms.find(x => x[0] === 'commissioned') || [])[1], st = (W.ms.find(x => x[0] === 'stars') || [])[1];   // 24p: the ceremony; 24t: star logger (E3, 0.45.11)
+  const com = (W.ms.find(x => x[0] === 'commissioned') || [])[1], st = (W.ms.find(x => x[0] === 'stars') || [])[1], sen = (W.ms.find(x => x[0] === 'senior') || [])[1];   // sen: 24u's Senior Officer (S5-2)   // 24p: the ceremony; 24t: star logger (E3, 0.45.11)
   const ff = W.ms.filter(x => /^ff[1-3]$/.test(x[0])).sort((a, b) => a[0] < b[0] ? 1 : -1)[0], gr = ff ? +ff[0][2] : 0;   // E2's fault-finder grade (the highest)
-  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{title}. Your reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', worksText('works.record.commissioned', 'Commissioned Officer, Day {n}.', { day: com, n: com }), { n: com }) : '') + (st ? ' ' + worksText('works.ms.stars', 'Star logger, Day {n}.', { n: st }) : '') + (gr ? ' ' + worksText('works.ms.grade', 'Fault-finder grade: {grade}.', { grade: worksText('works.grade.' + gr, ['', 'Fault-finder', 'Senior fault-finder', 'Master fault-finder'][gr]), n: ff[1] }) : '') };
+  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{title}. Your reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', worksText('works.record.commissioned', 'Commissioned Officer, Day {n}.', { day: com, n: com }), { n: com }) : '') + (sen ? ' ' + worksText('works.ms.senior', 'Senior Officer, Day {n}', { n: sen }) + '.' : '') + (st ? ' ' + worksText('works.ms.stars', 'Star logger, Day {n}.', { n: st }) : '') + (gr ? ' ' + worksText('works.ms.grade', 'Fault-finder grade: {grade}.', { grade: worksText('works.grade.' + gr, ['', 'Fault-finder', 'Senior fault-finder', 'Master fault-finder'][gr]), n: ff[1] }) : '') };
 }
 // ---- the device's Works app: Training, Work log, Tools; other sections add tabs with worksTabAdd (24k: Fault notes and
 // the Chief's notes): worksTabAdd({ id, title, order, view() -> [blocks], act?(verb, arg), badge?() -> number }); the
@@ -58780,7 +58780,7 @@ function promoCommission(now, how) {                     // commissioned: once
   return true;
 }
 function promoPip() {                                    // your collar: one pip more once commissioned (the kit's rank pips: makeCharacter's s.rank)
-  const want = promoDone('ceremony2') ? 1 : 0;
+  const want = (typeof puRank === 'function' && puRank()) || (promoDone('ceremony2') ? 1 : 0);   // (24u, S5-2: a third pip once the Senior Officer's bar is given)
   try { if (typeof player === 'undefined' || !player || (PLAYER_SPEC.rank || 0) === want) return false;
     PLAYER_SPEC.rank = player.spec.rank = want; const w = player, old = w.rig;
     w.obj.remove(old.root); old.root.traverse(o => { if (o.isMesh) o.geometry.dispose(); });
@@ -59318,7 +59318,7 @@ const PU = { offerFrom: 14, testFrom: 15, seekAt: 480, partyAt: 1145, seekBy: 13
 const PU_LIVE = { seek: null, said: new Set(), talkAt: -1e9 };
 function puClean(s) {                                    // a save's pu, junk dropped
   const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi ? v : null, t = s && typeof s === 'object' && s.t3 && typeof s.t3 === 'object' ? s.t3 : null;
-  return { t3: t && int(t.day, 1, 99999) ? { day: t.day, tries: int(t.tries, 0, 99) || 0, passed: t.passed === true, res: int(t.res, 1, 99999), bar: int(t.bar, 1, 99999), toast: int(t.toast, 1, 99999) } : null };
+  return { t3: t && int(t.day, 1, 99999) ? { day: t.day, tries: int(t.tries, 0, 99) || 0, passed: t.passed === true, res: int(t.res, 1, 99999), bar: int(t.bar, 1, 99999), toast: int(t.toast, 1, 99999), ...(int(t.cake, 0, 99999) !== null ? { cake: t.cake } : {}) } : null };   // cake: the day you had a slice (0: the window went by)
 }
 if (P5_PROMO3) { const s = SAVED && SAVED.ship && SAVED.ship.works; if (SHIP.works && s && s.pu) SHIP.works.pu = puClean(s.pu); }
 function puT3() { const W = SHIP.works; return W && W.pu && typeof W.pu === 'object' && W.pu.t3 && typeof W.pu.t3 === 'object' ? W.pu.t3 : null; }   // the save's Tier 3 record, or null (a function: puCheck asks it with P5_STEP5 alone)
@@ -59398,6 +59398,8 @@ function puNext(k) {                                     // worksNext's line for
     return at(worksBand()) >= at('steady') && !ladderNeeds({ rep: 'relied' }, W) ? worksText('next.t3.steps', 'Your Tier 3 test needs Relied on and Power safety. You\'re {band} now.', { band: worksBandWord() }, k) : null; }
   if (!T.passed) return worksText('next.wait.t3', 'Your Tier 3 test is set. The job board, the Works bay, 09:00.', null, k);
   if (!T.res) { const R = puResultDay(); return worksText('next.pu3.result', 'Your result: {day}, 08:15, the Chief\'s office.', { day: R === d ? 'today' : R === d + 1 ? 'tomorrow' : R ? dayName(R) : 'your next workday' }, k); }
+  if (!T.bar) return worksText('next.pu3.bar', 'The Captain pins your bar at {time}, the observation room, Deck 1.', { time: hhmm(promoCerTimes(T.res).at) }, k);
+  if (!T.toast) return worksText('next.pu3.toast', 'The Captain\'s toast at 19:00, her quarters, Deck 2.', null, k);
   return null;
 }
 // the Schedule's and Tracked's rows on day d (devDay asks): the test, then (turn 3) your result, the bar and the toast
@@ -59405,7 +59407,11 @@ function puItems(d) {
   const T = P5_PROMO3 && puT3(), W = SHIP.works; if (!T || !W) return [];
   const out = [];
   if (!T.passed && W.tier === 2 && T.day === d) out.push({ from: 540, to: 900, title: worksText('pu3.row.test', 'Your Tier 3 test'), where: 'the job board, the Works bay, Deck 5', kind: 'beat', deck: 5, room: 'w' });
-  if (T.passed && !T.res && W.tier === 2 && puResultDay() === d) out.push({ from: PU_R.at, to: PU_R.at + 30, title: worksText('pu3.row.result', 'Your result, 08:15'), where: 'the Chief\'s office, the Works bay, Deck 5', kind: 'beat', deck: 5, room: 'o' });
+  const has = id => SHIP.occasions.some(r => r.id === id && Math.floor(r.at / 1440) + 1 === d);   // a booked one is the occasion's own row
+  if (T.passed && !T.res && W.tier === 2 && puResultDay() === d && !has('pu3Result')) out.push({ from: PU_R.at, to: PU_R.at + 30, title: worksText('pu3.row.result', 'Your result, 08:15'), where: 'the Chief\'s office, the Works bay, Deck 5', kind: 'beat', deck: 5, room: 'o' });
+  const bd = T.res || (T.passed && W.tier === 2 ? puResultDay() : null);
+  if (bd === d && !T.bar && !has('pu3Bar')) { const C = promoCerTimes(d); out.push({ from: C.at, to: C.at + 25, title: worksText('pu3.row.bar', 'The Captain, {time}', { time: hhmm(C.at) }), where: 'the observation room, Deck 1', kind: 'beat', deck: 1, room: 'O' }); }
+  if (T.bar && !T.toast && puToastDay() === d && !has('pu3Toast')) out.push({ from: PU_R.toastAt, to: PU_R.toastAt + PU_R.toastLen, title: worksText('pu3.row.toast', 'The toast, 19:00'), where: 'the Captain\'s quarters, Deck 2', kind: 'beat', deck: 2, room: 'C' });
   return out;
 }
 // the crew's talk (live only, nothing saved): as 24p's promoTalkTick, with Tier 3's kinds. One line every few ship
@@ -59420,6 +59426,7 @@ function puTalkKind(now) {                               // -> [kind, who ('any'
     return T.day >= d ? ['pu3.soon', 'any', 'any'] : null;
   }
   if (W.tier === 2 && T.passed && !T.res) return ['pu3.passed', 'any', 'any'];   // the bay that evening, and anywhere after the shift
+  if (T.res === d && !T.bar) return ['pu3.senior', 'any', 'any'];   // the day: the news goes round
   return null;
 }
 function puTalkTick(now) {
@@ -59438,7 +59445,7 @@ function puTalkTick(now) {
     const kd = who === 'friend' && tier < 2 ? 'pu3.soon' : kind;   // friends wish you luck; the rest say how fast it came
     if (!here && !meal && !puInLounge() && kd === 'pu3.soon') continue;   // how fast: the bay, the mess and the lounge
     if (kd === 'pu3.watch' && !here && !(deckDef && deckDef.num === 6)) continue;   // watching you at it: the bay and Deck 6
-    if (kd === 'pu3.passed' && !here && Math.floor(m - (d - 1) * 1440) < DAY_SHIFT[1]) continue;   // the result's talk: the bay, then anywhere once the shift's over
+    if ((kd === 'pu3.passed' || kd === 'pu3.senior') && !here && !meal && Math.floor(m - (d - 1) * 1440) < DAY_SHIFT[1]) continue;   // the result's talk: the bay, then anywhere once the shift's over
     const l = socLine(a.p, kd, { t: m, act, tier, bubble: true, flags: { [kd]: true } }); if (!l) continue;
     if (bubbleSay(a.h, l.text, 5) === false) continue;
     PU_LIVE.said.add(kind + '@' + d + ':' + a.p.id); PU_LIVE.talkAt = m; if (typeof CHATTER_AT !== 'undefined') CHATTER_AT = simNow();
@@ -59644,6 +59651,203 @@ if (P5_PROMO3) {
   });
   WORK_TICKS.push((now, skip) => { puDelay(now); puTestBeats(now, skip); if (!skip) { puWarnTick(now); puTestGuide(now); } });
 }
+// ---- S5-2 turn 3: the result, the bar, the cake and the toast (the beats "The result", "The day", "The bar", "The cake",
+// "The toast"). The result: the first workday after the test with Calder on shift (puResultDay), her Mail at 06:00, the
+// urgent notice once you're up, a level 1 arrow to her office from 08:00, at 08:15 her scene there (OCCASIONS.pu3Result,
+// script pu3.result, or pu3.result.fri when the bar is a Friday's 17:15; she sits at her desk, you stand across it: the
+// office has no visitor's chair); Torres outside the glass (his word after it). Not there by 08:30, she comes to find
+// you and it plays where you are; by 09:15 it comes by Mail. At its end, puPromote: Tier 3, rank 'senior', xp from 0, the
+// milestone ['senior', day] (the Record's line), the ship's news, up to two friends' Mail, the crew round the board
+// (section 14's worksGather, on simNote('promoted')). The bar the same day: the Captain's ceremony at 16:30 (17:15 on a
+// Friday: promoCerTimes) in the observation room (OCCASIONS.pu3Bar, script pu3.bar; the guests promoGuests gives, each on
+// a ceremony spot), her invite that morning, the notice at 16:00, Calder's "Go." in the bay, a level 1 arrow from 16:15;
+// not there by 16:45 Calder walks you up; never missed: by 18:15 by Mail. The pin: your collar's third pip (the kit's rank
+// mark: makeCharacter's s.rank 2, through 24p's promoPip asking puRank) and the certificate on your shelf. Brennan's cake
+// after it (promoCakeWin's window, the Works tea corner; "Take a slice": a level 1 arrow to her). The toast: the next day
+// at 19:00 (or the first one the guard leaves free), a Captain's table in her quarters (OCCASIONS.pu3Toast, script
+// pu3.toast; Vance and Calder at the table), the invite at 08:00, the notice at 18:30, a level 1 arrow from 18:45; the
+// framed menu on your shelf, met or missed (missed: by Mail at its end)
+Object.assign(PU_R, { barSeek: 15, barBy: 105, cake: '5-tea-3', toastAt: 1140, toastLen: 60, toastMail: 480, toastWarn: 1110, toastArrow: 1125 });
+OCCASIONS.pu3Result = { title: 'Your result: the Chief\'s office', kind: 'summons', by: 'calder', deck: 5, room: 'o', at: PU_R.at, len: 30, script: 'pu3.result', due: () => false, mail: null };
+OCCASIONS.pu3Bar = { title: 'Your bar', kind: 'meeting', by: 'marrow', with: ['vance', 'calder', 'torres-zeke'], deck: 1, room: 'O', at: 990, len: 25, script: 'pu3.bar', due: () => false, mail: null };
+OCCASIONS.pu3Toast = { title: 'The Captain\'s toast', kind: 'invite', by: 'marrow', with: ['vance', 'calder'], deck: 2, room: 'C', at: PU_R.toastAt, len: PU_R.toastLen, script: 'pu3.toast', due: () => false, mail: null,
+  galley: { batch: { meals: 4, label: 'the Captain\'s toast' } } };
+function puKeepsake(what) {                              // on your shelf (section 20's keepsakes, at most 8), from the Captain by her name: giftKeepsake keeps one a person, and her commission is there already
+  try { socInit(); const K = SHIP.social.keepsakes || (SHIP.social.keepsakes = []); if (K.length < 8 && !K.some(x => x.what === what)) K.push({ from: 'Captain Odile Marrow', what, day: SHIP.time.day }); } catch (e) { /* no social */ }
+}
+function puMailCap(key, fallback, vars, at) {            // a writer's 'Subject | body' line, by Mail from the Captain
+  if (typeof mailSend !== 'function') return; const t = worksText(key, fallback, vars), i = t.indexOf(' | ');
+  mailSend({ at, from: 'Captain Odile Marrow', subject: i > 0 ? t.slice(0, i) : 'Senior Officer', body: i > 0 ? t.slice(i + 3) : t });
+}
+const puBarDay = () => { const T = puT3(); return T && T.res ? T.res : null; };   // the bar on the result's day
+function puToastDay() {                                  // the day after the bar, or the first after it the guard leaves free at 19:00
+  const T = puT3(); if (!T || !T.bar) return null;
+  for (let d = T.bar + 1, n = 0; n < 14; d++, n++) { const own = evBeatsOn(d).some(b => b.id === 'seniorToast'); if (own || guardFree(d, PU_R.toastAt, PU_R.toastAt + PU_R.toastLen, 'captain')) return d; }
+  return T.bar + 1;
+}
+function puHook(id, pick, end) {                         // our hooks on a writer's scene (once)
+  const sc = MEETING_SCRIPTS[id]; if (!sc || sc.puHooked) return sc;
+  const p0 = sc.onPick, e0 = sc.onEnd; sc.puHooked = true;
+  sc.onPick = (k, c) => { if (pick) pick(k, c); if (p0) p0(k, c); };
+  sc.onEnd = f => { if (e0) e0(f); if (end) end(f); };
+  return sc;
+}
+function puResultScript(d) {                             // pu3.result, or its Friday twin (the bar at 17:15)
+  const fri = (() => { try { return weekday(d) === 4; } catch (e) { return false; } })(), id = fri && MEETING_SCRIPTS['pu3.result.fri'] ? 'pu3.result.fri' : 'pu3.result';
+  if (!MEETING_SCRIPTS[id]) MEETING_SCRIPTS[id] = { title: 'Your result', from: 'Chief Ines Calder', stub: true, gist: 'Calder gave you your result: you passed. You\'re a Senior Officer now, Senior Technician, Tier 3.',
+    lines: [{ who: 'calder', text: 'Sit. You passed. Senior Officer.', to: 'you' }, { who: 'calder', text: 'The bar\'s the Captain\'s. This afternoon.' }] };
+  puHook(id, k => flagSet('pu3.reply2', k + 1), () => puPromote(shipNow(), 'met'));
+  OCCASIONS.pu3Result.script = id; return id;
+}
+for (const r of SHIP.occasions) { if (r.id === 'pu3Result') puResultScript(Math.floor(r.at / 1440) + 1); }   // a reload with it booked: its scene hooked
+function puPromote(now, how) {                           // you're a Senior Officer
+  const W = SHIP.works, T = puT3(); if (!W || W.tier !== 2 || !T || !T.passed || T.res) return false;
+  const d = worksDay(now), r = SHIP.occasions.find(x => x.id === 'pu3Result' && x.status === 'asked'); if (r) r.met = true;
+  W.tier = 3; W.rank = 'senior'; W.xp = 0; T.res = d; PU_LIVE.rseek = null;
+  if (!W.ms.some(x => x[0] === 'senior')) W.ms.push(['senior', d]);
+  if (how === 'mail') promoMail('mail.pu3.promo', 'Your result | You passed. As of today you\'re a Senior Officer: Senior Technician, Tier 3. The Captain pins your bar this afternoon, observation room.', null, now);
+  if (typeof newsAdd === 'function') try { newsAdd({ id: 'pu3.senior', about: 'you', lines: [worksText('pu3.news', '{me} is a Senior Officer as of today. The bar, the observation room, and cake.')], seed: ['dept:works'], kind: 'gossip' }); } catch (e) { /* no social */ }
+  if (typeof mailSend === 'function') promoGuests(d).slice(PU.guests, PU.guests + 2).forEach((id, k) => {
+    const t = careerText('mail.pu3.friend', k) || 'Senior Officer | Heard the news. Knew you would. ' + worksFirst(id) + '.', i = t.indexOf(' | ');
+    mailSend({ at: now + 60 + 30 * k, from: worksName(id), subject: i > 0 ? t.slice(0, i) : 'Senior Officer', body: i > 0 ? t.slice(i + 3) : t, quiet: true }); });
+  puBarBook(now);
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;       // the board: Tier 3 jobs for you now
+  simNote('promoted', { tier: 3, rank: 'senior', how });
+  return true;
+}
+function puResultTick(now, skip) {                       // the Mail at 06:00, the notice once you're up, booked; she finds you at 08:30; by Mail by 09:15
+  const W = SHIP.works, T = puT3(); if (!W || W.tier !== 2 || !T || !T.passed || T.res) return;
+  const rd = puResultDay(), d = worksDay(now), m = now - (d - 1) * 1440, B = (d - 1) * 1440, live = !skip && now >= shipNow() - 1; if (!rd || d < rd) return;
+  if (d > rd || m >= PU_R.latest) { puPromote(Math.min(now, (rd - 1) * 1440 + PU_R.latest), 'mail'); return; }   // never missed: by 09:15 it's done
+  let r = SHIP.occasions.find(x => x.id === 'pu3Result');
+  if (!r && m >= PU_R.wake - 60) { puResultScript(d); r = occasionAdd('pu3Result', B + PU_R.at, true, 30); }
+  if (m >= PU_R.wake && flag('mail.pu3.result') !== d) { flagSet('mail.pu3.result', d); promoMail('mail.pu3.result', 'Your result | My office, {time}. Before your shift.', { time: hhmm(PU_R.at) }, Math.max(now, B + PU_R.wake)); }
+  if (m >= PU_R.wake && m < PU_R.at && live && !promoBusy() && flag('pu3.result.told') !== d) { flagSet('pu3.result.told', d);
+    promoNotice(worksText('pu3.result.notice', 'Your Tier 3 result: {time}, the Chief\'s office, Works bay. Before your shift.', { time: hhmm(PU_R.at) }), worksName('calder')); }
+  if (!r) return;
+  if (live && m >= PU_R.at - 20 && m < PU_R.at + 30) {   // staging: Calder at her desk, Torres outside the glass
+    try { crewScene('calder', { mode: 'wait', to: '5-office-1', until: r.at + 30 }); if (!r.met) crewScene('torres-zeke', { mode: 'wait', to: { deck: 5, tile: [13, 3] }, until: r.at + 40 }); } catch (e) { /* no scene */ } }
+  if (m >= PU_R.seek && !r.met && !promoInOffice() && !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && !PU_LIVE.rseek && live) PU_LIVE.rseek = { by: 'calder', at: Math.floor(now) };   // 08:30: she comes to you
+  const S = PU_LIVE.rseek;
+  if (S && !r.met && live && !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && puNearMe('calder')) {
+    try { crewSceneEnd('calder'); } catch (e) { /* none */ }
+    worksSayAll('calder', worksVoice('calder', 'pu3.promo.fetch.result') || ['There you are. My office was empty. So we\'ll do it here.']);
+    const sc = puResultScript(d); r.met = true; (r.f || (r.f = {}))['met:' + r.key] = 1;
+    dialogueShow(sc, { id: r.key, who: ['calder'], at: now, where: { any: true } });
+  }
+}
+onSim('promoted', n => {                                 // Torres outside the glass, once it's over (his word if he's near)
+  if (!n || n.tier !== 3 || n.how !== 'met') return;
+  simTimeout(() => { if (puNearMe('torres-zeke', CHATTER_NEAR + 2)) { const l = worksVoice('torres-zeke', 'pu3.promo.glass'); if (l) worksSayAll('torres-zeke', l); } try { crewSceneEnd('torres-zeke'); crewSceneEnd('calder'); } catch (e) { /* none */ } }, 2500);
+});
+function puBarScript() {
+  if (!MEETING_SCRIPTS['pu3.bar']) MEETING_SCRIPTS['pu3.bar'] = { title: 'Your bar', from: 'Captain Odile Marrow', stub: true, gist: 'The Captain pinned your Senior Officer\'s bar in the observation room. The certificate is on your cabin shelf.',
+    lines: [{ who: 'marrow', text: 'A storm, a test and a ship that noticed.', to: 'you' }, { who: 'marrow', text: 'Hold still. There. Senior Officer.', pin: true }, { choice: [{ text: 'Thank you, Captain.', reply: { who: 'marrow', text: 'Congratulations, Senior Officer.' } }] }] };
+  return puHook('pu3.bar', () => puBar(shipNow(), 'met'), () => puBar(shipNow(), 'met'));   // the reply comes after the pin
+}
+function puBarBook(now) {                                // booked the moment you're promoted: the Captain's invite, that morning
+  const d = worksDay(now), T = promoCerTimes(d); if (SHIP.occasions.some(x => x.id === 'pu3Bar')) return null;
+  puBarScript(); const G = promoGuests(d); OCCASIONS.pu3Bar.with = G.filter(id => id !== 'marrow'); OCCASIONS.pu3Bar.at = T.at;
+  const r = occasionAdd('pu3Bar', (d - 1) * 1440 + T.at, true, OCCASIONS.pu3Bar.len); if (!r) return null;
+  try { const a = apptList().find(x => x.occ === r.key); if (a && !a.places) { const P = { marrow: '1-ceremony-captain' }; G.filter(id => id !== 'marrow').forEach((id, k) => { if (k < 6) P[id] = '1-ceremony-guest-' + (k + 1); }); a.places = P; } } catch (e) { /* no appointments */ }
+  puMailCap('mail.pu3.invite', 'Your bar, {time} | Chief Calder tells me you\'ve passed. Today at {time}, the observation room, Deck 1, I\'d like to pin your bar myself.', { time: hhmm(T.at) }, now);
+  return r;
+}
+for (const r of SHIP.occasions) { if (r.id === 'pu3Bar') puBarScript(); }
+function puBar(now, how) {                               // the bar's given: once
+  const W = SHIP.works, T = puT3(); if (!W || W.tier < 3 || !T || T.bar) return false;
+  const d = worksDay(now), r = SHIP.occasions.find(x => x.id === 'pu3Bar' && x.status === 'asked'); if (r) r.met = true;
+  T.bar = d; if (!W.ms.some(x => x[0] === 'senior.bar')) W.ms.push(['senior.bar', d]);
+  puKeepsake(worksText('pu3.keepsake', 'Senior Officer\'s certificate'));
+  if (how === 'mail') puMailCap('mail.pu3.bar', 'Your bar | We missed you this afternoon. The bar is on your cabin shelf with the certificate. Congratulations, Senior Officer.', null, now);
+  else simTimeout(() => puBarFriends(now), 30000);
+  promoPip();
+  simNote('pu3', { step: 'bar', day: d, how });
+  return true;
+}
+function puBarFriends(now) {                             // friends right after the bar (their bubbles)
+  try { const P = player.obj.position, G = promoGuests(worksDay(now)).slice(PU.guests); let n = 0;
+    for (const id of G) { const a = DECK_CREW.find(x => x.p && x.p.id === id); if (!a || !a.h || Math.hypot(a.x - P.x, a.z - P.z) > CHATTER_NEAR) continue;
+      const l = socLine(a.p, 'pu3.bar.friend', { t: now, tier: relTier(id), bubble: true, flags: { 'pu3.bar.friend': true } }); if (!l) continue;
+      const k = n++; simTimeout(() => { try { bubbleSay(a.h, l.text, 5); } catch (e) { /* gone */ } }, 5200 * k); } } catch (e) { /* not in play */ }
+}
+const puRank = () => { const T = P5_PROMO3 && puT3(); return T && T.bar ? 2 : 0; };   // 24p's promoPip asks: your collar's third pip once the bar's given
+function puBarTick(now, skip) {                          // the notice at 30 minutes before, Calder's "Go.", she walks you up at 16:45, by Mail by 18:15
+  const W = SHIP.works, T = puT3(), d0 = puBarDay(); if (!W || W.tier < 3 || !T || T.bar || !d0) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, C = promoCerTimes(d0), live = !skip && now >= shipNow() - 1;
+  if (d > d0 || d === d0 && m >= C.at + PU_R.barBy) { puBar(Math.min(now, (d0 - 1) * 1440 + C.at + PU_R.barBy), 'mail'); return; }
+  if (d < d0) return;
+  const r = SHIP.occasions.find(x => x.id === 'pu3Bar'); if (!r) { puBarBook(now); return; }
+  const f = r.f || (r.f = {});
+  if (m >= C.at - 30 && m < C.at && live && !f.notice && !promoBusy()) { f.notice = 1;
+    promoNotice(worksText('pu3.bar.notice', 'The Captain pins your bar at {time}: the observation room, Deck 1. Go now.', { time: hhmm(C.at) }), 'Captain Odile Marrow');
+    if (promoInBay()) worksSayAll('calder', worksVoice('calder', 'pu3.promo.bar') || [worksText('pu3.bar.say', 'Go.')]); }
+  if (m >= C.at + PU_R.barSeek && !f.seek && !r.met && r.status === 'asked' && live) { f.seek = now; r.len = C.late - C.at + 20;   // she walks you up; the room waits for you
+    worksSayAll('calder', worksVoice('calder', 'promo.fetch.ceremony') || ['There you are. The Captain\'s waiting. Come on.']); }
+}
+function puCakeTick(now) {                               // Brennan's cake after the bar: "Take a slice"
+  const W = SHIP.works, T = puT3(); if (!W || !T || !T.bar || T.cake !== undefined && T.cake !== null) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, K = promoCakeWin(T.bar);
+  if (d > T.bar || d === T.bar && m >= K[1]) { T.cake = 0; return; }
+  if (d < T.bar || m < K[0]) return;
+  if (!PU_LIVE.cake) { PU_LIVE.cake = 1; try { crewScene('brennan', { mode: 'wait', to: PU_R.cake, until: (d - 1) * 1440 + K[1], hold: 'tray' }); } catch (e) { /* no scene */ }
+    try { toast('Chef Auda Brennan', worksText('pu3.cake.toast.ready', 'There\'s cake at the Works tea corner. Your cake, Senior Officer.')); } catch (e) { /* no UI */ } }
+  if (typeof guideAsk === 'function') guideAsk({ id: 'pu3:cake', level: 1, owner: '24u (S5-2)', until: (d - 1) * 1440 + K[1],
+    goal: () => ({ deck: 5, room: 't', ...(puNearMe('brennan', 30) ? { crew: 'brennan' } : { place: PU_R.cake }), label: worksText('pu3.ptr.cake', 'Take a slice') }), done: () => { const t = puT3(); return !t || t.cake !== undefined && t.cake !== null; } });
+  if (puNearMe('brennan', 3)) { T.cake = d;
+    worksSayAll('brennan', worksVoice('brennan', 'pu3.cake') || ['Cake for the new Senior. Corner piece, love.']);
+    try { toast('Chef Auda Brennan', worksText('pu3.cake.toast', 'A slice of Brennan\'s cake. Still warm.')); } catch (e) { /* no UI */ }
+    if (puNearMe('calder', CHATTER_NEAR)) { const l = worksVoice('calder', 'pu3.promo.cake'); if (l) simTimeout(() => worksSayAll('calder', l), 5600); }
+    try { const P = player.obj.position; let n = 0; for (const a of DECK_CREW.filter(x => x.h && x.p && relTier(x.p.id) >= 2 && Math.hypot(x.x - P.x, x.z - P.z) <= CHATTER_NEAR)) { if (n >= 2) break;
+      const l = socLine(a.p, 'pu3.cake', { t: now, tier: relTier(a.p.id), bubble: true, flags: { 'pu3.cake': true } }); if (!l) continue; const k = n++; simTimeout(() => { try { bubbleSay(a.h, l.text, 5); } catch (e) { /* gone */ } }, 11000 + 5200 * k); } } catch (e) { /* not in play */ } }
+}
+function puToastScript() {
+  if (!MEETING_SCRIPTS['pu3.toast']) MEETING_SCRIPTS['pu3.toast'] = { title: 'The Captain\'s toast', from: 'Captain Odile Marrow', stub: true, gist: 'The Captain raised a toast to you in her quarters. The framed menu is on your cabin shelf.',
+    lines: [{ who: 'marrow', text: 'Cups up. To the Wren\'s newest Senior Officer.', to: 'you' }] };
+  return puHook('pu3.toast', k => flagSet('pu3.toast', k + 1), () => puToasted(shipNow(), 'met'));
+}
+for (const r of SHIP.occasions) { if (r.id === 'pu3Toast') puToastScript(); }
+function puToasted(now, how) {                           // the toast's over (or missed): the framed menu on your shelf
+  const T = puT3(); if (!T || T.toast) return false;
+  const d = worksDay(now), r = SHIP.occasions.find(x => x.id === 'pu3Toast' && x.status === 'asked'); if (r && how === 'met') r.met = true;
+  T.toast = d;
+  puKeepsake(worksText('pu3.menu', 'The Captain\'s menu'));
+  if (how === 'mail') puMailCap('mail.pu3.toast.missed', 'Tonight | We kept your chair. The toast was drunk anyway. The menu is on your shelf.', null, now);
+  simNote('pu3', { step: 'toast', day: d, how });
+  return true;
+}
+function puToastTick(now, skip) {                        // the invite at 08:00, the notice at 18:30, by Mail at its end if missed
+  const T = puT3(), td = puToastDay(); if (!T || T.toast || !td) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, B = (d - 1) * 1440, live = !skip && now >= shipNow() - 1;
+  if (d > td || d === td && m >= PU_R.toastAt + PU_R.toastLen) { const r = SHIP.occasions.find(x => x.id === 'pu3Toast'); puToasted(Math.min(now, (td - 1) * 1440 + PU_R.toastAt + PU_R.toastLen), r && r.met ? 'met' : 'mail'); return; }
+  if (d < td) return;
+  let r = SHIP.occasions.find(x => x.id === 'pu3Toast');
+  if (!r && m >= PU_R.toastMail - 60) { puToastScript(); r = occasionAdd('pu3Toast', B + PU_R.toastAt, true, PU_R.toastLen);
+    try { const a = r && apptList().find(x => x.occ === r.key); if (a && !a.places) a.places = { marrow: '2-captable-5', vance: '2-captable-2', calder: '2-captable-4' }; } catch (e) { /* no appointments */ } }
+  if (!r) return; const f = r.f || (r.f = {});
+  if (m >= PU_R.toastMail && !f.mail) { f.mail = 1; puMailCap('mail.pu3.toast', 'The toast | Tonight, 19:00, my quarters, Deck 2. Dinner, and a toast to our new Senior Officer.', null, Math.max(now, B + PU_R.toastMail)); }
+  if (m >= PU_R.toastWarn && m < PU_R.toastAt && live && !f.notice && !promoBusy()) { f.notice = 1; promoNotice(worksText('pu3.toast.notice', 'The Captain\'s toast at 19:00: her quarters, Deck 2. Go at quarter to.'), 'Captain Odile Marrow'); }
+}
+function puBeatsGuide(now) {                             // the level 1 arrows: your result, the bar, the toast
+  if (typeof guideAsk !== 'function') return; const owner = '24u (S5-2)';
+  const rr = SHIP.occasions.find(x => x.id === 'pu3Result' && x.status === 'asked' && !x.met);
+  if (rr && now >= rr.at - 15) guideAsk({ id: 'pu3:result', level: 1, owner, from: rr.at - 15, until: rr.at + rr.len,
+    goal: () => ({ deck: 5, room: 'o', place: '5-office-visit-1', label: worksText('pu3.ptr.result', 'Your result: Calder\'s office') + ', ' + hhmm(rr.at % 1440) }), done: () => !!rr.met || rr.status !== 'asked' || !!(puT3() || {}).res });
+  const br = SHIP.occasions.find(x => x.id === 'pu3Bar' && x.status === 'asked' && !x.met);
+  if (br && now >= br.at - 15) guideAsk({ id: 'pu3:bar', level: 1, owner, from: br.at - 15, until: br.at + br.len,
+    goal: () => ({ deck: 1, room: 'O', place: '1-ceremony-you', label: worksText('pu3.ptr.bar', 'Your bar: the observation room') + ', ' + hhmm(br.at % 1440) }), done: () => !!br.met || !!(puT3() || {}).bar });
+  const tr = SHIP.occasions.find(x => x.id === 'pu3Toast' && x.status === 'asked' && !x.met);
+  if (tr && now >= tr.at - 15) guideAsk({ id: 'pu3:toast', level: 1, owner, from: tr.at - 15, until: tr.at + tr.len,
+    goal: () => ({ deck: 2, room: 'C', place: '2-captable-1', label: worksText('pu3.ptr.toast', 'The Captain\'s toast: her quarters') }), done: () => !!tr.met || !!(puT3() || {}).toast });
+}
+function puEscort2(p, t) {                               // worksEscort's 24u part, the later beats: she comes to find you for your result; walks you up to the bar
+  const S = PU_LIVE.rseek, rr = SHIP.occasions.find(x => x.id === 'pu3Result' && x.status === 'asked');
+  if (S && rr && !rr.met && p.id === S.by && t < rr.at + 60) return { mode: 'follow', to: null };
+  const br = SHIP.occasions.find(x => x.id === 'pu3Bar' && x.status === 'asked');
+  if (br && br.f && br.f.seek && !br.met && p.id === 'calder' && t < br.at + br.len) return { mode: 'lead', to: { deck: 1, room: 'O' } };
+  return null;
+}
+if (P5_PROMO3) WORK_TICKS.push((now, skip) => { puResultTick(now, skip); puBarTick(now, skip); puToastTick(now, skip); if (!skip) { puCakeTick(now); puBeatsGuide(now); if (puRank()) promoPip(); } });
 // ---- end of slot: Later promotions ----
 
 // ---------------------------------------------------------------------

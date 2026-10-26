@@ -21,11 +21,19 @@
 #   t3pointer: (switch on) the test morning's notice, the level 1 arrow to the bay from 08:30; at 09:00 the job held for you
 #             on the worse Deck 6 junction (slot 25), the board's ring forced with Teaching arrows Off, "Your Tier 3 test:
 #             take it", the world arrow level 1; the Schedule's row; an hourly notice while you hold another job
-#   t3test:   (switch on) taken: Calder's word; level 1 arrows to each step; the plan names the two to warn; the switch
+#   t3passed: (switch on) the test, taken: Calder's word; level 1 arrows to each step; the plan names the two to warn; the switch
 #             refused before both know; "About the shutdown" on them in the chat card, their answer; one not found in 30
 #             minutes, Calder tells them; the breaker, back on, the junction put right; turned in: passed, still Tier 2,
 #             Calder's word, the Mail and the notice name tomorrow 08:15, the result's row; the crew watch, then talk of it.
 #             Not taken by 15:00: set again in two workdays, never failed
+#   t3result: (switch on) the result's day: the Mail at 06:00, the notice once you're up, booked at 08:15 in her office,
+#             What's next, a level 1 arrow from 08:00; not there at 08:30 she comes to find you and it plays where you are;
+#             at its end Tier 3, Senior Officer, xp 0, the Record's line, the friends' Mail, the bar booked the same day
+#   t3bar:    (switch on) the Captain's invite, the guests on the ceremony spots, the notice at 16:00 and Calder's "Go.",
+#             the level 1 arrow; the scene with the pin; the bar on your collar (a third pip), the certificate; the cake
+#             after it ("Take a slice", Brennan's line); on a Friday at 17:15; missed: by Mail by 18:15
+#   t3toast:  (switch on) the next day at 19:00 in her quarters: the invite, the notice at 18:30, the arrow, the scene,
+#             the framed menu; the Training tab's rows done and gone; missed: by Mail
 # The Tier 3 parts need a build with the switch on for everything but t3off: python3 promo_beats_check.py ON.html t3before
 # (ON.html: P5_STEP5 = true in a copy, plans/handover-b5.md).
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
@@ -270,8 +278,8 @@ def part_t3pointer(g):
     check('09:00 Your Tier 3 test' in r['rows'], f"t3pointer: the Schedule's row ({r['rows']})")
     check(r['busy'] == 2, f"t3pointer: one notice an hour while you hold another job: 10:00, not 10:10, 11:01 ({r['busy']})")
 
-def part_t3test(g):
-    if not t3on(g, 't3test'): return
+def part_t3passed(g):
+    if not t3on(g, 't3passed'): return
     print('(t3test) the test, step by step:')
     r = g.ev("""(() => { """ + T3_TEST + """ __tick(); setShipNow(14 * 1440 + 541); __tick(); const c = W.cur, j = SHIP.jobs.find(x => x.id === c.j), out = {};
       const st = () => jobStops(j).map(s => s.step + (s.done ? '+' : '-')).join(' '), arrow = () => GUIDE.list.filter(e => /^pu3:step/.test(e.id)).map(e => (e.goal() || {}).label || '').join('|');
@@ -302,11 +310,78 @@ def part_t3test(g):
     print('   ', r)
     check(r['t3'] and r['t3']['day'] == 17 and not r['t3']['passed'] and r['jobs'] == 0 and r['cur'] == 'ask' and r['mail'] and r['notes'], f"t3test: not taken by 15:00: set again in two workdays (Day 17), the job gone, never failed ({r})")
 
+T3_RES = """const W = __w(16, 300, { xp: 60, tr: { ps: 12, t2: 9, t3: 15 } }); W.tier = 2; W.rank = 'officer'; __friends();
+      for (const r of CAREER_LADDER) if (r.id !== 't3' && r.tier <= 2) { W.tr[r.id] = W.tr[r.id] || 9; (W.op[9] = W.op[9] || []).push(r.id); }
+      const T = puSet(15); T.passed = true; T.tries = 1;"""
+def dlg_run(pick):
+    return "let n = 0; while (DIALOGUE && n++ < 40) { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.pin) out.pin = n; dialogueStep(l && l.choice ? " + str(pick) + " : undefined); }"
+def part_t3result(g):
+    if not t3on(g, 't3result'): return
+    print('(t3result) the result, first thing:')
+    r = g.ev("""(() => { """ + T3_RES + """ const out = { rd: puResultDay() }; setShipNow(15 * 1440 + 361); __bay(); __tick();
+      out.occ = SHIP.occasions.filter(x => /^pu3/.test(x.id)).map(x => x.id + ' ' + hhmm(x.at % 1440)); out.mail = __mail().filter(m => /result/i.test(m)); out.notes = __notes.slice(); out.next = worksNext();
+      setShipNow(15 * 1440 + 482); __tick(); out.arrow = GUIDE.list.filter(e => /^pu3:result/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label);
+      setShipNow(15 * 1440 + 511); goToDeck(3); __tick(); out.seek = !!PU_LIVE.rseek; out.esc = (worksEscort({ id: 'calder' }, shipNow()) || {}).mode;
+      const keep = puNearMe; puNearMe = (id, r) => id === 'calder' ? true : keep(id, r); __tick(); puNearMe = keep;
+      out.dlg = DIALOGUE && DIALOGUE.id; """ + dlg_run(0) + """
+      out.w = [W.tier, W.rank, W.xp]; out.t3 = puT3(); out.rec = worksRecordHead().text; out.bar = SHIP.occasions.filter(x => x.id === 'pu3Bar').map(x => hhmm(x.at % 1440) + ' day ' + (Math.floor(x.at / 1440) + 1));
+      out.friends = __mail().filter(m => /^(Pell|Tomas|Rina)/.test(m)).length; out.kind = (puTalkKind(shipNow()) || [])[0];
+      """ + T3_RES.replace('const W =', 'const W2 =').replace('W.', 'W2.').replace('const T = puSet', 'const T2 = puSet').replace('T.passed', 'T2.passed').replace('T.tries', 'T2.tries') + """
+      setShipNow(15 * 1440 + 400); __tick(); setShipNow(15 * 1440 + 556); __tick(); out.late = [W2.tier, (puT3() || {}).res, __mail().filter(m => /You weren't about/.test(m)).length]; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['rd'] == 16 and 'pu3Result 08:15' in r['occ'] and any('08:15' in m for m in r['mail']) and any('08:15' in n for n in r['notes']) and 'today, 08:15' in r['next'], f"t3result: the Mail at 06:00, the notice, booked for 08:15, What's next ({r['occ']}, {r['mail']}, {r['notes']}, {r['next']})")
+    check(r['arrow'] and r['arrow'][0].startswith('1 ') and "Calder's office" in r['arrow'][0], f"t3result: a level 1 arrow to her office from 08:00 ({r['arrow']})")
+    check(r['seek'] and r['esc'] == 'follow' and r['dlg'] == 'pu3.result', f"t3result: not there at 08:30, she comes to find you, the scene where you are ({r})")
+    check(r['w'] == [3, 'senior', 0] and r['t3']['res'] == 16 and 'Senior Officer, Day 16' in r['rec'], f"t3result: Tier 3, Senior Officer, xp 0, the Record's line ({r['w']}, {r['rec']})")
+    check(r['bar'] == ['16:30 day 16'] and r['friends'] == 2 and r['kind'] == 'pu3.senior', f"t3result: the bar booked for 16:30 that day, two friends' Mail, the crew's news ({r['bar']}, {r['friends']}, {r['kind']})")
+    check(r['late'] == [3, 16, 1], f"t3result: never missed: by Mail by 09:15 ({r['late']})")
+
+def part_t3bar(g):
+    if not t3on(g, 't3bar'): return
+    print('(t3bar) the Captain pins your bar; the cake:')
+    r = g.ev("""(() => { """ + T3_RES + """ const out = {}; setShipNow(15 * 1440 + 520); __bay(); puPromote(shipNow(), 'met');
+      out.invite = __mail().filter(m => /^Captain Odile Marrow: Your bar/.test(m)); const a = apptList().find(x => /^pu3Bar@/.test(String(x.occ))); out.places = a && a.places; out.with = a && a.with;
+      out.next = worksNext(); __notes.length = 0; __said.length = 0; setShipNow(15 * 1440 + 961); __tick(); out.notice = __notes.slice(); out.go = __said.slice();
+      setShipNow(15 * 1440 + 976); goToDeck(4); __tick(); out.arrow = GUIDE.list.filter(e => e.id === 'pu3:bar').map(e => e.level + ' ' + (e.goal() || {}).label + ' ' + (e.goal() || {}).place);
+      setShipNow(15 * 1440 + 991); goToDeck(1); player.obj.position.copy(cellPos(...PLACE_OF.get('1-ceremony-you').at)); occasionsTick(shipNow()); meetingsTick(shipNow());
+      out.dlg = DIALOGUE && DIALOGUE.id; """ + dlg_run(1) + """ out.t3 = puT3(); out.pip = PLAYER_SPEC.rank; out.keep = (SHIP.social && SHIP.social.keepsakes || []).map(k => k.what);
+      setShipNow(15 * 1440 + 1021); __bay(); __tick(); out.cake = GUIDE.list.filter(e => e.id === 'pu3:cake').map(e => e.level + ' ' + (e.goal() || {}).label);
+      const keep = puNearMe; puNearMe = (id, r) => id === 'brennan' ? true : keep(id, r); __said.length = 0; __tick(); puNearMe = keep; out.slice = puT3().cake; out.brennan = __said.filter(x => /^brennan/.test(x));
+      let fd = 16; while (weekday(fd) !== 4) fd++; out.fri = [fd, promoCerTimes(fd).at];
+      """ + T3_RES.replace('const W =', 'const W2 =').replace('W.', 'W2.').replace('const T = puSet', 'const T2 = puSet').replace('T.passed', 'T2.passed').replace('T.tries', 'T2.tries') + """
+      setShipNow(15 * 1440 + 520); puPromote(shipNow(), 'met'); setShipNow(15 * 1440 + 1096); __tick(); out.missed = [(puT3() || {}).bar, __mail().filter(m => /^Captain Odile Marrow: Your bar \\| We missed/.test(m)).length]; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['invite'] and '16:30' in r['invite'][0] and r['places'] and r['places'].get('marrow') == '1-ceremony-captain' and len(r['places']) >= 4 and 'vance' in r['with'], f"t3bar: the Captain's invite that morning; the guests on the ceremony spots ({r['invite']}, {r['places']})")
+    check('16:30' in r['next'] and any('16:30' in n for n in r['notice']) and any(x.startswith('calder:') for x in r['go']), f"t3bar: What's next, the notice at 16:00, Calder's word in the bay ({r['next']}, {r['notice']}, {r['go']})")
+    check(r['arrow'] and r['arrow'][0].startswith('1 ') and '1-ceremony-you' in r['arrow'][0], f"t3bar: a level 1 arrow from 16:15 to your spot ({r['arrow']})")
+    check(r['dlg'] == 'pu3.bar' and r.get('pin') and r['t3']['bar'] == 16 and r['pip'] == 2 and any('certificate' in k.lower() for k in r['keep']), f"t3bar: the scene with the pin; the bar on your collar (a third pip), the certificate ({r})")
+    check(r['cake'] and r['cake'][0] == '1 Take a slice' and r['slice'] == 16 and r['brennan'], f"t3bar: the cake after: \"Take a slice\", Brennan's line ({r['cake']}, {r['slice']}, {r['brennan']})")
+    check(r['fri'][1] == 1035, f"t3bar: on a Friday at 17:15 ({r['fri']})")
+    check(r['missed'] == [16, 1], f"t3bar: missed, by Mail by 18:15 ({r['missed']})")
+
+def part_t3toast(g):
+    if not t3on(g, 't3toast'): return
+    print('(t3toast) the Captain\'s toast, the next day:')
+    r = g.ev("""(() => { """ + T3_RES + """ const out = {}; setShipNow(15 * 1440 + 520); __bay(); puPromote(shipNow(), 'met'); puBar(15 * 1440 + 1010, 'met');
+      out.day = puToastDay(); out.rows = __rows(17); setShipNow(16 * 1440 + 481); __tick(); out.occ = SHIP.occasions.filter(x => x.id === 'pu3Toast').map(x => hhmm(x.at % 1440));
+      const a = apptList().find(x => /^pu3Toast@/.test(String(x.occ))); out.places = a && a.places; out.mail = __mail().filter(m => /^Captain Odile Marrow: The toast/.test(m)); out.next = worksNext();
+      __notes.length = 0; setShipNow(16 * 1440 + 1111); __tick(); out.notice = __notes.slice(); setShipNow(16 * 1440 + 1126); goToDeck(4); __tick(); out.arrow = GUIDE.list.filter(e => e.id === 'pu3:toast').map(e => e.level + ' ' + (e.goal() || {}).label);
+      setShipNow(16 * 1440 + 1141); goToDeck(2); player.obj.position.copy(cellPos(...PLACE_OF.get('2-captable-1').at)); occasionsTick(shipNow()); meetingsTick(shipNow()); out.dlg = DIALOGUE && DIALOGUE.id;
+      """ + dlg_run(0) + """ out.t3 = puT3(); out.keep = (SHIP.social && SHIP.social.keepsakes || []).map(k => k.what); out.tab = puCheck(); out.next2 = worksNext();
+      """ + T3_RES.replace('const W =', 'const W2 =').replace('W.', 'W2.').replace('const T = puSet', 'const T2 = puSet').replace('T.passed', 'T2.passed').replace('T.tries', 'T2.tries') + """
+      setShipNow(15 * 1440 + 520); puPromote(shipNow(), 'met'); puBar(15 * 1440 + 1010, 'met'); setShipNow(16 * 1440 + 481); __tick(); setShipNow(16 * 1440 + 1201); __tick();
+      out.missed = [(puT3() || {}).toast, __mail().filter(m => /^Captain Odile Marrow: Tonight/.test(m)).length]; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['day'] == 17 and '19:00 The toast, 19:00' in r['rows'] and r['occ'] == ['19:00'] and r['places'] and r['places'].get('marrow'), f"t3toast: the next day, 19:00, her quarters, seats at her table ({r['day']}, {r['rows']}, {r['occ']}, {r['places']})")
+    check(r['mail'] and 'toast' in r['next'].lower() and r['notice'] and r['arrow'] and r['arrow'][0].startswith('1 '), f"t3toast: the invite, What's next, the notice at 18:30, a level 1 arrow ({r['mail']}, {r['notice']}, {r['arrow']})")
+    check(r['dlg'] == 'pu3.toast' and r['t3']['toast'] == 17 and any('menu' in k.lower() for k in r['keep']) and r['tab'] == [] and 'toast' not in r['next2'].lower(), f"t3toast: the scene, the framed menu, the Training tab's rows gone ({r['dlg']}, {r['t3']}, {r['keep']}, {r['tab']})")
+    check(r['missed'] == [17, 1], f"t3toast: missed: by Mail, the menu all the same ({r['missed']})")
+
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3test', part_t3test)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')
