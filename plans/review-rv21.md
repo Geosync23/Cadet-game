@@ -31,6 +31,8 @@ writers SW5 session_01FFW8ZfuaUqiPPqqhruwZhX (endgame pool), SW6 session_01Gy3XC
 | claude/vessel-words (SW4) | V-6 words, shoulds done | PASS | 7dd2eb5d (d75de7ab PASS too) |
 | claude/ending-words-b (SW5) | E-5 endgame pool (not baked) | PASS | 0d90de7a, 8ed1545a (should done) |
 | claude/ending-words-a (SW6) | E-5 week + both endings | FIXES NEEDED (1 must) | 6dd03f57 |
+| claude/ending-words-a (SW6) | fixes | PASS | aed8af49, b8c89e7a |
+| claude/vessel-sky (VB2) | V-5 + V-3 spots, v.1-v.3 | PASS (3 shoulds) | c070862c |
 | claude/ending (EN1) | E-2 turn 1 skeleton | PASS (1 should: docs) | 1c72a28d |
 
 ## Log
@@ -67,3 +69,14 @@ writers SW5 session_01FFW8ZfuaUqiPPqqhruwZhX (endgame pool), SW6 session_01Gy3XC
   before the main loop; cadet ALL IDENTICAL; check_fast OK 406 s. Should: 29b header, DEV_NOTES, owners, map still describe
   the kept copy (user said no way back).
 - VB2 v.1 e21ade10 received; waiting for v.2 as VB2 asked.
+- ~20:50 UTC: SW6 aed8af49 + b8c89e7a: must fixed (no daughter), Keep this ending added (lead corrected the relay: two
+  buttons), slow path (crossingBackAddress.plain, endingAsk.slow, unsure.slow, slow Mails/rows), friends neutral, nits done.
+  PASS. Nit left: .plain thanks you for leading the oath even if you missed it.
+- ~21:00 UTC: **VB2 claude/vessel-sky c070862c: PASS, 3 shoulds.** cadet vs acbb52e0 ALL IDENTICAL; check_fast OK 504 s (its
+  deck_check part: 40 chain spots, gap .65). Phone play with a stand-in event (probe in plans/rv21-shots/): ship 14:00 Sat to
+  09:10 Tue, engine and three flashes 17:40 Mon, props in their windows, draw calls 154-307, no errors; on screen from the
+  lounge's bow tiles (shot plans/rv21-shots/vessel-sky-c070862c-bow-1741.png). Shoulds: impeller 7 blades vs "twelve"
+  everywhere (and words say a cracked hub); tap keys differ from SW4's (SW4 inactive: VB2 reads SW4's keys); deck_check only
+  asserts VSKY.m exists (off screen from the lounge middle at 900x760).
+- VB1 V-1 claude/vessel 581fc84f received ~20:50; code read: off guarded (VESSEL undefined, vesselGuestAt null), times per spec,
+  C1-C3 as switches, late rule from Day 28; section 14 guestTrim one-line hook (sim owner to review). Checks running.
