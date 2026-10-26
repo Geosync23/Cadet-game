@@ -344,3 +344,48 @@ OLD df8d58b9 (0.93.0), sha256 `97f21893d17bce087b2ab4b3a3cd769a2f696da88da263a3f
 | perf_check NEW OLD | OK (backlog 32) | One flag: lantern supper Sat 18:30 trifold-folded js 1.86 -> 2.92 ms, same draw calls (267c). Re-measured alone twice (`PERF_SCENES="lantern"`): PERF CHECK OK both times; second run OLD 1.7 ms, NEW 1.87 ms: did not repeat = backlog 32. All 22 scenes' draw calls identical OLD/NEW (max 418). No memory growth (521/40/87). File 7.03 MB both. |
 | lines_check --day | OK (CR4) | PASS (0 errors), 308 s; handed over before it started |
 | p926_check | OK (CR4) | `P926 CHECK OK`, 64 ok, no FAIL, 519 s; handed over before it started |
+
+# 0.93.2 first pass (claude/staging-0.93.2 41c8a7e0), CR2's share — **OK** (perf: noise after re-measure; p926 by CR3)
+
+NEW 41c8a7e0, sha256 `89eafdc1cc2f2cbcc77db9168b009cb19561b9efe9067aeedf6386947a704960` (matches BM18's).
+OLD b957b92d (0.93.1), sha256 `6cd54ab97f4290aa5665ff40b5db35d0abc485dc8401d011084dfaa2f35a8eee`.
+A second pass on a new sha follows (FX26's mech m9 fix, CR6's FAIL).
+
+| Check | Result | Key lines |
+|---|---|---|
+| cadet_test OLD NEW (alone) | DIFFERENCES, expected | Exactly BM18's list: f_noshadow 3896, g_nocrew 3875, h_crewback 3861 px, each only Oona's bubble (OLD "No more blinking lights...", NEW "The washer's fixed...", FX20b); other 12 shots 0 px; `errors A [] errors B []`; taps the same. |
+| path_check | OK | `PATH CHECK OK` |
+| arc_check | OK | `ARC CHECK OK` |
+| lines_check | OK | PASS (0 errors, 69 warnings; 66 on 0.93.1). The same check on the OLD game also gives 69 warnings (plus the expected "baked blocks out of date" error), so the +3 come from 0.93.2's new content. |
+| intro_check (whole) | OK | `OK`, 0 FAIL lines (40 min) |
+| perf_check NEW OLD | 6 js flags, judged noise (backlog 32) after re-measure | See below. Draw calls: Every song +16 (190->206, 303->319, 192->208), storm party -1; max 418; memory flat (521/40/87); file 7.03 -> 7.22 MB; load 8.3-9.2 -> 10.3-11.7 s. |
+| lines_check --day | OK | PASS (0 errors) |
+| p926_check | CR3 | My run was cut at the runner's 2-hour limit while passing (parts 1-5 ok); BM18 gave it to CR3. |
+
+## perf on 0.93.2: the six flags
+
+First run: Sunday dinner landscape 2.04 -> 4.23 ms; quiz night portrait 1.5 -> 2.65; breakfast rush portrait 1.42 -> 2.45
+and landscape 1.45 -> 2.51; Captain's address trifold-folded-turned 1.67 -> 3.11; Bread day trifold-open 1.77 -> 2.89.
+NEW higher in 72 of 106 measures (median +11%).
+
+Re-measure 1 (the five scenes, OLD/NEW x 2, alone; PERF CHECK OK all four): quiz, breakfast, Captain's address and
+Bread day within OLD's spread, NEW lower about as often as higher (26 of 46 pairs higher, means 2.08 vs 2.14 ms).
+Sunday dinner NEW higher in all 9 pairs over 3 runs (~+0.8 ms), so reported to BM18 and lead 38 as possibly real.
+
+Re-measure 2 (Sunday dinner only; OLD, NEW, each switch off in turn, NEW, OLD; ms portrait / wide / landscape):
+
+| Build | Times |
+|---|---|
+| OLD | 1.95 / 2.98 / 2.88 |
+| NEW | 3.43 / 2.82 / 2.16 |
+| INSPECT_ON off | 3.51 / 2.62 / 2.69 |
+| EV_COMET_ON off | 2.33 / 2.93 / 2.11 |
+| SAVE_SLOTS_ON off | 2.18 / 3.40 / 2.65 |
+| TRAD_0932_ON off | 2.08 / 2.24 / 2.58 |
+| AUTO_DOORS_ON off | 2.63 / 3.20 / 2.72 |
+| PROMO_BEATS_ON off | 2.02 / 2.43 / 2.51 |
+| NEW | 1.88 / 2.20 / 2.92 |
+| OLD | 2.48 / 2.82 / 2.42 |
+
+OLD mean 2.59, NEW mean 2.57: no difference, and no switch stands out (all within the same 1.9-3.5 ms spread). The
+Sunday dinner rise did not hold up in a back-to-back run, so it is noise (backlog 32), not a regression.
