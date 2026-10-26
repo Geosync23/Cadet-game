@@ -9,19 +9,19 @@ another build is named. When a number here and a check's own output disagree, th
 
 **The user, 2026-10-22: "We just need to keep testing fully."** Every change to the game runs the **full round** of
 checks (all 33, the event days included) **before it is merged or published**, always **split across six check
-runners (CR1-CR6) at once**, about 30-35 minutes. The test picker (`tools/affected.py`, section 4) is only a quick aid
+runners (CR1-CR6) at once**, about 65 minutes (interactions_check alone is ~64 since 0.93.3; backlog BM18-1). The test picker (`tools/affected.py`, section 4) is only a quick aid
 while you work; it is **never the gate**. check_fast still runs before every push.
 
-### The six-way split (fixed; balanced on the measured minutes alone, about 200 in all)
+### The six-way split (fixed; balanced on the measured minutes alone, about 260 in all; rebalanced in 0.93.3 for interactions_check's ~64 min)
 
 | Runner | Its share | Minutes alone |
 |---|---|---|
 | **CR1** | `player_check` (the long one, ~20 min on a release run: a light share), devmode, bubble, puzzle, social, talk; the four arrows checks (arrows, arrows_pointer, dev_arrow); `day_check` Days **4, 11** (Thursdays: the bunk inspection, from 0.93.2) | ~45 |
-| **CR2** | `intro_check` (whole), `perf_check BUILD OLD`, `cadet_test OLD BUILD`, path, arc, lines, `lines_check --day`, p926 | ~38 |
-| **CR3** | `day_check` Days **0, 1, 5, 7**, weekend (from 0.92.5); arrows_d, arrows_f, controller (every part but reach) | ~44 |
+| **CR2** | `intro_check` (whole), `perf_check BUILD OLD`, `cadet_test OLD BUILD`, path, arc, lines, `lines_check --day`, p926; `day_check` Days **21, 22** (the comet; from 0.93.3) | ~54 |
+| **CR3** | `day_check` Days **0, 1, 5, 7**, weekend (from 0.92.5); arrows_d, arrows_f, controller (every part but reach); promo_sight, `sound_check` (from 0.93.3) | ~52 |
 | **CR4** | `day_check` Days **6, 8, 12, 13** (storm Saturday), **16, 19**; appt_check; `saves_check` (from 0.93.2) | ~45 |
-| **CR5** | `day_check` Days **21, 22** (the comet, from 0.93.2), **27**, interactions, events, career, promo_sight, `sound_check` (from 0.93.0) | ~50 |
-| **CR6** | `bash check_fast.sh` (words, names, deck, machine, leave, device), mech, bigevents, fridays, disc, tiles, join, food (`1 7` and `11 4`), clothes, stories, `promo_beats_check` (from 0.93.2) | ~40 |
+| **CR5** | `interactions_check` (whole; ~64 min since 0.93.3, backlog BM18-1), career | ~66 |
+| **CR6** | `bash check_fast.sh` (words, names, deck, machine, leave, device), mech, bigevents, fridays, disc, tiles, join, food (`1 7` and `11 4`), clothes, stories, `promo_beats_check` (from 0.93.2); `day_check` Day **27**, events (from 0.93.3) | ~54 |
 
 `OLD` = the last release's game (`git show <release commit>:starship-cadet.html > old.html`). Every check runs with
 its default arguments unless the table says otherwise (`intro_check` whole, not in pieces). If a check is added, give
@@ -162,7 +162,7 @@ or item you can't reach.
 | **day_check.py** | Fast-forwards one ship day: everyone sleeps 6 h+ in their own bed, eats twice, works their shift; no place held twice; nobody stuck over 10 ship minutes; draw calls under 450; the same day twice. | 8 per day | `python3 day_check.py BUILD.html DAY` (DAY default 1, a Monday). The event days: see 3.2 | `DAY CHECK OK` |
 | **player_check.py** | Section 15, you: needs over normal and neglect weeks, the speed rule, sleep, bonuses, Mail, the store, machines, carts, crawlways, activities; `--long` checks the save stays under 250 KB to Day 280. | 6 | `python3 player_check.py BUILD.html` / `--long [DAYS]` | `PLAYER CHECK OK` / `SAVE BUDGET OK` |
 | **intro_check.py** | The arrival and first week (section 21), parts 0-12: the happy path, the wanderer and the idler, save and reload at every step, skip-intro, the evening walked in the real game (part 8), first launch, the week's beats. | 11 whole | `python3 intro_check.py BUILD.html` (everything); `--evening` (part 8, ~5 min), `--dawdle` (part 8, lingering), `--week` (the week, 3-7 min), `--week --beats=d4-quiz,d5-invite`, `--firsts` | `OK` |
-| **interactions_check.py** | Section 15b: tapping real things starts the activity (pose, need rising), "In use", private places left alone, the job board, the goal pointer, draw calls. | 8 | `python3 interactions_check.py BUILD.html [--quick]` | `INTERACTIONS CHECK OK` |
+| **interactions_check.py** | Section 15b: tapping real things starts the activity (pose, need rising), "In use", private places left alone, the job board, the goal pointer, draw calls. | ~64 (since 0.93.3; was 8; backlog BM18-1) | `python3 interactions_check.py BUILD.html [--quick]` | `INTERACTIONS CHECK OK` |
 | **perf_check.py** | Busy scenes at phone size (portrait 1.5 and 0.7 zoom, landscape): draw calls (budget 450), triangles, game ms a frame, crew; memory over a week and deck round trips; with OLD, regressions. You must stand in the scene's own room. | 15 with OLD | `python3 perf_check.py BUILD.html OLD.html` (writes perf_check.json in the folder you run it from: move it before committing) | `PERF CHECK OK` |
 | **mech_check.py** | Each mechanic on the ladder: its training end to end, stage 0 once trained, twice the same, then its own parts. | 6 | `python3 mech_check.py BUILD.html [m1 m4 ...]` | `MECH CHECK OK` |
 | **events_check.py** | The small traditions (section 18): each due exactly when it should be, who goes and where, the deck minute by minute, Mail the evening before, ship notes, the voice budget, a ship year on paper. | 6 | `python3 events_check.py BUILD.html [DAYS]` | `EVENTS CHECK OK` |
