@@ -1361,3 +1361,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~07:32 UTC: **RV18 PASS auto-doors 98768969** (game 8f3c0461...75fa5). SW2 comet polish claude/sw2-comet-polish c8897265 (canon fix Tomas, tap lines, 7 length errors) → FX25. FX25 c.4 in checks (bow lounge fixed, sound merged, Friday comet lines; event-swap merged in).
 - ~07:33 UTC: FX28 promo-beats final 104420f (game 6f975a4d...dc288; SW2 polish in; check_fast/lines/names/promo_beats OK; cadet off identical) → RV19. career_check busy FAIL = old (FX28-1 = backlog 12).
 - ~07:49 UTC: BM18 one-off saves_check FAIL (30 s page-load limit under load after check_fast) → FX27 test-only fix 24f98147 (longer waits; game unchanged). BM18 to rerun.
+- ~07:52 UTC: FX26 storm-sat ea0ace07 (w.2): lantern supper = Saturday dinner (18:00-19:45, no separate Dinner); Storm stories by torchlight (k 474, Oduya, tap to join, 12 go). Asked for the torchlight look if ≤1 h. Full checks re-running.
