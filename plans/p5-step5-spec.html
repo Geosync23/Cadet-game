@@ -124,19 +124,20 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
 <div class="wrap">
 
 <header style="display:grid;gap:12px">
-  <p class="eyebrow">Build spec · Pillar 5 Step 5 · version 1 · EP2 for lead 39 · 2026-10-26</p>
+  <p class="eyebrow">Build spec · Pillar 5 Step 5 · version 2 · EP2 for lead 39 · 2026-10-26</p>
   <h1>Step 5: Senior Officer, the build spec</h1>
   <p class="lead">This page turns the agreed plan (version 3.1, your answers of 26 October) into pieces the builders can start on. For each piece: what it is, exactly which parts of the game file it touches, its switch, which builder seat it suits, the checks it must pass, and the words the head writer must write. Nothing here changes the design you agreed; where the game needed a small decision the plan didn't make, it's listed under "Judgement calls" so you can overrule it.</p>
   <div class="facts">
     <div class="fact"><b>Pieces</b>Six building pieces and the words: the career core first (small), then the promotion, power and relays, shutdowns, the sensor array and the head-scratchers side by side.</div>
     <div class="fact"><b>Builders at once</b>Four (the Works career engineer, mechanics seats A and B, the puzzles seat), plus the deck architect part-time and the head writer. Two reviewers, the build master and the six runners as usual.</div>
     <div class="fact"><b>Size</b>About 26 turns in all, shared by four builders; the longest seat (the Works career engineer: the core, then the promotion) has about 7.</div>
-    <div class="fact"><b>Your answers needed</b>Three small questions at the end (section 12). Building can start on the career core before they're answered.</div>
+    <div class="fact"><b>Your answers needed</b>Three small questions for this step, and two for Step 6, at the end (section 12). Building can start on the career core before they're answered.</div>
   </div>
   <p class="note">Built against the game on claude/integration d9c7e5f0 (0.93.2); it starts once 0.93.3 (the doors) is merged there. Sources: plans/pillar5-steps56-plan.html v3.1 (c827f392), plans/pillar5-plan.md (claude/p5-design), DEV_NOTES "Rules that keep it working", plans/owners.md, plans/testing-guide.md. Line numbers drift; the function and section names are what to search for (<code>python3 tools/section.py</code>).</p>
 </header>
 
 <nav class="toc" aria-label="Contents">
+  <p><a href="#beats">First: the beats, what you see and who speaks</a></p>
   <ol>
     <li><a href="#rules">The ground rules for every piece</a></li>
     <li><a href="#switches">Switches and where new code goes</a></li>
@@ -152,6 +153,45 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
     <li><a href="#questions">Your questions and the answers form</a></li>
   </ol>
 </nav>
+
+<section id="beats">
+  <h2>The beats: what you see, when it clears, who speaks</h2>
+  <p>Your two rules for this step (26 October): <b>"Make sure it's like the other steps now. Tons of arrows and super obvious progression"</b> and <b>"Pronounced moments with dialogue"</b>. So every beat below follows the first promotion's pattern as it is in 0.93.2 (FX28's promotion beats): at every moment you can see what to do next and where. In detail:</p>
+  <ul>
+    <li><b>An arrow at level 1 on the day itself</b> (24p's <code>guideAsk({ level: 1 })</code>): not hidden by a needs nudge, by Teaching arrows Off, or by tracking another job.</li>
+    <li><b>A ring line naming the step</b> on whatever you tap to do it ("Your Tier 3 test: take it", forced as 24p's <code>promoBeatsPtr</code> forces Tier 2's).</li>
+    <li><b>Notices, Tracked and Schedule rows</b> for every step. An hourly notice if you're holding another job while a step waits.</li>
+    <li><b>Nothing you can only learn about later by Mail.</b> Every step is said to you in person first (the right person comes to you, or meets you at a set place); the Mail is only the record.</li>
+    <li><b>Every key beat is a staged scene</b>: who speaks and where, a short talk in bubbles with replies where it fits, poses, others nearby reacting, and a clear closing line.</li>
+  </ul>
+  <div class="tbl"><table style="min-width:900px">
+    <thead><tr><th>Beat, when</th><th>What you see (ring line; arrow target, level; notice and Mail)</th><th>Clears when</th><th>The scene: who, where, the gist</th><th>Lines</th></tr></thead>
+    <tbody>
+      <tr><td><b>Nearly there</b><br>Officer, Steady and Reliable</td><td>Training tab "Your promotion" rows tick; the rep notice names what's left. No arrow (nowhere to go yet).</td><td>The offer</td><td>Calder passing in the bay: you're close; Halloran's grumble.</td><td>6</td></tr>
+      <tr><td><b>Power safety</b> (question 2)<br>from Day 12</td><td>Ring "Power safety with Calder"; arrow level 1 to Deck 6's port junction at her time; a notice that morning.</td><td>Lesson done</td><td>Calder at the junction: why a junction is the one thing you never rush; one reply from you; her close line.</td><td>8</td></tr>
+      <tr><td><b>The offer</b><br>Day 14 (or the storm Saturday)</td><td>Calder comes to find you (bay, the storm party, wherever you are; asleep: the next morning). Then an urgent notice "Your Tier 3 test: Monday 09:00", Tracked and Schedule rows, and the Mail as the record.</td><td>Said in person</td><td>Calder walks up: "Monday. Your next test." Two replies; at the party the lounge turns to look, Halloran: "some of us took a year".</td><td>9</td></tr>
+      <tr><td><b>Before</b><br>Day 14 evening, Day 15 breakfast</td><td>Tracked "Your Tier 3 test, 09:00"; friends come to you with luck (bubbles and the chat card); up to two Mails at 20:00.</td><td>The test starts</td><td>Friends raise a cup at the party (the drink pose); Tomas: "Go to bed early. Not yet."; crew chatter by days aboard.</td><td>16</td></tr>
+      <tr><td><b>Test morning</b><br>Day 15 from 06:00</td><td>Notice once you're up "Today: your Tier 3 test, 09:00, the job board". Arrow level 1 to the Works bay from 08:30; at the board the ring "Your Tier 3 test: take it".</td><td>Take it</td><td>Calder at the board as you come in: "Nine o'clock. Take it when you're ready."</td><td>3</td></tr>
+      <tr><td><b>The test</b><br>09:00-15:00</td><td>Arrow level 1 to the junction; ring at each step ("Warn Tove about the shutdown", "Switch it off", "Change the breaker", "Bring it back"); arrow level 1 to each of the two people to warn. Hourly notice if you hold another job.</td><td>Turned in</td><td>Calder walks with you and talks you through planning it; the two people you warn each answer; Torres's word at the end.</td><td>22</td></tr>
+      <tr><td><b>Passing</b><br>as you finish</td><td>Calder says it there; notice and Schedule "Your result, 08:15, Calder's office"; the Mail as the record.</td><td>Said</td><td>Calder: "Your result tomorrow, first thing. My office, 08:15. Don't be early." The bay talks about it that evening.</td><td>10</td></tr>
+      <tr><td><b>The result</b><br>Day 16, 08:15</td><td>Urgent notice once you're up; arrow level 1 to Calder's office from 08:00; ring "Your result: Calder's office". At 08:30 she comes to find you.</td><td>The meeting ends</td><td>Seated across her desk (the sit pose): "Sit. You passed. Senior Officer." She gives you the Tier 3 card; two replies; "The bar's the Captain's. Half four." Torres outside the glass, thumbs up.</td><td>9</td></tr>
+      <tr><td><b>The day</b><br>Day 16</td><td>"What's next" names the bar; Tracked "The Captain, 16:30".</td><td>16:30</td><td>The bay, the mess: the news goes round.</td><td>8</td></tr>
+      <tr><td><b>The bar</b><br>16:30 (17:15 on a Friday)</td><td>The Captain's invite in the morning; notice at 16:00 "Go now"; arrow level 1 to the observation room from 16:15; Calder in the bay: "Go."</td><td>The ceremony ends</td><td>Vance, Calder, Torres and up to three friends standing; the Captain pins the bar (the pin pose): "A storm, a test and a ship that noticed."; Vance's one dry line; friends' congratulations; the certificate.</td><td>10</td></tr>
+      <tr><td><b>The cake</b><br>after the bar</td><td>Ring "Take a slice".</td><td>A slice, or 17:30</td><td>Brennan with the cake, as for your pip; two friends' lines.</td><td>3</td></tr>
+      <tr><td><b>The toast</b><br>Day 17, 19:00</td><td>The invite in the morning; notice at 18:30; arrow level 1 to the Captain's quarters (Deck 2) from 18:45.</td><td>The toast ends</td><td>Seated, cups raised: the Captain's toast; Vance called in on his day off and says so; the framed menu.</td><td>8</td></tr>
+      <tr><td><b>Power and relays</b><br>Day 17, 11:00</td><td>Ring "Power and relays with Calder, 11:00"; notice 10:30; arrow level 1 to the relay room (Deck 1) from 10:45.</td><td>Training done</td><td>Calder in the relay room: swap a relay; the tester if you haven't one.</td><td>10</td></tr>
+      <tr><td><b>The drill</b><br>Day 17, 15:00</td><td>Ring "Run the Works part of the drill"; arrow level 1 to the Works bay at 14:50.</td><td>Drill ends</td><td>Your calls; the crew answer.</td><td>6</td></tr>
+      <tr><td><b>Shutdowns</b><br>Day 18, 09:00</td><td>Ring "Shutdowns with Calder, 09:00"; arrow level 1 to Deck 6's port junction from 08:45; the planning screen opened for you, each step named.</td><td>Your first booking made</td><td>Calder beside you at the screen: who it feeds, a quiet hour, who to warn; Brennan in person if it's the galley.</td><td>12</td></tr>
+      <tr><td><b>The commendation</b><br>Day 18, 16:00</td><td>As built (the storm's summons).</td><td>-</td><td>As built.</td><td>0</td></tr>
+      <tr><td><b>The sensor array</b><br>Day 19, 10:00</td><td>Ring "The sensor array with Hana Mori, 10:00"; arrow level 1 to Deck 2's array room from 09:45.</td><td>Training done</td><td>Mori names three stars, you pick one; Calder's one line.</td><td>8</td></tr>
+      <tr><td><b>Your shutdown</b><br>Day 19, the booked hour</td><td>Notice 30 minutes before; arrow level 1 to the junction; ring "Your shutdown, 14:00: switch it off".</td><td>Power back on</td><td>The crew in the affected rooms say so (thanks, or a grumble if you booked a meal).</td><td>6</td></tr>
+      <tr><td><b>The old-mysteries board</b><br>Day 21</td><td>Optional: Torres mentions it; a level 3 learning arrow to the board, once.</td><td>Seen</td><td>Torres by the board: "Old ones. Nobody's cracked them."</td><td>3</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>For the writer:</b> about 150 spoken lines in these scenes, inside about 250 lines for all of Step 5 (the rest are Mail, notices, labels and case texts; section 10 lists them by file). This is the size of the first promotion's writing plus the mechanics' training lines.</p>
+  <p><b>The arrow-follower check</b> (new part <code>step5</code> in arrows_check, by S5-2 with each piece adding its beats): from a Day 13 save (an Officer at "Reliable"), a player who only follows the arrow and the ring reaches every beat in this table in order, and is a Senior Officer with the bar, the toast, power and relays, a booked and carried-out shutdown and the sensor array done by Day 21. At every waking minute of a beat's window an arrow or a ring names it; each beat is said in person or by notice before its Mail. It runs three times: as is, with Teaching arrows Off, and while tracking another job. promo_beats_check's Tier 3 parts check each beat's words and times on their own.</p>
+</section>
+
 
 <section id="rules">
   <h2>1. The ground rules for every piece</h2>
@@ -252,7 +292,7 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
     <header><h3>S5-2 The Senior Officer promotion</h3><span class="phase">P5_PROMO3</span><span class="phase">Works career engineer</span><span class="phase">4 turns</span></header>
     <p>The plan's sections 4 and 5, step by step, in the new section 24u, following FX28's promotion beats so it looks and feels like your first promotion.</p>
     <dl>
-      <dt>The offer</dt><dd><code>puOffer(now)</code>: you're an Officer, the <code>t3</code> row's needs hold, Day 14 or later (the test never before Day 15). Calder's word if you're near her (the bay, or the storm party in the bow lounge on Day 14), always a Mail and an urgent notice (<code>promoNotice</code>). "What's next" and the Training tab tick it off. Sets <code>pu.t3.day</code> to the next workday of yours on or after Day 15 (<code>promoWorkday</code>).</dd>
+      <dt>The offer</dt><dd><code>puOffer(now)</code>: you're an Officer, the <code>t3</code> row's needs hold, Day 14 or later (the test never before Day 15). Calder comes to find you wherever you are (<code>worksEscort</code>'s 24u part; the bay, or the storm party in the bow lounge on Day 14; asleep, the next morning) and tells you in person; then an urgent notice (<code>promoNotice</code>) and the Mail as the record. Every later beat follows the beats table near the top: in person first, a level 1 arrow and a ring on the day. "What's next" and the Training tab tick it off. Sets <code>pu.t3.day</code> to the next workday of yours on or after Day 15 (<code>promoWorkday</code>).</dd>
       <dt>Before</dt><dd>The crew's chatter and friends' luck: <code>puTalkTick</code>, modelled on 24p's <code>promoTalkTick</code> / <code>promoTalkKind</code> with Tier 3 keys (24p's own stay untouched). Up to two friends' Mail at 20:00 the evening before (<code>promoFriendMail</code>'s pattern; which friends from <code>schedU</code> key 852). Schedule rows (<code>puItems(d)</code>, added to section 14's day list by one <code>typeof</code>-guarded line beside <code>promoBeatsItems</code>) and Tracked "Your Tier 3 test, 09:00".</dd>
       <dt>The test</dt><dd><code>WORK_MECH.t3.offer</code>, like <code>WORK_MECH.t2</code>: a real Tier 3 job held for you on whichever Deck 6 junction is in the worse state (<code>jobReserve</code>, a free slot: 20 is the Tier 2 test's, 24 the fix-scan's; the builder checks section 17 for the rest), 09:00-15:00, its parts set aside (<code>promoPartsAside</code>). Calder walks with you (<code>worksEscort</code>'s 24u part) and says each step (<code>worksTeach</code>, flags <code>train.t3.*</code>): a short planning talk at the junction (the branch it feeds, from <code>SHUT_BRANCHES</code>, and why now is quiet), warn the two people the branch affects (picked from the day's fixed roster with <code>schedU</code> key 853; tap them for "About the shutdown"; if one can't be found in 30 minutes, Calder says "I'll tell them"), switch it off, change the breaker, bring it back. Delayed, never failed: not taken by 15:00 or dropped, Calder says what to practise and sets it again in two workdays. The board's gold ring "Your Tier 3 test: take it", whatever the arrow setting: 24p's <code>promoBeatsPtr</code> gains one line, <code>key === 't3'</code> asks 24u.</dd>
       <dt>Passing</dt><dd>"Your result tomorrow, first thing. My office, 08:15." Mail and notice; Torres's word if he's near; the bay talks about it that evening.</dd>
@@ -359,7 +399,7 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
       <tr><td>mech_check</td><td>Parts ps, m19, m18, m20</td><td>S5-1, S5-3, S5-4, S5-5</td></tr>
       <tr><td>puzzle_check</td><td>Parts p4, p5, p9, board</td><td>S5-6</td></tr>
       <tr><td>day_check</td><td>New event days 15 (the Tier 3 test) and 16 (Senior Officer); Day 19's entry now means "the sensor array and a booked shutdown" (no night shift); Day 20 (the Captain's table at 19:30 again). Added to <code>EVENT_DAYS</code> and tools/affected.py</td><td>S5-1</td></tr>
-      <tr><td>arrows_check, dev_arrow_check</td><td>The week part over Days 14-17; the career arrow through the new steps</td><td>S5-2</td></tr>
+      <tr><td>arrows_check, dev_arrow_check</td><td>New part <code>step5</code>: the arrow-follower through every beat (the beats table), three ways; the week part over Days 14-17; the career arrow through the new steps</td><td>S5-2</td></tr>
       <tr><td>saves_check</td><td>A save mid-promotion; a save with an unsettled shutdown booking</td><td>S5-2, S5-4</td></tr>
       <tr><td>controller_check</td><td>reach, pick, and a pad-played Day 16 (section 9 of this page)</td><td>each piece</td></tr>
       <tr><td>bigevents_check, events_check</td><td>The moved rows; the guard's choices with them; nothing changes with the switch off</td><td>S5-1</td></tr>
@@ -417,20 +457,31 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
 
 <section id="questions">
   <h2>12. Your questions</h2>
+  <p>All five questions for Steps 5 and 6 are here and on the other step's page; answering on either page is enough.</p>
   <div class="q">
-    <h3>1. Play the Senior Officer promotion early?</h3>
-    <p>S5-2 is about a day and a half in. It can get its own full round and a Dev link (with <code>#p5s5</code>) so you can play the offer, the test, the result, the bar and the toast before the rest of Step 5 is done. The live game doesn't change either way.</p>
-    <p class="rec"><b>Recommended: yes, a Dev link after S5-2.</b> Your notes then shape the Engine Specialist promotion too. It costs one extra round (about 30 minutes of the runners).</p>
+    <h3>1. Try the Senior Officer promotion early? (Step 5)</h3>
+    <p>When the promotion part is built (about a day and a half in), would you like a test link to play it straight away: the offer, the test, the result, the bar and the toast? The real game doesn't change until all of Step 5 is done.</p>
+    <p class="rec"><b>Recommended: yes.</b> What you think of it can shape the Engine Specialist promotion too.</p>
   </div>
   <div class="q">
-    <h3>2. "Power safety" before the Tier 3 test</h3>
-    <p>The plan's offer needs "Relied on" as an Officer and Power safety, but there's no Power safety lesson in the game.</p>
-    <p class="rec"><b>Recommended: a short lesson</b> with Calder at a Deck 6 junction, offered from Day 12 (about 20 minutes, watch-only like P3). It sets up the junction you'll shut down in the test. The other choice: count Team jobs instead, and say nothing about power until the test.</p>
+    <h3>2. A power safety lesson before the Tier 3 test? (Step 5)</h3>
+    <p>The plan says you need "power safety" before Calder offers the Tier 3 test, but the game doesn't have that lesson yet.</p>
+    <p class="rec"><b>Recommended: a short lesson</b> with Calder at a power junction on Deck 6, from Day 12. It's about 20 minutes and you only watch. The other choice: skip it and only ask for Team jobs.</p>
   </div>
   <div class="q">
-    <h3>3. Booking a shutdown over a meal or a tradition</h3>
-    <p>The planning screen shows who'd be affected at each hour. What if you pick dinner, or the gym class?</p>
-    <p class="rec"><b>Recommended: allowed, with consequences.</b> The screen marks meal and tradition hours plainly; if you book one anyway, the crew grumble the next day and your reputation dips a little, and it can turn up later as a P9 clash. The other choice: those hours can't be picked at all.</p>
+    <h3>3. Turning the power off at mealtime? (Step 5)</h3>
+    <p>When you plan a power shutdown, you pick an hour for it the next day. Should you be allowed to pick dinner time, or the hour of a gym class or a ship event?</p>
+    <p class="rec"><b>Recommended: yes, but it shows.</b> Those hours are marked plainly; if you pick one anyway, the crew grumble the next day and your reputation dips a little. The other choice: those hours can't be picked.</p>
+  </div>
+  <div class="q">
+    <h3>4. The Monday meeting: every week or once? (Step 6)</h3>
+    <p>On Day 22 you join the Captain, Vance and the department chiefs at the big table for the Monday morning meeting, and choose what Works brings up.</p>
+    <p class="rec"><b>Recommended: every Monday from Day 22</b>, the first in full and later ones short. The other choice: only on Day 22 for now.</p>
+  </div>
+  <div class="q">
+    <h3>5. Calder's question: your answers (Step 6)</h3>
+    <p>At Four weeks aboard Calder asks what you want next. Your answer is kept for later; nothing changes in play yet.</p>
+    <p class="rec"><b>Recommended: four answers:</b> stay with the engines and lead the night crew; learn the bridge; teach the new cadets; or "I don't know yet". The other choice: suggest your own in the notes.</p>
   </div>
   <form id="answers">
     <div id="rows"></div>
@@ -445,9 +496,11 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
 (() => {
   // answers, kept in the page's own store at answers/user (the same shape as the plan page's form)
   const items = [
-    ['early', '1. Play the Senior Officer promotion early?', [['yes', 'Yes, a Dev link after S5-2 (recommended)'], ['no', 'No, wait for all of Step 5']]],
-    ['safety', '2. Power safety before the Tier 3 test', [['lesson', 'A short lesson with Calder (recommended)'], ['team', 'Count Team jobs instead']]],
-    ['meals', '3. Booking a shutdown over a meal or a tradition', [['allow', 'Allowed, with consequences (recommended)'], ['block', "Those hours can't be picked"]]],
+    ['early', '1. Try the Senior Officer promotion early?', [['yes', 'Yes, a test link as soon as it is built (recommended)'], ['no', 'No, wait for all of Step 5']]],
+    ['safety', '2. A power safety lesson before the Tier 3 test?', [['lesson', 'Yes, a short lesson with Calder (recommended)'], ['team', 'No, only ask for Team jobs']]],
+    ['meals', '3. Turning the power off at mealtime?', [['allow', 'Allowed, but the crew grumble (recommended)'], ['block', 'Those hours cannot be picked']]],
+    ['weekly', '4. The Monday meeting: every week or once?', [['weekly', 'Every Monday from Day 22 (recommended)'], ['once', 'Only on Day 22 for now']]],
+    ['answers', "5. Calder's question: your answers", [['four', 'The four answers (recommended)'], ['mine', 'My own, in the notes']]],
   ];
   const rows = document.getElementById('rows');
   for (const [k, name, opts] of items) {
