@@ -1546,3 +1546,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~22:28 UTC: **RV21 FIXES NEEDED VB1 V-2 73942e8a**: MUST vesselLights 47 going for 44 places (bigevents on-copy); shoulds: ramp crowd (~20, SW4 rampCrowd unused), Taavek goodbye missable (15-min window), round-one fallback, Saturday sheet Calder comes to you, doubled pilot toast, setTimeout, merge 3fb8eac7. Live beats/arrows/ramp replies OK.
 - ~22:28 UTC: CR5 reran join_check for CR6 on 0.93.3: OK (267 s, alone). CR6 need not rerun.
 - ~22:29 UTC: **CR1 0.93.3 OK** (all 11 checks; claude/checks-cr1; ~55%). 3 of 6 done (CR1, CR4, CR5); CR2, CR3, CR6 running.
+- ~22:33 UTC: CR1 also ran CR3's promo_sight + sound_check on 0.93.3: OK (CR3 must not rerun them). CR1 idle.
