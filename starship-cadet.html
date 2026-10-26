@@ -16919,7 +16919,7 @@ function ixFrame() {
   const mj = typeof myJob === 'function' ? myJob() : null, m = Math.floor(shipNow()), key = m + '|' + (mj ? mj.id + (mj.workDone ? '+' : '') + (mj.stepsDone || []).length : '') + '|' + SHIP.player.carry.length + '|' + (SHIP.player.work ? SHIP.player.work.fitted.length + '|' + !!SHIP.player.work.make : '');
   if (ixGoalAt !== key) { ixGoalAt = key; try { ixJobGoal = ixJobStep(); } catch (e) { ixJobGoal = null; } }
   const g = goalNow();                                   // the job's step only while it's tracked (goalNow: the arrow queue first when it's on)
-  adoorWay(g);                                           // the doors on the arrow's way open by themselves (15b, FX29)
+  adoorWay(g); adoorHint();                              // the doors on the arrow's way open by themselves; stopped at a shut one, how it opens (15b, FX29)
   if (!g) { if (!el.hidden) el.hidden = true; return; }
   if (typeof actProgress === 'function' && actProgress(ACT)) { if (!el.hidden) el.hidden = true; return; }   // section 15's progress bar is up over you: it says it all
   const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : ixLiftPanel() || { x: LIFT_AT[0], z: LIFT_AT[1] };
@@ -17121,7 +17121,7 @@ var AUTO_DOORS_ON = true;
 // deck from its bed places' rooms and each door's two rooms; no R(), no geometry)
 const ADOOR_WORDS = 'Doors. Private rooms are cabins and bunk rooms (and the washroom inside a cabin). Lift doors always open.';
 const ADOOR_CHOICES = [['all', 'All open by themselves'], ['private', 'Private rooms: tap to open'], ['none', 'All doors: tap to open']];
-const ADOOR = { tap: null, here: null, route: new Set(), way: null };
+const ADOOR = { tap: null, here: null, route: new Set(), way: null, hints: 0, hintAt: -1e9 };
 function doorsMode() {
   if (!AUTO_DOORS_ON || typeof SHIP === 'undefined' || !SHIP.device || !SHIP.device.settings) return 'all';
   const st = SHIP.device.settings; return st.doors === 'all' || st.doors === 'none' ? st.doors : st.autoDoors === false ? 'none' : 'private';
@@ -17191,6 +17191,23 @@ function adoorSelfKey() {                                // the door shut to you
   if (autoDoors() || typeof DOOR_OBJS === 'undefined') return null;
   const p = player.obj.position, d = DOOR_OBJS.filter(o => o.e.type === 'door' && adoorShut(o.e, player)).map(o => [o, Math.hypot(o.cx - p.x, o.cz - p.z)]).filter(([, m]) => m < .9).sort((x, y) => x[1] - y[1])[0];
   return d ? d[0].e.key : null;
+}
+const _aoA = new THREE.Vector3(), _aoB = new THREE.Vector3();
+function adoorOnMe(cx, cy) {                              // a tap on your own body on screen (feet to head, a body's width either side)
+  if (typeof player === 'undefined') return false;
+  const p = player.obj.position; _aoA.set(p.x, 0, p.z).project(camera); _aoB.set(p.x, player.h || 1.7, p.z).project(camera);
+  const ax = (_aoA.x + 1) / 2 * innerWidth, ay = (1 - _aoA.y) / 2 * innerHeight, bx = (_aoB.x + 1) / 2 * innerWidth, by = (1 - _aoB.y) / 2 * innerHeight;
+  const dx = bx - ax, dy = by - ay, l2 = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((cx - ax) * dx + (cy - ay) * dy) / l2));
+  return Math.hypot(cx - ax - dx * t, cy - ay - dy * t) < Math.max(14, Math.sqrt(l2) * .2);
+}
+// FX29 (lead 39): your own steering stopped at a door shut to you: say how it opens, the first few times in a session (not every bump)
+function adoorHint() {
+  const s = player.steer; if (!s || !s.k || player.path.length || autoDoors() || ADOOR.hints >= 3 || typeof DOOR_OBJS === 'undefined') return;
+  const now = performance.now(); if (now - ADOOR.hintAt < 20000) return;
+  const p = player.obj.position, d = DOOR_OBJS.find(o => o.e.type === 'door' && Math.hypot(o.cx - p.x, o.cz - p.z) < .6 && (o.cx - p.x) * s.x + (o.cz - p.z) * s.z > .1 && adoorShut(o.e, player));
+  if (!d) return;
+  ADOOR.hints++; ADOOR.hintAt = now;
+  toast('A private room', typeof PAD !== 'undefined' && PAD.used ? 'Press A, or tap the door, to open it.' : 'Tap the door to open it.');
 }
 function adoorTapSelf() { const k = adoorSelfKey(); return !!k && adoorTap(k); }   // a tap on you right by a shut door: that door
 function adoorSet(mode) {                                 // the Settings row: 'all' | 'private' | 'none' (true / false: 0.93.2's on / off)
@@ -62006,9 +62023,10 @@ function tap(cx, cy) {
   if (near && atPin && typeof ixPinBooth === 'function' && ixPinBooth()) return;   // FX5: the call booth's pin, over someone in the next booth
   if (tapCrew(cx, cy)) return;                           // a crew member (section 10)
   if (typeof shelfGlowTap === 'function' && shelfGlowTap(cx, cy)) return;   // the shelf lit up for the part you need (section 17, FX3): after the crew, so a tap on someone in front of it is still theirs (RV11)
-  const h = pick(cx, cy); if (!h) return;
+  const h = pick(cx, cy);
+  if (!atPin && !(h && (h.object.userData.item || h.object.userData.walker)) && adoorOnMe(cx, cy) && adoorTapSelf()) return;   // a tap on yourself right by a door shut to you is a tap on the door (RV18: low cut-away walls); someone, something or the arrow's pin there first (FX29: pick() never returns you)
+  if (!h) return;
   const ud = h.object.userData;
-  if (ud.walker && ud.walker.isPlayer && adoorTapSelf()) return;   // 0.93.2: Auto doors off, a tap on yourself right by a shut door is a tap on the door (RV18: low cut-away walls)
   if (ud.walker && ud.walker.active) {
     const who = ud.walker, s = who.spec;
     who.stop(); who.talking = 6; who.faceToward(player); player.faceToward(who);

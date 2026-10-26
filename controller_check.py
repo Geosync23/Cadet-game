@@ -1328,11 +1328,24 @@ STEER = r"""((gx, gz) => { const s = player.here(), g = nearestOpen(gx, gz, play
   let w = cellPos(...path[0]); if (path.length > 1 && Math.hypot(w.x - pp.x, w.z - pp.z) < .3) w = cellPos(...path[1]);
   const dx = w.x - pp.x, dz = w.z - pp.z, d = Math.hypot(dx, dz) || 1;
   const x = (dx * Math.cos(az) - dz * Math.sin(az)) / d, y = (dx * Math.sin(az) + dz * Math.cos(az)) / d; return { x, y }; })"""
+# FX29 (lead 39, CR5's 'day' FAIL): your own stick stops at a private room's door (the Doors setting's default); a player
+# then picks that door on the ring and presses A, and walks on. A door shut to you within 1.2 m, chosen on the ring: A
+SHUT_NEAR = r"""(() => { if (typeof adoorShut !== 'function') return false; const p = player.obj.position; return DOOR_OBJS.some(o => o.e.type === 'door' && Math.hypot(o.cx - p.x, o.cz - p.z) < 1.2 && adoorShut(o.e, player)); })()"""
+def open_door(r):
+    r.js('window.__pads.clear(0)'); r.step(2)
+    for k in range(12):
+        sel = r.ev(RING_SEL)
+        if sel and str(sel['key']).startswith('door:'): r.press('A'); r.step(40); return True
+        r.press('RIGHT'); r.step(4)
+    return False
 def walk_to(r, x, z, frames=900):
-    shut = 0
+    shut = 0; last = None; still = 0; doors = 0
     for k in range(frames // 6):
         # a panel that opened on the way (a ladder hatch underfoot, 0.64.17): B puts it away, as a player would, then on
         if shut < 4 and r.ev("!!padLayer()"): r.js('window.__pads.clear(0)'); r.press('B'); r.step(3); shut += 1; continue
+        pos = r.ev("[player.obj.position.x, player.obj.position.z]")
+        still = still + 1 if last and abs(pos[0] - last[0]) + abs(pos[1] - last[1]) < .03 else 0; last = pos
+        if still >= 2 and doors < 4 and r.ev(SHUT_NEAR): doors += 1; still = 0; open_door(r); continue
         st = r.ev(f"({STEER})({x}, {z})")
         if not st or st.get('there'): r.js('window.__pads.clear(0)'); r.step(2); return bool(st)
         if st.get('nopath'): r.js('window.__pads.clear(0)'); return False

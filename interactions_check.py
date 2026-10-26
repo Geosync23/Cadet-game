@@ -1803,7 +1803,17 @@ with sync_playwright() as pw:
         PRIV = r"""(priv => { adoorSet('private'); goToDeck(priv ? 4 : 3); actEnd(true); player.stop(); const ds = DOOR_OBJS.filter(o => o.e.type === 'door' && adoorPrivate(o.e.key) === priv).map(o => [o, doorSides(o.e)]).filter(([o, s]) => s.length === 2 && s.every(([i, j]) => free(i, j)));
           const [o, s] = ds[0]; window.__door = { key: o.e.key, a: s[0], b: s[1] }; player.obj.position.copy(cellPos(...s[0])); player.stop(); return [o.e.key, doorsMode(), 'doors' in SHIP.device.settings]; })(%s)"""
         ad['pubSet'] = g.ev(PRIV % 'false'); g.ev(STEER); g.step(60); ad['pub'] = g.ev(AT); g.ev(BACK)
-        ad['privSet'] = g.ev(PRIV % 'true'); g.ev(STEER); g.step(60); ad['priv'] = g.ev(AT); g.ev(BACK)
+        ad['privSet'] = g.ev(PRIV % 'true'); g.ev("ADOOR.hints = 0; ADOOR.hintAt = -1e9; document.getElementById('tx').textContent = ''"); g.ev(STEER); g.step(60); ad['priv'] = g.ev(AT)
+        ad['hint'] = g.ev("[ADOOR.hints, document.getElementById('tx').textContent]"); g.ev(BACK)
+        # FX29 (RV18's should): a real tap on your own body, standing by the bunk room's shut door, opens it (pick() never returns you)
+        if g.ev("typeof adoorOnMe === 'function'"):
+            g.ev(PRIV % 'true'); g.ev("(() => { const p = player.obj.position; target.copy(p).setY(.7); placeCam(); })()"); g.step(5)
+            xy = g.ev("(() => { const p = player.obj.position, v = new THREE.Vector3(p.x, .9, p.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight, adoorSelfKey()]; })()")
+            g.page.mouse.click(xy[0], xy[1]); g.step(3)
+            ad['tapMe'] = g.ev("[ADOOR.tap === window.__door.key, ADOOR.tap]") + [xy[2]]; g.ev(BACK); g.ev("ADOOR.tap = null")
+            check(ad['tapMe'][0], f"Doors 'private': a real tap on yourself by the bunk room's shut door opens it (FX29, RV18): {ad['tapMe']} {xy}")
+            check(ad['hint'][0] == 1 and 'Tap the door' in ad['hint'][1], f"Doors 'private': stopped at the shut door by your own steering, the hint says how it opens, once (FX29): {ad['hint']}")
+        else: check(False, 'no adoorOnMe (FX29)')
         # FX29 (lead 39, CR1's week guide): an arrow's way opens its doors, however you walk; with the arrow gone, the rule again
         if g.ev("typeof adoorWay === 'function'"):
             g.ev(PRIV % 'true'); g.ev("(() => { window.__trk = SHIP.player.track; SHIP.player.track = null; setGoal({ deck: 4, at: window.__door.b, label: 'FX29 test' }); adoorWay(goalNow()); })()")
