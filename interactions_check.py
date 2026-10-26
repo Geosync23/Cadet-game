@@ -1808,6 +1808,31 @@ with sync_playwright() as pw:
         check(ad['crew'] == [False, False], f"Auto doors: the crew are never stopped (0.93.2): {ad['crew']}")
         check(ad['saved'] == [False, False] and ad['savedOn'] is False, f"Auto doors: saved as off, loaded back; nothing saved when on (0.93.2): {ad['saved']} {ad['savedOn']}")
     else: check(False, 'no Auto doors (0.93.2)')
+    # Take a seat (0.93.2, the user's): with a tray in the mess hall, next to a free mess seat, a button the size of Put down
+    # just above it; a tap sits you at the nearest free seat and you eat (the tray's sit-and-eat); none without a tray, none
+    # outside the mess hall, none with no free seat near
+    if g.ev("typeof seatBtnSeat === 'function'"):
+        g.ev("(() => { goToDeck(3); actEnd(true); setShipNow(18 * 60 + 30); deckCrewFill(); SHIP.player.tray = null; })()")
+        tb = g.ev(r"""(() => { const out = {}, vis = () => (handTick(true), !document.getElementById('seatBtn').hidden), rect = id => { const b = document.getElementById(id).getBoundingClientRect(); return [b.top, b.bottom, b.right, b.height]; };
+          const pl = [...PLACE_OF.values()].find(q => q.type === 'mess-seat' && !heldBy(q.id)), sp = placeSpot(pl.id);
+          player.obj.position.set(sp.x + 1.0, 0, sp.z + .6); player.stop(); out.noTray = vis();
+          SHIP.player.tray = 'stew'; SHIP.player.trayLeft = 0; out.tray = vis(); out.near = (seatBtnSeat() || [{}])[0].id; return out; })()""")
+        g.step(10)   # Put down shows on its own tick: give it a few frames before measuring the two
+        tb.update(g.ev(r"""(() => { const out = {}, vis = () => (handTick(true), !document.getElementById('seatBtn').hidden), rect = id => { const b = document.getElementById(id).getBoundingClientRect(); return [b.top, b.bottom, b.right, b.height]; };
+          out.near = (seatBtnSeat() || [{}])[0].id;   // again: the crew move in those frames
+          if (vis()) { const s = rect('seatBtn'), p = rect('putDown'); out.above = s[1] <= p[0] && s[1] > p[0] - 30; out.same = Math.abs(s[3] - p[3]) <= 1; out.right = Math.abs(s[2] - p[2]) <= 1; }
+          const p0 = player.obj.position.clone(), lp = [...PLACE_OF.values()].find(q => q.type === 'lounge-seat' && placeSpot(q.id)), ls = placeSpot(lp.id); player.obj.position.set(ls.x + .8, 0, ls.z); player.stop(); out.lounge = vis();
+          player.obj.position.copy(p0); player.stop(); vis(); return out; })()"""))
+        bb = g.ev("(() => { const b = document.getElementById('seatBtn').getBoundingClientRect(); return [Math.round(b.left + b.width / 2), Math.round(b.top + b.height / 2)]; })()")
+        g.page.mouse.click(*bb); g.step(5)
+        tb['tap'] = g.ev("[ACT && ACT.kind, ACT && !!ACT.o.fed, ACT && ACT.placeId, (handTick(true), document.getElementById('seatBtn').hidden)]")
+        g.ev("(() => { actEnd(true); SHIP.player.tray = null; handTick(true); })()")
+        print('  Take a seat:', tb)
+        check(tb['noTray'] is False and tb['tray'] is True and tb.get('above') and tb.get('same') and tb.get('right') and tb['lounge'] is False,
+              f'Take a seat: only with a tray in the mess hall by a free seat, Put down\'s size, straight above it (0.93.2): {tb}')
+        check(tb['tap'][0] == 'eat' and tb['tap'][1] is True and tb['tap'][2] == tb['near'] and tb['tap'][3] is True,
+              f'a tap on Take a seat sits you at the nearest free seat to eat your tray, and the button goes (0.93.2): {tb["tap"]}')
+    else: check(False, 'no seatBtnSeat (0.93.2, Take a seat)')
     check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
