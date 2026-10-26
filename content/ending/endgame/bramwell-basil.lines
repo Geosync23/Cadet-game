@@ -1,0 +1,18 @@
+@crew bramwell-basil
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22).
+
+== greet
+? endgame
+- Oh, hi! You're staying? So you're still my mentor? Officially? I've written it down.   #funny
+
+== chat
+? endgame
+- I wrote home that my mentor stayed. Is "mentor" the word? It's the word. Brilliant.
+- The plant's doing better. Is that because you stayed? It isn't. Is it? It might be.   #funny
+- How long till you stopped feeling new? A week? A month? Don't tell me. I'll guess.
+- On the Ostrander colonies we'd have a parade for staying. Bigger than this. Not better.   #warm
+
+== bye
+? endgame
+- See you tomorrow! You'll be here tomorrow. That's the brilliant bit.   #warm

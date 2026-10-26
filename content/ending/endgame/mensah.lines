@@ -1,0 +1,15 @@
+@crew mensah
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22).
+
+== chat
+? endgame
+- The Chief said you'd stay. The Chief never bets. I lost a tea and gained a story.   #funny
+- On my rounds last night I said good night to every deck. Added your name. She didn't mind.   #warm
+- Made the Chief laugh twice this week. One was about you. I'm not saying which.   #funny
+- Quiet night, quiet decks. That's what we're for, you and me. The quiet.
+- The night shift waited up for the news. Then went straight to bed. Night shift, eh?   #funny
+
+== bye
+? endgame
+- Night, {me}. She's in good hands. Yours too, now.   #warm
