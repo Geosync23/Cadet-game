@@ -10459,6 +10459,7 @@ function schedBuild(p, d, occ, S) {
           if (pref && (pass === 0 ? !pref.has(pl.id) || avoid.has(pl.id) : pass === 1 ? pref.has(pl.id) || avoid.has(pl.id) : !avoid.has(pl.id))) continue;
           if (!mine && !isFree(pl.id, s, end, o.tag)) continue;
           if (shut && evClosed(pl, B + s, o.event, B + end)) continue;   // closed for the event
+          if (P5_M18 && sdPlanShut(d, occ, pl, B + s, B + end)) continue;   // a shutdown booked for that hour (24w, S5-4): read from the record settled at 22:00 the evening before
           if (act === 'leisure' && type.startsWith('work:') && (S.deskOf(pl.id) || (occ.rotIds && occ.rotIds.has(pl.id)))) continue;   // a guest at a work type: never someone's desk, nor today's stand-in's
           const lead = () => { if (!fromXY || dk !== deck) return;   // the walk (#9): they set off earlier, out of the end of what they were doing (at most half of it; never an event meeting, F0b)
             const l = segs[segs.length - 1], cut = l && l.to === t && l.deck === deck && l.act !== 'commute' && !(typeof eventMeetTag === 'function' && eventMeetTag(l.tag)) && !l.kept ? Math.min(walkLead(fromXY(dk), pl), Math.floor((l.to - l.from) / 2)) : 0;
@@ -58523,6 +58524,109 @@ onSim('job', n => {                                      // B: Torres comes by a
 // ---------------------------------------------------------------------
 
 // ---- slot: Shutdowns (section 24w). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// S5-4 (B3 for lead 39), behind P5_M18. Some of your Tier 3 power jobs need the power off: a repair on a junction, a power
+// junction, an inverter or a battery bank, once you're trained in shutdowns (j.shut: 24w marks them on the board for you,
+// held for you in slot SD_SLOT, status 'waiting' "needs a shutdown", without changing section 17). You book one for
+// tomorrow (the Works app's Shutdowns tab): an hour, the branch it cuts (SHUT_BRANCHES), the rooms you keep powered, who
+// you warned. At 22:00 the evening before, the booking settles into sd.set[day] (saved); the crew's plans for that day read
+// only that, through section 14's one hook sdPlanShut (the planner rule, as recPlanShut): the branch's rooms, minus the
+// kept ones, are closed for the hour, so the crew go elsewhere. A plan of that day made before 22:00 is dropped then and
+// made again (SHIP_DAYS, as machinesReset drops the rec deck's). Nothing reads a booking live.
+//   SHIP.works.sd (saved as ship.works.sd) = { book: [{ day, at, branch, keep: ['deck|room'], warned: [id], inPerson: [id],
+//   job }], set: { day: [the same, settled] }, done: [day], miss: [day] }
+// Job slots: SD_TRAIN_SLOT 42 (the training's real job), SD_SLOT 43 (the jobs marked for a shutdown).
+// The tables are built on first use (sdBranches), so a plan made while the file is still loading never meets an
+// uninitialised name; the save's sd is read back below and any plan already made for a settled day is dropped.
+const SD_SLOT = 43, SD_TRAIN_SLOT = 42, SD_SETTLE = 1320, SD_LEN = 60, SD_HOURS = [480, 1200];   // settles at 22:00; an hour; bookable from 08:00 to 20:00 starts (breakfast and dinner included: question 3)
+const SD_MEALS_OK = true;                                // question 3 (unanswered; the spec's recommendation): meal and tradition hours may be booked, marked plainly, and the crew grumble. false: those hours can't be picked
+const SD_KINDS = new Set(['junction', 'powerjunction', 'inverter', 'battery']);
+var SD_B = null;                                         // var: read by sdBranches before this line has run
+function sdBranches() {                                  // { id: { junction, name, rooms: [[deck, room]], keep: [[deck, room]] } } (rooms agreed with the deck architect: to confirm)
+  return SD_B || (SD_B = Object.freeze({
+    galley: { junction: '6-junction-1', name: 'the galley circuit', rooms: [[3, 'K'], [3, 'M']], keep: [[3, 'K']] },
+    gym: { junction: '6-junction-1', name: 'the gym and laundry circuit', rooms: [[3, 'F'], [4, 'l']], keep: [[4, 'l']] },
+    junior: { junction: '6-junction-2', name: 'the junior deck circuit', rooms: [[4, 'j'], [4, 'n']], keep: [[4, 'n']] },
+    lounge: { junction: '6-junction-2', name: 'the bow lounge circuit', rooms: [[3, 'L'], [3, 'B']], keep: [[3, 'B']] },
+    science: { junction: '2-breaker-1', name: 'the science corridor', rooms: [[2, 'L'], [2, 'M'], [2, 'J']], keep: [[2, 'M'], [2, 'J']] },
+    bridge: { junction: '1-junction-1', name: 'the observation room circuit', rooms: [[1, 'O'], [1, 'R']], keep: [[1, 'R']] },
+    works: { junction: '5-inverter-1', name: 'the Works bay circuit', rooms: [[5, 't'], [5, 'f']], keep: [[5, 'f']] } }));
+}
+var SHUT_BRANCHES = sdBranches();                         // the spec's name, for S5-2's test and S5-6's P9
+const SD_FEEDS = { '2-junction-1': '2-breaker-1' };      // a machine that shares another's branches (Deck 2's closet); Deck 5's batteries go through the inverter
+function sdFeed(machineId) { const m = typeof machineById === 'function' ? machineById(machineId) : null; if (!m) return null; return SD_FEEDS[m.id] || (m.kind === 'battery' && m.deck === 5 ? '5-inverter-1' : m.id); }
+const sdBranchesFor = machineId => { const f = sdFeed(machineId), B = sdBranches(); return f ? Object.keys(B).filter(k => B[k].junction === f) : []; };
+const sdRoomKey = r => r[0] + '|' + r[1];
+function sdData() { const W = SHIP.works; if (!W) return null; if (!W.sd || typeof W.sd !== 'object' || !Array.isArray(W.sd.book)) W.sd = { book: [], set: {}, done: [], miss: [] }; return W.sd; }
+function sdClean(s) {                                    // a save's sd read back: junk dropped
+  const int = v => Number.isInteger(v) && v >= 0 && v < 99999, B = sdBranches(), ids = a => Array.isArray(a) ? a.filter(x => typeof x === 'string').slice(0, 8).map(x => x.slice(0, 40)) : [];
+  const one = b => b && int(b.day) && int(b.at) && B[b.branch] ? { day: b.day, at: b.at, branch: b.branch, keep: ids(b.keep).filter(k => B[b.branch].keep.some(r => sdRoomKey(r) === k)), warned: ids(b.warned), inPerson: ids(b.inPerson), job: typeof b.job === 'string' ? b.job.slice(0, 80) : null } : null;
+  const set = {}; if (s && s.set && typeof s.set === 'object') for (const k of Object.keys(s.set).slice(0, 20)) if (/^\d{1,4}$/.test(k) && Array.isArray(s.set[k])) set[k] = s.set[k].map(one).filter(Boolean).slice(0, 6);
+  const days = a => Array.isArray(a) ? a.filter(int).slice(-20) : [];
+  return { book: Array.isArray(s && s.book) ? s.book.map(one).filter(Boolean).slice(0, 6) : [], set, done: days(s && s.done), miss: days(s && s.miss) };
+}
+if (P5_M18) (() => { const s = SAVED && SAVED.ship && SAVED.ship.works; if (SHIP.works && s && s.sd) { SHIP.works.sd = sdClean(s.sd);
+  for (const k of Object.keys(SHIP.works.sd.set)) { SHIP_DAYS.delete(+k); MACH_USE.delete(+k); } } })();   // a plan made while loading, before the record was read back
+// section 14's hook (take(), the room rules, the sim engineer's): is place pl closed by a settled shutdown between ship
+// minutes a and b of day d? Reads only sd.set[d] (settled at 22:00 the evening before), cached on the day's occ
+function sdPlanShut(d, occ, pl, a, b) {
+  if (!P5_M18 || !pl) return false;
+  let L = occ && occ.sdShut;
+  if (L === undefined) { L = sdShutList(d); if (occ) occ.sdShut = L; }
+  if (!L) return false;
+  const key = pl.deck + '|' + pl.room;
+  for (const x of L) if (x.from < b && a < x.to && x.rooms.has(key)) return true;
+  return false;
+}
+function sdShutList(d) {                                  // [{ from, to, rooms: Set('deck|room') }] for day d's settled bookings, or null
+  const S = SHIP.works && SHIP.works.sd, set = S && S.set && S.set[d]; if (!Array.isArray(set) || !set.length) return null;
+  const B = sdBranches(), out = [];
+  for (const e of set) { const br = B[e.branch]; if (!br) continue; const keep = new Set(e.keep || []);
+    out.push({ from: (d - 1) * 1440 + e.at, to: (d - 1) * 1440 + e.at + SD_LEN, rooms: new Set(br.rooms.map(sdRoomKey).filter(k => !keep.has(k))) }); }
+  return out.length ? out : null;
+}
+// 22:00: tomorrow's bookings settle (and the plans already made for that day are made again); a booking for a day that
+// has come without settling (a Dev clock jump) lapses. Old records go after a few days
+function sdSettle(t) {
+  const S = SHIP.works && SHIP.works.sd; if (!S) return;
+  const d = worksDay(t), m = t - (d - 1) * 1440, rest = [];
+  for (const b of S.book) {
+    if (b.day === d + 1 && m >= SD_SETTLE) { (S.set[b.day] = S.set[b.day] || []).push(b); SHIP_DAYS.delete(b.day); MACH_USE.delete(b.day); simNote('sdSettled', { day: b.day, at: b.at, branch: b.branch }); }
+    else if (b.day <= d) { if (!S.miss.includes(b.day)) S.miss.push(b.day); simNote('sdLapsed', { day: b.day, branch: b.branch }); }
+    else rest.push(b);
+  }
+  S.book = rest;
+  for (const k of Object.keys(S.set)) if (+k < d - 3) delete S.set[k];
+}
+// book a shutdown for job jobId on day `day` at minute `at` (from midnight): returns the booking or null. Only for a
+// day not yet settled (tomorrow before 22:00, else the day after), an hour in SD_HOURS, one of the job's branches
+function sdTarget(t = shipNow()) { const d = worksDay(t); return t - (d - 1) * 1440 < SD_SETTLE ? d + 1 : d + 2; }
+function sdBook(jobId, at, branch, keep = [], o = {}) {
+  const S = sdData(), j = SHIP.jobs.find(x => x.id === jobId); if (!S || !j || !j.shut || j.status === 'done') return null;
+  const day = o.day || sdTarget(), br = sdBranches()[branch];
+  if (day !== sdTarget() || !br || !sdBranchesFor(j.machine).includes(branch) || !Number.isInteger(at) || at < SD_HOURS[0] || at > SD_HOURS[1] || at % 60) return null;
+  S.book = S.book.filter(b => b.job !== jobId);
+  const b = { day, at, branch, keep: keep.filter(k => br.keep.some(r => sdRoomKey(r) === k)), warned: (o.warned || []).slice(0, 8), inPerson: (o.inPerson || []).slice(0, 8), job: jobId };
+  S.book.push(b); j.sdDay = day; j.why = worksText('sd.why.booked', 'shutdown booked: {day}, {time}', { day: 'Day ' + day, time: hhmm(at) });
+  simNote('sdBooked', { day, at, branch, job: jobId });
+  return b;
+}
+function sdCancel(jobId) {
+  const S = sdData(), i = S ? S.book.findIndex(b => b.job === jobId) : -1; if (i < 0) return false;
+  S.book.splice(i, 1); const j = SHIP.jobs.find(x => x.id === jobId); if (j) { delete j.sdDay; j.why = sdWhy(); }
+  return true;
+}
+const sdWhy = () => worksText('sd.why', 'needs a shutdown: book one in Works');
+// a job that needs the power off: a repair on a power junction, inverter or battery bank with a branch, Tier 3, yours to take
+const sdNeeds = j => !!(j && j.machine && j.kind === 'repair' && j.status !== 'done' && !j.claimedBy && sdBranchesFor(j.machine).length && SD_KINDS.has((machineById(j.machine) || {}).kind) && jobTier(j) >= 3);
+// once a ship minute, once trained: such jobs on the board for you are marked, held for you and wait for a booking
+function sdMark(t) {
+  const W = SHIP.works; if (!W || W.tr.m18 === undefined) return 0; let n = 0;
+  for (const j of SHIP.jobs) if (!j.shut && j.status === 'open' && j.found <= t && sdNeeds(j) && (heldForYou(j) || forYou(j) && t < leaveEnd(j))) {
+    j.shut = true; j.status = 'waiting'; j.why = sdWhy(); if (!j.reserved) { j.reserved = SD_SLOT; delete j.until; } n++; MACH_REV++;
+  }
+  return n;
+}
+if (P5_M18) WORK_TICKS.push((t, skip) => { sdSettle(t); sdMark(t); });
 // ---- end of slot: Shutdowns ----
 
 // ---------------------------------------------------------------------
