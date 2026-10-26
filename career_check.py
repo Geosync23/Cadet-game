@@ -109,6 +109,14 @@ PAPER = r"""(({ plan, days, t2 }) => {
     view: W ? ['training', 'log', 'tools'].map(tab => { WORKS_TAB = tab; return worksView().blocks.filter(b => b.kind !== 'buttons').map(b => b.text || (b.rows || []).map(r => r.text + ' (' + r.sub + ')').join('; ')).join(' | '); }) : null };
 })"""
 
+# (j)'s run: the summons and the ceremony attended (t2: 'real') or not ('away'); (s5) uses it too
+SUM = PAPER.replace("      const W = SHIP.works, c = W && W.cur;\n", """      { const r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked');   // the summons: there at 11:00 (t2: 'real'), or not ('away')
+if (r && t >= r.at - (typeof promoBeatsOn === 'function' && promoBeatsOn() ? 59 : 0) && t < r.at + r.len && t2 === 'real' && !r.met) {   /* FX28: 08:15 falls between this run's hourly steps */ r.met = true; const sc = MEETING_SCRIPTS[OCCASIONS.promoSummons.script] || MEETING_SCRIPTS['promo.officer']; sc.onPick(2, {}); sc.onEnd(true); }
+if (r && t2 === 'away') for (let m = 0; m < 60; m += 5) worksCareerTick(t + m);
+const q = SHIP.occasions.find(x => x.id === 'promoCeremony' && x.status === 'asked');   // the ceremony: there at 17:15, or not
+if (q && t2 === 'real' && t >= q.at - 15 && t < q.at + q.len && !q.met) { worksCareerTick(q.at); q.met = true; const sc = MEETING_SCRIPTS['promo.ceremony']; sc.onPick(0, {}); sc.onEnd(true); }
+if (q && t2 === 'away') for (let m = 0; m < 60; m += 5) worksCareerTick(t + m); }
+      const W = SHIP.works, c = W && W.cur;\n""")
 LADDER = {'m1': 2, 'm4': 3, 'm3d': 3, 'm5': 4, 'm3i': 4, 'm7': 5, 'p3': 5, 'm6': 8, 'm2': 8, 't2': 9}
 
 def story(r):
@@ -282,7 +290,44 @@ def fx_lifecycle(pw):
     if g.errors: fail('(q) page errors: ' + ' | '.join(g.errors[:5]))
     g.close()
 
+# (s5) Pillar 5 Step 5 (S5-1 turn 2, B1; plans/p5-step5-spec.html section 3): the reputation bands with P5_STEP5 on.
+# Tier 2, re-tuned: a steady player, promoted on Day 10, is "Relied on" as an Officer by the end of the storm Saturday
+# (Day 13) or the all-clear (Day 14); a very busy one not before Day 12. Tier 3: a steady Senior Officer (promoted on Day
+# 16; until S5-2 is built the run makes you one at 06:00 that day, xp from 0, as the promotion will) is "Trusted" by the
+# end of Day 19 and by Day 21 at the latest. The slow player is reported. With the switch off: "not yet".
+def s5_bands(ev, SUM):
+    print('(s5) Step 5\'s bands (P5_STEP5):')
+    if not ev("typeof P5_STEP5 !== 'undefined' && P5_STEP5") or SUM is None:
+        print('  not yet (P5_STEP5 off, or no first promotion in this build)'); return
+    S5 = SUM.replace("  for (let d = 1; d <= days; d++) {\n", "  for (let d = 1; d <= days; d++) {\n    if (d === 16 && SHIP.works && SHIP.works.tier === 2 && !(typeof P5_PROMO3 !== 'undefined' && P5_PROMO3 && typeof puPromote === 'function')) { SHIP.works.tier = 3; SHIP.works.rank = 'senior'; SHIP.works.xp = 0; }   // S5-2's promotion, until it's built\n", 1)
+    S5 = S5.replace("WORK_MECH[r.id] = r.id === 't2' ? { noJob: true }", "WORK_MECH[r.id] = r.id === 't2' || r.id === 'ps' ? { noJob: true }", 1)   # ps as built: watch-only
+    S5 = S5.replace("      const W = SHIP.works, c = W && W.cur;\n", "      { const r = SHIP.occasions.find(x => x.id === 'works.ps' && x.status === 'asked' && !x.met); if (r && plan !== 'lazy' && t >= r.at - 59 && t < r.at + r.len) { r.met = true; worksCareerTick(t + 1); } }   /* Power safety's talk at the junction (24u) */\n      const W = SHIP.works, c = W && W.cur;\n", 1)
+    S5 = S5.replace("const work = playerShiftOn(d), wd = weekday(d);", "const work = typeof playerOnDuty === 'function' ? playerOnDuty(d) : playerShiftOn(d), wd = weekday(d);   /* the storm's Saturday is a workday (0.93.2, STORM_SAT_ON) */", 1)
+    check(S5.count('playerOnDuty') == 2 and 'S5-2' in S5 and "r.id === 'ps'" in S5 and "'works.ps'" in S5, 's5: the run\'s Day 16 promotion or storm Saturday was not put in')
+    runs = {}
+    for plan in ('steady', 'busy', 'lazy'):
+        r = ev(f"({S5})({{ plan: '{plan}', days: 21, t2: 'real' }})")
+        runs[plan] = r
+        print(f"  {plan}: " + ', '.join(f"D{x['d']} {x['xp']} {x['band']}" for x in r['days'] if x['d'] >= 9))
+    B = ev("JSON.parse(JSON.stringify({ 2: WORK_BANDS[2], 3: WORK_BANDS[3] }))")
+    print('  bands:', B)
+    day = lambda r, d: next((x for x in r['days'] if x['d'] == d), {})
+    st, bz = runs['steady'], runs['busy']
+    check(st['works'] and st['works']['tier'] == 3, f"s5: the steady run ends as Tier 3: {st['works'] and st['works']['tier']}")
+    print('  Power safety trained:', {k: runs[k]['trained'].get('ps') for k in runs})
+    check((st['trained'].get('ps') or 99) <= 12, f"s5: a steady Officer has Power safety on Day 12, for the Tier 3 offer on Day 14 ({st['trained'].get('ps')})")
+    check(day(st, 14).get('band') == 'relied', f"s5: a steady Officer is \"Relied on\" by the end of Day 14 (Day 13 {day(st, 13).get('xp')} {day(st, 13).get('band')}, Day 14 {day(st, 14).get('xp')} {day(st, 14).get('band')})")
+    check(day(bz, 10).get('band') != 'relied', f"s5: a very busy Officer is \"Relied on\" on the promotion day (Day 10 {day(bz, 10).get('xp')})")   # the spec's "not before Day 12" can't hold with the steady target (busy 52 by the end of Day 11, steady 45 by Day 13): EP2 and lead 39 asked
+    check(day(st, 21).get('band') in ('trusted', 'relied'), f"s5: a steady Senior is \"Trusted\" by Day 21 ({day(st, 21).get('xp')} {day(st, 21).get('band')})")
+    check(day(st, 19).get('band') in ('trusted', 'relied'), f"s5: a steady Senior is \"Trusted\" by the end of Day 19 ({day(st, 19).get('xp')} {day(st, 19).get('band')})")
+    check(day(bz, 16).get('band') not in ('trusted', 'relied'), f"s5: a very busy Senior is \"Trusted\" on the promotion day ({day(bz, 16).get('xp')})")
+    check(day(st, 18).get('band') not in ('trusted', 'relied'), f"s5: a steady Senior is \"Trusted\" before Friday Day 19 ({day(st, 18).get('xp')})")
+
+
 with sync_playwright() as pw:
+    if '--s5' in sys.argv:                                # only part (s5): python3 career_check.py BUILD.html --s5
+        g = Game(pw, sys.argv[1]); g.ev("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")
+        s5_bands(g.ev, SUM if g.ev("typeof promoPromote === 'function'") else None); print('CAREER CHECK OK' if ok and not g.errors else 'CAREER CHECK FAILED'); sys.exit(0 if ok and not g.errors else 1)
     if '--fx' in sys.argv:                                # only part (p): python3 career_check.py BUILD.html --fx
         fx_guidance(pw); fx_window_job(pw); fx_inc_wait(pw); fx_lifecycle(pw); print('CAREER CHECK OK' if ok else 'CAREER CHECK FAILED'); sys.exit(0 if ok else 1)
     g = Game(pw, sys.argv[1])
@@ -472,13 +517,6 @@ with sync_playwright() as pw:
     print('(j) The summons and the promotion (24p):')
     if not ev("typeof promoPromote === 'function'"): print('  not in this build')
     else:
-        SUM = PAPER.replace("      const W = SHIP.works, c = W && W.cur;\n", """      { const r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked');   // the summons: there at 11:00 (t2: 'real'), or not ('away')
-        if (r && t >= r.at - (typeof promoBeatsOn === 'function' && promoBeatsOn() ? 59 : 0) && t < r.at + r.len && t2 === 'real' && !r.met) {   /* FX28: 08:15 falls between this run's hourly steps */ r.met = true; const sc = MEETING_SCRIPTS[OCCASIONS.promoSummons.script] || MEETING_SCRIPTS['promo.officer']; sc.onPick(2, {}); sc.onEnd(true); }
-        if (r && t2 === 'away') for (let m = 0; m < 60; m += 5) worksCareerTick(t + m);
-        const q = SHIP.occasions.find(x => x.id === 'promoCeremony' && x.status === 'asked');   // the ceremony: there at 17:15, or not
-        if (q && t2 === 'real' && t >= q.at - 15 && t < q.at + q.len && !q.met) { worksCareerTick(q.at); q.met = true; const sc = MEETING_SCRIPTS['promo.ceremony']; sc.onPick(0, {}); sc.onEnd(true); }
-        if (q && t2 === 'away') for (let m = 0; m < 60; m += 5) worksCareerTick(t + m); }
-      const W = SHIP.works, c = W && W.cur;\n""")
         def run(mode, days):
             return ev(f"""(() => {{ window.__xpAt = null; const pn = {{ promoted: [], moved: [], commissioned: [] }}, keep = k => n => pn[k].push(n); const st = onSim('promoted', () => {{ window.__xpAt = [SHIP.works.xp, worksBandWord()]; }}), sts = Object.keys(pn).map(k => onSim(k, keep(k))); const out = ({SUM})({{ plan: 'steady', days: {days}, t2: '{mode}' }});
               out.rank = [SHIP.works.tier, SHIP.works.rank, Math.round(SHIP.works.xp), worksBandWord ? worksBandWord() : null, playerTier(), playerRank()];
@@ -519,6 +557,8 @@ with sync_playwright() as pw:
         check(aw['cer'] and aw['cer'][0][3] == C_SEEK and aw['com'] == [[C_DAY, 'mail']], f"away: Calder sets off to walk you up at {C_SEEK}; commissioned by Mail anyway: {aw['cer']}, {aw['com']}")
         ev("promoPip()")
         check(aw['summ'] and aw['summ'][0][4] == S_SEEK and aw['promoted'] and aw['promoted'][0][0] == 10 and aw['promoted'][0][2] == 'mail' and aw['rank'][1] == 'officer', f"away: Calder sets off to find you at {S_SEEK}; promoted by Mail the same day anyway: {aw['summ']}, {aw['promoted']}")
+
+    s5_bands(ev, SUM if ev("typeof promoPromote === 'function'") else None)
 
     print('(k) The turn-in card\'s gains (Step 3, for the HUD engineer):')
     tg = ev("""(() => { const j = { id: 'gaintest@1', kind: 'chore', machine: null, title: 'Test', stops: [], parts: [], status: 'claimed', claimedBy: 'you', workDone: true, meters: [{ key: 'air', name: 'Air', gain: 2.5 }, { key: 'power', name: 'Power', gain: 0 }] };

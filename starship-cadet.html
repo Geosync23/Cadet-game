@@ -53291,10 +53291,13 @@ const WORK_TOOLS = {
 const WORK_BANDS = { 1: [[0, 'new'], [8, 'steady'], [18, 'reliable'], [30, 'trusted'], [40, 'relied']], 2: [[0, 'new'], [12, 'steady'], [28, 'reliable'], [45, 'trusted'], [60, 'relied']] };   // 2: C2's 0.44.19 numbers, kept by Step 4's page (0.45.7): about a dozen steady workdays to "Relied on" as an officer; side jobs add +2 a day at most (worksSideXp)   // the page's; with section 17's real faults in (0.44.10): steady 45-48 by the end of Day 8, a very busy player 35 at the end of Day 4
 // Pillar 5 Step 5 (S5-1, B1 for lead 39; plans/p5-step5-spec.html section 3, plan v3.1): the Senior Officer's rows, the
 // calibration rig and the Tier 3 bands, behind P5_STEP5 (section 13). Each row is inert until its sub-block registers
-// WORK_MECH[id] (24u t3; 24v m19; 24w m18; 24x m20; 24k's slot p4, p5, p9, mys; ps: S5-1 turn 2). Off: nothing here.
+// WORK_MECH[id] (24u ps and t3; 24v m19; 24w m18; 24x m20; 24k's slot p4, p5, p9, mys). Off: nothing here.
 if (P5_STEP5) {
+  // ps first among the Officer's small rows (the ladder opens one small a workday, in table order): Power safety on Day 12,
+  // before the workshop and the rest, so a steady player has it for the Tier 3 offer on Day 14 (S5-1 turn 2)
+  CAREER_LADDER.splice(CAREER_LADDER.findIndex(r => r.id === 't2') + 1, 0,
+    { id: 'ps', name: 'Power safety', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['calder'], where: { deck: 6, room: 'j' }, stages: [{ uses: 0 }] });   // a watch-only lesson at the Deck 6 port junction (spec question 2; 24u's WORK_MECH.ps)
   CAREER_LADDER.push(
-    { id: 'ps', name: 'Power safety', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['calder'], where: { deck: 6, room: 'j' }, stages: [{ uses: 0 }] },   // a watch-only lesson at the Deck 6 port junction (spec question 2)
     { id: 't3', name: 'Your Tier 3 test job', size: 'big', day: 15, tier: 2, rank: 'officer', needs: [{ rep: 'relied' }, { trained: 'ps' }], by: ['calder'], where: { deck: 5, room: 'o' }, job: 'test', stages: [{ uses: 0 }] },   // 24u (S5-2)
     { id: 'm19', name: 'Power and relays', size: 'big', day: 17, tier: 3, rank: 'senior', needs: { trained: 't3' }, by: ['calder'], where: { deck: 1, room: 'u' }, tool: 'tester', stages: [{ uses: 0 }, { uses: 3 }, { uses: 6 }] },   // 24v (S5-3): relays; conduit runs; the batteries' balance (Step 6's P6)
     { id: 'p4', name: 'Which gauge is lying?', size: 'small', day: 17, tier: 3, rank: 'senior', needs: null, by: ['torres-zeke'], stages: [{ uses: 0 }] },   // 24k's slot (S5-6)
@@ -53304,7 +53307,11 @@ if (P5_STEP5) {
     { id: 'p9', name: 'The clash', size: 'small', day: 19, tier: 3, rank: 'senior', needs: null, by: ['calder'], stages: [{ uses: 0 }] },   // 24k's slot (S5-6)
     { id: 'mys', name: 'The old-mysteries board', size: 'small', day: 21, tier: 3, rank: 'senior', needs: null, by: ['calder'], where: { deck: 5, room: 'w' }, stages: [{ uses: 0 }] });   // 24k's slot (S5-6)
   WORK_TOOLS.arrayrig = { name: 'the calibration rig', mech: 'm20', wearPerUse: 0 };   // carried (calrig is the machine shop's test rig)
-  WORK_BANDS[3] = WORK_BANDS[2].map(b => b.slice());     // a stand-in until S5-1 turn 2 sets the Tier 3 numbers with career_check (a steady Senior "Trusted" by Day 19)
+  // the bands (S5-1 turn 2, set by career_check part s5; the user's answer 1). Tier 2: a steady Officer (promoted Day 10,
+  // about 12 a workday, +7 on the storm Saturday) is "Relied on" by the end of the storm Saturday, Day 13 (45 on paper).
+  // Tier 3: a steady Senior (promoted Day 16) is "Trusted" on Friday Day 19 (62 on paper), when Calder can offer Tier 4
+  WORK_BANDS[2] = [[0, 'new'], [10, 'steady'], [22, 'reliable'], [32, 'trusted'], [42, 'relied']];
+  WORK_BANDS[3] = [[0, 'new'], [14, 'steady'], [30, 'reliable'], [55, 'trusted'], [75, 'relied']];
 }
 const BAND_WORD = { new: 'New', steady: 'Steady', reliable: 'Reliable', trusted: 'Trusted', relied: 'Relied on' };
 const WORK_XP = { service: 1, repair: 2, overhaul: 3, missed: -3, abandoned: -2 };
@@ -58505,6 +58512,55 @@ onSim('job', n => {                                      // B: Torres comes by a
 // ---------------------------------------------------------------------
 
 // ---- slot: Later promotions (section 24u). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- Power safety (ps; S5-1 turn 2, B1; the spec's question 2, recommended; its beat: "Ring 'Power safety with Calder';
+// arrow level 1 to Deck 6's port junction at her time; a notice that morning"). From Day 12, an Officer's first small row
+// (24 core's table puts it first). A small row has no lesson of its own in 24 core (it trains on its first use), so this
+// one asks for itself: on a workday morning (06:00-10:30, once you're up) Calder makes an appointment at 09:00 or 09:15 at the
+// Deck 6 port junction (room j; trainSetup's occasion 'works.ps', as a big row's) with her Mail and a toast; the talk there
+// (the head writer's train.ps.calder, a stand-in here until then) is the lesson, watch-only: trained when it's met. Missed:
+// asked again the next workday. The arrow: level 1 from 15 minutes before to the end (over Teaching arrows Off and a job in
+// hand, as the first promotion's beats). Saved: the occasion (section 18) and W.tr.ps. Behind P5_STEP5; t3 (S5-2) needs it
+function psAsk(d, now) {
+  const row = ladderRow('ps'), by = row && ladderTeacher(row, d); if (!by) return false;   // Calder off today: the next workday
+  const o = trainSetup(row), m = now - (d - 1) * 1440, at = Math.max(m + 45, DAY_SHIFT[0] + (schedU(machSeed('ps'), d, 851) < .5 ? 0 : 15));
+  o.by = by; o.script = trainScript(row, by); o.len = 20; o.title = 'Power safety with ' + worksFirst(by);
+  const r = occasionAdd('works.ps', (d - 1) * 1440 + at, false, 20); if (!r) return false;
+  const place = (DECKS[6].rooms[row.where.room] || { name: 'the port junction room' }).name, when = hhmm(at);
+  const ask = worksText('works.ask.ps', 'Power safety | Meet me at the {place} on Deck 6 at {time}. Twenty minutes. Come and watch.', { time: when, place, name: worksName(by) }), cut = ask.indexOf(' | ');
+  const subject = cut > 0 ? ask.slice(0, cut) : 'Power safety', body = cut > 0 ? ask.slice(cut + 3) : ask;
+  if (typeof mailSend === 'function') mailSend({ at: now, from: worksName(by), subject, body, quiet: true });
+  try { toast(worksName(by), body); } catch (e) { /* no UI */ }
+  flagSet('works.brief.ps', d);                          // the talk at the junction is the lesson's word (no after-word: worksTrained)
+  return true;
+}
+function psTick(now) {
+  const W = SHIP.works; if (!W || W.tr.ps !== undefined || !worksOpened(W).has('ps')) return;
+  const r = SHIP.occasions.filter(x => x.id === 'works.ps').pop(), d = worksDay(now), m = now - (d - 1) * 1440;
+  if (r && (r.met || r.status === 'kept')) { if (!(typeof DIALOGUE !== 'undefined' && DIALOGUE)) worksTrained('ps', now); return; }
+  if (r && r.status === 'asked' && now < r.at + r.len) {
+    if (typeof promoQueue === 'function' && promoQueue() && now >= r.at - 15)
+      guideAsk({ id: 'ps:meet:' + (Math.floor(r.at / 1440) + 1), level: 1, owner: '24u (S5-1)', from: r.at - 15, until: r.at + r.len,
+        goal: () => ({ deck: r.deck, room: r.room, ...(typeof guideTeacherIn === 'function' && guideTeacherIn(r.by, r.deck, r.room) ? { crew: r.by } : {}), label: worksText('ps.arrow', 'Power safety with {name}, {time}', { name: worksFirst(r.by), time: hhmm(r.at % 1440) }) }),
+        done: () => !!r.met || r.status !== 'asked' || guideTrained('ps') });
+    return;
+  }
+  if (r && Math.floor(r.at / 1440) + 1 >= d) return;     // today's, gone by (missed): tomorrow's workday
+  if (playerShiftOn(d) && m >= WORKS_ASK[0] && m <= WORKS_ASK[1]) psAsk(d, now);   // (minute ticks are play only: asked once you're up)
+}
+if (P5_STEP5) {
+  WORK_MECH.ps = { noJob: true };                        // its row opens (24 core's ladder); psTick asks and teaches
+  if (!(typeof MEETINGS_BAKED !== 'undefined' && (MEETINGS_BAKED['train.ps.calder'] || MEETINGS_BAKED['train.ps']))) MEETING_SCRIPTS['train.ps.calder'] = { title: 'Power safety', from: 'Chief Ines Calder', stub: true,   // stand-in until the head writer's ps words (content/works/keys-p5.md)
+    gist: 'Calder showed you the Deck 6 port junction: a junction is the one thing you never rush.',
+    lines: [{ who: 'calder', text: 'This is the port junction. Half of Deck 6 runs through this box.' },
+      { who: 'calder', text: 'Everything else on this ship, you can hurry. Not this. Never this.' },
+      { who: 'calder', text: 'Before you open it: who\'s on the other end of the line? Find out. Tell them.' },
+      { who: 'calder', text: 'Then the breaker, then your tester, then your hands. In that order, every time.' },
+      { choice: [{ text: 'Even for a quick fix?', reply: { who: 'calder', text: 'Especially for a quick fix. Quick is how people get hurt.' } },
+        { text: 'Who do I tell?', reply: { who: 'calder', text: 'Whoever\'s in the rooms it feeds. The board shows you. Ask if it doesn\'t.' } }] },
+      { who: 'calder', text: 'One day soon you\'ll switch one of these off on your own. That\'s the next step up.' },
+      { who: 'calder', text: 'That\'s it. Power safety. Don\'t make me say it twice.' }] };
+  WORK_TICKS.push((now, skip) => { if (!skip) psTick(now); });
+}
 // ---- end of slot: Later promotions ----
 
 // ---------------------------------------------------------------------

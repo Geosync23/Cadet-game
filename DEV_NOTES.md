@@ -973,6 +973,7 @@ gives way to clock-out at the shift's end. Test: `python3 arrows_d_check.py BUIL
 - **Section 24 core:** an `if (P5_STEP5)` block just after WORK_BANDS: the ladder rows ps, t3, m19, p4, m18, p5, m20, p9, mys (inert until each sub-block registers WORK_MECH[id]), WORK_TOOLS.arrayrig, and WORK_BANDS[3] as a stand-in copy of tier 2's (turn 2 sets the numbers).
 - **Section 18:** an `if (P5_STEP5)` block after the event swap's moves Pillar 5's EV_BEATS rows to v3.1's hours and adds seniorResult and nightShift3 (spec section 4).
 - **New sections 24u (later promotions), 24v (M19), 24w (M18), 24x (M20)** after 24p, each with its slot (`Later promotions`, `Power and relays`, `Shutdowns`, `Sensor array`). Empty so far.
+- **Turn 2 (S5-1, 0.93.4-s.2):** WORK_BANDS[2] = [0, 10, 22, 32, 42] and WORK_BANDS[3] = [0, 14, 30, 55, 75] in the P5 block (career_check part s5, `python3 career_check.py BUILD --s5` alone, about 25 s; provisional on the Tier 2 busy target). Power safety: the ps row sits right after t2; 24u's `psTick`/`psAsk` make its own appointment (occasion `works.ps`, Deck 6 port junction, 09:00 or 09:15, 20 minutes), a level 1 arrow, the talk `train.ps.calder` (stand-in), trained when met, asked again next workday if missed. mech_check part `ps`.
 - Note for builders: the ladder's job slot is `10 + (index among big rows) % 10`, so the new big rows t3, m19, m18, m20 share slots 10-13 with m1, m4, m5, m7; reserve your own free slot (the Tier 2 test uses 20, the fix-scan 24).
 
 ## Hook register
