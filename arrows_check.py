@@ -297,6 +297,13 @@ FOLLOW = r"""(() => {
     if (card && want) { const i = bs.findIndex(b => b.textContent.trim() === want); if (i >= 0) k = i; }
     const t = bs[k].textContent; bs[k].click(); return (card ? 'card: ' : 'reply: ') + t;
   }
+  // a chat card (section 20) opened by a tap at the pin: for the arrow's "X wants a word" (20c), Sit with them, else close it
+  // and tap again; with anyone but the arrow's person, closed. Left open, the card keeps them where they are (chatTick), so
+  // the follower stood by Theo all evening (FX30: arrows_check week guide, Day 6 20:10)
+  { const ch = document.getElementById('chat'); if (ch && !ch.hidden && typeof CHAT !== 'undefined' && CHAT && !CHAT.visit && !(CHAT.talk && !CHAT.talk.end)) { const g = goalNow(), mine = g && g.crew === CHAT.p.id, word = mine && /^story:word:/.test(g.guide || '');
+      const sit = [...ch.querySelectorAll('button')].find(b => b.textContent === 'Sit with them' && !b.disabled);
+      if (word && sit) { sit.click(); return 'chat: Sit with them'; }
+      if (word || !mine) { const who = CHAT.p.name; chatClose(); return 'close the chat with ' + who; } } }
   if (typeof pointNow === 'function') { try { const el = pointNow() && POINT.aim; if (el && el.isConnected && !document.getElementById('ptr').hidden) { el.click(); return 'pointer: ' + (el.textContent || '').slice(0, 30); } } catch (e) { /* piece C */ } }   // pointNow() is the shown pointer's id; POINT.aim its button
   // a head-scratcher (24k's case) waiting for your call while the arrow is your job's own step: Fault notes, as a player
   // reads the toast "Fault notes has the suspects": Where next? while clues are left, Call it once one is left, then Yes (AC2, FX3's gap 1)
@@ -348,7 +355,7 @@ FOLLOW = r"""(() => {
   if (it && it[2] < 2.5) { try { const v = it[1].clone().project(camera); ray.setFromCamera({ x: v.x, y: v.y }, camera); } catch (e) { /* no ray */ }   // the tap's ray through the thing, as a real tap would set it (a stale one from the last real tap made the board's tap restart a done job: AC2)
     const r = playerTap(it[0], it[1].clone(), it[1].clone()); let held = null; try { held = myJob(); } catch (e) { held = null; }
     if (r && ACT && (IX_ACTS[ACT.kind] && !/tea|biscuits|drink|water/i.test(g.label || '') || held && !held.workDone && /^(rec|sit$|eat$|lie$|hobby|disc|tiles|clothes|craft|bedMake|tidy|roofRide|pay$)/.test(ACT.kind))) { const k = ACT.kind; actEnd(true); window.__tapKey2 = key; return 'tap ' + it[0].t + ': started ' + k + ', not the job: up again'; }   // RV7: anything that isn't the job's stop (the climbing wall all Day 5); a sit-down or laundry instead of the job's stop (a pin by the folding table): the floor at the pin next (AC2)
-    if (!r || !ACT && !document.querySelector('#ixBoard:not([hidden]), #clockScreen:not([hidden]), #devDlg:not([hidden])')) window.__tapKey2 = key; return 'tap ' + it[0].t + ': ' + r; }   // answered but nothing started (a machine's "in good order" over the stop's spot): the floor at the pin next (AC2)
+    if (!r || !ACT && !QUEUE_YOU && !document.querySelector('#ixBoard:not([hidden]), #clockScreen:not([hidden]), #devDlg:not([hidden])')) window.__tapKey2 = key; return 'tap ' + it[0].t + ': ' + r; }   // answered but nothing started (a machine's "in good order" over the stop's spot): the floor at the pin next (AC2)   // QUEUE_YOU: in the line for it (every toilet in use) is an answer: you wait, as a player would (FX30: the floor tap at the pin talked to the one sat in it, and the chat kept them there)
   return pin();
 })()"""
 STATE = r"""(() => { const W = SHIP.works, d = SHIP.time.day, g = goalNow();
