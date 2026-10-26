@@ -8,10 +8,10 @@ title: Your result
 from: Chief Ines Calder
 gist: Calder gave you your result: you passed. You're a Works Officer now, Technician, Tier 2. The Captain pins your pip this afternoon.
 == lines
-calder > you: Door. Thank you. This won't take long.   [gesture]
-calder: Your scrubber. Filter in, fan settled, nothing I had to say twice.
-calder: You passed. As of now you're an Officer. Technician, Tier 2.
-calder: The badge. Left side. Straight, please.
+calder > you: Door. Thank you. Two minutes.   [gesture]
+calder: Your scrubber. Four bolts, one filter, no notes from me.
+calder: Result: passed. You're an Officer from today. Technician, Tier 2.
+calder: Your badge. Pin it level. I'll know if it isn't.
 ? choice
 * Thank you, Chief. I'll do it properly.   rel:calder+2
   calder: You already do. That's what the badge is for.   [nod]
