@@ -73,6 +73,9 @@
 - Don't rush the last line. It's the best one.   #warm
 
 // ---- Saturday Day 34, 10:00: Taavek's ship comes back (notice, a level 2 arrow to the bow glass, once)
+// EN2: the level 2 arrow's label to the glass (a place, as every arrow's)
+== event.crossingBack.arrow.vessel
+- Taavek's ship: the bow lounge, Deck 3
 == event.crossingBack.notice.vessel
 - Taavek's ship is off the bow again: the bow lounge glass, Deck 3.
 == event.crossingBack.status.vessel
