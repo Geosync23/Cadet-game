@@ -1521,3 +1521,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~21:48 UTC: B3 ac6eb9e4 (shared hook agreed with B4: sdPlanShut asks p9PlanRule, settle calls p9Settle; SW3 keys adopted; board text fix) → RV20. Slot 33 RELEASED (table: 25 t3, 26 t4, 27 vessel, 28/29 P4/P5, 32 m19, 34 m20, 35-37 Step 6, 38 P9, 42/43 m18). B3 writes its own leftover lines.
 - ~21:52 UTC: RV18 own interactions on doors OK (0 FAIL); **RV18 archived** (~58%, handover-rv18.md). 18 closed.
 - ~21:57 UTC: EN1 RV21 fixes cd4196d5 (Day 36 no shift, breakfast fetch, Zeke fetch, crowd limit, keepsake names; ending_check 10 OK; off identical). EN1 writes its own new keys, then retires after RV21 PASS. EN2 to merge into ending-crossing. B3 words 5ad090ff → RV20.
+- ~22:00 UTC: **LEAD 39 HANDING OVER at ~67% memory**: plans/handover-lead39.md written. Lead 40 to be started.
