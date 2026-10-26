@@ -40,6 +40,9 @@ SIM = r"""(async ({ n, day, step, draw }) => {
   // arriving (0.92.5, the user's item 21: crew flashed across the screen by the lift): a newcomer's body is drawn where it is from its
   // first frame (it was drawn once at the deck's origin): its drawn spot (Human.set's pos) within .1 of where it is, the step it appears
   out.born = 0; out.bornFar = 0; out.bornWho = []; const seen = new Set(DECK_CREW);
+  // the inspection walked (FX20b, RV19's S3): on Deck 4 on an inspection morning with INSPECT_ON, each ship minute 06:00-07:30,
+  // the room the walker is inside while heading for that room's door spot ('' when in a corridor or elsewhere)
+  const insW = n === 4 && typeof INSPECT_ON !== 'undefined' && INSPECT_ON && WEEK_SHAPE[weekday(day)].inspect ? inspectWalker(day) : null; out.insp = [];
   for (let k = 0; B + k * step * SHIP_RATE < B + 1440; k++) {
     setShipNow(B + k * step * SHIP_RATE);
     updateDeckCrew(step);
@@ -71,6 +74,9 @@ SIM = r"""(async ({ n, day, step, draw }) => {
     if (k % perMin === 0) {                                   // every ship minute: is everyone due here here?
       const here = new Set(DECK_CREW.map(a => a.p.id));
       for (const p of schedPeople()) { const w = whereIs(p, now); if (w.deck === n && w.act !== 'commute' && now - w.from > 1 && !here.has(p.id)) out.missing++; }
+      const im = Math.round(now - B);
+      if (insW && im >= 360 && im <= 450) { const a = DECK_CREW.find(x => x.p.id === insW), id = a && a.spot && a.spot.id || '';
+        out.insp.push([im, a && /^4-inspect-/.test(id) && roomAt(...a.here()) === id.slice(-1) ? id.slice(-1) : '']); }
     }
     if (draw && k % perHour === 0) {                         // every ship hour: a frame by the lift and one over the crowd
       for (const view of ['lift', 'crowd']) {
@@ -108,6 +114,22 @@ with sync_playwright() as pw:
         if r[k]: fail(f"{k}: {r[k][:8]}")
     print('  peak headcount by deck:', ', '.join(f"{d}: {v[0]} at {v[1]}" for d, v in sorted(r['peak'].items())))
     if r['unplaced']: print('  moments with no place (standing about):', r['unplaced'])
+
+    # FX20 (0.93.2): the bunk inspection walked for real, on an inspection morning with INSPECT_ON (a switched-on copy):
+    # the walker at each bunk room's door in order from 06:30, done by 07:15; the juniors standing by their bunks (and the
+    # walk live on Deck 4 in part 3)
+    if g.ev(f"typeof INSPECT_ON !== 'undefined' && INSPECT_ON && !!WEEK_SHAPE[weekday({DAY})].inspect"):
+        ins = g.ev(f"""(() => {{ const d = {DAY}, w = inspectWalker(d), p = w && schedPeople().find(x => x.id === w);
+          const walk = p ? planDay(p, d).filter(s => s.tag === 'inspect').map(s => [s.placeId.slice(-1), s.from % 1440, s.to % 1440]) : [];
+          const stand = schedPeople().map(q => planDay(q, d).find(s => s.tag === 'inspection' && /-stand$/.test(s.placeId || ''))).filter(Boolean);
+          return {{ w, walk, stand: stand.length, ids: stand.map(s => s.placeId), juniors: schedPeople().filter(q => /^4-B[1-8]-[1-6]$/.test(q.bed) && aboard(q, d)).length }}; }})()""")
+        order = [x[0] for x in ins['walk']]
+        print(f"  the inspection (FX20): {ins['w']} walks {' '.join(f'{x[0]}@{x[1]}-{x[2]}' for x in ins['walk'])}; {ins['stand']} of {ins['juniors']} juniors stand by their bunks")
+        # FX20b (RV19's M1): set off for room a by 06:18 (06:30 there, the walk is all they do from then), each room in the
+        # route's order to its leaving time (inspectPass), done by 07:15
+        rooms = g.ev("INSPECT_ROOMS"); pas = g.ev("INSPECT_ROOMS.map(inspectPass)")
+        if not ins['w'] or order != rooms or ins['walk'][0][1] > 378 or [x[2] for x in ins['walk']] != pas or any(ins['walk'][i][1] != ins['walk'][i - 1][2] for i in range(1, len(ins['walk']))) or ins['walk'][-1][2] > 435: fail(f"the inspection walk: {ins['w']} {ins['walk']}")
+        if ins['stand'] < 25 or len(set(ins['ids'])) != len(ins['ids']): fail(f"the juniors standing for the inspection: {ins['stand']} of {ins['juniors']}, a stand spot twice: {len(ins['ids']) - len(set(ins['ids']))}")
 
     # rooms in use: every place type over the week from DAY (types nobody used are listed, not failed)
     rooms = g.ev(f"roomsInUse({DAY}, 7)")
@@ -240,6 +262,13 @@ with sync_playwright() as pw:
             if L['left']: fail(f"deck {n}: {L['left']} gave up on the servery line: {L['who']}")
         if o['trayStill']: fail(f"deck {n}: standing still with a tray {o['trayStill']} times: {o['stillWho']}")
         if o['trayOut']: fail(f"deck {n}: a tray outside the mess hall {o['trayOut']} times: {o['trayWho']}")
+        if o.get('insp'):   # the inspection walked live (FX20b): inside each room in the route's order, room a by 06:31, two minutes or more in each, done by 07:15
+            rooms = g.ev("INSPECT_ROOMS")
+            mins = {r: [m for m, x in o['insp'] if x == r] for r in rooms}
+            firsts = [r for r in sorted(rooms, key=lambda r: mins[r][0] if mins[r] else 9999)]
+            print('  the inspection walked live: ' + ' '.join(f"{r}@{mins[r][0] // 60:02d}:{mins[r][0] % 60:02d}+{len(mins[r])}" if mins[r] else f"{r}@never" for r in rooms))
+            if any(len(mins[r]) < 2 for r in rooms) or firsts != rooms or mins['a'][0] > 391 or max(mins[rooms[-1]]) > 435:
+                fail(f"deck 4: the inspection walked live: rooms {firsts}, minutes inside {dict((r, len(mins[r])) for r in rooms)}")
 
     # jobs (section 17): the machine panels and other places the crew's jobs took them to, from the day just run
     jv = g.ev("typeof jobVisits === 'function' ? jobVisits() : null")
