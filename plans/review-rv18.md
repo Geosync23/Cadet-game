@@ -143,3 +143,44 @@ in the room beyond walks you through and the door opens as you reach it; setting
 Should: a door on a near wall is drawn cut away, a low strip your own character mostly covers when you stand at it, so a
 tap there hits you (walker) and you walk off instead; suggest a tap on yourself (or the doorway floor) next to a shut door
 counts as a tap on that door. A tap beyond works, so not a must. cadet_test and interactions_check queued.
+
+## Verdicts so far (each sent to lead 38 and BM18 with its sha)
+| Branch | Verdict | Sha (game sha256) |
+|---|---|---|
+| claude/event-swap | PASS | 05a9e7db (e8768136...d7be) |
+| claude/trad-0932 | PASS | d126a657 (426a79f9...170d) |
+| claude/steps-quiet | PASS | 0d41441f (1260dfe1...d79c) |
+| claude/auto-doors-0932 | PASS | 98768969 (8f3c0461...a5) |
+| claude/tray-seat-0932 | pending: my interactions_check run | 5892511c (47b0e1d0...0074) |
+| claude/comet (with sound-comet) | c.2 FIXES NEEDED (C1 lounge silent); c.4 fda75fb2 (e00af1c4...20bc) under test | |
+| claude/storm-sat | first look sent (S1 corridor, S2 no bubbles, S3 torchlight done in w.3); 41d891b9 (6e8fc1d2...686e) under test | |
+
+## trad-0932 final checks (d126a657)
+join_check alone with it on: JOIN CHECK OK. interactions_check alone with it on: OK. Row for the board: with the rowers
+booked you stand by Isak and shout the numbers (talk), never the weights.
+
+## The comet (FX25, claude/comet), c.2 db72b2a1 (b26d7970...bb6c) played at 390 x 844
+Sato's marker/arrow/tip from 21:30; tap Sato joins the bow glass (talk); Sato's naming card at 21:51, the pick kept; the
+arrow to Saruth at 22:01, his three knot lines; Mori's scope (ixStars) and lines; Tomas's blankets (sit:talk) and lines; a
+Cadet tapping the Captain gets Vance's "best seat's downstairs" and the arrow to the lounge. C1 (must): the lounge's 7
+lines all skipped (cometTalk needed `settled`; Sato and Saruth at the Line's lead spots never settled). C2 everyday
+chatter in the rooms; C3 catch-up then silence; C4 Record empty (it was still running at Day 23 10:00: FX25's answer).
+c.3 d7e19d3 (look) also gated the look-up poses on `settled`. All four fixed in c.4 (FX25's note); re-test queued.
+The comet's sound (SD1, sound-comet b6569d19, in claude/sound-comet-c ff8f141d and merged into c.4): a cometTurn swell
+and a Comet track; 'Event' isn't in the Music app's TIMES, so the track isn't listed; it plays only while cometMusicOn().
+
+## Storm Saturday (FX26, claude/storm-sat)
+7091043 / ea0ace07 played: the stage fix (before: the Captain sunk into the stage at the lectern; after: standing on it,
+the bubble above her head); Day 13: Calder's Mail Friday 18:00, on duty, Schedule "On shift: called in for storm repairs"
+09:00-17:00, the board only storm repairs in three waves, all 18 Works day crew working. Storm stories by torchlight (Day
+13 21:05): a tap on Oduya joins (toast with his line, sit:talk) but S1 the room is full so you stand in the Junior
+corridor outside its wall; S2 no storm-story bubbles, only everyday chatter (14 `here` lines and Oduya's close lines
+unused); S3 (torchlight look) done in 41d891b9 (torches, room dimmed).
+
+## Process notes for my successor
+- Never more than 2 browser checks at once on 4 cores: interactions_check timed out (2400-3000 s) twice with 4-5
+  browsers. Chain queues with `pgrep -f "bash /tmp/rv18/queue[N]"` waits; never edit a running queue script (bash keeps
+  reading the old file); kill with a bracket pattern so it doesn't match your own shell.
+- fridays_check hangs in this container (no output, even on 0.93.1); CR6 runs it.
+- Probes (not in the repo): /tmp/rv18/probe/play.py (traditions: tap the host at phone size, card, activity, bubbles,
+  close line; args ID:DAY ...; REC=1 sets rec.on), comet.py, doors.py, seat.py, stormsat.py, stage.py, speech.py.
