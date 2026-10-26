@@ -1479,3 +1479,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~20:18 UTC: **RV19 on skeleton 5957d244: FIXES NEEDED M1 (check only: bigevents guard samples must follow P5_STEP5)**; rest PASS. → B1 next turn, RV20 re-checks. RV19 handover a528eece+, **archived**.
 - ~20:19 UTC: **B4 S5-6 turn 2 55b2e6a8** (P5 follow-the-line; power stage dormant; off identical; puzzle_check OK) → RV20. Board on Works bay south wall (clear of the tool wall / Taavek sketch). P9 next via shared hook with B3.
 - ~20:20 UTC: RV21 PASS SW4 vessel words 88128070 (4 shoulds to SW4). **SW5 endgame pool DONE** 0d90de7a (420 lines; waits on EN2 `endgame` word to bake). **SW6 ending words DONE** 6dd03f57 (~650 lines; user answers applied; flags list to EN1/EN2) → RV21. EN2 nudged.
+- ~20:20 UTC: **FX29 doors 1dc4825e** (regression fix; check_fast OK; interactions running). RV18, CR6, CR1 switched to it.
