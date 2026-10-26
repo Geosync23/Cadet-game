@@ -241,3 +241,32 @@ playerTap.
 | rewiring by real taps, 390 x 844 (plans/rv20-rewire-tap.py) | c79a66dc | the chart look ("T1 yellow · T2 white ..."), "Done here. 7 stops to go", then the card "Blue" with T1-T6 and Not now (before: "about 10 minutes" and done, no wires) |
 
 **Verdict on c79a66dc: PASS.**
+
+## STOPPING POINT (~23:50 UTC, lead 40: the user's call). Where each open review stands
+- **c79a66dc** (tap fix, 0.93.4): **PASS** (above).
+- **b7e84f81** (claude/workstep-tap-fix, the team job's stale "your turn" arrow, my S2; on top of c79a66dc): diff read
+  (teamGoalOff clears only an arrow tagged team: j.id, at the step's move, teamLate and teamEnd); mech_check teamgoal m8
+  OK on b7e84f81, and teamgoal FAILS on c79a66dc as it should (late and end kept "brace the housing"). **Not run by me:**
+  cadet_test vs c79a66dc, check_fast, arrows_check (B2 reports all OK). No verdict sent; looks right; finish with cadet_test.
+- **deefa61a** (B2 M19 + turn 2 + B1's ladder merge): cadet_test vs c79a66dc ALL IDENTICAL; on copy mech_check m19 m15
+  wstap OK (lesson asked on Day 17 with m15/m17 untrained: M1 done); controller_check m19 (CTL_P5S5=1) OK; **machine_check
+  FAILED "traced faults"** on the on copy ("the same twice False": two runs differ; 23 of 46 line repairs at your tier):
+  not yet checked against the off build or the base: likely the new power line / fault tables (PWR_FAULTS in 24v) or
+  determinism; must be placed before a verdict. Live at 390 x 844 (plans/rv20-m19-live.py): the 10:30 notice "Power and
+  relays with Calder at 11:00: Relay room, Deck 1. Go at quarter to."; **Calder in the relay room from 10:53** (M2 done);
+  the meeting card at 11:00; your training relay played stop by stop by tap (M3 done), "Done. Turn it in at the board."
+  The board job's pick card not reached (my probe didn't turn the training job in first). check_fast not run (stopped).
+  No verdict sent.
+- **e7ff9253** (B5 S5-2 promotion + B1 51b1a9c6 + VB2 69eb706d + p5TeacherWait): diff partly read (24u function list,
+  puMakeJob uses j.mach so its stops walk by tap, puStops, puDevSteps). **Nothing run** (my queue q5.sh stopped before it
+  started). Probe ready: plans/rv20-pu-live.py (the offer at the Day 14 party, the test morning, the result seated, the
+  bar, the cake, the toast; screenshots). Check list in logs/b5-run.sh (copied below). No verdict.
+  Note seen while reading: DM_CAREER's Day 17 / 18 presets still train m15 and m17, but EP2's ladder order folds m15
+  into m19 and has m17 wait (Day 31): the Dev presets don't match the game.
+- **9ab93abf** (B3 shutdown fixes M2, M3, S1, S2): not started.
+- **7e6bca4b**: not received by me (lead 40 named it); nothing known.
+- RV21 has B4 (6b07b624 PASS) and B3 M20 7c5d9f79.
+
+B5 check list (planned): cadet_test vs 5957d244; promo_beats_check (on copy, all parts) and t3off (off); dev_arrow pu3;
+saves promo3; controller promo3; career_check --s5; arrows_check step5 (and teachoff, track); day_check 15, 16;
+check_fast; plus plans/rv20-pu-live.py.

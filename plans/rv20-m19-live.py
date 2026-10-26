@@ -44,7 +44,7 @@ with sync_playwright() as pw:
     D = lambda d, h, m=0: (d - 1) * 1440 + h * 60 + m
     print(ev("devmodeRun('Set', () => devmodeSetCareerTo(14))")); step(10)
     # Senior, everything before m19 trained (as mech_check's reset), on Day 16 evening
-    ev("(() => { const W = SHIP.works; W.tier = 3; W.rank = 'senior'; for (const r of CAREER_LADDER.slice(0, CAREER_LADDER.indexOf(ladderRow('m19')))) { if (W.tr[r.id] === undefined) W.tr[r.id] = 16; W.use[r.id] = Math.max(W.use[r.id] || 0, 9); if (!Object.values(W.op).some(a => a.includes(r.id))) (W.op[16] = W.op[16] || []).push(r.id); } W.xp = 50; W.cur = null; return true; })()")
+    ev("(() => { const W = SHIP.works; W.tier = 3; W.rank = 'senior'; for (const r of CAREER_LADDER.slice(0, CAREER_LADDER.indexOf(ladderRow('m19')))) { if (r.id === 'm15' || r.id === 'm17') continue; if (W.tr[r.id] === undefined) W.tr[r.id] = 16; W.use[r.id] = Math.max(W.use[r.id] || 0, 9); if (!Object.values(W.op).some(a => a.includes(r.id))) (W.op[16] = W.op[16] || []).push(r.id); } W.xp = 50; W.cur = null; return true; })()")
     ev(f"devmodeSkipTo({D(17, 5, 50)})"); ev("devmodeTopUp()"); step(10)
     ev(HOOK)
     bay = "(() => { if (deckDef.num !== 5) goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][2] || ROOM_TILES['w'][0])); player.stop(); })()"
@@ -59,7 +59,7 @@ with sync_playwright() as pw:
     until(D(17, 11, 20), "typeof DIALOGUE !== 'undefined' && !!DIALOGUE"); flush(); print('  ', info(), ev(calder)); shot('m19b_card')
     for i in range(30):
         if not ev("typeof DIALOGUE !== 'undefined' && !!DIALOGUE"): break
-        btn = page.locator('#dlgBox button:visible, .dlg button:visible, #dlg button:visible')
+        btn = page.locator('button.act:visible')
         if btn.count(): btn.first.click()
         else: page.mouse.click(195, 760)
         step(45)
@@ -69,26 +69,37 @@ with sync_playwright() as pw:
         if k == 1: shot('m19b_watch')
         if ev("SHIP.works.cur && SHIP.works.cur.st") == 'do': break
     shot('m19b_yourturn')
-    tapPanel = """(id => { const m = machineById(id), p = cellPos(...m.at); let best = null, bd = 1e9; for (const it of ITEMS) { it.hit.getWorldPosition(_wp); const dd = Math.hypot(_wp.x - p.x, _wp.z - p.z); if (dd < bd) { bd = dd; best = it; } } player.obj.position.copy(cellPos(...m.panel)); player.stop(); const at = new THREE.Vector3(p.x, 0.8, p.z); return [best.t, bd.toFixed(2), ixTap(best, at, at.clone())]; })"""
-    for k in range(10):
-        r = ev(tapPanel + "('1-relay-2')"); step(20); flush(); print('   tap', r, info()['goal'], ev("(() => { const j = SHIP.jobs.find(x => x.machine === '1-relay-2'); return j && [j.status, j.claimedBy, j.stepsDone]; })()"))
-        if k in (0, 1): shot(f'm19b_tap{k}')
-        for t in range(40):
-            if not ev("typeof ACT !== 'undefined' && !!ACT"): break
-            step(30)
-        if ev("SHIP.works.cur == null || SHIP.works.tr.m19 !== undefined"): break
-    flush(); print('  trained', ev("SHIP.works.tr.m19"), info())
-    # a board job with the pick (a week later): make one now on 1-relay-1 and play it
+    clickAt = """(id => { const sp = placeSpot(panelPlace(id)); const v = new THREE.Vector3(sp.x, 0.3, sp.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; })"""
+    def play(mid, tag, pick_wrong):
+        for k in range(12):
+            j = ev(f"(() => {{ const j = SHIP.jobs.find(x => x.machine === '{mid}' && /relayswap|battcell/.test(x.kind) && x.status !== 'done'); return j && [j.id, j.status, j.claimedBy, j.stepsDone, j.bad, j.wrongs, j.workDone]; }})()")
+            print('   job', j)
+            if not j or j[6]: break
+            ev(f"(() => {{ const m = machineById('{mid}'); if (deckDef.num !== m.deck) goToDeck(m.deck); player.obj.position.copy(cellPos(...m.panel)); player.stop(); }})()"); step(10)
+            xy = ev(clickAt + f"('{mid}')"); page.mouse.click(xy[0], xy[1]); step(20)
+            for t in range(60):
+                if not ev("typeof ACT !== 'undefined' && !!ACT"): break
+                step(30)
+            flush()
+            labs = [page.locator('button:visible').nth(i).inner_text() for i in range(page.locator('button:visible').count())]
+            opts = [l for l in labs if (l.startswith('R') and len(l) <= 3) or l.startswith('Cells')]
+            if opts:
+                shot(f'{tag}_pick')
+                if pick_wrong:
+                    page.locator(f'button:visible:text-is("{opts[(j[4] + 1) % len(opts)]}")').first.click(); step(20); flush(); pick_wrong = False
+                    print('   wrong picked', ev(f"(() => {{ const j = SHIP.jobs.find(x => x.id === '{j[0]}'); return [j.stepsDone, j.wrongs]; }})()"))
+                    continue
+                page.locator(f'button:visible:text-is("{opts[j[4]]}")').first.click(); step(20); flush()
+            if k == 0: shot(f'{tag}_tap0')
+    for k in range(5):
+        if ev("SHIP.works.cur && SHIP.works.cur.st") == 'do': break
+        until(ev('shipNow()') + 4)
+    ev("(() => { const j = SHIP.jobs.find(x => x.machine === '1-relay-2' && x.status !== 'done'); if (j && j.claimedBy !== 'you') claimJob(j.id); })()"); step(5)
+    play('1-relay-2', 'train', False)
+    flush(); print('  trained', ev("SHIP.works.tr.m19"), ev("SHIP.works.tr.m15"), info())
     ev("(() => { const j = pwrJob('relayswap', '1-relay-1', shipNow(), { key: 99 }); SHIP.jobs.push(j); claimJob(j.id); MACH_REV++; return j.id; })()"); step(10)
-    for k in range(6):
-        r = ev(tapPanel + "('1-relay-1')"); step(20); print('   tap', r, ev("(() => { const j = SHIP.jobs.find(x => x.machine === '1-relay-1' && x.status !== 'done'); return j && [j.status, j.stepsDone, j.bad, j.wrongs]; })()"))
-        shot(f'm19b_board{k}')
-        if page.locator('.choice button:visible, #ixChoose button:visible, button:has-text("R1")').count():
-            btns = page.locator('button:has-text("R")'); print('   pick buttons', btns.count(), [btns.nth(i).inner_text() for i in range(min(btns.count(), 8))])
-            break
-        for t in range(40):
-            if not ev("typeof ACT !== 'undefined' && !!ACT"): break
-            step(30)
+    play('1-relay-1', 'board', True)
+    print('  uses', ev("SHIP.works.use.m19"), ev("JSON.stringify(SHIP.works.side.pwr)"))
     print('errors', errs[:4])
     b.close()
 srv.terminate()
