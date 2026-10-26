@@ -426,3 +426,22 @@ OLD = 0.92.6 5898c190 (10f654de…f266). One at a time (arrows_check alone), CAD
 The promotion itself still works (test passed Day 9, officer Day 10, ceremony attended); only the arrow to the test is
 missing. The only game change b78e1e22 → 5898c190 is 27ad3cba (FX17's evMeetClash in evArrive), the same change behind
 0.92.6's reserved-job FAILs; FX17's 0.93.0 fix cured the reserved job but not this. Not fixed (check runner).
+
+# 0.93.1 (claude/staging-0.93.1 0a2fc617, 2026-10-26)
+
+**sha256 of starship-cadet.html: `6cd54ab97f4290aa5665ff40b5db35d0abc485dc8401d011084dfaa2f35a8eee`** (matches BM18's).
+OLD = 0.93.0 df8d58b9 (97f21893…f6a8). One at a time (arrows_check alone), CADET_WORK=/tmp/work-cr1.
+
+| Check | Result | Time | Key lines |
+|---|---|---|---|
+| player_check | **OK** | 370 s | PLAYER CHECK OK |
+| devmode_check | **OK** | 250 s | DEVMODE CHECK OK |
+| bubble_check | **OK** | 289 s | BUBBLE CHECK OK |
+| puzzle_check | **OK** | 65 s | PUZZLE CHECK OK |
+| social_check | **OK** | 26 s | SOCIAL CHECK OK |
+| talk_check | **OK** | 34 s | TALK CHECK OK |
+| arrows_check (all parts) | **OK** | 1166 s | ARROWS CHECK OK; promo queue now includes `promo:test:9` (0.93.0's FAIL fixed) |
+| arrows_pointer_check | **OK** | 120 s | arrows_pointer_check: OK |
+| dev_arrow_check | **OK** | 33 s | DEV ARROW CHECK OK |
+
+No FAILs, so no OLD runs were needed.
