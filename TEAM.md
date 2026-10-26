@@ -1392,3 +1392,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~12:33 UTC: **USER AWAKE** (8:33 AM Eastern): overnight mode over. Morning summary sent.
 - ~12:34 UTC: FX27 correction: same-tab fix not enough; diagnostics show the WHOLE localStorage empty before any game script ran (test browser in-memory storage purged when unheld). Test-only fix (keep a holder page open) + control run old→same old build (0.93.1, no slots) to prove it is the test browser. ~35 min.
 - ~12:47 UTC: arrows "week" FAIL placed on INSPECT_ON (alone OK when off) → FX20b game fix (ETA asked), RV18 reviews, rides round 2. Fallback INSPECT_ON off only with user word.
+- ~13:03 UTC: FX27 decisive control: slots-OFF→slots-OFF (0.93.1 code) also loses whole storage 3/12 in the test browser → not the slots work. Lead call: migrate FAIL with "storage before: []" = known-old FX27-1 (test-browser drop) for the round; FX27 still chasing a check fix.
