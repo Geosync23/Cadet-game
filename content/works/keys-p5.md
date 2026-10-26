@@ -299,18 +299,18 @@ Meeting `train.ps.calder` (watch-only, Deck 6 port junction; one choice of three
 (`{time}` `{place}`), `next.ps`, `next.wait.ps`; the test row's `works.mech.t3`, `next.t3`, `next.wait.t3`
 (`content/works/promo-t3.lines`).
 
-### M19 Power and relays (S5-3, 24v; `content/works/m19.lines`)
+### M19 Power and relays (S5-3, 24v; `content/works/m19.lines`; matched to B2's code, claude/p5s5-mech-a 3c38a65f)
 
 | What | Keys | Placeholders |
 | --- | --- | --- |
-| Ladder, ask, What's next, ring, notice | `works.mech.m19`, `works.ask.m19`, `next.m19`, `next.wait.m19`, `m19.ptr`, `m19.notice` | `{time}` `{place}` |
-| The training | meeting `train.m19.calder` (relay room; one choice of two) | |
-| Calder's steps | calder `work` flags `train.m19.tester` (the tester given, only if M15 hasn't), `train.m19.follow.look/pull/seat/test/wrong/done`, `.battery`, `.conduit` | |
-| The relay rack panel | `m19.relay.title` ({machine}), `.look`, `.pull`, `.seat`, `.test`, `.done`, `.wrong` | `{machine}` |
-| The battery banks | `m19.battery.title` ({machine}), `.read` ({n}), `.low`, `.even`, `.balance`, `.done` | |
-| Conduit runs (stage 2) | `m19.conduit.title` ({machine}), `.test`, `.good`, `.fault` | |
-| Tester toast, stage toasts | `m19.tester.give`, `m19.trained.stage2`, `m19.trained.stage3` | |
-| The drill: you run Works' part | `drill.works.ptr`, `.title`, `.text`, `.call.1-3` (stations, isolate, head count; in order), `.done` ({time}), `.order` (a call out of order); crew kind `drill.works.answer` under `flag:drill.works.call.<n>` (`content/banks/m19.lines`, Works bank); calder flags `drill.works.you`, `drill.works.you.done` | `{time}` |
+| Ladder, ask, What's next | `works.mech.m19`, `works.ask.m19`, `next.m19`, `next.wait.m19` | `{time}` `{place}` |
+| Ring line, urgent notice (10:30) | `m19.ring` ({name} {time}), `m19.notice` ({name} {time} {where}: B2 passes name and time too; the words check has no `{ring}`) | |
+| The training | meeting `train.m19.calder` (one choice of three); `m19.train.open` ({n}), `m19.train.test`; calder flag `train.m19.tester` (worksTeach) | |
+| Job cards | `m19.card.relay` ({place}), `m19.card.batt` ({n}) | |
+| A relay rack (R1-R6) | `m19.relay.ok`, `.bad` (one word each, in the lamp list), `.pick`, `.wrong`, `.test`, `.done` | |
+| A battery bank (four cell pairs) | `m19.batt.ok`, `.low`, `.pick`, `.wrong`, `.test`, `.done` ({n}) | |
+| Stage 2, proposed for B2's turn 2 | `m19.conduit.title` ({machine}), `.test`, `.good`, `.fault`; `m19.tester.give`, `m19.trained.stage2`, `m19.trained.stage3` | |
+| The drill: you run Works' part (proposed; not in B2's code yet) | `drill.works.ptr`, `.title`, `.text`, `.call.1-3` (stations, isolate, head count; in order), `.done` ({time}), `.order`; crew kind `drill.works.answer` under `flag:drill.works.call.<n>` (`content/banks/m19.lines`, Works bank); calder flags `drill.works.you`, `drill.works.you.done` | `{time}` |
 
 ### M18 Shutdowns (S5-4, 24w; `content/works/m18.lines`)
 

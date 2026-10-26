@@ -791,27 +791,10 @@
 ? flag:pu3.promo.cake
 - One slice. Then back to work tomorrow. Not tonight.   #funny
 
-// SW3 (2026-10-26, Pillar 5 Step 5, S5-3): M19 Power and relays (flags train.m19.<step>, as seat C's lead/follow steps)
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-3): M19 Power and relays (B2's code: worksTeach('m19', 'calder', 'tester'))
 == work
 ? flag:train.m19.tester
-- You'll want this. A conduit tester. Look after it.
-? flag:train.m19.follow.look
-- Watch the lights. Which one's late?
-? flag:train.m19.follow.pull
-- Straight out. Don't rock it.
-? flag:train.m19.follow.seat
-- Straight in. Push till it stops.
-? flag:train.m19.follow.test
-- Whole rack. All twelve.
-? flag:train.m19.follow.wrong
-- That one's on time. Look again. Count to one.
-? flag:train.m19.follow.done
-- All twelve. Good. The bridge won't notice. That's the point.
-// the battery banks (stage 3) and conduit runs (stage 2)
-? flag:train.m19.follow.battery
-- Four banks. One's carrying the others. Even them out.
-? flag:train.m19.follow.conduit
-- Test each length. The fault is where the reading drops.
+- You'll want this. The conduit tester. Clip it on, read the feed. It's yours.
 // the drill, the first time you run the Works part
 ? flag:drill.works.you
 - Your drill now. Three calls. Clear voice. Don't rush.
