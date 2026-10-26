@@ -20,6 +20,16 @@
 
 Times are with two lanes at once (about 1.8x a lone run). No FAIL; nothing new.
 
+**perf_check** (taken from CR2 on BM18's call; alone; run from the scratchpad, NEW 19400976 vs OLD d9c7e5f0):
+
+| Run | Result | Key lines |
+|---|---|---|
+| full | exit 1, 3675 s, `PERF CHECK: 3 problem(s)` | js only: Sunday dinner mess portrait 2.82 -> 4.31 ms; storm all-clear party landscape 1.73 -> 2.74; garden picnic trifold-open-turned 1.09 -> 2.51. Draw calls same OLD/NEW in every scene; round trips 521/521/521; week 521 -> 522; load 8.0-9.2 s both |
+| re-measure 1 (`PERF_SCENES` the 3 scenes) | `PERF CHECK OK` (658 s) | NEW: dinner portrait 2.43, storm landscape 2.27, picnic trifold-open-turned 1.08 ms: none repeats |
+| re-measure 2 | exit 1, 667 s, 1 problem | a different shape: storm party trifold-open 2.25 -> 3.54 ms (2.24 in re-measure 1); the three first flags don't repeat |
+
+Verdict: backlog 32 noise (one-off js spikes, never the same scene and shape twice). Nothing new.
+
 ## 0.93.2 round 2 (2026-10-26; after FX26's fix for CR6's mech m9)
 
 - **Candidate:** `claude/staging-0.93.2` d9c7e5f0
