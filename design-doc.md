@@ -702,7 +702,7 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
 - **Progress talks** with Chief Calder are appointments you ask for. They take place in her office on any day she's on shift.
 - Each is an appointment that opens its door for its window. If you miss one, a short Mail tells you; nothing is lost.
 
-**Scope and calendar (the user, 2026-10-20; plans/events-plan.html v3).** Only the events up to the end of the career (the promotions, ending with "Calder's question" on Day 26) are built. **Every later event is parked**, not deleted: it stays in the table below and in `plans/pillar3-plan.md`, in case the game grows. Events come by the calendar, not by your rank, with small parts that depend on rank. The fixed days for a new game:
+**Scope and calendar (the user, 2026-10-20; plans/events-plan.html v3).** Only the events up to the end of the career (the promotions, ending with "Calder's question" on Day 26) are built. Since the swap (2026-10-26) that is the visit and then the comet, and the comet on Day 26 is the last of them. **Every later event is parked**, not deleted: it stays in the table below and in `plans/pillar3-plan.md`, in case the game grows. Events come by the calendar, not by your rank, with small parts that depend on rank. The fixed days for a new game:
 - **Sunday Day 7: Crossing the Line**, a new one-day short event and the first chronologically. It's the user's "one more short one". It's on Sunday so that the player keeps Saturday as a completely free day. The Wren crosses into the Veyli reach.
   - 14:30: the horn (a gold pulse; the game has no sound) and gold hull lights, then the Captain's short address.
   - 14:30-15:15: the ceremony for first-timers in the bow lounge (you included), the oath at 14:40, then Brennan's punch.
@@ -714,15 +714,14 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
   - Thursday 11: the warning, and Calder's briefing at 14:00, after the first team job and the tea break.
   - Friday 12, 14:00: the front.
   - Sunday 14, 10:00: the all-clear, with the party that evening. Rec talent night moves a week, and Lap of the Wren moves to Monday Day 15 at 20:30.
-- **Tuesday Day 16, 21:30:** comet viewing, one day long.
-- **Days 26-30:** the diplomatic visit, shortened into a weekend finale.
-  - Day 22: named as next week's business.
-  - Friday 26: the warning, after Calder's question.
-  - Saturday 27: the greeting.
-  - Sunday 28: one dinner.
-  - Monday 29: the farewell.
+- **The visit before the comet** (the user, 2026-10-26, option A on `plans/trad-variety-pitch.html` section 5; built in 0.93.2 behind `EV_SWAP_ON`, off until the user switches it on):
+  - **Tuesday to Friday, Days 16-19: the diplomatic visit, short.** Tuesday 16: the warning, Commander Vance's memo (08:30) and Mail, and the prep jobs. Wednesday 17, 10:00: the Veyli come aboard in the shuttle bay. Thursday 18: the formal dinner in the Captain's quarters. Friday 19: the senior briefing at 08:00, the gift exchange at 08:20 and the farewell at 09:00, before the Friday hold, so the Captain's address that afternoon talks about it. It clears out before your night shifts (Days 19-20), the Captain's table (Day 20), Theo's send-off and Basil's arrival (Day 21).
+  - **Friday Day 26, 21:30: comet viewing**, after Calder's question and the four-weeks-aboard tea (tap night pauses for it). It is now the finale of the career's first stretch.
+  - **The new hand's tea after a rotation is removed** ("this one can go").
+  - **The Friday addresses** on Days 19 and 26 change with it: Day 19 "our guests left this morning", Day 26 "the comet tonight".
+- **Before the swap** (kept as history): Tuesday Day 16, 21:30, comet viewing; Days 26-30 the diplomatic visit as a weekend finale (Day 22 named as next week's business, Friday 26 the warning after Calder's question, Saturday 27 the greeting, Sunday 28 one dinner, Monday 29 the farewell).
 
-Build order: the ion storm first, then Crossing the Line, the comet and the visit. Each event is built switched off, then switched on. **The ion storm update is built and switched on** (2026-10-21, with the user's yes): the events base and the storm's update together, Days 11-15 of a new game. **Crossing the Line is built and switched on** (the user, 2026-10-23, via lead 31; 0.92.1): Saturday Day 6 to Monday Day 8 of a new game, the oath and the supper on Sunday Day 7; it follows the events switch. Pillar 5 steps 5-6 come later and fit around these days.
+Build order: the ion storm first, then Crossing the Line, the visit and the comet (the order they come in, since the swap). Each event is built switched off, then switched on. **The ion storm update is built and switched on** (2026-10-21, with the user's yes): the events base and the storm's update together, Days 11-15 of a new game. **Crossing the Line is built and switched on** (the user, 2026-10-23, via lead 31; 0.92.1): Saturday Day 6 to Monday Day 8 of a new game, the oath and the supper on Sunday Day 7; it follows the events switch. Pillar 5 steps 5-6 come later and fit around these days.
 
 **The events base's three answers (the user, 2026-10-21, each the recommended option; `plans/events-base-brief.md`):**
 - **A save already past an event's day** when the events are switched on: that event is **skipped**, never run late. Dev mode can still start it. The skip is decided once, the first time a save loads with events on, and kept with the save.
@@ -770,8 +769,8 @@ Build order: the ion storm first, then Crossing the Line, the comet and the visi
 | --- | --- | --- | --- |
 | — | Crossing the Line (new) | Short, Sunday Day 7 | One day: the Wren crosses into the Veyli reach. A ceremony for first-timers in the bow lounge and a supper in the mess. |
 | 1 | Ion storm | Main, built first; Days 11-15 | Touches every system: power flickers and comms go down. Calder's storm briefing in the Works bay, the Captain's address, emergency lighting deck by deck, storm stew, the Captain's all-clear, a rush on the call-home booths and a party in the bow lounge. |
-| — | Comet viewing | Short, Day 16 | One gentle evening at the observatory and the bow lounge windows. |
-| 2 | Diplomatic visit | Main, Days 26-30 (the finale) | A Veyli delegation fills Deck 2's visitor rooms (the second visitors' cabin is kept for this). A greeting in the shuttle bay, formal dinners in the Captain's quarters, a gift exchange. |
+| 2 | Diplomatic visit | Main, Days 16-19 (the swap; was Days 26-30) | A Veyli delegation fills Deck 2's visitor rooms (the second visitors' cabin is kept for this). A greeting in the shuttle bay, a formal dinner in the Captain's quarters, a gift exchange. |
+| — | Comet viewing | Short, Friday Day 26 at 21:30 (the swap; was Tuesday Day 16) | One gentle evening at the observatory and the bow lounge windows. The finale of the career's first stretch. |
 | — | Crew rotation day | Short, **parked** | Five crew leave on a transport and five new faces arrive. |
 | 3 | Something in the garden | Main, **parked** | A creature eats the crops; traps from the machine shop and a volunteer garden watch. It becomes the ship's pet. |
 | — | Power surge | Short, **parked** | A junction on Deck 6 trips and two decks lose power for a while. |

@@ -38,6 +38,8 @@ __import__('atexit').register(lambda: [f.unlink(missing_ok=True) for f in (WORK 
 from playwright.sync_api import sync_playwright
 
 SRC = pathlib.Path(sys.argv[1]).read_text()
+SWAP = bool(re.search(r"^const EV_SWAP_ON = true", SRC, flags=re.M))   # the event swap (0.93.2): the visit (Day 16) is the one a Day 20 load passes over, not the comet
+PASSED = 'diplomatic' if SWAP else 'comet'
 OFF_BUILD = sys.argv[1]          # the build switched off, for part 1
 ON_ALREADY = 'const EVENTS_ON = true;' in SRC
 if ON_ALREADY:                   # events on in the build (storm S10): parts 1-2 need the switched-off game, so make that copy
@@ -679,7 +681,7 @@ with sync_playwright() as pw:
             print(f"  evSkippedFor({c['f']}, log {c['l']}, running {c['c']}) = {c['got']}")
             if c['got'] != c['want']: fail(f"evSkippedFor({c['f']}, {c['l']}, {c['c']}) = {c['got']}, want {c['want']}")
         if P5['late'] == 'skip':
-            named = {(20, ()): ['crossingLine', 'ionStorm', 'comet'], (9, ()): ['crossingLine'], (20, ('ionStorm',)): ['crossingLine', 'comet'], (0, ()): [], (1, ()): []}
+            named = {(20, ()): ['crossingLine', 'ionStorm', PASSED], (9, ()): ['crossingLine'], (20, ('ionStorm',)): ['crossingLine', PASSED], (0, ()): [], (1, ()): []}
             for c in P5['cases']:
                 k = (c['f'], tuple(c['l']))
                 if k in named and not c['c'] and c['got'] != named[k]: fail(f"evSkippedFor({c['f']}, {c['l']}): {c['got']}, the brief says {named[k]}")
@@ -718,10 +720,10 @@ with sync_playwright() as pw:
         big_but = lambda *skip: sorted({d for i, b in bigs.items() if i not in skip for d in b})
         slog = [f"{r['id']}:{r['day']}-{r['day'] + n}" for r, n in zip(P5['plan'], P5['days']) if r['day'] + n <= 20]
         for title, save, want in [
-            ('a Day 20 save, events first on at Day 20', mk(20, frm=20), {'evFrom': 20, 'sk': ['comet', 'crossingLine', 'ionStorm'], 'ed': big_but('crossingLine', 'ionStorm', 'comet'), 'due': None, 'log': []}),
+            ('a Day 20 save, events first on at Day 20', mk(20, frm=20), {'evFrom': 20, 'sk': sorted([PASSED, 'crossingLine', 'ionStorm']), 'ed': big_but('crossingLine', 'ionStorm', PASSED), 'due': None, 'log': []}),
             ('a Day 20 save, events on from the start (evFrom 0)', mk(20, frm=0), {'evFrom': 0, 'sk': [], 'ed': big_but(), 'due': None, 'log': slog}),   # every event it missed is run on load, as an unbroken game ran them
             ('a Day 9 save, events first on at Day 9', mk(9, frm=9), {'evFrom': 9, 'sk': ['crossingLine'], 'ed': big_but('crossingLine'), 'due': {'id': 'ionStorm', 'day': 11} if storm else None, 'log': []}),
-            ('a Day 20 save, evFrom 20, the storm logged', mk(20, [{'id': 'ionStorm', 'startDay': 11, 'endDay': 17}], 20), {'evFrom': 20, 'sk': ['comet', 'crossingLine'], 'ed': big_but('crossingLine', 'comet'), 'due': None})]:
+            ('a Day 20 save, evFrom 20, the storm logged', mk(20, [{'id': 'ionStorm', 'startDay': 11, 'endDay': 17}], 20), {'evFrom': 20, 'sk': sorted([PASSED, 'crossingLine']), 'ed': big_but('crossingLine', PASSED), 'due': None})]:
             pg = load(b, on_html, save, errs=errs); r = state(pg); pg.close()
             print(f"  {title}: evFrom {r['evFrom']}, passes over {r['sk']}, eventDay {r['ed']}, due {r['due']}, log {r['log']}, running {r['ev']}")
             for k in ('evFrom', 'sk', 'ed', 'due', 'log'):

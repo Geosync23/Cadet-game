@@ -9,7 +9,7 @@ ROOT=$(cd "$(dirname "$0")/../.." && pwd); SNAP=$OUT/snap
 [ -d "$SNAP" ] || { mkdir -p "$SNAP"; git -C "$ROOT" archive HEAD | tar x -C "$SNAP"; }
 G=$SNAP/starship-cadet.html
 export CADET_CHROME=${CADET_CHROME:-/opt/pw-browsers/chromium} CADET_WORK=${CADET_WORK:-/tmp/cadet-work}
-ALL="lines arc talk leave social machine cadet clothes career food deck disc puzzle device path tiles join bubble mech bigevents devmode events intro day1 interactions fridays player perf day0 day5 day7 day12 day13 day16 day19 day21 day27"
+ALL="lines arc talk leave social machine cadet clothes career food deck disc puzzle device path tiles join bubble mech bigevents devmode events intro day1 interactions fridays player perf day0 day5 day7 day12 day13 day17 day19 day21 day26"
 cd "$SNAP"
 for n in ${@:-$ALL}; do
   [ -s "$OUT/$n.json" ] && continue

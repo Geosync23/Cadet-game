@@ -6,8 +6,8 @@ who: kowalczyk
 // edge of Marra Station for thirty years; it goes dark for good at ten to six one morning, a buoy instead. His pattern:
 // three long, one short. Never the command she was passed over for; never loneliness spelled out (the lonely theme).
 // No pictures (the game has none): someone on Marra saw the lights and wrote to her father.
-// Depends on your night shifts (Pillar 5, moved to Mon-Wed, Days 22-24, 21:00-06:00): beats 2-3 on the first night
-// (Day 22, before midnight), the crescendo at the dawn of the second (Day 24, 05:50; Day 23 is Zeke's). No day numbers in lines.
+// Depends on your night shifts (Pillar 5: Days 19-20, 21:00-06:00, as the game holds them; settled with the event swap, 0.93.2, lead 37): beats 2-3 on the first night
+// (Day 19, before midnight), the crescendo at the dawn after the second (Day 21, 05:50; it was Days 22-24, with Zeke's on Day 23). No day numbers in lines.
 // Numbering: beat 4 is the crescendo, beat 5 the afterglow (after 4 or 6), beat 6 the quiet ending for beat 4.
 
 == beat 1
@@ -32,7 +32,7 @@ them: There. Now you needn't read it. You're welcome.   [nod]
 them: Right. Bed, for me. Breakfast, for you. Go on, then.
 
 == beat 2
-// DAY: 22
+// DAY: 19
 // your first night shift, 21:30-22:30; acquaintance, met 3+ days (the builders' gate for the night shift)
 tone: light
 tier: acquaintance
@@ -59,7 +59,7 @@ them: Never mind. Your job: the log, on the hour, every hour. Then leave the qui
 them: On the hour. I'll be at the chart table, pretending not to read.
 
 == beat 3
-// DAY: 22
+// DAY: 19
 // the same night, an hour after beat 2, 23:00-23:59 (before midnight: that day's one heavy moment); tier and gap set for the night
 tone: heartfelt
 tier: acquaintance
@@ -85,8 +85,8 @@ them: It's why I leave film night before the lighthouse bit. Everyone thinks it'
 them: Right. Long night yet. The log won't keep itself. Go on, then.
 
 == beat 4
-// DAY: 24
-// CRESCENDO rides on: your second night shift, the bridge (Deck 1), 05:50; day: 24; cast: kowalczyk, takahashi-wen (night comms), mensah (night Watch, on his rounds; the builders confirm who's on watch); quiet ending: beat 6
+// DAY: 21
+// CRESCENDO rides on: your second night shift, the bridge (Deck 1), 05:50; day: 21; cast: kowalczyk, takahashi-wen (night comms), mensah (night Watch, on his rounds; the builders confirm who's on watch); quiet ending: beat 6
 tone: resolution
 tier: acquaintance
 gapDays: 0
@@ -120,7 +120,7 @@ them: Right. Log it: a test of the running lights. Satisfactory. Very satisfacto
 them: And somebody find me a novel with a dull ending. I've had enough feeling for one shift.   [laugh]
 
 == beat 5
-// DAY: from 24
+// DAY: from 21
 // afterglow: after the night shift, any early morning as she comes off (06:00-07:00); plays after beat 4 or beat 6
 tone: light
 tier: acquaintance
@@ -144,7 +144,7 @@ them: I've read the end. It's a good one. Read it in order, if you're that sort.
 them: Right. Bed, for me. Quiet watch, whenever yours is.
 
 == beat 6
-// DAY: 24
+// DAY: 21
 // QUIET ENDING for beat 4: plays only if beat 4 was missed (not on the bridge at 05:50); at 06:00 by the lift as she comes off. If you had no night shift at all, the builders play only beat 5 (with one line about the beacon)
 tone: light
 tier: acquaintance

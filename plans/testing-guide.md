@@ -19,8 +19,8 @@ while you work; it is **never the gate**. check_fast still runs before every pus
 | **CR1** | `player_check` (the long one, ~20 min on a release run: a light share), devmode, bubble, puzzle, social, talk | ~34 |
 | **CR2** | `intro_check` (whole), `perf_check BUILD OLD`, `cadet_test OLD BUILD`, path, arc, lines, `lines_check --day` | ~35 |
 | **CR3** | `day_check` Days **0, 1, 5, 7**, weekend (from 0.92.5) | ~44 |
-| **CR4** | `day_check` Days **12, 13, 16, 19** | ~32 |
-| **CR5** | `day_check` Days **21, 27**, interactions, events, career, `sound_check` (from 0.93.0) | ~37 |
+| **CR4** | `day_check` Days **12, 13, 17, 19** | ~32 |
+| **CR5** | `day_check` Days **21, 26**, interactions, events, career, `sound_check` (from 0.93.0) | ~37 |
 | **CR6** | `bash check_fast.sh` (words, names, deck, machine, leave, device), mech, bigevents, fridays, disc, tiles, join, food (`1 7` and `11 4`), clothes | ~35 |
 
 `OLD` = the last release's game (`git show <release commit>:starship-cadet.html > old.html`). Every check runs with
@@ -239,10 +239,10 @@ Days 12-13). From the game's calendar (`EV_CALENDAR`, `EV_BEATS`, `ROSTER_ROTATI
 | 7 | Crossing the Line (Sunday; its Mail on Day 6) | `day7` |
 | 12 | the ion storm's front (Friday; the warning is Day 11) | `day12` |
 | 13 | the storm's Saturday (the rec deck shut) | `day13` |
-| 16 | the comet (Tuesday, 21:30) | `day16` |
+| 17 | the diplomatic visit's greeting (Wednesday 10:00; the visit is Days 16-19 since the event swap, 0.93.2, `EV_SWAP_ON`; was `day16`, the comet's old day) | `day17` |
 | 19 | a Friday with its own address, and your first night shift | `day19` |
 | 21 | the first crew rotation (the Tern) | `day21` |
-| 27 | the diplomatic visit's finale (warning Day 26, Days 27-30) | `day27` |
+| 26 | the comet (Friday 21:30, since the event swap), Calder's question, four weeks aboard (was `day27`, the visit's old finale) | `day26` |
 
 Others worth a run when their area changes: Day 9 (the officer's test), 10-11 (summons, ceremony), 14 (the storm's
 all-clear), 77 (the next rotation). The picker already names the ten above (`EVENT_DAYS`). When the calendar gains
@@ -330,7 +330,7 @@ The rules, as of 0.64.12 (`RULES` in tools/affected.py is the master; `python3 t
 | 15b, 15r | interactions, player, join / deck, disc, interactions |
 | 16 food | food, day1 |
 | 17 machines | machine, mech, career, puzzle |
-| 18 events | events, join, intro, bigevents, fridays, day7, day12, day13, day16, day27 |
+| 18 events | events, join, intro, bigevents, fridays, day7, day12, day13, day17, day26 |
 | 18f Fridays | fridays, events, join, intro, bigevents, day1, food, perf, day5, day19 |
 | 19 device | device, puzzle, player |
 | 20, 20c social | social, arc, bubble, lines / social, arc |

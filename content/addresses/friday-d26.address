@@ -17,7 +17,11 @@ mail: All hands: the Captain's Friday address | Four Fridays, a storm and a come
 vance: Settle, please. The Captain.   [nod]
 marrow: Afternoon, everyone. Our fourth Friday. For some of you, that's every Friday you've had.
 // beat 1: a month of Fridays: who came, who went, the storm remembered
+? !swap
 marrow: A month ago {me} came aboard. Since then: the Line, a storm, a comet.   [gesture]
+? swap
+marrow: A month ago {me} came aboard. Since then: the Line, a storm, and our first guests.   [gesture]
+?
 ? band:smooth
 marrow: The storm crew's roster is still pinned up in the tea corner. I read it some evenings.   #warm
 ? band:bumpy|rough
@@ -34,7 +38,14 @@ marrow > you: {me}, four weeks with us. The good roads up are rarely quick.   #w
 ?
 marrow: Jobs on the Works board with your name on them: {myjobs}. The ship runs better for it.
 marrow: Rank is nice. The people you sit with at dinner matter more. Find them. Keep them.
-// beat 3: the Veyli, who they are and how we host them
+// beat 3: the Veyli, who they are and how we host them (swap: the comet tonight; the event swap, 0.93.2, FX22b's
+// draft for SW2 to polish: the comet viewing is tonight at 21:30, the bow lounge windows and the observatory)
+? swap
+marrow: And tonight, the comet. Dr. Sato says it passes at half past nine.   [gesture]
+marrow: The bow lounge windows are the place. The observatory's open too, for a turn at the scope.
+marrow: After a storm and a week of guests, I think the sky owes us one.   #warm
+marrow: What I ask: wrap up warm, find a window, and look up. It won't come round again soon.   #warm
+? !swap
 marrow: Now, guests. Tomorrow at ten, a Veyli delegation comes aboard, led by Speaker Teshavi.
 marrow: The Veyli are our cousins out here. They came this way long before us.
 marrow: Proud, careful, and very good at noticing. Ask them about the long ship. They like that.
@@ -44,6 +55,7 @@ vance: Three items. It's a short list.   [nod]
 // beat 4: what she asks of everyone
 marrow: What I ask: be yourselves, be kind, and answer their questions. They'll have a great many.
 marrow: Line the shuttle bay with me tomorrow, if you're free. Let's show them the ship we are.   #warm
+?
 // beat 5: four weeks aboard tonight, and the close
 marrow: Works has something for {me} after dinner. I'm not allowed to say what.   #funny
 marrow: Dinner's at five. Enjoy your weekend, those of you who have one.   [gesture]

@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.1
+   STARSHIP CADET: CSV Wren                           build 0.93.2-s.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9257,7 +9257,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.1';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.2-s.1';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -9392,6 +9392,7 @@ const SHORT_FRIDAY = true;                               // Short Fridays and th
 const WEEKEND_ON = true, WEEKEND_TRADS = new Set(['saturday-run', 'every-song', 'night-owls-cocoa', 'sunday-story', 'gerald-clinic', 'garden-picnic', 'bread-day', 'big-jigsaw']);   // the weekend traditions (0.92.5 item 16, FX14; plans/handover-fx14.md): on in the game from 0.92.5 (the user, 2026-10-25: "ship them switched on, no preview"; FX16); false = the game before them. Their .trad files load only with it (section 18's loader)
 const weekendTag = tag => typeof tag === 'string' && tag.startsWith('ev-') && [...WEEKEND_TRADS].some(id => tag === 'ev-' + id || tag.startsWith('ev-' + id + '-'));   // a weekend tradition's plan tag (FX9: their hosts stay to its end)
 const P926_TRADS = true, P926_NEW = new Set(['six-weeks-aboard', 'twelve-weeks-aboard', 'tool-night', 'route-night', 'window-sketch', 'open-house', 'garden-walk', 'spoon-band', 'card-night', 'worst-joke']);               // 0.92.6 (FX17, plans/patch-0.92.6.md items 2-5, 7, 8, 13, 15): the traditions that come alive (spoken talks, hosts, the swap, the guessing, the stands); off: 0.92.5. `?p926` previews
+const EV_SWAP_ON = URL_FLAGS.has('evswap');            // 0.93.2 (FX22b; plans/trad-variety-pitch.html section 5, option A): the diplomatic visit before the comet (section 18's 'event swap' block); off: the order as before
 const P926_APPT = true;                 // 0.92.6 item 9 (FX22; plans/patch-0.92.6.md): appointments as small traditions, each with its scene, and a real talk at every appointment; off: none of it (the game as 0.92.5)
 const SAVE_KEY = 'starship-cadet-save' + (DEVMODE ? '-dev' : ''), SAVE_V = 2;
 function saveGame() {
@@ -40101,8 +40102,10 @@ const FRI_ADDRESSES = {
       {"id": "1wljfqp", "who": "marrow", "text": "Long blackouts, a scorched relay room, food lost. We're putting it right, together.", "pose": "sigh", "if": ["band:rough"]},
       {"id": "1yhfej", "who": "marrow", "text": "Storm jobs closed in four days: {stormjobs}. The Chief made it look easy. It wasn't.", "pose": "nod"},
       {"id": "1ts9k26", "who": "marrow", "text": "And everyone who sat up with a neighbour by lantern light: that counted too.", "tone": "warm"},
-      {"id": "gj4ucn", "who": "marrow", "text": "Then on Tuesday, the comet. After a storm like that, I think the sky owed us one.", "pose": "gesture"},
-      {"id": "r4oiw3", "who": "marrow", "text": "Half of you were at the windows. The other half were asleep, and I don't blame you.", "tone": "funny"},
+      {"id": "gj4ucn", "who": "marrow", "text": "Then on Tuesday, the comet. After a storm like that, I think the sky owed us one.", "pose": "gesture", "if": ["!swap"]},
+      {"id": "r4oiw3", "who": "marrow", "text": "Half of you were at the windows. The other half were asleep, and I don't blame you.", "tone": "funny", "if": ["!swap"]},
+      {"id": "11vlapl", "who": "marrow", "text": "And this morning we saw our Veyli guests off. Three days, and they made every one count.", "pose": "gesture", "if": ["swap"]},
+      {"id": "xcyrw9", "who": "marrow", "text": "Speaker Teshavi asked if she might come back. I said yes before she'd finished asking.", "tone": "warm", "if": ["swap"]},
       {"id": "1qku5ad", "who": "marrow", "text": "My letters of thanks for the storm went out on Sunday. You know who you are."},
       {"id": "1uhcxva", "who": "marrow", "text": "{me} was on it. We talked in the ready room yesterday. Nobody tripped.", "tone": "funny", "if": ["commended"]},
       {"id": "5yz7bp", "who": "marrow", "text": "On Tuesday, Senior Officer {me} moved up to Deck 2. Lucky corridor.", "tone": "warm", "if": ["myrank:senior|specialist"]},
@@ -40120,7 +40123,8 @@ const FRI_ADDRESSES = {
     {"id": "lines", "pick": 1, "lines": [
       {"id": "1m1aw7p", "who": "vance", "text": "Settle, please. The Captain.", "pose": "nod"},
       {"id": "85elit", "who": "marrow", "text": "Afternoon, everyone. Our fourth Friday. For some of you, that's every Friday you've had."},
-      {"id": "mh0fnv", "who": "marrow", "text": "A month ago {me} came aboard. Since then: the Line, a storm, a comet.", "pose": "gesture"},
+      {"id": "mh0fnv", "who": "marrow", "text": "A month ago {me} came aboard. Since then: the Line, a storm, a comet.", "pose": "gesture", "if": ["!swap"]},
+      {"id": "il74gs", "who": "marrow", "text": "A month ago {me} came aboard. Since then: the Line, a storm, and our first guests.", "pose": "gesture", "if": ["swap"]},
       {"id": "1qqedke", "who": "marrow", "text": "The storm crew's roster is still pinned up in the tea corner. I read it some evenings.", "tone": "warm", "if": ["band:smooth"]},
       {"id": "1dirk5", "who": "marrow", "text": "There's still a scorch mark in the relay room. Chief Calder wants to keep it. So do I.", "if": ["band:bumpy|rough"]},
       {"id": "1qsc8i6", "who": "marrow", "text": "{me}: a junior four weeks ago, an Engine Specialist today. Rare.", "to": "you", "tone": "warm", "if": ["myrank:specialist"]},
@@ -40129,14 +40133,18 @@ const FRI_ADDRESSES = {
       {"id": "qimfd4", "who": "marrow", "text": "{me}, four weeks with us. The good roads up are rarely quick.", "to": "you", "tone": "warm", "if": ["myrank:junior"]},
       {"id": "1akj2fh", "who": "marrow", "text": "Jobs on the Works board with your name on them: {myjobs}. The ship runs better for it."},
       {"id": "3mv77c", "who": "marrow", "text": "Rank is nice. The people you sit with at dinner matter more. Find them. Keep them."},
-      {"id": "euhh6a", "who": "marrow", "text": "Now, guests. Tomorrow at ten, a Veyli delegation comes aboard, led by Speaker Teshavi."},
-      {"id": "9a0dg3", "who": "marrow", "text": "The Veyli are our cousins out here. They came this way long before us."},
-      {"id": "i04lju", "who": "marrow", "text": "Proud, careful, and very good at noticing. Ask them about the long ship. They like that."},
-      {"id": "1c0j96r", "who": "marrow", "text": "Envoy Saruth asks me to remind you: do not bow. Most of us do it wrong.", "tone": "funny"},
-      {"id": "12bdhle", "who": "marrow", "text": "Commander Vance will brief you tonight. He has a list. Of course he has a list.", "tone": "funny"},
-      {"id": "sn6445", "who": "vance", "text": "Three items. It's a short list.", "pose": "nod"},
-      {"id": "ju1eb8", "who": "marrow", "text": "What I ask: be yourselves, be kind, and answer their questions. They'll have a great many."},
-      {"id": "v9sapn", "who": "marrow", "text": "Line the shuttle bay with me tomorrow, if you're free. Let's show them the ship we are.", "tone": "warm"},
+      {"id": "1fdvkx3", "who": "marrow", "text": "And tonight, the comet. Dr. Sato says it passes at half past nine.", "pose": "gesture", "if": ["swap"]},
+      {"id": "7rzfv1", "who": "marrow", "text": "The bow lounge windows are the place. The observatory's open too, for a turn at the scope.", "if": ["swap"]},
+      {"id": "1971em6", "who": "marrow", "text": "After a storm and a week of guests, I think the sky owes us one.", "tone": "warm", "if": ["swap"]},
+      {"id": "1v6unrr", "who": "marrow", "text": "What I ask: wrap up warm, find a window, and look up. It won't come round again soon.", "tone": "warm", "if": ["swap"]},
+      {"id": "euhh6a", "who": "marrow", "text": "Now, guests. Tomorrow at ten, a Veyli delegation comes aboard, led by Speaker Teshavi.", "if": ["!swap"]},
+      {"id": "9a0dg3", "who": "marrow", "text": "The Veyli are our cousins out here. They came this way long before us.", "if": ["!swap"]},
+      {"id": "i04lju", "who": "marrow", "text": "Proud, careful, and very good at noticing. Ask them about the long ship. They like that.", "if": ["!swap"]},
+      {"id": "1c0j96r", "who": "marrow", "text": "Envoy Saruth asks me to remind you: do not bow. Most of us do it wrong.", "tone": "funny", "if": ["!swap"]},
+      {"id": "12bdhle", "who": "marrow", "text": "Commander Vance will brief you tonight. He has a list. Of course he has a list.", "tone": "funny", "if": ["!swap"]},
+      {"id": "sn6445", "who": "vance", "text": "Three items. It's a short list.", "pose": "nod", "if": ["!swap"]},
+      {"id": "ju1eb8", "who": "marrow", "text": "What I ask: be yourselves, be kind, and answer their questions. They'll have a great many.", "if": ["!swap"]},
+      {"id": "v9sapn", "who": "marrow", "text": "Line the shuttle bay with me tomorrow, if you're free. Let's show them the ship we are.", "tone": "warm", "if": ["!swap"]},
       {"id": "1ipczxs", "who": "marrow", "text": "Works has something for {me} after dinner. I'm not allowed to say what.", "tone": "funny"},
       {"id": "9bxluc", "who": "marrow", "text": "Dinner's at five. Enjoy your weekend, those of you who have one.", "pose": "gesture"},
     ]},
@@ -41388,6 +41396,7 @@ for (const t of TRAD_LIST) {
   if (ev.id === 'off-the-tern' && !(typeof ROT_TERN !== 'undefined' && ROT_TERN)) continue;   // section 14's switch (PT1)
   if (P926_NEW.has(ev.id) && !P926_TRADS) continue;    // 0.92.6's new traditions (FX17): only with their switch (section 13)
   if (WEEKEND_TRADS.has(ev.id) && !WEEKEND_ON) continue;   // the weekend traditions (0.92.5 item 16): only with their switch (section 13)
+  if (ev.id === 'crew-welcome-tea' && EV_SWAP_ON) continue;   // 0.93.2 (the user, the event swap): the new hand's tea after a rotation is gone ("this one can go")
   const r = REC_TRADS.find(x => x.id === ev.id);           // one of the rec deck's: the writer's file brings the words; the rules stay REC_TRADS' (whereFor, first, the rota)
   if (r) { for (const k of ['from', 'mail', 'ask', 'here', 'thanks', 'chatter', 'text', 'invite']) { const ds = Object.getOwnPropertyDescriptor(ev, k); if (ds && (ds.get || ds.value != null)) Object.defineProperty(r, k, ds); } r.baked = true; continue; }
   const i = SHIP_TRADITIONS.findIndex(x => x.id === ev.id);
@@ -42810,6 +42819,61 @@ const VEYLI_RETELL = {
   bumpy: ['The Veyli dinner was late. Brennan blamed the herbs.', 'Holt\'s still telling the door story. It gets longer every time.'],
   rough: ['Their cabin was freezing the first night. Nobody\'s owning up.', 'Holt and their pilot still won\'t look at each other.'],
 };
+// ---- the event swap (FX22b, 0.93.2; the user's answers on plans/trad-variety-pitch.html section 5, option A; lead 37):
+// the diplomatic visit comes before the comet. Behind EV_SWAP_ON (section 13; ?evswap previews); off: the order above.
+// Here, before EV_SHIPWIDE is made, as the storm update does. Both events stay drafts (off) until the user switches
+// them on. The old order is kept above and in design-doc's history.
+if (EV_SWAP_ON) {
+  // the calendar: the visit Tuesday Day 16 (the storm's five days end Monday Day 15), the comet Friday Day 26 at 21:30
+  EV_CALENDAR.splice(EV_CALENDAR.findIndex(r => r.id === 'comet'), 2, { id: 'diplomatic', day: 16, kind: 'main' }, { id: 'comet', day: 26, kind: 'short' });
+  EVENT_ORDER.push('comet');                             // storm, visit, comet
+  // the career beats the visit carried: Vance's memo into the warning morning, the senior briefing before the farewell
+  Object.assign(EV_BEATS.find(b => b.id === 'mondayBriefing'), { day: 16, at: [510, 570] });    // Tuesday 08:30, before the Senior Officer scene at 10:00
+  Object.assign(EV_BEATS.find(b => b.id === 'seniorBriefing'), { day: 19, at: [480, 500] });    // Friday 08:00, before the gift exchange at 08:20
+  // the visit, short (option A): Tuesday the warning (Vance's Mail, the prep jobs); Wednesday 10:00 the Veyli come aboard
+  // in the shuttle bay; Thursday one formal dinner; Friday the gift exchange 08:20 and the farewell 09:00, gone by ten,
+  // before the Friday hold (the Captain's address that afternoon can talk about it). Guests aboard Wednesday to Friday
+  const V = SHIP_EVENTS.diplomatic;
+  Object.assign(V, { days: 4, guestsArrive: 1, guestStay: 2, keep: ['birthday', 'captains-address'],
+    phases: [{ id: 'warning', at: [0, 540] }, { id: 'onset', at: [1, 600] }, { id: 'escalation', at: [2, 360] },
+      { id: 'resolution', at: [3, 500], clears: true }, { id: 'afterglow', at: [3, 600], clears: true }] });
+  V.galley = { ...V.galley, escalation: { ...V.galley.escalation, batch: n => n.day === 2 ? { meals: 10, label: 'the Veyli dinner in the Captain\'s quarters' } : null } };
+  const at = { 'veyli-moleth': [2, 600], 'veyli-clash': [2, 1260], 'veyli-told': [3, 720] };
+  V.news = V.news.map(n => at[n.id] ? { ...n, at: at[n.id] } : n);
+  V.moments = V.moments.map(m => m.id === 'farewell' ? { ...m, at: [3, 540], ask: 'The Veyli leave at nine. I want to see them off.' } : m);
+  V.meetings = V.meetings.map(m => m.id === 'veyliGreeting' ? { ...m, at: [1, 600] } : m.id === 'veyliGifts' ? { ...m, at: [3, 500] } : m);
+  V.mail = { ...V.mail, warning: { ...V.mail.warning, body: V.mail.warning.body.replace('arrives in two days', 'arrives tomorrow') } };
+  const res = V.address.resolution; V.address = { ...V.address, resolution: c => res(c).map(l => typeof l === 'string' ? l.replace('a busy five days', 'a busy few days') : l) };
+  // the comet (plans/comet-viewing-draft.js, the events engineer's draft of 0.34.18), at the design's 21:30: Sato's Mail
+  // that morning, the comet at the bow lounge windows and in the observatory from 21:30, tap night pausing for it (a
+  // Friday). It always goes smoothly. Its gatherings have their own keys (354, 355: the events' moments run from 340)
+  SHIP_EVENTS.comet = {
+    title: 'Comet viewing', days: 2, gap: 3, need: ['sato'], draft: true,   // on when the user says (events_check runs it)
+    phases: [{ id: 'warning', at: [0, 480] }, { id: 'onset', at: [0, 1275] }, { id: 'resolution', at: [0, 1380], clears: true },
+      { id: 'afterglow', at: [1, 0], clears: true }],
+    pause: ['onset'], keep: ['birthday'],
+    systems: { onset: { effects: ['skyComet'] } },          // the performance engineer may light the windows (inert until then)
+    routines: {}, galley: {}, jobs: {},
+    news: [
+      { id: 'comet-coming', from: 'sato', phase: 'warning', at: [0, 480], seed: ['dept:survey'], weight: 2,
+        lines: ['There\'s a comet passing tonight. Sato says the tail will fill the bow windows.', 'Comet at half nine. Get a window seat early.'] },
+      { id: 'comet-told', phase: 'afterglow', at: [1, 420], seed: ['all'], weight: 1,
+        lines: ['Did you see the tail last night? Green all the way along.', 'Half the ship was at the bow windows. Best seat on the ship.'] },
+    ],
+    moments: [
+      { id: 'cometLounge', name: 'Comet viewing', phase: 'onset', at: [0, 1290], len: 75, k: 354, where: { venue: 'bow-lounge', deck: 3, room: /^Bow lounge$/ }, gathering: true, who: .55, anim: null,
+        ask: 'Comet tonight at half nine. The bow windows are the place.', here: 'Look at the tail on it.', thanks: 'You find a spot at the bow windows as the comet slides past, its tail lit green.' },
+      { id: 'cometObservatory', name: 'Comet viewing (observatory)', phase: 'onset', at: [0, 1290], len: 75, k: 355, where: { deck: 2, room: /^Observatory$/ }, gathering: true, who: .3, anim: null,
+        ask: 'Sato\'s opening the observatory for the comet tonight.', here: 'Through the scope you can see the ice boiling off it.', thanks: 'You take a turn at the observatory scope. The comet\'s head is a fizzing ball of ice.' },
+    ],
+    meetings: [],
+    mail: { warning: { from: 'Dr. Imra Sato', subject: 'A comet tonight', body: 'A comet passes us tonight from about 21:30, close enough to see its tail from the bow lounge windows. The observatory will be open for anyone who wants a look through the scope. Wrap up warm.' } },
+    threads: [], traces: { smooth: [], bumpy: [], rough: [] },
+  };
+  // the two Friday addresses' Mail lines (their spoken lines carry swap / !swap: content/addresses; SW2 to polish)
+  FRI_ADDRESSES['friday-d19'].mail = ['All hands: the Captain\'s Friday address', 'The storm\'s tally and my thanks, our Veyli guests, this week\'s commendations and ranks, and the weekend ahead. To the night watch tonight: good watch.'];
+  FRI_ADDRESSES['friday-d26'].mail = ['All hands: the Captain\'s Friday address', 'Four Fridays, a storm and a Veyli delegation behind us. Tonight at half nine, the comet: the bow lounge windows are the place, and the observatory is open.'];
+}
 // the ship-wide events' gathering moments, shaped like traditions (EV_SHIPWIDE, read by eventsOn); each its own
 // hash key k (the storm's party 340, then 351 up), given in the moment's data (k) from the events base on. A moment may
 // carry its own name, ask, here, thanks, from and places (where: lists), else the party's
@@ -42917,7 +42981,7 @@ function eventGuestDays(g) {
   const e = SHIP.event && SHIP.event.id === g.event ? SHIP.event : [...SHIP.eventLog].reverse().find(l => l.id === g.event) || (() => { const d = eventDueDay(); return d && d.id === g.event ? { startDay: d.day } : null; })();
   if (!e) return null;
   const on = def.phases.find(p => p.id === 'onset'), off = g.arriveOffset != null ? g.arriveOffset : def.guestsArrive != null ? def.guestsArrive : on ? on.at[0] : 0;
-  return [e.startDay + off, e.startDay + off + (g.stay || 1)];
+  return [e.startDay + off, e.startDay + off + (def.guestStay || g.stay || 1)];   // def.guestStay: the event's own stay for all its guests (the short visit, 0.93.2)
 }
 // the threads and the player's part: other sections add to them (inert while no event runs)
 function eventScore(thread, n = 1) { const e = SHIP.event; if (e && !e.mine.settled) e.threads[thread] = (e.threads[thread] || 0) + n; }   // settled (the storm update: at the all-clear): the result is final
@@ -45157,6 +45221,7 @@ function friCond(term, d) {
   else if (k === 'arriving') r = typeof ROSTER_ROTATIONS === 'undefined' ? null : ROSTER_ROTATIONS.some(x => x.day > d && x.day <= d + 2 && (x.in || []).length > 0);   // new crew on this weekend's rotation (PR8's find: Day 19's welcome)
   else if (k === 'myrank') r = vs.includes((SHIP.works && SHIP.works.rank) || 'junior');
   else if (k === 'myshift') r = false;                                  // your night shifts are Pillar 5's: none yet
+  else if (k === 'swap') r = EV_SWAP_ON;                                // 0.93.2: the event swap (the visit before the comet), section 13's switch
   else if (k === 'season') r = vs.includes(seasonOf(d).id);
   else if (k === 'cue') r = typeof cue === 'function' ? vs.some(x => !!cue(x)) : null;
   else if (k === 'nod') r = vs.includes(friNod(d)[0]);

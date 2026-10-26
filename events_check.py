@@ -310,6 +310,7 @@ HOOKS = r"""(() => {
 DIPLO = r"""(() => {
   const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice(), m: MEETINGS.splice(0), draft: SHIP_EVENTS.diplomatic.draft };
   SHIP_EVENTS.diplomatic.draft = false;                  // as it will be when it's switched on
+  const D = SHIP_EVENTS.diplomatic, on = D.phases.find(p => p.id === 'onset').at[0], fw = D.moments.find(m => m.id === 'farewell').at[0];   // the greeting's and the farewell's days (2 and 7; 1 and 3 with the event swap, 0.93.2)
   const run = () => {
     SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0; MEETINGS.length = 0; EV_DAYS.clear();
     SHIP.eventLog.push(...EV_BEFORE('ionStorm'), { id: 'ionStorm', startDay: 10, endDay: 16, band: 'smooth', threads: {}, mine: {} });
@@ -324,7 +325,7 @@ DIPLO = r"""(() => {
     }
     mailSend = send;
     const R = { due, steps, batch, guestsOn, mails, addr: ADDRESSES.slice(a0).map(x => x.text.slice(0, 60)), meets: MEETINGS.map(m => m.id + ' ' + (Math.floor(m.at / 1440) + 1 - sd) + ' ' + hhmm(m.at % 1440)),
-      farewell: eventsOn(sd + 7).filter(e => e.id === 'farewell').map(e => e.from + '-' + e.to), going: schedPeople().filter(p => planDay(p, sd + 7).some(s => s.tag && s.tag.startsWith('ev-farewell'))).length,
+      farewell: eventsOn(sd + fw).filter(e => e.id === 'farewell').map(e => e.from + '-' + e.to), going: schedPeople().filter(p => planDay(p, sd + fw).some(s => s.tag && s.tag.startsWith('ev-farewell'))).length,
       guests: ['teshavi', 'kesrin'].map(id => { const g = typeof GUESTS !== 'undefined' && GUESTS.find(x => x.id === id); return g ? id + ':' + (eventGuestDays(g) || []).map(d => d - sd).join('-') : id + ':-'; }),
       log: SHIP.eventLog.filter(l => l.id === 'diplomatic').map(l => l.band + ' ' + JSON.stringify(l.threads)), traces: SHIP.traces.slice() };
     ADDRESSES.length = a0; return R;
@@ -335,9 +336,9 @@ DIPLO = r"""(() => {
   // live: the greeting plays when you're in the shuttle bay at 10:00 on the visit's day 2
   SHIP.event = null; SHIP.eventLog.length = 0; SHIP.eventLog.push(...EV_BEFORE('ionStorm'), { id: 'ionStorm', startDay: 10, endDay: 16, band: 'smooth', threads: {}, mine: {} }); MEETINGS.length = 0; EV_DAYS.clear();
   const sd = a.due.day; eventStart('diplomatic', sd); EV_DAYS.clear();
-  skipTo((sd + 1) * 1440 + 580); goToDeck(5); const bx = ROOM_BOX.S;
+  skipTo((sd - 1 + on) * 1440 + 580); goToDeck(5); const bx = ROOM_BOX.S;
   player.obj.position.copy(cellPos(Math.floor((bx.i0 + bx.i1) / 2), Math.floor((bx.j0 + bx.j1) / 2))); target.copy(player.obj.position).setY(.7);
-  for (let t = (sd + 1) * 1440 + 581; t <= (sd + 1) * 1440 + 602; t++) { setShipNow(t); eventsTick(); }
+  for (let t = (sd - 1 + on) * 1440 + 581; t <= (sd - 1 + on) * 1440 + 602; t++) { setShipNow(t); eventsTick(); }
   const live = { room: roomAt(...player.here()), open: DIALOGUE ? DIALOGUE.id : null, first: DIALOGUE ? dialogueView().who : null };
   if (DIALOGUE) dialogueEnd(true); if (typeof deviceAddress === 'function') deviceAddress(null);
   SHIP_EVENTS.diplomatic.draft = keep.draft;
@@ -470,6 +471,7 @@ with sync_playwright() as pw:
         if (t.id === 'first-light' && !(typeof FLC_ON !== 'undefined' && FLC_ON)) continue;   // patch #26: loaded only with its switch on (section 15's FLC_ON)
         if (t.id === 'captains-address' && !(typeof SHORT_FRIDAY !== 'undefined' && SHORT_FRIDAY && REC_TRAD_ON)) continue;
         if (typeof P926_NEW !== 'undefined' && P926_NEW.has(t.id) && !P926_TRADS) continue;   // 0.92.6's new traditions (FX17): loaded only with P926_TRADS
+        if (t.id === 'crew-welcome-tea' && typeof EV_SWAP_ON !== 'undefined' && EV_SWAP_ON) continue;   // gone with the event swap (0.93.2)
         if (typeof WEEKEND_TRADS !== 'undefined' && WEEKEND_TRADS.has(t.id) && !WEEKEND_ON) continue;   // the weekend traditions (0.92.5 item 16): loaded only with WEEKEND_ON   // Short Fridays: loaded only with its switch on (section 13's SHORT_FRIDAY; 18f) and the rec deck's traditions
         const ev = SHIP_TRADITIONS.find(e => e.id === t.id); if (!ev || !ev.baked) { out.bad.push('baked ' + t.id + ' not loaded'); continue; }
         let n = 0; for (let d = 0; d <= 364; d++) if (eventsOn(d).some(e => e.id === t.id)) n++;
@@ -517,6 +519,7 @@ with sync_playwright() as pw:
     fri_on = g.ev("typeof SHORT_FRIDAY !== 'undefined' && SHORT_FRIDAY && REC_TRAD_ON")
     wk_off = g.ev("typeof WEEKEND_TRADS !== 'undefined' && !WEEKEND_ON ? [...WEEKEND_TRADS] : []")
     wk_off += g.ev("typeof P926_NEW !== 'undefined' && !P926_TRADS ? [...P926_NEW] : []")   # 0.92.6's (FX17): only with P926_TRADS
+    wk_off += g.ev("typeof EV_SWAP_ON !== 'undefined' && EV_SWAP_ON ? ['crew-welcome-tea'] : []")   # the new hand's tea after a rotation, gone with the event swap (0.93.2)
     for i in want_ids:
         if i.startswith('rec-') and not rec_on: continue    # the rec deck's own load only with the deck switched on (0.83)
         if i == 'first-light' and not flc_on: continue      # First Light Cocoa (patch #26) loads only with FLC_ON
@@ -821,14 +824,16 @@ with sync_playwright() as pw:
     print('  greeting speakers:', V['names'], '| guests flag on days', a['guestsOn'])
     print('  live greeting (in the shuttle bay at 10:00):', V['live'])
     if V['live']['open'] != 'veyliGreeting' or V['live']['first'] != 'Captain Odile Marrow': fail(f"the live greeting: {V['live']}")
-    if a['guestsOn'] != [2, 3, 4, 5, 6]: fail(f"the 'guests' effect: {a['guestsOn']}")
-    if not a['due'] or a['due']['id'] != 'diplomatic' or a['due']['day'] < 23 or not V['same']: fail(f"the diplomatic visit's start or repeatability: {a['due']} {V['same']}")
+    SW = g.ev("typeof EV_SWAP_ON !== 'undefined' && EV_SWAP_ON")   # the event swap (0.93.2): the short visit, Days 16-19, before the comet
+    if SW: print('  (the event swap is on: the short visit, Tuesday to Friday)')
+    if a['guestsOn'] != ([1, 2] if SW else [2, 3, 4, 5, 6]): fail(f"the 'guests' effect: {a['guestsOn']}")
+    if not a['due'] or a['due']['id'] != 'diplomatic' or (a['due']['day'] != 16 if SW else a['due']['day'] < 23) or not V['same']: fail(f"the diplomatic visit's start or repeatability: {a['due']} {V['same']}")
     want = ['warning', 'onset', 'escalation', 'resolution', 'afterglow', 'end']
     if [w for x in a['steps'] for w in want if (' ' + w) in x.replace('phase ', ' ')] != want: fail(f"diplomatic phases: {a['steps']}")
     bd = dict(x.split(':') for x in a['batch'])
-    if bd.get('3') != '10' or bd.get('5') != '10' or bd.get('4') != '-' or bd.get('1') != '-': fail(f"the formal dinners' batch: {a['batch']}")
+    if (bd.get('2') != '10' or any(v != '-' for k, v in bd.items() if k != '2')) if SW else (bd.get('3') != '10' or bd.get('5') != '10' or bd.get('4') != '-' or bd.get('1') != '-'): fail(f"the formal dinners' batch: {a['batch']}")
     if len(a['addr']) != 2 or len(a['meets']) != 2 or not a['farewell'] or a['going'] < 3: fail('the visit\'s addresses, meetings or farewell')
-    if a['guests'][0] != 'teshavi:2-7' and a['guests'][0] != 'teshavi:-': fail(f"the guests' days: {a['guests']}")
+    if a['guests'][0] != ('teshavi:1-3' if SW else 'teshavi:2-7') and a['guests'][0] != 'teshavi:-': fail(f"the guests' days: {a['guests']}")
     if 'Speaker Teshavi' not in V['names'] or 'Envoy Saruth' not in V['names']: fail(f"the greeting's cast: {V['names']}")
 
     # 9b. tradOn (0.34.37, social B's calls home): the Sunday long table's window (Letters evening, its first user, went in 0.62.0) in absolute ship minutes, null outside it
@@ -854,6 +859,10 @@ with sync_playwright() as pw:
           honWent: go.filter(p => e.honorees.includes(p)).map(p => p.id + (p.shift === 'night' ? '(night)' : '')), others: go.filter(p => !e.honorees.includes(p)).length } : { d, missing: true, dropped: (EV_DROPPED.get(d) || []).includes(id) };
       }
       return row; }))()""")
+    SWT = g.ev("typeof EV_SWAP_ON !== 'undefined' && EV_SWAP_ON")   # the event swap (0.93.2): the rotations' new hand's tea is gone
+    if SWT:
+        if g.ev("SHIP_TRADITIONS.some(t => t.id === 'crew-welcome-tea')"): fail("the event swap: the rotations' new hand's tea should be gone")
+        for r in RT: r.pop('crew-welcome-tea', None); r['teaWeekday'] = 3
     for r in RT:
         print(f"  rotation day {r['day']}: " + '; '.join(f"{k} day {v['d']}: " + ('MISSING' if v.get('missing') else f"{v['names']} ({'honorees ok' if v['hon'] else 'WRONG honorees'}), went {v['went']}, honorees {v['honWent']}") for k, v in r.items() if k not in ('day', 'teaWeekday')))
         if r['teaWeekday'] != 3: fail(f"crew-welcome-tea's weekday is {r['teaWeekday']}, not Thursday (3), the user's decision")
