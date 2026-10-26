@@ -3,6 +3,16 @@
 Written by CR5 (session_01CHoEsvv7zMPZDr1ir7uAiz) on 2026-10-26, ~17:20 UTC, at ~54% memory, after the 0.93.2 round 2.
 A fresh CR5 reads this, then `CLAUDE.md`, then `plans/testing-guide.md` (THE RULE and the six-way split at the top).
 
+## Update (fresh CR5 session_01UH1U1UpsoL7viYaRRBu2bZ, 2026-10-26 ~22:35 UTC, at a stopping point, ~8% memory)
+
+- Lead is now lead 40 (session_01NXybH7NNqM8M4ngiyidq6m); BM18 unchanged.
+- From 0.93.3 BM18 rebalanced the shares (testing-guide.md on claude/staging-0.93.3): CR5 = interactions_check
+  (whole, ~41 min here) and career only. Interactions and career ran side by side (two CADET_WORKs), fine.
+- 0.93.3 round (19400976, game ec93b94d...d085): interactions OK, career known-old only, plus CR6's join_check
+  rerun OK. Results in plans/checks-cr5.md. Nothing pending.
+- run_share9.sh now takes `CR5_ONLY="name ..."` (day21 etc. for day_check, else name_check.py); it is in the old
+  session's scratchpad and lost with the container: recreate from "How a round goes" step 3.
+
 ## Role
 
 One of six check runners. Each game change runs the full round split across CR1-CR6 at once. CR5 never changes the
