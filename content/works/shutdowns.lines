@@ -94,3 +94,18 @@
 - In the middle of dinner? Really?
 - Whose idea was this hour?
 - Eating by torchlight. Lovely.
+
+// ---- the parts (RV20's M3): named at booking, in the 22:00 Mail and the morning's notice ({thing}: "a breaker and a bracket") ----
+== sd.parts.bring
+- Bring {thing}.
+== sd.parts.make
+- (make the {thing} in the machine shop)
+== sd.parts.none
+- nothing to fetch
+== sd.morning
+- Shutdown at {time}, {where}. Take the job now and get {thing} first.
+== sd.notice.parts
+- You still need {thing}.
+// the hour ran out with the power off and the work not done (Calder)
+== sd.over
+- Hour's up. Power back on: it never stays off past the booking. Finish it on the next one.
