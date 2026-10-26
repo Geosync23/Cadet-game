@@ -401,3 +401,19 @@ Setup checked before the round on 5898c190 (arrows_f OK in 40 s).
 | controller_check (every part but reach) | **OK** | CONTROLLER CHECK OK, all 28 parts; 2048 s (CR6's and CR4's offers declined: it had started) |
 
 No FAIL.
+
+# 0.93.1 (claude/staging-0.93.1 0a2fc617), BM18's start; reported to BM18 and lead 37
+
+sha256 **6cd54ab97f4290aa5665ff40b5db35d0abc485dc8401d011084dfaa2f35a8eee** (BM18's). OLD df8d58b9 (0.93.0). Own CADET_WORK.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | **OK** | DAY CHECK OK; peak 266; worst stuck 0.0; 273 s |
+| day_check 1 | **OK** | DAY CHECK OK; peak 247; worst stuck 0.0; 262 s |
+| day_check 5 | **OK** | DAY CHECK OK; peak 254; worst stuck 0.0; 255 s |
+| day_check 7 | **OK** | DAY CHECK OK; peak 272; worst stuck 0.0; 262 s |
+| weekend_check | **OK** | WEEKEND CHECK OK; 485 s |
+| arrows_d, arrows_f, controller_check (minus reach) | **handed to CR6** (new session 013wLtAm…, BM18's suggestion to save my memory; agreed before any started) | see CR6's notes |
+
+No FAIL in my part. (Offer went to CR4 and CR6 at once and both took it; CR6 was first, CR4 stopped its arrows_d after
+~40 s and kept nothing. Next time: offer to one runner at a time.)
