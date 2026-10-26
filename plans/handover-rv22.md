@@ -15,7 +15,7 @@ and the verdict table in plans/review-rv21.md.
    you; doubled pilot toast; setTimeout x7 -> simTimeout), VB2's claude/vessel-sky 3fb8eac7 merged, arrows_check vessel
    part, controller presets (Day 27 10:00, Day 28 09:25/12:55, Day 29 09:15). Re-run cadet off vs base, events_check
    (known-old FX24-2 only), bigevents on an ON copy, day_check 27-30 ON copy, phone play 390x844.
-2. **VB2 (session_01KRBGtugjBpv5iGcV5WDvCP), claude/ending-checks** (not pushed yet; on d1a61402 + local WIP). At ~23:36
+2. **VB2 (session_01KRBGtugjBpv5iGcV5WDvCP), claude/ending-checks** (c0b800b8 = WIP at the stopping point, not for verdict; see plans/handover-vb2.md there). At ~23:36
    VB2 said: stay path (asis, teachoff, track) passes; change-of-mind, go runs and controller_check `ending` still in
    trial; will send the sha, then day_check 31/50 ON copy. Review: arrows_check endstay/endgo, controller presets (Days
    32, 34, 35, 36), day_check 31/50 ON copy, any game fixes on top of d1a61402 (cadet off identical vs d1a61402).
