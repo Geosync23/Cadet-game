@@ -1,5 +1,34 @@
 # CR6 check results
 
+## 0.93.2 full round (2026-10-26): 11 OK, mech FAIL m9 (NEW, the storm Saturday's board hide); plus CR5's 2
+
+- **Build:** `claude/staging-0.93.2` 41c8a7e0, game sha256 `89eafdc1cc2f2cbcc77db9168b009cb19561b9efe9067aeedf6386947a704960`
+  (matches BM18's). OLD b957b92d (0.93.1). Switches on: TRAD_0932, EV_COMET, INSPECT, STORM_SAT, SAVE_SLOTS,
+  AUTO_DOORS, PROMO_BEATS; EV_SWAP off.
+
+| Check | Result | Key lines |
+|---|---|---|
+| check_fast.sh | OK (exit 0, 273 s) | `QUICK CHECK OK in 273 s` |
+| stories_check | OK (exit 0, 36 s) | `STORIES CHECK OK` |
+| mech_check | **FAIL** (exit 1, 498 s) | `FAIL m9: the board doesn't point at the valve` (below) |
+| bigevents_check | OK (exit 0, 179 s) | `BIGEVENTS CHECK OK` |
+| join_check | OK (exit 0, 259 s) | `JOIN CHECK OK` |
+| tiles_check | OK (exit 0, 115 s) | `ALL OK` |
+| disc_check | OK (exit 0, 298 s) | `ALL OK` |
+| food_check 1 7 | OK (exit 0, 62 s) | `FOOD CHECK OK` |
+| food_check 11 4 | OK (exit 0, 65 s) | `FOOD CHECK OK` |
+| clothes_check | OK (exit 0, 77 s) | `ALL OK` |
+| promo_beats_check (new) | OK (exit 0, 17 s) | `PROMO BEATS CHECK OK` |
+| fridays_check | OK (exit 0, 1601 s) | `FRIDAYS CHECK OK` |
+| events_check (taken from CR5) | FAIL, known-old only (exit 1, 1156 s) | `not reached: ['farouk-olu>3-lounge-28 16:00']` = FX24-2 |
+| sound_check (taken from CR5) | OK (exit 0, 302 s) | `SOUND CHECK OK` |
+
+### mech_check m9: NEW
+- m9 card `['Showers weak on Deck 4', ...]` board: `[]`. `mech_check.py OLD m9` (b957b92d's game): exit 0, board
+  `[['Repair: Showers weak on Deck 4', None, None]]`. NEW m9 alone: fails again.
+- Cause: openJobs() now hides non-storm jobs on the storm Saturday (`stormBoardHide`), the player's own traced job
+  included. BM18 confirmed; FX26 is making a game fix, then the full round runs again.
+
 ## Side job for RV19 / lead 38 (2026-10-26): claude/storm-sat 402899bd (game sha c799f15e...7cd), as pushed
 
 - fridays_check: OK (exit 0, 1842 s), `FRIDAYS CHECK OK`.
