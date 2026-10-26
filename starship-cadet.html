@@ -10217,7 +10217,7 @@ function schedFrame(p, d) {
   if (works && !f.night) wake = Math.min(wake, f.workStart - 45);
   const rh = REC_ON && !f.night ? recHostEarly(p, d, works && f.workStart) : null; if (rh != null) wake = Math.min(wake, rh);   // a rec tradition's host is up for it (Rina's Dawn swim; RA, 0.83)
   if (INSPECT_ON && shape.inspect && works && !f.night && p.id === inspectWalker(d)) wake = Math.min(wake, INSPECT_T0 - 60);   // the inspection's walker (FX20)
-  if (INSPECT_ON && shape.inspect && works && !f.night && /^4-B[1-8]-[1-6]$/.test(p.bed)) wake = Math.min(wake, 330 + Math.round(30 * U(16)));   // the juniors up for it, 05:30-06:00, spread (FX20)
+  if (INSPECT_ON && shape.inspect && works && !f.night && /^4-B[1-8]-[1-6]$/.test(p.bed) && !(p.rota && (p.rota.team === 'bar' || p.rota.relief === 'bar'))) wake = Math.min(wake, 330 + Math.round(30 * U(16)));   // the juniors up for it, 05:30-06:00, spread (FX20); the bar's keep their lie-in (FX20b: else under 6 hours' sleep after a 23:00 close)
   f.wake = Math.round(wake);
   return f;
 }
@@ -10732,7 +10732,8 @@ function schedBuild(p, d, occ, S) {
     seg('sleep', 1440, 'bed', p.bed);
   };
   const morning = (k, by) => {                           // the toilet, a wash, tidy for inspection, breakfast (sit-down or grab)
-    const ip = INSPECT_ON && F.shape.inspect && /^4-B[1-8]-[1-6]$/.test(p.bed) ? inspectPass(S.byId.get(p.bed).room) : null;   // FX20: when the walk leaves their room
+    const hostEarly = INSPECT_ON && F.shape.inspect && REC_ON && !F.night && recHostEarly(p, d, F.works && F.workStart) != null;   // FX20b: hosting an early tradition (Rina's Dawn swim): that, not standing for the walk
+    const ip = INSPECT_ON && F.shape.inspect && !hostEarly && /^4-B[1-8]-[1-6]$/.test(p.bed) ? inspectPass(S.byId.get(p.bed).room) : null;   // FX20: when the walk leaves their room
     let stood = false;
     if (ip && t < ip && t > ip - 30) { go(bedDeck); const id = p.bed + '-stand', to = ip + 1; hold(id, t, to); seg('off', to, 'event', id, { tag: 'inspection' }); stood = true; }   // too close to wash first: stand now, wash after
     const walker = INSPECT_ON && F.shape.inspect && p.id === inspectWalker(d) && t < INSPECT_T0;   // FX20b (RV19's M3): the walk is theirs from when they set off, nothing in between
@@ -10757,7 +10758,7 @@ function schedBuild(p, d, occ, S) {
     if (!walker) wash(k);
     if (!walker && quiet && sty >= .5 && sty < .7 && by - t >= 95) leisureUntil(t + 20 + Math.round(20 * U(k + 14)), k + 15);
     if (walker || stood) {                               // the walk done, or stood for it already (FX20)
-    } else if (INSPECT_ON && F.shape.inspect && /^4-B[1-8]-[1-6]$/.test(p.bed) && t < inspectPass(S.byId.get(p.bed).room)) {   // a junior stands by their bunk till the walk has passed
+    } else if (INSPECT_ON && F.shape.inspect && !hostEarly && /^4-B[1-8]-[1-6]$/.test(p.bed) && t < inspectPass(S.byId.get(p.bed).room)) {   // a junior stands by their bunk till the walk has passed
       go(bedDeck); const id = p.bed + '-stand', to = inspectPass(S.byId.get(p.bed).room) + 1;
       linger(INSPECT_TIMES[S.byId.get(p.bed).room][0] - 10);   // FX20b: in their bunk till about ten minutes before the walker's due, then up
       hold(id, t, to); seg('off', to, 'event', id, { tag: 'inspection' });
