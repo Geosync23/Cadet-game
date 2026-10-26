@@ -1247,7 +1247,7 @@ if _von or _vline:
         if not any(x.startswith('0 18:00 Commander Teo Vance') for x in a['mails']) or not any(x.startswith('3 12:00 Taavek') for x in a['mails']): fail(f"the Veyli vessel's Mail: {a['mails']}")
         if a['aboardAt'] != ['1 09:20 away', '1 09:35 aboard', '2 14:50 aboard', '2 15:05 away', '0 12:00 away', '3 10:00 away']: fail(f"Taavek aboard only Sunday 09:30 to Monday 15:00: {a['aboardAt']}")
         if a['called'] != ['marrow 0', 'calder 0,1', 'lindqvist-isak 2']: fail(f"called in: {a['called']}")
-        if a['meets'] != ['vesselCall 0 09:00', 'vesselSheet 0 10:00', 'vesselRamp 1 09:30', 'vesselHome 2 14:30']: fail(f"the Veyli vessel's meetings: {a['meets']}")
+        if a['meets'] != ['vesselCall 0 09:00', 'vesselSheet 0 10:00', 'vesselRamp 1 09:30', 'vesselJob 2 09:20', 'vesselHome 2 14:30']: fail(f"the Veyli vessel's meetings: {a['meets']}")
         if a['log'] != ['smooth {}'] or a['com']: fail(f"the Veyli vessel's end with nothing done: {a['log']} commendation {a['com']}")
         if c['com'] != [3] or not any('3 09:30' in x and 'Commendation' in x for x in c['mails']): fail(f"the commendation rule (C1): two jobs, a commendation Tuesday 09:30: {c['com']} {c['mails']}")
         if a['late'] != [False, True, False, False]: fail(f"the late-save rule: {a['late']}")
@@ -1309,6 +1309,41 @@ if _von or _vline:
         CH.update(g.ev("({ t: hhmm(shipNow() % 1440), joined: SHIP.events.joined.includes('vesselChain@28'), passed: SHIP.event.mine['vessel:chainN'], part: SHIP.event.mine['vessel:chain'], ring: guideList().filter(x => x.id === 'vessel:crate').map(x => x.level + (x.shown ? '*' : '')) })"))
         print('  V-3 live, the parts chain:', CH)
         if CH['on'] != ['13:00-14:00'] or CH['going'] < 25 or not CH['arrow'] or CH['tap'] is not True or not CH['joined'] or (CH['passed'] or 0) < 3 or not CH['part'] or not CH['ring']: fail(f"the parts chain: {CH}")
+        # V-4 live: Monday 09:15 in the Works bay: the arrow at Calder, Calder's word (vesselJob), the helper card twice (Kovac,
+        # then Zeke), then the five steps in the machine shop (the stock card: a wrong pick first, ten minutes lost), the
+        # lathe's wait, the part yours; the test fit at 13:30 with the helpers' reactions
+        g.ev("skipTo(28 * 1440 + 555); __vat(16, 3)")
+        for _ in range(10):
+            vmins(1)
+            if g.ev("!!DIALOGUE"): break
+        MK = g.ev("({ t: hhmm(shipNow() % 1440), dlg: DIALOGUE && DIALOGUE.id, arrow: guideList().filter(x => x.id === 'vessel:job').map(x => x.level + (x.shown ? '*' : '')), row: vesselItems(29).map(x => x.title) })"); MK['lines'] = g.ev("__vplay()")
+        g.page.wait_for_timeout(900); g.step(2)   # the card comes once the scene's panel has closed (a moment of real time)
+        MK['card1'] = g.ev("DEV.choose ? (devChosen(0), SHIP.event.mine['vessel:helpers']) : 'no card'"); g.page.wait_for_timeout(900); g.step(2)
+        MK['card2'] = g.ev("DEV.choose ? (devChosen(vesselHelperIds(29).filter(id => id !== 'kovac-zainab').indexOf('torres-zeke')), SHIP.event.mine['vessel:helpers']) : 'no card'")
+        g.ev("goToDeck(5); player.obj.position.copy(cellPos(24, 10)); target.copy(player.obj.position).setY(.7)")
+        seen = []
+        for _ in range(90):
+            vmins(1)
+            st = g.ev("({ s: SHIP.event.mine['vessel:step'] | 0, part: SHIP.event.mine['vessel:part'] || null, act: ACT && ACT.kind, card: !!DEV.choose, t: hhmm(shipNow() % 1440) })")
+            if st['card']:   # the stock card: a wrong pick first (if it's not the right one already), then the right one
+                k = g.ev("(() => { const L = Array.from(document.querySelectorAll('#devDlg button')).map(b => b.textContent).filter(x => x !== '×'); const right = vesselW('stock.1', 'The bronze bar, the one that sings'); const i = L.indexOf(right); window.__vright = i; return L; })()")
+                ri = g.ev("window.__vright")
+                if 'wrong' not in seen: g.ev(f"devChosen({(ri + 1) % 3})"); seen.append('wrong')
+                else: g.ev(f"devChosen({ri})"); seen.append('right')
+            if not seen or seen[-1] != f"step {st['s']}": seen.append(f"step {st['s']}")
+            if st['part']: break
+            # walk to the step's place when it isn't where you are
+            g.ev("(() => { const x = VESSEL_STEPS[SHIP.event.mine['vessel:step'] | 0]; if (!x || (ACT && ACT.kind === 'vesselStep')) return; const sp = placeSpot(x.at); if (Math.hypot(sp.x - player.obj.position.x, sp.z - player.obj.position.z) > 1.5) playerGo(sp.walk); })()")
+        MK.update(g.ev("({ t: hhmm(shipNow() % 1440), part: SHIP.event.mine['vessel:part'], helpers: SHIP.event.mine['vessel:helpers'], jobs: SHIP.event.mine.jobs })")); MK['seen'] = seen
+        print('  V-4 live, making the round one:', MK)
+        if MK['dlg'] != 'vesselJob' or not MK['arrow'] or MK['card2'] != ['kovac-zainab', 'torres-zeke'] or MK['part'] != 'you' or 'wrong' not in seen or 'step 5' not in seen: fail(f"making the round one: {MK}")
+        g.ev("skipTo(28 * 1440 + 812); goToDeck(5); player.obj.position.copy(cellPos(23, 10)); target.copy(player.obj.position).setY(.7)")
+        for _ in range(12):
+            vmins(1)
+            if g.ev("!!DIALOGUE"): break
+        TF = g.ev("({ t: hhmm(shipNow() % 1440), dlg: DIALOGUE && DIALOGUE.id, arrow: guideList().filter(x => x.id === 'vessel:testfit').map(x => x.level + (x.shown ? '*' : '')) })"); TF['lines'] = g.ev("__vplay()"); TF['done'] = g.ev("SHIP.event.mine['vessel:testfit']")
+        print('  V-4 live, the test fit:', TF)
+        if TF['dlg'] != 'vesselTestFit' or not TF['done']: fail(f"the test fit: {TF}")
         g.ev("skipTo(28 * 1440 + 875); __vat(5, 11)")
         for _ in range(12):
             vmins(1)
