@@ -25,6 +25,16 @@
 - Boxed up. It takes less room than it did on the shelf. It took more room than this in you.   #warm
 - Your keepsakes, wrapped in a Works orange scarf. Far too long. Perfect for wrapping.   #warm
 
+// ---- Monday's fetches (EN1, RV21's review): bubbles, 60 at most. Pell at 08:30 if you're not at breakfast; Zeke at
+// 10:15 if you're not in the shuttle bay
+== ending.breakfast.fetch
+- There you are! Breakfast. Brennan's holding your plate.   #funny
+== ending.bay.fetch
+- There you are. Half the ship's in the bay. With me.   #warm
+// the "Goodbye" button on a farewell's card in the bay
+== ending.btn.bye
+- Goodbye
+
 // ---- breakfast: bubbles at the tables (60 at most)
 == ending.breakfast.here
 - Last breakfast. Eat slowly. Make it last.   #warm

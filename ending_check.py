@@ -163,7 +163,7 @@ def part_endpage(g):
       const el = document.getElementById('endPage'); const r = { keys, made: endKeepCopy(), shown: !el.hidden, text: el.innerText, btns: [...el.querySelectorAll('button')].map(b => b.dataset.end), role: el.getAttribute('role'), focus: document.activeElement && document.activeElement.dataset.end };
       r.after = after; endPage(false); return r; })()""")
     print('   ', {k: r[k] for k in ('keys', 'made', 'btns', 'role', 'focus', 'after')})
-    check(any('this save ends' in x for x in r['after']), f"endpage: telling her Go says plainly it ends this save ({r['after']})"); print('   ', r['text'][:300].replace('\n', ' | '))
+    check(any('ends this save' in x for x in r['after']), f"endpage: telling her Go says plainly it ends this save ({r['after']})"); print('   ', r['text'][:300].replace('\n', ' | '))
     check(r['keys'] == [] and r['made'] is False, f"endpage: no kept copy with ?nosave ({r['keys']})")
     check(r['shown'] and 'Ada' in r['text'] and 'Days aboard' in r['text'] and 'Zeke' in r['text'] and r['role'] == 'dialog', f"endpage: the rows ({r['text'][:200]})")
     check(r['btns'] == ['keep', 'new'] and r['focus'] == 'keep', f"endpage: with no kept copy, Keep this ending and Start a new game, the first focused ({r})")

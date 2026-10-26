@@ -145,6 +145,28 @@
 - Start a new game
 == ending.endpage.btn.new.sub
 - Choose a save slot and come aboard again.
+// the end page's "What you kept": your keepsakes by name (EN1; the ship's decor is left out)
+== ending.endpage.kept.lineCertificate
+- Your Line certificate
+== ending.endpage.kept.linePlaque
+- Your name on the Line plaque
+== ending.endpage.kept.tilesTrophy
+- Your Tiles trophy
+== ending.endpage.kept.seedlingYours
+- Your seedling in the garden
+== ending.endpage.kept.mugYours
+- Your own mug at the tea corner
+== ending.endpage.kept.nameYours
+- Your name on the Works beam
+== ending.endpage.kept.framedMenu
+- The framed menu from the Captain's table
+== ending.endpage.kept.cometSketch
+- Your sketch of the comet
+== ending.endpage.kept.stormLantern
+- A storm lantern from the lantern supper
+// telling the Captain you'll go: said plainly, once (the user: the Go ends this save)
+== ending.notice.go.ends
+- Going ends this save when the Tern leaves Monday. Change your mind by Sunday's address.
 // the Saves app: the ended save's label
 == ending.saves.ended
 - Ended: you left on the Tern

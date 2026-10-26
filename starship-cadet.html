@@ -32873,6 +32873,10 @@ const LINES = JSON.parse([
   '{"text":"Day off: muster by the lift with the off-duty crew.","id":"1b4xffh"}]',
   ',"drill.toast":[',
   '{"text":"Drill in ten minutes. Muster at the Works bay.","id":"facp99"}]',
+  ',"ending.bay.fetch":[',
+  '{"text":"There you are. Half the ship\'s in the bay. With me.","id":"1um36en","tone":"warm"}]',
+  ',"ending.breakfast.fetch":[',
+  '{"text":"There you are! Breakfast. Brennan\'s holding your plate.","id":"5xnm8y","tone":"funny"}]',
   ',"ending.breakfast.here":[',
   '{"text":"Last breakfast. Eat slowly. Make it last.","id":"11687yd","tone":"warm"},',
   '{"text":"Nobody\'s taking the seat by you. We decided.","id":"cr7bqy","tone":"warm"},',
@@ -32880,6 +32884,8 @@ const LINES = JSON.parse([
   '{"text":"I can\'t eat. I\'m eating. I can\'t.","id":"4s09ek","tone":"funny"},',
   '{"text":"Half nine, the bay. The whole shift\'s going.","id":"28xdlj"},',
   '{"text":"Day shift\'s let off at half nine. All of it. For you.","id":"mf2b0y","tone":"warm"}]',
+  ',"ending.btn.bye":[',
+  '{"text":"Goodbye","id":"v615qd"}]',
   ',"ending.calder.fetch":[',
   '{"text":"There you are. Ready room. She\'s waiting. So\'s the step.","id":"rvor6j"},',
   '{"text":"Captain\'s asked for you. Now\'s good. Walk with me.","id":"7sziq"}]',
@@ -32968,6 +32974,24 @@ const LINES = JSON.parse([
   '{"text":"Your three closest friends","id":"1ooxarx"}]',
   ',"ending.endpage.kept":[',
   '{"text":"What you kept","id":"14axlks"}]',
+  ',"ending.endpage.kept.cometSketch":[',
+  '{"text":"Your sketch of the comet","id":"1qi0d0a"}]',
+  ',"ending.endpage.kept.framedMenu":[',
+  '{"text":"The framed menu from the Captain\'s table","id":"13f502n"}]',
+  ',"ending.endpage.kept.lineCertificate":[',
+  '{"text":"Your Line certificate","id":"6v8z3k"}]',
+  ',"ending.endpage.kept.linePlaque":[',
+  '{"text":"Your name on the Line plaque","id":"pylc59"}]',
+  ',"ending.endpage.kept.mugYours":[',
+  '{"text":"Your own mug at the tea corner","id":"8prmkf"}]',
+  ',"ending.endpage.kept.nameYours":[',
+  '{"text":"Your name on the Works beam","id":"pomhb9"}]',
+  ',"ending.endpage.kept.seedlingYours":[',
+  '{"text":"Your seedling in the garden","id":"yl73b3"}]',
+  ',"ending.endpage.kept.stormLantern":[',
+  '{"text":"A storm lantern from the lantern supper","id":"1tv0hjo"}]',
+  ',"ending.endpage.kept.tilesTrophy":[',
+  '{"text":"Your Tiles trophy","id":"14vtif6"}]',
   ',"ending.endpage.ranks":[',
   '{"text":"Your ranks","id":"87lgh2"}]',
   ',"ending.endpage.sub":[',
@@ -33102,6 +33126,8 @@ const LINES = JSON.parse([
   '{"text":"Come back and visit!","id":"13ztgwu","tone":"warm"}]',
   ',"ending.notice.go":[',
   '{"text":"The ready room, 16:00: time to go up. Deck 1.","id":"1yn2qtk"}]',
+  ',"ending.notice.go.ends":[',
+  '{"text":"Going ends this save when the Tern leaves Monday. Change your mind by Sunday\'s address.","id":"66ssq2"}]',
   ',"ending.notice.invite":[',
   '{"text":"The Captain asks to see you: the ready room, Deck 1, at 16:00.","id":"v4wdyf"}]',
   ',"ending.notice.lastMorning":[',
@@ -66217,7 +66243,7 @@ function endTell(c, from = 0) {                          // you told her: kept, 
   const before = endSaid(), changing = !!before && before !== c;
   endSay(c);
   const id = endTellId(c, changing);
-  if (c === 'go') endNotice(endText('ending.notice.go.ends', 'Going means this save ends when the Tern leaves on Monday. You can change your mind until the Captain\'s address on Sunday.'), 'Captain Odile Marrow');
+  if (c === 'go') endNotice(endText('ending.notice.go.ends', 'Going ends this save when the Tern leaves Monday. Change your mind by Sunday\'s address.'), 'Captain Odile Marrow');
   endMail(changing ? 'mail.ending.answer.change' : endSlow() && c === 'unsure' ? 'mail.ending.answer.unsure.slow' : 'mail.ending.answer.' + c, 'Your answer | Thank you for telling me in person. Captain Odile Marrow', 'Captain Odile Marrow', Math.floor(shipNow()) + 2);
   if (from) return endTellLines(id, from);
   if (!endPlay(id, ['marrow'])) endTellFallback(c);
