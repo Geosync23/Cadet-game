@@ -9002,6 +9002,19 @@ DECKS[7].places.push(...REC_MACHINES.map(m => ({ id: m.id + '-svc', machine: m.i
 // the rec deck's gather venues (RA, 0.83.2): their spots are REC_CREW_PLACES' 'event' places with `gather` (section 4d's
 // loop that makes other decks' spots has run before this deck is defined, so these are written out)
 DECKS[7].gathers = { 'river-banks': { name: 'the river hall', focus: [9.0, 3.0], rooms: 'K=', seats: [], also: [], lead: [] } };
+// 0.93.2 (FX26, the user's playtest note "Captain is clipping through the stage"): the floor under someone here (8b's
+// CrowdPerson.set reads deckDef.floorY as fy; no other deck has one): the stage's top (.55) on the stage, rising over the
+// last .1 before its front edge (a step up), else 0. The body takes a height of .3 and up as a seat's, so anyone standing
+// at the lectern or an act's spot (y .55) stood on the deck floor with their legs in the stage, and walking on or off the
+// stage (the walk-to tiles are on the floor in front of it) went through it. A seat on the stage (y about 1.05) is
+// unchanged: the high stool's rule already rests the feet .55 up. Deck coordinates; room A's stage is REC_STAGE 34 tiles
+// in (the lectern's 8.8 is deck 42.8)
+DECKS[7].floorY = (x, z) => {
+  const S = REC_STAGE, sn = Math.sqrt(1 - (8 / S.back) ** 2), zA = 9 - S.rz * sn, zB = 9 + S.rz * sn, xl = x - 34;
+  if (z <= zA || z >= zB || xl < 7) return 0;
+  const t = (z - zA) / (zB - zA), front = 8 - 4 * t * (1 - t) * (8 - S.front);   // the front edge's curve (recStage's quadratic)
+  return xl >= front ? .55 : xl > front - .1 ? .55 * (xl - front + .1) / .1 : 0;   // the walk-to tiles' middles are .15 or more in front of it: never lifted
+};
 // the rec deck's materials, made when the deck is built (so they are freed with it)
 let RK = null;
 function recMats() {
@@ -9511,7 +9524,7 @@ function alarmEnergy(m) {                                // the energy you'd wak
 }
 function alarmLate(m) {                                  // your shift's start that morning if the alarm is at or after it, else 0
   const d = Math.floor(alarmAt(m) / 1440) + 1;
-  return typeof DAY_SHIFT !== 'undefined' && typeof playerShiftOn === 'function' && playerShiftOn(d) && m >= DAY_SHIFT[0] ? DAY_SHIFT[0] : 0;
+  return typeof DAY_SHIFT !== 'undefined' && typeof playerShiftOn === 'function' && playerOnDuty(d) && m >= DAY_SHIFT[0] ? DAY_SHIFT[0] : 0;
 }
 function alarmDraw() {
   const ch = alarmChoices(), k = ch.indexOf(ALARM_PICK), $ = id => document.getElementById(id), late = alarmLate(ALARM_PICK);
@@ -9719,13 +9732,13 @@ function schedU(seed, day, k) {
   h = Math.imul(h ^ h >>> 16, 0x7FEB352D); h = Math.imul(h ^ h >>> 15, 0x846CA68B); h ^= h >>> 16;
   return (h >>> 0) / 4294967296;
 }
-const isWorkDay = (p, d) => !!p.work && !((p.rota && p.rota.offDays) || []).includes(weekday(d));
+const isWorkDay = (p, d) => !!p.work && (!((p.rota && p.rota.offDays) || []).includes(weekday(d)) || stormCalledIn(p, d));   // FX26 (0.93.2): the Works crew called in on the storm's Saturday (section 18)
 // your shift's start (Pillar 4, for section 20's reputation): on a work day, the first minute from 09:00 (DAY_SHIFT[0]) that you're in
 // a Works room on Deck 5, simNote('shiftStart', { late: minutes after 09:00 }); not there by 12:30, { late: 120,
 // missed: true }. Once a day (the flag 'shiftSent' holds the day, so a reload doesn't send it again)
 function shiftTick() {
   const d = SHIP.time.day, m = SHIP.time.min;
-  if (m < DAY_SHIFT[0] || flag('shiftSent') === d || !playerShiftOn(d)) return;
+  if (m < DAY_SHIFT[0] || flag('shiftSent') === d || !playerOnDuty(d)) return;   // FX26: the storm's Saturday call-in too
   let here = false;
   try { here = typeof careerAtWork === 'function' ? careerAtWork() : deckDef.num === 5 && (DECKS[5].places || []).some(pl => pl.type === 'work:works' && pl.room === roomAt(...player.here())); } catch (e) { here = false; }   // clocked in (the career engineer's time clock, 0.61.13)
   if (!here && m < (typeof CAREER !== 'undefined' ? CAREER.missBy : 600)) return;   // the career engineer's time clock (0.61.17): missed only if not clocked in by 12:30, as the career counts it
@@ -11567,7 +11580,7 @@ setTimeout(() => {
 const DEV_SHIFT = { from: 540, to: 1020, where: 'the Works bay, Deck 5' };   // 09:00-17:00 (0.44.14; section 17's DAY_SHIFT, which comes later in the file)
 // 0.35.17: the player's days off come from section 14's playerShiftOn(d) (the sim engineer; the user chose Saturday and
 // Sunday off). Section 19 no longer defines it, as a later declaration here would override section 14's
-const devShiftOn = d => { if (typeof playerShiftOn !== 'function') return true; try { return playerShiftOn(d) !== false; } catch (e) { return true; } };
+const devShiftOn = d => { if (typeof playerShiftOn !== 'function') return true; try { return playerOnDuty(d) !== false; } catch (e) { return true; } };   // FX26: the storm's Saturday call-in too
 // the weekday shapes (section 14's WEEK_SHAPE) that really put people somewhere. 0.35.18 (the user: "the schedule says
 // there is a Works meeting but nothing happened"): Monday's "All-hands briefing in the Works bay" is gone, as section 14's
 // Monday only starts the day shift 10 minutes early and nobody gathers; the Captain's piano stand-in is gone too (only
@@ -11614,7 +11627,7 @@ function devOccasions(a, b) {
 function devDay(d) {
   const B = (d - 1) * 1440, out = [
     { from: MEALS.breakfast[0], to: MEALS.breakfast[1], title: 'Breakfast', where: 'the mess, Deck 3', kind: 'meal' },
-    { from: DEV_SHIFT.from, to: dayShiftEnd(d), title: 'On shift', where: DEV_SHIFT.where, kind: 'shift' },   // 15:30 on a short Friday (14's dayShiftEnd)
+    { from: DEV_SHIFT.from, to: dayShiftEnd(d), title: playerCalledIn(d) ? 'On shift: called in for storm repairs' : 'On shift', where: DEV_SHIFT.where, kind: 'shift' },   // 15:30 on a short Friday (14's dayShiftEnd)
     { from: MEALS.dinner[0], to: MEALS.dinner[1], title: 'Dinner', where: 'the mess, Deck 3', kind: 'meal' }];
   if (!devShiftOn(d)) out.splice(1, 1, { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'Day off', where: 'no shift today, your time is your own', kind: 'off' });
   for (const g of apptGroups(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && a.at >= B && a.at < B + 1440)))
@@ -13420,7 +13433,7 @@ function teachTick(now) {
   const paced = now - POP.tip >= TEACH_GAP && Math.max(POP.card, POP.warn) <= now - TEACH_QUIET;
   const d = SHIP.time.day, min = SHIP.time.min, deck = deckDef.num;
   const c = { now, S, n: SHIP.player.needs, d, min, deck, app: DEV.open ? DEV.app : null,
-    work: teachTry(() => typeof playerShiftOn === 'function') ? !!playerShiftOn(d) : null,
+    work: teachTry(() => typeof playerShiftOn === 'function') ? !!playerOnDuty(d) : null,
     fault: teachTry(() => typeof machineList === 'function' && machineList().some(m => m.deck === deck && machineLook(m.id).blink)),
     trad: teachTry(() => typeof eventsOn === 'function' && eventsOn(d).some(e => min >= e.from - 60 && min < e.to)) };
   for (const [id, test, text, o] of TEACH) {
@@ -15286,7 +15299,7 @@ function sitBump(A) {
 // marker points to the Tea corner, with a card to say Keep working (it goes). SHIP.player.teaDay: the day you had it (saved)
 const TEA_FROM = 780, TEA_TO = 825, TEA_GOAL = 'Tea and biscuits, in the Tea corner';
 function teaOut(t = shipNow()) {
-  const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440, shift = typeof playerShiftOn === 'function' ? !!playerShiftOn(d) : weekday(d) < 5;
+  const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440, shift = typeof playerShiftOn === 'function' ? !!playerOnDuty(d) : weekday(d) < 5;
   if (typeof worksTeaOn === 'function') return shift && !!worksTeaOn(t);   // section 14's crew tea (X, 0.71.1): its times; your shift days
   const W = typeof WORKS_TEA !== 'undefined' && WORKS_TEA && Number.isFinite(WORKS_TEA.at) ? WORKS_TEA : { at: TEA_FROM, until: TEA_TO };   // section 14's crew tea (X, 0.71.1)
   return shift && m >= W.at && m < W.until;
@@ -15824,7 +15837,7 @@ function clockRmHeld(now) {                              // not now: something's
 function clockRmDue(now = shipNow()) {                   // -> 'in' | 'out' | null: what the clock wants of you now, and from when
   if (typeof CAREER === 'undefined' || typeof careerClockedIn !== 'function' || !SHIP.career || SHIP.career.end) return null;
   const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, S = DAY_SHIFT[0], E = dayShiftEnd(d);
-  if (d < 1 || !playerShiftOn(d)) return null;
+  if (d < 1 || !playerOnDuty(d)) return null;
   if (!careerClockedIn(d)) return m >= CAREER.clockIn && m < E ? { want: 'in', from: S - CLOCK_RM.pre, late: m >= S + CLOCK_RM.late } : null;
   if (!careerClockedOut(d)) return m >= E - CLOCK_RM.end0 && m < friAutoOut(d) ? { want: 'out', from: E - CLOCK_RM.end0, late: m >= E } : null;
   return null;
@@ -16385,7 +16398,7 @@ const ixBoard = (() => {
     draw() {
       if (el.hidden) return;
       list.textContent = '';
-      const jobs = jobsBoard(), mine = myJob(), open = jobs.filter(j => !j.claimedBy);
+      const jobs = jobsBoard().filter(j => !stormBoardHide(j)), mine = myJob(), open = jobs.filter(j => !j.claimedBy);   // FX26: the storm's Saturday, its jobs only
       // yours to take: section 17's openJobs('you') when it's there (its titles and wording), else the device's rule
       const yours = typeof openJobs === 'function' ? openJobs('you') : open.filter(j => canTake(j, null)).map(j => { const [title, where, state] = jobCard(j); return { id: j.id, title, where, state, urgency: j.urgency }; });
       const ids = new Set(yours.map(o => o.id)), les = boardLesson();
@@ -16500,7 +16513,7 @@ function ixLoose(j) {
 function ixWorkStep() {
   if (typeof careerClockedIn !== 'function' || typeof playerShiftOn !== 'function' || typeof CAREER === 'undefined') return null;
   const now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
-  if (d <= 1 && typeof introOn === 'function' && introOn() || !playerShiftOn(d) || m < CAREER.clockIn || m >= dayShiftEnd(d)) return null;
+  if (d <= 1 && typeof introOn === 'function' && introOn() || !playerOnDuty(d) || m < CAREER.clockIn || m >= dayShiftEnd(d)) return null;
   if (!careerClockedIn(d)) return { deck: 5, place: '5-timeclock-1', label: 'Clock in at the time clock' };
   const open = typeof openJobs === 'function' && (GUIDE_ON ? guideTakeable() : openJobs('you')).length; if (typeof boardEmptySay === 'function') boardEmptySay(!open, now);   // FX1: the empty board says so, not just no arrow; the queue on: only a job with a Take it counts (piece D's S6)
   return open ? { deck: 5, item: /job board/i, room: 'w', label: 'Take a job at the job board' } : null;
@@ -16992,7 +17005,7 @@ function guideTrain() {
 const GUIDE_SHIFT = { logN: -1, band: null };
 function guideShiftOver() {                              // clocked in, not out, past the end of today's shift
   try { const now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
-    return playerShiftOn(d) && m >= dayShiftEnd(d) && careerClockedIn(d) && !careerClockedOut(d); } catch (e) { return false; }
+    return playerOnDuty(d) && m >= dayShiftEnd(d) && careerClockedIn(d) && !careerClockedOut(d); } catch (e) { return false; }
 }
 function guideTakeable() {                               // the board's jobs with a Take it for you (ixBoard's rule), a held one first
   let L = []; try { L = typeof openJobs === 'function' ? openJobs('you') : []; } catch (e) { L = []; }
@@ -17023,7 +17036,7 @@ function guideShift() {
   guideShiftWords(now, P);
   if (typeof inspectDue === 'function' && typeof inspectGoal === 'function' && typeof INSPECT_AT !== 'undefined' && m >= 360 && m < INSPECT_AT && !(typeof SIM_AT !== 'undefined' && SIM_AT) && inspectDue(d))   // the inspection morning (F2, FX3's arrows in 24c): level 2, an event you're expected at; its goal empty once you're ready and there
     guideAsk({ id: 'inspect:' + d, level: 2, owner: '15b (piece D, F2)', from: base + 360, until: base + INSPECT_AT, goal: () => inspectGoal(d), done: () => !inspectDue(d) });
-  if (!playerShiftOn(d) || SHIP.career && SHIP.career.end) return;
+  if (!playerOnDuty(d) || SHIP.career && SHIP.career.end) return;
   const intro = d <= 1 && typeof introOn === 'function' && introOn();   // training day: the intro's own arrows (only the lesson's pointer below rings: FX15, patch 0.92.5 #22)
   const E = dayShiftEnd(d), inn = careerClockedIn(d), out = careerClockedOut(d), owner = '15b (piece D)';
   if (!intro && !inn && m >= CAREER.clockIn && m < E) {            // S2
@@ -20376,7 +20389,7 @@ function jobStopsBase(j, known, st) {
 function jobsSection(el) {
   const line = (txt, cls) => { const p = document.createElement('p'); p.textContent = txt; if (cls) p.className = cls; el.appendChild(p); return p; };
   const button = (txt, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = txt; b.style.cssText = 'margin:0 2px 8px;padding:4px 10px;font-size:12.5px'; b.onclick = () => { fn(); device.refresh(); }; el.appendChild(b); return b; };
-  const board = jobsBoard(), mine = myJob();
+  const board = jobsBoard().filter(j => !stormBoardHide(j)), mine = myJob();   // FX26: the storm's Saturday, its jobs only
   if (mine) {
     const [title, where, state] = jobCard(mine), m = mine.machine && !traceHidden(mine) && machineById(mine.machine);   // a traced fault: no room till it's found
     line('Yours: ' + title + ', ' + where + '.', 'devtime');
@@ -20407,7 +20420,7 @@ if (typeof device !== 'undefined' && device.addSection) device.addSection('jobs'
 // its place id or null. Take one with claimJob(id); finish it with finishJob(id); jobStops(job) gives the way there.
 function openJobs(forWho = 'you') {
   const you = forWho === 'you', tier = you ? playerTier() : hatchTier(forWho);
-  return jobsBoard().filter(j => !j.claimedBy && j.status !== 'waiting' && (jobTier(j) <= tier || (you && heldForYou(j))) && rankOk(forWho, j) && !(you && j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && (you || !heldForYou(j)) && !(you && bridgeBars(j))).map(j => {
+  return jobsBoard().filter(j => !j.claimedBy && j.status !== 'waiting' && !(you && stormBoardHide(j)) && (jobTier(j) <= tier || (you && heldForYou(j))) && rankOk(forWho, j) && !(you && j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && (you || !heldForYou(j)) && !(you && bridgeBars(j))).map(j => {
     const [title, where, state] = jobCard(j), m = j.machine && machineById(j.machine);
     const stops = jobStops(j).filter(x => x.step !== 'fetch'), main = jobByStops(j) ? stops[stops.length - 1] : j.kind === 'restock' ? stops[2] : stops[0];
     const place = main && main.places[0] || null, pl = placeById(place);
@@ -42425,6 +42438,7 @@ const EV_NOTES_ON = EVENTS_ON;                           // F2: a ship note as e
 const EV_DEVICE_ON = EVENTS_ON;                          // F3: the event on your device (Schedule, Tracked, status, Record)
 const EV_REPLAY_ON = EVENTS_ON;                          // F4: safe through reloads (a meeting comes back, a moment isn't felt twice)
 const EV_STORM_ON = EVENTS_ON;                           // the ion storm update (EV3, S1-S9; plans/event-storm-plan.md v1.2), laid over SHIP_EVENTS.ionStorm
+const STORM_SAT_ON = EV_STORM_ON;                        // 0.93.2 (FX26, the user's playtest note): the storm's Saturday is a workday, storm repairs only (slot 'Storm Saturday'); false = the storm without it
 const EV_LINE_ON = EVENTS_ON;                             // Crossing the Line (EV5, L1-L5; plans/event-line-plan.md v2.2): SHIP_EVENTS.crossingLine only while on; L6, switched on in 0.92.1 (the user's yes, 2026-10-23)
 // F0, the event calendar (plans/events-plan.html v3.2, section 1): a new game's fixed days (Day 0 the arrival, Day 1 a
 // Monday). day: the event's day 0 (its warning's day). One not built yet (no SHIP_EVENTS entry) or a draft is passed over
@@ -42642,6 +42656,27 @@ if (EV_STORM_ON) {
   S.settleTraces = ['stormLantern'];
   S.dayDress = [{ trad: 'lap-of-the-wren', day: 3, drop: true }, { trad: 'lap-of-the-wren', day: 4, add: { at: [1230, 1275], who: [['tomas', 1]], words: 'event.ionStorm.trad.lap-of-the-wren' } },
     { trad: 'rec-talent-night', day: 3, drop: true }, { trad: 'rec-talent-night', day: 10, add: {} }];
+  // 0.93.2 (FX26, the user's playtest note: "Saturday of the storm, you have to go to work and do storm repair jobs. The
+  // board will be nothing but them"): the escalation's day (Saturday Day 13) is a workday for you and the Works crew
+  // (stormSatDay, the slot 'Storm Saturday'). The storm's repair jobs go up in three waves on that day (day: 2), each held
+  // for you for 90 minutes, then the crew's; Calder's Mail on Friday at 18:00 says you're needed. The words are
+  // placeholders (event.ionStorm.job.<id>, event.ionStorm.mail.stormSat when the writers add them). S.stormSat.trad: the
+  // day's storm tradition, once the user picks one (CS1's options): null until then
+  if (STORM_SAT_ON) {
+    const R = (id, title, at, deck, kind, tag, mins, parts) => ({ id, title: evWord('event.ionStorm.job.' + id) || title, tier: 1, at, day: 2, hold: at + 90,
+      parts: parts || [], stops: [{ deck, machine: kind, mins, tag }] });
+    S.jobs.escalation.push(
+      R('stormFixLamps4', 'Storm repair: replace the blown lamps on Deck 4', 510, 4, 'lights', 'lamp', 20, ['lamp', 'lamp']),
+      R('stormFixLights3', 'Storm repair: reset the light relays on Deck 3', 510, 3, 'lights', 'lamp', 20),
+      R('stormFixBreakers2', 'Storm repair: reset the tripped breakers on Deck 2', 520, 2, 'junction', 'check', 20),
+      R('stormFixChiller', 'Storm repair: check the cold store chiller after the jolts', 660, 3, 'chiller', 'check', 25),
+      R('stormFixLights1', 'Storm repair: reset the light relays on Deck 1', 670, 1, 'lights', 'lamp', 20),
+      R('stormFixLights5', 'Storm repair: reset the light relays on Deck 5 after the surge', 810, 5, 'lights', 'lamp', 20),
+      R('stormFixBattery', 'Storm repair: check the battery bank\'s charge after the surge', 820, 5, 'battery', 'check', 15));
+    S.mail.stormSat = { ...evBankMail('event.ionStorm.mail.stormSat', { subject: 'You\'re needed tomorrow',
+      body: 'The storm\'s doing its worst tomorrow and I need every pair of hands. Your day off is off, sorry: clock in at 09:00 as usual. The board will be storm repairs and nothing else. All of Works is in. Calder.' }), at: [1, 1080], from: 'Chief Ines Calder' };
+    S.stormSat = { trad: null };
+  }
 }
 // ---- Crossing the Line (a short event; plans/event-line-plan.md v2.2 on claude/event-plan-line, the user's answers of
 // 2026-10-21: story A "The one on watch", the ceremony in the bow lounge). Only while EV_LINE_ON (off: no such event,
@@ -44428,6 +44463,41 @@ function evDoubleExcept(p, d) {
   return x ? x.at : null;
 }
 // ---- end of slot: Storm builder ----
+// ---- slot: Storm Saturday (section 18; FX26, 0.93.2, the user's playtest note). New code of this seat's goes here ----
+// The storm's Saturday (its escalation's day, Day 13 in a new game) is a workday: you're called in for a shift (09:00-17:00,
+// not a double, so the lantern supper at 18:00 stays free) and so is the Works crew, and the board that day has only the
+// storm's jobs. All behind STORM_SAT_ON (off: stormSatDay is null and nothing changes).
+// stormSatDay() -> that day, or null: from the calendar's plan and the storm's phases only (as eventDay), so the crew's
+// planner may read it; a Saturday only. Asked before section 18 has run (the planner at load), it says null and keeps nothing
+var STORM_SAT_D;
+function stormSatDay() {
+  if (STORM_SAT_D !== undefined) return STORM_SAT_D;
+  try {
+    if (!STORM_SAT_ON) return (STORM_SAT_D = null);
+    const r = evCalPlan().find(x => x.id === 'ionStorm'), ph = r && SHIP_EVENTS.ionStorm.phases.find(x => x.id === 'escalation'), d = ph ? r.day + ph.at[0] : null;
+    return (STORM_SAT_D = d != null && weekday(d) === 5 ? d : null);
+  } catch (e) { return null; }
+}
+// the crew called in (section 14's isWorkDay): the Works day crew, on their day off that Saturday; never you (your rota is
+// your own: playerCalledIn) nor a guest
+function stormCalledIn(p, d) { return p.dept === 'works' && !p.player && p.shift !== 'night' && p.rank !== 'guest' && d === stormSatDay(); }
+// you're called in that day, unless you're on leave or sick (careerOff) or it's a day of your rota anyway. Your rota
+// (playerShiftOn) doesn't change, so the lessons, the career's beats and the board's top-ups stay off that day;
+// playerOnDuty(d) is what the time clock, the work arrows, a missed shift's note, tea and the Schedule ask
+function playerCalledIn(d) {
+  try { return STORM_SAT_ON && d === stormSatDay() && !(typeof careerOff === 'function' && careerOff(d)) && !careerRota(d); } catch (e) { return false; }   // before section 18 has run: no
+}
+function playerOnDuty(d) { return playerShiftOn(d) || playerCalledIn(d); }
+// the board that day (the user: "The board will be nothing but them"): the storm's own jobs (event 'ionStorm') and repairs
+// to the machines it wears (power, comms, the cold store chiller). stormBoardHide(j): leave it off your board, your device's
+// list and the arrows. Play only (the board is yours); the crew's own picks don't change
+function stormBoardJob(j) {
+  if (j.event === 'ionStorm') return true;
+  const m = j.machine && typeof JOB_TYPES !== 'undefined' && JOB_TYPES[j.kind] && machineById(j.machine), K = m && MACHINE_KINDS[m.kind];
+  return !!K && (K.sys === 'power' || K.sys === 'comms' || m.kind === 'chiller');
+}
+function stormBoardHide(j) { const d = stormSatDay(); return d != null && Math.floor(shipNow() / 1440) + 1 === d && !stormBoardJob(j); }
+// ---- end of slot: Storm Saturday ----
 // ---- slot: Line builder (section 18; EV5, Crossing the Line L1-L6, plans/event-line-plan.md v2.2). New code of this seat's goes here ----
 // the first-timers (the user's line-q5 a): everyone aboard under two years by the roster's `since` (the Wren was last in
 // the reach two years ago, on a quiet charting run: content/facts.md), never a guest. Made once, when first asked (the
@@ -45222,7 +45292,7 @@ const FRI_V = new THREE.Vector3(), FRI_AT = new THREE.Vector3(), FRI_WHO = new M
 function friSpeaker(a) {
   const H = a.h, on = q => { FRI_V.set(q.x, q.y + 1.6, q.z).project(camera); return FRI_V.z < 1 && Math.abs(FRI_V.x) < .8 && FRI_V.y < .85 && FRI_V.y > -.9; };
   const old = FRI_WHO.get(a.p.id); if (old && old.H === H) return old;
-  const w = { p: a.p, h: H.h, H, get pos() {
+  const w = { p: a.p, h: H.h, H, get fy() { return H.fy; }, get pos() {   // fy: standing on the stage (FX26, 0.93.2: 8b's bubbles put it above a standing head)
     if (on(H.pos) || typeof player === 'undefined') return H.pos;
     const P = player.obj.position; let lo = 0, hi = 1;     // lo: on the screen (you), hi: off it (the speaker)
     for (let k = 0; k < 12; k++) { const t = (lo + hi) / 2; FRI_AT.set(P.x + (H.pos.x - P.x) * t, H.pos.y, P.z + (H.pos.z - P.z) * t); if (on(FRI_AT)) lo = t; else hi = t; }
@@ -46408,7 +46478,7 @@ function careerClock(now = shipNow(), quiet, hold) {     // -> 'in' | 'out' | nu
   // hold (patch #6, the Undo window): f(fx) gets the punch's side effects (the remark, the clock note) to run later; the punch itself counts at once
   const toast = quiet ? () => {} : TOAST_FN;
   const c = careerInit(now), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
-  if (!playerShiftOn(d)) { toast('Time clock', careerOn(d) ? 'You\'re on leave today. No need to clock in.' : sickToday(d) ? 'You\'re off sick. No need to clock in.' : 'No shift today. The clock can wait.'); return null; }
+  if (!playerOnDuty(d)) { toast('Time clock', careerOn(d) ? 'You\'re on leave today. No need to clock in.' : sickToday(d) ? 'You\'re off sick. No need to clock in.' : 'No shift today. The clock can wait.'); return null; }
   if (!careerClockedIn(d)) {
     if (m >= dayShiftEnd(d)) { toast('Time clock', 'The day shift is over. See you tomorrow.'); return null; }
     if (m < CAREER.clockIn) { toast('Time clock', 'Too early: the clock opens at 08:00. The shift starts at 09:00.'); return null; }   // reviewer 1e
@@ -46443,7 +46513,7 @@ function clockScreen(said, ask, after) {                // after (patch #6): 'un
     addEventListener('keydown', e => { if (e.key === 'Escape' && !el.hidden) el.hidden = true; });
   }
   const now = shipNow(), d = SHIP.time.day, m = SHIP.time.min, C = SHIP.career, mk = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x !== undefined) e.textContent = x; return e; };
-  const on = playerShiftOn(d), inn = careerClockedIn(d), out = careerClockedOut(d), wd = weekday(d);
+  const on = playerOnDuty(d), inn = careerClockedIn(d), out = careerClockedOut(d), wd = weekday(d);
   const st = said || (!on ? (careerOn(d) ? csText('leave', 'On leave today. Enjoy it.') : sickToday(d) ? csText('sick', 'Off sick. Get well.') : csText('offday', 'Day off. No clocking today.'))
     : out ? (wd === 4 ? csText('weekend', 'Shift done. See you Monday.') : csText('done', 'Shift done. See you tomorrow.')) : inn ? friClock('onshift', C.ci % 1440) || csText('onshift', 'On shift since {time}.', { time: hhmm(C.ci % 1440) })
     : m >= dayShiftEnd(d) ? csText('done', 'Shift done. See you tomorrow.') : csText('ready', 'Shift starts at {time}. Tap to clock in.', { time: hhmm(DAY_SHIFT[0]) }));
@@ -46555,11 +46625,11 @@ function careerTick(now = shipNow()) {
   if (c.on !== d && m >= CAREER.clockIn && m < CAREER.missBy && careerRota(d) && !careerOff(d) && careerAtWork()) c.on = d;
   if (c.ci > 0 && !(c.co > c.ci)) { const cd = Math.floor(c.ci / 1440) + 1;   // forgot to clock out: signed out at 17:00, no harm done
     if (cd < d || m >= friAutoOut(d)) { c.co = (cd - 1) * 1440 + dayShiftEnd(cd); if (SHIP.player.clockLog) SHIP.player.clockLog[cd] = c.co - c.ci; if (cd === d) toast('Time clock', careerText(friShort(cd) ? 'clock.auto.friday' : 'clock.auto', d) || 'You forgot to clock out. The clock signed you out at ' + hhmm(dayShiftEnd(cd)) + '.'); } }   // the auto clock-out counts for the time clock screen's hours too (0.28.65)
-  if (c.rm !== d && d > CAREER.grace && m >= CAREER.clockIn && m < dayShiftEnd(d) && playerShiftOn(d) && !careerClockedIn(d)) {   // in the Works bay, not clocked in: a reminder, once a day
+  if (c.rm !== d && d > CAREER.grace && m >= CAREER.clockIn && m < dayShiftEnd(d) && playerOnDuty(d) && !careerClockedIn(d)) {   // in the Works bay, not clocked in: a reminder, once a day
     let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
     if (inBay) { c.rm = d; toast('Time clock', 'Don\'t forget to clock in: the time clock is past the tool wall, by the tea corner.'); }
   }
-  if (!(c.k & 8) && m >= CAREER.clockIn && playerShiftOn(d)) { let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
+  if (!(c.k & 8) && m >= CAREER.clockIn && playerOnDuty(d)) { let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
     if (inBay && typeof tipShow === 'function') { c.k |= 8; tipShow('career.clock', careerText('career.tip.clock') || 'Clock in at the time clock in the Works bay (past the tool wall) when your shift starts, and out when it ends. Leave and sick days need none.'); } }
   for (let k = Math.min(c.e, c.z) + 1; k <= d; k++) {
     if (c.e < k && (k < d || m >= CAREER.missBy)) { c.e = k; if (k > CAREER.grace && careerRota(k) && !careerOff(k) && c.on !== k) { c.ms++; careerMissed(k); } }   // a full worked shift ends the run and re-arms the Chief at the day's end (careerDayEnd); days off, leave and sick days do neither
@@ -57820,6 +57890,7 @@ class CrowdPerson {
   set(pos, face, pose = 'stand', walkPhase) {
     if (!this.fresh) this.moved += Math.hypot(pos.x - this.pos.x, pos.z - this.pos.z);
     this.pos.set(pos.x, pos.y || 0, pos.z); this.face = face; this.pose = pose; this.phase = walkPhase;
+    this.fy = deckDef && deckDef.floorY ? deckDef.floorY(pos.x + OX, pos.z + OZ) : 0;   // FX26 (0.93.2): a raised floor under them (the rec deck's stage); 0 on every other deck
   }
   update(dt, t) {
     const g = this.g, rig = this.rig, h = this.h, { base, act } = parsePose(this.pose, this.pos.y), walking = base === 'walk' || base === 'crouch';
@@ -57834,7 +57905,7 @@ class CrowdPerson {
     animateActivity(this, this.pose, dt, t + g.t0, sk, this.pos.y);
     this.lookOff = base === 'lie' ? 0 : .5 * feelLook(g.t0); rig.head.rotation.x -= this.lookOff;   // a jolt: everyone looks up a moment
     const lie = ss(this.k.lie || 0), fx = Math.sin(this.rot), fz = Math.cos(this.rot), off = .76 * h * lie;
-    const floor = base === 'sit' || base === 'lie' || this.pos.y >= .3 ? 0 : this.pos.y;   // standing on a stage or a treadmill
+    const floor = base === 'sit' || base === 'lie' ? 0 : this.fy > 0 ? this.fy : this.pos.y >= .3 ? 0 : this.pos.y;   // standing on a stage or a treadmill; FX26 (0.93.2, the user's "Captain is clipping through the stage"): y .3 and up is a seat's height, so the rec deck's .55 stage comes as fy (a seat there keeps the high stool's feet-on-the-ring rule)
     const root = rig.root;
     root.position.set(this.pos.x + fx * off, L(floor, (this.pos.y > 0 ? this.pos.y : CROWD_SEAT[base] || CROWD_SEAT.sit) + .17 * h, lie), this.pos.z + fz * off);   // as before 0.27.0, getting out of bed
     root.rotation.set(-Math.PI / 2 * lie, this.rot, 0);
@@ -58323,8 +58394,9 @@ const bubbles = { list: [], hidden: false, el: null, v: new THREE.Vector3(), on:
     const on = this.on, now = performance.now(), dts = this.at ? Math.min(.1, (now - this.at) / 1000) : 1, ease = Math.min(1, dts * 10), lim = 900 * dts; on.length = 0; this.at = now;   // lim: a slide never goes faster than 900 px a second (0.47.10)
     for (const b of this.list) {
       const w = b.who, p = w.pos || (w.obj && w.obj.position) || w, h = w.h || 1;
-      const seat = w.pos && w.pos.y >= .3 ? w.pos.y : 0;   // seated: above the head on the seat; standing: above a standing head
-      this.v.set(p.x, seat ? seat + 1.15 * h : (w.pos ? w.pos.y : w.obj ? w.obj.position.y : p.y || 0) + 2.0 * h, p.z).project(camera);
+      const stage = w.fy > 0 && w.pos && w.pos.y < w.fy + .3;   // FX26 (0.93.2): standing on the rec deck's stage (the body's fy), not seated
+      const seat = !stage && w.pos && w.pos.y >= .3 ? w.pos.y : 0;   // seated: above the head on the seat; standing: above a standing head
+      this.v.set(p.x, seat ? seat + 1.15 * h : (stage ? w.fy : w.pos ? w.pos.y : w.obj ? w.obj.position.y : p.y || 0) + 2.0 * h, p.z).project(camera);
       const vis = !this.hidden && this.v.z < 1 && Math.abs(this.v.x) < 1 && this.v.y < .95 && this.v.y > -1;   // any zoom the camera allows (0.27.18)
       b.el.style.display = vis ? '' : 'none';
       if (!vis) continue;
@@ -60832,7 +60904,7 @@ function devmodeTopUp() { devmodeDo('Top up needs', () => { for (const k of NEED
 function devmodeClock(body) {
   const d = SHIP.time.day, st = devmodeState();
   const now = typeof careerClockedIn === 'function' && careerClockedIn(d) && !careerClockedOut(d) ? 'clocked in' : st.ex.includes(d) ? 'excused today'
-    : typeof playerShiftOn === 'function' && playerShiftOn(d) ? 'a workday' : 'no shift today';
+    : typeof playerShiftOn === 'function' && playerOnDuty(d) ? 'a workday' : 'no shift today';
   devmodeHead(body, 'Now');
   devmodeText(body, clockText() + ' · ' + now);
   devmodeRow(body, [['Next morning', () => devmodeGo('next morning', () => devmodeNext(WAKE_AT))],
