@@ -25,3 +25,4 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
   controller_check `ending` still in trial. Will send the sha, then day_check 31/50 ON copy.
 - ~23:45 UTC: lead 40: stopping point (the user's call). No review started; wrote plans/handover-rv22.md.
 - ~23:43 UTC: VB2 at stopping point: claude/ending-checks c0b800b8 is marked WIP (not for verdict); plans/handover-vb2.md there.
+- ~23:45 UTC: B3 sent claude/p5s5-m20 989b1759 (the 4 shoulds). Not reviewed: stopping point. Noted in the handover.

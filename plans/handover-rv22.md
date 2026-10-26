@@ -19,7 +19,9 @@ and the verdict table in plans/review-rv21.md.
    VB2 said: stay path (asis, teachoff, track) passes; change-of-mind, go runs and controller_check `ending` still in
    trial; will send the sha, then day_check 31/50 ON copy. Review: arrows_check endstay/endgo, controller presets (Days
    32, 34, 35, 36), day_check 31/50 ON copy, any game fixes on top of d1a61402 (cadet off identical vs d1a61402).
-3. **B3 (session_014FBmsiTsA9QymoN2qt4NyL), claude/p5s5-m20** after f57afcbc: m20 check parts run on an ON copy (not
+3. **B3 (session_014FBmsiTsA9QymoN2qt4NyL), claude/p5s5-m20 989b1759 is ready for review** (sent ~23:44; row 0.93.4-ar.4,
+   DEV_NOTES "The sensor array, M20", plans/handover-b3-m20.md; B3 reports cadet off identical vs f57afcbc, check_fast OK,
+   mech_check m19/m20/wstap and controller_check m19/m20 OK on an auto-switched copy, ladder order merged). Verify: m20 check parts run on an ON copy (not
    "not yet"); one teacher name (Calder teaches Day 19, Mori is off); no doubled Tracked row; in person before the 06:20
    Mail; recheck the Day 19 opening after the ladder-order merge deefa61a.
 
