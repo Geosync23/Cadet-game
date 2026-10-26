@@ -830,6 +830,8 @@ What section 17's `jobKindAdd` kinds and section 24's mechanics give a stop, and
 
 ## Player interactions (section 15b, the interactions engineer, 0.37.x)
 
+- **Take a seat** (0.93.2-y.1, FX24, the user's): section 15's `seatBtnSeat` / `seatBtnGo` and `#seatBtn`, the last button of `#handBtns` (so straight above Put down), Put down's size. Shown while you hold a tray, stand in the mess hall doing nothing else, with a free public mess seat within `SEAT_BTN_NEAR` (2.2 m); a tap is `actStart('sit', seat)` with your tray (you eat). Not switched: never shows without a tray. interactions_check's last part.
+
 Section `// 15b. PLAYER INTERACTIONS` sits right after section 15. It owns more things to use, the job board's list and the goal pointer. It reuses section 15's activity loop, so every rule there (the minutes, the gains, walking away to stop, `needEffects` and the ship's effects) applies to these too.
 
 - **The hook.** Section 15 declares `PLAYER_TAPS = []` above `playerTap`, and `playerTap` tries each `f(item, itemPos, tapPoint)` right after `jobTap`. Agreed with the player engineer; the line is the same on both branches. 15b pushes `ixTap`.

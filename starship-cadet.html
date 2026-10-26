@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.1
+   STARSHIP CADET: CSV Wren                           build 0.93.2-y.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9257,7 +9257,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.1';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.2-y.1';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14863,17 +14863,20 @@ function handEl() {
   st.textContent = '#handBtns{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:calc(76px + env(safe-area-inset-bottom));z-index:2;display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none}'
     + '#handBtns button{pointer-events:auto;min-width:44px;min-height:44px;padding:8px 14px;border-radius:22px;font-size:14px;display:flex;align-items:center;gap:6px;touch-action:manipulation}'
     + '#handBtns button[hidden]{display:none}#handBtns svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}'
-    + '#repairBtn{border-color:#e8c06a;color:#f2e3bf}body.dlgon #handBtns{display:none}';
+    + '#repairBtn{border-color:#e8c06a;color:#f2e3bf}body.dlgon #handBtns{display:none}'
+    + '#handBtns #seatBtn{min-height:48px;min-width:48px;padding:0 16px;font-weight:600;gap:8px}#handBtns #seatBtn svg{width:19px;height:19px}';   // 0.93.2: Take a seat, Put down's size (the user's)
   document.head.appendChild(st);
   el = document.createElement('div'); el.id = 'handBtns';
   el.innerHTML = '<button type="button" id="hobbyBtn" hidden aria-label="Hobby: something to do while you sit"><svg viewBox="0 0 24 24"><path d="' + NEED_ICON.leisure + '"/></svg><span>Hobby</span></button>'   // 0.28.61
     + '<button type="button" id="repairBtn" hidden aria-label="Repair: start the work here"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L4 16.7 7.3 20l5.3-5.3a4 4 0 0 0 5.1-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg><span>Repair</span></button>'
-    + '<button type="button" id="liftBtn" hidden aria-label="Lift: open the lift panel"><svg viewBox="0 0 24 24"><path d="M8 10l4-4 4 4"/><path d="M8 14l4 4 4-4"/></svg><span>Lift</span></button>';   // 0.92.6 #16
+    + '<button type="button" id="liftBtn" hidden aria-label="Lift: open the lift panel"><svg viewBox="0 0 24 24"><path d="M8 10l4-4 4 4"/><path d="M8 14l4 4 4-4"/></svg><span>Lift</span></button>'   // 0.92.6 #16
+    + '<button type="button" id="seatBtn" hidden aria-label="Take a seat: sit at the nearest free seat with your tray"><svg viewBox="0 0 24 24"><path d="M7 4v8h10"/><path d="M7 12v8M17 12v8M5 12h14"/></svg><span>Take a seat</span></button>';   // 0.93.2 (the user's): last in the stack, so just above Put down
   document.body.appendChild(el);
   for (const b of el.querySelectorAll('button')) b.addEventListener('pointerdown', e => e.stopPropagation());   // never a tap on the deck behind
   document.getElementById('repairBtn').onclick = e => { e.stopPropagation(); const h = handRepair(); if (h) h.go(); handTick(true); };
   document.getElementById('hobbyBtn').onclick = e => { e.stopPropagation(); hobbyPick(); handTick(true); };
   document.getElementById('liftBtn').onclick = e => { e.stopPropagation(); enterLift(); handTick(true); };   // as a tap on the panel (section 11)
+  document.getElementById('seatBtn').onclick = e => { e.stopPropagation(); seatBtnGo(); handTick(true); };   // 0.93.2: as a tap on that seat with your tray
   return el;
 }
 // ---- hobbies (0.28.61, the 0.60.7 plan's "Hobbies"): seven, each 30 ship minutes for +25 leisure, a meter like a
@@ -15001,7 +15004,8 @@ function handTick(now) {
   if (hb.hidden !== !hob) hb.hidden = !hob;
   HAND.repair = !!h; if (r.hidden !== !h) r.hidden = !h;
   const lb = document.getElementById('liftBtn'), lift = liftBtnShow(); if (lb.hidden !== !lift) lb.hidden = !lift;
-  if (!h && !hob && !lift) return;
+  const sb = document.getElementById('seatBtn'), seat = !!seatBtnSeat(); if (sb.hidden !== !seat) sb.hidden = !seat;   // 0.93.2: Take a seat
+  if (!h && !hob && !lift && !seat) return;
   // never over Put down (player engineer 8's #putDown, below us, lifts above a toast on phones) or a toast (0.28.55)
   const tops = [innerHeight - 76], pd = document.getElementById('putDown'), tt = document.getElementById('toast');
   if (pd && !pd.hidden) tops.push(pd.getBoundingClientRect().top - 10);
@@ -15022,6 +15026,26 @@ function liftBtnShow() {
   if (rm && rm.floor === 'lift') return true;            // in the car
   if (!rm || !rm.hall) return false;                     // a landing panel only from the landing (a hall), never through a wall or the trunks' glass
   const q = ixLiftPanel(); return !!q && Math.hypot(q.x - p.x, q.z - p.z) < LIFT_BTN_NEAR;
+}
+// Take a seat (0.93.2, the user's: "When standing next to an empty seat with a tray in hand in the mess hall, another
+// button the same size and just above 'Put down' appears that says 'Take a seat', which sits you at the nearest mess hall
+// seat"): in the stack above Put down (the last of #handBtns, so straight above it), shown while you hold a tray, stand in
+// the mess hall on Deck 3 doing nothing else, and a free mess seat (nobody in it, a public one) is within SEAT_BTN_NEAR m.
+// A tap is a tap on that seat: actStart('sit') with your tray eats it there (the usual sit-and-eat). Nothing it does
+// touches the ship until you tap it; it never shows without a tray, so tests and replays are unchanged
+const SEAT_BTN_NEAR = 2.2;
+function seatBtnSeat() {
+  if (!SHIP.player.tray || PAUSE.on || ACT || (typeof ride !== 'undefined' && ride) || (typeof DEV !== 'undefined' && DEV.open)
+    || document.body.classList.contains('dlgon') || typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 3 || typeof PLACE_OF === 'undefined') return null;
+  if (roomName(3, roomAt(...player.here())) !== 'mess hall') return null;
+  const p = player.obj.position;
+  return [...PLACE_OF.values()].filter(pl => pl.type === 'mess-seat' && pl.pose === 'sit' && !privatePlace(pl) && !heldBy(pl.id))
+    .map(pl => [pl, placeSpot(pl.id)]).filter(([, sp]) => sp && sp.pose === 'sit' && Math.hypot(sp.x - p.x, sp.z - p.z) < SEAT_BTN_NEAR)
+    .sort((m, n) => Math.hypot(m[1].x - p.x, m[1].z - p.z) - Math.hypot(n[1].x - p.x, n[1].z - p.z))[0] || null;
+}
+function seatBtnGo() {
+  const s = seatBtnSeat(); if (!s) return false;
+  actStart('sit', s[0].id, { pose: s[1].pose, title: 'Mess hall' }); return true;   // with your tray: kind 'eat', fed (actStart)
 }
 // the Record's words for your hobbies (0.28.63): the head writer's hobby.record.<h>, else by how often and how lately
 function hobbyWords() {
