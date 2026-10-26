@@ -1,0 +1,499 @@
+<title>Step 5 Spec</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one reading column. A calendar table, then each event as day cards with an hour-by-hour list,
+   then the shared parts (rank, groups, dialogue, Mail, traditions, stories, device, sound, props, risks,
+   checks, estimate), then the questions and the answers form. */
+:root {
+  --bg: #f3f5f2; --surface: #ffffff; --ink: #18221c; --muted: #536159; --line: #d3dcd5;
+  --visit: #5b4a8f; --visitSoft: #e7e2f3; --comet: #a8741a; --cometSoft: #f6ead2;
+  --old: #c9d2cc; --oldInk: #3e4b43; --some: #e6ebe7; --flag: #9a3d2e;
+  --display: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --visit: #b7a6ec; --visitSoft: #2a2440; --comet: #f0c060; --cometSoft: #3d3016;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --visit: #b7a6ec; --visitSoft: #2a2440; --comet: #f0c060; --cometSoft: #3d3016;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--body); margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; }
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 34px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 42px); font-weight: 800; line-height: 1.05; }
+h2 { font-size: 23px; font-weight: 800; }
+h3 { font-size: 18px; font-weight: 700; }
+p, li { max-width: 72ch; }
+p { margin: 0; }
+ul, ol { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--comet); }
+.lead { font-size: 18px; color: var(--muted); }
+section { display: grid; gap: 14px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.fact { border-top: 3px solid var(--visit); padding-top: 8px; font-size: 14.5px; }
+.fact:nth-child(2n) { border-top-color: var(--comet); }
+.fact b { display: block; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.note { font-size: 14.5px; color: var(--muted); }
+.flagnote { font-size: 14.5px; color: var(--flag); }
+
+/* day cards with an hour-by-hour list */
+.day { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; }
+.day.visit { border-top: 4px solid var(--visit); }
+.day.comet { border-top: 4px solid var(--comet); }
+.day.quiet { border-top: 4px solid var(--old); }
+.day header { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.phase { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 1px 8px; border-radius: 999px; background: var(--some); color: var(--oldInk); }
+.tl { list-style: none; padding: 0; margin: 0; display: grid; gap: 0; }
+.tl li { display: grid; grid-template-columns: 86px 1fr; gap: 4px 12px; padding: 8px 0; border-top: 1px solid var(--line); max-width: none; }
+.tl li:first-child { border-top: 0; }
+.tl time { font: 700 13.5px var(--mono); color: var(--muted); padding-top: 2px; }
+.tl .what b { display: inline; }
+.tl .where { display: block; font-size: 13px; color: var(--muted); }
+.tl .you { display: block; font-size: 14.5px; margin-top: 3px; padding-left: 10px; border-left: 3px solid var(--comet); }
+.tl li.big .what > b::after { content: "  big group"; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--visit); }
+.tl li.career time { color: var(--flag); }
+@media (max-width: 520px) { .tl li { grid-template-columns: 1fr; } }
+
+/* cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.card.visit { border-top: 4px solid var(--visit); }
+.card.comet { border-top: 4px solid var(--comet); }
+.card .role { font-size: 13px; color: var(--muted); }
+
+/* dialogue */
+.script { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.script h3 { font-size: 16px; }
+.script .ctx { font-size: 13.5px; color: var(--muted); }
+.ln { display: grid; grid-template-columns: 96px 1fr; gap: 10px; font-size: 15px; }
+.ln b { font-size: 13px; color: var(--visit); padding-top: 2px; }
+.script.comet .ln b { color: var(--comet); }
+.ln i { color: var(--muted); }
+.choice { font-size: 14.5px; padding-left: 106px; }
+.choice::before { content: "You: "; font-weight: 700; color: var(--muted); }
+@media (max-width: 520px) { .ln { grid-template-columns: 1fr; gap: 0; } .choice { padding-left: 0; } }
+
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 620px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 0 7px; border-radius: 999px; margin: 1px 2px 1px 0; }
+.tag.v { background: var(--visitSoft); color: var(--visit); }
+.tag.c { background: var(--cometSoft); color: var(--comet); }
+.tag.new { background: var(--some); color: var(--ink); border: 1px dashed var(--muted); }
+.tag.re { background: var(--old); color: var(--oldInk); }
+.tag.risk { background: transparent; color: var(--flag); border: 1px solid var(--flag); }
+
+/* questions and answers */
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.q .rec { font-size: 14.5px; }
+.q .rec b { color: var(--visit); }
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 16px; }
+.row { display: grid; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.row h3 { font-size: 16px; }
+.choices { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.opt { display: flex; gap: 8px; align-items: center; font-size: 15px; }
+input[type=text], textarea { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+textarea { min-height: 110px; }
+button { justify-self: start; font: 700 15px var(--body); padding: 10px 18px; border-radius: 8px; border: 0; background: var(--visit); color: var(--surface); cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--comet); outline-offset: 2px; }
+.status { font-size: 14px; color: var(--muted); }
+nav.toc { font-size: 14.5px; }
+nav.toc ol { grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); column-gap: 24px; }
+a { color: var(--visit); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<style>
+code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-radius: 4px; overflow-wrap: anywhere; }
+.piece { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--visit); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; }
+.piece:nth-of-type(2n) { border-top-color: var(--comet); }
+.piece header { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.piece dl { display: grid; grid-template-columns: 150px 1fr; gap: 6px 14px; margin: 0; font-size: 15px; }
+.piece dt { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 3px; }
+.piece dd { margin: 0; min-width: 0; }
+@media (max-width: 560px) { .piece dl { grid-template-columns: 1fr; gap: 2px; } .piece dd { margin-bottom: 8px; } }
+</style>
+<div class="wrap">
+
+<header style="display:grid;gap:12px">
+  <p class="eyebrow">Build spec · Pillar 5 Step 5 · version 1 · EP2 for lead 39 · 2026-10-26</p>
+  <h1>Step 5: Senior Officer, the build spec</h1>
+  <p class="lead">This page turns the agreed plan (version 3.1, your answers of 26 October) into pieces the builders can start on. For each piece: what it is, exactly which parts of the game file it touches, its switch, which builder seat it suits, the checks it must pass, and the words the head writer must write. Nothing here changes the design you agreed; where the game needed a small decision the plan didn't make, it's listed under "Judgement calls" so you can overrule it.</p>
+  <div class="facts">
+    <div class="fact"><b>Pieces</b>Six building pieces and the words: the career core first (small), then the promotion, power and relays, shutdowns, the sensor array and the head-scratchers side by side.</div>
+    <div class="fact"><b>Builders at once</b>Four (the Works career engineer, mechanics seats A and B, the puzzles seat), plus the deck architect part-time and the head writer. Two reviewers, the build master and the six runners as usual.</div>
+    <div class="fact"><b>Size</b>About 26 turns in all, shared by four builders; the longest seat (the Works career engineer: the core, then the promotion) has about 7.</div>
+    <div class="fact"><b>Your answers needed</b>Three small questions at the end (section 12). Building can start on the career core before they're answered.</div>
+  </div>
+  <p class="note">Built against the game on claude/integration d9c7e5f0 (0.93.2); it starts once 0.93.3 (the doors) is merged there. Sources: plans/pillar5-steps56-plan.html v3.1 (c827f392), plans/pillar5-plan.md (claude/p5-design), DEV_NOTES "Rules that keep it working", plans/owners.md, plans/testing-guide.md. Line numbers drift; the function and section names are what to search for (<code>python3 tools/section.py</code>).</p>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#rules">The ground rules for every piece</a></li>
+    <li><a href="#switches">Switches and where new code goes</a></li>
+    <li><a href="#data">Shared data, agreed up front</a></li>
+    <li><a href="#beats">The held hours (EV_BEATS), whole career</a></li>
+    <li><a href="#pieces">The pieces</a></li>
+    <li><a href="#order">Order, seats and who can work at once</a></li>
+    <li><a href="#overlap">Where pieces touch the same code</a></li>
+    <li><a href="#checks">Checks: new parts, new days, the rounds</a></li>
+    <li><a href="#pad">The game controller, piece by piece</a></li>
+    <li><a href="#words">Words for the head writer</a></li>
+    <li><a href="#calls">Judgement calls</a></li>
+    <li><a href="#questions">Your questions and the answers form</a></li>
+  </ol>
+</nav>
+
+<section id="rules">
+  <h2>1. The ground rules for every piece</h2>
+  <ul>
+    <li><b>Off means today's game.</b> With <code>P5_STEP5</code> off, cadet_test is ALL IDENTICAL against the build before it, and every day_check day is the same. Every piece also has its own switch, so a reviewer can turn one piece off and see the rest.</li>
+    <li><b>Never touch the first promotion.</b> Section 24p (the Tier 2 test and the Officer promotion) keeps working exactly as now. Step 5 reuses its helpers (<code>promoNotice</code>, <code>promoSay</code>, <code>promoMail</code>, <code>promoCerTimes</code>, <code>promoGuests</code>, <code>promoBusy</code>) by calling them, and only adds one-line, <code>typeof</code>-guarded hooks into 24p where the plan needs them (listed per piece). <code>SHIP.works.test</code> stays the Tier 2 record.</li>
+    <li><b>The planner rule.</b> The crew's day plans read only what's fixed for that day. Shutdown bookings (piece S5-4) are settled at 22:00 the evening before, copying the rec deck's <code>recPlanShut</code> / <code>recSettled</code> pattern in section 17 (a plan made before the record settles is marked and made again once it does).</li>
+    <li><b>Nothing new at load calls <code>R()</code>.</b> Choices come from <code>schedU</code> keys; section 24's note reserves 852-854 as spare: S5-1 hands 852 to S5-2 (which friends come), 853 to S5-4 (who is warned in the test), 854 to S5-6 (the old-mysteries board's order). Any more come from a new key range agreed with the sim engineer.</li>
+    <li><b>Phones first.</b> Every colour through <code>col()</code>, no coplanar faces, the 450 draw-call budget at phone and TriFold sizes. New props are merged meshes.</li>
+    <li><b>Every new button works with a game controller</b> (section 9 of this page): real buttons inside panels the controller already walks, nothing held or fast, nothing that only vibrates.</li>
+    <li><b>Each turn</b>, as CLAUDE.md says: small exact-string edits, new code in your slot, a row in plans/build-table.md, your piece's checks then <code>bash check_fast.sh</code>, commit and push; never the two build-number lines.</li>
+  </ul>
+</section>
+
+<section id="switches">
+  <h2>2. Switches and where new code goes</h2>
+  <p>S5-1's first turn adds all of these at once, so no two builders ever edit the same lines for them. They sit in section 13 beside <code>EV_COMET_ON</code>.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Switch</th><th>Line S5-1 adds</th><th>What it turns on</th></tr></thead>
+    <tbody>
+      <tr><td><code>P5_STEP5</code></td><td><code>const P5_STEP5 = URL_FLAGS.has('p5s5');</code></td><td>The master. Off by default; <code>#p5s5</code> on a Dev link previews it while it's built (as <code>#evswap</code> does). The switch-on turn makes it <code>true</code>.</td></tr>
+      <tr><td><code>P5_PROMO3</code></td><td><code>const P5_PROMO3 = P5_STEP5 &amp;&amp; true;</code></td><td>S5-2, the Senior Officer promotion</td></tr>
+      <tr><td><code>P5_M19</code></td><td>same pattern</td><td>S5-3, power and relays</td></tr>
+      <tr><td><code>P5_M18</code></td><td>same pattern</td><td>S5-4, shutdowns</td></tr>
+      <tr><td><code>P5_M20</code></td><td>same pattern</td><td>S5-5, the sensor array</td></tr>
+      <tr><td><code>P5_CASES5</code></td><td>same pattern</td><td>S5-6, P4, P5, P9 and the old-mysteries board</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>New sections.</b> Section ids allow one letter after the number (<code>tools/section.py</code>'s heading rule), and 24a-24t are taken. Step 5 uses four of the six left; 24y and 24z stay free, and Step 6 will get its own section 28 (its spec page says so). Each goes after 24p and before section 6 (CAMERA), in this order, each with its own slot made by <code>tools/add_slots.py</code>:</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Section</th><th>Heading</th><th>Owner seat</th><th>Piece</th></tr></thead>
+    <tbody>
+      <tr><td><code>24u</code></td><td>THE LATER PROMOTIONS (Pillar 5 Steps 5-6)</td><td>Works career engineer</td><td>S5-2 (Step 6 adds the Engine Specialist here too)</td></tr>
+      <tr><td><code>24v</code></td><td>POWER AND RELAYS (M19)</td><td>Mechanics seat A</td><td>S5-3</td></tr>
+      <tr><td><code>24w</code></td><td>SHUTDOWNS (M18)</td><td>Mechanics seat B</td><td>S5-4</td></tr>
+      <tr><td><code>24x</code></td><td>THE SENSOR ARRAY (M20)</td><td>Mechanics seat A</td><td>S5-5</td></tr>
+    </tbody>
+  </table></div>
+  <p>The head-scratchers stay in 24k (the puzzles seat's slot), the ladder rows and bands in section 24 core. S5-1 adds the four sections' rows to <code>plans/owners.md</code> and <code>plans/map.md</code>, and their <code>RULES</code> rows to <code>tools/affected.py</code> (until the map is remade they're picked by the rules alone).</p>
+</section>
+
+<section id="data">
+  <h2>3. Shared data, agreed up front</h2>
+  <p>So four builders can start the same day without waiting on each other, these shapes are fixed now. Each sub-block keeps its own key in <code>SHIP.works</code> and reads it back from the save itself, as 24k and 24f do (<code>worksClean</code> keeps only 24 core's fields).</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Where</th><th>Shape</th><th>Written by</th><th>Read by</th></tr></thead>
+    <tbody>
+      <tr><td><code>CAREER_LADDER</code> (24 core)</td><td>New rows, pushed in an <code>if (P5_STEP5)</code> block straight after the table: <code>ps</code> (Power safety, small, Day 12, tier 2, Calder, Deck 6 port junction room <code>j</code>; question 2), <code>t3</code> (big, Day 15, tier 2, needs <code>[{ rep: 'relied' }, { trained: 'ps' }]</code>, by Calder, Deck 5 <code>o</code>, job 'test'), <code>m19</code> (big, Day 17, tier 3, rank senior, needs <code>{ trained: 't3' }</code>, Calder, Deck 1 <code>u</code>, tool tester), <code>p4</code> (small, Day 17, tier 3, Torres), <code>m18</code> (big, Day 18, tier 3, needs <code>{ trained: 'm19' }</code>, Calder, Deck 6 <code>j</code>), <code>p5</code> (small, Day 18, tier 3, needs <code>{ trained: 'm18' }</code>, Calder), <code>m20</code> (big, Day 19, tier 3, Mori with Calder, Deck 2 <code>A</code>, tool arrayrig), <code>p9</code> (small, Day 19, tier 3, Calder), <code>mys</code> (small, Day 21, tier 3, the old-mysteries board, Deck 5 <code>w</code>). The same fields as today's rows; ids are new (names_check checks).</td><td>S5-1</td><td>Every piece registers <code>WORK_MECH[id]</code> for its own row(s); a row whose sub-block is off never opens.</td></tr>
+      <tr><td><code>WORK_BANDS</code> (24 core)</td><td>With <code>P5_STEP5</code>: <code>WORK_BANDS[2]</code> re-tuned (your answer 1: a steady player reaches "Relied on" as an Officer by the end of the storm Saturday, Day 13, or at the all-clear on Day 14; a very busy one not before Day 12), and a new <code>WORK_BANDS[3]</code> (a steady Senior reaches "Trusted" by Friday Day 19, most by Sunday Day 21). Numbers set by career_check, assigned in the same <code>if (P5_STEP5)</code> block; the table's shape doesn't change.</td><td>S5-1</td><td>24 core's band words, the Training tab, Dev mode's presets (section 25 reads <code>WORK_BANDS[tier]</code>)</td></tr>
+      <tr><td><code>WORK_TOOLS</code> (24 core)</td><td>One new tool, <code>arrayrig</code>: "the calibration rig", mech <code>m20</code>, carried, no wear. (The id <code>calrig</code> is already the machine shop's test rig, so it isn't reused.) The conduit tester keeps its row: S5-3 gives it at M19 if M15 hasn't already.</td><td>S5-1</td><td>S5-5, the Tools page</td></tr>
+      <tr><td><code>SHIP.works.pu</code> (24u)</td><td><code>{ t3: { day, tries, passed, res, bar, toast } }</code>: the test's day, tries, passed; the days the result, the bar and the toast were given (null until then). Step 6 adds <code>t4</code>, <code>move</code> and <code>end</code> beside it.</td><td>S5-2</td><td>Dev mode, the Training tab, the Record</td></tr>
+      <tr><td><code>SHIP.works.sd</code> (24w)</td><td><code>{ book: [{ day, at, branch, keep: [room], warned: [id], inPerson: [id] }], set: { day: [...] }, done: [day] }</code>: tomorrow's booking as you plan it; <code>set</code> is the record settled at 22:00 (what the crew's plans read); <code>done</code> the days carried out.</td><td>S5-4</td><td>Section 14's planner (through one hook), S5-6's P9 (a shutdown clash)</td></tr>
+      <tr><td><code>SHUT_BRANCHES</code> (24w, a fixed table)</td><td><code>{ id: { junction: machine id, name, rooms: [[deck, room], ...], keep: [rooms you may keep powered] } }</code>: each junction's branches, one to three rooms each, e.g. the galley circuit, the gym and laundry circuit, the science corridor. Starting list: <code>6-junction-1</code> and <code>-2</code> (Deck 6), <code>2-breaker-1</code> (Deck 2), <code>1-junction-1</code> (Deck 1), with rooms agreed with the deck architect.</td><td>S5-4</td><td>S5-2's test (picks one branch), S5-6</td></tr>
+      <tr><td><code>SHIP.works.ar</code> (24x)</td><td><code>{ star: name, sweeps, day }</code>: the star you calibrated against, sweeps done</td><td>S5-5</td><td>24t's star logging (a line if you logged the same star)</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="beats">
+  <h2>4. The held hours (EV_BEATS), whole career</h2>
+  <p>Today's <code>EV_BEATS</code> (section 18) still holds the old estimates: night shifts on Days 19-20, the Senior Officer scene at 10:00 on Day 16. With <code>P5_STEP5</code> on, S5-1 moves every Pillar 5 row to the plan's hours in one block placed in section 18 straight after the event swap's block, so the guard (<code>guardFree</code>, <code>evBeatsOn</code>) sees the agreed career. Rows are only holds: nothing plays from them, so Step 6's rows are set now too and Step 6 doesn't need to touch this table again (except the one new hold it adds for its briefing). Values change and two rows are added; the table's shape doesn't, but it's a shared table: <b>the events seat reviews it first</b>.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Row id</th><th>Kind</th><th>Today</th><th>With P5_STEP5</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td><code>tier3Test</code></td><td>test</td><td>Day 15, 09:00-17:00</td><td>Day 15, 09:00-15:00</td><td>The test's window</td></tr>
+      <tr><td><code>seniorResult</code> (new)</td><td>beat</td><td>-</td><td>Day 16, 08:15-08:30</td><td>Calder's office; her search after 08:30 runs past it by design (it never needs a held hour)</td></tr>
+      <tr><td><code>seniorOfficer</code></td><td>captain</td><td>Day 16, 10:00-12:00</td><td>Day 16, 16:15-17:30</td><td>The bar at 16:30 and the cake</td></tr>
+      <tr><td><code>seniorToast</code></td><td>captain</td><td>Day 17, 19:00-21:00</td><td>unchanged</td><td>The toast</td></tr>
+      <tr><td><code>shutdownsTraining</code></td><td>beat</td><td>Day 18, 09:00-12:00</td><td>unchanged</td><td>M18. The guard then puts the commendation summons at 16:00 (your answer 3)</td></tr>
+      <tr><td><code>nightAssigned</code></td><td>beat</td><td>Day 18, 14:00-15:00</td><td>Day 22, 09:15-09:30</td><td>Calder's "nights" word</td></tr>
+      <tr><td><code>nightShift1</code></td><td>night</td><td>Day 19, 20:30 to 07:00</td><td>Day 22, 22:40 to 06:00</td><td>After the comet</td></tr>
+      <tr><td><code>nightShift2</code></td><td>night</td><td>Day 20, 20:30 to 07:00</td><td>Day 23, 20:45 to 06:00</td><td>After Zeke's story</td></tr>
+      <tr><td><code>nightShift3</code> (new)</td><td>night</td><td>-</td><td>Day 24, 20:45 to 06:00</td><td>The third night</td></tr>
+      <tr><td><code>mondayBriefing</code></td><td>beat</td><td>Day 22 08:30-09:30 (the swap moves it to Day 16)</td><td>left alone</td><td>The swap's Day 16 memo hold stays; Step 6 adds its own Day 22 briefing hold</td></tr>
+      <tr><td><code>engineSpecialist</code></td><td>captain</td><td>Day 23, 10:00-12:00</td><td>Day 23, 16:15-17:10</td><td>The badge, before the bridge hour at 17:15</td></tr>
+      <tr><td><code>caldersQuestion</code></td><td>beat</td><td>Day 26, 18:00-19:00</td><td>Day 26, 18:40-19:30</td><td>Four weeks aboard</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Step 6's own rows (the Tier 4 test, the result at the comet, the Deck 2 move on Day 25 after dinner, mentoring on Day 26) are Step 6's to add with its pieces: they need its switch, and leaving them out changes nothing in Step 5.</p>
+</section>
+
+<section id="pieces">
+  <h2>5. The pieces</h2>
+
+  <article class="piece" id="s51">
+    <header><h3>S5-1 Career core</h3><span class="phase">P5_STEP5</span><span class="phase">Works career engineer</span><span class="phase">3 turns</span></header>
+    <p>The ground everyone else stands on. Turn 1 is a skeleton merged first, so the other three builders can start from it the same day.</p>
+    <dl>
+      <dt>Turn 1</dt><dd>The six switch lines (section 13); the four empty sections 24u-24x with headers and slots (<code>tools/add_slots.py</code>); the ladder rows, <code>arrayrig</code> and the empty <code>WORK_BANDS[3]</code> in the <code>if (P5_STEP5)</code> block in section 24 core; owners.md, map.md and affected.py rows. Nothing plays yet: every row waits for its sub-block's <code>WORK_MECH</code>.</dd>
+      <dt>Turn 2</dt><dd>The bands: <code>WORK_BANDS[2]</code> re-tuned and <code>WORK_BANDS[3]</code> set, with career_check's steady, busy and slow players; the storm Saturday's repairs already count (0.93.2), so this is numbers only. The <code>ps</code> Power safety lesson (question 2): a watch-only training moment like P3's, Calder at the Deck 6 port junction, 20 minutes, offered from Day 12 to an Officer.</dd>
+      <dt>Turn 3</dt><dd>The held hours (section 4 of this page), in section 18 after the swap's block; the Training tab's "Your promotion" rows for Tier 3 (<code>promoCheck</code>'s pattern, in a new 24u function that 24 core's Training tab calls through one <code>typeof</code>-guarded line); Dev mode's career presets for Days 14-21 (section 25: the Senior Officer states; dev_arrow_check's arrow names the new steps).</dd>
+      <dt>Touches</dt><dd>Section 13 (switch lines); 24 core (<code>CAREER_LADDER</code>, <code>WORK_BANDS</code>, <code>WORK_TOOLS</code>, the Training tab's hook); section 18 (<code>EV_BEATS</code>, events seat reviews); section 25 (presets, Dev mode seat reviews); tools/, plans/owners.md, plans/map.md.</dd>
+      <dt>Checks</dt><dd>career_check (the bands: steady Relied on as Officer by Day 14, Trusted as Senior by Day 21; on and off identical where off), bigevents_check (the guard with the new rows, the summons at 16:00 on Day 18, the Captain's table back to 19:30 on Day 20), events_check, mech_check (the ladder opens nothing early; <code>ps</code>), devmode_check and dev_arrow_check (the presets), names_check, controller_check reach (the Training tab's new rows), cadet_test identical with the switch off.</dd>
+    </dl>
+  </article>
+
+  <article class="piece" id="s52">
+    <header><h3>S5-2 The Senior Officer promotion</h3><span class="phase">P5_PROMO3</span><span class="phase">Works career engineer</span><span class="phase">4 turns</span></header>
+    <p>The plan's sections 4 and 5, step by step, in the new section 24u, following FX28's promotion beats so it looks and feels like your first promotion.</p>
+    <dl>
+      <dt>The offer</dt><dd><code>puOffer(now)</code>: you're an Officer, the <code>t3</code> row's needs hold, Day 14 or later (the test never before Day 15). Calder's word if you're near her (the bay, or the storm party in the bow lounge on Day 14), always a Mail and an urgent notice (<code>promoNotice</code>). "What's next" and the Training tab tick it off. Sets <code>pu.t3.day</code> to the next workday of yours on or after Day 15 (<code>promoWorkday</code>).</dd>
+      <dt>Before</dt><dd>The crew's chatter and friends' luck: <code>puTalkTick</code>, modelled on 24p's <code>promoTalkTick</code> / <code>promoTalkKind</code> with Tier 3 keys (24p's own stay untouched). Up to two friends' Mail at 20:00 the evening before (<code>promoFriendMail</code>'s pattern; which friends from <code>schedU</code> key 852). Schedule rows (<code>puItems(d)</code>, added to section 14's day list by one <code>typeof</code>-guarded line beside <code>promoBeatsItems</code>) and Tracked "Your Tier 3 test, 09:00".</dd>
+      <dt>The test</dt><dd><code>WORK_MECH.t3.offer</code>, like <code>WORK_MECH.t2</code>: a real Tier 3 job held for you on whichever Deck 6 junction is in the worse state (<code>jobReserve</code>, a free slot: 20 is the Tier 2 test's, 24 the fix-scan's; the builder checks section 17 for the rest), 09:00-15:00, its parts set aside (<code>promoPartsAside</code>). Calder walks with you (<code>worksEscort</code>'s 24u part) and says each step (<code>worksTeach</code>, flags <code>train.t3.*</code>): a short planning talk at the junction (the branch it feeds, from <code>SHUT_BRANCHES</code>, and why now is quiet), warn the two people the branch affects (picked from the day's fixed roster with <code>schedU</code> key 853; tap them for "About the shutdown"; if one can't be found in 30 minutes, Calder says "I'll tell them"), switch it off, change the breaker, bring it back. Delayed, never failed: not taken by 15:00 or dropped, Calder says what to practise and sets it again in two workdays. The board's gold ring "Your Tier 3 test: take it", whatever the arrow setting: 24p's <code>promoBeatsPtr</code> gains one line, <code>key === 't3'</code> asks 24u.</dd>
+      <dt>Passing</dt><dd>"Your result tomorrow, first thing. My office, 08:15." Mail and notice; Torres's word if he's near; the bay talks about it that evening.</dd>
+      <dt>The result</dt><dd>Day 16 (or the next workday): Mail at 06:00, the urgent notice once you're up, the arrow to Calder's office (Deck 5, <code>o</code>) from 08:00. At 08:15 a meeting there (script <code>pu3.result</code>, Next and two replies); not there by 08:30, she comes to find you (<code>worksEscort</code>); by 09:15 it comes by Mail. At its end, <code>puPromote</code>: <code>tier</code> 3, <code>rank</code> 'senior', xp from 0, a milestone in <code>W.ms</code>, "Senior Officer" on your Record, Tier 3 jobs and head-scratchers from then (24k reads the rank already). You stay in cabin 4-23; your laundry stays yours.</dd>
+      <dt>The bar</dt><dd>The Captain's ceremony at 16:30 (17:15 on a Friday) in the observation room (Deck 1, <code>O</code>) with <code>promoCerTimes</code> and <code>promoGuests</code> (Vance, Calder, Torres and up to three friends). Script <code>pu3.bar</code>: the Captain pins it (the pin pose), Vance's dry line. A second framed certificate on your cabin shelf. Your collar: the Senior Officer's bar, through the character kit's rank mark (<code>makeCharacter</code>'s <code>s.rank</code>; if the kit has no mark for rank 2, the performance engineer adds one merged into the collar, no new draw call). The invite that morning; the arrow from 16:15. Brennan's cake after it (<code>promoCakeWin</code>'s timing).</dd>
+      <dt>The toast</dt><dd>Wednesday Day 17, 19:00: a Captain's table (section 18's <code>captainsTable</code> occasion, its own script <code>pu3.toast</code>), Vance called in on his day off, a framed menu for your shelf. The guard already holds 19:00-21:00 (<code>seniorToast</code>).</dd>
+      <dt>Missed?</dt><dd>The same rules as the first promotion: asleep, in a talk or busy, they wait (<code>promoBusy</code>); nowhere near, they come to find you; Mail last. A slower player gets each beat on the first day the guard leaves free, in the same order.</dd>
+      <dt>Touches</dt><dd>24u (new: almost everything); 24p (one line in <code>promoBeatsPtr</code>); 24 core (<code>worksEscort</code> asks 24u: one line); section 14 (one line beside <code>promoBeatsItems</code>, the sim engineer reviews); section 8 (the rank mark, only if missing); section 25 (Dev mode's beats list for Days 15-17).</dd>
+      <dt>Checks</dt><dd>promo_beats_check gains Tier 3 parts (<code>t3off</code>, <code>t3pointer</code>, <code>t3before</code>, <code>t3passed</code>, <code>t3result</code>, <code>t3bar</code>, <code>t3toast</code>), and its Tier 2 parts stay OK with the switch on; promo_sight_check; career_check (Senior Officer on Day 16 for a steady player, later and in order for a slow one); arrows_check week extended over Days 14-17; dev_arrow_check; devmode_check; saves_check (a save between the test and the result, and between the result and the bar); day_check Days 15 and 16; controller_check reach, pick and a whole Day 16 played by pad; cadet_test identical off.</dd>
+    </dl>
+  </article>
+
+  <article class="piece" id="s53">
+    <header><h3>S5-3 M19 Power and relays</h3><span class="phase">P5_M19</span><span class="phase">Mechanics seat A</span><span class="phase">2 turns</span></header>
+    <dl>
+      <dt>What</dt><dd><code>WORK_MECH.m19</code> in 24v. The training Wednesday Day 17 at 11:00 (after the visit's line breaks up, with the swap), Calder, in the relay room (Deck 1, <code>u</code>: <code>1-relay-1</code>, <code>1-relay-2</code>): swap a relay. Then the battery rows (Deck 5, <code>y</code>: <code>5-battery-1</code> to <code>-4</code>). Grows: stage 1 relays; stage 2 conduit runs with the conduit tester (<code>6-conduit-1</code>, <code>-2</code>), which feeds P5's power stage; stage 3 the batteries' charge balance (left for Step 6's P6). The tester: given here (Calder: "You'll want this") unless M15 rewiring already gave it, through 24 core's tool giving, not a second row.</dd>
+      <dt>The drill</dt><dd>You run the Works part of the Wednesday 15:00 drill once you're a Senior: 24c's drill (section 24c) gets one <code>typeof</code>-guarded line asking 24v for your part (a few calls you make on the device, as the plan's "you run the Works part").</dd>
+      <dt>Touches</dt><dd>24v (new); 24c (one line); machines and jobs as they are in section 17 (relay, battery and conduit kinds already exist, all tier 3).</dd>
+      <dt>Checks</dt><dd>mech_check part m19 (training, the three stages, the tester given once whichever of M15 and M19 comes first), machine_check, controller_check pick (relay and battery panels get the ring; A works) and reach (the tester's steps).</dd>
+    </dl>
+  </article>
+
+  <article class="piece" id="s54">
+    <header><h3>S5-4 M18 Shutdowns</h3><span class="phase">P5_M18</span><span class="phase">Mechanics seat B, with the sim engineer</span><span class="phase">5 turns</span></header>
+    <p>The heart of Tier 3 and the biggest new screen. Its own builder from the start.</p>
+    <dl>
+      <dt>The training</dt><dd>Thursday Day 18, 09:00-12:00, Calder, at the Deck 6 port junction (<code>j</code>): plan a real one for tomorrow together.</dd>
+      <dt>Which jobs</dt><dd>From then, some of your Tier 3 power jobs need the power off: a repair on a junction, power junction, inverter or battery bank. 24w marks them when it sees them on the board for you (<code>j.shut</code>), without changing section 17. They can't be done until booked.</dd>
+      <dt>The planning screen</dt><dd>A new tab in the Works app ("Shutdowns"), added through 24 core's <code>worksTabAdd</code> (no edit to section 19). It lists the jobs that need one; for each: the branch and what it feeds (from <code>SHUT_BRANCHES</code>), tomorrow's hours with who'd be affected at each (read from tomorrow's day plans: who's in those rooms, a meal, a tradition); an hour picker (previous and next hour buttons, never held); "Warn" beside each person (a notice to their device, and a line from them); what keeps power (two or three choices from the branch's <code>keep</code>); Book and Cancel. Meal hours and traditions show plainly (question 3).</dd>
+      <dt>In person</dt><dd>Brennan before a galley one: a talk option on Brennan, "About tomorrow's shutdown". Not told in person by 22:00, he grumbles the next day (a line, a small reputation dip); never a failure.</dd>
+      <dt>The crew's day</dt><dd>At 22:00 the booking settles into <code>sd.set[tomorrow]</code> and is saved. Tomorrow's plans read it through one hook in section 14, <code>sdPlanShut(d, occ)</code>, copying <code>recPlanShut</code>: the booked rooms, minus the kept ones, are closed for that hour with the same "closed" room rule the comet and the storm use, so the crew go elsewhere (the gym class moves, the laundry waits). A plan made before 22:00 is marked and made again once the record settles. Nothing reads the booking live.</dd>
+      <dt>The day itself</dt><dd>At the booked hour: the arrow to the junction, switch off (the junction room goes dark; the crew in the affected rooms say so in their bubbles), the job, bring it back. Missed the hour: the booking lapses, the crew's day was changed for nothing (a grumble, a reputation dip), book again.</dd>
+      <dt>Touches</dt><dd>24w (new: the screen, bookings, the day); section 14 (one hook in the room rules gathering: the sim engineer owns and reviews it); 24 core (<code>worksTabAdd</code> call only); the page's CSS for the new tab (the HUD seat reviews).</dd>
+      <dt>Checks</dt><dd>mech_check part m18 (book, warn, keep, carry out, miss); day_check on a shutdown day (Day 19, with a booking made on Day 18) and the same day planned before and after 22:00 coming out identical; food_check with a galley shutdown at dinner; machine_check; saves_check (a save with a booking not yet settled, and one after); controller_check reach (the whole planning screen); cadet_test identical off.</dd>
+    </dl>
+  </article>
+
+  <article class="piece" id="s55">
+    <header><h3>S5-5 M20 The sensor array</h3><span class="phase">P5_M20</span><span class="phase">Mechanics seat A (after S5-3); deck architect for the spots</span><span class="phase">2 turns</span></header>
+    <dl>
+      <dt>What</dt><dd><code>WORK_MECH.m20</code> in 24x. Friday Day 19, 10:00-12:00, Hana Mori with Calder, in Deck 2's array room (<code>A</code>: <code>2-array-1</code>, <code>2-racks-1</code>, <code>-2</code>). You're given the calibration rig (<code>arrayrig</code>). "Pick the star" card: Mori names three; you pick one; you calibrate against it with tuning's dial (24e's turn control, already pad-ready); replace a failing module. Grows: one sensor; a full sweep; readings that feed Survey (a friendship moment with Mori). If you logged that star (24t), a line says so.</dd>
+      <dt>Spots</dt><dd>The deck architect adds two places to Deck 2 in a new <code>// P5 places</code> block at the end of its places (the split plan's name for it) (Mori at the rack, you at the array panel) and checks them with deck_check.</dd>
+      <dt>Your booked shutdown</dt><dd>On Day 19 after lunch, from S5-4: no code here; it just must not clash (the training ends at 12:00).</dd>
+      <dt>Touches</dt><dd>24x (new); section 4d (Deck 2 places, deck architect); 24t (one read of your star log, through a <code>typeof</code>-guarded call).</dd>
+      <dt>Checks</dt><dd>mech_check part m20, deck_check (Deck 2), machine_check, controller_check pick (the rack) and reach ("Pick the star").</dd>
+    </dl>
+  </article>
+
+  <article class="piece" id="s56">
+    <header><h3>S5-6 P4, P5, P9 and the old-mysteries board</h3><span class="phase">P5_CASES5</span><span class="phase">Puzzles seat; deck architect for the board</span><span class="phase">5 turns</span></header>
+    <dl>
+      <dt>Cases</dt><dd>In 24k's slot: <code>CASE_KINDS.p4</code> (Which gauge is lying?, from Day 17, a word from Torres, needs the scanner), <code>CASE_KINDS.p5</code> (Follow the line: M9's later stages; its power stage needs the conduit tester, so it waits for M19), <code>CASE_KINDS.p9</code> (The clash: its fix moves a crew routine, as the plan's laundry wash to 08:00; with <code>P5_M18</code> on it can also be a shutdown hour that clashes with someone's routine). The T3 band exists (<code>CASE_BANDS.T3</code>); <code>CASE_RATE</code> and <code>CASE_MAX</code> for a senior exist too.</dd>
+      <dt>The board</dt><dd>The old-mysteries board, from Sunday Day 21, in the Works bay beside the job board: a corkboard prop (the deck architect, in a new <code>// P5 places</code> block for Deck 5), tapped like the job board (through 15b's existing place use; the interactions engineer reviews). It lists five old cases (fixed, written by the head writer, their order from <code>schedU</code> key 854); take one, solve it when you like, a small reputation gain and a line in the Chief's notes.</dd>
+      <dt>Touches</dt><dd>24k (its slot); section 4d (the board's prop and place); section 15b (the board's tap, one entry).</dd>
+      <dt>Checks</dt><dd>puzzle_check parts p4, p5, p9, board (solvable, the fewest-clues rule, the P9 shutdown variant only with P5_M18); interactions_check (the board's tap); deck_check (Deck 5 calls); controller_check pick (the board) and reach (its case list and Take).</dd>
+    </dl>
+  </article>
+
+  <article class="piece" id="s57">
+    <header><h3>S5-7 Words</h3><span class="phase">no switch (words are gated by the keys their code asks for)</span><span class="phase">Head writer</span><span class="phase">2 turns</span></header>
+    <p>All the words in section 10 of this page, in <code>content/works/</code> (and the three existing lines to change), baked with <code>content_gen.py</code>. Each builder works with stand-in text in its code until then (the fallbacks in <code>worksText</code> / <code>promoSay</code>), so nobody waits on the words.</p>
+    <dl><dt>Checks</dt><dd>check_fast (words baked, names), lines_check, controller_check reach (labels only, no new buttons).</dd></dl>
+  </article>
+</section>
+
+<section id="order">
+  <h2>6. Order, seats and who can work at once</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>When</th><th>Works career engineer</th><th>Mechanics seat A</th><th>Mechanics seat B</th><th>Puzzles seat</th><th>Others</th></tr></thead>
+    <tbody>
+      <tr><td>Start</td><td>S5-1 turn 1 (the skeleton), merged at once</td><td>reads S5-3's targets</td><td>reads the planner hook with the sim engineer</td><td>reads 24k's case engine</td><td>Head writer starts the promotion's words from section 10</td></tr>
+      <tr><td>Then</td><td>S5-1 turns 2-3, then S5-2 (4 turns)</td><td>S5-3 (2 turns), then S5-5 (2 turns)</td><td>S5-4 (5 turns)</td><td>S5-6 (5 turns)</td><td>Deck architect: Deck 2 spots and the board (1-2 turns); head writer: the rest</td></tr>
+      <tr><td>End</td><td colspan="5">Reviews as each piece lands (two reviewers); the build master merges into staging; the full six-runner round; your playtest; then <code>P5_STEP5</code> on.</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>Builders at once: four</b>, plus the deck architect part-time and the head writer. A fifth builder doesn't help: the only piece that could split is S5-4, and its screen, bookings and planner hook share one save shape and one reviewer's head. If you want it faster, the one useful extra is a second mechanics seat taking S5-5 from seat A, which saves about one day.</p>
+  <p><b>Rounds</b> (the full round, about 30 minutes on six runners): one after S5-2 if you want to play the promotion early (question 1), and one at Step 5's end before the switch-on.</p>
+</section>
+
+<section id="overlap">
+  <h2>7. Where pieces touch the same code</h2>
+  <p>Kept as small as possible so parallel work merges cleanly. Everything not in this list is a piece's own new section or slot.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Place</th><th>Who touches it</th><th>How it stays apart</th></tr></thead>
+    <tbody>
+      <tr><td>Section 13 switch lines, <code>CAREER_LADDER</code>, <code>WORK_BANDS</code>, <code>WORK_TOOLS</code></td><td>S5-1 only</td><td>Written once in turn 1; the others only read them</td></tr>
+      <tr><td>Section 14</td><td>S5-2 (one line in the day list), S5-4 (one hook in the room rules)</td><td>Different functions; the sim engineer reviews both</td></tr>
+      <tr><td>24 core</td><td>S5-1 (Training tab hook), S5-2 (<code>worksEscort</code> line), S5-4 (<code>worksTabAdd</code> call, in 24w)</td><td>One line each, different functions</td></tr>
+      <tr><td>Section 4d</td><td>S5-5 (Deck 2), S5-6 (Deck 5)</td><td>Each deck's own new <code>// P5 places</code> block; the deck architect does both</td></tr>
+      <tr><td>Section 25 (Dev mode)</td><td>S5-1 (presets), S5-2 (the beats list)</td><td>Same seat; S5-2 after S5-1</td></tr>
+      <tr><td>Section 22 (words)</td><td>Head writer only</td><td>Builders use stand-ins</td></tr>
+      <tr><td>plans/build-table.md</td><td>Everyone</td><td>One row each under your work's name, as always</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="checks">
+  <h2>8. Checks: new parts, new days, the rounds</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Check</th><th>What's added</th><th>By</th></tr></thead>
+    <tbody>
+      <tr><td>career_check</td><td>Tier 2 re-tuned bands, Tier 3 bands; a steady player Senior Officer on Day 16; a slow player in order; switch off identical</td><td>S5-1, S5-2</td></tr>
+      <tr><td>promo_beats_check</td><td>Seven Tier 3 parts (S5-2); the Tier 2 parts with <code>P5_STEP5</code> on</td><td>S5-2</td></tr>
+      <tr><td>mech_check</td><td>Parts ps, m19, m18, m20</td><td>S5-1, S5-3, S5-4, S5-5</td></tr>
+      <tr><td>puzzle_check</td><td>Parts p4, p5, p9, board</td><td>S5-6</td></tr>
+      <tr><td>day_check</td><td>New event days 15 (the Tier 3 test) and 16 (Senior Officer); Day 19's entry now means "the sensor array and a booked shutdown" (no night shift); Day 20 (the Captain's table at 19:30 again). Added to <code>EVENT_DAYS</code> and tools/affected.py</td><td>S5-1</td></tr>
+      <tr><td>arrows_check, dev_arrow_check</td><td>The week part over Days 14-17; the career arrow through the new steps</td><td>S5-2</td></tr>
+      <tr><td>saves_check</td><td>A save mid-promotion; a save with an unsettled shutdown booking</td><td>S5-2, S5-4</td></tr>
+      <tr><td>controller_check</td><td>reach, pick, and a pad-played Day 16 (section 9 of this page)</td><td>each piece</td></tr>
+      <tr><td>bigevents_check, events_check</td><td>The moved rows; the guard's choices with them; nothing changes with the switch off</td><td>S5-1</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Runner shares: the two new day_check days go to the lightest shares (today CR2 at about 38 minutes and CR6 at about 40); the build master sets it in plans/testing-guide.md's table. Every new part must exit 1 on a fail and say "not yet" (never a pass) while its piece's switch is off.</p>
+</section>
+
+<section id="pad">
+  <h2>9. The game controller, piece by piece</h2>
+  <p>Section 26 is still off in the live game (<code>PAD_ON</code> false); controller_check switches it on in a copy. Its "reach" part finds every clickable by mouse first and then must reach and press each by pad, so each piece must also give the check a way to open its new panel (a Dev-mode state or the check's own setup), or the sweep never sees it. Rules for new UI: plain buttons inside a panel the controller already walks (<code>padPanel</code>), no custom drag or slider, nothing held, the highlight is the page's real focus.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Piece</th><th>What the pad must reach or pick</th><th>How the check gets there</th></tr></thead>
+    <tbody>
+      <tr><td>S5-1</td><td>The Training tab's Tier 3 rows (read-only, in order)</td><td>A Dev preset on Day 14</td></tr>
+      <tr><td>S5-2</td><td>The urgent notices (offer, result, bar); the board's ring and Take it; the result and bar meetings (Next, replies); the cake's slice; the toast meeting</td><td>Presets on Days 14, 15, 16, 17; a whole Day 16 by pad</td></tr>
+      <tr><td>S5-3</td><td>Relay and battery panels (ring, A); the tester's steps</td><td>A preset on Day 17</td></tr>
+      <tr><td>S5-4</td><td>The whole planning screen: the job list, the hour buttons, each Warn, the keep choices, Book, Cancel; Brennan's talk option</td><td>A preset on Day 18 after the training, with the Works app's Shutdowns tab open</td></tr>
+      <tr><td>S5-5</td><td>The array rack (ring, A); "Pick the star"; the dial (already pad-ready)</td><td>A preset on Day 19 at 10:00</td></tr>
+      <tr><td>S5-6</td><td>The board (ring, A); its case list and Take; P4, P5, P9 in the existing case panel</td><td>A preset on Day 21</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="words">
+  <h2>10. Words for the head writer</h2>
+  <p>New files in <code>content/works/</code>, keys listed in <code>content/works/keys-p5.md</code>. Counts are the least the code needs; more variety is welcome. Voices on file; the plan's section 8 has samples. Every Veyli is they/them. No emojis.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>File</th><th>What</th><th>About how many</th></tr></thead>
+    <tbody>
+      <tr><td>promo-t3.lines</td><td>The offer (Calder's word; Mail "Subject | body"; the notice); crew chatter before (by days aboard, the bay and the mess); friends' luck (bubble and chat card) and two friends' Mails; Calder at each test step (<code>train.t3.plan</code>, <code>.warn</code>, <code>.off</code>, <code>.breaker</code>, <code>.back</code>, <code>.again</code>); the two warned people's replies; passing; the 06:00 Mail; the bay after</td><td>about 60 lines</td></tr>
+      <tr><td>promo-t3 meetings</td><td><code>pu3.result</code> (Calder, about 6 lines and 2 replies); <code>pu3.bar</code> (the Captain about 5, Vance's dry line, friends 3); Brennan's cake (2); <code>pu3.toast</code> (the Captain's toast about 4, Vance 1); the framed menu's and the certificate's text</td><td>about 25</td></tr>
+      <tr><td>ps.lines</td><td>Power safety: Calder's lesson at the junction</td><td>about 8</td></tr>
+      <tr><td>m19.lines</td><td>Calder's training (<code>train.m19.*</code>), the tester given, the drill's calls; tap text for the relay and battery panels</td><td>about 20</td></tr>
+      <tr><td>m18.lines</td><td>Calder's training; the planning screen's labels (about 20 short ones: the tab, Feeds, the hour buttons, Warn, Keeps power, Book for tomorrow, Cancel, confirmations); warn notices (generic, plus Brennan in person, 3); the crew next day (thanks and grumbles, 8); the 22:00 Mail confirming</td><td>about 50</td></tr>
+      <tr><td>m20.lines</td><td>Mori and Calder's training; "Pick the star" (five stars and a line each, matching 24t's star list); the rig given; the friendship moment</td><td>about 20</td></tr>
+      <tr><td>cases.lines (additions)</td><td>P4, P5, P9 case templates (symptoms, suspects, clues), Torres's P4 word, Calder's P5 and P9 words; the five old mysteries (a title and a line each) and the board's tap text</td><td>about 45</td></tr>
+      <tr><td>Short UI words</td><td>Schedule and Tracked rows ("Your Tier 3 test", "Your result, 08:15", "The Captain, 16:30", "The toast, 19:00"), the Record's milestone, the Training tab's rows, mech names (<code>works.mech.ps</code>, <code>.m19</code>, <code>.m18</code>, <code>.m20</code>, <code>.mys</code>)</td><td>about 20</td></tr>
+      <tr><td>Existing lines to change</td><td><code>content/addresses/friday-d19.address</code> line 47 ("moved up to Deck 2": with v3.1 a Senior Officer stays in 4-23); <code>friday-d26.address</code> line 33 ("a Senior Officer today, on Deck 2"); <code>content/banks/event-comet.lines</code> near line 98 (the Captain's line to "a Senior Officer's Deck 2 window": on Day 22 you're a Senior Officer still in 4-23)</td><td>3</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="calls">
+  <h2>11. Judgement calls (overrule any of them)</h2>
+  <ul>
+    <li><b>The Tier 3 offer's second need.</b> The plan says "Relied on and Power safety"; the game has no Power safety row. This spec adds a short one (question 2); the other choice is to use Team jobs (Day 11), which every Officer has done by Day 14.</li>
+    <li><b>The test's two warnings.</b> The two people come from the junction branch's rooms on that day's fixed roster; if one can't be found within 30 minutes, Calder tells them, so the test never stalls.</li>
+    <li><b>Shutdown branches, not whole junctions.</b> A shutdown turns off one branch (one to three rooms), never a deck, so a mistake costs a grumble, not half the ship. The fed rooms don't change their lights (only the junction room goes dark): per-room emergency lighting doesn't exist today, and adding it risks draw calls and pixel changes on every deck.</li>
+    <li><b>Step 6's held hours are moved now.</b> Leaving the old night rows on Days 19-20 would keep the Captain's table early on Day 20 and block the guard there; the plan wants them gone in Step 5.</li>
+    <li><b>Four new sub-sections, 24u-24x.</b> Each mechanic owns its own section like 24a-24t; Step 6 gets a section 28 because the letters run out.</li>
+    <li><b>The words come last but nobody waits.</b> Builders use stand-ins; the head writer starts with the promotion's words, the ones you'll see first.</li>
+  </ul>
+</section>
+
+<section id="questions">
+  <h2>12. Your questions</h2>
+  <div class="q">
+    <h3>1. Play the Senior Officer promotion early?</h3>
+    <p>S5-2 is about a day and a half in. It can get its own full round and a Dev link (with <code>#p5s5</code>) so you can play the offer, the test, the result, the bar and the toast before the rest of Step 5 is done. The live game doesn't change either way.</p>
+    <p class="rec"><b>Recommended: yes, a Dev link after S5-2.</b> Your notes then shape the Engine Specialist promotion too. It costs one extra round (about 30 minutes of the runners).</p>
+  </div>
+  <div class="q">
+    <h3>2. "Power safety" before the Tier 3 test</h3>
+    <p>The plan's offer needs "Relied on" as an Officer and Power safety, but there's no Power safety lesson in the game.</p>
+    <p class="rec"><b>Recommended: a short lesson</b> with Calder at a Deck 6 junction, offered from Day 12 (about 20 minutes, watch-only like P3). It sets up the junction you'll shut down in the test. The other choice: count Team jobs instead, and say nothing about power until the test.</p>
+  </div>
+  <div class="q">
+    <h3>3. Booking a shutdown over a meal or a tradition</h3>
+    <p>The planning screen shows who'd be affected at each hour. What if you pick dinner, or the gym class?</p>
+    <p class="rec"><b>Recommended: allowed, with consequences.</b> The screen marks meal and tradition hours plainly; if you book one anyway, the crew grumble the next day and your reputation dips a little, and it can turn up later as a P9 clash. The other choice: those hours can't be picked at all.</p>
+  </div>
+  <form id="answers">
+    <div id="rows"></div>
+    <div class="row"><h3>Anything else about Step 5's build?</h3><textarea id="notes" aria-label="Anything else"></textarea></div>
+    <button type="submit">Save my answers</button>
+    <p class="status" id="status" role="status">Loading any saved answers...</p>
+  </form>
+</section>
+
+</div>
+<script>
+(() => {
+  // answers, kept in the page's own store at answers/user (the same shape as the plan page's form)
+  const items = [
+    ['early', '1. Play the Senior Officer promotion early?', [['yes', 'Yes, a Dev link after S5-2 (recommended)'], ['no', 'No, wait for all of Step 5']]],
+    ['safety', '2. Power safety before the Tier 3 test', [['lesson', 'A short lesson with Calder (recommended)'], ['team', 'Count Team jobs instead']]],
+    ['meals', '3. Booking a shutdown over a meal or a tradition', [['allow', 'Allowed, with consequences (recommended)'], ['block', "Those hours can't be picked"]]],
+  ];
+  const rows = document.getElementById('rows');
+  for (const [k, name, opts] of items) {
+    const r = document.createElement('div'); r.className = 'row';
+    const h = document.createElement('h3'); h.textContent = name; r.appendChild(h);
+    const c = document.createElement('div'); c.className = 'choices'; c.setAttribute('role', 'radiogroup'); c.setAttribute('aria-label', name);
+    for (const [v, t] of opts) {
+      const lab = document.createElement('label'); lab.className = 'opt';
+      const i = document.createElement('input'); i.type = 'radio'; i.name = k; i.value = v; i.id = k + '-' + v;
+      lab.appendChild(i); lab.appendChild(document.createTextNode(t)); c.appendChild(lab);
+    }
+    r.appendChild(c);
+    const n = document.createElement('input'); n.type = 'text'; n.id = k + '-note'; n.placeholder = 'Notes (optional)';
+    n.setAttribute('aria-label', name + ' notes'); r.appendChild(n);
+    rows.appendChild(r);
+  }
+  const form = document.getElementById('answers'), status = document.getElementById('status');
+  let ref = null;
+  const fill = d => {
+    if (!d) return;
+    for (const [k] of items) {
+      const a = d[k] || {};
+      for (const i of form.querySelectorAll('input[name="' + k + '"]')) i.checked = i.value === a.choice;
+      document.getElementById(k + '-note').value = a.note || '';
+    }
+    document.getElementById('notes').value = d.notes || '';
+  };
+  const read = () => {
+    const o = {};
+    for (const [k, name] of items) o[k] = { name, choice: (form.querySelector('input[name="' + k + '"]:checked') || {}).value || '', note: document.getElementById(k + '-note').value.trim() };
+    o.notes = document.getElementById('notes').value.trim(); o.savedAt = new Date().toISOString(); return o;
+  };
+  (async () => {
+    let db = null;
+    try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+    if (!db) { status.textContent = 'Answers can only be saved when you are signed in on claude.ai. You can still tick and write here.'; return; }
+    ref = db.doc('answers/user');
+    try { const s = await ref.get(); if (s.exists) { fill(s.data()); status.textContent = 'Your saved answers are shown. Change them and save again any time.'; } else status.textContent = 'Nothing saved yet.'; }
+    catch (e) { status.textContent = 'Could not load saved answers. You can still save new ones.'; }
+  })();
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!ref) { status.textContent = 'Saving is not available here. Please send your answers to the lead in chat.'; return; }
+    status.textContent = 'Saving...';
+    try { await ref.set(read()); status.textContent = 'Saved at ' + new Date().toLocaleTimeString() + '. You can change them and save again.'; }
+    catch (err) { status.textContent = 'That did not save (' + (err && err.code || 'error') + '). Please try again, or send your answers in chat.'; }
+  });
+})();
+</script>
