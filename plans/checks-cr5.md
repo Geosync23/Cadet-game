@@ -4,6 +4,29 @@ Check runner 5. Share (plans/testing-guide.md, six-way split): `day_check` Days 
 career. Own `CADET_WORK=/tmp/work-cr5`, `CADET_CHROME=/opt/pw-browsers/chromium`, one browser check at a time, each
 on a copy of the game in `/tmp/work-cr5/new.html` (sha256 checked after copying).
 
+## 0.93.2 full round, round 2 (2026-10-26, started 15:58 UTC, for BM18 and lead 38)
+
+- Candidate: `claude/staging-0.93.2` d9c7e5f0 (round 2: FX26's game fix for CR6's m9, and FX24's workbench-pin fix).
+  Checks run from a worktree of d9c7e5f0 (its own scripts).
+- `starship-cadet.html` sha256 `c99ea59cc753e58b98f06f7fbc0d51eb8cac1da39849f881533adb96917dd5d3`: matches BM18's.
+- OLD: 0.93.1 b957b92d.
+- events_check and sound_check handed to CR6 (BM18's split; not started here, scripts moved out first and put back
+  afterwards). CR6's events_check crashed on a page-load timeout beside its own lanes (no test line ran), and its
+  re-run alone was passed to CR1 (CR6, CR1 and BM18 agreed). CR1 offered to take more; declined (only ~8 min left).
+
+| Check | Result | Exit | Time | Key lines |
+|---|---|---|---|---|
+| `interactions_check.py BUILD` | OK | 0 | 2676 s | `INTERACTIONS CHECK OK` |
+| `day_check.py BUILD 21` | OK | 0 | 289 s | `DAY CHECK OK`; draw calls peak 225 / 195 / 295 / 237 on Decks 1-4 (budget 450) |
+| `day_check.py BUILD 22` (the comet) | OK | 0 | 291 s | `DAY CHECK OK` |
+| `day_check.py BUILD 27` | OK | 0 | 290 s | `DAY CHECK OK` |
+| `career_check.py BUILD` | **known (backlog 12 / FX28-1)** | 1 | 157 s | only `FAIL busy: "Relied on" before Day 5` (numbers as in round 1); ship.works 2526 bytes |
+| `promo_sight_check.py BUILD` | OK | 0 | 16 s | `PROMO SIGHT CHECK OK` |
+| `events_check.py BUILD` | with CR1 (re-run alone) | | | (CR1's result to follow) |
+| `sound_check.py BUILD` | OK (run by CR6) | 0 | 513 s | `SOUND CHECK OK` (CR6) |
+
+**CR5's own part, round 2: OK** (interactions, Days 21, 22, 27, promo_sight OK; career the known line only).
+
 ## 0.93.2 full round, first pass (2026-10-26, started 11:28 UTC, for BM18 and lead 38)
 
 - Candidate: `claude/staging-0.93.2` 41c8a7e0 (0.93.2; switches on: TRAD_0932, EV_COMET, INSPECT, STORM_SAT,
