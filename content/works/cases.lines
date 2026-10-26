@@ -39,3 +39,137 @@
 - Read every note. They're not all on the card. Check the machine.
 == chief.p3.3
 - The scanner sees what's worn. The notes see what's been tried.
+
+// ---- Pillar 5 Step 5 (SW3, 2026-10-26; S5-6, 24k's slot; spec section 10): head-scratchers P4, P5, P9 and the
+// old-mysteries board. Placeholders as above, plus {thing} a gauge's name ("the panel gauge"), {word} a reading word
+// ("high", "normal", "low"), {name} a person, and in P9 {thing} what they do ("the laundry wash"), {time} an hour, {when} as P1's.
+
+// P4 Which gauge is lying? (from Day 17, Torres's word, needs the scanner): two gauges disagree; one of them is wrong
+== works.mech.p4
+- Which gauge is lying?
+== next.p4
+- Coming up: Which gauge is lying? Torres has one for you.
+== next.wait.p4
+- Which gauge is lying? Torres is waiting with a pair that disagree.
+== case.title.p4
+- {machine}: two gauges disagree.
+== case.p4.head
+- What each one says
+== case.p4.gauge
+- {thing} reads {word}
+== case.p4.scan
+- Your scanner reads {word}
+== case.p4.call
+- Call it: {thing} is lying?
+== case.p4.right
+- Fixed. New gauge in. Now they agree.
+== case.wrong.p4
+- Replaced {thing}. They still disagree. The other one was lying.
+== case.hint.p4.1
+- A third reading settles it. What does your scanner say?
+== chief.p4.title
+- Two gauges
+== chief.p4.1
+- Two gauges, two answers. Get a third. The odd one out is lying.
+== chief.p4.2
+- A gauge that reads the same all day is stuck, not steady.
+
+// P5 Follow the line (M9's later stages; its power stage needs the conduit tester, so it waits for M19)
+== works.mech.p5
+- Follow the line
+== next.p5
+- Coming up: Follow the line. A fault somewhere along a whole line.
+== next.wait.p5
+- Follow the line: the Chief has a long one for you.
+== case.title.p5
+- {machine} {shows}. The fault is somewhere up the line.
+== case.p5.stop
+- {machine}: {word}
+== case.p5.power
+- A power line. Test each length with the conduit tester.
+== case.p5.notester
+- This one's a power line. You'll need the conduit tester first.
+== case.hint.p5.1
+- Start in the middle. Fine there? The fault is further on.
+== case.wrong.p5
+- New {part} in at {machine}. The line still {shows}. It's further along.
+== chief.p5.title
+- Long lines
+== chief.p5.1
+- Halve it. Then halve it again. Five tests find one fault in thirty.
+== chief.p5.2
+- Power's the same as water. The reading drops where the trouble is.
+
+// P9 The clash: a fault only when two routines overlap; its fix moves a crew routine (or, with shutdowns, an hour)
+== works.mech.p9
+- The clash
+== next.p9
+- Coming up: The clash. A fault that only happens when two things do.
+== next.wait.p9
+- The clash: the Chief has a fault that won't happen on its own.
+== case.title.p9
+- {machine} {shows}, but only {when}. Nothing's worn.
+== case.p9.head
+- Who's using it then
+== case.p9.who
+- {name}: {thing}, {time}
+== case.p9.move
+- Ask {name} to move {thing} to {time}?
+== case.p9.moved
+- {name} moves {thing} to {time}. Nothing broke. Nothing needed fixing.
+== case.p9.shut
+- Your shutdown hour clashes with {name}'s {thing}. Move one of them.
+== case.hint.p9.1
+- Every part is fine. So what else happens at that hour?
+== case.wrong.p9
+- New {part} in. Same hour tomorrow, same trouble. It isn't a part.
+== chief.p9.title
+- Clashes
+== chief.p9.1
+- Some faults aren't parts. They're two good things at the same time.
+== chief.p9.2
+- The fix is a conversation. Ask nicely. Offer them a better hour.
+
+// ---- the old-mysteries board (from Sunday Day 21, the Works bay beside the job board; five cases, order by schedU 854)
+== mys.board
+- Old mysteries
+== mys.board.tap
+- Old cards, pinned years ago, some in Calder's hand. Nobody's cracked them.
+== mys.board.none
+- You've taken them all. The board is bare. Torres says that's a first.
+== mys.take
+- Take this one
+== mys.taken
+- Taken. It's in your Fault notes, under the Chief's.
+== mys.solved
+- Solved. The card comes off the board. Calder adds a line to her notes.
+== mys.rep
+- Works reputation up: an old one cracked.
+== mys.chief
+- Old mystery cracked: {title}. Solved by {me}, Day {n}.
+== mys.1.title
+- The Tuesday hum
+== mys.1.line
+- A hum in the Deck 3 pipes, every Tuesday at four. Only Tuesdays. Seven years.
+== mys.2.title
+- The cold cabin
+== mys.2.line
+- One cabin on Deck 4 is always two degrees colder. Three crews have tried.
+== mys.3.title
+- The lift that waits
+== mys.3.line
+- The lift stops on Deck 3 by itself, late at night, and opens. Nobody's there.
+== mys.4.title
+- Calder's clock
+== mys.4.line
+- The bay's wall clock loses a minute a week. New clock, same minute.
+== mys.5.title
+- The garden flicker
+== mys.5.line
+- The garden lights dip for one second at dawn. Every dawn. Plants don't mind. Calder does.
+== works.mech.mys
+- The old-mysteries board
+== next.mys
+- Coming up: the old-mysteries board, in the Works bay. Old cases for a quiet day.
+== next.wait.mys
+- The old-mysteries board is up, beside the job board. Take one when you like.

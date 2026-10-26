@@ -1,0 +1,10 @@
+@bank all
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-6): P9, the crew member you ask to move their routine (kind p9.move, a bubble,
+// 60 characters): they agree. The builder may set flag p9.move.grumble for a reluctant yes.
+== p9.move
+- Eight instead? Fine. If it stops the noise, fine.
+- Move my wash? Course. Didn't know it caused bother.
+- Happy to. I'm up early anyway.
+? flag:p9.move.grumble
+- Fine. But I'm telling everyone it was your idea.   #funny
+- Earlier? Oh, go on, then. For the ship.

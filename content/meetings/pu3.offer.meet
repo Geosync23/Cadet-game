@@ -1,0 +1,20 @@
+@meeting pu3.offer
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-2's offer; spec "The beats", the offer): Calder comes to find you wherever you
+// are, the moment you're Relied on as an Officer and Power safety is done (from Day 14; the test is your next workday on
+// or after Day 15). This one is for a test TOMORROW; pu3.offer.monday is for a test on Monday (offered on a Friday or a
+// Saturday); pu3.offer.party is the storm party in the bow lounge (Day 14). The urgent notice and the Mail follow it.
+// Two replies; 24u can store pu3.reply 1-2 by the choices' order (keen, steady).
+title: Your next test
+from: Chief Ines Calder
+gist: Calder told you in person: your Tier 3 test is tomorrow at 09:00, a junction shutdown on Deck 6. Pass it and you're a Senior Officer.
+== lines
+calder > you: There you are. One minute.   [gesture]
+calder: Relied on. Power safety, done. That's all of it.
+calder: Tomorrow. Your next test. Tier 3. Nine o'clock, on the board.
+calder: A junction on Deck 6. You switch it off, change a breaker, bring it back. Safely.
+? choice
+* I'll be there at nine. Ready.   rel:calder+2
+  calder: I know. Eat breakfast first. Shutdowns go wrong on empty stomachs.   [nod]
+* A shutdown. People will notice.   rel:calder+2
+  calder: They will. That's the test. Who you tell, and when.   [nod]
+calder: Pass it and you're a Senior Officer. Go to bed at a sensible hour.

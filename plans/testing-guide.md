@@ -239,6 +239,8 @@ Days 12-13). From the game's calendar (`EV_CALENDAR`, `EV_BEATS`, `ROSTER_ROTATI
 | 7 | Crossing the Line (Sunday; its Mail on Day 6) | `day7` |
 | 12 | the ion storm's front (Friday; the warning is Day 11) | `day12` |
 | 13 | the storm's Saturday (the rec deck shut) | `day13` |
+| 15 | Pillar 5 Step 5: your Tier 3 test (09:00-15:00, with `P5_STEP5` on; off, a plain Monday) | `day15` |
+| 16 | Pillar 5 Step 5: your result 08:15 and the Senior Officer's bar 16:30 (with `P5_STEP5` on; also the visit's warning with the swap) | `day16` |
 | 17 | the diplomatic visit's greeting (Wednesday 10:00; the visit is Days 16-19 since the event swap, 0.93.2, `EV_SWAP_ON`; was `day16`, the comet's old day) | `day17` |
 | 19 | a Friday with its own address, and your first night shift | `day19` |
 | 21 | the first crew rotation (the Tern) | `day21` |

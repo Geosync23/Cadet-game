@@ -30,7 +30,7 @@ marrow: There's still a scorch mark in the relay room. Chief Calder wants to kee
 ? myrank:specialist
 marrow > you: {me}: a junior four weeks ago, an Engine Specialist today. Rare.   #warm
 ? myrank:senior
-marrow > you: {me}: a junior four weeks ago, a Senior Officer today, on Deck 2.   #warm
+marrow > you: {me}: a junior four weeks ago, a Senior Officer today. The junctions behave for you.   #warm
 ? myrank:officer
 marrow > you: {me}: a junior four weeks ago, an Officer today, with your own key.   #warm
 ? myrank:junior
