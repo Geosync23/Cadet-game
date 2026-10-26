@@ -24,6 +24,7 @@
 #   games     Tiles to the end, and Lightdisc (games)
 #   unplug    disconnect: stop walking at once, pause if used lately; reconnect resumes (deck, marks)
 #   odd       a pad that doesn't report the standard layout, and two pads (deck)
+#   vessel    A Veyli vessel needs help by pad, in a copy switched on: Calder and the sheet, the ramp's replies, the chain, the helper card and the making steps (VB1)
 # --inventory: with reach, runs its touch half even before the panels package (the list of what there is to reach).
 # --selftest: runs the parts on a copy with this check's own small stand-in driver (to prove the parts before section 26).
 # --mutants: plants faults in copies of the game (each part's own list) and checks the part FAILS on every one.
@@ -39,7 +40,7 @@ ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
 GAME = pathlib.Path(ARGS[0])
 ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'reach', 'day', 'games', 'unplug', 'odd',
-             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse']
+             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'vessel']
 PARTS = ARGS[1:] or ALL_PARTS
 SHOTS = WORK / 'test' / 'ctl_shots'; SHOTS.mkdir(parents=True, exist_ok=True)
 ARGS_GL = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
@@ -2308,10 +2309,91 @@ OLD_NEEDS = {'off': ['base'], 'quiet': ['base'], 'base': ['base'], 'deck': ['dec
              'drop': ['marks'], 'settings': ['settings'], 'a11y': ['panels', 'pick'], 'firstuse': ['base']}
 OLD_NAME = {'pick': 'pick1'}   # CT1's pick beside this check's own
 
+# Part "vessel" (VB1 for lead 40; plans/veyli-vessel-spec.html section 7): A Veyli vessel needs help played by pad, in a
+# copy with EV_VESSEL_ON switched on, at the spec's four starting points (set on paper, as Dev mode's presets would):
+# Day 27 10:00 (the ring on Calder and A: her scene, its reply by the D-pad and A; then the ring on the sheet and A signs),
+# Day 28 09:25 (at the ramp's foot: the scene and its three replies by pad), 12:55 (the ring on Zeke and A joins the chain),
+# Day 29 09:15 (Calder's word, the helper card's two picks by D-pad and A, then the making steps: A on the fabricator and
+# the lathe as the ring names them, the stock card by pad) to the part done
+VESSEL_START = r"""((t) => { SHIP.event = null; SHIP.eventLog.length = 0; for (const r of evCalPlan()) if (r.id !== 'veyliVessel') SHIP.eventLog.push({ id: r.id, startDay: r.day, endDay: r.day + SHIP_EVENTS[r.id].days, band: 'smooth', threads: {}, mine: {} });
+  MEETINGS.length = 0; EV_DAYS.clear(); SHIP_DAYS.clear(); skipTo(t); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; return true; })"""
+def vessel_at(r, deck, x, z):
+    r.ev(f"(() => {{ goToDeck({deck}); player.obj.position.copy(cellPos({x}, {z})); target.copy(player.obj.position).setY(.7); player.stop(); }})()"); r.step(10)
+def pad_scene(r, frames=40):
+    """a scene by pad: A goes on; at a reply, the D-pad to the first and A (the panel's buttons, as press_in_panel)"""
+    seen = []
+    for k in range(frames):
+        v = r.ev("DIALOGUE ? dialogueView() : (DEV.choose ? { card: true } : null)")
+        if not v: break
+        if v.get('choices') or v.get('card'):
+            res = press_in_panel(r, "[...document.querySelectorAll('#devDlg button.act')][0]"); seen.append('reply ' + res)
+        else: r.press('A'); r.step(4); seen.append('A')
+    return seen
+def part_vessel(pw, src, tag):
+    fails = []
+    vsrc = re.sub(r"^const EV_VESSEL_ON = URL_FLAGS\.has\('evvessel'\);", 'const EV_VESSEL_ON = true;', src, count=1, flags=re.M)
+    if vsrc == src: return ['the build has no EV_VESSEL_ON line (the vessel isn\'t built)']
+    r = Run(pw, vsrc, f'{tag}_vessel', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)")
+    M = lambda k: r.ev(f"SHIP.event && SHIP.event.mine[{json.dumps(k)}] || null")
+    # Day 27 10:00, the Works bay: the ring on Calder and A, her scene, then the sheet
+    r.ev(f"({VESSEL_START})({26 * 1440 + 600})"); vessel_at(r, 5, 15, 3)
+    if not r.ev("!!DIALOGUE"):
+        if not ring_and_A(r, ['calder', 'ines']): fails.append('Day 27: the ring never named Calder')
+    sc = pad_scene(r)
+    if not M('vessel:told'): fails.append(f'Day 27: Calder\'s sheet scene not played by pad ({sc})')
+    sh = r.ev(f"({WHERE_IS})('parts chain sheet')")
+    if not sh: fails.append('Day 27: no parts chain sheet in the Works bay')
+    else:
+        walk_to(r, sh[0], sh[1])
+        if not ring_and_A(r, ['sheet']): fails.append('Day 27: the ring never named the sheet')
+        for k in range(60):
+            r.step(10)
+            if M('vessel:signed'): break
+        if not M('vessel:signed'): fails.append('Day 27: A on the sheet didn\'t sign it')
+    # Day 28 09:25, the ramp's foot: the scene by pad
+    r.ev(f"skipTo({27 * 1440 + 565})"); vessel_at(r, 5, 5, 11)
+    for k in range(40):
+        r.step(50)
+        if r.ev("!!DIALOGUE"): break
+    sc = pad_scene(r)
+    if not M('vessel:met'): fails.append(f'Day 28: the ramp scene not played by pad ({sc})')
+    # Day 28 12:55: the ring on Zeke and A joins the chain
+    r.ev(f"skipTo({27 * 1440 + 775})"); vessel_at(r, 5, 16, 4)
+    for k in range(40):
+        r.step(50)
+        if r.ev("shipNow() % 1440 >= 781 && !!DECK_CREW.find(a => a.p.id === 'torres-zeke' && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) < 4)"): break   # (the chain's on from 13:00: a tap before only gets Zeke's ask)
+    if not ring_and_A(r, ['zeke', 'torres']): fails.append('Day 28: the ring never named Zeke')
+    r.step(30)
+    if not r.ev("SHIP.events.joined.includes('vesselChain@28')"): fails.append('Day 28: A on Zeke didn\'t join the chain')
+    # Day 29 09:15: Calder's word, the helper card, the steps
+    r.ev(f"skipTo({28 * 1440 + 555})"); vessel_at(r, 5, 16, 3)
+    for k in range(20):
+        r.step(50)
+        if r.ev("!!DIALOGUE"): break
+    if not r.ev("!!DIALOGUE"): ring_and_A(r, ['calder', 'ines'])
+    pad_scene(r); r.step(30); pad_scene(r); r.step(30); pad_scene(r)   # the scene, then the card twice
+    if len(M('vessel:helpers') or []) < 2: fails.append(f'Day 29: two helpers not picked by pad ({M("vessel:helpers")})')
+    for k in range(80):
+        if M('vessel:part'): break
+        if r.ev("!!DEV.choose || !!DIALOGUE"): pad_scene(r); continue
+        if r.ev("!!ACT || (SHIP.event.mine['vessel:wait'] || 0) > shipNow()"): r.step(50); continue
+        at = r.ev("(() => { const x = VESSEL_STEPS[SHIP.event.mine['vessel:step'] | 0]; if (!x) return null; const sp = placeSpot(x.at); return [sp.x, sp.z, x.at]; })()")
+        if not at: r.step(20); continue
+        walk_to(r, at[0], at[1])
+        if not ring_and_A(r, ['lathe', 'fabricator']): r.step(30)
+        r.step(20)
+    if M('vessel:part') != 'you': fails.append(f'Day 29: the part not made by pad (step {M("vessel:step")}, part {M("vessel:part")})')
+    joined = r.ev("SHIP.events.joined.includes('vesselChain@28')")
+    print(f"  vessel: signed {M('vessel:signed')}, met {M('vessel:met')}, chain joined {joined}, helpers {M('vessel:helpers')}, part {M('vessel:part')}")
+    if r.errors: fails.append(f'page errors {r.errors[:3]}')
+    r.close()
+    return fails
+
 # parts that need a package: 'not yet' until PAD_BUILT names it
-NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'],
+NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'], 'vessel': ['base', 'deck', 'pick', 'panels'],
          'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck']}
-PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'reach': part_reach, 'games': part_games, 'day': part_day}   # 'reach' joins when the pad half is written
+PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'reach': part_reach, 'games': part_games, 'day': part_day, 'vessel': part_vessel}   # 'reach' joins when the pad half is written
 for k, v in OLD_NEEDS.items(): NEEDS[OLD_NAME.get(k, k)] = v; PART_FN[OLD_NAME.get(k, k)] = legacy(k)
 
 # ---- planted faults --------------------------------------------------------------------------------------------------
