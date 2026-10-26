@@ -173,3 +173,5 @@ so 08:01-09:00 (label up, job not yet on the board) doesn't count; the other thr
 boardLesson's first branch now waits for the job's found time like its second branch already did; promoTestDay's open()
 counts the test only once found. cadet_test vs 0.93.0 df8d58b9 ALL IDENTICAL; day_check 9 OK; arrows_check all parts OK
 (promo queue now leads with promo:testday:9 and promo:test:9; test passed first try).
+Note: the build master is BM18, session_01A3S2VBMYmTt2wCZa8ej7XR (BM17 retired). 0.93.1 merged as claude/staging-0.93.1
+0a2fc617; send verdicts to BM18 and the lead.
