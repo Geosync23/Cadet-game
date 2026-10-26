@@ -29,3 +29,13 @@ Three jobs for 0.93.2, each on its own branch from claude/integration b957b92d (
 Setup as plans/testing-guide.md section 2 (pip install playwright numpy pillow; three r128 and acorn in CADET_WORK;
 CADET_CHROME=/opt/pw-browsers/chromium). Switch-on runs use a copy with the switch flipped by sed. Run long checks in
 separate CADET_WORK folders and separate log files (two runs writing one log file corrupt it).
+
+## 5. claude/doors-3way (lead 39, from claude/integration d9c7e5f0)
+- The Doors setting, three choices (the user): 'all' / 'private' (default) / 'none' in SHIP.device.settings.doors
+  (saved only when not 'private'; an old autoDoors: false loads as 'none'). Private = a door with a bed room either
+  side (adoorPrivate; today the 8 bunk-room doors on Deck 4). Controller: the ring offers a door shut to you, A opens it
+  (padWhat / padTargets; the door's cut-down height near the camera; your own body right by it). Build-number lines
+  not touched (CLAUDE.md: the build master's).
+- Tests: interactions_check's doors part (three modes, old saves), controller_check part 'door'.
+- Gotcha: near the camera the walls and doors are cut down (DOOR_OBJS g.scale.y), so a door's tap box is a floor strip
+  and your own body covers it; any new "find the door on screen" code must allow for both.
