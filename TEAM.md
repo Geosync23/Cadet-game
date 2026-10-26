@@ -1389,3 +1389,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~12:14 UTC: CR4 ~57%: does round 2 then hands over → hire fresh CR4 from plans/handover-check-runner-4.md (claude/checks-cr4 6c404166) after round 2 (not before).
 - ~12:23 UTC: **CR1 NEW FAIL arrows_check "week"** on 0.93.2: from Day 4 (first inspection Thursday) the arrow-following player stays on training m5:ask, never clocks in Days 4, 5, 8; m5/m7/p3 not learned; 0.93.1 OK. CR1 isolating (suspect inspection: Calder walker Day 4).
 - ~12:24 UTC: FX27 saves migrate flake = CHECK, not game (null read by the check's own init before new build ran; Slot 1 = old key, nothing copied/moved/cleared; 20/20 migrate runs pass; cause: check switched builds across tabs mid-pagehide save). Test-only fix (same tab + diagnostics), proving with a 20-run loop.
+- ~12:33 UTC: **USER AWAKE** (8:33 AM Eastern): overnight mode over. Morning summary sent.
