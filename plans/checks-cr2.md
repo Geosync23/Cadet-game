@@ -389,3 +389,20 @@ Re-measure 2 (Sunday dinner only; OLD, NEW, each switch off in turn, NEW, OLD; m
 
 OLD mean 2.59, NEW mean 2.57: no difference, and no switch stands out (all within the same 1.9-3.5 ms spread). The
 Sunday dinner rise did not hold up in a back-to-back run, so it is noise (backlog 32), not a regression.
+
+# 0.93.2 round 2 (claude/staging-0.93.2 d9c7e5f0), CR2's share — **OK**
+
+NEW d9c7e5f0, sha256 `c99ea59cc753e58b98f06f7fbc0d51eb8cac1da39849f881533adb96917dd5d3` (matches BM18's).
+OLD b957b92d (0.93.1), sha256 `6cd54ab97f4290aa5665ff40b5db35d0abc485dc8401d011084dfaa2f35a8eee`.
+Run in two parts to stay under the 2-hour background limit.
+
+| Check | Result | Key lines |
+|---|---|---|
+| cadet_test OLD NEW (alone) | DIFFERENCES, expected | Same as round 1: f_noshadow 3896, g_nocrew 3875, h_crewback 3861 px, same boxes (Oona's bubble only); other 12 shots 0 px; `errors A [] errors B []`; taps the same. |
+| path_check | OK | `PATH CHECK OK` |
+| arc_check | OK | `ARC CHECK OK` |
+| lines_check | OK | PASS (0 errors, 69 warnings; = round 1) |
+| intro_check (whole) | OK | `OK`, 0 FAIL lines (34 min) |
+| perf_check NEW OLD | OK (backlog 32) | Two one-off js flags: storm all-clear party trifold-folded-turned 2.11 -> 3.19 ms, Bread day trifold-open-turned 1.76 -> 2.81 ms; neither scene/shape flagged in round 1 (Bread day's shapes came out even in round 1's two re-measures), so not repeats; not re-measured (BM18's rule). Draw calls as round 1 (Every song +16, storm party -1; max 418). Memory flat (521/40/87). File 7.03 -> 7.23 MB; load 8.3-8.9 vs 8.4-8.9 s (round 1's slower load did not repeat). js mean 1.52 -> 1.66 ms over 106 measures. |
+| lines_check --day | OK (CR1) | PASS (0 errors), 381 s; handed over before it started |
+| p926_check | OK (CR3) | `P926 CHECK OK`, 677 s; handed over before it started |
