@@ -218,3 +218,9 @@ Taken from RV19 (lead 38) so RV19 could stay on storm-sat. BM18's FAIL with INSP
 Lead 38 moved it out of 0.93.2 (0.93.2 takes e45b7fe). Seven planner lines in section 14 gain `d >= 1` (the walker's
 early bed: `d >= 0`), all behind INSPECT_ON. cadet_test off ALL IDENTICAL; with it on: events_check OK, day_check 4 OK,
 machine_check OK.
+
+## Inspection i.9 (claude/inspection 5793626, game f9ba5c6b...beb3): PASS
+1872153 plus three lines in inspectWalkDo: when the officer gives your result in person, a player lying in their bunk
+(ACT kind 'lie'; sleeping is a different path) gets up first (CR1's arrows_check week FAIL: the follower lay down at the
+berth's arrow at 06:29 and stayed there all day). cadet_test off ALL IDENTICAL; with INSPECT_ON on: arrows_check week OK,
+events_check OK.
