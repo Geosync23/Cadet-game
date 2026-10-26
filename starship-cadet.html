@@ -58879,6 +58879,176 @@ if (P5_M19 && typeof jobKindAdd === 'function') {
 // ---------------------------------------------------------------------
 
 // ---- slot: Sensor array (section 24x). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// M20 (S5-5, B3 for lead 40; from B2's pointers in plans/handover-b2.md). The lesson, Friday Day 19 at 10:00
+// (WORK_MECH.m20.at), Hana Mori (Survey) with Calder in Deck 2's array room (A). Mori calibrates the array while you
+// watch, then one is yours: "Pick the star" (three reference stars, one of them yours if you've logged any: 24t's
+// starsLogged), turn the array's dial till the reading agrees with the star (a turn stop, as 24e's tuning), then swap the
+// rack's amber module. The calibration rig comes with it (the row's tool). Then about once a week (08:00 on a workday of
+// yours, not M19's day) a calibration job; from stage 2 (2 uses) a full sweep (three sensors to bring on); from stage 3 (4
+// uses) your sweeps feed Survey's charts (a word from Mori, a little friendship). The beats (spec "The beats"): said in
+// person when you're near her after the ask, an urgent notice at 09:30, a level 1 arrow with its ring line "The sensor
+// array with Hana Mori, 10:00" from 09:45. The array room has only machine places, so Mori's and Calder's appointment is
+// booked at the array's panel (as 24v's pwrHost). Saved: SHIP.works.side.ar = { star, sweeps, day } (24 core keeps side
+// whole; the spec's SHIP.works.ar, under side so worksClean keeps it). Job slot 34 (spec 90e72a2d). schedU keys 1065
+// (the three stars), 1066 (the dial's start), 1067 (the amber module), 1068 (the week's day), 1069 (which rack). No R().
+// Its stops are tapped one by one through 15b's ixStepwise. Off (P5_M20 false): nothing registers.
+const ARR_AT = 600, ARR_POST = 480, ARR_SLOT = 34, ARR_CREW = 30, ARR_KEEP = 90, ARR_MODULES = 6;
+const ARR_ARRAY = '2-array-1', ARR_RACKS = ['2-racks-1', '2-racks-2'];   // Mori's rack, then yours
+const arrSeed = () => machSeed('array');
+function arrState() {                                    // side.ar, cleaned (a save may hold junk)
+  const s = typeof worksSide === 'function' ? worksSide() : null; if (!s) return null;
+  const A = s.ar;
+  if (!A || typeof A !== 'object' || !s.arOk) {
+    const int = v => Number.isInteger(v) ? Math.max(0, Math.min(9999, v)) : 0;
+    s.ar = { star: A && typeof A.star === 'string' ? A.star.slice(0, 40) : null, sweeps: int(A && A.sweeps), day: int(A && A.day), week: A && Number.isInteger(A.week) ? A.week : -1 };
+    Object.defineProperty(s, 'arOk', { value: true, enumerable: false, configurable: true });
+  }
+  return s.ar;
+}
+// the three stars Mori names for a job: three of the writer's five (m20.star.1-5), seeded by the job's key; your own last
+// logged star (24t: "Wren {n}") in third place if you've logged one
+function arrStars(j) {
+  const k = j.key || 0, five = [1, 2, 3, 4, 5].map(n => [schedU(arrSeed(), k * 5 + n, 1065), n]).sort((a, b) => a[0] - b[0]).slice(0, 3).map(x => x[1]);
+  const out = five.map(n => ({ id: 's' + n, label: worksText('m20.star.' + n, ['', 'Tavessa\'s brightest', 'The white one, low', 'The old red giant', 'The close pair', 'The one behind us'][n]) }));
+  const logged = typeof starsLogged === 'function' ? starsLogged() : 0;
+  if (logged > 0) out[2] = { id: 'w' + logged, label: worksText('star.name', 'Wren {n}', { n: logged }) };
+  return out;
+}
+const arrRackOf = j => j.rack || ARR_RACKS[1];
+// a job: kind 'arraycal' on the array; o: { slot, train, key, rack, sweep }
+function arrJob(t, o = {}) {
+  const m = machineById(ARR_ARRAY); if (!m || !panelPlace(m.id)) return null;
+  const d = worksDay(t), k = o.key !== undefined ? o.key : d, sweep = !!o.sweep;
+  const offs = (sweep ? [0, 1, 2] : [0]).map(i => { const v = 1 + Math.floor(schedU(arrSeed(), k * 3 + i, 1066) * 3); return schedU(arrSeed(), k * 3 + i, 1066) < .5 ? -v : v; });
+  const rack = o.rack || ARR_RACKS[Math.floor(schedU(arrSeed(), k, 1069) * 2) % 2];
+  const title = sweep ? worksText('m20.card.sweep', 'A full sweep: the sensor array') : worksText('m20.card.cal', 'Calibrate the sensor array');
+  const j = jobMake('arraycal', { id: 'arraycal' + (o.slot || '') + ':' + ARR_ARRAY + '@' + Math.floor(t / 60) + '#' + k, machine: ARR_ARRAY, deck: m.deck, room: m.room, h: Math.floor(t / 60), tier: 3, urgency: 0, title,
+    key: k, rack, offs, cal: offs.slice(), bad: Math.floor(schedU(arrSeed(), k, 1067) * ARR_MODULES) % ARR_MODULES, star: null, sweep, wrongs: 0,
+    ...(o.slot ? { reserved: o.slot, until: (d - 1) * 1440 + dayShiftEnd(d) } : { leave: Math.max(60, (d - 1) * 1440 + dayShiftEnd(d) - Math.max(t, (d - 1) * 1440 + DAY_SHIFT[0])) + 60 }),
+    ...(o.train ? { train: o.train } : {}) });
+  j.posted = j.found = t;
+  return j;
+}
+const arrDialWord = v => v === 0 ? worksText('m20.cal.on', 'On the star. The array agrees.') : Math.abs(v) <= 1 ? worksText('m20.cal.close', 'Close. Small turns now.') : worksText('m20.cal.far', 'Far off. Keep turning.');
+// the stops: the star (a pick; any is right), the dial (one turn stop a sensor; settled at 0), the rack's amber module (look, swap)
+function arrStops(j) {
+  const m = machineById(j.machine), pp = m && panelPlace(m.id), rp = panelPlace(arrRackOf(j)); if (!pp || !rp) return [];
+  const st = (place, tag, how, mins, opts) => ({ deck: m.deck, placeId: place, mins, tag, how, ...(opts ? { opts } : {}) });
+  const label = worksText('m20.cal.title', 'Calibrate · {machine}', { machine: worksText('m20.array.name', 'the sensor array') });
+  const out = [st(pp, 'pick', 'choose', 1, { title: worksText('m20.pick.title', 'Pick the star'), text: worksText('m20.pick.text', 'Hana has three reference stars in view. Pick one to calibrate against.'), options: arrStars(j) })];
+  (j.offs || [0]).forEach((v0, i) => out.push(st(pp, 'turn', 'turn', 1, { label: (j.offs || []).length > 1 ? label + ' (' + (i + 1) + '/' + j.offs.length + ')' : label, v: (j.cal || [])[i] ?? v0, min: -3, max: 3, by: 1,
+    text: worksText('m20.cal.text', 'Turn the dial till the array\'s reading and the star agree.'), onTurn: v => { if (Array.isArray(j.cal)) j.cal[i] = v; return arrDialWord(v); }, ok: v => v === 0, gauge: null })));
+  const mods = Array.from({ length: ARR_MODULES }, (_, i) => 'M' + (i + 1) + ' ' + (i === j.bad ? worksText('m20.module.amber', 'amber') : worksText('m20.module.green', 'green'))).join(' · ');
+  out.push(st(rp, 'look', 'look', 1, { secs: 3, text: worksText('m20.module.look', 'One module\'s light is amber. The rest are green.') + ' ' + mods }),
+    st(rp, 'module', 'hold', 2));
+  return out;
+}
+function arrStepDone(j, k, res) {
+  const st = arrStops(j)[k]; if (!st) return true;
+  if (k > 0 && !(j.stepsDone || []).includes(k - 1)) return false;   // in order: the star, the dial, the module
+  if (st.tag === 'turn') { const v = res && res.value; if (v !== 0) return false; const i = arrStops(j).slice(0, k).filter(x => x.tag === 'turn').length; if (Array.isArray(j.cal)) j.cal[i] = 0; return true; }   // the dial settled on the star (section 15's turn card sends { value })
+  if (st.tag === 'pick') {
+    const pick = res && res.pick, o = arrStars(j).find(x => x.id === pick); if (!o) return false;
+    j.star = o.label;
+    const n = +String(pick).slice(1), who = 'mori';
+    if (pick[0] === 'w') worksSay(who, worksText('m20.star.yours', 'That\'s in your own star log: {star}. Hana noticed before you did.', { star: o.label }));
+    else worksSay(who, worksText('m20.star.' + n + '.line', ['', 'The brightest in Tavessa. It\'s steady. Steady is what we want.', 'Low and white. Very quiet star. It never surprises anyone.', 'Big and red and slow. It breathes, a little. Watch the reading.', 'Two stars, very close. Pick the left one. Everyone picks the right.', 'We passed it six weeks ago. It\'s still the best-measured star we have.'][n] || ''));
+  }
+  return true;
+}
+function arrDone(j, t, by) {
+  const s = SHIP.machines && SHIP.machines[j.machine];
+  if (s) { s.cond = Math.max(s.cond, ARR_KEEP); s.state = machineState(s.cond); }
+  if (by === 'you') {
+    const A = arrState(); if (A) { A.star = j.star || A.star; A.day = worksDay(t); if (j.sweep) A.sweeps++; }
+    if (!j.train) { worksUse('m20'); j.rightFirst = true; }
+    try { toast(j.title, j.sweep ? worksText('m20.sweep.done', 'Full sweep done. Survey has your readings.') : worksText('m20.module.done', 'All green. The array sees cleanly again.')); } catch (e) { /* no UI */ }
+    if (!j.train && worksStage('m20') >= 2 && !flag('m20.survey.' + worksDay(t))) {   // stage 3: your readings on Survey's chart, Mori's word and a little friendship
+      flagSet('m20.survey.' + worksDay(t), true); worksTeach('m20', 'mori', 'survey', [worksText('m20.survey', 'Your readings are on our chart now. That\'s your name in Survey\'s log, you know.')]);
+      try { if (typeof relAdd === 'function') relAdd('mori', 'favour', 2); } catch (e) { /* no social */ }
+    }
+  }
+  simNote('array', { id: j.id, machine: j.machine, by: by || null, star: j.star || null, sweep: !!j.sweep });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+// the week's day: a workday of yours after the lesson, not M19's (pwrDay), nor a test day
+function arrDay(w) {
+  const W = SHIP.works; if (!W || W.tr.m20 === undefined) return null; const P = typeof pwrDay === 'function' ? pwrDay(w) : null;
+  const days = [0, 1, 2, 3, 4].map(k => w * 7 + 1 + k).filter(d => d > W.tr.m20 && playerShiftOn(d) && d !== P && !(W.test && W.test.day === d));
+  return days.length ? days[Math.floor(schedU(arrSeed(), w, 1068) * days.length) % days.length] : null;
+}
+// the beats (Day 19): the notice at 09:30, the level 1 arrow with its ring line from 09:45, while the lesson is asked
+function arrBeats(now) {
+  const W = SHIP.works, c = W && W.cur; if (!c || c.id !== 'm20' || c.st !== 'meet' || !c.told) return;
+  const r = SHIP.occasions.find(x => x.key === c.occ); if (!r || r.met || r.status !== 'asked' || now >= r.at + r.len) return;
+  const who = typeof guideWho === 'function' ? guideWho(c.by) : worksFirst(c.by), when = hhmm(r.at % 1440);
+  const ring = worksText('m20.ptr', 'The sensor array with Hana Mori, {time}', { time: when, name: who });
+  if (now >= r.at - 30 && !flag('m20.notice.' + c.d) && typeof promoNotice === 'function') { flagSet('m20.notice.' + c.d, true); promoNotice(worksText('m20.notice', 'The sensor array with Hana Mori at {time}: the array room, Deck 2. Go at quarter to.', { time: when }), worksName(c.by)); }
+  if (now >= r.at - 15 && typeof guideAsk === 'function' && !(GUIDE.list || []).some(x => x.id === 'm20:meet:' + c.d))
+    guideAsk({ id: 'm20:meet:' + c.d, level: 1, owner: '24x', from: r.at - 15, until: r.at + r.len,
+      goal: () => ({ deck: r.deck, room: r.room, ...(typeof guideTeacherIn === 'function' && guideTeacherIn(c.by, r.deck, r.room) ? { crew: c.by } : {}), label: ring }),
+      done: () => !!r.met || r.status !== 'asked' || !(SHIP.works && SHIP.works.cur && SHIP.works.cur.id === 'm20' && SHIP.works.cur.st === 'meet') });
+}
+// the teachers at the lesson before it starts: the array room has no seat or standing place, so Mori's and Calder's
+// appointment is booked at the array's panel (24v's pwrHost), five minutes before; they stay the whole lesson
+function arrHost(now) {
+  const W = SHIP.works, c = W && W.cur; if (!c || c.id !== 'm20' || c.st !== 'meet' || typeof apptAdd !== 'function' || !SHIP.device) return;
+  const r = SHIP.occasions.find(x => x.key === c.occ); if (!r || r.met || now >= r.at + r.len) return;
+  if (!(SHIP.device.appts || []).some(a => a.occ === r.key || a.id === r.key)) apptAdd({ id: r.key, with: [...new Set(['mori', c.by, 'calder'])], at: r.at - 5, len: r.len + 5, where: panelPlace(ARR_ARRAY), kind: 'meeting', status: 'yes', by: c.by, title: (OCCASIONS['works.m20'] || {}).title || 'The sensor array' });
+}
+// said in person first: the first time you're near Mori after the ask (her deck, the same room or within 6 tiles), before
+// 09:30's notice, she tells you herself; the Mail stays the record
+function arrAskSay(now) {
+  const W = SHIP.works, c = W && W.cur; if (!c || c.id !== 'm20' || c.st !== 'meet' || flag('m20.said.' + c.d)) return;
+  const r = SHIP.occasions.find(x => x.key === c.occ); if (!r || now >= r.at - 30) return;
+  let near = false; try { const a = (typeof DECK_CREW !== 'undefined' ? DECK_CREW : []).find(x => x.p && x.p.id === c.by), P = player.obj.position; near = !!a && (Math.hypot(a.x - P.x, a.z - P.z) <= 6 || roomAt(...cellAt(a.x, a.z)) === roomAt(...player.here())); } catch (e) { near = false; }
+  if (!near) return;
+  flagSet('m20.said.' + c.d, true);
+  worksTeach('m20', c.by, 'ask', [worksText('m20.ask.say', 'You\'re the one Calder sent? {time}, the array room on Deck 2. Bring your eyes.', { time: hhmm(r.at % 1440) })]);
+}
+if (P5_M20 && typeof jobKindAdd === 'function') {
+  jobKindAdd('arraycal', { tier: 3, work: 0, text: 'Calibrate the sensor array', stops: arrStops, stepDone: arrStepDone, done: arrDone, veto: true, crew: { can: p => p.dept === 'survey' || incWorks(p), mins: ARR_CREW } });
+  if (typeof WORKS_SIDE_KINDS !== 'undefined' && WORKS_SIDE_KINDS.add) WORKS_SIDE_KINDS.add('arraycal');
+  if (!MEETING_SCRIPTS['train.m20.mori']) MEETING_SCRIPTS['train.m20.mori'] = { title: 'The sensor array', from: 'Hana Mori', stub: true,   // a stand-in until the head writer's (SW3's train.m20.mori on claude/p5s5-words) is merged
+    gist: 'Hana Mori and Calder showed you the sensor array: pick a reference star, turn the dial till the reading agrees, swap the amber module.',
+    lines: [{ who: 'mori', text: 'This is how the ship sees. Every reading Survey takes comes through here.', pose: 'gesture', to: 'you' },
+      { who: 'mori', text: 'It drifts. So we point it at a star we know and turn till it agrees.' },
+      { who: 'calder', text: 'And the racks behind it. One amber module and the whole picture blurs.' },
+      { choice: [{ text: 'Which star?', rel: { mori: 2 }, reply: { who: 'mori', text: 'I\'ll give you three. Any of them. Pick the one you like.' } },
+        { text: 'How close is close enough?', rel: { mori: 1 }, reply: { who: 'mori', text: 'When the reading stops arguing with the sky.' } },
+        { text: 'I\'ve been logging stars.', rel: { mori: 2 }, reply: { who: 'mori', text: 'I know. I read your log. Good eye.' } }] },
+      { who: 'mori', text: 'Watch me do one. Then it\'s yours.' }] };
+  WORK_MECH.m20 = {
+    at: () => {                                          // the lesson at 10:00 (the beats table); done before 12:00, ahead of a booked shutdown after lunch (S5-4)
+      // Mori is off on Fridays, so on Day 19 the ladder's teacher is Calder (the row's second): Mori comes in for it all the same
+      // (arrHost books her), and her meeting plays whoever teaches (asked here, before 24 core's trainScript picks one)
+      const k = 'train.m20.calder'; if (!MEETING_SCRIPTS[k] && MEETING_SCRIPTS['train.m20.mori']) MEETING_SCRIPTS[k] = MEETING_SCRIPTS['train.m20.mori'];
+      return ARR_AT; },
+    reserve(d, at, slot, o = {}) {                       // Mori's on her rack, then yours on the other, in this row's own slot
+      const t = (d - 1) * 1440 + at;
+      SHIP.jobs = SHIP.jobs.filter(x => !(x.reserved === ARR_SLOT && heldForYou(x) && !x.claimedBy));
+      const j = arrJob(t, { slot: ARR_SLOT, train: o.train || 'm20', key: d * 2 + (o.yours ? 1 : 0), rack: ARR_RACKS[o.yours ? 1 : 0] }); if (!j) return null;
+      SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+      return j.id;
+    },
+    watch: 10,
+  };
+  onSim('tool', n => { if (n && n.id === 'arrayrig') { try { toast(worksName('mori'), worksText('m20.rig.give', 'Hana Mori gave you the calibration rig. Survey\'s spare, now yours.')); } catch (e) { /* no UI */ } } });
+  onSim('trained', n => { if (n && n.mech === 'm20') worksTeach('m20', 'calder', 'calder', [worksText('m20.calder', 'Survey asks for you by name now. Don\'t make me regret it.')]); });   // Calder's one line
+  WORK_TICKS.push((now, skip) => {
+    arrHost(now);
+    if (!skip) { arrBeats(now); arrAskSay(now); }
+    const W = SHIP.works; if (!W || W.tr.m20 === undefined || !arrState()) return;
+    const A = arrState(), st = worksStage('m20');
+    if (!skip && st >= 1 && !flag('m20.stage2')) { flagSet('m20.stage2', worksDay(now)); try { toast(worksName('mori'), worksText('m20.trained.stage2', 'The sensor array: you can run a full sweep now.')); } catch (e) { /* no UI */ } }
+    if (!skip && st >= 2 && !flag('m20.stage3')) { flagSet('m20.stage3', worksDay(now)); try { toast(worksName('mori'), worksText('m20.trained.stage3', 'The sensor array: your sweeps feed Survey\'s charts now.')); } catch (e) { /* no UI */ } }
+    const d = worksDay(now), m = now - (d - 1) * 1440, w = incWeek(d);   // the week's job at 08:00 on its day
+    if (m < ARR_POST || !playerShiftOn(d) || arrDay(w) !== d || A.week >= w) return;
+    if (SHIP.jobs.some(x => x.kind === 'arraycal' && x.status !== 'done')) return;
+    const j = arrJob((d - 1) * 1440 + ARR_POST, { key: w * 7 + 6, sweep: st >= 1 });
+    if (j) { SHIP.jobs.push(j); A.week = w; if (typeof MACH_REV !== 'undefined') MACH_REV++; }
+  });
+}
 // ---- end of slot: Sensor array ----
 
 
