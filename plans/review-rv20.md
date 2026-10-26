@@ -82,3 +82,36 @@ Played (a Senior on Day 17 with every earlier row done, in the bay from 08:55, c
 
 **Verdict on 3c38a65f: FIXES NEEDED (M2, M3; M1 is B1's).** The beats around the lesson (the notice, the level 1 arrow
 and its ring line) work and read well at phone size; off is identical.
+
+## B4, P4 and P5: 38818701 (P4) and 55b2e6a8 (P5) (S5-6 turns 1-2, from 5957d244; game sha256 ed700990...7a4a)
+Diff read: 24k's slot only. P4: P4_BAND, P4_GAUGE, p4Decoys, p4Clues (each decoy's own gauge crosses it out; the cause's
+own gauge stuck, crossing out nothing), p4Text / p4Title / p4View (the doubt chips), p4Tick (the first case shown in
+your shift with Torres's word), p4Stage (the chiller's display, slot 28, held a week), CASE_KINDS.p4, CHIEF_NOTES.p4,
+WORK_MECH.p4. P5: P5_BAND, P5_FIRST, p5Line / p5Steps / p5Flow (from recorded conditions, no machinesNow), p5Pick (one
+each side of the cause), p5Clues (full crosses out it and above, low below), p5View (the line in order), p5Tick,
+p5Stage (3-pump-1's seal, slot 29), CASE_KINDS.p5 (power stage waits for M19). All behind P5_CASES5; schedU keys 892,
+893; no R().
+
+| Check | Build | Result |
+|---|---|---|
+| cadet_test vs 5957d244 | 55b2e6a8 off | ALL IDENTICAL |
+| check_fast | 55b2e6a8 | QUICK CHECK OK in 399 s (a first run alongside my probe exited 1 with no output; alone OK) |
+| puzzle_check (all + Step 5 parts on its own on-copy) | 55b2e6a8 | PUZZLE CHECK OK (not yet: p9, board). p4: 495 cases from a sweep, each one cause left, no single gauge solves it, one stuck gauge; first case staged Day 17 on the chiller, shown with Torres's word, save round trip 975 bytes, trained Day 17. p5: 96 cases; first case 3-pump-1 seal, Calder's word, trained Day 18 |
+| played, 390 x 844, ?p5s5 (plans/rv20-p4-live.py) | 55b2e6a8 | below |
+
+Played (a Senior on Day 17, in the bay, clocked in): 09:00 Brennan's Mail (the chiller running warm, meals binned),
+Torres's word "One for you. Cold store chiller runs warm, but its gauges say it's fine..." and the notice "Head-scratcher:
+...". **Torres was not on the deck**, so the word came as a toast. The Jobs app lists it as "Cold store chiller (milk
+going off) / repair, asked for you" (no card for P4, as with P2 and P3). Fault notes at phone size: the suspects as
+chips (Seal, Temperature sensor, Compressor, Bearing), "Where next?" with its pointer, Call it buttons; readable.
+
+**Verdict on 55b2e6a8 (with 38818701): PASS.** Shoulds:
+- S1. The first case's word from Torres (P4) and Calder (P5) is in person only if they happen to be on your deck, else a
+  toast. Show the first case when they're with you (or have them come by), with the toast as the fallback after a while.
+- S2. Stand-in titles read oddly where the machine's name and its symptom repeat ("Light relays lights flicker, but its
+  gauges say it's fine"). SW3's words are due; check the composed titles across the sweep then.
+- S3. Words: B4's keys and SW3's differ (B4: case.p4.gauge.<part>, case.p4.stuck / taped / read, case.p4.sensor,
+  case.p5.read / head; SW3: case.p4.gauge, case.p4.scan / call / right, case.p5.stop / power / notester, chief.p4.1-2).
+  B4 wires SW3's words next turn: agree one set with SW3.
+- Notes: the clue reading at the panel wasn't played by tap (puzzle_check reads them through caseClue); it's 24k's
+  existing path, played since P1. Controller reach and the Day 21 preset are later turns.
