@@ -1416,3 +1416,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~17:45 UTC: USER started lead 39 directly. Lead 38 idle once lead 39 confirms (then disable lead 38 check-in if lead 39 has not).
 - ~17:47 UTC: **USER: 0.93.2 = new base** → BM18 ff integration to d9c7e5f0.
 - ~17:58 UTC: **claude/integration = d9c7e5f0 (0.93.2)**, ff by BM18, sha checked.
+- ~18:00 UTC: **LEAD 39 took over** (session_019V68fz33UFv4cK5Z4iCDvi, claude/lead-39, started by the user; check-in trig_01AfELgSjcRd9vZXQhCYUS8e; lead 38 trig disabled by lead 39). Lead 38 forwarded post-note items (new base done) and is idle.
