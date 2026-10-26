@@ -369,7 +369,7 @@ with sync_playwright() as pw:
     # 'galley' extra: 'tasting', and its 'tally') for the cooking: 20 tastes an hour before, two for each taster, the
     # rest wasted, the week's two choices, the plates on Deck 3. With section 18's tallies (tallyOf) and a real tasting
     # table: the galley shows the tally's dishes and votes, your token goes through tallyVote once, and Sunday's side
-    # is the tally's winner
+    # is the tally's winner (the real one at its own times and, with 0.93.2's TRAD_0932_ON, CS1's dish names: tasteName)
     ts = g.ev(f"""(() => {{ let wed = {DAY} + 60; while (weekday(wed) !== 2) wed++; const CH = ['herb-flatbread', 'pickled-beans', 'tomato-jam-oatcakes', 'root-crisps', 'miso-greens', 'bean-fritters', 'carrot-ginger-soup', 'chilli-lime-corn'];
       GALLEY_TEST.tradTies = (kind, d) => d === wed ? (kind === 'galley' ? [{{ id: 'tasting-stand-in', from: 1095, to: 1155, tie: {{ meal: 'dinner', extra: 'tasting', batch: 20 }} }}] : kind === 'tally' ? [{{ id: 'tasting-stand-in', tie: {{ kind: 'tasting', choices: CH }} }}] : []) : [];
       {clr} GALLEY_TASTE.clear();
@@ -383,11 +383,12 @@ with sync_playwright() as pw:
         const rw = [...Array(28)].map((_, k) => {DAY} + 7 + k).find(d => galleyTasting(d)), keepVotes = JSON.stringify(SHIP.events.votes || {{}});
         if (rw) {{
           const z = galleyTasting(rw), r = tallyOf(z.id, rw), RB = (rw - 1) * 1440;
-          out.real = {{ day: rw, choices: z.choices, votes: z.votes, tally: r && r.choices.map(c => r.counts[c]), tallyChoices: r && r.choices, winner: z.winner, voters: z.voters.length, n: r && r.n }};
-          setShipNow(RB + 18 * 60 + 20); galleyTick(); out.real.left = SHIP.galley.tasting && SHIP.galley.tasting.left;
+          const lab = c => (typeof TRAD_0932_ON !== 'undefined' && TRAD_0932_ON && typeof tasteName === 'function' && tasteName(c)) || String(c).replace(/-/g, ' ');   // 0.93.2 (FX24): CS1's dish names with the switch on
+          out.real = {{ day: rw, choices: z.choices, votes: z.votes, tally: r && r.choices.map(c => r.counts[c]), tallyChoices: r && r.choices, tallyLabels: r && r.choices.map(lab), winner: z.winner, voters: z.voters.length, n: r && r.n }};
+          setShipNow(RB + z.from + 5); galleyTick(); out.real.left = SHIP.galley.tasting && SHIP.galley.tasting.left;
           out.real.vote = galleyVote(z.choices[1]); out.real.again = galleyVote(0); const z1 = galleyTasting(rw); out.real.you = z1.you; out.real.votes1 = z1.votes; out.real.after = SHIP.galley.tasting && SHIP.galley.tasting.left;
-          setShipNow(RB + 19 * 60 + 20); galleyTick(); out.real.result = galleyText('tasting');
-          const sun = rw + 4, tl = typeof tallyLast === 'function' ? tallyLast(z.id, sun) : null; out.real.sun = {{ side: galleyMenu(sun).side, note: galleyMenu(sun).note, tallyLast: tl && tl.winner, sideTie: !!(galleyTies(sun).dinner && galleyTies(sun).dinner.side) }};
+          setShipNow(RB + z.to + 5); galleyTick(); out.real.result = galleyText('tasting');
+          const sun = rw + 4, tl = typeof tallyLast === 'function' ? tallyLast(z.id, sun) : null; out.real.sun = {{ side: galleyMenu(sun).side, note: galleyMenu(sun).note, tallyLast: tl && tl.winner && lab(tl.winner), sideTie: !!(galleyTies(sun).dinner && galleyTies(sun).dinner.side) }};
         }}
         SHIP.events.votes = JSON.parse(keepVotes); GALLEY_MENU.clear(); SHIP.galley = null;
       }}
@@ -403,9 +404,9 @@ with sync_playwright() as pw:
     if R:
         print(f"   real (section 18's tally), day {R['day']}: {R['choices']}, votes {R['votes']} (tally {R['tallyChoices']} {R['tally']}, {R['n']} went; {R['voters']} came to taste) -> {R['winner']}")
         print(f"   your vote {R['vote']}, again {R['again']}, you {R['you']}, votes {R['votes1']}, tastes {R['left']} -> {R['after']} | {R['result']} | Sunday {R['sun']}")
-        if [c.replace('-', ' ') for c in R['tallyChoices'][:2]] != R['choices'] or R['votes'] != R['tally'][:2] or not R['vote'] or R['again'] or R['you'] != 1 or R['votes1'][1] != R['votes'][1] + 1: fail(f"tasting with the tally: {R}")
+        if R['tallyLabels'][:2] != R['choices'] or R['votes'] != R['tally'][:2] or not R['vote'] or R['again'] or R['you'] != 1 or R['votes1'][1] != R['votes'][1] + 1: fail(f"tasting with the tally: {R}")
         if R['left'] is not None and R['after'] != max(0, R['left'] - 2): fail(f"your tastes: {R}")
-        if R['sun']['sideTie'] and (R['sun']['side'] != (R['sun']['tallyLast'] or '').replace('-', ' ') or "Wednesday's winner" not in R['sun']['note']): fail(f"Sunday's side: {R['sun']}")
+        if R['sun']['sideTie'] and (R['sun']['side'] != (R['sun']['tallyLast'] or '') or "Wednesday's winner" not in R['sun']['note']): fail(f"Sunday's side: {R['sun']}")
     else: print('   no section 18 tally with a tasting table in this build: the vote is not checked')
 
     # 4o. late meals (0.29.28): simNote('lateMeal', { who, meal, late, how, deck }) live, once per person and meal; heard

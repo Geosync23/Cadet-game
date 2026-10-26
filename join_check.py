@@ -23,6 +23,8 @@ def fail(m): FAILS.append(m); print('  FAIL', m)
 
 EACH = r"""(id => {
   let d = 1, e = null; for (; d < 400; d++) { e = eventsOn(d).find(x => x.id === id); if (e) break; }
+  const recWas = typeof flag === 'function' ? flag('rec.on') : null; if (/^rec-/.test(id) && TRAD_JOIN[id] && TRAD_JOIN[id].rec && !recWas) { flagSet('rec.on', true); EV_DAYS.clear(); }   // 0.93.2's rec deck two wait for the deck's opening flag, as Paddle club (put back below)
+  for (d = 1; d < 400; d++) { e = eventsOn(d).find(x => x.id === id); if (e) break; }
   if (!e) return { id, err: 'not on in 400 days' };
   goToDeck(e.ev.where[0].deck); actEnd(true); clearGoal(); setShipNow((d - 1) * 1440 + e.from + 10); deckCrewFill();
   SHIP.events.joined = SHIP.events.joined.filter(k => k !== id + '@' + d); EV_MIN = -1; eventsTick();
@@ -36,12 +38,13 @@ EACH = r"""(id => {
   const mark = document.getElementById('tjMark'), marked = !!mark && /★/.test(mark.textContent);
   const s0 = SHIP.player.needs.social = 40, ok = tradJoinTap(TJ_NOW ? TJ_NOW.agent : a);
   if (typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.id === 'tiles.ladder') { dialogueNext(); dialogueChoose(1); dialogueEnd(true); }   // the ladder asks play or watch (0.92.5 item 20): watch
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE && /^(t932\.join|tasting\.table)$/.test(DIALOGUE.id)) { let n = 0; while (DIALOGUE && n++ < 20) { const v = dialogueView(); dialogueStep(v && v.choices ? 0 : undefined); } }   // 0.93.2 (FX24): the host's join line (the tasting table: its dishes and the jar), then the activity
   // (DS1, RV14's (a) on Bread day) the leader shown is TJ_NOW's (the host on duty near the spots leads: Brennan), not only
   // the planner's pick (tradLeader): the marker's name, the arrow's person and the tap must all be that one
   const shown = TJ_NOW ? TJ_NOW.lead : null, markName = mark ? mark.textContent : '', goalCrew = IX_GOAL && IX_GOAL.tj === id + '@' + d ? IX_GOAL.crew || null : null;
   const r = { id, d, lead: shown || lead, plan: lead, passive, now, goal, marked, ok, same: !!shown && markName.includes(tjFirst(shown)) && (goalCrew === null || goalCrew === shown) && (!goal || goal.includes(tjFirst(shown)) || /beam/i.test(goal)), joined: SHIP.events.joined.includes(id + '@' + d), social: SHIP.player.needs.social - s0,
     act: ACT ? [ACT.kind, ACT.placeId, ACT.o.pose] : null, walk: !!TJ_WALK, goalAfter: !!(IX_GOAL && IX_GOAL.tj), toast: document.getElementById('tx').textContent };
-  if (TJ_WALK) tradWalkEnd('over'); actEnd(true); return r;
+  if (TJ_WALK) tradWalkEnd('over'); actEnd(true); if (/^rec-/.test(id) && !recWas && typeof flagSet === 'function') { flagSet('rec.on', null); EV_DAYS.clear(); } return r;
 })"""
 
 with sync_playwright() as pw:
