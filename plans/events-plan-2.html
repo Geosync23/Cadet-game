@@ -115,7 +115,7 @@ a { color: var(--visit); }
 <div class="wrap">
 
 <header style="display:grid;gap:12px">
-  <p class="eyebrow">Plan · ship-wide events · EP1 for lead 37 · 2026-10-26 · stage 1 of 3</p>
+  <p class="eyebrow">Plan · ship-wide events · EP1 for lead 37 · 2026-10-26 · stage 2 of 3</p>
   <h1>The comet, the Veyli visit and the Veyli vessel, hour by hour</h1>
   <p class="lead">You asked whether the next ship-wide events were planned in detail for their new order. They weren't, so this page plans them. It comes in three stages. <b>Part A, the comet</b>, is finished first so it can be built for the next update (0.93.2) and switched on there. <b>Part B, the short Veyli visit</b>, follows, with what's kept, cut and new compared with the nine-day visit already in the build. <b>Part C, "A Veyli vessel needs help"</b>, is the coda after the career, Days 27-30. Your answers go at the bottom.</p>
   <div class="facts">
@@ -131,7 +131,7 @@ a { color: var(--visit); }
   <ol>
     <li><a href="#cal">The calendar, Days 15-30</a></li>
     <li><a href="#comet">A. The comet, Monday Day 22</a></li>
-    <li><a href="#visit">B. The Veyli visit, Days 16-19</a></li>
+    <li><a href="#vkept">B. The Veyli visit, Days 16-19</a></li>
     <li><a href="#vessel">C. The Veyli vessel, Days 27-30</a></li>
     <li><a href="#questions">Questions for you</a></li>
   </ol>
@@ -202,7 +202,7 @@ a { color: var(--visit); }
       <li class="big"><time>21:30-22:40</time><div class="what"><b>Tea with the Captain</b><span class="where">Observation room, Deck 1 · about 8, Officers and up</span>Captain Marrow pours from the tin marked NOT FOR BRIEFINGS. Vance arrives at about 21:25 from the cup. The window looks aft along the whole ship, so the comet passes the length of the Wren in front of them.<span class="you">Your part: Officers and up; tap the Captain for a cup and a place at the window. Cadets aren't turned away at the door: Vance sends them to the bow lounge, kindly ("The best seat's downstairs tonight, cadet").</span></div></li>
       <li><time>21:50</time><div class="what"><b>Naming it</b><span class="where">Bow lounge</span>Sato asks who's naming it for the log. If you joined her, you choose (three replies). If not, the crew shout names and Sato picks the one about the storm.</div></li>
       <li><time>21:55</time><div class="what"><b>Ravi Hart sketches it</b><span class="where">Bow lounge, a window seat</span>The comics artist of the garden crew draws it on a pad. The sketch goes up by the door tomorrow.</div></li>
-      <li><time>22:00-22:10</time><div class="what"><b>The comet knot</b><span class="where">Bow lounge glass</span>Saruth explains the Veyli custom and ties a knot, slowly, on a cord strung along the glass rail. Anyone near can tie one from the basket. After the visit, the cord hangs from the Speaker's gift instead.<span class="you">Your part: tap Saruth to tie yours. A comet knot goes on your shelf.</span></div></li>
+      <li><time>22:00-22:10</time><div class="what"><b>The comet knot</b><span class="where">Bow lounge glass</span>Saruth explains the Veyli custom and ties a knot, slowly, on a cord strung along the glass rail. Anyone near can tie one from the basket. After the visit, the knotted cord is hung beside the Speaker's gift on the lounge wall.<span class="you">Your part: tap Saruth to tie yours. A comet knot goes on your shelf.</span></div></li>
       <li><time>22:10-22:40</time><div class="what"><b>Raman's story</b><span class="where">Observatory, the back window</span>"The same comet", his crew story's big moment, "after the knot", as its notes say. It has the day to itself.</div></li>
       <li><time>22:20</time><div class="what"><b>The tail at the stern</b><span class="where">Felt everywhere aft</span>The comet has slid down the ship's side; the junior common room and the observation room have the tail.</div></li>
       <li><time>22:40</time><div class="what"><b>It's gone</b><span class="where">Everywhere</span>The tail slides out of the last window, the lights come up, the helm brings the Wren back onto her course, and the crew drift off to bed. Anyone whose bedtime falls inside it came from the start and leaves 20 minutes before bed, as at the late traditions. The sky shape is removed at 22:45.</div></li>
@@ -384,7 +384,38 @@ a { color: var(--visit); }
 </section>
 
 <h2 style="font-size:28px;border-top:4px solid var(--visit);padding-top:14px">Part B. The Veyli visit: Tuesday to Friday, Days 16-19</h2>
-<p class="note">Stage 2 adds a table of what's kept, cut and new compared with the nine-day visit in the build. What follows is the first full draft.</p>
+<section id="vkept">
+  <h2>B0. Kept, cut and new, against the visit in the build</h2>
+  <p>The build already has a nine-day visit (<code>SHIP_EVENTS.diplomatic</code>, <code>draft: true</code>, never switched on): its guests, voices, lines, two meeting scripts, jobs, threads, the cord sculpture and the debrief. The short visit is <b>laid over it at load behind <code>EV_VISIT_ON</code></b>, the way the storm update was laid over the storm, so nothing built is deleted: with the switch off it's exactly today's game. Most of it is kept.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Piece in the build</th><th></th><th>In the short visit</th></tr></thead>
+    <tbody>
+      <tr><td>The four guests (Teshavi, Kesrin, Moleth, Ithra): their looks, cabins (2-U, 4-01 to 4-03), habits, bios, voices and tap lines</td><td><span class="tag re">kept</span></td><td>As they are. Their stay goes from 5 days to 2 nights (aboard Wed 09:50 to Fri 09:40).</td></tr>
+      <tr><td>The calendar: <code>days: 9</code>, <code>gap: 7</code>, <code>need: ['vance']</code>, <code>guestsArrive: 2</code></td><td><span class="tag risk">cut</span></td><td>F0's calendar row (FX22b's swap: day 16). <code>days: 5</code> (Tue to Sat), guests arrive on day 1. Vance is called in on his days off instead of being needed on shift.</td></tr>
+      <tr><td>Phases: warning [0, 540], onset [2, 600], escalation [3, 360], resolution [7, 540], afterglow [7, 720]</td><td><span class="tag new">changed</span></td><td>warning [0, 450] 07:30 Tue; onset [1, 590] 09:50 Wed; escalation [2, 360] Thu; resolution [3, 540] 09:00 Fri (settles); afterglow [3, 580] 09:40 Fri (the letter), to the end of Sat.</td></tr>
+      <tr><td><code>pause: ['onset']</code> (every tradition off for the whole onset), keep birthday</td><td><span class="tag new">changed</span></td><td><code>pause: []</code>; keep birthday and the Captain's address; the shuttle bay closed to others Wed 09:30-10:45 and Fri 08:45-09:45; standing easy for the two lines.</td></tr>
+      <tr><td>Systems: the laundry's wear (dress uniforms), the guest heaters' wear, the <code>guests</code> effect</td><td><span class="tag re">kept</span></td><td>As built, on the new days.</td></tr>
+      <tr><td>Routines: Watch patrols the Deck 2 corridor; the Captain's quarters closed for the whole escalation</td><td><span class="tag re">kept</span> <span class="tag new">changed</span></td><td>The patrol is kept (it's where the door story happens). The quarters close only Thu 12:00-21:30.</td></tr>
+      <tr><td>Galley: 4 extra at the servery; a 10-meal batch for the dinners on days 3 and 5; herbs</td><td><span class="tag re">kept</span> <span class="tag risk">cut</span></td><td>The extras and herbs kept. One dinner (Thu, 8 meals: six seats and two stewards); the second dinner is cut. New: Veyli night in the mess (a meal gathering tied to the dinner, like the lantern supper).</td></tr>
+      <tr><td>Jobs: make up the visitors' cabin, the dining room lamp, the gift crates; herbs for the dinner</td><td><span class="tag re">kept</span></td><td>All four, on the new days (Tue 09:00; the herbs Thu 13:00). New: the posts and cord, the laundry run, dinner service, hanging the gift.</td></tr>
+      <tr><td>News: "four of them", Holt's promise, Moleth's forty questions, the clash at the door, the retelling by band</td><td><span class="tag re">kept</span></td><td>All five, retimed. The door news becomes the door story's (its words follow your choice).</td></tr>
+      <tr><td>The greeting meeting (<code>veyliGreeting</code>, 10:00, the bay)</td><td><span class="tag re">kept, extended</span></td><td>Its lines and three replies kept. Added: the Speaker's opening ("On your ship, we are the guests..."), the rank lines, Kesrin's "four minutes early". Fixed: "her aide" and "for five days" in its gist.</td></tr>
+      <tr><td>The gift exchange (<code>veyliGiftExchange</code>, observation room)</td><td><span class="tag re">kept, moved</span></td><td>From 09:00 on the last day to Fri 08:15. The Captain's "charts of every system we've crossed" grows into the chart with every star under its Veyli name, and the Speaker's reply. Moleth's "thirty-one" depends on Moleth's list.</td></tr>
+      <tr><td>The farewell gathering (k 351, 10:00, the bay)</td><td><span class="tag re">kept, moved</span></td><td>To Fri 09:00, 40 minutes, with the song, Ithra to Holt and the wave.</td></tr>
+      <tr><td>The Captain's two addresses</td><td><span class="tag re">kept</span></td><td>Reworded for two days, and "Speaker Teshavi tells me she..." fixed to they.</td></tr>
+      <tr><td>Vance's warning Mail ("arrives in two days")</td><td><span class="tag re">kept, reworded</span></td><td>"Tomorrow at ten", now at 07:30 Tue: it is the memo that used to come on Day 22.</td></tr>
+      <tr><td>Threads: dinners late, cold cabins, no herbs, courtesy</td><td><span class="tag re">kept</span></td><td>All four, their bounds scaled for one dinner and two nights (dinner late: good 10, bad 45 minutes; cold cabins: good 2, bad 8 hours; herbs 0 or 1; courtesy 2 and 6).</td></tr>
+      <tr><td>The volunteer sheet in the mess</td><td><span class="tag re">kept</span></td><td>As built, from Tue 08:00.</td></tr>
+      <tr><td>The cord sculpture (a trace on the bow lounge wall between the booths, smooth only)</td><td><span class="tag re">kept</span></td><td>As built. New: bumpy and rough traces (a single knot on the Works tea corner board; a framed letter in the Captain's office). On the comet night the crew's knotted cord is hung beside it.</td></tr>
+      <tr><td>The debrief (Vance, by band) and the retelling lines</td><td><span class="tag re">kept, reworded</span></td><td>Retimed to Fri 18:00, with the door and the song added to the retelling.</td></tr>
+      <tr><td>The senior briefing (an <code>EV_BEATS</code> hold on Day 29, 08:30) and Vance's memo riding on Day 22's Monday briefing</td><td><span class="tag new">moved</span></td><td>The briefing becomes the visit's own meeting, Wed 08:30 in the observation room; the memo is the warning Mail. The two old holds are retired (kept on record, not reused).</td></tr>
+      <tr><td>The Friday addresses on Days 19 and 26</td><td><span class="tag new">words</span></td><td>Day 19: the guests left this morning. Day 26: "a storm, the Veyli and a comet" behind us (no Veyli tomorrow).</td></tr>
+      <tr><td>Nine days aboard; the second dinner; a whole onset without traditions</td><td><span class="tag risk">cut</span></td><td>Parked, kept on record here and in the old events plan (the user's rule: cut things are parked, never deleted).</td></tr>
+      <tr><td>New in the short visit</td><td><span class="tag new">new</span></td><td>The story "Two at the door"; the senior briefing; the engine room tour; Moleth at Open door and at Calder's talk; Veyli night; the formal dinner as a meeting with seats by rank and stewards; Ithra's laps; the Speaker's silence; Kesrin's vending machine; the greeting line as a joinable gathering; the song; the Veyli shuttle on the pad; the bow and wave poses; rank parts throughout.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
 <section id="visit">
   <h2>B1. Story, guests and threads</h2>
   <p>Four Veyli come aboard for two nights. They are proud, ritual-minded and courteous, hard to read, and very sure of who they are. The Wren is a guest in their sky, and for two days they are guests in the Wren's corridors. Both sides know it, and the visit is about being good at both at once. The words keep to the old rules: the Wren travels the reach "as guests", never by anyone's leave or permission; nobody aboard is a soldier; Holt's distrust is his own, about one day, and never a word against the Veyli as a people.</p>
@@ -479,7 +510,7 @@ a { color: var(--visit); }
       <li class="big"><time>09:00-09:40</time><div class="what"><b>The farewell</b><span class="where">Shuttle bay · about 60 in the line</span>The four walk back up the aisle. Ithra stops at Holt and says one word (it depends on the door). At 09:20 Femi Rossi and Lucia Ferreira, at the front of the line, sing a Veyli leave-taking (Rossi has been learning it in the music room, Ferreira has the words from Saruth); the line joins the last phrase. The Speaker's reply. 09:30 up the ramp; 09:40 the shuttle lifts and the line waves.<span class="you">Your part: tap Vance to join the line. The Speaker's last line to you depends on what you said at the greeting.</span></div></li>
       <li><time>09:40</time><div class="what"><b>The threads settle; your commendation</b><span class="where">Mail</span>The result is settled as the farewell begins and the letter comes as it ends (section 12).</div></li>
       <li><time>09:45</time><div class="what"><b>The Captain's address</b><span class="where">Banner</span>The built resolution words, fixed for the Speaker's pronouns (they/them).</div></li>
-      <li><time>11:00</time><div class="what"><b>Hang the Speaker's gift</b><span class="where">Bow lounge</span>A job: hang the cord sculpture from the ceiling by the bow glass. Smooth visit only (otherwise the gift is smaller and goes to the Captain's office). Held for you until 14:00.</div></li>
+      <li><time>11:00</time><div class="what"><b>Hang the Speaker's gift</b><span class="where">Bow lounge</span>A job: hang the cord sculpture on the bow lounge wall between the booths (the trace already built). Smooth visit only (otherwise the gift is smaller and goes to the Captain's office). Held for you until 14:00.</div></li>
       <li><time>15:30-16:50</time><div class="what"><b>Short Friday and the Captain's address</b><span class="where">Auditorium</span>Untouched: the visit is on the keep list, so nothing of it ever pauses the address. Its Day 19 words are rewritten to talk about the guests who left this morning (and Kovac's lift moment may happen on the way).</div></li>
       <li><time>18:00</time><div class="what"><b>Vance's debrief</b><span class="where">Mail</span>"The visit: how it went", in words by band, with your part.</div></li>
       <li><time>evening</time><div class="what"><b>Everything as usual</b><span class="where">-</span>Works Friday tea, the jam, tap night, Imani O'Neill's birthday. Your night shift at 21:00 (held from 20:30).</div></li>
@@ -676,7 +707,7 @@ a { color: var(--visit); }
   <ul>
     <li><b>Commendation (the visit):</b> two or more visit jobs, or one visit job and one visit meeting, counted up to the end of the farewell (Fri 09:40); the letter comes then. Meetings: the briefing, the greeting, the tour, the door, the dinner (seat or steward), the gift exchange. Favours (the vending machine, Moleth's list, the silence) count toward friendships and are named in Vance's debrief, not in the commendation.</li>
     <li><b>The Captain's scenes</b> (one a day at most): the greeting and the farewell are crowds and don't count. The dinner counts for a seated player, and the gift exchange for an invited one. With the visit on, the commendation summons moves from Day 18 to Monday Day 22 at 11:00 (question B3), the same day in every game, when the Captain isn't hosting anyone.</li>
-    <li><b>Traces:</b> smooth: the cord sculpture in the bow lounge, turning with the vents (and, on the comet night three days later, the crew's comet knots hang from it). Bumpy: a single knot of cord on the Works tea corner's board. Rough: a polite letter framed in the Captain's office. Your keepsake: a knot of Veyli cord from the Speaker if you sat the silence or stood the gift exchange.</li>
+    <li><b>Traces:</b> smooth: the cord sculpture on the bow lounge wall, moving when the vents come on (and, on the comet night three days later, the crew's knotted cord is hung beside it). Bumpy: a single knot of cord on the Works tea corner's board. Rough: a polite letter framed in the Captain's office. Your keepsake: a knot of Veyli cord from the Speaker if you sat the silence or stood the gift exchange.</li>
     <li><b>Debrief words by band</b> (Vance): smooth, "They left delighted: warm cabins, dinner on time, and the door held from both sides."; bumpy, "They left on good terms: a cold cabin, the dried herbs, nothing the Concord will read about."; rough, "They left politely, which is the most I can say. We'll do better." Plus one line about your part.</li>
   </ul>
 </section><section id="device">
@@ -724,7 +755,7 @@ a { color: var(--visit); }
       <tr><td>Pour (steward)</td><td><span class="tag new">small pose</span></td><td>Standing with the teapot, a pour now and then</td></tr>
       <tr><td>Nod, gesture, sit, drink, fold (knot), telescope, the run's line</td><td><span class="tag re">reused</span></td><td>Existing poses and activities</td></tr>
       <tr><td>Place settings on the Captain's table; cord along the mess tables</td><td><span class="tag new">small props</span></td><td>Only while dressed</td></tr>
-      <tr><td>The cord sculpture</td><td><span class="tag new">prop, a trace</span></td><td>Bow lounge ceiling, sways with the vents; only after a smooth visit</td></tr>
+      <tr><td>The cord sculpture</td><td><span class="tag re">reused</span></td><td>The built trace on the bow lounge wall; only after a smooth visit</td></tr>
       
       
       
