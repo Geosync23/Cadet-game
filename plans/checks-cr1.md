@@ -576,3 +576,8 @@ No FAILs, so no OLD runs were needed.
 
 Extras for CR3 (agreed with CR3, BM18's ask; CR3 stopped them first), on 19400976, each alone:
 `promo_sight_check.py`: exit 0, 15 s, **PROMO SIGHT CHECK OK**; `sound_check.py`: exit 0, 177 s, **SOUND CHECK OK**.
+
+## FX30's week-guide fix (claude/week-guide-fix fa6b7de0, arrows_check.py only; lead 40's ask)
+
+fa6b7de0's arrows_check.py, `week guide`, against 0.93.3 19400976's game (sha256 ec93b94d…bcad085), alone: **ARROWS CHECK
+OK** (exit 0, 525 s). Stuck 0 every day (CR1-W1's Day 6 and Day 7 Deck 4 stalls gone); m5 Day 4, m6 by Day 8.
