@@ -11652,7 +11652,7 @@ function deviceLoad(s) {
       ...(Number.isInteger(a.grp) ? { grp: a.grp } : {}), ...(a.places && typeof a.places === 'object' ? { places: Object.fromEntries(Object.entries(a.places).filter(([k, v]) => typeof v === 'string').slice(0, 8)) } : { places: undefined }) }));   // places: each person's seat (0.71.2)
   const pointsSeen = {}; if (d.pointsSeen && typeof d.pointsSeen === 'object') for (const k in d.pointsSeen) if (Number.isInteger(d.pointsSeen[k]) && d.pointsSeen[k] > 0 && k.length < 60) pointsSeen[k] = Math.min(99, d.pointsSeen[k]);
   return { memos, tipsSeen, appts, booted: d.booted === true, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false, quiet: st.quiet === true,
-      ...(['all', 'first', 'off'].includes(st.teach) ? { teach: st.teach } : {}), ...(st.autoDoors === false ? { autoDoors: false } : {}) },   // autoDoors: 0.93.2, kept only when off   // the arrows plan: Teaching arrows, kept only once chosen
+      ...(['all', 'first', 'off'].includes(st.teach) ? { teach: st.teach } : {}), ...(st.doors === 'all' || st.doors === 'none' ? { doors: st.doors } : st.autoDoors === false ? { doors: 'none' } : {}) },   // autoDoors: 0.93.2, kept only when off   // the arrows plan: Teaching arrows, kept only once chosen
     ...(Object.keys(pointsSeen).length ? { pointsSeen } : {}),   // the panel pointer's counts (piece C), only once one has shown
     calendarRemind: { on: r.on !== false, ahead: [15, 30, 60].includes(r.ahead) ? r.ahead : 15, morning: r.morning !== false, per, everyday: r.everyday !== false,
       heard: (Array.isArray(r.heard) ? r.heard : []).filter(k => typeof k === 'string' && k.length < 120).slice(-80) } };   // 0.35.29: heads-ups
@@ -12962,7 +12962,7 @@ deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
     else if (verb === 'heads') SHIP.device.calendarRemind.on = !!arg; else if (verb === 'everyday') SHIP.device.calendarRemind.everyday = !!arg;
     else if (verb === 'ahead' && [15, 30, 60].includes(arg)) SHIP.device.calendarRemind.ahead = arg;
     else if (verb === 'teach' && TEACH_MODES[arg]) st.teach = arg;
-    else if (verb === 'doors') adoorSet(!!arg); },           // 0.93.2: Auto doors (15b)
+    else if (verb === 'doors') adoorSet(arg); },           // 0.93.2: Auto doors (15b)
   view: () => {
     const st = SHIP.device.settings, R = SHIP.device.calendarRemind, on = (v, verb) => [{ label: 'On', action: { app: 'settings', do: verb, arg: true }, on: !!v }, { label: 'Off', action: { app: 'settings', do: verb, arg: false }, on: !v }];
     return { title: 'Settings', blocks: [
@@ -12971,7 +12971,7 @@ deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
       { kind: 'text', text: 'Screen effects (flicker and roll)' }, { kind: 'buttons', items: on(st.fx, 'fx') },
       { kind: 'text', text: 'Tips' }, { kind: 'buttons', items: on(st.tips, 'tips') },
       { kind: 'text', text: 'Quiet off shift (work news as badges, no pop-ups, outside your shift)' }, { kind: 'buttons', items: on(st.quiet, 'quiet') },
-      ...(AUTO_DOORS_ON ? [{ kind: 'text', text: ADOOR_WORDS }, { kind: 'buttons', items: on(st.autoDoors !== false, 'doors') }] : []),   // 0.93.2: Auto doors (15b)
+      ...(AUTO_DOORS_ON ? [{ kind: 'text', text: ADOOR_WORDS }, { kind: 'buttons', items: ADOOR_CHOICES.map(([k, label]) => ({ label, action: { app: 'settings', do: 'doors', arg: k }, on: doorsMode() === k })) }] : []),   // 0.93.2: Auto doors (15b)
       ...SND.settingsBlocks(),                         // section 27: Sound On/Off and Volume
       ...(devNewSure ? [{ kind: 'text', text: 'Start a new game? Your current game will be lost.', mark: 'urgent' }, { kind: 'buttons', items: [{ label: 'Start over', action: { app: 'settings', do: 'newgo' } }, { label: 'Keep playing', action: { app: 'settings', do: 'newkeep' } }] }]
         : [{ kind: 'text', text: 'Start the game again from the beginning' }, { kind: 'buttons', items: [{ label: 'New game', action: { app: 'settings', do: 'newgame' } }] }]),
@@ -16919,6 +16919,7 @@ function ixFrame() {
   const mj = typeof myJob === 'function' ? myJob() : null, m = Math.floor(shipNow()), key = m + '|' + (mj ? mj.id + (mj.workDone ? '+' : '') + (mj.stepsDone || []).length : '') + '|' + SHIP.player.carry.length + '|' + (SHIP.player.work ? SHIP.player.work.fitted.length + '|' + !!SHIP.player.work.make : '');
   if (ixGoalAt !== key) { ixGoalAt = key; try { ixJobGoal = ixJobStep(); } catch (e) { ixJobGoal = null; } }
   const g = goalNow();                                   // the job's step only while it's tracked (goalNow: the arrow queue first when it's on)
+  adoorWay(g); adoorHint();                              // the doors on the arrow's way open by themselves; stopped at a shut one, how it opens (15b, FX29)
   if (!g) { if (!el.hidden) el.hidden = true; return; }
   if (typeof actProgress === 'function' && actProgress(ACT)) { if (!el.hidden) el.hidden = true; return; }   // section 15's progress bar is up over you: it says it all
   const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : ixLiftPanel() || { x: LIFT_AT[0], z: LIFT_AT[1] };
@@ -17111,15 +17112,63 @@ function turnInShow(j, a) {
 // a doorway leaves that door open until you're clear of it. AUTO_DOORS_ON: the feature's switch (on in 0.93.2); with it
 // off or the setting on, adoorShut is false and nothing changes. SHIP.device.settings.autoDoors (false when off, saved)
 var AUTO_DOORS_ON = true;
-const ADOOR_WORDS = 'Auto doors: doors open as you walk up to them. Off: tap a door, or somewhere in the room beyond, to open it. Lift doors always open.';
-const ADOOR = { tap: null, here: null, route: new Set() };
-const autoDoors = () => !AUTO_DOORS_ON || !(typeof SHIP !== 'undefined' && SHIP.device && SHIP.device.settings && SHIP.device.settings.autoDoors === false);
+// 0.93.3 (FX24 for lead 39; the user: "Even with auto doors off, public spaces like the mess hall, bow lounge, call booths, gym,
+// etc and rec deck should automatically open. It's really just private rooms. Have three settings. Auto open for private
+// spaces off and public on is the default"): three choices, SHIP.device.settings.doors 'all' (every door by itself, as
+// before 0.93.2), 'private' (the default, not saved: a door into a room someone sleeps in, cabins and bunk rooms and the
+// washroom inside a cabin, opens on a tap; every other door by itself) or 'none' (every door on a tap: 0.93.2's off). An
+// old save's autoDoors: false is 'none'. adoorKind(e): a door shut to you in this mode (adoorPrivate: worked out once a
+// deck from its bed places' rooms and each door's two rooms; no R(), no geometry)
+const ADOOR_WORDS = 'Doors. Private rooms are cabins and bunk rooms (and the washroom inside a cabin). Lift doors always open.';
+const ADOOR_CHOICES = [['all', 'All open by themselves'], ['private', 'Private rooms: tap to open'], ['none', 'All doors: tap to open']];
+const ADOOR = { tap: null, here: null, route: new Set(), way: null, hints: 0, hintAt: -1e9 };
+function doorsMode() {
+  if (!AUTO_DOORS_ON || typeof SHIP === 'undefined' || !SHIP.device || !SHIP.device.settings) return 'all';
+  const st = SHIP.device.settings; return st.doors === 'all' || st.doors === 'none' ? st.doors : st.autoDoors === false ? 'none' : 'private';
+}
+const autoDoors = () => doorsMode() === 'all';
+const ADOOR_PRIV = new Map();                             // deck -> the door edge keys of its private rooms
+function adoorPrivate(key) {
+  if (typeof deckDef === 'undefined' || !deckDef) return false;
+  let s = ADOOR_PRIV.get(deckDef.num);
+  if (!s) {
+    const beds = new Set((DECKS[deckDef.num].places || []).filter(p => p.type === 'bed').map(p => p.room || roomAt(...p.at)));
+    s = new Set();
+    for (const [k, e] of EDGES) if (e && e.type === 'door' && (e.horiz ? [[e.i, e.j - 1], [e.i, e.j]] : [[e.i - 1, e.j], [e.i, e.j]]).some(c => beds.has(roomAt(...c)))) s.add(k);
+    ADOOR_PRIV.set(deckDef.num, s);
+  }
+  return s.has(key);
+}
+function adoorKind(e) { const m = doorsMode(); return !!e && e.type === 'door' && (m === 'none' || m === 'private' && adoorPrivate(e.key)); }
 function adoorNear(key, m) { const e = EDGES.get(key); if (!e || typeof player === 'undefined') return false; const p = player.obj.position; return Math.hypot(p.x - e.cx, p.z - e.cz) < m; }
 function adoorShut(e, who) {                              // true: this door keeps you out (Auto doors off, not opened for you)
-  if (!e || e.type !== 'door' || !who || !who.isPlayer || autoDoors()) return false;
+  if (!e || e.type !== 'door' || !who || !who.isPlayer || !adoorKind(e)) return false;
   if (ADOOR.tap === e.key) { if (adoorNear(e.key, 3)) return false; ADOOR.tap = null; }
   if (ADOOR.here === e.key) { if (adoorNear(e.key, 1.6)) return false; ADOOR.here = null; }
+  if (ADOOR.way && ADOOR.way.doors.has(e.key)) return false;   // on the arrow's way (adoorWay)
   return !(ADOOR.route.has(e.key) && who.path && who.path.length);
+}
+// FX29 for lead 39 (CR1's week guide stuck at a bunk-room door): the doors on the way to the arrow's goal open by themselves,
+// in every setting, however you walk (keys, touch, the controller). ixFrame hands in goalNow() each frame; the way is
+// found again when the goal's tile changes, you change deck, or you step off it. No arrow: nothing (your own walking keeps
+// the rule). Only the player's collisions ask it; no R(), nothing saved.
+function adoorWay(g) {
+  if (!g || autoDoors()) { ADOOR.way = null; return; }
+  const w = deckDef.num === g.deck ? ixGoalWorld(g) : ixLiftPanel() || { x: LIFT_AT[0], z: LIFT_AT[1] }; if (!w) { ADOOR.way = null; return; }
+  let to = cellAt(w.x, w.z);
+  const gk = deckDef.num + '|' + K(to), here = player.here(), W0 = ADOOR.way;
+  if (W0 && W0.key === gk && W0.cells.has(K(here))) return;
+  if (!onGrid(to) || !free(...to)) { let bd = 1e9; const p0 = cellPos(...to); to = null; for (let a = 0; a < W; a++) for (let b = 0; b < D; b++) if (free(a, b)) { const p = cellPos(a, b), d = (p.x - p0.x) ** 2 + (p.z - p0.z) ** 2; if (d < bd) { bd = d; to = [a, b]; } } }
+  const path = to && onGrid(here) ? (K(to) === K(here) ? [] : findPath(here, to, null, player)) : null, doors = new Set(), cells = new Set([K(here)]);
+  if (path) { let a = here; for (const b of path) {
+    const keys = [];
+    if (b[0] !== a[0]) for (const j of new Set([a[1], b[1]])) keys.push(`v,${Math.max(a[0], b[0])},${j}`);
+    if (b[1] !== a[1]) for (const i of new Set([a[0], b[0]])) keys.push(`h,${i},${Math.max(a[1], b[1])}`);
+    for (const k of keys) { const e = EDGES.get(k); if (adoorKind(e)) doors.add(k); }
+    cells.add(K(b)); a = b;
+  } }
+  if (W0) for (const k of W0.doors) if (adoorNear(k, 1.6)) doors.add(k);   // the door you're in stays open while you clear it
+  ADOOR.way = { key: gk, cells, doors };
 }
 function adoorRoute(w, path) {                            // the doors a planned walk crosses (a diagonal step: both edges at its corner)
   if (autoDoors()) return; ADOOR.route = new Set();   // (on: nothing, so a walk planned while the game loads never reaches ADOOR)
@@ -17128,25 +17177,44 @@ function adoorRoute(w, path) {                            // the doors a planned
     const keys = [];
     if (b[0] !== a[0]) for (const j of new Set([a[1], b[1]])) keys.push(`v,${Math.max(a[0], b[0])},${j}`);
     if (b[1] !== a[1]) for (const i of new Set([a[0], b[0]])) keys.push(`h,${i},${Math.max(a[1], b[1])}`);
-    for (const k of keys) { const e = EDGES.get(k); if (e && e.type === 'door') ADOOR.route.add(k); }
+    for (const k of keys) { const e = EDGES.get(k); if (adoorKind(e)) ADOOR.route.add(k); }
     a = b;
   }
 }
 function adoorTap(key) {                                  // a tap on a door with Auto doors off: it opens, and you walk up to it
   if (autoDoors()) return false;
-  const e = EDGES.get(key); if (!e || e.type !== 'door') return false;
+  const e = EDGES.get(key); if (!adoorKind(e)) return false;   // a door that opens by itself in this mode: the tap is the floor's
   ADOOR.tap = key; approach(new THREE.Vector3(e.cx, 0, e.cz), reachableSide(e)[2], 0, () => {});
   return true;
 }
-function adoorTapSelf() {                                // a tap on you, within .9 m of a door that's shut to you: that door (your body covers its low strip)
-  if (autoDoors() || typeof DOOR_OBJS === 'undefined') return false;
+function adoorSelfKey() {                                // the door shut to you within .9 m of you (your body covers its low strip), or null
+  if (autoDoors() || typeof DOOR_OBJS === 'undefined') return null;
   const p = player.obj.position, d = DOOR_OBJS.filter(o => o.e.type === 'door' && adoorShut(o.e, player)).map(o => [o, Math.hypot(o.cx - p.x, o.cz - p.z)]).filter(([, m]) => m < .9).sort((x, y) => x[1] - y[1])[0];
-  return !!d && adoorTap(d[0].e.key);
+  return d ? d[0].e.key : null;
 }
-function adoorSet(on) {                                   // the Settings row
-  const st = SHIP.device.settings; if (on) delete st.autoDoors; else st.autoDoors = false;
-  ADOOR.tap = null; ADOOR.route = new Set(); ADOOR.here = null;
-  if (!on && typeof DOOR_OBJS !== 'undefined') { const p = player.obj.position, d = DOOR_OBJS.filter(o => o.e.type === 'door').sort((x, y) => Math.hypot(x.cx - p.x, x.cz - p.z) - Math.hypot(y.cx - p.x, y.cz - p.z))[0]; if (d && Math.hypot(d.cx - p.x, d.cz - p.z) < .55) ADOOR.here = d.e.key; }   // in a doorway: that one stays open till you're clear
+const _aoA = new THREE.Vector3(), _aoB = new THREE.Vector3();
+function adoorOnMe(cx, cy) {                              // a tap on your own body on screen (feet to head, a body's width either side)
+  if (typeof player === 'undefined') return false;
+  const p = player.obj.position; _aoA.set(p.x, 0, p.z).project(camera); _aoB.set(p.x, player.h || 1.7, p.z).project(camera);
+  const ax = (_aoA.x + 1) / 2 * innerWidth, ay = (1 - _aoA.y) / 2 * innerHeight, bx = (_aoB.x + 1) / 2 * innerWidth, by = (1 - _aoB.y) / 2 * innerHeight;
+  const dx = bx - ax, dy = by - ay, l2 = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((cx - ax) * dx + (cy - ay) * dy) / l2));
+  return Math.hypot(cx - ax - dx * t, cy - ay - dy * t) < Math.max(14, Math.sqrt(l2) * .2);
+}
+// FX29 (lead 39): your own steering stopped at a door shut to you: say how it opens, the first few times in a session (not every bump)
+function adoorHint() {
+  const s = player.steer; if (!s || !s.k || player.path.length || autoDoors() || ADOOR.hints >= 3 || typeof DOOR_OBJS === 'undefined') return;
+  const now = performance.now(); if (now - ADOOR.hintAt < 20000) return;
+  const p = player.obj.position, d = DOOR_OBJS.find(o => o.e.type === 'door' && Math.hypot(o.cx - p.x, o.cz - p.z) < .6 && (o.cx - p.x) * s.x + (o.cz - p.z) * s.z > .1 && adoorShut(o.e, player));
+  if (!d) return;
+  ADOOR.hints++; ADOOR.hintAt = now;
+  toast('A private room', typeof PAD !== 'undefined' && PAD.used ? 'Press A, or tap the door, to open it.' : 'Tap the door to open it.');
+}
+function adoorTapSelf() { const k = adoorSelfKey(); return !!k && adoorTap(k); }   // a tap on you right by a shut door: that door
+function adoorSet(mode) {                                 // the Settings row: 'all' | 'private' | 'none' (true / false: 0.93.2's on / off)
+  mode = mode === true ? 'all' : mode === false ? 'none' : ADOOR_CHOICES.some(([k]) => k === mode) ? mode : 'private';
+  const st = SHIP.device.settings; delete st.autoDoors; if (mode === 'private') delete st.doors; else st.doors = mode;
+  ADOOR.tap = null; ADOOR.route = new Set(); ADOOR.here = null; ADOOR.way = null;
+  if (mode !== 'all' && typeof DOOR_OBJS !== 'undefined') { const p = player.obj.position, d = DOOR_OBJS.filter(o => adoorKind(o.e)).sort((x, y) => Math.hypot(x.cx - p.x, x.cz - p.z) - Math.hypot(y.cx - p.x, y.cz - p.z))[0]; if (d && Math.hypot(d.cx - p.x, d.cz - p.z) < .55) ADOOR.here = d.e.key; }   // in a doorway: that one stays open till you're clear
 }
 // the patch, #11 (plans/patch-plan.html): a tracked arrow clears itself, by kind, so the next arrows (the arrival week's)
 // can show. Something on at a time (a meeting, tradition, appointment, meal...: the goal's trkFrom/trkTo, from Tracked):
@@ -61955,9 +62023,9 @@ function tap(cx, cy) {
   if (near && atPin && typeof ixPinBooth === 'function' && ixPinBooth()) return;   // FX5: the call booth's pin, over someone in the next booth
   if (tapCrew(cx, cy)) return;                           // a crew member (section 10)
   if (typeof shelfGlowTap === 'function' && shelfGlowTap(cx, cy)) return;   // the shelf lit up for the part you need (section 17, FX3): after the crew, so a tap on someone in front of it is still theirs (RV11)
-  const h = pick(cx, cy); if (!h) return;
+  const h = pick(cx, cy), meDoor = () => !atPin && adoorOnMe(cx, cy) && (h && typeof jobSpotTap === 'function' && jobSpotTap(h.point) || adoorTapSelf());   // a tap on yourself right by a door shut to you is a tap on the door (RV18: low cut-away walls), where it would only walk you over the floor: anyone, anything, a job's stop or the arrow's pin there first (FX29: pick() never returns you)
+  if (!h) { meDoor(); return; }
   const ud = h.object.userData;
-  if (ud.walker && ud.walker.isPlayer && adoorTapSelf()) return;   // 0.93.2: Auto doors off, a tap on yourself right by a shut door is a tap on the door (RV18: low cut-away walls)
   if (ud.walker && ud.walker.active) {
     const who = ud.walker, s = who.spec;
     who.stop(); who.talking = 6; who.faceToward(player); player.faceToward(who);
@@ -61986,6 +62054,7 @@ function tap(cx, cy) {
   }
   if (ud.door && adoorTap(ud.door)) return;             // 0.93.2: Auto doors off, a tap on a door opens it (15b)
   if (typeof playerFloorTap === 'function' && playerFloorTap(h.point)) return;   // section 15: a treadmill, seat or booth with no description of its own
+  if (meDoor()) return;
   const to = nearestOpen(h.point.x, h.point.z, player); playerGo(typeof tapBeside === 'function' ? tapBeside(to) : to);   // the patch (#17): not onto someone standing there
 }
 
@@ -62021,7 +62090,7 @@ cv.addEventListener('pointermove', e => {
   if (pts.size === 2) { const [a, b] = [...pts.values()]; setZoom(zoom0 * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch0); }
   else if (!pts.size && e.pointerType === 'mouse') {
     const h = pick(e.clientX, e.clientY), u = h && h.object.userData;
-    cv.style.cursor = u && (u.item || u.closedDoor || u.liftDoor || (u.walker && !u.walker.isPlayer) || u.door && !autoDoors()) ? 'pointer' : 'default';   // u.door: Auto doors off, a door is something to tap (0.93.2)
+    cv.style.cursor = u && (u.item || u.closedDoor || u.liftDoor || (u.walker && !u.walker.isPlayer) || u.door && adoorKind(EDGES.get(u.door))) ? 'pointer' : 'default';   // u.door: Auto doors off, a door is something to tap (0.93.2)
   }
 });
 const up = e => {
@@ -63430,12 +63499,14 @@ function padWhat(cx, cy, want) {                           // what a tap at (cx,
   const a = PAD_PICK.cs ? padCrewAt(cx, cy) : crewAtScreen(cx, cy); if (a) return 'crew:' + a.p.id;
   const h = pick(cx, cy); if (!h) return null;
   const ud = h.object.userData;
+  if (ud.walker && ud.walker.isPlayer && typeof adoorSelfKey === 'function' && adoorSelfKey()) return 'door:' + adoorSelfKey();   // you, right by a door shut to you: that door, as tap() takes it (the Doors setting, 0.93.3)
   if (ud.walker && ud.walker.active) return 'walker:' + ud.walker.spec.name;
   if (typeof ladderAimed === 'function' && ladderAimed(h)) return 'ladder';   // tap()'s next step (follow-up 1, CTT3's find): a point in line with the Spine ladder goes to the ladder, not the lift behind it
   if (ud.item) return ud.item.lift ? 'lift' : 'item:' + ITEMS.indexOf(ud.item);
   if (ud.liftDoor) return 'lift';
   if (ud.youLock) return 'lock:' + ud.youLock;
   if (ud.closedDoor) return 'door:' + ud.closedDoor;
+  if (ud.door && typeof adoorShut === 'function' && adoorShut(EDGES.get(ud.door), player)) return 'door:' + ud.door;   // a door shut to you (Doors setting, 0.93.3): A opens it
   if (want && !/^(job|crate|hamper|wardrobe|place:)/.test(want)) return 'floor';
   const p = h.point;                                     // the floor: playerFloorTap's order, read only
   if (typeof jobHere === 'function' && jobHere(p, true)) return 'job';
@@ -63521,8 +63592,8 @@ function padRaw() {                                       // what's in reach, be
   }
   for (const [key, x, z, ys] of PAD_PICK.items) add(key, x, z, ys, .25);
   for (const dobj of DOOR_OBJS) {                         // the lift and shut doors (an open doorway is only somewhere to walk)
-    const hit = dobj.g.children.find(o => o.userData.liftDoor || o.userData.youLock || o.userData.closedDoor), ud = hit ? hit.userData : null; if (!ud) continue;
-    add(ud.liftDoor ? 'lift' : ud.youLock ? 'lock:' + ud.youLock : 'door:' + ud.closedDoor, dobj.cx, dobj.cz, [1, .5, 1.5], .2);
+    const hit = dobj.g.children.find(o => o.userData.liftDoor || o.userData.youLock || o.userData.closedDoor || o.userData.door && typeof adoorShut === 'function' && adoorShut(dobj.e, player)), ud = hit ? hit.userData : null; if (!ud) continue;   // and a door shut to you (the Doors setting, 0.93.3)
+    add(ud.liftDoor ? 'lift' : ud.youLock ? 'lock:' + ud.youLock : 'door:' + (ud.closedDoor || ud.door), dobj.cx, dobj.cz, ud.door && !ud.closedDoor ? [1.1, .55, 1.65].map(y => y * (dobj.g.scale.y || 1)) : [1, .5, 1.5], .2);   // a door shut to you (0.93.3): at its height now, cut down near the camera
   }
   if (typeof jobHere === 'function' && jobsOn() && typeof ixChore === 'function') { const j = ixChore(), nx = j && !j.workDone && ixNextStop(j), pid = nx && nx.s.deck === deckDef.num && nx.s.places[0], sp = pid && PLACE_OF.has(pid) && placeSpot(pid); if (sp) add('job', sp.x, sp.z, [.05, .4, .8], .2); }
   const cr = SHIP.player.crate; if (cr && cr.deck === deckDef.num) add('crate', cr.x, cr.z, [.05, .3], .15);

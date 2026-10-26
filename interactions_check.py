@@ -1796,7 +1796,35 @@ with sync_playwright() as pw:
         for i in range(12): g.step(10); mx = max(mx, g.ev(AT)[2])
         ad['walkIn'] = g.ev(AT); ad['walkOpen'] = mx; g.ev(BACK); g.step(20)
         ad['crew'] = g.ev("(() => { const e = EDGES.get(window.__door.key), a = DECK_CREW.find(c => c.p); return [!!a && adoorShut(e, a), !!a && edgeBlocks(e, a.p)]; })()")
-        ad['saved'] = g.ev("(() => { const d = deviceLoad({ device: JSON.parse(JSON.stringify(SHIP.device)) }); return [SHIP.device.settings.autoDoors, d.settings.autoDoors]; })()")
+        ad['saved'] = g.ev("(() => { const d = deviceLoad({ device: JSON.parse(JSON.stringify(SHIP.device)) }); return [SHIP.device.settings.doors, d.settings.doors]; })()")
+        # 0.93.3: the three choices; an old save's autoDoors: false is 'none', nothing is the default 'private' (not saved);
+        # in 'private' a public door opens by itself to your own steering and a bunk room's stays shut
+        ad['old'] = g.ev("(() => { const L = s => deviceLoad({ device: { settings: s } }).settings; return [L({ autoDoors: false }).doors, L({}).doors === undefined, L({ doors: 'all' }).doors, L({ doors: 'private' }).doors === undefined]; })()")
+        PRIV = r"""(priv => { adoorSet('private'); goToDeck(priv ? 4 : 3); actEnd(true); player.stop(); const ds = DOOR_OBJS.filter(o => o.e.type === 'door' && adoorPrivate(o.e.key) === priv).map(o => [o, doorSides(o.e)]).filter(([o, s]) => s.length === 2 && s.every(([i, j]) => free(i, j)));
+          const [o, s] = ds[0]; window.__door = { key: o.e.key, a: s[0], b: s[1] }; player.obj.position.copy(cellPos(...s[0])); player.stop(); return [o.e.key, doorsMode(), 'doors' in SHIP.device.settings]; })(%s)"""
+        ad['pubSet'] = g.ev(PRIV % 'false'); g.ev(STEER); g.step(60); ad['pub'] = g.ev(AT); g.ev(BACK)
+        ad['privSet'] = g.ev(PRIV % 'true'); g.ev("ADOOR.hints = 0; ADOOR.hintAt = -1e9; document.getElementById('tx').textContent = ''"); g.ev(STEER); g.step(60); ad['priv'] = g.ev(AT)
+        ad['hint'] = g.ev("[ADOOR.hints, document.getElementById('tx').textContent]"); g.ev(BACK)
+        # FX29 (RV18's should): a real tap on your own body, standing by the bunk room's shut door, opens it (pick() never returns you)
+        if g.ev("typeof adoorOnMe === 'function'"):
+            g.ev(PRIV % 'true'); g.ev("(() => { ADOOR.here = null; const p = player.obj.position; target.copy(p).setY(.7); placeCam(); })()"); g.step(5)   # (adoorSet in the doorway the last part left you in keeps that door open till you're clear: not this test's case)
+            xy = g.ev("(() => { const p = player.obj.position, v = new THREE.Vector3(p.x, .9, p.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight, adoorSelfKey()]; })()")
+            g.page.mouse.click(xy[0], xy[1]); g.step(3)
+            ad['tapMe'] = g.ev("[ADOOR.tap === window.__door.key, ADOOR.tap]") + [xy[2]]; g.ev(BACK); g.ev("ADOOR.tap = null")
+            check(ad['tapMe'][0], f"Doors 'private': a real tap on yourself by the bunk room's shut door opens it (FX29, RV18): {ad['tapMe']} {xy}")
+            check(ad['hint'][0] == 1 and 'Tap the door' in ad['hint'][1], f"Doors 'private': stopped at the shut door by your own steering, the hint says how it opens, once (FX29): {ad['hint']}")
+        else: check(False, 'no adoorOnMe (FX29)')
+        # FX29 (lead 39, CR1's week guide): an arrow's way opens its doors, however you walk; with the arrow gone, the rule again
+        if g.ev("typeof adoorWay === 'function'"):
+            g.ev(PRIV % 'true'); g.ev("(() => { window.__trk = SHIP.player.track; SHIP.player.track = null; setGoal({ deck: 4, at: window.__door.b, label: 'FX29 test' }); adoorWay(goalNow()); })()")
+            ad['wayDoors'] = g.ev("!!ADOOR.way && ADOOR.way.doors.has(window.__door.key)")
+            g.ev(STEER); g.step(60); ad['way'] = g.ev(AT); g.ev(BACK); g.step(5)
+            g.ev("(() => { clearGoal(); adoorWay(goalNow()); })()"); g.ev(STEER); g.step(60); ad['wayGone'] = g.ev(AT); g.ev(BACK)
+            g.ev("(() => { SHIP.player.track = window.__trk; })()")
+            check(ad['wayDoors'] and ad['way'][1], f"Doors 'private': the arrow's way opens its bunk-room door to your own steering (FX29): {ad['wayDoors']} {ad['way']}")
+            check(ad['wayGone'][0] and ad['wayGone'][2] < .05, f"Doors 'private': the arrow gone, the bunk room's door is shut to your steering again (FX29): {ad['wayGone']}")
+        else: check(False, 'no adoorWay (FX29)')
+        g.ev(AD)   # back to the Deck 3 door, all doors on a tap
         g.ev("adoorSet(true)"); g.ev(STEER); g.step(60); ad['steerOn'] = g.ev(AT); g.ev(BACK)
         ad['savedOn'] = g.ev("'autoDoors' in deviceLoad({ device: JSON.parse(JSON.stringify(SHIP.device)) }).settings")
         print('  Auto doors:', ad)
@@ -1806,7 +1834,10 @@ with sync_playwright() as pw:
         check(ad.get('self') == [True, True], f"Auto doors off: a tap on yourself right by a shut door opens it (0.93.2, RV18): {ad.get('self')}")
         check(ad['steerOn'][1], f"Auto doors on: you walk straight through, as always (0.93.2): {ad['steerOn']}")
         check(ad['crew'] == [False, False], f"Auto doors: the crew are never stopped (0.93.2): {ad['crew']}")
-        check(ad['saved'] == [False, False] and ad['savedOn'] is False, f"Auto doors: saved as off, loaded back; nothing saved when on (0.93.2): {ad['saved']} {ad['savedOn']}")
+        check(ad['saved'] == ['none', 'none'] and ad['savedOn'] is False, f"Doors: 'none' saved and loaded back (0.93.3): {ad['saved']} {ad['savedOn']}")
+        check(ad['old'] == ['none', True, 'all', True], f"Doors: an old save's autoDoors off is 'none'; nothing, or 'private', is the default and not saved (0.93.3): {ad['old']}")
+        check(ad['pubSet'][1] == 'private' and ad['pubSet'][2] is False and ad['pub'][1], f"Doors 'private' (the default): a public door opens as you walk into it (0.93.3): {ad['pubSet']} {ad['pub']}")
+        check(ad['priv'][0] and ad['priv'][2] < .05, f"Doors 'private': a bunk room's door stays shut to your own steering (0.93.3): {ad['privSet']} {ad['priv']}")
     else: check(False, 'no Auto doors (0.93.2)')
     # Take a seat (0.93.2, the user's): with a tray in the mess hall, next to a free mess seat, a button the size of Put down
     # just above it; a tap sits you at the nearest free seat and you eat (the tray's sit-and-eat); none without a tray, none

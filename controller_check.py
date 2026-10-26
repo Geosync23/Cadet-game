@@ -17,6 +17,8 @@
 #   pick      the ringed thing and A, against cadet_test's taps (pick)
 #   lift      by Deck 3's lift door with people about: the ring offers the lift, and A on it opens the panel after someone
 #             steps in front (CP5: KC1, KC2) (pick)
+#   door      (0.93.3) the Doors setting's default: at a bunk room's shut door the ring offers it, A opens it, you walk
+#             through; a public door (it opens by itself) is never offered (pick)
 #   reach     the non-circular sweep: the clickables are read from the page itself (every element that is a button,
 #             link or input, or has a click/pointer/touch listener, or shows a hand cursor), first by mouse through every
 #             panel and menu; then every one must be reached and pressed by pad (panels)
@@ -38,7 +40,7 @@ __import__('atexit').register(lambda: [f.unlink(missing_ok=True) for f in (WORK 
 ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
 GAME = pathlib.Path(ARGS[0])
-ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'reach', 'day', 'games', 'unplug', 'odd',
+ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'door', 'reach', 'day', 'games', 'unplug', 'odd',
              'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse']
 PARTS = ARGS[1:] or ALL_PARTS
 SHOTS = WORK / 'test' / 'ctl_shots'; SHOTS.mkdir(parents=True, exist_ok=True)
@@ -1181,6 +1183,35 @@ def part_lift(pw, src, tag):
     elif not opened: fails.append('lift lobby, 22:00: A on "Lift" after someone stepped in front: the lift panel never opened')
     if r.errors: fails.append('lift lobby: page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
+DOOR_SET = r"""(() => { goToDeck(4, null); actEnd(true); player.stop(); adoorSet('private');
+  const ds = DOOR_OBJS.filter(o => o.e.type === 'door' && adoorPrivate(o.e.key)).map(o => [o, doorSides(o.e)]).filter(([o, s]) => s.length === 2 && s.every(([i, j]) => free(i, j)));
+  if (!ds.length) return 'no private door';
+  const [o, s] = ds[0]; window.__door = { key: o.e.key, a: s[0], b: s[1] }; const A = cellPos(...s[0]); player.obj.position.copy(A); player.stop(); target.copy(A).setY(.7);
+  return o.e.key; })()"""
+DOOR_A = r"""(() => { actEnd(true); const A = cellPos(...window.__door.a); player.obj.position.copy(A); player.stop(); target.copy(A).setY(.7); placeCam();   // (the arrival may have walked you on; the camera with you, as in play)
+  const P = PAD_PICK, k = 'door:' + window.__door.key, L = padTargets(), t = L.find(o => o.key === k); if (!t) { const o = DOOR_OBJS.find(x => x.e.key === window.__door.key), p = player.obj.position; return 'not offered: ' + L.map(o => o.key).join(', ') + ' [mode ' + doorsMode() + ', shut ' + (o && adoorShut(o.e, player)) + ', deck ' + deckDef.num + ', at ' + (o && Math.hypot(o.cx - p.x, o.cz - p.z).toFixed(2)) + '] ' + JSON.stringify([1, .5, 1.5].map(y => { const v = new THREE.Vector3(o.cx, y, o.cz).project(camera), cx = (v.x + 1) / 2 * innerWidth, cy = (1 - v.y) / 2 * innerHeight, h = pick(cx, cy); return [Math.round(cx), Math.round(cy), padWhat(cx, cy, k), h && Object.keys(h.object.userData).join('/')]; })) + ' pp ' + JSON.stringify([+p.x.toFixed(1), +p.z.toFixed(1), +target.x.toFixed(1), +target.z.toFixed(1)]); }
+  P.list = L; P.sel = t; P.chosen = true; P.n = 99; padFire('a'); return 'pressed'; })()"""
+def part_door(pw, src, tag):
+    """0.93.3 (FX24, the Doors setting; the user: every new piece works with a game controller): with 'private' (the
+    default), standing at a bunk room's shut door, the ring offers the door and A opens it (as a tap on it), and you can
+    walk through; a public door is never offered (it opens by itself)."""
+    fails = []
+    if 'function adoorPrivate' not in src: print('  door: not in this build (0.93.3)'); return fails
+    r = Run(pw, src, f'{tag}_door', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    key = r.ev(DOOR_SET); r.step(20)
+    res = r.ev(DOOR_A); r.step(30)
+    opened = r.ev("ADOOR.tap === window.__door.key")
+    r.ev("(() => { const { a, b } = window.__door, A = cellPos(...a), B = cellPos(...b), dx = B.x - A.x, dz = B.z - A.z, d = Math.hypot(dx, dz); player.obj.position.copy(A); player.stop(); player.steer = { x: dx / d, z: dz / d, k: 1 }; })()")
+    r.step(60); through = r.ev("(() => { const A = cellPos(...window.__door.a); endSteer(); return Math.hypot(player.obj.position.x - A.x, player.obj.position.z - A.z) > 1.2; })()")
+    pub = r.ev("(() => { goToDeck(3, null); return padTargets().filter(o => /^door:/.test(o.key) && !CLOSED_DOORS[o.key.slice(5)]).map(o => o.key); })()")
+    print(f'  door: a bunk room door {key}, the ring and A: {res}; opened {opened}; walked through {through}; public doors offered on Deck 3: {pub}')
+    if res != 'pressed': fails.append(f'door: the ring never offers the shut private door {key} ({res})')
+    elif not opened: fails.append(f'door: A on the shut private door {key} did not open it')
+    elif not through: fails.append(f'door: after A, you could not walk through {key}')
+    if pub: fails.append(f'door: a door that opens by itself is offered as a target ({pub})')
+    if r.errors: fails.append('door: page errors: ' + ' | '.join(r.errors[:3]))
+    r.close(); return fails
 def part_pick(pw, src, tag):
     fails = part_facing(pw, src, tag)
     fails += part_mess_seat(pw, src, tag)
@@ -1297,11 +1328,24 @@ STEER = r"""((gx, gz) => { const s = player.here(), g = nearestOpen(gx, gz, play
   let w = cellPos(...path[0]); if (path.length > 1 && Math.hypot(w.x - pp.x, w.z - pp.z) < .3) w = cellPos(...path[1]);
   const dx = w.x - pp.x, dz = w.z - pp.z, d = Math.hypot(dx, dz) || 1;
   const x = (dx * Math.cos(az) - dz * Math.sin(az)) / d, y = (dx * Math.sin(az) + dz * Math.cos(az)) / d; return { x, y }; })"""
+# FX29 (lead 39, CR5's 'day' FAIL): your own stick stops at a private room's door (the Doors setting's default); a player
+# then picks that door on the ring and presses A, and walks on. A door shut to you within 1.2 m, chosen on the ring: A
+SHUT_NEAR = r"""(() => { if (typeof adoorShut !== 'function') return false; const p = player.obj.position; return DOOR_OBJS.some(o => o.e.type === 'door' && Math.hypot(o.cx - p.x, o.cz - p.z) < 1.2 && adoorShut(o.e, player)); })()"""
+def open_door(r):
+    r.js('window.__pads.clear(0)'); r.step(2)
+    for k in range(12):
+        sel = r.ev(RING_SEL)
+        if sel and str(sel['key']).startswith('door:'): r.press('A'); r.step(40); return True
+        r.press('RIGHT'); r.step(4)
+    return False
 def walk_to(r, x, z, frames=900):
-    shut = 0
+    shut = 0; last = None; still = 0; doors = 0
     for k in range(frames // 6):
         # a panel that opened on the way (a ladder hatch underfoot, 0.64.17): B puts it away, as a player would, then on
         if shut < 4 and r.ev("!!padLayer()"): r.js('window.__pads.clear(0)'); r.press('B'); r.step(3); shut += 1; continue
+        pos = r.ev("[player.obj.position.x, player.obj.position.z]")
+        still = still + 1 if last and abs(pos[0] - last[0]) + abs(pos[1] - last[1]) < .03 else 0; last = pos
+        if still >= 2 and doors < 4 and r.ev(SHUT_NEAR): doors += 1; still = 0; open_door(r); continue
         st = r.ev(f"({STEER})({x}, {z})")
         if not st or st.get('there'): r.js('window.__pads.clear(0)'); r.step(2); return bool(st)
         if st.get('nopath'): r.js('window.__pads.clear(0)'); return False
@@ -2309,9 +2353,9 @@ OLD_NEEDS = {'off': ['base'], 'quiet': ['base'], 'base': ['base'], 'deck': ['dec
 OLD_NAME = {'pick': 'pick1'}   # CT1's pick beside this check's own
 
 # parts that need a package: 'not yet' until PAD_BUILT names it
-NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'],
+NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick'], 'door': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'],
          'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck']}
-PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'reach': part_reach, 'games': part_games, 'day': part_day}   # 'reach' joins when the pad half is written
+PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day}   # 'reach' joins when the pad half is written
 for k, v in OLD_NEEDS.items(): NEEDS[OLD_NAME.get(k, k)] = v; PART_FN[OLD_NAME.get(k, k)] = legacy(k)
 
 # ---- planted faults --------------------------------------------------------------------------------------------------
