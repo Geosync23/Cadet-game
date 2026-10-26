@@ -1,0 +1,38 @@
+@tradition midnight-toast
+// Round 2: after tap night Greta Garcia makes toast for the night shift going on and the night owls. Every 4 weeks from week 4 (Days 26, 54...).
+// Rules: FX24 (0.93.2, behind TRAD_0932_ON in section 13). Words: CS1 (plans/trad-0932-words.txt, claude/crew-stories-pitch 7b1e7300).
+k: 1305
+title: Midnight toast
+when: every 4 weeks friday week 4
+at: 23:00-23:30
+min: 20
+to-bed: yes
+where: 3 room Mess hall: mess-seat
+hold: 1
+who: garcia-greta always, night-owl 50%, night-shift 40%, everyone 5%
+anim: garcia-greta talk, everyone drink
+host: garcia-greta
+from: garcia-greta
+invite: host=garcia-greta odds=25% line="Midnight toast in the mess. For the night lot, and anyone else still up."
+
+== mail
+- Midnight toast tomorrow, {time}, the mess. Toast, butter, jam, a pot of tea, for the night shift going on and the owls still up. Pyjamas don't count against you.
+
+== ask
+- Midnight toast in the mess. Greta's making it. She says she isn't, but she is.   #funny
+- Still up? There's toast in the mess. Night shift's treat.
+- Toast at eleven. The best kind of late.
+
+== here
+- Butter's soft. Jam's from jar day.
+- Another slice? Go on. Nobody's counting.   #warm
+- Quiet in here this late. Nice.
+- Tea's stewed. That's how the night shift likes it.   #funny
+
+== thanks
+- Greta makes toast and tea for the night shift going on and anyone still awake. The mess is quiet and warm.   #warm
+
+== chatter
+- Midnight toast last night. Best toast I've had aboard. Possibly because it was midnight.   #funny
+- Greta says she only makes the toast for the night shift. She made me two slices.   #warm
+- I went to bed full of toast. No regrets.   #funny

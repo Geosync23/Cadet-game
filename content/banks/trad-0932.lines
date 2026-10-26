@@ -1,0 +1,182 @@
+@bank all
+// CS1's words for 0.93.2's traditions (plans/trad-0932-words.txt and plans/tasting-table-late-words.md on
+// claude/crew-stories-pitch 7b1e7300), pasted by FX24. Keys (section 18, the Traditions slot, behind TRAD_0932_ON):
+//   t932.<id>.join    the host, when you tap them to join (one a day, by the day)
+//   t932.<id>.close   the host, near the end (a bubble, once)
+//   tasting.dish.<key>  Brennan's dishes, "name | what she says setting it down"; two a week in turn (the keys: the tally's choices)
+//   tasting.greet / tasting.ask / tasting.thanks / tasting.close   Brennan when you join the tasting table
+
+// scone-morning (host halloran-emeka)
+== t932.scone-morning.join
+- Morning! Scone? Joke first or scone first? Scone first. I'm not a monster.
+- There you are. Warm one, from the middle of the tin. Best ones.
+- Sit, sit. Jam's there. Here's today's joke, you've been warned.
+== t932.scone-morning.close
+- That's the tin empty. Lovely. Same again in a few weeks.
+- Last scone's yours. And the last joke. Sorry about the joke.
+
+// rec-ring-the-bell (host chen-carmen)
+== t932.rec-ring-the-bell.join
+- Oh. You're climbing? Good. Chalk's there. The bell's waiting.
+- One climb, the hard route. Don't look down. Well, look a bit.
+- You're next. Everyone counts. It helps. It doesn't help.
+== t932.rec-ring-the-bell.close
+- That's everyone. The bell's still ringing in my ears. Or it isn't. Hard to say.
+- Next month, then. The bell isn't going anywhere.
+
+// coffee-trials (host volkov-maeve)
+== t932.coffee-trials.join
+- Hiya! Three cups. No names. Taste, then vote. Cup B is not mine. Probably.
+- Here, sip. Don't say anything yet. Faces only.
+- You're a judge now. Very serious job. Have a biscuit.
+== t932.coffee-trials.close
+- Tokens are in. And the winner is... the coffee machine, honestly. Ta-ra!
+- That's the trials. Nobody tell Calder we used the machine three times.
+
+// five-minute-skills (host nakamura-bilal)
+== t932.five-minute-skills.join
+- Good, you came. Sit there. Five minutes, I'm timing it.
+- Today's skill is a small one. Small skills save big days.
+- Watch first. Then your hands. Then mine, if yours get stuck.
+== t932.five-minute-skills.close
+- Five minutes. Well, eight. Everyone's got it. Mostly.
+- That's one more thing you know. Come back for the next one.
+
+// beginners-guitar (host larsen-hamid)
+== t932.beginners-guitar.join
+- You came! Brave. Sit near the door, in case.
+- Right, you're our audience. Clap whatever happens.
+- Here's the guitar. One chord. G. Ish.
+== t932.beginners-guitar.close
+- That's our set. All three songs. Two of them were the same song.
+- Thanks for listening. Your ears will recover.
+
+// windowsill-herbs (host janssen-hugo)
+== t932.windowsill-herbs.join
+- Hello! Smell this one. No, closer. That's the good basil.
+- Brought a pot? Lovely. No pot? Have a cutting.
+- We're judging the parsley today. Gently. It's sensitive.
+== t932.windowsill-herbs.close
+- Best bunch goes to Brennan. Everyone else takes a cutting home.
+- That's the herbs swapped. The garden smells amazing now.
+
+// sounds-from-home (host vasquez-uma)
+== t932.sounds-from-home.join
+- Hi. Sit anywhere. We're about to play a harbour. Then someone's grandad's clock.
+- Have you brought a sound? If not, just listen. That's half of it.
+- Lights low. Ears open. That's all we need.
+== t932.sounds-from-home.close
+- That's everyone's. Thank you for bringing a bit of home aboard.
+- Same time next month. Bring a different sound. Or the same one, if you miss it.
+
+// jar-day (host varga-tariq)
+== t932.jar-day.join
+- Apron's on the hook. Jars are washed. Beans are waiting.
+- You fill, I seal, you label. Neat letters, please.
+- Today it's carrots. Last time it was a sort of jam. We don't talk about it.
+== t932.jar-day.close
+- Forty jars. Forty-one. Who brought an extra jar? Never mind. Shelf it.
+- That's jar day. Your name's on the spice shelf now.
+
+// rec-lamplight-paddle (host silva-bea)
+== t932.rec-lamplight-paddle.join
+- Hello. Grab a paddle. No racing. I mean it.
+- Slow is the only speed tonight.
+- Sit low, paddle soft. The lamps do the rest.
+== t932.rec-lamplight-paddle.close
+- That's the river done. Out slowly, and mind the dock board.
+- Thank you for drifting with me. Sleep well tonight. You will.
+
+// playlist-duel (host oneill-imani)
+== t932.playlist-duel.join
+- You came! Pick a side. Left plays first.
+- Three songs each. Vote with your hands. I'll count. Honestly.
+- No skipping, no booing. Clapping's fine.
+== t932.playlist-duel.close
+- Left wins. I let them. Obviously.
+- Duel's done. Somebody's playlist goes on the jam's list on Friday.
+
+// row-for-the-board (host lindqvist-isak)
+== t932.row-for-the-board.join
+- You're here to shout? Good. Loud's what I need.
+- Two minutes each. Vance's name is up there. Not for long.
+- Count the metres out loud. Every hundred. Please.
+== t932.row-for-the-board.close
+- Not tonight. Close, though. Next month.
+- The board stays as it is. For now. Write that down.
+
+// seed-packet-day (host hart-ravi)
+== t932.seed-packet-day.join
+- Hello. Paper, seeds, pencils. Fold first. Draw after.
+- Pick your seeds from the jars. Then make the packet look like them.
+- Your drawing goes in Cruz's tin. For a whole season.
+== t932.seed-packet-day.close
+- That's the packets done. Cruz will sow them next season. Your names and all.
+- Thank you. That's next season sorted.
+
+// midnight-toast (host garcia-greta)
+== t932.midnight-toast.join
+- Still up? Fine. Sit. Toast's coming.
+- This is for the night shift. You can have some. Don't tell them.
+- Butter or jam? Wrong. Both.
+== t932.midnight-toast.close
+- Night shift's off to work. Go to bed, owls.
+- Last slice gone. Kitchen's closing. Sleep.
+
+// whodunnit-club (host achterberg-lars)
+== t932.whodunnit-club.join
+- Pencil, paper. Sit. Part one starts in a minute.
+- No guessing out loud. Write it down. Fold it over.
+- Tonight's is short. The culprit isn't.
+== t932.whodunnit-club.close
+- And it was... the one nobody wrote down. As usual.
+- That's the mystery. Same time next month. Bring suspicions.
+
+// Brennan's tasting table (after dinner, the galley)
+== tasting.dish.smoked-salt-caramels
+- Smoked salt caramels | Marra Station salt. Bite first, then tell me.
+== tasting.dish.seaweed-crackers
+- Seaweed crackers | Off the hydroponics wall. Crunchy. You'll see.
+== tasting.dish.lentil-dumplings
+- Spiced lentil dumplings | My mum's, by ear. Until it sounds right.
+== tasting.dish.green-tomato-oatcakes
+- Green tomato chutney on oatcakes | The garden was too keen. This is the fix.
+== tasting.dish.cardamom-rice-pudding
+- Cardamom rice pudding | Kovac sorted the pods. Every one.
+== tasting.dish.chilli-lime-popcorn
+- Chilli-lime popcorn | Nandakumar's chillies. Have water ready.
+== tasting.dish.cold-beetroot-soup
+- Cold beetroot soup | Cold soup. Don't make that face.
+== tasting.dish.thyme-honey-flatbread
+- Honey and thyme flatbread | Hugo's thyme. He'll want a report.
+== tasting.dish.black-bean-fritters
+- Black bean fritters | Crisp outside. Hold it by the edge, love.
+== tasting.dish.mushroom-broth-cup
+- Mushroom broth in a cup | Drink it. It's soup you hold.
+== tasting.dish.pear-ginger-crumble
+- Pear and ginger crumble | Pears from the stores. Ginger for the cold.
+== tasting.dish.pickled-carrot-ribbons
+- Pickled carrot ribbons | From jar day. Tariq's jar, not yours.
+== tasting.dish.sesame-noodle-nest
+- Sesame noodle nests | Twirl, don't slurp. Well. Slurp a bit.
+== tasting.dish.baked-plum-custard
+- Baked plum custard | Wobbles when it's right. Look at it wobble.
+== tasting.dish.herb-omelette-roll
+- Rolled herb omelette | Breakfast, but after dark. Live a little.
+== tasting.dish.sweet-potato-cakes
+- Sweet potato cakes | Mashed by Lukas. Fried by me. Blame him.
+== tasting.greet
+- Come through, love. Spoon's there. Two new ones tonight.
+- There you are. Clean spoon, open mind. Try the left one first.
+- Sit on the stool. Taste both before you say a word.
+== tasting.ask
+- Right. Which jar gets your token? Don't be polite.
+- Left jar or right jar, love. Honest answer.
+- Token in a jar, please. I won't look. I'll look a bit.
+== tasting.thanks
+- Thank you, love. If it wins, it's on Sunday's table.
+- Noted. You've got taste. Or you've got mine, anyway.
+- Lovely. Off you go, and take a biscuit for the road.
+== tasting.close
+- That's tonight's. Back out, the lot of you, I've pans to do.
+- Thank you, loves. The winner's on Sunday. The loser never happened.

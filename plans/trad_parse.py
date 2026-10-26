@@ -63,7 +63,7 @@ def parse_when(v, where):
     if low[:1] == ['weekly'] and len(t) >= 2:
         days = [_wd(x, where) for x in t[1].split(',') if x]   # weekly wednesday,thursday: two evenings a week
         w, i = {'weekday': days[0] if len(days) == 1 else days}, 2
-    elif low[:1] == ['every'] and len(t) >= 4 and low[2] == 'weeks' and t[1] in ('2', '4', '8'):   # 8: 0.92.6 (FX17)
+    elif low[:1] == ['every'] and len(t) >= 4 and low[2] == 'weeks' and t[1] in ('2', '3', '4', '6', '8'):   # 8: 0.92.6 (FX17); 3 and 6: 0.93.2 (FX24, the traditions variety)
         w, i = {'every': t[1] + 'weeks', 'weekday': _wd(t[3], where)}, 4
         if low[4:5] == ['week']:
             if len(t) < 6:
@@ -250,8 +250,8 @@ def finish(tr, tid, where):
     for need in ('k', 'name', 'when', 'at', 'where', 'who'):
         if need not in tr:
             raise TradError(f'{where}: tradition {tid} has no {need}' + (' (ask the traditions engineer for one)' if need == 'k' else ''))
-    if not (434 <= tr['k'] <= 499 or 710 <= tr['k'] <= 719):   # 710-719: 0.92.6 (FX17; k and k + 100 unused by any other hash)
-        raise TradError(f'{where}: k {tr["k"]} is outside 434-499 and 710-719')
+    if not (434 <= tr['k'] <= 499 or 710 <= tr['k'] <= 719 or 1300 <= tr['k'] <= 1349):   # 710-719: 0.92.6 (FX17; k and k + 100 unused by any other hash); 1300-1349: 0.93.2 (FX24, the same)
+        raise TradError(f'{where}: k {tr["k"]} is outside 434-499, 710-719 and 1300-1349')
     if any(h >= len(tr['where']) for h in tr.get('hold', [])):
         raise TradError(f'{where}: hold names a where line that is not there')
     bad = [x for x in tr.get('text', {}) if x not in TEXT_KINDS]

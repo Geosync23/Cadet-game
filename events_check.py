@@ -28,7 +28,8 @@ STEP = 0.05                    # real seconds a step, as day_check
 DUE_NEW = r"""((w, lo, hi) => {
   const s = new Set(), wdOf = d => ((d - 1) % 7 + 7) % 7, seas = d => ['sowing', 'greening', 'harvest', 'lanterns'][Math.floor((((d - 1) % 364) + 364) % 364 / 91)];
   const add = d => { if (d >= lo && d <= hi && (!w.season || [].concat(w.season).includes(seas(d))) && (w.from == null || d >= w.from) && (w.until == null || d <= w.until)) s.add(d); };
-  const n = { week: 1, '2weeks': 2, '4weeks': 4, '8weeks': 8 }[w.every || (w.weekday != null ? 'week' : '')];
+  const n = { week: 1, '2weeks': 2, '3weeks': 3, '4weeks': 4, '6weeks': 6, '8weeks': 8 }[w.every || (w.weekday != null ? 'week' : '')];   // 3 and 6: 0.93.2 (FX24)
+  if (w.any) { for (const x of w.any) dueNew(x, lo, hi).forEach(d => add(d)); return s; }   // either rhythm (0.93.2, TRAD_0932_WHEN)
   if (Array.isArray(w.weekday)) { for (const x of w.weekday) dueNew({ ...w, weekday: x }, lo, hi).forEach(d => s.add(d)); return s; }
   if (w.after === 'arrival') { const a = typeof introArrival === 'function' ? introArrival() : 0;
     if (w.days != null) add(a + w.days); else add(a + 1 + (w.weekday - wdOf(a + 1) + 7) % 7 + 7 * ((w.nth || 1) - 1)); }
@@ -37,13 +38,13 @@ DUE_NEW = r"""((w, lo, hi) => {
   else if (w.every === 'year') for (let y = 0; 364 * y + 1 <= hi; y++) add(364 * y + (w.dayOfYear != null ? w.dayOfYear : 1 + 7 * ((w.week || 1) - 1) + w.weekday));
   return s;
 })"""
-IS_NEW = "(w => typeof w.every === 'string' || !!w.after || w.season != null || w.from != null || w.until != null || Array.isArray(w.weekday))"
+IS_NEW = "(w => !!w.any || typeof w.every === 'string' || !!w.after || w.season != null || w.from != null || w.until != null || Array.isArray(w.weekday))"
 
 PLANS = r"""(days => {
   const out = { days: [], bad: [], empty: [], ids: SHIP_TRADITIONS.filter(e => !e.flag || (typeof flag === 'function' && flag(e.flag))).map(e => e.id) }, LINGER = 25;   // staying on a little after the end is fine
   const isNew = """ + IS_NEW + r""", dueNew = """ + DUE_NEW + r""", lo = Math.min(...days), hi = Math.max(...days);
   const DUE = new Map(SHIP_TRADITIONS.filter(ev => isNew(ev.when)).map(ev => [ev.id, dueNew(ev.when, lo, hi)]));
-  const tagId = tag => { if (SHIP_TRADITIONS.some(e => e.id === tag.slice(3))) return tag.slice(3); const m = /^ev-(.+?)(-(talk|drink|play|water|wash|read|cheer|clap|disc|cocoa|cook))?$/.exec(tag); return m && m[1]; };   // an id first (rec-chiefs-talk ends like an anim)   // cheer, clap, disc: the rec deck's (0.83, RA)
+  const tagId = tag => { if (SHIP_TRADITIONS.some(e => e.id === tag.slice(3))) return tag.slice(3); const m = /^ev-(.+?)(-(talk|drink|play|water|wash|read|cheer|clap|disc|cocoa|cook|fold))?$/.exec(tag); return m && m[1]; };   // an id first (rec-chiefs-talk ends like an anim)   // cheer, clap, disc: the rec deck's (0.83, RA)
   for (const d of days) {
     const on = eventsOn(d), wd = weekday(d), yd = shipYearDay(d), row = { d, wd: WEEKDAYS[wd].slice(0, 3), ev: [] };
     // due exactly when the table says
@@ -470,6 +471,8 @@ with sync_playwright() as pw:
         if (t.id === 'first-light' && !(typeof FLC_ON !== 'undefined' && FLC_ON)) continue;   // patch #26: loaded only with its switch on (section 15's FLC_ON)
         if (t.id === 'captains-address' && !(typeof SHORT_FRIDAY !== 'undefined' && SHORT_FRIDAY && REC_TRAD_ON)) continue;
         if (typeof P926_NEW !== 'undefined' && P926_NEW.has(t.id) && !P926_TRADS) continue;   // 0.92.6's new traditions (FX17): loaded only with P926_TRADS
+        if (typeof TRAD_0932_NEW !== 'undefined' && TRAD_0932_NEW.has(t.id) && !TRAD_0932_ON) continue;   // 0.93.2's new traditions (FX24): loaded only with TRAD_0932_ON
+        if (typeof TRAD_0932_ON !== 'undefined' && TRAD_0932_ON && (t.id === 'tasting-table' || t.id === 'tasting-table-late')) { if (!SHIP_TRADITIONS.some(e => e.id === 'tasting-table' && e.k === 1314)) out.bad.push('tasting-table-late not loaded as tasting-table'); continue; }   // 0.93.2: the reworked one in the old one's place
         if (typeof WEEKEND_TRADS !== 'undefined' && WEEKEND_TRADS.has(t.id) && !WEEKEND_ON) continue;   // the weekend traditions (0.92.5 item 16): loaded only with WEEKEND_ON   // Short Fridays: loaded only with its switch on (section 13's SHORT_FRIDAY; 18f) and the rec deck's traditions
         const ev = SHIP_TRADITIONS.find(e => e.id === t.id); if (!ev || !ev.baked) { out.bad.push('baked ' + t.id + ' not loaded'); continue; }
         let n = 0; for (let d = 0; d <= 364; d++) if (eventsOn(d).some(e => e.id === t.id)) n++;
@@ -481,13 +484,14 @@ with sync_playwright() as pw:
       }
       // a tradition that waits for a story flag (bridge hour: 'bridge.invited') comes on once it's set, and goes again
       for (const ev of SHIP_TRADITIONS.filter(e => e.flag && typeof flagSet === 'function')) {
-        const was = flag(ev.flag), on = () => [...Array(56).keys()].map(x => x + 1).concat([92, 99]).filter(x => eventsOn(x).some(e => e.id === ev.id)).length;   // + 92, 99: a season's first Monday (the rec deck's all-hands, 0.83)
+        const was = flag(ev.flag), on = () => [...Array(56).keys()].map(x => x + 1).concat([92, 99, 97, 105]).filter(x => eventsOn(x).some(e => e.id === ev.id)).length;   // + 92, 99: a season's first Monday (the rec deck's all-hands, 0.83); 97, 105: 0.93.2's Lamplight paddle and Ring the bell (FX24)
         flagSet(ev.flag, null); const off = on(); flagSet(ev.flag, true); const yes = on(); flagSet(ev.flag, was === undefined ? null : was); eventsOn(1);
         out.flags = (out.flags || []).concat(ev.id + ': ' + off + ' without, ' + yes + ' with ' + ev.flag);
         if (off || !yes) out.bad.push(ev.id + ' and its flag ' + ev.flag + ': ' + off + ' days without, ' + yes + ' with');
       }
       // and each rhythm on its own, as a tradition designer might write it
       for (const w of [{ every: 'week', weekday: 6 }, { every: '2weeks', weekday: 1 }, { every: '2weeks', weekday: 1, week: 2 }, { every: '4weeks', weekday: 5, week: 3 }, { every: '8weeks', weekday: 0, week: 5, from: 29 },
+          { every: '3weeks', weekday: 5, week: 2 }, { every: '6weeks', weekday: 6, week: 4, from: 64 }, { any: [{ weekday: 5, until: 7 }, { every: '2weeks', weekday: 5, week: 2 }] }, { any: [{ weekday: 3 }, { every: '2weeks', weekday: 1 }] },   // 0.93.2 (FX24)
           { every: 'quarter', quarterDay: 1 }, { every: 'quarter', week: 13, weekday: 6 }, { every: 'year', dayOfYear: 182 }, { every: 'year', week: 52, weekday: 6 },
           { after: 'arrival', days: 7 }, { after: 'arrival', days: 28 }, { after: 'arrival', weekday: 4 }, { after: 'arrival', weekday: 4, nth: 4 },
           { every: 'week', weekday: 2, season: 'greening' }, { every: 'week', weekday: 0, season: ['harvest', 'lanterns'], from: 200 }]) {
@@ -517,6 +521,7 @@ with sync_playwright() as pw:
     fri_on = g.ev("typeof SHORT_FRIDAY !== 'undefined' && SHORT_FRIDAY && REC_TRAD_ON")
     wk_off = g.ev("typeof WEEKEND_TRADS !== 'undefined' && !WEEKEND_ON ? [...WEEKEND_TRADS] : []")
     wk_off += g.ev("typeof P926_NEW !== 'undefined' && !P926_TRADS ? [...P926_NEW] : []")   # 0.92.6's (FX17): only with P926_TRADS
+    wk_off += g.ev("typeof TRAD_0932_NEW !== 'undefined' ? (TRAD_0932_ON ? ['tasting-table-late'] : [...TRAD_0932_NEW]) : []")   # 0.93.2's (FX24): only with TRAD_0932_ON; the reworked tasting table loads as tasting-table
     for i in want_ids:
         if i.startswith('rec-') and not rec_on: continue    # the rec deck's own load only with the deck switched on (0.83)
         if i == 'first-light' and not flc_on: continue      # First Light Cocoa (patch #26) loads only with FLC_ON
