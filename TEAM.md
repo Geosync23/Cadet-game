@@ -1451,3 +1451,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~19:52 UTC: SW2 swap fix in progress (claude/sw2-swap-fix-0933): Day 26 guests line + friday-d26 Mail header (both modes) + friday-d19 header drops the comet; lines_check PASS; check_fast/fridays running.
 - ~19:53 UTC: SW2 at 59%: finishes swap fix + handover, then idle. **Hired SW4 session_01DgMynb62u2rTUA9RocZi65** for the vessel words (claude/vessel-words). VB1 told.
 - ~19:54 UTC: B1 band conflict (Tier 2 Relied on): lead call 42 (steady by storm Saturday; busy Day 11 harmless since the offer waits for Day 14).
+- ~19:55 UTC: B4 calls OK (P4 stuck gauge, P5 honest flow clues). Lead: B2 adds power line in MACHINE_LINKS + junction/inverter/conduit/battery faults in S5-3 (for B4 P5 power stage + B3 jobs); P9 real via ONE shared section 14 hook with B3 (settled at 22:00).
