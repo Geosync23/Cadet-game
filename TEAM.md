@@ -1274,3 +1274,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~23:42 UTC: RV16 0.93.1 game fix claude/fix-promo-arrow 8cbcd6f0 (game 6cd54ab9…; boardLesson one-liner + promoTestDay open(); Day 9: 08:01 'Take a job at the board', 08:30 'Your Tier 2 test, 09:00: the Works bay', 09:09 test arrow leads; arrows, promo_sight, player, day 7/9, check_fast OK, cadet identical) → RV17 + BM18.
 - ~23:58 UTC check-in (lead 37): 0.93.1 candidate local at BM18 (8cbcd6f0 + backlog 0a2fc617), gate checks running; waiting RV17 verdict (nudged). Round after → publish both links ~01:00-01:15 UTC (9 PM Eastern).
 - ~00:07 UTC: **RV17 PASS 0.93.1 game fix 8cbcd6f0** (claude/review-rv17 320eb6bb). BM18 gate checks OK on 0a2fc617 (game 6cd54ab9…); pushing + round now. PUB1 primed.
+- ~00:09 UTC: **0.93.1 round started**: claude/staging-0.93.1 0a2fc617 (game 6cd54ab9…8eee, HUD 0.93.1), OLD df8d58b9; results ~01:20 UTC (9:20 PM Eastern).
