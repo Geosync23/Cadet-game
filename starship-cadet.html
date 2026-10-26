@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.1
+   STARSHIP CADET: CSV Wren                           build 0.93.2-i.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7730,6 +7730,25 @@ for (const [r, c, j, f] of [['a', 8, 3, 'n'], ['b', 13, 3, 'n'], ['c', 17, 3, 'n
   DECKS[4].places.push({ id: '4-inspect-' + r, type: 'event', event: 'inspection', at: [c, j], xy: [c + .5, j + .5], face: f, pose: 'stand', room: r });
   DECKS[4].inspect[r] = '4-inspect-' + r;
 }
+// FX20 (0.93.2, the user: "Bunk inspection doesn't do anything. A supervisor should come by."). INSPECT_ON: on inspection
+// Thursdays the duty officer (inspectWalker: Calder in your first week, then an officer on shift by the week's rota,
+// key 864; from the calendar only, so the planner can ask) walks the eight bunk rooms from 06:30, INSPECT_STEP minutes
+// at each room's 4-inspect place, yours (Bunk 1, room a) first; the juniors stand in front of their bunk (a stand spot
+// per bunk, <bed>-stand, made here only while the switch is on) until the walk has passed their room. Section 14 plans
+// it; 24c says the words when the walker is really there. INSPECT_ON false: as before.
+var INSPECT_ON = false;
+const INSPECT_ROOMS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'], INSPECT_T0 = 390, INSPECT_STEP = 3;
+const inspectPass = r => INSPECT_T0 + INSPECT_STEP * (INSPECT_ROOMS.indexOf(r) + 1);   // when the walk leaves room r
+function inspectWalker(d) {
+  const ppl = schedPeople(), on = p => !!p && !!p.work && p.shift !== 'night' && isWorkDay(p, d);
+  if (d <= 7 && on(ppl.find(p => p.id === 'calder'))) return 'calder';
+  const os = ppl.filter(p => ['officer', 'senior', 'chief'].includes(p.rank) && on(p)).map(p => p.id).sort();
+  return os.length ? os[Math.floor(schedU(864, Math.floor((d - 1) / 7), 864) * os.length) % os.length] : null;
+}
+if (INSPECT_ON) for (const b of DECKS[4].places.filter(q => q.type === 'bed' && /^4-B[1-8]-[1-6]$/.test(q.id))) {
+  const [c, r] = b.at, dz = b.face === 's' ? 1 : b.face === 'n' ? -1 : 0, k = +b.id.slice(-1);
+  DECKS[4].places.push({ id: b.id + '-stand', type: 'event', event: 'inspection', at: [c, r + dz], xy: [c + .5 + (k % 2 ? -.22 : .22), r + dz + .5], face: b.face === 's' ? 'n' : 's', pose: 'stand', room: b.room });
+}
 // hauling (m4): a drop spot just inside each stop's door, with room for the cart beside you; the stocktake's spots, one in front
 // of each storage shelf (the order of DECKS[5].shelves: Lights, Filters, Plumbing, Galley parts), beside the 5-parts-N spots
 const HAUL_DROPS = { laundry: '4-laundry-drop', infirmary: '3-infirmary-drop', store: '3-store-drop', galley: '3-galley-drop', bridge: '1-bridge-drop' };
@@ -9257,7 +9276,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.1';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.2-i.1';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -9609,7 +9628,7 @@ const LINE_WALK = [4, .55, [33, 4]];                    // the walk to the serve
 // tea-break habit always; workaholics now and then). For others: tea is out from WORKS_TEA.at to WORKS_TEA.until
 const WORKS_TEA = { at: 780, until: 840, step: 15, slots: 4, dur: 15, wait: 8, odds: .75, busy: .3 };
 const worksTeaOn = t => { const m = ((t % 1440) + 1440) % 1440; return m >= WORKS_TEA.at && m < WORKS_TEA.until; };   // t: absolute ship minutes (any day: the caller checks it's a workday)
-const STOPS = new Set(['queue', 'grab', 'drill', 'inspection', 'tea', 'toilet', 'hands', 'lift', 'pay', 'break']);   // short stops that never stretch to fill time
+const STOPS = new Set(['queue', 'grab', 'drill', 'inspection', 'inspect', 'tea', 'toilet', 'hands', 'lift', 'pay', 'break']);   // short stops that never stretch to fill time
 const RANK_ORDER = ['captain', 'xo', 'chief', 'senior', 'officer', 'junior', 'guest'];
 
 // ---- data access (read at call time, so section 9's ROSTER and every deck's places are in by then) ----
@@ -10187,6 +10206,8 @@ function schedFrame(p, d) {
   if (!works) wake += 45 + 45 * U(13) + (shape.lieIn || 0);
   if (works && !f.night) wake = Math.min(wake, f.workStart - 45);
   const rh = REC_ON && !f.night ? recHostEarly(p, d, works && f.workStart) : null; if (rh != null) wake = Math.min(wake, rh);   // a rec tradition's host is up for it (Rina's Dawn swim; RA, 0.83)
+  if (INSPECT_ON && shape.inspect && works && !f.night && p.id === inspectWalker(d)) wake = Math.min(wake, INSPECT_T0 - 60);   // the inspection's walker (FX20)
+  if (INSPECT_ON && shape.inspect && works && !f.night && /^4-B[1-8]-[1-6]$/.test(p.bed)) wake = Math.min(wake, 330 + Math.round(30 * U(16)));   // the juniors up for it, 05:30-06:00, spread (FX20)
   f.wake = Math.round(wake);
   return f;
 }
@@ -10701,6 +10722,9 @@ function schedBuild(p, d, occ, S) {
     seg('sleep', 1440, 'bed', p.bed);
   };
   const morning = (k, by) => {                           // the toilet, a wash, tidy for inspection, breakfast (sit-down or grab)
+    const ip = INSPECT_ON && F.shape.inspect && /^4-B[1-8]-[1-6]$/.test(p.bed) ? inspectPass(S.byId.get(p.bed).room) : null;   // FX20: when the walk leaves their room
+    let stood = false;
+    if (ip && t < ip && t > ip - 30) { go(bedDeck); const id = p.bed + '-stand', to = ip + 1; hold(id, t, to); seg('off', to, 'event', id, { tag: 'inspection' }); stood = true; }   // too close to wash first: stand now, wash after
     if (U(k + 7) < .5) toilet(k + 7);
     // not everyone goes the same way to breakfast (the user's playtest 2, 0.71.5): about 3 in 10 straight there and
     // wash after, 2 in 10 a short workout first, 2 in 10 a coffee or a read after the wash, the rest wash and go
@@ -10714,7 +10738,13 @@ function schedBuild(p, d, occ, S) {
     if (quiet && sty < .5 && by - t >= 80) take('gym', [[3, 'gym']], 15 + Math.round(10 * U(k + 14)), { wait: 5, min: 12, by: by - 50 });
     wash(k);
     if (quiet && sty >= .5 && sty < .7 && by - t >= 95) leisureUntil(t + 20 + Math.round(20 * U(k + 14)), k + 15);
-    if (F.shape.inspect && /^4-B/.test(p.bed)) { go(bedDeck); seg('off', t + 10, 'bed', p.bed, { tag: 'inspection' }); }
+    if (INSPECT_ON && F.shape.inspect && p.id === inspectWalker(d) && t <= INSPECT_T0 + 20) {   // the walk (FX20): each bunk room's door, yours first
+      go(4); linger(INSPECT_T0 - 1);
+      for (const r of INSPECT_ROOMS) { const id = '4-inspect-' + r, to = Math.max(t, INSPECT_T0 + INSPECT_STEP * INSPECT_ROOMS.indexOf(r)) + INSPECT_STEP; hold(id, t, to); seg('off', to, 'event', id, { tag: 'inspect', anim: 'look' }); }
+    } else if (stood) {                                  // stood for it already (FX20)
+    } else if (INSPECT_ON && F.shape.inspect && /^4-B[1-8]-[1-6]$/.test(p.bed) && t < inspectPass(S.byId.get(p.bed).room)) {   // a junior stands by their bunk till the walk has passed
+      go(bedDeck); const id = p.bed + '-stand', to = inspectPass(S.byId.get(p.bed).room) + 1; hold(id, t, to); seg('off', to, 'event', id, { tag: 'inspection' });
+    } else if (F.shape.inspect && /^4-B/.test(p.bed)) { go(bedDeck); seg('off', t + 10, 'bed', p.bed, { tag: 'inspection' }); }
     const pre = meet.find(e => !e.meal && !e.done && (e.at >= t || REC_ON && /^ev-rec-/.test(e.tag || '') && e.at + e.dur - t >= (e.min || 20)) && e.at + e.dur <= by - (REC_ON && /^ev-rec-/.test(e.tag || '') ? 8 : 25));   // a rec one (Dawn swim) already begun still counts (0.83.1)   // a gathering before breakfast (Sunrise stretch, Pick-your-own; 0.36.86): to it, then breakfast
     if (pre) leisureUntil(pre.at + pre.dur, k + 11);
     const mb = meet.find(e => e.meal === 'breakfast' && !e.done && e.at + 10 > t && e.at < by + 150);   // a meal tradition (the long breakfast) is their breakfast
@@ -52595,6 +52625,7 @@ const DRILL_AT = 900, DRILL_TOAST = 890, DRILL_END = 915;      // 15:00, the toa
 const INSPECT_AT = 390, INSPECT_MAIL = 420, BED_FROM = 330;     // 06:30 the walk, 07:00 the Mail if you weren't there; the bed from 05:30
 // the duty officer: Calder on your first, else an officer on shift that day by the week's rota (key 864)
 function inspectOfficer(d) {
+  if (INSPECT_ON) return inspectWalker(d) || 'calder';   // FX20: the one who really walks
   const W = SHIP.works; if (!W || W.use.m3i === undefined) return 'calder';
   const os = schedPeople().filter(p => OFFICER_RANKS.has(p.rank) && p.rank !== 'captain' && p.rank !== 'xo' && occOnShift(p.id, d)).map(p => p.id).sort();
   return os.length ? os[Math.floor(schedU(machSeed('inspect'), Math.floor((d - 1) / 7), 864) * os.length) % os.length] : 'calder';
@@ -52631,10 +52662,28 @@ function inspectRun(d, here) {
   if (here || res === 'nod') worksUse('m3i');
   return res;
 }
+// FX20 (INSPECT_ON): where the walker stands now on your deck (a bunk room's letter), or null
+function inspectWalkerAt(d) {
+  if (!INSPECT_ON || typeof DECK_CREW === 'undefined' || !deckDef || deckDef.num !== 4) return null;
+  const by = inspectOfficer(d), a = DECK_CREW.find(x => x.p && x.p.id === by && x.settled && x.spot && /^4-inspect-/.test(x.spot.id || ''));
+  return a ? a.spot.id.slice(-1) : null;
+}
+const INSPECT_SAID = { d: 0, rooms: new Set(), away: false };
+function inspectWalkTick(d, m) {                         // the words as the walker goes round (never changes the result: inspectRun does that)
+  if (INSPECT_SAID.d !== d) { INSPECT_SAID.d = d; INSPECT_SAID.rooms = new Set(); INSPECT_SAID.away = false; }
+  const r = inspectWalkerAt(d), by = inspectOfficer(d), wk = Math.floor((d - 1) / 7), mine = (placeById(playerBed()) || {}).room;
+  if (!r || INSPECT_SAID.rooms.has(r)) { if (!r && !INSPECT_SAID.away && m >= INSPECT_T0 + 1 && m < inspectPass('a') + 1 && !inspectHere() && deckDef && deckDef.num !== 4) { INSPECT_SAID.away = true; toast(worksName(by), worksText('inspect.walk.away', 'The duty officer is in your bunk room, and you\'re not.', {}, wk)); } return; }
+  INSPECT_SAID.rooms.add(r);
+  let here = false; try { here = roomAt(...player.here()) === r; } catch (e) { here = false; }
+  if (r === mine) { if (here) worksSay(by, worksText('inspect.walk.arrive', 'Morning. Let\'s see.', {}, wk)); else if (!INSPECT_SAID.away) { INSPECT_SAID.away = true; toast(worksName(by), worksText('inspect.walk.away', 'The duty officer is in your bunk room, and you\'re not.', {}, wk)); } }
+  else if (here) worksSay(by, worksText('inspect.walk.room.' + r, 'Beds made. Good.', {}, wk));
+  if (r === INSPECT_ROOMS[INSPECT_ROOMS.length - 1] && deckDef && deckDef.num === 4) simTimeout(() => toast(worksName(by), worksText('inspect.walk.done', 'Inspection\'s done for the week.', {}, wk)), 4000);
+}
 WORK_TICKS.push((now, skip) => {
   const d = worksDay(now), m = now - (d - 1) * 1440;
   if (m < INSPECT_AT || m >= INSPECT_AT + 60 || !inspectDue(d)) return;
-  if (!skip && m < INSPECT_MAIL && inspectHere()) inspectRun(d, true);
+  if (INSPECT_ON && !skip) inspectWalkTick(d, m);
+  if (!skip && m < INSPECT_MAIL && inspectHere() && (!INSPECT_ON || inspectWalkerAt(d) === (placeById(playerBed()) || {}).room)) { if (INSPECT_ON) simTimeout(() => { if (inspectDue(d)) inspectRun(d, true); }, 2600); else inspectRun(d, true); }
   else if (skip || m >= INSPECT_MAIL - 1) inspectRun(d, false);
 });
 WORK_MECH.m3i = {};                                      // a small row: opens on Thursday, trained by the first inspection
