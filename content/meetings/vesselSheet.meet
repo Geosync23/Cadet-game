@@ -13,6 +13,6 @@ calder > you: And one more thing. You're meeting their engineer. Foot of the ram
 ? choice
 * Me? Why me?   flavour:listen rel:calder+1
   calder: Someone met you, four weeks ago. Now you know how it's done.   [nod]
-* Half nine. I'll be there.   flavour:practical rel:calder+1
-  calder: Quarter past. Then you're early.   [nod]
+* Foot of the ramp. Got it.   flavour:practical rel:calder+1
+  calder: Quarter past nine, then. Then you're early.   [nod]
 calder: I'll be beside you. Also my day off. Sign the sheet.   [gesture]
