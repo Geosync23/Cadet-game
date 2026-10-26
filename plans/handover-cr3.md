@@ -44,4 +44,13 @@ backlog 12 (career busy line), 14 (perf memory), 23, 32, KP1 (Line ceremony 335 
   (Quick game removed; PROMO_SIGHT_ON), both fixed in the checks.
 
 ## Loose ends
-None open. 0.93.0's share all OK (0fcaca61). Next: the 0.93.1 round (BM18, ~00:20 UTC, same share).
+None open. Stopping point (the user's call, via lead 40) on 2026-10-26 ~22:50 UTC.
+- Latest: 0.93.3 share all OK (ec93b94d, staging-0.93.3 19400976). Since 0.93.3 the share also lists promo_sight and
+  sound_check (this round CR1 ran them, by BM18's call). controller_check now has a "door" part (the runner script reads
+  ALL_PARTS from the commit's own check and drops only "reach").
+- p926_check part 4 is CR3's fix (6a527c10, sha256 8886859c): the reading corner is fortnightly since FX24 (odd-week
+  Sundays: Days 7, 21, ...), so 'on' checks Day 14 empty and Day 21 in full; 'off' stays on Day 14.
+- Session ids at the stop: BM18 session_01A3S2VBMYmTt2wCZa8ej7XR; lead 40 session_01NXybH7NNqM8M4ngiyidq6m (TEAM.md now
+  lives on the current lead's branch). CR3 was session_01Pw3EQ24pSz4gjsFcLBMjUF.
+- To drop queued checks while one runs: kill the runner loop's bash (kill -9 its pid), the running check carries on
+  orphaned; then judge it by its log's last line and FAIL count (no exit code).
