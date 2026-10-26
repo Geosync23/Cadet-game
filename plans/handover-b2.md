@@ -67,7 +67,7 @@
 
 ## Loose ends
 - RV20's re-review of 5c745377 and c79a66dc is pending; I stand by for its fixes only.
-- When B1's ladder order lands, rerun mech_check m19 on a switch-on copy: the two Day 17 lines should pass.
+- B1's ladder order is merged (claude/p5s5-career 51b1a9c6): mech_check m19 passes in full on a switch-on copy, the Day 17 11:00 ask and the 10:30 notice included. 24v's own Rewiring fold-in hook is removed (24u's does it).
 - RV20's S2 (a stale team-job arrow over the lesson's step) is not touched: it looks older than Step 5.
 - The Calendar's Wednesday drill line still shows the juniors' drill for a Senior (24c's drillDue only knows juniors).
 

@@ -23139,7 +23139,15 @@ const VOICE = JSON.parse([
   '{"text":"Burnt the edges of forty rolls. Forty! That oven\'s got a temper.","id":"1kb8u98","flag":"train.m5.grumble"},',
   '{"text":"There. Steady as anything. Here, have a biscuit, love.","id":"1hyscf1","tone":"warm","flag":"train.m5.follow.done"},',
   '{"text":"Cake. For the new officer. First slice is yours.","id":"w8qnrf","tone":"warm","flag":"promo.cake"},',
-  '{"text":"Pell. It is not for you. Not yet.","id":"1r2lnzr","tone":"funny","flag":"promo.cake"}]',
+  '{"text":"Pell. It is not for you. Not yet.","id":"1r2lnzr","tone":"funny","flag":"promo.cake"},',
+  '{"text":"Cake for the new Senior. Corner piece, love. You\'ve earned the icing.","id":"1hnjifl","tone":"warm","flag":"pu3.cake"},',
+  '{"text":"Pell. Second slice. Not first. I can see you.","id":"h6u944","tone":"funny","flag":"pu3.cake"},',
+  '{"text":"Tomorrow? Galley circuit? Thank you for telling me to my face, love.","id":"tg9n6e","tone":"warm","flag":"sd.warn.brennan"},',
+  '{"text":"I\'ll bake early. Bread at six, nothing in the ovens at your hour.","id":"1kj5dsk","flag":"sd.warn.brennan"},',
+  '{"text":"If my cold store warms up by one degree, I\'m coming to find you.","id":"14hjyge","tone":"funny","flag":"sd.warn.brennan"},',
+  '{"text":"Love. My ovens went off. Nobody told me. Next time, you tell me.","id":"1mshtn5","flag":"sd.grumble.brennan"},',
+  '{"text":"Half a tray of rolls, flat. Tell me first. That\'s all I ask.","id":"vqbf7i","flag":"sd.grumble.brennan"},',
+  '{"text":"Your shutdown was a dream, love. Didn\'t lose a single loaf.","id":"1osit87","tone":"warm","flag":"sd.thanks.brennan"}]',
   ',"worried.captain":[',
   '{"text":"The Captain? Oh, love. She\'s kind, but she meant it. Eat something, then bed.","id":"1qz3mvl","tone":"serious","tier":[3,4]},',
   '{"text":"I left a place once, after the fire. I don\'t want you leaving like that. Eat, then go.","id":"1d94dh4","tone":"serious","beat":"brennan.3","tier":[3,4]}]',
@@ -23559,7 +23567,45 @@ const VOICE = JSON.parse([
   '{"text":"Your log\'s tidy. The night crew noticed. So did I.","id":"1a7uw03","flag":"log.talk"},',
   '{"text":"A ticket, solved. That\'s a fault-finder. Wear the pin.","id":"7nib96","flag":"ticket.solved"},',
   '{"text":"Set it going. Come back in ten. Not nine.","id":"1uyxrgh","flag":"train.m10.lead"},',
-  '{"text":"Finish it by hand. Machines don\'t do edges.","id":"1jmkik3","flag":"train.m10.lead"}]',
+  '{"text":"Finish it by hand. Machines don\'t do edges.","id":"1jmkik3","flag":"train.m10.lead"},',
+  '{"text":"Trusted. One more step. And Power safety, with me.","id":"wuvhv2","flag":"pu3.promo.near"},',
+  '{"text":"That\'s the one. Deck 6, port junction. Bring the clipboard.","id":"1996e75","flag":"train.t3.take"},',
+  '{"text":"Before you touch it: what does it feed? Read it to me.","id":"1gcqfhb","flag":"train.t3.plan"},',
+  '{"text":"Three rooms on that branch. Who\'s in them at ten?","id":"xlxrrq","flag":"train.t3.plan"},',
+  '{"text":"Nobody\'s eating. No class. That\'s why ten. Quiet hour.","id":"pw82g2","flag":"train.t3.plan"},',
+  '{"text":"Two people will feel it. Go and tell them. In person.","id":"ug2skg","flag":"train.t3.plan"},',
+  '{"text":"Face to face. A notice is a backup, not a warning.","id":"y8cf0b","flag":"train.t3.warn"},',
+  '{"text":"I\'ll tell them. Note it. Next time, start looking sooner.","id":"ddhfs1","flag":"train.t3.warn.late"},',
+  '{"text":"Both told. Good. Now the switch. Then check it\'s dead.","id":"1ijx63s","flag":"train.t3.off"},',
+  '{"text":"Tester on it. Dead is a number, not a feeling.","id":"5p8hgx","flag":"train.t3.off"},',
+  '{"text":"Old breaker out. Look at the scorch on it. That\'s why.","id":"s2un97","flag":"train.t3.breaker"},',
+  '{"text":"New one seated. Square. Push till it clicks.","id":"vrl30c","flag":"train.t3.breaker"},',
+  '{"text":"Bring it back. Slowly. Listen.","id":"ufsrd9","flag":"train.t3.back"},',
+  '{"text":"Hear that? That\'s three rooms with power. Nobody noticed.","id":"1l50fc7","flag":"train.t3.back"},',
+  '{"text":"Turn it in. That\'s the job.","id":"125llfo","flag":"train.t3.done"},',
+  '{"text":"Not today. That\'s not a fail. We go again in two days.","id":"1d52gpb","flag":"train.t3.again"},',
+  '{"text":"Practise the order. Warn, off, check, then touch.","id":"qn4jxr","flag":"train.t3.again"},',
+  '{"text":"Morning. Nine o\'clock it goes on the board. You\'ve eaten?","id":"1s2v0fq","flag":"pu3.promo.morning"},',
+  '{"text":"That\'s the test. Warned, off, changed, back.","id":"146bbyr","flag":"pu3.promo.passed"},',
+  '{"text":"Result tomorrow, first thing. My office, 08:15. Don\'t be early.","id":"1228oea","flag":"pu3.promo.passed"},',
+  '{"text":"There you are. My office was empty. So we\'ll do it here.","id":"k0w6va","flag":"pu3.promo.fetch.result"},',
+  '{"text":"Observation room. Half four. Go.","id":"zuv54w","flag":"pu3.promo.bar"},',
+  '{"text":"One slice. Then back to work tomorrow. Not tonight.","id":"p4wr","tone":"funny","flag":"pu3.promo.cake"},',
+  '{"text":"You\'ll want this. The conduit tester. Clip it on, read the feed. It\'s yours.","id":"132a5ro","flag":"train.m19.tester"},',
+  '{"text":"Your drill now. Three calls. Clear voice. Don\'t rush.","id":"1j1v6hq","flag":"drill.works.you"},',
+  '{"text":"Clean drill. Good. Good.","id":"edalsm","flag":"drill.works.you.done"},',
+  '{"text":"Read me what it feeds. All of it.","id":"18bqkz3","flag":"train.m18.follow.feeds"},',
+  '{"text":"Who\'s in those rooms at that hour? Look before you pick.","id":"12sck89","flag":"train.m18.follow.hour"},',
+  '{"text":"That\'s dinner. You can. You\'ll hear about it. I would.","id":"bapqlq","flag":"train.m18.follow.meal"},',
+  '{"text":"Warn them. Each one. Brennan in person, if it\'s hers.","id":"bp1nyz","flag":"train.m18.follow.warn"},',
+  '{"text":"What keeps power? Think of the cold store. Always.","id":"1bat1cq","flag":"train.m18.follow.keep"},',
+  '{"text":"Book it. Then it\'s yours. Tomorrow, be there early.","id":"1ne1bhv","flag":"train.m18.follow.book"},',
+  '{"text":"Your booking. Your switch. Check it\'s dead.","id":"cxjkty","flag":"sd.day.off"},',
+  '{"text":"Back on. On time. Good.","id":"19yhx6v","flag":"sd.day.back"},',
+  '{"text":"Survey\'s happy. That\'s rare. Back to Works after lunch.","id":"ljtkux","flag":"train.m20.calder"},',
+  '{"text":"Long line. One fault. Don\'t walk it all. Halve it.","id":"1jrllom","flag":"train.p5.word"},',
+  '{"text":"Every part\'s fine. Still goes wrong at the same hour. Think.","id":"1rduljp","flag":"train.p9.word"},',
+  '{"text":"Some faults are people. Nicely. Ask, don\'t tell.","id":"158ey5y","flag":"train.p9.word"}]',
   '}',
   '}',
   ',"chen-carmen":{"avoid":["being told to focus"],"cares":["her grandmother on Lisk","finding where she fits","her bench in the garden"],"invites":["garden"],"jokes":["she sings in the shower and the whole washroom knows","her voice messages home are longer than most shifts"],"joy":"her garden bench","keepsake":"a pressed leaf from her garden bench","likes":["sweet","plant"],"loves":["garden","music"],"needs":"share","openness":"normal","talk":"Drifts mid-sentence, then comes back with a better idea. Restless, always half-planning to be somewhere else.","tpl":"dreamy","words":{"hi":["Oh, hi","Hello","Hey, you"],"bye":["See you","Bye, then","Off I drift"],"yes":["Mm, sure","Yes","All right"],"thanks":["Thanks","Oh, thank you"],"wow":["Oh, look"],"sigh":["Oh, well"],"nick":[null,null,"{me}","{me}","{me}"]},"lines":{',
@@ -24641,6 +24687,12 @@ const VOICE = JSON.parse([
   '{"text":"Music room most evenings now. I sit at the back and tap my foot. Badly.","id":"3fj0yx","tone":"funny","habit":"music"}]',
   ',"promoted":[',
   '{"text":"Lovely. Lovely! Well done, you.","id":"1srnoh","tone":"warm"}]',
+  ',"pu3.senior":[',
+  '{"text":"Senior Officer. I\'m baking. Don\'t argue. Lovely.","id":"1awo4nf","tone":"warm"}]',
+  ',"pu3.soon":[',
+  '{"text":"Up for Tier 3 already? Some of us took a year.","id":"ide80q","tone":"funny"},',
+  '{"text":"I\'m not bitter. I\'m a little bitter. Well done, you.","id":"178nue3","tone":"funny"},',
+  '{"text":"Tier 3 at your age. I\'ll bake you something. Grudgingly.","id":"1yxf96w","tone":"funny"}]',
   ',"rumour":[',
   '{"text":"Lovely bit of news, this.","id":"1lfkmi7"},',
   '{"text":"Heard it over a scone. Very reliable.","id":"1q9m4c3","tone":"funny"}]',
@@ -24699,7 +24751,8 @@ const VOICE = JSON.parse([
   '{"text":"Look up. That\'s the whole spine. Nobody sees it but us.","id":"qu3245","tone":"warm","flag":"roof.view"},',
   '{"text":"Smoother already. Can you feel it? Lovely work.","id":"id1bay","flag":"roof.done"},',
   '{"text":"Set the lathe going. Come back in ten. Lovely.","id":"18joobb","flag":"train.m10.lead"},',
-  '{"text":"Now the hand work. Slow strokes. There.","id":"o8znzz","flag":"train.m10.lead"}]',
+  '{"text":"Now the hand work. Slow strokes. There.","id":"o8znzz","flag":"train.m10.lead"},',
+  '{"text":"Trusted already? Some of us were \\"new\\" for a year. Lovely.","id":"pa8i32","tone":"funny","flag":"pu3.promo.near"}]',
   '}',
   '}',
   ',"hart-ravi":{"avoid":["being asked to change his mind"],"cares":["the garden at first light","the comics wall","the fish back home on Valo","sleep, in theory"],"invites":["garden"],"jokes":["a late sleeper on the early team","the comics wall, where sometimes you\'re in one"],"joy":"drawing comics for the common room wall","keepsake":"the comic you were in, signed","likes":["plant","tea"],"loves":["card"],"needs":"cheer","openness":"normal","talk":"Gentle and slow, immovable once decided; grumbles about mornings and means none of it; short lines, a pause, then a good one.","tpl":"steady","words":{"hi":["Oh, hey","Hello"],"bye":["Go on, then","See you","Mind the hoses"],"yes":["Fine by me","Yeah","All right"],"thanks":["Ta","Thanks for that"],"wow":["Huh. Nice","Look at that"],"sigh":["Ah, well"],"nick":[null,null,"{me}","{me}","{me}"]},"lines":{',
@@ -26730,6 +26783,13 @@ const VOICE = JSON.parse([
   '{"text":"Dr. Sato\'s lost her mug. Again.","id":"x08dyf","tone":"funny"},',
   '{"text":"Off duty. I made a list for it.","id":"tkrijo","tone":"funny","act":"off"},',
   '{"text":"Observatory soon. My star\'s up.","id":"7sx1f2","time":"evening"}]',
+  ',"work":[',
+  '{"text":"Pick one. Any of them. Well, not any. One of those three.","id":"48ji6b","flag":"train.m20.follow.pick"},',
+  '{"text":"Small turns. Smaller. Oh, that\'s tidy.","id":"1t6dgzd","flag":"train.m20.follow.turn"},',
+  '{"text":"The amber one. Gently. They\'re older than they look.","id":"zc81lt","flag":"train.m20.follow.module"},',
+  '{"text":"It agrees. The array agrees. Thank you. That\'s lovely.","id":"1j1w8g0","tone":"warm","flag":"train.m20.follow.done"},',
+  '{"text":"Your sweep\'s on the chart. Look. That line is yours.","id":"btlo53","tone":"warm","flag":"m20.survey"},',
+  '{"text":"I put your name in the margin. Small. Sato won\'t notice.","id":"hhbr0b","tone":"funny","flag":"m20.survey"}]',
   '}',
   '}',
   ',"nakamura-bilal":{"avoid":["anyone touching his herbs without asking"],"cares":["his herbs for the galley","his twin on another survey ship","doing the Watch properly"],"invites":["garden","running"],"jokes":["his twin on another survey ship is always one step ahead, by letter","his mint has its own corner and its own opinions"],"joy":"his herbs","keepsake":"a sprig of mint, pressed in a notebook","likes":["tea","music"],"loves":["garden","plant"],"needs":"practical","openness":"normal","talk":"Patient and quietly proud, with good reason. Learning the Watch from Holt one lecture at a time.","tpl":"earnest","words":{"hi":["Hello","Hi","Oh, hello"],"bye":["See you","Take care","Bye, then"],"yes":["Of course","Yes","Happy to"],"thanks":["Thank you","Thanks"],"wow":["Oh, nice"],"sigh":["Oh well"],"nick":[null,null,"{me}","{me}","{me}"]},"lines":{',
@@ -29381,6 +29441,12 @@ const VOICE = JSON.parse([
   '{"text":"Went the long way round Deck 2 again. Found a new window. I\'ll show you tomorrow.","id":"1lvimf1"},',
   '{"text":"Your blanket was falling off, so I folded it. Badly. Holt would weep.","id":"cqf3do","tone":"funny"},',
   '{"text":"Observatory\'s open tonight. Come up if you see this in time. If not, I\'ll tell you all about it.","id":"1azoo1c","trad":"observatory-night"}]',
+  ',"pu3.luck":[',
+  '{"text":"Tomorrow\'s the big one? Go to bed early. Not yet. After this song.","id":"17p46jl","tone":"funny","place":"lounge"},',
+  '{"text":"Tier 3 tomorrow. I\'m more nervous than you. Is that normal?","id":"fgy5ru","tone":"funny"},',
+  '{"text":"Good luck tomorrow. You\'ll be brilliant. I think. Yes.","id":"1m5aqiu","tone":"warm"}]',
+  ',"pu3.senior":[',
+  '{"text":"Senior Officer! I\'m telling my brother. He won\'t know what it means.","id":"13pbewv","tone":"warm"}]',
   ',"rumour":[',
   '{"text":"Heard something on patrol. Is it gossip if it\'s Watch?","id":"16zj0ox"},',
   '{"text":"I wasn\'t listening. I\'ve just got very good ears.","id":"h97cb","tone":"funny"},',
@@ -30042,7 +30108,16 @@ const VOICE = JSON.parse([
   '{"text":"Two worn on one round? You\'ve got the eye now.","id":"36883z","flag":"round.two"},',
   '{"text":"That\'s the job. Catch them worn. Proud of you.","id":"hu6j7w","tone":"warm","flag":"round.two"},',
   '{"text":"Set it spinning. Go and have a tea. Ten minutes.","id":"z9i5xx","flag":"train.m10.lead"},',
-  '{"text":"Now finish it by hand. That\'s where it gets good.","id":"vo9zxr","flag":"train.m10.lead"}]',
+  '{"text":"Now finish it by hand. That\'s where it gets good.","id":"vo9zxr","flag":"train.m10.lead"},',
+  '{"text":"That came back on first time? Properly first time? Brilliant.","id":"lhd6a5","flag":"train.t3.torres"},',
+  '{"text":"I\'d have warned three people and the coils. Good job.","id":"17r623q","tone":"funny","flag":"train.t3.torres"},',
+  '{"text":"Well? Well? Your face. You passed. I knew it.","id":"o91s00","tone":"warm","flag":"pu3.promo.glass"},',
+  '{"text":"Don\'t tell me. I\'ll know tomorrow. I\'ll know by your walk.","id":"1auczkr","tone":"funny","flag":"pu3.promo.passed"},',
+  '{"text":"Two gauges on this one, and they don\'t agree. One\'s fibbing.","id":"1mchkgp","flag":"train.p4.word"},',
+  '{"text":"Get a third reading. The scanner doesn\'t take sides.","id":"709sg8","flag":"train.p4.word"},',
+  '{"text":"Old ones. Nobody\'s cracked them. I\'ve tried the Tuesday hum twice.","id":"r899rp","flag":"mys.word"},',
+  '{"text":"Take one if you like. No rush. They\'ve waited years.","id":"7m8gpr","flag":"mys.word"},',
+  '{"text":"Calder pinned the first. She says it\'s not personal. It\'s personal.","id":"1unds07","tone":"funny","flag":"mys.word"}]',
   ',"worried.captain":[',
   '{"text":"Up top to the Captain. {sigh}. I trained you, shipmate. I know what you can do.","id":"1v9hfzh","tone":"serious","tier":[3,4]}]',
   ',"worried.chief":[',
@@ -32094,6 +32169,12 @@ const LINES = JSON.parse([
   '{"text":"Ask the people who were near it. Then check the Roster: were they?","id":"18r6xme"}]',
   ',"case.hint.p3.1":[',
   '{"text":"Have you read every note? One\'s on the machine.","id":"17z99at"}]',
+  ',"case.hint.p4.1":[',
+  '{"text":"A third reading settles it. What does your scanner say?","id":"oludtf"}]',
+  ',"case.hint.p5.1":[',
+  '{"text":"Start in the middle. Fine there? The fault is further on.","id":"g1e1bz"}]',
+  ',"case.hint.p9.1":[',
+  '{"text":"Every part is fine. So what else happens at that hour?","id":"1vx9c56"}]',
   ',"case.line.air":[',
   '{"text":"The air on Deck {deck}","id":"ale9sq"}]',
   ',"case.line.air.shows":[',
@@ -32114,6 +32195,32 @@ const LINES = JSON.parse([
   '{"text":"Notes","id":"10j6ihw"}]',
   ',"case.p2.head":[',
   '{"text":"What people said (tap a name if it doesn\'t fit)","id":"fd8v6t"}]',
+  ',"case.p4.call":[',
+  '{"text":"Call it: {thing} is lying?","id":"47xqm7"}]',
+  ',"case.p4.gauge":[',
+  '{"text":"{thing} reads {word}","id":"hsod02"}]',
+  ',"case.p4.head":[',
+  '{"text":"What each one says","id":"144csut"}]',
+  ',"case.p4.right":[',
+  '{"text":"Fixed. New gauge in. Now they agree.","id":"1fq8ulm"}]',
+  ',"case.p4.scan":[',
+  '{"text":"Your scanner reads {word}","id":"a5q98j"}]',
+  ',"case.p5.notester":[',
+  '{"text":"This one\'s a power line. You\'ll need the conduit tester first.","id":"i9zlnd"}]',
+  ',"case.p5.power":[',
+  '{"text":"A power line. Test each length with the conduit tester.","id":"sb3wht"}]',
+  ',"case.p5.stop":[',
+  '{"text":"{machine}: {word}","id":"1432c20"}]',
+  ',"case.p9.head":[',
+  '{"text":"Who\'s using it then","id":"1p048sf"}]',
+  ',"case.p9.move":[',
+  '{"text":"Ask {name} to move {thing} to {time}?","id":"pw31"}]',
+  ',"case.p9.moved":[',
+  '{"text":"{name} moves {thing} to {time}. Nothing broke. Nothing needed fixing.","id":"1iukrsi"}]',
+  ',"case.p9.shut":[',
+  '{"text":"Your shutdown hour clashes with {name}\'s {thing}. Move one of them.","id":"hul01o"}]',
+  ',"case.p9.who":[',
+  '{"text":"{name}: {thing}, {time}","id":"100cfot"}]',
   ',"case.solved":[',
   '{"text":"Fixed. That was it.","id":"u0qu5s"}]',
   ',"case.strip.allday":[',
@@ -32138,6 +32245,12 @@ const LINES = JSON.parse([
   '{"text":"{machine} {shows}, but only {when}.","id":"15edg0h"}]',
   ',"case.title.p2":[',
   '{"text":"{machine} on Deck {deck} {shows} now and then","id":"191d9v6"}]',
+  ',"case.title.p4":[',
+  '{"text":"{machine}: two gauges disagree.","id":"i743qj"}]',
+  ',"case.title.p5":[',
+  '{"text":"{machine} {shows}. The fault is somewhere up the line.","id":"1eyaeik"}]',
+  ',"case.title.p9":[',
+  '{"text":"{machine} {shows}, but only {when}. Nothing\'s worn.","id":"urtz04"}]',
   ',"case.uncross":[',
   '{"text":"Put back","id":"70vieb"}]',
   ',"case.when.after":[',
@@ -32156,6 +32269,12 @@ const LINES = JSON.parse([
   '{"text":"Not that one. Have another look at the notes.","id":"kn965y"}]',
   ',"case.wrong.p1":[',
   '{"text":"New {part} in. {where} still {shows}.","id":"1njjif"}]',
+  ',"case.wrong.p4":[',
+  '{"text":"Replaced {thing}. They still disagree. The other one was lying.","id":"j3elom"}]',
+  ',"case.wrong.p5":[',
+  '{"text":"New {part} in at {machine}. The line still {shows}. It\'s further along.","id":"i3c4vn"}]',
+  ',"case.wrong.p9":[',
+  '{"text":"New {part} in. Same hour tomorrow, same trouble. It isn\'t a part.","id":"1e0a5rq"}]',
   ',"case.wrong.t2":[',
   '{"text":"Not that. The {part} is spent, but now you know.","id":"1tckgj2"}]',
   ',"chat":[',
@@ -32197,6 +32316,24 @@ const LINES = JSON.parse([
   '{"text":"The scanner sees what\'s worn. The notes see what\'s been tried.","id":"1hn3073"}]',
   ',"chief.p3.title":[',
   '{"text":"What\'s been tried","id":"n99x34"}]',
+  ',"chief.p4.1":[',
+  '{"text":"Two gauges, two answers. Get a third. The odd one out is lying.","id":"hqwhfs"}]',
+  ',"chief.p4.2":[',
+  '{"text":"A gauge that reads the same all day is stuck, not steady.","id":"fn5vw4"}]',
+  ',"chief.p4.title":[',
+  '{"text":"Two gauges","id":"1l9b7ub"}]',
+  ',"chief.p5.1":[',
+  '{"text":"Halve it. Then halve it again. Five tests find one fault in thirty.","id":"9fz94b"}]',
+  ',"chief.p5.2":[',
+  '{"text":"Power\'s the same as water. The reading drops where the trouble is.","id":"st465p"}]',
+  ',"chief.p5.title":[',
+  '{"text":"Long lines","id":"1k08qv1"}]',
+  ',"chief.p9.1":[',
+  '{"text":"Some faults aren\'t parts. They\'re two good things at the same time.","id":"15z8s6q"}]',
+  ',"chief.p9.2":[',
+  '{"text":"The fix is a conversation. Ask nicely. Offer them a better hour.","id":"1n8u3xy"}]',
+  ',"chief.p9.title":[',
+  '{"text":"Clashes","id":"1kvr365"}]',
   ',"clock.auto":[',
   '{"text":"The clock signed you out at 17:00. It does that.","id":"b89c73"},',
   '{"text":"17:00. The clock signed you out for you. Go and eat.","id":"14d7qkk"},',
@@ -32882,6 +33019,32 @@ const LINES = JSON.parse([
   '{"text":"Day off: muster by the lift with the off-duty crew.","id":"1b4xffh"}]',
   ',"drill.toast":[',
   '{"text":"Drill in ten minutes. Muster at the Works bay.","id":"facp99"}]',
+  ',"drill.works.answer":[',
+  '{"text":"At my station.","id":"1d11xur","dept":"works","flag":"drill.works.call.1"},',
+  '{"text":"Station. Ready when you are.","id":"45fxia","dept":"works","flag":"drill.works.call.1"},',
+  '{"text":"Here. Present. Mostly awake.","id":"1b9w8py","tone":"funny","dept":"works","flag":"drill.works.call.1"},',
+  '{"text":"Non-essential\'s off on my side.","id":"19lgnvl","dept":"works","flag":"drill.works.call.2"},',
+  '{"text":"Isolated. Galley ovens stay on, as ever.","id":"2d725m","tone":"funny","dept":"works","flag":"drill.works.call.2"},',
+  '{"text":"Present.","id":"1wc8vvd","dept":"works","flag":"drill.works.call.3"},',
+  '{"text":"Here. Counted. Can I have a biscuit now?","id":"so9wzc","tone":"funny","dept":"works","flag":"drill.works.call.3"}]',
+  ',"drill.works.call.1":[',
+  '{"text":"Works: all hands to your stations.","id":"6s40vu"}]',
+  ',"drill.works.call.2":[',
+  '{"text":"Isolate the non-essential power. Report when done.","id":"18ls6e8"}]',
+  ',"drill.works.call.3":[',
+  '{"text":"Head count. Works, report in.","id":"1nlorly"}]',
+  ',"drill.works.done":[',
+  '{"text":"Works reports all present and safe. Drill time: {time}.","id":"o20p7h"}]',
+  ',"drill.works.order":[',
+  '{"text":"Not yet. Stations first, then power, then the count.","id":"1m6s1hs"}]',
+  ',"drill.works.ptr":[',
+  '{"text":"Run the Works part of the drill","id":"1b24ivj"}]',
+  ',"drill.works.text":[',
+  '{"text":"You call Works\' part. Three calls, in order. The crew answer on their devices.","id":"vsskm5"}]',
+  ',"drill.works.title":[',
+  '{"text":"The drill: Works","id":"xe3z37"}]',
+  ',"event.comet.captain.senior":[',
+  '{"text":"Senior Officers get the good window. And the tea from the tin. Don\'t tell the juniors.","id":"as9z6e"}]',
   ',"event.comet.gather.cometCaptain.ask":[',
   '{"text":"The Captain\'s pouring tea for the comet in the observation room tonight. Officers.","id":"1318vr3"}]',
   ',"event.comet.gather.cometCaptain.here":[',
@@ -36253,10 +36416,40 @@ const LINES = JSON.parse([
   '{"text":"Logged. Calder will read it. She reads everything.","id":"1c7698u"}]',
   ',"log.serviced":[',
   '{"text":"{machine} serviced","id":"1gorptk"}]',
+  ',"m18.notice":[',
+  '{"text":"Shutdowns with the Chief at {time}: the Deck 6 port junction. Go at quarter to.","id":"kbvqex"}]',
+  ',"m18.ptr":[',
+  '{"text":"Shutdowns with Calder, {time}","id":"1syx5no"}]',
+  ',"m18.trained":[',
+  '{"text":"Shutdowns: you can book them now. Works app, Shutdowns tab.","id":"1efadte"}]',
   ',"m19.ask.say":[',
   '{"text":"{time}, the bridge\'s {where}. Power and relays. I\'ll meet you there.","id":"mev86a"}]',
+  ',"m19.batt.done":[',
+  '{"text":"Bank {n}\'s cells are level again.","id":"1590a8x"}]',
+  ',"m19.batt.low":[',
+  '{"text":"amber, sagging","id":"bqxu21"}]',
+  ',"m19.batt.ok":[',
+  '{"text":"green","id":"13kcbmh"}]',
+  ',"m19.batt.pick":[',
+  '{"text":"Which cells are low?","id":"19n8igm"}]',
+  ',"m19.batt.test":[',
+  '{"text":"All the bars green and level.","id":"15c9wf4"}]',
+  ',"m19.batt.wrong":[',
+  '{"text":"Those read fine. Look at the bars again.","id":"1wt5vsp"}]',
+  ',"m19.card.batt":[',
+  '{"text":"Check battery bank {n}","id":"1uf5spl"}]',
+  ',"m19.card.relay":[',
+  '{"text":"Swap a failing relay: {place}","id":"1urzxcw"}]',
   ',"m19.card.run":[',
   '{"text":"Test the conduit run: {where} crawlway","id":"1tsn01g"}]',
+  ',"m19.conduit.fault":[',
+  '{"text":"The tester drops here. The fault is in this length.","id":"6rw3ef"}]',
+  ',"m19.conduit.good":[',
+  '{"text":"Clean all the way. Next length.","id":"1kslosp"}]',
+  ',"m19.conduit.test":[',
+  '{"text":"Test this length","id":"1eudcht"}]',
+  ',"m19.conduit.title":[',
+  '{"text":"Conduit run · {machine}","id":"1qxl4ie"}]',
   ',"m19.drill.ans.0":[',
   '{"text":"Works team at stations.","id":"pwjaum"}]',
   ',"m19.drill.ans.1.fire":[',
@@ -36295,6 +36488,22 @@ const LINES = JSON.parse([
   '{"text":"Your call, {n} of 3","id":"1n7quhi"}]',
   ',"m19.drill.toast":[',
   '{"text":"Drill in ten minutes. You run the Works calls today. Muster hatch, Works bay.","id":"1jrkb4b"}]',
+  ',"m19.notice":[',
+  '{"text":"Power and relays with {name} at {time}: {where}. Go at quarter to.","id":"m20yl"}]',
+  ',"m19.relay.bad":[',
+  '{"text":"stutters","id":"1hingnx"}]',
+  ',"m19.relay.done":[',
+  '{"text":"Relay swapped. The rack\'s steady. The bridge won\'t flicker.","id":"hdfhlq"}]',
+  ',"m19.relay.ok":[',
+  '{"text":"steady","id":"91kroy"}]',
+  ',"m19.relay.pick":[',
+  '{"text":"Which relay\'s failing?","id":"x0kqla"}]',
+  ',"m19.relay.test":[',
+  '{"text":"Every lamp steady.","id":"13cfr3p"}]',
+  ',"m19.relay.wrong":[',
+  '{"text":"That one\'s steady. Watch the lamps again.","id":"wxqtq5"}]',
+  ',"m19.ring":[',
+  '{"text":"Power and relays with {name}, {time}","id":"1r2cxj7"}]',
   ',"m19.run.done":[',
   '{"text":"Feed tagged and logged. The run\'s sound again.","id":"1h2d5z9"}]',
   ',"m19.run.feed":[',
@@ -36315,6 +36524,72 @@ const LINES = JSON.parse([
   '{"text":"starboard","id":"zebfo8"}]',
   ',"m19.stage2":[',
   '{"text":"You\'ve got relays. Next: the conduit runs under Deck 6. Bring your tester.","id":"1i6fifk"}]',
+  ',"m19.tester.give":[',
+  '{"text":"The Chief gave you a conduit tester. It\'s in your locker.","id":"aizzy2"}]',
+  ',"m19.train.open":[',
+  '{"text":"The rack hums. Six lamps. One stutters: R{n}. That\'s the one.","id":"tv9yld"}]',
+  ',"m19.train.test":[',
+  '{"text":"Every lamp steady. Listen: it clicks over clean now.","id":"bmsxj4"}]',
+  ',"m19.trained.stage2":[',
+  '{"text":"Power and relays: you can test conduit runs now.","id":"19fid8p"}]',
+  ',"m19.trained.stage3":[',
+  '{"text":"Power and relays: the battery banks\' balance is yours now.","id":"13lna2p"}]',
+  ',"m20.cal.close":[',
+  '{"text":"Close. Small turns now.","id":"wjpacq"}]',
+  ',"m20.cal.far":[',
+  '{"text":"Far off. Keep turning.","id":"c4bjvm"}]',
+  ',"m20.cal.on":[',
+  '{"text":"On the star. The array agrees.","id":"194narb"}]',
+  ',"m20.cal.text":[',
+  '{"text":"Turn the dial till the array\'s reading and the star agree.","id":"iiu75b"}]',
+  ',"m20.cal.title":[',
+  '{"text":"Calibrate · {machine}","id":"xsjzb6"}]',
+  ',"m20.module.done":[',
+  '{"text":"All green. The array sees cleanly again.","id":"tgob9p"}]',
+  ',"m20.module.look":[',
+  '{"text":"One module\'s light is amber. The rest are green.","id":"1bf3cd9"}]',
+  ',"m20.module.swap":[',
+  '{"text":"Swap the amber module","id":"16t9h5d"}]',
+  ',"m20.module.title":[',
+  '{"text":"Array rack · {machine}","id":"jjh8vp"}]',
+  ',"m20.notice":[',
+  '{"text":"The sensor array with Hana Mori at {time}: the array room, Deck 2. Go at quarter to.","id":"1h20mtm"}]',
+  ',"m20.pick.text":[',
+  '{"text":"Hana has three reference stars in view. Pick one to calibrate against.","id":"nvldbf"}]',
+  ',"m20.pick.title":[',
+  '{"text":"Pick the star","id":"1nxoirc"}]',
+  ',"m20.ptr":[',
+  '{"text":"The sensor array with Hana Mori, {time}","id":"o5z0i9"}]',
+  ',"m20.rig.give":[',
+  '{"text":"Hana Mori gave you the calibration rig. Survey\'s spare, now yours.","id":"1acrzqz"}]',
+  ',"m20.star.1":[',
+  '{"text":"Tavessa\'s brightest","id":"d970pb"}]',
+  ',"m20.star.1.line":[',
+  '{"text":"The brightest in Tavessa. It\'s steady. Steady is what we want.","id":"1pegzoy"}]',
+  ',"m20.star.2":[',
+  '{"text":"The white one, low","id":"d1qdwt"}]',
+  ',"m20.star.2.line":[',
+  '{"text":"Low and white. Very quiet star. It never surprises anyone.","id":"1rksfwi"}]',
+  ',"m20.star.3":[',
+  '{"text":"The old red giant","id":"1231h9w"}]',
+  ',"m20.star.3.line":[',
+  '{"text":"Big and red and slow. It breathes, a little. Watch the reading.","id":"qj28to"}]',
+  ',"m20.star.4":[',
+  '{"text":"The close pair","id":"ugi5ly"}]',
+  ',"m20.star.4.line":[',
+  '{"text":"Two stars, very close. Pick the left one. Everyone picks the right.","id":"1x92ipl"}]',
+  ',"m20.star.5":[',
+  '{"text":"The one behind us","id":"15bzgad"}]',
+  ',"m20.star.5.line":[',
+  '{"text":"We passed it six weeks ago. It\'s still the best-measured star we have.","id":"1h7hm82"}]',
+  ',"m20.star.yours":[',
+  '{"text":"That\'s in your own star log: {star}. Hana noticed before you did.","id":"ngfwcz"}]',
+  ',"m20.sweep.done":[',
+  '{"text":"Full sweep done. Survey has your readings.","id":"1pnhah4"}]',
+  ',"m20.trained.stage2":[',
+  '{"text":"The sensor array: you can run a full sweep now.","id":"hcq36y"}]',
+  ',"m20.trained.stage3":[',
+  '{"text":"The sensor array: your sweeps feed Survey\'s charts now.","id":"jkyl8a"}]',
   ',"mail.favour.clock":[',
   '{"text":"My clock | My clock loses a few minutes every day. I\'ve been late twice. Could you take a look?","id":"8uk2v5"}]',
   ',"mail.favour.cold":[',
@@ -36354,6 +36629,34 @@ const LINES = JSON.parse([
   '{"text":"So proud | I know you\'ll be busy now. Don\'t you dare get too busy for tea. Congratulations, {nick}.","id":"9xiqrg","tone":"warm","tier":[4,4]}]',
   ',"mail.promo.move":[',
   '{"text":"Your cabin | You weren\'t about, so we moved you anyway. Cabin 4-23, officers\' corridor. Your things are there. Your key opens it. Quiet hours after 23:00. Your door\'s your own now: use it. Tomas says don\'t be a stranger.","id":"u8n5ov"}]',
+  ',"mail.pu3.again":[',
+  '{"text":"Again | Not today. Practise your shutdowns: warn first, check it\'s dead, then touch it. We go again {day}, 09:00.","id":"uyf8r"}]',
+  ',"mail.pu3.bar":[',
+  '{"text":"Your bar | We missed you this afternoon. The bar is on your cabin shelf with the certificate. Come up to the observation room one evening and I\'ll pin it properly. Congratulations, Senior Officer.","id":"93pqsg"}]',
+  ',"mail.pu3.friend":[',
+  '{"text":"Senior Officer! | Heard at lunch. Senior Officer {me}. You\'ll need a bigger mug. Come and find me later.","id":"1yjxw5m","tone":"funny","tier":[3,3]},',
+  '{"text":"Well done | Two promotions in a month. I\'ve had one in two years. Well done, properly. Tea soon?","id":"1bmg5vo","tone":"warm","tier":[3,3]},',
+  '{"text":"Told you, again | I said you\'d make Senior. I was right again. I\'m getting used to it. So proud of you.","id":"1kjy1je","tone":"warm","tier":[4,4]},',
+  '{"text":"Your bar | I want to see the bar up close. I\'ll be at the observation room door. Congratulations, {nick}.","id":"1o23bow","tone":"warm","tier":[4,4]}]',
+  ',"mail.pu3.invite":[',
+  '{"text":"Your bar, {time} | Chief Calder tells me you\'ve passed. Today at {time}, the observation room, Deck 1, I\'d like to pin your bar myself. Bring your friends. There will be cake; I\'m told that\'s not my decision.","id":"1hzpznm"}]',
+  ',"mail.pu3.luck":[',
+  '{"text":"Tomorrow | You came through the storm. A junction is a box with a switch on it. You\'ll be fine. Bed early, though.","id":"h9u9mz"},',
+  '{"text":"Good luck | Tier 3 tomorrow. I\'m not worried, so you shouldn\'t be. Proper breakfast. That\'s from a friend, and it\'s an order.","id":"octsbi"}]',
+  ',"mail.pu3.offer":[',
+  '{"text":"Your Tier 3 test | As I said: {day}, 09:00, Works bay. A Deck 6 junction, switched off and back on, properly. Pass it and you\'re a Senior Officer.","id":"pcfpul"}]',
+  ',"mail.pu3.offer.late":[',
+  '{"text":"Your Tier 3 test | I came to find you. Relied on, and Power safety done: that\'s all of it. Your Tier 3 test is {day}, 09:00, Works bay. Sleep.","id":"u759cb"}]',
+  ',"mail.pu3.passed":[',
+  '{"text":"Your test | Done. Your result {day}, {time}, my office. Not before. I won\'t have had my tea.","id":"vgsi0g"}]',
+  ',"mail.pu3.promo":[',
+  '{"text":"Your result | You weren\'t about, so you\'ll read it. You passed. As of today you\'re a Senior Officer: Senior Technician, Tier 3. Your card is on my desk. The Captain pins your bar this afternoon, observation room. Clean uniform.","id":"j3yzw9"}]',
+  ',"mail.pu3.result":[',
+  '{"text":"Your result | My office, {time}. Before your shift. Sit down when you come in. That\'s new.","id":"14qrumu"}]',
+  ',"mail.pu3.toast":[',
+  '{"text":"The toast | Tonight, 19:00, my quarters, Deck 2. Dinner, and a toast to our new Senior Officer. Commander Vance will be there, on his day off; please thank him for it, he\'ll enjoy refusing the thanks.","id":"1te1s60"}]',
+  ',"mail.pu3.toast.missed":[',
+  '{"text":"Tonight | We kept your chair. The toast was drunk anyway: I\'m told that\'s allowed. The menu is on your shelf. Next time, come hungry.","id":"1uwe1m"}]',
   ',"mail.rec.allhands.night":[',
   '{"text":"You slept through the Captain\'s all-hands, as you should. She said: a good season behind us, a busy one ahead, and thank you, all of you. Especially the night shift, who kept the lights on while we talked.","id":"3islis","tone":"warm"}]',
   ',"mail.rec.bellboard":[',
@@ -36372,6 +36675,10 @@ const LINES = JSON.parse([
   '{"text":"Wren talk tomorrow, 19:00 in the auditorium: {name}, \\"{title}\\". Come and listen, and bring a question.","id":"17dit7l"}]',
   ',"mail.rec.talk.you":[',
   '{"text":"Would you give a Wren talk? A small one, on the stage, with tea: \\"What I learned in my first month\\". It\'s on {weekday}, at seven. Nobody expects a speech. Just tell it as it was.","id":"3xqkxk"}]',
+  ',"mail.sd.missed":[',
+  '{"text":"Your shutdown | The hour came and went. People had moved their day for it. Book it again, and be there. I\'d rather hear why from you.","id":"1yl2189"}]',
+  ',"mail.sd.settled":[',
+  '{"text":"Tomorrow\'s shutdown | Settled. {where}, {time}. The crew\'s day is planned round it now. Be at the junction at quarter to.","id":"ijhkbw"}]',
   ',"mail.team":[',
   '{"text":"Team job, {time} | {job} tomorrow at {time}, Deck {deck}. {name} leads. You\'re on the team: be at your spot when it starts.","id":"fbg77m"}]',
   ',"mail.team.parts":[',
@@ -36398,6 +36705,42 @@ const LINES = JSON.parse([
   '{"text":"Waste & laundry","id":"lzhqg0"}]',
   ',"meter.water":[',
   '{"text":"Water","id":"17es417"}]',
+  ',"mys.1.line":[',
+  '{"text":"A hum in the Deck 3 pipes, every Tuesday at four. Only Tuesdays. Seven years.","id":"166s93g"}]',
+  ',"mys.1.title":[',
+  '{"text":"The Tuesday hum","id":"1mwbkn2"}]',
+  ',"mys.2.line":[',
+  '{"text":"One cabin on Deck 4 is always two degrees colder. Three crews have tried.","id":"1kmw5md"}]',
+  ',"mys.2.title":[',
+  '{"text":"The cold cabin","id":"riaiwt"}]',
+  ',"mys.3.line":[',
+  '{"text":"The lift stops on Deck 3 by itself, late at night, and opens. Nobody\'s there.","id":"1i1foey"}]',
+  ',"mys.3.title":[',
+  '{"text":"The lift that waits","id":"4dgbal"}]',
+  ',"mys.4.line":[',
+  '{"text":"The bay\'s wall clock loses a minute a week. New clock, same minute.","id":"nzp908"}]',
+  ',"mys.4.title":[',
+  '{"text":"Calder\'s clock","id":"3glt3a"}]',
+  ',"mys.5.line":[',
+  '{"text":"The garden lights dip for one second at dawn. Every dawn. Plants don\'t mind. Calder does.","id":"14da4i1"}]',
+  ',"mys.5.title":[',
+  '{"text":"The garden flicker","id":"1l86e38"}]',
+  ',"mys.board":[',
+  '{"text":"Old mysteries","id":"e6h45f"}]',
+  ',"mys.board.none":[',
+  '{"text":"You\'ve taken them all. The board is bare. Torres says that\'s a first.","id":"ql0ad0"}]',
+  ',"mys.board.tap":[',
+  '{"text":"Old cards, pinned years ago, some in Calder\'s hand. Nobody\'s cracked them.","id":"1j6jcxk"}]',
+  ',"mys.chief":[',
+  '{"text":"Old mystery cracked: {title}. Solved by {me}, Day {n}.","id":"dhn5df"}]',
+  ',"mys.rep":[',
+  '{"text":"Works reputation up: an old one cracked.","id":"12lgny9"}]',
+  ',"mys.solved":[',
+  '{"text":"Solved. The card comes off the board. Calder adds a line to her notes.","id":"1uvdo62"}]',
+  ',"mys.take":[',
+  '{"text":"Take this one","id":"1eqsl93"}]',
+  ',"mys.taken":[',
+  '{"text":"Taken. It\'s in your Fault notes, under the Chief\'s.","id":"yqhjet"}]',
   ',"near":[',
   '{"text":"Your mess is so busy. On my last ship we ate in shifts of three.","id":"18nk055","act":"meal","deck":"3","dept":"guest"},',
   '{"text":"I didn\'t expect a garden. It smells like somewhere I used to live.","id":"1nln0q5","act":"free","deck":"3","dept":"guest"},',
@@ -36884,8 +37227,14 @@ const LINES = JSON.parse([
   '{"text":"The Captain commissions you at 17:15, Deck 1. Clean uniform.","id":"1hox53v"}]',
   ',"next.m1":[',
   '{"text":"Torres wants to show you his round.","id":"l9uu6q"}]',
+  ',"next.m18":[',
+  '{"text":"Shutdowns comes next: planning a real one with the Chief, on Deck 6.","id":"19s8se1"}]',
+  ',"next.m19":[',
+  '{"text":"Power and relays comes next: the relay room on Deck 1, with the Chief.","id":"187id1e"}]',
   ',"next.m2":[',
   '{"text":"Your first oily job will earn you a work uniform.","id":"2dkl5g"}]',
+  ',"next.m20":[',
+  '{"text":"The sensor array comes next: Deck 2\'s array room, with Hana Mori from Survey.","id":"1vdws4y"}]',
   ',"next.m3d":[',
   '{"text":"Wednesday at three: the drill. Calder runs it.","id":"aa1rhm"}]',
   ',"next.m3i":[',
@@ -36904,12 +37253,28 @@ const LINES = JSON.parse([
   '{"text":"Tracing: a fault that starts somewhere else. Calder, Friday.","id":"e4alde"}]',
   ',"next.move":[',
   '{"text":"Tonight you move to cabin 4-23. Calder walks you there at five.","id":"htuzza"}]',
+  ',"next.mys":[',
+  '{"text":"Coming up: the old-mysteries board, in the Works bay. Old cases for a quiet day.","id":"cxuf06"}]',
   ',"next.p1":[',
   '{"text":"Some faults only show at some times. Calder has one.","id":"1tolvos"}]',
   ',"next.p2":[',
   '{"text":"Someone saw the fault and you didn\'t. Tomas has an idea.","id":"vb9tez"}]',
   ',"next.p3":[',
   '{"text":"The Chief has a funny one for you soon.","id":"13xivrw"}]',
+  ',"next.p4":[',
+  '{"text":"Coming up: Which gauge is lying? Torres has one for you.","id":"16wq9l2"}]',
+  ',"next.p5":[',
+  '{"text":"Coming up: Follow the line. A fault somewhere along a whole line.","id":"rkk15l"}]',
+  ',"next.p9":[',
+  '{"text":"Coming up: The clash. A fault that only happens when two things do.","id":"179xr0v"}]',
+  ',"next.ps":[',
+  '{"text":"Power safety comes next: a short lesson with the Chief at a Deck 6 junction.","id":"pcqri5"}]',
+  ',"next.pu3.bar":[',
+  '{"text":"The Captain pins your bar at {time}, the observation room, Deck 1.","id":"ayqosz"}]',
+  ',"next.pu3.result":[',
+  '{"text":"Your result: {day}, 08:15, the Chief\'s office.","id":"1ccqd9m"}]',
+  ',"next.pu3.toast":[',
+  '{"text":"The Captain\'s toast at 19:00, her quarters, Deck 2.","id":"cdwz7c"}]',
   ',"next.summons":[',
   '{"text":"Calder wants you in her office. Don\'t keep her waiting.","id":"168ij95"}]',
   ',"next.t2":[',
@@ -36922,10 +37287,20 @@ const LINES = JSON.parse([
   '{"text":"You\'re ready for your Tier 2 test. Calder will set the day.","id":"1frwk58"}]',
   ',"next.t2.steps":[',
   '{"text":"Your Tier 2 test needs Reliable and Making it safe. You\'re {band} now.","id":"5dy5km"}]',
+  ',"next.t3":[',
+  '{"text":"Next: your Tier 3 test. Relied on, and Power safety, and the Chief puts you up.","id":"1ft9oyg"}]',
+  ',"next.t3.steps":[',
+  '{"text":"Your Tier 3 test needs Relied on and Power safety. You\'re {band} now.","id":"1p335ke"}]',
   ',"next.wait.m1":[',
   '{"text":"Torres is waiting to show you his round. Find him.","id":"15mbvgm"}]',
+  ',"next.wait.m18":[',
+  '{"text":"Shutdowns: meet the Chief at the Deck 6 port junction.","id":"pag979"}]',
+  ',"next.wait.m19":[',
+  '{"text":"Power and relays: meet the Chief in the relay room, Deck 1.","id":"1xuk0du"}]',
   ',"next.wait.m2":[',
   '{"text":"Torres has something for you to wear. Find him.","id":"mheonb"}]',
+  ',"next.wait.m20":[',
+  '{"text":"The sensor array: meet Hana Mori in the array room, Deck 2.","id":"z8chlq"}]',
   ',"next.wait.m3d":[',
   '{"text":"The drill\'s on. Calder\'s waiting.","id":"1vllr5h"}]',
   ',"next.wait.m3i":[',
@@ -36942,16 +37317,34 @@ const LINES = JSON.parse([
   '{"text":"A team job\'s posted. Be at your spot when it starts.","id":"14qzy0y"}]',
   ',"next.wait.m9":[',
   '{"text":"Calder has the pipe kit for you. Go and see her.","id":"1nyeytn"}]',
+  ',"next.wait.mys":[',
+  '{"text":"The old-mysteries board is up, beside the job board. Take one when you like.","id":"1tc92gp"}]',
   ',"next.wait.p1":[',
   '{"text":"Calder has a head-scratcher. Ask her when it happens.","id":"106rkdr"}]',
   ',"next.wait.p2":[',
   '{"text":"Find Tomas. He\'s got a word for you about the scrubber.","id":"p1xdcl"}]',
   ',"next.wait.p3":[',
   '{"text":"Calder has a head-scratcher waiting at the board.","id":"i4oh2w"}]',
+  ',"next.wait.p4":[',
+  '{"text":"Which gauge is lying? Torres is waiting with a pair that disagree.","id":"1ma9hh0"}]',
+  ',"next.wait.p5":[',
+  '{"text":"Follow the line: the Chief has a long one for you.","id":"1v9t9pi"}]',
+  ',"next.wait.p9":[',
+  '{"text":"The clash: the Chief has a fault that won\'t happen on its own.","id":"1x2q2al"}]',
+  ',"next.wait.ps":[',
+  '{"text":"Power safety: meet the Chief at the Deck 6 port junction. You only watch.","id":"yvun05"}]',
   ',"next.wait.t2":[',
   '{"text":"Your test job is on the board. Calder\'s watching. Take it.","id":"1pe9j16"}]',
+  ',"next.wait.t3":[',
+  '{"text":"Your Tier 3 test is set. The job board, the Works bay, 09:00.","id":"ew9tvb"}]',
   ',"noz.plant":[',
   '{"text":"The irrigation plant hums along. You check its filter and the pressure while you\'re here.","id":"zvce1x"}]',
+  ',"p9.move":[',
+  '{"text":"Eight instead? Fine. If it stops the noise, fine.","id":"lgkje0"},',
+  '{"text":"Move my wash? Course. Didn\'t know it caused bother.","id":"elwtxb"},',
+  '{"text":"Happy to. I\'m up early anyway.","id":"bvyezx"},',
+  '{"text":"Fine. But I\'m telling everyone it was your idea.","id":"9m53km","tone":"funny","flag":"p9.move.grumble"},',
+  '{"text":"Earlier? Oh, go on, then. For the ship.","id":"17vrei4","flag":"p9.move.grumble"}]',
   ',"pb.busy.notice":[',
   '{"text":"Your Tier 2 test waits on the job board till {time}. Turn in or drop this job first.","id":"ze4e0a"}]',
   ',"pb.luck":[',
@@ -37091,6 +37484,169 @@ const LINES = JSON.parse([
   '{"text":"Well done. Really. Well done.","id":"1c7wz9z","tone":"warm","dept":"works"},',
   '{"text":"Three cheers! Well. One cheer. We\'re on shift.","id":"gt3hhr","tone":"funny","dept":"works"},',
   '{"text":"Pip suits you. Very shiny.","id":"10xr4bb","dept":"works"}]',
+  ',"pu3.again.notice":[',
+  '{"text":"Your Tier 3 test is set again: {day}, 09:00, the Works bay.","id":"k24s08"}]',
+  ',"pu3.bar.friend":[',
+  '{"text":"Senior Officer. Look at you. Look at the bar.","id":"1nbp9sr","tone":"warm","tier":[3,4]},',
+  '{"text":"It\'s straight. I checked. Calder checked too.","id":"1ko7wv1","tone":"funny","tier":[3,4]},',
+  '{"text":"Well done. Properly. I\'m so proud of you.","id":"1f4gwuy","tone":"warm","tier":[3,4]},',
+  '{"text":"Congratulations. Suits you.","id":"16q35hq"}]',
+  ',"pu3.bar.notice":[',
+  '{"text":"The Captain pins your bar at {time}: the observation room, Deck 1. Go now.","id":"hd8nt4"}]',
+  ',"pu3.bar.say":[',
+  '{"text":"Go.","id":"5qow0e"}]',
+  ',"pu3.busy.notice":[',
+  '{"text":"Your Tier 3 test waits on the job board till {time}. Turn in or drop this job first.","id":"1vzv551"}]',
+  ',"pu3.cake":[',
+  '{"text":"Brennan made it for you. So you get the corner.","id":"mofn0","tone":"warm","tier":[3,4]},',
+  '{"text":"First slice is yours. Second\'s mine. That\'s the rule.","id":"tory92","tone":"funny","tier":[3,4]},',
+  '{"text":"Cake for the new Senior. Lovely.","id":"uxvll2"}]',
+  ',"pu3.cake.toast":[',
+  '{"text":"A slice of Brennan\'s cake. Still warm.","id":"1i49bqs"}]',
+  ',"pu3.check.bar":[',
+  '{"text":"Your bar, from the Captain","id":"k6pkfm"}]',
+  ',"pu3.check.day":[',
+  '{"text":"The test from Day 15","id":"j4zu5z"}]',
+  ',"pu3.check.done":[',
+  '{"text":"Done","id":"1nsbwjw"}]',
+  ',"pu3.check.not":[',
+  '{"text":"Not yet","id":"11ost1m"}]',
+  ',"pu3.check.ps":[',
+  '{"text":"Power safety, with the Chief","id":"ommxys"}]',
+  ',"pu3.check.rep":[',
+  '{"text":"Relied on (you\'re {band})","id":"1ut2v2"}]',
+  ',"pu3.check.result":[',
+  '{"text":"Your result: {day}, 08:15","id":"75bn4r"}]',
+  ',"pu3.check.set":[',
+  '{"text":"Test job: {day}, 09:00","id":"xtmf76"}]',
+  ',"pu3.check.title":[',
+  '{"text":"Your promotion: the Tier 3 test","id":"1yjev36"}]',
+  ',"pu3.check.toast":[',
+  '{"text":"The Captain\'s toast","id":"131h3h9"}]',
+  ',"pu3.keepsake":[',
+  '{"text":"Senior Officer\'s certificate","id":"191x776"}]',
+  ',"pu3.keepsake.text":[',
+  '{"text":"Senior Officer, Senior Technician. A storm, a test and a ship that noticed. O. Marrow","id":"8kmogt"}]',
+  ',"pu3.luck":[',
+  '{"text":"Good luck tomorrow. You did the storm. This is nothing.","id":"12czwg","tone":"warm","tier":[3,4]},',
+  '{"text":"Big day tomorrow. Early night, all right?","id":"1rnuan6","tone":"warm","tier":[3,4]},',
+  '{"text":"Tier 3 tomorrow. I\'ve got a cup up for you.","id":"38u2t9","tone":"warm","tier":[3,4]},',
+  '{"text":"To your test. Cheers. No, really, cheers.","id":"18d4wj0","tone":"funny","tier":[3,4]},',
+  '{"text":"Today\'s the day. Go and switch something off.","id":"1ysntl0","tone":"funny","tier":[3,4],"time":"morning"},',
+  '{"text":"Good luck. Warn everyone twice. You\'ll be fine.","id":"4n9tww","tone":"warm","tier":[3,4],"time":"morning"},',
+  '{"text":"Eat something first. Shutdowns go better fed.","id":"y2jkn2","tone":"funny","tier":[3,4],"time":"morning"},',
+  '{"text":"One more song, then bed. You\'ve a test.","id":"fnx3bu","tone":"warm","place":"lounge","tier":[3,4]},',
+  '{"text":"Raise a cup, everyone. Tier 3 tomorrow.","id":"1jsz3jc","tone":"warm","place":"lounge","tier":[3,4]}]',
+  ',"pu3.menu":[',
+  '{"text":"The Captain\'s menu","id":"7jkgpr"}]',
+  ',"pu3.menu.text":[',
+  '{"text":"Soup from the garden. Brennan\'s pie. Custard. One toast: to the new Senior Officer.","id":"2p1deo"}]',
+  ',"pu3.morning.notice":[',
+  '{"text":"Today: your Tier 3 test, 09:00. It goes up on the job board in the Works bay.","id":"qerrnr"}]',
+  ',"pu3.morning.say":[',
+  '{"text":"Nine o\'clock. Take it when you\'re ready.","id":"1qb1zv"}]',
+  ',"pu3.news":[',
+  '{"text":"{me} is a Senior Officer as of today. The bar, the observation room, and cake.","id":"48ctgh"}]',
+  ',"pu3.offer.notice":[',
+  '{"text":"Your Tier 3 test: {day}, 09:00, the job board in the Works bay.","id":"6tilkx"}]',
+  ',"pu3.passed":[',
+  '{"text":"How did it go? Your face says well. Does it?","id":"cp31jj","tone":"warm","tier":[3,4]},',
+  '{"text":"Result tomorrow? I\'ll be outside the glass.","id":"kr22p9","tone":"warm","tier":[3,4]},',
+  '{"text":"You passed. I know you passed. Tell me tomorrow.","id":"1ukzk8l","tone":"funny","tier":[3,4]},',
+  '{"text":"Heard the junction came back on first time.","id":"ksz47l"},',
+  '{"text":"Your Tier 3 test\'s done? That\'s a big one.","id":"6e6346"},',
+  '{"text":"Clean shutdown today. Nobody even spilt a tea.","id":"c97nqn","dept":"works"},',
+  '{"text":"The bay\'s talking about your junction. Good talk.","id":"4au8jf","dept":"works"},',
+  '{"text":"Calder said \\"Good.\\" Twice, apparently.","id":"uq97wc","tone":"funny","dept":"works"}]',
+  ',"pu3.passed.notice":[',
+  '{"text":"Your Tier 3 test is done. Your result: {day}, {time}, the Chief\'s office.","id":"1ml69kn"}]',
+  ',"pu3.passed.say":[',
+  '{"text":"That\'s the test. Your result {day}, first thing. My office, {time}. Don\'t be early.","id":"m97xym"}]',
+  ',"pu3.ptr.back":[',
+  '{"text":"Bring it back","id":"1k8s7cx"}]',
+  ',"pu3.ptr.bar":[',
+  '{"text":"Your bar: the observation room","id":"1adwv41"}]',
+  ',"pu3.ptr.breaker":[',
+  '{"text":"Change the breaker","id":"1s1hbxt"}]',
+  ',"pu3.ptr.cake":[',
+  '{"text":"Take a slice","id":"t8fhz8"}]',
+  ',"pu3.ptr.off":[',
+  '{"text":"Switch it off","id":"r9ujrv"}]',
+  ',"pu3.ptr.plan":[',
+  '{"text":"Your Tier 3 test: plan it with Calder","id":"6zqnas"}]',
+  ',"pu3.ptr.result":[',
+  '{"text":"Your result: Calder\'s office","id":"1subhgc"}]',
+  ',"pu3.ptr.test":[',
+  '{"text":"Your Tier 3 test: take it","id":"1qfd1ds"}]',
+  ',"pu3.ptr.toast":[',
+  '{"text":"The Captain\'s toast: her quarters","id":"1kt7b8t"}]',
+  ',"pu3.ptr.turnin":[',
+  '{"text":"Turn it in","id":"1rtpnph"}]',
+  ',"pu3.ptr.warn":[',
+  '{"text":"Warn {name} about the shutdown","id":"q536wl"}]',
+  ',"pu3.result.notice":[',
+  '{"text":"Your Tier 3 result: {time}, the Chief\'s office, Works bay. Before your shift.","id":"1n9ngub"}]',
+  ',"pu3.row.bar":[',
+  '{"text":"The Captain, {time}","id":"1x39rkt"}]',
+  ',"pu3.row.result":[',
+  '{"text":"Your result, 08:15","id":"b9jdxv"}]',
+  ',"pu3.row.test":[',
+  '{"text":"Your Tier 3 test","id":"1ngbelo"}]',
+  ',"pu3.row.toast":[',
+  '{"text":"The toast, 19:00","id":"169la7d"}]',
+  ',"pu3.senior":[',
+  '{"text":"Senior Officer! At this rate you\'ll be Captain.","id":"wuj2xm","tone":"funny","tier":[3,4]},',
+  '{"text":"Senior Officer. I knew it. I\'m so pleased.","id":"ip0ocx","tone":"warm","tier":[3,4]},',
+  '{"text":"The bar this afternoon? I\'m coming. Try and stop me.","id":"kq71uc","tone":"warm","tier":[3,4]},',
+  '{"text":"Congratulations, Senior Officer.","id":"be0ofs"},',
+  '{"text":"Senior Officer already? Well done.","id":"xtykxe"},',
+  '{"text":"The Captain pins your bar at half four, I hear.","id":"scpnb5"},',
+  '{"text":"A Senior in the bay. Mind you still make the tea.","id":"391srk","tone":"funny","dept":"works"},',
+  '{"text":"Tier 3 jobs on the board for you now. Lucky you.","id":"6f4fpj","tone":"funny","dept":"works"},',
+  '{"text":"That\'s the new Senior Officer. Over there.","id":"1qtat1t","act":"breakfast|dinner"}]',
+  ',"pu3.soon":[',
+  '{"text":"Tier 3 already? You\'ve been aboard two weeks.","id":"11lrk3n","day":"-14"},',
+  '{"text":"Two weeks aboard and up for Senior. Calder means it.","id":"2f1gbl","day":"-14"},',
+  '{"text":"A Tier 3 test inside a fortnight. That\'s not normal.","id":"1sk0t49","day":"-14"},',
+  '{"text":"Two weeks and up for Tier 3. Took me two years.","id":"zr4cmk","tone":"funny","day":"-14","dept":"works"},',
+  '{"text":"Tier 3 at two weeks. I\'m telling the night crew.","id":"1l33zej","day":"-14","dept":"works"},',
+  '{"text":"Up for Tier 3, I hear. That came round quick.","id":"1pbbrog","day":"15-"},',
+  '{"text":"Senior Officer\'s test, then. Good. You\'ve earned it.","id":"gqlz7z","day":"15-"},',
+  '{"text":"Heard you\'re up for Tier 3. A shutdown, isn\'t it?","id":"2xvtvy"},',
+  '{"text":"Calder put you up for Senior? She doesn\'t do that lightly.","id":"c2b70h"},',
+  '{"text":"A Tier 3 test after the storm you had. Fair enough.","id":"xu5t7g"},',
+  '{"text":"Tier 3 means you switch things off. On purpose.","id":"3qq8yl","tone":"funny"},',
+  '{"text":"Tier 3 is a junction shutdown. Warn people first.","id":"7kkohp","dept":"works"},',
+  '{"text":"Your Tier 3\'s a junction. Rubber gloves, mind.","id":"10ye1p3","dept":"works"},',
+  '{"text":"It\'s always the port junction on Deck 6. Always.","id":"rpsn51","tone":"funny","dept":"works"},',
+  '{"text":"So you\'re the one up for Tier 3. Everyone\'s saying.","id":"a234qj","act":"breakfast|dinner"},',
+  '{"text":"Eat up. Senior test tomorrow, I hear.","id":"m87ya7","act":"breakfast|dinner"}]',
+  ',"pu3.toast.notice":[',
+  '{"text":"The Captain\'s toast at 19:00: her quarters, Deck 2. Go at quarter to.","id":"dy3zpb"}]',
+  ',"pu3.warn.ask":[',
+  '{"text":"About the shutdown","id":"vqwp1n"}]',
+  ',"pu3.warn.calder":[',
+  '{"text":"Calder told {name} for you. One less to find.","id":"exolcn"}]',
+  ',"pu3.warn.done":[',
+  '{"text":"{name} knows. Thank you.","id":"1qgl18k"}]',
+  ',"pu3.warned":[',
+  '{"text":"A shutdown? Thanks for telling me. I\'ll go elsewhere.","id":"eauoob"},',
+  '{"text":"How long? An hour? Fine. Thanks for the warning.","id":"1fyri7u"},',
+  '{"text":"Right you are. I\'ll save my work first.","id":"box911"},',
+  '{"text":"Off at ten? I\'ll take my tea break then. Thanks.","id":"112zwas"},',
+  '{"text":"Thank you for coming to say. Most people don\'t.","id":"1tmsxtd"},',
+  '{"text":"Fine. Shout when it\'s back on, will you?","id":"1dy8rre"},',
+  '{"text":"Shutting it down? Good. That breaker\'s been noisy.","id":"16zdnmu","dept":"works"},',
+  '{"text":"I\'ll keep clear. Gloves on, you.","id":"19t5090","dept":"works"},',
+  '{"text":"Noted. I\'ll let the bridge know. Thank you.","id":"1mkljg3","dept":"command"},',
+  '{"text":"Off? Not the ovens, I hope. No? Then that\'s fine.","id":"1dfie3c","dept":"galley"},',
+  '{"text":"I\'ll back my readings up first. Thank you.","id":"1v8oxe4","dept":"survey"}]',
+  ',"pu3.watch":[',
+  '{"text":"Don\'t mind us. We\'re just passing. Slowly.","id":"183ih8f","tone":"funny","dept":"works"},',
+  '{"text":"Steady. Check it\'s dead before you touch it.","id":"g3rw65","dept":"works"},',
+  '{"text":"Calder\'s quiet. Quiet\'s good with Calder.","id":"kowprp","tone":"funny","dept":"works"},',
+  '{"text":"That\'s the shutdown test, isn\'t it? Good luck.","id":"1omi8c5"},',
+  '{"text":"Lights going off for the test? Fine by me.","id":"10z0io4"}]',
   ',"queue.booth":[',
   '{"text":"You\'re {nth} in line for a booth.","id":"13kzbx0"}]',
   ',"queue.go":[',
@@ -37691,6 +38247,100 @@ const LINES = JSON.parse([
   '{"text":"worn","id":"avojtu"}]',
   ',"scan.title":[',
   '{"text":"Scanner · {machine}","id":"d8gjl2"}]',
+  ',"sd.book":[',
+  '{"text":"Book for tomorrow","id":"8qu3da"}]',
+  ',"sd.booked":[',
+  '{"text":"Booked: {where}, tomorrow at {time}. It\'s settled at 22:00 tonight.","id":"c9glo"}]',
+  ',"sd.booked.row":[',
+  '{"text":"Booked: tomorrow {time}","id":"1h5aq50"}]',
+  ',"sd.busyhour":[',
+  '{"text":"People will feel this one. Book it anyway?","id":"8yam6u"}]',
+  ',"sd.cancel":[',
+  '{"text":"Cancel booking","id":"ev5hd9"}]',
+  ',"sd.cancelled":[',
+  '{"text":"Booking cancelled. Nobody\'s day changes.","id":"dirl05"}]',
+  ',"sd.class":[',
+  '{"text":"A class is on in one of these rooms","id":"fw96tv"}]',
+  ',"sd.done":[',
+  '{"text":"Power back on. {where} is running again.","id":"1g6fmaj"}]',
+  ',"sd.feeds":[',
+  '{"text":"Feeds","id":"1o20v3i"}]',
+  ',"sd.feeds.rooms":[',
+  '{"text":"{where}: {text}","id":"1c3kedh"}]',
+  ',"sd.grumble":[',
+  '{"text":"Power off at mealtime? Really? I was hungry.","id":"14j18ou"},',
+  '{"text":"Nobody told me about the power. I was mid-wash.","id":"1yr3b2m"},',
+  '{"text":"The gym class moved for your shutdown. Twice the stairs.","id":"cq4dkz","tone":"funny"},',
+  '{"text":"Next time, maybe not right in the middle of dinner?","id":"1puv39h"},',
+  '{"text":"A shutdown at the quiz? I had the answer to number six.","id":"17bn54z","tone":"funny"}]',
+  ',"sd.head":[',
+  '{"text":"Jobs that need the power off","id":"d0fb8g"}]',
+  ',"sd.job":[',
+  '{"text":"{machine}: needs the power off","id":"1wqrkrw"}]',
+  ',"sd.keep":[',
+  '{"text":"Keeps power","id":"1d893sc"}]',
+  ',"sd.keep.none":[',
+  '{"text":"Nothing kept on","id":"1j3smnt"}]',
+  ',"sd.lapsed":[',
+  '{"text":"We moved our whole morning for that shutdown. It never came.","id":"kxd4s9"},',
+  '{"text":"Was the power going off or not? We waited.","id":"u8f4fp"}]',
+  ',"sd.meal":[',
+  '{"text":"Mealtime: the galley needs power","id":"xikfp4"}]',
+  ',"sd.missed":[',
+  '{"text":"You missed your hour. The booking\'s gone; the crew moved their day for nothing.","id":"6nhklx"}]',
+  ',"sd.needbook":[',
+  '{"text":"This needs the power off. Book a shutdown first: Works app, Shutdowns.","id":"13ldvdn"}]',
+  ',"sd.next":[',
+  '{"text":"Later","id":"1nrtcdt"}]',
+  ',"sd.no":[',
+  '{"text":"Pick another hour","id":"qif8l5"}]',
+  ',"sd.none":[',
+  '{"text":"No jobs need a shutdown. When one does, it shows here.","id":"157n8ya"}]',
+  ',"sd.notice":[',
+  '{"text":"Your shutdown at {time}: the junction on Deck {deck}. Go now.","id":"10vc93v"}]',
+  ',"sd.off":[',
+  '{"text":"Lights. Right. That\'s the shutdown, then.","id":"jkc9hw"},',
+  '{"text":"There it goes. Right on time.","id":"1usv76n"},',
+  '{"text":"I was warned. I was warned. Still made me jump.","id":"1vjwdux","tone":"funny"},',
+  '{"text":"Power\'s off in here. Tea break, then.","id":"6c71hr","tone":"funny"}]',
+  ',"sd.prev":[',
+  '{"text":"Earlier","id":"xas8mr"}]',
+  ',"sd.ptr":[',
+  '{"text":"Your shutdown, {time}: switch it off","id":"14t1jwm"}]',
+  ',"sd.ptr.back":[',
+  '{"text":"Your shutdown: bring it back","id":"1vxpymo"}]',
+  ',"sd.tab":[',
+  '{"text":"Shutdowns","id":"s3vqny"}]',
+  ',"sd.thanks":[',
+  '{"text":"Thanks for warning us about the power. Very tidy.","id":"d1k3rr"},',
+  '{"text":"That shutdown? Didn\'t even notice. That\'s good, isn\'t it?","id":"xaf8xf"},',
+  '{"text":"You picked a quiet hour. Thank you for that.","id":"yjucwd"}]',
+  ',"sd.trad":[',
+  '{"text":"A ship tradition is on then","id":"1xx0hig"}]',
+  ',"sd.warn":[',
+  '{"text":"Warn","id":"1egbsti"}]',
+  ',"sd.warn.ask":[',
+  '{"text":"About tomorrow\'s shutdown","id":"blk5qd"}]',
+  ',"sd.warn.notice":[',
+  '{"text":"{name}: power off tomorrow, {time}, {where}. About an hour.","id":"6b3tok"}]',
+  ',"sd.warn.sent":[',
+  '{"text":"{name} is warned.","id":"lqlid0"}]',
+  ',"sd.warned":[',
+  '{"text":"Tomorrow? Thanks for saying. I\'ll plan round it.","id":"1ims3fb"},',
+  '{"text":"An hour off? Fine. I\'ll go somewhere else.","id":"6g7yw3"},',
+  '{"text":"Good of you to tell me. Most just switch it off.","id":"11yftvq"},',
+  '{"text":"Noted. Thanks. I\'ll save my work first.","id":"1hfmswt"},',
+  '{"text":"Warned","id":"1ftnoq4"}]',
+  ',"sd.when":[',
+  '{"text":"Tomorrow at","id":"ynf46a"}]',
+  ',"sd.who":[',
+  '{"text":"Who\'d notice","id":"bxpq47"}]',
+  ',"sd.who.n":[',
+  '{"text":"{n} people in those rooms then","id":"h8gu0g"}]',
+  ',"sd.who.none":[',
+  '{"text":"Nobody\'s in those rooms then. A quiet hour.","id":"1cnwowb"}]',
+  ',"sd.yes":[',
+  '{"text":"Book it anyway","id":"ltxur4"}]',
   ',"seek":[',
   '{"text":"{hi}, {nick}. Got a minute? I\'ve been meaning to find you.","id":"1iy1tbv","tier":[1,1]},',
   '{"text":"Oh good, it\'s you. How\'s your week going?","id":"1yt0y9u","tier":[1,1]},',
@@ -39248,8 +39898,14 @@ const LINES = JSON.parse([
   '{"text":"Fancy a walk? | Fancy a walk? I\'ll show you my round. Tea corner, or the bay till half eleven.","id":"1dgg5pe"}]',
   ',"works.ask.m17":[',
   '{"text":"The lift roof | Thursday is lift day. Meet me at the lift, {place}, at {time}. Bring your gloves.","id":"1indey2"}]',
+  ',"works.ask.m18":[',
+  '{"text":"Shutdowns | Planning one, properly. We book a real one for tomorrow together. The Deck 6 port junction, {time}, {place}.","id":"iqhsn4"}]',
+  ',"works.ask.m19":[',
+  '{"text":"Power and relays | Your first Senior training. The relay room, Deck 1. Bring your hands; I\'ll bring the relays. {time}, {place}.","id":"4sogs1"}]',
   ',"works.ask.m2":[',
   '{"text":"Your uniform | Saw you after that job. Change before tea. A shower won\'t shift it. The wardrobe will.","id":"sy8vm1"}]',
+  ',"works.ask.m20":[',
+  '{"text":"The sensor array | Hana Mori in Survey has asked for you. Calibrating the array against a star. I\'ll come too. {time}, {place}.","id":"fau55e"}]',
   ',"works.ask.m3d":[',
   '{"text":"Drill at three | Drill at three. Works bay, ten to. Fire, this week.","id":"1aaknkm"}]',
   ',"works.ask.m3i":[',
@@ -39268,6 +39924,8 @@ const LINES = JSON.parse([
   '{"text":"The pipe kit | Board, first thing. Showers on Four are weak. You\'ll find out why.","id":"149ewu9"}]',
   ',"works.ask.p3":[',
   '{"text":"A funny one | Come to the board. Bring your device. I\'ve got a funny one.","id":"1mfjo75"}]',
+  ',"works.ask.ps":[',
+  '{"text":"Power safety | Before any Tier 3 work: Power safety, with me. Twenty minutes. You watch. {time}, {place}.","id":"1moyniv"}]',
   ',"works.band.new":[',
   '{"text":"New","id":"6x065e"}]',
   ',"works.band.newofficer":[',
@@ -39326,8 +39984,14 @@ const LINES = JSON.parse([
   '{"text":"rewiring","id":"dpqsg0"}]',
   ',"works.mech.m17":[',
   '{"text":"the lift roof","id":"197muw1"}]',
+  ',"works.mech.m18":[',
+  '{"text":"Shutdowns","id":"106t7jd"}]',
+  ',"works.mech.m19":[',
+  '{"text":"Power and relays","id":"79uiyq"}]',
   ',"works.mech.m2":[',
   '{"text":"your work uniform","id":"1imkuzv"}]',
+  ',"works.mech.m20":[',
+  '{"text":"The sensor array","id":"k4v1am"}]',
   ',"works.mech.m3d":[',
   '{"text":"the drill","id":"1m4msee"}]',
   ',"works.mech.m3i":[',
@@ -39344,20 +40008,34 @@ const LINES = JSON.parse([
   '{"text":"team jobs","id":"fkuypj"}]',
   ',"works.mech.m9":[',
   '{"text":"tracing","id":"1bhb2nd"}]',
+  ',"works.mech.mys":[',
+  '{"text":"The old-mysteries board","id":"e5h9x0"}]',
   ',"works.mech.p1":[',
   '{"text":"when does it happen?","id":"1ys1op9"}]',
   ',"works.mech.p2":[',
   '{"text":"who saw what?","id":"b40o8l"}]',
   ',"works.mech.p3":[',
   '{"text":"head-scratchers","id":"17zzowy"}]',
+  ',"works.mech.p4":[',
+  '{"text":"Which gauge is lying?","id":"381zr7"}]',
+  ',"works.mech.p5":[',
+  '{"text":"Follow the line","id":"iq1ygg"}]',
+  ',"works.mech.p9":[',
+  '{"text":"The clash","id":"1b8ppzi"}]',
+  ',"works.mech.ps":[',
+  '{"text":"Power safety","id":"l1e5dh"}]',
   ',"works.mech.t2":[',
   '{"text":"the Tier 2 test job","id":"ttdyf0"}]',
+  ',"works.mech.t3":[',
+  '{"text":"Your Tier 3 test job","id":"1r3fme7"}]',
   ',"works.mech.tickets":[',
   '{"text":"fault-finder tickets","id":"15ugspp"}]',
   ',"works.ms.commissioned":[',
   '{"text":"Commissioned Officer, Day {n}.","id":"1t04sxo"}]',
   ',"works.ms.grade":[',
   '{"text":"{grade}, Day {n}.","id":"m2t2od"}]',
+  ',"works.ms.senior":[',
+  '{"text":"Senior Officer, Day {n}","id":"1xy4txu"}]',
   ',"works.ms.stars":[',
   '{"text":"Star logger","id":"1wy29i0"}]',
   ',"works.note.scanner":[',
@@ -39416,6 +40094,8 @@ const LINES = JSON.parse([
   '{"text":"Your promotion: the Tier 2 test","id":"1oatm2o"}]',
   ',"works.promo.home":[',
   '{"text":"Your cabin: 4-23, on the officers\' corridor, Deck 4.","id":"14hwx2x"}]',
+  ',"works.pu3.home":[',
+  '{"text":"You stay in cabin 4-23 as a Senior Officer. Your laundry stays yours to do.","id":"1sm038w"}]',
   ',"works.rank.junior":[',
   '{"text":"Junior Officer","id":"1g2etsb"}]',
   ',"works.rank.officer":[',
@@ -39440,6 +40120,10 @@ const LINES = JSON.parse([
   '{"text":"Now Reliable. That\'s the reputation your Tier 2 test needs.","id":"1e0kawz"}]',
   ',"works.rep.up.steady":[',
   '{"text":"Now Steady. One more step, Reliable, and you\'re up for your Tier 2 test.","id":"11ug3u6"}]',
+  ',"works.rep.up2.relied":[',
+  '{"text":"Now Relied on. That\'s the reputation your Tier 3 test needs.","id":"10z7fn7"}]',
+  ',"works.rep.up2.trusted":[',
+  '{"text":"Now Trusted. One more step, Relied on, and you\'re up for your Tier 3 test.","id":"9kwpyb"}]',
   ',"works.skill.hang":[',
   '{"text":"getting the hang of these","id":"piahj7"}]',
   ',"works.skill.know":[',
@@ -39462,6 +40146,10 @@ const LINES = JSON.parse([
   '{"text":"Senior Technician","id":"1tka5j0"}]',
   ',"works.title.t4":[',
   '{"text":"Engine Specialist","id":"1gxunxw"}]',
+  ',"works.tool.arrayrig":[',
+  '{"text":"Calibration rig","id":"1toiry5"}]',
+  ',"works.tool.arrayrig.about":[',
+  '{"text":"A dial and a reading. Point the array at a known star and turn till they agree.","id":"1oqhwfd"}]',
   ',"works.tool.calrig":[',
   '{"text":"Calibration rig","id":"bb3fj5"}]',
   ',"works.tool.calrig.about":[',
@@ -40150,6 +40838,13 @@ const MEETINGS_BAKED = {
   "promo.ceremony": {"title": "Your commission", "from": "Captain Odile Marrow", "gist": "The Captain commissioned you as an Officer of the Wren. The framed commission is on your cabin shelf.", "lines": [{"who": "vance", "text": "Attention, please. The Captain.", "pose": "nod"}, {"who": "marrow", "text": "Thank you, Teo. Sit, everyone, if there are chairs. There never are.", "pose": "laugh"}, {"who": "marrow", "text": "Cadet. Chief Calder tells me you're ready. The Chief doesn't say that often.", "to": "you"}, {"who": "marrow", "text": "By the Survey Service, I commission you an Officer of the Wren. With all that comes with it."}, {"who": "marrow", "text": "Hold still. Pins are not my strong point.", "pin": true, "pose": "gesture"}, {"who": "marrow", "text": "There. Now, my question. What should an officer never forget?", "to": "you"}, {"choice": [{"text": "The people. Everyone aboard.", "rel": {"marrow": 2}, "mem": "promo.answer.people", "reply": {"who": "marrow", "text": "Good answer. The ship is the people in it. The rest is metal.", "pose": "nod"}}, {"text": "To ask when I don't know.", "rel": {"marrow": 2}, "mem": "promo.answer.ask", "reply": {"who": "marrow", "text": "Good answer. The ones who stop asking are the ones who worry me.", "pose": "nod"}}, {"text": "To mind the step in the ready room.", "rel": {"marrow": 1}, "mem": "promo.answer.step", "reply": {"who": "marrow", "text": "Ha. Calder warned me about you. Also correct.", "pose": "laugh"}}]}, {"who": "calder", "text": "Tier 2. On the day I said. Good.", "pose": "nod"}, {"who": "torres-zeke", "text": "Told everyone. Didn't I tell everyone?", "pose": "laugh"}, {"who": "marrow", "text": "Tea, then. Mine's the good stuff. Don't tell the galley."}, {"who": "marrow", "text": "Welcome, Officer. My door is open. Mind the step.", "to": "you"}]},
   "promo.officer": {"title": "My office, 11:00", "from": "Chief Ines Calder", "gist": "Calder promoted you to Officer: Technician, Tier 2. A badge, a collar pip, and your own cabin from tonight.", "lines": [{"who": "calder", "text": "Sit. No, stay standing. This won't take long.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "The scrubber. Filter in, fan settled, nobody had to tell you twice."}, {"who": "calder", "text": "You've passed. As of now you're an Officer. Technician, Tier 2."}, {"who": "calder", "text": "The badge. And the pip. Collar, left side. Straight, please."}, {"choice": [{"text": "Thank you, Chief. I won't let you down.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "I know. That's why you're standing here.", "pose": "nod"}}, {"text": "Me? Already?", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Already. I don't promote people to be kind. I promote them because they're ready."}}, {"text": "About time, honestly.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Hm. Torres said you'd say that. He owes me a biscuit.", "pose": "laugh"}}]}, {"who": "calder", "text": "The board leaves you Tier 2 work from tomorrow. Harder faults. Fewer carts."}, {"who": "calder", "text": "Tonight you move to 4-23. Your own cabin. I'll walk you there at five."}, {"who": "calder", "text": "The Captain commissions you tomorrow. Clean uniform. Go on, then. They're waiting outside."}]},
   "promo.result": {"title": "Your result", "from": "Chief Ines Calder", "gist": "Calder gave you your result: you passed. You're a Works Officer now, Technician, Tier 2. The Captain pins your pip this afternoon.", "lines": [{"who": "calder", "text": "Door. Thank you. Two minutes.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "Your scrubber. Four bolts, one filter, no notes from me."}, {"who": "calder", "text": "Result: passed. You're an Officer from today. Technician, Tier 2."}, {"who": "calder", "text": "Your badge. Pin it level. I'll know if it isn't."}, {"choice": [{"text": "Thank you, Chief. I'll do it properly.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "You already do. That's what the badge is for.", "pose": "nod"}}, {"text": "Really? This soon?", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Really. Soon isn't the measure. Ready is. You're ready."}}, {"text": "I wondered when you'd say so.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Hm. So did Torres. Out loud. Daily.", "pose": "nod"}}]}, {"who": "calder", "text": "The pip isn't mine to give. The Captain pins it this afternoon, observation room. Clean uniform."}, {"who": "calder", "text": "Tier 2 work on the board from tomorrow. Tonight, after dinner, I walk you to your cabin. 4-23."}, {"who": "calder", "text": "Go on, then. They're waiting outside."}]},
+  "pu3.bar": {"title": "Your bar", "from": "Captain Odile Marrow", "gist": "The Captain pinned your Senior Officer's bar in the observation room, with the Chief, the Commander and your friends there. The certificate is on your cabin shelf.", "lines": [{"who": "vance", "text": "Attention, please. The Captain. Again. Twice in a month is a record.", "pose": "nod"}, {"who": "marrow", "text": "Thank you, Teo. Nobody sit. It'll be quick, and the cake is waiting.", "pose": "laugh"}, {"who": "marrow", "text": "A storm, a test and a ship that noticed. That's what Chief Calder wrote. Three lines. For her, that's a novel.", "to": "you"}, {"who": "marrow", "text": "By the Survey Service, I make you a Senior Officer of the Wren. Senior Technician, Tier 3."}, {"who": "marrow", "text": "Hold still. Bars are worse than pips. There. Senior Officer.", "pin": true, "pose": "gesture"}, {"who": "marrow", "text": "Last time I asked you a question. One more. What did the storm teach you?", "to": "you"}, {"choice": [{"text": "That the ship is everyone in it, all at once.", "rel": {"marrow": 2}, "mem": "pu3.answer.people", "reply": {"who": "marrow", "text": "Yes. You only see it all at once when something goes wrong. Remember it on the quiet days.", "pose": "nod"}}, {"text": "To do the next job, then the next one.", "rel": {"marrow": 2}, "mem": "pu3.answer.next", "reply": {"who": "marrow", "text": "That's most of command, if I'm honest. Don't tell the Admiral.", "pose": "laugh"}}, {"text": "To keep a torch in my pocket.", "rel": {"marrow": 1}, "mem": "pu3.answer.torch", "reply": {"who": "marrow", "text": "Ha. Practical. Calder, is this your doing?", "pose": "laugh"}}]}, {"who": "calder", "text": "It's straight. I checked.", "pose": "nod"}, {"who": "vance", "text": "Regulation fourteen, the bar sits a finger above the pip. It does. Carry on."}, {"who": "torres-zeke", "text": "Two promotions and I cried at both. Right, onward. Cake.", "pose": "laugh"}, {"who": "marrow", "text": "Congratulations, Senior Officer. My door's still open. Still mind the step.", "to": "you"}]},
+  "pu3.offer": {"title": "Your next test", "from": "Chief Ines Calder", "gist": "Calder told you in person: your Tier 3 test is tomorrow at 09:00, a junction shutdown on Deck 6. Pass it and you're a Senior Officer.", "lines": [{"who": "calder", "text": "There you are. One minute.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "Relied on. Power safety, done. That's all of it."}, {"who": "calder", "text": "Tomorrow. Your next test. Tier 3. Nine o'clock, on the board."}, {"who": "calder", "text": "A junction on Deck 6. You switch it off, change a breaker, bring it back. Safely."}, {"choice": [{"text": "I'll be there at nine. Ready.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "I know. Eat breakfast first. Shutdowns go wrong on empty stomachs.", "pose": "nod"}}, {"text": "A shutdown. People will notice.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "They will. That's the test. Who you tell, and when.", "pose": "nod"}}]}, {"who": "calder", "text": "Pass it and you're a Senior Officer. Go to bed at a sensible hour."}]},
+  "pu3.offer.monday": {"title": "Your next test", "from": "Chief Ines Calder", "gist": "Calder told you in person: your Tier 3 test is Monday at 09:00, a junction shutdown on Deck 6. Pass it and you're a Senior Officer.", "lines": [{"who": "calder", "text": "Stop a minute. This is the good kind.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "Relied on, as of today. Power safety, done. Nothing left."}, {"who": "calder", "text": "Monday. Your next test. Tier 3. Nine o'clock, on the board."}, {"who": "calder", "text": "Deck 6, a power junction. Off, a new breaker, back on. Nobody hurt, nobody surprised."}, {"choice": [{"text": "Monday. I'll be ready.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "I know. Rest this weekend. Properly. That's not a suggestion.", "pose": "nod"}}, {"text": "Switching power off? On purpose?", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "On purpose. Planned, warned, timed. That's the difference between a shutdown and a fault.", "pose": "nod"}}]}, {"who": "calder", "text": "Pass it and you're a Senior Officer. Enjoy your weekend."}]},
+  "pu3.offer.party": {"title": "Your next test", "from": "Chief Ines Calder", "gist": "At the storm party, Calder told you in front of the lounge: your Tier 3 test is tomorrow, Monday, at 09:00. Pass it and you're a Senior Officer.", "lines": [{"who": "calder", "text": "Don't put your cup down. This won't take long.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "Relied on. And the storm counted. Every repair of it."}, {"who": "calder", "text": "Monday. Tomorrow, then. Your Tier 3 test, nine o'clock, on the board."}, {"who": "halloran-emeka", "text": "Tier 3? At two weeks aboard? Some of us took a year.", "pose": "laugh"}, {"who": "halloran-emeka", "text": "I'm not bitter. I'm a little bitter. Well done, you."}, {"choice": [{"text": "Tomorrow, then. I'll be ready.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "I know. One more cup of tea, then bed. Not two.", "pose": "nod"}}, {"text": "At a party? You couldn't wait till morning?", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "No. I wanted to see your face. There it is. Good.", "pose": "nod"}}]}, {"who": "tomas", "text": "Tomorrow's the big one? Go to bed early. Not yet. After this song.", "pose": "laugh", "to": "you"}, {"who": "calder", "text": "Pass it and you're a Senior Officer. Enjoy the party. Not too much."}]},
+  "pu3.result": {"title": "Your result", "from": "Chief Ines Calder", "gist": "Calder gave you your result: you passed. You're a Senior Officer now, Senior Technician, Tier 3. The Captain pins your bar this afternoon.", "lines": [{"who": "calder", "text": "Sit. Yes, sit. You've earned a chair.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "Your junction. Two people warned, power off, breaker in, power back. In that order."}, {"who": "calder", "text": "You passed. Senior Officer. Senior Technician, Tier 3."}, {"who": "calder", "text": "This card's mine. Tier 3 jobs on the board for you from today."}, {"choice": [{"text": "Thank you, Chief. For all of it.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "Noted. Thank you. Now, the rest.", "pose": "nod"}}, {"text": "The junction was the easy part. Telling people wasn't.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "Good. That's the right way round. Most learn it later.", "pose": "nod"}}]}, {"who": "calder", "text": "The bar's the Captain's. Half four, the observation room. Clean uniform."}, {"who": "calder", "text": "You stay in 4-23. Same cabin, harder work. Go on. Torres is pretending not to wait outside."}]},
+  "pu3.result.fri": {"title": "Your result", "from": "Chief Ines Calder", "gist": "Calder gave you your result: you passed. You're a Senior Officer now, Senior Technician, Tier 3. The Captain pins your bar this afternoon.", "lines": [{"who": "calder", "text": "Sit. Short Friday, so a short meeting.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "The junction. Warned, off, changed, back. Nothing missed."}, {"who": "calder", "text": "Result: passed. Senior Officer, from today. Senior Technician, Tier 3."}, {"who": "calder", "text": "Your Tier 3 card. From me. The board gives you Tier 3 work from Monday."}, {"choice": [{"text": "Thank you, Chief. Really.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "Noted. Thank you. Now, the afternoon.", "pose": "nod"}}, {"text": "Warning people was harder than the breaker.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "It always is. The ones who know that make good seniors.", "pose": "nod"}}]}, {"who": "calder", "text": "The bar's the Captain's. Quarter past five, after the short day. The observation room. Clean uniform."}, {"who": "calder", "text": "Same cabin, 4-23. Harder work. Go. Torres has been outside the glass for ten minutes."}]},
+  "pu3.toast": {"title": "The Captain's toast", "from": "Captain Odile Marrow", "gist": "The Captain gave a dinner in her quarters for your promotion, with the Commander and the Chief, and raised a toast to you. The framed menu is on your cabin shelf.", "lines": [{"who": "marrow", "text": "Come in. Sit there, by the window. The good chair. Tonight it's yours.", "pose": "gesture", "to": "you"}, {"who": "vance", "text": "For the record, this is my day off. I came in. Noted, I hope.", "pose": "nod"}, {"who": "marrow", "text": "Noted, Teo. Thank you. He ironed a shirt for it. I can tell.", "pose": "laugh"}, {"who": "calder", "text": "Brennan sent the pie. She said \"don't let the Chief talk shop\". I won't."}, {"who": "marrow", "text": "Cups up, then. To the Wren's newest Senior Officer. May every junction come back on."}, {"who": "vance", "text": "And may it be booked in advance. To the Senior Officer.", "pose": "nod"}, {"choice": [{"text": "To the Wren. And the people in it.", "rel": {"marrow": 1, "vance": 1}, "reply": {"who": "marrow", "text": "To the Wren. Good. Now eat, before it's cold and the Commander finds a regulation about it.", "pose": "laugh"}}, {"text": "To the Chief, who made me take the test.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "Hm. To the test, then. Drink your tea.", "pose": "nod"}}]}, {"who": "marrow", "text": "The menu's yours to keep. Frame it, or don't. Calder framed hers.", "to": "you"}, {"who": "calder", "text": "I did not. It's in a drawer. In a frame."}]},
   "rec.talent.you": {"title": "Talent night: your act", "from": "Lucia Ferreira", "gist": "You did an act at talent night, and the crowd cheered.", "lines": [{"who": "ferreira", "text": "And now, a first-timer. Be kind, everyone. Here's {me}!", "pose": "gesture"}, {"choice": [{"text": "(Play a tune on the piano)", "flavour": "share", "mem": "talent.tune", "reply": {"who": "ferreira", "text": "Lovely! Not a single wrong note. Well, one. It was the best one.", "pose": "laugh"}}, {"text": "(Tell a ship joke)", "flavour": "cheer", "mem": "talent.joke", "reply": {"who": "ferreira", "text": "Oh, that's terrible. They're all laughing. That's a win, {me}.", "pose": "laugh"}}, {"text": "(Do a Works trick with a spanner)", "flavour": "practical", "mem": "talent.trick", "reply": {"who": "ferreira", "text": "Spinning a spanner on one finger! Chief Calder's clapping. Mark the day.", "pose": "laugh"}}]}, {"who": "ferreira", "text": "Give it up for {me}, everybody!", "pose": "gesture"}]},
   "sickExam1": {"title": "The infirmary", "from": "Rina Deshi", "gist": "Rina in the infirmary: a ship cold, some medicine, and orders to drink water.", "lines": [{"who": "rina", "text": "Sit. On the bed, not the stool. The stool's mine.", "pose": "gesture"}, {"who": "rina", "text": "Open. Say \"ah\". Longer. Fine, that'll do.", "to": "you"}, {"who": "rina", "text": "Your temperature's up. Your throat's red. You've got a ship cold. Everyone gets one. Recycled air."}, {"who": "rina", "text": "It's not serious. It's just rubbish. I've had three this year."}, {"who": "rina", "text": "Two of these, with water. All the water. The whole cup.", "pose": "nod", "to": "you"}, {"choice": [{"text": "Thanks, Rina.", "rel": {"rina": 1}, "reply": {"who": "rina", "text": "Don't thank me. Drink the water."}}, {"text": "Do I have to go back to shift?", "rel": {"rina": 1}, "reply": {"who": "rina", "text": "You're excused. It's on the board. Calder knows. She said \"Fine.\" Twice."}}]}, {"who": "rina", "text": "You'll feel better in an hour. If you don't, come back and I'll be smug about something else."}]},
   "sickExam2": {"title": "The infirmary", "from": "Rina Deshi", "gist": "Rina in the infirmary: a bug going round Deck 4, some medicine, and the rest of the day off.", "lines": [{"who": "rina", "text": "Oh, look. Another one. You're the fourth from Deck 4 this week.", "pose": "sigh"}, {"who": "rina", "text": "Light in your eyes. Follow my finger. Good. Now the other way. Good.", "to": "you"}, {"who": "rina", "text": "It's the bug going round. Someone sneezed in the lift and now here we are."}, {"who": "rina", "text": "Medicine. Here. It tastes like a boot. That's how you know it's working."}, {"who": "rina", "text": "Drink it. All of it. I'm watching.", "pose": "listen", "to": "you"}, {"who": "rina", "text": "Good. You're excused today. It doesn't touch your leave. It's not your fault you've got a body."}, {"who": "rina", "text": "Go and lie down. If I see you at the Tiles table tonight, I'm winning by default."}]},
@@ -40195,7 +40890,10 @@ const MEETINGS_BAKED = {
   "train.m14.oneill-imani": {"title": "The racks", "from": "Imani O'Neill", "gist": "Imani showed you the garden's irrigation: clear the nozzles on each rack so the water runs even.", "lines": [{"who": "oneill-imani", "text": "Works! Excellent. The racks have been sulking.", "pose": "gesture"}, {"who": "oneill-imani", "text": "Nozzles clog. Roots get greedy. Clear each one and watch the spray.", "to": "you"}, {"who": "oneill-imani", "text": "Even spray, happy lettuce. Uneven spray, sad lettuce. Nobody wants sad lettuce.", "pose": "laugh"}]},
   "train.m15.calder": {"title": "Rewiring", "from": "Chief Ines Calder", "gist": "Calder showed you rewiring: match each wire to the chart, test, and if a fuse pops, redo only that pair.", "lines": [{"who": "calder", "text": "Junction box. Open it. Don't touch anything yet.", "pose": "gesture"}, {"who": "calder", "text": "The chart says which goes where. Match the colours. Pair by pair.", "to": "you"}, {"who": "calder", "text": "Then test. If a fuse pops, that pair's wrong. Only that pair. Swap it."}, {"who": "calder", "text": "Nothing here bites if you test first. Test first."}, {"choice": [{"text": "What if the colours have faded?", "rel": {"calder": 2}, "flavour": "practical", "reply": {"who": "calder", "text": "Then you switch things off one at a time and see what goes dark. Later. Today they're fresh."}}, {"text": "Pair by pair. Got it.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Good. Begin."}}]}]},
   "train.m17.halloran-emeka": {"title": "The lift roof", "from": "Emeka Halloran", "gist": "Emeka took you onto the lift roof: grease the guide rails at each deck on the way down the spine.", "lines": [{"who": "halloran-emeka", "text": "Thursday! Lift day. My favourite hour of the week.", "pose": "gesture"}, {"who": "halloran-emeka", "text": "We ride on the roof. Slowly. At each deck, grease the guides.", "to": "you"}, {"who": "halloran-emeka", "text": "Harness on. Hold the rail. Never lean out. Lovely view, though."}, {"choice": [{"text": "We ride on top?", "rel": {"halloran-emeka": 2}, "flavour": "listen", "reply": {"who": "halloran-emeka", "text": "Best seat on the ship. Don't tell the Captain I said so.", "pose": "laugh"}}, {"text": "Harness on.", "rel": {"halloran-emeka": 1}, "flavour": "practical", "reply": {"who": "halloran-emeka", "text": "Click. Hear that? Good. Up you get."}}]}]},
+  "train.m18.calder": {"title": "Shutdowns", "from": "Chief Ines Calder", "gist": "Calder showed you how to plan a shutdown: what a junction feeds, a quiet hour, who to warn, and what keeps power. You booked a real one for tomorrow.", "lines": [{"who": "calder", "text": "Your device. Works app. There's a new tab now. Shutdowns.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "Some Tier 3 jobs need the power off. You don't switch it off. You book it."}, {"who": "calder", "text": "First, what it feeds. Read the rooms. Then tomorrow's hours, and who's in them."}, {"who": "calder", "text": "Pick a quiet hour. Mealtimes and classes are marked. You can pick them. You'll hear about it."}, {"who": "calder", "text": "Warn the people it touches. The galley, you tell Brennan to her face. Always."}, {"who": "calder", "text": "Then what keeps power. The cold store, if it's the galley. You'll learn which."}, {"choice": [{"text": "What if nobody's ever quiet?", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "Somebody always is. Mid-morning. Mid-afternoon. Look harder.", "pose": "nod"}}, {"text": "Why tell people in person? There's a notice.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "A notice tells them. A person tells them you thought about them. They remember that.", "pose": "nod"}}, {"text": "(Just listen)", "reply": {"who": "calder", "text": "Good. Your turn.", "pose": "nod"}}]}, {"who": "calder", "text": "Book it for tomorrow. At 22:00 it's settled. Then the ship plans round you. Don't miss your hour."}]},
+  "train.m19.calder": {"title": "Power and relays", "from": "Chief Ines Calder", "gist": "Calder showed you the bridge's relay room: watch the lamps, pull the stuttering relay, seat a new one, test. Then the next rack was yours.", "lines": [{"who": "calder", "text": "Your first Senior training. The bridge's relays. Every light and screen up there runs through this room.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "Six relays a rack. A lamp each. A relay going bad stutters before it dies."}, {"who": "calder", "text": "Watch the lamps. Five steady. One stutters. That's your relay."}, {"who": "calder", "text": "Pull it straight. Seat the new one straight. Then test the whole rack, not just the one."}, {"choice": [{"text": "And if two stutter?", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "Then you swap the worse one first and watch the other. Today it's one.", "pose": "nod"}}, {"text": "Why test the whole rack for one relay?", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "Because the bad one was hiding a second. It usually is.", "pose": "nod"}}, {"text": "(Just watch the lamps)", "reply": {"who": "calder", "text": "Good. Patience with lamps. Most people blink first.", "pose": "nod"}}]}, {"who": "calder", "text": "Later, the battery banks on Deck 5. Cells in pairs. You find the tired one by its bar."}, {"who": "calder", "text": "I'll do this rack. You watch. Then the next one's yours. I'm not timing you."}]},
   "train.m2.torres-zeke": {"title": "Your uniform", "from": "Zeke Torres", "gist": "Zeke told you oily jobs make your uniform grubby. Change at your wardrobe after them; a shower won't do it.", "lines": [{"who": "torres-zeke", "text": "You've got half a machine on you. Change before tea. Calder notices.", "pose": "laugh", "to": "you"}, {"who": "torres-zeke", "text": "Shower won't shift it. Wardrobe will."}]},
+  "train.m20.mori": {"title": "The sensor array", "from": "Hana Mori", "gist": "Hana Mori from Survey showed you the sensor array, gave you the calibration rig, and let you pick the star to calibrate against.", "lines": [{"who": "mori", "text": "Oh, hello. You're early. That's good. Sorry. Hello.", "pose": "gesture", "to": "you"}, {"who": "mori", "text": "This is the array. It's how the Wren sees. Stars, dust, ships, everything. Well. Most things."}, {"who": "mori", "text": "Every few weeks it drifts. A little. So we point it at a star we know and see if it agrees."}, {"who": "mori", "text": "This is the calibration rig. It's Survey's spare. It's yours now. Please don't drop it."}, {"who": "calder", "text": "She means it. The last one she lent came back with a dent. Not mine."}, {"who": "mori", "text": "Three stars are up tonight. Well, today. They're always up. You pick one.", "to": "you"}, {"choice": [{"text": "Which one would you pick?", "rel": {"mori": 2}, "reply": {"who": "mori", "text": "Oh. The quiet one. Nobody ever picks it. But it's your choice. Really.", "pose": "laugh"}}, {"text": "Do you have a favourite star?", "rel": {"mori": 2}, "reply": {"who": "mori", "text": "All of them. No. One. I'll tell you another day. Maybe.", "pose": "laugh"}}, {"text": "(Look at the readings)", "reply": {"who": "mori", "text": "Yes. Good. Readings first. You'd do well in Survey.", "pose": "nod"}}]}, {"who": "calder", "text": "Pick it, calibrate, then the amber module. Mori runs the readings. I watch."}]},
   "train.m3d.calder": {"title": "Fire drill", "from": "Chief Ines Calder", "gist": "Calder briefed you for the Wednesday drill: fire this week. Extinguisher, hatch, wait for the all-clear.", "lines": [{"who": "calder", "text": "Drill at three. Fire, this week.", "pose": "gesture"}, {"who": "calder", "text": "Extinguisher off its bracket by the door. Stand by the hatch. Wait for me.", "to": "you"}, {"who": "calder", "text": "It rotates. Fire, pressure, power. Your Calendar says which."}, {"who": "calder", "text": "I time the team. Not you. The team."}, {"who": "calder", "text": "Back to it. Ten minutes."}]},
   "train.m3i.tomas": {"title": "Inspection morning", "from": "Tomas", "gist": "Tomas showed you the Thursday inspection: a clean uniform, your berth made, your locker tidy. Before 06:30.", "lines": [{"who": "tomas", "text": "Oh no. Thursday. Inspection. I forgot it was Thursday.", "pose": "sigh"}, {"who": "tomas", "text": "Three things. Clean uniform. Bed made. Locker tidy. Before half six.", "to": "you"}, {"who": "tomas", "text": "Corners. She checks the corners. I think she has a ruler. I've never seen it."}, {"who": "tomas", "text": "Tidy means nothing loose. Put things away. All the things."}, {"choice": [{"text": "Help me with the corners?", "rel": {"tomas": 2}, "flavour": "practical", "reply": {"who": "tomas", "text": "Fold, tuck, fold again. Like a parcel. A very flat parcel.", "pose": "gesture"}}, {"text": "What if it's not perfect?", "rel": {"tomas": 1}, "flavour": "listen", "reply": {"who": "tomas", "text": "Then she says something. Quietly. That's worse, sort of. But that's all."}}, {"text": "You'll be fine, Tomas.", "rel": {"tomas": 1}, "flavour": "cheer", "reply": {"who": "tomas", "text": "Will I? Yes. I will. Thank you. Thank you.", "pose": "laugh"}}]}, {"who": "tomas", "text": "Quick. She's on the stairs. No, the lift. Same thing. Quick."}]},
   "train.m4.esposito-yara": {"title": "The rest of the delivery", "from": "Yara Esposito", "gist": "Yara showed you the manifest run: load the cart from the hold, take each crate to its stop.", "lines": [{"who": "esposito-yara", "text": "Shelves done? Good. Now the rest of it.", "pose": "gesture"}, {"who": "esposito-yara", "text": "The manifest. Three crates today. Linen, medical, store stock.", "to": "you"}, {"who": "esposito-yara", "text": "Each one's got a stop. Laundry, infirmary, my counter. Load, drive, drop."}, {"who": "esposito-yara", "text": "I'll load the first. You load the rest. Then you drive. I'm not driving."}, {"choice": [{"text": "Why not?", "rel": {"esposito-yara": 2}, "flavour": "listen", "reply": {"who": "esposito-yara", "text": "Last time I drove, a cart met a wall. The wall won.", "pose": "laugh"}}, {"text": "In which order?", "rel": {"esposito-yara": 1}, "flavour": "practical", "reply": {"who": "esposito-yara", "text": "Mine, today. Yours, once you know the lift's moods."}}, {"text": "(Pick up the manifest)", "reply": {"who": "esposito-yara", "text": "Good. You read it before I told you to. Noted."}}]}, {"who": "esposito-yara", "text": "I'll walk you to the first stop. Then you're on your own."}]},
@@ -40213,6 +40911,7 @@ const MEETINGS_BAKED = {
   "train.p3.calder": {"title": "A funny one", "from": "Chief Ines Calder", "gist": "Your first head-scratcher: a washer that leaks. Notes from the crew say what's been tried. Cross off what didn't work.", "lines": [{"who": "calder", "text": "Here's a funny one. Washer 2 in the junior laundry. It leaks.", "pose": "gesture"}, {"who": "calder", "text": "Two people have had a go. Neither fixed it. Both left notes."}, {"who": "calder", "text": "Open Fault notes. Three suspects. The door seal, the drain valve, the pump.", "to": "you"}, {"who": "calder", "text": "Rule one, page one. If someone fitted it and it's still wrong, it isn't that."}, {"who": "calder", "text": "First note's on the job. New door seal in. Still leaks. So?"}, {"choice": [{"text": "So it's not the seal.", "rel": {"calder": 2}, "flavour": "practical", "reply": {"who": "calder", "text": "Cross it off.", "pose": "nod"}}, {"text": "Could the new seal be faulty?", "rel": {"calder": 1}, "flavour": "listen", "reply": {"who": "calder", "text": "Could be. Isn't. Trust the note. Cross it off."}}, {"text": "(Tap the door seal)", "reply": {"who": "calder", "text": "Good. Crossed off."}}]}, {"who": "calder", "text": "The other note's on the washer. Go and find it. I'll follow."}]},
   "train.p3.halloran-emeka": {"title": "A funny one", "from": "Emeka Halloran", "gist": "Your first head-scratcher: a washer that leaks. Notes from the crew say what's been tried. Cross off what didn't work.", "lines": [{"who": "halloran-emeka", "text": "Ooh, here's a funny one for you. Washer 2, junior laundry. It leaks.", "pose": "gesture"}, {"who": "halloran-emeka", "text": "Two of the crew have had a go already. Neither fixed it. Both left a note, bless them."}, {"who": "halloran-emeka", "text": "Open Fault notes. Three suspects. The door seal, the drain valve and the pump.", "to": "you"}, {"who": "halloran-emeka", "text": "Chief's rule, page one: if someone fitted it and it's still wrong, it isn't that."}, {"who": "halloran-emeka", "text": "First note's taped to the job. New door seal in, still leaks. So?"}, {"choice": [{"text": "Then it isn't the seal.", "rel": {"halloran-emeka": 2}, "flavour": "practical", "reply": {"who": "halloran-emeka", "text": "Lovely. Cross it off.", "pose": "nod"}}, {"text": "What if the new seal's faulty?", "rel": {"halloran-emeka": 1}, "flavour": "listen", "reply": {"who": "halloran-emeka", "text": "Could be, in theory. Not today. Trust the note and cross it off."}}, {"text": "(Cross off the door seal)", "reply": {"who": "halloran-emeka", "text": "There you go. One down."}}]}, {"who": "halloran-emeka", "text": "The other note's on the washer itself. Lead on. I'll follow."}]},
   "train.p3.torres-zeke": {"title": "A funny one", "from": "Zeke Torres", "gist": "Your first head-scratcher: a machine that's still wrong after the crew tried. Cross off what didn't work.", "lines": [{"who": "torres-zeke", "text": "Ooh. A head-scratcher. My favourite kind of job.", "pose": "laugh"}, {"who": "torres-zeke", "text": "People have had a go already. Nothing worked. They left notes."}, {"who": "torres-zeke", "text": "Open Fault notes. There's your suspects. Now the notes.", "to": "you"}, {"who": "torres-zeke", "text": "Calder's rule. If someone fitted it and it's still wrong, it isn't that."}, {"who": "torres-zeke", "text": "First note's on the job. Read it. What can you cross off?"}, {"choice": [{"text": "Whatever they fitted.", "rel": {"torres-zeke": 2}, "flavour": "practical", "reply": {"who": "torres-zeke", "text": "Exactly. Cross it off.", "pose": "nod"}}, {"text": "What if they fitted it badly?", "rel": {"torres-zeke": 1}, "flavour": "listen", "reply": {"who": "torres-zeke", "text": "Good question. Not today. Today the notes are true."}}, {"text": "(Cross it off)", "reply": {"who": "torres-zeke", "text": "Look at you. Detective."}}]}, {"who": "torres-zeke", "text": "Next note's at the machine. Lead on. I'll follow and hum."}]},
+  "train.ps.calder": {"title": "Power safety", "from": "Chief Ines Calder", "gist": "Calder showed you the Deck 6 port junction: what it feeds, how to make it safe, and why a junction is the one job you never rush.", "lines": [{"who": "calder", "text": "Stand there. Behind the line on the floor. Watch my hands.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "This junction feeds three rooms and a corridor. Everything you can hear from here."}, {"who": "calder", "text": "Most jobs, a mistake costs a part. Here, a mistake costs a person. So we never rush it."}, {"who": "calder", "text": "Four steps. Tell people. Switch it off. Test it's dead. Lock it, so nobody switches it back."}, {"who": "calder", "text": "Dead is a number on the tester. Never a guess. Never \"it should be\"."}, {"choice": [{"text": "What if someone needs the power back in a hurry?", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "Then they wait, and you tell them why. Nobody has ever thanked me for rushing a junction.", "pose": "nod"}}, {"text": "Have you ever been caught by one?", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "Once. My first ship. A small one. I tested the next one twice. I still do.", "pose": "nod"}}, {"text": "(Just watch)", "reply": {"who": "calder", "text": "Good. Watching is most of it.", "pose": "nod"}}]}, {"who": "calder", "text": "Your Tier 3 test is a junction like this. You'll do it. I'll watch. That's Power safety."}]},
 };
 // ---- END MEETINGS ----
 // ---- BEGIN TRADITIONS (generated by content_gen.py from content/: never hand-edit; edit content/ and re-run it) ----
@@ -40958,7 +41657,7 @@ const FRI_ADDRESSES = {
       {"id": "o2desp", "who": "marrow", "text": "Speaker Teshavi asked if they might come back. I said yes before they'd finished asking.", "tone": "warm", "if": ["swap"]},
       {"id": "1qku5ad", "who": "marrow", "text": "My letters of thanks for the storm went out on Sunday. You know who you are."},
       {"id": "1uhcxva", "who": "marrow", "text": "{me} was on it. We talked in the ready room yesterday. Nobody tripped.", "tone": "funny", "if": ["commended"]},
-      {"id": "5yz7bp", "who": "marrow", "text": "On Tuesday, Senior Officer {me} moved up to Deck 2. Lucky corridor.", "tone": "warm", "if": ["myrank:senior|specialist"]},
+      {"id": "kqp8uw", "who": "marrow", "text": "On Tuesday, {me} made Senior Officer. Same cabin, says the Chief. Harder work.", "tone": "warm", "if": ["myrank:senior|specialist"]},
       {"id": "6fxkak", "who": "marrow", "text": "Officer {me}, a busy fortnight. The Chief says you keep her on her toes.", "tone": "funny", "if": ["myrank:officer"]},
       {"id": "lziopr", "who": "marrow", "text": "{me}, three weeks with us. The Chief says you're finding your feet.", "if": ["myrank:junior"]},
       {"id": "1ch4sm1", "who": "marrow", "text": "Tonight the night watch takes the ship. Thank you, all of you, for the hours nobody sees."},
@@ -40978,7 +41677,7 @@ const FRI_ADDRESSES = {
       {"id": "1qqedke", "who": "marrow", "text": "The storm crew's roster is still pinned up in the tea corner. I read it some evenings.", "tone": "warm", "if": ["band:smooth"]},
       {"id": "1dirk5", "who": "marrow", "text": "There's still a scorch mark in the relay room. Chief Calder wants to keep it. So do I.", "if": ["band:bumpy|rough"]},
       {"id": "1qsc8i6", "who": "marrow", "text": "{me}: a junior four weeks ago, an Engine Specialist today. Rare.", "to": "you", "tone": "warm", "if": ["myrank:specialist"]},
-      {"id": "neq5fz", "who": "marrow", "text": "{me}: a junior four weeks ago, a Senior Officer today, on Deck 2.", "to": "you", "tone": "warm", "if": ["myrank:senior"]},
+      {"id": "1yk2w10", "who": "marrow", "text": "{me}: a junior four weeks ago, a Senior Officer today. The junctions behave for you.", "to": "you", "tone": "warm", "if": ["myrank:senior"]},
       {"id": "13gj3gd", "who": "marrow", "text": "{me}: a junior four weeks ago, an Officer today, with your own key.", "to": "you", "tone": "warm", "if": ["myrank:officer"]},
       {"id": "qimfd4", "who": "marrow", "text": "{me}, four weeks with us. The good roads up are rarely quick.", "to": "you", "tone": "warm", "if": ["myrank:junior"]},
       {"id": "1akj2fh", "who": "marrow", "text": "Jobs on the Works board with your name on them: {myjobs}. The ship runs better for it."},
@@ -45984,7 +46683,7 @@ const COMET_TALK = {
   cometStern: [['tomas', 'Blankets are on the sofa. Take one even if you\'re not cold. That\'s a rule. I\'ve just made it.'], ['tomas', 'I\'ve never seen one. Not ever. Not even a small one. Is that strange?'],
     ['pell', 'My mum\'ll want it described. Properly. Twice.'], ['rina', 'Twelve people under blankets and nobody\'s coughing. Good. Keep it that way.'], ['tomas', 'There it goes. This window\'s all the places we\'ve already been. Now that too.', 1340]],
   cometCaptain: [['marrow', 'Tea? It\'s from the tin. It says not for briefings, and this isn\'t one.'], ['vance', 'I\'m here for the comet, not to talk about the rowing.'],
-    ['marrow', () => playerRank() === 'senior' || playerRank() === 'specialist' ? 'Deck 2 has its perks. This window is one of them. Don\'t tell the juniors.' : 'Your first month aboard, and the sky\'s already showing off for you.']],
+    ['marrow', () => P5_STEP5 && playerRank() === 'senior' ? evWord('event.comet.captain.senior') || 'Senior Officers get the good window. And the tea from the tin. Don\'t tell the juniors.' : playerRank() === 'senior' || playerRank() === 'specialist' ? 'Deck 2 has its perks. This window is one of them. Don\'t tell the juniors.' : 'Your first month aboard, and the sky\'s already showing off for you.']],
 };
 const COMET_SAID = { key: null, said: new Set(), at: -99, n: 0 };
 // RV18's C1-C3: a line waits for its speaker (someone going tonight who isn't in the room yet is tried again at the next
@@ -53359,10 +54058,13 @@ const WORK_TOOLS = {
 const WORK_BANDS = { 1: [[0, 'new'], [8, 'steady'], [18, 'reliable'], [30, 'trusted'], [40, 'relied']], 2: [[0, 'new'], [12, 'steady'], [28, 'reliable'], [45, 'trusted'], [60, 'relied']] };   // 2: C2's 0.44.19 numbers, kept by Step 4's page (0.45.7): about a dozen steady workdays to "Relied on" as an officer; side jobs add +2 a day at most (worksSideXp)   // the page's; with section 17's real faults in (0.44.10): steady 45-48 by the end of Day 8, a very busy player 35 at the end of Day 4
 // Pillar 5 Step 5 (S5-1, B1 for lead 39; plans/p5-step5-spec.html section 3, plan v3.1): the Senior Officer's rows, the
 // calibration rig and the Tier 3 bands, behind P5_STEP5 (section 13). Each row is inert until its sub-block registers
-// WORK_MECH[id] (24u t3; 24v m19; 24w m18; 24x m20; 24k's slot p4, p5, p9, mys; ps: S5-1 turn 2). Off: nothing here.
+// WORK_MECH[id] (24u ps and t3; 24v m19; 24w m18; 24x m20; 24k's slot p4, p5, p9, mys). Off: nothing here.
 if (P5_STEP5) {
+  // ps first among the Officer's small rows (the ladder opens one small a workday, in table order): Power safety on Day 12,
+  // before the workshop and the rest, so a steady player has it for the Tier 3 offer on Day 14 (S5-1 turn 2)
+  CAREER_LADDER.splice(CAREER_LADDER.findIndex(r => r.id === 't2') + 1, 0,
+    { id: 'ps', name: 'Power safety', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['calder'], where: { deck: 6, room: 'j' }, stages: [{ uses: 0 }] });   // a watch-only lesson at the Deck 6 port junction (spec question 2; 24u's WORK_MECH.ps)
   CAREER_LADDER.push(
-    { id: 'ps', name: 'Power safety', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['calder'], where: { deck: 6, room: 'j' }, stages: [{ uses: 0 }] },   // a watch-only lesson at the Deck 6 port junction (spec question 2)
     { id: 't3', name: 'Your Tier 3 test job', size: 'big', day: 15, tier: 2, rank: 'officer', needs: [{ rep: 'relied' }, { trained: 'ps' }], by: ['calder'], where: { deck: 5, room: 'o' }, job: 'test', stages: [{ uses: 0 }] },   // 24u (S5-2)
     { id: 'm19', name: 'Power and relays', size: 'big', day: 17, tier: 3, rank: 'senior', needs: { trained: 't3' }, by: ['calder'], where: { deck: 1, room: 'u' }, tool: 'tester', stages: [{ uses: 0 }, { uses: 3 }, { uses: 6 }] },   // 24v (S5-3): relays; conduit runs; the batteries' balance (Step 6's P6)
     { id: 'p4', name: 'Which gauge is lying?', size: 'small', day: 17, tier: 3, rank: 'senior', needs: null, by: ['torres-zeke'], stages: [{ uses: 0 }] },   // 24k's slot (S5-6)
@@ -53372,7 +54074,11 @@ if (P5_STEP5) {
     { id: 'p9', name: 'The clash', size: 'small', day: 19, tier: 3, rank: 'senior', needs: null, by: ['calder'], stages: [{ uses: 0 }] },   // 24k's slot (S5-6)
     { id: 'mys', name: 'The old-mysteries board', size: 'small', day: 21, tier: 3, rank: 'senior', needs: null, by: ['calder'], where: { deck: 5, room: 'w' }, stages: [{ uses: 0 }] });   // 24k's slot (S5-6)
   WORK_TOOLS.arrayrig = { name: 'the calibration rig', mech: 'm20', wearPerUse: 0 };   // carried (calrig is the machine shop's test rig)
-  WORK_BANDS[3] = WORK_BANDS[2].map(b => b.slice());     // a stand-in until S5-1 turn 2 sets the Tier 3 numbers with career_check (a steady Senior "Trusted" by Day 19)
+  // the bands (S5-1 turn 2, set by career_check part s5; the user's answer 1). Tier 2: a steady Officer (promoted Day 10,
+  // about 12 a workday, +7 on the storm Saturday) is "Relied on" by the end of the storm Saturday, Day 13 (45 on paper).
+  // Tier 3: a steady Senior (promoted Day 16) is "Trusted" on Friday Day 19 (62 on paper), when Calder can offer Tier 4
+  WORK_BANDS[2] = [[0, 'new'], [10, 'steady'], [22, 'reliable'], [32, 'trusted'], [42, 'relied']];
+  WORK_BANDS[3] = [[0, 'new'], [14, 'steady'], [30, 'reliable'], [55, 'trusted'], [75, 'relied']];
 }
 const BAND_WORD = { new: 'New', steady: 'Steady', reliable: 'Reliable', trusted: 'Trusted', relied: 'Relied on' };
 const WORK_XP = { service: 1, repair: 2, overhaul: 3, missed: -3, abandoned: -2 };
@@ -53460,7 +54166,8 @@ function ladderTick(h) {
   if (c && c.d < d && (c.st === 'ask' || c.st === 'again') && !has('big') && m <= WORKS_ASK[1]) { const row = ladderRow(c.id); if (row && trainOffer(row, c, d, t)) { (W.op[d] = W.op[d] || []).push(row.id); out.push(row.id); } }
   for (const size of ['big', 'small']) {
     if ((W.op[d] || []).some(id => (ladderRow(id) || {}).size === size) || (size === 'big' && (W.cur || m > WORKS_ASK[1]))) continue;
-    const row = CAREER_LADDER.find(r => r.size === size && !opened.has(r.id) && WORK_MECH[r.id] && d >= r.day && r.tier <= W.tier && (!r.fixed || weekday(d) + 1 === r.fixed.wd) && ladderNeeds(r.needs, W));
+    const ok = r => r.size === size && !opened.has(r.id) && WORK_MECH[r.id] && d >= r.day && r.tier <= W.tier && (!r.fixed || weekday(d) + 1 === r.fixed.wd) && ladderNeeds(r.needs, W);
+    const row = size === 'big' && P5_STEP5 && typeof ladderBigP5 === 'function' ? ladderBigP5(ok, d, W) : CAREER_LADDER.find(ok);   // Pillar 5 Step 5 (24u): higher tier first (off: the table's order)
     if (row && ladderOpen(row, d, t)) out.push(row.id);
   }
   return out;
@@ -53671,7 +54378,8 @@ function worksEscortEnd(id) {
 onSim('caseCalled', n => { const c = SHIP.works && SHIP.works.cur; if (n && n.train && c && c.hold) worksEscortEnd(c.id); });   // 24k: the training case is called
 // the teacher's walk (section 14's escortPlanOf asks): lead you to the training job while you watch, follow you while you do one
 function worksEscort(p, t) {
-  { const pe = p && typeof promoEscort === 'function' ? promoEscort(p, t) || promoMoveEscort(p, t) || promoCerEscort(p, t) : null; if (pe) return pe; }   // 24p: Calder comes to find you for the summons; the walk to your cabin; up to the ceremony
+  { const pe = p && typeof promoEscort === 'function' ? promoEscort(p, t) || promoMoveEscort(p, t) || promoCerEscort(p, t) : null; if (pe) return pe; }
+  { const pe = p && P5_STEP5 && typeof p5Escort === 'function' ? p5Escort(p, t) : null; if (pe) return pe; }   // Pillar 5 Step 5 (24u): Calder comes to find you (Power safety's ask; S5-2 adds the promotion's)   // 24p: Calder comes to find you for the summons; the walk to your cabin; up to the ceremony
   const W = SHIP.works, c = W && W.cur; if (!c || !p || p.id !== c.by || (c.st !== 'watch' && c.st !== 'do' && c.st !== 'held') || worksDay(t) !== c.d) return null;
   const j = SHIP.jobs.find(x => x.id === c.j), spot = trainSpot(j);
   if (c.st === 'held') return spot ? { mode: 'follow', to: { deck: spot.deck, tile: spot.tile } } : null;   // they stay with you
@@ -53842,6 +54550,7 @@ worksTabAdd({ id: 'training', title: worksText('works.tab.training', 'Training')
   say(worksRankTitle(W) + '. ' + worksText('works.rep.title', 'Your reputation') + ': ' + (W ? worksBandWord() : worksText('works.band.new', 'New')) + '.', 'hot');
   say(worksText('works.training.next', 'What\'s next:') + ' ' + worksNext());
   if (typeof promoCheck === 'function') B.push(...promoCheck(), ...promoHomeLine());   // FX19 (24p's slot): the promotion's steps, ticked
+  if (typeof puCheck === 'function') B.push(...puCheck());   // Pillar 5 Step 5 (24u, S5-1): the Tier 3 test's steps, ticked
   const rows = [];
   if (worksShadowDone(W)) rows.push({ text: mechName('job').replace(/^job$/, 'The job loop'), sub: 'with Zeke Torres, Day 1' });
   if (W) for (const r of CAREER_LADDER) if (W.tr[r.id] !== undefined) rows.push({ text: mechName(r.id), sub: 'Day ' + W.tr[r.id] });
@@ -58573,6 +59282,122 @@ onSim('job', n => {                                      // B: Torres comes by a
 // ---------------------------------------------------------------------
 
 // ---- slot: Later promotions (section 24u). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- Power safety (ps; S5-1 turn 2, B1; the spec's question 2, recommended; its beat: "Ring 'Power safety with Calder';
+// arrow level 1 to Deck 6's port junction at her time; a notice that morning"). From Day 12, an Officer's first small row
+// (24 core's table puts it first). A small row has no lesson of its own in 24 core (it trains on its first use), so this
+// one asks for itself: on a workday morning (06:00-10:30, once you're up) Calder makes an appointment at 09:00 or 09:15 at the
+// Deck 6 port junction (room j; trainSetup's occasion 'works.ps', as a big row's) and comes to tell you in person (the user's
+// rule: p5Escort walks her over, psTellTick has her say it when she reaches you, the Mail after as the record; not reached
+// by 20 minutes before, an urgent notice and the Mail instead); the talk there
+// (the head writer's train.ps.calder, a stand-in here until then) is the lesson, watch-only: trained when it's met. Missed:
+// asked again the next workday. The arrow: level 1 from 15 minutes before to the end (over Teaching arrows Off and a job in
+// hand, as the first promotion's beats). Saved: the occasion (section 18) and W.tr.ps. Behind P5_STEP5; t3 (S5-2) needs it
+function psAsk(d, now) {                                 // the appointment; Calder then comes to tell you (psTellTick)
+  const row = ladderRow('ps'), by = row && ladderTeacher(row, d); if (!by) return false;   // Calder off today: the next workday
+  const o = trainSetup(row), m = now - (d - 1) * 1440, at = Math.max(m + 60, DAY_SHIFT[0] + (schedU(machSeed('ps'), d, 851) < .5 ? 0 : 15));
+  o.by = by; o.script = trainScript(row, by); o.len = 20; o.title = 'Power safety with ' + worksFirst(by);
+  const r = occasionAdd('works.ps', (d - 1) * 1440 + at, true, 20); if (!r) return false;
+  r.f = { seek: true };                                  // she walks over to you (p5Escort) until she's said it
+  flagSet('works.brief.ps', d);                          // the talk at the junction is the lesson's word (no after-word: worksTrained)
+  return true;
+}
+function psAskWords(r) {                                 // her ask: 'Subject | body' (works.ask.ps), the time and place filled
+  const place = (DECKS[r.deck].rooms[r.room] || { name: 'the port junction room' }).name + ' on ' + deckIn(r.deck), when = hhmm(r.at % 1440);
+  const ask = worksText('works.ask.ps', 'Power safety | Before any Tier 3 work: Power safety, with me. Twenty minutes. You watch. {time}, {place}.', { time: when, place, name: worksName(r.by) }), cut = ask.indexOf(' | ');
+  return { subject: cut > 0 ? ask.slice(0, cut) : 'Power safety', body: cut > 0 ? ask.slice(cut + 3) : ask };
+}
+function psTold(r, now, how) {                           // said (in person, or the notice when she couldn't reach you): the Mail is the record
+  if (!r.f || r.f.told) return; r.f.told = how; const w = psAskWords(r);
+  if (typeof mailSend === 'function') mailSend({ at: now, from: worksName(r.by), subject: w.subject, body: w.body, quiet: true });
+  if (how === 'notice' && typeof promoNotice === 'function') promoNotice(w.body, worksName(r.by));
+}
+function psTellTick(now) {                               // the user's rule: in person first. She comes to you once you're up and free; 20 minutes before, the notice
+  const r = SHIP.occasions.filter(x => x.id === 'works.ps').pop(); if (!r || r.status !== 'asked' || r.met || !r.f || r.f.told) return;
+  if (now >= r.at - 20) { psTold(r, now, 'notice'); return; }
+  if ((typeof DIALOGUE !== 'undefined' && DIALOGUE) || (typeof promoBusy === 'function' && promoBusy())) return;
+  try { const a = DECK_CREW.find(x => x.p && x.p.id === r.by), P = player.obj.position;
+    if (a && a.h && Math.hypot(a.x - P.x, a.z - P.z) < 2.2) { const w = psAskWords(r); worksSayAll(r.by, [w.body]); psTold(r, now, 'met'); } } catch (e) { /* not in play */ }
+}
+function p5Escort(p, t) {                                // worksEscort's 24u part (S5-1): Calder walking over to ask you for Power safety
+  const r = SHIP.occasions.filter(x => x.id === 'works.ps').pop();
+  if (r && r.f && r.f.seek && !r.f.told && r.status === 'asked' && p.id === r.by && t < r.at - 20 && !(typeof promoBusy === 'function' && promoBusy())) return { mode: 'follow', to: null };
+  return null;
+}
+function psTick(now) {
+  const W = SHIP.works; if (!W || W.tr.ps !== undefined || !worksOpened(W).has('ps')) return;
+  const r = SHIP.occasions.filter(x => x.id === 'works.ps').pop(), d = worksDay(now), m = now - (d - 1) * 1440;
+  if (r && (r.met || r.status === 'kept')) { if (!(typeof DIALOGUE !== 'undefined' && DIALOGUE)) worksTrained('ps', now); return; }
+  if (r && r.status === 'asked' && now < r.at + r.len) {
+    if (typeof promoQueue === 'function' && promoQueue() && now >= r.at - 15 && (!r.f || r.f.told))
+      guideAsk({ id: 'ps:meet:' + (Math.floor(r.at / 1440) + 1), level: 1, owner: '24u (S5-1)', from: r.at - 15, until: r.at + r.len,
+        goal: () => ({ deck: r.deck, room: r.room, ...(typeof guideTeacherIn === 'function' && guideTeacherIn(r.by, r.deck, r.room) ? { crew: r.by } : {}), label: worksText('ps.arrow', 'Power safety with {name}, {time}', { name: worksFirst(r.by), time: hhmm(r.at % 1440) }) }),
+        done: () => !!r.met || r.status !== 'asked' || guideTrained('ps') });
+    return;
+  }
+  if (r && Math.floor(r.at / 1440) + 1 >= d) return;     // today's, gone by (missed): tomorrow's workday
+  if (playerShiftOn(d) && m >= WORKS_ASK[0] && m <= WORKS_ASK[1]) psAsk(d, now);   // (minute ticks are play only: asked once you're up)
+}
+// ---- the ladder's order with P5_STEP5 on (S5-1, lead 39's call after RV20's review; plans/p5-step5-spec.html S5-1 "The
+// ladder's order", EP2). 24 core's ladderTick asks ladderBigP5 for the day's big row (off: its own find, unchanged):
+// higher tier first (the same tests, then a stable sort by tier, highest first), so a steady Senior gets m19 on Day 17,
+// m18 on 18, m20 on 19; m15 folds into m19 (a Senior who hasn't trained it never gets its own lesson: m19's training sets
+// W.tr.m15 that day, so rewiring opens; m19 gives the conduit tester once, toolGive's own rule); a big row below your tier
+// (m17 the lift roof) waits for a clear day: a workday with no career hold (beat, test, captain or night) between 06:00
+// and 16:00 and no ship-wide event's big day. Pure: from the ladder, the save's W, EV_BEATS and the calendar's plan
+function ladderClearDay(d) {
+  try { if (eventDay(d)) return false; return !evBeatsOn(d).some(b => ['beat', 'test', 'captain', 'night'].includes(b.kind) && b.from < 960 && b.to > 360); } catch (e) { return true; }
+}
+function ladderBigP5(ok, d, W) {
+  const list = CAREER_LADDER.filter(r => ok(r) && !(r.id === 'm15' && W.tier >= 3)).map((r, i) => [r, i]).sort((a, b) => (b[0].tier - a[0].tier) || (a[1] - b[1])).map(x => x[0]);
+  const top = list[0]; if (!top) return undefined;
+  if (W.tier >= 3 && top.tier < W.tier && !ladderClearDay(d)) return undefined;
+  return top;
+}
+if (P5_STEP5) onSim('trained', n => {                    // m15 folds into m19 (above)
+  const W = SHIP.works; if (!W || n.mech !== 'm19' || W.tr.m15 !== undefined || !ladderRow('m15')) return;
+  const d = W.tr.m19 || worksDay(n.t); W.tr.m15 = d; if (!worksOpened(W).has('m15')) (W.op[d] = W.op[d] || []).push('m15');
+});
+// the Training tab's "Your promotion" rows for Tier 3 (S5-1 turn 3; 24p's promoCheck pattern, its Done / Not yet words):
+// an Officer's, from Steady (or once the offer's made, S5-2's SHIP.works.pu.t3) until the Tier 3 test is passed. The beats
+// table's "Nearly there": the rows tick as each need holds. 24 core's Training tab asks it (one typeof-guarded line)
+function puCheck() {
+  const W = SHIP.works, d = SHIP.time.day; if (!P5_STEP5 || !W || W.tier !== 2) return [];
+  const T = W.pu && typeof W.pu === 'object' && W.pu.t3 && typeof W.pu.t3 === 'object' ? W.pu.t3 : null; if (T && T.passed) return [];
+  const B = WORK_BANDS[2], at = b => B.findIndex(x => x[1] === b), row3 = ladderRow('t3'), from = row3 ? row3.day : 15;
+  if (at(worksBand()) < at('steady') && !T) return [];
+  const yes = worksText('pu3.check.done', 'Done'), no = worksText('pu3.check.not', 'Not yet'), row = (text, ok) => ({ text, sub: ok ? yes : no });
+  const rows = [row(worksText('pu3.check.rep', 'Relied on (you\'re {band})', { band: worksBandWord() }), ladderNeeds({ rep: 'relied' }, W)),
+    row(worksText('pu3.check.ps', 'Power safety, with the Chief'), W.tr.ps !== undefined), row(worksText('pu3.check.day', 'The test from Day {day}', { day: from }), !!T || d >= from)];
+  if (T && Number.isInteger(T.day) && T.day > 0) rows.push({ text: worksText('pu3.check.set', 'Test job: {day}, 09:00', { day: T.day === d ? 'today' : T.day === d + 1 ? 'tomorrow' : dayName(T.day) }) });
+  return [{ kind: 'text', text: worksText('pu3.check.title', 'Your promotion: the Tier 3 test'), mark: 'head' }, { kind: 'list', rows }];
+}
+// Dev mode's career arrow (section 25's dvCareerNext asks; a small row's own lesson): the appointment if it's made, else the
+// next workday morning's ask (from Day 12, an Officer's). null once trained or when it isn't yours yet
+function psDevNext() {
+  const W = SHIP.works; if (!P5_STEP5 || !W || !WORK_MECH.ps || W.tr.ps !== undefined || W.tier < 2) return null;
+  const now = Math.floor(shipNow()), r = SHIP.occasions.filter(x => x.id === 'works.ps').pop(), wh = ladderRow('ps').where;
+  if (r && r.status === 'asked' && now < r.at + r.len) return { when: r.at, soon: 15, g: { deck: r.deck, room: r.room, label: 'Power safety with ' + guideWho(r.by) } };
+  const d0 = worksDay(now), past = r && Math.floor(r.at / 1440) + 1 >= d0;
+  for (let d = Math.max(d0 + (past ? 1 : 0), 12), i = 0; i < 42; d++, i++) {
+    if (!playerShiftOn(d) || d === d0 && now - (d - 1) * 1440 > WORKS_ASK[1]) continue;
+    return { when: d === d0 ? Math.max(now, (d - 1) * 1440 + WORKS_ASK[0]) : (d - 1) * 1440 + WORKS_ASK[0], g: { deck: wh.deck, room: wh.room, label: 'Power safety: ' + guideWho('calder') + ' asks you' } };
+  }
+  return null;
+}
+if (P5_STEP5) {
+  WORK_MECH.ps = { noJob: true };                        // its row opens (24 core's ladder); psTick asks and teaches
+  if (!(typeof MEETINGS_BAKED !== 'undefined' && (MEETINGS_BAKED['train.ps.calder'] || MEETINGS_BAKED['train.ps']))) MEETING_SCRIPTS['train.ps.calder'] = { title: 'Power safety', from: 'Chief Ines Calder', stub: true,   // stand-in until the head writer's ps words (content/works/keys-p5.md)
+    gist: 'Calder showed you the Deck 6 port junction: a junction is the one thing you never rush.',
+    lines: [{ who: 'calder', text: 'This is the port junction. Half of Deck 6 runs through this box.' },
+      { who: 'calder', text: 'Everything else on this ship, you can hurry. Not this. Never this.' },
+      { who: 'calder', text: 'Before you open it: who\'s on the other end of the line? Find out. Tell them.' },
+      { who: 'calder', text: 'Then the breaker, then your tester, then your hands. In that order, every time.' },
+      { choice: [{ text: 'Even for a quick fix?', reply: { who: 'calder', text: 'Especially for a quick fix. Quick is how people get hurt.' } },
+        { text: 'Who do I tell?', reply: { who: 'calder', text: 'Whoever\'s in the rooms it feeds. The board shows you. Ask if it doesn\'t.' } }] },
+      { who: 'calder', text: 'One day soon you\'ll switch one of these off on your own. That\'s the next step up.' },
+      { who: 'calder', text: 'That\'s it. Power safety. Don\'t make me say it twice.' }] };
+  WORK_TICKS.push((now, skip) => { if (!skip) { psTick(now); psTellTick(now); } });
+}
 // ---- end of slot: Later promotions ----
 
 // ---------------------------------------------------------------------
@@ -58725,10 +59550,7 @@ if (P5_M19 && typeof jobKindAdd === 'function') {
     const j = (SHIP.jobs || []).find(x => x.id === n.id), m = j && j.machine && machineById(j.machine);
     if (j && m && !JOB_KINDS[j.kind] && /^(battery|relay)$/.test(m.kind) && j.doneBy === 'you') worksUse('m19');
   });
-  onSim('trained', n => {                               // (EP2's ladder order, RV20's M1) Rewiring folds into this lesson: trained with it (the tester once)
-    const W = SHIP.works; if (!n || n.mech !== 'm19' || !W || W.tr.m15 !== undefined || !ladderRow('m15')) return;
-    W.tr.m15 = W.tr.m19; const d = W.tr.m19; if (!worksOpened(W).has('m15')) (W.op[d] = W.op[d] || []).push('m15');
-  });
+   // (Rewiring folds into this lesson: 24u's onSim 'trained', B1's, with the ladder order)
   WORK_TICKS.push((now, skip) => {
     pwrHost(now);
     if (!skip) { pwrBeats(now); pwrAskSay(now); }
@@ -63196,10 +64018,18 @@ const DM_CAREER = [
   { day: 23, later: 'Engine Specialist (not built yet)' },
   { day: 26, later: 'Calder\'s question (not built yet)' },
 ];
+if (P5_STEP5) {                                         // Pillar 5 Step 5 (S5-1 turn 3, B1): Power safety, the Tier 3 test and the Senior Officer's days (approximate, as above; the bands: 24 core's P5 block)
+  DM_CAREER.find(r => r.day === 12).train.splice(1, 0, 'ps');
+  Object.assign(DM_CAREER.find(r => r.day === 13), { band: 'relied' });   // Relied on at the end of the storm Saturday
+  Object.assign(DM_CAREER.find(r => r.day === 15), { train: ['p2', 't3'], band: 'relied', test3: true });
+  DM_CAREER.splice(DM_CAREER.findIndex(r => r.day === 16), 3, { day: 16, rank: 'senior', band: 'new', promo3: true },
+    { day: 17, train: ['m15', 'm19', 'p4'], band: 'reliable' }, { day: 18, train: ['m17', 'm18', 'p5'], band: 'reliable' },
+    { day: 19, train: ['m20', 'p9'], band: 'trusted' }, { day: 21, train: ['mys'], band: 'trusted' });
+}
 const DM_MAXDAY = 30, DM_SEED = 8;                      // the seed: no sick day (section 20's sickDue) before Day 46, so you never land unwell (devmode_check)
 function devmodeCareerFor(n) {                           // pure: SHIP.works's career part by the end of day n
   const rows = DM_CAREER.filter(r => r.day <= n), last = k => { for (let i = rows.length - 1; i >= 0; i--) if (rows[i][k] !== undefined) return rows[i][k]; return undefined; };
-  const promo = rows.some(r => r.promo), tier = promo ? 2 : 1, rank = last('rank') || 'junior', B = WORK_BANDS[tier] || WORK_BANDS[1];
+  const promo = rows.some(r => r.promo), promo3 = rows.some(r => r.promo3), tier = promo3 ? 3 : promo ? 2 : 1, rank = last('rank') || 'junior', B = WORK_BANDS[tier] || WORK_BANDS[1];   // promo3: Step 5's Senior Officer (P5_STEP5's rows)
   const out = { tier, rank, xp: (B.find(b => b[1] === (last('band') || 'new')) || B[0])[0], tr: {}, op: {}, use: {}, tools: {}, test: null, home: promo ? PROMO.home : 'bunk', done: [], ms: [] };
   for (const r of rows) for (const id of r.train || []) {
     const row = ladderRow(id); if (!row) continue;
@@ -63209,6 +64039,7 @@ function devmodeCareerFor(n) {                           // pure: SHIP.works's c
   }
   if (rows.some(r => r.test)) out.test = { tier: 2, day: 9, tries: 1, passed: true };
   if (promo) { out.done = ['summons2', 'cake2', 'move2', 'ceremony2']; out.ms = [['officer', 10], ['commissioned', Math.min(n, 11)]]; }
+  if (rows.some(r => r.test3)) { out.pu = { t3: { day: 15, tries: 1, passed: true, res: promo3 ? 16 : null, bar: promo3 ? 16 : null, toast: n >= 17 ? 17 : null } }; if (promo3) out.ms.push(['senior', 16]); }   // S5-2's record (24u)
   return out;
 }
 function devmodeCareerSet(n, now) {                      // SHIP.works set to day n's (the log, notes and side jobs kept)
@@ -63630,7 +64461,8 @@ function dvCareerNext() {                                // the next career step
       } catch (e) { /* none */ }
     }
     for (const id of ['m3d', 'm3i']) try { add(dvFixed(W, id), id); } catch (e) { /* none */ }
-    const small = CAREER_LADDER.find(r => r.size === 'small' && !r.fixed && W.tr[r.id] === undefined && WORK_MECH[r.id] && r.tier <= W.tier && (!r.needs || !r.needs.trained || W.tr[r.needs.trained] !== undefined));
+    const small = CAREER_LADDER.find(r => r.size === 'small' && !r.fixed && r.id !== 'ps' && W.tr[r.id] === undefined && WORK_MECH[r.id] && r.tier <= W.tier && (!r.needs || !r.needs.trained || W.tr[r.needs.trained] !== undefined));   // (ps: its own lesson, psDevNext below)
+    try { if (typeof psDevNext === 'function') add(psDevNext(), 'ps'); } catch (e) { /* none */ }   // Pillar 5 Step 5's Power safety (24u, S5-1)
     try { if (small) add(ladderNeeds(small.needs, W) ? dvWork(dvName(small.id) + ': it comes with a job', small.day) : dvNeed(small, W), 'small:' + small.id); } catch (e) { /* none */ }
     try { if (STORIES_ON && typeof storyDevNext === 'function') add(storyDevNext(now), 'story'); } catch (e) { /* none */ }   // a crew story's next step (FX21, section 20c's slot)
     try { if (W.test && W.test.passed) { const s = devmodePromoSteps().find(x => !x.done && DV_PROMO[x.label]); if (s) add({ when: s.at, soon: 15, g: { ...DV_PROMO[s.label], label: s.label } }, 'promo'); } } catch (e) { /* none */ }
