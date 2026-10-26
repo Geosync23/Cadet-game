@@ -191,3 +191,10 @@
 - Tap {name} to join the reading corner
 == join.reading-corner.notice
 - Reading corner: sit close in the bow lounge with a book and talk about what you're reading. Leisure and social up.
+
+== join.storm-stories.tip
+- Tap {name} for storm stories by torchlight
+== join.storm-stories.notice
+- Come in, sit anywhere. Torch under your chin when it's your turn. Storm stories by torchlight: social and leisure up.
+- Ah, good. We were just getting to the frightening part. It isn't very. Storm stories by torchlight: social and leisure up.
+- Sit with us. Listen first. Tell yours if you want to. Nobody has to. Storm stories by torchlight: social and leisure up.

@@ -8146,6 +8146,16 @@ const DECK_DRESS = {
     dressLantern(s, 11.83, SILL + .052, 4.3, glow);
     return { t: 'Storm lantern', x: (typeof evWord === 'function' && evWord('event.ionStorm.trace.lantern')) || 'A storm lantern on the galley pass. Nobody\'s moved it since the lantern supper.', floor: ['M', 11.83, 4.3], y: SILL + .18, w: .25, h: .35, d: .25 };
   } },
+  // stormTorches (FX26, 0.93.2; lead 38's ask for Storm stories by torchlight, section 18's dressing on the storm's
+  // Saturday 20:55-21:45): four storm lanterns in the junior common room, one on the coffee table and three on the rug
+  // round it (their feet just into the table top and the rug), while the room goes to low light (stormSupperDim). The
+  // supper's lantern kit: 2 draw calls, no shadows. Only with the storm's Saturday switched on
+  stormTorches: { deck: 4, what: 'storm stories: lanterns by the junior common room\'s coffee table, the lights down', on: () => STORM_SAT_ON, make(g) {
+    const s = dressAt(g, 'j', 'floor', 0, 0), glow = new THREE.MeshBasicMaterial({ color: col('#ffc46b'), toneMapped: false });
+    dressLantern(s, 3.38, .4, 4.16, glow);
+    for (const [x, z] of [[2.3, 3.0], [4.3, 5.1], [2.3, 5.2]]) dressLantern(s, x, .02, z, glow);
+    return { t: 'Torches', x: 'Storm lanterns round the coffee table and the main lights off. Tonight everyone tells the worst storm they\'ve been in, a torch under the chin.', floor: ['j', 3.38, 4.16], y: .55, w: .3, h: .35, d: .3 };
+  } },
   // framedMenu (EV4, the storm update's S9, the deck architect's stand-in; lead 23's call): the Captain's table's trace
   // ({ id, day }, from the occasion): its menu card, signed, in a dark frame on the wall above your keepsake shelf: the
   // bunk's, or your officer cabin's once SHIP.works.home is '4-23' (moved with the next deck build). Shown only while the
@@ -9031,6 +9041,19 @@ DECKS[7].places.push(...REC_MACHINES.map(m => ({ id: m.id + '-svc', machine: m.i
 // the rec deck's gather venues (RA, 0.83.2): their spots are REC_CREW_PLACES' 'event' places with `gather` (section 4d's
 // loop that makes other decks' spots has run before this deck is defined, so these are written out)
 DECKS[7].gathers = { 'river-banks': { name: 'the river hall', focus: [9.0, 3.0], rooms: 'K=', seats: [], also: [], lead: [] } };
+// 0.93.2 (FX26, the user's playtest note "Captain is clipping through the stage"): the floor under someone here (8b's
+// CrowdPerson.set reads deckDef.floorY as fy; no other deck has one): the stage's top (.55) on the stage, rising over the
+// last .1 before its front edge (a step up), else 0. The body takes a height of .3 and up as a seat's, so anyone standing
+// at the lectern or an act's spot (y .55) stood on the deck floor with their legs in the stage, and walking on or off the
+// stage (the walk-to tiles are on the floor in front of it) went through it. A seat on the stage (y about 1.05) is
+// unchanged: the high stool's rule already rests the feet .55 up. Deck coordinates; room A's stage is REC_STAGE 34 tiles
+// in (the lectern's 8.8 is deck 42.8)
+DECKS[7].floorY = (x, z) => {
+  const S = REC_STAGE, sn = Math.sqrt(1 - (8 / S.back) ** 2), zA = 9 - S.rz * sn, zB = 9 + S.rz * sn, xl = x - 34;
+  if (z <= zA || z >= zB || xl < 7) return 0;
+  const t = (z - zA) / (zB - zA), front = 8 - 4 * t * (1 - t) * (8 - S.front);   // the front edge's curve (recStage's quadratic)
+  return xl >= front ? .55 : xl > front - .1 ? .55 * (xl - front + .1) / .1 : 0;   // the walk-to tiles' middles are .15 or more in front of it: never lifted
+};
 // the rec deck's materials, made when the deck is built (so they are freed with it)
 let RK = null;
 function recMats() {
@@ -9569,7 +9592,7 @@ function alarmEnergy(m) {                                // the energy you'd wak
 }
 function alarmLate(m) {                                  // your shift's start that morning if the alarm is at or after it, else 0
   const d = Math.floor(alarmAt(m) / 1440) + 1;
-  return typeof DAY_SHIFT !== 'undefined' && typeof playerShiftOn === 'function' && playerShiftOn(d) && m >= DAY_SHIFT[0] ? DAY_SHIFT[0] : 0;
+  return typeof DAY_SHIFT !== 'undefined' && typeof playerShiftOn === 'function' && playerOnDuty(d) && m >= DAY_SHIFT[0] ? DAY_SHIFT[0] : 0;
 }
 function alarmDraw() {
   const ch = alarmChoices(), k = ch.indexOf(ALARM_PICK), $ = id => document.getElementById(id), late = alarmLate(ALARM_PICK);
@@ -9777,13 +9800,13 @@ function schedU(seed, day, k) {
   h = Math.imul(h ^ h >>> 16, 0x7FEB352D); h = Math.imul(h ^ h >>> 15, 0x846CA68B); h ^= h >>> 16;
   return (h >>> 0) / 4294967296;
 }
-const isWorkDay = (p, d) => !!p.work && !((p.rota && p.rota.offDays) || []).includes(weekday(d));
+const isWorkDay = (p, d) => !!p.work && (!((p.rota && p.rota.offDays) || []).includes(weekday(d)) || stormCalledIn(p, d));   // FX26 (0.93.2): the Works crew called in on the storm's Saturday (section 18)
 // your shift's start (Pillar 4, for section 20's reputation): on a work day, the first minute from 09:00 (DAY_SHIFT[0]) that you're in
 // a Works room on Deck 5, simNote('shiftStart', { late: minutes after 09:00 }); not there by 12:30, { late: 120,
 // missed: true }. Once a day (the flag 'shiftSent' holds the day, so a reload doesn't send it again)
 function shiftTick() {
   const d = SHIP.time.day, m = SHIP.time.min;
-  if (m < DAY_SHIFT[0] || flag('shiftSent') === d || !playerShiftOn(d)) return;
+  if (m < DAY_SHIFT[0] || flag('shiftSent') === d || !playerOnDuty(d)) return;   // FX26: the storm's Saturday call-in too
   let here = false;
   try { here = typeof careerAtWork === 'function' ? careerAtWork() : deckDef.num === 5 && (DECKS[5].places || []).some(pl => pl.type === 'work:works' && pl.room === roomAt(...player.here())); } catch (e) { here = false; }   // clocked in (the career engineer's time clock, 0.61.13)
   if (!here && m < (typeof CAREER !== 'undefined' ? CAREER.missBy : 600)) return;   // the career engineer's time clock (0.61.17): missed only if not clocked in by 12:30, as the career counts it
@@ -11646,7 +11669,7 @@ setTimeout(() => {
 const DEV_SHIFT = { from: 540, to: 1020, where: 'the Works bay, Deck 5' };   // 09:00-17:00 (0.44.14; section 17's DAY_SHIFT, which comes later in the file)
 // 0.35.17: the player's days off come from section 14's playerShiftOn(d) (the sim engineer; the user chose Saturday and
 // Sunday off). Section 19 no longer defines it, as a later declaration here would override section 14's
-const devShiftOn = d => { if (typeof playerShiftOn !== 'function') return true; try { return playerShiftOn(d) !== false; } catch (e) { return true; } };
+const devShiftOn = d => { if (typeof playerShiftOn !== 'function') return true; try { return playerOnDuty(d) !== false; } catch (e) { return true; } };   // FX26: the storm's Saturday call-in too
 // the weekday shapes (section 14's WEEK_SHAPE) that really put people somewhere. 0.35.18 (the user: "the schedule says
 // there is a Works meeting but nothing happened"): Monday's "All-hands briefing in the Works bay" is gone, as section 14's
 // Monday only starts the day shift 10 minutes early and nobody gathers; the Captain's piano stand-in is gone too (only
@@ -11693,9 +11716,10 @@ function devOccasions(a, b) {
 function devDay(d) {
   const B = (d - 1) * 1440, out = [
     { from: MEALS.breakfast[0], to: MEALS.breakfast[1], title: 'Breakfast', where: 'the mess, Deck 3', kind: 'meal' },
-    { from: DEV_SHIFT.from, to: dayShiftEnd(d), title: 'On shift', where: DEV_SHIFT.where, kind: 'shift' },   // 15:30 on a short Friday (14's dayShiftEnd)
+    { from: DEV_SHIFT.from, to: dayShiftEnd(d), title: playerCalledIn(d) ? 'On shift: called in for storm repairs' : 'On shift', where: DEV_SHIFT.where, kind: 'shift' },   // 15:30 on a short Friday (14's dayShiftEnd)
     { from: MEALS.dinner[0], to: MEALS.dinner[1], title: 'Dinner', where: 'the mess, Deck 3', kind: 'meal' }];
   if (!devShiftOn(d)) out.splice(1, 1, { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'Day off', where: 'no shift today, your time is your own', kind: 'off' });
+  if (d === stormSatDay()) out.splice(2, 1);             // FX26: the storm's Saturday has no dinner of its own: the lantern supper is it (section 18's event items list it)
   for (const g of apptGroups(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && a.at >= B && a.at < B + 1440)))
     out.push({ from: g.a.at - B, to: g.a.at - B + (g.a.len || 30), title: g.a.title || 'With ' + g.names, where: apptWhereName(g.a.where), kind: 'appt', place: g.a.where, aid: g.a.grp || g.a.id });
   for (const x of DEV_WEEK[weekday(d)]) if (!x.tradition) out.push({ from: x.at, to: x.at + x.len, title: x.title, where: x.where, kind: 'ship' });
@@ -13668,7 +13692,7 @@ function teachTick(now) {
   const paced = now - POP.tip >= TEACH_GAP && Math.max(POP.card, POP.warn) <= now - TEACH_QUIET;
   const d = SHIP.time.day, min = SHIP.time.min, deck = deckDef.num;
   const c = { now, S, n: SHIP.player.needs, d, min, deck, app: DEV.open ? DEV.app : null,
-    work: teachTry(() => typeof playerShiftOn === 'function') ? !!playerShiftOn(d) : null,
+    work: teachTry(() => typeof playerShiftOn === 'function') ? !!playerOnDuty(d) : null,
     fault: teachTry(() => typeof machineList === 'function' && machineList().some(m => m.deck === deck && machineLook(m.id).blink)),
     trad: teachTry(() => typeof eventsOn === 'function' && eventsOn(d).some(e => min >= e.from - 60 && min < e.to)) };
   for (const [id, test, text, o] of TEACH) {
@@ -14262,7 +14286,7 @@ function actEnd(abort) {
   if (A.kind === 'tidy' && A.done >= A.def.mins) { SHIP.player.untidy = false; toast('Your locker', 'All put away. Tidy.'); }
   if (typeof A.def.onDone === 'function' && A.done >= A.def.mins) try { A.def.onDone(A); } catch (e) { console.error(e); }   // a sub-block's own timed hold (24m's bench, 0.45.11)
   player.face = player.obj.rotation.y = A.face;
-  if (A.def.done) toast(A.def.title, A.def.done + (A.kind === 'eat' && A.o.company ? ' Good company, too.' : '') + (A.def.need ? ' ' + NEED_LABEL[A.def.need] + ' ' + Math.round(SHIP.player.needs[A.def.need]) + '.' : ''));
+  if (A.def.done) toast(/^tj:/.test(A.kind) && A.o.title || A.def.title, A.def.done + (A.kind === 'eat' && A.o.company ? ' Good company, too.' : '') + (A.def.need ? ' ' + NEED_LABEL[A.def.need] + ' ' + Math.round(SHIP.player.needs[A.def.need]) + '.' : ''));
   if (A.kind === 'browse') {
     basket = storePick(A.o.shelf || 'snack');
     toast(A.def.title, 'You pick out ' + basket.name + ' (' + basket.price + ' credits; you have ' + SHIP.player.credits + '). Pay at the counter.');
@@ -15558,7 +15582,7 @@ function sitBump(A) {
 // marker points to the Tea corner, with a card to say Keep working (it goes). SHIP.player.teaDay: the day you had it (saved)
 const TEA_FROM = 780, TEA_TO = 825, TEA_GOAL = 'Tea and biscuits, in the Tea corner';
 function teaOut(t = shipNow()) {
-  const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440, shift = typeof playerShiftOn === 'function' ? !!playerShiftOn(d) : weekday(d) < 5;
+  const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440, shift = typeof playerShiftOn === 'function' ? !!playerOnDuty(d) : weekday(d) < 5;
   if (typeof worksTeaOn === 'function') return shift && !!worksTeaOn(t);   // section 14's crew tea (X, 0.71.1): its times; your shift days
   const W = typeof WORKS_TEA !== 'undefined' && WORKS_TEA && Number.isFinite(WORKS_TEA.at) ? WORKS_TEA : { at: TEA_FROM, until: TEA_TO };   // section 14's crew tea (X, 0.71.1)
   return shift && m >= W.at && m < W.until;
@@ -16096,7 +16120,7 @@ function clockRmHeld(now) {                              // not now: something's
 function clockRmDue(now = shipNow()) {                   // -> 'in' | 'out' | null: what the clock wants of you now, and from when
   if (typeof CAREER === 'undefined' || typeof careerClockedIn !== 'function' || !SHIP.career || SHIP.career.end) return null;
   const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, S = DAY_SHIFT[0], E = dayShiftEnd(d);
-  if (d < 1 || !playerShiftOn(d)) return null;
+  if (d < 1 || !playerOnDuty(d)) return null;
   if (!careerClockedIn(d)) return m >= CAREER.clockIn && m < E ? { want: 'in', from: S - CLOCK_RM.pre, late: m >= S + CLOCK_RM.late } : null;
   if (!careerClockedOut(d)) return m >= E - CLOCK_RM.end0 && m < friAutoOut(d) ? { want: 'out', from: E - CLOCK_RM.end0, late: m >= E } : null;
   return null;
@@ -16233,7 +16257,7 @@ function ixSide(A) {
     if (A.o.company && d.with) side.social = (side.social || 0) + d.with * mult * (A.o.company === true ? 1 : A.o.company);   // by the best bond there (0.28.43)
     if (side[d.need]) { d.gain += side[d.need]; delete side[d.need]; }   // more of the main need: section 15 spreads d.gain over the minutes
     A.o.ixSide = side; A.o.ixGiven = {};
-    if (A.o.company && d.with) d.done = (d.done || '') + ' The company helped.';
+    if (A.o.company && d.with) d.done = (d.done ? d.done + ' ' : '') + 'The company helped.';   // FX26 (RV19): no leading space when it's the only words (a joined tradition's end toast, titled by the tradition's name, not its id, in actEnd)
   }
   const fx = typeof playerFx === 'function' ? playerFx() : null, n = SHIP.player.needs;
   for (const k in A.o.ixSide) {
@@ -16657,7 +16681,7 @@ const ixBoard = (() => {
     draw() {
       if (el.hidden) return;
       list.textContent = '';
-      const jobs = jobsBoard(), mine = myJob(), open = jobs.filter(j => !j.claimedBy);
+      const jobs = jobsBoard().filter(j => !stormBoardHide(j)), mine = myJob(), open = jobs.filter(j => !j.claimedBy);   // FX26: the storm's Saturday, its jobs only
       // yours to take: section 17's openJobs('you') when it's there (its titles and wording), else the device's rule
       const yours = typeof openJobs === 'function' ? openJobs('you') : open.filter(j => canTake(j, null)).map(j => { const [title, where, state] = jobCard(j); return { id: j.id, title, where, state, urgency: j.urgency }; });
       const ids = new Set(yours.map(o => o.id)), les = boardLesson();
@@ -16772,7 +16796,7 @@ function ixLoose(j) {
 function ixWorkStep() {
   if (typeof careerClockedIn !== 'function' || typeof playerShiftOn !== 'function' || typeof CAREER === 'undefined') return null;
   const now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
-  if (d <= 1 && typeof introOn === 'function' && introOn() || !playerShiftOn(d) || m < CAREER.clockIn || m >= dayShiftEnd(d)) return null;
+  if (d <= 1 && typeof introOn === 'function' && introOn() || !playerOnDuty(d) || m < CAREER.clockIn || m >= dayShiftEnd(d)) return null;
   if (!careerClockedIn(d)) return { deck: 5, place: '5-timeclock-1', label: 'Clock in at the time clock' };
   const open = typeof openJobs === 'function' && (GUIDE_ON ? guideTakeable() : openJobs('you')).length; if (typeof boardEmptySay === 'function') boardEmptySay(!open, now);   // FX1: the empty board says so, not just no arrow; the queue on: only a job with a Take it counts (piece D's S6)
   return open ? { deck: 5, item: /job board/i, room: 'w', label: 'Take a job at the job board' } : null;
@@ -17311,7 +17335,7 @@ function guideTrain() {
 const GUIDE_SHIFT = { logN: -1, band: null };
 function guideShiftOver() {                              // clocked in, not out, past the end of today's shift
   try { const now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
-    return playerShiftOn(d) && m >= dayShiftEnd(d) && careerClockedIn(d) && !careerClockedOut(d); } catch (e) { return false; }
+    return playerOnDuty(d) && m >= dayShiftEnd(d) && careerClockedIn(d) && !careerClockedOut(d); } catch (e) { return false; }
 }
 function guideTakeable() {                               // the board's jobs with a Take it for you (ixBoard's rule), a held one first
   let L = []; try { L = typeof openJobs === 'function' ? openJobs('you') : []; } catch (e) { L = []; }
@@ -17342,7 +17366,7 @@ function guideShift() {
   guideShiftWords(now, P);
   if (typeof inspectDue === 'function' && typeof inspectGoal === 'function' && typeof INSPECT_AT !== 'undefined' && m >= 360 && m < INSPECT_AT && !(typeof SIM_AT !== 'undefined' && SIM_AT) && inspectDue(d))   // the inspection morning (F2, FX3's arrows in 24c): level 2, an event you're expected at; its goal empty once you're ready and there
     guideAsk({ id: 'inspect:' + d, level: 2, owner: '15b (piece D, F2)', from: base + 360, until: base + INSPECT_AT, goal: () => inspectGoal(d), done: () => !inspectDue(d) });
-  if (!playerShiftOn(d) || SHIP.career && SHIP.career.end) return;
+  if (!playerOnDuty(d) || SHIP.career && SHIP.career.end) return;
   const intro = d <= 1 && typeof introOn === 'function' && introOn();   // training day: the intro's own arrows (only the lesson's pointer below rings: FX15, patch 0.92.5 #22)
   const E = dayShiftEnd(d), inn = careerClockedIn(d), out = careerClockedOut(d), owner = '15b (piece D)';
   if (!intro && !inn && m >= CAREER.clockIn && m < E) {            // S2
@@ -20707,7 +20731,7 @@ function jobStopsBase(j, known, st) {
 function jobsSection(el) {
   const line = (txt, cls) => { const p = document.createElement('p'); p.textContent = txt; if (cls) p.className = cls; el.appendChild(p); return p; };
   const button = (txt, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = txt; b.style.cssText = 'margin:0 2px 8px;padding:4px 10px;font-size:12.5px'; b.onclick = () => { fn(); device.refresh(); }; el.appendChild(b); return b; };
-  const board = jobsBoard(), mine = myJob();
+  const board = jobsBoard().filter(j => !stormBoardHide(j)), mine = myJob();   // FX26: the storm's Saturday, its jobs only
   if (mine) {
     const [title, where, state] = jobCard(mine), m = mine.machine && !traceHidden(mine) && machineById(mine.machine);   // a traced fault: no room till it's found
     line('Yours: ' + title + ', ' + where + '.', 'devtime');
@@ -20738,7 +20762,7 @@ if (typeof device !== 'undefined' && device.addSection) device.addSection('jobs'
 // its place id or null. Take one with claimJob(id); finish it with finishJob(id); jobStops(job) gives the way there.
 function openJobs(forWho = 'you') {
   const you = forWho === 'you', tier = you ? playerTier() : hatchTier(forWho);
-  return jobsBoard().filter(j => !j.claimedBy && j.status !== 'waiting' && (jobTier(j) <= tier || (you && heldForYou(j))) && rankOk(forWho, j) && !(you && j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && (you || !heldForYou(j)) && !(you && bridgeBars(j))).map(j => {
+  return jobsBoard().filter(j => !j.claimedBy && j.status !== 'waiting' && !(you && stormBoardHide(j)) && (jobTier(j) <= tier || (you && heldForYou(j))) && rankOk(forWho, j) && !(you && j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && (you || !heldForYou(j)) && !(you && bridgeBars(j))).map(j => {
     const [title, where, state] = jobCard(j), m = j.machine && machineById(j.machine);
     const stops = jobStops(j).filter(x => x.step !== 'fetch'), main = jobByStops(j) ? stops[stops.length - 1] : j.kind === 'restock' ? stops[2] : stops[0];
     const place = main && main.places[0] || null, pl = placeById(place);
@@ -36092,6 +36116,12 @@ const LINES = JSON.parse([
   '{"text":"Sowing: plant the new season\'s seeds with everyone. Leisure and social up.","id":"mlr6gk"}]',
   ',"join.sowing.tip":[',
   '{"text":"Tap {name} to help with the sowing","id":"ak7a5u"}]',
+  ',"join.storm-stories.notice":[',
+  '{"text":"Come in, sit anywhere. Torch under your chin when it\'s your turn. Storm stories by torchlight: social and leisure up.","id":"1p5cz3e"},',
+  '{"text":"Ah, good. We were just getting to the frightening part. It isn\'t very. Storm stories by torchlight: social and leisure up.","id":"1m79pgp"},',
+  '{"text":"Sit with us. Listen first. Tell yours if you want to. Nobody has to. Storm stories by torchlight: social and leisure up.","id":"1jt1tav"}]',
+  ',"join.storm-stories.tip":[',
+  '{"text":"Tap {name} for storm stories by torchlight","id":"6oopc"}]',
   ',"join.sunday-story.notice":[',
   '{"text":"The Sunday story: Chief Holt reads one chapter in the common room, lights low. Leisure and social up.","id":"1ir5vz1"}]',
   ',"join.sunday-story.tip":[',
@@ -40178,6 +40208,7 @@ const TRADITIONS = [
   {"id": "sowing", "k": 434, "name": "Sowing morning", "when": {"every": "quarter", "week": 1, "weekday": 5}, "at": [705, 760], "min": 20, "prio": 1, "where": [{"deck": 3, "pool": "garden"}], "hold": [], "who": [["tomas", 1], ["cruz-tove", 1], ["gardener", 0.9], ["garden-lover", 0.75], ["everyone", 0.3]], "anim": "water", "host": "cruz-tove", "from": "brennan", "ties": {"garden": "sow"}, "invite": {"host": "tomas", "odds": 0.5, "line": "Sowing morning at quarter to twelve. Come and plant one. I'll show you which end goes down."}, "trace": "seedlingYours", "text": {"mail": [{"t": "A new season starts in the garden: Sowing morning tomorrow, {time}. Everyone plants a seedling. Yours grows as long as you're aboard.", "tone": "light"}], "ask": [{"t": "Sowing morning today. Bring clean hands.", "tone": "light"}, {"t": "I'm planting basil this time. Don't tell Brennan, she'll want it.", "tone": "funny"}, {"t": "A new season in the garden. I always plant something new.", "tone": "light"}, {"t": "Sowing at quarter to twelve. Tove says there are enough pots for everyone.", "tone": "light"}], "here": [{"t": "Two seeds a pot. One for luck.", "tone": "light"}, {"t": "Gently. They're only small.", "tone": "warm"}, {"t": "Write your name on the tag, or Tove will name it for you.", "tone": "funny"}, {"t": "Mine from last season is the tall one at the end. Look at it go.", "tone": "light"}], "thanks": [{"t": "You press a seedling into its pot and write your name on the tag. {season} has begun.", "tone": "light"}, {"t": "You plant a seedling with the others and set it under the lamps. It's tiny, and it's yours.", "tone": "warm"}], "chatter": [{"t": "Whose seedling is that, already leaning towards the lamps?", "tone": "funny"}, {"t": "I've planted one every season since I came aboard. It's a little row of me now.", "tone": "warm"}, {"t": "Sowing morning on Saturday. The garden smells of wet soil for days after.", "tone": "light"}]}},
   {"id": "spice-shelf-supper", "k": 443, "name": "Spice shelf supper", "when": {"weekday": 1}, "at": [1095, 1155], "min": 25, "where": [{"deck": 3, "room": "^Mess hall$", "types": ["mess-seat"]}], "hold": [], "who": [["brennan", 1], ["lingers-at-meals", 0.7], ["galley", 0.6], ["everyone", 0.4]], "anim": "talk", "host": "brennan", "from": "brennan", "ties": {"galley": {"meal": "dinner"}}, "trace": "spiceJars", "meal": "dinner", "text": {"mail": [{"t": "Spice shelf supper tomorrow at {time}. I'm picking three jars from the shelf. Bring a guess, and an appetite.", "tone": "light"}], "ask": [{"t": "Spice shelf supper tonight. Brennan picked three jars. Guess whose.", "tone": "light"}, {"t": "Supper's a mystery tonight. Three spices off the shelf.", "tone": "light"}], "here": [{"t": "That's mine! That warm one. That's from home.", "tone": "warm"}, {"t": "Is that smoky one yours? It's lovely.", "tone": "light"}, {"t": "Brennan never says whose jar it is. We have to guess.", "tone": "light"}], "thanks": [{"t": "Brennan sets out supper made with three jars from the spice shelf, and the whole mess tries to guess whose they are.", "tone": "warm"}], "chatter": [{"t": "Spice shelf supper tonight. Hope she picks my jar.", "tone": "light"}, {"t": "That shelf's got half the galaxy on it now.", "tone": "warm"}, {"t": "Bring a spice from home next leave. Brennan will use it.", "tone": "light"}]}},
   {"id": "spoon-band", "k": 717, "name": "The spoon band", "when": {"every": "8weeks", "weekday": 0, "week": 2, "from": 64}, "at": [1065, 1110], "min": 20, "where": [{"deck": 4, "pool": "common-room"}], "hold": [0], "who": [["rossi-femi", 1], ["musician", 0.6], ["juniors", 0.35], ["everyone", 0.1]], "anim": [["musician", "play"], ["everyone", "play"]], "host": "rossi-femi", "from": "rossi-femi", "invite": {"host": "rossi-femi", "odds": 0.3, "line": "Spoon band tonight! Bring a spoon. Or two. Junior common room."}, "text": {"mail": [{"t": "The spoon band tomorrow, {time}, in the junior common room. Bring anything that makes a noise. Two spoons is a whole instrument. No skill needed.", "tone": "light"}], "ask": [{"t": "Spoon band later. I'm on pan lid. It's a big responsibility.", "tone": "funny"}, {"t": "Coming to the spoon band? Rossi counts us in. Loudly.", "tone": "light"}], "here": [{"t": "One, two, one, two, three, four!", "tone": "light"}, {"t": "Who's got the jar of rice? We need the rice.", "tone": "funny"}, {"t": "Keep up, spoons!", "tone": "light"}], "thanks": [{"t": "Rossi counts everyone in, and the junior common room fills with spoons, pan lids, a comb and a jar of rice. It nearly sounds like a song.", "tone": "funny"}], "chatter": [{"t": "The spoon band played three songs. I think it was three.", "tone": "funny"}, {"t": "I was on pan lid at the spoon band. I've never been happier.", "tone": "warm"}, {"t": "Rossi wants the spoon band at talent night. Somebody stop him.", "tone": "funny"}]}},
+  {"id": "storm-stories", "k": 474, "name": "Storm stories by torchlight", "when": {"every": "year", "dayOfYear": 13, "until": 1}, "at": [1260, 1305], "min": 20, "where": [{"deck": 4, "pool": "common-room"}], "hold": [0], "who": [["oduya", 1], ["holt", 0], ["mensah", 0], ["night-owl", 0.7], ["juniors", 0.4], ["everyone", 0.25]], "anim": [["oduya", "talk"]], "host": "oduya", "from": "oduya", "invite": {"host": "oduya", "odds": 0.4, "line": "Storm stories tonight, after the supper. Bring a torch and your worst storm."}, "spare": 1, "text": {"mail": [{"t": "Storm stories tomorrow night, {time}, the junior common room, after the lantern supper. Lights off, torches on. Bring the worst storm you've ever been in. You may exaggerate.", "tone": "light"}], "ask": [{"t": "Storm stories after the supper. Oduya says to bring a torch.", "tone": "light"}, {"t": "Have you got a worst storm? Everyone's got a worst storm.", "tone": "light"}, {"t": "Torchlight in the common room tonight. I'm telling the one about the roof.", "tone": "funny"}], "here": [{"t": "And then the window just... went. Whoosh. Well. Creaked.", "tone": "funny"}, {"t": "Torch under your chin. No, higher. There. Terrifying.", "tone": "funny"}, {"t": "That's not the worst storm. That's weather.", "tone": "funny"}, {"t": "Shh, the lights. Oh. No, just a flicker. Carry on.", "tone": "light"}, {"t": "I'd have hidden under the table. I did hide under the table.", "tone": "funny"}, {"t": "Tell it again, but bigger this time.", "tone": "light"}, {"t": "Hailstones the size of eggs on the farm moon. We ate the hail. It was not eggs.", "tone": "funny"}, {"t": "Our station lost power for a whole night. We played cards by the light of the fish tank.", "tone": "light"}, {"t": "A dust storm on Marra. Three days indoors. My brother learnt every song I hate.", "tone": "funny"}, {"t": "The ferry rocked so much the soup went sideways. All of it. Onto the captain.", "tone": "funny"}, {"t": "Wind took our washing line clean off. We found a sock in the next village.", "tone": "funny"}, {"t": "Lightning hit the radio mast. Every radio in town played the same song for a week.", "tone": "light"}, {"t": "I slept through the worst storm in forty years. I'm still annoyed about it.", "tone": "funny"}, {"t": "Snowed in at Gran's with one book. I know that book by heart now.", "tone": "warm"}], "thanks": [{"t": "In the dark common room, crewmates take turns telling the worst storm they've ever been in, torch under the chin. Each one a little worse than the truth.", "tone": "warm"}], "chatter": [{"t": "Storm stories last night. Somebody's hail was the size of melons by the third telling.", "tone": "funny"}, {"t": "I didn't think I'd laugh on a storm night. Then the torch stories.", "tone": "warm"}, {"t": "Oduya told one too. Just one. It was the best one.", "tone": "light"}]}},
   {"id": "sunday-story", "k": 464, "name": "The Sunday story", "when": {"every": "4weeks", "weekday": 6, "week": 4, "from": 1}, "at": [1275, 1315], "min": 25, "jitter": 5, "where": [{"deck": 4, "pool": "common-room"}], "hold": [0], "who": [["holt", 1], ["night-owl", 0.5], ["juniors", 0.45], ["common-room", 0.4], ["everyone", 0.08]], "anim": [["holt", "read"], ["everyone", null]], "host": "holt", "from": "holt", "spare": 1, "text": {"mail": [{"t": "The Sunday story tomorrow at {time}, the junior common room. Be on time. I don't recap.", "tone": "light"}], "ask": [{"t": "Holt's reading tonight. He does the voices. Don't tell him I said that.", "tone": "funny"}, {"t": "Sunday story at quarter past nine. Grab a beanbag early, they go fast.", "tone": "light"}, {"t": "Holt stopped on a cliffhanger last time. I need to know what happens.", "tone": "funny"}], "here": [{"t": "Shh. He's doing the old pilot's voice.", "tone": "funny"}, {"t": "One more page. Please. Just one.", "tone": "funny"}, {"t": "Nobody breathe. This is the good bit.", "tone": "light"}], "thanks": [{"t": "You find a spot on the common room floor. Chief Holt opens the book, clears his throat and reads, doing every voice, badly, while nobody so much as fidgets.", "tone": "light"}], "chatter": [{"t": "Holt ended the Sunday story on a cliffhanger again. He does it on purpose.", "tone": "funny"}, {"t": "I don't go for Holt's voices. I go for Holt's voices.", "tone": "funny"}, {"t": "The Sunday story's the only thing that gets the junior wing to bed on time.", "tone": "funny"}]}},
   {"id": "sunday-table", "k": 440, "name": "Sunday long table", "when": {"weekday": 6}, "at": [1080, 1140], "min": 30, "jitter": 10, "where": [{"deck": 3, "room": "^Mess hall$", "types": ["mess-seat"]}, {"deck": 3, "room": "^Mess hall$", "types": ["@long-table"]}], "hold": [], "who": [["brennan", 1], ["lingers-at-meals", 0.85], ["everyone", 0.6]], "anim": "talk", "host": "brennan", "from": "brennan", "ties": {"galley": {"meal": "dinner", "seating": "friends", "side": "tasting"}, "decor": "longTables"}, "meal": "dinner", "text": {"mail": [{"t": "Sunday long table tomorrow at {time}: the tables pushed together, the dish you voted for, and Wednesday's tasting winner on the side. Sit with your people.", "tone": "warm"}], "ask": [{"t": "Long table tonight. Save me a seat?", "tone": "warm"}, {"t": "Sunday dinner at six. I voted for the curry. Again.", "tone": "funny"}, {"t": "Long table at six. Come and sit with us.", "tone": "warm"}], "here": [{"t": "Pass that down, would you?", "tone": "light"}, {"t": "Who voted for this? Whoever it was, thank you.", "tone": "funny"}, {"t": "Budge up, there's room for one more.", "tone": "warm"}], "thanks": [{"t": "You squeeze in at the long table. A plate comes down the line to you without anyone asking.", "tone": "warm"}, {"t": "You sit down at the Sunday long table. Somebody tells a story you've heard before, and it's funnier this time.", "tone": "funny"}], "chatter": [{"t": "Sunday long table is the one meal I never eat on my own.", "tone": "warm"}, {"t": "Someone always ends up at the wrong end of the long table from the gravy.", "tone": "funny"}, {"t": "Best seat at the long table is the middle. You hear everything.", "tone": "light"}]}},
   {"id": "sunrise-stretch", "k": 448, "name": "Sunrise stretch", "when": {"weekday": [0, 2, 4]}, "at": [390, 420], "min": 15, "where": [{"deck": 3, "pool": "@stretch-garden"}, {"deck": 3, "pool": "garden"}], "hold": [], "who": [["rina", 1], ["early-riser", 0.55], ["runner", 0.4], ["gym-regular", 0.35], ["everyone", 0.08]], "host": "rina", "from": "rina", "wake": 15, "text": {"mail": [{"t": "Sunrise stretch at {time}, in the garden. Gentle, slow, done before breakfast. Come in what you slept in.", "tone": "light"}], "ask": [{"t": "Sunrise stretch in the morning? Gentle. I promise.", "tone": "light"}, {"t": "Stretch before breakfast? Wakes you up better than tea.", "tone": "light"}], "here": [{"t": "Reach up. And down. And groan quietly.", "tone": "funny"}, {"t": "Breathe in. Smell that? Tomatoes. Lovely start.", "tone": "light"}, {"t": "My knees say no. My knees are outvoted.", "tone": "funny"}], "thanks": [{"t": "You stretch among the garden beds with a few early risers while the grow lights warm up. Breakfast tastes better after.", "tone": "light"}], "chatter": [{"t": "Sunrise stretch tomorrow. Set an alarm.", "tone": "light"}, {"t": "I go to sunrise stretch for the garden smell, honestly.", "tone": "warm"}, {"t": "My back's better since I started the stretch.", "tone": "light"}]}},
@@ -43093,6 +43124,7 @@ function eventsTick() {
   if (SHORT_FRIDAY) friAddressTick();                    // the Captain's Friday address, line by line (section 18f)
   if (WEEKEND_ON) sundayStoryTick();                     // the Sunday story, Holt's chapter of the week (FX9, weekend slot)
   if (P926_TRADS) talkTick();                            // 0.92.6 item 13: the Wren talks spoken from the stool (FX17, Traditions slot)
+  if (STORM_SAT_ON) stormStoriesFrame();                 // 0.93.2 (FX26): the storm stories' talk (slot 'Storm Saturday')
   if (P926_TRADS) p926Frame();                           // 0.92.6: the swap meet's, reading corner's and spice supper's talk (FX17, Traditions slot)
   if (P926_APPT) apptFrame();                            // 0.92.6 item 9: appointments (FX22, Appointments builder slot)
   if (TRAD_0932_ON) t932Frame();                         // 0.93.2: the new traditions' talk and their hosts' closing lines (FX24, Traditions slot)
@@ -43188,6 +43220,7 @@ const EV_NOTES_ON = EVENTS_ON;                           // F2: a ship note as e
 const EV_DEVICE_ON = EVENTS_ON;                          // F3: the event on your device (Schedule, Tracked, status, Record)
 const EV_REPLAY_ON = EVENTS_ON;                          // F4: safe through reloads (a meeting comes back, a moment isn't felt twice)
 const EV_STORM_ON = EVENTS_ON;                           // the ion storm update (EV3, S1-S9; plans/event-storm-plan.md v1.2), laid over SHIP_EVENTS.ionStorm
+const STORM_SAT_ON = EV_STORM_ON;                        // 0.93.2 (FX26, the user's playtest note): the storm's Saturday is a workday, storm repairs only (slot 'Storm Saturday'); false = the storm without it
 const EV_LINE_ON = EVENTS_ON;                             // Crossing the Line (EV5, L1-L5; plans/event-line-plan.md v2.2): SHIP_EVENTS.crossingLine only while on; L6, switched on in 0.92.1 (the user's yes, 2026-10-23)
 // F0, the event calendar (plans/events-plan.html v3.2, section 1): a new game's fixed days (Day 0 the arrival, Day 1 a
 // Monday). day: the event's day 0 (its warning's day). One not built yet (no SHIP_EVENTS entry) or a draft is passed over
@@ -43405,6 +43438,42 @@ if (EV_STORM_ON) {
   S.settleTraces = ['stormLantern'];
   S.dayDress = [{ trad: 'lap-of-the-wren', day: 3, drop: true }, { trad: 'lap-of-the-wren', day: 4, add: { at: [1230, 1275], who: [['tomas', 1]], words: 'event.ionStorm.trad.lap-of-the-wren' } },
     { trad: 'rec-talent-night', day: 3, drop: true }, { trad: 'rec-talent-night', day: 10, add: {} }];
+  // 0.93.2 (FX26, the user's playtest note: "Saturday of the storm, you have to go to work and do storm repair jobs. The
+  // board will be nothing but them"): the escalation's day (Saturday Day 13) is a workday for you and the Works crew
+  // (stormSatDay, the slot 'Storm Saturday'). The storm's repair jobs go up in three waves on that day (day: 2), each held
+  // for you for 90 minutes, then the crew's; Calder's Mail on Friday at 18:00 says you're needed. The words are
+  // placeholders (event.ionStorm.job.<id>, event.ionStorm.mail.stormSat when the writers add them). S.stormSat.trad: the
+  // day's storm tradition, once the user picks one (CS1's options): null until then
+  if (STORM_SAT_ON) {
+    const R = (id, title, at, deck, kind, tag, mins, parts) => ({ id, title: evWord('event.ionStorm.job.' + id) || title, tier: 1, at, day: 2, hold: at + 90,
+      parts: parts || [], stops: [{ deck, machine: kind, mins, tag }] });
+    S.jobs.escalation.push(
+      R('stormFixLamps4', 'Storm repair: replace the blown lamps on Deck 4', 510, 4, 'lights', 'lamp', 20, ['lamp', 'lamp']),
+      R('stormFixLights3', 'Storm repair: reset the light relays on Deck 3', 510, 3, 'lights', 'lamp', 20),
+      R('stormFixBreakers2', 'Storm repair: reset the tripped breakers on Deck 2', 520, 2, 'junction', 'check', 20),
+      R('stormFixChiller', 'Storm repair: check the cold store chiller after the jolts', 660, 3, 'chiller', 'check', 25),
+      R('stormFixLights1', 'Storm repair: reset the light relays on Deck 1', 670, 1, 'lights', 'lamp', 20),
+      R('stormFixLights5', 'Storm repair: reset the light relays on Deck 5 after the surge', 810, 5, 'lights', 'lamp', 20),
+      R('stormFixBattery', 'Storm repair: check the battery bank\'s charge after the surge', 820, 5, 'battery', 'check', 15));
+    S.mail.stormSat = { ...evBankMail('event.ionStorm.mail.stormSat', { subject: 'You\'re needed tomorrow',
+      body: 'The storm\'s doing its worst tomorrow and I need every pair of hands. Your day off is off, sorry: clock in at 09:00 as usual. The board will be storm repairs and nothing else. All of Works is in. Calder.' }), at: [1, 1080], from: 'Chief Ines Calder' };
+    // the day's storm tradition (the user's pick, 2026-10-26): Storm stories by torchlight, 21:00-21:45 in the junior common
+    // room, Oduya hosting (content/traditions/storm-stories.trad: never on its own rhythm; the storm adds it to its
+    // Saturday). It goes on in the escalation (keep), and staying in pauses for it as for the supper
+    S.stormSat = { trad: 'storm-stories' };
+    S.dayDress.push({ trad: 'storm-stories', day: 2, add: {} });
+    S.keep.push('storm-stories');
+    for (const r of S.routines.escalation) if (r.rule === 'stayIn') r.off.push([2, 1240, 1305]);
+    // the lantern supper is that day's dinner (the user, 2026-10-26: "Lantern supper should replace dinner that Saturday
+    // storm day. Doesn't make sense to have 2 dinners."): everyone free goes (a meal tradition is the goers' dinner,
+    // section 14), Brennan as before, Lukas on the galley line never; the bridge's double shift eats from the trays
+    const ls = S.moments.find(m => m.id === 'lanternSupper');
+    if (ls) { ls.who = () => 1; ls.stay = [35, 50]; }   // shorter sittings (45-60 before), so the whole ship's dinner fits the mess's 48 seats by 19:45 (bigevents_check: nobody eats standing)
+    // tap Oduya to join (the user's rule for traditions: a host to tap, a fitting pose, its own words): sat in the circle,
+    // listening and telling (CS1's join lines are the toast, join.storm-stories.notice)
+    S.dressing.escalation.push({ id: 'stormTorches', title: 'Storm stories', at: [2, 1255, 1305] });   // the lanterns and the low light, 20:55-21:45 (DECK_DRESS.stormTorches)
+    TRAD_JOIN['storm-stories'] = { host: 'oduya', pose: 'sit:talk', need: 'social', gain: 15, also: { leisure: 6 }, verb: 'tell storm stories with them', what: 'storm stories by torchlight' };
+  }
 }
 // ---- Crossing the Line (a short event; plans/event-line-plan.md v2.2 on claude/event-plan-line, the user's answers of
 // 2026-10-21: story A "The one on watch", the ceremony in the bow lounge). Only while EV_LINE_ON (off: no such event,
@@ -45454,7 +45523,7 @@ function stormStoryTick(now) {
 // second): .85 while the lantern supper's lanterns are out (DECK_DRESS.lanternMess, drawn only on Deck 3) and you're in
 // the mess hall, else 0, so the rest of Deck 3 keeps its light (the plan; lead 23 on PR4's props review), as First Light
 // Cocoa dims only the bow lounge. Visual only; 0 while the storm update is off
-function stormSupperDim(n) { return EV_STORM_ON && n === 3 && typeof DRESS !== 'undefined' && DRESS.on.has('lanternMess') && roomAt(...player.here()) === 'M' ? .85 : 0; }
+function stormSupperDim(n) { return EV_STORM_ON && typeof DRESS !== 'undefined' && (n === 3 && DRESS.on.has('lanternMess') && roomAt(...player.here()) === 'M' || n === 4 && DRESS.on.has('stormTorches') && roomAt(...player.here()) === 'j') ? .85 : 0; }   // FX26: and the storm stories' low light in the junior common room
 // S2 (EV4): the window [from, to] (minutes of day d) someone on a ship-wide event's double shift is let off it that
 // day (the rule's except: [{ id, day (the event's day), at }]: the storm's Captain and Commander for the Friday address),
 // else null. Pure: the planner's own evAt. The windows start at or after the short Friday's 15:30 (friCrewEnd), so
@@ -45466,6 +45535,64 @@ function evDoubleExcept(p, d) {
   return x ? x.at : null;
 }
 // ---- end of slot: Storm builder ----
+// ---- slot: Storm Saturday (section 18; FX26, 0.93.2, the user's playtest note). New code of this seat's goes here ----
+// The storm's Saturday (its escalation's day, Day 13 in a new game) is a workday: you're called in for a shift (09:00-17:00,
+// not a double, so the lantern supper at 18:00 stays free) and so is the Works crew, and the board that day has only the
+// storm's jobs. All behind STORM_SAT_ON (off: stormSatDay is null and nothing changes).
+// stormSatDay() -> that day, or null: from the calendar's plan and the storm's phases only (as eventDay), so the crew's
+// planner may read it; a Saturday only. Asked before section 18 has run (the planner at load), it says null and keeps nothing
+var STORM_SAT_D;
+function stormSatDay() {
+  if (STORM_SAT_D !== undefined) return STORM_SAT_D;
+  try {
+    if (!STORM_SAT_ON) return (STORM_SAT_D = null);
+    const r = evCalPlan().find(x => x.id === 'ionStorm'), ph = r && SHIP_EVENTS.ionStorm.phases.find(x => x.id === 'escalation'), d = ph ? r.day + ph.at[0] : null;
+    return (STORM_SAT_D = d != null && weekday(d) === 5 ? d : null);
+  } catch (e) { return null; }
+}
+// the crew called in (section 14's isWorkDay): the Works day crew, on their day off that Saturday; never you (your rota is
+// your own: playerCalledIn) nor a guest
+function stormCalledIn(p, d) { return p.dept === 'works' && !p.player && p.shift !== 'night' && p.rank !== 'guest' && d === stormSatDay(); }
+// you're called in that day, unless you're on leave or sick (careerOff) or it's a day of your rota anyway. Your rota
+// (playerShiftOn) doesn't change, so the lessons, the career's beats and the board's top-ups stay off that day;
+// playerOnDuty(d) is what the time clock, the work arrows, a missed shift's note, tea and the Schedule ask
+function playerCalledIn(d) {
+  try { return STORM_SAT_ON && d === stormSatDay() && !(typeof careerOff === 'function' && careerOff(d)) && !careerRota(d); } catch (e) { return false; }   // before section 18 has run: no
+}
+function playerOnDuty(d) { return playerShiftOn(d) || playerCalledIn(d); }
+// the board that day (the user: "The board will be nothing but them"): the storm's own jobs (event 'ionStorm') and repairs
+// to the machines it wears (power, comms, the cold store chiller). stormBoardHide(j): leave it off your board, your device's
+// list and the arrows. Play only (the board is yours); the crew's own picks don't change
+function stormBoardJob(j) {
+  if (j.event === 'ionStorm') return true;
+  const m = j.machine && typeof JOB_TYPES !== 'undefined' && JOB_TYPES[j.kind] && machineById(j.machine), K = m && MACHINE_KINDS[m.kind];
+  return !!K && (K.sys === 'power' || K.sys === 'comms' || m.kind === 'chiller');
+}
+function stormBoardHide(j) { const d = stormSatDay(); return d != null && Math.floor(shipNow() / 1440) + 1 === d && !stormBoardJob(j); }
+// Storm stories by torchlight (RV18's S2, the user's rule: its own words): while it's on and you're in the junior common
+// room, a bubble every few seconds from those at it (tradTalk): a teller's worst storm (CS1's eight, one each in turn),
+// the listeners' asides, Oduya keeping it going; his closing lines in the last ten minutes. The room's everyday chatter
+// waits meanwhile (CHATTER_AT, as at the Captain's address). Looks only: never the planner
+const STORM_CLOSE = ['That\'s the last torch. Lights stay low. Sleep well, and let the storm do its job.', 'Good stories. Mostly true. Off to bed, and leave your torch by the door.'];   // CS1's close lines (plans/storm-stories-words.txt c7e67663)
+let STORM_WORDS = null;
+function stormSay(at, n, e, m) {
+  if (!STORM_WORDS) { const t = (TRAD_LIST.find(x => x.id === 'storm-stories') || {}).text || {}, h = (t.here || []).map(x => x.t || x); STORM_WORDS = { aside: [h[0], h[2], h[3], h[4]].filter(Boolean), host: ['Torch under your chin. Now tell it the way you tell it at home.', h[1], h[5]].filter(Boolean), story: h.slice(6) }; }
+  const W = STORM_WORDS, host = at.find(a => a.p.id === 'oduya'), rest = at.filter(a => a !== host).sort((x, y) => x.p.id < y.p.id ? -1 : 1);   // a steady order: each teller tells their own
+  if (m >= e.to - 10) return host ? [host, STORM_CLOSE[n % 2]] : null;   // from 21:35: the host's own plan has him off at about 21:40
+  const k = n % 3, i = n / 3 | 0;
+  if (k === 2 && host) return [host, W.host[i % W.host.length]];
+  if (!rest.length) return null;
+  if (k === 0 && W.story.length) return [rest[i % rest.length], W.story[i % W.story.length]];
+  return W.aside.length ? [rest[(i + 1) % rest.length], W.aside[i % W.aside.length]] : null;
+}
+function stormStoriesFrame() {
+  if (typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 4 || typeof DECK_CREW === 'undefined') return;
+  const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440; if (d !== stormSatDay()) return;
+  const e = eventsOn(d).find(x => x.id === 'storm-stories' && m >= x.from && m < x.to); if (!e || !friHere(e)) return;
+  if (typeof CHATTER_AT !== 'undefined') CHATTER_AT = simNow();   // the room's everyday chatter waits (section 20's chatter, section 22's overheard)
+  tradTalk('storm-stories', stormSay);
+}
+// ---- end of slot: Storm Saturday ----
 // ---- slot: Line builder (section 18; EV5, Crossing the Line L1-L6, plans/event-line-plan.md v2.2). New code of this seat's goes here ----
 // the first-timers (the user's line-q5 a): everyone aboard under two years by the roster's `since` (the Wren was last in
 // the reach two years ago, on a quiet charting run: content/facts.md), never a guest. Made once, when first asked (the
@@ -46535,7 +46662,7 @@ const FRI_V = new THREE.Vector3(), FRI_AT = new THREE.Vector3(), FRI_WHO = new M
 function friSpeaker(a) {
   const H = a.h, on = q => { FRI_V.set(q.x, q.y + 1.6, q.z).project(camera); return FRI_V.z < 1 && Math.abs(FRI_V.x) < .8 && FRI_V.y < .85 && FRI_V.y > -.9; };
   const old = FRI_WHO.get(a.p.id); if (old && old.H === H) return old;
-  const w = { p: a.p, h: H.h, H, get pos() {
+  const w = { p: a.p, h: H.h, H, get fy() { return H.fy; }, get pos() {   // fy: standing on the stage (FX26, 0.93.2: 8b's bubbles put it above a standing head)
     if (on(H.pos) || typeof player === 'undefined') return H.pos;
     const P = player.obj.position; let lo = 0, hi = 1;     // lo: on the screen (you), hi: off it (the speaker)
     for (let k = 0; k < 12; k++) { const t = (lo + hi) / 2; FRI_AT.set(P.x + (H.pos.x - P.x) * t, H.pos.y, P.z + (H.pos.z - P.z) * t); if (on(FRI_AT)) lo = t; else hi = t; }
@@ -47721,7 +47848,7 @@ function careerClock(now = shipNow(), quiet, hold) {     // -> 'in' | 'out' | nu
   // hold (patch #6, the Undo window): f(fx) gets the punch's side effects (the remark, the clock note) to run later; the punch itself counts at once
   const toast = quiet ? () => {} : TOAST_FN;
   const c = careerInit(now), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
-  if (!playerShiftOn(d)) { toast('Time clock', careerOn(d) ? 'You\'re on leave today. No need to clock in.' : sickToday(d) ? 'You\'re off sick. No need to clock in.' : 'No shift today. The clock can wait.'); return null; }
+  if (!playerOnDuty(d)) { toast('Time clock', careerOn(d) ? 'You\'re on leave today. No need to clock in.' : sickToday(d) ? 'You\'re off sick. No need to clock in.' : 'No shift today. The clock can wait.'); return null; }
   if (!careerClockedIn(d)) {
     if (m >= dayShiftEnd(d)) { toast('Time clock', 'The day shift is over. See you tomorrow.'); return null; }
     if (m < CAREER.clockIn) { toast('Time clock', 'Too early: the clock opens at 08:00. The shift starts at 09:00.'); return null; }   // reviewer 1e
@@ -47756,7 +47883,7 @@ function clockScreen(said, ask, after) {                // after (patch #6): 'un
     addEventListener('keydown', e => { if (e.key === 'Escape' && !el.hidden) el.hidden = true; });
   }
   const now = shipNow(), d = SHIP.time.day, m = SHIP.time.min, C = SHIP.career, mk = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x !== undefined) e.textContent = x; return e; };
-  const on = playerShiftOn(d), inn = careerClockedIn(d), out = careerClockedOut(d), wd = weekday(d);
+  const on = playerOnDuty(d), inn = careerClockedIn(d), out = careerClockedOut(d), wd = weekday(d);
   const st = said || (!on ? (careerOn(d) ? csText('leave', 'On leave today. Enjoy it.') : sickToday(d) ? csText('sick', 'Off sick. Get well.') : csText('offday', 'Day off. No clocking today.'))
     : out ? (wd === 4 ? csText('weekend', 'Shift done. See you Monday.') : csText('done', 'Shift done. See you tomorrow.')) : inn ? friClock('onshift', C.ci % 1440) || csText('onshift', 'On shift since {time}.', { time: hhmm(C.ci % 1440) })
     : m >= dayShiftEnd(d) ? csText('done', 'Shift done. See you tomorrow.') : csText('ready', 'Shift starts at {time}. Tap to clock in.', { time: hhmm(DAY_SHIFT[0]) }));
@@ -47868,11 +47995,11 @@ function careerTick(now = shipNow()) {
   if (c.on !== d && m >= CAREER.clockIn && m < CAREER.missBy && careerRota(d) && !careerOff(d) && careerAtWork()) c.on = d;
   if (c.ci > 0 && !(c.co > c.ci)) { const cd = Math.floor(c.ci / 1440) + 1;   // forgot to clock out: signed out at 17:00, no harm done
     if (cd < d || m >= friAutoOut(d)) { c.co = (cd - 1) * 1440 + dayShiftEnd(cd); if (SHIP.player.clockLog) SHIP.player.clockLog[cd] = c.co - c.ci; if (cd === d) toast('Time clock', careerText(friShort(cd) ? 'clock.auto.friday' : 'clock.auto', d) || 'You forgot to clock out. The clock signed you out at ' + hhmm(dayShiftEnd(cd)) + '.'); } }   // the auto clock-out counts for the time clock screen's hours too (0.28.65)
-  if (c.rm !== d && d > CAREER.grace && m >= CAREER.clockIn && m < dayShiftEnd(d) && playerShiftOn(d) && !careerClockedIn(d)) {   // in the Works bay, not clocked in: a reminder, once a day
+  if (c.rm !== d && d > CAREER.grace && m >= CAREER.clockIn && m < dayShiftEnd(d) && playerOnDuty(d) && !careerClockedIn(d)) {   // in the Works bay, not clocked in: a reminder, once a day
     let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
     if (inBay) { c.rm = d; toast('Time clock', 'Don\'t forget to clock in: the time clock is past the tool wall, by the tea corner.'); }
   }
-  if (!(c.k & 8) && m >= CAREER.clockIn && playerShiftOn(d)) { let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
+  if (!(c.k & 8) && m >= CAREER.clockIn && playerOnDuty(d)) { let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
     if (inBay && typeof tipShow === 'function') { c.k |= 8; tipShow('career.clock', careerText('career.tip.clock') || 'Clock in at the time clock in the Works bay (past the tool wall) when your shift starts, and out when it ends. Leave and sick days need none.'); } }
   for (let k = Math.min(c.e, c.z) + 1; k <= d; k++) {
     if (c.e < k && (k < d || m >= CAREER.missBy)) { c.e = k; if (k > CAREER.grace && careerRota(k) && !careerOff(k) && c.on !== k) { c.ms++; careerMissed(k); } }   // a full worked shift ends the run and re-arms the Chief at the day's end (careerDayEnd); days off, leave and sick days do neither
@@ -59327,6 +59454,7 @@ class CrowdPerson {
   set(pos, face, pose = 'stand', walkPhase) {
     if (!this.fresh) this.moved += Math.hypot(pos.x - this.pos.x, pos.z - this.pos.z);
     this.pos.set(pos.x, pos.y || 0, pos.z); this.face = face; this.pose = pose; this.phase = walkPhase;
+    this.fy = deckDef && deckDef.floorY ? deckDef.floorY(pos.x + OX, pos.z + OZ) : 0;   // FX26 (0.93.2): a raised floor under them (the rec deck's stage); 0 on every other deck
   }
   update(dt, t) {
     const g = this.g, rig = this.rig, h = this.h, { base, act } = parsePose(this.pose, this.pos.y), walking = base === 'walk' || base === 'crouch';
@@ -59341,7 +59469,7 @@ class CrowdPerson {
     animateActivity(this, this.pose, dt, t + g.t0, sk, this.pos.y);
     this.lookOff = base === 'lie' ? 0 : .5 * feelLook(g.t0); rig.head.rotation.x -= this.lookOff;   // a jolt: everyone looks up a moment
     const lie = ss(this.k.lie || 0), fx = Math.sin(this.rot), fz = Math.cos(this.rot), off = .76 * h * lie;
-    const floor = base === 'sit' || base === 'lie' || this.pos.y >= .3 ? 0 : this.pos.y;   // standing on a stage or a treadmill
+    const floor = base === 'sit' || base === 'lie' ? 0 : this.fy > 0 ? this.fy : this.pos.y >= .3 ? 0 : this.pos.y;   // standing on a stage or a treadmill; FX26 (0.93.2, the user's "Captain is clipping through the stage"): y .3 and up is a seat's height, so the rec deck's .55 stage comes as fy (a seat there keeps the high stool's feet-on-the-ring rule)
     const root = rig.root;
     root.position.set(this.pos.x + fx * off, L(floor, (this.pos.y > 0 ? this.pos.y : CROWD_SEAT[base] || CROWD_SEAT.sit) + .17 * h, lie), this.pos.z + fz * off);   // as before 0.27.0, getting out of bed
     root.rotation.set(-Math.PI / 2 * lie, this.rot, 0);
@@ -59830,8 +59958,9 @@ const bubbles = { list: [], hidden: false, el: null, v: new THREE.Vector3(), on:
     const on = this.on, now = performance.now(), dts = this.at ? Math.min(.1, (now - this.at) / 1000) : 1, ease = Math.min(1, dts * 10), lim = 900 * dts; on.length = 0; this.at = now;   // lim: a slide never goes faster than 900 px a second (0.47.10)
     for (const b of this.list) {
       const w = b.who, p = w.pos || (w.obj && w.obj.position) || w, h = w.h || 1;
-      const seat = w.pos && w.pos.y >= .3 ? w.pos.y : 0;   // seated: above the head on the seat; standing: above a standing head
-      this.v.set(p.x, seat ? seat + 1.15 * h : (w.pos ? w.pos.y : w.obj ? w.obj.position.y : p.y || 0) + 2.0 * h, p.z).project(camera);
+      const stage = w.fy > 0 && w.pos && w.pos.y < w.fy + .3;   // FX26 (0.93.2): standing on the rec deck's stage (the body's fy), not seated
+      const seat = !stage && w.pos && w.pos.y >= .3 ? w.pos.y : 0;   // seated: above the head on the seat; standing: above a standing head
+      this.v.set(p.x, seat ? seat + 1.15 * h : (stage ? w.fy : w.pos ? w.pos.y : w.obj ? w.obj.position.y : p.y || 0) + 2.0 * h, p.z).project(camera);
       const vis = !this.hidden && this.v.z < 1 && Math.abs(this.v.x) < 1 && this.v.y < .95 && this.v.y > -1;   // any zoom the camera allows (0.27.18)
       b.el.style.display = vis ? '' : 'none';
       if (!vis) continue;
@@ -62355,7 +62484,7 @@ function devmodeTopUp() { devmodeDo('Top up needs', () => { for (const k of NEED
 function devmodeClock(body) {
   const d = SHIP.time.day, st = devmodeState();
   const now = typeof careerClockedIn === 'function' && careerClockedIn(d) && !careerClockedOut(d) ? 'clocked in' : st.ex.includes(d) ? 'excused today'
-    : typeof playerShiftOn === 'function' && playerShiftOn(d) ? 'a workday' : 'no shift today';
+    : typeof playerShiftOn === 'function' && playerOnDuty(d) ? 'a workday' : 'no shift today';
   devmodeHead(body, 'Now');
   devmodeText(body, clockText() + ' · ' + now);
   devmodeRow(body, [['Next morning', () => devmodeGo('next morning', () => devmodeNext(WAKE_AT))],
