@@ -840,8 +840,9 @@ P4FIRST = r"""(() => {
 P5SWEEP = r"""(() => {
   const out = { cases: [], fit: 0 }, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, tools: W.tools };
   const jr = jobRun; jobRun = () => null; flagSet('case.p5.first', 'none');
-  W.rank = 'senior'; W.tier = 3; W.op = { 18: ['p5'] }; W.tr = {}; W.tools = Object.assign({}, W.tools, { pipekit: [12, 0] }); C.open = [];
+  W.rank = 'senior'; W.tier = 3; W.op = { 18: ['p5'] }; W.tr = { m19: 17 }; W.tools = Object.assign({}, W.tools, { pipekit: [12, 0], tester: [17, 0] }); C.open = [];
   const lines = Object.keys(MACHINE_LINKS).filter(l => lineOn(l)), all = [...new Set(lines.flatMap(lineIds))];
+  { const tr = W.tr; W.tr = {}; out.powerNoM19 = all.filter(id => caseCauses(machineById(id)).some(f => f.line === 'power' && CASE_KINDS.p5.fits(f, machineById(id)))).length; W.tr = tr; }   // the power stage waits for M19
   for (let d = 18; d <= 24; d++) {
     if (!playerShiftOn(d)) continue;
     const t = (d - 1) * 1440 + 600; setShipNow(t); machinesNow();
@@ -857,7 +858,7 @@ P5SWEEP = r"""(() => {
       const rate = CASE_RATE.senior; CASE_RATE.senior = 1; caseOffer(j, (d - 1) * 24 + 10); CASE_RATE.senior = rate; Object.assign(CASE_KINDS, keepK);
       const c = caseOf(j); if (!c) { SHIP.jobs = SHIP.jobs.filter(x => x !== j); continue; }
       const path = p5Line(m, f), st = p5Steps(f.line, path), at = s => caseSusAt(s) || id;
-      out.cases.push({ id: c.id, kind: c.kind, band: c.band, lim: caseBandOf(c.kind, c.band), cause: c.cause, sus: c.sus.slice(), fewest: c.fewest, title: j.title, card: caseCard(j), at0: caseAt(j), machine: id,
+      out.cases.push({ id: c.id, kind: c.kind, band: c.band, lim: caseBandOf(c.kind, c.band), cause: c.cause, sus: c.sus.slice(), fewest: c.fewest, title: j.title, card: caseCard(j), at0: caseAt(j), machine: id, line: f.line,
         susSteps: c.sus.map(s => st[at(s)]), causeStep: st[id], shown: !c.wait, parts: j.parts.slice(),
         clues: c.clues.map(k => ({ id: k.id, at: k.at, kills: k.kills.slice(), m: k.src.m, flow: k.src.flow, live: lineFlow(f.line, k.src.m), step: st[k.src.m], tool: k.src.tool, deck: caseClueDeck(k), reach: caseReachable(k), panel: panelPlace(k.src.m) === k.at, text: caseClueText(c, k) })) });
       SHIP.jobs = SHIP.jobs.filter(x => x !== j);
@@ -897,9 +898,10 @@ P5FIRST = r"""(() => {
 def part_p5(g, path):
     if not g.ev("typeof p5Stage === 'function'"): return 'not yet'
     S = g.ev(P5SWEEP)
-    cs = S['cases']; print(f"p5: {S['fit']} fits, {len(cs)} cases")
+    cs = S['cases']; print(f"p5: {S['fit']} fits, {len(cs)} cases, by line {dict((l, sum(1 for c in cs if c['line'] == l)) for l in sorted({c['line'] for c in cs}))}")
     for c in cs[:3]: print('  ', c['id'], c['sus'], [(k['m'], k['flow'], k['kills']) for k in c['clues']], c['title'])
     check(len(cs) >= 5, f"p5: the sweep made cases: {len(cs)}")
+    check(S['powerNoM19'] == 0, f"p5: no power case before M19 is trained: {S['powerNoM19']}")
     from itertools import combinations
     for c in cs:
         sus, clues, L = c['sus'], c['clues'], c['lim']
@@ -910,7 +912,7 @@ def part_p5(g, path):
         honest = all((k['flow'] >= .8) == (k['step'] < c['causeStep']) and abs(k['flow'] - k['live']) < .002 for k in clues)
         check(honest, f"{c['id']}: full above the fault, low from it on, as the line really reads: {[(k['m'], k['flow'], k['live'], k['step']) for k in clues]} cause step {c['causeStep']}")
         check(c['causeStep'] not in [s for s, x in zip(c['susSteps'], sus) if x != c['cause']], f"{c['id']}: no suspect on the fault's own step")
-        check(all(k['panel'] and k['reach'] and k['tool'] == 'pipekit' for k in clues), f"{c['id']}: each reading at its machine's panel, with the pipe kit")
+        check(all(k['panel'] and k['reach'] and k['tool'] == ('tester' if c['line'] == 'power' else 'pipekit') for k in clues), f"{c['id']}: each reading at its machine's panel, with the pipe kit (the conduit tester on a power line)")
         check(c['shown'] and c['parts'] == [] and c['machine'] not in (c['title'] + ' '.join(map(str, c['card'] or []))) and c['at0'] != c['machine'], f"{c['id']}: the card names the symptom, not the machine: {c['title']!r} {c['card']} {c['at0']}")
     F = g.ev(P5FIRST)
     print('p5 first:', F)
@@ -1072,7 +1074,10 @@ def part_p4(g, path):
 def part_board(g, path):
     if not g.ev("typeof mysOpen === 'function' && typeof DEVICE_APPS !== 'undefined' && DEVICE_APPS.has('oldcases')"): return 'not yet'
     A = g.ev(BOARD); print('board:', A)
-    g.step(240)
+    for k in range(30):                                   # the walk over to it, then it opens
+        g.step(30)
+        if g.ev("DEV.open && DEV.app === 'oldcases'"): break
+    print('  walked:', g.ev("[Math.round(player.obj.position.x * 10) / 10, Math.round(player.obj.position.z * 10) / 10, (player.path || []).length, DEV.open, DEV.app]"))
     B = g.ev(BOARD2); print('board, read:', B)
     check(A['item'] and A['tap'] is True, f"the board is on Deck 5 and taps: {A['item']} {A['tap']}")
     check(A['shutOfficer'] and A['shutDay20'], f"shut for an Officer and before Day 21: {A['shutOfficer']} {A['shutDay20']}")
