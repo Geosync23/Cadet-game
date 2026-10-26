@@ -59628,6 +59628,8 @@ function sdView() {
   const aff = sdAffected(day, SD_UI.branch, SD_UI.at, SD_UI.keep), marks = sdHourMarks(aff), bad = marks.length > 0;
   say(worksText('sd.step.hour', '4. The hour'), 'head');
   say(hhmm(SD_UI.at) + '-' + hhmm(SD_UI.at + SD_LEN) + ': ' + (aff.length ? worksText('sd.who.n', '{n} people in those rooms then', { n: aff.length }) : worksText('sd.who.none', 'nobody in those rooms then: a quiet hour')) + (bad ? '. ' + worksText('sd.hour.bad', 'Clashes with {thing}.', { thing: marks.join(', ') }) : '.'), bad ? 'urgent' : aff.length ? null : 'up');
+  { let cl = null; try { cl = typeof p9ShutClash === 'function' ? p9ShutClash({ day, at: SD_UI.at, branch: SD_UI.branch, keep: SD_UI.keep.slice() }) : null; } catch (e) { cl = null; }   // 24k's P9 (B4): a crew routine in those rooms then; pure, asked on each draw
+    if (cl && cl.who) say(worksText('case.p9.shut', 'Your shutdown hour clashes with {name}\'s {thing}. Move one of them.', { name: worksName(cl.who), thing: cl.thing || '' }), 'urgent'); }
   B.push({ kind: 'buttons', items: [sdBtn(worksText('sd.prev', 'Earlier hour'), 'hour', -1), sdBtn(worksText('sd.next', 'Later hour'), 'hour', 1), sdBtn(worksText('sd.hour.quietest', 'Quietest hour'), 'quiet', 0)] });
   say(worksText('sd.step.warn', '5. Warn who\'s affected'), 'head');
   if (!aff.length) say(worksText('sd.warn.none', 'Nobody to warn at that hour.'));
