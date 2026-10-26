@@ -967,6 +967,13 @@ gives way to clock-out at the shift's end. Test: `python3 arrows_d_check.py BUIL
 - **Words:** `content/works/promo-beats.lines` (notices, rows, Mails: `mail.pb.*` keys for the 400 limit, `{time}` and `{day}`), `content/banks/promo-beats.lines` (the crew's bubbles, kinds `pb.soon|luck|watch|passed|officer`), Calder's `work` lines under `flag:pb.promo.*`, `content/meetings/promo.result.meet`.
 - **Test:** `promo_beats_check.py BUILD [off pointer before passed result cabin talk]` (about 2 minutes). promo_sight_check's `move` part runs with the switch off (FX19's 17:00 walk).
 
+## The ending (section 29, the ending engineer EN1 for lead 39, 2026-10-26; switch `EV_ENDING_ON`, off)
+- **The spec:** `plans/ending-spec.html` on claude/p5-specs (EP2; the user's pick 2026-10-26: the crossing back, then the transfer offer: stay for the endgame or go with a big goodbye). Pieces E-1 (the crossing back, section 18, the events builder), E-2 (the offer and your answer, 29a) and E-3 (the goodbye, the end page, the kept copy, 29b) for EN1, E-4 (the endgame, 29c), E-5 (words).
+- **Switch (section 13):** `EV_ENDING_ON = URL_FLAGS.has('ending')`, on its own line after `P926_APPT` (the vessel's `EV_VESSEL_ON` goes there too: when both merge, keep the vessel's line first). `?ending` or `#ending` previews it.
+- **Section 29 (THE ENDING), after section 27 and just before the main loop** (not right after 24x/28 as the spec puts it: that spot is where Step 5's 24u-24x and Step 6's 28 add their lines, so the ending there would clash on every merge; at the end it also loads after everything it reads: 11's UI, 19's Saves app, 20's chat card, 25, 26). Sub-sections 29a THE OFFER (slot `Ending offer`), 29b THE GOODBYE AND THE END PAGE (slot `Ending goodbye`), 29c THE ENDGAME (slot `Endgame`). Empty so far.
+- **Its save:** `SHIP.end = { offer, said: [[day, 'stay' | 'go' | 'unsure']], settled }`; the kept copy at `SAVE_KEY + '-before-end'` (never with nosave, never into another slot).
+- **The user's three ending questions are open;** built as recommended, each other choice one switch away: a way back via the kept copy; change your mind until the Captain's address; one post worded by Calder's answer.
+
 ## Hook register
 
 One-line, `typeof`-guarded calls from one section into another (plans/pillar4-plan.md, "Keeping the one file from colliding"). The lead keeps this list; owners add their rows.

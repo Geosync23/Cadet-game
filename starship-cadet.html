@@ -9448,6 +9448,7 @@ const P926_TRADS = true, P926_NEW = new Set(['six-weeks-aboard', 'twelve-weeks-a
 const EV_SWAP_ON = URL_FLAGS.has('evswap');            // 0.93.2 (FX22b; plans/trad-variety-pitch.html section 5, option A): the diplomatic visit before the comet (section 18's 'event swap' block); off: the order as before
 const EV_COMET_ON = true;                                 // 0.93.2 (FX25; plans/events-plan-2.html Part A, the user's yes): the comet viewing on Monday Day 22, 21:30-22:40 (section 18's 'comet' block, with the events base on); false: the game before it
 const P926_APPT = true;                 // 0.92.6 item 9 (FX22; plans/patch-0.92.6.md): appointments as small traditions, each with its scene, and a real talk at every appointment; off: none of it (the game as 0.92.5)
+const EV_ENDING_ON = URL_FLAGS.has('ending');          // the ending (EN1 for lead 39; plans/ending-spec.html on claude/p5-specs, EP2, the user's pick 2026-10-26): the offer from Concord headquarters, your answer, the goodbye, the end page and the endgame (section 29; the crossing back is section 18's); off: none of it (?ending or #ending previews it)
 // save slots (0.93.2, FX27; the user's yes, 2026-10-26; the Saves app, section 19): three games per link type (Playtest,
 // Dev) and browser. Slot 1 is the save's old name (SAVE_BASE), so a save from before slots is Slot 1, untouched; slots 2
 // and 3 add '-2' and '-3'. The slot being played is kept under SAVE_BASE + '-slot' (read here, once: switching reloads
@@ -65502,6 +65503,44 @@ const SND = (() => {
   S._ = { FX, HUMS, STEP, LOOPS, startHum: (...a) => startHum(...a), state: () => ctx ? ctx.state : 'off', allowed: ALLOWED };
   return S;
 })();
+
+// =====================================================================
+// 29. THE ENDING (the ending engineer EN1 for lead 39; plans/ending-spec.html on claude/p5-specs by EP2, the user's pick
+// 2026-10-26). Behind EV_ENDING_ON (section 13); off: nothing here does anything. The crossing back (Sunday Day 35) is
+// section 18's block (E-1, the events builder); this section is the offer, your answer, the goodbye, the end page, the
+// kept copy and the endgame. Its save: SHIP.end = { offer, said: [[day, 'stay' | 'go' | 'unsure']], settled }. Step 6's
+// and the vessel's data are read only through typeof-guarded calls, with plain fallbacks. Placed after section 27, just
+// before the main loop, so it loads after everything it reads and no other branch adds lines at this spot.
+// =====================================================================
+
+// ---------------------------------------------------------------------
+// 29a THE OFFER (E-2, the ending engineer). Thursday Day 32 at 16:00 in the Captain's ready room (the letter from Concord
+// headquarters, through the Captain; the Admiral is her fish), Calder's walk, the friends' "About the transfer" (section
+// 20's chat card, through its hook), Zeke's Friday talk, the call home (section 18's booths, through their hook), the
+// Captain's "About the transfer" until her address, her 19:30 Saturday search, "Not sure yet", a slower career's later days.
+// Empty until E-2 turn 2.
+// ---------------------------------------------------------------------
+
+// ---- slot: Ending offer (section 29a). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Ending offer ----
+
+// ---------------------------------------------------------------------
+// 29b THE GOODBYE AND THE END PAGE (E-3, the ending engineer; the HUD seat reviews the page, FX27's saves owner the kept
+// copy). Monday Day 36 if you go: the last morning, the crowd in the shuttle bay, the farewells up the aisle, Zeke at the
+// ramp's foot, the Tern leaving (section 14's, called), the end page; the kept copy (SAVE_KEY + '-before-end', made once on
+// your first "Go", never with nosave, never into another slot) and the ended save. Empty until E-3.
+// ---------------------------------------------------------------------
+
+// ---- slot: Ending goodbye (section 29b). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Ending goodbye ----
+
+// ---------------------------------------------------------------------
+// 29c THE ENDGAME (E-4, the dialogue engineer for the line gate and the Works career engineer for "What's next"). If you
+// stay: the end.stay flag, the calendar closed for good, no more promotions, the first morning's scene. Empty until E-4.
+// ---------------------------------------------------------------------
+
+// ---- slot: Endgame (section 29c). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Endgame ----
 
 // =====================================================================
 // 12. MAIN LOOP

@@ -83,6 +83,12 @@ RULES = {
 for k in ['24', '24a', '24b', '24c', '24d', '24m', '24n', '24g', '24i', '24j', '24t', '24s', '24e', '24f', '24h', '24l', '24o', '24q', '24r', '24p']:
     RULES[k] = ['career', 'mech', 'leave']
 RULES['24k'] = ['puzzle', 'mech', 'career']
+# the ending (section 29, EN1; plans/ending-spec.html): picked by the rules alone until the map is remade (ending_check joins
+# CHECKS when it's written, E-2 turn 2)
+RULES['29'] = ['events', 'bigevents', 'saves', 'social', 'day1', 'devmode']
+RULES['29a'] = ['events', 'bigevents', 'social', 'talk', 'saves', 'day1']
+RULES['29b'] = ['saves', 'devmode', 'deck', 'events', 'bigevents', 'perf', 'day1', 'cadet']
+RULES['29c'] = ['lines', 'talk', 'social', 'events', 'bigevents', 'career', 'day1']
 
 
 def git(*a):
