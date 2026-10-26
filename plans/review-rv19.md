@@ -169,4 +169,77 @@ Notes (not blocking):
 
 ## FX28, promotion beats (claude/promo-beats, PROMO_BEATS_ON)
 Added by lead 38 at 05:07: the Tier 2 test and promotion made "very very hard to miss" (the user). Lands in steps over
-about 9-10 h; each step reviewed as it arrives, every one on a phone-size screen. Not pushed yet.
+about 9-10 h; each step reviewed as it arrives, every one on a phone-size screen.
+
+### Step 1: bd558a84 (0.93.2-p.1, game sha256 0676819d...b1ef), PROMO_BEATS_ON true as pushed
+Diff read: 24p's slot (PROMO_BEATS_ON, promoBeatsOn needs PROMO_SIGHT_ON too, PB_TIMES, promoBK, promoCerTimes,
+promoCakeWin, promoBeatsApply mutating PROMO and OCCASIONS.promoSummons at load and each minute, promoBeatsPtr,
+promoNotice, promoBeatsPassed, promoBeatsItems, promoBeatsWalkWait, promoTalkKind / promoTalkTick, promoBeatsTick, the
+Torres onSim), 24p readers (promoPlan, promoScript, the summons and seek, the cake, the walk, promoCerDay / promoCerTick,
+promoGuide's levels), section 19 (devDay rows; pointLimit's `force`), 15b (guideShift's test pointer), 25 (the steps
+sorted), section 22 words (baked). Nothing new calls R() at load. Off: promoBK, promoCerTimes, promoCakeWin give PROMO's.
+
+| Check | Build | Result |
+|---|---|---|
+| cadet_test vs b957b92d, alone | bd558a84, PROMO_BEATS_ON false | ALL IDENTICAL |
+| cadet_test vs b957b92d, alone | bd558a84 as pushed (on) | ALL IDENTICAL |
+| check_fast | bd558a84 | QUICK CHECK OK in 520 s |
+| promo_beats_check, promo_sight_check, mech_check | bd558a84 | OK, OK, OK |
+| career_check | bd558a84 | FAILED: 3. "busy: Relied on before Day 5" is old (b957b92d fails it too); NEW: "promoted once, on Day 10 at the scene: [[10, '10:00', 'mail']]" and "Tier 2 officer ... the reply remembered: None" (M3) |
+| devmode_check | bd558a84 | FAILED (NEW): "the Day 10 promotion beat (at 08:02 the summons is booked, still a junior): clock Day 10 10:50, rank officer" (M4) |
+
+### Played at phone size (390 x 844), Dev mode on a real Dev save (plans/rv19-promo-live.py)
+Set career to Day 8, then the test morning, the board, the test turned in, the evening, the result day, the pip, the cabin.
+- Day 8: the ready Mail and urgent notice at 06:00 ("Your Tier 2 test: tomorrow, 09:00"), Tomas's and Pell's luck Mails
+  at 20:00. Good.
+- Day 9 06:00 (in the bay): the morning notice; then Calder, as toasts because she isn't there, "There it is. Yours. I'm
+  watching, not helping." (step3's promo.test.start, meant for 09:00) and "Morning. Nine o'clock it goes on the board" (S1).
+  Tracked has "09:00 Your Tier 2 test". Bay chatter: "Your Tier 2 test? You've been aboard nine days." Good.
+- Day 9 09:02, Teaching arrows Off, board open: the gold ring on the test's Take it, "Your Tier 2 test: take it" (shot
+  B2). Good. (Another section's "Your shift starts now" banner sits over the list: not FX28's.)
+- Turned in: Calder "That's the test. Filter in, fan settled.", the Mail and the urgent notice "Your result: tomorrow,
+  08:15, the Chief's office"; the evening in the mess "Result tomorrow, first thing..." and "Heard you did your Tier 2
+  test. How'd it go?". Good.
+- Day 10 06:00: the result Mail and urgent notice; Tracked "08:15 Your result: the Chief's office". Good.
+- Day 10 07:50-08:40, waiting in the Works bay (needs low, as after Dev skips): the only world arrow is a needs one,
+  "Somewhere to sit and unwind" (shot D2); the office is marked only by Dev mode's own arrow. Calder never comes out: the
+  meeting passes "missed" at about 08:45 with a "(notes)" Mail and the promotion by Mail (M1, M2). With needs topped up the
+  result's arrow does show (shot G1) and walking into the office at 08:10 gives the promo.result card at 08:15; through
+  it you're an Officer, the Captain's and friends' Mails, the invite "Your pip, 16:30". Good.
+- Day 10 16:00: the urgent notice "The Captain pins your pip at 16:30... Go now." and Calder's word; the arrow from 16:10
+  "Tap the lift: Deck 1 · Your commission" (shot H2). Good. Staying in the bay: 16:45 Calder's "The Captain's waiting"
+  only as a toast (she's on Deck 1), the ceremony closes at 16:55 with a "(notes)" Mail (S2), and at 19:28 (in a Dev
+  skip) the commission-by-Mail says "Your commission, 17:15 | The officer ceremony is today at 17:15..." (S3).
+- 20:00 (never ate): the urgent notice "Calder is walking you there now", her lines as toasts; at 20:30 not walked yet,
+  still the bunk (she has to come from wherever she is; S4).
+- Dev mode note: a Dev clock skip past 12:30 on the result day "excuses" it, which moves the result to the next workday
+  while the "(notes)" Mail already says you passed. Dev only.
+
+### Findings
+**Must**
+- M1. The result's arrow (promoGuide's promo:summons) is level 2; an urgent needs nudge took the world arrow all of 07:50
+  -08:40 in my run. Make it level 1, like the test's, the pip's and the cabin's: the step the user most wants unmissable.
+- M2. In the Works bay at 08:15 (the likeliest place: you clock in there; the office is in the bay) nothing happens: the
+  seek skips `promoInBay()`, so the result goes by Mail at about 08:45. With the switch on, Calder should come out to you in
+  the bay too (or the card start beside her door), so the result is always said in person unless you're nowhere near.
+- M3. career_check fails twice where 0.93.1 passes: the promotion comes by Mail at 10:00, not at the scene, and the reply
+  isn't remembered. Fix the cause or the check, and say which.
+- M4. devmode_check fails: Dev mode's Day 10 promotion beat (DM_BEATS 'promo') still lands at 10:50, after the 08:15 result,
+  so you're already an Officer. Move it to the new time with the switch on.
+
+**Should**
+- S1. On the test morning Calder's step3 line "There it is. Yours. I'm watching, not helping." comes at 06:00 (the job is
+  made then, found at 09:00), before her new morning word; both as toasts when she isn't there. Say "There it is" when the
+  job is up, and the morning word only when she's in the bay with you (worksSay toasts otherwise). Check 0.93.1 too.
+- S2. The pip's seek: r.len is stretched to hold the room, but the ceremony closed at 16:55 (+25) without you, and Calder
+  never reached the bay from Deck 1. Check the room waits as meant, switch off and on.
+- S3. promoCommission's Mail uses `mail.promo.ceremony`, an invite text with "17:15" (content/works/step3.lines): wrong
+  words for a missed commission, and with the switch on the wrong time too. (Off: the same words exist in 0.93.1; a
+  backlog row if not fixed here.)
+- S4. The 20:00 walk says "Calder is walking you there now" while she's elsewhere; her lines arrive as toasts and nothing
+  had happened by 20:30. Have her come to you first, or word it as "Calder's on her way".
+- S5. The two build-number lines are the build master's (0.93.2-p.1 here).
+- S6. "Works reputation down: New officer" shows twice the afternoon you're promoted (xp reset to 0). Reads as a
+  punishment on your best day. Probably old; worth a word or a backlog row.
+
+**Verdict on bd558a84: FIXES NEEDED (M1-M4).**
