@@ -224,3 +224,12 @@ machine_check OK.
 (ACT kind 'lie'; sleeping is a different path) gets up first (CR1's arrows_check week FAIL: the follower lay down at the
 berth's arrow at 06:29 and stayed there all day). cadet_test off ALL IDENTICAL; with INSPECT_ON on: arrows_check week OK,
 events_check OK.
+
+## Workbench tap (FX24, claude/workbench-tap 484cde7d, game 4cee4b2b...e915; fix 82188f38): PASS
+One line in jobTap: with no machine job, in the machine shop (Deck 5 room f), a tap that jobSpotTap places at your chore's
+stop runs the chore before shopTap (orders, tinkering). No switch (a bug fix; lead 38). Reproduced on a local merge of
+484cde7d + inspection 5793626 (not pushed; the schedFrame bed lines clash: keep both): arrows_check week FAILED without the
+line ("Fix an extractor hose clamp" up 3+ ship hours from Day 8 13:45), OK with it. On the branch: cadet_test vs staging
+52d5998a ALL IDENTICAL; interactions OK; mech_check m10 OK (crafting and tinkering unaffected). A live tap on the Workbench
+at 5-shop-5 starts the chore; it needs a shop order or tinkering open at the same time to show the old bug, so the arrows
+run is the reproduction.
