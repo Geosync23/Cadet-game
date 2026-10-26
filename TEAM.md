@@ -1452,3 +1452,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~19:53 UTC: SW2 at 59%: finishes swap fix + handover, then idle. **Hired SW4 session_01DgMynb62u2rTUA9RocZi65** for the vessel words (claude/vessel-words). VB1 told.
 - ~19:54 UTC: B1 band conflict (Tier 2 Relied on): lead call 42 (steady by storm Saturday; busy Day 11 harmless since the offer waits for Day 14).
 - ~19:55 UTC: B4 calls OK (P4 stuck gauge, P5 honest flow clues). Lead: B2 adds power line in MACHINE_LINKS + junction/inverter/conduit/battery faults in S5-3 (for B4 P5 power stage + B3 jobs); P9 real via ONE shared section 14 hook with B3 (settled at 22:00).
+- ~19:57 UTC: **USER answered Steps 5-6: all recommended** (early Dev link after S5-2 yes; power safety lesson; mealtime shutdowns allowed w/ grumble; Monday briefing weekly; Calder's question four answers). EP2, B1, B3 told.
