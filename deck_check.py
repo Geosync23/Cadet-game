@@ -153,10 +153,30 @@ LEAKS = r"""(() => { const L = deckDef.leakJoints; if (!L) return null;
     if (j.puddlePlace && (!q || BLOCKED.has(K(q.at)) || q.room !== p.room)) bad.push(j.puddlePlace + ': the puddle\'s place is missing, blocked or in another room'); }
   return { n: L.length, bad }; })()"""
 
+# 0.92.5 (the user's item 7, "booths and sofas in the lounge clip and flicker"): in each seat kit, no two of its boxes share an
+# outer face (the same plane, the same side, overlapping): the phones-first rule, no coplanar surfaces
+COPLANAR = r"""(kinds => { const out = {};
+  for (const [kind, o] of kinds) { const g = new THREE.Group(); KIT[kind](g, o); g.updateMatrixWorld(true); const bx = [];
+    g.traverse(m => { if (!m.isMesh || !m.geometry || m.geometry.type !== 'BoxGeometry' || m.material === HIT_MAT) return;
+      const e = m.rotation; if (Math.abs(e.x) + Math.abs(e.y) + Math.abs(e.z) > 1e-6 || m.parent !== g) return;   // axis-aligned boxes only
+      m.geometry.computeBoundingBox(); const b = m.geometry.boundingBox.clone().applyMatrix4(m.matrixWorld); bx.push(b); });
+    const bad = [], E = 1e-4, A = ['x', 'y', 'z'];
+    for (let i = 0; i < bx.length; i++) for (let j = i + 1; j < bx.length; j++) for (let a = 0; a < 3; a++) for (const s of ['min', 'max']) {
+      if (Math.abs(bx[i][s][A[a]] - bx[j][s][A[a]]) > E) continue;   // the same face plane, the same side
+      const [p, q] = A.filter((_, k) => k !== a), ov = (Math.min(bx[i].max[p], bx[j].max[p]) - Math.max(bx[i].min[p], bx[j].min[p])) * (Math.min(bx[i].max[q], bx[j].max[q]) - Math.max(bx[i].min[q], bx[j].min[q]));
+      if (Math.min(bx[i].max[p], bx[j].max[p]) - Math.max(bx[i].min[p], bx[j].min[p]) > E && Math.min(bx[i].max[q], bx[j].max[q]) - Math.max(bx[i].min[q], bx[j].min[q]) > E) bad.push(i + '/' + j + ' ' + s + A[a] + ' ' + ov.toFixed(4)); }
+    out[kind + (o.w ? ' w ' + o.w : '')] = bad; }
+  return out; })"""
+SEAT_KITS = "[['booth', {}], ['sofa', { w: 2.4 }], ['sofa', { w: 2.0 }], ['armchair', {}], ['windowSeat', {}], ['beanbag', {}]]"
+
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
+    cp = g.ev(f"({COPLANAR})({SEAT_KITS})")
+    print('Seat kits, faces shared between their boxes (none wanted):', cp)
+    if any(cp.values()): ok_seats = False; print('  a seat kit has coplanar faces (they flicker)')
+    else: ok_seats = True
     decks = g.ev("typeof DECK_ORDER !== 'undefined' ? DECK_ORDER.slice().sort((a, b) => a - b) : Object.keys(DECKS).map(Number)")
-    ok = True
+    ok = ok_seats
     allIds = {}
     allMachines = {}
     for n in decks:
@@ -205,6 +225,16 @@ with sync_playwright() as pw:
     for m in mem[len(decks) - 1:]: v = json.loads(m); same.setdefault(','.join(v[1]), set()).add(json.dumps(v[0]))
     if any(len(v) > 1 for v in same.values()): ok = False; print('  memory changes between round trips')
     if not any(sum(1 for m in mem[len(decks) - 1:] if ','.join(json.loads(m)[1]) == k) > 1 for k in same): ok = False; print('  no two round trips to compare')
+    # 0.92.5 (the user's item 6): the auditorium's piano (and its bench) is on stage only during talent night, tappable only then
+    if 7 in decks:
+        g.ev("goToDeck(7)"); g.step(3)
+        td = g.ev("(() => { for (let d = 1; d <= 60; d++) if (tradOn('rec-talent-night', (d - 1) * 1440 + 1180)) return d; return null; })()")
+        pn = []
+        for m in ([1080, 1180, 1300] if td else []):
+            g.ev(f"setShipNow(({td} - 1) * 1440 + {m})"); g.step(30)
+            pn.append(g.ev("(() => { const it = ITEMS.find(i => i.t === 'Grand piano'); return [REC_SHOW.state, (REC_SHOW.piano || []).map(q => q.visible).concat(!!it && isShown(it.hit))]; })()"))
+        print(f"  the auditorium piano on talent night (Day {td}) at 18:00, 19:40, 21:40: [show, piano, bench, tappable]", pn)
+        if pn != [[None, [False, False, False]], ['talent', [True, True, True]], [None, [False, False, False]]]: ok = False; print('  the piano should be on stage (and tappable) only during talent night')
     print('errors', g.errors)
     if g.errors: ok = False
     print('DECK CHECK OK' if ok else 'DECK CHECK FAILED')

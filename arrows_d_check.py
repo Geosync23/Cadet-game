@@ -26,6 +26,8 @@ import sys, json, re, os, pathlib
 from playwright.sync_api import sync_playwright
 
 WORK = pathlib.Path(os.environ.get('CADET_WORK', '/tmp/cadet-work'))
+RUN_ID = f'p{os.getpid()}_'   # FX18-1: this run's copies carry the process id (two runs in one CADET_WORK never open each other's), gone at exit
+__import__('atexit').register(lambda: [f.unlink(missing_ok=True) for f in (WORK / 'test').glob(f'*_{RUN_ID}*') if f.is_file()])
 (WORK / 'test').mkdir(parents=True, exist_ok=True)
 THREE = (WORK / 'three/package/build/three.min.js').read_text()
 INIT = """(() => { let vt = 1000; const cbs = []; performance.now = () => vt; Date.now = () => vt;
@@ -46,7 +48,7 @@ class Page:
         self.page.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
         self.page.add_init_script(INIT)
         html = pathlib.Path(path).read_text(); i = html.rfind('})();')
-        tmp = WORK / 'test' / ('_arrows_d_' + tag + '_' + pathlib.Path(path).name)
+        tmp = WORK / 'test' / ('_arrows_d_' + RUN_ID + tag + '_' + pathlib.Path(path).name)
         tmp.write_text(html[:i] + "window.__sc = src => eval(src);\n" + html[i:])
         self.page.goto('file://' + str(tmp) + '#dev')
         self.page.wait_for_function('window.__sc !== undefined', timeout=90000)
@@ -102,11 +104,16 @@ def part_on(pg):
     if not pg.ev("guideTakeable().length"): pg.ev(f"({JOB})('arrows-d1', false)")
     shift(pg); lab = pg.ev(LAB)
     e = pg.ev("guideList().find(e => e.id === 'shift:job:9') || null")
-    print('  S3:', lab)
-    check(e and e['level'] == 4 and lab == 'Take a job at the board', f'S3: clocked in, a job to take: "Take a job at the board" at level 4 ({lab}, {e})')
+    # (RV16, 0.93.1) Day 9 is the Tier 2 test day: with the test on the board the arrow names it ("Your Tier 2 test job") and
+    # the pointer marks its Take it (FX10/FX15's lesson rule). Before 0.93.1 this check's own clock step back (07:50.2 -> 07:50)
+    # let the board drop the not-yet-posted test job, so S3 saw a plain board; it no longer does
+    les = pg.ev("(() => { const l = boardLesson(); return l ? 'Your ' + boardLessonName(l) : null; })()")
+    print('  S3:', lab, '(a lesson on the board: ' + les + ')' if les else '')
+    want = les or 'Take a job at the board'
+    check(e and e['level'] == 4 and lab == want, f'S3: clocked in, a job to take: "{want}" at level 4 ({lab}, {e})')
     pg.ev("ixBoard.open()"); shift(pg); p = ptr(pg)
     print('  S3 pointer:', p)
-    check(p['up'] and p['now'] == 'p:board:take' and p['text'] == 'Take it', f'S3: on the board, the pointer on Take it ({p})')
+    check(p['up'] and p['text'] == 'Take it' and (p['now'].startswith('p:board:lesson:') if les else p['now'] == 'p:board:take'), f'S3: on the board, the pointer on Take it ({"the lesson" if les else "the first row"}) ({p})')
     pg.ev("POINT.aim.click()"); pg.step(2); shift(pg); lab = pg.ev(LAB); p = ptr(pg)
     mine = pg.ev("myJob() && myJob().id")
     check(mine and lab and lab != 'Take a job at the board' and not p['up'], f'S3: taken: the job\'s own arrow, no pointer ({mine}, {lab}, {p})')
@@ -127,10 +134,10 @@ def part_on(pg):
       SHIP.jobs.push({ id: 'arrows-tj', machine: myJob().machine, deck: 5, kind: 'repair', urgency: 1, posted: now, found: now, claimedBy: null, parts: [], status: 'open' });
       W.cur = { id: 'm4', st: 'do', d: 9, by: 'esposito-yara', j: 'arrows-tj' }; guideTrain();
       guideAsk({ id: 'arrows-q4', level: 4, goal: () => ({ deck: 5, room: 'w', label: 'arrows-q4' }), until: now + 30 });
-      GUIDE.key = ''; const g = goalNow(), t3 = guideList().find(e => e.id === 'train:m4:do');
+      GUIDE.key = ''; const g = goalNow(), t3 = guideList().find(e => e.id === 'train:m4:do:9');   /* (DS1, patch 0.92.5 #12: T3 is per day) */
       guideDrop('arrows-q4'); window.__keep = keep; return { lab: g && g.label, t3: !!t3, pick: guidePick() && guidePick().id }; })()""")
     print('  pass-over:', r)
-    check(r['t3'] and r['pick'] == 'train:m4:do' and r['lab'] == 'arrows-q4', f'pass-over: T3 (the pick) has nothing to show, the next live entry should ({r})')
+    check(r['t3'] and r['pick'] == 'train:m4:do:9' and r['lab'] == 'arrows-q4', f'pass-over: T3 (the pick) has nothing to show, the next live entry should ({r})')
     # S7: clock out over a held job and over T3
     at(pg, 1019); shift(pg); lab0 = pg.ev(LAB)
     at(pg, 1020); pg.ev("guideTrain()"); shift(pg); lab = pg.ev(LAB)
@@ -174,6 +181,9 @@ def part_on2(pg):
     pg.ev("POINT.aim.click()"); p = ptr(pg); pg.ev("deviceClose()")
     check(not p['up'] and pg.ev("!POINT_Q.some(x => x.id === 'p:works:log')"), f'S8: the tab shown: gone ({p})')
     # S6: nothing with a Take it (a row without one counts as nothing): no arrow; FX1's word said (boardEmptySay)
+    # (FX19, 0.92.6: with PROMO_SIGHT_ON the Day 8 career's test is offered at once and runs on Day 9, its stage 'do' all day,
+    # and boardEmptySay rightly holds its word in a training or test; the empty board is tried with nothing under way, then put back)
+    pg.ev("window.__kc = SHIP.works ? SHIP.works.cur : null; if (SHIP.works) SHIP.works.cur = null")
     pg.ev("window.__oj = openJobs; openJobs = () => [{ id: 'arrows-none', asked: false }]; __toasts.length = 0; if (boardEmptySay.s) boardEmptySay.s.dry = false, boardEmptySay.s.at = -1e9")
     at(pg, 605); shift(pg); pg.ev("ixGoalAt = -1"); pg.step(2); lab = pg.ev(LAB); n1 = pg.ev("__toasts.filter(t => /Nothing on the board/.test(t)).length")
     hold = pg.ev("""(() => { boardEmptySay.s.dry = false; boardEmptySay.s.at = -1e9; __toasts.length = 0; const now = Math.floor(shipNow()), occ = { key: 'arrows-occ4', deck: 5, room: 'r', at: now - 2, len: 15, status: 'asked' };
@@ -182,7 +192,7 @@ def part_on2(pg):
       const W = SHIP.works, keep = W.cur, dk = DIALOGUE, out = {};
       DIALOGUE = { arrows: true }; out.dialogue = say(); DIALOGUE = dk;
       W.cur = { id: 'm4', st: 'watch', d: 9, by: 'esposito-yara' }; out.watch = say(); W.cur.st = 'do'; out.doo = say(); W.cur = keep; out.free = say(); return out; })()""")
-    pg.ev("openJobs = __oj")
+    pg.ev("openJobs = __oj; if (SHIP.works) SHIP.works.cur = __kc")
     print('  S6:', lab, n1, 'in a meeting, then after:', hold, '| in a dialogue, a watch, a turn, then free:', hold2)
     check(hold2 == {'dialogue': 0, 'watch': 0, 'doo': 0, 'free': 1}, f'S6: the board\'s word waits through a dialogue and a training\'s watch and turn (RV7) ({hold2})')
     check(hold == [0, 1], f'S6: the board\'s word waits through a meeting, then is said (lead 29) ({hold})')
@@ -267,9 +277,9 @@ with sync_playwright() as pw:
     path = sys.argv[1] if len(sys.argv) > 1 else 'starship-cadet.html'
     src = arrows_off(pathlib.Path(path).read_text())
     if check('const POINT_ON = false;' in src and 'function guideShift' in src, 'the build has piece D (guideShift) and the pointer switch'):
-        on = WORK / 'test' / ('_d_on_' + pathlib.Path(path).name)
+        on = WORK / 'test' / ('_d_on_' + RUN_ID + pathlib.Path(path).name)
         on.write_text(src.replace('const POINT_ON = false;', 'const POINT_ON = true;', 1))
-        off = WORK / 'test' / ('_d_off_' + pathlib.Path(path).name); off.write_text(src); path = str(off)
+        off = WORK / 'test' / ('_d_off_' + RUN_ID + pathlib.Path(path).name); off.write_text(src); path = str(off)
         b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
         ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
         for name, fn, p, guide in (('off', part_off, path, False), ('on: S2, S3, pass-over, S7', part_on, str(on), True), ('on: S5, S8, S6, S9', part_on2, str(on), True), ('tick', part_tick, str(on), True), ('the drill arrow', part_drill, path, False)):

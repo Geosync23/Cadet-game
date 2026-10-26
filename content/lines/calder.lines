@@ -656,3 +656,66 @@
 - Good question. Short answer: look there first.
 == talk.listen
 - No questions. Good. The board's waiting in the morning.
+
+// ---- SW1 (2026-10-24, patch 0.92.3 item 15): her own Talk a while frames (main characters don't use the shared
+// ones). The same NEVERs: no "well done", no exclamation marks.
+== talk.start
+- Five minutes. Fine.
+- Sit. I'm listening.
+- Talk. I've a gap. They're rare.
+? tier>=friend
+- {me}. Good. I hoped you'd stop.   #warm
+- Sit. I kept the good chair free. Don't tell anyone.   #warm
+
+== talk.sit
+- That chair. The other one wobbles. Two millimetres.   #funny
+- Sit there. You'll see the board. Don't look at it.   #funny
+- Sit. Mug's on the side. It's clean.
+
+== talk.filler
+- That's the Deck 5 fans. Every one in tune. Rare.
+- Hm.
+- I'm not good at this part. The talking. I'm better at fans.   #funny
+- The board's at eleven. I'm not looking at it. I am. I'm stopping.   #funny
+- Quiet's good. Not everything needs saying.
+- Torres would fill this with a song. I won't.   #funny
+
+== talk.end
+- Right. Back to it. That was useful.
+- Good. Same time next week. If the board allows.
+- That's my talking done for a month. I mean that kindly.   #funny
+- Thank you. I don't do this often. I'm glad I did.   #warm
+- Go on. The board won't clear itself. Neither will mine.
+
+== talk.stop
+- Fine. Go.
+- Another time. I'll remember where we were.
+- Understood. Off you go.
+
+== talk.go.shift
+- Shift. I'm never late. I won't start now.
+- Board at nine. I'm at it at ten to. Later.
+
+== talk.go.bed
+- Bed. Seven hours. Not six. Not eight.
+- I'm done for the day. So are you. Sleep.
+
+== talk.go.trad
+- {trad}. I said I'd look in. I keep my word.
+- Can't. {trad}. I'm expected, and I'm never late.
+// ---- ZW1 (writer), patch 0.92.3 item 26: you in dirty clothes. clothes.remark: yesterday's clothes (flag:clothes.stale);
+// clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3's hook). Bubbles, 60 characters or fewer; kind, never mean.
+== clothes.remark
+? flag:clothes.stale
+- Yesterday's uniform. Change it.
+- Same shirt. Second day. Wardrobe.
+
+// ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
+== bday.circle
+- Nobody tells me. Take an hour, {other}. That's an order.   #funny
+- Birthday? Nobody tells me. One slice each. I'm counting.   #funny
+== bday.circle.you
+- Is it? Nobody tells me. Happy birthday, then, {me}.   #funny
+== bday.thanks
+- Thank you. Back to work in ten minutes. Eleven.   #funny
+- Thanks. All of you. That's all I'll say.   #warm

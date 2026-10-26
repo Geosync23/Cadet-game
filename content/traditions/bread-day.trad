@@ -1,0 +1,43 @@
+@tradition bread-day
+// Bread day (FX11, 0.92.5 item 16 T3; SW1's weekend pitch, the user's yes 2026-10-24): Sunday mornings Brennan opens the
+// galley early and anyone who turns up kneads a loaf for the week's bread, round the prep island (Cook-along's places 3-cookalong-1..6 since FX9: one set of event spots in the galley, off the cooks' own; the
+// weekend slot in section 18). Zeke's first-night line ("Sunday's bread day") made real. Your loaf is in Monday's
+// breakfast basket with your name on a card. Flour and tins on the galley counters while it's on. Behind WEEKEND_ON.
+// Nandakumar never (FX9, RV14's events_check with the switch on): she hosts the rec deck's slow stretch at 08:00 on Sundays,
+// and from Bread day she missed it (Days 21, 35, 42).
+k: 467
+title: Bread day
+// (the user, 2026-10-25: spread across weeks, two new a weekend; was: weekly sunday from day 1)
+when: every 4 weeks sunday week 1 from day 1
+at: 07:00-07:50
+min: 25
+wake: 15
+where: 3 pool @cook-along
+hold: none
+who: nandakumar 0%, brennan always, calder 60%, galley 30%, early-riser 50%, juniors 25%, lingers-at-meals 20%, everyone 5%
+anim: cook
+host: brennan
+from: brennan
+ties: decor breadDay
+
+== mail
+- Bread day tomorrow at {time}, in the galley, love. Clean hands, rolled sleeves. You knead, I bake, and Monday's toast is yours.
+
+== ask
+- Bread day in the morning. Seven, in the galley. Brennan lets anyone knead.
+- Up early tomorrow? Bread day. Flour in your hair till lunch.   #funny
+- Kneading's the best bit of a Sunday. Ask anyone with floury elbows.   #funny
+
+== here
+- Push, fold, turn. Push, fold, turn. You've got it.
+- Not so much flour. It's bread, not a snowdrift.   #funny
+- Smell that? The first tins are in.   #warm
+- Brennan says mine's "rustic". I'm taking it.   #funny
+
+== thanks
+- You roll up your sleeves at the prep island and knead with the others while the ovens warm. Brennan pats each loaf into its tin, and by eight the whole deck smells of bread.
+
+== chatter
+- My loaf from bread day is in tomorrow's basket with my name on it. Proud.   #warm
+- There's still flour behind my ear from bread day. I've decided to keep it.   #funny
+- Sunday bread tastes better when you kneaded it yourself.

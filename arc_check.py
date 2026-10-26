@@ -19,7 +19,7 @@ JS = r"""
   socInit();
   const play = () => { let n = 0; while (DIALOGUE && n++ < 80) { const v = dialogueView(); if (!v) break; if (v.choices) dialogueStep(0); else dialogueStep(); } };
   const at = (d, m) => { SHIP.time.day = d; SHIP.time.min = m; return (d - 1) * 1440 + m; };
-  const live = (d, m) => { const t = (d - 1) * 1440 + m; if (typeof setShipNow === 'function') setShipNow(t); else at(d, m); if (typeof socialTo === 'function') socialTo(t); return t; };   // the crew's own social hours (bonds, rivals) run too
+  const live = (d, m) => { const t = (d - 1) * 1440 + m; if (typeof setShipNow === 'function') setShipNow(t); else at(d, m); if (typeof socialTo === 'function') socialTo(t); if (typeof STORIES_ON !== 'undefined' && STORIES_ON && typeof storyTick === 'function') storyTick(t); return t; };   // the crew's own social hours (bonds, rivals) run too; and the crew stories' clock (FX21: crescendo bookings, missed windows), as socialTick runs it
   const [MO] = momentBaked();
   const ppl = MODE === 'themes' ? [] : [...new Set(Object.values(MO || {}).map(m => m.who).concat(Object.keys(STORY_ARCS)))].map(id => socP(id)).filter(Boolean);
   const last = {}; for (const p of ppl) { let n = 0; for (const k in MO || {}) if (MO[k].who === p.id) n = Math.max(n, MO[k].beat); n = Math.max(n, (STORY_ARCS[p.id] || []).length); last[p.id] = n; }

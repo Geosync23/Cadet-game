@@ -28,7 +28,7 @@ STEP = 0.05                    # real seconds a step, as day_check
 DUE_NEW = r"""((w, lo, hi) => {
   const s = new Set(), wdOf = d => ((d - 1) % 7 + 7) % 7, seas = d => ['sowing', 'greening', 'harvest', 'lanterns'][Math.floor((((d - 1) % 364) + 364) % 364 / 91)];
   const add = d => { if (d >= lo && d <= hi && (!w.season || [].concat(w.season).includes(seas(d))) && (w.from == null || d >= w.from) && (w.until == null || d <= w.until)) s.add(d); };
-  const n = { week: 1, '2weeks': 2, '4weeks': 4 }[w.every || (w.weekday != null ? 'week' : '')];
+  const n = { week: 1, '2weeks': 2, '4weeks': 4, '8weeks': 8 }[w.every || (w.weekday != null ? 'week' : '')];
   if (Array.isArray(w.weekday)) { for (const x of w.weekday) dueNew({ ...w, weekday: x }, lo, hi).forEach(d => s.add(d)); return s; }
   if (w.after === 'arrival') { const a = typeof introArrival === 'function' ? introArrival() : 0;
     if (w.days != null) add(a + w.days); else add(a + 1 + (w.weekday - wdOf(a + 1) + 7) % 7 + 7 * ((w.nth || 1) - 1)); }
@@ -43,7 +43,7 @@ PLANS = r"""(days => {
   const out = { days: [], bad: [], empty: [], ids: SHIP_TRADITIONS.filter(e => !e.flag || (typeof flag === 'function' && flag(e.flag))).map(e => e.id) }, LINGER = 25;   // staying on a little after the end is fine
   const isNew = """ + IS_NEW + r""", dueNew = """ + DUE_NEW + r""", lo = Math.min(...days), hi = Math.max(...days);
   const DUE = new Map(SHIP_TRADITIONS.filter(ev => isNew(ev.when)).map(ev => [ev.id, dueNew(ev.when, lo, hi)]));
-  const tagId = tag => { if (SHIP_TRADITIONS.some(e => e.id === tag.slice(3))) return tag.slice(3); const m = /^ev-(.+?)(-(talk|drink|play|water|wash|read|cheer|clap|disc|cocoa))?$/.exec(tag); return m && m[1]; };   // an id first (rec-chiefs-talk ends like an anim)   // cheer, clap, disc: the rec deck's (0.83, RA)
+  const tagId = tag => { if (SHIP_TRADITIONS.some(e => e.id === tag.slice(3))) return tag.slice(3); const m = /^ev-(.+?)(-(talk|drink|play|water|wash|read|cheer|clap|disc|cocoa|cook))?$/.exec(tag); return m && m[1]; };   // an id first (rec-chiefs-talk ends like an anim)   // cheer, clap, disc: the rec deck's (0.83, RA)
   for (const d of days) {
     const on = eventsOn(d), wd = weekday(d), yd = shipYearDay(d), row = { d, wd: WEEKDAYS[wd].slice(0, 3), ev: [] };
     // due exactly when the table says
@@ -58,7 +58,7 @@ PLANS = r"""(days => {
       if (!s.tag || !/^ev-/.test(s.tag) || (typeof eventMeetTag === 'function' && eventMeetTag(s.tag))) continue;   // a ship-wide event's meeting (F0b), not a tradition
       const id = tagId(s.tag), e = on.find(x => x.id === id), B = (d - 1) * 1440;
       if (!e) { out.bad.push(d + ' ' + p.id + ' at ' + id + ', which is not on'); continue; }
-      if (s.from < B + e.from - Math.max(e.ev.early || 0, p.id === e.ev.host ? 5 : 0, e.ev.meal && typeof TRAD_LINE !== 'undefined' ? TRAD_LINE[1] : 0, e.ev.lead ? 35 : 0) ||   // the sim plans a host 5 minutes early; a meal tradition's diners sit as the line serves them, up to TRAD_LINE[1] early (sim 0.26.41); the Captain's address seats them up to 30 minutes early (18f's friLead), its host 5 more
+      if (s.from < B + e.from - Math.max(e.ev.early || 0, p.id === e.ev.host || typeof P926_TRADS !== 'undefined' && P926_TRADS && /^rec-(wren|chiefs)-talk$/.test(e.id) && recSpeaker(p, d) ? 5 : 0, e.ev.meal && typeof TRAD_LINE !== 'undefined' ? TRAD_LINE[1] : 0, e.ev.lead ? 35 : 0) ||   // the sim plans a host 5 minutes early; a meal tradition's diners sit as the line serves them, up to TRAD_LINE[1] early (sim 0.26.41); the Captain's address seats them up to 30 minutes early (18f's friLead), its host 5 more
          s.to > B + e.to + LINGER) out.bad.push(d + ' ' + p.id + ' at ' + id + ' ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ' outside ' + hhmm(e.from) + '-' + hhmm(e.to));
       const pools = eventOpts(e.ev, p).map(([n, k]) => S.shared.get(n + '|' + k) || []).flat().map(pl => pl.id);
       if (!pools.includes(s.placeId) && !(s.act === 'commute' && !s.placeId)) out.bad.push(d + ' ' + p.id + ' at ' + id + ' in ' + s.placeId + ', not one of its places');
@@ -457,7 +457,8 @@ with sync_playwright() as pw:
         for (const x of t) if (t.filter(k => k.from <= x.from && x.from < k.to).length > 2) out.bad.push('day ' + d + ': more than two traditions at once at ' + x.from);
         for (const a of all) for (const b of all) if (a !== b && recOnly(a) && recOnly(b) && a.from < b.to && b.from < a.to && evRooms(a.ev).some(r => evRooms(b.ev).includes(r))) out.bad.push('day ' + d + ': ' + a.id + ' and ' + b.id + ' at once in one room');
         for (const a of t) for (const b of t) if (a !== b && a.from < b.to && b.from < a.to && evRooms(a.ev).some(r => evRooms(b.ev).includes(r))) out.bad.push('day ' + d + ': ' + a.id + ' and ' + b.id + ' at once in one room');
-        if (d >= 1 && weekday(d) < 5 && t.length < 2 && !eventOn(d)) out.bad.push('day ' + d + ' (a weekday) has ' + t.length + ' tradition(s), not 2-3');
+        const bday = eventsOn(d).some(e => e.ev.when.birthday) ? 1 : 0;   // 0.92.5 (FX12): a birthday counts, as the weekly ones within an hour of it give way to it
+        if (d >= 1 && weekday(d) < 5 && t.length + bday < 2 && !eventOn(d)) out.bad.push('day ' + d + ' (a weekday) has ' + (t.length + bday) + ' tradition(s), not 2-3');
         if (EV_DROPPED.get(d)) out.dropped.push(d + ':' + EV_DROPPED.get(d).join('+'));
       }
       for (const d of [0, 1, 91, 92, 182, 183, 273, 274, 364, 365]) out.seasons.push(d + ':' + season(d) + ':' + seasonOf(d).week);
@@ -467,7 +468,9 @@ with sync_playwright() as pw:
         if (!schedPeople().some(p => p.id === v.host) || !(v.odds > 0 && v.odds <= 1) || typeof v.line !== 'string' || !v.line || v.line.length > 140) out.bad.push(e.id + ': invite ' + JSON.stringify(v)); }
       for (const t of TRAD_LIST) {
         if (t.id === 'first-light' && !(typeof FLC_ON !== 'undefined' && FLC_ON)) continue;   // patch #26: loaded only with its switch on (section 15's FLC_ON)
-        if (t.id === 'captains-address' && !(typeof SHORT_FRIDAY !== 'undefined' && SHORT_FRIDAY && REC_TRAD_ON)) continue;   // Short Fridays: loaded only with its switch on (section 13's SHORT_FRIDAY; 18f) and the rec deck's traditions
+        if (t.id === 'captains-address' && !(typeof SHORT_FRIDAY !== 'undefined' && SHORT_FRIDAY && REC_TRAD_ON)) continue;
+        if (typeof P926_NEW !== 'undefined' && P926_NEW.has(t.id) && !P926_TRADS) continue;   // 0.92.6's new traditions (FX17): loaded only with P926_TRADS
+        if (typeof WEEKEND_TRADS !== 'undefined' && WEEKEND_TRADS.has(t.id) && !WEEKEND_ON) continue;   // the weekend traditions (0.92.5 item 16): loaded only with WEEKEND_ON   // Short Fridays: loaded only with its switch on (section 13's SHORT_FRIDAY; 18f) and the rec deck's traditions
         const ev = SHIP_TRADITIONS.find(e => e.id === t.id); if (!ev || !ev.baked) { out.bad.push('baked ' + t.id + ' not loaded'); continue; }
         let n = 0; for (let d = 0; d <= 364; d++) if (eventsOn(d).some(e => e.id === t.id)) n++;
         if (!n && !t.when.birthday && !t.flag) out.bad.push('baked ' + t.id + ' never happens in a whole year');   // a flagged one waits for its story beat (tested above)
@@ -484,7 +487,7 @@ with sync_playwright() as pw:
         if (off || !yes) out.bad.push(ev.id + ' and its flag ' + ev.flag + ': ' + off + ' days without, ' + yes + ' with');
       }
       // and each rhythm on its own, as a tradition designer might write it
-      for (const w of [{ every: 'week', weekday: 6 }, { every: '2weeks', weekday: 1 }, { every: '2weeks', weekday: 1, week: 2 }, { every: '4weeks', weekday: 5, week: 3 },
+      for (const w of [{ every: 'week', weekday: 6 }, { every: '2weeks', weekday: 1 }, { every: '2weeks', weekday: 1, week: 2 }, { every: '4weeks', weekday: 5, week: 3 }, { every: '8weeks', weekday: 0, week: 5, from: 29 },
           { every: 'quarter', quarterDay: 1 }, { every: 'quarter', week: 13, weekday: 6 }, { every: 'year', dayOfYear: 182 }, { every: 'year', week: 52, weekday: 6 },
           { after: 'arrival', days: 7 }, { after: 'arrival', days: 28 }, { after: 'arrival', weekday: 4 }, { after: 'arrival', weekday: 4, nth: 4 },
           { every: 'week', weekday: 2, season: 'greening' }, { every: 'week', weekday: 0, season: ['harvest', 'lanterns'], from: 200 }]) {
@@ -512,10 +515,13 @@ with sync_playwright() as pw:
     rec_on = g.ev("typeof REC_DECK !== 'undefined' && REC_DECK")
     flc_on = g.ev("typeof FLC_ON !== 'undefined' && FLC_ON")
     fri_on = g.ev("typeof SHORT_FRIDAY !== 'undefined' && SHORT_FRIDAY && REC_TRAD_ON")
+    wk_off = g.ev("typeof WEEKEND_TRADS !== 'undefined' && !WEEKEND_ON ? [...WEEKEND_TRADS] : []")
+    wk_off += g.ev("typeof P926_NEW !== 'undefined' && !P926_TRADS ? [...P926_NEW] : []")   # 0.92.6's (FX17): only with P926_TRADS
     for i in want_ids:
         if i.startswith('rec-') and not rec_on: continue    # the rec deck's own load only with the deck switched on (0.83)
         if i == 'first-light' and not flc_on: continue      # First Light Cocoa (patch #26) loads only with FLC_ON
         if i == 'captains-address' and not fri_on: continue  # the Captain's Friday address (Short Fridays, 18f) loads only with SHORT_FRIDAY
+        if i in wk_off: continue                             # the weekend traditions (0.92.5 item 16) load only with WEEKEND_ON
         if i not in loaded: fail(f"content/traditions has {i}, but the game didn't load it (bake the TRADITIONS block again)")
     # every decor and trace id a tradition names is one the deck architect built (DECK_DRESS) or has announced, or one
     # a designer has asked for (it shows nothing until built); anything else is a typo
@@ -540,6 +546,7 @@ with sync_playwright() as pw:
                 'rec-slow-stretch': list(range(7, 43, 7)), 'rec-regatta': [21], 'rec-talent-night': [14, 42], 'rec-chiefs-talk': [8, 18], 'rec-wren-talk': [25, 29],
                 'rec-film-night': [], 'rec-all-hands': []}
         storm_cal = g.ev("typeof EV_CAL_ON !== 'undefined' && EV_CAL_ON")
+        if g.ev("typeof P926_TRADS !== 'undefined' && P926_TRADS"): PLAN['rec-chiefs-talk'] = PLAN['rec-chiefs-talk'] + [32]; PLAN['rec-wren-talk'] = PLAN['rec-wren-talk'] + [36, 39]   # 0.92.6 (FX17): the full talk rota
         dress = g.ev("(() => { const o = {}; if (typeof EV_DAY_DRESS !== 'undefined') for (const [k, v] of EV_DAY_DRESS) { const [id, d] = k.split('@'); ((o[id] = o[id] || { drop: [], add: [] })[v.drop ? 'drop' : 'add']).push(+d); } return o; })()")
         rc = g.ev("""(() => { const out = { on: {}, n: {}, hosts: [], talks: [] };
           for (let d = 1; d <= 42; d++) for (const e of eventsOn(d)) if (/^rec-/.test(e.id)) {
@@ -920,6 +927,161 @@ with sync_playwright() as pw:
     print('New game: before', NG['before'], '| after: occasions', NG['occ'], 'commendations', NG['com'], 'traces', NG['tr'], 'old Mail keys', NG['sent'], 'votes', NG['votes'], 'occasion meetings', NG['meet'], 'flag', NG['flag'], 'day', NG['day'])
     if not NG['before']['occ'] or NG['occ'] or NG['com'] or NG['ev'] or NG['log'] or NG['tr'] or NG['sent'] or NG['votes'] or NG['meet'] or NG['flag']: fail(f"a New game kept section 18's state: {NG}")
 
+    if g.errors: fail(f"console: {g.errors[:4]}")
+    g.b.close()
+
+# 12. Pick-your-own breakfast (FX12, 0.92.3 item 27, the user's): joined and finished at a garden bed, what you picked is
+# your tray (the servery's own), with a toast and an arrow to a mess seat; a seat eats it and the arrow goes. Walked
+# away part way: no tray. Once a day. A page of its own (the ship clock runs here)
+PYO_ST = "[ACT && ACT.kind, ACT && ACT.phase, SHIP.player.tray, IX_GOAL && IX_GOAL.label, IX_GOAL && IX_GOAL.place, player.holding, document.getElementById('tx').textContent]"
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1], 390, 844); g.step(3)
+    print('== Pick-your-own: a tray of what you picked')
+    if g.ev("typeof GUIDE_ON !== 'undefined' && GUIDE_ON"): g.ev("GUIDE.tq.length = 0; guideToast = () => false")
+    d = g.ev("(() => { for (let d = 2; d < 30; d++) if (eventsOn(d).some(e => e.id === 'pick-your-own')) return d; return null; })()")
+    JOIN = f"""(() => {{ const e = eventsOn({d}).find(e => e.id === 'pick-your-own'); tradJoinMinute(shipNow()); const lead = tradLeader(e), a = DECK_CREW.find(c => c.p && c.p.id === lead) || DECK_CREW.find(c => c.p); return !!a && tradJoin(e, a); }})()"""
+    def picking():
+        for k in range(80):
+            g.step(10)
+            if g.ev("!!(ACT && ACT.kind === 'ixGarden' && ACT.phase === 'do')"): break
+        g.step(70)
+    # walked away part way: no tray (and still none after the minute ticks)
+    g.ev(f"goToDeck(3); setShipNow(({d} - 1) * 1440 + 6 * 60 + 20)"); g.step(60)
+    j = g.ev(JOIN); picking()
+    s0 = g.ev("[ACT && ACT.kind, !!(ACT && ACT.def.onDone)]")
+    g.ev("player.steer = { x: 1, z: 0, k: 1 }"); g.step(10); g.ev("player.steer = null"); g.step(60)
+    s1 = g.ev(PYO_ST)
+    print('  joined', j, d, '| picking', s0, '| walked away', s1[:5])
+    if not (j and s0 == ['ixGarden', True]): fail(f"Pick-your-own: joining didn't start picking with a tray to come ({j}, {s0})")
+    if s1[2] or s1[3] == 'Your breakfast: the mess hall': fail(f"Pick-your-own: walking away part way gave a tray ({s1[:5]})")
+    # back at a bed, finished: the tray, the toast, the arrow at a mess seat, drawn in your hands
+    g.ev("SHIP.events.joined = SHIP.events.joined.filter(k => !k.startsWith('pick-your-own@'))"); j = g.ev(JOIN); picking()
+    g.ev("ACT.done = ACT.def.mins - .05")
+    for k in range(40):
+        g.step(10)
+        if not g.ev("!!ACT"): break
+    g.step(5); s2 = g.ev(PYO_ST); seat = s2[4]
+    # it travels (the user, 0.92.4: the only tray that leaves the mess hall): still yours a while later, out in the garden
+    g.step(90); s2b = g.ev("[roomAt(...player.here()), SHIP.player.tray, player.holding]")
+    print('  a while later, out of the mess hall:', s2b)
+    if not (s2b[0] != 'M' and s2b[1] == 'the fruit and greens you picked' and s2b[2] == 'tray'): fail(f"Pick-your-own: the tray didn't travel outside the mess hall ({s2b})")
+    print('  finished:', s2[2:6], '|', s2[6][:90])
+    if not (s2[2] == 'the fruit and greens you picked' and s2[3] == 'Your breakfast: the mess hall' and seat and seat.startswith('3-mess') and s2[5] == 'tray' and 'mess hall' in s2[6]):
+        fail(f"Pick-your-own: finished, no tray of what you picked, toast or arrow at a mess seat ({s2})")
+    # the tray is the servery's: a seat eats it (what you picked), and the arrow goes; picking again today: no second tray
+    if seat:
+        g.ev(f"actStart('sit', '{seat}', {{}})")
+        for k in range(80):
+            g.step(10)
+            if g.ev("!!(ACT && ACT.kind === 'eat' && ACT.phase === 'do')"): break
+        g.step(70); s3 = g.ev(PYO_ST)
+        print('  at the seat:', s3[:5], '|', s3[6][:70])
+        if not (s3[0] == 'eat' and not s3[2] and not s3[3] and 'you picked' in s3[6]): fail(f"Pick-your-own: a seat didn't eat the tray, or the arrow stayed ({s3})")
+        # sat down with it, the usual rule: get up mid-meal and the tray goes (0.92.4)
+        g.ev("player.steer = { x: 1, z: 0, k: 1 }"); g.step(10); g.ev("player.steer = null"); g.step(5); s3b = g.ev(PYO_ST)
+        print('  got up mid-meal:', s3b[:3], '|', s3b[6][:60])
+        if s3b[0] == 'eat' or s3b[2] or 'leave your tray' not in s3b[6]: fail(f"Pick-your-own: getting up from what you picked kept the tray ({s3b})")
+        g.ev("actEnd(true); SHIP.player.tray = null; SHIP.events.joined = SHIP.events.joined.filter(k => !k.startsWith('pick-your-own@'))"); g.ev(f"setShipNow(({d} - 1) * 1440 + 6 * 60 + 25)"); g.step(30)
+        j = g.ev(JOIN); picking(); s4a = g.ev(f"[ACT && ACT.kind, !!(ACT && ACT.def.onDone), (() => {{ const m = shipNow() - ({d} - 1) * 1440, e = eventsOn({d}).find(e => e.id === 'pick-your-own'); return m >= e.from && m < e.to; }})()]")
+        g.ev("if (ACT) ACT.done = ACT.def.mins - .05"); g.step(60)
+        s4 = g.ev(PYO_ST)
+        print('  picking again the same day, inside the window:', j, s4a, '| tray', s4[2])
+        if not (j and s4a[0] == 'ixGarden' and s4a[2]): fail(f"Pick-your-own: the second pick wasn't inside the tradition ({j}, {s4a})")
+        if s4[2]: fail(f"Pick-your-own: a second tray the same day ({s4[:5]})")
+        # off Deck 3 with what you picked, the hunger arrow still points at a mess seat (it travels "to the mess"; RV12, 0.92.4)
+        g.ev("actEnd(true); clearGoal(); NEED_GOAL = null; SHIP.player.tray = PYO_DISH; SHIP.player.trayGo = true; goToDeck(4)"); g.step(20)
+        g.ev("SHIP.player.needs.hunger = 5; needGoal('hunger')"); g.step(4)
+        s5 = g.ev("[deckDef.num, SHIP.player.tray, IX_GOAL && IX_GOAL.label, IX_GOAL && IX_GOAL.deck, IX_GOAL && IX_GOAL.place]")
+        print('  on Deck 4 with what you picked:', s5)
+        if not (s5[0] == 4 and s5[1] and s5[2] == 'A seat for your tray' and s5[3] == 3 and str(s5[4]).startswith('3-mess')): fail(f"Pick-your-own: off Deck 3 the arrow isn't at a mess seat ({s5})")
+    if g.errors: fail(f"console: {g.errors[:4]}")
+    g.b.close()
+
+# 13. Cook-along in the galley (0.92.5 item 19, the user's: "Cook along tradition should be in the kitchen"): on a Saturday
+# while it's on, everyone at it is at a 3-cookalong place in the galley (room K), cooking; none in the mess hall
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(3)
+    print('== Cook-along: in the galley')
+    ca = g.ev(r"""(() => { goToDeck(3); let d = 2; while (d < 30 && !eventsOn(d).some(e => e.id === 'cook-along')) d++;
+      const e = eventsOn(d).find(e => e.id === 'cook-along'); setShipNow((d - 1) * 1440 + e.from + 20); deckCrewFill(); for (let k = 0; k < 120; k++) updateDeckCrew(1 / 30);
+      const at = DECK_CREW.filter(a => a.spot && a.spot.id.startsWith('3-cookalong-'));
+      // nobody at a galley event spot inside a cook (RV14: Sato at 3-cookalong-3 .18 m from Madsen at 3-galley-6, 15:46): over
+      // .45 m from anyone settled at a 3-galley-* place, every 2 ship minutes through Cook-along (and Bread day with the switch on)
+      const close = [], gap = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
+      const sweep = (dd, id) => { const x = eventsOn(dd).find(e => e.id === id); if (!x) return; setShipNow((dd - 1) * 1440 + x.from); deckCrewFill();
+        const B0 = (dd - 1) * 1440 + x.from, st = .2; for (let k = 0; B0 + k * st * SHIP_RATE < (dd - 1) * 1440 + x.to; k++) { setShipNow(B0 + k * st * SHIP_RATE); updateDeckCrew(st); if (k % Math.max(1, Math.round(2 / (st * SHIP_RATE)))) continue;   // every 2 ship minutes
+          const ev = DECK_CREW.filter(a => a.settled && a.spot && a.spot.id.startsWith('3-cookalong-')), ck = DECK_CREW.filter(a => a.settled && a.spot && a.spot.id.startsWith('3-galley-'));
+          for (const a of ev) for (const b of ck) if (gap(a, b) < .45 && close.length < 6) close.push(id + ' day ' + dd + ' ' + hhmm(shipNow() % 1440) + ' ' + a.p.id + '@' + a.spot.id + ' / ' + b.p.id + '@' + b.spot.id + ' ' + gap(a, b).toFixed(2)); } };
+      sweep(d, 'cook-along'); for (let dd = 7; dd < 30; dd++) if (eventsOn(dd).some(e => e.id === 'bread-day')) { sweep(dd, 'bread-day'); break; }
+      return { day: d, at: at.map(a => [a.p.id, a.spot.id, roomAt(...a.here()), a.settled, a.pose]), places: deckDef.places.filter(p => p.id.startsWith('3-cookalong-')).map(p => p.room + ' ' + p.anim), close }; })()""")
+    print('  Day', ca['day'], '| at it:', ca['at'], '| its places:', sorted(set(ca['places'])))
+    if not ca['at'] or any(x[2] != 'K' for x in ca['at']) or set(ca['places']) != {'K cook'}: fail(f"Cook-along: not in the galley (room K, cooking): {ca}")
+    print('  at a galley event spot within .45 m of a cook:', ca['close'] or 'nobody')
+    if ca['close']: fail(f"a galley event spot inside a cook's place: {ca['close']}")
+    if g.errors: fail(f"console: {g.errors[:4]}")
+    g.b.close()
+
+# 14. 0.92.5 (FX12, the user's playtest notes): (4) late piano: never two nights running, the Captain and a few others
+# really there; (9) a birthday an hour apart from the day's other traditions; (10) the birthday redone: the birthday
+# person at the head of the long table, the cake on it, a ring round them with bubbles (names, not ids; no line twice),
+# a tap on the cake: a slice in your hand, eaten as you go, once a party. A page of its own (the ship clock runs here)
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1], 390, 844); g.step(3)
+    print('== 0.92.5: late piano, birthdays')
+    if g.ev("typeof GUIDE_ON !== 'undefined' && GUIDE_ON"): g.ev("GUIDE.tq.length = 0; guideToast = () => false")
+    LP = g.ev("""(() => { const out = []; for (let d = 1; d <= 28; d++) { const e = eventsOn(d).find(e => e.id === 'late-piano'); if (!e) continue;
+      const goers = schedPeople().filter(p => planDay(p, d).some(s => evTagId(s.tag) === e.id)).map(p => p.id); out.push([d, weekday(d), goers.length, goers.includes('marrow')]); } return out; })()""")
+    print('  late piano (day, weekday, going, the Captain):', LP)
+    days = [x[0] for x in LP]
+    if not LP or any(b - a == 1 for a, b in zip(days, days[1:])): fail(f"late piano two nights running ({days})")
+    if any(x[2] < 4 for x in LP) or sum(1 for x in LP if x[3]) < len(LP) - 1: fail(f"late piano: fewer than 4 going, or the Captain missing more than once ({LP})")
+    BD = g.ev("""(() => { const out = []; for (let d = 1; d <= 120; d++) { const l = eventsOn(d), b = l.find(e => e.id === 'birthday'); if (!b) continue;
+      out.push([d, b.from, b.to, l.filter(e => e !== b && evIsTrad(e.ev) && !evRare(e.ev.when) && (e.ev.prio || 0) < 2 && !e.ev.meal && e.from < b.to + 60 && b.from - 60 < e.to).map(e => e.id)]); } return out; })()""")   # a weekly one (the rest never give way: their time is taken last)
+    print('  birthdays (day, from, to, a weekly tradition within the hour):', BD[:6], '...', len(BD))
+    if not BD or any(x[3] for x in BD): fail(f"a birthday within an hour of a weekly tradition: {[x for x in BD if x[3]]}")
+    d, fr = BD[0][0], BD[0][1]
+    P0 = g.ev(f"""(() => {{ const e = eventsOn({d}).find(e => e.id === 'birthday'), at = id => schedPeople().filter(p => planDay(p, {d}).some(s => evTagId(s.tag) === 'birthday' && s.placeId && s.placeId.startsWith(id)));
+      return [e.honorees.map(p => p.id), at('3-bday-head').map(p => p.id), at('3-bday-').length]; }})()""")
+    print(f'  Day {d}: birthday for', P0[0], '| at the head', P0[1], '| planned in the ring and the head', P0[2])
+    if not (P0[1] and P0[1][0] == P0[0][0] and P0[2] >= 6): fail(f"the birthday: its person not planned at the head, or the ring nearly empty ({P0})")
+    g.ev(f"skipTo(({d} - 1) * 1440 + {fr} - 25); goToDeck(3)")
+    g.ev("window.__bub = []; const _bs = bubbleSay; bubbleSay = (w, t, s) => { __bub.push(t); return _bs(w, t, s); }")
+    for k in range(200):
+        g.step(30)
+        if g.ev("shipNow() % 1440") > fr + 15: break
+    L = g.ev("""[dressingOn(), !!ITEMS.find(i => i.bdayCake), DECK_CREW.filter(a => a.p && a.settled && a.spot && a.spot.id === '3-bday-head').map(a => a.p.id),
+      DECK_CREW.filter(a => a.p && a.settled && a.spot && /^3-bday-\\d/.test(a.spot.id)).length, __bub.filter(t => /birthday|Thank|returns|Hip|wish|cake/i.test(t))]""")
+    print('  live:', L[:4], '| bubbles', L[4][:6])
+    if 'birthdayTable' not in L[0] or not L[1]: fail(f"the birthday: no cake on the table ({L[:2]})")
+    if L[2] != P0[0][:1] or L[3] < 4: fail(f"the birthday: its person not in the birthday chair, or fewer than 4 in the ring ({L[2]}, {L[3]})")
+    bl = L[4]
+    if len(bl) < 3 or len(set(bl)) < len(bl) or any('{' in t or '-' in t.split(',')[-1].strip(' .!').split(' ')[-1] for t in bl): fail(f"the birthday's bubbles: fewer than 3, a line twice, or an id for a name ({bl})")
+    g.ev("(() => { const s = placeSpot('3-bday-head') || placeSpot('3-longtable-4'), c = nearestOpen(s.x + 1.5, s.z + 2.5, player); player.obj.position.copy(cellPos(...c)); player.stop(); })()"); g.step(30)
+    TAP = "(() => { const it = ITEMS.find(i => i.bdayCake); if (!it) return false; it.hit.getWorldPosition(_wp); return playerTap(it, _wp.clone(), _wp.clone()); })()"
+    g.ev(TAP)
+    for k in range(60):
+        g.step(10)
+        if g.ev("!!SLICE"): break
+    g.step(10); S1 = g.ev("[!!SLICE, player.holding, document.getElementById('tx').textContent]")
+    g.ev(TAP); g.step(4)
+    S2 = g.ev("document.getElementById('tx').textContent")
+    for k in range(200):
+        g.step(30)
+        if not g.ev("!!SLICE"): break
+    S3 = g.ev("[!!SLICE, document.getElementById('tx').textContent]")
+    print('  the cake:', S1, '| again:', S2[:50], '| after:', S3)
+    if not (S1[0] and S1[1] == 'slice' and 'slice' in S1[2].lower()): fail(f"a tap on the cake: no slice in your hand ({S1})")
+    if 'had your slice' not in S2: fail(f"the cake: a second slice the same party ({S2})")
+    if S3[0] or 'finish your slice' not in S3[1]: fail(f"the slice wasn't eaten as you go ({S3})")
+    if days:
+        d = next((x for x in days if x >= BD[0][0]), days[-1])   # on or after the birthday's day: the ship clock only runs forward
+        g.ev(f"skipTo(({d} - 1) * 1440 + 21 * 60 + 20); goToDeck(4)")
+        for k in range(40):
+            g.step(60)
+            if g.ev("shipNow() % 1440") >= 1325: break
+        live = g.ev("DECK_CREW.filter(a => a.p && a.settled && roomAt(...cellAt(a.x, a.z)) === 'n').map(a => a.p.id)")
+        print(f"  Day {d} at 22:05, settled in the music room:", live)
+        if len(live) < 3 or 'marrow' not in live: fail(f"late piano, Day {d}: the Captain and at least 2 others not there by 22:05 ({live})")
     if g.errors: fail(f"console: {g.errors[:4]}")
     g.b.close()
 

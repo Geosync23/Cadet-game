@@ -32,6 +32,8 @@
 # Run:  python3 controller_check.py BUILD.html [part ...] [--mutants]
 import sys, json, re, os, pathlib
 exec(open(__file__.replace('controller_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
+RUN_ID = f'p{os.getpid()}_'   # FX18-1: this run's copies carry the process id (two runs in one CADET_WORK never open each other's), gone at exit
+__import__('atexit').register(lambda: [f.unlink(missing_ok=True) for f in (WORK / 'test').glob(f'*_{RUN_ID}*') if f.is_file()])
 
 ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
@@ -134,7 +136,7 @@ class Run:
         self.page.add_init_script(INIT)
         self.page.add_init_script(FAKEPAD.replace('__CFG__', json.dumps({'mode': mode, 'plug': plug})))
         self.page.add_init_script(CENSUS)
-        f = WORK / 'test' / f'_ctl_{tag}.html'
+        f = WORK / 'test' / f'_ctl_{RUN_ID}{tag}.html'
         # the same quiet style as cadet_test's, but in the page from the start: added after loading, a speech bubble made
         # on the first frames could be caught mid pop-in, a different picture depending on how fast the machine ran
         f.write_text(instrument(src).replace('</head>', '<style>' + quiet + '</style></head>', 1))
@@ -1912,9 +1914,10 @@ def legacy_parts(GAME, ON, fails):
         p.ev(begin % 'false'); p.step(3)
         p.ev("(() => { const G = DISC.g; G.over = true; G.winner = 0; G.score = [7, 3]; G.phase = 'over'; discOver(); discResult(); })()"); p.step(3)
         check(p.ev(LD_FOCUS) == 'Again', f'disc: the result card should land on Again ({p.ev(LD_FOCUS)})')
-        p.press('right'); check(p.ev(LD_FOCUS) == 'Quick game', f'disc: D-pad right on the result card should reach Quick game ({p.ev(LD_FOCUS)})')
-        p.press('a'); p.step(3); check(p.ev('!!DISC.g && DISC.g.target') == 5, 'disc: A on Quick game should start a game to 5')
-        p.press('b'); p.step(3); check(p.ev('!DISC.g'), 'disc: B should leave the quick game')
+        p.press('right'); check(p.ev(LD_FOCUS) == 'Done', f'disc: D-pad right on the result card should reach Done ({p.ev(LD_FOCUS)})')   # 0.92.5 #3: Again, Done (no Quick game)
+        p.press('left'); check(p.ev(LD_FOCUS) == 'Again', f'disc: D-pad left should go back to Again ({p.ev(LD_FOCUS)})')
+        p.press('a'); p.step(3); check(p.ev('!!DISC.g && DISC.g.target') == 3, 'disc: A on Again should start a game to 3')
+        p.press('b'); p.step(3); check(p.ev('!DISC.g'), 'disc: B should leave the new game')
         p.close()
     FOCUS_ID = "(() => { const a = document.activeElement; return a ? (a.id || a.textContent.trim().slice(0, 24)) : null; })()"
     def part_screens(pw):
@@ -2037,13 +2040,13 @@ def legacy_parts(GAME, ON, fails):
         # same page, CTT's find) and compared as text and place instead
         BUBS = "bubbles.list.map(b => [b.text, b.el.style.display, b.el.style.transform])"
         a = Pad(pw, ON); a.plug(); a.step(31); a.g.page.add_style_tag(content='.bubw{opacity:0!important}')
-        a.g.shot(str(WORK / 'test' / '_pad_nopad.png')); ba = a.ev(BUBS); a.close()
+        a.g.shot(str(WORK / 'test' / f'_pad_{RUN_ID}nopad.png')); ba = a.ev(BUBS); a.close()
         b = Pad(pw, ON); b.plug(); b.press('x'); b.step(27)   # (a press is 3 frames)
         b.js("document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))"); b.step(1)   # (the deck drawn once after the touch)
         b.g.page.add_style_tag(content='.bubw{opacity:0!important}')
-        b.g.shot(str(WORK / 'test' / '_pad_touch.png')); bb = b.ev(BUBS); b.close()
+        b.g.shot(str(WORK / 'test' / f'_pad_{RUN_ID}touch.png')); bb = b.ev(BUBS); b.close()
         check(ba == bb, f'touch: the speech bubbles differ after a press then a touch: {ba} vs {bb}')
-        x, y = (WORK / 'test' / '_pad_nopad.png').read_bytes(), (WORK / 'test' / '_pad_touch.png').read_bytes()
+        x, y = (WORK / 'test' / f'_pad_{RUN_ID}nopad.png').read_bytes(), (WORK / 'test' / f'_pad_{RUN_ID}touch.png').read_bytes()
         check(x == y, 'touch: the screenshot after a press then a touch differs from the no-pad one (' + str(WORK / 'test') + '/_pad_*.png)')
     def part_drop(pw):
         p = Pad(pw, ON)
@@ -2294,7 +2297,7 @@ def legacy(name):
     a planted fault's copy), the part runs, and its failures (and any exception) are the list returned"""
     def run(pw, src, tag):
         fails = []
-        off, on = WORK / 'test' / f'_old_{tag}_{name}_off.html', WORK / 'test' / f'_old_{tag}_{name}_on.html'
+        off, on = WORK / 'test' / f'_old_{RUN_ID}{tag}_{name}_off.html', WORK / 'test' / f'_old_{RUN_ID}{tag}_{name}_on.html'
         off.write_text(with_switch(src, False)); on.write_text(with_switch(src, True))
         try: legacy_parts(str(off), on, fails)['part_' + name](pw)
         except Exception as e: fails.append(f'{type(e).__name__}: {e}')

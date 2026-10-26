@@ -433,3 +433,60 @@
 - Something on tonight. Good.
 ? trad:founding
 - A few words, then cake.   #funny
+
+// ---- SW3, 2026-10-24 (patch 0.92.3 item 15): her own Talk a while card frames, in place of the shared ones.
+== talk.start
+- Of course. I've a few minutes. Real ones, not captain's minutes.   #funny
+- Yes. Sit with me. I've been hoping someone would stop.
+- Good. Tell me how the ship looks from where you stand. Then it's my turn.
+? tier>=friend
+- {me}. Good. I've been saving things up to tell you.   #warm
+- Ah, there you are. Sit. The bridge can manage ten minutes without me.   #warm
+?
+
+== talk.sit
+- Sit, please. Not that chair. It wobbles. I keep meaning to report it.   #funny
+- Take a seat. Captains stand all day. I'm sitting.
+- Sit down. Shoulders down, too. Nobody's inspecting anybody.
+
+== talk.filler
+- Listen. That's the air handlers changing over. Every evening, about now.
+- I like this. Nobody's asking me to sign anything.   #funny
+- You've a good way of listening. It's rarer than you'd think.   #warm
+- Where was I? Ah. It doesn't matter. This is the good part.
+- She's very quiet tonight. I'll take that.
+- Tell me if I'm keeping you. People never do, with me. It's the rank.
+
+== talk.end
+- Thank you. That was the best part of my day. Truly.   #warm
+- Good. I'll carry that up to the bridge with me.
+- Right. The ship wants me back, and she's very patient about it.   #funny
+- Thank you, {me}. Let's do this again. I'll find you.
+- That did me good. Carry on, {me}.   #warm
+
+== talk.stop
+- Of course. Go on. We'll finish another time.
+- Off you go. I'll keep my question for later.
+- Another time, then. I'm not going anywhere. Literally.   #funny
+
+== talk.go.shift
+- Duty, I'm afraid. The bridge wants me. Later?
+- That's my watch. Hold that thought for me.
+
+== talk.go.bed
+- I'm for bed. Even captains are told to sleep. By the doctor.   #funny
+- Bedtime, I'm afraid. Tomorrow, {me}?
+
+== talk.go.trad
+- {trad} is starting. I said I'd look in. Walk with me?
+- I promised I'd show my face at {trad}. Come along?
+
+// ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
+== bday.circle
+- Happy birthday, {other}. We're glad you're with us.   #warm
+- Happy birthday. Tell me later what this year taught you.   #warm
+== bday.circle.you
+- Happy birthday, {me}. Welcome to another year aboard.   #warm
+== bday.thanks
+- Thank you, everyone. We're a good crew. You're the proof.   #warm
+- Thank you. Now, please, someone else cut it.   #funny

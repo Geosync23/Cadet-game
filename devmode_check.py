@@ -30,6 +30,8 @@
 # Run:  python3 devmode_check.py BUILD.html [part ...]   (parts: only those)   Good is DEVMODE CHECK OK (exit 0); a failure exits 1.
 import sys, os, re, json, pathlib
 exec(open(__file__.replace('devmode_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
+RUN_ID = f'p{os.getpid()}_'   # FX18-1: this run's copies carry the process id (two runs in one CADET_WORK never open each other's), gone at exit
+__import__('atexit').register(lambda: [f.unlink(missing_ok=True) for f in (WORK / 'test').glob(f'*_{RUN_ID}*') if f.is_file()])
 from playwright.sync_api import sync_playwright
 
 ok = True
@@ -45,7 +47,7 @@ REAL = ('starship-cadet-save', 'starship-cadet-arrived')
 DEV_OWN = ('starship-cadet-dev-mark', 'starship-cadet-dev-undo')   # Dev mode's Mark and Undo (D2, D4)
 GAME = sys.argv[1]
 ONLY = set(sys.argv[2:])                          # optional: run only these parts (e.g. trad)
-TMP = WORK / 'test' / '_devmode_check.html'
+TMP = WORK / 'test' / ('_devmode_check_' + RUN_ID + '.html')
 TMP.write_text(instrument(pathlib.Path(GAME).read_text()))
 
 class Page:

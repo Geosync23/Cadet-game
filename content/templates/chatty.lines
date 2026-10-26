@@ -1,0 +1,44 @@
+@template chatty
+// ZW1 (writer), patch 0.92.3 item 26: crew comment when you wear dirty clothes. clothes.remark: yesterday's clothes
+// (flag:clothes.stale); clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3). Bubbles, 60 characters or fewer.
+// Kind, never mean: the joke is on the clothes, not on you.
+== clothes.remark
+? flag:clothes.stale
+- Oh, is that yesterday's top? Don't worry, I won't tell!   #funny
+- Same outfit two days running! Bold. I like it. Sort of.   #funny
+? flag:clothes.stale tier>=friend
+- Laundry's not so bad! I'll come with you. We'll natter.   #warm
+== clothes.grubby
+? flag:clothes.grubby
+- Goodness, what have you been fixing? It's all over you!   #funny
+- You've got a smudge. And another. Oh, lots of smudges!   #funny
+? flag:clothes.grubby tier>=friend
+- Go and change, then come and tell me everything!   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 5: more lines for the chat card's opener (greet, near), so a tap doesn't repeat.
+// Heard after a person's own lines are used up (FX13's no-repeat). {hi}, {nick} and {me} are the speaker's own words.
+== greet
+- {hi}! Oh, perfect, you're exactly who I needed!
+- {hi}! Have you heard? No? Oh, sit down.
+- {hi}, {nick}! What's new? Tell me everything!
+- Oh, it's you! Brilliant. I've so much to say.
+- {hi}! I was just thinking about you. Nice things!
+- {hi}! You look well. Do you look well? You do!
+- {hi}! Got a minute? Got two? Lovely.
+- {hi}! I've had the oddest day. Want to hear?
+? tier>=acquaintance
+- {hi}, {nick}! My favourite person to bump into!
+- {hi}! I saved you a bit of gossip. Only nice gossip.
+? time:morning
+- Morning! Have you had breakfast? I've had two!
+? time:evening
+- Evening! What did you get up to today? Go on!
+== near
+- I'm in the middle of this, but talk to me!
+- Oh, hello! Don't mind the mess. There's a lot.
+- {room} again! I'm always in here. I love it.
+- Keep me company? This bit's so dull alone.
+- I'll finish this and then I'm all yours!
+- Look what I found! Well, look at it later.
+- Can you believe they let me do this? I can't!
+- Talk while I tidy? I tidy faster when I talk.

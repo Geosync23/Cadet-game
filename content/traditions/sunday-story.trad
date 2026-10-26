@@ -1,0 +1,42 @@
+@tradition sunday-story
+// The Sunday story (FX14, 0.92.5 item 16; SW1's pitch): a bedtime story for grown-ups. On Sunday evening at 21:15, before his early night
+// (his Monday start), Chief Holt reads one chapter of a long adventure book in the junior common room, doing the voices, badly.
+// Behind WEEKEND_ON. The chapters themselves are a writing job (SW1): a few to start.
+k: 464
+title: The Sunday story
+// (the user, 2026-10-25: spread across weeks, two new a weekend; was: weekly sunday)
+when: every 4 weeks sunday week 4 from day 1
+// (DS1, the rotation turn: the new one moves, never an old one) 21:15, was 22:15: Holt's Sunday bedtime runs 22:24-23:08 (his Monday
+// early start), so at 22:15 he, its host and reader, left before it began on most showings
+at: 21:15-21:55
+min: 25
+// (DS1, RV14: a full room had you standing beside the leader; a seated weekend join keeps a seat for you)
+spare: 1
+jitter: 5
+where: 4 pool common-room
+hold: 1
+who: holt always, night-owl 50%, juniors 45%, common-room 40%, everyone 8%
+anim: holt read, everyone none
+host: holt
+from: holt
+
+== mail
+- The Sunday story tomorrow at {time}, the junior common room. Be on time. I don't recap.
+
+== ask
+- Holt's reading tonight. He does the voices. Don't tell him I said that.   #funny
+- Sunday story at quarter past nine. Grab a beanbag early, they go fast.
+- Holt stopped on a cliffhanger last time. I need to know what happens.   #funny
+
+== here
+- Shh. He's doing the old pilot's voice.   #funny
+- One more page. Please. Just one.   #funny
+- Nobody breathe. This is the good bit.
+
+== thanks
+- You find a spot on the common room floor. Chief Holt opens the book, clears his throat and reads, doing every voice, badly, while nobody so much as fidgets.
+
+== chatter
+- Holt ended the Sunday story on a cliffhanger again. He does it on purpose.   #funny
+- I don't go for Holt's voices. I go for Holt's voices.   #funny
+- The Sunday story's the only thing that gets the junior wing to bed on time.   #funny

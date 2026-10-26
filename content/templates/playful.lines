@@ -1,0 +1,44 @@
+@template playful
+// ZW1 (writer), patch 0.92.3 item 26: crew comment when you wear dirty clothes. clothes.remark: yesterday's clothes
+// (flag:clothes.stale); clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3). Bubbles, 60 characters or fewer.
+// Kind, never mean: the joke is on the clothes, not on you.
+== clothes.remark
+? flag:clothes.stale
+- Day two of the same shirt! Going for a record?   #funny
+- That shirt's back! Missed it. Didn't miss it.   #funny
+? flag:clothes.stale tier>=friend
+- Race you to the laundry. Loser folds.   #warm
+== clothes.grubby
+? flag:clothes.grubby
+- Ooh, oil camouflage! Very stealthy. Not really.   #funny
+- Ten points for the grime. Minus ten for the smell.   #funny
+? flag:clothes.grubby tier>=friend
+- Change, then come back. I want the whole story.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 5: more lines for the chat card's opener (greet, near), so a tap doesn't repeat.
+// Heard after a person's own lines are used up (FX13's no-repeat). {hi}, {nick} and {me} are the speaker's own words.
+== greet
+- {hi}! Tag. You're it. No take-backs.
+- {hi}, {nick}! Bet you can't guess what I've been doing.
+- Ooh, it's you! Quick, look busy. Too late.
+- {hi}! Rate my day out of ten. I'll go first: seven.
+- {hi}! I was just about to do something silly.
+- Hey! You owe me a rematch. Of something.
+- {hi}! You're just in time for nothing at all!
+- {hi}! New rule: everyone says hello twice. Hello. Hello.
+? tier>=acquaintance
+- {hi}, {nick}! My favourite rival! Sort of rival.
+- {hi}! Bet I can beat you to the lift. Later.
+? time:morning
+- Morning! I've already won breakfast. Don't ask how.
+? time:evening
+- Evening! Who's up for something daft?
+== near
+- Watch this. Okay, don't. It's going wrong.
+- {room}! Best room. Today. Ask me tomorrow.
+- I'm racing myself. I'm winning. And losing.
+- Can you do this one-handed? I can. Nearly.
+- I've given this a name. It doesn't like it.
+- Ten seconds. Nine. Okay, a bit longer.
+- Shh. I'm being very serious. See?
+- Help me with this and I'll owe you a biscuit.

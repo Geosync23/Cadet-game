@@ -1,0 +1,305 @@
+<title>Rec Deck Sim Bay</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one reading column; the two tile maps side by side (stacked on a phone); the answers form at the end, the one boxed panel. */
+:root {
+  --bg: #f2f5f9; --surface: #ffffff; --ink: #142030; --muted: #4f5f73; --line: #cdd7e3;
+  --teal: #0f7f7a; --coral: #c9503f; --navy: #23406b; --gold: #a87a12;
+  --sim: #cfe0f7; --simInk: #1d3f73; --plant: #f6dfc9; --plantInk: #8a4a17; --other: #e4e9ef; --otherInk: #5a6878;
+  --display: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0d141e; --surface: #141e2b; --ink: #e4ebf3; --muted: #9aabbf; --line: #2a3a4e;
+  --teal: #49c2b9; --coral: #f08a7d; --navy: #8fb4ea; --gold: #e3b54a;
+  --sim: #1d3554; --simInk: #b9d3f7; --plant: #47301c; --plantInk: #f4c495; --other: #1c2633; --otherInk: #8d9cb0; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0d141e; --surface: #141e2b; --ink: #e4ebf3; --muted: #9aabbf; --line: #2a3a4e;
+  --teal: #49c2b9; --coral: #f08a7d; --navy: #8fb4ea; --gold: #e3b54a;
+  --sim: #1d3554; --simInk: #b9d3f7; --plant: #47301c; --plantInk: #f4c495; --other: #1c2633; --otherInk: #8d9cb0; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--body); margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; }
+.wrap { max-width: 960px; margin: 0 auto; display: grid; gap: 30px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 42px); font-weight: 800; line-height: 1.05; }
+h2 { font-size: 23px; font-weight: 800; }
+h3 { font-size: 17px; font-weight: 700; }
+p, li { max-width: 70ch; }
+p { margin: 0; }
+ul, ol { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--coral); }
+.lead { font-size: 18px; color: var(--muted); }
+section { display: grid; gap: 12px; }
+code { font: 13.5px var(--mono); background: var(--other); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.maps { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.map { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; min-width: 0; }
+.map svg { width: 100%; height: auto; display: block; }
+.map svg text { font-family: var(--body); }
+.key { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13.5px; color: var(--muted); }
+.key i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 560px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.fact { border-top: 3px solid var(--navy); padding-top: 8px; font-size: 14.5px; }
+.fact b { display: block; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 18px; }
+fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
+legend { font-weight: 700; margin-bottom: 6px; padding: 0; }
+.opt { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; }
+.opt input { margin-top: 4px; }
+textarea { width: 100%; min-height: 110px; font: inherit; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+button { justify-self: start; font: 700 15px var(--body); padding: 10px 18px; border-radius: 8px; border: 0; background: var(--navy); color: var(--surface); cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.status { font-size: 14px; color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <header class="stack" style="display:grid;gap:10px">
+    <span class="eyebrow">Rec deck plan · sim bay · v2 · 2026-10-24 · decided and built</span>
+    <h1>The flight simulator bay</h1>
+    <p class="lead">Your pick from the room pitch (idea 4): two sit-in sim pods where you fly a short practice run in the Tern, in the rec utility room across the concourse from the pool's bow end. The room's machines move into a narrow booth along the auditorium wall, so they can still break and be repaired. The float room stays as it is. </p>
+  </header>
+
+  <section>
+    <h2>What you decided (2026-10-24)</h2>
+    <ul>
+      <li><b>Layout:</b> build it as planned.</li>
+      <li><b>Sim night:</b> build it now. Done: every other Thursday, 19:30 to 20:30, first on Day 25.</li>
+      <li><b>No scores, just fly.</b> No landing grades and no board. A Tern cutaway poster with the bay's rules hangs between the screens instead.</li>
+      <li><b>The pods are machines</b> that wear and break, now. Done: Works repair them like the rest of the deck's machines.</li>
+      <li><b>A landing you steer yourself:</b> kept on record as an idea for later. Its prototype is a separate piece, not part of this build.</li>
+    </ul>
+    <p>Everything is built behind one switch, so the game stays exactly as it was until it's switched on after your review. The parts of this page below that talk about grades or a board are kept as first written, for the record.</p>
+  </section>
+
+  <section>
+    <h2>The idea in one look</h2>
+    <div class="facts">
+      <div class="fact"><b>Where</b>The rec utility room (6 × 7 tiles) splits into a sim bay (4 × 7) and a stage booth (2 × 7).</div>
+      <div class="fact"><b>What you do</b>Climb into a pod and fly a 15-minute practice run: out of the Wren's bay, once round her, and back in to land.</div>
+      <div class="fact"><b>What it fills</b>Leisure +20. Your landing gets a grade, and your best one goes on Dev Raman's board.</div>
+      <div class="fact"><b>Who else comes</b>Dev Raman, about half the helm and command crew, and a few curious others, about 8 people in all.</div>
+      <div class="fact"><b>The machines</b>Stage lights, sound rack and gravity plates move into the booth. Same ids, same jobs, same effects.</div>
+      <div class="fact"><b>Phones</b>About 10-16 extra draw calls inside the bay, 6 or fewer by the lift (170 today).</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>1. The new layout</h2>
+    <p>One tile is about a metre. North is up (port), the bow is to the right. The foyer is above the room, the washroom to its left, the auditorium to its right.</p>
+    <div class="maps">
+      <div class="map"><h3>Today: the rec utility room</h3><svg id="before" viewBox="0 0 330 290" role="img" aria-label="Today's rec utility room, 6 by 7 tiles, with the machines on its west wall"></svg></div>
+      <div class="map"><h3>Planned: sim bay and stage booth</h3><svg id="after" viewBox="0 0 330 290" role="img" aria-label="The planned sim bay, 4 by 7 tiles, and the stage booth, 2 by 7 tiles, along the auditorium wall"></svg></div>
+    </div>
+    <div class="key">
+      <span><i style="background:var(--sim)"></i>Sim bay (new room)</span>
+      <span><i style="background:var(--plant)"></i>Stage booth and plant (keeps the old room's key)</span>
+      <span><i style="background:var(--other)"></i>Next door (foyer, washroom, auditorium)</span>
+    </div>
+    <h3>The sim bay (columns 28-31, rows 11-17)</h3>
+    <ul>
+      <li><b>Door:</b> today's hatch from the foyer (<code>h,31,11</code>) becomes an ordinary door, so anyone can walk in. A name plate "Sim bay" beside it on the foyer side.</li>
+      <li><b>Two pods</b> face the west wall, each with its own big curved screen of stars. Pod 1 sits on rows 12-13, pod 2 on rows 15-16. You climb in from the aisle along the east side (column 31) and slide into the seat.</li>
+      <li><b>Dev Raman's board</b> on the west wall between the two screens (row 14): "Smoothest landings", the five best grades with names.</li>
+      <li><b>A bench</b> for two along the north wall, by the door: where you and the crew wait when both pods are taken.</li>
+      <li><b>A headset rack</b> and a stool on the south wall. The floor is a dark blue mat with a painted runway line.</li>
+    </ul>
+    <h3>The stage booth (columns 32-33, rows 11-17)</h3>
+    <ul>
+      <li><b>Entry:</b> a new Works hatch from the foyer at <code>h,32,11</code>. The stage door (<code>v,34,11</code>) and the booth window onto the stage (<code>v,34,12</code>) stay where they are.</li>
+      <li><b>Row 12:</b> the lighting desk under the window and Maeve's chair. Her place (<code>7-booth-1</code>) is on the same tile as today, so talent night needs no change.</li>
+      <li><b>Row 13:</b> the projector, aimed through the window.</li>
+      <li><b>Rows 14-16:</b> the three machines along the auditorium wall, each with its panel tile in front: stage lights and dimmers (14), sound rack (15), gravity plates (16).</li>
+      <li><b>Row 17:</b> kettle, first-aid locker ("FLOAT ROOM BUMPS GO IN THE BOOK"), seat spares and the expansion tank.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>2. The machines' new home</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>Machine</th><th>Today</th><th>Planned</th><th>What breaks when it's bad</th></tr></thead>
+      <tbody>
+        <tr><td>Stage lights <code>7-aud-lights</code> (Tier 1, part: lamp)</td><td class="n">at 28,13 · panel 29,13</td><td class="n">at 33,14 · panel 32,14</td><td>Auditorium lights dim or flicker</td></tr>
+        <tr><td>Sound rack <code>7-aud-sound</code> (Tier 2, part: cable)</td><td class="n">at 28,15 · panel 29,15</td><td class="n">at 33,15 · panel 32,15</td><td>The mic goes bad (the address, talent night)</td></tr>
+        <tr><td>Gravity plates <code>7-grav-plates</code> (Tier 3, part: signal card)</td><td class="n">south wall 30,17</td><td class="n">at 33,16 · panel 32,16</td><td>The float room shuts</td></tr>
+      </tbody>
+    </table></div>
+    <p>Only the tiles move. The ids, kinds, tiers, parts, wear, the jobs they post and Maeve's round all stay the same, so saved games carry their machines' wear across. No lesson, training or promotion step uses this room.</p>
+  </section>
+
+  <section>
+    <h2>3. What you do in the sim bay</h2>
+    <ol>
+      <li><b>Tap a pod.</b> "Sim pod: fly a practice run in the Tern." If both pods are taken, you wait on the bench and get in when one frees up, the same way the climbing wall's queue works.</li>
+      <li><b>You climb in</b> and sit, hands on the stick. The pod's screen plays the run: the bay doors open, stars stream past, the Wren's hull lights slide by, then her bay grows ahead and you settle in. 15 ship minutes. The ship's clock keeps running (unlike Lightdisc, which pauses it).</li>
+      <li><b>Leisure +20</b> over the run, the same rate as the rest of the deck's activities.</li>
+      <li><b>Your landing gets a grade</b> at the end, for example "Touchdown at 1.4 m/s. Smooth: 4 of 5." The grade improves with practice: early runs land mostly 2s and 3s, and after about ten runs you start to see 4s and 5s. It's worked out from how many runs you've done and the day and minute, never from the game's random numbers, so nothing else on the ship shifts.</li>
+      <li><b>Dev Raman's board</b> shows the five smoothest landings. Your best goes on it with your name when it's good enough. The crew's entries are fixed numbers for each game.</li>
+      <li><b>Saved:</b> how many runs you've done and your best grade. Older saves load with none.</li>
+      <li>Open 06:00 to midnight, like the rest of the deck.</li>
+    </ol>
+    <p>This is the "sit and watch" version from the pitch (medium size). A real landing you steer yourself with your thumb would be a bigger, separate piece of work: a question below.</p>
+  </section>
+
+  <section>
+    <h2>4. Who uses it</h2>
+    <ul>
+      <li><b>Dev Raman</b>, the senior helm officer who flew you in, gets the new "sim pilot" habit for good: he comes down after shift now and then to keep his hand in.</li>
+      <li><b>Helm and command crew</b> who have no rec deck habit yet: about half of them become sim pilots.</li>
+      <li><b>A few others</b> with no rec habit: about 1 in 25 (juniors 1 in 12) get curious and pick it up.</li>
+      <li>That's about 8 people. Nobody's existing rec habit changes (it's a new roll of its own), and a visit only ever takes the place of time they'd have spent resting in their bunk, as with the pool and the wall. Turns of 20-40 minutes, two pods, two waiting spots on the bench. The deck's head count limit (15 in the evenings, 6 on weekday daytimes) still holds.</li>
+      <li>Crew in a pod sit with their hands on the stick, and their screen runs the same flight.</li>
+      <li><b>Sim night (optional):</b> every other Thursday, 19:30 to 20:30, Dev Raman runs a sim night: two fly, four or five watch by the board, he stands behind the pods calling it, and Mail goes out the evening before. Question below on whether to build it now or later.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>5. Draw calls on a phone</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>Part</th><th>Estimate</th><th>How</th></tr></thead>
+      <tbody>
+        <tr><td>Two pods (tub, seat, canopy frame, stick)</td><td class="n">4-6</td><td>Shared materials, merged with the rest of the room's kit</td></tr>
+        <tr><td>Two screens</td><td class="n">1-2</td><td>One small shared shader (moving stars, the Wren's bay), time from the frame clock, no texture redraws; idle screens drift slowly; off-screen skips its update</td></tr>
+        <tr><td>Dev Raman's board</td><td class="n">1</td><td>A small canvas (512 wide), drawn when the deck is built and again only when your best changes</td></tr>
+        <tr><td>Bench, headset rack, stool, door, new wall</td><td class="n">3-6</td><td>Existing kit; walls packed as now</td></tr>
+        <tr><td>The booth's kit and machines</td><td class="n">0</td><td>The same pieces as today, moved</td></tr>
+      </tbody>
+    </table></div>
+    <p>Today the rec deck draws 170 calls by the lift (deck_check, 0.92.2). Plan: 6 or fewer extra by the lift, 10-16 extra looking into the bay, inside the deck's targets (under 300 by the lift, 450 on any view). Measured after each turn and written in the build table.</p>
+  </section>
+
+  <section>
+    <h2>6. What moves in the code and the checks</h2>
+    <ul>
+      <li><b>A switch.</b> Everything sits behind one switch, off while it's being built (the game stays identical), with a preview link (<code>#simbay</code> added to the game's link) to try it. Switching it on is its own step, after your review.</li>
+      <li><b>The deck (section 4e):</b> the map gets the new room, the doors and Works hatch, the booth's dressing, the machines' tiles, the new places (two pods, two bench spots, Dev's spot for sim night). The old room's key stays with the booth, so Maeve's place and the talent night code keep working.</li>
+      <li><b>Activities (section 15r):</b> the pod tap, the wait, the run and its grade, the board, the save.</li>
+      <li><b>The crew (section 14):</b> the "sim pilot" habit and what a visit does in the pods.</li>
+      <li><b>Checks:</b> deck_check (everything reachable, the new places, draw calls), day_check (sim pilots' days, nobody stuck, no double-booked pod), player_check (the run's leisure, saving), machine_check (the moved machines still wear, break and get fixed), interactions_check (a new part: tap a pod, sit, leisure rises, the run ends, the grade is saved), check_fast, and cadet_test (Decks 1-6 pixel-identical, and the whole game identical with the switch off).</li>
+      <li><b>Records:</b> design-doc's rec deck paragraph, the rec deck plan (the utility room's entry, marked changed, not deleted), DEV_NOTES and the build table, in the same commit as the work.</li>
+      <li>FX11 is working on the rec deck at the same time (the pool camera, the light disc). I'll keep in touch with them so we don't edit the same lines.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>7. Build turns</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>Turn</th><th>What</th><th>Checks</th></tr></thead>
+      <tbody>
+        <tr><td class="n">S1</td><td>The switch and preview link; the room split, doors, Works hatch; the booth's kit and the three machines moved</td><td>deck_check (off and on), machine_check, player_check, cadet_test identical with it off</td></tr>
+        <tr><td class="n">S2</td><td>The sim bay's look: two pods, the screens, the bench, Dev's board, the floor</td><td>deck_check, draw calls measured, screenshots</td></tr>
+        <tr><td class="n">S3</td><td>Your run: tap, wait, the flight, the grade, the board, saving</td><td>interactions_check (new part), player_check</td></tr>
+        <tr><td class="n">S4</td><td>The crew: sim pilots, their visits, sitting in the pods</td><td>day_check, deck_check</td></tr>
+        <tr><td class="n">S5</td><td>Sim night (only if you want it now)</td><td>events_check</td></tr>
+        <tr><td class="n">S6</td><td>Records, the full round of checks on six runners, a playable preview and screenshots for your review</td><td>The full round</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <form id="answers" novalidate>
+    <h2>Your answers</h2>
+    <fieldset>
+      <legend>Is the layout right (sim bay 4 × 7, booth 2 × 7 along the auditorium wall)?</legend>
+      <label class="opt"><input type="radio" id="lay-yes" name="layout" value="Yes, build it"><span>Yes, build it</span></label>
+      <label class="opt"><input type="radio" id="lay-change" name="layout" value="Change it (see notes)"><span>Change it (say how in the notes)</span></label>
+    </fieldset>
+    <fieldset>
+      <legend>Sim night with Dev Raman?</legend>
+      <label class="opt"><input type="radio" id="sn-now" name="simnight" value="Build it now (turn S5)"><span>Build it now (turn S5)</span></label>
+      <label class="opt"><input type="radio" id="sn-later" name="simnight" value="Later, after the bay is in"><span>Later, after the bay is in (recommended: the bay works fine without it)</span></label>
+      <label class="opt"><input type="radio" id="sn-no" name="simnight" value="No sim night"><span>No sim night</span></label>
+    </fieldset>
+    <fieldset>
+      <legend>Landing grades and Dev Raman's board of smoothest landings?</legend>
+      <label class="opt"><input type="radio" id="gr-yes" name="grades" value="Yes, grades and the board"><span>Yes, grades and the board (recommended)</span></label>
+      <label class="opt"><input type="radio" id="gr-no" name="grades" value="No scores, just fly"><span>No scores, just fly</span></label>
+    </fieldset>
+    <fieldset>
+      <legend>Should the pods be a machine that can break and Works repairs?</legend>
+      <label class="opt"><input type="radio" id="mc-later" name="podmachine" value="Later"><span>Later (recommended: keeps this build smaller)</span></label>
+      <label class="opt"><input type="radio" id="mc-now" name="podmachine" value="Now"><span>Now</span></label>
+      <label class="opt"><input type="radio" id="mc-no" name="podmachine" value="Never"><span>Never</span></label>
+    </fieldset>
+    <fieldset>
+      <legend>A real landing you steer yourself (a mini-game, like Lightdisc), some day?</legend>
+      <label class="opt"><input type="radio" id="mg-park" name="minigame" value="Keep it on record as an idea for later"><span>Keep it on record as an idea for later</span></label>
+      <label class="opt"><input type="radio" id="mg-no" name="minigame" value="No, watching is enough"><span>No, watching is enough</span></label>
+    </fieldset>
+    <fieldset>
+      <legend><label for="notes">Notes</label></legend>
+      <textarea id="notes" name="notes" placeholder="Anything to change or add"></textarea>
+    </fieldset>
+    <button type="submit" id="save">Save my answers</button>
+    <p class="status" id="status" aria-live="polite">Loading any saved answers...</p>
+  </form>
+</div>
+
+<script>
+(() => {
+  // the two tile maps: rows 10-17, columns 25-35 of the rec deck (room b is columns 28-33, rows 11-17)
+  const C0 = 25, R0 = 10, S = 28, OX = 6, OY = 6;
+  const NS = 'http://www.w3.org/2000/svg';
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  function draw(id, after) {
+    const svg = document.getElementById(id);
+    const el = (n, a, t) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (t != null) e.textContent = t; svg.appendChild(e); return e; };
+    const kind = (c, r) => r === 10 ? (c >= 30 && c <= 33 ? 'foyer' : 'out') : c <= 27 ? 'wash' : c >= 34 ? 'aud' : !after ? 'plant' : c <= 31 ? 'sim' : 'plant';
+    const fill = { foyer: '--other', wash: '--other', aud: '--other', sim: '--sim', plant: '--plant', out: '--bg' };
+    for (let r = 10; r <= 17; r++) for (let c = C0; c <= 35; c++) {
+      const k = kind(c, r); if (k === 'out') continue;
+      el('rect', { x: OX + (c - C0) * S, y: OY + (r - R0) * S, width: S - 1, height: S - 1, fill: css(fill[k]), rx: 2 });
+    }
+    const T = (c, r, s, col, sz = 9) => el('text', { x: OX + (c - C0) * S + S / 2, y: OY + (r - R0) * S + S / 2 + 3, 'text-anchor': 'middle', 'font-size': sz, fill: css(col), 'font-weight': 700 }, s);
+    const P = '--plantInk', M = '--simInk', O = '--otherInk';
+    T(31.5, 10, 'FOYER', O, 9); T(26, 14, 'WASH', O, 8); T(34.5, 14, 'AUD', O, 8);
+    // doors: a short bar on the edge
+    const edge = (h, c, r, col) => h ? el('rect', { x: OX + (c - C0) * S + 3, y: OY + (r - R0) * S - 3, width: S - 7, height: 5, fill: css(col), rx: 2 })
+      : el('rect', { x: OX + (c - C0) * S - 3, y: OY + (r - R0) * S + 3, width: 5, height: S - 7, fill: css(col), rx: 2 });
+    edge(false, 34, 11, '--coral'); edge(false, 34, 12, '--teal');   // stage door, booth window
+    if (!after) {
+      edge(true, 31, 11, '--coral');
+      T(28, 13, 'LT', P); T(29, 13, 'pnl', P, 7); T(28, 15, 'SND', P, 7.5); T(29, 15, 'pnl', P, 7); T(30, 17, 'GRV', P, 7.5);
+      T(33, 12, 'desk', P, 7.5); T(32, 12, 'M', P); T(33, 14, 'proj', P, 7.5); T(28, 11.6, 'dimmers', P, 7); T(31, 17, 'kettle', P, 7);
+    } else {
+      edge(true, 31, 11, '--navy'); edge(true, 32, 11, '--coral');
+      T(28.5, 12.5, 'POD 1', M, 9); T(28.5, 15.5, 'POD 2', M, 9); T(28, 14, 'board', M, 7.5); T(28.5, 11, 'bench', M, 7.5);
+      T(31, 13, 'aisle', M, 7); T(29.5, 17, 'headsets', M, 7);
+      T(33, 12, 'desk', P, 7.5); T(32, 12, 'M', P); T(33, 13, 'proj', P, 7.5);
+      T(33, 14, 'LT', P); T(33, 15, 'SND', P, 7.5); T(33, 16, 'GRV', P, 7.5); T(32, 14, 'pnl', P, 7); T(32, 15, 'pnl', P, 7); T(32, 16, 'pnl', P, 7);
+      T(32.5, 17, 'kettle', P, 7);
+      for (const r of [12, 15]) el('rect', { x: OX + 3 * S + 2, y: OY + (r - R0) * S + 2, width: 2 * S - 6, height: 2 * S - 6, fill: 'none', stroke: css('--simInk'), 'stroke-width': 1.5, rx: 8 });
+      el('rect', { x: OX + 3 * S, y: OY + 2 * S + 4, width: 3, height: 5 * S - 8, fill: css('--navy') });   // screens on the west wall
+    }
+    el('text', { x: OX, y: 286, 'font-size': 9, fill: css('--otherInk') }, 'M = Maeve’s chair · pnl = machine panel · coral bar = door or hatch · teal = booth window');
+  }
+  draw('before', false); draw('after', true);
+
+  // answers, kept in the page's own store
+  const form = document.getElementById('answers'), status = document.getElementById('status');
+  const radios = ['layout', 'simnight', 'grades', 'podmachine', 'minigame'];
+  let ref = null;
+  const fill = d => { if (!d) return; for (const n of radios) for (const r of form.querySelectorAll('input[name=' + n + ']')) r.checked = r.value === d[n]; document.getElementById('notes').value = d.notes || ''; };
+  const read = () => { const o = {}; for (const n of radios) o[n] = (form.querySelector('input[name=' + n + ']:checked') || {}).value || ''; o.notes = document.getElementById('notes').value.trim(); o.savedAt = new Date().toISOString(); return o; };
+  (async () => {
+    const db = window.claude && window.claude.use ? await window.claude.use('db') : null;
+    if (!db) { status.textContent = 'Answers can only be saved when you are signed in on claude.ai. You can still tick and write here.'; return; }
+    ref = db.doc('answers/user');
+    try { const s = await ref.get(); if (s.exists) { fill(s.data()); status.textContent = 'Your saved answers are shown. Change them and save again any time.'; } else status.textContent = 'Nothing saved yet.'; }
+    catch (e) { status.textContent = 'Could not load saved answers. You can still save new ones.'; }
+  })();
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!ref) { status.textContent = 'Saving is not available here. Please send your answers to the lead in chat.'; return; }
+    status.textContent = 'Saving...';
+    try { await ref.set(read()); status.textContent = 'Saved. The team will read your answers from here.'; }
+    catch (err) { status.textContent = 'That did not save (' + (err && err.code || 'error') + '). Please try again, or send your answers in chat.'; }
+  });
+})();
+</script>

@@ -808,10 +808,11 @@
 // Day 1: the training-day opener at the briefing's end
 ? flag:walk.train.open.1
 - Morning! It's a training day today. I'm with you all day.
+// (the user, patch 0.92.3 #7: clock in right after his hello, then the rest; the two lines swapped, none removed)
 ? flag:walk.train.open.2
-- Anything you're not sure of, ask. That's what I'm here for.   #warm
-? flag:walk.train.open.3
 - First, clock in. The time clock's by the tea corner.
+? flag:walk.train.open.3
+- Anything you're not sure of, ask. That's what I'm here for.   #warm
 // Day 1 dinner: you can't do every tradition (after walk.dinner.eve.1-3)
 ? flag:walk.eve.choose.1
 - You can't do every tradition in a day. Nobody can.
@@ -958,3 +959,73 @@
 // after the last walk.hand line. "Subject | body", like mail.zeke.cabin (one line: Mail bodies are plain text).
 == mail.zeke.land
 - Before you land | New hand, I'm writing this before the Tern docks, so by the time you read it I'll have handed you this in person and said most of it already. Here's the rest. What do you do first? Dinner. Always dinner first. Then everything else. Is it always this much? First night, yes. By Thursday it's just home with a lift in it. And if you're the quiet sort, good. The quiet ones last longest. Tomorrow, ten to nine, the Works bay. I'll be the one with the tea. Zeke
+
+// ---- SW1 (2026-10-24, patch 0.92.3 item 15): his own Talk a while frames (main characters don't use the shared ones)
+== talk.start
+- Oh, hello. A proper chat? Yes. Sit. Tell me things.
+- There you are. Go on, then. What's the news?
+- A chat? Happy to. The coils can manage without me for a bit.   #funny
+? tier>=friend
+- {nick}. Good. I was hoping it'd be you.   #warm
+- Oh, brilliant. I've been saving a question for you.   #warm
+
+== talk.sit
+- Sit, sit. Mind the wool. There's always wool.   #funny
+- Grab a seat. I'll budge up. I budge very well.   #funny
+- Sit down. Properly. Feet up, if you like.
+
+== talk.filler
+- Sorry. Was I humming? I was humming.   #funny
+- Listen. That's coil two. Steady as anything.
+- I like this. Just talking. No board. No sulking coils.   #warm
+- Where was I? Doesn't matter. Go on, you talk.
+- Funny, isn't it. A whole ship humming, and us just sitting here.
+- I've learnt more from your questions than you'd think.   #warm
+
+== talk.end
+- Right, onward. That was lovely. Thank you.   #warm
+- Good talk. Properly good. Same again soon?
+- Off you go, then. I'll be thinking about that all shift.
+- That's set me up. I might even sing. You've been warned.   #funny
+- Thanks for sitting with me. It helps. It always helps.   #warm
+
+== talk.stop
+- Oh. Right. Off you go. We'll finish it properly another time.
+- No, go on. I'll hold the thought. I'll knit it into something.   #funny
+- Of course. Mind the coils on your way.
+
+== talk.go.shift
+- Ah, I'm on in five. Coil three's waiting. Later?
+- Sorry, shift's starting. Find me at the overlook after?
+
+== talk.go.bed
+- Bed for me. I'll say goodnight to the coils on the way. Tomorrow?
+- I'm yawning at you. That's rude. Tomorrow, properly?   #funny
+
+== talk.go.trad
+- I'm running {trad} tonight. Come and help me start it?
+- Sorry, {trad}'s starting. Walk down with me?
+// ---- ZW1 (writer), patch 0.92.3 item 26: you in dirty clothes. clothes.remark: yesterday's clothes (flag:clothes.stale);
+// clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3's hook). Bubbles, 60 characters or fewer; kind, never mean.
+== clothes.remark
+? flag:clothes.stale
+- Yesterday's shirt? I won't tell Calder. She'll know anyway.   #funny
+- Same clothes as yesterday? Wardrobe, {me}. Properly.
+? flag:clothes.stale tier>=friend
+- I did a whole week in one shirt once. Don't. Ask Reyes.   #funny
+== clothes.grubby
+? flag:clothes.grubby
+- Look at you. Proper Works grime. I'm almost proud.   #funny
+- Coil three did that to me once. Change before tea.   #funny
+? flag:clothes.grubby tier>=friend
+- Good job, by the look of you. Now change. Properly.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
+== bday.circle
+- Happy birthday, {other}! Coil three sends her best.   #funny
+- Happy birthday! I'd knit you a scarf, but you'd see it.   #funny
+== bday.circle.you
+- Happy birthday, {me}! Proper cake, proper candles. Properly.   #warm
+== bday.thanks
+- Thanks, all! Right, cake. Then onward. Properly.   #warm
+- You lot. I'm going to hum. Sorry. Thank you.   #funny

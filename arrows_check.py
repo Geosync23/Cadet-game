@@ -26,13 +26,18 @@
 #          first workday after the scanner's first use (Day 9 at most); no arrow left up after its
 #          moment (the same label for over 3 ship hours)
 # On 0.64.15 (2b4a05db) both FAIL: that is the point. Which fixer turns which line green is printed with each FAIL.
-# Run one part:  python3 arrows_check.py BUILD.html shift   (parts: queue, shift, week; default all, about 15 minutes)
+# Run one part:  python3 arrows_check.py BUILD.html shift   (parts: queue, clockin, shift, week, promo; default all, about 45 minutes; promo alone about 30)
+# Part "promo" (DV1, lead 34): Days 8-12 following only the arrows: the first promotion end to end (see part_promo)
+# Part "clockin" (patch 0.92.3 item 6, AC3): Days 1-3 into the Works bay before clocking in: the clock-in tip at once (Day 1: after
+# Zeke's line), Clock in tracked (not with Teaching arrows Off), both gone the moment you clock in. A real new game.
 # Add 'guide' to play shift and week with the arrow queue switched on (GUIDE_ON), e.g. ... BUILD.html week guide
 # Setup as cadet_test.py (playwright, three r128 in $CADET_WORK/three). Run:  python3 arrows_check.py BUILD.html
 import sys, json, re, os, pathlib
 from playwright.sync_api import sync_playwright
 
 WORK = pathlib.Path(os.environ.get('CADET_WORK', '/tmp/cadet-work'))
+RUN_ID = f'p{os.getpid()}_'   # FX18-1: this run's copies carry the process id (two runs in one CADET_WORK never open each other's), gone at exit
+__import__('atexit').register(lambda: [f.unlink(missing_ok=True) for f in (WORK / 'test').glob(f'*_{RUN_ID}*') if f.is_file()])
 (WORK / 'test').mkdir(parents=True, exist_ok=True)
 THREE = (WORK / 'three/package/build/three.min.js').read_text()
 INIT = """(() => { let vt = 1000; const cbs = []; performance.now = () => vt; Date.now = () => vt;
@@ -55,7 +60,7 @@ class Page:
         self.page.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
         self.page.add_init_script(INIT)
         html = pathlib.Path(path).read_text(); i = html.rfind('})();')
-        self.tmp = WORK / 'test' / ('_arrows_' + pathlib.Path(path).name)
+        self.tmp = WORK / 'test' / ('_arrows_' + RUN_ID + pathlib.Path(path).name)
         self.tmp.write_text(html[:i] + "window.__sc = src => eval(src);\n" + html[i:])
         self.page.goto('file://' + str(self.tmp) + '#dev'); self.ready()
     def ready(self):
@@ -158,14 +163,14 @@ def part_queue(pg):
       W.cur.j = 'arrows-tj'; GUIDE.list.length = 0; GUIDE.rev++; guideTrain(); out.watch = lab(); const w = ent('train:m4:watch');
       if (w) { const g = w.goal(); out.watchLevel = w.level; out.watchCrew = g.crew; out.watchId = w.id; }
       W.cur.st = 'do'; out.watchAfter = lab();
-      GUIDE.list.length = 0; GUIDE.rev++; guideTrain(); out.doo = lab(); const o = ent('train:m4:do');
+      GUIDE.list.length = 0; GUIDE.rev++; guideTrain(); out.doo = lab(); const o = ent('train:m4:do:' + W.cur.d);   /* (DS1, patch 0.92.5 #12: T3 per day, named) */
       if (o) { const g = o.goal(); out.doLevel = o.level; out.doBoard = !!g && String(g.item) === String(/job board/i); out.doFit = fit(g && g.label); }
       SHIP.jobs.push({ id: 'arrows-mine', machine: mc.id, deck: mc.deck, kind: 'repair', urgency: 1, posted: now, found: now, claimedBy: 'you', parts: [], status: 'claimed' });
       out.otherJob = lab(); out.otherShown = guideNow() ? guideNow().id : null;
       SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'arrows-mine'); out.back = lab();
-      Object.assign(SHIP.jobs.find(j => j.id === 'arrows-tj'), { claimedBy: 'you', status: 'claimed' }); out.taken = lab(); out.takenLive = !!ent('train:m4:do');
+      Object.assign(SHIP.jobs.find(j => j.id === 'arrows-tj'), { claimedBy: 'you', status: 'claimed' }); out.taken = lab(); out.takenLive = !!ent('train:m4:do:' + W.cur.d);
       const off = Object.keys(WORK_MECH).find(k => WORK_MECH[k].offer && ladderRow(k));
-      if (off) { W.cur = { id: off, st: 'do', d, by: 'calder', j: 'arrows-tj' }; GUIDE.list.length = 0; GUIDE.rev++; guideTrain(); out.offer = [off, !!ent('train:' + off + ':do')]; }
+      if (off) { W.cur = { id: off, st: 'do', d, by: 'calder', j: 'arrows-tj' }; GUIDE.list.length = 0; GUIDE.rev++; guideTrain(); out.offer = [off, !!ent('train:' + off + ':do:' + d)]; }
       out.calder = guideWho('calder');
       SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'arrows-tj'); SHIP.occasions.splice(SHIP.occasions.indexOf(occ), 1); W.cur = keep; GUIDE.list.length = 0; GUIDE.rev++; return out; })()""")
     if t is not None:
@@ -178,10 +183,10 @@ def part_queue(pg):
         check(t['watch'] and t['watch'].startswith('Stay close and watch Yara') and t.get('watchLevel') == 3 and t.get('watchCrew') == 'esposito-yara', f'train: T2 should follow the teacher at level 3 ({t["watch"]}, {t.get("watchLevel")}, {t.get("watchCrew")})')
         check(str(t.get('watchId', '')).endswith(':' + str(pg.ev('SHIP.time.day'))), f'train: T2\'s once should be per training, its day in the id ({t.get("watchId")})')
         check(t['watchAfter'] is None or not str(t['watchAfter']).startswith('Stay close'), f'train: T2 outlived the watching ({t["watchAfter"]})')
-        check(t['doo'] and t['doo'].startswith('Your turn') and t.get('doLevel') == 3 and t.get('doBoard'), f'train: T3 should point at the board at level 3 ({t["doo"]}, {t.get("doLevel")}, {t.get("doBoard")})')
-        check(t['otherShown'] != 'train:m4:do' and not str(t['otherJob'] or '').startswith('Your turn'), f'train: T3 should leave the arrow to another job you hold ({t["otherJob"]}, {t["otherShown"]})')
-        check(str(t['back'] or '').startswith('Your turn'), f'train: T3 should come back when that job is gone ({t["back"]})')
-        check(not str(t['taken'] or '').startswith('Your turn') and not t['takenLive'], f'train: T3 outlived taking the job ({t["taken"]})')
+        check(t['doo'] and t['doo'].startswith('Your ') and 'lesson' in t['doo'] and t.get('doLevel') == 3 and t.get('doBoard'), f'train: T3 should point at the board at level 3 ({t["doo"]}, {t.get("doLevel")}, {t.get("doBoard")})')
+        check(not str(t['otherShown'] or '').startswith('train:m4:do') and 'lesson' not in str(t['otherJob'] or ''), f'train: T3 should leave the arrow to another job you hold ({t["otherJob"]}, {t["otherShown"]})')
+        check('lesson' in str(t['back'] or ''), f'train: T3 should come back when that job is gone ({t["back"]})')
+        check('lesson' not in str(t['taken'] or '') and not t['takenLive'], f'train: T3 outlived taking the job ({t["taken"]})')
         if 'offer' in t: check(not t['offer'][1], f'train: T3 for a row with its own offer ({t["offer"]})')
         check(t['calder'] == 'Calder', f'train: Calder should be "Calder" ({t["calder"]})')
         check(t.get('meetFit', 0) <= 258 and t.get('doFit', 0) <= 258, f'train: a label too wide for 390 px (T1 {t.get("meetFit")} px, T3 {t.get("doFit")} px; 258 fit)')
@@ -307,7 +312,8 @@ FOLLOW = r"""(() => {
   }
   // the phone left open (the Scanner opens it by itself): closed after a moment, as a player would (FX3's gap 2)
   if (DEV.open && !DEV.choose && !ACT) { window.__devN = (window.__devN || 0) + 1; if (window.__devN >= 3) { window.__devN = 0; deviceClose(); return 'close the device'; } } else window.__devN = 0;
-  if (ACT && ACT.phase !== 'walk' && IX_GOAL && /^career:/.test(IX_GOAL.trk || '')) { const l = IX_GOAL.label; actEnd(true); return 'leave it for: ' + l; }   // an urgent career arrow (Calder's call) over your work: you stop and go, as a player would (the repair's time is kept; FX4)
+  { const gq = typeof GUIDE_ON !== 'undefined' && GUIDE_ON ? goalNow() : null, call = IX_GOAL && /^career:/.test(IX_GOAL.trk || '') ? IX_GOAL : gq && /^(inc|promo):/.test(gq.guide || '') ? gq : null;   // DV1: and the promotion's beats (the queue's promo:*)   // FX10 (backlog 15): with the arrows on, Calder's call is the queue's level-1 'inc:m6', not IX_GOAL
+    if (ACT && ACT.phase !== 'walk' && call) { const l = call.label; actEnd(true); return 'leave it for: ' + l; } }   // an urgent career arrow (Calder's call) over your work: you stop and go, as a player would (the repair's time is kept; FX4)
   { const c = SHIP.works && SHIP.works.cur, r = c && c.st === 'meet' && SHIP.occasions.find(x => x.key === c.occ), n = shipNow(); if (r && !r.met && r.status === 'asked' && n >= r.at && n < r.at + r.len && deckDef.num === r.deck && roomAt(...player.here()) === r.room && !DIALOGUE && !ACT) return null; }   // in a training meeting's room while it's on: stay a moment for it to start (FX4)
   if (ACT) { if (IX_ACTS[ACT.kind] && ACT.phase !== 'walk' && (ACT.done || 0) >= ((ACT.def && ACT.def.mins) || 0)) { const k = ACT.kind; actEnd(); return 'stand up: ' + k; } return null; }   // a sit-down (tea, a lounge) once its minutes are in: up again, as a player would (AC2)
   const cs = document.getElementById('clockScreen');
@@ -316,6 +322,8 @@ FOLLOW = r"""(() => {
     const b = [...cs.querySelectorAll('button')].find(b => want.test(b.textContent)) || [...cs.querySelectorAll('button')].find(b => /close/i.test(b.textContent));
     if (b) { const t = b.textContent; b.click(); return 'clock screen: ' + t; }
   }
+  { const ds = document.getElementById('dmSheet'); if (ds && !ds.hidden && typeof devmodeOpen === 'function') { devmodeOpen(false); return 'close the Dev panel'; } }   // DV1 (lead 35, FX12's Day 9 FAIL, the real cause): a tap at a pin under the top-left card (the place and clock, which opens Dev mode's sheet in this Dev-save page) left the sheet open over the deck, and every later tap landed on its buttons
+  { const hp = document.getElementById('ixHealth'); if (hp && !hp.hidden) { document.getElementById('ixHealthC').click(); return 'close Ship health'; } }   // DV1 (lead 35, FX12's Day 9 FAIL): a Ship health board tapped on the way (the nearest thing to a pin) left its panel open over the deck, and every later tap landed on its list: closed, as a player would
   const bd = document.getElementById('ixBoard');
   if (bd && !bd.hidden) { const bs = [...bd.querySelectorAll('#ixBoardL button')], b = bs.find(b => /turn it in/i.test(b.textContent)) || bs.find(b => /take/i.test(b.textContent) && /asked for you/i.test((b.closest('.ixjob') || b.parentNode).textContent)) || bs.find(b => /take/i.test(b.textContent));   // a job held for you first (your turn at a lesson), as a player reading the arrow would (AC2)
     const t = b ? b.textContent + ': ' + ((b.closest('.ixjob') || b.parentNode).querySelector('b') || { textContent: '' }).textContent : 'nothing to take'; if (b) b.click(); else document.getElementById('ixBoardC').click(); return 'board: ' + t; }
@@ -359,7 +367,7 @@ def stuck_fix(lab):                                  # who should turn a "stuck 
     return FIX['stuck']
 
 class Follower:
-    def __init__(self, pg): self.pg = pg; self.acts = []; self.same = None; self.stuck = []; self.long = []
+    def __init__(self, pg): self.pg = pg; self.acts = []; self.same = None; self.stuck = []; self.long = []; self.guides = {}; self.dv = {}; self.test_led = None
     def run(self, until_min_abs, every=6):
         pg = self.pg
         while pg.ev('shipNow()') < until_min_abs:
@@ -368,7 +376,10 @@ class Follower:
             if isinstance(r, dict) and r.get('click'):
                 pg.page.mouse.click(*r['click']); pg.step(2, 50); r = 'tap the floor at the pin: ' + r['label'] + (' (working)' if pg.ev('!!ACT') else '')
             if r: self.acts.append((pg.ev('clockText()'), r))
-            s = pg.ev("(() => { const g = goalNow(); return [Math.floor(shipNow()), g ? g.label : null, player.here().join(','), deckDef.num, !!ACT || !!(DIALOGUE)]; })()")
+            s = pg.ev("(() => { const g = goalNow(), v = typeof dvCareerNext === 'function' ? dvCareerNext() : null; return [Math.floor(shipNow()), g ? g.label : null, player.here().join(','), deckDef.num, !!ACT || !!(DIALOGUE), g && g.guide || null, v ? v.label : null]; })()")
+            if s[5] and s[5] not in self.guides: self.guides[s[5]] = (s[0], s[1])   # the queue's entries seen leading, first time and label
+            if s[5] and s[1] and 'Tier 2 test job' in s[1] and not self.test_led and pg.ev("(() => { const c = SHIP.works && SHIP.works.cur; return !!(c && c.id === 't2' && c.j && guideTakeable().some(o => o.id === c.j)); })()"): self.test_led = (s[0], s[5])   # RV16: the queue leading to the test job by name while it can be taken (promo:test, or the shift's board arrow naming it)
+            if s[6] and s[6] not in self.dv: self.dv[s[6]] = s[0]                    # the Dev career arrow's labels
             if s[4] and self.same: self.same = (s[0], self.same[1], self.same[2], self.same[3]); continue   # busy (working, a meeting): not stuck
             if s[1]:
                 if self.same and self.same[1] == s[1]:
@@ -439,13 +450,73 @@ def part_week(ctx, path):
     check(not pg.errors, f'week: page errors {pg.errors[:3]}')
     pg.page.close()
 
+# Part "promo" (DV1 for lead 34, the user: "build and activate the promotion"): Days 8-12 following only the arrows, from a
+# career set to the end of Day 7 (Making it safe due on Day 8). The test job set, taken and passed on its day (its parts set
+# aside: no "Look over" all day for want of filters); the summons met in the Chief's office (not by Mail); the walk to cabin
+# 4-23 walked with Calder (not the 17:30 fallback, even mid-job); the ceremony attended by 17:30; flag 'promoted' set; each
+# beat led by the arrow queue (promo:test, promo:summons, promo:move, promo:ceremony); the Dev career arrow naming each.
+def part_promo(ctx, path):
+    pg = Page(ctx, path); real_game(pg, 8); f = Follower(pg); tday = None; N = {k: {} for k in ('promoted', 'moved', 'commissioned')}
+    for d in range(8, 13):
+        f.run((d - 1) * 1440 + 21 * 60 + 30)
+        s = pg.ev("(() => { const W = SHIP.works; return { rank: W.rank, test: W.test, done: W.done.slice(), cur: W.cur ? W.cur.id + ':' + W.cur.st : null, promoted: !!flag('promoted') }; })()")
+        if tday is None and s['test']: tday = s['test']['day']   # the day she set it for
+        for k, v in pg.ev("Object.fromEntries(['promoted', 'moved', 'commissioned'].map(k => [k, simNotes(k, 0)]))").items():   # gathered each evening (the notes bus keeps a few days)
+            for n in v: N[k][n['t']] = n
+        print(f'  promo: Day {d}: {s}')
+        f.night(d)
+    W = pg.ev("(() => { const W = SHIP.works; return { test: W.test, rank: W.rank, home: W.home, done: W.done, promoted: !!flag('promoted') }; })()")
+    N = {k: [v[t] for t in sorted(v)] for k, v in N.items()}
+    check(W['test'] and W['test']['passed'] and W['test']['tries'] == 1 and tday and W['test']['day'] == tday, f"promo: the test job not passed on its day (Day {tday}), first try (fix: DV1, its parts set aside): {W['test']}")
+    pr = N['promoted'][:1]; check(pr and pr[0].get('how') == 'met', f"promo: the summons not met in the Chief's office (how: {pr})")
+    mv = N['moved'][:1]; check(mv and mv[0].get('how') == 'walked', f"promo: the walk to cabin 4-23 not walked with her (how: {mv}) (fix: DV1, the walk starts at 17:00 even mid-job)")
+    cm = N['commissioned'][:1]; check(cm and cm[0].get('how') == 'met', f"promo: the ceremony not attended (how: {cm})")
+    check(W['rank'] == 'officer' and W['home'] == '4-23' and W['promoted'], f"promo: not an officer in 4-23 with the flag 'promoted' (fix: DV1): {W['rank']}, {W['home']}, promoted {W['promoted']}")
+    # promo:test, or (RV16, lead 37) the shift's board arrow already naming "Your Tier 2 test job" when the test is takeable: FX19's
+    # rule holds promo:test while you hold another job, and a job turned in and the test taken in the same ship minute leaves
+    # promo:test no tick to lead (seen on 0.92.6 after 27ad3cba moved Day 9's jobs); the player is led to the test by name either way
+    check(any(g.startswith('promo:test') for g in f.guides) or f.test_led, f"promo: the arrow queue never led to the Tier 2 test job while it could be taken (promo:test, or the board arrow naming it) (fix: DV1, the promotion's beats on the queue); seen {sorted(g for g in f.guides if g.startswith('promo'))}")
+    if f.test_led and not any(g.startswith('promo:test') for g in f.guides): print(f"  promo: the test job led by the board arrow naming it ({f.test_led[1]}, Day {f.test_led[0] // 1440 + 1} {hhmm(f.test_led[0])}), not promo:test")
+    for k in ('promo:summons', 'promo:move', 'promo:ceremony'):
+        check(any(g.startswith(k) for g in f.guides), f"promo: the arrow queue never led with {k} (fix: DV1, the promotion's beats on the queue); seen {sorted(g for g in f.guides if g.startswith('promo'))}")
+    for w in ('Your Tier 2 test job', 'The summons', 'Your cabin', 'The ceremony'):
+        check(any(w in l for l in f.dv), f"promo: the Dev career arrow never named \"{w}\"")
+    PROMO_LAB = re.compile(r'test job|scrubber|Chief|cabin|commission', re.I)   # the promotion's own steps; other stucks are week/shift's business (printed)
+    for t, lab, dk in f.stuck:
+        if PROMO_LAB.search(lab): fail(f'promo: stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk}) (fix: DV1)')
+        else: print(f'  promo: (not the promotion) stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk})')
+    print(f"  promo: test {W['test']}, notes {[(k, [n.get('how') or n.get('step') for n in v]) for k, v in N.items()]}, queue {sorted(g for g in f.guides if g.startswith('promo'))}, stuck {len(f.stuck)}")
+    check(not pg.errors, f'promo: page errors {pg.errors[:3]}')
+    pg.page.close()
+
+def part_clockin(ctx, path):                              # patch 0.92.3 item 6 (AC3; RV12's lines): Days 1-3, into the Works bay before clocking in
+    pg = Page(ctx, path)
+    pg.ev("localStorage.clear()"); pg.ev("newGameStart(true)"); pg.step(5)
+    pg.page.fill('form input[maxlength="24"]', 'Sam'); pg.page.click('form button'); pg.step(5)
+    IN_BAY = """(() => { if (DIALOGUE) dialogueEnd(); goToDeck(5); SHIP.device.settings.tips = true; const s = placeSpot('5-timeclock-1'),
+      t = (ROOM_TILES.w || []).map(c => cellPos(...c)).filter(w => Math.hypot(w.x - s.x, w.z - s.z) > 5)[0]; player.obj.position.copy(t); player.stop(); })()"""
+    LOOK = "(() => ({ tip: TIP_Q[0] ? TIP_Q[0].id : null, clockTips: TIP_Q.filter(t => /^career\\.clock/.test(t.id)).map(t => t.id), trk: IX_GOAL ? IX_GOAL.trk || null : null }))()"
+    pg.ev("skipTo(introAbs(1, 8 * 60 + 30))"); pg.ev(IN_BAY); pg.step(10); a = pg.ev(LOOK)
+    check(a['trk'] == 'clock:in' and not a['clockTips'], f'clockin: Day 1 into the Works bay: Clock in tracked, and no clock-in tip before Zeke says it ({a})')
+    pg.ev("SHIP.intro.done['d1-opener'] = Math.floor(shipNow())"); pg.step(5); b = pg.ev(LOOK)
+    check(b['tip'] == 'career.clock.1', f'clockin: Day 1 after Zeke\'s line: the clock-in tip on screen at once ({b})')
+    pg.ev("careerClock(shipNow())"); pg.step(3); c = pg.ev(LOOK)
+    check(c['trk'] != 'clock:in' and not c['clockTips'], f'clockin: clocked in: its arrow and its tip gone at once ({c})')
+    pg.ev("skipTo(introAbs(2, 8 * 60 + 20))"); pg.ev(IN_BAY); pg.step(10); d = pg.ev(LOOK)
+    check(d['tip'] == 'career.clock.2' and d['trk'] == 'clock:in', f'clockin: Day 2 at 08:20 into the Works bay: the tip on screen and Clock in tracked ({d})')
+    pg.ev("clearGoal(); skipTo(introAbs(3, 8 * 60 + 20)); SHIP.device.settings.teach = 'off'"); pg.ev(IN_BAY); pg.step(10); e = pg.ev(LOOK)   # (Day 2's arrow, still due, would carry over)
+    check(e['tip'] == 'career.clock.3' and e['trk'] != 'clock:in', f'clockin: Day 3 with Teaching arrows Off: the tip, no tracked arrow ({e})')
+    check(not pg.errors, f'clockin: page errors {pg.errors[:3]}')
+    print(f'  clockin: Day 1 {a} -> {b} -> {c}; Day 2 {d}; Day 3 (Off) {e}')
+    pg.page.close()
+
 GUIDE = 'guide' in sys.argv[2:]                       # run shift and week with the arrow queue switched on
 TEACHOFF = 'teachoff' in sys.argv[2:]                 # with 'guide': Settings' Teaching arrows set to Off
-PARTS = set(a for a in sys.argv[2:] if a not in ('guide', 'teachoff')) or {'queue', 'shift', 'week'}
+PARTS = set(a for a in sys.argv[2:] if a not in ('guide', 'teachoff')) or {'queue', 'clockin', 'shift', 'week', 'promo'}
 with sync_playwright() as pw:
     path = sys.argv[1]; src = pathlib.Path(path).read_text(); off = arrows_off(src)
-    if off != src: (WORK / 'test' / ('_off_' + pathlib.Path(path).name)).write_text(off)
-    off_path = str(WORK / 'test' / ('_off_' + pathlib.Path(path).name)) if off != src else path   # queue's 'off' part, and shift / week without 'guide': the arrows switched off
+    if off != src: (WORK / 'test' / ('_off_' + RUN_ID + pathlib.Path(path).name)).write_text(off)
+    off_path = str(WORK / 'test' / ('_off_' + RUN_ID + pathlib.Path(path).name)) if off != src else path   # queue's 'off' part, and shift / week without 'guide': the arrows switched off
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
     if 'queue' in PARTS:
@@ -459,10 +530,14 @@ with sync_playwright() as pw:
             part_once(ctx, off_path)
         except SystemExit: pass
         except Exception as e: fail(f'queue: stopped: {str(e)[:300]}')
-    for name, part in (('shift', part_shift), ('week', part_week)):
+    if 'clockin' in PARTS:
+        print('== clockin (patch 0.92.3 item 6)')
+        try: part_clockin(ctx, path)
+        except Exception as e: fail(f'clockin: stopped: {str(e)[:300]}')
+    for name, part in (('shift', part_shift), ('week', part_week), ('promo', part_promo)):
         if name not in PARTS: continue
         print(f'== {name} (following only the arrow)')
-        try: part(ctx, path if GUIDE else off_path)
+        try: part(ctx, path if GUIDE or name == 'promo' else off_path)   # promo: always the build as shipped (the arrows on)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
     b.close()
 

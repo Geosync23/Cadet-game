@@ -83,20 +83,22 @@ PAPER = r"""(({ normal }) => {
   const work = mins => { for (let m = 0; m < mins; m++) { needsDrain(1, false); if (typeof WORK_LEISURE !== 'undefined') n.leisure = needClamp(n.leisure - WORK_LEISURE / 60);   // work wears leisure down (0.73.0)
     if (typeof WORK_HUNGER !== 'undefined') n.hunger = needClamp(n.hunger - WORK_HUNGER / 60);   // and hunger: 7 an hour at work (the patch's #20)
     if (playerSpeed() < 1) slowMins++; look(); } };
-  // the patch's #22 (social 3 an hour): a steady player eats at a table of three and has two chats a day (as PP1's fnet.py)
+  // the patch's #22 (social 3 an hour): a steady player eats at a table of three and has two chats a day (as PP1's fnet.py);
+  // 0.92.3 (social 4.5 an hour, fitness 1.4, leisure 2.4, hunger 6 asleep): three chats, a call home and the gym every day,
+  // a grab at lunch, and two fun things after the hobby in the evening
   const meal = () => { const d = PLAYER_ACTS.eat; for (let m = 0; m < d.mins; m++) { needsDrain(1, false); n.hunger = needClamp(n.hunger + d.gain / d.mins + NEED_DRAIN.hunger[0] / 60);
     if (typeof COMPANY_GAIN !== 'undefined') n.social = needClamp(n.social + COMPANY_GAIN * 3 * needEffects(n).socialGain); look(); } };
-  const chats = () => { if (typeof CHAT_GAIN !== 'undefined') for (let c = 0; c < 2; c++) n.social = needClamp(n.social + CHAT_GAIN * needEffects(n).socialGain); look(); };
+  const chats = () => { if (typeof CHAT_GAIN !== 'undefined') for (let c = 0; c < 3; c++) n.social = needClamp(n.social + CHAT_GAIN * needEffects(n).socialGain); look(); };
   const ends = [];                                        // energy at bedtime, each day
   for (let day = 1; day <= 7; day++) {                    // 06:00 to 06:00
     if (normal) {
       act('toilet'); awake(57); act('shower'); awake(5); meal(); chats(); awake(25);   // 06:00-08:00 (the toilet: 0.28.19)
       const sh = day <= 5 ? work : awake;                                         // Monday to Friday on shift, the weekend off (0.73.0)
-      awake(60); sh(3 * 60); act('toilet'); sh(5 * 60 - 3);                        // the shift, 09:00-17:00, with a break at noon
+      awake(60); sh(3 * 60); act('toilet'); act('grab'); sh(5 * 60 - 6);                        // the shift, 09:00-17:00, with a break at noon
       awake(30); meal(); act('toilet'); awake(37);                                // dinner about 17:30
-      if (day % 2) act('gym'); else act('call'); act('hobby');                    // a hobby every evening keeps leisure up after work (0.28.63; every evening from 0.73.0)
-      if (typeof WORK_LEISURE !== 'undefined') n.leisure = needClamp(n.leisure + 15);   // and something fun: a tradition, Tiles or a talk (0.73.0: work wears leisure down)
-      awake(22 * 60 - (18 * 60 + 30) - (day % 2 ? 60 : 45) - 3); act('toilet');   // to 22:00, and before bed
+      act('gym'); act('call'); act('hobby');                    // a hobby every evening keeps leisure up after work (0.28.63; every evening from 0.73.0)
+      if (typeof WORK_LEISURE !== 'undefined') n.leisure = needClamp(n.leisure + 15 + 25);   // and something fun: a tradition, Tiles or a talk (0.73.0: work wears leisure down); and a swim or a game (0.92.3)
+      awake(22 * 60 - (18 * 60 + 30) - 75 - 15 - 3); act('toilet');   // to 22:00, and before bed
       ends.push(Math.round(n.energy * 10) / 10); sleep(8 * 60);
     } else { awake(16 * 60); sleep(8 * 60); }                                     // no meals, no shower, no gym, no calls
   }
@@ -248,6 +250,16 @@ with sync_playwright() as pw:
     p = g.ev(f"({PAPER})({{ normal: false }})"); print('  end', p['end'], 'lowest', p['lo'], 'highest', p['hi'])
     check(all(0 <= p['lo'][k] and p['hi'][k] <= 100 for k in p['lo']), 'neglect: a need left 0-100')
     check(p['end']['fitness'] < 25 and p['end']['hunger'] == 0, 'neglect: fitness and hunger should be low')
+    # 0.92.3 (the user's notes 3, 4, 5, 18; FX9): one neglected day off from 100, 16 hours awake then 8 asleep, nothing done
+    nd = g.ev("""(() => { const n = SHIP.player.needs, r = x => Math.round(x * 10) / 10; for (const k of NEED_KEYS) n[k] = 100;
+      needsDrain(16 * 60, false); const day = { fitness: r(100 - n.fitness), social: r(100 - n.social), leisure: r(100 - n.leisure) };
+      for (const k of NEED_KEYS) n[k] = 100; needsDrain(8 * 60, true); day.hunger = r(100 - n.hunger);
+      for (const k of NEED_KEYS) n[k] = 100; needsDrain(16 * 60, false); needsDrain(8 * 60, true); day.fitnessDay = r(100 - n.fitness); day.socialDay = r(100 - n.social); return day; })()""")
+    print('  a neglected day: lost', nd)
+    check(24 <= nd['fitnessDay'] <= 27, f"fitness should fall about 25 a day (a workout most days), not {nd['fitnessDay']}")
+    check(74 <= nd['socialDay'] <= 78, f"social should fall about 76 a day, not {nd['socialDay']}")
+    check(36 <= nd['leisure'] <= 40, f"leisure should fall about 38 over a day off, not {nd['leisure']}")
+    check(46 <= nd['hunger'] <= 50, f"hunger should fall about 48 over an 8-hour sleep (you wake hungry), not {nd['hunger']}")
 
     print('The speed rule:')
     sp = g.ev(r"""(() => { const n = SHIP.player.needs, out = {};
@@ -266,10 +278,16 @@ with sync_playwright() as pw:
         for (let k = 0; k < 20; k++) { playerUpdate(.05, 0); player.update(.05, 0); } player.steer = null; return player.vel; };
       for (const b of [0, .5]) { Object.assign(n, { fitness: 50, energy: 50, hunger: 50, bathroom: b }); const v = walk() / PLAYER_V0;
         out.push([Math.round(playerSpeed() * 1000) / 1000, Math.round(v * 100) / 100, !!player.needGo, Math.round((player.k && player.k['+go'] || 0) * 100) / 100, (player.propMeshes || []).length, needEffects().marks.bathroom[1].slice(0, 8)]); }
+      n.bathroom = 100; walk(); walk(); walk();          // 0.92.5 (the user's item 1): after the toilet the walk is fully normal again, knees included
+      out.push(player.rig.legs.map(l => Math.round(Math.abs(l.knee.rotation.z) * 1000) / 1000));
+      n.bathroom = 0; walk(); n.bathroom = 100; player.needGo = false;   // and sitting on the toilet while bursting (the '+go' block skips a sitter)
+      for (let k = 0; k < 60; k++) animateActivity(player, 'sit', .05, k * .05, 0);
+      walk(); walk(); walk(); out.push(player.rig.legs.map(l => Math.round(Math.abs(l.knee.rotation.z) * 1000) / 1000));
       Object.assign(n, NEEDS_FRESH); playerUpdate(0, 0); return JSON.stringify(out); })()""")
-    bg = json.loads(bg); print('  bathroom 0, then 0.5: [speed, walked, needGo, the pose blend, prop meshes, the device note]', bg)
+    bg = json.loads(bg); print('  bathroom 0, then 0.5: [speed, walked, needGo, the pose blend, prop meshes, the device note], then the knees after the toilet', bg)
     check(bg[0][:3] == [.7, .7, True] and bg[0][3] > .9 and bg[0][4] == 0 and bg[0][5] == 'Bursting', f"bathroom 0: hold yourself ('+go', no prop) and walk at 70%: {bg[0]}")
     check(bg[1][:3] == [1, 1, False] and bg[1][3] < .1 and bg[1][5] != 'Bursting', f'bathroom above 0: the pose and the slow walk end: {bg[1]}')
+    check(max(bg[2] + bg[3]) < .005, f"after the toilet the knees come back straight (no knock-kneed '+go' left in the walk), walking and after sitting: knee turn {bg[2]}, {bg[3]}")
 
     print('Pause (0.28.48, the user\'s "Need a pause button"):')
     S1 = "JSON.stringify([SHIP.time.day, Math.round(SHIP.time.min * 1000) / 1000, Math.round(SHIP.player.needs.hunger * 1000) / 1000, player.obj.position.x.toFixed(3), player.obj.position.z.toFixed(3)])"

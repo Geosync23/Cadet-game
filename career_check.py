@@ -24,6 +24,8 @@
 # Run:  python3 career_check.py BUILD.html     (--fx: only parts (p) and (q))
 import sys, json, os, re, pathlib
 exec(open(__file__.replace('career_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
+RUN_ID = f'p{os.getpid()}_'   # FX18-1: this run's copies carry the process id (two runs in one CADET_WORK never open each other's), gone at exit
+__import__('atexit').register(lambda: [f.unlink(missing_ok=True) for f in (WORK / 'test').glob(f'*_{RUN_ID}*') if f.is_file()])
 from playwright.sync_api import sync_playwright
 
 ok = True
@@ -252,7 +254,7 @@ FX_LIFE = r"""(() => {
     const items = trkItems().filter(x => x.sec === 'on').map(x => x.title); out.order = items;
     SHIP.works = null; SHIP.occasions.length = 0; }
   { const m = machineList().find(x => x.deck === 4) || machineList()[0], t = shipNow(); const j = { id: 'fx-test', machine: m.id, deck: m.deck, room: m.room, kind: 'service', status: 'open', posted: t, found: t, until: t + 30, parts: [], title: 'Test' }; SHIP.jobs.push(j);
-    clearGoal(); promoTestTell({ j: 'fx-test', by: 'calder' }); out.test = IX_GOAL && [IX_GOAL.label, IX_GOAL.trk, IX_GOAL.trkTo === j.until];
+    clearGoal(); const gq = GUIDE_ON; GUIDE_ON = false; promoTestTell({ j: 'fx-test', by: 'calder' }); GUIDE_ON = gq; out.test = IX_GOAL && [IX_GOAL.label, IX_GOAL.trk, IX_GOAL.trkTo === j.until];   // the old arrow, for the arrow queue off (with it on, 24p's promoGuide leads: arrows_check promo)
     setShipNow(t + 31); trkDoneCheck(); out.testAfter = IX_GOAL && IX_GOAL.label; SHIP.jobs = SHIP.jobs.filter(x => x !== j); clearGoal(); }
   { goToDeck(5); clearGoal(); const t = shipNow(), m = machineById('5-junction-1');   // the light relays' own tap starts the work (arrows_check: "Repair the light relays" up all day)
     const j = { id: 'fx-relays', machine: m.id, deck: m.deck, room: m.room, kind: 'chore', chore: 'fault', target: m.id, title: 'Reset a tripped breaker: light relays', parts: [], stops: [{ tag: 'fault', placeId: '5-junction-1-svc', mins: 10 }], status: 'claimed', claimedBy: 'you', posted: t, found: t, start: t };
@@ -407,7 +409,7 @@ with sync_playwright() as pw:
     check(j and j['tier'] == 1 and j['rank'] == 'junior' and j['xp'] == 0 and j['tr'] == {} and j['log'] == [] and j['tools'] == {'scanner': [3, 1]} and j['op'] == {'2': ['m1']} and j['cur'] is None, 'worksClean on junk')
     check(sv['bad'] is None, 'worksClean(null) should be none')
     # a real reload, saving on: mid-training, then an old save (no ship.works)
-    tmp = WORK / 'test' / '_career_save.html'
+    tmp = WORK / 'test' / ('_career_save_' + RUN_ID + '.html')
     tmp.write_text(instrument(pathlib.Path(sys.argv[1]).read_text()))
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     page = b.new_page(viewport={'width': 600, 'height': 500})
@@ -500,7 +502,8 @@ with sync_playwright() as pw:
         check(not sm['juniorHeld'], 'a junior job is still held for you as an officer')
         print('   the move:', sm['moved'], sm['home'])
         check(sm['home'][0] == '4-23' and 'move2' in sm['home'][1] and sm['home'][2] and sm['home'][3] and not sm['home'][4], f"the move: 4-23 is yours (home, done, its door opens for you, not the other spare's): {sm['home']}")
-        check(sm['moved'] and sm['moved'][0][0] == 10 and sm['moved'][0][1] <= '17:30' and len(sm['moved']) == 1, f"moved once, on Day 10 by 17:30: {sm['moved']}")
+        by = '22:00' if ev("typeof PROMO_SIGHT_ON !== 'undefined' && PROMO_SIGHT_ON") else '17:30'   # FX19 (0.92.6, the user: the walk can't be missed): open till 22:00 with the switch on
+        check(sm['moved'] and sm['moved'][0][0] == 10 and sm['moved'][0][1] <= by and len(sm['moved']) == 1, f"moved once, on Day 10 by {by}: {sm['moved']}")
         print('   the ceremony:', sm['cer'], sm['com'], 'pip', sm['pip'], sm['keep'], sm['guests'], sm['mailCer'])
         check(sm['cer'] and sm['cer'][0][:3] == [11, '17:15', '1/O'] and sm['com'] == [[11, 'met']], f"the ceremony on Day 11 at 17:15 in the observation room, commissioned once: {sm['cer']}, {sm['com']}")
         check(sm['pip'] == [1, 1] and sm['keep'] and 'commissioned officer, day 11' in (sm['head'] or '').lower() and 'ceremony2' in sm['works']['done'] and ['commissioned', 11] in sm['works']['ms'], f"the pip, the framed commission, the Record: {sm['pip']}, {sm['keep']}, {sm['head']}")
@@ -605,7 +608,7 @@ with sync_playwright() as pw:
       W.xp = 999; out.ready = worksNext(); W.test = { tier: 2, day: SHIP.time.day + 1, tries: 0, passed: false }; out.set = worksNext();
       W.rank = 'officer'; W.tier = 2; out.officer = worksRecordHead().text; SHIP.works = was; return out; })()""")
     print('  what\'s next before the test:', rn)
-    check('test job for you' not in rn['low'] and 'rely' in rn['low'], f"not Relied on yet: say so, not \"a test job for you\" ({rn['low']})")
+    check('test job for you' not in rn['low'] and ('rely' in rn['low'] or 'Reliable' in rn['low']), f"not Relied on (Reliable with FX19's switch) yet: say so, not \"a test job for you\" ({rn['low']})")
     check('test job for you' not in rn['ready'] and 'tomorrow' in rn['set'], f"ready, then set for tomorrow: the real state ({rn['ready']} / {rn['set']})")
     check('Junior Technician · Junior Officer' not in rn['head'] and rn['head'].startswith('Junior Technician.') and rn['officer'].startswith('Technician · Officer.'), f"the Record's title ({rn['head'][:40]} / {rn['officer'][:40]})")
 

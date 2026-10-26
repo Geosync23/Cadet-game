@@ -632,3 +632,25 @@
 == talk.go.trad
 - {trad}'s on, love. I've done a tray for it. Come and help me carry.
 - Sorry, love. {trad}. There'll be food. There's always food. Coming?
+// ---- ZW1 (writer), patch 0.92.3 item 26: you in dirty clothes. clothes.remark: yesterday's clothes (flag:clothes.stale);
+// clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3's hook). Bubbles, 60 characters or fewer; kind, never mean.
+== clothes.remark
+? flag:clothes.stale
+- Yesterday's top, love? Change it before you queue.
+- Busy, love? Clean shirt tomorrow. I'll be checking.   #funny
+== clothes.grubby
+? flag:clothes.grubby
+- Not in my mess like that, love. Change, then eat.
+- Love, you're half oil. Wash your hands at least.   #funny
+? flag:clothes.grubby tier>=friend
+- Go and change, love. I'll keep a plate warm. Just this once.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
+== bday.circle
+- Happy birthday, love! Don't touch the knife, I'll cut it.   #funny
+- Happy birthday, {other}. Your favourite. I asked around.   #warm
+== bday.circle.you
+- Happy birthday, love! Your favourite. I asked around.   #warm
+== bday.thanks
+- Thank you, loves. Now eat it before it goes cold. It's cake.   #funny
+- Oh, you lot. Who baked? Not me, for once. Thank you.   #warm

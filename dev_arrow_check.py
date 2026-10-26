@@ -13,6 +13,8 @@
 # Run:  python3 dev_arrow_check.py BUILD.html [part ...]   Good is DEV ARROW CHECK OK (exit 0); a failure exits 1.
 import sys, os, re, pathlib
 exec(open(__file__.replace('dev_arrow_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
+RUN_ID = f'p{os.getpid()}_'   # FX18-1: this run's copies carry the process id (two runs in one CADET_WORK never open each other's), gone at exit
+__import__('atexit').register(lambda: [f.unlink(missing_ok=True) for f in (WORK / 'test').glob(f'*_{RUN_ID}*') if f.is_file()])
 from playwright.sync_api import sync_playwright
 
 ok = True
@@ -26,7 +28,7 @@ def check(cond, msg):
 
 GAME = sys.argv[1]
 ONLY = set(sys.argv[2:])
-TMP = WORK / 'test' / '_dev_arrow_check.html'
+TMP = WORK / 'test' / ('_dev_arrow_check_' + RUN_ID + '.html')
 TMP.write_text(instrument(pathlib.Path(GAME).read_text()))
 
 class Page:

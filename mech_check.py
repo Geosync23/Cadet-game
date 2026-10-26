@@ -282,6 +282,115 @@ M7_LATER = r"""(() => { const W = SHIP.works; if (!W.tr.m7) W.tr.m7 = 5; toolGiv
 M7_SEE = "(() => { const j = SHIP.jobs.find(x => x.id === window.__m7j) || {}, cs = ((SHIP.works.cases || {}).open || []).find(c => c.job === j.id), g = ixJobStep(); return { goal: g && g.label, scan: !!j.scan, shown: cs ? !cs.wait : null, work: !!j.workDone, st: j.status, tr: SHIP.works.tr.m7 !== undefined }; })()"
 M7_PANEL = r"""(() => { const j = myJob(), m = machineById(j.machine); if (deckDef.num !== m.deck) goToDeck(m.deck); const s = placeSpot(panelPlace(m.id)), gl = nearestOpen(s.x, s.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return jobSpotTap(new THREE.Vector3(s.x, 0, s.z)); })()"""
 M7_FETCH = r"""(() => { if (deckDef.num !== 5) goToDeck(5); const need = jobNeeds(myJob(), myWork().w, SHIP.player.carry), it = ITEMS.find(i => i.t === shelfName(shelfOf(need[0]))); if (!it) return false; it.hit.getWorldPosition(_wp); const gl = nearestOpen(_wp.x, _wp.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return playerTap(it, _wp.clone(), _wp.clone()); })()"""
+# patch 0.92.5 (DS1; the user's playtest notes 11 and 15): from Day 4 a lesson meets at 09:00 or 09:15 (the first few
+# days as before: 09:15 plus a wait); a lesson not finished by the shift's end ends there, the teacher stops following
+# (worksEscort), a training job in your hands goes back to the board, and it's offered again on the next workday
+P925_OPEN = r"""((id) => {
+  const row = ladderRow(id);
+  SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = [];
+  MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1;
+  let d = Math.max(row.day, 2); while (!playerShiftOn(d) || (row.fixed && weekday(d) + 1 !== row.fixed.wd)) d++;
+  setShipNow((d - 1) * 1440 + 300); machinesNow(); const W = worksInit();
+  W.log.push(['earlier', 1, 0, 'service']);
+  for (const r of CAREER_LADDER.slice(0, CAREER_LADDER.indexOf(row))) { W.tr[r.id] = 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); }
+  if (row.needs) for (const n of [].concat(row.needs)) { if (n.flag) flagSet(n.flag, 1); if (n.rep) W.xp = 999; }
+  W.tier = Math.max(W.tier, row.tier || 1); if (row.rank) W.rank = row.rank;
+  if (row.needs) for (const n of [].concat(row.needs)) if (n.trained && !ladderRow(n.trained)) W.tr[n.trained] = 1;
+  const opened = ladderTick(Math.floor(((d - 1) * 1440 + WORKS_ASK[0]) / 60)), c = W.cur, r = c && SHIP.occasions.find(x => x.key === c.occ);
+  return { d, opened, st: c && c.st, at: r ? r.at - (d - 1) * 1440 : null };
+})"""
+P925_LAPSE = r"""((took) => {
+  const W = SHIP.works, c = W.cur; if (!c) return null; const j = SHIP.jobs.find(x => x.id === c.j), st0 = c.st, by = c.by;
+  if (took && j && !j.claimedBy) claimJob(j.id);
+  const p = ROSTER.find(x => x.id === by), t = (c.d - 1) * 1440 + dayShiftEnd(c.d) + 1, before = worksEscort(p, t - 30);
+  setShipNow(t); trainTick(t);
+  const j2 = SHIP.jobs.find(x => x.id === c.j), st = W.cur && W.cur.st, after = (e => e && e.mode)(worksEscort(p, t + 1)), lapse = simNotes('trainLapse').length;
+  let d2 = c.d + 1; while (!playerShiftOn(d2)) d2++;
+  setShipNow((d2 - 1) * 1440 + WORKS_ASK[0]); machinesNow(); ladderTick(Math.floor(((d2 - 1) * 1440 + WORKS_ASK[0]) / 60));   // the next workday's ask
+  return { st0, st, before: before && before.mode, after, mine: !!j2 && j2.claimedBy === 'you', lapse, next: W.cur && W.cur.id === c.id ? W.cur.st + ' Day ' + W.cur.d : null };
+})"""
+# (FX15, the user, patch 0.92.5 #22: "all training and lessons need it") every training job held for you on the board: the
+# row marked and named, the pointer on its Take it, the arrow naming it. A look at the board for one job: its row, the
+# board's line, the pointer's words and the arrow's (the guide entry whose id starts with `arrow`, its goal's label)
+P925L_LOOK = r"""((jid, arrow) => {
+  ixBoard.open(); const row = [...document.querySelectorAll('#ixBoardL .ixjob')].find(r => r.dataset.job === jid), sub = document.getElementById('ixBoardX').textContent; ixBoard.close();
+  SHIP.device.pointsSeen = {}; SHIP.guide.seen = {}; POINT_Q.length = 0; GUIDE.list.length = 0; guideTrain(); guideShift();
+  const q = POINT_Q.find(x => /^p:board:lesson:/.test(x.id)), e = arrow && GUIDE.list.find(x => x.id.indexOf(arrow) === 0); let a = null; try { a = e ? e.goal() : null; } catch (x) { a = null; }
+  return { lesson: boardLesson() === jid, row: row ? row.textContent.slice(0, 140) : null, marked: !!row && /lesson/.test(row.className), take: !!row && !!row.querySelector('button'), sub, pointer: q ? q.path.map(s => s.label || '').join('|') : null, arrow: a ? a.label : null };
+})"""
+P925L_T2 = M7_SETUP.replace("W.log.push(['earlier', 1, 0, 'service']);", "W.log.push(['earlier', 1, 0, 'service']); if (id === 't2') { W.xp = 999; W.test = { tier: 2, day: d, tries: 0, passed: false }; }")
+P925L_CASE = r"""(() => {   // a head-scratcher lesson's first case (24k's p3Stage, by hand): Washer 2's pump, held for you, its case shown
+  const d = SHIP.time.day, id = jobReserve('4-washer-2', d, SHIP.time.min, 20, { train: 'p3', tier: 1, cause: 'pump', until: shipNow() + 1440 }), j = SHIP.jobs.find(x => x.id === id); if (!j) return null;
+  delete j.make; delete j.makeMins; j.cause = 'pump'; j.parts = ['pump']; j.train = 'p3'; SHIP.works.cur = null;
+  const c = { id: 'c' + j.id, job: j.id, kind: 'p3', k: 0, band: 'T1', cause: 'pump', sus: ['pump'], clues: [], got: [], crossed: [], known: [], calls: [], posted: shipNow(), until: 0, wait: false, taken: false, train: true, told: true, title: '' };
+  caseState().open.push(c); j.case = c.id; if (j.found > shipNow()) setShipNow(j.found); return j.id; })()"""
+P925L_DAY1 = r"""((slot) => {   // the arrival week's jobs (section 21's INTRO_JOBS): Day 1, the intro on, the job held for you on the board
+  const I = SHIP.intro, keep = { on: I.on, ended: I.ended, done: { ...I.done } }; window.__p925l = keep;
+  I.on = true; I.ended = false; SHIP.works.cur = null; SHIP.jobs = []; const at = slot === 1 ? 540 : 780;
+  setShipNow(at + 10); machinesNow(); const id = jobReserve(slot === 1 ? 'lights' : 'washer', 1, at, slot), j = SHIP.jobs.find(x => x.id === id);
+  if (j && j.found > shipNow()) setShipNow(j.found + 1);
+  return id; })"""
+P925L_ARROW = r"""(() => {   // the intro's board arrow (section 21's introArrowTick): clocked in, told, the tea done, no arrow of anyone else's
+  const I = SHIP.intro, d = 1; I.done['arrow:clock'] = I.done['arrow:clock'] ?? shipNow(); I.done['tea:end'] = shipNow(); I.done['call:end'] = shipNow(); I.done['arrow:eat'] = I.done['arrow:eat'] ?? shipNow();
+  if (!careerClockedIn(d)) careerClock(shipNow(), true); if (typeof clearGoal === 'function') clearGoal(); INTRO_UI.arrowAt = 0; introArrowTick();
+  return { want: introArrowWant(Math.floor(shipNow())), goal: IX_GOAL ? IX_GOAL.label : null }; })()"""
+def part_p925l(g):
+    print('p925l (patch 0.92.5 #22: every training job on the board marked, pointed at and named by the arrow):')
+    t2 = g.ev(f"(() => {{ ({P925L_T2})('t2'); const c = SHIP.works.cur, j = c && SHIP.jobs.find(x => x.id === c.j); if (j && j.found > shipNow()) setShipNow(j.found); return c && c.st === 'do' ? c.j : null; }})()")
+    a = g.ev(f"({P925L_LOOK})({json.dumps(t2)}, null)") if t2 else None
+    print(f'  the Tier 2 test job: {a}')
+    check(bool(a) and a['marked'] and 'Your Tier 2 test job: take this one' in (a['row'] or '') and 'lesson' not in (a['row'] or '').split('Your Tier 2 test job')[1][:8] and a['pointer'] and a['pointer'].endswith('Take this one: your Tier 2 test job'),
+          f'#22: the Tier 2 test job is named as itself on the board and by the pointer, not "tier 2 test job lesson" ({a})')
+    cj = g.ev(P925L_CASE)
+    b = g.ev(f"({P925L_LOOK})({json.dumps(cj)}, 'train:board:')") if cj else None
+    print(f'  a head-scratcher lesson\'s first case: {b}')
+    check(bool(b) and b['lesson'] and b['marked'] and 'Your head-scratcher lesson: take this one' in (b['row'] or '') and 'head-scratcher lesson' in b['sub'] and (b['pointer'] or '').endswith('Take this one: your head-scratcher lesson') and b['arrow'] == 'Your head-scratcher lesson',
+          f'#22: a head-scratcher lesson\'s case job is marked, its Take it pointed at, and the arrow names it ({b})')
+    m6 = g.ev(f"(() => {{ ({M7_SETUP})('m6'); const c = SHIP.works.cur, j = c && SHIP.jobs.find(x => x.id === c.j); if (j && j.found > shipNow()) setShipNow(j.found); if (j && j.claimedBy) {{ j.claimedBy = null; j.status = 'open'; }} return c && c.st === 'do' ? c.j : null; }})()")
+    c6 = g.ev(f"({P925L_LOOK})({json.dumps(m6)}, null)") if m6 else None
+    print(f'  Making it safe\'s job left on the board (taken at the pipe, not here): {c6}')
+    check(bool(c6) and not c6['lesson'] and not c6['marked'] and 'take this one' not in (c6['row'] or '') and not c6['pointer'], f'#22: a lesson job you can\'t take at the board isn\'t marked "take this one" ({c6})')
+    for slot, name in ((1, 'shadow job'), (2, 'job to lead')):
+        jid = g.ev(f"({P925L_DAY1})({slot})")
+        d1 = g.ev(f"({P925L_LOOK})({json.dumps(jid)}, null)") if jid else None
+        if slot == 2 and d1: g.ev("SHIP.intro.done['arrow:board'] = shipNow() - 240")   # the morning's board arrow long done (you took the shadow job)
+        ar = g.ev(P925L_ARROW) if d1 else None
+        g.ev("(() => { const k = window.__p925l; if (k) { Object.assign(SHIP.intro, { on: k.on, ended: k.ended, done: k.done }); } if (typeof clearGoal === 'function') clearGoal(); INTRO_UI.arrow = null; })()")
+        print(f'  Day 1, slot {slot}: {d1}; the intro\'s arrow: {ar}')
+        check(bool(d1) and d1['marked'] and f'Your {name}: take this one' in (d1['row'] or '') and (d1['pointer'] or '').endswith(f'Take this one: your {name}') and ar and ar['goal'] == f'Your {name}: take it at the board',
+              f'#22: Day 1\'s {name} is marked on the board, its Take it pointed at, and the intro\'s arrow names it ({d1}, {ar})')
+
+def part_p925(g):
+    print('p925 (patch 0.92.5: lessons at 09:00/09:15 from Day 4; the lesson\'s job named on the board; an unfinished lesson ends with the shift):')
+    early = [g.ev(f"({P925_OPEN})('{i}')") for i in ('m1', 'm4')]
+    late = [g.ev(f"({P925_OPEN})('{i}')") for i in ('m5', 'm7')]   # (m6's is its own urgent call at the pipe, 24f: not a booked meeting)
+    print(f'  meets, the first days: {[(e["d"], e["at"]) for e in early]}; from Day 4: {[(e["d"], e["at"]) for e in late]}')
+    check(all(e['st'] == 'meet' and e['at'] is not None and e['at'] >= 9 * 60 + 25 for e in early), f'#11: the first few days\' lessons meet as before (09:15 and a wait): {early}')
+    check(all(e['st'] == 'meet' and e['at'] in (9 * 60, 9 * 60 + 15) for e in late), f'#11: from Day 4 a lesson meets at 09:00 or 09:15: {late}')
+    bd = g.ev(f"""(() => {{ ({M7_SETUP})('m7'); const c = SHIP.works.cur, d = SHIP.time.day;
+      if (SHIP.career) SHIP.career.ci = 0;   // not clocked in yet: you're at the board first
+      ixBoard.open(); const row = [...document.querySelectorAll('#ixBoardL .ixjob')].find(r => r.dataset.job === c.j), sub = document.getElementById('ixBoardX').textContent;
+      SHIP.device.pointsSeen = SHIP.device.pointsSeen || {{}}; SHIP.device.pointsSeen['p:board:lesson:m7'] = 1;   // rung once before: rung again
+      POINT_Q.length = 0; guideShift(); const q = POINT_Q.find(x => x.id === 'p:board:lesson:m7'), lab = q ? q.path.map(s => s.label || '').join('|') : null; ixBoard.close();
+      return {{ st: c.st, clocked: careerClockedIn(d), row: row ? row.textContent.slice(0, 120) : null, lesson: !!row && /lesson/.test(row.className), sub, pointer: lab }}; }})()""")
+    print(f'  the scanner lesson at the board: {bd}')
+    check(bd['st'] == 'do' and bd['row'] and 'Your scanner lesson: take this one' in bd['row'] and bd['lesson'] and 'scanner lesson' in bd['sub'],
+          f'#12: the board names the lesson\'s job: "Your scanner lesson: take this one", and its line says so ({bd})')
+    check(bool(bd['pointer']) and 'scanner lesson' in bd['pointer'] and not bd['clocked'], f'#12: the pointer rings the lesson\'s Take it again, before you\'ve clocked in, naming the lesson ({bd})')
+    do = g.ev(f"(() => {{ ({M7_SETUP})('m7'); return ({P925_LAPSE})(true); }})()")
+    print(f'  your turn (the scanner), its job in your hands at 17:01: {do}')
+    check(bool(do) and do['st0'] == 'do' and do['before'] and do['st'] == 'again' and not do['after'] and not do['mine'] and do['lapse'] >= 1 and (do['next'] or '').split(' ')[0] in ('watch', 'meet', 'do'),
+          f'#15: an unfinished lesson ends at the shift\'s end: offered again, the teacher stops following, the job back on the board ({do})')
+    hd = g.ev(f"""(() => {{ ({M7_SETUP})('m7'); const W = SHIP.works, c = W.cur, j = SHIP.jobs.find(x => x.id === c.j); if (!c || !j) return null;
+      j.status = 'done'; j.doneBy = 'you'; c.st = 'held'; c.hold = true; const open = worksCaseOpen(c.j), p = ROSTER.find(x => x.id === c.by), t = (c.d - 1) * 1440 + dayShiftEnd(c.d) + 1;
+      const before = (e => e && e.mode)(worksEscort(p, t - 30)); setShipNow(t); trainTick(t);
+      return {{ open, before, cur: W.cur && W.cur.st, trained: W.tr.m7 !== undefined, after: (e => e && e.mode)(worksEscort(p, t + 1)) }}; }})()""")
+    print(f'  held (its job turned in, its case open) at 17:01: {hd}')
+    check(bool(hd) and hd['before'] == 'follow' and hd['trained'] and not hd['cur'] and not hd['after'], f'#15: a lesson held at the shift\'s end (job done, case open) is trained and the teacher goes ({hd})')
+    wa = g.ev(f"(() => {{ ({M7_WATCH})('m7'); const c = SHIP.works.cur; if (c && c.st !== 'watch') {{ c.st = 'watch'; }} return ({P925_LAPSE})(false); }})()")
+    print(f'  watching at 17:01: {wa}')
+    check(bool(wa) and wa['st0'] == 'watch' and wa['st'] == 'again' and not wa['after'], f'#15: a lesson still at its watching ends at the shift\'s end, the teacher off ({wa})')
+
 def m7_taps(g):
     keep = g.ev("JSON.stringify({ t: shipNow(), deck: deckDef.num, pos: [player.obj.position.x, player.obj.position.z], needs: SHIP.player.needs, carry: SHIP.player.carry })")
     def wait():
@@ -1580,7 +1689,11 @@ def part_m17(g):
     res = g.ev("(() => { const kt = toast, said = []; toast = (a, b) => said.push(b); ROOF.r = null; roofData().on = 32; const S = worksSide(); for (const f of WORK_TICKS) { try { f(shipNow(), false); } catch (e) {} } for (const f of WORK_TICKS) { try { f(shipNow() + 1, false); } catch (e) {} } toast = kt; return [said.filter(x => /saved on the lift roof|back at the top/i.test(x)).length, 'on' in roofData()]; })()")
     check(res == [1, False], f"m17: loaded from a save made on the roof, roof.resume once ({res})")
     a2 = g.ev(M17P)
-    check(json.dumps({**a2, 'talk': 0}, sort_keys=True) == json.dumps({**a, 'talk': 0}, sort_keys=True), 'm17: the paper part differs after the rides')
+    # (FX17-3, lead 36) after the rides the lift runs smoother, so the machines' repair jobs (and the plans around them: whoever
+    # took a job, and the knock-ons) can rightly differ from the first read: compare the roof's rules and the hold's (open,
+    # once a day, held 15:35-16:30, nobody off the rule, the talk, the saves), not the day's crowd counts (movers, waiting)
+    rules = lambda x: {**x, 'talk': 0, 'hold': {k: v for k, v in x['hold'].items() if k not in ('movers', 'waiting')}}
+    check(json.dumps(rules(a2), sort_keys=True) == json.dumps(rules(a), sort_keys=True), 'm17: the paper part differs after the rides (%s)' % [k for k in a if rules(a).get(k) != rules(a2).get(k)])
     g.ev(f"(() => {{ const k = {keep}; LIFT_HOLD = null; setShipNow(k.t); if (deckDef.num !== k.deck) goToDeck(k.deck); player.obj.position.x = k.pos[0]; player.obj.position.z = k.pos[1]; Object.assign(SHIP.player.needs, k.needs); SHIP.player.carry = k.carry; }})()")   # as it was, for the parts after
 PARTS['m17'] = part_m17
 
@@ -1754,6 +1867,8 @@ with sync_playwright() as pw:
     if not only or 'fix2' in only: print('fix2 (the notes\' words):'); part_fix2_c(g)
     if not only or 't24' in only: part_t24(g)
     if not only or 'fx3' in only: print('fx3 (Making it safe\'s flow, the small lessons):'); part_fx3(g)
+    if not only or 'p925' in only: part_p925(g)
+    if not only or 'p925l' in only: part_p925l(g)
     ev("SHIP.works = null")
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:5]))
     g.close()

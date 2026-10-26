@@ -1,0 +1,143 @@
+# FX20: odd jobs around the ship (patch 0.92.6 item 10), step 1 plan
+
+The user: "Add a lot more simple jobs around the ship (cleaning vents, unsticking things); Works lets you see the ship; the bridge stays special."
+
+## How it works today
+- Calder's top-up (`boardTopUp`, section 17) keeps at least `BOARD_MIN` (2) jobs on the board for you each hour of your shift. Two top-ups in three are a small repair from FX10's `FIX_ROWS` (194 fittings at existing places, two streams: Deck 2 science and the rest of the ship, `FIX_PER` 6 a stream a day, each stream walked in a fixed seeded order so nothing repeats until the whole stream has); the third is an old chore (vent, calibrate, delivery, fault, seal).
+- A small repair is a chore (`chore: 'fix'`): held for you to the shift's end, never the crew's, no Works reputation (`xp: 0`). You walk to its place, tap (or the floor Repair button), and do it standing ("Small repair", work pose, the tool named), with the words `fix.<id>.title|sign|done` from content/works/fixes.lines.
+- FX19 (item 11, `BOARD_TRADE_ON`) adds trade jobs beside these (they don't count against BOARD_MIN) and sorts your trade first.
+
+## What I'll add (one switch: `ODD_ON = false` as shipped)
+- `ODD_ROWS`: 117 odd jobs in FIX_ROWS' own format, at existing public places nobody's repair uses yet: Deck 2 11 (lobby, corridors, washroom, observatory, chart room), Deck 3 51, Deck 4 22, Deck 5 13, Deck 6 4, Deck 7 16. Deck 1 none (the bridge stays special). No cabins or private rooms. No new geometry, textures or draw calls; no R().
+- A third stream `'o'` in `fixTable`/`fixPost` (only while ODD_ON): the streams take turns by fewest today, the odd stream up to `ODD_PER` (8) a day, walked in its own seeded order (about 15 shift days before any repeats).
+- While ODD_ON the board keeps `ODD_MIN` (3) jobs up for you instead of 2 (your call: "a lot more" read as more on the board, not only more kinds; say if you want 2 kept).
+- Words: titles are in the table; the sign and done lines would be keys `fix.oj-<id>.sign|done` (fixWord reads them unchanged), written by SW2 in a new content/works/odd.lines. Until then the job works with the title only.
+
+## The list (id | place | part | tool | minutes | system | title)
+- oj-d2lobby-vent|2-liftwait-2||a vent brush|15|air|Clean the lift lobby vent
+- oj-d2lobby-bench|2-bench-1||a hex key|10|hull|Tighten a wobbly lobby bench
+- oj-d2lobby-sign|2-liftwait-6||a cloth and polish|10|hull|Polish the deck sign by the lift
+- oj-d2lobby-light|2-liftwait-4|lamp|a step stool|10|power|Replace a buzzing lobby light
+- oj-d2corr-hinge|2-watch-7||an oil can|10|hull|Oil a squeaky door in the senior corridor
+- oj-d2corr-panel|2-watch-6||a screwdriver|10|hull|Refit a loose wall panel
+- oj-d2wc-drain|2-wctoilet-2||a drain snake|15|waste|Clear a slow drain in the washroom
+- oj-d2wc-vent|2-wctoilet-2||a vent brush|15|air|Clean the washroom extractor grille
+- oj-d2obs-blind|2-windowseat-6||a screwdriver|10|power|Unstick a window blind in the observatory
+- oj-d2chart-latch|2-windowseat-3||a hex key|10|hull|Free a sticky locker latch
+- oj-d2chart-vent|2-windowseat-4||a vent brush|15|air|Clean a dusty vent in the chart room
+- oj-d3plaza-vent|3-lift-2||a vent brush|15|air|Clean the lift plaza floor vent
+- oj-d3plaza-bench|3-bench-3||a hex key|10|hull|Tighten a rocking plaza bench
+- oj-d3plaza-gum|3-bench-2||a scraper|10|hull|Scrape gum off a bench
+- oj-d3plaza-sign|3-lift-5||a cloth and polish|10|hull|Polish the lift call plate
+- oj-d3plaza-mat|3-lift-6||a scraper and glue|15|hull|Stick down a curling floor mat
+- oj-d3prom-vent|3-bench-5||a vent brush|15|air|Clean a promenade vent
+- oj-d3prom-rail|3-bench-8||a hex key|10|hull|Tighten a loose handrail
+- oj-d3prom-planter|3-bench-10||a trowel|15|air|Unclog a planter drip line
+- oj-d3prom-glass|3-bench-13||a squeegee|15|hull|Clean the smudged view glass
+- oj-d3prom-light|3-bench-16|lamp|a step stool|10|power|Replace a flickering path light
+- oj-d3lounge-vent|3-lounge-2||a vent brush|15|air|Clean a lounge ceiling vent
+- oj-d3lounge-sofa|3-lounge-8||a hex key|10|hull|Fix a sagging sofa leg
+- oj-d3lounge-table|3-lounge-3||a spirit level and shims|10|hull|Level a wobbly lounge table
+- oj-d3lounge-blind|3-lounge-9||a screwdriver|10|power|Unstick a window blind in the lounge
+- oj-d3lounge-lamp|3-lounge-4|lamp|a step stool|10|power|Replace a lounge reading lamp
+- oj-d3lounge-socket|3-lounge-7||a multimeter|15|power|Reset a dead lounge socket
+- oj-d3mess-table|3-mess-2||a spirit level and shims|10|hull|Level a wobbly mess table
+- oj-d3mess-chair|3-mess-5||a hex key|10|hull|Tighten a squeaky mess chair
+- oj-d3mess-vent|3-mess-7||a vent brush|15|air|Clean a greasy mess hall vent
+- oj-d3mess-tray|3-mess-1||a screwdriver|15|food|Unjam the tray rack runner
+- oj-d3mess-floor|3-mess-4||a scraper|10|hull|Scrape a sticky patch off the floor
+- oj-d3mess-light|3-mess-8|lamp|a step stool|10|power|Replace a mess hall downlight
+- oj-d3galley-hood|3-galley-3||a degreaser and brush|20|air|Degrease the galley hood filters
+- oj-d3galley-drawer|3-galley-5||a hex key|10|food|Free a jammed utensil drawer
+- oj-d3galley-drain|3-galley-7||a drain snake|15|waste|Clear the galley floor drain
+- oj-d3galley-hinge|3-galley-1||an oil can|10|food|Oil a squeaky cupboard hinge
+- oj-d3cold-seal|3-cold-2|seal|a putty knife|15|food|Refit the cold store door seal
+- oj-d3store-shelf|3-shop-3||a hex key|10|hull|Fix a sagging shop shelf
+- oj-d3store-door|3-shop-6||an oil can|10|hull|Oil the sticking shop door
+- oj-d3store-light|3-shop-8|lamp|a step stool|10|power|Replace a crew store light
+- oj-d3call-door|3-callhome-1||an oil can|10|hull|Ease a sticky booth door
+- oj-d3call-vent|3-callhome-4||a vent brush|15|air|Clean a stuffy booth vent
+- oj-d3call-bench|3-bench-18||a hex key|10|hull|Tighten the booth bench
+- oj-d3gym-vent|3-gym-3||a vent brush|15|air|Clean a gym vent
+- oj-d3gym-mat|3-gym-4||a scraper and glue|15|hull|Stick down a lifting gym mat
+- oj-d3gym-rack|3-gym-6||a hex key|10|hull|Tighten a rattling weight rack
+- oj-d3gym-mirror|3-gym-9||a hex key|10|hull|Refix a loose gym mirror
+- oj-d3gym-fountain|3-gym-10|seal|a spanner|15|water|Fix the dripping water fountain
+- oj-d3gym-locker|3-gym-1||a screwdriver|10|hull|Unstick a gym locker
+- oj-d3garden-drip|3-tend-2||a pin and a cloth|15|water|Unblock a garden drip line
+- oj-d3garden-trellis|3-tend-5||twine and a hex key|10|food|Refix a leaning trellis
+- oj-d3garden-drain|3-tend-7||a trowel|15|water|Clear a clogged tray drain
+- oj-d3garden-light|3-tend-9|lamp|a step stool|10|power|Replace a grow light tube
+- oj-d3garden-vent|3-tend-4||a vent brush|15|air|Clean the garden air vent
+- oj-d3garden-hose|3-tend-6|seal|a spanner|10|water|Fix a leaking hose joint
+- oj-d3inf-curtain|3-ward-3||a step stool|10|hull|Free a stuck bed curtain
+- oj-d3inf-wheel|3-ward-4||an oil can|10|hull|Oil a squeaking bed wheel
+- oj-d3inf-vent|3-visit-2||a vent brush|15|air|Clean the waiting room vent
+- oj-d3wash-drain|3-toilet-1||a drain snake|15|waste|Clear a slow washroom drain
+- oj-d3wash-vent|3-toilet-3||a vent brush|15|air|Clean the washroom extractor grille
+- oj-d3wash-door|3-toilet-4||a screwdriver|10|hull|Fix a cubicle door that will not latch
+- oj-d4lobby-vent|4-lift-2||a vent brush|15|air|Clean the lift lobby vent
+- oj-d4lobby-bench|4-bench-1||a hex key|10|hull|Tighten a wobbly lobby bench
+- oj-d4lobby-board|4-bench-3||a pin box|10|comms|Tidy the notice board
+- oj-d4lobby-panel|4-bench-4||a screwdriver|10|hull|Refit a rattling wall panel
+- oj-d4corr-hinge|4-valve-panel||an oil can|10|hull|Oil a squeaky corridor door
+- oj-d4corr-vent|4-wet-1||a vent brush|15|air|Clean a corridor ceiling vent
+- oj-d4corr-strip|4-wet-2||a screwdriver|10|hull|Fix a lifting floor strip
+- oj-d4common-vent|4-common-3||a vent brush|15|air|Clean the common room vent
+- oj-d4common-sofa|4-common-4||a hex key|10|hull|Fix a sagging common room sofa
+- oj-d4common-screen|4-common-6||a multimeter|15|comms|Reset the common room screen
+- oj-d4common-table|4-common-7||a spirit level and shims|10|hull|Level the games table
+- oj-d4common-cup|4-common-9||a screwdriver|10|hull|Unstick a cupboard door
+- oj-d4laundry-lint|4-laundry-1||a lint brush|15|air|Clear the dryer lint trap
+- oj-d4laundry-drain|4-laundry-5||a drain snake|15|waste|Clear the laundry sink drain
+- oj-d4music-door|4-music-1||an oil can|10|hull|Oil the music room door
+- oj-d4music-stand|4-music-3||a hex key|10|hull|Tighten a floppy music stand
+- oj-d4port-drain|4-basin-p1||a drain snake|15|waste|Clear a slow basin drain
+- oj-d4port-vent|4-toilet-p1||a vent brush|15|air|Clean the washroom extractor grille
+- oj-d4port-hook|4-shower-queue-p2||a screwdriver|10|hull|Refix a loose towel hook
+- oj-d4stbd-drain|4-basin-q2||a drain snake|15|waste|Clear a slow basin drain
+- oj-d4stbd-mirror|4-shower-queue-q1||a cloth and anti-fog|10|hull|Clean a fogged mirror
+- oj-d4stbd-hook|4-shower-queue-q2||a screwdriver|10|hull|Refix a loose towel hook
+- oj-d5lobby-vent|5-lift-2||a vent brush|15|air|Clean the lift lobby vent
+- oj-d5lobby-sign|5-lift-4||a cloth and polish|10|hull|Polish the deck sign by the lift
+- oj-d5corr-hinge|5-valve-panel||an oil can|10|hull|Oil a squeaky corridor hatch
+- oj-d5corr-vent|5-wet-1||a vent brush|15|air|Clean a corridor ceiling vent
+- oj-d5corr-strip|5-wet-2||a screwdriver|10|hull|Fix a lifting floor strip
+- oj-d5hold-latch|5-hold-1||a pry bar|15|transport|Free a stuck cargo latch
+- oj-d5hold-strap|5-hold-2||a ratchet|10|transport|Re-tension a cargo strap
+- oj-d5cart-rail|5-cart-1||a grease gun|15|transport|Grease the cart bay guide rail
+- oj-d5cart-light|5-cart-2|lamp|a step stool|10|power|Replace a cart bay light
+- oj-d5tea-kettle|5-tea-3||descaler|15|water|Descale the tea corner kettle
+- oj-d5wash-drain|5-basin-2||a drain snake|15|waste|Clear a slow basin drain
+- oj-d5wash-vent|5-toilet-1||a vent brush|15|air|Clean the washroom extractor grille
+- oj-d5bay-clock|5-timeclock-1||a screwdriver|10|comms|Unstick the time clock card slot
+- oj-d6lobby-vent|6-lift-2||a vent brush|15|air|Clean the lift lobby vent
+- oj-d6lobby-bench|6-bench-2||a hex key|10|hull|Tighten a lobby bench
+- oj-d6lobby-hatch|6-lift-3||an oil can|10|hull|Oil a stiff inspection hatch
+- oj-d6lobby-light|6-bench-4|lamp|a step stool|10|power|Replace a lobby light
+- oj-d7lobby-vent|7-floatq-2||a vent brush|15|air|Clean the lift lobby vent
+- oj-d7conc-vent|7-beanbag-2||a vent brush|15|air|Clean a concourse vent
+- oj-d7pool-drain|7-pooledge-2||a pool skimmer|15|water|Skim the pool gutter
+- oj-d7pool-ladder|7-lounger-2||a spanner|10|hull|Tighten a pool ladder
+- oj-d7pool-lounger|7-lounger-3||an oil can|10|hull|Oil a stiff lounger hinge
+- oj-d7river-vent|7-beach-2||a vent brush|15|air|Clean a river hall vent
+- oj-d7river-hold|7-climb-1||a hex key|15|hull|Tighten a spinning climbing hold
+- oj-d7river-dock|7-dockq-2||a spanner|10|hull|Tighten a loose dock board
+- oj-d7sim-door|7-simq-1||an oil can|10|hull|Oil the sim bay door
+- oj-d7sim-vent|7-simwatch-1||a vent brush|15|air|Clean the sim bay vent
+- oj-d7stand-seat|7-stand-3||a hex key|10|hull|Fix a stuck tip-up seat in the stands
+- oj-d7aud-seat|7-seat-5||a hex key|10|hull|Fix a squeaky auditorium seat
+- oj-d7aud-vent|7-seat-2||a vent brush|15|air|Clean an auditorium vent
+- oj-d7disc-panel|7-disc-1||a screwdriver|10|hull|Refit a loose court wall panel
+- oj-d7float-vent|7-float-1||a vent brush|15|air|Clean the float room vent
+- oj-d7change-drain|7-rshower-2||a drain snake|15|waste|Clear a slow shower drain
+
+## Checks
+- machine_check: a new line "odd jobs": every row at a real place, not Deck 1, tier 1, a STOCK part or none, a real system; 14 days with ODD_ON: odd jobs posted every shift day, on 6 decks, none twice in 7 days, never claimed by the crew; ODD_ON false: none.
+- interactions_check: one odd stop tapped in each room (rows whose tap the room's own use takes are parked, as FX10 did).
+- cadet_test ALL IDENTICAL against FX19's base with the switch off; switched on: machine_check, interactions_check, deck_check, day_check on a few work days, phone-size screenshots.
+
+## Risks
+- Some places have their own tap (float pods, pool lanes, seats): a tap could start the room's activity instead of the job. interactions_check finds them; I park those rows.
+- More jobs held for you: day_check and the player's pace (backlog 12) see more work; switched off nothing changes.
+- Merge with FX19: I touch FIX_ROWS' neighbourhood, fixTable, fixPost and the two BOARD_MIN uses in boardTopUp; FX19 touched the lines next to them. I'll tell FX19.

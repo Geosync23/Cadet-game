@@ -64,6 +64,14 @@ SCENES = [
     # the first new crew down the Tern's ramp (Day 21, Pillar 5): not built yet (ROSTER_ROTATIONS starts at Day 35)
     {'name': 'first new crew off the Tern, shuttle bay Sun 17:40', 'day': 21, 'time': '17:40', 'deck': 5, 'room': r'^Shuttle bay', 'busy': True,
      'needs': "typeof ROSTER_ROTATIONS !== 'undefined' && ROSTER_ROTATIONS.some(r => r.day === 21)"},
+    # the weekend traditions (0.92.5 item 16, FX16's T5; the 4-week rotation): each at its busiest, on a day it's on. No `needs`: on a
+    # build without them (0.92.4) the same room at the same time is measured, so the two compare
+    {'name': 'weekend: Bread day, the galley Sun 07:25', 'day': 7, 'time': '07:25', 'deck': 3, 'room': r'^Galley$', 'busy': True},
+    {'name': 'weekend: Every song, music room Sat 17:40', 'day': 69, 'time': '17:40', 'deck': 4, 'room': r'^Music room$'},
+    {'name': 'weekend: garden picnic, garden Sat 13:25', 'day': 20, 'time': '13:25', 'deck': 3, 'room': r'garden', 'busy': True},
+    {'name': 'weekend: the big jigsaw, observation room Sun 14:00', 'day': 21, 'time': '14:00', 'deck': 1, 'room': r'^Observation room$'},
+    {'name': "weekend: night owls' cocoa, bow lounge Sat 22:55", 'day': 27, 'time': '22:55', 'deck': 3, 'room': r'^Bow lounge$'},
+    {'name': 'weekend: the Sunday story, junior common room Sun 21:35', 'day': 28, 'time': '21:35', 'deck': 4, 'room': r'^Junior common room$'},
 ]
 
 SCENE_JS = r"""(sc => {
