@@ -58755,6 +58755,58 @@ function sdChatSay(p) {
   return worksText('sd.chat.brennan', 'Thanks for telling me to my face. I\'ll get the stock pot on early and we\'ll manage.');
 }
 if (P5_M18) worksTabAdd({ id: 'shut', title: worksText('sd.tab', 'Shutdowns'), order: 40, verbs: 'sd', view: sdView, act: sdAct, badge: () => SHIP.works && (SHIP.works.tr.m18 !== undefined || SHIP.works.cur && SHIP.works.cur.id === 'm18') ? sdJobs().filter(j => !sdBooked(j.id)).length : 0 });
+// ---- the training (S5-4 turn 3): Thursday Day 18, Calder at Deck 6's port junction (the ladder row's where). The ask as
+// every training (24 core's trainOffer: her Mail and a word, the meeting at 09:00 or 09:15), then her talk there
+// (train.m18.calder: a stand-in until the head writer's), then the planning screen opens on a real job of yours (slot 42,
+// the port junction, marked for a shutdown) and she names each step; your first booking trains you. On the day: an urgent
+// notice once you're up, a level-1 arrow to the junction from 15 minutes before (whatever the Teaching arrows setting),
+// Schedule and Tracked rows. Not booked by the shift's end: as every training, offered again on your next workday ----
+const SD_SAY = {                                          // Calder's stand-in words (the head writer's m18.lines replace them: train.m18.<key> under her work lines)
+  open: ['Here\'s one for tomorrow. Open Works, Shutdowns: it\'s on your screen now.', 'One: the branch. What does it feed? Two: the hour. Who\'s in those rooms then?', 'Three: warn them. Four: book it before 22:00. I\'m watching.'],
+  booked: ['Booked. That settles at ten tonight, and the crew plan round it.', 'Tomorrow, be at the junction on the hour. Don\'t make them wait in the dark.'],
+  bad: 'Dinner hour? Your call. They\'ll grumble, and they\'ll be right to.', remind: 'Your shutdown plan: book it before the shift ends.' };
+function sdStandIn() {                                    // her meeting, if the head writer's isn't baked yet (made at the ask, never at load)
+  const k = 'train.m18.calder'; if (MEETING_SCRIPTS[k] || MEETING_SCRIPTS['train.m18']) return;
+  MEETING_SCRIPTS[k] = { title: 'Shutdowns', from: worksName('calder'), gist: 'Calder showed you how to plan a shutdown: the branch, a quiet hour, who to warn, and Brennan in person if it\'s the galley.',
+    lines: [{ who: 'calder', text: 'Some repairs need the power off. Never a whole deck: one branch.', pose: 'gesture', to: 'you' },
+      { who: 'calder', text: 'This junction feeds the galley and the mess on one side, the gym and the laundry on the other.' },
+      { who: 'calder', text: 'You pick the hour. Look at who\'s in those rooms then. A quiet hour costs nobody anything.' },
+      { who: 'calder', text: 'Dinner hour? The whole ship eats in the dark. You can. You\'ll hear about it.' },
+      { choice: [{ text: 'So I warn whoever\'s there.', reply: { who: 'calder', text: 'Every one. A note on their device is the least of it.' } },
+        { text: 'What can stay powered?', reply: { who: 'calder', text: 'Some rooms can be kept on. Fewer rooms off, fewer people put out.' } }] },
+      { who: 'calder', text: 'And if it touches the galley, you tell Brennan to his face. Before ten. Not a note.', pose: 'nod' },
+      { who: 'calder', text: 'Bookings settle at ten at night. After that the crew have planned round you.' },
+      { who: 'calder', text: 'Right. Your device. Let\'s plan a real one for tomorrow.' }] };
+}
+function sdTrainReserve(d, at) {                          // the training's real job: the port junction, marked, held for you until tomorrow's shift ends
+  const id = jobReserve('6-junction-1', d, at, SD_TRAIN_SLOT, { tier: 3, train: 'm18', until: d * 1440 + dayShiftEnd(d + 1) }), j = id && SHIP.jobs.find(x => x.id === id);
+  if (!j) return null;
+  j.shut = true; j.status = 'waiting'; j.why = sdWhy(); MACH_REV++;
+  Object.assign(SD_UI, { job: id, branch: null, at: null, keep: [], warned: [], inPerson: [], all: false });
+  if (typeof worksTabShow === 'function' && !SIM_AT) try { worksTabShow('shut'); } catch (e) { /* no device */ }
+  worksSayAll('calder', worksVoice('calder', 'train.m18.open') || SD_SAY.open);
+  simNote('sdTrain', { job: id, day: d });
+  return id;
+}
+function sdBookedHook(b) {                                // your first booking trains you (the training's job, or any)
+  const W = SHIP.works, c = W && W.cur; if (!W) return;
+  if (c && c.id === 'm18' && c.st === 'do') { worksSayAll('calder', worksVoice('calder', 'train.m18.booked') || SD_SAY.booked); if (sdHourMarks(sdAffected(b.day, b.branch, b.at, b.keep)).length) worksSay('calder', worksText('sd.say.bad', SD_SAY.bad)); worksTrained('m18'); }
+}
+if (P5_M18) WORK_MECH.m18 = { self: true, noJob: false, at: d => { sdStandIn(); return 540; }, reserve: (d, at) => sdTrainReserve(d, at) };
+// the beats while it's under way: the morning notice, the level-1 arrow, the screen's reminder each hour. Once a ship minute
+function sdTrainBeats(now) {
+  const W = SHIP.works, c = W && W.cur; if (!c || c.id !== 'm18') return;
+  const r = c.st === 'meet' && SHIP.occasions.find(x => x.key === c.occ), d = worksDay(now);
+  if (r && c.told && !flag('sd.train.notice.' + d) && !(typeof promoBusy === 'function' && promoBusy())) {
+    flagSet('sd.train.notice.' + d, 1);
+    const text = worksText('sd.train.notice', 'Today: shutdowns with Calder, {time}, the port power junction on Deck 6.', { time: hhmm(r.at % 1440) });
+    if (typeof promoNotice === 'function') promoNotice(text, worksName('calder')); else try { toast(worksName('calder'), text); } catch (e) { /* no UI */ }
+  }
+  if (r && typeof guideAsk === 'function') guideAsk({ id: 'sd:train:' + d, level: 1, owner: '24w (S5-4)', from: r.at - 15, until: r.at + r.len,
+    goal: () => ({ deck: 6, room: 'j', label: worksText('sd.train.arrow', 'Shutdowns with Calder, {time}', { time: hhmm(r.at % 1440) }) }), done: () => { const x = SHIP.works && SHIP.works.cur; return !x || x.id !== 'm18' || x.st !== 'meet'; } });
+  if (c.st === 'do' && now % 60 === 0 && !SIM_AT && !(typeof promoBusy === 'function' && promoBusy())) try { toast(worksName('calder'), worksText('sd.train.remind', SD_SAY.remind)); } catch (e) { /* no UI */ }
+}
+if (P5_M18) WORK_TICKS.push((t, skip) => { if (!skip) sdTrainBeats(Math.floor(t)); });
 // ---- end of slot: Shutdowns ----
 
 // ---------------------------------------------------------------------
