@@ -4818,6 +4818,10 @@ DECKS[5] = {
     placeWall('m', 'calendar', 'w', .5, { upTo: 9, ring: 12 });
     place('u', 'mug', 1.7, 1.3, 'e', { y: 1.995, tall: true });
     placeWall('t', 'mugRack', 's', 1.1, { hitW: .8, it: IT('Mug rack', 'Six hooks over the hot water, a Works mug on five of them. The sixth hook is empty. Nobody says whose it is.') });   // Pillar 4 (seat 8, 0.38.9)
+    // P5 places (S5-6, B4 for lead 39; plans/p5-step5-spec.html): the old-mysteries board, a corkboard on the bay's south
+    // wall facing the job board (the hull wall is full), tapped like the job board (15b's ixTap asks 24k's mysOpen).
+    // Only with P5_CASES5 (off: the deck as it was)
+    if (P5_CASES5) placeWall('w', 'notices', 's', 3.0, { hitW: 1.0, it: IT('Old mysteries', 'Yellowed cards pinned three deep: faults the crew never got to the bottom of, some older than the paint. Tap to read them.') });
   },
 };
 for (const [key, r] of Object.entries(DECKS[5].sealed)) DECKS[5].closedDoors[key] = { t: DECKS[5].rooms[r].name, x: DECKS[5].rooms[r].tap };
@@ -16388,6 +16392,7 @@ function ixStopDone(A) {
 function ixTap(it, at, point) {
   if (/job board/i.test(it.t) && typeof jobsBoard === 'function') { approach(at.clone(), it.front, it.depth, () => ixBoard.open(it)); return true; }
   if (/^ship health$/i.test(it.t) && typeof shipHealthRows === 'function') { approach(at.clone(), it.front, it.depth, () => ixHealth.open()); return true; }
+  if (/^old mysteries$/i.test(it.t) && typeof mysOpen === 'function') { approach(at.clone(), it.front, it.depth, () => mysOpen()); return true; }   // S5-6: 24k's old-mysteries board (P5_CASES5)
   if (IX_SKIP.test(it.t) && !IX_BEDS.test(it.t) || it.lift || ixTheirs(it, at) || ixMachine(at)) return false;
   const room = roomAt(...cellAt(at.x, at.z));             // the thing's own room: never a place through a wall
   const near = [...PLACE_OF.values()].map(pl => [pl, placeSpot(pl.id), ixKind(pl, it)])   // a floor tap's stand-in (section 15's playerFloorTap: the exercise bikes) has no hit box: from the spot tapped (0.92.0)
@@ -56749,6 +56754,122 @@ if (P5_CASES5) {
     'Low at a machine: the fault is there or above it. Read the middle and halve the line.'] };
   if (typeof WORK_MECH !== 'undefined') WORK_MECH.p5 = { open() { p5Stage(); } };
   if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip) p5Stage(); });
+}
+// The old-mysteries board (from Sunday Day 21, a Senior Officer's; optional). A corkboard on the Works bay's south wall
+// (Deck 5's P5 places block), tapped like the job board (15b's ixTap: mysOpen), a hidden device page: its five
+// old cases in the order schedU key 854 gives (MYS_CASES: fixed, the head writer's words, stand-ins here). Take one (one
+// at a time): a side job beside your board job ('mysc', never the crew's), three looks at the places its clues are
+// (mys.<id>.clue.1-3), then at the job board "What was it?" (a choose from mys.<id>.sus.1-3, shuffled by its id; a wrong
+// pick: "Not that.", pick again, never a fail). Solved: a small reputation gain (worksSideXp), a line in the Chief's
+// notes (mys.<id>.solved), the ladder row's use. The day it opens Torres has his word and a level 3 learning arrow
+// points at the board, once; the first time you read it, his line by the board. Saved: SHIP.works.side.mys = { seen,
+// taken, done: [ids] } (cleaned on read). No R(): the order from key 854, the choices' from key 854 on the case's id.
+const MYS_FROM = 21, MYS_KIND = 'mysc';
+const MYS_CASES = {                                       // where each clue is looked at: a machine's panel (else the job board)
+  knock: ['4-heater-1', '5-manifold-1', '4-pump-1'], fog: ['3-galleyplant-1', '3-recycler-1', '2-extractor-1'],
+  blink: ['1-lights-1', '1-junction-1', '5-fan-1'], cold: ['5-damper-2', '4-scrubber-1', '4-heater-1'],
+  hum: ['4-washer-4', '4-junction-2', '5-pump-2'] };
+const MYS_WORDS = {                                       // stand-ins until the head writer's mys.* lines are in (S5-7)
+  knock: { title: 'The three o\'clock knock', line: 'Two winters back, Deck 4\'s pipes knocked at three every night for a month. Then it stopped.',
+    clue: ['The heating plant\'s old log: a night boost was set for 02:55 that month.', 'The manifold\'s tag: a new regulator went in the day the knocking stopped.', 'A note on the pump: "Not the pump. Checked it twice. — H."'],
+    sus: ['The night boost slamming a worn regulator shut', 'Air in the pipes', 'A pump bearing'], solved: 'The knock: a night boost slamming a worn regulator. Fixed when it was changed, never written up.' },
+  fog: { title: 'The foggy Tuesdays', line: 'One spring the mess fogged up every Tuesday at lunch, and only on Tuesdays.',
+    clue: ['The galley plant\'s old rota: Tuesday was the big soup boil.', 'The recycler\'s log: steady all week, Tuesdays too.', 'The extractor\'s card: its filter was changed on Wednesdays, a week\'s grease in it by Tuesday.'],
+    sus: ['A clogged extractor filter on soup day', 'The recycler', 'A leak over the mess'], solved: 'The fog: a week\'s grease in the extractor filter, on soup day.' },
+  blink: { title: 'The noon blink', line: 'For a year Deck 1\'s lights blinked once at noon sharp. Nobody could catch it.',
+    clue: ['The light relays\' log: one dip a day, 12:00, nothing else.', 'The junction\'s old load chart: the noon peak, the same every day.', 'The fan hall\'s card: the big fan was set to start a cleaning run at 12:00.'],
+    sus: ['The fan\'s noon run pulling on the junction', 'A loose lamp', 'The bridge clocks'], solved: 'The blink: the fan\'s noon cleaning run pulling on Deck 1\'s junction.' },
+  cold: { title: 'The cold cabin', line: 'Cabin 4-12 was always cold, whoever lived in it. Then one day it wasn\'t.',
+    clue: ['Damper 2\'s old card: its flap was found jammed a quarter shut, the week 4-12 warmed up.', 'The scrubber\'s log: running normally all along.', 'The heating plant\'s log: 4-12\'s loop as warm as any.'],
+    sus: ['Damper 2, jammed part shut', 'The heating loop', 'The scrubber'], solved: 'The cold cabin: damper 2 jammed a quarter shut, starving 4-12 of warm air.' },
+  hum: { title: 'The singing washer', line: 'Washer 4 used to hum a note on its spin, and the junction next door hummed back.',
+    clue: ['Washer 4\'s card: the hum only on the fast spin.', 'The junction\'s card: a loose cover plate, found and tightened.', 'The pump\'s log: nothing at all.'],
+    sus: ['A loose junction cover plate ringing with the spin', 'The washer\'s bearing', 'The pump'], solved: 'The singing washer: the junction\'s loose cover plate ringing along with the spin.' } };
+const MYS_IDS = Object.keys(MYS_CASES);
+const mysText = (c, k, fb) => worksText('mys.' + c + '.' + k, fb);
+const mysOn = () => { const W = SHIP.works; return !!(P5_CASES5 && W && (W.rank === 'senior' || W.rank === 'specialist') && worksDay(shipNow()) >= MYS_FROM); };
+function mysState() {                                    // side.mys, cleaned (a save may hold junk)
+  const s = worksSide(); if (!s) return null;
+  if (!s.mys || typeof s.mys !== 'object' || !s.mysOk) {
+    const o = s.mys && typeof s.mys === 'object' ? s.mys : {};
+    s.mys = { seen: Number.isInteger(o.seen) ? o.seen : 0, taken: MYS_IDS.includes(o.taken) ? o.taken : null, done: (Array.isArray(o.done) ? o.done : []).filter(x => MYS_IDS.includes(x)).slice(0, 5) };
+    Object.defineProperty(s, 'mysOk', { value: true, enumerable: false, configurable: true });
+  }
+  return s.mys;
+}
+const mysOrder = () => MYS_IDS.map((id, i) => [schedU(machSeed('mys'), i, 854), id]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+const mysJob = () => SHIP.jobs.find(j => j.kind === MYS_KIND && j.status !== 'done' && j.claimedBy === 'you') || null;
+function mysPlace(id) { const p = machineById(id) ? panelPlace(id) : null; return p && placeById(p) ? p : '5-jobboard-1'; }
+// the side job: three looks, then the choose at the job board
+function mysStops(j) {
+  const S = MYS_CASES[j.mys], W = MYS_WORDS[j.mys]; if (!S) return [];
+  const opts = (j.order || [1, 2, 3]).map(n => ({ id: 'sus' + n, label: mysText(j.mys, 'sus.' + n, W.sus[n - 1]) }));
+  const B = placeById('5-jobboard-1');
+  return [...S.map((m, k) => { const pl = mysPlace(m), P = placeById(pl); return { deck: P.deck, placeId: pl, mins: 1, tag: 'clue', how: 'look', opts: { secs: 3, text: mysText(j.mys, 'clue.' + (k + 1), W.clue[k]) } }; }),
+    { deck: B ? B.deck : 5, placeId: '5-jobboard-1', mins: 1, tag: 'call', how: 'choose', opts: { title: worksText('mys.call', 'What was it?'), text: mysText(j.mys, 'title', W.title), options: opts } }];
+}
+function mysStepDone(j, k, res) {
+  const st = mysStops(j)[k]; if (!st || st.tag !== 'call') return true;
+  if (![0, 1, 2].every(i => (j.stepsDone || []).includes(i))) return false;   // the clues first
+  if (!res || res.pick !== 'sus1') { j.wrong = (j.wrong || 0) + 1; try { toast(mysText(j.mys, 'title', MYS_WORDS[j.mys].title), worksText('mys.not', 'Not that. Read the cards again.')); } catch (e) { /* no UI */ } return false; }
+  return true;
+}
+function mysDone(j) {
+  const S = mysState(); if (!S) return;
+  if (!S.done.includes(j.mys)) S.done.push(j.mys); if (S.taken === j.mys) S.taken = null;
+  worksSideXp(1, 'mys'); worksUse('mys');
+  try { toast(mysText(j.mys, 'title', MYS_WORDS[j.mys].title), worksText('mys.solved', 'Solved. It\'s in the Chief\'s notes now.')); } catch (e) { /* no UI */ }
+  simNote('mystery', { id: j.mys, wrong: j.wrong || 0 });
+  MACH_REV++;
+}
+function mysTake(id) {
+  const S = mysState(); if (!S || !mysOn() || !MYS_IDS.includes(id) || S.done.includes(id) || mysJob()) return false;
+  const order = [1, 2, 3].map(n => [schedU(machSeed('mys:' + id), n, 854), n]).sort((a, b) => a[0] - b[0]).map(x => x[1]), now = shipNow();
+  const j = jobMake(MYS_KIND, { id: MYS_KIND + ':' + id + '@' + Math.floor(now), deck: 5, h: Math.floor(now / 60), title: 'Old mystery: ' + mysText(id, 'title', MYS_WORDS[id].title), mys: id, order });
+  j.posted = j.found = now; j.claimedBy = 'you'; j.status = 'claimed'; j.start = now; SHIP.jobs.push(j); S.taken = id;
+  MACH_REV++; return true;
+}
+// the board as a device page (the controller walks it): the five, solved ones ticked, Take on the rest, one at a time
+function mysView() {
+  const S = mysState(), B = [], cur = mysJob();
+  B.push({ kind: 'text', text: worksText('mys.head', 'Old faults the crew never got to the bottom of. Take one when you like: one at a time.') });
+  if (!S || !mysOn()) { B.push({ kind: 'text', text: worksText('mys.shut', 'Calder\'s pinning these up for her Senior Officers.') }); return { title: 'Old mysteries', blocks: B }; }
+  const ids = mysOrder();
+  B.push({ kind: 'list', rows: ids.map(id => ({ text: mysText(id, 'title', MYS_WORDS[id].title), sub: S.done.includes(id) ? worksText('mys.done', 'solved') : cur && cur.mys === id ? worksText('mys.on', 'yours: on it') : mysText(id, 'line', MYS_WORDS[id].line), ...(S.done.includes(id) ? {} : cur && cur.mys === id ? { mark: 'hot' } : {}) })) });
+  if (cur) B.push({ kind: 'text', text: worksText('mys.oncur', 'You\'re on {title}. Read the three cards where they are, then call it at the job board.', { title: mysText(cur.mys, 'title', MYS_WORDS[cur.mys].title) }), mark: 'hot' });
+  else { const left = ids.filter(id => !S.done.includes(id)); if (left.length) B.push({ kind: 'buttons', items: left.map(id => ({ label: 'Take: ' + mysText(id, 'title', MYS_WORDS[id].title), action: { app: 'oldcases', do: 'take', arg: id } })) });
+    else B.push({ kind: 'text', text: worksText('mys.all', 'All five solved. Calder says she\'ll find more.') }); }
+  return { title: 'Old mysteries', blocks: B };
+}
+function mysAct(verb, arg) {
+  if (verb === 'take' && mysTake(arg)) { try { toast('Old mysteries', worksText('mys.taken', 'Taken: {title}. The first card is marked on your map.', { title: mysText(arg, 'title', MYS_WORDS[arg].title) })); } catch (e) { /* no UI */ } }
+  MACH_REV++;
+}
+// the tap (15b) and the first read: Torres's line by the board, once
+function mysOpen() {
+  const S = mysState(); if (!S) return false;
+  if (mysOn() && !S.seen) { S.seen = worksDay(shipNow()); worksSay('torres-zeke', worksText('mys.torres.seen', 'Old ones. Nobody\'s cracked them. Have a go, if you like.')); }
+  if (typeof deviceShow === 'function') deviceShow('oldcases');
+  return true;
+}
+// the day it opens: Torres's word and the learning arrow to the board, once (level 3: shown as a lesson, not your shift's)
+function mysTick(now, skip) {
+  if (skip || !mysOn()) return;
+  const S = mysState(); if (!S) return;
+  for (const x of SHIP.jobs) if (x.kind === MYS_KIND && x.workDone && x.status !== 'done') jobFinish(x, now, 'you');   // solved: done, no board turn-in
+  const m = now % 1440; if (S.seen || flag('mys.word') || m < 540 || m > 1260 || !player || !deckDef) return;
+  flagSet('mys.word', worksDay(now));
+  worksSay('torres-zeke', worksText('mys.torres.word', 'Calder\'s put the old mysteries up in the bay, by the lobby doors. Nobody\'s cracked them. Worth a look on a quiet day.'));
+  if (typeof guideAsk === 'function') guideAsk({ id: 'mys:board', level: 3, once: 1, owner: '24k', until: now + 180, goal: () => ({ deck: 5, room: 'w', item: /^old mysteries$/i, label: worksText('mys.arrow', 'The old-mysteries board, in the Works bay') }), done: () => { const T = mysState(); return !!(T && T.seen); } });
+}
+if (P5_CASES5) {
+  if (typeof jobKindAdd === 'function') jobKindAdd(MYS_KIND, { tier: 1, work: 0, text: 'Old mystery', side: true, stops: mysStops, stepDone: mysStepDone, done: mysDone, veto: true, crew: { can: () => false, mins: 30 } });
+  if (typeof WORKS_SIDE_KINDS !== 'undefined' && WORKS_SIDE_KINDS.add) WORKS_SIDE_KINDS.add(MYS_KIND);
+  deviceApp({ id: 'oldcases', title: 'Old mysteries', short: 'Mysteries', icon: 'wrench', order: 33, hidden: () => true, view: mysView, act: mysAct });
+  CHIEF_NOTES.mys = { title: 'Old mysteries', key: null, open: () => { const S = SHIP.works && mysState(); return !!(S && S.done.length); },
+    get lines() { const S = SHIP.works && mysState(); return (S ? S.done : []).map(id => mysText(id, 'solved', MYS_WORDS[id].solved)); } };
+  if (typeof WORK_MECH !== 'undefined') WORK_MECH.mys = { open() { const W = SHIP.works; if (W && W.use && W.use.mys > 0) worksTrained('mys'); } };   // the board is there from Day 21 for a Senior Officer (mysOn); one solved before the row opened (a Sunday) trains it now
+  if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(mysTick);
 }
 // ---- end of slot: Puzzles seat ----
 

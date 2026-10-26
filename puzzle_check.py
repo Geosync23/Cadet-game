@@ -765,7 +765,7 @@ S5_ON = "const P5_STEP5 = URL_FLAGS.has('p5s5');"
 NOT_YET = []
 
 # the off build: no Step 5 kind or board registered
-S5_OFF = r"""(() => ({ kinds: Object.keys(CASE_KINDS).filter(k => ['p4', 'p5', 'p9'].includes(k)), mech: typeof WORK_MECH !== 'undefined' ? ['p4', 'p5', 'p9', 'mys'].filter(k => WORK_MECH[k]) : [], on: typeof P5_CASES5 !== 'undefined' && P5_CASES5 }))()"""
+S5_OFF = r"""(() => ({ app: typeof DEVICE_APPS !== 'undefined' && DEVICE_APPS.has('oldcases'), job: typeof JOB_KINDS !== 'undefined' && !!JOB_KINDS.mysc, kinds: Object.keys(CASE_KINDS).filter(k => ['p4', 'p5', 'p9'].includes(k)), mech: typeof WORK_MECH !== 'undefined' ? ['p4', 'p5', 'p9', 'mys'].filter(k => WORK_MECH[k]) : [], on: typeof P5_CASES5 !== 'undefined' && P5_CASES5 }))()"""
 
 # P4 on paper: a Senior Officer (Day 17 on), the p4 row open, every cause P4 fits on every machine at your tier becomes a
 # case (rate 1, P4 alone); each checked: the decoys' gauges each cross out their own decoy, the stuck gauge is the cause's
@@ -920,6 +920,46 @@ def part_p5(g, path):
         check(F['view'] and F['fixed'] and F['closed'] and F['trained'] == 18, f"p5's first: the line view, the right call fixes it, trained Day 18: {F['view']} {F['fixed']} {F['trained']}")
     return 'done'
 
+# the old-mysteries board: on Deck 5 with the switch, tapped like the job board; shut before Day 21 or below Senior;
+# Torres's word and the level 3 arrow once on the day; his line at the first read; five in key 854's order; one taken at
+# a time (a side job, yours, three looks then the choose at the job board; a wrong pick isn't a fail); solved: the
+# Chief's notes line, a small reputation gain, the row's use; the next one can be taken; junk in the save cleaned
+BOARD = r"""(() => {
+  const out = {}, W = SHIP.works, keep = { rank: W.rank, tier: W.tier, op: W.op, tr: W.tr, xp: W.xp, side: W.side };
+  window.__said = []; const said = window.__said; window.__ws = worksSay; worksSay = (id, t) => said.push([id, t]);
+  goToDeck(5); out.item = !!ITEMS.find(i => i.t === 'Old mysteries');
+  W.side = {}; delete SHIP.flags['mys.word'];
+  W.rank = 'officer'; W.tier = 2; setShipNow(19 * 1440 + 600); out.shutOfficer = !mysOn() && mysView().blocks.every(b => b.kind !== 'buttons');
+  W.rank = 'senior'; W.tier = 3; setShipNow(19 * 1440 + 600); out.shutDay20 = !mysOn();
+  setShipNow(20 * 1440 + 545); mysTick(shipNow(), false); out.word = said.slice(); out.arrow = !!GUIDE.list.find(e => e.id === 'mys:board' && e.level === 3);
+  const g0 = GUIDE.list.find(e => e.id === 'mys:board'), goal = g0 && g0.goal(); out.goal = goal ? [goal.deck, goal.room, String(goal.item)] : null;
+  said.length = 0; mysTick(shipNow() + 60, false); out.wordOnce = said.length === 0;
+  // the tap
+  said.length = 0; const it = ITEMS.find(i => i.t === 'Old mysteries'); it.hit.getWorldPosition(_wp); out.tap = ixTap(it, _wp.clone(), _wp.clone());
+  return out;
+})()"""
+BOARD2 = r"""(() => {
+  const out = {}, W = SHIP.works, S = mysState();
+  out.open = DEV.open && DEV.app === 'oldcases'; out.seen = S.seen; out.arrowDone = (GUIDE.list.find(e => e.id === 'mys:board') || { done: () => true }).done();
+  out.torres = (window.__said || []).filter(w => w[0] === 'torres-zeke').map(w => w[1]);
+  const b = document.getElementById('devBody'); out.rows = [...b.querySelectorAll('.list .rt, .list li')].map(x => x.textContent).slice(0, 8);
+  out.takes = [...b.querySelectorAll('button')].map(x => x.textContent).filter(t => /^Take: /.test(t));
+  out.order = mysOrder(); out.order2 = mysOrder();
+  const first = out.order[0]; deviceDo({ app: 'oldcases', do: 'take', arg: first });
+  const j = mysJob(); out.taken = j && [j.mys, j.claimedBy, jobSide(j), jobStops(j).length, jobStops(j).map(s => (s.places || [])[0] || null)];
+  out.second = mysTake(out.order[1]);
+  deviceShow('oldcases'); out.takesAfter = [...b.querySelectorAll('button')].map(x => x.textContent).filter(t => /^Take: /.test(t)).length;
+  for (let k = 0; k < 3; k++) jobStepDone(j.id, k);
+  const xp0 = W.xp; jobStepDone(j.id, 3, { pick: 'sus2' }); out.wrongDone = !!j.workDone;
+  jobStepDone(j.id, 3, { pick: 'sus1' }); out.rightDone = !!j.workDone;
+  mysTick(shipNow(), false); out.status = j.status; out.done = S.done.slice(); out.xp = W.xp - xp0; out.use = W.use.mys;
+  out.notes = CHIEF_NOTES.mys.open() && CHIEF_NOTES.mys.lines.length === 1;
+  out.next = mysTake(out.order[1]); const j2 = mysJob(); out.next2 = j2 && j2.mys;
+  W.side.mysOk = false; W.side.mys = { seen: 21, taken: 'nope', done: ['knock', 'bad', 7] }; delete W.side.mysOk; out.clean = JSON.stringify(mysState());
+  deviceClose(); worksSay = window.__ws;
+  return out;
+})()"""
+
 def s5_copy(path):
     src = pathlib.Path(path).read_text()
     if S5_ON not in src: return None
@@ -958,13 +998,31 @@ def part_p4(g, path):
         check(F['fixed'] and F['closed'] and F['trained'] == 17, f"p4's first: the right call fixes it; the row trained on Day 17: {F['fixed']} {F['closed']} {F['trained']}")
     return 'done'
 
-S5_RUN = {'p4': part_p4, 'p5': part_p5}
+def part_board(g, path):
+    if not g.ev("typeof mysOpen === 'function' && typeof DEVICE_APPS !== 'undefined' && DEVICE_APPS.has('oldcases')"): return 'not yet'
+    A = g.ev(BOARD); print('board:', A)
+    g.step(240)
+    B = g.ev(BOARD2); print('board, read:', B)
+    check(A['item'] and A['tap'] is True, f"the board is on Deck 5 and taps: {A['item']} {A['tap']}")
+    check(A['shutOfficer'] and A['shutDay20'], f"shut for an Officer and before Day 21: {A['shutOfficer']} {A['shutDay20']}")
+    check(any(w[0] == 'torres-zeke' for w in A['word']) and A['arrow'] and A['goal'] and A['goal'][0] == 5 and A['wordOnce'], f"Day 21: Torres's word and a level 3 arrow to the board, once: {A['word']} {A['goal']}")
+    check(B['open'] and B['seen'] == 21 and B['arrowDone'] and len(B['torres']) == 1, f"the tap opens the board (walked to it), seen, the arrow done, Torres's line: {B['open']} {B['seen']} {B['arrowDone']} {B['torres']}")
+    check(len(B['takes']) == 5 and B['order'] == B['order2'] and sorted(B['order']) == sorted(['knock', 'fog', 'blink', 'cold', 'hum']), f"five old cases, Take on each, the same order twice: {B['takes']} {B['order']}")
+    check(B['taken'] and B['taken'][0] == B['order'][0] and B['taken'][1] == 'you' and B['taken'][2] and B['taken'][3] == 4 and B['taken'][4][3] == '5-jobboard-1' and all(B['taken'][4]), f"take one: a side job of yours, three looks then the board: {B['taken']}")
+    check(B['second'] is False and B['takesAfter'] == 0, f"one at a time: {B['second']} {B['takesAfter']}")
+    check(not B['wrongDone'] and B['rightDone'] and B['status'] == 'done' and B['done'] == [B['order'][0]], f"a wrong pick isn't a fail; the right one solves it: {B['wrongDone']} {B['rightDone']} {B['status']} {B['done']}")
+    check(B['xp'] >= 1 and B['use'] == 1 and B['notes'], f"solved: a small reputation gain, the row's use, the Chief's notes: {B['xp']} {B['use']} {B['notes']}")
+    check(B['next'] and B['next2'] == B['order'][1], f"then the next can be taken: {B['next2']}")
+    check(B['clean'] == '{"seen":21,"taken":null,"done":["knock"]}', f"junk in the save cleaned: {B['clean']}")
+    return 'done'
+
+S5_RUN = {'p4': part_p4, 'p5': part_p5, 'board': part_board}
 
 def run_s5(path, parts):
     with sync_playwright() as pw:
         g = Game(pw, path, 390, 844); g.step(2)
         off = g.ev(S5_OFF); g.close()
-        check(not off['kinds'] and not off['mech'] and not off['on'], f"switch off: nothing of Step 5's registered: {off}")
+        check(not off['kinds'] and not off['mech'] and not off['on'] and not off['app'] and not off['job'], f"switch off: nothing of Step 5's registered: {off}")
         on = s5_copy(path)
         if not on:
             for p in parts: print(f'{p}: not yet (no P5_STEP5 switch line in this build)'); NOT_YET.append(p)
