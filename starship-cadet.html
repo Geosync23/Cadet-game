@@ -47003,7 +47003,13 @@ function vesselPlaces() {
   if (DECKS[5].vesselChain) return;
   const spots = vesselChainSpots(), call = { id: '5-vchain-call', type: 'event', event: 'vessel-chain-call', at: [17, 4], xy: [17.5, 4.45], face: 0, pose: 'stand', anim: 'talk', room: 'w' };
   const you = spots.reduce((b, p) => Math.hypot(p.xy[0] - call.xy[0], p.xy[1] - call.xy[1]) < Math.hypot(b.xy[0] - call.xy[0], b.xy[1] - call.xy[1]) ? p : b);
-  DECKS[5].places.push(...spots, call);
+  // VB1's ask: Taavek and the helpers at the two benches (type 'event', nobody's day to day; facing the work): the Works
+  // bay's second bench (Taavek and Calder at its front, Zeke across it from the wall side), and the machine shop (Taavek
+  // between the lathe and the bench, the two helpers at the bench's east end; 5-shop-lathe stays yours)
+  const ev = (id, event, at, xy, face, room) => ({ id, type: 'event', event, at, xy, face, pose: 'stand', anim: 'talk', room });
+  const bench = [ev('5-vbench-1', 'vessel-bench', [18, 3], [18.35, 3.3], 'n', 'w'), ev('5-vbench-2', 'vessel-bench', [19, 3], [19.45, 3.35], 'n', 'w'), ev('5-vbench-3', 'vessel-bench', [18, 1], [18.9, 1.6], 's', 'w'),
+    ev('5-vshop-1', 'vessel-shop', [23, 11], [23.2, 11.55], 'w', 'f'), ev('5-vshop-2', 'vessel-shop', [25, 13], [25.0, 13.35], 'n', 'f'), ev('5-vshop-3', 'vessel-shop', [25, 12], [25.55, 12.5], 'w', 'f')];
+  DECKS[5].places.push(...spots, call, ...bench);
   DECKS[5].vesselChain = { spots: spots.map(p => p.id), call: call.id, you: you.id, path: VCHAIN_PATH };
   if (typeof SCHED_DATA !== 'undefined' && SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // planned before the spots: planned again
 }

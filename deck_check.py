@@ -271,7 +271,10 @@ with sync_playwright() as pw:
         g.ev("goToDeck(5)"); g.step(3)
         pl = g.ev(PLACES)
         vc = g.ev("(() => { const V = DECKS[5].vesselChain, ps = V.spots.map(id => deckDef.places.find(p => p.id === id)); return { n: ps.filter(Boolean).length, call: !!deckDef.places.find(p => p.id === V.call), you: V.spots.includes(V.you), gap: Math.max(...ps.slice(1).map((p, k) => Math.hypot(p.xy[0] - ps[k].xy[0], p.xy[1] - ps[k].xy[1]))) }; })()")
-        bad = [b for b in pl['bad'] if b.startswith('5-vchain')]
+        bad = [b for b in pl['bad'] if re.match(r'5-v(chain|bench|shop)', b)]
+        nb = g.ev("deckDef.places.filter(p => /^5-v(bench|shop)-/.test(p.id)).length")
+        print(f"The Veyli vessel: the bench spots (Works bay and machine shop): {nb} (want 6)")
+        if nb != 6: ok = False
         print(f"The Veyli vessel: the chain's spots on Deck 5: {vc['n']} (Zeke's {vc['call']}, yours in the line {vc['you']}), the widest gap {vc['gap']:.2f} tiles; bad: {bad}")
         if vc['n'] != 40 or not vc['call'] or not vc['you'] or vc['gap'] > 1.0 or bad: ok = False; print('  the chain spots: not 40, a spot missing, a gap over a tile, or a bad place')
         if g.ev("!!SHIP_EVENTS.veyliVessel"):

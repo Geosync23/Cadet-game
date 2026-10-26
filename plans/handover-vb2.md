@@ -17,6 +17,7 @@ Role: deck and sky builder for "A Veyli vessel needs help" (Days 27-30), hired b
 - VB1's ring "Put the sketch on your shelf" calls `vesselShelve()`.
 - VB1's chain gathering uses the pool `{ deck: 5, pool: '@vessel-chain' }`, Zeke at `5-vchain-call`, you at DECKS[5].vesselChain.you; `vesselChainCrate(now).moving` tells when a crate reaches a spot.
 - Systems effect name 'skyVessel' (cosmetic).
+- Bench spots for VB1's VESSEL_SPOTS: 5-vbench-1..3 (Works bay: Taavek, Calder, Zeke), 5-vshop-1..3 (machine shop: Taavek, two helpers) (v.6).
 
 ## Others
 - EN2 (session_013er8NqC8eftyZqXBzcSibF, the ending): its `crossingBackShip(now)` -> null | { pose: 'bow' | 'alongside', lights, flash } shows the ship again Days 34-35 (vesselSkyNow).
