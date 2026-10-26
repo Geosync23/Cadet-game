@@ -62894,6 +62894,7 @@ const SND = (() => {
     hatchOpen: t => door(t, true, 'hatchA'), hatchClose: t => door(t, false, 'hatchA'),
     liftPress: t => liftPress(t, undefined, 'B'), liftDoorsOpen: t => liftDoors(t, true, 'C'), liftDoorsClose: t => liftDoors(t, false, 'C'),
     liftRide: (t, o) => liftRide(t, o.d ?? 1.2, 'C'), liftArrive: t => liftArrive(t, 'C'),
+    cometTurn: t => { noise(t, 20, { brown: true, ft: 'lowpass', f: 110, fTo: 230, fT: 10, q: 0.7, gain: 0.047, swell: 0.5 }); tone(t, 55, 18, { gain: 0.022, a: 7 }); tone(t + 1, 82.41, 17, { gain: 0.013, a: 7 }); },   // the comet's turn (0.93.2, FX25): about 20 s, about 6 dB under the storm's swell, never an alarm
     step: (t, o) => (STEP[o.surface] || STEP.carpet)(t, o.pan || 0, ROUTE.steps),
   };
 
@@ -63591,6 +63592,8 @@ const SND = (() => {
       shift:      { name: 'Clockwork stars', time: 'Work', key: 52, mode: 'mixo', bpm: 74, a: [0, 1], b: [0, 3, 1, 2], c: [4, 2], seed: 409, pulse: true, note: 'A steady sequence and a soft pulse for getting into the work, under wide pads.' },
       steady:     { name: 'Steady state', time: 'Work', key: 50, mode: 'lydian', bpm: 70, a: [0, 1], b: [3, 0, 1, 2], c: [2, 4], seed: 419, pulse: true, bells: true, note: 'Heads-down work: a patient sequence, a chime tune and a very soft pulse.' },
       rounds:     { name: 'Rounds', time: 'Work', key: 55, mode: 'dorian', bpm: 72, a: [0, 1], b: [0, 2, 3, 1], c: [4, 1], seed: 421, pulse: true, pattern: [0, 1, 2, 1, 3, 2, 1, 2], note: 'Walking the ship with your job list: a moving sequence, a soft pulse and a singing lead.' },
+      // the comet (0.93.2, FX25's event; plans/events-plan-2.html A6): slow and bright, played only while you watch it
+      comet:      { name: 'Comet', time: 'Event', key: 54, mode: 'lydian', bpm: 52, a: [0, 1], b: [0, 3, 1, 2], c: [4, 1], seed: 433, slow: true, bells: true, wet: 0.7, bright: 1.15, note: 'The comet going by: slow, bright Lydian pads, a chime tune and wide open space. Only at the windows, on the night it passes.' },
     };
     for (const [k, d] of Object.entries(SPACE)) TRACKS[k] = space(d);
     const SPACE_LV = {dawn: 0.417, wake: 0.442, firstlight: 0.525, systems: 0.631, morning: 0.479, tea: 0.479, midday: 0.417, lunch: 0.452, promenade: 0.537, afternoon: 0.452, circuits: 0.525, golden: 0.49, evening: 0.468, porthole: 0.468, watch: 0.452, lullaby: 0.447, latenight: 0.484, deepspace: 0.484, shift: 0.513, steady: 0.495, rounds: 0.495};   // levels for the space tracks (set by measuring against the hum)
@@ -63632,11 +63635,12 @@ const SND = (() => {
          sec('Theme returns', 'A', 8, ['sPad', 'sBassMove', 'sSeqSlow', lead, 'sAnswer'], 2)],
         [sec('Closing', 'A', 4, ['sPad', 'sStars'], 1)], d.bpm, 4, 10, ['x']);
     }
-    const SHAPED = ['tea', 'lunch', 'porthole', 'watch', 'lullaby', 'latenight', 'deepspace'];
+    const SHAPED = ['tea', 'lunch', 'porthole', 'watch', 'lullaby', 'latenight', 'deepspace', 'comet'];
     SHAPED.forEach(shaped);
     const SHAPE_LV = {};   // levels for the reshaped tracks (set by measuring)
     for (const k of SHAPED) MLV[k] = SHAPE_LV[k] ?? MLV[k];
     for (const [k, f] of Object.entries({ lunch: 1.3, latenight: 1.3, deepspace: 1.4, systems: 1.3, dawn: 1.3 })) MLV[k] *= f;   // the quieter ones up 2-3 dB (measured)
+    MLV.comet = 0.65;   // the comet's level (measured against the hum)
 
     for (const k of ['morning', 'evening', 'latenight', 'shift', 'steady', 'rounds', 'firstlight', 'midday', 'lunch', 'afternoon', 'tea', 'golden', 'watch', 'lullaby', 'wake', 'systems', 'dawn', 'promenade', 'circuits', 'porthole', 'deepspace']) { const d = TRACKS[k]; delete TRACKS[k]; TRACKS[k] = d; }   // v7's order (its list and Next), as before the old definitions were left out
     // ---- the schedule: ship time of day, and a working set while you're on shift
@@ -63699,7 +63703,7 @@ const SND = (() => {
 
     // ---- the player
     let enabled = opts.enabled ?? true, volume = opts.volume ?? 0.7, paused = false, mode = opts.mode && TRACKS[opts.mode] ? opts.mode : 'schedule', resting = false;
-    let cur = null, curSet = null, seenSet = null, nextAt = ctx.currentTime + (opts.firstGap ?? 3), lastKey = null, lastMin = null, pendingChange = null;
+    let cur = null, curSet = null, seenSet = null, nextAt = ctx.currentTime + (opts.firstGap ?? 3), lastKey = null, lastMin = null, pendingChange = null, event = null;
     const applyVol = (f = 1.5) => { const v = enabled && !paused ? LEVEL * volume : 0; main.gain.cancelScheduledValues(ctx.currentTime); main.gain.setValueAtTime(main.gain.value, ctx.currentTime); main.gain.linearRampToValueAtTime(v, ctx.currentTime + f); };
     applyVol(0.5);
     // rotation: never the one that just played, and of the rest, the one heard least recently (never heard comes first;
@@ -63707,6 +63711,7 @@ const SND = (() => {
     const heard = { ...(opts.heard || {}) }; let heardN = Math.max(0, ...Object.values(heard).filter(Number.isFinite));
     function pick(set) {
       if (set === 'chosen') return mode;
+      if (set === 'event') return event;
       const list = SETS[set].filter(k => k !== lastKey), best = Math.min(...list.map(k => heard[k] ?? -1));
       const pool = list.filter(k => (heard[k] ?? -1) === best); return pool[(rnd() * pool.length) | 0] || SETS[set][0];
     }
@@ -63719,10 +63724,10 @@ const SND = (() => {
         if (cur) { cur.fadeOut(now, 3); cur = null; } pendingChange = null; nextAt = now + 2; lastMin = st.min; return;
       }
       if (resting) { resting = false; log('Day 1: music begins'); }
-      const set = mode === 'schedule' ? setFor(st) : 'chosen';
+      const set = mode !== 'schedule' ? 'chosen' : event ? 'event' : setFor(st);   // an event's own track (the comet) takes over the schedule while it's on
       // a big jump in ship time (sleeping skips the night) changes over straight away
       const jumped = lastMin !== null && Math.abs(st.min - lastMin) > 30 && Math.abs(st.min - lastMin) < 1410; lastMin = st.min;
-      if (set !== seenSet) { if (seenSet !== null && set !== 'chosen') log(`Time of day is now ${set}`); seenSet = set; }
+      if (set !== seenSet) { if (seenSet !== null && set !== 'chosen') log(set === 'event' ? `The ${TRACKS[event].name.toLowerCase()} is on` : `Time of day is now ${set}`); seenSet = set; }
       if (cur) {
         cur.tick(now + 0.5);
         if (set !== curSet) {   // time of day (or the shift) changed: cross-fade at the end of this section, or now after a jump
@@ -63740,6 +63745,8 @@ const SND = (() => {
       update,
       setEnabled(on) { enabled = !!on; if (!enabled && cur) { cur.fadeOut(ctx.currentTime, 2); cur = null; nextAt = ctx.currentTime + 3; } applyVol(); },
       setVolume(v) { volume = Math.max(0, Math.min(1, v)); applyVol(0.3); },
+      setEvent(key) { event = key && TRACKS[key] ? key : null; },   // an event's track (or null): it changes over at a section end, like a new time of day
+      eventOn() { return event; },
       pause() { paused = true; applyVol(0.3); },
       resume() { paused = false; applyVol(0.6); },
       setGaps(min, max) { cfg.gapMin = min; cfg.gapMax = Math.max(min, max); if (!cur) nextAt = Math.min(nextAt, ctx.currentTime + cfg.gapMax); },
@@ -63783,6 +63790,8 @@ const SND = (() => {
         if (S.musicLog) S.musicLog.push({ t: SHIP.time.day * 1440 + SHIP.time.min, text: tx });
         if (/^Playing /.test(tx) && S.music) { MP.heard = S.music.state().heard; S.savePrefs(); if (typeof DEV !== 'undefined' && DEV.open && DEV.app === 'music') deviceRefresh(); }   // the rotation carries on across days; a live Now playing
       } }); }
+    let ev = null; try { ev = typeof cometMusicOn === 'function' && cometMusicOn() ? 'comet' : null; } catch (e) { ev = null; }   // section 18's comet (FX25): its own track while you watch
+    S.music.setEvent(ev);
     S.music.update();
   });
   S.musicView = () => {
