@@ -10,7 +10,7 @@ RV19, session_01V6FDCQp5Ejidi8Chpo2nJG. Hired by lead 38 for 0.93.2; lead 39 fro
 | Save slots (SAVE_SLOTS_ON) | FX27 | claude/save-slots ba6b7b9a PASS; test-only a1df5739 PASS | PASS |
 | Promotion beats (PROMO_BEATS_ON) | FX28 | claude/promo-beats bd558a84 / 104420fd FIXES NEEDED; 44a4565f PASS | PASS |
 | Storm Saturday (STORM_SAT_ON) | FX26 (from RV18) | claude/storm-sat 402899bd PASS; follow-up 6f19944d PASS | PASS |
-| Pillar 5 Step 5 skeleton (P5_STEP5) | B1 | claude/p5s5-skeleton 5957d244 | see plans/review-rv19.md (in progress at writing) |
+| Pillar 5 Step 5 skeleton (P5_STEP5) | B1 | claude/p5s5-skeleton 5957d244 | FIXES NEEDED, M1 check only (bigevents_check guard samples stale with ?p5s5 on); off identical, safe to merge off if lead 39 says so |
 
 Everything is written up, with checks and findings, in `plans/review-rv19.md`.
 
