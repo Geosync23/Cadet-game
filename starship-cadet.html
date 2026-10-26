@@ -53781,6 +53781,7 @@ worksTabAdd({ id: 'training', title: worksText('works.tab.training', 'Training')
   say(worksRankTitle(W) + '. ' + worksText('works.rep.title', 'Your reputation') + ': ' + (W ? worksBandWord() : worksText('works.band.new', 'New')) + '.', 'hot');
   say(worksText('works.training.next', 'What\'s next:') + ' ' + worksNext());
   if (typeof promoCheck === 'function') B.push(...promoCheck(), ...promoHomeLine());   // FX19 (24p's slot): the promotion's steps, ticked
+  if (typeof puCheck === 'function') B.push(...puCheck());   // Pillar 5 Step 5 (24u, S5-1): the Tier 3 test's steps, ticked
   const rows = [];
   if (worksShadowDone(W)) rows.push({ text: mechName('job').replace(/^job$/, 'The job loop'), sub: 'with Zeke Torres, Day 1' });
   if (W) for (const r of CAREER_LADDER) if (W.tr[r.id] !== undefined) rows.push({ text: mechName(r.id), sub: 'Day ' + W.tr[r.id] });
@@ -58547,6 +58548,33 @@ function psTick(now) {
   if (r && Math.floor(r.at / 1440) + 1 >= d) return;     // today's, gone by (missed): tomorrow's workday
   if (playerShiftOn(d) && m >= WORKS_ASK[0] && m <= WORKS_ASK[1]) psAsk(d, now);   // (minute ticks are play only: asked once you're up)
 }
+// the Training tab's "Your promotion" rows for Tier 3 (S5-1 turn 3; 24p's promoCheck pattern, its Done / Not yet words):
+// an Officer's, from Steady (or once the offer's made, S5-2's SHIP.works.pu.t3) until the Tier 3 test is passed. The beats
+// table's "Nearly there": the rows tick as each need holds. 24 core's Training tab asks it (one typeof-guarded line)
+function puCheck() {
+  const W = SHIP.works, d = SHIP.time.day; if (!P5_STEP5 || !W || W.tier !== 2) return [];
+  const T = W.pu && typeof W.pu === 'object' && W.pu.t3 && typeof W.pu.t3 === 'object' ? W.pu.t3 : null; if (T && T.passed) return [];
+  const B = WORK_BANDS[2], at = b => B.findIndex(x => x[1] === b), row3 = ladderRow('t3'), from = row3 ? row3.day : 15;
+  if (at(worksBand()) < at('steady') && !T) return [];
+  const yes = worksText('works.promo.check.done', 'Done'), no = worksText('works.promo.check.not', 'Not yet'), row = (text, ok) => ({ text, sub: ok ? yes : no });
+  const rows = [row(worksText('works.pu.check.rep', 'Relied on (you\'re {band})', { band: worksBandWord() }), ladderNeeds({ rep: 'relied' }, W)),
+    row(worksText('works.pu.check.ps', 'Power safety'), W.tr.ps !== undefined), row(worksText('works.pu.check.day', 'The test from Day {day}', { day: from }), !!T || d >= from)];
+  if (T && Number.isInteger(T.day) && T.day > 0) rows.push({ text: worksText('works.pu.check.set', 'Test job: {day}, 09:00', { day: T.day === d ? 'today' : T.day === d + 1 ? 'tomorrow' : dayName(T.day) }) });
+  return [{ kind: 'text', text: worksText('works.pu.check.title', 'Your promotion: the Tier 3 test'), mark: 'head' }, { kind: 'list', rows }];
+}
+// Dev mode's career arrow (section 25's dvCareerNext asks; a small row's own lesson): the appointment if it's made, else the
+// next workday morning's ask (from Day 12, an Officer's). null once trained or when it isn't yours yet
+function psDevNext() {
+  const W = SHIP.works; if (!P5_STEP5 || !W || !WORK_MECH.ps || W.tr.ps !== undefined || W.tier < 2) return null;
+  const now = Math.floor(shipNow()), r = SHIP.occasions.filter(x => x.id === 'works.ps').pop(), wh = ladderRow('ps').where;
+  if (r && r.status === 'asked' && now < r.at + r.len) return { when: r.at, soon: 15, g: { deck: r.deck, room: r.room, label: 'Power safety with ' + guideWho(r.by) } };
+  const d0 = worksDay(now), past = r && Math.floor(r.at / 1440) + 1 >= d0;
+  for (let d = Math.max(d0 + (past ? 1 : 0), 12), i = 0; i < 42; d++, i++) {
+    if (!playerShiftOn(d) || d === d0 && now - (d - 1) * 1440 > WORKS_ASK[1]) continue;
+    return { when: d === d0 ? Math.max(now, (d - 1) * 1440 + WORKS_ASK[0]) : (d - 1) * 1440 + WORKS_ASK[0], g: { deck: wh.deck, room: wh.room, label: 'Power safety: ' + guideWho('calder') + ' asks you' } };
+  }
+  return null;
+}
 if (P5_STEP5) {
   WORK_MECH.ps = { noJob: true };                        // its row opens (24 core's ladder); psTick asks and teaches
   if (!(typeof MEETINGS_BAKED !== 'undefined' && (MEETINGS_BAKED['train.ps.calder'] || MEETINGS_BAKED['train.ps']))) MEETING_SCRIPTS['train.ps.calder'] = { title: 'Power safety', from: 'Chief Ines Calder', stub: true,   // stand-in until the head writer's ps words (content/works/keys-p5.md)
@@ -62905,10 +62933,18 @@ const DM_CAREER = [
   { day: 23, later: 'Engine Specialist (not built yet)' },
   { day: 26, later: 'Calder\'s question (not built yet)' },
 ];
+if (P5_STEP5) {                                         // Pillar 5 Step 5 (S5-1 turn 3, B1): Power safety, the Tier 3 test and the Senior Officer's days (approximate, as above; the bands: 24 core's P5 block)
+  DM_CAREER.find(r => r.day === 12).train.splice(1, 0, 'ps');
+  Object.assign(DM_CAREER.find(r => r.day === 13), { band: 'relied' });   // Relied on at the end of the storm Saturday
+  Object.assign(DM_CAREER.find(r => r.day === 15), { train: ['p2', 't3'], band: 'relied', test3: true });
+  DM_CAREER.splice(DM_CAREER.findIndex(r => r.day === 16), 3, { day: 16, rank: 'senior', band: 'new', promo3: true },
+    { day: 17, train: ['m15', 'm19', 'p4'], band: 'reliable' }, { day: 18, train: ['m17', 'm18', 'p5'], band: 'reliable' },
+    { day: 19, train: ['m20', 'p9'], band: 'trusted' }, { day: 21, train: ['mys'], band: 'trusted' });
+}
 const DM_MAXDAY = 30, DM_SEED = 8;                      // the seed: no sick day (section 20's sickDue) before Day 46, so you never land unwell (devmode_check)
 function devmodeCareerFor(n) {                           // pure: SHIP.works's career part by the end of day n
   const rows = DM_CAREER.filter(r => r.day <= n), last = k => { for (let i = rows.length - 1; i >= 0; i--) if (rows[i][k] !== undefined) return rows[i][k]; return undefined; };
-  const promo = rows.some(r => r.promo), tier = promo ? 2 : 1, rank = last('rank') || 'junior', B = WORK_BANDS[tier] || WORK_BANDS[1];
+  const promo = rows.some(r => r.promo), promo3 = rows.some(r => r.promo3), tier = promo3 ? 3 : promo ? 2 : 1, rank = last('rank') || 'junior', B = WORK_BANDS[tier] || WORK_BANDS[1];   // promo3: Step 5's Senior Officer (P5_STEP5's rows)
   const out = { tier, rank, xp: (B.find(b => b[1] === (last('band') || 'new')) || B[0])[0], tr: {}, op: {}, use: {}, tools: {}, test: null, home: promo ? PROMO.home : 'bunk', done: [], ms: [] };
   for (const r of rows) for (const id of r.train || []) {
     const row = ladderRow(id); if (!row) continue;
@@ -62918,6 +62954,7 @@ function devmodeCareerFor(n) {                           // pure: SHIP.works's c
   }
   if (rows.some(r => r.test)) out.test = { tier: 2, day: 9, tries: 1, passed: true };
   if (promo) { out.done = ['summons2', 'cake2', 'move2', 'ceremony2']; out.ms = [['officer', 10], ['commissioned', Math.min(n, 11)]]; }
+  if (rows.some(r => r.test3)) { out.pu = { t3: { day: 15, tries: 1, passed: true, res: promo3 ? 16 : null, bar: promo3 ? 16 : null, toast: n >= 17 ? 17 : null } }; if (promo3) out.ms.push(['senior', 16]); }   // S5-2's record (24u)
   return out;
 }
 function devmodeCareerSet(n, now) {                      // SHIP.works set to day n's (the log, notes and side jobs kept)
@@ -63339,7 +63376,8 @@ function dvCareerNext() {                                // the next career step
       } catch (e) { /* none */ }
     }
     for (const id of ['m3d', 'm3i']) try { add(dvFixed(W, id), id); } catch (e) { /* none */ }
-    const small = CAREER_LADDER.find(r => r.size === 'small' && !r.fixed && W.tr[r.id] === undefined && WORK_MECH[r.id] && r.tier <= W.tier && (!r.needs || !r.needs.trained || W.tr[r.needs.trained] !== undefined));
+    const small = CAREER_LADDER.find(r => r.size === 'small' && !r.fixed && r.id !== 'ps' && W.tr[r.id] === undefined && WORK_MECH[r.id] && r.tier <= W.tier && (!r.needs || !r.needs.trained || W.tr[r.needs.trained] !== undefined));   // (ps: its own lesson, psDevNext below)
+    try { if (typeof psDevNext === 'function') add(psDevNext(), 'ps'); } catch (e) { /* none */ }   // Pillar 5 Step 5's Power safety (24u, S5-1)
     try { if (small) add(ladderNeeds(small.needs, W) ? dvWork(dvName(small.id) + ': it comes with a job', small.day) : dvNeed(small, W), 'small:' + small.id); } catch (e) { /* none */ }
     try { if (STORIES_ON && typeof storyDevNext === 'function') add(storyDevNext(now), 'story'); } catch (e) { /* none */ }   // a crew story's next step (FX21, section 20c's slot)
     try { if (W.test && W.test.passed) { const s = devmodePromoSteps().find(x => !x.done && DV_PROMO[x.label]); if (s) add({ when: s.at, soon: 15, g: { ...DV_PROMO[s.label], label: s.label } }, 'promo'); } } catch (e) { /* none */ }
