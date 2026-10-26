@@ -21,6 +21,9 @@
 #            ramp closes, the save is marked ended and the end page opens
 #   pad:     (a copy with the controller on too, PAD_ON, and a pretend pad) the end page by pad: the highlight on its first
 #            button, the D-pad moves it to the second, A presses it, B does nothing (it must be answered)
+#   limits:  (RV21's review) Monday (Go) is no shift: careerOff, no missed shift counted; the last breakfast's arrow is level 1
+#            and Pell comes for you from 08:30; Zeke comes for you at 10:15 if you're not in the bay; from noon (you away) only
+#            the farewells and Zeke wait; nothing at night; the end page's keepsakes are named, the ship's decor left out
 #   week:    Friday: the friends come to you one at a time (seek asks), each with "About the transfer" and their own take;
 #            Zeke after dinner (arrow level 1 "Talk to Zeke", he finds you, the scene); a call home plays your family's
 #            scene once; the Schedule's rows (your answer by Saturday 20:00, Zeke); the Record's lines
@@ -321,7 +324,7 @@ def part_endpage(g):
       const el = document.getElementById('endPage'); const r = { keys, made: endKeepCopy(), shown: !el.hidden, text: el.innerText, btns: [...el.querySelectorAll('button')].map(b => b.dataset.end), role: el.getAttribute('role'), focus: document.activeElement && document.activeElement.dataset.end };
       r.after = after; endPage(false); return r; })()""")
     print('   ', {k: r[k] for k in ('keys', 'made', 'btns', 'role', 'focus', 'after')})
-    check(any('this save ends' in x for x in r['after']), f"endpage: telling her Go says plainly it ends this save ({r['after']})"); print('   ', r['text'][:300].replace('\n', ' | '))
+    check(any('ends this save' in x for x in r['after']), f"endpage: telling her Go says plainly it ends this save ({r['after']})"); print('   ', r['text'][:300].replace('\n', ' | '))
     check(r['keys'] == [] and r['made'] is False, f"endpage: no kept copy with ?nosave ({r['keys']})")
     check(r['shown'] and 'Ada' in r['text'] and 'Days aboard' in r['text'] and 'Zeke' in r['text'] and r['role'] == 'dialog', f"endpage: the rows ({r['text'][:200]})")
     check(r['btns'] == ['keep', 'new'] and r['focus'] == 'keep', f"endpage: with no kept copy, Keep this ending and Start a new game, the first focused ({r})")
@@ -380,6 +383,23 @@ def part_pad(pw, src):
     check(not d['hidden'] and 'stays ended' in (d['note'] or ''), f"pad: A presses Keep this ending ({d})")
     if g.errors: fail('page errors (pad): ' + ' | '.join(g.errors[:5]))
     g.close(); pc.unlink()
+
+def part_limits(g):
+    print('(limits) the goodbye day is no shift; the fetches; the crowd limit; keepsakes:')
+    r = g.ev("""(() => { __reset(36, 300); SHIP.end = endClean({ offer: { day: 32, met: true }, said: [[33, 'go']], settled: { day: 35, choice: 'go' }, f: { asks: 1 } });
+      const c = careerInit(); const ms0 = c.ms; for (const t of [480, 600, 760, 900, 1100]) { setShipNow(35 * 1440 + t); careerTick(shipNow()); }
+      const out = { off36: careerOff(36), off37: careerOff(37), shift: playerShiftOn(36), missed: c.ms - ms0, md: c.md };
+      __to(4, Object.keys(ROOM_TILES)[0]); setShipNow(35 * 1440 + 511); __tick(); out.bf = __guide('end:bf'); out.bfSeek = !!SHIP.end.f.bfSeek; out.pell = (CREW_SCENE.get('pell') || {}).mode;
+      setShipNow(35 * 1440 + 616); __tick(); out.byeSeek = !!SHIP.end.f.byeSeek; out.zeke = (CREW_SCENE.get('torres-zeke') || {}).mode;
+      CREW_SCENE.clear(); END_PAGE.crowd = null; setShipNow(35 * 1440 + 721); __tick(); out.noon = CREW_SCENE.size; out.byes = endByes().length;
+      CREW_SCENE.clear(); setShipNow(35 * 1440 + 1330); __tick(); out.night = CREW_SCENE.size;
+      SHIP.traces = ['linePlaque', 'longTables', 'tilesTrophy', 'partyLounge']; out.kept = endKeepsakes(); return out; })()""")
+    print('   ', r)
+    check(r['off36'] and not r['off37'] and not r['shift'] and r['missed'] == 0, f"limits: Monday (Go) is no shift, nothing missed ({r})")
+    check(r['bf'] and r['bf']['level'] == 1 and r['bfSeek'] and r['pell'] == 'follow', f"limits: breakfast's arrow level 1, Pell comes for you at 08:30 ({r})")
+    check(r['byeSeek'] and r['zeke'] == 'follow', f"limits: 10:15 and not in the bay, Zeke comes for you ({r})")
+    check(r['noon'] <= r['byes'] + 1 and r['night'] == 0, f"limits: from noon only the farewells and Zeke wait; nobody at night ({r})")
+    check(r['kept'] == ['Your name on the Line plaque', 'Your Tiles trophy'], f"limits: keepsakes named, decor left out ({r['kept']})")
 
 def part_week(g):
     print('(week) the friends, Zeke, the call home, the rows, the Record:')
@@ -473,7 +493,7 @@ with sync_playwright() as pw:
         g = Game(pw, str(on))
         g.step(2)
         check(g.ev(SETUP), 'setup (on)'); check(g.ev(SETUP2), 'setup (on, EN2)')
-        for name, fn in [('offer', part_offer), ('answers', part_answers), ('week', part_week), ('endpage', part_endpage), ('endgame', part_endgame), ('crossing', part_crossing)]:
+        for name, fn in [('offer', part_offer), ('answers', part_answers), ('week', part_week), ('endpage', part_endpage), ('limits', part_limits), ('endgame', part_endgame), ('crossing', part_crossing)]:
             if ONLY and name not in ONLY: continue
             try: fn(g)
             except Exception as e: fail(f'{name}: {e}')

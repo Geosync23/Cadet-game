@@ -2,7 +2,7 @@
 
 **Role:** the ending engineer: E-2 (the offer and your answer, section 29a) and E-3 (the goodbye, the end page, section 29b) of
 `plans/ending-spec.html` on claude/p5-specs (EP2). Session session_01Py28Kh6QV9kk64ri5AzQ5B.
-**Branch:** `claude/ending` from claude/staging-0.93.3 d9c7e5f0 (SW6's claude/ending-words-a merged in). Build-table rows ending-1 to ending-7. All behind
+**Branch:** `claude/ending` from claude/staging-0.93.3 d9c7e5f0 (SW6's claude/ending-words-a merged in). Build-table rows ending-1 to ending-9. Last: 319b7739 (game sha256 0f5866f3...); RV21 PASS on cd4196d5 (review fixes); 319b7739 adds only words. EN2 merges claude/ending into claude/ending-crossing (the combined ending). All behind
 `EV_ENDING_ON` (section 13, `URL_FLAGS.has('ending')`, off; `?ending` / `#ending` previews). Off: cadet_test ALL IDENTICAL
 against d9c7e5f0 on every turn, check_fast OK.
 
@@ -30,10 +30,11 @@ against d9c7e5f0 on every turn, check_fast OK.
   ask at the front; give the address minute with `crossBackAddressAt()`; read `endingChoice()` / `endSaid()` for the address's
   two versions. 29a settles at Day 35 15:00 itself, and if nothing's firm she finds you 15 minutes after.
 - **E-4 (endgame):** `flag('end.stay')` is the day it settled as Stay (`end.go` for Go).
-- **Writers:** SW6's words are merged and wired (ending-7, 93eb5380). Keys used here that SW6 hasn't written (stand-ins in code; SW6's session has ended): `ending.notice.go.ends` (the plain "this save ends" notice on Go), `ending.btn.bye` (the "Goodbye" button in the bay). SW6 keys not yet used: ending.rumour, ending.friend.told, ending.friend.settled, ending.breakfast.here (chatter bubbles), ending.status.*, ending.saves.ended, ending.endpage.btn.new.sub (ending.works.* are EN2's).
+- **Writers:** SW6's words are merged and wired (ending-7). EN1 wrote the last few keys in SW6's files (ending-9): ending.breakfast.fetch, ending.bay.fetch, ending.btn.bye, ending.endpage.kept.<id>, ending.notice.go.ends. SW6 keys not yet used: ending.rumour, ending.friend.told, ending.friend.settled, ending.breakfast.here (chatter bubbles), ending.status.*, ending.saves.ended, ending.endpage.btn.new.sub (ending.works.* are EN2's).
 - **EN2's API (agreed):** `endAnswer()`, `endSettle(now, answer)` -> the choice (calls EN2's `endStaySet(leave day)` on Stay; end.stay is EN2's), `end.cb.stay` / `end.cb.go` final, `END_ITEMS` rows through `endItems`. Zeke's Sunday 21:00 talk is EN1's (29a, `endZekeSunTick`).
 
 ## Loose ends
+- Owner review still owed: the one line in section 20's careerOff (`endOffDay`, the career engineer), the two chat-card lines (section 20) and the devDay/Record lines (section 19).
 - The packed cabin on Monday (24t's touches shown boxed) is not built: a display change in 24t, its owner's.
 - The end page's "What you kept" humanises `SHIP.traces` ids ("line plaque") until the writers name them.
 - The slower-career week settles on its own Sunday at 15:00 (judgement call; the crossing back stays Day 35).
@@ -46,5 +47,5 @@ on parts run in copies with the switch on, `pad` with PAD_ON on too, `reload`/`k
 cadet_test against the build before. Screenshots: `plans/ending-shots/`.
 
 ## Open questions for the user
-Ending questions 2 (change your mind until the address, or until the ramp) and 3 (the post by Calder's answer, or the same
-for everyone) are open; built as recommended, each one constant away.
+None. All three ending questions are answered (2026-10-26): no way back (the kept copy parked off, END_WAY_BACK false); change your
+mind until the Captain's address; the post worded by your answer to Calder.
