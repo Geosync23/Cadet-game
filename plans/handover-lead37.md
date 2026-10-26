@@ -17,6 +17,7 @@ Lead 37 = session_019GcNZ4GGEqfiuYDYnue7nX, branch claude/lead-37, hourly check-
 - Listening pass on sound: user hasn't given feedback yet; route to SD1 (core), FX20 (activities), FX22b (music). Listening list: plans/sound/audio-todo.md (dryer, airlock, shuttle bay not built).
 
 ## Seats (see TEAM.md CURRENT SEATS)
+EP1 (new): detailed plan page for the visit + comet (claude/events-plan-2) → publish to the user.
 RV18 (new) session_01PMfvrCN6StPzwVSPGX7ijH reviews both FX22b and FX24.
 FX24 (new) session_017zuWxNJfppnVwkQDtiwnb6 (USER RULE: every tradition = host you tap to join + simple pose/animation for the event + unique dialogue): traditions on claude/trad-0932 (take-turns, 14 new, tasting table rework, tea retired). CS1 writes words. Round-2 answers in: 13 yes + scones; Valo undecided.
 BM18 session_01A3S2VBMYmTt2wCZa8ej7XR (fine). Runners CR1, CR2, CR4, CR5, new CR6 fine; CR3 ~59% retired -> hire fresh CR3 from plans/handover-cr3.md (claude/checks-cr3) before the next round. FX17, BM17, old CR6 retired.
