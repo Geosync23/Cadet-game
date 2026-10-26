@@ -1782,5 +1782,47 @@ with sync_playwright() as pw:
     check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
+# the comet (FX25, 0.93.2; plans/events-plan-2.html A8), with the build's EV_COMET_ON: on Day 22 the two jobs on the board at
+# 09:05 (the blankets for anyone, the scope's filter for Officers and up), kept for you; from 21:30 the marker over Sato and
+# the arrow at her; a tap on Sato joins you at the bow glass (her words, a spot by her); at 21:50 her naming card (your
+# pick kept); at 22:00 the arrow at Saruth and a tap ties your knot (its trace); a tap on Mori, Tomas and the Captain each
+# joins theirs (the Captain as an Officer); a Cadet tapping the Captain is sent to the bow lounge, kindly, the arrow with them
+COMET_LIVE = r"""(() => { const R = {}, d = 22, B = (d - 1) * 1440;
+  const tick = (a, b) => { for (let t = a; t <= b; t++) { setShipNow(t); EV_MIN = -1; eventsTick(); } };
+  const into = (n, rk) => { actEnd(true); clearGoal(); goToDeck(n); deckCrewFill(); const tl = ROOM_TILES[rk], c = cellPos(...tl[Math.floor(tl.length / 2)]); player.obj.position.copy(cellPos(...nearestOpen(c.x, c.z, player))); player.stop(); };
+  const tap = id => { const a = tjAgent(id); if (!a) return { id, err: 'not on the deck' }; const ok = tradJoinTap(a); return { id, ok, joined: SHIP.events.joined.filter(k => /^comet/.test(k)), act: ACT && ACT.kind, toast: document.getElementById('tx').textContent }; };
+  skipTo(B + 545); R.jobs = (SHIP.jobs || []).filter(j => j.event === 'comet').map(j => [j.eventJob, j.reserved || null, j.only || null, j.status]);
+  skipTo(B + 1260); into(3, 'L'); tick(B + 1261, B + 1296); deckCrewFill(); tick(B + 1297, B + 1300);
+  R.lead = TJ_NOW && [TJ_NOW.key, TJ_NOW.lead]; R.goal = IX_GOAL && IX_GOAL.crew; R.mark = (document.getElementById('tjMark') || {}).textContent || '';
+  R.sato = tap('sato'); tick(B + 1301, B + 1312); R.card = DIALOGUE && DIALOGUE.id;
+  let n = 0; while (DIALOGUE && n++ < 10) { const v = dialogueView(); if (v.choices) dialogueStep(2); else dialogueStep(); }
+  R.named = SHIP.event && [SHIP.event.mine.named, SHIP.event.mine.namedBy];
+  tick(B + 1313, B + 1321); R.goal2 = IX_GOAL && IX_GOAL.crew; R.knot = tap('saruth'); R.knotCard = DIALOGUE && DIALOGUE.id; if (DIALOGUE) dialogueEnd(true);
+  R.trace = SHIP.traces.some(t => (t.id || t) === 'cometKnotYours');
+  into(2, 'J'); tick(B + 1322, B + 1323); R.mori = tap('mori');
+  into(4, 'j'); tick(B + 1324, B + 1325); R.tomas = tap('tomas');
+  into(1, 'O'); tick(B + 1326, B + 1327); R.cadetMark = !!TJ_NOW; R.cadet = tap('marrow'); R.cadetGoal = IX_GOAL && [IX_GOAL.deck, IX_GOAL.room];
+  const wk = SHIP.works; SHIP.works = { ...(wk || {}), rank: 'officer' }; clearGoal(); tick(B + 1328, B + 1329); R.officerMark = !!TJ_NOW; R.officer = tap('marrow'); SHIP.works = wk;
+  if (DIALOGUE) dialogueEnd(true); actEnd(true); return R; })()"""
+if True:
+    print('\nThe comet (Day 22):')
+    with sync_playwright() as pw:
+        g = Game(pw, sys.argv[1])
+        if not g.ev("typeof EV_COMET_ON !== 'undefined' && EV_COMET_ON && !!SHIP_EVENTS.comet"): print('  SKIP: the comet is switched off')
+        else:
+            C = g.ev(COMET_LIVE)
+            for k, v in C.items(): print(f'  {k}: {v}')
+            check(sorted(C['jobs']) == [['cometBlankets', 'event', None, 'open'], ['cometFilter', 'event', 'officer', 'open']], f"the comet's two jobs on the board at 09:05, kept for you, the filter Officers and up: {C['jobs']}")
+            check(C['lead'] == ['cometLounge@22', 'sato'] and C['goal'] == 'sato' and 'Sato' in C['mark'], f"the marker and the arrow at Sato from 21:30: {C['lead']} {C['goal']} {C['mark']}")
+            check(C['sato'].get('ok') and 'cometLounge@22' in C['sato']['joined'] and C['sato']['act'] == 'tj:cometLounge' and 'Sato' in C['sato']['toast'], f"a tap on Sato joins you at the bow glass: {C['sato']}")
+            check(C['card'] and 'comet.name' in C['card'] and C['named'] == [3, 'you'], f"Sato's naming card at 21:50, your pick kept: {C['card']} {C['named']}")
+            check(C['goal2'] == 'saruth' and C['knot'].get('ok') and C['knotCard'] and 'knot' in C['knotCard'] and C['trace'], f"Saruth's knot at 22:00: {C['goal2']} {C['knot']} {C['knotCard']} {C['trace']}")
+            for k, want in (('mori', 'ixStars'), ('tomas', 'tj:cometStern'), ('officer', 'tj:cometCaptain')):
+                check(C[k].get('ok') and C[k]['act'] == want, f"a tap on the host joins ({k}): {C[k]}")
+            check(not C['cadetMark'] and C['cadet'].get('ok') and 'downstairs' in C['cadet']['toast'] and 'cometCaptain@22' not in C['cadet']['joined'] and C['cadetGoal'] == [3, 'L'] and C['officerMark'],
+                  f"a Cadet at the Captain's tea is sent to the bow lounge, kindly; an Officer has the marker: {C['cadetMark']} {C['cadet']} {C['cadetGoal']} {C['officerMark']}")
+        check(not g.errors, f'no console errors in the comet part ({g.errors[:3]})')
+        g.close()
+
 print('INTERACTIONS CHECK OK' if ok else 'INTERACTIONS CHECK FAILED')
 sys.exit(0 if ok else 1)

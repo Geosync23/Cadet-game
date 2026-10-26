@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.2-c.1
+   STARSHIP CADET: CSV Wren                           build 0.93.2-c.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9257,7 +9257,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.2-c.1';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.2-c.2';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -32509,6 +32509,120 @@ const LINES = JSON.parse([
   '{"text":"Day off: muster by the lift with the off-duty crew.","id":"1b4xffh"}]',
   ',"drill.toast":[',
   '{"text":"Drill in ten minutes. Muster at the Works bay.","id":"facp99"}]',
+  ',"event.comet.gather.cometCaptain.ask":[',
+  '{"text":"The Captain\'s pouring tea for the comet in the observation room tonight. Officers.","id":"1318vr3"}]',
+  ',"event.comet.gather.cometCaptain.here":[',
+  '{"text":"Tea? It\'s from the tin. It says not for briefings, and this isn\'t one.","id":"9zg6sg"}]',
+  ',"event.comet.gather.cometCaptain.name":[',
+  '{"text":"Tea with the Captain","id":"11em7ci"}]',
+  ',"event.comet.gather.cometCaptain.thanks":[',
+  '{"text":"The Captain pours you a cup from the tin marked NOT FOR BRIEFINGS. The comet runs the length of the Wren in front of you.","id":"1dtd3wm"}]',
+  ',"event.comet.gather.cometLounge.ask":[',
+  '{"text":"The comet at half nine. The bow glass is the place.","id":"10jyvdn"}]',
+  ',"event.comet.gather.cometLounge.here":[',
+  '{"text":"There. Left of the strut. That smudge is a mountain of ice.","id":"2sv1yt"}]',
+  ',"event.comet.gather.cometLounge.name":[',
+  '{"text":"The comet at the bow glass","id":"fhfgqy"}]',
+  ',"event.comet.gather.cometLounge.thanks":[',
+  '{"text":"You stand beside Sato at the bow glass as the comet slides into view: a bright head, a long white tail and a faint blue one.","id":"nrv3zq"}]',
+  ',"event.comet.gather.cometScope.ask":[',
+  '{"text":"The observatory\'s open for the comet tonight. Five minutes each at the scope.","id":"1idwft"}]',
+  ',"event.comet.gather.cometScope.here":[',
+  '{"text":"Five minutes each. Don\'t touch the focus. Everybody touches the focus.","id":"r2iut7"}]',
+  ',"event.comet.gather.cometScope.name":[',
+  '{"text":"The comet at the scope","id":"1pcfbl4"}]',
+  ',"event.comet.gather.cometScope.thanks":[',
+  '{"text":"You take your turn at the scope. The comet\'s head fizzes with little jets of ice turning to gas.","id":"1s58cda"}]',
+  ',"event.comet.gather.cometStern.ask":[',
+  '{"text":"Blankets in the junior common room tonight. The stern windows get the tail.","id":"5hr8rk"}]',
+  ',"event.comet.gather.cometStern.here":[',
+  '{"text":"Blankets are on the sofa. Take one even if you\'re not cold. That\'s a rule. I\'ve just made it.","id":"bg1cp6"}]',
+  ',"event.comet.gather.cometStern.name":[',
+  '{"text":"The comet under blankets","id":"auh7xe"}]',
+  ',"event.comet.gather.cometStern.thanks":[',
+  '{"text":"Tomas hands you a blanket and shuffles up on the sofa. Everyone faces the stern windows and waits for the tail.","id":"1arnjmp"}]',
+  ',"event.comet.knot.1":[',
+  '{"text":"When a guest crosses our sky, we tie a knot, so we remember it was here, and that we saw it.","id":"15z14a"}]',
+  ',"event.comet.knot.2":[',
+  '{"text":"Tonight you are guests in our sky, watching another guest go by. That is worth a knot.","id":"10jur9t"}]',
+  ',"event.comet.knot.3":[',
+  '{"text":"Tie yours loose. It is still travelling.","id":"12dp3ad"}]',
+  ',"event.comet.knot.tip":[',
+  '{"text":"Tap Saruth to tie a comet knot","id":"1depesg"}]',
+  ',"event.comet.mail.warning":[',
+  '{"text":"A comet tonight | A comet tonight. Sol Bakshi caught it on the bow scanner in the night and Hana Mori has it on the long scope. It crosses our bow from about half past nine. The helm will bring us round so the bow lounge gets the head and the stern windows get the tail. The observatory is open, five minutes each at the scope. Officers are welcome in the observation room; the Captain has offered tea. Wrap up warm. It isn\'t cold. I just like saying it.","id":"8khekd"}]',
+  ',"event.comet.name.answer.1":[',
+  '{"text":"The Lantern. Lukas will cry. Good.","id":"1t3hbbx"}]',
+  ',"event.comet.name.answer.2":[',
+  '{"text":"It has one. It is old. You may use it the way a guest uses a host\'s name: kindly.","id":"1bcjd65"}]',
+  ',"event.comet.name.answer.3":[',
+  '{"text":"No. Absolutely not. Fine. It counts. Don\'t tell anyone.","id":"1hccuc7"}]',
+  ',"event.comet.name.ask":[',
+  '{"text":"Somebody has to name it for the log. I\'ve named three. The third doesn\'t count. You do this one.","id":"1spwab5"}]',
+  ',"event.comet.name.reply.1":[',
+  '{"text":"The Lantern. For the storm.","id":"r0b4a1"}]',
+  ',"event.comet.name.reply.2":[',
+  '{"text":"Ask the Envoy. It\'ll have a Veyli name already.","id":"vfyu18"}]',
+  ',"event.comet.name.reply.3":[',
+  '{"text":"Sato\'s Fourth. Make it count.","id":"toqgi6"}]',
+  ',"event.comet.news.coming.1":[',
+  '{"text":"Comet tonight. Get a window early.","id":"1722p1b"}]',
+  ',"event.comet.news.coming.2":[',
+  '{"text":"Bakshi caught a comet on the bow scanner in the night. Mori\'s got it on the long scope.","id":"qa4sr4"}]',
+  ',"event.comet.news.coming.3":[',
+  '{"text":"The helm\'s bringing us round at half nine so the bow glass gets the head.","id":"va08my"}]',
+  ',"event.comet.news.lunch.1":[',
+  '{"text":"Bow lounge or the blankets tonight? I can\'t decide.","id":"dqkd7f"}]',
+  ',"event.comet.news.lunch.2":[',
+  '{"text":"Tomas has never seen a comet. Eighteen months out here and never one.","id":"1a6j9pl"}]',
+  ',"event.comet.news.told.1":[',
+  '{"text":"Did you see the blue tail? Sato says it\'s the storm\'s wind. I\'m choosing to believe her.","id":"1fjytas"}]',
+  ',"event.comet.news.told.2":[',
+  '{"text":"Half the ship was at the bow glass. The other half was under Tomas\'s blankets.","id":"t72izp"}]',
+  ',"event.comet.notice.turn":[',
+  '{"text":"The helm is bringing the bow round for the comet.","id":"irrxvq"}]',
+  ',"event.comet.record.knot":[',
+  '{"text":"Tied a comet knot.","id":"1kcn751"}]',
+  ',"event.comet.record.named.1":[',
+  '{"text":"Named it the Lantern.","id":"gnod0j"}]',
+  ',"event.comet.record.named.2":[',
+  '{"text":"Gave it its Veyli name.","id":"1vzfhlr"}]',
+  ',"event.comet.record.named.3":[',
+  '{"text":"Named it Sato\'s Fourth.","id":"z0k41f"}]',
+  ',"event.comet.record.saw":[',
+  '{"text":"Saw the comet","id":"avwzj1"}]',
+  ',"event.comet.status.afterglow":[',
+  '{"text":"Last night\'s comet","id":"121kd3e"}]',
+  ',"event.comet.status.onset":[',
+  '{"text":"The comet is passing","id":"1w4ie8"}]',
+  ',"event.comet.status.resolution":[',
+  '{"text":"The comet has gone by","id":"13zq36i"}]',
+  ',"event.comet.status.warning":[',
+  '{"text":"A comet tonight at 21:30","id":"cmw986"}]',
+  ',"event.comet.talk.cometCaptain":[',
+  '{"text":"marrow: Tea? It\'s from the tin. It says not for briefings, and this isn\'t one.","id":"1855nb3"},',
+  '{"text":"vance: I\'m here for the comet, not to talk about the rowing.","id":"j5okt1"}]',
+  ',"event.comet.talk.cometLounge":[',
+  '{"text":"sato: There. Left of the strut. That smudge is a mountain of ice the size of Deck 3, falling past us.","id":"1tzys37"},',
+  '{"text":"holt: It\'s very bright.","id":"1azp01p"},',
+  '{"text":"mensah: That\'s the whole point of it, Chief.","id":"1xdsca1"},',
+  '{"text":"sato: The fuzz round the head is the coma. It\'s bigger than the Wren. A lot bigger. Don\'t tell the Wren.","id":"1guw5q7"},',
+  '{"text":"farouk-olu: On my birthday. I\'m counting it as mine.","id":"ro7adu"},',
+  '{"text":"sato: Two tails. The white one\'s dust. The blue one is ions, blown straight back by the same wind that gave us the storm. So yes. The storm says hello.","id":"1k10t1l"},',
+  '{"text":"haddad-tamsin: Fine. The bar closes at ten to eleven. Tonight only.","id":"7ilay6"}]',
+  ',"event.comet.talk.cometScope":[',
+  '{"text":"mori: Five minutes each. Don\'t touch the focus. Everybody touches the focus.","id":"1e9utbd"},',
+  '{"text":"mori: See the little jets on the bright side? That\'s ice turning straight to gas in the sunlight. It\'s fizzing. Like a tablet in water.","id":"cl3ttt"},',
+  '{"text":"mori: You touched the focus. It\'s fine. Everyone does. I\'ll put it back.","id":"1ic6hr8"}]',
+  ',"event.comet.talk.cometStern":[',
+  '{"text":"tomas: Blankets are on the sofa. Take one even if you\'re not cold. That\'s a rule. I\'ve just made it.","id":"2aj11h"},',
+  '{"text":"tomas: Eighteen months out here and I\'ve never seen one. Is that strange?","id":"sxk5yu"},',
+  '{"text":"pell: My mum\'ll want it described. Properly. Twice.","id":"ri5i29"},',
+  '{"text":"rina: Twelve people under blankets and nobody\'s coughing. Good. Keep it that way.","id":"1nnh5b0"}]',
+  ',"event.comet.turn.cadet":[',
+  '{"text":"The best seat\'s downstairs tonight, cadet. The bow lounge. Go on, you\'ll miss the head.","id":"9yybc2"}]',
+  ',"event.comet.turn.cadet.goal":[',
+  '{"text":"The comet at the bow glass","id":"1p2v8qx"}]',
   ',"event.crossingLine.address.onset.1":[',
   '{"text":"This is the Captain. I\'m off today, so I\'ll be brief. We\'ve crossed the Line.","id":"134e870"}]',
   ',"event.crossingLine.address.onset.2":[',
@@ -41961,7 +42075,7 @@ function tjActs() { for (const [id, s] of Object.entries(TRAD_JOIN)) if (!s.act 
   PLAYER_ACTS['tj:' + id] = def; if (typeof IX_ACTS !== 'undefined') IX_ACTS['tj:' + id] = def;
 } }
 tjActs();
-const tradJoinable = e => !!(e && TRAD_JOIN[e.id] && (evIsTrad(e.ev) || P926_APPT && e.ev.appt));   // an appointment's one-off too (0.92.6 item 9, FX22)
+const tradJoinable = e => !!(e && TRAD_JOIN[e.id] && (evIsTrad(e.ev) || P926_APPT && e.ev.appt || EV_COMET_ON && !!e.ev.when && e.ev.when.ship === 'comet'));   // the comet's four gatherings too (FX25)   // an appointment's one-off too (0.92.6 item 9, FX22)
 const tradWords = (e, k, ctx) => { const t = quizText('join.' + e.id + '.' + k, e.day, ctx); return t; };
 // the people going (their plan has them there today), and the leader: the tradition's host, else the spec's, when going;
 // else the spec's pick or the first of the goers by a hash of the day. Cached per day
@@ -41984,6 +42098,7 @@ function tradJoinMinute(now) {
   const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   for (const e of eventsOn(d)) {
     if (m < e.from || m >= e.to || !tradJoinable(e) || SHIP.events.joined.includes(e.id + '@' + d)) continue;
+    if (EV_COMET_ON && e.id === 'cometCaptain' && playerRank() === 'junior') continue;   // the Captain's tea is for Officers and up (a tap turns a Cadet to the bow lounge: cometTap)
     if (!e.rooms) e.rooms = eventRooms(e.ev);
     if (![...e.rooms].some(r => +r.split('|')[0] === deckDef.num)) continue;
     let lead = tradLeader(e), agent = lead && tjAgent(lead);
@@ -42042,6 +42157,7 @@ function tradPose(s, pl, sp) {
 // the tap (section 10's tapCrew asks first): someone at a joinable tradition now (or its leader) joins you. True when it did
 function tradJoinTap(a) {
   if (!a || !a.p || typeof deckDef === 'undefined') return false;
+  if (EV_COMET_ON && COMET && cometTap(a)) return true;     // the comet: Saruth's knot; a Cadet at the Captain's tea sent to the bow lounge (slot 'Comet builder')
   const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   const o = eventOf(a.p, now), e = (o && o.now ? o.e : TJ_NOW && TJ_NOW.lead === a.p.id ? TJ_NOW.e : null) || (P926_APPT ? apptHostEvent(a, d) : null);   // 0.92.6 item 9: an appointment joined already, its host at work for it (RV17 R1)
   if (e && e.id === 'tiles-ladder' && SHIP.events.joined.includes(e.id + '@' + d) && typeof tladAgain === 'function' && tladAgain(a)) return true;   // 0.92.5 item 20: watching, a tap asks for the next game
@@ -42357,6 +42473,7 @@ function eventsTick() {
   eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play
   if (EV_STORM_ON) stormStoryTick(now);                  // the storm update's story A, in play (slot 'Storm builder')
   if (EV_LINE_ON) lineStoryTick(now);                    // Crossing the Line's notices and story A, in play (slot 'Line builder')
+  if (EV_COMET_ON && COMET) cometTick(now);              // the comet's notices, the rooms' talk, the naming card and the knot, in play (slot 'Comet builder')
   if (prev >= 0) eventCallInTick(prev, m);               // F0b: the called-in notes as their meetings begin (inert while off)
   eventHelpKeep();                                       // the storm update S4: your prep jobs noted as they're done (inert while off)
   eventsDress(now);                                      // its dressing and the traces left by past events
@@ -42922,11 +43039,20 @@ if (EV_COMET_ON && EVENTS_ON) {
         stops: [{ deck: 5, room: /^Main storage$/, mins: 5, tag: 'pickup' }, { placeId: '2-telescope', mins: 15, tag: 'fit' }] }] },
     mail: {
       cometMail: { ...evBankMail('event.comet.mail.warning', { subject: 'A comet tonight', body: 'A comet tonight. Sol Bakshi caught it on the bow scanner in the night and Hana Mori has it on the long scope. It crosses our bow from about half past nine. The helm will bring us round so the bow lounge gets the head and the stern windows get the tail. The observatory is open, five minutes each at the scope. Officers are welcome in the observation room; the Captain has offered tea. Wrap up warm. It isn\'t cold. I just like saying it.' }), at: [0, 480], from: 'Dr. Imra Sato' },
-      cometLog: { ...evBankMail('event.comet.mail.log', { subject: 'The comet log', body: c => 'The comet is in the log' + (c.mine['named'] ? ' as ' + COMET_NAMES[c.mine['named'] - 1] : '') + '. Most of the ship watched it from one window or another. It was my fourth. The third still doesn\'t count.' }), at: [1, 480], from: 'Dr. Imra Sato' },
+      cometLog: { ...evBankMail('event.comet.mail.log', { subject: 'The comet log', body: c => 'The comet is in the log' + (c.mine['named'] > 0 ? ' as ' + COMET_NAMES[c.mine['named'] - 1] + (c.mine['namedBy'] === 'you' ? ', named by ' + c.you : '') : '') + '. Most of the ship watched it from one window or another. It was my fourth. The third still doesn\'t count.' }), at: [1, 480], from: 'Dr. Imra Sato' },
     },
     traces: { smooth: [], bumpy: [], rough: [] },
+    record: cometRecord,                                   // your Record's line (section 18's eventRecord): where you watched it, the name you gave it, your knot
   };
   C.places();                                              // the hosts' spots (the Line's venue gives the bow lounge's)
+  // c.2, tap to join (the user's rule for every gathering: a host you tap, a simple fitting pose, words only they say):
+  // section 18's TRAD_JOIN, read by tradJoinMinute (the marker over the host, the arrow, the tip) and tradJoin
+  Object.assign(TRAD_JOIN, {
+    cometLounge: { host: 'sato', pose: 'talk', need: 'leisure', gain: 15, also: { social: 6 }, verb: w('join.cometLounge.verb') || 'stand with her at the bow glass', what: w('join.cometLounge.what') || 'stand at the bow glass beside Sato and watch the comet come in' },
+    cometScope: { act: 'ixStars', host: 'mori', verb: w('join.cometScope.verb') || 'take a turn at the scope', what: w('join.cometScope.what') || 'take your turn at the scope after the one in front' },
+    cometStern: { host: 'tomas', pose: 'sit:talk', need: 'leisure', gain: 15, also: { social: 6 }, verb: w('join.cometStern.verb') || 'take a blanket', what: w('join.cometStern.what') || 'take a blanket and a place on the sofa, facing the stern windows' },
+    cometCaptain: { host: 'marrow', pose: MUG_ON ? 'cocoa' : 'drink', need: 'social', gain: 12, also: { leisure: 10 }, verb: w('join.cometCaptain.verb') || 'take a cup of tea', what: w('join.cometCaptain.what') || 'take a cup of the Captain\'s tea and a place at the window' } });
+  tjActs();
 }
 // the ship-wide events' gathering moments, shaped like traditions (EV_SHIPWIDE, read by eventsOn); each its own
 // hash key k (the storm's party 340, then 351 up), given in the moment's data (k) from the events base on. A moment may
@@ -43818,7 +43944,7 @@ function eventRecord() {
   if (!EV_DEVICE_ON || !SHIP.eventLog.length) return [];
   const rows = SHIP.eventLog.map(l => { const def = SHIP_EVENTS[l.id] || { title: l.id }, c = SHIP.commendations.find(x => x.event === l.id);
     return { text: quizText('event.' + l.id + '.record', l.startDay, {}) || def.title + (l.endDay - 1 > l.startDay ? ', Days ' + l.startDay + '-' + (l.endDay - 1) : ', Day ' + l.startDay) + '.',
-      sub: def.commend === false ? '' : (quizText('event.record.' + l.band, l.startDay, {}) || EV_RECORD_BAND[l.band] || '') + (c ? ' Commended by the Captain.' : ''), mark: c ? 'hot' : null }; });   // no score, no "came through it" (Crossing the Line)
+      sub: def.record ? def.record(l) : def.commend === false ? '' : (quizText('event.record.' + l.band, l.startDay, {}) || EV_RECORD_BAND[l.band] || '') + (c ? ' Commended by the Captain.' : ''), mark: c ? 'hot' : null }; });   // no score, no "came through it" (Crossing the Line)
   return [{ kind: 'text', text: 'Ship-wide events', mark: 'head' }, { kind: 'list', rows: rows.reverse() }];
 }
 // ---- Pick-your-own: breakfast on a tray (FX12, 0.92.3 item 27, the user's: "a tray of the food you picked in your hands
@@ -44753,6 +44879,115 @@ function cometWhereFor(map) { return (p, d, opts) => { const x = map[p.id]; retu
 function cometLate(p, d, bed) { return COMET && d === COMET.day && COMET.late.has(p.id) ? Math.max(bed, 1390) : bed; }
 // the names you can give it for the log (Sato's card at 21:50, c.2): the reply's index + 1 is kept as e.mine.named
 const COMET_NAMES = ['the Lantern', 'its Veyli name', 'Sato\'s Fourth'];
+// c.2, in play (from eventsTick once a ship minute; never the crew's planner): the bridge's notice as the helm brings
+// her round (21:30, a few minutes' grace), the heads-up at 21:15, the hosts' and the crowd's lines over their heads
+// while you're in one of the four rooms (cometTalk), Sato's naming card at 21:50 if you joined her at the glass
+// (else the crew shout names and she picks the Lantern), the arrow to Saruth for the knot at 22:00. Flags in the running
+// event's e.mine (saved with it): 'notice:*', 'named' (COMET_NAMES' index + 1), 'namedBy', 'knot'
+const cometW = (k, c) => evWord('event.comet.' + k, c);
+function cometTick(now) {
+  const e = SHIP.event; if (!COMET || !e || e.id !== 'comet') return;
+  const d = e.startDay, m = now - (d - 1) * 1440; if (m < 0 || m >= 1440) return;
+  const once = (k, f) => { if (!e.mine['notice:' + k]) { e.mine['notice:' + k] = 1; f(); } };
+  if (m >= 1275 && m < 1281) once('headsup', () => toast('Comet viewing', cometW('notice.headsup') || (playerRank() === 'junior'
+    ? 'The comet, in 15 minutes: the bow lounge, the observatory or the junior common room.' : 'The comet, in 15 minutes: the bow lounge, the observatory, the junior common room or the observation room.')));
+  if (m >= 1290 && m < 1296) once('turn', () => { const t = cometW('notice.turn') || 'The helm is bringing the bow round for the comet.';
+    toast('Bridge', t); if (typeof mailSend === 'function') mailSend({ at: now, from: 'The bridge', subject: 'Comet viewing', body: t, quiet: true }); });
+  if (m < 1290 || m >= 1360 || typeof deckDef === 'undefined' || !deckDef) return;
+  cometTalk(d, m);
+  const here = roomAt(...player.here()), lounge = deckDef.num === 3 && here === 'L', joined = SHIP.events.joined.includes('cometLounge@' + d);
+  if (m >= 1310 && m < 1325 && !e.mine.named && joined && lounge && !DIALOGUE) cometNameCard(e, d, now);
+  if (m >= 1325 && !e.mine.named) { e.mine.named = 1; e.mine.namedBy = 'sato'; }   // nobody named it at the card: the crew shout names and Sato picks the one about the storm
+  if (m >= 1320 && m < 1335 && lounge && joined && !e.mine.knot && !(IX_GOAL && IX_GOAL.comet)) {
+    const label = cometW('knot.tip') || 'Tap Saruth to tie a comet knot';
+    if (!IX_GOAL || IX_GOAL.tj) setGoal({ deck: 3, crew: 'saruth', label, comet: 'knot' }); ixTip('t:comet:knot', label + '. To the Veyli a comet is a guest crossing their sky.');
+  }
+  if ((m >= 1335 || e.mine.knot) && IX_GOAL && IX_GOAL.comet === 'knot') clearGoal();
+}
+// Sato's card (EP1's A4, the head writer's words when baked: MEETING_SCRIPTS['comet.name'] from content/meetings): three
+// names; the reply's index + 1 is e.mine.named (COMET_NAMES), namedBy 'you'. Never a commendation (a moment: script)
+function cometNameCard(e, d, now) {
+  if (typeof dialogueShow !== 'function') return;
+  const W = (k, fb) => cometW('name.' + k) || fb, pick = k => { e.mine.named = k + 1; e.mine.namedBy = 'you'; };
+  const id = MEETING_SCRIPTS['comet.name'] ? 'comet.name' : 'moment:comet.name';
+  if (id === 'comet.name') MEETING_SCRIPTS[id].onPick = pick;
+  else MEETING_SCRIPTS[id] = { title: 'Naming the comet', from: 'Dr. Imra Sato', gist: 'Sato named the comet for the log.', onPick: pick,
+    lines: [{ who: 'sato', text: W('ask', 'Somebody has to name it for the log. I\'ve named three. The third doesn\'t count. You do this one.'), pose: 'gesture', to: 'you' },
+      { choice: [{ text: W('reply.1', 'The Lantern. For the storm.'), rel: { sato: 2 }, reply: { who: 'sato', text: W('answer.1', 'The Lantern. Lukas will cry. Good.') } },
+        { text: W('reply.2', 'Ask the Envoy. It\'ll have a Veyli name already.'), rel: { saruth: 2 }, reply: { who: 'saruth', text: W('answer.2', 'It has one. It is old. You may use it the way a guest uses a host\'s name: kindly.') } },
+        { text: W('reply.3', 'Sato\'s Fourth. Make it count.'), rel: { sato: 3 }, reply: { who: 'sato', text: W('answer.3', 'No. Absolutely not. Fine. It counts. Don\'t tell anyone.'), pose: 'laugh' } }] }] };
+  e.mine.named = -1;                                       // asked (a reload doesn't ask again); the pick sets it, else the crew's choice at 22:05
+  MEETING_SCRIPTS[id].onEnd = () => { if (e.mine.named === -1) { e.mine.named = 1; e.mine.namedBy = 'sato'; } };
+  dialogueShow(id, { id: 'comet.name@' + d, who: ['sato', 'saruth'], at: now, where: { deck: 3, room: /^Bow lounge$/ } });
+}
+// the knot (22:00-22:15, you've joined the bow glass): a tap on Saruth; their words, your comet knot on your shelf
+function cometKnot(a, d, now) {
+  const e = SHIP.event; e.mine.knot = 1;
+  const W = (k, fb) => cometW('knot.' + k) || fb;
+  player.stop(); a.talking = 2; player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
+  MEETING_SCRIPTS['moment:comet.knot'] = { title: 'The comet knot', from: 'Envoy Saruth', gist: 'Saruth showed you how to tie a comet knot on the cord along the bow glass.',
+    lines: [{ who: 'saruth', text: W('1', 'When a guest crosses our sky, we tie a knot, so we remember it was here, and that we saw it.'), pose: 'gesture' },
+      { who: 'saruth', text: W('2', 'Tonight you are guests in our sky, watching another guest go by. That is worth a knot.') },
+      { who: 'saruth', text: W('3', 'Tie yours loose. It is still travelling.'), to: 'you' }],
+    onEnd: () => { delete MEETING_SCRIPTS['moment:comet.knot']; } };
+  if (typeof dialogueShow === 'function') dialogueShow('moment:comet.knot', { id: 'comet.knot@' + d, who: ['saruth'], at: now, where: { deck: 3, room: /^Bow lounge$/ } });
+  traceAdd('cometKnotYours', d);                          // your knot on your shelf (section 4d's DECK_DRESS.cometKnotYours, c.3)
+  return true;
+}
+// a tap during the comet (section 18's tradJoinTap asks first): Saruth's knot; a Cadet at the Captain's tea is sent down
+// to the bow lounge, kindly (Vance's line; the arrow to the lounge). True when it handled the tap
+function cometTap(a) {
+  const e = SHIP.event; if (!COMET || !e || e.id !== 'comet' || !a || !a.p) return false;
+  const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440; if (d !== e.startDay || m < 1290 || m >= 1360) return false;
+  if (a.p.id === 'saruth' && m >= 1320 && m < 1335 && SHIP.events.joined.includes('cometLounge@' + d) && !e.mine.knot) return cometKnot(a, d, now);
+  const o = eventOf(a.p, now);
+  if (playerRank() === 'junior' && o && o.now && o.e.id === 'cometCaptain') {
+    player.stop(); a.talking = 2;
+    toast('Commander Teo Vance', '"' + (cometW('turn.cadet') || 'The best seat\'s downstairs tonight, cadet. The bow lounge. Go on, you\'ll miss the head.') + '"');
+    setGoal({ deck: 3, room: 'L', label: cometW('turn.cadet.goal') || 'The comet at the bow glass' });
+    return true;
+  }
+  return false;
+}
+// the rooms' talk: while you're in one of the four rooms, a line over its speaker every 3 ship minutes, in order (the
+// host's own lines among the crowd's), from those settled at that gathering. Lines: the writers' event.comet.talk.<id>
+// ("who: text" each), else EP1's samples. Looks only, nothing saved
+const COMET_TALK = {
+  cometLounge: [['sato', 'There. Left of the strut. That smudge is a mountain of ice the size of Deck 3, falling past us.'], ['holt', 'It\'s very bright.'], ['mensah', 'That\'s the whole point of it, Chief.'],
+    ['sato', 'The fuzz round the head is the coma. It\'s bigger than the Wren. A lot bigger. Don\'t tell the Wren.'], ['farouk-olu', 'On my birthday. I\'m counting it as mine.'],
+    ['sato', 'Two tails. The white one\'s dust. The blue one is ions, blown straight back by the same wind that gave us the storm. So yes. The storm says hello.'], ['haddad-tamsin', 'Fine. The bar closes at ten to eleven. Tonight only.']],
+  cometScope: [['mori', 'Five minutes each. Don\'t touch the focus. Everybody touches the focus.'], ['mori', 'See the little jets on the bright side? That\'s ice turning straight to gas in the sunlight. It\'s fizzing. Like a tablet in water.'],
+    ['mori', 'You touched the focus. It\'s fine. Everyone does. I\'ll put it back.']],
+  cometStern: [['tomas', 'Blankets are on the sofa. Take one even if you\'re not cold. That\'s a rule. I\'ve just made it.'], ['tomas', 'Eighteen months out here and I\'ve never seen one. Is that strange?'],
+    ['pell', 'My mum\'ll want it described. Properly. Twice.'], ['rina', 'Twelve people under blankets and nobody\'s coughing. Good. Keep it that way.'], ['tomas', 'There it goes. This window\'s all the places we\'ve already been. Now that too.', 1340]],
+  cometCaptain: [['marrow', 'Tea? It\'s from the tin. It says not for briefings, and this isn\'t one.'], ['vance', 'I\'m here for the comet, not to talk about the rowing.'],
+    ['marrow', () => playerRank() === 'senior' || playerRank() === 'specialist' ? 'Deck 2 has its perks. This window is one of them. Don\'t tell the juniors.' : 'Your first month aboard, and the sky\'s already showing off for you.']],
+};
+const COMET_SAID = { key: null, said: new Set() };
+function cometTalk(d, m) {
+  if (typeof bubbleSay !== 'function' || typeof DECK_CREW === 'undefined') return;
+  const here = deckDef.num + '|' + roomAt(...player.here()), r = COMET.rooms.find(x => x[0] === here); if (!r) return;
+  const id = ['cometLounge', 'cometScope', 'cometStern', 'cometCaptain'][COMET.rooms.indexOf(r)], key = id + '@' + d;
+  if (COMET_SAID.key !== key) { COMET_SAID.key = key; COMET_SAID.said = new Set(); }
+  const baked = typeof LINES !== 'undefined' && Array.isArray(LINES['event.comet.talk.' + id]) ? LINES['event.comet.talk.' + id].map(x => { const i = x.text.indexOf(': '); return [x.text.slice(0, i), x.text.slice(i + 2)]; }) : null;
+  const L = baked ? baked.concat(COMET_TALK[id].filter(x => x[2] || typeof x[1] === 'function')) : COMET_TALK[id], slot = Math.floor((m - 1292) / 3); if (slot < 0) return;
+  for (let i = 0; i < L.length && i <= slot; i++) {
+    if (COMET_SAID.said.has(i) || L[i][2] && m < L[i][2]) continue;
+    const a = DECK_CREW.find(c => c.h && c.p && c.p.id === L[i][0] && c.settled && c.spot && here === deckDef.num + '|' + c.spot.room);
+    COMET_SAID.said.add(i); if (!a) continue;              // not there tonight: their line is skipped
+    bubbleSay(friSpeaker(a), typeof L[i][1] === 'function' ? L[i][1]() : L[i][1], 5); return;
+  }
+}
+// your Record's line for the comet (eventRecord asks the event's `record`): the window you joined (SHIP.events.joined),
+// the name if you gave it, your knot. Words: event.comet.record.* (the writers'), else these
+function cometRecord(l) {
+  const ids = ['cometLounge', 'cometScope', 'cometStern', 'cometCaptain'], where = ['from the bow lounge', 'through the observatory scope', 'under a blanket in the junior common room', 'over tea with the Captain'];
+  const i = ids.findIndex(id => SHIP.events.joined.includes(id + '@' + l.startDay)), m = l.mine || {}, out = [];
+  if (i >= 0) out.push((cometW('record.saw') || 'Saw the comet') + ' ' + where[i] + '.');
+  if (m.namedBy === 'you' && m.named >= 1 && m.named <= 3) out.push(cometW('record.named.' + m.named) || ['Named it the Lantern.', 'Gave it its Veyli name.', 'Named it Sato\'s Fourth.'][m.named - 1]);
+  if (m.knot) out.push(cometW('record.knot') || 'Tied a comet knot.');
+  return out.join(' ');
+}
 // ---- end of slot: Comet builder ----
 // ---- slot: Appointments builder (section 18; FX22, 0.92.6 item 9, plans/patch-0.92.6.md). New code of this seat's goes here ----
 // Behind P926_APPT (section 13; URL flag 'appt'). The user: "Appointments work almost exactly the same as ship traditions
