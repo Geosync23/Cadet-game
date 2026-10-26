@@ -877,7 +877,8 @@ with sync_playwright() as pw:
     if a['guestsOn'] != ([1, 2] if SW else [2, 3, 4, 5, 6]): fail(f"the 'guests' effect: {a['guestsOn']}")
     if not a['due'] or a['due']['id'] != 'diplomatic' or (a['due']['day'] != 16 if SW else a['due']['day'] < 23) or not V['same']: fail(f"the diplomatic visit's start or repeatability: {a['due']} {V['same']}")
     want = ['warning', 'onset', 'escalation', 'resolution', 'afterglow', 'end']
-    if [w for x in a['steps'] for w in want if (' ' + w) in x.replace('phase ', ' ')] != want: fail(f"diplomatic phases: {a['steps']}")
+    vs = a['steps']; e = next((i for i, x in enumerate(vs) if x.split(' ')[2:3] == ['end']), len(vs) - 1); vs = vs[:e + 1]   # the visit's own run: with the swap on, the comet starts inside the window
+    if [w for x in vs for w in want if (' ' + w) in x.replace('phase ', ' ')] != want: fail(f"diplomatic phases: {a['steps']}")
     bd = dict(x.split(':') for x in a['batch'])
     if (bd.get('2') != '10' or any(v != '-' for k, v in bd.items() if k != '2')) if SW else (bd.get('3') != '10' or bd.get('5') != '10' or bd.get('4') != '-' or bd.get('1') != '-'): fail(f"the formal dinners' batch: {a['batch']}")
     if len(a['addr']) != 2 or len(a['meets']) != 2 or not a['farewell'] or a['going'] < 3: fail('the visit\'s addresses, meetings or farewell')
