@@ -47100,7 +47100,7 @@ function crossingBackAsk(now) {
   const pick = ['stay', 'go'];
   return crossingBackMoment('crossingBackAddress.ask', ['marrow', 'torres-zeke'], ['story:address', 'ask'],
     L => L.map(l => l.choice ? { ...l, choice: l.choice.map(({ flag, ...c }) => c) } : l),
-    k => { const a = pick[k]; if (!a) return; cbEnd(() => { endSay(a, Math.floor(shipNow())); if (!endingChoice()) endSettle(Math.floor(shipNow())); });
+    (k, c) => { const a = pick[k]; if (!a || !c || !/^moment:crossingBackAddress\.ask/.test(DIALOGUE ? DIALOGUE.id : '') || DIALOGUE.cbAsked) return; DIALOGUE.cbAsked = 1; cbEnd(() => { endSay(a, Math.floor(shipNow())); if (!endingChoice()) endSettle(Math.floor(shipNow())); });
       const rest = (MEETING_SCRIPTS['crossingBackAddress.' + a] || { lines: [] }).lines.slice(3); if (DIALOGUE) DIALOGUE.queue.splice(DIALOGUE.i + 1, 0, ...rest); });
 }
 function crossingBackNotice(text, urgent, from) {

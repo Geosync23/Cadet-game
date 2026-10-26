@@ -114,8 +114,8 @@ def part_endgame(g):
       let early = [0, 0]; for (let d = 50; d < 64; d++) for (let m = 0; m < 1440; m += 60) { const [n, a] = __egHold((d - 1) * 1440 + m, 'early'); early[0] += n; early[1] += a; } out.early = early;
       out.first = first; out.later = later; out.postFalse = __egHold(40 * 1440, 'false');
       // a line said: lineFor gives an endgame greet on Day 36 to a crew member with no own greet line under it
-      __at(36, 600); const who = ROSTER.find(p => p.id === 'holt');
-      out.say = who ? (lineFor(who, 'greet', { peek: true }) || {}).id : null; out.egIds = lines.lines.filter(x => x[0] === 'greet' && (!x[2] || x[2] === 'holt')).map(x => x[1].id);
+      __at(36, 600); const who = ROSTER.find(p => p.id === 'holt'); { const r = relGet('holt'); r.pts = 999; r.tier = relTierOf(999); }   // a friend: the pool's greets are by tier
+      out.say = who ? (lineFor(who, 'greet', { peek: true }) || {}).id : null; { const all = []; for (const src of [LINES, ...Object.values(VOICE).map(v => v.lines || {}), ...Object.values(VOICE_TEMPLATES).map(v => v.lines || {})]) for (const e of (src.greet || [])) if (e.endgame != null) all.push(e.id); out.egAll = all; } out.egIds = lines.lines.filter(x => x[0] === 'greet' && (!x[2] || x[2] === 'holt')).map(x => x[1].id);
       // the calendar closed for good: a row planted on Day 40 is planned without the flag, never with it
       SHIP_EVENTS.endTestLate = { title: 'test', days: 2, phases: [{ id: 'warning', at: [0, 360] }] }; EV_CALENDAR.push({ id: 'endTestLate', day: 40, kind: 'short' });
       const keep = SHIP.flags['end.stay']; flagSet('end.stay', null); out.planOff = evCalPlan().some(x => x.id === 'endTestLate');
@@ -127,7 +127,7 @@ def part_endgame(g):
       try { WORKS_TAB = 'home'; const v = worksView(); out.page = v.blocks.filter(b => b.kind === 'text').map(b => b.text).join(' / '); } catch (e) { out.page = 'error ' + e; }
       WORKS_TAB = 'training';
       return out; })()""")
-    print('   ', {k: r[k] for k in r if k not in ('egIds',)})
+    print('   ', {k: r[k] for k in r if k not in ('egIds', 'egAll')})
     check(r['n'] > 0, f"endgame: there are endgame lines in the build ({r['n']})")
     check(r['pre'] == 0 and r['preFalse'][0] == r['preFalse'][1], f"endgame: no endgame line holds before the flag, every endgame:false one does ({r['pre']}, {r['preFalse']})")
     check(r['set'] and r['day'] == 36 and not r['on35'] and r['d35'] == 0, f"endgame: settled on Day 35 (end.stay 35), the endgame from Day 36; not on Day 35 ({r})")
@@ -136,7 +136,7 @@ def part_endgame(g):
     fr = r['later'][0] / max(1, r['later'][1])
     check(.25 <= fr <= .55, f"endgame: about 4 hours in 10 after the first 14 days ({r['later']}, {fr:.2f})")
     check(r['postFalse'][0] == 0, f"endgame: endgame:false lines never hold after ({r['postFalse']})")
-    check(r['say'] in r['egIds'], f"endgame: lineFor picks an endgame greet on Day 36 ({r['say']} not in {r['egIds']})")
+    check(r['say'] in r['egAll'], f"endgame: lineFor picks an endgame greet on Day 36 ({r['say']} not in {len(r['egAll'])} endgame greets)")
     check(r['planOff'] and not r['planOn'] and not r['cross'], f"endgame: a calendar row after Day 35 is planned before you stay, never after; the crossing back itself never closed ({r})")
     check('home' not in r['next35'].lower() and 'The Wren is home' in r['next36'] and not r['tab35'] and r['tab36'], f"endgame: What's next and the last page from Day 36 ({r['next35']} | {r['next36']}, tab {r['tab35']} {r['tab36']})")
     check('The Wren is home' in r['page'], f"endgame: the last page's words ({r['page']})")
@@ -144,7 +144,7 @@ def part_endgame(g):
     print('(endgame) the first morning:')
     r = g.ev("""(() => { const out = {}; __at(36, 240); __notes.length = 0; GUIDE.list.length = 0; SHIP.occasions = SHIP.occasions.filter(x => x.id !== 'endFirstMorning');
       occasionsTick(shipNow(), true); const rec = SHIP.occasions.find(x => x.id === 'endFirstMorning');
-      out.booked = rec ? hhmm(rec.at % 1440) + ' ' + rec.len + ' ' + rec.deck + rec.room : null; out.script = !!MEETING_SCRIPTS.endFirstMorning;
+      out.booked = rec ? hhmm(rec.at % 1440) + ' ' + rec.len + ' ' + rec.deck + rec.room : null; out.script = !!MEETING_SCRIPTS.endingFirstMorning;
       out.rows = devDay(36).filter(x => x.kind === 'beat').map(x => hhmm(x.from) + ' ' + x.title);
       out.rows35 = devDay(35).filter(x => /Captain/.test(x.title)).length + devDay(37).filter(x => /Captain/.test(x.title)).length;
       __at(36, (rec ? rec.at % 1440 : 450) - 40); __tick(); out.notes = __notes.slice(); const e0 = GUIDE.list.find(x => x.id === 'end:fm');
@@ -214,7 +214,7 @@ def part_crossing(g):
         exp = ['moment:crossingBackSignal', 'moment:crossingBackAddress.' + ({None: 'ask', 'unsure': 'ask', 'plain': 'plain'}.get(ans) or want)]
         check(r['address'] == exp and r['settled'] == want, f"crossing: the signal, then the address {exp[1]}, settled {want} ({r['address']}, {r['settled']})")
         check((r['day'] == 36 and r['endStay'] == 35) == (want == 'stay'), f"crossing: Stay settled on Day 35 starts the endgame on Day 36 ({r['endStay']}, {r['day']})")
-        if ans in (None, 'unsure'): check('marrow' in r.get('run1', '') and r.get('run1', '').count('marrow') >= 3, f"crossing: after the ask, the rest of the Stay address plays ({r.get('run1')})")
+        if ans in (None, 'unsure'): check(r.get('run1', '').count('Marrow') >= 5 and r.get('run1', '').count('?') == 2, f"crossing: after the ask, the rest of the Stay address plays ({r.get('run1')})")
         rec = {'stay': 'staying', 'go': 'Concord', None: 'reach'}[want]
         check(r['record'] and rec in r['record'], f"crossing: the address's record ({r['record']})")
         check(not r['cert0'] and r['cert'] and 'crossed back' in r['plaque'], f"crossing: the certificate's second date and the plaque's line from 15:15 ({r['cert0']}, {r['cert']}, {r['plaque'][-90:]})")
@@ -227,7 +227,7 @@ def part_off(g):
     r = g.ev("""(() => { __reset(32, 360); __tick(); setShipNow(31 * 1440 + 950); __tick();
       const p = __marrow(); const save = {}; try { SAVE_EXTRA.forEach(f => f({ ship: {}, player: {} })); } catch (e) { /* */ }
       return { on: EV_ENDING_ON, end: typeof SHIP.end, occ: typeof OCCASIONS.endingOffer, booked: SHIP.occasions.length, btn: typeof endChatButton === 'function' ? endChatButton(p) : 'none',
-        guide: GUIDE.list.filter(e => /^end:/.test(e.id)).length, scripts: Object.keys(MEETING_SCRIPTS).filter(k => /ending/.test(k)) }; })()""")
+        guide: GUIDE.list.filter(e => /^end:/.test(e.id)).length, scripts: Object.keys(MEETING_SCRIPTS).filter(k => /^moment:ending/.test(k)) }; })()""")
     print('   ', r)
     check(r['on'] is False and r['end'] == 'undefined' and r['occ'] == 'undefined' and r['booked'] == 0, f"off: no SHIP.end, no ending occasion, nothing booked ({r})")
     check(r['btn'] is None and r['guide'] == 0 and not r['scripts'], f"off: no button, no arrows, no scripts ({r})")
