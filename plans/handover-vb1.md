@@ -37,16 +37,25 @@ The user's answers (2026-10-26): C1 yes, C2 yes, C3 they wait at the ramp up to 
   at 5-make-1 (fixed: an event spot; VB2 asked for 5-vbench-1..3 and 5-vshop-1..3).
 - Switched off: cadet_test identical (known-old Oona bubble shots and a moving a_start bubble come and go: rerun).
 
+## State at the stopping point (lead 40, 2026-10-26)
+- Shas: V-1 dd043a00 (RV21 PASS on 581fc84f); V-2 73942e8a; V-3 85bdb51c; V-4 6d4b5192; RV21's V-2 fixes 85f07071
+  (+ VB2's claude/vessel-sky 3fb8eac7 merged: ed8b5787); the goodbye's arrow at the ramp's foot, the 24j hook
+  (vesselShopTap) and arrows_check's vessel part cdf2685f; controller_check's vessel part (the last commit).
+- RV21's V-2 list, all done: the must (lights over places) fixed in V-3; the arrival crowd (~20, vesselArrival k 360);
+  the goodbye not missable (from 14:30, the Tern waits to 15:30, Calder fetches you at 15:00); the round one's fallback
+  (Taavek brings it at 12:45, notice + gist at 13:00); Saturday Calder comes to find you; the pilot's word once;
+  simTimeout everywhere; 3fb8eac7 merged. Needs RV21's re-review of 85f07071 onward.
+- Passing on the last build: check_fast OK; cadet off ALL IDENTICAL (vs vessel-sky); events_check vessel part OK;
+  bigevents OK (switched-on copy); day_check 28 and 29 OK; arrows_check vessel (the arrow-follower) OK;
+  controller_check vessel OK.
+
 ## Loose ends (in order)
-1. Results of bigevents and day_check 29 on the V-4 copy (/tmp/vb1/big7.txt, d29b.txt), then day_check 27 and 30.
-2. arrows_check's vessel part (the spec's arrow-follower: from a Day 26 evening save, follow only the arrow and rings:
-   sign, ramp, round one, chain, helpers, the part, Taavek off, the glass, by Mon 18:00; again with Teaching arrows Off,
-   while tracking another job, and at a Senior Officer's rank). Not written yet.
-3. controller_check: Dev presets on Day 27 10:00, Day 28 09:25 and 12:55, Day 29 09:15 (spec section 7). Not written.
-4. join_check (the lights' gathering), interactions_check on a switched-on copy; perf/deck with the chain (VB2's).
-5. Words wanted (stand-ins now): stock.1-3 / stock.title / stock.text, record.met.bench, notice.home.missed,
-   tern.in, signed; tools/affected.py day28-30 at the switch-on turn.
-6. A screenshot set for the review (phone size).
+1. arrows_check vessel with `teachoff` and with `senior` (written, not yet run); day_check 27 and 30 on the latest copy.
+2. join_check and interactions_check on a switched-on copy; a phone-size screenshot set for the review.
+3. Making the round one is quick (done by about 09:50 when you follow the arrows: steps of 3+2+10+3+5 minutes): the
+   spec's 09:30-13:00 may want longer holds (VESSEL_STEPS minutes) if the user wants it to fill the morning.
+4. The stand-in words (marked in content/banks/event-veyliVessel.lines, "VB1's stand-ins") for a writer to polish.
+5. tools/affected.py: day28-30 at the switch-on turn.
 
 ## Gotchas
 - The data block runs at load before MEETING_SCRIPTS and the slot's consts: functions or vars only there.
