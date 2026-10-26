@@ -17,6 +17,7 @@ Lead 37 = session_019GcNZ4GGEqfiuYDYnue7nX, branch claude/lead-37, hourly check-
 - Listening pass on sound: user hasn't given feedback yet; route to SD1 (core), FX20 (activities), FX22b (music). Listening list: plans/sound/audio-todo.md (dryer, airlock, shuttle bay not built).
 
 ## Seats (see TEAM.md CURRENT SEATS)
+CS1 retired (handover-cs1.md a0e6cae4); SW2 session_017dLaLFBnRUQin3PQEQq6so for small words; fresh CS2 for big writing.
 FX26 (new) session_01Mda2GWi1hRm17TjvYmHoED: Captain stage clipping + storm Saturday work day (claude/storm-sat); storm tradition pick pending (CS1 ideas → user).
 FX25 (new) session_01V8edQWJxn9jX4Ddn19Jprf builds the comet (claude/comet). FX22b ~50% handing over after the swap.
 EP1 (new) session_01LjeoeX6qpCuwTV5UNVNwV5 (USER: comet ON in 0.93.2; FX22b builds it after the swap): detailed plan page for the visit + comet (claude/events-plan-2) → publish to the user.
