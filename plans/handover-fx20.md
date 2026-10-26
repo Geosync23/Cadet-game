@@ -46,3 +46,19 @@ The user: "Bunk inspection doesn't do anything. A supervisor should come by." Br
 - In section 27 (sound) the core's `S.actTick = null` and `S.whenReady` come after the activity slot. Install from `S.onFrame` once.
 - Use `pgrep -f "[n]ame"` in wait loops, or the loop matches itself.
 - Each parallel check needs its own CADET_WORK with `three` and `acorn` links.
+
+## RV19's verdict on 03449ace: FIXES NEEDED (2026-10-26 ~05:15 UTC; full notes plans/review-rv19.md on claude/review-rv19)
+For the fresh seat. FX20 stopped here at ~66% memory, and nothing below is done unless marked.
+- **M1** (done in eb87ab31): day_check's start bound was 370; it's 355 now. RV19 would rather the check test what it means: at room a by 06:30, done by 07:15.
+- **M2** (open, the big one): live, the walker never gets into Bunks 4-8, because the a..h order zigzags (c at 17,3, then d at 8,16, then e at 10,6...) and 5 fixed minutes a room can't cover the walk. Suggested fix:
+  - Order the rooms along the deck. From the places' `at`, a,b,c are on row 3 and e,g on row 6 (the north side); f,h on row 13 and d on row 16 (the south side). So try a,b,c,g,e,f,h,d, or measure the path lengths with findPath between the inspect places.
+  - Give each room its time from the real walking time: the path length in tiles divided by crew speed in tiles per ship minute, measured live, plus the step at the door. Compute these once from the places, deterministically, and use the same times in `inspectPass` so the juniors are released only after the walker has really been.
+  - Prove it live (RV19 has a probe that steps each ship minute and logs the walker's room).
+- **M3** (open): Day 11's walker (Mira Dahl) washes at a Deck 4 basin until ~06:19 and never reaches Bunk 1, so the player standing there gets the 06:59 Mail with here:false.
+  - (a) The walker must be in Bunk 1 by 06:30 with no other stop in between. In morning(), do the walk before wash/toilet, or wake them earlier (05:30 is already set: check the wash isn't put in between).
+  - (b) A safety net in 24c: if you're in your bunk room from 06:30 and the walker hasn't come by 06:59, it still counts as attended (inspectRun(d, true)), never the "you weren't there" Mail.
+- **S1:** the room lines b-h and inspect.walk.done are never heard. The WORK_TICKS line returns once inspectDue(d) is false, which is right after your result. Run inspectWalkTick for the whole walk, 06:30-07:20, outside the inspectDue guard.
+- **S2:** anim 'look' isn't in ACTS, so the walker just stands. Use an anim that exists, or add it with section 8's owner.
+- **S3:** add a live part to the check: the walker inside each room in order.
+- **S4:** this note's older lines say STEP 3 / 06:29-06:54. It's STEP 5 now (06:30-07:10) and will change with M2.
+Branch claude/inspection, head after this note. Tell lead 38 (session_01G2y9crUv6vDiiEB2q6Yo9W) and RV19 (session_01V6FDCQp5Ejidi8Chpo2nJG) when the fixes are in.
