@@ -1550,3 +1550,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~22:39 UTC: **VB1 V-3 + V-4 6d4b5192** (chain + making the part; off identical bar known-old Oona bubble shots; ON checks running) -> RV21. VB1 writes stand-in keys itself; folds RV21 V-2 fixes first; then arrows part + controller presets. VB2 queue: Taavek places -> B5 bar + chair -> ending test parts. Both told (priority now).
 - ~22:39 UTC: VB2 got it (~40%): Taavek places already in 3fb8eac7; bar (makeCharacter collar spec flag, merged, no new calls) + chair (Calder's office, P5_STEP5, sit place) on claude/p5s5-kit from B5's branch; then ending test parts.
 - ~22:42 UTC: **CR3 0.93.3 OK** (day 0/1/5/7, weekend, arrows_d/f, controller; promo_sight + sound by CR1 OK). 4 of 6 done; CR2 + CR6 running.
+- ~22:46 UTC: VB1 got it: vesselLights MUST already fixed in V-3 85bdb51c (38 going for 44 places); working RV21 shoulds + merge 3fb8eac7, then arrows part + controller presets.
