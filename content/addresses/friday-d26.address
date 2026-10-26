@@ -12,7 +12,7 @@
 // A player let go on Day 20 has left on the Tern, so there's no version for them.
 day: 26
 from: Captain Odile Marrow
-mail: All hands: the Captain's Friday address | Four Fridays, a storm and a comet behind us. Tomorrow at ten a Veyli delegation comes aboard, led by Speaker Teshavi: line the shuttle bay with me if you're free. Commander Vance's Mail tonight has the details.
+mail: All hands: the Captain's Friday address | Four Fridays, a storm and a comet behind us, and a month of good work. My thanks, all of you. Four weeks aboard is tonight, in the Works tea corner.
 == lines
 vance: Settle, please. The Captain.   [nod]
 marrow: Afternoon, everyone. Our fourth Friday. For some of you, that's every Friday you've had.
@@ -43,7 +43,7 @@ marrow: Rank is nice. The people you sit with at dinner matter more. Find them. 
 // comet without the swap: Monday's comet, looked back on, before the Veyli; FX25, 0.93.2)
 ? swap
 marrow: On Monday night, the comet. Half the ship at the windows, and not a word said.   [gesture]
-marrow: After a storm and a week of guests, I think the sky owed us that one.   #warm
+marrow: After a storm and three days of guests, I think the sky owed us that one.   #warm
 marrow: What I ask: keep looking up. Out here there's nearly always something worth seeing.   #warm
 ? !swap comet
 marrow: On Monday night, the comet. Half the ship at the windows, and not a word said.   [gesture]
