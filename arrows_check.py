@@ -592,7 +592,10 @@ def part_end(ctx, path, want, way):
     miss = [t for t in f.trace if t[4] and not t[3] and not (t[1] in t[4])]
     for t in miss[:6]: fail(f"{tag}: Day {t[0] // 1440 + 1} {hhmm(t[0])}: {t[4]} due, but the arrow leads with {t[1]} ('{t[2]}')")
     if len(miss) > 6: fail(f"{tag}: ... {len(miss) - 6} more minutes like that")
-    for t, lab, dk in f.stuck: fail(f'{tag}: stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk})')
+    mine = {t[2] for t in f.trace if t[1] and t[1].startswith('end:')}   # the labels the ending's own arrows wore
+    for t, lab, dk in f.stuck:                         # stuck on an ending arrow fails; on another (a job's, the clock: the hours skipped between the beats leave those behind) it's printed
+        if lab in mine: fail(f'{tag}: stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk}): the ending\'s arrow stays up with you there')
+        else: print(f'  {tag}: (not the ending) stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk})')
     led = sorted(set(t[1] for t in f.trace if t[1] and t[1].startswith('end:')))
     print(f"  {tag}: said {said}, settled {st['settled']}, ending arrows that led {led}, minutes due {sum(1 for t in f.trace if t[4] and not t[3])}, missed {len(miss)}, stuck {len(f.stuck)}")
     check(not pg.errors, f'{tag}: page errors {pg.errors[:3]}')
