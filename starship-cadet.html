@@ -44530,7 +44530,14 @@ function stormBoardJob(j) {
   const m = j.machine && typeof JOB_TYPES !== 'undefined' && JOB_TYPES[j.kind] && machineById(j.machine), K = m && MACHINE_KINDS[m.kind];
   return !!K && (K.sys === 'power' || K.sys === 'comms' || m.kind === 'chiller');
 }
-function stormBoardHide(j) { const d = stormSatDay(); return d != null && Math.floor(shipNow() / 1440) + 1 === d && !stormBoardJob(j); }
+// never your own work (lead 38's call on BM18's mech_check m9 find): a job you hold, one kept for you (a reservation, a
+// training case: heldForYou), a training job (`train`: a lesson's, the Tier 2 test's), a head-scratcher's (`case`), a
+// traced fault (`symptom`: your tracing's), or your lesson's job: only an unclaimed ordinary job is hidden that day
+function stormBoardMine(j) {
+  if (j.claimedBy === 'you' || j.train || j.case || j.symptom || j.reserved || (typeof heldForYou === 'function' && heldForYou(j))) return true;
+  const c = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.cur; return !!(c && c.j && c.j === j.id);
+}
+function stormBoardHide(j) { const d = stormSatDay(); return d != null && Math.floor(shipNow() / 1440) + 1 === d && !stormBoardJob(j) && !stormBoardMine(j); }
 // Storm stories by torchlight (RV18's S2, the user's rule: its own words): while it's on and you're in the junior common
 // room, a bubble every few seconds from those at it (tradTalk): a teller's worst storm (CS1's eight, one each in turn),
 // the listeners' asides, Oduya keeping it going; his closing lines in the last ten minutes. The room's everyday chatter
