@@ -17,6 +17,7 @@ Lead 37 hired me; **lead 38** (session_01G2y9crUv6vDiiEB2q6Yo9W) from 04:40. Bui
 | claude/inspection fix (FX20b) | PASS | e45b7fe (0.93.2); 1872153 and 5793626 PASS (later round) |
 | claude/storm-sat (FX26) | moved to RV19 after my first look | |
 | claude/workbench-tap (FX24) | PASS | 484cde7d |
+| claude/doors-3way (FX24, FX29) | PASS (0.93.3) | bdb6f00a |
 Nothing open. Comet shoulds for whoever next builds the comet (in review-rv18.md): the bedtime arrow hides the arrow to
 Saruth at 22:02; one present speaker repeats one line every 4 minutes.
 

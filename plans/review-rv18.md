@@ -233,3 +233,20 @@ line ("Fix an extractor hose clamp" up 3+ ship hours from Day 8 13:45), OK with 
 52d5998a ALL IDENTICAL; interactions OK; mech_check m10 OK (crafting and tinkering unaffected). A live tap on the Workbench
 at 5-shop-5 starts the chore; it needs a shop order or tinkering open at the same time to show the old bug, so the arrows
 run is the reproduction.
+
+## Doors, three choices (FX24 then FX29, claude/doors-3way bdb6f00a, game = 1dc48251 b0dd6aaa...99d9): PASS (0.93.3)
+Lead 39's brief: All open by themselves / Private rooms tap to open (new default) / All doors tap to open; old autoDoors false
+-> all tap; the controller can open a private door. Steps: 3051de4e (FX24), 329ad201 and 1dc48251 (FX29: an arrow's way
+opens its doors; a tap on yourself by a shut door opens it, the old adoorTapSelf line had been dead; a hint toast; the
+controller check presses A at a shut door), bdb6f00a (check only).
+- Private doors on all 7 decks: the 8 Deck 4 bunk-room doors only; cabins on Decks 2 and 4 are 'closed' doors already; no
+  public door is private.
+- cadet_test vs d9c7e5f0 alone: AUTO_DOORS_ON false ALL IDENTICAL (3051de4e, 329ad201, 1dc48251); as shipped only Bunk 1's
+  door shut before the first arrow appears (a_start..d_wallslow) and the steering shots 1e-4.
+- Played at 390 x 844: each mode at Bunk 1 and the mess hall; the hint; a real tap on yourself opens Bunk 1's door; a tap
+  on the corridor beyond walks you out; the Settings row; old saves migrate.
+- controller_check door + walk OK (mine), 29/29 (CR5); 'day' failed on 3051de4e (stick stopped at Bunk 1), fixed by the
+  check pressing A, which matches the design. arrows all OK (CR1; 'week guide' fails the same on 0.93.2: old).
+  player + day 1 OK (CR6); interactions alone OK (FX29).
+- Optional: the hint's title "A private room" also shows in 'all doors tap' mode at a public door.
+Also: FX29's bigevents_check change 8a91f1dc (late saves follow EV_SWAP_ON) reads right.
