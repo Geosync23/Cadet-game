@@ -755,6 +755,232 @@ def run(path):
         check(not errs and not pe, f'no errors: {errs} {pe}')
         g.close()
 
-run(sys.argv[1])
-print('PUZZLE CHECK OK' if ok else 'PUZZLE CHECK FAILED')
+# ---- Step 5's parts (S5-6, B4 for lead 39; plans/p5-step5-spec.html): p4, p5, p9, board. Each runs on a copy of the
+# build with P5_STEP5 switched on (the build's own switch line, swapped in the copy) and first checks that with the
+# switch off nothing of its own is registered. A part whose code isn't in the build says "not yet" (never a pass).
+#   python3 puzzle_check.py BUILD.html            the check as before, then every Step 5 part
+#   python3 puzzle_check.py BUILD.html p4 [p5 ...]  only those parts
+S5_PARTS = ['p4', 'p5', 'p9', 'board']
+S5_ON = "const P5_STEP5 = URL_FLAGS.has('p5s5');"
+NOT_YET = []
+
+# the off build: no Step 5 kind or board registered
+S5_OFF = r"""(() => ({ kinds: Object.keys(CASE_KINDS).filter(k => ['p4', 'p5', 'p9'].includes(k)), mech: typeof WORK_MECH !== 'undefined' ? ['p4', 'p5', 'p9', 'mys'].filter(k => WORK_MECH[k]) : [], on: typeof P5_CASES5 !== 'undefined' && P5_CASES5 }))()"""
+
+# P4 on paper: a Senior Officer (Day 17 on), the p4 row open, every cause P4 fits on every machine at your tier becomes a
+# case (rate 1, P4 alone); each checked: the decoys' gauges each cross out their own decoy, the stuck gauge is the cause's
+# part and crosses out nothing, distinct parts, the scanner needed at the panel, the words
+P4SWEEP = r"""(() => {
+  const out = { cases: [], fit: 0 }, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, tools: W.tools };
+  const jr = jobRun; jobRun = () => null; flagSet('case.p4.first', 'none');
+  W.rank = 'senior'; W.tier = 3; W.op = { 17: ['p4'] }; W.tr = {}; W.tools = Object.assign({}, W.tools, { scanner: [5, 0] }); C.open = [];
+  MACH_HOUR = null; MACH_SEEN = -1;
+  for (let d = 17; d <= 30; d++) {
+    if (!playerShiftOn(d)) continue;
+    const t = (d - 1) * 1440 + 600; setShipNow(t); machinesNow();
+    for (const m of machineList()) for (const f of caseCauses(m)) {
+      if (!CASE_KINDS.p4.fits(f, m) || jobTier({ machine: m.id }) > 3) continue;
+      out.fit++; C.open = []; SHIP.jobs = SHIP.jobs.filter(x => !x.case);
+      const j = { id: m.id + '@p4' + d + f.id, machine: m.id, deck: m.deck, kind: 'repair', urgency: 1, posted: t, found: t, claimedBy: null, parts: [f.part], status: 'open', cause: f.id };
+      SHIP.jobs.push(j);
+      const keepK = {}; for (const k in CASE_KINDS) if (k !== 'p4') { keepK[k] = CASE_KINDS[k]; delete CASE_KINDS[k]; }
+      const rate = CASE_RATE.senior; CASE_RATE.senior = 1; caseOffer(j, (d - 1) * 24 + 10); CASE_RATE.senior = rate; Object.assign(CASE_KINDS, keepK);
+      const c = caseOf(j); if (!c) continue;
+      const part = id => (caseCauses(m).find(x => x.id === id) || {}).part;
+      out.cases.push({ id: c.id, kind: c.kind, band: c.band, lim: caseBandOf(c.kind, c.band), cause: c.cause, sus: c.sus.slice(), fewest: c.fewest, title: j.title, parts: j.parts.slice(),
+        susParts: c.sus.map(part), shown: !c.wait,
+        clues: c.clues.map(k => ({ id: k.id, at: k.at, kills: k.kills.slice(), part: k.src.part, stuck: !!k.src.stuck, tool: k.src.tool || null, deck: caseClueDeck(k), reach: caseReachable(k), place: k.at === 'board' || !!placeById(k.at), panel: k.at === panelPlace(m.id), text: caseClueText(c, k) })) });
+      SHIP.jobs = SHIP.jobs.filter(x => x !== j);
+    }
+  }
+  C.open = []; jobRun = jr; Object.assign(W, keep);
+  return out;
+})()"""
+
+# P4's first: the row opens on Day 17 (Torres): the chiller's display stuck at 3°, slot 28, hidden till your shift,
+# shown with Torres's word; the readings; a wrong call (the compressor: a part back, the case goes on), the save
+# round trip, the right call (the display's signal card) fixes it, right first time... not (one wrong); the row trained
+P4FIRST = r"""(() => {
+  const out = {}, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, tools: W.tools };
+  C.open = []; delete SHIP.flags['case.p4.first']; W.rank = 'senior'; W.tier = 3; W.tr = { t3: 15 }; W.tools = Object.assign({}, W.tools, { scanner: [5, 0] });
+  const said = []; const ws = worksSay; worksSay = (id, t) => said.push([id, t]);
+  W.op = {}; setShipNow(16 * 1440 + 300); machinesNow(); p4Stage(); out.before = flag('case.p4.first');
+  W.op = { 17: ['p4'] }; setShipNow(16 * 1440 + 330); machinesNow(); WORK_MECH.p4.open(ladderRow('p4'), 17);
+  const id = flag('case.p4.first'), c = caseById(id), j = c && caseJob(c); out.staged = id; if (!c) { worksSay = ws; return out; }
+  out.machine = j.machine; out.cause = c.cause; out.sus = c.sus.slice().sort(); out.reserved = j.reserved; out.hidden = caseHidden(j); out.wait = c.wait; out.train = c.train;
+  out.again = (p4Stage(), C.open.filter(x => x.kind === 'p4').length);
+  caseTick(); out.waitEarly = c.wait;
+  setShipNow(16 * 1440 + 545); machinesNow(); caseTick();
+  out.shown = !c.wait; out.title = j.title; out.by = c.by; out.said = said.slice(); out.hiddenAfter = caseHidden(j); out.parts = j.parts.slice();
+  claimJob(j.id); caseTick(); out.board = c.got.slice();
+  for (const k of c.clues) caseClue(c.id, k.id);
+  out.texts = c.clues.map(k => caseClueText(c, k)); out.hint = caseHint(c.id);
+  (typeof worksTabAdd === 'function' ? (deviceShow('works'), deviceDo({ app: 'works', do: 'tab', arg: 'faults' }), deviceShow('works')) : deviceShow('faultnotes'));
+  const b = document.getElementById('devBody'); out.chips = [...b.querySelectorAll('.chips .chip')].map(x => x.textContent);
+  out.notes = b.textContent.includes('hasn\'t moved a hair'); deviceClose();
+  // a wrong call: a decoy
+  const wrong = c.sus.find(s => s !== c.cause), wp = caseSus(c, wrong).part;
+  caseCall(c.id, wrong); const s0 = SHIP.stores[wp]; SHIP.stores[wp]--;
+  let n = jobStops(j).length; for (let k = 0; k < n; k++) jobStepDone(j.id, k);
+  out.wrongFit = { done: !!j.workDone, known: c.known.includes(wrong) };
+  const sv = { ship: {} }; for (const f of SAVE_EXTRA) { try { f(sv); } catch (e) {} }
+  const canon = o => JSON.stringify(o, (k, v) => v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map(x => [x, v[x]])) : v);
+  const before = canon(c); CASE_SAVED = JSON.parse(JSON.stringify(sv.ship.works.cases)); delete SHIP.works.cases; CASE_CLEAN = false;
+  const c2 = caseOf(j); out.saveSame = !!c2 && canon(c2) === before; if (!out.saveSame) out.saveDiff = [before, canon(c2)]; out.saveBytes = JSON.stringify(c2).length;
+  caseCall(c2.id, c2.cause); n = jobStops(j).length; for (let k = 0; k < n; k++) jobStepDone(j.id, k);
+  out.fixed = !!j.workDone && SHIP.machines[j.machine].cond > 40;
+  turnInJob(j.id); caseTick(); out.closed = !caseById(c.id); out.trained = W.tr.p4;
+  worksSay = ws; Object.assign(W, keep); C.open = [];
+  return out;
+})()"""
+
+# P5 on paper: a Senior Officer with the p5 row open and the pipe kit; every line machine healthy, then each line cause
+# P5 fits on each line machine made faulty in turn (rate 1, P5 alone): the readings are the line's real shares (full above
+# the fault, low from it on), each at its machine's panel with the pipe kit; one suspect each side where the line has one
+P5SWEEP = r"""(() => {
+  const out = { cases: [], fit: 0 }, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, tools: W.tools };
+  const jr = jobRun; jobRun = () => null; flagSet('case.p5.first', 'none');
+  W.rank = 'senior'; W.tier = 3; W.op = { 18: ['p5'] }; W.tr = {}; W.tools = Object.assign({}, W.tools, { pipekit: [12, 0] }); C.open = [];
+  const lines = Object.keys(MACHINE_LINKS).filter(l => lineOn(l)), all = [...new Set(lines.flatMap(lineIds))];
+  for (let d = 18; d <= 24; d++) {
+    if (!playerShiftOn(d)) continue;
+    const t = (d - 1) * 1440 + 600; setShipNow(t); machinesNow();
+    for (const id of all) { const m = machineById(id); for (const f of caseCauses(m)) {
+      if (!CASE_KINDS.p5.fits(f, m)) continue;
+      for (const x of all) if (SHIP.machines[x]) { SHIP.machines[x].cond = 90; SHIP.machines[x].state = machineState(90); }
+      SHIP.jobs = SHIP.jobs.filter(x => !x.case && !(x.machine && all.includes(x.machine) && x.status !== 'done'));
+      out.fit++; C.open = [];
+      SHIP.machines[id].cond = 40; SHIP.machines[id].state = machineState(40);
+      const j = { id: id + '@p5' + d + f.id, machine: id, deck: m.deck, kind: 'repair', urgency: 1, posted: t, found: t, claimedBy: null, parts: [f.part], status: 'open', cause: f.id };
+      SHIP.jobs.push(j);
+      const keepK = {}; for (const k in CASE_KINDS) if (k !== 'p5') { keepK[k] = CASE_KINDS[k]; delete CASE_KINDS[k]; }
+      const rate = CASE_RATE.senior; CASE_RATE.senior = 1; caseOffer(j, (d - 1) * 24 + 10); CASE_RATE.senior = rate; Object.assign(CASE_KINDS, keepK);
+      const c = caseOf(j); if (!c) { SHIP.jobs = SHIP.jobs.filter(x => x !== j); continue; }
+      const path = p5Line(m, f), st = p5Steps(f.line, path), at = s => caseSusAt(s) || id;
+      out.cases.push({ id: c.id, kind: c.kind, band: c.band, lim: caseBandOf(c.kind, c.band), cause: c.cause, sus: c.sus.slice(), fewest: c.fewest, title: j.title, card: caseCard(j), at0: caseAt(j), machine: id,
+        susSteps: c.sus.map(s => st[at(s)]), causeStep: st[id], shown: !c.wait, parts: j.parts.slice(),
+        clues: c.clues.map(k => ({ id: k.id, at: k.at, kills: k.kills.slice(), m: k.src.m, flow: k.src.flow, live: lineFlow(f.line, k.src.m), step: st[k.src.m], tool: k.src.tool, deck: caseClueDeck(k), reach: caseReachable(k), panel: panelPlace(k.src.m) === k.at, text: caseClueText(c, k) })) });
+      SHIP.jobs = SHIP.jobs.filter(x => x !== j);
+    } }
+  }
+  for (const x of all) if (SHIP.machines[x]) { SHIP.machines[x].cond = 90; SHIP.machines[x].state = machineState(90); }
+  C.open = []; jobRun = jr; Object.assign(W, keep);
+  return out;
+})()"""
+
+# P5's first: the row opens on Day 18 (Calder): 3-pump-1's seal, slot 29, faulty at once, hidden till your shift; shown
+# with Calder's word; the card names the showers, not the pump; read the line, call it, fixed; the row trained
+P5FIRST = r"""(() => {
+  const out = {}, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, tools: W.tools };
+  C.open = []; delete SHIP.flags['case.p5.first']; W.rank = 'senior'; W.tier = 3; W.tr = { t3: 15, m19: 17, m18: 18 }; W.tools = Object.assign({}, W.tools, { pipekit: [12, 0] });
+  for (const x of ['water', 'heat', 'air'].flatMap(lineIds)) if (SHIP.machines[x]) { SHIP.machines[x].cond = 90; SHIP.machines[x].state = machineState(90); }
+  SHIP.jobs = SHIP.jobs.filter(x => !(x.machine && lineOf(x.machine) && x.status !== 'done'));
+  const said = []; const ws = worksSay; worksSay = (id, t) => said.push([id, t]);
+  W.op = { 18: ['p5'] }; setShipNow(17 * 1440 + 330); machinesNow(); WORK_MECH.p5.open(ladderRow('p5'), 18);
+  const id = flag('case.p5.first'), c = caseById(id), j = c && caseJob(c); out.staged = id; if (!c) { worksSay = ws; Object.assign(W, keep); return out; }
+  out.machine = j.machine; out.cause = c.cause; out.sus = c.sus.slice(); out.reserved = j.reserved; out.hidden = caseHidden(j); out.wait = c.wait;
+  out.reads = c.clues.map(k => [k.src.m, k.src.flow, k.kills.slice()]);
+  setShipNow(17 * 1440 + 545); machinesNow(); caseTick();
+  out.shown = !c.wait; out.title = j.title; out.card = caseCard(j); out.by = c.by; out.said = said.slice(); out.at0 = caseAt(j);
+  claimJob(j.id); caseTick();
+  for (const k of c.clues) caseClue(c.id, k.id);
+  out.texts = c.clues.map(k => caseClueText(c, k));
+  (typeof worksTabAdd === 'function' ? (deviceShow('works'), deviceDo({ app: 'works', do: 'tab', arg: 'faults' }), deviceShow('works')) : deviceShow('faultnotes'));
+  out.view = document.getElementById('devBody').textContent.includes('top to bottom'); deviceClose();
+  caseCall(c.id, c.cause); out.atRight = caseAt(j);
+  let n = jobStops(j).length; for (let k = 0; k < n; k++) jobStepDone(j.id, k);
+  out.fixed = !!j.workDone; turnInJob(j.id); caseTick(); out.closed = !caseById(c.id); out.trained = W.tr.p5;
+  worksSay = ws; Object.assign(W, keep); C.open = [];
+  return out;
+})()"""
+
+def part_p5(g, path):
+    if not g.ev("typeof p5Stage === 'function'"): return 'not yet'
+    S = g.ev(P5SWEEP)
+    cs = S['cases']; print(f"p5: {S['fit']} fits, {len(cs)} cases")
+    for c in cs[:3]: print('  ', c['id'], c['sus'], [(k['m'], k['flow'], k['kills']) for k in c['clues']], c['title'])
+    check(len(cs) >= 5, f"p5: the sweep made cases: {len(cs)}")
+    from itertools import combinations
+    for c in cs:
+        sus, clues, L = c['sus'], c['clues'], c['lim']
+        left = lambda ks: [s for s in sus if not any(s in k['kills'] for k in ks)]
+        check(left(clues) == [c['cause']] and all(len(left([k])) > 1 for k in clues), f"{c['id']}: one left, no single reading solves it: {left(clues)}")
+        fewest = min((n for n in range(1, len(clues) + 1) for ks in combinations(clues, n) if len(left(list(ks))) == 1), default=99)
+        check(fewest == c['fewest'] >= L['fewest'] and L['sus'][0] <= len(sus) <= L['sus'][1] and L['clues'][0] <= len(clues) <= L['clues'][1], f"{c['id']}: the band ({fewest}, {len(sus)}, {len(clues)})")
+        honest = all((k['flow'] >= .8) == (k['step'] < c['causeStep']) and abs(k['flow'] - k['live']) < .002 for k in clues)
+        check(honest, f"{c['id']}: full above the fault, low from it on, as the line really reads: {[(k['m'], k['flow'], k['live'], k['step']) for k in clues]} cause step {c['causeStep']}")
+        check(c['causeStep'] not in [s for s, x in zip(c['susSteps'], sus) if x != c['cause']], f"{c['id']}: no suspect on the fault's own step")
+        check(all(k['panel'] and k['reach'] and k['tool'] == 'pipekit' for k in clues), f"{c['id']}: each reading at its machine's panel, with the pipe kit")
+        check(c['shown'] and c['parts'] == [] and c['machine'] not in (c['title'] + ' '.join(map(str, c['card'] or []))) and c['at0'] != c['machine'], f"{c['id']}: the card names the symptom, not the machine: {c['title']!r} {c['card']} {c['at0']}")
+    F = g.ev(P5FIRST)
+    print('p5 first:', F)
+    check(F.get('staged') and F.get('staged') != 'none' and F.get('machine') == '3-pump-1' and F.get('cause') == 'seal' and F.get('reserved') == 29 and F.get('hidden'), f"p5's first: 3-pump-1's seal, slot 29, hidden: {F.get('staged')}")
+    if F.get('staged') and F.get('staged') != 'none':
+        check(F['shown'] and F['by'] == 'calder' and any(w[0] == 'calder' for w in F['said']) and 'Pump' not in F['title'], f"p5's first: shown in your shift with Calder's word, the card the symptom's: {F['title']!r}")
+        check(F['view'] and F['fixed'] and F['closed'] and F['trained'] == 18, f"p5's first: the line view, the right call fixes it, trained Day 18: {F['view']} {F['fixed']} {F['trained']}")
+    return 'done'
+
+def s5_copy(path):
+    src = pathlib.Path(path).read_text()
+    if S5_ON not in src: return None
+    out = WORK / 'test' / f'_s5on_{os.getpid()}_{pathlib.Path(path).name}'
+    out.write_text(src.replace(S5_ON, 'const P5_STEP5 = true;')); _RUN_FILES.append(out)
+    return out
+
+def part_p4(g, path):
+    if not g.ev("typeof p4Stage === 'function'"): return 'not yet'
+    S = g.ev(P4SWEEP)
+    cs = S['cases']; print(f"p4: {S['fit']} fits, {len(cs)} cases")
+    for c in cs[:3]: print('  ', c['id'], c['sus'], [(k['at'], k['kills'], k['stuck']) for k in c['clues']], c['title'])
+    check(len(cs) >= 5, f"p4: the sweep made cases: {len(cs)}")
+    from itertools import combinations
+    for c in cs:
+        sus, clues, L = c['sus'], c['clues'], c['lim']
+        left = lambda ks: [s for s in sus if not any(s in k['kills'] for k in ks)]
+        check(left(clues) == [c['cause']] and all(len(left([k])) > 1 for k in clues), f"{c['id']}: one left, no single gauge solves it: {left(clues)}")
+        fewest = min((n for n in range(1, len(clues) + 1) for ks in combinations(clues, n) if len(left(list(ks))) == 1), default=99)
+        check(fewest == c['fewest'] >= L['fewest'] and L['sus'][0] <= len(sus) <= L['sus'][1] and L['clues'][0] <= len(clues) <= L['clues'][1], f"{c['id']}: the band ({fewest}, {len(sus)}, {len(clues)})")
+        stuck = [k for k in clues if k['stuck']]
+        check(len(stuck) == 1 and stuck[0]['kills'] == [] and stuck[0]['part'] == c['susParts'][sus.index(c['cause'])] and stuck[0]['panel'] and stuck[0]['tool'] == 'scanner' and "hasn't moved" in stuck[0]['text'], f"{c['id']}: one stuck gauge, the cause's own, at the panel: {stuck}")
+        honest = all(len(k['kills']) == 1 and c['susParts'][sus.index(k['kills'][0])] == k['part'] and k['kills'][0] != c['cause'] for k in clues if not k['stuck'])
+        check(honest and len(set(c['susParts'])) == len(sus), f"{c['id']}: each decoy's own gauge crosses out only it; one part each: {c['susParts']}")
+        check(any(k['at'] == 'board' for k in clues) and all(k['reach'] and k['place'] for k in clues) and len({k['deck'] for k in clues if k['deck'] is not None}) <= 1, f"{c['id']}: one reading taped to the job, the rest at the panel, all reachable")
+        check(c['shown'] and c['parts'] == [] and c['title'].startswith('Head-scratcher: ') and "gauges say it's fine" in c['title'], f"{c['id']}: on the board, the part yours to find: {c['title']!r}")
+    F = g.ev(P4FIRST)
+    print('p4 first:', {k: v for k, v in F.items() if k not in ('texts',)})
+    check(F.get('before') is None and F.get('staged') and F.get('machine') == '3-chiller-1' and F.get('cause') == 'sensor' and F.get('reserved') == 28, f"p4's first: staged when the row opens, the chiller's display, slot 28: {F.get('staged')} {F.get('machine')} {F.get('cause')}")
+    if F.get('staged') and F.get('staged') != 'none':
+        check(F['hidden'] and F['wait'] and F['waitEarly'] and F['again'] == 1, f"p4's first: off the board till your shift, staged once: {F['hidden']} {F['waitEarly']} {F['again']}")
+        check(F['shown'] and not F['hiddenAfter'] and F['by'] == 'torres-zeke' and any(w[0] == 'torres-zeke' for w in F['said']), f"p4's first: shown at 09:05 with Torres's word: {F['title']!r} {F['said']}")
+        check(len(F['board']) == 1 and F['notes'] and len(F['chips']) >= 4, f"p4's first: the taped reading on taking it; Fault notes shows the stuck gauge: {F['board']} {F['chips']}")
+        check(not F['wrongFit']['done'] and F['wrongFit']['known'], f"p4's first: a wrong call doesn't fix it: {F['wrongFit']}")
+        check(F['saveSame'] and F['saveBytes'] < 2400, f"p4's first: the save round trip mid-case ({F['saveBytes']} bytes)")
+        check(F['fixed'] and F['closed'] and F['trained'] == 17, f"p4's first: the right call fixes it; the row trained on Day 17: {F['fixed']} {F['closed']} {F['trained']}")
+    return 'done'
+
+S5_RUN = {'p4': part_p4, 'p5': part_p5}
+
+def run_s5(path, parts):
+    with sync_playwright() as pw:
+        g = Game(pw, path, 390, 844); g.step(2)
+        off = g.ev(S5_OFF); g.close()
+        check(not off['kinds'] and not off['mech'] and not off['on'], f"switch off: nothing of Step 5's registered: {off}")
+        on = s5_copy(path)
+        if not on:
+            for p in parts: print(f'{p}: not yet (no P5_STEP5 switch line in this build)'); NOT_YET.append(p)
+            return
+        g = Game(pw, str(on), 390, 844); g.step(3)
+        g.ev(SETUP)
+        for p in parts:
+            f = S5_RUN.get(p)
+            r = f(g, path) if f else 'not yet'
+            if r == 'not yet': print(f'{p}: not yet'); NOT_YET.append(p)
+        pe = [e for e in g.errors if e.startswith('pageerror')]
+        check(not pe and not g.ev("DEV.errors.slice()"), f'Step 5 parts: no errors: {pe}')
+        g.close()
+
+only = [a for a in sys.argv[2:] if a in S5_PARTS]
+if not only: run(sys.argv[1])
+run_s5(sys.argv[1], only or S5_PARTS)
+print(('PUZZLE CHECK OK' + (f' (not yet: {", ".join(NOT_YET)})' if NOT_YET else '')) if ok else 'PUZZLE CHECK FAILED')
 sys.exit(0 if ok else 1)

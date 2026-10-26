@@ -56548,6 +56548,104 @@ function f3CaseWatch() {
   else if (left && !CASE_UI.ask) pointAsk({ id: 'p:case:next', once: 1, path: [{ el: () => buttonFor(A('next', 0)), label: worksText('case.point.next', 'Where next? The next clue') }], done: () => !onNotes() });
 }
 if (typeof POINT_WATCH !== 'undefined' && POINT_ON) POINT_WATCH.push(f3ScanWatch, f3CaseWatch);
+// ---- S5-6 (B4 for lead 39; plans/p5-step5-spec.html on claude/p5-specs): P4, P5, P9 and the old-mysteries board, all
+// behind P5_CASES5 (section 13). Off: nothing registers, and the game is the one before it. ----
+// P4. Which gauge is lying? (Day 17, a word from Torres; with the scanner's gauge probe). A part fault whose machine says
+// it's fine: every suspect has its own gauge, and a gauge reading normal crosses its suspect out (the decoys' gauges
+// really are normal). One more gauge is stuck: the cause's own, reading normal and flat all day; believed, it crosses
+// out the real cause, so every suspect looks fine and one gauge must be lying (the trap, like P2's mix-up: the solver
+// counts it as ruling out nothing). The first decoy's reading is taped to the job by whoever found it, the rest are at
+// the machine's panel. A cause named 'sensor' (the chiller's display) has the machine's other part causes as its decoys
+// (it hides what they'd show). The first case (when the p4 row opens: the cold store's chiller, its display stuck at 3°;
+// else the first machine that fits, slot 28, held a week) shows with Torres's word. Flags case.p4.first (staged or
+// 'none'). No R(): suspects by key 892 inside caseDecoys, the shown order by 893.
+const P4_BAND = { sus: [3, 4], clues: [3, 5], fewest: 2, decks: 1 }, P4_SLOT = 28;
+const P4_GAUGE = { pump: 'the outlet pressure', seal: 'the drip tray', valve: 'the valve position', bearing: 'the vibration meter', relay: 'the relay counter',
+  'fan belt': 'the belt speed', filter: 'the pressure across the filter', cartridge: 'the pressure across the cartridge', membrane: 'the flow through the membrane',
+  compressor: 'the compressor\'s current', element: 'the element\'s current', lamp: 'the lamp current', breaker: 'the breaker load', cable: 'the cable continuity',
+  cell: 'the cell charge', 'oxygen cell': 'the cell output', regulator: 'the regulated pressure', 'uv lamp': 'the UV meter', 'signal card': 'the display',
+  'nutrient pack': 'the pack level', 'coil winding': 'the coil current' };
+const p4Gauge = part => caseText('case.p4.gauge.' + String(part).replace(/ /g, '-'), P4_GAUGE[part] || 'the ' + part + ' gauge');
+// the decoys: the machine's other part causes with the same card (a sensor: all of them), each with a part of its own
+function p4Decoys(m, f, seed) {
+  const all = caseCauses(m), ok = x => !!x.part && x.part !== f.part;
+  const ids = f.id === 'sensor' ? all.filter(x => x.id !== f.id && ok(x)).map((x, i) => [schedU(seed, i, 892), x.id]).sort((a, b) => a[0] - b[0]).map(x => x[1]) : caseDecoys(m, f.id, seed, ok);
+  const seen = new Set([f.part]), out = [];
+  for (const id of ids) { const x = all.find(y => y.id === id); if (!seen.has(x.part)) { seen.add(x.part); out.push(id); } }
+  return out;
+}
+function p4Clues(j, cause, sus) {
+  const m = machineById(j.machine), pp = panelPlace(m.id), part = id => (caseCauses(m).find(x => x.id === id) || {}).part;
+  const out = sus.filter(s => s !== cause).map((s, i) => ({ id: 'g' + i, type: 'gauge', src: { part: part(s), read: 1, ...(i ? { tool: 'scanner' } : { by: caseTalker(caseDay(caseNow())) }) }, at: i ? pp : 'board', kills: [s] }));
+  out.push({ id: 's0', type: 'gauge', src: { part: part(cause), read: 1, stuck: 1, tool: 'scanner' }, at: pp, kills: [] });   // the liar: kills nothing
+  return out;
+}
+function p4Text(c, k) {
+  if (k.type !== 'gauge' || !k.src || !k.src.part) return null;
+  const g = p4Gauge(k.src.part), G = g.replace(/^./, x => x.toUpperCase()), p = k.src.by && schedPeople().find(x => x.id === k.src.by);
+  if (k.src.stuck) return caseText('case.p4.stuck', '{gauge}: normal, and it hasn\'t moved a hair all day.', { gauge: G });
+  if (p) return caseText('case.p4.taped', '{gauge}, read when it was found: normal, moving with the load.', { gauge: G }) + ' — ' + p.name.split(' ').slice(-1)[0];
+  return caseText('case.p4.read', '{gauge}: normal, moving with the load all day.', { gauge: G });
+}
+function p4Title(c, j) {
+  const m = machineById(j.machine), f = caseCauses(m).find(x => x.id === c.cause), d = c.sus.map(s => caseCauses(m).find(x => x.id === s)).find(x => x && x.id !== 'sensor');
+  const shows = (f && f.id === 'sensor' ? d && d.shows : f && f.shows) || 'acts up';   // a lying sensor: what the others would show (the chiller runs warm)
+  return caseText('case.title.p4', '{machine} {shows}, but its gauges say it\'s fine', { machine: caseMachName(j), shows: shows.split('|')[0] });
+}
+function p4View(c) {                                     // the readings as a table: tap one if it doesn't match what you saw
+  const got = c.clues.filter(k => c.got.includes(k.id) && k.src && k.src.part); if (!got.length) return [];
+  return [{ kind: 'text', text: caseText('case.p4.head', 'The gauges (tap one if it doesn\'t match what you see)') },
+    devChips(got.map(k => ({ label: p4Gauge(k.src.part).replace(/^the /, '').replace(/^./, x => x.toUpperCase()) + ': normal', on: !(c.doubt || []).includes(k.id), action: { app: caseApp(), do: 'case:doubt', arg: c.id + '|' + k.id } })))];
+}
+// the first case shows once the row has opened, inside your shift, with Torres's word (the row's teacher)
+function p4Tick(c, j) {
+  if (!c.wait || !c.train) return;
+  const now = shipNow(), d = caseDay(now), mn = now % 1440;
+  if (!caseOpened('p4') || !playerShiftOn(d) || mn < DAY_SHIFT[0] || mn >= 900) return;
+  const row = ladderRow('p4'); c.by = (row && ladderTeacher(row, d)) || 'torres-zeke';
+  caseShow(c, j);
+  const said = typeof worksVoice === 'function' && worksVoice(c.by, 'train.p4.word');
+  if (said && typeof worksSayAll === 'function') worksSayAll(c.by, said);
+  else worksSay(c.by, 'One for you. ' + c.title.replace(/^Head-scratcher: /, '') + '. Sometimes the gauge is the liar. Read them all, and watch for the one that never moves.');
+}
+// staged when the row opens (and retried each ship hour till it is): the chiller's stuck display, else the first
+// machine that fits, not busy; none: the first roll case is your first
+function p4Stage() {
+  if (flag('case.p4.first') !== undefined || !SHIP.works || !caseOpened('p4')) return;
+  const W = SHIP.works, C = caseState(); if (!C) return;
+  if (W.tr && W.tr.p4 !== undefined) { flagSet('case.p4.first', 'none'); return; }
+  const busy = id => SHIP.jobs.some(j => j.machine === id && j.status !== 'done' && (j.claimedBy || j.case || j.reserved));
+  const fits = (m, f) => !!f && !!f.part && panelPlace(m.id) && jobTier({ machine: m.id }) <= 2 && p4Decoys(m, f, 0).length >= 2;
+  const ch = machineById('3-chiller-1'), cf = ch && caseCauses(ch).find(x => x.id === 'sensor');
+  let m = ch && !busy(ch.id) && fits(ch, cf) ? ch : null, f = m ? cf : null;
+  if (!m) for (const x of machineList().slice().sort((a, b) => a.id < b.id ? -1 : 1)) { if (busy(x.id) || ENGINE_KINDS.has(x.kind)) continue; const g = caseCauses(x).find(y => fits(x, y)); if (g) { m = x; f = g; break; } }
+  if (!m) { flagSet('case.p4.first', 'none'); return; }
+  const now = shipNow(), d = caseDay(now), id = jobReserve(m.id, d, now % 1440, P4_SLOT, { train: 'p4', tier: 2, until: now + 7 * 1440, cause: f.id }), j = id && SHIP.jobs.find(x => x.id === id);
+  if (!j) return;
+  delete j.make; delete j.makeMins; j.cause = f.id; j.parts = [f.part]; j.train = 'p4';
+  const seed = machSeed('p4-first'), sus = [f.id].concat(p4Decoys(m, f, seed).slice(0, 3)).map((s, i) => [schedU(seed, i, 893), s]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  const clues = p4Clues(j, f.id, sus), r = caseSolve(sus, clues, 'T3', f.id, 'p4');
+  if (r.why) { flagSet('case.p4.first', 'none'); jobRelease(P4_SLOT); return; }
+  const c = { id: 'c' + j.id, job: j.id, kind: 'p4', k: 0, band: 'T3', cause: f.id, sus, fewest: r.fewest, clues, got: [], crossed: [], known: [], calls: [], fits: 0, posted: now, until: 0,
+    wait: true, taken: false, talk: false, long: false, train: true, told: false, title: '' };
+  C.open.push(c); j.case = c.id; C.n++; flagSet('case.p4.first', c.id);
+  MACH_REV++;
+}
+if (P5_CASES5) {
+  CASE_KINDS.p4 = { name: 'Which gauge is lying?', ladder: 'p4', noScan: true,
+    fits: (cause, m) => !!cause.part && caseBand(caseRank()) !== 'T1' && caseBand(caseRank()) !== 'T2' && !!panelPlace(m.id) && p4Decoys(m, cause, 0).length >= 2,
+    suspects: (j, seed, band) => { const m = machineById(j.machine), f = caseCauses(m).find(x => x.id === j.cause); return [j.cause].concat(p4Decoys(m, f, seed).slice(0, caseBandOf('p4', band).sus[1] - 1)); },
+    clues: (j, cause, sus) => p4Clues(j, cause, sus),
+    bands: { T3: P4_BAND, T4: P4_BAND },
+    title: p4Title, text: p4Text, view: p4View, tick: p4Tick, sus: (c, id) => id === 'sensor' ? { label: caseText('case.p4.sensor', 'temperature sensor'), part: 'signal card' } : null,
+    wait: j => j.train === 'p4',
+    hint: c => caseText('case.hint.p4.1', 'If every gauge says it\'s fine and it still isn\'t, one of them is lying. Which one never moves?') };
+  CHIEF_NOTES.p4 = { title: 'Which gauge is lying?', key: 'chief.p4', lines: [
+    'Every gauge says fine and it still isn\'t: one of them is lying.',
+    'A gauge that never moves is a gauge that\'s stuck. Trust the ones that wobble.'] };
+  if (typeof WORK_MECH !== 'undefined') WORK_MECH.p4 = { open() { p4Stage(); } };
+  if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip) p4Stage(); });
+}
 // ---- end of slot: Puzzles seat ----
 
 // ---------------------------------------------------------------------
