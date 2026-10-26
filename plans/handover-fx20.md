@@ -1,31 +1,34 @@
 # Handover: FX20 (builder), 2026-10-26
 
-Written at about 58% memory, as agreed with lead 37 (session_019GcNZ4GGEqfiuYDYnue7nX). A fresh seat can pick up from here.
+Written at about 58% memory, updated at about 65% (2026-10-26 ~05:00 UTC). Lead now: lead 38 (session_01G2y9crUv6vDiiEB2q6Yo9W, took over from lead 37). Reviewer: RV19 (session_01V6FDCQp5Ejidi8Chpo2nJG). Build master: BM18 (session_01A3S2VBMYmTt2wCZa8ej7XR). INSPECT_ON is to be ON in 0.93.2 (lead 38).
 
 ## Current job: the bunk inspection walked for real (0.93.2)
 
-The user: "Bunk inspection doesn't do anything. A supervisor should come by." Branch `claude/inspection`, from `claude/integration` b957b92d (0.93.1). HUD `0.93.2-i.N` (i.2 now). Reviewer RV18 (session_01PMfvrCN6StPzwVSPGX7ijH). Words: SW2 (session_017dLaLFBnRUQin3PQEQq6so), CS1 checks.
+The user: "Bunk inspection doesn't do anything. A supervisor should come by." Branch `claude/inspection`, from `claude/integration` b957b92d (0.93.1). HUD `0.93.2-i.N` (i.5 now; branch head eb87ab31, game as 03449ace). Reviewer RV19. Words: SW2 (session_017dLaLFBnRUQin3PQEQq6so), CS1 checks.
 
 ### What's built (all behind `var INSPECT_ON = false`, defined beside the inspection places in section 4's Deck 4 data, so the planner sees it)
 - `inspectWalker(d)`: from the calendar only (the planner may not read live state): Calder in week 1 (Day 4 is the first inspection Thursday; the m3i row's fixed day is 4) if she's on shift, else an officer/senior/chief on a day shift that day, by the week's rota (schedU(864, week, 864)).
 - Section 4 data: with the switch on, a stand spot per junior bunk, `<bed>-stand` (event places, the tile in front of the bunk, two per tile offset ±.22).
 - Section 14 (planner):
   - schedFrame: on inspection Thursdays the walker wakes by 05:30, the day-shift juniors 05:30-06:00 (spread).
-  - morning(): the walker goes to Deck 4 and straight to `4-inspect-a`, then a..h, `INSPECT_STEP` (3) minutes each from 06:30 (tag `inspect`, anim `look`; `inspect` added to `STOPS` so it never stretches). A junior stands at their stand spot until `inspectPass(room)` + 1. If that's within 30 minutes they stand first and wash after (`stood`). Otherwise there's the old 10-minute tidy.
+  - morning(): the walker goes to Deck 4 and straight to `4-inspect-a`, then a..h, `INSPECT_STEP` (5) minutes each from 06:30 (sets off for Deck 4 about 06:05: walking is slow at ship speed) (tag `inspect`, anim `look`; `inspect` added to `STOPS` so it never stretches). A junior stands at their stand spot until `inspectPass(room)` + 1. If that's within 30 minutes they stand first and wash after (`stood`). Otherwise there's the old 10-minute tidy.
 - Section 24c: `inspectOfficer` returns the walker when on. `inspectWalkerAt(d)` gives the room the walker is in (heading to its door spot). `inspectWalkTick` says the words:
   - the arrival line in your room, then your result in person (inspectRun(d, true), 2.6 s later);
   - a line per other room while you're in it;
   - a heads-up toast if they reach your room and you're elsewhere;
   - a "done" toast after Bunk 8.
   The 07:00 Mail is as before.
-- Words, placeholders now (worksText keys, variant by week): `inspect.walk.arrive`, `inspect.walk.room.b`..`h`, `inspect.walk.away`, `inspect.walk.done`. SW2 is writing `content/works/inspect-walk.lines`: bake it with `python3 content_gen.py`, then `content_gen.py --check`.
+- Words: SW2's content/works/inspect-walk.lines (CS1 PASS), baked in i.3 (worksText keys, variant by week): `inspect.walk.arrive`, `inspect.walk.room.b`..`h`, `inspect.walk.away`, `inspect.walk.done`. 
 - `day_check.py`: on an inspection morning with the switch on (run on a switched-on copy), the walk in order a..h between 06:25 and 07:00, at least 25 juniors standing, and no stand spot used twice.
 
 ### Measured
 - Day 4 walker Calder, Day 11 Dahl Mira; route 06:29-06:54. 30 of 55 juniors stand: the night shift's Bunk 8 sleeps (by design), and some juniors are already at early work stints.
 - Live (scratch probe): Calder in Bunk 1 by 06:30; "Morning. Let's see." then the result in person (simNote here: true); Tomas's training as before.
 
-### Checks to finish (running at handover, commit 707aec47)
+### Checks (on i.5 03449ace / eb87ab31)
+- Done: check_fast OK; cadet_test switched off vs b957b92d ALL IDENTICAL; switched on: day_check 4 OK (walk a@365-395 then 5 min each to 07:10, 31 of 46 juniors standing), player_check OK (0 fails), interactions_check OK (on i.4); live probe Day 4: Calder in Bunk 1 at 06:30, "Morning, Bunk 1. Stand by your berths, please.", your result in person. day_check 11 was still running at this update.
+- Tuning item: at ship speed the walker spends much of each 5 minutes walking between the far rooms (seen in rooms a and c at six-minute samples), so the other rooms' lines come only when you're in a room as they pass.
+### (older list)
 - check_fast; cadet_test switched off vs b957b92d (must be ALL IDENTICAL).
 - On a switched-on copy (`sed 's/^var INSPECT_ON = false;/var INSPECT_ON = true;/'`): day_check 4 and 11, player_check (3 known reserved-job FAILs exist on 0.92.6 too: compare), interactions_check.
 - Then push, and send the sha to lead 37 and RV18 (and SW2's words when they land).
