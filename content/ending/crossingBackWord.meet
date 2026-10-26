@@ -1,0 +1,18 @@
+@meeting crossingBackWord
+// SW6 (ending writer A), the crossing back announced (ending spec, the week): Wednesday Day 31, morning. Vance comes to
+// you (the Works bay, or wherever you are). Then EN2's notice, status line and his Mail (event.crossingBack.*.word).
+// Two replies. Regulation numbers are Vance's habit (regulation six: shoes; nine: rest).
+title: Commander Vance
+from: Commander Teo Vance
+gist: Vance came to find you: on Sunday at 14:30 the Wren crosses back over the Line, and you're leading the oath.
+== lines
+vance: There you are. A word, Cadet. Two words. Possibly four.   [gesture]
+vance > you: Sunday, 14:30, the Wren crosses back over the Line. Four weeks to the hour. The bow lounge again.
+vance > you: And you'll lead the oath this time. The Captain asked for you by name. I agreed. Eventually.
+vance: Cadet Bramwell is the only first-timer. Be gentle. Or don't. Tradition is unclear.   [nod]
+? choice
+* Me? Lead it?   flavour:share
+  vance: You. You stood at the front four weeks ago. Now you stand facing the other way. That's all it is.
+* I'll be there. Early.   flavour:practical
+  vance: Early. Correct. Ribbons are up by 14:00. I will be checking them. Twice.   [nod]
+vance: The words are on the card by the lectern. You won't need it. Nobody ever does. Carry on.
