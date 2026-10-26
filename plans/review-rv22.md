@@ -26,3 +26,4 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
 - ~23:45 UTC: lead 40: stopping point (the user's call). No review started; wrote plans/handover-rv22.md.
 - ~23:43 UTC: VB2 at stopping point: claude/ending-checks c0b800b8 is marked WIP (not for verdict); plans/handover-vb2.md there.
 - ~23:45 UTC: B3 sent claude/p5s5-m20 989b1759 (the 4 shoulds). Not reviewed: stopping point. Noted in the handover.
+- ~23:50 UTC: VB1 sent claude/vessel 5578c78d (shoulds, VB2 merge, arrows + controller vessel parts). Not reviewed: stopping point. In the handover.
