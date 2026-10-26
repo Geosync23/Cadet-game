@@ -828,7 +828,7 @@ SD_RUN = r"""((miss) => {
   setShipNow(B2 + b.at - 14); machinesNow(); worksCareerTick(shipNow()); out.atOpen = [j.status, guideList().filter(e => /^sd:/.test(e.id)).map(e => e.id + ' L' + e.level + (e.shown ? ' shown' : ''))];
   if (!miss) { out.claim = claimJob(j.id); setShipNow(B2 + b.at + 1); machinesNow(); worksCareerTick(shipNow()); out.st1 = b.st;
     jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); setShipNow(B2 + b.at + 30); machinesNow(); worksCareerTick(shipNow()); out.st2 = b.st; out.turnin = turnInJob(j.id); }
-  else { for (let t = B2 + b.at; t <= B2 + b.at + 70; t += 5) { setShipNow(t); machinesNow(); worksCareerTick(t); } out.st = b.st; out.after = [j.status, j.why]; out.mail = SHIP.mail.some(x => /shutdown/i.test(x.subject)); }
+  else { for (let t = B2 + b.at; t <= B2 + b.at + 70; t += 5) { setShipNow(t); machinesNow(); worksCareerTick(t); } out.st = b.st; out.after = [j.status, j.why]; out.mail = SHIP.mail.some(x => /shutdown/i.test(x.subject) && /came and went|never came/.test(x.body)); out.settledMail = SHIP.mail.some(x => /shutdown/i.test(x.subject) && /Settled/.test(x.body)); }
   out.sd = JSON.stringify({ done: SHIP.works.sd.done, miss: SHIP.works.sd.miss }); out.use = W.use.m18; out.xp = W.xp;
   out.notes = [...new Set(SHIP.notes.filter(n => /^sd/.test(n.kind)).map(n => n.kind))];
   return out;
@@ -853,12 +853,12 @@ def part_m18(g):
     print(f"  m18: Day {a['day']}: steps {a['log']}, screen '{a['screen']}', badge {a['badge']}, quiet hour booked {a['booked']}, affected {a['keep0']} -> {a['keep1']} with the kept rooms; settled {a['set']}; Day 19: {a['before']} -> {a['atOpen']}; taken: {a['st1']} -> {a['st2']}, turned in {a['turnin']}, uses {a['use']}; notes {a['notes']}")
     print(f"  m18 missed: {b['st']}, the job {b['after']}, Mail {b['mail']}, {b['sd']}")
     check(a['trained'] == a['day'] and a['booked'] and a['booked'][0] == a['day'] + 1, f"m18: trained by the first booking for the next day ({a['trained']}, {a['booked']})")
-    check(a['screen'].startswith('1. The job') and a['badge'] == 1, f"m18: the screen opens on the job, its badge ({a['screen']}, {a['badge']})")
+    check(a['screen'].startswith('1. ') and 'junction' in a['screen'] and a['badge'] == 1, f"m18: the screen opens on the job, its badge ({a['screen']}, {a['badge']})")
     check(a['keep1'] <= a['keep0'], f"m18: keeping rooms on leaves no more people affected ({a['keep0']} -> {a['keep1']})")
     check(a['round'], "m18: the save's sd reads back the same (sdClean)")
     check(a['before'][0] == 'waiting' and a['atOpen'][0] == 'open' and any(x.startswith('sd:day:') and ' L1' in x for x in a['atOpen'][1]), f"m18: the booked hour opens the job with a level-1 arrow ({a['before']} -> {a['atOpen']})")
     check(a['st1'] == 'off' and a['st2'] == 'done' and a['turnin'] and a['use'] == 1 and json.loads(a['sd'])['done'] == [a['day'] + 1], f"m18: power off, back on, done ({a['st1']}, {a['st2']}, {a['sd']})")
-    check(b['st'] == 'lapsed' and b['after'][0] == 'waiting' and b['mail'] and json.loads(b['sd'])['miss'] == [b['day'] + 1], f"m18: a missed hour lapses, says so and waits for a new booking ({b['st']}, {b['after']}, {b['mail']}, {b['sd']})")
+    check(b['settledMail'] and b['st'] == 'lapsed' and b['after'][0] == 'waiting' and b['mail'] and json.loads(b['sd'])['miss'] == [b['day'] + 1], f"m18: a missed hour lapses, says so and waits for a new booking ({b['st']}, {b['after']}, {b['mail']}, {b['sd']})")
     check(json.dumps(a, sort_keys=True) == json.dumps(a2, sort_keys=True), "m18: the same twice")
     p = g.ev(SD_PLAN)
     print(f"  m18 plan: diners in the mess 18:00-19:00 on Day 19: {p['messBefore']} before the settle, {p['messAfter']} after; booking alone changed nothing {p['same']}; changed at 22:00 {p['changed']}; fresh plan the same {p['again']}; settled {p['saved']}")

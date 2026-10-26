@@ -10459,7 +10459,7 @@ function schedBuild(p, d, occ, S) {
           if (pref && (pass === 0 ? !pref.has(pl.id) || avoid.has(pl.id) : pass === 1 ? pref.has(pl.id) || avoid.has(pl.id) : !avoid.has(pl.id))) continue;
           if (!mine && !isFree(pl.id, s, end, o.tag)) continue;
           if (shut && evClosed(pl, B + s, o.event, B + end)) continue;   // closed for the event
-          if (P5_M18 && sdPlanShut(d, occ, pl, B + s, B + end)) continue;   // a shutdown booked for that hour (24w, S5-4): read from the record settled at 22:00 the evening before
+          if (P5_STEP5 && sdPlanShut(d, occ, pl, B + s, B + end, p)) continue;   // Step 5's settled records (24w): a shutdown booked for that hour, a routine moved (24k's P9); read only from records settled at 22:00 the evening before
           if (act === 'leisure' && type.startsWith('work:') && (S.deskOf(pl.id) || (occ.rotIds && occ.rotIds.has(pl.id)))) continue;   // a guest at a work type: never someone's desk, nor today's stand-in's
           const lead = () => { if (!fromXY || dk !== deck) return;   // the walk (#9): they set off earlier, out of the end of what they were doing (at most half of it; never an event meeting, F0b)
             const l = segs[segs.length - 1], cut = l && l.to === t && l.deck === deck && l.act !== 'commute' && !(typeof eventMeetTag === 'function' && eventMeetTag(l.tag)) && !l.kept ? Math.min(walkLead(fromXY(dk), pl), Math.floor((l.to - l.from) / 2)) : 0;
@@ -58573,8 +58573,14 @@ if (P5_M18) (() => { const s = SAVED && SAVED.ship && SAVED.ship.works; if (SHIP
   for (const k of Object.keys(SHIP.works.sd.set)) { SHIP_DAYS.delete(+k); MACH_USE.delete(+k); } } })();   // a plan made while loading, before the record was read back
 // section 14's hook (take(), the room rules, the sim engineer's): is place pl closed by a settled shutdown between ship
 // minutes a and b of day d? Reads only sd.set[d] (settled at 22:00 the evening before), cached on the day's occ
-function sdPlanShut(d, occ, pl, a, b) {
-  if (!P5_M18 || !pl) return false;
+// p: the person being planned. WORKS_PLAN_RULES (others' rules on this same hook, e.g. 24k's P9 moving a routine: each
+// (d, occ, pl, a, b, p) -> true to pass that place by; it must read only records settled at 22:00, as this does)
+var WORKS_PLAN_RULES = [];                               // var: the planner may ask before this line has run
+var WORKS_SETTLE = [];                                   // others' 22:00 settles: fn(day) -> true if day's record changed (its plans are then made again)
+function sdPlanShut(d, occ, pl, a, b, p) {
+  if (!pl) return false;
+  for (const f of WORKS_PLAN_RULES) { try { if (f(d, occ, pl, a, b, p)) return true; } catch (e) { /* a rule's own fault: not closed */ } }
+  if (!P5_M18) return false;
   let L = occ && occ.sdShut;
   if (L === undefined) { L = sdShutList(d); if (occ) occ.sdShut = L; }
   if (!L) return false;
@@ -58595,12 +58601,18 @@ function sdSettle(t) {
   const S = SHIP.works && SHIP.works.sd; if (!S) return;
   const d = worksDay(t), m = t - (d - 1) * 1440, rest = [];
   for (const b of S.book) {
-    if (b.day === d + 1 && m >= SD_SETTLE) { (S.set[b.day] = S.set[b.day] || []).push(b); SHIP_DAYS.delete(b.day); MACH_USE.delete(b.day); simNote('sdSettled', { day: b.day, at: b.at, branch: b.branch }); }
+    if (b.day === d + 1 && m >= SD_SETTLE) { (S.set[b.day] = S.set[b.day] || []).push(b); SHIP_DAYS.delete(b.day); MACH_USE.delete(b.day); simNote('sdSettled', { day: b.day, at: b.at, branch: b.branch });
+      if (typeof mailSend === 'function') { const tx = worksText('mail.sd.settled', 'Tomorrow\'s shutdown | Settled. {where}, {time}. The crew\'s day is planned round it now. Be at the junction at quarter to.', { where: sdBranches()[b.branch].name, time: hhmm(b.at) }), i = tx.indexOf(' | ');
+        mailSend({ at: t, from: worksName('calder'), subject: i > 0 ? tx.slice(0, i) : 'Tomorrow\'s shutdown', body: i > 0 ? tx.slice(i + 3) : tx, quiet: true }); } }   // the Mail is the record (said in person at the booking)
     else if (b.day <= d) { if (!S.miss.includes(b.day)) S.miss.push(b.day); simNote('sdLapsed', { day: b.day, branch: b.branch }); }
     else rest.push(b);
   }
   S.book = rest;
   for (const k of Object.keys(S.set)) if (+k < d - 3) delete S.set[k];
+}
+function worksSettleOthers(t) {                        // the others' 22:00 records (WORKS_SETTLE), on the same clock as sdSettle
+  const d = worksDay(t); if (t - (d - 1) * 1440 < SD_SETTLE) return;
+  for (const f of WORKS_SETTLE) { let ch = false; try { ch = !!f(d + 1); } catch (e) { ch = false; } if (ch) { SHIP_DAYS.delete(d + 1); MACH_USE.delete(d + 1); } }
 }
 // book a shutdown for job jobId on day `day` at minute `at` (from midnight): returns the booking or null. Only for a
 // day not yet settled (tomorrow before 22:00, else the day after), an hour in SD_HOURS, one of the job's branches
@@ -58611,7 +58623,8 @@ function sdBook(jobId, at, branch, keep = [], o = {}) {
   if (day !== sdTarget() || !br || !sdBranchesFor(j.machine).includes(branch) || !Number.isInteger(at) || at < SD_HOURS[0] || at > SD_HOURS[1] || at % 60) return null;
   S.book = S.book.filter(b => b.job !== jobId);
   const b = { day, at, branch, keep: keep.filter(k => br.keep.some(r => sdRoomKey(r) === k)), warned: (o.warned || []).slice(0, 8), inPerson: (o.inPerson || []).slice(0, 8), job: jobId, ...(o.all ? { all: true } : {}) };
-  S.book.push(b); j.sdDay = day; if (Number.isFinite(j.until)) j.until = Math.max(j.until, day * 1440 + dayShiftEnd(day + 1));   // held at least till the day after j.why = worksText('sd.why.booked', 'shutdown booked: {day}, {time}', { day: 'Day ' + day, time: hhmm(at) });
+  S.book.push(b); j.sdDay = day; if (Number.isFinite(j.until)) j.until = Math.max(j.until, day * 1440 + dayShiftEnd(day + 1));   // held at least till the day after
+  j.why = worksText('sd.why.booked', 'shutdown booked: {day}, {time}', { day: 'Day ' + day, time: hhmm(at) });
   simNote('sdBooked', { day, at, branch, job: jobId });
   return b;
 }
@@ -58632,6 +58645,7 @@ function sdMark(t) {
   return n;
 }
 if (P5_M18) WORK_TICKS.push((t, skip) => { sdSettle(t); sdMark(t); });
+if (P5_STEP5) WORK_TICKS.push(t => worksSettleOthers(t));
 // ---- the planning screen: the Works app's Shutdowns tab (S5-4 turn 2). Every control is a plain button in the
 // device's panel (the controller walks it: section 26's padPanel). SD_UI is the draft on screen, live only (not saved):
 // the job, its branch, the hour, the rooms kept, who you warned; Book copies it into sd.book ----
@@ -58685,26 +58699,26 @@ function sdView() {
   if (!j) { say(worksText('sd.none', 'No jobs need the power off just now.')); return B; }
   const L = sdJobs();
   if (L.length > 1) { say(worksText('sd.step.job', '1. The job'), 'head'); B.push({ kind: 'buttons', items: L.map(x => ({ ...sdBtn(sdJobName(x), 'job', x.id), on: x.id === j.id })) }); }
-  else say(worksText('sd.job', '1. The job: {job}.', { job: sdJobName(j) }), 'head');
+  else say('1. ' + worksText('sd.job', '{machine}: needs the power off', { machine: sdJobName(j) }), 'head');
   const bk = sdBooked(j.id);
   if (bk && bk.set) { say(worksText('sd.settled', 'This one\'s settled: Day {day}, {time}. Be at the junction then.', { day: bk.b.day, time: hhmm(bk.b.at) }), 'urgent'); return B; }
   const brs = sdBranchesFor(j.machine), br = sdBranches()[SD_UI.branch];
   say(worksText('sd.step.branch', '2. The branch to switch off'), 'head');
   if (brs.length > 1) B.push({ kind: 'buttons', items: brs.map(k => ({ ...sdBtn(sdBranches()[k].name.replace(/^./, x => x.toUpperCase()), 'branch', k), on: k === SD_UI.branch })) });
-  say(worksText('sd.feeds', 'Feeds: {rooms}.', { rooms: br.rooms.map(r => sdRoomName(sdRoomKey(r))).join(', ') }));
+  say(worksText('sd.feeds.rooms', '{where}: {text}', { where: br.name.replace(/^./, x => x.toUpperCase()), text: br.rooms.map(r => sdRoomName(sdRoomKey(r))).join(', ') }) + '.');
   say(worksText('sd.step.keep', '3. Keep power to'), 'head');
   B.push({ kind: 'buttons', items: br.keep.map(r => { const k = sdRoomKey(r), on = SD_UI.keep.includes(k); return { ...sdBtn((on ? worksText('sd.keep.on', 'Kept on: ') : worksText('sd.keep.off', 'Keep on: ')) + sdRoomName(k), 'keep', k), on }; }) });
   const aff = sdAffected(day, SD_UI.branch, SD_UI.at, SD_UI.keep), marks = sdHourMarks(aff), bad = marks.length > 0;
   say(worksText('sd.step.hour', '4. The hour'), 'head');
-  say(hhmm(SD_UI.at) + '-' + hhmm(SD_UI.at + SD_LEN) + ': ' + (aff.length ? worksText('sd.hour.n', '{n} affected', { n: aff.length }) : worksText('sd.hour.quiet', 'nobody affected')) + (bad ? '. ' + worksText('sd.hour.bad', 'Clashes with {what}.', { what: marks.join(', ') }) : '.'), bad ? 'urgent' : aff.length ? null : 'up');
-  B.push({ kind: 'buttons', items: [sdBtn(worksText('sd.hour.prev', 'Earlier hour'), 'hour', -1), sdBtn(worksText('sd.hour.next', 'Later hour'), 'hour', 1), sdBtn(worksText('sd.hour.quietest', 'Quietest hour'), 'quiet', 0)] });
+  say(hhmm(SD_UI.at) + '-' + hhmm(SD_UI.at + SD_LEN) + ': ' + (aff.length ? worksText('sd.who.n', '{n} people in those rooms then', { n: aff.length }) : worksText('sd.who.none', 'nobody in those rooms then: a quiet hour')) + (bad ? '. ' + worksText('sd.hour.bad', 'Clashes with {thing}.', { thing: marks.join(', ') }) : '.'), bad ? 'urgent' : aff.length ? null : 'up');
+  B.push({ kind: 'buttons', items: [sdBtn(worksText('sd.prev', 'Earlier hour'), 'hour', -1), sdBtn(worksText('sd.next', 'Later hour'), 'hour', 1), sdBtn(worksText('sd.hour.quietest', 'Quietest hour'), 'quiet', 0)] });
   say(worksText('sd.step.warn', '5. Warn who\'s affected'), 'head');
   if (!aff.length) say(worksText('sd.warn.none', 'Nobody to warn at that hour.'));
   else {                                                 // the people who work there and Brennan first, then a few more; a crowd gets one ship notice
     const key = e => (e.id === 'brennan' ? 0 : e.acts.includes('work') ? 1 : 2), shown = aff.slice().sort((x, y) => key(x) - key(y) || (x.id < y.id ? -1 : 1)).slice(0, SD_SHOW);
     B.push({ kind: 'list', rows: shown.map(e => { const done = SD_UI.warned.includes(e.id) || SD_UI.inPerson.includes(e.id), brennan = e.id === 'brennan';
       return { text: worksName(e.id), sub: e.rooms.map(sdRoomName).join(', ') + (brennan && !SD_UI.inPerson.includes('brennan') ? ' · ' + worksText('sd.warn.brennan', 'tell him in person before 22:00') : ''),
-        button: done ? null : worksText('sd.warn.btn', 'Warn'), action: done ? null : { app: 'works', do: 'sd:warn', arg: e.id }, mark: done ? 'up' : null }; }) });
+        button: done ? null : worksText('sd.warn', 'Warn'), action: done ? null : { app: 'works', do: 'sd:warn', arg: e.id }, mark: done ? 'up' : null }; }) });
     if (aff.length > SD_SHOW) { const left = aff.filter(e => !SD_UI.warned.includes(e.id)).length;
       if (left) B.push({ kind: 'buttons', items: [sdBtn(worksText('sd.warn.all', 'Post a ship notice: warn all {n}', { n: aff.length }), 'warnall', 0)] }); else say(worksText('sd.warn.alldone', 'Ship notice posted: all {n} warned.', { n: aff.length }), 'up'); }
   }
@@ -58723,10 +58737,10 @@ function sdAct(verb, arg) {
   else if (v === 'quiet') { let best = null; for (let at = SD_HOURS[0]; at <= SD_HOURS[1]; at += 60) { const a = sdAffected(sdTarget(), SD_UI.branch, at, SD_UI.keep), n = a.length + (sdHourMarks(a).length ? 100 : 0); if (!best || n < best[1]) best = [at, n]; } if (best) SD_UI.at = best[0]; }
   else if (v === 'warn') sdWarn(arg);
   else if (v === 'warnall') { const aff = sdAffected(sdTarget(), SD_UI.branch, SD_UI.at, SD_UI.keep); for (const e of aff) if (e.id !== 'brennan' && !SD_UI.warned.includes(e.id)) sdWarn(e.id, true); SD_UI.all = true; { const b = sdPeek().book.find(x => x.job === SD_UI.job); if (b) b.all = true; }
-    try { toast(worksText('sd.notice.title', 'Ship notice'), worksText('sd.notice.posted', 'Posted: power off in {rooms}, {time}. {n} people warned.', { rooms: sdBranches()[SD_UI.branch].rooms.map(r => sdRoomName(sdRoomKey(r))).join(' and '), time: hhmm(SD_UI.at), n: aff.length })); } catch (e) { /* no UI */ } }
+    try { toast(worksText('sd.notice.title', 'Ship notice'), worksText('sd.notice.posted', 'Posted: power off in {text}, {time}. {n} people warned.', { text: sdBranches()[SD_UI.branch].rooms.map(r => sdRoomName(sdRoomKey(r))).join(' and '), time: hhmm(SD_UI.at), n: aff.length })); } catch (e) { /* no UI */ } }
   else if (v === 'book') { if (!SD_MEALS_OK && sdHourMarks(sdAffected(sdTarget(), SD_UI.branch, SD_UI.at, SD_UI.keep)).length) return;
     const b = sdBook(j.id, SD_UI.at, SD_UI.branch, SD_UI.keep, { warned: SD_UI.warned, inPerson: SD_UI.inPerson, all: SD_UI.all });
-    if (b) { try { toast(worksText('sd.title', 'Shutdown booked'), worksText('sd.booked.toast', 'Day {day}, {time}: {branch}. It settles at 22:00 tonight.', { day: b.day, time: hhmm(b.at), branch: sdBranches()[b.branch].name })); } catch (e) { /* no UI */ }
+    if (b) { try { toast(worksText('sd.title', 'Shutdown booked'), worksText('sd.booked', 'Booked: {where}, Day {day} at {time}. It settles at 22:00 tonight.', { day: b.day, time: hhmm(b.at), where: sdBranches()[b.branch].name })); } catch (e) { /* no UI */ }
       if (typeof sdBookedHook === 'function') sdBookedHook(b); } }
   else if (v === 'cancel') sdCancel(j.id);
   if (typeof deviceRefresh === 'function') try { deviceRefresh(); } catch (e) { /* none */ }
@@ -58746,14 +58760,14 @@ function sdChatButton(p) {
   if (!P5_M18 || !p || p.id !== 'brennan' || !SHIP.works) return null;
   const S = sdPeek(), want = [SD_UI.job && sdJobs().some(x => x.id === SD_UI.job) ? { branch: SD_UI.branch, keep: SD_UI.keep, inPerson: SD_UI.inPerson } : null].concat(S.book).filter(sdGalley);
   if (!want.length || want.every(b => (b.inPerson || []).includes('brennan'))) return null;
-  return { id: 'sd-tell', label: worksText('sd.chat.btn', 'About tomorrow\'s shutdown') };
+  return { id: 'sd-tell', label: worksText('sd.warn.ask', 'About tomorrow\'s shutdown') };
 }
 function sdChatSay(p) {
   if (!p || p.id !== 'brennan') return null;
   if (!SD_UI.inPerson.includes('brennan')) SD_UI.inPerson.push('brennan');
   for (const b of sdPeek().book) if (sdGalley(b) && !b.inPerson.includes('brennan')) b.inPerson.push('brennan');
   simNote('sdWarned', { who: 'brennan', inPerson: true });
-  return worksText('sd.chat.brennan', 'Thanks for telling me to my face. I\'ll get the stock pot on early and we\'ll manage.');
+  return (worksVoice('brennan', 'sd.warn.brennan') || [])[0] || worksText('sd.chat.brennan', 'Thanks for telling me to my face. I\'ll get the stock pot on early and we\'ll manage.');
 }
 if (P5_M18) worksTabAdd({ id: 'shut', title: worksText('sd.tab', 'Shutdowns'), order: 40, verbs: 'sd', view: sdView, act: sdAct, badge: () => SHIP.works && (SHIP.works.tr.m18 !== undefined || SHIP.works.cur && SHIP.works.cur.id === 'm18') ? sdJobs().filter(j => !sdBooked(j.id)).length : 0 });
 // ---- the training (S5-4 turn 3): Thursday Day 18, Calder at Deck 6's port junction (the ladder row's where). The ask as
@@ -58785,13 +58799,13 @@ function sdTrainReserve(d, at) {                          // the training's real
   j.shut = true; j.status = 'waiting'; j.why = sdWhy(); MACH_REV++;
   Object.assign(SD_UI, { job: id, branch: null, at: null, keep: [], warned: [], inPerson: [], all: false });
   if (typeof worksTabShow === 'function' && !SIM_AT) try { worksTabShow('shut'); } catch (e) { /* no device */ }
-  worksSayAll('calder', worksVoice('calder', 'train.m18.open') || SD_SAY.open);
+  { const v = ['feeds', 'hour', 'warn', 'keep'].flatMap(k => worksVoice('calder', 'train.m18.follow.' + k) || []); worksSayAll('calder', v.length ? v : SD_SAY.open); }   // the writer's flags (SW3), else the stand-ins
   simNote('sdTrain', { job: id, day: d });
   return id;
 }
 function sdBookedHook(b) {                                // your first booking trains you (the training's job, or any)
   const W = SHIP.works, c = W && W.cur; if (!W) return;
-  if (c && c.id === 'm18' && c.st === 'do') { worksSayAll('calder', worksVoice('calder', 'train.m18.booked') || SD_SAY.booked); if (sdHourMarks(sdAffected(b.day, b.branch, b.at, b.keep)).length) worksSay('calder', worksText('sd.say.bad', SD_SAY.bad)); worksTrained('m18'); }
+  if (c && c.id === 'm18' && c.st === 'do') { worksSayAll('calder', worksVoice('calder', 'train.m18.follow.book') || SD_SAY.booked); if (sdHourMarks(sdAffected(b.day, b.branch, b.at, b.keep)).length) worksSay('calder', (worksVoice('calder', 'train.m18.follow.meal') || [])[0] || worksText('sd.say.bad', SD_SAY.bad)); worksTrained('m18'); }
 }
 if (P5_M18) WORK_MECH.m18 = { self: true, noJob: false, at: d => { sdStandIn(); return 540; }, reserve: (d, at) => sdTrainReserve(d, at) };
 // the beats while it's under way: the morning notice, the level-1 arrow, the screen's reminder each hour. Once a ship minute
@@ -58800,11 +58814,11 @@ function sdTrainBeats(now) {
   const r = c.st === 'meet' && SHIP.occasions.find(x => x.key === c.occ), d = worksDay(now);
   if (r && c.told && !flag('sd.train.notice.' + d) && !(typeof promoBusy === 'function' && promoBusy())) {
     flagSet('sd.train.notice.' + d, 1);
-    const text = worksText('sd.train.notice', 'Today: shutdowns with Calder, {time}, the port power junction on Deck 6.', { time: hhmm(r.at % 1440) });
+    const text = worksText('m18.notice', 'Today: shutdowns with Calder, {time}, the port power junction on Deck 6.', { time: hhmm(r.at % 1440) });
     if (typeof promoNotice === 'function') promoNotice(text, worksName('calder')); else try { toast(worksName('calder'), text); } catch (e) { /* no UI */ }
   }
   if (r && typeof guideAsk === 'function') guideAsk({ id: 'sd:train:' + d, level: 1, owner: '24w (S5-4)', from: r.at - 15, until: r.at + r.len,
-    goal: () => ({ deck: 6, room: 'j', label: worksText('sd.train.arrow', 'Shutdowns with Calder, {time}', { time: hhmm(r.at % 1440) }) }), done: () => { const x = SHIP.works && SHIP.works.cur; return !x || x.id !== 'm18' || x.st !== 'meet'; } });
+    goal: () => ({ deck: 6, room: 'j', label: worksText('m18.ptr', 'Shutdowns with Calder, {time}', { time: hhmm(r.at % 1440) }) }), done: () => { const x = SHIP.works && SHIP.works.cur; return !x || x.id !== 'm18' || x.st !== 'meet'; } });
   if (c.st === 'do' && now % 60 === 0 && !SIM_AT && !(typeof promoBusy === 'function' && promoBusy())) try { toast(worksName('calder'), worksText('sd.train.remind', SD_SAY.remind)); } catch (e) { /* no UI */ }
 }
 if (P5_M18) WORK_TICKS.push((t, skip) => { if (!skip) sdTrainBeats(Math.floor(t)); });
@@ -58832,34 +58846,34 @@ function sdDayTick(now) {
   const d = worksDay(now), m = now - (d - 1) * 1440, live = now >= shipNow() - 1 && !SIM_AT;
   for (const b of sdToday(now)) {
     const j = SHIP.jobs.find(x => x.id === b.job); b.said = b.said || 0;
-    if (!b.st && m >= 360 && !(b.said & 1) && sdGalley(b) && !(b.inPerson || []).includes('brennan') && live) { b.said |= 1; worksSay('brennan', worksText('sd.brennan.grumble', SD_CREW.brennan)); worksXp(SD_XP.grumble); simNote('sdGrumble', { who: 'brennan', day: d }); }
+    if (!b.st && m >= 360 && !(b.said & 1) && sdGalley(b) && !(b.inPerson || []).includes('brennan') && live) { b.said |= 1; worksSay('brennan', (worksVoice('brennan', 'sd.grumble.brennan') || [])[0] || worksText('sd.brennan.grumble', SD_CREW.brennan)); worksXp(SD_XP.grumble); simNote('sdGrumble', { who: 'brennan', day: d }); }
     if (!b.st && m >= b.at - SD_BEAT.notice && m < b.at + SD_LEN && !(b.said & 2) && live && !(typeof promoBusy === 'function' && promoBusy() && m < b.at)) {
-      b.said |= 2; const text = worksText('sd.day.notice', 'Your shutdown, {time}: {branch}. Take the job at the board on the hour, then the junction.', { time: hhmm(b.at), branch: sdBranches()[b.branch].name });
+      b.said |= 2; const text = worksText('sd.notice', 'Your shutdown, {time}: {where}. Take the job at the board, then the junction on Deck {deck}.', { time: hhmm(b.at), where: sdBranches()[b.branch].name, deck: (machineById(j ? j.machine : '') || { deck: 6 }).deck });
       if (typeof promoNotice === 'function') promoNotice(text, worksName('calder')); else try { toast('Works', text); } catch (e) { /* no UI */ }
     }
     if (!j || j.status === 'done') { if (!b.st || b.st === 'off') { b.st = 'done'; if (!S.done.includes(d)) S.done.push(d); } continue; }   // done (by you, or the crew got to it first)
     if (!b.st && m >= b.at - SD_BEAT.arrow && m < b.at + SD_LEN && j.status === 'waiting') { j.status = 'open'; delete j.why; MACH_REV++; }   // the hour: it's yours to take
     if (!b.st && m >= b.at - SD_BEAT.arrow && m < b.at + SD_LEN && typeof guideAsk === 'function') {
-      const lab = worksText('sd.day.arrow', 'Your shutdown, {time}: switch it off', { time: hhmm(b.at) });
+      const lab = worksText('sd.ptr', 'Your shutdown, {time}: switch it off', { time: hhmm(b.at) });
       guideAsk({ id: 'sd:day:' + d + ':' + b.at, level: 1, owner: '24w (S5-4)', from: (d - 1) * 1440 + b.at - SD_BEAT.arrow, until: (d - 1) * 1440 + b.at + SD_LEN,
         goal: () => { let mj = null; try { mj = myJob(); } catch (e) { mj = null; } if (mj && mj.id === b.job) return null; return { deck: 5, item: /job board/i, room: 'w', label: lab }; },
         done: () => { let mj = null; try { mj = myJob(); } catch (e) { mj = null; } return !!mj && mj.id === b.job || b.st === 'done' || b.st === 'lapsed'; } });
       if (typeof pointAsk === 'function' && typeof pointBoard === 'function' && typeof POINT_ON !== 'undefined' && POINT_ON)
         pointAsk({ id: 'p:sd:' + d + ':' + b.at, force: true, path: pointBoard(b.job, lab), until: (d - 1) * 1440 + b.at + SD_LEN, done: () => { let mj = null; try { mj = myJob(); } catch (e) { mj = null; } return !!mj; } });
     }
-    if (!b.st && j.claimedBy === 'you' && m >= b.at && m < b.at + SD_LEN) { b.st = 'off'; simNote('sdOff', { day: d, branch: b.branch }); if (live && !sdCrewSay(b, 'off', now)) try { toast('Works', worksText('sd.day.off', '{branch}: power off.', { branch: sdBranches()[b.branch].name.replace(/^./, x => x.toUpperCase()) })); } catch (e) { /* no UI */ } }
+    if (!b.st && j.claimedBy === 'you' && m >= b.at && m < b.at + SD_LEN) { b.st = 'off'; simNote('sdOff', { day: d, branch: b.branch }); if (live && !sdCrewSay(b, 'off', now)) try { toast('Works', worksText('sd.day.off', '{where}: power off.', { where: sdBranches()[b.branch].name.replace(/^./, x => x.toUpperCase()) })); } catch (e) { /* no UI */ } }
     if (b.st === 'off' && j.workDone) {                  // the work's done: power back on
       b.st = 'done'; if (!S.done.includes(d)) S.done.push(d); worksUse('m18'); worksXp(SD_XP.done);
       const bad = sdHourMarks(sdAffected(d, b.branch, b.at, b.keep)).length > 0; if (bad) worksXp(SD_XP.grumble);
       simNote('sdBack', { day: d, branch: b.branch, grumble: bad });
-      if (live && !sdCrewSay(b, bad ? 'grumble' : 'back', now)) try { toast('Works', worksText('sd.day.back', '{branch}: power back on.', { branch: sdBranches()[b.branch].name.replace(/^./, x => x.toUpperCase()) })); } catch (e) { /* no UI */ }
+      if (live && !sdCrewSay(b, bad ? 'grumble' : 'back', now)) try { toast('Works', worksText('sd.done', 'Power back on. {where} is running again.', { where: sdBranches()[b.branch].name.replace(/^./, x => x.toUpperCase()) })); } catch (e) { /* no UI */ }
     }
     if (!b.st && m >= b.at + SD_LEN) {                   // missed: it lapses; book again
       b.st = 'lapsed'; if (!S.miss.includes(d)) S.miss.push(d); worksXp(SD_XP.lapse);
       if (j.claimedBy !== 'you') { j.status = 'waiting'; j.why = sdWhy(); delete j.sdDay; MACH_REV++; }
       simNote('sdLapsed', { day: d, branch: b.branch, missed: true });
-      if (typeof mailSend === 'function') mailSend({ at: now, from: worksName('calder'), subject: worksText('sd.lapse.subject', 'Your shutdown'), body: worksText('sd.lapse.body', 'You booked {time} and never came. The crew moved their day for nothing. Book it again.', { time: hhmm(b.at) }) });
-      if (live) try { toast(worksName('calder'), worksText('sd.lapse.say', 'You missed your shutdown. Book it again.')); } catch (e) { /* no UI */ }
+      if (typeof mailSend === 'function') mailSend({ at: now, from: worksName('calder'), ...(t => { const i = t.indexOf(' | '); return { subject: i > 0 ? t.slice(0, i) : 'Your shutdown', body: i > 0 ? t.slice(i + 3) : t }; })(worksText('mail.sd.missed', 'Your shutdown | You booked {time} and never came. The crew moved their day for nothing. Book it again.', { time: hhmm(b.at) })) });
+      if (live) try { toast(worksName('calder'), worksText('sd.missed', 'You missed your shutdown. Book it again.')); } catch (e) { /* no UI */ }
     }
   }
 }
@@ -58869,7 +58883,7 @@ function sdItems(d) {
   const S = P5_M18 && SHIP.works && SHIP.works.sd; if (!S) return [];
   const all = (S.set[d] || []).concat(S.book.filter(b => b.day === d));
   return all.filter(b => !b.st || b.st === 'off').map(b => { const j = SHIP.jobs.find(x => x.id === b.job), m = j && machineById(j.machine);
-    return { from: b.at, to: b.at + SD_LEN, title: worksText('sd.row', 'Your shutdown: {branch}', { branch: sdBranches()[b.branch].name }), where: m ? (DECKS[m.deck].rooms[m.room] || { name: 'the junction' }).name + ', ' + deckWord(m.deck) : 'the junction', kind: 'beat', deck: m ? m.deck : 6, room: m ? m.room : 'j' }; });
+    return { from: b.at, to: b.at + SD_LEN, title: worksText('sd.row', 'Your shutdown: {where}', { where: sdBranches()[b.branch].name }), where: m ? (DECKS[m.deck].rooms[m.room] || { name: 'the junction' }).name + ', ' + deckWord(m.deck) : 'the junction', kind: 'beat', deck: m ? m.deck : 6, room: m ? m.room : 'j' }; });
 }
 // ---- end of slot: Shutdowns ----
 
