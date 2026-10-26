@@ -1311,7 +1311,7 @@ M19 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works), O0 = JSON.st
  // the weeks: one job a week from the week after the lesson, 08:00 on a workday of yours, relay and battery by turns
  W = reset(17 * 1440 + 300); W.tr.m19 = 17; const seen = new Map();
  for (let t = 17 * 1440 + 360; t <= 38 * 1440 + 500; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); for (const x of SHIP.jobs) if (/^(relayswap|battcell)$/.test(x.kind)) seen.set(x.id, x); }
- out.weeks = [...seen.values()].map(x => [worksDay(x.posted), weekday(worksDay(x.posted)), Math.round(x.posted % 1440), x.kind, machineById(x.mach).kind, jobTier(x)]);
+ out.weeks = [...seen.values()].map(x => [worksDay(x.posted), weekday(worksDay(x.posted)), Math.round(x.posted % 1440), x.kind, machineById(x.machine).kind, jobTier(x)]);
  // a relay swap: read, a wrong pick (opens again), the right pick, swap, test; the machine put right; a use
  W = reset(19 * 1440 + 480); W.tr.m19 = 17; W.use.m19 = 0; const rel = machineList().find(m => m.kind === 'relay' && panelPlace(m.id));
  let j = pwrJob('relayswap', rel.id, shipNow(), { key: 91 }); SHIP.jobs.push(j); SHIP.machines[rel.id].cond = 30;
@@ -1964,14 +1964,14 @@ WSTAP_SETUP = r"""(() => { const d = 23; skipTo((d - 1) * 1440 + 570); machinesN
   const W = worksInit(); W.tier = Math.max(W.tier, 2); W.rank = W.rank === 'junior' ? 'officer' : W.rank; W.tr.t2 = W.tr.t2 || 10; W.tr.m15 = W.tr.m15 || 17;
   SHIP.jobs = SHIP.jobs.filter(x => x.claimedBy !== 'you'); SHIP.machines['4-junction-1'].cond = 40;
   const j = rewJob('4-junction-1', shipNow(), { key: 77 }); SHIP.jobs.push(j); if (!claimJob(j.id)) return null;
-  return { id: j.id, mach: '4-junction-1' }; })()"""
+  if (ACT && typeof actEnd === 'function') actEnd(true); if (DEV.choose) devChosen(-1); goToDeck(4); return { id: j.id, mach: '4-junction-1' }; })()"""
 WSTAP_PICK = "((j, k) => { const want = rewRight(j, k); return jobStops(j)[k].opts.options.findIndex(o => o.id === want); })"
-WSTAP_TAP = r"""((id) => { const m = machineById(id), p = cellPos(...m.at), v = new THREE.Vector3(); if (deckDef.num !== m.deck) goToDeck(m.deck);
+WSTAP_TAP = r"""((id) => { const m = machineById(id), p = cellPos(...m.at), v = new THREE.Vector3(); if (deckDef.num !== m.deck) return ['not on its deck', false];
   let best = null, bd = 1e9; for (const it of ITEMS) { if (!it.hit) continue; it.hit.getWorldPosition(v); const dd = Math.hypot(v.x - p.x, v.z - p.z); if (dd < bd) { bd = dd; best = it; } }
   player.obj.position.copy(cellPos(...m.panel)); player.stop(); const at = new THREE.Vector3(p.x, 0.8, p.z); return [best && best.t, playerTap(best, at, at.clone())]; })"""
 WSTAP_NOW = "((id) => { const j = SHIP.jobs.find(x => x.id === id) || {}; return { done: (j.stepsDone || []).slice(), n: jobStops(j).length, work: !!j.workDone, act: ACT ? ACT.kind : null, ws: ACT && ACT.o ? ACT.o.ws : null, card: !!DEV.choose }; })"
 def wstap_play(g, setup, pick, tag):
-    s = g.ev(setup); g.step(10)
+    s = g.ev(setup); g.step(40)   # the deck's things in place before the first tap
     if not check(s, f'{tag}: the job could not be set up'): return None
     acts, taps = set(), 0
     for n in range(60):
@@ -1990,6 +1990,10 @@ def wstap_play(g, setup, pick, tag):
     check(st['work'] and len(st['done']) == st['n'] and 'workStep' in acts, f'{tag}: its steps should play by tap to the end ({st})')
     return st
 JOB_TAP_EXTRA = {}
+JOB_TAP_EXTRA['relayswap'] = (r"""(() => { const d = 23; skipTo((d - 1) * 1440 + 600); machinesNow(); if (DIALOGUE) dialogueEnd(true);
+  const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.t3 = 15; W.tr.m19 = 17; toolGive('tester');
+  SHIP.jobs = SHIP.jobs.filter(x => x.claimedBy !== 'you'); const j = pwrJob('relayswap', '1-relay-1', shipNow(), { key: 91 }); SHIP.jobs.push(j); if (!claimJob(j.id)) return null;
+  if (ACT && typeof actEnd === 'function') actEnd(true); if (DEV.choose) devChosen(-1); goToDeck(1); return { id: j.id, mach: '1-relay-1' }; })()""", "((j, k) => j.bad)")   # 24v (S5-3): a relay swap by tap, the failing relay picked
 def part_wstap(pw):
     g = Game(pw, sys.argv[1], 390, 844)
     try:

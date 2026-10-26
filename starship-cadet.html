@@ -58594,8 +58594,8 @@ onSim('job', n => {                                      // B: Torres comes by a
 // tester (S5-3 turn 2, feeding P5's power stage); 3 (6 uses) the batteries' balance (Step 6's P6). The beats (spec "The
 // beats"): an urgent notice at 10:30, a level 1 arrow and its ring line "Power and relays with Calder, 11:00" from
 // 10:45. Saved: SHIP.works.side.pwr = { done, wrongs, week } (cleaned on read); a job keeps its own bad relay or cell
-// (j.bad) and picks (j.picks), and its machine as j.mach, not j.machine: a registered kind with j.machine is played at
-// its panel as a plain timed repair (section 15's jobBegin; 15b's ixChore leaves it out), so its steps never came up. Job slot PWR_SLOT (24 core's default for this row, 11, is Hauling's). schedU keys
+// (j.bad) and picks (j.picks). Its stops are tapped one by one through 15b's ixStepwise (claude/workstep-tap-fix: before it, a
+// registered kind with j.machine was played at its panel as a plain timed repair). Job slot PWR_SLOT (24 core's default for this row, 11, is Hauling's). schedU keys
 // 1060 (which machine), 1061 (the bad relay or cell), 1062 (the week's day). No R(). Off (P5_M19 false): nothing registers.
 const PWR_AT = 660, PWR_POST = 480, PWR_CREW = 40, PWR_KEEP = 90, PWR_SLOT = 32, PWR_RELAYS = 6, PWR_CELLS = 4;
 const PWR_TRAIN = ['1-relay-1', '1-relay-2'];            // Calder's, then yours
@@ -58618,7 +58618,7 @@ function pwrJob(kind, id, t, o = {}) {
   const d = worksDay(t), k = o.key !== undefined ? o.key : d, n = kind === 'battcell' ? PWR_CELLS : PWR_RELAYS;
   const bad = Math.floor(schedU(pwrSeed(), k, 1061) * n) % n;
   const title = kind === 'battcell' ? worksText('m19.card.batt', 'Check battery bank {n}', { n: id.split('-').pop() }) : worksText('m19.card.relay', 'Swap a failing relay: {place}', { place: pwrName(id) });
-  const j = jobMake(kind, { id: kind + (o.slot || '') + ':' + id + '@' + Math.floor(t / 60), mach: id, deck: m.deck, room: m.room, h: Math.floor(t / 60), tier: 3, urgency: 0, title, bad, picks: {}, wrongs: 0,
+  const j = jobMake(kind, { id: kind + (o.slot || '') + ':' + id + '@' + Math.floor(t / 60), machine: id, deck: m.deck, room: m.room, h: Math.floor(t / 60), tier: 3, urgency: 0, title, bad, picks: {}, wrongs: 0,
     ...(o.slot ? { reserved: o.slot, until: (d - 1) * 1440 + dayShiftEnd(d) } : { leave: Math.max(60, (d - 1) * 1440 + dayShiftEnd(d) - Math.max(t, (d - 1) * 1440 + DAY_SHIFT[0])) + 60 }),
     ...(o.train ? { train: o.train } : {}) });
   j.posted = j.found = t;
@@ -58626,7 +58626,7 @@ function pwrJob(kind, id, t, o = {}) {
 }
 // the stops, all at the machine's panel. A training job: Calder names the relay (no pick); a board job: read, pick, swap, test
 function pwrStops(j) {
-  const m = machineById(j.mach), pp = m && panelPlace(m.id); if (!pp) return [];
+  const m = machineById(j.machine), pp = m && panelPlace(m.id); if (!pp) return [];
   const batt = j.kind === 'battcell', n = batt ? PWR_CELLS : PWR_RELAYS, st = (tag, how, mins, opts) => ({ deck: m.deck, placeId: pp, mins, tag, how, ...(opts ? { opts } : {}) });
   const lamps = batt ? pwrLamps(n, j.bad, worksText('m19.batt.ok', 'green'), worksText('m19.batt.low', 'amber, sagging')) : pwrLamps(n, j.bad, worksText('m19.relay.ok', 'steady'), worksText('m19.relay.bad', 'stutters'));
   if (j.train) return [st('open', 'look', 1, { secs: 3, text: worksText('m19.train.open', 'The rack hums. One lamp stutters: R{n}. That\'s the one.', { n: j.bad + 1 }) }),
@@ -58648,14 +58648,14 @@ function pwrStepDone(j, k, res) {
   return true;
 }
 function pwrDone(j, t, by) {
-  const s = SHIP.machines && SHIP.machines[j.mach];
+  const s = SHIP.machines && SHIP.machines[j.machine];
   if (s) { s.cond = Math.max(s.cond, PWR_KEEP); s.state = machineState(s.cond); }
   if (by === 'you') {
     const P = pwrState(); if (P && !j.train) { P.done++; P.wrongs += j.wrongs || 0; }
     if (!j.train) { worksUse('m19'); j.rightFirst = !j.wrongs; }
-    try { toast(j.title, j.kind === 'battcell' ? worksText('m19.batt.done', 'Bank {n}\'s cells level again.', { n: String(j.mach).split('-').pop() }) : j.kind === 'conduitrun' ? worksText('m19.run.done', 'Feed tagged and logged. The run\'s sound again.') : worksText('m19.relay.done', 'Relay swapped. The rack\'s steady.')); } catch (e) { /* no UI */ }
+    try { toast(j.title, j.kind === 'battcell' ? worksText('m19.batt.done', 'Bank {n}\'s cells level again.', { n: String(j.machine).split('-').pop() }) : j.kind === 'conduitrun' ? worksText('m19.run.done', 'Feed tagged and logged. The run\'s sound again.') : worksText('m19.relay.done', 'Relay swapped. The rack\'s steady.')); } catch (e) { /* no UI */ }
   }
-  simNote('power', { id: j.id, kind: j.kind, machine: j.mach, by: by || null, wrongs: j.wrongs || 0 });
+  simNote('power', { id: j.id, kind: j.kind, machine: j.machine, by: by || null, wrongs: j.wrongs || 0 });
   if (typeof MACH_REV !== 'undefined') MACH_REV++;
 }
 // the week's day: a workday of yours after the lesson, not rewiring's, nor a test day; and the week's machine (one with no job open)
@@ -58666,7 +58666,7 @@ function pwrDay(w) {
 }
 const pwrKindOf = w => { const K = worksStage('m19') >= 1 && hasTool('tester') ? ['relayswap', 'conduitrun', 'battcell'] : ['relayswap', 'battcell']; return K[w % K.length]; };   // stage 2 (3 uses): conduit runs join, with the tester
 const PWR_MACH = { relayswap: 'relay', battcell: 'battery', conduitrun: 'conduit' };
-const pwrBoxes = kind => machineList().filter(m => m.kind === PWR_MACH[kind] && !m.stub && panelPlace(m.id) && !SHIP.jobs.some(j => (j.machine === m.id || j.mach === m.id) && j.status !== 'done'));
+const pwrBoxes = kind => machineList().filter(m => m.kind === PWR_MACH[kind] && !m.stub && panelPlace(m.id) && !SHIP.jobs.some(j => j.machine === m.id && j.status !== 'done'));
 // the beats (Day 17): the notice at 10:30, the level 1 arrow with its ring line from 10:45, both while the lesson is asked
 function pwrBeats(now) {
   const W = SHIP.works, c = W && W.cur; if (!c || c.id !== 'm19' || c.st !== 'meet' || !c.told) return;
@@ -58712,7 +58712,7 @@ if (P5_M19 && typeof jobKindAdd === 'function') {
     at: () => PWR_AT,                                    // the lesson at 11:00 (the beats table), after the visit's line breaks up
     reserve(d, at, slot, o = {}) {                       // Calder's on 1-relay-1, then yours on 1-relay-2, in this row's own slot
       const id = PWR_TRAIN[o.yours ? 1 : 0], t = (d - 1) * 1440 + at; if (!machineById(id)) return null;
-      SHIP.jobs = SHIP.jobs.filter(x => !(x.reserved === PWR_SLOT && heldForYou(x) && !x.claimedBy) && !((x.machine === id || x.mach === id) && x.status === 'open' && !x.claimedBy && !x.reserved));
+      SHIP.jobs = SHIP.jobs.filter(x => !(x.reserved === PWR_SLOT && heldForYou(x) && !x.claimedBy) && !(x.machine === id && x.status === 'open' && !x.claimedBy && !x.reserved));
       const j = pwrJob('relayswap', id, t, { slot: PWR_SLOT, train: o.train || 'm19', key: d * 2 + (o.yours ? 1 : 0) }); if (!j) return null;
       SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
       return j.id;
@@ -58786,8 +58786,8 @@ function runJob(kind, id, t, o = {}) {
   return j;
 }
 function runStops(j) {
-  const m = machineById(j.mach), pp = m && panelPlace(m.id); if (!pp) return [];
-  const F = runFeeds(j.mach), read = F.map((d, i) => worksText('m19.run.feed', 'Deck {deck}: {n}', { deck: d, n: runVolts(j, i) })).join(' · ');
+  const m = machineById(j.machine), pp = m && panelPlace(m.id); if (!pp) return [];
+  const F = runFeeds(j.machine), read = F.map((d, i) => worksText('m19.run.feed', 'Deck {deck}: {n}', { deck: d, n: runVolts(j, i) })).join(' · ');
   return [{ deck: m.deck, placeId: pp, mins: 1, tag: 'open', how: 'look', opts: { secs: 3, text: worksText('m19.run.open', 'The inspection box. A feed for each deck above: {text}.', { text: F.join(', ') }) } },
     { deck: m.deck, placeId: pp, mins: 1, tag: 'test', how: 'choose', opts: { tool: 'tester', title: worksText('m19.run.pick', 'Which feed reads low?'), text: worksText('m19.run.tester', 'The tester on each feed:') + ' ' + read,
       options: F.map((d, i) => ({ id: 'x' + i, label: worksText('m19.run.option', 'Deck {deck}', { deck: d }) })) } },
@@ -58803,7 +58803,7 @@ function runStepDone(j, k, res) {
 }
 function runDone(j, t, by) {
   pwrDone(j, t, by);
-  simNote('conduitRun', { id: j.id, machine: j.mach, deck: runFeeds(j.mach)[j.bad] || null, by: by || null });
+  simNote('conduitRun', { id: j.id, machine: j.machine, deck: runFeeds(j.machine)[j.bad] || null, by: by || null });
 }
 // ---- the Senior's part of the Wednesday drill (the plan's "you run the Works part"; 24c's drill stays the juniors'):
 // once you're trained in M19, a side job yours at 14:50 on Wednesdays you're on shift, at the Works bay's muster hatch:
