@@ -243,3 +243,12 @@ Set career to Day 8, then the test morning, the board, the test turned in, the e
   punishment on your best day. Probably old; worth a word or a backlog row.
 
 **Verdict on bd558a84: FIXES NEEDED (M1-M4).**
+
+### Step 1b: 104420fd (game sha256 6f975a4d...dc288; sent at 07:32, before my verdict on bd558a84)
+Since bd558a84: SW2's word polish (promo.result's opening and lines, promo-beats banks), Dev mode's promotion beat at 08:05
+with the switch on (DM_BEATS 'promo' `at` getter), career_check meets the 08:15 result between its hourly steps, backlog
+FX28-1. Checks: cadet_test vs b957b92d with the switch off ALL IDENTICAL; career_check only the known-old "busy: Relied on
+before Day 5" (M3 done); devmode_check OK (M4 done). M1 (the result's arrow level 2) and M2 (no seek in the Works bay) are
+unchanged in the code (promoGuide, promoSummonsTick), so the live finding stands.
+
+**Verdict on 104420fd: FIXES NEEDED (M1, M2; S1-S6 as above).**
