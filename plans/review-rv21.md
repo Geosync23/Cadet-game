@@ -27,7 +27,22 @@ writers SW5 session_01FFW8ZfuaUqiPPqqhruwZhX (endgame pool), SW6 session_01Gy3XC
 ## Verdicts
 | Branch | Piece | Verdict | Sha |
 |---|---|---|---|
+| claude/vessel-words (SW4) | V-6 words | PASS (4 shoulds) | 88128070 |
 
 ## Log
 - 2026-10-26 ~20:05 UTC: started; told all seven builders and lead 39 my session id. Read specs, RV18 handover, TEAM.md.
   Test setup per testing-guide 2.0 in /tmp/cadet-work. Waiting for shas.
+- ~20:40 UTC: **SW4 claude/vessel-words 88128070 (from d9c7e5f0): PASS, 4 shoulds.** Words only (bank
+  event-veyliVessel.lines + 8 .meet scenes, baked; game diff is additions only, nothing reads the keys until VB1).
+  Read every line against the beats table and canon: every Veyli they/them (Taavek, Saruth, the ship), the Admiral absent,
+  no "permission"/"leave"/reach, comet name unspoken, ASCII only; Day 0 canon right (Zeke showed you your bunk; Basil
+  "a week aboard" fits Day 21); C1 commendation Mail, C2 view and lights, C3 wait (late meet, wait bubbles, Zeke after
+  the hour, bench meet) all present. Checks: content_gen --check up to date; lines_check PASS (0 errors, 69 old
+  warnings); check_fast QUICK CHECK OK in 458 s; cadet_test vs d9c7e5f0: first run a_start 14812 px (beside
+  check_fast: backlog FX17-2), alone ALL IDENTICAL. Phone play / controller: n/a for words (comes with VB1's code).
+  Shoulds: (1) mail.commendation assumes you met Taavek at the ramp and made the part yourself, and promises an
+  in-person word "this week" that no beat builds: wording that holds for the bench meeting / helpers finishing, and
+  drop the promise unless VB1 builds it. (2) C3 says Calder comes to find you at 09:45: there is no Calder line for it
+  (only the notice); add an in-person line or two (talk.rampFind) so it is said in person first. (3)
+  gather.chain.thanks names Pell and Kovac as your neighbours: wrong when either is not in the line; neutral wording.
+  (4) helpers speak only at steps 1, 3, 4; steps 2 and 5 have Taavek alone: add 2 and 5 for each of the four helpers.
