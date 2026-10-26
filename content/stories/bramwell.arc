@@ -85,7 +85,7 @@ them: That's helped. Thanks, thanks. I'll still ask you a hundred things tomorro
 tone: resolution
 tier: acquaintance
 gapDays: 0
-where: Mess hall
+where: meal
 when: beat:bramwell.3 flag:bramwell.plant.done day:25
 crescendo: meal:dinner
 quiet: 5
