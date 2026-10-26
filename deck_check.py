@@ -256,5 +256,38 @@ with sync_playwright() as pw:
         if g.errors: ok = False; print('errors (the comet)', g.errors[:4])
     else: print('The comet: switched off')
     g.close()
+    # A Veyli vessel needs help (VB2: V-5 and V-3's spots, plans/veyli-vessel-spec.html), on a copy with EV_VESSEL_ON on (a
+    # preview switch until its switch-on turn; added to the copy when the build hasn't the line yet): the parts chain's 40
+    # spots and Zeke's on Deck 5 pass the places check, in line order, each within a tile of the next; and, once VB1's
+    # event is in, draw calls at a phone's size in the Works bay during the chain (the props, the crates) and at the bow
+    # glass at 17:41 Monday (the ship outside lit), each under the 450 budget, the ship one draw call of its own
+    src = open(sys.argv[1]).read()
+    if not re.search(r'const EV_VESSEL_ON = true\b', src):
+        src = re.sub(r'const EV_VESSEL_ON = [^;]+;', 'const EV_VESSEL_ON = true;', src, count=1) if 'const EV_VESSEL_ON' in src else src.replace('const P926_APPT = ', 'const EV_VESSEL_ON = true;\nconst P926_APPT = ', 1)
+    vp = WORK / 'test' / ('_vessel_' + os.path.basename(sys.argv[1])); vp.write_text(src)
+    g = Game(pw, str(vp), 390, 844)
+    if g.ev("typeof vesselOn === 'function' && vesselOn()"):
+        g.ev("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")
+        g.ev("goToDeck(5)"); g.step(3)
+        pl = g.ev(PLACES)
+        vc = g.ev("(() => { const V = DECKS[5].vesselChain, ps = V.spots.map(id => deckDef.places.find(p => p.id === id)); return { n: ps.filter(Boolean).length, call: !!deckDef.places.find(p => p.id === V.call), you: V.spots.includes(V.you), gap: Math.max(...ps.slice(1).map((p, k) => Math.hypot(p.xy[0] - ps[k].xy[0], p.xy[1] - ps[k].xy[1]))) }; })()")
+        bad = [b for b in pl['bad'] if b.startswith('5-vchain')]
+        print(f"The Veyli vessel: the chain's spots on Deck 5: {vc['n']} (Zeke's {vc['call']}, yours in the line {vc['you']}), the widest gap {vc['gap']:.2f} tiles; bad: {bad}")
+        if vc['n'] != 40 or not vc['call'] or not vc['you'] or vc['gap'] > 1.0 or bad: ok = False; print('  the chain spots: not 40, a spot missing, a gap over a tile, or a bad place')
+        if g.ev("!!SHIP_EVENTS.veyliVessel"):
+            g.ev("skipTo(27 * 1440 + 780); if (!SHIP.event || SHIP.event.id !== 'veyliVessel') eventStart('veyliVessel', 27)")
+            for name, deck, room, day, m in (('the parts chain, Works bay, Sunday 13:30', 5, 'w', 28, 810), ('the engine lights, the bow lounge, Monday 17:41', 3, 'L', 29, 1061)):
+                g.ev(f"for (let t = Math.max(shipNow() + 1, {day - 1} * 1440 + {m - 6}); t <= {day - 1} * 1440 + {m}; t++) {{ setShipNow(t); EV_MIN = -1; eventsTick(); }}")
+                g.ev(f"(() => {{ goToDeck({deck}); deckCrewFill(); const tl = ROOM_TILES['{room}'], c = cellPos(...tl[Math.floor(tl.length / 2)]); player.obj.position.copy(cellPos(...nearestOpen(c.x, c.z, player))); player.stop(); target.copy(player.obj.position).setY(.7); eventsDress(shipNow()); }})()")
+                g.step(40)
+                c = g.ev("({ calls: renderer.info.render.calls, crew: DECK_CREW.length, sky: !!VSKY.m, dress: [...DRESS.on.keys()].filter(k => /^vessel/.test(k)) })")
+                if c['sky']: g.ev("VSKY.m.visible = false"); g.step(1); c['noSky'] = g.ev("renderer.info.render.calls"); g.ev("VSKY.m.visible = true")
+                else: c['noSky'] = c['calls']
+                print(f"The Veyli vessel, {name}, phone size: draw calls {c['calls']} ({c['noSky']} without the ship outside), {c['crew']} on the deck, the ship outside {c['sky']}, dressing {c['dress']}")
+                if c['calls'] >= 450 or c['calls'] - c['noSky'] > 1 or (deck == 3 and not c['sky']): ok = False; print('  the vessel scene: over budget, no ship outside at the glass, or more than one call for it')
+        else: print("The Veyli vessel: its event isn't in this build yet (VB1's block): the scenes wait")
+        if g.errors: ok = False; print('errors (the Veyli vessel)', g.errors[:4])
+    else: print('The Veyli vessel: not in this build')
+    g.close(); vp.unlink(missing_ok=True)
     print('DECK CHECK OK' if ok else 'DECK CHECK FAILED')
     sys.exit(0 if ok else 1)   # so a failing check fails for the computer too (check_fast.sh, GitHub)
