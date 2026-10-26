@@ -19,5 +19,7 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
 |---|---|---|---|
 
 ## Log
-- 2026-10-26 ~23:55 UTC: started; told lead 40, VB1, VB2, B3. Test kit in /tmp/cadet-work and /tmp/cadet-work2. No new
+- 2026-10-26 ~23:30 UTC: started; told lead 40, VB1, VB2, B3. Test kit in /tmp/cadet-work and /tmp/cadet-work2. No new
   pushes on the three branches yet.
+- ~23:36 UTC: VB2: ending-checks not pushed; stay path (asis, teachoff, track) passing locally; change-of-mind, go runs and
+  controller_check `ending` still in trial. Will send the sha, then day_check 31/50 ON copy.
