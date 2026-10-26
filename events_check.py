@@ -60,7 +60,7 @@ PLANS = r"""(days => {
       if (!e) { out.bad.push(d + ' ' + p.id + ' at ' + id + ', which is not on'); continue; }
       if (s.from < B + e.from - Math.max(e.ev.early || 0, p.id === e.ev.host || typeof P926_TRADS !== 'undefined' && P926_TRADS && /^rec-(wren|chiefs)-talk$/.test(e.id) && recSpeaker(p, d) ? 5 : 0, e.ev.meal && typeof TRAD_LINE !== 'undefined' ? TRAD_LINE[1] : 0, e.ev.lead ? 35 : 0) ||   // the sim plans a host 5 minutes early; a meal tradition's diners sit as the line serves them, up to TRAD_LINE[1] early (sim 0.26.41); the Captain's address seats them up to 30 minutes early (18f's friLead), its host 5 more
          s.to > B + e.to + LINGER) out.bad.push(d + ' ' + p.id + ' at ' + id + ' ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ' outside ' + hhmm(e.from) + '-' + hhmm(e.to));
-      const pools = eventOpts(e.ev, p).map(([n, k]) => S.shared.get(n + '|' + k) || []).flat().map(pl => pl.id);
+      const pools = (e.ev.whereFor ? e.ev.whereFor(p, d, eventOpts(e.ev, p)) : eventOpts(e.ev, p)).map(([n, k]) => S.shared.get(n + '|' + k) || []).flat().map(pl => pl.id);   // a place by person too (whereFor: the comet's hosts at their own spots, FX25)
       if (!pools.includes(s.placeId) && !(s.act === 'commute' && !s.placeId)) out.bad.push(d + ' ' + p.id + ' at ' + id + ' in ' + s.placeId + ', not one of its places');
       (went[id] = went[id] || new Set()).add(p.id); (places[id] = places[id] || new Set()).add(s.placeId);
     }
@@ -313,7 +313,7 @@ DIPLO = r"""(() => {
   const D = SHIP_EVENTS.diplomatic, on = D.phases.find(p => p.id === 'onset').at[0], fw = D.moments.find(m => m.id === 'farewell').at[0];   // the greeting's and the farewell's days (2 and 7; 1 and 3 with the event swap, 0.93.2)
   const run = () => {
     SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0; MEETINGS.length = 0; EV_DAYS.clear();
-    SHIP.eventLog.push(...EV_BEFORE('ionStorm'), { id: 'ionStorm', startDay: 10, endDay: 16, band: 'smooth', threads: {}, mine: {} });
+    SHIP.eventLog.push(...EV_BEFORE('ionStorm'), { id: 'ionStorm', startDay: 10, endDay: 16, band: 'smooth', threads: {}, mine: {} }); SHIP.eventLog.push(...EV_BEFORE('diplomatic').filter(l => !SHIP.eventLog.some(x => x.id === l.id)));   // and any calendar event before it (the comet on Day 22 without the swap, FX25)
     const due = eventDueDay(), sd = due.day, a0 = ADDRESSES.length, mails = [], send = mailSend;
     mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 - sd + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
     eventStart('diplomatic', sd); EV_DAYS.clear();
@@ -334,7 +334,7 @@ DIPLO = r"""(() => {
   const sc = MEETING_SCRIPTS.veyliGreeting; dialogueShow('veyliGreeting', { id: 'veyliGreeting', who: ['marrow', 'vance', 'saruth', 'teshavi', 'kesrin'], at: shipNow() });
   const names = []; let n = 0; while (DIALOGUE && n++ < 20) { const v = dialogueView(); names.push(v.choices ? '[choice]' : v.who); dialogueStep(v.choices ? 1 : undefined); }
   // live: the greeting plays when you're in the shuttle bay at 10:00 on the visit's day 2
-  SHIP.event = null; SHIP.eventLog.length = 0; SHIP.eventLog.push(...EV_BEFORE('ionStorm'), { id: 'ionStorm', startDay: 10, endDay: 16, band: 'smooth', threads: {}, mine: {} }); MEETINGS.length = 0; EV_DAYS.clear();
+  SHIP.event = null; SHIP.eventLog.length = 0; SHIP.eventLog.push(...EV_BEFORE('ionStorm'), { id: 'ionStorm', startDay: 10, endDay: 16, band: 'smooth', threads: {}, mine: {} }); SHIP.eventLog.push(...EV_BEFORE('diplomatic').filter(l => !SHIP.eventLog.some(x => x.id === l.id)));   // and any calendar event before it (the comet on Day 22 without the swap, FX25) MEETINGS.length = 0; EV_DAYS.clear();
   const sd = a.due.day; eventStart('diplomatic', sd); EV_DAYS.clear();
   skipTo((sd - 1 + on) * 1440 + 580); goToDeck(5); const bx = ROOM_BOX.S;
   player.obj.position.copy(cellPos(Math.floor((bx.i0 + bx.i1) / 2), Math.floor((bx.j0 + bx.j1) / 2))); target.copy(player.obj.position).setY(.7);
@@ -344,6 +344,47 @@ DIPLO = r"""(() => {
   SHIP_EVENTS.diplomatic.draft = keep.draft;
   SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr); MEETINGS.length = 0; MEETINGS.push(...keep.m); EV_DAYS.clear();
   return { a, same: JSON.stringify(a) === JSON.stringify(b), names, live };
+})()"""
+
+# the comet (FX25, 0.93.2; plans/events-plan-2.html Part A, A8), on paper with the events base on, twice from a clean
+# slate (the calendar's earlier events logged): due Monday Day 22; the four gatherings 21:30-22:40 and who goes (the
+# hosts, the counts, Officers and up only at the Captain's tea); nobody else in the four rooms 21:15-22:45; Gym club and
+# the cup over by 21:15; a birthday that day an hour clear; then run Day 22 to Day 24: the phases at their minutes, Sato's
+# Mail at 08:00 and the log on Day 23 at 08:00, the two jobs from 09:00, smooth with no threads and no commendation
+COMET = r"""(() => {
+  if (typeof EV_COMET_ON === 'undefined' || !EV_COMET_ON || !SHIP_EVENTS.comet) return { off: true, has: !!SHIP_EVENTS.comet, cal: (EV_CALENDAR.find(r => r.id === 'comet') || {}).day || null };
+  const run = () => {
+    const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice(), m: MEETINGS.splice(0), com: JSON.stringify(SHIP.commendations || null) };
+    SHIP.event = null; SHIP.eventLog.length = 0; SHIP.eventLog.push(...EV_BEFORE('comet')); EV_DAYS.clear(); SHIP_DAYS.clear();
+    const due = eventDueDay(), d = due ? due.day : 22, B = (d - 1) * 1440, ids = ['cometLounge', 'cometScope', 'cometStern', 'cometCaptain'];
+    const on = eventsOn(d).map(e => e.id + ' ' + hhmm(e.from) + '-' + hhmm(e.to)), rooms = new Set(COMET.rooms.map(r => r[0]));
+    const going = {}, junior = [], hosts = {}, intruders = [];
+    for (const id of ids) going[id] = 0;
+    for (const p of schedPeople()) for (const s of planDay(p, d)) {
+      const m = s.tag && /^ev-(comet[A-Za-z]+)/.exec(s.tag), pl = s.placeId && placeById(s.placeId);
+      if (m && ids.includes(m[1]) && s.from <= B + 1290 + 10 && s.to > B + 1290) { going[m[1]]++; if (m[1] === 'cometCaptain' && (p.rank === 'junior' || p.rank === 'guest')) junior.push(p.id); }
+      if (m && SHIP_EVENTS.comet.moments.some(x => x.id === m[1] && x.host === p.id)) hosts[p.id] = hhmm(s.from % 1440) + '-' + hhmm(s.to % 1440);
+      if (!m && pl && rooms.has(pl.deck + '|' + pl.room) && s.from < B + 1365 && s.to > B + 1275 && s.act !== 'sleep' && s.act !== 'work') intruders.push(p.id + ' ' + s.act + ' ' + (s.tag || '') + ' ' + hhmm(s.from % 1440) + '-' + hhmm(s.to % 1440) + ' ' + s.placeId);
+    }
+    const ev = eventsOn(d), gym = ev.filter(e => /^(running|department-cup)$/.test(e.id)).map(e => e.id + ' ' + hhmm(e.to)), bday = ev.filter(e => e.id === 'birthday').map(e => hhmm(e.from) + '-' + hhmm(e.to));
+    const late = ev.filter(e => e.ev.when && !e.ev.when.ship && e.to > 1230 && e.from < 1425).map(e => e.id + ' ' + hhmm(e.from) + '-' + hhmm(e.to));
+    // run it: Day 21 to Day 24 every 10 minutes, the Mail captured
+    eventStart('comet', d); EV_DAYS.clear();
+    const mails = [], send = typeof mailSend === 'function' ? mailSend : null, steps = [], phase = {}, jobs = [];
+    if (send) mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 - d + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
+    for (let t = B - 60; t <= B + 2 * 1440 + 60; t += 10) {
+      const o = eventAdvance(t, true); if (o.length) steps.push(Math.floor(t / 1440) + 1 - d + ' ' + hhmm(t % 1440) + ' ' + o.join(', '));
+      const n = eventNow(t); if (n && n.id === 'comet' && !phase[n.phase]) phase[n.phase] = Math.floor(t / 1440) + 1 - d + ' ' + hhmm(t % 1440);
+      if (t === B + 540) { const l = eventMod('jobs', undefined, t); if (Array.isArray(l)) for (const j of l) jobs.push(j.id + (j.rank ? ':' + j.rank : '') + ' ' + hhmm(j.at) + '-' + hhmm(j.hold)); }
+    }
+    if (send) mailSend = send;
+    const log = SHIP.eventLog.filter(l => l.id === 'comet').map(l => l.band + ' ' + JSON.stringify(l.threads)), com = JSON.stringify(SHIP.commendations || null) !== keep.com;
+    const R = { due, on, going, junior, hosts, intruders: intruders.slice(0, 8), nIn: intruders.length, gym, bday, late, steps, phase, mails, jobs, log, com, left: SHIP.event && SHIP.event.id };
+    SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr); MEETINGS.length = 0; MEETINGS.push(...keep.m); EV_DAYS.clear(); SHIP_DAYS.clear();
+    return R;
+  };
+  const a = run(), b = run();
+  return { a, same: JSON.stringify(a) === JSON.stringify(b) };
 })()"""
 
 ok = True
@@ -912,6 +953,32 @@ with sync_playwright() as pw:
     print('Quiz night game:', Q)
     if not (Q['three'] and Q['same'] and Q['next'] and Q['oneRight'] and Q['start'] and Q['closed'] and Q['score'] is not None and 1 <= Q['score'] <= 3 and len(Q['seen']) >= 7): fail(f"the quiz game: {Q}")
 
+    # 9f. the comet (FX25, 0.93.2), on paper (see COMET above); with the switch off (a copy, at the end): nothing at all
+    CM = g.ev(COMET)
+    if CM.get('off'):
+        print('The comet: switched off (no entry:', not CM['has'], ')')
+    else:
+        a = CM['a']
+        print('The comet on paper: due', a['due'], '| the same twice:', CM['same'])
+        print('  that day:', a['on'])
+        print('  going at 21:30 (bow glass, scope, blankets, Captain\'s tea):', a['going'], '| hosts', a['hosts'], '| juniors at the tea', a['junior'])
+        print('  others in the four rooms 21:15-22:45:', a['nIn'], a['intruders'], '| gym:', a['gym'], '| birthday:', a['bday'], '| other evening traditions:', a['late'])
+        print('  phases:', a['phase']); [print('    ' + x) for x in a['steps']]
+        print('  Mail:', a['mails'], '| jobs at 09:05:', a['jobs'], '| result', a['log'], '| a commendation:', a['com'])
+        G = a['going']
+        if not a['due'] or a['due'].get('id') != 'comet' or a['due'].get('day') != 22: fail(f"the comet isn't due on Monday Day 22: {a['due']}")
+        if sum(1 for x in a['on'] if x.endswith('21:30-22:40') and x.startswith('comet')) != 4: fail(f"the comet's four gatherings at 21:30-22:40: {a['on']}")
+        if G['cometLounge'] < 30 or G['cometScope'] < 6 or G['cometStern'] < 6 or G['cometCaptain'] < 4 or a['junior']: fail(f"who goes to the comet: {G} (juniors at the Captain's tea: {a['junior']})")
+        if set(a['hosts']) != {'sato', 'mori', 'tomas', 'marrow'}: fail(f"the comet's hosts: {a['hosts']}")
+        if a['nIn']: fail(f"others in the comet's rooms 21:15-22:45: {a['intruders']}")
+        if any(x.split(' ')[1] > '21:15' for x in a['gym']): fail(f"Gym club or the cup past 21:15: {a['gym']}")
+        if any(x.split('-')[1] > '20:30' for x in a['bday']): fail(f"the birthday not an hour clear of the comet: {a['bday']}")
+        if a['phase'] != {'warning': '0 07:00', 'onset': '0 21:30', 'resolution': '0 22:40', 'afterglow': '1 00:00'}: fail(f"the comet's phases: {a['phase']}")
+        if a['mails'][:1] != ['0 08:00 A comet tonight'] or not any(x.startswith('1 08:00 ') and 'comet log' in x for x in a['mails']): fail(f"the comet's Mail: {a['mails']}")
+        if a['jobs'] != ['cometBlankets 09:00-17:00', 'cometFilter:officer 09:00-17:00']: fail(f"the comet's jobs: {a['jobs']}")
+        if a['log'] != ['smooth {}'] or a['com'] or a['left']: fail(f"the comet's end: {a['log']} commendation {a['com']} left {a['left']}")
+        if not CM['same']: fail('the comet ran differently the second time')
+
     # 10. the bridge invite (0.34.35), last: it skips on to day 50
     I = g.ev(INVITE)
     print('Bridge invite: eves', I['eves'][:4], '| booked', I['booked'], '| Vance there', I['vanceThere'], '| open', I.get('open'), '| flag', I.get('flagBefore'), '->', I.get('flagAfter'), '| after', I['after'], '| bridge hour day 23', I['before'], '->', I['on23'], f"({I['going']} going)")
@@ -1093,6 +1160,20 @@ with sync_playwright() as pw:
         if len(live) < 3 or 'marrow' not in live: fail(f"late piano, Day {d}: the Captain and at least 2 others not there by 22:05 ({live})")
     if g.errors: fail(f"console: {g.errors[:4]}")
     g.b.close()
+
+# the comet switched off (FX25, 0.93.2): a copy with `const EV_COMET_ON = false;` has no comet at all (no entry, no
+# gatherings on Day 22, the calendar's row passed over)
+_src = pathlib.Path(sys.argv[1]).read_text()
+if re.search(r'^const EV_COMET_ON = true;', _src, re.M):
+    _off = WORK / 'test' / f'_comet_off_{os.getpid()}.html'
+    _off.write_text(re.sub(r'^const EV_COMET_ON = true;', 'const EV_COMET_ON = false;', _src, count=1, flags=re.M)); _RUN_FILES.append(_off)
+    with sync_playwright() as pw:
+        g = Game(pw, str(_off))
+        X = g.ev("({ has: !!SHIP_EVENTS.comet, day22: eventsOn(22).map(e => e.id).filter(id => /comet/i.test(id)), sw: EV_SHIPWIDE.filter(e => /comet/i.test(e.id)).length, due: evCalPlan().map(r => r.id) })")
+        print('The comet switched off:', X)
+        if X['has'] or X['day22'] or X['sw'] or 'comet' in X['due']: fail(f"the comet switched off still shows: {X}")
+        if g.errors: fail(f"console (comet off): {g.errors[:4]}")
+        g.close()
 
 print('EVENTS CHECK OK' if ok else 'EVENTS CHECK FAILED')
 sys.exit(0 if ok else 1)
