@@ -1,5 +1,48 @@
 # Check runner CR4: results
 
+## 0.93.2 full round, first pass (2026-10-26)
+
+- **Candidate:** `claude/staging-0.93.2` 41c8a7e0 (HUD 0.93.2; ON: TRAD_0932, EV_COMET, INSPECT, STORM_SAT, SAVE_SLOTS, AUTO_DOORS, PROMO_BEATS; EV_SWAP off)
+- **starship-cadet.html sha256:** `89eafdc1cc2f2cbcc77db9168b009cb19561b9efe9067aeedf6386947a704960` (matches BM18's)
+- **OLD:** b957b92d (0.93.1, game 6cd54ab9...8eee)
+- **Share:** day_check Days 6, 8, 12, 13 (storm Saturday), 16, 19; appt_check; saves_check (new). One at a time, alone, at 41c8a7e0, `CADET_WORK=/tmp/work-cr4`. Reported to BM18 and lead 38. A second pass is expected after FX26's fix for CR6's mech m9 FAIL.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 6 | OK (exit 0, 286 s) | `DAY CHECK OK`; plans the same twice; nobody stuck; 0 arrivals drawn elsewhere; draw calls peak 278 / 450 |
+| day_check 8 | OK (exit 0, 268 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 278 / 450 |
+| day_check 12 | OK (exit 0, 275 s) | `DAY CHECK OK`; plans the same twice; storm skip as designed; draw calls peak 249 / 450 |
+| day_check 13 (storm Saturday) | OK (exit 0, 272 s) | `DAY CHECK OK`; plans the same twice; storm skip as designed; draw calls peak 262 / 450 (was 252) |
+| day_check 16 | OK (exit 0, 287 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 281 / 450 |
+| day_check 19 | OK (exit 0, 292 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 247 / 450 |
+| appt_check | OK (exit 0, 629 s) | `APPT CHECK OK`; 223 ok lines; FAIL lines only inside its planted self-tests |
+| saves_check | **FAIL once, then OK 3 times: NEW, intermittent** | First full run exit 1 (121 s), `SAVES CHECK FAILED`; re-runs: `migrate` alone OK, full run OK, full run OK (all `SAVES CHECK OK`, "migrate: the old save is Slot 1, day 3") |
+
+### saves_check: the failing run, full output
+
+```
+  off: one save, no app, keys ['starship-cadet-arrived', 'starship-cadet-save']
+FAIL migrate: the save left by the build with slots off is not there
+FAIL migrate: stopped: TypeError: the JSON object must be str, bytes or bytearray, not NoneType
+Traceback (most recent call last):
+  File "/home/user/Cadet-game/saves_check.py", line 232, in <module>
+    try: f(b)
+  File "/home/user/Cadet-game/saves_check.py", line 95, in part_migrate
+    o = json.loads(old)['time']
+  File "/usr/lib/python3.13/json/__init__.py", line 345, in loads
+TypeError: the JSON object must be str, bytes or bytearray, not NoneType
+  switch and delete: slots 1-3 played, switched, deleted
+  download: file and capability carry the save, starship-cadet-day12-0930.json
+  load: bad files refused, good ones played in Slots 3 and 1
+  nosave: no slots with ?nosave; Dev slots are -dev
+  shot: saves_check_page.png
+SAVES CHECK FAILED
+```
+
+**What it looks like (not proven):** part_migrate makes a game with slots off, saves it, closes that page, then opens a new page in the same browser context with an init script that copies `localStorage["starship-cadet-save"]` into `window.__first` before the game's own script runs. In the failing run `window.__first` came back null, though part_off had just seen the save in storage. Since the same file passed 3 times right after, this reads as a timing race in the check (the save not yet visible to the new page, or the init script reading too early), not a game fault. **NEW** (not on the known list; no OLD comparison possible, 0.93.1 has no save slots). Reported to BM18 and lead 38 at once, for saves_check's owner.
+
+**CR4:** day_check x6 and appt_check OK; saves_check NEW intermittent FAIL (1 of 4), reported.
+
 ## 0.93.1 full round (2026-10-26)
 
 - **Candidate:** `claude/staging-0.93.1` 0a2fc617 (HUD 0.93.1; arrows_check promo fix, boardLesson/promoTestDay)
