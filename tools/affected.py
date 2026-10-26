@@ -55,6 +55,7 @@ CHECKS = {
     'sound': ('python3 sound_check.py {g}', 5),   # section 27, sound and music (0.93.0; ~7.5 min beside two other checks)
     'promo_beats': ('python3 promo_beats_check.py {g}', 3),   # the promotion beats on paper (0.93.2, FX28)   # section 27, sound and music (0.93.0; ~7.5 min beside two other checks)
     'saves': ('python3 saves_check.py {g}', 3),   # the save slots and the Saves app (0.93.2, FX27)
+    'ending': ('python3 ending_check.py {g}', 2),   # the ending on paper (EN1; plans/ending-spec.html): off, the offer, your answer
     # in check_fast already (listed only so a check file of theirs is known)
     'deck': ('python3 deck_check.py {g}', 4), 'machine': ('python3 machine_check.py {g}', 1),
     'leave': ('python3 leave_check.py {g}', 1), 'device': ('python3 device_check.py {g}', 4),
@@ -83,12 +84,11 @@ RULES = {
 for k in ['24', '24a', '24b', '24c', '24d', '24m', '24n', '24g', '24i', '24j', '24t', '24s', '24e', '24f', '24h', '24l', '24o', '24q', '24r', '24p']:
     RULES[k] = ['career', 'mech', 'leave']
 RULES['24k'] = ['puzzle', 'mech', 'career']
-# the ending (section 29, EN1; plans/ending-spec.html): picked by the rules alone until the map is remade (ending_check joins
-# CHECKS when it's written, E-2 turn 2)
-RULES['29'] = ['events', 'bigevents', 'saves', 'social', 'day1', 'devmode']
-RULES['29a'] = ['events', 'bigevents', 'social', 'talk', 'saves', 'day1']
-RULES['29b'] = ['saves', 'devmode', 'deck', 'events', 'bigevents', 'perf', 'day1', 'cadet']
-RULES['29c'] = ['lines', 'talk', 'social', 'events', 'bigevents', 'career', 'day1']
+# the ending (section 29, EN1; plans/ending-spec.html): picked by the rules alone until the map is remade
+RULES['29'] = ['ending', 'events', 'bigevents', 'saves', 'social', 'day1', 'devmode']
+RULES['29a'] = ['ending', 'events', 'bigevents', 'social', 'talk', 'saves', 'day1']
+RULES['29b'] = ['ending', 'saves', 'devmode', 'deck', 'events', 'bigevents', 'perf', 'day1', 'cadet']
+RULES['29c'] = ['ending', 'lines', 'talk', 'social', 'events', 'bigevents', 'career', 'day1']
 
 
 def git(*a):
