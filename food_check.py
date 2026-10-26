@@ -49,6 +49,15 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.ev("window.__realTick = tickShip; tickShip = () => {}")
     g.ev("player.steer = null; player.stop()")
+    # (S5-4, B3) DAY_SD=at:branch[:keep] (e.g. 1080:galley): a shutdown settled for DAY, as if booked the evening before
+    # (a build with P5_M18 on: a copy with P5_STEP5 switched on); the galley must still feed everyone
+    if os.environ.get('DAY_SD'):
+        at, br, *kp = os.environ['DAY_SD'].split(':')
+        sd = g.ev(f"""(() => {{ if (typeof P5_M18 === 'undefined' || !P5_M18) return null; const W = worksInit(Math.max(1020, ({DAY} - 2) * 1440 + 1320)); if (!W) return null;
+          const S = sdData(); S.set[{DAY}] = [{{ day: {DAY}, at: {int(at)}, branch: {json.dumps(br)}, keep: {json.dumps(kp)}, warned: [], inPerson: ['brennan'], job: null }}];
+          SHIP_DAYS.clear(); MACH_USE.clear(); const L = sdShutList({DAY}); return L ? [...L[0].rooms] : null; }})()""")
+        print(f"A shutdown settled for Day {DAY} at {at} on {br} (DAY_SD): rooms closed {sd}")
+        if sd is None: fail('DAY_SD given, but this build has no shutdowns switched on (P5_M18)')
     print('Food reaches the cold store by:', g.ev("FOOD.restock === 'carts' && typeof cartClaim === 'function' ? 'hover cart only (cartClaim)' : 'the 10:30 top-up'"))
     print(f"Days {DAY}-{DAY + DAYS - 1} from {g.ev(f'WEEKDAYS[weekday({DAY})]')}, {g.ev('schedPeople().length')} people, {g.ev('galleyStaff().length')} galley staff")
     # the forecasts below (4b, 4c, 4e, and 4k's garden) read the machines' record, whose last hour stands for every hour after it: after
