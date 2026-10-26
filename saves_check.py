@@ -9,7 +9,8 @@
 #            downloads capability gets the same name and text; with no capability, Copy save as text is offered
 #   load:    a bad file (not JSON, a JSON that isn't a save, v 3) says so and changes nothing; a good one through the file
 #            picker into an empty slot plays it; over a used slot it asks, Keep it changes nothing, Replace it plays it
-#   nosave:  ?nosave never shows the app or reads the slot; Dev (#dev) slots carry "-dev"
+#   nosave:  ?nosave never shows the app or reads the slot; Dev (#dev) slots carry "-dev"; Dev mode's Copy my real game
+#            copies the Playtest slot being played and changes no Playtest slot
 #   shot:    the Saves page at phone size (saves_check_page.png)
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 saves_check.py BUILD.html [part ...]   Good is SAVES CHECK OK (exit 0); a failure exits 1.
@@ -201,6 +202,12 @@ def part_nosave(b):
     pg.close()
     pg = Page(ctx, '#dev')
     check(pg.ev("SAVE_BASE === 'starship-cadet-save-dev' && slotKey(2) === 'starship-cadet-save-dev-2' && SAVE_KEY === 'starship-cadet-save-dev'"), 'nosave: the Dev slots don\'t carry -dev')
+    # Dev mode's Copy my real game copies the Playtest slot being played (Slot 2 here, Day 11), not Slot 1 (Day 2)
+    pg.page.evaluate('() => { const s = JSON.parse(localStorage.getItem("starship-cadet-save")); s.time.day = 11; localStorage.setItem("starship-cadet-save-2", JSON.stringify(s)); }')
+    real2 = pg.page.evaluate('k => localStorage.getItem(k)', K2)
+    pg.ev_reload('devmodeCopyReal()')
+    check(pg.ev('DEVMODE && SHIP.time.day') == 11, f'nosave: Copy my real game did not copy Playtest Slot 2: {pg.ev("clockText()")}')
+    check(pg.page.evaluate('k => localStorage.getItem(k)', K2) == real2 and day_of(pg.page.evaluate('k => localStorage.getItem(k)', K1)) == 2, 'nosave: Copy my real game changed a Playtest slot')
     pg.close()
     print('  nosave: no slots with ?nosave; Dev slots are -dev')
 

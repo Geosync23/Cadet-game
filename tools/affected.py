@@ -53,6 +53,7 @@ CHECKS = {
     'arc': ('python3 arc_check.py {g}', 1), 'lines': ('python3 lines_check.py {g}', 1),
     'bigevents': ('python3 bigevents_check.py {g}', 5), 'fridays': ('python3 fridays_check.py {g}', 4),
     'sound': ('python3 sound_check.py {g}', 5),   # section 27, sound and music (0.93.0; ~7.5 min beside two other checks)
+    'saves': ('python3 saves_check.py {g}', 3),   # the save slots and the Saves app (0.93.2, FX27)
     # in check_fast already (listed only so a check file of theirs is known)
     'deck': ('python3 deck_check.py {g}', 4), 'machine': ('python3 machine_check.py {g}', 1),
     'leave': ('python3 leave_check.py {g}', 1), 'device': ('python3 device_check.py {g}', 4),
@@ -69,14 +70,14 @@ RULES = {
     'page': ['cadet', 'interactions', 'bubble'], '1': ['*'], '2': ['cadet', 'deck'], '3': ['cadet', 'deck'], '4': ['*'], '4a': ['*'],
     '4b': ['cadet', 'deck', 'perf'], '4c': ['*'], '4d': ['cadet', 'deck', 'day1', 'events', 'path'], '4e': ['cadet', 'deck', 'disc', 'day1'],
     '5': ['cadet', 'perf'], '13': ['*'], '14': ['day1', 'events', 'food', 'machine', 'intro', 'cadet', 'join', 'bigevents', 'fridays', 'day12', 'day21'],
-    '19': ['device', 'puzzle', 'player', 'arrows_pointer'], '15': ['player', 'interactions', 'clothes', 'leave'], '15b': ['interactions', 'player', 'join', 'arrows_pointer'],
+    '19': ['device', 'puzzle', 'player', 'arrows_pointer', 'saves'], '15': ['player', 'interactions', 'clothes', 'leave'], '15b': ['interactions', 'player', 'join', 'arrows_pointer'],
     '15r': ['deck', 'disc', 'interactions'], '16': ['food', 'day1'], '17': ['machine', 'mech', 'career', 'puzzle'],
     '22': ['lines', 'talk', 'bubble'], '18': ['events', 'join', 'weekend', 'intro', 'bigevents', 'fridays', 'day7', 'day12', 'day13', 'day16', 'day27'],
     '18f': ['fridays', 'events', 'join', 'intro', 'bigevents', 'day1', 'food', 'perf', 'day5', 'day19'], '20': ['social', 'arc', 'bubble', 'lines'],
-    '20c': ['social', 'arc'], '21': ['intro', 'clothes', 'day0'], '21b': ['clothes'], '23': ['tiles'], '23b': ['disc'], '6': ['cadet', 'bubble'],
+    '20c': ['social', 'arc'], '21': ['intro', 'clothes', 'day0', 'saves'], '21b': ['clothes'], '23': ['tiles'], '23b': ['disc'], '6': ['cadet', 'bubble'],
     '7': ['path', 'day1'], '8': ['cadet', 'perf'], '8b': ['cadet', 'perf', 'day1'], '9': ['day1', 'events', 'cadet', 'deck', 'day21'],
     '10': ['day1', 'cadet', 'deck', 'events'], '8c': ['disc', 'day1', 'perf'], '11': ['cadet', 'interactions', 'bubble'],
-    '25': ['devmode', 'dev_arrow'], '12': ['*'],
+    '25': ['devmode', 'dev_arrow', 'saves'], '12': ['*'],
 }
 for k in ['24', '24a', '24b', '24c', '24d', '24m', '24n', '24g', '24i', '24j', '24t', '24s', '24e', '24f', '24h', '24l', '24o', '24q', '24r', '24p']:
     RULES[k] = ['career', 'mech', 'leave']

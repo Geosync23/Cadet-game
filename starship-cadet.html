@@ -60950,8 +60950,9 @@ function devmodeUndo() {
   try { sessionStorage.setItem(DM_KEY.undo, '1'); } catch (e) { /* then it stays: a second Undo is harmless */ }   // the Undo is used: the new page drops it (devmodeBuild)
   devmodeLoad(u, 'Undo (' + u.label + ')');
 }
+const dmRealKey = () => { const n = SAVE_SLOTS_ON ? +slotRead(DM_REAL.save + '-slot') : 1; return n >= 2 && n <= SLOT_N && n % 1 === 0 ? DM_REAL.save + '-' + n : DM_REAL.save; };   // the Playtest save slot being played (section 13's slots; Slot 1 is DM_REAL.save)
 function devmodeCopyReal() {                              // your real game into the Dev save: read, never written
-  let real = null, arr = null; try { real = localStorage.getItem(DM_REAL.save); arr = localStorage.getItem(DM_REAL.arrived); } catch (e) { real = null; }
+  let real = null, arr = null; try { real = localStorage.getItem(dmRealKey()); arr = localStorage.getItem(DM_REAL.arrived); } catch (e) { real = null; }
   if (!real) return devmodeSay('There\'s no real game saved in this browser to copy.');
   const why = devmodeBusy(); if (why) return devmodeSay(why);
   const kept = devmodeKeep('Copy my real game'); if (kept) return devmodeSay('Not done: ' + kept);
