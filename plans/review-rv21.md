@@ -34,6 +34,10 @@ writers SW5 session_01FFW8ZfuaUqiPPqqhruwZhX (endgame pool), SW6 session_01Gy3XC
 | claude/ending-words-a (SW6) | fixes | PASS | aed8af49, b8c89e7a |
 | claude/vessel-sky (VB2) | V-5 + V-3 spots, v.1-v.3 | PASS (3 shoulds) | c070862c |
 | claude/vessel-sky (VB2) | v.4-v.5 (shoulds done + SW4 words) | PASS | cfc2dbe3 |
+| claude/vessel (VB1) | V-1 | PASS | 581fc84f |
+| claude/ending (EN1) | E-2/E-3 turns 2-4 | FIXES NEEDED (1 must) | 93eb5380 |
+| claude/ending (EN1) | fixes | PASS | cd4196d5 |
+| claude/ending-crossing (EN2) | E-1 + E-4, whole ending | own parts PASS (2 shoulds); waits for cd4196d5 merge | da1f8e14 |
 | claude/ending (EN1) | E-2 turn 1 skeleton | PASS (1 should: docs) | 1c72a28d |
 
 ## Log
@@ -96,3 +100,15 @@ writers SW5 session_01FFW8ZfuaUqiPPqqhruwZhX (endgame pool), SW6 session_01Gy3XC
     stale "questions are open" comment (section 29 core); last breakfast arrow level 2 and no fetch (missable); the Monday
     crowd re-staged every minute with no end if you never board (crew stuck all day: needs a fetch/disperse rule);
     end page "What you kept" shows raw trace ids; the handover's plans/ending-shots/ is not in the commit.
+- ~21:50 UTC: **EN1 93eb5380: FIXES NEEDED.** Must: on the goodbye Monday (Go) the shift counts as missed (tip "You missed
+  a shift without leave"; seen in the phone probe at 09:19 in the bay). Shoulds: crowd re-staged forever; breakfast level 2
+  and no fetch; raw trace ids on the end page; stale comment; no screenshots committed. 7029e8ad/93eb5380: cadet identical,
+  ending_check OK, check_fast OK, saves OK; probe: offer arrow level 1 at 15:50, ready room scene 16:01, bay 53 at 178 calls.
+- ~21:55 UTC: **EN2 da1f8e14 (whole ending): EN2's parts PASS**, 2 shoulds (the oath you lead is missable: fetch from 14:35
+  and hold the start; Vance's notice hard-coded). cadet vs aad4d266 ALL IDENTICAL; lines_check PASS (104 warnings);
+  content_gen up to date; ending_check OK; probe: oath arrow level 1 14:05, crossingBackOath (19 lines) at 14:45.
+- ~22:05 UTC: **EN1 cd4196d5: PASS** (careerOff hook endOffDay for Day 36 Go, section 20 owner to review the line; crowd limits
+  + Zeke 10:15 fetch; breakfast level 1 + Pell fetch; keepsakes named). ending_check 10 parts OK (limits: off36, no miss);
+  cadet ALL IDENTICAL.
+- ~22:05 UTC: **VB1 V-1 581fc84f: PASS.** day_check 27-30 on-copy OK; bigevents late-save FAILs = stale expectations fixed by
+  FX29 8a91f1dc (re-running on V-2). V-2 73942e8a: probe, cadet, events, bigevents running.
