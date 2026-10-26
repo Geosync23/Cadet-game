@@ -1,0 +1,475 @@
+<title>The Ending Spec</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one reading column. A calendar table, then each event as day cards with an hour-by-hour list,
+   then the shared parts (rank, groups, dialogue, Mail, traditions, stories, device, sound, props, risks,
+   checks, estimate), then the questions and the answers form. */
+:root {
+  --bg: #f3f5f2; --surface: #ffffff; --ink: #18221c; --muted: #536159; --line: #d3dcd5;
+  --visit: #5b4a8f; --visitSoft: #e7e2f3; --comet: #a8741a; --cometSoft: #f6ead2;
+  --old: #c9d2cc; --oldInk: #3e4b43; --some: #e6ebe7; --flag: #9a3d2e;
+  --display: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --visit: #b7a6ec; --visitSoft: #2a2440; --comet: #f0c060; --cometSoft: #3d3016;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --visit: #b7a6ec; --visitSoft: #2a2440; --comet: #f0c060; --cometSoft: #3d3016;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--body); margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; }
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 34px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 42px); font-weight: 800; line-height: 1.05; }
+h2 { font-size: 23px; font-weight: 800; }
+h3 { font-size: 18px; font-weight: 700; }
+p, li { max-width: 72ch; }
+p { margin: 0; }
+ul, ol { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--comet); }
+.lead { font-size: 18px; color: var(--muted); }
+section { display: grid; gap: 14px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.fact { border-top: 3px solid var(--visit); padding-top: 8px; font-size: 14.5px; }
+.fact:nth-child(2n) { border-top-color: var(--comet); }
+.fact b { display: block; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.note { font-size: 14.5px; color: var(--muted); }
+.flagnote { font-size: 14.5px; color: var(--flag); }
+
+/* day cards with an hour-by-hour list */
+.day { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; }
+.day.visit { border-top: 4px solid var(--visit); }
+.day.comet { border-top: 4px solid var(--comet); }
+.day.quiet { border-top: 4px solid var(--old); }
+.day header { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.phase { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 1px 8px; border-radius: 999px; background: var(--some); color: var(--oldInk); }
+.tl { list-style: none; padding: 0; margin: 0; display: grid; gap: 0; }
+.tl li { display: grid; grid-template-columns: 86px 1fr; gap: 4px 12px; padding: 8px 0; border-top: 1px solid var(--line); max-width: none; }
+.tl li:first-child { border-top: 0; }
+.tl time { font: 700 13.5px var(--mono); color: var(--muted); padding-top: 2px; }
+.tl .what b { display: inline; }
+.tl .where { display: block; font-size: 13px; color: var(--muted); }
+.tl .you { display: block; font-size: 14.5px; margin-top: 3px; padding-left: 10px; border-left: 3px solid var(--comet); }
+.tl li.big .what > b::after { content: "  big group"; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--visit); }
+.tl li.career time { color: var(--flag); }
+@media (max-width: 520px) { .tl li { grid-template-columns: 1fr; } }
+
+/* cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.card.visit { border-top: 4px solid var(--visit); }
+.card.comet { border-top: 4px solid var(--comet); }
+.card .role { font-size: 13px; color: var(--muted); }
+
+/* dialogue */
+.script { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.script h3 { font-size: 16px; }
+.script .ctx { font-size: 13.5px; color: var(--muted); }
+.ln { display: grid; grid-template-columns: 96px 1fr; gap: 10px; font-size: 15px; }
+.ln b { font-size: 13px; color: var(--visit); padding-top: 2px; }
+.script.comet .ln b { color: var(--comet); }
+.ln i { color: var(--muted); }
+.choice { font-size: 14.5px; padding-left: 106px; }
+.choice::before { content: "You: "; font-weight: 700; color: var(--muted); }
+@media (max-width: 520px) { .ln { grid-template-columns: 1fr; gap: 0; } .choice { padding-left: 0; } }
+
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 620px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 0 7px; border-radius: 999px; margin: 1px 2px 1px 0; }
+.tag.v { background: var(--visitSoft); color: var(--visit); }
+.tag.c { background: var(--cometSoft); color: var(--comet); }
+.tag.new { background: var(--some); color: var(--ink); border: 1px dashed var(--muted); }
+.tag.re { background: var(--old); color: var(--oldInk); }
+.tag.risk { background: transparent; color: var(--flag); border: 1px solid var(--flag); }
+
+/* questions and answers */
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.q .rec { font-size: 14.5px; }
+.q .rec b { color: var(--visit); }
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 16px; }
+.row { display: grid; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.row h3 { font-size: 16px; }
+.choices { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.opt { display: flex; gap: 8px; align-items: center; font-size: 15px; }
+input[type=text], textarea { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+textarea { min-height: 110px; }
+button { justify-self: start; font: 700 15px var(--body); padding: 10px 18px; border-radius: 8px; border: 0; background: var(--visit); color: var(--surface); cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--comet); outline-offset: 2px; }
+.status { font-size: 14px; color: var(--muted); }
+nav.toc { font-size: 14.5px; }
+nav.toc ol { grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); column-gap: 24px; }
+a { color: var(--visit); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<style>
+code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-radius: 4px; overflow-wrap: anywhere; }
+.piece { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--visit); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; }
+.piece:nth-of-type(2n) { border-top-color: var(--comet); }
+.piece header { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.piece dl { display: grid; grid-template-columns: 150px 1fr; gap: 6px 14px; margin: 0; font-size: 15px; }
+.piece dt { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 3px; }
+.piece dd { margin: 0; min-width: 0; }
+@media (max-width: 560px) { .piece dl { grid-template-columns: 1fr; gap: 2px; } .piece dd { margin-bottom: 8px; } }
+</style>
+<div class="wrap">
+
+<header style="display:grid;gap:12px">
+  <p class="eyebrow">Build spec · The ending · version 1 · EP2 for lead 39 · 2026-10-26</p>
+  <h1>The ending: crossing back, and the offer</h1>
+  <p class="lead">You chose (26 October): "Let's do 1. It's basically a shipwide event. But then mix in 3. Just the offer for a transfer to headquarters. You can stay and live in the endgame (game keeps going with no more promotions or more shipwide events) or go. If you go it's a big goodbye. Big crowd sees you off. Lots of dialogue leading up to this either way. And new original end game dialogue if you stay." This page plans exactly that. It runs over the week after the Veyli vessel (Days 31-36), under your rules: tons of arrows, super obvious progression, pronounced moments with dialogue.</p>
+  <div class="facts">
+    <div class="fact"><b>When</b>Wednesday Day 31 to Monday Day 36, clear of Steps 5-6 (which end Day 26) and the Veyli vessel (Days 27-30). The crossing back is Sunday Day 35 at 14:30, four weeks to the hour after the first crossing (Sunday Day 7).</div>
+    <div class="fact"><b>The choice</b>The Captain makes the offer on Thursday Day 32 in her ready room. You tell her by Saturday 20:00, and can change your mind until her address at the line on Sunday.</div>
+    <div class="fact"><b>Size</b>Five pieces, about 14 build turns, three builders at once. About 850 lines of words (two writers); about 400 of them are the endgame's new dialogue.</div>
+    <div class="fact"><b>Your answers</b>Three questions at the end.</div>
+  </div>
+  <p class="note">Against claude/integration d9c7e5f0 (0.93.2) and the specs on this branch (Step 5, Step 6, the Veyli vessel). Sources: the Line event (section 18's Crossing the Line block, the oath script <code>crossingCeremony</code>, the certificate and plaque traces), the arrival (section 21, Zeke at the Tern's ramp), save slots (section 13, FX27), Captain Marrow's voice notes.</p>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <p><a href="#beats">First: the beats, what you see and who speaks (both endings)</a></p>
+  <ol>
+    <li><a href="#offer">The offer: who, where, how long, changing your mind</a></li>
+    <li><a href="#after">After you choose: the endgame, and the end</a></li>
+    <li><a href="#switch">The switch and where the code goes</a></li>
+    <li><a href="#pieces">The pieces</a></li>
+    <li><a href="#order">Seats and order</a></li>
+    <li><a href="#apart">Shared with Steps 5-6 and the vessel, and how it stays apart</a></li>
+    <li><a href="#checks">Checks</a></li>
+    <li><a href="#pad">The game controller</a></li>
+    <li><a href="#words">Words: the lead-up, both endings, the endgame pool</a></li>
+    <li><a href="#doc">For the design doc</a></li>
+    <li><a href="#calls">Judgement calls</a></li>
+    <li><a href="#questions">Your questions</a></li>
+  </ol>
+</nav>
+
+<section id="beats">
+  <h2>The beats: what you see, when it clears, who speaks</h2>
+  <p>Your rules, as on every page: every moment that's yours has a level 1 arrow on the day (<code>guideAsk({ level: 1 })</code>), a forced ring line, a notice and Tracked and Schedule rows. It's said to you in person first, with Mail only as the record. Each key moment is a staged scene with dialogue, poses, people reacting and a closing line.</p>
+  <h3>The week (everyone)</h3>
+  <div class="tbl"><table style="min-width:900px">
+    <thead><tr><th>Beat, when</th><th>What you see</th><th>Clears when</th><th>The scene: who, where, the gist</th><th>Lines</th></tr></thead>
+    <tbody>
+      <tr><td><b>Crossing back, announced</b><br>Wed 31, morning</td><td>Vance comes to you (the Works bay, or wherever you are); then a notice, the status line "Sunday: the Wren crosses back over the Line", Vance's Mail as the record.</td><td>Said</td><td>Vance: Sunday at 14:30, the bow lounge again; "And you'll lead the oath this time. Basil's the only first-timer. Be gentle. Or don't." Two replies.</td><td>7</td></tr>
+      <tr><td><b>The ship talks</b><br>Wed-Sat</td><td>Chatter in the mess and the bay (no arrow).</td><td>-</td><td>Crew remember Day 7 and what's happened since; Basil asks what the oath is like.</td><td>30</td></tr>
+      <tr><td><b>The offer</b><br>Thu 32, 16:00</td><td>Morning: the Captain's invite notice "The ready room, 16:00"; arrow level 1 from 15:45; ring "The Captain" at her door. If you're not there by 16:10, Calder comes to find you.</td><td>The meeting ends</td><td>The ready room (Deck 1, <code>R</code>). The Captain and Calder; you seated. A letter from Concord headquarters: a transfer, a post there (question 3), coloured by your answer to Calder's question. "You don't have to answer now. Saturday evening." Three replies (thank her; ask what it is; "Can I think?"). The Admiral (her fish) gets one look and no explanation.</td><td>16</td></tr>
+      <tr><td><b>Calder, after</b><br>Thu 32, 16:30</td><td>She walks out with you (the escort's walk).</td><td>The walk ends</td><td>Calder on the stairs, her line chosen by your answer at Four weeks aboard ("You said you wanted to teach. Well."). Tracked "Your answer to the Captain: by Saturday 20:00".</td><td>8</td></tr>
+      <tr><td><b>The news gets out</b><br>Fri 33</td><td>Friends come to you, one at a time through the day (their chat card's own button, "About the transfer"). Their bubbles; no arrow needed, as they come to you.</td><td>Saturday 20:00</td><td>Each close friend's own take: some want you to stay, some say go, one won't say. Halloran overheard it ("It's a ship. Nothing's private."). Basil: "You can't go, you're my mentor." Pell, Tomas, Kovac each their own way.</td><td>60</td></tr>
+      <tr><td><b>Zeke</b><br>Fri 33 evening</td><td>Zeke finds you after dinner (escort); ring "Talk to Zeke".</td><td>The talk ends</td><td>The Works tea corner: Zeke doesn't tell you what to do; he talks about the evening he met you at the ramp. Two replies.</td><td>10</td></tr>
+      <tr><td><b>A call home</b> (optional)<br>Thu-Sat</td><td>The call booths offer "Call home about the transfer" (level 2 arrow, once).</td><td>Called, or Sunday</td><td>Your family on the line (the booths' own scene): proud, and careful not to choose for you.</td><td>8</td></tr>
+      <tr><td><b>The Veyli ship comes back</b><br>Sat 34, 10:00</td><td>A notice "Taavek's ship is off the bow again"; a level 2 arrow to the glass, once.</td><td>Seen</td><td>Saruth: they'll fly with the Wren to the line. "Company, the other way."</td><td>6</td></tr>
+      <tr><td><b>Your answer</b><br>Thu 16:30 to Sat 20:00</td><td>From the offer, a forced ring "Tell the Captain" on the Captain wherever she is, and Tracked; Saturday from 18:00, arrow level 1 to her. Not told by 20:00, she finds you at 19:30 (escort) and asks.</td><td>You've chosen</td><td>Stay: "Good. Selfishly, good." Go: "Then we'll make it a proper send-off." Each with two replies and her close; a different version for "I'm not sure yet" (she gives you until her address).</td><td>18</td></tr>
+      <tr><td><b>The crossing back</b><br>Sun 35, 14:00-15:15</td><td>Morning notice; arrow level 1 to the bow lounge from 14:00; ring "Lead the oath" at the front.</td><td>The oath and the address end</td><td>The horn; the Veyli ship alongside; you lead the first-timers' oath for Basil (the words the Captain read you on Day 7, now in your mouth: the oath script with you as host); Brennan's punch; Saruth reads the Veyli ship's last signal; the Captain's final address in the bow lounge, which names your choice to the crew ("We're keeping them" or "Monday, we lose them to the Concord"). The crowd reacts.</td><td>30</td></tr>
+      <tr><td><b>The Line supper</b><br>Sun 35, 18:00</td><td>As on Day 7, with a second certificate (a second date on your Line certificate).</td><td>-</td><td>Toasts, coloured by stay or go.</td><td>12</td></tr>
+      <tr><td><b>Zeke, at the end of the day</b><br>Sun 35, 21:00</td><td>Zeke finds you; ring "Talk to Zeke"; arrow level 1 to the shuttle bay.</td><td>The talk ends</td><td>The shuttle bay, by the Tern's ramp, where he met you on Day 0: "First night, you were the one on the ramp." Then his lines for stay or go; a close that mirrors his first words to you.</td><td>12</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>If you go</h3>
+  <div class="tbl"><table style="min-width:900px">
+    <thead><tr><th>Beat, when</th><th>What you see</th><th>Clears when</th><th>The scene</th><th>Lines</th></tr></thead>
+    <tbody>
+      <tr><td><b>Last morning</b><br>Mon 36, 06:00-09:00</td><td>Notice "Your last morning: the Tern leaves at 10:00"; Tracked rows for each step; your cabin's things packed (the cabin touches boxed).</td><td>09:30</td><td>Breakfast: friends sit with you; Brennan's last plate; the Captain's word in the mess.</td><td>20</td></tr>
+      <tr><td><b>The goodbye</b><br>Mon 36, 09:30-10:00</td><td>Arrow level 1 to the shuttle bay from 09:15; ring "Walk to the Tern"; then a ring on each person as you pass.</td><td>Up the ramp</td><td>The big crowd, about 60 (the day shift released for it; the bay's lines make an aisle, as for the Veyli greeting). You walk the aisle: each close friend says goodbye in turn, then Calder, Vance, the Captain; Zeke last at the ramp's foot, as on Day 0. The wave pose; cheers; the ramp closes.</td><td>60</td></tr>
+      <tr><td><b>The end</b><br>10:00</td><td>The view fades as the Tern pulls away, to the end page.</td><td>-</td><td>The end page (section 2).</td><td>20</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>If you stay</h3>
+  <div class="tbl"><table style="min-width:900px">
+    <thead><tr><th>Beat, when</th><th>What you see</th><th>Clears when</th><th>The scene</th><th>Lines</th></tr></thead>
+    <tbody>
+      <tr><td><b>The first morning after</b><br>Mon 36, breakfast</td><td>A notice "The Wren is back on her course"; the Captain's word at breakfast.</td><td>Said</td><td>The Captain sits down with you; the mess is pleased with itself.</td><td>10</td></tr>
+      <tr><td><b>The endgame</b><br>from Mon 36, for good</td><td>"What's next" in the Works app becomes "The Wren is home. Live in it." No more promotions or ship-wide events; the job board, the traditions, the crew's lives go on.</td><td>Never</td><td>The endgame pool (section 9): the crew talk about you staying, life after, and everyday lines that only exist now.</td><td>about 400</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>For the writers:</b> about 850 lines in all. That's about 280 for the week both endings share, about 100 for the goodbye, about 30 for the first morning of the endgame, about 400 for the endgame pool, and about 40 for the end page, the Mails, notices and labels.</p>
+  <p><b>The arrow-follower check</b> (new arrows_check parts <code>endstay</code> and <code>endgo</code>), from a Day 30 evening save. A player who only follows the arrow and the ring reaches every beat in order. They answer Stay or Go at the first "Tell the Captain", lead the oath, and end in the endgame on Day 36 or at the end page. At every waking minute of a beat's window an arrow or a ring names it; each beat is said in person before any Mail. It runs three ways each: as is, with Teaching arrows Off, and while tracking another job. A fourth run answers Go, then Stay before Sunday's address, and must end in the endgame.</p>
+</section>
+
+<section id="offer">
+  <h2>1. The offer: who, where, how long, changing your mind</h2>
+  <ul>
+    <li><b>Who and where:</b> the Captain, in her ready room, with Calder: Thursday Day 32 at 16:00, a Captain's scene (the guard's <code>captain</code> kind). The letter is from Concord headquarters.</li>
+    <li><b>The Admiral:</b> in the game he's the Captain's fish, and her notes say what he is is never explained. So the offer comes from headquarters through the Captain, never from an admiral in person; the fish gets his usual look.</li>
+    <li><b>What's offered:</b> a post at headquarters (question 3), its wording coloured by your answer to Calder's question (Step 6). If Step 6 isn't on, or you never answered, there's a plain version.</li>
+    <li><b>How long:</b> until Saturday 20:00. You tell the Captain in person (her "About the transfer" button, wherever she is). If you haven't by 19:30 Saturday, she comes to find you and asks.</li>
+    <li><b>Changing your mind:</b> you can tell her again any time until her address at the line on Sunday (about 15:00), as often as you like. After the address it's settled and the crew know. "Not sure yet" on Saturday keeps it open until the address, where she asks you at the front, before the crowd, with Stay and Go only.</li>
+    <li><b>A slower player:</b> the crossing back is Sunday Day 35 for everyone (the ship's course doesn't wait). The offer comes after your career's end (Calder's question). If that's later than Day 32, the offer comes the Thursday after, the answer is due the Saturday after, and a Go leaves on the Monday after (the Tern meets a Concord courier). The scenes are the same; the oath is still yours on Day 35.</li>
+  </ul>
+</section>
+
+<section id="after">
+  <h2>2. After you choose: the endgame, and the end</h2>
+  <ul>
+    <li><b>Stay:</b> from Monday Day 36 the game goes on for good.
+      <ul>
+        <li>No more ship-wide events: the calendar has nothing after the crossing back, and no new rows are ever added once you've stayed.</li>
+        <li>No more promotions: the ladder is finished.</li>
+        <li>The traditions, jobs, head-scratchers, friendships, rotations of the crew and every daily system go on.</li>
+        <li>A flag, <code>end.stay</code>, unlocks the endgame pool's lines (section 22 gets a new line condition, <code>"if": ["endgame"]</code>).</li>
+      </ul>
+    </li>
+    <li><b>Go:</b> after the ramp closes, the end page, a full-screen panel over the shuttle bay, shows:
+      <ul>
+        <li>your name and "Senior Officer, Engine Specialist" (or your rank);</li>
+        <li>days aboard;</li>
+        <li>your ranks with their days;</li>
+        <li>commendations;</li>
+        <li>your three closest friends;</li>
+        <li>what you kept (the certificates, the sketches, the Line certificate's two dates);</li>
+        <li>your answer to Calder;</li>
+        <li>Zeke's last line.</li>
+      </ul>
+      Then three buttons (question 1):
+      <ul>
+        <li><b>Back to before my choice:</b> the kept copy, below.</li>
+        <li><b>Keep this ending:</b> the save is marked ended; loading it shows this page again.</li>
+        <li><b>Start a new game:</b> the Saves app's slot choice.</li>
+      </ul>
+    </li>
+    <li><b>The kept copy:</b> the moment you first tell the Captain "Go", the save is copied once to its own key beside its slot (<code>SAVE_KEY + '-before-end'</code>), never into another slot, and never with <code>?nosave</code>. "Back to before my choice" loads it: Saturday, the choice open again. The Saves app shows it under the slot as "Before the goodbye". Dev mode and Playtest keep theirs apart, as slots do.</li>
+  </ul>
+</section>
+
+<section id="switch">
+  <h2>3. The switch and where the code goes</h2>
+  <ul>
+    <li><b>Switch:</b> <code>const EV_ENDING_ON = URL_FLAGS.has('ending');</code> in section 13, on its own line after the Veyli vessel's (after <code>P926_APPT</code>), so no merge touches Step 5's or Step 6's lines. <code>?ending</code> or <code>#ending</code> previews it.</li>
+    <li><b>The crossing back:</b> a ship-wide event, <code>SHIP_EVENTS.crossingBack</code>, in an <code>if (EV_ENDING_ON &amp;&amp; EVENTS_ON)</code> block in section 18 after the vessel's block, with its own slot "Ending builder". It reuses the Line's oath script (a variant, <code>crossingBack</code>, with you as host), the punch, the Line supper and the certificate trace (a second date). One <code>EV_BEATS</code> row: <code>endingOffer</code>, captain, Day 32, 15:45-16:45.</li>
+    <li><b>The offer, the answer, the goodbye, the end page, the kept copy:</b> a new section <code>// 29. THE ENDING</code> after section 28 (Step 6), with 29a THE OFFER, 29b THE GOODBYE AND THE END PAGE, 29c THE ENDGAME (the flag and "What's next"). Each has its own slot.</li>
+  </ul>
+</section>
+
+<section id="pieces">
+  <h2>4. The pieces</h2>
+  <article class="piece">
+    <header><h3>E-1 The crossing back</h3><span class="phase">EV_ENDING_ON</span><span class="phase">Events builder</span><span class="phase">3 turns</span></header>
+    <dl>
+      <dt>What</dt><dd>The event (Days 31-35): Vance's word Wednesday; the Veyli ship's return Saturday; Sunday's horn, the oath with you as host (the Line's <code>crossingCeremony</code> as a variant), the punch, Saruth's signal, the Captain's final address naming your choice, the Line supper, the certificate's second date; the calendar row Day 31 after the vessel.</dd>
+      <dt>Touches</dt><dd>Section 13 (one line); section 18 (the block and its slot; the Line's script read, not changed); the vessel's sky ship (called).</dd>
+      <dt>Checks</dt><dd>events_check (days, phases, the oath hosted by you, the address's two versions), bigevents_check (the row after the vessel, the Day 32 hold, room clashes, a late save), day_check Days 31 and 35, join_check, cadet_test identical off.</dd>
+    </dl>
+  </article>
+  <article class="piece">
+    <header><h3>E-2 The offer and your answer</h3><span class="phase">EV_ENDING_ON</span><span class="phase">Ending engineer (a new seat; the Works career engineer if free)</span><span class="phase">3 turns</span></header>
+    <dl>
+      <dt>What</dt><dd>29a: the ready room scene, Calder's walk, the friends' "About the transfer" button and their talks (section 20's chat card gains one button through its hook), Zeke's Friday talk, the call home's option at the booths, the Captain's "About the transfer" (any time until her address), her 19:30 Saturday search, "Not sure yet", the slower player's later days. Saved as <code>SHIP.end = { offer, said: [[day, 'stay' | 'go' | 'unsure']], settled }</code>.</dd>
+      <dt>Touches</dt><dd>29a (new); section 20 (one hook line on the chat card); section 18's booths (one option, through its hook); 24 core's Record (a line).</dd>
+      <dt>Checks</dt><dd>A new <code>ending_check</code> (the offer's day for steady and slow careers; every answer path; changing your mind; the 19:30 search; settled at the address), saves_check (a save between the offer and the answer), controller_check reach.</dd>
+    </dl>
+  </article>
+  <article class="piece">
+    <header><h3>E-3 The goodbye and the end page</h3><span class="phase">EV_ENDING_ON</span><span class="phase">Ending engineer, with the HUD seat for the page</span><span class="phase">4 turns</span></header>
+    <dl>
+      <dt>What</dt><dd>29b: Monday's last morning (packed cabin, the friends' breakfast), the crowd of about 60 in the shuttle bay (the day shift released: a called-in style rule the other way), the aisle and the farewells in turn, Zeke at the ramp's foot, up the ramp (the rotation's Tern sequence, reversed), the fade; the end page (an HTML panel in the page's CSS, the HUD seat reviews); the kept copy and its restore (section 13's save code and the Saves app, FX27's owner reviews); the "ended" save.</dd>
+      <dt>Touches</dt><dd>29b (new); the page's CSS; section 13 (the kept copy and the ended mark: two small hooks); section 19's Saves app (one row); section 14's Tern (called).</dd>
+      <dt>Checks</dt><dd>ending_check (the goodbye with 60 in the bay, every close friend says theirs), deck_check (the bay's aisle; draw calls under 450 at phone size with the crowd), saves_check (the kept copy: made once, only on Go, never with nosave, restores to Saturday with the choice open; the ended save shows the end page; other slots untouched), day_check Day 36 (Go), controller_check (the end page's buttons).</dd>
+    </dl>
+  </article>
+  <article class="piece">
+    <header><h3>E-4 The endgame</h3><span class="phase">EV_ENDING_ON</span><span class="phase">Dialogue engineer (the gate), Works career engineer (What's next)</span><span class="phase">2 turns</span></header>
+    <dl>
+      <dt>What</dt><dd>29c: the <code>end.stay</code> flag; the new line condition <code>endgame</code> in section 22's line filter, so the pool's lines are said only after you stay (and their weights let them be heard often in the first weeks, then settle); "What's next" and the Works app's last page; the calendar closed for good; the first morning's scene.</dd>
+      <dt>Touches</dt><dd>29c (new); section 22 (the condition: one line in the filter, the dialogue engineer owns it); 24 core ("What's next": one hook).</dd>
+      <dt>Checks</dt><dd>lines_check (the new condition; no endgame line before the flag), talk_check, social_check, day_check Days 36 and 50 (Stay: nothing ship-wide, traditions as usual), cadet_test identical off.</dd>
+    </dl>
+  </article>
+  <article class="piece">
+    <header><h3>E-5 Words</h3><span class="phase">no switch</span><span class="phase">Two writers</span><span class="phase">about 2 days</span></header>
+    <p>Section 9. Writer A: the week and both endings' scenes. Writer B: the endgame pool. Builders use stand-ins.</p>
+  </article>
+</section>
+
+<section id="order">
+  <h2>5. Seats and order</h2>
+  <ul>
+    <li><b>Three builders at once:</b>
+      <ul>
+        <li>the events builder (E-1);</li>
+        <li>an ending engineer (E-2, then E-3);</li>
+        <li>the dialogue engineer for E-4's gate, a small job, then free.</li>
+      </ul>
+      Plus two writers. The HUD seat and FX27's saves owner review E-3.</li>
+    <li><b>Start:</b> E-2, E-3 and E-4 can start now on 0.93.3, reading Step 6's and the vessel's data through <code>typeof</code>-guarded calls (Calder's answer, your rank, the sky ship) with plain fallbacks. E-1 needs the vessel's sky ship (V-5) merged first for the Veyli ship alongside; it can build everything else before that.</li>
+    <li><b>Switch-on:</b> after Step 6 and the vessel are on (the ending reads both), with its own full round and your playtest of both endings.</li>
+  </ul>
+</section>
+
+<section id="apart">
+  <h2>6. Shared with Steps 5-6 and the vessel, and how it stays apart</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Place</th><th>The others</th><th>The ending</th><th>How it stays apart</th></tr></thead>
+    <tbody>
+      <tr><td>Section 13 switch lines</td><td>Step 5/6 after <code>EV_COMET_ON</code>; the vessel after <code>P926_APPT</code></td><td>One line after the vessel's</td><td>Each in its own spot</td></tr>
+      <tr><td>Section 18 blocks and <code>EV_BEATS</code></td><td>Step 5/6's career rows (after the swap block); the vessel's block (after the comet's)</td><td>Its block after the vessel's; one row (<code>endingOffer</code>, Day 32)</td><td>Separate blocks and slots; the events seat reviews. A slower player's late career beats are guarded as always</td></tr>
+      <tr><td>Calder's question (Day 26)</td><td>S6-9 writes <code>SHIP.works.end</code></td><td>Reads it (a <code>typeof</code>-guarded read; a plain wording when absent)</td><td>Read only; the names differ (<code>SHIP.end</code> is the ending's own)</td></tr>
+      <tr><td>Your rank and quarters</td><td>S6-3: Engine Specialist, room B</td><td>Words by <code>myrank</code>; on Go, the cabin's things packed (24t's touches boxed: a display change)</td><td>Read only; the packing is the ending's own prop state</td></tr>
+      <tr><td>The Veyli ship in the sky</td><td>V-5's <code>skyVessel</code></td><td>Saturday 10:00 to Sunday 15:00, alongside</td><td>Called through its function; the vessel's builder reviews</td></tr>
+      <tr><td>The Tern and the shuttle bay</td><td>The vessel's two flights (Days 28-29); rotations</td><td>Monday Day 36 (Go)</td><td>Different days; the same ramp code, called</td></tr>
+      <tr><td>Section 21 (the arrival)</td><td>-</td><td>Mirrors Zeke at the ramp in words only</td><td>Not touched</td></tr>
+      <tr><td>Section 22 lines</td><td>Step 5/6 and the vessel add <code>content/</code> files</td><td>One new condition in the filter; new files</td><td>The dialogue engineer owns the filter line</td></tr>
+      <tr><td>Monday Day 36 08:30</td><td>The weekly briefing, if weekly (question 4 of the Step pages)</td><td>Go: the goodbye at 09:30. Stay: breakfast's word</td><td>The goodbye starts after the briefing</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="checks">
+  <h2>7. Checks</h2>
+  <ul>
+    <li><b>A new <code>ending_check</code></b> (on paper, like promo_beats_check), with these parts:
+      <ul>
+        <li>off: nothing with the switch off;</li>
+        <li>offer: the day, steady and slow;</li>
+        <li>answers: Stay, Go, Not sure, changing your mind, the 19:30 search, settled at the address;</li>
+        <li>crossing: the oath hosted by you, the address's two versions;</li>
+        <li>goodbye: the crowd and the farewells;</li>
+        <li>endpage: its rows and buttons;</li>
+        <li>endgame: no ship-wide event or promotion after; the pool's lines only after the flag.</li>
+      </ul>
+      It goes to the runners with the lightest shares.</li>
+    <li><b>arrows_check:</b> <code>endstay</code> and <code>endgo</code>, three ways each, plus the change-of-mind run.</li>
+    <li><b>saves_check:</b> the kept copy and the ended save, on every slot and on Dev, Playtest and nosave links.</li>
+    <li><b>day_check:</b> Days 31, 35 and 36 (both endings), and 50 (the endgame).</li>
+    <li><b>Also:</b> events_check, bigevents_check, lines_check, deck_check, controller_check, cadet_test identical off.</li>
+  </ul>
+</section>
+
+<section id="pad">
+  <h2>8. The game controller</h2>
+  <p>The pad must be able to reach and use:</p>
+  <ul>
+    <li>the offer's three replies;</li>
+    <li>"About the transfer" on the Captain's and friends' chat cards;</li>
+    <li>Stay, Go and Not sure;</li>
+    <li>"Lead the oath";</li>
+    <li>each farewell ring in the aisle (A, one press each);</li>
+    <li>the end page's three buttons (the end page is the page's real focus when it opens, so screen readers read it).</li>
+  </ul>
+  <p>controller_check reaches them from Dev presets on Days 32, 34, 35 and 36, and plays a whole Monday Day 36 (Go) by pad.</p>
+</section>
+
+<section id="words">
+  <h2>9. Words: the lead-up, both endings, the endgame pool</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>File</th><th>What</th><th>About how many</th></tr></thead>
+    <tbody>
+      <tr><td>content/banks/event-crossingBack.lines</td><td>Vance's word; the week's chatter; Saruth; the oath as you lead it (the Line's words, now yours) and Basil's answers; the Captain's final address in two versions; the Line supper's toasts in two versions</td><td>about 110</td></tr>
+      <tr><td>content/ending/offer.lines</td><td>The ready room (the Captain, Calder, your replies; four colourings by Calder's answer, and a plain one); Calder's walk; the Captain's answer scenes (stay, go, not sure; the 19:30 search; the address's question)</td><td>about 50</td></tr>
+      <tr><td>content/ending/friends.lines</td><td>Each close friend's "About the transfer" talk (Pell, Tomas, Kovac, Basil, Halloran, Torres and the friend tiers' generic ones); Zeke's two talks; the call home</td><td>about 120</td></tr>
+      <tr><td>content/ending/goodbye.lines</td><td>The last breakfast; the aisle: a goodbye from each close friend, then Calder, Vance, the Captain, Zeke at the ramp; the crowd's calls</td><td>about 100</td></tr>
+      <tr><td>content/ending/endgame.lines</td><td>The pool. About 40 crew with 6 lines each that only exist now (about 240): about you staying, about life after the career, about the ship's ordinary days. Then overheard pairs about you (about 40), friends' tier lines (about 60), the Captain, Calder, Vance and Zeke's own (about 40), and remarks at traditions (about 20).</td><td>about 400</td></tr>
+      <tr><td>UI and Mail</td><td>Notices, Tracked and Schedule rows, the status lines, Mails as records, the end page's text, the Saves app's "Before the goodbye", the Works app's last page</td><td>about 70</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Canon notes for the writers: the Admiral is the Captain's fish and is never explained; every Veyli is they/them; never "permission" or "leave" about the reach (say "cross back over the line"); the comet's Veyli name stays unspoken; no emojis.</p>
+</section>
+
+<section id="doc">
+  <h2>10. For the design doc (the builder adds it, in the commit that switches it on)</h2>
+  <p class="note">Add to design-doc.md's scope and its Pillar 6 events section: "The ending (the user, 2026-10-26). After the Veyli vessel the Wren crosses back over the Line (Sunday Day 35, four weeks after the first crossing): you lead the first-timers' oath, the Veyli ship flies alongside to the line, and the Captain gives her final address. On Thursday Day 32 the Captain offers you a transfer to Concord headquarters, in her ready room; you answer by Saturday and may change your mind until her address. Stay, and the game goes on for good with no more promotions or ship-wide events, and new endgame dialogue. Go, and a big crowd sees you off at the Tern's ramp on Monday Day 36, the mirror of your arrival; then an end page with your Record, and the choice to go back to before you answered. The scope sentence becomes: the events up to the career's end, the Veyli vessel, and the crossing back."</p>
+</section>
+
+<section id="calls">
+  <h2>11. Judgement calls (overrule any of them)</h2>
+  <ul>
+    <li><b>Sunday Day 35, 14:30</b> for the crossing back, to mirror the first crossing (Sunday Day 7, the same hour).</li>
+    <li><b>The offer comes from headquarters through the Captain.</b> The Admiral stays a fish.</li>
+    <li><b>You can change your mind until her address</b>, and never after: the crowd and the address make it real.</li>
+    <li><b>If you never answer</b>, the Captain asks you at the front at her address, with Stay and Go only. The game never decides for you.</li>
+    <li><b>Rotations of the crew go on in the endgame.</b> They're the crew's life, not ship-wide events. Only the event calendar closes.</li>
+    <li><b>A slower player</b> gets the offer after their career's end; the crossing back stays on Day 35.</li>
+  </ul>
+</section>
+
+<section id="questions">
+  <h2>12. Your questions</h2>
+  <div class="q">
+    <h3>1. After the goodbye, can you go back?</h3>
+    <p>If you choose to go, the game ends with an end page.</p>
+    <p class="rec"><b>Recommended: yes, one way back.</b> The game keeps a copy from just before you first said "Go", and the end page has "Back to before my choice" (Saturday, the choice open again), "Keep this ending" and "Start a new game". The other choice: no way back from the end page (you'd use another save slot).</p>
+  </div>
+  <div class="q">
+    <h3>2. How long can you change your mind?</h3>
+    <p class="rec"><b>Recommended: until the Captain's address at the line on Sunday afternoon</b>, after which the whole crew knows. The other choice: until the Tern's ramp on Monday (Zeke asks "Sure?" at the foot, and you can turn back).</p>
+  </div>
+  <div class="q">
+    <h3>3. What does headquarters offer?</h3>
+    <p class="rec"><b>Recommended: one post, worded by your answer to Calder's question.</b> If you said engines, the fleet's engine office. If teaching, the cadet academy. If the bridge, the command school. If "I don't know yet", "come and find out". The other choice: the same post for everyone, a place in headquarters' engineering office.</p>
+  </div>
+  <form id="answers">
+    <div id="rows"></div>
+    <div class="row"><h3>Anything else about the ending?</h3><textarea id="notes" aria-label="Anything else"></textarea></div>
+    <button type="submit">Save my answers</button>
+    <p class="status" id="status" role="status">Loading any saved answers...</p>
+  </form>
+</section>
+
+</div>
+<script>
+(() => {
+  // answers, kept in the page's own store at answers/user (the same shape as the plan page's form)
+  const items = [
+    ['back', '1. After the goodbye, can you go back?', [['yes', 'Yes, one way back to before my choice (recommended)'], ['no', 'No way back from the end page']]],
+    ['mind', '2. How long can you change your mind?', [['address', "Until the Captain's address on Sunday (recommended)"], ['ramp', "Until the Tern's ramp on Monday"]]],
+    ['post', '3. What does headquarters offer?', [['colour', "One post, worded by my answer to Calder (recommended)"], ['same', 'The same post for everyone']]],
+  ];
+  const rows = document.getElementById('rows');
+  for (const [k, name, opts] of items) {
+    const r = document.createElement('div'); r.className = 'row';
+    const h = document.createElement('h3'); h.textContent = name; r.appendChild(h);
+    const c = document.createElement('div'); c.className = 'choices'; c.setAttribute('role', 'radiogroup'); c.setAttribute('aria-label', name);
+    for (const [v, t] of opts) {
+      const lab = document.createElement('label'); lab.className = 'opt';
+      const i = document.createElement('input'); i.type = 'radio'; i.name = k; i.value = v; i.id = k + '-' + v;
+      lab.appendChild(i); lab.appendChild(document.createTextNode(t)); c.appendChild(lab);
+    }
+    r.appendChild(c);
+    const n = document.createElement('input'); n.type = 'text'; n.id = k + '-note'; n.placeholder = 'Notes (optional)';
+    n.setAttribute('aria-label', name + ' notes'); r.appendChild(n);
+    rows.appendChild(r);
+  }
+  const form = document.getElementById('answers'), status = document.getElementById('status');
+  let ref = null;
+  const fill = d => {
+    if (!d) return;
+    for (const [k] of items) {
+      const a = d[k] || {};
+      for (const i of form.querySelectorAll('input[name="' + k + '"]')) i.checked = i.value === a.choice;
+      document.getElementById(k + '-note').value = a.note || '';
+    }
+    document.getElementById('notes').value = d.notes || '';
+  };
+  const read = () => {
+    const o = {};
+    for (const [k, name] of items) o[k] = { name, choice: (form.querySelector('input[name="' + k + '"]:checked') || {}).value || '', note: document.getElementById(k + '-note').value.trim() };
+    o.notes = document.getElementById('notes').value.trim(); o.savedAt = new Date().toISOString(); return o;
+  };
+  (async () => {
+    let db = null;
+    try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+    if (!db) { status.textContent = 'Answers can only be saved when you are signed in on claude.ai. You can still tick and write here.'; return; }
+    ref = db.doc('answers/user');
+    try { const s = await ref.get(); if (s.exists) { fill(s.data()); status.textContent = 'Your saved answers are shown. Change them and save again any time.'; } else status.textContent = 'Nothing saved yet.'; }
+    catch (e) { status.textContent = 'Could not load saved answers. You can still save new ones.'; }
+  })();
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!ref) { status.textContent = 'Saving is not available here. Please send your answers to the lead in chat.'; return; }
+    status.textContent = 'Saving...';
+    try { await ref.set(read()); status.textContent = 'Saved at ' + new Date().toLocaleTimeString() + '. You can change them and save again.'; }
+    catch (err) { status.textContent = 'That did not save (' + (err && err.code || 'error') + '). Please try again, or send your answers in chat.'; }
+  });
+})();
+</script>

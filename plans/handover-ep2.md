@@ -27,3 +27,4 @@ Branch: `claude/p5-specs` (from claude/events-plan-2; push only there).
 ## Later (same day)
 - v2 of both step specs (e437f71d, db1313c1): beats tables for the user's rules (tons of arrows, pronounced moments), arrows_check parts step5/step6, all 5 questions on both pages. Published by lead 39: Step 5 claude.ai/artifact/9z1tyZ5faB6CPKt94DnN3N, Step 6 claude.ai/artifact/VZhNq1rnzRZYwtbjqJvxCo.
 - `plans/veyli-vessel-spec.html` (e9f0962c): EV_VESSEL_ON (#evvessel), section 18 block after the comet's + slot "Vessel builder"; 2 builders; can start on 0.93.3. jobReserve slots agreed: t3 25, t4 26, vessel 27 (kept, unused). Switch lines: Step 5/6 after EV_COMET_ON, vessel after P926_APPT.
+- `plans/ending-spec.html`: the ending (crossing back Day 35, the HQ offer Day 32, stay = endgame / go = goodbye + end page + kept copy). EV_ENDING_ON (?ending), section 29, 3 builders, ~850 lines. Canon: the Admiral is the Captain's fish, never explained.
