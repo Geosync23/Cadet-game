@@ -58,7 +58,7 @@ CHECKS = {
     'leave': ('python3 leave_check.py {g}', 1), 'device': ('python3 device_check.py {g}', 4),
 }
 FAST = {'deck', 'machine', 'leave', 'device'}
-EVENT_DAYS = ['day0', 'day5', 'day7', 'day12', 'day13', 'day17', 'day19', 'day21', 'day26']   # 0.93.2, the event swap: the visit's greeting Day 17, the comet Day 26 (were day16, day27)
+EVENT_DAYS = ['day0', 'day5', 'day7', 'day12', 'day13', 'day17', 'day19', 'day21', 'day22']   # 0.93.2, the event swap: the visit's greeting Day 17, the comet Day 22 (were day16, day27)
 FILE_OF = {'cadet': 'cadet_test.py', 'day1': 'day_check.py', **{d: 'day_check.py' for d in EVENT_DAYS}}
 ALL = {c for c in CHECKS if os.path.exists(os.path.join(ROOT, FILE_OF.get(c, c + '_check.py')))}
 LOAD_CHECKS = {'cadet', 'deck'}                       # code that runs only while the page opens: the pictures and the decks
@@ -71,7 +71,7 @@ RULES = {
     '5': ['cadet', 'perf'], '13': ['*'], '14': ['day1', 'events', 'food', 'machine', 'intro', 'cadet', 'join', 'bigevents', 'fridays', 'day12', 'day21'],
     '19': ['device', 'puzzle', 'player', 'arrows_pointer'], '15': ['player', 'interactions', 'clothes', 'leave'], '15b': ['interactions', 'player', 'join', 'arrows_pointer'],
     '15r': ['deck', 'disc', 'interactions'], '16': ['food', 'day1'], '17': ['machine', 'mech', 'career', 'puzzle'],
-    '22': ['lines', 'talk', 'bubble'], '18': ['events', 'join', 'weekend', 'intro', 'bigevents', 'fridays', 'day7', 'day12', 'day13', 'day17', 'day26'],
+    '22': ['lines', 'talk', 'bubble'], '18': ['events', 'join', 'weekend', 'intro', 'bigevents', 'fridays', 'day7', 'day12', 'day13', 'day17', 'day22'],
     '18f': ['fridays', 'events', 'join', 'intro', 'bigevents', 'day1', 'food', 'perf', 'day5', 'day19'], '20': ['social', 'arc', 'bubble', 'lines'],
     '20c': ['social', 'arc'], '21': ['intro', 'clothes', 'day0'], '21b': ['clothes'], '23': ['tiles'], '23b': ['disc'], '6': ['cadet', 'bubble'],
     '7': ['path', 'day1'], '8': ['cadet', 'perf'], '8b': ['cadet', 'perf', 'day1'], '9': ['day1', 'events', 'cadet', 'deck', 'day21'],

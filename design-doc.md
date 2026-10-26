@@ -451,7 +451,7 @@ What higher tiers unlock:
 - **Stage 1, six stories** (in `content/stories/`; the outlines are in `content/arcs/outlines.md`, "Crew stories"):
   - **Pell:** the practical he's afraid of, and whether he stays on the Wren or goes home to his mum's shop. Big scene: the practical in the Works bay, a weekday afternoon, Days 17-24.
   - **Theo Teague:** the comics artist who has moved stations eight times, and is leaving the Wren on Day 21. Big scene: his send-off in the shuttle bay, Day 21, 14:30.
-  - **Basil Bramwell:** the new hand off the Tern on Day 21, and his sad plant. Big scene: his new hand's tea in the mess, Day 25, 18:40.
+  - **Basil Bramwell:** the new hand off the Tern on Day 21, and his sad plant. Big scene: a welcome dinner with the Works crew in the mess, Day 25 (it was his new hand's tea, retired 2026-10-26).
   - **Emeka Halloran:** the breakfast jokes are his late dad's, 412 of them in a numbered book. Big scene: breakfast at the Works tables, from Day 15.
   - **Zainab Kovac:** the lift she has been afraid of since she was stuck in one as a child. Big scene: at the Deck 5 lift on her way to the Captain's Friday address, Day 19 or 26.
   - **Saad Salo:** the valve he once signed off without checking. Big scene: the ion storm, Day 13, from 08:30.
@@ -459,7 +459,7 @@ What higher tiers unlock:
 - **How a story goes.** A few ordinary story moments first, each opening as you get closer (tier, days known, sometimes a day range or a favour you did). Then the **big moment**: it's booked on its day at its gathering, with a Mail from the person the evening before (18:00) and a Calendar row, and it plays only there. The people it needs go to that gathering on its day if they're free (the lead's planner hook, decision A). At most one big moment a day.
 - **Going or missing.** Go, and you get the full scene. Miss it (its time passes, or its days run out), and a smaller **quiet ending** comes later instead: a short moment, or a Mail if the person has left the ship (Theo). Both endings are kind; there is never a bad ending. A small scene afterwards (the afterglow) can follow either. A step whose days run out without a quiet ending of its own is skipped, so no story gets stuck.
 - **Lines that depend on things.** Some lines play only if someone is there, or if you did a favour or said a certain thing earlier. Three new favours come with the stories: carry Theo's drawing to Calder, take Basil's plant to Tove Cruz, and collect three terrible jokes for Halloran.
-- **Decisions while building** (2026-10-25): Pell's practical is a scene in the Works bay, not at the open-door tea (the tea corner has three seats and he never got one). Saad's storm scene starts wherever you meet him: Zeke calls him on the comm and you walk down to the coolant loop together (lead 36). Kovac's scene plays at the Deck 5 lift on her way to the address, with just you (and Keane if he's there; lead 36). Basil's tea is the ship's welcome tea for new crew, in the mess.
+- **Decisions while building** (2026-10-25): Pell's practical is a scene in the Works bay, not at the open-door tea (the tea corner has three seats and he never got one). Saad's storm scene starts wherever you meet him: Zeke calls him on the comm and you walk down to the coolant loop together (lead 36). Kovac's scene plays at the Deck 5 lift on her way to the address, with just you (and Keane if he's there; lead 36). Basil's big scene is a welcome dinner with the Works crew in the mess, Day 25.
 - **Tone** (the user's choices): lighter, with "some grief and past pain" told gently; nobody ill or in trouble now; Zeke's dad is well and retiring; Halloran's dad is long gone. No repeated lines or stories, and every line keeps to the person's voice.
 - **When the switch went on** (0.92.6): the new Pell and Kovac stories replace their older ones (the old words stay on file in `content/arcs/`, parked), and Kovac's joy line becomes the knitted spanner grip she gives you.
 
@@ -702,7 +702,7 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
 - **Progress talks** with Chief Calder are appointments you ask for. They take place in her office on any day she's on shift.
 - Each is an appointment that opens its door for its window. If you miss one, a short Mail tells you; nothing is lost.
 
-**Scope and calendar (the user, 2026-10-20; plans/events-plan.html v3).** Only the events up to the end of the career (the promotions, ending with "Calder's question" on Day 26) are built. Since the swap (2026-10-26) that is the visit and then the comet, and the comet on Day 26 is the last of them. **Every later event is parked**, not deleted: it stays in the table below and in `plans/pillar3-plan.md`, in case the game grows. Events come by the calendar, not by your rank, with small parts that depend on rank. The fixed days for a new game:
+**Scope and calendar (the user, 2026-10-20; plans/events-plan.html v3).** Only the events up to the end of the career (the promotions, ending with "Calder's question" on Day 26) are built. Since the swap (2026-10-26) that is the visit and then the comet (Day 22), with A Veyli vessel needs help after Calder's question (Days 27-30). **Every later event is parked**, not deleted: it stays in the table below and in `plans/pillar3-plan.md`, in case the game grows. Events come by the calendar, not by your rank, with small parts that depend on rank. The fixed days for a new game:
 - **Sunday Day 7: Crossing the Line**, a new one-day short event and the first chronologically. It's the user's "one more short one". It's on Sunday so that the player keeps Saturday as a completely free day. The Wren crosses into the Veyli reach.
   - 14:30: the horn (a gold pulse; the game has no sound) and gold hull lights, then the Captain's short address.
   - 14:30-15:15: the ceremony for first-timers in the bow lounge (you included), the oath at 14:40, then Brennan's punch.
@@ -716,9 +716,10 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
   - Sunday 14, 10:00: the all-clear, with the party that evening. Rec talent night moves a week, and Lap of the Wren moves to Monday Day 15 at 20:30.
 - **The visit before the comet** (the user, 2026-10-26, option A on `plans/trad-variety-pitch.html` section 5; built in 0.93.2 behind `EV_SWAP_ON`, off until the user switches it on):
   - **Tuesday to Friday, Days 16-19: the diplomatic visit, short.** Tuesday 16: the warning, Commander Vance's memo (08:30) and Mail, and the prep jobs. Wednesday 17, 10:00: the Veyli come aboard in the shuttle bay. Thursday 18: the formal dinner in the Captain's quarters. Friday 19: the senior briefing at 08:00, the gift exchange at 08:20 and the farewell at 09:00, before the Friday hold, so the Captain's address that afternoon talks about it. It clears out before your night shifts (Days 19-20), the Captain's table (Day 20), Theo's send-off and Basil's arrival (Day 21).
-  - **Friday Day 26, 21:30: comet viewing**, after Calder's question and the four-weeks-aboard tea (tap night pauses for it). It is now the finale of the career's first stretch.
+  - **Monday Day 22, 21:30: comet viewing** (the user, 2026-10-26: earlier than first planned, Friday Day 26; EP1's `plans/events-plan-2.html` Part A has its hours), the evening after Theo's send-off and Basil's arrival.
+  - **Days 27-30: A Veyli vessel needs help**, a new short event after Calder's question (EP1's Part C; not built yet: a parked calendar row).
   - **The new hand's tea after a rotation is removed** ("this one can go").
-  - **The Friday addresses** on Days 19 and 26 change with it: Day 19 "our guests left this morning", Day 26 "the comet tonight".
+  - **The Friday addresses** on Days 19 and 26 change with it: Day 19 "our guests left this morning", Day 26 "a storm, the Veyli and a comet" behind us.
 - **Before the swap** (kept as history): Tuesday Day 16, 21:30, comet viewing; Days 26-30 the diplomatic visit as a weekend finale (Day 22 named as next week's business, Friday 26 the warning after Calder's question, Saturday 27 the greeting, Sunday 28 one dinner, Monday 29 the farewell).
 
 Build order: the ion storm first, then Crossing the Line, the visit and the comet (the order they come in, since the swap). Each event is built switched off, then switched on. **The ion storm update is built and switched on** (2026-10-21, with the user's yes): the events base and the storm's update together, Days 11-15 of a new game. **Crossing the Line is built and switched on** (the user, 2026-10-23, via lead 31; 0.92.1): Saturday Day 6 to Monday Day 8 of a new game, the oath and the supper on Sunday Day 7; it follows the events switch. Pillar 5 steps 5-6 come later and fit around these days.
@@ -770,7 +771,7 @@ Build order: the ion storm first, then Crossing the Line, the visit and the come
 | — | Crossing the Line (new) | Short, Sunday Day 7 | One day: the Wren crosses into the Veyli reach. A ceremony for first-timers in the bow lounge and a supper in the mess. |
 | 1 | Ion storm | Main, built first; Days 11-15 | Touches every system: power flickers and comms go down. Calder's storm briefing in the Works bay, the Captain's address, emergency lighting deck by deck, storm stew, the Captain's all-clear, a rush on the call-home booths and a party in the bow lounge. |
 | 2 | Diplomatic visit | Main, Days 16-19 (the swap; was Days 26-30) | A Veyli delegation fills Deck 2's visitor rooms (the second visitors' cabin is kept for this). A greeting in the shuttle bay, a formal dinner in the Captain's quarters, a gift exchange. |
-| — | Comet viewing | Short, Friday Day 26 at 21:30 (the swap; was Tuesday Day 16) | One gentle evening at the observatory and the bow lounge windows. The finale of the career's first stretch. |
+| — | Comet viewing | Short, Monday Day 22 at 21:30 (the swap; was Tuesday Day 16) | One gentle evening at the observatory and the bow lounge windows. |
 | — | Crew rotation day | Short, **parked** | Five crew leave on a transport and five new faces arrive. |
 | 3 | Something in the garden | Main, **parked** | A creature eats the crops; traps from the machine shop and a volunteer garden watch. It becomes the ship's pet. |
 | — | Power surge | Short, **parked** | A junction on Deck 6 trips and two decks lose power for a while. |
@@ -779,7 +780,7 @@ Build order: the ion storm first, then Crossing the Line, the visit and the come
 | 5 | Nebula drift | Main, **parked** | Every window fills with colour, the sensor array overloads, and strange dreams leave the crew sleepy and chatty. |
 | — | The late supply shuttle | Short, **parked** | Rationing, a bland menu and a busy machine shop, all from the numbers. |
 | 6 | Salvage | Main, **parked** | The Tern flies out to a derelict and the hold fills with odd finds. In later playthroughs it can lead into the garden creature. |
-| — | A Veyli vessel needs help | Short, **parked** | Works sends parts and a Veyli engineer comes aboard as a guest. |
+| — | A Veyli vessel needs help | Short, Days 27-30 (unparked 2026-10-26, after Calder's question; EP1's `plans/events-plan-2.html` Part C; not built yet) | Works sends parts and a Veyli engineer comes aboard as a guest. |
 | 7 | The déjà vu day | Main, **parked** | A time anomaly replays one day, and what you change the second time counts. Seeded routines make it cheap to build. |
 
 **Special missions.** Startable when you're ready, shown as an icon on the job list or ship map. Occasionally an away job by shuttle, like repairing another ship's systems.
