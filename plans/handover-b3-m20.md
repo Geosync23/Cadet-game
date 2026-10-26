@@ -18,3 +18,8 @@
 ## How to test
 - **Off:** `cadet_test.py` against mech-a's build: ALL IDENTICAL. Then `bash check_fast.sh`.
 - **On (copy with `const P5_STEP5 = true;`):** `mech_check.py ON m20 wstap`; `CTL_P5S5=1 controller_check.py BUILD m20`.
+
+## State at the stopping point (lead 40, 2026-10-26)
+- `claude/p5s5-m20`: RV21 PASSed 7c5d9f79 with 4 shoulds; all four are done (row 0.93.4-ar.4), along with lead 40's call on Mori's day off (ar.3). The latest sha, with this note, is the branch head. RV21 should re-check the shoulds there.
+- Checks on the head: off: cadet_test ALL IDENTICAL against f57afcbc; check_fast OK (229 s). Step 5's checks (mech m19, m20, wstap; controller m19, m20) now run by themselves on a switched-on copy: all OK.
+- Left: RV21's re-check. No Dev preset for Day 19 (the Dev mode seat's). My S5-4 shutdowns state is in plans/handover-b3.md on claude/p5s5-mech-b.
