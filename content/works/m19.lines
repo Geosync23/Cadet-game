@@ -1,0 +1,92 @@
+@bank all
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-3 words; spec section 10): M19 Power and relays (24v). The training is meeting
+// train.m19.calder in the relay room (Deck 1, u); keys matched to B2's code (claude/p5s5-mech-a 3c38a65f, 2026-10-26):
+// six relays R1-R6, a lamp that stutters; four battery cell pairs. Calder's tester line is her flag train.m19.tester; the
+// crew's answers in the drill are content/banks/m19.lines. Said by nobody unless noted. No "!". Mails "Subject | body".
+
+== works.mech.m19
+- Power and relays
+// the ask ({time}, {place} filled by the game)
+== works.ask.m19
+- Power and relays | Your first Senior training. The relay room, Deck 1. Bring your hands; I'll bring the relays. {time}, {place}.
+== next.m19
+- Power and relays comes next: the relay room on Deck 1, with the Chief.
+== next.wait.m19
+- Power and relays: meet the Chief in the relay room, Deck 1.
+// the ring line on the arrow (B2's m19.ring), and the urgent notice at 10:30 (asks B2 for {name} and {time} too: the
+// words check has no {ring})
+== m19.ring
+- Power and relays with {name}, {time}
+== m19.notice
+- Power and relays with {name} at {time}: {where}. Go at quarter to.
+
+// the job cards on the board (B2's relayswap and battcell kinds)
+== m19.card.relay
+- Swap a failing relay: {place}
+== m19.card.batt
+- Check battery bank {n}
+// the training's two looks (Calder's rack, 1-relay-1: you watch; {n} the stuttering relay's number)
+== m19.train.open
+- The rack hums. Six lamps. One stutters: R{n}. That's the one.
+== m19.train.test
+- Every lamp steady. Listen: it clicks over clean now.
+// a relay rack: each lamp's word (in the list "R1 steady · R2 stutters ..."), the pick, a wrong pick, the test, done
+== m19.relay.ok
+- steady
+== m19.relay.bad
+- stutters
+== m19.relay.pick
+- Which relay's failing?
+== m19.relay.wrong
+- That one's steady. Watch the lamps again.
+== m19.relay.test
+- Every lamp steady.
+== m19.relay.done
+- Relay swapped. The rack's steady. The bridge won't flicker.
+// a battery bank: four cell pairs ("Cells 1-2 green ..."), pick the low pair, swap the tired cell, check
+== m19.batt.ok
+- green
+== m19.batt.low
+- amber, sagging
+== m19.batt.pick
+- Which cells are low?
+== m19.batt.wrong
+- Those read fine. Look at the bars again.
+== m19.batt.test
+- All the bars green and level.
+== m19.batt.done
+- Bank {n}'s cells are level again.
+// stage 2 (B2's turn 2, proposed): a conduit run with the conduit tester (6-conduit-1, -2)
+== m19.conduit.title
+- Conduit run · {machine}
+== m19.conduit.test
+- Test this length
+== m19.conduit.good
+- Clean all the way. Next length.
+== m19.conduit.fault
+- The tester drops here. The fault is in this length.
+// the tester given (toast; only if M15 hasn't given it)
+== m19.tester.give
+- The Chief gave you a conduit tester. It's in your locker.
+== m19.trained.stage2
+- Power and relays: you can test conduit runs now.
+== m19.trained.stage3
+- Power and relays: the battery banks' balance is yours now.
+
+// the drill (Wednesdays 15:00, once you're Senior): you run the Works part. The ring, the card, your calls
+== drill.works.ptr
+- Run the Works part of the drill
+== drill.works.title
+- The drill: Works
+== drill.works.text
+- You call Works' part. Three calls, in order. The crew answer on their devices.
+== drill.works.call.1
+- Works: all hands to your stations.
+== drill.works.call.2
+- Isolate the non-essential power. Report when done.
+== drill.works.call.3
+- Head count. Works, report in.
+== drill.works.done
+- Works reports all present and safe. Drill time: {time}.
+== drill.works.order
+- Not yet. Stations first, then power, then the count.

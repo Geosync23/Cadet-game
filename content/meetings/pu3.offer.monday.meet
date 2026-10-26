@@ -1,0 +1,17 @@
+@meeting pu3.offer.monday
+// SW3: pu3.offer's twin for a test on Monday (offered on a Friday or a Saturday; the storm Saturday, Day 13, in the bay
+// after the storm shift). Same two replies in the same order.
+title: Your next test
+from: Chief Ines Calder
+gist: Calder told you in person: your Tier 3 test is Monday at 09:00, a junction shutdown on Deck 6. Pass it and you're a Senior Officer.
+== lines
+calder > you: Stop a minute. This is the good kind.   [gesture]
+calder: Relied on, as of today. Power safety, done. Nothing left.
+calder: Monday. Your next test. Tier 3. Nine o'clock, on the board.
+calder: Deck 6, a power junction. Off, a new breaker, back on. Nobody hurt, nobody surprised.
+? choice
+* Monday. I'll be ready.   rel:calder+2
+  calder: I know. Rest this weekend. Properly. That's not a suggestion.   [nod]
+* Switching power off? On purpose?   rel:calder+2
+  calder: On purpose. Planned, warned, timed. That's the difference between a shutdown and a fault.   [nod]
+calder: Pass it and you're a Senior Officer. Enjoy your weekend.

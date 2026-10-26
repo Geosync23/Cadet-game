@@ -1,0 +1,210 @@
+@bank all
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-7 words; plans/p5-step5-spec.html on claude/p5-specs, "The beats" and section 10):
+// the Senior Officer promotion's texts, for 24u's worksText (S5-2). Said by nobody unless noted. Mirrors the first
+// promotion's pb.* keys (content/works/promo-beats.lines), with pu3. in front. Calder speaks the "say" keys: exact,
+// numbers not adjectives, never "well done", no "!". Mails are "Subject | body", unsigned (the game adds the sender).
+// {day}: "tomorrow" or a weekday; {time}: a time like 08:15; {name}: a crew member's name. Each beat fires once.
+// The scenes are meetings (content/meetings/pu3.*.meet); the people's own words are kind `work` under flags in their
+// own lines (calder, torres-zeke, halloran-emeka, tomas, brennan); the crew's chatter is content/banks/promo-t3.lines.
+
+// ---- nearly there: the toast when your reputation word changes at Tier 2 (Officer) ----
+== works.rep.up2.trusted
+- Now Trusted. One more step, Relied on, and you're up for your Tier 3 test.
+== works.rep.up2.relied
+- Now Relied on. That's the reputation your Tier 3 test needs.
+
+// ---- the offer (Calder in person first: meeting pu3.offer, .monday or .party; then these) ----
+// the urgent notice ({day}: "tomorrow" or "Monday")
+== pu3.offer.notice
+- Your Tier 3 test: {day}, 09:00, the job board in the Works bay.
+// the Mail, the record of what she said
+== mail.pu3.offer
+- Your Tier 3 test | As I said: {day}, 09:00, Works bay. A Deck 6 junction, switched off and back on, properly. Pass it and you're a Senior Officer.
+// if she couldn't find you in person by 22:00 (you were asleep, or nowhere near), the Mail says it all
+== mail.pu3.offer.late
+- Your Tier 3 test | I came to find you. Relied on, and Power safety done: that's all of it. Your Tier 3 test is {day}, 09:00, Works bay. Sleep.
+// the Record's "What's next" while you're below Relied on as an Officer ({band}: your word now)
+== next.t3.steps
+- Your Tier 3 test needs Relied on and Power safety. You're {band} now.
+
+// ---- the Works app's Training tab, "Your promotion" checklist for Tier 3 ----
+== pu3.check.title
+- Your promotion: the Tier 3 test
+== pu3.check.day
+- The test from Day 15
+== pu3.check.rep
+- Relied on (you're {band})
+== pu3.check.ps
+- Power safety, with the Chief
+== pu3.check.set
+- Test job: {day}, 09:00
+== pu3.check.result
+- Your result: {day}, 08:15
+== pu3.check.bar
+- Your bar, from the Captain
+== pu3.check.toast
+- The Captain's toast
+== pu3.check.done
+- Done
+== pu3.check.not
+- Not yet
+
+// ---- the Schedule's and Tracked's rows ----
+== pu3.row.test
+- Your Tier 3 test
+== pu3.row.result
+- Your result, 08:15
+== pu3.row.bar
+- The Captain, {time}
+== pu3.row.toast
+- The toast, 19:00
+
+// ---- before: up to two friends' Mail at 20:00 the evening before (one each, in order) ----
+== mail.pu3.luck
+- Tomorrow | You came through the storm. A junction is a box with a switch on it. You'll be fine. Bed early, though.
+- Good luck | Tier 3 tomorrow. I'm not worried, so you shouldn't be. Proper breakfast. That's from a friend, and it's an order.
+
+// ---- the test morning ----
+// once you're up (a device notice)
+== pu3.morning.notice
+- Today: your Tier 3 test, 09:00. It goes up on the job board in the Works bay.
+// Calder as you come into the bay (her own lines under flag pu3.promo.morning come first)
+== pu3.morning.say
+- Nine o'clock. Take it when you're ready.
+// the board's gold ring on the test's Take it (forced, whatever Teaching arrows says)
+== pu3.ptr.test
+- Your Tier 3 test: take it
+
+// ---- the test: the ring line at each step ({name}: the person to warn) ----
+== pu3.ptr.plan
+- Your Tier 3 test: plan it with Calder
+== pu3.ptr.warn
+- Warn {name} about the shutdown
+== pu3.ptr.off
+- Switch it off
+== pu3.ptr.breaker
+- Change the breaker
+== pu3.ptr.back
+- Bring it back
+== pu3.ptr.turnin
+- Turn it in
+// the talk option on a person you have to warn
+== pu3.warn.ask
+- About the shutdown
+// the toast when you've warned someone ({name}), and when Calder tells the one you couldn't find
+== pu3.warn.done
+- {name} knows. Thank you.
+== pu3.warn.calder
+- Calder told {name} for you. One less to find.
+// holding another job while the test waits on the board (a notice, once an hour; {time}: when the test comes off)
+== pu3.busy.notice
+- Your Tier 3 test waits on the job board till {time}. Turn in or drop this job first.
+// not taken by 15:00, or dropped: never failed, set again ({day}: the new day)
+== pu3.again.notice
+- Your Tier 3 test is set again: {day}, 09:00, the Works bay.
+== mail.pu3.again
+- Again | Not today. Practise your shutdowns: warn first, check it's dead, then touch it. We go again {day}, 09:00.
+
+// ---- passing (her word there is train.t3.done; these after it) ----
+== pu3.passed.say
+- That's the test. Your result {day}, first thing. My office, {time}. Don't be early.
+== mail.pu3.passed
+- Your test | Done. Your result {day}, {time}, my office. Not before. I won't have had my tea.
+== pu3.passed.notice
+- Your Tier 3 test is done. Your result: {day}, {time}, the Chief's office.
+
+// ---- the result day ----
+// the Mail at 06:00 ({time}: 08:15)
+== mail.pu3.result
+- Your result | My office, {time}. Before your shift. Sit down when you come in. That's new.
+// the urgent notice once you're up
+== pu3.result.notice
+- Your Tier 3 result: {time}, the Chief's office, Works bay. Before your shift.
+// the ring on her office door and the arrow's label
+== pu3.ptr.result
+- Your result: Calder's office
+// her words by Mail if you never came (by 09:15)
+== mail.pu3.promo
+- Your result | You weren't about, so you'll read it. You passed. As of today you're a Senior Officer: Senior Technician, Tier 3. Your card is on my desk. The Captain pins your bar this afternoon, observation room. Clean uniform.
+
+// ---- the bar ----
+// the Captain's invite, that morning ({time}: 16:30, or 17:15 on a Friday)
+== mail.pu3.invite
+- Your bar, {time} | Chief Calder tells me you've passed. Today at {time}, the observation room, Deck 1, I'd like to pin your bar myself. Bring your friends. There will be cake; I'm told that's not my decision.
+// the notice 30 minutes before
+== pu3.bar.notice
+- The Captain pins your bar at {time}: the observation room, Deck 1. Go now.
+// Calder in the bay as it nears (her own lines under flag pu3.promo.bar come first)
+== pu3.bar.say
+- Go.
+// the arrow's and the ring's label
+== pu3.ptr.bar
+- Your bar: the observation room
+// the ceremony by Mail, if you never came (by 22:00)
+== mail.pu3.bar
+- Your bar | We missed you this afternoon. The bar is on your cabin shelf with the certificate. Come up to the observation room one evening and I'll pin it properly. Congratulations, Senior Officer.
+// the framed certificate on your cabin shelf (its name; and its text, if the game shows it)
+== pu3.keepsake
+- Senior Officer's certificate
+== pu3.keepsake.text
+- Senior Officer, Senior Technician. A storm, a test and a ship that noticed. O. Marrow
+// the Record's milestone ({n}: the day number)
+== works.ms.senior
+- Senior Officer, Day {n}
+// the Ship app's news (one gossip line; {me})
+== pu3.news
+- {me} is a Senior Officer as of today. The bar, the observation room, and cake.
+
+// ---- the cake ----
+// the ring on Brennan
+== pu3.ptr.cake
+- Take a slice
+// the toast when you take it
+== pu3.cake.toast
+- A slice of Brennan's cake. Still warm.
+
+// ---- the toast ----
+// the Captain's invite that morning
+== mail.pu3.toast
+- The toast | Tonight, 19:00, my quarters, Deck 2. Dinner, and a toast to our new Senior Officer. Commander Vance will be there, on his day off; please thank him for it, he'll enjoy refusing the thanks.
+// the notice at 18:30, and the arrow's label
+== pu3.toast.notice
+- The Captain's toast at 19:00: her quarters, Deck 2. Go at quarter to.
+== pu3.ptr.toast
+- The Captain's toast: her quarters
+// the framed menu on your cabin shelf (its name; its text)
+== pu3.menu
+- The Captain's menu
+== pu3.menu.text
+- Soup from the garden. Brennan's pie. Custard. One toast: to the new Senior Officer.
+// by Mail if you missed it
+== mail.pu3.toast.missed
+- Tonight | We kept your chair. The toast was drunk anyway: I'm told that's allowed. The menu is on your shelf. Next time, come hungry.
+
+// ---- after: What's next, and the Training tab line ----
+== next.pu3.result
+- Your result: {day}, 08:15, the Chief's office.
+== next.pu3.bar
+- The Captain pins your bar at {time}, the observation room, Deck 1.
+== next.pu3.toast
+- The Captain's toast at 19:00, her quarters, Deck 2.
+== works.pu3.home
+- You stay in cabin 4-23 as a Senior Officer. Your laundry stays yours to do.
+
+// ---- Power safety (ps, S5-1 turn 2; the lesson is meeting train.ps.calder) ----
+== works.mech.ps
+- Power safety
+// the ask (toast and Mail; {time} and {place} filled by the game; never a time by hand)
+== works.ask.ps
+- Power safety | Before any Tier 3 work: Power safety, with me. Twenty minutes. You watch. {time}, {place}.
+== next.ps
+- Power safety comes next: a short lesson with the Chief at a Deck 6 junction.
+== next.wait.ps
+- Power safety: meet the Chief at the Deck 6 port junction. You only watch.
+// the Tier 3 test row's own ladder name (t3) and What's next for it
+== works.mech.t3
+- Your Tier 3 test job
+== next.t3
+- Next: your Tier 3 test. Relied on, and Power safety, and the Chief puts you up.
+== next.wait.t3
+- Your Tier 3 test is set. The job board, the Works bay, 09:00.
