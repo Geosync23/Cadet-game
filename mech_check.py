@@ -2585,7 +2585,7 @@ with sync_playwright() as pw:
         finally: cp.unlink(missing_ok=True)
     # Pillar 5 Step 6's rows (S6-2 on: m21) exist only with P5_STEP6 on: with it off in this build, run on a copy with it on
     P6_LINE = "const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');"
-    if P6_LINE in src0 and (not only or only & {'m21', 'm23', 'm24'}):
+    if (P6_LINE in src0 or re.search(r'^const P5_STEP6 = P5_STEP5 && true;', src0, re.M)) and (not only or only & {'m21', 'm23', 'm24'}):   # (BM19) or already on (0.95.0): a fresh copy either way
         cp = WORK / 'test' / ('_mech_p6_' + str(os.getpid()) + '_' + pathlib.Path(sys.argv[1]).name); cp.write_text(src0.replace(P6_LINE, 'const P5_STEP6 = P5_STEP5 && true;', 1))
         try:
             g6 = Game(pw, str(cp)); rows6 = g6.ev("CAREER_LADDER.map(r => ({ id: r.id, name: r.name, size: r.size, inBuild: !!WORK_MECH[r.id], stages: (r.stages || []).length }))")
