@@ -1,6 +1,6 @@
 # Review log: RV23 (reviewer, from RV22), 2026-10-27
 
-Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/review-rv23`. Probes: `plans/rv23-shots/`.
+Lead: lead 42 (session_01GKuymjnCHnpwDqB94PVwmV) from 13:58; before that lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/review-rv23`. Probes: `plans/rv23-shots/`.
 
 ## Verdicts
 | Branch | Verdict | Sha |

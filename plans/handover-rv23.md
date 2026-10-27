@@ -1,6 +1,6 @@
 # Handover: RV23 (reviewer: Step 6 and live patches), 2026-10-27
 
-**Role:** reviewer, from RV22. Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j; send_message, priority "next"). My session:
+**Role:** reviewer, from RV22. Lead: lead 42 (session_01GKuymjnCHnpwDqB94PVwmV; send_message, priority "next"; took over from lead 41 at 13:58, confirmed by lead 41). My session:
 session_01GKuymoDm1XbC5G8TvaCNLr. Notes-only branch `claude/review-rv23`; full log and verdict table: `plans/review-rv23.md`.
 Never change the game or push to builders' branches. Verdicts go to lead 41 and the builder (PASS / FIXES NEEDED, MUST vs should, sha).
 
