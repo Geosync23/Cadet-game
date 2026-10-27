@@ -1,0 +1,52 @@
+@bank all
+// MA6 (2026-10-27, Pillar 5 Step 6, S6-2, stand-in words until the head writer's): M21 The Monday briefing (section
+// 28b). Every Monday from Day 22 for a Senior Officer, 08:30 at the conference table in the observation room (Deck 1).
+// The meetings are m21.brief (the first, in full) and m21.short (later Mondays). Said by nobody unless noted.
+
+// the beats: the notice once you're up, the arrow's ring line, Calder in person, the Mail (the record), the hourly notice
+// while you hold another job
+== m21.notice
+- {time}: the Monday briefing, the observation room, Deck 1. Your seat's at the far end.
+== m21.ptr
+- Your seat at the table
+== m21.say
+// Calder, near you before the briefing (once)
+- The Captain's briefing, {time}, the observation room. Works has a chair there. Yours.
+== m21.mail
+- The Monday briefing | {time}, the observation room, Deck 1. Works has a seat: yours.
+== m21.busy
+- The Monday briefing is at {time}, the observation room. Turn in or drop this job first.
+
+// what each choice did (said straight after you choose)
+== m21.raise.sd
+// the Captain: a job of yours waits for a shutdown, booked for tomorrow
+- Approved. Tomorrow at {time}: {where}. Chief Calder, see it's on the rota.
+== m21.raise.sd.none
+// the Captain: no job waits for a shutdown yet
+- Approved. When a job needs the power off, book the hour in Works. You have my yes.
+== m21.raise.worry
+// the Captain: an inspection job on the machine, held for you
+- Then look at it before it looks at us. {machine}. It's on the board for you.
+== m21.raise.worry.none
+// the Captain: no machine to worry about
+- Every machine in good order? Then that's the best kind of worry. Keep it that way.
+== m21.raise.parts
+// the Captain: the parts order
+- Order it. It comes up on Thursday. Commander, sign it off.
+== m21.raise.parts.vance
+// Vance, after the Captain
+- Signed. Thursday, ten o'clock, main storage.
+
+// the parts arriving on Thursday (Mail from Stores; a toast in play)
+== m21.parts.mail
+- Your parts order is in | {parts}, from Monday's briefing. Main storage, Deck 5.
+== m21.parts.toast
+- Your parts order is in: main storage, Deck 5.
+
+// the observation room's wall screen on a briefing Monday (and after): the agenda
+== m21.agenda.title
+- This week's briefing
+== m21.agenda
+- 1. The comet, tonight. 2. Basil's first week. 3. The parts order. 4. Works: your item.
+== m21.agenda.short
+- The memo: the week ahead, department by department. Last item: Works.

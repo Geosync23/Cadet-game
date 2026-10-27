@@ -38079,6 +38079,38 @@ const LINES = JSON.parse([
   '{"text":"The sensor array: your sweeps feed Survey\'s charts now.","id":"jkyl8a"}]',
   ',"m20.turn":[',
   '{"text":"Your turn: the sensor array, at the job board","id":"mmf3hn"}]',
+  ',"m21.agenda":[',
+  '{"text":"1. The comet, tonight. 2. Basil\'s first week. 3. The parts order. 4. Works: your item.","id":"fti103"}]',
+  ',"m21.agenda.short":[',
+  '{"text":"The memo: the week ahead, department by department. Last item: Works.","id":"12iqlqi"}]',
+  ',"m21.agenda.title":[',
+  '{"text":"This week\'s briefing","id":"3rkcr3"}]',
+  ',"m21.busy":[',
+  '{"text":"The Monday briefing is at {time}, the observation room. Turn in or drop this job first.","id":"1d676di"}]',
+  ',"m21.mail":[',
+  '{"text":"The Monday briefing | {time}, the observation room, Deck 1. Works has a seat: yours.","id":"1ozwjzg"}]',
+  ',"m21.notice":[',
+  '{"text":"{time}: the Monday briefing, the observation room, Deck 1. Your seat\'s at the far end.","id":"13ys68j"}]',
+  ',"m21.parts.mail":[',
+  '{"text":"Your parts order is in | {parts}, from Monday\'s briefing. Main storage, Deck 5.","id":"9zz3k6"}]',
+  ',"m21.parts.toast":[',
+  '{"text":"Your parts order is in: main storage, Deck 5.","id":"1ispzh2"}]',
+  ',"m21.ptr":[',
+  '{"text":"Your seat at the table","id":"1m5op3j"}]',
+  ',"m21.raise.parts":[',
+  '{"text":"Order it. It comes up on Thursday. Commander, sign it off.","id":"18hkyif"}]',
+  ',"m21.raise.parts.vance":[',
+  '{"text":"Signed. Thursday, ten o\'clock, main storage.","id":"sglxr1"}]',
+  ',"m21.raise.sd":[',
+  '{"text":"Approved. Tomorrow at {time}: {where}. Chief Calder, see it\'s on the rota.","id":"uvvsnr"}]',
+  ',"m21.raise.sd.none":[',
+  '{"text":"Approved. When a job needs the power off, book the hour in Works. You have my yes.","id":"3evu70"}]',
+  ',"m21.raise.worry":[',
+  '{"text":"Then look at it before it looks at us. {machine}. It\'s on the board for you.","id":"y2pmj5"}]',
+  ',"m21.raise.worry.none":[',
+  '{"text":"Every machine in good order? Then that\'s the best kind of worry. Keep it that way.","id":"1ht8hkw"}]',
+  ',"m21.say":[',
+  '{"text":"The Captain\'s briefing, {time}, the observation room. Works has a chair there. Yours.","id":"ec8lse"}]',
   ',"mail.ending.answer.change":[',
   '{"text":"Your answer, again | Noted, and passed on. That\'s what the days before Sunday are for. Captain Odile Marrow","id":"3ov51d"}]',
   ',"mail.ending.answer.go":[',
@@ -42498,6 +42530,8 @@ const MEETINGS_BAKED = {
   "lineSupperGuess": {"title": "What's in the punch?", "from": "Pell Okafor", "gist": "At the Line supper, Pell tried to guess what's in Brennan's punch.", "lines": [{"who": "pell", "text": "You carried it up. You know. What's in the punch? It's ginger. It's definitely ginger.", "pose": "listen", "to": "you"}, {"choice": [{"text": "No idea. Ask Brennan.", "rel": {"brennan": 1}, "flavour": "practical", "mem": "line.secret.kept", "reply": {"who": "pell", "text": "She'd tell me. She wouldn't. You're both the same. Unbearable.", "pose": "laugh"}}, {"text": "It's pickle brine.", "rel": {"pell": 1}, "flavour": "share", "mem": "line.secret.told", "reply": {"who": "pell", "text": "Pickle... no. No. I've had three mugs. Why would you tell me that?", "pose": "laugh"}}, {"text": "Ginger. Definitely ginger.", "rel": {"brennan": 1}, "flavour": "funny", "mem": "line.secret.kept", "reply": {"who": "pell", "text": "I knew it! Ha. Ginger. I'm never wrong about these things.", "pose": "laugh"}}]}]},
   "lineTomasMug": {"title": "A mug for the watch", "from": "Tomas Lind", "gist": "You took Tomas a mug of Line punch at his watch post.", "lines": [{"who": "tomas", "text": "You brought it up. Nobody brings things to the watch.", "pose": "laugh"}, {"who": "tomas", "text": "It's green. Why is it green? Don't tell me. I'm drinking it anyway."}, {"who": "tomas", "text": "Tell me one thing. Just one. Then I have to look at the screen again.", "pose": "listen"}]},
   "lineTomasSat": {"title": "Tomas, the night before", "from": "Tomas Lind", "gist": "Tomas is on watch all day tomorrow, so he'll miss his first Line.", "lines": [{"who": "tomas", "text": "Hey. Can I complain at you for a minute? A small complaint. Medium.", "pose": "sigh"}, {"who": "tomas", "text": "I'm on watch tomorrow. All day. My first Line, and I'll be watching a corridor screen."}, {"who": "tomas", "text": "Everyone keeps saying it's the best bit of being out here. The horn, the gold, the oath.", "pose": "listen", "to": "you"}, {"choice": [{"text": "I'll bring you some punch.", "rel": {"tomas": 1}, "flavour": "practical", "flag": "line.promised", "reply": {"who": "tomas", "text": "Would you? Even if it's awful? Especially if it's awful. I want the whole thing.", "pose": "laugh"}}, {"text": "I'll tell you every bit of it.", "rel": {"tomas": 1}, "flavour": "cheer", "reply": {"who": "tomas", "text": "Every bit. Who cries, who spills, what the Captain says. I'll want it twice.", "pose": "laugh"}}, {"text": "Can't you swap?", "rel": {"tomas": 1}, "flavour": "listen", "reply": {"who": "tomas", "text": "Not on a crossing. Someone has to watch her cross.", "pose": "nod"}}]}, {"who": "tomas", "text": "Why does it matter, anyway? It's just a line. Pell says past it we're guests in someone else's sky."}, {"who": "tomas", "text": "Help a long way off, every star with somebody else's name. So the oath's about each other. Huh.", "pose": "nod"}, {"who": "tomas", "text": "Right. Climbing wall, then bed. Early start. Cross well for me, {me}."}]},
+  "m21.brief": {"title": "The Monday briefing", "from": "Captain Odile Marrow", "gist": "The Monday briefing went on without you: the comet tonight, Basil's first week, the parts order. Works raised nothing this week.", "lines": [{"who": "marrow", "text": "Good morning. Sit, all of you. The coffee is on the side.", "pose": "gesture"}, {"who": "marrow", "text": "The far end is Works' chair now. Yours.", "to": "you"}, {"who": "marrow", "text": "The week ahead. Dr. Sato, the comet."}, {"who": "sato", "text": "Closest pass tonight, about half past ten. Survey will be up all night. The observation room will be full."}, {"who": "holt", "text": "The Watch has the corridors for it. Nobody on the hull, please. I mean it this time."}, {"who": "vance", "text": "Our new cadet, Basil, starts his first week today. He will ask everyone everything. Answer him."}, {"who": "nandakumar", "text": "The infirmary has flu jabs from Wednesday. You know who you are."}, {"who": "marrow", "text": "And the parts order closes today. Chief Calder?"}, {"who": "calder", "text": "Works has an item this week. It's yours to raise.", "to": "you"}, {"who": "marrow", "text": "Go on, then. What does Works need from this table?", "to": "you"}, {"choice": [{"text": "A shutdown for tomorrow.", "rel": {"marrow": 1}}, {"text": "I'm worried about one of our machines.", "rel": {"calder": 1}}, {"text": "Our parts order.", "rel": {"vance": 1}}]}, {"who": "marrow", "text": "Good. That's the week. Thank you, everyone.", "pose": "nod"}, {"who": "vance", "text": "Same time next Monday. Don't be late. I won't be."}]},
+  "m21.short": {"title": "The Monday briefing", "from": "Captain Odile Marrow", "gist": "The Monday briefing went on without you. The memo is on the observation room's screen. Works raised nothing this week.", "lines": [{"who": "marrow", "text": "Morning, all. The memo's on the screen. Read it later; I'll know if you don't.", "pose": "gesture"}, {"who": "marrow", "text": "Works. Anything for this table?", "to": "you"}, {"choice": [{"text": "A shutdown for tomorrow.", "rel": {"marrow": 1}}, {"text": "I'm worried about one of our machines.", "rel": {"calder": 1}}, {"text": "Our parts order.", "rel": {"vance": 1}}]}, {"who": "marrow", "text": "Thank you. Same time next week.", "pose": "nod"}]},
   "promo.ceremony": {"title": "Your commission", "from": "Captain Odile Marrow", "gist": "The Captain commissioned you as an Officer of the Wren. The framed commission is on your cabin shelf.", "lines": [{"who": "vance", "text": "Attention, please. The Captain.", "pose": "nod"}, {"who": "marrow", "text": "Thank you, Teo. Sit, everyone, if there are chairs. There never are.", "pose": "laugh"}, {"who": "marrow", "text": "Cadet. Chief Calder tells me you're ready. The Chief doesn't say that often.", "to": "you"}, {"who": "marrow", "text": "By the Survey Service, I commission you an Officer of the Wren. With all that comes with it."}, {"who": "marrow", "text": "Hold still. Pins are not my strong point.", "pin": true, "pose": "gesture"}, {"who": "marrow", "text": "There. Now, my question. What should an officer never forget?", "to": "you"}, {"choice": [{"text": "The people. Everyone aboard.", "rel": {"marrow": 2}, "mem": "promo.answer.people", "reply": {"who": "marrow", "text": "Good answer. The ship is the people in it. The rest is metal.", "pose": "nod"}}, {"text": "To ask when I don't know.", "rel": {"marrow": 2}, "mem": "promo.answer.ask", "reply": {"who": "marrow", "text": "Good answer. The ones who stop asking are the ones who worry me.", "pose": "nod"}}, {"text": "To mind the step in the ready room.", "rel": {"marrow": 1}, "mem": "promo.answer.step", "reply": {"who": "marrow", "text": "Ha. Calder warned me about you. Also correct.", "pose": "laugh"}}]}, {"who": "calder", "text": "Tier 2. On the day I said. Good.", "pose": "nod"}, {"who": "torres-zeke", "text": "Told everyone. Didn't I tell everyone?", "pose": "laugh"}, {"who": "marrow", "text": "Tea, then. Mine's the good stuff. Don't tell the galley."}, {"who": "marrow", "text": "Welcome, Officer. My door is open. Mind the step.", "to": "you"}]},
   "promo.officer": {"title": "My office, 11:00", "from": "Chief Ines Calder", "gist": "Calder promoted you to Officer: Technician, Tier 2. A badge, a collar pip, and your own cabin from tonight.", "lines": [{"who": "calder", "text": "Sit. No, stay standing. This won't take long.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "The scrubber. Filter in, fan settled, nobody had to tell you twice."}, {"who": "calder", "text": "You've passed. As of now you're an Officer. Technician, Tier 2."}, {"who": "calder", "text": "The badge. And the pip. Collar, left side. Straight, please."}, {"choice": [{"text": "Thank you, Chief. I won't let you down.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "I know. That's why you're standing here.", "pose": "nod"}}, {"text": "Me? Already?", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Already. I don't promote people to be kind. I promote them because they're ready."}}, {"text": "About time, honestly.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Hm. Torres said you'd say that. He owes me a biscuit.", "pose": "laugh"}}]}, {"who": "calder", "text": "The board leaves you Tier 2 work from tomorrow. Harder faults. Fewer carts."}, {"who": "calder", "text": "Tonight you move to 4-23. Your own cabin. I'll walk you there at five."}, {"who": "calder", "text": "The Captain commissions you tomorrow. Clean uniform. Go on, then. They're waiting outside."}]},
   "promo.result": {"title": "Your result", "from": "Chief Ines Calder", "gist": "Calder gave you your result: you passed. You're a Works Officer now, Technician, Tier 2. The Captain pins your pip this afternoon.", "lines": [{"who": "calder", "text": "Door. Thank you. Two minutes.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "Your scrubber. Four bolts, one filter, no notes from me."}, {"who": "calder", "text": "Result: passed. You're an Officer from today. Technician, Tier 2."}, {"who": "calder", "text": "Your badge. Pin it level. I'll know if it isn't."}, {"choice": [{"text": "Thank you, Chief. I'll do it properly.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "You already do. That's what the badge is for.", "pose": "nod"}}, {"text": "Really? This soon?", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Really. Soon isn't the measure. Ready is. You're ready."}}, {"text": "I wondered when you'd say so.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Hm. So did Torres. Out loud. Daily.", "pose": "nod"}}]}, {"who": "calder", "text": "The pip isn't mine to give. The Captain pins it this afternoon, observation room. Clean uniform."}, {"who": "calder", "text": "Tier 2 work on the board from tomorrow. Tonight, after dinner, I walk you to your cabin. 4-23."}, {"who": "calder", "text": "Go on, then. They're waiting outside."}]},
@@ -57168,7 +57202,7 @@ function ladderTick(h) {
   if (c && c.d < d && (c.st === 'ask' || c.st === 'again') && !has('big') && m <= WORKS_ASK[1]) { const row = ladderRow(c.id); if (row && trainOffer(row, c, d, t)) { (W.op[d] = W.op[d] || []).push(row.id); out.push(row.id); } }
   for (const size of ['big', 'small']) {
     if ((W.op[d] || []).some(id => (ladderRow(id) || {}).size === size) || (size === 'big' && (W.cur || m > WORKS_ASK[1]))) continue;
-    const ok = r => r.size === size && !opened.has(r.id) && WORK_MECH[r.id] && d >= r.day && r.tier <= W.tier && (!r.fixed || weekday(d) + 1 === r.fixed.wd) && ladderNeeds(r.needs, W);
+    const ok = r => r.size === size && !opened.has(r.id) && WORK_MECH[r.id] && !WORK_MECH[r.id].own && d >= r.day && r.tier <= W.tier && (!r.fixed || weekday(d) + 1 === r.fixed.wd) && ladderNeeds(r.needs, W);
     const row = size === 'big' && P5_STEP5 && typeof ladderBigP5 === 'function' ? ladderBigP5(ok, d, W) : CAREER_LADDER.find(ok);   // Pillar 5 Step 5 (24u): higher tier first (off: the table's order)
     if (row && ladderOpen(row, d, t)) out.push(row.id);
   }
@@ -57512,7 +57546,7 @@ function worksNext() {
     if (!promoDone('summons2')) return nx('summons', 'Calder will want a word about your test job.');
     if (!promoDone('move2')) return nx('move', 'Your own cabin, 4-23, after the shift.');
     if (!promoDone('ceremony2')) return nx('ceremony', 'Your commission: the observation room, 17:15 tomorrow.'); }
-  const next = CAREER_LADDER.find(r => !opened.has(r.id) && WORK_MECH[r.id] && r.tier <= W.tier && r.size === 'big');
+  const next = CAREER_LADDER.find(r => !opened.has(r.id) && WORK_MECH[r.id] && !WORK_MECH[r.id].own && r.tier <= W.tier && r.size === 'big');   // own: a row its section opens itself (28b's m21)
   if (next && next.id === 't2' && !(W.test && W.test.passed)) {   // the test job not open yet (FX3, AR1): what it waits for, not "Calder has a test job"
     if (W.test) return worksText('next.t2.set', 'Your Tier 2 test job: {day}, nine o\'clock in the Works bay.', { day: (dd => dd === 0 ? 'today' : dd === 1 ? 'tomorrow' : dayName(W.test.day))(W.test.day - SHIP.time.day) }, k);
     if (!ladderNeeds(next.needs.find(x => x && x.rep) || { rep: 'relied' }, W)) return (typeof promoSteps === 'function' && promoSteps(k)) || worksText('next.t2.rep', 'Calder sets your Tier 2 test once people rely on you. You\'re at {band}.', { band: worksBandWord() }, k);
@@ -64493,6 +64527,145 @@ function p5NightAt(t) {
 // ---------------------------------------------------------------------
 
 // ---- slot: Monday briefing (section 28b). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// M21 (S6-2, MA6 for lead 41). The Monday briefing: every Monday from Day 22 for a Senior Officer (tier 3 and up), 08:30
+// at the conference table in the observation room (Deck 1, O). The Captain chairs; Vance and the chiefs on shift each
+// have a seat (one appointment, a seat each: a.places, as section 14's ceremonySeat does), and you sit at the far end.
+// The first you attend is the full meeting (m21.brief, 45 minutes: each chief's item, then what Works raises); later
+// Mondays the short one (m21.short, 20 minutes: the memo and the same choice), done by 08:50. What you raise happens:
+// a shutdown (with P5_M18: a job of yours waiting for one is booked for tomorrow), a worry about a machine (an inspection
+// job on your worst machine, held for you, slot M21_SLOT), or a parts order (on the shelves on Thursday at 10:00). The
+// beats: an urgent notice once you're up, Calder's word if you're near her before 08:15, the Mail after either (the
+// record), an hourly notice while you hold another job, and a level 1 arrow with the ring line "Your seat at the table"
+// from 08:15. The wall screen shows the agenda. Not through the ladder (WORK_MECH.m21.own: Day 22's big row is the Tier
+// 4 test); trained (W.tr.m21) at the first briefing you attend. Saved: SHIP.works.side.m21 = { first, last, pick, order,
+// got, sd }. schedU key 1070 (the worry's fault). Words: content/works/m21.lines, content/meetings/m21.*.meet. No R().
+const M21_AT = 510, M21_LEN = 45, M21_SHORT = 20, M21_SLOT = 44, M21_FROM = 22, M21_PARTS_AT = 600;
+const M21_SEATS = { marrow: '1-conf-1', vance: '1-conf-2', sato: '1-conf-3', holt: '1-conf-4', nandakumar: '1-conf-5', ferreira: '1-conf-6', raman: '1-conf-7', calder: '1-conf-8' };   // you: 1-conf-10, the far end (the conference venue's first place)
+const M21_PARTS = ['filter', 'cartridge', 'cell', 'uv lamp'];   // what the order brings: two of each part the machine shop can't make
+function m21State() {                                    // side.m21, cleaned (a save may hold junk)
+  const s = typeof worksSide === 'function' ? worksSide() : null; if (!s) return null;
+  const A = s.m21;
+  if (!A || typeof A !== 'object' || !s.m21Ok) {
+    const int = v => Number.isInteger(v) && v >= 0 ? Math.min(v, 99999) : 0;
+    s.m21 = { first: int(A && A.first), last: int(A && A.last), pick: A && Number.isInteger(A.pick) && A.pick >= 0 && A.pick <= 2 ? A.pick : -1, order: int(A && A.order), got: int(A && A.got), sd: int(A && A.sd) };
+    Object.defineProperty(s, 'm21Ok', { value: true, enumerable: false, configurable: true });
+  }
+  return s.m21;
+}
+// is there a briefing for you on day d (from saved state only): a Monday from Day 22, a Senior Officer or above, your workday, the Captain aboard and on shift
+function m21Due(d) {
+  const W = SHIP.works; if (!P5_M21 || !W || d < M21_FROM || weekday(d) !== 0 || (W.tier || 1) < 3 || !playerShiftOn(d)) return false;
+  try { return occOnShift('marrow', d); } catch (e) { return false; }
+}
+const m21Rec = d => SHIP.occasions.find(x => (x.id === 'm21.brief' || x.id === 'm21.short') && Math.floor(x.at / 1440) + 1 === d) || null;
+// book the day's briefing (from 05:00; the full one until you've attended one): the occasion, then a seat each at the table
+function m21Book(now, quiet) {
+  const d = worksDay(now), m = now - (d - 1) * 1440; if (m < 300 || !m21Due(d)) return null;
+  let r = m21Rec(d);
+  if (!r) {
+    const S = m21State(), full = !(S && S.first), id = full ? 'm21.brief' : 'm21.short', len = full ? M21_LEN : M21_SHORT, o = OCCASIONS[id];
+    if (!o || m >= M21_AT + len) return null;
+    o.with = Object.keys(M21_SEATS).filter(x => x !== 'marrow' && (() => { try { return occOnShift(x, d); } catch (e) { return false; } })());
+    r = occasionAdd(id, (d - 1) * 1440 + M21_AT, quiet, len); if (!r) return null;
+  }
+  const a = apptList().find(x => x.occ === r.key);
+  if (a && !a.places) { const pl = {}; for (const id of a.with) if (M21_SEATS[id]) pl[id] = M21_SEATS[id]; a.places = pl; }
+  return r;
+}
+const m21Open = (r, now) => !!r && r.status === 'asked' && !r.met && now < r.at + r.len;
+function m21Mail(d, r) {
+  if (flag('m21.mail.' + d) || typeof mailSend !== 'function') return; flagSet('m21.mail.' + d, true);
+  const tx = worksText('m21.mail', 'The Monday briefing | {time}, the observation room, Deck 1. Works has a seat: yours.', { time: hhmm(r.at % 1440) }), i = tx.indexOf(' | ');
+  mailSend({ at: shipNow(), from: worksName('marrow'), subject: i > 0 ? tx.slice(0, i) : 'The Monday briefing', body: i > 0 ? tx.slice(i + 3) : tx, quiet: true });
+}
+// the beats, in play: the notice once you're up, Calder's word, the hourly notice while you hold a job, the arrow
+function m21Beats(now) {
+  const d = worksDay(now), m = now - (d - 1) * 1440, r = m21Rec(d); if (!m21Open(r, now) || m < 360) return;
+  const when = hhmm(r.at % 1440);
+  if (!flag('m21.notice.' + d) && !promoBusy()) { flagSet('m21.notice.' + d, now);   // the minute it came: the hourly reminders start the hour after
+    promoNotice(worksText('m21.notice', '{time}: the Monday briefing, the observation room, Deck 1. Your seat\'s at the far end.', { time: when }), worksName('marrow')); m21Mail(d, r); }
+  if (!flag('m21.said.' + d) && now < r.at - 15) {      // said in person: Calder, near you before the arrow (the mess at breakfast, the corridor)
+    let near = false; try { const a = (typeof DECK_CREW !== 'undefined' ? DECK_CREW : []).find(x => x.p && x.p.id === 'calder'), P = player.obj.position; near = !!a && (Math.hypot(a.x - P.x, a.z - P.z) <= 6 || roomAt(...cellAt(a.x, a.z)) === roomAt(...player.here())); } catch (e) { near = false; }
+    if (near) { flagSet('m21.said.' + d, true); worksSay('calder', worksText('m21.say', 'The Captain\'s briefing, {time}, the observation room. Works has a chair there. Yours.', { time: when })); m21Mail(d, r); }
+  }
+  if (now < r.at && flag('m21.notice.' + d) && Math.floor(now / 60) > Math.floor(flag('m21.notice.' + d) / 60) && flag('m21.busy') !== Math.floor(now / 60)) {   // holding another job: once an hour
+    let mj = null; try { mj = myJob(); } catch (e) { mj = null; }
+    if (mj && !mj.workDone) { flagSet('m21.busy', Math.floor(now / 60)); promoNotice(worksText('m21.busy', 'The Monday briefing is at {time}, the observation room. Turn in or drop this job first.', { time: when }), worksName('marrow')); }
+  }
+  if (now >= r.at - 15 && typeof guideAsk === 'function' && !(GUIDE.list || []).some(x => x.id === 'm21:meet:' + d))
+    guideAsk({ id: 'm21:meet:' + d, level: 1, owner: '28b', from: r.at - 15, until: r.at + r.len,
+      goal: () => ({ deck: 1, room: 'O', label: worksText('m21.ptr', 'Your seat at the table') }),
+      done: () => !!r.met || r.status !== 'asked' });
+}
+// what Works raises (the choice k), done now: returns the line said back ({ who, text }, and a second one or null)
+function m21Raise(k, now = shipNow()) {
+  const d = worksDay(now), S = m21State(); if (!S) return [];
+  S.pick = k; S.last = d;
+  if (k === 0) {                                          // a shutdown: a job of yours waiting for one, booked for tomorrow
+    const j = P5_M18 && typeof sdBook === 'function' ? SHIP.jobs.find(x => x.shut && x.status === 'waiting' && !x.sdDay && heldForYou(x)) : null;
+    if (j) { const day = sdTarget(now), at = typeof p5NightOf === 'function' && p5NightOf(day) ? 1200 : 600, br = sdBranchesFor(j.machine)[0], b = br && sdBook(j.id, at, br, [], {});   // on a night day, 20:00, before the night (Day 23)
+      if (b) { S.sd = b.day; simNote('m21', { pick: 'sd', day: d, job: j.id, at: b.at, branch: b.branch });
+        return [{ who: 'marrow', text: worksText('m21.raise.sd', 'Approved. Tomorrow at {time}: {where}. Chief Calder, see it\'s on the rota.', { time: hhmm(b.at), where: sdBranches()[b.branch].name }) }]; } }
+    simNote('m21', { pick: 'sd', day: d, job: null });
+    return [{ who: 'marrow', text: worksText('m21.raise.sd.none', 'Approved. When a job needs the power off, book the hour in Works. You have my yes.') }];
+  }
+  if (k === 1) {                                          // a worry: your worst machine, an inspection job held for you
+    const busy = new Set(SHIP.jobs.filter(x => x.status !== 'done' && x.machine).map(x => x.machine)), cond = id => (SHIP.machines[id] || { cond: 100 }).cond;
+    const m = machineList().filter(x => !x.stub && SHIP.machines[x.id] && panelPlace(x.id) && !ENGINE_KINDS.has(x.kind) && jobTier({ machine: x.id }) <= playerTier() && !busy.has(x.id))
+      .sort((a, b) => cond(a.id) - cond(b.id) || (a.id < b.id ? -1 : 1))[0];
+    const cs = m ? FAULT_CAUSES[m.kind] || [] : [], cause = cs.length ? cs[Math.floor(schedU(machSeed('m21'), d, 1070) * cs.length) % cs.length].id : null;
+    const id = m && jobReserve(m.id, d, now - (d - 1) * 1440, M21_SLOT, { tier: playerTier(), until: now + 3 * 1440, ...(cause ? { cause } : {}) });
+    const j = id && SHIP.jobs.find(x => x.id === id); if (j) j.m21 = d;
+    simNote('m21', { pick: 'worry', day: d, job: id || null, machine: m ? m.id : null });
+    return j ? [{ who: 'marrow', text: worksText('m21.raise.worry', 'Then look at it before it looks at us. {machine}. It\'s on the board for you.', { machine: machineTitle(m.id) }) }]
+      : [{ who: 'marrow', text: worksText('m21.raise.worry.none', 'Every machine in good order? Then that\'s the best kind of worry. Keep it that way.') }];
+  }
+  S.order = d + 3;                                        // the parts order: on the shelves on Thursday at 10:00
+  simNote('m21', { pick: 'parts', day: d, due: S.order });
+  return [{ who: 'marrow', text: worksText('m21.raise.parts', 'Order it. It comes up on Thursday. Commander, sign it off.') }, { who: 'vance', text: worksText('m21.raise.parts.vance', 'Signed. Thursday, ten o\'clock, main storage.') }];
+}
+// the order arrives (live or while time skips): two of each part the machine shop can't make, Mail from Stores
+function m21Parts(now, skip) {
+  const S = m21State(); if (!S || !S.order) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440; if (d < S.order || (d === S.order && m < M21_PARTS_AT)) return;
+  const got = M21_PARTS.filter(k => STOCK[k] !== undefined); for (const k of got) SHIP.stores[k] = (SHIP.stores[k] || 0) + 2;
+  S.got = S.order; S.order = 0; if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  const tx = worksText('m21.parts.mail', 'Your parts order is in | {parts}, from Monday\'s briefing. Main storage, Deck 5.', { parts: got.map(k => '2 ' + plural(k)).join(', ') }), i = tx.indexOf(' | ');
+  if (typeof mailSend === 'function') mailSend({ at: now, from: 'Stores', subject: i > 0 ? tx.slice(0, i) : 'Your parts order is in', body: i > 0 ? tx.slice(i + 3) : tx, quiet: true });
+  if (!skip) try { toast('Stores', worksText('m21.parts.toast', 'Your parts order is in: main storage, Deck 5.')); } catch (e) { /* no UI */ }
+  simNote('m21', { pick: 'partsIn', day: d });
+}
+// attended (you answered, or sat it through): the first one trains the row; the short one from then on
+function m21Attended(now = shipNow()) {
+  const W = SHIP.works, S = m21State(), d = worksDay(now); if (!W || !S) return;
+  if (!S.first) S.first = d; S.last = d;
+  if (W.tr.m21 === undefined) { W.tr.m21 = d; simNote('trained', { mech: 'm21' }); }
+}
+// the observation room's wall screen: the agenda, once the briefing is yours
+function m21Screen(it, at) {
+  if (!it || it.t !== 'Wall screen' || typeof deckDef === 'undefined' || deckDef.num !== 1) return false;
+  const W = SHIP.works, S = m21State(); if (!W || (W.tier || 1) < 3 || SHIP.time.day < M21_FROM) return false;
+  let room = null; try { room = roomAt(...cellAt(at.x, at.z)); } catch (e) { room = null; } if (room !== 'O') return false;
+  const full = !(S && S.first) || (S.first === SHIP.time.day), tx = full ? worksText('m21.agenda', '1. The comet, tonight. 2. Basil\'s first week. 3. The parts order. 4. Works: your item.') : worksText('m21.agenda.short', 'The memo: the week ahead, department by department. Last item: Works.');
+  const say = () => { try { toast(worksText('m21.agenda.title', 'This week\'s briefing'), tx); } catch (e) { /* no UI */ } };
+  if (typeof approach === 'function') approach(at.clone(), it.front, it.depth, say); else say();
+  return true;
+}
+if (P5_M21) {
+  for (const [id, len] of [['m21.brief', M21_LEN], ['m21.short', M21_SHORT]]) {
+    OCCASIONS[id] = { title: 'The Monday briefing', kind: 'meeting', by: 'marrow', with: [], deck: 1, room: 'O', at: M21_AT, len, script: id, due: () => false, mail: null };   // booked by m21Book, never by section 18's tick
+    if (!MEETING_SCRIPTS[id]) MEETING_SCRIPTS[id] = { title: 'The Monday briefing', from: 'Captain Odile Marrow', stub: true,   // a stand-in if the baked words are missing
+      gist: 'The Monday briefing went on without you. Works raised nothing this week.',
+      lines: [{ who: 'marrow', text: 'Morning, all.', pose: 'gesture' }, { who: 'marrow', text: 'Works. Anything for this table?', to: 'you' },
+        { choice: [{ text: 'A shutdown for tomorrow.' }, { text: 'I\'m worried about one of our machines.' }, { text: 'Our parts order.' }] }, { who: 'marrow', text: 'Thank you. Same time next week.', pose: 'nod' }] };
+    const sc = MEETING_SCRIPTS[id];
+    sc.onPick = k => { const said = m21Raise(k); m21Attended(); if (DIALOGUE && said.length) DIALOGUE.queue.splice(DIALOGUE.i + 1, 0, ...said); };   // the reply said back, then the close
+    sc.onEnd = finished => { if (finished) m21Attended(); };
+  }
+  WORK_MECH.m21 = { own: true, noJob: true };            // opened and trained here, never by the ladder (24 core's ladderTick)
+  PLAYER_TAPS.unshift(m21Screen);
+  WORK_TICKS.push((now, skip) => { m21Book(now, skip); m21Parts(now, skip); if (!skip) m21Beats(now); });
+}
 // ---- end of slot: Monday briefing ----
 
 // ---------------------------------------------------------------------
