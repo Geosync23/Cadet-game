@@ -29,7 +29,7 @@ A new account can't update these; it must publish new links (or the user shares 
 - **Not merged / open:**
   - B3 claude/talk-close f52e2abc (talk only when close): checks green, RV22 review not done.
   - B3 claude/train-titles 7cbc1ad0 (lesson titles say "with Calder"): RV22 review maybe done (see handover-rv22.md).
-  - VB1 claude/vessel: RV22 MUST: the round-one fallback: Taavek stops 4 m away, the scene needs 3.2 m, you get "missed" at 13:00 while the arrow points at the sheet; plus 2 shoulds (Calder's Saturday fetch is silent; the 12:40 arrow order). See handover-vb1.md for whether VB1 fixed it before the move.
+  - VB1 claude/vessel 03b63d95 (game 705c6fc5): round-one fallback MUST + 2 shoulds FIXED by VB1 before the move; needs a reviewer re-check, then merge.
   - VB2 claude/ending-checks: RV22 verdict (see handover-rv22.md).
 
 ## Restart plan (on the new account)
