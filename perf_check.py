@@ -78,6 +78,9 @@ SCENES = [
     {'name': 'Veyli vessel: the parts chain, Works bay Sun 13:30', 'day': 28, 'time': '13:30', 'deck': 5, 'room': r'^Works bay$', 'cells': True, 'on': ['EV_VESSEL_ON'], 'busy': True, 'needs': "typeof SHIP_EVENTS !== 'undefined' && !!SHIP_EVENTS.veyliVessel"},
     {'name': 'Veyli vessel: the parts chain, shuttle bay Sun 13:30', 'day': 28, 'time': '13:30', 'deck': 5, 'room': r'^Shuttle bay', 'cells': True, 'on': ['EV_VESSEL_ON'], 'busy': True, 'needs': "typeof SHIP_EVENTS !== 'undefined' && !!SHIP_EVENTS.veyliVessel"},
     {'name': 'Veyli vessel: the engine lights, bow lounge Mon 17:41', 'day': 29, 'time': '17:41', 'deck': 3, 'room': r'^Bow lounge$', 'on': ['EV_VESSEL_ON'], 'busy': True, 'needs': "typeof SHIP_EVENTS !== 'undefined' && !!SHIP_EVENTS.veyliVessel"},
+    # Step 6 (S6-4, DA6; plans/p5-step6-spec.html): Deck 6's engine machines, the rack and the watch board as the night shift starts (P5_STEP6)
+    {'name': 'Step 6: the engine room, Tue 21:00', 'day': 23, 'time': '21:00', 'deck': 6, 'room': r'^Engine room$', 'on': ['P5_STEP6'], 'needs': "typeof deck6P5Places === 'function'"},
+    {'name': 'Step 6: engine control, Tue 21:00', 'day': 23, 'time': '21:00', 'deck': 6, 'room': r'^Engine control$', 'on': ['P5_STEP6'], 'needs': "typeof deck6P5Places === 'function'"},
 ]
 
 SCENE_JS = r"""(sc => {
@@ -117,7 +120,7 @@ def switched(path, on):                                  # a copy of the build w
     src = open(path).read()
     for name in on:
         if re.search(r'const ' + name + r' = true\b', src): continue      # already on in the build (PR7's find: it shipped)
-        src, n = re.subn(r'const ' + name + r' = (?:false|[A-Z_]+|URL_FLAGS\.has\(\'[a-z0-9]+\'\));', 'const ' + name + ' = true;', src, count=1)   # or a preview switch (#evvessel)
+        src, n = re.subn(r'const ' + name + r' = (?:false|[A-Z_]+|(?:[A-Z0-9_]+ && )?URL_FLAGS\.has\(\'[a-z0-9]+\'\));', 'const ' + name + ' = true;', src, count=1)   # or a preview switch (#evvessel; Step 6's P5_STEP5 && #p5s6)
         if not n: return None                                        # no such switch: its branch isn't in this build
     tmp = WORK / 'test' / ('_on_' + '_'.join(on) + '_' + os.path.basename(path)); tmp.write_text(src); return str(tmp)
 

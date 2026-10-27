@@ -28,6 +28,7 @@
 #   odd       a pad that doesn't report the standard layout, and two pads (deck)
 #   s5cases   Step 5 (S5-6): the old-mysteries board by pad (ring, A, Take) and a head-scratcher's Fault notes (suspects, Call it), P5_STEP5 on (pick, panels)
 #   s6cases   Step 6 (S6-8): P6, P7 and P8 in Fault notes by pad at the Day 25 19:00 preset (a suspect and Call it, a grid cell, a toggle and To the rig), P5_STEP6 on (pick, panels)
+#   deck6     Step 6 (S6-4): Deck 6 on Day 23 at 21:00 by pad: the dosimeter rack (take, return), the coils' panels, the reactor door, P5_STEP6 on (pick)
 #   vessel    A Veyli vessel needs help by pad, in a copy switched on: Calder and the sheet, the ramp's replies, the chain, the helper card and the making steps (VB1)
 # --inventory: with reach, runs its touch half even before the panels package (the list of what there is to reach).
 # --selftest: runs the parts on a copy with this check's own small stand-in driver (to prove the parts before section 26).
@@ -44,7 +45,7 @@ ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
 GAME = pathlib.Path(ARGS[0])
 ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'door', 'reach', 'day', 'games', 'unplug', 'odd', 'shut',
-             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'm19', 'm20', 's5cases', 's6cases', 'vessel', 'ending', 'm21']
+             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'm19', 'm20', 's5cases', 's6cases', 'vessel', 'ending', 'm21', 'm24']
 PARTS = ARGS[1:] or ALL_PARTS
 SHOTS = WORK / 'test' / 'ctl_shots'; SHOTS.mkdir(parents=True, exist_ok=True)
 ARGS_GL = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
@@ -2917,9 +2918,59 @@ def part_m21(pw, src, tag):
     st = r.ev("JSON.stringify(m21State())"); print(f'  the briefing by pad: {n} choice screen(s); the record {st}')
     if n != 1: fails.append(f'm21: one choice screen expected by pad ({n})')
     if '"pick":2' not in st or '"order":25' not in st: fails.append(f'm21: the parts order picked by pad should be in the record ({st})')
+    sc = r.ev("(() => { const t = ROOM_TILES.O[0]; return [m21Screen({ t: 'Wall screen', front: 0, depth: 0 }, cellPos(t[0], t[1])), m21Screen({ t: 'Wall screen', front: 0, depth: 0 }, cellPos(...DECKS[1].lift))]; })()"); r.step(300)
+    shown = r.ev("document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent"); print(f'  the wall screen: {sc}, "{shown}"')
+    if sc != [True, False] or 'Works: your item' not in shown: fails.append(f'm21: the wall screen in the observation room should show the agenda, and only there ({sc}, "{shown}")')
     if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
 PART_FN['m21'] = part_m21; NEEDS['m21'] = ['panels']
+# (S6-6, MA6) night 3's coil swap by pad (the preset: Day 24 at 21:02, an Engine Specialist, in the engine room): the
+# Works app's Team tab, A toggles Keane and a Watch rating; on the bridge, A on Book the slot; A on each spot; then at the
+# drive panel each of your calls by the ring and A, till the swap is done
+P6_M24 = r"""(() => { skipTo(23 * 1440 + 1262); machinesNow(); if (DIALOGUE) dialogueEnd(true); const W = worksInit(); W.tier = 4; W.rank = 'specialist';
+  for (const r of CAREER_LADDER) if (r.id !== 'm24') { W.tr[r.id] = 1; (W.op[1] = W.op[1] || []).push(r.id); }
+  worksCareerTick(shipNow()); goToDeck(6); player.stop(); worksTabShow('team'); return m24Crew(); })()"""
+M24_BTN = "[...document.querySelectorAll('button')].find(b => b.offsetParent && {})"
+def m24_btn(r, fails, rx, scene):
+    res = press_in_panel(r, M24_BTN.format(f"/{rx}/.test(b.textContent)"))
+    if res != 'ok': fails.append(f'm24: {scene} by pad: {res}')
+    r.step(4); return res == 'ok'
+def part_m24(pw, src, tag):
+    fails = []
+    r = end_run(pw, src, f'{tag}_m24', P6_M24)
+    crew = r.ev("m24Crew()"); print(f'  21:02: the crew to pick from {crew}')
+    if not crew or crew[0] != 'keane-davi' or len(crew) < 2: r.close(); return [f'm24: no team to pick ({crew})']
+    rating = r.ev(f"worksName({json.dumps(crew[1])})")
+    m24_btn(r, fails, 'Davi Keane', 'A on Keane'); m24_btn(r, fails, rating, f'A on {rating}')
+    st = r.ev("m24State().pick"); print(f'  picked by pad: {st}')
+    if sorted(st) != sorted(['keane-davi', crew[1]]): fails.append(f'm24: A should toggle each person into the team ({st})')
+    m24_btn(r, fails, 'Davi Keane', 'A on Keane again (off)'); off = r.ev("m24State().pick.slice()"); m24_btn(r, fails, 'Davi Keane', 'A on Keane (back on)')
+    if 'keane-davi' in off: fails.append(f'm24: A again should take Keane off ({off})')
+    r.ev("(() => { goToDeck(1); const t = ROOM_TILES.B[Math.floor(ROOM_TILES.B.length / 2)]; player.obj.position.copy(cellPos(t[0], t[1])); player.stop(); worksTabShow('team'); })()"); r.step(10)
+    m24_btn(r, fails, 'Book the slot', 'A on Book the slot (on the bridge)')
+    j = r.ev("(() => { const s = m24State(), j = s.job && SHIP.jobs.find(x => x.id === s.job); return j ? [j.id, j.start] : null; })()"); print(f'  booked by pad: {j}')
+    if not j: r.close(); return fails + ['m24: Book the slot by pad booked nothing']
+    m24_btn(r, fails, 'The lifting frame: Davi', 'A on the lifting frame for Keane')
+    sp = r.ev("m24State().spots['keane-davi']")
+    if sp != 2: fails.append(f'm24: the spot by pad should put Keane on the lifting frame ({sp})')
+    r.ev(f"(() => {{ deviceClose(); skipTo({j[1]} - 3); machinesNow(); goToDeck(6); const pl = placeById(m24Spots()[2]), w = pl.walk || pl.at; player.obj.position.copy(cellPos(w[0], w[1])); player.stop(); }})()"); r.step(20)
+    said, n = [], 0
+    for k in range(200):
+        s = r.ev(f"(() => {{ const j = SHIP.jobs.find(x => x.id === {json.dumps(j[0])}); const mine = j.seq.map((s, i) => s.who === 'you' ? i : -1).filter(i => i >= 0); return {{ done: j.status === 'done', cur: j.cur, mine: mine.indexOf(j.cur), did: (j.stepsDone || []).length }}; }})()")
+        if s['done']: break
+        if s['mine'] >= 0 and s['did'] <= s['mine']:
+            for q in range(20):
+                if r.ev("!!DEV.choose"): break
+                r.step(10)
+            res = press_in_panel(r, "[...document.querySelectorAll('#devDlg button')].find(b => b.textContent.trim() === 'Next step')")
+            if res != 'ok': fails.append(f'm24: your call\'s Next step by pad (step {s["cur"]}): {res}'); break
+            said.append(s['cur']); n += 1
+        r.step(30)
+    st = r.ev("JSON.stringify(m24State())"); print(f'  the swap by pad: {n} calls (Next step at steps {said}); {st}')
+    if n != 6 or '"done":0' in st: fails.append(f'm24: six calls by pad and the swap done ({n}, {st})')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close(); return fails
+PART_FN['m24'] = part_m24; NEEDS['m24'] = ['panels']; P6_PARTS['m24'] = 'S6-6 leading a team'
 # (S5-5, B3) 24x's calibration job by pad only: the ring names the array and A starts each stop; "Pick the star" by the D-pad
 # and A; the dial's card turned with − / + by pad till it settles; then the rack's amber module (the ring, A)
 P5_M20JOB = r"""(() => { skipTo(22 * 1440 + 570); machinesNow(); if (DIALOGUE) dialogueEnd(true); if (ACT && typeof actEnd === 'function') actEnd(true); if (DEV.choose) devChosen(-1); const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.t3 = 15; W.tr.m20 = 19;
@@ -3206,7 +3257,67 @@ const PAD_BUILT = ['base', 'deck', 'marks', 'panels', 'games'];
 })();
 """
 
+# Part "deck6" (S6-4, DA6 for lead 41; plans/p5-step6-spec.html section 9): Deck 6's new things by pad, in a copy with
+# P5_STEP6 on, at the spec's preset (Day 23, 21:00, an Engine Specialist on Deck 6): the dosimeter rack (the ring names it,
+# A takes a badge, A again hangs it back), each drive coil (the ring names it, A shows its panel), and the reactor's
+# shielded door (the ring offers it, A says it's shut: the permit is S6-5's)
+S6_LINE = "const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');"
+D6_SETUP = r"""(() => { skipTo(22 * 1440 + 1260); const W = worksInit(shipNow()); if (!W) return false; W.tier = 4; W.rank = 'specialist'; for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; goToDeck(6); return typeof dosiOut === 'function'; })()"""
+D6_ITEM_AT = r"""((t) => { const it = ITEMS.find(i => i.t === t); if (!it) return null; const v = new THREE.Vector3(); it.hit.getWorldPosition(v); return { x: v.x, y: v.y, z: v.z }; })"""
+D6_TOAST = "(() => { const e = document.getElementById('toast'); return e ? e.textContent : ''; })()"
+D6_CLEAR = "toastEl.classList.remove('show'); typeof TOAST_AT !== 'undefined' && (TOAST_AT = -1e9); typeof GUIDE !== 'undefined' && GUIDE.tq && (GUIDE.tq.length = 0)"
+def d6_ring(r, word, tries=12):
+    seen = []
+    for k in range(tries):
+        h = r.ev(HINT); seen.append(h)
+        if h and word in h.lower(): return h, seen
+        r.press('RIGHT'); r.step(4)
+    return None, seen
+def part_deck6(pw, src, tag):
+    fails = []
+    if S6_LINE not in src or 'function deck6P5Places' not in src: print('  deck6: not in this build (S6-4)'); return fails
+    r = Run(pw, src.replace(S6_LINE, 'const P5_STEP6 = P5_STEP5 && true;'), f'{tag}_d6', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    if not r.ev(D6_SETUP): r.close(); return ['deck6: no Works record on Day 23 (worksInit) or no rack']
+    r.step(30)
+    def stand(title):
+        t = r.ev(f"({D6_ITEM_AT})({json.dumps(title)})")
+        if not t: return False
+        r.ev(D6_CLEAR); ok = r.ev(f"({STAND_BY})({json.dumps(t)})"); r.step(30); return ok
+    # the rack: take, then return
+    if not stand('Dosimeter rack'): fails.append('deck6: the rack is not on Deck 6')
+    else:
+        for want, label in ((True, 'take'), (False, 'return')):
+            r.ev(D6_CLEAR); r.step(4)   # the bottom line is the ring's again once the last message has gone
+            h, seen = d6_ring(r, 'dosimeter')
+            if not h: fails.append(f'deck6: the ring never named the rack to {label} ({seen[:4]}; {r.ev("JSON.stringify([!!ACT && ACT.kind, DEV.open, padTargets().length])")})'); break
+            r.press('A'); r.step(150)
+            out = r.ev("dosiOut() !== null")
+            if out != want: fails.append(f'deck6: A on the rack did not {label} the badge (out {out})'); break
+            print(f'  deck6: the rack by pad, {label}: ring {h!r}, badge out {out}')
+    # the coils' panels
+    for k in (1, 2, 3):
+        title = f'Drive coil {k}'
+        if not stand(title): fails.append(f'deck6: {title} is not on Deck 6'); continue
+        h, seen = d6_ring(r, f'coil {k}')
+        if not h: fails.append(f'deck6: the ring never named {title} ({seen[:4]})'); continue
+        r.press('A'); r.step(300); t = r.ev(D6_TOAST)
+        if title.lower() not in (t or '').lower(): fails.append(f'deck6: A on {title} did not show its panel ({t!r}; {r.ev(OUTCOME)})')
+        else: print(f'  deck6: {title} by pad: ring {h!r}, A: {t[:60]!r}')
+    # the reactor's shielded door, from the lobby's alcove: offered, shut without a permit
+    r.ev(D6_CLEAR); r.ev("(() => { player.obj.position.copy(cellPos(26, 3)); target.copy(player.obj.position).setY(.7); player.stop(); player.face = Math.PI / 2; })()"); r.step(30)
+    print('  deck6: by the reactor door the ring has', r.ev("JSON.stringify(padTargets().map(o => o.key || o.name).slice(0, 8))"))
+    h, seen = d6_ring(r, 'reactor')
+    if not h: fails.append(f'deck6: the ring never offered the reactor door ({seen[:4]})')
+    else:
+        r.press('A'); r.step(150); t = r.ev(D6_TOAST)
+        if 'reactor' not in (t or '').lower() and 'shielded' not in (t or '').lower(): fails.append(f'deck6: A on the reactor door said nothing ({t!r})')
+        else: print(f'  deck6: the reactor door by pad: ring {h!r}, A: {t[:60]!r}')
+    pe = [e for e in r.errors if e.startswith('pageerror')]
+    if pe: fails.append(f'deck6: page errors: {pe[:2]}')
+    r.close(); return fails
 PART_FN['promo3'] = part_promo3; NEEDS['promo3'] = ['panels']; ALL_PARTS.append('promo3')   # (S5-2: PARTS is ALL_PARTS itself when none are named)
+PART_FN['deck6'] = part_deck6; NEEDS['deck6'] = ['pick']; ALL_PARTS.append('deck6')   # S6-4: Deck 6's rack, coil panels and reactor door by pad
 # ---- (S6-1, N6 for lead 41) the night shift by pad (28a, on a copy with P5_STEP6 switched on): Calder's night.on scene
 # read through by pad (Day 22 09:16), the bunk's "Sleep until 16:45" (the ring on the bunk, the alarm's Set by the
 # D-pad and A), a whole night 2 by pad (Day 23 20:46: the stick to the time clock, its ring, Clock in; the lift to Deck 6

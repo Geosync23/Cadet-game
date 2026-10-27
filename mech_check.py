@@ -1635,6 +1635,86 @@ def part_m21(g):
     b = [g.ev(f"({M21})({k})") for k in range(3)]
     check(json.dumps(r, sort_keys=True) == json.dumps(b, sort_keys=True), 'm21: differs the second time')
 PARTS['m21'] = part_m21
+# 28d M24 leading a team (S6-6, MA6): on paper, night 3 (Day 24) for an Engine Specialist. The beats from 21:00 (the
+# notice, the Mail after it, the level 1 arrows: pick, book, spots); the picks (Keane, the one engine tech aboard, says
+# yes; a Watch rating "after my round", 20 minutes); booking only on the bridge and only with a team; the Watch's hour;
+# spots that follow onto the job before the start and not after; a good team (Keane on the lifting frame, a ready Watch
+# rating on the coupling) and quick calls finish early, a poor pick (both spots wrong) runs over the hour, never fails;
+# not coming: Keane finishes it, not trained; trained by the first you led; Schedule rows; none for a Senior with the
+# promotion on, none another day; the save cleaned; the same twice.
+M24 = r"""((opt) => {
+  opt = opt || {};
+  const out = { notices: [], arrows: [] };
+  SHIP.works = null; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = []; MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; GUIDE.list = [];
+  const pn = promoNotice; promoNotice = (text) => { if (/coil swap/i.test(text)) out.notices.push([shipNow() % 1440, text]); };   // (24u's own notices aside)
+  try {
+    const d = opt.day || 24; setShipNow((d - 1) * 1440 + 1250); machinesNow(); const W = worksInit(); W.tier = opt.tier || 4; W.rank = W.tier >= 4 ? 'specialist' : 'senior';
+    for (const r of CAREER_LADDER) if (r.id !== 'm24') { W.tr[r.id] = 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); }   // every other lesson done: nothing else asks tonight
+    out.on = m24On(); out.crew = m24Crew();
+    const n = d === 24 && m24Night() || { from: (d - 1) * 1440 + 1260 };
+    const tick = (a, b) => { for (let t = a; t <= b; t++) { setShipNow(t); machinesNow(); worksCareerTick(t); for (const e of GUIDE.list || []) if (/^m24:/.test(e.id) && !out.arrows.some(x => x[0] === e.id)) out.arrows.push([e.id, e.level, t % 1440]); } };
+    tick(n.from - 10, n.from + 5);
+    out.mails = SHIP.mail.filter(x => /coil swap/i.test(x.subject)).map(x => [x.at % 1440, x.subject]);
+    if (!out.on || d !== 24) return out;
+    out.bookEarly = !!m24Book(shipNow(), true);
+    const keane = 'keane-davi', rating = out.crew.find(id => id !== keane);
+    out.said = [m24Pick(keane), m24Pick(rating)];
+    out.notHere = !!m24Book(shipNow(), false);
+    if (opt.good) { m24SpotSet(keane, 2); tick(shipNow() + 1, (m24State().ready[rating] || 0) + 1); }
+    const j = m24Book(shipNow(), true); if (!j) return out;
+    out.job = [j.start % 1440, j.start - shipNow() >= 45, j.team.slice().sort(), j.spots.you];
+    out.spots0 = [j.spots[keane], j.spots[rating]];
+    if (opt.swap) { m24SpotSet(keane, m24State().spots[keane] === 1 ? 2 : 1); out.spots1 = [j.spots[keane], j.spots[rating], j.seq.filter(s => s.part === 'lift')[0].who]; }
+    tick(shipNow() + 1, j.start - 1);
+    let t = j.start, calls = 0;
+    for (; t < j.start + 240 && j.status !== 'done'; t++) { setShipNow(t); machinesNow(); worksCareerTick(t); if (!opt.away) { j.youIn = true;
+      const mine = j.seq.map((s, i) => s.who === 'you' ? i : -1).filter(i => i >= 0), k = mine.indexOf(j.cur); if (k >= 0 && !(j.stepsDone || []).includes(k)) { jobStepDone(j.id, k, {}); calls++; } } }
+    out.lateSpot = m24SpotSet(keane, 1);
+    const S = m24State(); out.end = [j.status, S.mins, calls, S.done > 0, W.tr.m24 === undefined ? null : W.tr.m24, !!j.youOut];
+    out.mailDone = SHIP.mail.filter(x => x.subject === 'The coil swap').length;
+    return out;
+  } finally { promoNotice = pn; }
+})"""
+M24_ITEMS = r"""(() => { SHIP.works = null; SHIP.jobs = []; setShipNow(23 * 1440 + 1250); const W = worksInit(); W.tier = 4; const a = m24Items(24).map(x => [x.from, x.title]);
+  m24Pick('keane-davi'); m24Pick(m24Crew()[1]); const j = m24Book(shipNow(), true); const b = m24Items(24).concat(m24Items(25)).map(x => [x.from, x.title]); return [a, b, j && j.start % 1440]; })()"""
+M24_SAVE = r"""(() => { SHIP.works = null; setShipNow(23 * 1440 + 300); const W = worksInit(); W.side = { m24: { day: 24, pick: ['keane-davi', 7, 'x'], said: { 'keane-davi': 'yes', x: 'maybe' }, ready: { a: -3, b: 40 }, slot: 'z', spots: { 'keane-davi': 2, y: 9 }, job: 5, done: 1.5, mins: 30 } }; return JSON.stringify(m24State()); })()"""
+def part_m24(g):
+    on = g.ev("typeof P5_M24 !== 'undefined' && P5_M24 && typeof m24Book === 'function'")
+    if not on: print('  m24: not in this build (P5_M24 off)'); return
+    good, poor = g.ev(f"({M24})({{ good: true }})"), g.ev(f"({M24})({{}})")
+    a = good
+    print(f"  m24 crew {a['crew']}, notices {a['notices']}, Mail {a['mails']}, arrows {a['arrows']}, said {a['said']}")
+    print(f"  m24 good team: job {a.get('job')}, spots {a.get('spots0')}, end {a.get('end')}; poor pick: spots {poor.get('spots0')}, end {poor.get('end')}")
+    check(a['on'] and a['crew'][:1] == ['keane-davi'] and len(a['crew']) >= 2, f"m24: Keane, then the night Watch ratings, to pick from ({a['crew']})")
+    check(len(a['notices']) == 1 and a['notices'][0][0] == 1260 and 'coil swap' in a['notices'][0][1], f"m24: one notice as the night starts, 21:00 ({a['notices']})")
+    check(len(a['mails']) == 1 and a['mails'][0][0] >= 1260, f"m24: one Mail, the record, after the notice ({a['mails']})")
+    check(['m24:pick', 1, 1260] in a['arrows'], f"m24: a level 1 arrow to pick your team from 21:00 ({a['arrows']})")
+    check(any(x[0] == 'm24:book' and x[1] == 1 for x in a['arrows']) and any(x[0] == 'm24:spots' and x[1] == 1 for x in a['arrows']), f"m24: level 1 arrows to book with the Watch and for the spots ({a['arrows']})")
+    check(a['said'] == ['yes', 'later'], f"m24: Keane says yes, a Watch rating after their round ({a['said']})")
+    check(not a['bookEarly'] and not a['notHere'], "m24: no booking before the team is picked, nor off the bridge")
+    check(a.get('job') and a['job'][1] and a['job'][2] == sorted(['keane-davi', a['crew'][1]]), f"m24: the Watch's hour at least 45 minutes on, the two you picked ({a.get('job')})")
+    check(a.get('spots0') == ['6-engine-2', '6-engine-1'] and poor.get('spots0') == ['6-engine-1', '6-engine-2'], f"m24: the spots on the job as you gave them ({a.get('spots0')}, {poor.get('spots0')})")
+    e, p = a.get('end') or [], poor.get('end') or []
+    check(e[:1] == ['done'] and e[1] <= 55 and e[2] == 6 and e[3] and e[4] == 24, f"m24: a good team and quick calls: done early (55 minutes or less), six calls, trained ({e})")
+    check(p[:1] == ['done'] and p[1] > 60 and p[3], f"m24: a poor pick runs over the hour, and is still done ({p})")
+    check(not a['lateSpot'], "m24: no spot change once the run has started")
+    check(a['mailDone'] == 1, f"m24: one Mail at the end ({a['mailDone']})")
+    s = g.ev(f"({M24})({{ swap: true }})")
+    check(s.get('spots1') and s['spots1'][0] == '6-engine-2' and s['spots1'][2] == 'keane-davi', f"m24: a spot changed before the start: the job follows ({s.get('spots1')})")
+    w = g.ev(f"({M24})({{ away: true }})")
+    print(f"  m24 not coming: {w.get('end')}")
+    check(w.get('end') and w['end'][0] == 'done' and w['end'][5] and w['end'][4] is None, f"m24: not there: Keane finishes it, not trained ({w.get('end')})")
+    o = g.ev(f"({M24})({{ tier: 3 }})")
+    check(not o['on'] and not o['notices'] and not o['arrows'], "m24: none for a Senior Officer (the promotion's on)")
+    o2 = g.ev(f"({M24})({{ day: 23 }})")
+    check(not o2['notices'] and not o2['arrows'] and not o2['mails'], f"m24: nothing on another night ({o2})")
+    it = g.ev(M24_ITEMS)
+    check(it[0] and it[0][0][1].startswith('Plan the coil swap') and any('coil swap' in x[1] and x[0] == it[2] for x in it[1]), f"m24: Schedule rows: the planning, then the slot ({it})")
+    sv = json.loads(g.ev(M24_SAVE))
+    check(sv == {'day': 24, 'pick': ['keane-davi', 'x'], 'said': {'keane-davi': 'yes'}, 'ready': {'b': 40}, 'slot': 0, 'spots': {'keane-davi': 2}, 'job': None, 'done': 0, 'mins': 30}, f"m24: the save read back, junk cleaned ({sv})")
+    good2 = g.ev(f"({M24})({{ good: true }})")
+    check(json.dumps(good, sort_keys=True) == json.dumps(good2, sort_keys=True), 'm24: differs the second time')
+PARTS['m24'] = part_m24
 
 # ---- favour cases (24l, seat E2 on H's behalf; not a ladder row, so it runs after the rows as EXTRA['fcase']): every
 # script has three clue places and its answer (sus.1) among the options; a friend asks (Mail, an offered favour) on the
@@ -2330,6 +2410,10 @@ with sync_playwright() as pw:
             print(f"m21 ({r['name']}): 28b's own briefing, not a training (its part below)")
             PARTS['m21'](g)
             return
+        if r['id'] == 'm24' and ev("!!(WORK_MECH.m24 && WORK_MECH.m24.own)"):   # 28d's own night 3 (S6-6): never through the ladder, trained by the first swap you led
+            print(f"m24 ({r['name']}): 28d's own coil swap on night 3, not a training (its part below)")
+            PARTS['m24'](g)
+            return
         if r['id'] == 't3' and ev("typeof puPassed === 'function'"):   # 24u's Tier 3 test job (S5-2) is no training either: promo_beats_check's t3 parts test it
             print(f"t3 ({r['name']}): 24u's test job, not a training (promo_beats_check t3before ... t3toast)")
             return
@@ -2368,13 +2452,13 @@ with sync_playwright() as pw:
         finally: cp.unlink(missing_ok=True)
     # Pillar 5 Step 6's rows (S6-2 on: m21) exist only with P5_STEP6 on: with it off in this build, run on a copy with it on
     P6_LINE = "const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');"
-    if P6_LINE in src0 and (not only or only & {'m21'}):
+    if P6_LINE in src0 and (not only or only & {'m21', 'm24'}):
         cp = WORK / 'test' / ('_mech_p6_' + str(os.getpid()) + '_' + pathlib.Path(sys.argv[1]).name); cp.write_text(src0.replace(P6_LINE, 'const P5_STEP6 = P5_STEP5 && true;', 1))
         try:
             g6 = Game(pw, str(cp)); rows6 = g6.ev("CAREER_LADDER.map(r => ({ id: r.id, name: r.name, size: r.size, inBuild: !!WORK_MECH[r.id], stages: (r.stages || []).length }))")
             base = {r['id'] for r in rows}
             for r in rows6:
-                if r['id'] in base or (only and r['id'] not in only) or r['id'] not in {'m21'}: continue   # (each Step 6 piece adds its id here)
+                if r['id'] in base or (only and r['id'] not in only) or r['id'] not in {'m21', 'm24'}: continue   # (each Step 6 piece adds its id here)
                 if not r['inBuild']: print(f"{r['id']} ({r['name']}): not in this build (P5_STEP6 on)"); continue
                 print(f"(on a copy with P5_STEP6 switched on)"); row_check(g6, g6.ev, r)
             if g6.errors: fail('page errors (P5_STEP6 copy): ' + ' | '.join(g6.errors[:5]))
