@@ -59309,7 +59309,8 @@ function ladderClearDay(d) {
   try { if (eventDay(d)) return false; return !evBeatsOn(d).some(b => ['beat', 'test', 'captain', 'night'].includes(b.kind) && b.from < 960 && b.to > 360); } catch (e) { return true; }
 }
 function ladderBigP5(ok, d, W) {
-  const list = CAREER_LADDER.filter(r => ok(r) && W.tr[r.id] === undefined && !(r.id === 'm15' && W.tier >= 3))   // (RV20's M1: a row already trained, never asked again: the order put a trained Tracing first, its meeting differed run to run).map((r, i) => [r, i]).sort((a, b) => (b[0].tier - a[0].tier) || (a[1] - b[1])).map(x => x[0]);
+  // (RV20's M1) a row already trained is never asked again: the order put a trained Tracing first, and its meeting differed run to run
+  const list = CAREER_LADDER.filter(r => ok(r) && W.tr[r.id] === undefined && !(r.id === 'm15' && W.tier >= 3)).map((r, i) => [r, i]).sort((a, b) => (b[0].tier - a[0].tier) || (a[1] - b[1])).map(x => x[0]);
   const top = list[0]; if (!top) return undefined;
   if (W.tier >= 3 && top.tier < W.tier && !ladderClearDay(d)) return undefined;
   return top;
