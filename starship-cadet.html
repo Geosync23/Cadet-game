@@ -5664,7 +5664,9 @@ Object.assign(WALL_KIT, {
         c.fillStyle = '#1d2740'; c.fillRect(0, 0, w, h); c.strokeStyle = '#d9b45a'; c.lineWidth = 3; c.strokeRect(5, 5, w - 10, h - 10);
         c.fillStyle = '#ecd08a'; c.textAlign = 'center';
         let f = 26; do c.font = '600 ' + f + 'px Georgia,serif'; while (c.measureText(o.text).width > w - 26 && --f > 14);
-        c.fillText(o.text, w / 2, 38); c.font = 'italic 17px Georgia,serif'; c.fillStyle = '#d9b45a'; c.fillText(o.sub, w / 2, 63);
+        c.fillText(o.text, w / 2, 38); c.font = 'italic 17px Georgia,serif'; c.fillStyle = '#d9b45a';
+        if (o.fit) { let f2 = 17; while (c.measureText(o.sub).width > w - 20 && --f2 > 10) c.font = 'italic ' + f2 + 'px Georgia,serif'; }   // o.fit: shrink a long rank to fit (S6-4's Engine Specialist)
+        c.fillText(o.sub, w / 2, 63);
       });
       const p = new THREE.Mesh(new THREE.PlaneGeometry(.56, .175), new THREE.MeshBasicMaterial({ map: t, toneMapped: false }));
       p.position.set(0, 2.5, .04); g.add(p); box(.62, .235, .035, D2.brass, 0, 2.5, .0175, g); return;
@@ -5828,14 +5830,15 @@ function d2Suite(rk, doorKey, o = {}) {
   } else {                                             // 4 x 5 on the hull: bed under the windows, desk on the far wall
     P.push(bed, { kind: 'ensuite', u: U - .6, v: .6, back: 'right' });
     desk(U - .375, 2.05, 'right', U - 1.0);
-    if (dU >= 1.4) P.push({ kind: 'suiteWardrobe', u: .375, v: .65, back: 'left' }, { kind: 'armchair', u: .53, v: 2.15, back: 'left', o: { fab: o.fab } });
+    if (dU >= 1.4) P.push({ kind: 'suiteWardrobe', u: .375, v: .65, back: 'left', ...(o.wardrobe ? { o: { it: o.wardrobe }, spot: 'cleanUniforms' } : {}) }, { kind: 'armchair', u: .53, v: 2.15, back: 'left', o: { fab: o.fab } });   // o.wardrobe: yours (S6-4, room B)
     else P.push({ kind: 'suiteWardrobe', u: 1.6, v: .375, back: 'front' }, { kind: 'armchair', u: .53, v: 2.2, back: 'left', o: { fab: o.fab } });   // v 2.2 keeps the way in from the door open
     P.push({ kind: 'suiteShelf', u: .26, v: 3.85, back: 'left', o: { trophy: o.trophy } }, { kind: 'suitePlant', u: U - .4, v: V - .4 });
     P.push({ kind: 'suiteRug', u: U / 2 + .1, v: 1.55, o: { w: 1.9, d: 1.3, k: o.rug } });
   }
   for (const p of P) {
     const u = flip ? U - p.u : p.u, back = flip && (p.back === 'left' || p.back === 'right') ? (p.back === 'left' ? 'right' : 'left') : (p.back || 'back');
-    const [lx, lz] = F.toL(u, p.v); place(rk, p.kind, lx, lz, F.wall[back], p.o || {});
+    const [lx, lz] = F.toL(u, p.v), g = place(rk, p.kind, lx, lz, F.wall[back], p.o || {});
+    if (p.spot) SPOTS.push({ room: rk, tag: p.spot, x: g.position.x, z: g.position.z, front: FACING[F.wall[back]] });   // your wardrobe's (S6-4)
   }
 }
 // the Captain's quarters and the senior corridor (0.9.3)
@@ -6556,7 +6559,7 @@ DECKS[2] = {
   ],
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
-    for (const [key, tw, text] of d.nameplates) placeOnEdge('brassPlate', key, tw, d2Plate(d.sealed[key], text));
+    for (const [key, tw, text] of d.nameplates) placeOnEdge('brassPlate', key, tw, key === 'h,13,17' && deck2Mine() ? deck2MinePlate() : d2Plate(d.sealed[key], text));   // S6-4: the suite's plate once it's yours
     for (const [key, tw] of [['v,19,12', 'w'], ['v,21,12', 'e']]) placeOnEdge('liftPanel', key, tw);
     placeOnEdge('deckDirectory', 'v,17,10', 'e', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Officer\'s Quarters - Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Officer\'s Quarters - Science, one below the bridge.') });
     // the spine behind glass: the trunks above the car, the ladder below it
@@ -6574,7 +6577,7 @@ DECKS[2] = {
     d2Suite('V', 'h,17,5', { fab: D2.fabs.sage, rug: 0, papers: true, kettle: true, bed: SEE('Dr. Sato\'s bed', 'A field guide to frontier lichens, face down on the pillow.'), desk: SEE('Dr. Sato\'s desk', 'Buried in survey printouts and a kettle that is never quite cold. Her terrible tea, in a tin marked TEA (GOOD).') });
     d2Suite('S', 'h,19,5', { fab: D2.fabs.slate, rug: 2, bed: SEE('The Second Officer\'s bed', 'Two alarm clocks, set a minute apart, for the night watch.'), desk: SEE('The Second Officer\'s desk', 'The night watch rota, and a mug that says THIRD IN COMMAND, FIRST TO BE WOKEN.') });
     d2Suite('T', 'h,9,17', { fab: D2.fabs.wine, rug: 2, bed: SEE('Chief Holt\'s bed', 'Squared away. A pair of boots under it, polished, side by side.'), desk: SEE('Chief Holt\'s desk', 'Patrol reports in a neat pile, and a note: ASK THE ENVOY ABOUT THE CORD. DON\'T.') });
-    d2Suite('B', 'h,13,17', { fab: D2.fabs.navy, rug: 0, swans: true, bed: SEE('Visitors\' suite', 'Made up for whoever the Concord sends next. Two towel swans on the bed, beak to beak.') });
+    d2Suite('B', 'h,13,17', deck2Mine() ? deck2MineSuite() : { fab: D2.fabs.navy, rug: 0, swans: true, bed: SEE('Visitors\' suite', 'Made up for whoever the Concord sends next. Two towel swans on the bed, beak to beak.') });   // S6-4: yours once you've moved in
     d2Suite('H', 'h,17,17', { fab: D2.fabs.navy, rug: 1, model: true, bed: SEE('The Senior Helm Officer\'s bed', 'A sleep mask with stars on it.'), desk: SEE('A model of the Wren', 'Hand-built, every hull plate scored in. The helm officer flies the real one on the day watch.') });
     d2Suite('R', 'h,19,17', { fab: D2.fabs.teal, rug: 2, bed: SEE('The Comms Chief\'s bed', 'A spare headset on the nightstand. Calls home don\'t keep office hours.'), desk: SEE('The Comms Chief\'s desk', 'A queue of messages waiting to go out, sorted by how far they have to travel.') });
     d2Suite('N', 'h,10,7', { inner: true, armchairs: true, fab: D2.fabs.sage, rug: 1, bed: SEE('The Counsellor\'s cabin', 'An armchair by the door and a box of tissues within reach of it. Even off duty.') });
@@ -6875,6 +6878,7 @@ DECKS[6] = {
     // lived-in touches (0.30.12): a mug on the port breakers, a sign in the starboard junction
     place('j', 'mug', 1.2, .3, 'n', { y: 1.995, tall: true });
     placeWall('J', 'plate', 'n', .6, { text: 'Sign in, sign out' });
+    if (P5_DECK6) deck6P5Dress();   // S6-4 (P5_DECK6): the coils' panels, the reactor's console, the dosimeter rack, the watch board (section 4d's slot)
   },
 };
 for (const [key, r] of Object.entries(DECKS[6].sealed)) DECKS[6].closedDoors[key] = { t: DECKS[6].rooms[r].name, x: DECKS[6].rooms[r].tap };
@@ -8366,6 +8370,146 @@ function ladderStand() {                                 // this deck's ladder r
 DECKS[3].places.push(...[[43.5, 17.45, 's'], [44.5, 17.35, 's'], [45.5, 17.45, 's'], [43.5, 19.55, 'n'], [44.5, 19.65, 'n'], [45.5, 19.55, 'n'],
   [46.45, 18.5, 'w'], [46.45, 19.45, 'w'], [44.5, 20.4, 'n']].map(([x, z, f], k) =>
   ({ id: '3-ladder-' + (k + 1), type: 'event', event: 'tiles-ladder', at: [Math.floor(x), Math.floor(z)], xy: [x, z], face: f, pose: 'stand', anim: 'talk', room: 'L' })));
+// ---- P5 places: Deck 6's engine machines (S6-4, DA6 for lead 41; plans/p5-step6-spec.html S6-4). Only with P5_DECK6 ----
+// The three drive coils (E) and the reactor (R) become real machines with the ids STUB_MACHINES already gives them, so the
+// stand-ins drop out. Each coil's panel is on its own prop, facing an aisle (1 and 3 south, 2 north, clear of the crew's
+// 6-engine-* desks); the reactor's is a console just inside its shielded door. Panel places are `work:works` with
+// `machine` (never anyone's desk). The coil swap's team spots (24h's team(): '6-coil-team-1..3', spot 1 the lead's,
+// between coils 2 and 3) serve all three coils (teamSpots reads the shared prefix). The dosimeter rack is on engine
+// control's west wall, by the door (you stand at '6-dosi-rack'); the watch board is on the engine room's north wall, by its door.
+// deck6P5Places() (and Deck 2's, the rack's save) runs once, from section 13's line after the switches (a const there can't be read before its line),
+// before anything builds the machine list. Data only, no R(); the kit below is made at load from existing materials.
+const DECK6_P5 = {
+  coils: [[4, 6, 's', 2.6, .1], [7, 5, 'n', 5.1, .4], [9, 6, 's', 7.6, .1]],   // [col, row of the coil's front tile, face, room-local x, the panel's dx from the tile]
+  team: [[8, 4, 's'], [6, 7, 'n'], [5, 4, 's']],
+};
+function deck6P5Places() {
+  const D = DECKS[6];
+  DECK6_P5.coils.forEach(([c, r, f, , dx], k) => {
+    const id = '6-coil-' + (k + 1), pr = f === 's' ? r + 1 : r - 1;
+    D.machines.push({ id, kind: 'coil', at: [c, r], room: 'E', face: f, panel: [c, pr], look: { lamp: [dx, 1.37, .36], drip: [dx, .95, .4], screen: [dx, 1.19, .37, .3, .18] } });
+    D.places.push({ id: id + '-svc', machine: id, type: 'work:works', at: [c, pr], face: f === 's' ? 'n' : 's', pose: 'work', room: 'E' });
+  });
+  D.machines.push({ id: '6-reactor-1', kind: 'reactor', at: [28, 3], room: 'R', face: 'w', panel: [27, 3], look: { lamp: [0, 1.32, .43], drip: [0, .95, .47], screen: [0, 1.12, .46, .3, .16] } });
+  D.places.push({ id: '6-reactor-1-svc', machine: '6-reactor-1', type: 'work:works', at: [27, 3], face: 'e', pose: 'work', room: 'R' });
+  D.teamSpots = D.teamSpots || {}; for (let k = 1; k <= 3; k++) D.teamSpots['6-coil-' + k] = DECK6_P5.team.map((_, q) => '6-coil-team-' + (q + 1));
+  DECK6_P5.team.forEach(([c, r, face], k) => D.places.push({ id: '6-coil-team-' + (k + 1), type: 'event', event: 'team-job', team: '6-coil-1', works: true, at: [c, r], face, pose: 'stand', anim: 'work', room: 'E' }));
+  D.places.push({ id: '6-dosi-rack', type: 'event', event: 'dosimeter', at: [22, 7], face: 'w', pose: 'stand', room: 'K' },
+    { id: '6-watch-board', type: 'event', event: 'watch-board', at: [10, 1], face: 'n', pose: 'stand', room: 'E' });
+  deck2P5Places();
+  SAVE_EXTRA.push(s => { const o = dosiOut(); if (o !== null) s.ship.dosi = { out: o }; });
+  onSim('newGame', () => { DOSI = { out: null, mesh: [] }; });
+}
+// the night's senior Works officer on the watch board: you, on your nights (P5_NIGHTS, from 21:00 the evening before
+// until 06:00), else the night crew's most senior who works that night. Read when Deck 6 is built (its dress)
+function deck6WatchName(t = shipNow()) {
+  const n = typeof p5NightAt === 'function' && p5NightAt(t + 15) || null;   // a quarter of an hour early: the board's chalked before the shift
+  if (n) return { name: (SHIP.player && SHIP.player.name) || 'You', you: true };
+  try {
+    const d = Math.floor(t / 1440) + 1 - (t % 1440 < 360 ? 1 : 0), RK = ['junior', 'officer', 'senior', 'specialist', 'chief'];
+    const ppl = schedPeople().filter(p => p.shift === 'night' && /works/i.test(p.dept || '') && isWorkDay(p, d))
+      .sort((a, b) => RK.indexOf(b.rank) - RK.indexOf(a.rank) || (a.id < b.id ? -1 : 1));
+    if (ppl.length) return { name: ppl[0].name, you: false };
+  } catch (e) { /* the board stays generic */ }
+  return null;
+}
+// the kit (made at load, no R(), existing materials): a coil's panel on a bracket off its cage, the reactor's local
+// console on a pedestal, the dosimeter rack (hooks of badges, one per Works tech; o.mine: an array for the first badge's meshes) and
+// the watch board (o.name: tonight's senior officer; its words drawn when the deck is built)
+Object.assign(KIT, {
+  coilPanel(g) {
+    box(.05, .5, .05, WM.steel, 0, .95, -.04, g);
+    box(.42, .3, .05, ENG.console, 0, 1.18, 0, g); box(.3, .18, .012, WM.screen, -.02, 1.19, .03, g);
+    box(.05, .05, .02, WM.screenAmber, .17, 1.27, .03, g); box(.05, .05, .02, WM.navGreen, .17, 1.12, .03, g);
+    return { w: .42, d: .1, noBlock: true };
+  },
+  reactorConsole(g) {
+    box(.16, .9, .16, WM.paintDark, 0, .45, 0, g);
+    const top = box(.5, .06, .36, ENG.console, 0, 1.0, .02, g); top.rotation.x = .4;
+    const sc = box(.34, .02, .2, WM.screen, 0, 1.04, .04, g); sc.rotation.x = .4;
+    box(.5, .05, .04, WM.hazard, 0, .88, .2, g);
+    return { w: .5, d: .4, noBlock: true };
+  },
+});
+Object.assign(WALL_KIT, {
+  dosiRack(g, o = {}) {
+    box(.86, .62, .03, M.slateDark, 0, 1.45, .015, g); box(.8, .08, .03, WM.hazard, 0, 1.8, .03, g);
+    for (let k = 0; k < 12; k++) {
+      const x = -.33 + (k % 6) * .132, y = 1.56 - Math.floor(k / 6) * .26;
+      cyl(.007, .007, .04, M.metal, x, y + .07, .04, g, 6).rotation.x = Math.PI / 2;
+      const b = [box(.07, .1, .012, KM.paper, x, y, .045, g), box(.05, .025, .014, KM.note, x, y + .02, .047, g)];
+      if (k === 0 && o.mine) for (const m of b) { m.userData.noMerge = true; o.mine.push(m); }   // your badge: shown or hidden (dosiShow)
+    }
+  },
+  watchBoard(g, o = {}) {
+    const t = tex(512, 256, (c, w, h) => {
+      c.fillStyle = '#1b2421'; c.fillRect(0, 0, w, h); c.strokeStyle = '#c99a3e'; c.lineWidth = 6; c.strokeRect(6, 6, w - 12, h - 12);
+      c.textAlign = 'center'; c.fillStyle = '#e8c06a'; c.font = '700 34px system-ui,sans-serif'; c.fillText('ENGINE WATCH', w / 2, 56);
+      c.fillStyle = '#a9c4bf'; c.font = '500 22px system-ui,sans-serif'; c.fillText('Tonight\'s senior Works officer', w / 2, 112);
+      c.fillStyle = '#f2efe6'; c.font = '600 36px system-ui,sans-serif'; c.fillText(o.name || '. . . . .', w / 2, 170, w - 40);
+      c.fillStyle = '#a9c4bf'; c.font = '500 18px system-ui,sans-serif'; c.fillText('Coils by the hour. Reactor by permit.', w / 2, 220);
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(1.0, .5), new THREE.MeshBasicMaterial({ map: t, toneMapped: false }));
+    p.position.set(0, 1.6, .035); g.add(p); box(1.06, .56, .03, M.wood, 0, 1.6, .015, g);
+  },
+});
+// Deck 6's dress, last (after the utility rooms, so nothing above changes): the coils' panels, the reactor's console, the
+// rack and the board. Only with P5_DECK6
+function deck6P5Dress() {
+  DECK6_P5.coils.forEach(([, , f, x]) => place('E', 'coilPanel', x, f === 's' ? 6.86 : 5.14, f));   // tapped as the coil: a real machine now, so section 15b's machine tap reads it out
+  place('R', 'reactorConsole', 1.05, 3.5, 'w');                   // tapped as the reactor (section 15b's machine tap), from inside only
+  const D = dosiState(); D.mesh = []; if (typeof PLAYER_TAPS !== 'undefined' && !PLAYER_TAPS.includes(dosiTap)) PLAYER_TAPS.push(dosiTap);
+  placeWall('K', 'dosiRack', 'w', 3.5, { mine: D.mesh, hitW: .9, it: IT('Dosimeter rack', 'A badge for everyone who might go through the reactor door. Take one before you go in; hang it back when you come out.') });
+  dosiShow();
+  const w = deck6WatchName();
+  placeWall('E', 'watchBoard', 'n', 8.5, { name: w && w.name, hitW: 1.0, it: IT('Watch board', w ? (w.you ? 'Your name, in chalk. Tonight the engine room is yours.' : 'Tonight\'s senior Works officer: ' + w.name + '.') : 'The engine watch, chalked up each evening.') });
+}
+// ---- the dosimeter rack (S6-4): take a badge before the reactor door, hang it back after. DOSI.out is the ship minute you
+// took one (null: on its hook). S6-5 reads dosiOut() (the permit, the Watch's word if it isn't back). Saved as
+// save.ship.dosi = { out } only while one is out, so a save without one is unchanged; the save is read the first time it's
+// asked (SAVED loads after this section). The badge on the rack's first hook is its own mesh (DOSI.mesh), hidden while out
+let DOSI = null;
+function dosiState() {
+  if (!DOSI) { let s = null; try { s = SAVED && SAVED.ship && SAVED.ship.dosi; } catch (e) { s = null; } DOSI = { out: s && Number.isInteger(s.out) && s.out >= 0 ? s.out : null, mesh: [] }; }
+  return DOSI;
+}
+const dosiOut = () => P5_DECK6 ? dosiState().out : null;   // the minute you took your badge, or null
+function dosiShow() { const D = dosiState(); for (const m of D.mesh) m.visible = D.out === null; }
+function dosiUse() {
+  const D = dosiState(), back = D.out !== null;
+  D.out = back ? null : Math.floor(shipNow()); dosiShow();
+  toast('Dosimeter rack', back ? worksText('m23.rack.back', 'You hang the badge back on its hook. It reads a little higher than when you took it, which is what it\'s for.')
+    : worksText('m23.rack.take', 'You clip a dosimeter badge to your collar. Your name goes on the sheet beside its hook.'));
+  if (typeof padBuzz === 'function') padBuzz('pick');
+  simNote('dosimeter', { out: D.out });
+  return !back;
+}
+function dosiTap(it, at) {                               // section 15's PLAYER_TAPS (added when Deck 6 is first built)
+  if (!P5_DECK6 || !it || it.t !== 'Dosimeter rack') return false;
+  approach(at.clone(), it.front, it.depth, () => dosiUse()); return true;
+}
+// ---- P5 places: Deck 2's visitors' suite (room B, bed 2-B) as your quarters once SHIP.works.home is '2-B' (S6-3's move).
+// Its brass plate reads your name over "Senior Officer, Engine Specialist"; the bed, desk and wardrobe are yours (the
+// wardrobe a 'cleanUniforms' spot, DECKS[2].wardrobes['2-B'] with its place `2-B-wardrobe`, as Bunk 1's); the keepsakes go
+// on the bookcase by the bed (DECKS[2].homeKeepsakes['2-B'], the shape of Deck 4's '4-23', place `2-B-keepsake`); 24t's
+// cabin touches have four spots (DECKS[2].cabinSpots['2-B'], the shape of '4-23''s, plus `wall`: the wall each faces away
+// from, for drawing; places `2-B-rug`, `-desk`, `-shelf`, `-ledge`). Places type 'event' (inert). Only with P5_DECK6
+const deck2Mine = () => P5_DECK6 && typeof worksHome === 'function' && worksHome() === '2-B';
+function deck2P5Places() {
+  const D = DECKS[2], ev = (id, c, r, xy, face) => ({ id, type: 'event', event: 'side', at: [c, r], xy, face, pose: 'stand', room: 'B' });
+  D.places.push(ev('2-B-wardrobe', 13, 17, [13.0, 17.6], 'w'), ev('2-B-keepsake', 13, 19, [13.2, 19.6], -36),
+    ev('2-B-rug', 13, 18, [13.5, 18.75], 's'), ev('2-B-desk', 14, 18, [14.85, 18.75], 'e'), ev('2-B-shelf', 13, 19, [13.1, 19.4], -51), ev('2-B-ledge', 14, 17, [14.5, 17.55], 'n'));
+  D.wardrobes = { ...(D.wardrobes || {}), '2-B': { room: 'B', place: '2-B-wardrobe' } };
+  D.homeKeepsakes = { ...(D.homeKeepsakes || {}), '2-B': { room: 'B', bed: '2-B', place: '2-B-keepsake', slots: [20.48, 20.63, 20.78, 20.93, 21.08, 21.23].map(z => [12.3, 1.17, z]), trophy: [12.16, 1.17, 21.2] } };
+  D.cabinSpots = { ...(D.cabinSpots || {}), '2-B': { room: 'B', rug: { place: '2-B-rug', at: [13.6, .01, 19.6], wall: 'n' }, desk: { place: '2-B-desk', at: [15.6, .78, 18.7], wall: 'e' },
+    shelf: { place: '2-B-shelf', at: [12.12, 1.6, 20.2], wall: 'w' }, ledge: { place: '2-B-ledge', at: [14.5, 1.15, 17.12], wall: 'n' } } };   // the ledge by the door (the windows are behind the bed)
+}
+function deck2MinePlate() { let nm = 'Cadet'; try { nm = (SHIP.player && SHIP.player.name) || nm; } catch (e) {} return { text: nm, sub: 'Senior Officer, Engine Specialist', fit: true }; }
+function deck2MineSuite() {
+  return { fab: D2.fabs.navy, rug: 0, bed: IT('Your bed', 'Bigger than the bunk and the officer\'s cabin put together. You still sleep on one side of it.'),
+    desk: IT('Your desk', 'A proper desk, under a proper lamp. Your coil logs are already stacking up on it.'),
+    wardrobe: { ...IT('Your wardrobe', 'Your uniforms, pressed, and the hamper hook on the door. Laundry comes to you up here.'), wardrobe: '2-B' } };
+}
 // ---- end of slot: Deck architect ----
 
 // =====================================================================
@@ -9484,6 +9628,7 @@ const P5_M24 = P5_STEP6 && true;                          // S6-6: leading a tea
 const P5_M25 = P5_STEP6 && true;                          // S6-7: mentoring Basil (section 28e)
 const P5_CASES6 = P5_STEP6 && true;                       // S6-8: head-scratchers P6, P7, P8 and the T4 band (24k's slot)
 const P5_END = P5_STEP6 && true;                          // S6-9: the end of the career, Calder's question (section 28f)
+if (P5_DECK6) deck6P5Places();                             // S6-4: Deck 6's coils, reactor, panels, team spots, rack and board (section 4d's slot), before anything lists the machines
 const P926_APPT = true;                 // 0.92.6 item 9 (FX22; plans/patch-0.92.6.md): appointments as small traditions, each with its scene, and a real talk at every appointment; off: none of it (the game as 0.92.5)
 const EV_VESSEL_ON = true;                                // switched on in 0.94.0 (it was URL_FLAGS.has('evvessel')). A Veyli vessel needs help, Days 27-30 (VB1 for lead 39; plans/veyli-vessel-spec.html, EP2): section 18's 'veyliVessel' block with the events base on (#evvessel previews it); false: the game before it
 const EV_ENDING_ON = true;                              // switched on in 0.94.0 (it was URL_FLAGS.has('ending')). the ending (EN1 for lead 39; plans/ending-spec.html on claude/p5-specs, EP2, the user's pick 2026-10-26): the offer from Concord headquarters, your answer, the goodbye, the end page and the endgame (section 29; the crossing back is section 18's); off: none of it (?ending or #ending previews it)
