@@ -47,3 +47,4 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
 - 00:46 UTC: lead 40: RV20 handing over; I also take B5's machine_check fix on claude/p5s5-promo (B5
   session_01CgbXRamJJp66pFTP43KYoB; recipe plans/handover-rv20.md on claude/review-rv20). Order: VB1, B5 fix, B3, VB2.
   B5 head now 516333a1 (fix not landed).
+  Note from RV20: B3's branch carries 51b1a9c6 (the ladder order that breaks machine_check 'traced faults ... the same twice' on a P5_STEP5 copy): B3's machine_check on an ON copy will fail until B5's fix is merged in.
