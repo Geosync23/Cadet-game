@@ -672,12 +672,12 @@ S6_TRACE = TRACE.replace("/^end:/", "/" + S6_RX + "/")
 S6_DUE = DUE.replace("/^end:/", "/" + S6_RX + "/")
 # what the player hears: notices, toasts, bubbles, scenes, Mail, each with its ship minute (window.__s6log)
 S6_HOOK = r"""(() => { if (window.__s6hook) return; window.__s6hook = 1; const L = window.__s6log = [], t = () => Math.floor(shipNow());
-  const wrap = (name, kind, txt) => { const f = eval(name); if (typeof f !== 'function') return; eval(name + ' = function (...a) { try { L.push([t(), kind, String(txt(...a) || '').slice(0, 160)]); } catch (e) { } return f.apply(this, a); }'); };
-  wrap('mailSend', 'mail', o => (o.from || '') + ' | ' + (o.subject || '') + ' | ' + (o.body || ''));
-  wrap('deviceNotify', 'notice', o => o && o.text);
-  wrap('toast', 'toast', (a, b) => a + ': ' + b);
-  wrap('bubbleSay', 'say', (h, s) => s);
-  wrap('dialogueShow', 'scene', id => id);
+  const log = (kind, txt) => { try { L.push([t(), kind, String(txt || '').slice(0, 160)]); } catch (e) { /* not logged */ } };
+  { const f = mailSend; mailSend = function (o) { log('mail', (o && o.from || '') + ' | ' + (o && o.subject || '') + ' | ' + (o && o.body || '')); return f.apply(this, arguments); }; }
+  { const f = deviceNotify; deviceNotify = function (o) { log('notice', o && o.text); return f.apply(this, arguments); }; }
+  { const f = toast; toast = function (a, b) { log('toast', a + ': ' + b); return f.apply(this, arguments); }; }
+  { const f = bubbleSay; bubbleSay = function (h, x) { log('say', x); return f.apply(this, arguments); }; }
+  { const f = dialogueShow; dialogueShow = function (id) { log('scene', id); return f.apply(this, arguments); }; }
 })()"""
 # each beat: [name, the level-1 arrow's id prefix that leads it, a record that says it happened (JS, true/false), the code that must exist for it]
 S6_BEATS = [
