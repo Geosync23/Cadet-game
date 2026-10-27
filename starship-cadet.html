@@ -67220,6 +67220,10 @@ function cqSeats() {                                     // hers: 5-tea-2 (its g
   let taken = false; try { taken = DECK_CREW.some(c => c.p && c.p.id !== 'calder' && (c.spot && c.spot.id === CQ.seats[0] || c.goalId === CQ.seats[0])); } catch (e) { taken = false; }
   return { her, you: mine || (her !== CQ.seats[0] && !taken ? CQ.seats[0] : CQ.stand) };
 }
+function cqSat() {                                       // on one of the corner's seats or its standing spot, there (not still walking to it: PLAYER_PLACE is the walk's goal; RV24)
+  if (!(CQ.seats.includes(PLAYER_PLACE) || PLAYER_PLACE === CQ.stand)) return false;
+  return !(typeof ACT !== 'undefined' && ACT && ACT.placeId === PLAYER_PLACE && ACT.phase && ACT.phase !== 'do');
+}
 function cqCalderDeck() {                                 // the deck Calder's on now (the arrow needs one: guideGoal skips a goal without a deck)
   try { const p = schedPeople().find(q => q.id === 'calder'), w = p && whereIs(p, shipNow()); if (w && w.deck) return w.deck; } catch (e) { /* not yet */ }
   try { return deckDef.num; } catch (e) { return 5; }
@@ -67261,7 +67265,7 @@ function cqTick(now, skip) {
     else cqSeatsClear(st, B);                              // and anyone who comes for the seats later stands too
     if (!CQ_LIVE.sitAt) CQ_LIVE.sitAt = now;
     if (typeof guideAsk === 'function' && st.you && PLAYER_PLACE !== st.you) guideAsk({ id: 'end:sit:' + d, level: 1, owner, until: B + CQ.by, goal: () => ({ deck: 5, room: 't', place: cqSeats().you || CQ.stand, label: worksText('end.ptr.sit', 'Sit with Calder') }), done: () => CQ.seats.includes(PLAYER_PLACE) || PLAYER_PLACE === CQ.stand || (cqOf() || { steps: {} }).steps.asked !== undefined });
-    if ((CQ.seats.includes(PLAYER_PLACE) || PLAYER_PLACE === CQ.stand || now - CQ_LIVE.sitAt >= CQ.wait) && puNearMe('calder', CHATTER_NEAR + 2)) dialogueShow(cqAskScene(), { id: 'end.ask', who: ['calder'], at: now, where: { any: true } });
+    if ((cqSat() || now - CQ_LIVE.sitAt >= CQ.wait) && puNearMe('calder', CHATTER_NEAR + 2)) dialogueShow(cqAskScene(), { id: 'end.ask', who: ['calder'], at: now, where: { any: true } });
     return; }
   // missed at the tea: she comes to find you (cqEscort); near you, the question standing up
   const on = d === E.day ? m < CQ.late : m >= 600 && m < 1260; if (!on) return;
