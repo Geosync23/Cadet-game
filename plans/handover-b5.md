@@ -32,8 +32,8 @@
 - 15b's board takes registered kinds only if they're in its BOARD_KINDS (I added 'tier3'; B2's relayswap/battcell?).
 
 ## State at the stopping point (lead 40's call, 2026-10-26 ~23:40 UTC)
-- **Latest sha: claude/p5s5-promo e7ff9253** (S5-2 all four turns + the teacher fix). I own 24 core and 24u for Step 5 now
-  (B1 retired). RV20 has 762d9cb5 + e7ff9253 to review; no verdict yet.
+- **Latest sha: claude/p5s5-promo 5703dfb6** (S5-2 all four turns + the teacher fix e7ff9253 + the test-morning arrow fix 5703dfb6). I own 24 core and 24u for Step 5 now
+  (B1 retired). RV20 has 762d9cb5, e7ff9253 and 5703dfb6 to review; no verdict yet.
 - **Teacher fix (e7ff9253):** `p5TeacherWait` in 24u via B1's `p5Escort`: for ps/m19/m18/m20 the teacher goes to the
   meeting's place from 30 min before (`P5_TEACH_LEAD`; the appointment's place, else a place in the room), and a self-led
   lesson's teacher follows you during 'do'. RV20's probes (claude/review-rv20 plans/rv20-m19-live.py, rv20-sd-live.py) on a
@@ -42,17 +42,28 @@
   Not seen directly: Calder staying beside you on M18's screen (the probe saw her in the lift lobby at 09:18).
   B2's and B3's own early appointments can go once merged.
 
-## The arrow-follower's three ways: redo on e7ff9253
-- As is: **OK** (on 762d9cb5): offer in person, test Day 15 first try, result, bar, cake, toast all met.
-- **Teaching arrows Off: FAILED** (on 762d9cb5), a real bug to fix next. On the test morning the follower ping-pongs
-  Deck 5 <-> Deck 3 from 09:00 to 09:14 ("walk to: Your Tier 3 test, 09:00: the Works bay", then "lift to Deck 3", over and
-  over: some other arrow pointing to Deck 3 alternates with pu3:testday, which stays up till 09:15 even once the job is
-  on the board); at 09:15 it takes another job (filter bank) and works it all morning; pu3:test never leads (by design it
-  yields while you hold another job), so the test lapses at 15:00 and is set again (Day 17, then 19). Fix ideas: end
-  pu3:testday as soon as the job is on the board; find what points to Deck 3 at 09:00 (scratch: arrows_check internals,
-  real_game(pg, 15), puSet(15), Follower.run to 13:00, print f.acts from 08:20); give the test's Take it priority over
-  other jobs on its morning.
-- Tracking another job (`track`): not run (stopped).
+## The arrow-follower's three ways (`arrows_check.py ON step5 [teachoff|track]`)
+- As is: **OK** on 762d9cb5 (offer in person, test Day 15 first try, result, bar, cake, toast met).
+- Teaching arrows Off first **FAILED** on 762d9cb5 and found two real bugs, both fixed in 24u's `puTestGuide` (build
+  table 0.93.4-s.10): (1) `pu3:testday` gave no goal once you were in the bay, so a Deck 3 arrow took over and the
+  follower rode the lift Deck 5 <-> 3 from 09:00 to 09:14: now it points at the board in the bay and is gone once the
+  test is on the board; (2) holding another job when the test went up (a ticket case held for you from 08:00) made the
+  test's arrow yield all day and it lapsed: now a level 1 arrow "Your Tier 3 test is waiting: drop this job at the board"
+  with that job's Drop it rung (forced). The follower now prefers the board row the arrow names. **On 5703dfb6's code the
+  Off run met the whole promotion** (test Day 15 first try, result, bar, cake, toast); its one FAIL was the check's own
+  expectation (pu3:drop led instead of pu3:test), fixed in the check.
+- Tracking another job: **OK on 5703dfb6** (the whole promotion met; only the known-old "hold it steady" stucks, not Step 5).
+- **All three ways OK on 5703dfb6** (run one after another, 00:16-00:32 UTC): as is, Teaching arrows Off, tracking another job.
+- Run them one after another (side by side they slow each other and page loads time out).
+## RV20's verdict (00:08 UTC) and after
+- e7ff9253: FIXES NEEDED, one must (M1); 5703dfb6's arrow fix PASSED. **M1 fixed** (build table 0.93.4-s.11): `ladderBigP5`
+  leaves trained rows out (machine_check "traced faults" was not the same twice: a trained-but-unopened Tracing was asked
+  again, and the check's two runs share SHIP.occasions). machine_check on the on copy OK twice.
+- Shoulds still open (not done: lead 40 said one job only): S1 friends' Mails at 08:16 on the result day say "Heard at
+  lunch" (mail.pu3.friend words, or send them at 13:00); S2 "Works reputation down: New officer" toast right after the
+  promotion (skip worksRepTell's drop on a tier change); S3 an empty toast titled "Visitor chair" as you sit (pass a
+  flavour or skip the toast); S4 Dev presets for Days 17-18 still train m15/m17 (DM_CAREER, unlike the new ladder order).
+- Note for the systems engineer: machine_check's traced run keeps SHIP.occasions between its two runs (an isolation gap).
 
 ## Open
 - Known old: the team job's "hold it steady" arrow (FX30) shows as "stuck" in the follower; not Step 5's.
