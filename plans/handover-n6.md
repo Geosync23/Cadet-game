@@ -56,6 +56,8 @@
 - simNote `p5night` { step: 'missed' | 'knock' | 'plate', day }.
 
 ## State (2026-10-27 ~14:00 UTC)
+- **Merged:** BM19 merged 992a4b0 into claude/staging-p5s6 7bc997eb (with W7's escort fix and promo4); this branch
+  has 7bc997eb merged in (game identical to it). RV23's must is cleared there.
 - Lead is now lead 42 (session_01GKuymjnCHnpwDqB94PVwmV, branch claude/lead-42), after lead 41.
 - Latest: claude/p5s6-nights 3bf30e6 (staging-p5s6 a2ef6416 merged). RV23: PASS (13:40 UTC), its one must (Calder's walk
   on Day 22) cleared once W7's escort fix cffe8187 is in: RV23's scratch merge saw her walk 20.8 m -> 5.4 m and night.on
