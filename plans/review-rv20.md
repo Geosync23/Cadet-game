@@ -336,3 +336,27 @@ rung (forced), done when you no longer hold it. cadet_test vs 5957d244 ALL IDENT
 promo_beats_check OK (on copy). arrows_check step5 teachoff not re-run by me (B5: the whole promotion met). The branch still
 carries 51b1a9c6's machine_check FAIL (M1 above), so e7ff9253 / 5703dfb6 stay FIXES NEEDED until that is fixed.
 - 00:33 UTC: B5 reports arrows_check step5 OK all three ways (as is, teachoff, track) on 5703dfb6; handover 516333a1. The machine_check FAIL (51b1a9c6) is not mentioned as fixed: still open.
+
+## Back to work (lead 40, ~00:40 UTC; new user rule: everything ships ON)
+### B3 shutdown fixes: claude/p5s5-mech-b fa1e152c (9ab93abf fixes, 7e6bca4b P9 clash on the screen, handover; carries 51b1a9c6)
+Diff read (24w): b.askB (the screen asked you to tell Brennan) gates his grumble and talk option; sdParts / sdReady: the
+parts named at booking, in the 22:00 Mail, a morning notice and the 30-minute notice; the job open from 06:00; power off
+only in the hour with the job yours and its parts in hand; never left off past the hour (back on, Calder's word, booked
+again); the training notice 30 min before; Calder's step lines stop once booked; the settle Mail capitalised; the screen
+asks 24k's p9ShutClash.
+| Check | Build | Result |
+|---|---|---|
+| cadet_test vs 5957d244 | fa1e152c off | ALL IDENTICAL |
+| check_fast | fa1e152c | QUICK CHECK OK in 372 s |
+| mech_check m18 | on copy | MECH CHECK OK |
+| saves_check shut | fa1e152c | SAVES CHECK OK |
+| played, 390 x 844 (plans/rv20-sd-live.py) | fa1e152c ?p5s5 | below |
+Played: the training notice at 08:45 ("Go at quarter to"); booked the galley circuit at 14:00 with Brennan not on the
+list: "Booked: ... Bring a breaker and a bracket(make the bracket in the machine shop)."; 22:00 "Settled. The galley
+circuit, 14:00 ... Bring ..."; Day 19 the morning notice and the 13:30 notice "You still need a breaker and a bracket";
+**no Brennan grumble, no dip** (M2 fixed); taking the job at 14:01 without the parts: the panel says what it needs and
+**the power stays on** (M3 fixed).
+**Verdict on fa1e152c: PASS.** Should: a missing space in "a bracket(make the bracket" (the words file's sd.parts.make
+has no leading space; the code's fallback has one). Note: the branch carries 51b1a9c6, so machine_check on the on copy
+fails until B5's fix lands (not B3's). The "Trained" toast again after a Dev clock jump: a jump artifact (B3 couldn't
+reproduce live).
