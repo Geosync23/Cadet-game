@@ -26,7 +26,7 @@
 #          first workday after the scanner's first use (Day 9 at most); no arrow left up after its
 #          moment (the same label for over 3 ship hours)
 # On 0.64.15 (2b4a05db) both FAIL: that is the point. Which fixer turns which line green is printed with each FAIL.
-# Run one part:  python3 arrows_check.py BUILD.html shift   (parts: queue, clockin, shift, week, promo, vessel; default all, about 70 minutes; promo alone about 30, vessel about 25)
+# Run one part:  python3 arrows_check.py BUILD.html shift   (parts: queue, clockin, shift, week, promo, vessel; step6 by name (Days 19-26, P5_STEP6 on a copy; ways asis teachoff track); default all, about 70 minutes; promo alone about 30, vessel about 25)
 # Part "promo" (DV1, lead 34): Days 8-12 following only the arrows: the first promotion end to end (see part_promo)
 # Part "clockin" (patch 0.92.3 item 6, AC3): Days 1-3 into the Works bay before clocking in: the clock-in tip at once (Day 1: after
 # Zeke's line), Clock in tracked (not with Teaching arrows Off), both gone the moment you clock in. A real new game.
@@ -322,6 +322,7 @@ FOLLOW = r"""(() => {
   { const gq = typeof GUIDE_ON !== 'undefined' && GUIDE_ON ? goalNow() : null, call = IX_GOAL && /^career:/.test(IX_GOAL.trk || '') ? IX_GOAL : gq && /^(inc|promo|pu3):/.test(gq.guide || '') && !/^pu3:step/.test(gq.guide || '') ? gq : null;   // S5-2: the Senior Officer's beats (pu3:*; not the test's own steps)   // DV1: and the promotion's beats (the queue's promo:*)   // FX10 (backlog 15): with the arrows on, Calder's call is the queue's level-1 'inc:m6', not IX_GOAL
     if (ACT && ACT.phase !== 'walk' && call) { const l = call.label; actEnd(true); return 'leave it for: ' + l; } }   // an urgent career arrow (Calder's call) over your work: you stop and go, as a player would (the repair's time is kept; FX4)
   { const c = SHIP.works && SHIP.works.cur, r = c && c.st === 'meet' && SHIP.occasions.find(x => x.key === c.occ), n = shipNow(); if (r && !r.met && r.status === 'asked' && n >= r.at && n < r.at + r.len && deckDef.num === r.deck && roomAt(...player.here()) === r.room && !DIALOGUE && !ACT) return null; }   // in a training meeting's room while it's on: stay a moment for it to start (FX4)
+  if (ACT && ACT.kind === 'lie' && ACT.phase !== 'walk' && !(typeof sleeping !== 'undefined' && sleeping) && goalNow() && !/sleep|bed|bunk/i.test(goalNow().label || '')) { actEnd(); return 'get up: ' + goalNow().label; }   // awake in bed with somewhere to be: up, as a player tapping away would (PZ6)
   if (ACT) { if (IX_ACTS[ACT.kind] && ACT.phase !== 'walk' && (ACT.done || 0) >= ((ACT.def && ACT.def.mins) || 0)) { const k = ACT.kind; actEnd(); return 'stand up: ' + k; } return null; }   // a sit-down (tea, a lounge) once its minutes are in: up again, as a player would (AC2)
   const cs = document.getElementById('clockScreen');
   if (cs && !cs.hidden && getComputedStyle(cs).display !== 'none') {
@@ -332,7 +333,7 @@ FOLLOW = r"""(() => {
   { const ds = document.getElementById('dmSheet'); if (ds && !ds.hidden && typeof devmodeOpen === 'function') { devmodeOpen(false); return 'close the Dev panel'; } }   // DV1 (lead 35, FX12's Day 9 FAIL, the real cause): a tap at a pin under the top-left card (the place and clock, which opens Dev mode's sheet in this Dev-save page) left the sheet open over the deck, and every later tap landed on its buttons
   { const hp = document.getElementById('ixHealth'); if (hp && !hp.hidden) { document.getElementById('ixHealthC').click(); return 'close Ship health'; } }   // DV1 (lead 35, FX12's Day 9 FAIL): a Ship health board tapped on the way (the nearest thing to a pin) left its panel open over the deck, and every later tap landed on its list: closed, as a player would
   const bd = document.getElementById('ixBoard');
-  if (bd && !bd.hidden) { const bs = [...bd.querySelectorAll('#ixBoardL button')], gl0 = ((goalNow() || {}).label || ''), b = bs.find(b => /turn it in/i.test(b.textContent)) || /Tier 3 test/.test(gl0) && bs.find(b => /take/i.test(b.textContent) && /Tier 3 test/.test((b.closest('.ixjob') || b.parentNode).textContent)) || bs.find(b => /take/i.test(b.textContent) && /asked for you/i.test((b.closest('.ixjob') || b.parentNode).textContent)) || bs.find(b => /take/i.test(b.textContent));   // a job held for you first (your turn at a lesson), as a player reading the arrow would (AC2)
+  if (bd && !bd.hidden) { const bs = [...bd.querySelectorAll('#ixBoardL button')], gl0 = ((goalNow() || {}).label || ''), b = bs.find(b => /turn it in/i.test(b.textContent)) || /drop this job/i.test(gl0) && bs.find(b => /^drop it$/i.test(b.textContent.trim())) || /Tier \d test/.test(gl0) && bs.find(b => /take/i.test(b.textContent) && (b.closest('.ixjob') || b.parentNode).textContent.includes(gl0.match(/Tier \d test/)[0])) || bs.find(b => /take/i.test(b.textContent) && /asked for you/i.test((b.closest('.ixjob') || b.parentNode).textContent)) || bs.find(b => /take/i.test(b.textContent));   // a job held for you first (your turn at a lesson), as a player reading the arrow would (AC2); "drop this job" (a test waiting while you hold another: pu3's, pu4's): its Drop it (PZ6)
     const t = b ? b.textContent + ': ' + ((b.closest('.ixjob') || b.parentNode).querySelector('b') || { textContent: '' }).textContent : 'nothing to take'; if (b) b.click(); else document.getElementById('ixBoardC').click(); return 'board: ' + t; }
   { const ch = document.getElementById('chat'); if (ch && !ch.hidden) {   // S5-2: a chat card open: the button the arrow names (the Tier 3 test's "About the shutdown"), else close it
       const gl = ((goalNow() || {}).label || '').toLowerCase(), bs = [...ch.querySelectorAll('button')], b = /about the shutdown|warn /.test(gl) ? bs.find(x => /about the shutdown/i.test(x.textContent)) : null;
@@ -385,7 +386,7 @@ class Follower:
         pg = self.pg
         while pg.ev('shipNow()') < until_min_abs:
             pg.step(every, 50)
-            if self.trace is not None: self.trace.append(pg.ev(TRACE))   # endstay / endgo: which level-1 entries are due, and which leads
+            if self.trace is not None: self.trace.append(pg.ev(getattr(self, 'trace_js', None) or TRACE))   # (step6: its own, S6_TRACE)   # endstay / endgo: which level-1 entries are due, and which leads
             r = pg.ev(self.pre) if self.pre else None                    # endstay / endgo: the ending's own buttons first (END_PICK)
             if not r: r = pg.ev(FOLLOW)
             if isinstance(r, dict) and r.get('click'):
@@ -659,6 +660,117 @@ def part_end(ctx, path, want, way):
     check(not pg.errors, f'{tag}: page errors {pg.errors[:3]}')
     pg.page.close()
 
+# Part "step6" (MA6 for lead 41; plans/p5-step6-spec.html, "The arrow-follower check"; on a copy with P5_STEP6 on): from a
+# Day 19 save (the career set to the end of Day 18, a Senior Officer at "Trusted"), a player who only follows the arrow and
+# the ring plays Days 19-26 (FOLLOW; the quiet hours between beats skipped, as the endings' parts do, but followed whenever one
+# of Step 6's level-1 arrows is due). Checked: every beat reached, in order (the briefing, the test, sleep; Calder at 22:40
+# and all three nights; the welcome, the badge, the move; mentoring and Calder's question by Day 26); at every waking minute
+# while one of Step 6's level-1 arrows is due, a Step 6 arrow leads (not hidden by a needs nudge, Teaching arrows Off or a
+# tracked job); each beat said in person or by notice before its Mail; never stuck on a Step 6 arrow. Three ways: as is,
+# Teaching arrows Off (teachoff), tracking another job (track). A beat whose piece isn't built yet prints "not yet".
+S6_RX = r'^(m21|m24|pu4|p5n|mt|cq|s6end|end:(?:tea|sit|find)):'   # (AS1) Calder's question is 28f's end:tea / end:sit / end:find (not the ending's end: arrows)
+S6_TRACE = TRACE.replace("/^end:/", "/" + S6_RX + "/")
+S6_DUE = DUE.replace("/^end:/.test(e.id) && ", "")   # any level-1 arrow due (a Step 5 lesson carried into the week too: skipping it would leave the ladder held), not only Step 6's
+# what the player hears: notices, toasts, bubbles, scenes, Mail, each with its ship minute (window.__s6log)
+S6_HOOK = r"""(() => { if (window.__s6hook) return; window.__s6hook = 1; const L = window.__s6log = [], t = () => Math.floor(shipNow());
+  const log = (kind, txt) => { try { L.push([t(), kind, String(txt || '').slice(0, 160)]); } catch (e) { /* not logged */ } };
+  { const f = mailSend; mailSend = function (o) { log('mail', (o && o.from || '') + ' | ' + (o && o.subject || '') + ' | ' + (o && o.body || '')); return f.apply(this, arguments); }; }
+  { const f = deviceNotify; deviceNotify = function (o) { log('notice', o && o.text); return f.apply(this, arguments); }; }
+  { const f = toast; toast = function (a, b) { log('toast', a + ': ' + b); return f.apply(this, arguments); }; }
+  { const f = bubbleSay; bubbleSay = function (h, x) { log('say', x); return f.apply(this, arguments); }; }
+  { const f = dialogueShow; dialogueShow = function (id) { log('scene', id); return f.apply(this, arguments); }; }
+})()"""
+# each beat: [name, the level-1 arrow's id prefix that leads it, a record that says it happened (JS, true/false), the code that must exist for it]
+S6_BEATS = [
+  ['the briefing', 'm21:', "SHIP.works.tr.m21 === 22", "typeof m21Book === 'function'"],
+  ['the Tier 4 test', 'pu4:', "!!(SHIP.works.pu && SHIP.works.pu.t4 && SHIP.works.pu.t4.passed)", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
+  ['sleep by day', 'p5n:bed:22', "(simNotes('sleep', 0) || []).length >= 0", "typeof playerNightOn === 'function'"],
+  ['night 1', 'p5n:in:22', "!!(SHIP.works.ns && SHIP.works.ns[22] && SHIP.works.ns[22].in)", "typeof playerNightOn === 'function'"],
+  ['the welcome', 'pu4:welcome', "!!SHIP.occasions.find(x => x.id === 'pu4Welcome' && x.met)", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
+  ['the badge', 'pu4:badge', "!!(SHIP.works.pu && SHIP.works.pu.t4 && SHIP.works.pu.t4.badge)", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
+  ['night 2', 'p5n:in:23', "!!(SHIP.works.ns && SHIP.works.ns[23] && SHIP.works.ns[23].in)", "typeof playerNightOn === 'function'"],
+  ['night 3 (the coil swap)', 'm24:', "!!(SHIP.works.side && SHIP.works.side.m24 && SHIP.works.side.m24.done)", "typeof m24Book === 'function'"],
+  ['the move', 'pu4:move', "SHIP.works.home === '2-B'", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
+  ['mentoring', 'mt:', "!!(SHIP.works.mt && SHIP.works.mt.steps && SHIP.works.mt.steps.done !== undefined)", "typeof P5_M25 !== 'undefined' && P5_M25 && typeof mtTick === 'function'"],
+  ['Calder\'s question', 'end:', "!!(SHIP.works.end && SHIP.works.end.answer)", "typeof P5_END !== 'undefined' && P5_END && typeof cqTick === 'function'"],
+]
+# skips stop a little before each of Step 6's times, so the beat's own tick runs live (an arrow is asked in play, not while time skips)
+S6_WATCH_JS = r"""(() => { const g = goalNow(), W = SHIP.works; return [clockText(), deckDef.num, roomAt(...player.here()), g && (g.guide || '') + ' ' + (g.label || ''), JSON.stringify((W.ns || {})[22] || null), ACT && ACT.kind, DIALOGUE && DIALOGUE.id, typeof sleeping !== 'undefined' && !!sleeping, typeof careerClockedIn === 'function' && careerClockedIn(22), SHIP.event && SHIP.event.id, typeof sleepUntilAt !== 'undefined' ? sleepUntilAt : null, SHIP.player.alarm]; })()"""
+S6_STOPS = sorted((d - 1) * 1440 + m for d, ms in {19: [570], 21: [1050], 22: [475, 555, 750, 1000, 1335], 23: [345, 960, 1235], 24: [345, 1235], 25: [345, 1020, 1140], 26: [520, 1100]}.items() for m in ms)
+MA62_JS = "(() => { const W = SHIP.works; return { tr: W.tr.m20 === undefined ? null : W.tr.m20, cur: W.cur ? W.cur.id + ' ' + W.cur.st : null, days: Object.keys(W.op || {}).filter(k => (W.op[k] || []).includes('m20')) }; })()"
+def step6_on(src): return src.replace("const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');", 'const P5_STEP6 = P5_STEP5 && true;', 1)
+def part_step6(ctx, path, way):
+    tag = 'step6' + ('' if way == 'asis' else ':' + way)
+    pg = Page(ctx, path)
+    if not pg.ev("typeof P5_STEP6 !== 'undefined' && P5_STEP6"): fail(f'{tag}: P5_STEP6 off in this copy'); pg.page.close(); return
+    real_game(pg, 19)
+    pg.ev("(() => { const W = SHIP.works, B = WORK_BANDS[W.tier] || WORK_BANDS[3], k = B.findIndex(b => b[1] === 'trusted'); if (k >= 0) W.xp = Math.max(W.xp, B[k][0] + 1); })()")   # a Senior at Trusted (the spec's Day 19 save)
+    if way == 'teachoff': pg.ev("SHIP.device.settings.teach = 'off'")
+    pg.ev(S6_HOOK)
+    st0 = pg.ev("(() => { const W = SHIP.works; return { tier: W.tier, rank: W.rank, band: worksBandWord(), m19: W.tr.m19 }; })()")
+    print(f'  {tag}: Day 19 start: {st0}')
+    f = Follower(pg); f.trace = []; f.trace_js = S6_TRACE
+    track = "(() => { const j = (SHIP.jobs || []).find(j => j.status === 'open' && !j.claimedBy); if (j) SHIP.player.track = j.id; return j ? j.id : null; })()"
+    def advance_to(t):                                 # the quiet hours skipped, but followed whenever a level-1 arrow is due; a skip never crosses one of Step 6's times (S6_STOPS)
+        while pg.ev('shipNow()') < t:
+            n = pg.ev('shipNow()')
+            if os.environ.get('S6_WATCH') and re.search(os.environ['S6_WATCH'], pg.ev('clockText()')): print('   watch', pg.ev(S6_WATCH_JS))   # (debugging) the state each step
+            if pg.ev("typeof sleeping !== 'undefined' && sleeping"): pg.page.wait_for_timeout(250); pg.step(3, 50); continue   # asleep: the game's own sleep runs to the alarm and wakes after its fade (real-time timers); skipping on would outrun the wake (PZ6)
+            if pg.ev("typeof DIALOGUE !== 'undefined' && !!DIALOGUE"): f.run(min(t, n + 5)); continue   # a scene open (Calder's walk down, the crews' welcome): read it through now, as a player would, never skipped past (PZ6)
+            if pg.ev(S6_DUE): f.run(min(t, n + 10)); continue
+            stop = min([x for x in S6_STOPS if x > n + 1] or [t])
+            pg.ev(f"devmodeSkipTo({min(t, n + 20, stop)}); for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 70)"); pg.step(3, 50)
+    m20 = None                                         # (MA6-2) Step 5's last lesson the eve of the Tier 4 test: trained, or asked and not taken
+    for d in range(19, int(os.environ.get('S6_UNTIL', 26)) + 1):
+        if way == 'track': pg.ev(track)
+        if os.environ.get('S6_UNTIL') and d == int(os.environ['S6_UNTIL']):   # (debugging) stop at noon that day, the state at 09:20 and 12:00
+            advance_to((d - 1) * 1440 + 560); print(f"  {tag}: Day {d} 09:20: {pg.ev(S6_STATE)}"); advance_to((d - 1) * 1440 + 720); print(f"  {tag}: Day {d} 12:00: {pg.ev(S6_STATE)}"); break
+        advance_to(d * 1440 + (5 * 60 + 50 if d < 26 else -4 * 60))   # to the next morning (Day 26: till 20:00, after Calder's question)
+        st = pg.ev(S6_STATE)
+        print(f"  {tag}: Day {d}: {st}")
+        if d == 21: m20 = pg.ev(MA62_JS)
+    st = pg.ev(S6_STATE)
+    # (MA6-2, W8's d18aafc8) a Tier 3 lesson asked and not taken by Day 21 never holds Day 22's Tier 4 test: the test opens
+    # on Day 22 and the lesson comes again later. The run carries it as it falls (no setup marks it done); said when it didn't arise
+    if m20 and pg.ev("typeof ladderTestDue === 'function'"):
+        op22 = pg.ev("(SHIP.works.op[22] || []).slice()"); carried = m20['tr'] is None
+        if carried: check('t4' in op22 and 'm20' not in op22, f"{tag}: MA6-2: Step 5's sensor array lesson, untaken by Day 21 ({m20}), held Day 22's Tier 4 test (op[22] {op22})")
+        print(f"  {tag}: MA6-2: the sensor array lesson on Day 21 {m20}; Day 22 opened {op22}" + ('' if carried else ' (trained before Day 22: the carried case did not arise)'))
+    order = []
+    for name, pre, rec, have in S6_BEATS:
+        if not pg.ev(have): print(f'  {tag}: {name}: not yet (its piece is not in this build)'); continue
+        led = [t for t in f.trace if t[1] and t[1].startswith(pre)]
+        done = pg.ev(rec)
+        check(led, f"{tag}: {name}: its level-1 arrow ({pre}) never led")
+        check(done, f"{tag}: {name}: not reached following the arrow ({rec})")
+        if led: order.append((led[0][0], name))
+    srt = sorted(order)
+    check([n for _, n in srt] == [n for _, n in order], f"{tag}: the beats out of order: {[(hhmm(t), 'Day ' + str(t // 1440 + 1), n) for t, n in srt]}")
+    miss = [t for t in f.trace if t[4] and not t[3] and not (t[1] in t[4])]
+    for t in miss[:6]: fail(f"{tag}: Day {t[0] // 1440 + 1} {hhmm(t[0])}: {t[4]} due, but the arrow leads with {t[1]} ('{t[2]}')")
+    if len(miss) > 6: fail(f"{tag}: ... {len(miss) - 6} more minutes like that")
+    log = pg.ev("window.__s6log || []")
+    BEAT_MAIL = re.compile(r'briefing|Tier 4|coil swap|night shift|your nights|badge|new quarters|your quarters|your result|Engine Specialist|mentor|Basil|Calder.s question', re.I)   # Step 6's beats, by the Mail's subject
+    for t, kind, txt in log:
+        parts = txt.split(' | ')
+        if kind != 'mail' or len(parts) < 2 or not BEAT_MAIL.search(parts[1]) or parts[0] in ('Stores', 'The Wren'): continue
+        said = [x for x in log if x[1] != 'mail' and t - 180 <= x[0] <= t]
+        check(said, f"{tag}: Day {t // 1440 + 1} {hhmm(t)}: Mail '{txt[:80]}' with nothing said in person or by notice before it")
+    mine = {t[2] for t in f.trace if t[1] and re.match(S6_RX, t[1])}
+    for t, lab, dk in f.stuck:
+        if lab in mine: fail(f'{tag}: stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk})')
+        else: print(f'  {tag}: (not Step 6) stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk})')
+    led = sorted(set(t[1].split(':')[0] + ':' + t[1].split(':')[1] for t in f.trace if t[1] and re.match(S6_RX, t[1])))
+    print(f"  {tag}: arrows that led {led}; minutes due {sum(1 for t in f.trace if t[4] and not t[3])}, missed {len(miss)}, stuck {len(f.stuck)}; order {[(n, 'Day ' + str(t // 1440 + 1) + ' ' + hhmm(t)) for t, n in srt]}")
+    if os.environ.get('S6_DEBUG'):                     # what the follower did around each beat that wasn't reached
+        for t, a in f.acts:
+            if re.search(os.environ['S6_DEBUG'], t): print('   ', t, a)
+    check(not pg.errors, f'{tag}: page errors {pg.errors[:3]}')
+    pg.page.close()
+S6_STATE = r"""(() => { const W = SHIP.works, s = W.side || {}; return { tier: W.tier, rank: W.rank, home: W.home || null, m21: W.tr.m21, m24: W.tr.m24, swap: s.m24 ? s.m24.done : null,
+  t4: W.pu && W.pu.t4 ? { passed: !!W.pu.t4.passed, badge: W.pu.t4.badge || null } : null, cur: W.cur ? W.cur.id + ':' + W.cur.st : null, op: W.op[SHIP.time.day] || W.op[SHIP.time.day - 1] || null, tr: Object.keys(W.tr).filter(k => /^(m19|m20|m18|t3|t4|m2[1-5]|ps)$/.test(k)),
+  t4j: (SHIP.jobs || []).filter(j => j.reserved === 26).map(j => [j.id, j.status, j.claimedBy || null]), ns: W.ns ? Object.keys(W.ns).map(k => k + ':' + (W.ns[k].in ? 'in' : '-')) : null, mt: W.mt ? (W.mt.steps || {}).done !== undefined : null, cq: W.end ? W.end.answer : null, at: clockText() }; })()"""
+
 def part_clockin(ctx, path):                              # patch 0.92.3 item 6 (AC3; RV12's lines): Days 1-3, into the Works bay before clocking in
     pg = Page(ctx, path)
     pg.ev("localStorage.clear()"); pg.ev("newGameStart(true)"); pg.step(5)
@@ -757,6 +869,12 @@ with sync_playwright() as pw:
         print(f'== {name} (following only the arrow)')
         try: part(ctx, path if GUIDE or name in ('promo', 'step5', 'vessel') else off_path)   # promo, step5, vessel: always the build as shipped (the arrows on)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
+    if 'step6' in PARTS:                               # (MA6) Step 6's arrow-follower, on a copy with P5_STEP6 on (the arrows as shipped)
+        sp = WORK / 'test' / ('_step6_' + RUN_ID + pathlib.Path(path).name); sp.write_text(step6_on(src))
+        for way in [w for w in WAYS if w != 'change']:
+            print(f'== step6 ({way}; following only the arrow, Days 19-26)')
+            try: part_step6(ctx, str(sp), way)
+            except Exception as e: fail(f'step6 {way}: stopped: {str(e)[:300]}')
     if PARTS & {'endstay', 'endgo'}:
         ep = WORK / 'test' / ('_ending_' + RUN_ID + pathlib.Path(path).name); ep.write_text(end_on(src))   # the ending on (EV_ENDING_ON), the arrows as shipped
         for want in ('stay', 'go'):
