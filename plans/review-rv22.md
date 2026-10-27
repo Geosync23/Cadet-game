@@ -38,3 +38,8 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
 - B3 989b1759 code read: arrOffer through 24f's existing WORK_MECH[].offer hook (no shared change). To check in play:
   with an offer, 24 core's T3 board arrow (guide 'train:m20:do') is skipped for m20 (line ~17335): is your turn still led?
   Stale comment at WORK_MECH.m20.at ("Mori comes in for it all the same (arrHost books her)").
+- Lead 40: no E3 seat; I review VB1's 24j hook myself. **24j hook (shopTap -> vesselShopTap): OK.** Fires only when
+  vesselNow() is the running veyliVessel (impossible with the switch off; `typeof` guard too), on Monday (k 2), on a lathe
+  or fabricator (shopMachineOf), after Calder's job and the helpers (step 1-5) and before the part (made by you, or by the
+  helpers at 13:25: bounded). Every other shop tap falls through unchanged. Should (words): the wrong-machine toast says
+  "at the bench" for the fabricator.
