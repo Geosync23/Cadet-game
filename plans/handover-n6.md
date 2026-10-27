@@ -66,6 +66,9 @@
 - MA6 (28d, night 3) reads playerNightOn(24); its Watch hour avoids night 3's incident (02:30-03:30 Day 25). MA6's
   28b defines m21Door() for Calder's wait after the briefing.
 - Backlog N6-1: an ended career's save doesn't load (section 20, not Step 6's).
+- 16:00 UTC: lead 42 offered PZ6's arrows_check step6 + m24 pick pointer job; I was at ~54% memory, so it went to AS1
+  (session_01GKuymmdgtDvbd8P7URXd4z). I stay idle for S6-1 round fixes and answer AS1's questions on the nights.
+- Branch: claude/p5s6-nights 6034515 has staging-p5s6 40f3bdac merged (game identical to it).
 
 ## Gotchas
 - `P5_NIGHTS` / `P5_LEAVE` are consts after sections 13-24: read only at run time. My readers go through `p5nOf` /
