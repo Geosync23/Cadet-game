@@ -516,9 +516,12 @@ END_PICK = r"""(() => {
   const ch = document.getElementById('chat');
   if (ch && !ch.hidden && CHAT && CHAT.p) {              // a chat card: the ending's button on it, else close it
     const eb = typeof endChatButton === 'function' ? endChatButton(CHAT.p) : null, b = eb && [...ch.querySelectorAll('button.act')].find(x => x.textContent === eb.label);
-    if (b) { b.click(); return 'chat: ' + eb.label + ' (' + CHAT.p.id + ')'; }
+    if (b) { const who = CHAT.p.id; b.click(); return 'chat: ' + eb.label + ' (' + who + ')'; }   // (the click may close the card)
     chatClose(); return 'close the chat card'; }
   const g = goalNow();
+  if (g && /^end:bye/.test(g.guide || '') && g.crew && deckDef.num === g.deck) {   // a farewell: walk right up to them (the goodbye comes within reach, 1.8; FOLLOW stops at 2.2)
+    const a = DECK_CREW.find(a => a.p && a.p.id === g.crew), p = player.obj.position;
+    if (a && Math.hypot(a.x - p.x, a.z - p.z) > 1.4) { const l = Math.hypot(a.x - p.x, a.z - p.z); player.obj.position.set(a.x + (p.x - a.x) / l, 0, a.z + (p.z - a.z) / l); player.stop(); return 'walk up to ' + g.crew; } }
   if (g && /^end:bye/.test(g.guide || '') && g.at && deckDef.num === 5 && typeof ternInside === 'function' && !ternInside() && SHIP.end && SHIP.end.f.ramp) {   // "Walk to the Tern": up the ramp and in
     const s = placeSpot('5-tern-aisle-1'); player.obj.position.set(s.x, 0, s.z); player.stop(); return 'up the ramp into the Tern'; }
   return null;
@@ -587,7 +590,9 @@ def part_end(ctx, path, want, way):
         check(st['stay'] and not st['go'] and st['endgame'] and not st['ended'], f"{tag}: not in the endgame on Day 36 (end.stay {st['stay']}, end.go {st['go']}, endgameOn {st['endgame']}, ended {st['ended']})")
         check(st['fm'] and st['fm']['met'], f"{tag}: the endgame's first morning (breakfast with the Captain) not met: {st['fm']}")
     else:
-        check(st['go'] and st['ended'] and st['page'], f"{tag}: Go did not end at the end page (end.go {st['go']}, ended {st['ended']}, page {st['page']}, the ramp {st['ramp']})")
+        if not check(st['go'] and st['ended'] and st['page'], f"{tag}: Go did not end at the end page (end.go {st['go']}, ended {st['ended']}, page {st['page']}, the ramp {st['ramp']})"):
+            byes = pg.ev("Object.keys(SHIP.end.f).filter(k => /^bye:/.test(k))"); nxt = pg.ev("endByes().find(id => !SHIP.end.f['bye:' + id]) || null"); arr = pg.ev("(goalNow() || {}).label || null")
+            print(f"  {tag}: goodbyes said {byes}, next {nxt}, arrow {arr}; last actions {f.acts[-10:]}")
     first_said = (said[0][0] - 1) * 1440 if said else 0
     for subj, at in st['mail']:
         if subj.startswith('Your answer'): check(said and at >= first_said, f"{tag}: Mail '{subj}' before you told her in person")
