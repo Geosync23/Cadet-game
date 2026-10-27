@@ -27,6 +27,7 @@
 #   unplug    disconnect: stop walking at once, pause if used lately; reconnect resumes (deck, marks)
 #   odd       a pad that doesn't report the standard layout, and two pads (deck)
 #   s5cases   Step 5 (S5-6): the old-mysteries board by pad (ring, A, Take) and a head-scratcher's Fault notes (suspects, Call it), P5_STEP5 on (pick, panels)
+#   deck6     Step 6 (S6-4): Deck 6 on Day 23 at 21:00 by pad: the dosimeter rack (take, return), the coils' panels, the reactor door, P5_STEP6 on (pick)
 #   vessel    A Veyli vessel needs help by pad, in a copy switched on: Calder and the sheet, the ramp's replies, the chain, the helper card and the making steps (VB1)
 # --inventory: with reach, runs its touch half even before the panels package (the list of what there is to reach).
 # --selftest: runs the parts on a copy with this check's own small stand-in driver (to prove the parts before section 26).
@@ -3145,7 +3146,67 @@ const PAD_BUILT = ['base', 'deck', 'marks', 'panels', 'games'];
 })();
 """
 
+# Part "deck6" (S6-4, DA6 for lead 41; plans/p5-step6-spec.html section 9): Deck 6's new things by pad, in a copy with
+# P5_STEP6 on, at the spec's preset (Day 23, 21:00, an Engine Specialist on Deck 6): the dosimeter rack (the ring names it,
+# A takes a badge, A again hangs it back), each drive coil (the ring names it, A shows its panel), and the reactor's
+# shielded door (the ring offers it, A says it's shut: the permit is S6-5's)
+S6_LINE = "const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');"
+D6_SETUP = r"""(() => { skipTo(22 * 1440 + 1260); const W = worksInit(shipNow()); if (!W) return false; W.tier = 4; W.rank = 'specialist'; for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; goToDeck(6); return typeof dosiOut === 'function'; })()"""
+D6_ITEM_AT = r"""((t) => { const it = ITEMS.find(i => i.t === t); if (!it) return null; const v = new THREE.Vector3(); it.hit.getWorldPosition(v); return { x: v.x, y: v.y, z: v.z }; })"""
+D6_TOAST = "(() => { const e = document.getElementById('toast'); return e ? e.textContent : ''; })()"
+D6_CLEAR = "toastEl.classList.remove('show'); typeof TOAST_AT !== 'undefined' && (TOAST_AT = -1e9); typeof GUIDE !== 'undefined' && GUIDE.tq && (GUIDE.tq.length = 0)"
+def d6_ring(r, word, tries=12):
+    seen = []
+    for k in range(tries):
+        h = r.ev(HINT); seen.append(h)
+        if h and word in h.lower(): return h, seen
+        r.press('RIGHT'); r.step(4)
+    return None, seen
+def part_deck6(pw, src, tag):
+    fails = []
+    if S6_LINE not in src or 'function deck6P5Places' not in src: print('  deck6: not in this build (S6-4)'); return fails
+    r = Run(pw, src.replace(S6_LINE, 'const P5_STEP6 = P5_STEP5 && true;'), f'{tag}_d6', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    if not r.ev(D6_SETUP): r.close(); return ['deck6: no Works record on Day 23 (worksInit) or no rack']
+    r.step(30)
+    def stand(title):
+        t = r.ev(f"({D6_ITEM_AT})({json.dumps(title)})")
+        if not t: return False
+        r.ev(D6_CLEAR); ok = r.ev(f"({STAND_BY})({json.dumps(t)})"); r.step(30); return ok
+    # the rack: take, then return
+    if not stand('Dosimeter rack'): fails.append('deck6: the rack is not on Deck 6')
+    else:
+        for want, label in ((True, 'take'), (False, 'return')):
+            r.ev(D6_CLEAR); r.step(4)   # the bottom line is the ring's again once the last message has gone
+            h, seen = d6_ring(r, 'dosimeter')
+            if not h: fails.append(f'deck6: the ring never named the rack to {label} ({seen[:4]}; {r.ev("JSON.stringify([!!ACT && ACT.kind, DEV.open, padTargets().length])")})'); break
+            r.press('A'); r.step(150)
+            out = r.ev("dosiOut() !== null")
+            if out != want: fails.append(f'deck6: A on the rack did not {label} the badge (out {out})'); break
+            print(f'  deck6: the rack by pad, {label}: ring {h!r}, badge out {out}')
+    # the coils' panels
+    for k in (1, 2, 3):
+        title = f'Drive coil {k}'
+        if not stand(title): fails.append(f'deck6: {title} is not on Deck 6'); continue
+        h, seen = d6_ring(r, f'coil {k}')
+        if not h: fails.append(f'deck6: the ring never named {title} ({seen[:4]})'); continue
+        r.press('A'); r.step(300); t = r.ev(D6_TOAST)
+        if title.lower() not in (t or '').lower(): fails.append(f'deck6: A on {title} did not show its panel ({t!r}; {r.ev(OUTCOME)})')
+        else: print(f'  deck6: {title} by pad: ring {h!r}, A: {t[:60]!r}')
+    # the reactor's shielded door, from the lobby's alcove: offered, shut without a permit
+    r.ev(D6_CLEAR); r.ev("(() => { player.obj.position.copy(cellPos(26, 3)); target.copy(player.obj.position).setY(.7); player.stop(); player.face = Math.PI / 2; })()"); r.step(30)
+    print('  deck6: by the reactor door the ring has', r.ev("JSON.stringify(padTargets().map(o => o.key || o.name).slice(0, 8))"))
+    h, seen = d6_ring(r, 'reactor')
+    if not h: fails.append(f'deck6: the ring never offered the reactor door ({seen[:4]})')
+    else:
+        r.press('A'); r.step(150); t = r.ev(D6_TOAST)
+        if 'reactor' not in (t or '').lower() and 'shielded' not in (t or '').lower(): fails.append(f'deck6: A on the reactor door said nothing ({t!r})')
+        else: print(f'  deck6: the reactor door by pad: ring {h!r}, A: {t[:60]!r}')
+    pe = [e for e in r.errors if e.startswith('pageerror')]
+    if pe: fails.append(f'deck6: page errors: {pe[:2]}')
+    r.close(); return fails
 PART_FN['promo3'] = part_promo3; NEEDS['promo3'] = ['panels']; ALL_PARTS.append('promo3')   # (S5-2: PARTS is ALL_PARTS itself when none are named)
+PART_FN['deck6'] = part_deck6; NEEDS['deck6'] = ['pick']; ALL_PARTS.append('deck6')   # S6-4: Deck 6's rack, coil panels and reactor door by pad
 # ---- run ----------------------------------------------------------------------------------------------------------
 if '--selftest' in FLAGS:
     if pad_switch(SRC) is not None: print('--selftest is for a build without section 26 (it plants its own PAD_ON)'); sys.exit(1)

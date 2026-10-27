@@ -22,7 +22,14 @@ switch lines: ask first).
 - `6-dosi-rack` [22,7] face w (engine control, west wall), `6-watch-board` [10,1] face n.
 - Sent to MA6 (S6-6) and lead 41.
 
-## Loose ends / turn 2
+## Built (turns 2-3, build-table row 0.94.0-s6.4b)
+- The rack: `DOSI`, `dosiState()`, `dosiOut()`, `dosiShow()`, `dosiUse()`, `dosiTap` (PLAYER_TAPS, added in deck6P5Dress);
+  saved as `save.ship.dosi = { out }` only while out (SAVE_EXTRA and onSim('newGame') registered in deck6P5Places).
+- Deck 2: `deck2Mine()`, `deck2P5Places()`, `deck2MinePlate()`, `deck2MineSuite()`; two lines in Deck 2's dress (the plate,
+  d2Suite('B')); d2Suite takes `o.wardrobe` (a cleanUniforms spot); brassPlate takes `o.fit`.
+- controller_check part `deck6` (NEEDS pick).
+
+## Loose ends (old turn-2 list, kept for the record)
 - Rack take/return: state (asked W7: SHIP.works.dosi in worksClean, or my own SAVE_EXTRA entry), a tap (PLAYER_TAPS is
   section 15's, defined after 4d: register at run time), the rack's empty hook (dosiRack o.out).
 - The reactor door for S6-5 (section 14's doorOpenFor, one line, theirs); the panel place inside R already opens it for a
@@ -31,6 +38,13 @@ switch lines: ask first).
   spots (DECKS[2].cabinSpots['2-B'], 24t's shape), its wardrobe as yours, keepsake shelf (VB2's loose end).
 - controller_check pick preset on Deck 6, Day 23 21:00 (the rack, the coils' panels, the reactor door).
 - The watch board is drawn when the deck is built: it doesn't change while you stay on Deck 6 across 21:00.
+
+## Still open
+- S6-3 (W7): playerBed() and worksHomeOpen() learn '2-B' (then the wardrobe, bed and door work); 24t's cabinMine/cabinDraw
+  read DECKS[2].cabinSpots['2-B'] (each spot has `wall`); section 8b reads DECKS[2].homeKeepsakes['2-B'].
+- The HUD still calls room B "Visitors' suite" when it's yours (DECKS[2].rooms.B.name is fixed at load).
+- S6-5: the reactor door's permit (section 14's doorOpenFor); dosiOut() for the badge.
+- The watch board is drawn when Deck 6 is built.
 
 ## How to test
 - ON copy: replace `const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');` with `const P5_STEP6 = P5_STEP5 && true;`.
