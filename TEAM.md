@@ -1799,3 +1799,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~21:13 UTC: R4 share on candidate 2 done: all OK/known-old EXCEPT **join_check FAIL (load timeout on the real reload in its save part, twice)**; BM19 comparing on OLD 0.94.0. interactions with AS1 (ETA ~22:05). R4 idle.
 - ~21:24 UTC: join_check = load false alarm (0.94.0 and candidate 2 both time out when 2 run at once; each alone JOIN CHECK OK). Waiting: AS1 interactions, R2 share, R3 controller C2/C3 + C1 alone.
 - ~21:25 UTC: **USER: switch on RANK_CARD_ON, CLOCK_UNDO_ON, SHOP_MENU_ON in 0.95.0 now** (option a). BM19 builds candidate 3 (+ check off-line sweep), then FULL round 3 (same 5 shares). Round-2 checks in flight finish first. PUB2 told publish waits for candidate 3 GO (~23:00 UTC / 7 PM ET).
+- ~21:27 UTC: USER confirmed again: keep the ending as is (END_WAY_BACK stays cut, no way back after the goodbye).
