@@ -2856,6 +2856,9 @@ def part_m21(pw, src, tag):
     st = r.ev("JSON.stringify(m21State())"); print(f'  the briefing by pad: {n} choice screen(s); the record {st}')
     if n != 1: fails.append(f'm21: one choice screen expected by pad ({n})')
     if '"pick":2' not in st or '"order":25' not in st: fails.append(f'm21: the parts order picked by pad should be in the record ({st})')
+    sc = r.ev("(() => { const t = ROOM_TILES.O[0]; return [m21Screen({ t: 'Wall screen', front: 0, depth: 0 }, cellPos(t[0], t[1])), m21Screen({ t: 'Wall screen', front: 0, depth: 0 }, cellPos(...DECKS[1].lift))]; })()"); r.step(300)
+    shown = r.ev("document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent"); print(f'  the wall screen: {sc}, "{shown}"')
+    if sc != [True, False] or 'Works: your item' not in shown: fails.append(f'm21: the wall screen in the observation room should show the agenda, and only there ({sc}, "{shown}")')
     if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
 PART_FN['m21'] = part_m21; NEEDS['m21'] = ['panels']
