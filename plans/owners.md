@@ -60,6 +60,13 @@ Section ids are the file's own headings (`// 19. DEVICE`, `// 24a ROUNDS`). Line
 | `24v` | power and relays (M19; S5-3, `P5_M19`) | (new, after 24u) | mechanics seat A | Works career engineer |
 | `24w` | shutdowns (M18; S5-4, `P5_M18`; its planner hook in section 14 is the sim engineer's to review) | (new, after 24v) | mechanics seat B | Works career engineer |
 | `24x` | the sensor array (M20; S5-5, `P5_M20`) | (new, after 24w) | mechanics seat A | Works career engineer |
+| `28` | the Engine Specialist, Pillar 5 Step 6 (`P5_STEP6`; plans/p5-step6-spec.html on claude/p5-specs): shared helpers `P5_NIGHTS`, `P5_LEAVE`, `p5NightOf`, `p5NightAt` | (new, after 24x, before 6) | Works career engineer W6 | Works career engineer |
+| `28a` | the night shift (M22; S6-1, `P5_NIGHT`): Days 22-24, `SHIP.works.ns`; its hooks in 14, 15, 16, 17, 20, 21b and 24f are those owners' to review | (new, after 28) | player engineer with the sim engineer | Player engineer |
+| `28b` | the Monday briefing (M21; S6-2, `P5_M21`) | (new, after 28a) | mechanics seat A | Works career engineer |
+| `28c` | engine work and the reactor (M23; S6-5, `P5_M23`; the reactor door's line in section 14 is the sim engineer's to review) | (new, after 28b) | mechanics seat B | Works career engineer |
+| `28d` | leading a team (M24; S6-6, `P5_M24`; `TEAM_JOBS.coil` in 24h's tables) | (new, after 28c) | mechanics seat A | Works career engineer |
+| `28e` | mentoring Basil (M25; S6-7, `P5_M25`; Basil's settled day read by one hook in section 14, the sim engineer's to review) | (new, after 28d) | Works career engineer | Works career engineer |
+| `28f` | the end of the career (S6-9, `P5_END`): Calder's question, `SHIP.works.end`, the Record's last page | (new, after 28e) | Works career engineer | Works career engineer |
 | `6` | camera | 46086-46121 | deck architects | Performance engineer |
 | `7` | grid, pathfinding (`findPath`), collision | 46122-46266 | performance engineer | Performance engineer |
 | `8` | character kit | 46267-46552 | deck architects | Performance engineer |

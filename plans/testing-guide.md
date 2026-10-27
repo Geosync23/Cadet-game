@@ -245,9 +245,13 @@ Days 12-13). From the game's calendar (`EV_CALENDAR`, `EV_BEATS`, `ROSTER_ROTATI
 | 19 | a Friday with its own address, and your first night shift | `day19` |
 | 21 | the first crew rotation (the Tern) | `day21` |
 | 22 | the comet (Monday 21:30, since the event swap; was `day27`, the visit's old finale) | `day22` |
+| 23 | Pillar 5 Step 6: the crews' welcome 06:00, the Captain's badge 16:30, your second night from 21:00 (with `P5_STEP6` on; off, a plain Tuesday) | `day23` |
+| 24 | Pillar 5 Step 6: your third night, leading a team (with `P5_STEP6` on; off, a plain Wednesday) | `day24` |
+| 25 | Pillar 5 Step 6: off nights at 06:00, your Deck 2 quarters after dinner (with `P5_STEP6` on; off, a plain Thursday) | `day25` |
+| 26 | Pillar 5 Step 6: mentoring Basil 09:00-15:30, Calder's question at Four weeks aboard 18:40 (with `P5_STEP6` on; also Day 26's address) | `day26` |
 
 Others worth a run when their area changes: Day 9 (the officer's test), 10-11 (summons, ceremony), 14 (the storm's
-all-clear), 77 (the next rotation). The picker already names the ten above (`EVENT_DAYS`). When the calendar gains
+all-clear), 77 (the next rotation). The picker already names the days above (`EVENT_DAYS`; Days 23-26 added by Step 6's first turn, W6, about 16 minutes more in the round: the build master puts them on the lightest shares). When the calendar gains
 an event day: add it to `EVENT_DAYS` **and** its own `CHECKS` entry (the `dayN` line) in tools/affected.py, to the
 rules of the section that holds the event, and to `ALL` in `plans/opt-cover/cov_run.sh` (its `day[0-9]*` case runs
 whichever days are named); its cover lands in the map at the next remake.
