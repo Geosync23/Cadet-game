@@ -494,6 +494,22 @@ def part_mt2(g):
     check(r['watch'] and '"wait"' in r['esc2'] and '5-bench-2' in r['esc2'] and r['dw'] >= 10 and r['dlg2'] == 'mt.do' and r['do'] and r['reply'] == 2, f"mt2: a job turned in, he goes to the bench; ten minutes watching him, his scene, your reply ({r})")
     check(r['late'] == [True, 1], f"mt2: no job by 13:00, Calder sends him to the bench ({r['late']})")
 
+def part_mt3(g):
+    if not g.ev("typeof P5_M25 !== 'undefined' && P5_M25"): print('(mt3) P5_M25 off: skipped'); return
+    print('(mt3) the stuck clue (you point him to one), the late talk (three replies); not helped: he works it out:')
+    r = g.ev("""(() => { """ + MT_DAY + """ const out = {}, M = SHIP.works.mt; Object.assign(M.steps, { met: 36540, watch: 36560, dw: 10, do: 36600 }); setShipNow(25 * 1440 + 650); __bay();
+      const keep = puNearMe; puNearMe = (id, r) => id === 'bramwell-basil' ? true : keep(id, r); __said.length = 0; __tick();
+      out.stuck = __said.filter(x => /^bramwell/.test(x)); out.arrow = GUIDE.list.filter(e => /^mt:clue/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label); out.esc1 = JSON.stringify(worksEscort({ id: 'bramwell-basil' }, shipNow()));
+      out.dlg1 = DIALOGUE && DIALOGUE.id; { """ + dlg_run(0) + """ } out.clue = M.clue;
+      setShipNow(25 * 1440 + 780); out.lunch = worksEscort({ id: 'bramwell-basil' }, shipNow()); setShipNow(25 * 1440 + 816); out.esc2 = (worksEscort({ id: 'bramwell-basil' }, shipNow()) || {}).mode; __tick();
+      out.dlg2 = DIALOGUE && DIALOGUE.id; { """ + dlg_run(2) + """ } out.late = [M.late, M.steps.late !== undefined]; out.esc3 = (worksEscort({ id: 'bramwell-basil' }, shipNow()) || {}).mode; puNearMe = keep;
+      out.clean = JSON.stringify(mtClean(JSON.parse(JSON.stringify(M)))) === JSON.stringify(M);
+      """ + MT_DAY.replace('const W =', 'const W2 =').replace('W.', 'W2.') + """ Object.assign(SHIP.works.mt.steps, { met: 1, watch: 2, dw: 10, do: 3 }); setShipNow(25 * 1440 + 746); __tick(); out.self = SHIP.works.mt.clue; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['stuck'] and r['arrow'] and r['arrow'][0].startswith('1 ') and '5-bench-2' in r['esc1'] and r['dlg1'] == 'mt.clue' and r['clue'] == 'meter', f"mt3: stuck at the bench, a level 1 arrow, you point him to a clue ({r['stuck']}, {r['arrow']}, {r['dlg1']}, {r['clue']})")
+    check(r['lunch'] is None and r['esc2'] == 'follow' and r['dlg2'] == 'mt.late' and r['late'] == [2, True] and r['esc3'] == 'wait' and r['clean'], f"mt3: lunch as planned; late, he hurries to you; three replies, yours kept; back to the bench ({r})")
+    check(r['self'] == 'self', f"mt3: not helped by 12:25, he works it out himself ({r['self']})")
+
 def part_t3pointer(g):
     if not t3on(g, 't3pointer'): return
     print('(t3pointer) the test morning and the board:')
@@ -631,7 +647,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev), ('mt', part_mt), ('mt2', part_mt2)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev), ('mt', part_mt), ('mt2', part_mt2), ('mt3', part_mt3)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')

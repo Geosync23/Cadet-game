@@ -12,7 +12,8 @@
 - **Turn 4b (s6.6):** Dev mode (career table, four presets, steps, arrow), forYou's engine line.
 - **Wave 2 (s6.7):** the 22:40 fetch and walk down (with N6's nights: pu4Fetches), the crews' welcome; the follow-escort fix (section 10; live fix on claude/escort-follow-fix cffe8187).
 - **S6-7 turn 1 (s6.9):** Basil's day settled at 22:00 (SHIP.works.mt), section 14's mtDesk hook, mtPlanRule, notices, row, arrow. 
-- **S6-7 turn 2 (s6.10):** hello, he watches you (mtEscort follow) through a turned-in job, you watch him at 5-bench-2 (steps.dw). Turns 3-4 left: the stuck clue (PZ6's case panel call), the late talk (three replies), Calder's first job alone, the Record line, W.tr.m25, Dev preset Day 26 09:00, controller reach.
+- **S6-7 turn 2 (s6.10):** hello, he watches you (mtEscort follow) through a turned-in job, you watch him at 5-bench-2 (steps.dw).
+- **S6-7 turn 3 (s6.11):** the stuck clue (stand-in dialogue; calls PZ6's caseMentorOpen({ day, onPick(id, key) }) if it exists: asked PZ6 for the real shape), the late talk. Turn 4 left: Calder's first job alone, the Record line, W.tr.m25, Dev preset Day 26 09:00, controller reach.
 - Approved MA6's 24 core touch in 27166be (WORK_MECH.m21.own skipped by ladderTick).
 
 ## Judgement calls (overrule any)

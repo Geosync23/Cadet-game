@@ -66173,6 +66173,9 @@ function mtEscort(p, t) {                                // p5Escort's 28e part:
   if (S.met === undefined) return m >= MT2.metBy ? { mode: 'follow', to: null } : null;
   if (S.watch === undefined) return { mode: 'follow', to: null };
   if (S.do === undefined) return { mode: 'wait', to: MT2.bench };
+  if (S.clue === undefined) return { mode: 'wait', to: MT2.bench };   // (turn 3) stuck at the bench
+  if (S.late === undefined) return m >= MT3.lateAt ? { mode: 'follow', to: null } : null;   // lunch as planned, then late: he hurries over to you
+  if (m < MT.to - 15) return { mode: 'wait', to: MT2.bench };          // back at the bench till Calder's first job for him
   return null;
 }
 function mtTick2(now, skip) {
@@ -66199,6 +66202,51 @@ onSim('job', n => {                                      // the job he watched y
   mtStep('watch', shipNow());
 });
 if (P5_M25) WORK_TICKS.push((now, skip) => mtTick2(now, skip));
+// S6-7 turn 3 (W7): the stuck clue and the late talk. After his turn at the bench he's stuck on a head-scratcher: a level
+// 1 arrow "Basil's stuck: help him"; next to him, you point him to one clue (24k's case panel in its point mode when the
+// puzzles seat's caseMentorOpen is there; until then a stand-in choice of three, mt.clue): mt.clue keeps which, and he
+// works the rest out. Not helped by 12:25, he works it out himself ('self'). After lunch he's late back: from 13:35 he
+// hurries over to find you (mtEscort follows you) and you choose what to say (mt.late, three replies: mt.late keeps it).
+// Then back to the bench till Calder's first job (turn 4)
+const MT3 = { clueBy: 745, lateAt: 815, lateBy: 870 };
+const MT_CLUES = ['meter', 'label', 'log'];
+function mtClueDone(k, t) { const M = mtOf(); if (!M || M.steps.clue !== undefined) return; M.clue = typeof k === 'string' ? k : MT_CLUES[k] || 'self'; mtStep('clue', t); }
+function mtClueScene() {
+  return mtScript('mt.clue', { title: 'Basil\'s stuck', from: 'Basil Bramwell', stub: true, gist: 'Basil was stuck on a fault at the bench. You pointed him to one clue, and he found the rest.',
+    lines: [{ who: 'bramwell-basil', text: 'It hums when it shouldn\'t, and the light says fine. I\'ve tried everything. Twice.', to: 'you' },
+      { choice: [{ text: 'Read the meter, not the light.', reply: { who: 'bramwell-basil', text: 'The meter. Oh. Oh! It\'s low. That\'s it.' } },
+        { text: 'Check the label against the log.', reply: { who: 'bramwell-basil', text: 'They don\'t match. Someone swapped it. Ha!' } },
+        { text: 'What changed since yesterday? The log.', reply: { who: 'bramwell-basil', text: 'Yesterday... the filter. The filter\'s new. Got it.' } }] }] },
+    { pick: k => mtClueDone(k, shipNow()) });
+}
+function mtLateScene() {
+  return mtScript('mt.late', { title: 'Basil, late', from: 'Basil Bramwell', stub: true, gist: 'Basil was late back from lunch. You had a word with him.',
+    lines: [{ who: 'bramwell-basil', text: 'Sorry! Sorry. The lift, and then Brennan wanted to know about the plant, and...', to: 'you', pose: 'shrug' },
+      { choice: [{ text: 'It happens. Don\'t make it a habit.', reply: { who: 'bramwell-basil', text: 'Not a habit. Never. Well. Not a habit.' } },
+        { text: 'Calder noticed. So did I.', reply: { who: 'bramwell-basil', text: 'Right. Yes. It won\'t happen again.' } },
+        { text: 'You owe me a tea.', reply: { who: 'bramwell-basil', text: 'Two teas! I\'ll find the good tin.' } }] }] },
+    { pick: k => { const M = mtOf(); if (M && M.late === null) M.late = k; }, end: () => mtStep('late', shipNow()) });
+}
+function mtTick3(now, skip) {
+  const M = mtOf(); if (!M || M.steps.done || M.steps.do === undefined) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, B = (d - 1) * 1440, S = M.steps, live = !skip && now >= shipNow() - 1, talk = typeof DIALOGUE !== 'undefined' && DIALOGUE;
+  if (d !== M.day || m >= MT.to) return; const owner = '28e (S6-7)';
+  if (S.clue === undefined) {
+    if (m >= MT3.clueBy) { mtClueDone('self', now); return; }   // he worked it out himself
+    if (!live) return;
+    mtSayOnce(MT.basil, 'mt.stuck', ['I\'m stuck. Properly stuck.']);
+    if (typeof guideAsk === 'function') guideAsk({ id: 'mt:clue:' + d, level: 1, owner, until: B + MT3.clueBy, goal: () => ({ deck: 5, room: 'w', ...(puNearMe(MT.basil, 30) ? { crew: MT.basil } : { place: MT2.bench }), label: worksText('mt.ptr.clue', 'Basil\'s stuck: help him') }), done: () => (mtOf() || { steps: {} }).steps.clue !== undefined });
+    if (!talk && puNearMe(MT.basil, MT2.near)) {
+      if (typeof caseMentorOpen === 'function') { if (!MT_LIVE.case) { MT_LIVE.case = 1; caseMentorOpen({ day: d, onPick: (id, key) => mtClueDone(String(id), shipNow()) }); } }   // 24k's case panel, point mode (the puzzles seat's)
+      else dialogueShow(mtClueScene(), { id: 'mt.clue', who: [MT.basil], at: now, where: { any: true } }); }
+    return; }
+  if (S.late === undefined) {
+    if (m >= MT3.lateBy) { M.late = M.late === null ? -1 : M.late; mtStep('late', now); return; }   // never caught up with you: no word
+    if (m < MT3.lateAt || !live) return;
+    if (!talk && puNearMe(MT.basil, CHATTER_NEAR)) dialogueShow(mtLateScene(), { id: 'mt.late', who: [MT.basil], at: now, where: { any: true } });
+  }
+}
+if (P5_M25) WORK_TICKS.push((now, skip) => mtTick3(now, skip));
 // ---- end of slot: Mentoring ----
 
 // ---------------------------------------------------------------------
