@@ -1,6 +1,6 @@
 # Handover: W8 (the Works career engineer for Pillar 5 Step 6, after W7)
 
-- **Role:** Works career engineer for Step 6, for lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j; send_message). Reviewer RV23 (session_01GKuymoDm1XbC5G8TvaCNLr), build master BM19 (session_01GKuymncYhRTKs8t4byNfdj). My session: session_01GKuymk95u5t4uDsahatkPN.
+- **Role:** Works career engineer for Step 6, for lead 42 (session_01GKuymjnCHnpwDqB94PVwmV; lead 41 session_01GKuymjWR1dqfbCw1MyEP9j forwards). Reviewer now RV24 (ask the lead for the id); before that Reviewer RV23 (session_01GKuymoDm1XbC5G8TvaCNLr), build master BM19 (session_01GKuymncYhRTKs8t4byNfdj). My session: session_01GKuymk95u5t4uDsahatkPN.
 - **Read first:** plans/handover-w7.md and plans/handover-w6.md (what came before), the spec `plans/p5-step6-spec.html` on claude/p5-specs, DEV_NOTES "Mentoring Basil" and "Calder's question".
 - **I own:** 24 core, 24u, section 28's shared helpers, 28e, 28f, the Step 6 switch lines, all Step 6 DM_CAREER rows (section 25). Other seats ask me before touching them.
 - **Branch:** `claude/p5s6-promo4`. Rows `0.94.0-s6.N`. Never touch the two build-number lines.
@@ -9,6 +9,8 @@
 - **s6.13:** merged claude/staging-p5s6 (a78f596: M24, DA6's S6-4, S6-6 turn 2; conflicts only in mech_check, controller_check, build-table: kept both sides). S6-7's clue now opens PZ6's casePoint (when the build has it). S6-9 turn 1: Calder's question (28f). 24 core: worksEscort skips p5nEscort while the asker is with you on a training/test job.
 
 - **s6.14:** S6-9 turn 2: Calder at her tea (her plan doesn't take her there: backlog W8-1), the seats cleared live, the Works app's last page; screenshots plans/w8-shots/.
+
+- **s6.15:** career_check (s6). **s6.16:** MA6-2 (lead 42's priority): a missed Tier 3 lesson can't hold the Tier 4 test (24 core, P5_PROMO4); asked lead 42 whether to do the same for t3 in the plain game.
 
 ## Still to do
 1. stories_check / fridays_check / events_check / bigevents_check on Day 26 with Step 6 on (the full round's; career_check --s6 is done, s6.15).
