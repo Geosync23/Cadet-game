@@ -29,6 +29,7 @@
 #   s5cases   Step 5 (S5-6): the old-mysteries board by pad (ring, A, Take) and a head-scratcher's Fault notes (suspects, Call it), P5_STEP5 on (pick, panels)
 #   s6cases   Step 6 (S6-8): P6, P7 and P8 in Fault notes by pad at the Day 25 19:00 preset (a suspect and Call it, a grid cell, a toggle and To the rig), P5_STEP6 on (pick, panels)
 #   deck6     Step 6 (S6-4): Deck 6 on Day 23 at 21:00 by pad: the dosimeter rack (take, return), the coils' panels, the reactor door, P5_STEP6 on (pick)
+#   team      (MA6-1) an ordinary team job's turn by pad: at your spot at your turn the ring names the job, A starts your turn, it finishes (pick)
 #   vessel    A Veyli vessel needs help by pad, in a copy switched on: Calder and the sheet, the ramp's replies, the chain, the helper card and the making steps (VB1)
 # --inventory: with reach, runs its touch half even before the panels package (the list of what there is to reach).
 # --selftest: runs the parts on a copy with this check's own small stand-in driver (to prove the parts before section 26).
@@ -45,7 +46,7 @@ ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
 GAME = pathlib.Path(ARGS[0])
 ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'door', 'reach', 'day', 'games', 'unplug', 'odd', 'shut',
-             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'm19', 'm20', 's5cases', 's6cases', 'vessel', 'ending', 'm21', 'm24']
+             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'm19', 'm20', 's5cases', 's6cases', 'vessel', 'ending', 'm21', 'm24', 'team']
 PARTS = ARGS[1:] or ALL_PARTS
 SHOTS = WORK / 'test' / 'ctl_shots'; SHOTS.mkdir(parents=True, exist_ok=True)
 ARGS_GL = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
@@ -2749,6 +2750,42 @@ def part_s6cases(pw, src, tag):
     if pe: fails.append(f'page errors: {pe[:2]}')
     r.close(); return fails
 
+# Part "team" (MA6-1, PZ6 for lead 41): an ordinary team job's turn by pad. An Officer in the Day 17 team job (the rota's
+# own), at your spot at your turn: the ring names the job at your feet and A starts your turn; done, the job moves on
+TEAM_SET = r"""(() => { const reset = t => { machinesNew(); SHIP.jobs = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; worksInit(t); SHIP.works.team = { plan: {} }; SHIP.works.inc = { plan: {}, open: null }; };
+  reset(15 * 1440 + 900); SHIP.works.rank = 'officer'; SHIP.works.tier = 2; let j = null;
+  for (let t = 15 * 1440 + 900; t <= 16 * 1440 + 900; t += 5) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); j = SHIP.jobs.find(x => x.kind === 'team' && x.claimedBy === 'you'); if (j && t >= j.start - 5) break; }
+  if (!j) return null;
+  for (const k of NEED_KEYS) SHIP.player.needs[k] = 90;
+  goToDeck(j.deck); const s = placeSpot(j.spots.you); player.obj.position.set(s.x, player.obj.position.y, s.z); target.copy(player.obj.position).setY(.7); player.stop();
+  for (let t = shipNow(); t < j.start + 120; t++) { setShipNow(t); for (const f of WORK_TICKS) f(t, false); if (j.cur >= 0 && j.seq[j.cur].who === 'you') break; }
+  window.__tj = j.id; return { id: j.id, title: j.title, cur: j.cur }; })()"""
+TEAM_ST = r"""(() => { const j = SHIP.jobs.find(x => x.id === window.__tj); return { cur: j.cur, done: (j.stepsDone || []).slice(), act: ACT && ACT.kind, job: ACT && ACT.o && ACT.o.job }; })()"""
+def part_team(pw, src, tag):
+    fails = []
+    r = Run(pw, src, f'{tag}_team', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    T = r.ev(TEAM_SET)
+    if not T: r.close(); return ['no team job with you in it (the Day 17 rota)']
+    r.step(20); r.ev("toastEl.classList.remove('show'); typeof TOAST_AT !== 'undefined' && (TOAST_AT = -1e9); typeof GUIDE !== 'undefined' && GUIDE.tq && (GUIDE.tq.length = 0)")
+    seen = []
+    for k in range(10):
+        h = hint_now(r); seen.append(h)
+        if h and any(w in h.lower() for w in ('job', 'team', 'hold', 'your turn')): break
+        r.press('RIGHT'); r.step(4)
+    else: h = None
+    if not h: fails.append(f'the ring never named the job at your feet (seen {seen})')
+    else:
+        r.press('A'); r.step(20); a = r.ev(TEAM_ST)
+        if a['act'] != 'ixStop' or a['job'] != T['id']: fails.append(f'A on {h!r} did not start your turn: {a}')
+        else:
+            r.step(320); b = r.ev(TEAM_ST)
+            if 0 not in b['done'] or b['cur'] <= T['cur']: fails.append(f'your turn by pad never finished: {b}')
+            else: print(f'  the team turn by pad: ring {h!r}, A, done, on to step {b["cur"]}')
+    pe = [e for e in r.errors if e.startswith('pageerror')]
+    if pe: fails.append(f'page errors: {pe[:2]}')
+    r.close(); return fails
+
 # parts that need a package: 'not yet' until PAD_BUILT names it
 # Part "vessel" (VB1 for lead 40; plans/veyli-vessel-spec.html section 7): A Veyli vessel needs help played by pad, in a
 # copy with EV_VESSEL_ON switched on, at the spec's four starting points (set on paper, as Dev mode's presets would):
@@ -2833,8 +2870,8 @@ def part_vessel(pw, src, tag):
 
 # parts that need a package: 'not yet' until PAD_BUILT names it
 NEEDS = {'ending': ['base', 'deck', 'pick', 'panels'], 'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick'], 'door': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'], 'vessel': ['base', 'deck', 'pick', 'panels'],
-         'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck'], 'shut': ['panels'], 's5cases': ['pick', 'panels'], 's6cases': ['pick', 'panels']}
-PART_FN = {'ending': part_ending, 'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day, 'shut': part_shut, 's5cases': part_s5cases, 's6cases': part_s6cases, 'vessel': part_vessel}   # 'reach' joins when the pad half is written
+         'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck'], 'shut': ['panels'], 's5cases': ['pick', 'panels'], 's6cases': ['pick', 'panels'], 'team': ['pick']}
+PART_FN = {'ending': part_ending, 'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day, 'shut': part_shut, 's5cases': part_s5cases, 's6cases': part_s6cases, 'team': part_team, 'vessel': part_vessel}   # 'reach' joins when the pad half is written
 if 'function mysOpen' not in SRC or (S5_LINE not in SRC and not re.search(r'\bconst P5_STEP5\s*=\s*true\b', SRC)): PART_FN.pop('s5cases')   # (BM19) or already on (0.94.0)   # no board in this build: "not yet", never a pass
 for k, v in OLD_NEEDS.items(): NEEDS[OLD_NAME.get(k, k)] = v; PART_FN[OLD_NAME.get(k, k)] = legacy(k)
 

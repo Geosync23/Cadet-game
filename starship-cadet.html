@@ -16511,7 +16511,7 @@ const ixChore = () => { const j = typeof myJob === 'function' && typeof jobStepD
 const ixStepwise = j => !!(j && j.machine && typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind] && typeof kindStops === 'function' && kindStops(j).some(x => (x.tag || 'job') !== 'job'));
 // a side job of yours (17's mySideJobs: the drill), beside any board job: its stops are tapped like a chore's, before the
 // board job's (it's only on for a few minutes); none once its work is done (p5-fix2: myJob leaves side jobs out, so the drill's taps did nothing)
-const ixSides = () => typeof mySideJobs === 'function' && typeof jobStops === 'function' ? mySideJobs().filter(j => typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind] && !j.machine && !j.workDone && !(j.found > shipNow())) : [];   // only once it's announced (the drill: 14:50, AR2's A1)
+const ixSides = () => typeof mySideJobs === 'function' && typeof jobStops === 'function' ? mySideJobs().filter(j => typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind] && (!j.machine || j.kind === 'team') && !j.workDone && !(j.found > shipNow())) : [];   // only once it's announced (the drill: 14:50, AR2's A1); a team job (24h) is on a machine, but your turns are at your own spot (MA6-1: they couldn't be tapped)
 const ixChores = () => [...ixSides(), ixChore()].filter(Boolean);
 function ixNextStop(j) { const st = jobStops(j), k = st.findIndex(x => !x.done); return k < 0 ? null : { k, s: st[k] }; }
 // first tips (Pillar 3, C13: 15b says when, the device draws them): tipShow(id, text) shows each once, when it's there
@@ -71684,7 +71684,8 @@ function padRaw() {                                       // what's in reach, be
     const hit = dobj.g.children.find(o => o.userData.liftDoor || o.userData.youLock || o.userData.closedDoor || o.userData.door && typeof adoorShut === 'function' && adoorShut(dobj.e, player)), ud = hit ? hit.userData : null; if (!ud) continue;   // and a door shut to you (the Doors setting, 0.93.3)
     add(ud.liftDoor ? 'lift' : ud.youLock ? 'lock:' + ud.youLock : 'door:' + (ud.closedDoor || ud.door), dobj.cx, dobj.cz, ud.door && !ud.closedDoor ? [1.1, .55, 1.65].map(y => y * (dobj.g.scale.y || 1)) : [1, .5, 1.5], .2);   // a door shut to you (0.93.3): at its height now, cut down near the camera
   }
-  if (typeof jobHere === 'function' && jobsOn() && typeof ixChore === 'function') { const j = ixChore(), nx = j && !j.workDone && ixNextStop(j), pid = nx && nx.s.deck === deckDef.num && nx.s.places[0], sp = pid && PLACE_OF.has(pid) && placeSpot(pid); if (sp) add('job', sp.x, sp.z, [.05, .4, .8], .2); }
+  if (typeof jobHere === 'function' && jobsOn() && typeof ixChore === 'function') { const j = (typeof ixChores === 'function' ? ixChores() : [ixChore()]).find(x => x && !x.workDone && ixNextStop(x)), nx = j && !j.workDone && ixNextStop(j),   // a side job's stop first, as jobHere takes the tap (MA6-1: a team job's turn)
+    pid = nx && nx.s.deck === deckDef.num && nx.s.places[0], sp = pid && PLACE_OF.has(pid) && placeSpot(pid); if (sp) add('job', sp.x, sp.z, [.05, .4, .8], .2); }
   const cr = SHIP.player.crate; if (cr && cr.deck === deckDef.num) add('crate', cr.x, cr.z, [.05, .3], .15);
   if (typeof CLOTHES_ON !== 'undefined' && CLOTHES_ON) { const hm = SHIP.clothes.hamper; if (hm && hm.at === 'floor' && hm.deck === deckDef.num) add('hamper', hm.x, hm.z, [.05, .3], .15);
     const w = PAD_PICK.wr; if (w) add('wardrobe', w.x, w.z, [.05, .5, 1], .2); }
