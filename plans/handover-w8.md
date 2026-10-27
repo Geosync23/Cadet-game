@@ -8,8 +8,10 @@
 ## Done
 - **s6.13:** merged claude/staging-p5s6 (a78f596: M24, DA6's S6-4, S6-6 turn 2; conflicts only in mech_check, controller_check, build-table: kept both sides). S6-7's clue now opens PZ6's casePoint (when the build has it). S6-9 turn 1: Calder's question (28f). 24 core: worksEscort skips p5nEscort while the asker is with you on a training/test job.
 
+- **s6.14:** S6-9 turn 2: Calder at her tea (her plan doesn't take her there: backlog W8-1), the seats cleared live, the Works app's last page; screenshots plans/w8-shots/.
+
 ## Still to do
-1. **S6-9 turn 2:** the Works app's last page (a tab listing the career's milestones and your answer); career_check Days 0-26; stories_check / fridays_check / events_check / bigevents_check on Day 26 with Step 6 on (the hold caldersQuestion exists); a live look (screenshots at 390x844) of Calder walking to the tea seat and sitting.
+1. **career_check Days 0-26** (a --s6 part: steady and slow, twice identical, nights, door plates, 4-23 back to spare); stories_check / fridays_check / events_check / bigevents_check on Day 26 with Step 6 on.
 2. **The refit odd job** and **DA6's '2-B' asks** (see handover-w7 "Still to do": 24t cabinMine/cabinDraw from DECKS[2].cabinSpots['2-B'], 8b keepsakes from DECKS[2].homeKeepsakes['2-B'], the HUD's room B name after you move in).
 3. **All Step 6 DM_CAREER rows** (m21, m22 nights, m23, m24, p6-p8, m25) so devmode_check set passes on a Step 6 copy (handover-w7 lists each row's shape).
 4. Live escort check on claude/escort-follow-fix (handover-w7) if lead 41 still wants it.

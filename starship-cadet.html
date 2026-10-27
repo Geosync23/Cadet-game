@@ -58092,7 +58092,7 @@ worksTabAdd({ id: 'tools', title: worksText('works.tab.tools', 'Tools'), order: 
   return [{ kind: 'list', rows: ts.map(k => ({ text: toolName(k).replace(/^the /, '').replace(/^./, x => x.toUpperCase()), sub: (WORK_TOOLS[k].bench ? 'In the machine shop' : 'In your locker') + ' · ' + (TOOL_SLOW_SAY[k] ? toolStateWord(k) : toolWord(W.tools[k][1])) + ' · since Day ' + W.tools[k][0] })) }];
 } });
 function worksView() {
-  const T = WORKS_TABS || [], tab = T.find(x => x.id === WORKS_TAB) || T[0], B = [{ kind: 'buttons', items: T.map(x => { const n = worksBadge(x); return { label: x.title + (n ? ' (' + n + ')' : ''), on: x === tab, action: { app: 'works', do: 'tab', arg: x.id } }; }) }];
+  const T = (WORKS_TABS || []).filter(x => !x.show || x.show()), tab = T.find(x => x.id === WORKS_TAB) || T[0], B = [{ kind: 'buttons', items: T.map(x => { const n = worksBadge(x); return { label: x.title + (n ? ' (' + n + ')' : ''), on: x === tab, action: { app: 'works', do: 'tab', arg: x.id } }; }) }];   // show: a tab that's there only sometimes (28f's last page)
   let more = []; try { more = tab ? tab.view() || [] : []; } catch (e) { more = [{ kind: 'text', text: 'Nothing to show.' }]; }
   return { title: worksText('works.app.title', 'Works'), blocks: B.concat(more) };
 }
@@ -66780,7 +66780,7 @@ if (P5_M25) WORK_TICKS.push((now, skip) => mtTick4(now, skip));
 // asks). Missed at the tea: she comes to find you (cqEscort, through p5Escort) till 22:00, and each later day 10:00-21:00
 // until she's asked; her Mail is only the record. Saved in end.steps (ship minutes). Nothing calls R(). Words: end.*
 // (stand-ins until the head writer's end.lines)
-const CQ = { from: 26, notice: 1100, arrow: 1115, at: 1120, sit: 1145, wait: 3, by: 1170, late: 1320, seats: ['5-tea-1', '5-tea-2'], near: 3.5 };
+const CQ = { from: 26, notice: 1100, arrow: 1115, at: 1120, sit: 1145, wait: 3, by: 1170, late: 1320, seats: ['5-tea-1', '5-tea-2'], stand: '5-tea-3', near: 3.5 };
 const CQ_ANSWERS = ['engines', 'bridge', 'teach', 'unsure'];
 const CQ_LIVE = { seat: null, sitAt: 0, said: {} };
 function cqClean(e) {                                    // a save's end, junk dropped
@@ -66813,6 +66813,7 @@ function cqAnswer(k, t) {                               // your answer: kept, th
     bridge: 'What you said | The bridge. I\'ve told Vance, and he smiled, which I didn\'t like. Go and learn it. Come back and tell us.',
     teach: 'What you said | Teaching. You were good with Basil. There\'ll be more like him; I\'ve told the Captain.',
     unsure: 'What you said | "I don\'t know yet." Best answer I\'ve had in years. Keep looking.' }[E.answer], null, t + 1);
+  try { toast(worksText('works.tab.career', 'Your career'), worksText('end.page.notice', 'A last page in the Works app: your four weeks.')); } catch (e) { /* no UI */ }
   simNote('end', { step: 'answer', day: E.day, answer: E.answer });
   return true;
 }
@@ -66840,9 +66841,15 @@ function cqSeats() {                                     // the tea corner's two
   const mine = CQ.seats.includes(PLAYER_PLACE) ? PLAYER_PLACE : null, her = CQ.seats.find(s => s !== mine) || null;
   return { her, you: mine || CQ.seats.find(s => s !== her) || null };
 }
-function cqEscort(p, t) {                               // p5Escort's 28f part: missed at the tea, Calder comes to find you
+function cqSeatsClear(st, B) {                           // live: the tea's guests on (or heading for) her seat and yours stand in the corner instead, till 19:30
+  let up = []; try { const on = id => id ? DECK_CREW.filter(c => c.p && c.p.id !== 'calder' && (c.spot && c.spot.id === id || c.goalId === id)).map(c => c.p.id) : [];
+    up = on(st.her).concat(st.you !== PLAYER_PLACE ? on(st.you) : []); for (const id of up) crewScene(id, { mode: 'wait', to: { deck: 5, room: 't' }, until: B + CQ.by }); } catch (e) { up = []; }
+  return up;
+}
+function cqEscort(p, t) {                               // p5Escort's 28f part: Calder at her tea from 18:30; missed there, she comes to find you
   const E = cqOf(); if (!E || !p || p.id !== 'calder' || E.answer || E.steps.asked !== undefined) return null;
   const d = worksDay(t), m = t - (d - 1) * 1440;
+  if (d === E.day && m >= CQ.arrow - 5 && m < CQ.by && !CQ_LIVE.seat) return { mode: 'wait', to: CQ.stand };   // her own tea: there from 18:30 (her plan has her on Deck 3 after dinner), till she sits
   const on = d === E.day ? m >= CQ.by && m < CQ.late : d > E.day && m >= 600 && m < 1260;
   return on && !promoBusy() ? { mode: 'follow', to: null } : null;
 }
@@ -66858,7 +66865,11 @@ function cqTick(now, skip) {
     if (S.story === undefined) { if (puNearMe('calder', CHATTER_NEAR + 2)) dialogueShow(cqStoryScene(), { id: 'end.story', who: ['calder'], at: now, where: { any: true } }); return; }
     if (m < CQ.sit) return;
     const st = cqSeats();                                // when it thins out: she sits, the arrow shows you the seat beside her
-    if (st.her && CQ_LIVE.seat !== st.her) { CQ_LIVE.seat = st.her; CQ_LIVE.sitAt = now; try { crewSceneEnd('calder'); crewComeTo('calder', st.her, null, { until: B + CQ.by }); } catch (e) { /* not on this deck */ } cqSayOnce('calder', 'end.sit', ['Come and sit down a minute.']); }
+    if (st.her && CQ_LIVE.seat !== st.her) {               // the seats' guests stand and gather round the table (the tea's still on), she sits
+      CQ_LIVE.seat = st.her; CQ_LIVE.sitAt = now; const up = cqSeatsClear(st, B);
+      try { crewSceneEnd('calder'); crewComeTo('calder', st.her, null, { until: B + CQ.by }); } catch (e) { /* not on this deck */ }
+      cqSayOnce('calder', 'end.sit', [up.length ? 'Budge up, you lot. Come and sit down a minute.' : 'Come and sit down a minute.']); }
+    else cqSeatsClear(st, B);                              // and anyone who comes for the seats later stands too
     if (!CQ_LIVE.sitAt) CQ_LIVE.sitAt = now;
     if (typeof guideAsk === 'function' && st.you && PLAYER_PLACE !== st.you) guideAsk({ id: 'end:sit:' + d, level: 1, owner, until: B + CQ.by, goal: () => ({ deck: 5, room: 't', place: cqSeats().you || CQ.seats[1], label: worksText('end.ptr.sit', 'Sit with Calder') }), done: () => CQ.seats.includes(PLAYER_PLACE) || (cqOf() || { steps: {} }).steps.asked !== undefined });
     if ((CQ.seats.includes(PLAYER_PLACE) || now - CQ_LIVE.sitAt >= CQ.wait) && puNearMe('calder', CHATTER_NEAR + 2)) dialogueShow(cqAskScene(), { id: 'end.ask', who: ['calder'], at: now, where: { any: true } });
@@ -66882,7 +66893,18 @@ function cqRecordLine() {                               // the Record's last lin
   return (ns ? ' ' + worksText('works.ms.nights', 'Night shift on the engines, to Day {n}', { n: ns }) + '.' : '')
     + (a ? ' ' + worksText('works.ms.question.' + a, 'Day {n}, asked what you want next: ' + { engines: 'the engines and the night crew', bridge: 'to learn the bridge', teach: 'to teach the new cadets', unsure: '"I don\'t know yet"' }[a], { n: E.day }) + '.' : '');
 }
+const CQ_MS = { commissioned: 'Commissioned Officer', officer: 'Officer', senior: 'Senior Officer', 'senior.bar': 'Your Senior Officer\'s bar', specialist: 'Engine Specialist: the test passed', 'specialist.badge': 'The Captain\'s engine badge', nights: 'The last of your night shifts', mentor: 'A day mentoring Basil', question: 'Calder\'s question', stars: 'Star logger', ff1: 'Fault-finder', ff2: 'Senior fault-finder', ff3: 'Master fault-finder' };
+function cqPage() {                                       // the Works app's last page, once you've answered: the career's milestones by day, your answer, what's on
+  const W = SHIP.works, E = cqOf(), B = []; if (!W || !E || !E.answer) return B;
+  B.push({ kind: 'text', mark: 'big', text: worksText('end.page.title', 'Your career, four weeks in') });
+  const rows = W.ms.filter(x => CQ_MS[x[0]]).slice().sort((a, b) => a[1] - b[1] || (a[0] < b[0] ? -1 : 1)).map(x => ({ text: worksText('end.ms.' + x[0], CQ_MS[x[0]]), sub: worksText('end.page.day', 'Day {n}', { n: x[1] }) }));
+  if (rows.length) B.push({ kind: 'list', rows });
+  B.push({ kind: 'text', mark: 'hot', text: worksText('end.page.answer.' + E.answer, 'You told Calder what you want next: ' + { engines: 'the engines, and the night crew.', bridge: 'to learn the bridge.', teach: 'to teach the new cadets.', unsure: '"I don\'t know yet."' }[E.answer]) });
+  B.push({ kind: 'text', text: worksText('end.page.on', 'The ship\'s life goes on: the board, your crew, Friday tea. Calder will hold you to it.') });
+  return B;
+}
 if (P5_END) {
+  worksTabAdd({ id: 'career', title: worksText('works.tab.career', 'Your career'), order: 90, show: () => !!(cqOf() || {}).answer, view: cqPage });
   WORKS_SETTLE.push(cqSettle);
   WORK_TICKS.push((now, skip) => cqTick(now, skip));
 }

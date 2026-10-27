@@ -538,7 +538,7 @@ def part_cq(g):
     print('(cq) Calder\'s question at Four weeks aboard: the Mail the evening before, the notice, the arrow, the cake and her story, she sits, the question, your answer, the Record:')
     for pick in range(4):
         r = g.ev("""(() => { const out = {}; """ + CQ_DAY + """ const E = SHIP.works.end; out.end0 = JSON.stringify(E); out.mail0 = __mail().filter(m => /^Chief Ines Calder: Four weeks, tomorrow/.test(m)).length;
-          out.rows = __rows(26); setShipNow(25 * 1440 + 600); out.next = worksNext();
+          const tabs = () => (WORKS_TABS || []).filter(x => !x.show || x.show()).map(x => x.id); out.tab0 = tabs().includes('career'); out.rows = __rows(26); setShipNow(25 * 1440 + 600); out.next = worksNext();
           setShipNow(25 * 1440 + 1101); __bay(); __tick(); out.notes = __notes.filter(n => /Four weeks/.test(n));
           setShipNow(25 * 1440 + 1116); __tick(); out.arrow = GUIDE.list.filter(e => /^end:tea/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label);
           __tea(); const keep = puNearMe; puNearMe = (id, r) => id === 'calder' ? true : keep(id, r); setShipNow(25 * 1440 + 1121); __tick(); out.dlg1 = DIALOGUE && DIALOGUE.id; { """ + dlg_run(1) + """ } out.story = E.steps.story !== undefined;
@@ -547,6 +547,7 @@ def part_cq(g):
           out.arrow2 = GUIDE.list.filter(e => /^end:sit/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label + ' ' + (e.goal() || {}).place); out.dlg2 = DIALOGUE && DIALOGUE.id;
           PLAYER_PLACE = '5-tea-2'; setShipNow(25 * 1440 + 1147); __tick(); out.dlg3 = DIALOGUE && DIALOGUE.id; { """ + dlg_run(pick) + """ } puNearMe = keep; PLAYER_PLACE = null;
           out.answer = E.answer; out.asked = E.steps.asked !== undefined; out.ms = SHIP.works.ms.filter(x => /nights|question/.test(x[0])).map(x => x.join(' '));
+          out.tab1 = tabs().includes('career'); out.page = cqPage().map(b => b.text || (b.rows || []).map(r => r.text + ' (' + r.sub + ')').join('; ')).join(' / '); out.toast = __toasts.filter(t => /Your career/.test(t[0])).length;
           out.mail = __mail().filter(m => /What you said/.test(m)).length; out.rec = worksRecordHead().text; out.clean = JSON.stringify(cqClean(JSON.parse(JSON.stringify(E)))) === JSON.stringify(E);
           setShipNow(25 * 1440 + 1200); __tick(); out.after = (worksEscort({ id: 'calder' }, shipNow()) || {}).mode || null; out.nextAfter = worksNext(); return out; })()""")
         if pick == 0:
@@ -558,6 +559,7 @@ def part_cq(g):
             check(r['dlg1'] == 'end.story' and r['story'] and not r['early'], f"cq: there from 18:40: the cake and her story; nothing more until it thins out ({r['dlg1']}, {r['story']}, {r['early']})")
             check(r['seat'] == '5-tea-1' and r['come'] == '5-tea-1' and r['sitSaid'] and r['arrow2'] and r['arrow2'][0].startswith('1 ') and '5-tea-2' in r['arrow2'][0] and not r['dlg2'], f"cq: at 19:05 she sits, says so, the arrow shows you the seat beside her ({r['seat']}, {r['come']}, {r['arrow2']}, {r['dlg2']})")
             check(r['dlg3'] == 'end.ask' and r['asked'] and r['ms'] == ['nights 24', 'question 26'] and r['mail'] == 1 and 'Night shift on the engines, to Day 24' in r['rec'] and r['clean'], f"cq: sat, her question; your answer kept, the milestones, the Mail as the record, the Record's lines ({r['dlg3']}, {r['ms']}, {r['mail']}, {r['rec']})")
+            check(not r['tab0'] and r['tab1'] and r['toast'] == 1 and 'Calder\'s question (Day 26)' in r['page'] and 'The last of your night shifts (Day 24)' in r['page'] and 'You told Calder' in r['page'], f"cq: the Works app's last page, Your career, once you've answered ({r['tab0']}, {r['tab1']}, {r['page']})")
             check(r['after'] is None and 'Friday tea' not in r['nextAfter'], f"cq: asked: she doesn't come looking, What's next moves on ({r['after']}, {r['nextAfter']})")
         check(r['answer'] == ['engines', 'bridge', 'teach', 'unsure'][pick] and 'asked what you want next' in r['rec'], f"cq: answer {pick} kept and on the Record ({r['answer']}, {r['rec'][-100:]})")
 
