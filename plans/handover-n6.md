@@ -28,8 +28,12 @@
    forced ring to the clock, then the engine room, the clock at 06:00, the plate, your bunk (ring on "Set alarm").
    Day 22 12:30: clock out, then sleep. Holding a job while the clock waits: an hourly notice. With P5_M21, 28b may
    define `m21Door(t)` -> { deck, tile } for Calder to wait at. Flags p5n.* (saved).
-4. Held jobs' night windows (17's jobReserve), the night incident (24f), the night's ordinary jobs; 21b's clothes day;
-   Navarro's call home.
+4. **The night's work, the night incident, the clothes day (done).** 28a: `P5N_INC`, `p5nBoardWin`, `p5nIncPlan`,
+   `p5nIncTick`, the `job` turn-in listener (ns[d].jobs), `p5nClothes`. Hooks: 17's boardTopUp (your night's hours),
+   leaveEnd (a job found in your night's hours is held for you in them), jobReserve (`o.night`: held to 06:00); 24f's
+   incPost (held for you while clocked in for a night); 21b's clothesYesterday, the status line and the morning tip
+   (`clothesLateAt`: four hours after your wake after a night). Navarro's call home: his rota's `calls-home` habit
+   already gives his off nights calls; no planner change (left as is, noted for review).
 5. Saves (03:00 loads into the same night), late saves, check parts: player_check night, clothes, saves, food, career,
    leave, day_check 22-25.
 6. Controller presets (Day 22 22:40, Day 23 21:00), a pad-played night 2, the words (night.lines, baked), the round.

@@ -19919,6 +19919,7 @@ function leaveEnd(j) {
   if (!forYou(j) || j.released) return j.found;
   if (j.cargo === 'meals') return j.found + 60;
   if (j.cargo === 'stores') { const d0 = Math.floor(j.found / 1440) * 1440; return playerShiftOn(d0 / 1440 + 1) && j.found < d0 + DELIVERY_KEEP ? d0 + DELIVERY_KEEP : j.found; }   // the delivery (0.33.42)
+  if (P5_NIGHT && typeof p5nBoardWin === 'function') { const w = p5nBoardWin(j.found); if (w) return j.found + Math.min(w.left, j.leave || (realRepair(j) ? FAULT_LEAVE : CREW_LEAVE)); }   // found in your night's hours: held for you in them (28a, S6-1)
   let t = j.found, left = j.leave || (realRepair(j) ? FAULT_LEAVE : CREW_LEAVE);
   for (let k = 0; k < 14 && left > 0; k++) {
     const d0 = Math.floor(t / 1440) * 1440;
@@ -20612,7 +20613,7 @@ const RESERVE_MAKE_MINS = 30;                            // how long you take to
 const heldForYou = j => (!!j.reserved && !j.freed && j.status !== 'done') || (typeof caseHeld === 'function' && j.status !== 'done' && !!caseHeld(j));   // 24k: a case's job is kept for you while it runs (0.33.47)
 function jobReserve(kind, day, at, slot = 1, o = {}) {
   machinesNow();
-  const due = (day - 1) * 1440 + at, until = Number.isFinite(o.until) ? o.until : (day - 1) * 1440 + dayShiftEnd(day);
+  const due = (day - 1) * 1440 + at, until = Number.isFinite(o.until) ? o.until : o.night && P5_NIGHT && typeof p5nOf === 'function' && p5nOf(day) ? p5nOf(day).to : (day - 1) * 1440 + dayShiftEnd(day);   // o.night: held through your night shift (28a, S6-1)
   const old = SHIP.jobs.find(j => j.reserved === slot && heldForYou(j));
   if (old && old.claimedBy) return old.id;
   if (old) SHIP.jobs = SHIP.jobs.filter(j => j !== old);
@@ -21618,10 +21619,10 @@ let BOARD_ON = true;
 const BOARD_MIN = 2, BOARD_FROM = 45, BOARD_KINDS = ['vent', 'calibrate', 'delivery', 'fault', 'seal'];
 const boardForYou = (j, t) => j.status === 'open' && !j.claimedBy && j.kind !== 'favour' && j.found <= t && !(typeof caseHidden === 'function' && caseHidden(j)) && !(typeof worksWatching === 'function' && worksWatching(j)) && (heldForYou(j) || (forYou(j) && t < leaveEnd(j)));
 function boardTopUp(h, jobs) {
-  const d = Math.floor(h / 24) + 1, t = h * 60, m = t - (d - 1) * 1440, end = dayShiftEnd(d);
+  const d = Math.floor(h / 24) + 1, t = h * 60, m = t - (d - 1) * 1440, nw = P5_NIGHT && typeof p5nBoardWin === 'function' ? p5nBoardWin(t) : null, end = nw ? m + nw.left : dayShiftEnd(d);   // nw: your night's hours (28a, S6-1; fixed by the day)
   for (const j of jobs) if (j.extra && j.status === 'open' && !j.claimedBy && t >= leaveEnd(j)) j.status = 'gone';   // untaken by the shift's end: lapsed
   for (let k = jobs.length - 1; k >= 0; k--) if (jobs[k].status === 'gone') jobs.splice(k, 1);
-  if (!BOARD_ON || h < 0 || !playerShiftOn(d) || m < DAY_SHIFT[0] || end - m < BOARD_FROM) return;
+  if (!BOARD_ON || h < 0 || (nw ? nw.left < BOARD_FROM : !playerShiftOn(d) || m < DAY_SHIFT[0] || end - m < BOARD_FROM)) return;
   if (jobs.some(j => j.reserved && j.status === 'open' && !j.claimedBy && j.found >= (d - 1) * 1440 && j.found <= t + 60)) return;   // a job reserved for you today (Day 1's two with Zeke, a training job) comes first: none while it's due within the hour or untaken
   if (BOARD_TRADE_ON) try { boardTradePost(h, jobs, t, m, end); } catch (e) { /* 24a's rounds not loaded yet */ }   // FX19 (0.92.6 #11): a job of your trade, beside the simple ones
   let n = jobs.filter(j => boardForYou(j, t) && !j.trade).length; if (n >= boardMin()) return;
@@ -55272,7 +55273,8 @@ SAVE_EXTRA.push(s => { s.clothes = JSON.parse(JSON.stringify(SHIP.clothes)); s.c
 onSim('newGame', n => { SHIP.clothes = clothesBlank(!n.arrival); });   // by shuttle: one spare outfit; on Monday: the full kit
 onSim('job', n => { if (n.step === 'turnin' && SHIP.time.day === 1 && SHIP.clothes.said['d1:turnin'] === undefined) SHIP.clothes.said['d1:turnin'] = Math.floor(shipNow()); });   // Day 1's first turn-in (d1-better)   // by shuttle: one spare outfit; on Monday: the full kit
 const hamperHeld = () => CLOTHES_ON && !!SHIP.clothes.hamper && SHIP.clothes.hamper.at === 'hands';
-const clothesYesterday = () => CLOTHES_ON && SHIP.clothes.changed < SHIP.time.day && SHIP.time.min >= CLOTHES_LATE && SHIP.time.min < CLOTHES_NIGHT;
+const clothesLateAt = () => { const n = P5_NIGHT && typeof p5nClothes === 'function' ? p5nClothes() : null; return n ? n.late : CLOTHES_LATE; };   // after a night shift: four hours after your wake (28a, S6-1)
+const clothesYesterday = () => CLOTHES_ON && SHIP.clothes.changed < SHIP.time.day && SHIP.time.min >= clothesLateAt() && SHIP.time.min < CLOTHES_NIGHT;
 // your uniform's grime (0.42.46, Pillar 5's m2 "uniform" page, for the mechanic seat's 24b): SHIP.clothes.grime 0-1 (saved, two
 // decimals). Oily jobs add to it through clothesGrime(add); a change at your wardrobe while grubby always takes a clean
 // outfit (even if you've changed today) and sets it to 0; a shower leaves it. uniformState(): 'grubby' (grime >= GRIME_GRUBBY),
@@ -55297,7 +55299,7 @@ function outfitLine() {
   if (!CLOTHES_ON) return null;
   if (PLAYER_SPEC.kit) return 'Rec kit on.';   // rec kit is clean (0.81.0)
   if (uniformState() === 'grubby') return 'Dirty outfit: grubby from work. Change at your wardrobe.';
-  if (SHIP.clothes.changed < SHIP.time.day) return SHIP.time.min < CLOTHES_LATE ? 'Yesterday\'s outfit: change before 10:00.' : 'Dirty outfit: yesterday\'s. Change at your wardrobe.';
+  if (SHIP.clothes.changed < SHIP.time.day) return SHIP.time.min < clothesLateAt() ? (clothesLateAt() !== CLOTHES_LATE ? 'Yesterday\'s outfit: change before ' + hhmm(clothesLateAt()) + '.' : 'Yesterday\'s outfit: change before 10:00.') : 'Dirty outfit: yesterday\'s. Change at your wardrobe.';
   return 'Clean outfit on.';
 }
 Object.assign(PLAYER_ACTS, { clothes: { mins: 1, pose: 'browse', title: 'Changing' } });
@@ -55595,7 +55597,7 @@ function clothesFrame() {
   uniformWatch();                                        // simNote('uniform') when it turns grubby, yesterday's or clean (10:00, 22:00, a change)
   clothesDirtyTick();                                    // (playtest patch 1, #8) the dirty clothes' extra drain, shown
   if (h && h.at === 'washer' && !h.done && now >= h.until) { h.done = true; toast('Laundry', clothesText('laundry.done', {}, 'Your washing\'s done. Collect it from the laundry on Deck 4.') + ' It\'s in ' + washerName(h.washer) + '.'); }
-  if (C.changed < SHIP.time.day && C.clean > 0 && SHIP.time.min >= 6 * 60 && SHIP.time.min < CLOTHES_LATE && deckDef.num === 4 && typeof ixTip === 'function' && !ACT)
+  if (C.changed < SHIP.time.day && C.clean > 0 && SHIP.time.min >= (P5_NIGHT && typeof p5nClothes === 'function' && p5nClothes() ? p5nClothes().wake : 6 * 60) && SHIP.time.min < clothesLateAt() && deckDef.num === 4 && typeof ixTip === 'function' && !ACT)
     ixTip('clothes', clothesText('tip.clothes', {}, 'Fresh clothes every morning from your wardrobe, by the door in Bunk 1 (by 10:00 you\'re in yesterday\'s clothes). When they run out, do your laundry when you can.'));   // once (the device's tips)
   // (the "Yesterday's clothes" pop-up, once a day, is cut: the user, 0.92.3 notes, item B; the green tips say it, clothesDirtyTip)
   const stale = clothesYesterday();                     // the writers' clothes.remark lines are gated on this flag (crew notice)
@@ -61175,7 +61177,7 @@ function incStart(kind, deck, t, train) {
 }
 function incPost(t, by) {                                // the open incident's job on the board
   const I = incState(), O = I && I.open; if (!O || O.j) return null;
-  const W = SHIP.works, d = worksDay(t), mine = W.tr.m6 !== undefined && playerShiftOn(d) && t - (d - 1) * 1440 < dayShiftEnd(d);
+  const W = SHIP.works, d = worksDay(t), mine = W.tr.m6 !== undefined && (playerShiftOn(d) && t - (d - 1) * 1440 < dayShiftEnd(d) || P5_NIGHT && typeof p5nIn === 'function' && p5nIn(t));   // or on your night shift (28a, S6-1)
   const j = incJob(O.kind, O.deck, t, { held: mine });
   SHIP.jobs.push(j); O.j = j.id;
   if (mine && t >= shipNow() - 1) try { toast(j.title, worksText('inc.call.' + O.kind, 'It\'s on the board, top of the list.')); } catch (e) { /* no UI */ }
@@ -64812,6 +64814,46 @@ function p5nGuide(now) {                                  // live, once a ship m
   }
 }
 if (P5_NIGHT) WORK_TICKS.push((now, skip) => { if (!p5nLive()) return; p5nState(); p5nWordTick(now, skip); if (!skip && now >= shipNow() - 1) p5nGuide(now); });
+// ---- the night's work, the night incident, the clothes day (S6-1, turn 4) ----
+// The board keeps up through your night (17's boardTopUp asks p5nBoardWin: the night's hours, fixed by the day, never
+// who's clocked in), so a night is the night crew's ordinary jobs and a pair of hands; S6-5 and S6-6 bring the night's
+// own work (jobReserve's o.night holds a job to 06:00; ns[d].jobs lists the jobs you turned in). One incident inside
+// each night (P5N_INC: its minute and kind from the day number alone, so planner-safe), 24f's own: held for you while
+// you're clocked in (24f's incPost asks p5nIn), else the night crew's; ns[d].inc. 21b's clothes day: after a night your
+// "yesterday's clothes" start four hours after your wake (p5nClothes), not at 10:00
+const P5N_INC = { seed: 'p5n:inc', from: 90, span: 25, kinds: ['burst', 'alarm'], decks: [4, 5] };   // 1h30 to 5h30 into the night
+function p5nBoardWin(t) {                                 // { left } minutes of your night still to run at ship minute t, or null
+  if (!p5nLive()) return null;
+  const d = worksDay(t);
+  for (const k of [d, d - 1]) { const n = playerNightOn(k) && p5nOf(k); if (n && t >= n.from && t < n.to) return { left: n.to - t }; }
+  return null;
+}
+function p5nIncPlan(k) {                                  // night k's incident: [kind, deck, ship minute], from the day number alone
+  const n = p5nOf(k); if (!n) return null;
+  const seed = machSeed(P5N_INC.seed), kind = P5N_INC.kinds[Math.floor(schedU(seed, k, 874) * P5N_INC.kinds.length) % P5N_INC.kinds.length];
+  return [kind, kind === 'alarm' ? 3 : P5N_INC.decks[Math.floor(schedU(seed, k, 875) * P5N_INC.decks.length) % P5N_INC.decks.length], n.from + P5N_INC.from + Math.floor(schedU(seed, k, 876) * P5N_INC.span) * 10];
+}
+function p5nIncTick(now, skip) {
+  if (!p5nLive() || typeof incStart !== 'function' || typeof incState !== 'function') return;
+  const W = SHIP.works, d = worksDay(now);
+  for (const k of [d - 1, d]) {
+    const P = playerNightOn(k) && p5nIncPlan(k); if (!P || now < P[2] || flag('p5n.inc.' + k) !== undefined) continue;
+    const I = incState(); if (!I || I.open) continue;      // another incident still open: not tonight
+    flagSet('p5n.inc.' + k, 1);
+    const S = incStart(P[0], P[1], now, false), R = p5nNight(k); if (S && S.j && R && R.inc.length < 12) R.inc.push(S.j);
+    if (S && skip) { const j = SHIP.jobs.find(x => x.id === S.j); if (j) jobFinish(j, now, 'crew'); }   // asleep through it: the crew's
+    simNote('p5night', { step: 'incident', day: k, kind: P[0] });
+  }
+}
+if (P5_NIGHT) WORK_TICKS.push((now, skip) => p5nIncTick(now, skip));
+if (P5_NIGHT) onSim('job', n => {                         // a job you turned in on your night: ns[d].jobs
+  if (!n || n.step !== 'turnin' || !p5nLive()) return; const N = p5nClockNight(shipNow()), R = N && SHIP.works && SHIP.works.ns && SHIP.works.ns[N.day];
+  if (R && R.in && !R.out && typeof n.id === 'string' && !R.jobs.includes(n.id) && R.jobs.length < 12) R.jobs.push(n.id.slice(0, 40));
+});
+function p5nClothes() {                                   // 21b asks: { wake, late } on the day after a night (you slept by day), else null
+  if (!p5nLive()) return null; const d = SHIP.time.day; if (!playerNightOn(d - 1)) return null;
+  const w = P5N_WAKE[d] || 945; return { wake: w, late: Math.min(w + 240, CLOTHES_NIGHT - 30) };
+}
 // section 19's Schedule (devDay) asks: Day 22's day part to 12:30, the night shift that evening (to 06:00) and its last
 // hours the next morning, the daytime sleep after it ("Sleep until 15:45") in place of "Day off"
 const P5N_WAKE = { 22: 1005, 23: 945, 24: 945, 25: 945 };   // the bed's "Sleep until": 16:45 on Day 22, else 15:45
