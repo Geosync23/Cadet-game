@@ -4,8 +4,13 @@
 Read CLAUDE.md, this note, then the bottom of TEAM.md on claude/lead-40 (from "LEAD 40 started", ~22:00 UTC Oct 26). plans/handover-lead39.md has the background (user rules, specs, ending answers) and still holds.
 Lead 40 = session_01NXybH7NNqM8M4ngiyidq6m, branch claude/lead-40 (from claude/lead-39). Hourly check-in trig_01Ho4S7S9dCaYyVC7qSaQi9t (57 * * * *): disable it when you take over and make your own.
 
-## Why this stopped
-~23:45 UTC (7:45 PM Eastern) Oct 26 the user called a STOPPING POINT: they may move to another account and have not decided. Every seat was told to finish only 0.93.3, start nothing new, push work-in-progress and update its handover. **Do not restart work until the user says whether we continue on this account or transfer.**
+## Current state (update 00:57 UTC Oct 27; TEAM.md has the detail)
+- 23:45 UTC Oct 26 the user called a stopping point (may move accounts, undecided); at 00:35 UTC they resumed at an easy/steady pace.
+- **USER RULE (00:38 UTC Oct 27): everything ships ON (Step 5, vessel, ending); nothing built switched off.**
+- 0.93.3 LIVE (Playtest 3HqM v7, Dev 9ZWA v7). Integration = 0.93.3 (3fd762cb, user OK).
+- Promotion preview (0.93.2-based): https://claude.ai/artifact/AvpWrMumcGiw4UYUpXd2X5.
+- BM18's claude/staging-0.94.0 543fba58 = every branch merged (0.93.4 fixes, Step 5, vessel, ending), switches still OFF, cadet identical. Next: blockers -> BM18 flips all switches ON -> full round -> publish both links.
+- Blockers: B5 ladder sort must (comment ate the sort in ladderBigP5) + 4 promotion shoulds; VB1 bigevents ON must; VB2 endgo/controller fixes df9ef46c (rerun running). RV22 is the only reviewer (RV20, RV21 archived).
 
 ## User rules (unchanged, see handover-lead39.md)
 Keep reducing the workforce (archive as soon as a piece passes + handover pushed; replace, don't add). Tons of arrows, staged scenes with dialogue, every piece works with a controller. Times to the user in US Eastern. No emojis. Never publish over 6daNCLCJAcsLCZn27CEthq.
