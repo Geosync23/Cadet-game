@@ -686,7 +686,7 @@ S6_BEATS = [
   ['the Tier 4 test', 'pu4:', "!!(SHIP.works.pu && SHIP.works.pu.t4 && SHIP.works.pu.t4.passed)", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
   ['sleep by day', 'p5n:bed:22', "(simNotes('sleep', 0) || []).length >= 0", "typeof playerNightOn === 'function'"],
   ['night 1', 'p5n:in:22', "!!(SHIP.works.ns && SHIP.works.ns[22] && SHIP.works.ns[22].in)", "typeof playerNightOn === 'function'"],
-  ['the welcome', 'pu4:welcome', "flag('pu4.welcome') !== undefined || !!(SHIP.works.pu && SHIP.works.pu.t4 && SHIP.works.pu.t4.welcome)", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
+  ['the welcome', 'pu4:welcome', "!!SHIP.occasions.find(x => x.id === 'pu4Welcome' && x.met)", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
   ['the badge', 'pu4:badge', "!!(SHIP.works.pu && SHIP.works.pu.t4 && SHIP.works.pu.t4.badge)", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
   ['night 2', 'p5n:in:23', "!!(SHIP.works.ns && SHIP.works.ns[23] && SHIP.works.ns[23].in)", "typeof playerNightOn === 'function'"],
   ['night 3 (the coil swap)', 'm24:', "!!(SHIP.works.side && SHIP.works.side.m24 && SHIP.works.side.m24.done)", "typeof m24Book === 'function'"],
