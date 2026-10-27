@@ -455,7 +455,7 @@ def part_t4dev(g):
       setShipNow(23 * 1440 + 600); out.eng24 = pu4EngineByDay(); setShipNow(24 * 1440 + 600); out.eng25 = pu4EngineByDay() && /pu4EngineByDay/.test(String(forYou)); return out; })()""")
     for k, v in r.items(): print('   ', k, v)
     check(r['c21'][0] == 3 and r['c22'][:2] == [4, 'specialist'] and '"badge":null' in r['c22'][3] and '"badge":23' in r['c23'][3] and r['c25'][2] == '2-B' and '"walked":25' in r['c25'][3] and r['c23'][4] == 'specialist,specialist.badge' and not any('Engine Specialist' in l for l in r['later']), f"t4dev: the career table: Tier 4 from Day 22, the badge Day 23, Deck 2 from Day 25 ({r['c21']}, {r['c22']}, {r['c23']}, {r['c25']}, {r['later']})")
-    check([b.split()[0] for b in r['beats']][-4:] == ['t4', 't4res', 't4badge', 't4move'], f"t4dev: the presets for Days 22, 22, 23, 25 ({r['beats']})")
+    check([b.split()[0] for b in r['beats'] if b.startswith('t4')] == ['t4', 't4res', 't4badge', 't4move'], f"t4dev: the presets for Days 22, 22, 23, 25 ({r['beats']})")
     check(r['steps'] == ['Your Tier 4 test 09:30 done', 'Your Tier 4 result 22:40'] and 'result' in r['next1'] and 'badge' in r['next2'] and 'Vance' in r['next3'] and r['steps2'][-1] == 'Your Deck 2 quarters', f"t4dev: the promotion list and the career arrow ({r['steps']}, {r['next1']}, {r['next2']}, {r['next3']}, {r['steps2']})")
     check(r['eng24'] is False and r['eng25'] is True, f"t4dev: engine jobs yours by day after the nights, not before ({r})")
 
@@ -509,6 +509,19 @@ def part_mt3(g):
     check(r['stuck'] and r['arrow'] and r['arrow'][0].startswith('1 ') and '5-bench-2' in r['esc1'] and r['dlg1'] == 'mt.clue' and r['clue'] == 'meter', f"mt3: stuck at the bench, a level 1 arrow, you point him to a clue ({r['stuck']}, {r['arrow']}, {r['dlg1']}, {r['clue']})")
     check(r['lunch'] is None and r['esc2'] == 'follow' and r['dlg2'] == 'mt.late' and r['late'] == [2, True] and r['esc3'] == 'wait' and r['clean'], f"mt3: lunch as planned; late, he hurries to you; three replies, yours kept; back to the bench ({r})")
     check(r['self'] == 'self', f"mt3: not helped by 12:25, he works it out himself ({r['self']})")
+
+def part_mt4(g):
+    if not g.ev("typeof P5_M25 !== 'undefined' && P5_M25"): print('(mt4) P5_M25 off: skipped'); return
+    print('(mt4) Calder gives Basil his first job alone; the Record line; missed: her Mail; the Dev preset:')
+    r = g.ev("""(() => { """ + MT_DAY + """ const out = {}, M = SHIP.works.mt; Object.assign(M.steps, { met: 1, watch: 2, dw: 10, do: 3, clue: 4, late: 5 }); M.clue = 'meter'; M.late = 0;
+      setShipNow(25 * 1440 + 896); __bay(); __tick(); out.arrow = GUIDE.list.filter(e => /^mt:first/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label); out.esc = (worksEscort({ id: 'bramwell-basil' }, shipNow()) || {}).mode;
+      const keep = puNearMe; puNearMe = (id, r) => id === 'bramwell-basil' || id === 'calder' ? true : keep(id, r); setShipNow(25 * 1440 + 901); __tick(); puNearMe = keep;
+      out.dlg = DIALOGUE && DIALOGUE.id; { """ + dlg_run(1) + """ } out.done = M.steps.done !== undefined; out.tr = SHIP.works.tr.m25; out.rec = worksRecordHead().text; out.next = worksNext();
+      """ + MT_DAY.replace('const W =', 'const W2 =').replace('W.', 'W2.') + """ setShipNow(25 * 1440 + 925); __tick(); out.mail = [SHIP.works.mt.steps.done !== undefined, __mail().filter(m => /^Chief Ines Calder: Basil/.test(m)).length];
+      out.preset = DM_BEATS.filter(b => b.id === 'mt').map(b => b.day + ' ' + hhmm(b.at)); return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['arrow'] and r['arrow'][0].startswith('1 ') and r['esc'] == 'wait' and r['dlg'] == 'mt.first' and r['done'] and r['tr'] == 26 and 'Mentored Basil, Day 26' in r['rec'] and 'Basil' not in r['next'], f"mt4: Calder's scene at the bench, the row trained, the Record's line ({r})")
+    check(r['mail'] == [True, 1] and r['preset'] == ['26 08:50'], f"mt4: not there by 15:20, by Mail; the Dev preset Day 26 08:50 ({r['mail']}, {r['preset']})")
 
 def part_t3pointer(g):
     if not t3on(g, 't3pointer'): return
@@ -647,7 +660,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev), ('mt', part_mt), ('mt2', part_mt2), ('mt3', part_mt3)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev), ('mt', part_mt), ('mt2', part_mt2), ('mt3', part_mt3), ('mt4', part_mt4)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')

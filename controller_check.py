@@ -3266,8 +3266,32 @@ def part_promo4(pw, src, tag):
     r.close()
     return fails
 
+# ---- (S6-7, W7) mentoring Basil by pad (28e, on a copy with P5_STEP6 on): the hello, the clue choice, the late talk's
+# three replies, Calder's first job: each scene read through by the D-pad and A, nothing tapped
+MT_SETUP = r"""(() => { introSkip(); const W = worksInit(Math.max(shipNow(), WORKS_START)); W.tier = 4; W.rank = 'specialist'; flagSet('p5n.on', 22); flagSet('p5n.off', 25);
+  skipTo(24 * 1440 + 1321); for (const f of WORK_TICKS) f(shipNow(), false); skipTo(25 * 1440 + 541); goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; return !!SHIP.works.mt; })()"""
+def part_mentor(pw, src, tag):
+    on = p6_copy(src)
+    if on == src or 'function mtSettle' not in src: return ['not yet: no P5_STEP6 switch line or no mentoring in this build']
+    fails = []
+    r = Run(pw, on, f'{tag}_mt', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    if not r.ev(MT_SETUP): r.close(); return ['setup: Basil\'s day not settled']
+    near = "const k = puNearMe; puNearMe = (id, rr) => id === 'bramwell-basil' || id === 'calder' ? true : k(id, rr); for (const f of WORK_TICKS) f(shipNow(), false); puNearMe = k;"
+    for scene, at, pick, setup in (('hello', 541, 1, ''), ('clue', 650, 2, "Object.assign(SHIP.works.mt.steps, { met: 1, watch: 2, dw: 10, do: 3 });"),
+                                  ('late', 816, 2, ""), ('first', 901, 0, "")):
+        r.ev(f"(() => {{ {setup} setShipNow(25 * 1440 + {at}); goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); {near} }})()"); r.step(6)
+        if not r.ev("!!DIALOGUE"): fails.append(f'{scene}: the scene did not open'); continue
+        pu3_read(r, fails, scene, pick)
+    got = r.ev("(() => { const M = SHIP.works.mt; return [M.steps.met !== undefined, M.clue, M.late, M.steps.done !== undefined]; })()"); print(f'  mentoring by pad: {got}')
+    if got != [True, 'log', 2, True]: fails.append(f'the replies by pad not kept ({got})')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close()
+    return fails
+
 PART_FN['promo3'] = part_promo3; NEEDS['promo3'] = ['panels']; ALL_PARTS.append('promo3')   # (S5-2: PARTS is ALL_PARTS itself when none are named)
 PART_FN['promo4'] = part_promo4; NEEDS['promo4'] = ['panels']; ALL_PARTS.append('promo4')   # (S6-3, W7)
+PART_FN['mentor'] = part_mentor; NEEDS['mentor'] = ['panels']; ALL_PARTS.append('mentor')   # (S6-7, W7)
 # ---- run ----------------------------------------------------------------------------------------------------------
 if '--selftest' in FLAGS:
     if pad_switch(SRC) is not None: print('--selftest is for a build without section 26 (it plants its own PAD_ON)'); sys.exit(1)
