@@ -17,6 +17,7 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
 ## Verdicts
 | Branch | Piece | Verdict | Sha |
 |---|---|---|---|
+| claude/p5s5-promo (B5) | machine_check fix (RV20 M1) | FIXES NEEDED (1 must: mid-line comment kills the sort) | cbca3e3e |
 
 ## Log
 - 2026-10-26 ~23:30 UTC: started; told lead 40, VB1, VB2, B3. Test kit in /tmp/cadet-work and /tmp/cadet-work2. No new
@@ -48,3 +49,6 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
   session_01CgbXRamJJp66pFTP43KYoB; recipe plans/handover-rv20.md on claude/review-rv20). Order: VB1, B5 fix, B3, VB2.
   B5 head now 516333a1 (fix not landed).
   Note from RV20: B3's branch carries 51b1a9c6 (the ladder order that breaks machine_check 'traced faults ... the same twice' on a P5_STEP5 copy): B3's machine_check on an ON copy will fail until B5's fix is merged in.
+- 00:55 UTC: **B5 claude/p5s5-promo cbca3e3e: FIXES NEEDED (1 must)**, from the diff: ladderBigP5's new comment is mid-line,
+  so `.map().sort().map()` (the higher-tier-first order) is commented out; still parses. Sent to B5 + lead 40.
+- VB1 5578c78d on the ON copy: arrows_check vessel OK; controller_check vessel OK.
