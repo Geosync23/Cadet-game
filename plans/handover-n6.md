@@ -17,7 +17,10 @@
    (the Schedule's rows), 20's `careerOff` (no day shift on Days 23-25), `careerClock` (the night's punch first;
    `yourDayEnd` for Day 22's 12:30), `clockScreen` (the night's screen), `careerTick`'s auto clock-out, 15b's
    `guideShiftOver` and the clock arrows (`yourDayEnd`).
-2. **Sleeping by day, the knock, the kept plate.** (in progress)
+2. **Sleeping by day, the knock, the kept plate (done).** 28a: `P5N_KNOCK`, `p5nDayBed`, `p5nSoon`, `p5nKnockAt`,
+   `p5nKnock`, `p5nBed`, `p5nPlate`. Hooks: 13's offerSleep (`p5nBed` first), alarmLate (the night first), sleepGo
+   (a day sleep isn't kept as your alarm; the knock wakes you); 15's bunkLie (lying down sleeps you after a night),
+   needGoal (no bunk arrow on or just before a night; the bunk by day after one), the t:late tip, the tray tap (the plate).
 3. Calder's night.on (Day 22 09:15) and night.off (Day 25 06:00); notices 20:30, arrows from 20:45 (level 1), ring
    lines, Tracked rows, Mail as the record; night 1's start at 22:40 with P5_PROMO4 off.
 4. Held jobs' night windows (17's jobReserve), the night incident (24f), the night's ordinary jobs; 21b's clothes day;

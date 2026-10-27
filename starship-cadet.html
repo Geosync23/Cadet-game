@@ -9603,6 +9603,7 @@ const bedtime = () => SHIP.time.min >= 20 * 60 || SHIP.time.min < 5 * 60 + 30;
 function offerSleep(at) {                                // at: where the tapped item is. True if it was your bunk
   const id = playerBed(), bed = (DECKS[deckOf(id)].places || []).find(p => p.id === id);
   if (!bed || deckDef.num !== deckOf(id) || at.distanceTo(cellPos(...bed.at)) > 1.2) return false;
+  if (P5_NIGHT && p5nBed()) return true;                 // 28a (S6-1): sleeping by day after a night shift, or not during one
   if (!bedtime() && !(typeof sickNow === 'function' && sickNow())) { toast('Your bunk', 'Too early to turn in. You can sleep here from 20:00.'); return true; }
   toastEl.classList.remove('show');
   if (!bedtime()) sleepGo(null); else alarmOpen();       // the nap (unwell by day) at once; at night the alarm clock (0.73.0)
@@ -9631,6 +9632,7 @@ function alarmEnergy(m) {                                // the energy you'd wak
 }
 function alarmLate(m) {                                  // your shift's start that morning if the alarm is at or after it, else 0
   const d = Math.floor(alarmAt(m) / 1440) + 1;
+  if (P5_NIGHT) { const n = p5nKnockAt(alarmAt(m)); if (n) return n.from % 1440; }   // 28a (S6-1): your night shift starts first
   return typeof DAY_SHIFT !== 'undefined' && typeof playerShiftOn === 'function' && playerOnDuty(d) && m >= DAY_SHIFT[0] ? DAY_SHIFT[0] : 0;
 }
 function alarmDraw() {
@@ -9657,11 +9659,14 @@ function sleepGo(wake) {                                 // wake: the alarm (min
   sleepEl.hidden = true; if (sleeping || ride) return;
   sleeping = true; fadeEl.style.transition = 'opacity .8s'; fadeEl.style.opacity = 1;
   const nap = !bedtime() && typeof sickNow === 'function' && sickNow();   // unwell by day: sleep it off for a few hours (0.61.5)
-  if (!nap) { if (!alarmOk(wake)) wake = WAKE_AT; SHIP.player.alarm = wake; toast(alarmText('alarm.title', 'Alarm'), alarmText('alarm.toast', 'Alarm set for {time}.', { time: hhmm(wake) })); }
+  const day = !nap && P5_NIGHT && p5nDayBed() === wake;   // 28a (S6-1): sleeping by day after a night (not kept as your alarm)
+  if (day) toast(alarmText('alarm.title', 'Alarm'), alarmText('alarm.toast', 'Alarm set for {time}.', { time: hhmm(wake) }));
+  if (!nap && !day) { if (!alarmOk(wake)) wake = WAKE_AT; SHIP.player.alarm = wake; toast(alarmText('alarm.title', 'Alarm'), alarmText('alarm.toast', 'Alarm set for {time}.', { time: hhmm(wake) })); }
   setTimeout(() => {
-    if (nap) { skipTo(shipNow() + SICK.nap); sickCure(3); } else sleepUntil(wake); nightT = nightAt();
+    const knock = !nap && P5_NIGHT ? p5nKnock(wake) : null;   // 28a (S6-1): your night shift wakes you (a knock), whatever the alarm
+    if (nap) { skipTo(shipNow() + SICK.nap); sickCure(3); } else if (knock) skipTo(knock.at); else sleepUntil(wake); nightT = nightAt();
     fadeEl.style.opacity = 0;
-    setTimeout(() => { fadeEl.style.transition = ''; sleeping = false; if (!nap) toast('Good morning', alarmText('alarm.ring', 'Morning. Your alarm\'s going.') + ' ' + clockText() + '.'); }, 850);
+    setTimeout(() => { fadeEl.style.transition = ''; sleeping = false; if (knock) knock.say(); else if (day) toast(alarmText('alarm.title', 'Alarm'), p5nText('night.wake', 'Your alarm. Night shift tonight from {time}.', { time: hhmm((p5nOf(SHIP.time.day) || { from: 1260 }).from % 1440) }) + ' ' + clockText() + '.'); else if (!nap) toast('Good morning', alarmText('alarm.ring', 'Morning. Your alarm\'s going.') + ' ' + clockText() + '.'); }, 850);
   }, 900);
 }
 addEventListener('keydown', e => { if (e.key === 'Escape' && !sleepEl.hidden) sleepEl.hidden = true; });
@@ -13707,7 +13712,7 @@ const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown wh
   ['t:trad', c => c.trad, 'There\'s a ship tradition today. Turn up and join in. It\'s how the crew makes a long voyage feel like home.'],
   ['t:hu', c => c.S.hu, 'Heads-ups tell you what\'s coming. Set how early, or turn them off, in your device\'s Settings.'],
   ['t:sleep', c => c.S.woke, 'Slept well? Your bunk takes you from 20:00 through to 06:00. By day, lie on it to rest.'],
-  ['t:late', c => c.min >= 1320, 'Getting late. Your bunk\'s in Bunk 1 on Deck 4. Stay up if you like. You\'ll feel it tomorrow.'],
+  ['t:late', c => c.min >= 1320 && !(P5_NIGHT && (p5nIn() || p5nSoon())), 'Getting late. Your bunk\'s in Bunk 1 on Deck 4. Stay up if you like. You\'ll feel it tomorrow.'],
   ['t:needs', c => NEED_KEYS.some(k => c.n[k] < 50), 'Your needs sit in the strip at the top. Keep them up and the day goes well. Let them drop and you slow down.'],
   ['t:loo', c => c.n.bathroom < 50, 'Public washrooms are in the junior wing on Deck 4, and on Deck 3. Cabin bathrooms are private.'],
   ['t:food', c => c.n.hunger < 50 && !teachMeal(c.min), 'Missed a meal? The grab shelf in the mess, Deck 3, is always open.'],
@@ -14089,7 +14094,7 @@ function bunkTap(it, at) {
 // and wake still lying in it. Before 0.28.29 a tap only slept you at night (standing) or said "Too early".
 const LIE_GAIN = .05;                                    // energy a ship minute lying down: 3 an hour
 function bunkLie(id) {
-  const sick = typeof sickNow === 'function' && sickNow(), night = typeof bedtime === 'function' && bedtime() || sick;   // unwell: you sleep it off, by day too (0.61.5)
+  const sick = typeof sickNow === 'function' && sickNow(), night = typeof bedtime === 'function' && bedtime() || sick || P5_NIGHT && !!p5nDayBed();   // unwell: you sleep it off, by day too (0.61.5); after a night shift too (28a, S6-1)
   actStart('lie', id, { title: 'Your bunk', sleep: night, after: sick ? 'You crawl into your bunk and close your eyes.' : night ? 'You climb into your bunk and pull the blanket up.' : 'Too early to sleep: you can turn in from 20:00. You lie down for a rest; tap anywhere to get up.' });   // the fresh-eyes playtest (lead 28): say why it's not sleep
 }
 // the Thursday inspection's berth (Pillar 5, m3): on an inspection morning (Thursday 05:30-08:00, not unwell) a tap on
@@ -14137,6 +14142,7 @@ function playerTap(it, at, point) {
     approach(at.clone(), it.front, it.depth, () => actStart('pay', null, { title: it.t, after: clerk ? clerk.p.name + ' rings it up.' : 'Nobody\'s on the till, so you scan your badge yourself.' }));
     return true;
   }
+  if (kind === 'tray' && P5_NIGHT && p5nPlate(it)) return true;   // 28a (S6-1): the plate kept for you after a night
   if (kind === 'tray' && !foodFrom('servery', true).ok) { toast(it.t, foodFrom('servery', true).why); return true; }   // a table with no tray just sits you (0.28.45)
   if (kind === 'tray' && typeof galleyJoin === 'function' && typeof galleyTurn === 'function') {   // join the galley's queue at its back
     const j = galleyJoin('player'), ln = j.line && typeof lineSpot === 'function' ? lineAt(lineSpot('player')) : null;   // the back of section 10's line for now (the galley joins you to it), else the galley's spot
@@ -15583,7 +15589,8 @@ const TRAY_SEAT_SAY = 'A seat for your tray';
 function needGoal(k) {
   if (k === 'hygiene' && typeof washCooling === 'function' && washCooling()) return false;   // a shower would give nothing yet (FX6)
   if (!NEED_FIX[k] || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || IX_GOAL && !(NEED_GOAL && IX_GOAL.label === NEED_GOAL.label)) return false;   // never over someone else's arrow
-  if (k === 'energy' && !(typeof bedtime === 'function' && bedtime()) && !(typeof sickNow === 'function' && sickNow())) return false;   // your bunk only when you can sleep there (FX3: a Day 8 "Your bunk" arrow stood all afternoon)
+  if (k === 'energy' && P5_NIGHT && (p5nIn() || p5nSoon())) return false;   // 28a (S6-1): not on (or just before) your night shift
+  if (k === 'energy' && !(typeof bedtime === 'function' && bedtime()) && !(typeof sickNow === 'function' && sickNow()) && !(P5_NIGHT && p5nDayBed())) return false;   // your bunk only when you can sleep there (FX3: a Day 8 "Your bunk" arrow stood all afternoon)
   const bed = typeof playerBed === 'function' ? playerBed() : null, here = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 4, pos = player.obj.position;
   if (k === 'hunger' && SHIP.player.tray && (here === 3 || TRAY_TRAVELS || SHIP.player.trayGo)) {   // a tray in hand: a seat to eat it at, not the servery again (LEAD31-14, FX6: "You already have your tray" till Food 0)
     const d2 = pl => { const c = cellPos(...pl.at); return Math.hypot(c.x - pos.x, c.z - pos.z); };
@@ -64584,6 +64591,48 @@ function p5nClockTick(now, skip) {
   }
 }
 if (P5_NIGHT) WORK_TICKS.push((now, skip) => p5nClockTick(now, skip));
+// ---- sleeping by day, the knock, the kept plate (S6-1, turn 2) ----
+// After a night (from 05:30) and on Day 22 once the day part is over (12:30), lying on your bunk sleeps you: the alarm
+// clock offers only "Sleep until 16:45" (Day 22) or "15:45" (Days 23-25; P5N_WAKE), and doesn't keep it as your alarm.
+// Clocked in for a night, the bunk won't have you. Asleep when a night is due, you're woken: a knock (Calder at 22:40
+// on night 1; at 20:30 on nights 2 and 3), whatever the alarm says. Daytime sleep counts as sleep (section 15's needs
+// drain asks `sleeping`). The morning after, 06:15-07:00, the servery has a plate kept for you (07:00 on: as usual)
+const P5N_KNOCK = { 22: 5, 23: 30, 24: 30 };              // minutes before the night's start
+function p5nDayBed(t = shipNow()) {                       // the day sleep's wake minute now, or 0
+  if (!p5nLive()) return 0;
+  const d = worksDay(t), m = t - (d - 1) * 1440, w = P5N_WAKE[d]; if (!w || m < 330 || m >= w - 30) return 0;
+  if (playerNightOn(d - 1)) return w;
+  const S = playerNightOn(d) && yourShift(d); return S && (!S.day || m >= S.day[1]) && m < S.night[0] - 120 ? w : 0;
+}
+const p5nSoon = (t = shipNow()) => { const n = p5nOf(worksDay(t)); return !!n && playerNightOn(n.day) && t >= n.from - 120 && t < n.from; };   // the two hours before a night
+function p5nKnockAt(abs, now = shipNow()) {               // the night you'd sleep into, waking at abs: { day, from, to, at } or null
+  if (!p5nLive()) return null;
+  for (const k of [worksDay(now), worksDay(now) + 1]) { const n = playerNightOn(k) && p5nOf(k), R = n && SHIP.works && SHIP.works.ns && SHIP.works.ns[k];
+    if (n && !(R && R.in) && n.from - (P5N_KNOCK[k] || 30) > now && n.from - (P5N_KNOCK[k] || 30) < abs) return { ...n, at: n.from - (P5N_KNOCK[k] || 30) }; }
+  return null;
+}
+function p5nKnock(wake) {                                 // section 13's sleepGo asks: { at, say } or null
+  const now = shipNow(), today = (SHIP.time.day - 1) * 1440 + wake, abs = today > now ? today : today + 1440, n = p5nKnockAt(abs, now); if (!n) return null;
+  return { at: n.at, say: () => { const who = n.day === 22 ? 'calder' : null, by = who && typeof worksName === 'function' ? worksName(who) : p5nText('night.knock.from', 'The night crew');
+    const t = n.day === 22 ? p5nText('night.knock.1', 'A knock at your bunk. Calder: "Up you get. Night shift. I\'ll see you down there."') : p5nText('night.knock', 'A knock at your bunk: your night shift starts at {time}.', { time: hhmm(n.from % 1440) });
+    if (typeof promoNotice === 'function') promoNotice(t, by); else toast('Your bunk', t); simNote('p5night', { step: 'knock', day: n.day }); } };
+}
+function p5nBed() {                                       // section 13's offerSleep asks: true if it's dealt with the tap
+  if (!p5nLive()) return false;
+  if (p5nIn()) { toast('Your bunk', p5nText('night.bed.on', 'You\'re on the night shift. Sleep after 06:00.')); return true; }
+  const w = p5nDayBed(); if (!w) return false;
+  toastEl.classList.remove('show'); ALARM_PICK = w; alarmDraw();
+  const $ = id => document.getElementById(id);
+  $('alarmT').textContent = p5nText('night.bed.until', 'Sleep until {time}', { time: hhmm(w) }); $('alarmW').hidden = true; $('alarmDn').disabled = true; $('alarmUp').disabled = true;
+  sleepEl.hidden = false; return true;
+}
+function p5nPlate(it) {                                   // 15's tray tap asks: Brennan's plate, the morning after a night, 06:15-07:00
+  if (!p5nLive() || SHIP.player.tray) return false;
+  const d = SHIP.time.day, m = SHIP.time.min; if (!playerNightOn(d - 1) || m < 375 || m >= MEALS.breakfast[0] || flag('p5n.plate') === d) return false;
+  flagSet('p5n.plate', d); SHIP.player.tray = p5nText('night.plate.dish', 'the plate kept for you'); SHIP.player.trayLeft = 0;
+  toast(it.t || 'Servery', p5nText('night.plate', 'Brennan\'s kept you a plate: "Night shift? Eat, then sleep." Find a seat and tap it to eat.'));
+  simNote('p5night', { step: 'plate', day: d - 1 }); return true;
+}
 // section 19's Schedule (devDay) asks: Day 22's day part to 12:30, the night shift that evening (to 06:00) and its last
 // hours the next morning, the daytime sleep after it ("Sleep until 15:45") in place of "Day off"
 const P5N_WAKE = { 22: 1005, 23: 945, 24: 945, 25: 945 };   // the bed's "Sleep until": 16:45 on Day 22, else 15:45
