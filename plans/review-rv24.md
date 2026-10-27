@@ -40,3 +40,19 @@ Code read (no runs yet):
 - promo_beats_check parts seated (actStart 'sit', real) and blocked (you on the seat's own tile; fails on 6f1915cb). PZ6-1: no known
   real-play path to the escort bug. Note: RV23's probes used placeSpot (the seat's own tile), so the original repro was the probe's
   placement; the fix stays (harmless, and a guard). Queued: seated blocked on 775c3ca and on 6f1915cb.
+
+## W8 runs (tips bd138090, eee654d4, d18aafc8; then 5d2c2361)
+- cadet ALL IDENTICAL: eee654d4 vs 62a8ac0b; d18aafc8 vs 8e0778ef. promo_beats (ON) cq cq2 mt mt3 mt4 t4test OK (eee654d4); t4carry
+  t4before t4test t4passed cq cq2 OK (d18aafc8). PZ6's seated + blocked on eee654d4 ON: OK (Calder walks to you sat at 3-lounge-24, 3-mess-9).
+- p4_play (Tier 4 offer, seated in the lounge) on d18aafc8: 22.2 m -> 2.6 m by 08:37, pu4.offer plays. n6_play: briefing skipped,
+  Calder 09:31 -> 5.3 m 09:43, night.on plays (after the 09:30 test was due: Day 22 coherence is item 3); clock-in/engine room/clock-out arrows.
+- cq_play.py (ON eee654d4, Dev 'cq' preset via devmodeSetCareerTo): stand: Calder at 5-tea-3 from 18:35, story 18:40, 19:05 "Budge
+  up", she sits 5-tea-1, arrow 'Sit with Calder' 5-tea-2, ask 19:08 (3-min fallback), Record, Mail, "Your career" toast. sit: actStart
+  at the arrow's seat at 19:05 left me on 5-tea-3 (Torres still getting up); ask 19:08 by the fallback. miss (Deck 3): notice 19:30,
+  Calder 23.9 m -> 3.7 m, ask 19:45 standing. No page errors.
+- MUST (sent 15:5x): end:find arrow has no deck, guideGoal needs g.deck: never shown (goalNow stayed the mysteries board).
+- shoulds: story with Calder alone at 18:40; seat guests leave the corner at 19:05; the arrow's seat taken as it appears; Dev 'cq'
+  preset starts the nights on Day 26 (toast + Mail "Your nights"); worksEscort `mine` without the day check.
+
+## DA6 runs (tip 0f859eca, base 40f3bdac)
+- cadet ALL IDENTICAL apart from renderer noise (beside another browser: re-run alone); mech m23 (ON) OK.
