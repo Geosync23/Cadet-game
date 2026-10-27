@@ -66556,7 +66556,8 @@ function m24Beats(now) {
     const lab = m24Ring(step), on = () => typeof DEV !== 'undefined' && DEV.open && DEV.app === 'works' && typeof buttonFor === 'function';
     const last = step === 'pick' ? { el: () => { const id = on() && m24Crew().find(x => !m24State().pick.includes(x)); return id ? buttonFor({ app: 'works', do: 'm24:pick', arg: id }) : null; }, label: lab }
       : { el: () => on() ? buttonFor({ app: 'works', do: 'm24:book', arg: 0 }) : null, label: lab };
-    pointAsk({ id: 'p:m24:' + step, force: true, path: [...guideWorksTab('team', lab), last], until: n.to,
+    const tab = guideWorksTab('team', lab); tab[tab.length - 1].open = () => on() && WORKS_TAB === 'team';   // the tab step is open once on Team (else the ring stays on it)
+    pointAsk({ id: 'p:m24:' + step, force: true, path: [...tab, last], until: n.to,
       done: () => { const s = m24State(); return !m24Live() || (step === 'pick' ? s.pick.length >= Math.min(2, m24Crew().length) : !!s.job); } });
   }
   if (typeof guideAsk !== 'function') return;
