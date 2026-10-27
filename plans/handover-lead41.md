@@ -12,6 +12,8 @@ Lead 41 = session_01GKuymjWR1dqfbCw1MyEP9j, branch claude/lead-41-e86n0x, hourly
 5. Optimization. 6. Playtest patches.
 
 ## User rules (all still hold)
+- **Questions for the user: always send a push notification** (PushNotification tool) or they won't see it (the user, Oct 27 ~9:40 AM Eastern).
+- Live fixes escort-follow-fix (W7) + team-turn-fix (PZ6) ship WITH Step 6, no 0.94.1 (the user).
 - CAP: at most **5 seats actively working at once** (idle seats don't count). Count before giving work or hiring.
 - Full round of checks before any game change is published (spread over the runners the cap allows; test-only fixes need no game re-run; a words-only fix re-runs the word-related checks: decision 5).
 - Tons of arrows, in person first, staged scenes with dialogue, controller, phones first. Times for the user in US Eastern, plain words, no emojis.
