@@ -1672,3 +1672,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~08:00 UTC: **R1 controller walk alone on 04cc0cb6: CONTROLLER CHECK OK** (BM19's #rot timeout = load). R1 queue: cadet OLD BUILD, saves + ending (f4914555), arrows endgo 4 ways (from BM19).
 - ~08:04 UTC: R1: cadet OLD vs BUILD ALL IDENTICAL (j_steer1 6 px 1 level = known noise); saves (f4914555) OK with shut + promo3 really run; ending_check OK. arrows endgo 4 ways running (~50 min).
 - ~08:05 UTC: R3: interactions OK (3495 s); mech rerun (old check) same t3 x4 (fixed in 4cb6d37b) + ps whole-run FAIL (W6 checking d69473b7; R3 told not to duplicate). R3 check_fast last.
+- ~08:10 UTC: **R3 share done** (checks-R3.md claude/checks-r3 2474fe8): all OK; career known-old only (with fix); mech t3 fixed in the check; mech ps whole-run FAIL open (W6). R3 idle until GO.
