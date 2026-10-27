@@ -3527,10 +3527,15 @@ def part_mentor(pw, src, tag):
     for scene, at, pick, setup in (('hello', 541, 1, ''), ('clue', 650, 2, "Object.assign(SHIP.works.mt.steps, { met: 1, watch: 2, dw: 10, do: 3 });"),
                                   ('late', 816, 2, ""), ('first', 901, 0, "")):
         r.ev(f"(() => {{ {setup} setShipNow(25 * 1440 + {at}); goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); {near} }})()"); r.step(6)
+        if scene == 'clue' and r.ev("typeof CASE_UI !== 'undefined' && !!CASE_UI.point"):   # (W8) PZ6's casePoint: Fault notes in point mode, a choice by the D-pad and A
+            b = s5_pad_to(r, r'^Point to')
+            if not b: fails.append(f'clue: the D-pad never reached a Point to (focus {r.ev(S5_FOCUS)!r})')
+            else: r.press('A'); r.step(4); print(f'  clue by pad (casePoint): {b!r} -> {r.ev("SHIP.works.mt.clue")!r}')
+            continue
         if not r.ev("!!DIALOGUE"): fails.append(f'{scene}: the scene did not open'); continue
         pu3_read(r, fails, scene, pick)
     got = r.ev("(() => { const M = SHIP.works.mt; return [M.steps.met !== undefined, M.clue, M.late, M.steps.done !== undefined]; })()"); print(f'  mentoring by pad: {got}')
-    if got != [True, 'log', 2, True]: fails.append(f'the replies by pad not kept ({got})')
+    if not (got[0] and got[1] not in (None, 'self') and (got[1] == 'log' or r.ev("typeof casePoint === 'function'")) and got[2] == 2 and got[3]): fails.append(f'the replies by pad not kept ({got})')
     if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
     r.close()
     return fails

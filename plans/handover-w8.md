@@ -14,6 +14,9 @@
 
 - **s6.17:** refit + DA6's 2-B asks. **s6.18:** Step 6 DM_CAREER rows, nights excused in Dev skips.
 
+- **s6.19:** RV24's MUST + 5 shoulds, Day 22 evening arrows, t3 check (backlog W8-3; covered with Step 6).
+- Lead is 42 (session_01GKuymjnCHnpwDqB94PVwmV), reviewer RV24 (session_01GKuymnJuoJTWnmYunbN7EP). Lead 42's messages reach me late sometimes; lead 41 relays.
+
 ## Still to do
 1. stories_check / fridays_check / events_check / bigevents_check on Day 26 with Step 6 on (the full round's; career_check --s6 is done, s6.15).
 2. (done s6.17: the refit and DA6's 2-B asks; the framed traces on the shelf are DA6's, told them. Nothing draws homeKeepsakes for 4-23 either: 8b has no keepsake-shelf drawing to point at room B.)

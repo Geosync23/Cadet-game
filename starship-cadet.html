@@ -57923,7 +57923,7 @@ onSim('caseCalled', n => { const c = SHIP.works && SHIP.works.cur; if (n && n.tr
 function worksEscort(p, t) {
   { const pe = p && typeof promoEscort === 'function' ? promoEscort(p, t) || promoMoveEscort(p, t) || promoCerEscort(p, t) : null; if (pe) return pe; }
   { const pe = p && P5_STEP5 && typeof p5Escort === 'function' ? p5Escort(p, t) : null; if (pe) return pe; }
-  { const c0 = SHIP.works && SHIP.works.cur, mine = !!(p && c0 && c0.by === p.id && /^(watch|do|held)$/.test(c0.st)), pe = p && P5_NIGHT && !mine && typeof p5nEscort === 'function' ? p5nEscort(p, t) : null; if (pe) return pe; }   // (W8) not while they're with you on a training or test job (Day 22's Tier 4 test at 09:30 and 28a's word from 09:15: she says it beside you)   // Step 6 (28a, S6-1): Calder comes to find you for your nights   // Pillar 5 Step 5 (24u): Calder comes to find you (Power safety's ask; S5-2's promotion beats)   // 24p: Calder comes to find you for the summons; the walk to your cabin; up to the ceremony
+  { const c0 = SHIP.works && SHIP.works.cur, mine = !!(p && c0 && c0.by === p.id && /^(watch|do|held)$/.test(c0.st) && worksDay(t) === c0.d), pe = p && P5_NIGHT && !mine && typeof p5nEscort === 'function' ? p5nEscort(p, t) : null; if (pe) return pe; }   // (W8) not while they're with you on a training or test job (Day 22's Tier 4 test at 09:30 and 28a's word from 09:15: she says it beside you)   // Step 6 (28a, S6-1): Calder comes to find you for your nights   // Pillar 5 Step 5 (24u): Calder comes to find you (Power safety's ask; S5-2's promotion beats)   // 24p: Calder comes to find you for the summons; the walk to your cabin; up to the ceremony
   const W = SHIP.works, c = W && W.cur; if (!c || !p || p.id !== c.by || (c.st !== 'watch' && c.st !== 'do' && c.st !== 'held') || worksDay(t) !== c.d) return null;
   const j = SHIP.jobs.find(x => x.id === c.j), spot = trainSpot(j);
   if (c.st === 'held') return spot ? { mode: 'follow', to: { deck: spot.deck, tile: spot.tile } } : null;   // they stay with you
@@ -64869,6 +64869,19 @@ function pu4BeatsGuide(now) {                            // the level 1 arrows: 
   const br = SHIP.occasions.find(x => x.id === 'pu4Badge' && x.status === 'asked' && !x.met);
   if (br && now >= br.at - 15) guideAsk({ id: 'pu4:badge', level: 1, owner, from: br.at - 15, until: br.at + br.len,
     goal: () => ({ deck: 1, room: 'O', place: '1-ceremony-you', label: worksText('pu4.ptr.badge', 'Your engine badge: the observation room') + ', ' + hhmm(br.at % 1440) }), done: () => !!br.met || br.status !== 'asked' || !!(puT4() || {}).badge });
+  pu4EveGuide(now, owner);
+}
+// (W8, PZ6's arrows find) the test day's evening led somewhere: from the 16:45 wake to Calder's 22:40, level 1 arrows to
+// dinner (till 19:00), then the comet with the Captain in the observation room (Deck 1; its tea from 21:30), so an arrow-only
+// player is where Calder finds you for the result (or ready for night 1 at 22:45). PU4_EVE: the phases' minutes
+const PU4_EVE = { from: 1005, dinner: 1140, comet: 1290, to: 1360 };
+function pu4EveGuide(now, owner) {
+  const T = puT4(), d = worksDay(now), m = now - (d - 1) * 1440, B = (d - 1) * 1440; if (!T || d !== T.day || m < PU4_EVE.from || m >= PU4_EVE.to) return;
+  const res = T.passed && !T.res, night = P5_NIGHT && typeof playerNightOn === 'function' && playerNightOn(d); if (!res && !night) return;
+  if (typeof sleeping !== 'undefined' && sleeping) return;
+  const then = res ? worksText('pu4.ptr.eve.res', 'Calder finds you at 22:40') : worksText('pu4.ptr.eve.night', 'your night shift from 22:45');
+  if (m < PU4_EVE.dinner) guideAsk({ id: 'pu4:eve:dinner:' + d, level: 1, owner, until: B + PU4_EVE.dinner, goal: () => ({ deck: 3, room: 'M', label: worksText('pu4.ptr.eve.dinner', 'Dinner first: the comet is at 21:30') }), done: () => { try { return deckDef.num === 3 && roomAt(...player.here()) === 'M'; } catch (e) { return false; } } });   // there: eat
+  else guideAsk({ id: 'pu4:eve:comet:' + d, level: 1, owner, from: B + PU4_EVE.dinner, until: B + PU4_EVE.to, goal: () => ({ deck: 1, room: 'O', label: (shipNow() - B < PU4_EVE.comet ? worksText('pu4.ptr.eve.soon', 'The comet, 21:30: the observation room') : worksText('pu4.ptr.eve.comet', 'The comet: the observation room')) + '. ' + then }), done: () => !!(puT4() || {}).res || !!PU4_LIVE.rseek });
 }
 function pu4Escort2(p, t) {                              // pu4Escort's later beats: she comes to find you for your result, walks you down, walks you up to the badge
   const S = PU4_LIVE.rseek; if (S && !S.met && p.id === S.by) return { mode: 'follow', to: null };
@@ -66900,7 +66913,7 @@ if (P5_M25) WORK_TICKS.push((now, skip) => mtTick4(now, skip));
 // asks). Missed at the tea: she comes to find you (cqEscort, through p5Escort) till 22:00, and each later day 10:00-21:00
 // until she's asked; her Mail is only the record. Saved in end.steps (ship minutes). Nothing calls R(). Words: end.*
 // (stand-ins until the head writer's end.lines)
-const CQ = { from: 26, notice: 1100, arrow: 1115, at: 1120, sit: 1145, wait: 3, by: 1170, late: 1320, seats: ['5-tea-1', '5-tea-2'], stand: '5-tea-3', near: 3.5 };
+const CQ = { from: 26, notice: 1100, arrow: 1115, at: 1120, sit: 1145, wait: 3, by: 1170, late: 1320, seats: ['5-tea-1', '5-tea-2'], stand: '5-tea-3', near: 3.5, focus: [22, 1], story: 5 };
 const CQ_ANSWERS = ['engines', 'bridge', 'teach', 'unsure'];
 const CQ_LIVE = { seat: null, sitAt: 0, said: {} };
 function cqClean(e) {                                    // a save's end, junk dropped
@@ -66961,9 +66974,19 @@ function cqSeats() {                                     // the tea corner's two
   const mine = CQ.seats.includes(PLAYER_PLACE) ? PLAYER_PLACE : null, her = CQ.seats.find(s => s !== mine) || null;
   return { her, you: mine || CQ.seats.find(s => s !== her) || null };
 }
+function cqCalderDeck() {                                 // the deck Calder's on now (the arrow needs one: guideGoal skips a goal without a deck)
+  try { const p = schedPeople().find(q => q.id === 'calder'), w = p && whereIs(p, shipNow()); if (w && w.deck) return w.deck; } catch (e) { /* not yet */ }
+  try { return deckDef.num; } catch (e) { return 5; }
+}
 function cqSeatsClear(st, B) {                           // live: the tea's guests on (or heading for) her seat and yours stand in the corner instead, till 19:30
   let up = []; try { const on = id => id ? DECK_CREW.filter(c => c.p && c.p.id !== 'calder' && (c.spot && c.spot.id === id || c.goalId === id)).map(c => c.p.id) : [];
-    up = on(st.her).concat(st.you !== PLAYER_PLACE ? on(st.you) : []); for (const id of up) crewScene(id, { mode: 'wait', to: { deck: 5, room: 't' }, until: B + CQ.by }); } catch (e) { up = []; }
+    up = on(st.her).concat(st.you !== PLAYER_PLACE ? on(st.you) : []); if (!up.length || deckDef.num !== 5) return up;
+    const seat = new Set(CQ.seats.map(id => (placeSpot(id) || { walk: [-1, -1] }).walk.join())), me = player.here().join(), T = [];
+    for (const v of CREW_SCENE.values()) if (v.to && Array.isArray(v.to.tile)) seat.add(v.to.tile.join());   // a tile already given to someone
+    for (const a of DECK_CREW) if (a.p && !up.includes(a.p.id)) seat.add(a.here().join());   // or where someone stands   // the corner has five tiles: stand just outside it by the opening, nearest first (then inside)
+    for (let k = 1; k <= 3; k++) for (let dj = -k; dj <= k; dj++) for (let di = -k; di <= k; di++) { if (Math.max(Math.abs(di), Math.abs(dj)) !== k) continue; const c = CQ.focus[0] + di, r = CQ.focus[1] + dj; if (free(c, r) && !seat.has(c + ',' + r) && c + ',' + r !== me) T.push([c, r]); }
+    T.sort((a, b) => (roomAt(...a) === 't') - (roomAt(...b) === 't') || Math.hypot(a[0] - CQ.focus[0], a[1] - CQ.focus[1]) - Math.hypot(b[0] - CQ.focus[0], b[1] - CQ.focus[1]) || a[1] - b[1] || a[0] - b[0]);
+    up.forEach((id, k) => { const tile = T[k]; if (tile) crewScene(id, { mode: 'wait', to: { deck: 5, tile }, until: B + CQ.by }); }); } catch (e) { up = []; }
   return up;
 }
 function cqEscort(p, t) {                               // p5Escort's 28f part: Calder at her tea from 18:30; missed there, she comes to find you
@@ -66981,7 +67004,7 @@ function cqTick(now, skip) {
     if (m >= CQ.notice && m < CQ.at && flag('end.notice') !== d && !promoBusy()) { flagSet('end.notice', d); promoNotice(worksText('end.notice', d === 26 ? 'Four weeks aboard: 18:40, the Works tea corner. There\'s cake.' : 'Friday tea: 18:40, the Works tea corner. Calder wants a word.'), worksName('calder')); }
     if (m < CQ.arrow - 1) return;
     if (typeof guideAsk === 'function' && S.story === undefined) guideAsk({ id: 'end:tea:' + d, level: 1, owner, from: B + CQ.arrow, until: B + CQ.by, goal: () => ({ deck: 5, room: 't', item: /^tea table$/i, label: worksText('end.ptr.tea', d === 26 ? 'Four weeks aboard: the Works tea corner' : 'Friday tea: the Works tea corner') }), done: () => (cqOf() || { steps: {} }).steps.story !== undefined || cqInTea() });
-    if (m < CQ.at || talk || promoBusy() || !cqInTea()) return;
+    if (m < CQ.at + CQ.story || talk || promoBusy() || !cqInTea()) return;   // from 18:45: the guests have come
     if (S.story === undefined) { if (puNearMe('calder', CHATTER_NEAR + 2)) dialogueShow(cqStoryScene(), { id: 'end.story', who: ['calder'], at: now, where: { any: true } }); return; }
     if (m < CQ.sit) return;
     const st = cqSeats();                                // when it thins out: she sits, the arrow shows you the seat beside her
@@ -66991,13 +67014,13 @@ function cqTick(now, skip) {
       cqSayOnce('calder', 'end.sit', [up.length ? 'Budge up, you lot. Come and sit down a minute.' : 'Come and sit down a minute.']); }
     else cqSeatsClear(st, B);                              // and anyone who comes for the seats later stands too
     if (!CQ_LIVE.sitAt) CQ_LIVE.sitAt = now;
-    if (typeof guideAsk === 'function' && st.you && PLAYER_PLACE !== st.you) guideAsk({ id: 'end:sit:' + d, level: 1, owner, until: B + CQ.by, goal: () => ({ deck: 5, room: 't', place: cqSeats().you || CQ.seats[1], label: worksText('end.ptr.sit', 'Sit with Calder') }), done: () => CQ.seats.includes(PLAYER_PLACE) || (cqOf() || { steps: {} }).steps.asked !== undefined });
-    if ((CQ.seats.includes(PLAYER_PLACE) || now - CQ_LIVE.sitAt >= CQ.wait) && puNearMe('calder', CHATTER_NEAR + 2)) dialogueShow(cqAskScene(), { id: 'end.ask', who: ['calder'], at: now, where: { any: true } });
+    if (typeof guideAsk === 'function' && st.you && PLAYER_PLACE !== st.you) guideAsk({ id: 'end:sit:' + d, level: 1, owner, until: B + CQ.by, goal: () => ({ deck: 5, room: 't', place: cqSeats().you || CQ.seats[1], label: worksText('end.ptr.sit', 'Sit with Calder') }), done: () => CQ.seats.includes(PLAYER_PLACE) || PLAYER_PLACE === CQ.stand || (cqOf() || { steps: {} }).steps.asked !== undefined });
+    if ((CQ.seats.includes(PLAYER_PLACE) || PLAYER_PLACE === CQ.stand || now - CQ_LIVE.sitAt >= CQ.wait) && puNearMe('calder', CHATTER_NEAR + 2)) dialogueShow(cqAskScene(), { id: 'end.ask', who: ['calder'], at: now, where: { any: true } });
     return; }
   // missed at the tea: she comes to find you (cqEscort); near you, the question standing up
   const on = d === E.day ? m < CQ.late : m >= 600 && m < 1260; if (!on) return;
   if (flag('end.find') !== d && !promoBusy()) { flagSet('end.find', d); promoNotice(worksText('end.find', 'Calder\'s looking for you: she wants to ask you something.'), worksName('calder')); }
-  if (typeof guideAsk === 'function') guideAsk({ id: 'end:find:' + d, level: 1, owner, until: B + (d === E.day ? CQ.late : 1260), goal: () => ({ crew: 'calder', label: worksText('end.ptr.find', 'Calder wants a word') }), done: () => !!(cqOf() || {}).answer });
+  if (typeof guideAsk === 'function') guideAsk({ id: 'end:find:' + d, level: 1, owner, until: B + (d === E.day ? CQ.late : 1260), goal: () => ({ deck: cqCalderDeck(), crew: 'calder', label: worksText('end.ptr.find', 'Calder wants a word') }), done: () => !!(cqOf() || {}).answer });
   if (!talk && !promoBusy() && puNearMe('calder', CQ.near)) dialogueShow(cqAskScene(), { id: 'end.ask', who: ['calder'], at: now, where: { any: true } });
 }
 function cqItems(d) {                                   // the Schedule's and Tracked's row (puItems asks)
@@ -71420,6 +71443,7 @@ function devmodeCareerSet(n, now) {                      // SHIP.works set to da
   if (n >= 8 && typeof flagSet === 'function') flagSet('works.oily', true);   // your work uniform's row needs it
   if (c.done.includes('ceremony2') && typeof giftKeepsake === 'function') try { giftKeepsake({ id: 'marrow' }, worksText('works.keepsake.commission', worksText('promo.keepsake', 'your framed commission'))); } catch (e) { /* no social */ }
   for (const r of SHIP.occasions || []) if (/^(works\.|promo)/.test(r.id) && r.status === 'asked') r.status = 'done';   // nothing left asking for what's now set
+  if (P5_NIGHT && typeof P5N_WORD !== 'undefined' && c.tr.m22 !== undefined) for (const k of ['on', 'off']) if (n > P5N_WORD[k].day && flag('p5n.' + k) === undefined) flagSet('p5n.' + k, 'dev');   // (W8) 28a's words (night.on, night.off) already said for days passed: no 'Your nights' on a later day
   if (P5_CASES6 && typeof flagSet === 'function') for (const id of ['p6', 'p7', 'p8']) if (c.tr[id] !== undefined && flag('case.' + id + '.first') === undefined) flagSet('case.' + id + '.first', c.tr[id]);   // (S6-8) the first head-scratcher of each: had
   if (typeof MACH_REV !== 'undefined') MACH_REV++;       // the board: the tier's jobs
 }
