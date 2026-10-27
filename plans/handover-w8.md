@@ -19,6 +19,8 @@
 
 - **s6.20:** Calder's seat 5-tea-2 (no stand-up through the wall); the parked M20 returns on a clear day (Day 29+), intended.
 
+- **RV24 PASS** on 6f13b61a (the whole W8 item). **s6.21:** staging d0d381e0 merged; her question waits until you've sat (cqSat).
+
 ## Still to do
 1. stories_check / fridays_check / events_check / bigevents_check on Day 26 with Step 6 on (the full round's; career_check --s6 is done, s6.15).
 2. (done s6.17: the refit and DA6's 2-B asks; the framed traces on the shelf are DA6's, told them. Nothing draws homeKeepsakes for 4-23 either: 8b has no keepsake-shelf drawing to point at room B.)
