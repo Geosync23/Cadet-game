@@ -89,7 +89,11 @@ None yet.
   coil swap. Mentoring and Calder's question: "not yet" (W8's pieces).
 - **Night 3, a real game gap, fixed separately:** `claude/m24-pick-pointer` (28d's m24Beats: a forced pointAsk through
   Works > Team to the next crew member to pick, and at the bridge to Book the slot; the world arrow stays). With it, the
-  follower should pick, book and run the swap; re-run all three ways on staging once it's merged.
+  follower should pick, book and run the swap. NOT YET: on m24-pick-pointer (WIP 1 commit, not for merge) controller_check m24
+  is OK but arrows step6 asis still fails night 3 (m24:pick led, no pick made). Next: S6_WATCH='Day 24.*2[1-2]:' and
+  S6_DEBUG to see whether the ring (POINT_Q 'p:m24:pick') shows and whether FOLLOW's pointer handling presses through
+  Device > Works > Team > the crew button; fix the ring or the follower, then mech m24, cadet vs 40f3bdac, check_fast,
+  and send to RV24 + BM19 + lead 42.
 - **Left:** (a) re-run asis/teachoff/track on staging with m24-pick-pointer; (b) drop the M20 setup line in part_step6
   ("the setup counts Step 5's sensor array lesson as done") once W8's d18aafc8 (MA6-2's fix) is in staging, and add a
   line that checks MA6-2 directly (a Tier 3 lesson missed on Day 19 must not block the Tier 4 test on Day 22);
