@@ -13,7 +13,7 @@ Keep reducing the workforce (archive as soon as a piece passes + handover pushed
 ## Releases
 - LIVE before this stop: 0.93.2 (Playtest 3HqM v6, Dev 9ZWA v6).
 - **0.93.3** (staging-0.93.3 19400976, game ec93b94d...d085: doors 3 ways + visit on + SW2 words + check fixes): full round all 6 shares OK, no new FAIL. perf_check flagged 3 single-scene js-time blips (backlog 32 pattern); CR4 re-measuring. On GO, PUB1 publishes both links as v7 (keep {downloads}). Check TEAM.md for whether this happened before the stop.
-- **0.93.4 (NOT started)**: published 0.93.3 + B2 claude/workstep-tap-fix c79a66dc (LIVE M15 Rewiring tap bug; RV20 PASS) + b7e84f81 on top (stale team-job arrow, live; RV20 pending) + FX30 test-only fa6b7de0 (week guide; CR1 OK on 0.93.3). Full round, then publish.
+- **0.93.4 (NOT started)**: published 0.93.3 + B2 claude/workstep-tap-fix c79a66dc (LIVE M15 Rewiring tap bug; RV20 PASS) + b7e84f81 on top (stale team-job arrow, live; RV20 PASS) + FX30 test-only fa6b7de0 (week guide; CR1 OK on 0.93.3). Full round, then publish.
 - ff integration only with the user's OK.
 
 ## Work in progress (all switched off in the game)
