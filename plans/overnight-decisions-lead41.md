@@ -6,8 +6,8 @@ Overnight mode (as before, roadmap-after-recdeck.md): no messages to the user; t
 
 ## The order
 1. Finish 0.94.0: reviews (RV23), merges + switch-on (BM19: P5_STEP5, EV_VESSEL_ON, EV_ENDING_ON on; older switches stay off), gate, full round, publish.
-2. Step 6 (plans/p5-step6-spec.html on claude/p5-specs; the user's answers: all recommended, see handover-lead39.md).
-3. **Dev mode update** (after Step 6; moved before the controller update by the user ~03:55 UTC): make Dev mode work with everything added since it was made, above all the new traditions / ship-wide events and the career progression (Step 5, Step 6, the vessel, the ending): presets, Set career, jumps to each beat and day, devmode_check / dev_arrow_check covering them.
+2. Step 6, **finished with its own full round and published** before anything after it starts (plans/p5-step6-spec.html on claude/p5-specs; the user's answers: all recommended, see handover-lead39.md).
+3. **Dev mode update** (after Step 6 is published; moved before the controller update by the user ~03:55 UTC): make Dev mode work with everything added since it was made, above all the new traditions / ship-wide events and the career progression (Step 5, Step 6, the vessel, the ending): presets, Set career, jumps to each beat and day, devmode_check / dev_arrow_check covering them.
 4. The controller update, after the Dev mode update: bring controller support up to date with EVERY feature added since it was made (audit each panel, button, scene, job, card and setting added since: the pad must reach and use all of them; controller_check covers each), then PAD_ON on. The user, ~03:45 UTC: "Its also to make sure the controller support is current with all added features since it was made."
 5. **Optimization** (after the controller update).
 6. **Playtest patches** (after optimization; from the user's playtest notes).
@@ -25,3 +25,4 @@ The user, ~03:50 UTC: "Let's also do a dev mode update once content complete. Ma
 "When I say 5 workers I mean 5 active ones": the cap counts seats **working at the same time**. A seat that is idle (waiting for a verdict or its next wave) doesn't count, so idle seats can stay rather than being archived and re-hired. Decision 2 follows: the round can use up to 5 runners at once while the others wait.
 
 The user, ~03:55 UTC: "Actually dev mode update before controller update." Order now: 0.94.0 -> Step 6 -> Dev mode update -> controller update -> optimization -> playtest patches.
+The user, ~03:58 UTC: "After step 6 publish though": Step 6 ships (full round + publish) before the Dev mode update starts.
