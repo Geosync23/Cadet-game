@@ -731,9 +731,10 @@ def part_step6(ctx, path, way):
     for t in miss[:6]: fail(f"{tag}: Day {t[0] // 1440 + 1} {hhmm(t[0])}: {t[4]} due, but the arrow leads with {t[1]} ('{t[2]}')")
     if len(miss) > 6: fail(f"{tag}: ... {len(miss) - 6} more minutes like that")
     log = pg.ev("window.__s6log || []")
-    BEAT_MAIL = re.compile(r'briefing|Tier 4|night|coil|badge|quarters|Deck 2|Basil|result|question|Engine Specialist', re.I)
+    BEAT_MAIL = re.compile(r'briefing|Tier 4|coil swap|night shift|your nights|badge|new quarters|your quarters|your result|Engine Specialist|mentor|Basil|Calder.s question', re.I)   # Step 6's beats, by the Mail's subject
     for t, kind, txt in log:
-        if kind != 'mail' or not BEAT_MAIL.search(txt) or txt.startswith('Stores'): continue
+        parts = txt.split(' | ')
+        if kind != 'mail' or len(parts) < 2 or not BEAT_MAIL.search(parts[1]) or parts[0] in ('Stores', 'The Wren'): continue
         said = [x for x in log if x[1] != 'mail' and t - 180 <= x[0] <= t]
         check(said, f"{tag}: Day {t // 1440 + 1} {hhmm(t)}: Mail '{txt[:80]}' with nothing said in person or by notice before it")
     mine = {t[2] for t in f.trace if t[1] and re.match(S6_RX, t[1])}
@@ -742,6 +743,9 @@ def part_step6(ctx, path, way):
         else: print(f'  {tag}: (not Step 6) stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk})')
     led = sorted(set(t[1].split(':')[0] + ':' + t[1].split(':')[1] for t in f.trace if t[1] and re.match(S6_RX, t[1])))
     print(f"  {tag}: arrows that led {led}; minutes due {sum(1 for t in f.trace if t[4] and not t[3])}, missed {len(miss)}, stuck {len(f.stuck)}; order {[(n, 'Day ' + str(t // 1440 + 1) + ' ' + hhmm(t)) for t, n in srt]}")
+    if os.environ.get('S6_DEBUG'):                     # what the follower did around each beat that wasn't reached
+        for t, a in f.acts:
+            if re.search(os.environ['S6_DEBUG'], t): print('   ', t, a)
     check(not pg.errors, f'{tag}: page errors {pg.errors[:3]}')
     pg.page.close()
 S6_STATE = r"""(() => { const W = SHIP.works, s = W.side || {}; return { tier: W.tier, rank: W.rank, home: W.home || null, m21: W.tr.m21, m24: W.tr.m24, swap: s.m24 ? s.m24.done : null,
