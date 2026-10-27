@@ -2,7 +2,7 @@
 
 **Role:** reviewer, from RV22. Lead: lead 42 (session_01GKuymjnCHnpwDqB94PVwmV; send_message, priority "next"; took over from lead 41 at 13:58, confirmed by lead 41). My session:
 session_01GKuymoDm1XbC5G8TvaCNLr. Notes-only branch `claude/review-rv23`; full log and verdict table: `plans/review-rv23.md`.
-Never change the game or push to builders' branches. Verdicts go to lead 41 and the builder (PASS / FIXES NEEDED, MUST vs should, sha).
+Never change the game or push to builders' branches. Verdicts go to lead 42 and the builder (PASS / FIXES NEEDED, MUST vs should, sha).
 
 Read first: CLAUDE.md, plans/handover-rv22.md (how RV22 tested), then the verdict table in plans/review-rv23.md. User rules for every
 verdict: works with a game controller; tons of arrows, obvious progression; key moments are staged scenes, in person first (Mail only
