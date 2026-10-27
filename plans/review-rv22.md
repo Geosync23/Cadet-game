@@ -43,3 +43,4 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
   or fabricator (shopMachineOf), after Calder's job and the helpers (step 1-5) and before the part (made by you, or by the
   helpers at 13:25: bounded). Every other shop tap falls through unchanged. Should (words): the wrong-machine toast says
   "at the bench" for the fabricator.
+- bigevents on the ON copy of 5578c78d: **FAILED** (vesselArrival 0 places for 20-31 people; vesselRamp cast calder/zeke/isak not planned at 09:30). Sent to VB1 + lead 40 as a MUST at once.
