@@ -1675,3 +1675,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~08:10 UTC: **R3 share done** (checks-R3.md claude/checks-r3 2474fe8): all OK; career known-old only (with fix); mech t3 fixed in the check; mech ps whole-run FAIL open (W6). R3 idle until GO.
 - ~08:10 UTC: **arrows week stall REAL**: 0.94.0 stuck Day 4 13:21 'Fix a wobbly stool' (twice); 0.93.3 stuck 0 through Day 8. BM19 splitting on d69473b7 (switches on, pre talk-close). BM19's own arrows: step5, endstay, queue/clockin/shift/promo/vessel OK.
 - ~08:36 UTC: **arrows week stall bisected (R1): starts with P5_STEP5 = true (bf228260)**; merges before clean; not talk-close. R1 diagnosing (game or check gap) -> W6 fixes.
+- ~08:37 UTC: week stall = MUST (wb-stool, 5-stool-1, hex key; Step 5 load-time registration changes Day 4). W6 owns the fix (priority 1; then vessel-words, then mech ps); R1 diagnoses for W6.
