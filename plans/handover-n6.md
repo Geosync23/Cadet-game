@@ -24,7 +24,7 @@
 3. **Calder's word, notices, arrows, rings (done).** 28a: `P5N_WORD`, `P5N_SEEK`, `p5nScript`, `p5nTold`,
    `p5nWordTick`, `p5nEscort` (hooked into 24 core's worksEscort, after p5Escort), `p5nGuide`. Meetings
    content/meetings/night.on.meet, night.off.meet; words content/works/night.lines (stand-ins, baked). Each night: the
-   notice (20:30; night 1 22:40 unless 24u defines `pu4Fetches(now)` true: S6-3's walk down), a level 1 arrow and
+   notice (20:30; night 1 22:40; with P5_PROMO4, W7's 24u fetch from the comet instead: its simNote('promoted', { tier: 4 }) clocks you in for night 1, and 24u may define `pu4Fetching(now)` to say whether it fetches tonight; else ours from 23:30), a level 1 arrow and
    forced ring to the clock, then the engine room, the clock at 06:00, the plate, your bunk (ring on "Set alarm").
    Day 22 12:30: clock out, then sleep. Holding a job while the clock waits: an hourly notice. With P5_M21, 28b may
    define `m21Door(t)` -> { deck, tile } for Calder to wait at. Flags p5n.* (saved).
@@ -34,8 +34,11 @@
    incPost (held for you while clocked in for a night); 21b's clothesYesterday, the status line and the morning tip
    (`clothesLateAt`: four hours after your wake after a night). Navarro's call home: his rota's `calls-home` habit
    already gives his off nights calls; no planner change (left as is, noted for review).
-5. Saves (03:00 loads into the same night), late saves, check parts: player_check night, clothes, saves, food, career,
-   leave, day_check 22-25.
+5. **The checks (done).** player_check's `night_part` (end of every run; `--night` alone; its own on copy) and
+   controller_check part `nights` (in ALL_PARTS): both OK on 06b6a15. Night 1 with P5_PROMO4 agreed with W7: 24u's
+   22:40 fetch from the comet (W7's `pu4Fetches(now)`, true while she fetches and walks you down) silences our night-1
+   notice; our clock and engine-room arrows lead her walk; the knock silent with P5_PROMO4. night.on/off open from 6 m (RV23's should). On-copy runs of day_check
+   24/25, food, leave, clothes: see the build table's last N6 row.
 6. Controller presets (Day 22 22:40, Day 23 21:00), a pad-played night 2, the words (night.lines, baked), the round.
 
 ## Shared formats
@@ -44,6 +47,15 @@
 - `yourShift(d)` -> `{ day: [from, to] | null, night: [from, to] | null }`, minutes from day d's midnight.
 - `playerNightOn(d)`: the night starting on day d is yours. `p5nNoDay(d)`: no day shift (the morning after a night).
 - simNote `p5night` { step: 'missed' | 'knock' | 'plate', day }.
+
+## State (2026-10-27 ~12:40 UTC)
+- Latest: claude/p5s6-nights e4458e0 (staging-p5s6 d39b87a6 merged). Reviewed by RV23 to c806c78: FIXES NEEDED, one
+  must: Calder didn't walk to you on Day 22 09:15 (the escort's follow parks her in the lift car). Lead 41: W7 fixes
+  worksEscort's follow at the source; take it when it lands, then re-run RV23's probe (plans/rv23-shots/n6_play.py on
+  claude/review-rv23).
+- MA6 (28d, night 3) reads playerNightOn(24); its Watch hour avoids night 3's incident (02:30-03:30 Day 25). MA6's
+  28b defines m21Door() for Calder's wait after the briefing.
+- Backlog N6-1: an ended career's save doesn't load (section 20, not Step 6's).
 
 ## Gotchas
 - `P5_NIGHTS` / `P5_LEAVE` are consts after sections 13-24: read only at run time. My readers go through `p5nOf` /
