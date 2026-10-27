@@ -8495,6 +8495,11 @@ function dosiTap(it, at) {                               // section 15's PLAYER_
 // cabin touches have four spots (DECKS[2].cabinSpots['2-B'], the shape of '4-23''s, plus `wall`: the wall each faces away
 // from, for drawing; places `2-B-rug`, `-desk`, `-shelf`, `-ledge`). Places type 'event' (inert). Only with P5_DECK6
 const deck2Mine = () => P5_DECK6 && typeof worksHome === 'function' && worksHome() === '2-B';
+const D2_B_WORDS = { name: 'Visitors\' suite', tap: 'The visitors\' suite, made up and empty, for inspectors, visiting captains and anyone the Concord sends.' };
+function d2RoomB() {                                      // (W8, DA6's ask) room B's name and tap on the HUD: yours once you've moved up (S6-3); the deck def's words otherwise
+  const B = DECKS[2] && DECKS[2].rooms && DECKS[2].rooms.B, mine = deck2Mine(); if (!B || B.mine === mine || !mine && B.mine === undefined) return;
+  B.mine = mine; B.name = mine ? 'Your quarters' : D2_B_WORDS.name; B.tap = mine ? 'Your quarters: the old visitors\' suite, yours since the move. The towel swans have gone.' : D2_B_WORDS.tap;
+}
 function deck2P5Places() {
   const D = DECKS[2], ev = (id, c, r, xy, face) => ({ id, type: 'event', event: 'side', at: [c, r], xy, face, pose: 'stand', room: 'B' });
   D.places.push(ev('2-B-wardrobe', 13, 17, [13.0, 17.6], 'w'), ev('2-B-keepsake', 13, 19, [13.2, 19.6], -36),
@@ -21724,6 +21729,7 @@ function fixTable() {
     for (const r of sh) (by[r.place.split('-')[0]] || (by[r.place.split('-')[0]] = [])).push(r);
     T.o = Object.keys(by).flatMap(n => by[n].map((r, j) => [(j + .5) / by[n].length, +n, r])).sort((a, b) => a[0] - b[0] || a[1] - b[1]).map(x => x[2]);   // each deck spread evenly along the stream: a day's few go all over the ship
     for (const r of xs) T.byId.set(r.id, r); }
+  if (P5_PROMO4 && typeof pu4RefitRow === 'function') { const r = pu4RefitRow(); T.byId.set(r.id, r); }   // (S6-3, W8) the refit odd job's row: by id only, never in a stream
   return FIX_TABLE = T;
 }
 const fixRow = id => fixTable().byId.get(id) || null;
@@ -59538,7 +59544,8 @@ const CABIN_LOOK = {                                     // each thing's shape: 
   'paper novel': { c: '#3f6e8c', box: [[.1, .15, .03, 0, .075, -.03]] }, 'puzzle book': { c: '#c9a24a', box: [[.14, .025, .1, 0, .0125, -.05]] },   // (E4, R5's fix 2: these four had no look)
   'pocket puzzle': { c: '#d9534f', box: [[.06, .06, .06, 0, .03, -.05]] }, 'metal puzzle': { c: '#9aa7b4', cyl: [[.045, .02, 0, .01]], box: [[.02, .07, .02, 0, .055, 0]] },
 };
-const cabinMine = () => typeof worksHome === 'function' && worksHome() === '4-23' && !!(DECKS[4].cabinSpots && DECKS[4].cabinSpots['4-23']);
+const cabinHome = () => { const h = typeof worksHome === 'function' ? worksHome() : null, n = h === '2-B' ? 2 : 4, S = h && DECKS[n] && DECKS[n].cabinSpots && DECKS[n].cabinSpots[h]; if (n === 2 && !(typeof puT4 === 'function' && puT4() && puT4().move && puT4().move.refit)) return null; return S ? { deck: n, home: h, spots: S } : null; };   // (S6-3, W8) your cabin's spots: 4-23's, or Deck 2's room B once it's yours and you did its refit (DA6's DECKS[2].cabinSpots['2-B'])
+const cabinMine = () => !!cabinHome();
 function cabinData() {
   const S = typeof worksSide === 'function' ? worksSide() : null; if (!S) return null;
   const c = S.cabin && typeof S.cabin === 'object' && !Array.isArray(S.cabin) ? S.cabin : (S.cabin = {});
@@ -59560,13 +59567,15 @@ function cabinClear() {
 }
 function cabinDraw() {
   if (typeof deckRoot === 'undefined' || !deckRoot || typeof deckDef === 'undefined') return;
-  const on = deckDef.num === 4 && cabinMine(), c = on ? cabinData() : null, key = on ? JSON.stringify(c) : '';
+  const H = cabinHome(), on = !!H && deckDef.num === H.deck, c = on ? cabinData() : null, key = on ? H.home + JSON.stringify(c) : '';
   if (CAB.root === deckRoot && CAB.key === key) return;
   if (CAB.root !== deckRoot) { CAB.g = null; CAB.items = []; CAB.root = deckRoot; }   // a new deck: the old group went with it
   cabinClear(); if (!on || !c) return;
-  const spots = DECKS[4].cabinSpots['4-23'], g = new THREE.Group(); CAB.g = g; CAB.key = key; deckRoot.add(g);
+  const spots = H.spots, g = new THREE.Group(); CAB.g = g; CAB.key = key; deckRoot.add(g);
+  const WALL_A = { n: Math.PI, s: 0, e: Math.PI / 2, w: -Math.PI / 2 }, BASE = { shelf: 'n', ledge: 'w' };   // 4-23's shelf backs onto the north wall, its ledge the west; a spot with its own `wall` (2-B's) turns to it
   for (const k of CABIN_SPOTS) {
     const sp = spots[k], [x, y, z] = sp.at, wx = x - OX, wz = z - OZ, s = new THREE.Group(); s.position.set(wx, y, wz); g.add(s);
+    if (sp.wall && BASE[k] && WALL_A[sp.wall] !== undefined) s.rotation.y = WALL_A[sp.wall] - WALL_A[BASE[k]];
     const L = c[k] && CABIN_LOOK[c[k]], m = L && dressMat(L.c);
     if (L) {
       for (const [w, h, d, ox, oy, oz] of L.box || []) { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(ox, oy + .002, oz); s.add(b); }
@@ -59648,15 +59657,15 @@ if (typeof PLAYER_TAPS !== 'undefined') PLAYER_TAPS.unshift(cabinTap, starTap);
 if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(now => {   // the cabin's things on the deck; 06:00: waking in a cabin that feels like yours
   cabinDraw();
   const d = worksDay(now), m = Math.floor(now - (d - 1) * 1440), c = cabinData();
-  if (m === 360 && c && CAB.woke !== d && cabinMood() && typeof playerBed === 'function' && playerBed() === '4-23') { CAB.woke = d; if (typeof leisureAdd === 'function') leisureAdd(4, 'cabin'); }
+  if (m === 360 && c && CAB.woke !== d && cabinMood() && typeof playerBed === 'function' && cabinHome() && playerBed() === cabinHome().home) { CAB.woke = d; if (typeof leisureAdd === 'function') leisureAdd(4, 'cabin'); }
 });
 // visitors notice (E4, 0.53.11): crew in your cabin while you're there say something about what's in it (the writer's bank
 // cabin.remark, by flag: cabin.lamp, .rug, .plant, .shelf, .made with two or more things you made), each once a day, one
 // every few minutes at most; a bubble. Not saved (a reload may let someone say it again)
 const CAB_REMARK = { day: 0, said: new Set(), at: -99 };
 function cabinRemark(now) {
-  if (typeof deckDef === 'undefined' || deckDef.num !== 4 || !cabinMine() || typeof DECK_CREW === 'undefined' || typeof lineFor !== 'function' || now - CAB_REMARK.at < 5) return;
-  const c = cabinData(), room = DECKS[4].cabinSpots['4-23'].room || 'W'; if (!c || !Object.keys(c).length || roomAt(...player.here()) !== room) return;
+  const H = cabinHome(); if (typeof deckDef === 'undefined' || !H || deckDef.num !== H.deck || typeof DECK_CREW === 'undefined' || typeof lineFor !== 'function' || now - CAB_REMARK.at < 5) return;
+  const c = cabinData(), room = H.spots.room || 'W'; if (!c || !Object.keys(c).length || roomAt(...player.here()) !== room) return;
   const d = worksDay(now); if (CAB_REMARK.day !== d) { CAB_REMARK.day = d; CAB_REMARK.said = new Set(); }
   const a = DECK_CREW.find(x => x.p && !CAB_REMARK.said.has(x.p.id) && roomAt(...x.here()) === room); if (!a) return;
   const made = Object.values(c).filter(x => TINKER_LIST.some(t => t.item === x)).length;
@@ -63488,7 +63497,7 @@ function promoHomeTick(now, skip) {                      // moved without the wa
     if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'works', text, urgent: true }); } catch (e) { /* no device */ }
     else try { toast(worksText('promo.home.title', 'Your cabin'), text); } catch (e) { /* no UI */ } }
   const label = worksText('promo.home.arrow', 'Your cabin, 4-23: your things are in');
-  if (promoQueue()) guideAsk({ id: 'promo:home', level: 1, owner: '24p (FX19)', until: d * 1440, goal: () => ({ deck: M.deck, room: M.room, label }), done: () => !!flag('promo.sight.home') });
+  if (promoQueue()) guideAsk({ id: 'promo:home', level: 1, owner: '24p (FX19)', until: d * 1440, goal: () => ({ deck: M.deck, room: M.room, label }), done: () => !!flag('promo.sight.home') || !SHIP.works || SHIP.works.home !== PROMO.home });   // (W8) or you've moved on (Deck 2's room B)
   else if (typeof setGoal === 'function' && typeof IX_GOAL !== 'undefined' && !IX_GOAL) setGoal({ deck: M.deck, room: M.room, label, trk: 'career:home', trkTo: d * 1440 });
 }
 function promoHomeLine() {                               // the Training tab: where your cabin is, once it's yours
@@ -64881,7 +64890,8 @@ function pu4WalkSay(key, fallback) {                     // each of Vance's walk
 function pu4Moved(now, how) {                            // room B is yours
   const W = SHIP.works, T = pu4MoveOn(); if (!W || !T) return false;
   const d = worksDay(now); W.home = PU4_M.home; T.move.walked = d; PU4_LIVE.mv = null;
-  if (typeof setGoal === 'function' && typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.trk === 'career:move4') setGoal(null);
+  if (typeof setGoal === 'function' && typeof IX_GOAL !== 'undefined' && IX_GOAL && /^career:(move4|home|move)$/.test(IX_GOAL.trk || '')) setGoal(null);   // (W8) and 4-23's old arrows
+  if (P5_DECK6 && typeof d2RoomB === 'function') d2RoomB();   // room B's name on the HUD
   simNote('moved', { home: W.home, how, t: now });
   return true;
 }
@@ -64947,6 +64957,47 @@ function pu4DevNext() {                                  // the Dev career arrow
 }
 function pu4EngineByDay() {                              // section 17's forYou asks: engine machines' jobs are yours by day, an Engine Specialist after the nights
   try { return playerRank() === 'specialist' && SHIP.time.day > Math.max(...Object.keys(P5_NIGHTS).map(Number)); } catch (e) { return false; }
+}
+// The refit (S6-3, W8; spec S6-3 "The refit"): from Day 23, once the move is set (T.move), an odd job on the board, "Refit
+// the visitors' suite" (section 17's fix-chore shape, its row only in fixTable's byId: PU4_REFIT, never in ODD_ROWS, so
+// the odd jobs' seeded stream is the same), posted at the start of each of your board windows (a night's, 28a's
+// p5nBoardWin, or a day shift's) till you move in; one at a time, an untaken one gone when the next is posted. Take it or
+// leave it to the crew: turned in by you, T.move.refit = true: your cabin touches (24t) come up with you to room B
+// (cabinHome reads it) and one more is yours to pick (a deviceChoose of the touches for its empty spots, placed there).
+// Not taken by the time you've moved in: the crew did it, and your touches stay behind. No R(): ids by the hour
+function pu4RefitRow() { return { id: 'oj-d2suite-refit', place: '2-B-rug', part: null, tool: 'a toolbox', mins: 30, sys: 'hull', title: 'Refit the visitors\' suite', from: 23 }; }   // a declaration: fixTable may ask before this line has run
+const PU4_REFIT = pu4RefitRow();
+const PU4_REFIT_PICK = { rug: 'woven rug', desk: 'little lamp', shelf: 'model ship', ledge: 'little plant' };
+const pu4RefitJob = j => !!j && j.fix === PU4_REFIT.id;
+function pu4RefitTick(now, skip) {
+  const T = puT4(), J = SHIP.jobs; if (!P5_DECK6 || !T || !T.move || T.move.refit || !Array.isArray(J)) return;
+  const drop = () => { for (let k = J.length - 1; k >= 0; k--) if (pu4RefitJob(J[k]) && J[k].status === 'open' && !J[k].claimedBy) J.splice(k, 1); };
+  if (T.move.walked || J.some(j => pu4RefitJob(j) && j.status === 'done')) { drop(); return; }   // moved in without it, or the crew did it (left past its window)
+  const d = worksDay(now), m = now - (d - 1) * 1440, h = Math.floor(now / 60); if (d < PU4_REFIT.from || !placeById(PU4_REFIT.place)) return;
+  const nw = P5_NIGHT && typeof p5nBoardWin === 'function' ? p5nBoardWin(now) : null, end = nw ? m + nw.left : dayShiftEnd(d);
+  if (!nw && !(playerShiftOn(d) && m >= DAY_SHIFT[0])) return;
+  const win = nw ? 'n' + (now + nw.left) : 'd' + d;     // this board window (a night's by its end, a day shift's by its day)
+  if (end - m < 60 || J.some(j => pu4RefitJob(j) && (j.win === win || j.claimedBy && j.status !== 'done'))) return;   // one per window; not while you hold one
+  drop();
+  const pl = placeById(PU4_REFIT.place), j = { id: 'fix-' + PU4_REFIT.id + '@' + h, machine: null, deck: pl.deck, room: pl.room, kind: 'chore', chore: 'fix', target: PU4_REFIT.id, title: '', bring: null, tier: 1,
+    stops: [{ deck: pl.deck, placeId: PU4_REFIT.place, mins: PU4_REFIT.mins, tag: 'fix' }], urgency: 0, leave: end - m, posted: now, found: now, claimedBy: null, parts: [],
+    status: 'open', extra: false, xp: 2, fix: PU4_REFIT.id, fixS: 'refit', sys: 'hull', tool: PU4_REFIT.tool, win };
+  j.title = fixWord(j, 'title') || PU4_REFIT.title; J.push(j);
+  if (!skip && flag('pu4.refit.posted') === undefined) { flagSet('pu4.refit.posted', d); try { promoNotice(worksText('pu4.refit.notice', 'On the board: refit the visitors\' suite, your new quarters. Do it yourself and your things come with you.'), worksName('calder')); } catch (e) { /* no UI */ } }
+}
+function pu4Refitted(t) {                                 // your refit turned in: your touches come with you, and one more to pick
+  const T = puT4(); if (!T || !T.move || T.move.refit) return false;
+  T.move.refit = true; simNote('refit', { t });
+  const c = typeof cabinData === 'function' ? cabinData() : null, free = c ? CABIN_SPOTS.filter(k => !c[k]) : [];
+  if (!c || !free.length || typeof deviceChoose !== 'function') return true;
+  try { deviceChoose({ title: worksText('pu4.refit.title', 'Your new quarters'), text: worksText('pu4.refit.pick', 'The suite\'s refitted, and your things go up with you. Calder found something for it too: pick one.'),
+    choices: free.map(k => PU4_REFIT_PICK[k].replace(/^./, x => x.toUpperCase())) }, i => { const k = free[i]; if (k === undefined || i < 0) return; const c2 = cabinData(); if (c2 && !c2[k]) c2[k] = PU4_REFIT_PICK[k]; try { cabinDraw(); } catch (e) { /* not on the deck */ } }); } catch (e) { /* no device */ }
+  return true;
+}
+if (P5_PROMO4) {
+  WORK_TICKS.push((now, skip) => pu4RefitTick(now, skip));
+  onSim('job', n => { if (n && n.step === 'turnin' && /^fix-oj-d2suite-refit@/.test(String(n.id))) pu4Refitted(shipNow()); });
+  if (P5_DECK6 && typeof d2RoomB === 'function') WORK_TICKS.push(() => d2RoomB());   // Deck 2's room B named yours on the HUD once you've moved up (4d's)
 }
 // ---- end of slot: Later promotions ----
 

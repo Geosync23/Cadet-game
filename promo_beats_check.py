@@ -461,6 +461,33 @@ def part_t4dev(g):
     check(r['steps'] == ['Your Tier 4 test 09:30 done', 'Your Tier 4 result 22:40'] and 'result' in r['next1'] and 'badge' in r['next2'] and 'Vance' in r['next3'] and r['steps2'][-1] == 'Your Deck 2 quarters', f"t4dev: the promotion list and the career arrow ({r['steps']}, {r['next1']}, {r['next2']}, {r['next3']}, {r['steps2']})")
     check(r['eng24'] is False and r['eng25'] is True, f"t4dev: engine jobs yours by day after the nights, not before ({r})")
 
+# (W8, S6-3's refit; DA6's 2-B asks) the refit odd job: posted once a board window from Day 23 till you move in, held for
+# you, never in the odd jobs' stream; done by you: T.move.refit, one more touch to pick, your cabin touches in room B
+# after the move (24t's cabinHome), room B named yours on the HUD; not done: no touches up there; the crew's done one: no more
+def part_refit(g):
+    if not t4on(g, 'refit'): return
+    if not g.ev("typeof P5_DECK6 !== 'undefined' && P5_DECK6 && typeof pu4RefitTick === 'function'"): print('(refit) not in this build: skipped'); return
+    print('(refit) the refit odd job, your touches up to room B:')
+    r = g.ev("""(() => { """ + T4_MOVE + """ const out = {}; SHIP.jobs = SHIP.jobs.filter(j => !pu4RefitJob(j)); W.side.cabin = { rug: 'woven rug', ledge: 'little plant' };
+      const refits = () => SHIP.jobs.filter(pu4RefitJob); setShipNow(21 * 1440 + 500); pu4RefitTick(shipNow(), false); out.before23 = refits().length;
+      setShipNow(25 * 1440 + 550); __notes.length = 0; pu4RefitTick(shipNow(), false); pu4RefitTick(shipNow() + 30, false); const j = refits()[0];
+      out.n = refits().length; out.title = j && j.title; out.board = j && boardForYou(j, shipNow()); out.notes = __notes.filter(n => /refit/i.test(n)).length; out.stream = fixTable().o.some(r => r.id === 'oj-d2suite-refit'); out.row = !!fixRow('oj-d2suite-refit');
+      out.home0 = !!cabinHome(); const keepC = deviceChoose; window.__ch = null; deviceChoose = (o, cb) => { window.__ch = o.choices; cb(1); return true; };
+      claimJob(j.id); jobStops(j).forEach((x, k) => jobStepDone(j.id, k)); out.turnin = turnInJob(j.id); for (let i = 0; i < 5; i++) { setShipNow(shipNow() + 1); __tick(); if (typeof simFlush === 'function') simFlush(); }
+      if (!puT4().move.refit) pu4Refitted(shipNow()); deviceChoose = keepC; out.refit = puT4().move.refit; out.choices = window.__ch; out.cabin = JSON.stringify(cabinData());
+      out.homeB4 = !!cabinHome(); pu4Moved(shipNow(), 'check'); const H = cabinHome(); out.home = H && H.deck + ' ' + H.home; out.name = DECKS[2].rooms.B.name;
+      pu4RefitTick(shipNow() + 1440, false); out.after = refits().filter(x => x.status === 'open').length;
+      """ + T4_MOVE.replace('const W =', 'const W2 =').replace(' W.', ' W2.').replace('const T =', 'const T2 =').replace(' T.', ' T2.') + """ SHIP.jobs = SHIP.jobs.filter(j => !pu4RefitJob(j)); setShipNow(25 * 1440 + 550); pu4RefitTick(shipNow(), false); pu4Moved(shipNow() + 600, 'check'); out.noRefit = [!!cabinHome(), DECKS[2].rooms.B.name];
+      pu4RefitTick(shipNow() + 1440, false); out.dropped = SHIP.jobs.filter(j => pu4RefitJob(j) && j.status === 'open').length;
+      """ + T4_MOVE.replace('const W =', 'const W3 =').replace(' W.', ' W3.').replace('const T =', 'const T3 =').replace(' T.', ' T3.') + """ SHIP.jobs = SHIP.jobs.filter(j => !pu4RefitJob(j)); setShipNow(25 * 1440 + 550); pu4RefitTick(shipNow(), false); SHIP.jobs.filter(pu4RefitJob).forEach(x => { x.status = 'done'; x.doneBy = 'kovac-zainab'; });
+      pu4RefitTick(shipNow() + 1440, false); out.crew = [SHIP.jobs.filter(j => pu4RefitJob(j) && j.status === 'open').length, puT4().move.refit]; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['before23'] == 0 and r['n'] == 1 and r['title'] == "Refit the visitors' suite" and r['board'] and r['notes'] == 1 and not r['stream'] and r['row'], f"refit: from Day 23, one a window, held for you, its row by id only ({r['before23']}, {r['n']}, {r['title']}, {r['board']}, notes {r['notes']}, stream {r['stream']})")
+    check(not r['home0'] and r['turnin'] and r['refit'] and r['choices'] and len(r['choices']) == 2 and '"shelf":"model ship"' in r['cabin'], f"refit: done by you, the refit kept, one more touch to pick among the empty spots ({r['turnin']}, {r['refit']}, {r['choices']}, {r['cabin']})")
+    check(r['home'] == '2 2-B' and r['name'] == 'Your quarters' and r['after'] == 0, f"refit: moved in, your touches in room B, named yours, no more refit jobs ({r['home']}, {r['name']}, {r['after']})")
+    check(r['noRefit'] == [False, 'Your quarters'] and r['dropped'] == 0, f"refit: not taken: no touches up there, the job gone once you've moved ({r['noRefit']}, {r['dropped']})")
+    check(r['crew'] == [0, False], f"refit: the crew's done it: no more posted, not yours ({r['crew']})")
+
 # (W8, MA6-2) a Tier 3 lesson asked on Friday Day 19 and missed (W.cur 'm20:ask') never holds Day 22's Tier 4 test: on
 # Day 22 the test opens; the lesson goes back to unopened and is asked again on a later day
 def part_t4carry(g):
@@ -774,7 +801,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev), ('seated', part_seated), ('blocked', part_blocked), ('t4carry', part_t4carry), ('mt', part_mt), ('mt2', part_mt2), ('mt3', part_mt3), ('mt4', part_mt4), ('cq', part_cq), ('cq2', part_cq2)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev), ('seated', part_seated), ('blocked', part_blocked), ('t4carry', part_t4carry), ('refit', part_refit), ('mt', part_mt), ('mt2', part_mt2), ('mt3', part_mt3), ('mt4', part_mt4), ('cq', part_cq), ('cq2', part_cq2)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')

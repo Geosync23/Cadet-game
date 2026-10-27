@@ -14,7 +14,7 @@
 
 ## Still to do
 1. stories_check / fridays_check / events_check / bigevents_check on Day 26 with Step 6 on (the full round's; career_check --s6 is done, s6.15).
-2. **The refit odd job** and **DA6's '2-B' asks** (see handover-w7 "Still to do": 24t cabinMine/cabinDraw from DECKS[2].cabinSpots['2-B'], 8b keepsakes from DECKS[2].homeKeepsakes['2-B'], the HUD's room B name after you move in).
+2. (done s6.17: the refit and DA6's 2-B asks; the framed traces on the shelf are DA6's, told them. Nothing draws homeKeepsakes for 4-23 either: 8b has no keepsake-shelf drawing to point at room B.)
 3. **All Step 6 DM_CAREER rows** (m21, m22 nights, m23, m24, p6-p8, m25) so devmode_check set passes on a Step 6 copy (handover-w7 lists each row's shape).
 4. Live escort check on claude/escort-follow-fix (handover-w7) if lead 41 still wants it.
 
