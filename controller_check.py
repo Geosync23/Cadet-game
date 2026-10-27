@@ -2711,7 +2711,7 @@ def pad_scene(r, frames=40):
 def part_vessel(pw, src, tag):
     fails = []
     vsrc = re.sub(r"^const EV_VESSEL_ON = URL_FLAGS\.has\('evvessel'\);", 'const EV_VESSEL_ON = true;', src, count=1, flags=re.M)
-    if vsrc == src: return ['the build has no EV_VESSEL_ON line (the vessel isn\'t built)']
+    if vsrc == src and not re.search(r'^const EV_VESSEL_ON = true;', src, re.M): return ['the build has no EV_VESSEL_ON line (the vessel isn\'t built)']   # (BM19) or already on (0.94.0)
     r = Run(pw, vsrc, f'{tag}_vessel', mode='pad', plug={}, w=390, h=844)
     r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)")
     M = lambda k: r.ev(f"SHIP.event && SHIP.event.mine[{json.dumps(k)}] || null")
@@ -2773,7 +2773,7 @@ def part_vessel(pw, src, tag):
 NEEDS = {'ending': ['base', 'deck', 'pick', 'panels'], 'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick'], 'door': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'], 'vessel': ['base', 'deck', 'pick', 'panels'],
          'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck'], 'shut': ['panels'], 's5cases': ['pick', 'panels']}
 PART_FN = {'ending': part_ending, 'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day, 'shut': part_shut, 's5cases': part_s5cases, 'vessel': part_vessel}   # 'reach' joins when the pad half is written
-if 'function mysOpen' not in SRC or S5_LINE not in SRC: PART_FN.pop('s5cases')   # no board in this build: "not yet", never a pass
+if 'function mysOpen' not in SRC or (S5_LINE not in SRC and not re.search(r'\bconst P5_STEP5\s*=\s*true\b', SRC)): PART_FN.pop('s5cases')   # (BM19) or already on (0.94.0)   # no board in this build: "not yet", never a pass
 for k, v in OLD_NEEDS.items(): NEEDS[OLD_NAME.get(k, k)] = v; PART_FN[OLD_NAME.get(k, k)] = legacy(k)
 
 # ---- Pillar 5 Step 5's pieces (plans/p5-step5-spec.html section 9): each part runs on a copy with P5_STEP5 on, and only
