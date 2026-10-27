@@ -519,6 +519,8 @@ END_PICK = r"""(() => {
     if (b) { const who = CHAT.p.id; b.click(); return 'chat: ' + eb.label + ' (' + who + ')'; }   // (the click may close the card)
     chatClose(); return 'close the chat card'; }
   const g = goalNow();
+  if (ACT && ACT.phase !== 'walk' && !DIALOGUE && g && /^end:/.test(g.guide || '') && (g.deck !== deckDef.num || g.room && roomAt(...player.here()) !== g.room || g.crew)) {   // seated (the last breakfast sits you at the table) while an ending arrow leads elsewhere: you get up and go, as a player would
+    const k = ACT.kind; actEnd(true); return 'get up for: ' + g.label + ' (' + k + ')'; }
   if (g && /^end:bye/.test(g.guide || '') && g.crew && deckDef.num === g.deck) {   // a farewell: walk right up to them (the goodbye comes within reach, 1.8; FOLLOW stops at 2.2)
     const a = DECK_CREW.find(a => a.p && a.p.id === g.crew), p = player.obj.position;
     if (a && Math.hypot(a.x - p.x, a.z - p.z) > 1.4) { const l = Math.hypot(a.x - p.x, a.z - p.z); player.obj.position.set(a.x + (p.x - a.x) / l, 0, a.z + (p.z - a.z) / l); player.stop(); return 'walk up to ' + g.crew; } }
