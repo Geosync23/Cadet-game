@@ -210,7 +210,14 @@ def t3on(g, name):
     return on
 
 def part_t3off(g):
-    if g.ev(T3): print('(t3off) P5_PROMO3 on in this build: skipped'); return
+    if g.ev(T3):   # (W6) the build ships it on from 0.94.0: the off part on a copy with P5_STEP5 switched off
+        src = pathlib.Path(sys.argv[1]).read_text(); off = re.sub(r"^const P5_STEP5 = true;", 'const P5_STEP5 = false;', src, count=1, flags=re.M)
+        if off == src: print('(t3off) P5_PROMO3 on in this build and no switch line to turn off: skipped'); return
+        cp = WORK / 'test' / f'_pb_t3off_{os.getpid()}_{pathlib.Path(sys.argv[1]).name}'; cp.write_text(off); _RUN_FILES.append(cp)
+        print('(t3off) on a copy with P5_STEP5 switched off'); h = Game(pw, str(cp)); h.step(2); check(h.ev(SETUP), 'setup (t3off copy)')
+        try: part_t3off(h)
+        finally: h.close()
+        return
     print('(t3off) P5_PROMO3 off: nothing of the Senior Officer promotion:')
     r = g.ev("""(() => { const W = __w(14, 1146, { xp: 60, tr: { ps: 12, t2: 9 } }); W.tier = 2; W.rank = 'officer'; __friends(); __bay();
       for (const t of [13 * 1440 + 500, 13 * 1440 + 1146, 13 * 1440 + 1201, 13 * 1440 + 1330, 14 * 1440 + 400]) { setShipNow(t); __tick(); }
