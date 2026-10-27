@@ -30,13 +30,14 @@ Runner R4 (session_01GKuymignKdueCaz2pftLEC). Build master BM19, lead 42. 2026-1
 | disc_check | OK | ALL OK |
 | tiles_check | OK | ALL OK |
 | interactions_check | handed to R1 (AS1) | My run was cut at 90 min by my own lane script's time limit (288 lines, 0 FAIL, at "real taps by the exercise bikes"): not a result. AS1 runs it whole, alone. |
-| join_check | **crash, twice: with BM19** | Both runs: every test passes up to "Sunday table's long tables", then join_check.py line 153 (the save part, a real reload without `?nosave`): `Page.goto: Timeout 30000ms exceeded` waiting for "load". No FAIL line; exit 1. BM19 runs it on candidate 2 and on OLD side by side to decide. |
+| join_check | OK (run by BM19, alone) | My two runs beside another browser: every test passes up to "Sunday table's long tables", then join_check.py line 153 (the save part, a real reload without `?nosave`): `Page.goto: Timeout 30000ms exceeded`. BM19: OLD and candidate 2 both time out there with two browsers at once, and both give JOIN CHECK OK alone. Load, not the build. |
 
 ### The join_check crash
 
 Run 1 ran beside interactions_check (load average about 8.7); run 2 beside disc_check only, no leftover browsers. Same
 line both times. The page loaded fine with `?nosave` earlier in the check; the hang is the first load that reads the
-check's own save (Day 7, after the Sunday table and deck changes). Not known old. The OLD comparison is BM19's.
+check's own save (Day 7, after the Sunday table and deck changes). Settled by BM19: the same timeout on OLD with two
+browsers at once, and JOIN CHECK OK on both builds alone. Run join_check alone.
 
 ## Round 1 (e0084ca9, game d1666007...f278), stopped early for candidate 2
 
@@ -47,5 +48,6 @@ interactions ran 85 min with 0 FAIL before I stopped round 1 (BM19's call). The 
 
 ## Lessons
 
+- join_check also times out on its real reload with a second browser beside it (both builds): run it alone.
 - interactions_check with a second browser beside it takes more than 90 minutes on 4 cores: give it no time limit
   per check, or run it alone.
