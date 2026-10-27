@@ -7,6 +7,7 @@ Cap rule: at most 5 seats working at once; read only until RV23 says it has gone
 ## Verdicts
 | Branch | Verdict | Sha |
 |---|---|---|
+| claude/p5s6-deck (DA6): S6-5 nights 1-2, keepsakes to room B, door fix | PASS (1 should: frames not visible in my shot) | 2df6bfce |
 | claude/m24-pick-pointer (AS1): night 3's pick ring | PASS | 5f649b45 |
 | claude/escort-seated-check (PZ6, test only) | code read OK (glance, lead 42); run later | 775c3ca |
 
@@ -67,3 +68,7 @@ Code read (no runs yet):
 
 ## W8 618c2901 (fixes): cadet identical vs 40f3bdac (noise; re-run alone); promo_beats cq cq2 t4eve t3carry t4test t4passed OK;
   devmode set t4beats OK; cq_play stand: story 18:45, "Budge up" 19:05, guests by the opening, ask 19:08, Record with the nights.
+
+## DA6 2df6bfce: PASS (sent 17:2x)
+- cadet identical (abf496f3 clean vs 40f3bdac; alone run of 2df6bfce pending); deck_check ON OK; d2b_look.py: home 2-B, all three
+  keepsakes on Deck 2 room B, tappable, 147 calls; should: frames not made out on the west wall at 390x844. Door fix read (inside R: open).
