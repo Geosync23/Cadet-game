@@ -59667,10 +59667,15 @@ function puTestGuide(now) {                              // the arrows: level 1 
   const j = (SHIP.jobs || []).find(x => x.kind === PU_T.kind && x.status !== 'done' && x.reserved === PU_T.slot && (x.claimedBy === 'you' || heldForYou(x))), owner = '24u (S5-2)';
   const onBoard = j && !j.claimedBy && !(j.found > now);
   if (!j || j.found > now) { if (now < B + PU_T.jobAt + 15) guideAsk({ id: 'pu3:testday:' + d, level: 1, owner, from: B + PU_T.jobAt - 30, until: B + PU_T.jobAt + 15,
-    goal: () => promoInBay() ? null : ({ deck: 5, room: 'w', label: worksText('pu3.ptr.day', 'Your Tier 3 test, 09:00: the Works bay') }), done: () => !!puT3() && puT3().passed }); return; }
+    goal: () => promoInBay() ? { deck: 5, item: /job board/i, room: 'w', label: worksText('pu3.ptr.day', 'Your Tier 3 test, 09:00: the Works bay') } : { deck: 5, room: 'w', label: worksText('pu3.ptr.day', 'Your Tier 3 test, 09:00: the Works bay') },   // in the bay: the board itself (a null goal let another arrow lead you off, and back: the Teaching-arrows-Off follower ping-ponged Decks 5 and 3)
+    done: () => !!puT3() && puT3().passed || (SHIP.jobs || []).some(x => x.kind === PU_T.kind && x.reserved === PU_T.slot && x.status !== 'done' && !(x.found > Math.floor(shipNow()))) }); return; }   // gone once the test is on the board: pu3:test leads from there
   let mj = null; try { mj = myJob(); } catch (e) { mj = null; }
   if (onBoard && !(mj && mj.id !== j.id && !jobSide(mj) && !mj.workDone)) guideAsk({ id: 'pu3:test:' + d, level: 1, owner, until: j.until || B + PU_T.until,
     goal: () => ({ deck: 5, item: /job board/i, room: 'w', label: worksText('pu3.ptr.test', 'Your Tier 3 test: take it') }), done: () => guideTaken(j.id) });
+  else if (onBoard && mj && mj.id !== j.id && !jobSide(mj) && !mj.workDone) {   // holding another job (a case held for you since 08:00, say): the test waits on the board till 15:00, so the board, and its Drop it rung
+    const other = mj.id, lab = worksText('pu3.ptr.drop', 'Your Tier 3 test is waiting: drop this job at the board');
+    guideAsk({ id: 'pu3:drop:' + d, level: 1, owner, until: j.until || B + PU_T.until, goal: () => ({ deck: 5, item: /job board/i, room: 'w', label: lab }), done: () => guideTaken(j.id) || (() => { try { const x = myJob(); return !x || x.id !== other; } catch (e) { return true; } })() });
+    if (typeof pointAsk === 'function' && typeof pointBoard === 'function' && POINT_ON) pointAsk({ id: 'p:pu3:drop', force: true, path: pointBoard(other, lab), until: j.until || B + PU_T.until, done: () => { try { const x = myJob(); return !x || x.id !== other; } catch (e) { return true; } } }); }
   if (j.claimedBy !== 'you') return;
   const label = () => { const b = j.t3 || {}, nx = !j.workDone && typeof ixNextStop === 'function' ? ixNextStop(j) : null, s = nx && nx.s;
     if (j.workDone) return { deck: 5, item: /job board/i, room: 'w', label: worksText('pu3.ptr.turnin', 'Turn it in') };
