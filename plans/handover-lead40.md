@@ -33,7 +33,7 @@ A new account can't update these; it must publish new links (or the user shares 
   - VB2 claude/ending-checks: RV22 verdict (see handover-rv22.md).
 
 - **Combined build head at the move:** claude/staging-0.94.0 07e033c9 (last game merge 64a1ba76, game 958493d0...; switches OFF; cadet identical to 0.93.3). talk-close, train-titles and VB1 03b63d95 are NOT merged yet.
-- **Open question for the user (BM18):** does "everything on" also cover four older switches that are off: TRAY_TRAVELS, INTRO_ASK_ON, ZEKE_CABIN_MAIL, PAD_ON? (END_WAY_BACK is cut by the user's ending answer and stays off.) Ask before flipping them.
+- **User answered (~03:10 UTC Oct 27): these older switches STAY OFF:** TRAY_TRAVELS (Pick-your-own breakfast tray already travels via P.trayGo, which is all the user wants), INTRO_ASK_ON ("Ask Zeke" stays parked), ZEKE_CABIN_MAIL (stays parked), PAD_ON (controller support stays off "until we update once content complete": turn it on in the update after the content is finished; keep building and testing every piece by pad on a switched copy as now). END_WAY_BACK stays off (ending answer). "Everything on" = P5_STEP5 and its sub-switches, EV_VESSEL_ON, EV_ENDING_ON (+ doors/visit already on).
 
 ## Restart plan (on the new account)
 1. One reviewer: finish the open reviews above (talk-close, train-titles, VB1's fix, VB2 ending-checks) from plans/handover-rv22.md on claude/review-rv22.
