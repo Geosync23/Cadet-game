@@ -27,37 +27,39 @@ with sync_playwright() as pw:
     g.step = lambda n, dt=1000/30: g.page.evaluate(f'window.__step({n}, {dt})')
     g.step(20)
     if g.page.locator('text=Sign and go aboard').count(): g.page.fill('form input', 'Ada'); g.page.click('text=Sign and go aboard'); g.step(30)
-    g.ev("devmodeRun('Set career', () => devmodeSetCareerTo(8))"); g.step(20)
-    g.ev(f"devmodeSkipTo({D(9, 12, 20)}); for (const k of NEED_KEYS) SHIP.player.needs[k] = 85"); g.step(10)
+    g.ev("devmodeRun('Set career', () => devmodeSetCareerTo(10))"); g.step(20)
+    g.ev(f"devmodeSkipTo({D(11, 12, 20)}); for (const k of NEED_KEYS) SHIP.player.needs[k] = 85"); g.step(10)
     g.ev("goToDeck(4)"); g.step(20)
     # someone awake on the deck, 5-12 m off, in view
     pick = g.ev("""(() => { const P = player.obj.position; const out = [];
       for (const a of DECK_CREW) { if (!a.p || !a.p.id) continue; const w = whereIs(a.p, shipNow()); if (!w || w.act === 'sleep') continue;
         out.push([a.p.id, +Math.hypot(a.x - P.x, a.z - P.z).toFixed(1), w.act]); } return out.sort((x, y) => x[1] - y[1]); })()""")
     print('crew', pick)
-    cand = [x for x in pick if 4 < x[1] < 12]
-    if not cand:   # stand someone's room away: move the player 6 m from the nearest awake one
-        who = pick[0][0]; g.ev(f"(() => {{ const a = DECK_CREW.find(c => c.p.id === '{who}'); const s = cellPos(...nearestOpen(a.x + 6, a.z, player)); player.obj.position.set(s.x, player.obj.position.y, s.z); target.copy(player.obj.position).setY(.7); player.stop(); }})()"); g.step(10)
-    else: who = cand[0][0]
+    who = [x for x in pick if x[2] in ('leisure', 'off')][0][0]
+    def place(dx, dz):   # stand dx, dz from them (an open tile), the camera on you
+        g.ev(f"(() => {{ const a = DECK_CREW.find(c => c.p.id === '{who}'); const s = cellPos(...nearestOpen(a.x + {dx}, a.z + {dz}, player)); player.obj.position.set(s.x, player.obj.position.y, s.z); target.copy(player.obj.position).setY(.7); player.stop(); }})()"); g.step(15)
+    for dx, dz in ((5, 0), (-5, 0), (0, 5), (0, -5), (4, 3)):
+        place(dx, dz); xy = g.ev(f"(() => {{ const a = DECK_CREW.find(c => c.p.id === '{who}'); const v = new THREE.Vector3(a.x, 1.0, a.z).project(camera); return [ (v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight ]; }})()")
+        if 20 < xy[0] < 370 and 250 < xy[1] < 650 and dist(g, who) > 3.5: break
     print('who', who, 'dist', dist(g, who))
     # face the camera at them: tap where they are
-    xy = tap_on(g, who); c1 = g.ev(CARD); print('A far tap', xy, c1, 'dist', dist(g, who)); g.page.screenshot(path=f'{OUT}/t1_far_card.png')
+    xy = tap_on(g, who); c1 = g.ev(CARD); print('A far tap', xy, c1, 'dist', dist(g, who)); g.page.screenshot(timeout=90000, path=f'{OUT}/t1_far_card.png')
     p0 = apos(g, who); g.step(60); print('   card left open 2 s: they', p0, '->', apos(g, who), g.ev(CARD)['chat'])
     if c1['chat'] and c1['chat']['far']:
-        g.page.click('#chat button:has-text("Walk over")'); g.step(2); print('B pressed Walk over', g.ev(CARD)); g.page.screenshot(path=f'{OUT}/t2_walking.png')
+        g.page.click('#chat button:has-text("Walk over")'); g.step(2); print('B pressed Walk over', g.ev(CARD)); g.page.screenshot(timeout=90000, path=f'{OUT}/t2_walking.png')
         trail = []
         for k in range(40):
             g.step(15); c = g.ev(CARD); trail.append((dist(g, who), apos(g, who), c['chat'] and c['chat']['far']))
             if c['chat'] and not c['chat']['far']: break
         print('   walk', trail[:3], '...', trail[-2:])
-        print('C arrived', g.ev(CARD), 'dist', dist(g, who)); g.page.screenshot(path=f'{OUT}/t3_up_close.png')
+        print('C arrived', g.ev(CARD), 'dist', dist(g, who)); g.page.screenshot(timeout=90000, path=f'{OUT}/t3_up_close.png')
     g.ev("chatClose()"); g.step(5)
     # near tap
-    print('D near tap', dist(g, who)); tap_on(g, who); print('  ', g.ev(CARD)); g.page.screenshot(path=f'{OUT}/t4_near_tap.png'); g.ev("chatClose()"); g.step(5)
+    print('D near tap', dist(g, who)); tap_on(g, who); print('  ', g.ev(CARD)); g.page.screenshot(timeout=90000, path=f'{OUT}/t4_near_tap.png'); g.ev("chatClose()"); g.step(5)
     # the chip: "would like a word" from afar
-    g.ev(f"(() => {{ const a = DECK_CREW.find(c => c.p.id === '{who}'); const s = cellPos(...nearestOpen(a.x + 6, a.z + 1, player)); player.obj.position.set(s.x, player.obj.position.y, s.z); target.copy(player.obj.position).setY(.7); player.stop(); }})()"); g.step(5)
-    g.ev(f"seekShow(DECK_CREW.find(c => c.p.id === '{who}').p, Math.floor(shipNow()), null, null)"); g.step(3); g.page.screenshot(path=f'{OUT}/t5_chip.png')
-    g.page.click('#seek'); g.step(3); print('E chip from', dist(g, who), g.ev(CARD)); g.page.screenshot(path=f'{OUT}/t6_chip_card.png')
+    place(dx, dz)
+    g.ev(f"seekShow(DECK_CREW.find(c => c.p.id === '{who}').p, Math.floor(shipNow()), null, null)"); g.step(3); g.page.screenshot(timeout=90000, path=f'{OUT}/t5_chip.png')
+    g.page.click('#seek'); g.step(3); print('E chip from', dist(g, who), g.ev(CARD)); g.page.screenshot(timeout=90000, path=f'{OUT}/t6_chip_card.png')
     if g.ev("!!(CHAT && CHAT.far)"):
         g.ev("chatDo('walk-over')")
         for k in range(40):
@@ -66,7 +68,7 @@ with sync_playwright() as pw:
         print('   chip walk arrived', g.ev(CARD), dist(g, who))
     # walking off with a far card open (no Walk over): does it close or stay?
     g.ev("chatClose()"); g.step(3); tap_on(g, who) if dist(g, who) > 2.5 else None
-    g.ev(f"(() => {{ const a = DECK_CREW.find(c => c.p.id === '{who}'); const s = cellPos(...nearestOpen(a.x - 7, a.z, player)); player.obj.position.set(s.x, player.obj.position.y, s.z); target.copy(player.obj.position).setY(.7); player.stop(); }})()"); g.step(5)
+    place(dx, dz)
     tap_on(g, who); g.step(3); print('F far card', g.ev(CARD)['chat'])
     g.ev("playerGo(cellAt(player.obj.position.x + 10, player.obj.position.z), () => {})"); g.step(200); print('   walked away', dist(g, who), g.ev(CARD)['chat'])
     print('errors', g.errors[:5]); br.close()
