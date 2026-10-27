@@ -49,13 +49,24 @@ The user's answers (2026-10-26): C1 yes, C2 yes, C3 they wait at the ramp up to 
   bigevents OK (switched-on copy); day_check 28 and 29 OK; arrows_check vessel (the arrow-follower) OK;
   controller_check vessel OK.
 
+## Switch-on round (2026-10-27, lead 40: everything ships ON; RV22 reviewing)
+- claude/vessel 0340b6f9: df796cab the arrival crowd without a venue (its places the bay's crowd pool, held for
+  nobody: a venue held all 108 spots for its goers and shut out the ramp meeting's cast; RV22's bigevents); 0f53dd16
+  the vessel's gathering tags in EV_MEET_TAGS (standing easy on shift counts as work) and day_check's Works tea excuses
+  an event in the tea hour (the chain is the Works crew's break that Sunday; lead 40: fine as is); 0340b6f9 RV22's play
+  notes (vesselFetch's flag only once someone comes, "at the fabricator", homeFind without a pronoun for Isak).
+- On ON copies: bigevents OK, day_check 28 OK (and off OK), interactions OK, join OK, check_fast OK. RV22 ran
+  events, day 27/29/30, arrows plain/teachoff/senior, controller: OK. The 24j hook: RV22 reviews it (no E3 seat now).
+- Fresh container setup: plans/testing-guide.md section 2 (CADET_CHROME=/opt/pw-browsers/chromium, CADET_WORK with
+  three and acorn). Under load join_check can time out loading the page: rerun alone.
+
 ## Loose ends (in order)
-1. arrows_check vessel with `teachoff` and with `senior` (written, not yet run); day_check 27 and 30 on the latest copy.
-2. join_check and interactions_check on a switched-on copy; a phone-size screenshot set for the review.
+1. RV22's verdict on 0340b6f9; BM18 merges it into staging-0.94.0.
+2. A phone-size screenshot set for the review (if asked).
 3. Making the round one is quick (done by about 09:50 when you follow the arrows: steps of 3+2+10+3+5 minutes): the
    spec's 09:30-13:00 may want longer holds (VESSEL_STEPS minutes) if the user wants it to fill the morning.
 4. The stand-in words (marked in content/banks/event-veyliVessel.lines, "VB1's stand-ins") for a writer to polish.
-5. tools/affected.py: day28-30 at the switch-on turn.
+5. tools/affected.py: day28-30 at the switch-on turn. Optional (lead 40): a crew line about late tea after the chain.
 
 ## Gotchas
 - The data block runs at load before MEETING_SCRIPTS and the slot's consts: functions or vars only there.
