@@ -27,6 +27,7 @@
 #   unplug    disconnect: stop walking at once, pause if used lately; reconnect resumes (deck, marks)
 #   odd       a pad that doesn't report the standard layout, and two pads (deck)
 #   s5cases   Step 5 (S5-6): the old-mysteries board by pad (ring, A, Take) and a head-scratcher's Fault notes (suspects, Call it), P5_STEP5 on (pick, panels)
+#   s6cases   Step 6 (S6-8): P6, P7 and P8 in Fault notes by pad at the Day 25 19:00 preset (a suspect and Call it, a grid cell, a toggle and To the rig), P5_STEP6 on (pick, panels)
 #   vessel    A Veyli vessel needs help by pad, in a copy switched on: Calder and the sheet, the ramp's replies, the chain, the helper card and the making steps (VB1)
 # --inventory: with reach, runs its touch half even before the panels package (the list of what there is to reach).
 # --selftest: runs the parts on a copy with this check's own small stand-in driver (to prove the parts before section 26).
@@ -43,7 +44,7 @@ ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
 GAME = pathlib.Path(ARGS[0])
 ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'door', 'reach', 'day', 'games', 'unplug', 'odd', 'shut',
-             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'm19', 'm20', 's5cases', 'vessel', 'ending']
+             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'm19', 'm20', 's5cases', 's6cases', 'vessel', 'ending']
 PARTS = ARGS[1:] or ALL_PARTS
 SHOTS = WORK / 'test' / 'ctl_shots'; SHOTS.mkdir(parents=True, exist_ok=True)
 ARGS_GL = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
@@ -2687,6 +2688,66 @@ def part_s5cases(pw, src, tag):
     if pe: fails.append(f'page errors: {pe[:2]}')
     r.close(); return fails
 
+# Part "s6cases" (S6-8, PZ6): Step 6's head-scratchers in Fault notes by pad, in a copy with P5_STEP6 on, at the spec's
+# preset (Day 25, 19:00; set on paper): an Engine Specialist with P6, P7 and P8's first cases shown. Each case by the
+# D-pad and A: its "Case N" button; P6 a suspect, then Call it; P7 a grid cell (it marks yes); P8 a cartridge toggle (it
+# picks it) and To the rig (the arrow there)
+S6_LINE = "const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');"
+S6_SETUP = r"""(() => { skipTo(24 * 1440 + 1140); const W = worksInit(shipNow()); if (!W) return false; W.rank = 'specialist'; W.tier = 4;
+  W.tr = Object.assign({}, W.tr, { t3: 15, m19: 17, t4: 22 }); W.tools = Object.assign({}, W.tools, { scanner: [5, 0], pipekit: [12, 0], tester: [17, 0] });
+  W.op = Object.assign({}, W.op, { 23: ['p6', 'p7'], 25: ['p8'] }); const C = caseState(); C.open = [];
+  for (const k of ['p6', 'p7', 'p8']) { delete SHIP.flags['case.' + k + '.first']; WORK_MECH[k].open(ladderRow(k), 25); const c = caseById(flag('case.' + k + '.first')); if (!c) return 'no ' + k; caseShow(c, caseJob(c)); }
+  const c7 = C.open.find(c => c.kind === 'p7'), c8 = C.open.find(c => c.kind === 'p8'); caseClue(c7.id, 'f0'); caseClue(c8.id, 'g0');
+  goToDeck(5); return C.open.map(c => c.kind).join(','); })()"""
+def part_s6cases(pw, src, tag):
+    fails = []
+    if S6_LINE not in src: return ['the build has no P5_STEP6 switch line']
+    r = Run(pw, src.replace(S6_LINE, 'const P5_STEP6 = P5_STEP5 && true;'), f'{tag}_s6', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    got = r.ev(S6_SETUP)
+    if got != 'p6,p7,p8': r.close(); return [f'the preset (Day 25, 19:00) did not show the three cases: {got}']
+    r.step(20)
+    open_notes = "(typeof worksTabAdd === 'function' ? (deviceShow('works'), deviceDo({ app: 'works', do: 'tab', arg: 'faults' }), deviceShow('works')) : deviceShow('faultnotes'))"
+    for n, kind in enumerate(['p6', 'p7', 'p8']):
+        r.ev(open_notes); r.step(6)
+        idx = r.ev(f"caseState().open.filter(c => !c.wait).findIndex(c => c.kind === '{kind}') + 1")
+        b = s5_pad_to(r, rf'^Case {idx}$')
+        if not b: fails.append(f'{kind}: the D-pad never reached its Case {idx} button (focus {r.ev(S5_FOCUS)!r})'); continue
+        r.press('A'); r.step(4)
+        if r.ev("CASE_UI.at && caseById(CASE_UI.at).kind") != kind: fails.append(f'{kind}: A on {b!r} did not show it ({r.ev("CASE_UI.at")})'); continue
+        if kind == 'p6':
+            sus = s5_pad_to(r, r'^(✕ )?[A-Z][a-z].*: ')
+            call = s5_pad_to(r, r'^Call it')
+            if not sus or not call: fails.append(f'p6: the D-pad never reached a suspect or Call it ({sus!r} {call!r})')
+            else:
+                r.press('A'); r.step(4)
+                if not r.ev("!!CASE_UI.ask"): fails.append(f'p6: A on {call!r} did not ask to call it')
+                else: print(f'  P6 by pad: {sus!r}, {call!r}'); r.ev("CASE_UI.ask = null")
+        elif kind == 'p7':
+            cell = s5_pad_to(r, r'^(✕ )?\d( ✓)?$')
+            if not cell: fails.append(f'p7: the D-pad never reached a grid cell (focus {r.ev(S5_FOCUS)!r})')
+            else:
+                before = r.ev("p7Grid(caseById(CASE_UI.at)).k.src.grid"); r.press('A'); r.step(4); after = r.ev("p7Grid(caseById(CASE_UI.at)).k.src.grid")
+                if before == after or 'y' not in after: fails.append(f'p7: A on the cell {cell!r} did not mark it ({before!r} -> {after!r})')
+                else: print(f'  P7 by pad: cell {cell!r} -> {after!r}')
+        else:
+            t = s5_pad_to(r, r'^\d( ✓)?$')
+            if not t: fails.append(f'p8: the D-pad never reached a cartridge toggle (focus {r.ev(S5_FOCUS)!r})')
+            else:
+                r.press('A'); r.step(4)
+                sel = r.ev("p8Of(caseById(CASE_UI.at)).sel")
+                if not sel: fails.append(f'p8: A on {t!r} did not pick it')
+                go = s5_pad_to(r, r'^(To the rig|Run the test)$')
+                if not go: fails.append('p8: the D-pad never reached To the rig')
+                else:
+                    r.press('A'); r.step(4)
+                    g = r.ev("(() => { const g = IX_GOAL; return g ? [g.deck, g.place || null] : null; })()")
+                    print(f'  P8 by pad: {t!r} picked ({sel}), {go!r} -> goal {g}')
+                    if not g or g[1] != '5-shop-4': fails.append(f'p8: A on {go!r} did not set the arrow to the rig: {g}')
+    pe = [e for e in r.errors if e.startswith('pageerror')]
+    if pe: fails.append(f'page errors: {pe[:2]}')
+    r.close(); return fails
+
 # parts that need a package: 'not yet' until PAD_BUILT names it
 # Part "vessel" (VB1 for lead 40; plans/veyli-vessel-spec.html section 7): A Veyli vessel needs help played by pad, in a
 # copy with EV_VESSEL_ON switched on, at the spec's four starting points (set on paper, as Dev mode's presets would):
@@ -2771,8 +2832,8 @@ def part_vessel(pw, src, tag):
 
 # parts that need a package: 'not yet' until PAD_BUILT names it
 NEEDS = {'ending': ['base', 'deck', 'pick', 'panels'], 'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick'], 'door': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'], 'vessel': ['base', 'deck', 'pick', 'panels'],
-         'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck'], 'shut': ['panels'], 's5cases': ['pick', 'panels']}
-PART_FN = {'ending': part_ending, 'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day, 'shut': part_shut, 's5cases': part_s5cases, 'vessel': part_vessel}   # 'reach' joins when the pad half is written
+         'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck'], 'shut': ['panels'], 's5cases': ['pick', 'panels'], 's6cases': ['pick', 'panels']}
+PART_FN = {'ending': part_ending, 'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day, 'shut': part_shut, 's5cases': part_s5cases, 's6cases': part_s6cases, 'vessel': part_vessel}   # 'reach' joins when the pad half is written
 if 'function mysOpen' not in SRC or (S5_LINE not in SRC and not re.search(r'\bconst P5_STEP5\s*=\s*true\b', SRC)): PART_FN.pop('s5cases')   # (BM19) or already on (0.94.0)   # no board in this build: "not yet", never a pass
 for k, v in OLD_NEEDS.items(): NEEDS[OLD_NAME.get(k, k)] = v; PART_FN[OLD_NAME.get(k, k)] = legacy(k)
 

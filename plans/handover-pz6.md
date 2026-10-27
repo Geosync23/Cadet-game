@@ -15,7 +15,14 @@
 1. P6 Does it add up? (and the shared `caseAtWork`, `caseFirstShow`, `caseFirstFreeze`; puzzle_check's Step 6 parts).
 2. P7 Faded labels (the grid; a one-line `K.act` hook in caseAct).
 3. P8 Swap testing (the test rig).
-4. controller_check reach for the new kinds; this note; review fixes.
+4. controller_check part s6cases; DEV_NOTES, design-doc, this note. Turns: 3046fb5, e3804ce, fd1f27f, then turn 4.
+
+## Loose ends
+- Drive-coil (coil module) P8 cases wait for S6-4's real Deck 6 coils (none to work on yet); puzzle_check expects
+  them only when the build has coils.
+- F3's old once-only pointer "Cross out what was tried" can point at a P6 pair (it's P3's wording); harmless, once ever.
+- Roll cases: P6-P8 post on real faults at the Specialist's rate (.33, at most 2 open) once their rows open.
+- Later: review S6-7's "point him to a clue" call into the case panel (24k).
 
 ## What I built (24k's slot, after the old-mysteries board)
 - **Shared:** `caseAtWork(now)` (your day shift, or a night from section 28's `p5NightAt`), `caseFirstShow(c, j, kid, fb)`
@@ -54,6 +61,8 @@ units go inside the number ("17 kW").
 ## Tests
 - `python3 puzzle_check.py BUILD.html p6 [p7 p8]`: Step 6's parts on a copy with `P5_STEP6 = P5_STEP5 && true`; the
   off test on the build itself (Step 6 is behind ?p5s6). With no part named: the old check, Step 5's parts, then Step 6's.
+- `python3 controller_check.py BUILD.html s6cases`: the Day 25 19:00 preset (on paper), P6-P8 in Fault notes by pad.
+- Results, every turn: cadet_test ALL IDENTICAL vs 64e296df (off), check_fast OK, puzzle_check p6 p7 p8 OK.
 
 ## Gotchas
 - Don't edit the game while check_fast runs; killing it leaves its workers running (kill them by pid, not `pkill -f`
