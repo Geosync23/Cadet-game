@@ -173,3 +173,124 @@
 - Coming up: the old-mysteries board, in the Works bay. Old cases for a quiet day.
 == next.wait.mys
 - The old-mysteries board is up, beside the job board. Take one when you like.
+
+// ---- Step 6 (S6-8, PZ6 for lead 41): stand-ins until the head writer's (spec section 10, cases.lines additions)
+// P6 Does it add up?: sums in pairs round a line's meters; then the batteries' balance (M19's third stage)
+== works.mech.p6
+- Does it add up?
+== next.p6
+- Coming up: Does it add up? Sums at the meters, then the batteries.
+== next.wait.p6
+- Does it add up?: the Chief has a sum for you.
+== case.title.p6
+- {machine} {shows}. The sums don't add up
+== case.title.p6.power
+- The battery banks don't balance
+== case.p6.line
+- The line sends {a}. {b} arrive. {n} going missing somewhere.
+== case.p6.pair
+- {machine} and {other}: in {n}, out {a} + {b}.
+== case.p6.short
+- {n} going missing here.
+== case.p6.adds
+- It adds up.
+== case.p6.head
+- Missing: {n}. Each meter sums two feeds. Which two don't add up?
+== case.hint.p6.1
+- A pair that adds up is fine, both of them. Two short pairs share your leak.
+== case.wrong.p6
+- New {part} in at {machine}. The sums still don't add up.
+== chief.p6.title
+- Does it add up?
+== chief.p6.1
+- In must equal out. If it doesn't, something's going missing between.
+== chief.p6.2
+- A pair that adds up is fine, both feeds. Two short pairs share the culprit.
+
+// P7 Faded labels: a light-relay panel's worn labels as a grid (relays down, rooms across); then you relabel it
+== works.mech.p7
+- Faded labels
+== next.p7
+- Coming up: Faded labels. A panel whose labels have worn off.
+== next.wait.p7
+- Faded labels: the Chief has a panel nobody can read.
+== case.title.p7
+- {machine}: the labels have worn off, and one relay chatters
+== case.p7.flick
+- The flicker's in the {room}. One relay's chattering. The labels are worn off.
+== case.p7.sketch
+- Pell's old sketch: relay {a} feeds the {room}.
+== case.p7.drill
+- The power drill's log: relay {a} off first, and the {room} went dark.
+== case.p7.flip
+- You flip relay {a}'s test switch: the lights blink in the {room}.
+== case.p7.not
+- Pell's sketch, a note in the margin: relay {a} isn't the {room}.
+== case.p7.head
+- Which relay feeds which room? Tap a cell: yes, no, blank.
+== case.p7.flicker
+- flickers
+== case.p7.relay
+- Relay {a}
+== case.p7.relabel
+- You relabel the panel, A to {a}, in big clear letters. Nobody has to guess again.
+== case.hint.p7.1
+- Every relay you can place on another room isn't it. The one left over feeds the flicker.
+== case.wrong.p7
+- New relay in at {a}. Still chattering. Wrong relay.
+== chief.p7.title
+- Faded labels
+== chief.p7.1
+- Each relay feeds one room. Place the ones you can; the one left over is the culprit.
+== chief.p7.2
+- Relabel the panel when you're done. The next person will thank you.
+
+// P8 Swap testing: five alike, one bad; the machine shop's test rig says how many in a group, not which; three runs
+== works.mech.p8
+- Swap testing
+== next.p8
+- Coming up: Swap testing. Five alike, one bad, and the test rig.
+== next.wait.p8
+- Swap testing: the machine shop's rig is free.
+== case.title.p8
+- {machine}: one of five {thing}s is bad. They all look alike
+== case.p8.cart
+- cartridge
+== case.p8.module
+- coil module
+== case.p8.rig
+- On the test rig: five {thing}s from {machine}. It says how many in a group are bad.
+== case.p8.run
+- Run {n}: {thing} {text} on the rig. {word}.
+== case.p8.one
+- One bad
+== case.p8.none
+- None bad
+== case.p8.go
+- Take them to the test rig in the machine shop, Deck 5.
+== case.p8.head
+- The test rig: pick a group, run it. {n} runs left.
+== case.p8.pick
+- Which go on the rig? Tap to pick.
+== case.p8.wait
+- Running: ready at {time}.
+== case.p8.runit
+- Run the test
+== case.p8.gorig
+- To the rig
+== case.p8.rigname
+- The test rig, in the machine shop
+== case.p8.running
+- Running. Ten minutes.
+== case.p8.out
+- Out of runs. {name}: "Fit new ones all round, then."
+== case.hint.p8.1
+- Put about half on the rig. None bad? It's in the other half. One bad? It's in this half.
+== case.wrong.p8
+- New {thing} in at {a}. Still bad. It was another one.
+== chief.p8.title
+- Swap testing
+== chief.p8.1
+- The rig says how many, not which. Test half, then half of that.
+== chief.p8.2
+- Three runs find one in eight. Five is easy, if you plan the runs.

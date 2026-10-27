@@ -1548,6 +1548,93 @@ def part_m20(g):
     check(json.loads(a['save']) == {'star': None, 'sweeps': 0, 'day': 3, 'week': -1}, f"m20: the save read back, junk cleaned ({a['save']})")
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm20: differs the second time')
 PARTS['m20'] = part_m20
+# 28b M21 the Monday briefing (S6-2, MA6): on paper, Day 22 from 05:00 for a Senior Officer. Booked at 05:00 (the Captain
+# and the chiefs on shift, a seat each at the conference table, 08:30 for 45 minutes), never through the ladder (W.cur
+# stays the ladder's); the notice once you're up, the Mail after it, the hourly notice while you hold a job, the level 1
+# arrow from 08:15; the meeting's three choices and what each does (a shutdown booked for tomorrow, or none to book; an
+# inspection job held for you on your worst machine; the parts on the shelves on Thursday at 10:00); trained at the first;
+# the short one the next Monday (20 minutes); a missed one keeps the full one; none for an Officer; the save cleaned.
+M21 = r"""((k, opt) => {
+  opt = opt || {};
+  const out = { notices: [], mails: [], book: null, appt: null, arrow: null, cur: [], reply: [], effect: null };
+  const reset = () => { SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = []; SHIP.device.appts.length = 0; MEETINGS.length = 0;
+    MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; if (typeof DIALOGUE !== 'undefined' && DIALOGUE) dialogueEnd(true); GUIDE.list = []; };
+  reset();
+  const pn = promoNotice; promoNotice = (text) => out.notices.push([shipNow() % 1440, text]);
+  try {
+    const d = opt.day || 22; setShipNow((d - 1) * 1440 + 240); machinesNow(); const W = worksInit(); W.tier = opt.tier || 3; W.rank = W.tier >= 3 ? 'senior' : 'officer';
+    if (opt.first) m21State().first = opt.first;
+    if (opt.held) { const m = machineList().find(x => !x.stub && x.deck === 4 && panelPlace(x.id)); SHIP.jobs.push({ id: 'held:x', machine: m.id, deck: 4, kind: 'repair', urgency: 0, posted: shipNow(), found: shipNow(), claimedBy: 'you', status: 'claimed', parts: [], start: shipNow() }); }
+    if (opt.shut) SHIP.jobs.push({ id: 'shut:x', machine: '6-junction-1', deck: 6, kind: 'repair', urgency: 0, posted: shipNow(), found: shipNow(), claimedBy: null, status: 'waiting', shut: true, reserved: SD_SLOT, parts: [] });
+    for (let m = 240; m <= 510; m++) {
+      const t = (d - 1) * 1440 + m; setShipNow(t); worksCareerTick(t); occasionsTick(t);
+      if (SHIP.works.cur) out.cur.push(SHIP.works.cur.id);
+      const r = m21Rec(d); if (r && !out.book) out.book = [m, r.id, r.at % 1440, r.len, r.deck, r.room];
+      if (!out.arrow && (GUIDE.list || []).some(x => x.id === 'm21:meet:' + d)) out.arrow = [(GUIDE.list.find(x => x.id === 'm21:meet:' + d)).level, m];
+    }
+    out.mails = SHIP.mail.filter(x => /briefing/i.test(x.subject || '')).map(x => [x.at % 1440, x.from, x.subject]);
+    const r = m21Rec(d); if (!r) return out;
+    const a = apptList().find(x => x.occ === r.key); out.appt = a ? [a.with.slice(), a.places || null, a.at % 1440, a.len] : null;
+    const mt = MEETINGS.find(x => x.id === r.key); out.script = mt ? mt.script : null;
+    if (opt.miss) { for (let m = 511; m <= 560; m++) { const t = (d - 1) * 1440 + m; setShipNow(t); worksCareerTick(t); occasionsTick(t); } out.status = r.status; out.tr = SHIP.works.tr.m21 === undefined ? null : SHIP.works.tr.m21; return out; }
+    dialogueShow(mt.script, mt); r.met = true;
+    for (let n = 0; n < 30 && DIALOGUE; n++) { const l = DIALOGUE.queue[DIALOGUE.i]; if (l.choice) { out.choices = l.choice.map(c => c.text); dialogueChoose(k); const nx = DIALOGUE.queue.slice(DIALOGUE.i); out.reply = nx.slice(0, 2).map(x => [x.who, typeof x.text === 'string' ? x.text : '']); } else dialogueNext(); }
+    out.tr = SHIP.works.tr.m21 === undefined ? null : SHIP.works.tr.m21; out.side = JSON.parse(JSON.stringify(m21State()));
+    out.op = Object.values(SHIP.works.op).flat().includes('m21');
+    if (k === 0) { const b = sdPeek().book[0]; out.effect = b ? [b.day, b.at, b.branch, b.job] : null; }
+    if (k === 1) { const j = SHIP.jobs.find(x => x.reserved === M21_SLOT); out.effect = j ? [j.m21, heldForYou(j), j.machine, Math.round((j.until - shipNow()) / 1440), !!j.cause] : null;
+      const cond = id => SHIP.machines[id].cond; out.worst = j ? machineList().filter(x => !x.stub && SHIP.machines[x.id] && panelPlace(x.id) && !ENGINE_KINDS.has(x.kind) && jobTier({ machine: x.id }) <= playerTier() && x.id !== j.machine && !SHIP.jobs.some(y => y !== j && y.machine === x.id && y.status !== 'done')).every(x => cond(x.id) >= cond(j.machine)) : null; }
+    if (k === 2) { const before = M21_PARTS.map(p => SHIP.stores[p] || 0); const seen = [];
+      for (let h = (d - 1) * 24 + 10; h <= (d + 3) * 24; h++) { const t = h * 60; for (const f of WORK_TICKS) try { f(t, true); } catch (e) { } if (!seen.length && (SHIP.stores[M21_PARTS[0]] || 0) !== before[0]) seen.push([Math.floor(t / 1440) + 1, t % 1440]); }
+      out.effect = [m21State().order, m21State().got, M21_PARTS.map((p, i) => (SHIP.stores[p] || 0) - before[i]), seen[0] || null, SHIP.mail.filter(x => x.from === 'Stores' && /parts order/i.test(x.subject)).length]; }
+    return out;
+  } finally { promoNotice = pn; }
+})"""
+M21_SAVE = r"""(() => { SHIP.works = null; setShipNow(21 * 1440 + 300); const W = worksInit(); W.side = { m21: { first: 'x', last: -4, pick: 7, order: 25.5, got: 3, sd: null, junk: 1 } }; return JSON.stringify(m21State()); })()"""
+def part_m21(g):
+    on = g.ev("typeof P5_M21 !== 'undefined' && P5_M21 && typeof m21Raise === 'function'")
+    if not on: print('  m21: not in this build (P5_M21 off)'); return
+    r = [g.ev(f"({M21})({k})") for k in range(3)]
+    a = r[0]
+    print(f"  m21 booked {a['book']}, appt {a['appt']}, notices {a['notices']}, Mail {a['mails']}, arrow {a['arrow']}, script {a['script']}")
+    check(a['book'] and a['book'][:6] == [300, 'm21.brief', 510, 45, 1, 'O'], f"m21: Day 22's briefing booked at 05:00 for 08:30, 45 minutes, the observation room ({a['book']})")
+    ap = a['appt'] or [[], {}, 0, 0]
+    check(ap[0][:1] == ['marrow'] and {'vance', 'calder', 'sato', 'holt'} <= set(ap[0]) and ap[2] == 510 and ap[3] == 45, f"m21: the Captain, Vance and the chiefs at 08:30 ({ap})")
+    check(ap[1] and all(ap[1].get(p, '').startswith('1-conf-') for p in ap[0]) and len(set(ap[1].values())) == len(ap[0]) and '1-conf-10' not in ap[1].values(), f"m21: a seat each at the table, yours (1-conf-10) left free ({ap[1]})")
+    check('m21' not in a['cur'] and not a['op'], f"m21: never through the ladder ({set(a['cur'])}, opened {a['op']})")
+    check(len(a['notices']) == 1 and a['notices'][0][0] == 360 and 'briefing' in a['notices'][0][1], f"m21: one notice once you're up, 06:00 ({a['notices']})")
+    check(len(a['mails']) == 1 and a['mails'][0][0] >= 360, f"m21: one Mail, the record, after the notice ({a['mails']})")
+    check(a['arrow'] == [1, 495], f"m21: a level 1 arrow from 08:15 ({a['arrow']})")
+    check(a['choices'] and len(a['choices']) == 3, f"m21: three choices ({a.get('choices')})")
+    check(a['tr'] == 22 and a['side']['first'] == 22, f"m21: trained at the first briefing ({a['tr']}, {a['side']})")
+    print(f"  m21 shutdown, no job: {a['reply']}; worry: {r[1]['effect']} {r[1]['reply'][:1]}; parts: {r[2]['effect']} {r[2]['reply']}")
+    check(a['effect'] is None and a['reply'] and a['reply'][0][0] == 'marrow', f"m21: a shutdown with no job waiting: approved, nothing booked ({a['effect']})")
+    s = g.ev(f"({M21})(0, {{ shut: true }})")
+    nt = g.ev("typeof P5_NIGHT !== 'undefined' && P5_NIGHT")
+    print(f"  m21 shutdown with a job waiting: {s['effect']} {s['reply'][:1]}")
+    check(s['effect'] and s['effect'][0] == 23 and s['effect'][1] == (1200 if nt else 600) and s['effect'][3] == 'shut:x', f"m21: the job waiting for a shutdown booked for tomorrow ({'20:00, before the night' if nt else '10:00'}) ({s['effect']})")
+    w = r[1]['effect']
+    check(w and w[0] == 22 and w[1] and w[3] == 3 and w[4] and r[1]['worst'], f"m21: the worry: an inspection job on your worst machine, held for you three days ({w}, worst {r[1]['worst']})")
+    p = r[2]['effect']
+    check(p and p[0] == 0 and p[1] == 25 and all(x == 2 for x in p[2]) and p[3] == [25, 600] and p[4] == 1, f"m21: the parts order on the shelves on Thursday (Day 25), two of each, Stores' Mail ({p})")
+    h = g.ev(f"({M21})(2, {{ held: true }})")
+    print(f"  m21 holding a job: notices {[n[0] for n in h['notices']]}")
+    check([n[0] for n in h['notices']] == [360, 420, 480], f"m21: holding another job, a notice each hour till the briefing ({h['notices']})")
+    n = g.ev(f"({M21})(2, {{ day: 29, first: 22 }})")
+    check(n['book'] and n['book'][1:4] == ['m21.short', 510, 20], f"m21: the next Monday the short one, 08:30-08:50 ({n['book']})")
+    m = g.ev(f"({M21})(2, {{ miss: true }})")
+    check(m['status'] == 'missed' and m['tr'] is None, f"m21: missed: not trained ({m.get('status')}, {m.get('tr')})")
+    m2 = g.ev(f"({M21})(2, {{ day: 29 }})")
+    check(m2['book'] and m2['book'][1] == 'm21.brief', f"m21: after a missed first one, the full one again ({m2['book']})")
+    o = g.ev(f"({M21})(2, {{ tier: 2 }})")
+    check(o['book'] is None and not o['notices'], f"m21: none for an Officer ({o['book']})")
+    t = g.ev(f"({M21})(1, {{ day: 23 }})")
+    check(t['book'] is None, "m21: none on a Tuesday")
+    sv = json.loads(g.ev(M21_SAVE))
+    check(sv == {'first': 0, 'last': 0, 'pick': -1, 'order': 0, 'got': 3, 'sd': 0}, f"m21: the save read back, junk cleaned ({sv})")
+    b = [g.ev(f"({M21})({k})") for k in range(3)]
+    check(json.dumps(r, sort_keys=True) == json.dumps(b, sort_keys=True), 'm21: differs the second time')
+PARTS['m21'] = part_m21
 
 # ---- favour cases (24l, seat E2 on H's behalf; not a ladder row, so it runs after the rows as EXTRA['fcase']): every
 # script has three clue places and its answer (sus.1) among the options; a friend asks (Mail, an offered favour) on the
@@ -2242,6 +2329,10 @@ with sync_playwright() as pw:
         if r['id'] == 't4' and ev("typeof pu4Ready === 'function'"):   # (S6-3) 24u's Tier 4 test job, no training either: promo_beats_check's t4 parts test it
             print(f"t4 ({r['name']}): 24u's test job, not a training (promo_beats_check t4before ...)")
             return
+        if r['id'] == 'm21' and ev("!!(WORK_MECH.m21 && WORK_MECH.m21.own)"):   # 28b's own briefing (S6-2): never through the ladder, trained at the first briefing
+            print(f"m21 ({r['name']}): 28b's own briefing, not a training (its part below)")
+            PARTS['m21'](g)
+            return
         if r['id'] == 't3' and ev("typeof puPassed === 'function'"):   # 24u's Tier 3 test job (S5-2) is no training either: promo_beats_check's t3 parts test it
             print(f"t3 ({r['name']}): 24u's test job, not a training (promo_beats_check t3before ... t3toast)")
             return
@@ -2277,6 +2368,20 @@ with sync_playwright() as pw:
                 print(f"(on a copy with P5_STEP5 switched on)"); row_check(g5, g5.ev, r)
             if g5.errors: fail('page errors (P5_STEP5 copy): ' + ' | '.join(g5.errors[:5]))
             g5.close()
+        finally: cp.unlink(missing_ok=True)
+    # Pillar 5 Step 6's rows (S6-2 on: m21) exist only with P5_STEP6 on: with it off in this build, run on a copy with it on
+    P6_LINE = "const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');"
+    if P6_LINE in src0 and (not only or only & {'m21'}):
+        cp = WORK / 'test' / ('_mech_p6_' + str(os.getpid()) + '_' + pathlib.Path(sys.argv[1]).name); cp.write_text(src0.replace(P6_LINE, 'const P5_STEP6 = P5_STEP5 && true;', 1))
+        try:
+            g6 = Game(pw, str(cp)); rows6 = g6.ev("CAREER_LADDER.map(r => ({ id: r.id, name: r.name, size: r.size, inBuild: !!WORK_MECH[r.id], stages: (r.stages || []).length }))")
+            base = {r['id'] for r in rows}
+            for r in rows6:
+                if r['id'] in base or (only and r['id'] not in only) or r['id'] not in {'m21'}: continue   # (each Step 6 piece adds its id here)
+                if not r['inBuild']: print(f"{r['id']} ({r['name']}): not in this build (P5_STEP6 on)"); continue
+                print(f"(on a copy with P5_STEP6 switched on)"); row_check(g6, g6.ev, r)
+            if g6.errors: fail('page errors (P5_STEP6 copy): ' + ' | '.join(g6.errors[:5]))
+            g6.close()
         finally: cp.unlink(missing_ok=True)
     if not only or 'ps' in only: part_ps(g)
     if (not only or 'side' in only) and ev("typeof worksSideXp === 'function'"):
