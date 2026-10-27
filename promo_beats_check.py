@@ -342,6 +342,55 @@ def part_t4test(g):
 T3_TEST = """const W = __w(15, 300, { xp: 60, tr: { ps: 12, t2: 9 } }); W.tier = 2; W.rank = 'officer'; __friends();
       for (const r of CAREER_LADDER) if (r.id !== 't3' && r.tier <= 2) { W.tr[r.id] = W.tr[r.id] || 9; (W.op[9] = W.op[9] || []).push(r.id); }
       puSet(15); flagSet('pu3.told', 14); flagSet('pu3.notice', 14); setShipNow(14 * 1440 + 361); machinesNow(); careerClock(shipNow(), true); __bay();"""
+# ---- S6-3 turn 3 (W7): the result when your shift starts (Day 22, 22:40), and the Captain's engine badge
+T4_RES = """const W = __w(22, 760, { xp: 60, tr: { ps: 12, t2: 9, t3: 15, m19: 17, t4: 22 } }); W.tier = 3; W.rank = 'senior'; __friends();
+      const T = pu4Set(22); T.passed = true; T.tries = 1;"""
+def part_t4passed(g):
+    if not t4on(g, 't4passed'): return
+    print('(t4passed) the result at 22:40: Calder finds you and says it; asleep, a knock; not found, by Mail:')
+    r = g.ev("""(() => { """ + T4_RES + """ const out = { when: hhmm(pu4ResWhen() % 1440) }; setShipNow(21 * 1440 + 1300); __bay(); __tick();
+      out.next = worksNext(); out.rows = __rows(22).filter(x => /result/i.test(x));
+      setShipNow(21 * 1440 + 1361); goToDeck(1); __tick(); out.seek = !!PU4_LIVE.rseek; out.esc = (worksEscort({ id: 'calder' }, shipNow()) || {}).mode;
+      const keep = puNearMe; puNearMe = (id, r) => id === 'calder' ? true : keep(id, r); __tick(); puNearMe = keep;
+      out.dlg = DIALOGUE && DIALOGUE.id; """ + dlg_run(0) + """
+      out.w = [W.tier, W.rank, W.xp]; out.t4 = puT4(); out.ms = W.ms.filter(x => /^specialist/.test(x[0])); out.mail = __mail().filter(m => /^Chief Ines Calder: Your result/.test(m)).length;
+      out.invite = __mail().filter(m => /^Captain Odile Marrow: Your badge/.test(m)); out.badge = SHIP.occasions.filter(x => x.id === 'pu4Badge').map(x => hhmm(x.at % 1440) + ' day ' + (Math.floor(x.at / 1440) + 1));
+      const a = apptList().find(x => /^pu4Badge@/.test(String(x.occ))); out.places = a && a.places; out.next2 = worksNext(); out.rec = worksRecordHead().text;
+      """ + T4_RES.replace('const W =', 'const W2 =').replace('W.', 'W2.').replace('const T = pu4Set', 'const T2 = pu4Set').replace('T.passed', 'T2.passed').replace('T.tries', 'T2.tries') + """
+      __notes.length = 0; setShipNow(21 * 1440 + 1361); sleeping = true; __tick(true); sleeping = false; out.knock = [W2.tier, (puT4() || {}).res, __notes.filter(n => /knock/i.test(n)).length];
+      """ + T4_RES.replace('const W =', 'const W3 =').replace('W.', 'W3.').replace('const T = pu4Set', 'const T3 = pu4Set').replace('T.passed', 'T3.passed').replace('T.tries', 'T3.tries') + """
+      setShipNow(21 * 1440 + 1361); __tick(); setShipNow(21 * 1440 + 1392); __tick(); out.late = [W3.tier, (puT4() || {}).res, __mail().filter(m => /Your result/.test(m)).length]; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['when'] == '22:40' and '22:40' in r['next'] and r['rows'] and r['rows'][0].startswith('22:40'), f"t4passed: the result when the night starts, 22:40; What's next and the Schedule say so ({r['when']}, {r['next']}, {r['rows']})")
+    check(r['seek'] and r['esc'] == 'follow' and r['dlg'] == 'pu4.stairs', f"t4passed: 22:40, she comes to find you where you are; her words in person ({r['seek']}, {r['esc']}, {r['dlg']})")
+    check(r['w'] == [4, 'specialist', 0] and r['t4']['res'] == 22 and r['ms'] == [['specialist', 22]] and r['mail'] == 1, f"t4passed: Tier 4, Engine Specialist, xp 0, the milestone, the Mail as the record ({r['w']}, {r['ms']}, {r['mail']})")
+    check(r['badge'] == ['16:30 day 23'] and r['invite'] and '16:30' in r['invite'][0] and r['places'] and r['places'].get('marrow') == '1-ceremony-captain' and len(r['places']) == 4, f"t4passed: the badge booked for 16:30 the next day, the Captain's invite, the four on their spots ({r['badge']}, {r['invite']}, {r['places']})")
+    check('engine badge' in r['next2'] and 'Specialist · ' not in r['rec'], f"t4passed: What's next names the badge; the Record says Engine Specialist once ({r['next2']}, {r['rec']})")
+    check(r['knock'] == [4, 22, 1], f"t4passed: asleep at 22:40, she knocks: a notice, the night is yours ({r['knock']})")
+    check(r['late'] == [4, 22, 1], f"t4passed: not found in 30 minutes, by Mail ({r['late']})")
+
+def part_t4badge(g):
+    if not t4on(g, 't4badge'): return
+    print('(t4badge) the Captain pins your engine badge; your Deck 2 quarters said there first:')
+    r = g.ev("""(() => { """ + T4_RES + """ const out = {}; pu4Promote(21 * 1440 + 1361, 'met');
+      __notes.length = 0; setShipNow(22 * 1440 + 800); __bay(); __tick(); out.wake = __notes.slice(); out.rows = __rows(23).filter(x => /badge/.test(x));
+      __notes.length = 0; __said.length = 0; setShipNow(22 * 1440 + 961); __tick(); out.notice = __notes.slice();
+      setShipNow(22 * 1440 + 976); goToDeck(4); __tick(); out.arrow = GUIDE.list.filter(e => e.id === 'pu4:badge').map(e => e.level + ' ' + (e.goal() || {}).label + ' ' + (e.goal() || {}).place);
+      setShipNow(22 * 1440 + 991); goToDeck(1); player.obj.position.copy(cellPos(...PLACE_OF.get('1-ceremony-you').at)); occasionsTick(shipNow()); meetingsTick(shipNow());
+      out.dlg = DIALOGUE && DIALOGUE.id; out.pin = 0; """ + dlg_run(0) + """ out.t4 = puT4(); out.keep = (SHIP.social && SHIP.social.keepsakes || []).map(k => k.what);
+      out.quarters = __mail().filter(m => /^Chief Ines Calder: Your quarters/.test(m)); out.rec = worksRecordHead().text;
+      """ + T4_RES.replace('const W =', 'const W2 =').replace('W.', 'W2.').replace('const T = pu4Set', 'const T2 = pu4Set').replace('T.passed', 'T2.passed').replace('T.tries', 'T2.tries') + """
+      pu4Promote(21 * 1440 + 1361, 'met'); setShipNow(22 * 1440 + 1006); sleeping = true; __tick(true); sleeping = false;
+      out.wait = [flag('pu4.badge.wait'), pu4BadgeDay(), SHIP.occasions.filter(x => x.id === 'pu4Badge' && x.status === 'asked').map(x => Math.floor(x.at / 1440) + 1)];
+      setShipNow(23 * 1440 + 1096); __tick(); out.missed = [(puT4() || {}).badge, __mail().filter(m => /^Captain Odile Marrow: Your badge \\| We missed/.test(m)).length]; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(any('16:30' in n and 'badge' in n for n in r['wake']) and r['rows'] and r['rows'][0].startswith('16:30'), f"t4badge: the notice as you wake, the Schedule's row ({r['wake']}, {r['rows']})")
+    check(any('Go now' in n for n in r['notice']) and r['arrow'] and r['arrow'][0].startswith('1 ') and '1-ceremony-you' in r['arrow'][0], f"t4badge: 16:00 'Go now', a level 1 arrow from 16:15 to your spot ({r['notice']}, {r['arrow']})")
+    check(r['dlg'] == 'pu4.badge' and r.get('pin') and r['t4']['badge'] == 23 and r['t4']['move'] and r['t4']['move']['ready'] == 25, f"t4badge: the scene with the pin; your quarters ready for Thursday Day 25 ({r['dlg']}, {r['t4']})")
+    check(r['quarters'] and 'Thursday' in r['quarters'][0] and any('Engine Specialist' in k for k in r['keep']) and 'Senior Officer, Engine Specialist, Day 23' in r['rec'], f"t4badge: Calder's Mail as the record, the certificate, the Record's line ({r['quarters']}, {r['keep']}, {r['rec']})")
+    check(r['wait'][0] == 1 and r['wait'][1] == 24 and 24 in r['wait'][2], f"t4badge: asleep at 16:45, the Captain waits until the next afternoon ({r['wait']})")
+    check(r['missed'] == [24, 1], f"t4badge: awake and not there, by Mail by 18:15 ({r['missed']})")
+
 def part_t3pointer(g):
     if not t3on(g, 't3pointer'): return
     print('(t3pointer) the test morning and the board:')
@@ -479,7 +528,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4badge', part_t4badge)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')

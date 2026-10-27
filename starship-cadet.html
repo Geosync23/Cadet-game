@@ -57523,10 +57523,10 @@ function worksNext() {
 // the Record's first lines (section 19 asks): your rank, your Works reputation and "What's next"
 function worksRecordHead() {                             // null before SHIP.works (Days 0-1 keep the Record's old line)
   const W = SHIP.works; if (!W) return null; const tier = W.tier, v = { title: worksText('works.title.t' + tier, 'tier ' + tier), rank: worksRankTitle(W), band: worksBandWord(), next: worksNext() };
-  if (W.rank !== 'junior') v.title += ' · ' + v.rank;   // the title and rank together, never "Junior Technician · Junior Officer" (FX3, AR1)
-  const com = (W.ms.find(x => x[0] === 'commissioned') || [])[1], st = (W.ms.find(x => x[0] === 'stars') || [])[1], sen = (W.ms.find(x => x[0] === 'senior') || [])[1];   // sen: 24u's Senior Officer (S5-2)   // 24p: the ceremony; 24t: star logger (E3, 0.45.11)
+  if (W.rank !== 'junior' && !v.title.endsWith(v.rank)) v.title += ' · ' + v.rank;   // the title and rank together, never "Junior Technician · Junior Officer" (FX3, AR1); never "Engine Specialist · Specialist" (S6-3)
+  const com = (W.ms.find(x => x[0] === 'commissioned') || [])[1], spc = (W.ms.find(x => x[0] === 'specialist.badge') || [])[1], st = (W.ms.find(x => x[0] === 'stars') || [])[1], sen = (W.ms.find(x => x[0] === 'senior') || [])[1];   // sen: 24u's Senior Officer (S5-2)   // 24p: the ceremony; 24t: star logger (E3, 0.45.11)
   const ff = W.ms.filter(x => /^ff[1-3]$/.test(x[0])).sort((a, b) => a[0] < b[0] ? 1 : -1)[0], gr = ff ? +ff[0][2] : 0;   // E2's fault-finder grade (the highest)
-  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{title}. Your reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', worksText('works.record.commissioned', 'Commissioned Officer, Day {n}.', { day: com, n: com }), { n: com }) : '') + (sen ? ' ' + worksText('works.ms.senior', 'Senior Officer, Day {n}', { n: sen }) + '.' : '') + (st ? ' ' + worksText('works.ms.stars', 'Star logger, Day {n}.', { n: st }) : '') + (gr ? ' ' + worksText('works.ms.grade', 'Fault-finder grade: {grade}.', { grade: worksText('works.grade.' + gr, ['', 'Fault-finder', 'Senior fault-finder', 'Master fault-finder'][gr]), n: ff[1] }) : '') };
+  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{title}. Your reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', worksText('works.record.commissioned', 'Commissioned Officer, Day {n}.', { day: com, n: com }), { n: com }) : '') + (sen ? ' ' + worksText('works.ms.senior', 'Senior Officer, Day {n}', { n: sen }) + '.' : '') + (spc ? ' ' + worksText('works.ms.specialist', 'Senior Officer, Engine Specialist, Day {n}', { n: spc }) + '.' : '') + (st ? ' ' + worksText('works.ms.stars', 'Star logger, Day {n}.', { n: st }) : '') + (gr ? ' ' + worksText('works.ms.grade', 'Fault-finder grade: {grade}.', { grade: worksText('works.grade.' + gr, ['', 'Fault-finder', 'Senior fault-finder', 'Master fault-finder'][gr]), n: ff[1] }) : '') };
 }
 // ---- the device's Works app: Training, Work log, Tools; other sections add tabs with worksTabAdd (24k: Fault notes and
 // the Chief's notes): worksTabAdd({ id, title, order, view() -> [blocks], act?(verb, arg), badge?() -> number }); the
@@ -63063,7 +63063,7 @@ function puRepUp(b1) {                                   // worksRepTell's line 
 }
 function puNext(k) {                                     // worksNext's line for the Tier 3 test and the Senior Officer's beats (null: its own)
   const W = SHIP.works, T = puT3(), d = SHIP.time.day; if (!P5_PROMO3 || !W) return null;
-  if (P5_PROMO4 && W.tier === 3 && (!T || T.toast)) return pu4Next(k);   // (S6-3) a Senior's: the Tier 4 test
+  if (P5_PROMO4 && (W.tier === 3 && (!T || T.toast) || W.tier === 4 && puT4())) return pu4Next(k);   // (S6-3) a Senior's: the Tier 4 test; an Engine Specialist's beats
   if (!T) { if (W.tier !== 2) return null; const B = WORK_BANDS[2], at = b => B.findIndex(x => x[1] === b);
     return at(worksBand()) >= at('steady') && !ladderNeeds({ rep: 'relied' }, W) ? worksText('next.t3.steps', 'Your Tier 3 test needs Relied on and Power safety. You\'re {band} now.', { band: worksBandWord() }, k) : null; }
   if (!T.passed) return worksText('next.wait.t3', 'Your Tier 3 test is set. The job board, the Works bay, 09:00.', null, k);
@@ -63622,7 +63622,7 @@ function pu4OfferTick(now, skip) {                       // once a ship minute: 
   dialogueShow(id, { id: 'pu4.offer' + v, who: ['calder'], at: now, where: { any: true } });
 }
 function pu4Escort(p, t) {                               // p5Escort's Step 6 part: Calder walking over to find you
-  const S = PU4_LIVE.seek; return S && !S.met && p.id === S.by && pu4Ready(worksDay(t)) ? { mode: 'follow', to: null } : null;
+  const S = PU4_LIVE.seek; return S && !S.met && p.id === S.by && pu4Ready(worksDay(t)) ? { mode: 'follow', to: null } : pu4Escort2(p, t);   // (turn 3: the result, the walk down, the badge)
 }
 function pu4NearTick(now, skip) {                        // nearly there: Trusted, in the bay or on Deck 6, Torres passing you (once)
   const W = SHIP.works; if (skip || !W || W.tier !== 3 || puT4() || flag('pu4.near') || now < shipNow() - 1 || worksBand() !== 'trusted' || typeof DIALOGUE !== 'undefined' && DIALOGUE) return;
@@ -63654,15 +63654,20 @@ function pu4RepUp(b1) {                                  // puRepUp's line as a 
   return b1 === 'trusted' ? worksText('works.rep.up3.trusted', 'Now Trusted. That\'s the reputation your Tier 4 test needs.') : null;
 }
 function pu4Next(k) {                                    // puNext's line for the Tier 4 test (null: its own)
-  const W = SHIP.works, T = puT4(), d = SHIP.time.day; if (!P5_PROMO4 || !W || W.tier !== 3) return null;
+  const W = SHIP.works, T = puT4(), d = SHIP.time.day; if (!P5_PROMO4 || !W || W.tier < 3) return null;
+  if (T && T.res) { const bd = !T.badge && pu4BadgeDay(); return bd ? worksText('next.wait.t4badge', 'The Captain pins your engine badge: {day}, {time}, the observation room, Deck 1.', { day: pu4DayWord(bd, d), time: hhmm(promoCerTimes(bd).at) }, k) : null; }   // (turn 3)
   if (!T) { const B = WORK_BANDS[3], at = b => B.findIndex(x => x[1] === b);
     return at(worksBand()) >= at('steady') && !ladderNeeds((ladderRow('t4') || {}).needs || { rep: 'trusted' }, W) ? worksText('next.t4.steps', 'Your Tier 4 test needs Trusted and power and relays. You\'re {band} now.', { band: worksBandWord() }, k) : null; }
   if (!T.passed) return worksText('next.wait.t4', 'Your Tier 4 test: {day}, {time}, the engine room, Deck 6.', { day: pu4DayWord(T.day, d), time: hhmm(PU4.testAt) }, k);
+  if (!T.res) { const at = pu4ResWhen(); return at === null ? null : worksText('next.wait.t4res', 'Your Tier 4 result: {day}, {time}, when your shift starts. Calder will find you.', { day: pu4DayWord(worksDay(at), d), time: hhmm(at % 1440) }, k); }
   return null;
 }
 function pu4Items(d) {                                   // puItems' Tier 4 rows on day d
   const T = P5_PROMO4 && puT4(), W = SHIP.works; if (!T || !W) return [];
-  return !T.passed && W.tier === 3 && T.day === d ? [{ from: PU4.testAt, to: PU4.testEnd, title: worksText('pu4.row.test', 'Your Tier 4 test'), where: 'the engine room, Deck 6', kind: 'beat', deck: 6, room: 'E' }] : [];
+  const out = !T.passed && W.tier === 3 && T.day === d ? [{ from: PU4.testAt, to: PU4.testEnd, title: worksText('pu4.row.test', 'Your Tier 4 test'), where: 'the engine room, Deck 6', kind: 'beat', deck: 6, room: 'E' }] : [];
+  const at = T.passed && !T.res ? pu4ResWhen() : null; if (at !== null && worksDay(at) === d) out.push({ from: at % 1440, to: at % 1440 + 30, title: worksText('pu4.row.res', 'Your Tier 4 result: Calder finds you'), where: 'wherever you are', kind: 'beat' });   // (turn 3)
+  const bd = T.res && !T.badge ? pu4BadgeDay() : null; if (bd === d) { const C = promoCerTimes(d); out.push({ from: C.at, to: C.at + 25, title: worksText('pu4.row.badge', 'The Captain, {time}: your engine badge', { time: hhmm(C.at) }), where: 'the observation room, Deck 1', kind: 'beat', deck: 1, room: 'O' }); }
+  return out;
 }
 if (P5_PROMO4) {
   WORK_TICKS.push((now, skip) => { pu4OfferTick(now, skip); pu4NearTick(now, skip); pu4BeatsTick(now); });
@@ -63792,6 +63797,130 @@ if (P5_PROMO4) {
   });
   WORK_TICKS.push((now, skip) => { pu4Delay(now); pu4TestBeats(now, skip); if (!skip) pu4TestGuide(now); });
 }
+// ---- S6-3 turn 3 (W7): your result and the Captain's badge (the beats "The result at the comet" and "The badge"). The
+// result when your shift starts (pu4ResWhen): the first night's start after the test, 5 minutes before (Day 22: 22:40, at
+// the comet), else the next day shift's. Calder comes to find you wherever you are (pu4Escort follows you) and tells you
+// (pu4.stairs; Mail as the record); asleep, she knocks (a notice: the night is yours); not found in 30 minutes, by Mail.
+// pu4Promote: Tier 4, rank 'specialist', xp from 0, the milestone ['specialist', day]. With the nights on (P5_NIGHT) she
+// then walks you down to the engine room (a level 1 arrow, "Go with Calder"). The badge: the Captain's, the next
+// afternoon at 16:30 (promoCerTimes) in the observation room with Calder, Torres and Vance (OCCASIONS.pu4Badge, script
+// pu4.badge, the pin pose); her invite by Mail when it's booked, the notice as you wake, the notice at 16:00 "Go now", a
+// level 1 arrow from 16:15; not there by 16:45 awake, Calder walks you up; asleep at 16:45, the Captain waits until your
+// next waking afternoon (flag pu4.badge.wait, at most 3 times); never missed: by Mail by 18:15. At its end (pu4Badge):
+// the milestone ['specialist.badge', day] ("Senior Officer, Engine Specialist" on the Record), the badge's certificate on
+// your shelf, Calder's word that your Deck 2 quarters are ready for Thursday (T.move.ready, the move's day) and her Mail
+const PU4_R = { early: 5, find: 30, walk: 45, badgeWait: 3 };
+OCCASIONS.pu4Badge = { title: 'Your engine badge', kind: 'meeting', by: 'marrow', with: ['vance', 'calder', 'torres-zeke'], deck: 1, room: 'O', at: 990, len: 25, script: 'pu4.badge', due: () => false, mail: null };
+function pu4ResWhen() {                                  // when your result comes (absolute minutes): your shift's start after the test day's 12:30
+  const T = puT4(); if (!T || !T.passed) return null;
+  const t = (T.day - 1) * 1440 + PU4_T.until;
+  for (let d = T.day; d < T.day + 14; d++) { const B = (d - 1) * 1440, n = P5_NIGHTS[d];   // the nights are fixed by the day (section 28)
+    if (d > T.day && playerShiftOn(d) && !(n && P5_NIGHT)) return B + DAY_SHIFT[0];
+    if (n && B + n[0] - PU4_R.early >= t) return B + n[0] - PU4_R.early; }
+  return T.day * 1440 + DAY_SHIFT[0];
+}
+const pu4MoveDay = d => { for (let k = d + 1; k < d + 8; k++) { try { if (weekday(k) === 3) return k; } catch (e) { return d + 2; } } return d + 2; };   // the Thursday after
+function pu4BadgeDay() {                                 // the Captain's afternoon: the day after a night's result (the same day after a morning's), later if you slept through it
+  const T = puT4(); if (!T || !T.res) return null;
+  const at = pu4ResWhen(), m = at === null ? 0 : at - (T.res - 1) * 1440;
+  return T.res + (m >= 720 || m < 0 ? 1 : 0) + Math.min(PU4_R.badgeWait, +flag('pu4.badge.wait') || 0);
+}
+function pu4ResultScript() {                             // the writer's pu4.stairs, or a stand-in; our hook on it
+  if (!MEETING_SCRIPTS['pu4.stairs']) MEETING_SCRIPTS['pu4.stairs'] = { title: 'Your result', from: 'Chief Ines Calder', stub: true, gist: 'Calder found you and told you: you passed. You\'re an Engine Specialist, Tier 4. The badge is the Captain\'s.',
+    lines: [{ who: 'calder', text: 'There you are. Walk with me.', to: 'you' }, { who: 'calder', text: 'Mind the step. You passed, by the way. Engine Specialist.', pose: 'nod' },
+      { who: 'calder', text: 'The badge is the Captain\'s, tomorrow. Reyes has the kettle on.' },
+      { choice: [{ text: 'Engine Specialist.', reply: { who: 'calder', text: 'Get used to it. Come on.' } }] }] };
+  puHook('pu4.stairs', k => flagSet('pu4.reply.res', k + 1), () => pu4Promote(shipNow(), 'met'));
+  return 'pu4.stairs';
+}
+function pu4Promote(now, how) {                          // you're an Engine Specialist
+  const W = SHIP.works, T = puT4(); if (!W || W.tier !== 3 || !T || !T.passed || T.res) return false;
+  const d = worksDay(now); W.tier = 4; W.rank = 'specialist'; W.xp = 0; T.res = d;
+  const S = PU4_LIVE.rseek; PU4_LIVE.rseek = null;
+  if (!W.ms.some(x => x[0] === 'specialist')) W.ms.push(['specialist', d]);
+  promoMail('mail.pu4.promo', 'Your result | You passed. As of tonight you\'re an Engine Specialist, Tier 4. The Captain pins your badge herself.', null, now);
+  if (how === 'knock' || how !== 'met' && now >= shipNow() - 1) promoNotice(how === 'knock' ? worksText('pu4.knock.notice', 'A knock: Calder. "You passed. Engine Specialist. Up you get, the night\'s yours."') : worksText('pu4.res.notice', 'Your Tier 4 result: you passed. You\'re an Engine Specialist.'), worksName('calder'));
+  if (typeof newsAdd === 'function') try { newsAdd({ id: 'pu4.specialist', about: 'you', lines: [worksText('pu4.news', '{me} is an Engine Specialist as of tonight. Drive coils, no less.')], seed: ['dept:works'], kind: 'gossip' }); } catch (e) { /* no social */ }
+  pu4BadgeBook(now);
+  if (how === 'met' && S && P5_NIGHT && P5_NIGHTS[d] && now < (d - 1) * 1440 + P5_NIGHTS[d][0] + PU4_R.walk) PU4_LIVE.walk = { d, until: (d - 1) * 1440 + P5_NIGHTS[d][0] + PU4_R.walk };   // then down to the engine room with her
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;       // the board: Tier 4 jobs for you now
+  simNote('promoted', { tier: 4, rank: 'specialist', how, t: now });
+  return true;
+}
+function pu4ResultTick(now, skip) {                      // she comes to find you when your shift starts; asleep, she knocks; not found in 30 minutes, by Mail
+  const W = SHIP.works, T = puT4(); if (!W || W.tier !== 3 || !T || !T.passed || T.res) return;
+  const at = pu4ResWhen(), live = !skip && now >= shipNow() - 1; if (at === null || now < at) return;
+  const S = PU4_LIVE.rseek;
+  if (now >= at + PU4_R.find && !(S && S.met && now < at + 2 * PU4_R.find)) { pu4Promote(Math.min(now, at + PU4_R.find), 'mail'); return; }
+  if (typeof sleeping !== 'undefined' && sleeping) { pu4Promote(now, 'knock'); return; }
+  if (!live) return;
+  if (!S) { PU4_LIVE.rseek = { by: 'calder', at: Math.floor(now) }; return; }
+  if (S.met || typeof DIALOGUE !== 'undefined' && DIALOGUE || !puNearMe('calder')) return;
+  try { crewSceneEnd('calder'); } catch (e) { /* none */ }
+  S.met = true; dialogueShow(pu4ResultScript(), { id: 'pu4.stairs', who: ['calder'], at: now, where: { any: true } });
+}
+function pu4BadgeScript() {                              // the writer's pu4.badge, or a stand-in; our hook on it
+  if (!MEETING_SCRIPTS['pu4.badge']) MEETING_SCRIPTS['pu4.badge'] = { title: 'Your engine badge', from: 'Captain Odile Marrow', stub: true, gist: 'The Captain pinned your engine badge in the observation room. Calder told you your Deck 2 quarters are ready for Thursday.',
+    lines: [{ who: 'vance', text: 'Attention, please. The Captain.' }, { who: 'marrow', text: 'A drive coil, on your first try, with these two watching. I\'d have shaken.', to: 'you', pose: 'gesture' },
+      { who: 'marrow', text: 'Hold still. There. Engine Specialist.', pin: true }, { who: 'torres-zeke', text: 'Proper job.' },
+      { who: 'calder', text: 'And your quarters on Deck 2 are ready for Thursday. Vance will walk you up.', to: 'you' },
+      { choice: [{ text: 'Thank you, Captain.', reply: { who: 'marrow', text: 'Congratulations, Engine Specialist. The bridge, next door, when you\'re ready.' } }] }] };
+  return puHook('pu4.badge', null, () => pu4Badge(shipNow(), 'met'));
+}
+for (const r of SHIP.occasions) { if (r.id === 'pu4Badge') pu4BadgeScript(); }   // a reload with it booked: its scene hooked
+function pu4BadgeBook(now) {                             // booked with your result: the Captain's invite by Mail
+  const d = pu4BadgeDay(); if (!d) return null; const T = promoCerTimes(d);
+  if (SHIP.occasions.some(x => x.id === 'pu4Badge' && x.status === 'asked' && Math.floor(x.at / 1440) + 1 === d)) return null;
+  pu4BadgeScript(); OCCASIONS.pu4Badge.at = T.at;
+  const r = occasionAdd('pu4Badge', (d - 1) * 1440 + T.at, true, OCCASIONS.pu4Badge.len); if (!r) return null;
+  try { const a = apptList().find(x => x.occ === r.key); if (a && !a.places) a.places = { marrow: '1-ceremony-captain', vance: '1-ceremony-guest-1', calder: '1-ceremony-guest-2', 'torres-zeke': '1-ceremony-guest-3' }; } catch (e) { /* no appointments */ }
+  puMailCap('mail.pu4.invite', 'Your badge, {day} {time} | Chief Calder tells me you\'ve passed. I\'d like to pin your engine badge myself: {day}, {time}, the observation room, Deck 1.', { day: pu4DayWord(d, worksDay(now)), time: hhmm(T.at) }, now);
+  return r;
+}
+function pu4Badge(now, how) {                            // the badge is given: once
+  const W = SHIP.works, T = puT4(); if (!W || W.tier < 4 || !T || !T.res || T.badge) return false;
+  const d = worksDay(now), r = SHIP.occasions.find(x => x.id === 'pu4Badge' && x.status === 'asked'); if (r) r.met = true;
+  T.badge = d; if (!W.ms.some(x => x[0] === 'specialist.badge')) W.ms.push(['specialist.badge', d]);
+  if (!T.move) T.move = { ready: pu4MoveDay(d), walked: null, refit: false };
+  puKeepsake(worksText('pu4.keepsake', 'Engine Specialist\'s certificate'));
+  if (how === 'mail') puMailCap('mail.pu4.badge', 'Your badge | We missed you this afternoon. Your engine badge is on your cabin shelf with the certificate. Congratulations, Engine Specialist.', null, now);
+  promoMail('mail.pu4.quarters', 'Your quarters | Deck 2, room B, is yours from {day}. Vance will walk you up after dinner. Bring nothing: your things will be there.', { day: dayName(T.move.ready) }, now);
+  if (how === 'mail' && now >= shipNow() - 1) promoNotice(worksText('pu4.quarters.notice', 'Your Deck 2 quarters are ready for {day}. Vance walks you up after dinner.', { day: dayName(T.move.ready) }), worksName('calder'));
+  simNote('pu4', { step: 'badge', day: d, how });
+  return true;
+}
+function pu4BadgeTick(now, skip) {                       // the notice as you wake, at 16:00 "Go now", Calder walks you up at 16:45; asleep, the Captain waits; by Mail by 18:15
+  const W = SHIP.works, T = puT4(); if (!W || W.tier < 4 || !T || !T.res || T.badge) return;
+  const bd = pu4BadgeDay(), d = worksDay(now), m = now - (d - 1) * 1440, C = promoCerTimes(bd), live = !skip && now >= shipNow() - 1;
+  if (d < bd) return;
+  if (d > bd || m >= C.at + PU_R.barBy) { pu4Badge(Math.min(now, (bd - 1) * 1440 + C.at + PU_R.barBy), 'mail'); return; }
+  let r = SHIP.occasions.find(x => x.id === 'pu4Badge' && Math.floor(x.at / 1440) + 1 === bd); if (!r) { r = pu4BadgeBook(now); if (!r) return; }
+  const f = r.f || (r.f = {});
+  if (m >= C.at + PU_R.barSeek && !r.met && typeof sleeping !== 'undefined' && sleeping && (+flag('pu4.badge.wait') || 0) < PU4_R.badgeWait) {   // slept through it: the Captain waits until your next waking afternoon
+    flagSet('pu4.badge.wait', (+flag('pu4.badge.wait') || 0) + 1); r.status = 'missed'; f.wait = 1; pu4BadgeBook(now); return; }
+  if (m >= 360 && m < C.at - 30 && live && !f.wake && !promoBusy()) { f.wake = 1;
+    promoNotice(worksText('pu4.badge.wake', 'Today at {time}: the Captain pins your engine badge, the observation room, Deck 1.', { time: hhmm(C.at) }), 'Captain Odile Marrow'); }
+  if (m >= C.at - 30 && m < C.at && live && !f.notice && !promoBusy()) { f.notice = f.wake = 1;
+    promoNotice(worksText('pu4.badge.notice', 'The Captain pins your engine badge at {time}: the observation room, Deck 1. Go now.', { time: hhmm(C.at) }), 'Captain Odile Marrow'); }
+  if (m >= C.at + PU_R.barSeek && !f.seek && !r.met && r.status === 'asked' && live) { f.seek = now; r.len = C.late - C.at + 20;   // she walks you up; the room waits for you
+    worksSayAll('calder', worksVoice('calder', 'promo.fetch.ceremony') || ['There you are. The Captain\'s waiting. Come on.']); }
+}
+function pu4BeatsGuide(now) {                            // the level 1 arrows: down to the engine room with Calder; the badge
+  if (typeof guideAsk !== 'function') return; const owner = '24u (S6-3)', L = PU4_LIVE.walk;
+  if (L && now < L.until) guideAsk({ id: 'pu4:walk:' + L.d, level: 1, owner, until: L.until, goal: () => ({ deck: 6, room: 'E', label: worksText('pu4.ptr.walk', 'Go with Calder: the engine room') }),
+    done: () => { let n = 0; try { n = deckDef.num; } catch (e) { n = 0; } if (n === 6) PU4_LIVE.walk = null; return n === 6 || !PU4_LIVE.walk; } });
+  const br = SHIP.occasions.find(x => x.id === 'pu4Badge' && x.status === 'asked' && !x.met);
+  if (br && now >= br.at - 15) guideAsk({ id: 'pu4:badge', level: 1, owner, from: br.at - 15, until: br.at + br.len,
+    goal: () => ({ deck: 1, room: 'O', place: '1-ceremony-you', label: worksText('pu4.ptr.badge', 'Your engine badge: the observation room') + ', ' + hhmm(br.at % 1440) }), done: () => !!br.met || br.status !== 'asked' || !!(puT4() || {}).badge });
+}
+function pu4Escort2(p, t) {                              // pu4Escort's later beats: she comes to find you for your result, walks you down, walks you up to the badge
+  const S = PU4_LIVE.rseek; if (S && !S.met && p.id === S.by) return { mode: 'follow', to: null };
+  if (PU4_LIVE.walk && p.id === 'calder' && t < PU4_LIVE.walk.until) return { mode: 'lead', to: { deck: 6, room: 'E' } };
+  const br = SHIP.occasions.find(x => x.id === 'pu4Badge' && x.status === 'asked');
+  if (br && br.f && br.f.seek && !br.met && p.id === 'calder' && t < br.at + br.len) return { mode: 'lead', to: { deck: 1, room: 'O' } };
+  return null;
+}
+if (P5_PROMO4) WORK_TICKS.push((now, skip) => { pu4ResultTick(now, skip); pu4BadgeTick(now, skip); if (!skip) pu4BeatsGuide(now); });
 // ---- end of slot: Later promotions ----
 
 // ---------------------------------------------------------------------
