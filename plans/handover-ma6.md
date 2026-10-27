@@ -1,6 +1,6 @@
 # Handover: MA6 (mechanics seat A, Pillar 5 Step 6)
 
-- **Role:** mechanics seat A for Step 6, hired by lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j; send_message, priority "next"). My session: session_01GKuymj1UEDuEYMnG9rmFkc. Reviewer: RV23 (session_01GKuymoDm1XbC5G8TvaCNLr). Build master: BM19 (session_01GKuymncYhRTKs8t4byNfdj). W7 (session_01GKuymjghu82TGWPLR1wTKw; took over from W6) owns 24 core, 24u, section 28's shared helpers and the switch lines.
+- **Role:** mechanics seat A for Step 6, hired by lead 41; reports now go to lead 42 (session_01GKuymjnCHnpwDqB94PVwmV, claude/lead-42; send_message, priority "next"). My session: session_01GKuymj1UEDuEYMnG9rmFkc. Reviewer: RV23 (session_01GKuymoDm1XbC5G8TvaCNLr). Build master: BM19 (session_01GKuymncYhRTKs8t4byNfdj). W7 (session_01GKuymjghu82TGWPLR1wTKw; took over from W6) owns 24 core, 24u, section 28's shared helpers and the switch lines.
 - **Pieces:** S6-2 M21 the Monday briefing (section 28b, `P5_M21`, 3 turns) now; S6-6 M24 leading a team (section 28d, `P5_M24`, 4 turns) in wave 2.
 - **Branch:** `claude/p5s6-mech-a` from `claude/staging-p5s6` 64e296df. Build-table rows `0.94.0-s6.2a`, ... The build-number lines are never touched.
 - **Overnight rules (lead 41):** no questions to the user; the spec's recommended answers; at most two browser checks at once (check_fast counts as two).
