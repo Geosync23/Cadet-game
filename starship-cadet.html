@@ -16708,7 +16708,7 @@ function boardLesson() {
 function boardLessonName(id = boardLesson()) {
   const c = SHIP.works && SHIP.works.cur, j = id && (SHIP.jobs || []).find(x => x.id === id);
   if (j && !(c && c.j === id)) return j.case ? 'head-scratcher lesson' : ({ 1: 'shadow job', 2: 'job to lead', 3: 'first solo job' })[j.reserved] || 'lesson';   // (FX15, patch 0.92.5 #22)
-  if (c && (c.id === 't2' || c.id === 't3')) return 'Tier ' + c.id.slice(1) + ' test job';     // (FX15) 24p's test, not a lesson (24u's Tier 3 test too, S5-2)
+  if (c && /^t[234]$/.test(c.id)) return 'Tier ' + c.id.slice(1) + ' test job';     // (FX15) 24p's test, not a lesson (24u's Tier 3 test too, S5-2)
   let n = ''; try { n = c && typeof mechName === 'function' ? mechName(c.id) : ''; } catch (e) { n = ''; }
   n = String(n || '').replace(/^the /i, '').toLowerCase(); return n ? n + ' lesson' : 'lesson';
 }
@@ -16724,7 +16724,7 @@ const ixBoard = (() => {
   }
   const PRI = ['routine', 'soon', 'urgent', 'urgent'];
   // what section 15 can walk you through today: machine jobs (and chores on a machine), and cart runs (cartTap)
-  const BOARD_KINDS = new Set(['rounds', 'haul', 'tier3']);   // the registered kinds taken at the board (lead 29: only these; never an incident, a leak, nozzles or the trace demo; 24u's Tier 3 test, S5-2)
+  const BOARD_KINDS = new Set(['rounds', 'haul', 'tier3', 'tier4']);   // the registered kinds taken at the board (lead 29: only these; never an incident, a leak, nozzles or the trace demo; 24u's Tier 3 test, S5-2)
   const doable = j => !!(j && (j.machine || j.kind === 'restock' || (j.kind === 'chore' || BOARD_KINDS.has(j.kind) && typeof JOB_KINDS === 'object' && JOB_KINDS[j.kind]) && typeof jobStepDone === 'function'));   // a round and a haul too (run by their stops; AC2, FX2's find): they said "coming soon", so Rounds and Hauling could never be taken
   const button = (txt, fn) => { const x = document.createElement('button'); x.type = 'button'; x.textContent = txt; x.onclick = fn; return x; };
   const LESSON = () => 'Your ' + boardLessonName() + ': take this one';   // FX10 (patch 0.92.3 item 29): the job a lesson's "your turn" put up for you (named: patch 0.92.5 #12)
@@ -57071,8 +57071,8 @@ if (P5_STEP5) {
 if (P5_STEP6) {
   CAREER_LADDER.push(
     { id: 'm22', name: 'The night shift', size: 'big', day: 22, tier: 1, rank: null, needs: null, by: ['calder'], where: { deck: 6, room: 'E' }, stages: [{ uses: 0 }] },   // 28a (S6-1): Days 22-24 at any rank; Calder's word, no training meeting
-    { id: 'm21', name: 'The Monday briefing', size: 'big', day: 22, tier: 3, rank: 'senior', needs: null, by: ['marrow'], where: { deck: 1, room: 'O' }, stages: [{ uses: 0 }] },   // 28b (S6-2): the conference table, every Monday from Day 22
     { id: 't4', name: 'Your Tier 4 test job', size: 'big', day: 22, tier: 3, rank: 'senior', needs: [{ rep: 'trusted' }, { trained: 'm19' }], by: ['calder', 'torres-zeke'], where: { deck: 6, room: 'E' }, job: 'test', stages: [{ uses: 0 }] },   // 24u (S6-3): a drive coil, slot 26
+    { id: 'm21', name: 'The Monday briefing', size: 'big', day: 22, tier: 3, rank: 'senior', needs: null, by: ['marrow'], where: { deck: 1, room: 'O' }, stages: [{ uses: 0 }] },   // 28b (S6-2): the conference table, every Monday from Day 22
     { id: 'm23', name: 'Engine work and the reactor', size: 'big', day: 22, tier: 4, rank: 'specialist', needs: { trained: 't4' }, by: ['reyes-alejandro', 'torres-zeke'], where: { deck: 6, room: 'E' }, stages: [{ uses: 0 }] },   // 28c (S6-5): night 1 with Reyes (Torres by day), slot 35
     { id: 'p6', name: 'Does it add up?', size: 'small', day: 22, tier: 4, rank: 'specialist', needs: null, by: ['reyes-alejandro', 'calder'], stages: [{ uses: 0 }] },   // 24k's slot (S6-8)
     { id: 'p7', name: 'Faded labels', size: 'small', day: 23, tier: 4, rank: 'specialist', needs: null, by: ['calder', 'torres-zeke'], stages: [{ uses: 0 }] },   // 24k's slot (S6-8)
@@ -57316,8 +57316,8 @@ function trainTick(now) {                                // once a ship minute i
     else if (r.status === 'missed') c.st = 'ask';        // offered again on your next workday
     return;
   }
-  if (c.st === 'held' && !/^t[23]$/.test(c.id) && trainShiftOver(c, now)) { worksEscortEnd(c.id); return; }   // (patch 0.92.5 #15, RV13) its job turned in, only its case open: trained, and the teacher's free to go
-  if (/^(watch|do)$/.test(c.st) && !/^t[23]$/.test(c.id) && trainShiftOver(c, now)) { trainLapse(row, c, now); return; }   // (patch 0.92.5 #15; not 24p's promotion test, nor 24u's Tier 3 test: they keep their own hours)
+  if (c.st === 'held' && !/^t[234]$/.test(c.id) && trainShiftOver(c, now)) { worksEscortEnd(c.id); return; }   // (patch 0.92.5 #15, RV13) its job turned in, only its case open: trained, and the teacher's free to go
+  if (/^(watch|do)$/.test(c.st) && !/^t[234]$/.test(c.id) && trainShiftOver(c, now)) { trainLapse(row, c, now); return; }   // (patch 0.92.5 #15; not 24p's promotion test, nor 24u's Tier 3 test: they keep their own hours)
   if (c.st === 'held') { if (!worksCaseOpen(c.j)) worksEscortEnd(c.id); return; }   // waiting on worksEscortEnd (the teacher stays with you), or its case closing
   if (c.st !== 'watch' && c.st !== 'do') return;
   const j = SHIP.jobs.find(x => x.id === c.j);
@@ -57365,7 +57365,7 @@ function worksAskSend(id, by, now) {
 // your training job turned in: trained, unless something holds the teacher with you (worksEscortHold: the designer's
 // Day 5, where Torres's scanner lesson runs on into the P3 training case); worksEscortEnd(id) then trains you
 const worksCaseOpen = jobId => { const C = SHIP.works && SHIP.works.cases; return !!(C && Array.isArray(C.open) && C.open.some(x => x && x.job === jobId)); };   // 24k's case on that job still open
-function worksDone(id, t) { const c = SHIP.works && SHIP.works.cur; if (!worksCounts(id, c)) return; if (c && c.id === id && c.hold && worksCaseOpen(c.j)) { c.st = 'held'; return; } if (id === 't2' && typeof promoPassed === 'function') { promoPassed(t); return; } if (id === 't3' && typeof puPassed === 'function') { puPassed(t); return; } worksTrained(id, t); }   // 24p: the test job is passed, not trained   // held only while its case is still open
+function worksDone(id, t) { const c = SHIP.works && SHIP.works.cur; if (!worksCounts(id, c)) return; if (c && c.id === id && c.hold && worksCaseOpen(c.j)) { c.st = 'held'; return; } if (id === 't2' && typeof promoPassed === 'function') { promoPassed(t); return; } if (id === 't3' && typeof puPassed === 'function') { puPassed(t); return; } if (id === 't4' && typeof pu4Passed === 'function') { pu4Passed(t); return; } worksTrained(id, t); }   // 24p: the test job is passed, not trained   // held only while its case is still open
 // a row's own say on whether your finished training job counts (WORK_MECH[id].counts(job); 24g's m7: only once you've
 // scanned it, p5-fix2). Not counted: no training now; trainTick sees the job done and offers the training again
 // the teacher's own job while you watch it (24 core's 'watch'): theirs, never on your board (AR2's B4, p5-fix2: taking it
@@ -63212,7 +63212,7 @@ function puMakeJob(d, at) {                              // the test job, held f
   SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
   return j.id;
 }
-const puPtr = key => key === 't3' && P5_PROMO3 ? { force: true, label: worksText('pu3.ptr.test', 'Your Tier 3 test: take it') } : null;   // 24p's promoBeatsPtr asks
+const puPtr = key => key === 't3' && P5_PROMO3 ? { force: true, label: worksText('pu3.ptr.test', 'Your Tier 3 test: take it') } : key === 't4' && P5_PROMO4 ? { force: true, label: worksText('pu4.ptr.test', 'Your Tier 4 test: take it') } : null;   // (S6-3: the Tier 4 test's)   // 24p's promoBeatsPtr asks
 // the result's day: the first workday of yours after the test with Calder on shift (Vance's a week on), as 24p's promoSummonsDay
 const PU_R = { at: 495, seek: 510, latest: 555, wake: 360 };
 function puResultDay() {
@@ -63666,6 +63666,131 @@ function pu4Items(d) {                                   // puItems' Tier 4 rows
 }
 if (P5_PROMO4) {
   WORK_TICKS.push((now, skip) => { pu4OfferTick(now, skip); pu4NearTick(now, skip); pu4BeatsTick(now); });
+}
+// ---- S6-3 turn 2: the Tier 4 test (the beats "The test" and "Passing"). On its day (Monday Day 22) the ladder opens t4
+// (WORK_MECH.t4.offer, as t3's): a Tier 4 job held for you from 09:30 to 12:30 (slot 26, kind 'tier4', walked stop by stop)
+// on whichever drive coil is in the worst state, its coil winding set aside (promoPartsAside). Calder follows you (24 core's
+// escort for a training's 'do'); Torres waits in the engine room while you hold it. Its stops, at the coil's panel (S6-4's,
+// once it's built; until then the engine room's work place by that coil): take the coil off the cycle, read the windings,
+// wind in the new one, bring it back into the cycle; Calder and Torres say each step (worksTeach: train.t4.*). Turned in:
+// passed (pu4Passed: "Your result when your shift starts. I'll find you.", Torres's two words, the Mail, the notice).
+// Never failed: not taken by 11:30, or the shift over undone, it's set again in two workdays. On the day: the notice once
+// you're up, a level 1 arrow to the board from 09:00 and to each step, the board's ring "Your Tier 4 test: take it"
+// (puPtr), an hourly notice while you hold another job. The result itself comes with the night (turn 3)
+const PU4_T = { jobAt: 570, until: 750, slot: 26, again: 2, keep: 95, coils: ['6-coil-1', '6-coil-2', '6-coil-3'], places: ['6-engine-1', '6-engine-2', '6-engine-3'], kind: 'tier4', part: 'coil winding' };
+function pu4Coil() {                                     // the drive coil in the worst state
+  try { machinesNow(); } catch (e) { /* on paper */ }
+  const ms = PU4_T.coils.filter(id => typeof machineById === 'function' && machineById(id));
+  return ms.sort((a, b) => ((SHIP.machines[a] || {}).cond || 100) - ((SHIP.machines[b] || {}).cond || 100) || (a < b ? -1 : 1))[0] || null;
+}
+const pu4Place = mid => (typeof panelPlace === 'function' && panelPlace(mid)) || PU4_T.places[Math.max(0, PU4_T.coils.indexOf(mid))];   // the coil's panel (S6-4), else the work place by it
+function pu4TestJob() { const W = SHIP.works, c = W && W.cur; return c && c.id === 't4' && c.st === 'do' && c.j ? (SHIP.jobs || []).find(x => x.id === c.j) || null : null; }
+function pu4Stops(j) {                                   // the coil's stops (after the winding's fetch: jobStopsOf puts it first)
+  const pp = pu4Place(j.mach); if (!pp || !placeById(pp)) return [];
+  const n = PU4_T.coils.indexOf(j.mach) + 1, st = (tag, how, mins, opts) => ({ deck: 6, placeId: pp, mins, tag, how, ...(opts ? { opts } : {}) });
+  return [st('isolate', 'look', 1, { secs: 4, title: worksText('pu4.ptr.isolate', 'Take coil {n} off the cycle', { n }), text: worksText('pu4.isolate.text', 'Torres eases the drive back. Coil {n} goes dark; the other two carry it.', { n }) }),
+    st('read', 'look', 1, { secs: 4, title: worksText('pu4.ptr.read', 'Read the windings'), text: worksText('pu4.read.text', 'The meter on each winding. The third reads low and warm: that\'s the one.') }),
+    st('wind', 'hold', 8), st('cycle', 'look', 1, { secs: 4, title: worksText('pu4.ptr.cycle', 'Bring it back into the cycle'), text: worksText('pu4.cycle.text', 'Coil {n} warms, catches the beat, and glows in turn with the others.', { n }) })];
+}
+function pu4StepDone(j, k) {                             // in order; Calder and Torres say each step
+  const all = jobStops(j), st = all[k]; if (!st) return true;
+  const done = new Set(j.stepsDone || []); if (k > 0 && !done.has(k - 1)) return false;
+  const c = SHIP.works && SHIP.works.cur, by = c && c.id === 't4' && c.by || 'calder';
+  if (st.step === 'isolate') worksTeach('t4', 'torres-zeke', 'isolate', ['Easy. Let the other two take it. Watch the hum drop.']);
+  if (st.step === 'read') worksTeach('t4', by, 'read', ['Every winding. Not just the one you think it is.']);
+  if (st.step === 'wind') worksTeach('t4', 'torres-zeke', 'wind', ['Tight. Even. Like you\'re winding a clock for your gran.']);
+  if (st.step === 'cycle') worksTeach('t4', by, 'cycle', ['Bring it back slowly. Let it find the beat.']);
+  return true;
+}
+function pu4JobDone(j, t, by) {                          // the coil put right
+  const s = SHIP.machines && SHIP.machines[j.mach]; if (s) { s.cond = Math.max(s.cond, PU4_T.keep); s.state = machineState(s.cond); }
+  if (by === 'you') worksTeach('t4', 'calder', 'done', ['Turn it in. That\'s the job.']);
+  simNote('pu4', { step: 'work', job: j.id, by: by || null });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+function pu4MakeJob(d, at) {                             // the test job, held for you in slot 26 (one that's there already, if it is)
+  const old = (SHIP.jobs || []).find(x => x.reserved === PU4_T.slot && x.status !== 'done' && heldForYou(x)); if (old) return old.id;
+  const mid = pu4Coil(); if (!mid || !placeById(pu4Place(mid))) return null;
+  const n = PU4_T.coils.indexOf(mid) + 1, t = (d - 1) * 1440 + at, j = jobMake(PU4_T.kind, { id: PU4_T.kind + ':' + mid + '@' + Math.floor(t / 60), mach: mid, deck: 6, room: 'E', h: Math.floor(t / 60), tier: 4, urgency: 1,
+    title: worksText('pu4.card', 'Your Tier 4 test: drive coil {n}, Deck 6', { n }), reserved: PU4_T.slot, until: (d - 1) * 1440 + PU4_T.until, train: 't4' });
+  j.posted = j.found = t; j.stops = kindStops(j).map(plainStop);
+  SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  return j.id;
+}
+function pu4Passed(t) {                                  // turned in: passed, whatever it took (24 core's worksDone asks)
+  const W = SHIP.works, T = puT4(), c = W && W.cur; if (!W || !T || T.passed) return false;
+  const by = (c && c.by) || 'calder', d = worksDay(t);
+  T.passed = true; T.day = d; W.tr.t4 = d; if (c && c.id === 't4') W.cur = null;
+  worksSayAll(by, worksVoice(by, 'pu4.promo.passed') || [worksText('pu4.passed.say', 'That\'s the test. Your result when your shift starts. I\'ll find you.')]);
+  try { if (puNearMe('torres-zeke', CHATTER_NEAR)) simTimeout(() => worksSayAll('torres-zeke', worksVoice('torres-zeke', 'pu4.promo.passed') || ['Proper job.']), 6000); } catch (e) { /* not in play */ }
+  flagSet('pu4.passed', d);
+  promoMail('mail.pu4.passed', 'Your test | Done. Your result when your shift starts. I\'ll find you.', null, t);
+  if (t >= shipNow() - 1) promoNotice(worksText('pu4.passed.notice', 'Your Tier 4 test is done. Your result: Calder will find you when your shift starts.'), worksName(by));
+  try { crewSceneEnd('torres-zeke'); } catch (e) { /* none */ }
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  simNote('pu4', { step: 'passed', day: d });
+  return true;
+}
+function pu4Delay(now) {                                 // not taken in time, or the shift over undone: set again in two workdays
+  const W = SHIP.works, c = W && W.cur, T = puT4(); if (!c || c.id !== 't4' || c.st !== 'again' || !T || T.passed) return;
+  const d = worksDay(now); T.day = promoWorkday(d, PU4_T.again); c.st = 'ask'; c.d = d; c.j = null;
+  SHIP.jobs = SHIP.jobs.filter(j => !(j.kind === PU4_T.kind && j.status !== 'done' && j.claimedBy !== 'you'));
+  const day = dayName(T.day), time = hhmm(PU4.testAt);
+  worksSayAll(c.by || 'calder', worksVoice(c.by || 'calder', 'train.t4.again') || [worksText('pu4.again.say', 'Not today. That\'s not a fail. We go again in two days.')]);
+  promoMail('mail.pu4.again', 'Again | Not today. Read every winding, then wind it tight and even. We go again {day}, {time}.', { day, time }, now);
+  if (now >= shipNow() - 1) promoNotice(worksText('pu4.again.notice', 'Your Tier 4 test is set again: {day}, {time}, the engine room.', { day, time }), worksName('calder'));
+  flagSet('pu4.morning', null);
+  simNote('pu4', { step: 'again', day: T.day });
+}
+function pu4TestGuide(now) {                             // the arrows: level 1 to the board from 09:00, then each step
+  const W = SHIP.works, T = puT4(); if (!W || !T || T.passed || W.tier !== 3 || typeof guideAsk !== 'function') return;
+  const d = worksDay(now), B = (d - 1) * 1440; if (T.day !== d || now < B + PU4_T.jobAt - 30) return;
+  const j = (SHIP.jobs || []).find(x => x.kind === PU4_T.kind && x.status !== 'done' && x.reserved === PU4_T.slot && (x.claimedBy === 'you' || heldForYou(x))), owner = '24u (S6-3)';
+  if (!j || j.found > now) { if (now < B + PU4_T.jobAt + 15) guideAsk({ id: 'pu4:testday:' + d, level: 1, owner, from: B + PU4_T.jobAt - 30, until: B + PU4_T.jobAt + 15,
+    goal: () => ({ deck: 5, ...(promoInBay() ? { item: /job board/i } : {}), room: 'w', label: worksText('pu4.ptr.day', 'Your Tier 4 test, {time}: the job board', { time: hhmm(PU4.testAt) }) }),
+    done: () => !!puT4() && puT4().passed || (SHIP.jobs || []).some(x => x.kind === PU4_T.kind && x.reserved === PU4_T.slot && x.status !== 'done' && !(x.found > Math.floor(shipNow()))) }); return; }
+  let mj = null; try { mj = myJob(); } catch (e) { mj = null; }
+  const onBoard = !j.claimedBy && !(j.found > now), other = mj && mj.id !== j.id && !jobSide(mj) && !mj.workDone;
+  if (onBoard) guideAsk({ id: (other ? 'pu4:drop:' : 'pu4:test:') + d, level: 1, owner, until: j.until || B + PU4_T.until,
+    goal: () => ({ deck: 5, item: /job board/i, room: 'w', label: other ? worksText('pu4.ptr.drop', 'Your Tier 4 test is waiting: drop this job at the board') : worksText('pu4.ptr.test', 'Your Tier 4 test: take it') }), done: () => guideTaken(j.id) });
+  if (j.claimedBy !== 'you') return;
+  const label = () => { const nx = !j.workDone && typeof ixNextStop === 'function' ? ixNextStop(j) : null, s = nx && nx.s;
+    if (j.workDone) return { deck: 5, item: /job board/i, room: 'w', label: worksText('pu4.ptr.turnin', 'Turn it in') };
+    if (!s) return null;
+    const lab = { fetch: worksText('pu4.ptr.fetch', 'Your Tier 4 test: a coil winding from main storage'), isolate: worksText('pu4.ptr.isolate', 'Take coil {n} off the cycle', { n: PU4_T.coils.indexOf(j.mach) + 1 }), read: worksText('pu4.ptr.read', 'Read the windings'), wind: worksText('pu4.ptr.wind', 'Wind in the new one'), cycle: worksText('pu4.ptr.cycle', 'Bring it back into the cycle') }[s.step];
+    return lab && s.places[0] ? { deck: s.deck, place: s.places[0], label: lab } : null; };
+  guideAsk({ id: 'pu4:step:' + d, level: 1, owner, until: B + dayShiftEnd(d) + 60, goal: label, done: () => j.status === 'done' || j.claimedBy !== 'you' });
+}
+function pu4TestBeats(now, skip) {                       // the morning's notice, Torres in the engine room while you hold it, the hourly notice while you hold another job
+  const W = SHIP.works, T = puT4(); if (!W || !T || T.passed || W.tier !== 3) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, live = !skip && now >= shipNow() - 1; if (T.day !== d || !live) return;
+  if (m >= 360 && m < PU4_T.jobAt && flag('pu4.morning') !== d && !promoBusy()) { flagSet('pu4.morning', d); promoNotice(worksText('pu4.morning.notice', 'Today: your Tier 4 test, {time}. It goes up on the job board in the Works bay.', { time: hhmm(PU4.testAt) })); }
+  const j = pu4TestJob();
+  if (j && j.claimedBy === 'you' && !j.workDone && !PU4_LIVE.torres) { PU4_LIVE.torres = 1; try { crewScene('torres-zeke', { mode: 'wait', to: pu4Place(j.mach) === PU4_T.places[1] ? PU4_T.places[0] : PU4_T.places[1], until: (d - 1) * 1440 + PU4_T.until + 60 }); } catch (e) { /* no scene */ } }
+  if (j && !j.claimedBy && !(j.found > now)) { let mj = null; try { mj = myJob(); } catch (e) { mj = null; }
+    if (mj && mj.id !== j.id && flag('pu4.busy') !== Math.floor(now / 60)) { flagSet('pu4.busy', Math.floor(now / 60));
+      promoNotice(worksText('pu4.busy.notice', 'Your Tier 4 test waits on the job board till {time}. Turn in or drop this job first.', { time: hhmm(PU4_T.until - 60) }), worksName('calder')); } }
+  if (j) promoPartsAside(j);
+}
+if (P5_PROMO4) {
+  jobKindAdd(PU4_T.kind, { tier: 4, work: 0, text: 'Your Tier 4 test', parts: [PU4_T.part], stops: pu4Stops, stepDone: pu4StepDone, done: pu4JobDone, veto: true, crew: { can: () => false, mins: 60 } });
+  WORK_MECH.t4 = {
+    offer(row, c, d, t) {                                // the test, on its day: the job held for you, Calder with you
+      const T = puT4(); if (!T || T.passed || d < T.day) return false;
+      const m = t - (d - 1) * 1440; if (m >= PU4_T.until - 60) return false;
+      const id = pu4MakeJob(d, Math.max(m, PU4_T.jobAt)); if (!id) return false;
+      c.st = 'do'; c.j = id; c.occ = null; c.told = true; T.tries++; T.day = d;
+      promoPartsAside(SHIP.jobs.find(x => x.id === id));
+      simNote('pu4', { step: 'start', day: d, job: id });
+      return true;
+    },
+    noJob: false,
+  };
+  onSim('job', n => {                                    // Calder at the board as you take it
+    const c = SHIP.works && SHIP.works.cur; if (!n || !c || c.id !== 't4' || c.st !== 'do' || n.id !== c.j || n.step !== 'take') return;
+    worksTeach('t4', c.by, 'take', ['That\'s yours. Deck 6. Bring a winding.']);
+  });
+  WORK_TICKS.push((now, skip) => { pu4Delay(now); pu4TestBeats(now, skip); if (!skip) pu4TestGuide(now); });
 }
 // ---- end of slot: Later promotions ----
 

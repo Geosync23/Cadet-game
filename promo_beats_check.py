@@ -307,6 +307,38 @@ def part_t4before(g):
     check(not r['sat'] and not r['sunAm'] and r['sunDinner'], f"t4before: Trusted at the weekend, she comes at Sunday dinner, not before ({r})")
     check(r['late'] and r['late']['day'] == 22 and r['lateMail'] == 1, f"t4before: not found by 22:00, it comes by Mail, the test still Monday ({r})")
 
+T4_TEST = """const W = __w(22, 300, { xp: 60, tr: { ps: 12, t2: 9, t3: 15, m19: 17 } }); W.tier = 3; W.rank = 'senior'; __friends();
+      for (const r of CAREER_LADDER) if (r.id !== 't4' && r.tier <= 3 && r.day <= 21) { W.tr[r.id] = W.tr[r.id] || 9; (W.op[9] = W.op[9] || []).push(r.id); }
+      pu4Set(22); flagSet('pu4.told', 19); flagSet('pu4.notice', 19); setShipNow(21 * 1440 + 361); machinesNow(); careerClock(shipNow(), true); __bay();"""
+def part_t4test(g):
+    if not t4on(g, 't4test'): return
+    print('(t4test) the test morning, the board, each step, passing; set again if not taken:')
+    r = g.ev("""(() => { """ + T4_TEST + """ __tick(); const out = { notes: __notes.filter(x => /Tier 4/.test(x)) };
+      setShipNow(21 * 1440 + 545); __tick(); out.day = GUIDE.list.filter(e => /^pu4/.test(e.id)).map(e => e.id + ' L' + e.level);
+      setShipNow(21 * 1440 + 571); __tick(); const c = W.cur, j = c && SHIP.jobs.find(x => x.id === c.j);
+      out.cur = c && c.id + ' ' + c.st; out.job = j && { slot: j.reserved, mach: j.mach, kind: j.kind, found: hhmm(j.found % 1440), until: hhmm(j.until % 1440), part: SHIP.stores['coil winding'] };
+      out.ptr = puPtr('t4'); out.board = GUIDE.list.filter(e => /^pu4:test:/.test(e.id)).map(e => (e.goal() || {}).label);
+      if (!j) return out;
+      const arrow = () => GUIDE.list.filter(e => /^pu4:step/.test(e.id)).map(e => (e.goal() || {}).label || '').join('|');
+      __said.length = 0; out.take = claimJob(j.id); __tick(); out.said = __said.slice(); out.esc = (worksEscort({ id: 'calder' }, shipNow()) || {}).mode; out.a0 = arrow();
+      out.stops = jobStops(j).map(x => x.step); SHIP.player.carry.push('coil winding');
+      out.order = jobStepDone(j.id, 2).ok;   // the winding before the reading: refused
+      out.r = jobStops(j).map((x, k) => jobStepDone(j.id, k).ok); out.done = !!j.workDone; out.cond = SHIP.machines[j.mach].cond; out.a1 = arrow();
+      __said.length = 0; __notes.length = 0; out.turnin = turnInJob(j.id); __tick(); out.t4 = puT4(); out.tr = W.tr.t4; out.cur2 = W.cur; out.passed = __said.slice();
+      out.mail = __mail().filter(m => /Your test/.test(m)); out.notes2 = __notes.slice(); return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(any('Tier 4' in n for n in r['notes']) and r['day'] and r['day'][0].startswith('pu4:testday:22 L1'), f"t4test: the morning's notice and a level 1 arrow to the board from 09:00 ({r['notes']}, {r['day']})")
+    check(r['cur'] == 't4 do' and r['job'] and r['job']['slot'] == 26 and r['job']['mach'] in ('6-coil-1', '6-coil-2', '6-coil-3') and r['job']['kind'] == 'tier4' and r['job']['found'] == '09:30' and r['job']['until'] == '12:30' and r['job']['part'] >= 1, f"t4test: 09:30, the test on the board, held for you to 12:30 in slot 26, on a drive coil, its winding on the shelf ({r['cur']}, {r['job']})")
+    check(r['ptr'] and r['ptr']['force'] and 'Tier 4' in r['ptr']['label'] and r['board'] == ['Your Tier 4 test: take it'], f"t4test: the board's ring and the arrow: take it ({r['ptr']}, {r['board']})")
+    check(r['take'] and r['esc'] == 'follow' and r['said'] and 'winding' in r['a0'], f"t4test: taken, Calder's word, she follows you, the arrow to the winding ({r['said']}, {r['esc']}, {r['a0']})")
+    check(r['stops'] == ['fetch', 'isolate', 'read', 'wind', 'cycle'] and not r['order'] and all(r['r']) and r['done'] and r['cond'] >= 95 and r['a1'] == 'Turn it in', f"t4test: fetch, off the cycle, read, wind, back in: in order; the coil put right ({r['stops']}, {r['order']}, {r['r']}, {r['cond']}, {r['a1']})")
+    check(r['turnin'] and r['t4']['passed'] and r['tr'] == 22 and r['cur2'] is None and any('I\'ll find you' in x for x in r['passed']) and r['mail'] and any('Tier 4' in n for n in r['notes2']), f"t4test: turned in: passed, Calder's \"I'll find you\", the Mail and the notice ({r['t4']}, {r['passed']}, {r['mail']}, {r['notes2']})")
+    r = g.ev("""(() => { """ + T4_TEST + """ __tick(); setShipNow(21 * 1440 + 571); __tick(); const out = {};
+      for (let t = 21 * 1440 + 600; t <= 21 * 1440 + 1100; t += 30) { setShipNow(t); machinesNow(); worksCareerTick(t); __tick(); }
+      out.t4 = puT4(); out.cur = W.cur && W.cur.id + ' ' + W.cur.st; out.mail = __mail().filter(m => /^Chief Ines Calder: Again/.test(m)).length; out.jobs = SHIP.jobs.filter(x => x.kind === 'tier4' && x.status !== 'done').length; return out; })()""")
+    print('   ', r)
+    check(r['t4'] and not r['t4']['passed'] and r['t4']['day'] > 22 and r['mail'] == 1 and r['jobs'] == 0, f"t4test: not taken: never failed, set again two workdays on, by her word and Mail ({r})")
+
 T3_TEST = """const W = __w(15, 300, { xp: 60, tr: { ps: 12, t2: 9 } }); W.tier = 2; W.rank = 'officer'; __friends();
       for (const r of CAREER_LADDER) if (r.id !== 't3' && r.tier <= 2) { W.tr[r.id] = W.tr[r.id] || 9; (W.op[9] = W.op[9] || []).push(r.id); }
       puSet(15); flagSet('pu3.told', 14); flagSet('pu3.notice', 14); setShipNow(14 * 1440 + 361); machinesNow(); careerClock(shipNow(), true); __bay();"""
@@ -447,7 +479,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')
