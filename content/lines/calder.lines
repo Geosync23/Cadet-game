@@ -833,3 +833,8 @@
 ? flag:train.p9.word
 - Every part's fine. Still goes wrong at the same hour. Think.
 - Some faults are people. Nicely. Ask, don't tell.
+
+// PZ6 (2026-10-27, Pillar 5 Step 6, S6-8): stand-ins for her words for P6, P7 (flags train.p6.word, train.p7.word)
+== work
+? flag:train.p6.word
+- Something's going missing. Read the meters in pairs. The pair that won't add up is yours.

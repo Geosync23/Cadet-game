@@ -173,3 +173,36 @@
 - Coming up: the old-mysteries board, in the Works bay. Old cases for a quiet day.
 == next.wait.mys
 - The old-mysteries board is up, beside the job board. Take one when you like.
+
+// ---- Step 6 (S6-8, PZ6 for lead 41): stand-ins until the head writer's (spec section 10, cases.lines additions)
+// P6 Does it add up?: sums in pairs round a line's meters; then the batteries' balance (M19's third stage)
+== works.mech.p6
+- Does it add up?
+== next.p6
+- Coming up: Does it add up? Sums at the meters, then the batteries.
+== next.wait.p6
+- Does it add up?: the Chief has a sum for you.
+== case.title.p6
+- {machine} {shows}. The sums don't add up
+== case.title.p6.power
+- The battery banks don't balance
+== case.p6.line
+- The line sends {a}. {b} arrive. {n} going missing somewhere.
+== case.p6.pair
+- {machine} and {other}: in {n}, out {a} + {b}.
+== case.p6.short
+- {n} going missing here.
+== case.p6.adds
+- It adds up.
+== case.p6.head
+- Missing: {n}. Each meter sums two feeds. Which two don't add up?
+== case.hint.p6.1
+- A pair that adds up is fine, both of them. Two short pairs share your leak.
+== case.wrong.p6
+- New {part} in at {machine}. The sums still don't add up.
+== chief.p6.title
+- Does it add up?
+== chief.p6.1
+- In must equal out. If it doesn't, something's going missing between.
+== chief.p6.2
+- A pair that adds up is fine, both feeds. Two short pairs share the culprit.
