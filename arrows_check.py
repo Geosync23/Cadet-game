@@ -26,7 +26,7 @@
 #          first workday after the scanner's first use (Day 9 at most); no arrow left up after its
 #          moment (the same label for over 3 ship hours)
 # On 0.64.15 (2b4a05db) both FAIL: that is the point. Which fixer turns which line green is printed with each FAIL.
-# Run one part:  python3 arrows_check.py BUILD.html shift   (parts: queue, clockin, shift, week, promo, vessel; step6 by name (Days 19-26, P5_STEP6 on a copy; ways asis teachoff track); default all, about 70 minutes; promo alone about 30, vessel about 25)
+# Run one part:  python3 arrows_check.py BUILD.html shift   (parts: queue, clockin, shift, week, promo, vessel; step6 by name (Days 19-26, P5_STEP6 on a copy; ways asis teachoff track skiptea); default all, about 70 minutes; promo alone about 30, vessel about 25)
 # Part "promo" (DV1, lead 34): Days 8-12 following only the arrows: the first promotion end to end (see part_promo)
 # Part "clockin" (patch 0.92.3 item 6, AC3): Days 1-3 into the Works bay before clocking in: the clock-in tip at once (Day 1: after
 # Zeke's line), Clock in tracked (not with Teaching arrows Off), both gone the moment you clock in. A real new game.
@@ -698,6 +698,7 @@ S6_BEATS = [
 S6_WATCH_JS = r"""(() => { const g = goalNow(), W = SHIP.works; return [clockText(), deckDef.num, roomAt(...player.here()), g && (g.guide || '') + ' ' + (g.label || ''), JSON.stringify((W.ns || {})[22] || null), ACT && ACT.kind, DIALOGUE && DIALOGUE.id, typeof sleeping !== 'undefined' && !!sleeping, typeof careerClockedIn === 'function' && careerClockedIn(22), SHIP.event && SHIP.event.id, typeof sleepUntilAt !== 'undefined' ? sleepUntilAt : null, SHIP.player.alarm]; })()"""
 S6_STOPS = sorted((d - 1) * 1440 + m for d, ms in {19: [570], 21: [1050], 22: [475, 555, 750, 1000, 1335], 23: [345, 960, 1235], 24: [345, 1235], 25: [345, 1020, 1140], 26: [520, 1100]}.items() for m in ms)
 MA62_JS = "(() => { const W = SHIP.works; return { tr: W.tr.m20 === undefined ? null : W.tr.m20, cur: W.cur ? W.cur.id + ' ' + W.cur.st : null, days: Object.keys(W.op || {}).filter(k => (W.op[k] || []).includes('m20')) }; })()"
+S6_TEA = (25 * 1440 + 1100, 25 * 1440 + 1175)        # (skiptea) Day 26 18:20 to 19:35: 28f's notice, the tea (CQ.by 19:30) and a little after
 def step6_on(src): return src.replace("const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');", 'const P5_STEP6 = P5_STEP5 && true;', 1)
 def part_step6(ctx, path, way):
     tag = 'step6' + ('' if way == 'asis' else ':' + way)
@@ -717,6 +718,8 @@ def part_step6(ctx, path, way):
             if os.environ.get('S6_WATCH') and re.search(os.environ['S6_WATCH'], pg.ev('clockText()')): print('   watch', pg.ev(S6_WATCH_JS))   # (debugging) the state each step
             if pg.ev("typeof sleeping !== 'undefined' && sleeping"): pg.page.wait_for_timeout(250); pg.step(3, 50); continue   # asleep: the game's own sleep runs to the alarm and wakes after its fade (real-time timers); skipping on would outrun the wake (PZ6)
             if pg.ev("typeof DIALOGUE !== 'undefined' && !!DIALOGUE"): f.run(min(t, n + 5)); continue   # a scene open (Calder's walk down, the crews' welcome): read it through now, as a player would, never skipped past (PZ6)
+            if way == 'skiptea' and S6_TEA[0] <= n < S6_TEA[1]:   # (AS1, RV24) the Friday tea missed: on Deck 3, not following, till after it, so only end:find can take you to Calder
+                pg.ev(f"(() => {{ if (ACT) actEnd(); if (deckDef.num !== 3) goToDeck(3); player.stop(); devmodeSkipTo({min(t, n + 20, S6_TEA[1])}); for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 70); }})()"); pg.step(3, 50); continue
             if pg.ev(S6_DUE): f.run(min(t, n + 10)); continue
             stop = min([x for x in S6_STOPS if x > n + 1] or [t])
             pg.ev(f"devmodeSkipTo({min(t, n + 20, stop)}); for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 70)"); pg.step(3, 50)
@@ -725,7 +728,7 @@ def part_step6(ctx, path, way):
         if way == 'track': pg.ev(track)
         if os.environ.get('S6_UNTIL') and d == int(os.environ['S6_UNTIL']):   # (debugging) stop at noon that day, the state at 09:20 and 12:00
             advance_to((d - 1) * 1440 + 560); print(f"  {tag}: Day {d} 09:20: {pg.ev(S6_STATE)}"); advance_to((d - 1) * 1440 + 720); print(f"  {tag}: Day {d} 12:00: {pg.ev(S6_STATE)}"); break
-        advance_to(d * 1440 + (5 * 60 + 50 if d < 26 else -4 * 60))   # to the next morning (Day 26: till 20:00, after Calder's question)
+        advance_to(d * 1440 + (5 * 60 + 50 if d < 26 else -2 * 60 if way == 'skiptea' else -4 * 60))   # to the next morning (Day 26: till 20:00, after Calder's question; skiptea: till 22:00, her search's end)
         st = pg.ev(S6_STATE)
         print(f"  {tag}: Day {d}: {st}")
         if d == 21: m20 = pg.ev(MA62_JS)
@@ -736,6 +739,8 @@ def part_step6(ctx, path, way):
         op22 = pg.ev("(SHIP.works.op[22] || []).slice()"); carried = m20['tr'] is None
         if carried: check('t4' in op22 and 'm20' not in op22, f"{tag}: MA6-2: Step 5's sensor array lesson, untaken by Day 21 ({m20}), held Day 22's Tier 4 test (op[22] {op22})")
         print(f"  {tag}: MA6-2: the sensor array lesson on Day 21 {m20}; Day 22 opened {op22}" + ('' if carried else ' (trained before Day 22: the carried case did not arise)'))
+    if way == 'skiptea' and pg.ev("typeof cqTick === 'function'"):   # the tea missed: Calder's search led you (her end:find arrow showed), and she asked
+        check([t for t in f.trace if t[1] and t[1].startswith('end:find')], f"{tag}: the tea missed: Calder's 'Calder wants a word' arrow (end:find) never led")
     order = []
     for name, pre, rec, have in S6_BEATS:
         if not pg.ev(have): print(f'  {tag}: {name}: not yet (its piece is not in this build)'); continue
@@ -841,8 +846,8 @@ def part_vessel(ctx, path):
 GUIDE = 'guide' in sys.argv[2:]                       # run shift and week with the arrow queue switched on
 TEACHOFF = 'teachoff' in sys.argv[2:]                 # with 'guide': Settings' Teaching arrows set to Off (and step5's second way)
 TRACK = 'track' in sys.argv[2:]                       # step5's third way: a Tracked place of your own each morning
-WAYS = [a for a in ('asis', 'teachoff', 'track', 'change') if a in sys.argv[2:]] or ['asis', 'teachoff', 'track', 'change']   # endstay / endgo (teachoff without 'guide' picks the endings' Teaching arrows Off way)
-PARTS = set(a for a in sys.argv[2:] if a not in ('guide', 'teachoff', 'track', 'senior', 'asis', 'change')) or {'queue', 'clockin', 'shift', 'week', 'promo', 'vessel'}   # endstay and endgo only when named (about 25 minutes a way); step5 by name (S5-2: a build with P5_STEP5 on)
+WAYS = [a for a in ('asis', 'teachoff', 'track', 'change', 'skiptea') if a in sys.argv[2:]] or ['asis', 'teachoff', 'track', 'change', 'skiptea']   # endstay / endgo (teachoff without 'guide' picks the endings' Teaching arrows Off way)
+PARTS = set(a for a in sys.argv[2:] if a not in ('guide', 'teachoff', 'track', 'senior', 'asis', 'change', 'skiptea')) or {'queue', 'clockin', 'shift', 'week', 'promo', 'vessel'}   # endstay and endgo only when named (about 25 minutes a way); step5 by name (S5-2: a build with P5_STEP5 on)
 with sync_playwright() as pw:
     path = sys.argv[1]; src = pathlib.Path(path).read_text(); off = arrows_off(src)
     if off != src: (WORK / 'test' / ('_off_' + RUN_ID + pathlib.Path(path).name)).write_text(off)
@@ -880,7 +885,7 @@ with sync_playwright() as pw:
         for want in ('stay', 'go'):
             if 'end' + want not in PARTS: continue
             for way in WAYS:
-                if way == 'change' and want == 'go': continue   # the change of mind ends in the endgame: endstay's
+                if way == 'change' and want == 'go' or way == 'skiptea': continue   # the change of mind ends in the endgame: endstay's
                 print(f'== end{want} ({way}; following only the arrow, Days 31-36)')
                 try: part_end(ctx, str(ep), want, way)
                 except Exception as e: fail(f'end{want} {way}: stopped: {str(e)[:300]}')

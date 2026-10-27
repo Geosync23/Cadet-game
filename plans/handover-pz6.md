@@ -108,6 +108,9 @@ None yet.
   28e's `mt.steps.done`; Calder's question's arrows are 28f's `end:tea/sit/find` (in S6_RX), `have` is `cqTick`. On a local
   merge of staging 40f3bdac + m24-pick-pointer 5f649b45 + p5s6-promo4 23a0e29c: asis, teachoff, track all OK, every beat
   through Calder's question (Day 26 18:40). Before W8's promo4 is in staging, the MA6-2 line is skipped (no ladderTestDue).
+- **AS1, way 'skiptea' (RV24's ask):** Day 26 18:20-19:35 on Deck 3, not following (the tea missed), then on to 22:00;
+  checks Calder's end:find arrow led and she asked. On staging + m24-pick-pointer + promo4: before W8's 618c2901 FAIL
+  (end:find never led; she still found you), with 6f13b61a OK. In the default ways for step6 (not the endings).
 - **Left:** (a) done (see above); (b) drop the M20 setup line in part_step6
   ("the setup counts Step 5's sensor array lesson as done") once W8's d18aafc8 (MA6-2's fix) is in staging, and add a
   line that checks MA6-2 directly (a Tier 3 lesson missed on Day 19 must not block the Tier 4 test on Day 22);
