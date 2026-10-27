@@ -377,11 +377,23 @@ def part_t3toast(g):
     check(r['dlg'] == 'pu3.toast' and r['t3']['toast'] == 17 and any('menu' in k.lower() for k in r['keep']) and r['tab'] == [] and 'toast' not in r['next2'].lower(), f"t3toast: the scene, the framed menu, the Training tab's rows gone ({r['dlg']}, {r['t3']}, {r['keep']}, {r['tab']})")
     check(r['missed'] == [17, 1], f"t3toast: missed: by Mail, the menu all the same ({r['missed']})")
 
+def part_t3shoulds(g):
+    if not t3on(g, 't3shoulds'): return
+    print('(t3shoulds) RV20\'s shoulds: the friends\' Mail at lunch, no "reputation down" at the promotion, the presets\' order:')
+    r = g.ev("""(() => { """ + T3_RES + """ const out = {}; setShipNow(15 * 1440 + 496); __bay(); GUIDE_SHIFT.band = worksBand(); GUIDE_SHIFT.tier = 2;
+      puPromote(shipNow(), 'met'); __toasts.length = 0; guideShiftWords(Math.floor(shipNow()), false); out.toasts = __toasts.map(t => t.join(': '));
+      out.friends = SHIP.mail.filter(m => /^(Pell|Tomas|Rina)/.test(m.from)).map(m => hhmm(m.at % 1440));
+      const c = devmodeCareerFor(18); out.pre = ['m15', 'm17', 'm19'].map(k => k + ':' + (c.tr[k] === undefined ? '-' : c.tr[k])); return out; })()""")
+    print('   ', r)
+    check(not any('down' in t for t in r['toasts']), f"t3shoulds: no \"reputation down\" as you're promoted ({r['toasts']})")
+    check(len(r['friends']) == 2 and all(x >= '12:30' for x in r['friends']), f"t3shoulds: the friends' Mail at lunch, as their words say ({r['friends']})")
+    check(r['pre'] == ['m15:17', 'm17:-', 'm19:17'], f"t3shoulds: the Day 18 preset follows the ladder (m15 with m19 on Day 17, no m17) ({r['pre']})")
+
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')
