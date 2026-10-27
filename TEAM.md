@@ -1706,3 +1706,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~11:36 UTC: **RV23 PASS PZ6 S6-8** (e16be28: P6-P8; cadet identical; puzzle p6-p8 + controller s6cases OK) -> BM19 merges into staging-p5s6. PZ6 holds MA6-1 until a seat frees.
 - ~11:43 UTC: MA6 S6-6 turn 1 8f943e82 (M24 team: Works app Team tab, Book the slot on the bridge 23:00-04:00, spots, six Next-step calls at the drive panel; slot 36, schedU 1071; cadet identical (noise); lines, mech m24/m21, controller m24 OK) -> RV23. Next: run with DA6's deck.
 - ~11:44 UTC: **staging-p5s6 8d1c749f** (+ PZ6 S6-8; game 2c66a6ab...b442; cadet identical; names on/off OK).
+- ~11:50 UTC: **USER (morning): yes, fast-forward integration to 0.94.0; keep going.** BM19 doing it. Overnight mode over (user awake).
