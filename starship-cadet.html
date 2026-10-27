@@ -14997,6 +14997,7 @@ function jobTap(it, at) {
   if (!jobsOn() || typeof deckDef === 'undefined') return false;
   if (typeof traceHidden === 'function' && traceTap(it, at)) return true;   // 24i: a traced job not yet found: the pipe kit's reading (Pillar 5, M3)
   const P = SHIP.player, mw = myWork(), c = cellAt(at.x, at.z);
+  if (mw && typeof ixStepwise === 'function' && ixStepwise(mw.j)) return false;   // a registered kind stepped stop by stop (15b's ixChoreTap: 24q's rewiring), not the plain repair (B2, RV20's M3)
   if (!mw && deckDef.num === 5 && roomAt(...c) === 'f' && typeof jobSpotTap === 'function' && jobSpotTap(at)) return true;   // a chore whose stop is this bench (a small repair: Fix an extractor hose clamp at 5-shop-5): the job, not the bench's crafting or tinkering (FX20b's arrows_check week, Day 8; lead 38)
   if (typeof shopTap === 'function' && shopTap(it, at, mw)) return true;   // 24j: the order board, your order's stops, tinkering (Pillar 5, M10)
   if (deckDef.num === 5 && roomAt(...c) === 'r' && !/tarp/i.test(it.t)) {      // main storage, Deck 5: a shelf or the counter
@@ -16293,7 +16294,11 @@ function ixTheirs(it, at) {
 const IX_STOP = { lamp: ['Replacing the lamp', 'work'], vent: ['Cleaning the vent', 'work'], pickup: ['Picking it up', 'browse'], drop: ['Dropping it off', 'browse'],
   inspect: ['Inspecting', 'work'], fault: ['Clearing the fault', 'work'], fetch: ['Main storage', 'browse'], fix: ['Small repair', 'work'] };   // fix: FX10's small repairs
 Object.assign(PLAYER_ACTS, { ixStop: { mins: 10, pose: 'work', title: 'Your job' } });
-const ixChore = () => { const j = typeof myJob === 'function' && typeof jobStepDone === 'function' && typeof jobStops === 'function' ? myJob() : null; return j && (j.kind === 'chore' || typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind]) && !j.machine ? j : null; };   // a registered kind (17's jobKindAdd) walks like a chore (Pillar 5)
+const ixChore = () => { const j = typeof myJob === 'function' && typeof jobStepDone === 'function' && typeof jobStops === 'function' ? myJob() : null; return j && (j.kind === 'chore' || typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind]) && (!j.machine || ixStepwise(j)) ? j : null; };   // a registered kind (17's jobKindAdd) walks like a chore (Pillar 5)
+// (B2 for lead 39, RV20's M3) a registered kind on a machine whose stops are more than the panel's one 'job' stop (24q's rewiring:
+// open, check, wire, test) walks stop by stop too; before, its panel tap took section 15's plain repair (jobBegin found no 'job'
+// stop: "Repairing" for the job's minutes, then done) and its steps never came up. One 'job' stop (24e's tuning) stays jobBegin's
+const ixStepwise = j => !!(j && j.machine && typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind] && typeof kindStops === 'function' && kindStops(j).some(x => (x.tag || 'job') !== 'job'));
 // a side job of yours (17's mySideJobs: the drill), beside any board job: its stops are tapped like a chore's, before the
 // board job's (it's only on for a few minutes); none once its work is done (p5-fix2: myJob leaves side jobs out, so the drill's taps did nothing)
 const ixSides = () => typeof mySideJobs === 'function' && typeof jobStops === 'function' ? mySideJobs().filter(j => typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind] && !j.machine && !j.workDone && !(j.found > shipNow())) : [];   // only once it's announced (the drill: 14:50, AR2's A1)
@@ -57074,20 +57079,23 @@ function teamPost(P, w, t) {                             // a plan entry posted 
 const teamYours = j => j.claimedBy === 'you' && !j.youOut;
 const teamStepMins = (j, s) => Math.ceil(s.mins * (j.late ? TEAM_SLOW : 1));
 const teamLabel = j => teamText('team.name.' + j.team_kind, TEAM_NAME[j.team_kind]);
+// your turn's arrow carries the job's id (team: j.id) and goes when the step moves on, when the lead starts without you
+// and at the end (B2 for lead 40, RV20's S2: it stayed for hours after "started without you"); another section's never
+const teamGoalOff = j => { if (typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.team === j.id && typeof clearGoal === 'function') clearGoal(); };
 function teamNext(j, t) {                                // the next step (or the end)
-  j.cur++; j.stepAt = t;
+  j.cur++; j.stepAt = t; teamGoalOff(j);
   if (j.cur >= j.seq.length) return teamEnd(j, t);
   const s = j.seq[j.cur];
   simNote('team', { id: j.id, step: j.cur, by: s.who, kind: s.who === 'you' ? 'turn' : 'step' });
   if (s.who === 'you') {
     try { toast(teamLabel(j), teamText('team.turn.' + s.part, 'Your turn: ' + TEAM_PART[s.part] + '.', { job: teamLabel(j) })); } catch (e) { /* no UI */ }
-    const pl = placeById(j.spots && j.spots.you); if (pl && typeof setGoal === 'function') setGoal({ deck: pl.deck, room: pl.room, label: TEAM_PART[s.part] });
+    const pl = placeById(j.spots && j.spots.you); if (pl && typeof setGoal === 'function') setGoal({ deck: pl.deck, room: pl.room, label: TEAM_PART[s.part], team: j.id });
   } else if (teamYours(j)) worksTeach('m8', j.lead, 'call.' + s.part, null);
   return true;
 }
 // the sequence done: the other machines right, then section 17's finish (yours if you were in it: your stops are done)
 function teamEnd(j, t) {
-  j.cur = j.seq.length; teamOthersRight(j, t);
+  j.cur = j.seq.length; teamOthersRight(j, t); teamGoalOff(j);
   const you = teamYours(j);
   simNote('team', { id: j.id, step: j.seq.length, by: you ? 'you' : j.lead, kind: 'done' });
   if (you) worksTeach('m8', j.lead, 'done', [teamText('team.done', 'That\'s it. Good work, all.')]);
@@ -57100,6 +57108,7 @@ function teamEnd(j, t) {
 function teamLate(j, t) {
   if (!j.youOut && typeof teamYouOut === 'function') teamYouOut(j.id);
   j.late = true; for (const s of j.seq) if (s.who === 'you') s.who = j.lead;
+  teamGoalOff(j);
   simNote('team', { id: j.id, step: j.cur, by: j.lead, kind: 'late' });
   try { toast(teamLabel(j), teamText('team.late', '{name} started without you.', { name: worksFirst(j.lead) })); } catch (e) { /* no UI */ }
 }
