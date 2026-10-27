@@ -19,6 +19,7 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
 | claude/p5s6-mech-a (MA6): M24 leading a team | PASS | 8f943e82 |
 | claude/p5s6-deck (DA6): turns 2-3, the rack and Deck 2 | PASS | dd32a9a7 |
 | claude/p5s6-mech-a (MA6): M24 turn 2 | PASS | a92d0562 |
+| claude/p5s6-deck (DA6): M23 night 1 | PASS (2 shoulds: controller part; ring at stop 1 shot) | 9332d5a1 |
 | VB2's ending leftovers (arrows endgo teachoff, track) | PASS | staging-0.94.0 d69473b7 |
 
 ## VB1 03b63d95
@@ -98,4 +99,5 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
 - MA6 a92d0562: PASS. cadet identical vs b472fa1a; mech m21 m24 OK; controller m24 OK (coil-swap card at 390x844).
 - N6 06b6a158: cadet identical alone vs 8d1c749f (one start-frame diff beside another check, 0 alone); player_check night part OK;
   controller nights OK; 6 m reach done. Open: the lift-car escort must (W7's fix at the source); then re-run n6_play.py.
+- DA6 9332d5a1: PASS. cadet identical vs d39b87a6; mech m23 OK (11 stops). shoulds: controller part, a 390x844 shot of the ring at stop 1.
 - Waiting: W7's escort fix.
