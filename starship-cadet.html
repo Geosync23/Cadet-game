@@ -33412,6 +33412,8 @@ const LINES = JSON.parse([
   '{"text":"Stand at the foot of the ramp","id":"1h5s2ej"}]',
   ',"event.veyliVessel.ring.rampBench":[',
   '{"text":"Say hello to Taavek","id":"1tmzimv"}]',
+  ',"event.veyliVessel.ring.roundFind":[',
+  '{"text":"Taavek is bringing you the round one","id":"1iq6o2q"}]',
   ',"event.veyliVessel.ring.sheet":[',
   '{"text":"Sign the parts chain sheet","id":"87bk4c"}]',
   ',"event.veyliVessel.ring.shelf":[',
@@ -33538,7 +33540,7 @@ const LINES = JSON.parse([
   '{"text":"taavek: Zeke. Good. You are also one who meets.","id":"18kd9pq"}]',
   ',"event.veyliVessel.talk.roundOneFind":[',
   '{"text":"taavek: There! The one who meets. I bring the round one to you. Look.","id":"1tnzywx"},',
-  '{"text":"taavek: Broken. Very. Come, the bench, quick, before the chain.","id":"1y5jamw"}]',
+  '{"text":"taavek: Broken. Very. Here, I show you.","id":"2inglk"}]',
   ',"event.veyliVessel.talk.sheetFind":[',
   '{"text":"calder: There you are. Day off, both of us. A minute?","id":"1nsxfe6"},',
   '{"text":"calder: There\'s a sheet in the Works bay with a gap near the top. Your name goes in it.","id":"8t2mel"}]',
@@ -46628,6 +46630,7 @@ function vesselData() {
     guest: 'taavek', arrive: 570, leave: 900, leaveBy: 930,   // Taavek off the Tern Sunday 09:30, home on it Monday 15:00 (the Tern waits for you to 15:30: leaveBy)
     addressAt: { sat: [0, 480], tue: [3, 555] },           // the Captain's addresses: Saturday 08:00, Tuesday 09:15 (the resolution's minute)
     turns: { vesselTurn: [0, 510], vesselTurnBack: [3, 540] },   // the turn there (Saturday 08:30) and back (Tuesday 09:00): the comet's soft swell, its sound too
+    roundFetch: 750,                                       // Sunday 12:30: the round one still unseen, Taavek (waiting at the bench till then) comes to find you with it (RV22: 12:45 left too little time for the walk across decks)
     late: 28,                                              // a save first loaded with the vessel on from this day: passed over for good (EV_LATE 'skip')
   };
 }
@@ -46688,7 +46691,7 @@ function vesselTick(now, quiet) {
     e.mine['addr:' + key] = 1; vesselAddress(key, t, !!quiet || now - t > 5);
   }
   if (quiet) return;
-  { const v = vesselNow(now); if (v && typeof deckDef !== 'undefined' && deckDef) { vesselScenes(v); vesselScenes2(v); vesselChain(v); vesselMaking(v); vesselTestFit(v); vesselShelf(v); vesselTern(v); vesselTalkNow(v); } }   // V-2: your beats in person
+  { const v = vesselNow(now); if (v && typeof deckDef !== 'undefined' && deckDef) { vesselFetchTick(v); vesselScenes(v); vesselScenes2(v); vesselChain(v); vesselMaking(v); vesselTestFit(v); vesselShelf(v); vesselTern(v); vesselTalkNow(v); } }   // V-2: your beats in person
   for (const [id, at] of Object.entries(VESSEL.turns)) {
     const t = evBeatAt(e.startDay, at); if (now < t || e.mine['snd:' + id]) continue;
     e.mine['snd:' + id] = 1; if (now - t >= 3) continue;
@@ -46799,7 +46802,7 @@ function vesselWhere(p, t) {
   const m = v.m, met = v.e.mine['vessel:met'], late = m >= VESSEL.arrive + VESSEL.rampWait, S = VESSEL_SPOTS();
   let k = -1;
   if (met && m < VESSEL.arrive + VESSEL.rampWait && m >= VESSEL.arrive) k = p.id === 'taavek' ? 0 : p.id === 'calder' ? 1 : -1;
-  if (met && !v.e.mine['vessel:roundOne'] && m >= 595 && m < 720) k = p.id === 'taavek' ? 0 : p.id === 'calder' ? 1 : 2;   // the round one: the three of them at the bench
+  if (met && !v.e.mine['vessel:roundOne'] && m >= 595 && (m < 720 || p.id === 'taavek' && m < VESSEL.roundFetch)) k = p.id === 'taavek' ? 0 : p.id === 'calder' ? 1 : 2;   // the round one: the three of them at the bench; Taavek waits there with it until they come to find you (RV22)
   if (!met && late && m < 720 && p.id === 'torres-zeke') k = 2;
   if (k < 0) return null;
   return { deck: 5, act: 'off', type: 'event', placeId: S.bench[k], moving: false, from: t - 1, until: t + 1, tag: 'ev-veyliVessel-bench' };
@@ -46849,14 +46852,14 @@ function vesselScenes(v) {
   if (v.now >= at(0, 600) && v.now < at(1, 780) && !M['vessel:signed']) {
     if (!M['vessel:told']) {
       vesselNotice(v, 'sheet', at(0, 600), at(1, 780), 'Chief Ines Calder', W('notice.sheet', 'Chief Calder is looking for you: there\'s a sheet to sign in the Works bay.'));
-      const ramp = v.now >= at(1, VESSEL.arrive - 20) && !M['vessel:met'] || v.k === 1 && M['vessel:met'] && !M['vessel:roundOne'] && v.now < at(1, 765);   // Taavek first (the ramp, the bench after 10:30, the round one): the sheet after
+      const ramp = v.now >= at(1, VESSEL.arrive - 20) && !M['vessel:met'] || v.k === 1 && M['vessel:met'] && !M['vessel:roundOne'];   // Taavek first (the ramp, the bench after 10:30, the round one to 13:00: RV22): the sheet after
       if (!ramp && !(deckDef.num === 5 && roomAt(...player.here()) === 'w')) {   // Calder comes to find you, wherever you are (the spec): at 10:00, again at 11:30
         if (v.now >= at(0, 600)) vesselFetch(v, 'calder', 'vessel:fetch:sheet', 'talk.sheetFind', ['calder: There you are. A minute? There\'s a sheet with your name near the top.'], 20);
         if (v.now >= at(0, 690)) vesselFetch(v, 'calder', 'vessel:fetch:sheet2', 'talk.sheetFind', ['calder: There you are. A minute? There\'s a sheet with your name near the top.'], 20);
       }
       if (!ramp) vesselArrow('sheet', 1, () => vesselCrewGoal('calder', W('ring.sheet', 'Sign the parts chain sheet')), at(0, 600), at(1, 780), () => !!(SHIP.event && SHIP.event.mine['vessel:told']));
-      if (ramp) guideDrop('vessel:sheet'); else if (vesselReach('calder', 3.2)) vesselScene('sheet', 'vesselSheet', ['calder'], v, () => { M['vessel:told'] = 1; });
-    } else if (v.now >= at(1, VESSEL.arrive - 20) && !M['vessel:met']) guideDrop('vessel:sign');   // the ramp first, then the sheet again
+      if (ramp) guideDrop('vessel:sheet'); else if (vesselNear('calder')) vesselScene('sheet', 'vesselSheet', ['calder'], v, () => { M['vessel:told'] = 1; });
+    } else if (v.now >= at(1, VESSEL.arrive - 20) && !M['vessel:met'] || v.k === 1 && M['vessel:met'] && !M['vessel:roundOne']) guideDrop('vessel:sign');   // the ramp first, and the round one (RV22), then the sheet again
     else vesselArrow('sign', 1, () => ({ deck: 5, item: /^Parts chain sheet$/, room: 'w', label: W('ring.sheet', 'Sign the parts chain sheet'), vessel: true }), at(0, 600), at(1, 780), () => !!(SHIP.event && SHIP.event.mine['vessel:signed']));
   }
   // Saturday 14:00: the little ship comes into view (optional): a notice, a level-2 arrow once to the bow lounge
@@ -46902,7 +46905,21 @@ function vesselFetch(v, who, flag, key, alt, mins) {
   if (!pl) return;                                      // nowhere free to stand by you (the lift car, a full room): tried again next minute (RV22)
   v.e.mine[flag] = 1;
   const L = (vesselWords(key) || alt).map(t => evFill(t.slice(t.indexOf(': ') + 2), evCtx(v.e)));
-  crewComeTo(who, pl[0].id, a => { a.talking = 2; bubbleSay(friSpeaker(a), L[0], 6); if (L[1]) simTimeout(() => { try { bubbleSay(friSpeaker(a), L[1], 6); } catch (err) { /* gone */ } }, 4500); }, { until: v.now + mins });
+  const f = VESSEL_FETCH = { who, flag, L, until: v.now + mins, said: false };
+  crewComeTo(who, pl[0].id, a => vesselFetchSay(f, a), { until: f.until });
+}
+// the fetch's words, once: when they reach the place (crewComeTo's onArrive), or as soon as they're in your room within
+// 6 m on the way (the place it picked can be a few metres off, or taken as they come: RV22 saw no bubble). Live only
+let VESSEL_FETCH = null;
+function vesselFetchSay(f, a) {
+  if (!f || f.said || !a) return; f.said = true; a.talking = 2;
+  bubbleSay(friSpeaker(a), f.L[0], 6); if (f.L[1]) simTimeout(() => { try { bubbleSay(friSpeaker(a), f.L[1], 6); } catch (err) { /* gone */ } }, 4500);
+}
+// within reach for a scene: 3.2 m, or 6 m from someone who's come to find you (where they stop can be a few metres off)
+const vesselNear = id => vesselReach(id, VESSEL_FETCH && VESSEL_FETCH.who === id ? 6 : 3.2);
+function vesselFetchTick(v) {
+  const f = VESSEL_FETCH; if (!f) return; if (f.said || v.now >= f.until) { VESSEL_FETCH = f.said && v.now < f.until ? f : null; return; }
+  const a = vesselReach(f.who, 6); if (a) vesselFetchSay(f, a);
 }
 // the Tern goes across (Sunday 08:00, the ramp shut behind it, Lindqvist's words in the shuttle bay) and comes back
 // at 09:30 with Taavek (the ramp opens); the same on Monday at 15:00, home. Deck 5 only, nobody on the ramp; the ramp
@@ -46996,13 +47013,14 @@ function vesselTalkNow(v) {
 function vesselScenes2(v) {
   const e = v.e, M = e.mine, at = (k, m) => vesselAt(e, k, m), W = vesselW;
   // the round one: from 09:55 (or as soon as you've met them), the arrow at Taavek; the scene at the bench with Calder
-  // and Zeke when you're beside Taavek in the Works bay (or tap them). Not there by 12:45: Taavek comes to find you and
+  // and Zeke when you're beside Taavek in the Works bay (or tap them). Not seen by 12:30 (VESSEL.roundFetch; Taavek waits
+  // at the bench till then, the arrow at them leading the sheet's until 13:00): Taavek comes to find you, wherever you are, and
   // shows you where you are; not reached by 13:00 (the chain), the notice and its record by Mail
   if (v.k === 1 && M['vessel:met'] && !M['vessel:roundOne'] && v.now >= at(1, 595)) {
     if (v.now < at(1, 780)) {
-      vesselArrow('bench', 1, () => vesselCrewGoal('taavek', W('ring.bench', 'Join Taavek at the bench')), at(1, 595), at(1, 780), () => !!(SHIP.event && SHIP.event.mine['vessel:roundOne']));
-      if (v.now >= at(1, 765) && !(deckDef.num === 5 && roomAt(...player.here()) === 'w')) vesselFetch(v, 'taavek', 'vessel:fetch:roundOne', 'talk.roundOneFind', ['taavek: There! The one who meets. I bring the round one to you. Look.'], 15);
-      if ((deckDef.num === 5 && roomAt(...player.here()) === 'w' || M['vessel:fetch:roundOne']) && vesselReach('taavek', 3.2) && v.now >= at(1, 600))
+      vesselArrow('bench', 1, () => vesselCrewGoal('taavek', VESSEL_FETCH && VESSEL_FETCH.who === 'taavek' ? W('ring.roundFind', 'Taavek is bringing you the round one') : W('ring.bench', 'Join Taavek at the bench')), at(1, 595), at(1, 780), () => !!(SHIP.event && SHIP.event.mine['vessel:roundOne']));
+      if (v.now >= at(1, VESSEL.roundFetch)) vesselFetch(v, 'taavek', 'vessel:fetch:roundOne', 'talk.roundOneFind', ['taavek: There! The one who meets. I bring the round one to you. Look.'], 780 - VESSEL.roundFetch);
+      if ((deckDef.num === 5 && roomAt(...player.here()) === 'w' || M['vessel:fetch:roundOne']) && vesselNear('taavek') && v.now >= at(1, 600))
         vesselScene('roundOne', 'vesselRoundOne', ['taavek', 'calder', 'torres-zeke'], v, () => { M['vessel:roundOne'] = 1; });
     } else if (!DIALOGUE) { M['vessel:roundOne'] = -1; toast('Taavek', W('notice.roundOne.missed', 'Taavek showed Calder and Zeke the round one at the bench: it will have to be made, tomorrow, in the machine shop.')); meetingGist('vesselRoundOne'); }
   }

@@ -508,10 +508,12 @@
 == event.veyliVessel.talk.sheetFind
 - calder: There you are. Day off, both of us. A minute?
 - calder: There's a sheet in the Works bay with a gap near the top. Your name goes in it.
-// Sunday 12:45, you weren't at the bench: Taavek comes to find you with the round one
+// Sunday 12:30, you weren't at the bench: Taavek comes to find you with the round one (the scene where they stop)
 == event.veyliVessel.talk.roundOneFind
 - taavek: There! The one who meets. I bring the round one to you. Look.
-- taavek: Broken. Very. Come, the bench, quick, before the chain.
+- taavek: Broken. Very. Here, I show you.
+== event.veyliVessel.ring.roundFind
+- Taavek is bringing you the round one
 // Sunday 13:00, the round one missed even so (a notice; its gist comes by Mail)
 == event.veyliVessel.notice.roundOne.missed
 - Taavek showed Calder and Zeke the round one at the bench: it will have to be made, tomorrow, in the machine shop.
