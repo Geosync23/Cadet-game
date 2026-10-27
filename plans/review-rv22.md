@@ -19,6 +19,9 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
 |---|---|---|---|
 | claude/p5s5-promo (B5) | machine_check fix (RV20 M1) | FIXES NEEDED (1 must: mid-line comment kills the sort) | cbca3e3e |
 | claude/p5s5-promo (B5) | machine_check fix + RV20 S1-S4 | PASS (1 should: friends' Mail future-dated) | f00d93c1 |
+| claude/p5s5-promo (B5) | the should | PASS | c3d36cde |
+| claude/vessel (VB1) | RV21's shoulds, VB2 merge, arrows/controller parts | FIXES NEEDED (bigevents, day 28) | 5578c78d |
+| claude/vessel (VB1) | the fixes | FIXES NEEDED (1 must: round-one fetch never starts the scene; 2 shoulds) | 0340b6f9 |
 
 ## Log
 - 2026-10-26 ~23:30 UTC: started; told lead 40, VB1, VB2, B3. Test kit in /tmp/cadet-work and /tmp/cadet-work2. No new
@@ -74,3 +77,8 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
   went 5), 29 ON OK; events_check only known-old FX24-2. Running bigevents ON, arrows vessel, phone play.
 - B5 c3d36cde (S1 fixed: puFriendsTick files the friends' Mail from 12:30 on the result day, dated then; T.res is set
   only by puPromote, so never on a fail). Running promo_beats ON.
+- 02:10 UTC: **B5 c3d36cde PASS** (promo_beats ON OK, friends 12:31, early 0).
+- **VB1 0340b6f9: FIXES NEEDED (1 must).** bigevents ON OK (108 places); arrows vessel OK; phone play (vb1_play.py, standing
+  in the bow lounge): Calder fetched Saturday 10:00/11:30 but no bubble recorded (should); Sunday 12:45 Taavek fetched,
+  stopped 4 m away, scene needs 3.2 m: nothing, "missed" at 13:00 (MUST; shot vessel-0340b6f9-roundone-fetch.png); the
+  12:40 arrow was the sheet, not the round one (should). Ramp scene with Calder, Monday goodbye, Tern: good.
