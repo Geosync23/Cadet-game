@@ -26,6 +26,7 @@
 #   games     Tiles to the end, and Lightdisc (games)
 #   unplug    disconnect: stop walking at once, pause if used lately; reconnect resumes (deck, marks)
 #   odd       a pad that doesn't report the standard layout, and two pads (deck)
+#   s5cases   Step 5 (S5-6): the old-mysteries board by pad (ring, A, Take) and a head-scratcher's Fault notes (suspects, Call it), P5_STEP5 on (pick, panels)
 # --inventory: with reach, runs its touch half even before the panels package (the list of what there is to reach).
 # --selftest: runs the parts on a copy with this check's own small stand-in driver (to prove the parts before section 26).
 # --mutants: plants faults in copies of the game (each part's own list) and checks the part FAILS on every one.
@@ -41,7 +42,7 @@ ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
 GAME = pathlib.Path(ARGS[0])
 ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'door', 'reach', 'day', 'games', 'unplug', 'odd', 'shut',
-             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'm19', 'm20']
+             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'm19', 'm20', 's5cases']
 PARTS = ARGS[1:] or ALL_PARTS
 SHOTS = WORK / 'test' / 'ctl_shots'; SHOTS.mkdir(parents=True, exist_ok=True)
 ARGS_GL = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
@@ -2465,10 +2466,77 @@ OLD_NEEDS = {'off': ['base'], 'quiet': ['base'], 'base': ['base'], 'deck': ['dec
              'drop': ['marks'], 'settings': ['settings'], 'a11y': ['panels', 'pick'], 'firstuse': ['base']}
 OLD_NAME = {'pick': 'pick1'}   # CT1's pick beside this check's own
 
+# ---- s5cases (S5-6, B4 for lead 39; plans/p5-step5-spec.html section 9): the old-mysteries board and Step 5's cases by
+# pad, on a copy with P5_STEP5 on too. A Senior Officer on Day 21 in the Works bay: stood by the board, the ring names it
+# (D-pad to it if something else is nearer), A walks you there and opens it; the D-pad reaches each Take and A takes one;
+# then a head-scratcher (P4's first) in Fault notes: the D-pad reaches its suspects and Call it, and A asks to call it.
+# "not yet" in a build without the board (mysOpen).
+S5_LINE = "const P5_STEP5 = URL_FLAGS.has('p5s5');"
+S5_SETUP = r"""(() => { skipTo(20 * 1440 + 600); const W = worksInit(shipNow()); if (!W) return false; W.rank = 'senior'; W.tier = 3; W.tr = Object.assign({}, W.tr, { t3: 15 }); W.tools = Object.assign({}, W.tools, { scanner: [5, 0], pipekit: [12, 0] });
+  goToDeck(5); return true; })()"""
+S5_BOARD_AT = r"""(() => { const it = ITEMS.find(i => i.t === 'Old mysteries'); if (!it) return null; const v = new THREE.Vector3(); it.hit.getWorldPosition(v);
+  return { kind: 'item', name: it.t, words: ['old mysteries'], x: v.x, y: v.y, z: v.z, item: ITEMS.indexOf(it) }; })()"""
+S5_FOCUS = "(() => { const f = document.activeElement; return f && f !== document.body ? (f.textContent || f.getAttribute('aria-label') || '').trim().slice(0, 60) : null; })()"
+S5_MARK = r"""((rx) => { for (const o of document.querySelectorAll('[data-ctt]')) o.removeAttribute('data-ctt'); const R = new RegExp(rx);
+  const e = [...document.querySelectorAll('#devBody button, #devBody [role=button]')].find(x => x.getClientRects().length && R.test((x.textContent || '').trim()));
+  if (e) e.setAttribute('data-ctt', '1'); return e ? e.textContent.trim().slice(0, 60) : null; })"""
+def s5_pad_to(r, rx, tries=30):
+    # the button found by its words and marked (as the reach sweep's KEY_MARK does), then the D-pad steered toward it
+    for k in range(tries + 1):
+        name = r.ev(f"({S5_MARK})({json.dumps(rx)})")
+        if not name: return None
+        f = r.ev(f"({FOCUS_ON})('[data-ctt]')")
+        if f.get('on'): return name
+        if f.get('none'): r.press('DOWN'); r.step(2); continue
+        dx, dy = f['dx'], f['dy']
+        r.press(('RIGHT' if dx > 0 else 'LEFT') if abs(dx) >= abs(dy) else ('DOWN' if dy > 0 else 'UP')); r.step(2)
+    return None
+def part_s5cases(pw, src, tag):
+    fails = []
+    r = Run(pw, src.replace(S5_LINE, 'const P5_STEP5 = true;'), f'{tag}_s5', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    if not r.ev(S5_SETUP): r.close(); return ['no Works record on Day 21 (worksInit)']
+    r.step(60)
+    t = r.ev(S5_BOARD_AT)
+    if not t: r.close(); return ['the board is not on Deck 5']
+    r.ev("toastEl.classList.remove('show'); typeof TOAST_AT !== 'undefined' && (TOAST_AT = -1e9); typeof GUIDE !== 'undefined' && GUIDE.tq && (GUIDE.tq.length = 0)")
+    if not r.ev(f"({STAND_BY})({json.dumps(t)})"): r.close(); return ['nowhere to stand by the board']
+    r.step(72); found = None; seen = []
+    for k in range(9):
+        h = r.ev(HINT)
+        seen.append(h)
+        if h and 'old mysteries' in h.lower(): found = h; break
+        r.press('RIGHT'); r.step(4)
+    if not found: fails.append(f'the ring never named the board (bottom lines: {seen}; you at {r.ev(OUTCOME)}, it at {[round(t["x"], 2), round(t["z"], 2)]})')
+    r.press('A'); r.step(240)
+    if not r.ev("DEV.open && DEV.app === 'oldcases'"): fails.append(f'A on the board did not open it ({r.ev("[DEV.open, DEV.app]")})')
+    else:
+        f = s5_pad_to(r, r'^Take')
+        if not f: fails.append('the D-pad never reached a Take button')
+        else:
+            r.press('A'); r.step(6)
+            if not r.ev("!!mysJob()"): fails.append(f'A on {f!r} did not take it')
+            else: print(f'  the board by pad: ring {found!r}, {f!r} taken')
+    # P4's first case in Fault notes, by pad
+    r.ev("(() => { deviceClose(); const W = SHIP.works; W.op = Object.assign({}, W.op, { 21: ['p4'] }); delete SHIP.flags['case.p4.first']; p4Stage(); const c = caseById(flag('case.p4.first')); if (c) caseShow(c, caseJob(c)); return !!c; })()")
+    r.ev("(typeof worksTabAdd === 'function' ? (deviceShow('works'), deviceDo({ app: 'works', do: 'tab', arg: 'faults' }), deviceShow('works')) : deviceShow('faultnotes'))"); r.step(6)
+    sus = s5_pad_to(r, r'^(Seal|Compressor|Bearing|Temperature sensor)')
+    if not sus: fails.append(f'the D-pad never reached a suspect in Fault notes (focus {r.ev(S5_FOCUS)!r}; device {r.ev("[DEV.open, DEV.app, typeof WORKS_TAB !== \'undefined\' && WORKS_TAB, !!caseById(flag(\'case.p4.first\'))]")})')
+    call = s5_pad_to(r, r'^Call it')
+    if not call: fails.append('the D-pad never reached Call it')
+    else:
+        r.press('A'); r.step(4)
+        if not r.ev("!!CASE_UI.ask"): fails.append(f'A on {call!r} did not ask to call it')
+        else: print(f'  Fault notes by pad: {sus!r}, {call!r}')
+    pe = [e for e in r.errors if e.startswith('pageerror')]
+    if pe: fails.append(f'page errors: {pe[:2]}')
+    r.close(); return fails
+
 # parts that need a package: 'not yet' until PAD_BUILT names it
 NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick'], 'door': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'],
-         'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck'], 'shut': ['panels']}
-PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day, 'shut': part_shut}   # 'reach' joins when the pad half is written
+         'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck'], 'shut': ['panels'], 's5cases': ['pick', 'panels']}
+PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day, 'shut': part_shut, 's5cases': part_s5cases}   # 'reach' joins when the pad half is written
+if 'function mysOpen' not in SRC or S5_LINE not in SRC: PART_FN.pop('s5cases')   # no board in this build: "not yet", never a pass
 for k, v in OLD_NEEDS.items(): NEEDS[OLD_NAME.get(k, k)] = v; PART_FN[OLD_NAME.get(k, k)] = legacy(k)
 
 # ---- Pillar 5 Step 5's pieces (plans/p5-step5-spec.html section 9): each part runs on a copy with P5_STEP5 on, and only

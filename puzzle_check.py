@@ -755,6 +755,392 @@ def run(path):
         check(not errs and not pe, f'no errors: {errs} {pe}')
         g.close()
 
-run(sys.argv[1])
-print('PUZZLE CHECK OK' if ok else 'PUZZLE CHECK FAILED')
+# ---- Step 5's parts (S5-6, B4 for lead 39; plans/p5-step5-spec.html): p4, p5, p9, board. Each runs on a copy of the
+# build with P5_STEP5 switched on (the build's own switch line, swapped in the copy) and first checks that with the
+# switch off nothing of its own is registered. A part whose code isn't in the build says "not yet" (never a pass).
+#   python3 puzzle_check.py BUILD.html            the check as before, then every Step 5 part
+#   python3 puzzle_check.py BUILD.html p4 [p5 ...]  only those parts
+S5_PARTS = ['p4', 'p5', 'p9', 'board']
+S5_ON = "const P5_STEP5 = URL_FLAGS.has('p5s5');"
+NOT_YET = []
+
+# the off build: no Step 5 kind or board registered
+S5_OFF = r"""(() => ({ clash: typeof FAULT_CAUSES !== 'undefined' && (FAULT_CAUSES.washer || []).some(x => x.id === 'clash'), app: typeof DEVICE_APPS !== 'undefined' && DEVICE_APPS.has('oldcases'), job: typeof JOB_KINDS !== 'undefined' && !!JOB_KINDS.mysc, kinds: Object.keys(CASE_KINDS).filter(k => ['p4', 'p5', 'p9'].includes(k)), mech: typeof WORK_MECH !== 'undefined' ? ['p4', 'p5', 'p9', 'mys'].filter(k => WORK_MECH[k]) : [], on: typeof P5_CASES5 !== 'undefined' && P5_CASES5 }))()"""
+
+# P4 on paper: a Senior Officer (Day 17 on), the p4 row open, every cause P4 fits on every machine at your tier becomes a
+# case (rate 1, P4 alone); each checked: the decoys' gauges each cross out their own decoy, the stuck gauge is the cause's
+# part and crosses out nothing, distinct parts, the scanner needed at the panel, the words
+P4SWEEP = r"""(() => {
+  const out = { cases: [], fit: 0 }, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, tools: W.tools };
+  const jr = jobRun; jobRun = () => null; flagSet('case.p4.first', 'none');
+  W.rank = 'senior'; W.tier = 3; W.op = { 17: ['p4'] }; W.tr = {}; W.tools = Object.assign({}, W.tools, { scanner: [5, 0] }); C.open = [];
+  MACH_HOUR = null; MACH_SEEN = -1;
+  for (let d = 17; d <= 30; d++) {
+    if (!playerShiftOn(d)) continue;
+    const t = (d - 1) * 1440 + 600; setShipNow(t); machinesNow();
+    for (const m of machineList()) for (const f of caseCauses(m)) {
+      if (!CASE_KINDS.p4.fits(f, m) || jobTier({ machine: m.id }) > 3) continue;
+      out.fit++; C.open = []; SHIP.jobs = SHIP.jobs.filter(x => !x.case);
+      const j = { id: m.id + '@p4' + d + f.id, machine: m.id, deck: m.deck, kind: 'repair', urgency: 1, posted: t, found: t, claimedBy: null, parts: [f.part], status: 'open', cause: f.id };
+      SHIP.jobs.push(j);
+      const keepK = {}; for (const k in CASE_KINDS) if (k !== 'p4') { keepK[k] = CASE_KINDS[k]; delete CASE_KINDS[k]; }
+      const rate = CASE_RATE.senior; CASE_RATE.senior = 1; caseOffer(j, (d - 1) * 24 + 10); CASE_RATE.senior = rate; Object.assign(CASE_KINDS, keepK);
+      const c = caseOf(j); if (!c) continue;
+      const part = id => (caseCauses(m).find(x => x.id === id) || {}).part;
+      out.cases.push({ id: c.id, kind: c.kind, band: c.band, lim: caseBandOf(c.kind, c.band), cause: c.cause, sus: c.sus.slice(), fewest: c.fewest, title: j.title, parts: j.parts.slice(),
+        susParts: c.sus.map(part), shown: !c.wait,
+        clues: c.clues.map(k => ({ id: k.id, at: k.at, kills: k.kills.slice(), part: k.src.part, stuck: !!k.src.stuck, scan: !!k.src.scan, tool: k.src.tool || null, deck: caseClueDeck(k), reach: caseReachable(k), place: k.at === 'board' || !!placeById(k.at), panel: k.at === panelPlace(m.id), text: caseClueText(c, k) })) });
+      SHIP.jobs = SHIP.jobs.filter(x => x !== j);
+    }
+  }
+  C.open = []; jobRun = jr; Object.assign(W, keep);
+  return out;
+})()"""
+
+# P4's first: the row opens on Day 17 (Torres): the chiller's display stuck at 3°, slot 28, hidden till your shift,
+# shown with Torres's word; the readings; a wrong call (the compressor: a part back, the case goes on), the save
+# round trip, the right call (the display's signal card) fixes it, right first time... not (one wrong); the row trained
+P4FIRST = r"""(() => {
+  const out = {}, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, tools: W.tools };
+  C.open = []; delete SHIP.flags['case.p4.first']; W.rank = 'senior'; W.tier = 3; W.tr = { t3: 15 }; W.tools = Object.assign({}, W.tools, { scanner: [5, 0] });
+  const said = []; const ws = worksSay; worksSay = (id, t) => said.push([id, t]);
+  W.op = {}; setShipNow(16 * 1440 + 300); machinesNow(); p4Stage(); out.before = flag('case.p4.first');
+  W.op = { 17: ['p4'] }; setShipNow(16 * 1440 + 330); machinesNow(); WORK_MECH.p4.open(ladderRow('p4'), 17);
+  const id = flag('case.p4.first'), c = caseById(id), j = c && caseJob(c); out.staged = id; if (!c) { worksSay = ws; return out; }
+  out.machine = j.machine; out.cause = c.cause; out.sus = c.sus.slice().sort(); out.reserved = j.reserved; out.hidden = caseHidden(j); out.wait = c.wait; out.train = c.train;
+  out.again = (p4Stage(), C.open.filter(x => x.kind === 'p4').length);
+  caseTick(); out.waitEarly = c.wait;
+  setShipNow(16 * 1440 + 545); machinesNow(); caseTick();
+  out.shown = !c.wait; out.title = j.title; out.by = c.by; out.said = said.slice(); out.come = typeof CASE_COME !== 'undefined' ? CASE_COME.by : null; if (out.come) { CASE_COME.at = 0; caseComeTick(shipNow()); out.said2 = said.slice(); } out.hiddenAfter = caseHidden(j); out.parts = j.parts.slice();
+  claimJob(j.id); caseTick(); out.board = c.got.slice();
+  for (const k of c.clues) caseClue(c.id, k.id);
+  out.texts = c.clues.map(k => caseClueText(c, k)); out.hint = caseHint(c.id);
+  (typeof worksTabAdd === 'function' ? (deviceShow('works'), deviceDo({ app: 'works', do: 'tab', arg: 'faults' }), deviceShow('works')) : deviceShow('faultnotes'));
+  const b = document.getElementById('devBody'); out.chips = [...b.querySelectorAll('.chips .chip')].map(x => x.textContent);
+  out.notes = b.textContent.includes('hasn\'t moved a hair'); deviceClose();
+  // a wrong call: a decoy
+  const wrong = c.sus.find(s => s !== c.cause), wp = caseSus(c, wrong).part;
+  caseCall(c.id, wrong); const s0 = SHIP.stores[wp]; SHIP.stores[wp]--;
+  let n = jobStops(j).length; for (let k = 0; k < n; k++) jobStepDone(j.id, k);
+  out.wrongFit = { done: !!j.workDone, known: c.known.includes(wrong) };
+  const sv = { ship: {} }; for (const f of SAVE_EXTRA) { try { f(sv); } catch (e) {} }
+  const canon = o => JSON.stringify(o, (k, v) => v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map(x => [x, v[x]])) : v);
+  const before = canon(c); CASE_SAVED = JSON.parse(JSON.stringify(sv.ship.works.cases)); delete SHIP.works.cases; CASE_CLEAN = false;
+  const c2 = caseOf(j); out.saveSame = !!c2 && canon(c2) === before; if (!out.saveSame) out.saveDiff = [before, canon(c2)]; out.saveBytes = JSON.stringify(c2).length;
+  caseCall(c2.id, c2.cause); n = jobStops(j).length; for (let k = 0; k < n; k++) jobStepDone(j.id, k);
+  out.fixed = !!j.workDone && SHIP.machines[j.machine].cond > 40;
+  turnInJob(j.id); caseTick(); out.closed = !caseById(c.id); out.trained = W.tr.p4;
+  worksSay = ws; Object.assign(W, keep); C.open = [];
+  return out;
+})()"""
+
+# P5 on paper: a Senior Officer with the p5 row open and the pipe kit; every line machine healthy, then each line cause
+# P5 fits on each line machine made faulty in turn (rate 1, P5 alone): the readings are the line's real shares (full above
+# the fault, low from it on), each at its machine's panel with the pipe kit; one suspect each side where the line has one
+P5SWEEP = r"""(() => {
+  const out = { cases: [], fit: 0 }, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, tools: W.tools };
+  const jr = jobRun; jobRun = () => null; flagSet('case.p5.first', 'none');
+  W.rank = 'senior'; W.tier = 3; W.op = { 18: ['p5'] }; W.tr = { m19: 17 }; W.tools = Object.assign({}, W.tools, { pipekit: [12, 0], tester: [17, 0] }); C.open = [];
+  const lines = Object.keys(MACHINE_LINKS).filter(l => lineOn(l)), all = [...new Set(lines.flatMap(lineIds))];
+  { const tr = W.tr; W.tr = {}; out.powerNoM19 = all.filter(id => caseCauses(machineById(id)).some(f => f.line === 'power' && CASE_KINDS.p5.fits(f, machineById(id)))).length; W.tr = tr; }   // the power stage waits for M19
+  for (let d = 18; d <= 24; d++) {
+    if (!playerShiftOn(d)) continue;
+    const t = (d - 1) * 1440 + 600; setShipNow(t); machinesNow();
+    for (const id of all) { const m = machineById(id); for (const f of caseCauses(m)) {
+      if (!CASE_KINDS.p5.fits(f, m)) continue;
+      for (const x of all) if (SHIP.machines[x]) { SHIP.machines[x].cond = 90; SHIP.machines[x].state = machineState(90); }
+      SHIP.jobs = SHIP.jobs.filter(x => !x.case && !(x.machine && all.includes(x.machine) && x.status !== 'done'));
+      out.fit++; C.open = [];
+      SHIP.machines[id].cond = 40; SHIP.machines[id].state = machineState(40);
+      const j = { id: id + '@p5' + d + f.id, machine: id, deck: m.deck, kind: 'repair', urgency: 1, posted: t, found: t, claimedBy: null, parts: [f.part], status: 'open', cause: f.id };
+      SHIP.jobs.push(j);
+      const keepK = {}; for (const k in CASE_KINDS) if (k !== 'p5') { keepK[k] = CASE_KINDS[k]; delete CASE_KINDS[k]; }
+      const rate = CASE_RATE.senior; CASE_RATE.senior = 1; caseOffer(j, (d - 1) * 24 + 10); CASE_RATE.senior = rate; Object.assign(CASE_KINDS, keepK);
+      const c = caseOf(j); if (!c) { SHIP.jobs = SHIP.jobs.filter(x => x !== j); continue; }
+      const path = p5Line(m, f), st = p5Steps(f.line, path), at = s => caseSusAt(s) || id;
+      out.cases.push({ id: c.id, kind: c.kind, band: c.band, lim: caseBandOf(c.kind, c.band), cause: c.cause, sus: c.sus.slice(), fewest: c.fewest, title: j.title, card: caseCard(j), at0: caseAt(j), machine: id, line: f.line,
+        susSteps: c.sus.map(s => st[at(s)]), causeStep: st[id], shown: !c.wait, parts: j.parts.slice(),
+        clues: c.clues.map(k => ({ id: k.id, at: k.at, kills: k.kills.slice(), m: k.src.m, flow: k.src.flow, live: lineFlow(f.line, k.src.m), step: st[k.src.m], tool: k.src.tool, deck: caseClueDeck(k), reach: caseReachable(k), panel: panelPlace(k.src.m) === k.at, text: caseClueText(c, k) })) });
+      SHIP.jobs = SHIP.jobs.filter(x => x !== j);
+    } }
+  }
+  for (const x of all) if (SHIP.machines[x]) { SHIP.machines[x].cond = 90; SHIP.machines[x].state = machineState(90); }
+  C.open = []; jobRun = jr; Object.assign(W, keep);
+  return out;
+})()"""
+
+# P5's first: the row opens on Day 18 (Calder): 3-pump-1's seal, slot 29, faulty at once, hidden till your shift; shown
+# with Calder's word; the card names the showers, not the pump; read the line, call it, fixed; the row trained
+P5FIRST = r"""(() => {
+  const out = {}, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, tools: W.tools };
+  C.open = []; delete SHIP.flags['case.p5.first']; W.rank = 'senior'; W.tier = 3; W.tr = { t3: 15, m19: 17, m18: 18 }; W.tools = Object.assign({}, W.tools, { pipekit: [12, 0] });
+  for (const x of ['water', 'heat', 'air'].flatMap(lineIds)) if (SHIP.machines[x]) { SHIP.machines[x].cond = 90; SHIP.machines[x].state = machineState(90); }
+  SHIP.jobs = SHIP.jobs.filter(x => !(x.machine && lineOf(x.machine) && x.status !== 'done'));
+  const said = []; const ws = worksSay; worksSay = (id, t) => said.push([id, t]);
+  W.op = { 18: ['p5'] }; setShipNow(17 * 1440 + 330); machinesNow(); WORK_MECH.p5.open(ladderRow('p5'), 18);
+  const id = flag('case.p5.first'), c = caseById(id), j = c && caseJob(c); out.staged = id; if (!c) { worksSay = ws; Object.assign(W, keep); return out; }
+  out.machine = j.machine; out.cause = c.cause; out.sus = c.sus.slice(); out.reserved = j.reserved; out.hidden = caseHidden(j); out.wait = c.wait;
+  out.reads = c.clues.map(k => [k.src.m, k.src.flow, k.kills.slice()]);
+  setShipNow(17 * 1440 + 545); machinesNow(); caseTick();
+  out.shown = !c.wait; out.title = j.title; out.card = caseCard(j); out.by = c.by; out.said = said.slice(); out.come = typeof CASE_COME !== 'undefined' ? CASE_COME.by : null; if (out.come) { CASE_COME.at = 0; caseComeTick(shipNow()); out.said = said.slice(); } out.at0 = caseAt(j);
+  claimJob(j.id); caseTick();
+  for (const k of c.clues) caseClue(c.id, k.id);
+  out.texts = c.clues.map(k => caseClueText(c, k));
+  (typeof worksTabAdd === 'function' ? (deviceShow('works'), deviceDo({ app: 'works', do: 'tab', arg: 'faults' }), deviceShow('works')) : deviceShow('faultnotes'));
+  out.view = document.getElementById('devBody').textContent.includes('top to bottom'); deviceClose();
+  caseCall(c.id, c.cause); out.atRight = caseAt(j);
+  let n = jobStops(j).length; for (let k = 0; k < n; k++) jobStepDone(j.id, k);
+  out.fixed = !!j.workDone; turnInJob(j.id); caseTick(); out.closed = !caseById(c.id); out.trained = W.tr.p5;
+  worksSay = ws; Object.assign(W, keep); C.open = [];
+  return out;
+})()"""
+
+def part_p5(g, path):
+    if not g.ev("typeof p5Stage === 'function'"): return 'not yet'
+    S = g.ev(P5SWEEP)
+    cs = S['cases']; print(f"p5: {S['fit']} fits, {len(cs)} cases, by line {dict((l, sum(1 for c in cs if c['line'] == l)) for l in sorted({c['line'] for c in cs}))}")
+    for c in cs[:3]: print('  ', c['id'], c['sus'], [(k['m'], k['flow'], k['kills']) for k in c['clues']], c['title'])
+    check(len(cs) >= 5, f"p5: the sweep made cases: {len(cs)}")
+    check(S['powerNoM19'] == 0, f"p5: no power case before M19 is trained: {S['powerNoM19']}")
+    from itertools import combinations
+    for c in cs:
+        sus, clues, L = c['sus'], c['clues'], c['lim']
+        left = lambda ks: [s for s in sus if not any(s in k['kills'] for k in ks)]
+        check(left(clues) == [c['cause']] and all(len(left([k])) > 1 for k in clues), f"{c['id']}: one left, no single reading solves it: {left(clues)}")
+        fewest = min((n for n in range(1, len(clues) + 1) for ks in combinations(clues, n) if len(left(list(ks))) == 1), default=99)
+        check(fewest == c['fewest'] >= L['fewest'] and L['sus'][0] <= len(sus) <= L['sus'][1] and L['clues'][0] <= len(clues) <= L['clues'][1], f"{c['id']}: the band ({fewest}, {len(sus)}, {len(clues)})")
+        honest = all((k['flow'] >= .8) == (k['step'] < c['causeStep']) and abs(k['flow'] - k['live']) < .002 for k in clues)
+        check(honest, f"{c['id']}: full above the fault, low from it on, as the line really reads: {[(k['m'], k['flow'], k['live'], k['step']) for k in clues]} cause step {c['causeStep']}")
+        check(c['causeStep'] not in [s for s, x in zip(c['susSteps'], sus) if x != c['cause']], f"{c['id']}: no suspect on the fault's own step")
+        check(all(k['panel'] and k['reach'] and k['tool'] == ('tester' if c['line'] == 'power' else 'pipekit') for k in clues), f"{c['id']}: each reading at its machine's panel, with the pipe kit (the conduit tester on a power line)")
+        check(c['shown'] and c['parts'] == [] and c['machine'] not in (c['title'] + ' '.join(map(str, c['card'] or []))) and c['at0'] != c['machine'], f"{c['id']}: the card names the symptom, not the machine: {c['title']!r} {c['card']} {c['at0']}")
+    F = g.ev(P5FIRST)
+    print('p5 first:', F)
+    check(F.get('staged') and F.get('staged') != 'none' and F.get('machine') == '3-pump-1' and F.get('cause') == 'seal' and F.get('reserved') == 29 and F.get('hidden'), f"p5's first: 3-pump-1's seal, slot 29, hidden: {F.get('staged')}")
+    if F.get('staged') and F.get('staged') != 'none':
+        check(F['shown'] and F['by'] == 'calder' and any(w[0] == 'calder' for w in F['said']) and 'Pump' not in F['title'], f"p5's first: shown in your shift with Calder's word, the card the symptom's: {F['title']!r}")
+        check(F['view'] and F['fixed'] and F['closed'] and F['trained'] == 18, f"p5's first: the line view, the right call fixes it, trained Day 18: {F['view']} {F['fixed']} {F['trained']}")
+    return 'done'
+
+# the old-mysteries board: on Deck 5 with the switch, tapped like the job board; shut before Day 21 or below Senior;
+# Torres's word and the level 3 arrow once on the day; his line at the first read; five in key 854's order; one taken at
+# a time (a side job, yours, three looks then the choose at the job board; a wrong pick isn't a fail); solved: the
+# Chief's notes line, a small reputation gain, the row's use; the next one can be taken; junk in the save cleaned
+BOARD = r"""(() => {
+  const out = {}, W = SHIP.works, keep = { rank: W.rank, tier: W.tier, op: W.op, tr: W.tr, xp: W.xp, side: W.side };
+  window.__said = []; const said = window.__said; window.__ws = worksSay; worksSay = (id, t) => said.push([id, t]);
+  goToDeck(5); out.item = !!ITEMS.find(i => i.t === 'Old mysteries');
+  W.side = {}; delete SHIP.flags['mys.word'];
+  W.rank = 'officer'; W.tier = 2; setShipNow(19 * 1440 + 600); out.shutOfficer = !mysOn() && mysView().blocks.every(b => b.kind !== 'buttons');
+  W.rank = 'senior'; W.tier = 3; setShipNow(19 * 1440 + 600); out.shutDay20 = !mysOn();
+  setShipNow(20 * 1440 + 545); mysTick(shipNow(), false); out.come = CASE_COME.by; if (out.come) { CASE_COME.at = 0; caseComeTick(shipNow()); } out.word = said.slice(); out.arrow = !!GUIDE.list.find(e => e.id === 'mys:board' && e.level === 3);
+  const g0 = GUIDE.list.find(e => e.id === 'mys:board'), goal = g0 && g0.goal(); out.goal = goal ? [goal.deck, goal.room, String(goal.item)] : null;
+  said.length = 0; mysTick(shipNow() + 60, false); out.wordOnce = said.length === 0;
+  // the tap
+  said.length = 0; const it = ITEMS.find(i => i.t === 'Old mysteries'); it.hit.getWorldPosition(_wp); out.tap = ixTap(it, _wp.clone(), _wp.clone());
+  return out;
+})()"""
+BOARD2 = r"""(() => {
+  const out = {}, W = SHIP.works, S = mysState();
+  out.open = DEV.open && DEV.app === 'oldcases'; out.seen = S.seen; out.arrowDone = (GUIDE.list.find(e => e.id === 'mys:board') || { done: () => true }).done();
+  out.torres = (window.__said || []).filter(w => w[0] === 'torres-zeke').map(w => w[1]);
+  const b = document.getElementById('devBody'); out.rows = [...b.querySelectorAll('.list .rt, .list li')].map(x => x.textContent).slice(0, 8);
+  out.takes = [...b.querySelectorAll('button')].map(x => x.textContent).filter(t => /^Take/.test(t));
+  out.order = mysOrder(); out.order2 = mysOrder();
+  const first = out.order[0]; deviceDo({ app: 'oldcases', do: 'take', arg: first });
+  const j = mysJob(); out.taken = j && [j.mys, j.claimedBy, jobSide(j), jobStops(j).length, jobStops(j).map(s => (s.places || [])[0] || null)];
+  out.second = mysTake(out.order[1]);
+  deviceShow('oldcases'); out.takesAfter = [...b.querySelectorAll('button')].map(x => x.textContent).filter(t => /^Take/.test(t)).length;
+  for (let k = 0; k < 3; k++) jobStepDone(j.id, k);
+  const xp0 = W.xp; jobStepDone(j.id, 3, { pick: 'sus2' }); out.wrongDone = !!j.workDone;
+  jobStepDone(j.id, 3, { pick: 'sus1' }); out.rightDone = !!j.workDone;
+  mysTick(shipNow(), false); out.status = j.status; out.done = S.done.slice(); out.xp = W.xp - xp0; out.use = W.use.mys;
+  out.notes = CHIEF_NOTES.mys.open() && CHIEF_NOTES.mys.lines.length === 1 && /Day 21/.test(CHIEF_NOTES.mys.lines[0]);
+  out.next = mysTake(out.order[1]); const j2 = mysJob(); out.next2 = j2 && j2.mys;
+  W.side.mysOk = false; W.side.mys = { seen: 21, taken: 'nope', done: ['2', 'bad', 7], days: { 2: 22 } }; delete W.side.mysOk; out.clean = JSON.stringify(mysState());
+  // RV20's N1: Torres's pointer still on its way when you read the board: dropped, no word
+  window.__said.length = 0; CASE_COME.by = null; S.seen = 0; delete SHIP.flags['mys.word']; caseSayInPerson('torres-zeke', 'pointer', { skip: () => !!mysState().seen });
+  const going = CASE_COME.by; S.seen = 21; caseComeTick(shipNow()); out.n1 = [going, CASE_COME.by, window.__said.length];
+  deviceClose(); worksSay = window.__ws;
+  return out;
+})()"""
+
+# P9: the row opens on Day 19 (Calder): the clash found from the last fortnight's real plans (one person's wash on the same
+# weekday overlapping the same calendar item, nobody else's ever); the washer's case: the clash, other people's washes,
+# parts; each clue honest against the plans; shown with Calder's word; call it, reset, then the ask in person; the move
+# settled at 22:00 for the next such day (once), read by the planner's rule for that person, at that hour, in the laundry
+P9 = r"""(() => {
+  const out = {}, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, side: W.side };
+  C.open = []; delete SHIP.flags['case.p9.first']; W.rank = 'senior'; W.tier = 3; W.tr = { t3: 15 }; W.side = {};
+  const said = []; const ws = worksSay, wa = worksSayAll; worksSay = (id, t) => said.push([id, t]); worksSayAll = (id, L) => said.push([id, L[0]]);
+  W.op = { 19: ['p9'] }; setShipNow(18 * 1440 + 330); machinesNow();
+  const F = p9Find(19); out.find = F && { A: F.A, title: F.title, wd: F.wd, trips: F.trips, others: F.others.length };
+  WORK_MECH.p9.open(ladderRow('p9'), 19);
+  const id = flag('case.p9.first'), c = caseById(id), j = c && caseJob(c); out.staged = id;
+  if (!c) { worksSay = ws; worksSayAll = wa; Object.assign(W, keep); return out; }
+  const P = p9Of(c); out.machine = j.machine; out.cause = c.cause; out.sus = c.sus.slice(); out.reserved = j.reserved; out.hidden = caseHidden(j); out.fewest = c.fewest; out.lim = caseBandOf('p9', c.band);
+  out.clues = c.clues.map(k => ({ id: k.id, at: k.at, kills: k.kills.slice(), type: k.type, text: caseClueText(c, k), reach: caseReachable(k), deck: caseClueDeck(k) }));
+  // honesty: every trip is the person's wash overlapping the item; nobody else washed at a trip's time; the rota's washes are theirs
+  const L = new Set(p9Laundry()), washesOf = (pid, d) => planDay(schedPeople().find(x => x.id === pid), d).filter(s => s.tag === 'laundry' && L.has(s.placeId)).map(s => [s.from - (d - 1) * 1440, s.to - (d - 1) * 1440]);
+  const item = (d) => devDay(d).find(i => i.title === F.title);
+  out.tripsOk = F.trips.every(({ d: dd, t }) => { const it = item(dd); return weekday(dd) === P.wd && it && washesOf(P.A, dd).some(([a, b]) => a <= t && t < b && it.from < b && a < it.to); });
+  out.othersOk = c.sus.filter(s => /^r:/.test(s)).every(s => F.trips.every(({ d: dd, t }) => !washesOf(s.slice(2), dd).some(([a, b]) => a <= t && t < b)));
+  out.rotaOk = c.clues.filter(k => k.src.who).every(k => k.src.ws.every(([dd, a]) => washesOf(k.src.who, dd).some(([x]) => x === a)));
+  out.partsOut = c.clues.find(k => k.id === 't0').kills.slice().sort().join() === c.sus.filter(s => !/^r:/.test(s) && s !== 'clash').sort().join();
+  setShipNow(18 * 1440 + 545); machinesNow(); caseTick();
+  out.shown = !c.wait; out.title = j.title; out.by = c.by; out.come = CASE_COME.by; if (out.come) { CASE_COME.at = 0; caseComeTick(shipNow()); } out.said = said.slice();
+  out.labels = c.sus.map(s => caseSus(c, s).label);
+  claimJob(j.id); caseTick(); for (const k of c.clues) caseClue(c.id, k.id);
+  caseCall(c.id, 'clash'); caseTick(); out.stops = [jobStops(j).length, (j.stepsDone || []).slice()];
+  const n = jobStops(j).length; for (let k = 0; k < n; k++) if (!(j.stepsDone || []).includes(k)) jobStepDone(j.id, k);
+  out.fixed = !!j.workDone; caseTick(); const S = p9State(); out.ask = S.ask && S.ask.who;
+  turnInJob(j.id); caseTick(); out.closed = !caseById(c.id); out.trained = W.tr.p9;
+  // the ask, in person: away, nothing; beside them, the answer and the move
+  const pa = schedPeople().find(x => x.id === P.A); p9AskTick(shipNow(), false); out.askArrow = !!GUIDE.list.find(e => e.id === 'p9:ask' && e.level === 1); out.notYet = !!S.ask;
+  const fake = { p: pa, x: player.obj.position.x + 1, z: player.obj.position.z }; DECK_CREW.push(fake);
+  said.length = 0; p9AskTick(shipNow(), false); DECK_CREW.splice(DECK_CREW.indexOf(fake), 1);
+  out.answered = said.some(w => w[0] === P.A); out.moves = S.moves.slice(); out.askGone = !S.ask;
+  // settled at 22:00 for the next such weekday, once; the rule for them only, in the laundry, at that hour
+  let nd = 20; while (weekday(nd) !== P.wd) nd++;
+  out.settle = [p9Settle(nd), p9Settle(nd), p9Settle(nd - 1)]; out.set = S.set[nd];
+  const lp = placeById([...L][0]), occ = {}, A0 = (nd - 1) * 1440;
+  const other = schedPeople().find(x => x.id !== P.A);
+  out.rule = [p9PlanRule(nd, occ, lp, A0 + P.a + 5, A0 + P.a + 35, pa), p9PlanRule(nd, {}, lp, A0 + P.a + 5, A0 + P.a + 35, other), p9PlanRule(nd, {}, placeById('3-mess-1') || { type: 'mess' }, A0 + P.a + 5, A0 + P.a + 35, pa), p9PlanRule(nd - 7 + 14, {}, lp, A0 + P.a + 5, A0 + P.a + 35, pa)];
+  out.hook = typeof sdPlanShut === 'function';
+  W.side.p9Ok = false; W.side.p9 = { ask: { who: 7 }, moves: [{ who: 'x', wd: 2, a: 1, b: 2, from: 3 }, 'junk'], set: { 5: [{ who: 'x', a: 1, b: 2 }, null], bad: 1 } }; delete W.side.p9Ok; out.clean = JSON.stringify(p9State());
+  worksSay = ws; worksSayAll = wa; Object.assign(W, keep); C.open = [];
+  return out;
+})()"""
+
+# P9's shutdown form (P5_M18): a booking whose branch has someone's wash then -> the clash line, the same answer each ask;
+# a booking over nobody's routine -> none; the notice once. B3's sdAffected stood in when 24w isn't in the build
+P9SHUT = r"""(() => {
+  const real = typeof sdAffected === 'function' && !window.__sdStub, out = { real };
+  if (!real) { window.__sdStub = true; window.sdAffected = (day, branch, at) => branch === 'b-laundry' ? [{ id: 'zz-nobody', rooms: ['4|x'], acts: ['work'], tags: ['job'] }, { id: 'navarro-mateo', rooms: ['4|l'], acts: ['leisure'], tags: ['laundry'] }] : [{ id: 'quist-ilse', rooms: ['6|j'], acts: ['work'], tags: ['job'] }]; }
+  P9_SHUT.k = null;
+  if (!real) { out.hit = p9ShutClash({ day: 24, at: 1140, branch: 'b-laundry', keep: [] }); out.again = p9ShutClash({ day: 24, at: 1140, branch: 'b-laundry', keep: [] }) === out.hit; out.none = p9ShutClash({ day: 24, at: 600, branch: 'b-other', keep: [] }); }
+  out.m18 = P5_M18;
+  return out;
+})()"""
+def p9_shut(g, path, m18_off=False):
+    R = g.ev(P9SHUT); print('p9 shut:', R)
+    if R['real']: print('  p9 shut: B3\'s sdAffected is in this build: checked on the merge with its planning screen'); return
+    if not R['m18']: check(R.get('hit') is None and R.get('none') is None, f"p9 shut: nothing with P5_M18 off: {R}"); return
+    check(R['hit'] and R['hit']['who'] == 'navarro-mateo' and 'laundry' in R['hit']['thing'] and R['again'] and R['none'] is None, f"p9 shut: the wash in the shutdown hour is the clash, the same each ask, none over nobody's routine: {R}")
+
+def part_p9(g, path):
+    if not g.ev("typeof p9Stage === 'function'"): return 'not yet'
+    R = g.ev(P9); print('p9:', R)
+    check(R.get('find') and R.get('staged') and R['staged'] != 'none', f"p9: a clash found in the last fortnight's plans and staged: {R.get('find')} {R.get('staged')}")
+    if not R.get('staged') or R['staged'] == 'none': return 'done'
+    from itertools import combinations
+    sus, clues, L = R['sus'], R['clues'], R['lim']
+    left = lambda ks: [s for s in sus if not any(s in k['kills'] for k in ks)]
+    fewest = min((n for n in range(1, len(clues) + 1) for ks in combinations(clues, n) if len(left(list(ks))) == 1), default=99)
+    check(R['cause'] == 'clash' and R['reserved'] == 38 and R['hidden'] and R['machine'].startswith('4-washer-'), f"p9: the washer's clash, slot 38, hidden till shown: {R['machine']} {R['cause']}")
+    check(left(clues) == ['clash'] and all(len(left([k])) > 1 for k in clues) and fewest == R['fewest'] >= L['fewest'] and L['sus'][0] <= len(sus) <= L['sus'][1], f"p9: one left (the clash), no single clue solves it, the band: {left(clues)} {fewest} {sus}")
+    check(any(s.startswith('r:') for s in sus) and any(not s.startswith('r:') and s != 'clash' for s in sus), f"p9: suspects the clash, other people's washes and parts: {sus}")
+    check(R['tripsOk'] and R['othersOk'] and R['rotaOk'] and R['partsOut'], f"p9: honest against the plans: trips {R['tripsOk']}, others {R['othersOk']}, rota {R['rotaOk']}, the log rules the parts out {R['partsOut']}")
+    check(all(k['reach'] for k in clues) and len({k['deck'] for k in clues if k['deck'] is not None}) <= 1, f"p9: every clue reachable, one deck")
+    check(R['shown'] and 'only on' in R['title'] and R['by'] == 'calder' and any(w[0] == 'calder' for w in R['said']), f"p9: shown with Calder's word: {R['title']!r} {R['said']}")
+    check(R['stops'][1] and 0 in R['stops'][1] and R['fixed'] and R['ask'] == R['find']['A'] and R['closed'] and R['trained'] == 19, f"p9: called, no part to fetch, the reset fixes it, the ask is next, trained: {R['stops']} {R['fixed']} {R['ask']} {R['trained']}")
+    check(R['askArrow'] and R['notYet'] and R['answered'] and R['askGone'] and len(R['moves']) == 1 and R['moves'][0]['who'] == R['find']['A'], f"p9: a level 1 arrow to them; asked in person, their answer, the move: {R['askArrow']} {R['answered']} {R['moves']}")
+    check(R['settle'] == [True, False, False] and R['set'] and R['set'][0]['who'] == R['find']['A'], f"p9: settled once at 22:00 for the next such day only: {R['settle']} {R['set']}")
+    check(R['rule'] == [True, False, False, False], f"p9: the planner's rule closes the laundry for them only, at that hour, on that day: {R['rule']}")
+    check(R['clean'] == '{"ask":null,"moves":[{"who":"x","wd":2,"a":1,"b":2,"from":3}],"set":{"5":[{"who":"x","a":1,"b":2}]}}', f"p9: junk in the save cleaned: {R['clean']}")
+    p9_shut(g, path)
+    src = pathlib.Path(path).read_text().replace(S5_ON, 'const P5_STEP5 = true;')
+    if 'const P5_M18 = P5_STEP5 && true;' in src:   # the shutdown form only with P5_M18: a copy with it off
+        off = WORK / 'test' / f'_s5m18off_{os.getpid()}_{pathlib.Path(path).name}'; off.write_text(src.replace('const P5_M18 = P5_STEP5 && true;', 'const P5_M18 = P5_STEP5 && false;')); _RUN_FILES.append(off)
+        h = Game(g._pw, str(off), 390, 844) if hasattr(g, '_pw') else None
+        if h: h.step(2); print('  (with P5_M18 off)'); p9_shut(h, path); h.close()
+    if not R['hook']: print("  p9: section 14's hook (B3's sdPlanShut, 24w) is not in this build: the planner side is checked on a merge with claude/p5s5-mech-b")
+    return 'done'
+
+def s5_copy(path):
+    src = pathlib.Path(path).read_text()
+    if S5_ON not in src: return None
+    out = WORK / 'test' / f'_s5on_{os.getpid()}_{pathlib.Path(path).name}'
+    out.write_text(src.replace(S5_ON, 'const P5_STEP5 = true;')); _RUN_FILES.append(out)
+    return out
+
+def part_p4(g, path):
+    if not g.ev("typeof p4Stage === 'function'"): return 'not yet'
+    S = g.ev(P4SWEEP)
+    cs = S['cases']; print(f"p4: {S['fit']} fits, {len(cs)} cases")
+    for c in cs[:3]: print('  ', c['id'], c['sus'], [(k['at'], k['kills'], k['stuck']) for k in c['clues']], c['title'])
+    check(len(cs) >= 5, f"p4: the sweep made cases: {len(cs)}")
+    from itertools import combinations
+    for c in cs:
+        sus, clues, L = c['sus'], c['clues'], c['lim']
+        left = lambda ks: [s for s in sus if not any(s in k['kills'] for k in ks)]
+        check(left(clues) == [c['cause']] and all(len(left([k])) > 1 for k in clues), f"{c['id']}: one left, no single gauge solves it: {left(clues)}")
+        fewest = min((n for n in range(1, len(clues) + 1) for ks in combinations(clues, n) if len(left(list(ks))) == 1), default=99)
+        check(fewest == c['fewest'] >= L['fewest'] and L['sus'][0] <= len(sus) <= L['sus'][1] and L['clues'][0] <= len(clues) <= L['clues'][1], f"{c['id']}: the band ({fewest}, {len(sus)}, {len(clues)})")
+        stuck = [k for k in clues if k['stuck']]; scan = [k for k in clues if k['scan']]
+        check(len(stuck) == 1 and stuck[0]['kills'] == [] and stuck[0]['part'] == c['susParts'][sus.index(c['cause'])] and stuck[0]['panel'] and stuck[0]['tool'] == 'scanner' and "hasn't moved" in stuck[0]['text'], f"{c['id']}: one stuck gauge, the cause's own, at the panel: {stuck}")
+        check(len(scan) == 1 and scan[0]['kills'] == [] and scan[0]['panel'] and scan[0]['tool'] == 'scanner' and 'scanner reads' in scan[0]['text'], f"{c['id']}: the scanner's third reading at the panel, ruling out nothing: {scan}")
+        honest = all(len(k['kills']) == 1 and c['susParts'][sus.index(k['kills'][0])] == k['part'] and k['kills'][0] != c['cause'] for k in clues if not k['stuck'] and not k['scan'])
+        check(honest and len(set(c['susParts'])) == len(sus), f"{c['id']}: each decoy's own gauge crosses out only it; one part each: {c['susParts']}")
+        check(any(k['at'] == 'board' for k in clues) and all(k['reach'] and k['place'] for k in clues) and len({k['deck'] for k in clues if k['deck'] is not None}) <= 1, f"{c['id']}: one reading taped to the job, the rest at the panel, all reachable")
+        check(c['shown'] and c['parts'] == [] and c['title'].startswith('Head-scratcher: ') and 'disagree' in c['title'], f"{c['id']}: on the board, the part yours to find: {c['title']!r}")
+    F = g.ev(P4FIRST)
+    print('p4 first:', {k: v for k, v in F.items() if k not in ('texts',)})
+    check(F.get('before') is None and F.get('staged') and F.get('machine') == '3-chiller-1' and F.get('cause') == 'sensor' and F.get('reserved') == 28, f"p4's first: staged when the row opens, the chiller's display, slot 28: {F.get('staged')} {F.get('machine')} {F.get('cause')}")
+    if F.get('staged') and F.get('staged') != 'none':
+        check(F['hidden'] and F['wait'] and F['waitEarly'] and F['again'] == 1, f"p4's first: off the board till your shift, staged once: {F['hidden']} {F['waitEarly']} {F['again']}")
+        check(F['shown'] and not F['hiddenAfter'] and F['by'] == 'torres-zeke' and (any(w[0] == 'torres-zeke' for w in F['said']) or (F.get('come') == 'torres-zeke' and any(w[0] == 'torres-zeke' for w in F.get('said2', [])))), f"p4's first: shown at 09:05 with Torres's word, in person (he walks over; a toast if he can't): {F['title']!r} {F['said']} {F.get('come')}")
+        check(len(F['board']) == 1 and F['notes'] and len(F['chips']) >= 9 and any('scanner' in x for x in F['chips']), f"p4's first: the taped reading on taking it; Fault notes shows the stuck gauge: {F['board']} {F['chips']}")
+        check(not F['wrongFit']['done'] and F['wrongFit']['known'], f"p4's first: a wrong call doesn't fix it: {F['wrongFit']}")
+        check(F['saveSame'] and F['saveBytes'] < 2400, f"p4's first: the save round trip mid-case ({F['saveBytes']} bytes)")
+        check(F['fixed'] and F['closed'] and F['trained'] == 17, f"p4's first: the right call fixes it; the row trained on Day 17: {F['fixed']} {F['closed']} {F['trained']}")
+    return 'done'
+
+def part_board(g, path):
+    if not g.ev("typeof mysOpen === 'function' && typeof DEVICE_APPS !== 'undefined' && DEVICE_APPS.has('oldcases')"): return 'not yet'
+    A = g.ev(BOARD); print('board:', A)
+    for k in range(30):                                   # the walk over to it, then it opens
+        g.step(30)
+        if g.ev("DEV.open && DEV.app === 'oldcases'"): break
+    print('  walked:', g.ev("[Math.round(player.obj.position.x * 10) / 10, Math.round(player.obj.position.z * 10) / 10, (player.path || []).length, DEV.open, DEV.app]"))
+    B = g.ev(BOARD2); print('board, read:', B)
+    check(A['item'] and A['tap'] is True, f"the board is on Deck 5 and taps: {A['item']} {A['tap']}")
+    check(A['shutOfficer'] and A['shutDay20'], f"shut for an Officer and before Day 21: {A['shutOfficer']} {A['shutDay20']}")
+    check(any(w[0] == 'torres-zeke' for w in A['word']) and A['arrow'] and A['goal'] and A['goal'][0] == 5 and A['wordOnce'], f"Day 21: Torres's word and a level 3 arrow to the board, once: {A['word']} {A['goal']}")
+    check(B['open'] and B['seen'] == 21 and B['arrowDone'] and len(B['torres']) == 1, f"the tap opens the board (walked to it), seen, the arrow done, Torres's line: {B['open']} {B['seen']} {B['arrowDone']} {B['torres']}")
+    check(len(B['takes']) == 5 and B['order'] == B['order2'] and sorted(B['order']) == ['1', '2', '3', '4', '5'], f"five old cases, Take on each, the same order twice: {B['takes']} {B['order']}")
+    check(B['taken'] and B['taken'][0] == B['order'][0] and B['taken'][1] == 'you' and B['taken'][2] and B['taken'][3] == 4 and B['taken'][4][3] == '5-jobboard-1' and all(B['taken'][4]), f"take one: a side job of yours, three looks then the board: {B['taken']}")
+    check(B['second'] is False and B['takesAfter'] == 0, f"one at a time: {B['second']} {B['takesAfter']}")
+    check(not B['wrongDone'] and B['rightDone'] and B['status'] == 'done' and B['done'] == [B['order'][0]], f"a wrong pick isn't a fail; the right one solves it: {B['wrongDone']} {B['rightDone']} {B['status']} {B['done']}")
+    check(B['xp'] >= 1 and B['use'] == 1 and B['notes'], f"solved: a small reputation gain, the row's use, the Chief's notes: {B['xp']} {B['use']} {B['notes']}")
+    check(B['next'] and B['next2'] == B['order'][1], f"then the next can be taken: {B['next2']}")
+    check(B['n1'][1] is None and B['n1'][2] == 0, f"RV20 N1: read the board first, and Torres's pointer still on its way is dropped: {B['n1']}")
+    check(B['clean'] == '{"seen":21,"taken":null,"done":["2"],"days":{"2":22}}', f"junk in the save cleaned: {B['clean']}")
+    return 'done'
+
+S5_RUN = {'p4': part_p4, 'p5': part_p5, 'p9': part_p9, 'board': part_board}
+
+def run_s5(path, parts):
+    with sync_playwright() as pw:
+        g = Game(pw, path, 390, 844); g.step(2)
+        off = g.ev(S5_OFF); g.close()
+        check(not off['kinds'] and not off['mech'] and not off['on'] and not off['app'] and not off['job'] and not off['clash'], f"switch off: nothing of Step 5's registered: {off}")
+        on = s5_copy(path)
+        if not on:
+            for p in parts: print(f'{p}: not yet (no P5_STEP5 switch line in this build)'); NOT_YET.append(p)
+            return
+        g = Game(pw, str(on), 390, 844); g.step(3); g._pw = pw
+        g.ev(SETUP)
+        for p in parts:
+            f = S5_RUN.get(p)
+            r = f(g, path) if f else 'not yet'
+            if r == 'not yet': print(f'{p}: not yet'); NOT_YET.append(p)
+        pe = [e for e in g.errors if e.startswith('pageerror')]
+        check(not pe and not g.ev("DEV.errors.slice()"), f'Step 5 parts: no errors: {pe}')
+        g.close()
+
+only = [a for a in sys.argv[2:] if a in S5_PARTS]
+if not only: run(sys.argv[1])
+run_s5(sys.argv[1], only or S5_PARTS)
+print(('PUZZLE CHECK OK' + (f' (not yet: {", ".join(NOT_YET)})' if NOT_YET else '')) if ok else 'PUZZLE CHECK FAILED')
 sys.exit(0 if ok else 1)
