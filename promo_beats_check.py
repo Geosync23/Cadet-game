@@ -352,7 +352,8 @@ T3_TEST = """const W = __w(15, 300, { xp: 60, tr: { ps: 12, t2: 9 } }); W.tier =
       for (const r of CAREER_LADDER) if (r.id !== 't3' && r.tier <= 2) { W.tr[r.id] = W.tr[r.id] || 9; (W.op[9] = W.op[9] || []).push(r.id); }
       puSet(15); flagSet('pu3.told', 14); flagSet('pu3.notice', 14); setShipNow(14 * 1440 + 361); machinesNow(); careerClock(shipNow(), true); __bay();"""
 # ---- S6-3 turn 3 (W7): the result when your shift starts (Day 22, 22:40), and the Captain's engine badge
-T4_RES = """const W = __w(22, 760, { xp: 60, tr: { ps: 12, t2: 9, t3: 15, m19: 17, t4: 22 } }); W.tier = 3; W.rank = 'senior'; __friends();
+T4_RES = """if (typeof DIALOGUE !== 'undefined' && DIALOGUE) dialogueEnd(false); DIALOGUE = null; if (typeof P5N_SEEK !== 'undefined') P5N_SEEK.kind = null;   /* an earlier part (t4test) may leave 28a's night word open */
+      const W = __w(22, 760, { xp: 60, tr: { ps: 12, t2: 9, t3: 15, m19: 17, t4: 22 } }); W.tier = 3; W.rank = 'senior'; __friends();
       const T = pu4Set(22); T.passed = true; T.tries = 1; flagSet('p5n.on', 22);"""
 def part_t4passed(g):
     if not t4on(g, 't4passed'): return
