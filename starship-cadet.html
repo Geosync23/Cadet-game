@@ -52209,7 +52209,7 @@ function seekEl() {                                       // (z-index 2, with th
   st.textContent = '#seek{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:2;max-width:min(220px,60vw);background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px;color:#e6f0f1;line-height:1.35;cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}#seek b{color:#bdeee6;font-weight:600}';
   document.head.appendChild(st);
   el = document.createElement('div'); el.id = 'seek'; el.hidden = true; document.body.appendChild(el);
-  el.onclick = () => { if (SEEK && SEEK.visit) { visitIn(); return; } const s = SEEK; seekEnd(); if (s) { const a = DECK_CREW.find(x => x.p === s.p); if (a) { a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z); } chatOpen(s.p, !s.line, s.line || undefined); } };
+  el.onclick = () => { if (SEEK && SEEK.visit) { visitIn(); return; } const s = SEEK; seekEnd(); if (s) { const a = DECK_CREW.find(x => x.p === s.p); if (a) { a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z); } chatOpen(s.p, !s.line, s.line || undefined, { tap: true }); } };   // from afar: Walk over first
   return el;
 }
 function seekShow(p, m, why, a) {                       // the chip (why: an ask's, for its line: the career engineer's worried friends and goodbyes, 0.61.0); a: they've walked up (0.71.0)
@@ -52563,6 +52563,12 @@ function chatDraw(el, v) {
 }
 function chatShow() {
   const C = CHAT, p = C.p, r = relGet(p.id), today = SHIP.time.day;
+  if (C.far) {                                          // too far to talk: who they are, what they're doing, and the walk over (talk choices once you're there)
+    const el = chatEl(); el.hidden = false;
+    (CHAT_SKIN.draw || chatDraw)(el, { who: p.name, role: typeof rankCardRole === 'function' ? rankCardRole(p) : p.role, tier: REL_NAMES[relTier(p.id)], line: C.line.text, say: false,
+      buttons: [{ id: 'walk-over', label: C.walking ? 'Walking over…' : 'Walk over', off: !!C.walking }] });
+    return;
+  }
   const f = C.fav, ready = f && !f.idea && f.status === 'claimed' && f.claimedBy === 'you' && (f.workDone || !f.stops.length);
   const intro = C.ask === 'intro' && typeof introOptions === 'function' ? introOptions(p) : [];   // "Do you know...?" (20c's introductions)
   const buttons = C.ask === 'intro' ? intro.slice(0, 3).map(x => ({ id: 'intro:' + x.id, label: x.name })).concat([{ id: 'back', label: 'Back' }])
@@ -52589,11 +52595,27 @@ function chatShow() {
   (CHAT_SKIN.draw || chatDraw)(el, v);
   if (C.talk) talkMeter(el, C.talk);                     // the Talk a while meter, over the buttons (either skin)
 }
-function chatOpen(p, greet, line) {                       // greet: they came to you (socialSeek), so they say hello first; line: one to open with (a visit)
+// talking happens up close (the user, 2026-10-27): within TALK_NEAR tiles (1 tile is about a metre) of them; a tap from
+// further shows their card with what they're doing and Walk over, and the talk choices come when you get there
+const TALK_NEAR = 2.5, TALK_FAR_STAY = 6;                 // TALK_FAR_STAY: ship minutes (10 real seconds) a far card stays if you don't press Walk over (RV23's should)
+const DOING_WORD = { work: 'at work', leisure: 'taking a break', breakfast: 'having breakfast', dinner: 'having dinner', gym: 'working out', callhome: 'calling home', wash: 'washing up', commute: 'on the move', off: 'off duty', appt: 'meeting someone', event: 'at an event', sleep: 'asleep' };
+function chatDoing(p, w) {                               // "Tove is at work in the garden."
+  const what = w && DOING_WORD[w.act] || 'busy', pl = w && w.placeId && typeof placeById === 'function' ? placeById(w.placeId) : null;
+  const room = pl && DECKS[pl.deck] && DECKS[pl.deck].rooms[pl.room] ? DECKS[pl.deck].rooms[pl.room].name : null;
+  return shortName(p) + ' is ' + what + (room ? ' in the ' + room.replace(/^the /i, '').toLowerCase() : '') + '. Walk over to talk.';
+}
+function chatWalk(C) {                                   // walk to a free tile beside them (they wait while you come)
+  const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === C.p); if (!a || typeof playerGo !== 'function') return;
+  const goal = nearestOpen(a.x, a.z, player); if (!goal) return;
+  C.walking = shipNow(); a.talking = Math.max(a.talking || 0, 6); playerGo(goal, () => {}); chatShow();
+}
+function chatOpen(p, greet, line, o) {                    // greet: they came to you (socialSeek), so they say hello first; line: one to open with (a visit); o.tap: your tap (or their chip) from wherever you are
   if (!p || !p.id) return false;
   socInit(); if (!SOC.idx.has(p.id)) return false;
   const w = typeof whereIs === 'function' ? whereIs(p, shipNow()) : null;
   if (w && w.act === 'sleep') { chatClose(); toast(p.name, p.role + '. Fast asleep. Better not wake them.'); return true; }
+  { const a0 = o && o.tap && typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === p);   // (the user, 2026-10-27) talk only up close: from further off, their card says who and what they're doing, and Walk over; reach: move further off than now (not walking over) and it closes (RV23)
+    if (a0 && Math.hypot(a0.x - player.obj.position.x, a0.z - player.obj.position.z) > TALK_NEAR) { if (CHAT && CHAT.p !== p) chatClose(); CHAT = { p, far: true, greet, open: line || null, line: { text: chatDoing(p, w), say: false }, ask: false, at: shipNow(), reach: Math.hypot(a0.x - player.obj.position.x, a0.z - player.obj.position.z) + 1.5 }; if (typeof toastEl !== 'undefined') toastEl.classList.remove('show'); chatShow(); return true; } }
   const r = relGet(p.id); if (r.met === null) r.met = Math.floor(shipNow());
   const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === p), d = a ? Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) : 0;
   CHAT = { p, line: line || (greet ? socGreet(p) : chatLine(p)), ask: false, fav: favourOf(p), at: shipNow(), reach: Math.max(4, d + 1.5) };   // walk off further than that and it closes
@@ -52613,6 +52635,7 @@ function chatClose() { if (CHAT && CHAT.talk && !CHAT.talk.end) talkEnd(CHAT, 'w
 const chatSay = (text, say = true) => { CHAT.line = { text, say }; chatShow(); };
 function chatDo(id) {
   const C = CHAT; if (!C) return;
+  if (C.far) { if (id === 'walk-over') chatWalk(C); return; }   // only the walk from afar
   const p = C.p, r = relGet(p.id), U = k => schedU(p.seed, Math.floor(shipNow() / 60), k), pick = (a, k) => a[Math.floor(U(k) * a.length)];
   if (id === 'chat') {
     if (r.chatDay === SHIP.time.day) return;
@@ -52819,6 +52842,15 @@ function talkMeter(el, T) {                               // the meter in the ca
 // the card closes when you walk off or they leave the deck (socialTick, every frame); while it's open they stay put
 function chatTick() {
   const C = CHAT; if (!C) return;
+  if (C.far) {                                          // walking over: they wait for you; close enough, and the card opens as if you'd tapped them there
+    const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === C.p); if (!a) { chatClose(); return; }
+    const dd = Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z);
+    if (C.walking) a.talking = Math.max(a.talking || 0, .25);
+    if (!C.walking && (dd > C.reach || shipNow() - C.at > TALK_FAR_STAY)) { chatClose(); return; }   // (RV23's should) not walking over: it closes when you move away or after a short while, so seeks, visits and chatter aren't held back
+    if (C.walking && dd <= TALK_NEAR) { const { p, greet, open } = C; CHAT = null; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z); a.talking = 6; chatOpen(p, greet, open || undefined); return; }
+    if (C.walking && !player.path.length && shipNow() - C.walking > 1) { C.walking = 0; C.at = shipNow(); C.reach = dd + 1.5; chatShow(); }   // stopped short (a closed door, a tap elsewhere): Walk over again (the short while starts again from here)
+    return;
+  }
   if (C.visit) { if (C.talk && !C.talk.end) talkStep(C); return; }   // a visitor in your bunk room stays till you close it (or 22:00); a talk with them still runs
   const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === C.p);
   if (!a || Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > C.reach) { chatClose(); return; }
@@ -67817,10 +67849,11 @@ function tapCrew(cx, cy) {
   sndFx('hello');                                        // a friendly bloop (section 27, 0.93.0)
   if (typeof introTap === 'function' && introTap(a.p)) return true;   // section 21: the arrival evening's tap-to-ask (0.26.31)
   if (typeof tradJoinTap === 'function' && tradJoinTap(a)) return true;   // section 18: tap someone at a tradition to join in (0.70.0)
-  a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
+  const far = typeof TALK_NEAR !== 'undefined' && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > TALK_NEAR;   // (section 20) too far to talk: their card offers Walk over
+  if (!far) { a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z); }
   const ap = typeof apptTapKeep === 'function' ? apptTapKeep(a.p, a.x, a.z) : null;   // section 14: due to meet them now (Rina's health check): kept
   if (ap) { toast(ap.title || 'Appointment', 'Kept: ' + a.p.name + ' is seeing you now.'); if (typeof playerChat === 'function') playerChat(a.p); return true; }
-  if (typeof chatOpen === 'function' && chatOpen(a.p)) return true;   // section 20: the chat card
+  if (typeof chatOpen === 'function' && chatOpen(a.p, false, undefined, { tap: true })) return true;   // section 20: the chat card (from afar: who, what they're doing, Walk over)
   const f = crewFeeling(a.p, shipNow());               // section 14: "Tomas looks tired"
   const el = typeof eventLine === 'function' ? eventLine(a.p, shipNow()) : null;   // section 18: "Coming to the quiz tonight?"
   toast(a.p.name, a.p.role + '. ' + (f ? f + ' ' : '') + (el ? '"' + el + '"' : a.p.bio));
