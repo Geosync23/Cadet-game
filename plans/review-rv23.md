@@ -96,4 +96,6 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
 - MA6 8f943e82: PASS. cadet identical vs 3e502ca; mech_check m24 OK; controller m24 OK (pick, book, six calls by pad).
 - DA6 dd32a9a7: PASS. cadet identical vs 5dc0f13; controller deck6 OK (rack take/return, coils 1-3, reactor door by pad).
 - MA6 a92d0562: PASS. cadet identical vs b472fa1a; mech m21 m24 OK; controller m24 OK (coil-swap card at 390x844).
-- Waiting: W7 and N6 fixes for the lift-car escort.
+- N6 06b6a158: cadet identical alone vs 8d1c749f (one start-frame diff beside another check, 0 alone); player_check night part OK;
+  controller nights OK; 6 m reach done. Open: the lift-car escort must (W7's fix at the source); then re-run n6_play.py.
+- Waiting: W7's escort fix.
