@@ -57,3 +57,8 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
   472-476/480 for 8; Works tea 13:00 on 7 went 0). Same two fails on 6d4b519's ON copy (476/480; tea 0): from V-3's chain,
   slightly worse with 85f07071's 09:15 standEasy. A MUST under the ON rule. Sent to VB1.
 - B5 ea40ae51 (S1-S4 shoulds on cbca3e3e): the mid-line comment still there (line 59312). Reminded B5; review on the next sha.
+- 01:35 UTC: B5 claude/p5s5-promo **f00d93c1** (comment moved; carries S1-S4 ea40ae51). Diff read: ladderBigP5's sort live
+  again; S2 (no "reputation down" on a tier change, P5_STEP5 only), S3 (visitor chair words), S4 (Dev presets) fine.
+  S1 should: the friends' Mail is sent at the promotion (~08:30) with `at` = 12:30, so it sits in the inbox at once,
+  dated in the future (mailSend files it immediately; section 18 clamps such dates with Math.min(shipNow(), at)). Running:
+  machine_check ON, promo_beats_check ON, cadet_test 5957d244 vs f00d93c1.
