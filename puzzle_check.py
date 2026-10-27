@@ -1149,7 +1149,7 @@ def run_s5(path, parts):
 # ---- Step 6's parts (S6-8, PZ6): P6, P7, P8, run on a copy with P5_STEP6 switched on (the build ships it behind ?p5s6);
 # the switch off: nothing of Step 6's cases registered. A part whose code isn't in the build says "not yet".
 #   python3 puzzle_check.py BUILD.html p6 [p7 p8]   only those parts
-S6_PARTS = ['p6', 'p7', 'p8']
+S6_PARTS = ['p6', 'p7', 'p8', 'point']
 S6_ON = "const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');"
 S6_OFF = r"""(() => ({ kinds: Object.keys(CASE_KINDS).filter(k => ['p6', 'p7', 'p8'].includes(k)), mech: typeof WORK_MECH !== 'undefined' ? ['p6', 'p7', 'p8'].filter(k => WORK_MECH[k]) : [], on: typeof P5_CASES6 !== 'undefined' && P5_CASES6, notes: ['p6', 'p7', 'p8'].filter(k => CHIEF_NOTES[k]) }))()"""
 # an Engine Specialist (rank 'specialist', tier 4: the T4 band), the row open
@@ -1451,7 +1451,45 @@ def part_p8(g, path):
         check(not F['wrongFit']['done'] and F['wrongFit']['known'] and F['fixed'] and F['closed'] and F['trained'] == 25, f"p8's first: a wrong one doesn't fix it, the right one does, trained Day 25: {F['wrongFit']} {F['fixed']} {F['trained']}")
     return 'done'
 
-S6_RUN = {'p6': part_p6, 'p7': part_p7, 'p8': part_p8}
+# casePoint (S6-7's "point Basil to a clue", W7's 28e): a practice case on paper in Fault notes' point mode; three clues
+# to point him to, exactly one the key (with what he has, one suspect left), checked here by the same rule; the same seed
+# the same case; a real tap on a choice closes the device and calls onPick once (the key: true); closing calls onClose;
+# nothing posted or saved
+POINT = r"""((seed) => { const out = {}, W = SHIP.works, C = caseState(), cases0 = JSON.stringify(W.cases), jobs0 = SHIP.jobs.length;
+  window.__pk = []; out.ok = casePoint({ by: 'basil', seed, onPick: (id, key) => window.__pk.push([id, key]), onClose: () => window.__pk.push(['close']) });
+  const P = CASE_UI.point; if (!P) return out;
+  out.m = P.m; out.sus = P.sus.slice(); out.pick = P.pick.slice(); out.key = P.key; out.has = P.has.slice();
+  const left = ids => P.sus.filter(s => !P.clues.some(k => ids.includes(k.id) && k.kills.includes(s))).length;
+  out.lefts = P.pick.map(id => left(P.has.concat([id])));
+  out.open = DEV.open && (DEV.app === 'works' || DEV.app === 'faultnotes'); out.text = document.getElementById('devBody').textContent;
+  out.buttons = [...document.querySelectorAll('#devBody button')].filter(b => /^Point to/.test(b.textContent)).map(b => [b.textContent, Math.round(b.getBoundingClientRect().height)]);
+  out.posted = SHIP.jobs.length !== jobs0 || JSON.stringify(W.cases) !== cases0;
+  return out; })"""
+
+def part_point(g, path):
+    if not g.ev("typeof casePoint === 'function'"): return 'not yet'
+    g.ev("(() => { const W = SHIP.works; W.rank = 'specialist'; W.tier = 4; })()")
+    A = g.ev(f"({POINT})(12345)"); print('point:', {k: v for k, v in A.items() if k != 'text'})
+    check(A.get('ok') and A.get('open') and "head-scratcher" in A.get('text', '') and len(A.get('buttons', [])) == 3 and min(b[1] for b in A['buttons']) >= 40, f"casePoint: Fault notes in point mode, three choices: {A.get('buttons')}")
+    if not A.get('ok'): return 'done'
+    check(A['lefts'].count(1) == 1 and A['lefts'][A['pick'].index(A['key'])] == 1 and not A['posted'], f"casePoint: exactly one key (one suspect left with it), nothing posted or saved: {A['lefts']} {A['posted']}")
+    g.ev("deviceClose()"); g.step(2); closed = g.ev("[window.__pk.slice(), !!CASE_UI.point]")
+    check(closed[0] == [['close']] and not closed[1], f"casePoint: closing the device calls onClose: {closed}")
+    B = g.ev(f"({POINT})(12345)")
+    check(B['pick'] == A['pick'] and B['key'] == A['key'] and B['m'] == A['m'], "casePoint: the same seed, the same case")
+    C = g.ev(f"({POINT})(777)"); print('point (another seed):', C.get('m'), C.get('pick'), C.get('key'))
+    g.ev("deviceClose()"); g.step(2)
+    for want in (True, False):
+        g.ev(f"({POINT})(12345)"); g.step(4)
+        lab = g.ev(f"(() => {{ const P = CASE_UI.point, id = {'P.key' if want else 'P.pick.find(x => x !== P.key)'}, k = P.clues.find(x => x.id === id); return k.src.scan ? null : p4Gauge(k.src.part); }})()")
+        bs = g.page.query_selector_all('#devBody button')
+        b = next((x for x in bs if x.text_content().startswith('Point to') and ((lab and lab in x.text_content()) or (not lab and 'scanner' in x.text_content()))), None)
+        if b: b.click(); g.step(4)
+        r = g.ev("[window.__pk.slice(), !!CASE_UI.point, DEV.open]")
+        check(b and len(r[0]) == 1 and r[0][0][1] is want and not r[1] and not r[2], f"casePoint: a real tap on {'the key' if want else 'another'} choice closes it and calls onPick once ({want}): {r}")
+    return 'done'
+
+S6_RUN = {'p6': part_p6, 'p7': part_p7, 'p8': part_p8, 'point': part_point}
 
 def run_s6(path, parts):
     with sync_playwright() as pw:

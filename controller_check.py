@@ -27,7 +27,7 @@
 #   unplug    disconnect: stop walking at once, pause if used lately; reconnect resumes (deck, marks)
 #   odd       a pad that doesn't report the standard layout, and two pads (deck)
 #   s5cases   Step 5 (S5-6): the old-mysteries board by pad (ring, A, Take) and a head-scratcher's Fault notes (suspects, Call it), P5_STEP5 on (pick, panels)
-#   s6cases   Step 6 (S6-8): P6, P7 and P8 in Fault notes by pad at the Day 25 19:00 preset (a suspect and Call it, a grid cell, a toggle and To the rig), P5_STEP6 on (pick, panels)
+#   s6cases   Step 6 (S6-8): P6, P7 and P8 in Fault notes by pad at the Day 25 19:00 preset (a suspect and Call it, a grid cell, a toggle and To the rig); casePoint's choices (S6-7), P5_STEP6 on (pick, panels)
 #   deck6     Step 6 (S6-4): Deck 6 on Day 23 at 21:00 by pad: the dosimeter rack (take, return), the coils' panels, the reactor door, P5_STEP6 on (pick)
 #   vessel    A Veyli vessel needs help by pad, in a copy switched on: Calder and the sheet, the ramp's replies, the chain, the helper card and the making steps (VB1)
 # --inventory: with reach, runs its touch half even before the panels package (the list of what there is to reach).
@@ -2745,6 +2745,17 @@ def part_s6cases(pw, src, tag):
                     g = r.ev("(() => { const g = IX_GOAL; return g ? [g.deck, g.place || null] : null; })()")
                     print(f'  P8 by pad: {t!r} picked ({sel}), {go!r} -> goal {g}')
                     if not g or g[1] != '5-shop-4': fails.append(f'p8: A on {go!r} did not set the arrow to the rig: {g}')
+    # casePoint (S6-7's "point Basil to a clue"): the three choices by the D-pad, A picks one
+    if r.ev("typeof casePoint === 'function'"):
+        r.ev("deviceClose()"); r.step(2)
+        if not r.ev("(window.__pk = [], casePoint({ by: 'basil', seed: 12345, onPick: (id, key) => window.__pk.push([id, key]) }))"): fails.append('casePoint: no case shown')
+        else:
+            r.step(6); b = s5_pad_to(r, r'^Point to')
+            if not b: fails.append(f'casePoint: the D-pad never reached a choice (focus {r.ev(S5_FOCUS)!r})')
+            else:
+                r.press('A'); r.step(4); pk = r.ev("window.__pk.slice()")
+                if len(pk) != 1: fails.append(f'casePoint: A on {b!r} did not pick it: {pk}')
+                else: print(f'  casePoint by pad: {b!r} -> {pk}')
     pe = [e for e in r.errors if e.startswith('pageerror')]
     if pe: fails.append(f'page errors: {pe[:2]}')
     r.close(); return fails
