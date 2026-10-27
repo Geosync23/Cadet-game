@@ -57897,7 +57897,7 @@ onSim('caseCalled', n => { const c = SHIP.works && SHIP.works.cur; if (n && n.tr
 function worksEscort(p, t) {
   { const pe = p && typeof promoEscort === 'function' ? promoEscort(p, t) || promoMoveEscort(p, t) || promoCerEscort(p, t) : null; if (pe) return pe; }
   { const pe = p && P5_STEP5 && typeof p5Escort === 'function' ? p5Escort(p, t) : null; if (pe) return pe; }
-  { const pe = p && P5_NIGHT && typeof p5nEscort === 'function' ? p5nEscort(p, t) : null; if (pe) return pe; }   // Step 6 (28a, S6-1): Calder comes to find you for your nights   // Pillar 5 Step 5 (24u): Calder comes to find you (Power safety's ask; S5-2's promotion beats)   // 24p: Calder comes to find you for the summons; the walk to your cabin; up to the ceremony
+  { const c0 = SHIP.works && SHIP.works.cur, mine = !!(p && c0 && c0.by === p.id && /^(watch|do|held)$/.test(c0.st)), pe = p && P5_NIGHT && !mine && typeof p5nEscort === 'function' ? p5nEscort(p, t) : null; if (pe) return pe; }   // (W8) not while they're with you on a training or test job (Day 22's Tier 4 test at 09:30 and 28a's word from 09:15: she says it beside you)   // Step 6 (28a, S6-1): Calder comes to find you for your nights   // Pillar 5 Step 5 (24u): Calder comes to find you (Power safety's ask; S5-2's promotion beats)   // 24p: Calder comes to find you for the summons; the walk to your cabin; up to the ceremony
   const W = SHIP.works, c = W && W.cur; if (!c || !p || p.id !== c.by || (c.st !== 'watch' && c.st !== 'do' && c.st !== 'held') || worksDay(t) !== c.d) return null;
   const j = SHIP.jobs.find(x => x.id === c.j), spot = trainSpot(j);
   if (c.st === 'held') return spot ? { mode: 'follow', to: { deck: spot.deck, tile: spot.tile } } : null;   // they stay with you
@@ -58042,7 +58042,7 @@ function worksRecordHead() {                             // null before SHIP.wor
   if (W.rank !== 'junior' && !v.title.endsWith(v.rank)) v.title += ' · ' + v.rank;   // the title and rank together, never "Junior Technician · Junior Officer" (FX3, AR1); never "Engine Specialist · Specialist" (S6-3)
   const com = (W.ms.find(x => x[0] === 'commissioned') || [])[1], spc = (W.ms.find(x => x[0] === 'specialist.badge') || [])[1], mnt = (W.ms.find(x => x[0] === 'mentor') || [])[1], st = (W.ms.find(x => x[0] === 'stars') || [])[1], sen = (W.ms.find(x => x[0] === 'senior') || [])[1];   // sen: 24u's Senior Officer (S5-2)   // 24p: the ceremony; 24t: star logger (E3, 0.45.11)
   const ff = W.ms.filter(x => /^ff[1-3]$/.test(x[0])).sort((a, b) => a[0] < b[0] ? 1 : -1)[0], gr = ff ? +ff[0][2] : 0;   // E2's fault-finder grade (the highest)
-  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{title}. Your reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', worksText('works.record.commissioned', 'Commissioned Officer, Day {n}.', { day: com, n: com }), { n: com }) : '') + (sen ? ' ' + worksText('works.ms.senior', 'Senior Officer, Day {n}', { n: sen }) + '.' : '') + (spc ? ' ' + worksText('works.ms.specialist', 'Senior Officer, Engine Specialist, Day {n}', { n: spc }) + '.' : '') + (mnt ? ' ' + worksText('works.ms.mentor', 'Mentored Basil, Day {n}', { n: mnt }) + '.' : '') + (st ? ' ' + worksText('works.ms.stars', 'Star logger, Day {n}.', { n: st }) : '') + (gr ? ' ' + worksText('works.ms.grade', 'Fault-finder grade: {grade}.', { grade: worksText('works.grade.' + gr, ['', 'Fault-finder', 'Senior fault-finder', 'Master fault-finder'][gr]), n: ff[1] }) : '') };
+  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{title}. Your reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', worksText('works.record.commissioned', 'Commissioned Officer, Day {n}.', { day: com, n: com }), { n: com }) : '') + (sen ? ' ' + worksText('works.ms.senior', 'Senior Officer, Day {n}', { n: sen }) + '.' : '') + (spc ? ' ' + worksText('works.ms.specialist', 'Senior Officer, Engine Specialist, Day {n}', { n: spc }) + '.' : '') + (mnt ? ' ' + worksText('works.ms.mentor', 'Mentored Basil, Day {n}', { n: mnt }) + '.' : '') + (st ? ' ' + worksText('works.ms.stars', 'Star logger, Day {n}.', { n: st }) : '') + (gr ? ' ' + worksText('works.ms.grade', 'Fault-finder grade: {grade}.', { grade: worksText('works.grade.' + gr, ['', 'Fault-finder', 'Senior fault-finder', 'Master fault-finder'][gr]), n: ff[1] }) : '') + (P5_END && typeof cqRecordLine === 'function' ? cqRecordLine() : '') };   // (S6-9) the nights and Calder's question
 }
 // ---- the device's Works app: Training, Work log, Tools; other sections add tabs with worksTabAdd (24k: Fault notes and
 // the Chief's notes): worksTabAdd({ id, title, order, view() -> [blocks], act?(verb, arg), badge?() -> number }); the
@@ -63728,6 +63728,7 @@ function p5Escort(p, t) {                                // worksEscort's 24u pa
   { const w = p5TeacherWait(p, t); if (w) return w; }
   if (P5_PROMO4) { const e = pu4Escort(p, t); if (e) return e; }   // S6-3: the Tier 4 offer
   if (P5_M25 && typeof mtEscort === 'function') { const e = mtEscort(p, t); if (e) return e; }   // S6-7 (28e): Basil's day with you
+  if (P5_END && typeof cqEscort === 'function') { const e = cqEscort(p, t); if (e) return e; }   // S6-9 (28f): Calder comes to find you for her question
   if (P5_PROMO3 && typeof puEscort === 'function') return puEscort(p, t) || puEscort2(p, t);   // S5-2: the Tier 3 offer, your result, up to the bar
   return null;
 }
@@ -63928,6 +63929,7 @@ function puRepUp(b1) {                                   // worksRepTell's line 
 function puNext(k) {                                     // worksNext's line for the Tier 3 test and the Senior Officer's beats (null: its own)
   const W = SHIP.works, T = puT3(), d = SHIP.time.day; if (!P5_PROMO3 || !W) return null;
   { const mn = P5_M25 && typeof mtNext === 'function' ? mtNext(k) : null; if (mn) return mn; }   // (S6-7) Basil's day with you, on its eve and its day
+  { const en = P5_END && typeof cqNext === 'function' ? cqNext(k) : null; if (en) return en; }   // (S6-9) Calder's question at the Friday tea
   if (P5_PROMO4 && (W.tier === 3 && (!T || T.toast) || W.tier === 4 && puT4())) return pu4Next(k);   // (S6-3) a Senior's: the Tier 4 test; an Engine Specialist's beats
   if (!T) { if (W.tier !== 2) return null; const B = WORK_BANDS[2], at = b => B.findIndex(x => x[1] === b);
     return at(worksBand()) >= at('steady') && !ladderNeeds({ rep: 'relied' }, W) ? worksText('next.t3.steps', 'Your Tier 3 test needs Relied on and Power safety. You\'re {band} now.', { band: worksBandWord() }, k) : null; }
@@ -63939,7 +63941,7 @@ function puNext(k) {                                     // worksNext's line for
 }
 // the Schedule's and Tracked's rows on day d (devDay asks): the test, then (turn 3) your result, the bar and the toast
 function puItems(d) {
-  const T = P5_PROMO3 && puT3(), W = SHIP.works, s6 = () => (P5_PROMO4 ? pu4Items(d) : []).concat(P5_M25 && typeof mtItems === 'function' ? mtItems(d) : []); if (!T || !W) return s6();
+  const T = P5_PROMO3 && puT3(), W = SHIP.works, s6 = () => (P5_PROMO4 ? pu4Items(d) : []).concat(P5_M25 && typeof mtItems === 'function' ? mtItems(d) : [], P5_END && typeof cqItems === 'function' ? cqItems(d) : []); if (!T || !W) return s6();
   const out = s6();   // (S6-3) the Tier 4 test's row; (S6-7) Basil's day
   if (!T.passed && W.tier === 2 && T.day === d) out.push({ from: 540, to: 900, title: worksText('pu3.row.test', 'Your Tier 3 test'), where: 'the job board, the Works bay, Deck 5', kind: 'beat', deck: 5, room: 'w' });
   const has = id => SHIP.occasions.some(r => r.id === id && Math.floor(r.at / 1440) + 1 === d);   // a booked one is the occasion's own row
@@ -66573,7 +66575,7 @@ function mtClean(m) {                                    // a save's mt, junk dr
   const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi ? v : null, obj = o => o && typeof o === 'object' && !Array.isArray(o);
   if (!obj(m) || !int(m.day, 1, 99999)) return null;
   const steps = {}; if (obj(m.steps)) for (const k of Object.keys(m.steps).slice(0, 12)) if (/^[a-z]{1,12}$/.test(k) && int(m.steps[k], 0, 99999) !== null) steps[k] = m.steps[k];
-  return { day: m.day, set: int(m.set, 0, 99999), steps, late: int(m.late, 0, 9), clue: typeof m.clue === 'string' ? m.clue.slice(0, 40) : null };
+  return { day: m.day, set: int(m.set, 0, 99999), steps, late: int(m.late, 0, 9), clue: typeof m.clue === 'string' ? m.clue.slice(0, 40) : null, ...(typeof m.clueKey === 'boolean' ? { clueKey: m.clueKey } : {}) };
 }
 if (P5_M25) (() => { const s = SAVED && SAVED.ship && SAVED.ship.works; if (SHIP.works && s && s.mt) { const m = mtClean(s.mt); if (m) { SHIP.works.mt = m; SHIP_DAYS.delete(m.day); } } })();   // a plan made while loading, before the record was read back
 const mtOf = () => { const W = P5_M25 && SHIP.works; return W && W.mt && typeof W.mt === 'object' ? W.mt : null; };
@@ -66676,14 +66678,21 @@ onSim('job', n => {                                      // the job he watched y
 });
 if (P5_M25) WORK_TICKS.push((now, skip) => mtTick2(now, skip));
 // S6-7 turn 3 (W7): the stuck clue and the late talk. After his turn at the bench he's stuck on a head-scratcher: a level
-// 1 arrow "Basil's stuck: help him"; next to him, you point him to one clue (24k's case panel in its point mode when the
-// puzzles seat's caseMentorOpen is there; until then a stand-in choice of three, mt.clue): mt.clue keeps which, and he
+// 1 arrow "Basil's stuck: help him"; next to him, you point him to one clue (24k's case panel in its point mode, the
+// puzzles seat's casePoint; when it has no fair case, a stand-in choice of three, mt.clue): mt.clue keeps which (mt.clueKey: the key one), and he
 // works the rest out. Not helped by 12:25, he works it out himself ('self'). After lunch he's late back: from 13:35 he
 // hurries over to find you (mtEscort follows you) and you choose what to say (mt.late, three replies: mt.late keeps it).
 // Then back to the bench till Calder's first job (turn 4)
 const MT3 = { clueBy: 745, lateAt: 815, lateBy: 870 };
 const MT_CLUES = ['meter', 'label', 'log'];
 function mtClueDone(k, t) { const M = mtOf(); if (!M || M.steps.clue !== undefined) return; M.clue = typeof k === 'string' ? k : MT_CLUES[k] || 'self'; mtStep('clue', t); }
+function mtCasePoint(now) {                               // PZ6's casePoint: his head-scratcher on paper, you point him to one clue; false: no fair case (the stand-in scene)
+  if (typeof casePoint !== 'function') return false;
+  const seed = schedU(machSeed('m25'), worksDay(now), 894) * 4294967296 | 0;
+  return !!casePoint({ by: MT.basil, seed, onPick: (id, isKey) => { const M = mtOf(); if (M && M.steps.clue === undefined) M.clueKey = !!isKey;
+      mtSayOnce(MT.basil, 'mt.pointed', [isKey ? 'That one. Oh, that leaves just one. Got it!' : 'That one rules nothing out... but now I see what does. Got it.']); mtClueDone(String(id), shipNow()); },
+    onClose: () => { MT_LIVE.case = shipNow() + 10; } });
+}
 function mtClueScene() {
   return mtScript('mt.clue', { title: 'Basil\'s stuck', from: 'Basil Bramwell', stub: true, gist: 'Basil was stuck on a fault at the bench. You pointed him to one clue, and he found the rest.',
     lines: [{ who: 'bramwell-basil', text: 'It hums when it shouldn\'t, and the light says fine. I\'ve tried everything. Twice.', to: 'you' },
@@ -66710,8 +66719,8 @@ function mtTick3(now, skip) {
     mtSayOnce(MT.basil, 'mt.stuck', ['I\'m stuck. Properly stuck.']);
     if (typeof guideAsk === 'function') guideAsk({ id: 'mt:clue:' + d, level: 1, owner, until: B + MT3.clueBy, goal: () => ({ deck: 5, room: 'w', ...(puNearMe(MT.basil, 30) ? { crew: MT.basil } : { place: MT2.bench }), label: worksText('mt.ptr.clue', 'Basil\'s stuck: help him') }), done: () => (mtOf() || { steps: {} }).steps.clue !== undefined });
     if (!talk && puNearMe(MT.basil, MT2.near)) {
-      if (typeof caseMentorOpen === 'function') { if (!MT_LIVE.case) { MT_LIVE.case = 1; caseMentorOpen({ day: d, onPick: (id, key) => mtClueDone(String(id), shipNow()) }); } }   // 24k's case panel, point mode (the puzzles seat's)
-      else dialogueShow(mtClueScene(), { id: 'mt.clue', who: [MT.basil], at: now, where: { any: true } }); }
+      if (now >= (MT_LIVE.case || 0) && mtCasePoint(now)) MT_LIVE.case = Infinity;   // 24k's case panel in point mode (the puzzles seat's casePoint): once; closed unpicked, again in 10 minutes
+      else if (now >= (MT_LIVE.case || 0)) dialogueShow(mtClueScene(), { id: 'mt.clue', who: [MT.basil], at: now, where: { any: true } }); }
     return; }
   if (S.late === undefined) {
     if (m >= MT3.lateBy) { M.late = M.late === null ? -1 : M.late; mtStep('late', now); return; }   // never caught up with you: no word
@@ -66760,6 +66769,123 @@ if (P5_M25) WORK_TICKS.push((now, skip) => mtTick4(now, skip));
 // ---------------------------------------------------------------------
 
 // ---- slot: End of the career (section 28f). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// S6-9 turn 1 (W8 for lead 41; plans/p5-step6-spec.html S6-9): Calder's question. Once you're an Engine Specialist, the
+// first Friday from Day 26 (Four weeks aboard on Day 26, its tea in the Works tea corner, 18:40-19:30): settled at 22:00 the
+// evening before (cqSettle, 24w's WORKS_SETTLE) as SHIP.works.end = { day, set, steps: {}, answer } (restored after
+// worksClean at load, as 28e's mt is), with Calder's Mail. On the day: the notice at 18:20, a level 1 arrow to the tea
+// corner from 18:35; there with Calder from 18:40, the cake and her story (end.story); when it thins out (19:05) she takes
+// one of the corner's two seats (crewComeTo) and the arrow shows you the other; sat (or by her for three minutes), her
+// question (end.ask): what you want next, four answers (the spec's question 5), her reply to each. end.answer keeps yours
+// (CQ_ANSWERS); the milestones (the nights, the question) go into W.ms and the Record shows them (cqRecordLine, 24 core
+// asks). Missed at the tea: she comes to find you (cqEscort, through p5Escort) till 22:00, and each later day 10:00-21:00
+// until she's asked; her Mail is only the record. Saved in end.steps (ship minutes). Nothing calls R(). Words: end.*
+// (stand-ins until the head writer's end.lines)
+const CQ = { from: 26, notice: 1100, arrow: 1115, at: 1120, sit: 1145, wait: 3, by: 1170, late: 1320, seats: ['5-tea-1', '5-tea-2'], near: 3.5 };
+const CQ_ANSWERS = ['engines', 'bridge', 'teach', 'unsure'];
+const CQ_LIVE = { seat: null, sitAt: 0, said: {} };
+function cqClean(e) {                                    // a save's end, junk dropped
+  const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi ? v : null, obj = o => o && typeof o === 'object' && !Array.isArray(o);
+  if (!obj(e) || !int(e.day, 1, 99999)) return null;
+  const steps = {}; if (obj(e.steps)) for (const k of Object.keys(e.steps).slice(0, 8)) if (/^[a-z]{1,12}$/.test(k) && int(e.steps[k], 0, 9999999) !== null) steps[k] = e.steps[k];
+  return { day: e.day, set: int(e.set, 0, 99999), steps, answer: CQ_ANSWERS.includes(e.answer) ? e.answer : null };
+}
+if (P5_END) (() => { const s = SAVED && SAVED.ship && SAVED.ship.works; if (SHIP.works && s && s.end) { const e = cqClean(s.end); if (e) SHIP.works.end = e; } })();
+const cqOf = () => { const W = P5_END && SHIP.works; return W && W.end && typeof W.end === 'object' ? W.end : null; };
+function cqSettle(d) {                                  // 24w's 22:00 settle for day d: Calder's question at the Friday tea, once you're an Engine Specialist
+  const W = SHIP.works; if (!P5_END || !W || W.end || d < CQ.from || !(W.tier >= 4 && W.rank === 'specialist')) return false;
+  let fri = false; try { fri = weekday(d) === 4; } catch (e) { fri = false; } if (!fri) return false;
+  W.end = { day: d, set: d - 1, steps: {}, answer: null };
+  promoMail('mail.end.set', d === 26 ? 'Four weeks, tomorrow | Friday tea tomorrow is your four weeks aboard. 18:40, the Works tea corner. Come hungry. And keep a minute after: I want to ask you something.'
+    : 'Friday tea | Tea tomorrow, 18:40, the Works tea corner. Keep a minute after: I want to ask you something.', null, (d - 2) * 1440 + 1320);
+  simNote('end', { step: 'set', day: d });
+  return true;
+}
+function cqStep(k, t) { const E = cqOf(); if (!E || E.steps[k] !== undefined) return false; E.steps[k] = Math.floor(t); simNote('end', { step: k, day: E.day }); return true; }
+function cqSayOnce(id, key, lines) { if (CQ_LIVE.said[key]) return; CQ_LIVE.said[key] = 1; try { worksSayAll(id, worksVoice(id, key) || lines); } catch (e) { /* not in play */ } }
+const cqInTea = () => { try { return deckDef.num === 5 && roomAt(...player.here()) === 't'; } catch (e) { return false; } };
+function cqAnswer(k, t) {                               // your answer: kept, the milestones, Calder's Mail as the record
+  const E = cqOf(), W = SHIP.works; if (!E || E.answer || !W) return false;
+  const d = worksDay(t); E.answer = CQ_ANSWERS[k] || 'unsure'; cqStep('asked', t);
+  const ns = W.ns && typeof W.ns === 'object' ? Object.keys(W.ns).map(Number).filter(n => W.ns[n] && W.ns[n].in > 0).sort((a, b) => a - b) : [];
+  if (ns.length && !W.ms.some(x => x[0] === 'nights')) W.ms.push(['nights', ns[ns.length - 1]]);
+  if (!W.ms.some(x => x[0] === 'question')) W.ms.push(['question', d]);
+  promoMail('mail.end.' + E.answer, { engines: 'What you said | The engines, and the night crew. Good. I\'ve told Kowalczyk; she pretended not to be pleased. We\'ll talk about what that means.',
+    bridge: 'What you said | The bridge. I\'ve told Vance, and he smiled, which I didn\'t like. Go and learn it. Come back and tell us.',
+    teach: 'What you said | Teaching. You were good with Basil. There\'ll be more like him; I\'ve told the Captain.',
+    unsure: 'What you said | "I don\'t know yet." Best answer I\'ve had in years. Keep looking.' }[E.answer], null, t + 1);
+  simNote('end', { step: 'answer', day: E.day, answer: E.answer });
+  return true;
+}
+function cqStoryScene() {
+  return mtScript('end.story', { title: 'Four weeks aboard', from: 'Chief Ines Calder', stub: true, gist: 'At your four weeks aboard Calder cut you a slice of the cake and told everyone about her own first month.',
+    lines: [{ who: 'calder', text: 'Four weeks! The new hand cuts the cake. It\'s the rule.', to: 'you' },
+      { who: 'calder', text: 'My first month, the Chief before me sat me down right here and asked what I wanted.' },
+      { who: 'calder', text: 'I said, "Not to break anything." On Day 31 I broke the coolant loop.' },
+      { who: 'calder', text: 'He just said, "Now you know how it works." Best thing anyone ever told me. To four weeks.', pose: 'wave' },
+      { choice: [{ text: 'To four weeks.', reply: { who: 'calder', text: 'And many more. Eat your cake.' } }, { text: 'What happened to the coolant loop?', reply: { who: 'calder', text: 'It works better now than it did. Ask me again in a year.' } }] }] },
+    { pick: k => flagSet('end.story', k + 1), end: () => cqStep('story', shipNow()) });
+}
+function cqAskScene() {
+  return mtScript('end.ask', { title: 'Calder\'s question', from: 'Chief Ines Calder', stub: true, gist: 'Calder sat down beside you after the cake and asked what you want next.',
+    lines: [{ who: 'calder', text: 'Sit with me a minute. The others can finish the cake.', to: 'you' },
+      { who: 'calder', text: 'A month. A badge, three nights on the engines, Basil. You\'ve done the lot.' },
+      { who: 'calder', text: 'So I\'ll ask you what he asked me. What do you want next?' },
+      { choice: [{ text: 'Stay with the engines. Lead the night crew.', reply: { who: 'calder', text: 'Good. The engines like you, and nights need someone steady. We\'ll make it so.' } },
+        { text: 'Learn the bridge.', reply: { who: 'calder', text: 'The bridge! Vance will be insufferable. Go on, then. Learn it, and come back and tell us.' } },
+        { text: 'Teach the new cadets.', reply: { who: 'calder', text: 'You were good with Basil. There\'ll be more like him. I\'ll tell the Captain.' } },
+        { text: 'I don\'t know yet.', reply: { who: 'calder', text: 'Good answer. Most of us didn\'t. You\'ve got time, and you\'ve got us.' } }] }] },
+    { pick: k => cqAnswer(k, shipNow()) });
+}
+function cqSeats() {                                     // the tea corner's two seats: hers and yours (yours: the one you're on, else the other)
+  const mine = CQ.seats.includes(PLAYER_PLACE) ? PLAYER_PLACE : null, her = CQ.seats.find(s => s !== mine) || null;
+  return { her, you: mine || CQ.seats.find(s => s !== her) || null };
+}
+function cqEscort(p, t) {                               // p5Escort's 28f part: missed at the tea, Calder comes to find you
+  const E = cqOf(); if (!E || !p || p.id !== 'calder' || E.answer || E.steps.asked !== undefined) return null;
+  const d = worksDay(t), m = t - (d - 1) * 1440;
+  const on = d === E.day ? m >= CQ.by && m < CQ.late : d > E.day && m >= 600 && m < 1260;
+  return on && !promoBusy() ? { mode: 'follow', to: null } : null;
+}
+function cqTick(now, skip) {
+  const E = cqOf(); if (!E || E.answer) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, B = (d - 1) * 1440, S = E.steps, live = !skip && now >= shipNow() - 1, talk = typeof DIALOGUE !== 'undefined' && DIALOGUE;
+  if (d < E.day || !live) return; const owner = '28f (S6-9)';
+  if (d === E.day && m < CQ.by) {                        // the tea
+    if (m >= CQ.notice && m < CQ.at && flag('end.notice') !== d && !promoBusy()) { flagSet('end.notice', d); promoNotice(worksText('end.notice', d === 26 ? 'Four weeks aboard: 18:40, the Works tea corner. There\'s cake.' : 'Friday tea: 18:40, the Works tea corner. Calder wants a word.'), worksName('calder')); }
+    if (m < CQ.arrow - 1) return;
+    if (typeof guideAsk === 'function' && S.story === undefined) guideAsk({ id: 'end:tea:' + d, level: 1, owner, from: B + CQ.arrow, until: B + CQ.by, goal: () => ({ deck: 5, room: 't', item: /^tea table$/i, label: worksText('end.ptr.tea', d === 26 ? 'Four weeks aboard: the Works tea corner' : 'Friday tea: the Works tea corner') }), done: () => (cqOf() || { steps: {} }).steps.story !== undefined || cqInTea() });
+    if (m < CQ.at || talk || promoBusy() || !cqInTea()) return;
+    if (S.story === undefined) { if (puNearMe('calder', CHATTER_NEAR + 2)) dialogueShow(cqStoryScene(), { id: 'end.story', who: ['calder'], at: now, where: { any: true } }); return; }
+    if (m < CQ.sit) return;
+    const st = cqSeats();                                // when it thins out: she sits, the arrow shows you the seat beside her
+    if (st.her && CQ_LIVE.seat !== st.her) { CQ_LIVE.seat = st.her; CQ_LIVE.sitAt = now; try { crewSceneEnd('calder'); crewComeTo('calder', st.her, null, { until: B + CQ.by }); } catch (e) { /* not on this deck */ } cqSayOnce('calder', 'end.sit', ['Come and sit down a minute.']); }
+    if (!CQ_LIVE.sitAt) CQ_LIVE.sitAt = now;
+    if (typeof guideAsk === 'function' && st.you && PLAYER_PLACE !== st.you) guideAsk({ id: 'end:sit:' + d, level: 1, owner, until: B + CQ.by, goal: () => ({ deck: 5, room: 't', place: cqSeats().you || CQ.seats[1], label: worksText('end.ptr.sit', 'Sit with Calder') }), done: () => CQ.seats.includes(PLAYER_PLACE) || (cqOf() || { steps: {} }).steps.asked !== undefined });
+    if ((CQ.seats.includes(PLAYER_PLACE) || now - CQ_LIVE.sitAt >= CQ.wait) && puNearMe('calder', CHATTER_NEAR + 2)) dialogueShow(cqAskScene(), { id: 'end.ask', who: ['calder'], at: now, where: { any: true } });
+    return; }
+  // missed at the tea: she comes to find you (cqEscort); near you, the question standing up
+  const on = d === E.day ? m < CQ.late : m >= 600 && m < 1260; if (!on) return;
+  if (flag('end.find') !== d && !promoBusy()) { flagSet('end.find', d); promoNotice(worksText('end.find', 'Calder\'s looking for you: she wants to ask you something.'), worksName('calder')); }
+  if (typeof guideAsk === 'function') guideAsk({ id: 'end:find:' + d, level: 1, owner, until: B + (d === E.day ? CQ.late : 1260), goal: () => ({ crew: 'calder', label: worksText('end.ptr.find', 'Calder wants a word') }), done: () => !!(cqOf() || {}).answer });
+  if (!talk && !promoBusy() && puNearMe('calder', CQ.near)) dialogueShow(cqAskScene(), { id: 'end.ask', who: ['calder'], at: now, where: { any: true } });
+}
+function cqItems(d) {                                   // the Schedule's and Tracked's row (puItems asks)
+  const E = cqOf(); return E && E.day === d && !E.answer ? [{ from: CQ.at, to: CQ.by, title: worksText('end.row', d === 26 ? 'Four weeks aboard: Calder\'s question' : 'Friday tea: Calder\'s question'), where: 'the Works tea corner, Deck 5', kind: 'beat', deck: 5, room: 't' }] : [];
+}
+function cqNext(k) {                                    // What's next on the eve and the day (puNext asks first)
+  const E = cqOf(), d = SHIP.time.day; if (!E || E.answer || d > E.day || d < E.day - 1) return null;
+  return worksText('next.end', 'Friday tea with Calder: {day}, {time}, the Works tea corner.', { day: E.day === d ? 'today' : 'tomorrow', time: hhmm(CQ.at) }, k);
+}
+function cqRecordLine() {                               // the Record's last lines (24 core's worksRecordHead asks): the nights, and what you told Calder
+  const W = P5_END && SHIP.works; if (!W) return '';
+  const ns = (W.ms.find(x => x[0] === 'nights') || [])[1], E = cqOf(), a = E && E.answer;
+  return (ns ? ' ' + worksText('works.ms.nights', 'Night shift on the engines, to Day {n}', { n: ns }) + '.' : '')
+    + (a ? ' ' + worksText('works.ms.question.' + a, 'Day {n}, asked what you want next: ' + { engines: 'the engines and the night crew', bridge: 'to learn the bridge', teach: 'to teach the new cadets', unsure: '"I don\'t know yet"' }[a], { n: E.day }) + '.' : '');
+}
+if (P5_END) {
+  WORKS_SETTLE.push(cqSettle);
+  WORK_TICKS.push((now, skip) => cqTick(now, skip));
+}
 // ---- end of slot: End of the career ----
 
 
@@ -71170,6 +71296,7 @@ if (P5_PROMO4) DM_BEATS.push(                           // Pillar 5 Step 6 (S6-3
   { id: 't4badge', label: 'Day 23: the engine badge', day: 23, by: 22, at: 960, where: { deck: 1, room: 'O' } },   // 16:00 in the observation room: the Captain at 16:30
   { id: 't4move', label: 'Day 25: your Deck 2 quarters', day: 25, by: 24, at: 1110, where: { deck: 3, room: 'M' } });   // 18:30 in the mess: dinner, then Vance
 if (P5_M25) DM_BEATS.push({ id: 'mt', label: 'Day 26: Basil with you', day: 26, by: 25, at: 530, where: { deck: 5, room: 'w' }, set: W => { if (!W.mt) { W.mt = { day: 26, set: 25, steps: {}, late: null, clue: null }; SHIP_DAYS.delete(26); } } });   // 08:50 in the Works bay: Basil from 09:00 (S6-7)
+if (P5_END) DM_BEATS.push({ id: 'cq', label: 'Day 26: Calder\'s question', day: 26, by: 25, at: 1115, where: { deck: 5, room: 't' }, set: W => { if (!W.end) W.end = { day: 26, set: 25, steps: {}, answer: null }; } });   // 18:35 by the Works tea corner: Four weeks aboard from 18:40 (S6-9)
 // starting friendships (the user's q1: the people a steady player meets, approximate): [id, points by about Day 10, from day]
 // (REL_TIERS: 10 an acquaintance, 30 a colleague, 60 a friend), through section 20's relAdd ('intro:' so openness leaves them as given)
 const DM_FRIENDS = [['torres-zeke', 70, 1], ['tomas', 65, 1], ['pell', 50, 3], ['calder', 35, 1], ['halloran-emeka', 32, 1], ['esposito-yara', 30, 3], ['brennan', 22, 1],

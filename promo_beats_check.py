@@ -500,13 +500,20 @@ def part_mt3(g):
     r = g.ev("""(() => { """ + MT_DAY + """ const out = {}, M = SHIP.works.mt; Object.assign(M.steps, { met: 36540, watch: 36560, dw: 10, do: 36600 }); setShipNow(25 * 1440 + 650); __bay();
       const keep = puNearMe; puNearMe = (id, r) => id === 'bramwell-basil' ? true : keep(id, r); __said.length = 0; __tick();
       out.stuck = __said.filter(x => /^bramwell/.test(x)); out.arrow = GUIDE.list.filter(e => /^mt:clue/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label); out.esc1 = JSON.stringify(worksEscort({ id: 'bramwell-basil' }, shipNow()));
-      out.dlg1 = DIALOGUE && DIALOGUE.id; { """ + dlg_run(0) + """ } out.clue = M.clue;
+      out.point = typeof CASE_UI !== 'undefined' && CASE_UI.point ? CASE_UI.point.key : null; out.dlg1 = DIALOGUE && DIALOGUE.id;
+      if (out.point) { out.pick = CASE_UI.point.pick.slice(); casePointPick(out.point); out.pointed = __said.filter(x => /^bramwell/.test(x)).length > out.stuck.length; } else { """ + dlg_run(0) + """ } out.clue = M.clue; out.key = M.clueKey;
       setShipNow(25 * 1440 + 780); out.lunch = worksEscort({ id: 'bramwell-basil' }, shipNow()); setShipNow(25 * 1440 + 816); out.esc2 = (worksEscort({ id: 'bramwell-basil' }, shipNow()) || {}).mode; __tick();
       out.dlg2 = DIALOGUE && DIALOGUE.id; { """ + dlg_run(2) + """ } out.late = [M.late, M.steps.late !== undefined]; out.esc3 = (worksEscort({ id: 'bramwell-basil' }, shipNow()) || {}).mode; puNearMe = keep;
       out.clean = JSON.stringify(mtClean(JSON.parse(JSON.stringify(M)))) === JSON.stringify(M);
       """ + MT_DAY.replace('const W =', 'const W2 =').replace('W.', 'W2.') + """ Object.assign(SHIP.works.mt.steps, { met: 1, watch: 2, dw: 10, do: 3 }); setShipNow(25 * 1440 + 746); __tick(); out.self = SHIP.works.mt.clue; return out; })()""")
     for k, v in r.items(): print('   ', k, v)
-    check(r['stuck'] and r['arrow'] and r['arrow'][0].startswith('1 ') and '5-bench-2' in r['esc1'] and r['dlg1'] == 'mt.clue' and r['clue'] == 'meter', f"mt3: stuck at the bench, a level 1 arrow, you point him to a clue ({r['stuck']}, {r['arrow']}, {r['dlg1']}, {r['clue']})")
+    pz = g.ev("typeof casePoint === 'function'")   # PZ6's case panel in point mode: then the clue is one of its three, the key kept (mt.clueKey); without it the stand-in scene
+    hit = (r['point'] and r['clue'] == r['point'] and r['key'] is True and len(r['pick']) == 3 and r['pointed']) if pz else (r['dlg1'] == 'mt.clue' and r['clue'] == 'meter')
+    check(r['stuck'] and r['arrow'] and r['arrow'][0].startswith('1 ') and '5-bench-2' in r['esc1'] and hit, f"mt3: stuck at the bench, a level 1 arrow, you point him to a clue ({'casePoint' if pz else 'stand-in'}: {r['stuck']}, {r['arrow']}, {r['dlg1']}, {r.get('point')}, {r['clue']})")
+    if pz:   # casePoint with no fair case: the stand-in scene instead
+        r2 = g.ev("""(() => { """ + MT_DAY + """ const out = {}, M = SHIP.works.mt; Object.assign(M.steps, { met: 36540, watch: 36560, dw: 10, do: 36600 }); setShipNow(25 * 1440 + 650); __bay(); MT_LIVE.case = 0;
+          const keep = puNearMe, cp = casePoint; puNearMe = (id, r) => id === 'bramwell-basil' ? true : keep(id, r); casePoint = () => false; __tick(); out.dlg = DIALOGUE && DIALOGUE.id; { """ + dlg_run(1) + """ } out.clue = M.clue; casePoint = cp; puNearMe = keep; return out; })()""")
+        check(r2['dlg'] == 'mt.clue' and r2['clue'] == 'label', f"mt3: casePoint with no fair case, the stand-in scene ({r2})")
     check(r['lunch'] is None and r['esc2'] == 'follow' and r['dlg2'] == 'mt.late' and r['late'] == [2, True] and r['esc3'] == 'wait' and r['clean'], f"mt3: lunch as planned; late, he hurries to you; three replies, yours kept; back to the bench ({r})")
     check(r['self'] == 'self', f"mt3: not helped by 12:25, he works it out himself ({r['self']})")
 
@@ -522,6 +529,53 @@ def part_mt4(g):
     for k, v in r.items(): print('   ', k, v)
     check(r['arrow'] and r['arrow'][0].startswith('1 ') and r['esc'] == 'wait' and r['dlg'] == 'mt.first' and r['done'] and r['tr'] == 26 and 'Mentored Basil, Day 26' in r['rec'] and 'Basil' not in r['next'], f"mt4: Calder's scene at the bench, the row trained, the Record's line ({r})")
     check(r['mail'] == [True, 1] and r['preset'] == ['26 08:50'], f"mt4: not there by 15:20, by Mail; the Dev preset Day 26 08:50 ({r['mail']}, {r['preset']})")
+
+CQ_DAY = """const W = __w(25, 1300, { xp: 10, tr: { ps: 12, t2: 9, t3: 15, m19: 17, t4: 22, m25: 26 } }); W.tier = 4; W.rank = 'specialist'; W.ns = { 22: { in: 1, out: 2, jobs: 0, inc: 0, late: 0 }, 23: { in: 1, out: 2, jobs: 0, inc: 0, late: 0 }, 24: { in: 1, out: 2, jobs: 0, inc: 0, late: 0 } };
+  W.ms.push(['specialist', 22], ['specialist.badge', 23], ['mentor', 26]); if (DIALOGUE) dialogueEnd(false); DIALOGUE = null; MT_LIVE.said = {}; setShipNow(24 * 1440 + 1321); out.settle = cqSettle(26); CQ_LIVE.seat = null; CQ_LIVE.sitAt = 0; CQ_LIVE.said = {};
+  const __tea = () => { if (deckDef.num !== 5) goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['t'][0])); };"""
+def part_cq(g):
+    if not g.ev("typeof P5_END !== 'undefined' && P5_END"): print('(cq) P5_END off: skipped'); return
+    print('(cq) Calder\'s question at Four weeks aboard: the Mail the evening before, the notice, the arrow, the cake and her story, she sits, the question, your answer, the Record:')
+    for pick in range(4):
+        r = g.ev("""(() => { const out = {}; """ + CQ_DAY + """ const E = SHIP.works.end; out.end0 = JSON.stringify(E); out.mail0 = __mail().filter(m => /^Chief Ines Calder: Four weeks, tomorrow/.test(m)).length;
+          out.rows = __rows(26); setShipNow(25 * 1440 + 600); out.next = worksNext();
+          setShipNow(25 * 1440 + 1101); __bay(); __tick(); out.notes = __notes.filter(n => /Four weeks/.test(n));
+          setShipNow(25 * 1440 + 1116); __tick(); out.arrow = GUIDE.list.filter(e => /^end:tea/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label);
+          __tea(); const keep = puNearMe; puNearMe = (id, r) => id === 'calder' ? true : keep(id, r); setShipNow(25 * 1440 + 1121); __tick(); out.dlg1 = DIALOGUE && DIALOGUE.id; { """ + dlg_run(1) + """ } out.story = E.steps.story !== undefined;
+          setShipNow(25 * 1440 + 1130); __tick(); out.early = DIALOGUE && DIALOGUE.id;
+          PLAYER_PLACE = null; setShipNow(25 * 1440 + 1146); __said.length = 0; __tick(); out.seat = CQ_LIVE.seat; out.sitSaid = __said.filter(x => /^calder/.test(x)).length; out.come = COME_TO.has('calder') && COME_TO.get('calder').placeId;
+          out.arrow2 = GUIDE.list.filter(e => /^end:sit/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label + ' ' + (e.goal() || {}).place); out.dlg2 = DIALOGUE && DIALOGUE.id;
+          PLAYER_PLACE = '5-tea-2'; setShipNow(25 * 1440 + 1147); __tick(); out.dlg3 = DIALOGUE && DIALOGUE.id; { """ + dlg_run(pick) + """ } puNearMe = keep; PLAYER_PLACE = null;
+          out.answer = E.answer; out.asked = E.steps.asked !== undefined; out.ms = SHIP.works.ms.filter(x => /nights|question/.test(x[0])).map(x => x.join(' '));
+          out.mail = __mail().filter(m => /What you said/.test(m)).length; out.rec = worksRecordHead().text; out.clean = JSON.stringify(cqClean(JSON.parse(JSON.stringify(E)))) === JSON.stringify(E);
+          setShipNow(25 * 1440 + 1200); __tick(); out.after = (worksEscort({ id: 'calder' }, shipNow()) || {}).mode || null; out.nextAfter = worksNext(); return out; })()""")
+        if pick == 0:
+            for k, v in r.items(): print('   ', k, v)
+        else: print(f"    answer {pick}: {r['answer']}; Record: ...{r['rec'][-90:]}")
+        if pick == 0:
+            check(r['settle'] and '"day":26' in r['end0'] and r['mail0'] == 1 and any('Calder' in x and '18:40' in x for x in r['rows']) and 'Friday tea' in r['next'], f"cq: settled at 22:00 the evening before, Calder's Mail, the Schedule's row, What's next ({r['settle']}, {r['mail0']}, {r['rows']}, {r['next']})")
+            check(r['notes'] and r['arrow'] and r['arrow'][0].startswith('1 ') and 'tea corner' in r['arrow'][0], f"cq: the notice at 18:20, a level 1 arrow to the tea corner from 18:35 ({r['notes']}, {r['arrow']})")
+            check(r['dlg1'] == 'end.story' and r['story'] and not r['early'], f"cq: there from 18:40: the cake and her story; nothing more until it thins out ({r['dlg1']}, {r['story']}, {r['early']})")
+            check(r['seat'] == '5-tea-1' and r['come'] == '5-tea-1' and r['sitSaid'] and r['arrow2'] and r['arrow2'][0].startswith('1 ') and '5-tea-2' in r['arrow2'][0] and not r['dlg2'], f"cq: at 19:05 she sits, says so, the arrow shows you the seat beside her ({r['seat']}, {r['come']}, {r['arrow2']}, {r['dlg2']})")
+            check(r['dlg3'] == 'end.ask' and r['asked'] and r['ms'] == ['nights 24', 'question 26'] and r['mail'] == 1 and 'Night shift on the engines, to Day 24' in r['rec'] and r['clean'], f"cq: sat, her question; your answer kept, the milestones, the Mail as the record, the Record's lines ({r['dlg3']}, {r['ms']}, {r['mail']}, {r['rec']})")
+            check(r['after'] is None and 'Friday tea' not in r['nextAfter'], f"cq: asked: she doesn't come looking, What's next moves on ({r['after']}, {r['nextAfter']})")
+        check(r['answer'] == ['engines', 'bridge', 'teach', 'unsure'][pick] and 'asked what you want next' in r['rec'], f"cq: answer {pick} kept and on the Record ({r['answer']}, {r['rec'][-100:]})")
+
+def part_cq2(g):
+    if not g.ev("typeof P5_END !== 'undefined' && P5_END"): print('(cq2) P5_END off: skipped'); return
+    print('(cq2) not sat by her for three minutes: she asks anyway; missed at the tea: she comes to find you, that evening and the next day; not yet an Engine Specialist: nothing:')
+    r = g.ev("""(() => { const out = {}; """ + CQ_DAY + """ const E = SHIP.works.end; __tea(); const keep = puNearMe; puNearMe = (id, r) => id === 'calder' ? true : keep(id, r);
+      E.steps.story = 25 * 1440 + 1125; PLAYER_PLACE = null; setShipNow(25 * 1440 + 1146); __tick(); out.d0 = DIALOGUE && DIALOGUE.id; setShipNow(25 * 1440 + 1149); __tick(); out.d1 = DIALOGUE && DIALOGUE.id; { """ + dlg_run(3) + """ } out.a = E.answer;
+      SHIP.works.end = { day: 26, set: 25, steps: {}, answer: null }; const E2 = SHIP.works.end; GUIDE.list.length = 0; SHIP.flags = {}; puNearMe = keep; __bay();
+      setShipNow(25 * 1440 + 1175); out.esc1 = (worksEscort({ id: 'calder' }, shipNow()) || {}).mode || null; __notes.length = 0; __tick(); out.find = __notes.filter(n => /Calder/.test(n)); out.arrow = GUIDE.list.filter(e => /^end:find/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).crew);
+      out.other = DIALOGUE && DIALOGUE.id; if (DIALOGUE) dialogueEnd(false); DIALOGUE = null; setShipNow(25 * 1440 + 1330); out.esc2 = (worksEscort({ id: 'calder' }, shipNow()) || {}).mode || null; setShipNow(26 * 1440 + 610); out.esc3 = (worksEscort({ id: 'calder' }, shipNow()) || {}).mode || null;
+      puNearMe = (id, r) => id === 'calder' ? true : keep(id, r); __tick(); out.d2 = DIALOGUE && DIALOGUE.id; { """ + dlg_run(2) + """ } puNearMe = keep; out.a2 = E2.answer; out.dayA = (E2.steps.asked - (E2.steps.asked % 1440)) / 1440 + 1;
+      const W3 = __w(25, 1300, {}); W3.tier = 3; W3.rank = 'senior'; out.senior = cqSettle(26); out.none = !SHIP.works.end; out.preset = DM_BEATS.filter(b => b.id === 'cq').map(b => b.day + ' ' + hhmm(b.at)); return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['d0'] is None and r['d1'] == 'end.ask' and r['a'] == 'unsure', f"cq2: not on the seat, after three minutes by her she asks anyway ({r['d0']}, {r['d1']}, {r['a']})")
+    check(r['esc1'] == 'follow' and r['find'] and r['arrow'] == ['1 calder'] and r['esc2'] is None and r['esc3'] == 'follow' and r['d2'] == 'end.ask' and r['a2'] == 'teach' and r['dayA'] == 27, f"cq2: missed, she comes to find you till 22:00 and the next day; asked then ({r})")
+    check(r['senior'] is False and r['none'], f"cq2: not yet an Engine Specialist, no question settled ({r['senior']})")
+    check(r['preset'] == ['26 18:35'], f"cq2: the Dev preset, Day 26 18:35 by the tea corner ({r['preset']})")
 
 def part_t3pointer(g):
     if not t3on(g, 't3pointer'): return
@@ -660,7 +714,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev), ('mt', part_mt), ('mt2', part_mt2), ('mt3', part_mt3), ('mt4', part_mt4)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev), ('mt', part_mt), ('mt2', part_mt2), ('mt3', part_mt3), ('mt4', part_mt4), ('cq', part_cq), ('cq2', part_cq2)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')
