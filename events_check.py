@@ -1275,6 +1275,16 @@ if _von or _vline:
         L.update(g.ev("({ told: SHIP.event.mine['vessel:told'], signed: SHIP.event.mine['vessel:signed'], mail: __vmail.slice(), arrows: guideList().filter(x => /^vessel:/.test(x.id)).map(x => x.id) })")); g.ev("mailSend = __vms")
         print('  V-2 live, the sheet:', L)
         if L['dlg'] != 'vesselSheet' or '[choice]' not in L['lines'] or not L['told'] or not L['signed'] or not any('Calder' in x for x in L['mail']) or L['arrow'] != ['1 shown'] or not L['row']: fail(f"the sheet (Calder's scene, the arrow, signing, the parts list): {L}")
+        def vfetch(t0, setup, who, want, mins):   # someone comes to find you in the bow lounge (Deck 3, the seats): their words, then the scene where they stop (RV22: a place 4-5 m off said nothing)
+            g.ev(f"__vfresh({t0}); {setup} goToDeck(3); player.obj.position.copy(cellPos(...nearestOpen(cellPos(24, 3).x, cellPos(24, 3).z, player))); target.copy(player.obj.position).setY(.7); window.__vbub = []; window.__vbs = window.__vbs || bubbleSay; bubbleSay = (w, t, sc) => {{ __vbub.push((w && w.p ? w.p.id : '?') + ': ' + t); return __vbs(w, t, sc); }}")
+            for _ in range(mins):
+                vmins(1)
+                if g.ev("!!DIALOGUE"): break
+            F = g.ev(f"({{ t: hhmm(shipNow() % 1440), dlg: DIALOGUE && DIALOGUE.id, said: __vbub.filter(x => x.startsWith('{who}:')), ring: IX_GOAL && IX_GOAL.label, far: (() => {{ const a = DECK_CREW.find(a => a.p.id === '{who}'); return a ? +Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z).toFixed(1) : null; }})() }})"); F['lines'] = g.ev("__vplay(); bubbleSay = __vbs; 'ok'")
+            print(f'  V-2 live, {who} comes to find you in the bow lounge:', F)
+            if F['dlg'] != want or not F['said']: fail(f"{who} came to find you but no words or no scene ({want}): {F}")
+            return F
+        vfetch(26 * 1440 + 686, '', 'calder', 'vesselSheet', 25)   # Saturday 11:30, Calder's second look for you
         for how, t0, at, want in [('on time', 27 * 1440 + 560, (5, 11), 'vesselRamp'), ('find', 27 * 1440 + 584, None, None), ('late', 27 * 1440 + 597, (5, 11), 'vesselRamp.late'), ('Zeke stood in', 27 * 1440 + 640, (16, 3), 'vesselRamp.bench')]:
             if how == 'find':   # C3: at 09:45, not at the ramp (in the mess on Deck 3), Calder comes to find you, in person (the clock only runs forward: between the others)
                 g.ev(f"__vfresh({t0}); goToDeck(3); player.obj.position.copy(cellPos(30, 6)); target.copy(player.obj.position).setY(.7)"); vmins(4)
@@ -1302,6 +1312,8 @@ if _von or _vline:
         B1 = g.ev("({ t: hhmm(shipNow() % 1440), dlg: DIALOGUE && DIALOGUE.id, arrow: guideList().filter(x => x.id === 'vessel:bench').map(x => x.level + (x.shown ? '*' : '')) })"); B1['lines'] = g.ev("__vplay()")
         B1['done'] = g.ev("SHIP.event.mine['vessel:roundOne']"); print('  V-2b live, the round one:', B1)
         if B1['dlg'] != 'vesselRoundOne' or not B1['done']: fail(f"the round one at the bench: {B1}")
+        RF = vfetch(27 * 1440 + 745, "SHIP.event.mine['vessel:met'] = 1; SHIP.event.mine['vessel:metBy'] = 'ramp';", 'taavek', 'vesselRoundOne', 30)   # Sunday 12:30: the round one unseen, Taavek brings it
+        if RF['ring'] and 'chain sheet' in RF['ring']: fail(f"the sheet's arrow over the round one's (RV22): {RF}")
         # V-3 live: the parts chain, Sunday 13:00 (the arrow at Zeke from 12:45, tapping Zeke takes a gap, crates through your
         # hands counted, three of them your part toward C1); turnout planned (the spec: 25 or more)
         CH = g.ev("(() => { const d = 28; return { on: eventsOn(d).filter(x => x.id === 'vesselChain').map(x => hhmm(x.from) + '-' + hhmm(x.to)), going: schedPeople().filter(p => planDay(p, d).some(s => s.tag && s.tag.startsWith('ev-vesselChain'))).length, arrival: schedPeople().filter(p => planDay(p, d).some(s => s.tag && s.tag.startsWith('ev-vesselArrival'))).length }; })()")
