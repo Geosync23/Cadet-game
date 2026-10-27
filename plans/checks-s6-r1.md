@@ -71,3 +71,14 @@ Step 6's beats, every way: the briefing (Day 22 08:15), the Tier 4 test, sleep b
 tell, reactor, out, badge back), the coil swap (Day 24), the move (Day 25), mentoring and Calder's question (Day 26).
 
 **R1: OK on 82b02fb9.**
+
+### Round 2: taken from R4 (agreed with R4, who didn't start them; 20:33 UTC)
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 26 | OK | DAY CHECK OK |
+| day_check 27 | OK | DAY CHECK OK |
+| appt_check | OK | APPT CHECK OK |
+| saves_check | OK | SAVES CHECK OK |
+| stories_check | OK | STORIES CHECK OK |
+| clothes_check | OK | ALL OK |
