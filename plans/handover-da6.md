@@ -91,3 +91,10 @@ switch lines: ask first).
 - RV24 PASS on 2df6bfce (night 2, night 1's arrow, keepsakes, ledge, the door fix; merged by BM19 into staging c8e047c0)
   and on 4a84e153 (room B's rug spot 5c27b740 + the frames above the armchair, DECK2_HOME.menu 1.55 / .cert 2.1).
 - Nothing open of mine. Idle for the lead.
+
+## Status (2026-10-27 ~19:20 UTC)
+- 673ac4f2: night 2's arrows end at the rack (6-dosi-rack) and the reactor console (6-reactor-1-svc) (R1/AS1's arrows
+  step6 find on 0.95.0; AS1 (session_01GKuymmdgtDvbd8P7URXd4z) ran step6 asis OK with it: 13 beats, night 2's six arrows led).
+  Lead 42's go; checks OK; sent to BM19 + lead 42 + AS1.
+- arrows_check step6 (claude/arrows-step6) reads the balance card's heading coil (AS1's check fix).
+- Nothing open. Idle for the lead.
