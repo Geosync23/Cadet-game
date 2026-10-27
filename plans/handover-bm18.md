@@ -1,6 +1,6 @@
 # Handover: build master BM18 (session_01A3S2VBMYmTt2wCZa8ej7XR)
 
-Read this first if you take over as build master (BM19). Before me: `plans/handover-bm17.md` (0.92.5-0.92.6). Stopped at the user's call (2026-10-26, via lead 40) after finishing 0.93.3.
+Read this first if you take over as build master (BM19). Before me: `plans/handover-bm17.md` (0.92.5-0.92.6). Finished 0.93.3 (GO), then built the combined staging-0.94.0 (everything merged, nothing switched on yet). Stopped 2026-10-27 ~03:00 UTC: the user is moving the project to another account (lead 40).
 
 ## Who
 
@@ -8,6 +8,7 @@ Read this first if you take over as build master (BM19). Before me: `plans/hando
 - Publisher: PUB1, session_01GnpjFR6oumvuvTrmcXSqeg. On GO, tell PUB1 and the lead together (lead 40's rule).
 - Check runners (0.93.3 round): CR1 session_01CsWNjCsy8u5mrHJgTVgCst (~55% memory), CR2 session_01DsTDi6xJcpdDVhSkELEm24 (~55%), CR3 session_01Pw3EQ24pSz4gjsFcLBMjUF, CR4 session_01RgnU5d6Um75LNznFSotXYH (fresh 2026-10-26), CR5 session_01UH1U1UpsoL7viYaRRBu2bZ (fresh 2026-10-26; the old CR5 session_01CHoEsvv7zMPZDr1ir7uAiz retired), CR6 session_013wLtAmKooMrgGrXF4Ljiof.
 - Reviewers: RV18 session_01PMfvrCN6StPzwVSPGX7ijH (doors), RV20 session_01PyJwfvfQVu4oXTYDMGkacw (Step 5, workstep fix), RV21 session_01AmTyMHLr5UuCY9zo3nQcwS (vessel, ending, puzzles).
+- 0.94.0 builders: B3 session_014FBmsiTsA9QymoN2qt4NyL (shutdowns, sensor array, talk-close, train-titles), B5 session_01CgbXRamJJp66pFTP43KYoB (Senior Officer promotion), VB1 session_01UsjGN26E88zwrNPWwef4iT (the vessel's events), VB2 session_01KRBGtugjBpv5iGcV5WDvCP (vessel sky, kit, ending checks). Reviewer RV22 (Step 5, vessel; ask lead 40 for its session). EN1, EN2, B4, FX29, EC1 archived.
 - Builders: FX29 session_01XmCJrSagiUiqhdfGLG9sTv (doors, check fixes), FX30 (week-guide test fix), B2 session_015mjNkxuGoEZGKA2ksBPz9u (workstep / team-arrow fixes), SW2 session_017dLaLFBnRUQin3PQEQq6so.
 
 ## Builds I made
@@ -24,15 +25,42 @@ All six shares done, no new FAIL:
 - perf: "3 problem(s)", all one-scene js-time flags (backlog 32 pattern): Sunday dinner mess portrait 2.82->4.31 ms; storm all-clear party landscape 1.73->2.74; garden picnic trifold-open-turned 1.09->2.51. No draw-call or memory problem (round trips 521->521->521; week 521->522). CR4 re-measured those 3 scenes alone, twice: none repeated (run 1 OK; run 2 one flag in a different shape, storm party trifold-open 2.25->3.54, 2.24 in run 1) = backlog 32 noise.
 - **GO from testing** sent to lead 40 and PUB1 together, 2026-10-26 ~23:46 UTC. Publish and the integration fast-forward are the lead's/PUB1's (not done by me before stopping).
 
-## The 0.93.4 plan (lead 40; NOT started, the user stopped here)
+## 0.93.3 after GO
 
-staging-0.93.4 = published 0.93.3 (19400976) + B2's claude/workstep-tap-fix **c79a66dc** (RV20 PASS; the live M15 Rewiring tap bug; branched from acbb52e0, so merge onto 0.93.3) + B2's **b7e84f81** on the same branch (stale team-job "your turn" arrow; **RV20 PASS** 2026-10-27 ~00:00 UTC: cadet identical vs c79a66dc, check_fast OK, mech teamgoal m8 OK; so merge the branch head b7e84f81) + FX30's claude/week-guide-fix **fa6b7de0** (arrows_check.py + build-table only; test only, no reviewer needed; CR1 ran `week guide` OK on 0.93.3's game: stuck 0, so mark backlog CR1-W1 fixed when it lands). Gate: check_fast, cadet vs 19400976, mech m15/m5/wstap/teamgoal, then the full round; tell the lead the sha when the round starts.
+Published by PUB1; the user said yes to integration: **claude/integration fast-forwarded d9c7e5f0 -> 3fd762cb** (staging-0.93.3's tip: 19400976 + docs), check_fast OK on it. 0.93.4 was never built on its own: the user's new rule ("everything on, nothing should be installed off", 2026-10-27 via lead 40) folded it into 0.94.0.
 
-## Passed and held for later sets (the lead sends each set)
+## staging-0.94.0 (the combined build; last game merge 64a1ba76, game sha256 958493d0697cca4c...; this note sits on top)
 
-- Ending: RV21 PASS claude/ending-crossing **d1a61402** (the whole ending behind EV_ENDING_ON off; replaces every earlier ending sha). Merge note (RV21): its switch line sits after P926_APPT, as the vessel's will; keep the vessel's line first. Words: SW6 ending-words-a b8c89e7a PASS; SW5 ending-words-b 8ed1545a (bake only with EN2's endgame condition).
-- Vessel: RV21 PASS VB1 claude/vessel **6d4b5192** (V-1..V-4) + VB2 claude/vessel-sky **3fb8eac7** (v.6; contains SW4's vessel words 7dd2eb5d); both needed. VB1 has shoulds pending.
-- Step 5: RV21 PASS B4 claude/p5s5-puzzles **6b07b624** (t5-t7, behind P5_CASES5; check with B4 that it supersedes RV20's 4e5c878f/55b2e6a8); RV21 PASS B3 claude/p5s5-m20 **7c5d9f79** (sensor array, behind P5_M20); SW3 p5s5-words 277b9c15. FIXES NEEDED (don't merge): p5s5-skeleton 5957d244, p5s5-mech-a 3c38a65f, p5s5-mech-b 5ad090ff (RV20: 3 musts). RV20 (2026-10-27): B2's part of claude/p5s5-mech-a deefa61a PASSES, but the build fails machine_check on its switched-on copy ("traced faults", not the same twice) from B1's **51b1a9c6**, which deefa61a and B5's branch carry: merge NO Step 5 branch carrying 51b1a9c6 until B5 fixes it.
+From integration 3fd762cb. **No switch flipped, HUD still 0.93.3.** On every push: check_fast OK and cadet_test vs 0.93.3 (19400976) ALL IDENTICAL (everything new is off). Merged, in order (merge commits on the branch name each):
+
+| Piece | Sha merged | Review |
+| --- | --- | --- |
+| B2 claude/workstep-tap-fix (M15 rewiring tap + team-job arrow, live fixes) | b7e84f81 | RV20 PASS |
+| FX30 claude/week-guide-fix (arrows_check week guide) | fa6b7de0 | test only; CR1 OK on 0.93.3 (CR1-W1 can be marked fixed) |
+| B1 + VB2 kit + B5 claude/p5s5-promo (Step 5 skeleton, career 51b1a9c6, S5-2 promotion, kit 69eb706d, SW3 words) | 5703dfb6, cbca3e3e, ea40ae51, **f00d93c1**, **c3d36cde** | RV22 PASS f00d93c1 (its MUST: ladderBigP5's sort had been commented out; I checked the fixed line); c3d36cde = RV22's one should |
+| B2 claude/p5s5-mech-a (M19 power and relays) | deefa61a | RV20 PASS (B2's part) |
+| B3 claude/p5s5-mech-b (M18 shutdowns) | fa1e152c, **98460d79** | RV20 PASS fa1e152c; 98460d79 = its should |
+| B3 claude/p5s5-m20 (M20 sensor array) | 989b1759, **247420aa** | RV22 PASS 247420aa |
+| B4 claude/p5s5-puzzles (S5-6 cases, t5-t7) | 6b07b624 | RV21 PASS |
+| VB1 + VB2 claude/vessel (the Veyli vessel, contains vessel-sky 3fb8eac7) | 5578c78d, **0340b6f9** | RV21 PASS up to 6d4b5192 + vessel-sky; 0340b6f9 (three switch-on fixes) with RV22 |
+| EN1 + EN2 claude/ending-crossing (the whole ending) | d1a61402 | RV21 PASS |
+| VB2 claude/ending-checks (ending arrows/controller parts) | 6fe92ead, **571b073f** | test only; all 7 arrow ways + controller ending green (VB2) |
+
+Checks with things switched on, on copies: machine_check with P5_STEP5 = true OK twice (after B5's fix); controller_check ending OK on 64a1ba76. VB1, VB2 and B5 each confirmed my conflict fixes in their areas.
+
+**Conflicts I resolved (owners confirmed):** section 18's vessel and ending data blocks each opened an `if (...) {` sharing one closing brace: I added the missing `}` (the parse error names_check caught); words re-baked with content_gen twice (baked-words clashes); controller_check.py had NEEDS/PART_FN re-declared by two pieces (would have dropped door, shut, s5cases): now one table after part_vessel; arrows_check.py one PARTS/WAYS line for step5 (B5), vessel (VB1), endstay/endgo (VB2): 'track' and 'teachoff' mean the same for both (B5 + VB2 checked); bigevents_check late saves: Day 23 due = the first row after Day 22, Day 28 (vessel passed over) due = the next row after Day 28; docs/backlog/build-table duplicates removed.
+
+**NOT merged yet (waiting for RV22's PASS):** B3's claude/talk-close **f52e2abc** (talk only when close; the user's request; on, no switch; from ac810e7e); B3's claude/train-titles **7cbc1ad0** (4 strings: "with Calder"; from 64a1ba76); VB1's round-one fix (sha from VB1 / lead 40). Merge each on its PASS, then check_fast, cadet vs 0.93.3, and controller_check ending.
+
+## Switch-on and round steps for the next build master
+
+1. Merge whatever has passed since (above). check_fast; cadet vs 19400976 must stay ALL IDENTICAL while everything new is off.
+2. On lead 40's word, one commit per switch, each with check_fast: `const P5_STEP5 = URL_FLAGS.has('p5s5');` -> `true` (its sub-switches P5_PROMO3, P5_M19, P5_M18, P5_M20, P5_CASES5 are already `P5_STEP5 && true`); `const EV_VESSEL_ON = URL_FLAGS.has('evvessel');` -> `true`; `const EV_ENDING_ON = URL_FLAGS.has('ending');` -> `true`. Update design-doc.md and DEV_NOTES ("switched on in 0.94.0") in the same commits.
+3. Ask lead 40 about the older `false` switches still in the file (TRAY_TRAVELS, INTRO_ASK_ON, ZEKE_CABIN_MAIL, PAD_ON; END_WAY_BACK is CUT by the user and stays off): the "everything on" rule may or may not cover them; cut items stay off.
+4. Set the HUD lines (header `build` line and GAME_BUILD) to 0.94.0.
+5. Gate before the round: check_fast; cadet vs 19400976 (expect differences now: explain each); machine_check twice (same faults both runs); bigevents, events, fridays; day_check 16-19, 22, 27-30, 31-36 (the vessel and the ending's week); controller_check (all but reach, with ending, m19, m20, s5cases, vessel, shut, door); arrows_check incl. step5, vessel, endstay, endgo.
+6. Full six-runner round (plans/testing-guide.md shares; add the new event days 27-36 and the new parts to the lightest runners), OLD = 0.93.3's game (19400976). Known-old: career "Relied on" before Day 5 (backlog 12), events FX24-2, perf one-offs (backlog 14, 32).
+7. GO/NO-GO to the lead and PUB1 together.
 
 ## Gotchas (new ones; BM16/BM17's still apply)
 
