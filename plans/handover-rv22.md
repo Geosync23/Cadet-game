@@ -1,39 +1,51 @@
-# Handover: RV22 (reviewer: vessel, ending checks, B3 M20 shoulds), 2026-10-26 ~23:45 UTC
+# Handover: RV22 (reviewer: vessel, ending checks, Step 5 items), 2026-10-27 ~03:10 UTC
 
-**Role:** reviewer, replacing RV21. Lead: lead 40 (session_01NXybH7NNqM8M4ngiyidq6m). My session:
-session_011wAn842cKDVWvoH8Cr9geD. Notes-only branch `claude/review-rv22` (from claude/review-rv21 aa8bce7b); log in
-plans/review-rv22.md. Never change the game or push to builders' branches. Stopped at the user's stopping point (lead 40)
-before any review started: **no verdicts given.**
+**Role:** reviewer, replaced RV21 and took RV20's last item. Lead: lead 40 (session_01NXybH7NNqM8M4ngiyidq6m). My
+session: session_011wAn842cKDVWvoH8Cr9geD. Notes-only branch `claude/review-rv22`; full log and verdict table:
+`plans/review-rv22.md`. Never change the game or push to builders' branches. Stopped because the user is moving the
+project to another account (lead 40, ~03:00 UTC).
 
-Read first: plans/handover-rv21.md (how to test, probes in plans/rv21-shots/, gotchas, user answers C1-C3 and Q1-Q3)
-and the verdict table in plans/review-rv21.md.
+Read first: plans/handover-rv21.md (how RV21 tested, user answers C1-C3 / Q1-Q3), then the verdict table in
+plans/review-rv22.md. User rules for every verdict: works with a game controller; tons of arrows, super obvious
+progression; key moments are staged scenes with dialogue; phones first; NEW (lead 40, 2026-10-27): everything ships
+ON, so the checks on a switched-on copy are the ones that count.
 
-## Queue (nothing started)
-1. **VB1 (session_01UsjGN26E88zwrNPWwef4iT), claude/vessel 5578c78d is ready for review** (sent ~23:50). 85f07071: RV21's
-   V-2 shoulds (ramp crowd = gathering vesselArrival k 360, ~20, rampCrowd bubbles; Taavek's goodbye notice+arrow from
-   14:30 at the ramp's foot, Tern waits to 15:30, Calder fetches 15:00; round-one fallback, Taavek brings it 12:45, notice
-   13:00; Saturday vesselFetch 10:00/11:30; pilot toast once; setTimeout -> simTimeout); VB2's 3fb8eac7 merged (ed8b5787).
-   cdf2685f: goodbye arrow; **a one-line hook in 24j's shopTap (lathe/fabricator tap does the making step: 24j's owner
-   must review)**; arrows_check vessel part. 72b5f9dd: controller_check vessel part (the four presets).
-   VB1 reports: check_fast OK, cadet off ALL IDENTICAL vs vessel-sky; on an ON copy events_check vessel, bigevents,
-   day_check 28/29, arrows_check vessel, controller_check vessel OK. **Not yet run by VB1:** arrows teachoff and senior,
-   day_check 27/30 on the latest copy, join_check, interactions_check. Reviewer: re-run all of these, cadet off vs its
-   base, events_check (known-old FX24-2 only), and play the beats at 390x844 (RV21's probes v2_probe.py, v34_probe.py,
-   vsky_bow.py).
-2. **VB2 (session_01KRBGtugjBpv5iGcV5WDvCP), claude/ending-checks** (6fe92ead = final WIP at the stopping point, test only, not for verdict; see plans/handover-vb2.md there. VB2 at 00:36: endstay 4/4 pass; endgo teachoff pass, asis/track stop after Monday's breakfast; controller ending all but two farewell rings; day_check 31/50 ON OK). At ~23:36
-   VB2 said: stay path (asis, teachoff, track) passes; change-of-mind, go runs and controller_check `ending` still in
-   trial; will send the sha, then day_check 31/50 ON copy. Review: arrows_check endstay/endgo, controller presets (Days
-   32, 34, 35, 36), day_check 31/50 ON copy, any game fixes on top of d1a61402 (cadet off identical vs d1a61402).
-3. **B3 (session_014FBmsiTsA9QymoN2qt4NyL), claude/p5s5-m20 989b1759 is ready for review** (sent ~23:44; row 0.93.4-ar.4,
-   DEV_NOTES "The sensor array, M20", plans/handover-b3-m20.md; B3 reports cadet off identical vs f57afcbc, check_fast OK,
-   mech_check m19/m20/wstap and controller_check m19/m20 OK on an auto-switched copy, ladder order merged). Verify: m20 check parts run on an ON copy (not
-   "not yet"); one teacher name (Calder teaches Day 19, Mori is off); no doubled Tracked row; in person before the 06:20
-   Mail; recheck the Day 19 opening after the ladder-order merge deefa61a.
+## Verdicts given
+| Branch | Verdict | Sha |
+|---|---|---|
+| claude/p5s5-promo (B5) machine_check fix + RV20 S1-S4 | PASS (its should fixed next) | f00d93c1 |
+| claude/p5s5-promo (B5) the should (friends' Mail at 12:30) | PASS | c3d36cde |
+| claude/p5s5-m20 (B3) RV21's shoulds + turn arrow | PASS | 247420aa |
+| claude/vessel (VB1) | FIXES NEEDED (bigevents, day 28) | 5578c78d |
+| claude/vessel (VB1) | FIXES NEEDED (1 must: round-one fetch; 2 shoulds) | 0340b6f9 |
+| 24j hook vesselShopTap in shopTap (no E3 seat; lead 40 asked me) | OK | 5578c78d on |
+See review-rv22.md for VB2's ending checks and B3's train-titles (decided at the end of this session).
 
-All three builders and lead 40 know RV22 is their reviewer; a successor should tell them its own session id.
+## Open items (exact state)
+1. **VB1 claude/vessel 705c6fc5: NOT reviewed** (lead 40: leave for the next account). It answers my 0340b6f9 verdict:
+   roundFetch 12:30 (Taavek waits at the bench, then comes to you), vesselNear 6 m while fetching, vesselFetchTick
+   (words on arrival or within 6 m), sheet arrows dropped while the round one is pending, ring.roundFind. Diff read only:
+   looks right. Possible should: VESSEL_FETCH isn't saved, so a reload mid-fetch leaves the flag set, reach 3.2, Taavek
+   back to their plan. To run on it (vessel ON copy: sed the `EV_VESSEL_ON = URL_FLAGS.has('evvessel')` line to `true`):
+   cadet_test 3fb8eac7 vs 705c6fc5 (off), events_check (known-old FX24-2 only), arrows_check vessel, day_check 28,
+   and the phone play `plans/rv22-shots/vb1_play.py <wt>/starship-cadet.html <outdir> main` (stands in the bow lounge;
+   check Saturday Calder's words + sheet scene, Sunday 12:30 Taavek's words + round-one scene, Monday goodbye).
+   Everything else on the vessel passed on 0340b6f9 (bigevents, day 27-30, controller vessel, arrows teachoff/senior,
+   join/interactions by VB1). VB1's day_check edit (Works tea excuses an eventMeetTag in the tea hour): reviewed OK.
+2. **B3 claude/talk-close f52e2abc: NOT reviewed** (lead 40: leave). From staging-0.94.0 ac810e7e; the user's "talk only up
+   close" (TALK_NEAR 2.5 tiles, Walk over); section 20 chatOpen/chatShow/chatDo/chatTick far mode (the social
+   engineer's hooks), section 10 tapCrew. No switch. Check: cadet, player_check, interactions, arrows week guide,
+   controller pick/promo3/day/ending, and that the ending's goodbyes (VB2's controller ending: walk up within 1.8) and
+   the vessel's taps (vesselTap through tradJoinTap) still work.
+3. B5's S1-S4 and machine_check fix: done. B3's S5-4 98460d79: not mine (B3 asked lead 40 who re-checks it).
 
-## Setup done in this container (lost when it ends)
-/tmp/cadet-work and /tmp/cadet-work2 per testing-guide section 2 (three r128, acorn 8.12.1, playwright).
+## How I test
+Setup per plans/testing-guide.md section 2 in /tmp/cadet-work and /tmp/cadet-work2 (two lanes, at most 2 browsers).
+Worktrees per sha under /tmp/rv22/wt-<sha>. Queues as one background bash script per lane. cadet_test beside another
+check can show "max 1" renderer noise: rerun alone (it went to ALL IDENTICAL every time). Probes: plans/rv22-shots/
+(vb1_play.py, m20_live2.py) and plans/rv21-shots/. In a probe never name a global HOOK, run, D etc. that cadet_test's
+exec defines (HOOK broke my first probe); a page needs `#dev` for devmodeRun. A probe's player dropped in the lift car
+('@') has no free places for crewComeTo: stand them in a room.
 
 ## Open questions for the user
-None.
+None from me.
