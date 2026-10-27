@@ -40,5 +40,9 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
 - "stuck" = arrows outside the ending the follower couldn't act on: "Clock in: shift at 09:00" from Day 32 16:03 (both); track also
   "air plant, Deck 5" from Day 31 08:01. Not blocking.
 
+## BM19's events_check fix c03d51da (staging, test-only; glance on lead 41's word)
+- Read: accepts 'crossingBack' as the event left at Day 31 00:00, and __vfresh logs only calendar rows before the vessel. Looks right;
+  no reply sent (BM19: reply only on a problem). Could be tighter (accept crossingBack only with the ending on), not needed.
+
 ## Next
 - W6's claude/talk-close-fix (the far card closing): quick verdict with talk_play.py when the sha comes.
