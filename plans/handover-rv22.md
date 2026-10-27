@@ -20,7 +20,7 @@ and the verdict table in plans/review-rv21.md.
    day_check 27/30 on the latest copy, join_check, interactions_check. Reviewer: re-run all of these, cadet off vs its
    base, events_check (known-old FX24-2 only), and play the beats at 390x844 (RV21's probes v2_probe.py, v34_probe.py,
    vsky_bow.py).
-2. **VB2 (session_01KRBGtugjBpv5iGcV5WDvCP), claude/ending-checks** (c0b800b8 = WIP at the stopping point, not for verdict; see plans/handover-vb2.md there). At ~23:36
+2. **VB2 (session_01KRBGtugjBpv5iGcV5WDvCP), claude/ending-checks** (6fe92ead = final WIP at the stopping point, test only, not for verdict; see plans/handover-vb2.md there. VB2 at 00:36: endstay 4/4 pass; endgo teachoff pass, asis/track stop after Monday's breakfast; controller ending all but two farewell rings; day_check 31/50 ON OK). At ~23:36
    VB2 said: stay path (asis, teachoff, track) passes; change-of-mind, go runs and controller_check `ending` still in
    trial; will send the sha, then day_check 31/50 ON copy. Review: arrows_check endstay/endgo, controller presets (Days
    32, 34, 35, 36), day_check 31/50 ON copy, any game fixes on top of d1a61402 (cadet off identical vs d1a61402).
