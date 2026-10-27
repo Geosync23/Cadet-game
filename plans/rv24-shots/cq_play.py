@@ -51,7 +51,7 @@ with sync_playwright() as pw:
     if g.page.locator('text=Sign and go aboard').count(): g.page.fill('form input', 'Ada'); g.page.click('text=Sign and go aboard'); g.step(30)
     print('dev', g.ev("typeof devmodeState === 'function' && !!devmodeState()")); g.ev(RVHOOK)
     g.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)")
-    g.ev("devmodeRun('Set career', () => devmodeSetCareer(26, DM_BEATS.find(b => b.id === 'cq')))"); g.step(30); g.ev(RVHOOK)
+    g.ev("devmodeRun('Set career: beat', () => devmodeSetCareerTo(26, DM_BEATS.find(b => b.id === 'cq')))"); g.step(30); g.ev(RVHOOK)
     log(g, 'start'); g.shot(f'{OUT}/cq0_start.png')
     print('works', g.ev("JSON.stringify({ tier: SHIP.works.tier, rank: SHIP.works.rank, end: SHIP.works.end })"))
     print('rows', g.ev("JSON.stringify(typeof cqItems === 'function' ? cqItems(26) : null)"))
