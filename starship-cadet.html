@@ -64065,7 +64065,7 @@ function sdCrewSay(b, kind, now) {
 }
 // what the job needs, in words ("a breaker and a bracket (make the bracket in the machine shop)"), and whether you have it
 // all: taken by you and its next stop is the junction's, not a fetch or a make (RV20's M3: the power goes off only then)
-function sdParts(j) { if (!j || !Array.isArray(j.parts) || !j.parts.length || typeof partList !== 'function') return ''; return partList(j.parts) + (j.make ? worksText('sd.parts.make', ' (make the {thing} in the machine shop)', { thing: j.make }) : ''); }
+function sdParts(j) { if (!j || !Array.isArray(j.parts) || !j.parts.length || typeof partList !== 'function') return ''; return partList(j.parts) + (j.make ? ' ' + worksText('sd.parts.make', '(make the {thing} in the machine shop)', { thing: j.make }).trim() : ''); }
 function sdReady(j) { if (!j || j.claimedBy !== 'you') return false; let st = []; try { st = jobStops(j); } catch (e) { st = []; } const nx = st.find(x => !x.done); return !!nx && nx.step !== 'fetch' && nx.step !== 'make'; }
 function sdDayTick(now) {
   const W = SHIP.works, S = W && W.sd; if (!S) return;
