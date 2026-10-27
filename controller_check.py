@@ -41,7 +41,7 @@ ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
 GAME = pathlib.Path(ARGS[0])
 ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'door', 'reach', 'day', 'games', 'unplug', 'odd', 'shut',
-             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'm19']
+             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'm19', 'm20']
 PARTS = ARGS[1:] or ALL_PARTS
 SHOTS = WORK / 'test' / 'ctl_shots'; SHOTS.mkdir(parents=True, exist_ok=True)
 ARGS_GL = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
@@ -2473,7 +2473,7 @@ for k, v in OLD_NEEDS.items(): NEEDS[OLD_NAME.get(k, k)] = v; PART_FN[OLD_NAME.g
 
 # ---- Pillar 5 Step 5's pieces (plans/p5-step5-spec.html section 9): each part runs on a copy with P5_STEP5 on, and only
 # when the build has it on or CTL_P5S5=1 is set (a builder's branch before the switch-on); else "not yet", never a pass ----
-P5_PARTS = {'m19': 'S5-3 power and relays'}
+P5_PARTS = {'m19': 'S5-3 power and relays', 'm20': 'S5-5 the sensor array'}
 def p5_on(src): return bool(re.search(r'\bconst P5_STEP5\s*=\s*true\b', src))
 def p5_copy(src): return re.sub(r"\bconst P5_STEP5\s*=\s*URL_FLAGS\.has\('p5s5'\)", 'const P5_STEP5 = true', src, count=1)
 # one of 24v's jobs played by pad only: at each stop the ring names the thing and A starts the step; a pick card's buttons
@@ -2523,6 +2523,49 @@ def part_m19(pw, src, tag):
     if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
 PART_FN['m19'] = part_m19; NEEDS['m19'] = ['pick', 'panels']
+# (S5-5, B3) 24x's calibration job by pad only: the ring names the array and A starts each stop; "Pick the star" by the D-pad
+# and A; the dial's card turned with − / + by pad till it settles; then the rack's amber module (the ring, A)
+P5_M20JOB = r"""(() => { skipTo(22 * 1440 + 570); machinesNow(); if (DIALOGUE) dialogueEnd(true); if (ACT && typeof actEnd === 'function') actEnd(true); if (DEV.choose) devChosen(-1); const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.t3 = 15; W.tr.m20 = 19;
+  SHIP.jobs = SHIP.jobs.filter(x => x.claimedBy !== 'you'); const j = arrJob(shipNow(), { key: 91 }); SHIP.jobs.push(j); if (!claimJob(j.id)) return null;
+  const pl = placeById(panelPlace(j.machine)), w = pl.walk || pl.at; goToDeck(pl.deck);
+  const near = [[0, -3], [0, 3], [-1, -3], [-1, 3], [0, -2], [0, 2]].map(([dx, dz]) => [w[0] + dx, w[1] + dz]).find(([x, z]) => free(x, z) && roomAt(x, z) === pl.room) || w;   // a few tiles off, in the room: standing at the panel, you'd be in front of the dish on screen
+  player.obj.position.copy(cellPos(near[0], near[1]));
+  return { id: j.id, n: jobStops(j).length, star: jobStops(j)[0].opts.options[0].label }; })()"""
+DIAL_NOW = "((id) => { const w = (SHIP.player.wsteps || []).find(x => x.job === id && x.how === 'turn'); return w ? w.v : null; })"
+def part_m20(pw, src, tag):
+    fails = []
+    r = Run(pw, src, f'{tag}_m20', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    s = r.ev(P5_M20JOB); r.step(20)
+    if not s: r.close(); return ['m20: the calibration job could not be set up']
+    said, turns, picked = [], 0, False
+    for n in range(40):
+        st = r.ev(f"({JOB_NOW})({json.dumps(s['id'])})")
+        if st['work']: break
+        if not st['card']:
+            h = ring_and_A(r, ['your job', 'array', 'sensor'])
+            if not h: fails.append(f'm20: the ring never named it ({hint_now(r)})'); break
+            said.append(h)
+        for k in range(40):
+            st = r.ev(f"({JOB_NOW})({json.dumps(s['id'])})")
+            if st['card'] or st['act'] in ('null', 'None'): break
+            r.step(10)
+        if st['card']:
+            dial = r.ev("[...document.querySelectorAll('#devDlg button')].some(b => b.textContent.trim() === '+')")
+            if dial:
+                v = r.ev(f"({DIAL_NOW})({json.dumps(s['id'])})") or 0
+                pick = '−' if v > 0 else '+'; turns += 1
+            else: pick = s['star']; picked = True
+            res = press_in_panel(r, f"[...document.querySelectorAll('#devDlg button')].find(b => b.textContent.trim() === {json.dumps(pick)})")
+            if res != 'ok': fails.append(f'm20: the card\'s "{pick}" by pad: {res}'); break
+            r.step(10)
+    st = r.ev(f"({JOB_NOW})({json.dumps(s['id'])})")
+    print(f'  m20: the ring said {said[:3]}; star picked {picked}; dial presses {turns}; stops done {st["done"]} of {s["n"]}; work done {st["work"]}')
+    if not st['work']: fails.append(f'm20: not finished by pad (stops done {st["done"]} of {s["n"]})')
+    if not picked or not turns: fails.append(f'm20: the star card ({picked}) or the dial ({turns}) never came up')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close(); return fails
+PART_FN['m20'] = part_m20; NEEDS['m20'] = ['pick', 'panels']
 
 # ---- planted faults --------------------------------------------------------------------------------------------------
 # Each is put into a copy of the game just before the test hook (inside the game's scope). A part must FAIL on each of
@@ -2793,8 +2836,9 @@ with sync_playwright() as pw:
             note = f'waits for package{"s" if len(missing) > 1 else ""} {", ".join(missing)}' if missing else 'built in this check later'
             print(f'  not yet ({note})'); RESULTS.append((part, 'not yet', note)); continue
         psrc = SRC if part in SELF_BOTH else ON_SRC
-        if part in P5_PARTS:                             # Step 5's: its switch on in the build, or CTL_P5S5=1 (a copy with it on)
-            if not (p5_on(SRC) or os.environ.get('CTL_P5S5')): print(f'  not yet ({P5_PARTS[part]}: P5_STEP5 is off)'); RESULTS.append((part, 'not yet', 'P5_STEP5 off')); continue
+        if part in P5_PARTS:                             # Step 5's: run on a copy with P5_STEP5 switched on, so the round tests them while it's off (RV21's S1); 'not yet' only with no switch line
+            if not p5_on(SRC) and p5_copy(psrc) == psrc: print(f'  not yet ({P5_PARTS[part]}: no P5_STEP5 switch line)'); RESULTS.append((part, 'not yet', 'no P5_STEP5 line')); continue
+            if not p5_on(SRC): print(f'  (on a copy with P5_STEP5 switched on)')
             psrc = p5_copy(psrc)
         fails = PART_FN[part](br, psrc, 'g')
         for f in fails: check(False, f'{part}: {f}')

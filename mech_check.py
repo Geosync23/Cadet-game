@@ -46,7 +46,7 @@ TRAIN = r"""((id) => {
     if (j.train === 'm7' && typeof scanRead === 'function') { scanRead(jid); if (typeof caseTick === 'function') caseTick(); }   // the scanner's training: you read it first (it shows Day 5's case; p5-fix2)
     const cs = SHIP.works && SHIP.works.cases && (SHIP.works.cases.open || []).find(c => c.job === jid);   // a head-scratcher (24k): call it right first
     if (cs && typeof caseCall === 'function') caseCall(cs.id, cs.cause);
-    jobStops(j).forEach((s, k) => jobStepDone(jid, k, j.kind === 'rewire' && s.step === 'wire' ? { pick: rewRight(j, k) } : undefined)); return turnInJob(jid); };   // 24q: a rewire's pairs answered from its chart
+    jobStops(j).forEach((s, k) => jobStepDone(jid, k, j.kind === 'rewire' && s.step === 'wire' ? { pick: rewRight(j, k) } : j.kind === 'arraycal' ? (s.how === 'turn' ? { value: 0 } : s.how === 'choose' ? { pick: arrStars(j)[0].id } : undefined) : undefined)); return turnInJob(jid); };   // 24x: a star picked, the dial settled   // 24q: a rewire's pairs answered from its chart
   let teacher = null, yours = null;
   for (let m = 360; m < 1020; m += 10) {
     const t = (d - 1) * 1440 + m; setShipNow(t); machinesNow(); worksCareerTick(t);
@@ -1488,6 +1488,67 @@ def part_m19_all(g):
     part_m19(g); part_m19b(g)
 PARTS['m19'] = part_m19_all
 
+# 24x the sensor array (S5-5, B3; P5_M20): Day 19's ask (10:00 in the array room, Deck 2; Calder teaches, as Mori is off on
+# Fridays, and Mori is booked in with her at the array's panel), the urgent notice at 09:30, the level 1 arrow from 09:45 with
+# its ring line; a calibration job: pick a star (any of the three; your logged star among them), the dial (only settled
+# counts), the rack's amber module, turned in: a use, the star saved; the weekly job (a full sweep, three dials, from 2
+# uses); stage 3's word from Mori; the save read back, junk cleaned; the same twice
+M20 = r"""(() => { const out = {};
+ const reset = t => { machinesNew(); SHIP.jobs = []; SHIP.flags = {}; SHIP.notes = []; SHIP.mail = []; SHIP.occasions.length = 0; if (SHIP.device) SHIP.device.appts = []; MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1;
+   for (const e of guideList()) if (/^m20:/.test(e.id)) guideDrop(e.id); setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(); W.log.push(['x', 1, 0, 'service']); W.tier = 3; W.rank = 'senior';
+   for (const r of CAREER_LADDER) if (r.id !== 'm20') { W.tr[r.id] = 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); } return W; };
+ // the ask and the beats
+ let W = reset(18 * 1440 + 300); const notes = [], pn = promoNotice; promoNotice = (text) => notes.push([Math.floor(shipNow()) % 1440, text]);
+ try { for (let t = 18 * 1440 + 300; t <= 18 * 1440 + 598; t += 1) { setShipNow(t); machinesNow(); worksCareerTick(t); if (DIALOGUE && typeof dialogueEnd === 'function') dialogueEnd(true); } } finally { promoNotice = pn; }
+ const c = W.cur, r = c && SHIP.occasions.find(x => x.key === c.occ), g = guideList().find(e => /^m20:meet:/.test(e.id)), ap = (SHIP.device.appts || []).filter(a => r && (a.occ === r.key || a.occ === r.key + ':2'));
+ out.ask = c && r ? [c.id, c.st, r.at % 1440, r.deck, r.room, c.by] : null; out.notice = notes;
+ out.arrow = g ? [g.level, g.from % 1440] : null; out.mail = SHIP.mail.filter(x => /sensor array/i.test(x.subject)).map(x => Math.floor(x.at) % 1440); worksTrained('m20'); out.later = flag('m20.mori.later') || null; out.appt = ap.length ? [ap.flatMap(a => a.with).sort(), ap[0].at % 1440, [...new Set(ap.map(a => a.where))].length] : null;
+ // a job of yours
+ W = reset(22 * 1440 + 480); let j = arrJob(shipNow(), { key: 81 }); SHIP.jobs.push(j);
+ out.board = !!openJobs().find(x => x.id === j.id); out.claimed = claimJob(j.id);
+ let S = jobStops(j); out.stops = S.map(s => s.step + ':' + s.how); const opts = S[0].opts.options.map(o => o.id);
+ out.badPick = jobStepDone(j.id, 0, { pick: 'zz' }).ok === true; out.pick = jobStepDone(j.id, 0, { pick: opts[1] }).ok;
+ out.dialOff = jobStepDone(j.id, 1, { value: 2 }).ok === true; out.dialOn = jobStepDone(j.id, 1, { value: 0 }).ok;
+ jobStepDone(j.id, 2, {}); jobStepDone(j.id, 3, {}); out.turnin = turnInJob(j.id); simFlush();
+ const A = arrState(); out.after = [SHIP.machines['2-array-1'].cond >= 90, W.use.m20 || 0, A.star === S[0].opts.options[1].label, A.day];
+ // your logged star among the three
+ SHIP.works.side.cabin = SHIP.works.side.cabin || {}; const sd = starsData(); if (sd) { sd.n = 3; sd.last = 20; }
+ out.yours = arrStars({ key: 81 }).map(o => o.label).includes(worksText('star.name', 'Wren {n}', { n: 3 }));
+ // the weeks: one a week after the lesson, a full sweep from 2 uses, Mori's word from 4
+ W = reset(18 * 1440 + 300); W.tr.m20 = 19; W.use.m20 = 0; (W.op[19] = ['m20']); const weeks = [];
+ for (let t = 19 * 1440 + 300; t <= 40 * 1440; t += 60) { setShipNow(t); machinesNow(); worksCareerTick(t);
+   for (const x of SHIP.jobs) if (x.kind === 'arraycal' && x.status !== 'done' && !x.seen) { x.seen = true; weeks.push([worksDay(x.posted), x.posted % 1440, !!x.sweep, (x.offs || []).length]); x.status = 'done'; x.doneAt = t; W.use.m20 = (W.use.m20 || 0) + 1; } }
+ out.weeks = weeks; out.stages = [0, 2, 4].map(n => { W.use.m20 = n; return worksStage('m20'); });
+ W.use.m20 = 4; j = arrJob(41 * 1440 + 480, { key: 99 }); SHIP.jobs.push(j); setShipNow(41 * 1440 + 490); claimJob(j.id);
+ const said = []; const ws = worksTeach, wv = worksVoice; worksTeach = (m, who, k, fb) => { said.push(m + '.' + k); return fb; }; worksVoice = () => null;
+ try { jobStops(j).forEach((s2, k) => jobStepDone(j.id, k, s2.how === 'turn' ? { value: 0 } : s2.how === 'choose' ? { pick: arrStars(j)[0].id } : {})); turnInJob(j.id); } finally { worksTeach = ws; worksVoice = wv; }
+ out.survey = said;
+ // the save: junk cleaned
+ const side = SHIP.works.side; side.ar = { star: 7, sweeps: 'x', day: 3, week: 'y' }; delete side.arOk; out.save = JSON.stringify(arrState());
+ return out; })()"""
+def part_m20(g):
+    a, b = g.ev(M20), g.ev(M20)
+    print(f"  m20 ask {a['ask']}, notice {a['notice']}, arrow {a['arrow']}, appt {a['appt']}")
+    print(f"  m20 job: stops {a['stops']}, after {a['after']}, your star listed {a['yours']}; weeks {a['weeks']}; stages {a['stages']}; stage 3 {a['survey']}; save {a['save']}")
+    check(a['ask'] and a['ask'][:5] == ['m20', 'meet', 600, 2, 'A'], f"m20: asked on Day 19 for 10:00 in the array room, Deck 2 ({a['ask']})")
+    check(len(a['notice']) == 1 and a['notice'][0][0] == 570 and 'sensor array' in a['notice'][0][1], f"m20: one urgent notice at 09:30 naming it ({a['notice']})")
+    check(a['arrow'] == [1, 585], f"m20: a level 1 arrow from 09:45 ({a['arrow']})")
+    check(a['appt'] and a['appt'][0] == ['calder'] and a['appt'][1] == 595, f"m20: Calder (Mori is off on Fridays) booked at the array's panel from 09:55; Mori not brought in on her day off ({a['appt']})")
+    check(len(a['mail']) == 1 and a['mail'][0] >= 570, f"m20: one Mail, after the 09:30 notice (no Mail at the ask) ({a['mail']})")
+    check(a['later'] == 1, f"m20: Mori's word saved for the next time you meet her ({a['later']})")
+    check(a['board'] and a['claimed'], 'm20: a calibration job on the board for a Senior Officer, taken')
+    check(a['stops'] == ['pick:choose', 'turn:turn', 'look:look', 'module:hold'], f"m20: the steps ({a['stops']})")
+    check(not a['badPick'] and a['pick'] and not a['dialOff'] and a['dialOn'] and a['turnin'], f"m20: a star picked, only a settled dial counts, turned in")
+    check(a['after'][:3] == [True, 1, True], f"m20: the array put right, a use, the star saved ({a['after']})")
+    check(a['yours'], "m20: your last logged star is one of the three")
+    W = a['weeks']
+    check(len(W) >= 3 and all(e[1] == 480 for e in W) and not W[0][2] and W[0][3] == 1 and any(e[2] and e[3] == 3 for e in W), f"m20: one a week at 08:00, a full sweep (three dials) from 2 uses ({W})")
+    check(a['stages'] == [0, 1, 2], f"m20: stages at 2 and 4 uses ({a['stages']})")
+    check(a['survey'] == ['m20.survey'], f"m20: from 4 uses, Mori's word on Survey's chart ({a['survey']})")
+    check(json.loads(a['save']) == {'star': None, 'sweeps': 0, 'day': 3, 'week': -1}, f"m20: the save read back, junk cleaned ({a['save']})")
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm20: differs the second time')
+PARTS['m20'] = part_m20
+
 # ---- favour cases (24l, seat E2 on H's behalf; not a ladder row, so it runs after the rows as EXTRA['fcase']): every
 # script has three clue places and its answer (sus.1) among the options; a friend asks (Mail, an offered favour) on the
 # week's evening; accepted, the side job: the clues before the call, a wrong pick refused (never a fail), the right one
@@ -2071,6 +2132,11 @@ JOB_TAP_EXTRA['relayswap'] = (r"""(() => { const d = 23; skipTo((d - 1) * 1440 +
   const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.t3 = 15; W.tr.m19 = 17; toolGive('tester');
   SHIP.jobs = SHIP.jobs.filter(x => x.claimedBy !== 'you'); const j = pwrJob('relayswap', '1-relay-1', shipNow(), { key: 91 }); SHIP.jobs.push(j); if (!claimJob(j.id)) return null;
   if (ACT && typeof actEnd === 'function') actEnd(true); if (DEV.choose) devChosen(-1); goToDeck(1); return { id: j.id, mach: '1-relay-1' }; })()""", "((j, k) => j.bad)")   # 24v (S5-3): a relay swap by tap, the failing relay picked
+JOB_TAP_EXTRA['arraycal'] = (r"""(() => { const d = 23; skipTo((d - 1) * 1440 + 600); machinesNow(); if (DIALOGUE) dialogueEnd(true);
+  const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.t3 = 15; W.tr.m20 = 19;
+  SHIP.jobs = SHIP.jobs.filter(x => x.claimedBy !== 'you'); const j = arrJob(shipNow(), { key: 91 }); SHIP.jobs.push(j); if (!claimJob(j.id)) return null;
+  if (ACT && typeof actEnd === 'function') actEnd(true); if (DEV.choose) devChosen(-1); goToDeck(2); return { id: j.id, mach: '2-array-1' }; })()""",
+  "((j, k) => { const st = jobStops(j)[k]; if (st.how !== 'turn') return 0; const w = SHIP.player.wsteps.find(x => x.job === j.id && x.k === k); return w && w.v > 0 ? 0 : 1; })")   # 24x (S5-5): a calibration by tap: the first star, the dial turned toward 0 (− or +)
 def part_wstap(pw):
     g = Game(pw, sys.argv[1], 390, 844)
     try:
@@ -2169,14 +2235,10 @@ with sync_playwright() as pw:
     sr = ev(ROW_STAND)                                     # E2's rows (m13, m14) live in 24 core's table (E1); a stand-in only in a build without it
     if sr: print('stand-in ladder rows (24 core\'s table not in this build):', sr)
     rows = ev("CAREER_LADDER.map(r => ({ id: r.id, name: r.name, size: r.size, inBuild: !!WORK_MECH[r.id], stages: (r.stages || []).length }))")
-    for r in rows:
-        if only and r['id'] not in only: continue
-        if not r['inBuild']:
-            print(f"{r['id']} ({r['name']}): not in this build")
-            continue
+    def row_check(g, ev, r):
         if r['id'] == 't2' and ev("typeof promoPassed === 'function'"):   # 24p's test job (0.44.18) is no training: career_check (i)-(j) tests it
             print(f"t2 ({r['name']}): 24p's test job, not a training (career_check (i) and (j))")
-            continue
+            return
         a = ev(f"({TRAIN})('{r['id']}')")
         b = ev(f"({TRAIN})('{r['id']}')")
         print(f"{r['id']} ({r['name']}, {r['size']}): opened Day {a['day']}, trained Day {a['trained']}, steps {a['states']}, teacher's job by {a['teacher']}, yours by {a['yours']}, stage {a['stage']}")
@@ -2188,6 +2250,28 @@ with sync_playwright() as pw:
         check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), f"{r['id']}: the training differs the second time")
         if r['id'] in PARTS:
             PARTS[r['id']](g)
+    for r in rows:
+        if only and r['id'] not in only: continue
+        if not r['inBuild']:
+            print(f"{r['id']} ({r['name']}): not in this build")
+            continue
+        row_check(g, ev, r)
+    # (RV21's S1) Pillar 5 Step 5's rows exist only with P5_STEP5 on: with it off in this build, they're run on a copy with
+    # it switched on (as saves_check's and controller_check's Step 5 parts do), so the round tests them before the switch-on
+    P5_LINE = "const P5_STEP5 = URL_FLAGS.has('p5s5');"
+    src0 = pathlib.Path(sys.argv[1]).read_text()
+    if P5_LINE in src0 and (not only or only & {'ps', 't3', 'm19', 'm18', 'm20', 'p4', 'p5', 'p9', 'mys'}):
+        cp = WORK / 'test' / ('_mech_p5_' + str(os.getpid()) + '_' + pathlib.Path(sys.argv[1]).name); cp.write_text(src0.replace(P5_LINE, 'const P5_STEP5 = true;', 1))
+        try:
+            g5 = Game(pw, str(cp)); rows5 = g5.ev("CAREER_LADDER.map(r => ({ id: r.id, name: r.name, size: r.size, inBuild: !!WORK_MECH[r.id], stages: (r.stages || []).length }))")
+            base = {r['id'] for r in rows}
+            for r in rows5:
+                if r['id'] in base or (only and r['id'] not in only): continue
+                if not r['inBuild']: print(f"{r['id']} ({r['name']}): not in this build (P5_STEP5 on)"); continue
+                print(f"(on a copy with P5_STEP5 switched on)"); row_check(g5, g5.ev, r)
+            if g5.errors: fail('page errors (P5_STEP5 copy): ' + ' | '.join(g5.errors[:5]))
+            g5.close()
+        finally: cp.unlink(missing_ok=True)
     if not only or 'ps' in only: part_ps(g)
     if (not only or 'side' in only) and ev("typeof worksSideXp === 'function'"):
         print('side (Step 4\'s core: tool wear, the side-job cap, the texts):'); part_side(g)
