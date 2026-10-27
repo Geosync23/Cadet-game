@@ -1731,3 +1731,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~13:43 UTC: W7 handover pushed (promo4 8d13dab4); W7 idle -> archive when W8 confirms. QUEUED (cap): a check part proving a follow escort reaches a SEATED player (pu3) on top of escort-follow-fix -> PZ6 when a seat frees.
 - ~13:44 UTC: W8 confirmed. **W7 archived.**
 - ~13:57 UTC check-in (lead 41 at ~57% memory): handing over to lead 42 now (Step 6 round + publish are big). handover-lead41.md updated with seat states.
+- ~13:57 UTC: **Hired LEAD 42** session_01GKuymjnCHnpwDqB94PVwmV (claude/lead-42 from claude/lead-41-e86n0x). Lead 41 disables its check-in once lead 42's is up, then stays idle.
