@@ -94,7 +94,11 @@ None yet.
   S6_DEBUG to see whether the ring (POINT_Q 'p:m24:pick') shows and whether FOLLOW's pointer handling presses through
   Device > Works > Team > the crew button; fix the ring or the follower, then mech m24, cadet vs 40f3bdac, check_fast,
   and send to RV24 + BM19 + lead 42.
-- **Left:** (a) re-run asis/teachoff/track on staging with m24-pick-pointer; (b) drop the M20 setup line in part_step6
+- **AS1 took over (2026-10-27):** night 3 fixed on `claude/m24-pick-pointer` 5f649b45 (the ring's Team tab step had no
+  `open`, so it stayed on the tab and never reached a name). With it, on staging 40f3bdac: asis, teachoff and track all
+  OK (every Step 6 beat, missed 0, stuck 0). Sent to RV24, BM19, lead 42. Fresh machine setup: `pip install playwright
+  numpy pillow`, three and acorn into /tmp/cadet-work (DEV_NOTES), `CADET_CHROME=/opt/pw-browsers/chromium`, a CADET_WORK each run.
+- **Left:** (a) done (see above); (b) drop the M20 setup line in part_step6
   ("the setup counts Step 5's sensor array lesson as done") once W8's d18aafc8 (MA6-2's fix) is in staging, and add a
   line that checks MA6-2 directly (a Tier 3 lesson missed on Day 19 must not block the Tier 4 test on Day 22);
   (c) W8 is adding a Day 22 evening arrow (16:45-22:55 had none; lead 42 passed it on); (d) send shas to lead 42 and RV24.
