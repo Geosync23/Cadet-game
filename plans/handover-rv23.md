@@ -20,13 +20,19 @@ free, so no path and no retry. W7's fix claude/escort-follow-fix cffe8187 (secti
 every 0.5 s). Proven live: W7 de6d5525 (Tier 4 offer) and N6 06b6a158 + cffe8187 (night.on), both seated in the bow lounge.
 
 ## Open items (exact state at writing)
-1. p3_play.py (the 0.94.0 Tier 3 offer, seated, Day 15, on cffe8187): was running; lead 41 asked for it (the fix in the live game).
-2. Queued in /tmp/rv23/s6 lane1.sh / lane2.sh: PZ6 team-turn-fix 12afb4a (cadet vs 6f1915cb, interactions_check, controller team), N6
-   992a4b0 (cadet vs a2ef6416), PZ6 91710ce casePoint (cadet vs a2ef6416, puzzle_check point), MA6 db56362e (cadet vs ce113792,
-   controller m24). Results land in /tmp/rv23/s6/done.txt (gone if the container is reclaimed: re-run).
-3. N6's final Day 22 probe once cffe8187 is in staging (n6_play.py on N6's head with Step 6 on).
-4. Basil's mentoring day (W7 S6-7 later turns): play it live at 390x844.
-5. DA6 9332d5a1 shoulds: a controller part for M23 night 1; a shot of the job's ring at stop 1.
+Done at the handover (14:45): PZ6 12afb4a PASS, PZ6 91710ce PASS, MA6 db56362e PASS, N6 992a4b0 off identical, W7 36e8cf5a off
+identical (not played live). All sent to lead 42. RV24 (session_01GKuymnJuoJTWnmYunbN7EP, claude/review-rv24) takes over:
+1. W8 claude/p5s6-promo4 bd13809 then eee654d (28f Calder's question, mtCasePoint, worksEscort skips p5nEscort on a training/test job):
+   check live that Calder still walks to a seated player for the Tier 4 offer and night.on after the worksEscort change.
+2. Basil's mentoring day (S6-7) live at 390x844: my mt_play.py used devmodeSetCareer(26, DM_BEATS 'mt') inside devmodeRun and stayed on
+   Day 0 (the preset didn't take): find the right Dev call (devmode_check's t4beats loads presets) before playing.
+3. Day 22 on merged staging (7bc997eb or c477e525): briefing 08:30 (m21), night.on 09:15-10:00 (Calder waits at m21Door with m21), Tier 4
+   test 09:30. Seated in the lounge skipping the briefing, Calder only set off at 10:01 and night.on came by notice. Play Day 22 the way a
+   player would (to the briefing, Calder at the door, then the test) and judge whether the three beats fit together.
+4. DA6 claude/p5s6-deck 88377cfa + 31ad2f0e (night 2; the m23 arrow my should found; controller m23): cadet, controller m23, and
+   interactions_check (it touches 15b's ixChoreLast and section 14's doorOpenFor).
+5. The 0.94.0 Tier 3 offer live with the escort fix: p3_play.py on Day 15 found the offer already made during the skip; set it up
+   without the skip (or accept: the same fix is proven live on the Tier 4 offer and night.on).
 
 ## How I test
 Setup per plans/testing-guide.md section 2 in /tmp/cadet-work and /tmp/cadet-work2 (two lanes, at most 2 browsers on 4 cores). One

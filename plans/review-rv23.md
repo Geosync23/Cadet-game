@@ -21,6 +21,10 @@ Lead: lead 42 (session_01GKuymjnCHnpwDqB94PVwmV) from 13:58; before that lead 41
 | claude/p5s6-deck (DA6): turns 2-3, the rack and Deck 2 | PASS | dd32a9a7 |
 | claude/p5s6-mech-a (MA6): M24 turn 2 | PASS | a92d0562 |
 | claude/p5s6-deck (DA6): M23 night 1 | PASS (2 shoulds: controller part; ring at stop 1 shot) | 9332d5a1 |
+| claude/team-turn-fix (PZ6): team turn by tap/pad, live patch | PASS | 12afb4a |
+| claude/p5s6-puzzles (PZ6): casePoint | PASS | 91710ce |
+| claude/p5s6-mech-a (MA6): m24Call card while ACT | PASS | db56362e |
+| claude/p5s6-promo4 (W7): S6-7 turns 2-4 | off identical; not played live (handed to RV24) | 36e8cf5a |
 | VB2's ending leftovers (arrows endgo teachoff, track) | PASS | staging-0.94.0 d69473b7 |
 
 ## VB1 03b63d95
@@ -105,3 +109,7 @@ Lead: lead 42 (session_01GKuymjnCHnpwDqB94PVwmV) from 13:58; before that lead 41
 - W7 de6d5525 live (p4_play): seated, Calder 22.2 m -> 2.6 m by 08:37, offer scene opens. 9dcd0b1a controller promo4 OK.
 - N6 06b6a158 + cffe8187 scratch merge (n6_play): Calder 20.8 m -> 5.4 m by 09:28, night.on opens and plays.
 - Queued: W7 9d24b9f9 (S6-7 mentoring: cadet + day_check 26 ON, the mtDesk planner hook). p3_play (Tier 3 offer, seated, Day 15) re-running.
+- Last batch (to 14:45): PZ6 12afb4a PASS (cadet identical, interactions incl. its real-tap team turn, controller team); PZ6 91710ce
+  PASS (cadet identical alone, puzzle point); MA6 db56362e PASS; N6 992a4b0 cadet identical; W7 36e8cf5a cadet identical, mt_play's Dev
+  preset stayed on Day 0 (not played). Day 22 on staging 7bc997eb: night.on by notice when the player skips the briefing (Calder at
+  m21Door until 10:00): handed to RV24 for a coherent Day 22 play. Handover: plans/handover-rv23.md. RV24 takes over.
