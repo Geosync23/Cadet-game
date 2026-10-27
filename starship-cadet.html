@@ -9743,12 +9743,13 @@ function newGameStart(arrival) {
 // Going to sleep: tap your own bunk (playerBed(), ROSTER_PLAYER's bed, by its place on Deck 4) from 20:00 to 05:30.
 // The alarm clock opens (0.73.0; no dialog from 0.28.9 to then); Set alarm fades the view out, skips to the wake time
 // (sleepUntil) and fades back in. Unwell by day (the nap) you sleep at once, as before.
-const playerBed = () => { const h = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home; return typeof h === 'string' && (DECKS[4].places || []).some(q => q.id === h && q.type === 'bed') ? h : ROSTER_PLAYER.bed; }, WAKE_AT = 6 * 60, CLOCK_EARLY = 7;   // CLOCK_EARLY: minutes the Works crew arrive early to clock in (the clock's queue wait, 6, and the clocking, 1)   // read when used: ROSTER_PLAYER comes later in the file
+const playerBed = () => { const h = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home; return typeof h === 'string' && (DECKS[4].places || []).concat(h === '2-B' && DECKS[2] && DECKS[2].places || []).some(q => q.id === h && q.type === 'bed') ? h : ROSTER_PLAYER.bed; }, WAKE_AT = 6 * 60, CLOCK_EARLY = 7;   // CLOCK_EARLY: minutes the Works crew arrive early to clock in (the clock's queue wait, 6, and the clocking, 1)   // read when used: ROSTER_PLAYER comes later in the file
 const sleepEl = document.getElementById('sleepAsk'); let sleeping = false;
 const bedtime = () => SHIP.time.min >= 20 * 60 || SHIP.time.min < 5 * 60 + 30;
 function offerSleep(at) {                                // at: where the tapped item is. True if it was your bunk
   const id = playerBed(), bed = (DECKS[deckOf(id)].places || []).find(p => p.id === id);
   if (!bed || deckDef.num !== deckOf(id) || at.distanceTo(cellPos(...bed.at)) > 1.2) return false;
+  if (P5_NIGHT && p5nBed()) return true;                 // 28a (S6-1): sleeping by day after a night shift, or not during one
   if (!bedtime() && !(typeof sickNow === 'function' && sickNow())) { toast('Your bunk', 'Too early to turn in. You can sleep here from 20:00.'); return true; }
   toastEl.classList.remove('show');
   if (!bedtime()) sleepGo(null); else alarmOpen();       // the nap (unwell by day) at once; at night the alarm clock (0.73.0)
@@ -9777,6 +9778,7 @@ function alarmEnergy(m) {                                // the energy you'd wak
 }
 function alarmLate(m) {                                  // your shift's start that morning if the alarm is at or after it, else 0
   const d = Math.floor(alarmAt(m) / 1440) + 1;
+  if (P5_NIGHT) { const n = p5nKnockAt(alarmAt(m)); if (n) return n.from % 1440; }   // 28a (S6-1): your night shift starts first
   return typeof DAY_SHIFT !== 'undefined' && typeof playerShiftOn === 'function' && playerOnDuty(d) && m >= DAY_SHIFT[0] ? DAY_SHIFT[0] : 0;
 }
 function alarmDraw() {
@@ -9803,11 +9805,14 @@ function sleepGo(wake) {                                 // wake: the alarm (min
   sleepEl.hidden = true; if (sleeping || ride) return;
   sleeping = true; fadeEl.style.transition = 'opacity .8s'; fadeEl.style.opacity = 1;
   const nap = !bedtime() && typeof sickNow === 'function' && sickNow();   // unwell by day: sleep it off for a few hours (0.61.5)
-  if (!nap) { if (!alarmOk(wake)) wake = WAKE_AT; SHIP.player.alarm = wake; toast(alarmText('alarm.title', 'Alarm'), alarmText('alarm.toast', 'Alarm set for {time}.', { time: hhmm(wake) })); }
+  const day = !nap && P5_NIGHT && p5nDayBed() === wake;   // 28a (S6-1): sleeping by day after a night (not kept as your alarm)
+  if (day) toast(alarmText('alarm.title', 'Alarm'), alarmText('alarm.toast', 'Alarm set for {time}.', { time: hhmm(wake) }));
+  if (!nap && !day) { if (!alarmOk(wake)) wake = WAKE_AT; SHIP.player.alarm = wake; toast(alarmText('alarm.title', 'Alarm'), alarmText('alarm.toast', 'Alarm set for {time}.', { time: hhmm(wake) })); }
   setTimeout(() => {
-    if (nap) { skipTo(shipNow() + SICK.nap); sickCure(3); } else sleepUntil(wake); nightT = nightAt();
+    const knock = !nap && P5_NIGHT ? p5nKnock(wake) : null;   // 28a (S6-1): your night shift wakes you (a knock), whatever the alarm
+    if (nap) { skipTo(shipNow() + SICK.nap); sickCure(3); } else if (knock) skipTo(knock.at); else sleepUntil(wake); nightT = nightAt();
     fadeEl.style.opacity = 0;
-    setTimeout(() => { fadeEl.style.transition = ''; sleeping = false; if (!nap) toast('Good morning', alarmText('alarm.ring', 'Morning. Your alarm\'s going.') + ' ' + clockText() + '.'); }, 850);
+    setTimeout(() => { fadeEl.style.transition = ''; sleeping = false; if (knock) knock.say(); else if (day) toast(alarmText('alarm.title', 'Alarm'), p5nText('night.wake', 'Your alarm. Night shift tonight from {time}.', { time: hhmm((p5nOf(SHIP.time.day) || { from: 1260 }).from % 1440) }) + ' ' + clockText() + '.'); else if (!nap) toast('Good morning', alarmText('alarm.ring', 'Morning. Your alarm\'s going.') + ' ' + clockText() + '.'); }, 850);
   }, 900);
 }
 addEventListener('keydown', e => { if (e.key === 'Escape' && !sleepEl.hidden) sleepEl.hidden = true; });
@@ -9985,7 +9990,7 @@ function schedU(seed, day, k) {
   h = Math.imul(h ^ h >>> 16, 0x7FEB352D); h = Math.imul(h ^ h >>> 15, 0x846CA68B); h ^= h >>> 16;
   return (h >>> 0) / 4294967296;
 }
-const isWorkDay = (p, d) => !!p.work && (!((p.rota && p.rota.offDays) || []).includes(weekday(d)) || stormCalledIn(p, d));   // FX26 (0.93.2): the Works crew called in on the storm's Saturday (section 18)
+const isWorkDay = (p, d) => !!p.work && (!((p.rota && p.rota.offDays) || []).includes(weekday(d)) || stormCalledIn(p, d)) && !(P5_NIGHT && typeof p5nOnLeave === 'function' && p5nOnLeave(p, d));   // S6-1: Navarro's leave on your nights (28's P5_LEAVE, fixed by the day)   // FX26 (0.93.2): the Works crew called in on the storm's Saturday (section 18)
 // your shift's start (Pillar 4, for section 20's reputation): on a work day, the first minute from 09:00 (DAY_SHIFT[0]) that you're in
 // a Works room on Deck 5, simNote('shiftStart', { late: minutes after 09:00 }); not there by 12:30, { late: 120,
 // missed: true }. Once a day (the flag 'shiftSent' holds the day, so a reload doesn't send it again)
@@ -11929,6 +11934,7 @@ function devDay(d) {
   try { if (typeof introOn === 'function' && introOn() && typeof INTRO_WEEK !== 'undefined') for (const b of INTRO_WEEK)
     if (b.day === d && DEV_BEATS[b.id] && b.where && Number.isInteger(b.where.deck))
       out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckIn(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room, ...(b.stand ? { place: b.stand } : {}) }); } catch (e) { /* not yet */ }   // place: where you stand for it (item 81: the room's middle was the Chief's own seat, under her)
+  try { if (P5_NIGHT && typeof p5nItems === 'function') p5nItems(d, out); } catch (e) { /* not yet */ }   // 28a (S6-1): your night shift, and Day 22's short day
   try { if (typeof puItems === 'function') out.push(...puItems(d)); } catch (e) { /* not yet */ }   // 24u (S5-2): the Senior Officer promotion's steps, with P5_PROMO3
   try { if (typeof promoBeatsItems === 'function') out.push(...promoBeatsItems(d)); } catch (e) { /* not yet */ }   // FX28: the promotion's steps (24p), with PROMO_BEATS_ON
   try { if (typeof sdItems === 'function') out.push(...sdItems(d)); } catch (e) { /* not yet */ }   // 24w (S5-4): your booked shutdown, with P5_M18
@@ -13855,7 +13861,7 @@ const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown wh
   ['t:trad', c => c.trad, 'There\'s a ship tradition today. Turn up and join in. It\'s how the crew makes a long voyage feel like home.'],
   ['t:hu', c => c.S.hu, 'Heads-ups tell you what\'s coming. Set how early, or turn them off, in your device\'s Settings.'],
   ['t:sleep', c => c.S.woke, 'Slept well? Your bunk takes you from 20:00 through to 06:00. By day, lie on it to rest.'],
-  ['t:late', c => c.min >= 1320, 'Getting late. Your bunk\'s in Bunk 1 on Deck 4. Stay up if you like. You\'ll feel it tomorrow.'],
+  ['t:late', c => c.min >= 1320 && !(P5_NIGHT && (p5nIn() || p5nSoon())), 'Getting late. Your bunk\'s in Bunk 1 on Deck 4. Stay up if you like. You\'ll feel it tomorrow.'],
   ['t:needs', c => NEED_KEYS.some(k => c.n[k] < 50), 'Your needs sit in the strip at the top. Keep them up and the day goes well. Let them drop and you slow down.'],
   ['t:loo', c => c.n.bathroom < 50, 'Public washrooms are in the junior wing on Deck 4, and on Deck 3. Cabin bathrooms are private.'],
   ['t:food', c => c.n.hunger < 50 && !teachMeal(c.min), 'Missed a meal? The grab shelf in the mess, Deck 3, is always open.'],
@@ -14237,7 +14243,7 @@ function bunkTap(it, at) {
 // and wake still lying in it. Before 0.28.29 a tap only slept you at night (standing) or said "Too early".
 const LIE_GAIN = .05;                                    // energy a ship minute lying down: 3 an hour
 function bunkLie(id) {
-  const sick = typeof sickNow === 'function' && sickNow(), night = typeof bedtime === 'function' && bedtime() || sick;   // unwell: you sleep it off, by day too (0.61.5)
+  const sick = typeof sickNow === 'function' && sickNow(), night = typeof bedtime === 'function' && bedtime() || sick || P5_NIGHT && !!p5nDayBed();   // unwell: you sleep it off, by day too (0.61.5); after a night shift too (28a, S6-1)
   actStart('lie', id, { title: 'Your bunk', sleep: night, after: sick ? 'You crawl into your bunk and close your eyes.' : night ? 'You climb into your bunk and pull the blanket up.' : 'Too early to sleep: you can turn in from 20:00. You lie down for a rest; tap anywhere to get up.' });   // the fresh-eyes playtest (lead 28): say why it's not sleep
 }
 // the Thursday inspection's berth (Pillar 5, m3): on an inspection morning (Thursday 05:30-08:00, not unwell) a tap on
@@ -14285,6 +14291,7 @@ function playerTap(it, at, point) {
     approach(at.clone(), it.front, it.depth, () => actStart('pay', null, { title: it.t, after: clerk ? clerk.p.name + ' rings it up.' : 'Nobody\'s on the till, so you scan your badge yourself.' }));
     return true;
   }
+  if (kind === 'tray' && P5_NIGHT && p5nPlate(it)) return true;   // 28a (S6-1): the plate kept for you after a night
   if (kind === 'tray' && !foodFrom('servery', true).ok) { toast(it.t, foodFrom('servery', true).why); return true; }   // a table with no tray just sits you (0.28.45)
   if (kind === 'tray' && typeof galleyJoin === 'function' && typeof galleyTurn === 'function') {   // join the galley's queue at its back
     const j = galleyJoin('player'), ln = j.line && typeof lineSpot === 'function' ? lineAt(lineSpot('player')) : null;   // the back of section 10's line for now (the galley joins you to it), else the galley's spot
@@ -15731,7 +15738,8 @@ const TRAY_SEAT_SAY = 'A seat for your tray';
 function needGoal(k) {
   if (k === 'hygiene' && typeof washCooling === 'function' && washCooling()) return false;   // a shower would give nothing yet (FX6)
   if (!NEED_FIX[k] || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || IX_GOAL && !(NEED_GOAL && IX_GOAL.label === NEED_GOAL.label)) return false;   // never over someone else's arrow
-  if (k === 'energy' && !(typeof bedtime === 'function' && bedtime()) && !(typeof sickNow === 'function' && sickNow())) return false;   // your bunk only when you can sleep there (FX3: a Day 8 "Your bunk" arrow stood all afternoon)
+  if (k === 'energy' && P5_NIGHT && (p5nIn() || p5nSoon())) return false;   // 28a (S6-1): not on (or just before) your night shift
+  if (k === 'energy' && !(typeof bedtime === 'function' && bedtime()) && !(typeof sickNow === 'function' && sickNow()) && !(P5_NIGHT && p5nDayBed())) return false;   // your bunk only when you can sleep there (FX3: a Day 8 "Your bunk" arrow stood all afternoon)
   const bed = typeof playerBed === 'function' ? playerBed() : null, here = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 4, pos = player.obj.position;
   if (k === 'hunger' && SHIP.player.tray && (here === 3 || TRAY_TRAVELS || SHIP.player.trayGo)) {   // a tray in hand: a seat to eat it at, not the servery again (LEAD31-14, FX6: "You already have your tray" till Food 0)
     const d2 = pl => { const c = cellPos(...pl.at); return Math.hypot(c.x - pos.x, c.z - pos.z); };
@@ -15995,7 +16003,7 @@ SAVE_EXTRA.unshift(() => clockUndoSettle());       // a save ends the window fir
 function clockButtons(row, act, s) {                     // the screen's two halves, left and right: [Clock in | Close], [ | Undo] ...
   const gap = () => { const b = act('', () => {}); b.disabled = true; b.style.visibility = 'hidden'; b.setAttribute('aria-hidden', 'true'); return b; };
   const half = b => { b.style.flex = '1 1 0'; return b; }, close = () => act(csText('close', 'Close'), () => { document.getElementById('clockScreen').hidden = true; });
-  const u = CLOCK_UNDO && CLOCK_UNDO.d === SHIP.time.day ? CLOCK_UNDO : null, m = SHIP.time.min, ends = m >= dayShiftEnd(SHIP.time.day);
+  const u = CLOCK_UNDO && CLOCK_UNDO.d === SHIP.time.day ? CLOCK_UNDO : null, m = SHIP.time.min, ends = m >= yourDayEnd(SHIP.time.day);
   const said = (r, k) => r === 'in' ? (SHIP.time.min - DAY_SHIFT[0] > 5 ? csText('late', 'Clocked in at {time}. A little late. It happens.', { time: hhmm(SHIP.time.min) }) : csText('didin', 'Clocked in at {time}. Have a good shift.', { time: hhmm(SHIP.time.min) }))
     : r === 'out' ? friClock('didout', SHIP.time.min) || csText('didout', 'Clocked out at {time}. Evening\'s yours.', { time: hhmm(SHIP.time.min) }) : null;
   const punch = early => () => { const r = clockPunch(early); const t = said(r); if (CLOCK_UNDO) CLOCK_UNDO.said = t; clockScreen(t); };
@@ -16386,6 +16394,16 @@ function clockRemindTick(now = shipNow()) {
   CLOCK_RM_LOG.push([d, m, st, text]); if (CLOCK_RM_LOG.length > 60) CLOCK_RM_LOG.shift();
   return st;
 }
+// your hours on day d (S6-1, plans/p5-step6-spec.html "Your hours"): { day: [from, to] | null, night: [from, to] | null } in
+// minutes from day d's midnight (a night runs past 1440, to 06:00 the next morning). DAY_SHIFT's 43 readers stay as they
+// are: only the time clock, its arrows, the Schedule and the readers that run in your night hours ask this. Off: the day
+// shift as ever (dayShiftEnd), and never a night
+function yourShift(d) {
+  const night = P5_NIGHT && typeof playerNightOn === 'function' && playerNightOn(d) ? P5_NIGHTS[d].slice() : null;
+  const day = playerOnDuty(d) ? [DAY_SHIFT[0], night ? Math.min(dayShiftEnd(d), P5N.dayEnd) : dayShiftEnd(d)] : null;   // Day 22: the morning to 12:30
+  return { day, night };
+}
+const yourDayEnd = d => { const s = yourShift(d); return s.day ? s.day[1] : dayShiftEnd(d); };
 // ---- end of slot: Player engineer ----
 
 // =====================================================================
@@ -16858,7 +16876,7 @@ function boardLesson() {
 function boardLessonName(id = boardLesson()) {
   const c = SHIP.works && SHIP.works.cur, j = id && (SHIP.jobs || []).find(x => x.id === id);
   if (j && !(c && c.j === id)) return j.case ? 'head-scratcher lesson' : ({ 1: 'shadow job', 2: 'job to lead', 3: 'first solo job' })[j.reserved] || 'lesson';   // (FX15, patch 0.92.5 #22)
-  if (c && (c.id === 't2' || c.id === 't3')) return 'Tier ' + c.id.slice(1) + ' test job';     // (FX15) 24p's test, not a lesson (24u's Tier 3 test too, S5-2)
+  if (c && /^t[234]$/.test(c.id)) return 'Tier ' + c.id.slice(1) + ' test job';     // (FX15) 24p's test, not a lesson (24u's Tier 3 test too, S5-2)
   let n = ''; try { n = c && typeof mechName === 'function' ? mechName(c.id) : ''; } catch (e) { n = ''; }
   n = String(n || '').replace(/^the /i, '').toLowerCase(); return n ? n + ' lesson' : 'lesson';
 }
@@ -16874,7 +16892,7 @@ const ixBoard = (() => {
   }
   const PRI = ['routine', 'soon', 'urgent', 'urgent'];
   // what section 15 can walk you through today: machine jobs (and chores on a machine), and cart runs (cartTap)
-  const BOARD_KINDS = new Set(['rounds', 'haul', 'tier3']);   // the registered kinds taken at the board (lead 29: only these; never an incident, a leak, nozzles or the trace demo; 24u's Tier 3 test, S5-2)
+  const BOARD_KINDS = new Set(['rounds', 'haul', 'tier3', 'tier4']);   // the registered kinds taken at the board (lead 29: only these; never an incident, a leak, nozzles or the trace demo; 24u's Tier 3 test, S5-2)
   const doable = j => !!(j && (j.machine || j.kind === 'restock' || (j.kind === 'chore' || BOARD_KINDS.has(j.kind) && typeof JOB_KINDS === 'object' && JOB_KINDS[j.kind]) && typeof jobStepDone === 'function'));   // a round and a haul too (run by their stops; AC2, FX2's find): they said "coming soon", so Rounds and Hauling could never be taken
   const button = (txt, fn) => { const x = document.createElement('button'); x.type = 'button'; x.textContent = txt; x.onclick = fn; return x; };
   const LESSON = () => 'Your ' + boardLessonName() + ': take this one';   // FX10 (patch 0.92.3 item 29): the job a lesson's "your turn" put up for you (named: patch 0.92.5 #12)
@@ -17608,7 +17626,7 @@ function guideTrain() {
 const GUIDE_SHIFT = { logN: -1, band: null };
 function guideShiftOver() {                              // clocked in, not out, past the end of today's shift
   try { const now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
-    return playerOnDuty(d) && m >= dayShiftEnd(d) && careerClockedIn(d) && !careerClockedOut(d); } catch (e) { return false; }
+    return playerOnDuty(d) && m >= yourDayEnd(d) && careerClockedIn(d) && !careerClockedOut(d); } catch (e) { return false; }
 }
 function guideTakeable() {                               // the board's jobs with a Take it for you (ixBoard's rule), a held one first
   let L = []; try { L = typeof openJobs === 'function' ? openJobs('you') : []; } catch (e) { L = []; }
@@ -17644,7 +17662,7 @@ function guideShift() {
     guideAsk({ id: 'inspect:' + d, level: 2, owner: '15b (piece D, F2)', from: base + 360, until: base + INSPECT_AT, goal: () => inspectGoal(d), done: () => !inspectDue(d) });
   if (!playerOnDuty(d) || SHIP.career && SHIP.career.end) return;
   const intro = d <= 1 && typeof introOn === 'function' && introOn();   // training day: the intro's own arrows (only the lesson's pointer below rings: FX15, patch 0.92.5 #22)
-  const E = dayShiftEnd(d), inn = careerClockedIn(d), out = careerClockedOut(d), owner = '15b (piece D)';
+  const E = yourDayEnd(d), inn = careerClockedIn(d), out = careerClockedOut(d), owner = '15b (piece D)';
   if (!intro && !inn && m >= CAREER.clockIn && m < E) {            // S2
     guideAsk({ id: 'shift:in:' + d, level: 4, owner, from: base + CAREER.clockIn, until: base + E, goal: () => guideClock('Clock in: shift at ' + hhmm(DAY_SHIFT[0])), done: () => careerClockedIn(d) });
     if (P) pointAsk({ id: 'p:clock:in', once: 3, path: pointClock('in', 'Clock in'), until: base + E, done: () => careerClockedIn(d) });
@@ -20046,11 +20064,12 @@ const HOLD_MAX = 4;                                      // small jobs held for 
 // SHARE_KEEP held on the board: so you see the Works crew doing the jobs you do ("Bea on it")
 const SHARE_EVERY = 3, SHARE_KEEP = 2;
 let SHARE_ON = true;                                    // machine_check turns it off where it needs a job left for you
-const forYou = j => j.urgency < 2 && jobTier(j) <= playerTier() && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && rankOk('you', j) && (!j.junior || playerRank() === 'junior') && !bridgeBars(j);
+const forYou = j => j.urgency < 2 && jobTier(j) <= playerTier() && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind) && !(P5_PROMO4 && pu4EngineByDay())) && rankOk('you', j) && (!j.junior || playerRank() === 'junior') && !bridgeBars(j);
 function leaveEnd(j) {
   if (!forYou(j) || j.released) return j.found;
   if (j.cargo === 'meals') return j.found + 60;
   if (j.cargo === 'stores') { const d0 = Math.floor(j.found / 1440) * 1440; return playerShiftOn(d0 / 1440 + 1) && j.found < d0 + DELIVERY_KEEP ? d0 + DELIVERY_KEEP : j.found; }   // the delivery (0.33.42)
+  if (P5_NIGHT && typeof p5nBoardWin === 'function') { const w = p5nBoardWin(j.found); if (w) return j.found + Math.min(w.left, j.leave || (realRepair(j) ? FAULT_LEAVE : CREW_LEAVE)); }   // found in your night's hours: held for you in them (28a, S6-1)
   let t = j.found, left = j.leave || (realRepair(j) ? FAULT_LEAVE : CREW_LEAVE);
   for (let k = 0; k < 14 && left > 0; k++) {
     const d0 = Math.floor(t / 1440) * 1440;
@@ -20744,7 +20763,7 @@ const RESERVE_MAKE_MINS = 30;                            // how long you take to
 const heldForYou = j => (!!j.reserved && !j.freed && j.status !== 'done') || (typeof caseHeld === 'function' && j.status !== 'done' && !!caseHeld(j));   // 24k: a case's job is kept for you while it runs (0.33.47)
 function jobReserve(kind, day, at, slot = 1, o = {}) {
   machinesNow();
-  const due = (day - 1) * 1440 + at, until = Number.isFinite(o.until) ? o.until : (day - 1) * 1440 + dayShiftEnd(day);
+  const due = (day - 1) * 1440 + at, until = Number.isFinite(o.until) ? o.until : o.night && P5_NIGHT && typeof p5nOf === 'function' && p5nOf(day) ? p5nOf(day).to : (day - 1) * 1440 + dayShiftEnd(day);   // o.night: held through your night shift (28a, S6-1)
   const old = SHIP.jobs.find(j => j.reserved === slot && heldForYou(j));
   if (old && old.claimedBy) return old.id;
   if (old) SHIP.jobs = SHIP.jobs.filter(j => j !== old);
@@ -21750,10 +21769,10 @@ let BOARD_ON = true;
 const BOARD_MIN = 2, BOARD_FROM = 45, BOARD_KINDS = ['vent', 'calibrate', 'delivery', 'fault', 'seal'];
 const boardForYou = (j, t) => j.status === 'open' && !j.claimedBy && j.kind !== 'favour' && j.found <= t && !(typeof caseHidden === 'function' && caseHidden(j)) && !(typeof worksWatching === 'function' && worksWatching(j)) && (heldForYou(j) || (forYou(j) && t < leaveEnd(j)));
 function boardTopUp(h, jobs) {
-  const d = Math.floor(h / 24) + 1, t = h * 60, m = t - (d - 1) * 1440, end = dayShiftEnd(d);
+  const d = Math.floor(h / 24) + 1, t = h * 60, m = t - (d - 1) * 1440, nw = P5_NIGHT && typeof p5nBoardWin === 'function' ? p5nBoardWin(t) : null, end = nw ? m + nw.left : dayShiftEnd(d);   // nw: your night's hours (28a, S6-1; fixed by the day)
   for (const j of jobs) if (j.extra && j.status === 'open' && !j.claimedBy && t >= leaveEnd(j)) j.status = 'gone';   // untaken by the shift's end: lapsed
   for (let k = jobs.length - 1; k >= 0; k--) if (jobs[k].status === 'gone') jobs.splice(k, 1);
-  if (!BOARD_ON || h < 0 || !playerShiftOn(d) || m < DAY_SHIFT[0] || end - m < BOARD_FROM) return;
+  if (!BOARD_ON || h < 0 || (nw ? nw.left < BOARD_FROM : !playerShiftOn(d) || m < DAY_SHIFT[0] || end - m < BOARD_FROM)) return;
   if (jobs.some(j => j.reserved && j.status === 'open' && !j.claimedBy && j.found >= (d - 1) * 1440 && j.found <= t + 60)) return;   // a job reserved for you today (Day 1's two with Zeke, a training job) comes first: none while it's due within the hour or untaken
   if (BOARD_TRADE_ON) try { boardTradePost(h, jobs, t, m, end); } catch (e) { /* 24a's rounds not loaded yet */ }   // FX19 (0.92.6 #11): a job of your trade, beside the simple ones
   let n = jobs.filter(j => boardForYou(j, t) && !j.trade).length; if (n >= boardMin()) return;
@@ -38480,6 +38499,10 @@ const LINES = JSON.parse([
   '{"text":"My door | My door squeaks, but only at night. In the day it\'s silent. Am I imagining it?","id":"us2rse"}]',
   ',"mail.fri.week1":[',
   '{"text":"Tomorrow\'s a short Friday. The day shift stops at half past three; I\'ll see all of you in the auditorium at four. Dinner at five. Our new hands especially.","id":"1s3rh01"}]',
+  ',"mail.night.off":[',
+  '{"text":"Off nights | Three clean nights. Navarro\'s back Friday night. Sleep today; tomorrow you\'ve a cadet with you.","id":"1cf0vj4"}]',
+  ',"mail.night.on":[',
+  '{"text":"Your nights | As I said: Navarro\'s on leave. You cover his nights, tonight from 22:45 (after the comet), then 21:00 to 06:00, to Wednesday. Sleep this afternoon. I\'ll come and get you.","id":"1hrv3ke"}]',
   ',"mail.pb.cabin":[',
   '{"text":"Your cabin | After dinner I\'ll walk you to 4-23. Eat first. Your things are on their way.","id":"1ddsoh5"}]',
   ',"mail.pb.captain":[',
@@ -39228,6 +39251,86 @@ const LINES = JSON.parse([
   '{"text":"Your test job is on the board. Calder\'s watching. Take it.","id":"1pe9j16"}]',
   ',"next.wait.t3":[',
   '{"text":"Your Tier 3 test is set. The job board, the Works bay, 09:00.","id":"ew9tvb"}]',
+  ',"night.bed.on":[',
+  '{"text":"You\'re on the night shift. Sleep after 06:00.","id":"1rna0dx"}]',
+  ',"night.bed.until":[',
+  '{"text":"Sleep until {time}","id":"1684vg2"}]',
+  ',"night.clock.auto":[',
+  '{"text":"You forgot to clock out. The clock signed you out at 06:00.","id":"1c7su3u"}]',
+  ',"night.clock.done":[',
+  '{"text":"You\'re clocked out. Bed, then.","id":"o9illf"}]',
+  ',"night.clock.early":[',
+  '{"text":"An early finish: it\'s noted.","id":"1rbezka"}]',
+  ',"night.clock.in":[',
+  '{"text":"Clocked in at {time}. Night shift till 06:00.","id":"cr99c1"}]',
+  ',"night.clock.out":[',
+  '{"text":"Clocked out at {time}. {hours} h tonight.","id":"133bia4"}]',
+  ',"night.clock.over":[',
+  '{"text":"The night shift\'s over. Get some sleep.","id":"jpjvsd"}]',
+  ',"night.knock":[',
+  '{"text":"A knock at your bunk: your night shift starts at {time}.","id":"1lhkjee"}]',
+  ',"night.knock.1":[',
+  '{"text":"A knock at your bunk. Calder: \\"Up you get. Night shift. I\'ll see you down there.\\"","id":"uzphzk"}]',
+  ',"night.knock.from":[',
+  '{"text":"The night crew","id":"hes3al"}]',
+  ',"night.notice":[',
+  '{"text":"Night shift at {time}. Clock in at the Works bay, then the engine room on Deck 6.","id":"1e2y0fj"}]',
+  ',"night.notice.1":[',
+  '{"text":"Night shift now. Clock in at the Works bay, then down to the engine room.","id":"qav6h9"}]',
+  ',"night.notice.busy":[',
+  '{"text":"Your night shift starts at {time}. Turn in or drop this job first.","id":"1atyjrj"}]',
+  ',"night.off.notice":[',
+  '{"text":"Your nights are done. Navarro\'s back Friday night. Bed: you\'ve a cadet tomorrow.","id":"1aaywy6"}]',
+  ',"night.on.notice":[',
+  '{"text":"Night shift tonight from 22:45, after the comet. Then 21:00 to 06:00 till Wednesday.","id":"8mbzdh"}]',
+  ',"night.plate":[',
+  '{"text":"Brennan\'s kept you a plate: \\"Night shift? Eat, then sleep.\\" Find a seat and tap it.","id":"fqjc7a"}]',
+  ',"night.plate.dish":[',
+  '{"text":"the plate kept for you","id":"17hvaum"}]',
+  ',"night.plate.notice":[',
+  '{"text":"A plate\'s kept for you in the mess, from 06:15. Then sleep until {time}.","id":"mzm653"}]',
+  ',"night.ptr.bed":[',
+  '{"text":"Sleep until {time}","id":"m7g11k"}]',
+  ',"night.ptr.bed.22":[',
+  '{"text":"Sleep now: night shift tonight","id":"ik2xe4"}]',
+  ',"night.ptr.dayout":[',
+  '{"text":"Clock out, then sleep","id":"11v72zf"}]',
+  ',"night.ptr.in":[',
+  '{"text":"Night shift: clock in","id":"2f8k8t"}]',
+  ',"night.ptr.out":[',
+  '{"text":"Clock out: the night\'s done","id":"vj9xwo"}]',
+  ',"night.ptr.plate":[',
+  '{"text":"A plate\'s kept for you in the mess","id":"1p503dg"}]',
+  ',"night.ptr.room":[',
+  '{"text":"Night shift: the engine room","id":"pw2xlq"}]',
+  ',"night.row":[',
+  '{"text":"Night shift, {from}-06:00","id":"168oyw6"}]',
+  ',"night.row.end":[',
+  '{"text":"Night shift, until 06:00","id":"1bgsm9k"}]',
+  ',"night.row.sleep":[',
+  '{"text":"Sleep until {time}","id":"1374nzq"}]',
+  ',"night.row.told":[',
+  '{"text":"Night shift tonight, after the comet","id":"1c6exd0"}]',
+  ',"night.screen.didin":[',
+  '{"text":"Clocked in at {time}. Quiet night, with luck.","id":"1c3gl5s"}]',
+  ',"night.screen.didout":[',
+  '{"text":"Clocked out at {time}. Bed.","id":"1htqrxy"}]',
+  ',"night.screen.done":[',
+  '{"text":"Night done. Sleep well.","id":"63on7q"}]',
+  ',"night.screen.hours":[',
+  '{"text":"Tonight: {hours} h","id":"4u9qiw"}]',
+  ',"night.screen.on":[',
+  '{"text":"On the night shift since {time}.","id":"v185mz"}]',
+  ',"night.screen.over":[',
+  '{"text":"The night shift\'s over.","id":"1ugdx12"}]',
+  ',"night.screen.ready":[',
+  '{"text":"Night shift {from}-06:00. Tap to clock in.","id":"dhu2ts"}]',
+  ',"night.sleep.notice":[',
+  '{"text":"Sleep now: night shift tonight. Your bunk, until 16:45.","id":"cekf4n"}]',
+  ',"night.wake":[',
+  '{"text":"Your alarm. Night shift tonight from {time}.","id":"znp007"}]',
+  ',"night.where":[',
+  '{"text":"the time clock, then the engine room, Deck 6","id":"i1ehd6"}]',
   ',"note":[',
   '{"text":"Glad you stayed. That\'s the whole note.","id":"ulym6p","tone":"warm","endgame":"early","tier":[3,4]},',
   '{"text":"Saved you a biscuit. Not a goodbye one. An ordinary one. Better.","id":"1t133et","tone":"warm","endgame":"early","tier":[3,4]},',
@@ -42897,6 +43000,8 @@ const MEETINGS_BAKED = {
   "lineTomasSat": {"title": "Tomas, the night before", "from": "Tomas Lind", "gist": "Tomas is on watch all day tomorrow, so he'll miss his first Line.", "lines": [{"who": "tomas", "text": "Hey. Can I complain at you for a minute? A small complaint. Medium.", "pose": "sigh"}, {"who": "tomas", "text": "I'm on watch tomorrow. All day. My first Line, and I'll be watching a corridor screen."}, {"who": "tomas", "text": "Everyone keeps saying it's the best bit of being out here. The horn, the gold, the oath.", "pose": "listen", "to": "you"}, {"choice": [{"text": "I'll bring you some punch.", "rel": {"tomas": 1}, "flavour": "practical", "flag": "line.promised", "reply": {"who": "tomas", "text": "Would you? Even if it's awful? Especially if it's awful. I want the whole thing.", "pose": "laugh"}}, {"text": "I'll tell you every bit of it.", "rel": {"tomas": 1}, "flavour": "cheer", "reply": {"who": "tomas", "text": "Every bit. Who cries, who spills, what the Captain says. I'll want it twice.", "pose": "laugh"}}, {"text": "Can't you swap?", "rel": {"tomas": 1}, "flavour": "listen", "reply": {"who": "tomas", "text": "Not on a crossing. Someone has to watch her cross.", "pose": "nod"}}]}, {"who": "tomas", "text": "Why does it matter, anyway? It's just a line. Pell says past it we're guests in someone else's sky."}, {"who": "tomas", "text": "Help a long way off, every star with somebody else's name. So the oath's about each other. Huh.", "pose": "nod"}, {"who": "tomas", "text": "Right. Climbing wall, then bed. Early start. Cross well for me, {me}."}]},
   "m21.brief": {"title": "The Monday briefing", "from": "Captain Odile Marrow", "gist": "The Monday briefing went on without you: the comet tonight, Basil's first week, the parts order. Works raised nothing this week.", "lines": [{"who": "marrow", "text": "Good morning. Sit, all of you. The coffee is on the side.", "pose": "gesture"}, {"who": "marrow", "text": "The far end is Works' chair now. Yours.", "to": "you"}, {"who": "marrow", "text": "The week ahead. Dr. Sato, the comet."}, {"who": "sato", "text": "Closest pass tonight, about half past ten. Survey will be up all night. The observation room will be full."}, {"who": "holt", "text": "The Watch has the corridors for it. Nobody on the hull, please. I mean it this time."}, {"who": "vance", "text": "Our new cadet, Basil, starts his first week today. He will ask everyone everything. Answer him."}, {"who": "nandakumar", "text": "The infirmary has flu jabs from Wednesday. You know who you are."}, {"who": "marrow", "text": "And the parts order closes today. Chief Calder?"}, {"who": "calder", "text": "Works has an item this week. It's yours to raise.", "to": "you"}, {"who": "marrow", "text": "Go on, then. What does Works need from this table?", "to": "you"}, {"choice": [{"text": "A shutdown for tomorrow.", "rel": {"marrow": 1}}, {"text": "I'm worried about one of our machines.", "rel": {"calder": 1}}, {"text": "Our parts order.", "rel": {"vance": 1}}]}, {"who": "marrow", "text": "Good. That's the week. Thank you, everyone.", "pose": "nod"}, {"who": "vance", "text": "Same time next Monday. Don't be late. I won't be."}]},
   "m21.short": {"title": "The Monday briefing", "from": "Captain Odile Marrow", "gist": "The Monday briefing went on without you. The memo is on the observation room's screen. Works raised nothing this week.", "lines": [{"who": "marrow", "text": "Morning, all. The memo's on the screen. Read it later; I'll know if you don't.", "pose": "gesture"}, {"who": "marrow", "text": "Works. Anything for this table?", "to": "you"}, {"choice": [{"text": "A shutdown for tomorrow.", "rel": {"marrow": 1}}, {"text": "I'm worried about one of our machines.", "rel": {"calder": 1}}, {"text": "Our parts order.", "rel": {"vance": 1}}]}, {"who": "marrow", "text": "Thank you. Same time next week.", "pose": "nod"}]},
+  "night.off": {"title": "Off nights", "from": "Chief Ines Calder", "gist": "Calder came down at 06:00: your three nights are done. Navarro's back Friday night. You've a cadet tomorrow.", "lines": [{"who": "calder", "text": "That's your three nights. Clean ones.", "pose": "nod", "to": "you"}, {"who": "calder", "text": "Navarro's back Friday night. You're off nights."}, {"choice": [{"text": "I could get used to nights.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Don't. Daylight's good for you.", "pose": "nod"}}, {"text": "I'm going to sleep for a week.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "Until 15:45 will do.", "pose": "nod"}}]}, {"who": "calder", "text": "You've a cadet tomorrow. Go to bed."}]},
+  "night.on": {"title": "Night shift", "from": "Chief Ines Calder", "gist": "Calder told you in person: Navarro's on leave, so you cover his nights, Monday to Wednesday. Tonight from 22:45, after the comet; then 21:00 to 06:00.", "lines": [{"who": "calder", "text": "A word, before you go.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "Navarro's on leave. Family. Someone covers his nights."}, {"who": "calder", "text": "You. Monday to Wednesday. Tonight from 22:45, then 21:00 to 06:00."}, {"choice": [{"text": "Nights. I can do nights.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "Good. Sleep this afternoon. Curtains shut, properly.", "pose": "nod"}}, {"text": "What happens down there all night?", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "The engines don't sleep. Reyes will show you.", "pose": "nod"}}]}, {"who": "calder", "text": "Watch your comet first. I'll come and get you."}]},
   "promo.ceremony": {"title": "Your commission", "from": "Captain Odile Marrow", "gist": "The Captain commissioned you as an Officer of the Wren. The framed commission is on your cabin shelf.", "lines": [{"who": "vance", "text": "Attention, please. The Captain.", "pose": "nod"}, {"who": "marrow", "text": "Thank you, Teo. Sit, everyone, if there are chairs. There never are.", "pose": "laugh"}, {"who": "marrow", "text": "Cadet. Chief Calder tells me you're ready. The Chief doesn't say that often.", "to": "you"}, {"who": "marrow", "text": "By the Survey Service, I commission you an Officer of the Wren. With all that comes with it."}, {"who": "marrow", "text": "Hold still. Pins are not my strong point.", "pin": true, "pose": "gesture"}, {"who": "marrow", "text": "There. Now, my question. What should an officer never forget?", "to": "you"}, {"choice": [{"text": "The people. Everyone aboard.", "rel": {"marrow": 2}, "mem": "promo.answer.people", "reply": {"who": "marrow", "text": "Good answer. The ship is the people in it. The rest is metal.", "pose": "nod"}}, {"text": "To ask when I don't know.", "rel": {"marrow": 2}, "mem": "promo.answer.ask", "reply": {"who": "marrow", "text": "Good answer. The ones who stop asking are the ones who worry me.", "pose": "nod"}}, {"text": "To mind the step in the ready room.", "rel": {"marrow": 1}, "mem": "promo.answer.step", "reply": {"who": "marrow", "text": "Ha. Calder warned me about you. Also correct.", "pose": "laugh"}}]}, {"who": "calder", "text": "Tier 2. On the day I said. Good.", "pose": "nod"}, {"who": "torres-zeke", "text": "Told everyone. Didn't I tell everyone?", "pose": "laugh"}, {"who": "marrow", "text": "Tea, then. Mine's the good stuff. Don't tell the galley."}, {"who": "marrow", "text": "Welcome, Officer. My door is open. Mind the step.", "to": "you"}]},
   "promo.officer": {"title": "My office, 11:00", "from": "Chief Ines Calder", "gist": "Calder promoted you to Officer: Technician, Tier 2. A badge, a collar pip, and your own cabin from tonight.", "lines": [{"who": "calder", "text": "Sit. No, stay standing. This won't take long.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "The scrubber. Filter in, fan settled, nobody had to tell you twice."}, {"who": "calder", "text": "You've passed. As of now you're an Officer. Technician, Tier 2."}, {"who": "calder", "text": "The badge. And the pip. Collar, left side. Straight, please."}, {"choice": [{"text": "Thank you, Chief. I won't let you down.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "I know. That's why you're standing here.", "pose": "nod"}}, {"text": "Me? Already?", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Already. I don't promote people to be kind. I promote them because they're ready."}}, {"text": "About time, honestly.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Hm. Torres said you'd say that. He owes me a biscuit.", "pose": "laugh"}}]}, {"who": "calder", "text": "The board leaves you Tier 2 work from tomorrow. Harder faults. Fewer carts."}, {"who": "calder", "text": "Tonight you move to 4-23. Your own cabin. I'll walk you there at five."}, {"who": "calder", "text": "The Captain commissions you tomorrow. Clean uniform. Go on, then. They're waiting outside."}]},
   "promo.result": {"title": "Your result", "from": "Chief Ines Calder", "gist": "Calder gave you your result: you passed. You're a Works Officer now, Technician, Tier 2. The Captain pins your pip this afternoon.", "lines": [{"who": "calder", "text": "Door. Thank you. Two minutes.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "Your scrubber. Four bolts, one filter, no notes from me."}, {"who": "calder", "text": "Result: passed. You're an Officer from today. Technician, Tier 2."}, {"who": "calder", "text": "Your badge. Pin it level. I'll know if it isn't."}, {"choice": [{"text": "Thank you, Chief. I'll do it properly.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "You already do. That's what the badge is for.", "pose": "nod"}}, {"text": "Really? This soon?", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Really. Soon isn't the measure. Ready is. You're ready."}}, {"text": "I wondered when you'd say so.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Hm. So did Torres. Out loud. Daily.", "pose": "nod"}}]}, {"who": "calder", "text": "The pip isn't mine to give. The Captain pins it this afternoon, observation room. Clean uniform."}, {"who": "calder", "text": "Tier 2 work on the board from tomorrow. Tonight, after dinner, I walk you to your cabin. 4-23."}, {"who": "calder", "text": "Go on, then. They're waiting outside."}]},
@@ -51885,7 +51990,7 @@ function careerSick(d, on = true) {                      // a sick day: excused 
   if (c.md > 0 && c.md === d) { c.md = 0; c.ms = Math.max(0, c.ms - 1); repAdd('works', CAREER.hitDept, null, 'sickNote'); if (SHIP.rep && SHIP.rep.ship) SHIP.rep.ship.work = Math.min(100, careerWork() + (c.mx || 0)); }   // reviewer 1d: the work it took, not more
 }
 function careerOff(d) {                                  // no shift that day: leave, sick, or let go (section 14's playerShiftOn asks)
-  const c = SHIP.career; return !!c && (c.b.includes(d) || c.s.includes(d) || (c.go != null && d >= c.go) || typeof devmodeExcused === 'function' && devmodeExcused(d) || typeof endOffDay === 'function' && endOffDay(d));   // endOffDay: your last day, leaving on the Tern (section 29b, the ending; false with it off)   // devmodeExcused: a workday Dev mode skipped (section 25; false with Dev mode off)
+  const c = SHIP.career; return !!c && (c.b.includes(d) || c.s.includes(d) || (c.go != null && d >= c.go) || typeof devmodeExcused === 'function' && devmodeExcused(d) || typeof endOffDay === 'function' && endOffDay(d) || P5_NIGHT && p5nNoDay(d));   // p5nNoDay: the morning after your night shift (28a, S6-1; false with it off)   // endOffDay: your last day, leaving on the Tern (section 29b, the ending; false with it off)   // devmodeExcused: a workday Dev mode skipped (section 25; false with Dev mode off)
 }
 const careerDeadline = d => (d - 1) * 1440 + CAREER.bookBy;
 function careerCanBook(d, now = shipNow()) {             // 'book', 'cancel' or null
@@ -51992,15 +52097,16 @@ function careerClock(now = shipNow(), quiet, hold) {     // -> 'in' | 'out' | nu
   // hold (patch #6, the Undo window): f(fx) gets the punch's side effects (the remark, the clock note) to run later; the punch itself counts at once
   const toast = quiet ? () => {} : TOAST_FN;
   const c = careerInit(now), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  if (P5_NIGHT) { const r = p5nClock(now, toast, hold); if (r !== undefined) return r; }   // a night's punch (28a, S6-1), kept apart from the day's
   if (!playerOnDuty(d)) { toast('Time clock', careerOn(d) ? 'You\'re on leave today. No need to clock in.' : sickToday(d) ? 'You\'re off sick. No need to clock in.' : 'No shift today. The clock can wait.'); return null; }
   if (!careerClockedIn(d)) {
-    if (m >= dayShiftEnd(d)) { toast('Time clock', 'The day shift is over. See you tomorrow.'); return null; }
+    if (m >= yourDayEnd(d)) { toast('Time clock', 'The day shift is over. See you tomorrow.'); return null; }
     if (m < CAREER.clockIn) { toast('Time clock', 'Too early: the clock opens at 08:00. The shift starts at 09:00.'); return null; }   // reviewer 1e
     c.ci = Math.floor(now); c.co = 0; careerStarted(now); toast('Time clock', 'Clocked in at ' + hhmm(m) + '.');
     const fx = () => { careerRemark('in', now, m - DAY_SHIFT[0]); simNote('clock', { what: 'in' }); }; if (hold) hold(fx); else fx(); return 'in';
   }
   if (careerClockedOut(d)) { toast('Time clock', 'You\'re clocked out for the day.'); return null; }
-  c.co = Math.floor(now); const h = c.co - c.ci, early = m < CAREER.earlyOut;
+  c.co = Math.floor(now); const h = c.co - c.ci, early = m < Math.min(CAREER.earlyOut, yourDayEnd(d));   // (Day 22's day part ends at 12:30 with the nights: 28a)
   if (SHIP.player.clockLog) SHIP.player.clockLog[d] = h;   // every clock-out counts for the screen's hours (0.28.65, reviewer 0607)
   if (early) repAdd(null, 0, { work: -2 }, 'early');   // a short shift: a small dip, like being late, never a missed shift (the user's choice, 0.61.18)
   toast('Time clock', 'Clocked out at ' + hhmm(m) + '. ' + Math.floor(h / 60) + 'h ' + String(h % 60).padStart(2, '0') + 'm today.' + (early ? ' An early finish: it\'s noted.' : ''));
@@ -52030,19 +52136,20 @@ function clockScreen(said, ask, after) {                // after (patch #6): 'un
   const on = playerOnDuty(d), inn = careerClockedIn(d), out = careerClockedOut(d), wd = weekday(d);
   const st = said || (!on ? (careerOn(d) ? csText('leave', 'On leave today. Enjoy it.') : sickToday(d) ? csText('sick', 'Off sick. Get well.') : csText('offday', 'Day off. No clocking today.'))
     : out ? (wd === 4 ? csText('weekend', 'Shift done. See you Monday.') : csText('done', 'Shift done. See you tomorrow.')) : inn ? friClock('onshift', C.ci % 1440) || csText('onshift', 'On shift since {time}.', { time: hhmm(C.ci % 1440) })
-    : m >= dayShiftEnd(d) ? csText('done', 'Shift done. See you tomorrow.') : csText('ready', 'Shift starts at {time}. Tap to clock in.', { time: hhmm(DAY_SHIFT[0]) }));
+    : m >= yourDayEnd(d) ? csText('done', 'Shift done. See you tomorrow.') : csText('ready', 'Shift starts at {time}. Tap to clock in.', { time: hhmm(DAY_SHIFT[0]) }));
   el.dataset.ph = SHIP.device.settings.phosphor; el.textContent = ''; el.hidden = false;
   if (CLOCK_UNDO_ON) CLOCK_DRAWN = performance.now();   // patch #6: the tap guard's start
   const x = mk('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', csText('close', 'Close')); x.onclick = e => { e.stopPropagation(); el.hidden = true; };
+  if (P5_NIGHT && p5nClockNight(now)) { el.append(x); p5nClockScreen(el, mk, (r, label, f) => { const b = mk('button', 'act', label); b.type = 'button'; b.onclick = e => { e.stopPropagation(); f(); }; r.appendChild(b); return b; }, said); return; }   // a night's hours (28a, S6-1)
   el.append(x, mk('small', '', csText('title', 'WORKS TIME CLOCK') + ' · ' + csText('sub', 'CSV Wren · Works bay')), mk('p', '', ask ? (CLOCK_UNDO_ON ? csText('earlyask', 'Clock out early? It\'ll be noted.') : csText('early', 'Before 17:00. Clock out early?')) : st));
   const today = inn ? (out ? C.co : Math.floor(now)) - C.ci : 0;
   let week = today; for (let k = d - wd; k < d; k++) week += SHIP.player.clockLog[k] || 0;
   el.append(mk('small', '', csText('hours', 'YOUR HOURS')), mk('p', '', csText('today', 'Today: {hours} h', { hours: hrs(today) }) + ' · ' + csText('week', 'This week: {hours} h', { hours: hrs(week) })));
   const row = mk('div', 'btns'), act = (label, f) => { const b = mk('button', 'act', label); b.type = 'button'; b.onclick = e => { e.stopPropagation(); if (CLOCK_UNDO_ON && performance.now() - CLOCK_DRAWN < CLOCK_TAP_GUARD) return; f(); }; row.appendChild(b); return b; };   // patch #6: taps just after a redraw are ignored
   if (CLOCK_UNDO_ON) { clockButtons(row, act, { on, inn, out, m, ask, after }); el.appendChild(row); try { (row.querySelector('button:not([disabled])') || x).focus(); } catch (e) { /* no focus */ } return; }
-  if (on && !out && !(inn ? false : m >= dayShiftEnd(d) || m < CAREER.clockIn)) {
+  if (on && !out && !(inn ? false : m >= yourDayEnd(d) || m < CAREER.clockIn)) {
     if (!inn) act(csText('in', 'Clock in'), () => { const r = careerClock(shipNow(), true); clockScreen(r ? (SHIP.time.min - DAY_SHIFT[0] > 5 ? csText('late', 'Clocked in at {time}. A little late. It happens.', { time: hhmm(SHIP.time.min) }) : csText('didin', 'Clocked in at {time}. Have a good shift.', { time: hhmm(SHIP.time.min) })) : null); });
-    else if (SHIP.time.min < dayShiftEnd(d) && !ask) act(csText('out', 'Clock out'), () => clockScreen(null, true));   // before the shift ends (17:00): asks first
+    else if (SHIP.time.min < yourDayEnd(d) && !ask) act(csText('out', 'Clock out'), () => clockScreen(null, true));   // before the shift ends (17:00): asks first
     else act(csText('out', 'Clock out'), () => { const r = careerClock(shipNow(), true); clockScreen(r ? friClock('didout', SHIP.time.min) || csText('didout', 'Clocked out at {time}. Evening\'s yours.', { time: hhmm(SHIP.time.min) }) : null); });
   }
   act(csText('close', 'Close'), () => { el.hidden = true; }).classList.add('next');
@@ -52138,7 +52245,7 @@ function careerTick(now = shipNow()) {
   const g = Math.max(0, Math.floor((d - 1) / CAREER.every)); while (c.w < g) { c.w++; c.l = Math.min(CAREER.max, c.l + 1); }
   if (c.on !== d && m >= CAREER.clockIn && m < CAREER.missBy && careerRota(d) && !careerOff(d) && careerAtWork()) c.on = d;
   if (c.ci > 0 && !(c.co > c.ci)) { const cd = Math.floor(c.ci / 1440) + 1;   // forgot to clock out: signed out at 17:00, no harm done
-    if (cd < d || m >= friAutoOut(d)) { c.co = (cd - 1) * 1440 + dayShiftEnd(cd); if (SHIP.player.clockLog) SHIP.player.clockLog[cd] = c.co - c.ci; if (cd === d) toast('Time clock', careerText(friShort(cd) ? 'clock.auto.friday' : 'clock.auto', d) || 'You forgot to clock out. The clock signed you out at ' + hhmm(dayShiftEnd(cd)) + '.'); } }   // the auto clock-out counts for the time clock screen's hours too (0.28.65)
+    if (cd < d || m >= friAutoOut(d)) { c.co = (cd - 1) * 1440 + yourDayEnd(cd); if (SHIP.player.clockLog) SHIP.player.clockLog[cd] = c.co - c.ci; if (cd === d) toast('Time clock', careerText(friShort(cd) ? 'clock.auto.friday' : 'clock.auto', d) || 'You forgot to clock out. The clock signed you out at ' + hhmm(yourDayEnd(cd)) + '.'); } }   // the auto clock-out counts for the time clock screen's hours too (0.28.65)
   if (c.rm !== d && d > CAREER.grace && m >= CAREER.clockIn && m < dayShiftEnd(d) && playerOnDuty(d) && !careerClockedIn(d)) {   // in the Works bay, not clocked in: a reminder, once a day
     let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
     if (inBay) { c.rm = d; toast('Time clock', 'Don\'t forget to clock in: the time clock is past the tool wall, by the tea corner.'); }
@@ -55550,6 +55657,7 @@ function clothesLoad(s) {
   if (Number.isInteger(x.clean) && x.clean >= 0) C.clean = Math.min(CLOTHES_FULL, x.clean);
   if (Number.isInteger(x.changed)) C.changed = x.changed;
   if (Number.isInteger(x.told)) C.told = x.told;
+  if (Number.isInteger(x.coll)) C.coll = x.coll;           // (S6-3) the day your laundry was collected from Deck 2
   C.kit = x.kit !== false;
   C.grime = isFinite(x.grime) ? grimeRound(x.grime) : 0;   // an older save: clean (0.42.46)
   if (x.said && typeof x.said === 'object') for (const k in x.said) if (isFinite(x.said[k])) C.said[k] = +x.said[k];
@@ -55565,7 +55673,8 @@ SAVE_EXTRA.push(s => { s.clothes = JSON.parse(JSON.stringify(SHIP.clothes)); s.c
 onSim('newGame', n => { SHIP.clothes = clothesBlank(!n.arrival); });   // by shuttle: one spare outfit; on Monday: the full kit
 onSim('job', n => { if (n.step === 'turnin' && SHIP.time.day === 1 && SHIP.clothes.said['d1:turnin'] === undefined) SHIP.clothes.said['d1:turnin'] = Math.floor(shipNow()); });   // Day 1's first turn-in (d1-better)   // by shuttle: one spare outfit; on Monday: the full kit
 const hamperHeld = () => CLOTHES_ON && !!SHIP.clothes.hamper && SHIP.clothes.hamper.at === 'hands';
-const clothesYesterday = () => CLOTHES_ON && SHIP.clothes.changed < SHIP.time.day && SHIP.time.min >= CLOTHES_LATE && SHIP.time.min < CLOTHES_NIGHT;
+const clothesLateAt = () => { const n = P5_NIGHT && typeof p5nClothes === 'function' ? p5nClothes() : null; return n ? n.late : CLOTHES_LATE; };   // after a night shift: four hours after your wake (28a, S6-1)
+const clothesYesterday = () => CLOTHES_ON && SHIP.clothes.changed < SHIP.time.day && SHIP.time.min >= clothesLateAt() && SHIP.time.min < CLOTHES_NIGHT;
 // your uniform's grime (0.42.46, Pillar 5's m2 "uniform" page, for the mechanic seat's 24b): SHIP.clothes.grime 0-1 (saved, two
 // decimals). Oily jobs add to it through clothesGrime(add); a change at your wardrobe while grubby always takes a clean
 // outfit (even if you've changed today) and sets it to 0; a shower leaves it. uniformState(): 'grubby' (grime >= GRIME_GRUBBY),
@@ -55590,7 +55699,7 @@ function outfitLine() {
   if (!CLOTHES_ON) return null;
   if (PLAYER_SPEC.kit) return 'Rec kit on.';   // rec kit is clean (0.81.0)
   if (uniformState() === 'grubby') return 'Dirty outfit: grubby from work. Change at your wardrobe.';
-  if (SHIP.clothes.changed < SHIP.time.day) return SHIP.time.min < CLOTHES_LATE ? 'Yesterday\'s outfit: change before 10:00.' : 'Dirty outfit: yesterday\'s. Change at your wardrobe.';
+  if (SHIP.clothes.changed < SHIP.time.day) return SHIP.time.min < clothesLateAt() ? (clothesLateAt() !== CLOTHES_LATE ? 'Yesterday\'s outfit: change before ' + hhmm(clothesLateAt()) + '.' : 'Yesterday\'s outfit: change before 10:00.') : 'Dirty outfit: yesterday\'s. Change at your wardrobe.';
   return 'Clean outfit on.';
 }
 Object.assign(PLAYER_ACTS, { clothes: { mins: 1, pose: 'browse', title: 'Changing' } });
@@ -55745,6 +55854,16 @@ function hamperUp(quiet) {                               // pick the set-down ha
   if (!quiet) toast('Laundry hamper', 'You pick your hamper up again.');
   return true;
 }
+// S6-3 (W7 for lead 41; the onboarding engineer reviews): with your quarters on Deck 2 (SHIP.works.home '2-B', 24u asks each
+// ship minute) your laundry is collected: from 10:00 what's dirty goes (a dirty hamper too, unless it's in a washer); the
+// next morning from 06:00 it's back, clean, in your wardrobe. SHIP.clothes.coll: the day it went (saved)
+function clothesCollect(now) {
+  const C = SHIP.clothes; if (!CLOTHES_ON || !C) return;
+  const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, h = C.hamper;
+  if (Number.isInteger(C.coll) && d > C.coll && m >= 360) { delete C.coll; C.clean = CLOTHES_FULL; C.kit = true;
+    if (now >= shipNow() - 1 && !(typeof sleeping !== 'undefined' && sleeping)) toast('Laundry', clothesText('laundry.collected', {}, 'Your washing is back from the laundry, clean and folded in your wardrobe.')); }
+  if (!Number.isInteger(C.coll) && m >= 600 && C.clean < CLOTHES_FULL && (!h || h.state === 'dirty' && h.at !== 'washer')) { C.coll = d; if (h) { C.hamper = null; clothesGoal(null); } }
+}
 function hamperPut() {                                   // section 15b's Put down: set the hamper down where you stand
   if (!hamperHeld()) return '';
   const h = SHIP.clothes.hamper, p = player.obj.position, f = player.face || 0;
@@ -55888,7 +56007,7 @@ function clothesFrame() {
   uniformWatch();                                        // simNote('uniform') when it turns grubby, yesterday's or clean (10:00, 22:00, a change)
   clothesDirtyTick();                                    // (playtest patch 1, #8) the dirty clothes' extra drain, shown
   if (h && h.at === 'washer' && !h.done && now >= h.until) { h.done = true; toast('Laundry', clothesText('laundry.done', {}, 'Your washing\'s done. Collect it from the laundry on Deck 4.') + ' It\'s in ' + washerName(h.washer) + '.'); }
-  if (C.changed < SHIP.time.day && C.clean > 0 && SHIP.time.min >= 6 * 60 && SHIP.time.min < CLOTHES_LATE && deckDef.num === 4 && typeof ixTip === 'function' && !ACT)
+  if (C.changed < SHIP.time.day && C.clean > 0 && SHIP.time.min >= (P5_NIGHT && typeof p5nClothes === 'function' && p5nClothes() ? p5nClothes().wake : 6 * 60) && SHIP.time.min < clothesLateAt() && deckDef.num === 4 && typeof ixTip === 'function' && !ACT)
     ixTip('clothes', clothesText('tip.clothes', {}, 'Fresh clothes every morning from your wardrobe, by the door in Bunk 1 (by 10:00 you\'re in yesterday\'s clothes). When they run out, do your laundry when you can.'));   // once (the device's tips)
   // (the "Yesterday's clothes" pop-up, once a day, is cut: the user, 0.92.3 notes, item B; the green tips say it, clothesDirtyTip)
   const stale = clothesYesterday();                     // the writers' clothes.remark lines are gated on this flag (crew notice)
@@ -57470,8 +57589,8 @@ if (P5_STEP5) {
 if (P5_STEP6) {
   CAREER_LADDER.push(
     { id: 'm22', name: 'The night shift', size: 'big', day: 22, tier: 1, rank: null, needs: null, by: ['calder'], where: { deck: 6, room: 'E' }, stages: [{ uses: 0 }] },   // 28a (S6-1): Days 22-24 at any rank; Calder's word, no training meeting
-    { id: 'm21', name: 'The Monday briefing', size: 'big', day: 22, tier: 3, rank: 'senior', needs: null, by: ['marrow'], where: { deck: 1, room: 'O' }, stages: [{ uses: 0 }] },   // 28b (S6-2): the conference table, every Monday from Day 22
     { id: 't4', name: 'Your Tier 4 test job', size: 'big', day: 22, tier: 3, rank: 'senior', needs: [{ rep: 'trusted' }, { trained: 'm19' }], by: ['calder', 'torres-zeke'], where: { deck: 6, room: 'E' }, job: 'test', stages: [{ uses: 0 }] },   // 24u (S6-3): a drive coil, slot 26
+    { id: 'm21', name: 'The Monday briefing', size: 'big', day: 22, tier: 3, rank: 'senior', needs: null, by: ['marrow'], where: { deck: 1, room: 'O' }, stages: [{ uses: 0 }] },   // 28b (S6-2): the conference table, every Monday from Day 22
     { id: 'm23', name: 'Engine work and the reactor', size: 'big', day: 22, tier: 4, rank: 'specialist', needs: { trained: 't4' }, by: ['reyes-alejandro', 'torres-zeke'], where: { deck: 6, room: 'E' }, stages: [{ uses: 0 }] },   // 28c (S6-5): night 1 with Reyes (Torres by day), slot 35
     { id: 'p6', name: 'Does it add up?', size: 'small', day: 22, tier: 4, rank: 'specialist', needs: null, by: ['reyes-alejandro', 'calder'], stages: [{ uses: 0 }] },   // 24k's slot (S6-8)
     { id: 'p7', name: 'Faded labels', size: 'small', day: 23, tier: 4, rank: 'specialist', needs: null, by: ['calder', 'torres-zeke'], stages: [{ uses: 0 }] },   // 24k's slot (S6-8)
@@ -57715,8 +57834,8 @@ function trainTick(now) {                                // once a ship minute i
     else if (r.status === 'missed') c.st = 'ask';        // offered again on your next workday
     return;
   }
-  if (c.st === 'held' && !/^t[23]$/.test(c.id) && trainShiftOver(c, now)) { worksEscortEnd(c.id); return; }   // (patch 0.92.5 #15, RV13) its job turned in, only its case open: trained, and the teacher's free to go
-  if (/^(watch|do)$/.test(c.st) && !/^t[23]$/.test(c.id) && trainShiftOver(c, now)) { trainLapse(row, c, now); return; }   // (patch 0.92.5 #15; not 24p's promotion test, nor 24u's Tier 3 test: they keep their own hours)
+  if (c.st === 'held' && !/^t[234]$/.test(c.id) && trainShiftOver(c, now)) { worksEscortEnd(c.id); return; }   // (patch 0.92.5 #15, RV13) its job turned in, only its case open: trained, and the teacher's free to go
+  if (/^(watch|do)$/.test(c.st) && !/^t[234]$/.test(c.id) && trainShiftOver(c, now)) { trainLapse(row, c, now); return; }   // (patch 0.92.5 #15; not 24p's promotion test, nor 24u's Tier 3 test: they keep their own hours)
   if (c.st === 'held') { if (!worksCaseOpen(c.j)) worksEscortEnd(c.id); return; }   // waiting on worksEscortEnd (the teacher stays with you), or its case closing
   if (c.st !== 'watch' && c.st !== 'do') return;
   const j = SHIP.jobs.find(x => x.id === c.j);
@@ -57764,7 +57883,7 @@ function worksAskSend(id, by, now) {
 // your training job turned in: trained, unless something holds the teacher with you (worksEscortHold: the designer's
 // Day 5, where Torres's scanner lesson runs on into the P3 training case); worksEscortEnd(id) then trains you
 const worksCaseOpen = jobId => { const C = SHIP.works && SHIP.works.cases; return !!(C && Array.isArray(C.open) && C.open.some(x => x && x.job === jobId)); };   // 24k's case on that job still open
-function worksDone(id, t) { const c = SHIP.works && SHIP.works.cur; if (!worksCounts(id, c)) return; if (c && c.id === id && c.hold && worksCaseOpen(c.j)) { c.st = 'held'; return; } if (id === 't2' && typeof promoPassed === 'function') { promoPassed(t); return; } if (id === 't3' && typeof puPassed === 'function') { puPassed(t); return; } worksTrained(id, t); }   // 24p: the test job is passed, not trained   // held only while its case is still open
+function worksDone(id, t) { const c = SHIP.works && SHIP.works.cur; if (!worksCounts(id, c)) return; if (c && c.id === id && c.hold && worksCaseOpen(c.j)) { c.st = 'held'; return; } if (id === 't2' && typeof promoPassed === 'function') { promoPassed(t); return; } if (id === 't3' && typeof puPassed === 'function') { puPassed(t); return; } if (id === 't4' && typeof pu4Passed === 'function') { pu4Passed(t); return; } worksTrained(id, t); }   // 24p: the test job is passed, not trained   // held only while its case is still open
 // a row's own say on whether your finished training job counts (WORK_MECH[id].counts(job); 24g's m7: only once you've
 // scanned it, p5-fix2). Not counted: no training now; trainTick sees the job done and offers the training again
 // the teacher's own job while you watch it (24 core's 'watch'): theirs, never on your board (AR2's B4, p5-fix2: taking it
@@ -57780,7 +57899,8 @@ onSim('caseCalled', n => { const c = SHIP.works && SHIP.works.cur; if (n && n.tr
 // the teacher's walk (section 14's escortPlanOf asks): lead you to the training job while you watch, follow you while you do one
 function worksEscort(p, t) {
   { const pe = p && typeof promoEscort === 'function' ? promoEscort(p, t) || promoMoveEscort(p, t) || promoCerEscort(p, t) : null; if (pe) return pe; }
-  { const pe = p && P5_STEP5 && typeof p5Escort === 'function' ? p5Escort(p, t) : null; if (pe) return pe; }   // Pillar 5 Step 5 (24u): Calder comes to find you (Power safety's ask; S5-2's promotion beats)   // 24p: Calder comes to find you for the summons; the walk to your cabin; up to the ceremony
+  { const pe = p && P5_STEP5 && typeof p5Escort === 'function' ? p5Escort(p, t) : null; if (pe) return pe; }
+  { const pe = p && P5_NIGHT && typeof p5nEscort === 'function' ? p5nEscort(p, t) : null; if (pe) return pe; }   // Step 6 (28a, S6-1): Calder comes to find you for your nights   // Pillar 5 Step 5 (24u): Calder comes to find you (Power safety's ask; S5-2's promotion beats)   // 24p: Calder comes to find you for the summons; the walk to your cabin; up to the ceremony
   const W = SHIP.works, c = W && W.cur; if (!c || !p || p.id !== c.by || (c.st !== 'watch' && c.st !== 'do' && c.st !== 'held') || worksDay(t) !== c.d) return null;
   const j = SHIP.jobs.find(x => x.id === c.j), spot = trainSpot(j);
   if (c.st === 'held') return spot ? { mode: 'follow', to: { deck: spot.deck, tile: spot.tile } } : null;   // they stay with you
@@ -57922,10 +58042,10 @@ function worksNext() {
 // the Record's first lines (section 19 asks): your rank, your Works reputation and "What's next"
 function worksRecordHead() {                             // null before SHIP.works (Days 0-1 keep the Record's old line)
   const W = SHIP.works; if (!W) return null; const tier = W.tier, v = { title: worksText('works.title.t' + tier, 'tier ' + tier), rank: worksRankTitle(W), band: worksBandWord(), next: worksNext() };
-  if (W.rank !== 'junior') v.title += ' · ' + v.rank;   // the title and rank together, never "Junior Technician · Junior Officer" (FX3, AR1)
-  const com = (W.ms.find(x => x[0] === 'commissioned') || [])[1], st = (W.ms.find(x => x[0] === 'stars') || [])[1], sen = (W.ms.find(x => x[0] === 'senior') || [])[1];   // sen: 24u's Senior Officer (S5-2)   // 24p: the ceremony; 24t: star logger (E3, 0.45.11)
+  if (W.rank !== 'junior' && !v.title.endsWith(v.rank)) v.title += ' · ' + v.rank;   // the title and rank together, never "Junior Technician · Junior Officer" (FX3, AR1); never "Engine Specialist · Specialist" (S6-3)
+  const com = (W.ms.find(x => x[0] === 'commissioned') || [])[1], spc = (W.ms.find(x => x[0] === 'specialist.badge') || [])[1], st = (W.ms.find(x => x[0] === 'stars') || [])[1], sen = (W.ms.find(x => x[0] === 'senior') || [])[1];   // sen: 24u's Senior Officer (S5-2)   // 24p: the ceremony; 24t: star logger (E3, 0.45.11)
   const ff = W.ms.filter(x => /^ff[1-3]$/.test(x[0])).sort((a, b) => a[0] < b[0] ? 1 : -1)[0], gr = ff ? +ff[0][2] : 0;   // E2's fault-finder grade (the highest)
-  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{title}. Your reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', worksText('works.record.commissioned', 'Commissioned Officer, Day {n}.', { day: com, n: com }), { n: com }) : '') + (sen ? ' ' + worksText('works.ms.senior', 'Senior Officer, Day {n}', { n: sen }) + '.' : '') + (st ? ' ' + worksText('works.ms.stars', 'Star logger, Day {n}.', { n: st }) : '') + (gr ? ' ' + worksText('works.ms.grade', 'Fault-finder grade: {grade}.', { grade: worksText('works.grade.' + gr, ['', 'Fault-finder', 'Senior fault-finder', 'Master fault-finder'][gr]), n: ff[1] }) : '') };
+  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{title}. Your reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', worksText('works.record.commissioned', 'Commissioned Officer, Day {n}.', { day: com, n: com }), { n: com }) : '') + (sen ? ' ' + worksText('works.ms.senior', 'Senior Officer, Day {n}', { n: sen }) + '.' : '') + (spc ? ' ' + worksText('works.ms.specialist', 'Senior Officer, Engine Specialist, Day {n}', { n: spc }) + '.' : '') + (st ? ' ' + worksText('works.ms.stars', 'Star logger, Day {n}.', { n: st }) : '') + (gr ? ' ' + worksText('works.ms.grade', 'Fault-finder grade: {grade}.', { grade: worksText('works.grade.' + gr, ['', 'Fault-finder', 'Senior fault-finder', 'Master fault-finder'][gr]), n: ff[1] }) : '') };
 }
 // ---- the device's Works app: Training, Work log, Tools; other sections add tabs with worksTabAdd (24k: Fault notes and
 // the Chief's notes): worksTabAdd({ id, title, order, view() -> [blocks], act?(verb, arg), badge?() -> number }); the
@@ -61813,7 +61933,7 @@ function incStart(kind, deck, t, train) {
 }
 function incPost(t, by) {                                // the open incident's job on the board
   const I = incState(), O = I && I.open; if (!O || O.j) return null;
-  const W = SHIP.works, d = worksDay(t), mine = W.tr.m6 !== undefined && playerShiftOn(d) && t - (d - 1) * 1440 < dayShiftEnd(d);
+  const W = SHIP.works, d = worksDay(t), mine = W.tr.m6 !== undefined && (playerShiftOn(d) && t - (d - 1) * 1440 < dayShiftEnd(d) || P5_NIGHT && typeof p5nIn === 'function' && p5nIn(t));   // or on your night shift (28a, S6-1)
   const j = incJob(O.kind, O.deck, t, { held: mine });
   SHIP.jobs.push(j); O.j = j.id;
   if (mine && t >= shipNow() - 1) try { toast(j.title, worksText('inc.call.' + O.kind, 'It\'s on the board, top of the list.')); } catch (e) { /* no UI */ }
@@ -63033,6 +63153,7 @@ Object.assign(PROMO, { home: '4-23', homeRoom: { deck: 4, room: 'W' }, moveWait:
 const worksHome = () => (SHIP.works && SHIP.works.home !== 'bunk' && SHIP.works.home) || null;   // your cabin's number, or null in the bunk room
 function worksHomeOpen(deck, room) {                     // is this your own cabin? (section 14's doorOpenFor)
   const W = SHIP.works; if (!W) return false;
+  if (typeof pu4HomeOpen === 'function' && pu4HomeOpen(deck, room)) return true;   // (S6-3) room B on Deck 2, once it's yours
   const walking = W.mv && !promoDone('move2');           // on the walk there: open as you arrive
   return (W.home === PROMO.home || walking) && deck === PROMO.homeRoom.deck && room === PROMO.homeRoom.room;
 }
@@ -63608,6 +63729,7 @@ function p5Escort(p, t) {                                // worksEscort's 24u pa
   const r = SHIP.occasions.filter(x => x.id === 'works.ps').pop();
   if (r && r.f && r.f.seek && !r.f.told && r.status === 'asked' && p.id === r.by && t < r.at - 20 && !(typeof promoBusy === 'function' && promoBusy())) return { mode: 'follow', to: null };
   { const w = p5TeacherWait(p, t); if (w) return w; }
+  if (P5_PROMO4) { const e = pu4Escort(p, t); if (e) return e; }   // S6-3: the Tier 4 offer
   if (P5_PROMO3 && typeof puEscort === 'function') return puEscort(p, t) || puEscort2(p, t);   // S5-2: the Tier 3 offer, your result, up to the bar
   return null;
 }
@@ -63667,7 +63789,8 @@ if (P5_STEP5) onSim('trained', n => {                    // m15 folds into m19 (
 // table's "Nearly there": the rows tick as each need holds. 24 core's Training tab asks it (one typeof-guarded line)
 function puCheck() {
   const W = SHIP.works, d = SHIP.time.day; if (!P5_STEP5 || !W || W.tier < 2) return [];
-  const T = puT3(); if (W.tier > 2 && !(P5_PROMO3 && T && T.passed && !T.toast)) return [];   // (S5-2: the rows run on to the toast)
+  const T = puT3(); if (P5_PROMO4 && W.tier === 3 && !(T && T.passed && !T.toast)) return pu4Check();   // (S6-3) a Senior's: the Tier 4 test
+  if (W.tier > 2 && !(P5_PROMO3 && T && T.passed && !T.toast)) return [];   // (S5-2: the rows run on to the toast)
   const B = WORK_BANDS[2], at = b => B.findIndex(x => x[1] === b), row3 = ladderRow('t3'), from = row3 ? row3.day : 15;
   if (W.tier === 2 && at(worksBand()) < at('steady') && !T) return [];
   const pk = (key, old, fb, v) => worksHas('pu3.check.' + key) ? worksText('pu3.check.' + key, fb, v) : worksText('works.pu.check.' + old, fb, v);   // SW3's words (pu3.check.*), else S5-1's stand-ins
@@ -63728,7 +63851,8 @@ const PU = { offerFrom: 14, testFrom: 15, seekAt: 480, partyAt: 1145, seekBy: 13
 const PU_LIVE = { seek: null, said: new Set(), talkAt: -1e9 };
 function puClean(s) {                                    // a save's pu, junk dropped
   const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi ? v : null, t = s && typeof s === 'object' && s.t3 && typeof s.t3 === 'object' ? s.t3 : null;
-  return { t3: t && int(t.day, 1, 99999) ? { day: t.day, tries: int(t.tries, 0, 99) || 0, passed: t.passed === true, res: int(t.res, 1, 99999), bar: int(t.bar, 1, 99999), toast: int(t.toast, 1, 99999), ...(int(t.cake, 0, 99999) !== null ? { cake: t.cake } : {}) } : null };   // cake: the day you had a slice (0: the window went by)
+  const t4 = typeof pu4Clean === 'function' && s && typeof s === 'object' ? pu4Clean(s.t4) : null;   // (S6-3) the Tier 4 record
+  return { ...(t4 ? { t4 } : {}), t3: t && int(t.day, 1, 99999) ? { day: t.day, tries: int(t.tries, 0, 99) || 0, passed: t.passed === true, res: int(t.res, 1, 99999), bar: int(t.bar, 1, 99999), toast: int(t.toast, 1, 99999), ...(int(t.cake, 0, 99999) !== null ? { cake: t.cake } : {}) } : null };   // cake: the day you had a slice (0: the window went by)
 }
 if (P5_PROMO3) { const s = SAVED && SAVED.ship && SAVED.ship.works; if (SHIP.works && s && s.pu) SHIP.works.pu = puClean(s.pu); }
 function puT3() { const W = SHIP.works; return W && W.pu && typeof W.pu === 'object' && W.pu.t3 && typeof W.pu.t3 === 'object' ? W.pu.t3 : null; }   // the save's Tier 3 record, or null (a function: puCheck asks it with P5_STEP5 alone)
@@ -63799,11 +63923,13 @@ function puNearTick(now, skip) {                         // nearly there: at Tru
   if (puNearMe('halloran-emeka', CHATTER_NEAR)) { const l = worksVoice('halloran-emeka', 'pu3.promo.near'); if (l) simTimeout(() => worksSayAll('halloran-emeka', l), 5600); }
 }
 function puRepUp(b1) {                                   // worksRepTell's line as an Officer at Trusted and Relied on (null: its own)
+  { const l = P5_PROMO4 ? pu4RepUp(b1) : null; if (l) return l; }   // (S6-3) a Senior's, for Tier 4
   const W = SHIP.works; if (!P5_PROMO3 || !W || W.tier !== 2 || puT3()) return null;
   return b1 === 'trusted' ? worksText('works.rep.up2.trusted', 'Now Trusted. One more step, Relied on, and you\'re up for your Tier 3 test.') : b1 === 'relied' ? worksText('works.rep.up2.relied', 'Now Relied on. That\'s the reputation your Tier 3 test needs.') : null;
 }
 function puNext(k) {                                     // worksNext's line for the Tier 3 test and the Senior Officer's beats (null: its own)
   const W = SHIP.works, T = puT3(), d = SHIP.time.day; if (!P5_PROMO3 || !W) return null;
+  if (P5_PROMO4 && (W.tier === 3 && (!T || T.toast) || W.tier === 4 && puT4())) return pu4Next(k);   // (S6-3) a Senior's: the Tier 4 test; an Engine Specialist's beats
   if (!T) { if (W.tier !== 2) return null; const B = WORK_BANDS[2], at = b => B.findIndex(x => x[1] === b);
     return at(worksBand()) >= at('steady') && !ladderNeeds({ rep: 'relied' }, W) ? worksText('next.t3.steps', 'Your Tier 3 test needs Relied on and Power safety. You\'re {band} now.', { band: worksBandWord() }, k) : null; }
   if (!T.passed) return worksText('next.wait.t3', 'Your Tier 3 test is set. The job board, the Works bay, 09:00.', null, k);
@@ -63814,8 +63940,8 @@ function puNext(k) {                                     // worksNext's line for
 }
 // the Schedule's and Tracked's rows on day d (devDay asks): the test, then (turn 3) your result, the bar and the toast
 function puItems(d) {
-  const T = P5_PROMO3 && puT3(), W = SHIP.works; if (!T || !W) return [];
-  const out = [];
+  const T = P5_PROMO3 && puT3(), W = SHIP.works; if (!T || !W) return P5_PROMO4 ? pu4Items(d) : [];
+  const out = P5_PROMO4 ? pu4Items(d) : [];   // (S6-3) the Tier 4 test's row
   if (!T.passed && W.tier === 2 && T.day === d) out.push({ from: 540, to: 900, title: worksText('pu3.row.test', 'Your Tier 3 test'), where: 'the job board, the Works bay, Deck 5', kind: 'beat', deck: 5, room: 'w' });
   const has = id => SHIP.occasions.some(r => r.id === id && Math.floor(r.at / 1440) + 1 === d);   // a booked one is the occasion's own row
   if (T.passed && !T.res && W.tier === 2 && puResultDay() === d && !has('pu3Result')) out.push({ from: PU_R.at, to: PU_R.at + 30, title: worksText('pu3.row.result', 'Your result, 08:15'), where: 'the Chief\'s office, the Works bay, Deck 5', kind: 'beat', deck: 5, room: 'o' });
@@ -63952,7 +64078,7 @@ function puMakeJob(d, at) {                              // the test job, held f
   SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
   return j.id;
 }
-const puPtr = key => key === 't3' && P5_PROMO3 ? { force: true, label: worksText('pu3.ptr.test', 'Your Tier 3 test: take it') } : null;   // 24p's promoBeatsPtr asks
+const puPtr = key => key === 't3' && P5_PROMO3 ? { force: true, label: worksText('pu3.ptr.test', 'Your Tier 3 test: take it') } : key === 't4' && P5_PROMO4 ? { force: true, label: worksText('pu4.ptr.test', 'Your Tier 4 test: take it') } : null;   // (S6-3: the Tier 4 test's)   // 24p's promoBeatsPtr asks
 // the result's day: the first workday of yours after the test with Calder on shift (Vance's a week on), as 24p's promoSummonsDay
 const PU_R = { at: 495, seek: 510, latest: 555, wake: 360 };
 function puResultDay() {
@@ -64281,6 +64407,7 @@ function puDevSteps() {                                  // [{ label, at (absolu
 }
 function puDevNext() {                                   // the Dev career arrow's next Senior Officer beat: { when, soon, g } or null
   const W = SHIP.works, T = puT3(); if (!P5_PROMO3 || !W) return null;
+  { const n4 = P5_PROMO4 ? pu4DevNext() : null; if (n4) return n4; }   // (S6-3) the Engine Specialist's next beat
   const now = Math.floor(shipNow()), d = worksDay(now), abs = (dd, m) => (dd - 1) * 1440 + m;
   if (!T) { if (W.tier !== 2 || !ladderNeeds((ladderRow('t3') || {}).needs, W)) return null;
     const dd = Math.max(d, PU.offerFrom), p = puPartyAt(dd), at = p !== null ? p + 5 : PU.seekAt;
@@ -64292,6 +64419,527 @@ function puDevNext() {                                   // the Dev career arrow
   if (!T.bar) return { when: abs(rd, promoCerTimes(rd).at), soon: 15, g: { deck: 1, place: '1-ceremony-you', room: 'O', label: 'Your bar, the observation room' } };
   if (!T.toast) { const td = puToastDay(); return td ? { when: abs(td, PU_R.toastAt), soon: 15, g: { deck: 2, place: '2-captable-1', room: 'C', label: 'The Captain\'s toast, her quarters' } } : null; }
   return null;
+}
+// ---- S6-3 (W6 for lead 41; plans/p5-step6-spec.html on claude/p5-specs, "The beats" and piece S6-3): the Engine Specialist
+// promotion, behind P5_PROMO4 (under P5_STEP6), the Senior Officer's beats again (S5-2 above) with Tier 4's own. Turn 1:
+// the offer and what comes before it. A Senior Officer, Trusted, trained in power and relays (the t4 row's needs), from
+// Friday Day 19 (the test never before Monday Day 22). On a workday Calder comes to find you from 08:00 (puEscort's
+// pattern: pu4Escort, through p5Escort) and says it in person (pu4.offer); at the weekend she waits for Sunday dinner and
+// comes to your table from 18:00 (pu4.offer.dinner: the table reacts). Then the urgent notice and her Mail as the record;
+// not found by 22:00 (awake), by Mail. Only then is the test set: SHIP.works.pu.t4.day, the first workday after today, never
+// before Day 22. Before it: the Training tab's Tier 4 rows (pu4Check, through puCheck), What's next (puNext), the
+// reputation toast at Trusted (puRepUp), the Schedule's and Tracked's rows (puItems), Torres's "Drive coils" passing you
+// at Trusted (once), up to two friends' Mail at 20:00 the evening before. Saved: SHIP.works.pu.t4 = { day, tries, passed,
+// res, badge, move } (puClean keeps it), flags pu4.*. Live only: PU4_LIVE. Nothing calls R(). Words: pu4.* (stand-ins
+// here until the head writer's content/works/promo-t4.lines and the meetings pu4.offer, pu4.offer.dinner)
+const PU4 = { offerFrom: 19, testFrom: 22, seekAt: 480, dinnerAt: 1080, seekBy: 1320, testAt: 570, testEnd: 750, luckAt: 1200 };
+const PU4_LIVE = { seek: null };
+function puT4() { const W = SHIP.works; return W && W.pu && typeof W.pu === 'object' && W.pu.t4 && typeof W.pu.t4 === 'object' ? W.pu.t4 : null; }   // the save's Tier 4 record, or null
+function pu4Clean(t) {                                   // puClean's Tier 4 part: junk dropped
+  const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi ? v : null;
+  return t && typeof t === 'object' && int(t.day, 1, 99999) ? { day: t.day, tries: int(t.tries, 0, 99) || 0, passed: t.passed === true, res: int(t.res, 1, 99999), badge: int(t.badge, 1, 99999), move: t.move && typeof t.move === 'object' ? { ready: int(t.move.ready, 1, 99999), walked: int(t.move.walked, 1, 99999), refit: t.move.refit === true } : null } : null;
+}
+function pu4Set(day) { const W = SHIP.works; if (!W.pu || typeof W.pu !== 'object') W.pu = { t3: null }; return W.pu.t4 = { day, tries: 0, passed: false, res: null, badge: null, move: null }; }
+function pu4Ready(d) {                                   // the offer's needs hold today (and it isn't made yet)
+  const W = SHIP.works, row = ladderRow('t4');
+  return !!(P5_PROMO4 && W && W.tier === 3 && W.rank === 'senior' && row && !puT4() && d >= PU4.offerFrom && ladderNeeds(row.needs, W));
+}
+const pu4TestDay = d => Math.max(PU4.testFrom, promoWorkday(d));
+const pu4DayWord = (day, d) => day === d ? 'today' : day === d + 1 ? 'tomorrow' : dayName(day);
+function pu4AtDinner() { try { return !!ACT && ACT.kind === 'eat' && deckDef.num === 3; } catch (e) { return false; } }   // at your table in the mess (Deck 3)
+function pu4Script(v, hook) {                            // a live copy of the writer's scene (else a stand-in), our hooks on it; the dinner's without anyone who isn't near
+  const id = 'pu4.offer' + v, base = MEETING_SCRIPTS[id] || MEETING_SCRIPTS['pu4.offer'] || { title: 'Your next test', from: 'Chief Ines Calder', stub: true, gist: 'Calder told you in person: your Tier 4 test is set, Monday at 09:30. A drive coil. Pass it and you\'re an Engine Specialist.',
+    lines: [{ who: 'calder', text: 'There you are. Trusted, and the relays done. That\'s all of it.', to: 'you' },
+      { who: 'calder', text: 'Monday. A drive coil. Tier 4.' },
+      { choice: [{ text: 'I\'ll be ready.', reply: { who: 'calder', text: 'I know. That\'s why it\'s Monday.' } },
+        { text: 'A drive coil? Me?', reply: { who: 'calder', text: 'With me and Torres watching. Half past nine, the engine room.' } }] },
+      ...(v === '.dinner' ? [{ who: 'pell', text: 'Torres is pretending not to be proud.' }] : [])] };
+  let lines = base.lines;
+  if (v === '.dinner') { const here = w => w === 'calder' || !!puNearMe(w, CHATTER_NEAR + 3); lines = lines.filter(l => !l.who || l.who === 'you' || here(l.who)); }
+  MEETING_SCRIPTS['pu4.live'] = { ...base, lines, onPick: (k, c) => { if (hook.pick) hook.pick(k, c); }, onEnd: f => { if (hook.end) hook.end(f); } };
+  return 'pu4.live';
+}
+function pu4Offered(now, how) {                          // the test is set; the notice and the Mail, the record of what she said
+  if (puT4()) return false;
+  const d = worksDay(now), T = pu4Set(pu4TestDay(d)), day = pu4DayWord(T.day, d), time = hhmm(PU4.testAt);
+  flagSet('pu4.told', d); PU4_LIVE.seek = null;
+  promoMail(how === 'mail' ? 'mail.pu4.offer.late' : 'mail.pu4.offer', 'Your Tier 4 test | {day}, {time}, the engine room, Deck 6. A drive coil, with Torres and me. Pass it and you\'re an Engine Specialist.', { day, time }, now);
+  if (now >= shipNow() - 1 && !promoBusy() || how === 'person') { promoNotice(worksText('pu4.offer.notice', 'Your Tier 4 test: {day}, {time}, the engine room, Deck 6.', { day, time }), worksName('calder')); flagSet('pu4.notice', d); }
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  simNote('pu4', { step: 'set', day: T.day, how });
+  return true;
+}
+function pu4OfferTick(now, skip) {                       // once a ship minute: she comes to find you (a workday from 08:00; Sunday at dinner), and tells you
+  const d = worksDay(now), m = now - (d - 1) * 1440, T = puT4();
+  if (T && flag('pu4.told') !== undefined && flag('pu4.notice') === undefined && !skip && now >= shipNow() - 1 && !promoBusy()) {   // set while you slept: the notice once you're up
+    flagSet('pu4.notice', d); promoNotice(worksText('pu4.offer.notice', 'Your Tier 4 test: {day}, {time}, the engine room, Deck 6.', { day: pu4DayWord(T.day, d), time: hhmm(PU4.testAt) }), worksName('calder')); }
+  if (!pu4Ready(d)) { PU4_LIVE.seek = null; return; }
+  const wd = (() => { try { return weekday(d); } catch (e) { return 0; } })(), work = playerShiftOn(d);
+  if (!work && wd !== 6) { PU4_LIVE.seek = null; return; }   // a day off that isn't Sunday: she waits for Sunday dinner
+  const from = work ? PU4.seekAt : PU4.dinnerAt;
+  if (m >= PU4.seekBy) { if (flag('pu4.late') !== d) { flagSet('pu4.late', d); if (!(typeof sleeping !== 'undefined' && sleeping)) pu4Offered(now, 'mail'); } return; }   // not found by 22:00 (awake): by Mail; asleep: the morning
+  if (skip || now < shipNow() - 1 || m < from) return;
+  const S = PU4_LIVE.seek;
+  if (!S) { if (!promoBusy() && guardFree(d, m, m + 15)) PU4_LIVE.seek = { by: 'calder', at: Math.floor(now), d }; return; }
+  if (typeof sleeping !== 'undefined' && sleeping) { PU4_LIVE.seek = null; return; }
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE || !puNearMe(S.by)) return;
+  const v = !work && pu4AtDinner() ? '.dinner' : '';
+  const id = pu4Script(v, { pick: k => flagSet('pu4.reply', k + 1), end: () => pu4Offered(shipNow(), 'person') });
+  S.met = true; flagSet('pu4.offer.at', v || 'day');
+  dialogueShow(id, { id: 'pu4.offer' + v, who: ['calder'], at: now, where: { any: true } });
+}
+function pu4Escort(p, t) {                               // p5Escort's Step 6 part: Calder walking over to find you
+  const S = PU4_LIVE.seek; return S && !S.met && p.id === S.by && pu4Ready(worksDay(t)) ? { mode: 'follow', to: null } : pu4Escort2(p, t);   // (turn 3: the result, the walk down, the badge)
+}
+function pu4NearTick(now, skip) {                        // nearly there: Trusted, in the bay or on Deck 6, Torres passing you (once)
+  const W = SHIP.works; if (skip || !W || W.tier !== 3 || puT4() || flag('pu4.near') || now < shipNow() - 1 || worksBand() !== 'trusted' || typeof DIALOGUE !== 'undefined' && DIALOGUE) return;
+  let deck = 0; try { deck = deckDef.num; } catch (e) { deck = 0; }
+  if (!(promoInBay() || deck === 6) || !puNearMe('torres-zeke', CHATTER_NEAR)) return;
+  flagSet('pu4.near', worksDay(now));
+  worksSayAll('torres-zeke', worksVoice('torres-zeke', 'pu4.promo.near') || ['Drive coils. Just saying.']);
+}
+function pu4BeatsTick(now) {                             // the evening before the test: up to two friends' Mail at 20:00
+  const T = puT4(), W = SHIP.works; if (!T || !W || T.passed || W.tier !== 3) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, B = (d - 1) * 1440;
+  if (T.day === d + 1 && m >= PU4.luckAt && flag('mail.pu4.luck') !== d) { flagSet('mail.pu4.luck', d);
+    promoGuests(T.day).slice(PU.guests, PU.guests + 2).forEach((id, k) => {
+      const t = worksText('mail.pu4.luck', 'Good luck | A drive coil tomorrow. You\'ve done harder things on worse days. Sleep.', null, k), i = t.indexOf(' | ');
+      mailSend({ at: Math.max(now, B + PU4.luckAt) + 10 * k, from: worksName(id), subject: i > 0 ? t.slice(0, i) : 'Good luck', body: i > 0 ? t.slice(i + 3) : t, quiet: true }); }); }
+}
+function pu4Check() {                                    // puCheck's Tier 4 rows: a Senior's, from Steady (or once the offer's made) until the test is passed
+  const W = SHIP.works, d = SHIP.time.day, T = puT4(); if (!P5_PROMO4 || !W || W.tier !== 3) return [];
+  const B = WORK_BANDS[3], at = b => B.findIndex(x => x[1] === b), row4 = ladderRow('t4');
+  if (at(worksBand()) < at('steady') && !T) return [];
+  const yes = worksText('works.promo.check.done', 'Done'), no = worksText('works.promo.check.not', 'Not yet'), row = (text, ok) => ({ text, sub: ok ? yes : no });
+  const rows = [row(worksText('pu4.check.rep', 'Trusted (you\'re {band})', { band: worksBandWord() }), ladderNeeds({ rep: 'trusted' }, W)),
+    row(worksText('pu4.check.m19', 'Power and relays'), W.tr.m19 !== undefined), row(worksText('pu4.check.day', 'The test from Day {day}', { day: row4 ? row4.day : PU4.testFrom }), !!T || d >= (row4 ? row4.day : PU4.testFrom))];
+  if (T) rows.push(T.passed ? row(worksText('pu4.check.set', 'Test job: {day}, {time}', { day: 'Day ' + T.day, time: hhmm(PU4.testAt) }), true) : { text: worksText('pu4.check.set', 'Test job: {day}, {time}', { day: pu4DayWord(T.day, d), time: hhmm(PU4.testAt) }) });
+  return [{ kind: 'text', text: worksText('pu4.check.title', 'Your promotion: the Tier 4 test'), mark: 'head' }, { kind: 'list', rows }];
+}
+function pu4RepUp(b1) {                                  // puRepUp's line as a Senior at Trusted (null: its own)
+  const W = SHIP.works; if (!P5_PROMO4 || !W || W.tier !== 3 || puT4()) return null;
+  return b1 === 'trusted' ? worksText('works.rep.up3.trusted', 'Now Trusted. That\'s the reputation your Tier 4 test needs.') : null;
+}
+function pu4Next(k) {                                    // puNext's line for the Tier 4 test (null: its own)
+  const W = SHIP.works, T = puT4(), d = SHIP.time.day; if (!P5_PROMO4 || !W || W.tier < 3) return null;
+  if (T && T.res) { const bd = !T.badge && pu4BadgeDay(); if (bd) return worksText('next.wait.t4badge', 'The Captain pins your engine badge: {day}, {time}, the observation room, Deck 1.', { day: pu4DayWord(bd, d), time: hhmm(promoCerTimes(bd).at) }, k);   // (turn 3)
+    return T.move && T.move.ready && !T.move.walked ? worksText('next.wait.t4move', 'Your quarters on Deck 2: {day}, after dinner. Vance walks you up.', { day: pu4DayWord(Math.max(d, T.move.ready), d) }, k) : null; }   // (turn 4)
+  if (!T) { const B = WORK_BANDS[3], at = b => B.findIndex(x => x[1] === b);
+    return at(worksBand()) >= at('steady') && !ladderNeeds((ladderRow('t4') || {}).needs || { rep: 'trusted' }, W) ? worksText('next.t4.steps', 'Your Tier 4 test needs Trusted and power and relays. You\'re {band} now.', { band: worksBandWord() }, k) : null; }
+  if (!T.passed) return worksText('next.wait.t4', 'Your Tier 4 test: {day}, {time}, the engine room, Deck 6.', { day: pu4DayWord(T.day, d), time: hhmm(PU4.testAt) }, k);
+  if (!T.res) { const at = pu4ResWhen(); return at === null ? null : worksText('next.wait.t4res', 'Your Tier 4 result: {day}, {time}, when your shift starts. Calder will find you.', { day: pu4DayWord(worksDay(at), d), time: hhmm(at % 1440) }, k); }
+  return null;
+}
+function pu4Items(d) {                                   // puItems' Tier 4 rows on day d
+  const T = P5_PROMO4 && puT4(), W = SHIP.works; if (!T || !W) return [];
+  const out = !T.passed && W.tier === 3 && T.day === d ? [{ from: PU4.testAt, to: PU4.testEnd, title: worksText('pu4.row.test', 'Your Tier 4 test'), where: 'the engine room, Deck 6', kind: 'beat', deck: 6, room: 'E' }] : [];
+  const at = T.passed && !T.res ? pu4ResWhen() : null; if (at !== null && worksDay(at) === d) out.push({ from: at % 1440, to: at % 1440 + 30, title: worksText('pu4.row.res', 'Your Tier 4 result: Calder finds you'), where: 'wherever you are', kind: 'beat' });   // (turn 3)
+  const bd = T.res && !T.badge ? pu4BadgeDay() : null; if (bd === d) { const C = promoCerTimes(d); out.push({ from: C.at, to: C.at + 25, title: worksText('pu4.row.badge', 'The Captain, {time}: your engine badge', { time: hhmm(C.at) }), where: 'the observation room, Deck 1', kind: 'beat', deck: 1, room: 'O' }); }
+  if (T.move && T.move.ready && !T.move.walked && d >= T.move.ready) { const f = pu4MoveFrom(d); if (f !== null) out.push({ from: d === T.move.ready ? 1140 : f, to: PU4_M.late, title: worksText('pu4.row.move', 'Vance walks you to your quarters'), where: 'Deck 2, room B', kind: 'beat', deck: 2, room: 'B' }); }   // (turn 4)
+  return out;
+}
+if (P5_PROMO4) {
+  WORK_TICKS.push((now, skip) => { pu4OfferTick(now, skip); pu4NearTick(now, skip); pu4BeatsTick(now); });
+}
+// ---- S6-3 turn 2: the Tier 4 test (the beats "The test" and "Passing"). On its day (Monday Day 22) the ladder opens t4
+// (WORK_MECH.t4.offer, as t3's): a Tier 4 job held for you from 09:30 to 12:30 (slot 26, kind 'tier4', walked stop by stop)
+// on whichever drive coil is in the worst state, its coil winding set aside (promoPartsAside). Calder follows you (24 core's
+// escort for a training's 'do'); Torres waits in the engine room while you hold it. Its stops, at the coil's panel (S6-4's,
+// once it's built; until then the engine room's work place by that coil): take the coil off the cycle, read the windings,
+// wind in the new one, bring it back into the cycle; Calder and Torres say each step (worksTeach: train.t4.*). Turned in:
+// passed (pu4Passed: "Your result when your shift starts. I'll find you.", Torres's two words, the Mail, the notice).
+// Never failed: not taken by 11:30, or the shift over undone, it's set again in two workdays. On the day: the notice once
+// you're up, a level 1 arrow to the board from 09:00 and to each step, the board's ring "Your Tier 4 test: take it"
+// (puPtr), an hourly notice while you hold another job. The result itself comes with the night (turn 3)
+const PU4_T = { jobAt: 570, until: 750, slot: 26, again: 2, keep: 95, coils: ['6-coil-1', '6-coil-2', '6-coil-3'], places: ['6-engine-1', '6-engine-2', '6-engine-3'], kind: 'tier4', part: 'coil winding' };
+function pu4Coil() {                                     // the drive coil in the worst state
+  try { machinesNow(); } catch (e) { /* on paper */ }
+  const ms = PU4_T.coils.filter(id => typeof machineById === 'function' && machineById(id));
+  return ms.sort((a, b) => ((SHIP.machines[a] || {}).cond || 100) - ((SHIP.machines[b] || {}).cond || 100) || (a < b ? -1 : 1))[0] || null;
+}
+const pu4Place = mid => (typeof panelPlace === 'function' && panelPlace(mid)) || PU4_T.places[Math.max(0, PU4_T.coils.indexOf(mid))];   // the coil's panel (S6-4), else the work place by it
+function pu4TestJob() { const W = SHIP.works, c = W && W.cur; return c && c.id === 't4' && c.st === 'do' && c.j ? (SHIP.jobs || []).find(x => x.id === c.j) || null : null; }
+function pu4Stops(j) {                                   // the coil's stops (after the winding's fetch: jobStopsOf puts it first)
+  const pp = pu4Place(j.mach); if (!pp || !placeById(pp)) return [];
+  const n = PU4_T.coils.indexOf(j.mach) + 1, st = (tag, how, mins, opts) => ({ deck: 6, placeId: pp, mins, tag, how, ...(opts ? { opts } : {}) });
+  return [st('isolate', 'look', 1, { secs: 4, title: worksText('pu4.ptr.isolate', 'Take coil {n} off the cycle', { n }), text: worksText('pu4.isolate.text', 'Torres eases the drive back. Coil {n} goes dark; the other two carry it.', { n }) }),
+    st('read', 'look', 1, { secs: 4, title: worksText('pu4.ptr.read', 'Read the windings'), text: worksText('pu4.read.text', 'The meter on each winding. The third reads low and warm: that\'s the one.') }),
+    st('wind', 'hold', 8), st('cycle', 'look', 1, { secs: 4, title: worksText('pu4.ptr.cycle', 'Bring it back into the cycle'), text: worksText('pu4.cycle.text', 'Coil {n} warms, catches the beat, and glows in turn with the others.', { n }) })];
+}
+function pu4StepDone(j, k) {                             // in order; Calder and Torres say each step
+  const all = jobStops(j), st = all[k]; if (!st) return true;
+  const done = new Set(j.stepsDone || []); if (k > 0 && !done.has(k - 1)) return false;
+  const c = SHIP.works && SHIP.works.cur, by = c && c.id === 't4' && c.by || 'calder';
+  if (st.step === 'isolate') worksTeach('t4', 'torres-zeke', 'isolate', ['Easy. Let the other two take it. Watch the hum drop.']);
+  if (st.step === 'read') worksTeach('t4', by, 'read', ['Every winding. Not just the one you think it is.']);
+  if (st.step === 'wind') worksTeach('t4', 'torres-zeke', 'wind', ['Tight. Even. Like you\'re winding a clock for your gran.']);
+  if (st.step === 'cycle') worksTeach('t4', by, 'cycle', ['Bring it back slowly. Let it find the beat.']);
+  return true;
+}
+function pu4JobDone(j, t, by) {                          // the coil put right
+  const s = SHIP.machines && SHIP.machines[j.mach]; if (s) { s.cond = Math.max(s.cond, PU4_T.keep); s.state = machineState(s.cond); }
+  if (by === 'you') worksTeach('t4', 'calder', 'done', ['Turn it in. That\'s the job.']);
+  simNote('pu4', { step: 'work', job: j.id, by: by || null });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+function pu4MakeJob(d, at) {                             // the test job, held for you in slot 26 (one that's there already, if it is)
+  const old = (SHIP.jobs || []).find(x => x.reserved === PU4_T.slot && x.status !== 'done' && heldForYou(x)); if (old) return old.id;
+  const mid = pu4Coil(); if (!mid || !placeById(pu4Place(mid))) return null;
+  const n = PU4_T.coils.indexOf(mid) + 1, t = (d - 1) * 1440 + at, j = jobMake(PU4_T.kind, { id: PU4_T.kind + ':' + mid + '@' + Math.floor(t / 60), mach: mid, deck: 6, room: 'E', h: Math.floor(t / 60), tier: 4, urgency: 1,
+    title: worksText('pu4.card', 'Your Tier 4 test: drive coil {n}, Deck 6', { n }), reserved: PU4_T.slot, until: (d - 1) * 1440 + PU4_T.until, train: 't4' });
+  j.posted = j.found = t; j.stops = kindStops(j).map(plainStop);
+  SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  return j.id;
+}
+function pu4Passed(t) {                                  // turned in: passed, whatever it took (24 core's worksDone asks)
+  const W = SHIP.works, T = puT4(), c = W && W.cur; if (!W || !T || T.passed) return false;
+  const by = (c && c.by) || 'calder', d = worksDay(t);
+  T.passed = true; T.day = d; W.tr.t4 = d; if (c && c.id === 't4') W.cur = null;
+  worksSayAll(by, worksVoice(by, 'pu4.promo.passed') || [worksText('pu4.passed.say', 'That\'s the test. Your result when your shift starts. I\'ll find you.')]);
+  try { if (puNearMe('torres-zeke', CHATTER_NEAR)) simTimeout(() => worksSayAll('torres-zeke', worksVoice('torres-zeke', 'pu4.promo.passed') || ['Proper job.']), 6000); } catch (e) { /* not in play */ }
+  flagSet('pu4.passed', d);
+  promoMail('mail.pu4.passed', 'Your test | Done. Your result when your shift starts. I\'ll find you.', null, t);
+  if (t >= shipNow() - 1) promoNotice(worksText('pu4.passed.notice', 'Your Tier 4 test is done. Your result: Calder will find you when your shift starts.'), worksName(by));
+  try { crewSceneEnd('torres-zeke'); } catch (e) { /* none */ }
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  simNote('pu4', { step: 'passed', day: d });
+  return true;
+}
+function pu4Delay(now) {                                 // not taken in time, or the shift over undone: set again in two workdays
+  const W = SHIP.works, c = W && W.cur, T = puT4(); if (!c || c.id !== 't4' || c.st !== 'again' || !T || T.passed) return;
+  const d = worksDay(now); T.day = promoWorkday(d, PU4_T.again); c.st = 'ask'; c.d = d; c.j = null;
+  SHIP.jobs = SHIP.jobs.filter(j => !(j.kind === PU4_T.kind && j.status !== 'done' && j.claimedBy !== 'you'));
+  const day = dayName(T.day), time = hhmm(PU4.testAt);
+  worksSayAll(c.by || 'calder', worksVoice(c.by || 'calder', 'train.t4.again') || [worksText('pu4.again.say', 'Not today. That\'s not a fail. We go again in two days.')]);
+  promoMail('mail.pu4.again', 'Again | Not today. Read every winding, then wind it tight and even. We go again {day}, {time}.', { day, time }, now);
+  if (now >= shipNow() - 1) promoNotice(worksText('pu4.again.notice', 'Your Tier 4 test is set again: {day}, {time}, the engine room.', { day, time }), worksName('calder'));
+  flagSet('pu4.morning', null);
+  simNote('pu4', { step: 'again', day: T.day });
+}
+function pu4TestGuide(now) {                             // the arrows: level 1 to the board from 09:00, then each step
+  const W = SHIP.works, T = puT4(); if (!W || !T || T.passed || W.tier !== 3 || typeof guideAsk !== 'function') return;
+  const d = worksDay(now), B = (d - 1) * 1440; if (T.day !== d || now < B + PU4_T.jobAt - 30) return;
+  const j = (SHIP.jobs || []).find(x => x.kind === PU4_T.kind && x.status !== 'done' && x.reserved === PU4_T.slot && (x.claimedBy === 'you' || heldForYou(x))), owner = '24u (S6-3)';
+  if (!j || j.found > now) { if (now < B + PU4_T.jobAt + 15) guideAsk({ id: 'pu4:testday:' + d, level: 1, owner, from: B + PU4_T.jobAt - 30, until: B + PU4_T.jobAt + 15,
+    goal: () => ({ deck: 5, ...(promoInBay() ? { item: /job board/i } : {}), room: 'w', label: worksText('pu4.ptr.day', 'Your Tier 4 test, {time}: the job board', { time: hhmm(PU4.testAt) }) }),
+    done: () => !!puT4() && puT4().passed || (SHIP.jobs || []).some(x => x.kind === PU4_T.kind && x.reserved === PU4_T.slot && x.status !== 'done' && !(x.found > Math.floor(shipNow()))) }); return; }
+  let mj = null; try { mj = myJob(); } catch (e) { mj = null; }
+  const onBoard = !j.claimedBy && !(j.found > now), other = mj && mj.id !== j.id && !jobSide(mj) && !mj.workDone;
+  if (onBoard) guideAsk({ id: (other ? 'pu4:drop:' : 'pu4:test:') + d, level: 1, owner, until: j.until || B + PU4_T.until,
+    goal: () => ({ deck: 5, item: /job board/i, room: 'w', label: other ? worksText('pu4.ptr.drop', 'Your Tier 4 test is waiting: drop this job at the board') : worksText('pu4.ptr.test', 'Your Tier 4 test: take it') }), done: () => guideTaken(j.id) });
+  if (j.claimedBy !== 'you') return;
+  const label = () => { const nx = !j.workDone && typeof ixNextStop === 'function' ? ixNextStop(j) : null, s = nx && nx.s;
+    if (j.workDone) return { deck: 5, item: /job board/i, room: 'w', label: worksText('pu4.ptr.turnin', 'Turn it in') };
+    if (!s) return null;
+    const lab = { fetch: worksText('pu4.ptr.fetch', 'Your Tier 4 test: a coil winding from main storage'), isolate: worksText('pu4.ptr.isolate', 'Take coil {n} off the cycle', { n: PU4_T.coils.indexOf(j.mach) + 1 }), read: worksText('pu4.ptr.read', 'Read the windings'), wind: worksText('pu4.ptr.wind', 'Wind in the new one'), cycle: worksText('pu4.ptr.cycle', 'Bring it back into the cycle') }[s.step];
+    return lab && s.places[0] ? { deck: s.deck, place: s.places[0], label: lab } : null; };
+  guideAsk({ id: 'pu4:step:' + d, level: 1, owner, until: B + dayShiftEnd(d) + 60, goal: label, done: () => j.status === 'done' || j.claimedBy !== 'you' });
+}
+function pu4TestBeats(now, skip) {                       // the morning's notice, Torres in the engine room while you hold it, the hourly notice while you hold another job
+  const W = SHIP.works, T = puT4(); if (!W || !T || T.passed || W.tier !== 3) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, live = !skip && now >= shipNow() - 1; if (T.day !== d || !live) return;
+  if (m >= 360 && m < PU4_T.jobAt && flag('pu4.morning') !== d && !promoBusy()) { flagSet('pu4.morning', d); promoNotice(worksText('pu4.morning.notice', 'Today: your Tier 4 test, {time}. It goes up on the job board in the Works bay.', { time: hhmm(PU4.testAt) })); }
+  const j = pu4TestJob();
+  if (j && j.claimedBy === 'you' && !j.workDone && !PU4_LIVE.torres) { PU4_LIVE.torres = 1; try { crewScene('torres-zeke', { mode: 'wait', to: pu4Place(j.mach) === PU4_T.places[1] ? PU4_T.places[0] : PU4_T.places[1], until: (d - 1) * 1440 + PU4_T.until + 60 }); } catch (e) { /* no scene */ } }
+  if (j && !j.claimedBy && !(j.found > now)) { let mj = null; try { mj = myJob(); } catch (e) { mj = null; }
+    if (mj && mj.id !== j.id && flag('pu4.busy') !== Math.floor(now / 60)) { flagSet('pu4.busy', Math.floor(now / 60));
+      promoNotice(worksText('pu4.busy.notice', 'Your Tier 4 test waits on the job board till {time}. Turn in or drop this job first.', { time: hhmm(PU4_T.until - 60) }), worksName('calder')); } }
+  if (j) promoPartsAside(j);
+}
+if (P5_PROMO4) {
+  jobKindAdd(PU4_T.kind, { tier: 4, work: 0, text: 'Your Tier 4 test', parts: [PU4_T.part], stops: pu4Stops, stepDone: pu4StepDone, done: pu4JobDone, veto: true, crew: { can: () => false, mins: 60 } });
+  WORK_MECH.t4 = {
+    offer(row, c, d, t) {                                // the test, on its day: the job held for you, Calder with you
+      const T = puT4(); if (!T || T.passed || d < T.day) return false;
+      const m = t - (d - 1) * 1440; if (m >= PU4_T.until - 60) return false;
+      const id = pu4MakeJob(d, Math.max(m, PU4_T.jobAt)); if (!id) return false;
+      c.st = 'do'; c.j = id; c.occ = null; c.told = true; T.tries++; T.day = d;
+      promoPartsAside(SHIP.jobs.find(x => x.id === id));
+      simNote('pu4', { step: 'start', day: d, job: id });
+      return true;
+    },
+    noJob: false,
+  };
+  onSim('job', n => {                                    // Calder at the board as you take it
+    const c = SHIP.works && SHIP.works.cur; if (!n || !c || c.id !== 't4' || c.st !== 'do' || n.id !== c.j || n.step !== 'take') return;
+    worksTeach('t4', c.by, 'take', ['That\'s yours. Deck 6. Bring a winding.']);
+  });
+  WORK_TICKS.push((now, skip) => { pu4Delay(now); pu4TestBeats(now, skip); if (!skip) pu4TestGuide(now); });
+}
+// ---- S6-3 turn 3 (W7): your result and the Captain's badge (the beats "The result at the comet" and "The badge"). The
+// result when your shift starts (pu4ResWhen): the first night's start after the test, 5 minutes before (Day 22: 22:40, at
+// the comet), else the next day shift's. Calder comes to find you wherever you are (pu4Escort follows you) and tells you
+// (pu4.stairs; Mail as the record); asleep, she knocks (a notice: the night is yours); not found in 30 minutes, by Mail.
+// pu4Promote: Tier 4, rank 'specialist', xp from 0, the milestone ['specialist', day]. With the nights on (P5_NIGHT) she
+// then walks you down to the engine room (a level 1 arrow, "Go with Calder"). The badge: the Captain's, the next
+// afternoon at 16:30 (promoCerTimes) in the observation room with Calder, Torres and Vance (OCCASIONS.pu4Badge, script
+// pu4.badge, the pin pose); her invite by Mail when it's booked, the notice as you wake, the notice at 16:00 "Go now", a
+// level 1 arrow from 16:15; not there by 16:45 awake, Calder walks you up; asleep at 16:45, the Captain waits until your
+// next waking afternoon (flag pu4.badge.wait, at most 3 times); never missed: by Mail by 18:15. At its end (pu4Badge):
+// the milestone ['specialist.badge', day] ("Senior Officer, Engine Specialist" on the Record), the badge's certificate on
+// your shelf, Calder's word that your Deck 2 quarters are ready for Thursday (T.move.ready, the move's day) and her Mail
+const PU4_R = { early: 5, find: 30, walk: 45, badgeWait: 3 };
+OCCASIONS.pu4Badge = { title: 'Your engine badge', kind: 'meeting', by: 'marrow', with: ['vance', 'calder', 'torres-zeke'], deck: 1, room: 'O', at: 990, len: 25, script: 'pu4.badge', due: () => false, mail: null };
+function pu4ResWhen() {                                  // when your result comes (absolute minutes): your shift's start after the test day's 12:30
+  const T = puT4(); if (!T || !T.passed) return null;
+  const t = (T.day - 1) * 1440 + PU4_T.until;
+  for (let d = T.day; d < T.day + 14; d++) { const B = (d - 1) * 1440, n = P5_NIGHTS[d];   // the nights are fixed by the day (section 28)
+    if (d > T.day && playerShiftOn(d) && !(n && P5_NIGHT)) return B + DAY_SHIFT[0];
+    if (n && B + n[0] - PU4_R.early >= t) return B + n[0] - PU4_R.early; }
+  return T.day * 1440 + DAY_SHIFT[0];
+}
+const pu4MoveDay = d => { for (let k = d + 1; k < d + 8; k++) { try { if (weekday(k) === 3) return k; } catch (e) { return d + 2; } } return d + 2; };   // the Thursday after
+function pu4BadgeDay() {                                 // the Captain's afternoon: the day after a night's result (the same day after a morning's), later if you slept through it
+  const T = puT4(); if (!T || !T.res) return null;
+  const at = pu4ResWhen(), m = at === null ? 0 : at - (T.res - 1) * 1440;
+  return T.res + (m >= 720 || m < 0 ? 1 : 0) + Math.min(PU4_R.badgeWait, +flag('pu4.badge.wait') || 0);
+}
+function pu4ResultScript() {                             // the writer's pu4.stairs, or a stand-in; our hook on it
+  if (!MEETING_SCRIPTS['pu4.stairs']) MEETING_SCRIPTS['pu4.stairs'] = { title: 'Your result', from: 'Chief Ines Calder', stub: true, gist: 'Calder found you and told you: you passed. You\'re an Engine Specialist, Tier 4. The badge is the Captain\'s.',
+    lines: [{ who: 'calder', text: 'There you are. Walk with me.', to: 'you' }, { who: 'calder', text: 'Mind the step. You passed, by the way. Engine Specialist.', pose: 'nod' },
+      { who: 'calder', text: 'The badge is the Captain\'s, tomorrow. Reyes has the kettle on.' },
+      { choice: [{ text: 'Engine Specialist.', reply: { who: 'calder', text: 'Get used to it. Come on.' } }] }] };
+  puHook('pu4.stairs', k => flagSet('pu4.reply.res', k + 1), () => pu4Promote(shipNow(), 'met'));
+  return 'pu4.stairs';
+}
+function pu4Promote(now, how) {                          // you're an Engine Specialist
+  const W = SHIP.works, T = puT4(); if (!W || W.tier !== 3 || !T || !T.passed || T.res) return false;
+  const d = worksDay(now); W.tier = 4; W.rank = 'specialist'; W.xp = 0; T.res = d;
+  PU4_LIVE.rseek = null;
+  if (!W.ms.some(x => x[0] === 'specialist')) W.ms.push(['specialist', d]);
+  promoMail('mail.pu4.promo', 'Your result | You passed. As of tonight you\'re an Engine Specialist, Tier 4. The Captain pins your badge herself.', null, now);
+  if (how === 'knock' || how !== 'met' && now >= shipNow() - 1) promoNotice(how === 'knock' ? worksText('pu4.knock.notice', 'A knock: Calder. "You passed. Engine Specialist. Up you get, the night\'s yours."') : worksText('pu4.res.notice', 'Your Tier 4 result: you passed. You\'re an Engine Specialist.'), worksName('calder'));
+  if (typeof newsAdd === 'function') try { newsAdd({ id: 'pu4.specialist', about: 'you', lines: [worksText('pu4.news', '{me} is an Engine Specialist as of tonight. Drive coils, no less.')], seed: ['dept:works'], kind: 'gossip' }); } catch (e) { /* no social */ }
+  pu4BadgeBook(now);
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;       // the board: Tier 4 jobs for you now
+  simNote('promoted', { tier: 4, rank: 'specialist', how, t: now });
+  return true;
+}
+function pu4ResultTick(now, skip) {                      // she comes to find you when your shift starts; asleep, she knocks; not found in 30 minutes, by Mail
+  const W = SHIP.works, T = puT4(); if (!W || W.tier !== 3 || !T || !T.passed || T.res) return;
+  const at = pu4ResWhen(), live = !skip && now >= shipNow() - 1; if (at === null || now < at) return;
+  const S = PU4_LIVE.rseek, L = PU4_LIVE.walk, talk = typeof DIALOGUE !== 'undefined' && DIALOGUE;
+  if (S && S.said) return;                               // her scene is on: its end promotes you
+  if (now >= (S && S.met && L ? L.until : at + PU4_R.find) + (S && S.met ? 15 : 0)) { pu4Promote(Math.min(now, at + PU4_R.find), 'mail'); PU4_LIVE.walk = null; return; }   // not found (or the walk never got there): by Mail
+  if (!(S && S.met) && typeof sleeping !== 'undefined' && sleeping) { pu4Promote(now, 'knock'); return; }
+  if (!live) return;
+  if (!S) { PU4_LIVE.rseek = { by: 'calder', at: Math.floor(now) }; return; }
+  const say = () => { S.said = true; dialogueShow(pu4ResultScript(), { id: 'pu4.stairs', who: ['calder'], at: now, where: { any: true } }); };
+  if (!S.met) { if (talk || !puNearMe('calder')) return;
+    try { crewSceneEnd('calder'); } catch (e) { /* none */ }
+    S.met = true; const d = worksDay(now), N = P5_NIGHT && P5_NIGHTS[d];
+    if (!N) { say(); return; }                           // no night tonight: she says it where she found you
+    PU4_LIVE.walk = { d, until: (d - 1) * 1440 + N[0] + PU4_R.walk };   // the night's yours: she walks you down and says it on the way
+    worksSayAll('calder', worksVoice('calder', 'pu4.promo.fetch') || [worksText('pu4.fetch.say', 'There you are. Walk with me: the night\'s ours.')]); return; }
+  let deck = 0, rm = ''; try { deck = deckDef.num; rm = roomAt(...player.here()); } catch (e) { deck = 0; }
+  if (!talk && puNearMe('calder', CHATTER_NEAR) && (rm === '@' || deck === 6 || now >= L.until - 10)) say();   // on the stairs (the lift lobby), or on Deck 6
+}
+function pu4Fetches(now) {                               // 28a asks (night 1's notice): Calder's coming for you with your result, or walking you down
+  const T = P5_PROMO4 && puT4(); if (PU4_LIVE.walk) return true; if (!T || !T.passed || T.res) return false;
+  const at = pu4ResWhen(); return at !== null && now >= at && now < at + PU4_R.find && !(typeof sleeping !== 'undefined' && sleeping);
+}
+function pu4BadgeScript() {                              // the writer's pu4.badge, or a stand-in; our hook on it
+  if (!MEETING_SCRIPTS['pu4.badge']) MEETING_SCRIPTS['pu4.badge'] = { title: 'Your engine badge', from: 'Captain Odile Marrow', stub: true, gist: 'The Captain pinned your engine badge in the observation room. Calder told you your Deck 2 quarters are ready for Thursday.',
+    lines: [{ who: 'vance', text: 'Attention, please. The Captain.' }, { who: 'marrow', text: 'A drive coil, on your first try, with these two watching. I\'d have shaken.', to: 'you', pose: 'gesture' },
+      { who: 'marrow', text: 'Hold still. There. Engine Specialist.', pin: true }, { who: 'torres-zeke', text: 'Proper job.' },
+      { who: 'calder', text: 'And your quarters on Deck 2 are ready for Thursday. Vance will walk you up.', to: 'you' },
+      { choice: [{ text: 'Thank you, Captain.', reply: { who: 'marrow', text: 'Congratulations, Engine Specialist. The bridge, next door, when you\'re ready.' } }] }] };
+  return puHook('pu4.badge', null, () => pu4Badge(shipNow(), 'met'));
+}
+for (const r of SHIP.occasions) { if (r.id === 'pu4Badge') pu4BadgeScript(); }   // a reload with it booked: its scene hooked
+function pu4BadgeBook(now) {                             // booked with your result: the Captain's invite by Mail
+  const d = pu4BadgeDay(); if (!d) return null; const T = promoCerTimes(d);
+  if (SHIP.occasions.some(x => x.id === 'pu4Badge' && x.status === 'asked' && Math.floor(x.at / 1440) + 1 === d)) return null;
+  pu4BadgeScript(); OCCASIONS.pu4Badge.at = T.at;
+  const r = occasionAdd('pu4Badge', (d - 1) * 1440 + T.at, true, OCCASIONS.pu4Badge.len); if (!r) return null;
+  try { const a = apptList().find(x => x.occ === r.key); if (a && !a.places) a.places = { marrow: '1-ceremony-captain', vance: '1-ceremony-guest-1', calder: '1-ceremony-guest-2', 'torres-zeke': '1-ceremony-guest-3' }; } catch (e) { /* no appointments */ }
+  puMailCap('mail.pu4.invite', 'Your badge, {day} {time} | Chief Calder tells me you\'ve passed. I\'d like to pin your engine badge myself: {day}, {time}, the observation room, Deck 1.', { day: pu4DayWord(d, worksDay(now)), time: hhmm(T.at) }, now);
+  return r;
+}
+function pu4Badge(now, how) {                            // the badge is given: once
+  const W = SHIP.works, T = puT4(); if (!W || W.tier < 4 || !T || !T.res || T.badge) return false;
+  const d = worksDay(now), r = SHIP.occasions.find(x => x.id === 'pu4Badge' && x.status === 'asked'); if (r) r.met = true;
+  T.badge = d; if (!W.ms.some(x => x[0] === 'specialist.badge')) W.ms.push(['specialist.badge', d]);
+  if (!T.move) T.move = { ready: pu4MoveDay(d), walked: null, refit: false };
+  puKeepsake(flag('pu4.signed') !== undefined ? worksText('pu4.keepsake.signed', 'Engine Specialist\'s certificate, signed by both engine crews') : worksText('pu4.keepsake', 'Engine Specialist\'s certificate'));
+  if (how === 'mail') puMailCap('mail.pu4.badge', 'Your badge | We missed you this afternoon. Your engine badge is on your cabin shelf with the certificate. Congratulations, Engine Specialist.', null, now);
+  promoMail('mail.pu4.quarters', 'Your quarters | Deck 2, room B, is yours from {day}. Vance will walk you up after dinner. Bring nothing: your things will be there.', { day: dayName(T.move.ready) }, now);
+  if (how === 'mail' && now >= shipNow() - 1) promoNotice(worksText('pu4.quarters.notice', 'Your Deck 2 quarters are ready for {day}. Vance walks you up after dinner.', { day: dayName(T.move.ready) }), worksName('calder'));
+  simNote('pu4', { step: 'badge', day: d, how });
+  return true;
+}
+function pu4BadgeTick(now, skip) {                       // the notice as you wake, at 16:00 "Go now", Calder walks you up at 16:45; asleep, the Captain waits; by Mail by 18:15
+  const W = SHIP.works, T = puT4(); if (!W || W.tier < 4 || !T || !T.res || T.badge) return;
+  const bd = pu4BadgeDay(), d = worksDay(now), m = now - (d - 1) * 1440, C = promoCerTimes(bd), live = !skip && now >= shipNow() - 1;
+  if (d < bd) return;
+  if (d > bd || m >= C.at + PU_R.barBy) { pu4Badge(Math.min(now, (bd - 1) * 1440 + C.at + PU_R.barBy), 'mail'); return; }
+  let r = SHIP.occasions.find(x => x.id === 'pu4Badge' && Math.floor(x.at / 1440) + 1 === bd); if (!r) { r = pu4BadgeBook(now); if (!r) return; }
+  const f = r.f || (r.f = {});
+  if (m >= C.at + PU_R.barSeek && !r.met && typeof sleeping !== 'undefined' && sleeping && (+flag('pu4.badge.wait') || 0) < PU4_R.badgeWait) {   // slept through it: the Captain waits until your next waking afternoon
+    flagSet('pu4.badge.wait', (+flag('pu4.badge.wait') || 0) + 1); r.status = 'missed'; f.wait = 1; pu4BadgeBook(now); return; }
+  if (m >= 360 && m < C.at - 30 && live && !f.wake && !promoBusy()) { f.wake = 1;
+    promoNotice(worksText('pu4.badge.wake', 'Today at {time}: the Captain pins your engine badge, the observation room, Deck 1.', { time: hhmm(C.at) }), 'Captain Odile Marrow'); }
+  if (m >= C.at - 30 && m < C.at && live && !f.notice && !promoBusy()) { f.notice = f.wake = 1;
+    promoNotice(worksText('pu4.badge.notice', 'The Captain pins your engine badge at {time}: the observation room, Deck 1. Go now.', { time: hhmm(C.at) }), 'Captain Odile Marrow'); }
+  if (m >= C.at + PU_R.barSeek && !f.seek && !r.met && r.status === 'asked' && live) { f.seek = now; r.len = C.late - C.at + 20;   // she walks you up; the room waits for you
+    worksSayAll('calder', worksVoice('calder', 'promo.fetch.ceremony') || ['There you are. The Captain\'s waiting. Come on.']); }
+}
+function pu4BeatsGuide(now) {                            // the level 1 arrows: down to the engine room with Calder; the badge
+  if (typeof guideAsk !== 'function') return; const owner = '24u (S6-3)', L = PU4_LIVE.walk;
+  if (L) { let rm = ''; try { rm = deckDef.num === 6 ? roomAt(...player.here()) : ''; } catch (e) { rm = ''; }   // the walk's over in the engine room (28a's arrows lead it: clock in, then down)
+    if (now >= L.until || (rm === 'E' || rm === 'K') && (puT4() || {}).res) PU4_LIVE.walk = null;
+    else if (!(P5_NIGHT && typeof p5nNight === 'function')) guideAsk({ id: 'pu4:walk:' + L.d, level: 1, owner, until: L.until, goal: () => ({ deck: 6, room: 'E', label: worksText('pu4.ptr.walk', 'Go with Calder: the engine room') }), done: () => !PU4_LIVE.walk }); }
+  const br = SHIP.occasions.find(x => x.id === 'pu4Badge' && x.status === 'asked' && !x.met);
+  if (br && now >= br.at - 15) guideAsk({ id: 'pu4:badge', level: 1, owner, from: br.at - 15, until: br.at + br.len,
+    goal: () => ({ deck: 1, room: 'O', place: '1-ceremony-you', label: worksText('pu4.ptr.badge', 'Your engine badge: the observation room') + ', ' + hhmm(br.at % 1440) }), done: () => !!br.met || br.status !== 'asked' || !!(puT4() || {}).badge });
+}
+function pu4Escort2(p, t) {                              // pu4Escort's later beats: she comes to find you for your result, walks you down, walks you up to the badge
+  const S = PU4_LIVE.rseek; if (S && !S.met && p.id === S.by) return { mode: 'follow', to: null };
+  const L = PU4_LIVE.mv; if (L && p.id === L.by && t < (L.d - 1) * 1440 + PU4_M.late) return L.met ? { mode: 'lead', to: { deck: PU4_M.room.deck, room: PU4_M.room.room } } : { mode: 'follow', to: null };   // (turn 4) Vance: to you, then up to Deck 2
+  const K = PU4_LIVE.walk; if (K && p.id === 'calder' && t < K.until) { let inn = true; try { inn = !(P5_NIGHT && typeof p5nNight === 'function') || !!((SHIP.works.ns || {})[K.d] || {}).in; } catch (e) { inn = true; }
+    return { mode: 'lead', to: inn ? { deck: 6, room: 'E' } : { deck: 5, room: 'w' } }; }   // the Works bay's time clock first (28a's night punch), then the engine room
+  const br = SHIP.occasions.find(x => x.id === 'pu4Badge' && x.status === 'asked');
+  if (br && br.f && br.f.seek && !br.met && p.id === 'calder' && t < br.at + br.len) return { mode: 'lead', to: { deck: 1, room: 'O' } };
+  return null;
+}
+if (P5_PROMO4) WORK_TICKS.push((now, skip) => { pu4ResultTick(now, skip); pu4BadgeTick(now, skip); if (!skip) pu4BeatsGuide(now); });
+// ---- S6-3 wave 2 (W7): the crews' welcome (the beat "The crews' welcome"). The morning after your result's night (Day 23),
+// 06:00 at the shift change in the engine room: Torres's speech (too long), Reyes and the night crew, the day crew, a ring
+// of them round you (OCCASIONS.pu4Welcome, script pu4.welcome, the talk pose); they sign your certificate (flag
+// pu4.signed: the badge's certificate is the signed one). Only with the nights (P5_NIGHT) and if you worked night 1. A level
+// 1 arrow "The shift change" to the engine room's middle from 05:45; not there by 06:30, Torres's Mail ("We signed it anyway")
+const PU4_W = { at: 360, len: 20, arrow: 15, by: 30 };
+OCCASIONS.pu4Welcome = { title: 'The crews\' welcome', kind: 'meeting', by: 'torres-zeke', with: ['reyes-alejandro', 'calder'], deck: 6, room: 'E', at: PU4_W.at, len: PU4_W.len, script: 'pu4.welcome', due: () => false, mail: null };
+function pu4WelcomeDay() {                               // the morning after the night you were made Engine Specialist (that night worked), or null
+  const T = P5_PROMO4 && P5_NIGHT && puT4(); if (!T || !T.res || !P5_NIGHTS[T.res]) return null;
+  const n = (SHIP.works.ns || {})[T.res]; return n && n.in ? T.res + 1 : null;
+}
+function pu4WelcomeCrew() {                              // both engine crews (the roster's engine room people), Torres and Reyes first
+  let ids = []; try { ids = ROSTER.filter(p => jobCrew(p) === 'engine' && p.id !== 'torres-zeke' && p.id !== 'reyes-alejandro').map(p => p.id).sort().slice(0, 4); } catch (e) { ids = []; }
+  return ['reyes-alejandro', 'calder', ...ids];
+}
+function pu4WelcomeScript() {                            // the writer's pu4.welcome, or a stand-in; our hook on it
+  if (!MEETING_SCRIPTS['pu4.welcome']) MEETING_SCRIPTS['pu4.welcome'] = { title: 'The crews\' welcome', from: 'Zeke Torres', stub: true, gist: 'Both engine crews met you at the shift change. Torres made a speech that went on too long, and they signed your certificate.',
+    lines: [{ who: 'torres-zeke', text: 'Right. Both crews. Gather in. Closer. You too, Reyes.', pose: 'gesture' }, { who: 'torres-zeke', text: 'When I was a lad on the old Hesper, we had a saying about drive coils. Two sayings. Three, depending.', to: 'you' },
+      { who: 'reyes-alejandro', text: 'Zeke. The night crew wants its bed.' }, { who: 'torres-zeke', text: 'I\'m getting there. The point is: welcome. Engine Specialist.', pose: 'nod' },
+      { who: 'calder', text: 'Sign it, everyone. The Captain wants it back by this afternoon.' },
+      { choice: [{ text: 'Thank you. All of you.', reply: { who: 'torres-zeke', text: 'Proper job. Now go and sleep.' } }, { text: 'Was that the short version?', reply: { who: 'reyes-alejandro', text: 'That was the short version.' } }] }] };
+  return puHook('pu4.welcome', k => flagSet('pu4.welcome.reply', k + 1), () => pu4Welcomed(shipNow(), 'met'));
+}
+for (const r of SHIP.occasions) { if (r.id === 'pu4Welcome') pu4WelcomeScript(); }
+function pu4Welcomed(now, how) {                         // once: the certificate signed (met or missed)
+  if (flag('pu4.signed') !== undefined) return false;
+  const r = SHIP.occasions.find(x => x.id === 'pu4Welcome' && x.status === 'asked'); if (r && how === 'met') r.met = true;
+  flagSet('pu4.signed', worksDay(now));
+  if (how === 'mail' && typeof mailSend === 'function') { const t = worksText('mail.pu4.welcome', 'Your certificate | We signed it anyway. Both crews. Come down and see us. Zeke.'), i = t.indexOf(' | ');
+    mailSend({ at: now, from: worksName('torres-zeke'), subject: i > 0 ? t.slice(0, i) : 'Your certificate', body: i > 0 ? t.slice(i + 3) : t }); }
+  simNote('pu4', { step: 'welcome', day: worksDay(now), how });
+  return true;
+}
+function pu4WelcomeTick(now, skip) {                     // booked at the night's start; the arrow from 05:45; by Mail at 06:30
+  const wd = pu4WelcomeDay(); if (!wd || flag('pu4.signed') !== undefined) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, B = (wd - 1) * 1440; if (d > wd || d === wd && m >= PU4_W.at + PU4_W.by) { pu4Welcomed(Math.min(now, B + PU4_W.at + PU4_W.by), 'mail'); return; }
+  let r = SHIP.occasions.find(x => x.id === 'pu4Welcome');
+  if (!r) { pu4WelcomeScript(); OCCASIONS.pu4Welcome.with = pu4WelcomeCrew(); r = occasionAdd('pu4Welcome', B + PU4_W.at, true, PU4_W.len); if (!r) return; }
+  if (!skip && typeof guideAsk === 'function' && now >= B + PU4_W.at - PU4_W.arrow) guideAsk({ id: 'pu4:welcome', level: 1, owner: '24u (S6-3)', from: B + PU4_W.at - PU4_W.arrow, until: B + PU4_W.at + PU4_W.by,
+    goal: () => ({ deck: 6, room: 'E', label: worksText('pu4.ptr.welcome', 'The shift change: the engine room') }), done: () => flag('pu4.signed') !== undefined || !!r.met });
+}
+if (P5_PROMO4) WORK_TICKS.push((now, skip) => pu4WelcomeTick(now, skip));
+// ---- S6-3 turn 4 (W7): your quarters on Deck 2 (the beat "Your quarters"). From the move's day (T.move.ready, the Thursday
+// after the badge: Day 25): the notice as you wake ("After dinner: Vance walks you to your new quarters"), the Schedule's
+// and Tracked's row, Calder's Mail at 17:00 as the record. After dinner (once you've eaten and left the mess, or at 20:00)
+// Commander Vance comes to find you (pu4Escort2 follows you, then leads), the urgent notice as the walk starts, a level 1
+// arrow "Go with Vance" to room B on Deck 2; he waits while you're busy. Open until 22:00, then the next day from the end of
+// your shift, the notice and arrow each day until you've stepped in. In room B (pu4Moved): SHIP.works.home = '2-B'
+// (playerBed, worksHomeOpen follow it; 4-23's plate is "Spare 4-23" again), T.move.walked, Vance's lines on the way and
+// at the door (stand-ins), simNote('moved'). From then your laundry is collected (21b's clothesCollect, asked here)
+const PU4_M = { mail: 1020, walkBy: 1200, late: 1320, home: '2-B', room: { deck: 2, room: 'B' }, met: 15 };
+const pu4MoveOn = () => { const T = P5_PROMO4 && puT4(); return T && T.move && T.move.ready && !T.move.walked ? T : null; };
+function pu4MoveFrom(d) {                                // the walk's start today (ship minutes) or null: the first day after dinner (20:00 at the latest), later days the shift's end
+  const T = pu4MoveOn(); if (!T || d < T.move.ready) return null;
+  if (d > T.move.ready) { let e = DAY_SHIFT[1]; try { e = playerShiftOn(d) ? dayShiftEnd(d) : DAY_SHIFT[1]; } catch (e2) { e = DAY_SHIFT[1]; } return e; }
+  return MEALS.dinner[0];
+}
+function pu4MoveWait(now) {                              // true = not yet on the first day: your dinner first, and out of the mess (20:00 at the latest)
+  const T = pu4MoveOn(), d = worksDay(now), m = now - (d - 1) * 1440; if (!T || d !== T.move.ready || m >= PU4_M.walkBy) return false;
+  if (flag('pu4.ate') !== d) return true;
+  if (typeof ACT !== 'undefined' && ACT && ACT.kind === 'eat') return true;
+  try { if (deckDef.num === 3 && roomAt(...player.here()) === 'M') return true; } catch (e) { /* on paper: out of the mess */ }
+  return false;
+}
+function pu4WalkSay(key, fallback) {                     // each of Vance's walk lines once
+  const L = PU4_LIVE.mv; if (!L || L.s.includes(key)) return; L.s.push(key);
+  worksSayAll(L.by, worksVoice(L.by, key) || [worksText(key, fallback)]);
+}
+function pu4Moved(now, how) {                            // room B is yours
+  const W = SHIP.works, T = pu4MoveOn(); if (!W || !T) return false;
+  const d = worksDay(now); W.home = PU4_M.home; T.move.walked = d; PU4_LIVE.mv = null;
+  if (typeof setGoal === 'function' && typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.trk === 'career:move4') setGoal(null);
+  simNote('moved', { home: W.home, how, t: now });
+  return true;
+}
+function pu4MoveTick(now, skip) {                        // the notice as you wake, the Mail at 17:00, the walk after dinner; open until 22:00, then the next day
+  const T = pu4MoveOn(); if (!T) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, B = (d - 1) * 1440, live = !skip && now >= shipNow() - 1; if (d < T.move.ready) return;
+  if (d === T.move.ready && m >= PU4_M.mail && flag('mail.pu4.move') !== d) { flagSet('mail.pu4.move', d);
+    promoMail('mail.pu4.move', 'Tonight | Your quarters on Deck 2 are ready. Eat first: Vance will come and find you after dinner. Your things are already there.', null, Math.max(now, B + PU4_M.mail)); }
+  if (live && m >= 360 && m < PU4_M.late && flag('pu4.move.wake') !== d && !promoBusy()) { flagSet('pu4.move.wake', d);
+    promoNotice(d === T.move.ready ? worksText('pu4.move.wake', 'After dinner: Vance walks you to your new quarters on Deck 2.') : worksText('pu4.move.again', 'Your Deck 2 quarters: Vance walks you up at the end of your shift.'), worksName('vance')); }
+  if (!skip && d === T.move.ready && typeof ACT !== 'undefined' && ACT && ACT.kind === 'eat' && ACT.o && ACT.o.fed && m >= MEALS.dinner[0] && flag('pu4.ate') !== d) flagSet('pu4.ate', d);
+  const from = pu4MoveFrom(d), L = PU4_LIVE.mv;
+  if (m >= PU4_M.late) { if (L) { PU4_LIVE.mv = null; worksSayAll(L.by, worksVoice(L.by, 'pu4.walk.late') || [worksText('pu4.walk.late', 'It\'s late. Tomorrow, after your shift.')]); } return; }   // open until 22:00, then the next day
+  if (!live || from === null || m < from || pu4MoveWait(now)) return;
+  if (!L) { if (promoBusy() || typeof DIALOGUE !== 'undefined' && DIALOGUE) return;   // he waits while you're busy
+    PU4_LIVE.mv = { by: 'vance', at: Math.floor(now), d, s: [], met: false };
+    promoNotice(worksText('pu4.move.notice', 'Commander Vance is coming to walk you to your new quarters on Deck 2.'), worksName('vance'));
+    if (typeof setGoal === 'function' && !promoQueue()) setGoal({ deck: PU4_M.room.deck, room: PU4_M.room.room, label: worksText('pu4.ptr.move', 'Your quarters: Deck 2'), trk: 'career:move4', trkTo: B + PU4_M.late });
+    return; }
+  if (!L.met) { if (puNearMe('vance', 2.5) || now - L.at >= PU4_M.met) { L.met = true; if (puNearMe('vance', 3)) pu4WalkSay('pu4.walk.met', 'There you are. Deck 2, then. With me.'); } return; }
+  try { const rm = roomAt(...player.here()), n = deckDef.num, M = PU4_M.room, bed = PLACE_OF.get(PU4_M.home), [c, r] = player.here();
+    if (rm === '@') pu4WalkSay('pu4.walk.lift', 'Deck 2. Lucky corridor.');
+    if (n === M.deck && rm !== M.room && ROOMS[rm] && ROOMS[rm].hall) pu4WalkSay('pu4.walk.corridor', 'The Captain\'s at the end. She knocks; so do I.');
+    if (n === M.deck && bed && Math.hypot(c - bed.at[0], r - bed.at[1]) < 6) pu4WalkSay('pu4.walk.door', 'Your door. Senior Officer, Engine Specialist.');
+    if (n === M.deck && rm === M.room) { pu4WalkSay('pu4.walk.inside', 'Shoes off inside, regulation six.');
+      simTimeout(() => { try { worksSayAll('vance', worksVoice('vance', 'pu4.walk.neighbour') || [worksText('pu4.walk.neighbour', 'I\'m two doors down. Knock if the pipes sing.')]); } catch (e) { /* gone */ } }, 5200);
+      pu4Moved(now, 'walked'); } } catch (e) { /* not in play */ }
+}
+function pu4MoveGuide(now) {                             // the level 1 arrow while Vance walks you
+  const L = PU4_LIVE.mv; if (!L || typeof guideAsk !== 'function') return;
+  guideAsk({ id: 'pu4:move:' + L.d, level: 1, owner: '24u (S6-3)', until: (L.d - 1) * 1440 + PU4_M.late,
+    goal: () => !(PU4_LIVE.mv && PU4_LIVE.mv.met) && puNearMe('vance', 30) ? { deck: deckDef.num, crew: 'vance', label: worksText('pu4.ptr.vance', 'Go with Vance') } : { deck: PU4_M.room.deck, room: PU4_M.room.room, label: worksText('pu4.ptr.vance2', 'Go with Vance: your quarters, Deck 2') },
+    done: () => !PU4_LIVE.mv || !!(puT4() || {}).move && !!puT4().move.walked });
+}
+const pu4HomeOpen = (deck, room) => { const W = SHIP.works; return !!(P5_PROMO4 && W && (W.home === PU4_M.home || PU4_LIVE.mv) && deck === PU4_M.room.deck && room === PU4_M.room.room); };   // worksHomeOpen asks
+if (P5_PROMO4) WORK_TICKS.push((now, skip) => { pu4MoveTick(now, skip); if (!skip) pu4MoveGuide(now); if (worksHome() === PU4_M.home && typeof clothesCollect === 'function') clothesCollect(now); });
+// ---- S6-3 turn 4b (W7): Dev mode. Its promotion list (devmodePromoSteps asks pu4DevSteps) and its career arrow (puDevNext
+// asks pu4DevNext first: the next Engine Specialist beat, where and when); the presets (section 25's DM_BEATS, Days 22-25)
+function pu4DevSteps() {                                 // [{ label, at (absolute minutes), done }], in order
+  const T = P5_PROMO4 && puT4(); if (!T) return [];
+  const abs = (d, m) => (d - 1) * 1440 + m, out = [{ label: 'Your Tier 4 test', at: abs(T.day, PU4_T.jobAt), done: !!T.passed }];
+  if (!T.passed) return out;
+  out.push({ label: 'Your Tier 4 result', at: pu4ResWhen(), done: !!T.res }); if (!T.res) return out;
+  const bd = T.badge || pu4BadgeDay(); out.push({ label: 'Your engine badge, from the Captain', at: abs(bd, promoCerTimes(bd).at), done: !!T.badge });
+  if (T.move && T.move.ready) out.push({ label: 'Your Deck 2 quarters', at: abs(T.move.walked || T.move.ready, 1140), done: !!T.move.walked });
+  return out;
+}
+function pu4DevNext() {                                  // the Dev career arrow's next Engine Specialist beat: { when, soon, g } or null
+  const W = SHIP.works, T = puT4(); if (!P5_PROMO4 || !W || W.tier < 3) return null;
+  const now = Math.floor(shipNow()), d = worksDay(now), abs = (dd, m) => (dd - 1) * 1440 + m;
+  if (!T) { const t3 = puT3(); if (W.tier !== 3 || t3 && !t3.toast || !ladderNeeds((ladderRow('t4') || {}).needs, W)) return null;
+    for (let dd = Math.max(d, PU4.offerFrom); dd < Math.max(d, PU4.offerFrom) + 8; dd++) { let wd = 0; try { wd = weekday(dd); } catch (e) { wd = 0; }
+      const at = playerShiftOn(dd) ? PU4.seekAt : wd === 6 ? PU4.dinnerAt : null; if (at === null || abs(dd, PU4.seekBy) <= now) continue;
+      return { when: Math.max(now, abs(dd, at)), soon: 15, g: at === PU4.dinnerAt ? { deck: 3, room: 'M', label: 'The Tier 4 offer: Calder at Sunday dinner' } : { deck: 5, room: 'w', label: 'The Tier 4 offer: Calder comes to find you' } }; }
+    return null; }
+  if (!T.passed) { const j = pu4TestJob(); if (j && j.claimedBy === 'you') { let g = null; try { g = typeof ixJobGoal !== 'undefined' && ixJobGoal ? { ...ixJobGoal } : null; } catch (e) { g = null; } return { when: now, g: g ? { ...g, label: 'Your Tier 4 test · ' + g.label } : { deck: 6, room: 'E', label: 'Your Tier 4 test' } }; }
+    return { when: abs(T.day, PU4_T.jobAt), soon: 30, g: { deck: 5, item: /job board/i, room: 'w', label: 'Your Tier 4 test job, at the board' } }; }
+  if (!T.res) return { when: pu4ResWhen(), soon: 15, g: { deck: 1, room: 'O', label: 'Your Tier 4 result: Calder finds you' } };
+  if (!T.badge) { const bd = pu4BadgeDay(); return { when: abs(bd, promoCerTimes(bd).at), soon: 15, g: { deck: 1, place: '1-ceremony-you', room: 'O', label: 'Your engine badge, the observation room' } }; }
+  if (T.move && T.move.ready && !T.move.walked) { const dd = Math.max(d, T.move.ready), f = pu4MoveFrom(dd);
+    return { when: abs(dd, f === null ? 1140 : f), soon: 15, g: PU4_LIVE.mv ? { deck: 2, room: 'B', label: 'Go with Vance: your quarters, Deck 2' } : { deck: 3, room: 'M', label: 'Dinner, then Vance walks you to Deck 2' } }; }
+  return null;
+}
+function pu4EngineByDay() {                              // section 17's forYou asks: engine machines' jobs are yours by day, an Engine Specialist after the nights
+  try { return playerRank() === 'specialist' && SHIP.time.day > Math.max(...Object.keys(P5_NIGHTS).map(Number)); } catch (e) { return false; }
 }
 // ---- end of slot: Later promotions ----
 
@@ -65229,6 +65877,282 @@ function p5NightAt(t) {
 // ---------------------------------------------------------------------
 
 // ---- slot: Night shift (section 28a). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// Your nights (S6-1, N6 for lead 41). Days 22-24 are night days (28's P5_NIGHTS): Day 22's day shift ends at 12:30
+// (P5N.dayEnd), then the night from 22:45; on Days 23-25 there's no day shift (careerOff asks p5nNoDay), only the nights
+// from 21:00, each to 06:00. The time clock in the Works bay keeps the nights apart from the day's punch (SHIP.career.ci
+// and .co stay the day's): SHIP.works.ns[d] = { in, out, jobs, inc, late } for the night that starts on day d (ship
+// minutes; jobs and incidents are S6-5's and S6-6's to fill), plus miss: true once it counts as missed. A missed night
+// costs your reputation like a missed shift (careerMissed), never the run toward being let go (the storm Saturday's rule).
+// A game already past Day 22 when the switch comes on skips the nights (ns.skip; the events' EV_LATE 'skip'); a save
+// at 03:00 loads into the same night, clocked in. Nothing here calls R(); the planner reads only P5_LEAVE (fixed)
+const P5N = { open: 60, missBy: 210, early: 60, auto: 60, dayEnd: 750 };   // the clock opens an hour before; missed if not in by 3h30 in; out before 05:00 is early; signed out an hour after 06:00
+const P5N_LATE = P5_NIGHT && SHIP.time.day >= 23 && !(SAVED && SAVED.ship && SAVED.ship.works && SAVED.ship.works.ns);   // loaded past Day 22 with no nights of its own: skipped
+function p5nClean(s) {                                    // a save's ns, junk dropped
+  const o = s && typeof s === 'object' && !Array.isArray(s) ? s : {}, out = o.skip === true ? { skip: true } : {}, int = v => Number.isInteger(v) && v >= 0 ? v : 0, ids = a => Array.isArray(a) ? a.filter(x => typeof x === 'string').slice(0, 12).map(x => x.slice(0, 40)) : [];
+  for (const k of Object.keys(o)) if (/^\d{1,3}$/.test(k) && o[k] && typeof o[k] === 'object') { const n = o[k]; out[k] = { in: int(n.in), out: int(n.out), jobs: ids(n.jobs), inc: ids(n.inc), late: int(n.late), ...(n.miss === true ? { miss: true } : {}) }; }
+  return out;
+}
+if (P5_NIGHT) { const s = SAVED && SAVED.ship && SAVED.ship.works; if (SHIP.works && s && s.ns) SHIP.works.ns = p5nClean(s.ns); }
+function p5nState() {                                     // SHIP.works.ns, made once the Works state exists
+  const W = SHIP.works; if (!P5_NIGHT || !W) return null;
+  if (!W.ns || typeof W.ns !== 'object') W.ns = P5N_LATE ? { skip: true } : {};
+  return W.ns;
+}
+const p5nSkipped = () => { const W = SHIP.works; return W && W.ns ? !!W.ns.skip : P5N_LATE; };
+const p5nLive = () => P5_NIGHT && !p5nSkipped();
+function p5nOf(d) { try { return p5nLive() ? p5NightOf(d) : null; } catch (e) { return null; } }   // (28's table is read only once the game runs)
+// your night on day d: yours unless you're off sick that day or let go
+function playerNightOn(d) {
+  const n = p5nOf(d), c = SHIP.career; return !!n && !(c && (c.s.includes(d) || c.go != null && d >= c.go));
+}
+const p5nNoDay = d => !!p5nOf(d - 1);                     // no day shift: the morning after a night (Days 23-25). careerOff asks
+function p5nNight(d) { const S = p5nState(); if (!S) return null; return S[d] || (S[d] = { in: 0, out: 0, jobs: [], inc: [], late: 0 }); }
+// section 14's isWorkDay asks: Navarro's leave (P5_LEAVE, fixed by the day number, so the planner may read it)
+function p5nOnLeave(p, d) { try { const L = P5_LEAVE[p.id]; return !!L && L.includes(d); } catch (e) { return false; } }
+// the night the time clock answers for at ship minute t: from an hour before it starts to an hour after 06:00, or null
+function p5nClockNight(t) {
+  const d = worksDay(t);
+  for (const k of [d, d - 1]) { const n = playerNightOn(k) && p5nOf(k); if (n && t >= n.from - P5N.open && t < n.to + P5N.auto) return n; }
+  return null;
+}
+const p5nText = (k, fb, v) => typeof worksText === 'function' ? worksText(k, fb, v) : fb;
+// section 20's careerClock asks first: a punch for the night (undefined: not a night's hours, the day's clock as ever)
+function p5nClock(now, toast, hold) {
+  const N = p5nClockNight(now); if (!N) return undefined;
+  const R = p5nNight(N.day); if (!R) return undefined;
+  if (!R.in) {
+    if (now >= N.to) { toast('Time clock', p5nText('night.clock.over', 'The night shift\'s over. Get some sleep.')); return null; }
+    R.in = Math.floor(now); R.out = 0; R.late = Math.max(0, Math.round(now - N.from));
+    toast('Time clock', p5nText('night.clock.in', 'Clocked in at {time}. Night shift till 06:00.', { time: hhmm(now % 1440) }));
+    const fx = () => { careerRemark('in', now, R.late); simNote('clock', { what: 'in', night: N.day }); simNote('shiftStart', { late: Math.min(120, R.late), night: N.day }); }; if (hold) hold(fx); else fx(); return 'in';
+  }
+  if (R.out) { toast('Time clock', p5nText('night.clock.done', 'You\'re clocked out. Bed, then.')); return null; }
+  R.out = Math.floor(now); const h = R.out - R.in, early = now < N.to - P5N.early;
+  if (SHIP.player.clockLog) SHIP.player.clockLog[N.day] = (SHIP.player.clockLog[N.day] || 0) + h;
+  if (early) repAdd(null, 0, { work: -2 }, 'early');   // as the day's short shift: a small dip, never a missed one
+  toast('Time clock', p5nText('night.clock.out', 'Clocked out at {time}. {hours} h tonight.', { time: hhmm(now % 1440), hours: hrs(h) }) + (early ? ' ' + p5nText('night.clock.early', 'An early finish: it\'s noted.') : ''));
+  const fx = () => { careerRemark(early ? 'early' : 'out', now); simNote('clock', { what: 'out', night: N.day }); }; if (hold) hold(fx); else fx(); return 'out';
+}
+const p5nIn = (t = shipNow()) => { const N = p5nClockNight(t), R = N && SHIP.works && SHIP.works.ns && SHIP.works.ns[N.day]; return !!R && R.in > 0 && !R.out; };   // clocked in for a night, not out
+// the time clock's screen at night (section 20's clockScreen asks; false: not a night's hours)
+function p5nClockScreen(el, mk, act, said) {
+  const now = shipNow(), N = p5nClockNight(now); if (!N) return false;
+  const R = (SHIP.works && SHIP.works.ns && SHIP.works.ns[N.day]) || { in: 0, out: 0 }, inn = R.in > 0, out = R.out > 0;
+  const st = said || (out ? p5nText('night.screen.done', 'Night done. Sleep well.') : inn ? p5nText('night.screen.on', 'On the night shift since {time}.', { time: hhmm(R.in % 1440) })
+    : now >= N.to ? p5nText('night.screen.over', 'The night shift\'s over.') : p5nText('night.screen.ready', 'Night shift {from}-06:00. Tap to clock in.', { from: hhmm(N.from % 1440) }));
+  el.append(mk('small', '', csText('title', 'WORKS TIME CLOCK') + ' · ' + csText('sub', 'CSV Wren · Works bay')), mk('p', '', st));
+  const h = inn ? (out ? R.out : Math.floor(now)) - R.in : 0;
+  el.append(mk('small', '', csText('hours', 'YOUR HOURS')), mk('p', '', p5nText('night.screen.hours', 'Tonight: {hours} h', { hours: hrs(h) })));
+  const row = mk('div', 'btns');
+  if (!out && !(!inn && now >= N.to)) act(row, inn ? csText('out', 'Clock out') : csText('in', 'Clock in'), () => { const r = careerClock(shipNow(), true); clockScreen(r === 'in' ? p5nText('night.screen.didin', 'Clocked in at {time}. Quiet night, with luck.', { time: hhmm(SHIP.time.min) }) : r === 'out' ? p5nText('night.screen.didout', 'Clocked out at {time}. Bed.', { time: hhmm(SHIP.time.min) }) : null); });
+  act(row, csText('close', 'Close'), () => { el.hidden = true; }).classList.add('next');
+  el.appendChild(row);
+  try { (row.querySelector('button') || el).focus(); } catch (e) { /* no focus */ }
+  return true;
+}
+// once a ship minute (hourly while time skips): signed out an hour after 06:00 if you forgot; missed if not in by P5N.missBy
+function p5nClockTick(now, skip) {
+  if (!p5nLive()) return;
+  p5nState();
+  const d = worksDay(now);
+  for (const k of [d - 1, d]) {
+    const N = playerNightOn(k) && p5nOf(k); if (!N || now < N.from) continue;
+    const R = p5nNight(k);
+    if (R.in && !R.out && now >= N.to + P5N.auto) { R.out = N.to; if (SHIP.player.clockLog) SHIP.player.clockLog[k] = (SHIP.player.clockLog[k] || 0) + R.out - R.in;
+      if (!skip) toast('Time clock', p5nText('night.clock.auto', 'You forgot to clock out. The clock signed you out at 06:00.')); }
+    if (!R.in && !R.miss && now >= N.from + P5N.missBy) { R.miss = true; R.late = P5N.missBy; if (typeof careerMissed === 'function') careerMissed(k); simNote('p5night', { step: 'missed', day: k }); }
+  }
+}
+if (P5_NIGHT) WORK_TICKS.push((now, skip) => p5nClockTick(now, skip));
+// ---- sleeping by day, the knock, the kept plate (S6-1, turn 2) ----
+// After a night (from 05:30) and on Day 22 once the day part is over (12:30), lying on your bunk sleeps you: the alarm
+// clock offers only "Sleep until 16:45" (Day 22) or "15:45" (Days 23-25; P5N_WAKE), and doesn't keep it as your alarm.
+// Clocked in for a night, the bunk won't have you. Asleep when a night is due, you're woken: a knock (Calder at 22:40
+// on night 1; at 20:30 on nights 2 and 3), whatever the alarm says. Daytime sleep counts as sleep (section 15's needs
+// drain asks `sleeping`). The morning after, 06:15-07:00, the servery has a plate kept for you (07:00 on: as usual)
+const P5N_KNOCK = { 22: 5, 23: 30, 24: 30 };              // minutes before the night's start
+function p5nDayBed(t = shipNow()) {                       // the day sleep's wake minute now, or 0
+  if (!p5nLive()) return 0;
+  const d = worksDay(t), m = t - (d - 1) * 1440, w = P5N_WAKE[d]; if (!w || m < 330 || m >= w - 30) return 0;
+  if (playerNightOn(d - 1)) return w;
+  const S = playerNightOn(d) && yourShift(d); return S && (!S.day || m >= S.day[1]) && m < S.night[0] - 120 ? w : 0;
+}
+const p5nSoon = (t = shipNow()) => { const n = p5nOf(worksDay(t)); return !!n && playerNightOn(n.day) && t >= n.from - 120 && t < n.from; };   // the two hours before a night
+function p5nKnockAt(abs, now = shipNow()) {               // the night you'd sleep into, waking at abs: { day, from, to, at } or null
+  if (!p5nLive()) return null;
+  for (const k of [worksDay(now), worksDay(now) + 1]) { const n = playerNightOn(k) && p5nOf(k), R = n && SHIP.works && SHIP.works.ns && SHIP.works.ns[k];
+    if (n && !(R && R.in) && n.from - (P5N_KNOCK[k] || 30) > now && n.from - (P5N_KNOCK[k] || 30) < abs) return { ...n, at: n.from - (P5N_KNOCK[k] || 30) }; }
+  return null;
+}
+function p5nKnock(wake) {                                 // section 13's sleepGo asks: { at, say } or null
+  const now = shipNow(), today = (SHIP.time.day - 1) * 1440 + wake, abs = today > now ? today : today + 1440, n = p5nKnockAt(abs, now); if (!n) return null;
+  return { at: n.at, say: () => { const who = n.day === 22 ? 'calder' : null, by = who && typeof worksName === 'function' ? worksName(who) : p5nText('night.knock.from', 'The night crew');
+    const t = n.day === 22 ? p5nText('night.knock.1', 'A knock at your bunk. Calder: "Up you get. Night shift. I\'ll see you down there."') : p5nText('night.knock', 'A knock at your bunk: your night shift starts at {time}.', { time: hhmm(n.from % 1440) });
+    if (typeof promoNotice === 'function') promoNotice(t, by); else toast('Your bunk', t); simNote('p5night', { step: 'knock', day: n.day }); } };
+}
+function p5nBed() {                                       // section 13's offerSleep asks: true if it's dealt with the tap
+  if (!p5nLive()) return false;
+  if (p5nIn()) { toast('Your bunk', p5nText('night.bed.on', 'You\'re on the night shift. Sleep after 06:00.')); return true; }
+  const w = p5nDayBed(); if (!w) return false;
+  toastEl.classList.remove('show'); ALARM_PICK = w; alarmDraw();
+  const $ = id => document.getElementById(id);
+  $('alarmT').textContent = p5nText('night.bed.until', 'Sleep until {time}', { time: hhmm(w) }); $('alarmW').hidden = true; $('alarmDn').disabled = true; $('alarmUp').disabled = true;
+  sleepEl.hidden = false; return true;
+}
+function p5nPlate(it) {                                   // 15's tray tap asks: Brennan's plate, the morning after a night, 06:15-07:00
+  if (!p5nLive() || SHIP.player.tray) return false;
+  const d = SHIP.time.day, m = SHIP.time.min; if (!playerNightOn(d - 1) || m < 375 || m >= MEALS.breakfast[0] || flag('p5n.plate') === d) return false;
+  flagSet('p5n.plate', d); SHIP.player.tray = p5nText('night.plate.dish', 'the plate kept for you'); SHIP.player.trayLeft = 0;
+  toast(it.t || 'Servery', p5nText('night.plate', 'Brennan\'s kept you a plate: "Night shift? Eat, then sleep." Find a seat and tap it to eat.'));
+  simNote('p5night', { step: 'plate', day: d - 1 }); return true;
+}
+// ---- Calder's word, the notices, the arrows and the rings (S6-1, turn 3; the user's rules: in person first, the
+// Mail only as the record; a level 1 arrow and a forced ring at every step, whatever Teaching arrows or tracking say).
+// Day 22 from 09:15 Calder comes to find you (meeting night.on; with the Monday briefing, S6-2, she waits by its door:
+// m21Door, when 28b has it); not met by 10:00, the notice. Thursday Day 25 at 06:00 she comes down to you (night.off).
+// Each night: the notice (20:30; night 1 at 22:40, unless S6-3's walk down from the comet says it: pu4Fetches), the
+// arrow and ring to the time clock, then the engine room, at 06:00 the clock again, then the kept plate and your bunk.
+// Holding another job while the clock waits: a notice each hour. Flags p5n.* (saved); words content/works/night.lines
+const P5N_WORD = { on: { day: 22, at: 555, by: 600, night: 22 }, off: { day: 25, at: 360, by: 400, night: 24 } };
+const P5N_SEEK = { kind: null };                          // live: the word Calder's on her way to say
+const p5nCalder = () => typeof worksName === 'function' ? worksName('calder') : 'Chief Ines Calder';
+function p5nNear(id, r = 2.2) { try { const a = DECK_CREW.find(x => x.p && x.p.id === id), P = player.obj.position; return !!a && Math.hypot(a.x - P.x, a.z - P.z) < r; } catch (e) { return false; } }
+function p5nScript(kind, end) {                           // the writer's scene (else a stand-in), our hooks on a live copy
+  const id = 'night.' + kind, base = MEETING_SCRIPTS[id] || { title: kind === 'on' ? 'Night shift' : 'Off nights', from: 'Chief Ines Calder', stub: true,
+    gist: kind === 'on' ? 'Calder told you: Navarro\'s on leave, so you cover his nights, Monday to Wednesday.' : 'Calder came down at 06:00: your nights are done.',
+    lines: kind === 'on' ? [{ who: 'calder', text: 'Navarro\'s on leave. You cover his nights, Monday to Wednesday.', to: 'you' }, { who: 'calder', text: 'Watch your comet first. I\'ll come and get you.' }]
+      : [{ who: 'calder', text: 'That\'s your three nights. Navarro\'s back Friday night.', to: 'you' }, { who: 'calder', text: 'You\'ve a cadet tomorrow. Go to bed.' }] };
+  MEETING_SCRIPTS['night.live'] = { ...base, onPick: k => flagSet('p5n.reply.' + kind, k + 1), onEnd: () => end() };
+  return 'night.live';
+}
+function p5nTold(kind, now, how) {                        // said: in person, or the notice when she couldn't reach you; the Mail is the record
+  if (flag('p5n.' + kind) !== undefined) return; flagSet('p5n.' + kind, how); P5N_SEEK.kind = null;
+  if (typeof promoMail === 'function') promoMail('mail.night.' + kind, kind === 'on' ? 'Your nights | Navarro\'s on leave. You cover his nights, tonight from 22:45 (after the comet), then 21:00 to 06:00, to Wednesday.' : 'Off nights | Three clean nights. Navarro\'s back Friday night. Sleep today; tomorrow you\'ve a cadet with you.', null, now);
+  if (kind === 'on' || how === 'notice') promoNotice(kind === 'on' ? p5nText('night.on.notice', 'Night shift tonight from 22:45, after the comet. Then 21:00 to 06:00 till Wednesday.') : p5nText('night.off.notice', 'Your nights are done. Navarro\'s back Friday night. Bed: you\'ve a cadet tomorrow.'), p5nCalder());
+  simNote('p5night', { step: kind, how });
+}
+function p5nWordTick(now, skip) {                         // once a ship minute (hourly while time skips)
+  const d = worksDay(now), m = now - (d - 1) * 1440, live = !skip && now >= shipNow() - 1;
+  for (const kind of ['on', 'off']) {
+    const T = P5N_WORD[kind]; if (flag('p5n.' + kind) !== undefined || !playerNightOn(T.night)) continue;
+    if (kind === 'off' && !(SHIP.works.ns[T.night] && SHIP.works.ns[T.night].in) && d === T.day) { if (m >= T.at) flagSet('p5n.off', 'none'); continue; }   // never came in for the last night: nothing to come down for
+    if (d < T.day || d === T.day && m < T.at) continue;
+    if (d > T.day || m >= T.by) { if (live && !(typeof sleeping !== 'undefined' && sleeping)) p5nTold(kind, now, 'notice'); continue; }   // asleep: once you're up
+    if (!live) continue;
+    P5N_SEEK.kind = kind;
+    if ((typeof DIALOGUE !== 'undefined' && DIALOGUE) || promoBusy() || !p5nNear('calder')) continue;
+    dialogueShow(p5nScript(kind, () => p5nTold(kind, shipNow(), 'person')), { id: 'night.' + kind, who: ['calder'], at: now, where: { any: true } });
+  }
+}
+function p5nEscort(p, t) {                                // 24 core's worksEscort asks: Calder on her way to find you
+  if (!p || p.id !== 'calder' || !P5N_SEEK.kind || flag('p5n.' + P5N_SEEK.kind) !== undefined || promoBusy()) return null;
+  if (P5N_SEEK.kind === 'on' && P5_M21 && typeof m21Door === 'function') { const w = m21Door(t); if (w) return { mode: 'wait', to: w }; }   // S6-2: by the observation room's door
+  return { mode: 'follow', to: null };
+}
+const p5nRoomIn = () => { try { return deckDef.num === 6 && ['E', 'K'].includes(roomAt(...player.here())); } catch (e) { return false; } };
+function p5nHeld() { try { const j = myJob(); return j && !jobSide(j) && !j.workDone ? j : null; } catch (e) { return null; } }
+function p5nGuide(now) {                                  // live, once a ship minute: the notices, the level 1 arrows, the rings
+  if (!p5nLive() || typeof guideAsk !== 'function') return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, owner = '28a (S6-1)', P = typeof POINT_ON !== 'undefined' && POINT_ON && typeof pointAsk === 'function', bed = () => (typeof playerBed === 'function' ? playerBed() : '4-1');
+  const sleepRing = (id, w, until) => { if (P) pointAsk({ id, force: true, until, done: () => !p5nDayBed(), path: [{ open: () => !sleepEl.hidden, el: () => null }, { el: () => document.getElementById('sleepYes'), label: p5nText('night.ptr.bed', 'Sleep until {time}', { time: hhmm(w) }) }] }); };
+  const S = playerNightOn(d) && yourShift(d);              // Day 22's afternoon: sleep now
+  if (S && S.day && m >= S.day[1] && p5nDayBed(now)) {
+    if (flag('p5n.sleep.' + d) === undefined && !promoBusy()) { flagSet('p5n.sleep.' + d, 1); promoNotice(p5nText('night.sleep.notice', 'Sleep now: night shift tonight. Your bunk, until 16:45.'), p5nCalder()); }
+    if (careerClockedIn(d) && !careerClockedOut(d)) { const lab = p5nText('night.ptr.dayout', 'Clock out, then sleep');   // the day part's punch first
+      guideAsk({ id: 'p5n:dayout:' + d, level: 1, owner, from: (d - 1) * 1440 + S.day[1], until: (d - 1) * 1440 + P5N_WAKE[d] - 30, goal: () => guideClock(lab), done: () => careerClockedOut(d) });
+      if (P) pointAsk({ id: 'p:p5n:dayout:' + d, force: true, path: pointClock('out', lab), until: (d - 1) * 1440 + P5N_WAKE[d] - 30, done: () => careerClockedOut(d) }); }
+    else guideAsk({ id: 'p5n:bed:' + d, level: 1, owner, from: (d - 1) * 1440 + S.day[1], until: (d - 1) * 1440 + P5N_WAKE[d] - 30, goal: () => ({ deck: 4, place: bed(), label: p5nText('night.ptr.bed.22', 'Sleep now: night shift tonight') }), done: () => !p5nDayBed() });
+    sleepRing('p:p5n:bed:' + d, P5N_WAKE[d], (d - 1) * 1440 + P5N_WAKE[d] - 30);
+  }
+  for (const k of [d - 1, d]) {
+    const N = playerNightOn(k) && p5nOf(k); if (!N) continue;
+    const R = p5nNight(k), at = N.from - (k === 22 ? 5 : 30), fetched = k === 22 && P5_PROMO4 && typeof pu4Fetches === 'function' && pu4Fetches(now);
+    if (now >= at && !R.in && !R.miss && now < N.to) {
+      if (flag('p5n.notice.' + k) === undefined && !fetched) { flagSet('p5n.notice.' + k, 1); promoNotice(k === 22 ? p5nText('night.notice.1', 'Night shift now. Clock in at the Works bay, then down to the engine room.') : p5nText('night.notice', 'Night shift at {time}. Clock in at the Works bay, then the engine room on Deck 6.', { time: hhmm(N.from % 1440) }), p5nCalder()); }
+      const h = Math.floor(now / 60), held = p5nHeld();
+      if (held && flag('p5n.busy') !== h) { flagSet('p5n.busy', h); promoNotice(p5nText('night.notice.busy', 'Your night shift starts at {time}. Turn in or drop this job first.', { time: hhmm(N.from % 1440) }), p5nCalder()); }
+      if (now >= N.from - 15 || k === 22) {
+        const lab = p5nText('night.ptr.in', 'Night shift: clock in');
+        guideAsk({ id: 'p5n:in:' + k, level: 1, owner, from: N.from - (k === 22 ? 5 : 15), until: N.to, goal: () => guideClock(lab), done: () => !!(SHIP.works.ns[k] || {}).in || !!(SHIP.works.ns[k] || {}).miss });
+        if (P) pointAsk({ id: 'p:p5n:in:' + k, force: true, path: pointClock('in', lab), until: N.to, done: () => !!(SHIP.works.ns[k] || {}).in });
+      }
+    }
+    if (R.in && !R.out && now < N.to - 10) {
+      if (p5nRoomIn()) flagSet('p5n.room.' + k, 1);
+      if (flag('p5n.room.' + k) === undefined) guideAsk({ id: 'p5n:room:' + k, level: 1, owner, until: N.to - 10, goal: () => ({ deck: 6, room: 'E', label: p5nText('night.ptr.room', 'Night shift: the engine room') }), done: () => flag('p5n.room.' + k) !== undefined || p5nRoomIn() || !!(SHIP.works.ns[k] || {}).out });
+    }
+    if (R.in && !R.out && now >= N.to - 10 && now < N.to + P5N.auto) {
+      const lab = p5nText('night.ptr.out', 'Clock out: the night\'s done');
+      guideAsk({ id: 'p5n:out:' + k, level: 1, owner, from: N.to - 10, until: N.to + P5N.auto, goal: () => guideClock(lab), done: () => !!(SHIP.works.ns[k] || {}).out });
+      if (P) pointAsk({ id: 'p:p5n:out:' + k, force: true, path: pointClock('out', lab), until: N.to + P5N.auto, done: () => !!(SHIP.works.ns[k] || {}).out });
+    }
+    if (d === k + 1 && (R.out || now >= N.to + P5N.auto) && !(typeof sleeping !== 'undefined' && sleeping)) {   // the morning after: the plate, then your bunk
+      const w = P5N_WAKE[d] || 945, plate = m < MEALS.breakfast[0] && flag('p5n.plate') !== d && !SHIP.player.tray;
+      if (R.in && flag('p5n.platesaid.' + d) === undefined && m < MEALS.breakfast[0]) { flagSet('p5n.platesaid.' + d, 1); promoNotice(p5nText('night.plate.notice', 'A plate\'s kept for you in the mess, from 06:15. Then sleep until {time}.', { time: hhmm(w) }), 'Brennan'); }
+      if (plate && R.in) { if (m >= 375) guideAsk({ id: 'p5n:plate:' + d, level: 1, owner, until: (d - 1) * 1440 + MEALS.breakfast[0], goal: () => ({ deck: 3, place: '3-queue-1', label: p5nText('night.ptr.plate', 'A plate\'s kept for you in the mess') }), done: () => flag('p5n.plate') === d || !!SHIP.player.tray }); }
+      else if (p5nDayBed(now) && !SHIP.player.tray && (k !== 24 || flag('p5n.off') !== undefined)) {   // (a tray in hand: eat it first)
+        guideAsk({ id: 'p5n:bed:' + d, level: 1, owner, until: (d - 1) * 1440 + w - 30, goal: () => ({ deck: 4, place: bed(), label: p5nText('night.ptr.bed', 'Sleep until {time}', { time: hhmm(w) }) }), done: () => !p5nDayBed() });
+        sleepRing('p:p5n:bed:' + d, w, (d - 1) * 1440 + w - 30);
+      }
+    }
+  }
+}
+if (P5_NIGHT) WORK_TICKS.push((now, skip) => { if (!p5nLive()) return; p5nState(); p5nWordTick(now, skip); if (!skip && now >= shipNow() - 1) p5nGuide(now); });
+// ---- the night's work, the night incident, the clothes day (S6-1, turn 4) ----
+// The board keeps up through your night (17's boardTopUp asks p5nBoardWin: the night's hours, fixed by the day, never
+// who's clocked in), so a night is the night crew's ordinary jobs and a pair of hands; S6-5 and S6-6 bring the night's
+// own work (jobReserve's o.night holds a job to 06:00; ns[d].jobs lists the jobs you turned in). One incident inside
+// each night (P5N_INC: its minute and kind from the day number alone, so planner-safe), 24f's own: held for you while
+// you're clocked in (24f's incPost asks p5nIn), else the night crew's; ns[d].inc. 21b's clothes day: after a night your
+// "yesterday's clothes" start four hours after your wake (p5nClothes), not at 10:00
+const P5N_INC = { seed: 'p5n:inc', from: 90, span: 25, kinds: ['burst', 'alarm'], decks: [4, 5] };   // 1h30 to 5h30 into the night
+function p5nBoardWin(t) {                                 // { left } minutes of your night still to run at ship minute t, or null
+  if (!p5nLive()) return null;
+  const d = worksDay(t);
+  for (const k of [d, d - 1]) { const n = playerNightOn(k) && p5nOf(k); if (n && t >= n.from && t < n.to) return { left: n.to - t }; }
+  return null;
+}
+function p5nIncPlan(k) {                                  // night k's incident: [kind, deck, ship minute], from the day number alone
+  const n = p5nOf(k); if (!n) return null;
+  const seed = machSeed(P5N_INC.seed), kind = P5N_INC.kinds[Math.floor(schedU(seed, k, 874) * P5N_INC.kinds.length) % P5N_INC.kinds.length];
+  return [kind, kind === 'alarm' ? 3 : P5N_INC.decks[Math.floor(schedU(seed, k, 875) * P5N_INC.decks.length) % P5N_INC.decks.length], n.from + P5N_INC.from + Math.floor(schedU(seed, k, 876) * P5N_INC.span) * 10];
+}
+function p5nIncTick(now, skip) {
+  if (!p5nLive() || typeof incStart !== 'function' || typeof incState !== 'function') return;
+  const W = SHIP.works, d = worksDay(now);
+  for (const k of [d - 1, d]) {
+    const P = playerNightOn(k) && p5nIncPlan(k); if (!P || now < P[2] || flag('p5n.inc.' + k) !== undefined) continue;
+    const I = incState(); if (!I || I.open) continue;      // another incident still open: not tonight
+    flagSet('p5n.inc.' + k, 1);
+    const S = incStart(P[0], P[1], now, false), R = p5nNight(k); if (S && S.j && R && R.inc.length < 12) R.inc.push(S.j);
+    if (S && skip) { const j = SHIP.jobs.find(x => x.id === S.j); if (j) jobFinish(j, now, 'crew'); }   // asleep through it: the crew's
+    simNote('p5night', { step: 'incident', day: k, kind: P[0] });
+  }
+}
+if (P5_NIGHT) WORK_TICKS.push((now, skip) => p5nIncTick(now, skip));
+if (P5_NIGHT) onSim('job', n => {                         // a job you turned in on your night: ns[d].jobs
+  if (!n || n.step !== 'turnin' || !p5nLive()) return; const N = p5nClockNight(shipNow()), R = N && SHIP.works && SHIP.works.ns && SHIP.works.ns[N.day];
+  if (R && R.in && !R.out && typeof n.id === 'string' && !R.jobs.includes(n.id) && R.jobs.length < 12) R.jobs.push(n.id.slice(0, 40));
+});
+function p5nClothes() {                                   // 21b asks: { wake, late } on the day after a night (you slept by day), else null
+  if (!p5nLive()) return null; const d = SHIP.time.day; if (!playerNightOn(d - 1)) return null;
+  const w = P5N_WAKE[d] || 945; return { wake: w, late: Math.min(w + 240, CLOTHES_NIGHT - 30) };
+}
+// section 19's Schedule (devDay) asks: Day 22's day part to 12:30, the night shift that evening (to 06:00) and its last
+// hours the next morning, the daytime sleep after it ("Sleep until 15:45") in place of "Day off"
+const P5N_WAKE = { 22: 1005, 23: 945, 24: 945, 25: 945 };   // the bed's "Sleep until": 16:45 on Day 22, else 15:45
+function p5nItems(d, out) {
+  if (!p5nLive()) return;
+  const S = yourShift(d), i = out.findIndex(x => x.kind === 'shift' || x.kind === 'off'), where = p5nText('night.where', 'the time clock, then the engine room, Deck 6');
+  if (playerNightOn(d - 1)) {
+    out.push({ from: 0, to: P5_NIGHTS[d - 1][1] - 1440, title: p5nText('night.row.end', 'Night shift, until 06:00'), where: 'the engine room, Deck 6', kind: 'night', deck: 6, room: 'E' });
+    if (i >= 0 && out[i].kind === 'off') out.splice(i, 1, { from: 375, to: P5N_WAKE[d] || 945, title: p5nText('night.row.sleep', 'Sleep until {time}', { time: hhmm(P5N_WAKE[d] || 945) }), where: 'your bunk', kind: 'sleep' });
+  }
+  if (S.night) {
+    if (S.day && i >= 0 && out[i].kind === 'shift') { out[i].to = S.day[1]; out.push({ from: S.day[1] + 15, to: P5N_WAKE[d], title: p5nText('night.row.sleep', 'Sleep until {time}', { time: hhmm(P5N_WAKE[d]) }), where: 'your bunk', kind: 'sleep' }); }
+    out.push({ from: S.night[0], to: 1440, title: d === 22 && flag('p5n.on') !== undefined ? p5nText('night.row.told', 'Night shift tonight, after the comet') : p5nText('night.row', 'Night shift, {from}-06:00', { from: hhmm(S.night[0]) }), where, kind: 'shift', night: true });
+  }
+}
 // ---- end of slot: Night shift ----
 
 // ---------------------------------------------------------------------
@@ -65351,6 +66275,14 @@ function m21Attended(now = shipNow()) {
   const W = SHIP.works, S = m21State(), d = worksDay(now); if (!W || !S) return;
   if (!S.first) S.first = d; S.last = d;
   if (W.tr.m21 === undefined) { W.tr.m21 = d; simNote('trained', { mech: 'm21' }); }
+}
+// where Calder waits at the briefing's end for 28a's night.on word (Day 22, 09:15; N6's optional hook): the observation
+// room's tile by its way out to the lift lobby (the first room O tile, in map order, next to a walkable tile of another room)
+function m21Door() {
+  const D = DECKS[1], map = D && D.map; if (!map) return null;
+  for (let j = 0; j < map.length; j++) for (let i = 0; i < map[j].length; i++) if (map[j][i] === 'O')
+    for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const c = map[j + dj] && map[j + dj][i + di]; if (c && c !== 'O' && c !== '.' && c !== '#' && /[A-Za-z@]/.test(c)) return { deck: 1, tile: [i, j] }; }
+  return null;
 }
 // the observation room's wall screen: the agenda, once the briefing is yours
 function m21Screen(it, at) {
@@ -65643,8 +66575,10 @@ function m24State() {                                    // side.m24, cleaned (a
 // is night 3's swap yours (saved state and fixed tables only): your night that day, an Engine Specialist (a Senior with the promotion off)
 function m24On(d = M24_NIGHT) {
   const W = SHIP.works; if (!P5_M24 || !W || d !== M24_NIGHT || typeof p5NightOf !== 'function' || !p5NightOf(d)) return false;
+  if (typeof playerNightOn === 'function' && !playerNightOn(d)) return false;   // 28a (N6): not off sick, not let go, not a late save past the nights
   return (W.tier || 1) >= (P5_PROMO4 ? 4 : 3);
 }
+const M24_CLEAR = [150, 210];                            // night 3's incident (28a's p5nIncPlan(24), fixed by the day: a burst on Deck 5, Day 25 02:30): the Watch's hour keeps clear of 02:30-03:30
 const m24Night = () => p5NightOf(M24_NIGHT);
 // is it the night now (from its start to 06:00), and the swap not yet done
 function m24Live(now = shipNow()) { const n = m24On() && m24Night(), S = n && m24State(); return !!n && now >= n.from && now < n.to && !!S && !S.done; }
@@ -65683,6 +66617,7 @@ const m24AtBridge = () => { try { return deckDef.num === 1 && roomAt(...player.h
 function m24SlotFor(now) {
   const S = m24State(), n = m24Night(), late = Math.max(0, ...S.pick.map(id => S.ready[id] || 0));
   let at = Math.ceil(Math.max(now + 45, late + 10) / 15) * 15; at = Math.max(at, (M24_NIGHT - 1) * 1440 + 1380);
+  const c0 = M24_NIGHT * 1440 + M24_CLEAR[0], c1 = M24_NIGHT * 1440 + M24_CLEAR[1]; if (at < c1 && at + M24_LEN > c0) at = c1;   // not across the incident
   return Math.min(at, n.to - 120);
 }
 function m24Book(now = shipNow(), here = m24AtBridge()) {
@@ -65822,7 +66757,7 @@ if (P5_M24) {
   if (typeof TEAM_JOBS !== 'undefined') {                // 24h's tables (W7's), one entry each; machines empty so the day rota (teamPlan) never picks it
     TEAM_JOBS.coil = { machines: [], coils: M24_COILS.slice(), n: 3, deck: 6, steps: M24_STEPS.map(([w, p, m]) => [w === 'you' ? 'you' : w - 1, p, 'hold', m]) };
     TEAM_NAME.coil = 'Coil swap';
-    Object.assign(TEAM_PART, { cslow: 'call it: drive to slow', cunbolt: 'call it: unbolt', clift: 'call it: lift', cseat: 'call it: seat the new coil', ctest: 'call it: test', cup: 'call it: drive back up',
+    Object.assign(TEAM_PART, { cslow: 'your call: drive to slow', cunbolt: 'your call: unbolt', clift: 'your call: lift it out', cseat: 'your call: seat the new coil', ctest: 'your call: test it', cup: 'your call: drive back up',
       isolate: 'isolate the coupling', unbolt: 'unbolt the coil', lift: 'lift it out', seat: 'seat the new coil', test: 'test the readings' });
     TEAM_PARTS.coil = ['coil winding'];
   }
@@ -68567,11 +69502,12 @@ class CrewAgent {
   escortStep(dt, e) {
     if (e.scene) this.hold = e.hold || null;             // a stage direction's box (crewScene, 0.71.2); escorts as before
     const pp = e.after ? e.after : player.obj.position, dist = Math.hypot(pp.x - this.x, pp.z - this.z), you = cellAt(pp.x, pp.z);
-    let goal = e.mode === 'follow' ? you : escortGoal(e, this);
+    let goal = e.mode === 'follow' ? (free(...you) ? you : nearestOpen(pp.x, pp.z, null) || you) : escortGoal(e, this);   // (W7, RV23's MUST) follow: your tile, or the open one nearest you while you sit (a seat's tile isn't free: no path, as seekStep knows)
     if (goal && e.mode !== 'follow' && !e.after && typeof escBeside === 'function') goal = escBeside(goal, pp, this);   // the patch (#17): his spot is yours: the free tile beside you
     const key = e.mode + '|' + (goal ? goal.join(',') : '-');
     this.escT = (this.escT || 0) - dt;
-    if (key !== this.esc && (this.escT <= 0 || !this.esc || this.esc.split('|')[0] !== e.mode)) {
+    const lost = e.mode === 'follow' && !this.path.length && dist > ESC_NEAR && this.escT <= 0;   // (W7) no path yet and not by you: try again every half second
+    if ((key !== this.esc || lost) && (this.escT <= 0 || !this.esc || this.esc.split('|')[0] !== e.mode)) {
       this.esc = key; this.escT = .5; this.gapT = 0; this.goalId = '@escort'; this.settled = false; this.spot = null; this.path = [];
       let from = this.here(); if (!free(...from)) from = nearestOpen(this.x, this.z, null) || from;
       if (goal) { const p = crewPath(from, goal, new Set([...this.rooms, roomAt(...from), roomAt(...goal)]), this); if (p) this.path = p; }
@@ -70196,10 +71132,13 @@ if (P5_STEP5) {                                         // Pillar 5 Step 5 (S5-1
     { day: 17, train: ['m19', 'm15', 'p4'], band: 'reliable' }, { day: 18, train: ['m18', 'p5'], defer: ['m17'], band: 'reliable' },   // (RV20 S4) the new ladder order: m15 folds into m19 the same day; m17 waits for a clear day (Day 31, past DM_MAXDAY)
     { day: 19, train: ['m20', 'p9'], band: 'trusted' }, { day: 21, train: ['mys'], band: 'trusted' });
 }
+if (P5_PROMO4) {                                        // Pillar 5 Step 6 (S6-3, W7): the Tier 4 test passed Day 22, Engine Specialist that night, the badge Day 23, Deck 2 from Day 25 (approximate)
+  const i = DM_CAREER.findIndex(r => r.day === 23 && r.later); if (i >= 0) DM_CAREER.splice(i, 1, { day: 22, train: ['t4'], rank: 'specialist', band: 'new', promo4: true });
+}
 const DM_MAXDAY = 30, DM_SEED = 8;                      // the seed: no sick day (section 20's sickDue) before Day 46, so you never land unwell (devmode_check)
 function devmodeCareerFor(n) {                           // pure: SHIP.works's career part by the end of day n
   const rows = DM_CAREER.filter(r => r.day <= n), last = k => { for (let i = rows.length - 1; i >= 0; i--) if (rows[i][k] !== undefined) return rows[i][k]; return undefined; };
-  const promo = rows.some(r => r.promo), promo3 = rows.some(r => r.promo3), tier = promo3 ? 3 : promo ? 2 : 1, rank = last('rank') || 'junior', B = WORK_BANDS[tier] || WORK_BANDS[1];   // promo3: Step 5's Senior Officer (P5_STEP5's rows)
+  const promo = rows.some(r => r.promo), promo3 = rows.some(r => r.promo3), promo4 = rows.some(r => r.promo4), tier = promo4 ? 4 : promo3 ? 3 : promo ? 2 : 1, rank = last('rank') || 'junior', B = WORK_BANDS[tier] || WORK_BANDS[1];   // promo3: Step 5's Senior Officer (P5_STEP5's rows)
   const out = { tier, rank, xp: (B.find(b => b[1] === (last('band') || 'new')) || B[0])[0], tr: {}, op: {}, use: {}, tools: {}, test: null, home: promo ? PROMO.home : 'bunk', done: [], ms: [] };
   for (const r of rows) for (const id of r.train || []) {
     const row = ladderRow(id); if (!row) continue;
@@ -70210,6 +71149,8 @@ function devmodeCareerFor(n) {                           // pure: SHIP.works's c
   if (rows.some(r => r.test)) out.test = { tier: 2, day: 9, tries: 1, passed: true };
   if (promo) { out.done = ['summons2', 'cake2', 'move2', 'ceremony2']; out.ms = [['officer', 10], ['commissioned', Math.min(n, 11)]]; }
   if (rows.some(r => r.test3)) { out.pu = { t3: { day: 15, tries: 1, passed: true, res: promo3 ? 16 : null, bar: promo3 ? 16 : null, toast: n >= 17 ? 17 : null } }; if (promo3) out.ms.push(['senior', 16]); }   // S5-2's record (24u)
+  if (promo4 && out.pu) { out.pu.t4 = { day: 22, tries: 1, passed: true, res: 22, badge: n >= 23 ? 23 : null, move: n >= 23 ? { ready: 25, walked: n >= 25 ? 25 : null, refit: false } : null };   // S6-3's record (24u)
+    out.ms.push(['specialist', 22]); if (n >= 23) out.ms.push(['specialist.badge', 23]); if (n >= 25) out.home = '2-B'; }
   return out;
 }
 function devmodeCareerSet(n, now) {                      // SHIP.works set to day n's (the log, notes and side jobs kept)
@@ -70239,7 +71180,7 @@ function devmodeWeekMet(upTo) {                          // the first week's bea
 }
 function devmodeWake() {                                 // into your bed's room, beside it (the bunk room, or cabin 4-23)
   const id = playerBed(), n = deckOf(id), bed = (DECKS[n].places || []).find(p => p.id === id); if (!bed) return null;
-  const room = roomAt(...bed.at); return devmodeMove(n, () => cellPos(...bed.at), r => r === room);
+  const room = n !== deckDef.num && bed.room ? bed.room : roomAt(...bed.at); return devmodeMove(n, () => cellPos(...bed.at), r => r === room);   // (S6-3) another deck's bed (Deck 2's 2-B): its own room, not this deck's tile
 }
 // the story's beats as shortcuts (the user's q3: they go on to the beat's time and place): the career by the end of
 // day `by`, then the clock to `at` on `day` and you in the room, with `set` for what the beat waits on
@@ -70247,6 +71188,11 @@ const DM_BEATS = [
   { id: 't2', label: 'Day 9: the test job', day: 9, by: 8, at: 530, where: { deck: 5, room: 'w' }, set: W => { W.test = { tier: 2, day: 9, tries: 0, passed: false }; } },   // 08:50 in the Works bay: Calder's test, held from 09:00
   { id: 'promo', label: 'Day 10: the promotion', day: 10, by: 9, get at() { return promoBeatsOn() ? PB_TIMES.summonsAt - 10 : 650; }, where: { deck: 5, room: 'w' } },   // 10:50 in the Works bay: her summons at 11:00 (08:05 for 08:15 with FX28's PROMO_BEATS_ON)
 ];
+if (P5_PROMO4) DM_BEATS.push(                           // Pillar 5 Step 6 (S6-3, W7): the Engine Specialist's beats
+  { id: 't4', label: 'Day 22: the Tier 4 test', day: 22, by: 21, at: 560, where: { deck: 5, room: 'w' }, set: () => { if (!puT4()) pu4Set(22); flagSet('pu4.told', 21); flagSet('pu4.notice', 21); } },   // 09:20 in the Works bay: the test on the board at 09:30
+  { id: 't4res', label: 'Day 22: your Tier 4 result', day: 22, by: 21, at: 1350, where: { deck: 1, room: 'O' }, set: W => { const T = puT4() || pu4Set(22); T.passed = true; T.tries = T.tries || 1; T.day = 22; W.tr.t4 = 22; } },   // 22:30 at the comet: Calder finds you at 22:40
+  { id: 't4badge', label: 'Day 23: the engine badge', day: 23, by: 22, at: 960, where: { deck: 1, room: 'O' } },   // 16:00 in the observation room: the Captain at 16:30
+  { id: 't4move', label: 'Day 25: your Deck 2 quarters', day: 25, by: 24, at: 1110, where: { deck: 3, room: 'M' } });   // 18:30 in the mess: dinner, then Vance
 // starting friendships (the user's q1: the people a steady player meets, approximate): [id, points by about Day 10, from day]
 // (REL_TIERS: 10 an acquaintance, 30 a colleague, 60 a friend), through section 20's relAdd ('intro:' so openness leaves them as given)
 const DM_FRIENDS = [['torres-zeke', 70, 1], ['tomas', 65, 1], ['pell', 50, 3], ['calder', 35, 1], ['halloran-emeka', 32, 1], ['esposito-yara', 30, 3], ['brennan', 22, 1],
@@ -70376,6 +71322,7 @@ function devmodePromoSteps() {                           // the promotion's beat
     out.push({ label: 'The ceremony', at: abs(P.ceremony.day, P.ceremony.at), done: promoDone('ceremony2') });
   }
   try { if (typeof puDevSteps === 'function') out.push(...puDevSteps()); } catch (e) { /* none */ }   // Pillar 5 Step 5's Senior Officer (24u, S5-2), after the first promotion's
+  try { if (P5_PROMO4 && typeof pu4DevSteps === 'function') out.push(...pu4DevSteps()); } catch (e) { /* none */ }   // Step 6's Engine Specialist (24u, S6-3)
   return promoBeatsOn() ? out.sort((a, b) => a.at - b.at) : out;   // FX28: the pip before the cake and your cabin
 }
 function devmodePromoNext() {
@@ -70398,7 +71345,7 @@ function devmodeXp(add, label) {
   devmodeDo('Career: ' + label, () => { const W = devmodeW(); W.xp = Math.max(0, Math.min(9999, typeof add === 'function' ? add(W) : W.xp + add)); return 'Works reputation: ' + BAND_WORD[worksBand()] + ' (xp ' + W.xp + ').'; });
 }
 function devmodeNextTraining() {
-  const W = SHIP.works, row = W && CAREER_LADDER.find(r => W.tr[r.id] === undefined && r.tier <= W.tier && r.id !== 't2');
+  const W = SHIP.works, row = W && CAREER_LADDER.find(r => W.tr[r.id] === undefined && r.tier <= W.tier && r.id !== 't2' && WORK_MECH[r.id]);   // (W6, RV23's note) a row whose sub-block isn't built (Step 6's before its pieces land) is never offered
   if (!row) return devmodeSay(W ? 'Every training open to your tier is done.' : 'No career record yet.');
   devmodeDo('Career: train ' + mechName(row.id), () => {
     const d = SHIP.time.day; if (W.cur && W.cur.id === row.id) W.cur = null;
