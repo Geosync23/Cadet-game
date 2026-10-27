@@ -52568,7 +52568,7 @@ function chatShow() {
 }
 // talking happens up close (the user, 2026-10-27): within TALK_NEAR tiles (1 tile is about a metre) of them; a tap from
 // further shows their card with what they're doing and Walk over, and the talk choices come when you get there
-const TALK_NEAR = 2.5;
+const TALK_NEAR = 2.5, TALK_FAR_STAY = 6;                 // TALK_FAR_STAY: ship minutes (10 real seconds) a far card stays if you don't press Walk over (RV23's should)
 const DOING_WORD = { work: 'at work', leisure: 'taking a break', breakfast: 'having breakfast', dinner: 'having dinner', gym: 'working out', callhome: 'calling home', wash: 'washing up', commute: 'on the move', off: 'off duty', appt: 'meeting someone', event: 'at an event', sleep: 'asleep' };
 function chatDoing(p, w) {                               // "Tove is at work in the garden."
   const what = w && DOING_WORD[w.act] || 'busy', pl = w && w.placeId && typeof placeById === 'function' ? placeById(w.placeId) : null;
@@ -52585,8 +52585,8 @@ function chatOpen(p, greet, line, o) {                    // greet: they came to
   socInit(); if (!SOC.idx.has(p.id)) return false;
   const w = typeof whereIs === 'function' ? whereIs(p, shipNow()) : null;
   if (w && w.act === 'sleep') { chatClose(); toast(p.name, p.role + '. Fast asleep. Better not wake them.'); return true; }
-  { const a0 = o && o.tap && typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === p);   // (the user, 2026-10-27) talk only up close: from further off, their card says who and what they're doing, and Walk over
-    if (a0 && Math.hypot(a0.x - player.obj.position.x, a0.z - player.obj.position.z) > TALK_NEAR) { if (CHAT && CHAT.p !== p) chatClose(); CHAT = { p, far: true, greet, open: line || null, line: { text: chatDoing(p, w), say: false }, ask: false, at: shipNow(), reach: Infinity }; if (typeof toastEl !== 'undefined') toastEl.classList.remove('show'); chatShow(); return true; } }
+  { const a0 = o && o.tap && typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === p);   // (the user, 2026-10-27) talk only up close: from further off, their card says who and what they're doing, and Walk over; reach: move further off than now (not walking over) and it closes (RV23)
+    if (a0 && Math.hypot(a0.x - player.obj.position.x, a0.z - player.obj.position.z) > TALK_NEAR) { if (CHAT && CHAT.p !== p) chatClose(); CHAT = { p, far: true, greet, open: line || null, line: { text: chatDoing(p, w), say: false }, ask: false, at: shipNow(), reach: Math.hypot(a0.x - player.obj.position.x, a0.z - player.obj.position.z) + 1.5 }; if (typeof toastEl !== 'undefined') toastEl.classList.remove('show'); chatShow(); return true; } }
   const r = relGet(p.id); if (r.met === null) r.met = Math.floor(shipNow());
   const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === p), d = a ? Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) : 0;
   CHAT = { p, line: line || (greet ? socGreet(p) : chatLine(p)), ask: false, fav: favourOf(p), at: shipNow(), reach: Math.max(4, d + 1.5) };   // walk off further than that and it closes
@@ -52817,8 +52817,9 @@ function chatTick() {
     const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === C.p); if (!a) { chatClose(); return; }
     const dd = Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z);
     if (C.walking) a.talking = Math.max(a.talking || 0, .25);
-    if (dd <= TALK_NEAR) { const { p, greet, open } = C; CHAT = null; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z); a.talking = 6; chatOpen(p, greet, open || undefined); return; }
-    if (C.walking && !player.path.length && shipNow() - C.walking > 1) { C.walking = 0; chatShow(); }   // stopped short (a closed door, a tap elsewhere): Walk over again
+    if (!C.walking && (dd > C.reach || shipNow() - C.at > TALK_FAR_STAY)) { chatClose(); return; }   // (RV23's should) not walking over: it closes when you move away or after a short while, so seeks, visits and chatter aren't held back
+    if (C.walking && dd <= TALK_NEAR) { const { p, greet, open } = C; CHAT = null; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z); a.talking = 6; chatOpen(p, greet, open || undefined); return; }
+    if (C.walking && !player.path.length && shipNow() - C.walking > 1) { C.walking = 0; C.at = shipNow(); C.reach = dd + 1.5; chatShow(); }   // stopped short (a closed door, a tap elsewhere): Walk over again (the short while starts again from here)
     return;
   }
   if (C.visit) { if (C.talk && !C.talk.end) talkStep(C); return; }   // a visitor in your bunk room stays till you close it (or 22:00); a talk with them still runs
