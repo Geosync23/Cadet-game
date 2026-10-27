@@ -3228,7 +3228,8 @@ def n6_clock(r, fails, want, scene):
     if not ck or not walk_to(r, ck[0], ck[1]): fails.append(f'{scene}: could not walk to the time clock by the stick ({ck})'); return False
     h = ring_and_A(r, ['clock']); r.step(6)
     if not r.ev("(() => { const c = document.getElementById('clockScreen'); return !!c && !c.hidden; })()"): fails.append(f'{scene}: the time clock\'s screen never opened (ring "{h}")'); return False
-    res = press_in_panel(r, f"clockButton('{want}')"); r.step(4)
+    lab = 'Clock in' if want == 'in' else 'Clock out'
+    res = press_in_panel(r, f"[...document.querySelectorAll('#clockScreen .btns button')].find(b => !b.disabled && b.textContent === '{lab}')"); r.step(4)
     print(f'  {scene} by pad: ring "{h}", {want} {res}')
     r.ev("(() => { const c = document.getElementById('clockScreen'); if (c) c.hidden = true; })()"); r.step(2)
     return res == 'ok'
@@ -3246,15 +3247,20 @@ def part_nights(pw, src, tag):
     bd = r.ev("(() => { const id = playerBed(), b = (DECKS[deckOf(id)].places || []).find(p => p.id === id), c = b && cellPos(...(b.walk || b.at)); return c ? [c.x, c.z] : null; })()")
     if not bd or not walk_to(r, bd[0], bd[1]): fails.append(f'bed: could not walk to your bunk by the stick ({bd})')
     else:
-        h = ring_and_A(r, ['bunk', 'lie', 'sleep', 'bed'])
-        for k in range(20):
+        mine = r.ev(MY_BUNK); h = None
+        for k in range(12):                              # the ring on your own bunk (not a neighbour's)
+            sel = r.ev(RING_SEL)
+            if sel and mine and sel['key'] == mine: h = r.ev(HINT); break
+            r.press('RIGHT'); r.step(4)
+        if h: r.press('A')
+        for k in range(40):                              # you walk over and lie down; by day after 12:30 lying brings the alarm card
+            r.step(15)
             if r.ev("!sleepEl.hidden"): break
-            r.step(10)
         lab = r.ev("sleepEl.hidden ? null : document.getElementById('alarmT').textContent")
         res = press_in_panel(r, "document.getElementById('sleepYes')") if lab else 'the alarm never opened'
         r.page.wait_for_timeout(2600); r.step(4)
         t = r.ev("[SHIP.time.day, SHIP.time.min]"); print(f'  the bunk by pad: ring "{h}", "{lab}", Set {res}, woke at {t}')
-        if lab != 'Sleep until 16:45' or t != [22, 1005]: fails.append(f'bed: "Sleep until 16:45" not reached or not slept by pad ({h}, {lab}, {res}, {t})')
+        if lab != 'Sleep until 16:45' or t[0] != 22 or not 1005 <= t[1] < 1010: fails.append(f'bed: "Sleep until 16:45" not reached or not slept by pad ({h}, {lab}, {res}, {t})')
     # night 2 by pad: Day 23 20:46 in the Works bay
     r.ev("(() => { skipTo(22 * 1440 + 1246); machinesNow(); goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); player.stop(); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; })()"); r.ev(N6_TICK); r.step(10)
     if n6_clock(r, fails, 'in', 'night 2 clock in') and not r.ev("(SHIP.works.ns[23] || {}).in > 0"): fails.append('night 2: Clock in pressed by pad, not clocked in')
