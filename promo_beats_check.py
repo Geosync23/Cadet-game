@@ -261,9 +261,204 @@ def part_t3before(g):
     check(r['mon'] == 15 and r['dlg'] == 'pu3.offer' and r['t3'] and r['t3']['day'] == 16, f"t3before: on a later day, from 08:00, \"tomorrow\" ({r})")
     check(r['late'] and r['late']['day'] == 16 and r['lateMail'] == 1, f"t3before: not found by 22:00, it comes by Mail ({r})")
 
+# ---- Step 6, S6-3 (W6): the Engine Specialist promotion. t4off on the build as shipped (P5_STEP6 off: nothing); the rest
+# on a copy with P5_STEP6 switched on (const P5_STEP6 = P5_STEP5 && true;)
+T4 = "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"
+def t4on(g, name):
+    on = g.ev(T4)
+    if not on: print(f'({name}) P5_PROMO4 off in this build: skipped (run it on a copy with P5_STEP6 on)')
+    return on
+T4_W = "const W = __w(19, 470, { xp: 60, tr: { ps: 12, t2: 9, t3: 15, m19: 17 } }); W.tier = 3; W.rank = 'senior'; __friends();"
+def part_t4off(g):
+    if g.ev(T4): print('(t4off) P5_PROMO4 on in this build: skipped (it is the shipped build\'s part)'); return
+    print('(t4off) P5_PROMO4 off: nothing of the Engine Specialist promotion:')
+    r = g.ev("""(() => { """ + T4_W + """ __bay();
+      for (const t of [18 * 1440 + 500, 18 * 1440 + 900, 20 * 1440 + 1090, 20 * 1440 + 1330]) { setShipNow(t); __tick(); }
+      return { ready: typeof pu4Ready === 'function' && pu4Ready(19), t4: !!(SHIP.works.pu && SHIP.works.pu.t4), rows: __rows(22).filter(x => /Tier 4/.test(x)),
+        flags: Object.keys(SHIP.flags).filter(k => /pu4/.test(k)), mail: __mail().filter(m => /Tier 4/.test(m)), notes: __notes.filter(n => /Tier 4/.test(n)), dlg: DIALOGUE && DIALOGUE.id, tab: JSON.stringify(puCheck()) }; })()""")
+    print('   ', r)
+    check(not r['ready'] and not r['t4'] and not r['rows'] and not r['flags'] and not r['mail'] and not r['notes'] and not r['dlg'] and 'Tier 4' not in r['tab'], f"t4off: nothing happens ({r})")
+def part_t4before(g):
+    if not t4on(g, 't4before'): return
+    print('(t4before) the offer in person (Friday), the record, the rows; the weekend: Sunday dinner; by Mail at 22:00:')
+    r = g.ev("""(() => { """ + T4_W + """ __bay(); const out = { ready18: pu4Ready(18), ready: pu4Ready(19) };
+      setShipNow(18 * 1440 + 470); __tick(); out.early = !!PU4_LIVE.seek; setShipNow(18 * 1440 + 481); __tick(); out.held = !!PU4_LIVE.seek; setShipNow(18 * 1440 + 501); __tick();   // Friday 08:00-08:20 is the Senior briefing's held hour: after it
+      out.seek = !!PU4_LIVE.seek; out.esc = (p5Escort({ id: 'calder' }, shipNow()) || {}).mode; out.before = !!puT4();
+      const keep = puNearMe; puNearMe = id => id === 'calder' ? true : keep(id); __tick(); puNearMe = keep;
+      out.dlg = DIALOGUE ? DIALOGUE.m.id : null; out.during = !!puT4();
+      let n = 0; while (DIALOGUE && n++ < 30) { const l = DIALOGUE.queue[DIALOGUE.i]; dialogueStep(l && l.choice ? 1 : undefined); }
+      out.t4 = puT4(); out.reply = flag('pu4.reply'); out.notes = __notes.filter(x => /Tier 4/.test(x)); out.mail = __mail().filter(m => /Tier 4/.test(m));
+      out.rows = __rows(22); out.next = worksNext(); out.tab = JSON.stringify(puCheck()); out.esc2 = (p5Escort({ id: 'calder' }, shipNow()) || {}).mode || null;
+      setShipNow(20 * 1440 + 1201); __tick(); out.luck = __mail().filter(m => /Good luck/.test(m)).length;
+      const keep2 = JSON.stringify(SHIP.works.pu || {}); const c = pu4Clean(JSON.parse(keep2).t4); out.clean = JSON.stringify(c) === JSON.stringify(puT4()); out.junk = pu4Clean({ day: 'x' });
+      return out; })()""")
+    for k in ('held', 'ready18', 'ready', 'early', 'seek', 'esc', 'before', 'dlg', 'during', 't4', 'reply', 'notes', 'mail', 'rows', 'next', 'tab', 'esc2', 'luck', 'clean', 'junk'): print('   ', k, r[k])
+    check(not r['ready18'] and r['ready'] and not r['early'] and not r['held'] and r['seek'] and r['esc'] == 'follow' and not r['before'], f"t4before: from Friday Day 19, 08:00 (after the briefing's hold to 08:20), she comes to find you (her escort follows you), the test not set yet ({r})")
+    check(r['dlg'] == 'pu4.offer' and not r['during'], f"t4before: next to you, her scene, in person first ({r['dlg']})")
+    check(r['t4'] and r['t4']['day'] == 22 and r['t4']['tries'] == 0 and not r['t4']['passed'] and r['reply'] == 2 and r['esc2'] is None, f"t4before: at its end the test is set for Monday Day 22, your reply kept, she stops following ({r['t4']})")
+    check(any('Tier 4' in n and '09:30' in n for n in r['notes']) and any(m.startswith('Chief Ines Calder: Your Tier 4 test |') for m in r['mail']), f"t4before: then the urgent notice and the Mail, the record ({r['notes']}, {r['mail']})")
+    check(any('09:30' in x and 'Tier 4' in x for x in r['rows']) and 'Tier 4' in r['next'] and 'Power and relays' in r['tab'] and 'Test job' in r['tab'], f"t4before: the Schedule, What's next and the Training tab ({r['rows']}, {r['next']}, {r['tab']})")
+    check(r['luck'] == 2 and r['clean'] and r['junk'] is None, f"t4before: two friends' Mail at 20:00 on Sunday; the save's record read back, junk dropped ({r['luck']}, {r['clean']}, {r['junk']})")
+    r = g.ev("""(() => { const out = {}; (() => { """ + T4_W + """ })(); __bay();
+      setShipNow(19 * 1440 + 600); __tick(); out.sat = !!PU4_LIVE.seek;   // Saturday: she waits for Sunday dinner
+      setShipNow(20 * 1440 + 600); __tick(); out.sunAm = !!PU4_LIVE.seek; setShipNow(20 * 1440 + 1081); __tick(); out.sunDinner = !!PU4_LIVE.seek;
+      setShipNow(20 * 1440 + 1321); __tick(); out.late = puT4(); out.lateMail = __mail().filter(m => /Tier 4/.test(m)).length; return out; })()""")
+    print('   ', r)
+    check(not r['sat'] and not r['sunAm'] and r['sunDinner'], f"t4before: Trusted at the weekend, she comes at Sunday dinner, not before ({r})")
+    check(r['late'] and r['late']['day'] == 22 and r['lateMail'] == 1, f"t4before: not found by 22:00, it comes by Mail, the test still Monday ({r})")
+
+T4_TEST = """const W = __w(22, 300, { xp: 60, tr: { ps: 12, t2: 9, t3: 15, m19: 17 } }); W.tier = 3; W.rank = 'senior'; __friends();
+      for (const r of CAREER_LADDER) if (r.id !== 't4' && r.tier <= 3 && r.day <= 21) { W.tr[r.id] = W.tr[r.id] || 9; (W.op[9] = W.op[9] || []).push(r.id); }
+      pu4Set(22); flagSet('pu4.told', 19); flagSet('pu4.notice', 19); setShipNow(21 * 1440 + 361); machinesNow(); careerClock(shipNow(), true); __bay();"""
+def part_t4test(g):
+    if not t4on(g, 't4test'): return
+    print('(t4test) the test morning, the board, each step, passing; set again if not taken:')
+    r = g.ev("""(() => { """ + T4_TEST + """ __tick(); const out = { notes: __notes.filter(x => /Tier 4/.test(x)) };
+      setShipNow(21 * 1440 + 545); __tick(); out.day = GUIDE.list.filter(e => /^pu4/.test(e.id)).map(e => e.id + ' L' + e.level);
+      setShipNow(21 * 1440 + 571); __tick(); const c = W.cur, j = c && SHIP.jobs.find(x => x.id === c.j);
+      out.cur = c && c.id + ' ' + c.st; out.job = j && { slot: j.reserved, mach: j.mach, kind: j.kind, found: hhmm(j.found % 1440), until: hhmm(j.until % 1440), part: SHIP.stores['coil winding'] };
+      out.ptr = puPtr('t4'); out.board = GUIDE.list.filter(e => /^pu4:test:/.test(e.id)).map(e => (e.goal() || {}).label);
+      if (!j) return out;
+      const arrow = () => GUIDE.list.filter(e => /^pu4:step/.test(e.id)).map(e => (e.goal() || {}).label || '').join('|');
+      __said.length = 0; out.take = claimJob(j.id); __tick(); out.said = __said.slice(); out.esc = (worksEscort({ id: 'calder' }, shipNow()) || {}).mode; out.a0 = arrow();
+      out.stops = jobStops(j).map(x => x.step); SHIP.player.carry.push('coil winding');
+      out.order = jobStepDone(j.id, 2).ok;   // the winding before the reading: refused
+      out.r = jobStops(j).map((x, k) => jobStepDone(j.id, k).ok); out.done = !!j.workDone; out.cond = SHIP.machines[j.mach].cond; out.a1 = arrow();
+      __said.length = 0; __notes.length = 0; out.turnin = turnInJob(j.id); __tick(); out.t4 = puT4(); out.tr = W.tr.t4; out.cur2 = W.cur; out.passed = __said.slice();
+      out.mail = __mail().filter(m => /Your test/.test(m)); out.notes2 = __notes.slice(); return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(any('Tier 4' in n for n in r['notes']) and r['day'] and r['day'][0].startswith('pu4:testday:22 L1'), f"t4test: the morning's notice and a level 1 arrow to the board from 09:00 ({r['notes']}, {r['day']})")
+    check(r['cur'] == 't4 do' and r['job'] and r['job']['slot'] == 26 and r['job']['mach'] in ('6-coil-1', '6-coil-2', '6-coil-3') and r['job']['kind'] == 'tier4' and r['job']['found'] == '09:30' and r['job']['until'] == '12:30' and r['job']['part'] >= 1, f"t4test: 09:30, the test on the board, held for you to 12:30 in slot 26, on a drive coil, its winding on the shelf ({r['cur']}, {r['job']})")
+    check(r['ptr'] and r['ptr']['force'] and 'Tier 4' in r['ptr']['label'] and r['board'] == ['Your Tier 4 test: take it'], f"t4test: the board's ring and the arrow: take it ({r['ptr']}, {r['board']})")
+    check(r['take'] and r['esc'] == 'follow' and r['said'] and 'winding' in r['a0'], f"t4test: taken, Calder's word, she follows you, the arrow to the winding ({r['said']}, {r['esc']}, {r['a0']})")
+    check(r['stops'] == ['fetch', 'isolate', 'read', 'wind', 'cycle'] and not r['order'] and all(r['r']) and r['done'] and r['cond'] >= 95 and r['a1'] == 'Turn it in', f"t4test: fetch, off the cycle, read, wind, back in: in order; the coil put right ({r['stops']}, {r['order']}, {r['r']}, {r['cond']}, {r['a1']})")
+    check(r['turnin'] and r['t4']['passed'] and r['tr'] == 22 and r['cur2'] is None and any('I\'ll find you' in x for x in r['passed']) and r['mail'] and any('Tier 4' in n for n in r['notes2']), f"t4test: turned in: passed, Calder's \"I'll find you\", the Mail and the notice ({r['t4']}, {r['passed']}, {r['mail']}, {r['notes2']})")
+    r = g.ev("""(() => { """ + T4_TEST + """ __tick(); setShipNow(21 * 1440 + 571); __tick(); const out = {};
+      for (let t = 21 * 1440 + 600; t <= 21 * 1440 + 1100; t += 30) { setShipNow(t); machinesNow(); worksCareerTick(t); __tick(); }
+      out.t4 = puT4(); out.cur = W.cur && W.cur.id + ' ' + W.cur.st; out.mail = __mail().filter(m => /^Chief Ines Calder: Again/.test(m)).length; out.jobs = SHIP.jobs.filter(x => x.kind === 'tier4' && x.status !== 'done').length; return out; })()""")
+    print('   ', r)
+    check(r['t4'] and not r['t4']['passed'] and r['t4']['day'] > 22 and r['mail'] == 1 and r['jobs'] == 0, f"t4test: not taken: never failed, set again two workdays on, by her word and Mail ({r})")
+
 T3_TEST = """const W = __w(15, 300, { xp: 60, tr: { ps: 12, t2: 9 } }); W.tier = 2; W.rank = 'officer'; __friends();
       for (const r of CAREER_LADDER) if (r.id !== 't3' && r.tier <= 2) { W.tr[r.id] = W.tr[r.id] || 9; (W.op[9] = W.op[9] || []).push(r.id); }
       puSet(15); flagSet('pu3.told', 14); flagSet('pu3.notice', 14); setShipNow(14 * 1440 + 361); machinesNow(); careerClock(shipNow(), true); __bay();"""
+# ---- S6-3 turn 3 (W7): the result when your shift starts (Day 22, 22:40), and the Captain's engine badge
+T4_RES = """const W = __w(22, 760, { xp: 60, tr: { ps: 12, t2: 9, t3: 15, m19: 17, t4: 22 } }); W.tier = 3; W.rank = 'senior'; __friends();
+      const T = pu4Set(22); T.passed = true; T.tries = 1; flagSet('p5n.on', 22);"""
+def part_t4passed(g):
+    if not t4on(g, 't4passed'): return
+    print('(t4passed) the result at 22:40: Calder finds you and says it; asleep, a knock; not found, by Mail:')
+    r = g.ev("""(() => { """ + T4_RES + """ const out = { when: hhmm(pu4ResWhen() % 1440) }; setShipNow(21 * 1440 + 1300); __bay(); __tick();
+      out.next = worksNext(); out.rows = __rows(22).filter(x => /result/i.test(x));
+      setShipNow(21 * 1440 + 1361); goToDeck(1); __tick(); out.seek = !!PU4_LIVE.rseek; out.esc = (worksEscort({ id: 'calder' }, shipNow()) || {}).mode;
+      out.fetch = typeof pu4Fetches === 'function' && pu4Fetches(shipNow()); out.n1 = __notes.filter(n => /Night shift now/.test(n)).length;
+      const keep = puNearMe; puNearMe = (id, r) => id === 'calder' ? true : keep(id, r); __said.length = 0; __tick();
+      out.walk = !!PU4_LIVE.walk; out.dlg0 = DIALOGUE && DIALOGUE.id; out.found = __said.filter(x => /^calder/.test(x)); out.lead = JSON.stringify((worksEscort({ id: 'calder' }, shipNow()) || {}).to || null);
+      if (PU4_LIVE.walk && typeof p5nNight === 'function') { p5nNight(22).in = shipNow(); } out.lead2 = JSON.stringify((worksEscort({ id: 'calder' }, shipNow()) || {}).to || null);
+      goToDeck(6); setShipNow(21 * 1440 + 1370); __tick(); puNearMe = keep;
+      out.dlg = DIALOGUE && DIALOGUE.id; """ + dlg_run(0) + """
+      out.w = [W.tier, W.rank, W.xp]; out.t4 = puT4(); out.ms = W.ms.filter(x => /^specialist/.test(x[0])); out.mail = __mail().filter(m => /^Chief Ines Calder: Your result/.test(m)).length;
+      out.invite = __mail().filter(m => /^Captain Odile Marrow: Your badge/.test(m)); out.badge = SHIP.occasions.filter(x => x.id === 'pu4Badge').map(x => hhmm(x.at % 1440) + ' day ' + (Math.floor(x.at / 1440) + 1));
+      const a = apptList().find(x => /^pu4Badge@/.test(String(x.occ))); out.places = a && a.places; out.next2 = worksNext(); out.rec = worksRecordHead().text;
+      """ + T4_RES.replace('const W =', 'const W2 =').replace('W.', 'W2.').replace('const T = pu4Set', 'const T2 = pu4Set').replace('T.passed', 'T2.passed').replace('T.tries', 'T2.tries') + """
+      __notes.length = 0; setShipNow(21 * 1440 + 1361); sleeping = true; __tick(true); sleeping = false; out.knock = [W2.tier, (puT4() || {}).res, __notes.filter(n => /knock/i.test(n)).length];
+      """ + T4_RES.replace('const W =', 'const W3 =').replace('W.', 'W3.').replace('const T = pu4Set', 'const T3 = pu4Set').replace('T.passed', 'T3.passed').replace('T.tries', 'T3.tries') + """
+      setShipNow(21 * 1440 + 1361); __tick(); setShipNow(21 * 1440 + 1392); __tick(); out.late = [W3.tier, (puT4() || {}).res, __mail().filter(m => /Your result/.test(m)).length]; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['when'] == '22:40' and '22:40' in r['next'] and r['rows'] and r['rows'][0].startswith('22:40'), f"t4passed: the result when the night starts, 22:40; What's next and the Schedule say so ({r['when']}, {r['next']}, {r['rows']})")
+    check(r['seek'] and r['esc'] == 'follow' and r['dlg'] == 'pu4.stairs', f"t4passed: 22:40, she comes to find you where you are; her words in person ({r['seek']}, {r['esc']}, {r['dlg']})")
+    if r['walk']: check(r['fetch'] and r['n1'] == 0 and not r['dlg0'] and r['found'] and '"deck":5' in r['lead'] and '"deck":6' in r['lead2'], f"t4passed (nights on): night 1's own notice held back, she finds you and walks you down: the time clock first, then the engine room; her words on the way ({r['fetch']}, {r['n1']}, {r['dlg0']}, {r['found']}, {r['lead']}, {r['lead2']})")
+    check(r['w'] == [4, 'specialist', 0] and r['t4']['res'] == 22 and r['ms'] == [['specialist', 22]] and r['mail'] == 1, f"t4passed: Tier 4, Engine Specialist, xp 0, the milestone, the Mail as the record ({r['w']}, {r['ms']}, {r['mail']})")
+    check(r['badge'] == ['16:30 day 23'] and r['invite'] and '16:30' in r['invite'][0] and r['places'] and r['places'].get('marrow') == '1-ceremony-captain' and len(r['places']) == 4, f"t4passed: the badge booked for 16:30 the next day, the Captain's invite, the four on their spots ({r['badge']}, {r['invite']}, {r['places']})")
+    check('engine badge' in r['next2'] and 'Specialist · ' not in r['rec'], f"t4passed: What's next names the badge; the Record says Engine Specialist once ({r['next2']}, {r['rec']})")
+    check(r['knock'] == [4, 22, 1], f"t4passed: asleep at 22:40, she knocks: a notice, the night is yours ({r['knock']})")
+    check(r['late'] == [4, 22, 1], f"t4passed: not found in 30 minutes, by Mail ({r['late']})")
+
+def part_t4welcome(g):
+    if not t4on(g, 't4welcome'): return
+    if not g.ev("typeof P5_NIGHT !== 'undefined' && P5_NIGHT"): print('(t4welcome) P5_NIGHT off: no welcome (skipped)'); return
+    print('(t4welcome) Day 23 06:00, the shift change: both crews, Torres\'s speech, the certificate signed; missed: by Mail:')
+    r = g.ev("""(() => { """ + T4_RES + """ const out = {}; pu4Promote(21 * 1440 + 1361, 'met'); p5nNight(22).in = 21 * 1440 + 1366;
+      setShipNow(22 * 1440 + 346); __tick(); out.occ = SHIP.occasions.filter(x => x.id === 'pu4Welcome').map(x => hhmm(x.at % 1440) + ' day ' + (Math.floor(x.at / 1440) + 1));
+      out.arrow = GUIDE.list.filter(e => e.id === 'pu4:welcome').map(e => e.level + ' ' + (e.goal() || {}).label); const a = apptList().find(x => /^pu4Welcome@/.test(String(x.occ))); out.with = a && a.with;
+      setShipNow(22 * 1440 + 361); goToDeck(6); player.obj.position.copy(cellPos(...ROOM_TILES['E'][Math.floor(ROOM_TILES['E'].length / 2)])); occasionsTick(shipNow()); meetingsTick(shipNow());
+      out.dlg = DIALOGUE && DIALOGUE.id; """ + dlg_run(1) + """ out.signed = flag('pu4.signed'); pu4Badge(22 * 1440 + 1000, 'met'); out.keep = (SHIP.social && SHIP.social.keepsakes || []).map(k => k.what).filter(k => /Specialist/.test(k));
+      """ + T4_RES.replace('const W =', 'const W2 =').replace('W.', 'W2.').replace('const T = pu4Set', 'const T2 = pu4Set').replace('T.passed', 'T2.passed').replace('T.tries', 'T2.tries') + """
+      pu4Promote(21 * 1440 + 1361, 'met'); p5nNight(22).in = 21 * 1440 + 1366; setShipNow(22 * 1440 + 346); __tick(); setShipNow(22 * 1440 + 391); __tick();
+      out.missed = [flag('pu4.signed'), __mail().filter(m => /We signed it anyway/.test(m)).length];
+      """ + T4_RES.replace('const W =', 'const W3 =').replace('W.', 'W3.').replace('const T = pu4Set', 'const T3 = pu4Set').replace('T.passed', 'T3.passed').replace('T.tries', 'T3.tries') + """
+      pu4Promote(21 * 1440 + 1361, 'mail'); setShipNow(22 * 1440 + 361); __tick(); out.none = SHIP.occasions.filter(x => x.id === 'pu4Welcome').length; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['occ'] == ['06:00 day 23'] and r['arrow'] and r['arrow'][0].startswith('1 ') and r['with'] and 'reyes-alejandro' in r['with'] and 'torres-zeke' in r['with'], f"t4welcome: booked for 06:00, both crews, a level 1 arrow from 05:45 ({r['occ']}, {r['arrow']}, {r['with']})")
+    check(r['dlg'] == 'pu4.welcome' and r['signed'] == 23 and r['keep'] and 'signed' in r['keep'][0], f"t4welcome: the speech, the certificate signed, the signed one at the badge ({r['dlg']}, {r['signed']}, {r['keep']})")
+    check(r['missed'] == [23, 1] and r['none'] == 0, f"t4welcome: missed: Torres's Mail; night 1 not worked: no welcome ({r['missed']}, {r['none']})")
+
+def part_t4badge(g):
+    if not t4on(g, 't4badge'): return
+    print('(t4badge) the Captain pins your engine badge; your Deck 2 quarters said there first:')
+    r = g.ev("""(() => { """ + T4_RES + """ const out = {}; pu4Promote(21 * 1440 + 1361, 'met');
+      __notes.length = 0; setShipNow(22 * 1440 + 800); __bay(); __tick(); out.wake = __notes.slice(); out.rows = __rows(23).filter(x => /badge/.test(x));
+      __notes.length = 0; __said.length = 0; setShipNow(22 * 1440 + 961); __tick(); out.notice = __notes.slice();
+      setShipNow(22 * 1440 + 976); goToDeck(4); __tick(); out.arrow = GUIDE.list.filter(e => e.id === 'pu4:badge').map(e => e.level + ' ' + (e.goal() || {}).label + ' ' + (e.goal() || {}).place);
+      setShipNow(22 * 1440 + 991); goToDeck(1); player.obj.position.copy(cellPos(...PLACE_OF.get('1-ceremony-you').at)); occasionsTick(shipNow()); meetingsTick(shipNow());
+      out.dlg = DIALOGUE && DIALOGUE.id; out.pin = 0; """ + dlg_run(0) + """ out.t4 = puT4(); out.keep = (SHIP.social && SHIP.social.keepsakes || []).map(k => k.what);
+      out.quarters = __mail().filter(m => /^Chief Ines Calder: Your quarters/.test(m)); out.rec = worksRecordHead().text;
+      """ + T4_RES.replace('const W =', 'const W2 =').replace('W.', 'W2.').replace('const T = pu4Set', 'const T2 = pu4Set').replace('T.passed', 'T2.passed').replace('T.tries', 'T2.tries') + """
+      pu4Promote(21 * 1440 + 1361, 'met'); setShipNow(22 * 1440 + 1006); sleeping = true; __tick(true); sleeping = false;
+      out.wait = [flag('pu4.badge.wait'), pu4BadgeDay(), SHIP.occasions.filter(x => x.id === 'pu4Badge' && x.status === 'asked').map(x => Math.floor(x.at / 1440) + 1)];
+      setShipNow(23 * 1440 + 1096); __tick(); out.missed = [(puT4() || {}).badge, __mail().filter(m => /^Captain Odile Marrow: Your badge \\| We missed/.test(m)).length]; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(any('16:30' in n and 'badge' in n for n in r['wake']) and r['rows'] and r['rows'][0].startswith('16:30'), f"t4badge: the notice as you wake, the Schedule's row ({r['wake']}, {r['rows']})")
+    check(any('Go now' in n for n in r['notice']) and r['arrow'] and r['arrow'][0].startswith('1 ') and '1-ceremony-you' in r['arrow'][0], f"t4badge: 16:00 'Go now', a level 1 arrow from 16:15 to your spot ({r['notice']}, {r['arrow']})")
+    check(r['dlg'] == 'pu4.badge' and r.get('pin') and r['t4']['badge'] == 23 and r['t4']['move'] and r['t4']['move']['ready'] == 25, f"t4badge: the scene with the pin; your quarters ready for Thursday Day 25 ({r['dlg']}, {r['t4']})")
+    check(r['quarters'] and 'Thursday' in r['quarters'][0] and any('Engine Specialist' in k for k in r['keep']) and 'Senior Officer, Engine Specialist, Day 23' in r['rec'], f"t4badge: Calder's Mail as the record, the certificate, the Record's line ({r['quarters']}, {r['keep']}, {r['rec']})")
+    check(r['wait'][0] == 1 and r['wait'][1] == 24 and 24 in r['wait'][2], f"t4badge: asleep at 16:45, the Captain waits until the next afternoon ({r['wait']})")
+    check(r['missed'] == [24, 1], f"t4badge: awake and not there, by Mail by 18:15 ({r['missed']})")
+
+# ---- S6-3 turn 4 (W7): your quarters on Deck 2, Vance's walk after dinner; open till 22:00, then the next day; laundry collected
+T4_MOVE = """const W = __w(25, 300, { xp: 10, tr: { ps: 12, t2: 9, t3: 15, m19: 17, t4: 22 } }); W.tier = 4; W.rank = 'specialist'; __friends();
+      const T = pu4Set(22); T.passed = true; T.tries = 1; T.res = 22; T.badge = 23; T.move = { ready: 25, walked: null, refit: false }; PU4_LIVE.mv = null; flagSet('p5n.on', 22); flagSet('p5n.off', 25);"""
+def part_t4move(g):
+    if not t4on(g, 't4move'): return
+    print('(t4move) Thursday: the notice, the Mail, Vance after dinner, room B on Deck 2; late: the next day; laundry collected:')
+    r = g.ev("""(() => { """ + T4_MOVE + """ const out = {}; setShipNow(24 * 1440 + 400); __bay(); __tick(); out.wake = __notes.slice(); out.rows = __rows(25).filter(x => /quarters/.test(x)); out.next = worksNext();
+      setShipNow(24 * 1440 + 1021); __tick(); out.mail = __mail().filter(m => /^Chief Ines Calder: Tonight/.test(m)).length;
+      setShipNow(24 * 1440 + 1100); __tick(); out.early = !!PU4_LIVE.mv; flagSet('pu4.ate', 25); __notes.length = 0; __tick(); out.mv = !!PU4_LIVE.mv; out.notice = __notes.slice();
+      out.esc = (worksEscort({ id: 'vance' }, shipNow()) || {}).mode; out.open0 = worksHomeOpen(2, 'B');
+      const keep = puNearMe; puNearMe = (id, r) => id === 'vance' ? true : keep(id, r); __said.length = 0; setShipNow(24 * 1440 + 1102); __tick(); puNearMe = keep;
+      out.met = PU4_LIVE.mv && PU4_LIVE.mv.met; out.esc2 = (worksEscort({ id: 'vance' }, shipNow()) || {}).mode; out.arrow = GUIDE.list.filter(e => /^pu4:move/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label);
+      goToDeck(2); player.obj.position.copy(cellPos(...PLACE_OF.get('2-B').at)); setShipNow(24 * 1440 + 1110); __tick();
+      out.home = W.home; out.t4 = puT4(); out.bed = playerBed(); out.open = [worksHomeOpen(2, 'B'), worksHomeOpen(4, 'W')]; out.said = __said.filter(x => /^vance/.test(x)); out.next2 = worksNext();
+      """ + T4_MOVE.replace('const W =', 'const W2 =').replace('W.', 'W2.').replace('const T = pu4Set', 'const T2 = pu4Set').replace(' T.', ' T2.') + """
+      __bay(); setShipNow(24 * 1440 + 1201); __tick(); out.by20 = !!PU4_LIVE.mv; setShipNow(24 * 1440 + 1321); __tick(); out.gone22 = !PU4_LIVE.mv && !puT4().move.walked;
+      const e26 = dayShiftEnd(26); setShipNow(25 * 1440 + e26 - 5); __tick(); out.before26 = !!PU4_LIVE.mv; setShipNow(25 * 1440 + e26 + 1); __tick(); out.next26 = !!PU4_LIVE.mv;
+      CLOTHES_ON = true; W2.home = '2-B'; SHIP.clothes.clean = 2; SHIP.clothes.hamper = null; delete SHIP.clothes.coll; setShipNow(25 * 1440 + 601); __tick(); out.coll = SHIP.clothes.coll;
+      setShipNow(26 * 1440 + 361); __tick(true); out.back = [SHIP.clothes.clean, SHIP.clothes.coll]; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(any('After dinner' in n for n in r['wake']) and r['rows'] and r['rows'][0].startswith('19:00') and 'Deck 2' in r['next'] and r['mail'] == 1, f"t4move: the notice as you wake, the Schedule's row, What's next, Calder's Mail at 17:00 ({r['wake']}, {r['rows']}, {r['next']}, {r['mail']})")
+    check(not r['early'] and r['mv'] and any('Vance' in n for n in r['notice']) and r['esc'] == 'follow' and r['open0'], f"t4move: not before your dinner; then the urgent notice, Vance comes to you, the door opens for the walk ({r})")
+    check(r['met'] and r['esc2'] == 'lead' and r['arrow'] and r['arrow'][0].startswith('1 Go with Vance'), f"t4move: met, he leads; a level 1 arrow 'Go with Vance' ({r['esc2']}, {r['arrow']})")
+    check(r['home'] == '2-B' and r['t4']['move']['walked'] == 25 and r['bed'] == '2-B' and r['open'][0] is True and not r['open'][1] and any('regulation six' in x for x in r['said']) and 'Deck 2' not in (r['next2'] or ''), f"t4move: stepped in: room B is yours, your bed, your door, Vance's lines ({r['home']}, {r['bed']}, {r['open']}, {r['said']})")
+    check(r['by20'] and r['gone22'] and not r['before26'] and r['next26'], f"t4move: no dinner, at 20:00 anyway; open till 22:00, then the next day at your shift's end ({r})")
+    check(r['coll'] == 26 and r['back'] == [5, None], f"t4move: laundry collected at 10:00, back clean the next morning ({r['coll']}, {r['back']})")
+
+# ---- S6-3 turn 4b (W7): Dev mode's Tier 4 rows, steps, career arrow and presets; forYou's engine line
+def part_t4dev(g):
+    if not t4on(g, 't4dev'): return
+    print('(t4dev) Dev mode: the career table to Day 25, the promotion list, the career arrow, the presets; engine jobs by day:')
+    r = g.ev("""(() => { const out = {}; const c = n => { const x = devmodeCareerFor(n); return [x.tier, x.rank, x.home, JSON.stringify(x.pu && x.pu.t4 || null), x.ms.map(m => m[0]).filter(k => /^specialist/.test(k)).join(',')]; };
+      out.c21 = c(21); out.c22 = c(22); out.c23 = c(23); out.c25 = c(25); out.later = DM_CAREER.filter(r => r.later).map(r => r.later);
+      out.beats = DM_BEATS.map(b => b.id + ' ' + b.day + ' ' + hhmm(b.at));
+      """ + T4_RES + """ out.steps = devmodePromoSteps().filter(x => /Tier 4|engine|Deck 2/.test(x.label)).map(x => x.label + ' ' + hhmm(x.at % 1440) + (x.done ? ' done' : ''));
+      setShipNow(21 * 1440 + 900); out.next1 = (puDevNext() || { g: {} }).g.label; pu4Promote(21 * 1440 + 1361, 'met'); out.next2 = (puDevNext() || { g: {} }).g.label; pu4Badge(22 * 1440 + 1000, 'met'); out.next3 = (puDevNext() || { g: {} }).g.label;
+      out.steps2 = devmodePromoSteps().filter(x => /Tier 4|engine|Deck 2/.test(x.label)).map(x => x.label + (x.done ? ' done' : ''));
+      setShipNow(23 * 1440 + 600); out.eng24 = pu4EngineByDay(); setShipNow(24 * 1440 + 600); out.eng25 = pu4EngineByDay() && /pu4EngineByDay/.test(String(forYou)); return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['c21'][0] == 3 and r['c22'][:2] == [4, 'specialist'] and '"badge":null' in r['c22'][3] and '"badge":23' in r['c23'][3] and r['c25'][2] == '2-B' and '"walked":25' in r['c25'][3] and r['c23'][4] == 'specialist,specialist.badge' and not any('Engine Specialist' in l for l in r['later']), f"t4dev: the career table: Tier 4 from Day 22, the badge Day 23, Deck 2 from Day 25 ({r['c21']}, {r['c22']}, {r['c23']}, {r['c25']}, {r['later']})")
+    check([b.split()[0] for b in r['beats']][-4:] == ['t4', 't4res', 't4badge', 't4move'], f"t4dev: the presets for Days 22, 22, 23, 25 ({r['beats']})")
+    check(r['steps'] == ['Your Tier 4 test 09:30 done', 'Your Tier 4 result 22:40'] and 'result' in r['next1'] and 'badge' in r['next2'] and 'Vance' in r['next3'] and r['steps2'][-1] == 'Your Deck 2 quarters', f"t4dev: the promotion list and the career arrow ({r['steps']}, {r['next1']}, {r['next2']}, {r['next3']}, {r['steps2']})")
+    check(r['eng24'] is False and r['eng25'] is True, f"t4dev: engine jobs yours by day after the nights, not before ({r})")
+
 def part_t3pointer(g):
     if not t3on(g, 't3pointer'): return
     print('(t3pointer) the test morning and the board:')
@@ -401,7 +596,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')
