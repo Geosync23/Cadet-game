@@ -83,3 +83,12 @@ Code read (no runs yet):
   Tier 3 offer live (optional).
 - DA6 4a84e153: PASS (17:4x, lead 42's priority): frames moved above the armchair (DECK2_HOME.menu 1.55, .cert 2.1); DA6's 390x844 shot and crop read; alone cadet: 6f13b61a and 5c27b740 ALL IDENTICAL.
 - W8 9063aafe: cqSat (the question once seated, not mid-walk): code read OK, PASS carries (17:4x).
+- W8 9063aafe: PASS (cq cq2 OK; cadet vs d0d381e0 identical, 1-level noise partly beside another browser). Sent 17:5x.
+- AS1 5f649b45 "alone" re-run: identical with 1-level noise (the Day 22 probe ran beside it: not truly alone; merged already).
+
+## Day 22 coherence (RV23's item 3), reported to lead 42
+- Arrow follower (AS1's step6 asis): briefing attended, Tier 4 test passed, night 1 clocked in, 0 missed, 0 stuck: the beats fit.
+- Skipping the briefing (n6_play): Calder's night word at 09:43 after the 09:30 test was due (test waited ~13 min). Acceptable.
+- d22_play.py (scratch merge staging d0d381e0 + W8 6f13b61a, one 4d conflict: keep both) stalled at 08:47 in my probe; stopped for the round.
+
+## Idle (lead 42, 17:47: the round is on, cap BM19 + 4 runners). Skipped on the lead's word: PZ6 775c3ca run, arrows-step6 runs.
