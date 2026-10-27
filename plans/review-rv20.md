@@ -327,3 +327,11 @@ read).
 
 The promotion itself meets the user's three rules in play: every beat in person first, a level 1 arrow and notices
 each day, staged scenes with the right people in the right rooms. Controller and arrows not re-run by me.
+
+### 5703dfb6 (B5: the test morning's arrows, on e7ff9253): the arrow fix PASS; the branch's M1 still open
+Diff read (24u puTestGuide only): in the bay the test-day arrow points at the job board (it was a null goal, so another
+arrow led you off and back: B5's Teaching-arrows-Off follower ping-ponged Decks 5 and 3) and ends once the test is on the
+board; holding another job, a level 1 "Your Tier 3 test is waiting: drop this job at the board" with that job's Drop it
+rung (forced), done when you no longer hold it. cadet_test vs 5957d244 ALL IDENTICAL; check_fast OK in 307 s;
+promo_beats_check OK (on copy). arrows_check step5 teachoff not re-run by me (B5: the whole promotion met). The branch still
+carries 51b1a9c6's machine_check FAIL (M1 above), so e7ff9253 / 5703dfb6 stay FIXES NEEDED until that is fixed.
