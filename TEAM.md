@@ -1608,3 +1608,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~00:57 UTC check-in (lead 40): steady pace, everything-on plan. Active: BM18, PUB1 (idle), RV22, CR1-6 (idle), B3 (idle, Step 6), B5, VB1, VB2. Closed this lead: EN1, B1, FX30, EN2, B4, RV21, B2, RV20 (26 total). Check-in prompt + handover-lead40.md updated.
 - ~00:58 UTC: staging-0.94.0 ac810e7e (+ mech-b 98460d79, promo cbca3e3e; switches off; cadet identical; machine_check ON OK once). BM18 warned: cbca3e3e has RV22's ladder-sort must; re-run after B5's next sha.
 - ~00:59 UTC: B3 M20 247420aa (after-lesson turn gets its own arrow via 24x; off identical "apart from renderer noise" -> RV22 to confirm) -> RV22. 98460d79 needs no re-review (PASS + one space; merged).
+- ~01:00 UTC: B3 noise detail: one shot j_steer1, 6 px at most 1 level off; 14 shots 0. RV22 to confirm (rule: off must be pixel-identical; find why if not).
