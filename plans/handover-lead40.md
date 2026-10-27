@@ -1,41 +1,46 @@
-# Handover: lead 40
+# Handover: lead 40 (MOVING TO A NEW ACCOUNT)
 
-## START HERE (next lead)
-Read CLAUDE.md, this note, then the bottom of TEAM.md on claude/lead-40 (from "LEAD 40 started", ~22:00 UTC Oct 26). plans/handover-lead39.md has the background (user rules, specs, ending answers) and still holds.
-Lead 40 = session_01NXybH7NNqM8M4ngiyidq6m, branch claude/lead-40 (from claude/lead-39). Hourly check-in trig_01Ho4S7S9dCaYyVC7qSaQi9t (57 * * * *): disable it when you take over and make your own.
+## START HERE (the first lead on the new account)
+The user moved the project to another claude.ai account on Oct 26-27 (decided ~03:00 UTC Oct 27 = 11 PM Eastern Oct 26). Nothing on the old account (sessions, scheduled tasks, artifacts) can be reached from the new one; only the GitHub repo carries over.
+1. Make sure the new account's GitHub connection can reach **Geosync23/Cadet-game** (read + push).
+2. Read CLAUDE.md, this note, the bottom of TEAM.md on **claude/lead-40** (from "LEAD 40 started"), then plans/handover-lead39.md for the background (user rules, specs, ending answers).
+3. Make your own branch (claude/lead-41 from claude/lead-40), your own hourly check-in, and hire only the seats you need (see "Restart plan").
+4. Tell the user, in plain words, US Eastern times, no emojis.
 
-## Current state (update 00:57 UTC Oct 27; TEAM.md has the detail)
-- 23:45 UTC Oct 26 the user called a stopping point (may move accounts, undecided); at 00:35 UTC they resumed at an easy/steady pace.
-- **USER RULE (00:38 UTC Oct 27): everything ships ON (Step 5, vessel, ending); nothing built switched off.**
-- 0.93.3 LIVE (Playtest 3HqM v7, Dev 9ZWA v7). Integration = 0.93.3 (3fd762cb, user OK).
-- Promotion preview (0.93.2-based): https://claude.ai/artifact/AvpWrMumcGiw4UYUpXd2X5.
-- BM18's claude/staging-0.94.0 543fba58 = every branch merged (0.93.4 fixes, Step 5, vessel, ending), switches still OFF, cadet identical. Next: blockers -> BM18 flips all switches ON -> full round -> publish both links.
-- Blockers (01:58 UTC): all fixed; waiting only on RV22 verdicts (vessel 0340b6f9, m20 247420aa, B5 c3d36cde) and B3 claude/talk-close (user request: talk only when close). Lead 39 archived.
+## User rules (all still hold; see CLAUDE.md and handover-lead39.md)
+- **Everything ships ON** (the user, 00:38 UTC Oct 27): Step 5, the Veyli vessel, the ending; nothing built switched off.
+- Keep the workforce small: no new hires unless a seat is the long pole; archive a seat as soon as its piece passes and its handover is pushed; replace, don't add.
+- Full round of checks (six runners) before any game change is published.
+- Tons of arrows, staged scenes with dialogue, works with a game controller. Phones first.
+- **Talk only when close** (the user, ~01:00 UTC Oct 27): built by B3 on claude/talk-close (see below).
+- Weekly usage: the old account was at its seven-day warning; keep the new one lean too.
 
-## User rules (unchanged, see handover-lead39.md)
-Keep reducing the workforce (archive as soon as a piece passes + handover pushed; replace, don't add). Tons of arrows, staged scenes with dialogue, every piece works with a controller. Times to the user in US Eastern. No emojis. Never publish over 6daNCLCJAcsLCZn27CEthq.
+## Links (owned by the OLD account)
+A new account can't update these; it must publish new links (or the user shares edit access from the old account). Ask the user which.
+- Playtest https://claude.ai/artifact/3HqM5XiXaHXzgrpq7JbesJ v7 = 0.93.3
+- Dev https://claude.ai/artifact/9ZWAgqiZCvkJvVjjhjVkEr v7 = 0.93.3
+- Promotion preview https://claude.ai/artifact/AvpWrMumcGiw4UYUpXd2X5 v1 (0.93.2-based, ?p5s5)
+- The user's "current save" https://claude.ai/artifact/6daNCLCJAcsLCZn27CEthq v11 = 0.92.2 (never publish over it). Saves live in the browser per link: to carry the playthrough to a new link the user uses Download my save there, then Load a save file on the new link.
+- Capabilities on the game links: {downloads}. Details: plans/handover-publisher-1.md on claude/publish-25.
 
-## Releases
-- LIVE before this stop: 0.93.2 (Playtest 3HqM v6, Dev 9ZWA v6).
-- **0.93.3** (staging-0.93.3 19400976, game ec93b94d...d085: doors 3 ways + visit on + SW2 words + check fixes): full round all 6 shares OK, no new FAIL. perf_check flagged 3 single-scene js-time blips (backlog 32 pattern); CR4 re-measuring. On GO, PUB1 publishes both links as v7 (keep {downloads}). Check TEAM.md for whether this happened before the stop.
-- **0.93.4 (NOT started)**: published 0.93.3 + B2 claude/workstep-tap-fix c79a66dc (LIVE M15 Rewiring tap bug; RV20 PASS) + b7e84f81 on top (stale team-job arrow, live; RV20 PASS) + FX30 test-only fa6b7de0 (week guide; CR1 OK on 0.93.3). Full round, then publish.
-- ff integration only with the user's OK.
+## Code state
+- **Live / integration:** 0.93.3. claude/integration = 3fd762cb (game ec93b94d...d085).
+- **Combined build:** claude/staging-0.94.0 (BM18; see plans/handover-bm18.md there for the exact head). It merges: 0.93.4 fixes (workstep-tap-fix c79a66dc + b7e84f81 team-arrow, both RV20 PASS; week-guide-fix fa6b7de0 test only), Step 5 (p5s5-promo c3d36cde PASS, mech-a deefa61a PASS, mech-b 98460d79 PASS, m20 247420aa PASS, puzzles 6b07b624 PASS), vessel (claude/vessel 0340b6f9), ending (ending-crossing d1a61402 PASS + ending-checks 571b073f). **All switches still OFF** (cadet identical to 0.93.3).
+- **Not merged / open:**
+  - B3 claude/talk-close f52e2abc (talk only when close): checks green, RV22 review not done.
+  - B3 claude/train-titles 7cbc1ad0 (lesson titles say "with Calder"): RV22 review maybe done (see handover-rv22.md).
+  - VB1 claude/vessel: RV22 MUST: the round-one fallback: Taavek stops 4 m away, the scene needs 3.2 m, you get "missed" at 13:00 while the arrow points at the sheet; plus 2 shoulds (Calder's Saturday fetch is silent; the 12:40 arrow order). See handover-vb1.md for whether VB1 fixed it before the move.
+  - VB2 claude/ending-checks: RV22 verdict (see handover-rv22.md).
 
-## Work in progress (all switched off in the game)
-- **Step 5** (P5_STEP5): RV20 PASS: SW3 words, B4 puzzles 6b07b624 (via RV21), B3 M20 7c5d9f79 (via RV21, 4 shoulds). Waiting on RV20: B5 promotion claude/p5s5-promo e7ff9253 (includes B1 51b1a9c6, VB2 kit 69eb706d: collar bar + Calder's visitor chair, teacher-at-meeting fix for every lesson); B2 M19 claude/p5s5-mech-a deefa61a; B3 S5-4 claude/p5s5-mech-b 7e6bca4b. B3 M20 shoulds on claude/p5s5-m20 (newer than f57afcbc) -> RV22. On promotion PASS: early Dev link ?p5s5 for the user (user already said yes).
-- **Vessel** (EV_VESSEL_ON): V-1..V-4 RV21 PASS (claude/vessel 6d4b5192). VB1 doing shoulds (ramp crowd, goodbye window, round-one fallback, Saturday Calder comes to you, doubled toast, setTimeout) + merge VB2 vessel-sky 3fb8eac7 + arrows_check part + controller presets -> RV22.
-- **Ending** (EV_ENDING_ON): RV21 PASS as one, claude/ending-crossing d1a61402. VB2 owns it now: arrows_check endstay/endgo + controller presets + day_check 31/50 ON copy (claude/ending-checks) -> RV22.
-- **Step 6**: not started; reuse Step 5 seats (VB2 earmarked S6-4 deck architect; B3 free).
-
-- **Step 5 merge blocker**: B1 51b1a9c6 (in B5 promo, B2 mech-a, B3 branches) makes machine_check ON fail "traced faults" (not repeatable). B5 fixes before any Step 5 merge.
-
-## Seats at the stop
-Active: BM18 01A3S2VBMYmTt2wCZa8ej7XR; PUB1 01GnpjFR6oumvuvTrmcXSqeg; RV20 01PyJwfvfQVu4oXTYDMGkacw (~48%+); RV22 011wAn842cKDVWvoH8Cr9geD (new, replaces RV21); CR1 01CsWNjCsy8u5mrHJgTVgCst, CR2 01DsTDi6xJcpdDVhSkELEm24, CR3 01Pw3EQ24pSz4gjsFcLBMjUF, CR4 01RgnU5d6Um75LNznFSotXYH, CR5 01UH1U1UpsoL7viYaRRBu2bZ, CR6 013wLtAmKooMrgGrXF4Ljiof; B2 015mjNkxuGoEZGKA2ksBPz9u (~60%, archive on RV20 PASS); B3 014FBmsiTsA9QymoN2qt4NyL (~45%); B5 01CgbXRamJJp66pFTP43KYoB (owns 24 core/24u); VB1 01UsjGN26E88zwrNPWwef4iT (~45%); VB2 01KRBGtugjBpv5iGcV5WDvCP (~40%). Lead 39 019V68fz33UFv4cK5Z4iCDvi idle (archive).
-Archived by lead 40: EN1, B1, FX30, EN2, B4, RV21 (24 closed since lead 39 started).
-If moving accounts: these sessions stay on this account; a new account starts fresh sessions from the branches and handover notes named above.
+## Restart plan (on the new account)
+1. One reviewer: finish the open reviews above (talk-close, train-titles, VB1's fix, VB2 ending-checks) from plans/handover-rv22.md on claude/review-rv22.
+2. One builder: fix whatever is still open (VB1's round-one fallback first), from the builders' handovers (handover-vb1.md on claude/vessel, handover-b3.md on p5s5-mech-b, handover-b3-m20.md, handover-b5.md on p5s5-promo, handover-vb2.md on ending-checks).
+3. One build master (from plans/handover-bm18.md on claude/staging-0.94.0): merge the passed pieces, flip ALL switches ON (P5_STEP5 and its sub-switches, EV_VESSEL_ON, EV_ENDING_ON), bump the build (0.94.0), then the full six-runner round (plans/testing-guide.md; old check notes on claude/checks-cr1..6).
+4. One publisher: publish to new links (or the old ones if the user shares edit access); tell the user.
+5. Then Step 6 (not started; specs in handover-lead39.md).
 
 ## Backlog added this shift
-P9 true move needs a second section 14 hook after schedBuild (B4-1); interactions_check.py:1262 SyntaxWarning '\|' (test only); careerOff read live (only matters if section 14 plans Monday's shift before Sunday's settle); perf blips (backlog 32) if they repeat; social/device owners' one-line hook reviews for the ending.
+P9 true move needs a second section 14 hook (B4-1); interactions_check.py:1262 SyntaxWarning; careerOff read live; perf blips (backlog 32) if they repeat; controller ring can't pick a person hidden behind another in a crowd (VB2); Tomas "Tonight?" Mail body shows function source (old, RV20); What's next sentences use first names (lead: fine).
 
-## Waiting on the user
-Continue here or transfer to another account. Tap-test Download my save / Load a save file ("later").
+## Seats on the old account at the move
+All archived or idle with handovers pushed: BM18, PUB1, RV22, B3, VB1, VB2 (and lead 40). Archived tonight: EN1, B1, FX30, EN2, B4, RV21, B2, RV20, lead 39, B5, CR1-CR6.
