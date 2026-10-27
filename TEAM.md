@@ -1715,3 +1715,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~12:04 UTC: **RV23: shared cause** — worksEscort follow parks Calder in the lift car ('@'), path length 0, so 'come and find you' never arrives (W7's Tier 4 offer MUST + N6's night word MUST). W7 (owner) fixes at the source + first checks whether LIVE Step 5 pu3 offer has the same bug. N6 waits for W7's fix, does should + turn 4. **RV23 PASS DA6 469b606b** (dd32a9a7 turns 2-3 still to review; BM19 merges after that). RV23 ~35% mem.
 - ~12:06 UTC: **RV23 PASS MA6 8f943e82** (M24 team by pad) -> BM19 merges. DA6 merge waits for dd32a9a7 verdict.
 - ~12:07 UTC: **RV23 PASS DA6 dd32a9a7** (S6-4 complete; controller deck6 by pad) -> BM19 merges. RV23 idle until W7's escort fix.
+- ~12:12 UTC: DA6 merged staging-p5s6 8d1c749f into p5s6-deck 23217355 (clean); idle, queued for S6-5. MA6 ~54% mem, running staging compare checks. Active: W7, N6, PZ6, BM19, MA6 = 5.
