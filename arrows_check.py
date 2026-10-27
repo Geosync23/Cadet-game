@@ -293,7 +293,8 @@ FOLLOW = r"""(() => {
     const card = !!DEV.choose, txt = dlg.textContent, n = Math.max(1, bs.length - 1);
     if (card && window.__cardTxt === txt) window.__pick = ((window.__pick || 0) + 1) % n;
     window.__cardTxt = txt; let k = card ? (window.__pick || 0) % n : 0;
-    const want = /cold|cool|dim|slow/i.test(txt) ? '+' : /hot|flicker|blink|fast/i.test(txt) ? '\u2212' : null;   // a tuning card: read the machine's word, as a player would
+    const own = card && /coil (\d)/i.exec((dlg.querySelector('small') || {}).textContent || ''), rd = own && new RegExp('Coil ' + own[1] + ' (running cold|a little cool|steady|a little hot|running hot)', 'i').exec(txt);   // (AS1) 28c's balance card shows both coils: read this card's own coil (its heading), as a player would
+    const want = /cold|cool|dim|slow/i.test(rd ? rd[1] : txt) ? '+' : /hot|flicker|blink|fast/i.test(rd ? rd[1] : txt) ? '\u2212' : null;   // a tuning card: read the machine's word, as a player would
     if (card && want) { const i = bs.findIndex(b => b.textContent.trim() === want); if (i >= 0) k = i; }
     const t = bs[k].textContent; bs[k].click(); return (card ? 'card: ' : 'reply: ') + t;
   }
@@ -668,7 +669,7 @@ def part_end(ctx, path, want, way):
 # while one of Step 6's level-1 arrows is due, a Step 6 arrow leads (not hidden by a needs nudge, Teaching arrows Off or a
 # tracked job); each beat said in person or by notice before its Mail; never stuck on a Step 6 arrow. Three ways: as is,
 # Teaching arrows Off (teachoff), tracking another job (track). A beat whose piece isn't built yet prints "not yet".
-S6_RX = r'^(m21|m24|pu4|p5n|mt|cq|s6end|end:(?:tea|sit|find)):'   # (AS1) Calder's question is 28f's end:tea / end:sit / end:find (not the ending's end: arrows)
+S6_RX = r'^(m21|m23|m24|pu4|p5n|mt|cq|s6end|end:(?:tea|sit|find)):'   # (AS1) Calder's question is 28f's end:tea / end:sit / end:find (not the ending's end: arrows)
 S6_TRACE = TRACE.replace("/^end:/", "/" + S6_RX + "/")
 S6_DUE = DUE.replace("/^end:/.test(e.id) && ", "")   # any level-1 arrow due (a Step 5 lesson carried into the week too: skipping it would leave the ladder held), not only Step 6's
 # what the player hears: notices, toasts, bubbles, scenes, Mail, each with its ship minute (window.__s6log)
@@ -686,9 +687,11 @@ S6_BEATS = [
   ['the Tier 4 test', 'pu4:', "!!(SHIP.works.pu && SHIP.works.pu.t4 && SHIP.works.pu.t4.passed)", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
   ['sleep by day', 'p5n:bed:22', "(simNotes('sleep', 0) || []).length >= 0", "typeof playerNightOn === 'function'"],
   ['night 1', 'p5n:in:22', "!!(SHIP.works.ns && SHIP.works.ns[22] && SHIP.works.ns[22].in)", "typeof playerNightOn === 'function'"],
+  ['engine work (night 1)', 'm23:n1', "!!(SHIP.works.side && SHIP.works.side.m23 && SHIP.works.side.m23.d1)", "typeof m23Beats2 === 'function'"],   # (AS1) 28c, S6-5
   ['the welcome', 'pu4:welcome', "!!SHIP.occasions.find(x => x.id === 'pu4Welcome' && x.met)", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
   ['the badge', 'pu4:badge', "!!(SHIP.works.pu && SHIP.works.pu.t4 && SHIP.works.pu.t4.badge)", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
   ['night 2', 'p5n:in:23', "!!(SHIP.works.ns && SHIP.works.ns[23] && SHIP.works.ns[23].in)", "typeof playerNightOn === 'function'"],
+  ['the reactor (night 2)', 'm23:permit', "!!(SHIP.works.side && SHIP.works.side.m23 && SHIP.works.side.m23.d2)", "typeof m23Beats2 === 'function'"],   # (AS1) 28c, S6-5: permit, badge, the Watch, the reactor, the badge back
   ['night 3 (the coil swap)', 'm24:', "!!(SHIP.works.side && SHIP.works.side.m24 && SHIP.works.side.m24.done)", "typeof m24Book === 'function'"],
   ['the move', 'pu4:move', "SHIP.works.home === '2-B'", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
   ['mentoring', 'mt:', "!!(SHIP.works.mt && SHIP.works.mt.steps && SHIP.works.mt.steps.done !== undefined)", "typeof P5_M25 !== 'undefined' && P5_M25 && typeof mtTick === 'function'"],
