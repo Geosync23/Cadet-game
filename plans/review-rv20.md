@@ -335,3 +335,4 @@ board; holding another job, a level 1 "Your Tier 3 test is waiting: drop this jo
 rung (forced), done when you no longer hold it. cadet_test vs 5957d244 ALL IDENTICAL; check_fast OK in 307 s;
 promo_beats_check OK (on copy). arrows_check step5 teachoff not re-run by me (B5: the whole promotion met). The branch still
 carries 51b1a9c6's machine_check FAIL (M1 above), so e7ff9253 / 5703dfb6 stay FIXES NEEDED until that is fixed.
+- 00:33 UTC: B5 reports arrows_check step5 OK all three ways (as is, teachoff, track) on 5703dfb6; handover 516333a1. The machine_check FAIL (51b1a9c6) is not mentioned as fixed: still open.
