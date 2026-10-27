@@ -1060,6 +1060,10 @@ gives way to clock-out at the shift's end. Test: `python3 arrows_d_check.py BUIL
 - **Saved:** `ship.end = { offer: { day, met, how }, said: [[day, choice]], settled: { day, choice }, f: { invite, seek, led, late, picked, walk, search } }`, only with the switch on (`endClean` checks it on load). A new game clears it.
 - **Test:** `python3 ending_check.py BUILD.html [off offer answers week endpage pad goodbye reload keep]` (about 6 minutes; the on parts run in a copy with the switch on; reload serves it from a web address, as saves_check does).
 
+## Talking up close (claude/talk-close, B3 for lead 40, 2026-10-27; the user's call, on: no switch)
+- Section 20: `TALK_NEAR` (2.5 tiles). `chatOpen(p, greet, line, o)`: with `o.tap` (section 10's `tapCrew`, and the "wants a word" chip) and the person further than TALK_NEAR on your deck, the card opens in far mode (`CHAT.far`): name, rank, tier, what they're doing (`chatDoing`, from whereIs: `DOING_WORD`), and one button, Walk over (`chatWalk`: `playerGo` to a free tile beside them; they wait, `talking`). `chatTick` opens the full card (the same `chatOpen`, no tap) once you're within TALK_NEAR; stopped short (a closed door), the button comes back. Every other caller (visits, hosts, the intro, appointments, someone who walked up to you, the arrow-follower checks) opens the card as before.
+- Section 10's `tapCrew`: from afar it doesn't stop you or turn you to face them.
+
 ## Hook register
 
 One-line, `typeof`-guarded calls from one section into another (plans/pillar4-plan.md, "Keeping the one file from colliding"). The lead keeps this list; owners add their rows.
