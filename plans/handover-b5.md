@@ -53,7 +53,7 @@
   Off run met the whole promotion** (test Day 15 first try, result, bar, cake, toast); its one FAIL was the check's own
   expectation (pu3:drop led instead of pu3:test), fixed in the check.
 - Tracking another job: **OK on 5703dfb6** (the whole promotion met; only the known-old "hold it steady" stucks, not Step 5).
-- As is was last run on 762d9cb5 (OK); not rerun on 5703dfb6 for want of time.
-- Redo all three on the final sha in one quiet machine (they slow each other down: run them one after another).
+- **All three ways OK on 5703dfb6** (run one after another, 00:16-00:32 UTC): as is, Teaching arrows Off, tracking another job.
+- Run them one after another (side by side they slow each other and page loads time out).
 ## Open
 - Known old: the team job's "hold it steady" arrow (FX30) shows as "stuck" in the follower; not Step 5's.
