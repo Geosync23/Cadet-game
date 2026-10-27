@@ -9,6 +9,8 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
 | claude/talk-close (B3): talk only up close | PASS (1 should) | f52e2abc |
 | claude/p5s6-core (W6): Step 6 first turn, all off | PASS (1 note) | 95ef6947 (game 7c13cfe7) |
 | claude/talk-close-fix (W6): the far card closes | PASS | 6dfc4ec1 (game ea9e0f3c) |
+| claude/vessel-words (W6): 4 lines cut to 90 chars | PASS | 0f8a2406 (game afde419d) |
+| claude/check-offcopies (test only) | code read OK, not run | 00161062 |
 | VB2's ending leftovers (arrows endgo teachoff, track) | PASS | staging-0.94.0 d69473b7 |
 
 ## VB1 03b63d95
@@ -49,6 +51,16 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
 - Far card closes 1.5 m further off than it opened or after TALK_FAR_STAY (6 ship min) unless Walk over; full card only after Walk over.
   talk_play.py on it alone (Walk over clicked with force=True): all cases as before; no full card unasked. W6: cadet identical, player,
   controller pick/day, check_fast OK.
+
+## W6 vessel-words 0f8a2406: PASS
+- The 4 lines keep meaning and voice; content_gen --check up to date; lines_check PASS (0 errors). Live 390x844 on the build (all ON;
+  vw_play.py, VW_ONLY=shelf for the shelf part alone): signed toast by a real sheet tap, round-one missed 13:00, home missed 15:30, all
+  2 lines. Shelf line fires at 12:00 but a jump-fired Zeke notice replaced it in the probe; my tap on the shelf sketch didn't land.
+- Side note: the 12:00 heads-up reads "Put Taavek's sketch on your shelf is starting" (wording for an event, not a to-do).
+
+## check-offcopies 00161062 (test only): code read OK
+- Off copies for events vessel-off and promo_beats t3off when the build ships on; mech ps stand-in first; arrows follower closes a device
+  a nearby tap opened. Not run.
 
 ## Next
 - Nothing queued. Waiting for lead 41.
