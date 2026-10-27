@@ -26,7 +26,8 @@ See review-rv22.md for VB2's ending checks and B3's train-titles (decided at the
    roundFetch 12:30 (Taavek waits at the bench, then comes to you), vesselNear 6 m while fetching, vesselFetchTick
    (words on arrival or within 6 m), sheet arrows dropped while the round one is pending, ring.roundFind. Diff read only:
    looks right. Possible should: VESSEL_FETCH isn't saved, so a reload mid-fetch leaves the flag set, reach 3.2, Taavek
-   back to their plan. To run on it (vessel ON copy: sed the `EV_VESSEL_ON = URL_FLAGS.has('evvessel')` line to `true`):
+   back to their plan. VB1 reports on 705c6fc5 (handover 03b63d95): arrows vessel OK, controller vessel OK, cadet off
+   vs 0340b6f9 ALL IDENTICAL, check_fast OK. To run on it (vessel ON copy: sed the `EV_VESSEL_ON = URL_FLAGS.has('evvessel')` line to `true`):
    cadet_test 3fb8eac7 vs 705c6fc5 (off), events_check (known-old FX24-2 only), arrows_check vessel, day_check 28,
    and the phone play `plans/rv22-shots/vb1_play.py <wt>/starship-cadet.html <outdir> main` (stands in the bow lounge;
    check Saturday Calder's words + sheet scene, Sunday 12:30 Taavek's words + round-one scene, Monday goodbye).
