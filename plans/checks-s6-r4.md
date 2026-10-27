@@ -29,7 +29,7 @@ Runner R4 (session_01GKuymignKdueCaz2pftLEC). Build master BM19, lead 42. 2026-1
 | food_check 11 4 | OK | FOOD CHECK OK |
 | disc_check | OK | ALL OK |
 | tiles_check | OK | ALL OK |
-| interactions_check | handed to R1 (AS1) | My run was cut at 90 min by my own lane script's time limit (288 lines, 0 FAIL, at "real taps by the exercise bikes"): not a result. AS1 runs it whole, alone. |
+| interactions_check | OK (run by R1) | INTERACTIONS CHECK OK, 324 lines, 0 FAIL, about 35 min alone. (My own run beside a second browser was cut at 90 min by my lane script's time limit: 288 lines, 0 FAIL; not a result.) |
 | join_check | OK (run by BM19, alone) | My two runs beside another browser: every test passes up to "Sunday table's long tables", then join_check.py line 153 (the save part, a real reload without `?nosave`): `Page.goto: Timeout 30000ms exceeded`. BM19: OLD and candidate 2 both time out there with two browsers at once, and both give JOIN CHECK OK alone. Load, not the build. |
 
 ### The join_check crash
@@ -50,4 +50,4 @@ interactions ran 85 min with 0 FAIL before I stopped round 1 (BM19's call). The 
 
 - join_check also times out on its real reload with a second browser beside it (both builds): run it alone.
 - interactions_check with a second browser beside it takes more than 90 minutes on 4 cores: give it no time limit
-  per check, or run it alone.
+  per check, or run it alone (alone it took about 35 min on R1's machine).
