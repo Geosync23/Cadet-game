@@ -379,12 +379,14 @@ def stuck_fix(lab):                                  # who should turn a "stuck 
     return FIX['stuck']
 
 class Follower:
-    def __init__(self, pg): self.pg = pg; self.acts = []; self.same = None; self.stuck = []; self.long = []; self.guides = {}; self.dv = {}; self.test_led = None
+    def __init__(self, pg): self.pg = pg; self.acts = []; self.same = None; self.stuck = []; self.long = []; self.guides = {}; self.dv = {}; self.test_led = None; self.pre = None; self.trace = None
     def run(self, until_min_abs, every=6):
         pg = self.pg
         while pg.ev('shipNow()') < until_min_abs:
             pg.step(every, 50)
-            r = pg.ev(FOLLOW)
+            if self.trace is not None: self.trace.append(pg.ev(TRACE))   # endstay / endgo: which level-1 entries are due, and which leads
+            r = pg.ev(self.pre) if self.pre else None                    # endstay / endgo: the ending's own buttons first (END_PICK)
+            if not r: r = pg.ev(FOLLOW)
             if isinstance(r, dict) and r.get('click'):
                 pg.page.mouse.click(*r['click']); pg.step(2, 50); r = 'tap the floor at the pin: ' + r['label'] + (' (working)' if pg.ev('!!ACT') else '')
             if r: self.acts.append((pg.ev('clockText()'), r))
@@ -536,6 +538,122 @@ def part_step5(ctx, path):
         if LAB.search(lab): fail(f'step5: stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk})')
         else: print(f'  step5: (not Step 5) stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk})')
     check(not pg.errors, f'step5: page errors {pg.errors[:3]}')
+# Parts "endstay" and "endgo" (VB2 for lead 40; plans/ending-spec.html section 7, the arrow-follower; on a copy with the ending
+# on, EV_ENDING_ON): from a Day 30 evening (the career set to the end of Day 30), a player who only follows the arrow and the
+# ring plays Days 31-36. What a player reading the screen does on top of FOLLOW (END_PICK): on someone's chat card, the
+# ending's own button ("About the transfer", "Goodbye"); on the Captain's question, the answer this run gives (Stay or Go; the
+# 19:30 search and the address's ask by their order, Stay first); up the ramp into the Tern when the arrow says "Walk to the
+# Tern". Checked: the beats in order (the offer met in the ready room, your answer at the first "Tell the Captain", by Saturday
+# 20:00; the oath led; settled at the address; Zeke on Sunday evening); Stay ends in the endgame on Day 36 (its first morning
+# met), Go at the end page (the save marked ended); "Your answer" Mail only after you told her in person, "Tomorrow" only after
+# it's settled; at every waking minute while one of the ending's level-1 arrows is due, an ending arrow leads (none hidden by
+# another job's arrow, the needs nudges, or Teaching arrows Off); never stuck. Each part three ways: as is, with Teaching arrows
+# Off (teachoff), while tracking another job (track); endstay also the change of mind (change: Go at the first "Tell the
+# Captain", Stay on Sunday at 10:00 by her button, before her address; ends in the endgame). Pick ways with the words asis, teachoff, track, change (default all).
+TRACE = r"""(() => { const g = goalNow(), n = shipNow(), due = GUIDE.list.filter(e => e.level === 1 && /^end:/.test(e.id) && (e.from == null || e.from <= n) && n < e.until && (() => { try { return !e.done || !e.done(); } catch (x) { return false; } })()).map(e => e.id);
+  return [Math.floor(n), g && g.guide || null, g ? g.label : null, !!ACT || !!DIALOGUE || !!DEV.choose || (typeof sleeping !== 'undefined' && !!sleeping) || !!document.querySelector('#endPage:not([hidden])'), due]; })()"""
+END_PICK = r"""(() => {
+  const want = window.__want, dlg = document.getElementById('devDlg');
+  if (DEV.choose && dlg && !dlg.hidden) {                // her question on the phone: the run's answer, by its words
+    const lab = endText('ending.ui.choice.' + want, want === 'stay' ? 'I\'m staying on the Wren.' : 'I\'m taking the post.'), b = [...dlg.querySelectorAll('button.act')].find(x => x.textContent.trim() === lab.trim());
+    if (b) { b.click(); return 'answer: ' + want; } }
+  if (DIALOGUE && dlg && !dlg.hidden) {                  // her search's and the address's choices: Stay first, Go second
+    const v = dialogueView(); if (v && v.choices && /endingSearch|crossingBackAddress\.ask|endingAsk/.test(DIALOGUE.id || '')) {
+      const b = [...dlg.querySelectorAll('button.act')][want === 'stay' ? 0 : 1]; if (b) { b.click(); return 'scene answer: ' + want; } } }
+  const ch = document.getElementById('chat');
+  if (ch && !ch.hidden && CHAT && CHAT.p) {              // a chat card: the ending's button on it, else close it
+    const eb = typeof endChatButton === 'function' ? endChatButton(CHAT.p) : null, b = eb && [...ch.querySelectorAll('button.act')].find(x => x.textContent === eb.label);
+    if (b) { const who = CHAT.p.id; b.click(); return 'chat: ' + eb.label + ' (' + who + ')'; }   // (the click may close the card)
+    chatClose(); return 'close the chat card'; }
+  const g = goalNow();
+  if (g && /^end:bye/.test(g.guide || '') && g.crew && deckDef.num === g.deck) {   // a farewell: walk right up to them (the goodbye comes within reach, 1.8; FOLLOW stops at 2.2)
+    const a = DECK_CREW.find(a => a.p && a.p.id === g.crew), p = player.obj.position;
+    if (a && Math.hypot(a.x - p.x, a.z - p.z) > 1.4) { const l = Math.hypot(a.x - p.x, a.z - p.z); player.obj.position.set(a.x + (p.x - a.x) / l, 0, a.z + (p.z - a.z) / l); player.stop(); return 'walk up to ' + g.crew; } }
+  if (g && /^end:bye/.test(g.guide || '') && g.at && deckDef.num === 5 && typeof ternInside === 'function' && !ternInside() && SHIP.end && SHIP.end.f.ramp) {   // "Walk to the Tern": up the ramp and in
+    const s = placeSpot('5-tern-aisle-1'); player.obj.position.set(s.x, 0, s.z); player.stop(); return 'up the ramp into the Tern'; }
+  return null;
+})()"""
+END_STATE = r"""(() => { const E = SHIP.end, W = typeof endWeek === 'function' ? endWeek() : null, l = SHIP.eventLog.find(x => x.id === 'crossingBack'), ev = SHIP.event && SHIP.event.id === 'crossingBack' ? SHIP.event : null;
+  const fm = (SHIP.occasions || []).find(x => x.id === 'endFirstMorning');
+  return { week: W, offer: E && E.offer, said: E ? E.said.slice() : [], settled: E && E.settled, ended: E && E.ended || null, zeke: E && E.f.zeke || null, zekeSun: E && E.f.zekeSun || null, ramp: E && E.f.ramp || null,
+    oath: !!((ev && ev.mine['met:crossingBackOath']) || (l && l.mine && l.mine['met:crossingBackOath'])), stay: typeof flag === 'function' ? flag('end.stay') : null, go: typeof flag === 'function' ? flag('end.go') : null,
+    endgame: typeof endgameOn === 'function' ? endgameOn() : null, fm: fm ? { met: !!(fm.met || fm.f && Object.keys(fm.f).some(k => /^met:/.test(k))), status: fm.status } : null, page: !!document.querySelector('#endPage:not([hidden])'),
+    mail: SHIP.mail.filter(m => /Your answer|Tomorrow/.test(m.subject || '')).map(m => [m.subject, m.at]) }; })()"""
+def end_on(src):                                       # the ending switched on (and nothing else changed)
+    return src.replace("const EV_ENDING_ON = URL_FLAGS.has('ending');", 'const EV_ENDING_ON = true;', 1)
+
+DUE = r"""(() => { const n = shipNow(); return GUIDE.list.some(e => e.level === 1 && /^end:/.test(e.id) && (e.from == null || e.from <= n) && n < e.until && (() => { try { return !e.done || !e.done(); } catch (x) { return false; } })()); })()"""
+CHANGE = r"""(() => { if (DIALOGUE || DEV.choose) return 'busy'; const p = schedPeople().find(p => p.id === 'marrow'), w = whereIs(p, shipNow()); if (!w || !w.deck) return 'nowhere';
+  if (deckDef.num !== w.deck) goToDeck(w.deck); const a = DECK_CREW.find(a => a.p && a.p.id === 'marrow'); if (a) { player.obj.position.copy(cellPos(...nearestOpen(a.x, a.z, player))); player.stop(); }
+  chatOpen(p); return 'her chat card'; })()"""
+# the ending's beats by day (minutes): followed from a little before each to a little after (Day 31 Vance's word; Day 32 the
+# offer, Calder's walk, the first "Tell the Captain"; Day 33 Zeke after dinner; Day 34 the ship at the glass, her deadline; Day 35
+# the oath and the address, the supper, Zeke by the ramp; Day 36 the last morning and the goodbye, or the first morning)
+END_WINDOWS = {31: [(420, 720)], 32: [(900, 1290)], 33: [(1050, 1320)], 34: [(570, 690), (1050, 1230)], 35: [(810, 990), (1050, 1170), (1230, 1395)],
+               36: {'go': [(350, 680)], 'stay': [(360, 600)]}}
+def part_end(ctx, path, want, way):
+    tag = f'end{want}' + ('' if way == 'asis' else ':' + way)
+    pg = Page(ctx, path)
+    if not pg.ev("typeof EV_ENDING_ON !== 'undefined' && EV_ENDING_ON && typeof endWeek === 'function'"): fail(f'{tag}: the ending is not in this build (EV_ENDING_ON)'); pg.page.close(); return
+    real_game(pg, 31)
+    if way == 'teachoff': pg.ev("SHIP.device.settings.teach = 'off'")
+    first = 'go' if way == 'change' else want
+    pg.ev(f"window.__want = '{first}'")
+    f = Follower(pg); f.pre = END_PICK; f.trace = []
+    track = "(() => { const j = (SHIP.jobs || []).find(j => j.status === 'open' && !j.claimedBy); if (j) SHIP.player.track = j.id; return j ? j.id : null; })()"
+    def advance_to(t):                                 # the hours between the ending's beats: skipped (as a night is), but followed whenever one of its level-1 arrows is due
+        while pg.ev('shipNow()') < t:
+            n = pg.ev('shipNow()')
+            if pg.ev(DUE): f.run(min(t, n + 10)); continue
+            pg.ev(f"devmodeSkipTo({min(t, n + 20)}); for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 70)"); pg.step(3, 50)
+    for d in range(31, 37):
+        B = (d - 1) * 1440
+        if way == 'track': pg.ev(track)
+        for a, b in END_WINDOWS[d] if d < 36 else END_WINDOWS[36][want]:
+            if way == 'change' and d == 35 and pg.ev("window.__want") != 'stay':   # Sunday 10:00, Go told on Saturday: you change your mind before her address, at her button, as a player would
+                advance_to(B + 10 * 60); pg.ev("window.__want = 'stay'")
+                r = pg.ev(CHANGE)
+                for _ in range(8): pg.step(3, 50); pg.ev(END_PICK)
+                for _ in range(40):                    # her scene for the change, read through
+                    if not pg.ev("!!DIALOGUE"): break
+                    pg.ev(FOLLOW); pg.step(3, 50)
+                print(f'  {tag}: Day 35 10:00, changing your mind: {r}; said {pg.ev("SHIP.end.said")}')
+            advance_to(B + a); f.run(B + b)
+        st = pg.ev(END_STATE)
+        print(f"  {tag}: Day {d}: offer {st['offer']}, said {st['said']}, settled {st['settled']}, oath {st['oath']}, zeke {st['zeke']}/{st['zekeSun']}, ended {st['ended']}, endgame {st['endgame']}, stuck {len(f.stuck)}")
+        if st['ended'] or st['page']: break
+        if d < 36: advance_to(B + 23 * 60 + 30); f.night(d)
+    st = pg.ev(END_STATE); W = st['week'] or {}
+    check(W.get('offer') == 32, f"{tag}: the offer's day {W.get('offer')} (want 32: the career at its end, Step 6 off)")
+    check(st['offer'] and st['offer'].get('met'), f"{tag}: the offer not met following the arrow: {st['offer']}")
+    said = st['said']; due = (W.get('due', 34) - 1) * 1440 + 20 * 60
+    check(said and said[0][1] == first, f"{tag}: the first answer {said[:1]} (want {first}, at the first 'Tell the Captain')")
+    check(said and said[0][0] <= W.get('due', 34), f"{tag}: answered on Day {said[0][0] if said else None}, after Saturday")
+    if way == 'change': check(said and said[-1][1] == 'stay' and said[-1][0] <= W.get('settle', 35), f"{tag}: the change of mind not kept: {said}")
+    check(st['oath'], f"{tag}: the oath not led (crossingBackOath met)")
+    check(st['settled'] and st['settled'].get('choice') == want and st['settled'].get('day') == W.get('settle'), f"{tag}: not settled at the address as {want}: {st['settled']}")
+    check(st['zekeSun'], f"{tag}: Zeke's Sunday evening talk not had")
+    if want == 'stay':
+        check(st['stay'] and not st['go'] and st['endgame'] and not st['ended'], f"{tag}: not in the endgame on Day 36 (end.stay {st['stay']}, end.go {st['go']}, endgameOn {st['endgame']}, ended {st['ended']})")
+        check(st['fm'] and st['fm']['met'], f"{tag}: the endgame's first morning (breakfast with the Captain) not met: {st['fm']}")
+    else:
+        if not check(st['go'] and st['ended'] and st['page'], f"{tag}: Go did not end at the end page (end.go {st['go']}, ended {st['ended']}, page {st['page']}, the ramp {st['ramp']})"):
+            byes = pg.ev("Object.keys(SHIP.end.f).filter(k => /^bye:/.test(k))"); nxt = pg.ev("endByes().find(id => !SHIP.end.f['bye:' + id]) || null"); arr = pg.ev("(goalNow() || {}).label || null")
+            print(f"  {tag}: goodbyes said {byes}, next {nxt}, arrow {arr}; last actions {f.acts[-10:]}")
+    first_said = (said[0][0] - 1) * 1440 if said else 0
+    for subj, at in st['mail']:
+        if subj.startswith('Your answer'): check(said and at >= first_said, f"{tag}: Mail '{subj}' before you told her in person")
+        if subj.startswith('Tomorrow'): check(st['settled'], f"{tag}: Mail '{subj}' before it was settled")
+    miss = [t for t in f.trace if t[4] and not t[3] and not (t[1] in t[4])]
+    for t in miss[:6]: fail(f"{tag}: Day {t[0] // 1440 + 1} {hhmm(t[0])}: {t[4]} due, but the arrow leads with {t[1]} ('{t[2]}')")
+    if len(miss) > 6: fail(f"{tag}: ... {len(miss) - 6} more minutes like that")
+    mine = {t[2] for t in f.trace if t[1] and t[1].startswith('end:')}   # the labels the ending's own arrows wore
+    for t, lab, dk in f.stuck:                         # stuck on an ending arrow fails; on another (a job's, the clock: the hours skipped between the beats leave those behind) it's printed
+        if lab in mine: fail(f'{tag}: stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk}): the ending\'s arrow stays up with you there')
+        else: print(f'  {tag}: (not the ending) stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk})')
+    led = sorted(set(t[1] for t in f.trace if t[1] and t[1].startswith('end:')))
+    print(f"  {tag}: said {said}, settled {st['settled']}, ending arrows that led {led}, minutes due {sum(1 for t in f.trace if t[4] and not t[3])}, missed {len(miss)}, stuck {len(f.stuck)}")
+    check(not pg.errors, f'{tag}: page errors {pg.errors[:3]}')
     pg.page.close()
 
 def part_clockin(ctx, path):                              # patch 0.92.3 item 6 (AC3; RV12's lines): Days 1-3, into the Works bay before clocking in
@@ -608,7 +726,8 @@ def part_vessel(ctx, path):
 GUIDE = 'guide' in sys.argv[2:]                       # run shift and week with the arrow queue switched on
 TEACHOFF = 'teachoff' in sys.argv[2:]                 # with 'guide': Settings' Teaching arrows set to Off (and step5's second way)
 TRACK = 'track' in sys.argv[2:]                       # step5's third way: a Tracked place of your own each morning
-PARTS = set(a for a in sys.argv[2:] if a not in ('guide', 'teachoff', 'track', 'senior')) or {'queue', 'clockin', 'shift', 'week', 'promo', 'vessel'}   # step5 by name (S5-2: a build with P5_STEP5 on)
+WAYS = [a for a in ('asis', 'teachoff', 'track', 'change') if a in sys.argv[2:]] or ['asis', 'teachoff', 'track', 'change']   # endstay / endgo (teachoff without 'guide' picks the endings' Teaching arrows Off way)
+PARTS = set(a for a in sys.argv[2:] if a not in ('guide', 'teachoff', 'track', 'senior', 'asis', 'change')) or {'queue', 'clockin', 'shift', 'week', 'promo', 'vessel'}   # endstay and endgo only when named (about 25 minutes a way); step5 by name (S5-2: a build with P5_STEP5 on)
 with sync_playwright() as pw:
     path = sys.argv[1]; src = pathlib.Path(path).read_text(); off = arrows_off(src)
     if off != src: (WORK / 'test' / ('_off_' + RUN_ID + pathlib.Path(path).name)).write_text(off)
@@ -635,6 +754,15 @@ with sync_playwright() as pw:
         print(f'== {name} (following only the arrow)')
         try: part(ctx, path if GUIDE or name in ('promo', 'step5', 'vessel') else off_path)   # promo, step5, vessel: always the build as shipped (the arrows on)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
+    if PARTS & {'endstay', 'endgo'}:
+        ep = WORK / 'test' / ('_ending_' + RUN_ID + pathlib.Path(path).name); ep.write_text(end_on(src))   # the ending on (EV_ENDING_ON), the arrows as shipped
+        for want in ('stay', 'go'):
+            if 'end' + want not in PARTS: continue
+            for way in WAYS:
+                if way == 'change' and want == 'go': continue   # the change of mind ends in the endgame: endstay's
+                print(f'== end{want} ({way}; following only the arrow, Days 31-36)')
+                try: part_end(ctx, str(ep), want, way)
+                except Exception as e: fail(f'end{want} {way}: stopped: {str(e)[:300]}')
     b.close()
 
 print('ARROWS CHECK OK' if ok else 'ARROWS CHECK FAILED')
