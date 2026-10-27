@@ -19,7 +19,8 @@
 
 ## Loose ends
 - Drive-coil (coil module) P8 cases wait for S6-4's real Deck 6 coils (none to work on yet); puzzle_check expects
-  them only when the build has coils.
+  them only when the build has coils. DA6 (S6-4): the coils will be '6-coil-1..3' (panels '6-coil-N-svc'); P8's
+  fits needs only panelPlace and a 'coil winding' cause, so check them on a merge with DA6's turn.
 - F3's old once-only pointer "Cross out what was tried" can point at a P6 pair (it's P3's wording); harmless, once ever.
 - Roll cases: P6-P8 post on real faults at the Specialist's rate (.33, at most 2 open) once their rows open.
 - Later: review S6-7's "point him to a clue" call into the case panel (24k).
