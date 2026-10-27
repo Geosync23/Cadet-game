@@ -1231,8 +1231,10 @@ if _von or _vline:
         _vp = str(WORK / 'test' / f'_vessel_on_{os.getpid()}.html'); pathlib.Path(_vp).write_text(_src.replace(_vline.group(0), 'const EV_VESSEL_ON = true;', 1)); _RUN_FILES.append(pathlib.Path(_vp))
     with sync_playwright() as pw:
         g = Game(pw, _vp)
-        if not _von:   # the build itself, switched off: nothing at all
-            g2 = Game(pw, sys.argv[1]); X = g2.ev(VESSEL_JS); g2.close()
+        if True:   # switched off: nothing at all (the build itself, or from 0.94.0, which ships it on, a copy switched off; W6)
+            _voff = sys.argv[1]
+            if _von: _voff = str(WORK / 'test' / f'_vessel_off_{os.getpid()}.html'); pathlib.Path(_voff).write_text(_src.replace(_von.group(0), 'const EV_VESSEL_ON = false;', 1)); _RUN_FILES.append(pathlib.Path(_voff))
+            g2 = Game(pw, _voff); X = g2.ev(VESSEL_JS); g2.close()
             print('The Veyli vessel switched off:', X)
             if not X.get('off') or X['has'] or 'veyliVessel' in X['plan'] or X['sw'] or X['day28']: fail(f"the Veyli vessel switched off still shows: {X}")
         g.ev("window.EV_BEFORE = id => { if (typeof EV_CAL_ON === 'undefined' || !EV_CAL_ON) return []; const r0 = EV_CALENDAR.find(r => r.id === id); return evCalPlan().filter(r => r.id !== id && r0 && r.day < r0.day).map(r => ({ id: r.id, startDay: r.day, endDay: r.day + SHIP_EVENTS[r.id].days, band: 'smooth', threads: {}, mine: {} })); }")
