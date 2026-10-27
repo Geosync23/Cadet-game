@@ -32,6 +32,9 @@ A new account can't update these; it must publish new links (or the user shares 
   - VB1 claude/vessel 03b63d95 (game 705c6fc5): round-one fallback MUST + 2 shoulds FIXED by VB1 before the move; needs a reviewer re-check, then merge.
   - VB2 claude/ending-checks: RV22 verdict (see handover-rv22.md).
 
+- **Combined build head at the move:** claude/staging-0.94.0 07e033c9 (last game merge 64a1ba76, game 958493d0...; switches OFF; cadet identical to 0.93.3). talk-close, train-titles and VB1 03b63d95 are NOT merged yet.
+- **Open question for the user (BM18):** does "everything on" also cover four older switches that are off: TRAY_TRAVELS, INTRO_ASK_ON, ZEKE_CABIN_MAIL, PAD_ON? (END_WAY_BACK is cut by the user's ending answer and stays off.) Ask before flipping them.
+
 ## Restart plan (on the new account)
 1. One reviewer: finish the open reviews above (talk-close, train-titles, VB1's fix, VB2 ending-checks) from plans/handover-rv22.md on claude/review-rv22.
 2. One builder: fix whatever is still open (VB1's round-one fallback first), from the builders' handovers (handover-vb1.md on claude/vessel, handover-b3.md on p5s5-mech-b, handover-b3-m20.md, handover-b5.md on p5s5-promo, handover-vb2.md on ending-checks).
