@@ -25,3 +25,15 @@
 ## Gotchas
 - `P5_NIGHTS` and `P5_LEAVE` are consts in section 28, after sections 13-24 in the file: read them only once the game runs (a const read before its line throws, even inside `typeof`).
 - day_check on the on copy: make it with `const P5_STEP5 = true;` and `const P5_STEP6 = P5_STEP5 && true;`.
+
+## Done for lead 41 between Step 6 turns (2026-10-27, all merged or with BM19)
+- `claude/talk-close-fix` 6dfc4ec1: a far talk card closes when you move off or after 10 s; no full card unasked (RV23 PASS, in staging 9faaee80).
+- `claude/career-check-pick` 4cb6d37b: career_check's paper player makes the pick on M19's jobs (backlog W6-1); mech_check skips t3 like t2 (W6-2). Merged.
+- `claude/vessel-words` 0f8a2406: four Veyli vessel lines cut to 90 characters or less.
+- `claude/check-offcopies` 00161062: arrows_check's follower closes a device a nearby tap opened (the week stall at the wobbly stool, by the Old mysteries board); mech_check ps's stand-in Calder first in DECK_CREW; events_check's vessel-off and promo_beats t3off on off copies.
+
+## Notes for S6-3 and later
+- **mech_check row_check:** add t4 beside t2 and t3 (24u's test job is no training) when S6-3 registers WORK_MECH.t4.
+- **Dev mode:** devmodeNextTraining (section 25) doesn't check WORK_MECH, so with Step 6 on before its pieces land it could offer m22 (RV23's note).
+- **career_check's paper player** now answers pick stops; a new pick-style job needs `j.bad` (or options that accept one in turn).
+- Checks run on a switched-on build since 0.94.0: make off parts run on an off copy (`= true;` line swapped), as BM19's sweep did.
