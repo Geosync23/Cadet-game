@@ -51,3 +51,13 @@ switch lines: ask first).
 - cadet_test base vs branch (off, ALL IDENTICAL); deck_check, machine_check on the ON copy (and on the base's ON copy to
   compare); `PERF_SCENES='Step 6' python3 perf_check.py BUILD`; check_fast.
 - Each check in its own CADET_WORK (DEV_NOTES "Parallel runs"); at most two browser checks at once.
+
+## Status (2026-10-27 ~12:15 UTC)
+- S6-4 done: RV23 PASS on 469b606b and dd32a9a7; staging-p5s6 8d1c749f merged in at 23217355 (cadet identical, check_fast OK).
+- Next (lead 41): S6-5 M23 engine work and the reactor (section 28c, P5_M23), only after lead 41's "go". Spec rows read:
+  night 1 with Reyes (coil service, control board swap with steps on the device, balancing two coils = two 24e dials
+  pulling on each other, coolant readings as repairs, the night's incident); night 2 the reactor (a "Sign the permit"
+  card with the watch officer on Deck 1, a badge from the rack = dosiOut(), the door through section 14's doorOpenFor
+  (one line, sim engineer reviews), the Watch told in and out, the badge returned); WORK_MECH.m23 reserve slot 35;
+  checks: mech_check m23 + the reactor, machine_check, day_check 23, controller_check presets on nights 1 and 2.
+- Gotcha: run cadet_test on its own (beside another browser check it showed false differences).
