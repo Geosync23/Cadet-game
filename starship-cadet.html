@@ -66970,17 +66970,18 @@ function cqAskScene() {
         { text: 'I don\'t know yet.', reply: { who: 'calder', text: 'Good answer. Most of us didn\'t. You\'ve got time, and you\'ve got us.' } }] }] },
     { pick: k => cqAnswer(k, shipNow()) });
 }
-function cqSeats() {                                     // the tea corner's two seats: hers and yours (yours: the one you're on, else the other)
-  const mine = CQ.seats.includes(PLAYER_PLACE) ? PLAYER_PLACE : null, her = CQ.seats.find(s => s !== mine) || null;
-  return { her, you: mine || CQ.seats.find(s => s !== her) || null };
+function cqSeats() {                                     // hers: 5-tea-2 (its guest steps out inside the corner; one leaving 5-tea-1 starts behind its wall, backlog W8-2), else 5-tea-1 if you're on 5-tea-2. Yours: where you are, else 5-tea-1 while it's free, else the standing spot beside her
+  const mine = CQ.seats.includes(PLAYER_PLACE) || PLAYER_PLACE === CQ.stand ? PLAYER_PLACE : null, her = mine === CQ.seats[1] ? CQ.seats[0] : CQ.seats[1];
+  let taken = false; try { taken = DECK_CREW.some(c => c.p && c.p.id !== 'calder' && (c.spot && c.spot.id === CQ.seats[0] || c.goalId === CQ.seats[0])); } catch (e) { taken = false; }
+  return { her, you: mine || (her !== CQ.seats[0] && !taken ? CQ.seats[0] : CQ.stand) };
 }
 function cqCalderDeck() {                                 // the deck Calder's on now (the arrow needs one: guideGoal skips a goal without a deck)
   try { const p = schedPeople().find(q => q.id === 'calder'), w = p && whereIs(p, shipNow()); if (w && w.deck) return w.deck; } catch (e) { /* not yet */ }
   try { return deckDef.num; } catch (e) { return 5; }
 }
-function cqSeatsClear(st, B) {                           // live: the tea's guests on (or heading for) her seat and yours stand in the corner instead, till 19:30
+function cqSeatsClear(st, B) {                           // live: the tea's guests on (or heading for) her seat stand by the corner instead, till 19:30 (yours is only ever a free one)
   let up = []; try { const on = id => id ? DECK_CREW.filter(c => c.p && c.p.id !== 'calder' && (c.spot && c.spot.id === id || c.goalId === id)).map(c => c.p.id) : [];
-    up = on(st.her).concat(st.you !== PLAYER_PLACE ? on(st.you) : []); if (!up.length || deckDef.num !== 5) return up;
+    up = on(st.her); if (!up.length || deckDef.num !== 5) return up;
     const seat = new Set(CQ.seats.map(id => (placeSpot(id) || { walk: [-1, -1] }).walk.join())), me = player.here().join(), T = [];
     for (const v of CREW_SCENE.values()) if (v.to && Array.isArray(v.to.tile)) seat.add(v.to.tile.join());   // a tile already given to someone
     for (const a of DECK_CREW) if (a.p && !up.includes(a.p.id)) seat.add(a.here().join());   // or where someone stands   // the corner has five tiles: stand just outside it by the opening, nearest first (then inside)
@@ -67014,7 +67015,7 @@ function cqTick(now, skip) {
       cqSayOnce('calder', 'end.sit', [up.length ? 'Budge up, you lot. Come and sit down a minute.' : 'Come and sit down a minute.']); }
     else cqSeatsClear(st, B);                              // and anyone who comes for the seats later stands too
     if (!CQ_LIVE.sitAt) CQ_LIVE.sitAt = now;
-    if (typeof guideAsk === 'function' && st.you && PLAYER_PLACE !== st.you) guideAsk({ id: 'end:sit:' + d, level: 1, owner, until: B + CQ.by, goal: () => ({ deck: 5, room: 't', place: cqSeats().you || CQ.seats[1], label: worksText('end.ptr.sit', 'Sit with Calder') }), done: () => CQ.seats.includes(PLAYER_PLACE) || PLAYER_PLACE === CQ.stand || (cqOf() || { steps: {} }).steps.asked !== undefined });
+    if (typeof guideAsk === 'function' && st.you && PLAYER_PLACE !== st.you) guideAsk({ id: 'end:sit:' + d, level: 1, owner, until: B + CQ.by, goal: () => ({ deck: 5, room: 't', place: cqSeats().you || CQ.stand, label: worksText('end.ptr.sit', 'Sit with Calder') }), done: () => CQ.seats.includes(PLAYER_PLACE) || PLAYER_PLACE === CQ.stand || (cqOf() || { steps: {} }).steps.asked !== undefined });
     if ((CQ.seats.includes(PLAYER_PLACE) || PLAYER_PLACE === CQ.stand || now - CQ_LIVE.sitAt >= CQ.wait) && puNearMe('calder', CHATTER_NEAR + 2)) dialogueShow(cqAskScene(), { id: 'end.ask', who: ['calder'], at: now, where: { any: true } });
     return; }
   // missed at the tea: she comes to find you (cqEscort); near you, the question standing up
