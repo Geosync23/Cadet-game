@@ -1640,3 +1640,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~03:45 UTC: USER: the controller update also means **making controller support current with every feature added since it was made** (full audit + fixes + controller_check coverage), then PAD_ON on.
 - ~03:36 UTC: **BM19 staging-0.94.0 ce927cea** (+ train-titles 7ce89d56; check_fast OK; cadet ALL IDENTICAL vs 0.93.3; game d96674f9...e335). Waits on RV23 for vessel 03b63d95 + talk-close f52e2abc; preparing switch flips locally.
 - ~03:50 UTC: **USER PLAN: 0.94.0 -> Step 6 -> controller update (audit + PAD_ON) -> Dev mode update (all new traditions + career progression) -> optimization -> playtest patches.** Logged in plans/overnight-decisions-lead41.md.
+- ~03:55 UTC: USER: **Dev mode update BEFORE the controller update.** Order: 0.94.0 -> Step 6 -> Dev mode -> controller (audit + PAD_ON) -> optimization -> playtest patches.
