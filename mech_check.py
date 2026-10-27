@@ -2196,7 +2196,7 @@ PS_RUN = r"""(() => {
     SHIP.occasions = SHIP.occasions.filter(x => x.id !== 'works.ps'); SHIP.mail = []; const t1 = (d + 2) * 1440 + 400; setShipNow(t1); psAsk(d + 3, t1);
     const r = SHIP.occasions.find(x => x.id === 'works.ps'); const P = player.obj.position, fake = { p: { id: r.by }, h: {}, x: P.x, z: P.z }, said = [], keep = worksSayAll;
     out.escort = [JSON.stringify(worksEscort({ id: r.by }, t1)), SHIP.mail.length];
-    DECK_CREW.push(fake); worksSayAll = (id, l) => said.push([id, l[0]]); try { psTellTick(t1); } finally { worksSayAll = keep; DECK_CREW.splice(DECK_CREW.indexOf(fake), 1); }
+    DECK_CREW.unshift(fake); worksSayAll = (id, l) => said.push([id, l[0]]);   /* (W6) first in the list: psTellTick finds the first Calder, and the real one is on the deck when an earlier part left you there */ try { psTellTick(t1); } finally { worksSayAll = keep; DECK_CREW.splice(DECK_CREW.indexOf(fake), 1); }
     out.inPerson = [r.f.told, said.length ? said[0][0] : null, said.length && /Power safety/.test(said[0][1]), SHIP.mail.map(m => m.subject), JSON.stringify(worksEscort({ id: r.by }, t1))];
     SHIP.occasions = SHIP.occasions.filter(x => x.id !== 'works.ps'); }
   out.script = OCCASIONS['works.ps'] ? OCCASIONS['works.ps'].script : null; out.cur = W.cur && W.cur.id === 'ps' ? 'ps:' + W.cur.st : null;
