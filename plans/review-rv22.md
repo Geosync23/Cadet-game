@@ -70,3 +70,7 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
   The same ladder fix must reach B2 deefa61a and B3 fa1e152c (lead 40 told).
 - VB1 **0340b6f9** (df796cab venue/places; 0f53dd16 EV_MEET_TAGS + day_check tea excuse; 0340b6f9 my 3 notes): diff read OK
   (tea excuse narrow: only people with an eventMeetTag segment in the tea hour). Re-running on it.
+- VB1 0340b6f9 re-runs: cadet 3fb8eac7 vs 0340b6f9 ALL IDENTICAL; day_check 28 ON OK (tea on 0 easy 7), 28 OFF OK (tea on 7
+  went 5), 29 ON OK; events_check only known-old FX24-2. Running bigevents ON, arrows vessel, phone play.
+- B5 c3d36cde (S1 fixed: puFriendsTick files the friends' Mail from 12:30 on the result day, dated then; T.res is set
+  only by puPromote, so never on a fail). Running promo_beats ON.
