@@ -28,6 +28,10 @@ The user's decision: TRAY_TRAVELS, INTRO_ASK_ON, ZEKE_CABIN_MAIL, PAD_ON stay of
 - Lead 41 started the round on 9faaee80 with three runners, two shares each: R1 session_01GKuymit8htMajswkRRb27s (CR1 minus arrows + CR4), R2 session_01GKuymjMx2JdLdXE2tHNFHG (CR2 + CR3 minus controller), R3 session_01GKuymjroMc9y1arLHK5aPv (CR5 + CR6 minus gate part 1, plus ending_check). They report to me and the lead. **GO/NO-GO is mine** when all are in; a must from my gate goes to the runners at once.
 - Known-old: career "Relied on" before Day 5 (backlog 12), events FX24-2, perf one-offs (backlog 14, 32).
 
+## Result
+
+**GO from testing sent to lead 41, 2026-10-27 ~10:20 UTC: 1d5e8845, game 5f4c5415814c78eb4c93eaad76ecc35dfa53f1f7cbb4c1f5af541f3971900a0f.** Publishing and the integration fast-forward are the lead's and the user's. The findings below were all resolved (fixed in checks, or the vessel words); see the build table's '0.94.0 round' row.
+
 ## Round findings (2026-10-27 ~08:40 UTC, game 04cc0cb6)
 
 - **MUST, open:** arrows_check week stalls Day 4 13:21 at "Fix a wobbly stool" (wb-stool, 5-stool-1, Works bay). Bisected (R1 + me): 4fea0aa0 clean, bf228260 (P5_STEP5 = true only) stalls. Sent to lead 41 for a Step 5 builder.
