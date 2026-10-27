@@ -59,7 +59,7 @@
 - Lead is now lead 42 (session_01GKuymjnCHnpwDqB94PVwmV, branch claude/lead-42), after lead 41.
 - Latest: claude/p5s6-nights 3bf30e6 (staging-p5s6 a2ef6416 merged). RV23: PASS (13:40 UTC), its one must (Calder's walk
   on Day 22) cleared once W7's escort fix cffe8187 is in: RV23's scratch merge saw her walk 20.8 m -> 5.4 m and night.on
-  play. Next: merge staging when it carries cffe8187; then the nights' own full round before switch-on. MA6 reviewed
+  play. Lead 42 (13:58 UTC): merge staging only if this branch needs cffe8187 (BM19 merges the nights himself); no separate nights round (the Step 6 full round after switch-on covers it); stay idle for round fixes; N6-1 waits for the playtest-patches stage. MA6 reviewed
   the mech_check m19 edits: OK.
 - MA6 (28d, night 3) reads playerNightOn(24); its Watch hour avoids night 3's incident (02:30-03:30 Day 25). MA6's
   28b defines m21Door() for Calder's wait after the briefing.
