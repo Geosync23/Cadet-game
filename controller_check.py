@@ -2897,11 +2897,14 @@ def part_m24(pw, src, tag):
         s = r.ev(f"(() => {{ const j = SHIP.jobs.find(x => x.id === {json.dumps(j[0])}); const mine = j.seq.map((s, i) => s.who === 'you' ? i : -1).filter(i => i >= 0); return {{ done: j.status === 'done', cur: j.cur, mine: mine.indexOf(j.cur), did: (j.stepsDone || []).length }}; }})()")
         if s['done']: break
         if s['mine'] >= 0 and s['did'] <= s['mine']:
-            h = ring_and_A(r, ['call', 'drive', 'unbolt', 'lift', 'seat', 'test', 'coil', 'team'])
-            if not h: fails.append(f'm24: the ring never named your call (step {s["cur"]}; {hint_now(r)})'); break
-            said.append(h); n += 1
+            for q in range(20):
+                if r.ev("!!DEV.choose"): break
+                r.step(10)
+            res = press_in_panel(r, "[...document.querySelectorAll('#devDlg button')].find(b => b.textContent.trim() === 'Next step')")
+            if res != 'ok': fails.append(f'm24: your call\'s Next step by pad (step {s["cur"]}): {res}'); break
+            said.append(s['cur']); n += 1
         r.step(30)
-    st = r.ev("JSON.stringify(m24State())"); print(f'  the swap by pad: {n} calls, the ring said {said[:2]}; {st}')
+    st = r.ev("JSON.stringify(m24State())"); print(f'  the swap by pad: {n} calls (Next step at steps {said}); {st}')
     if n != 6 or '"done":0' in st: fails.append(f'm24: six calls by pad and the swap done ({n}, {st})')
     if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails

@@ -46,6 +46,9 @@
 - Your call: test it.
 == team.turn.cup
 - Your call: bring the drive back up.
+== m24.next
+// the button on your call's card
+- Next step
 == m24.reply.isolate
 - Isolating. Coupling's cold.
 == m24.reply.unbolt
