@@ -7,6 +7,7 @@ Cap rule: at most 5 seats working at once; read only until RV23 says it has gone
 ## Verdicts
 | Branch | Verdict | Sha |
 |---|---|---|
+| claude/escort-seated-check (PZ6, test only) | code read OK (glance, lead 42); run later | 775c3ca |
 
 ## W8 claude/p5s6-promo4 bd138090 (S6-7 clue by casePoint, S6-9 turn 1 Calder's question, worksEscort change); base 62a8ac0b
 Code read (no runs yet):
