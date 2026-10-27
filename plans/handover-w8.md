@@ -12,10 +12,12 @@
 
 - **s6.15:** career_check (s6). **s6.16:** MA6-2 (lead 42's priority): a missed Tier 3 lesson can't hold the Tier 4 test (24 core, P5_PROMO4); asked lead 42 whether to do the same for t3 in the plain game.
 
+- **s6.17:** refit + DA6's 2-B asks. **s6.18:** Step 6 DM_CAREER rows, nights excused in Dev skips.
+
 ## Still to do
 1. stories_check / fridays_check / events_check / bigevents_check on Day 26 with Step 6 on (the full round's; career_check --s6 is done, s6.15).
 2. (done s6.17: the refit and DA6's 2-B asks; the framed traces on the shelf are DA6's, told them. Nothing draws homeKeepsakes for 4-23 either: 8b has no keepsake-shelf drawing to point at room B.)
-3. **All Step 6 DM_CAREER rows** (m21, m22 nights, m23, m24, p6-p8, m25) so devmode_check set passes on a Step 6 copy (handover-w7 lists each row's shape).
+3. (done s6.18: all Step 6 DM_CAREER rows; devmode_check passes on ON6. Not set by Dev: side.m21 / side.m24 records (MA6's) and W.mt done: the game makes its own as the skip runs.)
 4. Live escort check on claude/escort-follow-fix (handover-w7) if lead 41 still wants it.
 
 ## Judgement calls (overrule any)

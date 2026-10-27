@@ -71016,14 +71016,26 @@ function devmodeSkipTo(to) {
     }
     st.ex = [...new Set(st.ex)].sort((x, y) => x - y).slice(-60);
   }
+  const exN = devmodeNightsWorked(from, to);              // (S6, W8) a night shift the jump passes the miss of (28a): worked, as a steady player's
   for (let t = from; t < to;) { t = Math.min(to, t + DM_STEP); skipTo(t); }
   nightT = nightAt(); if (typeof deckCrewFill === 'function') deckCrewFill();   // everyone where they now are, once (section 11 skips it while held)
   const out = ['Now ' + clockText() + '.'];
   if (ex.length) out.push((ex.length === 1 ? 'Day ' + ex[0] + ' excused.' : 'Days ' + ex.join(', ') + ' excused.'));
+  if (exN.length) out.push((exN.length === 1 ? 'The night of Day ' + exN[0] : 'The nights of Days ' + exN.join(', ')) + ' clocked as worked.');
   for (const id of miss) { const n = 'Skipped: ' + (DM_MEETS[id] || 'a first-week meeting') + ' counted as missed. This isn\'t a real player\'s Day ' + SHIP.time.day + '.'; if (!st.note.includes(n)) st.note = (st.note ? st.note + ' ' : '') + n; }
   const notes = (SHIP.mail || []).slice(mail0).map(m => m.subject).filter(s => / \(notes\)$/.test(s || ''));
   if (notes.length) out.push('Skipped, with notes in Mail: ' + notes.map(s => s.replace(/ \(notes\)$/, '')).join(', ') + '.');
   return out.join(' ');
+}
+function devmodeNightsWorked(from, to) {                 // 28a's nights (P5_NIGHT): one whose miss (P5N.missBy in) the jump passes with you not clocked in is clocked in at its start, and out at its end if the jump passes that too
+  const out = []; if (!P5_NIGHT || typeof p5nOf !== 'function' || typeof playerNightOn !== 'function' || !SHIP.works) return out;
+  for (let k = Math.floor(from / 1440); k <= Math.floor(to / 1440) + 1; k++) {
+    const N = playerNightOn(k) && p5nOf(k); if (!N) continue;
+    const b = N.from + P5N.missBy; if (from >= b || to < b) continue;
+    const R = p5nNight(k); if (!R || R.in || R.miss) continue;
+    R.in = N.from; if (to >= N.to) R.out = N.to; out.push(k);
+  }
+  return out;
 }
 function devmodeGo(label, to) { devmodeDo('Clock: ' + label, () => devmodeSkipTo(to()), devmodeArrival); }
 function devmodeTopUp() { devmodeDo('Top up needs', () => { for (const k of NEED_KEYS) SHIP.player.needs[k] = needClamp(100); return 'Needs topped up.'; }); }
@@ -71318,6 +71330,11 @@ if (P5_STEP5) {                                         // Pillar 5 Step 5 (S5-1
 if (P5_PROMO4) {                                        // Pillar 5 Step 6 (S6-3, W7): the Tier 4 test passed Day 22, Engine Specialist that night, the badge Day 23, Deck 2 from Day 25 (approximate)
   const i = DM_CAREER.findIndex(r => r.day === 23 && r.later); if (i >= 0) DM_CAREER.splice(i, 1, { day: 22, train: ['t4'], rank: 'specialist', band: 'new', promo4: true });
 }
+if (P5_STEP6) {                                         // (W8) Step 6's other rows on their ladder days: the briefing, the nights, engine work, P6-P8, leading a team, mentoring (each only if its piece is in)
+  const day6 = d => { let r = DM_CAREER.find(x => x.day === d && !x.later); if (!r) { r = { day: d }; DM_CAREER.push(r); DM_CAREER.sort((a, b) => a.day - b.day); } return r; };
+  for (const id of ['m22', 'm21', 'm23', 'p6', 'p7', 'm24', 'p8', 'm25']) { const row = ladderRow(id); if (row) { const r = day6(row.day); r.train = (r.train || []).concat(id); } }
+  if (P5_END) { const k = DM_CAREER.findIndex(r => r.day === 26 && r.later); if (k >= 0) DM_CAREER.splice(k, 1); }   // Calder's question: built (her question settles itself the evening before, 28f)
+}
 const DM_MAXDAY = 30, DM_SEED = 8;                      // the seed: no sick day (section 20's sickDue) before Day 46, so you never land unwell (devmode_check)
 function devmodeCareerFor(n) {                           // pure: SHIP.works's career part by the end of day n
   const rows = DM_CAREER.filter(r => r.day <= n), last = k => { for (let i = rows.length - 1; i >= 0; i--) if (rows[i][k] !== undefined) return rows[i][k]; return undefined; };
@@ -71342,6 +71359,7 @@ function devmodeCareerSet(n, now) {                      // SHIP.works set to da
   if (n >= 8 && typeof flagSet === 'function') flagSet('works.oily', true);   // your work uniform's row needs it
   if (c.done.includes('ceremony2') && typeof giftKeepsake === 'function') try { giftKeepsake({ id: 'marrow' }, worksText('works.keepsake.commission', worksText('promo.keepsake', 'your framed commission'))); } catch (e) { /* no social */ }
   for (const r of SHIP.occasions || []) if (/^(works\.|promo)/.test(r.id) && r.status === 'asked') r.status = 'done';   // nothing left asking for what's now set
+  if (P5_CASES6 && typeof flagSet === 'function') for (const id of ['p6', 'p7', 'p8']) if (c.tr[id] !== undefined && flag('case.' + id + '.first') === undefined) flagSet('case.' + id + '.first', c.tr[id]);   // (S6-8) the first head-scratcher of each: had
   if (typeof MACH_REV !== 'undefined') MACH_REV++;       // the board: the tier's jobs
 }
 function devmodeWeekMet(upTo) {                          // the first week's beats before `upTo` marked as attended (section 21's records)
