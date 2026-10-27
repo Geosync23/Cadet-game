@@ -694,6 +694,7 @@ S6_BEATS = [
   ['Calder\'s question', 'cq:', "!!(SHIP.works.end && SHIP.works.end.answer)", "typeof P5_END !== 'undefined' && P5_END && typeof endQuestion === 'function'"],
 ]
 # skips stop a little before each of Step 6's times, so the beat's own tick runs live (an arrow is asked in play, not while time skips)
+S6_WATCH_JS = r"""(() => { const g = goalNow(), W = SHIP.works; return [clockText(), deckDef.num, roomAt(...player.here()), g && (g.guide || '') + ' ' + (g.label || ''), JSON.stringify((W.ns || {})[22] || null), ACT && ACT.kind, DIALOGUE && DIALOGUE.id, typeof sleeping !== 'undefined' && !!sleeping, typeof careerClockedIn === 'function' && careerClockedIn(22), SHIP.event && SHIP.event.id]; })()"""
 S6_STOPS = sorted((d - 1) * 1440 + m for d, ms in {19: [570], 21: [1050], 22: [475, 555, 750, 1000, 1335], 23: [345, 960, 1235], 24: [345, 1235], 25: [345, 1020, 1140], 26: [520, 1100]}.items() for m in ms)
 def step6_on(src): return src.replace("const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');", 'const P5_STEP6 = P5_STEP5 && true;', 1)
 def part_step6(ctx, path, way):
@@ -713,6 +714,7 @@ def part_step6(ctx, path, way):
     def advance_to(t):                                 # the quiet hours skipped, but followed whenever a level-1 arrow is due; a skip never crosses one of Step 6's times (S6_STOPS)
         while pg.ev('shipNow()') < t:
             n = pg.ev('shipNow()')
+            if os.environ.get('S6_WATCH') and re.search(os.environ['S6_WATCH'], pg.ev('clockText()')): print('   watch', pg.ev(S6_WATCH_JS))   # (debugging) the state each step
             if pg.ev(S6_DUE): f.run(min(t, n + 10)); continue
             stop = min([x for x in S6_STOPS if x > n + 1] or [t])
             pg.ev(f"devmodeSkipTo({min(t, n + 20, stop)}); for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 70)"); pg.step(3, 50)
