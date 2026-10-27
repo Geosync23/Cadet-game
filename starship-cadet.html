@@ -8184,10 +8184,10 @@ const DECK_DRESS = {
   // ({ id, day }, from the occasion): its menu card, signed, in a dark frame on the wall above your keepsake shelf: the
   // bunk's, or your officer cabin's once SHIP.works.home is '4-23' (moved with the next deck build). Shown only while the
   // storm update is on (`on`, read by dressShow), so a game with it off stays as it was. 2 draw calls
-  framedMenu: { deck: 4, on: () => typeof EV_STORM_ON !== 'undefined' && EV_STORM_ON, what: 'the menu from the Captain\'s table, framed above your shelf', make(g, o) {
-    const cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = cab ? 'W' : 'a', along = cab ? .5 : 2.5;
-    const s = dressAt(g, room, 'n', along);
-    dressBox(s, .24, .3, .025, '#2e2620', 0, 2.47, .0125);           // the frame, flat on the wall
+  framedMenu: { get deck() { return deck2Home() ? 2 : 4; }, on: () => typeof EV_STORM_ON !== 'undefined' && EV_STORM_ON, what: 'the menu from the Captain\'s table, framed above your shelf', make(g, o) {
+    const B = deck2Home(), cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = B ? 'B' : cab ? 'W' : 'a', along = B ? DECK2_HOME.menu : cab ? .5 : 2.5, wl = B ? 'w' : 'n', y = B ? DECK2_HOME.y : 2.47;   // S6-4: room B's west wall, above the bookcase, once it's yours
+    const s = dressAt(g, room, wl, along);
+    dressBox(s, .24, .3, .025, '#2e2620', 0, y, .0125);           // the frame, flat on the wall
     const t = tex(192, 240, (c, w, h) => {
       c.fillStyle = '#f4efe2'; c.fillRect(0, 0, w, h);
       c.fillStyle = '#7a2e2a'; c.textAlign = 'center'; c.font = '700 15px Georgia,serif'; c.fillText('THE CAPTAIN\'S TABLE', w / 2, 30);
@@ -8197,8 +8197,8 @@ const DECK_DRESS = {
       c.strokeStyle = '#1f3c6e'; c.lineWidth = 1.5;                    // the signatures: a few loops of pen along the bottom
       for (let k = 0; k < 6; k++) { const x0 = 22 + (k % 3) * 52, y0 = 196 + Math.floor(k / 3) * 22; c.beginPath(); c.moveTo(x0, y0); for (let i = 1; i <= 8; i++) c.lineTo(x0 + i * 4.5, y0 - 5 * Math.sin(i * (1.3 + k * .2))); c.stroke(); }
     });
-    const p = new THREE.Mesh(new THREE.PlaneGeometry(.2, .26), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 2.47, .031); s.add(p);   // .006 in front of the frame (PR4: no shimmer at phone distance)
-    return { t: 'Framed menu', x: 'The menu from the Captain\'s table, signed by everyone who sat at it.', wall: [room, 'n', along], y: 2.47, w: .26, h: .32 };
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.2, .26), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, y, .031); s.add(p);   // .006 in front of the frame (PR4: no shimmer at phone distance)
+    return { t: 'Framed menu', x: 'The menu from the Captain\'s table, signed by everyone who sat at it.', wall: [room, wl, along], y, w: .26, h: .32 };
   } },
   // Crossing the Line (EV5, L3, the deck architect's stand-in; PR4 reviews; all behind EV_LINE_ON by `on`, so a game with it
   // off never shows them). lineRibbons, the ceremony (Sunday 14:30-15:15, section 18's dressing; gone before the reading
@@ -8242,18 +8242,18 @@ const DECK_DRESS = {
   // lineCertificate: your Line certificate (section 18's settleTraces, from the oath's end), framed beside the
   // Captain's table menu above your keepsake shelf: the bunk's, or your officer cabin's once SHIP.works.home is '4-23'
   // (moved with the next deck build, as framedMenu is). 2 draw calls
-  lineCertificate: { deck: 4, on: () => typeof EV_LINE_ON !== 'undefined' && EV_LINE_ON, what: 'your Line certificate, framed above your shelf', make(g) {
-    const cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = cab ? 'W' : 'a', along = cab ? .9 : 2.05;
-    const s = dressAt(g, room, 'n', along), name = (typeof SHIP !== 'undefined' && SHIP.player && SHIP.player.name) || 'Cadet', back = typeof crossingBackDone === 'function' && crossingBackDone();
-    dressBox(s, .22, .28, .025, '#3a3024', 0, 2.45, .0125);
+  lineCertificate: { get deck() { return deck2Home() ? 2 : 4; }, on: () => typeof EV_LINE_ON !== 'undefined' && EV_LINE_ON, what: 'your Line certificate, framed above your shelf', make(g) {
+    const B = deck2Home(), cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = B ? 'B' : cab ? 'W' : 'a', along = B ? DECK2_HOME.cert : cab ? .9 : 2.05, wl = B ? 'w' : 'n', y = B ? DECK2_HOME.y : 2.45;   // S6-4: room B, as framedMenu
+    const s = dressAt(g, room, wl, along), name = (typeof SHIP !== 'undefined' && SHIP.player && SHIP.player.name) || 'Cadet', back = typeof crossingBackDone === 'function' && crossingBackDone();
+    dressBox(s, .22, .28, .025, '#3a3024', 0, y, .0125);
     const t = tex(176, 224, (c, w, h) => {
       c.fillStyle = '#f6efd8'; c.fillRect(0, 0, w, h); c.strokeStyle = '#c9a23e'; c.lineWidth = 5; c.strokeRect(8, 8, w - 16, h - 16);
       c.fillStyle = '#7a5a1e'; c.textAlign = 'center'; c.font = '700 14px Georgia,serif'; c.fillText('THE LINE', w / 2, 40);
       c.fillStyle = '#2b2b2b'; c.font = 'italic 500 12px Georgia,serif'; ['This is to say that', name, 'crossed into the', 'Veyli reach, Day 7'].concat(back ? ['and back, Day 35'] : []).forEach((l, k) => c.fillText(l, w / 2, 76 + k * 22));   // the ending (E-1): the second date
       c.strokeStyle = '#1f3c6e'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(52, 192); for (let i = 1; i <= 16; i++) c.lineTo(52 + i * 4.5, 192 - 5 * Math.sin(i * 1.4)); c.stroke();   // the Captain's signature
     });
-    const p = new THREE.Mesh(new THREE.PlaneGeometry(.18, .24), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 2.45, .028); s.add(p);
-    return { t: 'Line certificate', x: (back && typeof evWord === 'function' && evWord('event.crossingBack.keepsake')) || (typeof evWord === 'function' && evWord('event.crossingLine.keepsake')) || 'Your Line certificate, signed by the Captain.', wall: [room, 'n', along], y: 2.45, w: .24, h: .3 };
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.18, .24), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, y, .028); s.add(p);
+    return { t: 'Line certificate', x: (back && typeof evWord === 'function' && evWord('event.crossingBack.keepsake')) || (typeof evWord === 'function' && evWord('event.crossingLine.keepsake')) || 'Your Line certificate, signed by the Captain.', wall: [room, wl, along], y, w: .24, h: .3 };
   } },
   // 0.38.31: spiceJars: the jars on the mess hall's spice shelf, one more after each Spice shelf supper. A trace ({ id:
   // 'spiceJars', day, n }): n jars when given, else one for each week since day (from the first supper), up to 12. 4 draw calls
@@ -8395,7 +8395,8 @@ function deck6P5Places() {
   D.teamSpots = D.teamSpots || {}; for (let k = 1; k <= 3; k++) D.teamSpots['6-coil-' + k] = DECK6_P5.team.map((_, q) => '6-coil-team-' + (q + 1));
   DECK6_P5.team.forEach(([c, r, face], k) => D.places.push({ id: '6-coil-team-' + (k + 1), type: 'event', event: 'team-job', team: '6-coil-1', works: true, at: [c, r], face, pose: 'stand', anim: 'work', room: 'E' }));
   D.places.push({ id: '6-dosi-rack', type: 'event', event: 'dosimeter', at: [22, 7], face: 'w', pose: 'stand', room: 'K' },
-    { id: '6-watch-board', type: 'event', event: 'watch-board', at: [10, 1], face: 'n', pose: 'stand', room: 'E' });
+    { id: '6-watch-board', type: 'event', event: 'watch-board', at: [10, 1], face: 'n', pose: 'stand', room: 'E' },
+    { id: '6-control-board', type: 'event', event: 'engine', at: [25, 4], xy: [25.65, 4.85], face: 'e', pose: 'stand', room: 'K' });   // at engine control's board (S6-5's coolant and board swap)
   deck2P5Places();
   SAVE_EXTRA.push(s => { const o = dosiOut(); if (o !== null) s.ship.dosi = { out: o }; });
   onSim('newGame', () => { DOSI = { out: null, mesh: [] }; });
@@ -8457,7 +8458,7 @@ Object.assign(WALL_KIT, {
 // rack and the board. Only with P5_DECK6
 function deck6P5Dress() {
   DECK6_P5.coils.forEach(([, , f, x]) => place('E', 'coilPanel', x, f === 's' ? 6.86 : 5.14, f));   // tapped as the coil: a real machine now, so section 15b's machine tap reads it out
-  place('R', 'reactorConsole', 1.05, 3.5, 'w');                   // tapped as the reactor (section 15b's machine tap), from inside only
+  place('R', 'reactorConsole', 1.05, 3.5, 'w', { it: IT('Reactor local console', 'The reactor\'s own readings, just inside the shielded door.') });   // on its tile the machine's tap reads the reactor out; on night 2 it's S6-5's visit
   const D = dosiState(); D.mesh = []; if (typeof PLAYER_TAPS !== 'undefined' && !PLAYER_TAPS.includes(dosiTap)) PLAYER_TAPS.push(dosiTap);
   placeWall('K', 'dosiRack', 'w', 3.5, { mine: D.mesh, hitW: .9, it: IT('Dosimeter rack', 'A badge for everyone who might go through the reactor door. Take one before you go in; hang it back when you come out.') });
   dosiShow();
@@ -8495,14 +8496,18 @@ function dosiTap(it, at) {                               // section 15's PLAYER_
 // cabin touches have four spots (DECKS[2].cabinSpots['2-B'], the shape of '4-23''s, plus `wall`: the wall each faces away
 // from, for drawing; places `2-B-rug`, `-desk`, `-shelf`, `-ledge`). Places type 'event' (inert). Only with P5_DECK6
 const deck2Mine = () => P5_DECK6 && typeof worksHome === 'function' && worksHome() === '2-B';
+// your framed keepsakes (4d's framedMenu and lineCertificate, section 18's vesselSketchShelf) follow you to room B: on its west
+// wall above the bookcase by the bed (wall-along metres from the room's north edge; y the frames' middle, top the bookcase's)
+const DECK2_HOME = { menu: 3.55, cert: 4.12, sketch: 3.85, y: 1.72, top: 1.15 };
+const deck2Home = () => deck2Mine();
 function deck2P5Places() {
   const D = DECKS[2], ev = (id, c, r, xy, face) => ({ id, type: 'event', event: 'side', at: [c, r], xy, face, pose: 'stand', room: 'B' });
   D.places.push(ev('2-B-wardrobe', 13, 17, [13.0, 17.6], 'w'), ev('2-B-keepsake', 13, 19, [13.2, 19.6], -36),
-    ev('2-B-rug', 13, 18, [13.5, 18.75], 's'), ev('2-B-desk', 14, 18, [14.85, 18.75], 'e'), ev('2-B-shelf', 13, 19, [13.1, 19.4], -51), ev('2-B-ledge', 14, 17, [14.5, 17.55], 'n'));
+    ev('2-B-rug', 13, 18, [13.5, 18.75], 's'), ev('2-B-desk', 14, 18, [14.85, 18.75], 'e'), ev('2-B-shelf', 13, 19, [13.1, 19.4], -51), ev('2-B-ledge', 14, 17, [14.3, 17.55], 'n'));
   D.wardrobes = { ...(D.wardrobes || {}), '2-B': { room: 'B', place: '2-B-wardrobe' } };
   D.homeKeepsakes = { ...(D.homeKeepsakes || {}), '2-B': { room: 'B', bed: '2-B', place: '2-B-keepsake', slots: [20.48, 20.63, 20.78, 20.93, 21.08, 21.23].map(z => [12.3, 1.17, z]), trophy: [12.16, 1.17, 21.2] } };
   D.cabinSpots = { ...(D.cabinSpots || {}), '2-B': { room: 'B', rug: { place: '2-B-rug', at: [13.6, .01, 19.6], wall: 'n' }, desk: { place: '2-B-desk', at: [15.6, .78, 18.7], wall: 'e' },
-    shelf: { place: '2-B-shelf', at: [12.12, 1.6, 20.2], wall: 'w' }, ledge: { place: '2-B-ledge', at: [14.5, 1.15, 17.12], wall: 'n' } } };   // the ledge by the door (the windows are behind the bed)
+    shelf: { place: '2-B-shelf', at: [12.12, 1.6, 20.2], wall: 'w' }, ledge: { place: '2-B-ledge', at: [14.3, 1.15, 17.12], wall: 'n' } } };   // the ledge by the door, clear of the wash pod (the windows are behind the bed)
 }
 function deck2MinePlate() { let nm = 'Cadet'; try { nm = (SHIP.player && SHIP.player.name) || nm; } catch (e) {} return { text: nm, sub: 'Senior Officer, Engine Specialist', fit: true }; }
 function deck2MineSuite() {
@@ -10176,6 +10181,7 @@ function doorOpenFor(room, who, t = shipNow(), deck = typeof deckDef !== 'undefi
   if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof occasionDoorOpen === 'function' && occasionDoorOpen(deck, room, t)) return true;   // section 18's occasions: a summons, the Captain's table
   if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof jobDoorOpen === 'function' && jobDoorOpen(deck, room)) return true;   // section 15: your job's next stop is in there (0.28.52)
   if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof worksHomeOpen === 'function' && worksHomeOpen(deck, room)) return true;   // section 24p: your own cabin, once you're an officer
+  if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof m23DoorOpen === 'function' && m23DoorOpen(deck, room, t)) return true;   // 28c (S6-5): the reactor's shielded door, with a permit, a badge and the Watch told
   for (const a of apptList()) {
     if (!apptOn(a) || !/^(invite|summons|meeting|checkup|work|social)$/.test(a.kind || 'social')) continue;
     const pl = apptPlace(a); if (!pl || pl.deck !== deck || pl.room !== room) continue;
@@ -11937,6 +11943,7 @@ function devDay(d) {
   try { if (typeof promoBeatsItems === 'function') out.push(...promoBeatsItems(d)); } catch (e) { /* not yet */ }   // FX28: the promotion's steps (24p), with PROMO_BEATS_ON
   try { if (typeof sdItems === 'function') out.push(...sdItems(d)); } catch (e) { /* not yet */ }   // 24w (S5-4): your booked shutdown, with P5_M18
   try { if (typeof m24Items === 'function') out.push(...m24Items(d)); } catch (e) { /* not yet */ }   // 28d (S6-6): night 3's coil swap, with P5_M24
+  try { if (typeof m23Items === 'function') out.push(...m23Items(d)); } catch (e) { /* not yet */ }   // 28c (S6-5): your nights' engine work, with P5_M23
   try { if (typeof EV_VESSEL_ON !== 'undefined' && EV_VESSEL_ON && typeof vesselItems === 'function') out.push(...vesselItems(d)); } catch (e) { /* not yet */ }   // the Veyli vessel's beats (section 18's slot 'Vessel builder')
   try { if (typeof endItems === 'function') out.push(...endItems(d)); } catch (e) { /* not yet */ }   // 29a: the ending's week (EN1), with EV_ENDING_ON
   return out.sort((x, y) => x.from - y.from);
@@ -16514,13 +16521,14 @@ const ixStepwise = j => !!(j && j.machine && typeof JOB_KINDS === 'object' && JO
 const ixSides = () => typeof mySideJobs === 'function' && typeof jobStops === 'function' ? mySideJobs().filter(j => typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind] && (!j.machine || j.kind === 'team') && !j.workDone && !(j.found > shipNow())) : [];   // only once it's announced (the drill: 14:50, AR2's A1); a team job (24h) is on a machine, but your turns are at your own spot (MA6-1: they couldn't be tapped)
 const ixChores = () => [...ixSides(), ixChore()].filter(Boolean);
 function ixNextStop(j) { const st = jobStops(j), k = st.findIndex(x => !x.done); return k < 0 ? null : { k, s: st[k] }; }
+const ixSideOwn = s => { const nx = ixNextStop(s), pl = nx && nx.s.places[0] && PLACE_OF.get(nx.s.places[0]); return !!(pl && pl.machine); };   // a side job's next stop is a machine's panel (S6-5)
 // first tips (Pillar 3, C13: 15b says when, the device draws them): tipShow(id, text) shows each once, when it's there
 function ixTip(id, text) { if (typeof tipShow === 'function') { try { tipShow(id, text); } catch (e) { /* the tips aren't ours */ } } }
 // 0.28.55 (the lead): at a chore's stop a thing you can use does its own thing. Section 15's playerTap asks ixChoreLast
 // last of all (scenery with nothing of its own to do), and with own = true just before machineTap, for a stop that is that
 // machine's own panel (section 18's stormBallasts at the lights). The floor at the stop and the Repair button: jobHere
 function ixChoreLast(it, at, own) {
-  for (const s of ixSides()) if (!own && ixChoreTap(it, at, s)) return true;   // the drill's stop first (its stops are never a machine's panel)
+  for (const s of ixSides()) if ((!own || ixSideOwn(s)) && ixChoreTap(it, at, s)) return true;   // the drill's stop first (its stops are never a machine's panel); 28c's night jobs' are (S6-5: at the panel, before the machine's own tap)
   const j = ixChore(), nx = j && !j.workDone ? ixNextStop(j) : null, pl = nx && nx.s.places[0] && PLACE_OF.get(nx.s.places[0]);
   return own && !(pl && pl.machine) ? false : ixChoreTap(it, at);
 }
@@ -50615,11 +50623,11 @@ function vesselDress() {
     } },
     // the sketch Taavek gives you, leaning at the back of your keepsake shelf (the bunk's, or 4-23's once SHIP.works.home is
     // '4-23'), between the Line certificate and the framed menu: a trace { id: 'vesselSketchShelf', day } (vesselShelve)
-    vesselSketchShelf: { deck: 4, on, what: 'Taavek\'s sketch on your shelf', make(g) {
-      const cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = cab ? 'W' : 'a', along = cab ? .5 : 2.5;
-      const s = dressAt(g, room, 'n', along - .235), c = new THREE.Group(); c.position.set(0, 2.17, .03); c.rotation.x = -.13; s.add(c);   // its foot on the shelf (top 2.17), leaning back
+    vesselSketchShelf: { get deck() { return typeof deck2Home === 'function' && deck2Home() ? 2 : 4; }, on, what: 'Taavek\'s sketch on your shelf', make(g) {
+      const B = typeof deck2Home === 'function' && deck2Home(), cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = B ? 'B' : cab ? 'W' : 'a', along = B ? DECK2_HOME.sketch + .235 : cab ? .5 : 2.5, wl = B ? 'w' : 'n', top = B ? DECK2_HOME.top : 2.17;   // S6-4: room B's bookcase once it's yours
+      const s = dressAt(g, room, wl, along - .235), c = new THREE.Group(); c.position.set(0, top, .03); c.rotation.x = -.13; s.add(c);   // its foot on the shelf (top 2.17; room B's bookcase 1.15), leaning back
       vesselCard(c, .1, 0, 'you', .16, .19);
-      return { t: vesselW('tap.sketchShelf.t', 'Taavek\'s sketch'), x: vesselW('tap.sketch.shelf', 'Taavek\'s sketch of you at the foot of the Tern\'s ramp, the round one in your hands. Underneath, in careful letters: "For you. The one who meets."'), wall: [room, 'n', along - .235], y: 2.27, w: .2, h: .24 };
+      return { t: vesselW('tap.sketchShelf.t', 'Taavek\'s sketch'), x: vesselW('tap.sketch.shelf', 'Taavek\'s sketch of you at the foot of the Tern\'s ramp, the round one in your hands. Underneath, in careful letters: "For you. The one who meets."'), wall: [room, wl, along - .235], y: top + .1, w: .2, h: .24 };
     } },
   });
 }
@@ -66376,6 +66384,232 @@ if (P5_M21) {
 // ---------------------------------------------------------------------
 
 // ---- slot: Engine work (section 28c). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// M23 (S6-5, DA6 for lead 41). Engine work and the reactor, on your first two nights (P5_NIGHTS; a night day has no
+// ladder, so it runs here, WORK_MECH.m23.own, as 28d's m24). Night 1 (Day 22, from 22:45, once you're an Engine Specialist):
+// one job with Reyes, yours as the night starts (a side job: beside any board job you hold, done where you finish it, nothing to
+// turn in): a coil service
+// (listen, then service the worst of S6-4's three coils), the coolant readings at engine control's board (which loop reads
+// low: a wrong pick is never a fail, look again), the low loop topped up (the old M16's coolant repair, merged in), a
+// control board swap (read the fault lamp, pull it, seat the new one, test: its steps one by one on the device), and
+// balancing two coils (24e's turn control used twice, at coil 1's panel then coil 2's: each card shows both coils, and each
+// coil's setting pulls on the other's reading until both are settled). Reyes teaches as you go (his bubble when he's on
+// the deck, else a toast). Night 2 (Day 23, from 21:00): the reactor (below). Trained (W.tr.m23) when night 2's done.
+// Saved: SHIP.works.side.m23 = { j1, d1, permit, told, j2, out, back, word, d2 } (cleaned on read); the job keeps its own coil, low loop, fault board and
+// balance (j.coil, j.loop, j.board, j.bal). Job slot M23_SLOT 35. schedU keys 1080 (the low loop), 1081 (the fault board).
+// Words: content/works/m23.lines (stand-ins here until the head writer's). No R(). Off (P5_M23 false): nothing registers.
+const M23_N1 = 22, M23_N2 = 23, M23_SLOT = 35, M23_BY = 'reyes-alejandro', M23_COILS = ['6-coil-1', '6-coil-2', '6-coil-3'], M23_BOARD = '6-control-board';
+function m23State() {                                    // side.m23, cleaned (a save may hold junk)
+  const s = typeof worksSide === 'function' ? worksSide() : null; if (!s) return null;
+  const A = s.m23;
+  if (!A || typeof A !== 'object' || !s.m23Ok) {
+    const int = v => Number.isInteger(v) && v >= 0 ? Math.min(v, 999999) : 0, str = v => typeof v === 'string' ? v.slice(0, 80) : null;
+    s.m23 = { j1: str(A && A.j1), d1: int(A && A.d1), permit: int(A && A.permit), told: int(A && A.told), j2: str(A && A.j2), out: int(A && A.out), back: int(A && A.back), word: int(A && A.word), d2: int(A && A.d2) };
+    Object.defineProperty(s, 'm23Ok', { value: true, enumerable: false, configurable: true });
+  }
+  return s.m23;
+}
+// is night d's engine work yours (saved state and the fixed table only): your night, an Engine Specialist (a Senior with the promotion off)
+function m23On(d) {
+  const W = SHIP.works; if (!P5_M23 || !W || (d !== M23_N1 && d !== M23_N2) || typeof p5NightOf !== 'function' || !p5NightOf(d)) return false;
+  return (W.tier || 1) >= (P5_PROMO4 ? 4 : 3);
+}
+const m23Live = (d, now = shipNow()) => { const n = m23On(d) && p5NightOf(d); return !!n && now >= n.from && now < n.to; };
+function m23Coil() {                                     // the coil to service: the worst of the three (key 1071's tie-break, as 28d)
+  const c = id => (SHIP.machines[id] || { cond: 100 }).cond;
+  return M23_COILS.filter(id => machineById(id) && panelPlace(id)).sort((a, b) => c(a) - c(b) || (a < b ? -1 : 1))[0] || null;
+}
+const m23Board = () => placeById(M23_BOARD) ? M23_BOARD : panelPlace(M23_COILS[1]);   // ship-wide (PLACE_OF is the deck you're on)
+const m23Loops = (bad, ok, low) => [1, 2, 3].map(i => worksText('m23.loop', 'Loop {n}', { n: i }) + ' ' + (i - 1 === bad ? low : ok)).join(' · ');
+// the balance: the coil you're turning shows its own dial; the other's reading is its own setting plus half this one's
+// (whole steps), so turning one moves the other; each settled at its mark (0), both read steady
+const m23Read = (v, o) => v + Math.trunc(o / 2);
+const M23_BAL = ['running cold', 'a little cool', 'steady', 'a little hot', 'running hot'];
+const m23BalWord = r => { const k = Math.max(-2, Math.min(2, r)); return worksText('m23.bal.' + (k > 0 ? '+' : '') + k, M23_BAL[k + 2]); };
+function m23Gauge(j, k) {
+  const [a, b] = j.bal, r = k ? [m23Read(a, b), b] : [a, m23Read(b, a)];
+  return worksText('m23.bal.gauge', 'Coil 1 {a}. Coil 2 {b}.', { a: m23BalWord(r[0]), b: m23BalWord(r[1]) });
+}
+// the night's job (kind 'm23night'): every stop in order
+function m23Stops(j) {
+  const coil = j.coil && panelPlace(j.coil), board = m23Board(), p1 = panelPlace(M23_COILS[0]), p2 = panelPlace(M23_COILS[1]); if (!coil || !board || !p1 || !p2) return [];
+  const st = (placeId, tag, how, mins, opts) => ({ deck: 6, placeId, mins, tag, how, ...(opts ? { opts } : {}) });
+  const loops = m23Loops(j.loop, worksText('m23.loop.ok', 'full'), worksText('m23.loop.low', 'low, and dropping'));
+  const name = machineLabel(machineById(j.coil)).split(',')[0];
+  return [
+    st(coil, 'listen', 'look', 1, { secs: 3, text: worksText('m23.coil.listen', 'Listen first. {coil}\'s hum dips every third beat: its windings want a service.', { coil: name }) }),
+    st(coil, 'service', 'hold', 8),
+    st(board, 'read', 'look', 1, { secs: 3, text: loops }),
+    st(board, 'loop', 'choose', 1, { title: worksText('m23.loop.pick', 'Which loop\'s low?'), text: loops, options: [0, 1, 2].map(i => ({ id: 'l' + i, label: worksText('m23.loop', 'Loop {n}', { n: i + 1 }) })) }),
+    st(board, 'topup', 'hold', 3),
+    st(board, 'lamp', 'look', 1, { secs: 3, text: worksText('m23.board.lamp', 'One control board\'s lamp flickers amber: C{n}. That\'s the one to swap.', { n: j.board + 1 }) }),
+    st(board, 'pull', 'hold', 2),
+    st(board, 'seat', 'hold', 2),
+    st(board, 'test', 'look', 1, { secs: 3, text: worksText('m23.board.test', 'Every lamp green. The board counts up through its checks and settles.') }),
+    ...[0, 1].map(k => st(k ? p2 : p1, 'bal' + k, 'turn', 1, { label: worksText('m23.bal.label', 'Coil {n}', { n: k + 1 }), v: j.bal[k], min: -3, max: 3, by: 1,
+      text: worksText('m23.bal.card', 'Settle this coil. Watch both: they pull on each other.'),
+      gauge: () => m23Gauge(j, k), onTurn: v => { j.bal[k] = v; return m23Gauge(j, k); }, ok: v => v === 0 && (k === 0 || j.bal[0] === 0) })),
+  ];
+}
+// Reyes, as each stop is done (only the right pick moves on: a wrong one, look again)
+const M23_SAY = { listen: ['Hear it? Now you\'ll never not hear it.', 'Service it. Take your time, the night\'s long.'], service: ['Good. Now the board. Coolant first, always.'],
+  read: ['Read them all before you touch anything.'], topup: ['Topped up. That\'s a repair nobody sees. Best kind.'], lamp: ['Amber means tired, not dead. Swap it before it is.'],
+  test: ['Clean. Last thing: the two end coils have drifted apart. Balance them.'], bal0: ['See coil 2 move when you turn coil 1? They share a field. Now coil 2.'] };
+function m23StepDone(j, k, res) {
+  const st = m23Stops(j)[k]; if (!st) return true;
+  const done = new Set(j.stepsDone || []); if (k > 0 && !done.has(k - 1)) return false;   // in order
+  if (st.tag === 'loop' && (res && res.pick) !== 'l' + j.loop) { j.wrongs = (j.wrongs || 0) + 1; try { toast(j.title, worksText('m23.loop.wrong', 'That one reads full. Look at the readings again.')); } catch (e) { /* no UI */ } return false; }
+  if (st.tag === 'bal1' && j.bal[0] !== 0) return false;
+  const say = M23_SAY[st.tag]; if (say) worksSay(M23_BY, worksText('m23.say.' + st.tag, say[0]));
+  return true;
+}
+function m23Done(j, t, by) {
+  const s = SHIP.machines && SHIP.machines[j.coil]; if (s) { s.cond = Math.max(s.cond, 96); s.state = machineState(s.cond); }
+  const S = m23State();
+  if (by === 'you' && S && !S.d1) {
+    S.d1 = Math.floor(t); worksUse('m23'); if (typeof worksXp === 'function') worksXp(3);
+    worksSay(M23_BY, worksText('m23.done', 'That\'s a night\'s work. You\'ll do, Specialist.'));
+    if (typeof mailSend === 'function') { const tx = worksText('m23.mail.n1', 'Night 1 | A coil serviced, a coolant loop topped up, a control board swapped, two coils balanced. Logged by Reyes.'), i = tx.indexOf(' | ');
+      mailSend({ at: Math.floor(t), from: 'Works', subject: i > 0 ? tx.slice(0, i) : 'Night 1', body: i > 0 ? tx.slice(i + 3) : tx, quiet: true }); }
+  }
+  j.status = 'done'; j.end = Math.floor(t);               // a side job: done where you finish it
+  simNote('m23', { step: 'n1', by: by || null, wrongs: j.wrongs || 0 });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+// the job, posted once the night starts and you're an Engine Specialist: yours at once, or held while you're on another
+function m23Post(now) {
+  const S = m23State(), n = p5NightOf(M23_N1), coil = m23Coil(); if (!S || S.j1 || !coil) return null;
+  const d = M23_N1, key = machSeed('m23');
+  const j = jobMake('m23night', { id: 'm23night:' + coil + '@' + Math.floor(now / 60), deck: 6, room: 'E',   // no j.machine: a side job's stops are tapped like a chore's (15b's ixSides)
+    h: Math.floor(now / 60), tier: 4, urgency: 1,
+    title: worksText('m23.card', 'Night 1 with Reyes: a coil, the coolant, a board, a balance'), coil, loop: Math.floor(schedU(key, d, 1080) * 3) % 3, board: Math.floor(schedU(key, d, 1081) * 6) % 6,
+    bal: [2, -2], wrongs: 0, reserved: M23_SLOT, until: n.to, train: 'm23' });
+  j.posted = j.found = j.start = Math.floor(now); j.claimedBy = 'you'; j.status = 'claimed';   // yours from the start: never on the board
+  SHIP.jobs.push(j); S.j1 = j.id; if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  return j;
+}
+// the beats, in play on night 1: the job yours as it starts, the notice (once 24u's beats are done) and Reyes's word
+function m23Beats(now) {
+  if (!m23Live(M23_N1, now)) return;
+  const S = m23State(); if (!S || S.d1) return;
+  const j = S.j1 ? SHIP.jobs.find(x => x.id === S.j1) : m23Post(now); if (!j || j.status === 'done') return;
+  if (!flag('m23.n1.notice') && !promoBusy()) { flagSet('m23.n1.notice', Math.floor(now));
+    promoNotice(worksText('m23.n1.notice', 'Your first night: engine work with Reyes. He\'s in the engine room, Deck 6.'), worksName(M23_BY));
+    worksSay(M23_BY, worksText('m23.n1.say', 'Specialist. Kettle\'s on. First, a coil: come and listen to it with me.')); }
+  // a level 1 arrow to the next stop (a side job has no job pointer of its own), once you've clocked in for the night (S6-1's SHIP.works.ns)
+  const ns = SHIP.works.ns, clocked = !ns || !!(ns[M23_N1] || {}).in;
+  if (clocked && typeof guideAsk === 'function' && !(GUIDE.list || []).some(x => x.id === 'm23:n1'))
+    guideAsk({ id: 'm23:n1', level: 1, owner: '28c', from: p5NightOf(M23_N1).from, until: p5NightOf(M23_N1).to, goal: () => m23N1Goal(),
+      done: () => { const S2 = m23State(), jj = S2 && S2.j1 && SHIP.jobs.find(x => x.id === S2.j1); return !jj || !!jj.workDone || jj.status === 'done'; } });
+}
+function m23N1Goal() {                                   // the next stop's place, and its ring line
+  const S = m23State(), j = S && S.j1 && SHIP.jobs.find(x => x.id === S.j1); if (!j) return null;
+  const nx = jobStops(j).find(x => !x.done), pid = nx && nx.places[0]; if (!pid) return null;
+  const board = pid === m23Board(), coil = !board && machineById((placeById(pid) || {}).machine || '');
+  return { deck: 6, place: pid, label: board ? worksText('m23.ptr.board', 'Engine work: the board in engine control') : worksText('m23.ptr.coil', 'Engine work: {coil}', { coil: coil ? machineLabel(coil).split(',')[0] : 'a coil' }) };
+}
+// the Schedule's row (section 14's devDay): each night's engine work until it's done
+function m23Items(d) {
+  if (!m23On(d)) return [];
+  const S = m23State(), n = p5NightOf(d), B = (d - 1) * 1440; if (!S || (d === M23_N1 ? S.d1 : S.d2)) return [];
+  return [{ from: n.from - B, to: n.to - B, title: d === M23_N1 ? worksText('m23.row.n1', 'Engine work with Reyes') : worksText('m23.row.n2', 'The reactor: permit, badge, the Watch'), where: 'the engine room, Deck 6', kind: 'beat', deck: 6, room: d === M23_N1 ? 'E' : 'R' }];
+}
+// ---- night 2 (Day 23, from 21:00): the reactor. In order: "Sign the permit" (a card with the night watch officer on the
+// bridge, Deck 1), "Take a badge" (S6-4's dosimeter rack in engine control: dosiOut()), "Tell the Watch" you're going in
+// (a card on Deck 6), a short careful visit through the reactor's shielded door (it opens for you only with all three:
+// m23DoorOpen, asked by section 14's doorOpenFor; a side job at the reactor's local console: the shield readings, the
+// seals, the core), the Watch told you're out (a card as you finish), the badge back on its hook. A badge not back half
+// an hour after you're out: a word from the Watch (once). A notice at 20:30, a level 1 arrow with its ring line for each
+// step. Trained (W.tr.m23) and the Mail when the badge is back. Saved in side.m23: permit, told, j2, out, back, word, d2.
+const M23_WATCH = 'kowalczyk', M23_LATE = 30;
+function m23Night2Step(S) {                              // the step that's next, or null (all done)
+  if (!S || S.d2) return null;
+  const j = S.j2 && SHIP.jobs.find(x => x.id === S.j2);
+  return !S.permit ? 'permit' : !S.told && dosiOut() === null ? 'badge' : !S.told ? 'tell' : !S.out ? (j && j.workDone ? 'outcard' : 'reactor') : dosiOut() !== null ? 'return' : null;
+}
+// the shielded door: open for you with a permit, a badge and the Watch told, until you're out (and while you're still inside)
+function m23DoorOpen(deck, room, t = shipNow()) {
+  if (!P5_M23 || deck !== 6 || room !== 'R' || !m23On(M23_N2)) return false;
+  const S = m23State(), n = p5NightOf(M23_N2); if (!S || !S.permit || !S.told || !n) return false;
+  try { if (deckDef.num === 6 && roomAt(...player.here()) === 'R') return true; } catch (e) { /* not on a deck */ }   // still inside, at any time: never shut in (RV24)
+  if (t < n.from || t >= n.to + 60 || S.out) return false;
+  return dosiOut() !== null;
+}
+function m23ReactorStops() {
+  const pp = panelPlace('6-reactor-1'); if (!pp) return [];
+  const st = (tag, how, mins, opts) => ({ deck: 6, placeId: pp, mins, tag, how, ...(opts ? { opts } : {}) });
+  return [st('shield', 'look', 1, { secs: 3, text: worksText('m23.r.shield', 'Shield readings: all green, the badge on your collar ticking slowly. Nothing here to stay for.') }),
+    st('seals', 'hold', 5), st('core', 'look', 1, { secs: 3, text: worksText('m23.r.core', 'The core\'s glow through the inspection port: even, calm. Logged. Out you go.') })];
+}
+function m23ReactorDone(j, t, by) {
+  j.status = 'done'; j.end = Math.floor(t);
+  if (by === 'you') worksSay(M23_WATCH, worksText('m23.r.done', 'Readings logged. Tell the Watch you\'re out, then the badge back on its hook.'));
+  simNote('m23', { step: 'reactor', by: by || null });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+function m23ReactorPost(now) {
+  const S = m23State(), n = p5NightOf(M23_N2); if (!S || S.j2 || !panelPlace('6-reactor-1')) return null;
+  const j = jobMake('m23reactor', { id: 'm23reactor:6-reactor-1@' + Math.floor(now / 60), reactor: '6-reactor-1', deck: 6, room: 'R', h: Math.floor(now / 60), tier: 4, urgency: 1,
+    title: worksText('m23.r.card', 'The reactor: readings, seals, the core'), reserved: M23_SLOT, until: n.to, train: 'm23' });
+  j.posted = j.found = j.start = Math.floor(now); j.claimedBy = 'you'; j.status = 'claimed';
+  SHIP.jobs.push(j); S.j2 = j.id; if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  return j;
+}
+const m23OnBridge = () => { try { return deckDef.num === 1 && roomAt(...player.here()) === 'B'; } catch (e) { return false; } };
+const m23OnDeck6 = () => { try { return deckDef.num === 6; } catch (e) { return false; } };
+// the cards (deviceChoose: touch or pad), each once it's due and you're where it's signed; the choice is the step
+function m23Permit(now) { const S = m23State(); if (!S || S.permit) return false; S.permit = Math.floor(now); worksSay(M23_WATCH, worksText('m23.permit.said', 'Signed. Two hours on it. Badge from the rack, and tell me when you\'re in.')); simNote('m23', { step: 'permit' }); return true; }
+function m23Tell(now, out) {
+  const S = m23State(); if (!S) return false;
+  if (!out) { if (S.told || !S.permit || dosiOut() === null) return false; S.told = Math.floor(now); m23ReactorPost(now); }
+  else { const j = S.j2 && SHIP.jobs.find(x => x.id === S.j2); if (S.out || !j || !j.workDone) return false; S.out = Math.floor(now); }
+  promoNotice(out ? worksText('m23.watch.out', 'The Watch: you\'re out of the reactor, logged at {time}. Badge back on its hook, please.', { time: hhmm(Math.floor(now) % 1440) })
+    : worksText('m23.watch.in', 'The Watch: you\'re going into the reactor, logged at {time}. Ten minutes, no more.', { time: hhmm(Math.floor(now) % 1440) }), 'The Watch');
+  simNote('m23', { step: out ? 'out' : 'in' }); return true;
+}
+let M23_ASKED = -1;
+function m23Card(now) {
+  const S = m23State(), k = m23Night2Step(S); if (!k || now - M23_ASKED < 1 || typeof deviceChoose !== 'function') return;
+  if (typeof DEV !== 'undefined' && (DEV.choose || DEV.open)) return;
+  let c = null;
+  if (k === 'permit' && m23OnBridge()) c = { title: worksText('m23.permit.title', 'Reactor entry permit'), text: worksText('m23.permit.text', 'The watch officer reads it through with you: one person, a badge, ten minutes, the Watch told in and out.'), choices: [worksText('m23.permit.sign', 'Sign the permit')], go: () => m23Permit(now) };
+  else if (k === 'tell' && m23OnDeck6()) c = { title: worksText('m23.tell.title', 'Tell the Watch'), text: worksText('m23.tell.text', 'Permit signed, badge on. Tell the bridge you\'re going in.'), choices: [worksText('m23.tell.in', 'Going in')], go: () => m23Tell(now, false) };
+  else if (k === 'outcard') c = { title: worksText('m23.tell.title', 'Tell the Watch'), text: worksText('m23.tell.outtext', 'Readings done. Tell the bridge you\'re coming out.'), choices: [worksText('m23.tell.out', 'Coming out')], go: () => m23Tell(now, true) };
+  if (!c) return;
+  const ok = deviceChoose({ title: c.title, text: c.text, choices: c.choices }, i => { M23_ASKED = shipNow(); if (i === 0) c.go(); });
+  if (ok) M23_ASKED = now;
+}
+function m23Ring(k) {
+  return { permit: worksText('m23.ptr.permit', 'Sign the permit'), badge: worksText('m23.ptr.badge', 'Take a badge'), tell: worksText('m23.ptr.tell', 'Tell the Watch'),
+    reactor: worksText('m23.ptr.reactor', 'The reactor'), outcard: worksText('m23.ptr.tell', 'Tell the Watch'), return: worksText('m23.ptr.return', 'Hang the badge back') }[k];
+}
+const M23_GOAL = { permit: { deck: 1, room: 'B' }, badge: { deck: 6, room: 'K' }, tell: { deck: 6, room: 'K' }, reactor: { deck: 6, room: 'R' }, outcard: { deck: 6, room: 'R' }, return: { deck: 6, room: 'K' } };
+function m23Beats2(now) {
+  if (!m23On(M23_N2)) return;
+  const S = m23State(), n = p5NightOf(M23_N2); if (!S || S.d2 || now < n.from - 30 || now >= n.to) return;
+  if (!flag('m23.n2.notice') && !promoBusy()) { flagSet('m23.n2.notice', Math.floor(now));
+    promoNotice(worksText('m23.n2.notice', 'Tonight, the reactor: a permit from the bridge, a badge from the rack, and the Watch told in and out.'), worksName('calder')); }
+  if (now < n.from) return;
+  const k = m23Night2Step(S);
+  if (S.out && dosiOut() !== null && !S.word && now >= S.out + M23_LATE) {   // the badge not back: a word from the Watch, once
+    S.word = Math.floor(now); promoNotice(worksText('m23.watch.badge', 'The Watch: your dosimeter badge isn\'t back on its hook. Rack in engine control, please.'), 'The Watch'); simNote('m23', { step: 'word' });
+  }
+  if (S.out && dosiOut() === null && !S.d2) {          // all done: the badge is back
+    S.back = S.back || Math.floor(now); S.d2 = Math.floor(now); const W = SHIP.works;
+    if (W && W.tr.m23 === undefined) { W.tr.m23 = M23_N2; if (typeof worksXp === 'function') worksXp(3); simNote('trained', { mech: 'm23' }); }
+    if (typeof mailSend === 'function') { const tx = worksText('m23.mail.n2', 'The reactor | Permit signed, badge out and back, the Watch told in and out. Readings logged.'), i = tx.indexOf(' | ');
+      mailSend({ at: Math.floor(now), from: 'Works', subject: i > 0 ? tx.slice(0, i) : 'The reactor', body: i > 0 ? tx.slice(i + 3) : tx, quiet: true }); }
+    simNote('m23', { step: 'n2' }); return;
+  }
+  if (!k || typeof guideAsk !== 'function') return;
+  if (!(GUIDE.list || []).some(x => x.id === 'm23:' + k))
+    guideAsk({ id: 'm23:' + k, level: 1, owner: '28c', from: n.from, until: n.to, goal: () => ({ ...M23_GOAL[k], label: m23Ring(k) }), done: () => m23Night2Step(m23State()) !== k || !m23On(M23_N2) });
+}
+if (P5_M23 && typeof jobKindAdd === 'function') {
+  jobKindAdd('m23night', { tier: 4, work: 0, side: true, text: 'Engine work', stops: m23Stops, stepDone: m23StepDone, done: m23Done, veto: true, crew: { can: () => false, mins: 60 } });
+  WORK_MECH.m23 = { own: true, noJob: true };            // run here on your nights, never by the ladder (a night day has no ladder)
+  jobKindAdd('m23reactor', { tier: 4, work: 0, side: true, text: 'The reactor', stops: m23ReactorStops, done: m23ReactorDone, crew: { can: () => false, mins: 60 } });
+  WORK_TICKS.push((now, skip) => { if (!skip) { m23Beats(now); m23Beats2(now); m23Card(now); } });
+}
 // ---- end of slot: Engine work ----
 
 // ---------------------------------------------------------------------
