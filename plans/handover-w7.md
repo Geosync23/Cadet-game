@@ -14,7 +14,7 @@
 - **S6-7 turn 1 (s6.9):** Basil's day settled at 22:00 (SHIP.works.mt), section 14's mtDesk hook, mtPlanRule, notices, row, arrow. 
 - **S6-7 turn 2 (s6.10):** hello, he watches you (mtEscort follow) through a turned-in job, you watch him at 5-bench-2 (steps.dw).
 - **S6-7 turn 3 (s6.11):** the stuck clue (stand-in dialogue; calls PZ6's caseMentorOpen({ day, onPick(id, key) }) if it exists: asked PZ6 for the real shape), the late talk.
-- **S6-7 turn 4 (s6.12):** Calder's first job alone (mtDone: tr.m25, ms mentor, Record line), Dev preset 'mt', controller part mentor. Left for S6-7: PZ6's real caseMentorOpen (the stand-in dialogue until then); day_check Day 26; stories_check (Basil). (old note:, the Record line, W.tr.m25, Dev preset Day 26 09:00, controller reach.
+- **S6-7 turn 4 (s6.12):** Calder's first job alone (mtDone: tr.m25, ms mentor, Record line), Dev preset 'mt', controller part mentor. Left for S6-7: PZ6's real caseMentorOpen (the stand-in dialogue until then); day_check Day 26; stories_check (Basil).
 - Approved MA6's 24 core touch in 27166be (WORK_MECH.m21.own skipped by ladderTick).
 
 ## Judgement calls (overrule any)
@@ -25,12 +25,12 @@
 
 ## Still to do
 - **Parked: the refit odd job** ("Refit the visitors' suite", from Day 23; T.move.refit; its effect: 24t's touches follow you to 2-B) until S6-4 adds Deck 2's cabin spots. Don't add it to ODD_ROWS directly: the odd-job stream's seeded order would change with the switch on; post it as its own job, its row only in fixTable's byId.
-- Presets for Days 21 and 26 come with S6-7/S6-9 (and N6's nights).
 - Judgement: the move never happens by Mail alone (the spec: notice and arrow each day until you've stepped in).
-- Next: S6-7 mentoring Basil (28e), then S6-9 (28f); all Step 6 DM_CAREER rows at the end (lead 41: I'm the one owner); the refit job after DA6's Deck 2 cabin spots; pu4Place to DA6's '6-coil-N-svc'.
+- Next: S6-9 the end (28f, 2 turns); all Step 6 DM_CAREER rows at the end (lead 41: I'm the one owner); the refit job after DA6's Deck 2 cabin spots; pu4Place to DA6's '6-coil-N-svc'.
 - Done (s6.8): controller_check part promo4 (RV23's should).
+- Known: mech_check m19 fails on an on copy of claude/p5s6-nights (N6's; told). devmode_check set fails on the on copy only for Step 6 rows missing from DM_CAREER (mine to add at the end).
 
 ## How to test
 - On copy: `sed "s/^const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');/const P5_STEP6 = P5_STEP5 \&\& true;/" starship-cadet.html > ON6.html`.
-- `promo_beats_check.py BUILD t4off`; `promo_beats_check.py ON6.html t4before t4test t4passed t4badge t3passed`; `mech_check.py ON6.html t3 t4 m19`; cadet_test vs 64e296df; check_fast.
+- `promo_beats_check.py BUILD t4off`; `promo_beats_check.py ON6.html t4before t4test t4passed t4welcome t4badge t4move t4dev mt mt2 mt3 mt4 t3passed`; `mech_check.py ON6.html t3 t4 m21 m25`; `controller_check.py BUILD promo4 mentor`; `devmode_check.py ON6.html t4beats`; cadet_test vs 64e296df; check_fast.
 - Fresh container: acorn must be 8.12.1 (`npm pack acorn@8.12.1` in $CADET_WORK/acorn).
