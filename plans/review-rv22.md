@@ -28,3 +28,13 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
 - ~23:45 UTC: B3 sent claude/p5s5-m20 989b1759 (the 4 shoulds). Not reviewed: stopping point. Noted in the handover.
 - ~23:50 UTC: VB1 sent claude/vessel 5578c78d (shoulds, VB2 merge, arrows + controller vessel parts). Not reviewed: stopping point. In the handover.
 - 00:36 UTC (10-27): VB2 final WIP 6fe92ead on claude/ending-checks (test only, not for verdict). In the handover.
+- 01:00 UTC (10-27): lead 40: back to work. NEW USER RULE: everything ships ON. Queue: VB1 claude/vessel 5578c78d (re-review
+  from 85f07071), then B3 claude/p5s5-m20 989b1759, then VB2's ending fixes.
+- VB1 5578c78d: cadet_test 3fb8eac7 (vessel-sky) vs 5578c78d, vessel off: ALL IDENTICAL. Running: events_check, day_check
+  27-30 (ON copy), bigevents (ON copy), arrows_check vessel (+teachoff, +senior), controller_check vessel. Code read of
+  ed8b5787..5578c78d: shoulds look done (vesselFetch for Saturday/round one/home, leaveBy 930, VESSEL_TERN_SAID,
+  vesselArrival k 360, simTimeout x7). Word note: talk.homeFind "So's Isak, on his day off" genders Isak (crew text uses
+  they for Isak; no canon pronoun).
+- B3 989b1759 code read: arrOffer through 24f's existing WORK_MECH[].offer hook (no shared change). To check in play:
+  with an offer, 24 core's T3 board arrow (guide 'train:m20:do') is skipped for m20 (line ~17335): is your turn still led?
+  Stale comment at WORK_MECH.m20.at ("Mori comes in for it all the same (arrHost books her)").
