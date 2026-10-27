@@ -2961,6 +2961,7 @@ def part_m24(pw, src, tag):
             for q in range(20):
                 if r.ev("!!DEV.choose"): break
                 r.step(10)
+            if not said: r.shot(f'{tag}_m24_call')
             res = press_in_panel(r, "[...document.querySelectorAll('#devDlg button')].find(b => b.textContent.trim() === 'Next step')")
             if res != 'ok': fails.append(f'm24: your call\'s Next step by pad (step {s["cur"]}): {res}'); break
             said.append(s['cur']); n += 1
