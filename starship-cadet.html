@@ -11930,6 +11930,7 @@ function devDay(d) {
   try { if (typeof puItems === 'function') out.push(...puItems(d)); } catch (e) { /* not yet */ }   // 24u (S5-2): the Senior Officer promotion's steps, with P5_PROMO3
   try { if (typeof promoBeatsItems === 'function') out.push(...promoBeatsItems(d)); } catch (e) { /* not yet */ }   // FX28: the promotion's steps (24p), with PROMO_BEATS_ON
   try { if (typeof sdItems === 'function') out.push(...sdItems(d)); } catch (e) { /* not yet */ }   // 24w (S5-4): your booked shutdown, with P5_M18
+  try { if (typeof m24Items === 'function') out.push(...m24Items(d)); } catch (e) { /* not yet */ }   // 28d (S6-6): night 3's coil swap, with P5_M24
   try { if (typeof EV_VESSEL_ON !== 'undefined' && EV_VESSEL_ON && typeof vesselItems === 'function') out.push(...vesselItems(d)); } catch (e) { /* not yet */ }   // the Veyli vessel's beats (section 18's slot 'Vessel builder')
   try { if (typeof endItems === 'function') out.push(...endItems(d)); } catch (e) { /* not yet */ }   // 29a: the ending's week (EN1), with EV_ENDING_ON
   return out.sort((x, y) => x.from - y.from);
@@ -38359,6 +38360,88 @@ const LINES = JSON.parse([
   '{"text":"Every machine in good order? Then that\'s the best kind of worry. Keep it that way.","id":"1ht8hkw"}]',
   ',"m21.say":[',
   '{"text":"The Captain\'s briefing, {time}, the observation room. Works has a chair there. Yours.","id":"ec8lse"}]',
+  ',"m24.book":[',
+  '{"text":"Book the slot","id":"1fm6j48"}]',
+  ',"m24.book.go":[',
+  '{"text":"Book the slot (go to the bridge)","id":"txno4g"}]',
+  ',"m24.book.no":[',
+  '{"text":"Pick your team first.","id":"yco954"}]',
+  ',"m24.book.where":[',
+  '{"text":"The Watch books it: go up to the bridge, Deck 1.","id":"cq540c"}]',
+  ',"m24.booked":[',
+  '{"text":"Booked: {from} to {to}.","id":"1czcy4v"}]',
+  ',"m24.busy":[',
+  '{"text":"The coil swap waits for you: {text}. Turn in or drop this job first.","id":"13njatt"}]',
+  ',"m24.card":[',
+  '{"text":"The coil swap, {time}, Deck 6: your team","id":"resoda"}]',
+  ',"m24.done.early":[',
+  '{"text":"Done early. That was a good team.","id":"twaki0"}]',
+  ',"m24.done.on":[',
+  '{"text":"Done, on the hour. Clean work.","id":"cgab4s"}]',
+  ',"m24.done.slow":[',
+  '{"text":"Done. Slow, but done. The coil doesn\'t mind.","id":"1pbqwo8"}]',
+  ',"m24.mail":[',
+  '{"text":"Tonight: the coil swap | You lead it. Pick your team, book the Watch, a spot each.","id":"3o9riu"}]',
+  ',"m24.mail.done":[',
+  '{"text":"The coil swap | Done in {n} minutes with {a} and {b}. Logged for Calder.","id":"glapp"}]',
+  ',"m24.next":[',
+  '{"text":"Next step","id":"b5n9p7"}]',
+  ',"m24.notice":[',
+  '{"text":"Tonight you lead the coil swap. Pick your team: Works, the Team tab.","id":"cvnsf8"}]',
+  ',"m24.pick.friend":[',
+  '{"text":"For you? Yes. Now.","id":"9rpzvu"}]',
+  ',"m24.pick.later":[',
+  '{"text":"After my round. Twenty minutes.","id":"19ofi02"}]',
+  ',"m24.pick.yes":[',
+  '{"text":"Yes. Where do you want me?","id":"1cxgbmu"}]',
+  ',"m24.ptr.book":[',
+  '{"text":"Book the slot with the Watch","id":"49ezrw"}]',
+  ',"m24.ptr.pick":[',
+  '{"text":"Pick your team","id":"ma5ter"}]',
+  ',"m24.ptr.spots":[',
+  '{"text":"A spot for each, then the coil swap at {time}","id":"icov6p"}]',
+  ',"m24.reply.isolate":[',
+  '{"text":"Isolating. Coupling\'s cold.","id":"ogomyz"}]',
+  ',"m24.reply.lift":[',
+  '{"text":"Lifting. Easy, easy.","id":"1iqvbil"}]',
+  ',"m24.reply.seat":[',
+  '{"text":"Seating the new one. Gently.","id":"1v1kxgp"}]',
+  ',"m24.reply.test":[',
+  '{"text":"Testing. Readings coming up.","id":"gd02rc"}]',
+  ',"m24.reply.unbolt":[',
+  '{"text":"Bolts coming out. Mind your toes.","id":"bjoao0"}]',
+  ',"m24.row.plan":[',
+  '{"text":"Plan the coil swap: your team, the Watch","id":"9inzbm"}]',
+  ',"m24.row.swap":[',
+  '{"text":"The coil swap, your team","id":"1mixwl9"}]',
+  ',"m24.said.later":[',
+  '{"text":"after their round","id":"1j1090g"}]',
+  ',"m24.said.yes":[',
+  '{"text":"yes","id":"1f2ytpw"}]',
+  ',"m24.say":[',
+  '{"text":"Calder says the coil swap\'s yours tonight. Pick your team, boss.","id":"qj44xn"}]',
+  ',"m24.spot.1":[',
+  '{"text":"The coupling","id":"1669vfs"}]',
+  ',"m24.spot.2":[',
+  '{"text":"The lifting frame","id":"118yf9a"}]',
+  ',"m24.step.book":[',
+  '{"text":"2. Book the slot with the Watch (on the bridge, Deck 1)","id":"pui29q"}]',
+  ',"m24.step.pick":[',
+  '{"text":"1. Pick your team","id":"gbl3d4"}]',
+  ',"m24.step.run":[',
+  '{"text":"4. At the drive panel, call each step: Next step.","id":"gcdckm"}]',
+  ',"m24.step.spots":[',
+  '{"text":"3. A spot for each","id":"dwwbtk"}]',
+  ',"m24.tab":[',
+  '{"text":"Team","id":"1oeqydj"}]',
+  ',"m24.tab.done":[',
+  '{"text":"The coil swap: done in {n} minutes.","id":"1gslmgr"}]',
+  ',"m24.tab.head":[',
+  '{"text":"Tonight\'s coil swap: the drive runs slow for an hour while your team changes a coil.","id":"5pe86v"}]',
+  ',"m24.tab.none":[',
+  '{"text":"Team jobs you lead show here. Nothing tonight.","id":"yzdv5d"}]',
+  ',"m24.watch":[',
+  '{"text":"The Watch gives you {from} to {to}. The drive goes to slow on your call.","id":"1nrpd68"}]',
   ',"mail.ending.answer.change":[',
   '{"text":"Your answer, again | Noted, and passed on. That\'s what the days before Sunday are for. Captain Odile Marrow","id":"3ov51d"}]',
   ',"mail.ending.answer.go":[',
@@ -41523,8 +41606,20 @@ const LINES = JSON.parse([
   '{"text":"The team\'s here. Find your spot.","id":"xd5kir"}]',
   ',"team.turn.brace":[',
   '{"text":"Your turn: brace the housing","id":"1e7ppsu"}]',
+  ',"team.turn.clift":[',
+  '{"text":"Your call: lift it out.","id":"1ru1dq1"}]',
   ',"team.turn.crank":[',
   '{"text":"Your turn: crank the drum","id":"16azz9j"}]',
+  ',"team.turn.cseat":[',
+  '{"text":"Your call: seat the new coil.","id":"r7fliq"}]',
+  ',"team.turn.cslow":[',
+  '{"text":"Your call: drive to slow. Next step, at the drive panel.","id":"1eu5qna"}]',
+  ',"team.turn.ctest":[',
+  '{"text":"Your call: test it.","id":"1p6j14t"}]',
+  ',"team.turn.cunbolt":[',
+  '{"text":"Your call: unbolt it.","id":"221eg5"}]',
+  ',"team.turn.cup":[',
+  '{"text":"Your call: bring the drive back up.","id":"1igibq6"}]',
   ',"team.turn.drain":[',
   '{"text":"Your turn: drain it down","id":"qfk20r"}]',
   ',"team.turn.hold":[',
@@ -65296,6 +65391,228 @@ if (P5_M21) {
 // ---------------------------------------------------------------------
 
 // ---- slot: Leading a team (section 28d). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// M24 (S6-6, MA6 for lead 41). Leading a team: night 3 (Day 24, your night from 21:00; P5_NIGHTS), a coil swap while the
+// drive runs slow, the new team-job kind 'coil' (24h's tables, one entry each, added here at load). You plan it in the
+// Works app's Team tab: pick your team from the engine night crew on shift (each answers: yes at once, or "after my
+// round", ready 20 minutes later); book the slot with the Watch (on the bridge: the Watch gives you an hour from the next
+// quarter hour at least 45 minutes on, between 23:00 and 04:00); give each a spot (the coupling, the lifting frame); then
+// call each step as it runs (24h's step engine: your calls are your stops, "Next step" at the drive panel; the crew's
+// steps run their minutes). A spot that suits the person (the lifting frame for someone strong: a gym habit) is quicker;
+// someone not ready by the start is slower at first. A good team and quick calls finish inside the hour, a poor pick runs
+// slow, never fails. The beats: an urgent notice once your night starts, a word from the crew if you're near one first,
+// the Mail after (the record), a level 1 arrow for each step with its ring line ("Pick your team", "Book the slot with the
+// Watch", "A spot for each", the job), an hourly notice while you hold another job and a step waits, Schedule rows. Not
+// through the ladder (WORK_MECH.m24.own, as 28b's m21); trained (W.tr.m24) when the first is done. The spots: S6-4's
+// team spots by the coils when they're there (24h's teamSpots), else Deck 6's three engine places. Job slot M24_SLOT 36.
+// Saved: SHIP.works.side.m24 = { day, pick: [ids], said: { id: 'yes' | 'later' }, ready: { id: minute }, slot, spots:
+// { id: 1 | 2 }, job, done, mins }. schedU key 1071 (the coil to swap on ties). Words: content/works/m24.lines. No R().
+const M24_NIGHT = 24, M24_SLOT = 36, M24_LEN = 60, M24_LATER = 20, M24_COILS = ['6-coil-1', '6-coil-2', '6-coil-3'], M24_PLACES = ['6-engine-1', '6-engine-2', '6-engine-3'];
+const M24_SPOT = [null, 'precise', 'strong'];            // spot 1 the coupling (careful hands), spot 2 the lifting frame (strong arms); 3 the drive panel, yours
+// the swap: [who (1 the coupling's, 2 the frame's, 'you' your call), part, minutes]
+const M24_STEPS = [['you', 'cslow', 1], [1, 'isolate', 8], ['you', 'cunbolt', 1], [2, 'unbolt', 10], ['you', 'clift', 1], [2, 'lift', 8], ['you', 'cseat', 1], [1, 'seat', 8], ['you', 'ctest', 1], [1, 'test', 6], ['you', 'cup', 1]];
+function m24State() {                                    // side.m24, cleaned (a save may hold junk)
+  const s = typeof worksSide === 'function' ? worksSide() : null; if (!s) return null;
+  const A = s.m24;
+  if (!A || typeof A !== 'object' || !s.m24Ok) {
+    const int = v => Number.isInteger(v) && v >= 0 ? Math.min(v, 999999) : 0, ids = a => Array.isArray(a) ? a.filter(x => typeof x === 'string').slice(0, 4).map(x => x.slice(0, 40)) : [];
+    const map = (o, ok) => { const r = {}; if (o && typeof o === 'object') for (const k of Object.keys(o).slice(0, 6)) if (ok(o[k])) r[k.slice(0, 40)] = o[k]; return r; };
+    s.m24 = { day: int(A && A.day), pick: ids(A && A.pick), said: map(A && A.said, v => v === 'yes' || v === 'later'), ready: map(A && A.ready, v => Number.isInteger(v) && v >= 0), slot: int(A && A.slot),
+      spots: map(A && A.spots, v => v === 1 || v === 2), job: A && typeof A.job === 'string' ? A.job.slice(0, 80) : null, done: int(A && A.done), mins: int(A && A.mins) };
+    Object.defineProperty(s, 'm24Ok', { value: true, enumerable: false, configurable: true });
+  }
+  return s.m24;
+}
+// is night 3's swap yours (saved state and fixed tables only): your night that day, an Engine Specialist (a Senior with the promotion off)
+function m24On(d = M24_NIGHT) {
+  const W = SHIP.works; if (!P5_M24 || !W || d !== M24_NIGHT || typeof p5NightOf !== 'function' || !p5NightOf(d)) return false;
+  return (W.tier || 1) >= (P5_PROMO4 ? 4 : 3);
+}
+const m24Night = () => p5NightOf(M24_NIGHT);
+// is it the night now (from its start to 06:00), and the swap not yet done
+function m24Live(now = shipNow()) { const n = m24On() && m24Night(), S = n && m24State(); return !!n && now >= n.from && now < n.to && !!S && !S.done; }
+// who you can pick: the engine night crew working that night, then the night Watch ratings (on their rounds: "after my
+// round"; willing hands, slower on a coil). Night 3 has one engine tech aboard (Keane: Reyes and Jovanovic are off, and
+// the roster's Kowal is a reserve, not aboard), so a team of two needs a Watch rating, or a poor pick of two. ROSTER order
+const m24Engine = p => !!p && !!p.work && p.work.place === 'work:engine';
+function m24Crew() {
+  const n = m24Night(); if (!n) return [];
+  let ps = []; try { ps = schedPeople().filter(p => p.shift === 'night' && (m24Engine(p) || p.dept === 'watch' && p.rank === 'junior') && (() => { const w = planWhere(p, n.from + 60); return !!w && w.act === 'work'; })()); } catch (e) { ps = []; }
+  return ps.filter(m24Engine).concat(ps.filter(p => !m24Engine(p))).map(p => p.id);
+}
+const m24Strong = id => { const p = schedPeople().find(q => q.id === id); return !!p && (p.habits || []).some(h => /gym/.test(h)); };
+function m24Spots() {                                    // [coupling, lifting frame, drive panel (yours)]: S6-4's team spots by the coils (its spot 1 is the lead's: yours), else the engine places
+  const sp = typeof teamSpots === 'function' ? teamSpots(M24_COILS[0]) : []; return sp.length >= 3 ? [sp[1], sp[2], sp[0]] : M24_PLACES.slice();
+}
+function m24Coil() {                                     // the coil to swap: the worst of the three (key 1071 on ties)
+  const c = id => (SHIP.machines[id] || { cond: 100 }).cond;
+  return M24_COILS.filter(id => machineById(id)).sort((a, b) => c(a) - c(b) || schedU(machSeed(a), M24_NIGHT, 1071) - schedU(machSeed(b), M24_NIGHT, 1071))[0] || null;
+}
+// someone picked: their answer (yes at once, or after their round when they're on a job just now)
+function m24Pick(id, now = shipNow()) {
+  now = Math.floor(now); const S = m24State(); if (!S || S.job || !m24Crew().includes(id)) return null;
+  const i = S.pick.indexOf(id); if (i >= 0) { S.pick.splice(i, 1); delete S.said[id]; delete S.ready[id]; delete S.spots[id]; return 'off'; }
+  if (S.pick.length >= 2) return null;
+  let busy = false; try { const p = schedPeople().find(q => q.id === id), w = whereIs(p, now); busy = !m24Engine(p) || !!w && (w.type === 'job' || w.tag === 'team'); } catch (e) { busy = false; }   // a Watch rating is on their round
+  S.pick.push(id); S.said[id] = busy ? 'later' : 'yes'; S.ready[id] = busy ? now + M24_LATER : now;
+  if (!S.spots[id]) { const free = [1, 2].find(k => !Object.values(S.spots).includes(k)); if (free) S.spots[id] = free; }
+  const friend = (() => { try { return relTier(id) >= 3; } catch (e) { return false; } })();
+  const line = busy ? worksText('m24.pick.later', 'After my round. Twenty minutes.') : friend ? worksText('m24.pick.friend', 'For you? Yes. Now.') : worksText('m24.pick.yes', 'Yes. Where do you want me?');
+  worksSay(id, line); simNote('m24', { step: 'pick', id, said: S.said[id] });
+  return S.said[id];
+}
+const m24AtBridge = () => { try { return deckDef.num === 1 && roomAt(...player.here()) === 'B'; } catch (e) { return false; } };
+// the Watch's hour: from the next quarter hour at least 45 minutes on and once everyone's ready, 23:00 at the earliest, 04:00 the latest start
+function m24SlotFor(now) {
+  const S = m24State(), n = m24Night(), late = Math.max(0, ...S.pick.map(id => S.ready[id] || 0));
+  let at = Math.ceil(Math.max(now + 45, late + 10) / 15) * 15; at = Math.max(at, (M24_NIGHT - 1) * 1440 + 1380);
+  return Math.min(at, n.to - 120);
+}
+function m24Book(now = shipNow(), here = m24AtBridge()) {
+  now = Math.floor(now); const S = m24State(); if (!S || S.job || S.pick.length < Math.min(2, m24Crew().length) || !here) return null;
+  const at = m24SlotFor(now), j = m24Post(at); if (!j) return null;
+  S.slot = at; S.job = j.id; simNote('m24', { step: 'book', at });
+  worksSay('kowalczyk', worksText('m24.watch', 'The Watch gives you {from} to {to}. The drive goes to slow on your call.', { from: hhmm(at % 1440), to: hhmm((at + M24_LEN) % 1440) }));
+  return j;
+}
+// the job's sequence from the picks and spots: whose step is whose, each step's minutes by how well the spot suits them
+function m24Seq(S, start) {
+  const by = k => S.pick.find(id => S.spots[id] === k) || S.pick.find(id => S.spots[id] !== (k === 1 ? 2 : 1)) || S.pick[0];
+  const fit = (id, k) => ((M24_SPOT[k] === 'strong') === m24Strong(id) ? 1 : 1.35) * (m24Engine(schedPeople().find(p => p.id === id)) ? 1 : 1.25);   // the right spot; an engine hand
+  const first = new Set();
+  return M24_STEPS.map(([who, part, mins]) => {
+    if (who === 'you') return { who: 'you', part, how: 'hold', mins };
+    const id = by(who); let f = fit(id, who); if (!first.has(id)) { first.add(id); if ((S.ready[id] || 0) > start) f *= 1.2; }   // not ready by the start: slower at first
+    return { who: id, part, how: 'hold', mins: Math.ceil(mins * f) };
+  });
+}
+function m24Post(at) {
+  const S = m24State(), coil = m24Coil(); if (!S || !coil || typeof teamJobPost !== 'function') return null;
+  const sp = m24Spots(), seq = m24Seq(S, at), mine = seq.filter(s => s.who === 'you').map(s => ({ deck: 6, placeId: sp[2], mins: 1, tag: 'team', how: 'hold' }));
+  const crew = [1, 2].map(k => S.pick.find(id => S.spots[id] === k)).filter(Boolean).concat(S.pick.filter(id => !S.spots[id]));
+  const spots = { you: sp[2] }; for (const id of crew) spots[id] = sp[(S.spots[id] || 1) - 1];
+  const mins = seq.reduce((a, s) => a + s.mins, 0) + 5;
+  const id = teamJobPost({ id: 'team:coil@' + M24_NIGHT, machine: coil, start: at, mins, team: crew, lead: crew[0], you: true, steps: mine, spots, found: shipNow(),
+    title: worksText('m24.card', 'The coil swap, {time}, Deck 6: your team', { time: hhmm(at % 1440) }) });
+  const j = id && SHIP.jobs.find(x => x.id === id); if (!j) return null;
+  j.seq = seq.map(s => ({ ...s, who: s.who === 'you' ? 'you' : j.team.includes(s.who) ? s.who : j.lead }));
+  Object.assign(j, { team_kind: 'coil', machines: M24_COILS.filter(x => machineById(x)), cur: -1, stepAt: null, late: false, reserved: M24_SLOT, until: at + 4 * 60, m24: M24_NIGHT });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  return j;
+}
+// a spot for each: k (1 the coupling, 2 the lifting frame) to id, the other to the other; before the start, the job follows
+function m24SpotSet(id, k, now = shipNow()) {
+  const S = m24State(); if (!S || !S.pick.includes(id) || (k !== 1 && k !== 2)) return false;
+  const j = S.job && SHIP.jobs.find(x => x.id === S.job); if (j && (j.cur >= 0 || now >= j.start)) return false;   // the run has started
+  const other = S.pick.find(x => x !== id); S.spots[id] = k; if (other) S.spots[other] = k === 1 ? 2 : 1;
+  if (j) { const sp = m24Spots(), seq = m24Seq(S, j.start);
+    for (const c of j.team) { const pl = sp[(S.spots[c] || 1) - 1]; j.spots[c] = pl; for (const g of j.segsBy[c] || []) if (g.tag === 'team') g.placeId = pl; }
+    j.seq = seq.map(s => ({ ...s, who: s.who === 'you' ? 'you' : j.team.includes(s.who) ? s.who : j.lead })); if (typeof MACH_REV !== 'undefined') MACH_REV++; }
+  simNote('m24', { step: 'spot', id, k });
+  return true;
+}
+// the crew answer each call as their step starts; the end: how it went, trained the first time
+function m24Team(n) {
+  const S = m24State(), j = n && S && S.job === n.id && SHIP.jobs.find(x => x.id === n.id); if (!j) return;
+  const st = j.seq[n.step];                              // (the bus keeps only the note's own kind, 'team': a crew step starting is its step and its who; the end is step = the sequence's length)
+  if (st && n.by !== 'you' && st.who === n.by) worksSay(n.by, worksText('m24.reply.' + j.seq[n.step].part, { isolate: 'Isolating. Coupling\'s cold.', unbolt: 'Bolts coming out. Mind your toes.', lift: 'Lifting. Easy, easy.', seat: 'Seating the new one. Gently.', test: 'Testing. Readings coming up.' }[j.seq[n.step].part] || 'On it.'));
+  if (n.step !== j.seq.length || S.done) return;
+  const t = Math.floor(shipNow()), mins = Math.max(0, t - j.start); S.done = t; S.mins = mins;   // whole ship minutes (the save keeps integers)
+  const res = mins <= M24_LEN - 5 ? 'early' : mins <= M24_LEN ? 'on' : 'slow';   // a good team and quick calls about 52 minutes; a poor pick over the hour
+  worksSay(j.lead, worksText('m24.done.' + res, { early: 'Done early. That was a good team.', on: 'Done, on the hour. Clean work.', slow: 'Done. Slow, but done. The coil doesn\'t mind.' }[res]));
+  if (typeof mailSend === 'function') { const tx = worksText('m24.mail.done', 'The coil swap | Done in {n} minutes with {a} and {b}. Logged for Calder.', { n: mins, a: worksFirst(j.team[0]), b: worksFirst(j.team[1] || j.team[0]) }), i = tx.indexOf(' | ');
+    mailSend({ at: t, from: 'Works', subject: i > 0 ? tx.slice(0, i) : 'The coil swap', body: i > 0 ? tx.slice(i + 3) : tx, quiet: true }); }
+  const W = SHIP.works; if (W && !j.youOut) { worksXp(res === 'slow' ? 1 : 3); if (W.tr.m24 === undefined) { W.tr.m24 = worksDay(j.start); simNote('trained', { mech: 'm24' }); } }   // you led it (not: Keane finished it without you)
+  simNote('m24', { step: 'done', mins, res });
+}
+// your call, in play: at the drive panel when it's your turn, a card with "Next step" (a call is a word, done at once). 15b's
+// taps don't reach a team job's stops (a side job on a machine; backlog MA6-1), so the card is how a call is made, by
+// touch or pad. Not now: it comes back a ship minute later
+let M24_ASKED = -1;
+function m24Call(now) {
+  const S = m24State(), j = S && S.job && SHIP.jobs.find(x => x.id === S.job); if (!j || j.status === 'done' || !j.seq || j.cur < 0 || j.cur >= j.seq.length) return;
+  const s = j.seq[j.cur], mine = j.seq.map((x, i) => x.who === 'you' ? i : -1).filter(i => i >= 0), k = mine.indexOf(j.cur);
+  if (s.who !== 'you' || k < 0 || (j.stepsDone || []).includes(k) || !teamAtSpot(j) || now - M24_ASKED < 1 || typeof deviceChoose !== 'function') return;
+  if (typeof DEV !== 'undefined' && (DEV.choose || DEV.open)) return;
+  const ok = deviceChoose({ title: teamLabel(j), text: worksText('team.turn.' + s.part, TEAM_PART[s.part]), choices: [worksText('m24.next', 'Next step')] }, c => { M24_ASKED = shipNow(); if (c === 0) jobStepDone(j.id, k, {}); });
+  if (ok) M24_ASKED = now;
+}
+// the beats, in play while it's your night and the swap's to do
+function m24Beats(now) {
+  if (!m24Live(now)) return;
+  const S = m24State(), n = m24Night(), d = M24_NIGHT, j = S.job && SHIP.jobs.find(x => x.id === S.job);
+  if (!S.day) S.day = d;
+  if (!flag('m24.notice') && !promoBusy()) { flagSet('m24.notice', now);
+    promoNotice(worksText('m24.notice', 'Tonight you lead the coil swap. Pick your team: Works, the Team tab.'), worksName('calder')); m24Mail(); }
+  if (!flag('m24.said') && !S.pick.length) {            // in person: one of the night crew, near you
+    for (const id of m24Crew()) { let near = false; try { const a = DECK_CREW.find(x => x.p && x.p.id === id), P = player.obj.position; near = !!a && Math.hypot(a.x - P.x, a.z - P.z) <= 6; } catch (e) { near = false; }
+      if (near) { flagSet('m24.said', now); worksSay(id, worksText('m24.say', 'Calder says the coil swap\'s yours tonight. Pick your team, boss.')); m24Mail(); break; } }
+  }
+  const step = !S.pick.length || S.pick.length < Math.min(2, m24Crew().length) ? 'pick' : !S.job ? 'book' : !j || (j.cur < 0 && now < j.start) ? 'spots' : null;
+  if (step && flag('m24.notice') && Math.floor(now / 60) > Math.floor(flag('m24.notice') / 60) && flag('m24.busy') !== Math.floor(now / 60)) {   // holding another job: once an hour
+    let mj = null; try { mj = myJob(); } catch (e) { mj = null; }
+    if (mj && !mj.workDone && mj.id !== S.job) { flagSet('m24.busy', Math.floor(now / 60)); promoNotice(worksText('m24.busy', 'The coil swap waits for you: {text}. Turn in or drop this job first.', { text: m24Ring(step, j) }), worksName('calder')); }
+  }
+  if (typeof guideAsk !== 'function') return;
+  for (const k of ['pick', 'book', 'spots']) if (k === step && !(GUIDE.list || []).some(x => x.id === 'm24:' + k)) {
+    guideAsk({ id: 'm24:' + k, level: 1, owner: '28d', from: n.from, until: n.to,
+      goal: () => k === 'book' ? { deck: 1, room: 'B', label: m24Ring(k) } : { deck: 6, room: 'E', label: m24Ring(k, SHIP.jobs.find(x => x.id === m24State().job)) },
+      done: () => { const s = m24State(), jj = s && s.job && SHIP.jobs.find(x => x.id === s.job); return !m24Live() || (k === 'pick' ? s.pick.length >= Math.min(2, m24Crew().length) : k === 'book' ? !!s.job : !jj || jj.cur >= 0 || shipNow() >= jj.start); } });
+  }
+}
+function m24Ring(k, j) {
+  return k === 'pick' ? worksText('m24.ptr.pick', 'Pick your team') : k === 'book' ? worksText('m24.ptr.book', 'Book the slot with the Watch')
+    : worksText('m24.ptr.spots', 'A spot for each, then the coil swap at {time}', { time: j ? hhmm(j.start % 1440) : '' });
+}
+function m24Mail() {
+  if (flag('m24.mail') || typeof mailSend !== 'function') return; flagSet('m24.mail', true);
+  const tx = worksText('m24.mail', 'Tonight: the coil swap | You lead it. Pick your team, book the Watch, a spot each.'), i = tx.indexOf(' | ');
+  mailSend({ at: shipNow(), from: worksName('calder'), subject: i > 0 ? tx.slice(0, i) : 'Tonight: the coil swap', body: i > 0 ? tx.slice(i + 3) : tx, quiet: true });
+}
+// the Schedule's rows (section 15's devDay): the night's planning, then the slot
+function m24Items(d) {
+  if (!m24On() || !m24State()) return [];
+  const S = m24State(), n = m24Night(), B = (d - 1) * 1440, out = []; if (S.done) return out;
+  if (d === M24_NIGHT && !S.job) out.push({ from: n.from - B, to: 1440, title: worksText('m24.row.plan', 'Plan the coil swap: your team, the Watch'), where: 'the engine room, Deck 6', kind: 'beat', deck: 6, room: 'E' });
+  if (S.slot && Math.floor(S.slot / 1440) + 1 === d) out.push({ from: S.slot - B, to: S.slot - B + M24_LEN, title: worksText('m24.row.swap', 'The coil swap, your team'), where: 'the engine room, Deck 6', kind: 'beat', deck: 6, room: 'E' });
+  return out;
+}
+// the Works app's Team tab: pick (A toggles each), book, a spot for each
+const m24Btn = (label, verb, arg, on) => ({ label, action: { app: 'works', do: 'm24:' + verb, arg }, ...(on !== undefined ? { on } : {}) });
+function m24View() {
+  const B = [], say = (text, mark) => B.push({ kind: 'text', text, mark }), S = m24State();
+  if (!m24On() || !S) { say(worksText('m24.tab.none', 'Team jobs you lead show here. Nothing tonight.')); return B; }
+  if (S.done) { say(worksText('m24.tab.done', 'The coil swap: done in {n} minutes.', { n: S.mins }), 'up'); return B; }
+  const crew = m24Crew(), j = S.job && SHIP.jobs.find(x => x.id === S.job);
+  say(worksText('m24.tab.head', 'Tonight\'s coil swap: the drive runs slow for an hour while your team changes a coil.'), 'hot');
+  say(worksText('m24.step.pick', '1. Pick your team'), 'head');
+  B.push({ kind: 'buttons', items: crew.map(id => m24Btn(worksName(id) + (S.said[id] ? ': ' + (S.said[id] === 'later' ? worksText('m24.said.later', 'after their round') : worksText('m24.said.yes', 'yes')) : ''), 'pick', id, S.pick.includes(id))) });
+  say(worksText('m24.step.book', '2. Book the slot with the Watch (on the bridge, Deck 1)'), 'head');
+  if (j) say(worksText('m24.booked', 'Booked: {from} to {to}.', { from: hhmm(j.start % 1440), to: hhmm((j.start + M24_LEN) % 1440) }), 'up');
+  else B.push({ kind: 'buttons', items: [m24Btn(m24AtBridge() ? worksText('m24.book', 'Book the slot') : worksText('m24.book.go', 'Book the slot (go to the bridge)'), 'book', 0)] });
+  say(worksText('m24.step.spots', '3. A spot for each'), 'head');
+  for (const k of [1, 2]) B.push({ kind: 'buttons', items: S.pick.map(id => m24Btn((k === 1 ? worksText('m24.spot.1', 'The coupling') : worksText('m24.spot.2', 'The lifting frame')) + ': ' + worksFirst(id), 'spot', id + '|' + k, S.spots[id] === k)) });
+  say(worksText('m24.step.run', '4. At the drive panel, call each step: Next step.'), 'head');
+  return B;
+}
+function m24Act(verb, arg) {
+  const v = String(verb).replace(/^m24:/, '');
+  if (v === 'pick') m24Pick(String(arg));
+  else if (v === 'book') { if (!m24Book()) try { toast(worksText('m24.tab', 'Team'), m24AtBridge() ? worksText('m24.book.no', 'Pick your team first.') : worksText('m24.book.where', 'The Watch books it: go up to the bridge, Deck 1.')); } catch (e) { /* no UI */ } }
+  else if (v === 'spot') { const [id, k] = String(arg).split('|'); m24SpotSet(id, +k); }
+}
+if (P5_M24) {
+  if (typeof TEAM_JOBS !== 'undefined') {                // 24h's tables (W7's), one entry each; machines empty so the day rota (teamPlan) never picks it
+    TEAM_JOBS.coil = { machines: [], coils: M24_COILS.slice(), n: 3, deck: 6, steps: M24_STEPS.map(([w, p, m]) => [w === 'you' ? 'you' : w - 1, p, 'hold', m]) };
+    TEAM_NAME.coil = 'Coil swap';
+    Object.assign(TEAM_PART, { cslow: 'call it: drive to slow', cunbolt: 'call it: unbolt', clift: 'call it: lift', cseat: 'call it: seat the new coil', ctest: 'call it: test', cup: 'call it: drive back up',
+      isolate: 'isolate the coupling', unbolt: 'unbolt the coil', lift: 'lift it out', seat: 'seat the new coil', test: 'test the readings' });
+    TEAM_PARTS.coil = ['coil winding'];
+  }
+  WORK_MECH.m24 = { own: true, noJob: true };            // run here on night 3, never by the ladder (a night day has no ladder)
+  worksTabAdd({ id: 'team', title: worksText('m24.tab', 'Team'), order: 45, verbs: 'm24', view: m24View, act: m24Act, badge: () => m24Live() && !m24State().job ? 1 : 0 });
+  onSim('team', m24Team);
+  WORK_TICKS.push((now, skip) => { if (!skip) { m24Beats(now); m24Call(now); } });
+}
 // ---- end of slot: Leading a team ----
 
 // ---------------------------------------------------------------------
