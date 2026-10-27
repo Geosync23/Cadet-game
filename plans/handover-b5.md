@@ -55,5 +55,15 @@
 - Tracking another job: **OK on 5703dfb6** (the whole promotion met; only the known-old "hold it steady" stucks, not Step 5).
 - **All three ways OK on 5703dfb6** (run one after another, 00:16-00:32 UTC): as is, Teaching arrows Off, tracking another job.
 - Run them one after another (side by side they slow each other and page loads time out).
+## RV20's verdict (00:08 UTC) and after
+- e7ff9253: FIXES NEEDED, one must (M1); 5703dfb6's arrow fix PASSED. **M1 fixed** (build table 0.93.4-s.11): `ladderBigP5`
+  leaves trained rows out (machine_check "traced faults" was not the same twice: a trained-but-unopened Tracing was asked
+  again, and the check's two runs share SHIP.occasions). machine_check on the on copy OK twice.
+- Shoulds still open (not done: lead 40 said one job only): S1 friends' Mails at 08:16 on the result day say "Heard at
+  lunch" (mail.pu3.friend words, or send them at 13:00); S2 "Works reputation down: New officer" toast right after the
+  promotion (skip worksRepTell's drop on a tier change); S3 an empty toast titled "Visitor chair" as you sit (pass a
+  flavour or skip the toast); S4 Dev presets for Days 17-18 still train m15/m17 (DM_CAREER, unlike the new ladder order).
+- Note for the systems engineer: machine_check's traced run keeps SHIP.occasions between its two runs (an isolation gap).
+
 ## Open
 - Known old: the team job's "hold it steady" arrow (FX30) shows as "stuck" in the follower; not Step 5's.
