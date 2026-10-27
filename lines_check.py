@@ -34,7 +34,7 @@ VALUES = {
     'warmth': {'cold', 'warm'},
     'bond': {'best', 'friends', 'friend', 'rivals', 'rival', 'mentor', 'mentee', 'drifting', 'couple', 'partner', 'missed'},   # section 20's BOND_KINDS and bondOf's aliases 'mood': {'low', 'ok', 'high'},
     'rep': {'new', 'known', 'well', 'theirs'}, 'ship.work': {'low', 'ok', 'high'}, 'ship.kindness': {'low', 'ok', 'high'},
-    'ship.spirit': {'low', 'ok', 'high'}, 'week1': {'true', 'false'}, 'leaving': {'soon', 'you'}, 'newhere': {'true', 'false'},
+    'ship.spirit': {'low', 'ok', 'high'}, 'week1': {'true', 'false'}, 'leaving': {'soon', 'you'}, 'newhere': {'true', 'false'}, 'endgame': {'true', 'false', 'early'},
     'guide': {'true', 'false'},
     'time': {'morning', 'afternoon', 'evening', 'night'}, 'weekday': {'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'},
     'season': {'sowing', 'greening', 'harvest', 'lanterns'}, 'birthday': {'me', 'you'},

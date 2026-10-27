@@ -1,0 +1,19 @@
+@crew tran-chloe
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- You stayed. Good. I'd have had to find your sock a new home. It's in my box. Obviously.   #funny
+? endgame
+- Rest-day bake on Sunday. Brennan's inspecting. You're tasting. That's the deal now.
+- Ordinary day. Messages sorted, lights out at ten. Perfect.
+? endgame:early
+- Zofia says she guessed you'd stay. Zofia guessed you'd go, too. Zofia guesses everything.   #funny
+? endgame:early
+- Smells like my gran's kitchen in the galley today. Seemed right, for this week.   #warm
+
+== bye
+? endgame
+- Lights out soon. Even for people who stayed.   #funny

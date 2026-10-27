@@ -1,0 +1,16 @@
+@crew brennan
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame
+- There you are, love. Sit. Your dish is back on the Friday list. For good, this time.   #warm
+? endgame:early
+- I'd planned you a goodbye supper. Now I've a supper and no goodbye. We'll eat it anyway.   #funny
+? endgame
+- You're staying, so you're on the Sunday bread. Knead like you mean it, love.
+- Hear that pan? That's a pan that's glad you stayed. Don't argue with a pan.   #funny
+- Have you eaten? You have? Good. Eat again. An ordinary Wednesday's no excuse.   #funny
+? endgame:early tier>=friend
+- I watched that mess door all Saturday, love. I'm too old to be watching doors.   #warm

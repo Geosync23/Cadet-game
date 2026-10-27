@@ -1,0 +1,20 @@
+@crew mensah
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- The Chief said you'd stay. The Chief never bets. I lost a tea and gained a story.   #funny
+? endgame
+- On my rounds last night I said good night to every deck. Added your name. She didn't mind.   #warm
+? endgame:early
+- Made the Chief laugh twice this week. One was about you. I'm not saying which.   #funny
+? endgame
+- Quiet night, quiet decks. That's what we're for, you and me. The quiet.
+? endgame:early
+- The night shift waited up for the news. Then went straight to bed. Night shift, eh?   #funny
+
+== bye
+? endgame
+- Night, {me}. She's in good hands. Yours too, now.   #warm

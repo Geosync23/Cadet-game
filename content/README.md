@@ -108,6 +108,7 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `moved:<id>` | that crew member has left the Wren | `moved:okoro` |
 | `guide:` | `true` while you're guiding a newcomer | `guide:true` |
 | `here:<crewId>` | crew stories (FX21): that crew member is in the scene with the speaker (same room now); `you` always is | `here:torres-zeke` |
+| `endgame` | the ending (section 29c): you stayed aboard. Only from the first morning after the crossing back; every hour for the first 14 days, then about 4 hours in 10, so the everyday lines come back. Such a line is heard over the speaker's own everyday lines. `endgame:early`: only in those first 14 days. `endgame:false` (or `!endgame`): you haven't stayed (yet) | `endgame`, `endgame:early tier>=friend` |
 
 **About the moment** (the dialogue engine):
 

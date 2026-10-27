@@ -94,6 +94,7 @@ SAME = r"""(d => {
 
 # one event on its deck, minute by minute, from 30 minutes before to its end
 SIM = r"""(async ({ d, id, step }) => {
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE) dialogueEnd(true); if (typeof CREW_SCENE !== 'undefined') CREW_SCENE.clear();   // EN2: a scene left open, or someone sent walking, by a later day's play (the ending's) doesn't follow the clock back
   const e = eventsOn(d).find(x => x.id === id), B = (d - 1) * 1440;
   const att = new Map();                                 // person -> their event segment
   for (const p of schedPeople()) for (const s of planDay(p, d)) if (s.tag && s.tag.startsWith('ev-' + id) && s.placeId) att.set(p.id, s);
@@ -179,6 +180,7 @@ STORM = r"""(() => {
 # briefing in the Works bay (the panel, the cast, a choice), the front at 14:00 on day 11 (the jolt, the address), the
 # all-clear in the observation room (walking out mails the gist), then on to the end (the log, the traces, the debrief)
 LIVE = r"""(() => {
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE) dialogueEnd(true); if (typeof CREW_SCENE !== 'undefined') CREW_SCENE.clear();   // EN2: a scene left open, or someone sent walking, by a later day's play (the ending's) doesn't follow the clock back
   const dress = [], hadDress = typeof dressShow === 'function', ds = hadDress ? dressShow : null;
   const spy = l => { const k = l.map(x => typeof x === 'string' ? x : x.id + (x.lines ? '[' + x.lines.length + ']' : '')).join('+'); if (dress[dress.length - 1] !== k) dress.push(k); };
   // with the deck architect's dressShow in the game's own scope, a window stand-in is never seen: wrap the real one there

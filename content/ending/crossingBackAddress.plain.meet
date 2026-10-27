@@ -1,0 +1,16 @@
+@meeting crossingBackAddress.plain
+// SW6 (ending writer A), the Captain's final address at the crossing back on a SLOWER CAREER (RV21's review): the
+// offer hasn't come yet (it comes the Thursday after Calder's question, after Day 35), so no choice is named. After
+// crossingBackSignal, as the other versions.
+title: The Captain's address
+from: Captain Odile Marrow
+gist: At the Line, the Captain thanked the crew for a good month in the Veyli reach. The Wren is back on her course.
+== lines
+marrow: One more thing, and then you can all get back to your Sunday.   [gesture]
+marrow: Four weeks ago we crossed into the reach as guests. We were good ones. I'm proud of every one of you.
+marrow: We charted, we listened, and when a small ship asked for company, we gave it. The reach will remember that.   [nod]
+holt: So will I. Don't tell anyone.
+marrow > you: And {me} led the oath like they'd been doing it for years. Thank you.
+pell: They practised on me. For an hour. I know it by heart now.   [laugh]
+marrow: Tomorrow we're back on our course, with thick charts and short distances. Enjoy the quiet. It won't last.   [laugh]
+marrow: That's all. The supper's at six. Carry on, all of you.

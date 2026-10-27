@@ -1,0 +1,31 @@
+@meeting endingOffer
+// SW6 (ending writer A), the offer (ending spec, section 1): Thursday Day 32, 16:00, the ready room (Deck 1). The
+// Captain and Calder; you seated. A letter from Concord headquarters, through the Captain (never an admiral in
+// person). FOR EN1: after the line "It's a post, and it's yours if you want it." insert the post's two lines from
+// offer.lines, ending.offer.post.<engines|bridge|teach|unsure>.1 and .2 by Calder's answer (SHIP.works.end.answer),
+// or ending.offer.post.plain.1 and .2 when there's no answer. The Admiral gets one look and no explanation.
+// A SLOWER PLAYER (offer after Day 35): replace the line "And you can change your mind until I speak at the Line on
+// Sunday..." with ending.offer.slow.change (offer.lines).
+title: The ready room
+from: Captain Odile Marrow
+gist: In her ready room, with Calder there, the Captain read you a letter from Concord headquarters: a post there, if you want it. Your answer by Saturday evening.
+== lines
+marrow: Come in. Mind the step. You've never tripped on it once. I've been watching.   [gesture]
+marrow > you: Sit, please, {me}. Chief Calder's here because I asked her to be. Nobody's in trouble.
+calder: Nobody. I checked.   [nod]
+marrow: This came this morning, from Concord headquarters. It's about you. I'll read you the part that matters.   [gesture]
+marrow: "Headquarters has followed the cadet's record with interest. We would like to offer them a post."
+marrow: It's a post, and it's yours if you want it.
+marrow: They'd like you on Monday's Tern, if you say yes. A courier will meet it.
+marrow: The Admiral has read it too. He's said nothing. That's normal.   [nod]
+? choice
+* Thank you. I don't know what to say.   flavour:share
+  marrow: Then don't say anything yet. Nobody's ever been sorry they took a day.
+* What would I actually be doing?   flavour:practical
+  marrow: More than the letter says. Less than you're imagining. It's real work, and they asked for you by name.
+* Can I think about it?   flavour:listen
+  marrow: You can. I'd worry if you didn't.   [nod]
+calder > you: For the record, I wrote to them. Two lines. Both true.
+marrow > you: You don't have to answer now. Saturday evening, by eight. Come and find me, wherever I am.
+marrow: And you can change your mind until I speak at the Line on Sunday. After that, the ship knows.
+marrow: Whatever you choose, it's a good answer. I mean that. That's all. Thank you for coming up.

@@ -1,0 +1,20 @@
+@crew tomas
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- I wrote to my brother that you stayed. He wrote back "Good." Underlined. Twice.   #warm
+? endgame:early
+- I counted the windows again. Twenty-two. I sort of thought there'd be one more now.   #funny
+? endgame
+- Is it strange? No next thing to aim for? I think I'd like it. I think. Ask me in a month.
+? endgame time:evening
+- Clear sky tonight. Want to name a star? Not properly. Just between us.
+? endgame:early tier>=friend
+- When you said you'd stay, I breathed out. First time since Thursday. Sort of literally.   #warm
+
+== bye
+? endgame
+- Night! Long way round Deck 2? No? Just me, then. I like the long way.   #funny

@@ -1,0 +1,20 @@
+@crew quist-ilse
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- You stayed. The basil on my sill perked up. Not because of you. Probably. Possibly.   #funny
+? endgame
+- Ordinary day. Grease, herbs, a mystery I've already solved. Lovely, really.
+? endgame:early
+- I guessed you'd stay by chapter two. Of the week. Thursday, I mean.   #funny
+? endgame:early
+- Brennan used my thyme on Sunday and said so. Then said you were staying. Good day.   #warm
+? endgame
+- The herbs like people who stay. They get used to your hands. So do I, a bit.   #warm
+
+== bye
+? endgame
+- Bye. Water something on your way. Anything. It helps.

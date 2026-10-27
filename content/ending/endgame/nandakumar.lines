@@ -1,0 +1,16 @@
+@crew nandakumar
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- Good. You stayed. Now drink some water. Two good decisions in a row.   #funny
+? endgame:early
+- I've moved your file from "pending" to the ordinary drawer. It's the best drawer.
+? endgame
+- Ordinary week. Two splinters, one sprain, nobody bleeding. I'll take it.
+- The chillies came up early. I'd like to say it was for you. It wasn't. Still.   #funny
+- You've time now. Sleep eight hours. That isn't advice.
+? endgame tier>=friend
+- I'm glad, {me}. Truly. Now sit up straight.   #warm

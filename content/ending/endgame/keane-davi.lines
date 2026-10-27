@@ -1,0 +1,19 @@
+@crew keane-davi
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- Hey, hey. You stayed! I mopped the engine room in your honour. You could eat off it.   #funny
+? endgame
+- Ordinary night. Cleaned panel four. Then panel four again. It's a good panel.   #funny
+- My gran on Kesh sent a song for you. Same one as Eklund's gran. We're looking into it.   #funny
+? endgame:early
+- Night radio played something cheerful at three. I took it as a sign. About you staying.   #warm
+? endgame tier>=friend
+- Stay as long as you like, mate. The floor'll be clean whenever you come down.   #warm
+
+== bye
+? endgame
+- Night! Lovely lift, that. Lovely. Off you go.   #funny

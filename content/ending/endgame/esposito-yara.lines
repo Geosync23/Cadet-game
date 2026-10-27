@@ -1,0 +1,18 @@
+@crew esposito-yara
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- You stayed. I knew Thursday. You bought biscuits for six. Nobody leaving buys for six.   #funny
+? endgame
+- Ordinary morning at the store. Soap, socks, a Gerald enquiry. Perfect.
+- You're out of something. Toothpaste? No. Thread. Here. You can pay me later.   #funny
+- I put your staying in my star journal. Not a star. It still counts.   #warm
+? endgame:early
+- Ordinary shopping again, then. Good. Your basket was getting very goodbye-shaped.   #funny
+
+== bye
+? endgame
+- Off you go. Come back when you're out of thread. Tuesday, I'd say.
