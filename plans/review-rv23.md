@@ -14,6 +14,8 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
 | claude/p5s6-mech-a (MA6): M21 the Monday briefing | PASS | 27166be |
 | claude/p5s6-puzzles (PZ6): S6-8 P6-P8 | PASS | fd1f27f (= aed3f73, e16be28) |
 | claude/p5s6-nights (N6): S6-1 turns 1-3 | FIXES NEEDED (1 must: Calder not in person Day 22; 1 should: 2.2 m reach) | c806c78 |
+| claude/p5s6-promo4 (W6/W7): S6-3 turns 1-4b | FIXES NEEDED (must: Calder stuck in the lift car, no offer in person) | 9ac35bfd |
+| claude/p5s6-deck (DA6): S6-4 Deck 6 kit | PASS | 469b606b |
 | VB2's ending leftovers (arrows endgo teachoff, track) | PASS | staging-0.94.0 d69473b7 |
 
 ## VB1 03b63d95
@@ -84,3 +86,8 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
   10:00. should: p5nNear 2.2 m (use a looser reach while fetching).
 - Queued: W7 promo4 (latest 9ac35bfd; p4_play on a1ea8034; cadet 76e59409, 9ac35bfd; clothes_check), DA6 deck 469b606b (base
   3e502ca; d6_look.py), MA6 m24 8f943e82 (base 3e502ca).
+- Shared cause (W7 offer, N6 night word): worksEscort's follow puts Calder in the lift car ('@') on your deck, esc "follow|42,17",
+  path 0; she never walks out (p4_diag.py on a1ea8034 ON). crewComeTo (VB1's vessel) works across decks. Sent to lead 41, W7, N6.
+- W7 9ac35bfd: cadet identical at every turn; MUST above; should: controller part for the Tier 4 test at the board.
+- DA6 469b606b: PASS. cadet identical vs 3e502ca; d6_look.py: coil service spots reachable in E, 104-107 calls; kit tappable.
+- Queued: MA6 m24 8f943e82.
