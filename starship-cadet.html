@@ -36612,6 +36612,8 @@ const LINES = JSON.parse([
   '{"text":"The sensor array: you can run a full sweep now.","id":"hcq36y"}]',
   ',"m20.trained.stage3":[',
   '{"text":"The sensor array: your sweeps feed Survey\'s charts now.","id":"jkyl8a"}]',
+  ',"m20.turn":[',
+  '{"text":"Your turn: the sensor array, at the job board","id":"mmf3hn"}]',
   ',"mail.favour.clock":[',
   '{"text":"My clock | My clock loses a few minutes every day. I\'ve been late twice. Could you take a look?","id":"8uk2v5"}]',
   ',"mail.favour.cold":[',
@@ -59869,6 +59871,14 @@ function arrOffer(row, c, d, t) {
   c.st = 'meet'; c.occ = r.key; c.told = true; c.mail = null;   // told: 24 core's trainTell (a toast) isn't needed; the beats here say it
   return true;
 }
+// (RV22) your turn after the watch: 24 core's T3 arrow skips a row with its own offer, so it's asked here: the board until
+// you take your calibration job (then the job's own arrow leads to the array)
+function arrTurn(now) {
+  const c = SHIP.works && SHIP.works.cur; if (!c || c.id !== 'm20' || c.st !== 'do' || !c.j || typeof guideAsk !== 'function') return;
+  guideAsk({ id: 'm20:do:' + c.d, level: 2, owner: '24x', until: now + 480,
+    goal: () => { let m = null; try { m = myJob(); } catch (e) { m = null; } return m && m.id === c.j || (typeof guideShiftOver === 'function' && guideShiftOver()) ? null : { deck: 5, item: /job board/i, room: 'w', label: worksText('m20.turn', 'Your turn: the sensor array, at the job board') }; },
+    done: () => { const x = SHIP.works && SHIP.works.cur; let m = null; try { m = myJob(); } catch (e) { m = null; } return !x || x.id !== 'm20' || x.st !== 'do' || (!!m && m.id === c.j); } });
+}
 function arrMail(c, r) {
   if (!c || !r || flag('m20.mail.' + c.d) || typeof mailSend !== 'function') return; flagSet('m20.mail.' + c.d, true);
   const tx = worksText('m20.mail', 'Training: the sensor array | {time}, the array room on Deck 2, with {name}.', { time: hhmm(r.at % 1440), name: worksName(c.by) }), i = tx.indexOf(' | ');
@@ -59889,8 +59899,8 @@ if (P5_M20 && typeof jobKindAdd === 'function') {
   WORK_MECH.m20 = {
     offer: (row, c, d, t) => arrOffer(row, c, d, t),
     at: () => {                                          // the lesson at 10:00 (the beats table); done before 12:00, ahead of a booked shutdown after lunch (S5-4)
-      // Mori is off on Fridays, so on Day 19 the ladder's teacher is Calder (the row's second): Mori comes in for it all the same
-      // (arrHost books her), and her meeting plays whoever teaches (asked here, before 24 core's trainScript picks one)
+      // Mori is off on Fridays, so on Day 19 the ladder's teacher is Calder (the row's second), with her own meeting below
+      // (made here, before trainScript picks one); Mori isn't brought in on her day off (lead 40)
       const k = 'train.m20.calder'; if (!MEETING_SCRIPTS[k]) MEETING_SCRIPTS[k] = { title: 'The sensor array', from: 'Chief Ines Calder', stub: true,   // Calder's stand-in (Mori's meeting has Mori speaking)
         gist: 'Calder showed you the sensor array in Hana Mori\'s place: pick a reference star, turn the dial till the reading agrees, swap the amber module.',
         lines: [{ who: 'calder', text: 'Hana\'s off today, so you get me. She\'ll want to see your numbers.', pose: 'gesture', to: 'you' },
@@ -59916,7 +59926,7 @@ if (P5_M20 && typeof jobKindAdd === 'function') {
     arrHost(now);
     if (!skip && flag('m20.mori.later') === 1) { let near = false; try { const a = (typeof DECK_CREW !== 'undefined' ? DECK_CREW : []).find(x => x.p && x.p.id === 'mori'), P = player.obj.position; near = !!a && Math.hypot(a.x - P.x, a.z - P.z) <= 6; } catch (e) { near = false; }
       if (near) { flagSet('m20.mori.later', 2); { const v = worksVoice('mori', 'm20.later'); if (v) worksSayAll('mori', v); else worksSay('mori', worksText('m20.mori.later', 'Calder says you calibrated my array without me. I checked your numbers. Good.')); } } }   // the first time you're near her after it (lead 40)
-    if (!skip) { arrBeats(now); arrAskSay(now); }
+    if (!skip) { arrBeats(now); arrAskSay(now); arrTurn(now); }
     const W = SHIP.works; if (!W || W.tr.m20 === undefined || !arrState()) return;
     const A = arrState(), st = worksStage('m20');
     if (!skip && st >= 1 && !flag('m20.stage2')) { flagSet('m20.stage2', worksDay(now)); try { toast(worksName('mori'), worksText('m20.trained.stage2', 'The sensor array: you can run a full sweep now.')); } catch (e) { /* no UI */ } }
