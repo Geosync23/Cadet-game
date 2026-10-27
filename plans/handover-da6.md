@@ -71,3 +71,11 @@ switch lines: ask first).
   15b ixChoreLast + ixSideOwn (the interactions engineer to review); 4d places 6-control-board.
 - Checks: mech_check m23 (both nights), controller_check m23 (both nights by pad), deck6.
 - Not done (ask the lead): "the night's incident" on night 1; Torres by day (S6-3's forYou line); real words (m23.lines).
+
+## Status (2026-10-27 ~14:40 UTC)
+- S6-5 done: 9332d5a1 (night 1, RV23 PASS), 88377cfa (night 2 + controller part m23), 31ad2f0e (night 1's arrow m23:n1 after
+  the clock-in; shots in plans/da6-shots), 5085853a (staging c477e52 merged: S6-1 nights, S6-3; full round OK). Queued with
+  RV24 (RV23's successor). Lead is now lead 42 (session_01GKuymjnCHnpwDqB94PVwmV).
+- Waiting: PZ6's claude/team-turn-fix 12afb4a (15b ixSides filter + pad ring "Your job") to reach staging; it's
+  complementary to my ixSideOwn line. When it lands: merge staging, run controller_check m23 + team.
+- Idle for review fixes.
