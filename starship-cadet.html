@@ -16682,7 +16682,7 @@ function lessonClash(j, mins) {
   const make = typeof madeHere === 'function' && madeHere(j) || (j.parts || []).some(p => !(SHIP.stores[p] > 0) && !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p)));
   const end = now + (mins || 0) + (make && typeof makeMins === 'function' ? makeMins(j) : 0) + LESSON_WALK; if (end <= r.at) return null;
   const row = typeof ladderRow === 'function' && ladderRow(c.id), what = row ? mechName(row.id).replace(/^./, x => x.toUpperCase()) : 'Your lesson';
-  return 'Heads up: it runs to about ' + hhmm(Math.round(end) % 1440) + (make ? ' (its part has to be made in the machine shop)' : '') + ', and ' + what + ' with ' + worksFirst(c.by) + ' starts at ' + hhmm(r.at % 1440) + '.';
+  return 'Heads up: it runs to about ' + hhmm(Math.round(end) % 1440) + (make ? ' (its part has to be made in the machine shop)' : '') + ', and ' + what + ' with ' + guideWho(c.by) + ' starts at ' + hhmm(r.at % 1440) + '.';
 }
 function boardLesson() {
   const c = SHIP.works && SHIP.works.cur, j = c && c.st === 'do' && c.j && (SHIP.jobs || []).find(x => x.id === c.j);
@@ -57162,7 +57162,7 @@ function trainOffer(row, c, d, t) {                      // the ask, or the ask 
   let early = 0; try { early = M.at ? +M.at(d) || 0 : 0; } catch (e) { early = 0; }   // a sub-block's earliest meeting (24d: m4 after the delivery's unload)
   const at = d >= TRAIN_PROMPT_DAY ? Math.max(m + 60, DAY_SHIFT[0] + (schedU(machSeed(row.id), d, 851) < .5 ? 0 : 15), early)   // (DS1, the user, patch 0.92.5 #11) from Day 4: 09:00 or 09:15, no waiting about
     : Math.min(Math.max(900, early), Math.max(m + 60, DAY_SHIFT[0] + 15, early) + Math.ceil(schedU(machSeed(row.id), d, 850) * 6) * 10), o = trainSetup(row);   // FX1: never before 09:15 (it was 08:30: an ask at 06:00 pulled you off before your shift)
-  o.by = by; o.script = trainScript(row, by); o.title = 'Training: ' + mechName(row.id).replace(/^./, x => x.toLowerCase()) + ' with ' + worksFirst(by);   // FX1: the Calendar, Schedule and Tracked name the teacher
+  o.by = by; o.script = trainScript(row, by); o.title = 'Training: ' + mechName(row.id).replace(/^./, x => x.toLowerCase()) + ' with ' + guideWho(by);   // (the arrows' name: Calder, Brennan; Zeke, Yara) FX1: the Calendar, Schedule and Tracked name the teacher
   const r = occasionAdd('works.' + row.id, (d - 1) * 1440 + at, false, o.len);
   if (!r) return false;
   c.st = 'meet'; c.occ = r.key; c.told = false;
@@ -62409,7 +62409,7 @@ function trainArrow(c, now) {                           // (its state on the fun
   if (A.key !== r.key) { if (ours) clearGoal(); A.key = r.key; A.up = A.lost = false; A.mine = null; }
   let here = false; try { here = deckDef.num === r.deck && roomAt(...player.here()) === r.room; } catch (e) { here = false; }
   const want = c.told && !r.met && r.status === 'asked' && now >= r.at - A.lead && now < r.at + r.len && !(typeof DIALOGUE !== 'undefined' && DIALOGUE);
-  const row = ladderRow(c.id), base = row ? mechName(row.id).replace(/^./, x => x.toUpperCase()) + ' with ' + worksFirst(c.by) + ', ' + hhmm(r.at % 1440) : null;
+  const row = ladderRow(c.id), base = row ? mechName(row.id).replace(/^./, x => x.toUpperCase()) + ' with ' + guideWho(c.by) + ', ' + hhmm(r.at % 1440) : null;
   const label = here ? 'Wait here: ' + base.charAt(0).toLowerCase() + base.slice(1) : base;
   const held = typeof myJob === 'function' ? myJob() : null, busy = !A.up && !!held && !((held.start || 0) >= r.at - A.lead);   // holding a job: it keeps the arrow (the playtest patch 1, #7); a word 10 minutes before instead. FX4: not a job taken once the window had opened (a steady player turns one in and takes the next at the board: Day 5's scanner was missed till Monday with the queue off)
   if (want && busy) { if (A.said !== r.key && now >= r.at - 10 && base) { A.said = r.key; try { toast(worksName(c.by), base + ', ' + ((DECKS[r.deck].rooms || {})[r.room] || { name: 'the Works bay' }).name + '. In ten minutes: the Schedule tracker shows the way.'); } catch (e) { /* no UI */ } } return; }
@@ -64290,7 +64290,7 @@ function arrAskSay(now) {
 // teacher's own name (Calder on Mori's days off)
 function arrOffer(row, c, d, t) {
   const m = t - (d - 1) * 1440, at = Math.max(ARR_AT, m + 30), o = trainSetup(row); WORK_MECH.m20.at(d);
-  o.by = c.by; o.script = trainScript(row, c.by); o.title = 'Training: ' + mechName(row.id).replace(/^./, x => x.toLowerCase()) + ' with ' + worksFirst(c.by);
+  o.by = c.by; o.script = trainScript(row, c.by); o.title = 'Training: ' + mechName(row.id).replace(/^./, x => x.toLowerCase()) + ' with ' + guideWho(c.by);
   const r = occasionAdd('works.' + row.id, (d - 1) * 1440 + at, false, o.len); if (!r) return false;
   c.st = 'meet'; c.occ = r.key; c.told = true; c.mail = null;   // told: 24 core's trainTell (a toast) isn't needed; the beats here say it
   return true;
