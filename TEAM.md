@@ -1601,3 +1601,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~00:46 UTC: **RV20 PASS B3 mech-b fa1e152c** (should: missing space in parts text -> B3). RV20 ~58% handing over (handover-rv20.md, review-rv20 eb95b418+); RV22 takes the B5 machine_check re-check. Archive RV20 once its handover is final.
 - ~00:46 UTC: RV20 final handover claude/review-rv20 a8b8caac. **RV20 archived** (26 closed). RV22 is the only reviewer now.
 - ~00:52 UTC: B3 mech-b 98460d79 (parts-text space fix; check_fast OK) -> BM18 for staging-0.94.0. B3 standing by (Step 6).
+- ~00:52 UTC: **B5 machine_check fix cbca3e3e** (not randomness: higher-tier-first ladder re-asked a trained row; ladderBigP5 skips trained rows; machine_check ON OK twice; off identical) -> RV22 + BM18. B5 next: RV20's 4 promotion shoulds.
