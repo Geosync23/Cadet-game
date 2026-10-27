@@ -79,3 +79,10 @@ switch lines: ask first).
 - Waiting: PZ6's claude/team-turn-fix 12afb4a (15b ixSides filter + pad ring "Your job") to reach staging; it's
   complementary to my ixSideOwn line. When it lands: merge staging, run controller_check m23 + team.
 - Idle for review fixes.
+
+## Status (2026-10-27 ~16:30 UTC)
+- abf496f3: your framed keepsakes (framedMenu, lineCertificate, vesselSketchShelf) follow you to room B (DECK2_HOME,
+  deck2Home(), dressing `deck` getters). events_check ON has 2 FAILs that are identical on staging 40f3bdac switched on
+  (farouk-olu>3-lounge-28; bridgeInvite@50 missed): pre-existing, reported to lead 42.
+- With RV24 (session_01GKuymnJuoJTWnmYunbN7EP) for review; BM19 merges on its pass. W8's d2RoomB (4d slot) approved.
+- Idle for review fixes.
