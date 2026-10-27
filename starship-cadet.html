@@ -23760,7 +23760,8 @@ const VOICE = JSON.parse([
   '{"text":"Long line. One fault. Don\'t walk it all. Halve it.","id":"1jrllom","flag":"train.p5.word"},',
   '{"text":"Every part\'s fine. Still goes wrong at the same hour. Think.","id":"1rduljp","flag":"train.p9.word"},',
   '{"text":"Some faults are people. Nicely. Ask, don\'t tell.","id":"158ey5y","flag":"train.p9.word"},',
-  '{"text":"Something\'s going missing. Read the meters in pairs. The pair that won\'t add up is yours.","id":"fqw7rq","flag":"train.p6.word"}]',
+  '{"text":"Something\'s going missing. Read the meters in pairs. The pair that won\'t add up is yours.","id":"fqw7rq","flag":"train.p6.word"},',
+  '{"text":"The labels on that panel wore off years ago. Work out which relay feeds what.","id":"uzwcgt","flag":"train.p7.word"}]',
   '}',
   '}',
   ',"chen-carmen":{"avoid":["being told to focus"],"cares":["her grandmother on Lisk","finding where she fits","her bench in the garden"],"invites":["garden"],"jokes":["she sings in the shower and the whole washroom knows","her voice messages home are longer than most shifts"],"joy":"her garden bench","keepsake":"a pressed leaf from her garden bench","likes":["sweet","plant"],"loves":["garden","music"],"needs":"share","openness":"normal","talk":"Drifts mid-sentence, then comes back with a better idea. Restless, always half-planning to be somewhere else.","tpl":"dreamy","words":{"hi":["Oh, hi","Hello","Hey, you"],"bye":["See you","Bye, then","Off I drift"],"yes":["Mm, sure","Yes","All right"],"thanks":["Thanks","Oh, thank you"],"wow":["Oh, look"],"sigh":["Oh, well"],"nick":[null,null,"{me}","{me}","{me}"]},"lines":{',
@@ -30502,7 +30503,8 @@ const VOICE = JSON.parse([
   '{"text":"Get a third reading. The scanner doesn\'t take sides.","id":"709sg8","flag":"train.p4.word"},',
   '{"text":"Old ones. Nobody\'s cracked them. I\'ve tried the Tuesday hum twice.","id":"r899rp","flag":"mys.word"},',
   '{"text":"Take one if you like. No rush. They\'ve waited years.","id":"7m8gpr","flag":"mys.word"},',
-  '{"text":"Calder pinned the first. She says it\'s not personal. It\'s personal.","id":"1unds07","tone":"funny","flag":"mys.word"}]',
+  '{"text":"Calder pinned the first. She says it\'s not personal. It\'s personal.","id":"1unds07","tone":"funny","flag":"mys.word"},',
+  '{"text":"Labels on that panel? Gone. Years ago. Make a grid. It\'s oddly relaxing.","id":"d837pe","flag":"train.p7.word"}]',
   ',"worried.captain":[',
   '{"text":"Up top to the Captain. {sigh}. I trained you, shipmate. I know what you can do.","id":"1v9hfzh","tone":"serious","tier":[3,4]}]',
   ',"worried.chief":[',
@@ -32607,6 +32609,8 @@ const LINES = JSON.parse([
   '{"text":"Start in the middle. Fine there? The fault is further on.","id":"g1e1bz"}]',
   ',"case.hint.p6.1":[',
   '{"text":"A pair that adds up is fine, both of them. Two short pairs share your leak.","id":"13nyks3"}]',
+  ',"case.hint.p7.1":[',
+  '{"text":"Every relay you can place on another room isn\'t it. The one left over feeds the flicker.","id":"17b74z2"}]',
   ',"case.hint.p9.1":[',
   '{"text":"Every part is fine. So what else happens at that hour?","id":"1vx9c56"}]',
   ',"case.line.air":[',
@@ -32655,6 +32659,24 @@ const LINES = JSON.parse([
   '{"text":"{machine} and {other}: in {n}, out {a} + {b}.","id":"cjhil"}]',
   ',"case.p6.short":[',
   '{"text":"{n} going missing here.","id":"3uf97k"}]',
+  ',"case.p7.drill":[',
+  '{"text":"The power drill\'s log: relay {a} off first, and the {room} went dark.","id":"nccjv9"}]',
+  ',"case.p7.flick":[',
+  '{"text":"The flicker\'s in the {room}. One relay\'s chattering. The labels are worn off.","id":"1y6datp"}]',
+  ',"case.p7.flicker":[',
+  '{"text":"flickers","id":"18cqdpk"}]',
+  ',"case.p7.flip":[',
+  '{"text":"You flip relay {a}\'s test switch: the lights blink in the {room}.","id":"1n04u21"}]',
+  ',"case.p7.head":[',
+  '{"text":"Which relay feeds which room? Tap a cell: yes, no, blank.","id":"1jauh6n"}]',
+  ',"case.p7.not":[',
+  '{"text":"Pell\'s sketch, a note in the margin: relay {a} isn\'t the {room}.","id":"iv1ej9"}]',
+  ',"case.p7.relabel":[',
+  '{"text":"You relabel the panel, A to {a}, in big clear letters. Nobody has to guess again.","id":"93o72k"}]',
+  ',"case.p7.relay":[',
+  '{"text":"Relay {a}","id":"n3hl7s"}]',
+  ',"case.p7.sketch":[',
+  '{"text":"Pell\'s old sketch: relay {a} feeds the {room}.","id":"1xmxe64"}]',
   ',"case.p9.head":[',
   '{"text":"Who\'s using it then","id":"1p048sf"}]',
   ',"case.p9.move":[',
@@ -32697,6 +32719,8 @@ const LINES = JSON.parse([
   '{"text":"{machine} {shows}. The sums don\'t add up","id":"1tu7evq"}]',
   ',"case.title.p6.power":[',
   '{"text":"The battery banks don\'t balance","id":"1ft9o76"}]',
+  ',"case.title.p7":[',
+  '{"text":"{machine}: the labels have worn off, and one relay chatters","id":"19l968n"}]',
   ',"case.title.p9":[',
   '{"text":"{machine} {shows}, but only {when}. Nothing\'s worn.","id":"urtz04"}]',
   ',"case.uncross":[',
@@ -32723,6 +32747,8 @@ const LINES = JSON.parse([
   '{"text":"New {part} in at {machine}. The line still {shows}. It\'s further along.","id":"i3c4vn"}]',
   ',"case.wrong.p6":[',
   '{"text":"New {part} in at {machine}. The sums still don\'t add up.","id":"yajwnk"}]',
+  ',"case.wrong.p7":[',
+  '{"text":"New relay in at {a}. Still chattering. Wrong relay.","id":"ut3r1j"}]',
   ',"case.wrong.p9":[',
   '{"text":"New {part} in. Same hour tomorrow, same trouble. It isn\'t a part.","id":"1e0a5rq"}]',
   ',"case.wrong.t2":[',
@@ -32834,6 +32860,12 @@ const LINES = JSON.parse([
   '{"text":"A pair that adds up is fine, both feeds. Two short pairs share the culprit.","id":"1jlc766"}]',
   ',"chief.p6.title":[',
   '{"text":"Does it add up?","id":"tq12oi"}]',
+  ',"chief.p7.1":[',
+  '{"text":"Each relay feeds one room. Place the ones you can; the one left over is the culprit.","id":"l0z5a6"}]',
+  ',"chief.p7.2":[',
+  '{"text":"Relabel the panel when you\'re done. The next person will thank you.","id":"1trmdnv"}]',
+  ',"chief.p7.title":[',
+  '{"text":"Faded labels","id":"18ahjdb"}]',
   ',"chief.p9.1":[',
   '{"text":"Some faults aren\'t parts. They\'re two good things at the same time.","id":"15z8s6q"}]',
   ',"chief.p9.2":[',
@@ -38806,6 +38838,8 @@ const LINES = JSON.parse([
   '{"text":"Coming up: Follow the line. A fault somewhere along a whole line.","id":"rkk15l"}]',
   ',"next.p6":[',
   '{"text":"Coming up: Does it add up? Sums at the meters, then the batteries.","id":"q9fna7"}]',
+  ',"next.p7":[',
+  '{"text":"Coming up: Faded labels. A panel whose labels have worn off.","id":"11kfltw"}]',
   ',"next.p9":[',
   '{"text":"Coming up: The clash. A fault that only happens when two things do.","id":"179xr0v"}]',
   ',"next.ps":[',
@@ -38872,6 +38906,8 @@ const LINES = JSON.parse([
   '{"text":"Follow the line: the Chief has a long one for you.","id":"1v9t9pi"}]',
   ',"next.wait.p6":[',
   '{"text":"Does it add up?: the Chief has a sum for you.","id":"7bhse7"}]',
+  ',"next.wait.p7":[',
+  '{"text":"Faded labels: the Chief has a panel nobody can read.","id":"n984d6"}]',
   ',"next.wait.p9":[',
   '{"text":"The clash: the Chief has a fault that won\'t happen on its own.","id":"1x2q2al"}]',
   ',"next.wait.ps":[',
@@ -41663,6 +41699,8 @@ const LINES = JSON.parse([
   '{"text":"Follow the line","id":"iq1ygg"}]',
   ',"works.mech.p6":[',
   '{"text":"Does it add up?","id":"yqhlbq"}]',
+  ',"works.mech.p7":[',
+  '{"text":"Faded labels","id":"xashhn"}]',
   ',"works.mech.p9":[',
   '{"text":"The clash","id":"1b8ppzi"}]',
   ',"works.mech.ps":[',
@@ -59841,6 +59879,7 @@ function caseAct(verb, arg) {
   else if (v === 'doubt') { c.doubt = c.doubt || []; const i = c.doubt.indexOf(s); if (i < 0) c.doubt.push(s); else c.doubt.splice(i, 1); }   // P2: a witness marked "doesn't fit" (yours, kept)
   else if (v === 'talk') caseTalk(c.id);
   else if (v === 'long') caseLong(c.id);
+  else { const K = CASE_KINDS[c.kind]; try { if (K && K.act) K.act(c, v, s); } catch (e) { /* a kind's own verbs (P7's grid, P8's rig) */ } }
   MACH_REV++;
 }
 // a tab of 24 core's Works app when it has tabs (worksTabAdd), else its own app (faultnotes), hidden till a kind opens
@@ -61017,6 +61056,133 @@ if (P5_CASES6) {
     'A pair that adds up is fine, both feeds. Two short pairs share the culprit.'] };
   if (typeof WORK_MECH !== 'undefined') WORK_MECH.p6 = { open() { p6Stage(); } };
   if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip) p6Stage(); });
+}
+// P7. Faded labels (Day 23, Calder, else Torres; a logic grid). A light-relay panel (a junction's lights, or the relay
+// room's) whose four or five relays, A to E, have lost their labels; one relay chatters (the cause), so one room's
+// lights flicker. Each relay feeds one room on the panel's deck (a fixed match by the case's seed, key 892; rooms you
+// can reach). Clues: which room flickers (taped to the job: rules out nothing); for each other relay one honest fact
+// that it feeds another room: Pell's old sketch and the power drill's log at the panel, and test switches you flip in
+// the rooms themselves ("flipped C: the closet blinked"); with four relays a fact that the chatterer isn't one room
+// (rules out nothing; it helps the grid). Fault notes has the grid (relays down, rooms across: tap a cell for yes, no,
+// blank; kept on the job's first clue, so it saves). Called right and fitted: you relabel the panel for good
+// (SHIP.works.side.p7 = { labelled: [machine ids] }; no faded-labels case there again). The first (when the p7 row opens:
+// 4-junction-1, the officers' corridor's, else the first that fits; slot 40, held a week). Flag case.p7.first.
+const P7_BAND = { sus: [4, 5], clues: [5, 6], fewest: 3, decks: 1 }, P7_SLOT = 40, P7_FIRST = '4-junction-1', P7_KINDS = new Set(['lights', 'relay']);
+const P7_LET = 'ABCDE';
+function p7State() {
+  const s = worksSide(); if (!s) return null;
+  if (!s.p7 || typeof s.p7 !== 'object' || !s.p7Ok) {
+    const o = s.p7 && typeof s.p7 === 'object' ? s.p7 : {};
+    s.p7 = { labelled: (Array.isArray(o.labelled) ? o.labelled : []).filter(x => typeof x === 'string' && machineById(x)).slice(-12) };
+    Object.defineProperty(s, 'p7Ok', { value: true, enumerable: false, configurable: true });
+  }
+  return s.p7;
+}
+// the rooms a panel feeds: its deck's lit rooms with a place you can reach (not halls' voids, the spine or the lift), by name
+function p7Rooms(m) {
+  const D = DECKS[m.deck]; if (!D || !D.rooms) return [];
+  const at = {}; for (const p of D.places || []) if (p.room && !at[p.room] && placeTier(p.id) <= caseTier()) at[p.room] = p.id;
+  return Object.keys(D.rooms).filter(r => { const R = D.rooms[r]; return R && R.name && !R.void && !R.spine && R.floor !== 'lift' && at[r]; })
+    .map(r => ({ r, name: D.rooms[r].name, at: at[r] })).sort((a, b) => a.name < b.name ? -1 : 1);
+}
+// the case's layout, from its seed: n relays, the rooms (n of them), which relay feeds which, and the chatterer's letter
+function p7Lay(m, seed, n) {
+  const all = p7Rooms(m); if (all.length < n) return null;
+  const rooms = all.map((x, i) => [schedU(seed, i, 892), x]).sort((a, b) => a[0] - b[0]).slice(0, n).map(x => x[1]);
+  const feed = rooms.map((x, i) => [schedU(seed, 20 + i, 892), i]).sort((a, b) => a[0] - b[0]).map(x => x[1]);   // relay i feeds rooms[feed[i]]
+  return { n, rooms, feed, bad: Math.floor(schedU(seed, 40, 892) * n) };
+}
+const p7Sid = (c, i) => { const L = p7Of(c); return L && i === L.bad ? c.cause : 'r:' + P7_LET[i]; };
+const p7Of = c => { const k = c && c.clues.find(x => x.src && x.src.lay); return k ? k.src.lay : null; };   // the layout, kept on the first clue (caseClean keeps only the engine's fields)
+function p7Clues(j, cause, sus, seed) {
+  const m = machineById(j.machine), L = p7Lay(m, seed, sus.length), pp = panelPlace(m.id); if (!L) return [];
+  const lay = { n: L.n, rooms: L.rooms.map(x => [x.r, x.name]), feed: L.feed, bad: L.bad }, sid = i => i === L.bad ? cause : 'r:' + P7_LET[i];
+  const out = [{ id: 'f0', type: 'note', src: { lay, grid: '', flick: L.feed[L.bad] }, at: 'board', kills: [] }];   // which room flickers
+  const others = [...Array(L.n).keys()].filter(i => i !== L.bad).map((i, k) => [schedU(seed, 60 + k, 892), i]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  others.forEach((i, k) => {
+    const how = k === 0 ? 'sketch' : k === 1 ? 'drill' : 'flip', room = L.rooms[L.feed[i]];
+    out.push({ id: 'x' + k, type: how === 'flip' ? 'gauge' : how === 'drill' ? 'log' : 'note', src: { how, relay: i, room: L.feed[i], ...(how === 'sketch' ? { by: 'pell' } : {}) }, at: how === 'flip' ? room.at : pp, kills: [sid(i)] });
+  });
+  if (L.n === 4) { const not = [...Array(L.n).keys()].find(r => r !== L.feed[L.bad] && r !== L.feed[others[0]]);   // the chatterer isn't that room: true, rules out nothing
+    out.push({ id: 'y0', type: 'note', src: { how: 'not', relay: L.bad, room: not, by: 'pell' }, at: pp, kills: [] }); }
+  return out;
+}
+const p7Room = (c, i) => { const L = p7Of(c), x = L && L.rooms[i]; return x ? x[1].toLowerCase() : 'a room'; };
+function p7Text(c, k) {
+  const s = k.src || {};
+  if (s.lay) return caseText('case.p7.flick', 'The flicker\'s in the {room}. One relay\'s chattering. The labels are worn off.', { room: p7Room(c, s.flick) });
+  const R = P7_LET[s.relay], room = p7Room(c, s.room);
+  if (s.how === 'sketch') return caseText('case.p7.sketch', 'Pell\'s old sketch: relay {a} feeds the {room}.', { a: R, room });
+  if (s.how === 'drill') return caseText('case.p7.drill', 'The power drill\'s log: relay {a} off first, and the {room} went dark.', { a: R, room });
+  if (s.how === 'flip') return caseText('case.p7.flip', 'You flip relay {a}\'s test switch: the lights blink in the {room}.', { a: R, room });
+  if (s.how === 'not') return caseText('case.p7.not', 'Pell\'s sketch, a note in the margin: relay {a} isn\'t the {room}.', { a: R, room });
+  return null;
+}
+// the grid: relays down, rooms across; a cell is blank, yes or no (yours, kept on the first clue)
+function p7Grid(c) { const k = c.clues.find(x => x.src && x.src.lay), L = k && k.src.lay; if (!L) return null; const g = String(k.src.grid || ''); return { k, L, at: (r, x) => g[r * L.n + x] || '.' }; }
+function p7View(c) {
+  const G = p7Grid(c); if (!G || !c.got.includes(G.k.id)) return [];
+  const { L } = G, B = [{ kind: 'text', text: caseText('case.p7.head', 'Which relay feeds which room? Tap a cell: yes, no, blank.') },
+    { kind: 'list', rows: L.rooms.map((x, i) => ({ text: (i + 1) + '. ' + x[1], ...(i === G.k.src.flick ? { mark: 'hot', sub: caseText('case.p7.flicker', 'flickers') } : {}) })) }];
+  for (let r = 0; r < L.n; r++) B.push({ kind: 'text', text: caseText('case.p7.relay', 'Relay {a}', { a: P7_LET[r] }) },   // a row of big chips (44 px): a room's number, ✓ yes, crossed out no
+    devChips(L.rooms.map((x, i) => { const v = G.at(r, i); return { label: (i + 1) + (v === 'y' ? ' ✓' : ''), on: v !== 'n', action: { app: caseApp(), do: 'case:p7', arg: c.id + '|' + r + '.' + i } }; })));
+  return B;
+}
+function p7Act(c, v, s) {                                 // case:p7, arg 'row.col': blank, yes, no, blank ('row.-1' clears the row)
+  const G = p7Grid(c); if (v !== 'p7' || !G) return false;
+  const [r, x] = String(s).split('.').map(Number), n = G.L.n; if (!(r >= 0 && r < n)) return false;
+  const g = (String(G.k.src.grid || '') + '.'.repeat(n * n)).slice(0, n * n).split('');
+  if (x < 0) for (let i = 0; i < n; i++) g[r * n + i] = '.'; else if (x < n) g[r * n + x] = { '.': 'y', y: 'n', n: '.' }[g[r * n + x]] || '.';
+  G.k.src.grid = g.join(''); return true;
+}
+function p7Fits(cause, m) {
+  if (cause.part !== 'relay' || cause.id !== 'relay' || !P7_KINDS.has(m.kind) || caseBand(caseRank()) !== 'T4' || !panelPlace(m.id)) return false;
+  const S = SHIP.works && p7State(); if (S && S.labelled.includes(m.id)) return false;   // relabelled: no mystery there now
+  return p7Rooms(m).length >= 4;
+}
+function p7Sus(c, id) { const L = p7Of(c); if (!L) return null; const i = id === c.cause ? L.bad : P7_LET.indexOf(String(id).slice(2)); return i >= 0 ? { label: caseText('case.p7.relay', 'Relay {a}', { a: P7_LET[i] }), part: 'relay' } : null; }
+// called right and fitted: the panel relabelled for good, once
+function p7Tick(c, j) {
+  if (caseFirstShow(c, j, 'p7', 'The labels on that panel wore off years ago. Work out which relay feeds what. A grid helps.')) return;
+  if (c.wait || !j.workDone || c.calls[c.calls.length - 1] !== c.cause) return;
+  const S = p7State(); if (!S || S.labelled.includes(j.machine)) return;
+  S.labelled.push(j.machine); if (S.labelled.length > 12) S.labelled.shift();
+  try { toast(caseMachName(j), caseText('case.p7.relabel', 'You relabel the panel, A to {a}, in big clear letters. Nobody has to guess again.', { a: P7_LET[(p7Of(c) || { n: 4 }).n - 1] })); } catch (e) { /* no UI */ }
+  MACH_REV++;
+}
+function p7Stage() {
+  if (flag('case.p7.first') !== undefined || !SHIP.works || !caseOpened('p7')) return;
+  const W = SHIP.works; if (!caseState()) return;
+  if (W.tr && W.tr.p7 !== undefined) { flagSet('case.p7.first', 'none'); return; }
+  const busy = id => SHIP.jobs.some(j => j.machine === id && j.status !== 'done' && (j.claimedBy || j.case || j.reserved));
+  const ok = x => x && !busy(x.id) && jobTier({ machine: x.id }) <= 3 && caseCauses(x).some(f => f.id === 'relay') && p7Rooms(x).length >= 4;
+  const m = [machineById(P7_FIRST)].concat(machineList().filter(x => P7_KINDS.has(x.kind)).sort((a, b) => a.id < b.id ? -1 : 1)).find(ok);
+  if (!m) { flagSet('case.p7.first', 'none'); return; }
+  const now = shipNow(), d = caseDay(now), id = jobReserve(m.id, d, now % 1440, P7_SLOT, { train: 'p7', tier: 3, until: now + 7 * 1440, cause: 'relay' }), j = id && SHIP.jobs.find(x => x.id === id);
+  if (!j) return;
+  delete j.make; delete j.makeMins; j.cause = 'relay'; j.parts = ['relay']; j.train = 'p7';
+  const seed = machSeed('p7-first'), n = 4, ids = [...Array(n).keys()].map(i => 'r:' + P7_LET[i]), clues = p7Clues(j, 'relay', ids.slice(0, n), seed), L = clues[0] && clues[0].src.lay;
+  if (!L) { flagSet('case.p7.first', 'none'); jobRelease(P7_SLOT); return; }
+  const sus0 = ids.map((x, i) => i === L.bad ? 'relay' : x), sus = sus0.map((x, i) => [schedU(seed, i, 893), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  for (const k of clues) k.kills = k.kills.map(x => x === 'r:' + P7_LET[L.bad] ? 'relay' : x);
+  if (!caseFirstFreeze(j, 'p7', sus, clues, 'case.p7.first')) { flagSet('case.p7.first', 'none'); jobRelease(P7_SLOT); }
+}
+if (P5_CASES6) {
+  CASE_KINDS.p7 = { name: 'Faded labels', ladder: 'p7', noScan: true, fits: p7Fits,
+    // the relays: the chatterer is the cause (its letter from the seed), the others 'r:<letter>'
+    suspects: (j, seed) => { const m = machineById(j.machine), n = schedU(seed, 0, 893) < .5 ? 4 : 5, L = p7Lay(m, seed, n); if (!L) throw new Error('rooms');
+      return [...Array(n).keys()].map(i => i === L.bad ? j.cause : 'r:' + P7_LET[i]); },
+    clues: (j, cause, sus, seed) => p7Clues(j, cause, sus, seed),
+    bands: { T4: P7_BAND }, sus: p7Sus, text: p7Text, view: p7View, act: p7Act, tick: p7Tick,
+    title: (c, j) => caseText('case.title.p7', '{machine}: the labels have worn off, and one relay chatters', { machine: caseMachName(j) }),
+    wrong: (c, s) => caseText('case.wrong.p7', 'New relay in at {a}. Still chattering. Wrong relay.', { a: (p7Sus(c, s) || { label: s }).label.replace(/^Relay /, '') }),
+    wait: j => j.train === 'p7',
+    hint: c => caseText('case.hint.p7.1', 'Every relay you can place on another room isn\'t it. The one left over feeds the flicker.') };
+  CHIEF_NOTES.p7 = { title: 'Faded labels', key: 'chief.p7', lines: [
+    'Each relay feeds one room. Place the ones you can; the one left over is the culprit.',
+    'Relabel the panel when you\'re done. The next person will thank you.'] };
+  if (typeof WORK_MECH !== 'undefined') WORK_MECH.p7 = { open() { p7Stage(); } };
+  if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip) p7Stage(); });
 }
 // ---- end of slot: Puzzles seat ----
 

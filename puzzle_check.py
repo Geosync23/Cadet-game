@@ -1254,7 +1254,106 @@ def part_p6(g, path):
         check(F['fixed'] and F['closed'] and F['trained'] == 23, f"p6's first: the right call fixes it; the row trained on Day 23: {F['fixed']} {F['closed']} {F['trained']}")
     return 'done'
 
-S6_RUN = {'p6': part_p6}
+
+# P7 on paper: every light-relay panel's relay cause P7 fits becomes a case; each checked: the band and the fewest rule;
+# the layout a true match (each relay one room, each room one relay); the flicker clue names the chatterer's room and
+# rules out nothing; each fact names a relay and the room it really feeds, never the flicker's, and rules out that
+# relay alone; a flip is in the room it names, the sketch and the drill at the panel; the "isn't" note true and ruling
+# out nothing; the grid's cells toggle and keep; a relabelled panel gets no faded-labels case
+P7SWEEP = r"""(() => {
+  const out = { cases: [], fit: 0 }; """ + S6_ME + r"""
+  const jr = jobRun; jobRun = () => null; flagSet('case.p7.first', 'none'); W.op = { 23: ['p7'] }; C.open = []; W.side = W.side || {};
+  for (let d = 23; d <= 26; d++) {
+    if (!playerShiftOn(d)) continue;
+    const t = (d - 1) * 1440 + 600; setShipNow(t); machinesNow();
+    for (const m of machineList()) for (const f of caseCauses(m)) {
+      if (!CASE_KINDS.p7.fits(f, m) || jobTier({ machine: m.id }) > 4) continue;
+      out.fit++; C.open = []; SHIP.jobs = SHIP.jobs.filter(x => !x.case);
+      const j = { id: m.id + '@p7' + d, machine: m.id, deck: m.deck, kind: 'repair', urgency: 1, posted: t, found: t, claimedBy: null, parts: [f.part], status: 'open', cause: f.id };
+      SHIP.jobs.push(j);
+      const keepK = {}; for (const k in CASE_KINDS) if (k !== 'p7') { keepK[k] = CASE_KINDS[k]; delete CASE_KINDS[k]; }
+      const rate = CASE_RATE.specialist; CASE_RATE.specialist = 1; caseOffer(j, (d - 1) * 24 + 10); CASE_RATE.specialist = rate; Object.assign(CASE_KINDS, keepK);
+      const c = caseOf(j); if (!c) { SHIP.jobs = SHIP.jobs.filter(x => x !== j); continue; }
+      const L = p7Of(c), rooms = p7Rooms(m), roomOf = {}; for (const x of rooms) roomOf[x.r] = x;
+      const g0 = c.clues[0].src.grid; caseClue(c.id, 'f0'); p7Act(c, 'p7', '1.2'); p7Act(c, 'p7', '1.2'); p7Act(c, 'p7', '0.0'); const g1 = c.clues[0].src.grid; p7Act(c, 'p7', '0.-1');
+      out.cases.push({ id: c.id, cause: c.cause, sus: c.sus.slice(), fewest: c.fewest, band: c.band, lim: caseBandOf('p7', c.band), title: j.title, shown: !c.wait, parts: j.parts.slice(), deck: m.deck,
+        lay: L, sid: [...Array(L.n).keys()].map(i => p7Sid(c, i)), labels: c.sus.map(s => p7Sus(c, s).label), grid: [g0, g1, c.clues[0].src.grid], view: JSON.stringify(p7View(c)),
+        clues: c.clues.map(k => ({ id: k.id, at: k.at, kills: k.kills.slice(), src: k.src, deck: caseClueDeck(k), reach: caseReachable(k), text: caseClueText(c, k), panel: k.at === panelPlace(m.id), room: k.at && k.at !== 'board' && placeById(k.at) ? placeById(k.at).room : null })) });
+      SHIP.jobs = SHIP.jobs.filter(x => x !== j);
+    }
+  }
+  const S = p7State(), m0 = machineById('4-junction-1'), f0 = caseCauses(m0).find(f => f.id === 'relay'); out.fitsBefore = CASE_KINDS.p7.fits(f0, m0); S.labelled.push(m0.id); out.fitsLabelled = CASE_KINDS.p7.fits(f0, m0); S.labelled = [];
+  C.open = []; jobRun = jr; Object.assign(W, keep);
+  return out;
+})()"""
+
+# P7's first: the officers' corridor's panel (4-junction-1), slot 40, hidden till you're at work; shown with the teacher's
+# word in person; the grid on Fault notes (its cells 44 px or more on a phone); a wrong relay doesn't fix it; the right
+# one does, the panel relabelled for good (saved, cleaned on read), and no faded-labels case there again
+P7FIRST = r"""(() => {
+  const out = {}; """ + S6_ME + r"""
+  C.open = []; delete SHIP.flags['case.p7.first']; W.side = {};
+  SHIP.jobs = SHIP.jobs.filter(x => !(x.machine === '4-junction-1' && x.status !== 'done'));
+  const said = []; const ws = worksSay, wa = worksSayAll; worksSay = (id, t) => said.push([id, t]); worksSayAll = (id, L) => said.push([id, L[0]]);
+  W.op = { 23: ['p7'] }; setShipNow(22 * 1440 + 330); machinesNow(); WORK_MECH.p7.open(ladderRow('p7'), 23);
+  const id = flag('case.p7.first'), c = caseById(id), j = c && caseJob(c); out.staged = id; if (!c) { worksSay = ws; worksSayAll = wa; Object.assign(W, keep); return out; }
+  out.machine = j.machine; out.cause = c.cause; out.sus = c.sus.slice(); out.reserved = j.reserved; out.hidden = caseHidden(j); out.wait = c.wait; out.band = c.band; out.fewest = c.fewest;
+  out.again = (p7Stage(), C.open.filter(x => x.kind === 'p7').length);
+  setShipNow(22 * 1440 + 545); machinesNow(); caseTick();
+  out.shown = !c.wait; out.title = j.title; out.by = c.by; out.come = CASE_COME.by; if (out.come) { CASE_COME.at = 0; caseComeTick(shipNow()); } out.said = said.slice();
+  claimJob(j.id); caseTick(); out.board = c.got.slice();
+  for (const k of c.clues) caseClue(c.id, k.id);
+  out.texts = c.clues.map(k => caseClueText(c, k));
+  (typeof worksTabAdd === 'function' ? (deviceShow('works'), deviceDo({ app: 'works', do: 'tab', arg: 'faults' }), deviceShow('works')) : deviceShow('faultnotes'));
+  const cell = () => [...document.querySelectorAll('#devBody button')].filter(b => /^(✕ )?\d( ✓)?$/.test(b.textContent));
+  out.cells = cell().length; out.cellMin = Math.min(...cell().map(b => Math.min(b.getBoundingClientRect().width, b.getBoundingClientRect().height)));
+  const b0 = cell()[0]; if (b0) b0.click(); deviceShow(DEV.app); out.tapped = c.clues[0].src.grid; out.cellAfter = (cell()[0] || {}).textContent;
+  deviceClose();
+  const sv = JSON.stringify(SHIP.works.cases); out.saveBytes = sv.length; out.saveSame = JSON.stringify(caseClean(JSON.parse(sv))) === JSON.stringify(caseClean(SHIP.works.cases));
+  const wrong = c.sus.find(s => s !== c.cause); caseCall(c.id, wrong); let n = jobStops(j).length; for (let k = 0; k < n; k++) jobStepDone(j.id, k);
+  out.wrongFit = { done: !!j.workDone, known: c.known.includes(wrong), labelled: p7State().labelled.slice() };
+  caseCall(c.id, c.cause); n = jobStops(j).length; for (let k = 0; k < n; k++) jobStepDone(j.id, k);
+  out.fixed = !!j.workDone; caseTick(); out.labelled = p7State().labelled.slice(); turnInJob(j.id); caseTick(); out.closed = !caseById(c.id); out.trained = W.tr.p7;
+  const m = machineById('4-junction-1'); out.fitsAfter = CASE_KINDS.p7.fits(caseCauses(m).find(f => f.id === 'relay'), m);
+  W.side.p7Ok = false; W.side.p7 = { labelled: ['4-junction-1', 'nope', 7] }; delete W.side.p7Ok; out.clean = JSON.stringify(p7State());
+  worksSay = ws; worksSayAll = wa; Object.assign(W, keep); C.open = [];
+  return out;
+})()"""
+
+def part_p7(g, path):
+    if not g.ev("typeof p7Stage === 'function'"): return 'not yet'
+    S = g.ev(P7SWEEP); cs = S['cases']
+    print(f"p7: {S['fit']} fits, {len(cs)} cases on {sorted({c['id'].split('@')[0][1:] for c in cs})}")
+    for c in cs[:2]: print('  ', c['id'], c['labels'], [k['text'] for k in c['clues']], c['title'])
+    check(len(cs) >= 4 and any(c['lay']['n'] == 4 for c in cs) and any(c['lay']['n'] == 5 for c in cs), f"p7: the sweep made 4- and 5-relay cases: {len(cs)}")
+    check(S['fitsBefore'] and not S['fitsLabelled'], f"p7: a relabelled panel gets no faded-labels case: {S['fitsBefore']} {S['fitsLabelled']}")
+    for c in cs:
+        s6_band(c); L = c['lay']; n = L['n']
+        check(sorted(L['feed']) == list(range(n)) and len(L['rooms']) == n and len({r[0] for r in L['rooms']}) == n, f"{c['id']}: a true match, one room per relay: {L}")
+        fl = [k for k in c['clues'] if 'lay' in k['src']]
+        check(len(fl) == 1 and fl[0]['at'] == 'board' and fl[0]['kills'] == [] and fl[0]['src']['flick'] == L['feed'][L['bad']], f"{c['id']}: the flicker on the job, the chatterer's room, ruling out nothing")
+        facts = [k for k in c['clues'] if k['src'].get('how') in ('sketch', 'drill', 'flip')]
+        check(len(facts) == n - 1 and sorted(k['src']['relay'] for k in facts) == sorted(i for i in range(n) if i != L['bad']), f"{c['id']}: one fact for each other relay")
+        for k in facts:
+            r = k['src']['relay']
+            check(k['src']['room'] == L['feed'][r] != L['feed'][L['bad']] and k['kills'] == [c['sid'][r]] and L['rooms'][k['src']['room']][1].lower() in k['text'], f"{c['id']} {k['id']}: an honest fact, ruling out its relay alone: {k['text']!r} {k['kills']}")
+            check((k['room'] == L['rooms'][k['src']['room']][0]) if k['src']['how'] == 'flip' else k['panel'], f"{c['id']} {k['id']}: a flip in its room, the sketch and the drill at the panel")
+        nots = [k for k in c['clues'] if k['src'].get('how') == 'not']
+        check(all(k['src']['relay'] == L['bad'] and k['src']['room'] != L['feed'][L['bad']] and k['kills'] == [] for k in nots) and (len(nots) == 1) == (n == 4), f"{c['id']}: the 'isn't' note true, ruling out nothing, with four relays")
+        check(c['grid'][1][n + 2] == 'n' and c['grid'][1][0] == 'y' and c['grid'][2][:n] == '.' * n, f"{c['id']}: the grid's cells toggle (yes, no, blank) and a row clears: {c['grid']}")
+        check(c['shown'] and c['parts'] == [] and c['title'].startswith('Head-scratcher: ') and 'Relay A' in c['view'], f"{c['id']}: on the board, the part yours to find, the grid: {c['title']!r}")
+    F = g.ev(P7FIRST); print('p7 first:', {k: v for k, v in F.items() if k != 'texts'}); print('   ', F.get('texts'))
+    check(F.get('staged') and F['staged'] != 'none' and F.get('machine') == '4-junction-1' and F.get('reserved') == 40 and F.get('hidden') and F.get('band') == 'T4' and F.get('again') == 1, f"p7's first: the officers' corridor's panel, slot 40, hidden till you're at work, once: {F.get('staged')}")
+    if F.get('staged') and F['staged'] != 'none':
+        check(F['shown'] and F['by'] in ('calder', 'torres-zeke') and any(w[0] == F['by'] for w in F['said']), f"p7's first: shown at work with the teacher's word, in person: {F['by']} {F['said']}")
+        check(F['board'] == ['f0'] and F['cells'] >= 16 and F['cellMin'] >= 44 and F['tapped'][:1] == 'y' and '✓' in (F['cellAfter'] or ''), f"p7's first: the flicker on taking it; the grid's cells 44 px or more, a tap marks yes: {F['cells']} {F['cellMin']} {F['tapped']}")
+        check(not F['wrongFit']['done'] and F['wrongFit']['known'] and not F['wrongFit']['labelled'], f"p7's first: a wrong relay doesn't fix it: {F['wrongFit']}")
+        check(F['saveSame'] and F['saveBytes'] < 2600, f"p7's first: the save round trip mid-case ({F['saveBytes']} bytes)")
+        check(F['fixed'] and F['labelled'] == ['4-junction-1'] and F['closed'] and F['trained'] == 23 and not F['fitsAfter'], f"p7's first: the right relay fixes it, the panel relabelled, trained Day 23: {F['fixed']} {F['labelled']} {F['trained']}")
+        check(F['clean'] == '{"labelled":["4-junction-1"]}', f"p7: junk in the save cleaned: {F['clean']}")
+    return 'done'
+
+S6_RUN = {'p6': part_p6, 'p7': part_p7}
 
 def run_s6(path, parts):
     with sync_playwright() as pw:

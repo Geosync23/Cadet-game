@@ -206,3 +206,41 @@
 - In must equal out. If it doesn't, something's going missing between.
 == chief.p6.2
 - A pair that adds up is fine, both feeds. Two short pairs share the culprit.
+
+// P7 Faded labels: a light-relay panel's worn labels as a grid (relays down, rooms across); then you relabel it
+== works.mech.p7
+- Faded labels
+== next.p7
+- Coming up: Faded labels. A panel whose labels have worn off.
+== next.wait.p7
+- Faded labels: the Chief has a panel nobody can read.
+== case.title.p7
+- {machine}: the labels have worn off, and one relay chatters
+== case.p7.flick
+- The flicker's in the {room}. One relay's chattering. The labels are worn off.
+== case.p7.sketch
+- Pell's old sketch: relay {a} feeds the {room}.
+== case.p7.drill
+- The power drill's log: relay {a} off first, and the {room} went dark.
+== case.p7.flip
+- You flip relay {a}'s test switch: the lights blink in the {room}.
+== case.p7.not
+- Pell's sketch, a note in the margin: relay {a} isn't the {room}.
+== case.p7.head
+- Which relay feeds which room? Tap a cell: yes, no, blank.
+== case.p7.flicker
+- flickers
+== case.p7.relay
+- Relay {a}
+== case.p7.relabel
+- You relabel the panel, A to {a}, in big clear letters. Nobody has to guess again.
+== case.hint.p7.1
+- Every relay you can place on another room isn't it. The one left over feeds the flicker.
+== case.wrong.p7
+- New relay in at {a}. Still chattering. Wrong relay.
+== chief.p7.title
+- Faded labels
+== chief.p7.1
+- Each relay feeds one room. Place the ones you can; the one left over is the culprit.
+== chief.p7.2
+- Relabel the panel when you're done. The next person will thank you.

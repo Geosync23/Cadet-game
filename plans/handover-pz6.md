@@ -27,12 +27,20 @@
   or 2 from a feed of 4+. Clues: `m0` the line's meter on the job (sent, came; kills nothing), then a ring of pair
   meters `p0..`, each at its first machine's panel (pair i = suspect i and i+1 in the line's order): adds up kills
   both, short kills the rest. Fewest is always 2. Flag `case.p6.first`.
+- **P7** `CASE_KINDS.p7`, `p7State/p7Rooms/p7Lay/p7Clues/p7Text/p7Grid/p7View/p7Act/p7Fits/p7Sus/p7Tick/p7Stage`, `P7_BAND`,
+  `P7_SLOT = 40`, `P7_FIRST = '4-junction-1'`. Panels of kind lights or relay, cause `relay`. Suspects: the chatterer is
+  the cause, the others `'r:<letter>'`. The layout (rooms, who feeds what, the chatterer) rides on clue `f0`'s
+  `src.lay`, the grid on `src.grid` (n*n of '.', 'y', 'n'). Facts `x0..`: sketch (panel, by Pell), drill (panel log),
+  flips (in the room). `y0` (four relays only): "X isn't Y", kills nothing. `SHIP.works.side.p7 = { labelled }`.
+- **caseAct** (24k, mine): an unknown verb goes to the kind's `act(c, verb, arg)`.
 
 ## Words
 Stand-ins, baked (content_gen.py), lines_check PASS: content/works/cases.lines (the P6 keys: works.mech.p6, next.p6,
 next.wait.p6, case.title.p6, case.title.p6.power, case.p6.line {a} {b} {n}, case.p6.pair {machine} {other} {n} {a} {b},
 case.p6.short {n}, case.p6.adds, case.p6.head {n}, case.hint.p6.1, case.wrong.p6 {part} {machine}, chief.p6.title/.1/.2);
-calder.lines and reyes-alejandro.lines (`== work`, flag train.p6.word). lines_check only knows its PLACEHOLDERS list:
+calder.lines and reyes-alejandro.lines (`== work`, flag train.p6.word). P7: case.title.p7, case.p7.flick/.sketch/.drill/
+.flip/.not ({a} {room}), .head, .flicker, .relay, .relabel, case.wrong.p7, case.hint.p7.1, chief.p7.*; calder and
+torres-zeke train.p7.word. Room names read lowercased ("the bunk 2" reads oddly: the head writer may want articles). lines_check only knows its PLACEHOLDERS list:
 units go inside the number ("17 kW").
 
 ## Tests
