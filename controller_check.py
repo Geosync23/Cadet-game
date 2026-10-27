@@ -3610,7 +3610,7 @@ MT_SETUP = r"""(() => { introSkip(); const W = worksInit(Math.max(shipNow(), WOR
   skipTo(24 * 1440 + 1321); for (const f of WORK_TICKS) f(shipNow(), false); skipTo(25 * 1440 + 541); goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; return !!SHIP.works.mt; })()"""
 def part_mentor(pw, src, tag):
     on = p6_copy(src)
-    if on == src or 'function mtSettle' not in src: return ['not yet: no P5_STEP6 switch line or no mentoring in this build']
+    if (on == src and not p6_on(src)) or 'function mtSettle' not in src: return ['not yet: no P5_STEP6 switch line or no mentoring in this build']
     fails = []
     r = Run(pw, on, f'{tag}_mt', mode='pad', plug={}, w=390, h=844)
     r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
