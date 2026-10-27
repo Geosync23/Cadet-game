@@ -68360,11 +68360,12 @@ class CrewAgent {
   escortStep(dt, e) {
     if (e.scene) this.hold = e.hold || null;             // a stage direction's box (crewScene, 0.71.2); escorts as before
     const pp = e.after ? e.after : player.obj.position, dist = Math.hypot(pp.x - this.x, pp.z - this.z), you = cellAt(pp.x, pp.z);
-    let goal = e.mode === 'follow' ? you : escortGoal(e, this);
+    let goal = e.mode === 'follow' ? (free(...you) ? you : nearestOpen(pp.x, pp.z, null) || you) : escortGoal(e, this);   // (W7, RV23's MUST) follow: your tile, or the open one nearest you while you sit (a seat's tile isn't free: no path, as seekStep knows)
     if (goal && e.mode !== 'follow' && !e.after && typeof escBeside === 'function') goal = escBeside(goal, pp, this);   // the patch (#17): his spot is yours: the free tile beside you
     const key = e.mode + '|' + (goal ? goal.join(',') : '-');
     this.escT = (this.escT || 0) - dt;
-    if (key !== this.esc && (this.escT <= 0 || !this.esc || this.esc.split('|')[0] !== e.mode)) {
+    const lost = e.mode === 'follow' && !this.path.length && dist > ESC_NEAR && this.escT <= 0;   // (W7) no path yet and not by you: try again every half second
+    if ((key !== this.esc || lost) && (this.escT <= 0 || !this.esc || this.esc.split('|')[0] !== e.mode)) {
       this.esc = key; this.escT = .5; this.gapT = 0; this.goalId = '@escort'; this.settled = false; this.spot = null; this.path = [];
       let from = this.here(); if (!free(...from)) from = nearestOpen(this.x, this.z, null) || from;
       if (goal) { const p = crewPath(from, goal, new Set([...this.rooms, roomAt(...from), roomAt(...goal)]), this); if (p) this.path = p; }
