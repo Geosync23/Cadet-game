@@ -66469,6 +66469,7 @@ function m24Call(now) {
   const s = j.seq[j.cur], mine = j.seq.map((x, i) => x.who === 'you' ? i : -1).filter(i => i >= 0), k = mine.indexOf(j.cur);
   if (s.who !== 'you' || k < 0 || (j.stepsDone || []).includes(k) || !teamAtSpot(j) || now - M24_ASKED < 1 || typeof deviceChoose !== 'function') return;
   if (typeof DEV !== 'undefined' && (DEV.choose || DEV.open)) return;
+  if (typeof ACT !== 'undefined' && ACT) return;          // already doing it by a tap at the spot (15b's taps reach team stops once claude/team-turn-fix is in, PZ6): no card over it
   const ok = deviceChoose({ title: teamLabel(j), text: worksText('team.turn.' + s.part, TEAM_PART[s.part]), choices: [worksText('m24.next', 'Next step')] }, c => { M24_ASKED = shipNow(); if (c === 0) jobStepDone(j.id, k, {}); });
   if (ok) M24_ASKED = now;
 }
