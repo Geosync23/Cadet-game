@@ -66550,6 +66550,15 @@ function m24Beats(now) {
     let mj = null; try { mj = myJob(); } catch (e) { mj = null; }
     if (mj && !mj.workDone && mj.id !== S.job) { flagSet('m24.busy', Math.floor(now / 60)); promoNotice(worksText('m24.busy', 'The coil swap waits for you: {text}. Turn in or drop this job first.', { text: m24Ring(step, j) }), worksName('calder')); }
   }
+  // (PZ6 for lead 42, arrows_check step6) the picker and the booking are on the device: a forced ring through Works'
+  // Team tab to the next crew member to pick, or (at the bridge) to Book the slot; the world arrow stays as it is
+  if ((step === 'pick' || step === 'book' && m24AtBridge()) && typeof pointAsk === 'function' && typeof guideWorksTab === 'function') {
+    const lab = m24Ring(step), on = () => typeof DEV !== 'undefined' && DEV.open && DEV.app === 'works' && typeof buttonFor === 'function';
+    const last = step === 'pick' ? { el: () => { const id = on() && m24Crew().find(x => !m24State().pick.includes(x)); return id ? buttonFor({ app: 'works', do: 'm24:pick', arg: id }) : null; }, label: lab }
+      : { el: () => on() ? buttonFor({ app: 'works', do: 'm24:book', arg: 0 }) : null, label: lab };
+    pointAsk({ id: 'p:m24:' + step, force: true, path: [...guideWorksTab('team', lab), last], until: n.to,
+      done: () => { const s = m24State(); return !m24Live() || (step === 'pick' ? s.pick.length >= Math.min(2, m24Crew().length) : !!s.job); } });
+  }
   if (typeof guideAsk !== 'function') return;
   for (const k of ['pick', 'book', 'spots']) if (k === step && !(GUIDE.list || []).some(x => x.id === 'm24:' + k)) {
     guideAsk({ id: 'm24:' + k, level: 1, owner: '28d', from: n.from, until: n.to,
