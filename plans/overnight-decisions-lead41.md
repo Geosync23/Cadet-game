@@ -27,3 +27,6 @@ The user, ~03:50 UTC: "Let's also do a dev mode update once content complete. Ma
 The user, ~03:55 UTC: "Actually dev mode update before controller update." Order now: 0.94.0 -> Step 6 -> Dev mode update -> controller update -> optimization -> playtest patches.
 The user, ~03:58 UTC: "After step 6 publish though": Step 6 ships (full round + publish) before the Dev mode update starts.
 | 5 | After the 0.94.0 round, small fixes landed (test-only check fixes; 4 over-long vessel lines). Re-run the whole round? | **Test-only fixes: no game re-run** (game file unchanged). **Words-only fix: re-run the checks that read or show those words** (check_fast, lines_check, events vessel part, a phone look), not the whole round. | The game logic is unchanged; the user's full-round rule is about game changes, and a reworded notice can't affect the other checks. |
+
+## Results
+- 0.94.0 published ~10:23 UTC (6:23 AM Eastern) on NEW links: Playtest https://claude.ai/artifact/7hQ14AcwZHCi5EvL1AKiMU , Dev https://claude.ai/artifact/KEyaHvon6ZaVHHFRdAe18m . Old links untouched. claude/integration NOT yet fast-forwarded (waits for the user).
