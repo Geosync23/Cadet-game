@@ -38,6 +38,12 @@ Role: deck and sky builder for "A Veyli vessel needs help" (Days 27-30), hired b
 - dressShow keys props by id: two dressing entries with one id must have windows that don't overlap.
 - A sky quad is hidden wherever anything else drew (the floor, walls): vesselAnchor rejects points the deck's floor would cover.
 
+## CURRENT STATUS (2026-10-27 ~01:45 UTC; read this first, the sections below are history)
+- **claude/vessel-sky** 3fb8eac7: done, RV21 PASS. **claude/p5s5-kit** 69eb706d: done, with B5 to merge (RV20 verdict not seen). **claude/ending-checks** 571b073f: done and green (test only, on d1a61402): arrows_check `endstay endgo` ARROWS CHECK OK all 7 ways, controller_check `ending` CONTROLLER CHECK OK, day_check 31/50 ON OK; with RV22 (session_011wAn842cKDVWvoH8Cr9geD) for review. The "LEFT" lists in the older sections below are all done.
+- BM18 merged the work into claude/staging-0.94.0 (543fba58); I checked the ending's merge spots there: OK. ending-checks' later test fixes (df9ef46c onward) are to be taken into staging once RV22 passes them.
+- **Backlog idea (for the controller seat, not urgent):** the pad's ring (section 26, padRaw/padFind) can't single out one person in a crowd: a person hidden on screen behind another is never offered (crewAtScreen picks the front one). Seen in the ending's shuttle bay (Rina) and a busy room (Pell). Players can still say goodbye by walking up; an improvement would let the ring offer a named person behind another (e.g. pick by the person's own screen point when the ring's target key names them).
+- Nothing in progress; nothing uncommitted.
+
 ## Stopping point (lead 40, 2026-10-26 ~23:40 UTC; the user's call)
 Three branches of mine, all pushed:
 - **claude/vessel-sky** 3fb8eac7 (v.6): the Veyli vessel's looks, chain/bench spots, props, poses bow/wave. RV21 PASS on every sha. Waits for BM18's merge.
