@@ -47,7 +47,8 @@ with sync_playwright() as pw:
     g.step(20)
     if g.page.locator('text=Sign and go aboard').count(): g.page.fill('form input', 'Ada'); g.page.click('text=Sign and go aboard'); g.step(30)
     g.ev(RVHOOK); g.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)")
-    out = g.ev("""(() => { const W = worksInit(); W.tier = 4; W.rank = 'specialist'; W.home = '2-B'; goToDeck(2);
+    g.ev("devmodeRun('Set career: beat', () => devmodeSetCareerTo(25))"); g.step(20)
+    out = g.ev("""(() => { const W = SHIP.works || worksInit(); W.tier = 4; W.rank = 'specialist'; W.home = '2-B'; goToDeck(2);
       const ids = ['framedMenu', 'lineCertificate', 'vesselSketchShelf']; dressShow(ids);
       const t = ROOM_TILES['B']; const c = t[Math.floor(t.length / 2)]; player.obj.position.copy(cellPos(...c)); player.stop();
       return { mine: deck2Mine(), decks: ids.map(i => [i, DECK_DRESS[i] && DECK_DRESS[i].deck, DECK_DRESS[i] && (!DECK_DRESS[i].on || DECK_DRESS[i].on())]), on: [...DRESS.on.keys()], items: ITEMS.filter(i => /Framed menu|Line certificate|sketch/i.test(i.t)).map(i => i.t), calls: renderer.info.render.calls }; })()""")
