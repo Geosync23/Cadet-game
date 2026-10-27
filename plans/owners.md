@@ -56,6 +56,10 @@ Section ids are the file's own headings (`// 19. DEVICE`, `// 24a ROUNDS`). Line
 | `24l` | favour cases | 45149-45364 | seat E2 for H | Puzzles seat |
 | `24o` `24q` `24r` | leak hunting, rewiring, irrigation | 45365-45767 | seat E2 | Works career engineer |
 | `24p` | the first promotion | 45768-46085 | Works career engineer C2 | Works career engineer |
+| `24u` | the later promotions (Pillar 5 Steps 5-6; Step 5's S5-2, `P5_PROMO3`) | (new, after 24p) | Works career engineer | Works career engineer |
+| `24v` | power and relays (M19; S5-3, `P5_M19`) | (new, after 24u) | mechanics seat A | Works career engineer |
+| `24w` | shutdowns (M18; S5-4, `P5_M18`; its planner hook in section 14 is the sim engineer's to review) | (new, after 24v) | mechanics seat B | Works career engineer |
+| `24x` | the sensor array (M20; S5-5, `P5_M20`) | (new, after 24w) | mechanics seat A | Works career engineer |
 | `6` | camera | 46086-46121 | deck architects | Performance engineer |
 | `7` | grid, pathfinding (`findPath`), collision | 46122-46266 | performance engineer | Performance engineer |
 | `8` | character kit | 46267-46552 | deck architects | Performance engineer |

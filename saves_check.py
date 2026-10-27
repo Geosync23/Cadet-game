@@ -228,6 +228,31 @@ def part_nosave(b):
     pg.close()
     print('  nosave: no slots with ?nosave; Dev slots are -dev')
 
+# promo3 (S5-2, B5): the Senior Officer promotion in a save, with P5_STEP5 on in a copy: saved between the test and the
+# result (the record read back, the result still to come the next morning at 08:15), and between the result and the bar
+# (a Senior Officer, the bar's occasion still booked for 16:30, given at the ceremony)
+P5_SW = "const P5_STEP5 = URL_FLAGS.has('p5s5');"
+def part_promo3(b):
+    if P5_SW not in SRC or 'function puPromote' not in SRC: print('  promo3: not yet (no P5_STEP5 switch line or no Senior Officer promotion in this build)'); return
+    tmp = WORK / 'test' / ('_saves_check_pu3_' + RUN_ID + '.html'); tmp.write_text(instrument(SRC.replace(P5_SW, 'const P5_STEP5 = true;')))
+    ctx = new_ctx(b); pg = Page(ctx, '', tmp); pg.sign()
+    pg.ev("""(() => { introSkip(); setShipNow(14 * 1440 + 700); machinesNow(); const W = worksInit(); W.tier = 2; W.rank = 'officer'; W.xp = 60; W.tr.ps = 12; W.tr.t2 = 9;
+      const T = puSet(15); T.tries = 1; puPassed(shipNow()); updateClock(); saveGame(); })()""")
+    pg.go('', tmp)
+    a = pg.ev("(() => ({ day: SHIP.time.day, t3: puT3(), tier: SHIP.works.tier, rd: puResultDay(), next: worksNext() }))()")
+    print('  promo3: saved after the test:', a)
+    check(a['t3'] and a['t3']['passed'] and a['t3']['day'] == 15 and a['t3']['tries'] == 1 and a['tier'] == 2 and a['rd'] == 16 and 'result' in a['next'].lower(), f'promo3: the passed test did not read back, the result still to come ({a})')
+    pg.ev("(() => { for (let t = shipNow(); t <= 15 * 1440 + 520; t += 5) { setShipNow(t); machinesNow(); worksCareerTick(t); } const r = SHIP.occasions.find(x => x.id === 'pu3Result'); if (r && SHIP.works.tier === 2) puPromote(shipNow(), 'met'); updateClock(); saveGame(); })()")
+    pg.go('', tmp)
+    c = pg.ev("(() => { const r = SHIP.occasions.find(x => x.id === 'pu3Bar'); return { t3: puT3(), tier: SHIP.works.tier, rank: SHIP.works.rank, bar: r ? [hhmm(r.at % 1440), r.status] : null, hooked: !!(MEETING_SCRIPTS['pu3.bar'] && MEETING_SCRIPTS['pu3.bar'].puHooked) }; })()")
+    print('  promo3: saved after the result:', c)
+    check(c['tier'] == 3 and c['rank'] == 'senior' and c['t3'] and c['t3']['res'] == 16 and not c['t3']['bar'] and c['bar'] == ['16:30', 'asked'] and c['hooked'], f'promo3: a Senior Officer with the bar still booked did not read back ({c})')
+    e = pg.ev("(() => { MEETING_SCRIPTS['pu3.bar'].onEnd(true); return [puT3().bar, PLAYER_SPEC.rank]; })()")
+    check(e == [16, 2], f'promo3: after the reload the bar is given at its end, a third pip ({e})')
+    check(not pg.errors, f'promo3: page errors {pg.errors[:3]}')
+    pg.close(); tmp.unlink(missing_ok=True)
+LATER = [('promo3', part_promo3)]
+
 def part_shot(b):
     ctx = new_ctx(b)
     pg = Page(ctx); monday_game(pg, 6)
@@ -244,7 +269,7 @@ def part_shot(b):
 PARTS = [('migrate', part_migrate), ('switch', part_switch), ('download', part_download), ('load', part_load), ('nosave', part_nosave), ('shot', part_shot)]
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
-    for name, f in PARTS:
+    for name, f in PARTS + LATER:   # LATER: Step 5's parts (S5-2's promo3)
         if ONLY and name not in ONLY: continue
         try: f(b)
         except Exception as e: fail(f'{name}: stopped: {type(e).__name__}: {e}'); __import__('traceback').print_exc()   # the whole story, for a runner who keeps only the end

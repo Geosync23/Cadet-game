@@ -40,7 +40,7 @@ CHECKS = {
     # the event days (lead 25, 2026-10-21: day_check on Day 1 alone misses an event day's own failures): Day 0 the
     # arrival, the first Friday's address 5, the Line 7, the storm's front 12 and its Saturday 13, the comet 16, Day 19's
     # address and night shift, the first crew rotation 21, the diplomatic finale 27 (EV_CALENDAR, EV_BEATS, ROSTER_ROTATIONS)
-    **{f'day{d}': (f'python3 day_check.py {{g}} {d}', 8) for d in (0, 5, 7, 12, 13, 16, 19, 21, 27)},
+    **{f'day{d}': (f'python3 day_check.py {{g}} {d}', 8) for d in (0, 5, 7, 12, 13, 15, 16, 19, 21, 27)},   # 15, 16: Pillar 5 Step 5's Tier 3 test and Senior Officer days (S5-1)
     'interactions': ('python3 interactions_check.py {g}', 8), 'perf': ('python3 perf_check.py {g} OLD.html', 15),
     'mech': ('python3 mech_check.py {g}', 6), 'events': ('python3 events_check.py {g}', 6),
     'bubble': ('python3 bubble_check.py {g}', 5), 'devmode': ('python3 devmode_check.py {g}', 5), 'dev_arrow': ('python3 dev_arrow_check.py {g}', 2),   # Dev mode's career arrow (DV1)
@@ -60,7 +60,7 @@ CHECKS = {
     'leave': ('python3 leave_check.py {g}', 1), 'device': ('python3 device_check.py {g}', 4),
 }
 FAST = {'deck', 'machine', 'leave', 'device'}
-EVENT_DAYS = ['day0', 'day5', 'day7', 'day12', 'day13', 'day17', 'day19', 'day21', 'day22']   # 0.93.2, the event swap: the visit's greeting Day 17, the comet Day 22 (were day16, day27)
+EVENT_DAYS = ['day0', 'day5', 'day7', 'day12', 'day13', 'day15', 'day16', 'day17', 'day19', 'day21', 'day22']   # 0.93.2, the event swap: the visit's greeting Day 17, the comet Day 22 (were day16, day27)
 FILE_OF = {'cadet': 'cadet_test.py', 'day1': 'day_check.py', **{d: 'day_check.py' for d in EVENT_DAYS}}
 ALL = {c for c in CHECKS if os.path.exists(os.path.join(ROOT, FILE_OF.get(c, c + '_check.py')))}
 LOAD_CHECKS = {'cadet', 'deck'}                       # code that runs only while the page opens: the pictures and the decks
@@ -83,6 +83,11 @@ RULES = {
 for k in ['24', '24a', '24b', '24c', '24d', '24m', '24n', '24g', '24i', '24j', '24t', '24s', '24e', '24f', '24h', '24l', '24o', '24q', '24r', '24p']:
     RULES[k] = ['career', 'mech', 'leave']
 RULES['24k'] = ['puzzle', 'mech', 'career']
+# Pillar 5 Step 5 (S5-1): picked by the rules alone until the map is remade
+RULES['24u'] = ['career', 'mech', 'leave', 'events', 'bigevents', 'saves', 'dev_arrow', 'devmode', 'day15', 'day16']
+RULES['24v'] = ['career', 'mech', 'leave', 'machine']
+RULES['24w'] = ['career', 'mech', 'leave', 'machine', 'day1', 'food', 'saves']
+RULES['24x'] = ['career', 'mech', 'leave', 'machine', 'deck']
 
 
 def git(*a):

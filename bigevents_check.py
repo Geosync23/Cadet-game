@@ -190,6 +190,7 @@ PAPER = r"""(() => {
     for (const b of EV_BEATS) if (b.kind === 'captain') G.captainDays[b.day] = (G.captainDays[b.day] || 0) + 1;
     // test day; Day 18 16:00 free; the table at 19:30 on Day 20 crosses the night shift, at 19:00 it doesn't; Day 21 05:00 is the night shift; Friday 16:00
     G.samples = [guardFree(15, 600, 625, 'captain'), guardFree(18, 960, 985, 'captain'), guardFree(20, 1170, 1260, 'captain'), guardFree(20, 1140, 1215, 'captain'), guardFree(21, 300, 330, 'beat'), guardFree(12, 960, 990, 'beat')];
+    G.p5 = typeof P5_STEP5 !== 'undefined' && !!P5_STEP5; G.samples5 = [guardFree(23, 300, 330, 'beat'), guardFree(16, 495, 510, 'beat'), guardFree(22, 1380, 1400, 'beat'), guardFree(24, 1300, 1330, 'beat')];   // Pillar 5 Step 5's held hours (S5-1): nights from Day 22, the result at 08:15 on Day 16
     out.guard = G;
   }
   // the occasions the guard places (F1c): the summons' hour on Day 18, the Captain's table on Day 20
@@ -533,7 +534,10 @@ def judge(a, tag):
         for d, n in G['captainDays'].items():
             if n > 1: fail(f"{tag}: two of the Captain's scenes on Day {d} (EV_BEATS)")
             if int(d) in G['testDays']: fail(f"{tag}: a Captain's scene on test Day {d}")
-        if G['samples'] != [False, True, False, True, False, False]: fail(f"{tag}: the guard's samples {G['samples']} (want: test Day 15 no; Day 18 16:00 yes; Day 20 19:30-21:00 no; 19:00-20:15 yes; the night shift Day 21 05:00 no; Friday 16:00 no)")
+        if G.get('p5'):   # Pillar 5 Step 5's held hours (S5-1, plan v3.1): the nights move to Days 22-24, so Day 20's table is back at 19:30 and Day 21 05:00 is free
+            if G['samples'] != [False, True, True, True, True, False]: fail(f"{tag}: the guard's samples with P5_STEP5 {G['samples']} (want: test Day 15 no; Day 18 16:00 yes; Day 20 19:30-21:00 yes; 19:00-20:15 yes; Day 21 05:00 yes; Friday 16:00 no)")
+            if G['samples5'] != [False, False, False, False]: fail(f"{tag}: Step 5's holds {G['samples5']} (want all no: Day 23 05:00 in night 1, Day 16 08:15 the result, Day 22 23:00 night 1, Day 24 21:40 night 3)")
+        elif G['samples'] != [False, True, False, True, False, False]: fail(f"{tag}: the guard's samples {G['samples']} (want: test Day 15 no; Day 18 16:00 yes; Day 20 19:30-21:00 no; 19:00-20:15 yes; the night shift Day 21 05:00 no; Friday 16:00 no)")
     elif guard_on: waiting('guardFree and the career beats in EV_BEATS (F1b)')
     for d, l in a['captains'].items():
         if len(l) > 1: fail(f"{tag}: two of the Captain's scenes in the events' meetings on Day {d}: {l}")
