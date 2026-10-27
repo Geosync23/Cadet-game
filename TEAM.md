@@ -1642,3 +1642,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~03:50 UTC: **USER PLAN: 0.94.0 -> Step 6 -> controller update (audit + PAD_ON) -> Dev mode update (all new traditions + career progression) -> optimization -> playtest patches.** Logged in plans/overnight-decisions-lead41.md.
 - ~03:55 UTC: USER: **Dev mode update BEFORE the controller update.** Order: 0.94.0 -> Step 6 -> Dev mode -> controller (audit + PAD_ON) -> optimization -> playtest patches.
 - ~03:58 UTC: USER: Dev mode update starts only **after Step 6 is published** (own full round + publish first).
+- ~03:49 UTC: **W6 Step 6 first turn claude/p5s6-core 95ef6947** (game 7c13cfe7; all off; cadet identical vs 07e033c9; check_fast OK; day 22 on both-switches copy OK; affected.py CHECKS gained days 17 + 22 that were missing) -> RV23 queue after vessel + talk-close. W6 idle until Step 6 waves (after 0.94.0 publish).
