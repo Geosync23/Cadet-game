@@ -26,4 +26,5 @@ Lead 42 = session_01GKuymjnCHnpwDqB94PVwmV, branch claude/lead-42, hourly check-
 - Every game change = full round (CLAUDE.md). Words-only = word checks (decision 5). Test-only = no game re-run.
 - Checks written for a switch being off break when it goes on: sweep for the off line; ending_check/controller ending need a Step-6-off copy (assign window.P5_STEP6 in the copy, the script is wrapped in a function).
 - More than ~2-3 browsers per machine gives false timeouts: re-run alone before calling a FAIL.
+- BM19 sometimes waits for a human yes before acting on the lead's word (it stalled ~1 h on 27 Oct before round 3): check it moved; if not, send GO to the runners yourself.
 - Questions for the user: also a PushNotification. Times in US Eastern.
