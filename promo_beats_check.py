@@ -32,6 +32,8 @@
 #   t3bar:    (switch on) the Captain's invite, the guests on the ceremony spots, the notice at 16:00 and Calder's "Go.",
 #             the level 1 arrow; the scene with the pin; the bar on your collar (spec.bar, the kit's mark), the certificate; the cake
 #             after it ("Take a slice", Brennan's line); on a Friday at 17:15; missed: by Mail by 18:15
+#   seated:   (switch on) Calder's offer finds you sitting the game's own way (lounge and mess seats), live
+#   blocked:  (switch on) a guard: you on a seat's own blocked tile, she still arrives (W7's escort fix; fails on 0.94.0)
 #   t3toast:  (switch on) the next day at 19:00 in her quarters: the invite, the notice at 18:30, the arrow, the scene,
 #             the framed menu; the Training tab's rows done and gone; missed: by Mail
 # The Tier 3 parts need a build with the switch on for everything but t3off: python3 promo_beats_check.py ON.html t3before
@@ -712,11 +714,49 @@ def part_t3shoulds(g):
     check(r['early'] == 0 and len(r['friends']) == 2 and all(x >= '12:30' and 'future' not in x for x in r['friends']), f"t3shoulds: the friends' Mail filed at lunch, dated then, none before ({r['early']}, {r['friends']})")
     check(r['pre'] == ['m15:17', 'm17:-', 'm19:17'], f"t3shoulds: the Day 18 preset follows the ladder (m15 with m19 on Day 17, no m17) ({r['pre']})")
 
+# seated / blocked (PZ6 for lead 42; W7's escort-follow-fix 87d62f22): Calder's Tier 3 offer comes to find you (a 'follow'
+# escort) on Day 15 from 08:00, live, frame by frame:
+#   seated:  you sit the game's own way (actStart 'sit') at a lounge seat and a mess seat: she walks over and her offer
+#            scene plays. Seated, you stay on the seat's walk tile, which is open, so this passed before the fix too: it
+#            guards against the fix breaking the real case
+#   blocked: you stand ON a seat's own tile (blocked: no real-play way there is known; W7's and RV23's repro put you there
+#            directly): she must aim for the open tile beside you and still arrive. Fails on 0.94.0 6f1915cb (no path, she
+#            waits in the corridor), passes from the fix on
+SEAT_T = r"""((seat, how) => { if (typeof DIALOGUE !== 'undefined' && DIALOGUE) dialogueEnd(true); actEnd(true);
+  const W = __w(14, 470, { xp: 60, tr: { ps: 12, t2: 9 } }); W.tier = 2; W.rank = 'officer'; __friends();
+  goToDeck(3); const pl = placeById(seat), w = cellPos(...(pl.walk || pl.at)), s = placeSpot(seat);
+  if (how === 'stand') player.obj.position.set(s.x, player.obj.position.y, s.z); else player.obj.position.set(w.x, player.obj.position.y, w.z);
+  target.copy(player.obj.position).setY(.7); player.stop(); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90;
+  setShipNow(14 * 1440 + 476); if (how === 'sit') actStart('sit', seat);
+  const c = cellAt(player.obj.position.x, player.obj.position.z); return { cell: c, open: free(...c) }; })"""
+SEAT_ST = r"""(() => { const a = DECK_CREW.find(x => x.p && x.p.id === 'calder'), P = player.obj.position, c = cellAt(P.x, P.z);
+  return { t: hhmm(shipNow() % 1440), seek: !!PU_LIVE.seek, act: ACT && ACT.kind, phase: ACT && ACT.phase, open: free(...c), dlg: DIALOGUE ? DIALOGUE.m.id : null,
+    calder: a ? Math.round(Math.hypot(a.x - P.x, a.z - P.z) * 10) / 10 : null }; })()"""
+def seat_run(g, seat, how):
+    s0 = g.ev(f"({SEAT_T})('{seat}', '{how}')"); last = None; sat = None
+    for k in range(30):
+        g.step(150); last = g.ev(SEAT_ST)
+        if last['act'] == 'sit' and last['phase'] == 'do' and sat is None: sat = last['open']
+        if last['dlg']: break
+    g.ev("if (DIALOGUE) dialogueEnd(true); actEnd(true)")
+    return s0, sat, last
+def part_seated(g):
+    if not t3on(g, 'seated'): return
+    print('(seated) Calder finds you while you sit, the game\'s own way:')
+    for seat in ('3-lounge-24', '3-mess-9'):
+        s0, sat, last = seat_run(g, seat, 'sit'); print('   ', seat, s0, 'seated on an open tile:', sat, last)
+        check(sat is True and last['act'] in ('sit', None) and last['dlg'] == 'pu3.offer', f"seated at {seat}: you sit (on its open walk tile), she walks over and her offer plays ({sat} {last})")
+def part_blocked(g):
+    if not t3on(g, 'blocked'): return
+    print('(blocked) a guard: you standing on a seat\'s own (blocked) tile, she still arrives (W7\'s fix; no known real-play path):')
+    s0, sat, last = seat_run(g, '3-lounge-24', 'stand'); print('   ', s0, last)
+    check(s0['open'] is False and last['dlg'] == 'pu3.offer' and last['seek'] is not None, f"blocked: on a blocked tile, she aims beside you and her offer plays ({s0} {last})")
+
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev), ('mt', part_mt), ('mt2', part_mt2), ('mt3', part_mt3), ('mt4', part_mt4), ('cq', part_cq), ('cq2', part_cq2)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev), ('seated', part_seated), ('blocked', part_blocked), ('mt', part_mt), ('mt2', part_mt2), ('mt3', part_mt3), ('mt4', part_mt4), ('cq', part_cq), ('cq2', part_cq2)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')

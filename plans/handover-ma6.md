@@ -14,9 +14,10 @@
 ## Turn 2 (checks only)
 - day_check 22 OK (plain and forced copies), bigevents_check OK, controller_check m21 adds the wall screen. RV23 PASS on 27166be.
 
-## Next
-- S6-2 turn 3: the arrows_check step6 beat (the arrow-follower) once its frame exists (S6-3's); any review fixes. Known, low risk: Vance is in the briefing's cast; if the bridge invite (Vance at breakfast, 05:00-10:00) ever fell on a briefing Monday he'd be pulled to Deck 1 at 08:30.
-- S6-6 (wave 2): 28d, TEAM_JOBS.coil in 24h (the owner is W6 for the table's shape), slot 36.
+## State (2026-10-27 ~12:40 UTC)
+- All my work is in claude/staging-p5s6 ce113792: S6-2 (27166be, RV23 PASS) and S6-6 turns 1-2 (8f943e82, a92d0562, RV23 PASS), plus test-only commits.
+- Left: the arrows_check step6 beats for the briefing and night 3 once that frame exists (S6-3's, W7); the head writer's words replace my stand-ins (m21.lines, m21.*.meet, m24.lines; keys as they are). Known, low risk: Vance is in the briefing's cast; if the bridge invite (Vance at breakfast, 05:00-10:00) ever fell on a briefing Monday he'd be pulled to Deck 1 at 08:30.
+- Backlog MA6-1 (team turns can't be tapped) is PZ6's fix (claude/team-turn-fix); the coil swap doesn't depend on it.
 
 ## S6-6 turn 1 (M24)
 - See DEV_NOTES "28d, M24 leading a team". Slot 36, schedU 1071. DA6 (session_01GKuymjJ4sU5hfdU8bH49UW) owns S6-4: coils '6-coil-1..3', spots '6-coil-team-1..3' (spot 1 the lead's: yours). N6 (session_01GKuymnDA25R2a5yZGYpaBS, claude/p5s6-nights) asked about night hooks (no reply yet). W7 asked about the 24h table entries (no reply yet). Backlog MA6-1: a team turn can't be tapped in today's game.

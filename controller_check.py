@@ -3258,92 +3258,6 @@ const PAD_BUILT = ['base', 'deck', 'marks', 'panels', 'games'];
 })();
 """
 
-# ---- (S6-3, W7) the Engine Specialist promotion by pad (24u, on a copy with P5_STEP6 on): the offer's scene (Next, a
-# reply), the board's Take it for the Tier 4 test, a step at the coil by the ring and A, the result's scene on Deck 6,
-# the Captain's engine badge (the lift to Deck 1, the stick to your spot, the scene). "not yet" in a build without it
-PU4_SETUP = r"""((day, min) => { introSkip(); const W = worksInit(Math.max(shipNow(), WORKS_START)); W.tier = 3; W.rank = 'senior'; W.xp = 60;
-  for (const r of CAREER_LADDER) if (r.id !== 't4' && r.tier <= 3 && r.day <= 21) { W.tr[r.id] = W.tr[r.id] || 9; (W.op[9] = W.op[9] || []).push(r.id); }
-  W.tr.ps = 12; W.tr.t3 = 15; W.tr.m19 = 17; W.pu = { t3: { day: 15, tries: 1, passed: true, res: 16, bar: 16, toast: 17 } }; flagSet('p5n.on', 22);
-  skipTo((day - 1) * 1440 + min); machinesNow(); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; return true; })"""
-def part_promo4(pw, src, tag):
-    on = p6_copy(src)
-    if on == src or 'function pu4Promote' not in src: return ['not yet: no P5_STEP6 switch line or no Engine Specialist promotion in this build']
-    fails = []
-    r = Run(pw, on, f'{tag}_pu4', mode='pad', plug={}, w=390, h=844)
-    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
-    # the offer: Friday Day 19 in the Works bay, Calder beside you: her scene, by pad
-    r.ev(f"({PU4_SETUP})(19, 500)"); r.ev("goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0]))"); r.step(10)
-    r.ev("(() => { const k = puNearMe; puNearMe = id => id === 'calder' ? true : k(id); PU4_LIVE.seek = { by: 'calder', at: Math.floor(shipNow()), d: 19 }; pu4OfferTick(shipNow(), false); puNearMe = k; })()"); r.step(6)
-    if not r.ev("!!DIALOGUE"): fails.append('offer: her scene did not open')
-    else: pu3_read(r, fails, 'offer', 1)
-    t4 = r.ev("puT4()"); print(f'  the offer by pad: {t4}')
-    if not (t4 and t4['day'] == 22): fails.append(f'offer: the test not set by the scene read by pad ({t4})')
-    # the board, Day 22 09:31: the stick to the board, the ring, the test's Take it
-    r.ev("(() => { setShipNow(21 * 1440 + 571); machinesNow(); careerClock(shipNow(), true); worksCareerTick(shipNow()); for (const f of WORK_TICKS) f(shipNow(), false); goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); })()"); r.step(10)
-    jid = r.ev("(() => { const c = SHIP.works.cur; return c && c.id === 't4' ? c.j : null; })()")
-    bd = r.ev(f"({WHERE_IS})('job board')")
-    if not jid: fails.append('board: the Tier 4 test not held for you at 09:30')
-    elif not bd or not walk_to(r, bd[0], bd[1]): fails.append(f'board: could not walk to the job board by the stick ({bd})')
-    else:
-        h = ring_and_A(r, ['board', 'job']); r.step(10)
-        res = press_in_panel(r, "[...document.querySelectorAll('#ixBoard [data-job]')].filter(x => x.dataset.job === " + json.dumps(jid) + ").map(x => x.querySelector('button'))[0]") if r.ev("typeof ixBoard !== 'undefined' && ixBoard.isOpen") else 'the board never opened'
-        took = r.ev(f"(() => {{ try {{ return myJob() && myJob().id === {json.dumps(jid)}; }} catch (e) {{ return false; }} }})()")
-        print(f'  the board by pad: ring "{h}", Take it {res}, taken {took}')
-        if not took: fails.append(f'board: the Tier 4 test not taken by pad (ring {h}, {res})')
-        r.ev("typeof ixBoard !== 'undefined' && ixBoard.isOpen && ixBoard.close()"); r.step(3)
-    # a step at the coil by the ring: off the cycle (the winding fetched)
-    if jid:
-        r.ev(f"(() => {{ const j = SHIP.jobs.find(x => x.id === {json.dumps(jid)}); jobStepDone(j.id, 0); goToDeck(6); const s = placeSpot(jobStops(j)[1].places[0]); player.obj.position.copy(cellPos(...nearestOpen(s.x, s.z, player))); player.stop(); }})()"); r.step(10)
-        h = ring_and_A(r, ['drive coil']); r.step(330)   # the coil's step is a 4-second look
-        done = r.ev(f"(() => {{ const j = SHIP.jobs.find(x => x.id === {json.dumps(jid)}); return (j.stepsDone || []).includes(1); }})()")
-        print(f'  the coil by the ring: "{h}", step done {done}')
-        if not done: fails.append(f'coil: "Take coil off the cycle" not done by the ring and A ({h})')
-    # the result, 22:41 on Deck 6 (on the walk down): her scene by pad
-    r.ev("(() => { const T = puT4(); if (T) { T.passed = true; T.day = 22; } SHIP.works.cur = null; SHIP.works.tr.t4 = 22; setShipNow(21 * 1440 + 1361); goToDeck(6); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; const k = puNearMe; puNearMe = (id, r) => id === 'calder' ? true : k(id, r); for (let i = 0; i < 3; i++) pu4ResultTick(shipNow() + i * .1, false); puNearMe = k; })()"); r.step(6)
-    if not r.ev("!!DIALOGUE"): fails.append(f'result: her scene did not open ({r.ev("JSON.stringify(PU4_LIVE)")})')
-    else: pu3_read(r, fails, 'result', 0)
-    w = r.ev("[SHIP.works.tier, SHIP.works.rank]"); print(f'  the result by pad: {w}')
-    if w != [4, 'specialist']: fails.append(f'result: not an Engine Specialist after her scene by pad ({w})')
-    # the badge, Day 23: the lift to Deck 1, the stick to your spot, the Captain's scene
-    r.ev("(() => { PU4_LIVE.walk = null; skipTo(22 * 1440 + 975); machinesNow(); for (const f of WORK_TICKS) f(shipNow(), false); goToDeck(4); })()"); r.step(20)
-    if ride(r, 1, fails, 'badge'):
-        sp = r.ev("(() => { const s = placeSpot('1-ceremony-you'); return s ? [s.x, s.z] : null; })()")
-        if not sp or not walk_to(r, sp[0], sp[1]): fails.append(f'badge: could not walk to your spot by the stick ({sp})')
-        r.ev("(() => { setShipNow(22 * 1440 + 991); occasionsTick(shipNow()); meetingsTick(shipNow()); })()"); r.step(10)
-        if not r.ev("!!DIALOGUE"): fails.append('badge: the Captain\'s scene did not open')
-        else: pu3_read(r, fails, 'badge', 0)
-    b = r.ev("(puT4() || {}).badge"); print(f'  the badge by pad: {b}')
-    if b != 23: fails.append(f'badge: not given after the scene by pad ({b})')
-    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
-    r.close()
-    return fails
-
-# ---- (S6-7, W7) mentoring Basil by pad (28e, on a copy with P5_STEP6 on): the hello, the clue choice, the late talk's
-# three replies, Calder's first job: each scene read through by the D-pad and A, nothing tapped
-MT_SETUP = r"""(() => { introSkip(); const W = worksInit(Math.max(shipNow(), WORKS_START)); W.tier = 4; W.rank = 'specialist'; flagSet('p5n.on', 22); flagSet('p5n.off', 25);
-  skipTo(24 * 1440 + 1321); for (const f of WORK_TICKS) f(shipNow(), false); skipTo(25 * 1440 + 541); goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; return !!SHIP.works.mt; })()"""
-def part_mentor(pw, src, tag):
-    on = p6_copy(src)
-    if on == src or 'function mtSettle' not in src: return ['not yet: no P5_STEP6 switch line or no mentoring in this build']
-    fails = []
-    r = Run(pw, on, f'{tag}_mt', mode='pad', plug={}, w=390, h=844)
-    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
-    if not r.ev(MT_SETUP): r.close(); return ['setup: Basil\'s day not settled']
-    near = "const k = puNearMe; puNearMe = (id, rr) => id === 'bramwell-basil' || id === 'calder' ? true : k(id, rr); for (const f of WORK_TICKS) f(shipNow(), false); puNearMe = k;"
-    for scene, at, pick, setup in (('hello', 541, 1, ''), ('clue', 650, 2, "Object.assign(SHIP.works.mt.steps, { met: 1, watch: 2, dw: 10, do: 3 });"),
-                                  ('late', 816, 2, ""), ('first', 901, 0, "")):
-        r.ev(f"(() => {{ {setup} setShipNow(25 * 1440 + {at}); goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); {near} }})()"); r.step(6)
-        if not r.ev("!!DIALOGUE"): fails.append(f'{scene}: the scene did not open'); continue
-        pu3_read(r, fails, scene, pick)
-    got = r.ev("(() => { const M = SHIP.works.mt; return [M.steps.met !== undefined, M.clue, M.late, M.steps.done !== undefined]; })()"); print(f'  mentoring by pad: {got}')
-    if got != [True, 'log', 2, True]: fails.append(f'the replies by pad not kept ({got})')
-    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
-    r.close()
-    return fails
-
-PART_FN['promo3'] = part_promo3; NEEDS['promo3'] = ['panels']; ALL_PARTS.append('promo3')   # (S5-2: PARTS is ALL_PARTS itself when none are named)
-PART_FN['promo4'] = part_promo4; NEEDS['promo4'] = ['panels']; ALL_PARTS.append('promo4')   # (S6-3, W7)
-PART_FN['mentor'] = part_mentor; NEEDS['mentor'] = ['panels']; ALL_PARTS.append('mentor')   # (S6-7, W7)
 # Part "deck6" (S6-4, DA6 for lead 41; plans/p5-step6-spec.html section 9): Deck 6's new things by pad, in a copy with
 # P5_STEP6 on, at the spec's preset (Day 23, 21:00, an Engine Specialist on Deck 6): the dosimeter rack (the ring names it,
 # A takes a badge, A again hangs it back), each drive coil (the ring names it, A shows its panel), and the reactor's
@@ -3404,6 +3318,176 @@ def part_deck6(pw, src, tag):
     if pe: fails.append(f'deck6: page errors: {pe[:2]}')
     r.close(); return fails
 PART_FN['deck6'] = part_deck6; NEEDS['deck6'] = ['pick']; ALL_PARTS.append('deck6')   # S6-4: Deck 6's rack, coil panels and reactor door by pad
+# ---- (S6-3, W7) the Engine Specialist promotion by pad (24u, on a copy with P5_STEP6 on): the offer's scene (Next, a
+# reply), the board's Take it for the Tier 4 test, a step at the coil by the ring and A, the result's scene on Deck 6,
+# the Captain's engine badge (the lift to Deck 1, the stick to your spot, the scene). "not yet" in a build without it
+PU4_SETUP = r"""((day, min) => { introSkip(); const W = worksInit(Math.max(shipNow(), WORKS_START)); W.tier = 3; W.rank = 'senior'; W.xp = 60;
+  for (const r of CAREER_LADDER) if (r.id !== 't4' && r.tier <= 3 && r.day <= 21) { W.tr[r.id] = W.tr[r.id] || 9; (W.op[9] = W.op[9] || []).push(r.id); }
+  W.tr.ps = 12; W.tr.t3 = 15; W.tr.m19 = 17; W.pu = { t3: { day: 15, tries: 1, passed: true, res: 16, bar: 16, toast: 17 } }; flagSet('p5n.on', 22);
+  skipTo((day - 1) * 1440 + min); machinesNow(); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; return true; })"""
+def part_promo4(pw, src, tag):
+    on = p6_copy(src)
+    if on == src or 'function pu4Promote' not in src: return ['not yet: no P5_STEP6 switch line or no Engine Specialist promotion in this build']
+    fails = []
+    r = Run(pw, on, f'{tag}_pu4', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    # the offer: Friday Day 19 in the Works bay, Calder beside you: her scene, by pad
+    r.ev(f"({PU4_SETUP})(19, 500)"); r.ev("goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0]))"); r.step(10)
+    r.ev("(() => { const k = puNearMe; puNearMe = id => id === 'calder' ? true : k(id); PU4_LIVE.seek = { by: 'calder', at: Math.floor(shipNow()), d: 19 }; pu4OfferTick(shipNow(), false); puNearMe = k; })()"); r.step(6)
+    if not r.ev("!!DIALOGUE"): fails.append('offer: her scene did not open')
+    else: pu3_read(r, fails, 'offer', 1)
+    t4 = r.ev("puT4()"); print(f'  the offer by pad: {t4}')
+    if not (t4 and t4['day'] == 22): fails.append(f'offer: the test not set by the scene read by pad ({t4})')
+    # the board, Day 22 09:31: the stick to the board, the ring, the test's Take it
+    r.ev("(() => { setShipNow(21 * 1440 + 571); machinesNow(); careerClock(shipNow(), true); worksCareerTick(shipNow()); for (const f of WORK_TICKS) f(shipNow(), false); goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); })()"); r.step(10)
+    jid = r.ev("(() => { const c = SHIP.works.cur; return c && c.id === 't4' ? c.j : null; })()")
+    bd = r.ev(f"({WHERE_IS})('job board')")
+    if not jid: fails.append('board: the Tier 4 test not held for you at 09:30')
+    elif not bd or not walk_to(r, bd[0], bd[1]): fails.append(f'board: could not walk to the job board by the stick ({bd})')
+    else:
+        h = ring_and_A(r, ['board', 'job']); r.step(10)
+        res = press_in_panel(r, "[...document.querySelectorAll('#ixBoard [data-job]')].filter(x => x.dataset.job === " + json.dumps(jid) + ").map(x => x.querySelector('button'))[0]") if r.ev("typeof ixBoard !== 'undefined' && ixBoard.isOpen") else 'the board never opened'
+        took = r.ev(f"(() => {{ try {{ return myJob() && myJob().id === {json.dumps(jid)}; }} catch (e) {{ return false; }} }})()")
+        print(f'  the board by pad: ring "{h}", Take it {res}, taken {took}')
+        if not took: fails.append(f'board: the Tier 4 test not taken by pad (ring {h}, {res})')
+        r.ev("typeof ixBoard !== 'undefined' && ixBoard.isOpen && ixBoard.close()"); r.step(3)
+    # a step at the coil by the ring: off the cycle (the winding fetched)
+    if jid:
+        r.ev(f"(() => {{ const j = SHIP.jobs.find(x => x.id === {json.dumps(jid)}); jobStepDone(j.id, 0); goToDeck(6); const s = placeSpot(jobStops(j)[1].places[0]); player.obj.position.copy(cellPos(...nearestOpen(s.x, s.z, player))); player.stop(); }})()"); r.step(10)
+        h = ring_and_A(r, ['drive coil']); r.step(330)   # the coil's step is a 4-second look
+        done = r.ev(f"(() => {{ const j = SHIP.jobs.find(x => x.id === {json.dumps(jid)}); return (j.stepsDone || []).includes(1); }})()")
+        print(f'  the coil by the ring: "{h}", step done {done}')
+        if not done: fails.append(f'coil: "Take coil off the cycle" not done by the ring and A ({h})')
+    # the result, 22:41 on Deck 6 (on the walk down): her scene by pad
+    r.ev("(() => { const T = puT4(); if (T) { T.passed = true; T.day = 22; } SHIP.works.cur = null; SHIP.works.tr.t4 = 22; setShipNow(21 * 1440 + 1361); goToDeck(6); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; const k = puNearMe; puNearMe = (id, r) => id === 'calder' ? true : k(id, r); for (let i = 0; i < 3; i++) pu4ResultTick(shipNow() + i * .1, false); puNearMe = k; })()"); r.step(6)
+    if not r.ev("!!DIALOGUE"): fails.append(f'result: her scene did not open ({r.ev("JSON.stringify(PU4_LIVE)")})')
+    else: pu3_read(r, fails, 'result', 0)
+    w = r.ev("[SHIP.works.tier, SHIP.works.rank]"); print(f'  the result by pad: {w}')
+    if w != [4, 'specialist']: fails.append(f'result: not an Engine Specialist after her scene by pad ({w})')
+    # the badge, Day 23: the lift to Deck 1, the stick to your spot, the Captain's scene
+    r.ev("(() => { PU4_LIVE.walk = null; skipTo(22 * 1440 + 975); machinesNow(); for (const f of WORK_TICKS) f(shipNow(), false); goToDeck(4); })()"); r.step(20)
+    if ride(r, 1, fails, 'badge'):
+        sp = r.ev("(() => { const s = placeSpot('1-ceremony-you'); return s ? [s.x, s.z] : null; })()")
+        if not sp or not walk_to(r, sp[0], sp[1]): fails.append(f'badge: could not walk to your spot by the stick ({sp})')
+        r.ev("(() => { setShipNow(22 * 1440 + 991); occasionsTick(shipNow()); meetingsTick(shipNow()); })()"); r.step(10)
+        if not r.ev("!!DIALOGUE"): fails.append('badge: the Captain\'s scene did not open')
+        else: pu3_read(r, fails, 'badge', 0)
+    b = r.ev("(puT4() || {}).badge"); print(f'  the badge by pad: {b}')
+    if b != 23: fails.append(f'badge: not given after the scene by pad ({b})')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close()
+    return fails
+
+PART_FN['promo4'] = part_promo4; NEEDS['promo4'] = ['panels']; ALL_PARTS.append('promo4')   # (S6-3, W7)
+# ---- (S6-1, N6 for lead 41) the night shift by pad (28a, on a copy with P5_STEP6 switched on): Calder's night.on scene
+# read through by pad (Day 22 09:16), the bunk's "Sleep until 16:45" (the ring on the bunk, the alarm's Set by the
+# D-pad and A), a whole night 2 by pad (Day 23 20:46: the stick to the time clock, its ring, Clock in; the lift to Deck 6
+# and the stick into the engine room; unplugging mid-night stops you and pauses; at 05:52 back up to the clock, Clock out;
+# the lift to the mess and the servery's kept plate by the ring), and Calder's night.off scene (Day 25 06:01).
+# "not yet" in a build without section 28a's nights
+N6_SW = "const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');"
+N6_SETUP = r"""((day, min) => { introSkip(); const W = worksInit(Math.max(shipNow(), WORKS_START)); careerInit(); W.tr.m6 = 8; skipTo((day - 1) * 1440 + min); machinesNow();
+  const c = SHIP.career; c.go = null; c.end = false; c.ms = 0; c.n = 0; c.q = 0; careerCard(false); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; return true; })"""
+N6_TICK = "(() => { worksCareerTick(shipNow()); for (const f of WORK_TICKS) f(shipNow(), false); })()"
+def n6_word(r, fails, kind):
+    r.ev(f"(() => {{ const k = p5nNear; p5nNear = id => id === 'calder' ? true : k(id); try {{ p5nWordTick(shipNow(), false); }} finally {{ p5nNear = k; }} }})()"); r.step(6)
+    if not r.ev("!!DIALOGUE"): fails.append(f'night.{kind}: her scene did not open'); return
+    pu3_read(r, fails, f'night.{kind}', 0)
+    told = r.ev(f"flag('p5n.{kind}')"); print(f'  night.{kind} by pad: told {told}')
+    if told != 'person': fails.append(f'night.{kind}: not told in person after the scene read by pad ({told})')
+def n6_clock(r, fails, want, scene):
+    ck = r.ev(f"({WHERE_IS})('time clock')")
+    if not ck or not walk_to(r, ck[0], ck[1]): fails.append(f'{scene}: could not walk to the time clock by the stick ({ck})'); return False
+    h = ring_and_A(r, ['clock']); r.step(6)
+    if not r.ev("(() => { const c = document.getElementById('clockScreen'); return !!c && !c.hidden; })()"): fails.append(f'{scene}: the time clock\'s screen never opened (ring "{h}")'); return False
+    lab = 'Clock in' if want == 'in' else 'Clock out'
+    res = press_in_panel(r, f"[...document.querySelectorAll('#clockScreen .btns button')].find(b => !b.disabled && b.textContent === '{lab}')"); r.step(4)
+    print(f'  {scene} by pad: ring "{h}", {want} {res}')
+    r.ev("(() => { const c = document.getElementById('clockScreen'); if (c) c.hidden = true; })()"); r.step(2)
+    return res == 'ok'
+def part_nights(pw, src, tag):
+    on = src.replace(N6_SW, 'const P5_STEP6 = P5_STEP5 && true;', 1)
+    if 'function playerNightOn' not in src or (on == src and not re.search(r'\bconst P5_STEP6\s*=\s*P5_STEP5\s*&&\s*true\b', src)): return ['not yet: no section 28a nights or no P5_STEP6 switch line in this build']
+    fails = []
+    r = Run(pw, on, f'{tag}_n6', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    # Calder's word, Day 22 09:16, in the Works bay
+    r.ev(f"({N6_SETUP})(22, 556)"); r.ev("goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); player.stop()"); r.step(10)
+    n6_word(r, fails, 'on')
+    # the bunk by day, Day 22 12:40: the ring on your bunk, then the alarm's Set by pad
+    r.ev("(() => { skipTo(21 * 1440 + 760); machinesNow(); if (careerClockedIn(22) && !careerClockedOut(22)) careerClock(shipNow(), true); goToDeck(4); })()"); r.step(10)
+    bd = r.ev("(() => { const id = playerBed(), b = (DECKS[deckOf(id)].places || []).find(p => p.id === id), c = b && cellPos(...(b.walk || b.at)); return c ? [c.x, c.z] : null; })()")
+    if not bd or not walk_to(r, bd[0], bd[1]): fails.append(f'bed: could not walk to your bunk by the stick ({bd})')
+    else:
+        mine = r.ev(MY_BUNK); h = None
+        for k in range(12):                              # the ring on your own bunk (not a neighbour's)
+            sel = r.ev(RING_SEL)
+            if sel and mine and sel['key'] == mine: h = r.ev(HINT); break
+            r.press('RIGHT'); r.step(4)
+        if h: r.press('A')
+        for k in range(40):                              # you walk over and lie down; by day after 12:30 lying brings the alarm card
+            r.step(15)
+            if r.ev("!sleepEl.hidden"): break
+        lab = r.ev("sleepEl.hidden ? null : document.getElementById('alarmT').textContent")
+        res = press_in_panel(r, "document.getElementById('sleepYes')") if lab else 'the alarm never opened'
+        r.page.wait_for_timeout(2600); r.step(4)
+        t = r.ev("[SHIP.time.day, SHIP.time.min]"); print(f'  the bunk by pad: ring "{h}", "{lab}", Set {res}, woke at {t}')
+        if lab != 'Sleep until 16:45' or t[0] != 22 or not 1005 <= t[1] < 1010: fails.append(f'bed: "Sleep until 16:45" not reached or not slept by pad ({h}, {lab}, {res}, {t})')
+    # night 2 by pad: Day 23 20:46 in the Works bay
+    r.ev("(() => { skipTo(22 * 1440 + 1246); machinesNow(); goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); player.stop(); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; })()"); r.ev(N6_TICK); r.step(10)
+    if n6_clock(r, fails, 'in', 'night 2 clock in') and not r.ev("(SHIP.works.ns[23] || {}).in > 0"): fails.append('night 2: Clock in pressed by pad, not clocked in')
+    if ride(r, 6, fails, 'night 2'):
+        mid = r.ev("(() => { const T = ROOM_TILES['E'] || []; const c = T[Math.floor(T.length / 2)]; return c ? [cellPos(...c).x, cellPos(...c).z] : null; })()")
+        if not mid or not walk_to(r, mid[0], mid[1]): fails.append(f'night 2: could not walk into the engine room by the stick ({mid})')
+        r.ev(N6_TICK); r.step(4)
+        if r.ev("flag('p5n.room.23')") is None: fails.append('night 2: in the engine room, but its arrow step not done')
+        # unplugged mid-night: stops you and pauses
+        r.pad(10, a={0: 1}, release=False); r.js('window.__pads.unplug(0)'); r.step(1); p0 = r.ev("[player.obj.position.x, player.obj.position.z]"); r.step(10); p1 = r.ev("[player.obj.position.x, player.obj.position.z]")
+        st = r.ev("PAUSE.on"); mv = ((p1[0] - p0[0]) ** 2 + (p1[1] - p0[1]) ** 2) ** .5; print(f'  unplugged mid-night: moved {mv:.3f} m, paused {st}')
+        if mv > .01 or not st: fails.append(f'night 2: unplugging mid-night should stop you and pause ({mv:.3f} m, paused {st})')
+        r.js('window.__pads.plug(0, {})'); r.step(5); r.press('MENU'); r.step(10)
+        if r.ev("PAUSE.on"): fails.append('night 2: Start after plugging back in did not go on')
+    r.ev("(() => { setShipNow(23 * 1440 + 352); machinesNow(); })()"); r.ev(N6_TICK); r.step(4)
+    if ride(r, 5, fails, 'night 2 end') and n6_clock(r, fails, 'out', 'night 2 clock out') and not r.ev("(SHIP.works.ns[23] || {}).out > 0"): fails.append('night 2: Clock out pressed by pad, not clocked out')
+    r.ev("(() => { setShipNow(23 * 1440 + 376); machinesNow(); SHIP.player.tray = null; })()"); r.ev(N6_TICK); r.step(4)
+    if ride(r, 3, fails, 'the plate'):
+        sv = r.ev(f"({WHERE_IS})('servery')")
+        if not sv or not walk_to(r, sv[0], sv[1]): fails.append(f'the plate: could not walk to the servery by the stick ({sv})')
+        else:
+            h = ring_and_A(r, ['servery', 'eat', 'breakfast', 'food', 'tray']); r.step(10)
+            tray = r.ev("SHIP.player.tray || null"); print(f'  the kept plate by pad: ring "{h}", tray {tray}')
+            if tray != 'the plate kept for you': fails.append(f'the plate: not given by the ring and A at 06:16 ({h}, {tray})')
+    # Calder's night.off, Day 25 06:01 in the engine room (night 3 worked)
+    r.ev("(() => { const R = p5nNight(24); R.in = 24 * 1440 - 180; R.out = 0; skipTo(24 * 1440 + 361); machinesNow(); goToDeck(6); player.obj.position.copy(cellPos(...(ROOM_TILES['E'] || ROOM_TILES[Object.keys(ROOM_TILES)[0]])[0])); player.stop(); })()"); r.step(10)
+    n6_word(r, fails, 'off')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close()
+    return fails
+PART_FN['nights'] = part_nights; NEEDS['nights'] = ['panels']; ALL_PARTS.append('nights')   # (S6-1)
+# ---- (S6-7, W7) mentoring Basil by pad (28e, on a copy with P5_STEP6 on): the hello, the clue choice, the late talk's
+# three replies, Calder's first job: each scene read through by the D-pad and A, nothing tapped
+MT_SETUP = r"""(() => { introSkip(); const W = worksInit(Math.max(shipNow(), WORKS_START)); W.tier = 4; W.rank = 'specialist'; flagSet('p5n.on', 22); flagSet('p5n.off', 25);
+  skipTo(24 * 1440 + 1321); for (const f of WORK_TICKS) f(shipNow(), false); skipTo(25 * 1440 + 541); goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; return !!SHIP.works.mt; })()"""
+def part_mentor(pw, src, tag):
+    on = p6_copy(src)
+    if on == src or 'function mtSettle' not in src: return ['not yet: no P5_STEP6 switch line or no mentoring in this build']
+    fails = []
+    r = Run(pw, on, f'{tag}_mt', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    if not r.ev(MT_SETUP): r.close(); return ['setup: Basil\'s day not settled']
+    near = "const k = puNearMe; puNearMe = (id, rr) => id === 'bramwell-basil' || id === 'calder' ? true : k(id, rr); for (const f of WORK_TICKS) f(shipNow(), false); puNearMe = k;"
+    for scene, at, pick, setup in (('hello', 541, 1, ''), ('clue', 650, 2, "Object.assign(SHIP.works.mt.steps, { met: 1, watch: 2, dw: 10, do: 3 });"),
+                                  ('late', 816, 2, ""), ('first', 901, 0, "")):
+        r.ev(f"(() => {{ {setup} setShipNow(25 * 1440 + {at}); goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); {near} }})()"); r.step(6)
+        if not r.ev("!!DIALOGUE"): fails.append(f'{scene}: the scene did not open'); continue
+        pu3_read(r, fails, scene, pick)
+    got = r.ev("(() => { const M = SHIP.works.mt; return [M.steps.met !== undefined, M.clue, M.late, M.steps.done !== undefined]; })()"); print(f'  mentoring by pad: {got}')
+    if got != [True, 'log', 2, True]: fails.append(f'the replies by pad not kept ({got})')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close()
+    return fails
+
+PART_FN['mentor'] = part_mentor; NEEDS['mentor'] = ['panels']; ALL_PARTS.append('mentor')   # (S6-7, W7)
 # ---- run ----------------------------------------------------------------------------------------------------------
 if '--selftest' in FLAGS:
     if pad_switch(SRC) is not None: print('--selftest is for a build without section 26 (it plants its own PAD_ON)'); sys.exit(1)

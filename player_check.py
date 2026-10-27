@@ -41,7 +41,8 @@
 #   day 280 (or --long N), skipTo ten hours at a time, measured after each day's 06:00; prints the size and the biggest
 #   parts every 10 days and fails if it ever passes SAVE_BUDGET (250 KB). About two minutes on a combined build.
 # Setup and environment as for cadet_test.py.
-# Run:  python3 player_check.py BUILD.html  [--long [DAYS]]
+#   the night shift (S6-1, N6): on a Step 6 copy, hours, sleeping by day, the knock, the plate, a save at 03:00 (night_part)
+# Run:  python3 player_check.py BUILD.html  [--long [DAYS]] [--night: the night part alone]
 import sys, json, pathlib
 exec(open(__file__.replace('player_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
@@ -219,6 +220,94 @@ def save_budget(pw, path, days):
             print(f"  day {d:3d} {sz['total'] / 1024:6.1f} KB  biggest: " + ', '.join(f'{k} {v / 1024:.1f}' for v, k in top), flush=True)
     ev("localStorage.clear()"); b.close()
     return worst, errs
+
+# ---- the night shift (S6-1, N6 for lead 41; plans/p5-step6-spec.html S6-1): on a copy with Step 6 switched on (the
+# P5_STEP6 line set to true) unless the build already has it on; with it off, the game as before. Hours (yourShift),
+# sleeping by day (the bunk's "Sleep until 16:45", counted as sleep, not kept as your alarm), the knock, the bunk
+# refused on your night, the kept plate 06:15-07:00 (once, not after 07:00), and a save at 03:00 that loads into the same
+# night, clocked in, a job held for you still held. Also runs alone: python3 player_check.py BUILD.html --night
+def night_part(pw, path):
+    src = pathlib.Path(path).read_text()
+    if 'function playerNightOn' not in src:
+        print('The night shift: this build has no section 28a (playerNightOn): skipped'); return []
+    sw = "const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');"
+    print('The night shift (S6-1):')
+    if sw in src:                                        # off as shipped: nothing of the nights
+        g = Game(pw, path)
+        off = json.loads(g.ev("(() => { skipTo(22 * 1440 + 600); worksInit(); careerInit(); return JSON.stringify([[22, 23, 24, 25].map(d => yourShift(d)), playerNightOn(22), careerOff(23), !!(SHIP.works && SHIP.works.ns)]); })()"))
+        print('  off:', off); errs = g.errors[:]; g.close()
+        check(off == [[{'day': [540, 1020], 'night': None}, {'day': [540, 1020], 'night': None}, {'day': [540, 1020], 'night': None}, {'day': [540, 1020], 'night': None}], False, False, False], f'with Step 6 off, no nights: the day shift as before, no ns: {off}')
+        src = src.replace(sw, "const P5_STEP6 = P5_STEP5 && true;")
+    else: errs = []
+    on = WORK / 'test' / '_night_on.html'; on.write_text(src)
+    g = Game(pw, str(on))
+    h = json.loads(g.ev("(() => { skipTo(21 * 1440 + 780); worksInit(); careerInit(); return JSON.stringify([[22, 23, 24, 25, 26].map(d => yourShift(d)), [21, 22, 23, 24, 25].map(d => playerNightOn(d)), [22, 23, 24, 25].map(d => careerOff(d))]); })()"))
+    print('  hours:', h)
+    check(h[0] == [{'day': [540, 750], 'night': [1365, 1800]}, {'day': None, 'night': [1260, 1800]}, {'day': None, 'night': [1260, 1800]}, {'day': None, 'night': None}, {'day': [540, 930], 'night': None}], f'your hours: Day 22 to 12:30 then 22:45-06:00, Days 23-24 21:00-06:00, Day 25 none, Day 26 the short Friday: {h[0]}')
+    check(h[1] == [False, True, True, True, False] and h[2] == [False, True, True, True], f'nights on Days 22-24; no day shift on 23-25: {h[1]} {h[2]}')
+    a = json.loads(g.ev("""(() => { SHIP.player.needs.energy = 20; const r = [p5nDayBed(), p5nBed(), document.getElementById('alarmT').textContent, sleepEl.hidden];
+      document.getElementById('sleepYes').click(); return JSON.stringify(r); })()"""))
+    g.page.wait_for_timeout(2600)
+    b = json.loads(g.ev("JSON.stringify([SHIP.time.day, SHIP.time.min, Math.round(SHIP.player.needs.energy), SHIP.player.alarm, sleeping])"))
+    print('  sleeping by day:', a, b)
+    check(a == [1005, True, 'Sleep until 16:45', False], f"Day 22 after 12:30 the bunk offers only 'Sleep until 16:45': {a}")
+    check(b[0] == 22 and b[1] == 1005 and b[2] >= 55 and b[3] == 360 and b[4] is False, f'slept by day to 16:45, energy refilled as sleep (from 20), the alarm still 06:00: {b}')
+    k = json.loads(g.ev("(() => { careerClock(shipNow(), true); return JSON.stringify([hhmm(SHIP.time.min)]); })()"))
+    g.ev("skipTo(21 * 1440 + 1370); careerClock(shipNow(), true)")
+    n = json.loads(g.ev("JSON.stringify([p5nIn(), (() => { const T = [], t0 = toast; toast = (x, y) => { T.push(String(y)); return t0(x, y); }; let r; try { r = p5nBed(); } finally { toast = t0; } return [r, T.join(' ')]; })(), sleepEl.hidden])"))
+    print('  on the night:', k, n)
+    check(n[0] is True and n[1][0] is True and 'night shift' in n[1][1] and n[2] is True, f'clocked in for night 1, the bunk refuses you (a toast, no alarm): {n}')
+    g.ev("skipTo(22 * 1440 + 361); careerClock(shipNow(), true); skipTo(22 * 1440 + 1215); sleepGo(360)")
+    g.page.wait_for_timeout(2600)
+    kn = json.loads(g.ev("JSON.stringify([SHIP.time.day, SHIP.time.min, simNotes('p5night').filter(x => x.step === 'knock').length, SHIP.player.alarm])"))
+    print('  the knock:', kn)
+    check(kn[:3] == [23, 1230, 1], f'asleep at 20:15 on Day 23 with the alarm at 06:00: woken at 20:30 by a knock: {kn}')
+    pl = json.loads(g.ev("""(() => { careerClock(shipNow(), true); skipTo(23 * 1440 + 361); careerClock(shipNow(), true); const out = [];
+      skipTo(23 * 1440 + 365); SHIP.player.tray = null; out.push(p5nPlate({ t: 'Servery' }));
+      skipTo(23 * 1440 + 377); out.push(p5nPlate({ t: 'Servery' }), SHIP.player.tray); SHIP.player.tray = null; out.push(p5nPlate({ t: 'Servery' }));
+      flagSet('p5n.plate', 0); skipTo(23 * 1440 + 421); out.push(p5nPlate({ t: 'Servery' })); return JSON.stringify(out); })()"""))
+    print('  the kept plate:', pl)
+    check(pl == [False, True, 'the plate kept for you', False, False], f'the plate: not before 06:15, once from 06:15, not after 07:00: {pl}')
+    mo = json.loads(g.ev("""(() => { const nav = ROSTER.find(p => p.id === 'navarro-mateo'), c = SHIP.career, l0 = c.l, ms0 = c.ms, w0 = careerWork();
+      const out = [[21, 22, 23, 24, 25, 26].map(d => isWorkDay(nav, d)), [22, 23].map(d => careerOn(d)), [22, 23, 24].map(d => { const P = p5nIncPlan(d), N = p5nOf(d); return !!P && P[2] > N.from && P[2] < N.to; })];
+      skipTo(24 * 1440 + 900); out.push(clothesLateAt(), Math.round(w0 - careerWork()) > 0, c.ms === ms0, c.l === l0, !!(SHIP.works.ns[24] || {}).miss);
+      return JSON.stringify(out); })()"""))
+    print('  Navarro, the night incident, the clothes day, a missed night:', mo)
+    check(mo[0] == [True, False, False, False, False, True] and mo[1] == [False, False], f"Navarro's leave on his Monday and Tuesday nights (Wednesday and Thursday his own nights off), not your leave: {mo[0]} {mo[1]}")
+    check(mo[2] == [True, True, True], f'one incident planned inside each night: {mo[2]}')
+    check(mo[3] == 1185, f"after a night, yesterday's clothes from 19:45 (four hours after a 15:45 wake): {mo[3]}")
+    check(mo[4:] == [True, True, True, True], f'a missed night (night 3, never clocked in) costs reputation, not the run toward being let go, not your leave: {mo[4:]}')
+    errs += g.errors; g.close()
+    # a save at 03:00 on night 2 loads into the same night, clocked in, a job held for you still held to 06:00
+    tmp = WORK / 'test' / '_night_save.html'; tmp.write_text(instrument(src))
+    br = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+    page = br.new_page(viewport={'width': 600, 'height': 500}); page.on('pageerror', lambda e: errs.append(f'pageerror: {e} {(e.stack or "")[:600]}'))
+    page.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
+    page.add_init_script(INIT)
+    def load():
+        page.goto('file://' + str(tmp)); page.wait_for_function('window.__sc !== undefined', timeout=120000)
+    ev = lambda x: page.evaluate('s => window.__sc(s)', x)
+    load(); ev("localStorage.clear()"); load(); print('  (loaded, saving on)', flush=True)
+    ev("(() => { newGameStart(false); careerInit(); SHIP.career.gs = 0; const end = 22 * 1440 + 1262; while (shipNow() < end) { skipTo(Math.min(end, shipNow() + 600)); const c = SHIP.career; if (c) { c.go = null; c.end = false; c.ms = 0; c.n = 0; c.q = 0; } } careerCard(false); worksInit(); careerInit(); careerClock(shipNow(), true); })()   // (never let go on the way: 22 days skipped without work)")
+    sv = json.loads(ev("""(() => { const id = jobReserve('lights', 23, 1430, 39, { night: true }); skipTo(23 * 1440 + 180); saveGame();
+      const j = SHIP.jobs.find(x => x.id === id); return JSON.stringify([SHIP.time.day, SHIP.time.min, p5nIn(), !!id, j ? [j.reserved, j.until, j.status] : null]); })()"""))
+    print('  (saved at 03:00)', sv, flush=True)
+    try: load()
+    except Exception as e: print('  reload failed:', errs[:3]); raise
+    ld = json.loads(ev("""JSON.stringify([SHIP.time.day, SHIP.time.min, p5nIn(), (SHIP.works.ns[23] || {}).in > 0, !(SHIP.works.ns[23] || {}).out, P5N_LATE, p5nSkipped(),
+      (j => j ? [j.reserved, j.until, j.status] : null)(SHIP.jobs.find(x => x.reserved === 39 && x.status !== 'done'))])"""))
+    print('  a save at 03:00:', sv, ld)
+    check(sv[0] == 24 and sv[1] == 180 and sv[2] is True and sv[3] and sv[4] and sv[4][1] == 23 * 1440 + 360, f'on night 2 at 03:00, clocked in, a job held for you to 06:00: {sv}')
+    check(ld[:7] == [24, 180, True, True, True, False, False] and ld[7] == sv[4], f'loaded into the same night: clocked in, not skipped, the job still held: {ld}')
+    ev("localStorage.clear()"); br.close()
+    return errs
+
+if '--night' in sys.argv:
+    with sync_playwright() as pw:
+        errs = night_part(pw, sys.argv[1])
+    if errs: fail('page errors: ' + '; '.join(errs[:3]))
+    print('PLAYER NIGHT OK' if ok else 'PLAYER NIGHT FAILED')
+    sys.exit(0 if ok else 1)
 
 if '--long' in sys.argv:
     k = sys.argv.index('--long'); days = int(sys.argv[k + 1]) if len(sys.argv) > k + 1 and sys.argv[k + 1].isdigit() else 280
@@ -1645,6 +1734,8 @@ with sync_playwright() as pw:
     ev("localStorage.removeItem(SAVE_KEY)")
     b.close()
 
+with sync_playwright() as pw:
+    errors = errors + night_part(pw, sys.argv[1])
 print('errors', errors[:5])
 if errors: fail('page errors')
 print('PLAYER CHECK OK' if ok else 'PLAYER CHECK FAILED')
