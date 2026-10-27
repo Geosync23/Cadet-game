@@ -717,6 +717,7 @@ def part_step6(ctx, path, way):
             n = pg.ev('shipNow()')
             if os.environ.get('S6_WATCH') and re.search(os.environ['S6_WATCH'], pg.ev('clockText()')): print('   watch', pg.ev(S6_WATCH_JS))   # (debugging) the state each step
             if pg.ev("typeof sleeping !== 'undefined' && sleeping"): pg.page.wait_for_timeout(250); pg.step(3, 50); continue   # asleep: the game's own sleep runs to the alarm and wakes after its fade (real-time timers); skipping on would outrun the wake (PZ6)
+            if pg.ev("typeof DIALOGUE !== 'undefined' && !!DIALOGUE"): f.run(min(t, n + 5)); continue   # a scene open (Calder's walk down, the crews' welcome): read it through now, as a player would, never skipped past (PZ6)
             if pg.ev(S6_DUE): f.run(min(t, n + 10)); continue
             stop = min([x for x in S6_STOPS if x > n + 1] or [t])
             pg.ev(f"devmodeSkipTo({min(t, n + 20, stop)}); for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 70)"); pg.step(3, 50)
