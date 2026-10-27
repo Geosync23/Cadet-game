@@ -1,0 +1,36 @@
+# Handover: lead 41 (first lead on the NEW account)
+
+## START HERE (next lead)
+Read CLAUDE.md, this note, then the bottom of TEAM.md on **claude/lead-41-e86n0x** from "LEAD 41 started" (every line after). Then plans/overnight-decisions-lead41.md (the user's plan order + the calls made overnight). Older background: plans/handover-lead40.md, plans/handover-lead39.md.
+Lead 41 = session_01GKuymjWR1dqfbCw1MyEP9j, branch claude/lead-41-e86n0x, hourly check-in trig_01Bk5Qen4j2ZgBtkLYX1Qwd7 (53 * * * *): disable it when you take over and make your own (copy its prompt).
+
+## The user's plan (in order; see overnight-decisions-lead41.md)
+1. 0.94.0: DONE. Published on NEW links (Playtest https://claude.ai/artifact/7hQ14AcwZHCi5EvL1AKiMU , Dev https://claude.ai/artifact/KEyaHvon6ZaVHHFRdAe18m , {downloads}); claude/integration = 6f1915cb (user OK). Step 5, vessel, ending, talk-close all ON; older switches stay OFF (TRAY_TRAVELS, INTRO_ASK_ON, ZEKE_CABIN_MAIL, PAD_ON, END_WAY_BACK).
+2. Step 6 (in progress) on claude/staging-p5s6, its own full round, then publish (PUB2 publishes to the same new links or new ones; ask the user).
+3. Then the Dev mode update (all new traditions/ship-wide events + career progression).
+4. Then the controller update (bring it current with every feature since it was made, then PAD_ON on).
+5. Optimization. 6. Playtest patches.
+
+## User rules (all still hold)
+- CAP: at most **5 seats actively working at once** (idle seats don't count). Count before giving work or hiring.
+- Full round of checks before any game change is published (spread over the runners the cap allows; test-only fixes need no game re-run; a words-only fix re-runs the word-related checks: decision 5).
+- Tons of arrows, in person first, staged scenes with dialogue, controller, phones first. Times for the user in US Eastern, plain words, no emojis.
+- Old account's links can't be updated from here; never publish over 6daNCLCJAcsLCZn27CEthq.
+
+## Seats (new account)
+- BM19 build master session_01GKuymncYhRTKs8t4byNfdj (claude/staging-0.94.0 done; now merges Step 6 pieces into claude/staging-p5s6; has the Step 6 seat list).
+- RV23 reviewer session_01GKuymoDm1XbC5G8TvaCNLr (Step 6 reviewer).
+- PUB2 publisher session_01GKuymkDxLVyt4rjtcJxdab (idle; handover-publisher-2.md on claude/publish-26).
+- W7 career engineer session_01GKuymjghu82TGWPLR1wTKw (claude/p5s6-promo4; S6-3 done in day parts, now night parts, then S6-7, S6-9; owns 24 core/24u/section 28 helpers/switch lines; adds all DM_CAREER rows at the end).
+- N6 nights session_01GKuymnDA25R2a5yZGYpaBS (claude/p5s6-nights; S6-1; RV23 FIXES NEEDED on c806c78: Calder doesn't come Day 22 09:15; loosen fetch reach).
+- MA6 mechanics A session_01GKuymj1UEDuEYMnG9rmFkc (claude/p5s6-mech-a; S6-2 merged; S6-6 team turn 1 8f943e82 in review).
+- PZ6 puzzles session_01GKuymjrmdGE4vaHHHGkvYF (S6-8 merged; HOLDING live bug MA6-1 until a seat frees: team job turn can't be tapped; fix on claude/team-turn-fix from staging-0.94.0).
+- DA6 deck architect session_01GKuymjJ4sU5hfdU8bH49UW (claude/p5s6-deck; S6-4 turn 1 469b606b in review; names 6-coil-1..3, 6-reactor-1, 6-coil-team-1..3, *-svc).
+- Not hired yet: mechanics B for S6-5 engine work (needs DA6's machines).
+- Archived: W6, R1, R2, R3.
+
+## Gotchas
+- 0.94.0 is the first build with switches set to `true`: many checks looked for the OFF line. BM19 + W6 fixed puzzle, ending, saves, controller, events, promo_beats, mech; watch for more as Step 6 switches go on.
+- Several "FAILs" tonight were check-follower gaps (career pick, mech t3, arrows week next to the mysteries board): bisect, then ask "would a real player get stuck?" before changing the game.
+- Lead can't push non-lead branches: delegate. Seats sometimes duplicate work (two sweeps): name one owner.
+- More than ~3 browsers on one machine gives false timeouts.
