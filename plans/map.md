@@ -73,6 +73,7 @@ No slot for the crew designer (section 9's roster is generated). A new feature (
 | Furniture and room kit | `4b` | `KIT`, `place`, `placeWall`, `mergeMeshes` |
 | Building and unloading a deck, the floor painter | `4c` | `buildDeck`, `unloadDeck` |
 | A deck's map, rooms, dressing (Decks 1-6) | `4d` | `DECKS[n]`; the places for traditions, the Tern, Pillar 5 come after the decks |
+| Step 6's Deck 6 machines and places (S6-4) | `4d` (Deck architect slot) | `DECK6_P5`, `deck6P5Places()` (called once from section 13 after the switches, `P5_DECK6`), `deck6P5Dress()` (the last line of `DECKS[6].dress`), `deck6WatchName()`, kit `coilPanel`, `reactorConsole`, wall kit `dosiRack`, `watchBoard`; ids `6-coil-1..3`, `6-reactor-1`, `6-coil-N-svc`, `6-reactor-1-svc`, `6-coil-team-1..3`, `6-dosi-rack`, `6-watch-board` |
 | The rec deck's map and dressing | `4e` | `DECKS[7]`, `RK`, `REC_ROUTES` |
 | Day and night light, mood lighting | `5` | `applyLight` |
 | The clock, saving and loading, the notes bus, new game | `13` | `shipNow`, `SAVED`, `SAVE_EXTRA`, `saveGame`, `simNote` / `onSim`, `flag` / `flagSet`, `newGameStart`, `GAME_BUILD` |

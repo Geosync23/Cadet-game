@@ -1,0 +1,39 @@
+# Handover: DA6, the Step 6 deck architect (session_01GKuymjJ4sU5hfdU8bH49UW)
+
+Role: S6-4 of plans/p5-step6-spec.html (on claude/p5-specs): Deck 6's working engine machines, the dosimeter rack (take
+and return), the watch board, team spots, the reactor door; Deck 2's suite as the player's quarters. Switch `P5_DECK6`
+(section 13, W7's line). Lead 41 session_01GKuymjWR1dqfbCw1MyEP9j; reviewer RV23 session_01GKuymoDm1XbC5G8TvaCNLr;
+build master BM19 session_01GKuymncYhRTKs8t4byNfdj; W7 session_01GKuymjghu82TGWPLR1wTKw (section 28 helpers, 24u, the
+switch lines: ask first).
+
+## Branch: claude/p5s6-deck (from claude/staging-p5s6 3e502ca)
+
+## Built (turn 1, build-table row 0.94.0-s6.4a)
+- Section 4d's Deck architect slot: `DECK6_P5` (coil tiles, team spots), `deck6P5Places()`, `deck6WatchName()`, kit
+  `coilPanel`, `reactorConsole`, wall kit `dosiRack` (o.out = empty hooks), `watchBoard` (o.name), `deck6P5Dress()`.
+- One line after section 13's switches: `if (P5_DECK6) deck6P5Places();` (sent to W7 for review).
+- One line at the end of `DECKS[6].dress`: `if (P5_DECK6) deck6P5Dress();`.
+- perf_check: two scenes `Step 6: the engine room / engine control, Tue 21:00`; switched() accepts `X && URL_FLAGS.has(..)`.
+
+## Names given to others
+- Machines `6-coil-1..3` (kind coil, room E), `6-reactor-1` (room R): same ids as STUB_MACHINES.
+- Panel places `6-coil-N-svc` (coil 1 [4,7], 2 [7,4], 3 [9,7]), `6-reactor-1-svc` [27,3] (inside the reactor door).
+- Team spots `6-coil-team-1..3` ([8,4] the lead's, [6,7], [5,4]); DECKS[6].teamSpots for each coil.
+- `6-dosi-rack` [22,7] face w (engine control, west wall), `6-watch-board` [10,1] face n.
+- Sent to MA6 (S6-6) and lead 41.
+
+## Loose ends / turn 2
+- Rack take/return: state (asked W7: SHIP.works.dosi in worksClean, or my own SAVE_EXTRA entry), a tap (PLAYER_TAPS is
+  section 15's, defined after 4d: register at run time), the rack's empty hook (dosiRack o.out).
+- The reactor door for S6-5 (section 14's doorOpenFor, one line, theirs); the panel place inside R already opens it for a
+  job stop through jobDoorOpen.
+- Deck 2 room B: the brass name plate "Senior Officer, Engine Specialist" once SHIP.works.home is '2-B', cabin-touch
+  spots (DECKS[2].cabinSpots['2-B'], 24t's shape), its wardrobe as yours, keepsake shelf (VB2's loose end).
+- controller_check pick preset on Deck 6, Day 23 21:00 (the rack, the coils' panels, the reactor door).
+- The watch board is drawn when the deck is built: it doesn't change while you stay on Deck 6 across 21:00.
+
+## How to test
+- ON copy: replace `const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');` with `const P5_STEP6 = P5_STEP5 && true;`.
+- cadet_test base vs branch (off, ALL IDENTICAL); deck_check, machine_check on the ON copy (and on the base's ON copy to
+  compare); `PERF_SCENES='Step 6' python3 perf_check.py BUILD`; check_fast.
+- Each check in its own CADET_WORK (DEV_NOTES "Parallel runs"); at most two browser checks at once.
