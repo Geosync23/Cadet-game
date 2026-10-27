@@ -61,6 +61,7 @@
   again, and the check's two runs share SHIP.occasions). machine_check on the on copy OK twice.
 - Shoulds S1-S4 **done** (build table 0.93.4-s.12; promo_beats_check part t3shoulds): friends' Mail from 12:30; no "reputation down" toast at the promotion (15b's guideShiftWords, P5_STEP5); the visitor chair's toast has words (`pu3.result.sit`, a stand-in for the writer); Dev presets Days 17-18 follow the ladder (no m17).
 - RV22's MUST on cbca3e3e (build table 0.93.4-s.13): the M1 comment had been put mid-line and disabled ladderBigP5's sort; moved to the line above, order re-checked (m19 before m17), machine_check twice OK.
+- RV22 PASSED f00d93c1 (01:49 UTC) with one should: the friends' Mail filed at 08:30 dated 12:30; fixed in s.14 (`puFriendsTick`: filed at 12:30, dated then). Also from RV22/RV20 for lead 40: the ladder fix must reach B2's and B3's branches (they carry 51b1a9c6).
 - Note for the systems engineer: machine_check's traced run keeps SHIP.occasions between its two runs (an isolation gap).
 
 ## Open

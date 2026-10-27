@@ -325,7 +325,7 @@ def part_t3result(g):
       const keep = puNearMe; puNearMe = (id, r) => id === 'calder' ? true : keep(id, r); __tick(); puNearMe = keep;
       out.dlg = DIALOGUE && DIALOGUE.id; """ + dlg_run(0) + """
       out.w = [W.tier, W.rank, W.xp]; out.t3 = puT3(); out.rec = worksRecordHead().text; out.bar = SHIP.occasions.filter(x => x.id === 'pu3Bar').map(x => hhmm(x.at % 1440) + ' day ' + (Math.floor(x.at / 1440) + 1));
-      out.friends = __mail().filter(m => /^(Pell|Tomas|Rina)/.test(m)).length; out.kind = (puTalkKind(shipNow()) || [])[0];
+      out.kind = (puTalkKind(shipNow()) || [])[0]; const f0 = __mail().filter(m => /^(Pell|Tomas|Rina)/.test(m)).length; setShipNow(15 * 1440 + 751); __tick(); out.friends = __mail().filter(m => /^(Pell|Tomas|Rina)/.test(m)).length - f0 + (f0 ? 100 : 0);   // filed at lunch, none before
       """ + T3_RES.replace('const W =', 'const W2 =').replace('W.', 'W2.').replace('const T = puSet', 'const T2 = puSet').replace('T.passed', 'T2.passed').replace('T.tries', 'T2.tries') + """
       setShipNow(15 * 1440 + 400); __tick(); setShipNow(15 * 1440 + 556); __tick(); out.late = [W2.tier, (puT3() || {}).res, __mail().filter(m => /You weren't about/.test(m)).length]; return out; })()""")
     for k, v in r.items(): print('   ', k, v)
@@ -382,11 +382,12 @@ def part_t3shoulds(g):
     print('(t3shoulds) RV20\'s shoulds: the friends\' Mail at lunch, no "reputation down" at the promotion, the presets\' order:')
     r = g.ev("""(() => { """ + T3_RES + """ const out = {}; setShipNow(15 * 1440 + 496); __bay(); GUIDE_SHIFT.band = worksBand(); GUIDE_SHIFT.tier = 2;
       puPromote(shipNow(), 'met'); __toasts.length = 0; guideShiftWords(Math.floor(shipNow()), false); out.toasts = __toasts.map(t => t.join(': '));
-      out.friends = SHIP.mail.filter(m => /^(Pell|Tomas|Rina)/.test(m.from)).map(m => hhmm(m.at % 1440));
+      const early = SHIP.mail.filter(m => /^(Pell|Tomas|Rina)/.test(m.from)).length; setShipNow(15 * 1440 + 751); __tick();
+      out.friends = SHIP.mail.filter(m => /^(Pell|Tomas|Rina)/.test(m.from)).map(m => hhmm(m.at % 1440) + (m.at > shipNow() ? ' future' : '')); out.early = early;
       const c = devmodeCareerFor(18); out.pre = ['m15', 'm17', 'm19'].map(k => k + ':' + (c.tr[k] === undefined ? '-' : c.tr[k])); return out; })()""")
     print('   ', r)
     check(not any('down' in t for t in r['toasts']), f"t3shoulds: no \"reputation down\" as you're promoted ({r['toasts']})")
-    check(len(r['friends']) == 2 and all(x >= '12:30' for x in r['friends']), f"t3shoulds: the friends' Mail at lunch, as their words say ({r['friends']})")
+    check(r['early'] == 0 and len(r['friends']) == 2 and all(x >= '12:30' and 'future' not in x for x in r['friends']), f"t3shoulds: the friends' Mail filed at lunch, dated then, none before ({r['early']}, {r['friends']})")
     check(r['pre'] == ['m15:17', 'm17:-', 'm19:17'], f"t3shoulds: the Day 18 preset follows the ladder (m15 with m19 on Day 17, no m17) ({r['pre']})")
 
 with sync_playwright() as pw:
