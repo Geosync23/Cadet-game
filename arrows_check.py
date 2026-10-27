@@ -385,7 +385,7 @@ class Follower:
         pg = self.pg
         while pg.ev('shipNow()') < until_min_abs:
             pg.step(every, 50)
-            if self.trace is not None: self.trace.append(pg.ev(TRACE))   # endstay / endgo: which level-1 entries are due, and which leads
+            if self.trace is not None: self.trace.append(pg.ev(getattr(self, 'trace_js', None) or TRACE))   # (step6: its own, S6_TRACE)   # endstay / endgo: which level-1 entries are due, and which leads
             r = pg.ev(self.pre) if self.pre else None                    # endstay / endgo: the ending's own buttons first (END_PICK)
             if not r: r = pg.ev(FOLLOW)
             if isinstance(r, dict) and r.get('click'):
@@ -683,16 +683,18 @@ S6_HOOK = r"""(() => { if (window.__s6hook) return; window.__s6hook = 1; const L
 S6_BEATS = [
   ['the briefing', 'm21:', "SHIP.works.tr.m21 === 22", "typeof m21Book === 'function'"],
   ['the Tier 4 test', 'pu4:', "!!(SHIP.works.pu && SHIP.works.pu.t4 && SHIP.works.pu.t4.passed)", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
-  ['sleep by day', 'p5n:bed', "(simNotes('sleep', 0) || []).length >= 0", "typeof playerNightOn === 'function'"],
-  ['night 1', 'p5n:', "!!(SHIP.works.ns && SHIP.works.ns[22] && SHIP.works.ns[22].in)", "typeof playerNightOn === 'function'"],
+  ['sleep by day', 'p5n:bed:22', "(simNotes('sleep', 0) || []).length >= 0", "typeof playerNightOn === 'function'"],
+  ['night 1', 'p5n:in:22', "!!(SHIP.works.ns && SHIP.works.ns[22] && SHIP.works.ns[22].in)", "typeof playerNightOn === 'function'"],
   ['the welcome', 'pu4:welcome', "flag('pu4.welcome') !== undefined || !!(SHIP.works.pu && SHIP.works.pu.t4 && SHIP.works.pu.t4.welcome)", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
   ['the badge', 'pu4:badge', "!!(SHIP.works.pu && SHIP.works.pu.t4 && SHIP.works.pu.t4.badge)", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
-  ['night 2', 'p5n:', "!!(SHIP.works.ns && SHIP.works.ns[23] && SHIP.works.ns[23].in)", "typeof playerNightOn === 'function'"],
+  ['night 2', 'p5n:in:23', "!!(SHIP.works.ns && SHIP.works.ns[23] && SHIP.works.ns[23].in)", "typeof playerNightOn === 'function'"],
   ['night 3 (the coil swap)', 'm24:', "!!(SHIP.works.side && SHIP.works.side.m24 && SHIP.works.side.m24.done)", "typeof m24Book === 'function'"],
   ['the move', 'pu4:move', "SHIP.works.home === '2-B'", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
   ['mentoring', 'mt:', "!!(SHIP.works.mt && SHIP.works.mt.done)", "typeof P5_M25 !== 'undefined' && P5_M25 && typeof mtTick === 'function'"],
   ['Calder\'s question', 'cq:', "!!(SHIP.works.end && SHIP.works.end.answer)", "typeof P5_END !== 'undefined' && P5_END && typeof endQuestion === 'function'"],
 ]
+# skips stop a little before each of Step 6's times, so the beat's own tick runs live (an arrow is asked in play, not while time skips)
+S6_STOPS = sorted((d - 1) * 1440 + m for d, ms in {19: [570], 21: [1050], 22: [475, 555, 750, 1000, 1335], 23: [345, 960, 1235], 24: [345, 1235], 25: [345, 1020, 1140], 26: [520, 1100]}.items() for m in ms)
 def step6_on(src): return src.replace("const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');", 'const P5_STEP6 = P5_STEP5 && true;', 1)
 def part_step6(ctx, path, way):
     tag = 'step6' + ('' if way == 'asis' else ':' + way)
@@ -700,17 +702,20 @@ def part_step6(ctx, path, way):
     if not pg.ev("typeof P5_STEP6 !== 'undefined' && P5_STEP6"): fail(f'{tag}: P5_STEP6 off in this copy'); pg.page.close(); return
     real_game(pg, 19)
     pg.ev("(() => { const W = SHIP.works, B = WORK_BANDS[W.tier] || WORK_BANDS[3], k = B.findIndex(b => b[1] === 'trusted'); if (k >= 0) W.xp = Math.max(W.xp, B[k][0] + 1); })()")   # a Senior at Trusted (the spec's Day 19 save)
+    pg.ev("(() => { const W = SHIP.works; if (ladderRow('m20') && W.tr.m20 === undefined) { W.tr.m20 = 18; W.use.m20 = 1; (W.op[18] = W.op[18] || []).push('m20'); } })()")   # Step 5's last lesson done (the sensor array): a Step 5 lesson carried into Day 22 blocks the Tier 4 test (backlog MA6-2), checked apart
+    print(f'  {tag}: (the setup counts Step 5\'s sensor array lesson as done: backlog MA6-2)')
     if way == 'teachoff': pg.ev("SHIP.device.settings.teach = 'off'")
     pg.ev(S6_HOOK)
     st0 = pg.ev("(() => { const W = SHIP.works; return { tier: W.tier, rank: W.rank, band: worksBandWord(), m19: W.tr.m19 }; })()")
     print(f'  {tag}: Day 19 start: {st0}')
-    f = Follower(pg); f.trace = []
+    f = Follower(pg); f.trace = []; f.trace_js = S6_TRACE
     track = "(() => { const j = (SHIP.jobs || []).find(j => j.status === 'open' && !j.claimedBy); if (j) SHIP.player.track = j.id; return j ? j.id : null; })()"
-    def advance_to(t):                                 # the quiet hours skipped, but followed whenever a Step 6 level-1 arrow is due
+    def advance_to(t):                                 # the quiet hours skipped, but followed whenever a level-1 arrow is due; a skip never crosses one of Step 6's times (S6_STOPS)
         while pg.ev('shipNow()') < t:
             n = pg.ev('shipNow()')
             if pg.ev(S6_DUE): f.run(min(t, n + 10)); continue
-            pg.ev(f"devmodeSkipTo({min(t, n + 20)}); for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 70)"); pg.step(3, 50)
+            stop = min([x for x in S6_STOPS if x > n + 1] or [t])
+            pg.ev(f"devmodeSkipTo({min(t, n + 20, stop)}); for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 70)"); pg.step(3, 50)
     for d in range(19, int(os.environ.get('S6_UNTIL', 26)) + 1):
         if way == 'track': pg.ev(track)
         if os.environ.get('S6_UNTIL') and d == int(os.environ['S6_UNTIL']):   # (debugging) stop at noon that day, the state at 09:20 and 12:00
