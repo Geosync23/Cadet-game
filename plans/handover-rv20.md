@@ -1,4 +1,4 @@
-# Handover: RV20 (Step 5 reviewer), 2026-10-26 ~23:50 UTC
+# Handover: RV20 (Step 5 reviewer), updated 2026-10-27 ~00:50 UTC (handing over at ~58% memory)
 
 **Role:** reviewer for Pillar 5 Step 5 (spec plans/p5-step5-spec.html on claude/p5-specs). Notes-only branch
 `claude/review-rv20`; the full log and every verdict are in `plans/review-rv20.md` (its last section, "STOPPING POINT",
@@ -17,7 +17,19 @@ link for the user).
 | B3 shutdowns | 5ad090ff | FIXES NEEDED (M1 teacher: B5's e7ff9253; M2, M3: B3's 9ab93abf, not reviewed) |
 | B2 tap fix (0.93.4) | c79a66dc | PASS |
 | EN1 careerOff hook | cd4196d5 | OK (one-line career review for lead 40 / RV21) |
-Open: 9ab93abf (B3 shutdown fixes, not started). Done since: b7e84f81 PASS; deefa61a PASS for B2 (the build carries 51b1a9c6's machine_check FAIL); e7ff9253 FIXES NEEDED (that FAIL; shoulds S1-S4). See review-rv20.md, last section.
+Done since the stopping point: b7e84f81 PASS; deefa61a PASS for B2's work; e7ff9253 / 5703dfb6 FIXES NEEDED
+(one must: machine_check); fa1e152c (B3 shutdown fixes) PASS.
+
+## Open, for the next reviewer (lead 40's order)
+1. **B5's machine_check fix** (claude/p5s5-promo, not landed at 00:50; head 516333a1 = 5703dfb6 + handover). The bug:
+   machine_check.py on a copy with `const P5_STEP5 = true;` fails "traced faults" ("the same twice False"): its 28-day
+   traced run twice in one page differs. Bisect: 283aed60 OK, 3da2b3a1 OK, 3c38a65f OK, **51b1a9c6 FAIL** (B1's ladder
+   order: ladderBigP5 / ladderClearDay, the m15 fold-in onSim, psAsk / p5Escort). When it lands: machine_check on the on
+   copy ("the same twice True" and MACHINE CHECK OK), promo_beats_check (on), cadet_test vs 5957d244, check_fast; then
+   confirm the promotion branch passes (my earlier play and checks on e7ff9253 / 5703dfb6 stand; B5 reports arrows step5
+   OK all three ways). Then B5's shoulds S1-S4 (review-rv20.md). The same fix must reach deefa61a (B2) and fa1e152c (B3),
+   which carry 51b1a9c6: re-run machine_check on their on copies after merging it.
+2. The new user rule (lead 40, 00:40 UTC): everything ships ON. So on-copy checks are the ones that count.
 
 ## Builders
 B2 mechanics A session_015mjNkxuGoEZGKA2ksBPz9u (claude/p5s5-mech-a, claude/workstep-tap-fix); B3 session_014FBmsiTsA9QymoN2qt4NyL
