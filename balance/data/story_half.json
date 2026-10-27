@@ -1,0 +1,530 @@
+{
+ "t4": {
+  "day": 31,
+  "tries": 0,
+  "passed": true,
+  "res": 32,
+  "badge": 32,
+  "move": {
+   "ready": 39,
+   "walked": null,
+   "refit": true
+  }
+ },
+ "mt": {
+  "day": 26,
+  "set": 25,
+  "steps": {
+   "done": 36920
+  },
+  "late": null,
+  "clue": null
+ },
+ "end": {
+  "day": 33,
+  "set": 32,
+  "steps": {},
+  "answer": null
+ },
+ "home": "4-23",
+ "tr": {
+  "m1": 2,
+  "m4": 3,
+  "m3d": 3,
+  "m3i": 4,
+  "m5": 4,
+  "m7": 5,
+  "p3": 5,
+  "m6": 8,
+  "m2": 8,
+  "t2": 9,
+  "m8": 11,
+  "ps": 12,
+  "m9": 12,
+  "p1": 15,
+  "t3": 16,
+  "m15": 17,
+  "m19": 18,
+  "m18": 19,
+  "m20": 22,
+  "m21": 26,
+  "m25": 26,
+  "p4": 29,
+  "p5": 30,
+  "m13": 30,
+  "t4": 31,
+  "m23": 33,
+  "p6": 33,
+  "m24": 36,
+  "p7": 36,
+  "m17": 37,
+  "p8": 37,
+  "m22": 38
+ },
+ "endWeek": {
+  "offer": 39,
+  "due": 41,
+  "settle": 42,
+  "leave": 43
+ },
+ "endState": {
+  "offer": {
+   "day": 39,
+   "met": false,
+   "how": null
+  },
+  "said": [],
+  "settled": null,
+  "f": {
+   "invite": 55080,
+   "seek": 55740
+  }
+ },
+ "occ": [
+  [
+   "works.m1",
+   2,
+   "09:35",
+   "kept",
+   true
+  ],
+  [
+   "works.m4",
+   3,
+   "10:15",
+   "kept",
+   true
+  ],
+  [
+   "works.m5",
+   4,
+   "09:15",
+   "kept",
+   true
+  ],
+  [
+   "works.m7",
+   5,
+   "09:15",
+   "kept",
+   true
+  ],
+  [
+   "works.m6",
+   8,
+   "09:15",
+   "kept",
+   true
+  ],
+  [
+   "promoSummons",
+   10,
+   "08:15",
+   "kept",
+   true
+  ],
+  [
+   "promoCeremony",
+   10,
+   "16:30",
+   "kept",
+   true
+  ],
+  [
+   "works.m8",
+   11,
+   "09:00",
+   "kept",
+   true
+  ],
+  [
+   "works.m9",
+   12,
+   "09:15",
+   "kept",
+   true
+  ],
+  [
+   "works.ps",
+   12,
+   "09:00",
+   "kept",
+   true
+  ],
+  [
+   "works.t3",
+   15,
+   "10:00",
+   "kept",
+   true
+  ],
+  [
+   "works.m15",
+   17,
+   "09:15",
+   "kept",
+   true
+  ],
+  [
+   "pu3Result",
+   17,
+   "08:15",
+   "kept",
+   true
+  ],
+  [
+   "pu3Bar",
+   17,
+   "16:30",
+   "kept",
+   true
+  ],
+  [
+   "works.m19",
+   18,
+   "09:00",
+   "kept",
+   true
+  ],
+  [
+   "pu3Toast",
+   18,
+   "19:00",
+   "missed",
+   false
+  ],
+  [
+   "works.m18",
+   19,
+   "09:15",
+   "kept",
+   true
+  ],
+  [
+   "works.m20",
+   22,
+   "09:15",
+   "kept",
+   true
+  ],
+  [
+   "m21.brief",
+   22,
+   "08:30",
+   "missed",
+   false
+  ],
+  [
+   "works.m21",
+   26,
+   "09:15",
+   "kept",
+   true
+  ],
+  [
+   "m21.brief",
+   29,
+   "08:30",
+   "missed",
+   false
+  ],
+  [
+   "works.t4",
+   31,
+   "09:00",
+   "kept",
+   true
+  ],
+  [
+   "pu4Badge",
+   32,
+   "16:30",
+   "kept",
+   true
+  ],
+  [
+   "works.m23",
+   33,
+   "09:15",
+   "kept",
+   true
+  ],
+  [
+   "works.m24",
+   36,
+   "09:00",
+   "asked",
+   true
+  ],
+  [
+   "m21.brief",
+   36,
+   "08:30",
+   "asked",
+   false
+  ],
+  [
+   "works.m17",
+   37,
+   "09:00",
+   "asked",
+   true
+  ],
+  [
+   "works.m22",
+   38,
+   "09:00",
+   "asked",
+   true
+  ],
+  [
+   "endingOffer",
+   39,
+   "16:00",
+   "asked",
+   false
+  ]
+ ],
+ "mail": [
+  [
+   42,
+   "Stores: Out of filters"
+  ],
+  [
+   42,
+   "Stores: Out of membranes"
+  ],
+  [
+   40,
+   "Stores: Out of oxygen cells"
+  ],
+  [
+   39,
+   "Chief Ines Calder: Tonight"
+  ],
+  [
+   39,
+   "Stores: Out of cells"
+  ],
+  [
+   38,
+   "Emeka Halloran: Bring the parts"
+  ],
+  [
+   38,
+   "Chief Ines Calder: Training: The night shift"
+  ],
+  [
+   37,
+   "Emeka Halloran: The lift roof"
+  ],
+  [
+   36,
+   "Emeka Halloran: Bring the parts"
+  ],
+  [
+   36,
+   "Stores: Out of oxygen cells"
+  ],
+  [
+   36,
+   "Captain Odile Marrow: The Monday briefing"
+  ],
+  [
+   36,
+   "Saad Salo: The mug rack"
+  ],
+  [
+   36,
+   "Chief Ines Calder: Training: Leading a team"
+  ],
+  [
+   33,
+   "Stores: Out of cells"
+  ],
+  [
+   33,
+   "Alejandro Reyes: Training: Engine work and the reactor"
+  ],
+  [
+   32,
+   "Chief Ines Calder: Friday tea"
+  ],
+  [
+   32,
+   "Chief Ines Calder: Your quarters"
+  ],
+  [
+   32,
+   "Captain Odile Marrow: Your badge"
+  ],
+  [
+   32,
+   "Captain Odile Marrow: Your badge, today 16:30"
+  ],
+  [
+   32,
+   "Chief Ines Calder: Your result"
+  ],
+  [
+   31,
+   "Farah Rahman: Bring the parts"
+  ],
+  [
+   31,
+   "Chief Ines Calder: Your test"
+  ],
+  [
+   31,
+   "Chief Ines Calder: Training: Your Tier 4 test job"
+  ],
+  [
+   30,
+   "Chief Ines Calder: Your Tier 4 test"
+  ],
+  [
+   29,
+   "Captain Odile Marrow: The Monday briefing"
+  ],
+  [
+   29,
+   "Priya Kowal: The fan spindle"
+  ],
+  [
+   29,
+   "Zainab Kovac: The guitar hook"
+  ],
+  [
+   29,
+   "Stores: Out of membranes"
+  ],
+  [
+   27,
+   "Stores: Out of filters"
+  ],
+  [
+   27,
+   "Stores: Out of cells"
+  ],
+  [
+   26,
+   "Chief Ines Calder: Basil"
+  ],
+  [
+   26,
+   "Captain Odile Marrow: Training: The Monday briefing"
+  ],
+  [
+   25,
+   "Chief Ines Calder: Tomorrow"
+  ],
+  [
+   25,
+   "Chief Ines Calder: Missed shift"
+  ],
+  [
+   24,
+   "Chief Ines Calder: Missed shift"
+  ],
+  [
+   23,
+   "Chief Ines Calder: Missed shift"
+  ],
+  [
+   22,
+   "Chief Ines Calder: Your nights"
+  ],
+  [
+   22,
+   "Hana Mori: Training: the sensor array"
+  ],
+  [
+   22,
+   "Captain Odile Marrow: The Monday briefing"
+  ],
+  [
+   22,
+   "Rafe Mwangi: The drawer pull"
+  ],
+  [
+   22,
+   "Alejandro Reyes: The guitar hook"
+  ],
+  [
+   22,
+   "Hana Mori: The sensor array"
+  ],
+  [
+   20,
+   "Stores: Out of cells"
+  ],
+  [
+   19,
+   "Davi Keane: The lamp arm"
+  ],
+  [
+   19,
+   "Chief Ines Calder: Shutdowns"
+  ],
+  [
+   18,
+   "Captain Odile Marrow: Tonight"
+  ],
+  [
+   18,
+   "Captain Odile Marrow: The toast"
+  ],
+  [
+   18,
+   "Chief Ines Calder: Power and relays"
+  ],
+  [
+   17,
+   "Captain Odile Marrow: Your bar"
+  ],
+  [
+   17,
+   "Emeka Halloran: Bring the parts"
+  ],
+  [
+   17,
+   "Stores: The supply shuttle is late"
+  ],
+  [
+   17,
+   "Captain Odile Marrow: Your bar, 16:30"
+  ],
+  [
+   17,
+   "Chief Ines Calder: Your result"
+  ],
+  [
+   17,
+   "Chief Ines Calder: Your result"
+  ],
+  [
+   17,
+   "Chief Ines Calder: Training: rewiring"
+  ],
+  [
+   17,
+   "Stores: Out of membranes"
+  ],
+  [
+   16,
+   "Emeka Halloran: Washer overhaul"
+  ],
+  [
+   16,
+   "Chief Ines Calder: Your test"
+  ],
+  [
+   15,
+   "Chief Ines Calder: Your Tier 3 test"
+  ],
+  [
+   15,
+   "Chief Ines Calder: Training: Your Tier 3 test job"
+  ]
+ ]
+}

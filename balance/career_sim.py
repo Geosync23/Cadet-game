@@ -35,6 +35,10 @@ def build(SUM):
     S = S.replace("  const lazySkip = new Set();", "  const lazySkip = new Set(); const __miss = {}; let __budget = 0, __mins = 0, __idle = 0, __kinds = {};", 1)
     S = S.replace("    days_.push({ tier:", "    days_.push({ mins: __mins, idle: __idle, kinds: JSON.stringify(__kinds), meters: typeof shipMeters === 'function' ? shipMeters() : null, career: SHIP.career ? { st: SHIP.career.st, n: SHIP.career.n, go: SHIP.career.go, ms: SHIP.career.ms, work: typeof careerWork === 'function' ? Math.round(careerWork()) : null } : null, health: typeof shipHealth === 'function' ? shipHealth() : null, srep: SHIP.rep && SHIP.rep.ship ? JSON.parse(JSON.stringify(SHIP.rep.ship)) : null, tier:", 1)
     S = S.replace("    let jobs = 0, used = [];", "    let jobs = 0, used = []; __mins = 0; __idle = 0; __kinds = {};", 1)
+    if os.environ.get('REALMECH'):   # keep the game's own sub-blocks; stand-ins only for rows that have none
+        a = "  for (const k in WORK_MECH) delete WORK_MECH[k];\n"; assert a in S; S = S.replace(a, "  const __real = new Set(Object.keys(WORK_MECH));\n", 1)
+        b = "if (plan !== 'none') for (const r of CAREER_LADDER) WORK_MECH[r.id] ="; assert b in S
+        S = S.replace(b, "if (plan !== 'none') for (const r of CAREER_LADDER) if (!__real.has(r.id)) WORK_MECH[r.id] =", 1)
     return S
 
 if __name__ == '__main__':

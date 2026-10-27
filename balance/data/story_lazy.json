@@ -1,0 +1,525 @@
+{
+ "t4": null,
+ "mt": null,
+ "end": null,
+ "home": "4-23",
+ "tr": {
+  "m1": 2,
+  "m3i": 4,
+  "m4": 4,
+  "m5": 8,
+  "m7": 10,
+  "m3d": 10,
+  "m2": 10,
+  "p3": 11,
+  "m6": 12,
+  "t2": 15,
+  "m8": 16,
+  "m9": 17,
+  "p1": 19,
+  "m15": 19,
+  "m17": 22,
+  "m22": 29
+ },
+ "endWeek": {
+  "offer": 39,
+  "due": 41,
+  "settle": 42,
+  "leave": 43
+ },
+ "endState": {
+  "offer": {
+   "day": 39,
+   "met": false,
+   "how": null
+  },
+  "said": [],
+  "settled": null,
+  "f": {
+   "invite": 55080,
+   "seek": 55740
+  }
+ },
+ "occ": [
+  [
+   "works.m1",
+   2,
+   "09:35",
+   "kept",
+   true
+  ],
+  [
+   "works.m4",
+   3,
+   "10:15",
+   "missed",
+   false
+  ],
+  [
+   "works.m4",
+   4,
+   "09:00",
+   "kept",
+   true
+  ],
+  [
+   "works.m5",
+   5,
+   "09:15",
+   "missed",
+   false
+  ],
+  [
+   "works.m5",
+   8,
+   "09:00",
+   "kept",
+   true
+  ],
+  [
+   "works.m7",
+   9,
+   "09:15",
+   "missed",
+   false
+  ],
+  [
+   "works.m7",
+   10,
+   "09:15",
+   "kept",
+   true
+  ],
+  [
+   "works.m6",
+   11,
+   "09:15",
+   "missed",
+   false
+  ],
+  [
+   "works.m6",
+   12,
+   "09:15",
+   "kept",
+   true
+  ],
+  [
+   "promoSummons",
+   16,
+   "08:15",
+   "kept",
+   true
+  ],
+  [
+   "works.m8",
+   16,
+   "10:00",
+   "kept",
+   true
+  ],
+  [
+   "promoCeremony",
+   16,
+   "16:30",
+   "kept",
+   true
+  ],
+  [
+   "works.ps",
+   16,
+   "10:00",
+   "missed",
+   false
+  ],
+  [
+   "works.m9",
+   17,
+   "09:00",
+   "kept",
+   true
+  ],
+  [
+   "works.ps",
+   17,
+   "09:15",
+   "missed",
+   false
+  ],
+  [
+   "works.m15",
+   18,
+   "09:15",
+   "missed",
+   false
+  ],
+  [
+   "works.ps",
+   18,
+   "09:00",
+   "missed",
+   false
+  ],
+  [
+   "works.m15",
+   19,
+   "09:15",
+   "kept",
+   true
+  ],
+  [
+   "works.ps",
+   19,
+   "09:15",
+   "missed",
+   false
+  ],
+  [
+   "works.m17",
+   22,
+   "09:00",
+   "kept",
+   true
+  ],
+  [
+   "works.ps",
+   22,
+   "09:15",
+   "missed",
+   false
+  ],
+  [
+   "works.m22",
+   26,
+   "09:15",
+   "missed",
+   false
+  ],
+  [
+   "works.ps",
+   26,
+   "09:15",
+   "missed",
+   false
+  ],
+  [
+   "works.m22",
+   29,
+   "09:15",
+   "kept",
+   true
+  ],
+  [
+   "works.ps",
+   29,
+   "09:00",
+   "missed",
+   false
+  ],
+  [
+   "works.ps",
+   30,
+   "09:00",
+   "asked",
+   false
+  ],
+  [
+   "works.ps",
+   31,
+   "09:00",
+   "asked",
+   false
+  ],
+  [
+   "works.ps",
+   32,
+   "09:00",
+   "asked",
+   false
+  ],
+  [
+   "works.ps",
+   33,
+   "09:15",
+   "asked",
+   false
+  ],
+  [
+   "works.ps",
+   36,
+   "09:15",
+   "asked",
+   false
+  ],
+  [
+   "works.ps",
+   37,
+   "09:15",
+   "asked",
+   false
+  ],
+  [
+   "works.ps",
+   38,
+   "09:15",
+   "asked",
+   false
+  ],
+  [
+   "works.ps",
+   39,
+   "09:00",
+   "asked",
+   false
+  ],
+  [
+   "works.ps",
+   40,
+   "09:15",
+   "asked",
+   false
+  ]
+ ],
+ "mail": [
+  [
+   40,
+   "Chief Ines Calder: Power safety"
+  ],
+  [
+   40,
+   "Stores: Out of filters"
+  ],
+  [
+   39,
+   "Chief Ines Calder: Power safety"
+  ],
+  [
+   38,
+   "Emeka Halloran: Bring the parts"
+  ],
+  [
+   38,
+   "Stores: Out of cells"
+  ],
+  [
+   38,
+   "Chief Ines Calder: Power safety"
+  ],
+  [
+   37,
+   "Chief Ines Calder: Power safety"
+  ],
+  [
+   36,
+   "Emeka Halloran: Bring the parts"
+  ],
+  [
+   36,
+   "Chief Ines Calder: Power safety"
+  ],
+  [
+   36,
+   "Saad Salo: The mug rack"
+  ],
+  [
+   36,
+   "Stores: Out of membranes"
+  ],
+  [
+   35,
+   "Stores: Out of oxygen cells"
+  ],
+  [
+   34,
+   "Stores: Out of filters"
+  ],
+  [
+   33,
+   "Chief Ines Calder: Power safety"
+  ],
+  [
+   32,
+   "Chief Ines Calder: Power safety"
+  ],
+  [
+   32,
+   "Stores: Out of cells"
+  ],
+  [
+   31,
+   "Farah Rahman: Bring the parts"
+  ],
+  [
+   31,
+   "Chief Ines Calder: Power safety"
+  ],
+  [
+   30,
+   "Stores: Out of oxygen cells"
+  ],
+  [
+   30,
+   "Chief Ines Calder: Power safety"
+  ],
+  [
+   29,
+   "Chief Ines Calder: Power safety"
+  ],
+  [
+   29,
+   "Priya Kowal: The fan spindle"
+  ],
+  [
+   29,
+   "Zainab Kovac: The guitar hook"
+  ],
+  [
+   29,
+   "Chief Ines Calder: Training: The night shift"
+  ],
+  [
+   27,
+   "Stores: Out of filters"
+  ],
+  [
+   27,
+   "Stores: Out of membranes"
+  ],
+  [
+   26,
+   "Chief Ines Calder: Power safety"
+  ],
+  [
+   26,
+   "Stores: Out of cells"
+  ],
+  [
+   26,
+   "Chief Ines Calder: Training: The night shift"
+  ],
+  [
+   25,
+   "Chief Ines Calder: Missed shift"
+  ],
+  [
+   24,
+   "Chief Ines Calder: Missed shift"
+  ],
+  [
+   23,
+   "Stores: Out of oxygen cells"
+  ],
+  [
+   23,
+   "Stores: Out of filters"
+  ],
+  [
+   23,
+   "Chief Ines Calder: Missed shift"
+  ],
+  [
+   22,
+   "Chief Ines Calder: Your nights"
+  ],
+  [
+   22,
+   "Chief Ines Calder: Power safety"
+  ],
+  [
+   22,
+   "Emeka Halloran: The lift roof"
+  ],
+  [
+   21,
+   "Stores: Out of membranes"
+  ],
+  [
+   20,
+   "Stores: Out of cells"
+  ],
+  [
+   19,
+   "Chief Ines Calder: Power safety"
+  ],
+  [
+   19,
+   "Stores: Out of filters"
+  ],
+  [
+   19,
+   "Chief Ines Calder: Training: rewiring"
+  ],
+  [
+   18,
+   "Stores: Out of oxygen cells"
+  ],
+  [
+   18,
+   "Stores: Out of UV lamps"
+  ],
+  [
+   18,
+   "Chief Ines Calder: Power safety"
+  ],
+  [
+   18,
+   "Chief Ines Calder: Training: rewiring"
+  ],
+  [
+   17,
+   "Emeka Halloran: Washer overhaul"
+  ],
+  [
+   17,
+   "Stores: The supply shuttle is late"
+  ],
+  [
+   17,
+   "Chief Ines Calder: Power safety"
+  ],
+  [
+   17,
+   "Chief Ines Calder: The pipe kit"
+  ],
+  [
+   16,
+   "Chief Ines Calder: Your cabin"
+  ],
+  [
+   16,
+   "Chief Ines Calder: Your cabin"
+  ],
+  [
+   16,
+   "Emeka Halloran: Scrubber fan change"
+  ],
+  [
+   16,
+   "Chief Ines Calder: Power safety"
+  ],
+  [
+   16,
+   "The Captain's office: Your pip, 16:30"
+  ],
+  [
+   16,
+   "Chief Ines Calder: A ticket case"
+  ],
+  [
+   16,
+   "Zeke Torres: Recycler, 09:30"
+  ],
+  [
+   16,
+   "Captain Odile Marrow: Congratulations"
+  ],
+  [
+   16,
+   "Chief Ines Calder: Your result"
+  ],
+  [
+   15,
+   "Stores: Out of membranes"
+  ]
+ ]
+}

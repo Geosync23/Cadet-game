@@ -1,0 +1,31 @@
+== relaxed t4 None 
+  mt None 
+  end None 
+  endWeek None home 4-23
+  occasions: []
+  mail >= Day 20:
+    [40, 'Stores: Out of filters']
+    [39, 'Stores: Out of cells']
+    [38, 'Emeka Halloran: Scrubber fan change']
+    [36, 'Emeka Halloran: Recycler membrane change']
+    [36, 'Stores: Out of oxygen cells']
+    [36, 'Saad Salo: The mug rack']
+    [32, 'Stores: Out of cells']
+    [32, 'Stores: Out of membranes']
+    [29, 'Stores: Out of oxygen cells']
+    [29, 'Priya Kowal: The fan spindle']
+    [29, 'Zainab Kovac: The guitar hook']
+    [28, 'Stores: Out of cells']
+    [27, 'Stores: Out of filters']
+    [27, 'Stores: Out of membranes']
+    [25, 'Chief Ines Calder: Missed shift']
+    [24, 'Chief Ines Calder: Missed shift']
+    [23, 'Chief Ines Calder: Missed shift']
+    [22, 'Stores: Out of filters']
+    [22, 'Chief Ines Calder: Your nights']
+    [22, 'Rafe Mwangi: The drawer pull']
+    [22, 'Alejandro Reyes: The guitar hook']
+    [21, 'Stores: Out of oxygen cells']
+    [21, 'Stores: Out of membranes']
+    [21, 'Stores: Out of cells']
+errors []
