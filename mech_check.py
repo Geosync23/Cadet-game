@@ -1370,7 +1370,7 @@ PARTS['m15'] = part_m15
 # machine right and is a use; a repair of yours on a relay is a use too; stages at 3 and 6 uses; not taken, the crew's
 # the next day; the save cleaned; the same twice
 M19 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works), O0 = JSON.stringify(SHIP.occasions);
- const reset = t => { machinesNew(); SHIP.jobs = []; SHIP.flags = {}; SHIP.occasions.length = 0; MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t); W.tier = 3; W.rank = 'senior'; for (const r of CAREER_LADDER.slice(0, CAREER_LADDER.indexOf(ladderRow('m19')))) { W.tr[r.id] = 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); } W.xp = 999; delete worksSide().pwrOk; worksSide().pwr = null; W.inc = { plan: {}, open: null }; return W; };
+ const reset = t => { machinesNew(); SHIP.jobs = []; SHIP.flags = {}; SHIP.occasions.length = 0; SHIP.career = null;   /* (N6) the career afresh too: its misses and let-go day decide your workdays (playerShiftOn), so a run must not inherit the last one's */ MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t); W.tier = 3; W.rank = 'senior'; for (const r of CAREER_LADDER.slice(0, CAREER_LADDER.indexOf(ladderRow('m19')))) { W.tr[r.id] = 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); } W.xp = 999; delete worksSide().pwrOk; worksSide().pwr = null; W.inc = { plan: {}, open: null }; return W; };
  const tick = (a, b, s = 10) => { for (let t = a; t <= b; t += s) { setShipNow(t); machinesNow(); worksCareerTick(t); } };
  // the lesson's beats on Day 17: asked at 06:00 for 11:00 in the relay room; the notice at 10:30, the level 1 arrow from 10:45
  const said = [], kn = promoNotice; promoNotice = (x, f) => said.push([Math.round(shipNow() % 1440), x]);
@@ -1405,9 +1405,10 @@ M19 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works), O0 = JSON.st
  simNote('job', { step: 'turnin', id: rj.id, t: shipNow(), machine: rel.id, job: 'repair' }); simFlush(); out.repairUse = W.use.m19;
  out.stages = [0, 2, 3, 5, 6].map(n => { W.use.m19 = n; return worksStage('m19'); });
  // not taken: the crew's the next day
- // (N6: Days 30-31, a Tuesday and Wednesday clear of Step 6's nights; Day 23 has no day shift with P5_NIGHT on)
- W = reset(29 * 1440 + 480); W.tr.m19 = 17; j = pwrJob('relayswap', rel.id, shipNow(), { key: 93 }); SHIP.jobs.push(j); out.held = leaveEnd(j) - 29 * 1440;
- for (let t = 29 * 1440 + 490; t <= 30 * 1440 + 900; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); } out.crew = [j.status, j.doneBy !== 'you' && !!j.doneBy];
+ // (N6: Days 18-19, a Thursday and Friday before Step 6's nights; Day 23 has no day shift with P5_NIGHT on, and a later
+ // pair ran the weekly plan into a week the second run then saw)
+ W = reset(17 * 1440 + 480); W.tr.m19 = 17; j = pwrJob('relayswap', rel.id, shipNow(), { key: 93 }); SHIP.jobs.push(j); out.held = leaveEnd(j) - 17 * 1440;
+ for (let t = 17 * 1440 + 490; t <= 18 * 1440 + 900; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); } out.crew = [j.status, j.doneBy !== 'you' && !!j.doneBy];
  worksSide().pwr = { done: 'x', wrongs: -4 }; delete worksSide().pwrOk; out.save = JSON.stringify(pwrState()); worksSide().pwr = { done: 3, wrongs: 1, week: 4 }; delete worksSide().pwrOk; out.save2 = JSON.stringify(pwrState());
  SHIP.works = JSON.parse(W0); SHIP.occasions.length = 0; for (const o of JSON.parse(O0)) SHIP.occasions.push(o); SHIP.jobs = []; return out; })()"""
 def part_m19(g):
@@ -1433,6 +1434,7 @@ def part_m19(g):
     check(a['stages'] == [0, 0, 1, 1, 2], f"m19: stages at 3 and 6 uses ({a['stages']})")
     check(a['held'] == 1440 + 600 and a['crew'] == ['done', True], f"m19: not taken, the crew's the next day ({a['held']}, {a['crew']})")
     check(json.loads(a['save']) == {'done': 0, 'wrongs': 0, 'week': -1} and json.loads(a['save2']) == {'done': 3, 'wrongs': 1, 'week': 4}, 'm19: the save read back, junk cleaned')
+    if json.dumps(a, sort_keys=True) != json.dumps(b, sort_keys=True): print('  m19 differs in:', [k for k in a if json.dumps(a.get(k), sort_keys=True) != json.dumps(b.get(k), sort_keys=True)], {k: (a.get(k), b.get(k)) for k in a if json.dumps(a.get(k), sort_keys=True) != json.dumps(b.get(k), sort_keys=True)})
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm19: differs the second time')
 # turn 2: stage 2's conduit runs (the tester's reading, a wrong feed opens it again, the note for P5), the weeks with
 # them joining at 3 uses, the power line and its fault rows, and the Senior's part of the Wednesday drill (posted at
