@@ -54,7 +54,9 @@ PAPER = r"""(({ plan, days, t2 }) => {
     if (j.train === 'm7' && typeof scanRead === 'function') { scanRead(id); if (typeof caseTick === 'function') caseTick(); }   // the scanner's training: you read it first (it shows Day 5's case; p5-fix2)
     const cs = SHIP.works && SHIP.works.cases && (SHIP.works.cases.open || []).find(c => c.job === id);   // a head-scratcher (24k): call it right first
     if (cs && typeof caseCall === 'function') caseCall(cs.id, cs.cause);
-    jobStops(j).forEach((s, k) => jobStepDone(id, k)); return turnInJob(id); };
+    jobStops(j).forEach((s, k) => { const op = (s.opts && s.opts.options) || s.options; if (!Array.isArray(op)) { jobStepDone(id, k); return; }   // a pick (M19's relay and cells, its drill): the right one first, else each in turn, as a careful player
+      const right = Number.isInteger(j.bad) ? 'x' + j.bad : null, opts = right ? [right].concat(op.map(o => o.id).filter(x => x !== right)) : op.map(o => o.id);
+      for (const o of opts) if (jobStepDone(id, k, { pick: o }).ok) break; }); return turnInJob(id); };
   const lazySkip = new Set();                            // the lazy player misses each training's first ask
   let firstJob = null;
   for (let d = 1; d <= days; d++) {
