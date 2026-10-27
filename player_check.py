@@ -231,6 +231,9 @@ def night_part(pw, path):
     if 'function playerNightOn' not in src:
         print('The night shift: this build has no section 28a (playerNightOn): skipped'); return []
     sw = "const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');"
+    _t6 = re.compile(r"^const P5_STEP6 = P5_STEP5 && true;.*$", re.M)
+    if _t6.search(src):   # (BM19) switched on (0.95.0): the off test on a copy with the off line put back
+        src = _t6.sub(lambda m: sw, src, count=1); offp = WORK / 'test' / '_night_off.html'; offp.write_text(src); path = str(offp)
     print('The night shift (S6-1):')
     if sw in src:                                        # off as shipped: nothing of the nights
         g = Game(pw, path)

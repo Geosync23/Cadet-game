@@ -1493,8 +1493,11 @@ S6_RUN = {'p6': part_p6, 'p7': part_p7, 'p8': part_p8, 'point': part_point}
 
 def run_s6(path, parts):
     with sync_playwright() as pw:
-        src = pathlib.Path(path).read_text()
-        g = Game(pw, path, 390, 844); g.step(2)
+        src = pathlib.Path(path).read_text(); offp = path
+        _t6 = re.compile(r"^const P5_STEP6 = P5_STEP5 && true;.*$", re.M)
+        if _t6.search(src):   # (BM19) switched on (0.95.0): the off test on a copy with the off line put back, the parts as before
+            src = _t6.sub(lambda m: S6_ON, src, count=1); offp = WORK / 'test' / f'_s6off_{os.getpid()}_{pathlib.Path(path).name}'; offp.write_text(src); _RUN_FILES.append(offp); offp = str(offp)
+        g = Game(pw, offp, 390, 844); g.step(2)
         off = g.ev(S6_OFF); g.close()
         check(not off['kinds'] and not off['mech'] and not off['on'] and not off['notes'], f"Step 6 switch off: none of its cases registered: {off}")
         if S6_ON not in src:

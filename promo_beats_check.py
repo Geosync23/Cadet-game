@@ -272,7 +272,14 @@ def t4on(g, name):
     return on
 T4_W = "const W = __w(19, 470, { xp: 60, tr: { ps: 12, t2: 9, t3: 15, m19: 17 } }); W.tier = 3; W.rank = 'senior'; __friends();"
 def part_t4off(g):
-    if g.ev(T4): print('(t4off) P5_PROMO4 on in this build: skipped (it is the shipped build\'s part)'); return
+    if g.ev(T4):   # (BM19) switched on in 0.95.0: the off part on a copy with P5_STEP6 back to its off line
+        src = pathlib.Path(sys.argv[1]).read_text(); off = re.sub(r"^const P5_STEP6 = P5_STEP5 && true;", "const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');", src, count=1, flags=re.M)
+        if off == src: print('(t4off) P5_PROMO4 on in this build and no switch line to turn off: skipped'); return
+        cp = WORK / 'test' / f'_pb_t4off_{os.getpid()}_{pathlib.Path(sys.argv[1]).name}'; cp.write_text(off); _RUN_FILES.append(cp)
+        print('(t4off) on a copy with P5_STEP6 switched off'); h = Game(pw, str(cp)); h.step(2); check(h.ev(SETUP), 'setup (t4off copy)')
+        try: part_t4off(h)
+        finally: h.close()
+        return
     print('(t4off) P5_PROMO4 off: nothing of the Engine Specialist promotion:')
     r = g.ev("""(() => { """ + T4_W + """ __bay();
       for (const t of [18 * 1440 + 500, 18 * 1440 + 900, 20 * 1440 + 1090, 20 * 1440 + 1330]) { setShipNow(t); __tick(); }

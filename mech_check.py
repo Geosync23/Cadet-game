@@ -1724,6 +1724,124 @@ def part_m24(g):
     check(json.dumps(good, sort_keys=True) == json.dumps(good2, sort_keys=True), 'm24: differs the second time')
 PARTS['m24'] = part_m24
 
+# m23 (S6-5, DA6; 28c's own nights, never through the ladder): night 1 with Reyes on Day 22 from 22:45: the job yours as
+# the night starts (a side job), one notice, every stop in order (a wrong loop is looked at again, coil 2 can't be settled
+# before coil 1), the coil serviced, the Mail; nothing for a Senior Officer (the promotion on) nor on another night
+M23 = r"""((opt) => {
+  opt = opt || {};
+  const out = { notices: [], steps: [] };
+  SHIP.works = null; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = []; MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; GUIDE.list = [];
+  const pn = promoNotice; promoNotice = (text) => { if (/Reyes|reactor|permit|badge/i.test(text)) out.notices.push([shipNow() % 1440, text]); };
+  try {
+    const d = opt.day || 22; setShipNow((d - 1) * 1440 + 1350); machinesNow(); const W = worksInit(); W.tier = opt.tier || 4; W.rank = W.tier >= 4 ? 'specialist' : 'senior';
+    for (const r of CAREER_LADDER) if (r.id !== 'm23') { W.tr[r.id] = 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); }
+    out.on = m23On(d);
+    for (let t = shipNow(); t <= (d - 1) * 1440 + 1375; t++) { setShipNow(t); machinesNow(); worksCareerTick(t); }
+    const j = SHIP.jobs.find(x => x.kind === 'm23night'); out.job = j ? [j.claimedBy, j.status, j.start % 1440, j.coil] : null;
+    out.arrowBefore = !!SHIP.works.ns && (GUIDE.list || []).some(e => e.id === 'm23:n1');   // S6-1's clock-in first
+    if (SHIP.works.ns) { SHIP.works.ns[d] = Object.assign(SHIP.works.ns[d] || {}, { in: shipNow() }); setShipNow(shipNow() + 1); machinesNow(); worksCareerTick(shipNow()); }
+    const ar = (GUIDE.list || []).find(e => e.id === 'm23:n1'), g0 = ar && ar.goal(); out.arrow = ar ? [ar.level, g0 && g0.place] : null;
+    if (!j || opt.day) return out;
+    const stops = jobStops(j); out.n = stops.length; out.mine = !!myJob() === false;
+    out.early = jobStepDone(j.id, 2, {}).ok;              // out of order
+    out.balEarly = jobStepDone(j.id, stops.length - 1, { value: 0 }).ok;   // coil 2 before coil 1
+    for (let k = 0; k < stops.length; k++) {
+      const st = stops[k], tag = st.step || st.tag;
+      if (tag === 'loop') { const bad = 'l' + ((j.loop + 1) % 3); out.wrong = jobStepDone(j.id, k, { pick: bad }); }
+      if (tag === 'bal0') { out.gauge0 = st.opts.gauge(); out.balTurn = st.opts.onTurn(1); out.balOk = [st.opts.ok(1), st.opts.ok(0)]; st.opts.onTurn(0); }
+      if (tag === 'bal1') { out.gauge1 = jobStops(j)[k].opts.gauge(); jobStops(j)[k].opts.onTurn(0); }
+      const r = jobStepDone(j.id, k, tag === 'loop' ? { pick: 'l' + j.loop } : tag.startsWith('bal') ? { value: 0 } : {});
+      out.steps.push([tag, r.ok]);
+      setShipNow(shipNow() + 5); machinesNow(); worksCareerTick(shipNow());
+    }
+    const S = m23State(); out.end = [j.status, !!j.workDone, S.d1 > 0, (SHIP.machines[j.coil] || {}).cond >= 96, j.wrongs];
+    out.mails = SHIP.mail.filter(x => /Night 1/.test(x.subject)).length;
+    return out;
+  } finally { promoNotice = pn; }
+})"""
+def part_m23(g):
+    on = g.ev("typeof P5_M23 !== 'undefined' && P5_M23 && typeof m23Post === 'function'")
+    if not on: print('  m23: not in this build (P5_M23 off)'); return
+    a = g.ev(f"({M23})({{}})")
+    print(f"  m23 night 1: on {a['on']}, job {a.get('job')}, notices {a['notices']}, {a.get('n')} stops {a.get('steps')}, end {a.get('end')}, Mail {a.get('mails')}")
+    print(f"  m23 balance: {a.get('gauge0')!r} -> {a.get('balTurn')!r}; then {a.get('gauge1')!r}")
+    check(a['on'] and a.get('job') and a['job'][0] == 'you' and a['job'][1] == 'claimed' and a['job'][2] == 1365, f"m23: night 1's job yours as the night starts, 22:45 ({a.get('job')})")
+    check(a.get('mine'), "m23: a side job (your board job, if any, stays yours)")
+    check(not a.get('arrowBefore'), "m23: no arrow of ours before you've clocked in for the night (S6-1's arrow leads)")
+    check(a.get('arrow') == [1, a['job'][3] + '-svc'], f"m23: a level 1 arrow to the coil's panel, the first stop (a side job has no job pointer) ({a.get('arrow')})")
+    check(len(a['notices']) == 1 and a['notices'][0][0] == 1365, f"m23: one notice as the night starts ({a['notices']})")
+    check(a.get('n') == 11 and all(ok for _, ok in a['steps']), f"m23: eleven stops, each done in order ({a.get('steps')})")
+    check(not a.get('early'), "m23: a stop can't be done before the one before it")
+    check(a.get('wrong') and a['wrong'].get('retry'), f"m23: a wrong loop is looked at again, never a fail ({a.get('wrong')})")
+    check(a.get('balEarly') is False and a.get('balOk') == [False, True], f"m23: coil 2 waits for coil 1; settled at 0 ({a.get('balEarly')}, {a.get('balOk')})")
+    check(a.get('gauge0') != a.get('balTurn') and a['gauge0'].split('. ')[1] != a['balTurn'].split('. ')[1], f"m23: turning coil 1 moves coil 2's reading too ({a.get('gauge0')!r} -> {a.get('balTurn')!r})")
+    e = a.get('end') or []
+    check(e[:4] == ['done', True, True, True] and e[4] == 1, f"m23: done where you finish it, night 1 logged, the coil serviced ({e})")
+    check(a.get('mails') == 1, f"m23: one Mail, the record ({a.get('mails')})")
+    o = g.ev(f"({M23})({{ tier: 3 }})")
+    check(not o['on'] and not o['job'] and not o['notices'], f"m23: none for a Senior Officer (the promotion's on) ({o})")
+    o2 = g.ev(f"({M23})({{ day: 24 }})")
+    check(not o2['job'] and not o2['notices'], f"m23: nothing on night 3 ({o2})")
+
+# night 2 (Day 23 from 21:00): the door shut without a permit (and without a badge, and before the Watch is told), each
+# step's arrow in order, the cards' steps, the visit, the Watch's word when the badge isn't back after half an hour,
+# trained and the Mail once it is
+M23N2 = r"""((opt) => {
+  opt = opt || {};
+  const out = { notices: [], arrows: [], door: {} };
+  SHIP.works = null; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = []; MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; GUIDE.list = [];
+  DOSI = { out: null, mesh: [] };
+  const pn = promoNotice; promoNotice = (text, from) => { if (/reactor|permit|badge|Watch/i.test(text)) out.notices.push([shipNow() % 1440, from || '', text.slice(0, 40)]); };
+  const dc = deviceChoose; deviceChoose = () => false;   // the cards are played by calling their steps here (controller_check plays them by pad)
+  try {
+    const d = 23; setShipNow((d - 1) * 1440 + 1200); machinesNow(); const W = worksInit(); W.tier = 4; W.rank = 'specialist';
+    for (const r of CAREER_LADDER) if (r.id !== 'm23') { W.tr[r.id] = 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); }
+    const tick = (a, b) => { for (let t = a; t <= b; t++) { setShipNow(t); machinesNow(); worksCareerTick(t); for (const e of GUIDE.list || []) if (/^m23:/.test(e.id) && !out.arrows.some(x => x[0] === e.id)) out.arrows.push([e.id, e.level, t % 1440]); } };
+    const door = () => doorOpenFor('R', 'player', shipNow(), 6);
+    tick(shipNow(), (d - 1) * 1440 + 1265);
+    out.door.none = door();
+    dosiUse(); out.door.badgeOnly = door(); dosiUse();      // a badge, no permit: still shut
+    out.tellEarly = m23Tell(shipNow(), false);
+    m23Permit(shipNow()); tick(shipNow() + 1, shipNow() + 3);
+    out.door.permitOnly = door();
+    out.tellNoBadge = m23Tell(shipNow(), false);
+    dosiUse(); tick(shipNow() + 1, shipNow() + 3);
+    out.door.notTold = door();
+    m23Tell(shipNow(), true);                               // out before in: nothing
+    m23Tell(shipNow(), false); tick(shipNow() + 1, shipNow() + 3);
+    out.door.told = door();
+    const S = m23State(), j = SHIP.jobs.find(x => x.id === S.j2); out.job = j ? [j.claimedBy, j.status, jobStops(j).length] : null;
+    if (j) for (let k = 0; k < jobStops(j).length; k++) { jobStepDone(j.id, k, {}); tick(shipNow() + 1, shipNow() + 2); }
+    out.outEarly = !!S.out;
+    m23Tell(shipNow(), true); tick(shipNow() + 1, shipNow() + 2);
+    out.door.outside = door();
+    tick(shipNow() + 1, shipNow() + (opt.late ? 35 : 5));
+    out.word = S.word > 0;
+    dosiUse(); tick(shipNow() + 1, shipNow() + 2);
+    out.end = [S.d2 > 0, W.tr.m23 === undefined ? null : W.tr.m23, SHIP.mail.filter(x => x.subject === 'The reactor').length, j && j.status];
+    out.step = m23Night2Step(S);
+    return out;
+  } finally { promoNotice = pn; deviceChoose = dc; }
+})"""
+def part_m23n2(g):
+    a = g.ev(f"({M23N2})({{}})")
+    print(f"  m23 night 2: door {a['door']}, notices {a['notices']}, arrows {a['arrows']}, job {a.get('job')}, end {a.get('end')}")
+    dr = a['door']
+    check(not dr['none'] and not dr['badgeOnly'] and not dr['permitOnly'] and not dr['notTold'], f"m23: the reactor door stays shut without a permit, a badge and the Watch told ({dr})")
+    check(dr['told'] and not dr['outside'], f"m23: it opens with all three, and shuts once you're out ({dr})")
+    check(not a['tellEarly'] and not a['tellNoBadge'], "m23: no telling the Watch before the permit and the badge")
+    check([x[0] for x in a['arrows']] == ['m23:permit', 'm23:badge', 'm23:tell', 'm23:reactor', 'm23:outcard', 'm23:return'] and all(x[1] == 1 for x in a['arrows']), f"m23: a level 1 arrow for each step, in order ({a['arrows']})")
+    check(a['arrows'][:1] and a['arrows'][0][2] == 1260, f"m23: the first arrow at 21:00 ({a['arrows'][:1]})")
+    n = a['notices']
+    check(n[:1] and n[0][0] == 1230 and len([x for x in n if x[1] == 'The Watch']) == 2, f"m23: the notice at 20:30, the Watch told in and out ({n})")
+    check(a.get('job') and a['job'][0] == 'you' and a['job'][2] == 3 and not a['outEarly'], f"m23: the visit, yours, three stops ({a.get('job')})")
+    check(not a['word'], "m23: no word from the Watch when the badge is back in time")
+    check(a['end'][:4] == [True, 23, 1, 'done'] and a['step'] is None, f"m23: trained on Day 23 with the badge back, one Mail ({a['end']})")
+    b = g.ev(f"({M23N2})({{ late: true }})")
+    check(b['word'] and len([x for x in b['notices'] if 'badge' in x[2].lower()]) >= 1, f"m23: the badge not back after half an hour: a word from the Watch ({b['notices']})")
+def part_m23_all(g): part_m23(g); part_m23n2(g)
+PARTS['m23'] = part_m23_all
+
 # ---- favour cases (24l, seat E2 on H's behalf; not a ladder row, so it runs after the rows as EXTRA['fcase']): every
 # script has three clue places and its answer (sus.1) among the options; a friend asks (Mail, an offered favour) on the
 # week's evening; accepted, the side job: the clues before the call, a wrong pick refused (never a fail), the right one
@@ -2424,6 +2542,10 @@ with sync_playwright() as pw:
         if r['id'] == 'm25' and ev("!!(WORK_MECH.m25 && WORK_MECH.m25.own)"):   # (S6-7) 28e's own day with Basil, never through the ladder: promo_beats_check's mt parts test it
             print(f"m25 ({r['name']}): 28e's own day with Basil, not a training (promo_beats_check mt)")
             return
+        if r['id'] == 'm23' and ev("!!(WORK_MECH.m23 && WORK_MECH.m23.own)"):   # 28c's own nights (S6-5): never through the ladder
+            print(f"m23 ({r['name']}): 28c's own engine work on your nights, not a training (its part below)")
+            PARTS['m23'](g)
+            return
         if r['id'] == 'm24' and ev("!!(WORK_MECH.m24 && WORK_MECH.m24.own)"):   # 28d's own night 3 (S6-6): never through the ladder, trained by the first swap you led
             print(f"m24 ({r['name']}): 28d's own coil swap on night 3, not a training (its part below)")
             PARTS['m24'](g)
@@ -2466,13 +2588,13 @@ with sync_playwright() as pw:
         finally: cp.unlink(missing_ok=True)
     # Pillar 5 Step 6's rows (S6-2 on: m21) exist only with P5_STEP6 on: with it off in this build, run on a copy with it on
     P6_LINE = "const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');"
-    if P6_LINE in src0 and (not only or only & {'m21', 'm24'}):
+    if (P6_LINE in src0 or re.search(r'^const P5_STEP6 = P5_STEP5 && true;', src0, re.M)) and (not only or only & {'m21', 'm23', 'm24'}):   # (BM19) or already on (0.95.0): a fresh copy either way
         cp = WORK / 'test' / ('_mech_p6_' + str(os.getpid()) + '_' + pathlib.Path(sys.argv[1]).name); cp.write_text(src0.replace(P6_LINE, 'const P5_STEP6 = P5_STEP5 && true;', 1))
         try:
             g6 = Game(pw, str(cp)); rows6 = g6.ev("CAREER_LADDER.map(r => ({ id: r.id, name: r.name, size: r.size, inBuild: !!WORK_MECH[r.id], stages: (r.stages || []).length }))")
             base = {r['id'] for r in rows}
             for r in rows6:
-                if r['id'] in base or (only and r['id'] not in only) or r['id'] not in {'m21', 'm24'}: continue   # (each Step 6 piece adds its id here)
+                if r['id'] in base or (only and r['id'] not in only) or r['id'] not in {'m21', 'm23', 'm24'}: continue   # (each Step 6 piece adds its id here)
                 if not r['inBuild']: print(f"{r['id']} ({r['name']}): not in this build (P5_STEP6 on)"); continue
                 print(f"(on a copy with P5_STEP6 switched on)"); row_check(g6, g6.ev, r)
             if g6.errors: fail('page errors (P5_STEP6 copy): ' + ' | '.join(g6.errors[:5]))

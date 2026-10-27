@@ -77,3 +77,41 @@ units go inside the number ("17 kW").
 
 ## Open questions for the user
 None yet.
+
+## arrows_check part step6 (taken over from MA6 for lead 42, 2026-10-27; handed on to N6 at ~70% memory)
+- **Branch:** `claude/arrows-step6` (MA6's claude/p5s6-mech-a 99040a2 + staging-p5s6 8e0778ef; test only). Run:
+  `python3 arrows_check.py BUILD.html step6 [asis|teachoff|track]` (it makes its own P5_STEP6-on copy; ~25-30 min a way).
+  Debugging env: `S6_UNTIL=<day>` (stop at noon, state at 09:20/12:00), `S6_DEBUG='<regex on clockText>'` (the
+  follower's actions), `S6_WATCH='<regex>'` (state each advance step: deck, room, goal, ns[22], ACT, DIALOGUE, sleeping).
+- **Check gaps fixed (none were game bugs):** (1) "drop this job" presses the board's Drop it; (2) after dropping, the
+  follower takes the row of the test its arrow names ("Tier N test"), not the first Take it; (3) no skipping while
+  `sleeping` (the game wakes after a real-time 850 ms fade; the skips outran it, so you lay "asleep" till 22:55);
+  (4) awake in bed with a non-sleep arrow due, the follower gets up; (5) an open scene (DIALOGUE) is read through at once
+  (Calder's walk-down stayed open all night 1, unread, so the welcome slipped a day); (6) the welcome's record is the
+  pu4Welcome occasion `.met` (24u's pu4Welcomed), not flag 'pu4.welcome' (never set).
+- **State (last runs, staging 8e0778ef + the branch):** asis, teachoff and track all reach the briefing, the Tier 4
+  test, sleep by day, nights 1-3 clocked in, the welcome, the badge and the move to 2-B; all three fail only night 3's
+  coil swap. Mentoring and Calder's question: "not yet" (W8's pieces).
+- **Night 3, a real game gap, fixed separately:** `claude/m24-pick-pointer` (28d's m24Beats: a forced pointAsk through
+  Works > Team to the next crew member to pick, and at the bridge to Book the slot; the world arrow stays). With it, the
+  follower should pick, book and run the swap. NOT YET: on m24-pick-pointer (WIP 1 commit, not for merge) controller_check m24
+  is OK but arrows step6 asis still fails night 3 (m24:pick led, no pick made). Next: S6_WATCH='Day 24.*2[1-2]:' and
+  S6_DEBUG to see whether the ring (POINT_Q 'p:m24:pick') shows and whether FOLLOW's pointer handling presses through
+  Device > Works > Team > the crew button; fix the ring or the follower, then mech m24, cadet vs 40f3bdac, check_fast,
+  and send to RV24 + BM19 + lead 42.
+- **AS1 took over (2026-10-27):** night 3 fixed on `claude/m24-pick-pointer` 5f649b45 (the ring's Team tab step had no
+  `open`, so it stayed on the tab and never reached a name). With it, on staging 40f3bdac: asis, teachoff and track all
+  OK (every Step 6 beat, missed 0, stuck 0). Sent to RV24, BM19, lead 42. Fresh machine setup: `pip install playwright
+  numpy pillow`, three and acorn into /tmp/cadet-work (DEV_NOTES), `CADET_CHROME=/opt/pw-browsers/chromium`, a CADET_WORK each run.
+- **AS1, MA6-2 and W8's beats (2026-10-27):** the M20 setup line is gone; a direct MA6-2 line checks that a sensor array
+  lesson untaken by Day 21 doesn't hold Day 22's Tier 4 test (it says when the case didn't arise). Mentoring's record is
+  28e's `mt.steps.done`; Calder's question's arrows are 28f's `end:tea/sit/find` (in S6_RX), `have` is `cqTick`. On a local
+  merge of staging 40f3bdac + m24-pick-pointer 5f649b45 + p5s6-promo4 23a0e29c: asis, teachoff, track all OK, every beat
+  through Calder's question (Day 26 18:40). Before W8's promo4 is in staging, the MA6-2 line is skipped (no ladderTestDue).
+- **AS1, way 'skiptea' (RV24's ask):** Day 26 18:20-19:35 on Deck 3, not following (the tea missed), then on to 22:00;
+  checks Calder's end:find arrow led and she asked. On staging + m24-pick-pointer + promo4: before W8's 618c2901 FAIL
+  (end:find never led; she still found you), with 6f13b61a OK. In the default ways for step6 (not the endings).
+- **Left:** (a) done (see above); (b) drop the M20 setup line in part_step6
+  ("the setup counts Step 5's sensor array lesson as done") once W8's d18aafc8 (MA6-2's fix) is in staging, and add a
+  line that checks MA6-2 directly (a Tier 3 lesson missed on Day 19 must not block the Tier 4 test on Day 22);
+  (c) W8 is adding a Day 22 evening arrow (16:45-22:55 had none; lead 42 passed it on); (d) send shas to lead 42 and RV24.
