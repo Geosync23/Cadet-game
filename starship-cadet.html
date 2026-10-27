@@ -32886,6 +32886,20 @@ const LINES = JSON.parse([
   '{"text":"Your shutdown hour clashes with {name}\'s {thing}. Move one of them.","id":"hul01o"}]',
   ',"case.p9.who":[',
   '{"text":"{name}: {thing}, {time}","id":"100cfot"}]',
+  ',"case.point.ask":[',
+  '{"text":"Point {name} to one more:","id":"1qvoib8"}]',
+  ',"case.point.has":[',
+  '{"text":"What {name} has read","id":"x67qz9"}]',
+  ',"case.point.out":[',
+  '{"text":"ruled out","id":"6u5qeq"}]',
+  ',"case.point.scan":[',
+  '{"text":"the scanner, at the panel","id":"16qxruo"}]',
+  ',"case.point.sus":[',
+  '{"text":"What {name} suspects","id":"1u1z3ts"}]',
+  ',"case.point.title":[',
+  '{"text":"{name}\'s head-scratcher: {machine}","id":"hcwpyg"}]',
+  ',"case.point.to":[',
+  '{"text":"Point to: {text}","id":"1tlnr4z"}]',
   ',"case.solved":[',
   '{"text":"Fixed. That was it.","id":"u0qu5s"}]',
   ',"case.strip.allday":[',
@@ -60257,6 +60271,7 @@ function caseLongNext(c) { const s = c.sus.find(x => !c.known.includes(x)); if (
 const CHIEF_NOTES = {};
 const CASE_UI = { at: null, ask: null, chief: false };
 function caseView() {
+  if (CASE_UI.point && typeof casePointView === 'function') return casePointView();   // S6-7's "point him to a clue" (24k's slot, casePoint)
   const C = SHIP.works && SHIP.works.cases && caseState(), open = C ? C.open.filter(c => !c.wait) : [];
   const B = [];
   if (CASE_UI.chief) {
@@ -60300,6 +60315,7 @@ function caseView() {
 }
 function caseAct(verb, arg) {
   const v = String(verb).replace(/^case:/, ''), [id, s] = String(arg).split('|');
+  if (v === 'point') { if (typeof casePointPick === 'function') casePointPick(String(arg)); return; }   // casePoint's pick (24k's slot)
   if (v === 'chief') { CASE_UI.chief = !!+arg; return; }
   if (v === 'at') { CASE_UI.at = arg; CASE_UI.ask = null; return; }
   const c = caseById(id); if (!c) return;
@@ -61723,6 +61739,51 @@ if (P5_CASES6) {
   if (typeof WORK_MECH !== 'undefined') WORK_MECH.p8 = { open() { p8Stage(); } };
   if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip) p8Stage(); });
 }
+// casePoint (S6-7's "point Basil to a clue", W7's 28e calls it; PZ6): a practice head-scratcher on paper that someone
+// you're teaching is stuck on, shown in Fault notes in a point mode. casePoint({ by, seed, onPick(clueId, isKey),
+// onClose() }) -> true (shown) | false (no fair case: the caller's stand-in). The case is P4's (Which gauge is lying?)
+// on the first machine Basil's tier can do (the cold store's chiller first, then by id): the cause and two or three
+// decoys, the decoys' gauges (each rules out its own), the stuck gauge and the scanner's reading (rule out nothing),
+// one answer left by them all. He has every decoy's gauge but one; the three left to point him to are that one (the key: with
+// what he has, it leaves one suspect) and the two that rule out nothing, in an order by key 893 on the seed. Never
+// posted or saved (CASE_UI.point only); a pick closes the device and calls onPick once; closing it calls onClose. No R():
+// the caller's seed (the same seed, the same case), built only when called
+function casePoint(o = {}) {
+  if (!P5_STEP6 || !SHIP.works || typeof p4Decoys !== 'function') return false;
+  const seed = Number.isFinite(o.seed) ? o.seed | 0 : 0, ok = (m, f) => !!f && !!f.part && !!panelPlace(m.id) && jobTier({ machine: m.id }) <= 2 && p4Decoys(m, f, seed).length >= 2;
+  let m = machineById('3-chiller-1'), f = m && caseCauses(m).find(x => x.id === 'sensor');
+  if (!(m && ok(m, f))) { m = null; f = null; for (const x of machineList().slice().sort((a, b) => a.id < b.id ? -1 : 1)) { if (ENGINE_KINDS.has(x.kind)) continue; const g = caseCauses(x).find(y => ok(x, y)); if (g) { m = x; f = g; break; } } }
+  if (!m) return false;
+  const sus = [f.id].concat(p4Decoys(m, f, seed).slice(0, 2 + (schedU(seed, 0, 893) < .5 ? 0 : 1))).slice(0, 4);
+  let clues; try { clues = p4Clues({ machine: m.id }, f.id, sus); } catch (e) { return false; }
+  if (sus.filter(x => !clues.some(k => k.kills.includes(x))).join() !== f.id) return false;   // one answer, the cause (not caseSolve: its reach is yours, and the case is his)
+  const gauges = clues.filter(k => k.kills.length), key = gauges[Math.floor(schedU(seed, 1, 893) * gauges.length)], none = clues.filter(k => !k.kills.length);
+  const has = clues.filter(k => k.kills.length && k !== key), left = s => sus.filter(x => !has.concat([s]).some(k => k.kills.includes(x))).length;
+  if (none.length !== 2 || left(key) !== 1 || none.some(k => left(k) === 1)) return false;
+  const pick = [key].concat(none).map((k, i) => [schedU(seed, 2 + i, 893), k]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  CASE_UI.point = { by: o.by || 'basil', m: m.id, cause: f.id, sus, has: has.map(k => k.id), pick: pick.map(k => k.id), key: key.id, clues, onPick: o.onPick || null, onClose: o.onClose || null };
+  CASE_UI.chief = false;
+  if (typeof worksTabAdd === 'function') { deviceShow('works'); deviceDo({ app: 'works', do: 'tab', arg: 'faults' }); deviceShow('works'); } else deviceShow('faultnotes');
+  return true;
+}
+function casePointView() {
+  const P = CASE_UI.point, m = machineById(P.m), cs = caseCauses(m), c = { sus: P.sus, clues: P.clues, kind: 'p4' }, B = [];
+  const name = shortName(schedPeople().find(p => p.id === P.by) || { name: 'Basil' }), lab = s => { const f = cs.find(x => x.id === s); return (s === 'sensor' ? caseText('case.p4.sensor', 'temperature sensor') : f && (f.name || f.part) || s).replace(/^./, x => x.toUpperCase()); };
+  const has = P.clues.filter(k => P.has.includes(k.id)), out = new Set(has.flatMap(k => k.kills));
+  B.push({ kind: 'text', text: caseText('case.point.title', '{name}\'s head-scratcher: {machine}', { name, machine: caseMachName({ machine: P.m }) }), mark: 'big' },
+    { kind: 'text', text: caseText('case.point.sus', 'What {name} suspects', { name }) }, { kind: 'list', rows: P.sus.map(s => ({ text: lab(s), ...(out.has(s) ? { sub: caseText('case.point.out', 'ruled out') } : {}) })) },
+    { kind: 'text', text: caseText('case.point.has', 'What {name} has read', { name }) }, { kind: 'list', rows: has.map(k => ({ text: p4Text(c, k) || 'A clue.' })) },
+    { kind: 'text', text: caseText('case.point.ask', 'Point {name} to one more:', { name }), mark: 'hot' },
+    { kind: 'buttons', items: P.pick.map(id => { const k = P.clues.find(x => x.id === id); return { label: caseText('case.point.to', 'Point to: {text}', { text: k.src.scan ? caseText('case.point.scan', 'the scanner, at the panel') : p4Gauge(k.src.part) }), action: { app: caseApp(), do: 'case:point', arg: id } }; }) });
+  return { title: 'Fault notes', blocks: B };
+}
+function casePointPick(id) {
+  const P = CASE_UI.point; if (!P || !P.pick.includes(id)) return;
+  CASE_UI.point = null; const f = P.onPick;
+  try { if (typeof deviceClose === 'function') deviceClose(); } catch (e) { /* no UI */ }
+  if (f) { try { f(id, id === P.key); } catch (e) { /* the caller's */ } }
+}
+if (P5_STEP6 && typeof deviceOn === 'function') deviceOn('close', () => { const P = CASE_UI.point; if (!P) return; CASE_UI.point = null; if (P.onClose) { try { P.onClose(); } catch (e) { /* the caller's */ } } });
 // ---- end of slot: Puzzles seat ----
 
 // ---------------------------------------------------------------------
