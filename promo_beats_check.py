@@ -391,6 +391,33 @@ def part_t4badge(g):
     check(r['wait'][0] == 1 and r['wait'][1] == 24 and 24 in r['wait'][2], f"t4badge: asleep at 16:45, the Captain waits until the next afternoon ({r['wait']})")
     check(r['missed'] == [24, 1], f"t4badge: awake and not there, by Mail by 18:15 ({r['missed']})")
 
+# ---- S6-3 turn 4 (W7): your quarters on Deck 2, Vance's walk after dinner; open till 22:00, then the next day; laundry collected
+T4_MOVE = """const W = __w(25, 300, { xp: 10, tr: { ps: 12, t2: 9, t3: 15, m19: 17, t4: 22 } }); W.tier = 4; W.rank = 'specialist'; __friends();
+      const T = pu4Set(22); T.passed = true; T.tries = 1; T.res = 22; T.badge = 23; T.move = { ready: 25, walked: null, refit: false }; PU4_LIVE.mv = null;"""
+def part_t4move(g):
+    if not t4on(g, 't4move'): return
+    print('(t4move) Thursday: the notice, the Mail, Vance after dinner, room B on Deck 2; late: the next day; laundry collected:')
+    r = g.ev("""(() => { """ + T4_MOVE + """ const out = {}; setShipNow(24 * 1440 + 400); __bay(); __tick(); out.wake = __notes.slice(); out.rows = __rows(25).filter(x => /quarters/.test(x)); out.next = worksNext();
+      setShipNow(24 * 1440 + 1021); __tick(); out.mail = __mail().filter(m => /^Chief Ines Calder: Tonight/.test(m)).length;
+      setShipNow(24 * 1440 + 1100); __tick(); out.early = !!PU4_LIVE.mv; flagSet('pu4.ate', 25); __notes.length = 0; __tick(); out.mv = !!PU4_LIVE.mv; out.notice = __notes.slice();
+      out.esc = (worksEscort({ id: 'vance' }, shipNow()) || {}).mode; out.open0 = worksHomeOpen(2, 'B');
+      const keep = puNearMe; puNearMe = (id, r) => id === 'vance' ? true : keep(id, r); __said.length = 0; setShipNow(24 * 1440 + 1102); __tick(); puNearMe = keep;
+      out.met = PU4_LIVE.mv && PU4_LIVE.mv.met; out.esc2 = (worksEscort({ id: 'vance' }, shipNow()) || {}).mode; out.arrow = GUIDE.list.filter(e => /^pu4:move/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label);
+      goToDeck(2); player.obj.position.copy(cellPos(...PLACE_OF.get('2-B').at)); setShipNow(24 * 1440 + 1110); __tick();
+      out.home = W.home; out.t4 = puT4(); out.bed = playerBed(); out.open = [worksHomeOpen(2, 'B'), worksHomeOpen(4, 'W')]; out.said = __said.filter(x => /^vance/.test(x)); out.next2 = worksNext();
+      """ + T4_MOVE.replace('const W =', 'const W2 =').replace('W.', 'W2.').replace('const T = pu4Set', 'const T2 = pu4Set').replace(' T.', ' T2.') + """
+      __bay(); setShipNow(24 * 1440 + 1201); __tick(); out.by20 = !!PU4_LIVE.mv; setShipNow(24 * 1440 + 1321); __tick(); out.gone22 = !PU4_LIVE.mv && !puT4().move.walked;
+      const e26 = dayShiftEnd(26); setShipNow(25 * 1440 + e26 - 5); __tick(); out.before26 = !!PU4_LIVE.mv; setShipNow(25 * 1440 + e26 + 1); __tick(); out.next26 = !!PU4_LIVE.mv;
+      CLOTHES_ON = true; W2.home = '2-B'; SHIP.clothes.clean = 2; SHIP.clothes.hamper = null; delete SHIP.clothes.coll; setShipNow(25 * 1440 + 601); __tick(); out.coll = SHIP.clothes.coll;
+      setShipNow(26 * 1440 + 361); __tick(true); out.back = [SHIP.clothes.clean, SHIP.clothes.coll]; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(any('After dinner' in n for n in r['wake']) and r['rows'] and r['rows'][0].startswith('19:00') and 'Deck 2' in r['next'] and r['mail'] == 1, f"t4move: the notice as you wake, the Schedule's row, What's next, Calder's Mail at 17:00 ({r['wake']}, {r['rows']}, {r['next']}, {r['mail']})")
+    check(not r['early'] and r['mv'] and any('Vance' in n for n in r['notice']) and r['esc'] == 'follow' and r['open0'], f"t4move: not before your dinner; then the urgent notice, Vance comes to you, the door opens for the walk ({r})")
+    check(r['met'] and r['esc2'] == 'lead' and r['arrow'] and r['arrow'][0].startswith('1 Go with Vance'), f"t4move: met, he leads; a level 1 arrow 'Go with Vance' ({r['esc2']}, {r['arrow']})")
+    check(r['home'] == '2-B' and r['t4']['move']['walked'] == 25 and r['bed'] == '2-B' and r['open'][0] is True and not r['open'][1] and any('regulation six' in x for x in r['said']) and 'Deck 2' not in (r['next2'] or ''), f"t4move: stepped in: room B is yours, your bed, your door, Vance's lines ({r['home']}, {r['bed']}, {r['open']}, {r['said']})")
+    check(r['by20'] and r['gone22'] and not r['before26'] and r['next26'], f"t4move: no dinner, at 20:00 anyway; open till 22:00, then the next day at your shift's end ({r})")
+    check(r['coll'] == 26 and r['back'] == [5, None], f"t4move: laundry collected at 10:00, back clean the next morning ({r['coll']}, {r['back']})")
+
 def part_t3pointer(g):
     if not t3on(g, 't3pointer'): return
     print('(t3pointer) the test morning and the board:')
@@ -528,7 +555,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4badge', part_t4badge)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4badge', part_t4badge), ('t4move', part_t4move)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')
