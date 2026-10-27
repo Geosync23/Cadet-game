@@ -46642,6 +46642,9 @@ function vesselStatus(ph, c) {
 function vesselLate(from, log, current) {
   return !!VESSEL && Number.isInteger(from) && from >= VESSEL.late && !(log || []).some(l => l.id === 'veyliVessel') && !(current && current.id === 'veyliVessel');
 }
+// standing easy on shift for the arrival crowd and the parts chain counts as work, the walk there and back too, as the
+// Line's ceremony (section 14's dayReport reads eventMeetTag): their tags join the meetings' (RV22's day_check 28)
+if (EV_VESSEL_ON && EVENTS_ON) for (const t of ['ev-vesselArrival', 'ev-vesselArrival-talk', 'ev-vesselChain', 'ev-vesselChain-talk']) EV_MEET_TAGS.add(t);
 if (EV_VESSEL_ON && EVENTS_ON && VESSEL) {
   SHIP.vesselFrom = SAVED && SAVED.ship && Number.isInteger(SAVED.ship.vesselFrom) ? SAVED.ship.vesselFrom : SHIP.time ? SHIP.time.day : 0;
   SAVE_EXTRA.push(s => { if (SHIP.vesselFrom != null) s.ship.vesselFrom = SHIP.vesselFrom; });
