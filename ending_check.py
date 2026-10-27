@@ -43,11 +43,11 @@ exec(open(__file__.replace('ending_check.py', 'cadet_test.py')).read().split("a,
 from playwright.sync_api import sync_playwright
 # (BM19, lead 42, 0.95.0) the parts here set the clock straight to the offer's day (Day 32): with Step 6 on, the offer
 # waits for Calder's question (the career's end), so the check runs on a copy with P5_STEP6 off; Step 6's way into the
-# ending is promo_beats_check's cq parts and arrows_check step6's. The copy's line is a `var` (R3's find) so part_offer's
-# window.P5_STEP6 = true still reaches the game's endStep6 (a top-level const would hide it)
+# ending is promo_beats_check's cq parts and arrows_check step6's. The copy's line assigns the global window.P5_STEP6 (R3's find;
+# the game's script is wrapped in a function, so a const or var there would hide it) so part_offer's = true reaches endStep6
 _s6 = re.compile(r"^const P5_STEP6 = P5_STEP5 && true;.*$", re.M); _src0 = pathlib.Path(sys.argv[1]).read_text()
 if _s6.search(_src0):
-    _off6 = WORK / 'test' / ('ending_s6off_' + pathlib.Path(sys.argv[1]).name); _off6.write_text(_s6.sub(lambda m: "var P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');", _src0, count=1))
+    _off6 = WORK / 'test' / ('ending_s6off_' + pathlib.Path(sys.argv[1]).name); _off6.write_text(_s6.sub(lambda m: "window.P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');", _src0, count=1))
     print(f'(on a copy with P5_STEP6 off: {_off6.name})'); sys.argv[1] = str(_off6)
 
 ok = True
