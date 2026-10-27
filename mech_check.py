@@ -2414,6 +2414,9 @@ with sync_playwright() as pw:
         if r['id'] == 't2' and ev("typeof promoPassed === 'function'"):   # 24p's test job (0.44.18) is no training: career_check (i)-(j) tests it
             print(f"t2 ({r['name']}): 24p's test job, not a training (career_check (i) and (j))")
             return
+        if r['id'] == 't4' and ev("typeof pu4Ready === 'function'"):   # (S6-3) 24u's Tier 4 test job, no training either: promo_beats_check's t4 parts test it
+            print(f"t4 ({r['name']}): 24u's test job, not a training (promo_beats_check t4before ...)")
+            return
         if r['id'] == 'm21' and ev("!!(WORK_MECH.m21 && WORK_MECH.m21.own)"):   # 28b's own briefing (S6-2): never through the ladder, trained at the first briefing
             print(f"m21 ({r['name']}): 28b's own briefing, not a training (its part below)")
             PARTS['m21'](g)
