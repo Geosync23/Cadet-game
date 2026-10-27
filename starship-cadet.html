@@ -10420,7 +10420,8 @@ function seatNear(S, id) {
 function schedBuild(p, d, occ, S) {
   const F = schedFrame(p, d), P = schedFrame(p, d - 1), U = F.U, H = F.H, B = (d - 1) * 1440, C = SCHED_COMMUTE;
   const rot = occ.rot && occ.rot.get(p.id);                // a day standing in at another station (shipDay's rotation)
-  const bedDeck = deckOf(p.bed), desk = rot ? rot.id : S.desks.get(p.id) || null, wd = rot ? rot.deck : p.work && p.work.deck;
+  const bedDeck = deckOf(p.bed), desk = rot ? rot.id : (P5_M25 && typeof mtDesk === 'function' && mtDesk(p, d, S)) || S.desks.get(p.id) || null,   // (S6-7, 28e) Basil's desk on his day with you: the Works bay, read only from the record settled at 22:00
+    wd = rot ? rot.deck : p.work && p.work.deck;
   const wtype = rot ? rot.type : p.work && p.work.place, deskAnim = placeAnim(desk && S.byId.get(desk));
   const N = needsEst(p, d);                               // the needs that steer today's choices
   const EVD = evDay(d), shut = EVD && EVD.some(e => e && e.rules.some(r => r.rule === 'closed'));   // a ship-wide event today (C7)
@@ -63685,6 +63686,7 @@ function puRepUp(b1) {                                   // worksRepTell's line 
 }
 function puNext(k) {                                     // worksNext's line for the Tier 3 test and the Senior Officer's beats (null: its own)
   const W = SHIP.works, T = puT3(), d = SHIP.time.day; if (!P5_PROMO3 || !W) return null;
+  { const mn = P5_M25 && typeof mtNext === 'function' ? mtNext(k) : null; if (mn) return mn; }   // (S6-7) Basil's day with you, on its eve and its day
   if (P5_PROMO4 && (W.tier === 3 && (!T || T.toast) || W.tier === 4 && puT4())) return pu4Next(k);   // (S6-3) a Senior's: the Tier 4 test; an Engine Specialist's beats
   if (!T) { if (W.tier !== 2) return null; const B = WORK_BANDS[2], at = b => B.findIndex(x => x[1] === b);
     return at(worksBand()) >= at('steady') && !ladderNeeds({ rep: 'relied' }, W) ? worksText('next.t3.steps', 'Your Tier 3 test needs Relied on and Power safety. You\'re {band} now.', { band: worksBandWord() }, k) : null; }
@@ -63696,8 +63698,8 @@ function puNext(k) {                                     // worksNext's line for
 }
 // the Schedule's and Tracked's rows on day d (devDay asks): the test, then (turn 3) your result, the bar and the toast
 function puItems(d) {
-  const T = P5_PROMO3 && puT3(), W = SHIP.works; if (!T || !W) return P5_PROMO4 ? pu4Items(d) : [];
-  const out = P5_PROMO4 ? pu4Items(d) : [];   // (S6-3) the Tier 4 test's row
+  const T = P5_PROMO3 && puT3(), W = SHIP.works, s6 = () => (P5_PROMO4 ? pu4Items(d) : []).concat(P5_M25 && typeof mtItems === 'function' ? mtItems(d) : []); if (!T || !W) return s6();
+  const out = s6();   // (S6-3) the Tier 4 test's row; (S6-7) Basil's day
   if (!T.passed && W.tier === 2 && T.day === d) out.push({ from: 540, to: 900, title: worksText('pu3.row.test', 'Your Tier 3 test'), where: 'the job board, the Works bay, Deck 5', kind: 'beat', deck: 5, room: 'w' });
   const has = id => SHIP.occasions.some(r => r.id === id && Math.floor(r.at / 1440) + 1 === d);   // a booked one is the occasion's own row
   if (T.passed && !T.res && W.tier === 2 && puResultDay() === d && !has('pu3Result')) out.push({ from: PU_R.at, to: PU_R.at + 30, title: worksText('pu3.row.result', 'Your result, 08:15'), where: 'the Chief\'s office, the Works bay, Deck 5', kind: 'beat', deck: 5, room: 'o' });
@@ -66084,6 +66086,60 @@ if (P5_M21) {
 // ---------------------------------------------------------------------
 
 // ---- slot: Mentoring (section 28e). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// S6-7 turn 1 (W7 for lead 41; plans/p5-step6-spec.html S6-7): Basil's day with you. Once you're a Senior Officer (or an
+// Engine Specialist), the first Friday from Day 26: settled at 22:00 the evening before (mtSettle, through 24w's
+// WORKS_SETTLE), SHIP.works.mt = { day, set, steps: {}, late, clue } (restored after worksClean at load, as 24w's sd is).
+// The crew's planner reads only that settled record (mtPlanRule, through 24w's WORKS_PLAN_RULES, section 14's hook): from
+// 09:00 to 15:30 Basil's work is in the Works bay, with you, not out on the ship. Calder's Mail at the settle is the record
+// (she says it at 06:00 on Thursday: 28a's night.off); the notice as you wake, the Schedule's and Tracked's row, What's
+// next, a level 1 arrow to the Works bay from 08:55. WORK_MECH.m25 is this section's own (never through the ladder);
+// trained at the day's end (turn 4). Nothing calls R(). Words: mt.* (stand-ins until the head writer's m25.lines)
+const MT = { from: 26, at: 540, to: 930, arrow: 535, basil: 'bramwell-basil' };
+function mtClean(m) {                                    // a save's mt, junk dropped
+  const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi ? v : null, obj = o => o && typeof o === 'object' && !Array.isArray(o);
+  if (!obj(m) || !int(m.day, 1, 99999)) return null;
+  const steps = {}; if (obj(m.steps)) for (const k of Object.keys(m.steps).slice(0, 12)) if (/^[a-z]{1,12}$/.test(k) && int(m.steps[k], 0, 99999) !== null) steps[k] = m.steps[k];
+  return { day: m.day, set: int(m.set, 0, 99999), steps, late: int(m.late, 0, 9), clue: typeof m.clue === 'string' ? m.clue.slice(0, 40) : null };
+}
+if (P5_M25) (() => { const s = SAVED && SAVED.ship && SAVED.ship.works; if (SHIP.works && s && s.mt) { const m = mtClean(s.mt); if (m) { SHIP.works.mt = m; SHIP_DAYS.delete(m.day); } } })();   // a plan made while loading, before the record was read back
+const mtOf = () => { const W = P5_M25 && SHIP.works; return W && W.mt && typeof W.mt === 'object' ? W.mt : null; };
+function mtSettle(d) {                                   // 24w's 22:00 settle for day d: Basil's day with you, the first Friday from Day 26 once you're a Senior
+  const W = SHIP.works; if (!P5_M25 || !W || W.mt || d < MT.from || !(W.rank === 'senior' || W.rank === 'specialist')) return false;
+  let fri = false; try { fri = weekday(d) === 4; } catch (e) { fri = false; } if (!fri) return false;
+  W.mt = { day: d, set: d - 1, steps: {}, late: null, clue: null };
+  promoMail('mail.mt.set', 'Tomorrow | Basil\'s with you all day, 09:00 in the bay. He watches you, then you watch him. Be kind; be honest.', null, (d - 2) * 1440 + 1320);
+  simNote('mt', { step: 'set', day: d });
+  return true;
+}
+function mtPlanRule(d, occ, pl, a, b, p) {               // section 14's hook (24w's WORKS_PLAN_RULES): Basil's work stays in the Works bay on his day with you
+  const M = mtOf(); if (!M || !p || p.id !== MT.basil || d !== M.day || !pl || !String(pl.type || '').startsWith('work')) return false;
+  const B = (d - 1) * 1440; if (b <= B + MT.at || a >= B + MT.to) return false;
+  return !(pl.deck === 5 && pl.room === 'w');
+}
+function mtDesk(p, d, S) {                                // section 14's hook (the planner's desk): Basil's work place on his day with you, a Works bay spot nobody has as a desk
+  const M = mtOf(); if (!M || !p || p.id !== MT.basil || d !== M.day) return null;
+  const taken = new Set(S && S.desks ? [...S.desks.values()] : []);
+  return ['5-stool-1', '5-bench-4', '5-bench-3', '5-bench-2', '5-bench-1'].find(id => !taken.has(id) && !!placeById(id)) || null;   // (placeById: any deck, so the plan is the same wherever you are)
+}
+function mtItems(d) {                                    // the Schedule's and Tracked's row (puItems asks)
+  const M = mtOf(); return M && M.day === d && !M.steps.done ? [{ from: MT.at, to: MT.to, title: worksText('mt.row', 'Basil with you: mentoring'), where: 'the Works bay, Deck 5', kind: 'beat', deck: 5, room: 'w' }] : [];
+}
+function mtNext(k) {                                     // What's next on his eve and his day (puNext asks first)
+  const M = mtOf(), d = SHIP.time.day; if (!M || M.steps.done || d > M.day || d < M.day - 1) return null;
+  return worksText('next.mt', 'Basil with you: {day}, {time}, the Works bay.', { day: M.day === d ? 'today' : 'tomorrow', time: hhmm(MT.at) }, k);
+}
+function mtTick(now, skip) {                             // the notice as you wake, the level 1 arrow from 08:55
+  const M = mtOf(); if (!M || M.steps.done) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, B = (d - 1) * 1440, live = !skip && now >= shipNow() - 1; if (d !== M.day) return;
+  if (live && m >= 360 && m < MT.at && flag('mt.wake') !== d && !promoBusy()) { flagSet('mt.wake', d); promoNotice(worksText('mt.wake', 'Today: Basil\'s with you, 09:00 in the Works bay. Mentoring.'), worksName('calder')); }
+  if (!skip && typeof guideAsk === 'function' && m >= MT.arrow - 1 && m < MT.at + 30 && !M.steps.met)
+    guideAsk({ id: 'mt:bay:' + d, level: 1, owner: '28e (S6-7)', from: B + MT.arrow, until: B + MT.at + 30, goal: () => ({ deck: 5, room: 'w', label: worksText('mt.ptr.bay', 'Basil, 09:00: the Works bay') }), done: () => promoInBay() || !!(mtOf() || {}).steps.met });
+}
+if (P5_M25) {
+  WORK_MECH.m25 = { own: true, noJob: true };            // this section's own day, never opened by the ladder (24 core's ladderTick skips own rows)
+  WORKS_SETTLE.push(mtSettle); WORKS_PLAN_RULES.push(mtPlanRule);
+  WORK_TICKS.push((now, skip) => mtTick(now, skip));
+}
 // ---- end of slot: Mentoring ----
 
 // ---------------------------------------------------------------------

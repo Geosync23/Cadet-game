@@ -2333,6 +2333,9 @@ with sync_playwright() as pw:
             print(f"m21 ({r['name']}): 28b's own briefing, not a training (its part below)")
             PARTS['m21'](g)
             return
+        if r['id'] == 'm25' and ev("!!(WORK_MECH.m25 && WORK_MECH.m25.own)"):   # (S6-7) 28e's own day with Basil, never through the ladder: promo_beats_check's mt parts test it
+            print(f"m25 ({r['name']}): 28e's own day with Basil, not a training (promo_beats_check mt)")
+            return
         if r['id'] == 't3' and ev("typeof puPassed === 'function'"):   # 24u's Tier 3 test job (S5-2) is no training either: promo_beats_check's t3 parts test it
             print(f"t3 ({r['name']}): 24u's test job, not a training (promo_beats_check t3before ... t3toast)")
             return

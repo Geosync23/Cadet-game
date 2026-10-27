@@ -459,6 +459,24 @@ def part_t4dev(g):
     check(r['steps'] == ['Your Tier 4 test 09:30 done', 'Your Tier 4 result 22:40'] and 'result' in r['next1'] and 'badge' in r['next2'] and 'Vance' in r['next3'] and r['steps2'][-1] == 'Your Deck 2 quarters', f"t4dev: the promotion list and the career arrow ({r['steps']}, {r['next1']}, {r['next2']}, {r['next3']}, {r['steps2']})")
     check(r['eng24'] is False and r['eng25'] is True, f"t4dev: engine jobs yours by day after the nights, not before ({r})")
 
+# ---- S6-7 turn 1 (W7): Basil's day with you, settled at 22:00 the evening before; his work in the Works bay; the notices
+def part_mt(g):
+    if not g.ev("typeof P5_M25 !== 'undefined' && P5_M25"): print('(mt) P5_M25 off: skipped'); return
+    print('(mt) mentoring: settled at 22:00 on Thursday, Basil\'s work in the bay 09:00-15:30, the notice, the row, the arrow:')
+    r = g.ev("""(() => { const W = __w(25, 1300, { xp: 10, tr: { ps: 12, t2: 9, t3: 15, m19: 17, t4: 22 } }); W.tier = 4; W.rank = 'specialist'; flagSet('p5n.on', 22); flagSet('p5n.off', 25);
+      const out = {}, bas = schedPeople().find(p => p.id === 'bramwell-basil'), seg = () => planDay(bas, 26).filter(x => x.to > 25 * 1440 + 540 && x.from < 25 * 1440 + 930 && /^work/.test(x.type || '')).map(x => x.deck + '|' + (placeById(x.placeId) || {}).room);
+      out.before = [...new Set(seg())]; __tick(); out.early = !!SHIP.works.mt;
+      setShipNow(24 * 1440 + 1321); __tick(); out.mt = SHIP.works.mt; out.mail = __mail().filter(m => /^Chief Ines Calder: Tomorrow/.test(m)).length; out.next = worksNext();
+      out.after = [...new Set(seg())]; out.rows = __rows(26).filter(x => /Basil/.test(x));
+      out.clean = JSON.stringify(mtClean(JSON.parse(JSON.stringify(SHIP.works.mt)))) === JSON.stringify(SHIP.works.mt); out.junk = mtClean({ day: 'x' });
+      __notes.length = 0; setShipNow(25 * 1440 + 400); __tick(); out.wake = __notes.slice(); setShipNow(25 * 1440 + 536); goToDeck(3); __tick(); out.arrow = GUIDE.list.filter(e => /^mt:bay/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label);
+      const W2 = __w(25, 1300, { xp: 10 }); W2.tier = 2; W2.rank = 'officer'; setShipNow(24 * 1440 + 1321); __tick(); out.officer = !!SHIP.works.mt; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(not r['early'] and r['mt'] and r['mt']['day'] == 26 and r['mt']['set'] == 25 and r['mail'] == 1 and 'Basil' in r['next'], f"mt: settled at 22:00 on Thursday for Friday Day 26, Calder's Mail, What's next ({r['mt']}, {r['mail']}, {r['next']})")
+    check(r['after'] and all(x == '5|w' for x in r['after']), f"mt: Basil's work 09:00-15:30 in the Works bay once settled ({r['before']} -> {r['after']})")
+    check(r['rows'] and r['rows'][0].startswith('09:00') and any('Basil' in n for n in r['wake']) and r['arrow'] and r['arrow'][0].startswith('1 '), f"mt: the row, the notice as you wake, a level 1 arrow from 08:55 ({r['rows']}, {r['wake']}, {r['arrow']})")
+    check(r['clean'] and r['junk'] is None and not r['officer'], f"mt: the save's record read back, junk dropped; not a Senior: no day ({r})")
+
 def part_t3pointer(g):
     if not t3on(g, 't3pointer'): return
     print('(t3pointer) the test morning and the board:')
@@ -596,7 +614,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev), ('mt', part_mt)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')
