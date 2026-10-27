@@ -61,8 +61,8 @@ with sync_playwright() as pw:
     g.step(10); print('ready', g.ev("[pu4Ready(19), worksBand(), SHIP.works.tier, SHIP.works.rank, typeof PU4_LIVE !== 'undefined' && PU4_LIVE.seek]"))
     near = lambda: g.ev("(() => { const a = DECK_CREW.find(c => c.p && c.p.id === 'calder'); return a ? +Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z).toFixed(1) : null; })()")
     trail = []
-    while g.ev('shipNow()') < D(19, 10, 30):
-        g.step(10, 50); trail.append((g.ev("hhmm(shipNow() % 1440)"), near(), g.ev("!!(PU4_LIVE.seek)")))
+    while g.ev('shipNow()') < D(19, 9, 40):
+        g.step(20, 100); trail.append((g.ev("hhmm(shipNow() % 1440)"), near(), g.ev("!!(PU4_LIVE.seek)")))
         if g.ev("!!DIALOGUE"): break
     print('trail', trail[::6], trail[-3:])
     log(g, 'offer?'); g.shot(f'{OUT}/p1_offer_{WHERE}.png')

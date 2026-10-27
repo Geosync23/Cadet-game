@@ -11,6 +11,7 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
 | claude/talk-close-fix (W6): the far card closes | PASS | 6dfc4ec1 (game ea9e0f3c) |
 | claude/vessel-words (W6): 4 lines cut to 90 chars | PASS | 0f8a2406 (game afde419d) |
 | claude/check-offcopies (test only) | code read OK, not run | 00161062 |
+| claude/p5s6-mech-a (MA6): M21 the Monday briefing | PASS | 27166be |
 | VB2's ending leftovers (arrows endgo teachoff, track) | PASS | staging-0.94.0 d69473b7 |
 
 ## VB1 03b63d95
@@ -66,3 +67,12 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
 - Lead 41 (10:25): 0.94.0 published; I'm Step 6's reviewer. Wave 1 on claude/staging-p5s6 64e296df: W6 S6-3 day parts, N6 S6-1 nights
   (session_01GKuymnDA25R2a5yZGYpaBS), MA6 S6-2 briefing (session_01GKuymj1UEDuEYMnG9rmFkc), PZ6 S6-8 cases (session_01GKuymjrmdGE4vaHHHGkvYF).
   Verdicts to lead 41 + the builder; OFF identical vs 64e296df; base worktree /tmp/rv23/wt-64e296df.
+
+## Step 6 wave 1 (base 64e296df)
+- MA6 27166be: PASS. cadet identical; mech_check m21 OK; controller m21 OK (arrow "Your seat at the table" at 08:25, briefing by pad);
+  the seated briefing at 390x844 (controller's shot). Merge note: W6 bfcebb6d also edits the Step 6 ladder rows (t4 before m21).
+- In progress: W6 promo4 bfcebb6d (turn 1 d40a95ee: cadet identical; p4_play.py live offer probe queued), N6 nights 157fe11 (9e176f6
+  cadet identical; 157fe11 cadet identical; day_check 23 + player_check ON running), PZ6 puzzles fd1f27f (3046fb5 cadet identical,
+  puzzle p6 OK; fd1f27f cadet + p6 p7 p8 queued).
+- To raise: N6's isWorkDay reads P5_LEAVE (section 28, later in the file) inside try: if the planner runs at load before that line,
+  Navarro's leave is missed there and seen later (ON only; day_check's "same day twice" should show it). W6: no controller part for t4.
