@@ -53,3 +53,7 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
   so `.map().sort().map()` (the higher-tier-first order) is commented out; still parses. Sent to B5 + lead 40.
 - VB1 5578c78d on the ON copy: arrows_check vessel OK; controller_check vessel OK.
 - 00:59 UTC: B3 now asks for claude/p5s5-m20 **247420aa** (arrTurn: level 2 'Your turn' board arrow for m20, the stale comment). B3 reports cadet vs 989b1759 'identical apart from renderer noise (1 level off)': must re-run myself (regressions must be pixel-identical).
+- VB1 5578c78d ON copy: events_check only known-old FX24-2 (OK); day_check 27, 29, 30 OK; **day_check 28 FAILED** (work
+  472-476/480 for 8; Works tea 13:00 on 7 went 0). Same two fails on 6d4b519's ON copy (476/480; tea 0): from V-3's chain,
+  slightly worse with 85f07071's 09:15 standEasy. A MUST under the ON rule. Sent to VB1.
+- B5 ea40ae51 (S1-S4 shoulds on cbca3e3e): the mid-line comment still there (line 59312). Reminded B5; review on the next sha.
