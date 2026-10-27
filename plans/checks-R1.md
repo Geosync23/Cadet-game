@@ -50,4 +50,26 @@ These use the check files from staging f4914555 (test-only fixes; game unchanged
 | arrows_check endgo track | PASS (rc 0, 185 s) | settled go Day 35; `ARROWS CHECK OK` |
 | arrows_check endgo change | n/a by design | the check skips change for go (line 764: "the change of mind ends in the endgame: endstay's"); 1 s, nothing run |
 
-Result: R1 OK.
+## arrows_check week (BM19's ask): FAIL, cause found (a gap in the check, not a game bug)
+
+Run alone on 04cc0cb6 (check from f4914555), rc 1, 527 s:
+`FAIL week: stuck from Day 4 13:21 at "Fix a wobbly stool" (Deck 5)` and `FAIL week: the arrow "Fix a wobbly stool" stayed up over 3 ship hours from Day 4 13:20`. The same in BM19's container, so it isn't the load.
+
+Finding which change causes it (Day 4 line of each build):
+
+| Build | Day 4 |
+|---|---|
+| dfe4680d (first merge) | clocked 548, stuck 0 |
+| 0b06cca5 (+ mech-a) | clocked 548, stuck 0 |
+| 4fea0aa0 (all merged, switches off; BM19) | clocked 548, stuck 0 |
+| bf228260 (P5_STEP5 = true, one game line) | clocked 538, stuck 1 (the same 2 FAILs) |
+| 8dce96cc (+ vessel on) | clocked 538, stuck 1 (the same 2 FAILs) |
+
+Cause (probes on bf228260 vs 4fea0aa0, no game change): Step 5's Old mysteries board (`mysBoard`, game line 4828,
+behind P5_CASES5) sits 0.93 from the stool job's spot. The check's follower taps the nearest item first: Your bench
+on 4fea0aa0 (which starts the job), the board on bf228260. The board's tap opens the device's 'oldcases' app, so the
+follower's floor tap at the pin, 2 frames later, lands on the device and nothing starts. This repeats every 3 ship
+minutes. A real player isn't stuck: on bf228260 at 13:23 a real tap on the pin hits the floor and starts the job
+(ixStop:do), and a tap on Your bench does too. Sent to W6 (Step 5 owner) to fix, in the check or by moving the board.
+
+Result: R1 OK for my share and the extra checks; arrows_check week FAIL is a gap in the check, diagnosed and handed to W6.
