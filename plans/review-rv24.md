@@ -19,3 +19,12 @@ Code read (no runs yet):
 - worksEscort skip of p5nEscort ("mine"): doesn't check worksDay(t) === c.d like the rest of worksEscort (a stale cur from an earlier
   day would also skip it); minor.
 - mtCasePoint: seeded with schedU, no R(); closed unpicked retries in 10 min; false falls back to the stand-in. Reads fine.
+
+## DA6 claude/p5s6-deck 88377cfa + 31ad2f0e (S6-5 night 2 the reactor; night 1's arrow); base a2ef6416 (RV23 handed both over)
+Code read (no runs yet):
+- 28c night 2: permit card on the bridge, badge from the rack, "Going in" card on Deck 6, a side job at the reactor console, "Coming out"
+  card, badge back (trained, Mail); the Watch's word if the badge isn't back 30 min after you're out. Door: m23DoorOpen in doorOpenFor
+  (permit, told, badge out; once out, only while you're still inside). m23night no longer has j.machine (stops tapped like a chore's,
+  ixSideOwn in 15b). 31ad2f0e: m23:n1 level 1 arrow to night 1's next stop after the night's clock-in.
+- Possible should: m23DoorOpen is false from n.to + 60 even if you're still inside and not out (stuck behind the shielded door?).
+- Plan: cadet 31ad2f0e vs a2ef6416; mech m23 (ON); controller m23 deck6; m23_door.py (door and path at each step, shots at 390x844).
