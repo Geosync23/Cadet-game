@@ -64826,8 +64826,8 @@ function m24Crew() {
   return ps.filter(m24Engine).concat(ps.filter(p => !m24Engine(p))).map(p => p.id);
 }
 const m24Strong = id => { const p = schedPeople().find(q => q.id === id); return !!p && (p.habits || []).some(h => /gym/.test(h)); };
-function m24Spots() {                                    // [coupling, lifting frame, drive panel]: S6-4's team spots by the coils, else the engine places
-  const sp = typeof teamSpots === 'function' ? teamSpots(M24_COILS[0]) : []; return sp.length >= 3 ? sp.slice(0, 3) : M24_PLACES.slice();
+function m24Spots() {                                    // [coupling, lifting frame, drive panel (yours)]: S6-4's team spots by the coils (its spot 1 is the lead's: yours), else the engine places
+  const sp = typeof teamSpots === 'function' ? teamSpots(M24_COILS[0]) : []; return sp.length >= 3 ? [sp[1], sp[2], sp[0]] : M24_PLACES.slice();
 }
 function m24Coil() {                                     // the coil to swap: the worst of the three (key 1071 on ties)
   const c = id => (SHIP.machines[id] || { cond: 100 }).cond;
