@@ -23,7 +23,7 @@
   fits needs only panelPlace and a 'coil winding' cause, so check them on a merge with DA6's turn.
 - F3's old once-only pointer "Cross out what was tried" can point at a P6 pair (it's P3's wording); harmless, once ever.
 - Roll cases: P6-P8 post on real faults at the Specialist's rate (.33, at most 2 open) once their rows open.
-- Later: review S6-7's "point him to a clue" call into the case panel (24k).
+- S6-7's call into the case panel: built for W7 as `casePoint` (below); W7's 28e calls it on Day 26.
 
 ## What I built (24k's slot, after the old-mysteries board)
 - **Shared:** `caseAtWork(now)` (your day shift, or a night from section 28's `p5NightAt`), `caseFirstShow(c, j, kid, fb)`
@@ -41,6 +41,9 @@
   `src.lay`, the grid on `src.grid` (n*n of '.', 'y', 'n'). Facts `x0..`: sketch (panel, by Pell), drill (panel log),
   flips (in the room). `y0` (four relays only): "X isn't Y", kills nothing. `SHIP.works.side.p7 = { labelled }`.
 - **caseAct** (24k, mine): an unknown verb goes to the kind's `act(c, verb, arg)`.
+- **casePoint({ by, seed, onPick(clueId, isKey), onClose })** -> bool, for W7's 28e (mentoring): a practice P4 case on
+  paper in Fault notes' point mode (`CASE_UI.point`; caseView and caseAct each have one line for it), three choices,
+  one key; never posted or saved; behind P5_STEP6. `casePointView`, `casePointPick`; a deviceOn('close') hook.
 - **P8** `CASE_KINDS.p8`, `p8Bad/p8Sid/p8Of/p8Word/p8Clues/p8Kills/p8Text/p8Sus/p8Runs/p8Pending/p8View/p8Act/p8Tick/p8Fits/
   p8Stage`, `P8_BAND`, `P8_SLOT = 41`, `P8_RIG = '5-shop-4'`, `P8_RUNS = 3`, `P8_MINS = 10`. Parts cartridge or coil
   winding. Suspects: the bad one is the cause, the others `'k:<n>'`. Clue `g0` (the rig, at P8_RIG) keeps `bad` and
@@ -62,7 +65,9 @@ units go inside the number ("17 kW").
 ## Tests
 - `python3 puzzle_check.py BUILD.html p6 [p7 p8]`: Step 6's parts on a copy with `P5_STEP6 = P5_STEP5 && true`; the
   off test on the build itself (Step 6 is behind ?p5s6). With no part named: the old check, Step 5's parts, then Step 6's.
-- `python3 controller_check.py BUILD.html s6cases`: the Day 25 19:00 preset (on paper), P6-P8 in Fault notes by pad.
+- `python3 controller_check.py BUILD.html s6cases`: the Day 25 19:00 preset (on paper), P6-P8 in Fault notes by pad,
+  then casePoint's choice. `puzzle_check.py BUILD point`: casePoint.
+- Also done for lead 41: claude/team-turn-fix (backlog MA6-1, a team job's turn by tap and pad).
 - Results, every turn: cadet_test ALL IDENTICAL vs 64e296df (off), check_fast OK, puzzle_check p6 p7 p8 OK.
 
 ## Gotchas
