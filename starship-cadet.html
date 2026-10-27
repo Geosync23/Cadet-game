@@ -15854,7 +15854,7 @@ SAVE_EXTRA.unshift(() => clockUndoSettle());       // a save ends the window fir
 function clockButtons(row, act, s) {                     // the screen's two halves, left and right: [Clock in | Close], [ | Undo] ...
   const gap = () => { const b = act('', () => {}); b.disabled = true; b.style.visibility = 'hidden'; b.setAttribute('aria-hidden', 'true'); return b; };
   const half = b => { b.style.flex = '1 1 0'; return b; }, close = () => act(csText('close', 'Close'), () => { document.getElementById('clockScreen').hidden = true; });
-  const u = CLOCK_UNDO && CLOCK_UNDO.d === SHIP.time.day ? CLOCK_UNDO : null, m = SHIP.time.min, ends = m >= dayShiftEnd(SHIP.time.day);
+  const u = CLOCK_UNDO && CLOCK_UNDO.d === SHIP.time.day ? CLOCK_UNDO : null, m = SHIP.time.min, ends = m >= yourDayEnd(SHIP.time.day);
   const said = (r, k) => r === 'in' ? (SHIP.time.min - DAY_SHIFT[0] > 5 ? csText('late', 'Clocked in at {time}. A little late. It happens.', { time: hhmm(SHIP.time.min) }) : csText('didin', 'Clocked in at {time}. Have a good shift.', { time: hhmm(SHIP.time.min) }))
     : r === 'out' ? friClock('didout', SHIP.time.min) || csText('didout', 'Clocked out at {time}. Evening\'s yours.', { time: hhmm(SHIP.time.min) }) : null;
   const punch = early => () => { const r = clockPunch(early); const t = said(r); if (CLOCK_UNDO) CLOCK_UNDO.said = t; clockScreen(t); };
@@ -38131,6 +38131,10 @@ const LINES = JSON.parse([
   '{"text":"My door | My door squeaks, but only at night. In the day it\'s silent. Am I imagining it?","id":"us2rse"}]',
   ',"mail.fri.week1":[',
   '{"text":"Tomorrow\'s a short Friday. The day shift stops at half past three; I\'ll see all of you in the auditorium at four. Dinner at five. Our new hands especially.","id":"1s3rh01"}]',
+  ',"mail.night.off":[',
+  '{"text":"Off nights | Three clean nights. Navarro\'s back Friday night. Sleep today; tomorrow you\'ve a cadet with you.","id":"1cf0vj4"}]',
+  ',"mail.night.on":[',
+  '{"text":"Your nights | As I said: Navarro\'s on leave. You cover his nights, tonight from 22:45 (after the comet), then 21:00 to 06:00, to Wednesday. Sleep this afternoon. I\'ll come and get you.","id":"1hrv3ke"}]',
   ',"mail.pb.cabin":[',
   '{"text":"Your cabin | After dinner I\'ll walk you to 4-23. Eat first. Your things are on their way.","id":"1ddsoh5"}]',
   ',"mail.pb.captain":[',
@@ -38867,6 +38871,86 @@ const LINES = JSON.parse([
   '{"text":"Your test job is on the board. Calder\'s watching. Take it.","id":"1pe9j16"}]',
   ',"next.wait.t3":[',
   '{"text":"Your Tier 3 test is set. The job board, the Works bay, 09:00.","id":"ew9tvb"}]',
+  ',"night.bed.on":[',
+  '{"text":"You\'re on the night shift. Sleep after 06:00.","id":"1rna0dx"}]',
+  ',"night.bed.until":[',
+  '{"text":"Sleep until {time}","id":"1684vg2"}]',
+  ',"night.clock.auto":[',
+  '{"text":"You forgot to clock out. The clock signed you out at 06:00.","id":"1c7su3u"}]',
+  ',"night.clock.done":[',
+  '{"text":"You\'re clocked out. Bed, then.","id":"o9illf"}]',
+  ',"night.clock.early":[',
+  '{"text":"An early finish: it\'s noted.","id":"1rbezka"}]',
+  ',"night.clock.in":[',
+  '{"text":"Clocked in at {time}. Night shift till 06:00.","id":"cr99c1"}]',
+  ',"night.clock.out":[',
+  '{"text":"Clocked out at {time}. {hours} h tonight.","id":"133bia4"}]',
+  ',"night.clock.over":[',
+  '{"text":"The night shift\'s over. Get some sleep.","id":"jpjvsd"}]',
+  ',"night.knock":[',
+  '{"text":"A knock at your bunk: your night shift starts at {time}.","id":"1lhkjee"}]',
+  ',"night.knock.1":[',
+  '{"text":"A knock at your bunk. Calder: \\"Up you get. Night shift. I\'ll see you down there.\\"","id":"uzphzk"}]',
+  ',"night.knock.from":[',
+  '{"text":"The night crew","id":"hes3al"}]',
+  ',"night.notice":[',
+  '{"text":"Night shift at {time}. Clock in at the Works bay, then the engine room on Deck 6.","id":"1e2y0fj"}]',
+  ',"night.notice.1":[',
+  '{"text":"Night shift now. Clock in at the Works bay, then down to the engine room.","id":"qav6h9"}]',
+  ',"night.notice.busy":[',
+  '{"text":"Your night shift starts at {time}. Turn in or drop this job first.","id":"1atyjrj"}]',
+  ',"night.off.notice":[',
+  '{"text":"Your nights are done. Navarro\'s back Friday night. Bed: you\'ve a cadet tomorrow.","id":"1aaywy6"}]',
+  ',"night.on.notice":[',
+  '{"text":"Night shift tonight from 22:45, after the comet. Then 21:00 to 06:00 till Wednesday.","id":"8mbzdh"}]',
+  ',"night.plate":[',
+  '{"text":"Brennan\'s kept you a plate: \\"Night shift? Eat, then sleep.\\" Find a seat and tap it.","id":"fqjc7a"}]',
+  ',"night.plate.dish":[',
+  '{"text":"the plate kept for you","id":"17hvaum"}]',
+  ',"night.plate.notice":[',
+  '{"text":"A plate\'s kept for you in the mess, from 06:15. Then sleep until {time}.","id":"mzm653"}]',
+  ',"night.ptr.bed":[',
+  '{"text":"Sleep until {time}","id":"m7g11k"}]',
+  ',"night.ptr.bed.22":[',
+  '{"text":"Sleep now: night shift tonight","id":"ik2xe4"}]',
+  ',"night.ptr.dayout":[',
+  '{"text":"Clock out, then sleep","id":"11v72zf"}]',
+  ',"night.ptr.in":[',
+  '{"text":"Night shift: clock in","id":"2f8k8t"}]',
+  ',"night.ptr.out":[',
+  '{"text":"Clock out: the night\'s done","id":"vj9xwo"}]',
+  ',"night.ptr.plate":[',
+  '{"text":"A plate\'s kept for you in the mess","id":"1p503dg"}]',
+  ',"night.ptr.room":[',
+  '{"text":"Night shift: the engine room","id":"pw2xlq"}]',
+  ',"night.row":[',
+  '{"text":"Night shift, {from}-06:00","id":"168oyw6"}]',
+  ',"night.row.end":[',
+  '{"text":"Night shift, until 06:00","id":"1bgsm9k"}]',
+  ',"night.row.sleep":[',
+  '{"text":"Sleep until {time}","id":"1374nzq"}]',
+  ',"night.row.told":[',
+  '{"text":"Night shift tonight, after the comet","id":"1c6exd0"}]',
+  ',"night.screen.didin":[',
+  '{"text":"Clocked in at {time}. Quiet night, with luck.","id":"1c3gl5s"}]',
+  ',"night.screen.didout":[',
+  '{"text":"Clocked out at {time}. Bed.","id":"1htqrxy"}]',
+  ',"night.screen.done":[',
+  '{"text":"Night done. Sleep well.","id":"63on7q"}]',
+  ',"night.screen.hours":[',
+  '{"text":"Tonight: {hours} h","id":"4u9qiw"}]',
+  ',"night.screen.on":[',
+  '{"text":"On the night shift since {time}.","id":"v185mz"}]',
+  ',"night.screen.over":[',
+  '{"text":"The night shift\'s over.","id":"1ugdx12"}]',
+  ',"night.screen.ready":[',
+  '{"text":"Night shift {from}-06:00. Tap to clock in.","id":"dhu2ts"}]',
+  ',"night.sleep.notice":[',
+  '{"text":"Sleep now: night shift tonight. Your bunk, until 16:45.","id":"cekf4n"}]',
+  ',"night.wake":[',
+  '{"text":"Your alarm. Night shift tonight from {time}.","id":"znp007"}]',
+  ',"night.where":[',
+  '{"text":"the time clock, then the engine room, Deck 6","id":"i1ehd6"}]',
   ',"note":[',
   '{"text":"Glad you stayed. That\'s the whole note.","id":"ulym6p","tone":"warm","endgame":"early","tier":[3,4]},',
   '{"text":"Saved you a biscuit. Not a goodbye one. An ordinary one. Better.","id":"1t133et","tone":"warm","endgame":"early","tier":[3,4]},',
@@ -42516,6 +42600,8 @@ const MEETINGS_BAKED = {
   "lineSupperGuess": {"title": "What's in the punch?", "from": "Pell Okafor", "gist": "At the Line supper, Pell tried to guess what's in Brennan's punch.", "lines": [{"who": "pell", "text": "You carried it up. You know. What's in the punch? It's ginger. It's definitely ginger.", "pose": "listen", "to": "you"}, {"choice": [{"text": "No idea. Ask Brennan.", "rel": {"brennan": 1}, "flavour": "practical", "mem": "line.secret.kept", "reply": {"who": "pell", "text": "She'd tell me. She wouldn't. You're both the same. Unbearable.", "pose": "laugh"}}, {"text": "It's pickle brine.", "rel": {"pell": 1}, "flavour": "share", "mem": "line.secret.told", "reply": {"who": "pell", "text": "Pickle... no. No. I've had three mugs. Why would you tell me that?", "pose": "laugh"}}, {"text": "Ginger. Definitely ginger.", "rel": {"brennan": 1}, "flavour": "funny", "mem": "line.secret.kept", "reply": {"who": "pell", "text": "I knew it! Ha. Ginger. I'm never wrong about these things.", "pose": "laugh"}}]}]},
   "lineTomasMug": {"title": "A mug for the watch", "from": "Tomas Lind", "gist": "You took Tomas a mug of Line punch at his watch post.", "lines": [{"who": "tomas", "text": "You brought it up. Nobody brings things to the watch.", "pose": "laugh"}, {"who": "tomas", "text": "It's green. Why is it green? Don't tell me. I'm drinking it anyway."}, {"who": "tomas", "text": "Tell me one thing. Just one. Then I have to look at the screen again.", "pose": "listen"}]},
   "lineTomasSat": {"title": "Tomas, the night before", "from": "Tomas Lind", "gist": "Tomas is on watch all day tomorrow, so he'll miss his first Line.", "lines": [{"who": "tomas", "text": "Hey. Can I complain at you for a minute? A small complaint. Medium.", "pose": "sigh"}, {"who": "tomas", "text": "I'm on watch tomorrow. All day. My first Line, and I'll be watching a corridor screen."}, {"who": "tomas", "text": "Everyone keeps saying it's the best bit of being out here. The horn, the gold, the oath.", "pose": "listen", "to": "you"}, {"choice": [{"text": "I'll bring you some punch.", "rel": {"tomas": 1}, "flavour": "practical", "flag": "line.promised", "reply": {"who": "tomas", "text": "Would you? Even if it's awful? Especially if it's awful. I want the whole thing.", "pose": "laugh"}}, {"text": "I'll tell you every bit of it.", "rel": {"tomas": 1}, "flavour": "cheer", "reply": {"who": "tomas", "text": "Every bit. Who cries, who spills, what the Captain says. I'll want it twice.", "pose": "laugh"}}, {"text": "Can't you swap?", "rel": {"tomas": 1}, "flavour": "listen", "reply": {"who": "tomas", "text": "Not on a crossing. Someone has to watch her cross.", "pose": "nod"}}]}, {"who": "tomas", "text": "Why does it matter, anyway? It's just a line. Pell says past it we're guests in someone else's sky."}, {"who": "tomas", "text": "Help a long way off, every star with somebody else's name. So the oath's about each other. Huh.", "pose": "nod"}, {"who": "tomas", "text": "Right. Climbing wall, then bed. Early start. Cross well for me, {me}."}]},
+  "night.off": {"title": "Off nights", "from": "Chief Ines Calder", "gist": "Calder came down at 06:00: your three nights are done. Navarro's back Friday night. You've a cadet tomorrow.", "lines": [{"who": "calder", "text": "That's your three nights. Clean ones.", "pose": "nod", "to": "you"}, {"who": "calder", "text": "Navarro's back Friday night. You're off nights."}, {"choice": [{"text": "I could get used to nights.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Don't. Daylight's good for you.", "pose": "nod"}}, {"text": "I'm going to sleep for a week.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "Until 15:45 will do.", "pose": "nod"}}]}, {"who": "calder", "text": "You've a cadet tomorrow. Go to bed."}]},
+  "night.on": {"title": "Night shift", "from": "Chief Ines Calder", "gist": "Calder told you in person: Navarro's on leave, so you cover his nights, Monday to Wednesday. Tonight from 22:45, after the comet; then 21:00 to 06:00.", "lines": [{"who": "calder", "text": "A word, before you go.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "Navarro's on leave. Family. Someone covers his nights."}, {"who": "calder", "text": "You. Monday to Wednesday. Tonight from 22:45, then 21:00 to 06:00."}, {"choice": [{"text": "Nights. I can do nights.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "Good. Sleep this afternoon. Curtains shut, properly.", "pose": "nod"}}, {"text": "What happens down there all night?", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "The engines don't sleep. Reyes will show you.", "pose": "nod"}}]}, {"who": "calder", "text": "Watch your comet first. I'll come and get you."}]},
   "promo.ceremony": {"title": "Your commission", "from": "Captain Odile Marrow", "gist": "The Captain commissioned you as an Officer of the Wren. The framed commission is on your cabin shelf.", "lines": [{"who": "vance", "text": "Attention, please. The Captain.", "pose": "nod"}, {"who": "marrow", "text": "Thank you, Teo. Sit, everyone, if there are chairs. There never are.", "pose": "laugh"}, {"who": "marrow", "text": "Cadet. Chief Calder tells me you're ready. The Chief doesn't say that often.", "to": "you"}, {"who": "marrow", "text": "By the Survey Service, I commission you an Officer of the Wren. With all that comes with it."}, {"who": "marrow", "text": "Hold still. Pins are not my strong point.", "pin": true, "pose": "gesture"}, {"who": "marrow", "text": "There. Now, my question. What should an officer never forget?", "to": "you"}, {"choice": [{"text": "The people. Everyone aboard.", "rel": {"marrow": 2}, "mem": "promo.answer.people", "reply": {"who": "marrow", "text": "Good answer. The ship is the people in it. The rest is metal.", "pose": "nod"}}, {"text": "To ask when I don't know.", "rel": {"marrow": 2}, "mem": "promo.answer.ask", "reply": {"who": "marrow", "text": "Good answer. The ones who stop asking are the ones who worry me.", "pose": "nod"}}, {"text": "To mind the step in the ready room.", "rel": {"marrow": 1}, "mem": "promo.answer.step", "reply": {"who": "marrow", "text": "Ha. Calder warned me about you. Also correct.", "pose": "laugh"}}]}, {"who": "calder", "text": "Tier 2. On the day I said. Good.", "pose": "nod"}, {"who": "torres-zeke", "text": "Told everyone. Didn't I tell everyone?", "pose": "laugh"}, {"who": "marrow", "text": "Tea, then. Mine's the good stuff. Don't tell the galley."}, {"who": "marrow", "text": "Welcome, Officer. My door is open. Mind the step.", "to": "you"}]},
   "promo.officer": {"title": "My office, 11:00", "from": "Chief Ines Calder", "gist": "Calder promoted you to Officer: Technician, Tier 2. A badge, a collar pip, and your own cabin from tonight.", "lines": [{"who": "calder", "text": "Sit. No, stay standing. This won't take long.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "The scrubber. Filter in, fan settled, nobody had to tell you twice."}, {"who": "calder", "text": "You've passed. As of now you're an Officer. Technician, Tier 2."}, {"who": "calder", "text": "The badge. And the pip. Collar, left side. Straight, please."}, {"choice": [{"text": "Thank you, Chief. I won't let you down.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "I know. That's why you're standing here.", "pose": "nod"}}, {"text": "Me? Already?", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Already. I don't promote people to be kind. I promote them because they're ready."}}, {"text": "About time, honestly.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Hm. Torres said you'd say that. He owes me a biscuit.", "pose": "laugh"}}]}, {"who": "calder", "text": "The board leaves you Tier 2 work from tomorrow. Harder faults. Fewer carts."}, {"who": "calder", "text": "Tonight you move to 4-23. Your own cabin. I'll walk you there at five."}, {"who": "calder", "text": "The Captain commissions you tomorrow. Clean uniform. Go on, then. They're waiting outside."}]},
   "promo.result": {"title": "Your result", "from": "Chief Ines Calder", "gist": "Calder gave you your result: you passed. You're a Works Officer now, Technician, Tier 2. The Captain pins your pip this afternoon.", "lines": [{"who": "calder", "text": "Door. Thank you. Two minutes.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "Your scrubber. Four bolts, one filter, no notes from me."}, {"who": "calder", "text": "Result: passed. You're an Officer from today. Technician, Tier 2."}, {"who": "calder", "text": "Your badge. Pin it level. I'll know if it isn't."}, {"choice": [{"text": "Thank you, Chief. I'll do it properly.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "You already do. That's what the badge is for.", "pose": "nod"}}, {"text": "Really? This soon?", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Really. Soon isn't the measure. Ready is. You're ready."}}, {"text": "I wondered when you'd say so.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Hm. So did Torres. Out loud. Daily.", "pose": "nod"}}]}, {"who": "calder", "text": "The pip isn't mine to give. The Captain pins it this afternoon, observation room. Clean uniform."}, {"who": "calder", "text": "Tier 2 work on the board from tomorrow. Tonight, after dinner, I walk you to your cabin. 4-23."}, {"who": "calder", "text": "Go on, then. They're waiting outside."}]},
@@ -51650,7 +51736,7 @@ function clockScreen(said, ask, after) {                // after (patch #6): 'un
   const on = playerOnDuty(d), inn = careerClockedIn(d), out = careerClockedOut(d), wd = weekday(d);
   const st = said || (!on ? (careerOn(d) ? csText('leave', 'On leave today. Enjoy it.') : sickToday(d) ? csText('sick', 'Off sick. Get well.') : csText('offday', 'Day off. No clocking today.'))
     : out ? (wd === 4 ? csText('weekend', 'Shift done. See you Monday.') : csText('done', 'Shift done. See you tomorrow.')) : inn ? friClock('onshift', C.ci % 1440) || csText('onshift', 'On shift since {time}.', { time: hhmm(C.ci % 1440) })
-    : m >= dayShiftEnd(d) ? csText('done', 'Shift done. See you tomorrow.') : csText('ready', 'Shift starts at {time}. Tap to clock in.', { time: hhmm(DAY_SHIFT[0]) }));
+    : m >= yourDayEnd(d) ? csText('done', 'Shift done. See you tomorrow.') : csText('ready', 'Shift starts at {time}. Tap to clock in.', { time: hhmm(DAY_SHIFT[0]) }));
   el.dataset.ph = SHIP.device.settings.phosphor; el.textContent = ''; el.hidden = false;
   if (CLOCK_UNDO_ON) CLOCK_DRAWN = performance.now();   // patch #6: the tap guard's start
   const x = mk('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', csText('close', 'Close')); x.onclick = e => { e.stopPropagation(); el.hidden = true; };
@@ -51661,9 +51747,9 @@ function clockScreen(said, ask, after) {                // after (patch #6): 'un
   el.append(mk('small', '', csText('hours', 'YOUR HOURS')), mk('p', '', csText('today', 'Today: {hours} h', { hours: hrs(today) }) + ' · ' + csText('week', 'This week: {hours} h', { hours: hrs(week) })));
   const row = mk('div', 'btns'), act = (label, f) => { const b = mk('button', 'act', label); b.type = 'button'; b.onclick = e => { e.stopPropagation(); if (CLOCK_UNDO_ON && performance.now() - CLOCK_DRAWN < CLOCK_TAP_GUARD) return; f(); }; row.appendChild(b); return b; };   // patch #6: taps just after a redraw are ignored
   if (CLOCK_UNDO_ON) { clockButtons(row, act, { on, inn, out, m, ask, after }); el.appendChild(row); try { (row.querySelector('button:not([disabled])') || x).focus(); } catch (e) { /* no focus */ } return; }
-  if (on && !out && !(inn ? false : m >= dayShiftEnd(d) || m < CAREER.clockIn)) {
+  if (on && !out && !(inn ? false : m >= yourDayEnd(d) || m < CAREER.clockIn)) {
     if (!inn) act(csText('in', 'Clock in'), () => { const r = careerClock(shipNow(), true); clockScreen(r ? (SHIP.time.min - DAY_SHIFT[0] > 5 ? csText('late', 'Clocked in at {time}. A little late. It happens.', { time: hhmm(SHIP.time.min) }) : csText('didin', 'Clocked in at {time}. Have a good shift.', { time: hhmm(SHIP.time.min) })) : null); });
-    else if (SHIP.time.min < dayShiftEnd(d) && !ask) act(csText('out', 'Clock out'), () => clockScreen(null, true));   // before the shift ends (17:00): asks first
+    else if (SHIP.time.min < yourDayEnd(d) && !ask) act(csText('out', 'Clock out'), () => clockScreen(null, true));   // before the shift ends (17:00): asks first
     else act(csText('out', 'Clock out'), () => { const r = careerClock(shipNow(), true); clockScreen(r ? friClock('didout', SHIP.time.min) || csText('didout', 'Clocked out at {time}. Evening\'s yours.', { time: hhmm(SHIP.time.min) }) : null); });
   }
   act(csText('close', 'Close'), () => { el.hidden = true; }).classList.add('next');
@@ -57401,7 +57487,8 @@ onSim('caseCalled', n => { const c = SHIP.works && SHIP.works.cur; if (n && n.tr
 // the teacher's walk (section 14's escortPlanOf asks): lead you to the training job while you watch, follow you while you do one
 function worksEscort(p, t) {
   { const pe = p && typeof promoEscort === 'function' ? promoEscort(p, t) || promoMoveEscort(p, t) || promoCerEscort(p, t) : null; if (pe) return pe; }
-  { const pe = p && P5_STEP5 && typeof p5Escort === 'function' ? p5Escort(p, t) : null; if (pe) return pe; }   // Pillar 5 Step 5 (24u): Calder comes to find you (Power safety's ask; S5-2's promotion beats)   // 24p: Calder comes to find you for the summons; the walk to your cabin; up to the ceremony
+  { const pe = p && P5_STEP5 && typeof p5Escort === 'function' ? p5Escort(p, t) : null; if (pe) return pe; }
+  { const pe = p && P5_NIGHT && typeof p5nEscort === 'function' ? p5nEscort(p, t) : null; if (pe) return pe; }   // Step 6 (28a, S6-1): Calder comes to find you for your nights   // Pillar 5 Step 5 (24u): Calder comes to find you (Power safety's ask; S5-2's promotion beats)   // 24p: Calder comes to find you for the summons; the walk to your cabin; up to the ceremony
   const W = SHIP.works, c = W && W.cur; if (!c || !p || p.id !== c.by || (c.st !== 'watch' && c.st !== 'do' && c.st !== 'held') || worksDay(t) !== c.d) return null;
   const j = SHIP.jobs.find(x => x.id === c.j), spot = trainSpot(j);
   if (c.st === 'held') return spot ? { mode: 'follow', to: { deck: spot.deck, tile: spot.tile } } : null;   // they stay with you
@@ -64557,7 +64644,7 @@ function p5nClock(now, toast, hold) {
   R.out = Math.floor(now); const h = R.out - R.in, early = now < N.to - P5N.early;
   if (SHIP.player.clockLog) SHIP.player.clockLog[N.day] = (SHIP.player.clockLog[N.day] || 0) + h;
   if (early) repAdd(null, 0, { work: -2 }, 'early');   // as the day's short shift: a small dip, never a missed one
-  toast('Time clock', p5nText('night.clock.out', 'Clocked out at {time}. {h}h {m}m tonight.', { time: hhmm(now % 1440), h: Math.floor(h / 60), m: String(h % 60).padStart(2, '0') }) + (early ? ' ' + p5nText('night.clock.early', 'An early finish: it\'s noted.') : ''));
+  toast('Time clock', p5nText('night.clock.out', 'Clocked out at {time}. {hours} h tonight.', { time: hhmm(now % 1440), hours: hrs(h) }) + (early ? ' ' + p5nText('night.clock.early', 'An early finish: it\'s noted.') : ''));
   const fx = () => { careerRemark(early ? 'early' : 'out', now); simNote('clock', { what: 'out', night: N.day }); }; if (hold) hold(fx); else fx(); return 'out';
 }
 const p5nIn = (t = shipNow()) => { const N = p5nClockNight(t), R = N && SHIP.works && SHIP.works.ns && SHIP.works.ns[N.day]; return !!R && R.in > 0 && !R.out; };   // clocked in for a night, not out
@@ -64633,6 +64720,98 @@ function p5nPlate(it) {                                   // 15's tray tap asks:
   toast(it.t || 'Servery', p5nText('night.plate', 'Brennan\'s kept you a plate: "Night shift? Eat, then sleep." Find a seat and tap it to eat.'));
   simNote('p5night', { step: 'plate', day: d - 1 }); return true;
 }
+// ---- Calder's word, the notices, the arrows and the rings (S6-1, turn 3; the user's rules: in person first, the
+// Mail only as the record; a level 1 arrow and a forced ring at every step, whatever Teaching arrows or tracking say).
+// Day 22 from 09:15 Calder comes to find you (meeting night.on; with the Monday briefing, S6-2, she waits by its door:
+// m21Door, when 28b has it); not met by 10:00, the notice. Thursday Day 25 at 06:00 she comes down to you (night.off).
+// Each night: the notice (20:30; night 1 at 22:40, unless S6-3's walk down from the comet says it: pu4Fetches), the
+// arrow and ring to the time clock, then the engine room, at 06:00 the clock again, then the kept plate and your bunk.
+// Holding another job while the clock waits: a notice each hour. Flags p5n.* (saved); words content/works/night.lines
+const P5N_WORD = { on: { day: 22, at: 555, by: 600, night: 22 }, off: { day: 25, at: 360, by: 400, night: 24 } };
+const P5N_SEEK = { kind: null };                          // live: the word Calder's on her way to say
+const p5nCalder = () => typeof worksName === 'function' ? worksName('calder') : 'Chief Ines Calder';
+function p5nNear(id, r = 2.2) { try { const a = DECK_CREW.find(x => x.p && x.p.id === id), P = player.obj.position; return !!a && Math.hypot(a.x - P.x, a.z - P.z) < r; } catch (e) { return false; } }
+function p5nScript(kind, end) {                           // the writer's scene (else a stand-in), our hooks on a live copy
+  const id = 'night.' + kind, base = MEETING_SCRIPTS[id] || { title: kind === 'on' ? 'Night shift' : 'Off nights', from: 'Chief Ines Calder', stub: true,
+    gist: kind === 'on' ? 'Calder told you: Navarro\'s on leave, so you cover his nights, Monday to Wednesday.' : 'Calder came down at 06:00: your nights are done.',
+    lines: kind === 'on' ? [{ who: 'calder', text: 'Navarro\'s on leave. You cover his nights, Monday to Wednesday.', to: 'you' }, { who: 'calder', text: 'Watch your comet first. I\'ll come and get you.' }]
+      : [{ who: 'calder', text: 'That\'s your three nights. Navarro\'s back Friday night.', to: 'you' }, { who: 'calder', text: 'You\'ve a cadet tomorrow. Go to bed.' }] };
+  MEETING_SCRIPTS['night.live'] = { ...base, onPick: k => flagSet('p5n.reply.' + kind, k + 1), onEnd: () => end() };
+  return 'night.live';
+}
+function p5nTold(kind, now, how) {                        // said: in person, or the notice when she couldn't reach you; the Mail is the record
+  if (flag('p5n.' + kind) !== undefined) return; flagSet('p5n.' + kind, how); P5N_SEEK.kind = null;
+  if (typeof promoMail === 'function') promoMail('mail.night.' + kind, kind === 'on' ? 'Your nights | Navarro\'s on leave. You cover his nights, tonight from 22:45 (after the comet), then 21:00 to 06:00, to Wednesday.' : 'Off nights | Three clean nights. Navarro\'s back Friday night. Sleep today; tomorrow you\'ve a cadet with you.', null, now);
+  if (kind === 'on' || how === 'notice') promoNotice(kind === 'on' ? p5nText('night.on.notice', 'Night shift tonight from 22:45, after the comet. Then 21:00 to 06:00 till Wednesday.') : p5nText('night.off.notice', 'Your nights are done. Navarro\'s back Friday night. Bed: you\'ve a cadet tomorrow.'), p5nCalder());
+  simNote('p5night', { step: kind, how });
+}
+function p5nWordTick(now, skip) {                         // once a ship minute (hourly while time skips)
+  const d = worksDay(now), m = now - (d - 1) * 1440, live = !skip && now >= shipNow() - 1;
+  for (const kind of ['on', 'off']) {
+    const T = P5N_WORD[kind]; if (flag('p5n.' + kind) !== undefined || !playerNightOn(T.night)) continue;
+    if (kind === 'off' && !(SHIP.works.ns[T.night] && SHIP.works.ns[T.night].in) && d === T.day) { if (m >= T.at) flagSet('p5n.off', 'none'); continue; }   // never came in for the last night: nothing to come down for
+    if (d < T.day || d === T.day && m < T.at) continue;
+    if (d > T.day || m >= T.by) { if (live && !(typeof sleeping !== 'undefined' && sleeping)) p5nTold(kind, now, 'notice'); continue; }   // asleep: once you're up
+    if (!live) continue;
+    P5N_SEEK.kind = kind;
+    if ((typeof DIALOGUE !== 'undefined' && DIALOGUE) || promoBusy() || !p5nNear('calder')) continue;
+    dialogueShow(p5nScript(kind, () => p5nTold(kind, shipNow(), 'person')), { id: 'night.' + kind, who: ['calder'], at: now, where: { any: true } });
+  }
+}
+function p5nEscort(p, t) {                                // 24 core's worksEscort asks: Calder on her way to find you
+  if (!p || p.id !== 'calder' || !P5N_SEEK.kind || flag('p5n.' + P5N_SEEK.kind) !== undefined || promoBusy()) return null;
+  if (P5N_SEEK.kind === 'on' && P5_M21 && typeof m21Door === 'function') { const w = m21Door(t); if (w) return { mode: 'wait', to: w }; }   // S6-2: by the observation room's door
+  return { mode: 'follow', to: null };
+}
+const p5nRoomIn = () => { try { return deckDef.num === 6 && ['E', 'K'].includes(roomAt(...player.here())); } catch (e) { return false; } };
+function p5nHeld() { try { const j = myJob(); return j && !jobSide(j) && !j.workDone ? j : null; } catch (e) { return null; } }
+function p5nGuide(now) {                                  // live, once a ship minute: the notices, the level 1 arrows, the rings
+  if (!p5nLive() || typeof guideAsk !== 'function') return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, owner = '28a (S6-1)', P = typeof POINT_ON !== 'undefined' && POINT_ON && typeof pointAsk === 'function', bed = () => (typeof playerBed === 'function' ? playerBed() : '4-1');
+  const sleepRing = (id, w, until) => { if (P) pointAsk({ id, force: true, until, done: () => !p5nDayBed(), path: [{ open: () => !sleepEl.hidden, el: () => null }, { el: () => document.getElementById('sleepYes'), label: p5nText('night.ptr.bed', 'Sleep until {time}', { time: hhmm(w) }) }] }); };
+  const S = playerNightOn(d) && yourShift(d);              // Day 22's afternoon: sleep now
+  if (S && S.day && m >= S.day[1] && p5nDayBed(now)) {
+    if (flag('p5n.sleep.' + d) === undefined && !promoBusy()) { flagSet('p5n.sleep.' + d, 1); promoNotice(p5nText('night.sleep.notice', 'Sleep now: night shift tonight. Your bunk, until 16:45.'), p5nCalder()); }
+    if (careerClockedIn(d) && !careerClockedOut(d)) { const lab = p5nText('night.ptr.dayout', 'Clock out, then sleep');   // the day part's punch first
+      guideAsk({ id: 'p5n:dayout:' + d, level: 1, owner, from: (d - 1) * 1440 + S.day[1], until: (d - 1) * 1440 + P5N_WAKE[d] - 30, goal: () => guideClock(lab), done: () => careerClockedOut(d) });
+      if (P) pointAsk({ id: 'p:p5n:dayout:' + d, force: true, path: pointClock('out', lab), until: (d - 1) * 1440 + P5N_WAKE[d] - 30, done: () => careerClockedOut(d) }); }
+    else guideAsk({ id: 'p5n:bed:' + d, level: 1, owner, from: (d - 1) * 1440 + S.day[1], until: (d - 1) * 1440 + P5N_WAKE[d] - 30, goal: () => ({ deck: 4, place: bed(), label: p5nText('night.ptr.bed.22', 'Sleep now: night shift tonight') }), done: () => !p5nDayBed() });
+    sleepRing('p:p5n:bed:' + d, P5N_WAKE[d], (d - 1) * 1440 + P5N_WAKE[d] - 30);
+  }
+  for (const k of [d - 1, d]) {
+    const N = playerNightOn(k) && p5nOf(k); if (!N) continue;
+    const R = p5nNight(k), at = N.from - (k === 22 ? 5 : 30), fetched = k === 22 && P5_PROMO4 && typeof pu4Fetches === 'function' && pu4Fetches(now);
+    if (now >= at && !R.in && !R.miss && now < N.to) {
+      if (flag('p5n.notice.' + k) === undefined && !fetched) { flagSet('p5n.notice.' + k, 1); promoNotice(k === 22 ? p5nText('night.notice.1', 'Night shift now. Clock in at the Works bay, then down to the engine room.') : p5nText('night.notice', 'Night shift at {time}. Clock in at the Works bay, then the engine room on Deck 6.', { time: hhmm(N.from % 1440) }), p5nCalder()); }
+      const h = Math.floor(now / 60), held = p5nHeld();
+      if (held && flag('p5n.busy') !== h) { flagSet('p5n.busy', h); promoNotice(p5nText('night.notice.busy', 'Your night shift starts at {time}. Turn in or drop this job first.', { time: hhmm(N.from % 1440) }), p5nCalder()); }
+      if (now >= N.from - 15 || k === 22) {
+        const lab = p5nText('night.ptr.in', 'Night shift: clock in');
+        guideAsk({ id: 'p5n:in:' + k, level: 1, owner, from: N.from - (k === 22 ? 5 : 15), until: N.to, goal: () => guideClock(lab), done: () => !!(SHIP.works.ns[k] || {}).in || !!(SHIP.works.ns[k] || {}).miss });
+        if (P) pointAsk({ id: 'p:p5n:in:' + k, force: true, path: pointClock('in', lab), until: N.to, done: () => !!(SHIP.works.ns[k] || {}).in });
+      }
+    }
+    if (R.in && !R.out && now < N.to - 10) {
+      if (p5nRoomIn()) flagSet('p5n.room.' + k, 1);
+      if (flag('p5n.room.' + k) === undefined) guideAsk({ id: 'p5n:room:' + k, level: 1, owner, until: N.to - 10, goal: () => ({ deck: 6, room: 'E', label: p5nText('night.ptr.room', 'Night shift: the engine room') }), done: () => flag('p5n.room.' + k) !== undefined || p5nRoomIn() || !!(SHIP.works.ns[k] || {}).out });
+    }
+    if (R.in && !R.out && now >= N.to - 10 && now < N.to + P5N.auto) {
+      const lab = p5nText('night.ptr.out', 'Clock out: the night\'s done');
+      guideAsk({ id: 'p5n:out:' + k, level: 1, owner, from: N.to - 10, until: N.to + P5N.auto, goal: () => guideClock(lab), done: () => !!(SHIP.works.ns[k] || {}).out });
+      if (P) pointAsk({ id: 'p:p5n:out:' + k, force: true, path: pointClock('out', lab), until: N.to + P5N.auto, done: () => !!(SHIP.works.ns[k] || {}).out });
+    }
+    if (d === k + 1 && (R.out || now >= N.to + P5N.auto) && !(typeof sleeping !== 'undefined' && sleeping)) {   // the morning after: the plate, then your bunk
+      const w = P5N_WAKE[d] || 945, plate = m < MEALS.breakfast[0] && flag('p5n.plate') !== d && !SHIP.player.tray;
+      if (R.in && flag('p5n.platesaid.' + d) === undefined && m < MEALS.breakfast[0]) { flagSet('p5n.platesaid.' + d, 1); promoNotice(p5nText('night.plate.notice', 'A plate\'s kept for you in the mess, from 06:15. Then sleep until {time}.', { time: hhmm(w) }), 'Brennan'); }
+      if (plate && R.in) { if (m >= 375) guideAsk({ id: 'p5n:plate:' + d, level: 1, owner, until: (d - 1) * 1440 + MEALS.breakfast[0], goal: () => ({ deck: 3, place: '3-queue-1', label: p5nText('night.ptr.plate', 'A plate\'s kept for you in the mess') }), done: () => flag('p5n.plate') === d || !!SHIP.player.tray }); }
+      else if (p5nDayBed(now) && !SHIP.player.tray && (k !== 24 || flag('p5n.off') !== undefined)) {   // (a tray in hand: eat it first)
+        guideAsk({ id: 'p5n:bed:' + d, level: 1, owner, until: (d - 1) * 1440 + w - 30, goal: () => ({ deck: 4, place: bed(), label: p5nText('night.ptr.bed', 'Sleep until {time}', { time: hhmm(w) }) }), done: () => !p5nDayBed() });
+        sleepRing('p:p5n:bed:' + d, w, (d - 1) * 1440 + w - 30);
+      }
+    }
+  }
+}
+if (P5_NIGHT) WORK_TICKS.push((now, skip) => { if (!p5nLive()) return; p5nState(); p5nWordTick(now, skip); if (!skip && now >= shipNow() - 1) p5nGuide(now); });
 // section 19's Schedule (devDay) asks: Day 22's day part to 12:30, the night shift that evening (to 06:00) and its last
 // hours the next morning, the daytime sleep after it ("Sleep until 15:45") in place of "Day off"
 const P5N_WAKE = { 22: 1005, 23: 945, 24: 945, 25: 945 };   // the bed's "Sleep until": 16:45 on Day 22, else 15:45
@@ -64645,7 +64824,7 @@ function p5nItems(d, out) {
   }
   if (S.night) {
     if (S.day && i >= 0 && out[i].kind === 'shift') { out[i].to = S.day[1]; out.push({ from: S.day[1] + 15, to: P5N_WAKE[d], title: p5nText('night.row.sleep', 'Sleep until {time}', { time: hhmm(P5N_WAKE[d]) }), where: 'your bunk', kind: 'sleep' }); }
-    out.push({ from: S.night[0], to: 1440, title: p5nText('night.row', 'Night shift, {from}-06:00', { from: hhmm(S.night[0]) }), where, kind: 'shift', night: true });
+    out.push({ from: S.night[0], to: 1440, title: d === 22 && flag('p5n.on') !== undefined ? p5nText('night.row.told', 'Night shift tonight, after the comet') : p5nText('night.row', 'Night shift, {from}-06:00', { from: hhmm(S.night[0]) }), where, kind: 'shift', night: true });
   }
 }
 // ---- end of slot: Night shift ----

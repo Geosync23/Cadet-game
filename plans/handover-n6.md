@@ -21,8 +21,13 @@
    `p5nKnock`, `p5nBed`, `p5nPlate`. Hooks: 13's offerSleep (`p5nBed` first), alarmLate (the night first), sleepGo
    (a day sleep isn't kept as your alarm; the knock wakes you); 15's bunkLie (lying down sleeps you after a night),
    needGoal (no bunk arrow on or just before a night; the bunk by day after one), the t:late tip, the tray tap (the plate).
-3. Calder's night.on (Day 22 09:15) and night.off (Day 25 06:00); notices 20:30, arrows from 20:45 (level 1), ring
-   lines, Tracked rows, Mail as the record; night 1's start at 22:40 with P5_PROMO4 off.
+3. **Calder's word, notices, arrows, rings (done).** 28a: `P5N_WORD`, `P5N_SEEK`, `p5nScript`, `p5nTold`,
+   `p5nWordTick`, `p5nEscort` (hooked into 24 core's worksEscort, after p5Escort), `p5nGuide`. Meetings
+   content/meetings/night.on.meet, night.off.meet; words content/works/night.lines (stand-ins, baked). Each night: the
+   notice (20:30; night 1 22:40 unless 24u defines `pu4Fetches(now)` true: S6-3's walk down), a level 1 arrow and
+   forced ring to the clock, then the engine room, the clock at 06:00, the plate, your bunk (ring on "Set alarm").
+   Day 22 12:30: clock out, then sleep. Holding a job while the clock waits: an hourly notice. With P5_M21, 28b may
+   define `m21Door(t)` -> { deck, tile } for Calder to wait at. Flags p5n.* (saved).
 4. Held jobs' night windows (17's jobReserve), the night incident (24f), the night's ordinary jobs; 21b's clothes day;
    Navarro's call home.
 5. Saves (03:00 loads into the same night), late saves, check parts: player_check night, clothes, saves, food, career,
