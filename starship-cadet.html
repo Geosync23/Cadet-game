@@ -57680,7 +57680,10 @@ function ladderTick(h) {
   const today = W.op[d] || [], has = size => today.some(id => (ladderRow(id) || {}).size === size), opened = worksOpened(W);
   const c = W.cur;
   if (c && c.st === 'held' && c.d < d) worksEscortEnd(c.id);   // a hold left from an earlier day: trained now (the ladder never stalls)
-  if (c && c.d < d && (c.st === 'ask' || c.st === 'again') && !has('big') && m <= WORKS_ASK[1]) { const row = ladderRow(c.id); if (row && trainOffer(row, c, d, t)) { (W.op[d] = W.op[d] || []).push(row.id); out.push(row.id); } }
+  if (c && c.d < d && (c.st === 'ask' || c.st === 'again') && !has('big') && m <= WORKS_ASK[1] && P5_PROMO4 && ladderTestDue(c, d, W, opened)) {   // (W8, MA6-2) a lesson carried over never holds a test row on its day (Day 22's Tier 4 test): it goes back to unopened and comes again on a later day
+    const k = (W.op[c.d] || []).indexOf(c.id); if (k >= 0) W.op[c.d].splice(k, 1); opened.delete(c.id); W.cur = null; simNote('ladder', { mech: c.id, size: 'big', day: d, parked: true });
+    const tr = ladderTestDue(c, d, W, opened); if (tr && ladderOpen(tr, d, t)) out.push(tr.id); }   // the test first (the table has the lesson ahead of it)
+  else if (c && c.d < d && (c.st === 'ask' || c.st === 'again') && !has('big') && m <= WORKS_ASK[1]) { const row = ladderRow(c.id); if (row && trainOffer(row, c, d, t)) { (W.op[d] = W.op[d] || []).push(row.id); out.push(row.id); } }
   for (const size of ['big', 'small']) {
     if ((W.op[d] || []).some(id => (ladderRow(id) || {}).size === size) || (size === 'big' && (W.cur || m > WORKS_ASK[1]))) continue;
     const ok = r => r.size === size && !opened.has(r.id) && WORK_MECH[r.id] && !WORK_MECH[r.id].own && d >= r.day && r.tier <= W.tier && (!r.fixed || weekday(d) + 1 === r.fixed.wd) && ladderNeeds(r.needs, W);
@@ -57688,6 +57691,9 @@ function ladderTick(h) {
     if (row && ladderOpen(row, d, t)) out.push(row.id);
   }
   return out;
+}
+function ladderTestDue(c, d, W, opened) {                 // a test row (job 'test') that could open today, other than the carried one (or undefined)
+  return CAREER_LADDER.find(r => r.job === 'test' && r.id !== c.id && r.size === 'big' && !opened.has(r.id) && W.tr[r.id] === undefined && WORK_MECH[r.id] && !WORK_MECH[r.id].own && d >= r.day && r.tier <= W.tier && (!r.fixed || weekday(d) + 1 === r.fixed.wd) && ladderNeeds(r.needs, W));
 }
 function ladderOpen(row, d, t) {
   const W = SHIP.works;
@@ -63775,7 +63781,7 @@ function ladderClearDay(d) {
 function ladderBigP5(ok, d, W) {
   // (RV20's M1) a row already trained is never asked again: the order put a trained Tracing first, and its meeting differed run to run
   const list = CAREER_LADDER.filter(r => ok(r) && W.tr[r.id] === undefined && !(r.id === 'm15' && W.tier >= 3)).map((r, i) => [r, i]).sort((a, b) => (b[0].tier - a[0].tier) || (a[1] - b[1])).map(x => x[0]);
-  const top = list[0]; if (!top) return undefined;
+  const top = (P5_PROMO4 && list.find(r => r.job === 'test')) || list[0]; if (!top) return undefined;   // (W8, MA6-2) with Step 6: a test row due goes ahead of a lesson of its tier (Day 22's Tier 4 test before an untaken M20)
   if (W.tier >= 3 && top.tier < W.tier && !ladderClearDay(d)) return undefined;
   return top;
 }

@@ -461,6 +461,24 @@ def part_t4dev(g):
     check(r['steps'] == ['Your Tier 4 test 09:30 done', 'Your Tier 4 result 22:40'] and 'result' in r['next1'] and 'badge' in r['next2'] and 'Vance' in r['next3'] and r['steps2'][-1] == 'Your Deck 2 quarters', f"t4dev: the promotion list and the career arrow ({r['steps']}, {r['next1']}, {r['next2']}, {r['next3']}, {r['steps2']})")
     check(r['eng24'] is False and r['eng25'] is True, f"t4dev: engine jobs yours by day after the nights, not before ({r})")
 
+# (W8, MA6-2) a Tier 3 lesson asked on Friday Day 19 and missed (W.cur 'm20:ask') never holds Day 22's Tier 4 test: on
+# Day 22 the test opens; the lesson goes back to unopened and is asked again on a later day
+def part_t4carry(g):
+    if not t4on(g, 't4carry'): return
+    print('(t4carry) a lesson missed on Day 19 and the Tier 4 test on Day 22:')
+    r = g.ev("""(() => { """ + T4_TEST.replace("r.id !== 't4' && r.tier <= 3", "r.id !== 't4' && r.id !== 'm20' && r.tier <= 3").replace("pu4Set(22);", "pu4Set(22); W.cur = { id: 'm20', st: 'ask', d: 19, by: 'calder', occ: null, j: null, w: 0 }; (W.op[19] = W.op[19] || []).push('m20');") + """
+      const out = {}; out.m20 = !!WORK_MECH.m20; for (let h = 6; h <= 10; h++) { setShipNow(21 * 1440 + h * 60); careerClock(shipNow(), true); __tick(); }
+      out.cur = W.cur && W.cur.id + ' ' + W.cur.st; out.job = SHIP.jobs.some(j => j.reserved === 26); out.op19 = (W.op[19] || []).includes('m20'); out.op22 = W.op[22] || [];
+      out.again = []; for (let d = 23; d <= 30 && !out.again.length; d++) for (let h = 6; h <= 10; h++) { setShipNow((d - 1) * 1440 + h * 60); if (W.cur && W.cur.id === 't4') { W.tr.t4 = 22; W.cur = null; } ladderTick((d - 1) * 24 + h); if (W.cur && W.cur.id === 'm20') { out.again = [d, W.cur.st]; break; } }
+      return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    r2 = g.ev("""(() => { """ + T4_TEST.replace("r.id !== 't4' && r.tier <= 3", "r.id !== 't4' && r.id !== 'm20' && r.tier <= 3") + """ return { cur: W.cur && W.cur.id + ' ' + W.cur.st, op22: W.op[22] || [] }; })()""")
+    print('    never asked:', r2)
+    check(r2['cur'] and r2['cur'].startswith('t4') and 'm20' not in r2['op22'], f"t4carry: an untaken lesson of Tier 3 never goes ahead of the Tier 4 test on Day 22 ({r2})")
+    if not r['m20']: print('    (no M20 in this build: the carried lesson is a stand-in name only)')
+    check(r['cur'] and r['cur'].startswith('t4') and r['job'] and 't4' in r['op22'] and not r['op19'], f"t4carry: Day 22 opens the Tier 4 test, not the carried lesson ({r['cur']}, job {r['job']}, op22 {r['op22']}, op19 {r['op19']})")
+    if r['m20']: check(r['again'] and r['again'][0] > 22, f"t4carry: the lesson is asked again on a later day ({r['again']})")
+
 # ---- S6-7 turn 1 (W7): Basil's day with you, settled at 22:00 the evening before; his work in the Works bay; the notices
 def part_mt(g):
     if not g.ev("typeof P5_M25 !== 'undefined' && P5_M25"): print('(mt) P5_M25 off: skipped'); return
@@ -756,7 +774,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev), ('seated', part_seated), ('blocked', part_blocked), ('mt', part_mt), ('mt2', part_mt2), ('mt3', part_mt3), ('mt4', part_mt4), ('cq', part_cq), ('cq2', part_cq2)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev), ('seated', part_seated), ('blocked', part_blocked), ('t4carry', part_t4carry), ('mt', part_mt), ('mt2', part_mt2), ('mt3', part_mt3), ('mt4', part_mt4), ('cq', part_cq), ('cq2', part_cq2)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')
