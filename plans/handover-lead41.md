@@ -23,7 +23,7 @@ Lead 41 = session_01GKuymjWR1dqfbCw1MyEP9j, branch claude/lead-41-e86n0x, hourly
 - BM19 build master session_01GKuymncYhRTKs8t4byNfdj (claude/staging-0.94.0 done; now merges Step 6 pieces into claude/staging-p5s6; has the Step 6 seat list).
 - RV23 reviewer session_01GKuymoDm1XbC5G8TvaCNLr (Step 6 reviewer).
 - PUB2 publisher session_01GKuymkDxLVyt4rjtcJxdab (idle; handover-publisher-2.md on claude/publish-26).
-- W7 career engineer session_01GKuymjghu82TGWPLR1wTKw (claude/p5s6-promo4; S6-3 done in day parts, now night parts, then S6-7, S6-9; owns 24 core/24u/section 28 helpers/switch lines; adds all DM_CAREER rows at the end).
+- W8 career engineer session_01GKuymk95u5t4uDsahatkPN (from W7's handover: casePoint swap in S6-7, S6-9 the end, refit job + '2-B' asks, all DM_CAREER rows). W7 (archived after W8 confirms) session_01GKuymjghu82TGWPLR1wTKw (claude/p5s6-promo4; S6-3 done in day parts, now night parts, then S6-7, S6-9; owns 24 core/24u/section 28 helpers/switch lines; adds all DM_CAREER rows at the end).
 - N6 nights session_01GKuymnDA25R2a5yZGYpaBS (claude/p5s6-nights; S6-1; RV23 FIXES NEEDED on c806c78: Calder doesn't come Day 22 09:15; loosen fetch reach).
 - MA6 mechanics A session_01GKuymj1UEDuEYMnG9rmFkc (claude/p5s6-mech-a; S6-2 merged; S6-6 team turn 1 8f943e82 in review).
 - PZ6 puzzles session_01GKuymjrmdGE4vaHHHGkvYF (S6-8 merged; HOLDING live bug MA6-1 until a seat frees: team job turn can't be tapped; fix on claude/team-turn-fix from staging-0.94.0).
