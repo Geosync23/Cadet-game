@@ -2694,7 +2694,7 @@ def part_s5cases(pw, src, tag):
 # Day 28 09:25 (at the ramp's foot: the scene and its three replies by pad), 12:55 (the ring on Zeke and A joins the chain),
 # Day 29 09:15 (Calder's word, the helper card's two picks by D-pad and A, then the making steps: A on the fabricator and
 # the lathe as the ring names them, the stock card by pad) to the part done
-VESSEL_START = r"""((t) => { SHIP.event = null; SHIP.eventLog.length = 0; for (const r of evCalPlan()) if (r.id !== 'veyliVessel') SHIP.eventLog.push({ id: r.id, startDay: r.day, endDay: r.day + SHIP_EVENTS[r.id].days, band: 'smooth', threads: {}, mine: {} });
+VESSEL_START = r"""((t) => { SHIP.event = null; SHIP.eventLog.length = 0; const v0 = evCalPlan().find(r => r.id === 'veyliVessel'); /* BM19: only the rows before the vessel (the crossing back logged as done made the calendar pass over it) */ for (const r of evCalPlan()) if (r.id !== 'veyliVessel' && (!v0 || r.day < v0.day)) SHIP.eventLog.push({ id: r.id, startDay: r.day, endDay: r.day + SHIP_EVENTS[r.id].days, band: 'smooth', threads: {}, mine: {} });
   MEETINGS.length = 0; EV_DAYS.clear(); SHIP_DAYS.clear(); skipTo(t); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; return true; })"""
 def vessel_at(r, deck, x, z):
     r.ev(f"(() => {{ goToDeck({deck}); player.obj.position.copy(cellPos({x}, {z})); target.copy(player.obj.position).setY(.7); player.stop(); }})()"); r.step(10)
