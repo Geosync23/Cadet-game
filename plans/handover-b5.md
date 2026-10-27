@@ -60,6 +60,7 @@
   leaves trained rows out (machine_check "traced faults" was not the same twice: a trained-but-unopened Tracing was asked
   again, and the check's two runs share SHIP.occasions). machine_check on the on copy OK twice.
 - Shoulds S1-S4 **done** (build table 0.93.4-s.12; promo_beats_check part t3shoulds): friends' Mail from 12:30; no "reputation down" toast at the promotion (15b's guideShiftWords, P5_STEP5); the visitor chair's toast has words (`pu3.result.sit`, a stand-in for the writer); Dev presets Days 17-18 follow the ladder (no m17).
+- RV22's MUST on cbca3e3e (build table 0.93.4-s.13): the M1 comment had been put mid-line and disabled ladderBigP5's sort; moved to the line above, order re-checked (m19 before m17), machine_check twice OK.
 - Note for the systems engineer: machine_check's traced run keeps SHIP.occasions between its two runs (an isolation gap).
 
 ## Open
