@@ -8,7 +8,7 @@ Cap rule: at most 5 seats working at once; read only until RV23 says it has gone
 | Branch | Verdict | Sha |
 |---|---|---|
 | claude/p5s6-promo4 (W8): S6-7, S6-9, MA6-2, refit, DM rows, RV24's fixes | PASS (2 shoulds) | 6f13b61a |
-| claude/p5s6-deck (DA6): S6-5 nights 1-2, keepsakes to room B, door fix | PASS (1 should: frames not visible in my shot) | 2df6bfce, 5c27b740 |
+| claude/p5s6-deck (DA6): S6-5 nights 1-2, keepsakes to room B, door fix | PASS (frames should cleared in 4a84e153) | 2df6bfce, 5c27b740, 4a84e153 |
 | claude/m24-pick-pointer (AS1): night 3's pick ring | PASS | 5f649b45 |
 | claude/escort-seated-check (PZ6, test only) | code read OK (glance, lead 42); run later | 775c3ca |
 
@@ -81,3 +81,4 @@ Code read (no runs yet):
 - Alone cadet re-runs pending: 6f13b61a, 5c27b740, 5f649b45 vs 40f3bdac.
 - Still to do: AS1 arrows-step6 75f6262c (test only); PZ6 775c3ca run; Day 22 coherent play on merged staging (RV23's item 3);
   Tier 3 offer live (optional).
+- DA6 4a84e153: PASS (17:4x, lead 42's priority): frames moved above the armchair (DECK2_HOME.menu 1.55, .cert 2.1); DA6's 390x844 shot and crop read; alone cadet: 6f13b61a and 5c27b740 ALL IDENTICAL.
