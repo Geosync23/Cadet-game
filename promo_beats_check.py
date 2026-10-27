@@ -477,6 +477,23 @@ def part_mt(g):
     check(r['rows'] and r['rows'][0].startswith('09:00') and any('Basil' in n for n in r['wake']) and r['arrow'] and r['arrow'][0].startswith('1 '), f"mt: the row, the notice as you wake, a level 1 arrow from 08:55 ({r['rows']}, {r['wake']}, {r['arrow']})")
     check(r['clean'] and r['junk'] is None and not r['officer'], f"mt: the save's record read back, junk dropped; not a Senior: no day ({r})")
 
+MT_DAY = """const W = __w(25, 1300, { xp: 10, tr: { ps: 12, t2: 9, t3: 15, m19: 17, t4: 22 } }); W.tier = 4; W.rank = 'specialist'; flagSet('p5n.on', 22); flagSet('p5n.off', 25); setShipNow(24 * 1440 + 1321); __tick();"""
+def part_mt2(g):
+    if not g.ev("typeof P5_M25 !== 'undefined' && P5_M25"): print('(mt2) P5_M25 off: skipped'); return
+    print('(mt2) Basil\'s hello, he watches you (follows) through a job, you watch him at the bench:')
+    r = g.ev("""(() => { """ + MT_DAY + """ const out = {}; setShipNow(25 * 1440 + 541); __bay();
+      const keep = puNearMe; puNearMe = (id, r) => id === 'bramwell-basil' ? true : keep(id, r); __tick(); out.dlg1 = DIALOGUE && DIALOGUE.id; """ + dlg_run(0) + """
+      const M = SHIP.works.mt; out.met = M.steps.met !== undefined; out.esc1 = (worksEscort({ id: 'bramwell-basil' }, shipNow()) || {}).mode;
+      __tick(); out.arrow1 = GUIDE.list.filter(e => /^mt:watch/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label);
+      simNote('job', { id: 'x', step: 'turnin' }); out.watch = M.steps.watch !== undefined; out.esc2 = JSON.stringify(worksEscort({ id: 'bramwell-basil' }, shipNow()));
+      for (let i = 0; i < 11; i++) { setShipNow(25 * 1440 + 600 + i); __tick(); } out.dw = M.steps.dw; out.dlg2 = DIALOGUE && DIALOGUE.id; { """ + dlg_run(1) + """ } out.do = M.steps.do !== undefined; out.reply = flag('mt.do');
+      out.arrow2 = GUIDE.list.filter(e => /^mt:do/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label); puNearMe = keep;
+      """ + MT_DAY.replace('const W =', 'const W2 =').replace('W.', 'W2.') + """ SHIP.works.mt.steps.met = 25 * 1440 + 545; __said.length = 0; setShipNow(25 * 1440 + 781); __bay(); __tick(); out.late = [SHIP.works.mt.steps.watch !== undefined, __said.filter(x => /^calder/.test(x)).length]; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['dlg1'] == 'mt.hello' and r['met'] and r['esc1'] == 'follow' and r['arrow1'] and r['arrow1'][0].startswith('1 '), f"mt2: the hello in the bay, then he follows you; a level 1 arrow to take a job ({r['dlg1']}, {r['esc1']}, {r['arrow1']})")
+    check(r['watch'] and '"wait"' in r['esc2'] and '5-bench-2' in r['esc2'] and r['dw'] >= 10 and r['dlg2'] == 'mt.do' and r['do'] and r['reply'] == 2, f"mt2: a job turned in, he goes to the bench; ten minutes watching him, his scene, your reply ({r})")
+    check(r['late'] == [True, 1], f"mt2: no job by 13:00, Calder sends him to the bench ({r['late']})")
+
 def part_t3pointer(g):
     if not t3on(g, 't3pointer'): return
     print('(t3pointer) the test morning and the board:')
@@ -614,7 +631,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev), ('mt', part_mt)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev), ('mt', part_mt), ('mt2', part_mt2)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')

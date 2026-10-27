@@ -63487,6 +63487,7 @@ function p5Escort(p, t) {                                // worksEscort's 24u pa
   if (r && r.f && r.f.seek && !r.f.told && r.status === 'asked' && p.id === r.by && t < r.at - 20 && !(typeof promoBusy === 'function' && promoBusy())) return { mode: 'follow', to: null };
   { const w = p5TeacherWait(p, t); if (w) return w; }
   if (P5_PROMO4) { const e = pu4Escort(p, t); if (e) return e; }   // S6-3: the Tier 4 offer
+  if (P5_M25 && typeof mtEscort === 'function') { const e = mtEscort(p, t); if (e) return e; }   // S6-7 (28e): Basil's day with you
   if (P5_PROMO3 && typeof puEscort === 'function') return puEscort(p, t) || puEscort2(p, t);   // S5-2: the Tier 3 offer, your result, up to the bar
   return null;
 }
@@ -66140,6 +66141,64 @@ if (P5_M25) {
   WORKS_SETTLE.push(mtSettle); WORKS_PLAN_RULES.push(mtPlanRule);
   WORK_TICKS.push((now, skip) => mtTick(now, skip));
 }
+// S6-7 turn 2 (W7): hello, watch, do. In the bay from 09:00: Basil at his spot; near him (or he comes to find you from
+// 09:15) the hello (mt.hello: Calder hands him over, your reply). Then he watches you: he follows you (the escort turned
+// round, mtEscort through p5Escort) through the next job you turn in (a level 1 arrow "Take a job: Basil watches" while
+// you hold none); by 13:00 without one, Calder: let him have a go. Then you watch him: he works at a bench in the bay
+// (MT2.bench), a level 1 arrow "Watch Basil work"; ten ship minutes near him (steps.dw) and his scene (mt.do, your reply).
+// Saved in mt.steps (met, watch, dw, do: ship minutes). Live only: MT_LIVE (who said what)
+const MT2 = { metBy: 555, watchBy: 780, near: 3.5, watchMins: 10, bench: '5-bench-2' };
+const MT_LIVE = { said: {}, at: -1 };
+function mtScript(id, base, hook) {                      // the writer's scene, or a stand-in; our hook on it (once)
+  if (!MEETING_SCRIPTS[id]) MEETING_SCRIPTS[id] = base;
+  return puHook(id, hook.pick || null, hook.end || null) && id;
+}
+function mtHello() {
+  return mtScript('mt.hello', { title: 'Basil, for the day', from: 'Chief Ines Calder', stub: true, gist: 'Calder handed Basil over to you for the day: he watches you, then you watch him.',
+    lines: [{ who: 'calder', text: 'Basil. You\'re with this one today. Watch everything.', to: 'bramwell-basil' }, { who: 'bramwell-basil', text: 'Everything. Yes. Hi! Can I carry something?', to: 'you', pose: 'wave' },
+      { choice: [{ text: 'Watch first. Then you carry.', reply: { who: 'bramwell-basil', text: 'Watch first. Right. Watching.' } }, { text: 'Grab the toolbox.', reply: { who: 'bramwell-basil', text: 'On it! Which one is the toolbox?' } }] }] },
+    { pick: k => flagSet('mt.hello', k + 1), end: () => mtStep('met', shipNow()) });
+}
+function mtDoScene() {
+  return mtScript('mt.do', { title: 'Basil\'s turn', from: 'Basil Bramwell', stub: true, gist: 'You watched Basil do a job at the bench. He did it, mostly.',
+    lines: [{ who: 'bramwell-basil', text: 'Done? Is it done? Is that how you do it?', to: 'you' },
+      { choice: [{ text: 'Good. Check the seal once more.', reply: { who: 'bramwell-basil', text: 'Once more. Oh. It was loose. Thank you.' } }, { text: 'Good work. That\'s how.', reply: { who: 'bramwell-basil', text: 'That\'s how! I\'m writing it down.' } }] }] },
+    { pick: k => flagSet('mt.do', k + 1), end: () => mtStep('do', shipNow()) });
+}
+function mtStep(k, t) { const M = mtOf(); if (!M || M.steps[k] !== undefined) return false; M.steps[k] = Math.floor(t); simNote('mt', { step: k, day: M.day }); return true; }
+function mtSayOnce(id, key, lines) { if (MT_LIVE.said[key]) return; MT_LIVE.said[key] = 1; try { worksSayAll(id, worksVoice(id, key) || lines); } catch (e) { /* not in play */ } }
+function mtEscort(p, t) {                                // p5Escort's 28e part: Basil comes to find you, follows you while he watches, works at the bench
+  const M = mtOf(); if (!M || !p || p.id !== MT.basil || worksDay(t) !== M.day || M.steps.done) return null;
+  const m = t - (M.day - 1) * 1440, S = M.steps; if (m < MT.at || m >= MT.to) return null;
+  if (S.met === undefined) return m >= MT2.metBy ? { mode: 'follow', to: null } : null;
+  if (S.watch === undefined) return { mode: 'follow', to: null };
+  if (S.do === undefined) return { mode: 'wait', to: MT2.bench };
+  return null;
+}
+function mtTick2(now, skip) {
+  const M = mtOf(); if (!M || M.steps.done) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, B = (d - 1) * 1440, S = M.steps, live = !skip && now >= shipNow() - 1, talk = typeof DIALOGUE !== 'undefined' && DIALOGUE;
+  if (d !== M.day || m < MT.at || m >= MT.to || !live) return;
+  const owner = '28e (S6-7)', near = r => !!puNearMe(MT.basil, r);
+  if (S.met === undefined) { if (!talk && near(CHATTER_NEAR) && (promoInBay() || m >= MT2.metBy)) dialogueShow(mtHello(), { id: 'mt.hello', who: [MT.basil, 'calder'], at: now, where: { any: true } }); return; }
+  if (S.watch === undefined) {
+    if (m >= MT2.watchBy) { mtSayOnce('calder', 'mt.go', ['Let him have a go. The bench, Basil.']); mtStep('watch', now); return; }
+    let mj = null; try { mj = myJob(); } catch (e) { mj = null; }
+    if (!mj && typeof guideAsk === 'function') guideAsk({ id: 'mt:watch:' + d, level: 1, owner, until: B + MT2.watchBy, goal: () => ({ deck: 5, item: /job board/i, room: 'w', label: worksText('mt.ptr.watch', 'Take a job: Basil watches') }), done: () => { try { return !!myJob() || (mtOf() || { steps: {} }).steps.watch !== undefined; } catch (e) { return true; } } });
+    if (mj && near(CHATTER_NEAR) && now - MT_LIVE.at >= 6) { MT_LIVE.at = now; const L = ['Why that one first?', 'Is that the right spanner? It looks like the right spanner.', 'Should I write this down? I\'m writing it down.']; const i = Object.keys(MT_LIVE.said).filter(x => /^mt\.q/.test(x)).length; if (i < L.length) mtSayOnce(MT.basil, 'mt.q' + i, [L[i]]); }
+    return; }
+  if (S.do === undefined) {
+    if (typeof guideAsk === 'function') guideAsk({ id: 'mt:do:' + d, level: 1, owner, until: B + MT.to, goal: () => ({ deck: 5, room: 'w', ...(near(30) ? { crew: MT.basil } : { place: MT2.bench }), label: worksText('mt.ptr.do', 'Watch Basil work') }), done: () => (mtOf() || { steps: {} }).steps.do !== undefined });
+    if (near(MT2.near) && promoInBay() && Math.floor(now) !== MT_LIVE.dwAt) { MT_LIVE.dwAt = Math.floor(now); S.dw = (S.dw || 0) + 1; }
+    if ((S.dw || 0) >= MT2.watchMins && !talk && near(MT2.near)) dialogueShow(mtDoScene(), { id: 'mt.do', who: [MT.basil], at: now, where: { any: true } });
+  }
+}
+onSim('job', n => {                                      // the job he watched you do, turned in
+  const M = mtOf(); if (!n || n.step !== 'turnin' || !M || M.steps.met === undefined || M.steps.watch !== undefined || worksDay(shipNow()) !== M.day) return;
+  if (puNearMe(MT.basil, CHATTER_NEAR + 2)) mtSayOnce(MT.basil, 'mt.watched', ['So that\'s how. Can I try one? At the bench?']);
+  mtStep('watch', shipNow());
+});
+if (P5_M25) WORK_TICKS.push((now, skip) => mtTick2(now, skip));
 // ---- end of slot: Mentoring ----
 
 // ---------------------------------------------------------------------
