@@ -12,6 +12,8 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
 | claude/vessel-words (W6): 4 lines cut to 90 chars | PASS | 0f8a2406 (game afde419d) |
 | claude/check-offcopies (test only) | code read OK, not run | 00161062 |
 | claude/p5s6-mech-a (MA6): M21 the Monday briefing | PASS | 27166be |
+| claude/p5s6-puzzles (PZ6): S6-8 P6-P8 | PASS | fd1f27f (= aed3f73, e16be28) |
+| claude/p5s6-nights (N6): S6-1 turns 1-3 | FIXES NEEDED (1 must: Calder not in person Day 22; 1 should: 2.2 m reach) | c806c78 |
 | VB2's ending leftovers (arrows endgo teachoff, track) | PASS | staging-0.94.0 d69473b7 |
 
 ## VB1 03b63d95
@@ -76,3 +78,9 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
   puzzle p6 OK; fd1f27f cadet + p6 p7 p8 queued).
 - To raise: N6's isWorkDay reads P5_LEAVE (section 28, later in the file) inside try: if the planner runs at load before that line,
   Navarro's leave is missed there and seen later (ON only; day_check's "same day twice" should show it). W6: no controller part for t4.
+- PZ6 fd1f27f: PASS. cadet identical (3046fb5, fd1f27f); puzzle_check p6 p7 p8 OK; controller s6cases OK (aed3f73).
+- N6 c806c78: FIXES NEEDED. cadet identical (9e176f6, 157fe11, c806c78); day_check 23 + player_check ON OK (157fe11); n6_play.py:
+  notice 22:40, arrows clock in / engine room / clock out OK. MUST: Day 22 Calder stood 22.7 m off 09:16-09:58, never came; notice at
+  10:00. should: p5nNear 2.2 m (use a looser reach while fetching).
+- Queued: W7 promo4 (latest 9ac35bfd; p4_play on a1ea8034; cadet 76e59409, 9ac35bfd; clothes_check), DA6 deck 469b606b (base
+  3e502ca; d6_look.py), MA6 m24 8f943e82 (base 3e502ca).
