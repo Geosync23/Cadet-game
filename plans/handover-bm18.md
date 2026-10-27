@@ -26,13 +26,13 @@ All six shares done, no new FAIL:
 
 ## The 0.93.4 plan (lead 40; NOT started, the user stopped here)
 
-staging-0.93.4 = published 0.93.3 (19400976) + B2's claude/workstep-tap-fix **c79a66dc** (RV20 PASS; the live M15 Rewiring tap bug; branched from acbb52e0, so merge onto 0.93.3) + B2's **b7e84f81** on the same branch (stale team-job "your turn" arrow; RV20 reviewing the delta when I stopped; include only if passed) + FX30's claude/week-guide-fix **fa6b7de0** (arrows_check.py + build-table only; test only, no reviewer needed; CR1 ran `week guide` OK on 0.93.3's game: stuck 0, so mark backlog CR1-W1 fixed when it lands). Gate: check_fast, cadet vs 19400976, mech m15/m5/wstap/teamgoal, then the full round; tell the lead the sha when the round starts.
+staging-0.93.4 = published 0.93.3 (19400976) + B2's claude/workstep-tap-fix **c79a66dc** (RV20 PASS; the live M15 Rewiring tap bug; branched from acbb52e0, so merge onto 0.93.3) + B2's **b7e84f81** on the same branch (stale team-job "your turn" arrow; **RV20 PASS** 2026-10-27 ~00:00 UTC: cadet identical vs c79a66dc, check_fast OK, mech teamgoal m8 OK; so merge the branch head b7e84f81) + FX30's claude/week-guide-fix **fa6b7de0** (arrows_check.py + build-table only; test only, no reviewer needed; CR1 ran `week guide` OK on 0.93.3's game: stuck 0, so mark backlog CR1-W1 fixed when it lands). Gate: check_fast, cadet vs 19400976, mech m15/m5/wstap/teamgoal, then the full round; tell the lead the sha when the round starts.
 
 ## Passed and held for later sets (the lead sends each set)
 
 - Ending: RV21 PASS claude/ending-crossing **d1a61402** (the whole ending behind EV_ENDING_ON off; replaces every earlier ending sha). Merge note (RV21): its switch line sits after P926_APPT, as the vessel's will; keep the vessel's line first. Words: SW6 ending-words-a b8c89e7a PASS; SW5 ending-words-b 8ed1545a (bake only with EN2's endgame condition).
 - Vessel: RV21 PASS VB1 claude/vessel **6d4b5192** (V-1..V-4) + VB2 claude/vessel-sky **3fb8eac7** (v.6; contains SW4's vessel words 7dd2eb5d); both needed. VB1 has shoulds pending.
-- Step 5: RV21 PASS B4 claude/p5s5-puzzles **6b07b624** (t5-t7, behind P5_CASES5; check with B4 that it supersedes RV20's 4e5c878f/55b2e6a8); RV21 PASS B3 claude/p5s5-m20 **7c5d9f79** (sensor array, behind P5_M20); SW3 p5s5-words 277b9c15. FIXES NEEDED (don't merge): p5s5-skeleton 5957d244, p5s5-mech-a 3c38a65f, p5s5-mech-b 5ad090ff (RV20: 3 musts).
+- Step 5: RV21 PASS B4 claude/p5s5-puzzles **6b07b624** (t5-t7, behind P5_CASES5; check with B4 that it supersedes RV20's 4e5c878f/55b2e6a8); RV21 PASS B3 claude/p5s5-m20 **7c5d9f79** (sensor array, behind P5_M20); SW3 p5s5-words 277b9c15. FIXES NEEDED (don't merge): p5s5-skeleton 5957d244, p5s5-mech-a 3c38a65f, p5s5-mech-b 5ad090ff (RV20: 3 musts). RV20 (2026-10-27): B2's part of claude/p5s5-mech-a deefa61a PASSES, but the build fails machine_check on its switched-on copy ("traced faults", not the same twice) from B1's **51b1a9c6**, which deefa61a and B5's branch carry: merge NO Step 5 branch carrying 51b1a9c6 until B5 fixes it.
 
 ## Gotchas (new ones; BM16/BM17's still apply)
 
