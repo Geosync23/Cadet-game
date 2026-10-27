@@ -344,14 +344,18 @@ T3_TEST = """const W = __w(15, 300, { xp: 60, tr: { ps: 12, t2: 9 } }); W.tier =
       puSet(15); flagSet('pu3.told', 14); flagSet('pu3.notice', 14); setShipNow(14 * 1440 + 361); machinesNow(); careerClock(shipNow(), true); __bay();"""
 # ---- S6-3 turn 3 (W7): the result when your shift starts (Day 22, 22:40), and the Captain's engine badge
 T4_RES = """const W = __w(22, 760, { xp: 60, tr: { ps: 12, t2: 9, t3: 15, m19: 17, t4: 22 } }); W.tier = 3; W.rank = 'senior'; __friends();
-      const T = pu4Set(22); T.passed = true; T.tries = 1;"""
+      const T = pu4Set(22); T.passed = true; T.tries = 1; flagSet('p5n.on', 22);"""
 def part_t4passed(g):
     if not t4on(g, 't4passed'): return
     print('(t4passed) the result at 22:40: Calder finds you and says it; asleep, a knock; not found, by Mail:')
     r = g.ev("""(() => { """ + T4_RES + """ const out = { when: hhmm(pu4ResWhen() % 1440) }; setShipNow(21 * 1440 + 1300); __bay(); __tick();
       out.next = worksNext(); out.rows = __rows(22).filter(x => /result/i.test(x));
       setShipNow(21 * 1440 + 1361); goToDeck(1); __tick(); out.seek = !!PU4_LIVE.rseek; out.esc = (worksEscort({ id: 'calder' }, shipNow()) || {}).mode;
-      const keep = puNearMe; puNearMe = (id, r) => id === 'calder' ? true : keep(id, r); __tick(); puNearMe = keep;
+      out.fetch = typeof pu4Fetches === 'function' && pu4Fetches(shipNow()); out.n1 = __notes.filter(n => /Night shift now/.test(n)).length;
+      const keep = puNearMe; puNearMe = (id, r) => id === 'calder' ? true : keep(id, r); __said.length = 0; __tick();
+      out.walk = !!PU4_LIVE.walk; out.dlg0 = DIALOGUE && DIALOGUE.id; out.found = __said.filter(x => /^calder/.test(x)); out.lead = JSON.stringify((worksEscort({ id: 'calder' }, shipNow()) || {}).to || null);
+      if (PU4_LIVE.walk && typeof p5nNight === 'function') { p5nNight(22).in = shipNow(); } out.lead2 = JSON.stringify((worksEscort({ id: 'calder' }, shipNow()) || {}).to || null);
+      goToDeck(6); setShipNow(21 * 1440 + 1370); __tick(); puNearMe = keep;
       out.dlg = DIALOGUE && DIALOGUE.id; """ + dlg_run(0) + """
       out.w = [W.tier, W.rank, W.xp]; out.t4 = puT4(); out.ms = W.ms.filter(x => /^specialist/.test(x[0])); out.mail = __mail().filter(m => /^Chief Ines Calder: Your result/.test(m)).length;
       out.invite = __mail().filter(m => /^Captain Odile Marrow: Your badge/.test(m)); out.badge = SHIP.occasions.filter(x => x.id === 'pu4Badge').map(x => hhmm(x.at % 1440) + ' day ' + (Math.floor(x.at / 1440) + 1));
@@ -363,11 +367,31 @@ def part_t4passed(g):
     for k, v in r.items(): print('   ', k, v)
     check(r['when'] == '22:40' and '22:40' in r['next'] and r['rows'] and r['rows'][0].startswith('22:40'), f"t4passed: the result when the night starts, 22:40; What's next and the Schedule say so ({r['when']}, {r['next']}, {r['rows']})")
     check(r['seek'] and r['esc'] == 'follow' and r['dlg'] == 'pu4.stairs', f"t4passed: 22:40, she comes to find you where you are; her words in person ({r['seek']}, {r['esc']}, {r['dlg']})")
+    if r['walk']: check(r['fetch'] and r['n1'] == 0 and not r['dlg0'] and r['found'] and '"deck":5' in r['lead'] and '"deck":6' in r['lead2'], f"t4passed (nights on): night 1's own notice held back, she finds you and walks you down: the time clock first, then the engine room; her words on the way ({r['fetch']}, {r['n1']}, {r['dlg0']}, {r['found']}, {r['lead']}, {r['lead2']})")
     check(r['w'] == [4, 'specialist', 0] and r['t4']['res'] == 22 and r['ms'] == [['specialist', 22]] and r['mail'] == 1, f"t4passed: Tier 4, Engine Specialist, xp 0, the milestone, the Mail as the record ({r['w']}, {r['ms']}, {r['mail']})")
     check(r['badge'] == ['16:30 day 23'] and r['invite'] and '16:30' in r['invite'][0] and r['places'] and r['places'].get('marrow') == '1-ceremony-captain' and len(r['places']) == 4, f"t4passed: the badge booked for 16:30 the next day, the Captain's invite, the four on their spots ({r['badge']}, {r['invite']}, {r['places']})")
     check('engine badge' in r['next2'] and 'Specialist · ' not in r['rec'], f"t4passed: What's next names the badge; the Record says Engine Specialist once ({r['next2']}, {r['rec']})")
     check(r['knock'] == [4, 22, 1], f"t4passed: asleep at 22:40, she knocks: a notice, the night is yours ({r['knock']})")
     check(r['late'] == [4, 22, 1], f"t4passed: not found in 30 minutes, by Mail ({r['late']})")
+
+def part_t4welcome(g):
+    if not t4on(g, 't4welcome'): return
+    if not g.ev("typeof P5_NIGHT !== 'undefined' && P5_NIGHT"): print('(t4welcome) P5_NIGHT off: no welcome (skipped)'); return
+    print('(t4welcome) Day 23 06:00, the shift change: both crews, Torres\'s speech, the certificate signed; missed: by Mail:')
+    r = g.ev("""(() => { """ + T4_RES + """ const out = {}; pu4Promote(21 * 1440 + 1361, 'met'); p5nNight(22).in = 21 * 1440 + 1366;
+      setShipNow(22 * 1440 + 346); __tick(); out.occ = SHIP.occasions.filter(x => x.id === 'pu4Welcome').map(x => hhmm(x.at % 1440) + ' day ' + (Math.floor(x.at / 1440) + 1));
+      out.arrow = GUIDE.list.filter(e => e.id === 'pu4:welcome').map(e => e.level + ' ' + (e.goal() || {}).label); const a = apptList().find(x => /^pu4Welcome@/.test(String(x.occ))); out.with = a && a.with;
+      setShipNow(22 * 1440 + 361); goToDeck(6); player.obj.position.copy(cellPos(...ROOM_TILES['E'][Math.floor(ROOM_TILES['E'].length / 2)])); occasionsTick(shipNow()); meetingsTick(shipNow());
+      out.dlg = DIALOGUE && DIALOGUE.id; """ + dlg_run(1) + """ out.signed = flag('pu4.signed'); pu4Badge(22 * 1440 + 1000, 'met'); out.keep = (SHIP.social && SHIP.social.keepsakes || []).map(k => k.what).filter(k => /Specialist/.test(k));
+      """ + T4_RES.replace('const W =', 'const W2 =').replace('W.', 'W2.').replace('const T = pu4Set', 'const T2 = pu4Set').replace('T.passed', 'T2.passed').replace('T.tries', 'T2.tries') + """
+      pu4Promote(21 * 1440 + 1361, 'met'); p5nNight(22).in = 21 * 1440 + 1366; setShipNow(22 * 1440 + 346); __tick(); setShipNow(22 * 1440 + 391); __tick();
+      out.missed = [flag('pu4.signed'), __mail().filter(m => /We signed it anyway/.test(m)).length];
+      """ + T4_RES.replace('const W =', 'const W3 =').replace('W.', 'W3.').replace('const T = pu4Set', 'const T3 = pu4Set').replace('T.passed', 'T3.passed').replace('T.tries', 'T3.tries') + """
+      pu4Promote(21 * 1440 + 1361, 'mail'); setShipNow(22 * 1440 + 361); __tick(); out.none = SHIP.occasions.filter(x => x.id === 'pu4Welcome').length; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['occ'] == ['06:00 day 23'] and r['arrow'] and r['arrow'][0].startswith('1 ') and r['with'] and 'reyes-alejandro' in r['with'] and 'torres-zeke' in r['with'], f"t4welcome: booked for 06:00, both crews, a level 1 arrow from 05:45 ({r['occ']}, {r['arrow']}, {r['with']})")
+    check(r['dlg'] == 'pu4.welcome' and r['signed'] == 23 and r['keep'] and 'signed' in r['keep'][0], f"t4welcome: the speech, the certificate signed, the signed one at the badge ({r['dlg']}, {r['signed']}, {r['keep']})")
+    check(r['missed'] == [23, 1] and r['none'] == 0, f"t4welcome: missed: Torres's Mail; night 1 not worked: no welcome ({r['missed']}, {r['none']})")
 
 def part_t4badge(g):
     if not t4on(g, 't4badge'): return
@@ -393,7 +417,7 @@ def part_t4badge(g):
 
 # ---- S6-3 turn 4 (W7): your quarters on Deck 2, Vance's walk after dinner; open till 22:00, then the next day; laundry collected
 T4_MOVE = """const W = __w(25, 300, { xp: 10, tr: { ps: 12, t2: 9, t3: 15, m19: 17, t4: 22 } }); W.tier = 4; W.rank = 'specialist'; __friends();
-      const T = pu4Set(22); T.passed = true; T.tries = 1; T.res = 22; T.badge = 23; T.move = { ready: 25, walked: null, refit: false }; PU4_LIVE.mv = null;"""
+      const T = pu4Set(22); T.passed = true; T.tries = 1; T.res = 22; T.badge = 23; T.move = { ready: 25, walked: null, refit: false }; PU4_LIVE.mv = null; flagSet('p5n.on', 22); flagSet('p5n.off', 25);"""
 def part_t4move(g):
     if not t4on(g, 't4move'): return
     print('(t4move) Thursday: the notice, the Mail, Vance after dinner, room B on Deck 2; late: the next day; laundry collected:')
@@ -572,7 +596,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')

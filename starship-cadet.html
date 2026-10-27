@@ -64461,13 +64461,12 @@ function pu4ResultScript() {                             // the writer's pu4.sta
 function pu4Promote(now, how) {                          // you're an Engine Specialist
   const W = SHIP.works, T = puT4(); if (!W || W.tier !== 3 || !T || !T.passed || T.res) return false;
   const d = worksDay(now); W.tier = 4; W.rank = 'specialist'; W.xp = 0; T.res = d;
-  const S = PU4_LIVE.rseek; PU4_LIVE.rseek = null;
+  PU4_LIVE.rseek = null;
   if (!W.ms.some(x => x[0] === 'specialist')) W.ms.push(['specialist', d]);
   promoMail('mail.pu4.promo', 'Your result | You passed. As of tonight you\'re an Engine Specialist, Tier 4. The Captain pins your badge herself.', null, now);
   if (how === 'knock' || how !== 'met' && now >= shipNow() - 1) promoNotice(how === 'knock' ? worksText('pu4.knock.notice', 'A knock: Calder. "You passed. Engine Specialist. Up you get, the night\'s yours."') : worksText('pu4.res.notice', 'Your Tier 4 result: you passed. You\'re an Engine Specialist.'), worksName('calder'));
   if (typeof newsAdd === 'function') try { newsAdd({ id: 'pu4.specialist', about: 'you', lines: [worksText('pu4.news', '{me} is an Engine Specialist as of tonight. Drive coils, no less.')], seed: ['dept:works'], kind: 'gossip' }); } catch (e) { /* no social */ }
   pu4BadgeBook(now);
-  if (how === 'met' && S && P5_NIGHT && P5_NIGHTS[d] && now < (d - 1) * 1440 + P5_NIGHTS[d][0] + PU4_R.walk) PU4_LIVE.walk = { d, until: (d - 1) * 1440 + P5_NIGHTS[d][0] + PU4_R.walk };   // then down to the engine room with her
   if (typeof MACH_REV !== 'undefined') MACH_REV++;       // the board: Tier 4 jobs for you now
   simNote('promoted', { tier: 4, rank: 'specialist', how, t: now });
   return true;
@@ -64475,14 +64474,25 @@ function pu4Promote(now, how) {                          // you're an Engine Spe
 function pu4ResultTick(now, skip) {                      // she comes to find you when your shift starts; asleep, she knocks; not found in 30 minutes, by Mail
   const W = SHIP.works, T = puT4(); if (!W || W.tier !== 3 || !T || !T.passed || T.res) return;
   const at = pu4ResWhen(), live = !skip && now >= shipNow() - 1; if (at === null || now < at) return;
-  const S = PU4_LIVE.rseek;
-  if (now >= at + PU4_R.find && !(S && S.met && now < at + 2 * PU4_R.find)) { pu4Promote(Math.min(now, at + PU4_R.find), 'mail'); return; }
-  if (typeof sleeping !== 'undefined' && sleeping) { pu4Promote(now, 'knock'); return; }
+  const S = PU4_LIVE.rseek, L = PU4_LIVE.walk, talk = typeof DIALOGUE !== 'undefined' && DIALOGUE;
+  if (S && S.said) return;                               // her scene is on: its end promotes you
+  if (now >= (S && S.met && L ? L.until : at + PU4_R.find) + (S && S.met ? 15 : 0)) { pu4Promote(Math.min(now, at + PU4_R.find), 'mail'); PU4_LIVE.walk = null; return; }   // not found (or the walk never got there): by Mail
+  if (!(S && S.met) && typeof sleeping !== 'undefined' && sleeping) { pu4Promote(now, 'knock'); return; }
   if (!live) return;
   if (!S) { PU4_LIVE.rseek = { by: 'calder', at: Math.floor(now) }; return; }
-  if (S.met || typeof DIALOGUE !== 'undefined' && DIALOGUE || !puNearMe('calder')) return;
-  try { crewSceneEnd('calder'); } catch (e) { /* none */ }
-  S.met = true; dialogueShow(pu4ResultScript(), { id: 'pu4.stairs', who: ['calder'], at: now, where: { any: true } });
+  const say = () => { S.said = true; dialogueShow(pu4ResultScript(), { id: 'pu4.stairs', who: ['calder'], at: now, where: { any: true } }); };
+  if (!S.met) { if (talk || !puNearMe('calder')) return;
+    try { crewSceneEnd('calder'); } catch (e) { /* none */ }
+    S.met = true; const d = worksDay(now), N = P5_NIGHT && P5_NIGHTS[d];
+    if (!N) { say(); return; }                           // no night tonight: she says it where she found you
+    PU4_LIVE.walk = { d, until: (d - 1) * 1440 + N[0] + PU4_R.walk };   // the night's yours: she walks you down and says it on the way
+    worksSayAll('calder', worksVoice('calder', 'pu4.promo.fetch') || [worksText('pu4.fetch.say', 'There you are. Walk with me: the night\'s ours.')]); return; }
+  let deck = 0, rm = ''; try { deck = deckDef.num; rm = roomAt(...player.here()); } catch (e) { deck = 0; }
+  if (!talk && puNearMe('calder', CHATTER_NEAR) && (rm === '@' || deck === 6 || now >= L.until - 10)) say();   // on the stairs (the lift lobby), or on Deck 6
+}
+function pu4Fetches(now) {                               // 28a asks (night 1's notice): Calder's coming for you with your result, or walking you down
+  const T = P5_PROMO4 && puT4(); if (PU4_LIVE.walk) return true; if (!T || !T.passed || T.res) return false;
+  const at = pu4ResWhen(); return at !== null && now >= at && now < at + PU4_R.find && !(typeof sleeping !== 'undefined' && sleeping);
 }
 function pu4BadgeScript() {                              // the writer's pu4.badge, or a stand-in; our hook on it
   if (!MEETING_SCRIPTS['pu4.badge']) MEETING_SCRIPTS['pu4.badge'] = { title: 'Your engine badge', from: 'Captain Odile Marrow', stub: true, gist: 'The Captain pinned your engine badge in the observation room. Calder told you your Deck 2 quarters are ready for Thursday.',
@@ -64507,7 +64517,7 @@ function pu4Badge(now, how) {                            // the badge is given: 
   const d = worksDay(now), r = SHIP.occasions.find(x => x.id === 'pu4Badge' && x.status === 'asked'); if (r) r.met = true;
   T.badge = d; if (!W.ms.some(x => x[0] === 'specialist.badge')) W.ms.push(['specialist.badge', d]);
   if (!T.move) T.move = { ready: pu4MoveDay(d), walked: null, refit: false };
-  puKeepsake(worksText('pu4.keepsake', 'Engine Specialist\'s certificate'));
+  puKeepsake(flag('pu4.signed') !== undefined ? worksText('pu4.keepsake.signed', 'Engine Specialist\'s certificate, signed by both engine crews') : worksText('pu4.keepsake', 'Engine Specialist\'s certificate'));
   if (how === 'mail') puMailCap('mail.pu4.badge', 'Your badge | We missed you this afternoon. Your engine badge is on your cabin shelf with the certificate. Congratulations, Engine Specialist.', null, now);
   promoMail('mail.pu4.quarters', 'Your quarters | Deck 2, room B, is yours from {day}. Vance will walk you up after dinner. Bring nothing: your things will be there.', { day: dayName(T.move.ready) }, now);
   if (how === 'mail' && now >= shipNow() - 1) promoNotice(worksText('pu4.quarters.notice', 'Your Deck 2 quarters are ready for {day}. Vance walks you up after dinner.', { day: dayName(T.move.ready) }), worksName('calder'));
@@ -64532,8 +64542,9 @@ function pu4BadgeTick(now, skip) {                       // the notice as you wa
 }
 function pu4BeatsGuide(now) {                            // the level 1 arrows: down to the engine room with Calder; the badge
   if (typeof guideAsk !== 'function') return; const owner = '24u (S6-3)', L = PU4_LIVE.walk;
-  if (L && now < L.until) guideAsk({ id: 'pu4:walk:' + L.d, level: 1, owner, until: L.until, goal: () => ({ deck: 6, room: 'E', label: worksText('pu4.ptr.walk', 'Go with Calder: the engine room') }),
-    done: () => { let n = 0; try { n = deckDef.num; } catch (e) { n = 0; } if (n === 6) PU4_LIVE.walk = null; return n === 6 || !PU4_LIVE.walk; } });
+  if (L) { let rm = ''; try { rm = deckDef.num === 6 ? roomAt(...player.here()) : ''; } catch (e) { rm = ''; }   // the walk's over in the engine room (28a's arrows lead it: clock in, then down)
+    if (now >= L.until || (rm === 'E' || rm === 'K') && (puT4() || {}).res) PU4_LIVE.walk = null;
+    else if (!(P5_NIGHT && typeof p5nNight === 'function')) guideAsk({ id: 'pu4:walk:' + L.d, level: 1, owner, until: L.until, goal: () => ({ deck: 6, room: 'E', label: worksText('pu4.ptr.walk', 'Go with Calder: the engine room') }), done: () => !PU4_LIVE.walk }); }
   const br = SHIP.occasions.find(x => x.id === 'pu4Badge' && x.status === 'asked' && !x.met);
   if (br && now >= br.at - 15) guideAsk({ id: 'pu4:badge', level: 1, owner, from: br.at - 15, until: br.at + br.len,
     goal: () => ({ deck: 1, room: 'O', place: '1-ceremony-you', label: worksText('pu4.ptr.badge', 'Your engine badge: the observation room') + ', ' + hhmm(br.at % 1440) }), done: () => !!br.met || br.status !== 'asked' || !!(puT4() || {}).badge });
@@ -64541,12 +64552,55 @@ function pu4BeatsGuide(now) {                            // the level 1 arrows: 
 function pu4Escort2(p, t) {                              // pu4Escort's later beats: she comes to find you for your result, walks you down, walks you up to the badge
   const S = PU4_LIVE.rseek; if (S && !S.met && p.id === S.by) return { mode: 'follow', to: null };
   const L = PU4_LIVE.mv; if (L && p.id === L.by && t < (L.d - 1) * 1440 + PU4_M.late) return L.met ? { mode: 'lead', to: { deck: PU4_M.room.deck, room: PU4_M.room.room } } : { mode: 'follow', to: null };   // (turn 4) Vance: to you, then up to Deck 2
-  if (PU4_LIVE.walk && p.id === 'calder' && t < PU4_LIVE.walk.until) return { mode: 'lead', to: { deck: 6, room: 'E' } };
+  const K = PU4_LIVE.walk; if (K && p.id === 'calder' && t < K.until) { let inn = true; try { inn = !(P5_NIGHT && typeof p5nNight === 'function') || !!((SHIP.works.ns || {})[K.d] || {}).in; } catch (e) { inn = true; }
+    return { mode: 'lead', to: inn ? { deck: 6, room: 'E' } : { deck: 5, room: 'w' } }; }   // the Works bay's time clock first (28a's night punch), then the engine room
   const br = SHIP.occasions.find(x => x.id === 'pu4Badge' && x.status === 'asked');
   if (br && br.f && br.f.seek && !br.met && p.id === 'calder' && t < br.at + br.len) return { mode: 'lead', to: { deck: 1, room: 'O' } };
   return null;
 }
 if (P5_PROMO4) WORK_TICKS.push((now, skip) => { pu4ResultTick(now, skip); pu4BadgeTick(now, skip); if (!skip) pu4BeatsGuide(now); });
+// ---- S6-3 wave 2 (W7): the crews' welcome (the beat "The crews' welcome"). The morning after your result's night (Day 23),
+// 06:00 at the shift change in the engine room: Torres's speech (too long), Reyes and the night crew, the day crew, a ring
+// of them round you (OCCASIONS.pu4Welcome, script pu4.welcome, the talk pose); they sign your certificate (flag
+// pu4.signed: the badge's certificate is the signed one). Only with the nights (P5_NIGHT) and if you worked night 1. A level
+// 1 arrow "The shift change" to the engine room's middle from 05:45; not there by 06:30, Torres's Mail ("We signed it anyway")
+const PU4_W = { at: 360, len: 20, arrow: 15, by: 30 };
+OCCASIONS.pu4Welcome = { title: 'The crews\' welcome', kind: 'meeting', by: 'torres-zeke', with: ['reyes-alejandro', 'calder'], deck: 6, room: 'E', at: PU4_W.at, len: PU4_W.len, script: 'pu4.welcome', due: () => false, mail: null };
+function pu4WelcomeDay() {                               // the morning after the night you were made Engine Specialist (that night worked), or null
+  const T = P5_PROMO4 && P5_NIGHT && puT4(); if (!T || !T.res || !P5_NIGHTS[T.res]) return null;
+  const n = (SHIP.works.ns || {})[T.res]; return n && n.in ? T.res + 1 : null;
+}
+function pu4WelcomeCrew() {                              // both engine crews (the roster's engine room people), Torres and Reyes first
+  let ids = []; try { ids = ROSTER.filter(p => jobCrew(p) === 'engine' && p.id !== 'torres-zeke' && p.id !== 'reyes-alejandro').map(p => p.id).sort().slice(0, 4); } catch (e) { ids = []; }
+  return ['reyes-alejandro', 'calder', ...ids];
+}
+function pu4WelcomeScript() {                            // the writer's pu4.welcome, or a stand-in; our hook on it
+  if (!MEETING_SCRIPTS['pu4.welcome']) MEETING_SCRIPTS['pu4.welcome'] = { title: 'The crews\' welcome', from: 'Zeke Torres', stub: true, gist: 'Both engine crews met you at the shift change. Torres made a speech that went on too long, and they signed your certificate.',
+    lines: [{ who: 'torres-zeke', text: 'Right. Both crews. Gather in. Closer. You too, Reyes.', pose: 'gesture' }, { who: 'torres-zeke', text: 'When I was a lad on the old Hesper, we had a saying about drive coils. Two sayings. Three, depending.', to: 'you' },
+      { who: 'reyes-alejandro', text: 'Zeke. The night crew wants its bed.' }, { who: 'torres-zeke', text: 'I\'m getting there. The point is: welcome. Engine Specialist.', pose: 'nod' },
+      { who: 'calder', text: 'Sign it, everyone. The Captain wants it back by this afternoon.' },
+      { choice: [{ text: 'Thank you. All of you.', reply: { who: 'torres-zeke', text: 'Proper job. Now go and sleep.' } }, { text: 'Was that the short version?', reply: { who: 'reyes-alejandro', text: 'That was the short version.' } }] }] };
+  return puHook('pu4.welcome', k => flagSet('pu4.welcome.reply', k + 1), () => pu4Welcomed(shipNow(), 'met'));
+}
+for (const r of SHIP.occasions) { if (r.id === 'pu4Welcome') pu4WelcomeScript(); }
+function pu4Welcomed(now, how) {                         // once: the certificate signed (met or missed)
+  if (flag('pu4.signed') !== undefined) return false;
+  const r = SHIP.occasions.find(x => x.id === 'pu4Welcome' && x.status === 'asked'); if (r && how === 'met') r.met = true;
+  flagSet('pu4.signed', worksDay(now));
+  if (how === 'mail' && typeof mailSend === 'function') { const t = worksText('mail.pu4.welcome', 'Your certificate | We signed it anyway. Both crews. Come down and see us. Zeke.'), i = t.indexOf(' | ');
+    mailSend({ at: now, from: worksName('torres-zeke'), subject: i > 0 ? t.slice(0, i) : 'Your certificate', body: i > 0 ? t.slice(i + 3) : t }); }
+  simNote('pu4', { step: 'welcome', day: worksDay(now), how });
+  return true;
+}
+function pu4WelcomeTick(now, skip) {                     // booked at the night's start; the arrow from 05:45; by Mail at 06:30
+  const wd = pu4WelcomeDay(); if (!wd || flag('pu4.signed') !== undefined) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, B = (wd - 1) * 1440; if (d > wd || d === wd && m >= PU4_W.at + PU4_W.by) { pu4Welcomed(Math.min(now, B + PU4_W.at + PU4_W.by), 'mail'); return; }
+  let r = SHIP.occasions.find(x => x.id === 'pu4Welcome');
+  if (!r) { pu4WelcomeScript(); OCCASIONS.pu4Welcome.with = pu4WelcomeCrew(); r = occasionAdd('pu4Welcome', B + PU4_W.at, true, PU4_W.len); if (!r) return; }
+  if (!skip && typeof guideAsk === 'function' && now >= B + PU4_W.at - PU4_W.arrow) guideAsk({ id: 'pu4:welcome', level: 1, owner: '24u (S6-3)', from: B + PU4_W.at - PU4_W.arrow, until: B + PU4_W.at + PU4_W.by,
+    goal: () => ({ deck: 6, room: 'E', label: worksText('pu4.ptr.welcome', 'The shift change: the engine room') }), done: () => flag('pu4.signed') !== undefined || !!r.met });
+}
+if (P5_PROMO4) WORK_TICKS.push((now, skip) => pu4WelcomeTick(now, skip));
 // ---- S6-3 turn 4 (W7): your quarters on Deck 2 (the beat "Your quarters"). From the move's day (T.move.ready, the Thursday
 // after the badge: Day 25): the notice as you wake ("After dinner: Vance walks you to your new quarters"), the Schedule's
 // and Tracked's row, Calder's Mail at 17:00 as the record. After dinner (once you've eaten and left the mess, or at 20:00)
