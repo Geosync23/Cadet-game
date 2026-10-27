@@ -1732,3 +1732,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~13:44 UTC: W8 confirmed. **W7 archived.**
 - ~13:57 UTC check-in (lead 41 at ~57% memory): handing over to lead 42 now (Step 6 round + publish are big). handover-lead41.md updated with seat states.
 - ~13:57 UTC: **Hired LEAD 42** session_01GKuymjnCHnpwDqB94PVwmV (claude/lead-42 from claude/lead-41-e86n0x). Lead 41 disables its check-in once lead 42's is up, then stays idle.
+- ~13:58 UTC: lead 42 check-in trig_016zcYSSwXEKiD4zNuLoL9p9 up; all seats told. **Lead 41 check-in disabled; lead 41 idle.**
