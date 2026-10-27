@@ -3454,7 +3454,6 @@ def part_deck6(pw, src, tag):
     pe = [e for e in r.errors if e.startswith('pageerror')]
     if pe: fails.append(f'deck6: page errors: {pe[:2]}')
     r.close(); return fails
-PART_FN['promo3'] = part_promo3; NEEDS['promo3'] = ['panels']; ALL_PARTS.append('promo3')   # (S5-2: PARTS is ALL_PARTS itself when none are named)
 PART_FN['deck6'] = part_deck6; NEEDS['deck6'] = ['pick']; ALL_PARTS.append('deck6')   # S6-4: Deck 6's rack, coil panels and reactor door by pad
 # ---- (S6-3, W7) the Engine Specialist promotion by pad (24u, on a copy with P5_STEP6 on): the offer's scene (Next, a
 # reply), the board's Take it for the Tier 4 test, a step at the coil by the ring and A, the result's scene on Deck 6,
@@ -3602,6 +3601,35 @@ def part_nights(pw, src, tag):
     r.close()
     return fails
 PART_FN['nights'] = part_nights; NEEDS['nights'] = ['panels']; ALL_PARTS.append('nights')   # (S6-1)
+# ---- (S6-7, W7) mentoring Basil by pad (28e, on a copy with P5_STEP6 on): the hello, the clue choice, the late talk's
+# three replies, Calder's first job: each scene read through by the D-pad and A, nothing tapped
+MT_SETUP = r"""(() => { introSkip(); const W = worksInit(Math.max(shipNow(), WORKS_START)); W.tier = 4; W.rank = 'specialist'; flagSet('p5n.on', 22); flagSet('p5n.off', 25);
+  skipTo(24 * 1440 + 1321); for (const f of WORK_TICKS) f(shipNow(), false); skipTo(25 * 1440 + 541); goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; return !!SHIP.works.mt; })()"""
+def part_mentor(pw, src, tag):
+    on = p6_copy(src)
+    if on == src or 'function mtSettle' not in src: return ['not yet: no P5_STEP6 switch line or no mentoring in this build']
+    fails = []
+    r = Run(pw, on, f'{tag}_mt', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    if not r.ev(MT_SETUP): r.close(); return ['setup: Basil\'s day not settled']
+    near = "const k = puNearMe; puNearMe = (id, rr) => id === 'bramwell-basil' || id === 'calder' ? true : k(id, rr); for (const f of WORK_TICKS) f(shipNow(), false); puNearMe = k;"
+    for scene, at, pick, setup in (('hello', 541, 1, ''), ('clue', 650, 2, "Object.assign(SHIP.works.mt.steps, { met: 1, watch: 2, dw: 10, do: 3 });"),
+                                  ('late', 816, 2, ""), ('first', 901, 0, "")):
+        r.ev(f"(() => {{ {setup} setShipNow(25 * 1440 + {at}); goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); {near} }})()"); r.step(6)
+        if scene == 'clue' and r.ev("typeof CASE_UI !== 'undefined' && !!CASE_UI.point"):   # (W8) PZ6's casePoint: Fault notes in point mode, a choice by the D-pad and A
+            b = s5_pad_to(r, r'^Point to')
+            if not b: fails.append(f'clue: the D-pad never reached a Point to (focus {r.ev(S5_FOCUS)!r})')
+            else: r.press('A'); r.step(4); print(f'  clue by pad (casePoint): {b!r} -> {r.ev("SHIP.works.mt.clue")!r}')
+            continue
+        if not r.ev("!!DIALOGUE"): fails.append(f'{scene}: the scene did not open'); continue
+        pu3_read(r, fails, scene, pick)
+    got = r.ev("(() => { const M = SHIP.works.mt; return [M.steps.met !== undefined, M.clue, M.late, M.steps.done !== undefined]; })()"); print(f'  mentoring by pad: {got}')
+    if not (got[0] and got[1] not in (None, 'self') and (got[1] == 'log' or r.ev("typeof casePoint === 'function'")) and got[2] == 2 and got[3]): fails.append(f'the replies by pad not kept ({got})')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close()
+    return fails
+
+PART_FN['mentor'] = part_mentor; NEEDS['mentor'] = ['panels']; ALL_PARTS.append('mentor')   # (S6-7, W7)
 # ---- run ----------------------------------------------------------------------------------------------------------
 if '--selftest' in FLAGS:
     if pad_switch(SRC) is not None: print('--selftest is for a build without section 26 (it plants its own PAD_ON)'); sys.exit(1)

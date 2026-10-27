@@ -279,7 +279,7 @@ INVITE = r"""(() => {
   // slept through: the next eve (day 50) with no flag, skipped straight to 09:00, past Vance's breakfast
   SHIP.occasions.length = 0; MEETINGS.length = 0; flagSet('bridge.invited', null); mails.length = 0;
   skipTo(48 * 1440 + 22 * 60); skipTo(49 * 1440 + 540);
-  R.slept = SHIP.occasions.map(r => r.key + ' ' + r.status); R.sleptFlag = !!flag('bridge.invited'); R.mails2 = mails.slice();
+  R.slept = SHIP.occasions.filter(r => /^bridgeInvite/.test(r.key)).map(r => r.key + ' ' + r.status);   /* (BM19, N6's find) only the invite: with Step 6 on, the missed nights bring the Chief's summons onto Day 50 too */ R.sleptFlag = !!flag('bridge.invited'); R.mails2 = mails.slice();
   mailSend = send; SHIP.occasions.length = 0; SHIP.occasions.push(...keep); MEETINGS.length = 0; flagSet('bridge.invited', null); if (DIALOGUE) dialogueEnd(true);
   return R;
 })()"""

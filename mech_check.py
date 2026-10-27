@@ -1322,7 +1322,7 @@ ROW_AGREE = r"""(() => { const r13 = ladderRow('m13'), r14 = ladderRow('m14'), s
 M15 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
  const reset = t => { machinesNew(); SHIP.jobs = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t); W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10; W.tr.m15 = 17; W.use.m15 = 1; delete worksSide().rewOk; worksSide().rewire = null; W.inc = { plan: {}, open: null }; return W; };
  const tick = (a, b) => { for (let t = a; t <= b; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); } };
- let W = reset(20 * 1440 + 300); const seen = new Map(); for (let t = 20 * 1440 + 360; t <= 41 * 1440 + 500; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); for (const x of SHIP.jobs) if (x.kind === 'rewire') seen.set(x.id, x); }
+ let W = reset(27 * 1440 + 300); const seen = new Map(); for (let t = 27 * 1440 + 360; t <= 48 * 1440 + 500; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); for (const x of SHIP.jobs) if (x.kind === 'rewire') seen.set(x.id, x); }
  const js = [...seen.values()]; out.weeks = js.map(x => [worksDay(x.posted), weekday(worksDay(x.posted)), Math.round(x.posted % 1440), x.machine, jobTier(x), x.chart.length, x.status]);
  const right = (j, k) => ({ pick: rewRight(j, k) });
  W = reset(22 * 1440 + 480); let j = rewJob('4-junction-1', shipNow(), { key: 99 }); SHIP.jobs.push(j); SHIP.machines['4-junction-1'].cond = 40;
@@ -1340,8 +1340,8 @@ M15 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
  W.use.m15 = 3; j = rewJob('4-junction-1', shipNow(), { key: 97, stage: worksStage('m15') }); SHIP.jobs.push(j); claimJob(j.id); S = jobStops(j); jobStepDone(j.id, 0, {});
  out.faded = [j.faded.length, S[1].step, jobStepDone(j.id, 2, right(j, 2)).ok, jobStepDone(j.id, 1, {}).ok, jobStepDone(j.id, 2, right(j, 2)).ok];
  // not taken: the crew's the next day
- W = reset(22 * 1440 + 480); j = rewJob('4-junction-1', shipNow(), { key: 96 }); SHIP.jobs.push(j); out.held = leaveEnd(j) - 22 * 1440;
- tick(22 * 1440 + 490, 23 * 1440 + 900); out.crew = [j.status, j.doneBy !== 'you' && !!j.doneBy];
+ W = reset(28 * 1440 + 480); j = rewJob('4-junction-1', shipNow(), { key: 96 }); SHIP.jobs.push(j); out.held = leaveEnd(j) - 28 * 1440;   /* (BM19) Day 29, past the nights (Days 22-25 have no day shift with Step 6 on, any rank; lead 42) */
+ tick(28 * 1440 + 490, 29 * 1440 + 900); out.crew = [j.status, j.doneBy !== 'you' && !!j.doneBy];
  worksSide().rewire = { done: 'x', wrongs: -4 }; delete worksSide().rewOk; out.save = JSON.stringify(rewState()); worksSide().rewire = { done: 3, wrongs: 1, week: 4 }; delete worksSide().rewOk; out.save2 = JSON.stringify(rewState());
  SHIP.works = JSON.parse(W0); return out; })()"""
 def part_m15(g):
@@ -2542,6 +2542,9 @@ with sync_playwright() as pw:
         if r['id'] == 'm23' and ev("!!(WORK_MECH.m23 && WORK_MECH.m23.own)"):   # 28c's own nights (S6-5): never through the ladder
             print(f"m23 ({r['name']}): 28c's own engine work on your nights, not a training (its part below)")
             PARTS['m23'](g)
+            return
+        if r['id'] == 'm25' and ev("!!(WORK_MECH.m25 && WORK_MECH.m25.own)"):   # (S6-7) 28e's own day with Basil, never through the ladder: promo_beats_check's mt parts test it
+            print(f"m25 ({r['name']}): 28e's own day with Basil, not a training (promo_beats_check mt)")
             return
         if r['id'] == 'm24' and ev("!!(WORK_MECH.m24 && WORK_MECH.m24.own)"):   # 28d's own night 3 (S6-6): never through the ladder, trained by the first swap you led
             print(f"m24 ({r['name']}): 28d's own coil swap on night 3, not a training (its part below)")
