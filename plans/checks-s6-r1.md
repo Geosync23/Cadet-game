@@ -82,3 +82,9 @@ tell, reactor, out, badge back), the coil swap (Day 24), the move (Day 25), ment
 | saves_check | OK | SAVES CHECK OK |
 | stories_check | OK | STORIES CHECK OK |
 | clothes_check | OK | ALL OK |
+
+### Round 2: interactions_check, taken from R4 (BM19 and lead 42; R4's run was cut at 90 min with 0 FAILs)
+
+| Check | Result | Key lines |
+|---|---|---|
+| interactions_check (whole, no time limit, alone on the machine) | OK | exit 0, INTERACTIONS CHECK OK, 324 lines, no FAIL (2095 s, about 35 min) |
