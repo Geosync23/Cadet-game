@@ -20,12 +20,13 @@ claude/staging-0.94.0 (push here only).
 
 The user's decision: TRAY_TRAVELS, INTRO_ASK_ON, ZEKE_CABIN_MAIL, PAD_ON stay off; END_WAY_BACK is cut, stays off.
 
-## Still to do
+## Now (2026-10-27 ~07:05 UTC)
 
-1. Gate part 1 (on d69473b7, running): machine_check twice, bigevents, events, fridays, day_check 16-19, 22, 27-36. Logs in my scratchpad (gone with the session).
-2. On lead 41's word (RV23 PASS): merge B3's claude/talk-close f52e2abc. It is on with no switch, so cadet_test vs 19400976 will differ: explain each difference (with the three switches on, the copies of 0.93.3 differ anyway; compare against a d69473b7 copy too, to see talk-close's own part).
-3. Gate part 2 after talk-close: check_fast, cadet vs 19400976 (each difference explained), controller_check (all but reach, with ending, m19, m20, s5cases, vessel, shut, door), arrows_check incl. step5, vessel, endstay, endgo.
-4. Tell lead 41 the commit + game sha256 for the six-runner round (OLD = 19400976). Known-old: career "Relied on" before Day 5 (backlog 12), events FX24-2, perf one-offs (backlog 14, 32).
+- db3c0930: events_check fix c03d51da (vessel + ending together; test only; RV23 to glance). Gate part 1 on d69473b7 all green (machine x2, bigevents, fridays, day 16-19, 22, 27-36; events known-old FX24-2 only).
+- **9faaee80** = merge of claude/talk-close-fix 6dfc4ec1 (B3 f52e2abc + W6 ea9e0f3c). Game sha256 **04cc0cb65f2272c8f7afbeb438b94d972d80a8f59d42580515b86a1a380e0dbf**. check_fast OK; cadet vs 19400976 ALL IDENTICAL (Day 1 Deck 4 doesn't reach any of it).
+- Gate part 2 running (counts as its share of the round): controller_check every part but reach, then arrows endgo | arrows default, step5, endstay.
+- Lead 41 started the round on 9faaee80 with three runners, two shares each: R1 session_01GKuymit8htMajswkRRb27s (CR1 minus arrows + CR4), R2 session_01GKuymjMx2JdLdXE2tHNFHG (CR2 + CR3 minus controller), R3 session_01GKuymjroMc9y1arLHK5aPv (CR5 + CR6 minus gate part 1, plus ending_check). They report to me and the lead. **GO/NO-GO is mine** when all are in; a must from my gate goes to the runners at once.
+- Known-old: career "Relied on" before Day 5 (backlog 12), events FX24-2, perf one-offs (backlog 14, 32).
 
 ## Gotchas
 
