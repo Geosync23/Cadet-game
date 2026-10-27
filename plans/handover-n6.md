@@ -24,7 +24,7 @@
 3. **Calder's word, notices, arrows, rings (done).** 28a: `P5N_WORD`, `P5N_SEEK`, `p5nScript`, `p5nTold`,
    `p5nWordTick`, `p5nEscort` (hooked into 24 core's worksEscort, after p5Escort), `p5nGuide`. Meetings
    content/meetings/night.on.meet, night.off.meet; words content/works/night.lines (stand-ins, baked). Each night: the
-   notice (20:30; night 1 22:40; with P5_PROMO4, W7's 24u fetch from the comet instead: its simNote('promoted', { tier: 4 }) clocks you in for night 1, and 24u may define `pu4Fetching(now)` to say whether it fetches tonight; else ours from 23:30), a level 1 arrow and
+   notice (20:30; night 1 22:40; with P5_PROMO4 and W7's 24u `pu4Fetches(now)` true, none of ours: her fetch from the comet says it; see turn 6), a level 1 arrow and
    forced ring to the clock, then the engine room, the clock at 06:00, the plate, your bunk (ring on "Set alarm").
    Day 22 12:30: clock out, then sleep. Holding a job while the clock waits: an hourly notice. With P5_M21, 28b may
    define `m21Door(t)` -> { deck, tile } for Calder to wait at. Flags p5n.* (saved).
@@ -55,11 +55,12 @@
 - `playerNightOn(d)`: the night starting on day d is yours. `p5nNoDay(d)`: no day shift (the morning after a night).
 - simNote `p5night` { step: 'missed' | 'knock' | 'plate', day }.
 
-## State (2026-10-27 ~12:40 UTC)
-- Latest: claude/p5s6-nights 992a4b0 (staging-p5s6 a2ef6416 merged). Reviewed by RV23 to c806c78: FIXES NEEDED, one
-  must: Calder didn't walk to you on Day 22 09:15 (the escort's follow parks her in the lift car). Lead 41: W7 fixes
-  worksEscort's follow at the source; take it when it lands, then re-run RV23's probe (plans/rv23-shots/n6_play.py on
-  claude/review-rv23).
+## State (2026-10-27 ~14:00 UTC)
+- Lead is now lead 42 (session_01GKuymjnCHnpwDqB94PVwmV, branch claude/lead-42), after lead 41.
+- Latest: claude/p5s6-nights 3bf30e6 (staging-p5s6 a2ef6416 merged). RV23: PASS (13:40 UTC), its one must (Calder's walk
+  on Day 22) cleared once W7's escort fix cffe8187 is in: RV23's scratch merge saw her walk 20.8 m -> 5.4 m and night.on
+  play. Next: merge staging when it carries cffe8187; then the nights' own full round before switch-on. MA6 reviewed
+  the mech_check m19 edits: OK.
 - MA6 (28d, night 3) reads playerNightOn(24); its Watch hour avoids night 3's incident (02:30-03:30 Day 25). MA6's
   28b defines m21Door() for Calder's wait after the briefing.
 - Backlog N6-1: an ended career's save doesn't load (section 20, not Step 6's).
