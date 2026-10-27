@@ -121,3 +121,8 @@
 - New ship. New coils. One of them's shy. Obviously. My neighbour says the cat's well. Anyway, hello.
 ? tier>=friend
 - I still leave notes at shift change. Nobody here writes back yet. Tell Zeke coil three was always shy. Anyway.
+
+// PZ6 (2026-10-27, Pillar 5 Step 6, S6-8): a stand-in for his word for P6 on your first night (flag train.p6.word)
+== work
+? flag:train.p6.word
+- A sum for you. Something's going missing. Meters in pairs. Find the short ones. Anyway.
