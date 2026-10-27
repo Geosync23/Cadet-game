@@ -1353,7 +1353,105 @@ def part_p7(g, path):
         check(F['clean'] == '{"labelled":["4-junction-1"]}', f"p7: junk in the save cleaned: {F['clean']}")
     return 'done'
 
-S6_RUN = {'p6': part_p6, 'p7': part_p7}
+
+# P8 on paper: every cartridge or coil-module cause P8 fits becomes a case; each checked: five suspects, one the cause,
+# the others numbered; the band and the fewest rule on the frozen plan (three runs, cartridge i's number in binary); the
+# rig's clue at the machine shop's rig; each frozen run honest (none bad rules out the group, one bad the rest)
+P8SWEEP = r"""(() => {
+  const out = { cases: [], fit: 0 }; """ + S6_ME + r"""
+  const jr = jobRun; jobRun = () => null; flagSet('case.p8.first', 'none'); W.op = { 25: ['p8'] }; C.open = [];
+  for (let d = 25; d <= 26; d++) {
+    const t = (d - 1) * 1440 + 600; setShipNow(t); machinesNow();
+    for (const m of machineList()) for (const f of caseCauses(m)) {
+      if (!CASE_KINDS.p8.fits(f, m) || jobTier({ machine: m.id }) > 4) continue;
+      out.fit++; C.open = []; SHIP.jobs = SHIP.jobs.filter(x => !x.case);
+      const j = { id: m.id + '@p8' + d + f.id, machine: m.id, deck: m.deck, kind: 'repair', urgency: 1, posted: t, found: t, claimedBy: null, parts: [f.part], status: 'open', cause: f.id };
+      SHIP.jobs.push(j);
+      const keepK = {}; for (const k in CASE_KINDS) if (k !== 'p8') { keepK[k] = CASE_KINDS[k]; delete CASE_KINDS[k]; }
+      const rate = CASE_RATE.specialist; CASE_RATE.specialist = 1; caseOffer(j, (d - 1) * 24 + 10); CASE_RATE.specialist = rate; Object.assign(CASE_KINDS, keepK);
+      const c = caseOf(j); if (!c) { SHIP.jobs = SHIP.jobs.filter(x => x !== j); continue; }
+      const R = p8Of(c);
+      out.cases.push({ id: c.id, cause: c.cause, sus: c.sus.slice(), fewest: c.fewest, band: c.band, lim: caseBandOf('p8', c.band), title: j.title, shown: !c.wait, parts: j.parts.slice(), kind: m.kind,
+        bad: R.bad, sid: [0, 1, 2, 3, 4].map(i => p8Sid(c.cause, R.bad, i)), labels: c.sus.map(s => p8Sus(c, s).label), susParts: c.sus.map(s => p8Sus(c, s).part), part: f.part,
+        clues: c.clues.map(k => ({ id: k.id, at: k.at, kills: k.kills.slice(), src: k.src, deck: caseClueDeck(k), reach: caseReachable(k), text: caseClueText(c, k) })) });
+      SHIP.jobs = SHIP.jobs.filter(x => x !== j);
+    }
+  }
+  out.coils = machineList().filter(m => m.kind === 'coil' && !m.stub && panelPlace(m.id)).length;   // drive coils to work on (S6-4's Deck 6 machines)
+  C.open = []; jobRun = jr; Object.assign(W, keep);
+  return out;
+})()"""
+
+# P8's first: 3-filter-1's cartridges, slot 41, hidden till you're at work; shown with the teacher's word in person; taken,
+# the rig's clue only at the rig; Fault notes by taps: five toggles, Run the test sends you to the rig when you're
+# elsewhere; at the rig a run takes ten ship minutes, then its honest result is a clue; two runs by halves, the third
+# finds it (or leaves two); out of runs the teacher's "new ones all round"; the right call fixes it; the save mid-run
+P8FIRST = r"""(() => {
+  const out = {}; """ + S6_ME + r"""
+  C.open = []; delete SHIP.flags['case.p8.first'];
+  SHIP.jobs = SHIP.jobs.filter(x => !(x.machine === '3-filter-1' && x.status !== 'done'));
+  const said = []; const ws = worksSay, wa = worksSayAll; worksSay = (id, t) => said.push([id, t]); worksSayAll = (id, L) => said.push([id, L[0]]);
+  W.op = { 25: ['p8'] }; setShipNow(24 * 1440 + 330); machinesNow(); WORK_MECH.p8.open(ladderRow('p8'), 25);
+  const id = flag('case.p8.first'), c = caseById(id), j = c && caseJob(c); out.staged = id; if (!c) { worksSay = ws; worksSayAll = wa; Object.assign(W, keep); return out; }
+  out.machine = j.machine; out.cause = c.cause; out.sus = c.sus.slice(); out.reserved = j.reserved; out.hidden = caseHidden(j); out.wait = c.wait; out.band = c.band; out.fewest = c.fewest;
+  out.again = (p8Stage(), C.open.filter(x => x.kind === 'p8').length);
+  setShipNow(24 * 1440 + 545); machinesNow(); caseTick();
+  out.shown = !c.wait; out.title = j.title; out.by = c.by; out.come = CASE_COME.by; if (out.come) { CASE_COME.at = 0; caseComeTick(shipNow()); } out.said = said.slice();
+  claimJob(j.id); caseTick(); out.boardGot = c.got.slice();
+  const R = p8Of(c), open = () => (typeof worksTabAdd === 'function' ? (deviceShow('works'), deviceDo({ app: 'works', do: 'tab', arg: 'faults' }), deviceShow('works')) : deviceShow('faultnotes'));
+  const btn = re => [...document.querySelectorAll('#devBody button')].find(b => re.test(b.textContent));
+  open(); out.goText = document.getElementById('devBody').textContent.includes('test rig'); deviceClose();
+  goToDeck(5); const sp = placeSpot(P8_RIG); player.obj.position.set(sp.x, player.obj.position.y, sp.z); caseTick(); out.rigGot = c.got.includes('g0');
+  open(); out.toggles = [...document.querySelectorAll('#devBody button')].filter(b => /^\d( ✓)?$/.test(b.textContent)).map(b => Math.round(b.getBoundingClientRect().height));
+  const half = R.bad < 2 ? [0, 1] : [2, 3];                // a group with the bad one, then without
+  for (const i of [0, 1]) { const b = btn(new RegExp('^' + (i + 1) + '( ✓)?$')); if (b) b.click(); open(); }
+  out.sel = R.sel; const run = btn(/^Run the test/); out.runBtn = !!run; if (run) run.click();
+  const k0 = c.clues.find(k => k.src.run === 0 && !k.src.plan); out.pending = !!k0 && !c.got.includes(k0.id) && !!p8Pending(c);
+  const sv = JSON.stringify(SHIP.works.cases); out.saveBytes = sv.length; out.saveSame = JSON.stringify(caseClean(JSON.parse(sv))) === JSON.stringify(caseClean(SHIP.works.cases));
+  setShipNow(shipNow() + 9); caseTick(); out.early = c.got.includes(k0 && k0.id);
+  setShipNow(shipNow() + 2); caseTick(); out.r0 = k0 && { got: c.got.includes(k0.id), count: k0.src.count, mask: k0.src.mask, kills: k0.kills.slice(), text: caseClueText(c, k0) };
+  out.honest0 = k0 && (k0.src.count === (R.bad < 2 ? 1 : 0));
+  // two more runs, each a single cartridge, then out of runs
+  for (const i of [2, 3]) { open(); const b = btn(new RegExp('^' + (i + 1) + '( ✓)?$')); if (b) b.click(); open(); const r = btn(/^Run the test/); if (r) r.click(); setShipNow(shipNow() + 11); caseTick(); }
+  open(); out.out = document.getElementById('devBody').textContent; out.runsLeft = !!btn(/^Run the test/); deviceClose();
+  out.got = c.got.slice(); out.left = c.sus.filter(s => !c.clues.some(k => c.got.includes(k.id) && k.kills.includes(s)));
+  const wrong = c.sus.find(s => s !== c.cause); caseCall(c.id, wrong); let n = jobStops(j).length; for (let k = 0; k < n; k++) jobStepDone(j.id, k);
+  out.wrongFit = { done: !!j.workDone, known: c.known.includes(wrong) };
+  caseCall(c.id, c.cause); n = jobStops(j).length; for (let k = 0; k < n; k++) jobStepDone(j.id, k);
+  out.fixed = !!j.workDone; turnInJob(j.id); caseTick(); out.closed = !caseById(c.id); out.trained = W.tr.p8;
+  worksSay = ws; worksSayAll = wa; Object.assign(W, keep); C.open = [];
+  return out;
+})()"""
+
+def part_p8(g, path):
+    if not g.ev("typeof p8Stage === 'function'"): return 'not yet'
+    S = g.ev(P8SWEEP); cs = S['cases']
+    print(f"p8: {S['fit']} fits, {len(cs)} cases on {sorted({c['id'].split('@')[0][1:] for c in cs})}")
+    for c in cs[:1]: print('  ', c['id'], c['labels'], [k['text'] for k in c['clues']], c['title'])
+    check(len(cs) >= 3 and (any(c['kind'] == 'coil' for c in cs) or not S['coils']) and any(c['part'] == 'cartridge' for c in cs), f"p8: cartridge cases, and coil-module cases where the build has drive coils ({S['coils']}): {len(cs)}")
+    for c in cs:
+        s6_band(c)
+        check(len(c['sus']) == 5 and c['sid'][c['bad']] == c['cause'] and sorted(c['sid']) == sorted(c['sus']) and len(set(c['labels'])) == 5 and set(c['susParts']) == {c['part']}, f"{c['id']}: five alike, numbered, the bad one the cause: {c['labels']}")
+        rig = [k for k in c['clues'] if k['src'].get('rig')]; runs = [k for k in c['clues'] if 'run' in k['src']]
+        check(len(rig) == 1 and rig[0]['at'] == '5-shop-4' and rig[0]['kills'] == [] and len(runs) == 3 and all(k['at'] is None for k in runs), f"{c['id']}: the rig's clue at the rig, three runs yours to make")
+        for k in runs:
+            m = k['src']['mask']; one = bool(m >> c['bad'] & 1)
+            check(sorted(k['kills']) == sorted(c['sid'][i] for i in range(5) if bool(m >> i & 1) != one), f"{c['id']} {k['id']}: the frozen run honest: {m} {k['kills']}")
+        check(c['shown'] and c['parts'] == [] and c['title'].startswith('Head-scratcher: '), f"{c['id']}: on the board, the part yours to find: {c['title']!r}")
+    F = g.ev(P8FIRST); print('p8 first:', {k: v for k, v in F.items() if k != 'out'}); print('   ', (F.get('out') or '')[-200:])
+    check(F.get('staged') and F['staged'] != 'none' and F.get('machine') == '3-filter-1' and F.get('reserved') == 41 and F.get('hidden') and F.get('band') == 'T4' and F.get('again') == 1, f"p8's first: 3-filter-1's cartridges, slot 41, hidden till you're at work, once: {F.get('staged')}")
+    if F.get('staged') and F['staged'] != 'none':
+        check(F['shown'] and F['by'] in ('halloran-emeka', 'torres-zeke') and any(w[0] == F['by'] for w in F['said']), f"p8's first: shown at work with the teacher's word, in person: {F['by']} {F['said']}")
+        check(F['boardGot'] == [] and F['goText'] and F['rigGot'], f"p8's first: nothing on the job; Fault notes sends you to the rig; the rig's clue there")
+        check(len(F['toggles']) == 5 and min(F['toggles']) >= 44 and F['sel'] == 3 and F['runBtn'] and F['pending'], f"p8's first: five toggles (44 px+), two picked, Run the test, running: {F['toggles']} {F['sel']}")
+        check(not F['early'] and F['r0'] and F['r0']['got'] and F['honest0'] and F['r0']['mask'] == 3, f"p8's first: the result after ten ship minutes, honest: {F['r0']}")
+        check(F['saveSame'] and F['saveBytes'] < 2600, f"p8's first: the save round trip mid-run ({F['saveBytes']} bytes)")
+        check(not F['runsLeft'] and len(F['got']) == 4 and F['cause'] in F['left'], f"p8's first: three runs, then none left; the bad one never ruled out: {F['got']} {F['left']}")
+        check(len(F['left']) == 1 or 'new ones all round' in F['out'], f"p8's first: out of runs and unsure, the teacher's word: {F['left']}")
+        check(not F['wrongFit']['done'] and F['wrongFit']['known'] and F['fixed'] and F['closed'] and F['trained'] == 25, f"p8's first: a wrong one doesn't fix it, the right one does, trained Day 25: {F['wrongFit']} {F['fixed']} {F['trained']}")
+    return 'done'
+
+S6_RUN = {'p6': part_p6, 'p7': part_p7, 'p8': part_p8}
 
 def run_s6(path, parts):
     with sync_playwright() as pw:

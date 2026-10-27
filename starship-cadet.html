@@ -24963,7 +24963,8 @@ const VOICE = JSON.parse([
   '{"text":"Smoother already. Can you feel it? Lovely work.","id":"id1bay","flag":"roof.done"},',
   '{"text":"Set the lathe going. Come back in ten. Lovely.","id":"18joobb","flag":"train.m10.lead"},',
   '{"text":"Now the hand work. Slow strokes. There.","id":"o8znzz","flag":"train.m10.lead"},',
-  '{"text":"Trusted already? Some of us were \\"new\\" for a year. Lovely.","id":"pa8i32","tone":"funny","flag":"pu3.promo.near"}]',
+  '{"text":"Trusted already? Some of us were \\"new\\" for a year. Lovely.","id":"pa8i32","tone":"funny","flag":"pu3.promo.near"},',
+  '{"text":"Five cartridges, one bad, all alike. The rig tells you how many in a group. Three goes.","id":"1fdm4oo","flag":"train.p8.word"}]',
   '}',
   '}',
   ',"hart-ravi":{"avoid":["being asked to change his mind"],"cares":["the garden at first light","the comics wall","the fish back home on Valo","sleep, in theory"],"invites":["garden"],"jokes":["a late sleeper on the early team","the comics wall, where sometimes you\'re in one"],"joy":"drawing comics for the common room wall","keepsake":"the comic you were in, signed","likes":["plant","tea"],"loves":["card"],"needs":"cheer","openness":"normal","talk":"Gentle and slow, immovable once decided; grumbles about mornings and means none of it; short lines, a pause, then a good one.","tpl":"steady","words":{"hi":["Oh, hey","Hello"],"bye":["Go on, then","See you","Mind the hoses"],"yes":["Fine by me","Yeah","All right"],"thanks":["Ta","Thanks for that"],"wow":["Huh. Nice","Look at that"],"sigh":["Ah, well"],"nick":[null,null,"{me}","{me}","{me}"]},"lines":{',
@@ -30504,7 +30505,8 @@ const VOICE = JSON.parse([
   '{"text":"Old ones. Nobody\'s cracked them. I\'ve tried the Tuesday hum twice.","id":"r899rp","flag":"mys.word"},',
   '{"text":"Take one if you like. No rush. They\'ve waited years.","id":"7m8gpr","flag":"mys.word"},',
   '{"text":"Calder pinned the first. She says it\'s not personal. It\'s personal.","id":"1unds07","tone":"funny","flag":"mys.word"},',
-  '{"text":"Labels on that panel? Gone. Years ago. Make a grid. It\'s oddly relaxing.","id":"d837pe","flag":"train.p7.word"}]',
+  '{"text":"Labels on that panel? Gone. Years ago. Make a grid. It\'s oddly relaxing.","id":"d837pe","flag":"train.p7.word"},',
+  '{"text":"Five alike, one bad. The rig says how many, not which. Three goes. Plan them.","id":"1asapd4","flag":"train.p8.word"}]',
   ',"worried.captain":[',
   '{"text":"Up top to the Captain. {sigh}. I trained you, shipmate. I know what you can do.","id":"1v9hfzh","tone":"serious","tier":[3,4]}]',
   ',"worried.chief":[',
@@ -32611,6 +32613,8 @@ const LINES = JSON.parse([
   '{"text":"A pair that adds up is fine, both of them. Two short pairs share your leak.","id":"13nyks3"}]',
   ',"case.hint.p7.1":[',
   '{"text":"Every relay you can place on another room isn\'t it. The one left over feeds the flicker.","id":"17b74z2"}]',
+  ',"case.hint.p8.1":[',
+  '{"text":"Put about half on the rig. None bad? It\'s in the other half. One bad? It\'s in this half.","id":"17f6a20"}]',
   ',"case.hint.p9.1":[',
   '{"text":"Every part is fine. So what else happens at that hour?","id":"1vx9c56"}]',
   ',"case.line.air":[',
@@ -32677,6 +32681,36 @@ const LINES = JSON.parse([
   '{"text":"Relay {a}","id":"n3hl7s"}]',
   ',"case.p7.sketch":[',
   '{"text":"Pell\'s old sketch: relay {a} feeds the {room}.","id":"1xmxe64"}]',
+  ',"case.p8.cart":[',
+  '{"text":"cartridge","id":"z4qbl1"}]',
+  ',"case.p8.go":[',
+  '{"text":"Take them to the test rig in the machine shop, Deck 5.","id":"16bxprw"}]',
+  ',"case.p8.gorig":[',
+  '{"text":"To the rig","id":"inf7ze"}]',
+  ',"case.p8.head":[',
+  '{"text":"The test rig: pick a group, run it. {n} runs left.","id":"orq0mf"}]',
+  ',"case.p8.module":[',
+  '{"text":"coil module","id":"uxq6mv"}]',
+  ',"case.p8.none":[',
+  '{"text":"None bad","id":"vudgop"}]',
+  ',"case.p8.one":[',
+  '{"text":"One bad","id":"jlgx3h"}]',
+  ',"case.p8.out":[',
+  '{"text":"Out of runs. {name}: \\"Fit new ones all round, then.\\"","id":"1auec5i"}]',
+  ',"case.p8.pick":[',
+  '{"text":"Which go on the rig? Tap to pick.","id":"1h27h6c"}]',
+  ',"case.p8.rig":[',
+  '{"text":"On the test rig: five {thing}s from {machine}. It says how many in a group are bad.","id":"9edqlc"}]',
+  ',"case.p8.rigname":[',
+  '{"text":"The test rig, in the machine shop","id":"131pwu9"}]',
+  ',"case.p8.run":[',
+  '{"text":"Run {n}: {thing} {text} on the rig. {word}.","id":"128uzfr"}]',
+  ',"case.p8.runit":[',
+  '{"text":"Run the test","id":"1fj512s"}]',
+  ',"case.p8.running":[',
+  '{"text":"Running. Ten minutes.","id":"kj28es"}]',
+  ',"case.p8.wait":[',
+  '{"text":"Running: ready at {time}.","id":"1agtplx"}]',
   ',"case.p9.head":[',
   '{"text":"Who\'s using it then","id":"1p048sf"}]',
   ',"case.p9.move":[',
@@ -32721,6 +32755,8 @@ const LINES = JSON.parse([
   '{"text":"The battery banks don\'t balance","id":"1ft9o76"}]',
   ',"case.title.p7":[',
   '{"text":"{machine}: the labels have worn off, and one relay chatters","id":"19l968n"}]',
+  ',"case.title.p8":[',
+  '{"text":"{machine}: one of five {thing}s is bad. They all look alike","id":"1x50fvq"}]',
   ',"case.title.p9":[',
   '{"text":"{machine} {shows}, but only {when}. Nothing\'s worn.","id":"urtz04"}]',
   ',"case.uncross":[',
@@ -32749,6 +32785,8 @@ const LINES = JSON.parse([
   '{"text":"New {part} in at {machine}. The sums still don\'t add up.","id":"yajwnk"}]',
   ',"case.wrong.p7":[',
   '{"text":"New relay in at {a}. Still chattering. Wrong relay.","id":"ut3r1j"}]',
+  ',"case.wrong.p8":[',
+  '{"text":"New {thing} in at {a}. Still bad. It was another one.","id":"11lbt96"}]',
   ',"case.wrong.p9":[',
   '{"text":"New {part} in. Same hour tomorrow, same trouble. It isn\'t a part.","id":"1e0a5rq"}]',
   ',"case.wrong.t2":[',
@@ -32866,6 +32904,12 @@ const LINES = JSON.parse([
   '{"text":"Relabel the panel when you\'re done. The next person will thank you.","id":"1trmdnv"}]',
   ',"chief.p7.title":[',
   '{"text":"Faded labels","id":"18ahjdb"}]',
+  ',"chief.p8.1":[',
+  '{"text":"The rig says how many, not which. Test half, then half of that.","id":"wfaszh"}]',
+  ',"chief.p8.2":[',
+  '{"text":"Three runs find one in eight. Five is easy, if you plan the runs.","id":"1i5gf4i"}]',
+  ',"chief.p8.title":[',
+  '{"text":"Swap testing","id":"8mg1cy"}]',
   ',"chief.p9.1":[',
   '{"text":"Some faults aren\'t parts. They\'re two good things at the same time.","id":"15z8s6q"}]',
   ',"chief.p9.2":[',
@@ -38840,6 +38884,8 @@ const LINES = JSON.parse([
   '{"text":"Coming up: Does it add up? Sums at the meters, then the batteries.","id":"q9fna7"}]',
   ',"next.p7":[',
   '{"text":"Coming up: Faded labels. A panel whose labels have worn off.","id":"11kfltw"}]',
+  ',"next.p8":[',
+  '{"text":"Coming up: Swap testing. Five alike, one bad, and the test rig.","id":"h7lc2n"}]',
   ',"next.p9":[',
   '{"text":"Coming up: The clash. A fault that only happens when two things do.","id":"179xr0v"}]',
   ',"next.ps":[',
@@ -38908,6 +38954,8 @@ const LINES = JSON.parse([
   '{"text":"Does it add up?: the Chief has a sum for you.","id":"7bhse7"}]',
   ',"next.wait.p7":[',
   '{"text":"Faded labels: the Chief has a panel nobody can read.","id":"n984d6"}]',
+  ',"next.wait.p8":[',
+  '{"text":"Swap testing: the machine shop\'s rig is free.","id":"1vy7uu1"}]',
   ',"next.wait.p9":[',
   '{"text":"The clash: the Chief has a fault that won\'t happen on its own.","id":"1x2q2al"}]',
   ',"next.wait.ps":[',
@@ -41701,6 +41749,8 @@ const LINES = JSON.parse([
   '{"text":"Does it add up?","id":"yqhlbq"}]',
   ',"works.mech.p7":[',
   '{"text":"Faded labels","id":"xashhn"}]',
+  ',"works.mech.p8":[',
+  '{"text":"Swap testing","id":"ebrc2a"}]',
   ',"works.mech.p9":[',
   '{"text":"The clash","id":"1b8ppzi"}]',
   ',"works.mech.ps":[',
@@ -61183,6 +61233,101 @@ if (P5_CASES6) {
     'Relabel the panel when you\'re done. The next person will thank you.'] };
   if (typeof WORK_MECH !== 'undefined') WORK_MECH.p7 = { open() { p7Stage(); } };
   if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip) p7Stage(); });
+}
+// P8. Swap testing at the bench (Day 25, the machine shop's teacher: Halloran, a stand-in, the roster has no shop tech;
+// the test rig, calrig). One of five cartridges (a filter bank's; or a drive coil's five coil modules) is bad, and
+// they all look alike. On the machine shop's test rig (P8_RIG, Deck 5) you put any group of them on, it runs for ten
+// ship minutes, and it says how many in the group are bad (none or one), not which. Three runs. The clues: the rig
+// itself (being there with them: rules out nothing) and the three runs, each one yours to choose (Fault notes: a
+// toggle per cartridge, then Run the test); a run's result rules out the group (none) or everyone else (one), set
+// honestly when it runs. For the solver the runs stand frozen as the three-bit plan (cartridge i's number in binary),
+// which always finds it; your own runs replace them. Out of runs and not sure: "Fit new ones all round" (the long way,
+// which uses the parts). The first (when the p8 row opens: 3-filter-1's cartridges, else the first that fits; slot 41,
+// held a week). Flag case.p8.first. No R(): the bad one by key 892, the shown order by 893.
+const P8_BAND = { sus: [5, 5], clues: [4, 4], fewest: 2, decks: 1 }, P8_SLOT = 41, P8_RIG = '5-shop-4', P8_RUNS = 3, P8_N = 5, P8_MINS = 10, P8_FIRST = '3-filter-1';
+const P8_PARTS = new Set(['cartridge', 'coil winding']);
+const p8Bad = seed => Math.floor(schedU(seed, 70, 892) * P8_N);
+const p8Sid = (cause, bad, i) => i === bad ? cause : 'k:' + (i + 1);
+const p8Of = c => { const k = c && c.clues.find(x => x.src && x.src.rig); return k ? k.src : null; };   // the rig's clue keeps the bad one and your picks
+const p8Word = c => { const j = caseJob(c), m = j && machineById(j.machine); return m && m.kind === 'coil' ? caseText('case.p8.module', 'coil module') : caseText('case.p8.cart', 'cartridge'); };
+function p8Clues(j, cause, sus, seed) {
+  const bad = p8Bad(seed), sid = i => p8Sid(cause, bad, i), out = [{ id: 'g0', type: 'rig', src: { rig: 1, bad, sel: 0 }, at: P8_RIG, kills: [] }];
+  for (let b = 0; b < P8_RUNS; b++) {                     // the frozen plan: run b holds the ones whose number has bit b
+    let mask = 0; for (let i = 0; i < P8_N; i++) if ((i + 1) >> b & 1) mask |= 1 << i;
+    out.push({ id: 'r' + b, type: 'rig', src: { run: b, mask, plan: 1 }, at: null, kills: p8Kills(mask, bad, sid) });
+  }
+  return out;
+}
+function p8Kills(mask, bad, sid) { const one = !!(mask >> bad & 1), out = []; for (let i = 0; i < P8_N; i++) if (!!(mask >> i & 1) === !one) out.push(sid(i)); return out; }
+const p8List = mask => [...Array(P8_N).keys()].filter(i => mask >> i & 1).map(i => i + 1).join(', ');
+function p8Text(c, k) {
+  const s = k.src || {};
+  if (s.rig) return caseText('case.p8.rig', 'On the test rig: five {thing}s from {machine}. It says how many in a group are bad.', { thing: p8Word(c), machine: caseMachName(caseJob(c) || {}) });
+  if (s.run == null || s.plan) return null;
+  return caseText('case.p8.run', 'Run {n}: {thing} {text} on the rig. {word}.', { n: s.run + 1, thing: p8Word(c) + (s.mask & s.mask - 1 ? 's' : ''), text: p8List(s.mask), word: s.count ? caseText('case.p8.one', 'One bad') : caseText('case.p8.none', 'None bad') });
+}
+function p8Sus(c, id) { const R = p8Of(c); if (!R) return null; const i = id === c.cause ? R.bad : +String(id).slice(2) - 1; const w = p8Word(c); return i >= 0 ? { label: w.replace(/^./, x => x.toUpperCase()) + ' ' + (i + 1), part: (caseCauses(machineById((caseJob(c) || {}).machine)).find(f => f.id === c.cause) || {}).part || null } : null; }
+const p8Runs = c => c.clues.filter(k => k.src && k.src.run != null);
+const p8Pending = c => p8Runs(c).find(k => k.src.t && !c.got.includes(k.id));
+function p8View(c) {
+  const R = p8Of(c), g = c.clues.find(k => k.src && k.src.rig); if (!R || !c.got.includes(g.id)) return c.got.length ? [] : [{ kind: 'text', text: caseText('case.p8.go', 'Take them to the test rig in the machine shop, Deck 5.') }];
+  const used = p8Runs(c).filter(k => !k.src.plan).length, left = P8_RUNS - used, pend = p8Pending(c), w = p8Word(c), A = arg => ({ app: caseApp(), do: 'case:p8', arg: c.id + '|' + arg });
+  const B = [{ kind: 'text', text: caseText('case.p8.head', 'The test rig: pick a group, run it. {n} runs left.', { n: left }), mark: 'hot' }, { kind: 'text', text: caseText('case.p8.pick', 'Which go on the rig? Tap to pick.') }];
+  B.push({ kind: 'buttons', items: [...Array(P8_N).keys()].map(i => ({ label: (i + 1) + (R.sel >> i & 1 ? ' ✓' : ''), on: !!(R.sel >> i & 1), action: A('sel.' + i) })) });
+  if (pend) B.push({ kind: 'text', text: caseText('case.p8.wait', 'Running: ready at {time}.', { time: hhmm(pend.src.t % 1440) }) });
+  else if (left > 0) B.push({ kind: 'buttons', items: [{ label: caseNear(P8_RIG) ? caseText('case.p8.runit', 'Run the test') : caseText('case.p8.gorig', 'To the rig'), action: A('run') }] });
+  else if (c.sus.filter(s => !c.known.includes(s) && !p8Runs(c).some(k => c.got.includes(k.id) && k.kills.includes(s))).length > 1)
+    B.push({ kind: 'text', text: caseText('case.p8.out', 'Out of runs. {name}: "Fit new ones all round, then."', { name: shortName(schedPeople().find(p => p.id === (c.by || 'calder')) || { name: 'Calder' }) }) });
+  return B;
+}
+function p8Act(c, v, s) {
+  if (v !== 'p8') return false;
+  const R = p8Of(c), g = c.clues.find(k => k.src && k.src.rig); if (!R || !c.got.includes(g.id)) return false;
+  if (/^sel\.\d$/.test(s)) { const i = +s.slice(4); if (i < P8_N && !p8Pending(c)) R.sel ^= 1 << i; return true; }
+  if (s !== 'run') return false;
+  if (!caseNear(P8_RIG)) { const p = placeById(P8_RIG); if (p) goTo({ deck: p.deck, place: p.id, label: caseText('case.p8.rigname', 'The test rig, in the machine shop') }); return true; }
+  const k = p8Runs(c).find(x => x.src.plan); if (!k || p8Pending(c) || !R.sel) return false;
+  const sid = i => p8Sid(c.cause, R.bad, i);
+  k.src = { run: p8Runs(c).filter(x => !x.src.plan).length, mask: R.sel, count: R.sel >> R.bad & 1, t: shipNow() + P8_MINS };
+  k.kills = p8Kills(R.sel, R.bad, sid).filter(x => c.sus.includes(x)); R.sel = 0;
+  try { toast(caseText('case.p8.rigname', 'The test rig, in the machine shop'), caseText('case.p8.running', 'Running. Ten minutes.')); } catch (e) { /* no UI */ }
+  return true;
+}
+function p8Tick(c, j) {
+  if (caseFirstShow(c, j, 'p8', 'Five cartridges, one bad, all alike. The rig tells you how many in a group, not which. Three goes.')) return;
+  const k = p8Pending(c); if (k && shipNow() >= k.src.t) caseClue(c.id, k.id);
+}
+function p8Fits(cause, m) { return P8_PARTS.has(cause.part) && !cause.load && caseBand(caseRank()) === 'T4' && !!panelPlace(m.id) && !!placeById(P8_RIG); }
+function p8Stage() {
+  if (flag('case.p8.first') !== undefined || !SHIP.works || !caseOpened('p8')) return;
+  const W = SHIP.works; if (!caseState()) return;
+  if (W.tr && W.tr.p8 !== undefined) { flagSet('case.p8.first', 'none'); return; }
+  const busy = id => SHIP.jobs.some(j => j.machine === id && j.status !== 'done' && (j.claimedBy || j.case || j.reserved));
+  const ok = x => x && !busy(x.id) && !ENGINE_KINDS.has(x.kind) && jobTier({ machine: x.id }) <= 3 && caseCauses(x).some(f => f.part === 'cartridge' && !f.load);
+  const m = [machineById(P8_FIRST)].concat(machineList().slice().sort((a, b) => a.id < b.id ? -1 : 1)).find(ok);
+  if (!m || !placeById(P8_RIG)) { flagSet('case.p8.first', 'none'); return; }
+  const f = caseCauses(m).find(x => x.part === 'cartridge' && !x.load);
+  const now = shipNow(), d = caseDay(now), id = jobReserve(m.id, d, now % 1440, P8_SLOT, { train: 'p8', tier: 3, until: now + 7 * 1440, cause: f.id }), j = id && SHIP.jobs.find(x => x.id === id);
+  if (!j) return;
+  delete j.make; delete j.makeMins; j.cause = f.id; j.parts = [f.part]; j.train = 'p8';
+  const seed = machSeed('p8-first'), bad = p8Bad(seed), sus0 = [...Array(P8_N).keys()].map(i => p8Sid(f.id, bad, i));
+  const sus = sus0.map((x, i) => [schedU(seed, i, 893), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  if (!caseFirstFreeze(j, 'p8', sus, p8Clues(j, f.id, sus0, seed), 'case.p8.first')) { flagSet('case.p8.first', 'none'); jobRelease(P8_SLOT); }
+}
+if (P5_CASES6) {
+  CASE_KINDS.p8 = { name: 'Swap testing', ladder: 'p8', noScan: true, fits: p8Fits,
+    suspects: (j, seed) => { const bad = p8Bad(seed); return [...Array(P8_N).keys()].map(i => p8Sid(j.cause, bad, i)); },
+    clues: (j, cause, sus, seed) => p8Clues(j, cause, sus, seed),
+    bands: { T4: P8_BAND }, sus: p8Sus, text: p8Text, view: p8View, act: p8Act, tick: p8Tick,
+    title: (c, j) => caseText('case.title.p8', '{machine}: one of five {thing}s is bad. They all look alike', { machine: caseMachName(j), thing: p8Word(c) }),
+    wrong: (c, s) => caseText('case.wrong.p8', 'New {thing} in at {a}. Still bad. It was another one.', { thing: p8Word(c), a: (p8Sus(c, s) || { label: s }).label.replace(/^\D+/, '') }),
+    wait: j => j.train === 'p8',
+    hint: c => caseText('case.hint.p8.1', 'Put about half on the rig. None bad? It\'s in the other half. One bad? It\'s in this half.') };
+  CHIEF_NOTES.p8 = { title: 'Swap testing', key: 'chief.p8', lines: [
+    'The rig says how many, not which. Test half, then half of that.',
+    'Three runs find one in eight. Five is easy, if you plan the runs.'] };
+  if (typeof WORK_MECH !== 'undefined') WORK_MECH.p8 = { open() { p8Stage(); } };
+  if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip) p8Stage(); });
 }
 // ---- end of slot: Puzzles seat ----
 
