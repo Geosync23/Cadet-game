@@ -476,9 +476,12 @@ def part_reload(b, on):
     ctx.close()
 
 with sync_playwright() as pw:
-    src = pathlib.Path(sys.argv[1]).read_text()
+    src = pathlib.Path(sys.argv[1]).read_text(); offpath = sys.argv[1]
+    _on = re.compile(r"^const EV_ENDING_ON = true;.*$", re.M)
+    if _on.search(src):   # (BM19) switched on in 0.94.0: the off parts on a copy with the off line put back; the on parts as before
+        src = _on.sub(lambda m: SWITCH, src, count=1); offp = WORK / 'test' / ('ending_off_' + pathlib.Path(sys.argv[1]).name); offp.write_text(src); offpath = str(offp)
     if not ONLY or 'off' in ONLY:
-        g = Game(pw, sys.argv[1])
+        g = Game(pw, offpath)
         g.step(2)
         check(g.ev(SETUP), 'setup')
         try: part_off(g)

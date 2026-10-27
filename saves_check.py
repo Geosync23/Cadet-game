@@ -234,7 +234,7 @@ def part_nosave(b):
 # (a Senior Officer, the bar's occasion still booked for 16:30, given at the ceremony)
 P5_SW = "const P5_STEP5 = URL_FLAGS.has('p5s5');"
 def part_promo3(b):
-    if P5_SW not in SRC or 'function puPromote' not in SRC: print('  promo3: not yet (no P5_STEP5 switch line or no Senior Officer promotion in this build)'); return
+    if (P5_SW not in SRC and not re.search(r'^const P5_STEP5 = true;', SRC, re.M)) or 'function puPromote' not in SRC: print('  promo3: not yet (no P5_STEP5 switch line or no Senior Officer promotion in this build)'); return   # (BM19) or already on (0.94.0)
     tmp = WORK / 'test' / ('_saves_check_pu3_' + RUN_ID + '.html'); tmp.write_text(instrument(SRC.replace(P5_SW, 'const P5_STEP5 = true;')))
     ctx = new_ctx(b); pg = Page(ctx, '', tmp); pg.sign()
     pg.ev("""(() => { introSkip(); setShipNow(14 * 1440 + 700); machinesNow(); const W = worksInit(); W.tier = 2; W.rank = 'officer'; W.xp = 60; W.tr.ps = 12; W.tr.t2 = 9;
@@ -273,7 +273,7 @@ def part_shot(b):
 # "not yet" (never a pass)
 P5_LINE = "const P5_STEP5 = URL_FLAGS.has('p5s5');"
 def part_shut(b):
-    if P5_LINE not in SRC or 'function sdBook' not in SRC: print('  shut: not yet (no P5_STEP5 switch line or no shutdowns in this build)'); return
+    if (P5_LINE not in SRC and not re.search(r'^const P5_STEP5 = true;', SRC, re.M)) or 'function sdBook' not in SRC: print('  shut: not yet (no P5_STEP5 switch line or no shutdowns in this build)'); return   # (BM19) or already on (0.94.0)
     tmp = WORK / 'test' / ('_saves_check_p5_' + RUN_ID + '.html'); tmp.write_text(instrument(SRC.replace(P5_LINE, 'const P5_STEP5 = true;')))
     ctx = new_ctx(b); pg = Page(ctx, '', tmp); pg.sign()
     j = pg.ev("""(() => { introSkip(); setShipNow(17 * 1440 + 600); machinesNow(); const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.m18 = 18;

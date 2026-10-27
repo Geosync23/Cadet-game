@@ -572,7 +572,7 @@ REACH_INVENTORY = {}
 # With P5_M18 off in the game (and in the copy here: P5_STEP5 is switched on in it), "not yet", never a pass
 def part_shut(pw, src, tag):
     on = src.replace("const P5_STEP5 = URL_FLAGS.has('p5s5');", "const P5_STEP5 = true;", 1)
-    if on == src or not re.search(r'\bconst P5_M18\s*=', src): return ['not yet: no P5_STEP5 switch line or no P5_M18 in this build']
+    if (on == src and not p5_on(src)) or not re.search(r'\bconst P5_M18\s*=', src): return ['not yet: no P5_STEP5 switch line or no P5_M18 in this build']   # (BM19) or already on (0.94.0)
     sw = Sweep(pw, on, f'{tag}_shut'); sw.MAX_DEPTH = 2
     sw.r = Run(pw, on, f'{tag}_shut_sweep', h=2400, quiet=REACH_QUIET); sw.r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); sw.r.step(20)   # a tall page: the whole screen in sight (the touch half lists only what's on screen; the pad half scrolls)
     if not sw.press(sw.scan(), '@sit:shutdowns'): sw.r.close(); return ['the shutdowns screen did not open (SD_SETUP)']
@@ -1439,7 +1439,7 @@ def pu3_beside(r, who):
       const a = DECK_CREW.find(x => x.p && x.p.id === '{who}'); if (!a) return 'not on the deck'; const c = nearestOpen(a.x + .9, a.z, player); player.obj.position.copy(cellPos(...c)); player.stop(); return [a.x, a.z]; }})()""")
 def part_promo3(pw, src, tag):
     on = src.replace(PU3_SW, 'const P5_STEP5 = true;', 1)
-    if on == src or 'function puPromote' not in src: return ['not yet: no P5_STEP5 switch line or no Senior Officer promotion in this build']
+    if (on == src and not p5_on(src)) or 'function puPromote' not in src: return ['not yet: no P5_STEP5 switch line or no Senior Officer promotion in this build']   # (BM19) or already on (0.94.0)
     fails = []
     r = Run(pw, on, f'{tag}_pu3', mode='pad', plug={}, w=390, h=844)
     r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
