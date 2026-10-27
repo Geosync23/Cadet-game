@@ -1716,3 +1716,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~12:06 UTC: **RV23 PASS MA6 8f943e82** (M24 team by pad) -> BM19 merges. DA6 merge waits for dd32a9a7 verdict.
 - ~12:07 UTC: **RV23 PASS DA6 dd32a9a7** (S6-4 complete; controller deck6 by pad) -> BM19 merges. RV23 idle until W7's escort fix.
 - ~12:12 UTC: DA6 merged staging-p5s6 8d1c749f into p5s6-deck 23217355 (clean); idle, queued for S6-5. MA6 ~54% mem, running staging compare checks. Active: W7, N6, PZ6, BM19, MA6 = 5.
+- ~12:15 UTC: **W7: LIVE BUG in 0.94.0 confirmed**: follow escorts fail while the player is SEATED (escortStep aims at your tile, a seat isn't free, crewPath null, never retried): Step 5's pu3 offer at your table, pu4, N6's night word, intro follow escorts. Fix at source (section 10: free tile or nearestOpen + retry 0.5 s) on claude/escort-follow-fix from 6f1915cb + promo4. Asking the user: 0.94.1 patch now (escort + MA6-1 team turn) vs with Step 6.
