@@ -21,6 +21,9 @@
 ## S6-6 turn 1 (M24)
 - See DEV_NOTES "28d, M24 leading a team". Slot 36, schedU 1071. DA6 (session_01GKuymjJ4sU5hfdU8bH49UW) owns S6-4: coils '6-coil-1..3', spots '6-coil-team-1..3' (spot 1 the lead's: yours). N6 (session_01GKuymnDA25R2a5yZGYpaBS, claude/p5s6-nights) asked about night hooks (no reply yet). W7 asked about the 24h table entries (no reply yet). Backlog MA6-1: a team turn can't be tapped in today's game.
 
+## S6-6 turn 2
+- N6 answered: playerNightOn(d), yourShift(d).night, p5nIn(t), SHIP.works.ns[d]; night 3's incident a burst on Deck 5 at 02:30 Day 25 (the Watch's hour avoids 02:30-03:30); 28a calls 28b's m21Door() if defined. W7 OK'd the 24h entries (and asks that Step 6's Dev table rows are his alone: told him m21/m24's facts). DA6's coils/spots work (checked on a scratch merge of claude/p5s6-deck dd32a9a7). RV23 PASS on 8f943e82.
+
 ## Gotchas
 - simNote keeps only its own kind: a payload's `kind` (24h's 'turn', 'step', 'done') is overwritten with 'team'; read step numbers.
 - Line keys allow no underscores (content_gen's kind pattern); placeholders only from lines_check's PLACEHOLDERS.
