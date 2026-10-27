@@ -27,6 +27,7 @@
 #   unplug    disconnect: stop walking at once, pause if used lately; reconnect resumes (deck, marks)
 #   odd       a pad that doesn't report the standard layout, and two pads (deck)
 #   s5cases   Step 5 (S5-6): the old-mysteries board by pad (ring, A, Take) and a head-scratcher's Fault notes (suspects, Call it), P5_STEP5 on (pick, panels)
+#   s6cases   Step 6 (S6-8): P6, P7 and P8 in Fault notes by pad at the Day 25 19:00 preset (a suspect and Call it, a grid cell, a toggle and To the rig), P5_STEP6 on (pick, panels)
 #   vessel    A Veyli vessel needs help by pad, in a copy switched on: Calder and the sheet, the ramp's replies, the chain, the helper card and the making steps (VB1)
 # --inventory: with reach, runs its touch half even before the panels package (the list of what there is to reach).
 # --selftest: runs the parts on a copy with this check's own small stand-in driver (to prove the parts before section 26).
@@ -43,7 +44,7 @@ ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
 GAME = pathlib.Path(ARGS[0])
 ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'door', 'reach', 'day', 'games', 'unplug', 'odd', 'shut',
-             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'm19', 'm20', 's5cases', 'vessel', 'ending']
+             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'm19', 'm20', 's5cases', 's6cases', 'vessel', 'ending', 'm21']
 PARTS = ARGS[1:] or ALL_PARTS
 SHOTS = WORK / 'test' / 'ctl_shots'; SHOTS.mkdir(parents=True, exist_ok=True)
 ARGS_GL = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
@@ -2687,6 +2688,66 @@ def part_s5cases(pw, src, tag):
     if pe: fails.append(f'page errors: {pe[:2]}')
     r.close(); return fails
 
+# Part "s6cases" (S6-8, PZ6): Step 6's head-scratchers in Fault notes by pad, in a copy with P5_STEP6 on, at the spec's
+# preset (Day 25, 19:00; set on paper): an Engine Specialist with P6, P7 and P8's first cases shown. Each case by the
+# D-pad and A: its "Case N" button; P6 a suspect, then Call it; P7 a grid cell (it marks yes); P8 a cartridge toggle (it
+# picks it) and To the rig (the arrow there)
+S6_LINE = "const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');"
+S6_SETUP = r"""(() => { skipTo(24 * 1440 + 1140); const W = worksInit(shipNow()); if (!W) return false; W.rank = 'specialist'; W.tier = 4;
+  W.tr = Object.assign({}, W.tr, { t3: 15, m19: 17, t4: 22 }); W.tools = Object.assign({}, W.tools, { scanner: [5, 0], pipekit: [12, 0], tester: [17, 0] });
+  W.op = Object.assign({}, W.op, { 23: ['p6', 'p7'], 25: ['p8'] }); const C = caseState(); C.open = [];
+  for (const k of ['p6', 'p7', 'p8']) { delete SHIP.flags['case.' + k + '.first']; WORK_MECH[k].open(ladderRow(k), 25); const c = caseById(flag('case.' + k + '.first')); if (!c) return 'no ' + k; caseShow(c, caseJob(c)); }
+  const c7 = C.open.find(c => c.kind === 'p7'), c8 = C.open.find(c => c.kind === 'p8'); caseClue(c7.id, 'f0'); caseClue(c8.id, 'g0');
+  goToDeck(5); return C.open.map(c => c.kind).join(','); })()"""
+def part_s6cases(pw, src, tag):
+    fails = []
+    if S6_LINE not in src: return ['the build has no P5_STEP6 switch line']
+    r = Run(pw, src.replace(S6_LINE, 'const P5_STEP6 = P5_STEP5 && true;'), f'{tag}_s6', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    got = r.ev(S6_SETUP)
+    if got != 'p6,p7,p8': r.close(); return [f'the preset (Day 25, 19:00) did not show the three cases: {got}']
+    r.step(20)
+    open_notes = "(typeof worksTabAdd === 'function' ? (deviceShow('works'), deviceDo({ app: 'works', do: 'tab', arg: 'faults' }), deviceShow('works')) : deviceShow('faultnotes'))"
+    for n, kind in enumerate(['p6', 'p7', 'p8']):
+        r.ev(open_notes); r.step(6)
+        idx = r.ev(f"caseState().open.filter(c => !c.wait).findIndex(c => c.kind === '{kind}') + 1")
+        b = s5_pad_to(r, rf'^Case {idx}$')
+        if not b: fails.append(f'{kind}: the D-pad never reached its Case {idx} button (focus {r.ev(S5_FOCUS)!r})'); continue
+        r.press('A'); r.step(4)
+        if r.ev("CASE_UI.at && caseById(CASE_UI.at).kind") != kind: fails.append(f'{kind}: A on {b!r} did not show it ({r.ev("CASE_UI.at")})'); continue
+        if kind == 'p6':
+            sus = s5_pad_to(r, r'^(✕ )?[A-Z][a-z].*: ')
+            call = s5_pad_to(r, r'^Call it')
+            if not sus or not call: fails.append(f'p6: the D-pad never reached a suspect or Call it ({sus!r} {call!r})')
+            else:
+                r.press('A'); r.step(4)
+                if not r.ev("!!CASE_UI.ask"): fails.append(f'p6: A on {call!r} did not ask to call it')
+                else: print(f'  P6 by pad: {sus!r}, {call!r}'); r.ev("CASE_UI.ask = null")
+        elif kind == 'p7':
+            cell = s5_pad_to(r, r'^(✕ )?\d( ✓)?$')
+            if not cell: fails.append(f'p7: the D-pad never reached a grid cell (focus {r.ev(S5_FOCUS)!r})')
+            else:
+                before = r.ev("p7Grid(caseById(CASE_UI.at)).k.src.grid"); r.press('A'); r.step(4); after = r.ev("p7Grid(caseById(CASE_UI.at)).k.src.grid")
+                if before == after or 'y' not in after: fails.append(f'p7: A on the cell {cell!r} did not mark it ({before!r} -> {after!r})')
+                else: print(f'  P7 by pad: cell {cell!r} -> {after!r}')
+        else:
+            t = s5_pad_to(r, r'^\d( ✓)?$')
+            if not t: fails.append(f'p8: the D-pad never reached a cartridge toggle (focus {r.ev(S5_FOCUS)!r})')
+            else:
+                r.press('A'); r.step(4)
+                sel = r.ev("p8Of(caseById(CASE_UI.at)).sel")
+                if not sel: fails.append(f'p8: A on {t!r} did not pick it')
+                go = s5_pad_to(r, r'^(To the rig|Run the test)$')
+                if not go: fails.append('p8: the D-pad never reached To the rig')
+                else:
+                    r.press('A'); r.step(4)
+                    g = r.ev("(() => { const g = IX_GOAL; return g ? [g.deck, g.place || null] : null; })()")
+                    print(f'  P8 by pad: {t!r} picked ({sel}), {go!r} -> goal {g}')
+                    if not g or g[1] != '5-shop-4': fails.append(f'p8: A on {go!r} did not set the arrow to the rig: {g}')
+    pe = [e for e in r.errors if e.startswith('pageerror')]
+    if pe: fails.append(f'page errors: {pe[:2]}')
+    r.close(); return fails
+
 # parts that need a package: 'not yet' until PAD_BUILT names it
 # Part "vessel" (VB1 for lead 40; plans/veyli-vessel-spec.html section 7): A Veyli vessel needs help played by pad, in a
 # copy with EV_VESSEL_ON switched on, at the spec's four starting points (set on paper, as Dev mode's presets would):
@@ -2771,8 +2832,8 @@ def part_vessel(pw, src, tag):
 
 # parts that need a package: 'not yet' until PAD_BUILT names it
 NEEDS = {'ending': ['base', 'deck', 'pick', 'panels'], 'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick'], 'door': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'], 'vessel': ['base', 'deck', 'pick', 'panels'],
-         'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck'], 'shut': ['panels'], 's5cases': ['pick', 'panels']}
-PART_FN = {'ending': part_ending, 'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day, 'shut': part_shut, 's5cases': part_s5cases, 'vessel': part_vessel}   # 'reach' joins when the pad half is written
+         'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck'], 'shut': ['panels'], 's5cases': ['pick', 'panels'], 's6cases': ['pick', 'panels']}
+PART_FN = {'ending': part_ending, 'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day, 'shut': part_shut, 's5cases': part_s5cases, 's6cases': part_s6cases, 'vessel': part_vessel}   # 'reach' joins when the pad half is written
 if 'function mysOpen' not in SRC or (S5_LINE not in SRC and not re.search(r'\bconst P5_STEP5\s*=\s*true\b', SRC)): PART_FN.pop('s5cases')   # (BM19) or already on (0.94.0)   # no board in this build: "not yet", never a pass
 for k, v in OLD_NEEDS.items(): NEEDS[OLD_NAME.get(k, k)] = v; PART_FN[OLD_NAME.get(k, k)] = legacy(k)
 
@@ -2828,6 +2889,37 @@ def part_m19(pw, src, tag):
     if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
 PART_FN['m19'] = part_m19; NEEDS['m19'] = ['pick', 'panels']
+# ---- Pillar 5 Step 6's pieces (plans/p5-step6-spec.html section 9): each part runs on a copy with P5_STEP6 on (the build
+# has P5_STEP5 on since 0.94.0); "not yet" only with no P5_STEP6 switch line ----
+P6_PARTS = {'m21': 'S6-2 the Monday briefing'}
+def p6_on(src): return bool(re.search(r'\bconst P5_STEP6\s*=\s*(true|P5_STEP5 && true)\s*;', src))
+def p6_copy(src): return re.sub(r"\bconst P5_STEP6\s*=\s*P5_STEP5 && URL_FLAGS\.has\('p5s6'\)", 'const P5_STEP6 = P5_STEP5 && true', src, count=1)
+# (S6-2, MA6) the Monday briefing by pad: a Senior Officer on Day 22 at 08:25 (the preset), standing in the observation
+# room; the ring names the seat; at 08:30 the meeting plays: Go on with A, each of the three choices reached with the D-pad,
+# the third (the parts order) taken with A; then the order is in the record
+P6_M21 = r"""(() => { skipTo(21 * 1440 + 505); machinesNow(); if (DIALOGUE) dialogueEnd(true); const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.t3 = 15; worksCareerTick(shipNow());
+  goToDeck(1); player.stop();   // at the lift: the ring leads to the seat
+  const r = m21Rec(22); return r ? [r.id, r.at % 1440] : null; })()"""
+def part_m21(pw, src, tag):
+    fails = []
+    r = end_run(pw, src, f'{tag}_m21', P6_M21)
+    s = r.ev("m21Rec(22) && [m21Rec(22).id, m21Rec(22).at % 1440]")
+    if s != ['m21.brief', 510]: r.close(); return [f'm21: Day 22\'s briefing not booked for 08:30 ({s})']
+    h = r.ev("(() => { GUIDE.key = ''; const g = goalNow(); return g ? g.label : null; })()"); print(f'  08:25 at the lift: the arrow says "{h}"')
+    if 'seat at the table' not in (h or '').lower(): fails.append(f'm21: the arrow\'s ring line should name your seat at the table ("{h}")')
+    r.ev("(() => { const pl = placeById('1-conf-10'), w = pl.walk || pl.at; player.obj.position.copy(cellPos(w[0], w[1] - 1)); player.stop(); })()")   # in the observation room by your seat
+    for k in range(80):
+        if r.ev("!!DIALOGUE"): break
+        r.step(30)
+    if not r.ev("!!DIALOGUE"): r.close(); return fails + [f'm21: the briefing never played in the observation room (08:30; now {r.ev("hhmm(shipNow() % 1440)")})']
+    r.shot(f'{tag}_m21_briefing')
+    n = end_dialogue(r, fails, 'the Monday briefing', pick=2)
+    st = r.ev("JSON.stringify(m21State())"); print(f'  the briefing by pad: {n} choice screen(s); the record {st}')
+    if n != 1: fails.append(f'm21: one choice screen expected by pad ({n})')
+    if '"pick":2' not in st or '"order":25' not in st: fails.append(f'm21: the parts order picked by pad should be in the record ({st})')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close(); return fails
+PART_FN['m21'] = part_m21; NEEDS['m21'] = ['panels']
 # (S5-5, B3) 24x's calibration job by pad only: the ring names the array and A starts each stop; "Pick the star" by the D-pad
 # and A; the dial's card turned with − / + by pad till it settles; then the rack's amber module (the ring, A)
 P5_M20JOB = r"""(() => { skipTo(22 * 1440 + 570); machinesNow(); if (DIALOGUE) dialogueEnd(true); if (ACT && typeof actEnd === 'function') actEnd(true); if (DEV.choose) devChosen(-1); const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.t3 = 15; W.tr.m20 = 19;
@@ -3224,6 +3316,10 @@ with sync_playwright() as pw:
             if not p5_on(SRC) and p5_copy(psrc) == psrc: print(f'  not yet ({P5_PARTS[part]}: no P5_STEP5 switch line)'); RESULTS.append((part, 'not yet', 'no P5_STEP5 line')); continue
             if not p5_on(SRC): print(f'  (on a copy with P5_STEP5 switched on)')
             psrc = p5_copy(psrc)
+        if part in P6_PARTS:                             # Step 6's: on a copy with P5_STEP6 switched on
+            if not p6_on(SRC) and p6_copy(psrc) == psrc: print(f'  not yet ({P6_PARTS[part]}: no P5_STEP6 switch line)'); RESULTS.append((part, 'not yet', 'no P5_STEP6 line')); continue
+            if not p6_on(SRC): print(f'  (on a copy with P5_STEP6 switched on)')
+            psrc = p6_copy(psrc)
         fails = PART_FN[part](br, psrc, 'g')
         for f in fails: check(False, f'{part}: {f}')
         RESULTS.append((part, 'FAIL' if fails else 'OK', f'{len(fails)} problems' if fails else ''))

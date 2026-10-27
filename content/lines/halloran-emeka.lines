@@ -262,3 +262,8 @@
 // nearly there: in the bay, near Calder (pu3.promo.near), after her line
 ? flag:pu3.promo.near
 - Trusted already? Some of us were "new" for a year. Lovely.   #funny
+
+// PZ6 (2026-10-27, Pillar 5 Step 6, S6-8): a stand-in for his word for P8 (flag train.p8.word; the roster has no shop tech)
+== work
+? flag:train.p8.word
+- Five cartridges, one bad, all alike. The rig tells you how many in a group. Three goes.
