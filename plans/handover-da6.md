@@ -86,3 +86,8 @@ switch lines: ask first).
   (farouk-olu>3-lounge-28; bridgeInvite@50 missed): pre-existing, reported to lead 42.
 - With RV24 (session_01GKuymnJuoJTWnmYunbN7EP) for review; BM19 merges on its pass. W8's d2RoomB (4d slot) approved.
 - Idle for review fixes.
+
+## Status (2026-10-27 ~17:40 UTC)
+- RV24 PASS on 2df6bfce (night 2, night 1's arrow, keepsakes, ledge, the door fix; merged by BM19 into staging c8e047c0)
+  and on 4a84e153 (room B's rug spot 5c27b740 + the frames above the armchair, DECK2_HOME.menu 1.55 / .cert 2.1).
+- Nothing open of mine. Idle for the lead.
