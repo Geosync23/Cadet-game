@@ -26,7 +26,7 @@
 #          first workday after the scanner's first use (Day 9 at most); no arrow left up after its
 #          moment (the same label for over 3 ship hours)
 # On 0.64.15 (2b4a05db) both FAIL: that is the point. Which fixer turns which line green is printed with each FAIL.
-# Run one part:  python3 arrows_check.py BUILD.html shift   (parts: queue, clockin, shift, week, promo, vessel; default all, about 70 minutes; promo alone about 30, vessel about 25)
+# Run one part:  python3 arrows_check.py BUILD.html shift   (parts: queue, clockin, shift, week, promo, vessel; step6 by name (Days 19-26, P5_STEP6 on a copy; ways asis teachoff track); default all, about 70 minutes; promo alone about 30, vessel about 25)
 # Part "promo" (DV1, lead 34): Days 8-12 following only the arrows: the first promotion end to end (see part_promo)
 # Part "clockin" (patch 0.92.3 item 6, AC3): Days 1-3 into the Works bay before clocking in: the clock-in tip at once (Day 1: after
 # Zeke's line), Clock in tracked (not with Teaching arrows Off), both gone the moment you clock in. A real new game.
@@ -659,6 +659,94 @@ def part_end(ctx, path, want, way):
     check(not pg.errors, f'{tag}: page errors {pg.errors[:3]}')
     pg.page.close()
 
+# Part "step6" (MA6 for lead 41; plans/p5-step6-spec.html, "The arrow-follower check"; on a copy with P5_STEP6 on): from a
+# Day 19 save (the career set to the end of Day 18, a Senior Officer at "Trusted"), a player who only follows the arrow and
+# the ring plays Days 19-26 (FOLLOW; the quiet hours between beats skipped, as the endings' parts do, but followed whenever one
+# of Step 6's level-1 arrows is due). Checked: every beat reached, in order (the briefing, the test, sleep; Calder at 22:40
+# and all three nights; the welcome, the badge, the move; mentoring and Calder's question by Day 26); at every waking minute
+# while one of Step 6's level-1 arrows is due, a Step 6 arrow leads (not hidden by a needs nudge, Teaching arrows Off or a
+# tracked job); each beat said in person or by notice before its Mail; never stuck on a Step 6 arrow. Three ways: as is,
+# Teaching arrows Off (teachoff), tracking another job (track). A beat whose piece isn't built yet prints "not yet".
+S6_RX = r'^(m21|m24|pu4|p5n|mt|cq|s6end):'
+S6_TRACE = TRACE.replace("/^end:/", "/" + S6_RX + "/")
+S6_DUE = DUE.replace("/^end:/", "/" + S6_RX + "/")
+# what the player hears: notices, toasts, bubbles, scenes, Mail, each with its ship minute (window.__s6log)
+S6_HOOK = r"""(() => { if (window.__s6hook) return; window.__s6hook = 1; const L = window.__s6log = [], t = () => Math.floor(shipNow());
+  const wrap = (name, kind, txt) => { const f = eval(name); if (typeof f !== 'function') return; eval(name + ' = function (...a) { try { L.push([t(), kind, String(txt(...a) || '').slice(0, 160)]); } catch (e) { } return f.apply(this, a); }'); };
+  wrap('mailSend', 'mail', o => (o.from || '') + ' | ' + (o.subject || '') + ' | ' + (o.body || ''));
+  wrap('deviceNotify', 'notice', o => o && o.text);
+  wrap('toast', 'toast', (a, b) => a + ': ' + b);
+  wrap('bubbleSay', 'say', (h, s) => s);
+  wrap('dialogueShow', 'scene', id => id);
+})()"""
+# each beat: [name, the level-1 arrow's id prefix that leads it, a record that says it happened (JS, true/false), the code that must exist for it]
+S6_BEATS = [
+  ['the briefing', 'm21:', "SHIP.works.tr.m21 === 22", "typeof m21Book === 'function'"],
+  ['the Tier 4 test', 'pu4:', "!!(SHIP.works.pu && SHIP.works.pu.t4 && SHIP.works.pu.t4.passed)", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
+  ['sleep by day', 'p5n:bed', "(simNotes('sleep', 0) || []).length >= 0", "typeof playerNightOn === 'function'"],
+  ['night 1', 'p5n:', "!!(SHIP.works.ns && SHIP.works.ns[22] && SHIP.works.ns[22].in)", "typeof playerNightOn === 'function'"],
+  ['the welcome', 'pu4:welcome', "flag('pu4.welcome') !== undefined || !!(SHIP.works.pu && SHIP.works.pu.t4 && SHIP.works.pu.t4.welcome)", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
+  ['the badge', 'pu4:badge', "!!(SHIP.works.pu && SHIP.works.pu.t4 && SHIP.works.pu.t4.badge)", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
+  ['night 2', 'p5n:', "!!(SHIP.works.ns && SHIP.works.ns[23] && SHIP.works.ns[23].in)", "typeof playerNightOn === 'function'"],
+  ['night 3 (the coil swap)', 'm24:', "!!(SHIP.works.side && SHIP.works.side.m24 && SHIP.works.side.m24.done)", "typeof m24Book === 'function'"],
+  ['the move', 'pu4:move', "SHIP.works.home === '2-B'", "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"],
+  ['mentoring', 'mt:', "!!(SHIP.works.mt && SHIP.works.mt.done)", "typeof P5_M25 !== 'undefined' && P5_M25 && typeof mtTick === 'function'"],
+  ['Calder\'s question', 'cq:', "!!(SHIP.works.end && SHIP.works.end.answer)", "typeof P5_END !== 'undefined' && P5_END && typeof endQuestion === 'function'"],
+]
+def step6_on(src): return src.replace("const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');", 'const P5_STEP6 = P5_STEP5 && true;', 1)
+def part_step6(ctx, path, way):
+    tag = 'step6' + ('' if way == 'asis' else ':' + way)
+    pg = Page(ctx, path)
+    if not pg.ev("typeof P5_STEP6 !== 'undefined' && P5_STEP6"): fail(f'{tag}: P5_STEP6 off in this copy'); pg.page.close(); return
+    real_game(pg, 19)
+    pg.ev("(() => { const W = SHIP.works, B = WORK_BANDS[W.tier] || WORK_BANDS[3], k = B.findIndex(b => b[1] === 'trusted'); if (k >= 0) W.xp = Math.max(W.xp, B[k][0] + 1); })()")   # a Senior at Trusted (the spec's Day 19 save)
+    if way == 'teachoff': pg.ev("SHIP.device.settings.teach = 'off'")
+    pg.ev(S6_HOOK)
+    st0 = pg.ev("(() => { const W = SHIP.works; return { tier: W.tier, rank: W.rank, band: worksBandWord(), m19: W.tr.m19 }; })()")
+    print(f'  {tag}: Day 19 start: {st0}')
+    f = Follower(pg); f.trace = []
+    track = "(() => { const j = (SHIP.jobs || []).find(j => j.status === 'open' && !j.claimedBy); if (j) SHIP.player.track = j.id; return j ? j.id : null; })()"
+    def advance_to(t):                                 # the quiet hours skipped, but followed whenever a Step 6 level-1 arrow is due
+        while pg.ev('shipNow()') < t:
+            n = pg.ev('shipNow()')
+            if pg.ev(S6_DUE): f.run(min(t, n + 10)); continue
+            pg.ev(f"devmodeSkipTo({min(t, n + 20)}); for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 70)"); pg.step(3, 50)
+    for d in range(19, 27):
+        if way == 'track': pg.ev(track)
+        advance_to(d * 1440 + (5 * 60 + 50 if d < 26 else -4 * 60))   # to the next morning (Day 26: till 20:00, after Calder's question)
+        st = pg.ev(S6_STATE)
+        print(f"  {tag}: Day {d}: {st}")
+    st = pg.ev(S6_STATE)
+    order = []
+    for name, pre, rec, have in S6_BEATS:
+        if not pg.ev(have): print(f'  {tag}: {name}: not yet (its piece is not in this build)'); continue
+        led = [t for t in f.trace if t[1] and t[1].startswith(pre)]
+        done = pg.ev(rec)
+        check(led, f"{tag}: {name}: its level-1 arrow ({pre}) never led")
+        check(done, f"{tag}: {name}: not reached following the arrow ({rec})")
+        if led: order.append((led[0][0], name))
+    srt = sorted(order)
+    check([n for _, n in srt] == [n for _, n in order], f"{tag}: the beats out of order: {[(hhmm(t), 'Day ' + str(t // 1440 + 1), n) for t, n in srt]}")
+    miss = [t for t in f.trace if t[4] and not t[3] and not (t[1] in t[4])]
+    for t in miss[:6]: fail(f"{tag}: Day {t[0] // 1440 + 1} {hhmm(t[0])}: {t[4]} due, but the arrow leads with {t[1]} ('{t[2]}')")
+    if len(miss) > 6: fail(f"{tag}: ... {len(miss) - 6} more minutes like that")
+    log = pg.ev("window.__s6log || []")
+    BEAT_MAIL = re.compile(r'briefing|Tier 4|night|coil|badge|quarters|Deck 2|Basil|result|question|Engine Specialist', re.I)
+    for t, kind, txt in log:
+        if kind != 'mail' or not BEAT_MAIL.search(txt) or txt.startswith('Stores'): continue
+        said = [x for x in log if x[1] != 'mail' and t - 180 <= x[0] <= t]
+        check(said, f"{tag}: Day {t // 1440 + 1} {hhmm(t)}: Mail '{txt[:80]}' with nothing said in person or by notice before it")
+    mine = {t[2] for t in f.trace if t[1] and re.match(S6_RX, t[1])}
+    for t, lab, dk in f.stuck:
+        if lab in mine: fail(f'{tag}: stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk})')
+        else: print(f'  {tag}: (not Step 6) stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk})')
+    led = sorted(set(t[1].split(':')[0] + ':' + t[1].split(':')[1] for t in f.trace if t[1] and re.match(S6_RX, t[1])))
+    print(f"  {tag}: arrows that led {led}; minutes due {sum(1 for t in f.trace if t[4] and not t[3])}, missed {len(miss)}, stuck {len(f.stuck)}; order {[(n, 'Day ' + str(t // 1440 + 1) + ' ' + hhmm(t)) for t, n in srt]}")
+    check(not pg.errors, f'{tag}: page errors {pg.errors[:3]}')
+    pg.page.close()
+S6_STATE = r"""(() => { const W = SHIP.works, s = W.side || {}; return { tier: W.tier, rank: W.rank, home: W.home || null, m21: W.tr.m21, m24: W.tr.m24, swap: s.m24 ? s.m24.done : null,
+  t4: W.pu && W.pu.t4 ? { passed: !!W.pu.t4.passed, badge: W.pu.t4.badge || null } : null, ns: W.ns ? Object.keys(W.ns).map(k => k + ':' + (W.ns[k].in ? 'in' : '-')) : null, mt: W.mt ? !!W.mt.done : null, at: clockText() }; })()"""
+
 def part_clockin(ctx, path):                              # patch 0.92.3 item 6 (AC3; RV12's lines): Days 1-3, into the Works bay before clocking in
     pg = Page(ctx, path)
     pg.ev("localStorage.clear()"); pg.ev("newGameStart(true)"); pg.step(5)
@@ -757,6 +845,12 @@ with sync_playwright() as pw:
         print(f'== {name} (following only the arrow)')
         try: part(ctx, path if GUIDE or name in ('promo', 'step5', 'vessel') else off_path)   # promo, step5, vessel: always the build as shipped (the arrows on)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
+    if 'step6' in PARTS:                               # (MA6) Step 6's arrow-follower, on a copy with P5_STEP6 on (the arrows as shipped)
+        sp = WORK / 'test' / ('_step6_' + RUN_ID + pathlib.Path(path).name); sp.write_text(step6_on(src))
+        for way in [w for w in WAYS if w != 'change']:
+            print(f'== step6 ({way}; following only the arrow, Days 19-26)')
+            try: part_step6(ctx, str(sp), way)
+            except Exception as e: fail(f'step6 {way}: stopped: {str(e)[:300]}')
     if PARTS & {'endstay', 'endgo'}:
         ep = WORK / 'test' / ('_ending_' + RUN_ID + pathlib.Path(path).name); ep.write_text(end_on(src))   # the ending on (EV_ENDING_ON), the arrows as shipped
         for want in ('stay', 'go'):
