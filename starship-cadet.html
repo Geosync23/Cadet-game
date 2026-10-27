@@ -66658,7 +66658,7 @@ function m23Ring(k) {
   return { permit: worksText('m23.ptr.permit', 'Sign the permit'), badge: worksText('m23.ptr.badge', 'Take a badge'), tell: worksText('m23.ptr.tell', 'Tell the Watch'),
     reactor: worksText('m23.ptr.reactor', 'The reactor'), outcard: worksText('m23.ptr.tell', 'Tell the Watch'), return: worksText('m23.ptr.return', 'Hang the badge back') }[k];
 }
-const M23_GOAL = { permit: { deck: 1, room: 'B' }, badge: { deck: 6, room: 'K' }, tell: { deck: 6, room: 'K' }, reactor: { deck: 6, room: 'R' }, outcard: { deck: 6, room: 'R' }, return: { deck: 6, room: 'K' } };
+const M23_GOAL = { permit: { deck: 1, room: 'B' }, badge: { deck: 6, place: '6-dosi-rack' }, tell: { deck: 6, room: 'K' }, reactor: { deck: 6, place: '6-reactor-1-svc' }, outcard: { deck: 6, room: 'R' }, return: { deck: 6, place: '6-dosi-rack' } };   // a place: the arrow ends at the rack, the console (R1/AS1's find)
 function m23Beats2(now) {
   if (!m23On(M23_N2)) return;
   const S = m23State(), n = p5NightOf(M23_N2); if (!S || S.d2 || now < n.from - 30 || now >= n.to) return;
