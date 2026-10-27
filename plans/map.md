@@ -43,7 +43,9 @@ One labelled, empty block per seat at the end of its main section, where that se
 | HUD seat | 11 |
 | Fridays builder | 18f (its own section, after 18; the slot is at its end) |
 | Comet builder | 18 (its slot is right after the Line builder's; FX25, 0.93.2) |
+| Vessel builder | 18 (its slot is right after the Comet builder's; VB1 and VB2, A Veyli vessel needs help, `EV_VESSEL_ON`; VB2's V-5 code below the marker line near its end) |
 | Storm Saturday (FX26, 0.93.2) | 18 (right after the Storm builder's slot) |
+| Vessel sky (VB2, A Veyli vessel needs help V-5) | 18 (right after the Appointments builder's slot; VB1's 'Vessel builder' slot is after the Comet builder's) |
 | Dev mode engineer | 25 (its own section, after 11; the slot is at its end) |
 | Controller engineer | 26 (its own section, after 25; the slot is at its end) |
 

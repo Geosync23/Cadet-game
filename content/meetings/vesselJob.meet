@@ -1,0 +1,15 @@
+@meeting vesselJob
+// SW4, the Veyli vessel: Monday Day 29, 09:20 (after any Monday briefing), the Works bay. Calder gives you the job;
+// then the helper card (pick two: event.veyliVessel.help.card.*, each pick answers with help.<id>.pick, then
+// help.done). No reply here: the card is the choice. Basil is a week aboard; Pell only if his story kept him aboard.
+title: Taavek's part
+from: Chief Ines Calder
+gist: Chief Calder gave you Taavek's part to make: the impeller, on the machine shop lathe, with Taavek and two helpers you pick.
+== lines
+calder: {me}. A minute.   [gesture]
+calder: Taavek's part. It's yours.
+taavek: The round one! We make it. Today. Yes.   [laugh]
+calder: Machine shop. Their sketch, our stock, the lathe. Taavek beside you.
+calder > you: Pick two. Don't pick me, I'll only hover.   [nod]
+taavek: She will hover. I see it already.   [laugh]
+calder: Done by three. Taavek's Tern goes at three.   [gesture]

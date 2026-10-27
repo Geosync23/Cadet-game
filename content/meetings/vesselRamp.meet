@@ -1,0 +1,26 @@
+@meeting vesselRamp
+// SW4, the Veyli vessel: Sunday Day 28, 09:30-09:50, the shuttle bay, the foot of the Tern's ramp. About 20 watch
+// (their bubbles: event.veyliVessel.talk.rampCrowd). Lindqvist brings the Tern in; the ramp opens; Taavek walks down
+// with a crate and the broken part (the bow pose on Taavek's first line). Calder (called in) beside you. Three
+// replies, each answered; Calder closes. Late (09:35-10:30): vesselRamp.late. Not there by 10:30: Zeke stands in,
+// and you meet Taavek at the bench (vesselRamp.bench).
+title: Off the Tern
+from: Taavek
+gist: You met Taavek, the Veyli ship's engineer, at the foot of the Tern's ramp, with Chief Calder: a crate, a broken part, and coffee.
+== lines
+lindqvist-isak: Tern's down. One guest, one crate, one broken thing. All in one piece.   [gesture]
+calder: Ramp's opening. Stand where they can see you.
+taavek: Hello! Taavek. Engineer. Yes.   [gesture]
+taavek: This. The round one. Broken. Very.   [sigh]
+taavek > you: You. You are the one who meets? Good. Someone met you, also?   [listen]
+? choice
+* Welcome aboard. Let's see the round one.   flavour:practical rel:taavek+1
+  taavek: Yes! First you look, then the words. That is the right way.   [nod]
+* Someone met me. Zeke. He showed me my bunk.   flavour:share rel:taavek+1,torres-zeke+1
+  taavek: Zeke met you. You meet me. Good. That is the way.   [nod]
+* Coffee first?   flavour:cheer rel:taavek+1
+  taavek: Yes! Yes. You understand everything already.   [laugh]
+torres-zeke: Look at that. Four weeks ago that was you, coming down the ramp.   [laugh]
+calder > taavek: Chief Calder. Works. Welcome aboard the Wren.   [nod]
+taavek: Chief. Good. The crate is mine. Parts inside. Also sweets.   [gesture]
+calder: The bench is this way, ten o'clock. Bring the round one. Coffee on the way.   [gesture]

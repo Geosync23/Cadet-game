@@ -9474,6 +9474,7 @@ const P5_M18 = P5_STEP5 && true;                          // S5-4: shutdowns (se
 const P5_M20 = P5_STEP5 && true;                          // S5-5: the sensor array (section 24x)
 const P5_CASES5 = P5_STEP5 && true;                       // S5-6: head-scratchers P4, P5, P9 and the old-mysteries board (24k's slot)
 const P926_APPT = true;                 // 0.92.6 item 9 (FX22; plans/patch-0.92.6.md): appointments as small traditions, each with its scene, and a real talk at every appointment; off: none of it (the game as 0.92.5)
+const EV_VESSEL_ON = URL_FLAGS.has('evvessel');           // A Veyli vessel needs help, Days 27-30 (VB1 for lead 39; plans/veyli-vessel-spec.html, EP2): section 18's 'veyliVessel' block with the events base on (#evvessel previews it); false: the game before it
 // save slots (0.93.2, FX27; the user's yes, 2026-10-26; the Saves app, section 19): three games per link type (Playtest,
 // Dev) and browser. Slot 1 is the save's old name (SAVE_BASE), so a save from before slots is Slot 1, untouched; slots 2
 // and 3 add '-2' and '-3'. The slot being played is kept under SAVE_BASE + '-slot' (read here, once: switching reloads
@@ -10085,10 +10086,11 @@ const guestWard = n => (schedData().shared.get(n + '|patient-bed') || []).length
 const guestDayNo = (p, d, max = 7) => { for (let i = 0; i < max; i++) if (guestStay(p, d - i) === 'arrive') return i + 1; return max + 1; };
 // a guest's day on an arrival or departure day: away until 10:00 then the shuttle bay, or the shuttle bay then away
 function guestTrim(p, d, segs, spot) {
+  { const vt = typeof vesselGuestTrim === 'function' ? vesselGuestTrim(p, d, segs) : null; if (vt) return vt; }   // the Veyli vessel's Taavek: off the Tern Sunday 09:30, home Monday 15:00 (section 18's slot 'Vessel builder'; null while off)
   if (aboardAllDay(p, d)) return segs;
   const B = (d - 1) * 1440, away = (from, to) => ({ from, to, act: 'away', deck: 0, type: null, placeId: null });
   if (!aboard(p, d)) return [away(B, B + 1440)];
-  const arriving = guestStay(p, d) === 'arrive', cut = B + (p.guest ? GUEST_AT : arriving ? ROTA_ON : ROTA_OFF), out = [];   // crew: off at 15:00, on at 17:40
+  const arriving = guestStay(p, d) === 'arrive', cut = B + (p.guest ? GUEST_AT : arriving ? ROTA_ON : ROTA_OFF), out = [];   // crew: off at 15:00, on at 17:40   // crew: off at 15:00, on at 17:40
   const k = arriving && !p.guest && typeof rotTernIndex === 'function' ? rotTernIndex(p, d) : -1;
   if (k >= 0) {                                          // ROT_TERN: out of the Tern's aisle one every 3 minutes, down the ramp to a crowd spot (rotTernHold's)
     const t0 = cut + 3 * k, end = B + ROT_TERN_END;
@@ -11771,6 +11773,7 @@ function devDay(d) {
   try { if (typeof puItems === 'function') out.push(...puItems(d)); } catch (e) { /* not yet */ }   // 24u (S5-2): the Senior Officer promotion's steps, with P5_PROMO3
   try { if (typeof promoBeatsItems === 'function') out.push(...promoBeatsItems(d)); } catch (e) { /* not yet */ }   // FX28: the promotion's steps (24p), with PROMO_BEATS_ON
   try { if (typeof sdItems === 'function') out.push(...sdItems(d)); } catch (e) { /* not yet */ }   // 24w (S5-4): your booked shutdown, with P5_M18
+  try { if (typeof EV_VESSEL_ON !== 'undefined' && EV_VESSEL_ON && typeof vesselItems === 'function') out.push(...vesselItems(d)); } catch (e) { /* not yet */ }   // the Veyli vessel's beats (section 18's slot 'Vessel builder')
   return out.sort((x, y) => x.from - y.from);
 }
 const DEV_BEATS = { 'd1-briefing': 'Morning briefing with the Chief', 'd2-solo': 'The Chief\'s office: your first solo job', 'd2-booths': 'Calling home', 'd3-store': 'The crew store' };   // titles (stand-ins; the beats' own words are section 21's)
@@ -33426,6 +33429,459 @@ const LINES = JSON.parse([
   '{"text":"Lap of the Wren tomorrow night instead of Sunday, 20:30 round the promenade. Tomas leads. A slow walk to stretch the legs after the storm.","id":"1y4klqr"}]',
   ',"event.ionStorm.trad.lap-of-the-wren.thanks":[',
   '{"text":"You fall in with the walkers behind Tomas. After three days indoors, the long way round feels like a holiday.","id":"hg0id8","tone":"warm"}]',
+  ',"event.veyliVessel.address.sat":[',
+  '{"text":"marrow: This is the Captain. It\'s my day off, so I\'ll be quick. My tea\'s going cold.","id":"14yxbhk"},',
+  '{"text":"marrow: A small Veyli ship has lost its coolant pump. It\'s drifting, a day off our course.","id":"nztllr"},',
+  '{"text":"marrow: They\'ve called us. Not for help: for company. That\'s their word, and a good one.","id":"fv1qpz"},',
+  '{"text":"marrow: At half past eight we turn toward them. You\'ll feel it. Hold on to your cups.","id":"e607xs"},',
+  '{"text":"marrow: We were guests in their sky for a month. Tonight we can be good ones. Marrow out.","id":"1po25qz"}]',
+  ',"event.veyliVessel.address.tue":[',
+  '{"text":"marrow: This is the Captain. Our neighbours are under way, and so are we.","id":"qefjwg"},',
+  '{"text":"marrow: They sent a message for the whole ship. The Envoy will read it. Envoy?","id":"1gehfj5"},',
+  '{"text":"saruth: They say: the Wren kept company well. Their engine is warm.","id":"16lxpig"},',
+  '{"text":"saruth: They will remember the ship, and the hands.","id":"elq4dk"},',
+  '{"text":"marrow: Thank you, Works, and the chain. And {me}, who met their engineer.","id":"m62a6f"},',
+  '{"text":"marrow: Back on our course. Back to it. Marrow out.","id":"157p2p9"}]',
+  ',"event.veyliVessel.chain.count":[',
+  '{"text":"torres-zeke: Crate! Fittings. Light one. Pass it.","id":"1dcxasy"},',
+  '{"text":"torres-zeke: Next one\'s heavy. Bend the knees. Pass it. Lovely. Next.","id":"15se88i"},',
+  '{"text":"torres-zeke: Coolant. Keep it upright. Upright is the whole job.","id":"1m3wh3l"},',
+  '{"text":"torres-zeke: Seals. Gently. They\'re only rubber, but they\'re our rubber.","id":"a06jzi"},',
+  '{"text":"torres-zeke: Next! Don\'t look at it. Just pass it.","id":"1dypyyl"},',
+  '{"text":"torres-zeke: Heavy one. Two hands. Breathe out.","id":"1mb5dsc"}]',
+  ',"event.veyliVessel.gather.arrival.ask":[',
+  '{"text":"Their engineer comes down the Tern\'s ramp at half nine. Come and see.","id":"1dsukim"}]',
+  ',"event.veyliVessel.gather.arrival.here":[',
+  '{"text":"There. The ramp\'s opening.","id":"keelu6"}]',
+  ',"event.veyliVessel.gather.arrival.name":[',
+  '{"text":"Taavek comes aboard","id":"1ad6090"}]',
+  ',"event.veyliVessel.gather.arrival.thanks":[',
+  '{"text":"You stand with the crowd in the shuttle bay as the Tern\'s ramp comes down.","id":"2mfetv"}]',
+  ',"event.veyliVessel.gather.chain.ask":[',
+  '{"text":"Parts chain at one. Storage door to the ramp. Bring your arms.","id":"1fsdkrz"}]',
+  ',"event.veyliVessel.gather.chain.here":[',
+  '{"text":"Find a gap in the line. Face the next person. I\'ll call the count.","id":"1valetl"}]',
+  ',"event.veyliVessel.gather.chain.name":[',
+  '{"text":"The parts chain","id":"1oyjqvm"}]',
+  ',"event.veyliVessel.gather.chain.thanks":[',
+  '{"text":"Zeke waves you into a gap in the line. The first crate is already coming down it toward you.","id":"17rfvb5"}]',
+  ',"event.veyliVessel.gather.lights.ask":[',
+  '{"text":"At twenty to six, the little ship lights its engine. Come to the glass.","id":"1na58uv"}]',
+  ',"event.veyliVessel.gather.lights.here":[',
+  '{"text":"Stand with us. Watch the stern of the little ship, low on the left.","id":"12gu81a"}]',
+  ',"event.veyliVessel.gather.lights.name":[',
+  '{"text":"The engine lights, at the bow glass","id":"mz0ywc"}]',
+  ',"event.veyliVessel.gather.lights.thanks":[',
+  '{"text":"Saruth makes room for you at the glass. Out in the dark, the little Veyli ship waits, its lights low.","id":"j12ok2"}]',
+  ',"event.veyliVessel.goal.bench":[',
+  '{"text":"The round one, at the Works bay bench","id":"11qafn3"}]',
+  ',"event.veyliVessel.goal.chain":[',
+  '{"text":"The parts chain, Main storage","id":"nxa1t"}]',
+  ',"event.veyliVessel.goal.home":[',
+  '{"text":"See Taavek off at the Tern\'s ramp","id":"njm1uu"}]',
+  ',"event.veyliVessel.goal.job":[',
+  '{"text":"Taavek\'s part: see Chief Calder in the Works bay","id":"zjlkzb"}]',
+  ',"event.veyliVessel.goal.lights":[',
+  '{"text":"The engine lights, at the bow glass","id":"trwn0z"}]',
+  ',"event.veyliVessel.goal.ramp":[',
+  '{"text":"Meet Taavek at the foot of the Tern\'s ramp","id":"1t5iz0o"}]',
+  ',"event.veyliVessel.goal.shop":[',
+  '{"text":"Taavek\'s part, in the machine shop","id":"1mmd08u"}]',
+  ',"event.veyliVessel.goal.testfit":[',
+  '{"text":"The test fit, in the machine shop","id":"1761jy6"}]',
+  ',"event.veyliVessel.goal.view":[',
+  '{"text":"The Veyli ship, from the bow glass","id":"f3yfmu"}]',
+  ',"event.veyliVessel.help.bramwell-basil.pick":[',
+  '{"text":"Me? Brilliant! I\'ll hold things. I\'m very good at holding things. Is that a job?","id":"12a2sjj"}]',
+  ',"event.veyliVessel.help.bramwell-basil.step.1":[',
+  '{"text":"bramwell-basil: What\'s it for? Is it hot? Does it spin? It spins. Brilliant.","id":"1r1jrj7"}]',
+  ',"event.veyliVessel.help.bramwell-basil.step.2":[',
+  '{"text":"bramwell-basil: Why that one? Because it rings? Does metal ring? It rings. Brilliant.","id":"1uocyqt"}]',
+  ',"event.veyliVessel.help.bramwell-basil.step.3":[',
+  '{"text":"bramwell-basil: How do you know it\'s slow enough? Oh. You listen. Brilliant.","id":"8k2tv7"}]',
+  ',"event.veyliVessel.help.bramwell-basil.step.4":[',
+  '{"text":"bramwell-basil: I\'m holding it. Look. Holding. Told you I was good at this.","id":"1xp70l3"}]',
+  ',"event.veyliVessel.help.bramwell-basil.step.5":[',
+  '{"text":"bramwell-basil: How can you tell it\'s balanced? It\'s not wobbling. Oh. Brilliant.","id":"1vw6wt7"}]',
+  ',"event.veyliVessel.help.card.bramwell-basil":[',
+  '{"text":"Basil Bramwell: a week aboard. Show him how it\'s done.","id":"5ekckv"}]',
+  ',"event.veyliVessel.help.card.kovac-zainab":[',
+  '{"text":"Zainab Kovac: exact. She\'ll count every blade twice.","id":"89t9vv"}]',
+  ',"event.veyliVessel.help.card.pell":[',
+  '{"text":"Pell: practical. He knows which way every machine sticks.","id":"73gwvn"}]',
+  ',"event.veyliVessel.help.card.title":[',
+  '{"text":"Pick two helpers","id":"miqw1o"}]',
+  ',"event.veyliVessel.help.card.torres-zeke":[',
+  '{"text":"Zeke Torres: engines. He talks to machines, and they listen.","id":"d0qvht"}]',
+  ',"event.veyliVessel.help.carryOn":[',
+  '{"text":"taavek: We go on. Slow. When you come, you see. Good.","id":"1j71qzo"}]',
+  ',"event.veyliVessel.help.done":[',
+  '{"text":"taavek: Good. Four of us, and the round one. We make it. Together.","id":"4jjwj5"}]',
+  ',"event.veyliVessel.help.doneWithout":[',
+  '{"text":"taavek: Done. Your helpers, very good. Next time, you also. Yes?","id":"12jz6w1"}]',
+  ',"event.veyliVessel.help.kovac-zainab.pick":[',
+  '{"text":"Oh. Me? Um. Yes. Twelve blades. I\'ll count them. Twice. Lovely part.","id":"1tmk6v9"}]',
+  ',"event.veyliVessel.help.kovac-zainab.step.1":[',
+  '{"text":"kovac-zainab: Twelve on the sketch. Twelve on the part. Sorry. Counted again. Twelve.","id":"6lrr4e"}]',
+  ',"event.veyliVessel.help.kovac-zainab.step.2":[',
+  '{"text":"kovac-zainab: Not that one. Sorry. That one\'s got a flaw. There. This bar. It\'s lovely.","id":"1y59ol8"}]',
+  ',"event.veyliVessel.help.kovac-zainab.step.3":[',
+  '{"text":"kovac-zainab: Feed\'s a touch quick. Just a touch. Sorry. There. Lovely.","id":"16aflvg"}]',
+  ',"event.veyliVessel.help.kovac-zainab.step.4":[',
+  '{"text":"kovac-zainab: Hold it there. Don\'t breathe. You can breathe. Just not on it.","id":"rjc5sw"}]',
+  ',"event.veyliVessel.help.kovac-zainab.step.5":[',
+  '{"text":"kovac-zainab: Nearly. A hair heavy on blade seven. Sorry. Seven. There. Balanced.","id":"1pnl6gg"}]',
+  ',"event.veyliVessel.help.pair.bramwell-basil.kovac-zainab":[',
+  '{"text":"bramwell-basil: How do you count so fast?","id":"m0vx80"},',
+  '{"text":"kovac-zainab: Slowly. Every time. That\'s the trick.","id":"lrra23"}]',
+  ',"event.veyliVessel.help.pair.bramwell-basil.pell":[',
+  '{"text":"bramwell-basil: Do you always hum at the lathe?","id":"yxega9"},',
+  '{"text":"pell: Only when it\'s going well. Hum with me.","id":"184ne4d"}]',
+  ',"event.veyliVessel.help.pair.bramwell-basil.torres-zeke":[',
+  '{"text":"bramwell-basil: Zeke, is this how you trained {me}?","id":"hhom1t"},',
+  '{"text":"torres-zeke: Exactly like this. Lots of questions. Lovely.","id":"x9glhk"}]',
+  ',"event.veyliVessel.help.pair.kovac-zainab.pell":[',
+  '{"text":"pell: Counted them again, Zainab?","id":"11ly3ak"},',
+  '{"text":"kovac-zainab: Three times. I said twice. I lied. Sorry.","id":"1vfytcn"}]',
+  ',"event.veyliVessel.help.pair.kovac-zainab.torres-zeke":[',
+  '{"text":"torres-zeke: Zainab, it\'s perfect.","id":"rk7q5r"},',
+  '{"text":"kovac-zainab: It\'s nearly perfect. Your scarf is nearly perfect.","id":"426wr8"}]',
+  ',"event.veyliVessel.help.pair.pell.torres-zeke":[',
+  '{"text":"pell: You\'re talking to it, Zeke.","id":"fcg82v"},',
+  '{"text":"torres-zeke: It\'s talking back. Listen. That\'s a nice noise.","id":"ls0c5r"}]',
+  ',"event.veyliVessel.help.pell.pick":[',
+  '{"text":"Oi oi! Right, so. You turn it, I\'ll hold it, we both take the credit.","id":"18rbq6c"}]',
+  ',"event.veyliVessel.help.pell.step.1":[',
+  '{"text":"pell: Right, so. It\'s a fan that does its job underwater. I\'ve met worse.","id":"lhg4fp"}]',
+  ',"event.veyliVessel.help.pell.step.2":[',
+  '{"text":"pell: That bar. It\'s the one I\'d pick, and I\'m never wrong about bars.","id":"5v1web"}]',
+  ',"event.veyliVessel.help.pell.step.3":[',
+  '{"text":"pell: Lathe always pulls a bit left on this one. Lean on it. There you go.","id":"iqjzeh"}]',
+  ',"event.veyliVessel.help.pell.step.4":[',
+  '{"text":"pell: Checked. True to a hair. A thin hair. Don\'t tell Calder I said a hair.","id":"gfnz90"}]',
+  ',"event.veyliVessel.help.pell.step.5":[',
+  '{"text":"pell: Wobbles a bit, see? Shave the heavy side. Little bit. Oi oi, there she spins.","id":"73cxmz"}]',
+  ',"event.veyliVessel.help.torres-zeke.pick":[',
+  '{"text":"Yes! A Veyli pump. I\'ve wanted to see inside one for a month. Right, onward.","id":"17kk5x1"}]',
+  ',"event.veyliVessel.help.torres-zeke.step.1":[',
+  '{"text":"torres-zeke: Look at that curve. It wants to spin. You can see it wanting to.","id":"pcoydu"}]',
+  ',"event.veyliVessel.help.torres-zeke.step.2":[',
+  '{"text":"torres-zeke: That\'s the bar. Good grain. It\'ll turn sweet as anything.","id":"cm1ep6"}]',
+  ',"event.veyliVessel.help.torres-zeke.step.3":[',
+  '{"text":"torres-zeke: Hear that? That\'s a happy lathe. Don\'t push her and she\'ll do anything.","id":"mhxig5"}]',
+  ',"event.veyliVessel.help.torres-zeke.step.4":[',
+  '{"text":"torres-zeke: Checked. It\'s true. Coil three would be jealous.","id":"yscac0"}]',
+  ',"event.veyliVessel.help.torres-zeke.step.5":[',
+  '{"text":"torres-zeke: Spin it. Watch the tips. Steady as coil one on a good day. Lovely.","id":"beauep"}]',
+  ',"event.veyliVessel.lights.you":[',
+  '{"text":"saruth: That light is your part, turning. They will remember the one who met them.","id":"qnbd8m"}]',
+  ',"event.veyliVessel.lights.you.calder":[',
+  '{"text":"calder: Good part, {me}. Don\'t let it go to your head.","id":"lv3vc3"}]',
+  ',"event.veyliVessel.mail.address.sat":[',
+  '{"text":"A Veyli ship asks for company | A small Veyli ship has lost its coolant pump and is drifting, a day off our course. They\'ve called us, not for help but for company: the Envoy says that\'s the word. We turn toward them at 08:30 and hold station off their bow until they\'re under way. Works will tell you what\'s needed. We were guests in their sky for a month. Tonight we can be good ones.","id":"1k96wdi"}]',
+  ',"event.veyliVessel.mail.address.tue":[',
+  '{"text":"Company kept | The Veyli ship is under way. The Envoy read their message to us: \\"The Wren kept company well. Our engine is warm. We will remember the ship, and the hands.\\" Thank you, Works, for the part; thank you, everyone on the chain; and thank you, {me}, who met their engineer at the foot of the ramp.","id":"sdv3s7"}]',
+  ',"event.veyliVessel.mail.commendation":[',
+  '{"text":"Commendation: The Veyli ship | For your work while we kept the Veyli ship company, noted on your record with thanks. You helped their engineer, Taavek, and their part went home with them. Chief Calder says it ran true first time. Well done.","id":"1op03g3"}]',
+  ',"event.veyliVessel.mail.letter":[',
+  '{"text":"From Taavek | {me}. Good day. The round one goes round. Our ship is warm. I write this with help, so the words are good, but they are mine. The sketch I give you, put it on a shelf. On my shelf, your ship. Coffee next time. Go well. Taavek.","id":"1m9etd5"}]',
+  ',"event.veyliVessel.mail.partslist":[',
+  '{"text":"Parts chain, Sunday 13:00 | For the Veyli ship, by the Tern: our spare coolant pump, 40 fittings, 12 drums of coolant, seals, the small tool kit. Main storage to the ramp, by hand: the lift is too slow and the trolleys won\'t take the ramp. Sign the sheet in the Works bay. Sensible shoes. Their engineer arrives 09:30; {me} meets them at the ramp, with me.","id":"z795dz"}]',
+  ',"event.veyliVessel.mail.tomorrow":[',
+  '{"text":"Tomorrow | Times for Sunday. 08:00: the Tern goes across, Isak Lindqvist at the helm. 09:30: the Tern returns with the Veyli ship\'s engineer, Taavek, met at the ramp by {me} and Chief Calder. 13:00: the parts chain, Main storage to the shuttle bay. Breakfast first, sensible shoes, and be on time. Carry on.","id":"twz3b1"}]',
+  ',"event.veyliVessel.news.coming.1":[',
+  '{"text":"A Veyli ship\'s in trouble. Wen picked it up in the night.","id":"ad2z34"}]',
+  ',"event.veyliVessel.news.coming.2":[',
+  '{"text":"Their pump\'s gone. They\'re drifting a day off our course.","id":"lcmkvq"}]',
+  ',"event.veyliVessel.news.coming.3":[',
+  '{"text":"Saruth was in comms at six. In full robes. At six.","id":"1ab4jzn"}]',
+  ',"event.veyliVessel.news.coming.4":[',
+  '{"text":"The Captain\'s coming in. On a Saturday. That\'s how you know.","id":"1jn3ac6"}]',
+  ',"event.veyliVessel.news.coming.5":[',
+  '{"text":"They didn\'t ask for help, apparently. They asked for company.","id":"1gm8n05"}]',
+  ',"event.veyliVessel.news.coming.6":[',
+  '{"text":"Company. I like that. Better than a distress call.","id":"m6bsh4"}]',
+  ',"event.veyliVessel.news.coming.7":[',
+  '{"text":"If it\'s a pump, it\'s Works. Somebody tell the Chief.","id":"1vg7kqz"}]',
+  ',"event.veyliVessel.news.coming.8":[',
+  '{"text":"I\'ve never seen a Veyli ship up close. Only the Envoy\'s shuttle.","id":"1nx7v1j"}]',
+  ',"event.veyliVessel.news.told.1":[',
+  '{"text":"Did you see it light up? Three flashes. I had a lump in my throat.","id":"1q1zb0m"}]',
+  ',"event.veyliVessel.news.told.2":[',
+  '{"text":"Taavek had nine coffees on Sunday. Brennan counted.","id":"7llxqu"}]',
+  ',"event.veyliVessel.news.told.3":[',
+  '{"text":"Thirty of us in that chain. My arms still know about it.","id":"1gr9ruw"}]',
+  ',"event.veyliVessel.news.told.4":[',
+  '{"text":"Calder hovered. I saw her. She says she didn\'t.","id":"1na1wku"}]',
+  ',"event.veyliVessel.news.told.5":[',
+  '{"text":"Taavek drew the whole Works bay. It\'s by the tool wall now.","id":"1dfja2z"}]',
+  ',"event.veyliVessel.news.told.6":[',
+  '{"text":"I\'ve still got two Veyli sweets. Saving them. For what, I don\'t know.","id":"mf2r5f"}]',
+  ',"event.veyliVessel.news.told.7":[',
+  '{"text":"Company kept. I keep saying it. It\'s a good thing to be able to say.","id":"1hwhyzc"}]',
+  ',"event.veyliVessel.news.told.8":[',
+  '{"text":"The part ran true first time. Works will be unbearable for a week.","id":"1gntro7"}]',
+  ',"event.veyliVessel.notice.breakfast":[',
+  '{"text":"Something\'s happening: a Veyli ship has called the Wren.","id":"oehzyi"}]',
+  ',"event.veyliVessel.notice.chain":[',
+  '{"text":"The parts chain starts at 13:00: Main storage to the Tern. Zeke\'s calling the count.","id":"17stpm6"}]',
+  ',"event.veyliVessel.notice.home":[',
+  '{"text":"Taavek goes home at 15:00. See them off at the Tern\'s ramp.","id":"z3jie5"}]',
+  ',"event.veyliVessel.notice.home.missed":[',
+  '{"text":"Taavek went home on the Tern. They left a sketch for you with Chief Calder: it\'s on your shelf.","id":"ewffua"}]',
+  ',"event.veyliVessel.notice.job":[',
+  '{"text":"Chief Calder has a job for you in the Works bay: Taavek\'s part.","id":"tsrp6z"}]',
+  ',"event.veyliVessel.notice.lights":[',
+  '{"text":"At 17:40 the Veyli ship lights its engine. The crew are gathering at the bow glass.","id":"n2kmg9"}]',
+  ',"event.veyliVessel.notice.ramp":[',
+  '{"text":"Taavek arrives at 09:30: you\'re meeting them at the foot of the Tern\'s ramp.","id":"zvwiqn"}]',
+  ',"event.veyliVessel.notice.rampWait":[',
+  '{"text":"Taavek and Chief Calder are waiting for you at the foot of the Tern\'s ramp.","id":"o8a1wh"}]',
+  ',"event.veyliVessel.notice.rampWait.late":[',
+  '{"text":"Taavek is still waiting at the ramp. The Chief has fetched them a coffee.","id":"63rmkl"}]',
+  ',"event.veyliVessel.notice.rampZeke":[',
+  '{"text":"Zeke has taken Taavek to the Works bay bench. Go and say hello.","id":"ec8o74"}]',
+  ',"event.veyliVessel.notice.roundOne.missed":[',
+  '{"text":"Taavek showed Calder and Zeke the round one at the bench: it will have to be made, tomorrow, in the machine shop.","id":"1yjoop4"}]',
+  ',"event.veyliVessel.notice.sheet":[',
+  '{"text":"Chief Calder is looking for you: there\'s a sheet to sign in the Works bay.","id":"1gi26rj"}]',
+  ',"event.veyliVessel.notice.shop":[',
+  '{"text":"Taavek and your helpers are waiting in the machine shop.","id":"1rs2tlo"}]',
+  ',"event.veyliVessel.notice.shop.hourly":[',
+  '{"text":"Taavek\'s part is still on the bench in the machine shop.","id":"o9479g"}]',
+  ',"event.veyliVessel.notice.turn":[',
+  '{"text":"The Wren is turning toward the Veyli ship.","id":"yfih4x"}]',
+  ',"event.veyliVessel.notice.turnBack":[',
+  '{"text":"The Veyli ship is under way. The Wren is turning back onto her course.","id":"ksykw7"}]',
+  ',"event.veyliVessel.notice.view":[',
+  '{"text":"The Veyli ship is off the bow: you can see it from Deck 3\'s glass.","id":"zq8w5f"}]',
+  ',"event.veyliVessel.record.chain":[',
+  '{"text":"Passed crates in the parts chain.","id":"t47y74"}]',
+  ',"event.veyliVessel.record.done":[',
+  '{"text":"Kept a Veyli ship company, Days 27-30; made its part with Taavek.","id":"1gp52s0"}]',
+  ',"event.veyliVessel.record.met":[',
+  '{"text":"Met Taavek at the foot of the Tern\'s ramp.","id":"1kg8ig5"}]',
+  ',"event.veyliVessel.record.met.bench":[',
+  '{"text":"Met Taavek at the Works bay bench.","id":"jseyae"}]',
+  ',"event.veyliVessel.ring.bench":[',
+  '{"text":"Join Taavek at the bench","id":"15ph2sd"}]',
+  ',"event.veyliVessel.ring.chain":[',
+  '{"text":"Join the chain","id":"n3s9ue"}]',
+  ',"event.veyliVessel.ring.crate":[',
+  '{"text":"Pass the crate","id":"17n0zff"}]',
+  ',"event.veyliVessel.ring.home":[',
+  '{"text":"See Taavek off","id":"k1abfw"}]',
+  ',"event.veyliVessel.ring.job":[',
+  '{"text":"Pick two helpers","id":"1y3ehpc"}]',
+  ',"event.veyliVessel.ring.lights":[',
+  '{"text":"Stand at the glass","id":"1p7mr3c"}]',
+  ',"event.veyliVessel.ring.ramp":[',
+  '{"text":"Stand at the foot of the ramp","id":"1h5s2ej"}]',
+  ',"event.veyliVessel.ring.rampBench":[',
+  '{"text":"Say hello to Taavek","id":"1tmzimv"}]',
+  ',"event.veyliVessel.ring.sheet":[',
+  '{"text":"Sign the parts chain sheet","id":"87bk4c"}]',
+  ',"event.veyliVessel.ring.shelf":[',
+  '{"text":"Put the sketch on your shelf","id":"qe5yqt"}]',
+  ',"event.veyliVessel.ring.step.1":[',
+  '{"text":"Look at Taavek\'s sketch","id":"ptmf8y"}]',
+  ',"event.veyliVessel.ring.step.2":[',
+  '{"text":"Choose the stock","id":"fp1fxr"}]',
+  ',"event.veyliVessel.ring.step.3":[',
+  '{"text":"Turn it on the lathe","id":"umwloi"}]',
+  ',"event.veyliVessel.ring.step.4":[',
+  '{"text":"Hold it while it\'s checked","id":"njz506"}]',
+  ',"event.veyliVessel.ring.step.5":[',
+  '{"text":"Balance the round one","id":"6aoimf"}]',
+  ',"event.veyliVessel.ring.testfit":[',
+  '{"text":"The test fit","id":"1wgdkqw"}]',
+  ',"event.veyliVessel.saruth.breakfast":[',
+  '{"text":"They ask for company. It is a very old way of asking. Thank you for answering it.","id":"nuwetv"}]',
+  ',"event.veyliVessel.sched.chain":[',
+  '{"text":"The parts chain, 13:00, Main storage","id":"120yvi3"}]',
+  ',"event.veyliVessel.sched.home":[',
+  '{"text":"Taavek goes home, 15:00, the shuttle bay","id":"2wxg7c"}]',
+  ',"event.veyliVessel.sched.lights":[',
+  '{"text":"The engine lights, 17:30, the bow lounge","id":"1q7rmnf"}]',
+  ',"event.veyliVessel.sched.ramp":[',
+  '{"text":"Meet Taavek, 09:30, the shuttle bay","id":"1bkp4ud"}]',
+  ',"event.veyliVessel.sched.sheet":[',
+  '{"text":"Sign the parts chain sheet, Works bay","id":"1aae2j1"}]',
+  ',"event.veyliVessel.signed":[',
+  '{"text":"You sign the sheet: Sunday, 13:00, Main storage to the Tern. A pen on a string, and your name near the top.","id":"j5a744"}]',
+  ',"event.veyliVessel.status.afterglow":[',
+  '{"text":"The Veyli ship is under way","id":"1cbrz5t"}]',
+  ',"event.veyliVessel.status.escalation":[',
+  '{"text":"Taavek is aboard: the part today","id":"19k3oag"}]',
+  ',"event.veyliVessel.status.onset":[',
+  '{"text":"Taavek is aboard","id":"1kuy4cz"}]',
+  ',"event.veyliVessel.status.onset.early":[',
+  '{"text":"The Tern brings the Veyli engineer at 09:30","id":"1tg4cte"}]',
+  ',"event.veyliVessel.status.resolution":[',
+  '{"text":"The Veyli ship is under way","id":"1pnxfwy"}]',
+  ',"event.veyliVessel.status.warning":[',
+  '{"text":"A Veyli ship has asked for company","id":"1p6xgd9"}]',
+  ',"event.veyliVessel.stock.1":[',
+  '{"text":"The bronze bar, the one that sings","id":"6kdmsw"}]',
+  ',"event.veyliVessel.stock.2":[',
+  '{"text":"The soft alloy, the shiny one","id":"b2akjb"}]',
+  ',"event.veyliVessel.stock.3":[',
+  '{"text":"The steel offcut from the bin","id":"19uo64l"}]',
+  ',"event.veyliVessel.stock.text":[',
+  '{"text":"Taavek taps each bar and listens.","id":"1jejfl9"}]',
+  ',"event.veyliVessel.stock.title":[',
+  '{"text":"Choose the stock","id":"8z8ybf"}]',
+  ',"event.veyliVessel.taavek.mistake":[',
+  '{"text":"taavek: Ah! Too deep. Small. Not bad. We go again, slower. The round one forgives.","id":"1w48oxk"}]',
+  ',"event.veyliVessel.taavek.step.1":[',
+  '{"text":"taavek: Here. My drawing. And here, the broken one. Twelve. All the same. Very curved.","id":"16vkqxr"}]',
+  ',"event.veyliVessel.taavek.step.2":[',
+  '{"text":"taavek: This one? No. Too soft. This one. Yes. Good. It sings when you tap it.","id":"84l9zp"}]',
+  ',"event.veyliVessel.taavek.step.3":[',
+  '{"text":"taavek: Slow. Slow. The machine knows. We listen to it. Yes.","id":"1imwuae"}]',
+  ',"event.veyliVessel.taavek.step.4":[',
+  '{"text":"taavek: Now we hold. Still. Very still. Like a sketch.","id":"1rf8xaq"}]',
+  ',"event.veyliVessel.taavek.step.5":[',
+  '{"text":"taavek: It must go round and not wobble. Like a good dancer. No. Like a good pump.","id":"1pdzqf5"}]',
+  ',"event.veyliVessel.taavek.stepDone":[',
+  '{"text":"taavek: Good. Next.","id":"wj54j1"}]',
+  ',"event.veyliVessel.talk.call":[',
+  '{"text":"takahashi-wen: Veyli band. Not the Envoy\'s code. A small ship, close, and it\'s repeating.","id":"1fw29jp"},',
+  '{"text":"achterberg-lars: Distress?","id":"3a9b2z"},',
+  '{"text":"takahashi-wen: Not a word I know. That\'s not static, though. Wake the Envoy.","id":"la3s27"},',
+  '{"text":"saruth: Thank you for waking me. No, it is right that you did. Let me read it.","id":"1u2tjac"},',
+  '{"text":"saruth: They do not ask for help. We have no polite way to say it. They ask for company.","id":"199e0n0"},',
+  '{"text":"saruth: Tell the Captain, please. Gently. It is her day off, and she will want to come.","id":"kac51c"}]',
+  ',"event.veyliVessel.talk.chain":[',
+  '{"text":"torres-zeke: Right, everyone! Storage door to the ramp. Arm\'s length. Face along.","id":"1a1n9a8"},',
+  '{"text":"pell: Oi oi, who packed this one? Bricks?","id":"1y36hu5"},',
+  '{"text":"kovac-zainab: Lift with your legs. Sorry. Not you. Well, you too. Everyone.","id":"1axu9q0"},',
+  '{"text":"halloran-emeka: Lovely rhythm, this. Like a bakery line. Without the cake.","id":"1pum84v"},',
+  '{"text":"taavek: So many hands! On our ship, we are few. Here, a river of hands.","id":"140k7nr"},',
+  '{"text":"calder: Halfway. Nobody\'s dropped one. Keep it that way.","id":"7l345i"},',
+  '{"text":"brennan: Drink when you get a gap, loves. I\'ve left water by the door.","id":"1fsrrw"},',
+  '{"text":"torres-zeke: The pump. Last and biggest. Four hands on it. {me}, with me.","id":"1y4n05c"}]',
+  ',"event.veyliVessel.talk.chainEnd":[',
+  '{"text":"torres-zeke: And that\'s the lot! Every crate, and not one dropped.","id":"cl0k6h"},',
+  '{"text":"taavek: Thank you. All of you. My ship will say it. I say it first.","id":"1iwrkxm"},',
+  '{"text":"calder: Good chain. Water, then off you go.","id":"16ttzhe"}]',
+  ',"event.veyliVessel.talk.homeFind":[',
+  '{"text":"calder: There you are. Taavek won\'t go without saying goodbye.","id":"1am2pf0"},',
+  '{"text":"calder: The Tern\'s waiting. So\'s Isak, on his day off. Come on.","id":"kvsh0a"}]',
+  ',"event.veyliVessel.talk.lap":[',
+  '{"text":"tomas: Taavek! Walk the lap with us? It\'s just walking. Round the ship.","id":"14v7vdy"},',
+  '{"text":"taavek: Round! A round one. I come. I draw while I walk.","id":"1z0k9lf"}]',
+  ',"event.veyliVessel.talk.lights":[',
+  '{"text":"saruth: Watch the stern of the little ship. Low, on the left. It will not be long.","id":"p044j1"},',
+  '{"text":"tomas: Is that it? No. That\'s a star. Sorry. Is that it?","id":"15bu3qo"},',
+  '{"text":"calder: The part\'s in. Taavek says it spins. We\'ll see.","id":"ua9fl4"},',
+  '{"text":"sato: Their engine\'s waking. Look, the hull\'s catching the glow.","id":"76to4k"},',
+  '{"text":"saruth: Three, slowly. They say: company kept.","id":"r0r3vt"},',
+  '{"text":"torres-zeke: That\'s the round one out there, turning. Ours. Well, theirs. Ours.","id":"xtfiir"},',
+  '{"text":"halloran-emeka: Dinner, everyone! Lovely. Lovely evening.","id":"1ij4bfn"}]',
+  ',"event.veyliVessel.talk.lunch":[',
+  '{"text":"halloran-emeka: Taavek, here\'s one. Why don\'t pumps keep secrets? They always leak!","id":"kn61h1"},',
+  '{"text":"taavek: Ha! Secrets! Very good. Secrets.","id":"1lltbcd"},',
+  '{"text":"halloran-emeka: That\'s... not the funny bit. But I\'ll take it. Lovely.","id":"sgxpqq"},',
+  '{"text":"pell: These sweets taste like a sneeze. A nice sneeze. Can I have another?","id":"1mom0t2"}]',
+  ',"event.veyliVessel.talk.rampCrowd":[',
+  '{"text":"pell: Is that the broken bit? It\'s bigger than my head.","id":"iu97fg"},',
+  '{"text":"kovac-zainab: Oh. Twelve blades. Ours have nine.","id":"2ido6q"},',
+  '{"text":"halloran-emeka: Look at that. A guest, on a Sunday. Lovely.","id":"1sxfezg"},',
+  '{"text":"rossi-femi: They brought a crate. Who brings a crate to a first meeting?","id":"18h65gg"},',
+  '{"text":"torres-zeke: Everyone, if they\'re sensible. I brought you a scarf.","id":"ay13bz"}]',
+  ',"event.veyliVessel.talk.rampFind":[',
+  '{"text":"calder: {me}. There you are. Taavek\'s at the foot of the ramp. Waiting.","id":"1ihv3td"},',
+  '{"text":"calder: They\'re not cross. I\'m not either. Much. Come on.","id":"dh71m1"}]',
+  ',"event.veyliVessel.talk.rampWait":[',
+  '{"text":"calder: Five minutes. They\'re coming.","id":"jprqn9"},',
+  '{"text":"taavek: We wait. Good. Waiting is also a kind of meeting.","id":"1ozda4l"},',
+  '{"text":"calder: Coffee?","id":"1evubbo"},',
+  '{"text":"taavek: Yes! Always yes.","id":"13eubdq"},',
+  '{"text":"taavek: Your bay. I draw it while we wait. The crane is a good crane. Proud.","id":"173y0oq"},',
+  '{"text":"calder: That crane is older than me. Don\'t tell it.","id":"wdtj5q"}]',
+  ',"event.veyliVessel.talk.rampZeke":[',
+  '{"text":"torres-zeke: Right. I\'ll take them. Someone met me once and was late too. It was fine.","id":"dn6kof"},',
+  '{"text":"taavek: Zeke. Good. You are also one who meets.","id":"18kd9pq"}]',
+  ',"event.veyliVessel.talk.roundOneFind":[',
+  '{"text":"taavek: There! The one who meets. I bring the round one to you. Look.","id":"1tnzywx"},',
+  '{"text":"taavek: Broken. Very. Come, the bench, quick, before the chain.","id":"1y5jamw"}]',
+  ',"event.veyliVessel.talk.sheetFind":[',
+  '{"text":"calder: There you are. Day off, both of us. A minute?","id":"1nsxfe6"},',
+  '{"text":"calder: There\'s a sheet in the Works bay with a gap near the top. Your name goes in it.","id":"8t2mel"}]',
+  ',"event.veyliVessel.talk.story":[',
+  '{"text":"holt: Hm. They laughed at the bear. Nobody laughs at the bear.","id":"1hfpee5"},',
+  '{"text":"taavek: The voices! Good voices. I understand nothing. Very good.","id":"ai65g4"}]',
+  ',"event.veyliVessel.talk.sundayTable":[',
+  '{"text":"brennan: Coffee for our guest. Strong, love? Course it is.","id":"1yyf2ek"},',
+  '{"text":"taavek: Very bitter. Very good. Another, please. Yes.","id":"3sqp82"}]',
+  ',"event.veyliVessel.talk.swap":[',
+  '{"text":"taavek: Sweets. Veyli. One for a coffee. Good trade, yes?","id":"1mopdd7"},',
+  '{"text":"ishikawa-orla: One sweet, one mug. That\'s the rate. I\'m writing it down.","id":"fmyclf"},',
+  '{"text":"taavek: Big mug, two sweets. Small mug, one. I am an engineer. I measure.","id":"14akc5i"}]',
+  ',"event.veyliVessel.talk.ternOut":[',
+  '{"text":"lindqvist-isak: She\'s warm and she wants to go. Ramp coming up. Clear the yellow, please.","id":"1w04jc7"},',
+  '{"text":"torres-zeke: Off she goes. Bring us back a guest, Isak.","id":"1wvjvrg"},',
+  '{"text":"lindqvist-isak: Half nine. One guest. Keep the kettle on.","id":"u552i2"}]',
+  ',"event.veyliVessel.talk.view":[',
+  '{"text":"tomas: That\'s it? It\'s tiny. I mean small. I mean it\'s lovely. Sorry.","id":"1mmdb9s"},',
+  '{"text":"sato: Slim hull, three running lights. Two of them low. They\'re saving power.","id":"1r37mjd"},',
+  '{"text":"holt: Hm. Smaller than I thought.","id":"1bgaoqx"},',
+  '{"text":"mensah: Smaller than you thought, Chief? It\'d fit in our shuttle bay twice.","id":"faf0ue"},',
+  '{"text":"hart-ravi: I\'m drawing it. Don\'t move. I know it\'s not moving. Don\'t anyway.","id":"1cg0r4k"},',
+  '{"text":"farouk-olu: Only a few aboard, Wen thinks. A long way from anyone, until this morning.","id":"vnlio2"}]',
+  ',"event.veyliVessel.tap.crate":[',
+  '{"text":"A crate for the Veyli ship. FITTINGS, in Calder\'s capitals, and a tiny drawing.","id":"1mzzh6r"}]',
+  ',"event.veyliVessel.tap.newpart":[',
+  '{"text":"The new round one: twelve blades, Wren metal, true. A tiny Veyli mark on the hub.","id":"5v9svt"}]',
+  ',"event.veyliVessel.tap.part":[',
+  '{"text":"The round one: a Veyli impeller, twelve curved blades, cracked clean through the hub.","id":"1w7o6w4"}]',
+  ',"event.veyliVessel.tap.sheet":[',
+  '{"text":"The parts chain sheet. Thirty-odd names already, and yours, near the top.","id":"1nfz4qt"}]',
+  ',"event.veyliVessel.tap.sheet.before":[',
+  '{"text":"The parts chain sheet: Sunday, 13:00, Main storage to the Tern. A pen on a string.","id":"i2jxv9"}]',
+  ',"event.veyliVessel.tap.sketch.bench":[',
+  '{"text":"Taavek\'s sketch of the part, every blade numbered. Someone has added IMPELLER.","id":"1fi6ae"}]',
+  ',"event.veyliVessel.tap.sketch.shelf":[',
+  '{"text":"Taavek\'s sketch of you at the foot of the Tern\'s ramp, the round one in your hands. Underneath, in careful letters: \\"For you. The one who meets.\\"","id":"4d660f"}]',
+  ',"event.veyliVessel.tap.sketch.wall":[',
+  '{"text":"Taavek\'s sketch of the Works bay, pinned by the tool wall. Calder is in it, hovering.","id":"chxc9v"}]',
+  ',"event.veyliVessel.tern.in":[',
+  '{"text":"Down gently. One guest, one crate, one broken thing. Ramp\'s opening.","id":"13ljg1k"}]',
+  ',"event.veyliVessel.testfit.bramwell-basil":[',
+  '{"text":"Did we do that? We did that! Can I write home about it? I\'m writing home about it.","id":"u48jn9"}]',
+  ',"event.veyliVessel.testfit.kovac-zainab":[',
+  '{"text":"Oh. It\'s true. It\'s really true. Um. Sorry. I\'m just pleased.","id":"urn7ic"}]',
+  ',"event.veyliVessel.testfit.pell":[',
+  '{"text":"Look at it go! Get it on the board. Get it framed.","id":"1fe1pvq"}]',
+  ',"event.veyliVessel.testfit.torres-zeke":[',
+  '{"text":"Listen to it. Not a wobble. That\'s a happy part, that is.","id":"19bl4lt"}]',
+  ',"event.veyliVessel.tracked.bench":[',
+  '{"text":"Join Taavek at the Works bay bench, 10:00","id":"1jqa4d2"}]',
+  ',"event.veyliVessel.tracked.chain":[',
+  '{"text":"The parts chain, 13:00, Main storage to the Tern","id":"1r30s1t"}]',
+  ',"event.veyliVessel.tracked.home":[',
+  '{"text":"See Taavek off, 15:00, the shuttle bay","id":"1kkrn50"}]',
+  ',"event.veyliVessel.tracked.ramp":[',
+  '{"text":"Meet Taavek at the foot of the Tern\'s ramp, 09:30","id":"c4q8p"}]',
+  ',"event.veyliVessel.tracked.sheet":[',
+  '{"text":"Sign the parts chain sheet in the Works bay","id":"w10l3k"}]',
+  ',"event.veyliVessel.tracked.shelf":[',
+  '{"text":"Put Taavek\'s sketch on your shelf","id":"cmrbh8"}]',
+  ',"event.veyliVessel.tracked.step.1":[',
+  '{"text":"Taavek\'s part: look at the sketch and the broken one","id":"13bcw6p"}]',
+  ',"event.veyliVessel.tracked.step.2":[',
+  '{"text":"Taavek\'s part: choose the stock","id":"qa9swa"}]',
+  ',"event.veyliVessel.tracked.step.3":[',
+  '{"text":"Taavek\'s part: turn it on the lathe","id":"jkws09"}]',
+  ',"event.veyliVessel.tracked.step.4":[',
+  '{"text":"Taavek\'s part: hold it while your helper checks","id":"x68oqr"}]',
+  ',"event.veyliVessel.tracked.step.5":[',
+  '{"text":"Taavek\'s part: balance it","id":"1ady05i"}]',
+  ',"event.veyliVessel.tracked.testfit":[',
+  '{"text":"Taavek\'s part: the test fit, 13:30","id":"eq4f1g"}]',
+  ',"event.veyliVessel.wait":[',
+  '{"text":"The lathe\'s still turning. Taavek holds up ten fingers, then fewer.","id":"189wplo"}]',
   ',"farewell.day":[',
   '{"text":"{bye}, {nick}. Safe trip on the Tern.","id":"1rz0hru","tier":[1,4]},',
   '{"text":"Off today, then. Good luck out there. I mean it.","id":"1etbqx6","tier":[1,4]},',
@@ -41116,6 +41572,14 @@ const MEETINGS_BAKED = {
   "train.p3.halloran-emeka": {"title": "A funny one", "from": "Emeka Halloran", "gist": "Your first head-scratcher: a washer that leaks. Notes from the crew say what's been tried. Cross off what didn't work.", "lines": [{"who": "halloran-emeka", "text": "Ooh, here's a funny one for you. Washer 2, junior laundry. It leaks.", "pose": "gesture"}, {"who": "halloran-emeka", "text": "Two of the crew have had a go already. Neither fixed it. Both left a note, bless them."}, {"who": "halloran-emeka", "text": "Open Fault notes. Three suspects. The door seal, the drain valve and the pump.", "to": "you"}, {"who": "halloran-emeka", "text": "Chief's rule, page one: if someone fitted it and it's still wrong, it isn't that."}, {"who": "halloran-emeka", "text": "First note's taped to the job. New door seal in, still leaks. So?"}, {"choice": [{"text": "Then it isn't the seal.", "rel": {"halloran-emeka": 2}, "flavour": "practical", "reply": {"who": "halloran-emeka", "text": "Lovely. Cross it off.", "pose": "nod"}}, {"text": "What if the new seal's faulty?", "rel": {"halloran-emeka": 1}, "flavour": "listen", "reply": {"who": "halloran-emeka", "text": "Could be, in theory. Not today. Trust the note and cross it off."}}, {"text": "(Cross off the door seal)", "reply": {"who": "halloran-emeka", "text": "There you go. One down."}}]}, {"who": "halloran-emeka", "text": "The other note's on the washer itself. Lead on. I'll follow."}]},
   "train.p3.torres-zeke": {"title": "A funny one", "from": "Zeke Torres", "gist": "Your first head-scratcher: a machine that's still wrong after the crew tried. Cross off what didn't work.", "lines": [{"who": "torres-zeke", "text": "Ooh. A head-scratcher. My favourite kind of job.", "pose": "laugh"}, {"who": "torres-zeke", "text": "People have had a go already. Nothing worked. They left notes."}, {"who": "torres-zeke", "text": "Open Fault notes. There's your suspects. Now the notes.", "to": "you"}, {"who": "torres-zeke", "text": "Calder's rule. If someone fitted it and it's still wrong, it isn't that."}, {"who": "torres-zeke", "text": "First note's on the job. Read it. What can you cross off?"}, {"choice": [{"text": "Whatever they fitted.", "rel": {"torres-zeke": 2}, "flavour": "practical", "reply": {"who": "torres-zeke", "text": "Exactly. Cross it off.", "pose": "nod"}}, {"text": "What if they fitted it badly?", "rel": {"torres-zeke": 1}, "flavour": "listen", "reply": {"who": "torres-zeke", "text": "Good question. Not today. Today the notes are true."}}, {"text": "(Cross it off)", "reply": {"who": "torres-zeke", "text": "Look at you. Detective."}}]}, {"who": "torres-zeke", "text": "Next note's at the machine. Lead on. I'll follow and hum."}]},
   "train.ps.calder": {"title": "Power safety", "from": "Chief Ines Calder", "gist": "Calder showed you the Deck 6 port junction: what it feeds, how to make it safe, and why a junction is the one job you never rush.", "lines": [{"who": "calder", "text": "Stand there. Behind the line on the floor. Watch my hands.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "This junction feeds three rooms and a corridor. Everything you can hear from here."}, {"who": "calder", "text": "Most jobs, a mistake costs a part. Here, a mistake costs a person. So we never rush it."}, {"who": "calder", "text": "Four steps. Tell people. Switch it off. Test it's dead. Lock it, so nobody switches it back."}, {"who": "calder", "text": "Dead is a number on the tester. Never a guess. Never \"it should be\"."}, {"choice": [{"text": "What if someone needs the power back in a hurry?", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "Then they wait, and you tell them why. Nobody has ever thanked me for rushing a junction.", "pose": "nod"}}, {"text": "Have you ever been caught by one?", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "Once. My first ship. A small one. I tested the next one twice. I still do.", "pose": "nod"}}, {"text": "(Just watch)", "reply": {"who": "calder", "text": "Good. Watching is most of it.", "pose": "nod"}}]}, {"who": "calder", "text": "Your Tier 3 test is a junction like this. You'll do it. I'll watch. That's Power safety."}]},
+  "vesselHome": {"title": "Taavek goes home", "from": "Taavek", "gist": "You saw Taavek off at the Tern's ramp. They gave you a sketch, labelled in Veyli: \"For you. The one who meets.\"", "lines": [{"who": "calder", "text": "Ramp's down. Part's packed. Say it now, if you're saying it.", "pose": "nod"}, {"who": "taavek", "text": "Three sketches. One for my ship. One for your bay, by the tools.", "pose": "gesture"}, {"who": "taavek", "text": "And one for you. The one who meets.", "pose": "gesture", "to": "you"}, {"choice": [{"text": "I'll put it on my shelf.", "flavour": "share", "rel": {"taavek": 1}, "reply": {"who": "taavek", "text": "Good. A shelf is a good place. On my shelf, your ship.", "pose": "nod"}}, {"text": "Come back and see it.", "flavour": "cheer", "rel": {"taavek": 1}, "reply": {"who": "taavek", "text": "Yes. When we pass, I knock. Loudly.", "pose": "laugh"}}, {"text": "What does the writing say?", "flavour": "listen", "rel": {"taavek": 1}, "reply": {"who": "taavek", "text": "\"For you. The one who meets.\" And your name. Badly. I practise.", "pose": "laugh"}}]}, {"who": "lindqvist-isak", "text": "My day off, and I'd fly this one twice. Strapped in? She wants to go.", "pose": "gesture"}, {"who": "taavek", "text": "Go well. Go well, Wren.", "pose": "gesture"}, {"who": "calder", "text": "Good part. Back to it.", "pose": "nod"}]},
+  "vesselJob": {"title": "Taavek's part", "from": "Chief Ines Calder", "gist": "Chief Calder gave you Taavek's part to make: the impeller, on the machine shop lathe, with Taavek and two helpers you pick.", "lines": [{"who": "calder", "text": "{me}. A minute.", "pose": "gesture"}, {"who": "calder", "text": "Taavek's part. It's yours."}, {"who": "taavek", "text": "The round one! We make it. Today. Yes.", "pose": "laugh"}, {"who": "calder", "text": "Machine shop. Their sketch, our stock, the lathe. Taavek beside you."}, {"who": "calder", "text": "Pick two. Don't pick me, I'll only hover.", "pose": "nod", "to": "you"}, {"who": "taavek", "text": "She will hover. I see it already.", "pose": "laugh"}, {"who": "calder", "text": "Done by three. Taavek's Tern goes at three.", "pose": "gesture"}]},
+  "vesselRamp": {"title": "Off the Tern", "from": "Taavek", "gist": "You met Taavek, the Veyli ship's engineer, at the foot of the Tern's ramp, with Chief Calder: a crate, a broken part, and coffee.", "lines": [{"who": "lindqvist-isak", "text": "Tern's down. One guest, one crate, one broken thing. All in one piece.", "pose": "gesture"}, {"who": "calder", "text": "Ramp's opening. Stand where they can see you."}, {"who": "taavek", "text": "Hello! Taavek. Engineer. Yes.", "pose": "gesture"}, {"who": "taavek", "text": "This. The round one. Broken. Very.", "pose": "sigh"}, {"who": "taavek", "text": "You. You are the one who meets? Good. Someone met you, also?", "pose": "listen", "to": "you"}, {"choice": [{"text": "Welcome aboard. Let's see the round one.", "flavour": "practical", "rel": {"taavek": 1}, "reply": {"who": "taavek", "text": "Yes! First you look, then the words. That is the right way.", "pose": "nod"}}, {"text": "Someone met me. Zeke. He showed me my bunk.", "flavour": "share", "rel": {"taavek": 1, "torres-zeke": 1}, "reply": {"who": "taavek", "text": "Zeke met you. You meet me. Good. That is the way.", "pose": "nod"}}, {"text": "Coffee first?", "flavour": "cheer", "rel": {"taavek": 1}, "reply": {"who": "taavek", "text": "Yes! Yes. You understand everything already.", "pose": "laugh"}}]}, {"who": "torres-zeke", "text": "Look at that. Four weeks ago that was you, coming down the ramp.", "pose": "laugh"}, {"who": "calder", "text": "Chief Calder. Works. Welcome aboard the Wren.", "pose": "nod", "to": "taavek"}, {"who": "taavek", "text": "Chief. Good. The crate is mine. Parts inside. Also sweets.", "pose": "gesture"}, {"who": "calder", "text": "The bench is this way, ten o'clock. Bring the round one. Coffee on the way.", "pose": "gesture"}]},
+  "vesselRamp.bench": {"title": "Meeting Taavek", "from": "Taavek", "gist": "You met Taavek, the Veyli ship's engineer, at the Works bay bench. Zeke had met them at the ramp.", "lines": [{"who": "torres-zeke", "text": "Here they are. Taavek, this is {me}. The one who was meant to meet you.", "pose": "gesture"}, {"who": "taavek", "text": "Hello! Taavek. Engineer, here, at your bench. Yes.", "pose": "gesture"}, {"who": "taavek", "text": "Zeke met me. Good. And now you. Two who meet. Very good.", "pose": "laugh", "to": "you"}, {"who": "taavek", "text": "And this. The round one. Very broken.", "pose": "sigh"}, {"who": "taavek", "text": "You also, someone met you? When you came?", "pose": "listen", "to": "you"}, {"choice": [{"text": "Welcome aboard. Sorry I missed the ramp.", "flavour": "practical", "rel": {"taavek": 1}, "reply": {"who": "taavek", "text": "Not missed. Here is also a good place to meet. Look.", "pose": "nod"}}, {"text": "Zeke did. He showed me my bunk.", "flavour": "share", "rel": {"taavek": 1, "torres-zeke": 1}, "reply": {"who": "taavek", "text": "Zeke! Zeke meets everyone. Good. That is the way.", "pose": "laugh"}}, {"text": "Has anyone got you a coffee?", "flavour": "cheer", "rel": {"taavek": 1}, "reply": {"who": "taavek", "text": "Zeke. Two. Now you, three? You understand everything.", "pose": "laugh"}}]}, {"who": "torres-zeke", "text": "Right. Coffee, then the round one. Onward.", "pose": "nod"}]},
+  "vesselRamp.late": {"title": "Off the Tern", "from": "Taavek", "gist": "You met Taavek, the Veyli ship's engineer, at the foot of the Tern's ramp. They and Chief Calder had waited for you, with coffee.", "lines": [{"who": "calder", "text": "There you are. They waited. So did I.", "pose": "nod"}, {"who": "taavek", "text": "Hello! Hello. Taavek. Engineer. Yes.", "pose": "gesture"}, {"who": "taavek", "text": "You are the one who meets? Late one who meets. Still good.", "pose": "laugh", "to": "you"}, {"who": "taavek", "text": "This is why I come. The round one. Broken. Very.", "pose": "sigh"}, {"who": "taavek", "text": "When you came, someone met you, also?", "pose": "listen", "to": "you"}, {"choice": [{"text": "Welcome aboard. Sorry I'm late. Let's see the round one.", "flavour": "practical", "rel": {"taavek": 1}, "reply": {"who": "taavek", "text": "Late is fine. First you look, then the words. Good.", "pose": "nod"}}, {"text": "Zeke did. He showed me my bunk, and he was on time.", "flavour": "share", "rel": {"taavek": 1, "torres-zeke": 1}, "reply": {"who": "taavek", "text": "On time! Ha. Zeke met you, you meet me. Good. The way.", "pose": "laugh"}}, {"text": "Coffee? Or have you had one?", "flavour": "cheer", "rel": {"taavek": 1}, "reply": {"who": "taavek", "text": "Coffee second! The Chief gave me coffee first. Good Chief.", "pose": "laugh"}}]}, {"who": "calder", "text": "Chief Calder. Works. We've done the names. Twice, while we waited.", "pose": "nod"}, {"who": "taavek", "text": "The crate is mine. Parts inside. Also sweets.", "pose": "gesture"}, {"who": "calder", "text": "The bench is this way. Bring the round one.", "pose": "gesture"}]},
+  "vesselRoundOne": {"title": "The round one", "from": "Taavek", "gist": "At the Works bay bench, Taavek showed you the broken part: an impeller for their coolant pump, cracked through the hub. Nothing in the Wren's stores is like it. It will have to be made.", "lines": [{"who": "taavek", "text": "Here. The round one.", "pose": "gesture"}, {"who": "taavek", "text": "From the pump. For the cold. It goes round, round, round. Now it goes clunk.", "pose": "laugh"}, {"who": "torres-zeke", "text": "Look at the hub. Cracked right through. That's been a long time coming."}, {"who": "calder", "text": "Twelve blades. Ours have nine. Nothing in stores this shape."}, {"who": "taavek", "text": "I draw it. You look. Then you say.", "pose": "gesture"}, {"who": "calder", "text": "{me}. What is it?", "pose": "listen", "to": "you"}, {"choice": [{"text": "An impeller. It pushes their coolant round.", "flavour": "practical", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Good. Write it on the sketch.", "pose": "nod"}}, {"text": "A fan, sort of? For the cold side?", "flavour": "listen", "rel": {"torres-zeke": 1}, "reply": {"who": "torres-zeke", "text": "Close. An impeller. It shoves the coolant round, not air.", "pose": "nod"}}, {"text": "The round one.", "flavour": "cheer", "rel": {"taavek": 1}, "reply": {"who": "taavek", "text": "Yes! The round one. You learn very fast.", "pose": "laugh"}}]}, {"who": "taavek", "text": "Impeller. A good word. Long. I keep \"the round one\".", "pose": "laugh"}, {"who": "calder", "text": "Nothing like it aboard. It will have to be made."}, {"who": "taavek", "text": "Made. Yes. Here? With your machines?", "pose": "listen"}, {"who": "calder", "text": "Tomorrow, in the machine shop. Today, the chain. One o'clock.", "pose": "gesture"}]},
+  "vesselSheet": {"title": "The parts chain sheet", "from": "Chief Ines Calder", "gist": "Chief Calder asked you to sign up for the parts chain (Sunday 13:00, Main storage to the Tern) and to meet the Veyli ship's engineer at the foot of the Tern's ramp, Sunday 09:30.", "lines": [{"who": "calder", "text": "There you are. It's my day off. The Veyli didn't check.", "pose": "gesture"}, {"who": "calder", "text": "A sheet. The parts chain, tomorrow at one. Our spare pump, fittings, coolant. Main storage to the Tern, by hand."}, {"who": "calder", "text": "The lift's too slow and the trolleys won't take the ramp. People will."}, {"who": "calder", "text": "And one more thing. You're meeting their engineer. Foot of the ramp, half nine.", "pose": "nod", "to": "you"}, {"choice": [{"text": "Me? Why me?", "flavour": "listen", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Someone met you, four weeks ago. Now you know how it's done.", "pose": "nod"}}, {"text": "Foot of the ramp. Got it.", "flavour": "practical", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Quarter past nine, then. Then you're early.", "pose": "nod"}}]}, {"who": "calder", "text": "I'll be beside you. Also my day off. Sign the sheet.", "pose": "gesture"}]},
+  "vesselTestFit": {"title": "The test fit", "from": "Taavek", "gist": "The new impeller went into its housing on the bench and spun true. Taavek said a long word in Veyli, then: \"Good. Very good. The round one.\"", "lines": [{"who": "taavek", "text": "Now. In it goes. Slowly. You turn it.", "pose": "gesture"}, {"who": "taavek", "text": "Ah. Ah!", "pose": "listen"}, {"who": "taavek", "text": "No common word for this. In Veyli, it is long. It means: good, and also, I will tell everyone.", "pose": "laugh"}, {"who": "taavek", "text": "Good. Very good. The round one.", "pose": "nod", "to": "you"}, {"choice": [{"text": "We made it together.", "flavour": "share", "rel": {"taavek": 1}, "reply": {"who": "taavek", "text": "Together. Yes. Your hands, my drawing. Good trade.", "pose": "nod"}}, {"text": "Tell everyone, then.", "flavour": "cheer", "rel": {"taavek": 1}, "reply": {"who": "taavek", "text": "I will! First my ship. Then everyone. Then everyone again.", "pose": "laugh"}}]}, {"who": "taavek", "text": "Now I pack it. Carefully. Like an egg. A very hard egg.", "pose": "laugh"}]},
 };
 // ---- END MEETINGS ----
 // ---- BEGIN TRADITIONS (generated by content_gen.py from content/: never hand-edit; edit content/ and re-run it) ----
@@ -43277,7 +43741,7 @@ function evBdayBusy(p, d, a, b) {
 }
 function evBdaySlot(list) {
   const b = list.find(e => e.ev.when && e.ev.when.birthday); if (!b) return [];
-  const len = b.to - b.from, kept = list.filter(e => e !== b && (evIsTrad(e.ev) || EV_COMET_ON && e.ev.when.ship === 'comet') && !evNewWk(e)), fresh = list.filter(e => e !== b && evIsTrad(e.ev) && evNewWk(e));   // evBudget's left out are out of the list already
+  const len = b.to - b.from, kept = list.filter(e => e !== b && (evIsTrad(e.ev) || EV_COMET_ON && e.ev.when.ship === 'comet' || EV_VESSEL_ON && e.ev.when.ship === 'veyliVessel') && !evNewWk(e)), fresh = list.filter(e => e !== b && evIsTrad(e.ev) && evNewWk(e));   // evBudget's left out are out of the list already
   const near = (o, s) => o.from < s + len + EV_BDAY.gap && s - EV_BDAY.gap < o.to, fixed = o => (o.ev.prio || 0) >= 2 || !!o.ev.meal || evRare(o.ev.when) >= 1 || !!o.ev.when.ship;   // the comet counts as a tradition for the birthday's hour, one that never gives way (FX25, EP1's A5)   // only a weekly one gives way (it's on again next week)
   let best = null;
   for (let s = EV_BDAY.from; s <= EV_BDAY.to; s += EV_BDAY.step) {
@@ -43719,7 +44183,7 @@ function tjActs() { for (const [id, s] of Object.entries(TRAD_JOIN)) if (!s.act 
   PLAYER_ACTS['tj:' + id] = def; if (typeof IX_ACTS !== 'undefined') IX_ACTS['tj:' + id] = def;
 } }
 tjActs();
-const tradJoinable = e => !!(e && TRAD_JOIN[e.id] && (evIsTrad(e.ev) || P926_APPT && e.ev.appt || EV_COMET_ON && !!e.ev.when && e.ev.when.ship === 'comet'));   // the comet's four gatherings too (FX25)   // an appointment's one-off too (0.92.6 item 9, FX22)
+const tradJoinable = e => !!(e && TRAD_JOIN[e.id] && (evIsTrad(e.ev) || P926_APPT && e.ev.appt || EV_COMET_ON && !!e.ev.when && e.ev.when.ship === 'comet' || EV_VESSEL_ON && !!e.ev.when && e.ev.when.ship === 'veyliVessel'));   // the comet's four gatherings too (FX25); the Veyli vessel's engine lights (VB1)   // an appointment's one-off too (0.92.6 item 9, FX22)
 const tradWords = (e, k, ctx) => { const t = quizText('join.' + e.id + '.' + k, e.day, ctx); return t; };
 // the people going (their plan has them there today), and the leader: the tradition's host, else the spec's, when going;
 // else the spec's pick or the first of the goers by a hash of the day. Cached per day
@@ -43802,6 +44266,7 @@ function tradPose(s, pl, sp) {
 function tradJoinTap(a) {
   if (!a || !a.p || typeof deckDef === 'undefined') return false;
   if (EV_COMET_ON && COMET && cometTap(a)) return true;     // the comet: Saruth's knot; a Cadet at the Captain's tea sent to the bow lounge (slot 'Comet builder')
+  if (EV_VESSEL_ON && VESSEL && vesselTap(a)) return true;  // the Veyli vessel: Calder's sheet, Taavek at the ramp or the bench (slot 'Vessel builder')
   const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   const o = eventOf(a.p, now), e = (o && o.now ? o.e : TJ_NOW && TJ_NOW.lead === a.p.id ? TJ_NOW.e : null) || (P926_APPT ? apptHostEvent(a, d) : null);   // 0.92.6 item 9: an appointment joined already, its host at work for it (RV17 R1)
   if (e && e.id === 'tiles-ladder' && SHIP.events.joined.includes(e.id + '@' + d) && typeof tladAgain === 'function' && tladAgain(a)) return true;   // 0.92.5 item 20: watching, a tap asks for the next game
@@ -44003,6 +44468,7 @@ function tradWalkFrame(dt) {
 }
 // section 14's whereIs, first after a visit: the walk's roles (escort-shaped, so section 10 walks them), else null
 function tradWhere(p, t) {
+  if (EV_VESSEL_ON && VESSEL) { const vw = vesselWhere(p, t); if (vw) return vw; }   // the Veyli vessel: Taavek and Calder to the bench once you've met (slot 'Vessel builder')
   const ws = REC_DECK ? wsoWhere(p, t) : null; if (ws) return ws;   // Winner Stays On: the two on court (0.83.1, RA)
   if (TJ_FREE && t >= TJ_FREE.at) {                      // the beam's crowd breaks up: on to what comes after it
     if (t >= TJ_FREE.until) TJ_FREE = null;
@@ -44107,8 +44573,10 @@ function eventsTick() {
   if (STORM_SAT_ON) stormStoriesFrame();                 // 0.93.2 (FX26): the storm stories' talk (slot 'Storm Saturday')
   if (P926_TRADS) p926Frame();                           // 0.92.6: the swap meet's, reading corner's and spice supper's talk (FX17, Traditions slot)
   if (P926_APPT) apptFrame();                            // 0.92.6 item 9: appointments (FX22, Appointments builder slot)
+  if (EV_VESSEL_ON && VESSEL) vesselChainHands();        // the Veyli vessel's parts chain: each crate through your hands (slot 'Vessel builder')
   if (TRAD_0932_ON) t932Frame();                         // 0.93.2: the new traditions' talk and their hosts' closing lines (FX24, Traditions slot)
   if (EV_COMET_ON && COMET) cometFrame();                // the comet in the sky, the turn, the dimming, the crowd looking up (slot 'Comet builder')
+  if (vesselOn()) vesselSkyFrame();                      // the little Veyli ship off the bow (slot 'Vessel sky', VB2; EV_VESSEL_ON)
   if (DIALOGUE && !dialogueView().choices && performance.now() - DIALOGUE.at > DIALOGUE_AUTO) dialogueStep();
   const now = shipNow(), m = Math.floor(now);
   if (m === EV_MIN) return;
@@ -44122,6 +44590,7 @@ function eventsTick() {
   if (EV_STORM_ON) stormStoryTick(now);                  // the storm update's story A, in play (slot 'Storm builder')
   if (EV_LINE_ON) lineStoryTick(now);                    // Crossing the Line's notices and story A, in play (slot 'Line builder')
   if (EV_COMET_ON && COMET) cometTick(now);              // the comet's notices, the rooms' talk, the naming card and the knot, in play (slot 'Comet builder')
+  if (EV_VESSEL_ON && VESSEL) vesselTick(now);           // A Veyli vessel needs help: the Saturday address, the turns' swell, in play (slot 'Vessel builder')
   if (prev >= 0) eventCallInTick(prev, m);               // F0b: the called-in notes as their meetings begin (inert while off)
   eventHelpKeep();                                       // the storm update S4: your prep jobs noted as they're done (inert while off)
   eventsDress(now);                                      // its dressing and the traces left by past events
@@ -44809,6 +45278,111 @@ if (EV_COMET_ON && EVENTS_ON) {
   SHIP_EVENTS.comet.dressing = { warning: dressAtM(1260, 1290), onset: dressAtM(1290, 1320).concat(dressAtM(1320, 1360)), resolution: dressAtM(1360, 1365) };
   SHIP_EVENTS.comet.settleTraces = ['cometCord'];          // the knotted cord stays on the bow glass rail for good (from 22:40)
   SHIP_EVENTS.comet.moments.push({ id: 'cometTurnBack', phase: 'resolution', at: [0, 1360], where: 'shipwide', feel: ['cometTurnBack'], len: 20 });   // the helm brings her back onto her course
+}
+// ---- A Veyli vessel needs help (VB1 for lead 39, V-1; plans/veyli-vessel-spec.html by EP2, from EP1's plans/events-plan-2.html
+// Part C). Behind EV_VESSEL_ON (section 13; ?evvessel previews it) with the events base on; off: the game before it (the
+// swap's calendar row passed over, or no row). The coda after the career, Saturday Day 27 to Tuesday Day 30: a small Veyli
+// ship has lost its coolant pump and asks for company. Saturday the call, the news at breakfast, the Captain's address
+// at 08:00 and the turn toward it at 08:30, Calder's parts-chain sheet at 10:00; Sunday the Tern goes across and brings
+// back its engineer Taavek (09:30, the foot of the ramp), the round one at the bench, the parts chain at 13:00; Monday
+// making the impeller, the test fit, Taavek home at 15:00 and the engine lights at 17:40; Tuesday it leaves, the
+// Captain's thanks, your commendation (C1) and Taavek's letter. No threads, no score. The functions are in the slot
+// 'Vessel builder' (end of section 18); its fixed data is VESSEL (vesselData), a var
+if (EV_VESSEL_ON && EVENTS_ON) {
+  const w = (k, c) => evWord('event.veyliVessel.' + k, c), V = VESSEL = vesselData();
+  { const r = EV_CALENDAR.find(x => x.id === 'veyliVessel');   // the swap's row; without the swap, added here in day order
+    if (r) r.day = V.day; else { const i = EV_CALENDAR.findIndex(x => x.day > V.day); EV_CALENDAR.splice(i < 0 ? EV_CALENDAR.length : i, 0, { id: 'veyliVessel', day: V.day, kind: 'short' }); } }
+  if (!EVENT_ORDER.includes('veyliVessel')) EVENT_ORDER.push('veyliVessel');
+  SHIP_EVENTS.veyliVessel = {
+    title: 'A Veyli vessel needs help', days: 4, threads: [], pause: [], keep: ['birthday'],
+    // C1 (VESSEL.commend, vesselData): a commendation by the usual rule (two of its jobs, or one and a meeting), the
+    // letter a Mail on Tuesday at 09:30 (commendAt); false: never one, like the comet
+    commend: V.commend, ...(V.commend ? { commendAt: [3, 570] } : {}),
+    commendation: evBankMail('event.veyliVessel.mail.commendation', { subject: 'Commendation: the Veyli ship',
+      body: 'For your part in keeping the Veyli ship company: meeting their engineer, the parts chain and the round one you made with them. Noted on your record with thanks. Chief Calder says the part spins true.' }),
+    // Taavek aboard Sunday 09:30 to Monday 15:00 (section 14's guestTrim asks vesselGuestAt for the minutes): arriving the
+    // day after the call, one day's stay
+    guestsArrive: 1, guestStay: 1,
+    phases: [{ id: 'warning', at: [0, 370] }, { id: 'onset', at: [1, 480] }, { id: 'escalation', at: [2, 560] },
+      { id: 'resolution', at: [3, 555], clears: true }, { id: 'afterglow', at: [3, 560], clears: true }],
+    systems: { warning: { effects: ['skyVessel'] } },    // the little ship off the bow (C2, VB2's slot 'Vessel sky'; looks only), to the all-clear
+    routines: {}, galley: {},
+    status: { warning: c => w('status.warning', c) || 'A Veyli ship has asked for company', onset: c => vesselStatus('onset', c), escalation: c => w('status.escalation', c) || 'Taavek is aboard: the part today',
+      resolution: c => w('status.resolution', c) || 'The Veyli ship is under way', afterglow: c => w('status.afterglow', c) || 'The Veyli ship is under way' },
+    // the news (section 20 spreads it): at breakfast from Comms and Command, then everyone; the retellings Tuesday and
+    // Wednesday. The writers' event.veyliVessel.news.coming.1-8 and told.1-8 (vesselWords), else these
+    news: [
+      { id: 'vessel-coming', from: 'saruth', phase: 'warning', at: [0, 420], seed: ['dept:comms', 'dept:command', 'dept:helm'], weight: 3,
+        lines: () => vesselWords('news.coming', 1, 4, ['A Veyli ship\'s in trouble. Wen picked it up in the night.', 'Their pump\'s gone. They\'re drifting a day off our course.', 'Saruth was in comms at six. At six.', 'The Captain\'s coming in. On a Saturday. That\'s how you know.']) },
+      { id: 'vessel-coming-all', phase: 'warning', at: [0, 450], seed: ['all'], weight: 1,
+        lines: () => vesselWords('news.coming', 5, 8, ['They didn\'t ask for help, apparently. They asked for company.', 'If it\'s a pump, it\'s Works. Somebody tell the Chief.']) },
+      { id: 'vessel-told', phase: 'afterglow', at: [3, 720], seed: ['all'], weight: 2,
+        lines: () => vesselWords('news.told', 1, 8, ['Three slow flashes. Saruth says it means company kept.', 'Thirty of us in that chain. My arms still know about it.', 'The part ran true first time. Works will be unbearable for a week.']) },
+    ],
+    moments: [
+      // the turn toward the little ship, felt everywhere (the comet's, reused: the stars slide across every window and a soft
+      // swell under the hum), and back onto her course on Tuesday as it leaves
+      { id: 'vesselTurn', phase: 'warning', at: [0, 510], where: 'shipwide', feel: ['cometTurn'], len: 20 },
+      { id: 'vesselTurnBack', phase: 'afterglow', at: [3, 540], where: 'shipwide', feel: ['cometTurnBack'], len: 20 },
+    ],
+    // the scenes with a place and a cast (section 14 plans the named there, called in on a day off: the Captain on
+    // Saturday, Calder on Sunday, Lindqvist on Monday). Their arrows, rings and words are V-2's (the slot); until then
+    // stand-in scripts (vesselScripts, the slot)
+    meetings: [
+      { id: 'vesselCall', phase: 'warning', at: [0, 540], len: 20, where: { venue: 'observation', deck: 1, room: /^Observation room$/ }, script: 'vessel.captain', who: ['marrow'] },   // after her breakfast: the Captain at the glass as the Wren comes round
+      // V-2: planning only (the cast in place, called in on a day off); the scenes themselves are the slot's (vesselScenes:
+      // your arrow, the person who tells you): ranks [] keeps them off the Schedule (the slot's rows instead), and a script
+      // that isn't there means no panel and no Mail from the meetings' own tick
+      { id: 'vesselSheet', phase: 'warning', at: [0, 600], len: 120, where: { venue: 'works-bay', deck: 5, room: /^Works bay$/ }, script: 'vessel.plan.sheet', ranks: [], who: ['calder'] },   // Calder by the job board, 10:00-12:00
+      { id: 'vesselRamp', phase: 'onset', at: [1, 570], len: 60, where: { venue: 'shuttle-bay', deck: 5, room: /^Shuttle bay$/ }, script: 'vessel.plan.ramp', ranks: [], who: ['calder', 'torres-zeke', 'lindqvist-isak'] },   // waiting at the ramp up to an hour (C3)
+      { id: 'vesselJob', phase: 'escalation', at: [2, 560], len: 15, where: { venue: 'works-bay', deck: 5, room: /^Works bay$/ }, script: 'vessel.plan.job', ranks: [], who: ['calder'] },   // V-4: Calder's word, 09:20 (planning only)
+      { id: 'vesselHome', phase: 'escalation', at: [2, 870], len: 60, where: { venue: 'shuttle-bay', deck: 5, room: /^Shuttle bay$/ }, script: 'vessel.plan.home', ranks: [], who: ['calder', 'lindqvist-isak'] },   // Taavek home on the Tern: there from 14:30, gone by 15:30 at the latest (Lindqvist called in)
+    ],
+    // the Captain's two addresses, Saturday 08:00 and Tuesday 09:15 (VESSEL.addressAt, sent by vesselTick: not phases'
+    // starts, and their Mail copy is the writers' record Mail, mail.address.sat|tue). The writers' address.sat|tue
+    // ("marrow: line" lists, Saruth reading the Veyli ship's thanks on Tuesday), else these
+    address: {
+      sat: ['This is the Captain. In the night a small Veyli ship asked us for company. Its coolant pump has failed and it is drifting, safe, but alone.',
+        'We were guests in their sky for a month. Tonight we can be good ones. At half past eight we turn toward them. Marrow out.'],
+      tue: ['This is the Captain. The Veyli ship is under way again, on its own engine, with a part made in our Works bay.',
+        'Envoy Saruth: They say the Wren kept company well. Their engine is warm.', c => 'Thank you, Works, and the chain. And ' + c.you + ', who met their engineer. Marrow out.'] },
+    mail: {
+      vanceTomorrow: { at: [0, 1080], from: 'Commander Teo Vance', ...evBankMail('event.veyliVessel.mail.tomorrow', { subject: 'Tomorrow: the Veyli engineer',
+        body: c => 'Times for tomorrow. 08:00 the Tern goes across to the Veyli ship. 09:30 it comes back with their engineer, Taavek, who stays with us until Monday afternoon: the foot of the ramp, shuttle bay, Deck 5 (' + c.you + ', you\'re meeting them, as Chief Calder said). 13:00 the parts chain from Main storage to the Tern. Everyone else as usual.' }) },
+      taavekLetter: { at: [3, 720], from: 'Taavek', ...evBankMail('event.veyliVessel.mail.letter', { subject: 'From the round one\'s ship',
+        body: 'Hello. Taavek. The round one spins. Very good. The ship is warm, all of us are warm. Thank you for meeting. Thank you for making. The sketch is for your shelf. You are the one who meets. Taavek.' }) },
+    },
+    traces: { smooth: [], bumpy: [], rough: [] },
+    record: vesselRecord,                                  // your Record's line (section 18's eventRecord): who you met, what you made, the glass
+  };
+  // V-2b: the engine lights at the bow glass, Monday 17:30-18:00 (k 358): Saruth hosts (tap to join, TRAD_JOIN below), the
+  // comet's front spots at the glass then the lounge's seats; the bow lounge kept for it 17:15-18:05 (routines)
+  SHIP_EVENTS.veyliVessel.moments.push({ id: 'vesselLights', name: w('gather.lights.name') || 'The engine lights, at the bow glass', phase: 'escalation', at: [2, 1050], len: 30, k: 358,
+    where: { venue: 'bow-lounge-line', deck: 3, room: /^Bow lounge$/ }, gathering: true, who: vesselLightsWho, anim: null, host: 'saruth', toBed: 30, lead: cometLead, from: 'Envoy Saruth',
+    places: [{ deck: 3, pool: '@bow-lounge-line-front' }, { deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }],
+    whereFor: cometWhereFor({ saruth: [3, '@bow-lounge-line-lead-4'] }),
+    ask: w('gather.lights.ask') || 'At twenty to six, the little ship lights its engine. Come to the glass.', here: w('gather.lights.here') || 'Stand with us. Watch the stern of the little ship, low on the left.',
+    thanks: c => evWord('event.veyliVessel.gather.lights.thanks', c) || 'Saruth makes room for you at the glass. Out in the dark, the little Veyli ship waits, its lights low.' });
+  SHIP_EVENTS.veyliVessel.routines = { escalation: [{ where: '3|L', name: 'the bow lounge', rule: 'closed', gather: true, off: [[2, 0, 1035], [2, 1085, 1440], [3, 0, 1440]] }] };
+  Object.assign(TRAD_JOIN, { vesselLights: { host: 'saruth', pose: 'talk', need: 'leisure', gain: 15, also: { social: 6 }, verb: w('join.lights.verb') || 'stand at the glass with Saruth', what: w('join.lights.what') || 'stand at the bow glass beside Saruth and watch the little ship' } });
+  tjActs();
+  // V-3: the parts chain, Sunday 13:00-14:00 (k 359): VB2's line of 40 spots from Main storage's door to the Tern's ramp
+  // (pool '@vessel-chain'), Zeke calling the count at his own spot; the day shift stands easy for it (the Line's rule:
+  // the bridge, the watch and the galley stay); you tap Zeke to join (TRAD_JOIN below)
+  SHIP_EVENTS.veyliVessel.moments.push({ id: 'vesselChain', name: w('gather.chain.name') || 'The parts chain', phase: 'onset', at: [1, 780], len: 60, k: 359,
+    where: { deck: 5, room: /^Works bay$/ }, gathering: true, who: vesselChainWho, anim: null, host: 'torres-zeke', easy: true, lead: lineLead, from: 'Zeke Torres',
+    places: [{ deck: 5, pool: '@vessel-chain' }], whereFor: cometWhereFor({ 'torres-zeke': [5, '@vessel-chain-call'] }),
+    ask: w('gather.chain.ask') || 'Parts chain at one. Storage door to the ramp. Bring your arms.', here: w('gather.chain.here') || 'Find a gap in the line. Face the next person. I\'ll call the count.',
+    thanks: c => evWord('event.veyliVessel.gather.chain.thanks', c) || 'Zeke waves you into a gap in the line. The first crate is already coming down it toward you.' });
+  // RV21: about twenty watch Taavek come down the Tern's ramp, Sunday 09:20-09:50 (k 360; the shuttle bay's crowd spots,
+  // as the rotation's Off the Tern): Works and Comms off duty, by a hash. A turn-up gathering, nothing to tap
+  SHIP_EVENTS.veyliVessel.moments.push({ id: 'vesselArrival', name: w('gather.arrival.name') || 'Taavek comes aboard', phase: 'onset', at: [1, 560], len: 30, k: 360,
+    where: { venue: 'shuttle-bay', deck: 5, room: /^Shuttle bay$/ }, gathering: true, who: vesselArrivalWho, anim: null, easy: true, lead: lineLead, from: 'Zeke Torres',
+    ask: w('gather.arrival.ask') || 'Their engineer comes down the Tern\'s ramp at half nine. Come and see.', here: w('gather.arrival.here') || 'There. The ramp\'s opening.',
+    thanks: c => evWord('event.veyliVessel.gather.arrival.thanks', c) || 'You stand with the crowd at the shuttle bay as the Tern\'s ramp comes down.' });
+  SHIP_EVENTS.veyliVessel.routines.onset = [{ who: 'all', rule: 'standEasy', at: [555, 590], not: ['dept:command', 'dept:helm', 'dept:watch', 'dept:galley'] }, { who: 'all', rule: 'standEasy', at: [780, 840], not: ['dept:command', 'dept:helm', 'dept:watch', 'dept:galley'] }];
+  Object.assign(TRAD_JOIN, { vesselChain: { host: 'torres-zeke', pose: 'stand', need: 'fitness', gain: 10, also: { social: 6 }, verb: w('join.chain.verb') || 'take a gap in the chain', what: w('join.chain.what') || 'take a gap in the line and pass the crates along' } });
+  tjActs();
 }
 // the ship-wide events' gathering moments, shaped like traditions (EV_SHIPWIDE, read by eventsOn); each its own
 // hash key k (the storm's party 340, then 351 up), given in the moment's data (k) from the events base on. A moment may
@@ -47029,6 +47603,638 @@ function cometMusicOn() {
   const here = deckDef.num + '|' + roomAt(...player.here()); return COMET.rooms.some(r => r[0] === here);
 }
 // ---- end of slot: Comet builder ----
+// ---- slot: Vessel builder (section 18; VB1, A Veyli vessel needs help V-1 to V-4, plans/veyli-vessel-spec.html). New code of this seat's goes here ----
+// VESSEL: the event's fixed data, made by its data block at load (vesselData), or left undefined while EV_VESSEL_ON or
+// the events base is off. A var, so section 14 can ask it before section 18 has run (it reads undefined then). Nothing
+// here calls R(); the crew's planner reads only VESSEL's fixed data, the calendar and the roster
+var VESSEL;
+function vesselData() {
+  return {
+    day: 27,                                               // Saturday Day 27, the day after Calder's question (EP1's Part C)
+    // the user's questions (answered 2026-10-26, via lead 39), each a one-line switch:
+    commend: true,                                         // C1, the user's yes (2026-10-26): a commendation by the usual rule (false: no score, like the comet)
+    sky: true,                                             // C2, the user's yes: the little ship off the bow, Saturday 14:00 to Tuesday 09:05 (VB2's slot 'Vessel sky'; false: words only, Saruth reads the signal)
+    rampWait: 60,                                          // C3, the user's answer: not at the ramp at 09:30, Taavek and Calder wait for you up to an hour, then Zeke stands in and you meet Taavek at the bench (0: Zeke stands in from 09:35, the spec's first choice)
+    guest: 'taavek', arrive: 570, leave: 900, leaveBy: 930,   // Taavek off the Tern Sunday 09:30, home on it Monday 15:00 (the Tern waits for you to 15:30: leaveBy)
+    addressAt: { sat: [0, 480], tue: [3, 555] },           // the Captain's addresses: Saturday 08:00, Tuesday 09:15 (the resolution's minute)
+    turns: { vesselTurn: [0, 510], vesselTurnBack: [3, 540] },   // the turn there (Saturday 08:30) and back (Tuesday 09:00): the comet's soft swell, its sound too
+    late: 28,                                              // a save first loaded with the vessel on from this day: passed over for good (EV_LATE 'skip')
+  };
+}
+// the onset's status line: the Tern on its way until Taavek is aboard. What you see only
+function vesselStatus(ph, c) {
+  const e = SHIP.event, t = shipNow(), in_ = e && t >= (e.startDay - 1 + 1) * 1440 + VESSEL.arrive;
+  return in_ ? evWord('event.veyliVessel.status.onset', c) || 'Taavek is aboard' : evWord('event.veyliVessel.status.onset.early', c) || 'The Tern brings the Veyli engineer at 09:30';
+}
+// the passed-over rule for a late save: the day this game first loaded with the vessel on (SHIP.vesselFrom, set once,
+// saved only while on, like SHIP.evFrom); from VESSEL.late on, the vessel is passed over for good unless it already ran
+// or runs. Pure (bigevents_check calls it)
+function vesselLate(from, log, current) {
+  return !!VESSEL && Number.isInteger(from) && from >= VESSEL.late && !(log || []).some(l => l.id === 'veyliVessel') && !(current && current.id === 'veyliVessel');
+}
+if (EV_VESSEL_ON && EVENTS_ON && VESSEL) {
+  SHIP.vesselFrom = SAVED && SAVED.ship && Number.isInteger(SAVED.ship.vesselFrom) ? SAVED.ship.vesselFrom : SHIP.time ? SHIP.time.day : 0;
+  SAVE_EXTRA.push(s => { if (SHIP.vesselFrom != null) s.ship.vesselFrom = SHIP.vesselFrom; });
+  if (vesselLate(SHIP.vesselFrom, SHIP.eventLog, SHIP.event)) EV_SKIPPED.add('veyliVessel');
+  if (typeof onSim === 'function') onSim('newGame', () => { SHIP.vesselFrom = 0; });   // (the base's newGame clears EV_SKIPPED)
+  SIM_ADVANCE.push((from, to) => vesselTick(to, true));
+  vesselScripts();                                       // the scenes' stand-in scripts, the head writer's when baked
+  PLAYER_TAPS.push((it, at) => vesselSign(it, at));      // V-2: signing it
+  Object.assign(PLAYER_ACTS, { vesselStep: { mins: 3, pose: 'work', title: 'Machine shop' } });   // V-4: a making step's hold (vesselStepStart sets its minutes)
+}
+// the writers' words for the vessel: a list key's lines (event.veyliVessel.<key>, all of it, or <key>.<a> to <key>.<b>
+// for numbered keys), else alt. What you see and hear only
+function vesselWords(key, a, b, alt) {
+  if (typeof LINES === 'undefined') return alt;
+  const one = k => Array.isArray(LINES['event.veyliVessel.' + k]) ? LINES['event.veyliVessel.' + k].map(x => x.text).filter(t => typeof t === 'string') : [];
+  const out = a == null ? one(key) : Array.from({ length: b - a + 1 }, (_, i) => one(key + '.' + (a + i))).flat();
+  return out.length ? out : alt;
+}
+// an address's lines as said: the writers' "marrow: line" list (the Captain's own words bare, anyone else's with their
+// name: "Envoy Saruth: ..."), else the data's; {me} filled
+function vesselAddressLines(key, c) {
+  const L = vesselWords('address.' + key), def = SHIP_EVENTS.veyliVessel;
+  const raw = L ? L.map(t => { const i = t.indexOf(': '), who = i > 0 ? t.slice(0, i) : 'marrow', p = who !== 'marrow' && evPerson(who); return (p ? p.name + ': ' : '') + (i > 0 ? t.slice(i + 2) : t); }) : def.address[key].map(x => evText(x, c));
+  return raw.map(t => evFill(t, c));
+}
+// the Captain's address (the base's captainAddress: the banner on every deck, ADDRESSES), with the writers' record
+// Mail (mail.address.<key>) in place of its plain "All hands" copy when they've written one
+function vesselAddress(key, t, quiet) {
+  const e = SHIP.event, c = evCtx(e, t), m = evBankMail('event.veyliVessel.mail.address.' + key, null), send = typeof mailSend === 'function' ? mailSend : null;
+  if (m && send) mailSend = () => {};                    // (captainAddress's own copy, swapped for the record Mail)
+  try { captainAddress({ lines: vesselAddressLines(key, c), at: t, quiet }); } finally { if (m && send) mailSend = send; }
+  if (m && send) mailSend({ at: t, from: 'Captain Odile Marrow', subject: m.subject, body: evText(m.body, c), quiet: true });
+}
+// in play (from eventsTick once a ship minute) and after a sleep or skip (quiet): the Captain's two addresses at their
+// minutes (the banner, or quietly the Mail), and the comet's swell under the hum as the Wren turns, with the bridge's
+// notice. Flags in the running event's e.mine (saved with it): 'addr:<key>', 'snd:<moment>'
+function vesselTick(now, quiet) {
+  const e = SHIP.event, def = SHIP_EVENTS.veyliVessel; if (!VESSEL || !e || e.id !== 'veyliVessel' || !def) return;
+  for (const [key, at] of Object.entries(VESSEL.addressAt)) {
+    const t = evBeatAt(e.startDay, at); if (now < t || e.mine['addr:' + key]) continue;
+    e.mine['addr:' + key] = 1; vesselAddress(key, t, !!quiet || now - t > 5);
+  }
+  if (quiet) return;
+  { const v = vesselNow(now); if (v && typeof deckDef !== 'undefined' && deckDef) { vesselScenes(v); vesselScenes2(v); vesselChain(v); vesselMaking(v); vesselTestFit(v); vesselShelf(v); vesselTern(v); vesselTalkNow(v); } }   // V-2: your beats in person
+  for (const [id, at] of Object.entries(VESSEL.turns)) {
+    const t = evBeatAt(e.startDay, at); if (now < t || e.mine['snd:' + id]) continue;
+    e.mine['snd:' + id] = 1; if (now - t >= 3) continue;
+    sndFx('cometTurn', { long: 22 });                    // section 27's FX.cometTurn (SD1's), the comet's
+    toast('Bridge', evWord('event.veyliVessel.notice.' + (id === 'vesselTurn' ? 'turn' : 'turnBack')) || (id === 'vesselTurn' ? 'The Wren is turning toward the Veyli ship.' : 'The Veyli ship is under way. The Wren is turning back onto her course.'));
+  }
+}
+// the scenes' scripts until the head writer's are baked (content/meetings vessel.*: a baked one is kept as it is).
+// V-1 stand-ins: the Captain at the glass after the turn, the ramp, Taavek going home; V-2 makes them staged scenes
+function vesselScripts() {
+  const W = (k, fb) => evWord('event.veyliVessel.' + k) || fb, put = (id, sc) => { if (!MEETING_SCRIPTS[id]) MEETING_SCRIPTS[id] = sc; };
+  put('vessel.captain', { title: 'The Captain at the glass', from: 'Captain Odile Marrow', gist: 'A small Veyli ship called in the night: its coolant pump has failed. It asks for company, not rescue. The Captain has turned the Wren to keep it company.',
+    lines: [{ who: 'marrow', text: W('call.1', 'My day off, and the Veyli call at half five. Envoy Saruth read it to me twice.'), pose: 'gesture' },
+      { who: 'marrow', text: W('call.2', 'A small ship. Its pump has failed. They don\'t want a tow. Saruth says a tow is a story, and company is a kindness.') },
+      { who: 'marrow', text: W('call.3', 'So we keep them company. There, coming round off the bow, in a few hours. Chief Calder will want hands.'), to: 'you' }] });
+  // V-2's scenes (SW4's content/meetings vesselSheet, vesselRamp, vesselRamp.late, vesselRamp.bench when baked)
+  put('vesselSheet', { title: 'The parts chain sheet', from: 'Chief Ines Calder', gist: 'Chief Calder asked you to sign up for the parts chain (Sunday 13:00, Main storage to the Tern) and to meet the Veyli ship\'s engineer at the foot of the Tern\'s ramp, Sunday 09:30.',
+    lines: [{ who: 'calder', text: W('sheet.1', 'There you are. It\'s my day off. The Veyli didn\'t check.'), pose: 'gesture' },
+      { who: 'calder', text: W('sheet.2', 'A sheet. The parts chain, tomorrow at one. Main storage to the Tern, by hand.') },
+      { who: 'calder', text: W('sheet.3', 'And you\'re meeting their engineer. Foot of the ramp, half nine.'), to: 'you' },
+      { choice: [{ text: 'Me? Why me?', rel: { calder: 1 }, reply: { who: 'calder', text: 'Someone met you, four weeks ago. Now you know how it\'s done.' } },
+        { text: 'Foot of the ramp. Got it.', rel: { calder: 1 }, reply: { who: 'calder', text: 'Quarter past nine, then. Then you\'re early.' } }] },
+      { who: 'calder', text: W('sheet.4', 'Sign the sheet.'), pose: 'gesture' }] });
+  const ramp = (first, title, gist) => ({ title, from: 'Taavek', gist,
+    lines: first.concat([{ who: 'taavek', text: 'This. The round one. Broken. Very.' }, { who: 'taavek', text: 'You. You are the one who meets? Good. Someone met you, also?', to: 'you' },
+      { choice: [{ text: 'Welcome aboard. Let\'s see the round one.', rel: { taavek: 1 }, reply: { who: 'taavek', text: 'Yes! First you look, then the words.' } },
+        { text: 'Someone met me. Zeke.', rel: { taavek: 1 }, reply: { who: 'taavek', text: 'Zeke met you. You meet me. Good. That is the way.' } },
+        { text: 'Coffee first?', rel: { taavek: 1 }, reply: { who: 'taavek', text: 'Yes! Yes. You understand everything already.' } }] },
+      { who: 'calder', text: 'The bench is this way. Bring the round one. Coffee on the way.', pose: 'gesture' }]) });
+  put('vesselRamp', ramp([{ who: 'taavek', text: 'Hello! Taavek. Engineer. Yes.', pose: 'gesture' }], 'Off the Tern', 'You met Taavek, the Veyli ship\'s engineer, at the foot of the Tern\'s ramp, with Chief Calder.'));
+  put('vesselRamp.late', ramp([{ who: 'calder', text: 'There you are. They waited. So did I.' }, { who: 'taavek', text: 'Hello! Taavek. Engineer. Yes.', pose: 'gesture' }], 'Off the Tern', 'You met Taavek, the Veyli ship\'s engineer, at the foot of the Tern\'s ramp. They and Chief Calder had waited for you.'));
+  put('vesselRamp.bench', ramp([{ who: 'torres-zeke', text: 'Here they are. Taavek, this is the one who was meant to meet you.' }, { who: 'taavek', text: 'Hello! Taavek. Engineer, here, at your bench.', pose: 'gesture' }], 'Meeting Taavek', 'You met Taavek, the Veyli ship\'s engineer, at the Works bay bench. Zeke had met them at the ramp.'));
+  put('vessel.home', { title: 'Taavek goes home', from: 'Chief Ines Calder', gist: 'Taavek went home on the Tern with the new part.',
+    lines: [{ who: 'taavek', text: W('home.1', 'Good. Very good. The round one goes home.'), pose: 'wave' },
+      { who: 'calder', text: W('home.2', 'Safe across. Tell your ship the Wren says hello.') }] });
+}
+// your Record's line (eventRecord asks the event's `record`): the part, the ramp, the chain. Words:
+// event.veyliVessel.record.* (the writers'), else these. The flags are V-2 to V-4's (e.mine, kept in the log; 'vessel:part' VB2's too)
+function vesselRecord(l) {
+  const m = l.mine || {}, W = (k, fb) => evWord('event.veyliVessel.record.' + k) || fb, out = [];
+  if (m['vessel:part']) out.push(W('done', 'Kept a Veyli ship company, Days 27-30; made its part with Taavek.'));
+  if (m['vessel:met']) out.push(m['vessel:metBy'] === 'bench' ? W('met.bench', 'Met Taavek at the Works bay bench.') : W('met', 'Met Taavek at the foot of the Tern\'s ramp.'));
+  if (m['vessel:chain']) out.push(W('chain', 'Passed crates in the parts chain.'));
+  const c = SHIP.commendations.find(x => x.event === 'veyliVessel' && x.day >= l.startDay);
+  return out.join(' ') + (c ? (out.length ? ' ' : '') + 'Commended by the Captain.' : '');
+}
+// ---- V-2 (VB1): your part, in person. Each of your beats has its level-1 arrow (guideAsk: shown with Teaching arrows
+// Off and over a tracked job), its named goal (the ring line: the goal's label), a notice, and its Schedule and Tracked
+// row (vesselItems, from section 15's devDay); the scene plays when you reach the one who tells you (or tap them).
+// Flags in the running event's e.mine (saved with it): 'vessel:told' (Calder's sheet scene), 'vessel:signed',
+// 'vessel:met' (Taavek, at the ramp or the bench), 'vessel:metBy' ('ramp' | 'late' | 'bench'), 'notice:<id>',
+// 'vessel:seen' (the bow glass on Saturday). In play only: nothing here is read by the crew's planner
+// minute m of event day k, absolute; and where you are in the running vessel event: { e, d (its day 0), k (event day),
+// m (minute of that day), now } or null
+const vesselAt = (e, k, m) => (e.startDay - 1 + k) * 1440 + m;
+function vesselNow(now = shipNow()) {
+  const e = SHIP.event; if (!VESSEL || !e || e.id !== 'veyliVessel') return null;
+  const k = Math.floor(now / 1440) + 1 - e.startDay; if (k < 0 || k > 3) return null;
+  return { e, d: e.startDay, k, m: now - (e.startDay - 1 + k) * 1440, now };
+}
+// the places the scenes use: VB2's when its Deck 5 places are in, else the nearest built ones
+const vesselSpot = (id, alt) => typeof placeById === 'function' && placeById(id) ? id : alt;
+const VESSEL_SPOTS = () => ({ bench: [vesselSpot('5-vbench-1', '5-works-bay-crowd-6'), vesselSpot('5-vbench-2', '5-works-bay-crowd-11'), vesselSpot('5-vbench-3', '5-works-bay-crowd-12')],
+  shop: [vesselSpot('5-vshop-1', '5-shop-board'), vesselSpot('5-vshop-2', '5-make-2')], rampTop: '5-tern-ramp-top', aisle: ROT_TERN_AISLE, foot: ROT_TERN_FOOT });
+// ---- Taavek's two days (section 14's guestTrim asks first; pure: the event's start day and the places only). Sunday:
+// out of the Tern's aisle at 09:30, waiting at the top of its ramp until 10:30 (the user's C3: they wait for you up to
+// an hour), at the Works bay bench to 12:00 (the round one), then their own day. Monday: their own morning, the machine
+// shop 09:20-12:00 and 13:15-14:30 (the part, the test fit), the ramp's top at 14:35 and up into the aisle by 15:00
+function vesselGuestTrim(p, d, segs) {
+  if (!VESSEL || !p || p.id !== VESSEL.guest || p.event !== 'veyliVessel') return null;
+  const g = eventGuestDays(p); if (!g || (d !== g[0] && d !== g[1])) return null;
+  const B = (d - 1) * 1440, S = VESSEL_SPOTS(), at = (from, to, placeId, tag) => ({ from: B + from, to: B + to, act: 'off', deck: 5, type: 'event', placeId, tag });
+  const away = (from, to) => ({ from: B + from, to: B + to, act: 'away', deck: 0, type: null, placeId: null });
+  if (d === g[0]) return vesselOverlay(segs, [away(0, VESSEL.arrive), at(VESSEL.arrive, VESSEL.arrive + 3, S.aisle, 'arrive'), at(VESSEL.arrive + 3, VESSEL.arrive + VESSEL.rampWait, S.rampTop, 'ev-veyliVessel-ramp'),
+    at(VESSEL.arrive + VESSEL.rampWait, 720, S.bench[0], 'ev-veyliVessel-bench'), at(770, 845, S.rampTop, 'ev-veyliVessel-chain')], B, B + 1440);   // the chain: taking the crates in at the top of the ramp
+  return vesselOverlay(segs, [at(560, 720, S.shop[0], 'ev-veyliVessel-shop'), at(795, VESSEL.leave - 30, S.shop[0], 'ev-veyliVessel-shop'), at(VESSEL.leave - 25, VESSEL.leaveBy - 3, S.rampTop, 'leave'),
+    at(VESSEL.leaveBy - 3, VESSEL.leaveBy, S.aisle, 'board'), away(VESSEL.leaveBy, 1440)], B, B + 1440);
+}
+// lay fixed pieces over a day's plan: the plan's own segments fill the gaps between them, clipped, with a lift ride
+// (SCHED_COMMUTE) wherever the deck changes at a piece's edge. Pure
+function vesselOverlay(segs, fixed, B, E) {
+  const C = SCHED_COMMUTE, out = [], ride = (from, to, deck, fromDeck) => ({ from, to, act: 'commute', deck, type: 'lift', placeId: null, fromDeck });
+  let t = B, deck = null;
+  for (const f of fixed.concat([null])) {
+    const end = f ? f.from : E;
+    let g = segs.filter(s => s.to > t && s.from < end).map(s => ({ ...s, from: Math.max(s.from, t), to: Math.min(s.to, end) })).filter(s => s.to > s.from);
+    if (f && deck && f.deck === deck && end - t < 2 * C + 6 && out.length) { out[out.length - 1] = { ...out[out.length - 1], to: end }; g = []; }   // a short gap between two pieces on one deck: stay at the first
+    if (g.length && deck && g[0].deck && g[0].deck !== deck && g[0].act !== 'commute') {   // off a fixed piece to the plan on another deck
+      const a = g[0].from, to = g[0].deck;
+      while (g.length && g[0].from < a + C) { if (g[0].to <= a + C) g.shift(); else { g[0] = { ...g[0], from: a + C }; break; } }
+      g.unshift(ride(a, a + C, to, deck));
+    }
+    const last = g.length ? g[g.length - 1] : null, here = last ? last.deck : deck;
+    if (f && f.deck && here && here !== f.deck) {            // to the fixed piece on another deck: the ride comes out of the gap's end
+      while (g.length && g[g.length - 1].to > end - C) { const x = g.pop(); if (x.from < end - C) { g.push({ ...x, to: end - C }); break; } }
+      g.push(ride(end - C, end, f.deck, here));
+    }
+    out.push(...g); if (f) { out.push(f); t = f.to; deck = f.deck || deck; }
+  }
+  return out;
+}
+// live (section 14's whereIs, through tradWhere; in play only): once you've met Taavek at the ramp, Taavek and Calder
+// go to the Works bay bench (Calder said "this way"); not met by 10:30, Zeke has met Taavek and waits there with them
+function vesselWhere(p, t) {
+  const v = vesselNow(t); if (v && v.k === 2 && p && p.id === 'taavek') return v.e.mine['vessel:home'] === 1 && v.m >= VESSEL.leave - 25 && v.m < VESSEL.leaveBy ? { deck: 5, act: 'off', type: 'event', placeId: ROT_TERN_AISLE, moving: false, from: t - 1, until: t + 1, tag: 'board' } : null;   // goodbye said: up into the Tern
+  if (v && v.k === 2 && p) return vesselHelperWhere(p, t, v);   // Monday: your two helpers in the machine shop (V-4)
+  if (!v || v.k !== 1 || !p || !['taavek', 'calder', 'torres-zeke'].includes(p.id)) return null;
+  const m = v.m, met = v.e.mine['vessel:met'], late = m >= VESSEL.arrive + VESSEL.rampWait, S = VESSEL_SPOTS();
+  let k = -1;
+  if (met && m < VESSEL.arrive + VESSEL.rampWait && m >= VESSEL.arrive) k = p.id === 'taavek' ? 0 : p.id === 'calder' ? 1 : -1;
+  if (met && !v.e.mine['vessel:roundOne'] && m >= 595 && m < 720) k = p.id === 'taavek' ? 0 : p.id === 'calder' ? 1 : 2;   // the round one: the three of them at the bench
+  if (!met && late && m < 720 && p.id === 'torres-zeke') k = 2;
+  if (k < 0) return null;
+  return { deck: 5, act: 'off', type: 'event', placeId: S.bench[k], moving: false, from: t - 1, until: t + 1, tag: 'ev-veyliVessel-bench' };
+}
+// ---- the scenes: a scene plays (the writers' .meet through dialogueShow, so it counts as one of the event's meetings
+// toward C1) when you come within reach of the one who tells you, in their room, or tap them; the meeting's room is
+// where you stand then, so walking out closes it as any meeting (the gist then comes by Mail: you were told in person
+// first). A scene's script by its run: a function of the vesselNow record
+function vesselScene(id, script, who, v, onEnd) {
+  if (typeof dialogueShow !== 'function' || DIALOGUE || !MEETING_SCRIPTS[script]) return false;
+  const r = roomAt(...player.here()), rm = r && deckDef.rooms && deckDef.rooms[r], name = rm ? rm.name : null;
+  const sc = MEETING_SCRIPTS[script], prev = sc.onEnd;
+  sc.onEnd = finished => { sc.onEnd = prev; try { onEnd(finished); } catch (err) { /* the scene closes anyway */ } };
+  v.e.mine['vessel:scene:' + id] = 1;
+  return dialogueShow(script, { id: 'vessel.' + id + '@' + v.d, event: 'veyliVessel', who, at: v.now, where: { deck: deckDef.num, room: name ? new RegExp('^' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$') : null } });
+}
+// someone you can reach for a scene: on this deck, in your room, within r metres (drawn crew; null when not)
+function vesselReach(id, r = 3) {
+  if (typeof DECK_CREW === 'undefined' || typeof deckDef === 'undefined' || !deckDef) return null;
+  const a = DECK_CREW.find(c => c.p && c.p.id === id); if (!a) return null;
+  const p = player.obj.position, mine = roomAt(...player.here());
+  return mine && roomAt(...cellAt(a.x, a.z)) === mine && Math.hypot(a.x - p.x, a.z - p.z) <= r ? a : null;
+}
+// a goal at a person wherever the plan has them (their deck, and their room as the fallback when they aren't drawn)
+function vesselCrewGoal(id, label, extra) {
+  const p = schedPeople().find(q => q.id === id); if (!p) return null;
+  const w = whereIs(p, shipNow()); if (!w || !w.deck) return null;
+  const pl = w.placeId && typeof placeById === 'function' ? placeById(w.placeId) : null;
+  return { deck: w.deck, crew: id, ...(pl ? { place: pl.id } : {}), label, vessel: true, ...(extra || {}) };
+}
+// once: a notice (a toast; never over a dialogue, it waits) the first minute it's due
+function vesselNotice(v, id, t0, t1, title, text) {
+  if (v.e.mine['notice:' + id] || v.now < t0 || v.now >= t1) return false;
+  v.e.mine['notice:' + id] = 1; toast(title, text); return true;
+}
+// the arrow: guideAsk at the level, asked again each minute with its window and done (the queue keeps one per id)
+function vesselArrow(id, level, goal, from, until, done, o) {
+  if (typeof guideAsk !== 'function') return;
+  guideAsk({ id: 'vessel:' + id, level, goal, from, until, done, owner: 'vessel', ...(o || {}) });
+}
+// the scenes' windows and their notices, arrows and triggers (from vesselTick once a ship minute, in play)
+function vesselScenes(v) {
+  const e = v.e, M = e.mine, at = (k, m) => vesselAt(e, k, m), sleeping = typeof ACT !== 'undefined' && ACT && /^(sleep|lie)$/.test(ACT.kind);
+  const W = vesselW;
+  // Saturday 10:00: Calder's sheet. Calder (called in) in the Works bay from 10:00 to 12:00, then wherever the plan has
+  // them; the arrow at Calder until the scene, then at the sheet until you sign (to Sunday 13:00, the chain)
+  if (v.now >= at(0, 600) && v.now < at(1, 780) && !M['vessel:signed']) {
+    if (!M['vessel:told']) {
+      vesselNotice(v, 'sheet', at(0, 600), at(1, 780), 'Chief Ines Calder', W('notice.sheet', 'Chief Calder is looking for you: there\'s a sheet to sign in the Works bay.'));
+      const ramp = v.now >= at(1, VESSEL.arrive - 20) && !M['vessel:met'] || v.k === 1 && M['vessel:met'] && !M['vessel:roundOne'] && v.now < at(1, 765);   // Taavek first (the ramp, the bench after 10:30, the round one): the sheet after
+      if (!ramp && !(deckDef.num === 5 && roomAt(...player.here()) === 'w')) {   // Calder comes to find you, wherever you are (the spec): at 10:00, again at 11:30
+        if (v.now >= at(0, 600)) vesselFetch(v, 'calder', 'vessel:fetch:sheet', 'talk.sheetFind', ['calder: There you are. A minute? There\'s a sheet with your name near the top.'], 20);
+        if (v.now >= at(0, 690)) vesselFetch(v, 'calder', 'vessel:fetch:sheet2', 'talk.sheetFind', ['calder: There you are. A minute? There\'s a sheet with your name near the top.'], 20);
+      }
+      if (!ramp) vesselArrow('sheet', 1, () => vesselCrewGoal('calder', W('ring.sheet', 'Sign the parts chain sheet')), at(0, 600), at(1, 780), () => !!(SHIP.event && SHIP.event.mine['vessel:told']));
+      if (ramp) guideDrop('vessel:sheet'); else if (vesselReach('calder', 3.2)) vesselScene('sheet', 'vesselSheet', ['calder'], v, () => { M['vessel:told'] = 1; });
+    } else if (v.now >= at(1, VESSEL.arrive - 20) && !M['vessel:met']) guideDrop('vessel:sign');   // the ramp first, then the sheet again
+    else vesselArrow('sign', 1, () => ({ deck: 5, item: /^Parts chain sheet$/, room: 'w', label: W('ring.sheet', 'Sign the parts chain sheet'), vessel: true }), at(0, 600), at(1, 780), () => !!(SHIP.event && SHIP.event.mine['vessel:signed']));
+  }
+  // Saturday 14:00: the little ship comes into view (optional): a notice, a level-2 arrow once to the bow lounge
+  if (v.now >= at(0, 840) && v.now < at(0, 1080) && !M['vessel:seen']) {
+    vesselNotice(v, 'view', at(0, 840), at(0, 1080), 'Bridge', W('notice.view', 'The Veyli ship is off the bow: you can see it from Deck 3\'s glass.'));
+    vesselArrow('view', 2, () => ({ deck: 3, room: 'L', label: W('goal.view', 'The Veyli ship, from the bow glass'), vessel: true }), at(0, 840), at(0, 1080), () => !!(SHIP.event && SHIP.event.mine['vessel:seen']), { once: 1 });
+    if (deckDef.num === 3 && roomAt(...player.here()) === 'L') M['vessel:seen'] = 1;
+  }
+  // Sunday: the notice once you're up (from 08:00); the arrow at the ramp's foot from 09:10; the scene from 09:30 when
+  // Taavek is down the ramp and you're at its foot (or tap them); waiting for you to 10:30 (C3), then Zeke has met them
+  // and you meet them at the Works bay bench
+  if (v.k >= 1 && !M['vessel:met'] && v.now >= at(1, 480)) {
+    if (!sleeping) vesselNotice(v, 'ramp', at(1, 480), at(1, 720), 'Commander Teo Vance', W('notice.ramp', 'Taavek arrives at 09:30: you\'re meeting them at the foot of the Tern\'s ramp.'));
+    const R0 = at(1, VESSEL.arrive), R1 = at(1, VESSEL.arrive + VESSEL.rampWait);
+    if (v.now < R1) {
+      vesselArrow('ramp', 1, () => ({ deck: 5, place: ROT_TERN_FOOT, room: 'S', label: W('ring.ramp', 'Stand at the foot of the ramp'), vessel: true }), at(1, VESSEL.arrive - 20), R1, () => !!(SHIP.event && SHIP.event.mine['vessel:met']));
+      if (v.now >= R0 + 5) vesselNotice(v, 'rampWait', R0 + 5, R1, 'Chief Ines Calder', W('notice.rampWait', 'Taavek and Chief Calder are waiting for you at the foot of the Tern\'s ramp.'));
+      if (v.now >= R0 + 30) vesselNotice(v, 'rampWait.late', R0 + 30, R1, 'Chief Ines Calder', W('notice.rampWait.late', 'They\'re still waiting at the ramp, Deck 5. Half an hour now.'));
+      if (v.now >= R0 + 15 && !M['vessel:found'] && !(deckDef.num === 5 && roomAt(...player.here()) === 'S')) vesselFind(v);   // 09:45: Calder comes to find you, in person
+      const foot = placeSpot(ROT_TERN_FOOT), p = player.obj.position, near = deckDef.num === 5 && foot && Math.hypot(foot.x - p.x, foot.z - p.z) < 1.6;
+      const tv = v.now >= R0 + 3 ? vesselReach('taavek', near ? 4.5 : 1.8) : null;   // down the ramp, out of the aisle
+      if (tv && !(tv.spot && tv.spot.id === ROT_TERN_AISLE)) {
+        const late = v.now >= R0 + 5;
+        vesselScene('ramp', late ? 'vesselRamp.late' : 'vesselRamp', ['taavek', 'calder', 'torres-zeke', 'lindqvist-isak'], v, () => { M['vessel:met'] = 1; M['vessel:metBy'] = late ? 'late' : 'ramp'; });
+      }
+    } else {
+      vesselNotice(v, 'rampZeke', R1, at(3, 0), 'Zeke Torres', W('notice.rampZeke', 'Zeke met Taavek at the ramp. They\'re at the Works bay bench: go and say hello.'));
+      vesselArrow('rampBench', 1, () => vesselCrewGoal('taavek', W('ring.rampBench', 'Say hello to Taavek at the bench')), R1, at(2, VESSEL.leave), () => !!(SHIP.event && SHIP.event.mine['vessel:met']));
+      if (vesselReach('taavek', 3.2)) vesselScene('rampBench', 'vesselRamp.bench', ['taavek', 'torres-zeke', 'calder'], v, () => { M['vessel:met'] = 1; M['vessel:metBy'] = 'bench'; });
+    }
+  }
+}
+// C3, the user's: at 09:45, not at the ramp, Calder comes to find you wherever you are (section 14's crewComeTo: a free
+// place in your room nearest you), says the writers' talk.rampFind there, and goes back to the ramp; the arrow stays on
+// the ramp. Once ('vessel:found'); live only
+function vesselFind(v) { vesselFetch(v, 'calder', 'vessel:found', 'talk.rampFind', ['calder: There you are. Taavek\'s at the foot of the ramp. Waiting.', 'calder: They\'re not cross. I\'m not either. Much. Come on.'], 12); }
+// someone comes to find you wherever you are (section 14's crewComeTo: the free place in your room nearest you), says
+// the writers' "who: line" lines there, and goes back after `mins`; once a run (the flag). Live only
+function vesselFetch(v, who, flag, key, alt, mins) {
+  if (typeof crewComeTo !== 'function' || typeof deckDef === 'undefined' || !deckDef || v.e.mine[flag]) return;
+  v.e.mine[flag] = 1;
+  const p = player.obj.position, mine = roomAt(...player.here()), P = (DECKS[deckDef.num].places || []).filter(pl => pl.room === mine && !pl.machine && pl.pose !== 'lie' && !(typeof heldBy === 'function' && heldBy(pl.id)));
+  const pl = P.map(q => { const c = q.xy ? cellPos(q.xy[0] - .5, q.xy[1] - .5) : cellPos(...q.at); return [q, Math.hypot(c.x - p.x, c.z - p.z)]; }).sort((x, y) => x[1] - y[1] || (x[0].id < y[0].id ? -1 : 1))[0];
+  if (!pl) return;
+  const L = (vesselWords(key) || alt).map(t => evFill(t.slice(t.indexOf(': ') + 2), evCtx(v.e)));
+  crewComeTo(who, pl[0].id, a => { a.talking = 2; bubbleSay(friSpeaker(a), L[0], 6); if (L[1]) simTimeout(() => { try { bubbleSay(friSpeaker(a), L[1], 6); } catch (err) { /* gone */ } }, 4500); }, { until: v.now + mins });
+}
+// the Tern goes across (Sunday 08:00, the ramp shut behind it, Lindqvist's words in the shuttle bay) and comes back
+// at 09:30 with Taavek (the ramp opens); the same on Monday at 15:00, home. Deck 5 only, nobody on the ramp; the ramp
+// isn't saved (a reload finds it open, as every load)
+function vesselTern(v) {
+  if (typeof ternRamp !== 'function' || typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 5) return;
+  const home = v.e.mine['vessel:home'], gone = v.k === 2 && v.m >= (home === 1 ? VESSEL.leave - 20 : VESSEL.leaveBy) && v.m < VESSEL.leaveBy + 30;   // home: once Taavek's aboard (or at 15:30)
+  const away = v.k === 1 && v.m >= 480 && v.m < VESSEL.arrive || gone && !(DECK_CREW || []).some(a => a.p && a.p.id === 'taavek' && a.goalId !== ROT_TERN_AISLE);
+  if (away && TERN.target > 0 && ternClear() && !(typeof ternInside === 'function' && ternInside())) ternRamp(false, 3);
+  if (!away && TERN.target < 1 && (v.k === 1 && v.m >= VESSEL.arrive && v.m < VESSEL.arrive + 60 || v.k === 2 && v.m >= VESSEL.leaveBy + 30 && v.m < VESSEL.leaveBy + 90)) {
+    ternRamp(true, 2.5);
+    if (v.k === 1 && !v.e.mine['notice:ternIn'] && VESSEL_TERN_SAID !== v.e.startDay) { v.e.mine['notice:ternIn'] = 1; VESSEL_TERN_SAID = v.e.startDay; toast('Isak Lindqvist, the pilot', '"' + (vesselW('tern.in', 'Down gently. One guest, one crate. Ramp\'s opening.')) + '"'); }
+  }
+}
+let VESSEL_TERN_SAID = null;                              // the pilot's word once a run, whatever reloads the event (RV21: it showed twice)
+// a tap on someone (section 18's tradJoinTap asks first): Calder for the sheet, Taavek at the ramp or the bench. True
+// when it played a scene
+function vesselTap(a) {
+  const v = vesselNow(); if (!v || !a || !a.p || DIALOGUE) return false;
+  const M = v.e.mine, at = (k, m) => vesselAt(v.e, k, m), id = a.p.id;
+  if (id === 'calder' && !M['vessel:told'] && v.now >= at(0, 600) && v.now < at(1, 780) && !(v.now >= at(1, VESSEL.arrive - 20) && !M['vessel:met']) && !(v.k === 1 && M['vessel:met'] && !M['vessel:roundOne'] && v.now < at(1, 765))) { player.stop(); a.talking = 2; return vesselScene('sheet', 'vesselSheet', ['calder'], v, () => { M['vessel:told'] = 1; }); }
+  if (id === 'calder' && v.k === 2 && !M['vessel:job'] && v.m >= 560 && v.m < 780) { player.stop(); a.talking = 2; return vesselScene('job', 'vesselJob', ['calder', 'taavek'], v, () => { M['vessel:job'] = 1; simTimeout(() => { const w = vesselNow(); if (w) vesselHelperCard(w); }, 400); }); }   // V-4: Calder's word
+  if (id === 'taavek' && !M['vessel:met'] && v.now >= at(1, VESSEL.arrive)) {
+    player.stop(); a.talking = 2;
+    const R1 = at(1, VESSEL.arrive + VESSEL.rampWait), bench = v.now >= R1, late = v.now >= at(1, VESSEL.arrive + 5);
+    return vesselScene(bench ? 'rampBench' : 'ramp', bench ? 'vesselRamp.bench' : late ? 'vesselRamp.late' : 'vesselRamp', ['taavek', 'calder', 'torres-zeke', 'lindqvist-isak'], v,
+      () => { M['vessel:met'] = 1; M['vessel:metBy'] = bench ? 'bench' : late ? 'late' : 'ramp'; });
+  }
+  return false;
+}
+// the parts chain sheet (VB2's prop 'vesselSheet' on the Works bay's job board wall, Saturday 09:30 to Sunday 14:00, its
+// item tagged vesselSheet): its tap (PLAYER_TAPS): before Calder's word, what it is; after it, you sign (once) and
+// Calder's parts list comes by Mail as the record
+function vesselSign(it, at) {
+  if (!it || !it.vesselSheet) return false;
+  const v = vesselNow(), M = v && v.e.mine;
+  if (!v || !M['vessel:told'] || M['vessel:signed']) { toast('Parts chain sheet', M && M['vessel:signed'] ? vesselW('tap.sheet', 'The parts chain sheet. Thirty-odd names already, and yours, near the top.') : vesselW('tap.sheet.before', 'The parts chain sheet: Sunday, 13:00, Main storage to the Tern. A pen on a string.')); return true; }
+  approach(at.clone(), it.front, it.depth, () => {
+    const w = vesselNow(); if (!w || w.e.mine['vessel:signed']) return;
+    w.e.mine['vessel:signed'] = 1;
+    toast('Parts chain sheet', vesselW('signed', 'You sign the sheet: Sunday, 13:00, Main storage to the Tern.'));
+    const m = evBankMail('event.veyliVessel.mail.partslist', { subject: 'Parts chain, Sunday 13:00', body: c => 'For the Veyli ship, by the Tern: our spare coolant pump, 40 fittings, 12 drums of coolant, seals, the small tool kit. Main storage to the ramp, by hand. Their engineer arrives 09:30; ' + c.you + ' meets them at the ramp, with me.' });
+    if (typeof mailSend === 'function') mailSend({ at: shipNow(), from: 'Chief Ines Calder', subject: m.subject, body: evText(m.body, evCtx(w.e)), quiet: true });
+  });
+  return true;
+}
+// your rows on the Schedule and Tracked (section 15's devDay, day d): the sheet until signed; the ramp from Saturday
+// evening (Vance's Mail and Calder have both told you by then) until you've met Taavek; at the bench after 10:30
+function vesselItems(d) {
+  const e = SHIP.event; if (!VESSEL || !e || e.id !== 'veyliVessel') return [];
+  const k = d - e.startDay, M = e.mine, now = shipNow(), out = [], row = (from, to, key, alt, where, deck, room) => out.push({ from, to, title: vesselW(key, alt), where, kind: 'beat', deck, room });
+  if (k === 0 && !M['vessel:signed'] && now >= vesselAt(e, 0, 570)) row(600, 1080, 'sched.sheet', 'Sign the parts chain sheet, Works bay', 'the Works bay, Deck 5', 5, 'w');
+  if (k === 1 && !M['vessel:met'] && now >= vesselAt(e, 0, 1080)) row(VESSEL.arrive, VESSEL.arrive + VESSEL.rampWait, 'sched.ramp', 'Meet Taavek, 09:30, the shuttle bay', 'the foot of the Tern\'s ramp, the shuttle bay, Deck 5', 5, 'S');
+  if (k === 1 && M['vessel:met'] && !M['vessel:roundOne']) row(600, 690, 'tracked.bench', 'Join Taavek at the Works bay bench', 'the bench, the Works bay, Deck 5', 5, 'w');
+  if (k === 2 && !M['vessel:job']) row(560, 600, 'goal.job', 'Taavek\'s part: see Chief Calder in the Works bay', 'the Works bay, Deck 5', 5, 'w');
+  if (k === 2 && M['vessel:job'] && !M['vessel:part'] && (M['vessel:step'] | 0) >= 1) row(600, 805, 'tracked.step.' + (M['vessel:step'] | 0), 'Taavek\'s part, in the machine shop', 'the machine shop, Deck 5', 5, 'f');
+  if (k === 2 && M['vessel:part'] && !M['vessel:testfit']) row(810, 870, 'tracked.testfit', 'Taavek\'s part: the test fit, 13:30', 'the machine shop, Deck 5', 5, 'f');
+  if (k === 2 && !M['vessel:home']) row(VESSEL.leave - 15, VESSEL.leave, 'sched.home', 'Taavek goes home, 15:00, the shuttle bay', 'the Tern\'s ramp, the shuttle bay, Deck 5', 5, 'S');
+  if (k >= 3 && M['vessel:sketch'] && !M['vessel:shelved']) row(720, 1439, 'tracked.shelf', 'Put Taavek\'s sketch on your shelf', 'your cabin, Deck 4', 4, null);
+  return out;
+}
+// the crowd's lines over their heads (the comet's way: a line every 4 ship minutes while you're in the room, in order,
+// from whoever says it when they're drawn in that room; one not there is passed over). The writers' talk.<key> ("who:
+// line" lists), else alt. Looks only, nothing saved
+const VESSEL_SAID = { key: null, n: 0, at: -99 };
+function vesselTalk(key, deck, room, m, alt) {
+  if (typeof bubbleSay !== 'function' || typeof DECK_CREW === 'undefined' || deckDef.num !== deck || roomAt(...player.here()) !== room) return;
+  const S = VESSEL_SAID; if (S.key !== key) { S.key = key; S.n = 0; S.at = -99; }
+  if (m - S.at < 4) return;
+  const L = (vesselWords('talk.' + key) || alt).map(t => { const i = t.indexOf(': '); return [t.slice(0, i), t.slice(i + 2)]; });
+  for (let k = 0; k < L.length; k++) {
+    const i = (S.n + k) % L.length, a = DECK_CREW.find(c => c.h && c.p && c.p.id === L[i][0]);
+    if (!a || roomAt(...cellAt(a.x, a.z)) !== room) continue;
+    bubbleSay(friSpeaker(a), L[i][1], 5); S.at = m; S.n = i + 1; return;
+  }
+}
+// what's said around you now: the bow glass on Saturday afternoon, the Tern going on Sunday morning, Calder and Taavek
+// waiting at the ramp (C3)
+function vesselTalkNow(v) {
+  if (DIALOGUE) return;
+  if (v.k === 0 && v.m >= 840 && v.m < 1080) vesselTalk('view', 3, 'L', v.now, ['tomas: That\'s it? It\'s tiny. I mean small. I mean it\'s lovely.', 'sato: Slim hull, three running lights. Two of them low. They\'re saving power.']);
+  if (v.k === 1 && v.m >= 470 && v.m < 500) vesselTalk('ternOut', 5, 'S', v.now, ['lindqvist-isak: She\'s warm and she wants to go. Clear the yellow, please.', 'torres-zeke: Off she goes. Bring us back a guest, Isak.']);
+  if (v.k === 1 && v.m >= VESSEL.arrive && v.m < VESSEL.arrive + 20 && (!DIALOGUE || !/^vesselRamp/.test(DIALOGUE.id))) vesselTalk('rampCrowd', 5, 'S', v.now, ['pell: There! Is that them? That\'s them.', 'kovac-zainab: They\'re carrying it themselves. The broken one.']);   // the crowd as Taavek comes down (RV21)
+  if (v.k === 1 && v.m >= VESSEL.arrive + 5 && v.m < VESSEL.arrive + VESSEL.rampWait && !v.e.mine['vessel:met']) vesselTalk('rampWait', 5, 'S', v.now, ['calder: They\'ll be here. Give them a minute.', 'taavek: I wait. Waiting is good. I see your ship.']);
+}
+// ---- V-2b (VB1): the round one at the bench (Sunday from 10:00, once you've met Taavek), Taavek going home (Monday
+// 14:45-15:00 at the ramp) and the engine lights at the bow glass (Monday 17:30, Saruth hosting, a gathering you tap to
+// join; the glow and three slow flashes at 17:40 are VB2's sky). From vesselScenes, in play. Flags: 'vessel:roundOne',
+// 'vessel:home', 'vessel:glass', 'vessel:sketch' (Taavek's sketch for your shelf: handed over at the ramp, or left
+// with Calder if you missed it)
+function vesselScenes2(v) {
+  const e = v.e, M = e.mine, at = (k, m) => vesselAt(e, k, m), W = vesselW;
+  // the round one: from 09:55 (or as soon as you've met them), the arrow at Taavek; the scene at the bench with Calder
+  // and Zeke when you're beside Taavek in the Works bay (or tap them). Not there by 12:45: Taavek comes to find you and
+  // shows you where you are; not reached by 13:00 (the chain), the notice and its record by Mail
+  if (v.k === 1 && M['vessel:met'] && !M['vessel:roundOne'] && v.now >= at(1, 595)) {
+    if (v.now < at(1, 780)) {
+      vesselArrow('bench', 1, () => vesselCrewGoal('taavek', W('ring.bench', 'Join Taavek at the bench')), at(1, 595), at(1, 780), () => !!(SHIP.event && SHIP.event.mine['vessel:roundOne']));
+      if (v.now >= at(1, 765) && !(deckDef.num === 5 && roomAt(...player.here()) === 'w')) vesselFetch(v, 'taavek', 'vessel:fetch:roundOne', 'talk.roundOneFind', ['taavek: There! The one who meets. I bring the round one to you. Look.'], 15);
+      if ((deckDef.num === 5 && roomAt(...player.here()) === 'w' || M['vessel:fetch:roundOne']) && vesselReach('taavek', 3.2) && v.now >= at(1, 600))
+        vesselScene('roundOne', 'vesselRoundOne', ['taavek', 'calder', 'torres-zeke'], v, () => { M['vessel:roundOne'] = 1; });
+    } else if (!DIALOGUE) { M['vessel:roundOne'] = -1; toast('Taavek', W('notice.roundOne.missed', 'Taavek showed Calder and Zeke the round one at the bench: it will have to be made, tomorrow, in the machine shop.')); meetingGist('vesselRoundOne'); }
+  }
+  // Taavek goes home: the notice and the arrow from 14:30 (the ring on Calder at the ramp), the scene with Taavek and
+  // Calder in the shuttle bay; the Tern waits for you to 15:30 (as at the ramp on Sunday), Calder coming to find you at
+  // 15:00; missed even so, Taavek leaves the sketch with Calder (a notice)
+  if (v.k === 2 && v.now >= at(2, VESSEL.leave - 30) && !M['vessel:home']) {
+    if (v.now < at(2, VESSEL.leaveBy)) {
+      vesselNotice(v, 'home', at(2, VESSEL.leave - 30), at(2, VESSEL.leaveBy), 'Chief Ines Calder', W('notice.home', 'Taavek goes home at 15:00. See them off at the Tern\'s ramp.'));
+      vesselArrow('home', 1, () => ({ deck: 5, place: ROT_TERN_FOOT, room: 'S', label: W('ring.home', 'See Taavek off'), vessel: true }), at(2, VESSEL.leave - 30), at(2, VESSEL.leaveBy), () => !!(SHIP.event && SHIP.event.mine['vessel:home']));
+      if (v.now >= at(2, VESSEL.leave) && !(deckDef.num === 5 && roomAt(...player.here()) === 'S')) vesselFetch(v, 'calder', 'vessel:fetch:home', 'talk.homeFind', ['calder: There you are. Taavek won\'t go without saying goodbye. The Tern\'s waiting. Come on.'], 15);
+      if (deckDef.num === 5 && roomAt(...player.here()) === 'S' && (vesselReach('calder', 4) || vesselReach('taavek', 4)))
+        vesselScene('home', 'vesselHome', ['calder', 'taavek', 'lindqvist-isak'], v, () => { M['vessel:home'] = 1; M['vessel:sketch'] = 'you'; });
+    } else { M['vessel:home'] = -1; M['vessel:sketch'] = 'calder'; toast('Chief Ines Calder', W('notice.home.missed', 'Taavek went home on the Tern. They left a sketch for you with Chief Calder: it\'s on your shelf.')); }
+  }
+  // the engine lights: the notice at 17:15, the arrow at Saruth at the bow glass (the ring "Stand at the glass") until
+  // you've joined (section 18's tap to join: TRAD_JOIN.vesselLights) or 18:00; at 17:40 the lounge's line to you
+  const L0 = at(2, 1050), L1 = at(2, 1080);
+  if (v.k === 2 && v.now >= L0 - 15 && v.now < L1) {
+    vesselNotice(v, 'lights', L0 - 15, L1, 'Envoy Saruth', W('notice.lights', 'At 17:40 the Veyli ship lights its engine. The crew are gathering at the bow glass.'));
+    const joined = () => SHIP.events.joined.includes('vesselLights@' + (e.startDay + 2));
+    vesselArrow('lights', 1, () => ({ ...(vesselCrewGoal('saruth', W('ring.lights', 'Stand at the glass')) || { deck: 3, room: 'L', label: W('ring.lights', 'Stand at the glass') }), room: 'L' }), L0 - 15, L1, () => !!SHIP.event && joined());
+    if (joined()) M['vessel:glass'] = 1;
+    if (v.now >= at(2, 1062) && !M['vessel:lightsYou'] && deckDef.num === 3 && roomAt(...player.here()) === 'L' && typeof bubbleSay === 'function') {
+      const s = vesselReach('saruth', 9) ? 'saruth' : vesselReach('calder', 9) ? 'calder' : null, a = s && vesselReach(s, 9);
+      if (a) { M['vessel:lightsYou'] = 1; const k = s === 'saruth' ? 'lights.you' : 'lights.you.calder', t = (vesselWords(k) || [s === 'saruth' ? 'saruth: That light is your part, turning.' : 'calder: Good part. Don\'t let it go to your head.'])[0];
+        bubbleSay(friSpeaker(a), evFill(t.slice(t.indexOf(': ') + 2), evCtx(e)), 7); vesselCheer(); }
+    }
+  }
+}
+// the lounge cheers and looks at you, briefly (looks only): those at the lights' gathering turn to face you
+function vesselCheer() {
+  if (typeof DECK_CREW === 'undefined') return;
+  const p = player.obj.position;
+  for (const a of DECK_CREW) if (a.p && /^ev-vesselLights/.test(a.tag || '') && Math.hypot(a.x - p.x, a.z - p.z) < 9) { a.talking = 2; a.face = Math.atan2(p.x - a.x, p.z - a.z); }
+}
+// who goes to the engine lights (the gathering's who: 1 or 0, pure): the people the lounge's talk needs (Saruth hosts),
+// and about four in ten of everyone else by one hash a day (k 358, the gathering's own key: no more meaning to go than
+// its 44 places); no guest but Saruth
+const VESSEL_LIGHTS_GO = ['saruth', 'calder', 'sato', 'tomas', 'torres-zeke', 'halloran-emeka', 'kovac-zainab', 'bramwell-basil', 'pell'];
+// who comes to watch Taavek arrive (the gathering's who: 1 or 0, pure; k 360): Works, Comms, Stores and Survey, nearly
+// all by hash (about twenty can: the rest are asleep, away or on a post that can't wait)
+function vesselArrivalWho(p, d) { return p && p.rank !== 'guest' && ['works', 'comms', 'store', 'survey'].includes(p.dept) && p.id !== 'calder' && p.id !== 'torres-zeke' && schedU(p.seed, d, 360) < .95 ? 1 : 0; }   // (the day shift stands easy for it: the onset's rule)
+function vesselLightsWho(p, d) {
+  if (!p || p.rank === 'guest' && p.id !== 'saruth') return 0;
+  return VESSEL_LIGHTS_GO.includes(p.id) || schedU(p.seed, d, 358) < .4 ? 1 : 0;
+}
+// Taavek's sketch on your shelf (Tuesday, the beats table: "the next time you're in your cabin"): from Tuesday 12:00
+// (Taavek's letter) while you're on Deck 4, a level-1 arrow at your bed with the ring line; within reach of it, VB2's
+// vesselShelve() puts it up (a lasting trace) and a notice says so. To Wednesday's end; flag 'vessel:shelved'
+function vesselShelf(v) {
+  const M = v.e.mine; if (!M['vessel:sketch'] || M['vessel:shelved'] || v.k < 3) return;
+  const bed = typeof playerBed === 'function' ? playerBed() : null; if (!bed || deckDef.num !== 4) return;
+  vesselArrow('shelf', 1, () => ({ deck: 4, place: bed, label: vesselW('ring.shelf', 'Put the sketch on your shelf'), vessel: true }), vesselAt(v.e, 3, 720), vesselAt(v.e, 5, 0), () => !!(SHIP.event && SHIP.event.mine['vessel:shelved']));
+  const sp = v.now >= vesselAt(v.e, 3, 720) && placeSpot(bed), p = player.obj.position;
+  if (sp && Math.hypot(sp.x - p.x, sp.z - p.z) < 1.4) {
+    M['vessel:shelved'] = 1; if (typeof vesselShelve === 'function') vesselShelve();
+    toast('Taavek\'s sketch', vesselW('tap.sketch.shelf', 'Taavek\'s sketch of your favourite machine, labelled in Veyli: "The one who meets."'));
+  }
+}
+// ---- V-3 (VB1): the parts chain, Sunday 13:00-14:00. A gathering (vesselChain, k 359) in a line of VB2's 40 spots
+// from Main storage's door to the Tern's ramp (pool '@vessel-chain'), Zeke calling the count at his own spot; the day
+// shift stands easy for it (the Line's rule); you tap Zeke to take a gap. The crates are VB2's (vesselChainCrate: one
+// every 2.4 ship minutes, passed between the hands that are there); as one comes into your hands, the ring "Pass the
+// crate" on the next pair of hands (a tap passes it, or it goes on by itself a moment later), and Zeke calls it. Your
+// part counts as one of the event's jobs toward C1 once you've passed three. Flags: 'vessel:chain' (passed three),
+// 'vessel:chainN' (how many), 'notice:chain*'. In play only
+const VESSEL_CHAIN_GO = ['torres-zeke', 'calder', 'pell', 'kovac-zainab', 'halloran-emeka', 'brennan', 'bramwell-basil'];
+function vesselChainWho(p, d) {                           // the gathering's who: 1 or 0, pure (k 359, its own key)
+  if (!p || p.rank === 'guest') return 0;
+  return VESSEL_CHAIN_GO.includes(p.id) || p.dept === 'works' || p.dept === 'store' || schedU(p.seed, d, 359) < .75 ? 1 : 0;
+}
+const VCHAIN_YOU = { key: null, seen: new Set(), said: 0, ring: null };
+// your place in the line now: the index of your hands among those there (VB2's VCHAIN.occ, in line order), or -1
+function vesselChainYou() {
+  if (typeof VCHAIN === 'undefined' || !VCHAIN.occ || deckDef.num !== 5) return -1;
+  const p = player.obj.position; return VCHAIN.occ.findIndex(([x, z]) => Math.hypot(x - p.x, z - p.z) < .5);
+}
+function vesselChain(v) {                               // once a ship minute (vesselTick): the notice, the arrows, the talk
+  const e = v.e, M = e.mine, at = (k, m) => vesselAt(e, k, m), d = e.startDay + 1, W = vesselW;
+  if (v.k !== 1 || v.now < at(1, 765) || v.now >= at(1, 840)) return;
+  vesselNotice(v, 'chain', at(1, 765), at(1, 840), 'Zeke Torres', W('notice.chain', 'The parts chain starts at 13:00: Main storage to the Tern. Zeke\'s calling the count.'));
+  if (!SHIP.events.joined.includes('vesselChain@' + d)) {
+    vesselArrow('chain', 1, () => vesselCrewGoal('torres-zeke', W('ring.chain', 'Join the chain'), { room: 'w' }), at(1, 765), at(1, 840), () => !!SHIP.event && SHIP.events.joined.includes('vesselChain@' + d));
+    return;
+  }
+  const C = vesselChainCrate(v.now), on = C.left + C.moving.length > 0;
+  // in the line: the ring on the next pair of hands while crates are still coming (each one goes through yours)
+  vesselArrow('crate', 1, () => { const i = vesselChainYou(), O = typeof VCHAIN !== 'undefined' && VCHAIN.occ; if (i < 0 || !O) return null; const nx = O[Math.min(O.length - 1, i + 1)];
+    return { deck: 5, xz: { x: nx[0], z: nx[1] }, label: W('ring.crate', 'Pass the crate'), vessel: true }; }, at(1, 780), at(1, 840), () => { const c = vesselChainCrate(); return c.left + c.moving.length === 0; });
+  if (DIALOGUE) return;
+  const room = roomAt(...player.here());
+  if (on) vesselTalk('chain', 5, room, v.now, ['torres-zeke: Right, everyone! Storage door to the ramp. Arm\'s length. Face along.']);
+  else if (!M['notice:chainEnd']) { M['notice:chainEnd'] = 1; vesselTalk('chainEnd', 5, room, v.now + 9, ['torres-zeke: And that\'s the lot! Every crate, and not one dropped.']); }
+}
+// every frame while you're in the line (eventsTick): a crate coming through your hands is counted once, and Zeke calls it
+function vesselChainHands() {
+  const e = SHIP.event; if (!VESSEL || !e || e.id !== 'veyliVessel' || typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 5) return;
+  const now = shipNow(), d = e.startDay + 1, M = e.mine; if (Math.floor(now / 1440) + 1 !== d || !SHIP.events.joined.includes('vesselChain@' + d)) return;
+  const i = vesselChainYou(); if (i < 0) return;
+  const C = vesselChainCrate(now), O = VCHAIN.occ, n = O.length - 1, Y = VCHAIN_YOU; if (Y.key !== d) { Y.key = d; Y.seen = new Set(); Y.said = 0; }
+  C.moving.forEach((f, k) => {
+    const g = f * n / 39, id = C.n + k; if (g < i || g >= i + 1 || Y.seen.has(id)) return;   // in your hands now (held, then swung on)
+    Y.seen.add(id); M['vessel:chainN'] = (M['vessel:chainN'] || 0) + 1;
+    if (M['vessel:chainN'] >= 3 && !M['vessel:chain']) { M['vessel:chain'] = 1; eventMine('jobs', 1); }   // your part: one of the event's jobs (C1)
+    const z = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(a => a.p && a.p.id === 'torres-zeke'), L = vesselWords('chain.count') || ['torres-zeke: Crate! Pass it.'];
+    if (z && typeof bubbleSay === 'function') { const t = L[Y.said++ % L.length]; bubbleSay(friSpeaker(z), evFill(t.slice(t.indexOf(': ') + 2), evCtx(e)), 4); }
+  });
+}
+// ---- V-4 (VB1): making the round one, Monday Day 29. 09:20 Calder's word in the Works bay (the scene vesselJob, then the
+// helper card: pick two of Kovac, Pell (while he's aboard), Basil and Zeke, each pick answering in their own way); then
+// five steps in the machine shop with Taavek and your two helpers beside you (look at the sketch, choose the stock, set
+// the lathe going and wait, hold it while a helper checks, balance it), each with its ring (the arrow and its label),
+// its Tracked row, Taavek's line and a helper's; a wrong stock costs ten minutes, never the part. Away or slow, the
+// helpers carry on and it's done by 13:25 for the test fit at 13:30 (vesselTestFit, the helpers' reactions). Your own
+// steps (no section 17 job, no stock: the part is a one-off of the workshop's kind, at its lathe and bench). Flags:
+// 'vessel:job', 'vessel:helpers' ([id, id]), 'vessel:step' (the next step, 1-5; 6 done), 'vessel:wait' (the minute the
+// lathe or a mistake lets you go on), 'vessel:part' ('you' | 'helpers': VB2's new part on the bench reads it),
+// 'vessel:testfit'. In play only
+const VESSEL_HELPERS = ['kovac-zainab', 'pell', 'bramwell-basil', 'torres-zeke'];
+const VESSEL_STEPS = [null,
+  { at: '5-shop-fab', mins: 3, after: 'You look over Taavek\'s sketch and the broken one: twelve curved blades, all the same.' },
+  { at: '5-shop-fab', mins: 2, stock: true, after: 'You pick the stock and clamp it ready.' },
+  { at: '5-shop-lathe', mins: 1, wait: 10, after: 'You set the lathe going on the round one. Ten minutes: it knows what to do.' },
+  { at: '5-shop-lathe', mins: 3, after: 'You hold it still while your helper checks every blade.' },
+  { at: '5-shop-fab', mins: 5, after: 'You balance it on the bench until it turns and stops anywhere.' }];
+const vesselHelperIds = d => VESSEL_HELPERS.filter(id => { const p = schedPeople().find(q => q.id === id); return p && aboard(p, d); });   // Pell "if he stayed": whoever's aboard that day
+function vesselLine(key, alt, who) {                     // a writer's "who: line" (the first of a list, or one), as [who, text]
+  const L = vesselWords(key); const t = L ? L[0] : (who ? who + ': ' : '') + alt; const i = t.indexOf(': ');
+  return i > 0 && !/\s/.test(t.slice(0, i)) ? [t.slice(0, i), t.slice(i + 2)] : [who || null, t];
+}
+function vesselSay(who, text, secs = 5) {                // over their head when they're drawn near you, else a notice from them
+  const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(c => c.p && c.p.id === who), p = player.obj.position;
+  const t = evFill(text, evCtx(SHIP.event));
+  if (a && Math.hypot(a.x - p.x, a.z - p.z) < 9 && typeof bubbleSay === 'function') bubbleSay(friSpeaker(a), t, secs);
+  else { const q = evPerson(who); toast(q ? q.name : 'Taavek', '"' + t + '"'); }
+}
+// the helper card: two picks, one card each (the controller's D-pad and A reach every choice)
+function vesselHelperCard(v) {
+  const M = v.e.mine, d = v.e.startDay + 2, got = (M['vessel:helpers'] || []).slice(); if (got.length >= 2 || DIALOGUE) return false;
+  const left = vesselHelperIds(d).filter(id => !got.includes(id)), W = vesselW;
+  return deviceChoose({ title: W('help.card.title', 'Pick two helpers') + (got.length ? ' (' + (got.length + 1) + ' of 2)' : ''), text: got.length ? 'And one more.' : 'Two helpers for Taavek\'s part.',
+    choices: left.map(id => W('help.card.' + id, (evPerson(id) || { name: id }).name)) }, i => {
+    const id = left[i]; if (!id || !SHIP.event || SHIP.event.id !== 'veyliVessel') return;
+    const m = SHIP.event.mine; m['vessel:helpers'] = (m['vessel:helpers'] || []).concat([id]).slice(0, 2);
+    const [w, t] = vesselLine('help.' + id + '.pick', 'Right with you.', id); vesselSay(w || id, t);
+    if (m['vessel:helpers'].length < 2) simTimeout(() => { const v2 = vesselNow(); if (v2) vesselHelperCard(v2); }, 600);
+    else { const [w2, t2] = vesselLine('help.done', 'Good. Four of us, and the round one. We make it. Together.', 'taavek'); simTimeout(() => vesselSay(w2 || 'taavek', t2, 6), 1500); m['vessel:step'] = m['vessel:step'] || 1; }
+  });
+}
+function vesselMaking(v) {
+  const e = v.e, M = e.mine, at = (k, m) => vesselAt(e, k, m), W = vesselW, d = e.startDay + 2;
+  if (v.k !== 2 || v.now < at(2, 560) || v.now >= at(2, VESSEL.leave)) return;
+  // Calder's word (09:20): the notice, the arrow at Calder ("Pick two helpers"), the scene, then the card; nobody picked
+  // by 10:00 (you didn't come), Calder picks Kovac and Zeke and the steps wait for you
+  if (!M['vessel:job']) {
+    vesselNotice(v, 'job', at(2, 560), at(2, 780), 'Chief Ines Calder', W('notice.job', 'Chief Calder has a job for you in the Works bay: Taavek\'s part.'));
+    vesselArrow('job', 1, () => vesselCrewGoal('calder', W('ring.job', 'Pick two helpers')), at(2, 560), at(2, 780), () => !!(SHIP.event && SHIP.event.mine['vessel:job']));
+    if (vesselReach('calder', 3.2)) vesselScene('job', 'vesselJob', ['calder', 'taavek'], v, () => { M['vessel:job'] = 1; simTimeout(() => { const w = vesselNow(); if (w) vesselHelperCard(w); }, 400); });
+  } else if ((M['vessel:helpers'] || []).length < 2 && v.now < at(2, 600)) {   // the card put away ("Not now"): back at Calder, it comes again
+    vesselArrow('job2', 1, () => vesselCrewGoal('calder', W('ring.job', 'Pick two helpers')), at(2, 560), at(2, 600), () => !!(SHIP.event && (SHIP.event.mine['vessel:helpers'] || []).length >= 2));
+    if (!DEV.choose && vesselReach('calder', 3.2)) vesselHelperCard(v);
+  }
+  if (v.now >= at(2, 600) && (M['vessel:helpers'] || []).length < 2) {   // Calder picks for you
+    const ids = vesselHelperIds(d), pick = (M['vessel:helpers'] || []).slice(); for (const id of ['kovac-zainab', 'torres-zeke'].concat(ids)) if (pick.length < 2 && !pick.includes(id) && ids.includes(id)) pick.push(id);
+    M['vessel:helpers'] = pick; M['vessel:job'] = M['vessel:job'] || -1; M['vessel:step'] = M['vessel:step'] || 1;
+  }
+  // the steps: the arrow at the step's place (its ring line), the step when you're there; the lathe's wait; the
+  // helpers carry on from 13:25 if it isn't done; an hourly notice while you're elsewhere
+  const s = M['vessel:step'] | 0;
+  if (s >= 1 && s <= 5 && !M['vessel:part']) {
+    if (v.now >= at(2, 805)) { M['vessel:part'] = 'helpers'; M['vessel:step'] = 6; const [w, t] = vesselLine('help.doneWithout', 'Done. Your helpers, very good. Next time, you also. Yes?', 'taavek'); vesselSay(w || 'taavek', t, 6); return; }
+    const S = VESSEL_STEPS[s], wait = (M['vessel:wait'] || 0) > v.now;
+    vesselArrow('step', 1, () => { const x = SHIP.event && VESSEL_STEPS[SHIP.event.mine['vessel:step'] | 0]; return x ? { deck: 5, place: x.at, room: 'f', label: W('ring.step.' + (SHIP.event.mine['vessel:step'] | 0), ['', 'Look at Taavek\'s sketch', 'Choose the stock', 'Turn it on the lathe', 'Hold it while it\'s checked', 'Balance the round one'][SHIP.event.mine['vessel:step'] | 0]), vessel: true } : null; },
+      at(2, 560), at(2, 805), () => !!(SHIP.event && (SHIP.event.mine['vessel:part'] || (SHIP.event.mine['vessel:step'] | 0) > 5)));
+    if (!(deckDef.num === 5 && roomAt(...player.here()) === 'f')) {
+      const h = Math.floor((v.now - at(2, 600)) / 60);
+      if (h >= 0 && v.m >= 630 && (v.now - at(2, 600)) % 60 < 1 && !M['notice:shop' + h]) { M['notice:shop' + h] = 1; toast('Machine shop', W('notice.shop.hourly', 'Taavek\'s part is still on the bench in the machine shop.')); }
+      return;
+    }
+    vesselNotice(v, 'shop', at(2, 560), at(2, 805), 'Machine shop', W('notice.shop', 'Taavek and your helpers are waiting in the machine shop.'));
+    if (wait || (typeof ACT !== 'undefined' && ACT && ACT.kind === 'vesselStep') || DIALOGUE) return;
+    const sp = placeSpot(S.at), p = player.obj.position; if (!sp || Math.hypot(sp.x - p.x, sp.z - p.z) > 1.8) return;
+    vesselStepStart(v, s);
+  }
+}
+// a step: Taavek's line and a helper's (the first helper on odd steps, the second on even), then the step's hold (an
+// activity at the bench or the lathe: walk away and it waits for you); step 2's stock card first
+function vesselStepStart(v, s) {
+  const M = v.e.mine, S = VESSEL_STEPS[s], H = M['vessel:helpers'] || [], who = H[(s + 1) % 2] || H[0];
+  const [tw, tt] = vesselLine('taavek.step.' + s, '', 'taavek'); if (tt) vesselSay(tw || 'taavek', tt, 6);
+  if (who) { const [hw, ht] = vesselLine('help.' + who + '.step.' + s, '', who); if (ht) simTimeout(() => vesselSay(hw || who, ht, 5), 2500); }
+  const go = () => {
+    actStart('vesselStep', S.at, { title: 'Machine shop', after: S.after });
+    if (typeof ACT !== 'undefined' && ACT && ACT.kind === 'vesselStep') { ACT.def.mins = S.mins; ACT.def.until = A => { if (A.done < S.mins) return false; if (A.o.fin) return true; A.o.fin = true; vesselStepDone(s); return true; }; }
+  };
+  if (!S.stock) return go();
+  const C = [1, 2, 3].map(k => [k, vesselW('stock.' + k, ['', 'The bronze bar, the one that sings', 'The soft alloy', 'The steel offcut'][k])]), order = [0, 1, 2].sort((a, b) => idHash('stock' + v.d + a) - idHash('stock' + v.d + b)).map(i => C[i]);
+  deviceChoose({ title: vesselW('stock.title', 'Choose the stock'), text: vesselW('stock.text', 'Taavek taps each bar and listens.'), choices: order.map(x => x[1]) }, i => {
+    const x = order[i]; if (!x) return;
+    if (x[0] !== 1) { const [mw, mt] = vesselLine('taavek.mistake', 'Ah! Not this one. Small. Not bad. We go again, slower. The round one forgives.', 'taavek'); vesselSay(mw || 'taavek', mt, 6); M['vessel:wait'] = shipNow() + 10; return; }   // a small mistake: ten minutes, never the part
+    go();
+  });
+}
+function vesselStepDone(s) {
+  const e = SHIP.event; if (!e || e.id !== 'veyliVessel') return;
+  const M = e.mine; if ((M['vessel:step'] | 0) !== s) return;
+  M['vessel:step'] = s + 1;
+  if (VESSEL_STEPS[s].wait) {                           // the lathe runs: come back in ten; your two helpers pass the time (the writers' pair lines)
+    M['vessel:wait'] = shipNow() + VESSEL_STEPS[s].wait;
+    const H = (M['vessel:helpers'] || []).slice().sort(), L = H.length === 2 ? vesselWords('help.pair.' + H[0] + '.' + H[1]) : null;
+    if (L) L.slice(0, 2).forEach((t, k) => simTimeout(() => { const i = t.indexOf(': '); vesselSay(t.slice(0, i), t.slice(i + 2), 5); }, 3000 + 3500 * k));
+  }
+  if (s >= 5) { M['vessel:part'] = 'you'; eventMine('jobs', 1); }   // made with your own hands: one of the event's jobs (C1)
+  const [w, t] = vesselLine('taavek.stepDone', 'Good. Next.', 'taavek'); vesselSay(w || 'taavek', t, 4);
+}
+// the test fit (13:30, the machine shop bench): the arrow at Taavek from 13:20, the scene beside them, the helpers'
+// reactions after; to 14:30
+function vesselTestFit(v) {
+  const e = v.e, M = e.mine, at = (k, m) => vesselAt(e, k, m);
+  if (v.k !== 2 || !M['vessel:part'] || M['vessel:testfit'] || v.now < at(2, 800) || v.now >= at(2, 870)) return;
+  vesselArrow('testfit', 1, () => vesselCrewGoal('taavek', vesselW('ring.testfit', 'The test fit'), { room: 'f' }), at(2, 800), at(2, 870), () => !!(SHIP.event && SHIP.event.mine['vessel:testfit']));
+  if (v.now >= at(2, 810) && deckDef.num === 5 && roomAt(...player.here()) === 'f' && vesselReach('taavek', 3.5))
+    vesselScene('testfit', 'vesselTestFit', ['taavek'].concat(M['vessel:helpers'] || []), v, () => {
+      M['vessel:testfit'] = 1;
+      (M['vessel:helpers'] || []).forEach((id, k) => simTimeout(() => { const [w, t] = vesselLine('testfit.' + id, 'Look at it go!', id); vesselSay(w || id, t, 5); }, 1200 + 2500 * k));
+    });
+}
+// a tap on the lathe or the fabricator while Taavek's part is on (24j's shopTap asks first): the step at that machine
+// starts (the walk there and its hold, as the ring), or a word that the part comes first. True when it handled the tap
+function vesselShopTap(it, at) {
+  const v = vesselNow(); if (!v || v.k !== 2 || !it || !shopMachineOf(it)) return false;
+  const M = v.e.mine, s = M['vessel:step'] | 0; if (!M['vessel:job'] || s < 1 || s > 5 || M['vessel:part']) return false;
+  if (DIALOGUE || typeof ACT !== 'undefined' && ACT && ACT.kind === 'vesselStep') return true;
+  if ((M['vessel:wait'] || 0) > v.now) { toast('Machine shop', vesselW('wait', 'The lathe\'s still turning. Taavek holds up ten fingers, then fewer.')); return true; }
+  if (shopMachineOf(it) !== VESSEL_STEPS[s].at) { toast('Machine shop', vesselW('ring.step.' + s, 'Taavek\'s part first') + ': ' + (VESSEL_STEPS[s].at === '5-shop-lathe' ? 'at the lathe.' : 'at the bench.')); return true; }
+  vesselStepStart(v, s); return true;
+}
+// live (vesselWhere asks): Monday, your two helpers in the machine shop with Taavek from the card to the test fit
+function vesselHelperWhere(p, t, v) {
+  const M = v.e.mine, H = M['vessel:helpers'] || [], k = H.indexOf(p.id); if (k < 0 || M['vessel:testfit'] || v.m < 570 || v.m >= 840) return null;
+  const S = VESSEL_SPOTS(), id = [S.shop[1], vesselSpot('5-vshop-3', '5-shop-board')][k];
+  return { deck: 5, act: 'off', type: 'event', placeId: id, moving: false, from: t - 1, until: t + 1, tag: 'ev-veyliVessel-shop' };
+}
+// ---- end of slot: Vessel builder ----
 // ---- slot: Appointments builder (section 18; FX22, 0.92.6 item 9, plans/patch-0.92.6.md). New code of this seat's goes here ----
 // Behind P926_APPT (section 13; URL flag 'appt'). The user: "Appointments work almost exactly the same as ship traditions
 // but are usually one on one or very small group." Words: content/appointments/ (SW2's, CS1 passed), baked into APPT_WORDS.
@@ -47435,6 +48641,325 @@ if (P926_APPT) {
   if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // planned before the feast's spots: planned again
 }
 // ---- end of slot: Appointments builder ----
+
+// ---- slot: Vessel sky (section 18; VB2, A Veyli vessel needs help: V-5 and V-3's spots, plans/veyli-vessel-spec.html). New code of this seat's goes here ----
+// Behind EV_VESSEL_ON (section 13, the events builder VB1's switch) with the events base on; off: nothing here is made,
+// pushed or drawn (the game before it). VB1's 'Vessel builder' slot owns the event itself (SHIP_EVENTS.veyliVessel, its
+// beats, rings and arrows); this slot owns the looks: the little Veyli ship off the bow, the small props, and the parts
+// chain's line of places on Deck 5. No R(); every colour through col(); made on demand, never at load.
+const vesselOn = () => typeof EV_VESSEL_ON !== 'undefined' && !!EV_VESSEL_ON && EVENTS_ON;
+// minutes since the warning day's midnight (Saturday 00:00 = 0, Sunday = 1440, ...) while the event is on, else null.
+// Pure of the clock and SHIP.event
+function vesselT(now = shipNow()) {
+  const e = typeof SHIP !== 'undefined' && SHIP.event; if (!vesselOn() || !e || e.id !== 'veyliVessel' || !Number.isFinite(e.startDay)) return null;
+  const t = now - (e.startDay - 1) * 1440; return t >= 0 ? t : null;
+}
+// the times (event minutes): in view Saturday 14:00; the engine lights Monday 17:40; it leaves Tuesday 09:00, gone 09:05
+const VSKY_FROM = 840, VSKY_LIGHT = 2 * 1440 + 1060, VSKY_GO = 3 * 1440 + 540, VSKY_TO = 3 * 1440 + 545;
+// how the ship looks at event minute t (fractional): k its fade, s its size, go how far it has moved ahead (tiles),
+// lights its three lights (low while it holds station), engine the stern glow, flash the three slow flashes
+function vesselLook(t) {
+  const c = x => Math.max(0, Math.min(1, x));
+  const inn = c((t - VSKY_FROM) / 15), out = c((t - VSKY_GO) / (VSKY_TO - VSKY_GO)), e = c((t - VSKY_LIGHT) / .6);
+  const p = t - VSKY_LIGHT - .5, flash = p >= 0 && p < 3 ? Math.pow(Math.sin(Math.PI * (p % 1)), 2) : 0;   // three slow pulses, a ship minute each
+  return { k: inn * (1 - out * out), s: (.55 + .45 * inn) * (1 - .6 * out), go: 9 * out * out, lights: e > 0 ? .35 + .65 * e : .35, engine: e, flash };
+}
+// for VB1's scene at the glass: how bright the engine is now (0 dark, 1 lit), and the flash on top (0..1)
+function vesselShipFlash(now = shipNow()) { const t = vesselT(now); if (t == null || t < VSKY_FROM || t >= VSKY_TO) return { engine: 0, flash: 0 }; const L = vesselLook(t); return { engine: L.engine, flash: L.flash }; }
+// the ship in the sky: one small quad of its own (1 draw call) round the ship's point on screen, drawn just inside the far
+// plane like section 4b's SKY and the comet (so only where nothing else drew: off the bow and through the windows). Its
+// point is off the current deck's bow where you can see it (vesselAnchor); it flies the Wren's way (+x).
+// Premultiplied blending: the hull covers the stars behind it, the lights and the engine glow add
+const VSKY = { m: null, v: new THREE.Vector3(), w: new THREE.Vector3(), s: new THREE.Vector2(), key: '', next: 0, to: null, at: null };
+const _vsX = new THREE.Vector3(1, 0, 0);
+function vesselSkyMake() {
+  const C = h => new THREE.Color(col(h));
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uPR: { value: 1 }, uP: { value: new THREE.Vector2() }, uA: { value: new THREE.Vector2(1, 0) }, uC: { value: new THREE.Vector2() }, uR: { value: new THREE.Vector2() },
+      uS: { value: 20 }, uK: { value: 0 }, uL: { value: .35 }, uE: { value: 0 }, uF: { value: 0 },
+      cH: { value: C('#7c879b') }, cR: { value: C('#b9c8e6') }, cB: { value: C('#3f6fb0') }, cW: { value: C('#f2f6ff') }, cP: { value: C('#5fd6c6') }, cS: { value: C('#e8b05a') }, cE: { value: C('#9db4ff') } },
+    vertexShader: 'uniform vec2 uC, uR; void main() { gl_Position = vec4(uC + position.xy * uR, .9999, 1.0); }',
+    fragmentShader: `uniform float uPR, uS, uK, uL, uE, uF; uniform vec2 uP, uA; uniform vec3 cH, cR, cB, cW, cP, cS, cE;
+      float dot2(vec2 q) { return dot(q, q); }
+      void main() {
+        vec2 p = gl_FragCoord.xy / uPR - uP;
+        float u = dot(p, uA) / uS, v = (uA.x * p.y - uA.y * p.x) / uS;                   // along (bow +1, stern -1) and across, in half-lengths
+        float uu = clamp(u, -1.0, 1.0), w = .36 * pow(max(0.0, 1.0 - uu * uu), .4) * (1.0 - .32 * uu);   // a blunt teardrop: full stern, fine bow
+        w = max(w, .34 * pow(clamp((-.4 - u) / .6, 0.0, 1.0), 1.4));                         // two swept fins at the stern
+        float d = (abs(v) - w) * uS, a = clamp(.5 - d, 0.0, 1.0) * step(-1.02, u) * step(u, 1.0);
+        float lit = .5 + .5 * clamp(v / max(w, .05), -1.0, 1.0), rim = smoothstep(-2.0, 0.0, d);
+        vec3 hull = mix(cH * (.45 + .75 * lit), cR, .5 * rim);
+        hull = mix(hull, cB, .85 * step(abs(u + .1), .05) * step(abs(v), w - .02));                   // a blue band round the waist
+        hull += cS * .9 * uL * step(abs(v - .05), .035) * step(.4, fract(u * 9.0)) * step(.25, u) * step(u, .7);   // a row of warm windows
+        float r = max(1.2, .06 * uS), lv = uL * (1.0 + 2.2 * uF);
+        float sw = .37;                                                                  // the hull's half-width at u = -.5, where the side lights sit
+        vec2 q = vec2(u, v) * uS;
+        float bow = exp(-dot2(q - vec2(.86, 0.0) * uS) / (r * r)), pt = exp(-dot2(q - vec2(-.5, sw) * uS) / (r * r)), sb = exp(-dot2(q - vec2(-.5, -sw) * uS) / (r * r));
+        float halo = (exp(-length(q - vec2(.86, 0.0) * uS) / (4.0 * r)) + exp(-length(q - vec2(-.5, sw) * uS) / (4.0 * r)) + exp(-length(q - vec2(-.5, -sw) * uS) / (4.0 * r))) * (.12 + .4 * uF);
+        vec2 e = q - vec2(-1.04, 0.0) * uS; float re = .17 * uS;
+        float eng = exp(-dot2(e) / (re * re)) + .35 * exp(-length(e) / (.7 * uS)) + .5 * exp(-e.y * e.y / (re * re * .5)) * exp(min(e.x, 0.0) / (.9 * uS)) * step(e.x, 0.0);
+        vec3 glow = (cW * bow + cP * pt + cS * sb) * lv + cW * halo * uL + cE * uE * eng * (1.0 + .4 * uF);
+        gl_FragColor = vec4((hull * a + glow) * uK, a * uK);
+      }`,
+    transparent: true, depthWrite: false, blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
+  m.frustumCulled = false; m.renderOrder = 1e6 + 2; m.raycast = () => {}; scene.add(m); return m;
+}
+function vesselSkyDrop() { const m = VSKY.m; if (!m) return; scene.remove(m); m.geometry.dispose(); m.material.dispose(); VSKY.m = null; }
+// where it hangs: out in the space you can see from where you stand, off the bow: the nearest tile off the deck's map,
+// in the deck's forward part (from its hull's bow on, else its forward 40%), that shows on the screen clear of the top
+// bar, two tiles further out (as the comet's head, section 18's cometHead, but bow-ward). Looked up twice a second; the
+// point eases to a new spot rather than jumping. None on the screen: it waits beyond the bow (off the screen)
+function vesselAnchor(out) {
+  const S = VSKY, t = simNow() / 1000, [pi, pj] = player.here(), key = deckDef.num + ':' + pi + ',' + pj;
+  if (t >= (S.next || 0) || S.key !== key) {
+    S.next = t + .5; const moved = S.key !== key; S.key = key; let best = null;
+    const fwd = deckDef.hull && deckDef.hull.bowFrom ? deckDef.hull.bowFrom : Math.floor(W * .6);
+    const off = (i, j) => { const r = MAP[j]; return !r || r[i] === undefined || r[i] === '.' || r[i] === ' '; };
+    const pz = player.obj.position.clone().project(camera).z, w = new THREE.Vector3(), o = new THREE.Vector3(), dir = camera.getWorldDirection(new THREE.Vector3());
+    const onDeck = v => { o.set(v.x, v.y, -1).unproject(camera); const k = -o.y / dir.y, x = o.x + k * dir.x, z = o.z + k * dir.z; return !off(Math.floor(x + OX), Math.floor(z + OZ)); };   // the floor would be drawn over that point
+    for (let r = 1; r <= 18; r++) for (let i = pi - r; i <= pi + r; i++) for (let j = pj - r; j <= pj + r; j++) {
+      if (Math.max(Math.abs(i - pi), Math.abs(j - pj)) !== r || i < fwd || !off(i, j)) continue;
+      const dd = Math.hypot(i - pi, j - pj), c = cellPos(i + (i - pi) / dd, j + (j - pj) / dd);   // a tile further out
+      for (const y of w.set(c.x, 0, c.z).project(camera).z > pz ? [3, 1.4] : [-1.5, .4]) {   // the far side: above the hull wall, the near side: out under the cutaway; else level with the windows
+        const v = w.set(c.x, y, c.z).project(camera), sc = dd - .5 * (i - pi) + 3 * Math.abs(v.x);   // nearer, further forward and nearer the middle of the screen is better
+        if (Math.abs(v.x) < .88 && v.y < .7 && v.y > -.85 && !onDeck(v)) { if (!best || sc < best[2]) best = [c.x, c.z, sc, y]; break; }   // the ship's own point on the screen, clear of the top bar and of the deck's floor
+      }
+    }
+    const c = best ? null : cellPos(W + 6, D / 2);
+    S.to = best ? [best[0], best[3], best[1]] : [c.x, -1.5, c.z]; if (!S.at || moved && !best) S.at = S.to.slice();
+  }
+  for (let k = 0; k < 3; k++) S.at[k] += (S.to[k] - S.at[k]) * .06;
+  return out.set(S.at[0], S.at[1], S.at[2]);
+}
+// what the sky shows now: the vessel event's ship (unless VB1's VESSEL.sky, the user's C2, says words only), else the
+// ending's (EN2's crossingBackShip(now) in the slot 'Ending builder': null, or { pose: 'bow' | 'alongside', lights 0..1,
+// flash }, typeof-guarded; its comings and goings eased over about 10 seconds here). -> vesselLook's shape, or null
+function vesselSkyNow() {
+  const t = vesselT(), sky = typeof VESSEL === 'undefined' || !VESSEL || VESSEL.sky !== false, S = VSKY, r = simNow() / 1000, dt = Math.min(.1, Math.max(0, r - (S.rt || r)));
+  S.rt = r;
+  if (sky && t != null && t >= VSKY_FROM && t < VSKY_TO) { S.hk = 0; return vesselLook(t); }
+  const x = typeof crossingBackShip === 'function' ? crossingBackShip(shipNow()) : null;
+  if (x) { const al = x.pose === 'alongside', n = shipNow(); S.hook = { k: 1, s: al ? 1.35 : 1, go: 0, lights: .35 + .65 * Math.max(0, Math.min(1, +x.lights || 0)), engine: 1, flash: x.flash ? Math.pow(Math.sin(Math.PI * (n % 1)), 2) : 0 }; }
+  S.hk = Math.max(0, Math.min(1, (S.hk || 0) + (x ? 1 : -1) * dt / 10));
+  return S.hook && S.hk > 0 ? { ...S.hook, k: S.hk } : null;
+}
+// every frame from eventsTick (looks only, nothing saved): the ship outside, and the chain's moving crates on Deck 5
+function vesselSkyFrame() {
+  if (typeof deckDef !== 'undefined' && deckDef && deckRoot) vesselChainFrame();
+  const L = typeof deckDef !== 'undefined' && !!deckDef && typeof renderer !== 'undefined' ? vesselSkyNow() : null;
+  if (!L) return vesselSkyDrop();
+  const S = VSKY; if (!S.m) S.m = vesselSkyMake();
+  const U = S.m.material.uniforms, sz = renderer.getSize(S.s), px = v => [(v.x + 1) / 2 * sz.x, (v.y + 1) / 2 * sz.y];
+  vesselAnchor(S.v); if (L.go) S.v.x += L.go;
+  const h = px(S.w.copy(S.v).project(camera)), b = px(S.w.copy(S.v).add(_vsX).project(camera)), ax = b[0] - h[0], ay = b[1] - h[1], tile = Math.hypot(ax, ay) || 1;
+  const hs = Math.max(7, .8 * tile * L.s), R = 3 * hs;                    // half its length on screen; the quad reaches past the engine's plume
+  U.uPR.value = renderer.getPixelRatio(); U.uP.value.set(h[0], h[1]); U.uA.value.set(ax / tile, ay / tile); U.uS.value = hs;
+  U.uC.value.set(h[0] / sz.x * 2 - 1, h[1] / sz.y * 2 - 1); U.uR.value.set(R / sz.x * 2, R / sz.y * 2);
+  U.uK.value = L.k; U.uL.value = L.lights; U.uE.value = L.engine; U.uF.value = L.flash;
+}
+// ---- Veyli vessel places (Deck 5): the parts chain's line (V-3's spots, for VB1's gathering). Forty spots, about 0.7 apart,
+// from just inside Main storage's door (26, 6) out along the main corridor, through the lift lobby and the Works bay (the
+// lift car splits the lobby), the other lobby door and the haulway, into the shuttle bay and down beside the Tern's ramp
+// to its foot (5-vchain-40 stands beside ROT_TERN_FOOT, off the ramp's tiles, so the ramp can still close). Each faces
+// the next, anim 'lift'; type 'event', event 'vessel-chain' (the planner's pool 5|@vessel-chain, in order; nobody uses
+// them day to day). Zeke calls the count from 5-vchain-call in the Works bay (its own event, so not in the pool);
+// DECKS[5].vesselChain = { spots, call, you, path } (you: the spot nearest Zeke, for your turn in the line). Pushed only
+// with the switch on (vesselLooksInit)
+const VCHAIN_PATH = [[26.5, 6.4], [26.5, 7.5], [21.6, 7.5], [20.5, 6.6], [19.5, 5.5], [16.5, 5.5], [16.4, 6.5], [14.5, 7.4], [10.5, 7.5], [9.3, 7.6], [8.6, 8.6], [7.2, 9.6], [6.4, 10.5], [6.3, 11.4]];
+function vesselChainSpots(n = 40) {
+  const P = VCHAIN_PATH, len = [0]; for (let k = 1; k < P.length; k++) len.push(len[k - 1] + Math.hypot(P[k][0] - P[k - 1][0], P[k][1] - P[k - 1][1]));
+  const at = d => { let k = 1; while (k < P.length - 1 && len[k] < d) k++; const f = (d - len[k - 1]) / ((len[k] - len[k - 1]) || 1); return [P[k - 1][0] + f * (P[k][0] - P[k - 1][0]), P[k - 1][1] + f * (P[k][1] - P[k - 1][1])]; };
+  const pts = Array.from({ length: n }, (_, k) => at(len[len.length - 1] * k / (n - 1)));
+  const deg = (dx, dz) => Math.round(Math.atan2(dx, dz) * 180 / Math.PI), r2 = v => Math.round(v * 100) / 100;
+  return pts.map(([x, z], k) => { const [nx, nz] = pts[Math.min(n - 1, k + 1)], [px, pz] = pts[Math.max(0, k - 1)], i = Math.floor(x), j = Math.floor(z);
+    return { id: '5-vchain-' + (k + 1), type: 'event', event: 'vessel-chain', at: [i, j], xy: [r2(x), r2(z)], face: k < n - 1 ? deg(nx - x, nz - z) : deg(x - px, z - pz), pose: 'stand', anim: 'lift', room: roomOfTile(5, i, j) }; });
+}
+function vesselPlaces() {
+  if (DECKS[5].vesselChain) return;
+  const spots = vesselChainSpots(), call = { id: '5-vchain-call', type: 'event', event: 'vessel-chain-call', at: [17, 4], xy: [17.5, 4.45], face: 0, pose: 'stand', anim: 'talk', room: 'w' };
+  const you = spots.reduce((b, p) => Math.hypot(p.xy[0] - call.xy[0], p.xy[1] - call.xy[1]) < Math.hypot(b.xy[0] - call.xy[0], b.xy[1] - call.xy[1]) ? p : b);
+  // VB1's ask: Taavek and the helpers at the two benches (type 'event', nobody's day to day; facing the work): the Works
+  // bay's second bench (Taavek and Calder at its front, Zeke across it from the wall side), and the machine shop (Taavek
+  // between the lathe and the bench, the two helpers at the bench's east end; 5-shop-lathe stays yours)
+  const ev = (id, event, at, xy, face, room) => ({ id, type: 'event', event, at, xy, face, pose: 'stand', anim: 'talk', room });
+  const bench = [ev('5-vbench-1', 'vessel-bench', [18, 3], [18.35, 3.3], 'n', 'w'), ev('5-vbench-2', 'vessel-bench', [19, 3], [19.45, 3.35], 'n', 'w'), ev('5-vbench-3', 'vessel-bench', [18, 1], [18.9, 1.6], 's', 'w'),
+    ev('5-vshop-1', 'vessel-shop', [23, 11], [23.2, 11.55], 'w', 'f'), ev('5-vshop-2', 'vessel-shop', [25, 13], [25.0, 13.35], 'n', 'f'), ev('5-vshop-3', 'vessel-shop', [25, 12], [25.55, 12.5], 'w', 'f')];
+  DECKS[5].places.push(...spots, call, ...bench);
+  DECKS[5].vesselChain = { spots: spots.map(p => p.id), call: call.id, you: you.id, path: VCHAIN_PATH };
+  if (typeof SCHED_DATA !== 'undefined' && SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // planned before the spots: planned again
+}
+// ---- the small props (section 4d's DECK_DRESS shape, all behind the switch by `on`; dressShow merges each by colour, no
+// shadows). Shown through SHIP_EVENTS.veyliVessel.dressing (vesselLooksInit adds them to every phase, each with its own
+// window [event day, from, to], so they never hang on VB1's phase times), and the two sketches as lasting traces.
+// The round one (the Veyli coolant pump's impeller): a shroud disc, a hub and twelve swept blades, lying flat; the broken
+// one tarnished bronze, cracked through the hub, a blade snapped off and one short; the new one bright steel
+function vesselImpeller(s, x, y, z, broken) {
+  const m = dressMat(broken ? '#8a7650' : '#c9d2da'), dk = dressMat(broken ? '#4a4036' : '#8f9ba6');
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(.11, .11, .014, 20), m); disc.position.set(x, y + .007, z); s.add(disc);
+  const hub = new THREE.Mesh(new THREE.CylinderGeometry(.034, .04, .05, 12), dk); hub.position.set(x, y + .03, z); s.add(hub);
+  if (broken) { const c = new THREE.Mesh(new THREE.BoxGeometry(.09, .056, .007), dressMat('#1e1a16')); c.position.set(x, y + .03, z); c.rotation.y = .4; s.add(c); }   // the crack through the hub, out to the disc
+  for (let k = 0; k < 12; k++) {
+    if (broken && k === 3) continue;                       // snapped off
+    const a = k * Math.PI * 2 / 12, l = broken && k === 8 ? .045 : .075, b = new THREE.Mesh(new THREE.BoxGeometry(l, .032, .008), m);
+    b.position.set(x + Math.cos(a) * (.036 + l / 2), y + .03, z - Math.sin(a) * (.036 + l / 2)); b.rotation.y = a + .5; s.add(b);   // swept: turned off the radius
+  }
+}
+// Taavek's crate: a Veyli travelling chest in Taavek's grey-blue, a teal band and a blue cord handle (2-3 draw calls)
+function vesselCrate(s, x, y, z, turn = 0) {
+  const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = turn; s.add(g);
+  dressBox(g, .5, .3, .36, '#3a4a5a', 0, .15, 0); dressBox(g, .52, .06, .38, '#4f6276', 0, .33, 0);   // the chest, its lid a little over
+  dressBox(g, .52, .05, .38, '#5fd6c6', 0, .16, 0);                                                    // the band round it
+  const h = new THREE.Mesh(new THREE.TorusGeometry(.06, .012, 6, 12, Math.PI), dressMat('#3f6fb0')); h.position.set(0, .36, 0); g.add(h);   // the handle, its ends in the lid
+  return g;
+}
+// a pencil sketch on a card (a canvas, no R()): what: 'works' (the Works bay: benches, the tool wall, people) or 'you'
+// (you at the ramp's foot, the round one in your hands), signed with Taavek's mark
+function vesselSketchTex(what) {
+  return tex(240, 180, (c, w, h) => {
+    c.fillStyle = '#f2ecdf'; c.fillRect(0, 0, w, h); c.strokeStyle = '#3b3b3b'; c.lineWidth = 1.6; c.lineCap = 'round';
+    const L = (...p) => { c.beginPath(); c.moveTo(p[0], p[1]); for (let k = 2; k < p.length; k += 2) c.lineTo(p[k], p[k + 1]); c.stroke(); };
+    if (what === 'works') {
+      L(10, 120, 230, 120); L(30, 120, 30, 60, 110, 60, 110, 120); for (let k = 0; k < 5; k++) L(40 + k * 14, 70, 40 + k * 14, 95);   // the floor, the tool wall and its tools
+      L(130, 100, 215, 100); L(135, 100, 135, 120); L(210, 100, 210, 120);                                                          // a bench
+      for (const [x, y] of [[150, 82], [185, 78]]) { c.beginPath(); c.arc(x, y, 7, 0, Math.PI * 2); c.stroke(); L(x, y + 7, x, y + 18); }   // two heads over the bench
+    } else {
+      L(10, 150, 230, 150); L(60, 150, 140, 70); L(150, 150, 150, 70, 140, 70);                                                    // the floor, the ramp
+      c.beginPath(); c.arc(185, 88, 9, 0, Math.PI * 2); c.stroke(); L(185, 97, 185, 130, 175, 150); L(185, 130, 195, 150);          // you, standing
+      c.beginPath(); c.arc(185, 112, 11, 0, Math.PI * 2); c.stroke(); for (let k = 0; k < 7; k++) { const a = k * .9; L(185, 112, 185 + 10 * Math.cos(a), 112 + 10 * Math.sin(a)); }   // the round one, held
+    }
+    c.strokeStyle = '#3f6fb0'; c.lineWidth = 2; c.beginPath(); c.moveTo(w - 46, h - 18); c.bezierCurveTo(w - 38, h - 34, w - 26, h - 4, w - 14, h - 20); c.stroke();   // Taavek's mark
+  });
+}
+function vesselCard(s, y, z, what, wd = .34, ht = .26) {
+  dressBox(s, wd + .02, ht + .02, .012, '#d8d0bd', 0, y, z + .006);                                  // the card's backing (z to z + .012)
+  const p = new THREE.Mesh(new THREE.PlaneGeometry(wd, ht), new THREE.MeshBasicMaterial({ map: vesselSketchTex(what), toneMapped: false })); p.position.set(0, y, z + .018); s.add(p);   // .006 in front of the backing
+  dressBox(s, .025, .025, .02, '#3f6fb0', 0, y + ht / 2 - .03, z + .022);                             // a blue pin, through the card
+}
+const vesselW = (k, alt) => (typeof evWord === 'function' && evWord('event.veyliVessel.' + k)) || alt;
+// where the bench props sit: the Works bay's second bench (w, 8.7, 2.45, w 1.6) and the machine shop's bench (f, 3.3, 3.5,
+// w 1.6), both tops at .93, on their free front-right corner (clear of the vice, the unit, the slate and the task lamp)
+const VPROPS = { works: ['w', 8.7 + .6, 2.45 + .15], shop: ['f', 3.3 + .6, 3.5 + .14], shopOld: ['f', 3.3 + .62, 3.5 - .12], crate: ['w', 7.55, 2.5, .3], top: .93 };
+const vesselPartMade = () => { const e = SHIP.event; return !!(e && e.id === 'veyliVessel' && e.mine && e.mine['vessel:part']); };
+function vesselDress() {
+  const on = () => vesselOn();
+  Object.assign(DECK_DRESS, {
+    vesselCrate: { deck: 5, on, what: 'Taavek\'s crate by the Works bay bench', make(g) {
+      const [room, a, b, turn] = VPROPS.crate, s = dressAt(g, room, 'floor', a, b); vesselCrate(s, 0, 0, 0, turn);
+      return { t: vesselW('tap.taavekCrate.t', 'Taavek\'s crate'), x: vesselW('tap.taavekCrate', 'Taavek\'s travelling crate: Veyli tools in cord loops, a sketchbook, and a tin of sweets that is emptier every time you look.'), floor: [room, a, b], y: .3, w: .55, h: .4, d: .45 };
+    } },
+    // the broken round one: on the Works bay bench from Sunday's meeting, then on the machine shop's bench while you make the new one
+    vesselPartOld: { deck: 5, on, what: 'the broken round one on a bench', make(g, o) {
+      const [room, a, b] = o.shop ? VPROPS.shopOld : VPROPS.works, s = dressAt(g, room, 'floor', a, b); vesselImpeller(s, 0, VPROPS.top, 0, true);
+      return { t: vesselW('tap.partOld.t', 'The round one'), x: vesselW('tap.part', 'The Veyli ship\'s coolant pump impeller. One blade is gone and another is cracked short. Taavek calls it the round one, and pats it like a sick animal.'), floor: [room, a, b], y: VPROPS.top + .04, w: .3, h: .12, d: .3 };
+    } },
+    // the new round one, on the machine shop's bench once it's made (VB1's SHIP.event.mine['vessel:part']), till Taavek takes it at 15:00
+    vesselPartNew: { deck: 5, on: () => vesselOn() && vesselPartMade(), what: 'the new round one, made in the machine shop', make(g) {
+      const [room, a, b] = VPROPS.shop, s = dressAt(g, room, 'floor', a, b); vesselImpeller(s, 0, VPROPS.top, 0, false);
+      return { t: vesselW('tap.partNew.t', 'The new round one'), x: vesselW('tap.newpart', 'The new impeller, turned on the Wren\'s lathe and balanced by hand. It spins true. Taavek has already sketched it twice.'), floor: [room, a, b], y: VPROPS.top + .04, w: .3, h: .12, d: .3 };
+    } },
+    // Taavek's sketch of the Works bay, pinned to the top right corner of the tool wall's pegboard (the board's face at .05),
+    // from Monday 15:20 (Taavek's goodbye), for good: a trace from the all-clear (settleTraces)
+    vesselSketchWorks: { deck: 5, on, what: 'Taavek\'s sketch of the Works bay, pinned to the tool wall', make(g) {
+      const s = dressAt(g, 'w', 'n', 9.3 + .55); vesselCard(s, 1.74, .057, 'works');   // .007 off the pegboard
+      return { t: vesselW('tap.sketchWorks.t', 'Taavek\'s sketch'), x: vesselW('tap.sketch.wall', 'Taavek\'s pencil sketch of the Works bay: the tool wall, a bench, two heads bent over the round one. Signed with a blue loop. Calder pinned it up herself.'), wall: ['w', 'n', 9.3 + .55], y: 1.74, w: .4, h: .32 };
+    } },
+    // Calder's parts chain sheet (VB1's ask): pinned to the bottom corner of the Works job board, where the storm's sign-up
+    // sheet goes (signupWorks; never out at once), Saturday 09:30 to Sunday 14:00; o.lines the names signed so far. Its item
+    // carries the tag { vesselSheet: true } for VB1's tap (signing; PLAYER_TAPS); its text by SHIP.event.mine['vessel:signed']
+    vesselSheet: { deck: 5, on, what: 'the parts chain sheet on the Works job board', make(g, o) {
+      const signed = !!(SHIP.event && SHIP.event.mine && SHIP.event.mine['vessel:signed']);
+      dressSheet(dressAt(g, 'w', 'n', 6.65), { head: 'PARTS CHAIN', title: vesselW('sheet.title', 'Sunday 13:00\nMain storage to the Tern'), lines: o.lines || [] }, .088, 1.12);   // in front of the board's screen (.075)
+      return { t: vesselW('tap.sheet.t', 'Parts chain sheet'), x: signed ? vesselW('tap.sheet', 'The parts chain sheet. Your name is on it, in your own handwriting, between two of Zeke\'s friends.') : vesselW('tap.sheet.before', 'Calder\'s sheet for the parts chain: Sunday at 13:00, Main storage to the Tern\'s ramp. A line of names, and room for more.'),
+        wall: ['w', 'n', 6.65], y: 1.12, tag: { vesselSheet: true } };
+    } },
+    // the chain's two stacks: Main storage's, by its door, going down; the bay's, beside the ramp's foot, going up (o.n)
+    vesselChainFrom: { deck: 5, on, what: 'crates of parts for the Veyli ship, by Main storage\'s door', make(g, o) {
+      const r = ROOM_BOX.r, a = 25.6 - r.i0, b = 5.45 - r.j0, s = dressAt(g, 'r', 'floor', a, b); vesselStack(s, o.n == null ? VCHAIN.n : o.n);
+      return { t: vesselW('tap.stack.t', 'Crates for the Veyli ship'), x: vesselW('tap.crate', 'Parts, seals and a spare pump body for the Veyli ship, packed by Zeke and labelled in two languages, one of them by Taavek.'), floor: ['r', a, b], y: .5, w: .9, h: 1, d: .7 };
+    } },
+    vesselChainTo: { deck: 5, on, what: 'the crates waiting by the Tern\'s ramp', make(g, o) {
+      const r = ROOM_BOX.S, a = 7.3 - r.i0, b = 11.55 - r.j0, s = dressAt(g, 'S', 'floor', a, b); vesselStack(s, o.n || 0);
+      return { t: vesselW('tap.stack.t', 'Crates for the Veyli ship'), x: vesselW('tap.crate', 'The crates from the chain, waiting at the foot of the Tern\'s ramp. Zeke has counted them twice.'), floor: ['S', a, b], y: .5, w: .9, h: 1, d: .7 };
+    } },
+    // the sketch Taavek gives you, leaning at the back of your keepsake shelf (the bunk's, or 4-23's once SHIP.works.home is
+    // '4-23'), between the Line certificate and the framed menu: a trace { id: 'vesselSketchShelf', day } (vesselShelve)
+    vesselSketchShelf: { deck: 4, on, what: 'Taavek\'s sketch on your shelf', make(g) {
+      const cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = cab ? 'W' : 'a', along = cab ? .5 : 2.5;
+      const s = dressAt(g, room, 'n', along - .235), c = new THREE.Group(); c.position.set(0, 2.17, .03); c.rotation.x = -.13; s.add(c);   // its foot on the shelf (top 2.17), leaning back
+      vesselCard(c, .1, 0, 'you', .16, .19);
+      return { t: vesselW('tap.sketchShelf.t', 'Taavek\'s sketch'), x: vesselW('tap.sketch.shelf', 'Taavek\'s sketch of you at the foot of the Tern\'s ramp, the round one in your hands. Underneath, in careful letters: "For you. The one who meets."'), wall: [room, 'n', along - .235], y: 2.27, w: .2, h: .24 };
+    } },
+  });
+}
+// the names on the sheet: Calder's and Zeke's first, then the Works crew by roster order, and yours once you've signed
+function vesselSheetLines(c) {
+  const you = SHIP.event && SHIP.event.mine && SHIP.event.mine['vessel:signed'], n = dressNames('works', 9).filter(x => x !== 'Calder' && x !== 'Torres');
+  return ['I. Calder', 'Z. Torres'].concat(n.slice(0, you ? 4 : 5)).concat(you ? [(c && c.you) || 'Cadet'] : []).slice(0, 8);
+}
+// put the sketch on your shelf (VB1's ring "Put the sketch on your shelf" calls it): a lasting trace with today's day
+function vesselShelve(day = SHIP.time.day) { if (vesselOn()) traceAdd('vesselSketchShelf', day); }
+// the windows (event day, from, to) each prop shows in: Sunday's meeting to Monday's goodbye; the sketch from 15:20 on
+const VDRESS = [
+  { id: 'vesselCrate', at: [1, 590, 1440] }, { id: 'vesselCrate', at: [2, 0, 900] },
+  { id: 'vesselPartOld', at: [1, 600, 1440] }, { id: 'vesselPartOld', at: [2, 0, 570] }, { id: 'vesselPartOld', shop: 1, at: [2, 570, 900] },
+  { id: 'vesselPartNew', at: [2, 570, 900] },
+  { id: 'vesselSketchWorks', at: [2, 920, 1440] }, { id: 'vesselSketchWorks', at: [3, 0, 1440] },
+  { id: 'vesselSheet', at: [0, 570, 1440], lines: vesselSheetLines }, { id: 'vesselSheet', at: [1, 0, 840], lines: vesselSheetLines },
+  { id: 'vesselChainFrom', at: [1, 720, 830], get n() { return vesselChainCrate().left; } },   // the counts read as dressShow is handed the list (a minute's)
+  { id: 'vesselChainTo', at: [1, 781, 1440], get n() { return vesselChainCrate().n; } }, { id: 'vesselChainTo', at: [2, 0, 900], get n() { return VCHAIN.n; } }];
+// the parts chain's crates (V-3's looks; VB1's chain owns who stands where and your turn): Sunday 13:01, twenty crates set
+// off from Main storage's door, one every 2.4 minutes, hand to hand down the forty spots (a quarter of a ship minute a
+// hand, a little lift between hands), the last into the bay by about 13:56. vesselChainCrate(now) -> { n: crates in the
+// bay so far, left: still in storage, moving: [index along the spots (0 to 39, fractional)] } pure of the clock (your
+// ring on a crate can fire as one reaches your spot). Drawn on Deck 5 as one instanced mesh (1 draw call), and the two
+// stacks (storage end, bay end) as dressing with their counts
+const VCHAIN = { n: 20, from: 781, gap: 2.4, hand: .25, mesh: null, root: null };
+function vesselChainCrate(now = shipNow()) {
+  const t = vesselT(now), C = VCHAIN, out = { n: 0, left: C.n, moving: [] }; if (t == null || t < 1440 + C.from) return t != null && t >= 2 * 1440 ? { n: C.n, left: 0, moving: [] } : out;
+  const m = t - 1440;
+  for (let c = 0; c < C.n; c++) { const f = (m - C.from - c * C.gap) / C.hand; if (f < 0) continue; out.left--; if (f >= 39) out.n++; else out.moving.push(f); }
+  return out;
+}
+function vesselChainFrame() {
+  const C = VCHAIN, on = deckDef.num === 5 && DECKS[5].vesselChain, cr = on ? vesselChainCrate() : null, t = simNow() / 1000;
+  // the hands: the spots someone stands at (the crew, or you), in line order, looked up twice a second; the crates pass
+  // only between them, so a short line still passes hand to hand. Fewer than two: no crates in the air
+  if (cr && cr.moving.length && (t >= (C.next || 0) || C.root !== deckRoot)) {
+    C.next = t + .5; const who = (typeof DECK_CREW !== 'undefined' ? DECK_CREW.map(a => [a.x, a.z]) : []).concat([[player.obj.position.x, player.obj.position.z]]);
+    C.occ = DECKS[5].vesselChain.spots.map(id => placeSpot(id)).filter(sp => sp && who.some(([x, z]) => Math.hypot(x - sp.x, z - sp.z) < .45)).map(sp => [sp.x, sp.z]);
+  }
+  if (!cr || !cr.moving.length || !C.occ || C.occ.length < 2) { if (C.mesh) { C.mesh.parent && C.mesh.parent.remove(C.mesh); C.mesh.geometry.dispose(); C.mesh = null; } return; }
+  if (!C.mesh || C.root !== deckRoot) {
+    if (C.mesh) { C.mesh.parent && C.mesh.parent.remove(C.mesh); C.mesh.geometry.dispose(); }
+    C.mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(.44, .3, .34), dressMat('#6f88a3'), 6); C.mesh.frustumCulled = false; C.mesh.raycast = () => {};
+    C.root = deckRoot; deckRoot.add(C.mesh);
+  }
+  const M = C.mesh, o = C.o || (C.o = new THREE.Object3D()), P = C.occ, n = P.length - 1;
+  cr.moving.slice(0, 6).forEach((f, k) => {
+    const g = f * n / 39, i = Math.min(n - 1, Math.floor(g)), u = g - i, e = u < .5 ? 0 : (u - .5) * 2, sm = e * e * (3 - 2 * e);   // held half the time, then swung to the next pair of hands
+    o.position.set(P[i][0] + sm * (P[i + 1][0] - P[i][0]), 1.0 + .1 * Math.sin(Math.PI * sm), P[i][1] + sm * (P[i + 1][1] - P[i][1]));
+    o.rotation.y = Math.atan2(P[i + 1][0] - P[i][0], P[i + 1][1] - P[i][1]); o.updateMatrix(); M.setMatrixAt(k, o.matrix);
+  });
+  M.count = Math.min(6, cr.moving.length); M.instanceMatrix.needsUpdate = true;
+}
+// a stack of n crates (up to 20: two by two, five high), its band in Works orange; 2 draw calls
+function vesselStack(s, n) {
+  for (let k = 0; k < Math.min(20, n); k++) { const x = (k % 2) * .48 - .24, z = (Math.floor(k / 2) % 2) * .38 - .19, y = Math.floor(k / 4) * .31;
+    dressBox(s, .44, .3, .34, '#6f88a3', x, y + .15, z); dressBox(s, .45, .06, .35, '#e07a3c', x, y + .2, z); }
+}
+// at load with the switch on, after VB1's block (this slot comes later in the file): the places, the props, and the
+// props' windows in every phase of the event; the Works bay sketch stays for good from the all-clear
+function vesselLooksInit() {
+  if (!vesselOn()) return;
+  vesselPlaces(); vesselDress();
+  const def = SHIP_EVENTS.veyliVessel; if (!def) return;
+  def.dressing = def.dressing || {};
+  for (const ph of def.phases || []) { const l = def.dressing[ph.id] || (def.dressing[ph.id] = []); for (const x of VDRESS) if (!l.some(y => y.id === x.id && y.at && y.at.join() === x.at.join())) l.push(x); }
+  def.settleTraces = [...new Set((def.settleTraces || []).concat('vesselSketchWorks'))];
+}
+vesselLooksInit();
+// ---- end of slot: Vessel sky ----
 
 // =====================================================================
 // 18f SHORT FRIDAYS AND THE CAPTAIN'S ADDRESS (the Fridays builder FR1; plans/fridays-plan.md rev 4, plans/fridays-build-brief.md)
@@ -56160,6 +57685,7 @@ function shopTinker(it, at) {
 // the place: its shelves in main storage, its part to make in the machine shop; tinkering only with no machine job
 function shopTap(it, at, mw) {
   if (typeof deckDef === 'undefined' || deckDef.num !== 5) return false;
+  if (typeof vesselShopTap === 'function' && vesselShopTap(it, at)) return true;   // the Veyli vessel's part (section 18's slot 'Vessel builder'): a tap on the lathe or the fabricator is its step, not tinkering
   const room = roomAt(...cellAt(at.x, at.z)), s = shopData(), P = SHIP.player;
   if (room === 'f' && /^order board$/i.test(it.t)) return shopBoard(it);
   const j = s && s.orders.map(shopJobOf).find(Boolean);
@@ -63467,6 +64993,24 @@ if (typeof EV_COMET_ON !== 'undefined' && EV_COMET_ON) {
     r.head.rotation.x = L(r.head.rotation.x, -.42, s); r.head.rotation.y = L(r.head.rotation.y, -.12, s); r.torso.rotation.x = L(r.torso.rotation.x, -.06, s);
   } };
   for (const k of ['look', 'point']) { ACT_SEATED.add(k); CROWD_ANIMS.add(k); }
+}
+// ---- A Veyli vessel needs help (VB2 for lead 39, plans/veyli-vessel-spec.html; the ending reuses the wave): 'bow' (Taavek's
+// hello at the ramp: a slow bow from the hips, hands together in front, held, then up again, every few seconds) and 'wave'
+// (the right arm up, the hand swinging side to side; seated too). Looks only: no props, no R(), no draw calls. Behind
+// EV_VESSEL_ON or the ending's EV_ENDING_ON (both declared in section 13, before this)
+if (typeof EV_VESSEL_ON !== 'undefined' && EV_VESSEL_ON || typeof EV_ENDING_ON !== 'undefined' && EV_ENDING_ON) {
+  ACTS.bow = { f(r, s, t, b, ph) {
+    const u = (t * .22 + ph) % 1, d = u < .25 ? ss(u / .25) : u < .6 ? 1 : u < .85 ? 1 - ss((u - .6) / .25) : 0;   // down, held, up, a pause
+    r.torso.rotation.x = L(r.torso.rotation.x, .55 * d, s); r.head.rotation.x = L(r.head.rotation.x, .25 * d, s); r.head.rotation.y = L(r.head.rotation.y, 0, s);
+    for (const a of r.arms) armTo(a, s, -.45 - .25 * d, -.95, -.18, .1);   // the hands meet in front of the waist
+  } };
+  ACTS.wave = { f(r, s, t, b, ph) {
+    const R_ = r.arms.find(a => a.side < 0), sw = Math.sin(t * 7 + ph * 6.283);
+    R_.sh.rotation.x = L(R_.sh.rotation.x, -2.55, s); R_.el.rotation.x = L(R_.el.rotation.x, -.5, s);
+    R_.sh.rotation.z = L(R_.sh.rotation.z, R_.side * (.3 + .28 * sw), s); R_.hand.rotation.x = L(R_.hand.rotation.x, 0, s);
+    r.head.rotation.x = L(r.head.rotation.x, -.05, s); r.head.rotation.y = L(r.head.rotation.y, .08 * sw, s);
+  } };
+  ACT_SEATED.add('wave'); for (const k of ['bow', 'wave']) CROWD_ANIMS.add(k);
 }
 // ---- end of slot: Performance engineer ----
 
