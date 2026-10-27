@@ -11,8 +11,11 @@
 - Words: stand-ins baked by me (content/works/m21.lines, content/meetings/m21.brief.meet, m21.short.meet).
 - Checks: mech_check part m21 (P5_STEP6 copy), controller_check part m21 (`P6_PARTS`, P5_STEP6 copy).
 
+## Turn 2 (checks only)
+- day_check 22 OK (plain and forced copies), bigevents_check OK, controller_check m21 adds the wall screen. RV23 PASS on 27166be.
+
 ## Next
-- S6-2 turn 2: day_check 22 and bigevents_check on a P5_STEP6 copy (the hold, no clash with the bridge invite at breakfast); the agenda screen tested live; the arrows_check step6 beat (the arrow-follower) if the frame exists by then; review fixes.
+- S6-2 turn 3: the arrows_check step6 beat (the arrow-follower) once its frame exists (S6-3's); any review fixes. Known, low risk: Vance is in the briefing's cast; if the bridge invite (Vance at breakfast, 05:00-10:00) ever fell on a briefing Monday he'd be pulled to Deck 1 at 08:30.
 - S6-6 (wave 2): 28d, TEAM_JOBS.coil in 24h (the owner is W6 for the table's shape), slot 36.
 
 ## Gotchas
