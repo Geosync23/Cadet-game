@@ -32,6 +32,13 @@ The user's decision: TRAY_TRAVELS, INTRO_ASK_ON, ZEKE_CABIN_MAIL, PAD_ON stay of
 
 **GO from testing sent to lead 41, 2026-10-27 ~10:20 UTC: 1d5e8845, game 5f4c5415814c78eb4c93eaad76ecc35dfa53f1f7cbb4c1f5af541f3971900a0f.** Publishing and the integration fast-forward are the lead's and the user's. The findings below were all resolved (fixed in checks, or the vessel words); see the build table's '0.94.0 round' row.
 
+## Step 6 staging
+
+**claude/staging-p5s6 64e296df** (lead 41, 2026-10-27 ~10:40 UTC): staging-0.94.0 6f1915cb + W6's claude/p5s6-core 9e5867e6 (95ef6947 + handover-w6). Game a0ba2ffc...34b2. check_fast OK; cadet vs 1d5e8845 ALL IDENTICAL; names_check OK on a P5_STEP6-on copy. Step 6 builders branch from it; merges of Step 6 pieces go here (cadet vs 1d5e8845 must stay ALL IDENTICAL while P5_STEP6 is off). The integration fast-forward to 0.94.0 waits for the user's OK.
+
+Step 6 merged so far: **3e502cac** = MA6 claude/p5s6-mech-a c3ca5e84 (RV23 PASS 27166bec + notes); game 7977c6db...; check_fast OK, cadet vs 64e296df ALL IDENTICAL, names_check on a P5_STEP6-on copy (sed `const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');` -> `P5_STEP5 && true;`). When promo4 (W7, bfcebb6d) lands: keep t4 first in the Step 6 ladder rows (RV23).
+Step 6 seats (tell each when staging-p5s6 moves, priority next): W7 career session_01GKuymjghu82TGWPLR1wTKw (p5s6-promo4), N6 nights session_01GKuymnDA25R2a5yZGYpaBS (p5s6-nights), MA6 session_01GKuymj1UEDuEYMnG9rmFkc (p5s6-mech-a), PZ6 session_01GKuymjrmdGE4vaHHHGkvYF (p5s6-puzzles), DA6 session_01GKuymjJ4sU5hfdU8bH49UW (p5s6-deck). Reviewer RV23 session_01GKuymoDm1XbC5G8TvaCNLr.
+
 ## Round findings (2026-10-27 ~08:40 UTC, game 04cc0cb6)
 
 - **MUST, open:** arrows_check week stalls Day 4 13:21 at "Fix a wobbly stool" (wb-stool, 5-stool-1, Works bay). Bisected (R1 + me): 4fea0aa0 clean, bf228260 (P5_STEP5 = true only) stalls. Sent to lead 41 for a Step 5 builder.
