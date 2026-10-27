@@ -82,3 +82,4 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
   in the bow lounge): Calder fetched Saturday 10:00/11:30 but no bubble recorded (should); Sunday 12:45 Taavek fetched,
   stopped 4 m away, scene needs 3.2 m: nothing, "missed" at 13:00 (MUST; shot vessel-0340b6f9-roundone-fetch.png); the
   12:40 arrow was the sheet, not the round one (should). Ramp scene with Calder, Monday goodbye, Tern: good.
+- 02:44 UTC: B3 asks for claude/talk-close f52e2abc (from staging-0.94.0 ac810e7e; talk only within TALK_NEAR 2.5 tiles, Walk over; section 20 + 10 tapCrew; no switch). Queued after B3 m20 and VB2. B3: controller_check ending 4 FAILs on staging ac810e7e (Day 34 ring None for pell; Monday goodbye, end page) with or without it.
