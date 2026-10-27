@@ -261,6 +261,52 @@ def part_t3before(g):
     check(r['mon'] == 15 and r['dlg'] == 'pu3.offer' and r['t3'] and r['t3']['day'] == 16, f"t3before: on a later day, from 08:00, \"tomorrow\" ({r})")
     check(r['late'] and r['late']['day'] == 16 and r['lateMail'] == 1, f"t3before: not found by 22:00, it comes by Mail ({r})")
 
+# ---- Step 6, S6-3 (W6): the Engine Specialist promotion. t4off on the build as shipped (P5_STEP6 off: nothing); the rest
+# on a copy with P5_STEP6 switched on (const P5_STEP6 = P5_STEP5 && true;)
+T4 = "typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"
+def t4on(g, name):
+    on = g.ev(T4)
+    if not on: print(f'({name}) P5_PROMO4 off in this build: skipped (run it on a copy with P5_STEP6 on)')
+    return on
+T4_W = "const W = __w(19, 470, { xp: 60, tr: { ps: 12, t2: 9, t3: 15, m19: 17 } }); W.tier = 3; W.rank = 'senior'; __friends();"
+def part_t4off(g):
+    if g.ev(T4): print('(t4off) P5_PROMO4 on in this build: skipped (it is the shipped build\'s part)'); return
+    print('(t4off) P5_PROMO4 off: nothing of the Engine Specialist promotion:')
+    r = g.ev("""(() => { """ + T4_W + """ __bay();
+      for (const t of [18 * 1440 + 500, 18 * 1440 + 900, 20 * 1440 + 1090, 20 * 1440 + 1330]) { setShipNow(t); __tick(); }
+      return { ready: typeof pu4Ready === 'function' && pu4Ready(19), t4: !!(SHIP.works.pu && SHIP.works.pu.t4), rows: __rows(22).filter(x => /Tier 4/.test(x)),
+        flags: Object.keys(SHIP.flags).filter(k => /pu4/.test(k)), mail: __mail().filter(m => /Tier 4/.test(m)), notes: __notes.filter(n => /Tier 4/.test(n)), dlg: DIALOGUE && DIALOGUE.id, tab: JSON.stringify(puCheck()) }; })()""")
+    print('   ', r)
+    check(not r['ready'] and not r['t4'] and not r['rows'] and not r['flags'] and not r['mail'] and not r['notes'] and not r['dlg'] and 'Tier 4' not in r['tab'], f"t4off: nothing happens ({r})")
+def part_t4before(g):
+    if not t4on(g, 't4before'): return
+    print('(t4before) the offer in person (Friday), the record, the rows; the weekend: Sunday dinner; by Mail at 22:00:')
+    r = g.ev("""(() => { """ + T4_W + """ __bay(); const out = { ready18: pu4Ready(18), ready: pu4Ready(19) };
+      setShipNow(18 * 1440 + 470); __tick(); out.early = !!PU4_LIVE.seek; setShipNow(18 * 1440 + 481); __tick(); out.held = !!PU4_LIVE.seek; setShipNow(18 * 1440 + 501); __tick();   // Friday 08:00-08:20 is the Senior briefing's held hour: after it
+      out.seek = !!PU4_LIVE.seek; out.esc = (p5Escort({ id: 'calder' }, shipNow()) || {}).mode; out.before = !!puT4();
+      const keep = puNearMe; puNearMe = id => id === 'calder' ? true : keep(id); __tick(); puNearMe = keep;
+      out.dlg = DIALOGUE ? DIALOGUE.m.id : null; out.during = !!puT4();
+      let n = 0; while (DIALOGUE && n++ < 30) { const l = DIALOGUE.queue[DIALOGUE.i]; dialogueStep(l && l.choice ? 1 : undefined); }
+      out.t4 = puT4(); out.reply = flag('pu4.reply'); out.notes = __notes.filter(x => /Tier 4/.test(x)); out.mail = __mail().filter(m => /Tier 4/.test(m));
+      out.rows = __rows(22); out.next = worksNext(); out.tab = JSON.stringify(puCheck()); out.esc2 = (p5Escort({ id: 'calder' }, shipNow()) || {}).mode || null;
+      setShipNow(20 * 1440 + 1201); __tick(); out.luck = __mail().filter(m => /Good luck/.test(m)).length;
+      const keep2 = JSON.stringify(SHIP.works.pu || {}); const c = pu4Clean(JSON.parse(keep2).t4); out.clean = JSON.stringify(c) === JSON.stringify(puT4()); out.junk = pu4Clean({ day: 'x' });
+      return out; })()""")
+    for k in ('held', 'ready18', 'ready', 'early', 'seek', 'esc', 'before', 'dlg', 'during', 't4', 'reply', 'notes', 'mail', 'rows', 'next', 'tab', 'esc2', 'luck', 'clean', 'junk'): print('   ', k, r[k])
+    check(not r['ready18'] and r['ready'] and not r['early'] and not r['held'] and r['seek'] and r['esc'] == 'follow' and not r['before'], f"t4before: from Friday Day 19, 08:00 (after the briefing's hold to 08:20), she comes to find you (her escort follows you), the test not set yet ({r})")
+    check(r['dlg'] == 'pu4.offer' and not r['during'], f"t4before: next to you, her scene, in person first ({r['dlg']})")
+    check(r['t4'] and r['t4']['day'] == 22 and r['t4']['tries'] == 0 and not r['t4']['passed'] and r['reply'] == 2 and r['esc2'] is None, f"t4before: at its end the test is set for Monday Day 22, your reply kept, she stops following ({r['t4']})")
+    check(any('Tier 4' in n and '09:30' in n for n in r['notes']) and any(m.startswith('Chief Ines Calder: Your Tier 4 test |') for m in r['mail']), f"t4before: then the urgent notice and the Mail, the record ({r['notes']}, {r['mail']})")
+    check(any('09:30' in x and 'Tier 4' in x for x in r['rows']) and 'Tier 4' in r['next'] and 'Power and relays' in r['tab'] and 'Test job' in r['tab'], f"t4before: the Schedule, What's next and the Training tab ({r['rows']}, {r['next']}, {r['tab']})")
+    check(r['luck'] == 2 and r['clean'] and r['junk'] is None, f"t4before: two friends' Mail at 20:00 on Sunday; the save's record read back, junk dropped ({r['luck']}, {r['clean']}, {r['junk']})")
+    r = g.ev("""(() => { const out = {}; (() => { """ + T4_W + """ })(); __bay();
+      setShipNow(19 * 1440 + 600); __tick(); out.sat = !!PU4_LIVE.seek;   // Saturday: she waits for Sunday dinner
+      setShipNow(20 * 1440 + 600); __tick(); out.sunAm = !!PU4_LIVE.seek; setShipNow(20 * 1440 + 1081); __tick(); out.sunDinner = !!PU4_LIVE.seek;
+      setShipNow(20 * 1440 + 1321); __tick(); out.late = puT4(); out.lateMail = __mail().filter(m => /Tier 4/.test(m)).length; return out; })()""")
+    print('   ', r)
+    check(not r['sat'] and not r['sunAm'] and r['sunDinner'], f"t4before: Trusted at the weekend, she comes at Sunday dinner, not before ({r})")
+    check(r['late'] and r['late']['day'] == 22 and r['lateMail'] == 1, f"t4before: not found by 22:00, it comes by Mail, the test still Monday ({r})")
+
 T3_TEST = """const W = __w(15, 300, { xp: 60, tr: { ps: 12, t2: 9 } }); W.tier = 2; W.rank = 'officer'; __friends();
       for (const r of CAREER_LADDER) if (r.id !== 't3' && r.tier <= 2) { W.tr[r.id] = W.tr[r.id] || 9; (W.op[9] = W.op[9] || []).push(r.id); }
       puSet(15); flagSet('pu3.told', 14); flagSet('pu3.notice', 14); setShipNow(14 * 1440 + 361); machinesNow(); careerClock(shipNow(), true); __bay();"""
@@ -401,7 +447,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')

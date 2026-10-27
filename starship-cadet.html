@@ -62863,6 +62863,7 @@ function p5Escort(p, t) {                                // worksEscort's 24u pa
   const r = SHIP.occasions.filter(x => x.id === 'works.ps').pop();
   if (r && r.f && r.f.seek && !r.f.told && r.status === 'asked' && p.id === r.by && t < r.at - 20 && !(typeof promoBusy === 'function' && promoBusy())) return { mode: 'follow', to: null };
   { const w = p5TeacherWait(p, t); if (w) return w; }
+  if (P5_PROMO4) { const e = pu4Escort(p, t); if (e) return e; }   // S6-3: the Tier 4 offer
   if (P5_PROMO3 && typeof puEscort === 'function') return puEscort(p, t) || puEscort2(p, t);   // S5-2: the Tier 3 offer, your result, up to the bar
   return null;
 }
@@ -62922,7 +62923,8 @@ if (P5_STEP5) onSim('trained', n => {                    // m15 folds into m19 (
 // table's "Nearly there": the rows tick as each need holds. 24 core's Training tab asks it (one typeof-guarded line)
 function puCheck() {
   const W = SHIP.works, d = SHIP.time.day; if (!P5_STEP5 || !W || W.tier < 2) return [];
-  const T = puT3(); if (W.tier > 2 && !(P5_PROMO3 && T && T.passed && !T.toast)) return [];   // (S5-2: the rows run on to the toast)
+  const T = puT3(); if (P5_PROMO4 && W.tier === 3 && !(T && T.passed && !T.toast)) return pu4Check();   // (S6-3) a Senior's: the Tier 4 test
+  if (W.tier > 2 && !(P5_PROMO3 && T && T.passed && !T.toast)) return [];   // (S5-2: the rows run on to the toast)
   const B = WORK_BANDS[2], at = b => B.findIndex(x => x[1] === b), row3 = ladderRow('t3'), from = row3 ? row3.day : 15;
   if (W.tier === 2 && at(worksBand()) < at('steady') && !T) return [];
   const pk = (key, old, fb, v) => worksHas('pu3.check.' + key) ? worksText('pu3.check.' + key, fb, v) : worksText('works.pu.check.' + old, fb, v);   // SW3's words (pu3.check.*), else S5-1's stand-ins
@@ -62983,7 +62985,8 @@ const PU = { offerFrom: 14, testFrom: 15, seekAt: 480, partyAt: 1145, seekBy: 13
 const PU_LIVE = { seek: null, said: new Set(), talkAt: -1e9 };
 function puClean(s) {                                    // a save's pu, junk dropped
   const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi ? v : null, t = s && typeof s === 'object' && s.t3 && typeof s.t3 === 'object' ? s.t3 : null;
-  return { t3: t && int(t.day, 1, 99999) ? { day: t.day, tries: int(t.tries, 0, 99) || 0, passed: t.passed === true, res: int(t.res, 1, 99999), bar: int(t.bar, 1, 99999), toast: int(t.toast, 1, 99999), ...(int(t.cake, 0, 99999) !== null ? { cake: t.cake } : {}) } : null };   // cake: the day you had a slice (0: the window went by)
+  const t4 = typeof pu4Clean === 'function' && s && typeof s === 'object' ? pu4Clean(s.t4) : null;   // (S6-3) the Tier 4 record
+  return { ...(t4 ? { t4 } : {}), t3: t && int(t.day, 1, 99999) ? { day: t.day, tries: int(t.tries, 0, 99) || 0, passed: t.passed === true, res: int(t.res, 1, 99999), bar: int(t.bar, 1, 99999), toast: int(t.toast, 1, 99999), ...(int(t.cake, 0, 99999) !== null ? { cake: t.cake } : {}) } : null };   // cake: the day you had a slice (0: the window went by)
 }
 if (P5_PROMO3) { const s = SAVED && SAVED.ship && SAVED.ship.works; if (SHIP.works && s && s.pu) SHIP.works.pu = puClean(s.pu); }
 function puT3() { const W = SHIP.works; return W && W.pu && typeof W.pu === 'object' && W.pu.t3 && typeof W.pu.t3 === 'object' ? W.pu.t3 : null; }   // the save's Tier 3 record, or null (a function: puCheck asks it with P5_STEP5 alone)
@@ -63054,11 +63057,13 @@ function puNearTick(now, skip) {                         // nearly there: at Tru
   if (puNearMe('halloran-emeka', CHATTER_NEAR)) { const l = worksVoice('halloran-emeka', 'pu3.promo.near'); if (l) simTimeout(() => worksSayAll('halloran-emeka', l), 5600); }
 }
 function puRepUp(b1) {                                   // worksRepTell's line as an Officer at Trusted and Relied on (null: its own)
+  { const l = P5_PROMO4 ? pu4RepUp(b1) : null; if (l) return l; }   // (S6-3) a Senior's, for Tier 4
   const W = SHIP.works; if (!P5_PROMO3 || !W || W.tier !== 2 || puT3()) return null;
   return b1 === 'trusted' ? worksText('works.rep.up2.trusted', 'Now Trusted. One more step, Relied on, and you\'re up for your Tier 3 test.') : b1 === 'relied' ? worksText('works.rep.up2.relied', 'Now Relied on. That\'s the reputation your Tier 3 test needs.') : null;
 }
 function puNext(k) {                                     // worksNext's line for the Tier 3 test and the Senior Officer's beats (null: its own)
   const W = SHIP.works, T = puT3(), d = SHIP.time.day; if (!P5_PROMO3 || !W) return null;
+  if (P5_PROMO4 && W.tier === 3 && (!T || T.toast)) return pu4Next(k);   // (S6-3) a Senior's: the Tier 4 test
   if (!T) { if (W.tier !== 2) return null; const B = WORK_BANDS[2], at = b => B.findIndex(x => x[1] === b);
     return at(worksBand()) >= at('steady') && !ladderNeeds({ rep: 'relied' }, W) ? worksText('next.t3.steps', 'Your Tier 3 test needs Relied on and Power safety. You\'re {band} now.', { band: worksBandWord() }, k) : null; }
   if (!T.passed) return worksText('next.wait.t3', 'Your Tier 3 test is set. The job board, the Works bay, 09:00.', null, k);
@@ -63069,8 +63074,8 @@ function puNext(k) {                                     // worksNext's line for
 }
 // the Schedule's and Tracked's rows on day d (devDay asks): the test, then (turn 3) your result, the bar and the toast
 function puItems(d) {
-  const T = P5_PROMO3 && puT3(), W = SHIP.works; if (!T || !W) return [];
-  const out = [];
+  const T = P5_PROMO3 && puT3(), W = SHIP.works; if (!T || !W) return P5_PROMO4 ? pu4Items(d) : [];
+  const out = P5_PROMO4 ? pu4Items(d) : [];   // (S6-3) the Tier 4 test's row
   if (!T.passed && W.tier === 2 && T.day === d) out.push({ from: 540, to: 900, title: worksText('pu3.row.test', 'Your Tier 3 test'), where: 'the job board, the Works bay, Deck 5', kind: 'beat', deck: 5, room: 'w' });
   const has = id => SHIP.occasions.some(r => r.id === id && Math.floor(r.at / 1440) + 1 === d);   // a booked one is the occasion's own row
   if (T.passed && !T.res && W.tier === 2 && puResultDay() === d && !has('pu3Result')) out.push({ from: PU_R.at, to: PU_R.at + 30, title: worksText('pu3.row.result', 'Your result, 08:15'), where: 'the Chief\'s office, the Works bay, Deck 5', kind: 'beat', deck: 5, room: 'o' });
@@ -63547,6 +63552,120 @@ function puDevNext() {                                   // the Dev career arrow
   if (!T.bar) return { when: abs(rd, promoCerTimes(rd).at), soon: 15, g: { deck: 1, place: '1-ceremony-you', room: 'O', label: 'Your bar, the observation room' } };
   if (!T.toast) { const td = puToastDay(); return td ? { when: abs(td, PU_R.toastAt), soon: 15, g: { deck: 2, place: '2-captable-1', room: 'C', label: 'The Captain\'s toast, her quarters' } } : null; }
   return null;
+}
+// ---- S6-3 (W6 for lead 41; plans/p5-step6-spec.html on claude/p5-specs, "The beats" and piece S6-3): the Engine Specialist
+// promotion, behind P5_PROMO4 (under P5_STEP6), the Senior Officer's beats again (S5-2 above) with Tier 4's own. Turn 1:
+// the offer and what comes before it. A Senior Officer, Trusted, trained in power and relays (the t4 row's needs), from
+// Friday Day 19 (the test never before Monday Day 22). On a workday Calder comes to find you from 08:00 (puEscort's
+// pattern: pu4Escort, through p5Escort) and says it in person (pu4.offer); at the weekend she waits for Sunday dinner and
+// comes to your table from 18:00 (pu4.offer.dinner: the table reacts). Then the urgent notice and her Mail as the record;
+// not found by 22:00 (awake), by Mail. Only then is the test set: SHIP.works.pu.t4.day, the first workday after today, never
+// before Day 22. Before it: the Training tab's Tier 4 rows (pu4Check, through puCheck), What's next (puNext), the
+// reputation toast at Trusted (puRepUp), the Schedule's and Tracked's rows (puItems), Torres's "Drive coils" passing you
+// at Trusted (once), up to two friends' Mail at 20:00 the evening before. Saved: SHIP.works.pu.t4 = { day, tries, passed,
+// res, badge, move } (puClean keeps it), flags pu4.*. Live only: PU4_LIVE. Nothing calls R(). Words: pu4.* (stand-ins
+// here until the head writer's content/works/promo-t4.lines and the meetings pu4.offer, pu4.offer.dinner)
+const PU4 = { offerFrom: 19, testFrom: 22, seekAt: 480, dinnerAt: 1080, seekBy: 1320, testAt: 570, testEnd: 750, luckAt: 1200 };
+const PU4_LIVE = { seek: null };
+function puT4() { const W = SHIP.works; return W && W.pu && typeof W.pu === 'object' && W.pu.t4 && typeof W.pu.t4 === 'object' ? W.pu.t4 : null; }   // the save's Tier 4 record, or null
+function pu4Clean(t) {                                   // puClean's Tier 4 part: junk dropped
+  const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi ? v : null;
+  return t && typeof t === 'object' && int(t.day, 1, 99999) ? { day: t.day, tries: int(t.tries, 0, 99) || 0, passed: t.passed === true, res: int(t.res, 1, 99999), badge: int(t.badge, 1, 99999), move: t.move && typeof t.move === 'object' ? { ready: int(t.move.ready, 1, 99999), walked: int(t.move.walked, 1, 99999), refit: t.move.refit === true } : null } : null;
+}
+function pu4Set(day) { const W = SHIP.works; if (!W.pu || typeof W.pu !== 'object') W.pu = { t3: null }; return W.pu.t4 = { day, tries: 0, passed: false, res: null, badge: null, move: null }; }
+function pu4Ready(d) {                                   // the offer's needs hold today (and it isn't made yet)
+  const W = SHIP.works, row = ladderRow('t4');
+  return !!(P5_PROMO4 && W && W.tier === 3 && W.rank === 'senior' && row && !puT4() && d >= PU4.offerFrom && ladderNeeds(row.needs, W));
+}
+const pu4TestDay = d => Math.max(PU4.testFrom, promoWorkday(d));
+const pu4DayWord = (day, d) => day === d ? 'today' : day === d + 1 ? 'tomorrow' : dayName(day);
+function pu4AtDinner() { try { return !!ACT && ACT.kind === 'eat' && deckDef.num === 3; } catch (e) { return false; } }   // at your table in the mess (Deck 3)
+function pu4Script(v, hook) {                            // a live copy of the writer's scene (else a stand-in), our hooks on it; the dinner's without anyone who isn't near
+  const id = 'pu4.offer' + v, base = MEETING_SCRIPTS[id] || MEETING_SCRIPTS['pu4.offer'] || { title: 'Your next test', from: 'Chief Ines Calder', stub: true, gist: 'Calder told you in person: your Tier 4 test is set, Monday at 09:30. A drive coil. Pass it and you\'re an Engine Specialist.',
+    lines: [{ who: 'calder', text: 'There you are. Trusted, and the relays done. That\'s all of it.', to: 'you' },
+      { who: 'calder', text: 'Monday. A drive coil. Tier 4.' },
+      { choice: [{ text: 'I\'ll be ready.', reply: { who: 'calder', text: 'I know. That\'s why it\'s Monday.' } },
+        { text: 'A drive coil? Me?', reply: { who: 'calder', text: 'With me and Torres watching. Half past nine, the engine room.' } }] },
+      ...(v === '.dinner' ? [{ who: 'pell', text: 'Torres is pretending not to be proud.' }] : [])] };
+  let lines = base.lines;
+  if (v === '.dinner') { const here = w => w === 'calder' || !!puNearMe(w, CHATTER_NEAR + 3); lines = lines.filter(l => !l.who || l.who === 'you' || here(l.who)); }
+  MEETING_SCRIPTS['pu4.live'] = { ...base, lines, onPick: (k, c) => { if (hook.pick) hook.pick(k, c); }, onEnd: f => { if (hook.end) hook.end(f); } };
+  return 'pu4.live';
+}
+function pu4Offered(now, how) {                          // the test is set; the notice and the Mail, the record of what she said
+  if (puT4()) return false;
+  const d = worksDay(now), T = pu4Set(pu4TestDay(d)), day = pu4DayWord(T.day, d), time = hhmm(PU4.testAt);
+  flagSet('pu4.told', d); PU4_LIVE.seek = null;
+  promoMail(how === 'mail' ? 'mail.pu4.offer.late' : 'mail.pu4.offer', 'Your Tier 4 test | {day}, {time}, the engine room, Deck 6. A drive coil, with Torres and me. Pass it and you\'re an Engine Specialist.', { day, time }, now);
+  if (now >= shipNow() - 1 && !promoBusy() || how === 'person') { promoNotice(worksText('pu4.offer.notice', 'Your Tier 4 test: {day}, {time}, the engine room, Deck 6.', { day, time }), worksName('calder')); flagSet('pu4.notice', d); }
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  simNote('pu4', { step: 'set', day: T.day, how });
+  return true;
+}
+function pu4OfferTick(now, skip) {                       // once a ship minute: she comes to find you (a workday from 08:00; Sunday at dinner), and tells you
+  const d = worksDay(now), m = now - (d - 1) * 1440, T = puT4();
+  if (T && flag('pu4.told') !== undefined && flag('pu4.notice') === undefined && !skip && now >= shipNow() - 1 && !promoBusy()) {   // set while you slept: the notice once you're up
+    flagSet('pu4.notice', d); promoNotice(worksText('pu4.offer.notice', 'Your Tier 4 test: {day}, {time}, the engine room, Deck 6.', { day: pu4DayWord(T.day, d), time: hhmm(PU4.testAt) }), worksName('calder')); }
+  if (!pu4Ready(d)) { PU4_LIVE.seek = null; return; }
+  const wd = (() => { try { return weekday(d); } catch (e) { return 0; } })(), work = playerShiftOn(d);
+  if (!work && wd !== 6) { PU4_LIVE.seek = null; return; }   // a day off that isn't Sunday: she waits for Sunday dinner
+  const from = work ? PU4.seekAt : PU4.dinnerAt;
+  if (m >= PU4.seekBy) { if (flag('pu4.late') !== d) { flagSet('pu4.late', d); if (!(typeof sleeping !== 'undefined' && sleeping)) pu4Offered(now, 'mail'); } return; }   // not found by 22:00 (awake): by Mail; asleep: the morning
+  if (skip || now < shipNow() - 1 || m < from) return;
+  const S = PU4_LIVE.seek;
+  if (!S) { if (!promoBusy() && guardFree(d, m, m + 15)) PU4_LIVE.seek = { by: 'calder', at: Math.floor(now), d }; return; }
+  if (typeof sleeping !== 'undefined' && sleeping) { PU4_LIVE.seek = null; return; }
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE || !puNearMe(S.by)) return;
+  const v = !work && pu4AtDinner() ? '.dinner' : '';
+  const id = pu4Script(v, { pick: k => flagSet('pu4.reply', k + 1), end: () => pu4Offered(shipNow(), 'person') });
+  S.met = true; flagSet('pu4.offer.at', v || 'day');
+  dialogueShow(id, { id: 'pu4.offer' + v, who: ['calder'], at: now, where: { any: true } });
+}
+function pu4Escort(p, t) {                               // p5Escort's Step 6 part: Calder walking over to find you
+  const S = PU4_LIVE.seek; return S && !S.met && p.id === S.by && pu4Ready(worksDay(t)) ? { mode: 'follow', to: null } : null;
+}
+function pu4NearTick(now, skip) {                        // nearly there: Trusted, in the bay or on Deck 6, Torres passing you (once)
+  const W = SHIP.works; if (skip || !W || W.tier !== 3 || puT4() || flag('pu4.near') || now < shipNow() - 1 || worksBand() !== 'trusted' || typeof DIALOGUE !== 'undefined' && DIALOGUE) return;
+  let deck = 0; try { deck = deckDef.num; } catch (e) { deck = 0; }
+  if (!(promoInBay() || deck === 6) || !puNearMe('torres-zeke', CHATTER_NEAR)) return;
+  flagSet('pu4.near', worksDay(now));
+  worksSayAll('torres-zeke', worksVoice('torres-zeke', 'pu4.promo.near') || ['Drive coils. Just saying.']);
+}
+function pu4BeatsTick(now) {                             // the evening before the test: up to two friends' Mail at 20:00
+  const T = puT4(), W = SHIP.works; if (!T || !W || T.passed || W.tier !== 3) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, B = (d - 1) * 1440;
+  if (T.day === d + 1 && m >= PU4.luckAt && flag('mail.pu4.luck') !== d) { flagSet('mail.pu4.luck', d);
+    promoGuests(T.day).slice(PU.guests, PU.guests + 2).forEach((id, k) => {
+      const t = worksText('mail.pu4.luck', 'Good luck | A drive coil tomorrow. You\'ve done harder things on worse days. Sleep.', null, k), i = t.indexOf(' | ');
+      mailSend({ at: Math.max(now, B + PU4.luckAt) + 10 * k, from: worksName(id), subject: i > 0 ? t.slice(0, i) : 'Good luck', body: i > 0 ? t.slice(i + 3) : t, quiet: true }); }); }
+}
+function pu4Check() {                                    // puCheck's Tier 4 rows: a Senior's, from Steady (or once the offer's made) until the test is passed
+  const W = SHIP.works, d = SHIP.time.day, T = puT4(); if (!P5_PROMO4 || !W || W.tier !== 3) return [];
+  const B = WORK_BANDS[3], at = b => B.findIndex(x => x[1] === b), row4 = ladderRow('t4');
+  if (at(worksBand()) < at('steady') && !T) return [];
+  const yes = worksText('works.promo.check.done', 'Done'), no = worksText('works.promo.check.not', 'Not yet'), row = (text, ok) => ({ text, sub: ok ? yes : no });
+  const rows = [row(worksText('pu4.check.rep', 'Trusted (you\'re {band})', { band: worksBandWord() }), ladderNeeds({ rep: 'trusted' }, W)),
+    row(worksText('pu4.check.m19', 'Power and relays'), W.tr.m19 !== undefined), row(worksText('pu4.check.day', 'The test from Day {day}', { day: row4 ? row4.day : PU4.testFrom }), !!T || d >= (row4 ? row4.day : PU4.testFrom))];
+  if (T) rows.push(T.passed ? row(worksText('pu4.check.set', 'Test job: {day}, {time}', { day: 'Day ' + T.day, time: hhmm(PU4.testAt) }), true) : { text: worksText('pu4.check.set', 'Test job: {day}, {time}', { day: pu4DayWord(T.day, d), time: hhmm(PU4.testAt) }) });
+  return [{ kind: 'text', text: worksText('pu4.check.title', 'Your promotion: the Tier 4 test'), mark: 'head' }, { kind: 'list', rows }];
+}
+function pu4RepUp(b1) {                                  // puRepUp's line as a Senior at Trusted (null: its own)
+  const W = SHIP.works; if (!P5_PROMO4 || !W || W.tier !== 3 || puT4()) return null;
+  return b1 === 'trusted' ? worksText('works.rep.up3.trusted', 'Now Trusted. That\'s the reputation your Tier 4 test needs.') : null;
+}
+function pu4Next(k) {                                    // puNext's line for the Tier 4 test (null: its own)
+  const W = SHIP.works, T = puT4(), d = SHIP.time.day; if (!P5_PROMO4 || !W || W.tier !== 3) return null;
+  if (!T) { const B = WORK_BANDS[3], at = b => B.findIndex(x => x[1] === b);
+    return at(worksBand()) >= at('steady') && !ladderNeeds((ladderRow('t4') || {}).needs || { rep: 'trusted' }, W) ? worksText('next.t4.steps', 'Your Tier 4 test needs Trusted and power and relays. You\'re {band} now.', { band: worksBandWord() }, k) : null; }
+  if (!T.passed) return worksText('next.wait.t4', 'Your Tier 4 test: {day}, {time}, the engine room, Deck 6.', { day: pu4DayWord(T.day, d), time: hhmm(PU4.testAt) }, k);
+  return null;
+}
+function pu4Items(d) {                                   // puItems' Tier 4 rows on day d
+  const T = P5_PROMO4 && puT4(), W = SHIP.works; if (!T || !W) return [];
+  return !T.passed && W.tier === 3 && T.day === d ? [{ from: PU4.testAt, to: PU4.testEnd, title: worksText('pu4.row.test', 'Your Tier 4 test'), where: 'the engine room, Deck 6', kind: 'beat', deck: 6, room: 'E' }] : [];
+}
+if (P5_PROMO4) {
+  WORK_TICKS.push((now, skip) => { pu4OfferTick(now, skip); pu4NearTick(now, skip); pu4BeatsTick(now); });
 }
 // ---- end of slot: Later promotions ----
 
@@ -69078,7 +69197,7 @@ function devmodeXp(add, label) {
   devmodeDo('Career: ' + label, () => { const W = devmodeW(); W.xp = Math.max(0, Math.min(9999, typeof add === 'function' ? add(W) : W.xp + add)); return 'Works reputation: ' + BAND_WORD[worksBand()] + ' (xp ' + W.xp + ').'; });
 }
 function devmodeNextTraining() {
-  const W = SHIP.works, row = W && CAREER_LADDER.find(r => W.tr[r.id] === undefined && r.tier <= W.tier && r.id !== 't2');
+  const W = SHIP.works, row = W && CAREER_LADDER.find(r => W.tr[r.id] === undefined && r.tier <= W.tier && r.id !== 't2' && WORK_MECH[r.id]);   // (W6, RV23's note) a row whose sub-block isn't built (Step 6's before its pieces land) is never offered
   if (!row) return devmodeSay(W ? 'Every training open to your tier is done.' : 'No career record yet.');
   devmodeDo('Career: train ' + mechName(row.id), () => {
     const d = SHIP.time.day; if (W.cur && W.cur.id === row.id) W.cur = null;
