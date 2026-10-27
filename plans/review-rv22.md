@@ -23,6 +23,8 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
 | claude/vessel (VB1) | RV21's shoulds, VB2 merge, arrows/controller parts | FIXES NEEDED (bigevents, day 28) | 5578c78d |
 | claude/vessel (VB1) | the fixes | FIXES NEEDED (1 must: round-one fetch never starts the scene; 2 shoulds) | 0340b6f9 |
 | claude/p5s5-m20 (B3) | RV21's 4 shoulds + the turn arrow | PASS | 247420aa |
+| claude/ending-checks (VB2) | arrows endstay/endgo, controller ending (test only) | PASS on what I re-ran (see log); endgo teachoff/track, day 31/50 not re-run by me | 571b0737 |
+| claude/train-titles (B3) | training titles by guideWho | PASS (diff read, B3's runs; GitHub quick check 7cbc1ad0 success, 7ce89d56 running at the move) | 7ce89d56 |
 
 ## Log
 - 2026-10-26 ~23:30 UTC: started; told lead 40, VB1, VB2, B3. Test kit in /tmp/cadet-work and /tmp/cadet-work2. No new
@@ -87,3 +89,10 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
 - 02:55 UTC: **B3 247420aa PASS**: cadet f57afcbc vs 247420aa alone ALL IDENTICAL (beside another check: f/g/h max-1 noise); mech_check m20 wstap m19 OK; controller m19 m20 OK; live Day 19 (probe m20_live2.py) Calder teaches, one row, notice+Mail 09:30, turn arrow from 10:13.
 - 02:55 UTC: VB1 **705c6fc5** (the must + 2 shoulds): diff read OK (roundFetch 12:30, Taavek waits at the bench till then; vesselNear 6 m while fetching; vesselFetchTick says the words on arrival or within 6 m; sheet arrows dropped while the round one is pending). Possible should: VESSEL_FETCH is not saved: a reload mid-fetch leaves the flag set, reach back to 3.2, Taavek back to their plan. To run: cadet off, events, arrows vessel, phone play.
 - 02:57 UTC: B3 claude/train-titles 7cbc1ad0 (from staging 64a1ba76; training titles name ranked teachers by surname). Queued after VB1 705c6fc5, VB2, talk-close.
+- 03:15 UTC (move): **VB2 571b0737: PASS on what I re-ran** (game = d1a61402): controller_check ending CONTROLLER CHECK OK
+  (Day 32 offer, Day 34 Captain + Not sure + friend (pell hidden, tomas ok), Day 35 oath, Day 36 Go by pad: breakfast, 10
+  farewells + ramp, into the Tern, end page highlight then D-pad, Keep this ending, ended); arrows_check endstay asis,
+  teachoff, track, change and endgo asis ran through Day 36 with no FAIL lines (every run prints "stuck 1": not a FAIL;
+  ask what it is). Not finished at the move: endgo teachoff/track, the staging controller ending run, day_check 31/50 ON.
+- **B3 train-titles 7ce89d56: PASS**: 6 lines worksFirst -> guideWho (titles, clash warning, trainArrow label, M20 ask,
+  What's next); no check matches the old wording; B3: check_fast OK, cadet ALL IDENTICAL vs 64a1ba76.

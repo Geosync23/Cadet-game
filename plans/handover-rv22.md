@@ -19,10 +19,11 @@ ON, so the checks on a switched-on copy are the ones that count.
 | claude/vessel (VB1) | FIXES NEEDED (bigevents, day 28) | 5578c78d |
 | claude/vessel (VB1) | FIXES NEEDED (1 must: round-one fetch; 2 shoulds) | 0340b6f9 |
 | 24j hook vesselShopTap in shopTap (no E3 seat; lead 40 asked me) | OK | 5578c78d on |
-See review-rv22.md for VB2's ending checks and B3's train-titles (decided at the end of this session).
+| claude/ending-checks (VB2) arrows endstay/endgo + controller ending | PASS on what I re-ran (below) | 571b0737 |
+| claude/train-titles (B3) | PASS (GitHub quick check on 7ce89d56 was still running at the move: confirm it's green) | 7ce89d56 |
 
 ## Open items (exact state)
-1. **VB1 claude/vessel 705c6fc5: NOT reviewed** (lead 40: leave for the next account). It answers my 0340b6f9 verdict:
+1. **VB1 claude/vessel 705c6fc5 (handover-only head 03b63d95): NOT reviewed** (lead 40: leave for the next account). It answers my 0340b6f9 verdict:
    roundFetch 12:30 (Taavek waits at the bench, then comes to you), vesselNear 6 m while fetching, vesselFetchTick
    (words on arrival or within 6 m), sheet arrows dropped while the round one is pending, ring.roundFind. Diff read only:
    looks right. Possible should: VESSEL_FETCH isn't saved, so a reload mid-fetch leaves the flag set, reach 3.2, Taavek
@@ -38,7 +39,12 @@ See review-rv22.md for VB2's ending checks and B3's train-titles (decided at the
    engineer's hooks), section 10 tapCrew. No switch. Check: cadet, player_check, interactions, arrows week guide,
    controller pick/promo3/day/ending, and that the ending's goodbyes (VB2's controller ending: walk up within 1.8) and
    the vessel's taps (vesselTap through tradJoinTap) still work.
-3. B5's S1-S4 and machine_check fix: done. B3's S5-4 98460d79: not mine (B3 asked lead 40 who re-checks it).
+3. **VB2 claude/ending-checks 571b0737**: my re-runs passed (controller ending OK in full; arrows endstay x4 and endgo asis
+   to Day 36 with no FAIL). Not re-run by me: endgo teachoff/track (VB2: OK), day_check 31/50 on an ending-ON copy
+   (VB2: OK), and VB2's controller ending on staging (B3 saw 4 FAILs there on ac810e7e: Day 34 ring None for pell,
+   Monday goodbye, end page). Every arrows run prints "stuck 1": ask VB2/its successor what that counts. With talk-close
+   merged, re-run controller ending (goodbyes are by walking up within 1.8).
+4. B5's S1-S4 and machine_check fix: done. B3's S5-4 98460d79: not mine (B3 asked lead 40 who re-checks it).
 
 ## How I test
 Setup per plans/testing-guide.md section 2 in /tmp/cadet-work and /tmp/cadet-work2 (two lanes, at most 2 browsers).
