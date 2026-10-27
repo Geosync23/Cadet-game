@@ -1,0 +1,283 @@
+<title>Wren Balance Report</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a Works logbook. One reading column; each finding is a log entry with a gold tab, its evidence, and the user's answer slip. */
+:root {
+  --paper: #f4f3ef; --sheet: #fbfaf7; --ink: #1d2126; --ink-2: #4a5059; --rule: #d9d6cc; --gold: #9a6a00; --gold-soft: #f1e2bd;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300;
+  --hi: #b4322c; --mid: #a36a00; --lo: #3a6f3a;
+  --f-display: 'Saira Condensed', 'Arial Narrow', sans-serif; --f-body: 'Atkinson Hyperlegible', system-ui, sans-serif; --f-data: 'JetBrains Mono', ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #15181c; --sheet: #1c2026; --ink: #e9e7e1; --ink-2: #b3b0a8; --rule: #343a42; --gold: #e0ac3c; --gold-soft: #3a3020;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #2f9a2f; --hi: #f07a6f; --mid: #e3a83e; --lo: #7fc07f; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #15181c; --sheet: #1c2026; --ink: #e9e7e1; --ink-2: #b3b0a8; --rule: #343a42; --gold: #e0ac3c; --gold-soft: #3a3020;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #2f9a2f; --hi: #f07a6f; --mid: #e3a83e; --lo: #7fc07f; color-scheme: dark }
+body { background: var(--paper); color: var(--ink); font: 16px/1.6 var(--f-body); }
+.wrap { max-width: 760px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h1 { font-size: 2.6rem; letter-spacing: .01em; }
+h2 { font-size: 1.7rem; }
+h3 { font-size: 1.25rem; }
+p { margin: 0; max-width: 65ch; }
+.eyebrow { font: 600 .78rem var(--f-data); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+.meta { color: var(--ink-2); font-size: .92rem; display: grid; gap: 4px; }
+.mono { font-family: var(--f-data); font-size: .88em; }
+section { display: grid; gap: 14px; }
+.summary ol { margin: 0; padding-left: 1.4em; display: grid; gap: 10px; }
+.summary li { max-width: 65ch; }
+.summary a { color: inherit; text-decoration-color: var(--gold); text-underline-offset: 3px; }
+.entry { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 20px; display: grid; gap: 14px; position: relative; }
+.entry::before { content: attr(data-tag); position: absolute; top: -11px; left: 16px; background: var(--gold); color: var(--sheet); font: 600 .72rem var(--f-data); letter-spacing: .1em; padding: 2px 8px; border-radius: 3px; }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; font-size: .95rem; }
+.facts dt { font: 600 .74rem var(--f-data); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); padding-top: 3px; }
+.facts dd { margin: 0; min-width: 0; }
+@media (max-width: 520px) { .facts { grid-template-columns: 1fr; } .facts dd { margin-bottom: 6px; } h1 { font-size: 2.1rem; } }
+.sure { display: inline-block; font: 600 .74rem var(--f-data); letter-spacing: .06em; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor; }
+.sure.high { color: var(--lo); } .sure.med { color: var(--mid); } .sure.low { color: var(--hi); }
+.chartwrap { overflow-x: auto; }
+.chart { width: 100%; min-width: 520px; height: auto; display: block; font-family: var(--f-data); }
+.chart .grid { stroke: var(--rule); stroke-width: 1; }
+.chart .axis { stroke: var(--ink-2); stroke-width: 1; }
+.chart .tick, .chart .axlab { fill: var(--ink-2); font-size: 11px; }
+.chart .dl { fill: var(--ink); font-size: 11px; dominant-baseline: middle; }
+.chart .ref { stroke: var(--gold); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.chart .reflab { fill: var(--gold); font-size: 11px; }
+.chart .ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .hit { fill: transparent; }
+.chart .hit:hover { fill: var(--gold-soft); }
+.s1 { stroke: var(--s1); } .s2 { stroke: var(--s2); } .s3 { stroke: var(--s3); } .s4 { stroke: var(--s4); } .s5 { stroke: var(--s5); } .s6 { stroke: var(--s6); }
+.s1f { fill: var(--s1); } .s2f { fill: var(--s2); } .s3f { fill: var(--s3); } .s4f { fill: var(--s4); } .s5f { fill: var(--s5); } .s6f { fill: var(--s6); }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; font-size: .9rem; font-variant-numeric: tabular-nums; min-width: 100%; }
+th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th { font: 600 .74rem var(--f-data); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+.answer { border-top: 1px dashed var(--rule); padding-top: 12px; display: grid; gap: 8px; }
+.answer legend, .answer .lab { font: 600 .74rem var(--f-data); letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+.answer fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.answer label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+textarea { width: 100%; min-height: 64px; font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; padding: 8px; box-sizing: border-box; }
+button { font: 600 .9rem var(--f-body); color: var(--sheet); background: var(--gold); border: 0; border-radius: 4px; padding: 7px 14px; cursor: pointer; justify-self: start; }
+button:focus-visible, textarea:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.status { font-size: .85rem; color: var(--ink-2); min-height: 1.2em; }
+.note { color: var(--ink-2); font-size: .92rem; }
+ul.plain { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+</style>
+
+<div class="wrap">
+<header style="display:grid;gap:10px">
+  <div class="eyebrow">CSV Wren · Works balance survey · BAL1</div>
+  <h1>How the Wren's numbers play</h1>
+  <div class="meta">
+    <span>Build 0.95.0 candidate 3 (claude/staging-p5s6 b5199dc3, game file sha256 b18d2b64…238a), everything switched on.</span>
+    <span>Written 27 October 2026, 6:15 pm Eastern. Nothing in the game was changed; every number below comes from the game's own code, run on paper.</span>
+  </div>
+  <p>I played the career and the needs many times over, as different kinds of player: quick, steady, relaxed, half pace, one job a day, and players who miss shifts. Each finding says what I saw, how sure I am, and a range worth trying. Every finding has a place for your answer at the bottom of its box; it saves to this page.</p>
+</header>
+
+<section class="summary">
+  <h2>The short version</h2>
+  <ol>
+    <li><a href="#f1">Becoming an Engine Specialist hangs on one point.</a> On Day 19 a steady player has 60 points against the 55 needed and is promoted on Day 23. A player doing about one job a day fewer has 54 and waits until Day 30; a 7-jobs-a-day player until Day 32. Calder's question and the ending wait for it.</li>
+    <li><a href="#f2">Promotions follow the calendar, not the work.</a> Quick and steady players are promoted on exactly the same days. Doing more jobs can even be slower, because the board's extra jobs give no career points and nothing tells you which jobs count.</li>
+    <li><a href="#f3">The two reputations disagree about missed shifts.</a> A missed shift costs the career 3 points (less than two jobs) but the ship-wide work word 15 (about a week of work). A player who misses two shifts a week is still made an Officer on Day 10 and a Senior Officer on Day 18 while heading for the Chief's talk.</li>
+    <li><a href="#f4">Two meals a day are not enough food on a workday.</a> A careful player who eats breakfast and dinner every day wakes at zero food and is "Hungry" (tasks 15% slower) about a quarter of their waking time. One bite at lunch fixes it, but nothing in the day points to lunch.</li>
+    <li><a href="#f5">Fitness drops fast enough that the gym is a daily chore.</a> Going every other day leaves you out of shape, walking at 80%, about three quarters of the time.</li>
+    <li><a href="#f6">Leisure runs down even for a player who plays.</a> A shift takes about 63; a hobby, a tradition, a call home and a talk every evening still leaves a diligent player "Restless" a fifth of the time.</li>
+    <li><a href="#f7">Money doesn't matter.</a> 15 credits a job is 2,700 credits by Day 30 for a steady player. Everything in the crew store, once each, costs under 100.</li>
+    <li><a href="#f8">The ship meters fill in days, not weeks.</a> The design says about 90 by the end of week two; a steady player is at 91 on Day 4 and 97 on Day 5. After that the turn-in card's meter chips mostly say nothing.</li>
+  </ol>
+</section>
+
+<section id="f1" class="entry" data-tag="FINDING 1 · CAREER">
+  <h2>Engine Specialist hangs on one point</h2>
+  <p>The Tier 4 test is on Day 22. Calder offers it only if, by then, your Tier 3 reputation is "Trusted" (55 points). A Senior Officer starts at 0 on Day 16 and earns points only from real machine jobs (a service 1, a repair 2, an overhaul 3). That leaves four workdays, Days 16 to 19, to earn 55. The steady player makes 60. A player who does about one job a day fewer, or whose jobs are more often the board's extra small ones, makes 54 and misses by a single point.</p>
+  {{ch_tier}}
+  <p class="note">The tier each style reaches by day (the paper players take jobs from the real board; each job costs its minutes plus 20 minutes of walking). Dashed lines: the Tier 4 test (Day 22) and Calder's question (Day 26).</p>
+  {{ch_t3}}
+  <p class="note">Tier 3 points, Days 16-22. The relaxed player tops out at 54.</p>
+  <dl class="facts">
+    <dt>Missing it costs</dt><dd>8 to 10 days. The next test comes after the night shifts and Day 26: the relaxed player is an Engine Specialist on Day 30, the half-pace player on Day 32. Calder's question and the ending's week come only after that, and only for an Engine Specialist. A one-job-a-day player is still Tier 2 on Day 45, so they never see the ending.</dd>
+    <dt>Why it matters</dt><dd>The last two weeks of the career (the Monday briefing, leading a team, mentoring Basil, Calder's question) are written around Days 22-26. Whether you see them on time depends on a margin of one job, which no player can see coming.</dd>
+    <dt>Knock-on</dt><dd>Low needs make it worse: hungry and restless together make tasks 23% slower (finding 4, 6), which is about the gap between steady and relaxed.</dd>
+    <dt>How sure</dt><dd><span class="sure high">High</span> The game's own career code on paper, the same run career_check uses, with each style over 30-45 days. Walking is an estimate (20 minutes a job).</dd>
+    <dt>Try</dt><dd>Tier 3 "Trusted" at <b>40-45</b> instead of 55 (tried at 45 in a copy: the relaxed player is then an Engine Specialist on Day 23, like the steady one; at 40 the half-pace player still misses). Or a second test day on Day 26 before Calder's question. Or let the test wait for "Reliable" (30), as the Tier 2 test already does.</dd>
+  </dl>
+  <div class="answer" data-f="f1"></div>
+</section>
+
+<section id="f2" class="entry" data-tag="FINDING 2 · CAREER">
+  <h2>Promotions follow the calendar, not the work</h2>
+  <p>Each step of the ladder opens on a set day (Rounds on Day 2, the scanner on Day 5, the Tier 2 test never before Day 9, and so on). Reputation is meant to be the other gate, but at Tier 1 it fills long before the day comes: anyone doing 7 or more jobs a workday is "Relied on" by Day 5, four days before the test can happen.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Player</th><th>Jobs a workday</th><th>Officer</th><th>Senior Officer</th><th>Engine Specialist</th><th>Credits by Day 30</th></tr></thead>
+    <tbody>{{career_rows}}</tbody>
+  </table></div>
+  <dl class="facts">
+    <dt>What it means</dt><dd>Working hard doesn't speed you up and working lightly doesn't slow you down, until the one cliff in finding 1. The reputation words ("Steady", "Reliable", "Trusted") climb in the first few days and then sit still.</dd>
+    <dt>A hidden rule</dt><dd>The board's extra jobs (small repairs, odd jobs, top-ups) give no career points by design. The relaxed player did more jobs than the steady one by Day 30 (195 against 178) yet was promoted a week later, because more of them were extras. The job board doesn't say which jobs count.</dd>
+    <dt>How sure</dt><dd><span class="sure high">High</span> The same paper runs. Matches the known career_check note (backlog 12 and 17), which waits for this pass.</dd>
+    <dt>Try</dt><dd>Either keep the calendar pacing (it is gentle and cozy) and treat reputation as words only, or make reputation matter: Tier 1 "Relied on" around <b>60-70</b> points so a steady player gets there on Day 8 as planned. Either way, mark the jobs that build your reputation on the board.</dd>
+  </dl>
+  <div class="answer" data-f="f2"></div>
+</section>
+
+<section id="f3" class="entry" data-tag="FINDING 3 · REPUTATION">
+  <h2>The two reputations disagree about missed shifts</h2>
+  <p>There are two reputations. Your career points (what promotions wait for) lose 3 for a missed shift. The ship-wide work word (what the Chief's talk, the Captain's reprimand and being let go look at) loses 15. A steady workday adds about 2-5 to the ship-wide word, less as it gets higher, so one missed shift undoes about a week.</p>
+  {{ch_two}}
+  <p class="note">A player who misses every Monday and Friday from Day 3. Career tier (times 25, so Tier 1 is 25) keeps climbing while the ship-wide work word falls under the Chief's line.</p>
+  <dl class="facts">
+    <dt>What happens</dt><dd>That player is made an Officer on Day 10 and a Senior Officer on Day 18 while their work word drops from 71 to 24 by Day 21 and under 5 by Day 26. A player who misses one workday in three is under 15 by Day 25. The game can promote you in the same week the Captain reprimands you.</dd>
+    <dt>Cozy check</dt><dd>One missed shift by a steady player costs 15 and recovers over a week or so, with tips and friends checking on you: gentle enough. The problem is only that the two numbers tell opposite stories.</dd>
+    <dt>How sure</dt><dd><span class="sure med">Medium</span> The numbers are the game's own (careerMissed). The Chief → Captain → let go chain itself wasn't run on paper (leave_check covers it), so I report where the word goes, not the exact day of each talk.</dd>
+    <dt>Try</dt><dd>Career points for a missed shift <b>-8 to -10</b>, or hold a promotion test while the work word is under "steady". Or soften the ship-wide hit to <b>8-10</b>.</dd>
+  </dl>
+  <div class="answer" data-f="f3"></div>
+</section>
+
+<section id="f4" class="entry" data-tag="FINDING 4 · NEEDS">
+  <h2>Two meals are not enough food on a workday</h2>
+  <p>On a workday food drops about 135: 7 an hour on shift, 4 an hour otherwise awake, 6 an hour asleep. Breakfast and dinner give 55 each and tea 4, so 114. The gap is about 20 a day, so even a player who never misses a meal ends up waking at zero and is hungry for the whole morning before breakfast and again from mid-afternoon. The design notes say "about 35 on waking after a normal day with a bite at lunch", but nothing in the day points to lunch: the crew eat twice.</p>
+  {{ch_hunger}}
+  <p class="note">Food over a Tuesday and Wednesday for the diligent player (06:00 up, breakfast 07:30, tea 13:00, dinner 17:30, bed 22:30), with and without a grab-shelf bite at noon.</p>
+  {{nb}}
+  <p class="note">Share of waking time each need spends under 25 (the red), by play style, over 28 days.</p>
+  <dl class="facts">
+    <dt>How sure</dt><dd><span class="sure high">High</span> My needs model is checked against the game's own needsDrain (identical to the decimal). The meals' timing is my choice of a sensible day; walking time is not counted, which would only make it worse.</dd>
+    <dt>Try</dt><dd>Food asleep <b>4 an hour</b> instead of 6 (tried: hungry time drops from 26% to 2% for the diligent player). Or tea and biscuits at <b>15-20</b> food instead of 4, making 13:00 the lunch. Or food at work <b>6 an hour</b> instead of 7.</dd>
+  </dl>
+  <div class="answer" data-f="f4"></div>
+</section>
+
+<section id="f5" class="entry" data-tag="FINDING 5 · NEEDS">
+  <h2>The gym is a daily chore</h2>
+  <p>Fitness drops 1.4 an hour awake and 0.35 asleep, about 26 a day. A workout gives 30. So only a daily workout keeps you out of the red; every other day leaves you out of shape most of the time, and that means walking at 80%. On a ship this big, walking is a large share of play, so this penalty is felt all day.</p>
+  {{ch_fit}}
+  <div class="tbl"><table>
+    <thead><tr><th>What-if (model only)</th><th>Average: fitness red</th><th>Average: walking slowed</th><th>Diligent: hungry</th><th>Average: hungry</th><th>Average: restless</th></tr></thead>
+    <tbody>{{sweep_rows}}</tbody>
+  </table></div>
+  <dl class="facts">
+    <dt>How sure</dt><dd><span class="sure high">High</span> for the arithmetic. Whether a daily gym visit feels like a chore or a nice habit is yours to judge in play.</dd>
+    <dt>Try</dt><dd>Fitness awake <b>0.9-1.0 an hour</b> (at 0.9 the every-other-day player is almost never out of shape), or a workout at <b>+45</b>.</dd>
+  </dl>
+  <div class="answer" data-f="f5"></div>
+</section>
+
+<section id="f6" class="entry" data-tag="FINDING 6 · NEEDS">
+  <h2>Leisure runs down even for a player who plays</h2>
+  <p>A shift day costs about 63 leisure (2.4 an hour awake, 3 more at work). A hobby gives 25, a tradition 15, a call home or a full talk 5. The diligent player who does a hobby, a tradition, a call and a talk every evening gets 50: still restless about a fifth of the waking time. The average player is restless 60% of the time.</p>
+  <dl class="facts">
+    <dt>Effect</dt><dd>Mild on its own (tasks 10% slower), but it stacks with hunger: 0.85 × 0.9, so 23% slower jobs, which feeds straight into finding 1.</dd>
+    <dt>How sure</dt><dd><span class="sure high">High</span> for the numbers.</dd>
+    <dt>Try</dt><dd>Leisure at work <b>1.5-2 an hour</b> on top (instead of 3), or a tradition at <b>+20-25</b>. Traditions are plentiful (finding 9), so making them the leisure answer suits the game.</dd>
+  </dl>
+  <div class="answer" data-f="f6"></div>
+</section>
+
+<section id="f7" class="entry" data-tag="FINDING 7 · MONEY">
+  <h2>Money doesn't matter</h2>
+  <p>Every job pays 15 credits. The dearest thing in the crew store is the sketchpad at 15; all three hobby kits together are 37; a drink at the bar is 2; snacks 2-4; small comforts 3-10. A player spending every single day at the store and the bar would use about 15-20 credits a day: one job.</p>
+  {{ch_cred}}
+  <dl class="facts">
+    <dt>How sure</dt><dd><span class="sure high">High</span> Pay and prices read from the game; credits are jobs × 15 from the paper runs.</dd>
+    <dt>Try</dt><dd>Your call whether money should matter at all. If it should: pay <b>3-5 credits a job</b> (or a weekly wage of about 100), or give credits something to buy (cabin things, gifts for friends, the swap meet). If it shouldn't, the wallet could quietly fade into the background.</dd>
+  </dl>
+  <div class="answer" data-f="f7"></div>
+</section>
+
+<section id="f8" class="entry" data-tag="FINDING 8 · SHIP">
+  <h2>The ship meters fill in days, not weeks</h2>
+  <p>Upkeep grows back 1 point a day per system, and each job takes off several. The design aims for "from about 75 to about 90 over the first two weeks".</p>
+  {{ch_met}}
+  <dl class="facts">
+    <dt>What happens</dt><dd>Steady: 91 on Day 4, 97 on Day 5, and it stays in the high 90s. Even 7 jobs a day reaches 92 by Day 5. After that the turn-in card shows few or no meter chips, so your work stops showing. A one-job-a-day player drifts down to about 66: the meters do tell a lazy ship from a kept one.</dd>
+    <dt>How sure</dt><dd><span class="sure high">High</span> Paper runs; the same as the design-doc's open question about a faster upkeep creep.</dd>
+    <dt>Try</dt><dd>Upkeep creep <b>3-4 a day</b> per system (instead of 1), or each job's meter step halved. Either keeps a steady player near 85-90 with work still visible on every turn-in.</dd>
+  </dl>
+  <div class="answer" data-f="f8"></div>
+</section>
+
+<section id="f9" class="entry" data-tag="FINDING 9 · TRADITIONS">
+  <h2>Plenty to go to, every evening</h2>
+  <p>From the game's own calendar, Days 1-56: about 40 traditions and gatherings a week, and a day-shift player can reach about 30 of them. On workdays there are {{wde_lo}} to {{wde_hi}} in the evening (about {{wde_avg}} on average). The design-doc still says "every weekday has 2-3".</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Week</th><th>On</th><th>In the evening</th><th>Pairs that overlap</th><th>Most you can go to</th></tr></thead>
+    <tbody>{{trad_rows}}</tbody>
+  </table></div>
+  <dl class="facts">
+    <dt>Reading</dt><dd>Not a problem: choice is the point, and week 2 (the storm) is quieter. It does mean leisure (finding 6) is easy to fix for anyone who goes to things, and hard for anyone who doesn't know that's what they're for.</dd>
+    <dt>How sure</dt><dd><span class="sure high">High</span> for the counts. Counted from eventsOn(d); "most you can go to" assumes 5 minutes between them and no sleep before 23:30.</dd>
+    <dt>Try</dt><dd>No change needed. Maybe update the design-doc's "2-3", and let the leisure warning name tonight's tradition.</dd>
+  </dl>
+  <div class="answer" data-f="f9"></div>
+</section>
+
+<section id="f10" class="entry" data-tag="FINDING 10 · WORK AND FRIENDS">
+  <h2>Smaller things that look right</h2>
+  <ul class="plain">
+    <li><b>The board keeps up.</b> A quick player finds 14-18 jobs a shift and almost never an empty board; a steady one about 9-10. This matches the design (9-14 quick, 7-10 relaxed). Only the storm Saturday has idle hours (2-4), by design.</li>
+    <li><b>The Works crew keep the machines well on their own.</b> machine_check's real crew hold ship health at 85-99 over 28 days and leave about 4 machine jobs a day for you. Parts run short now and then (a shelf at 0; 1,295 job-hours waiting for parts over 28 days), which only slows the crew.</li>
+    <li><b>Friendships grow at a cozy pace.</b> Say hello (+1) and a full talk (about +5) every day, with a meal together (+3): about 9 a day with one person, so a friend (60) in about a week and a close friend (100) in about 12 days. Tiles and Lightdisc give friendship once a day per person, so they can't be farmed.</li>
+    <li><b>Social is easy to keep up</b> for anyone who calls home or talks; a player who never does is lonely almost all the time, but the cost is tiny (energy drains 5% faster). Gentle, as a cozy game should be.</li>
+    <li><b>Tier 1 and Tier 2 are reached by every style</b>, even one job a day (Officer on Day 16). Nobody is stuck early.</li>
+  </ul>
+  <p class="note">Side note for the team, not balance: machine_check run for 28 days (instead of its usual 14) fails two of its own checks ("a machine broke with the Works crew on the job", "traced faults"). The usual 14-day run passes.</p>
+  <div class="answer" data-f="f10"></div>
+</section>
+
+<section class="entry" data-tag="ONLY YOUR PLAY CAN TELL">
+  <h2>What only your own play can judge</h2>
+  <ul class="plain">
+    <li>Whether the calendar pacing (promotions on set days) feels calm and reliable, or feels like the work doesn't count.</li>
+    <li>How long walking really takes on a phone. My players walk 20 minutes a job; if real walking is longer, every career finding gets tighter.</li>
+    <li>Whether a daily gym visit, a lunch stop and an evening tradition feel like a nice routine or a to-do list.</li>
+    <li>Whether the need warnings feel helpful or naggy when several needs are low together.</li>
+    <li>Whether money should be part of the game at all.</li>
+    <li>How it feels to miss the Day 22 test by one job and wait a week, and whether the ending arriving later feels fine.</li>
+    <li>Whether 4-6 traditions on a weekday evening feel lively or crowded.</li>
+    <li>The night shifts (Days 22-24): my paper players can't clock in at night, so I left them out.</li>
+  </ul>
+  <div class="answer" data-f="general"></div>
+</section>
+
+<footer class="note">
+  Scripts and raw tables: branch claude/balance-research, folder <span class="mono">balance/</span> (career_sim.py, needs_sim.py with needs_verify.py, needs_sweep.py, trads_sim.py, trads_stats.py, build_report.py; data/ holds every run). Every what-if was tried in a copy or in the model; the game was not changed.
+</footer>
+</div>
+
+<script>
+(() => {
+  const CHOICES = [['try', 'Try the suggestion'], ['other', 'Try something else'], ['keep', 'Keep it as it is'], ['talk', "Let's talk about it"]];
+  const boxes = [...document.querySelectorAll('.answer')];
+  boxes.forEach(b => {
+    const f = b.dataset.f, gen = f === 'general';
+    b.innerHTML = (gen ? '' : '<fieldset><legend>Your answer</legend>' + CHOICES.map(([v, t]) => `<label><input type="radio" name="c-${f}" id="c-${f}-${v}" value="${v}"> ${t}</label>`).join('') + '</fieldset>')
+      + `<label class="lab" for="n-${f}">${gen ? 'Anything else' : 'Notes'}</label><textarea id="n-${f}" placeholder="${gen ? 'What you noticed in your own play, or questions for the team' : 'Optional: a number to try, or why'}"></textarea>`
+      + `<button type="button" id="s-${f}">Save</button><div class="status" id="st-${f}" aria-live="polite">Saving needs you to be signed in to claude.ai.</div>`;
+  });
+  const status = (f, t) => { const e = document.getElementById('st-' + f); if (e) e.textContent = t; };
+  claude.use('db').then(async db => {
+    if (!db) { boxes.forEach(b => status(b.dataset.f, 'Answers can\'t be saved in this view. Tell the team in chat instead.')); return; }
+    boxes.forEach(b => status(b.dataset.f, ''));
+    const fill = (f, d) => {
+      if (d.choice) { const r = document.getElementById(`c-${f}-${d.choice}`); if (r) r.checked = true; }
+      const t = document.getElementById('n-' + f); if (t && document.activeElement !== t) t.value = d.note || '';
+      if (d.at) status(f, 'Saved ' + new Date(d.at).toLocaleString());
+    };
+    try { db.collection('answers').onSnapshot(s => s.docs.forEach(x => fill(x.id, x.data()))); } catch (e) { /* the page still works without the live view */ }
+    boxes.forEach(b => {
+      const f = b.dataset.f;
+      document.getElementById('s-' + f).addEventListener('click', async () => {
+        const c = b.querySelector('input[type=radio]:checked');
+        status(f, 'Saving...');
+        try { await db.doc('answers/' + f).set({ choice: c ? c.value : null, note: document.getElementById('n-' + f).value.slice(0, 4000), at: Date.now() }); status(f, 'Saved ' + new Date().toLocaleString()); }
+        catch (e) { status(f, 'Not saved: ' + (e && e.code === 'not_granted' ? 'you can view this page but not answer on it.' : 'please try again in a moment.')); }
+      });
+    });
+  });
+})();
+</script>

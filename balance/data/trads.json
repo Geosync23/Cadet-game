@@ -1,0 +1,3355 @@
+[
+{
+"d": 1,
+"wd": 0,
+"work": true,
+"list": [
+{
+"id": "running",
+"name": "Gym club",
+"from": 1155,
+"to": 1200,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "first-light",
+"name": "First Light Cocoa",
+"from": 1200,
+"to": 1245,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "name-on-the-beam",
+"name": "Name on the beam",
+"from": 1025,
+"to": 1060,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunrise-stretch",
+"name": "Sunrise stretch",
+"from": 390,
+"to": 420,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 2,
+"wd": 1,
+"work": true,
+"list": [
+{
+"id": "rec-dawn-swim",
+"name": "Dawn swim",
+"from": 375,
+"to": 405,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wall-night",
+"name": "Wall night",
+"from": 1110,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "knit-and-natter",
+"name": "Knit and natter",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "late-piano",
+"name": "Late piano",
+"from": 1300,
+"to": 1345,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "spice-shelf-supper",
+"name": "Spice shelf supper",
+"from": 1095,
+"to": 1155,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tiles-night",
+"name": "Tiles night",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 3,
+"wd": 2,
+"work": true,
+"list": [
+{
+"id": "rec-paddle-club",
+"name": "Paddle club",
+"from": 1110,
+"to": 1170,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-float-hour",
+"name": "Float hour",
+"from": 1290,
+"to": 1335,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "open-door",
+"name": "Open door",
+"from": 1000,
+"to": 1070,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "pick-your-own",
+"name": "Pick-your-own breakfast",
+"from": 375,
+"to": 415,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tasting-table",
+"name": "Brennan's tasting table",
+"from": 1200,
+"to": 1245,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 4,
+"wd": 3,
+"work": true,
+"list": [
+{
+"id": "quiz",
+"name": "Quiz night",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "birthday",
+"name": "Birthday",
+"from": 1080,
+"to": 1135,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-dawn-swim",
+"name": "Dawn swim",
+"from": 375,
+"to": 405,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "late-piano",
+"name": "Late piano",
+"from": 1300,
+"to": 1345,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 5,
+"wd": 4,
+"work": true,
+"list": [
+{
+"id": "jam",
+"name": "Music jam",
+"from": 1185,
+"to": 1275,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "new-hands-tea",
+"name": "New hand's tea",
+"from": 1120,
+"to": 1170,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunrise-stretch",
+"name": "Sunrise stretch",
+"from": 390,
+"to": 420,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tap-night",
+"name": "Tap night",
+"from": 1200,
+"to": 1320,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "captains-address",
+"name": "The Captain's Friday address",
+"from": 960,
+"to": 1010,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 6,
+"wd": 5,
+"work": false,
+"list": [
+{
+"id": "observatory-night",
+"name": "Observatory night",
+"from": 1275,
+"to": 1355,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "film",
+"name": "Film night",
+"from": 1200,
+"to": 1320,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "harvest",
+"name": "Harvest morning",
+"from": 570,
+"to": 690,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "cook-along",
+"name": "Cook-along",
+"from": 930,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "garden-hour",
+"name": "Garden hour",
+"from": 840,
+"to": 900,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "long-breakfast",
+"name": "Long breakfast",
+"from": 480,
+"to": 570,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "saturday-run",
+"name": "Saturday run",
+"from": 420,
+"to": 460,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sowing",
+"name": "Sowing morning",
+"from": 705,
+"to": 760,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tiles-ladder",
+"name": "Tiles ladder",
+"from": 900,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 7,
+"wd": 6,
+"work": false,
+"list": [
+{
+"id": "market",
+"name": "Sunday swap meet",
+"from": 630,
+"to": 750,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wso",
+"name": "Winner Stays On",
+"from": 690,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-slow-stretch",
+"name": "Slow stretch",
+"from": 480,
+"to": 525,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "bread-day",
+"name": "Bread day",
+"from": 420,
+"to": 470,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "lap-of-the-wren",
+"name": "Lap of the Wren",
+"from": 1230,
+"to": 1275,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "one-week-aboard",
+"name": "One week aboard",
+"from": 1035,
+"to": 1075,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "reading-corner",
+"name": "Reading corner",
+"from": 960,
+"to": 1020,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunday-table",
+"name": "The Line supper",
+"from": 1080,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "lineCeremony",
+"name": "Crossing the Line",
+"from": 870,
+"to": 915,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 8,
+"wd": 0,
+"work": true,
+"list": [
+{
+"id": "running",
+"name": "Gym club",
+"from": 1155,
+"to": 1200,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "birthday",
+"name": "Birthday",
+"from": 1260,
+"to": 1315,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-chiefs-talk",
+"name": "Chief's talk",
+"from": 1140,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "five-minute-skills",
+"name": "Five-minute skills",
+"from": 1095,
+"to": 1125,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunrise-stretch",
+"name": "Sunrise stretch",
+"from": 390,
+"to": 420,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 9,
+"wd": 1,
+"work": true,
+"list": [
+{
+"id": "birthday",
+"name": "Birthday",
+"from": 1290,
+"to": 1345,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-dawn-swim",
+"name": "Dawn swim",
+"from": 375,
+"to": 405,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wall-night",
+"name": "Wall night",
+"from": 1110,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "open-lab",
+"name": "Open lab",
+"from": 1050,
+"to": 1110,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "spice-shelf-supper",
+"name": "Spice shelf supper",
+"from": 1095,
+"to": 1155,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 10,
+"wd": 2,
+"work": true,
+"list": [
+{
+"id": "rec-paddle-club",
+"name": "Paddle club",
+"from": 1110,
+"to": 1170,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-float-hour",
+"name": "Float hour",
+"from": 1290,
+"to": 1335,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "open-door",
+"name": "Open door",
+"from": 1000,
+"to": 1070,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "pick-your-own",
+"name": "Pick-your-own breakfast",
+"from": 375,
+"to": 415,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tasting-table",
+"name": "Brennan's tasting table",
+"from": 1200,
+"to": 1245,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 11,
+"wd": 3,
+"work": true,
+"list": [
+{
+"id": "quiz",
+"name": "Quiz night",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-dawn-swim",
+"name": "Dawn swim",
+"from": 375,
+"to": 405,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "late-piano",
+"name": "Late piano",
+"from": 1300,
+"to": 1345,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "postcard-night",
+"name": "Postcard night",
+"from": 1125,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 12,
+"wd": 4,
+"work": true,
+"list": [
+{
+"id": "sunrise-stretch",
+"name": "Sunrise stretch",
+"from": 390,
+"to": 420,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "captains-address",
+"name": "The Captain's Friday address",
+"from": 960,
+"to": 1010,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 13,
+"wd": 5,
+"work": false,
+"list": [
+{
+"id": "storm-stories",
+"name": "Storm stories by torchlight",
+"from": 1260,
+"to": 1305,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "lanternSupper",
+"name": "Lantern supper",
+"from": 1080,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 14,
+"wd": 6,
+"work": false,
+"list": [
+{
+"id": "market",
+"name": "Sunday swap meet",
+"from": 630,
+"to": 750,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wso",
+"name": "Winner Stays On",
+"from": 690,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "gerald-clinic",
+"name": "Gerald clinic",
+"from": 870,
+"to": 915,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunday-table",
+"name": "Sunday long table",
+"from": 1080,
+"to": 1140,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "party",
+"name": "All-clear party",
+"from": 1140,
+"to": 1260,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 15,
+"wd": 0,
+"work": true,
+"list": [
+{
+"id": "running",
+"name": "Gym club",
+"from": 1155,
+"to": 1200,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "book-circle",
+"name": "Book circle",
+"from": 1215,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "lap-of-the-wren",
+"name": "Lap of the Wren",
+"from": 1230,
+"to": 1275,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunrise-stretch",
+"name": "Sunrise stretch",
+"from": 390,
+"to": 420,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 16,
+"wd": 1,
+"work": true,
+"list": [
+{
+"id": "rec-dawn-swim",
+"name": "Dawn swim",
+"from": 375,
+"to": 405,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wall-night",
+"name": "Wall night",
+"from": 1110,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "knit-and-natter",
+"name": "Knit and natter",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "late-piano",
+"name": "Late piano",
+"from": 1300,
+"to": 1345,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "spice-shelf-supper",
+"name": "Spice shelf supper",
+"from": 1095,
+"to": 1155,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tiles-night",
+"name": "Tiles night",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 17,
+"wd": 2,
+"work": true,
+"list": [
+{
+"id": "rec-paddle-club",
+"name": "Paddle club",
+"from": 1110,
+"to": 1170,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-float-hour",
+"name": "Float hour",
+"from": 1290,
+"to": 1335,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "open-door",
+"name": "Open door",
+"from": 1000,
+"to": 1070,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "pick-your-own",
+"name": "Pick-your-own breakfast",
+"from": 375,
+"to": 415,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tasting-table",
+"name": "Brennan's tasting table",
+"from": 1200,
+"to": 1245,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 18,
+"wd": 3,
+"work": true,
+"list": [
+{
+"id": "quiz",
+"name": "Quiz night",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-dawn-swim",
+"name": "Dawn swim",
+"from": 375,
+"to": 405,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-chiefs-talk",
+"name": "Chief's talk",
+"from": 1140,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "late-piano",
+"name": "Late piano",
+"from": 1300,
+"to": 1345,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 19,
+"wd": 4,
+"work": true,
+"list": [
+{
+"id": "works-tea",
+"name": "Works Friday tea",
+"from": 1125,
+"to": 1170,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "birthday",
+"name": "Birthday",
+"from": 1275,
+"to": 1330,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunrise-stretch",
+"name": "Sunrise stretch",
+"from": 390,
+"to": 420,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "captains-address",
+"name": "The Captain's Friday address",
+"from": 960,
+"to": 1010,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 20,
+"wd": 5,
+"work": false,
+"list": [
+{
+"id": "observatory-night",
+"name": "Observatory night",
+"from": 1275,
+"to": 1355,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "film",
+"name": "Film night",
+"from": 1200,
+"to": 1320,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "harvest",
+"name": "Harvest morning",
+"from": 570,
+"to": 690,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "farewell-supper",
+"name": "Farewell supper",
+"from": 1080,
+"to": 1160,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "garden-hour",
+"name": "Garden hour",
+"from": 840,
+"to": 900,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "garden-picnic",
+"name": "Garden picnic",
+"from": 780,
+"to": 830,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "jar-day",
+"name": "Jar day",
+"from": 930,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "long-breakfast",
+"name": "Long breakfast",
+"from": 480,
+"to": 570,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tiles-ladder",
+"name": "Tiles ladder",
+"from": 900,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 21,
+"wd": 6,
+"work": false,
+"list": [
+{
+"id": "market",
+"name": "Sunday swap meet",
+"from": 630,
+"to": 750,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wso",
+"name": "Winner Stays On",
+"from": 690,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-slow-stretch",
+"name": "Slow stretch",
+"from": 480,
+"to": 525,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-regatta",
+"name": "River regatta",
+"from": 570,
+"to": 660,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-talent-night",
+"name": "Talent night",
+"from": 1170,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "big-jigsaw",
+"name": "The big jigsaw",
+"from": 780,
+"to": 930,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "lap-of-the-wren",
+"name": "Lap of the Wren",
+"from": 1230,
+"to": 1275,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "off-the-tern",
+"name": "Off the Tern",
+"from": 1055,
+"to": 1075,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "reading-corner",
+"name": "Reading corner",
+"from": 960,
+"to": 1020,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunday-table",
+"name": "Sunday long table",
+"from": 1080,
+"to": 1140,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 22,
+"wd": 0,
+"work": true,
+"list": [
+{
+"id": "birthday",
+"name": "Birthday",
+"from": 1170,
+"to": 1225,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "department-cup",
+"name": "Department cup",
+"from": 1215,
+"to": 1275,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "five-minute-skills",
+"name": "Five-minute skills",
+"from": 1095,
+"to": 1125,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "name-on-the-beam-new",
+"name": "Name on the beam",
+"from": 1025,
+"to": 1060,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunrise-stretch",
+"name": "Sunrise stretch",
+"from": 390,
+"to": 420,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "cometLounge",
+"name": "The comet at the bow glass",
+"from": 1290,
+"to": 1360,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "cometScope",
+"name": "The comet at the scope",
+"from": 1290,
+"to": 1360,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "cometStern",
+"name": "The comet under blankets",
+"from": 1290,
+"to": 1360,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "cometCaptain",
+"name": "Tea with the Captain",
+"from": 1290,
+"to": 1360,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 23,
+"wd": 1,
+"work": true,
+"list": [
+{
+"id": "rec-dawn-swim",
+"name": "Dawn swim",
+"from": 375,
+"to": 405,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wall-night",
+"name": "Wall night",
+"from": 1110,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "beginners-guitar",
+"name": "Beginners' guitar, badly",
+"from": 1300,
+"to": 1345,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "knit-and-natter",
+"name": "Knit and natter",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "spice-shelf-supper",
+"name": "Spice shelf supper",
+"from": 1095,
+"to": 1155,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tiles-night",
+"name": "Tiles night",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 24,
+"wd": 2,
+"work": true,
+"list": [
+{
+"id": "hull-lights",
+"name": "Hull-lights evening",
+"from": 1260,
+"to": 1320,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-paddle-club",
+"name": "Paddle club",
+"from": 1110,
+"to": 1170,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-float-hour",
+"name": "Float hour",
+"from": 1290,
+"to": 1335,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "open-door",
+"name": "Open door",
+"from": 1000,
+"to": 1070,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "pick-your-own",
+"name": "Pick-your-own breakfast",
+"from": 375,
+"to": 415,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tasting-table",
+"name": "Brennan's tasting table",
+"from": 1200,
+"to": 1245,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 25,
+"wd": 3,
+"work": true,
+"list": [
+{
+"id": "quiz",
+"name": "Quiz night",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-dawn-swim",
+"name": "Dawn swim",
+"from": 375,
+"to": 405,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wren-talk",
+"name": "Wren talk",
+"from": 1140,
+"to": 1180,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "late-piano",
+"name": "Late piano",
+"from": 1300,
+"to": 1345,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "postcard-night",
+"name": "Postcard night",
+"from": 1125,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-sim-night",
+"name": "Sim night",
+"from": 1170,
+"to": 1230,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 26,
+"wd": 4,
+"work": true,
+"list": [
+{
+"id": "jam",
+"name": "Music jam",
+"from": 1185,
+"to": 1275,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "four-weeks-aboard",
+"name": "Four weeks aboard",
+"from": 1120,
+"to": 1170,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "midnight-toast",
+"name": "Midnight toast",
+"from": 1380,
+"to": 1410,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunrise-stretch",
+"name": "Sunrise stretch",
+"from": 390,
+"to": 420,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tap-night",
+"name": "Tap night",
+"from": 1200,
+"to": 1320,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "captains-address",
+"name": "The Captain's Friday address",
+"from": 960,
+"to": 1010,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 27,
+"wd": 5,
+"work": false,
+"list": [
+{
+"id": "observatory-night",
+"name": "Observatory night",
+"from": 1275,
+"to": 1355,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "film",
+"name": "Film night",
+"from": 1200,
+"to": 1320,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "coffee-trials",
+"name": "The coffee machine trials",
+"from": 900,
+"to": 960,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "cook-along",
+"name": "Cook-along",
+"from": 930,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "garden-hour",
+"name": "Garden hour",
+"from": 840,
+"to": 900,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "long-breakfast",
+"name": "Long breakfast",
+"from": 480,
+"to": 570,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "night-owls-cocoa",
+"name": "Night owls' cocoa",
+"from": 1350,
+"to": 1410,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "seed-packet-day",
+"name": "Seed packet day",
+"from": 990,
+"to": 1035,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 28,
+"wd": 6,
+"work": false,
+"list": [
+{
+"id": "market",
+"name": "Sunday swap meet",
+"from": 630,
+"to": 750,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-slow-stretch",
+"name": "Slow stretch",
+"from": 480,
+"to": 525,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-cup",
+"name": "Lightdisc Cup",
+"from": 690,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "lap-of-the-wren",
+"name": "Lap of the Wren",
+"from": 1230,
+"to": 1275,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunday-story",
+"name": "The Sunday story",
+"from": 1275,
+"to": 1315,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunday-table",
+"name": "Sunday long table",
+"from": 1080,
+"to": 1140,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "vesselChain",
+"name": "The parts chain",
+"from": 780,
+"to": 840,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "vesselArrival",
+"name": "Taavek comes aboard",
+"from": 560,
+"to": 590,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 29,
+"wd": 0,
+"work": true,
+"list": [
+{
+"id": "running",
+"name": "Gym club",
+"from": 1155,
+"to": 1200,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wren-talk",
+"name": "Wren talk",
+"from": 1140,
+"to": 1180,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "book-circle",
+"name": "Book circle",
+"from": 1215,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunrise-stretch",
+"name": "Sunrise stretch",
+"from": 390,
+"to": 420,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tool-night",
+"name": "Tool night",
+"from": 1065,
+"to": 1110,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "vesselLights",
+"name": "The engine lights, at the bow glass",
+"from": 1050,
+"to": 1080,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 30,
+"wd": 1,
+"work": true,
+"list": [
+{
+"id": "birthday",
+"name": "Birthday",
+"from": 1275,
+"to": 1330,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-dawn-swim",
+"name": "Dawn swim",
+"from": 375,
+"to": 405,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wall-night",
+"name": "Wall night",
+"from": 1110,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "spice-shelf-supper",
+"name": "Spice shelf supper",
+"from": 1095,
+"to": 1155,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 31,
+"wd": 2,
+"work": true,
+"list": [
+{
+"id": "rec-paddle-club",
+"name": "Paddle club",
+"from": 1110,
+"to": 1170,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-float-hour",
+"name": "Float hour",
+"from": 1290,
+"to": 1335,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "open-door",
+"name": "Open door",
+"from": 1000,
+"to": 1070,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "pick-your-own",
+"name": "Pick-your-own breakfast",
+"from": 375,
+"to": 415,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tasting-table",
+"name": "Brennan's tasting table",
+"from": 1200,
+"to": 1245,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 32,
+"wd": 3,
+"work": true,
+"list": [
+{
+"id": "quiz",
+"name": "Quiz night",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-dawn-swim",
+"name": "Dawn swim",
+"from": 375,
+"to": 405,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-chiefs-talk",
+"name": "Chief's talk",
+"from": 1140,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "late-piano",
+"name": "Late piano",
+"from": 1300,
+"to": 1345,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 33,
+"wd": 4,
+"work": true,
+"list": [
+{
+"id": "works-tea",
+"name": "Works Friday tea",
+"from": 1125,
+"to": 1170,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "jam",
+"name": "Music jam",
+"from": 1185,
+"to": 1275,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunrise-stretch",
+"name": "Sunrise stretch",
+"from": 390,
+"to": 420,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tap-night",
+"name": "Tap night",
+"from": 1200,
+"to": 1320,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "captains-address",
+"name": "The Captain's Friday address",
+"from": 960,
+"to": 1010,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 34,
+"wd": 5,
+"work": false,
+"list": [
+{
+"id": "observatory-night",
+"name": "Observatory night",
+"from": 1275,
+"to": 1355,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "film",
+"name": "Film night",
+"from": 1200,
+"to": 1320,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "harvest",
+"name": "Harvest morning",
+"from": 570,
+"to": 690,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "garden-hour",
+"name": "Garden hour",
+"from": 840,
+"to": 900,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "jar-day",
+"name": "Jar day",
+"from": 930,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "long-breakfast",
+"name": "Long breakfast",
+"from": 480,
+"to": 570,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "saturday-run",
+"name": "Saturday run",
+"from": 420,
+"to": 460,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tiles-ladder",
+"name": "Tiles ladder",
+"from": 900,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 35,
+"wd": 6,
+"work": false,
+"list": [
+{
+"id": "market",
+"name": "Sunday swap meet",
+"from": 630,
+"to": 750,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wso",
+"name": "Winner Stays On",
+"from": 690,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-slow-stretch",
+"name": "Slow stretch",
+"from": 480,
+"to": 525,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "bread-day",
+"name": "Bread day",
+"from": 420,
+"to": 470,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "lap-of-the-wren",
+"name": "Lap of the Wren",
+"from": 1230,
+"to": 1275,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "reading-corner",
+"name": "Reading corner",
+"from": 960,
+"to": 1020,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunday-table",
+"name": "The Line supper",
+"from": 1080,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "crossingBackCeremony",
+"name": "Crossing back",
+"from": 870,
+"to": 915,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 36,
+"wd": 0,
+"work": true,
+"list": [
+{
+"id": "running",
+"name": "Gym club",
+"from": 1155,
+"to": 1200,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wren-talk",
+"name": "Wren talk",
+"from": 1140,
+"to": 1180,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "five-minute-skills",
+"name": "Five-minute skills",
+"from": 1095,
+"to": 1125,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunrise-stretch",
+"name": "Sunrise stretch",
+"from": 390,
+"to": 420,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "windowsill-herbs",
+"name": "Windowsill herbs",
+"from": 1050,
+"to": 1080,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 37,
+"wd": 1,
+"work": true,
+"list": [
+{
+"id": "rec-dawn-swim",
+"name": "Dawn swim",
+"from": 375,
+"to": 405,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wall-night",
+"name": "Wall night",
+"from": 1110,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "beginners-guitar",
+"name": "Beginners' guitar, badly",
+"from": 1300,
+"to": 1345,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "knit-and-natter",
+"name": "Knit and natter",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "open-lab",
+"name": "Open lab",
+"from": 1050,
+"to": 1110,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "spice-shelf-supper",
+"name": "Spice shelf supper",
+"from": 1095,
+"to": 1155,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tiles-night",
+"name": "Tiles night",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 38,
+"wd": 2,
+"work": true,
+"list": [
+{
+"id": "rec-paddle-club",
+"name": "Paddle club",
+"from": 1110,
+"to": 1170,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-float-hour",
+"name": "Float hour",
+"from": 1290,
+"to": 1335,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "open-door",
+"name": "Open door",
+"from": 1000,
+"to": 1070,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "pick-your-own",
+"name": "Pick-your-own breakfast",
+"from": 375,
+"to": 415,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "route-night",
+"name": "Route night",
+"from": 1170,
+"to": 1220,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "whodunnit-club",
+"name": "Whodunnit club",
+"from": 1170,
+"to": 1230,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 39,
+"wd": 3,
+"work": true,
+"list": [
+{
+"id": "quiz",
+"name": "Quiz night",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-dawn-swim",
+"name": "Dawn swim",
+"from": 375,
+"to": 405,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wren-talk",
+"name": "Wren talk",
+"from": 1140,
+"to": 1180,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "late-piano",
+"name": "Late piano",
+"from": 1300,
+"to": 1345,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "postcard-night",
+"name": "Postcard night",
+"from": 1125,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-sim-night",
+"name": "Sim night",
+"from": 1170,
+"to": 1230,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 40,
+"wd": 4,
+"work": true,
+"list": [
+{
+"id": "works-tea",
+"name": "Works Friday tea",
+"from": 1125,
+"to": 1170,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "jam",
+"name": "Music jam",
+"from": 1185,
+"to": 1275,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunrise-stretch",
+"name": "Sunrise stretch",
+"from": 390,
+"to": 420,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tap-night",
+"name": "Tap night",
+"from": 1200,
+"to": 1320,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "captains-address",
+"name": "The Captain's Friday address",
+"from": 960,
+"to": 1010,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 41,
+"wd": 5,
+"work": false,
+"list": [
+{
+"id": "observatory-night",
+"name": "Observatory night",
+"from": 1275,
+"to": 1355,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "film",
+"name": "Film night",
+"from": 1200,
+"to": 1320,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "birthday",
+"name": "Birthday",
+"from": 1080,
+"to": 1135,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "coffee-trials",
+"name": "The coffee machine trials",
+"from": 900,
+"to": 960,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "cook-along",
+"name": "Cook-along",
+"from": 930,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "garden-hour",
+"name": "Garden hour",
+"from": 840,
+"to": 900,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "long-breakfast",
+"name": "Long breakfast",
+"from": 480,
+"to": 570,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 42,
+"wd": 6,
+"work": false,
+"list": [
+{
+"id": "market",
+"name": "Sunday swap meet",
+"from": 630,
+"to": 750,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "birthday",
+"name": "Birthday",
+"from": 1215,
+"to": 1270,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wso",
+"name": "Winner Stays On",
+"from": 690,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-slow-stretch",
+"name": "Slow stretch",
+"from": 480,
+"to": 525,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-talent-night",
+"name": "Talent night",
+"from": 1170,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "gerald-clinic",
+"name": "Gerald clinic",
+"from": 870,
+"to": 915,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "six-weeks-aboard",
+"name": "Six weeks aboard",
+"from": 1035,
+"to": 1075,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunday-table",
+"name": "Sunday long table",
+"from": 1080,
+"to": 1140,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 43,
+"wd": 0,
+"work": true,
+"list": [
+{
+"id": "running",
+"name": "Gym club",
+"from": 1155,
+"to": 1200,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wren-talk",
+"name": "Wren talk",
+"from": 1140,
+"to": 1180,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "book-circle",
+"name": "Book circle",
+"from": 1215,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunrise-stretch",
+"name": "Sunrise stretch",
+"from": 390,
+"to": 420,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 44,
+"wd": 1,
+"work": true,
+"list": [
+{
+"id": "rec-dawn-swim",
+"name": "Dawn swim",
+"from": 375,
+"to": 405,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wall-night",
+"name": "Wall night",
+"from": 1110,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "knit-and-natter",
+"name": "Knit and natter",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "late-piano",
+"name": "Late piano",
+"from": 1300,
+"to": 1345,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "spice-shelf-supper",
+"name": "Spice shelf supper",
+"from": 1095,
+"to": 1155,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tiles-night",
+"name": "Tiles night",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 45,
+"wd": 2,
+"work": true,
+"list": [
+{
+"id": "rec-paddle-club",
+"name": "Paddle club",
+"from": 1110,
+"to": 1170,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-float-hour",
+"name": "Float hour",
+"from": 1290,
+"to": 1335,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "open-door",
+"name": "Open door",
+"from": 1000,
+"to": 1070,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "pick-your-own",
+"name": "Pick-your-own breakfast",
+"from": 375,
+"to": 415,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tasting-table",
+"name": "Brennan's tasting table",
+"from": 1200,
+"to": 1245,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 46,
+"wd": 3,
+"work": true,
+"list": [
+{
+"id": "quiz",
+"name": "Quiz night",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-dawn-swim",
+"name": "Dawn swim",
+"from": 375,
+"to": 405,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-chiefs-talk",
+"name": "Chief's talk",
+"from": 1140,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "late-piano",
+"name": "Late piano",
+"from": 1300,
+"to": 1345,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sounds-from-home",
+"name": "Sounds from home",
+"from": 1200,
+"to": 1245,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 47,
+"wd": 4,
+"work": true,
+"list": [
+{
+"id": "works-tea",
+"name": "Works Friday tea",
+"from": 1125,
+"to": 1170,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "birthday",
+"name": "Birthday",
+"from": 1230,
+"to": 1285,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunrise-stretch",
+"name": "Sunrise stretch",
+"from": 390,
+"to": 420,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "captains-address",
+"name": "The Captain's Friday address",
+"from": 960,
+"to": 1010,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 48,
+"wd": 5,
+"work": false,
+"list": [
+{
+"id": "observatory-night",
+"name": "Observatory night",
+"from": 1275,
+"to": 1355,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "film",
+"name": "Film night",
+"from": 1200,
+"to": 1320,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "harvest",
+"name": "Harvest morning",
+"from": 570,
+"to": 690,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "garden-hour",
+"name": "Garden hour",
+"from": 840,
+"to": 900,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "garden-picnic",
+"name": "Garden picnic",
+"from": 780,
+"to": 830,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "jar-day",
+"name": "Jar day",
+"from": 930,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "long-breakfast",
+"name": "Long breakfast",
+"from": 480,
+"to": 570,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tiles-ladder",
+"name": "Tiles ladder",
+"from": 900,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "window-sketch",
+"name": "Window sketching",
+"from": 705,
+"to": 750,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 49,
+"wd": 6,
+"work": false,
+"list": [
+{
+"id": "market",
+"name": "Sunday swap meet",
+"from": 630,
+"to": 750,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wso",
+"name": "Winner Stays On",
+"from": 690,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-slow-stretch",
+"name": "Slow stretch",
+"from": 480,
+"to": 525,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-regatta",
+"name": "River regatta",
+"from": 570,
+"to": 660,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "big-jigsaw",
+"name": "The big jigsaw",
+"from": 780,
+"to": 930,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "lap-of-the-wren",
+"name": "Lap of the Wren",
+"from": 1230,
+"to": 1275,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "reading-corner",
+"name": "Reading corner",
+"from": 960,
+"to": 1020,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunday-table",
+"name": "Sunday long table",
+"from": 1080,
+"to": 1140,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 50,
+"wd": 0,
+"work": true,
+"list": [
+{
+"id": "running",
+"name": "Gym club",
+"from": 1155,
+"to": 1200,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wren-talk",
+"name": "Wren talk",
+"from": 1140,
+"to": 1180,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "department-cup",
+"name": "Department cup",
+"from": 1215,
+"to": 1275,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "five-minute-skills",
+"name": "Five-minute skills",
+"from": 1095,
+"to": 1125,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunrise-stretch",
+"name": "Sunrise stretch",
+"from": 390,
+"to": 420,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 51,
+"wd": 1,
+"work": true,
+"list": [
+{
+"id": "rec-dawn-swim",
+"name": "Dawn swim",
+"from": 375,
+"to": 405,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wall-night",
+"name": "Wall night",
+"from": 1110,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "beginners-guitar",
+"name": "Beginners' guitar, badly",
+"from": 1300,
+"to": 1345,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "knit-and-natter",
+"name": "Knit and natter",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "row-for-the-board",
+"name": "Row for the board",
+"from": 1140,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "spice-shelf-supper",
+"name": "Spice shelf supper",
+"from": 1095,
+"to": 1155,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tiles-night",
+"name": "Tiles night",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 52,
+"wd": 2,
+"work": true,
+"list": [
+{
+"id": "hull-lights",
+"name": "Hull-lights evening",
+"from": 1260,
+"to": 1320,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-paddle-club",
+"name": "Paddle club",
+"from": 1110,
+"to": 1170,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-float-hour",
+"name": "Float hour",
+"from": 1290,
+"to": 1335,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "open-door",
+"name": "Open door",
+"from": 1000,
+"to": 1070,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "pick-your-own",
+"name": "Pick-your-own breakfast",
+"from": 375,
+"to": 415,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "tasting-table",
+"name": "Brennan's tasting table",
+"from": 1200,
+"to": 1245,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 53,
+"wd": 3,
+"work": true,
+"list": [
+{
+"id": "quiz",
+"name": "Quiz night",
+"from": 1200,
+"to": 1290,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-dawn-swim",
+"name": "Dawn swim",
+"from": 375,
+"to": 405,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-wren-talk",
+"name": "Wren talk",
+"from": 1140,
+"to": 1180,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "late-piano",
+"name": "Late piano",
+"from": 1300,
+"to": 1345,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "open-house",
+"name": "Open house",
+"from": 1035,
+"to": 1095,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "postcard-night",
+"name": "Postcard night",
+"from": 1125,
+"to": 1185,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-sim-night",
+"name": "Sim night",
+"from": 1170,
+"to": 1230,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 54,
+"wd": 4,
+"work": true,
+"list": [
+{
+"id": "works-tea",
+"name": "Works Friday tea",
+"from": 1125,
+"to": 1170,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "birthday",
+"name": "Birthday",
+"from": 1230,
+"to": 1285,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "midnight-toast",
+"name": "Midnight toast",
+"from": 1380,
+"to": 1410,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunrise-stretch",
+"name": "Sunrise stretch",
+"from": 390,
+"to": 420,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "captains-address",
+"name": "The Captain's Friday address",
+"from": 960,
+"to": 1010,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 55,
+"wd": 5,
+"work": false,
+"list": [
+{
+"id": "observatory-night",
+"name": "Observatory night",
+"from": 1275,
+"to": 1355,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "film",
+"name": "Film night",
+"from": 1200,
+"to": 1320,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "coffee-trials",
+"name": "The coffee machine trials",
+"from": 900,
+"to": 960,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "cook-along",
+"name": "Cook-along",
+"from": 930,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "garden-hour",
+"name": "Garden hour",
+"from": 840,
+"to": 900,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "long-breakfast",
+"name": "Long breakfast",
+"from": 480,
+"to": 570,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "night-owls-cocoa",
+"name": "Night owls' cocoa",
+"from": 1350,
+"to": 1410,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+},
+{
+"d": 56,
+"wd": 6,
+"work": false,
+"list": [
+{
+"id": "market",
+"name": "Sunday swap meet",
+"from": 630,
+"to": 750,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-slow-stretch",
+"name": "Slow stretch",
+"from": 480,
+"to": 525,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "rec-cup",
+"name": "Lightdisc Cup",
+"from": 690,
+"to": 990,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "lap-of-the-wren",
+"name": "Lap of the Wren",
+"from": 1230,
+"to": 1275,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunday-story",
+"name": "The Sunday story",
+"from": 1275,
+"to": 1315,
+"meal": false,
+"every": null,
+"kind": null
+},
+{
+"id": "sunday-table",
+"name": "Sunday long table",
+"from": 1080,
+"to": 1140,
+"meal": false,
+"every": null,
+"kind": null
+}
+]
+}
+]

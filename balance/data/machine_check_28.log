@@ -1,0 +1,158 @@
+Play ran the machines: True, never ahead of the clock: True; shipEffects in the same hour about 2 us, at a new hour 8 ms
+88 machines (86 from the decks, 2 stand-ins), 28 days
+No repairs (2.5 s):
+  ship health by day: 98 95 92 85 75 60 48 40 34 30 26 23 20 17 15 13 11 10 9 8 6 5 4 3 2 2 1 1
+  systems at the end: power 4, air 0, water 0, heat 0, food 0, waste 0, comms 0, propulsion 0, transport 0, rec 0, hull 0
+  by kind: first day faulty / failing / broken (median), and the end
+    relay            9.9  14.4  16.8   end   0.0 broken
+    junction         6.1  11.4  14.4   end   0.0 broken
+    lights           5.3   8.5  10.5   end   0.0 broken
+    databus          8.4  13.0  15.5   end   0.0 broken
+    gasplant         8.0  11.8  13.9   end   0.0 broken
+    scrubber         3.0   5.0   6.4   end   0.0 broken
+    powerjunction    5.8  11.3  14.2   end   0.0 broken
+    array            7.5  15.1  19.4   end   0.0 broken
+    oven             3.4   5.4   6.4   end   0.0 broken
+    range            3.4   5.4   6.5   end   0.0 broken
+    galleyplant      4.0   6.5   8.1   end   0.0 broken
+    chiller          7.0  10.0  11.6   end   0.0 broken
+    recycler         2.6   5.3   7.0   end   0.0 broken
+    filter           2.7   4.4   5.3   end   0.0 broken
+    pump             4.7   8.2  10.3   end   0.0 broken
+    uv               8.1  12.1  14.1   end   0.0 broken
+    nutrient         2.7   5.7   7.5   end   0.0 broken
+    irrigation       4.7   8.2  10.1   end   0.0 broken
+    growlight        4.5   7.3   8.8   end   0.0 broken
+    heater           5.0   8.5  10.4   end   0.0 broken
+    heatpump         3.2   6.8   8.8   end   0.0 broken
+    washer           3.5   5.9   7.2   end   0.0 broken
+    o2cell           4.3   7.9   9.7   end   0.0 broken
+    electrolyser     8.2  12.1  14.2   end   0.0 broken
+    airplant         7.5  11.3  13.4   end   0.0 broken
+    manifold         6.7  11.4  14.0   end   0.0 broken
+    battery          9.7  15.0  18.1   end   0.0 broken
+    inverter        11.1  16.6  19.6   end   0.0 broken
+    cartdock         6.9  10.7  12.8   end   0.0 broken
+    valve           10.1  15.9  19.1   end   0.0 broken
+    fan              4.6   9.1  11.8   end   0.0 broken
+    damper          11.7  17.4  20.7   end   0.0 broken
+    lift             3.5   6.2   7.7   end   0.0 broken
+    doorgear        12.4  20.1  24.4   end   0.0 broken
+    conduit         12.8  19.0  22.5   end   0.0 broken
+    coil            12.2  18.0  21.3   end   0.0 broken
+    reactor         19.3     -     -   end  31.1 faulty
+    poolfilter       6.5  10.9  13.3   end   0.0 broken
+    pooldoser        8.6  13.5  16.9   end   0.0 broken
+    poolheat         4.7  10.4  13.5   end   0.0 broken
+    riverpump        7.3  12.3  15.5   end   0.0 broken
+    wavegate        10.0  17.1  20.4   end   0.0 broken
+    wallholds        6.5   9.7  11.6   end   0.0 broken
+    belay           10.0  15.9  19.5   end   0.0 broken
+    stagelights      7.4  12.9  16.2   end   0.0 broken
+    soundrack       10.0  17.0  20.5   end   0.0 broken
+    seathinges       7.5  11.7  14.5   end   0.0 broken
+    courtnet         8.2  15.0  18.8   end   0.0 broken
+    scoreboard       8.5  14.0  17.4   end   0.0 broken
+    gravplate        9.8  17.9  22.2   end   0.0 broken
+    simpod           9.4  14.3  17.4   end   0.0 broken
+  at the end: 87 broken, healthy 0, worn 0, faulty 1, failing 0
+  FAIL slow machines failing: ['2-array-1', '5-doorgear-1']
+  Deck 4 at the end: hygiene restore x0.23, energy drain x2.78, energy restore x0.59, walk x0.80, mood -30
+    serious    Meals run late (3-oven-1, broken)
+    serious    Meals run late (3-oven-2, broken)
+    serious    Meals run late (3-range-1, broken)
+    serious    The galley is hot and smoky (3-galleyplant-1, broken)
+    serious    The cold store runs warm (3-chiller-1, broken)
+    serious    Showers run weak (3-recycler-1, broken)
+    serious    The water runs cloudy (3-filter-1, broken)
+    serious    Showers run weak (3-pump-1, broken)
+    serious    Showers run weak (5-pump-1, broken)
+    serious    Showers run weak (5-pump-2, broken)
+    serious    The water tastes of chlorine (3-uv-1, broken)
+    serious    The garden wilts (3-nutrient-1, broken)
+  Deck 3 at the end: cook x2.62, hunger restore x0.77, lift x2.00, mood -30
+  shipEffectsAt matches the last 7 days: True, reads change nothing: True
+The same twice: True | one jump: True | odd minutes: True | caches cleared: True
+Ideal crew (3 jobs an hour on the day shift): 502 jobs, worst state worn, lowest ship health 96.9
+  ship health by day: 100 100 100 100 99 99 99 99 99 98 99 99 98 98 98 98 98 98 99 98 99 98 99 99 98 98 98 98
+Real Works crew: 564 jobs done (chore 119, haul 4, overhaul 1, repair 51, restock 4, service 369, tune 16), 92 parts made in the machine shop
+  worst state broken, lowest ship health 85.5, at most 30 jobs on the board, lowest shelf 0, job-hours waiting for parts 1295
+  repairs claimed after 14.0 h (median), 162.8 h at worst
+  ship health by day: 99 97 96 98 98 99 99 96 96 97 94 97 99 99 96 94 90 88 93 99 98 96 97 99 99 97 99 98
+  jobs left for the player (your tier, on the board an hour or more of the day shift): 121, 4.3 a day
+  restock runs 4, nobody on two jobs at once: True, every job inside its work block: True, overlay matches: True
+  FAIL a machine broke with the Works crew on the job
+  the same twice: True | one jump: True | odd minutes: True
+Looks: 0 out of range, board rows ok True: ['Ship health 12 failing', 'Air 0 failing (Air scrubber, Deck 2)', 'Water 0 failing (Water recycler, Deck 3)', 'Power 0 failing (Light relays, Deck 1)']; crew grumble about the stuffy air; chiller at day 10 {'cond': 24.9, 'state': 'failing', 'spoil': 0.0207}; pure True
+Ion storm on: comms machines worn harder than without it 9/9; no repairs, the array ends ['broken']; with the Works crew the array's worst worn, its jobs [('service', 'done'), ('service', 'done'), ('service', 'done')], lowest ship health 86.1
+Your job: {'id': '3-oven-1@87', 'claimed': True, 'mine': True, 'fin': True, 'before': 39.42140720333076, 'after': 95, 'took': True, 'stock': 0, 'oneAtATime': True, 'lapse': True, 'kept': True, 'ret': True}
+Food by cart: replays pure True, over the cap 0, urgent runs missed 0, daily runs off the day shift 0
+Cart run as your job: {'waits': True, 'took': True, 'fin': True, 'stops': 'cart load unload return', 'leftThen': True, 'crewTook': True, 'urgentNow': True, 'waitingOk': True}
+Tapping a machine: 'Washer 1: in good order. You start a load. It fills and begins to churn.' ran True, running True, extra wear 0.301, a crew member's adds none True; broken starts False ('Oven 1: broken. Nothing happens.'); no use starts False
+Stores' Mail over 28 days: 12 (1 late deliveries, landed on the late day True), shape ok True, sent twice 0: ['Out of filters', 'Out of cells', 'Out of membranes', 'Out of cells', 'Out of filters', 'Out of membranes']
+Tier locks (a tier-3 hatch; you pass every hatch since 0.27.35, crew by rank): {'you': True, 'junior': False, 'senior': True, 'youTier1': True}
+Chores over 14 days: {'lamp': 6, 'calibrate': 12, 'delivery': 11, 'fault': 2, 'filter': 20, 'seal': 14, 'round': 4, 'vent': 6}; stops not real places [], tiers below their rooms []
+openJobs (days 2-5): 26 jobs you could take, kinds ['service', 'repair', 'restock', 'calibrate', 'lamp', 'delivery', 'tune'], bad shape []; e.g. ['Service: Light relays (Deck 1, 14 min, bring relay)', 'Service: Pool filter 1 (Deck 7, 14 min, bring cartridge)', 'Service: Main lift (Deck 5, 14 min, bring relay)', 'Service: Washer 2 (Deck 4, 14 min, bring pump)']
+  took 'Calibrate the galley plant': True, stops calibrate@3-galleyplant-1-panel, finished True, did its work True
+Turning jobs in: {'kind': 'lamp', 'n': 2, 'left': '1,0', 'lastDone': True, 'marked': True, 'workDone': True, 'mine': True, 'kept': True, 'offBoard': True, 'bad': True, 'tin': True, 'done': True, 'again': False, 'mOk': True}
+Event hooks and favours: {'fasterPower': True, 'othersSame': True, 'once': True, 'tagged': True, 'crewTook': 4, 'after': 4, 'titles': ['Secure loose things: bow lounge (tier 1)', 'Clean a vent: lift lobby (tier 1)', 'Check: utility closet (tier 3)', 'Carry packs to the junction (tier 1)'], 'offBoard': True, 'crewLeft': True, 'acc': True, 'steps': 'tea return', 'backEarly': False, 's0': True, 'tin': True, 'done': True, 'lapsed': True, 'trayOk': True, 'trayCrew': True, 'trayArrive': True, 'tMine': None, 'volunteered': True, 'coldOk': True, 'packsOk': True, 'blackouts': 4, 'blackoutMin': 0, 'boOk': True, 'mineOk': True}
+Food runs in live play, 6 days: {'runs': 5, 'crew': 4, 'late': [], 'coldMin': 128, 'holdMin': 750}
+The board through a week: weekday day shift 3.7 jobs for you on average, 0 of 40 hours with none, 3 at the shift's start on day 1 (0 empty hours before that), at most 4 held; days off: held [], crew took 12 of your kind, you could take one True (51 job-hours open)
+The garden: grow lights ['3-growlight-1', '3-growlight-2']; gardenAt all fine {'water': 1, 'feed': 1, 'light': 1}, pure True; broken: {'irrigation': {'water': 0, 'feed': 1, 'light': 1}, 'nutrient': {'water': 1, 'feed': 0, 'light': 1}, 'growlight': {'water': 1, 'feed': 1, 'light': 0}}
+  crate run garden@540: once True, for you first True, taken by eklund-leila, arrived True, carryWaiting till then True; yours: took True, stops 'pickup drop', waiting before/after the drop [True, False], landed ['garden@620']
+Reserved jobs: ['reserve1:4-junction-1@480', 'reserve2:4-washer-1@780', 'reserve3:4-junction-2@1905'] on ['4-junction-1', '4-washer-1', '4-junction-2'] (tiers [1, 1, 1], panels True, make minutes [30, 30, 30]); asking again True, looked up True
+  slot 1: early False, on the board True asked True, machine faulty, crew see it False, took True, stops 'fetch make job', kept past 14 h True, turned in True; notes 'take/1 stop:fetch/1 stop:make/1 stop:job/1 done/1 turnin/1'
+  slot 2 untaken: crew before 17:00 False, crew took it 21:00 day 1; slot 3 released True; an ordinary job's lapse noted (job and jobAbandoned) True
+  social notes: your repairs 4-junction-1:faulty, the crew's 34, a dropped job abandoned True, jobUnclaimed 4 (once each True), bad shape 0
+Works crew at work: Day 1 {'who': 'silva-bea', 'place': '4-lift-1', 'deck': 4, 'carry': False, 'dropCarry': False, 'stand': True}, Day 2 {'who': 'silva-bea', 'place': '5-bench-1', 'deck': 5, 'carry': True, 'dropCarry': True, 'stand': True}; shared at once 10 of 51 small jobs in the week, with fewer than 2 others held [], a shared one held for you []
+Shelves and the delivery: {'noShelf': [], 'lineOk': True, 'claimed': True, 'stopFirst': True, 'need': True, 'wrong': True, 'right': True, 'noNeed': True, 'shop': [1, 0], 'lateWeek1': False, 'crates': 6, 'dj': True, 'title': 'Unload the Wednesday delivery', 'keep': True, 'crewBefore': False, 'took': True, 'trips': [9, 4, 5, 4, 0, 1], 'emptied': True, 'fin': True, 'k0': False, 'k1': 'quist-ilse', 'cartRun': True, 'k2': True}
+Ranks (0.33.45): tier 1 rank junior (with SHIP.works tier 2: 2, rank officer: officer); Works crew by rank {'senior': 1, 'junior': 13, 'officer': 2, 'specialist': 7}
+  senior-only: on your board False, you claimed False, taken by a senior; junior job held for you True (on the board True), as an officer held False on the board True
+  ladderTick: 8 calls in 8 h, hour by hour True; its reserve reserve20:4-scrubber-1@690: tier 2, train t2, held True, you claimed it True
+Fault tables (0.33.46): 46 kinds; missing Tier 1 [], parts not in STOCK [], card and sign shared []
+  the pick: the same twice True, loads picked 0, settings before Day 4 0, causes never picked [], commonest not the most often []
+  oven element:361 seal:257 belt:128 drift:214; range element:428 relay:287 drift:245; galleyplant bearing:140 belt:498 filter:322; chiller compressor:315 seal:486 bearing:159; washer pump:321 valve:230 bearing:109 relay:90 seal:210; lift bearing:310 breaker:150 relay:500; lights lamp:242 breaker:113 relay:362 drift:243; cartdock cable:138 relay:310 cell:267 drift:245; growlight relay:334 lamp:479 drift:147; damper bearing:330 relay:464 seal:166; scrubber filter:495 panel:163 bearing:302; heater valve:467 pump:315 relay:178; recycler pump:271 membrane:446 seal:106 valve:137; filter seal:311 cartridge:476 valve:173; uv relay:338 seal:170 lamp:452; pump bearing:163 seal:314 pump:483; valve seal:387 valve:573; heatpump pump:394 valve:275 bearing:291; manifold valve:510 seal:163 regulator:287; o2cell cell:492 regulator:320 relay:148; electrolyser membrane:486 cell:298 relay:176; irrigation valve:327 nozzles:156 pump:477; nutrient regulator:157 pack:465 pump:338; airplant filter:481 belt:317 bearing:162; fan bearing:489 belt:311 relay:160; gasplant seal:327 regulator:474 valve:159; poolfilter cartridge:565 seal:395; pooldoser relay:516 drift:444; poolheat valve:710 regulator:250; riverpump bearing:592 impeller:368; wavegate relay:463 seal:497; wallholds hold:960; belay brake:552 tag:408; stagelights lamp:960; soundrack amp:382 cable:578; seathinges hinge:960; courtnet power:465 coil:495; scoreboard panel:960; gravplate cooling:464 controller:496; doorgear seal:486 bearing:308 relay:166; simpod base:606 screen:354; battery cell:493 relay:158 bus:309; inverter breaker:584 fan:376; conduit cable:594 joint:366; junction relay:326 breaker:472 cable:162; powerjunction breaker:483 relay:331 cable:146
+  a steady player, Days 2-28: 149 jobs on 16 shift days (9.3 a day), machine jobs 61, repairs 32 (52%)
+    by day (all/machine/repairs): 2:10/5/0 3:9/4/3 4:10/4/0 5:9/5/3 8:9/5/1 9:8/7/3 10:8/4/4 11:9/3/3 12:8/3/3 15:13/0/0 16:10/5/4 17:10/2/1 18:9/5/4 19:8/5/3 22:10/1/0 26:9/3/0
+    lowest ship health 90.4, worst state 2, repairs from Day 2 without a cause [], causes on Days 0-1 [], the same twice True
+    causes seen: airplant.bearing:1 cartdock.relay:2 chiller.bearing:1 chiller.seal:1 galleyplant.belt:1 galleyplant.filter:1 growlight.drift:1 growlight.lamp:2 growlight.relay:3 lift.relay:1 lights.lamp:2 lights.relay:3 oven.drift:2 oven.seal:1 poolfilter.cartridge:2 poolfilter.seal:1 range.drift:1 range.relay:1 scrubber.bearing:1 scrubber.filter:2 seathinges.hinge:1 simpod.base:4 stagelights.lamp:1 wallholds.hold:4 washer.bearing:1 washer.pump:1 washer.relay:2 washer.seal:1 washer.valve:2
+Job kinds (0.33.47): registered True (over a built-in False), posted [True, True]; untaken: teague-theo at look@4-lift-1 pick@4-laundry-1 (30 min, held undefined:cart look:cart), done by them true
+  yours: held True, card 'Test run / Deck 4 · lift lobby / Test run / routine', on your board True, claimed True, stops 'look:look+opts pick:choose+opts', other jobs' steps hold; done True, results {"0":{"pick":"worn"},"1":{"pick":"b"}}, done for you 'you {"0":{"pick":"worn"},"1":{"pick":"b"}}', stepDone '0:worn 1:b'
+  save keeps it True, drops an unknown kind True; machineFound: healthy None, [fresh, again, found now, by, notes, note ok] [True, False, True, 'you', 1, True]
+Hooks for 24k and M1 (0.33.47): caseOffer 8 faults; a held case job: crew took it False, you claimed True, wrong fix True (machine not put right True); side job beside a board job True (board True, myJob the board's True, side jobs side@1); old lift id read as the new 33.5 (old gone True)
+Drift (0.33.48): without the tune kind 0 drifts; with a stand-in 15 in 14 days (first day 4 09:00), tune jobs 4 (3 done by the crew), e.g. ['Tune: Oven 1 (runs cool)', 'Tune: Light relays (lights dim)', 'Tune: Range (runs hot)', 'Tune: Cart dock 1 (charges slow)']
+  lowest ship health 91.0 (without drift 93.0); the same twice True, one jump True
+  looks [flicker, dim, blink, drift]: settled [0, 0, False, 0], +2 [0.4, 0, False, 2], -2 [0, 0.24, False, -2] (works -16 points lower), dock +1 [0, 0, True, 1], clamped to 3, a fan refused True; after settling [0, 0, False, 0]
+  save: [86.36363795859776, None, 3] loads as [3, 1]; a save without drifts loads settled True
+Incidents (0.33.49): machineFault True -> faulty (40), never raised True, its repair found True; lift stuck True x3, over after 40 min True, off True
+  joint job [tier, parts, stops, card] [1, 'seal', '20@4-lift-1', 'Burst joint'], on your board True, the crew's when left: done
+Hauling (0.33.50): without the haul kind manifests [], misplaced []; with a stand-in: ['linen>4-laundry-drop medical>3-infirmary-drop store>3-store-drop', 'galley>3-galley-drop medical>3-infirmary-drop', 'galley>3-galley-drop medical>3-infirmary-drop', 'store>3-store-drop linen>4-laundry-drop medical>3-infirmary-drop']
+  week 1 crates [all, parts, manifest] [8, 5, 3], took {"id":"linen","dest":"4-laundry-drop"}, then 2; misplaced on 1 of 4 Thursdays ['membrane@5-parts-1']; bad []; save keeps them True, a fetch puts it right True; the same twice True
+Air line and Tier 2 tables (0.33.56): real {'5-fan-1': True, '5-damper-1': True, '5-damper-2': True}, panels {'5-fan-1': True, '5-damper-1': True, '5-damper-2': True}; a broken damper is felt on decks {'5-damper-1': [1, 2, 3], '5-damper-2': [4, 5, 6]}
+  18 Tier 2 kinds with a machine; missing tables [], bad lines [], causes never picked [], commonest not the most often [], loads picked 0
+Ship meters (0.33.57): a fresh ship reads 77 (machines 99.2), failing 0, fine 4: ['Heat 65 poor', 'Waste and laundry 68 poor', 'Water 69 poor', 'Comms and sensors 69 poor', 'Power 70 poor', 'Lift and doors 70 worn', 'Air 71 worn', 'Galley and food 91 fine', 'Hull 94 fine', 'Drive 96 fine', 'Rec deck 99 fine']
+  untended a day: upkeep out of step [], the board down 2.8; a steady player: 149 jobs, without meters ['fix-oj-d3plaza-mat@394', 'fix-in-rail@395', 'chore-round:deck5@396', 'extra-calibrate:5-cartdock-1@397'], main system unknown [], a step under 1 ['7-pool-filter-1@418 0.9', '7-aud-seats@429 0.8'], done with the board at 97 or more (nothing much left to show: not counted) 52
+  the board by day [76, 79, 83, 88, 91, 90, 89, 92, 93, 98, 97, 99, 98, 97, 97, 99, 96, 93, 99, 99, 98, 97, 96, 98, 97, 99, 99, 97], at the end 96; the same twice True
+  FAIL the ship meters: your jobs
+  the bridge room: shut [False, False, False] (offered, for you, taken), the crew's True; invited [True, True]; bridge crates in 8 weeks shut 0, invited 6; save keeps the upkeep True, an older save none True
+Team job (crew): team:3-recycler-1@14970, team 3, lead calder, claimed by calder, your stops 0; at their spots True, back after True, kept in the save True; done by calder (you out False, 40 min), recycler 97 (97.76589592118721 as it was done, team repairs to 98), meters 0, overlapping jobs []
+Team job (you): team:3-recycler-1@14970, team 3, lead calder, claimed by you, your stops 1; at their spots True, back after True, kept in the save True; done by you (you out False, 40 min), recycler 97 (98 as it was done, team repairs to 98), meters 3, overlapping jobs []
+Team job (in): team:3-recycler-1@14970, team 3, lead calder, claimed by you, your stops 1; at their spots True, back after True, kept in the save True; done by calder (you out True, 48 min), recycler 97 (97.76589592118721 as it was done, team repairs to 98), meters 3, overlapping jobs []
+Team job (out): team:3-recycler-1@14970, team 3, lead calder, claimed by you, your stops 1; at their spots True, back after True, kept in the save True; done by calder (you out True, 48 min), recycler 97 (97.76589592118721 as it was done, team repairs to 98), meters 0, overlapping jobs []
+  the same twice True
+Tier 2 test job: reserve20:4-scrubber-1@12000, faulty, drift 2, cause filter, parts ['filter', 'filter'], held True, its own tune job False; tuneSet to 1 False, to 0 True (then 0), to 2 again False
+Lines (0.33.59): on {'water': True, 'heat': True, 'air': True, 'pool': True, 'power': True}, not real [], no panel []; one bad machine at a time: wrong readings []; Day 12's (5-pump-1, before/after 5-valve-2, 5-valve-1): ['full', 'full', 'low', 'full']
+  traced faults (56 days, an Officer): 33 of 80 line repairs at your tier (41%), decks named [1, 2, 4, 5]; cause off its line [], card shows the machine [], openJobs shows a place []
+  one: 'Cold cabins on Deck 4', read the middle {'before': 0.6, 'after': 0.6, 'word': 'low'}, its own {'before': 1, 'after': 0.6, 'word': 'low'}, readings kept 2, found True; claimed True, fixed True (95), closed True; untrained: 0 traced; the same twice False
+  FAIL traced faults
+Pool leak (0.84.5): line on True, day 2, cause seal, symptom {'line': 'pool', 'decks': [5], 'deck': 5}, card 'Water dripping from the ceiling in main storage on Deck 5' (shows the machine False), openJobs [5, None, None]; goal [5, '5-aisle-2'], puddle True, drip seen True, then [7, '7-pool-heat-svc']; readings [['7-pool-heat', 'low', 'low', False], ['7-pool-filter-2', 'full', 'low', False], ['7-pool-filter-1', 'full', 'low', True]]; fixed True (95), closed True, dry True; the same twice True
+Save round trip: 88 machines and 55 jobs at hour 156, read back True, the same True, junk refused True
+The board keeps up (patch 1, note 13): a quick player, Days 1-7 (jobs/minutes with nothing to take): 1:10/0 2:11/0 3:9/0 4:12/0 5:8/0
+  top-ups posted 30, most on the board for you at once 4, taken by the crew [], still up after the shift [], the same twice True
+  with BOARD_ON false: 1:3/300 2:7/120 3:6/105 4:6/180 5:7/15
+  the quick player's jobs (notes 21, 24): 50 on Days 1-7, the same job again 1 (2%), Days 1-3 0 of 30; on Deck 2 9 (18%)
+  small repairs (FX10): 24 posted, 8 in the science area, the same one twice 0, rows with no place, a part not in STOCK or no system []; the crew's [], forced share {'plain': True, 'fix': False}
+  odd jobs (FX20): 117 rows (3 parked), unsound []; ODD_ON True, the board keeps 3; posted 11 on days [1, 2, 3, 4, 5] (days with 2+ small jobs [1, 2, 3, 4, 5]), decks [2, 3, 4, 5, 7], the same twice 0; the fewest decks in any 12 in a row of its order 5
+  the scanner's first use held for you (FX10): {'off': False, 'before': False, 'used': False, 'lessonDay': False, 'due': True, 'again': False, 'job': ['4-washer-1', 'pump', 1020, True]}
+errors []
+MACHINE CHECK FAILED

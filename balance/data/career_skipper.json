@@ -1,0 +1,1656 @@
+{
+ "plan": "skipper",
+ "pay": 15,
+ "trained": {
+  "m1": 2,
+  "m4": 3,
+  "m3d": 3,
+  "m3i": 4,
+  "m5": 4,
+  "m7": 5,
+  "p3": 5,
+  "m6": 8,
+  "m2": 8,
+  "m8": 11,
+  "ps": 12,
+  "m9": 12,
+  "p1": 16,
+  "m15": 18,
+  "m19": 19,
+  "m13": 22,
+  "m18": 22,
+  "m20": 26,
+  "p4": 29,
+  "m21": 29
+ },
+ "promo": [
+  [
+   "set",
+   8,
+   9
+  ],
+  [
+   "start",
+   9,
+   9
+  ],
+  [
+   "passed",
+   9,
+   9
+  ]
+ ],
+ "days": [
+  {
+   "mins": 519,
+   "idle": 0,
+   "kinds": "{\"lamp\":1,\"delivery\":1,\"fix\":9,\"calibrate\":2,\"vent\":1,\"service\":1}",
+   "meters": {
+    "air": 78.3,
+    "water": 70.9,
+    "power": 85.9,
+    "heat": 69.7,
+    "food": 99.8,
+    "waste": 74.5,
+    "hull": 99.3,
+    "comms": 71.6,
+    "propulsion": 95.3,
+    "transport": 81.8,
+    "rec": 98.5
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 61
+   },
+   "health": 98.7,
+   "srep": {
+    "work": 60.76,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 1,
+   "rank": "junior",
+   "home": "bunk",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 1,
+   "wd": 0,
+   "work": true,
+   "jobs": 15,
+   "op": [],
+   "xp": 0,
+   "band": "new",
+   "cur": null,
+   "used": []
+  },
+  {
+   "mins": 487,
+   "idle": 0,
+   "kinds": "{\"service\":5,\"repair\":1,\"delivery\":1,\"fix\":6,\"calibrate\":1}",
+   "meters": {
+    "air": 84.3,
+    "water": 83,
+    "power": 99.5,
+    "heat": 76.7,
+    "food": 87.8,
+    "waste": 77.5,
+    "hull": 99.8,
+    "comms": 80.2,
+    "propulsion": 94.3,
+    "transport": 91.8,
+    "rec": 98.4
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 66
+   },
+   "health": 97.7,
+   "srep": {
+    "work": 65.93,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 1,
+   "rank": "junior",
+   "home": "bunk",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 2,
+   "wd": 1,
+   "work": true,
+   "jobs": 15,
+   "op": [
+    "m1"
+   ],
+   "xp": 10,
+   "band": "steady",
+   "cur": null,
+   "used": [
+    "m1"
+   ]
+  },
+  {
+   "mins": 0,
+   "idle": 0,
+   "kinds": "{}",
+   "meters": {
+    "air": 82.8,
+    "water": 84.5,
+    "power": 96.9,
+    "heat": 76.7,
+    "food": 79.8,
+    "waste": 73.4,
+    "hull": 98.8,
+    "comms": 79.2,
+    "propulsion": 93.3,
+    "transport": 91.3,
+    "rec": 89.4
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 51
+   },
+   "health": 96,
+   "srep": {
+    "work": 50.93,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 1,
+   "rank": "junior",
+   "home": "bunk",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 3,
+   "wd": 2,
+   "work": true,
+   "jobs": 1,
+   "op": [
+    "m4",
+    "m3d"
+   ],
+   "xp": 10,
+   "band": "steady",
+   "cur": null,
+   "used": [
+    "m1",
+    "m4",
+    "m3d"
+   ]
+  },
+  {
+   "mins": 495,
+   "idle": 2,
+   "kinds": "{\"repair\":2,\"service\":4,\"round\":1,\"fix\":6,\"vent\":1}",
+   "meters": {
+    "air": 93.7,
+    "water": 92.1,
+    "power": 99.8,
+    "heat": 93.5,
+    "food": 98.2,
+    "waste": 83.6,
+    "hull": 99.8,
+    "comms": 93.5,
+    "propulsion": 92,
+    "transport": 97.3,
+    "rec": 91.1
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 58
+   },
+   "health": 98.3,
+   "srep": {
+    "work": 58.25,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 1,
+   "rank": "junior",
+   "home": "bunk",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 4,
+   "wd": 3,
+   "work": true,
+   "jobs": 15,
+   "op": [
+    "m5",
+    "m3i"
+   ],
+   "xp": 22,
+   "band": "reliable",
+   "cur": null,
+   "used": [
+    "m3i",
+    "m1",
+    "m4",
+    "m5"
+   ]
+  },
+  {
+   "mins": 499,
+   "idle": 0,
+   "kinds": "{\"repair\":4,\"service\":1,\"rounds\":1,\"fix\":4,\"fault\":1,\"lamp\":1,\"delivery\":1}",
+   "meters": {
+    "air": 99.8,
+    "water": 98.7,
+    "power": 96.5,
+    "heat": 99.4,
+    "food": 98.5,
+    "waste": 90.1,
+    "hull": 98.9,
+    "comms": 99.8,
+    "propulsion": 99.8,
+    "transport": 88.8,
+    "rec": 98.9
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 64
+   },
+   "health": 98,
+   "srep": {
+    "work": 63.76,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 1,
+   "rank": "junior",
+   "home": "bunk",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 5,
+   "wd": 4,
+   "work": true,
+   "jobs": 14,
+   "op": [
+    "m7",
+    "p3"
+   ],
+   "xp": 38,
+   "band": "trusted",
+   "cur": null,
+   "used": [
+    "m1",
+    "m4",
+    "m5",
+    "m7"
+   ]
+  },
+  {
+   "mins": 0,
+   "idle": 0,
+   "kinds": "{}",
+   "meters": {
+    "air": 98.4,
+    "water": 98.2,
+    "power": 95.6,
+    "heat": 98.4,
+    "food": 97.5,
+    "waste": 97.2,
+    "hull": 98.8,
+    "comms": 97.6,
+    "propulsion": 98.8,
+    "transport": 98.8,
+    "rec": 98.7
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 64
+   },
+   "health": 99,
+   "srep": {
+    "work": 63.76,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 1,
+   "rank": "junior",
+   "home": "bunk",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 6,
+   "wd": 5,
+   "work": false,
+   "jobs": 0,
+   "op": [],
+   "xp": 38,
+   "band": "trusted",
+   "cur": null,
+   "used": []
+  },
+  {
+   "mins": 0,
+   "idle": 0,
+   "kinds": "{}",
+   "meters": {
+    "air": 95,
+    "water": 97.2,
+    "power": 96.4,
+    "heat": 96.4,
+    "food": 95.1,
+    "waste": 97.3,
+    "hull": 97.8,
+    "comms": 95.5,
+    "propulsion": 96.8,
+    "transport": 97.8,
+    "rec": 95.8
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 64
+   },
+   "health": 98.5,
+   "srep": {
+    "work": 63.76,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 1,
+   "rank": "junior",
+   "home": "bunk",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 7,
+   "wd": 6,
+   "work": false,
+   "jobs": 0,
+   "op": [],
+   "xp": 38,
+   "band": "trusted",
+   "cur": null,
+   "used": []
+  },
+  {
+   "mins": 478,
+   "idle": 0,
+   "kinds": "{\"repair\":2,\"service\":4,\"rounds\":1,\"joint\":1,\"fix\":4,\"vent\":1}",
+   "meters": {
+    "air": 94.9,
+    "water": 99.8,
+    "power": 92.4,
+    "heat": 99.8,
+    "food": 99.8,
+    "waste": 99.8,
+    "hull": 99.8,
+    "comms": 99.8,
+    "propulsion": 99.8,
+    "transport": 99.8,
+    "rec": 92.1
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 69
+   },
+   "health": 97.7,
+   "srep": {
+    "work": 68.54,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 1,
+   "rank": "junior",
+   "home": "bunk",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 8,
+   "wd": 0,
+   "work": true,
+   "jobs": 14,
+   "op": [
+    "m6",
+    "m2"
+   ],
+   "xp": 52,
+   "band": "relied",
+   "cur": null,
+   "used": [
+    "m1",
+    "m4",
+    "m5",
+    "m7",
+    "m6",
+    "m2"
+   ]
+  },
+  {
+   "mins": 0,
+   "idle": 0,
+   "kinds": "{}",
+   "meters": {
+    "air": 99.1,
+    "water": 99.5,
+    "power": 87.5,
+    "heat": 99.5,
+    "food": 83.8,
+    "waste": 99.5,
+    "hull": 99.5,
+    "comms": 99.5,
+    "propulsion": 99.5,
+    "transport": 97.2,
+    "rec": 88.9
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 54
+   },
+   "health": 95.8,
+   "srep": {
+    "work": 53.54,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 1,
+   "rank": "junior",
+   "home": "bunk",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 9,
+   "wd": 1,
+   "work": true,
+   "jobs": 1,
+   "op": [
+    "t2"
+   ],
+   "xp": 51,
+   "band": "relied",
+   "cur": null,
+   "used": [
+    "m1",
+    "m4",
+    "m5",
+    "m7",
+    "m6"
+   ]
+  },
+  {
+   "mins": 519,
+   "idle": 0,
+   "kinds": "{\"repair\":3,\"restock\":1,\"service\":2,\"filter\":1,\"fix\":3,\"vent\":1,\"calibrate\":1,\"rounds\":1}",
+   "meters": {
+    "air": 99.8,
+    "water": 99.4,
+    "power": 99.8,
+    "heat": 99.7,
+    "food": 97.9,
+    "waste": 99.4,
+    "hull": 99.8,
+    "comms": 90.4,
+    "propulsion": 99.8,
+    "transport": 89.2,
+    "rec": 90.9
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 59
+   },
+   "health": 98.2,
+   "srep": {
+    "work": 58.84,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 2,
+   "rank": "officer",
+   "home": "4-23",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 10,
+   "wd": 2,
+   "work": true,
+   "jobs": 13,
+   "op": [],
+   "xp": 16,
+   "band": "steady",
+   "cur": null,
+   "used": [
+    "m1",
+    "m4",
+    "m5",
+    "m7",
+    "m6",
+    "m3d"
+   ]
+  },
+  {
+   "mins": 494,
+   "idle": 0,
+   "kinds": "{\"repair\":4,\"filter\":2,\"fix\":2,\"rounds\":1,\"seal\":1,\"chore\":1}",
+   "meters": {
+    "air": 99.2,
+    "water": 91.1,
+    "power": 98.7,
+    "heat": 90.9,
+    "food": 85.4,
+    "waste": 99.2,
+    "hull": 99.8,
+    "comms": 99.1,
+    "propulsion": 99.8,
+    "transport": 99.7,
+    "rec": 98.6
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 62
+   },
+   "health": 96.2,
+   "srep": {
+    "work": 62.03,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 2,
+   "rank": "officer",
+   "home": "4-23",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 11,
+   "wd": 3,
+   "work": true,
+   "jobs": 12,
+   "op": [
+    "m8"
+   ],
+   "xp": 32,
+   "band": "trusted",
+   "cur": null,
+   "used": [
+    "m3i",
+    "m1",
+    "m4",
+    "m5",
+    "m7",
+    "m6",
+    "m8"
+   ]
+  },
+  {
+   "mins": 0,
+   "idle": 0,
+   "kinds": "{}",
+   "meters": {
+    "air": 84.5,
+    "water": 86.1,
+    "power": 87.1,
+    "heat": 78.5,
+    "food": 84.1,
+    "waste": 99.5,
+    "hull": 99.5,
+    "comms": 98.2,
+    "propulsion": 99.4,
+    "transport": 96.6,
+    "rec": 87.3
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 47
+   },
+   "health": 89.6,
+   "srep": {
+    "work": 47.03,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 2,
+   "rank": "officer",
+   "home": "4-23",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 12,
+   "wd": 4,
+   "work": true,
+   "jobs": 1,
+   "op": [
+    "m9",
+    "ps"
+   ],
+   "xp": 31,
+   "band": "reliable",
+   "cur": null,
+   "used": [
+    "m1",
+    "m4",
+    "m5",
+    "m7",
+    "m6",
+    "m8",
+    "m9"
+   ]
+  },
+  {
+   "mins": 314,
+   "idle": 153,
+   "kinds": "{\"service\":1,\"chore\":7}",
+   "meters": {
+    "air": 99.7,
+    "water": 99.4,
+    "power": 97.1,
+    "heat": 84.8,
+    "food": 99.7,
+    "waste": 97.8,
+    "hull": 99.7,
+    "comms": 98.2,
+    "propulsion": 99.7,
+    "transport": 99.7,
+    "rec": 99.7
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 54
+   },
+   "health": 97.8,
+   "srep": {
+    "work": 53.91,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 2,
+   "rank": "officer",
+   "home": "4-23",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 13,
+   "wd": 5,
+   "work": true,
+   "jobs": 8,
+   "op": [],
+   "xp": 39,
+   "band": "trusted",
+   "cur": null,
+   "used": [
+    "m1",
+    "m4",
+    "m5",
+    "m7",
+    "m6",
+    "m8",
+    "m9"
+   ]
+  },
+  {
+   "mins": 0,
+   "idle": 0,
+   "kinds": "{}",
+   "meters": {
+    "air": 84.3,
+    "water": 94.4,
+    "power": 97.2,
+    "heat": 98.7,
+    "food": 95,
+    "waste": 98.2,
+    "hull": 98.7,
+    "comms": 94.4,
+    "propulsion": 98.7,
+    "transport": 92.9,
+    "rec": 97.6
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 54
+   },
+   "health": 96,
+   "srep": {
+    "work": 53.91,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 2,
+   "rank": "officer",
+   "home": "4-23",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 14,
+   "wd": 6,
+   "work": false,
+   "jobs": 0,
+   "op": [],
+   "xp": 39,
+   "band": "trusted",
+   "cur": null,
+   "used": []
+  },
+  {
+   "mins": 0,
+   "idle": 0,
+   "kinds": "{}",
+   "meters": {
+    "air": 75.7,
+    "water": 77.6,
+    "power": 89.5,
+    "heat": 97.7,
+    "food": 92.4,
+    "waste": 97.7,
+    "hull": 79.6,
+    "comms": 97.2,
+    "propulsion": 97.4,
+    "transport": 83.7,
+    "rec": 88.7
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 39
+   },
+   "health": 89.4,
+   "srep": {
+    "work": 38.91,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 2,
+   "rank": "officer",
+   "home": "4-23",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 15,
+   "wd": 0,
+   "work": true,
+   "jobs": 0,
+   "op": [
+    "p1"
+   ],
+   "xp": 36,
+   "band": "trusted",
+   "cur": null,
+   "used": [
+    "m1",
+    "m4",
+    "m5",
+    "m7",
+    "m6",
+    "m8",
+    "m9"
+   ]
+  },
+  {
+   "mins": 554,
+   "idle": 0,
+   "kinds": "{\"repair\":9,\"incident\":1}",
+   "meters": {
+    "air": 66.7,
+    "water": 87.1,
+    "power": 95.5,
+    "heat": 99,
+    "food": 99.8,
+    "waste": 99.8,
+    "hull": 99.8,
+    "comms": 99.8,
+    "propulsion": 99.8,
+    "transport": 99.8,
+    "rec": 99.2
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 40
+   },
+   "health": 92.6,
+   "srep": {
+    "work": 39.91,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 2,
+   "rank": "officer",
+   "home": "4-23",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 16,
+   "wd": 1,
+   "work": true,
+   "jobs": 10,
+   "op": [
+    "p2"
+   ],
+   "xp": 60,
+   "band": "relied",
+   "cur": null,
+   "used": [
+    "m1",
+    "m4",
+    "m5",
+    "m7",
+    "m6",
+    "m8",
+    "m9"
+   ]
+  },
+  {
+   "mins": 456,
+   "idle": 0,
+   "kinds": "{\"repair\":2,\"service\":3,\"tune\":2,\"fix\":4,\"fault\":1,\"round\":1}",
+   "meters": {
+    "air": 53.9,
+    "water": 98.8,
+    "power": 95.4,
+    "heat": 87.2,
+    "food": 99.8,
+    "waste": 87.9,
+    "hull": 99.8,
+    "comms": 99,
+    "propulsion": 99.8,
+    "transport": 99.8,
+    "rec": 98.8
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 45
+   },
+   "health": 89.9,
+   "srep": {
+    "work": 44.91,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 2,
+   "rank": "officer",
+   "home": "4-23",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 17,
+   "wd": 2,
+   "work": true,
+   "jobs": 14,
+   "op": [
+    "t3",
+    "m10"
+   ],
+   "xp": 71,
+   "band": "relied",
+   "cur": null,
+   "used": [
+    "m1",
+    "m4",
+    "m5",
+    "m7",
+    "m6",
+    "m8",
+    "m9",
+    "t3",
+    "m3d"
+   ]
+  },
+  {
+   "mins": 0,
+   "idle": 0,
+   "kinds": "{}",
+   "meters": {
+    "air": 48.4,
+    "water": 87.1,
+    "power": 82.7,
+    "heat": 81.9,
+    "food": 89.9,
+    "waste": 80.1,
+    "hull": 99.5,
+    "comms": 91.3,
+    "propulsion": 99.4,
+    "transport": 84.2,
+    "rec": 88.3
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 31
+   },
+   "health": 82.3,
+   "srep": {
+    "work": 31.44,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 3,
+   "rank": "senior",
+   "home": "4-23",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 18,
+   "wd": 3,
+   "work": true,
+   "jobs": 1,
+   "op": [
+    "m15",
+    "m11"
+   ],
+   "xp": 0,
+   "band": "new",
+   "cur": null,
+   "used": [
+    "m3i",
+    "m1",
+    "m4",
+    "m5",
+    "m7",
+    "m6",
+    "m8",
+    "m9",
+    "m15",
+    "t3"
+   ]
+  },
+  {
+   "mins": 484,
+   "idle": 0,
+   "kinds": "{\"repair\":4,\"restock\":1,\"tune\":2,\"fix\":3,\"service\":1,\"lamp\":1}",
+   "meters": {
+    "air": 53.1,
+    "water": 98.6,
+    "power": 85.8,
+    "heat": 89.3,
+    "food": 89.3,
+    "waste": 99.8,
+    "hull": 99.8,
+    "comms": 88.7,
+    "propulsion": 99.7,
+    "transport": 97.9,
+    "rec": 99.5
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 36
+   },
+   "health": 87.4,
+   "srep": {
+    "work": 36.44,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 3,
+   "rank": "senior",
+   "home": "4-23",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 19,
+   "wd": 4,
+   "work": true,
+   "jobs": 13,
+   "op": [
+    "m19",
+    "m12"
+   ],
+   "xp": 13,
+   "band": "new",
+   "cur": null,
+   "used": [
+    "m1",
+    "m4",
+    "m5",
+    "m7",
+    "m6",
+    "m8",
+    "m9",
+    "m15",
+    "t3",
+    "m19"
+   ]
+  },
+  {
+   "mins": 0,
+   "idle": 0,
+   "kinds": "{}",
+   "meters": {
+    "air": 51.6,
+    "water": 98.2,
+    "power": 88.8,
+    "heat": 98.8,
+    "food": 98.7,
+    "waste": 91.9,
+    "hull": 98.8,
+    "comms": 84.9,
+    "propulsion": 98.8,
+    "transport": 98.8,
+    "rec": 97.5
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 36
+   },
+   "health": 89.7,
+   "srep": {
+    "work": 36.44,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 3,
+   "rank": "senior",
+   "home": "4-23",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 20,
+   "wd": 5,
+   "work": false,
+   "jobs": 0,
+   "op": [],
+   "xp": 13,
+   "band": "new",
+   "cur": null,
+   "used": []
+  },
+  {
+   "mins": 0,
+   "idle": 0,
+   "kinds": "{}",
+   "meters": {
+    "air": 51.2,
+    "water": 97.8,
+    "power": 96,
+    "heat": 97.8,
+    "food": 97.8,
+    "waste": 97,
+    "hull": 97.8,
+    "comms": 96.2,
+    "propulsion": 97.8,
+    "transport": 97.8,
+    "rec": 95.5
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 36
+   },
+   "health": 92.1,
+   "srep": {
+    "work": 36.44,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 3,
+   "rank": "senior",
+   "home": "4-23",
+   "ns": "",
+   "mt": null,
+   "end": null,
+   "d": 21,
+   "wd": 6,
+   "work": false,
+   "jobs": 0,
+   "op": [],
+   "xp": 13,
+   "band": "new",
+   "cur": null,
+   "used": []
+  },
+  {
+   "mins": 499,
+   "idle": 0,
+   "kinds": "{\"fault\":1,\"leak\":1,\"repair\":4,\"chore\":2,\"service\":2,\"lamp\":1,\"rounds\":1}",
+   "meters": {
+    "air": 75.1,
+    "water": 91.2,
+    "power": 85.3,
+    "heat": 99.5,
+    "food": 91.5,
+    "waste": 99.8,
+    "hull": 99.8,
+    "comms": 90.2,
+    "propulsion": 99.3,
+    "transport": 99.8,
+    "rec": 89
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 41
+   },
+   "health": 90.9,
+   "srep": {
+    "work": 41.44,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 3,
+   "rank": "senior",
+   "home": "4-23",
+   "ns": "22",
+   "mt": null,
+   "end": null,
+   "d": 22,
+   "wd": 0,
+   "work": true,
+   "jobs": 13,
+   "op": [
+    "m18",
+    "m13"
+   ],
+   "xp": 30,
+   "band": "reliable",
+   "cur": null,
+   "used": [
+    "m1",
+    "m4",
+    "m5",
+    "m7",
+    "m6",
+    "m8",
+    "m9",
+    "m15",
+    "t3",
+    "m19",
+    "m18"
+   ]
+  },
+  {
+   "mins": 0,
+   "idle": 0,
+   "kinds": "{}",
+   "meters": {
+    "air": 66.8,
+    "water": 98.5,
+    "power": 96.1,
+    "heat": 97.4,
+    "food": 98.8,
+    "waste": 98.8,
+    "hull": 98.8,
+    "comms": 85.6,
+    "propulsion": 98.5,
+    "transport": 96.9,
+    "rec": 98.1
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 29
+   },
+   "health": 93.5,
+   "srep": {
+    "work": 29.01,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 3,
+   "rank": "senior",
+   "home": "4-23",
+   "ns": "22,23",
+   "mt": null,
+   "end": null,
+   "d": 23,
+   "wd": 1,
+   "work": false,
+   "jobs": 0,
+   "op": [],
+   "xp": 27,
+   "band": "steady",
+   "cur": null,
+   "used": []
+  },
+  {
+   "mins": 0,
+   "idle": 0,
+   "kinds": "{}",
+   "meters": {
+    "air": 96.8,
+    "water": 97.6,
+    "power": 97,
+    "heat": 97.8,
+    "food": 97.5,
+    "waste": 95.3,
+    "hull": 97.8,
+    "comms": 96.6,
+    "propulsion": 97.8,
+    "transport": 97.8,
+    "rec": 97.4
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 20
+   },
+   "health": 99.4,
+   "srep": {
+    "work": 20.31,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 3,
+   "rank": "senior",
+   "home": "4-23",
+   "ns": "22,23,24",
+   "mt": null,
+   "end": null,
+   "d": 24,
+   "wd": 2,
+   "work": false,
+   "jobs": 0,
+   "op": [],
+   "xp": 25,
+   "band": "steady",
+   "cur": null,
+   "used": [
+    "m3d"
+   ]
+  },
+  {
+   "mins": 0,
+   "idle": 0,
+   "kinds": "{}",
+   "meters": {
+    "air": 96.8,
+    "water": 96.8,
+    "power": 94,
+    "heat": 96.2,
+    "food": 96.8,
+    "waste": 95.2,
+    "hull": 96.8,
+    "comms": 96,
+    "propulsion": 96.8,
+    "transport": 96.8,
+    "rec": 95.1
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 14
+   },
+   "health": 99.3,
+   "srep": {
+    "work": 14.22,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 3,
+   "rank": "senior",
+   "home": "4-23",
+   "ns": "22,23,24",
+   "mt": 26,
+   "end": null,
+   "d": 25,
+   "wd": 3,
+   "work": false,
+   "jobs": 0,
+   "op": [],
+   "xp": 23,
+   "band": "steady",
+   "cur": null,
+   "used": [
+    "m3i"
+   ]
+  },
+  {
+   "mins": 511,
+   "idle": 0,
+   "kinds": "{\"service\":6,\"rounds\":1,\"battcell\":1,\"incident\":1,\"joint\":1,\"repair\":2,\"tune\":1,\"fix\":1}",
+   "meters": {
+    "air": 99.8,
+    "water": 98.7,
+    "power": 86.1,
+    "heat": 99.8,
+    "food": 87,
+    "waste": 99.8,
+    "hull": 99.8,
+    "comms": 99.8,
+    "propulsion": 99.8,
+    "transport": 99.8,
+    "rec": 99.6
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 18
+   },
+   "health": 96.4,
+   "srep": {
+    "work": 18.22,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 3,
+   "rank": "senior",
+   "home": "4-23",
+   "ns": "22,23,24",
+   "mt": 26,
+   "end": null,
+   "d": 26,
+   "wd": 4,
+   "work": true,
+   "jobs": 15,
+   "op": [
+    "m20",
+    "m14"
+   ],
+   "xp": 46,
+   "band": "reliable",
+   "cur": null,
+   "used": [
+    "m1",
+    "m4",
+    "m5",
+    "m7",
+    "m6",
+    "m8",
+    "m9",
+    "m15",
+    "t3",
+    "m19",
+    "m18",
+    "m20"
+   ]
+  },
+  {
+   "mins": 0,
+   "idle": 0,
+   "kinds": "{}",
+   "meters": {
+    "air": 97.4,
+    "water": 98.8,
+    "power": 96,
+    "heat": 98.7,
+    "food": 97.5,
+    "waste": 98.8,
+    "hull": 98.8,
+    "comms": 98.5,
+    "propulsion": 98.1,
+    "transport": 98.8,
+    "rec": 98.6
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 18
+   },
+   "health": 99.1,
+   "srep": {
+    "work": 18.22,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 3,
+   "rank": "senior",
+   "home": "4-23",
+   "ns": "22,23,24",
+   "mt": 26,
+   "end": null,
+   "d": 27,
+   "wd": 5,
+   "work": false,
+   "jobs": 0,
+   "op": [],
+   "xp": 46,
+   "band": "reliable",
+   "cur": null,
+   "used": []
+  },
+  {
+   "mins": 0,
+   "idle": 0,
+   "kinds": "{}",
+   "meters": {
+    "air": 95.8,
+    "water": 95.9,
+    "power": 95.3,
+    "heat": 97.3,
+    "food": 96.9,
+    "waste": 97.8,
+    "hull": 97.8,
+    "comms": 96.6,
+    "propulsion": 97.8,
+    "transport": 97.8,
+    "rec": 96.2
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 18
+   },
+   "health": 98.8,
+   "srep": {
+    "work": 18.22,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 3,
+   "rank": "senior",
+   "home": "4-23",
+   "ns": "22,23,24",
+   "mt": 26,
+   "end": null,
+   "d": 28,
+   "wd": 6,
+   "work": false,
+   "jobs": 0,
+   "op": [],
+   "xp": 46,
+   "band": "reliable",
+   "cur": null,
+   "used": []
+  },
+  {
+   "mins": 138,
+   "idle": 0,
+   "kinds": "{\"service\":1,\"repair\":2}",
+   "meters": {
+    "air": 92.7,
+    "water": 84.1,
+    "power": 84.6,
+    "heat": 99.5,
+    "food": 90.4,
+    "waste": 99.5,
+    "hull": 97,
+    "comms": 99.5,
+    "propulsion": 98.3,
+    "transport": 93.8,
+    "rec": 98.5
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 18
+   },
+   "health": 94,
+   "srep": {
+    "work": 18.22,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 3,
+   "rank": "senior",
+   "home": "4-23",
+   "ns": "22,23,24",
+   "mt": 26,
+   "end": null,
+   "d": 29,
+   "wd": 0,
+   "work": true,
+   "jobs": 4,
+   "op": [
+    "m21",
+    "p4"
+   ],
+   "xp": 55,
+   "band": "trusted",
+   "cur": null,
+   "used": [
+    "m1",
+    "m4",
+    "m5",
+    "m7",
+    "m6",
+    "m8",
+    "m9",
+    "m15",
+    "t3",
+    "m19",
+    "m18",
+    "m20",
+    "m21",
+    "m25"
+   ]
+  },
+  {
+   "mins": 0,
+   "idle": 0,
+   "kinds": "{}",
+   "meters": {
+    "air": 90.1,
+    "water": 99.5,
+    "power": 79,
+    "heat": 90.1,
+    "food": 96.5,
+    "waste": 99.5,
+    "hull": 99.5,
+    "comms": 87.4,
+    "propulsion": 96.9,
+    "transport": 98.5,
+    "rec": 88.9
+   },
+   "career": {
+    "st": 0,
+    "n": 0,
+    "go": null,
+    "ms": 0,
+    "work": 13
+   },
+   "health": 93.5,
+   "srep": {
+    "work": 12.75,
+    "kindness": 50,
+    "spirit": 50
+   },
+   "tier": 3,
+   "rank": "senior",
+   "home": "4-23",
+   "ns": "22,23,24",
+   "mt": 26,
+   "end": null,
+   "d": 30,
+   "wd": 1,
+   "work": true,
+   "jobs": 1,
+   "op": [
+    "t4",
+    "p5"
+   ],
+   "xp": 52,
+   "band": "reliable",
+   "cur": null,
+   "used": [
+    "m1",
+    "m4",
+    "m5",
+    "m7",
+    "m6",
+    "m8",
+    "m9",
+    "m15",
+    "t3",
+    "m19",
+    "m18",
+    "m20",
+    "t4",
+    "m21",
+    "m25"
+   ]
+  }
+ ],
+ "mail": [
+  "torres-zeke: Fancy a walk?",
+  "esposito-yara: The rest of the delivery",
+  "calder: Galley, 09:15",
+  "halloran-emeka: Board, when you're in",
+  "calder: Burst pipe",
+  "halloran-emeka: Recycler, 09:30",
+  "calder: The pipe kit",
+  "calder: Training: Your Tier 3 test job",
+  "calder: Training: rewiring",
+  "calder: Power and relays",
+  "calder: Shutdowns",
+  "calder: The sensor array",
+  "marrow: Training: The Monday briefing",
+  "calder: Training: Your Tier 4 test job"
+ ],
+ "errors": []
+}
