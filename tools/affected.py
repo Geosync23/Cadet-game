@@ -40,7 +40,7 @@ CHECKS = {
     # the event days (lead 25, 2026-10-21: day_check on Day 1 alone misses an event day's own failures): Day 0 the
     # arrival, the first Friday's address 5, the Line 7, the storm's front 12 and its Saturday 13, the comet 16, Day 19's
     # address and night shift, the first crew rotation 21, the diplomatic finale 27 (EV_CALENDAR, EV_BEATS, ROSTER_ROTATIONS)
-    **{f'day{d}': (f'python3 day_check.py {{g}} {d}', 8) for d in (0, 5, 7, 12, 13, 15, 16, 19, 21, 27)},   # 15, 16: Pillar 5 Step 5's Tier 3 test and Senior Officer days (S5-1)
+    **{f'day{d}': (f'python3 day_check.py {{g}} {d}', 8) for d in (0, 5, 7, 12, 13, 15, 16, 17, 19, 21, 22, 23, 24, 25, 26, 27)},   # 15, 16: Pillar 5 Step 5's Tier 3 test and Senior Officer days (S5-1); 23-26: Step 6's nights, the badge, the move, mentoring and Calder's question (W6; 17 and 22 were in EVENT_DAYS but not here, so the picker never offered them)
     'interactions': ('python3 interactions_check.py {g}', 8), 'perf': ('python3 perf_check.py {g} OLD.html', 15),
     'mech': ('python3 mech_check.py {g}', 6), 'events': ('python3 events_check.py {g}', 6),
     'bubble': ('python3 bubble_check.py {g}', 5), 'devmode': ('python3 devmode_check.py {g}', 5), 'dev_arrow': ('python3 dev_arrow_check.py {g}', 2),   # Dev mode's career arrow (DV1)
@@ -61,7 +61,7 @@ CHECKS = {
     'leave': ('python3 leave_check.py {g}', 1), 'device': ('python3 device_check.py {g}', 4),
 }
 FAST = {'deck', 'machine', 'leave', 'device'}
-EVENT_DAYS = ['day0', 'day5', 'day7', 'day12', 'day13', 'day15', 'day16', 'day17', 'day19', 'day21', 'day22']   # 0.93.2, the event swap: the visit's greeting Day 17, the comet Day 22 (were day16, day27)
+EVENT_DAYS = ['day0', 'day5', 'day7', 'day12', 'day13', 'day15', 'day16', 'day17', 'day19', 'day21', 'day22', 'day23', 'day24', 'day25', 'day26']   # 0.93.2, the event swap: the visit's greeting Day 17, the comet Day 22 (were day16, day27); 23-26: Pillar 5 Step 6 (W6, with P5_STEP6 on; off, plain days)
 FILE_OF = {'cadet': 'cadet_test.py', 'day1': 'day_check.py', **{d: 'day_check.py' for d in EVENT_DAYS}}
 ALL = {c for c in CHECKS if os.path.exists(os.path.join(ROOT, FILE_OF.get(c, c + '_check.py')))}
 LOAD_CHECKS = {'cadet', 'deck'}                       # code that runs only while the page opens: the pictures and the decks
@@ -89,6 +89,15 @@ RULES['24u'] = ['career', 'mech', 'leave', 'events', 'bigevents', 'saves', 'dev_
 RULES['24v'] = ['career', 'mech', 'leave', 'machine']
 RULES['24w'] = ['career', 'mech', 'leave', 'machine', 'day1', 'food', 'saves']
 RULES['24x'] = ['career', 'mech', 'leave', 'machine', 'deck']
+# Pillar 5 Step 6 (W6's first turn; plans/p5-step6-spec.html section 8): section 28 and its sub-sections, by the rules alone until the map is remade
+RULES['28'] = ['career', 'mech', 'leave', 'events', 'bigevents', 'day22', 'day23', 'day24', 'day25', 'day26']
+RULES['28a'] = ['career', 'mech', 'leave', 'player', 'clothes', 'food', 'saves', 'events', 'day1', 'day22', 'day23', 'day24', 'day25']
+RULES['28b'] = ['career', 'mech', 'bigevents', 'day22']
+RULES['28c'] = ['career', 'mech', 'machine', 'day23']
+RULES['28d'] = ['career', 'mech', 'day24']
+RULES['28e'] = ['career', 'mech', 'social', 'arc', 'day26']
+RULES['28f'] = ['career', 'fridays', 'social', 'arc', 'day26']
+RULES['24u'] = RULES['24u'] + ['day22', 'day23', 'day25']   # S6-3's Engine Specialist and the move
 # the ending (section 29, EN1; plans/ending-spec.html): picked by the rules alone until the map is remade
 RULES['29'] = ['ending', 'events', 'bigevents', 'saves', 'social', 'day1', 'devmode']
 RULES['29a'] = ['ending', 'events', 'bigevents', 'social', 'talk', 'saves', 'day1']

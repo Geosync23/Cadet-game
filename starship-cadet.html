@@ -9474,6 +9474,16 @@ const P5_M19 = P5_STEP5 && true;                          // S5-3: power and rel
 const P5_M18 = P5_STEP5 && true;                          // S5-4: shutdowns (section 24w)
 const P5_M20 = P5_STEP5 && true;                          // S5-5: the sensor array (section 24x)
 const P5_CASES5 = P5_STEP5 && true;                       // S5-6: head-scratchers P4, P5, P9 and the old-mysteries board (24k's slot)
+const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');      // Pillar 5 Step 6, Engine Specialist and the end (W6 for lead 41; plans/p5-step6-spec.html on claude/p5-specs, plan v3.1): the master, needs Step 5; off: the game before it (?p5s5&p5s6, or #p5s5.p5s6 on an artifact link, previews both)
+const P5_NIGHT = P5_STEP6 && true;                        // S6-1: the night shift, Days 22-24, and Navarro's leave (section 28a)
+const P5_M21 = P5_STEP6 && true;                          // S6-2: the Monday briefing (section 28b)
+const P5_PROMO4 = P5_STEP6 && true;                       // S6-3: the Engine Specialist promotion and your Deck 2 quarters (section 24u)
+const P5_DECK6 = P5_STEP6 && true;                        // S6-4: Deck 6's working engine machines, the dosimeter rack, the watch board, team spots; Deck 2's suite as yours (section 4d)
+const P5_M23 = P5_STEP6 && true;                          // S6-5: engine work and the reactor (section 28c)
+const P5_M24 = P5_STEP6 && true;                          // S6-6: leading a team (section 28d)
+const P5_M25 = P5_STEP6 && true;                          // S6-7: mentoring Basil (section 28e)
+const P5_CASES6 = P5_STEP6 && true;                       // S6-8: head-scratchers P6, P7, P8 and the T4 band (24k's slot)
+const P5_END = P5_STEP6 && true;                          // S6-9: the end of the career, Calder's question (section 28f)
 const P926_APPT = true;                 // 0.92.6 item 9 (FX22; plans/patch-0.92.6.md): appointments as small traditions, each with its scene, and a real talk at every appointment; off: none of it (the game as 0.92.5)
 const EV_VESSEL_ON = URL_FLAGS.has('evvessel');           // A Veyli vessel needs help, Days 27-30 (VB1 for lead 39; plans/veyli-vessel-spec.html, EP2): section 18's 'veyliVessel' block with the events base on (#evvessel previews it); false: the game before it
 const EV_ENDING_ON = URL_FLAGS.has('ending');          // the ending (EN1 for lead 39; plans/ending-spec.html on claude/p5-specs, EP2, the user's pick 2026-10-26): the offer from Concord headquarters, your answer, the goodbye, the end page and the endgame (section 29; the crossing back is section 18's); off: none of it (?ending or #ending previews it)
@@ -46133,6 +46143,11 @@ if (P5_STEP5) {
   EV_BEATS.push({ id: 'seniorResult', kind: 'beat', day: 16, at: [495, 510] },   // 08:15-08:30, Calder's office (her search after 08:30 needs no hold)
     { id: 'nightShift3', kind: 'night', day: 24, at: [1245, 1800] });   // the third night, 20:45 to 06:00
   // seniorToast (Day 17, 19:00-21:00) and shutdownsTraining (Day 18, 09:00-12:00) stay as they are; mondayBriefing is the swap's
+  // Step 6's own holds (W6's first turn, plans/p5-step6-spec.html section 1), behind P5_STEP6; the rows above are Step 5's
+  if (P5_STEP6) EV_BEATS.push({ id: 'p5Briefing', kind: 'beat', day: 22, at: [510, 555] },   // 08:30-09:15: the Monday briefing (S6-2), before Calder's "nights" word
+    { id: 'tier4Test', kind: 'test', day: 22, at: [570, 750] },                               // 09:30-12:30: the Tier 4 test (S6-3)
+    { id: 'deck2Move', kind: 'beat', day: 25, at: [1140, 1320] },                             // 19:00-22:00: Vance walks you to Deck 2 after dinner (S6-3)
+    { id: 'mentoring', kind: 'beat', day: 26, at: [540, 930] });                              // 09:00-15:30: Basil's day with you (S6-7)
 }
 // ---- the comet (FX25, 0.93.2; plans/events-plan-2.html Part A by EP1, the user's yes: on in 0.93.2). Behind
 // EV_COMET_ON (section 13) with the events base on; off: the game before it (the swap's draft above, or the calendar's
@@ -56999,6 +57014,24 @@ if (P5_STEP5) {
   WORK_BANDS[2] = [[0, 'new'], [10, 'steady'], [22, 'reliable'], [32, 'trusted'], [42, 'relied']];
   WORK_BANDS[3] = [[0, 'new'], [14, 'steady'], [30, 'reliable'], [55, 'trusted'], [75, 'relied']];
 }
+// Pillar 5 Step 6 (W6 for lead 41; plans/p5-step6-spec.html section 3): the Engine Specialist's rows and the Tier 4 bands,
+// behind P5_STEP6 (section 13), after Step 5's (P5_STEP6 needs it). Each row is inert until its piece registers WORK_MECH[id]
+// (28a m22; 28b m21; 24u t4; 28c m23; 28d m24; 28e m25; 24k's slot p6, p7, p8). Pushed at the end, so the rows above keep
+// their places and slots. Off: nothing here
+if (P5_STEP6) {
+  CAREER_LADDER.push(
+    { id: 'm22', name: 'The night shift', size: 'big', day: 22, tier: 1, rank: null, needs: null, by: ['calder'], where: { deck: 6, room: 'E' }, stages: [{ uses: 0 }] },   // 28a (S6-1): Days 22-24 at any rank; Calder's word, no training meeting
+    { id: 'm21', name: 'The Monday briefing', size: 'big', day: 22, tier: 3, rank: 'senior', needs: null, by: ['marrow'], where: { deck: 1, room: 'O' }, stages: [{ uses: 0 }] },   // 28b (S6-2): the conference table, every Monday from Day 22
+    { id: 't4', name: 'Your Tier 4 test job', size: 'big', day: 22, tier: 3, rank: 'senior', needs: [{ rep: 'trusted' }, { trained: 'm19' }], by: ['calder', 'torres-zeke'], where: { deck: 6, room: 'E' }, job: 'test', stages: [{ uses: 0 }] },   // 24u (S6-3): a drive coil, slot 26
+    { id: 'm23', name: 'Engine work and the reactor', size: 'big', day: 22, tier: 4, rank: 'specialist', needs: { trained: 't4' }, by: ['reyes-alejandro', 'torres-zeke'], where: { deck: 6, room: 'E' }, stages: [{ uses: 0 }] },   // 28c (S6-5): night 1 with Reyes (Torres by day), slot 35
+    { id: 'p6', name: 'Does it add up?', size: 'small', day: 22, tier: 4, rank: 'specialist', needs: null, by: ['reyes-alejandro', 'calder'], stages: [{ uses: 0 }] },   // 24k's slot (S6-8)
+    { id: 'p7', name: 'Faded labels', size: 'small', day: 23, tier: 4, rank: 'specialist', needs: null, by: ['calder', 'torres-zeke'], stages: [{ uses: 0 }] },   // 24k's slot (S6-8)
+    { id: 'm24', name: 'Leading a team', size: 'big', day: 24, tier: 4, rank: 'specialist', needs: { trained: 'm23' }, by: ['calder'], where: { deck: 6, room: 'E' }, job: 'team', stages: [{ uses: 0 }] },   // 28d (S6-6): night 3's coil swap, slot 36
+    { id: 'p8', name: 'Swap testing', size: 'small', day: 25, tier: 4, rank: 'specialist', needs: null, by: ['halloran-emeka', 'torres-zeke'], where: { deck: 5, room: 'f' }, tool: 'calrig', stages: [{ uses: 0 }] },   // 24k's slot (S6-8): the machine shop's test rig (no shop tech in the roster: S6-8 names the teacher)
+    { id: 'm25', name: 'Mentoring', size: 'big', day: 26, tier: 3, rank: 'senior', needs: null, by: ['calder'], where: { deck: 5, room: 'w' }, stages: [{ uses: 0 }] });   // 28e (S6-7): Basil's day with you, slot 37
+  // Tier 4's bands: a stand-in (only shown; nothing waits on them in Pillar 5). career_check sets the numbers (S6-1, S6-3, S6-9)
+  WORK_BANDS[4] = [[0, 'new'], [16, 'steady'], [34, 'reliable'], [60, 'trusted'], [85, 'relied']];
+}
 const BAND_WORD = { new: 'New', steady: 'Steady', reliable: 'Reliable', trusted: 'Trusted', relied: 'Relied on' };
 const WORK_XP = { service: 1, repair: 2, overhaul: 3, missed: -3, abandoned: -2 };
 const WORKS_RIGHT_FROM = 5;                              // "right first time" counts from Day 5 (the scanner)
@@ -64363,6 +64396,90 @@ if (P5_M20 && typeof jobKindAdd === 'function') {
   });
 }
 // ---- end of slot: Sensor array ----
+
+// =====================================================================
+// 28. THE ENGINE SPECIALIST (Pillar 5 Step 6; the Works career engineer, W6 for lead 41; plans/p5-step6-spec.html on
+// claude/p5-specs, plan v3.1). Behind P5_STEP6 (section 13) and its sub-switches; off: nothing here does anything.
+// Section 24's letters run out after 24x (24y and 24z are kept spare), so Step 6's new mechanics get this section, after
+// 24x and before section 6: the shared helpers here, then one sub-section and slot a piece (28a-28f). The Engine
+// Specialist promotion and the move are 24u's (S6-3), the cases 24k's slot (S6-8), the deck work section 4d's (S6-4).
+// =====================================================================
+// your night shifts, minutes from that day's midnight (22:45 or 21:00 to 06:00 the next morning). Fixed by the day
+// number, whatever your rank (the user's answer of 22 October), so the crew's planner may read it (the planner rule)
+const P5_NIGHTS = { 22: [1365, 1800], 23: [1260, 1800], 24: [1260, 1800] };
+// Navarro's leave: the nights of his rota that fall on yours (Monday and Tuesday; Wednesday is his night off anyway; spec
+// section 4). Fixed, read by section 14's isWorkDay hook (S6-1, the sim engineer's line), so the planner rule holds.
+// Section 14 loads before this line: read both tables only once the game runs, never at load (a const before its line throws)
+const P5_LEAVE = { 'navarro-mateo': [22, 23] };
+// the night shift that starts on day d: { day, from, to } in ship minutes (from 22:45 or 21:00 to 06:00 the next day), or
+// null (not a night day, or P5_NIGHT off). Reads only the fixed table, so planner-safe
+function p5NightOf(d) {
+  const n = P5_NIGHT && P5_NIGHTS[d]; if (!n) return null;
+  const B = (d - 1) * 1440; return { day: d, from: B + n[0], to: B + n[1] };
+}
+// the night shift ship minute t falls inside (that evening's or the one from the evening before), or null
+function p5NightAt(t) {
+  const d = worksDay(t);
+  for (const n of [p5NightOf(d), p5NightOf(d - 1)]) if (n && t >= n.from && t < n.to) return n;
+  return null;
+}
+
+// ---- slot: Engine Specialist (section 28). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Engine Specialist ----
+
+// ---------------------------------------------------------------------
+// 28a THE NIGHT SHIFT (M22, the player engineer with the sim engineer; plans/p5-step6-spec.html S6-1).
+// Behind P5_NIGHT: yourShift(d) (section 15), Calder's night.on and night.off, sleeping by day, the kept plate, the time
+// clock at night, night windows on held jobs, Navarro's leave (P5_LEAVE), SHIP.works.ns. Empty until S6-1.
+// ---------------------------------------------------------------------
+
+// ---- slot: Night shift (section 28a). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Night shift ----
+
+// ---------------------------------------------------------------------
+// 28b THE MONDAY BRIEFING (M21, mechanics seat A; plans/p5-step6-spec.html S6-2).
+// Behind P5_M21: WORK_MECH.m21, the conference table in the observation room every Monday from Day 22 (held hour
+// p5Briefing), what Works raises (three choices), the briefing screen. Empty until S6-2.
+// ---------------------------------------------------------------------
+
+// ---- slot: Monday briefing (section 28b). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Monday briefing ----
+
+// ---------------------------------------------------------------------
+// 28c ENGINE WORK AND THE REACTOR (M23, mechanics seat B; plans/p5-step6-spec.html S6-5).
+// Behind P5_M23: WORK_MECH.m23 (slot 35), night 1 with Reyes (a coil service, a control board, balancing two coils), night
+// 2's reactor (the permit, the dosimeter badge, the Watch). Empty until S6-5.
+// ---------------------------------------------------------------------
+
+// ---- slot: Engine work (section 28c). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Engine work ----
+
+// ---------------------------------------------------------------------
+// 28d LEADING A TEAM (M24, mechanics seat A; plans/p5-step6-spec.html S6-6).
+// Behind P5_M24: WORK_MECH.m24 (slot 36), night 3's coil swap (TEAM_JOBS.coil in 24h's tables), the team picker, the slot
+// booked with the Watch, the spots and your calls. Empty until S6-6.
+// ---------------------------------------------------------------------
+
+// ---- slot: Leading a team (section 28d). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Leading a team ----
+
+// ---------------------------------------------------------------------
+// 28e MENTORING (M25, the Works career engineer with the sim engineer; plans/p5-step6-spec.html S6-7).
+// Behind P5_M25: WORK_MECH.m25 (slot 37), Basil's day with you on Day 26 (settled at 22:00 the evening before,
+// SHIP.works.mt), watch, do, the stuck clue, the late talk. Empty until S6-7.
+// ---------------------------------------------------------------------
+
+// ---- slot: Mentoring (section 28e). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Mentoring ----
+
+// ---------------------------------------------------------------------
+// 28f THE END OF THE CAREER (the Works career engineer; plans/p5-step6-spec.html S6-9).
+// Behind P5_END: Calder's question at Four weeks aboard (Day 26, 18:40), your answer (SHIP.works.end), the career's
+// milestones and the Record's last page. Empty until S6-9.
+// ---------------------------------------------------------------------
+
+// ---- slot: End of the career (section 28f). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: End of the career ----
 
 
 
