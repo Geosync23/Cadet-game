@@ -1716,6 +1716,61 @@ def part_m24(g):
     check(json.dumps(good, sort_keys=True) == json.dumps(good2, sort_keys=True), 'm24: differs the second time')
 PARTS['m24'] = part_m24
 
+# m23 (S6-5, DA6; 28c's own nights, never through the ladder): night 1 with Reyes on Day 22 from 22:45: the job yours as
+# the night starts (a side job), one notice, every stop in order (a wrong loop is looked at again, coil 2 can't be settled
+# before coil 1), the coil serviced, the Mail; nothing for a Senior Officer (the promotion on) nor on another night
+M23 = r"""((opt) => {
+  opt = opt || {};
+  const out = { notices: [], steps: [] };
+  SHIP.works = null; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = []; MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; GUIDE.list = [];
+  const pn = promoNotice; promoNotice = (text) => { if (/Reyes|reactor|permit|badge/i.test(text)) out.notices.push([shipNow() % 1440, text]); };
+  try {
+    const d = opt.day || 22; setShipNow((d - 1) * 1440 + 1350); machinesNow(); const W = worksInit(); W.tier = opt.tier || 4; W.rank = W.tier >= 4 ? 'specialist' : 'senior';
+    for (const r of CAREER_LADDER) if (r.id !== 'm23') { W.tr[r.id] = 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); }
+    out.on = m23On(d);
+    for (let t = shipNow(); t <= (d - 1) * 1440 + 1375; t++) { setShipNow(t); machinesNow(); worksCareerTick(t); }
+    const j = SHIP.jobs.find(x => x.kind === 'm23night'); out.job = j ? [j.claimedBy, j.status, j.start % 1440, j.coil] : null;
+    if (!j || opt.day) return out;
+    const stops = jobStops(j); out.n = stops.length; out.mine = !!myJob() === false;
+    out.early = jobStepDone(j.id, 2, {}).ok;              // out of order
+    out.balEarly = jobStepDone(j.id, stops.length - 1, { value: 0 }).ok;   // coil 2 before coil 1
+    for (let k = 0; k < stops.length; k++) {
+      const st = stops[k], tag = st.step || st.tag;
+      if (tag === 'loop') { const bad = 'l' + ((j.loop + 1) % 3); out.wrong = jobStepDone(j.id, k, { pick: bad }); }
+      if (tag === 'bal0') { out.gauge0 = st.opts.gauge(); out.balTurn = st.opts.onTurn(1); out.balOk = [st.opts.ok(1), st.opts.ok(0)]; st.opts.onTurn(0); }
+      if (tag === 'bal1') { out.gauge1 = jobStops(j)[k].opts.gauge(); jobStops(j)[k].opts.onTurn(0); }
+      const r = jobStepDone(j.id, k, tag === 'loop' ? { pick: 'l' + j.loop } : tag.startsWith('bal') ? { value: 0 } : {});
+      out.steps.push([tag, r.ok]);
+      setShipNow(shipNow() + 5); machinesNow(); worksCareerTick(shipNow());
+    }
+    const S = m23State(); out.end = [j.status, !!j.workDone, S.d1 > 0, (SHIP.machines[j.coil] || {}).cond >= 96, j.wrongs];
+    out.mails = SHIP.mail.filter(x => /Night 1/.test(x.subject)).length;
+    return out;
+  } finally { promoNotice = pn; }
+})"""
+def part_m23(g):
+    on = g.ev("typeof P5_M23 !== 'undefined' && P5_M23 && typeof m23Post === 'function'")
+    if not on: print('  m23: not in this build (P5_M23 off)'); return
+    a = g.ev(f"({M23})({{}})")
+    print(f"  m23 night 1: on {a['on']}, job {a.get('job')}, notices {a['notices']}, {a.get('n')} stops {a.get('steps')}, end {a.get('end')}, Mail {a.get('mails')}")
+    print(f"  m23 balance: {a.get('gauge0')!r} -> {a.get('balTurn')!r}; then {a.get('gauge1')!r}")
+    check(a['on'] and a.get('job') and a['job'][0] == 'you' and a['job'][1] == 'claimed' and a['job'][2] == 1365, f"m23: night 1's job yours as the night starts, 22:45 ({a.get('job')})")
+    check(a.get('mine'), "m23: a side job (your board job, if any, stays yours)")
+    check(len(a['notices']) == 1 and a['notices'][0][0] == 1365, f"m23: one notice as the night starts ({a['notices']})")
+    check(a.get('n') == 11 and all(ok for _, ok in a['steps']), f"m23: eleven stops, each done in order ({a.get('steps')})")
+    check(not a.get('early'), "m23: a stop can't be done before the one before it")
+    check(a.get('wrong') and a['wrong'].get('retry'), f"m23: a wrong loop is looked at again, never a fail ({a.get('wrong')})")
+    check(a.get('balEarly') is False and a.get('balOk') == [False, True], f"m23: coil 2 waits for coil 1; settled at 0 ({a.get('balEarly')}, {a.get('balOk')})")
+    check(a.get('gauge0') != a.get('balTurn') and a['gauge0'].split('. ')[1] != a['balTurn'].split('. ')[1], f"m23: turning coil 1 moves coil 2's reading too ({a.get('gauge0')!r} -> {a.get('balTurn')!r})")
+    e = a.get('end') or []
+    check(e[:4] == ['done', True, True, True] and e[4] == 1, f"m23: done where you finish it, night 1 logged, the coil serviced ({e})")
+    check(a.get('mails') == 1, f"m23: one Mail, the record ({a.get('mails')})")
+    o = g.ev(f"({M23})({{ tier: 3 }})")
+    check(not o['on'] and not o['job'] and not o['notices'], f"m23: none for a Senior Officer (the promotion's on) ({o})")
+    o2 = g.ev(f"({M23})({{ day: 24 }})")
+    check(not o2['job'] and not o2['notices'], f"m23: nothing on night 3 ({o2})")
+PARTS['m23'] = part_m23
+
 # ---- favour cases (24l, seat E2 on H's behalf; not a ladder row, so it runs after the rows as EXTRA['fcase']): every
 # script has three clue places and its answer (sus.1) among the options; a friend asks (Mail, an offered favour) on the
 # week's evening; accepted, the side job: the clues before the call, a wrong pick refused (never a fail), the right one
@@ -2410,6 +2465,10 @@ with sync_playwright() as pw:
             print(f"m21 ({r['name']}): 28b's own briefing, not a training (its part below)")
             PARTS['m21'](g)
             return
+        if r['id'] == 'm23' and ev("!!(WORK_MECH.m23 && WORK_MECH.m23.own)"):   # 28c's own nights (S6-5): never through the ladder
+            print(f"m23 ({r['name']}): 28c's own engine work on your nights, not a training (its part below)")
+            PARTS['m23'](g)
+            return
         if r['id'] == 'm24' and ev("!!(WORK_MECH.m24 && WORK_MECH.m24.own)"):   # 28d's own night 3 (S6-6): never through the ladder, trained by the first swap you led
             print(f"m24 ({r['name']}): 28d's own coil swap on night 3, not a training (its part below)")
             PARTS['m24'](g)
@@ -2452,13 +2511,13 @@ with sync_playwright() as pw:
         finally: cp.unlink(missing_ok=True)
     # Pillar 5 Step 6's rows (S6-2 on: m21) exist only with P5_STEP6 on: with it off in this build, run on a copy with it on
     P6_LINE = "const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');"
-    if P6_LINE in src0 and (not only or only & {'m21', 'm24'}):
+    if P6_LINE in src0 and (not only or only & {'m21', 'm23', 'm24'}):
         cp = WORK / 'test' / ('_mech_p6_' + str(os.getpid()) + '_' + pathlib.Path(sys.argv[1]).name); cp.write_text(src0.replace(P6_LINE, 'const P5_STEP6 = P5_STEP5 && true;', 1))
         try:
             g6 = Game(pw, str(cp)); rows6 = g6.ev("CAREER_LADDER.map(r => ({ id: r.id, name: r.name, size: r.size, inBuild: !!WORK_MECH[r.id], stages: (r.stages || []).length }))")
             base = {r['id'] for r in rows}
             for r in rows6:
-                if r['id'] in base or (only and r['id'] not in only) or r['id'] not in {'m21', 'm24'}: continue   # (each Step 6 piece adds its id here)
+                if r['id'] in base or (only and r['id'] not in only) or r['id'] not in {'m21', 'm23', 'm24'}: continue   # (each Step 6 piece adds its id here)
                 if not r['inBuild']: print(f"{r['id']} ({r['name']}): not in this build (P5_STEP6 on)"); continue
                 print(f"(on a copy with P5_STEP6 switched on)"); row_check(g6, g6.ev, r)
             if g6.errors: fail('page errors (P5_STEP6 copy): ' + ' | '.join(g6.errors[:5]))

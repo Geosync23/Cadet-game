@@ -8395,7 +8395,8 @@ function deck6P5Places() {
   D.teamSpots = D.teamSpots || {}; for (let k = 1; k <= 3; k++) D.teamSpots['6-coil-' + k] = DECK6_P5.team.map((_, q) => '6-coil-team-' + (q + 1));
   DECK6_P5.team.forEach(([c, r, face], k) => D.places.push({ id: '6-coil-team-' + (k + 1), type: 'event', event: 'team-job', team: '6-coil-1', works: true, at: [c, r], face, pose: 'stand', anim: 'work', room: 'E' }));
   D.places.push({ id: '6-dosi-rack', type: 'event', event: 'dosimeter', at: [22, 7], face: 'w', pose: 'stand', room: 'K' },
-    { id: '6-watch-board', type: 'event', event: 'watch-board', at: [10, 1], face: 'n', pose: 'stand', room: 'E' });
+    { id: '6-watch-board', type: 'event', event: 'watch-board', at: [10, 1], face: 'n', pose: 'stand', room: 'E' },
+    { id: '6-control-board', type: 'event', event: 'engine', at: [24, 4], xy: [24.9, 4.6], face: 'e', pose: 'stand', room: 'K' });   // at engine control's board (S6-5's coolant and board swap)
   deck2P5Places();
   SAVE_EXTRA.push(s => { const o = dosiOut(); if (o !== null) s.ship.dosi = { out: o }; });
   onSim('newGame', () => { DOSI = { out: null, mesh: [] }; });
@@ -11931,6 +11932,7 @@ function devDay(d) {
   try { if (typeof promoBeatsItems === 'function') out.push(...promoBeatsItems(d)); } catch (e) { /* not yet */ }   // FX28: the promotion's steps (24p), with PROMO_BEATS_ON
   try { if (typeof sdItems === 'function') out.push(...sdItems(d)); } catch (e) { /* not yet */ }   // 24w (S5-4): your booked shutdown, with P5_M18
   try { if (typeof m24Items === 'function') out.push(...m24Items(d)); } catch (e) { /* not yet */ }   // 28d (S6-6): night 3's coil swap, with P5_M24
+  try { if (typeof m23Items === 'function') out.push(...m23Items(d)); } catch (e) { /* not yet */ }   // 28c (S6-5): your nights' engine work, with P5_M23
   try { if (typeof EV_VESSEL_ON !== 'undefined' && EV_VESSEL_ON && typeof vesselItems === 'function') out.push(...vesselItems(d)); } catch (e) { /* not yet */ }   // the Veyli vessel's beats (section 18's slot 'Vessel builder')
   try { if (typeof endItems === 'function') out.push(...endItems(d)); } catch (e) { /* not yet */ }   // 29a: the ending's week (EN1), with EV_ENDING_ON
   return out.sort((x, y) => x.from - y.from);
@@ -65382,6 +65384,128 @@ if (P5_M21) {
 // ---------------------------------------------------------------------
 
 // ---- slot: Engine work (section 28c). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// M23 (S6-5, DA6 for lead 41). Engine work and the reactor, on your first two nights (P5_NIGHTS; a night day has no
+// ladder, so it runs here, WORK_MECH.m23.own, as 28d's m24). Night 1 (Day 22, from 22:45, once you're an Engine Specialist):
+// one job with Reyes, yours as the night starts (a side job: beside any board job you hold, done where you finish it, nothing to
+// turn in): a coil service
+// (listen, then service the worst of S6-4's three coils), the coolant readings at engine control's board (which loop reads
+// low: a wrong pick is never a fail, look again), the low loop topped up (the old M16's coolant repair, merged in), a
+// control board swap (read the fault lamp, pull it, seat the new one, test: its steps one by one on the device), and
+// balancing two coils (24e's turn control used twice, at coil 1's panel then coil 2's: each card shows both coils, and each
+// coil's setting pulls on the other's reading until both are settled). Reyes teaches as you go (his bubble when he's on
+// the deck, else a toast). Night 2 (Day 23, from 21:00): the reactor, in turn 2. Trained (W.tr.m23) when both are done.
+// Saved: SHIP.works.side.m23 = { j1, d1, ... } (cleaned on read); the job keeps its own coil, low loop, fault board and
+// balance (j.coil, j.loop, j.board, j.bal). Job slot M23_SLOT 35. schedU keys 1080 (the low loop), 1081 (the fault board).
+// Words: content/works/m23.lines (stand-ins here until the head writer's). No R(). Off (P5_M23 false): nothing registers.
+const M23_N1 = 22, M23_N2 = 23, M23_SLOT = 35, M23_BY = 'reyes-alejandro', M23_COILS = ['6-coil-1', '6-coil-2', '6-coil-3'], M23_BOARD = '6-control-board';
+function m23State() {                                    // side.m23, cleaned (a save may hold junk)
+  const s = typeof worksSide === 'function' ? worksSide() : null; if (!s) return null;
+  const A = s.m23;
+  if (!A || typeof A !== 'object' || !s.m23Ok) {
+    const int = v => Number.isInteger(v) && v >= 0 ? Math.min(v, 999999) : 0, str = v => typeof v === 'string' ? v.slice(0, 80) : null;
+    s.m23 = { j1: str(A && A.j1), d1: int(A && A.d1) };
+    Object.defineProperty(s, 'm23Ok', { value: true, enumerable: false, configurable: true });
+  }
+  return s.m23;
+}
+// is night d's engine work yours (saved state and the fixed table only): your night, an Engine Specialist (a Senior with the promotion off)
+function m23On(d) {
+  const W = SHIP.works; if (!P5_M23 || !W || (d !== M23_N1 && d !== M23_N2) || typeof p5NightOf !== 'function' || !p5NightOf(d)) return false;
+  return (W.tier || 1) >= (P5_PROMO4 ? 4 : 3);
+}
+const m23Live = (d, now = shipNow()) => { const n = m23On(d) && p5NightOf(d); return !!n && now >= n.from && now < n.to; };
+function m23Coil() {                                     // the coil to service: the worst of the three (key 1071's tie-break, as 28d)
+  const c = id => (SHIP.machines[id] || { cond: 100 }).cond;
+  return M23_COILS.filter(id => machineById(id) && panelPlace(id)).sort((a, b) => c(a) - c(b) || (a < b ? -1 : 1))[0] || null;
+}
+const m23Board = () => PLACE_OF && PLACE_OF.has(M23_BOARD) ? M23_BOARD : panelPlace(M23_COILS[1]);
+const m23Loops = (bad, ok, low) => [1, 2, 3].map(i => worksText('m23.loop', 'Loop {n}', { n: i }) + ' ' + (i - 1 === bad ? low : ok)).join(' · ');
+// the balance: the coil you're turning shows its own dial; the other's reading is its own setting plus half this one's
+// (whole steps), so turning one moves the other; each settled at its mark (0), both read steady
+const m23Read = (v, o) => v + Math.trunc(o / 2);
+const M23_BAL = ['running cold', 'a little cool', 'steady', 'a little hot', 'running hot'];
+const m23BalWord = r => { const k = Math.max(-2, Math.min(2, r)); return worksText('m23.bal.' + (k > 0 ? '+' : '') + k, M23_BAL[k + 2]); };
+function m23Gauge(j, k) {
+  const [a, b] = j.bal, r = k ? [m23Read(a, b), b] : [a, m23Read(b, a)];
+  return worksText('m23.bal.gauge', 'Coil 1 {a}. Coil 2 {b}.', { a: m23BalWord(r[0]), b: m23BalWord(r[1]) });
+}
+// the night's job (kind 'm23night'): every stop in order
+function m23Stops(j) {
+  const coil = j.coil && panelPlace(j.coil), board = m23Board(), p1 = panelPlace(M23_COILS[0]), p2 = panelPlace(M23_COILS[1]); if (!coil || !board || !p1 || !p2) return [];
+  const st = (placeId, tag, how, mins, opts) => ({ deck: 6, placeId, mins, tag, how, ...(opts ? { opts } : {}) });
+  const loops = m23Loops(j.loop, worksText('m23.loop.ok', 'full'), worksText('m23.loop.low', 'low, and dropping'));
+  const name = machineLabel(machineById(j.coil)).split(',')[0];
+  return [
+    st(coil, 'listen', 'look', 1, { secs: 3, text: worksText('m23.coil.listen', 'Listen first. {coil}\'s hum dips every third beat: its windings want a service.', { coil: name }) }),
+    st(coil, 'service', 'hold', 8),
+    st(board, 'read', 'look', 1, { secs: 3, text: loops }),
+    st(board, 'loop', 'choose', 1, { title: worksText('m23.loop.pick', 'Which loop\'s low?'), text: loops, options: [0, 1, 2].map(i => ({ id: 'l' + i, label: worksText('m23.loop', 'Loop {n}', { n: i + 1 }) })) }),
+    st(board, 'topup', 'hold', 3),
+    st(board, 'lamp', 'look', 1, { secs: 3, text: worksText('m23.board.lamp', 'One control board\'s lamp flickers amber: C{n}. That\'s the one to swap.', { n: j.board + 1 }) }),
+    st(board, 'pull', 'hold', 2),
+    st(board, 'seat', 'hold', 2),
+    st(board, 'test', 'look', 1, { secs: 3, text: worksText('m23.board.test', 'Every lamp green. The board counts up through its checks and settles.') }),
+    ...[0, 1].map(k => st(k ? p2 : p1, 'bal' + k, 'turn', 1, { label: worksText('m23.bal.label', 'Coil {n}', { n: k + 1 }), v: j.bal[k], min: -3, max: 3, by: 1,
+      text: worksText('m23.bal.card', 'Settle this coil. Watch both: they pull on each other.'),
+      gauge: () => m23Gauge(j, k), onTurn: v => { j.bal[k] = v; return m23Gauge(j, k); }, ok: v => v === 0 && (k === 0 || j.bal[0] === 0) })),
+  ];
+}
+// Reyes, as each stop is done (only the right pick moves on: a wrong one, look again)
+const M23_SAY = { listen: ['Hear it? Now you\'ll never not hear it.', 'Service it. Take your time, the night\'s long.'], service: ['Good. Now the board. Coolant first, always.'],
+  read: ['Read them all before you touch anything.'], topup: ['Topped up. That\'s a repair nobody sees. Best kind.'], lamp: ['Amber means tired, not dead. Swap it before it is.'],
+  test: ['Clean. Last thing: the two end coils have drifted apart. Balance them.'], bal0: ['See coil 2 move when you turn coil 1? They share a field. Now coil 2.'] };
+function m23StepDone(j, k, res) {
+  const st = m23Stops(j)[k]; if (!st) return true;
+  const done = new Set(j.stepsDone || []); if (k > 0 && !done.has(k - 1)) return false;   // in order
+  if (st.tag === 'loop' && (res && res.pick) !== 'l' + j.loop) { j.wrongs = (j.wrongs || 0) + 1; try { toast(j.title, worksText('m23.loop.wrong', 'That one reads full. Look at the readings again.')); } catch (e) { /* no UI */ } return false; }
+  if (st.tag === 'bal1' && j.bal[0] !== 0) return false;
+  const say = M23_SAY[st.tag]; if (say) worksSay(M23_BY, worksText('m23.say.' + st.tag, say[0]));
+  return true;
+}
+function m23Done(j, t, by) {
+  const s = SHIP.machines && SHIP.machines[j.coil]; if (s) { s.cond = Math.max(s.cond, 96); s.state = machineState(s.cond); }
+  const S = m23State();
+  if (by === 'you' && S && !S.d1) {
+    S.d1 = Math.floor(t); worksUse('m23'); if (typeof worksXp === 'function') worksXp(3);
+    worksSay(M23_BY, worksText('m23.done', 'That\'s a night\'s work. You\'ll do, Specialist.'));
+    if (typeof mailSend === 'function') { const tx = worksText('m23.mail.n1', 'Night 1 | A coil serviced, a coolant loop topped up, a control board swapped, two coils balanced. Logged by Reyes.'), i = tx.indexOf(' | ');
+      mailSend({ at: Math.floor(t), from: 'Works', subject: i > 0 ? tx.slice(0, i) : 'Night 1', body: i > 0 ? tx.slice(i + 3) : tx, quiet: true }); }
+  }
+  j.status = 'done'; j.end = Math.floor(t);               // a side job: done where you finish it
+  simNote('m23', { step: 'n1', by: by || null, wrongs: j.wrongs || 0 });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+// the job, posted once the night starts and you're an Engine Specialist: yours at once, or held while you're on another
+function m23Post(now) {
+  const S = m23State(), n = p5NightOf(M23_N1), coil = m23Coil(); if (!S || S.j1 || !coil) return null;
+  const d = M23_N1, key = machSeed('m23');
+  const j = jobMake('m23night', { id: 'm23night:' + coil + '@' + Math.floor(now / 60), machine: coil, deck: 6, room: 'E', h: Math.floor(now / 60), tier: 4, urgency: 1,
+    title: worksText('m23.card', 'Night 1 with Reyes: a coil, the coolant, a board, a balance'), coil, loop: Math.floor(schedU(key, d, 1080) * 3) % 3, board: Math.floor(schedU(key, d, 1081) * 6) % 6,
+    bal: [2, -2], wrongs: 0, reserved: M23_SLOT, until: n.to, train: 'm23' });
+  j.posted = j.found = j.start = Math.floor(now); j.claimedBy = 'you'; j.status = 'claimed';   // yours from the start: never on the board
+  SHIP.jobs.push(j); S.j1 = j.id; if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  return j;
+}
+// the beats, in play on night 1: the job yours as it starts, the notice (once 24u's beats are done) and Reyes's word
+function m23Beats(now) {
+  if (!m23Live(M23_N1, now)) return;
+  const S = m23State(); if (!S || S.d1) return;
+  const j = S.j1 ? SHIP.jobs.find(x => x.id === S.j1) : m23Post(now); if (!j || j.status === 'done') return;
+  if (!flag('m23.n1.notice') && !promoBusy()) { flagSet('m23.n1.notice', Math.floor(now));
+    promoNotice(worksText('m23.n1.notice', 'Your first night: engine work with Reyes. He\'s in the engine room, Deck 6.'), worksName(M23_BY));
+    worksSay(M23_BY, worksText('m23.n1.say', 'Specialist. Kettle\'s on. First, a coil: come and listen to it with me.')); }
+}
+// the Schedule's row (section 14's devDay): night 1's engine work until it's done
+function m23Items(d) {
+  if (d !== M23_N1 || !m23On(d)) return [];
+  const S = m23State(), n = p5NightOf(d), B = (d - 1) * 1440; if (!S || S.d1) return [];
+  return [{ from: n.from - B, to: n.to - B, title: worksText('m23.row.n1', 'Engine work with Reyes'), where: 'the engine room, Deck 6', kind: 'beat', deck: 6, room: 'E' }];
+}
+if (P5_M23 && typeof jobKindAdd === 'function') {
+  jobKindAdd('m23night', { tier: 4, work: 0, side: true, text: 'Engine work', stops: m23Stops, stepDone: m23StepDone, done: m23Done, veto: true, crew: { can: () => false, mins: 60 } });
+  WORK_MECH.m23 = { own: true, noJob: true };            // run here on your nights, never by the ladder (a night day has no ladder)
+  WORK_TICKS.push((now, skip) => { if (!skip) m23Beats(now); });
+}
 // ---- end of slot: Engine work ----
 
 // ---------------------------------------------------------------------
