@@ -98,6 +98,11 @@ None yet.
   `open`, so it stayed on the tab and never reached a name). With it, on staging 40f3bdac: asis, teachoff and track all
   OK (every Step 6 beat, missed 0, stuck 0). Sent to RV24, BM19, lead 42. Fresh machine setup: `pip install playwright
   numpy pillow`, three and acorn into /tmp/cadet-work (DEV_NOTES), `CADET_CHROME=/opt/pw-browsers/chromium`, a CADET_WORK each run.
+- **AS1, MA6-2 and W8's beats (2026-10-27):** the M20 setup line is gone; a direct MA6-2 line checks that a sensor array
+  lesson untaken by Day 21 doesn't hold Day 22's Tier 4 test (it says when the case didn't arise). Mentoring's record is
+  28e's `mt.steps.done`; Calder's question's arrows are 28f's `end:tea/sit/find` (in S6_RX), `have` is `cqTick`. On a local
+  merge of staging 40f3bdac + m24-pick-pointer 5f649b45 + p5s6-promo4 23a0e29c: asis, teachoff, track all OK, every beat
+  through Calder's question (Day 26 18:40). Before W8's promo4 is in staging, the MA6-2 line is skipped (no ladderTestDue).
 - **Left:** (a) done (see above); (b) drop the M20 setup line in part_step6
   ("the setup counts Step 5's sensor array lesson as done") once W8's d18aafc8 (MA6-2's fix) is in staging, and add a
   line that checks MA6-2 directly (a Tier 3 lesson missed on Day 19 must not block the Tier 4 test on Day 22);
