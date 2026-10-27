@@ -669,7 +669,7 @@ def part_end(ctx, path, want, way):
 # Teaching arrows Off (teachoff), tracking another job (track). A beat whose piece isn't built yet prints "not yet".
 S6_RX = r'^(m21|m24|pu4|p5n|mt|cq|s6end):'
 S6_TRACE = TRACE.replace("/^end:/", "/" + S6_RX + "/")
-S6_DUE = DUE.replace("/^end:/", "/" + S6_RX + "/")
+S6_DUE = DUE.replace("/^end:/.test(e.id) && ", "")   # any level-1 arrow due (a Step 5 lesson carried into the week too: skipping it would leave the ladder held), not only Step 6's
 # what the player hears: notices, toasts, bubbles, scenes, Mail, each with its ship minute (window.__s6log)
 S6_HOOK = r"""(() => { if (window.__s6hook) return; window.__s6hook = 1; const L = window.__s6log = [], t = () => Math.floor(shipNow());
   const log = (kind, txt) => { try { L.push([t(), kind, String(txt || '').slice(0, 160)]); } catch (e) { /* not logged */ } };
