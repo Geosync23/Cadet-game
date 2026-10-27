@@ -747,7 +747,8 @@ M9 = r"""(() => {
   // how many would be traced (section 17's traceFor): every line machine over 20 days, trained and not
   let n = 0, tr = 0, un = 0, lines = {}; const W = reset(14 * 1440);
   if (typeof traceFor === 'function') {
-    for (let d = 14; d < 34; d++) for (const m of machineList()) { const l = lineOf(m.id); if (!l || !lineOn(l)) continue; n++; const t = traceFor(m, (d - 1) * 24 + 9); if (t) { tr++; lines[t] = (lines[t] || 0) + 1; } }
+    for (let d = 14; d < 34; d++) for (const m of machineList()) { const l = lineOf(m.id); if (!l || !lineOn(l) || jobTier({ machine: m.id }) > playerTier()) continue; n++;   // (B2, S5-3: only line machines at your tier: the power line's are Tier 3)
+      const t = traceFor(m, (d - 1) * 24 + 9); if (t) { tr++; lines[t] = (lines[t] || 0) + 1; } }
     out.trainedAfter = W.tr.m9; delete W.tr.m9; for (const m of machineList()) if (traceFor(m, 14 * 24 + 9)) un++; out.trainedBy = W.tr.m9;
   }
   out.share = [n, tr, lines, un];
@@ -1284,6 +1285,131 @@ def part_m15(g):
     check(json.loads(a['save']) == {'done': 0, 'wrongs': 0, 'week': -1} and json.loads(a['save2']) == {'done': 3, 'wrongs': 1, 'week': 4}, 'm15: the save read back, junk cleaned')
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm15: differs the second time')
 PARTS['m15'] = part_m15
+
+# ---- M19 power and relays (24v, mechanics seat A, S5-3): the lesson on Day 17 at 11:00 with its beats (an urgent notice at
+# 10:30, a level 1 arrow and its ring line from 10:45); the conduit tester given once, whichever of M15 and M19 comes first
+# (Calder's "You'll want this" only when it's new); then one job a week, 08:00 on a workday of yours, a relay swap or a
+# battery cell check by the week; read, pick, swap, test: a wrong pick opens that stop again (never a fail); done puts the
+# machine right and is a use; a repair of yours on a relay is a use too; stages at 3 and 6 uses; not taken, the crew's
+# the next day; the save cleaned; the same twice
+M19 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works), O0 = JSON.stringify(SHIP.occasions);
+ const reset = t => { machinesNew(); SHIP.jobs = []; SHIP.flags = {}; SHIP.occasions.length = 0; MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t); W.tier = 3; W.rank = 'senior'; for (const r of CAREER_LADDER.slice(0, CAREER_LADDER.indexOf(ladderRow('m19')))) { W.tr[r.id] = 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); } W.xp = 999; delete worksSide().pwrOk; worksSide().pwr = null; W.inc = { plan: {}, open: null }; return W; };
+ const tick = (a, b, s = 10) => { for (let t = a; t <= b; t += s) { setShipNow(t); machinesNow(); worksCareerTick(t); } };
+ // the lesson's beats on Day 17: asked at 06:00 for 11:00 in the relay room; the notice at 10:30, the level 1 arrow from 10:45
+ const said = [], kn = promoNotice; promoNotice = (x, f) => said.push([Math.round(shipNow() % 1440), x]);
+ let W = reset(16 * 1440 + 300); for (const k of ['m15', 'm17']) { delete W.tr[k]; delete W.use[k]; for (const d in W.op) W.op[d] = W.op[d].filter(x => x !== k); } delete W.tools.tester; tick(16 * 1440 + 350, 16 * 1440 + 600);   // a steady Senior: Rewiring and the lift roof not trained by hand (EP2's ladder order, B1's 24 core; RV20's M1)
+ const c = W.cur, r = c && SHIP.occasions.find(x => x.key === c.occ); out.ask = c && r ? [c.id, c.st, r.at % 1440, r.deck, r.room, c.by] : null;
+ tick(16 * 1440 + 601, 16 * 1440 + 646, 1); const e = GUIDE.list.find(x => x.id === 'm19:meet:17'); let g = null; try { g = e && e.goal(); } catch (x) { g = null; }
+ out.notice = said.slice(); out.arrow = e ? [e.level, e.from % 1440, g && g.deck, g && g.room, g && g.label] : null;
+ promoNotice = kn;
+ // the tester: new with M19 (Calder's line), or already M15's (no second one)
+ const teach = []; const kt = worksTeach; worksTeach = (m, w, k, f) => { teach.push(m + '.' + k); return f; };
+ W.cur = { id: 'm19', st: 'do', d: 17, by: 'calder', occ: null, j: null, w: 0 }; worksTrained('m19'); simFlush(); out.tester = [hasTool('tester'), teach.slice()]; out.fold = [W.tr.m15 === W.tr.m19, worksOpened(W).has('m15')];
+ W = reset(16 * 1440 + 300); W.tr.m15 = 17; toolGive('tester'); const day0 = W.tools.tester[0]; W.cur = { id: 'm19', st: 'do', d: 17, by: 'calder', occ: null, j: null, w: 0 }; teach.length = 0; worksTrained('m19'); simFlush();
+ out.tester2 = [W.tools.tester[0] === day0, teach.slice(), Object.keys(W.tools).filter(k => k === 'tester').length];
+ worksTeach = kt;
+ // the weeks: one job a week from the week after the lesson, 08:00 on a workday of yours, relay and battery by turns
+ W = reset(17 * 1440 + 300); W.tr.m19 = 17; const seen = new Map();
+ for (let t = 17 * 1440 + 360; t <= 38 * 1440 + 500; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); for (const x of SHIP.jobs) if (/^(relayswap|battcell)$/.test(x.kind)) seen.set(x.id, x); }
+ out.weeks = [...seen.values()].map(x => [worksDay(x.posted), weekday(worksDay(x.posted)), Math.round(x.posted % 1440), x.kind, machineById(x.machine).kind, jobTier(x)]);
+ // a relay swap: read, a wrong pick (opens again), the right pick, swap, test; the machine put right; a use
+ W = reset(19 * 1440 + 480); W.tr.m19 = 17; W.use.m19 = 0; const rel = machineList().find(m => m.kind === 'relay' && panelPlace(m.id));
+ let j = pwrJob('relayswap', rel.id, shipNow(), { key: 91 }); SHIP.jobs.push(j); SHIP.machines[rel.id].cond = 30;
+ out.board = !!openJobs().find(x => x.id === j.id); out.claimed = claimJob(j.id); let S = jobStops(j); out.stops = S.map(s => s.step + ':' + s.how);
+ out.early = jobStepDone(j.id, 1, { pick: 'x' + j.bad }).ok; jobStepDone(j.id, 0, {});
+ out.wrong = jobStepDone(j.id, 1, { pick: 'x' + ((j.bad + 1) % 6) }); out.right = jobStepDone(j.id, 1, { pick: 'x' + j.bad }).ok;
+ jobStepDone(j.id, 2, {}); out.test = jobStepDone(j.id, 3, {}).ok; out.turnin = turnInJob(j.id);
+ out.after = [SHIP.machines[rel.id].cond >= 90, W.use.m19, worksSide().pwr.done, worksSide().pwr.wrongs, j.rightFirst];
+ // a battery cell check, right first time
+ const bat = machineList().find(m => m.kind === 'battery' && panelPlace(m.id)); j = pwrJob('battcell', bat.id, shipNow(), { key: 92 }); SHIP.jobs.push(j); claimJob(j.id); S = jobStops(j);
+ S.forEach((s, k) => jobStepDone(j.id, k, s.step === 'pick' ? { pick: 'x' + j.bad } : {})); out.batt = [S.map(s => s.step + ':' + s.how).join(' '), (S[1].opts.options || []).length, turnInJob(j.id), j.rightFirst, W.use.m19];
+ // an ordinary repair of yours on a relay counts; stages at 3 and 6
+ const rj = { id: 'pwr-test-repair', machine: rel.id, deck: rel.deck, kind: 'repair', urgency: 1, posted: shipNow(), found: shipNow(), claimedBy: 'you', status: 'done', doneBy: 'you', parts: [] }; SHIP.jobs.push(rj);
+ simNote('job', { step: 'turnin', id: rj.id, t: shipNow(), machine: rel.id, job: 'repair' }); simFlush(); out.repairUse = W.use.m19;
+ out.stages = [0, 2, 3, 5, 6].map(n => { W.use.m19 = n; return worksStage('m19'); });
+ // not taken: the crew's the next day
+ W = reset(22 * 1440 + 480); W.tr.m19 = 17; j = pwrJob('relayswap', rel.id, shipNow(), { key: 93 }); SHIP.jobs.push(j); out.held = leaveEnd(j) - 22 * 1440;
+ for (let t = 22 * 1440 + 490; t <= 23 * 1440 + 900; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); } out.crew = [j.status, j.doneBy !== 'you' && !!j.doneBy];
+ worksSide().pwr = { done: 'x', wrongs: -4 }; delete worksSide().pwrOk; out.save = JSON.stringify(pwrState()); worksSide().pwr = { done: 3, wrongs: 1, week: 4 }; delete worksSide().pwrOk; out.save2 = JSON.stringify(pwrState());
+ SHIP.works = JSON.parse(W0); SHIP.occasions.length = 0; for (const o of JSON.parse(O0)) SHIP.occasions.push(o); SHIP.jobs = []; return out; })()"""
+def part_m19(g):
+    a, b = g.ev(M19), g.ev(M19)
+    print('  m19 ask', a['ask'], 'notice', a['notice'], 'arrow', a['arrow'])
+    print('  m19 tester', a['tester'], a['tester2'], 'weeks', a['weeks'])
+    print('  m19 stops', a['stops'], 'wrong', a['wrong'], 'after', a['after'], 'batt', a['batt'], 'repair use', a['repairUse'], 'stages', a['stages'], 'held', a['held'], 'crew', a['crew'])
+    check(a['ask'] and a['ask'][:6] == ['m19', 'meet', 660, 1, 'u', 'calder'], f"m19: a steady Senior (Rewiring and the lift roof untrained) asked on Day 17 for 11:00 in the relay room, Deck 1, with Calder ({a['ask']}; another lesson first means 24 core's ladder order, B1's, isn't in this build)")
+    check(len(a['notice']) == 1 and a['notice'][0][0] == 630 and 'Power and relays' in a['notice'][0][1], f"m19: one urgent notice at 10:30 naming it ({a['notice']})")
+    check(a['arrow'] and a['arrow'][0] == 1 and a['arrow'][1] == 645 and a['arrow'][2] == 1 and a['arrow'][3] == 'u' and a['arrow'][4].startswith('Power and relays with Calder, 11:00'), f"m19: a level 1 arrow from 10:45 to the relay room, its ring line naming it ({a['arrow']})")
+    check(a.get('fold') == [True, True], f"m19: Rewiring folds into it: trained (and counted open) with it ({a.get('fold')})")
+    check(a['tester'][0] and a['tester'][1] == ['m19.tester'], f"m19: the tester given with the lesson, Calder's word with it ({a['tester']})")
+    check(a['tester2'][0] and a['tester2'][1] == [] and a['tester2'][2] == 1, f"m19: M15 gave it first: no second tester, no word ({a['tester2']})")
+    W = a['weeks']
+    check(3 <= len(W) <= 4 and all(e[0] > 17 and e[1] <= 4 and e[2] == 480 and e[5] == 3 for e in W), f"m19: one a week after the lesson, 08:00 on a weekday, Tier 3 ({W})")
+    check(all((e[3] == 'relayswap') == (e[4] == 'relay') for e in W) and {e[3] for e in W} == {'relayswap', 'battcell'}, f"m19: relay swaps and battery checks by turns, each on its own kind of machine ({W})")
+    check(a['board'] and a['claimed'] and not a['early'], "m19: offered to a Senior Officer; read before you pick")
+    check(a['stops'] == ['read:look', 'pick:choose', 'swap:hold', 'test:look'], f"m19: the steps ({a['stops']})")
+    check(a['wrong'].get('retry') and a['right'] and a['test'] and a['turnin'], f"m19: a wrong pick opens the stop again, the right one goes on ({a['wrong']})")
+    check(a['after'] == [True, 1, 1, 1, False], f"m19: done puts the relay right, a use, the wrong pick kept (not right first time) ({a['after']})")
+    check(a['batt'][0] == 'read:look pick:choose swap:hold test:look' and a['batt'][1] == 4 and a['batt'][2] and a['batt'][3] is True and a['batt'][4] == 2, f"m19: a battery check, four pairs of cells, right first time ({a['batt']})")
+    check(a['repairUse'] == 3, f"m19: a repair of yours on a relay counts as a use ({a['repairUse']})")
+    check(a['stages'] == [0, 0, 1, 1, 2], f"m19: stages at 3 and 6 uses ({a['stages']})")
+    check(a['held'] == 1440 + 600 and a['crew'] == ['done', True], f"m19: not taken, the crew's the next day ({a['held']}, {a['crew']})")
+    check(json.loads(a['save']) == {'done': 0, 'wrongs': 0, 'week': -1} and json.loads(a['save2']) == {'done': 3, 'wrongs': 1, 'week': 4}, 'm19: the save read back, junk cleaned')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm19: differs the second time')
+# turn 2: stage 2's conduit runs (the tester's reading, a wrong feed opens it again, the note for P5), the weeks with
+# them joining at 3 uses, the power line and its fault rows, and the Senior's part of the Wednesday drill (posted at
+# 14:50 for a Senior trained in M19, three calls in order, a wrong one opens again, the crew answer, the all-clear at
+# 15:15; none for an Officer)
+M19B = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
+ const reset = t => { machinesNew(); SHIP.jobs = []; SHIP.flags = {}; SHIP.notes = []; MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t); W.tier = 3; W.rank = 'senior'; W.tr.t3 = 15; W.tr.m19 = 17; W.use.m19 = 3; toolGive('tester'); delete worksSide().pwrOk; worksSide().pwr = null; W.inc = { plan: {}, open: null }; return W; };
+ // the line and the faults
+ out.line = [lineOn('power'), lineOf('5-inverter-1'), lineOf('6-junction-2'), JSON.stringify(lineDecks('power', '6-conduit-1')), JSON.stringify(lineDecks('power', '2-junction-1')), (linePath('power', '1-junction-1') || []).length];
+ out.faults = ['battery', 'inverter', 'conduit', 'junction', 'powerjunction'].map(k => [k, (FAULT_CAUSES[k] || []).length, (FAULT_CAUSES[k] || []).some(c => c.line === 'power'), (FAULT_CAUSES[k] || []).every(c => !c.part || (STOCK && Object.prototype.hasOwnProperty.call(STOCK, c.part)))]);
+ out.symptom = SYMPTOM_TEXT.power || null;
+ // a conduit run: open, the tester's readings, a wrong feed, the right one, tag; the conduit right, a use, the note
+ let W = reset(22 * 1440 + 480); const n0 = W.use.m19; let j = runJob('conduitrun', '6-conduit-1', shipNow(), { key: 81 }); SHIP.jobs.push(j); SHIP.machines['6-conduit-1'].cond = 30;
+ out.runBoard = !!openJobs().find(x => x.id === j.id); claimJob(j.id); let S = jobStops(j); out.runStops = S.map(s => s.step + ':' + s.how); out.runOpts = (S[1].opts.options || []).map(o => o.label); out.runText = S[1].opts.text;
+ jobStepDone(j.id, 0, {}); out.runWrong = !!jobStepDone(j.id, 1, { pick: 'x' + ((j.bad + 1) % 3) }).retry; out.runRight = jobStepDone(j.id, 1, { pick: 'x' + j.bad }).ok; jobStepDone(j.id, 2, {});
+ out.runTurnin = turnInJob(j.id); simFlush(); out.runAfter = [SHIP.machines['6-conduit-1'].cond >= 90, W.use.m19 - n0, simNotes('conduitRun', 0).filter(x => x.id === j.id).map(x => x.deck)[0]];
+ // the weeks from 3 uses: conduit runs join
+ W = reset(17 * 1440 + 300); const seen = new Map();
+ for (let t = 17 * 1440 + 360; t <= 38 * 1440 + 500; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); for (const x of SHIP.jobs) if (/^(relayswap|battcell|conduitrun)$/.test(x.kind)) seen.set(x.id, x); }
+ out.weeks = [...seen.values()].map(x => x.kind); out.stage2 = flag('m19.stage2') || null;
+ // the Senior's drill on a Wednesday
+ let wed = 22; while (weekday(wed) !== 2 || !playerShiftOn(wed)) wed++;
+ W = reset((wed - 1) * 1440 + 800); const said = [], ks = worksSay; worksSay = (who, x) => said.push(who + ': ' + x);
+ for (let t = (wed - 1) * 1440 + 840; t <= (wed - 1) * 1440 + 892; t += 1) { setShipNow(t); machinesNow(); worksCareerTick(t); }
+ j = pdrillJobOf(wed); out.drill = j ? [j.claimedBy, Math.round(j.found % 1440), j.drill, jobStops(j).length, jobStops(j)[0].how] : null;
+ const g = GUIDE.list.find(x => x.id === 'm19:drill:' + wed); let gg = null; try { gg = g && g.goal(); } catch (e) { gg = null; } out.drillArrow = g ? [g.level, gg && gg.label] : null;
+ if (j) { out.drillEarly = !!jobStepDone(j.id, 1, { pick: 'c1' }).retry; out.drillWrong = !!jobStepDone(j.id, 0, { pick: 'c2' }).retry; [0, 1, 2].forEach(k => jobStepDone(j.id, k, { pick: 'c' + k })); out.drillDone = !!j.workDone; }
+ for (let t = (wed - 1) * 1440 + 893; t <= (wed - 1) * 1440 + 920; t += 1) { setShipNow(t); machinesNow(); worksCareerTick(t); }
+ out.drillEnd = j ? [j.status, j.doneBy, j.wrongs] : null; out.said = said.slice(); worksSay = ks;
+ // an Officer gets none (24c's drill is the juniors'; an Officer has no part yet)
+ W = reset((wed + 6) * 1440 + 800); W.rank = 'officer'; W.tier = 2; delete W.tr.m19; const w2 = wed + 7;
+ for (let t = (w2 - 1) * 1440 + 840; t <= (w2 - 1) * 1440 + 900; t += 10) { setShipNow(t); machinesNow(); worksCareerTick(t); }
+ out.officer = !!pdrillJobOf(w2);
+ SHIP.works = JSON.parse(W0); SHIP.jobs = []; return out; })()"""
+def part_m19b(g):
+    a, b = g.ev(M19B), g.ev(M19B)
+    print('  m19 line', a['line'], 'faults', a['faults'], 'symptom', a['symptom'])
+    print('  m19 run', a['runStops'], a['runOpts'], a['runText'], 'after', a['runAfter'], 'weeks', a['weeks'], 'stage2 word', a['stage2'])
+    print('  m19 drill', a['drill'], a['drillArrow'], 'end', a['drillEnd'], 'said', a['said'], 'officer', a['officer'])
+    L = a['line']
+    check(L[0] and L[1] == 'power' and L[2] == 'power' and L[3] == '[1,2,3]' and L[4] == '[2]' and L[5] == 4, f"m19: the power line (batteries, inverter, the conduits as branches, each deck's junction after) ({L})")
+    check(all(f[1] >= 2 and f[2] and f[3] for f in a['faults']) and a['symptom'], f"m19: fault rows for the power kinds, some cutting the line, parts in stock ({a['faults']})")
+    check(a['runBoard'] and a['runStops'] == ['open:look', 'test:choose', 'tag:hold'] and a['runOpts'] == ['Deck 1', 'Deck 2', 'Deck 3'] and 'Deck 2:' in a['runText'], f"m19: a conduit run, its feeds by the tester ({a['runStops']}, {a['runOpts']})")
+    check(a['runWrong'] and a['runRight'] and a['runTurnin'] and a['runAfter'][0] and a['runAfter'][1] == 1 and a['runAfter'][2] in (1, 2, 3), f"m19: a wrong feed opens it again; done, the conduit right, a use, the note names the deck ({a['runAfter']})")
+    check('conduitrun' in a['weeks'] and a['stage2'], f"m19: from 3 uses the conduit runs join the weeks, Calder says so once ({a['weeks']}, {a['stage2']})")
+    d = a['drill']
+    check(d and d[0] == 'you' and d[1] == 890 and d[3] == 3 and d[4] == 'choose', f"m19: the Senior's drill, yours at 14:50, three calls ({d})")
+    check(a['drillArrow'] and a['drillArrow'][0] == 1 and a['drillArrow'][1] == 'Run the Works part of the drill', f"m19: a level 1 arrow with its ring line ({a['drillArrow']})")
+    check(a.get('drillEarly') and a.get('drillWrong') and a.get('drillDone'), "m19: the calls in order; a wrong call opens it again")
+    check(a['drillEnd'] == ['done', 'you', 1] and any(s.startswith('torres-zeke:') for s in a['said']) and any(s.startswith('halloran-emeka:') for s in a['said']), f"m19: the crew answer; the all-clear ends it ({a['drillEnd']})")
+    check(a['officer'] is False, "m19: no Senior's drill for an Officer")
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm19 (turn 2): differs the second time: ' + str([(k, a[k], b.get(k)) for k in a if a[k] != b.get(k)][:3]))
+def part_m19_all(g):
+    part_m19(g); part_m19b(g)
+PARTS['m19'] = part_m19_all
 
 # ---- favour cases (24l, seat E2 on H's behalf; not a ladder row, so it runs after the rows as EXTRA['fcase']): every
 # script has three clue places and its answer (sus.1) among the options; a friend asks (Mail, an offered favour) on the
@@ -1864,6 +1990,10 @@ def wstap_play(g, setup, pick, tag):
     check(st['work'] and len(st['done']) == st['n'] and 'workStep' in acts, f'{tag}: its steps should play by tap to the end ({st})')
     return st
 JOB_TAP_EXTRA = {}
+JOB_TAP_EXTRA['relayswap'] = (r"""(() => { const d = 23; skipTo((d - 1) * 1440 + 600); machinesNow(); if (DIALOGUE) dialogueEnd(true);
+  const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.t3 = 15; W.tr.m19 = 17; toolGive('tester');
+  SHIP.jobs = SHIP.jobs.filter(x => x.claimedBy !== 'you'); const j = pwrJob('relayswap', '1-relay-1', shipNow(), { key: 91 }); SHIP.jobs.push(j); if (!claimJob(j.id)) return null;
+  if (ACT && typeof actEnd === 'function') actEnd(true); if (DEV.choose) devChosen(-1); goToDeck(1); return { id: j.id, mach: '1-relay-1' }; })()""", "((j, k) => j.bad)")   # 24v (S5-3): a relay swap by tap, the failing relay picked
 def part_wstap(pw):
     g = Game(pw, sys.argv[1], 390, 844)
     try:

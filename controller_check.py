@@ -41,7 +41,7 @@ ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
 GAME = pathlib.Path(ARGS[0])
 ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'door', 'reach', 'day', 'games', 'unplug', 'odd',
-             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse']
+             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'm19']
 PARTS = ARGS[1:] or ALL_PARTS
 SHOTS = WORK / 'test' / 'ctl_shots'; SHOTS.mkdir(parents=True, exist_ok=True)
 ARGS_GL = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
@@ -2448,6 +2448,59 @@ NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick']
 PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day}   # 'reach' joins when the pad half is written
 for k, v in OLD_NEEDS.items(): NEEDS[OLD_NAME.get(k, k)] = v; PART_FN[OLD_NAME.get(k, k)] = legacy(k)
 
+# ---- Pillar 5 Step 5's pieces (plans/p5-step5-spec.html section 9): each part runs on a copy with P5_STEP5 on, and only
+# when the build has it on or CTL_P5S5=1 is set (a builder's branch before the switch-on); else "not yet", never a pass ----
+P5_PARTS = {'m19': 'S5-3 power and relays'}
+def p5_on(src): return bool(re.search(r'\bconst P5_STEP5\s*=\s*true\b', src))
+def p5_copy(src): return re.sub(r"\bconst P5_STEP5\s*=\s*URL_FLAGS\.has\('p5s5'\)", 'const P5_STEP5 = true', src, count=1)
+# one of 24v's jobs played by pad only: at each stop the ring names the thing and A starts the step; a pick card's buttons
+# are reached with the D-pad and the right one pressed with A (after one wrong pick, which must leave the stop open)
+P5_JOB = r"""((kind, mach, d, at) => { skipTo((d - 1) * 1440 + at); machinesNow();
+  const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.t3 = 15; W.tr.m19 = 17; toolGive('tester');
+  SHIP.jobs = SHIP.jobs.filter(x => x.claimedBy !== 'you'); const j = (kind === 'conduitrun' ? runJob : pwrJob)(kind, mach, shipNow(), { key: 91 }); SHIP.jobs.push(j); if (!claimJob(j.id)) return null;
+  const pl = placeById(panelPlace(mach)), w = pl.walk || pl.at; goToDeck(pl.deck); player.obj.position.copy(cellPos(w[0], w[1]));
+  const k = jobStops(j).findIndex(s => s.how === 'choose'); return { id: j.id, right: jobStops(j)[k].opts.options[j.bad].label, wrong: jobStops(j)[k].opts.options[(j.bad + 1) % jobStops(j)[k].opts.options.length].label, n: jobStops(j).length }; })"""
+JOB_NOW = "((id) => { const j = SHIP.jobs.find(x => x.id === id) || {}; return { done: (j.stepsDone || []).slice(), work: !!j.workDone, act: String(ACT && ACT.kind), card: !!DEV.choose }; })"
+def p5_pad_job(r, kind, mach, d, at, words, fails, tag):
+    s = r.ev(f"({P5_JOB})({json.dumps(kind)}, {json.dumps(mach)}, {d}, {at})"); r.step(20)
+    if not s: fails.append(f'{tag}: the job could not be set up'); return None
+    said, wrong = [], False
+    for n in range(3 * s['n'] + 4):
+        st = r.ev(f"({JOB_NOW})({json.dumps(s['id'])})")
+        if st['work']: break
+        if not st['card']:
+            h = ring_and_A(r, words)
+            if not h: fails.append(f'{tag}: the ring never named it ({hint_now(r)})'); return None
+            said.append(h)
+        for k in range(40):                              # the step runs (a look, a hold) or its card opens
+            st = r.ev(f"({JOB_NOW})({json.dumps(s['id'])})")
+            if st['card'] or st['act'] in ('null', 'None'): break
+            r.step(10)
+        if st['card']:
+            pick = s['wrong'] if not wrong else s['right']
+            res = press_in_panel(r, f"[...document.querySelectorAll('#devDlg button')].find(b => b.textContent.trim() === {json.dumps(pick)})")
+            if res != 'ok': fails.append(f'{tag}: the pick card\'s "{pick}" by pad: {res}'); return None
+            r.step(10)
+            if not wrong:
+                wrong = True; after = r.ev(f"({JOB_NOW})({json.dumps(s['id'])})")
+                k = [i for i in range(s['n']) if i not in after['done']]
+                if after['work'] or not k: fails.append(f'{tag}: a wrong pick should leave its stop open ({after})')
+    st = r.ev(f"({JOB_NOW})({json.dumps(s['id'])})")
+    print(f'  {tag}: the ring said {said[:2]}; stops done {st["done"]} of {s["n"]}; work done {st["work"]}; a wrong pick tried {wrong}')
+    if not st['work']: fails.append(f'{tag}: not finished by pad (stops done {st["done"]} of {s["n"]})')
+    if not wrong: fails.append(f'{tag}: its pick card never opened')
+    return st
+def part_m19(pw, src, tag):
+    fails = []
+    r = Run(pw, src, f'{tag}_m19', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    p5_pad_job(r, 'relayswap', '1-relay-1', 22, 570, ['relay'], fails, 'a relay swap (Deck 1)')
+    p5_pad_job(r, 'battcell', '5-battery-1', 22, 600, ['battery'], fails, 'a battery check (Deck 5)')
+    p5_pad_job(r, 'conduitrun', '6-conduit-1', 22, 630, ['inspection', 'conduit', 'box'], fails, 'a conduit run with the tester (Deck 6)')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close(); return fails
+PART_FN['m19'] = part_m19; NEEDS['m19'] = ['pick', 'panels']
+
 # ---- planted faults --------------------------------------------------------------------------------------------------
 # Each is put into a copy of the game just before the test hook (inside the game's scope). A part must FAIL on each of
 # its own. Per-frame faults use the game's own requestAnimationFrame (the check's virtual clock drives it).
@@ -2717,6 +2770,9 @@ with sync_playwright() as pw:
             note = f'waits for package{"s" if len(missing) > 1 else ""} {", ".join(missing)}' if missing else 'built in this check later'
             print(f'  not yet ({note})'); RESULTS.append((part, 'not yet', note)); continue
         psrc = SRC if part in SELF_BOTH else ON_SRC
+        if part in P5_PARTS:                             # Step 5's: its switch on in the build, or CTL_P5S5=1 (a copy with it on)
+            if not (p5_on(SRC) or os.environ.get('CTL_P5S5')): print(f'  not yet ({P5_PARTS[part]}: P5_STEP5 is off)'); RESULTS.append((part, 'not yet', 'P5_STEP5 off')); continue
+            psrc = p5_copy(psrc)
         fails = PART_FN[part](br, psrc, 'g')
         for f in fails: check(False, f'{part}: {f}')
         RESULTS.append((part, 'FAIL' if fails else 'OK', f'{len(fails)} problems' if fails else ''))
