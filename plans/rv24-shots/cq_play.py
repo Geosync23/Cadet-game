@@ -10,7 +10,7 @@ RVHOOK = """(() => { window.__t = []; window.__b = [];
   const T = toast; toast = (a, b) => { window.__t.push(clockText() + ' ' + a + ': ' + b); return T(a, b); };
   const B = bubbleSay; bubbleSay = (w, t, s) => { try { window.__b.push(clockText() + ' ' + ((w && ((w.p && w.p.id) || w.id || w.name)) || w) + ': ' + t); } catch (e) {} return B(w, t, s); }; })()"""
 ST = """(() => { const g = goalNow(); const pos = id => { const a = DECK_CREW.find(c => c.p && c.p.id === id); return a ? Math.round(Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) * 10) / 10 : null; };
-  const seat = id => { const pl = placeById(id); if (!pl) return null; const c = placeSpot(id); const on = DECK_CREW.filter(a => a.p && Math.hypot(a.x - c.x, a.z - c.z) < 0.5).map(a => a.p.id); return (BUSY.has(id) ? 'B ' : '') + (PLAYER_PLACE === id ? 'YOU ' : '') + on.join(','); };
+  const seat = id => { const pl = placeById(id); if (!pl) return null; const c = placeSpot(id); if (!c) return null; const on = DECK_CREW.filter(a => a.p && Math.hypot(a.x - c.x, a.z - c.z) < 0.5).map(a => a.p.id); return (BUSY.has(id) ? 'B ' : '') + (PLAYER_PLACE === id ? 'YOU ' : '') + on.join(','); };
   const tea = DECK_CREW.filter(a => a.p && deckDef.num === 5 && roomAt(...cellAt(a.x, a.z)) === 't').map(a => a.p.id);
   return { clock: clockText(), deck: deckDef && deckDef.num, room: roomAt(...player.here()), place: PLAYER_PLACE, goal: g && [g.label, g.place || g.crew || null], dlg: DIALOGUE && DIALOGUE.id,
     calder: pos('calder'), s1: seat('5-tea-1'), s2: seat('5-tea-2'), s3: seat('5-tea-3'), tea, cq: (typeof cqOf === 'function' && JSON.stringify(cqOf())), come: COME_TO.has('calder') ? COME_TO.get('calder').placeId : null, ev: SHIP.event && SHIP.event.id }; })()"""
