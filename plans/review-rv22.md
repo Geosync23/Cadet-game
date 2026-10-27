@@ -22,6 +22,7 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
 | claude/p5s5-promo (B5) | the should | PASS | c3d36cde |
 | claude/vessel (VB1) | RV21's shoulds, VB2 merge, arrows/controller parts | FIXES NEEDED (bigevents, day 28) | 5578c78d |
 | claude/vessel (VB1) | the fixes | FIXES NEEDED (1 must: round-one fetch never starts the scene; 2 shoulds) | 0340b6f9 |
+| claude/p5s5-m20 (B3) | RV21's 4 shoulds + the turn arrow | PASS | 247420aa |
 
 ## Log
 - 2026-10-26 ~23:30 UTC: started; told lead 40, VB1, VB2, B3. Test kit in /tmp/cadet-work and /tmp/cadet-work2. No new
@@ -83,3 +84,4 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
   stopped 4 m away, scene needs 3.2 m: nothing, "missed" at 13:00 (MUST; shot vessel-0340b6f9-roundone-fetch.png); the
   12:40 arrow was the sheet, not the round one (should). Ramp scene with Calder, Monday goodbye, Tern: good.
 - 02:44 UTC: B3 asks for claude/talk-close f52e2abc (from staging-0.94.0 ac810e7e; talk only within TALK_NEAR 2.5 tiles, Walk over; section 20 + 10 tapCrew; no switch). Queued after B3 m20 and VB2. B3: controller_check ending 4 FAILs on staging ac810e7e (Day 34 ring None for pell; Monday goodbye, end page) with or without it.
+- 02:55 UTC: **B3 247420aa PASS**: cadet f57afcbc vs 247420aa alone ALL IDENTICAL (beside another check: f/g/h max-1 noise); mech_check m20 wstap m19 OK; controller m19 m20 OK; live Day 19 (probe m20_live2.py) Calder teaches, one row, notice+Mail 09:30, turn arrow from 10:13.
