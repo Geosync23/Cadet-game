@@ -1588,3 +1588,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~23:54 UTC: **RV20 PASS B2 M19 deefa61a.** machine_check ON "traced faults" FAIL bisected to B1's 51b1a9c6 (B5 owns now). b7e84f81 verdict pending.
 - ~23:58 UTC check-in (lead 40): stopping point. Stopped: BM18, PUB1, CR1-6, B2, B3, VB1, RV22. Finishing by 00:45 UTC: RV20 (b7e84f81), VB2 (ending checks), B5 (tracking-another-job arrow run ~00:30). 0.93.3 LIVE v7. Check-in prompt changed to stopping-point mode.
 - ~00:01 UTC Oct 27: **RV20 PASS b7e84f81** (stale team-job arrow). claude/workstep-tap-fix (c79a66dc + b7e84f81) ready for 0.93.4 (not started). **B2 archived** (25 closed; handover-b2.md on p5s5-mech-a).
+- ~00:05 UTC: BM18 handover updated (3fd762cb): 0.93.4 complete when restarted; BLOCKER: no Step 5 branch carrying B1's 51b1a9c6 merges until B5 fixes the machine_check ON "traced faults" (not repeatable) FAIL.

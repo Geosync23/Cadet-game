@@ -22,6 +22,8 @@ Keep reducing the workforce (archive as soon as a piece passes + handover pushed
 - **Ending** (EV_ENDING_ON): RV21 PASS as one, claude/ending-crossing d1a61402. VB2 owns it now: arrows_check endstay/endgo + controller presets + day_check 31/50 ON copy (claude/ending-checks) -> RV22.
 - **Step 6**: not started; reuse Step 5 seats (VB2 earmarked S6-4 deck architect; B3 free).
 
+- **Step 5 merge blocker**: B1 51b1a9c6 (in B5 promo, B2 mech-a, B3 branches) makes machine_check ON fail "traced faults" (not repeatable). B5 fixes before any Step 5 merge.
+
 ## Seats at the stop
 Active: BM18 01A3S2VBMYmTt2wCZa8ej7XR; PUB1 01GnpjFR6oumvuvTrmcXSqeg; RV20 01PyJwfvfQVu4oXTYDMGkacw (~48%+); RV22 011wAn842cKDVWvoH8Cr9geD (new, replaces RV21); CR1 01CsWNjCsy8u5mrHJgTVgCst, CR2 01DsTDi6xJcpdDVhSkELEm24, CR3 01Pw3EQ24pSz4gjsFcLBMjUF, CR4 01RgnU5d6Um75LNznFSotXYH, CR5 01UH1U1UpsoL7viYaRRBu2bZ, CR6 013wLtAmKooMrgGrXF4Ljiof; B2 015mjNkxuGoEZGKA2ksBPz9u (~60%, archive on RV20 PASS); B3 014FBmsiTsA9QymoN2qt4NyL (~45%); B5 01CgbXRamJJp66pFTP43KYoB (owns 24 core/24u); VB1 01UsjGN26E88zwrNPWwef4iT (~45%); VB2 01KRBGtugjBpv5iGcV5WDvCP (~40%). Lead 39 019V68fz33UFv4cK5Z4iCDvi idle (archive).
 Archived by lead 40: EN1, B1, FX30, EN2, B4, RV21 (24 closed since lead 39 started).
