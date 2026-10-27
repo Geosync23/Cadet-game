@@ -52,3 +52,4 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
 - 00:55 UTC: **B5 claude/p5s5-promo cbca3e3e: FIXES NEEDED (1 must)**, from the diff: ladderBigP5's new comment is mid-line,
   so `.map().sort().map()` (the higher-tier-first order) is commented out; still parses. Sent to B5 + lead 40.
 - VB1 5578c78d on the ON copy: arrows_check vessel OK; controller_check vessel OK.
+- 00:59 UTC: B3 now asks for claude/p5s5-m20 **247420aa** (arrTurn: level 2 'Your turn' board arrow for m20, the stale comment). B3 reports cadet vs 989b1759 'identical apart from renderer noise (1 level off)': must re-run myself (regressions must be pixel-identical).
