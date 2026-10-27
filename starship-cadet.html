@@ -44382,9 +44382,12 @@ if (EV_VESSEL_ON && EVENTS_ON) {
     ask: w('gather.chain.ask') || 'Parts chain at one. Storage door to the ramp. Bring your arms.', here: w('gather.chain.here') || 'Find a gap in the line. Face the next person. I\'ll call the count.',
     thanks: c => evWord('event.veyliVessel.gather.chain.thanks', c) || 'Zeke waves you into a gap in the line. The first crate is already coming down it toward you.' });
   // RV21: about twenty watch Taavek come down the Tern's ramp, Sunday 09:20-09:50 (k 360; the shuttle bay's crowd spots,
-  // as the rotation's Off the Tern): Works and Comms off duty, by a hash. A turn-up gathering, nothing to tap
+  // as the rotation's Off the Tern): Works and Comms off duty, by a hash. A turn-up gathering, nothing to tap. No venue:
+  // a venue's crowd spots are held for its goers alone (eventPools' ev:<id>), and the ramp meeting's cast (Calder, Zeke,
+  // Lindqvist, from 09:25) stands in the same bay; the spots come from places, held for nobody (RV22's bigevents)
   SHIP_EVENTS.veyliVessel.moments.push({ id: 'vesselArrival', name: w('gather.arrival.name') || 'Taavek comes aboard', phase: 'onset', at: [1, 560], len: 30, k: 360,
-    where: { venue: 'shuttle-bay', deck: 5, room: /^Shuttle bay$/ }, gathering: true, who: vesselArrivalWho, anim: null, easy: true, lead: lineLead, from: 'Zeke Torres',
+    where: { deck: 5, room: /^Shuttle bay$/ }, gathering: true, who: vesselArrivalWho, anim: null, easy: true, lead: lineLead, from: 'Zeke Torres',
+    places: [{ deck: 5, pool: '@gather-shuttle-bay' }],
     ask: w('gather.arrival.ask') || 'Their engineer comes down the Tern\'s ramp at half nine. Come and see.', here: w('gather.arrival.here') || 'There. The ramp\'s opening.',
     thanks: c => evWord('event.veyliVessel.gather.arrival.thanks', c) || 'You stand with the crowd at the shuttle bay as the Tern\'s ramp comes down.' });
   SHIP_EVENTS.veyliVessel.routines.onset = [{ who: 'all', rule: 'standEasy', at: [555, 590], not: ['dept:command', 'dept:helm', 'dept:watch', 'dept:galley'] }, { who: 'all', rule: 'standEasy', at: [780, 840], not: ['dept:command', 'dept:helm', 'dept:watch', 'dept:galley'] }];
