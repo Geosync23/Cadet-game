@@ -65468,7 +65468,7 @@ function p5nPlate(it) {                                   // 15's tray tap asks:
 // Mail only as the record; a level 1 arrow and a forced ring at every step, whatever Teaching arrows or tracking say).
 // Day 22 from 09:15 Calder comes to find you (meeting night.on; with the Monday briefing, S6-2, she waits by its door:
 // m21Door, when 28b has it); not met by 10:00, the notice. Thursday Day 25 at 06:00 she comes down to you (night.off).
-// Each night: the notice (20:30; night 1 at 22:40, or with P5_PROMO4 S6-3's fetch from the comet: that walk clocks you in), the
+// Each night: the notice (20:30; night 1 at 22:40, or with P5_PROMO4 none while S6-3's fetch from the comet runs: 24u's pu4Fetches), the
 // arrow and ring to the time clock, then the engine room, at 06:00 the clock again, then the kept plate and your bunk.
 // Holding another job while the clock waits: a notice each hour. Flags p5n.* (saved); words content/works/night.lines
 const P5N_WORD = { on: { day: 22, at: 555, by: 600, night: 22 }, off: { day: 25, at: 360, by: 400, night: 24 } };
@@ -65524,9 +65524,9 @@ function p5nGuide(now) {                                  // live, once a ship m
   }
   for (const k of [d - 1, d]) {
     const N = playerNightOn(k) && p5nOf(k); if (!N) continue;
-    const R = p5nNight(k), at = N.from - (k === 22 ? 5 : 30), fetched = k === 22 && P5_PROMO4 && now < N.from + 45 && (typeof pu4Fetching !== 'function' || pu4Fetching(now));   // (pu4Fetching: 24u's say, when it has one, whether her fetch is on tonight)   // night 1 with S6-3: Calder fetches you from the comet at 22:40 (24u, W7) and her walk down clocks you in (below); ours from 23:30 if she hasn't
-    if (now >= at && !R.in && !R.miss && now < N.to && !fetched) {
-      if (flag('p5n.notice.' + k) === undefined) { flagSet('p5n.notice.' + k, 1); promoNotice(k === 22 ? p5nText('night.notice.1', 'Night shift now. Clock in at the Works bay, then down to the engine room.') : p5nText('night.notice', 'Night shift at {time}. Clock in at the Works bay, then the engine room on Deck 6.', { time: hhmm(N.from % 1440) }), p5nCalder()); }
+    const R = p5nNight(k), at = N.from - (k === 22 ? 5 : 30), fetched = k === 22 && P5_PROMO4 && typeof pu4Fetches === 'function' && pu4Fetches(now);   // night 1 with S6-3: Calder fetches you from the comet at 22:40 (24u, W7) and walks you to the clock, then down: no notice of ours meanwhile   // night 1 with S6-3: Calder fetches you from the comet at 22:40 (24u, W7) and her walk down clocks you in (below); ours from 23:30 if she hasn't
+    if (now >= at && !R.in && !R.miss && now < N.to) {
+      if (flag('p5n.notice.' + k) === undefined && !fetched) { flagSet('p5n.notice.' + k, 1); promoNotice(k === 22 ? p5nText('night.notice.1', 'Night shift now. Clock in at the Works bay, then down to the engine room.') : p5nText('night.notice', 'Night shift at {time}. Clock in at the Works bay, then the engine room on Deck 6.', { time: hhmm(N.from % 1440) }), p5nCalder()); }
       const h = Math.floor(now / 60), held = p5nHeld();
       if (held && flag('p5n.busy') !== h) { flagSet('p5n.busy', h); promoNotice(p5nText('night.notice.busy', 'Your night shift starts at {time}. Turn in or drop this job first.', { time: hhmm(N.from % 1440) }), p5nCalder()); }
       if (now >= N.from - 15 || k === 22) {
@@ -65537,7 +65537,7 @@ function p5nGuide(now) {                                  // live, once a ship m
     }
     if (R.in && !R.out && now < N.to - 10) {
       if (p5nRoomIn()) flagSet('p5n.room.' + k, 1);
-      if (flag('p5n.room.' + k) === undefined && !(typeof PU4_LIVE !== 'undefined' && PU4_LIVE && PU4_LIVE.walk)) guideAsk({ id: 'p5n:room:' + k, level: 1, owner, until: N.to - 10, goal: () => ({ deck: 6, room: 'E', label: p5nText('night.ptr.room', 'Night shift: the engine room') }), done: () => flag('p5n.room.' + k) !== undefined || p5nRoomIn() || !!(SHIP.works.ns[k] || {}).out });
+      if (flag('p5n.room.' + k) === undefined) guideAsk({ id: 'p5n:room:' + k, level: 1, owner, until: N.to - 10, goal: () => ({ deck: 6, room: 'E', label: p5nText('night.ptr.room', 'Night shift: the engine room') }), done: () => flag('p5n.room.' + k) !== undefined || p5nRoomIn() || !!(SHIP.works.ns[k] || {}).out });
     }
     if (R.in && !R.out && now >= N.to - 10 && now < N.to + P5N.auto) {
       const lab = p5nText('night.ptr.out', 'Clock out: the night\'s done');
@@ -65555,10 +65555,6 @@ function p5nGuide(now) {                                  // live, once a ship m
     }
   }
 }
-if (P5_NIGHT) onSim('promoted', n => {                    // night 1 with S6-3: Calder's fetch from the comet (24u) is your clock-in for night 1
-  if (!n || n.tier !== 4 || !p5nLive()) return; const N = playerNightOn(22) && p5nOf(22), t = shipNow(); if (!N || t < N.from - P5N.open || t >= N.to) return;
-  const R = p5nNight(22); if (R && !R.in) { R.in = Math.floor(t); R.out = 0; R.late = Math.max(0, Math.round(t - N.from)); simNote('clock', { what: 'in', night: 22, by: 'calder' }); }
-});
 if (P5_NIGHT) WORK_TICKS.push((now, skip) => { if (!p5nLive()) return; p5nState(); p5nWordTick(now, skip); if (!skip && now >= shipNow() - 1) p5nGuide(now); });
 // ---- the night's work, the night incident, the clothes day (S6-1, turn 4) ----
 // The board keeps up through your night (17's boardTopUp asks p5nBoardWin: the night's hours, fixed by the day, never

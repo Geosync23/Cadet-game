@@ -1405,8 +1405,9 @@ M19 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works), O0 = JSON.st
  simNote('job', { step: 'turnin', id: rj.id, t: shipNow(), machine: rel.id, job: 'repair' }); simFlush(); out.repairUse = W.use.m19;
  out.stages = [0, 2, 3, 5, 6].map(n => { W.use.m19 = n; return worksStage('m19'); });
  // not taken: the crew's the next day
- W = reset(22 * 1440 + 480); W.tr.m19 = 17; j = pwrJob('relayswap', rel.id, shipNow(), { key: 93 }); SHIP.jobs.push(j); out.held = leaveEnd(j) - 22 * 1440;
- for (let t = 22 * 1440 + 490; t <= 23 * 1440 + 900; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); } out.crew = [j.status, j.doneBy !== 'you' && !!j.doneBy];
+ // (N6: Days 30-31, a Tuesday and Wednesday clear of Step 6's nights; Day 23 has no day shift with P5_NIGHT on)
+ W = reset(29 * 1440 + 480); W.tr.m19 = 17; j = pwrJob('relayswap', rel.id, shipNow(), { key: 93 }); SHIP.jobs.push(j); out.held = leaveEnd(j) - 29 * 1440;
+ for (let t = 29 * 1440 + 490; t <= 30 * 1440 + 900; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); } out.crew = [j.status, j.doneBy !== 'you' && !!j.doneBy];
  worksSide().pwr = { done: 'x', wrongs: -4 }; delete worksSide().pwrOk; out.save = JSON.stringify(pwrState()); worksSide().pwr = { done: 3, wrongs: 1, week: 4 }; delete worksSide().pwrOk; out.save2 = JSON.stringify(pwrState());
  SHIP.works = JSON.parse(W0); SHIP.occasions.length = 0; for (const o of JSON.parse(O0)) SHIP.occasions.push(o); SHIP.jobs = []; return out; })()"""
 def part_m19(g):

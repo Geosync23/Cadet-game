@@ -36,8 +36,8 @@
    already gives his off nights calls; no planner change (left as is, noted for review).
 5. **The checks (done).** player_check's `night_part` (end of every run; `--night` alone; its own on copy) and
    controller_check part `nights` (in ALL_PARTS): both OK on 06b6a15. Night 1 with P5_PROMO4 agreed with W7: 24u's
-   22:40 fetch from the comet clocks you in (onSim 'promoted' tier 4); ours silent till 23:30 (24u may define
-   `pu4Fetching(now)`); the knock silent then. night.on/off open from 6 m (RV23's should). On-copy runs of day_check
+   22:40 fetch from the comet (W7's `pu4Fetches(now)`, true while she fetches and walks you down) silences our night-1
+   notice; our clock and engine-room arrows lead her walk; the knock silent with P5_PROMO4. night.on/off open from 6 m (RV23's should). On-copy runs of day_check
    24/25, food, leave, clothes: see the build table's last N6 row.
 6. Controller presets (Day 22 22:40, Day 23 21:00), a pad-played night 2, the words (night.lines, baked), the round.
 
