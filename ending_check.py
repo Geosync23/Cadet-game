@@ -43,10 +43,11 @@ exec(open(__file__.replace('ending_check.py', 'cadet_test.py')).read().split("a,
 from playwright.sync_api import sync_playwright
 # (BM19, lead 42, 0.95.0) the parts here set the clock straight to the offer's day (Day 32): with Step 6 on, the offer
 # waits for Calder's question (the career's end), so the check runs on a copy with P5_STEP6 off; Step 6's way into the
-# ending is promo_beats_check's cq parts and arrows_check step6's
+# ending is promo_beats_check's cq parts and arrows_check step6's. The copy's line is a `var` (R3's find) so part_offer's
+# window.P5_STEP6 = true still reaches the game's endStep6 (a top-level const would hide it)
 _s6 = re.compile(r"^const P5_STEP6 = P5_STEP5 && true;.*$", re.M); _src0 = pathlib.Path(sys.argv[1]).read_text()
 if _s6.search(_src0):
-    _off6 = WORK / 'test' / ('ending_s6off_' + pathlib.Path(sys.argv[1]).name); _off6.write_text(_s6.sub(lambda m: "const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');", _src0, count=1))
+    _off6 = WORK / 'test' / ('ending_s6off_' + pathlib.Path(sys.argv[1]).name); _off6.write_text(_s6.sub(lambda m: "var P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');", _src0, count=1))
     print(f'(on a copy with P5_STEP6 off: {_off6.name})'); sys.argv[1] = str(_off6)
 
 ok = True
@@ -248,7 +249,7 @@ def part_offer(g):
     r = g.ev("""(() => { const out = {}; __reset(20, 600);
       out.plain = endOfferDay(); window.P5_STEP6 = true; SHIP.works = SHIP.works || worksInit();
       delete SHIP.works.end; out.none = endOfferDay(); SHIP.works.end = { answer: 'teach the new cadets', day: 26 }; out.steady = endOfferDay(); out.post = endPostKind();
-      SHIP.works.end = { answer: 'engines', day: 33 }; out.slow = endOfferDay(); out.week = endWeek(); delete window.P5_STEP6; delete SHIP.works.end; out.back = endOfferDay(); return out; })()""")
+      SHIP.works.end = { answer: 'engines', day: 33 }; out.slow = endOfferDay(); out.week = endWeek(); window.P5_STEP6 = false; delete SHIP.works.end; out.back = endOfferDay(); return out; })()""")
     print('   ', r)
     check(r['plain'] == 32 and r['none'] is None and r['steady'] == 32 and r['slow'] == 39 and r['back'] == 32, f"offer: Day 32 (Step 6 off), none before Calder's question, Day 32 after Day 26, Day 39 after Day 33 ({r})")
     check(r['post'] == 'teach' and r['week'] == {'offer': 39, 'due': 41, 'settle': 42, 'leave': 43}, f"offer: the post by your answer, the slower week ({r})")
