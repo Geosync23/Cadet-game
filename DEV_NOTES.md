@@ -1063,6 +1063,7 @@ gives way to clock-out at the shift's end. Test: `python3 arrows_d_check.py BUIL
 ## Talking up close (claude/talk-close, B3 for lead 40, 2026-10-27; the user's call, on: no switch)
 - Section 20: `TALK_NEAR` (2.5 tiles). `chatOpen(p, greet, line, o)`: with `o.tap` (section 10's `tapCrew`, and the "wants a word" chip) and the person further than TALK_NEAR on your deck, the card opens in far mode (`CHAT.far`): name, rank, tier, what they're doing (`chatDoing`, from whereIs: `DOING_WORD`), and one button, Walk over (`chatWalk`: `playerGo` to a free tile beside them; they wait, `talking`). `chatTick` opens the full card (the same `chatOpen`, no tap) once you're within TALK_NEAR; stopped short (a closed door), the button comes back. Every other caller (visits, hosts, the intro, appointments, someone who walked up to you, the arrow-follower checks) opens the card as before.
 - Section 10's `tapCrew`: from afar it doesn't stop you or turn you to face them.
+- **The far card left alone (W6 for lead 41, RV23's should):** without Walk over it closes once you're 1.5 further off than when it opened (`C.reach`) or after `TALK_FAR_STAY` (6 ship minutes, 10 real seconds), so seeks, visits and chatter (which wait on CHAT) aren't held back. The full card opens only after Walk over: someone wandering within TALK_NEAR doesn't open it. A walk that stops short starts the short while again.
 
 ## Hook register
 
