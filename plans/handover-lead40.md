@@ -28,7 +28,7 @@ A new account can't update these; it must publish new links (or the user shares 
 - **Combined build:** claude/staging-0.94.0 (BM18; see plans/handover-bm18.md there for the exact head). It merges: 0.93.4 fixes (workstep-tap-fix c79a66dc + b7e84f81 team-arrow, both RV20 PASS; week-guide-fix fa6b7de0 test only), Step 5 (p5s5-promo c3d36cde PASS, mech-a deefa61a PASS, mech-b 98460d79 PASS, m20 247420aa PASS, puzzles 6b07b624 PASS), vessel (claude/vessel 0340b6f9), ending (ending-crossing d1a61402 PASS + ending-checks 571b073f). **All switches still OFF** (cadet identical to 0.93.3).
 - **Not merged / open:**
   - B3 claude/talk-close f52e2abc (talk only when close): checks green, RV22 review not done.
-  - B3 claude/train-titles 7cbc1ad0 (lesson titles say "with Calder"): RV22 review maybe done (see handover-rv22.md).
+  - B3 claude/train-titles 7ce89d56 (titles + What's next use guideWho, "Calder will show you"; cadet identical): needs reviewer PASS, then merge.
   - VB1 claude/vessel 03b63d95 (game 705c6fc5): round-one fallback MUST + 2 shoulds FIXED by VB1 before the move; needs a reviewer re-check, then merge.
   - VB2 claude/ending-checks: RV22 verdict (see handover-rv22.md).
 
