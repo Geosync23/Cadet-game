@@ -28,3 +28,14 @@ Code read (no runs yet):
   ixSideOwn in 15b). 31ad2f0e: m23:n1 level 1 arrow to night 1's next stop after the night's clock-in.
 - Possible should: m23DoorOpen is false from n.to + 60 even if you're still inside and not out (stuck behind the shielded door?).
 - Plan: cadet 31ad2f0e vs a2ef6416; mech m23 (ON); controller m23 deck6; m23_door.py (door and path at each step, shots at 390x844).
+
+## W8 eee654d4 (S6-9 turn 2), reviewed together with bd138090 at lead 42's word
+- Read: Calder waits in the tea corner from 18:30 (cqEscort 'wait' to CQ.stand '5-tea-3', a place id where others pass { deck, room }:
+  check live she gets there); the seats' guests stand (cqSeatsClear: crewScene wait in room 't' till 19:30), which answers my seat
+  worry above; Works app tab 'Your career' (order 90, show() once answered; worksView filters tabs by show: off, no tab has show).
+  Backlog W8-1: Calder misses her own Four weeks aboard in the plain game (her plan is on Deck 3).
+
+## PZ6 claude/escort-seated-check 775c3ca (test only, from staging c477e525)
+- promo_beats_check parts seated (actStart 'sit', real) and blocked (you on the seat's own tile; fails on 6f1915cb). PZ6-1: no known
+  real-play path to the escort bug. Note: RV23's probes used placeSpot (the seat's own tile), so the original repro was the probe's
+  placement; the fix stays (harmless, and a guard). Queued: seated blocked on 775c3ca and on 6f1915cb.
