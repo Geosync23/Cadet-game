@@ -8,7 +8,7 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
 | claude/vessel (VB1): RV22's must (round-one fetch) + 2 shoulds | PASS | 03b63d95 (game 705c6fc5) |
 | claude/talk-close (B3): talk only up close | PASS (1 should) | f52e2abc |
 | claude/p5s6-core (W6): Step 6 first turn, all off | PASS (1 note) | 95ef6947 (game 7c13cfe7) |
-| claude/ending-checks (VB2): RV22's leftovers | see below | 571b073f (head 0a2993cc, handover only) |
+| VB2's ending leftovers (arrows endgo teachoff, track) | PASS | staging-0.94.0 d69473b7 |
 
 ## VB1 03b63d95
 - cadet_test 0340b6f9 vs 03b63d95 (off): ALL IDENTICAL.
@@ -34,4 +34,11 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
   inert (the offer needs WORK_MECH[id]).
 - note: devmodeNextTraining and Dev mode's career list don't check WORK_MECH (Step 6 on before its pieces: Dev mode could offer m22).
 
-## VB2 ending-checks 571b073f: running (arrows endgo teachoff, track; day_check 31, 50 on an ending-ON copy)
+## VB2 ending-checks leftovers, on staging-0.94.0 d69473b7 (everything ON; lead 41 asked for the switched-on build): PASS
+- arrows_check endgo teachoff OK, endgo track OK (staging's arrows_check, newer than 0a2993cc): Go Day 34, settled Day 35, ended Day 36;
+  every ending arrow led, 475 minutes due, 0 missed. day_check 31-36 left to BM19's gate (lead 41).
+- "stuck" = arrows outside the ending the follower couldn't act on: "Clock in: shift at 09:00" from Day 32 16:03 (both); track also
+  "air plant, Deck 5" from Day 31 08:01. Not blocking.
+
+## Next
+- W6's claude/talk-close-fix (the far card closing): quick verdict with talk_play.py when the sha comes.
