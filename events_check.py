@@ -1244,7 +1244,7 @@ if _von or _vline:
         print('  result', a['log'], '| commendation (days from the start): none done', a['com'], '| two jobs', c['com'], '| late saves (27, 28, 28 logged, 28 running):', a['late'])
         if not a['due'] or a['due'].get('id') != 'veyliVessel' or a['due'].get('day') != 27: fail(f"the Veyli vessel isn't due on Saturday Day 27: {a['due']}")
         if a['phase'] != {'warning': '0 06:10', 'onset': '1 08:00', 'escalation': '2 09:20', 'resolution': '3 09:15', 'afterglow': '3 09:20'}: fail(f"the Veyli vessel's phases: {a['phase']}")
-        if not any(x.startswith('4 00:00') and 'end smooth' in x for x in a['steps']) or a['left']: fail(f"the Veyli vessel's end (midnight Tuesday): {a['steps'][-2:]} left {a['left']}")
+        if not any(x.startswith('4 00:00') and 'end smooth' in x for x in a['steps']) or (a['left'] and a['left'] != 'crossingBack'): fail(f"the Veyli vessel's end (midnight Tuesday): {a['steps'][-2:]} left {a['left']}")   # (BM19: with the ending on, the crossing back starts as the vessel ends, Day 31 00:00)
         if a['addr'] != ['0 08:00', '3 09:15']: fail(f"the Captain's addresses: {a['addr']}")
         if not any(x.startswith('0 18:00 Commander Teo Vance') for x in a['mails']) or not any(x.startswith('3 12:00 Taavek') for x in a['mails']): fail(f"the Veyli vessel's Mail: {a['mails']}")
         if a['aboardAt'] != ['1 09:20 away', '1 09:35 aboard', '2 14:50 aboard', '2 15:35 away', '0 12:00 away', '3 10:00 away']: fail(f"Taavek aboard only Sunday 09:30 to Monday 15:30 (the Tern waits for you to 15:30; RV21): {a['aboardAt']}")
@@ -1259,7 +1259,7 @@ if _von or _vline:
         # Taavek and Calder waiting (vesselRamp.late), and after 10:30 at the Works bay bench, Zeke having met them
         # (vesselRamp.bench); each time Taavek's at the bench afterwards and the Record says you met them
         g.ev("""window.__vmins = n => { for (let k = 0; k < n * 50; k++) window.__step(1, 1000 / 30); };
-          window.__vfresh = t => { SHIP.event = null; SHIP.eventLog.length = 0; for (const r of evCalPlan()) if (r.id !== 'veyliVessel') SHIP.eventLog.push({ id: r.id, startDay: r.day, endDay: r.day + SHIP_EVENTS[r.id].days, band: 'smooth', threads: {}, mine: {} });
+          window.__vfresh = t => { SHIP.event = null; SHIP.eventLog.length = 0; const v0 = evCalPlan().find(r => r.id === 'veyliVessel'); /* BM19: only the rows before the vessel (the crossing back logged as done made the calendar pass over it) */ for (const r of evCalPlan()) if (r.id !== 'veyliVessel' && (!v0 || r.day < v0.day)) SHIP.eventLog.push({ id: r.id, startDay: r.day, endDay: r.day + SHIP_EVENTS[r.id].days, band: 'smooth', threads: {}, mine: {} });
             MEETINGS.length = 0; EV_DAYS.clear(); SHIP_DAYS.clear(); if (DIALOGUE) dialogueEnd(true); guideList().filter(x => /^vessel:/.test(x.id)).forEach(x => guideDrop(x.id)); skipTo(t); };   // a fresh run: no arrows left from the last
           window.__vplay = () => { const seen = []; for (let k = 0; k < 30 && DIALOGUE; k++) { const v = dialogueView(); if (!v) break; seen.push(v.choices ? '[choice]' : v.id); dialogueStep(v.choices ? 0 : undefined); } return seen; };
           window.__vat = (c, r) => { goToDeck(5); player.obj.position.copy(cellPos(c, r)); target.copy(player.obj.position).setY(.7); }; 'ok'""")
