@@ -7,7 +7,7 @@ Overnight mode (as before, roadmap-after-recdeck.md): no messages to the user; t
 ## The order
 1. Finish 0.94.0: reviews (RV23), merges + switch-on (BM19: P5_STEP5, EV_VESSEL_ON, EV_ENDING_ON on; older switches stay off), gate, full round, publish.
 2. Step 6 (plans/p5-step6-spec.html on claude/p5-specs; the user's answers: all recommended, see handover-lead39.md).
-3. The controller update: PAD_ON on (the user's rule: "until we update once content complete"), after Step 6.
+3. The controller update, after Step 6: bring controller support up to date with EVERY feature added since it was made (audit each panel, button, scene, job, card and setting added since: the pad must reach and use all of them; controller_check covers each), then PAD_ON on. The user, ~03:45 UTC: "Its also to make sure the controller support is current with all added features since it was made."
 
 ## Decisions
 | # | Question | Decision (recommended) | Why |
