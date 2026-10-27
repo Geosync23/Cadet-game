@@ -8503,11 +8503,11 @@ const deck2Home = () => deck2Mine();
 function deck2P5Places() {
   const D = DECKS[2], ev = (id, c, r, xy, face) => ({ id, type: 'event', event: 'side', at: [c, r], xy, face, pose: 'stand', room: 'B' });
   D.places.push(ev('2-B-wardrobe', 13, 17, [13.0, 17.6], 'w'), ev('2-B-keepsake', 13, 19, [13.2, 19.6], -36),
-    ev('2-B-rug', 13, 18, [13.5, 18.75], 's'), ev('2-B-desk', 14, 18, [14.85, 18.75], 'e'), ev('2-B-shelf', 13, 19, [13.1, 19.4], -51), ev('2-B-ledge', 14, 17, [14.5, 17.55], 'n'));
+    ev('2-B-rug', 13, 18, [13.5, 18.75], 's'), ev('2-B-desk', 14, 18, [14.85, 18.75], 'e'), ev('2-B-shelf', 13, 19, [13.1, 19.4], -51), ev('2-B-ledge', 14, 17, [14.3, 17.55], 'n'));
   D.wardrobes = { ...(D.wardrobes || {}), '2-B': { room: 'B', place: '2-B-wardrobe' } };
   D.homeKeepsakes = { ...(D.homeKeepsakes || {}), '2-B': { room: 'B', bed: '2-B', place: '2-B-keepsake', slots: [20.48, 20.63, 20.78, 20.93, 21.08, 21.23].map(z => [12.3, 1.17, z]), trophy: [12.16, 1.17, 21.2] } };
   D.cabinSpots = { ...(D.cabinSpots || {}), '2-B': { room: 'B', rug: { place: '2-B-rug', at: [13.6, .01, 19.6], wall: 'n' }, desk: { place: '2-B-desk', at: [15.6, .78, 18.7], wall: 'e' },
-    shelf: { place: '2-B-shelf', at: [12.12, 1.6, 20.2], wall: 'w' }, ledge: { place: '2-B-ledge', at: [14.5, 1.15, 17.12], wall: 'n' } } };   // the ledge by the door (the windows are behind the bed)
+    shelf: { place: '2-B-shelf', at: [12.12, 1.6, 20.2], wall: 'w' }, ledge: { place: '2-B-ledge', at: [14.3, 1.15, 17.12], wall: 'n' } } };   // the ledge by the door, clear of the wash pod (the windows are behind the bed)
 }
 function deck2MinePlate() { let nm = 'Cadet'; try { nm = (SHIP.player && SHIP.player.name) || nm; } catch (e) {} return { text: nm, sub: 'Senior Officer, Engine Specialist', fit: true }; }
 function deck2MineSuite() {
