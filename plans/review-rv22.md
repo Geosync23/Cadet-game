@@ -44,3 +44,6 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
   helpers at 13:25: bounded). Every other shop tap falls through unchanged. Should (words): the wrong-machine toast says
   "at the bench" for the fabricator.
 - bigevents on the ON copy of 5578c78d: **FAILED** (vesselArrival 0 places for 20-31 people; vesselRamp cast calder/zeke/isak not planned at 09:30). Sent to VB1 + lead 40 as a MUST at once.
+- 00:46 UTC: lead 40: RV20 handing over; I also take B5's machine_check fix on claude/p5s5-promo (B5
+  session_01CgbXRamJJp66pFTP43KYoB; recipe plans/handover-rv20.md on claude/review-rv20). Order: VB1, B5 fix, B3, VB2.
+  B5 head now 516333a1 (fix not landed).
