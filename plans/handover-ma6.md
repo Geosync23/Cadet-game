@@ -11,11 +11,19 @@
 - Words: stand-ins baked by me (content/works/m21.lines, content/meetings/m21.brief.meet, m21.short.meet).
 - Checks: mech_check part m21 (P5_STEP6 copy), controller_check part m21 (`P6_PARTS`, P5_STEP6 copy).
 
+## Turn 2 (checks only)
+- day_check 22 OK (plain and forced copies), bigevents_check OK, controller_check m21 adds the wall screen. RV23 PASS on 27166be.
+
 ## Next
-- S6-2 turn 2: day_check 22 and bigevents_check on a P5_STEP6 copy (the hold, no clash with the bridge invite at breakfast); the agenda screen tested live; the arrows_check step6 beat (the arrow-follower) if the frame exists by then; review fixes.
+- S6-2 turn 3: the arrows_check step6 beat (the arrow-follower) once its frame exists (S6-3's); any review fixes. Known, low risk: Vance is in the briefing's cast; if the bridge invite (Vance at breakfast, 05:00-10:00) ever fell on a briefing Monday he'd be pulled to Deck 1 at 08:30.
 - S6-6 (wave 2): 28d, TEAM_JOBS.coil in 24h (the owner is W6 for the table's shape), slot 36.
 
+## S6-6 turn 1 (M24)
+- See DEV_NOTES "28d, M24 leading a team". Slot 36, schedU 1071. DA6 (session_01GKuymjJ4sU5hfdU8bH49UW) owns S6-4: coils '6-coil-1..3', spots '6-coil-team-1..3' (spot 1 the lead's: yours). N6 (session_01GKuymnDA25R2a5yZGYpaBS, claude/p5s6-nights) asked about night hooks (no reply yet). W7 asked about the 24h table entries (no reply yet). Backlog MA6-1: a team turn can't be tapped in today's game.
+
 ## Gotchas
+- simNote keeps only its own kind: a payload's `kind` (24h's 'turn', 'step', 'done') is overwritten with 'team'; read step numbers.
+- Line keys allow no underscores (content_gen's kind pattern); placeholders only from lines_check's PLACEHOLDERS.
 - `worksInit()` returns null before WORKS_START: in a test, skipTo first, then worksInit.
 - `mailSend` unshifts: new Mail is at the front of SHIP.mail.
 - In pad mode the arrow's label isn't the pad hint: read `goalNow().label` (with `GUIDE.key = ''`).
