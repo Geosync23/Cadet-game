@@ -32,3 +32,6 @@
 // the Mail, after the word in person or the 09:30 notice (the record; "Subject | body")
 == m20.mail
 - Training: the sensor array | {time}, the array room on Deck 2, with {name}.
+// your turn after watching the lesson (the arrow to the job board)
+== m20.turn
+- Your turn: the sensor array, at the job board
