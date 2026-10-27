@@ -66429,6 +66429,17 @@ function m23Beats(now) {
   if (!flag('m23.n1.notice') && !promoBusy()) { flagSet('m23.n1.notice', Math.floor(now));
     promoNotice(worksText('m23.n1.notice', 'Your first night: engine work with Reyes. He\'s in the engine room, Deck 6.'), worksName(M23_BY));
     worksSay(M23_BY, worksText('m23.n1.say', 'Specialist. Kettle\'s on. First, a coil: come and listen to it with me.')); }
+  // a level 1 arrow to the next stop (a side job has no job pointer of its own), once you've clocked in for the night (S6-1's SHIP.works.ns)
+  const ns = SHIP.works.ns, clocked = !ns || !!(ns[M23_N1] || {}).in;
+  if (clocked && typeof guideAsk === 'function' && !(GUIDE.list || []).some(x => x.id === 'm23:n1'))
+    guideAsk({ id: 'm23:n1', level: 1, owner: '28c', from: p5NightOf(M23_N1).from, until: p5NightOf(M23_N1).to, goal: () => m23N1Goal(),
+      done: () => { const S2 = m23State(), jj = S2 && S2.j1 && SHIP.jobs.find(x => x.id === S2.j1); return !jj || !!jj.workDone || jj.status === 'done'; } });
+}
+function m23N1Goal() {                                   // the next stop's place, and its ring line
+  const S = m23State(), j = S && S.j1 && SHIP.jobs.find(x => x.id === S.j1); if (!j) return null;
+  const nx = jobStops(j).find(x => !x.done), pid = nx && nx.places[0]; if (!pid) return null;
+  const board = pid === m23Board(), coil = !board && machineById((placeById(pid) || {}).machine || '');
+  return { deck: 6, place: pid, label: board ? worksText('m23.ptr.board', 'Engine work: the board in engine control') : worksText('m23.ptr.coil', 'Engine work: {coil}', { coil: coil ? machineLabel(coil).split(',')[0] : 'a coil' }) };
 }
 // the Schedule's row (section 14's devDay): each night's engine work until it's done
 function m23Items(d) {

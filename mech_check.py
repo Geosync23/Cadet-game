@@ -1735,6 +1735,9 @@ M23 = r"""((opt) => {
     out.on = m23On(d);
     for (let t = shipNow(); t <= (d - 1) * 1440 + 1375; t++) { setShipNow(t); machinesNow(); worksCareerTick(t); }
     const j = SHIP.jobs.find(x => x.kind === 'm23night'); out.job = j ? [j.claimedBy, j.status, j.start % 1440, j.coil] : null;
+    out.arrowBefore = !!SHIP.works.ns && (GUIDE.list || []).some(e => e.id === 'm23:n1');   // S6-1's clock-in first
+    if (SHIP.works.ns) { SHIP.works.ns[d] = Object.assign(SHIP.works.ns[d] || {}, { in: shipNow() }); setShipNow(shipNow() + 1); machinesNow(); worksCareerTick(shipNow()); }
+    const ar = (GUIDE.list || []).find(e => e.id === 'm23:n1'), g0 = ar && ar.goal(); out.arrow = ar ? [ar.level, g0 && g0.place] : null;
     if (!j || opt.day) return out;
     const stops = jobStops(j); out.n = stops.length; out.mine = !!myJob() === false;
     out.early = jobStepDone(j.id, 2, {}).ok;              // out of order
@@ -1761,6 +1764,8 @@ def part_m23(g):
     print(f"  m23 balance: {a.get('gauge0')!r} -> {a.get('balTurn')!r}; then {a.get('gauge1')!r}")
     check(a['on'] and a.get('job') and a['job'][0] == 'you' and a['job'][1] == 'claimed' and a['job'][2] == 1365, f"m23: night 1's job yours as the night starts, 22:45 ({a.get('job')})")
     check(a.get('mine'), "m23: a side job (your board job, if any, stays yours)")
+    check(not a.get('arrowBefore'), "m23: no arrow of ours before you've clocked in for the night (S6-1's arrow leads)")
+    check(a.get('arrow') == [1, a['job'][3] + '-svc'], f"m23: a level 1 arrow to the coil's panel, the first stop (a side job has no job pointer) ({a.get('arrow')})")
     check(len(a['notices']) == 1 and a['notices'][0][0] == 1365, f"m23: one notice as the night starts ({a['notices']})")
     check(a.get('n') == 11 and all(ok for _, ok in a['steps']), f"m23: eleven stops, each done in order ({a.get('steps')})")
     check(not a.get('early'), "m23: a stop can't be done before the one before it")
