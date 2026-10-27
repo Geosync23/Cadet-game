@@ -1638,3 +1638,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~03:32 UTC: Hired **W6** session_01GKuymmTEpqHLycbYTJwRQn (Step 6 Works career engineer, claude/p5s6-core from staging-0.94.0): the spec's first turn only (switch lines, section 28, ladder rows, held hours, all OFF), then waits for the waves after 0.94.0 ships. Seats: RV23, BM19, W6 (3 of 5). Check-in prompt changed to overnight mode.
 - ~03:40 UTC: USER: the cap is **5 ACTIVE** seats (working at the same time); idle/waiting seats don't count.
 - ~03:45 UTC: USER: the controller update also means **making controller support current with every feature added since it was made** (full audit + fixes + controller_check coverage), then PAD_ON on.
+- ~03:36 UTC: **BM19 staging-0.94.0 ce927cea** (+ train-titles 7ce89d56; check_fast OK; cadet ALL IDENTICAL vs 0.93.3; game d96674f9...e335). Waits on RV23 for vessel 03b63d95 + talk-close f52e2abc; preparing switch flips locally.
