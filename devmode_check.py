@@ -423,6 +423,7 @@ def part_set(b):
     pg = Page(ctx, '#dev'); pg.sign(); pg.step(20)
     # the table's days are the ladder's (a moved training fails here, not silently)
     bad = pg.ev("""(() => { const out = [], seen = new Set();
+      for (const r of DM_CAREER) for (const id of r.defer || []) seen.add(id);   // (S5-2, RV20 S4) a row the Step 5 ladder puts off past its day (m17: Day 31)
       for (const r of DM_CAREER) for (const id of r.train || []) { seen.add(id); const row = ladderRow(id); if (!row || row.day !== r.day) out.push(id + ': table ' + r.day + ', ladder ' + (row ? row.day : 'none')); }
       for (const row of CAREER_LADDER) if (row.day <= DM_MAXDAY && !seen.has(row.id)) out.push(row.id + ': on the ladder (Day ' + row.day + '), not in the table');
       return out; })()""")

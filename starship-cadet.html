@@ -17464,7 +17464,10 @@ function guideShiftWords(now, P) {                       // S8 and S9
   const n = Array.isArray(W.log) ? W.log.length : 0, tabDone = tab => () => DEV.open && DEV.app === 'works' && WORKS_TAB === tab;
   if (P && GUIDE_SHIFT.logN >= 0 && n > GUIDE_SHIFT.logN) pointAsk({ id: 'p:works:log', once: 1, path: guideWorksTab('log', 'Your work is logged here'), until: now + 120, done: tabDone('log') });
   GUIDE_SHIFT.logN = n;
+  if (P5_STEP5 && GUIDE_SHIFT.tier === undefined) GUIDE_SHIFT.tier = W.tier;   // (RV20 S2) the tier the band was read in
   const b = typeof worksBand === 'function' ? worksBand() : null; if (!b || b === GUIDE_SHIFT.band) return;
+  if (P5_STEP5 && GUIDE_SHIFT.tier !== undefined && GUIDE_SHIFT.tier !== W.tier) { GUIDE_SHIFT.band = b; GUIDE_SHIFT.tier = W.tier; return; }   // (RV20 S2, Step 5) promoted: the new tier's words start again at New; never "reputation down"
+  if (P5_STEP5) GUIDE_SHIFT.tier = W.tier;
   const k = 'rep:' + b, up = GUIDE_SHIFT.band !== null && Object.keys(BAND_WORD).indexOf(b) > Object.keys(BAND_WORD).indexOf(GUIDE_SHIFT.band);
   if (up && !SHIP.guide.seen[k]) {                       // a new word reached since we last looked (up, never on a drop; not the one a game loads with: RV6)
     toast(worksText('works.app.title', 'Works'), 'Works reputation: ' + worksBandWord());
@@ -63284,7 +63287,7 @@ function puPromote(now, how) {                           // you're a Senior Offi
   if (typeof newsAdd === 'function') try { newsAdd({ id: 'pu3.senior', about: 'you', lines: [worksText('pu3.news', '{me} is a Senior Officer as of today. The bar, the observation room, and cake.')], seed: ['dept:works'], kind: 'gossip' }); } catch (e) { /* no social */ }
   if (typeof mailSend === 'function') promoGuests(d).slice(PU.guests, PU.guests + 2).forEach((id, k) => {
     const t = careerText('mail.pu3.friend', k) || 'Senior Officer | Heard the news. Knew you would. ' + worksFirst(id) + '.', i = t.indexOf(' | ');
-    mailSend({ at: now + 60 + 30 * k, from: worksName(id), subject: i > 0 ? t.slice(0, i) : 'Senior Officer', body: i > 0 ? t.slice(i + 3) : t, quiet: true }); });
+    mailSend({ at: Math.max(now + 60, (d - 1) * 1440 + 750) + 30 * k, from: worksName(id), subject: i > 0 ? t.slice(0, i) : 'Senior Officer', body: i > 0 ? t.slice(i + 3) : t, quiet: true }); });   // (RV20 S1: at lunch, 12:30 on, as their words say "Heard at lunch")
   puBarBook(now);
   if (typeof MACH_REV !== 'undefined') MACH_REV++;       // the board: Tier 3 jobs for you now
   simNote('promoted', { tier: 3, rank: 'senior', how });
@@ -63303,7 +63306,7 @@ function puResultTick(now, skip) {                       // the Mail at 06:00, t
   if (live && m >= PU_R.at - 20 && m < PU_R.at + 30) {   // staging: Calder at her desk, Torres outside the glass
     try { crewScene('calder', { mode: 'wait', to: '5-office-1', until: r.at + 30 }); if (!r.met) crewScene('torres-zeke', { mode: 'wait', to: { deck: 5, tile: [13, 3] }, until: r.at + 40 }); } catch (e) { /* no scene */ } }
   if (live && r.met && !(r.f || {}).sat && typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.m && DIALOGUE.m.id === r.key && promoInOffice() && !ACT && PLACE_OF.has('5-office-visit-sit')) {   // her scene in her office: you sit in the visitor's chair, across her desk
-    (r.f || (r.f = {})).sat = 1; try { actStart('sit', '5-office-visit-sit', { title: 'Visitor chair' }); } catch (e) { /* stand, then */ } }
+    (r.f || (r.f = {})).sat = 1; try { actStart('sit', '5-office-visit-sit', { title: 'Visitor chair', after: worksText('pu3.result.sit', 'You sit across the desk from her.') }); } catch (e) { /* stand, then */ } }
   if (m >= PU_R.seek && !r.met && !promoInOffice() && !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && !PU_LIVE.rseek && live) PU_LIVE.rseek = { by: 'calder', at: Math.floor(now) };   // 08:30: she comes to you
   const S = PU_LIVE.rseek;
   if (S && !r.met && live && !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && puNearMe('calder')) {
@@ -68681,7 +68684,7 @@ if (P5_STEP5) {                                         // Pillar 5 Step 5 (S5-1
   Object.assign(DM_CAREER.find(r => r.day === 13), { band: 'relied' });   // Relied on at the end of the storm Saturday
   Object.assign(DM_CAREER.find(r => r.day === 15), { train: ['p2', 't3'], band: 'relied', test3: true });
   DM_CAREER.splice(DM_CAREER.findIndex(r => r.day === 16), 3, { day: 16, rank: 'senior', band: 'new', promo3: true },
-    { day: 17, train: ['m15', 'm19', 'p4'], band: 'reliable' }, { day: 18, train: ['m17', 'm18', 'p5'], band: 'reliable' },
+    { day: 17, train: ['m19', 'm15', 'p4'], band: 'reliable' }, { day: 18, train: ['m18', 'p5'], defer: ['m17'], band: 'reliable' },   // (RV20 S4) the new ladder order: m15 folds into m19 the same day; m17 waits for a clear day (Day 31, past DM_MAXDAY)
     { day: 19, train: ['m20', 'p9'], band: 'trusted' }, { day: 21, train: ['mys'], band: 'trusted' });
 }
 const DM_MAXDAY = 30, DM_SEED = 8;                      // the seed: no sick day (section 20's sickDue) before Day 46, so you never land unwell (devmode_check)

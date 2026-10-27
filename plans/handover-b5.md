@@ -59,10 +59,7 @@
 - e7ff9253: FIXES NEEDED, one must (M1); 5703dfb6's arrow fix PASSED. **M1 fixed** (build table 0.93.4-s.11): `ladderBigP5`
   leaves trained rows out (machine_check "traced faults" was not the same twice: a trained-but-unopened Tracing was asked
   again, and the check's two runs share SHIP.occasions). machine_check on the on copy OK twice.
-- Shoulds still open (not done: lead 40 said one job only): S1 friends' Mails at 08:16 on the result day say "Heard at
-  lunch" (mail.pu3.friend words, or send them at 13:00); S2 "Works reputation down: New officer" toast right after the
-  promotion (skip worksRepTell's drop on a tier change); S3 an empty toast titled "Visitor chair" as you sit (pass a
-  flavour or skip the toast); S4 Dev presets for Days 17-18 still train m15/m17 (DM_CAREER, unlike the new ladder order).
+- Shoulds S1-S4 **done** (build table 0.93.4-s.12; promo_beats_check part t3shoulds): friends' Mail from 12:30; no "reputation down" toast at the promotion (15b's guideShiftWords, P5_STEP5); the visitor chair's toast has words (`pu3.result.sit`, a stand-in for the writer); Dev presets Days 17-18 follow the ladder (no m17).
 - Note for the systems engineer: machine_check's traced run keeps SHIP.occasions between its two runs (an isolation gap).
 
 ## Open
