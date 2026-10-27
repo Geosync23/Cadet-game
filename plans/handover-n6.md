@@ -39,7 +39,14 @@
    22:40 fetch from the comet (W7's `pu4Fetches(now)`, true while she fetches and walks you down) silences our night-1
    notice; our clock and engine-room arrows lead her walk; the knock silent with P5_PROMO4. night.on/off open from 6 m (RV23's should). On-copy runs of day_check
    24/25, food, leave, clothes: see the build table's last N6 row.
-6. Controller presets (Day 22 22:40, Day 23 21:00), a pad-played night 2, the words (night.lines, baked), the round.
+6. **Turn 6 (done, 992a4b0):** W7's `pu4Fetches(now)` silences only our night-1 notice (our arrows lead her walk; no
+   auto clock-in). Check fixes for the nights on: leave_check's full-shift part (Days 29-31), mech_check m19's next-day
+   part (Days 18-19) and its reset clears SHIP.career. On a Step 6 copy: day_check 22-25, food, clothes, leave,
+   mech m19, player_check, controller nights all OK. Controller presets: none in section 25 (S6-3's seat, W7 adds Step
+   6's Dev rows at the end); controller_check's `nights` part sets its own Day 22 and Day 23 states instead.
+   Words are stand-ins, baked.
+- **Left for S6-1:** RV23's must (Calder's walk to you on Day 22): take W7's escort fix (claude/escort-follow-fix
+  cffe8187) once it's in staging, then RV23 re-runs plans/rv23-shots/n6_play.py. Then the nights' own full round.
 
 ## Shared formats
 - `SHIP.works.ns` = `{ skip?: true, [d]: { in, out, jobs: [ids], inc: [ids], late, miss?: true } }` (ship minutes).
@@ -49,7 +56,7 @@
 - simNote `p5night` { step: 'missed' | 'knock' | 'plate', day }.
 
 ## State (2026-10-27 ~12:40 UTC)
-- Latest: claude/p5s6-nights e4458e0 (staging-p5s6 d39b87a6 merged). Reviewed by RV23 to c806c78: FIXES NEEDED, one
+- Latest: claude/p5s6-nights 992a4b0 (staging-p5s6 a2ef6416 merged). Reviewed by RV23 to c806c78: FIXES NEEDED, one
   must: Calder didn't walk to you on Day 22 09:15 (the escort's follow parks her in the lift car). Lead 41: W7 fixes
   worksEscort's follow at the source; take it when it lands, then re-run RV23's probe (plans/rv23-shots/n6_play.py on
   claude/review-rv23).
