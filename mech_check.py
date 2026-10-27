@@ -2239,6 +2239,9 @@ with sync_playwright() as pw:
         if r['id'] == 't2' and ev("typeof promoPassed === 'function'"):   # 24p's test job (0.44.18) is no training: career_check (i)-(j) tests it
             print(f"t2 ({r['name']}): 24p's test job, not a training (career_check (i) and (j))")
             return
+        if r['id'] == 't3' and ev("typeof puPassed === 'function'"):   # 24u's Tier 3 test job (S5-2) is no training either: promo_beats_check's t3 parts test it
+            print(f"t3 ({r['name']}): 24u's test job, not a training (promo_beats_check t3before ... t3toast)")
+            return
         a = ev(f"({TRAIN})('{r['id']}')")
         b = ev(f"({TRAIN})('{r['id']}')")
         print(f"{r['id']} ({r['name']}, {r['size']}): opened Day {a['day']}, trained Day {a['trained']}, steps {a['states']}, teacher's job by {a['teacher']}, yours by {a['yours']}, stage {a['stage']}")
