@@ -16,6 +16,7 @@ Session session_01GnpjFR6oumvuvTrmcXSqeg, branch `claude/publish-25` (this note 
 | Dev (old, user's longer save) | https://claude.ai/artifact/6daNCLCJAcsLCZn27CEthq | v11 = 0.92.2, **don't touch** | dev/starship-cadet-dev.html |
 | Sim Bay Preview | https://claude.ai/artifact/G1fpE2YeMtPukqTZ2J3u77 | v1 = claude/rec-simbay cb4387e8 | simbay-preview/sim-bay-preview.html |
 | Appointments pitch (db: answers/user) | https://claude.ai/artifact/CTLouY4DK2gFuWBF8YwS3L | v1 = claude/appointments-pitch 52dd1cc1 | appointments/appointments-pitch.html |
+| Dev: promotion preview (#dev.p5s5 set by its first-line script; downloads) | https://claude.ai/artifact/AvpWrMumcGiw4UYUpXd2X5 | v1 = claude/p5s5-promo 5703dfb6 (GAME_BUILD 0.93.2, game 2731893e…9337) | promo/starship-cadet-dev-promotion-preview.html |
 | Sim Flight Prototype | https://claude.ai/artifact/RMgibsuh2KdxcF3kd8vuJr | v2 = claude/simflight 7bf86392 | simflight/sim-flight-prototype.html |
 
 History of the old pairs: 0.64.12 (v1), 0.64.13, 0.64.14, 0.64.15, 0.64.16, 0.64.17 (v6), rolled back to 0.64.16 at the user's request (v7), 0.91.0, 0.92.0, 0.92.1, 0.92.2 (v11). Then 0.92.3 went on new links (the user's wish, to keep the old saves), and 0.92.4 updated those.
@@ -40,3 +41,4 @@ Claude-Session: https://claude.ai/code/session_01GnpjFR6oumvuvTrmcXSqeg" && git 
 - **Sound test**: the game mutes itself under automated browsers (navigator.webdriver) unless the link has `#sound` (`#dev.sound` on Dev); for Settings, Music and Saves, use a test-only copy with cadet_test.py's eval hook (`window.__sc = src => eval(src);` before the last `})();`), `introFlagSet('intro.device')`, then `deviceShow('settings' | 'music' | 'saves')`. Scripts: tools/build_pages.py, tools/instrument.py, tools/sound2.js in the scratchpad (rebuild them from this note in a new session).
 - Since 0.93.3 Settings has a three-way **Doors** row ("Doors. Private rooms are…": All open by themselves / Private rooms: tap to open / All doors: tap to open) in place of 0.93.2's Auto doors On/Off; test for that wording.
 - Loose end for the user: the live claude.ai download prompt (Saves → Download my save) has never been seen by a publisher; the local test only reaches the plain-link fallback.
+- The game's switches read `?query` OR `#hash` tokens (`#a.b-c`), but in the claude.ai viewer only the plain `#hash` reaches the page; a preview page sets its tokens with a first-line `history.replaceState` script, as the Dev and promotion-preview pages do.
