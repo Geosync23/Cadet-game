@@ -8,6 +8,10 @@ Overnight mode (as before, roadmap-after-recdeck.md): no messages to the user; t
 1. Finish 0.94.0: reviews (RV23), merges + switch-on (BM19: P5_STEP5, EV_VESSEL_ON, EV_ENDING_ON on; older switches stay off), gate, full round, publish.
 2. Step 6 (plans/p5-step6-spec.html on claude/p5-specs; the user's answers: all recommended, see handover-lead39.md).
 3. The controller update, after Step 6: bring controller support up to date with EVERY feature added since it was made (audit each panel, button, scene, job, card and setting added since: the pad must reach and use all of them; controller_check covers each), then PAD_ON on. The user, ~03:45 UTC: "Its also to make sure the controller support is current with all added features since it was made."
+4. **Dev mode update** (after the controller update): make Dev mode work with everything added since it was made, above all the new traditions / ship-wide events and the career progression (Step 5, Step 6, the vessel, the ending): presets, Set career, jumps to each beat and day, devmode_check / dev_arrow_check covering them.
+5. **Optimization** (after Dev mode).
+6. **Playtest patches** (after optimization; from the user's playtest notes).
+The user, ~03:50 UTC: "Let's also do a dev mode update once content complete. Make sure it works with all the new traditions and career progression. Do that after controllers. Then optimization. Then playtest patches. That's the plan right now."
 
 ## Decisions
 | # | Question | Decision (recommended) | Why |
