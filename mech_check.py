@@ -1630,6 +1630,8 @@ def part_m21(g):
     check(o['book'] is None and not o['notices'], f"m21: none for an Officer ({o['book']})")
     t = g.ev(f"({M21})(1, {{ day: 23 }})")
     check(t['book'] is None, "m21: none on a Tuesday")
+    dr = g.ev("(() => { const r = m21Door(); return r ? [r.deck, DECKS[1].map[r.tile[1]][r.tile[0]]] : null; })()")
+    check(dr == [1, 'O'], f"m21: Calder's spot at the briefing's end (28a's night.on): a tile of the observation room by its way out ({dr})")
     sv = json.loads(g.ev(M21_SAVE))
     check(sv == {'first': 0, 'last': 0, 'pick': -1, 'order': 0, 'got': 3, 'sd': 0}, f"m21: the save read back, junk cleaned ({sv})")
     b = [g.ev(f"({M21})({k})") for k in range(3)]
@@ -1711,6 +1713,8 @@ def part_m24(g):
     check(not o2['notices'] and not o2['arrows'] and not o2['mails'], f"m24: nothing on another night ({o2})")
     it = g.ev(M24_ITEMS)
     check(it[0] and it[0][0][1].startswith('Plan the coil swap') and any('coil swap' in x[1] and x[0] == it[2] for x in it[1]), f"m24: Schedule rows: the planning, then the slot ({it})")
+    cl = g.ev("(() => { SHIP.works = null; setShipNow(24 * 1440 + 100); const W = worksInit(); W.tier = 4; const S = m24State(); S.pick = ['keane-davi']; S.ready = { 'keane-davi': 0 }; return [m24SlotFor(24 * 1440 + 30) % 1440, m24SlotFor(24 * 1440 + 60) % 1440]; })()")
+    check(cl[0] == 75 and cl[1] == 210, f"m24: the Watch's hour keeps clear of night 3's incident, 02:30-03:30 (booked at 00:30: 01:15 = {cl[0]}; at 01:00, 01:45 would cross it, so 03:30 = {cl[1]})")
     sv = json.loads(g.ev(M24_SAVE))
     check(sv == {'day': 24, 'pick': ['keane-davi', 'x'], 'said': {'keane-davi': 'yes'}, 'ready': {'b': 40}, 'slot': 0, 'spots': {'keane-davi': 2}, 'job': None, 'done': 0, 'mins': 30}, f"m24: the save read back, junk cleaned ({sv})")
     good2 = g.ev(f"({M24})({{ good: true }})")

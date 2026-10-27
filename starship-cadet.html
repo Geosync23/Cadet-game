@@ -65203,6 +65203,14 @@ function m21Attended(now = shipNow()) {
   if (!S.first) S.first = d; S.last = d;
   if (W.tr.m21 === undefined) { W.tr.m21 = d; simNote('trained', { mech: 'm21' }); }
 }
+// where Calder waits at the briefing's end for 28a's night.on word (Day 22, 09:15; N6's optional hook): the observation
+// room's tile by its way out to the lift lobby (the first room O tile, in map order, next to a walkable tile of another room)
+function m21Door() {
+  const D = DECKS[1], map = D && D.map; if (!map) return null;
+  for (let j = 0; j < map.length; j++) for (let i = 0; i < map[j].length; i++) if (map[j][i] === 'O')
+    for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const c = map[j + dj] && map[j + dj][i + di]; if (c && c !== 'O' && c !== '.' && c !== '#' && /[A-Za-z@]/.test(c)) return { deck: 1, tile: [i, j] }; }
+  return null;
+}
 // the observation room's wall screen: the agenda, once the briefing is yours
 function m21Screen(it, at) {
   if (!it || it.t !== 'Wall screen' || typeof deckDef === 'undefined' || deckDef.num !== 1) return false;
@@ -65280,8 +65288,10 @@ function m24State() {                                    // side.m24, cleaned (a
 // is night 3's swap yours (saved state and fixed tables only): your night that day, an Engine Specialist (a Senior with the promotion off)
 function m24On(d = M24_NIGHT) {
   const W = SHIP.works; if (!P5_M24 || !W || d !== M24_NIGHT || typeof p5NightOf !== 'function' || !p5NightOf(d)) return false;
+  if (typeof playerNightOn === 'function' && !playerNightOn(d)) return false;   // 28a (N6): not off sick, not let go, not a late save past the nights
   return (W.tier || 1) >= (P5_PROMO4 ? 4 : 3);
 }
+const M24_CLEAR = [150, 210];                            // night 3's incident (28a's p5nIncPlan(24), fixed by the day: a burst on Deck 5, Day 25 02:30): the Watch's hour keeps clear of 02:30-03:30
 const m24Night = () => p5NightOf(M24_NIGHT);
 // is it the night now (from its start to 06:00), and the swap not yet done
 function m24Live(now = shipNow()) { const n = m24On() && m24Night(), S = n && m24State(); return !!n && now >= n.from && now < n.to && !!S && !S.done; }
@@ -65320,6 +65330,7 @@ const m24AtBridge = () => { try { return deckDef.num === 1 && roomAt(...player.h
 function m24SlotFor(now) {
   const S = m24State(), n = m24Night(), late = Math.max(0, ...S.pick.map(id => S.ready[id] || 0));
   let at = Math.ceil(Math.max(now + 45, late + 10) / 15) * 15; at = Math.max(at, (M24_NIGHT - 1) * 1440 + 1380);
+  const c0 = M24_NIGHT * 1440 + M24_CLEAR[0], c1 = M24_NIGHT * 1440 + M24_CLEAR[1]; if (at < c1 && at + M24_LEN > c0) at = c1;   // not across the incident
   return Math.min(at, n.to - 120);
 }
 function m24Book(now = shipNow(), here = m24AtBridge()) {
@@ -65459,7 +65470,7 @@ if (P5_M24) {
   if (typeof TEAM_JOBS !== 'undefined') {                // 24h's tables (W7's), one entry each; machines empty so the day rota (teamPlan) never picks it
     TEAM_JOBS.coil = { machines: [], coils: M24_COILS.slice(), n: 3, deck: 6, steps: M24_STEPS.map(([w, p, m]) => [w === 'you' ? 'you' : w - 1, p, 'hold', m]) };
     TEAM_NAME.coil = 'Coil swap';
-    Object.assign(TEAM_PART, { cslow: 'call it: drive to slow', cunbolt: 'call it: unbolt', clift: 'call it: lift', cseat: 'call it: seat the new coil', ctest: 'call it: test', cup: 'call it: drive back up',
+    Object.assign(TEAM_PART, { cslow: 'your call: drive to slow', cunbolt: 'your call: unbolt', clift: 'your call: lift it out', cseat: 'your call: seat the new coil', ctest: 'your call: test it', cup: 'your call: drive back up',
       isolate: 'isolate the coupling', unbolt: 'unbolt the coil', lift: 'lift it out', seat: 'seat the new coil', test: 'test the readings' });
     TEAM_PARTS.coil = ['coil winding'];
   }
