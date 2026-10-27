@@ -435,13 +435,13 @@ def part_set(b):
         check(setc(n) is True, f'set: Day {n} refused: {pg.ev("DM_UI.msg")}')
         pg.step(20)
         S = pg.ev(f"""(() => {{ const W = SHIP.works, c = devmodeCareerFor({n}); return {{ clock: clockText(), rank: W && W.rank, tier: W && W.tier, xp: W && W.xp, tr: W && Object.keys(W.tr).sort().join(), want: Object.keys(c.tr).sort().join(),
-          wrank: c.rank, cur: W && W.cur, room: ROOMS[roomAt(...player.here())].name, bed: roomAt(...player.here()) === roomAt(...(DECKS[deckOf(playerBed())].places.find(p => p.id === playerBed()) || {{ at: [0, 0] }}).at), deck: deckDef.num, pip: PLAYER_SPEC.rank || 0,
+          wrank: c.rank, cur: W && W.cur, room: ROOMS[roomAt(...player.here())].name, bed: roomAt(...player.here()) === roomAt(...(DECKS[deckOf(playerBed())].places.find(p => p.id === playerBed()) || {{ at: [0, 0] }}).at), deck: deckDef.num, bdeck: deckOf(playerBed()), pip: PLAYER_SPEC.rank || 0,
           ms: SHIP.career.ms, st: SHIP.career.st, missed: SHIP.mail.filter(m => /missed|summons|warning/i.test(m.subject || '') || Object.values(INTRO_MEETINGS).some(x => m.subject === x.title + ' (notes)')).map(m => m.subject), open: SHIP.occasions.filter(o => o.status === 'asked').map(o => o.id),
           met: INTRO_WEEK.filter(b => b.meeting && introAbs(b.day, b.at) < shipNow()).every(b => SHIP.intro.done[b.id + ':met'] >= 0), set: devmodeState().set, settle: !!SHIP.intro.settle.all }}; }})()""")
         got[n] = S
         check(S['clock'].startswith(f'Day {n},') and S['clock'].endswith('06:00'), f'set: Day {n} landed at {S["clock"]}')
         check(S['rank'] == S['wrank'] and S['tr'] == S['want'] and S['cur'] is None, f'set: Day {n}: the career isn\'t the table\'s: {S}')
-        check(S['bed'] and S['deck'] == 4, f'set: Day {n}: not woken in your bed\'s room ({S["room"]})')
+        check(S['bed'] and S['deck'] == S['bdeck'] in (4, 2), f'set: Day {n}: not woken in your bed\'s room ({S["room"]})')
         check(S['ms'] == 0 and S['st'] == 0 and not S['missed'] and not S['open'], f'set: Day {n}: a miss, a first-week meeting\'s notes, a summons or something still asking: {S}')
         check(S['met'] and S['set']['day'] == n and (S['settle'] == (n > 7)), f'set: Day {n}: the first week or the Dev record: {S}')
     sick = pg.ev("Array.from({ length: DM_MAXDAY + 15 }, (_, i) => i + 1).filter(d => sickDue(d))")
@@ -552,6 +552,24 @@ def part_career(b):
     pg.close(); ctx.close()
     print(f'  career: xp, next band, next training (Rounds + clipboard), a tool, Undo; rank Officer and Junior by hand; Day 8 test opened (only the day missing), passed, Next step through {seen} to the ceremony; the tab')
 
+# ---- S6-3 (W7): the Engine Specialist's presets (Days 22, 22, 23, 25), on a build with P5_PROMO4 on (else skipped)
+def part_t4beats(b):
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = Page(ctx, '#dev'); pg.sign(); pg.step(20)
+    if not pg.ev("typeof P5_PROMO4 !== 'undefined' && P5_PROMO4"): print('  t4beats: P5_PROMO4 off: skipped'); pg.close(); ctx.close(); return
+    beat = lambda id: pg.ev(f"devmodeRun('Set career: beat', () => devmodeSetCareerTo(DM_BEATS.find(b => b.id === '{id}').day, DM_BEATS.find(b => b.id === '{id}')))")
+    look = "({ clock: clockText(), deck: deckDef.num, room: ROOMS[roomAt(...player.here())].name, rank: SHIP.works.rank, t4: puT4(), home: SHIP.works.home, badge: SHIP.occasions.filter(o => o.id === 'pu4Badge' && o.status === 'asked').length })"
+    got = {}
+    for id in ('t4', 't4res', 't4badge', 't4move'):
+        beat(id); pg.step(20); got[id] = pg.ev(look)
+    for k, v in got.items(): print('   ', k, v)
+    t = got['t4']; check(t['clock'] == 'Day 22, Monday 09:20' and t['room'] == 'Works bay' and t['rank'] == 'senior' and t['t4'] and t['t4']['day'] == 22 and not t['t4']['passed'], f't4beats: Day 22 the test: {t}')
+    t = got['t4res']; check(t['clock'].startswith('Day 22,') and t['clock'].endswith('22:30') and t['deck'] == 1 and t['rank'] == 'senior' and t['t4']['passed'] and not t['t4']['res'], f't4beats: Day 22 the result: {t}')
+    t = got['t4badge']; check(t['clock'].endswith('16:00') and t['deck'] == 1 and t['rank'] == 'specialist' and t['t4']['res'] == 22 and not t['t4']['badge'] and t['badge'] == 1, f't4beats: Day 23 the badge booked: {t}')
+    t = got['t4move']; check(t['clock'].endswith('18:30') and t['deck'] == 3 and t['t4']['move'] and t['t4']['move']['ready'] == 25 and not t['t4']['move']['walked'] and t['home'] == '4-23', f't4beats: Day 25 the move: {t}')
+    check(not pg.errors, f't4beats: errors {pg.errors[:3]}')
+    pg.close(); ctx.close()
+
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
@@ -559,7 +577,7 @@ with sync_playwright() as pw:
         if ONLY and name not in ONLY: continue
         try: part(ctx)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
-    for name, part in (('clock', part_clock), ('move', part_move), ('slow', part_slow), ('trad', part_trad), ('set', part_set), ('career', part_career)):
+    for name, part in (('clock', part_clock), ('move', part_move), ('slow', part_slow), ('trad', part_trad), ('set', part_set), ('career', part_career), ('t4beats', part_t4beats)):
         if ONLY and name not in ONLY: continue
         try: part(b)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
