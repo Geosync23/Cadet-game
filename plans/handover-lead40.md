@@ -27,10 +27,11 @@ A new account can't update these; it must publish new links (or the user shares 
 - **Live / integration:** 0.93.3. claude/integration = 3fd762cb (game ec93b94d...d085).
 - **Combined build:** claude/staging-0.94.0 (BM18; see plans/handover-bm18.md there for the exact head). It merges: 0.93.4 fixes (workstep-tap-fix c79a66dc + b7e84f81 team-arrow, both RV20 PASS; week-guide-fix fa6b7de0 test only), Step 5 (p5s5-promo c3d36cde PASS, mech-a deefa61a PASS, mech-b 98460d79 PASS, m20 247420aa PASS, puzzles 6b07b624 PASS), vessel (claude/vessel 0340b6f9), ending (ending-crossing d1a61402 PASS + ending-checks 571b073f). **All switches still OFF** (cadet identical to 0.93.3).
 - **Not merged / open:**
-  - B3 claude/talk-close f52e2abc (talk only when close): checks green, RV22 review not done.
-  - B3 claude/train-titles 7ce89d56 (titles + What's next use guideWho, "Calder will show you"; cadet identical): needs reviewer PASS, then merge.
-  - VB1 claude/vessel 03b63d95 (game 705c6fc5): round-one fallback MUST + 2 shoulds FIXED by VB1 before the move; needs a reviewer re-check, then merge.
-  - VB2 claude/ending-checks: RV22 verdict (see handover-rv22.md).
+  - B3 claude/train-titles 7ce89d56: **RV22 PASS** -> merge.
+  - VB2 claude/ending-checks 571b0737: **RV22 PASS** on what it re-ran (controller ending in full; arrows endstay x4, endgo asis); not re-run by RV22: endgo teachoff/track, day_check 31/50 ON (VB2 had them green). Already merged.
+  - VB1 claude/vessel 03b63d95 (game 705c6fc5): round-one fallback MUST + 2 shoulds fixed; **not reviewed** (RV22: diff looks right). Review, then merge.
+  - B3 claude/talk-close f52e2abc (talk only when close): checks green; **not reviewed**. Review, then merge.
+  - RV22's exact state: plans/handover-rv22.md on claude/review-rv22 6894dd6.
 
 - **Combined build head at the move:** claude/staging-0.94.0 07e033c9 (last game merge 64a1ba76, game 958493d0...; switches OFF; cadet identical to 0.93.3). talk-close, train-titles and VB1 03b63d95 are NOT merged yet.
 - **User answered (~03:10 UTC Oct 27): these older switches STAY OFF:** TRAY_TRAVELS (Pick-your-own breakfast tray already travels via P.trayGo, which is all the user wants), INTRO_ASK_ON ("Ask Zeke" stays parked), ZEKE_CABIN_MAIL (stays parked), PAD_ON (controller support stays off "until we update once content complete": turn it on in the update after the content is finished; keep building and testing every piece by pad on a switched copy as now). END_WAY_BACK stays off (ending answer). "Everything on" = P5_STEP5 and its sub-switches, EV_VESSEL_ON, EV_ENDING_ON (+ doors/visit already on).
@@ -46,4 +47,4 @@ A new account can't update these; it must publish new links (or the user shares 
 P9 true move needs a second section 14 hook (B4-1); interactions_check.py:1262 SyntaxWarning; careerOff read live; perf blips (backlog 32) if they repeat; controller ring can't pick a person hidden behind another in a crowd (VB2); Tomas "Tonight?" Mail body shows function source (old, RV20); What's next sentences use first names (lead: fine).
 
 ## Seats on the old account at the move
-All archived or idle with handovers pushed: BM18, PUB1, RV22, B3, VB1, VB2 (and lead 40). Archived tonight: EN1, B1, FX30, EN2, B4, RV21, B2, RV20, lead 39, B5, CR1-CR6.
+All seats archived with handovers pushed (lead 40 last). Lead 40 check-in trig_01Ho4S7S9dCaYyVC7qSaQi9t disabled.
