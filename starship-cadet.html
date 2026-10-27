@@ -66529,9 +66529,10 @@ function m23Night2Step(S) {                              // the step that's next
 // the shielded door: open for you with a permit, a badge and the Watch told, until you're out (and while you're still inside)
 function m23DoorOpen(deck, room, t = shipNow()) {
   if (!P5_M23 || deck !== 6 || room !== 'R' || !m23On(M23_N2)) return false;
-  const S = m23State(), n = p5NightOf(M23_N2); if (!S || !S.permit || !S.told || !n || t < n.from || t >= n.to + 60) return false;
-  if (!S.out) return dosiOut() !== null;
-  try { return deckDef.num === 6 && roomAt(...player.here()) === 'R'; } catch (e) { return false; }   // out, but still inside: let you out
+  const S = m23State(), n = p5NightOf(M23_N2); if (!S || !S.permit || !S.told || !n) return false;
+  try { if (deckDef.num === 6 && roomAt(...player.here()) === 'R') return true; } catch (e) { /* not on a deck */ }   // still inside, at any time: never shut in (RV24)
+  if (t < n.from || t >= n.to + 60 || S.out) return false;
+  return dosiOut() !== null;
 }
 function m23ReactorStops() {
   const pp = panelPlace('6-reactor-1'); if (!pp) return [];
