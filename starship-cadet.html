@@ -15966,7 +15966,7 @@ function washToilet(A) { const t = A.o.cost && A.o.cost.hygiene; if (t > 0) SHIP
 // patch #21 (plans/patch-plan.html, the user's "Junior Officer"): the rank before the title on a crew card and in the device's
 // crew lists ("Junior Officer · Storekeeper · stranger"). Left out where the title already says it (Captain, Executive Officer,
 // Head of …) and for guests. The words live in content/banks/talk.lines (card.rank.*). Off = identical; ?rankcard turns it on.
-let RANK_CARD_ON = URL_FLAGS.has('rankcard');
+let RANK_CARD_ON = true;   // switched on in 0.95.0 (the user, via lead 42; it was URL_FLAGS.has('rankcard'))
 const RANK_CARD_WORDS = { captain: 'Captain', xo: 'Commander', chief: 'Department Chief', senior: 'Senior Officer', officer: 'Officer', junior: 'Junior Officer' };
 function rankCardWord(p) {
   if (!RANK_CARD_ON || !p || p.player || !RANK_CARD_WORDS[p.rank] || /^(Captain|Executive Officer|Head of )/.test(p.role || '')) return null;
@@ -15981,7 +15981,7 @@ function rankCardRole(p) { const w = rankCardWord(p); return w ? w + (p.role ? '
 // CLOCK_UNDO.fx. Undo puts the kept copy of the clock record back. A save settles the window first. Off = identical; ?clockundo.
 // Held on purpose (PP1's review): the clock note waits too, so what listens to it (Day 1's intro arrow to the job board, the
 // at-work leisure drain) starts up to 5 s late; an Undo would otherwise leave the arrow on the board. Not a bug to fix.
-let CLOCK_UNDO_ON = URL_FLAGS.has('clockundo');
+let CLOCK_UNDO_ON = true;   // switched on in 0.95.0 (the user, via lead 42; it was URL_FLAGS.has('clockundo'))
 const CLOCK_UNDO_S = 5, CLOCK_TAP_GUARD = 500, CLOCK_WALK = 1.5;   // real seconds of Undo; ms of the tap guard; tiles you may step away
 let CLOCK_UNDO = null, CLOCK_DRAWN = -1e9;               // the open window { what, t, d, keep, fx, said, at, deck, x, z }; the screen's last draw
 function clockPunch(early) {                             // a punch from the screen -> careerClock's result; held unless it's an early clock-out
@@ -16034,7 +16034,7 @@ function clockButtons(row, act, s) {                     // the screen's two hal
 // prices; what you can't afford is greyed out ("3 more credits"). Choosing one puts it in your basket and runs the
 // counter's pay step (playerTap on the counter: you step up to the till and the storekeeper rings it up), so eating,
 // the locker, gifts and hobbies work as before. The shelves keep browse-and-pick. Off = identical; ?shopmenu.
-let SHOP_MENU_ON = URL_FLAGS.has('shopmenu');
+let SHOP_MENU_ON = true;   // switched on in 0.95.0 (the user, via lead 42; it was URL_FLAGS.has('shopmenu'))
 const shopMenuText = (k, d, n) => (typeof talkText === 'function' ? talkText('shop.menu.' + k, d) : d).split('{n}').join(n);
 function shopMenuClerk(p) {                              // p is serving at the counter now: the work:store place on this deck, settled there
   if (!SHOP_MENU_ON || !p || typeof DECK_CREW === 'undefined') return false;
