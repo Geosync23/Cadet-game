@@ -1377,7 +1377,7 @@ P8SWEEP = r"""(() => {
       SHIP.jobs = SHIP.jobs.filter(x => x !== j);
     }
   }
-  out.coils = machineList().filter(m => m.kind === 'coil' && !m.stub && panelPlace(m.id)).length;   // drive coils to work on (S6-4's Deck 6 machines)
+  out.coils = machineList().filter(m => m.kind === 'coil' && !m.stub && panelPlace(m.id) && caseCauses(m).some(f => f.part === 'coil winding' && !f.load)).length;   // drive coils with a coil-module fault (S6-4's machines, S6-5's faults)
   C.open = []; jobRun = jr; Object.assign(W, keep);
   return out;
 })()"""
