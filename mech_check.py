@@ -2543,6 +2543,9 @@ with sync_playwright() as pw:
             print(f"m23 ({r['name']}): 28c's own engine work on your nights, not a training (its part below)")
             PARTS['m23'](g)
             return
+        if r['id'] == 'm25' and ev("!!(WORK_MECH.m25 && WORK_MECH.m25.own)"):   # (S6-7) 28e's own day with Basil, never through the ladder: promo_beats_check's mt parts test it
+            print(f"m25 ({r['name']}): 28e's own day with Basil, not a training (promo_beats_check mt)")
+            return
         if r['id'] == 'm24' and ev("!!(WORK_MECH.m24 && WORK_MECH.m24.own)"):   # 28d's own night 3 (S6-6): never through the ladder, trained by the first swap you led
             print(f"m24 ({r['name']}): 28d's own coil swap on night 3, not a training (its part below)")
             PARTS['m24'](g)

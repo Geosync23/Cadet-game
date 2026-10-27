@@ -464,9 +464,205 @@ def part_t4dev(g):
       setShipNow(23 * 1440 + 600); out.eng24 = pu4EngineByDay(); setShipNow(24 * 1440 + 600); out.eng25 = pu4EngineByDay() && /pu4EngineByDay/.test(String(forYou)); return out; })()""")
     for k, v in r.items(): print('   ', k, v)
     check(r['c21'][0] == 3 and r['c22'][:2] == [4, 'specialist'] and '"badge":null' in r['c22'][3] and '"badge":23' in r['c23'][3] and r['c25'][2] == '2-B' and '"walked":25' in r['c25'][3] and r['c23'][4] == 'specialist,specialist.badge' and not any('Engine Specialist' in l for l in r['later']), f"t4dev: the career table: Tier 4 from Day 22, the badge Day 23, Deck 2 from Day 25 ({r['c21']}, {r['c22']}, {r['c23']}, {r['c25']}, {r['later']})")
-    check([b.split()[0] for b in r['beats']][-4:] == ['t4', 't4res', 't4badge', 't4move'], f"t4dev: the presets for Days 22, 22, 23, 25 ({r['beats']})")
+    check([b.split()[0] for b in r['beats'] if b.startswith('t4')] == ['t4', 't4res', 't4badge', 't4move'], f"t4dev: the presets for Days 22, 22, 23, 25 ({r['beats']})")
     check(r['steps'] == ['Your Tier 4 test 09:30 done', 'Your Tier 4 result 22:40'] and 'result' in r['next1'] and 'badge' in r['next2'] and 'Vance' in r['next3'] and r['steps2'][-1] == 'Your Deck 2 quarters', f"t4dev: the promotion list and the career arrow ({r['steps']}, {r['next1']}, {r['next2']}, {r['next3']}, {r['steps2']})")
     check(r['eng24'] is False and r['eng25'] is True, f"t4dev: engine jobs yours by day after the nights, not before ({r})")
+
+# (W8, lead 42's t3 question) the same as t4carry for Step 5's Tier 3 test (Day 15): a lesson of Tier 2 (Tracing, m9)
+# asked and missed before (W.cur 'm9:ask' from Day 13), or never asked; on Day 15 the test opens. In the game as shipped
+# (Step 6 off) the lesson holds it: this part reports "held (the game as shipped)" there and checks only with the Step 6
+# switch on, where 24 core's MA6-2 fix (ladderTestDue, a due test row ahead of a lesson of its tier) covers every test row
+def part_t3carry(g):
+    if not g.ev("typeof puSet === 'function' && typeof ladderRow === 'function' && !!ladderRow('t3') && !!ladderRow('m9')"): print('(t3carry) no Tier 3 test or Tracing in this build: skipped'); return
+    print('(t3carry) a lesson missed before the Tier 3 test on Day 15:')
+    base = T3_TEST.replace("r.id !== 't3' && r.tier <= 2", "r.id !== 't3' && r.id !== 'm9' && r.tier <= 2")
+    r = g.ev("""(() => { """ + base.replace("puSet(15);", "puSet(15); W.cur = { id: 'm9', st: 'ask', d: 13, by: 'calder', occ: null, j: null, w: 0 }; (W.op[13] = W.op[13] || []).push('m9');") + """
+      const out = { on: typeof P5_PROMO4 !== 'undefined' && !!P5_PROMO4 }; for (let h = 6; h <= 10; h++) { setShipNow(14 * 1440 + h * 60); careerClock(shipNow(), true); __tick(); }
+      out.cur = W.cur && W.cur.id + ' ' + W.cur.st; out.op15 = W.op[15] || []; return out; })()""")
+    r2 = g.ev("""(() => { """ + base + """ return { cur: W.cur && W.cur.id + ' ' + W.cur.st, op15: W.op[15] || [] }; })()""")
+    print('    carried:', r, '| never asked:', r2)
+    held, held2 = not (r['cur'] or '').startswith('t3'), not (r2['cur'] or '').startswith('t3')
+    if not r['on']: print(f"    the game as shipped (Step 6 off): carried {'held' if held else 'not held'}, never asked {'held' if held2 else 'not held'}"); return
+    check(not held and 't3' in r['op15'], f"t3carry: with Step 6, Day 15 opens the Tier 3 test, not the carried lesson ({r})")
+    check(not held2 and 'm9' not in r2['op15'], f"t3carry: with Step 6, an untaken lesson of Tier 2 never goes ahead of the Tier 3 test ({r2})")
+
+# (W8, PZ6's arrows find) the test day's evening: level 1 arrows from the 16:45 wake to dinner, then the comet in the
+# observation room, till Calder's 22:40 (read through goalNow: what the screen shows)
+def part_t4eve(g):
+    if not t4on(g, 't4eve'): return
+    print('(t4eve) the evening of the Tier 4 test: dinner, then the comet, till Calder comes:')
+    r = g.ev("""(() => { """ + T4_RES + """ const out = {}, at = m => { setShipNow(21 * 1440 + m); GUIDE.list.length = 0; __tick(); const x = goalNow(); return x ? (x.deck || '') + ' ' + (x.label || '') : null; };
+      out.e1000 = at(1000); out.e1010 = at(1010); out.e1150 = at(1150); out.e1300 = at(1300); out.e1365 = at(1365);
+      goToDeck(3); player.obj.position.copy(cellPos(...ROOM_TILES['M'][0])); out.inMess = at(1020); T.res = 22; out.told = at(1300); PU4_LIVE.rseek = null; PU4_LIVE.walk = null; GUIDE.list.length = 0; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    ok1 = r['e1010'] and r['e1010'].startswith('3 Dinner') and r['e1150'] and r['e1150'].startswith('1 The comet, 21:30') and 'Calder finds you at 22:40' in r['e1150'] and r['e1300'] and r['e1300'].startswith('1 The comet: the observation room')
+    check(ok1, f"t4eve: from 16:45 a level 1 arrow to dinner, then the comet in the observation room, Calder at 22:40 ({r['e1010']}, {r['e1150']}, {r['e1300']})")
+    check(not (r['e1000'] or '').startswith('3 Dinner') and not (r['e1365'] or '').startswith('1 The comet') and not (r['inMess'] or '').startswith('3 Dinner') and not (r['told'] or '').startswith('1 The comet'), f"t4eve: none before 16:45 or after 22:40, in the mess, or once told ({r['e1000']}, {r['e1365']}, {r['inMess']}, {r['told']})")
+
+# (W8, S6-3's refit; DA6's 2-B asks) the refit odd job: posted once a board window from Day 23 till you move in, held for
+# you, never in the odd jobs' stream; done by you: T.move.refit, one more touch to pick, your cabin touches in room B
+# after the move (24t's cabinHome), room B named yours on the HUD; not done: no touches up there; the crew's done one: no more
+def part_refit(g):
+    if not t4on(g, 'refit'): return
+    if not g.ev("typeof P5_DECK6 !== 'undefined' && P5_DECK6 && typeof pu4RefitTick === 'function'"): print('(refit) not in this build: skipped'); return
+    print('(refit) the refit odd job, your touches up to room B:')
+    r = g.ev("""(() => { """ + T4_MOVE + """ const out = {}; SHIP.jobs = SHIP.jobs.filter(j => !pu4RefitJob(j)); W.side.cabin = { rug: 'woven rug', ledge: 'little plant' };
+      const refits = () => SHIP.jobs.filter(pu4RefitJob); setShipNow(21 * 1440 + 500); pu4RefitTick(shipNow(), false); out.before23 = refits().length;
+      setShipNow(25 * 1440 + 550); __notes.length = 0; pu4RefitTick(shipNow(), false); pu4RefitTick(shipNow() + 30, false); const j = refits()[0];
+      out.n = refits().length; out.title = j && j.title; out.board = j && boardForYou(j, shipNow()); out.notes = __notes.filter(n => /refit/i.test(n)).length; out.stream = fixTable().o.some(r => r.id === 'oj-d2suite-refit'); out.row = !!fixRow('oj-d2suite-refit');
+      out.home0 = !!cabinHome(); const keepC = deviceChoose; window.__ch = null; deviceChoose = (o, cb) => { window.__ch = o.choices; cb(1); return true; };
+      claimJob(j.id); jobStops(j).forEach((x, k) => jobStepDone(j.id, k)); out.turnin = turnInJob(j.id); for (let i = 0; i < 5; i++) { setShipNow(shipNow() + 1); __tick(); if (typeof simFlush === 'function') simFlush(); }
+      if (!puT4().move.refit) pu4Refitted(shipNow()); deviceChoose = keepC; out.refit = puT4().move.refit; out.choices = window.__ch; out.cabin = JSON.stringify(cabinData());
+      out.homeB4 = !!cabinHome(); pu4Moved(shipNow(), 'check'); const H = cabinHome(); out.home = H && H.deck + ' ' + H.home; out.name = DECKS[2].rooms.B.name;
+      pu4RefitTick(shipNow() + 1440, false); out.after = refits().filter(x => x.status === 'open').length;
+      """ + T4_MOVE.replace('const W =', 'const W2 =').replace(' W.', ' W2.').replace('const T =', 'const T2 =').replace(' T.', ' T2.') + """ SHIP.jobs = SHIP.jobs.filter(j => !pu4RefitJob(j)); setShipNow(25 * 1440 + 550); pu4RefitTick(shipNow(), false); pu4Moved(shipNow() + 600, 'check'); out.noRefit = [!!cabinHome(), DECKS[2].rooms.B.name];
+      pu4RefitTick(shipNow() + 1440, false); out.dropped = SHIP.jobs.filter(j => pu4RefitJob(j) && j.status === 'open').length;
+      """ + T4_MOVE.replace('const W =', 'const W3 =').replace(' W.', ' W3.').replace('const T =', 'const T3 =').replace(' T.', ' T3.') + """ SHIP.jobs = SHIP.jobs.filter(j => !pu4RefitJob(j)); setShipNow(25 * 1440 + 550); pu4RefitTick(shipNow(), false); SHIP.jobs.filter(pu4RefitJob).forEach(x => { x.status = 'done'; x.doneBy = 'kovac-zainab'; });
+      pu4RefitTick(shipNow() + 1440, false); out.crew = [SHIP.jobs.filter(j => pu4RefitJob(j) && j.status === 'open').length, puT4().move.refit]; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['before23'] == 0 and r['n'] == 1 and r['title'] == "Refit the visitors' suite" and r['board'] and r['notes'] == 1 and not r['stream'] and r['row'], f"refit: from Day 23, one a window, held for you, its row by id only ({r['before23']}, {r['n']}, {r['title']}, {r['board']}, notes {r['notes']}, stream {r['stream']})")
+    check(not r['home0'] and r['turnin'] and r['refit'] and r['choices'] and len(r['choices']) == 2 and '"shelf":"model ship"' in r['cabin'], f"refit: done by you, the refit kept, one more touch to pick among the empty spots ({r['turnin']}, {r['refit']}, {r['choices']}, {r['cabin']})")
+    check(r['home'] == '2 2-B' and r['name'] == 'Your quarters' and r['after'] == 0, f"refit: moved in, your touches in room B, named yours, no more refit jobs ({r['home']}, {r['name']}, {r['after']})")
+    check(r['noRefit'] == [False, 'Your quarters'] and r['dropped'] == 0, f"refit: not taken: no touches up there, the job gone once you've moved ({r['noRefit']}, {r['dropped']})")
+    check(r['crew'] == [0, False], f"refit: the crew's done it: no more posted, not yours ({r['crew']})")
+
+# (W8, MA6-2) a Tier 3 lesson asked on Friday Day 19 and missed (W.cur 'm20:ask') never holds Day 22's Tier 4 test: on
+# Day 22 the test opens; the lesson goes back to unopened and is asked again on a later day
+def part_t4carry(g):
+    if not t4on(g, 't4carry'): return
+    print('(t4carry) a lesson missed on Day 19 and the Tier 4 test on Day 22:')
+    r = g.ev("""(() => { """ + T4_TEST.replace("r.id !== 't4' && r.tier <= 3", "r.id !== 't4' && r.id !== 'm20' && r.tier <= 3").replace("pu4Set(22);", "pu4Set(22); W.cur = { id: 'm20', st: 'ask', d: 19, by: 'calder', occ: null, j: null, w: 0 }; (W.op[19] = W.op[19] || []).push('m20');") + """
+      const out = {}; out.m20 = !!WORK_MECH.m20; for (let h = 6; h <= 10; h++) { setShipNow(21 * 1440 + h * 60); careerClock(shipNow(), true); __tick(); }
+      out.cur = W.cur && W.cur.id + ' ' + W.cur.st; out.job = SHIP.jobs.some(j => j.reserved === 26); out.op19 = (W.op[19] || []).includes('m20'); out.op22 = W.op[22] || [];
+      out.again = []; for (let d = 23; d <= 30 && !out.again.length; d++) for (let h = 6; h <= 10; h++) { setShipNow((d - 1) * 1440 + h * 60); if (W.cur && W.cur.id === 't4') { W.tr.t4 = 22; W.cur = null; } ladderTick((d - 1) * 24 + h); if (W.cur && W.cur.id === 'm20') { out.again = [d, W.cur.st]; break; } }
+      return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    r2 = g.ev("""(() => { """ + T4_TEST.replace("r.id !== 't4' && r.tier <= 3", "r.id !== 't4' && r.id !== 'm20' && r.tier <= 3") + """ return { cur: W.cur && W.cur.id + ' ' + W.cur.st, op22: W.op[22] || [] }; })()""")
+    print('    never asked:', r2)
+    check(r2['cur'] and r2['cur'].startswith('t4') and 'm20' not in r2['op22'], f"t4carry: an untaken lesson of Tier 3 never goes ahead of the Tier 4 test on Day 22 ({r2})")
+    if not r['m20']: print('    (no M20 in this build: the carried lesson is a stand-in name only)')
+    check(r['cur'] and r['cur'].startswith('t4') and r['job'] and 't4' in r['op22'] and not r['op19'], f"t4carry: Day 22 opens the Tier 4 test, not the carried lesson ({r['cur']}, job {r['job']}, op22 {r['op22']}, op19 {r['op19']})")
+    if r['m20']: check(r['again'] and r['again'][0] > 22, f"t4carry: the lesson is asked again on a later day ({r['again']})")
+
+# ---- S6-7 turn 1 (W7): Basil's day with you, settled at 22:00 the evening before; his work in the Works bay; the notices
+def part_mt(g):
+    if not g.ev("typeof P5_M25 !== 'undefined' && P5_M25"): print('(mt) P5_M25 off: skipped'); return
+    print('(mt) mentoring: settled at 22:00 on Thursday, Basil\'s work in the bay 09:00-15:30, the notice, the row, the arrow:')
+    r = g.ev("""(() => { const W = __w(25, 1300, { xp: 10, tr: { ps: 12, t2: 9, t3: 15, m19: 17, t4: 22 } }); W.tier = 4; W.rank = 'specialist'; flagSet('p5n.on', 22); flagSet('p5n.off', 25);
+      const out = {}, bas = schedPeople().find(p => p.id === 'bramwell-basil'), seg = () => planDay(bas, 26).filter(x => x.to > 25 * 1440 + 540 && x.from < 25 * 1440 + 930 && /^work/.test(x.type || '')).map(x => x.deck + '|' + (placeById(x.placeId) || {}).room);
+      out.before = [...new Set(seg())]; __tick(); out.early = !!SHIP.works.mt;
+      setShipNow(24 * 1440 + 1321); __tick(); out.mt = SHIP.works.mt; out.mail = __mail().filter(m => /^Chief Ines Calder: Tomorrow/.test(m)).length; out.next = worksNext();
+      out.after = [...new Set(seg())]; out.rows = __rows(26).filter(x => /Basil/.test(x));
+      out.clean = JSON.stringify(mtClean(JSON.parse(JSON.stringify(SHIP.works.mt)))) === JSON.stringify(SHIP.works.mt); out.junk = mtClean({ day: 'x' });
+      __notes.length = 0; setShipNow(25 * 1440 + 400); __tick(); out.wake = __notes.slice(); setShipNow(25 * 1440 + 536); goToDeck(3); __tick(); out.arrow = GUIDE.list.filter(e => /^mt:bay/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label);
+      const W2 = __w(25, 1300, { xp: 10 }); W2.tier = 2; W2.rank = 'officer'; setShipNow(24 * 1440 + 1321); __tick(); out.officer = !!SHIP.works.mt; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(not r['early'] and r['mt'] and r['mt']['day'] == 26 and r['mt']['set'] == 25 and r['mail'] == 1 and 'Basil' in r['next'], f"mt: settled at 22:00 on Thursday for Friday Day 26, Calder's Mail, What's next ({r['mt']}, {r['mail']}, {r['next']})")
+    check(r['after'] and all(x == '5|w' for x in r['after']), f"mt: Basil's work 09:00-15:30 in the Works bay once settled ({r['before']} -> {r['after']})")
+    check(r['rows'] and r['rows'][0].startswith('09:00') and any('Basil' in n for n in r['wake']) and r['arrow'] and r['arrow'][0].startswith('1 '), f"mt: the row, the notice as you wake, a level 1 arrow from 08:55 ({r['rows']}, {r['wake']}, {r['arrow']})")
+    check(r['clean'] and r['junk'] is None and not r['officer'], f"mt: the save's record read back, junk dropped; not a Senior: no day ({r})")
+
+MT_DAY = """const W = __w(25, 1300, { xp: 10, tr: { ps: 12, t2: 9, t3: 15, m19: 17, t4: 22 } }); W.tier = 4; W.rank = 'specialist'; flagSet('p5n.on', 22); flagSet('p5n.off', 25); setShipNow(24 * 1440 + 1321); __tick();"""
+def part_mt2(g):
+    if not g.ev("typeof P5_M25 !== 'undefined' && P5_M25"): print('(mt2) P5_M25 off: skipped'); return
+    print('(mt2) Basil\'s hello, he watches you (follows) through a job, you watch him at the bench:')
+    r = g.ev("""(() => { """ + MT_DAY + """ const out = {}; setShipNow(25 * 1440 + 541); __bay();
+      const keep = puNearMe; puNearMe = (id, r) => id === 'bramwell-basil' ? true : keep(id, r); __tick(); out.dlg1 = DIALOGUE && DIALOGUE.id; """ + dlg_run(0) + """
+      const M = SHIP.works.mt; out.met = M.steps.met !== undefined; out.esc1 = (worksEscort({ id: 'bramwell-basil' }, shipNow()) || {}).mode;
+      __tick(); out.arrow1 = GUIDE.list.filter(e => /^mt:watch/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label);
+      simNote('job', { id: 'x', step: 'turnin' }); out.watch = M.steps.watch !== undefined; out.esc2 = JSON.stringify(worksEscort({ id: 'bramwell-basil' }, shipNow()));
+      for (let i = 0; i < 11; i++) { setShipNow(25 * 1440 + 600 + i); __tick(); } out.dw = M.steps.dw; out.dlg2 = DIALOGUE && DIALOGUE.id; { """ + dlg_run(1) + """ } out.do = M.steps.do !== undefined; out.reply = flag('mt.do');
+      out.arrow2 = GUIDE.list.filter(e => /^mt:do/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label); puNearMe = keep;
+      """ + MT_DAY.replace('const W =', 'const W2 =').replace('W.', 'W2.') + """ SHIP.works.mt.steps.met = 25 * 1440 + 545; __said.length = 0; setShipNow(25 * 1440 + 781); __bay(); __tick(); out.late = [SHIP.works.mt.steps.watch !== undefined, __said.filter(x => /^calder/.test(x)).length]; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['dlg1'] == 'mt.hello' and r['met'] and r['esc1'] == 'follow' and r['arrow1'] and r['arrow1'][0].startswith('1 '), f"mt2: the hello in the bay, then he follows you; a level 1 arrow to take a job ({r['dlg1']}, {r['esc1']}, {r['arrow1']})")
+    check(r['watch'] and '"wait"' in r['esc2'] and '5-bench-2' in r['esc2'] and r['dw'] >= 10 and r['dlg2'] == 'mt.do' and r['do'] and r['reply'] == 2, f"mt2: a job turned in, he goes to the bench; ten minutes watching him, his scene, your reply ({r})")
+    check(r['late'] == [True, 1], f"mt2: no job by 13:00, Calder sends him to the bench ({r['late']})")
+
+def part_mt3(g):
+    if not g.ev("typeof P5_M25 !== 'undefined' && P5_M25"): print('(mt3) P5_M25 off: skipped'); return
+    print('(mt3) the stuck clue (you point him to one), the late talk (three replies); not helped: he works it out:')
+    r = g.ev("""(() => { """ + MT_DAY + """ const out = {}, M = SHIP.works.mt; Object.assign(M.steps, { met: 36540, watch: 36560, dw: 10, do: 36600 }); setShipNow(25 * 1440 + 650); __bay();
+      const keep = puNearMe; puNearMe = (id, r) => id === 'bramwell-basil' ? true : keep(id, r); __said.length = 0; __tick();
+      out.stuck = __said.filter(x => /^bramwell/.test(x)); out.arrow = GUIDE.list.filter(e => /^mt:clue/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label); out.esc1 = JSON.stringify(worksEscort({ id: 'bramwell-basil' }, shipNow()));
+      out.point = typeof CASE_UI !== 'undefined' && CASE_UI.point ? CASE_UI.point.key : null; out.dlg1 = DIALOGUE && DIALOGUE.id;
+      if (out.point) { out.pick = CASE_UI.point.pick.slice(); casePointPick(out.point); out.pointed = __said.filter(x => /^bramwell/.test(x)).length > out.stuck.length; } else { """ + dlg_run(0) + """ } out.clue = M.clue; out.key = M.clueKey;
+      setShipNow(25 * 1440 + 780); out.lunch = worksEscort({ id: 'bramwell-basil' }, shipNow()); setShipNow(25 * 1440 + 816); out.esc2 = (worksEscort({ id: 'bramwell-basil' }, shipNow()) || {}).mode; __tick();
+      out.dlg2 = DIALOGUE && DIALOGUE.id; { """ + dlg_run(2) + """ } out.late = [M.late, M.steps.late !== undefined]; out.esc3 = (worksEscort({ id: 'bramwell-basil' }, shipNow()) || {}).mode; puNearMe = keep;
+      out.clean = JSON.stringify(mtClean(JSON.parse(JSON.stringify(M)))) === JSON.stringify(M);
+      """ + MT_DAY.replace('const W =', 'const W2 =').replace('W.', 'W2.') + """ Object.assign(SHIP.works.mt.steps, { met: 1, watch: 2, dw: 10, do: 3 }); setShipNow(25 * 1440 + 746); __tick(); out.self = SHIP.works.mt.clue; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    pz = g.ev("typeof casePoint === 'function'")   # PZ6's case panel in point mode: then the clue is one of its three, the key kept (mt.clueKey); without it the stand-in scene
+    hit = (r['point'] and r['clue'] == r['point'] and r['key'] is True and len(r['pick']) == 3 and r['pointed']) if pz else (r['dlg1'] == 'mt.clue' and r['clue'] == 'meter')
+    check(r['stuck'] and r['arrow'] and r['arrow'][0].startswith('1 ') and '5-bench-2' in r['esc1'] and hit, f"mt3: stuck at the bench, a level 1 arrow, you point him to a clue ({'casePoint' if pz else 'stand-in'}: {r['stuck']}, {r['arrow']}, {r['dlg1']}, {r.get('point')}, {r['clue']})")
+    if pz:   # casePoint with no fair case: the stand-in scene instead
+        r2 = g.ev("""(() => { """ + MT_DAY + """ const out = {}, M = SHIP.works.mt; Object.assign(M.steps, { met: 36540, watch: 36560, dw: 10, do: 36600 }); setShipNow(25 * 1440 + 650); __bay(); MT_LIVE.case = 0;
+          const keep = puNearMe, cp = casePoint; puNearMe = (id, r) => id === 'bramwell-basil' ? true : keep(id, r); casePoint = () => false; __tick(); out.dlg = DIALOGUE && DIALOGUE.id; { """ + dlg_run(1) + """ } out.clue = M.clue; casePoint = cp; puNearMe = keep; return out; })()""")
+        check(r2['dlg'] == 'mt.clue' and r2['clue'] == 'label', f"mt3: casePoint with no fair case, the stand-in scene ({r2})")
+    check(r['lunch'] is None and r['esc2'] == 'follow' and r['dlg2'] == 'mt.late' and r['late'] == [2, True] and r['esc3'] == 'wait' and r['clean'], f"mt3: lunch as planned; late, he hurries to you; three replies, yours kept; back to the bench ({r})")
+    check(r['self'] == 'self', f"mt3: not helped by 12:25, he works it out himself ({r['self']})")
+
+def part_mt4(g):
+    if not g.ev("typeof P5_M25 !== 'undefined' && P5_M25"): print('(mt4) P5_M25 off: skipped'); return
+    print('(mt4) Calder gives Basil his first job alone; the Record line; missed: her Mail; the Dev preset:')
+    r = g.ev("""(() => { """ + MT_DAY + """ const out = {}, M = SHIP.works.mt; Object.assign(M.steps, { met: 1, watch: 2, dw: 10, do: 3, clue: 4, late: 5 }); M.clue = 'meter'; M.late = 0;
+      setShipNow(25 * 1440 + 896); __bay(); __tick(); out.arrow = GUIDE.list.filter(e => /^mt:first/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label); out.esc = (worksEscort({ id: 'bramwell-basil' }, shipNow()) || {}).mode;
+      const keep = puNearMe; puNearMe = (id, r) => id === 'bramwell-basil' || id === 'calder' ? true : keep(id, r); setShipNow(25 * 1440 + 901); __tick(); puNearMe = keep;
+      out.dlg = DIALOGUE && DIALOGUE.id; { """ + dlg_run(1) + """ } out.done = M.steps.done !== undefined; out.tr = SHIP.works.tr.m25; out.rec = worksRecordHead().text; out.next = worksNext();
+      """ + MT_DAY.replace('const W =', 'const W2 =').replace('W.', 'W2.') + """ setShipNow(25 * 1440 + 925); __tick(); out.mail = [SHIP.works.mt.steps.done !== undefined, __mail().filter(m => /^Chief Ines Calder: Basil/.test(m)).length];
+      out.preset = DM_BEATS.filter(b => b.id === 'mt').map(b => b.day + ' ' + hhmm(b.at)); return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['arrow'] and r['arrow'][0].startswith('1 ') and r['esc'] == 'wait' and r['dlg'] == 'mt.first' and r['done'] and r['tr'] == 26 and 'Mentored Basil, Day 26' in r['rec'] and 'Basil' not in r['next'], f"mt4: Calder's scene at the bench, the row trained, the Record's line ({r})")
+    check(r['mail'] == [True, 1] and r['preset'] == ['26 08:50'], f"mt4: not there by 15:20, by Mail; the Dev preset Day 26 08:50 ({r['mail']}, {r['preset']})")
+
+CQ_DAY = """const W = __w(25, 1300, { xp: 10, tr: { ps: 12, t2: 9, t3: 15, m19: 17, t4: 22, m25: 26 } }); W.tier = 4; W.rank = 'specialist'; W.ns = { 22: { in: 1, out: 2, jobs: 0, inc: 0, late: 0 }, 23: { in: 1, out: 2, jobs: 0, inc: 0, late: 0 }, 24: { in: 1, out: 2, jobs: 0, inc: 0, late: 0 } };
+  W.ms.push(['specialist', 22], ['specialist.badge', 23], ['mentor', 26]); if (DIALOGUE) dialogueEnd(false); DIALOGUE = null; MT_LIVE.said = {}; setShipNow(24 * 1440 + 1321); out.settle = cqSettle(26); CQ_LIVE.seat = null; CQ_LIVE.sitAt = 0; CQ_LIVE.said = {};
+  const __tea = () => { if (deckDef.num !== 5) goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['t'][0])); };"""
+def part_cq(g):
+    if not g.ev("typeof P5_END !== 'undefined' && P5_END"): print('(cq) P5_END off: skipped'); return
+    print('(cq) Calder\'s question at Four weeks aboard: the Mail the evening before, the notice, the arrow, the cake and her story, she sits, the question, your answer, the Record:')
+    for pick in range(4):
+        r = g.ev("""(() => { const out = {}; """ + CQ_DAY + """ const E = SHIP.works.end; out.end0 = JSON.stringify(E); out.mail0 = __mail().filter(m => /^Chief Ines Calder: Four weeks, tomorrow/.test(m)).length;
+          const tabs = () => (WORKS_TABS || []).filter(x => !x.show || x.show()).map(x => x.id); out.tab0 = tabs().includes('career'); out.rows = __rows(26); setShipNow(25 * 1440 + 600); out.next = worksNext();
+          setShipNow(25 * 1440 + 1101); __bay(); __tick(); out.notes = __notes.filter(n => /Four weeks/.test(n));
+          setShipNow(25 * 1440 + 1116); __tick(); out.arrow = GUIDE.list.filter(e => /^end:tea/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label);
+          __tea(); const keep = puNearMe; puNearMe = (id, r) => id === 'calder' ? true : keep(id, r); setShipNow(25 * 1440 + 1121); __tick(); out.d40 = DIALOGUE && DIALOGUE.id; setShipNow(25 * 1440 + 1126); __tick(); out.dlg1 = DIALOGUE && DIALOGUE.id; { """ + dlg_run(1) + """ } out.story = E.steps.story !== undefined;
+          setShipNow(25 * 1440 + 1130); __tick(); out.early = DIALOGUE && DIALOGUE.id;
+          PLAYER_PLACE = null; setShipNow(25 * 1440 + 1146); __said.length = 0; __tick(); out.seat = CQ_LIVE.seat; out.sitSaid = __said.filter(x => /^calder/.test(x)).length; out.come = COME_TO.has('calder') && COME_TO.get('calder').placeId;
+          out.arrow2 = GUIDE.list.filter(e => /^end:sit/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).label + ' ' + (e.goal() || {}).place); out.dlg2 = DIALOGUE && DIALOGUE.id;
+          PLAYER_PLACE = '5-tea-1'; setShipNow(25 * 1440 + 1147); __tick(); out.dlg3 = DIALOGUE && DIALOGUE.id; { """ + dlg_run(pick) + """ } puNearMe = keep; PLAYER_PLACE = null;
+          out.answer = E.answer; out.asked = E.steps.asked !== undefined; out.ms = SHIP.works.ms.filter(x => /nights|question/.test(x[0])).map(x => x.join(' '));
+          out.tab1 = tabs().includes('career'); out.page = cqPage().map(b => b.text || (b.rows || []).map(r => r.text + ' (' + r.sub + ')').join('; ')).join(' / '); out.toast = __toasts.filter(t => /Your career/.test(t[0])).length;
+          out.mail = __mail().filter(m => /What you said/.test(m)).length; out.rec = worksRecordHead().text; out.clean = JSON.stringify(cqClean(JSON.parse(JSON.stringify(E)))) === JSON.stringify(E);
+          setShipNow(25 * 1440 + 1200); __tick(); out.after = (worksEscort({ id: 'calder' }, shipNow()) || {}).mode || null; out.nextAfter = worksNext(); return out; })()""")
+        if pick == 0:
+            for k, v in r.items(): print('   ', k, v)
+        else: print(f"    answer {pick}: {r['answer']}; Record: ...{r['rec'][-90:]}")
+        if pick == 0:
+            check(r['settle'] and '"day":26' in r['end0'] and r['mail0'] == 1 and any('Calder' in x and '18:40' in x for x in r['rows']) and 'Friday tea' in r['next'], f"cq: settled at 22:00 the evening before, Calder's Mail, the Schedule's row, What's next ({r['settle']}, {r['mail0']}, {r['rows']}, {r['next']})")
+            check(r['notes'] and r['arrow'] and r['arrow'][0].startswith('1 ') and 'tea corner' in r['arrow'][0], f"cq: the notice at 18:20, a level 1 arrow to the tea corner from 18:35 ({r['notes']}, {r['arrow']})")
+            check(not r['d40'] and r['dlg1'] == 'end.story' and r['story'] and not r['early'], f"cq: there from 18:40; the cake and her story from 18:45 (the guests have come); nothing more until it thins out ({r['d40']}, {r['dlg1']}, {r['story']}, {r['early']})")
+            check(r['seat'] == '5-tea-2' and r['come'] == '5-tea-2' and r['sitSaid'] and r['arrow2'] and r['arrow2'][0].startswith('1 ') and '5-tea-1' in r['arrow2'][0] and not r['dlg2'], f"cq: at 19:05 she sits, says so, the arrow shows you the seat beside her ({r['seat']}, {r['come']}, {r['arrow2']}, {r['dlg2']})")
+            check(r['dlg3'] == 'end.ask' and r['asked'] and r['ms'] == ['nights 24', 'question 26'] and r['mail'] == 1 and 'Night shift on the engines, to Day 24' in r['rec'] and r['clean'], f"cq: sat, her question; your answer kept, the milestones, the Mail as the record, the Record's lines ({r['dlg3']}, {r['ms']}, {r['mail']}, {r['rec']})")
+            check(not r['tab0'] and r['tab1'] and r['toast'] == 1 and 'Calder\'s question (Day 26)' in r['page'] and 'The last of your night shifts (Day 24)' in r['page'] and 'You told Calder' in r['page'], f"cq: the Works app's last page, Your career, once you've answered ({r['tab0']}, {r['tab1']}, {r['page']})")
+            check(r['after'] is None and 'Friday tea' not in r['nextAfter'], f"cq: asked: she doesn't come looking, What's next moves on ({r['after']}, {r['nextAfter']})")
+        check(r['answer'] == ['engines', 'bridge', 'teach', 'unsure'][pick] and 'asked what you want next' in r['rec'], f"cq: answer {pick} kept and on the Record ({r['answer']}, {r['rec'][-100:]})")
+
+def part_cq2(g):
+    if not g.ev("typeof P5_END !== 'undefined' && P5_END"): print('(cq2) P5_END off: skipped'); return
+    print('(cq2) not sat by her for three minutes: she asks anyway; missed at the tea: she comes to find you, that evening and the next day; not yet an Engine Specialist: nothing:')
+    r = g.ev("""(() => { const out = {}; """ + CQ_DAY + """ const E = SHIP.works.end; __tea(); const keep = puNearMe; puNearMe = (id, r) => id === 'calder' ? true : keep(id, r);
+      E.steps.story = 25 * 1440 + 1125; PLAYER_PLACE = null; setShipNow(25 * 1440 + 1146); __tick(); out.d0 = DIALOGUE && DIALOGUE.id; setShipNow(25 * 1440 + 1149); __tick(); out.d1 = DIALOGUE && DIALOGUE.id; { """ + dlg_run(3) + """ } out.a = E.answer;
+      SHIP.works.end = { day: 26, set: 25, steps: {}, answer: null }; const E2 = SHIP.works.end; GUIDE.list.length = 0; SHIP.flags = {}; puNearMe = keep; __bay();
+      setShipNow(25 * 1440 + 1175); out.esc1 = (worksEscort({ id: 'calder' }, shipNow()) || {}).mode || null; __notes.length = 0; __tick(); out.find = __notes.filter(n => /Calder/.test(n)); out.arrow = GUIDE.list.filter(e => /^end:find/.test(e.id)).map(e => e.level + ' ' + (e.goal() || {}).crew + ' ' + (e.goal() || {}).deck); out.screen = (goalNow() || {}).label || null;
+      out.other = DIALOGUE && DIALOGUE.id; if (DIALOGUE) dialogueEnd(false); DIALOGUE = null; setShipNow(25 * 1440 + 1330); out.esc2 = (worksEscort({ id: 'calder' }, shipNow()) || {}).mode || null; setShipNow(26 * 1440 + 610); out.esc3 = (worksEscort({ id: 'calder' }, shipNow()) || {}).mode || null;
+      puNearMe = (id, r) => id === 'calder' ? true : keep(id, r); __tick(); out.d2 = DIALOGUE && DIALOGUE.id; { """ + dlg_run(2) + """ } puNearMe = keep; out.a2 = E2.answer; out.dayA = (E2.steps.asked - (E2.steps.asked % 1440)) / 1440 + 1;
+      const W3 = __w(25, 1300, {}); W3.tier = 3; W3.rank = 'senior'; out.senior = cqSettle(26); out.none = !SHIP.works.end; out.preset = DM_BEATS.filter(b => b.id === 'cq').map(b => b.day + ' ' + hhmm(b.at)); return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['d0'] is None and r['d1'] == 'end.ask' and r['a'] == 'unsure', f"cq2: not on the seat, after three minutes by her she asks anyway ({r['d0']}, {r['d1']}, {r['a']})")
+    check(r['esc1'] == 'follow' and r['find'] and r['arrow'] and r['arrow'][0].startswith('1 calder ') and r['arrow'][0].split()[-1].isdigit() and r['screen'] == 'Calder wants a word' and r['esc2'] is None and r['esc3'] == 'follow' and r['d2'] == 'end.ask' and r['a2'] == 'teach' and r['dayA'] == 27, f"cq2: missed, she comes to find you till 22:00 and the next day; asked then ({r})")
+    check(r['senior'] is False and r['none'], f"cq2: not yet an Engine Specialist, no question settled ({r['senior']})")
+    check(r['preset'] == ['26 18:35'], f"cq2: the Dev preset, Day 26 18:35 by the tea corner ({r['preset']})")
 
 def part_t3pointer(g):
     if not t3on(g, 't3pointer'): return
@@ -643,7 +839,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev), ('seated', part_seated), ('blocked', part_blocked)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4welcome', part_t4welcome), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev), ('seated', part_seated), ('blocked', part_blocked), ('t4carry', part_t4carry), ('refit', part_refit), ('t4eve', part_t4eve), ('t3carry', part_t3carry), ('mt', part_mt), ('mt2', part_mt2), ('mt3', part_mt3), ('mt4', part_mt4), ('cq', part_cq), ('cq2', part_cq2)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')

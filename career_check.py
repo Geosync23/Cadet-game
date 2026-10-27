@@ -297,14 +297,18 @@ def fx_lifecycle(pw):
 # (Day 13) or the all-clear (Day 14); a very busy one not before Day 12. Tier 3: a steady Senior Officer (promoted on Day
 # 16; until S5-2 is built the run makes you one at 06:00 that day, xp from 0, as the promotion will) is "Trusted" by the
 # end of Day 19 and by Day 21 at the latest. The slow player is reported. With the switch off: "not yet".
-def s5_bands(ev, SUM):
-    print('(s5) Step 5\'s bands (P5_STEP5):')
-    if not ev("typeof P5_STEP5 !== 'undefined' && P5_STEP5") or SUM is None:
-        print('  not yet (P5_STEP5 off, or no first promotion in this build)'); return
+def s5_src(SUM):                                      # (s5)'s run, with Step 5's promotion, Power safety's talk and the storm's Saturday; (s6) builds on it
     S5 = SUM.replace("  for (let d = 1; d <= days; d++) {\n", "  for (let d = 1; d <= days; d++) {\n    if (d === 16 && SHIP.works && SHIP.works.tier === 2 && !(typeof P5_PROMO3 !== 'undefined' && P5_PROMO3 && typeof puPromote === 'function')) { SHIP.works.tier = 3; SHIP.works.rank = 'senior'; SHIP.works.xp = 0; }   // S5-2's promotion, until it's built\n", 1)
     S5 = S5.replace("WORK_MECH[r.id] = r.id === 't2' ? { noJob: true }", "WORK_MECH[r.id] = r.id === 't2' || r.id === 'ps' ? { noJob: true }", 1)   # ps as built: watch-only
     S5 = S5.replace("      const W = SHIP.works, c = W && W.cur;\n", "      { const r = SHIP.occasions.find(x => x.id === 'works.ps' && x.status === 'asked' && !x.met); if (r && plan !== 'lazy' && t >= r.at - 59 && t < r.at + r.len) { r.met = true; worksCareerTick(t + 1); } }   /* Power safety's talk at the junction (24u) */\n      const W = SHIP.works, c = W && W.cur;\n", 1)
     S5 = S5.replace("const work = playerShiftOn(d), wd = weekday(d);", "const work = typeof playerOnDuty === 'function' ? playerOnDuty(d) : playerShiftOn(d), wd = weekday(d);   /* the storm's Saturday is a workday (0.93.2, STORM_SAT_ON) */", 1)
+    return S5
+
+def s5_bands(ev, SUM):
+    print('(s5) Step 5\'s bands (P5_STEP5):')
+    if not ev("typeof P5_STEP5 !== 'undefined' && P5_STEP5") or SUM is None:
+        print('  not yet (P5_STEP5 off, or no first promotion in this build)'); return
+    S5 = s5_src(SUM)
     check(S5.count('playerOnDuty') == 2 and 'S5-2' in S5 and "r.id === 'ps'" in S5 and "'works.ps'" in S5, 's5: the run\'s Day 16 promotion or storm Saturday was not put in')
     runs = {}
     for plan in ('steady', 'busy', 'lazy'):
@@ -331,10 +335,52 @@ def s5_bands(ev, SUM):
     check(day(st, 18).get('band') not in ('trusted', 'relied'), f"s5: a steady Senior is \"Trusted\" before Friday Day 19 ({day(st, 18).get('xp')})")
 
 
+# (s6) Step 6 (W8, S6-9; P5_STEP6 on in a copy): Days 0-26 on paper, steady and slow (the lazy player), the steady run
+# twice, identical. Built on (s5)'s run; the move up to Deck 2 is Vance's walk (live), so on Day 25 at 20:00 the run
+# calls the walk's own end (pu4Moved), as a player who went with him would. Checks: the Tier 4 test passed Day 22 and
+# the Engine Specialist from Day 23; nights 22-24 yours at any rank (their records made; clocking in is live: 28a's checks); Basil's day and Calder's question settled for
+# Day 26 (an Engine Specialist only); after the move, room B is yours (the bed, the door plate "Senior Officer, Engine
+# Specialist") and 4-23 is a spare again; ship.works small; no page errors
+def s6_src(SUM):
+    S6 = s5_src(SUM).replace("      const t = (d - 1) * 1440 + h * 60; at(t);\n", "      const t = (d - 1) * 1440 + h * 60; at(t);\n      if (d === 25 && h === 20 && typeof pu4Moved === 'function' && typeof pu4MoveOn === 'function' && pu4MoveOn() && !pu4MoveOn().move.walked) pu4Moved(t, 'paper');   /* (s6) Vance's walk up */\n", 1)
+    S6 = S6.replace("    days_.push({ d, wd, work, jobs,", "    days_.push({ tier: W && W.tier, rank: W && W.rank, home: W && W.home, ns: W && W.ns ? Object.keys(W.ns).join(',') : '', mt: W && W.mt ? W.mt.day : null, end: W && W.end ? W.end.day : null, d, wd, work, jobs,", 1)
+    S6 = S6.replace("  return { days: days_,", "  const bed = playerBed(), mine = typeof deck2Mine === 'function' && deck2Mine(), plate = mine && typeof deck2MinePlate === 'function' ? deck2MinePlate().sub : null;\n  return { bed, mine, plate, days: days_,", 1)
+    return S6
+
+def s6_career(ev, SUM):
+    print('(s6) Step 6, Days 0-26 (P5_STEP6):')
+    if not ev("typeof P5_STEP6 !== 'undefined' && P5_STEP6") or SUM is None:
+        print('  not yet (P5_STEP6 off)'); return
+    S6 = s6_src(SUM)
+    check(S6.count('(s6)') == 1 and 'deck2MinePlate' in S6 and 'mt: W && W.mt' in S6, 's6: the run\'s move or day rows were not put in')
+    st = ev(f"({S6})({{ plan: 'steady', days: 26, t2: 'real' }})")
+    again = ev(f"({S6})({{ plan: 'steady', days: 26, t2: 'real' }})")
+    sl = ev(f"({S6})({{ plan: 'lazy', days: 26, t2: 'real' }})")
+    for name, r in (('steady', st), ('slow', sl)):
+        print(f"  {name}: " + ', '.join(f"D{x['d']} T{x['tier']} {x['xp']} {x['band']}" for x in r['days'] if x['d'] >= 20))
+        print(f"    nights {r['days'][-1]['ns']}; Basil {r['days'][-1]['mt']}; question {r['days'][-1]['end']}; home {r['works']['home']}, bed {r['bed']}, room B yours {r['mine']}, plate {r['plate']!r}; ship.works {r['size']} bytes")
+    day = lambda r, d: next((x for x in r['days'] if x['d'] == d), {})
+    W = st['works']
+    check(W['tr'].get('t4') == 22 and day(st, 22).get('tier') == 3 and day(st, 23).get('tier') == 4 and day(st, 23).get('rank') == 'specialist', f"s6: a steady Senior passes the Tier 4 test on Day 22, Engine Specialist from Day 23 ({W['tr'].get('t4')}, D22 T{day(st, 22).get('tier')}, D23 T{day(st, 23).get('tier')} {day(st, 23).get('rank')})")
+    check(day(st, 24).get('ns') == '22,23,24', f"s6: the steady run's nights 22-24 yours ({day(st, 24).get('ns')})")
+    check(day(sl, 24).get('ns') == '22,23,24', f"s6: the slow run's nights 22-24 yours, at any rank (Tier {day(sl, 22).get('tier')}: {day(sl, 24).get('ns')})")
+    check(day(st, 25).get('mt') == 26 and W['tr'].get('m25') == 26 and any(x[0] == 'mentor' for x in W['ms']), f"s6: Basil's day settled for Day 26 and done ({day(st, 25).get('mt')}, {W['tr'].get('m25')})")
+    check(day(st, 25).get('end') == 26, f"s6: Calder's question settled for Day 26 ({day(st, 25).get('end')})")
+    check(day(st, 24).get('home') == '4-23' and W['home'] == '2-B' and st['mine'] and st['bed'] != '4-23' and st['plate'] == 'Senior Officer, Engine Specialist', f"s6: moved up on Day 25: room B yours, its plate, 4-23 a spare again ({day(st, 24).get('home')} -> {W['home']}, bed {st['bed']}, {st['mine']}, {st['plate']!r})")
+    slow4 = day(sl, 25).get('tier') == 4
+    check(bool(day(sl, 25).get('end')) == slow4, f"s6: the slow run's question only for an Engine Specialist (Tier {day(sl, 25).get('tier')}, question {day(sl, 25).get('end')})")
+    check(st['size'] < 6000 and sl['size'] < 6000, f"s6: ship.works small by Day 26 ({st['size']}, {sl['size']} bytes)")
+    same = json.dumps(st, sort_keys=True) == json.dumps(again, sort_keys=True)
+    check(same, 's6: the steady run twice is not identical' + ('' if same else ': ' + next((f"Day {a['d']}: {a} vs {b}" for a, b in zip(st['days'], again['days']) if a != b), 'the end state differs')))
+
+
 with sync_playwright() as pw:
     if '--s5' in sys.argv:                                # only part (s5): python3 career_check.py BUILD.html --s5
         g = Game(pw, sys.argv[1]); g.ev("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")
         s5_bands(g.ev, SUM if g.ev("typeof promoPromote === 'function'") else None); print('CAREER CHECK OK' if ok and not g.errors else 'CAREER CHECK FAILED'); sys.exit(0 if ok and not g.errors else 1)
+    if '--s6' in sys.argv:                                # only part (s6): python3 career_check.py ON6.html --s6
+        g = Game(pw, sys.argv[1]); g.ev("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")
+        s6_career(g.ev, SUM if g.ev("typeof promoPromote === 'function'") else None); print('CAREER CHECK OK' if ok and not g.errors else 'CAREER CHECK FAILED'); sys.exit(0 if ok and not g.errors else 1)
     if '--fx' in sys.argv:                                # only part (p): python3 career_check.py BUILD.html --fx
         fx_guidance(pw); fx_window_job(pw); fx_inc_wait(pw); fx_lifecycle(pw); print('CAREER CHECK OK' if ok else 'CAREER CHECK FAILED'); sys.exit(0 if ok else 1)
     g = Game(pw, sys.argv[1])

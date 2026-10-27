@@ -567,6 +567,9 @@ def part_t4beats(b):
     t = got['t4res']; check(t['clock'].startswith('Day 22,') and t['clock'].endswith('22:30') and t['deck'] == 1 and t['rank'] == 'senior' and t['t4']['passed'] and not t['t4']['res'], f't4beats: Day 22 the result: {t}')
     t = got['t4badge']; check(t['clock'].endswith('16:00') and t['deck'] == 1 and t['rank'] == 'specialist' and t['t4']['res'] == 22 and not t['t4']['badge'] and t['badge'] == 1, f't4beats: Day 23 the badge booked: {t}')
     t = got['t4move']; check(t['clock'].endswith('18:30') and t['deck'] == 3 and t['t4']['move'] and t['t4']['move']['ready'] == 25 and not t['t4']['move']['walked'] and t['home'] == '4-23', f't4beats: Day 25 the move: {t}')
+    if pg.ev("typeof P5_END !== 'undefined' && P5_END"):   # (S6-9, W8) Calder's question: Day 26 18:35 by the tea corner, the question settled
+        beat('cq'); pg.step(20); q = pg.ev("({ clock: clockText(), room: ROOMS[roomAt(...player.here())].name, rank: SHIP.works.rank, end: SHIP.works.end })"); print('    cq', q)
+        check(q['clock'] == 'Day 26, Friday 18:35' and q['room'] == 'Tea corner' and q['rank'] == 'specialist' and q['end'] and q['end']['day'] == 26 and not q['end']['answer'], f't4beats: Day 26 Calder\'s question: {q}')
     check(not pg.errors, f't4beats: errors {pg.errors[:3]}')
     pg.close(); ctx.close()
 
