@@ -33500,7 +33500,7 @@ const LINES = JSON.parse([
   '{"text":"calder: Good chain. Water, then off you go.","id":"16ttzhe"}]',
   ',"event.veyliVessel.talk.homeFind":[',
   '{"text":"calder: There you are. Taavek won\'t go without saying goodbye.","id":"1am2pf0"},',
-  '{"text":"calder: The Tern\'s waiting. So\'s Isak, on his day off. Come on.","id":"kvsh0a"}]',
+  '{"text":"calder: The Tern\'s waiting. So\'s Isak. Day off, and still flying. Come on.","id":"1bdidqt"}]',
   ',"event.veyliVessel.talk.lap":[',
   '{"text":"tomas: Taavek! Walk the lap with us? It\'s just walking. Round the ship.","id":"14v7vdy"},',
   '{"text":"taavek: Round! A round one. I come. I draw while I walk.","id":"1z0k9lf"}]',
@@ -46897,10 +46897,10 @@ function vesselFind(v) { vesselFetch(v, 'calder', 'vessel:found', 'talk.rampFind
 // the writers' "who: line" lines there, and goes back after `mins`; once a run (the flag). Live only
 function vesselFetch(v, who, flag, key, alt, mins) {
   if (typeof crewComeTo !== 'function' || typeof deckDef === 'undefined' || !deckDef || v.e.mine[flag]) return;
-  v.e.mine[flag] = 1;
   const p = player.obj.position, mine = roomAt(...player.here()), P = (DECKS[deckDef.num].places || []).filter(pl => pl.room === mine && !pl.machine && pl.pose !== 'lie' && !(typeof heldBy === 'function' && heldBy(pl.id)));
   const pl = P.map(q => { const c = q.xy ? cellPos(q.xy[0] - .5, q.xy[1] - .5) : cellPos(...q.at); return [q, Math.hypot(c.x - p.x, c.z - p.z)]; }).sort((x, y) => x[1] - y[1] || (x[0].id < y[0].id ? -1 : 1))[0];
-  if (!pl) return;
+  if (!pl) return;                                      // nowhere free to stand by you (the lift car, a full room): tried again next minute (RV22)
+  v.e.mine[flag] = 1;
   const L = (vesselWords(key) || alt).map(t => evFill(t.slice(t.indexOf(': ') + 2), evCtx(v.e)));
   crewComeTo(who, pl[0].id, a => { a.talking = 2; bubbleSay(friSpeaker(a), L[0], 6); if (L[1]) simTimeout(() => { try { bubbleSay(friSpeaker(a), L[1], 6); } catch (err) { /* gone */ } }, 4500); }, { until: v.now + mins });
 }
@@ -47238,7 +47238,7 @@ function vesselShopTap(it, at) {
   const M = v.e.mine, s = M['vessel:step'] | 0; if (!M['vessel:job'] || s < 1 || s > 5 || M['vessel:part']) return false;
   if (DIALOGUE || typeof ACT !== 'undefined' && ACT && ACT.kind === 'vesselStep') return true;
   if ((M['vessel:wait'] || 0) > v.now) { toast('Machine shop', vesselW('wait', 'The lathe\'s still turning. Taavek holds up ten fingers, then fewer.')); return true; }
-  if (shopMachineOf(it) !== VESSEL_STEPS[s].at) { toast('Machine shop', vesselW('ring.step.' + s, 'Taavek\'s part first') + ': ' + (VESSEL_STEPS[s].at === '5-shop-lathe' ? 'at the lathe.' : 'at the bench.')); return true; }
+  if (shopMachineOf(it) !== VESSEL_STEPS[s].at) { toast('Machine shop', vesselW('ring.step.' + s, 'Taavek\'s part first') + ': ' + (VESSEL_STEPS[s].at === '5-shop-lathe' ? 'at the lathe.' : 'at the fabricator.')); return true; }
   vesselStepStart(v, s); return true;
 }
 // live (vesselWhere asks): Monday, your two helpers in the machine shop with Taavek from the card to the test fit

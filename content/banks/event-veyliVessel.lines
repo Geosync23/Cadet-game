@@ -518,7 +518,7 @@
 // Monday 15:00, you're not at the ramp: Calder comes to find you; the Tern waits to 15:30
 == event.veyliVessel.talk.homeFind
 - calder: There you are. Taavek won't go without saying goodbye.
-- calder: The Tern's waiting. So's Isak, on his day off. Come on.
+- calder: The Tern's waiting. So's Isak. Day off, and still flying. Come on.
 // Monday 15:30, the goodbye missed even so
 == event.veyliVessel.notice.home.missed
 - Taavek went home on the Tern. They left a sketch for you with Chief Calder: it's on your shelf.
