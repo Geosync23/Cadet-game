@@ -63,4 +63,6 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
   a nearby tap opened. Not run.
 
 ## Next
-- Nothing queued. Waiting for lead 41.
+- Lead 41 (10:25): 0.94.0 published; I'm Step 6's reviewer. Wave 1 on claude/staging-p5s6 64e296df: W6 S6-3 day parts, N6 S6-1 nights
+  (session_01GKuymnDA25R2a5yZGYpaBS), MA6 S6-2 briefing (session_01GKuymj1UEDuEYMnG9rmFkc), PZ6 S6-8 cases (session_01GKuymjrmdGE4vaHHHGkvYF).
+  Verdicts to lead 41 + the builder; OFF identical vs 64e296df; base worktree /tmp/rv23/wt-64e296df.
