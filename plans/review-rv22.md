@@ -62,3 +62,4 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
   S1 should: the friends' Mail is sent at the promotion (~08:30) with `at` = 12:30, so it sits in the inbox at once,
   dated in the future (mailSend files it immediately; section 18 clamps such dates with Math.min(shipNow(), at)). Running:
   machine_check ON, promo_beats_check ON, cadet_test 5957d244 vs f00d93c1.
+- 01:37 UTC: VB2 says claude/ending-checks is ready (571b073f, test only on d1a61402; arrows endstay/endgo 7 ways OK, controller ending OK, day 31/50 ON OK). Note to check: farewells in a crowd by walking up, not the pad ring. Queued after B3.
