@@ -42,3 +42,16 @@ Claude-Session: https://claude.ai/code/session_01GnpjFR6oumvuvTrmcXSqeg" && git 
 - Since 0.93.3 Settings has a three-way **Doors** row ("Doors. Private rooms are…": All open by themselves / Private rooms: tap to open / All doors: tap to open) in place of 0.93.2's Auto doors On/Off; test for that wording.
 - Loose end for the user: the live claude.ai download prompt (Saves → Download my save) has never been seen by a publisher; the local test only reaches the plain-link fallback.
 - The game's switches read `?query` OR `#hash` tokens (`#a.b-c`), but in the claude.ai viewer only the plain `#hash` reaches the page; a preview page sets its tokens with a first-line `history.replaceState` script, as the Dev and promotion-preview pages do.
+
+## Moving to another account (lead 40, 2026-10-27)
+The user is moving the project to another account. Every live page below is owned by **this** account. A session on the new account **cannot update any of them**: it must publish **new links**, unless this account shares edit access to a page with the new account from that page's Share menu. Saves live in each page's own browser storage, so a new link starts with no save (Saves → Download my save on an old page, then Load a save file on the new one, carries a game across).
+
+| Page | Link | Version / build | Capabilities | Rule |
+|---|---|---|---|---|
+| Playtest (current) | https://claude.ai/artifact/3HqM5XiXaHXzgrpq7JbesJ | v7 = 0.93.3 (staging-0.93.3 19400976) | downloads | updated each release |
+| Dev (current) | https://claude.ai/artifact/9ZWAgqiZCvkJvVjjhjVkEr | v7 = 0.93.3 | downloads | updated each release |
+| Dev: promotion preview | https://claude.ai/artifact/AvpWrMumcGiw4UYUpXd2X5 | v1 = claude/p5s5-promo 5703dfb6 (0.93.2 base, #dev.p5s5) | downloads | early preview |
+| Dev (old, the user's current save) | https://claude.ai/artifact/6daNCLCJAcsLCZn27CEthq | v11 = 0.92.2 | none | **never publish over it** unless the user explicitly says so |
+| Playtest (old, a save of the user's) | https://claude.ai/artifact/Wn6mUGcxatoWVqhCNTa1vs | v11 = 0.92.2 | none | leave alone |
+
+Also live on this account (no capabilities unless noted): Sim Bay Preview https://claude.ai/artifact/G1fpE2YeMtPukqTZ2J3u77, Sim Flight Prototype https://claude.ai/artifact/RMgibsuh2KdxcF3kd8vuJr, appointments pitch https://claude.ai/artifact/CTLouY4DK2gFuWBF8YwS3L (db: the user's answers at answers/user, readable with ArtifactData only from this account).
