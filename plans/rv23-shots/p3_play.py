@@ -55,13 +55,13 @@ with sync_playwright() as pw:
     WHERE = PART if PART in ('bay', 'mess') else 'mess'
     def setup():
         g.ev("(() => { const W = SHIP.works; W.tier = 2; W.rank = 'officer'; W.xp = 60; W.tr.ps = W.tr.ps || 12; })()")
-    jump(g, D(14, 8, 21)); setup()
+    jump(g, D(15, 8, 21)); setup()
     if WHERE == 'bay': deck(g, 5, None); g.ev("player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); player.stop()")
     else: deck(g, 3, "'3-lounge-24'")
-    g.step(10); print('ready', g.ev("[puReady(14), worksBand(), SHIP.works.tier, SHIP.works.rank, typeof PU_LIVE !== 'undefined' && PU_LIVE.seek]"))
+    g.step(10); print('ready', g.ev("[puReady(15), worksBand(), SHIP.works.tier, SHIP.works.rank, typeof PU_LIVE !== 'undefined' && PU_LIVE.seek]"))
     near = lambda: g.ev("(() => { const a = DECK_CREW.find(c => c.p && c.p.id === 'calder'); return a ? +Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z).toFixed(1) : null; })()")
     trail = []
-    while g.ev('shipNow()') < D(14, 9, 40):
+    while g.ev('shipNow()') < D(15, 9, 40):
         g.step(20, 100); trail.append((g.ev("hhmm(shipNow() % 1440)"), near(), g.ev("!!(PU_LIVE.seek)")))
         if g.ev("!!DIALOGUE"): break
     print('trail', trail[::6], trail[-3:])

@@ -13,8 +13,9 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
 | claude/check-offcopies (test only) | code read OK, not run | 00161062 |
 | claude/p5s6-mech-a (MA6): M21 the Monday briefing | PASS | 27166be |
 | claude/p5s6-puzzles (PZ6): S6-8 P6-P8 | PASS | fd1f27f (= aed3f73, e16be28) |
-| claude/p5s6-nights (N6): S6-1 turns 1-3 | FIXES NEEDED (1 must: Calder not in person Day 22; 1 should: 2.2 m reach) | c806c78 |
-| claude/p5s6-promo4 (W6/W7): S6-3 turns 1-4b | FIXES NEEDED (must: Calder stuck in the lift car, no offer in person) | 9ac35bfd |
+| claude/p5s6-nights (N6): S6-1 turns 1-5 | PASS with W7's escort fix merged (must + should cleared) | 06b6a158 + cffe8187 |
+| claude/p5s6-promo4 (W6/W7): S6-3 up to 9dcd0b1a | PASS (must + should cleared) | 9dcd0b1a |
+| claude/escort-follow-fix (W7): escortStep follow while you sit | PASS (live pu3 re-running) | cffe8187 |
 | claude/p5s6-deck (DA6): S6-4 Deck 6 kit | PASS | 469b606b |
 | claude/p5s6-mech-a (MA6): M24 leading a team | PASS | 8f943e82 |
 | claude/p5s6-deck (DA6): turns 2-3, the rack and Deck 2 | PASS | dd32a9a7 |
@@ -100,4 +101,7 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
 - N6 06b6a158: cadet identical alone vs 8d1c749f (one start-frame diff beside another check, 0 alone); player_check night part OK;
   controller nights OK; 6 m reach done. Open: the lift-car escort must (W7's fix at the source); then re-run n6_play.py.
 - DA6 9332d5a1: PASS. cadet identical vs d39b87a6; mech m23 OK (11 stops). shoulds: controller part, a 390x844 shot of the ring at stop 1.
-- Waiting: W7's escort fix.
+- Escort fix cffe8187: cadet identical vs 6f1915cb; intro --evening OK. Cause (W7): the follow's goal was your own (seat) tile, never free.
+- W7 de6d5525 live (p4_play): seated, Calder 22.2 m -> 2.6 m by 08:37, offer scene opens. 9dcd0b1a controller promo4 OK.
+- N6 06b6a158 + cffe8187 scratch merge (n6_play): Calder 20.8 m -> 5.4 m by 09:28, night.on opens and plays.
+- Queued: W7 9d24b9f9 (S6-7 mentoring: cadet + day_check 26 ON, the mtDesk planner hook). p3_play (Tier 3 offer, seated, Day 15) re-running.
