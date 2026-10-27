@@ -2703,7 +2703,7 @@ S6_SETUP = r"""(() => { skipTo(24 * 1440 + 1140); const W = worksInit(shipNow())
   goToDeck(5); return C.open.map(c => c.kind).join(','); })()"""
 def part_s6cases(pw, src, tag):
     fails = []
-    if S6_LINE not in src: return ['the build has no P5_STEP6 switch line']
+    if S6_LINE not in src and not re.search(r'\bconst P5_STEP6\s*=\s*P5_STEP5\s*&&\s*true\b', src): return ['the build has no P5_STEP6 switch line']   # (BM19) or already on (0.95.0)
     r = Run(pw, src.replace(S6_LINE, 'const P5_STEP6 = P5_STEP5 && true;'), f'{tag}_s6', mode='pad', plug={}, w=390, h=844)
     r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
     got = r.ev(S6_SETUP)
@@ -3324,7 +3324,7 @@ def d6_ring(r, word, tries=12):
     return None, seen
 def part_deck6(pw, src, tag):
     fails = []
-    if S6_LINE not in src or 'function deck6P5Places' not in src: print('  deck6: not in this build (S6-4)'); return fails
+    if (S6_LINE not in src and not re.search(r'\bconst P5_STEP6\s*=\s*P5_STEP5\s*&&\s*true\b', src)) or 'function deck6P5Places' not in src: print('  deck6: not in this build (S6-4)'); return fails
     r = Run(pw, src.replace(S6_LINE, 'const P5_STEP6 = P5_STEP5 && true;'), f'{tag}_d6', mode='pad', plug={}, w=390, h=844)
     r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
     if not r.ev(D6_SETUP): r.close(); return ['deck6: no Works record on Day 23 (worksInit) or no rack']
@@ -3376,7 +3376,7 @@ PU4_SETUP = r"""((day, min) => { introSkip(); const W = worksInit(Math.max(shipN
   skipTo((day - 1) * 1440 + min); machinesNow(); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; return true; })"""
 def part_promo4(pw, src, tag):
     on = p6_copy(src)
-    if on == src or 'function pu4Promote' not in src: return ['not yet: no P5_STEP6 switch line or no Engine Specialist promotion in this build']
+    if (on == src and not re.search(r'\bconst P5_STEP6\s*=\s*P5_STEP5\s*&&\s*true\b', src)) or 'function pu4Promote' not in src: return ['not yet: no P5_STEP6 switch line or no Engine Specialist promotion in this build']
     fails = []
     r = Run(pw, on, f'{tag}_pu4', mode='pad', plug={}, w=390, h=844)
     r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
