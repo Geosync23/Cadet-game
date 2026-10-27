@@ -7,6 +7,7 @@ Cap rule: at most 5 seats working at once; read only until RV23 says it has gone
 ## Verdicts
 | Branch | Verdict | Sha |
 |---|---|---|
+| claude/m24-pick-pointer (AS1): night 3's pick ring | PASS | 5f649b45 |
 | claude/escort-seated-check (PZ6, test only) | code read OK (glance, lead 42); run later | 775c3ca |
 
 ## W8 claude/p5s6-promo4 bd138090 (S6-7 clue by casePoint, S6-9 turn 1 Calder's question, worksEscort change); base 62a8ac0b
@@ -56,3 +57,13 @@ Code read (no runs yet):
 
 ## DA6 runs (tip 0f859eca, base 40f3bdac)
 - cadet ALL IDENTICAL apart from renderer noise (beside another browser: re-run alone); mech m23 (ON) OK.
+
+## AS1 claude/m24-pick-pointer 5f649b45 (base 40f3bdac): PASS
+- cadet ALL IDENTICAL (1-level renderer noise beside another browser: re-run alone pending); arrows_check (claude/arrows-step6's) step6
+  asis OK: night 3's swap reached by arrows, 740 min due, 0 missed, 0 stuck; controller m24 OK. AS1's arrows-step6 ee18d663: code read OK.
+
+## DA6 S6-5 runs (tip 0f859eca): interactions OK; controller m23 deck6 OK; m23_door.py: door shut before permit / badge / the Watch
+  told, open (10-tile path) once told, open while out but inside, shut once outside; late-badge word at 31 min; no page errors.
+
+## W8 618c2901 (fixes): cadet identical vs 40f3bdac (noise; re-run alone); promo_beats cq cq2 t4eve t3carry t4test t4passed OK;
+  devmode set t4beats OK; cq_play stand: story 18:45, "Budge up" 19:05, guests by the opening, ask 19:08, Record with the nights.
