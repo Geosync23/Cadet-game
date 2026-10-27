@@ -1911,5 +1911,42 @@ if True:
         check(not g.errors, f'no console errors in the comet part ({g.errors[:3]})')
         g.close()
 
+# MA6-1 (PZ6 for lead 41): an ordinary team job (24h, M8) as a real player at phone size. An Officer in the Day 17
+# scrubber job (the rota's own, posted the day before), at your spot: the job is one of your chores at your turn; a real
+# tap on your spot's floor starts your turn (Holding) and, done, the job moves on to the next step; a tap during
+# someone else's step is refused (24h's veto: "Not yet"), nothing done
+TEAM_SET = r"""(() => { const reset = t => { machinesNew(); SHIP.jobs = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; worksInit(t); SHIP.works.team = { plan: {} }; SHIP.works.inc = { plan: {}, open: null }; };
+  reset(15 * 1440 + 900); SHIP.works.rank = 'officer'; SHIP.works.tier = 2; let j = null;
+  for (let t = 15 * 1440 + 900; t <= 16 * 1440 + 900; t += 5) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); j = SHIP.jobs.find(x => x.kind === 'team' && x.claimedBy === 'you'); if (j && t >= j.start - 5) break; }
+  if (!j) return null;
+  for (const k of NEED_KEYS) SHIP.player.needs[k] = 90;
+  goToDeck(j.deck); const s = placeSpot(j.spots.you); player.obj.position.set(s.x, player.obj.position.y, s.z); target.copy(player.obj.position).setY(.7); player.stop();
+  window.__tj = j.id; return { id: j.id, spot: j.spots.you, seq: j.seq.map(x => x.who) }; })()"""
+TEAM_TO = r"""((mine) => { const j = SHIP.jobs.find(x => x.id === window.__tj);   // the clock to the next step that is (mine) or isn't yours
+  for (let t = shipNow(); t < j.start + 120; t++) { setShipNow(t); for (const f of WORK_TICKS) f(t, false); if (j.cur >= 0 && j.cur < j.seq.length && (j.seq[j.cur].who === 'you') === mine) break; }
+  return { cur: j.cur, who: j.seq[j.cur] && j.seq[j.cur].who, chores: ixChores().map(x => x.id) }; })"""
+TEAM_XY = r"""(() => { const j = SHIP.jobs.find(x => x.id === window.__tj), s = placeSpot(j.spots.you), v = new THREE.Vector3(s.x, .05, s.z).project(camera), r = renderer.domElement.getBoundingClientRect();
+  return [r.left + (v.x + 1) / 2 * r.width, r.top + (1 - v.y) / 2 * r.height]; })()"""
+TEAM_ST = r"""(() => { const j = SHIP.jobs.find(x => x.id === window.__tj); return { cur: j.cur, done: (j.stepsDone || []).slice(), act: ACT && ACT.kind, job: ACT && ACT.o && ACT.o.job, toast: (document.getElementById('toast') || {}).textContent || '' }; })()"""
+if True:
+    print('\nA team job\'s turn by a real tap (MA6-1):')
+    with sync_playwright() as pw:
+        g = Game(pw, sys.argv[1], 390, 844); g.step(5)
+        g.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)")
+        T = g.ev(TEAM_SET); print('  ', T)
+        check(T and 'you' in T['seq'], f"a team job with you in it, at your spot: {T}")
+        if T:
+            g.step(20); a = g.ev(f"({TEAM_TO})(false)"); g.step(6)
+            x, y = g.ev(TEAM_XY); g.page.mouse.click(x, y); g.step(240); early = g.ev(TEAM_ST); print('   out of turn:', a, early)
+            check(not early['done'] and early['cur'] <= 1, f"a tap during someone else's step does none of yours (the lead's step runs on by itself): {early}")
+            b = g.ev(f"({TEAM_TO})(true)"); g.step(6); print('   your turn:', b)
+            check(T['id'] in b['chores'], f"at your turn the team job is one of your chores (15b's ixChores): {b['chores']}")
+            g.ev("actEnd(true)"); g.step(4); x, y = g.ev(TEAM_XY); g.page.mouse.click(x, y); g.step(30); c = g.ev(TEAM_ST)
+            check(c['act'] == 'ixStop' and c['job'] == T['id'], f"a real tap on your spot starts your turn: {c}")
+            g.step(300); d = g.ev(TEAM_ST); print('   after:', d)
+            check(0 in d['done'] and d['cur'] > b['cur'], f"your turn done, the job on to the next step: {d}")
+        check(not [e for e in g.errors if e.startswith('pageerror')], f'no page errors in the team part ({g.errors[:2]})')
+        g.close()
+
 print('INTERACTIONS CHECK OK' if ok else 'INTERACTIONS CHECK FAILED')
 sys.exit(0 if ok else 1)

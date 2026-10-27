@@ -294,3 +294,19 @@
 - The rig says how many, not which. Test half, then half of that.
 == chief.p8.2
 - Three runs find one in eight. Five is easy, if you plan the runs.
+
+// casePoint (S6-7's mentoring: point Basil to a clue; PZ6): Fault notes' point mode
+== case.point.title
+- {name}'s head-scratcher: {machine}
+== case.point.sus
+- What {name} suspects
+== case.point.out
+- ruled out
+== case.point.has
+- What {name} has read
+== case.point.ask
+- Point {name} to one more:
+== case.point.to
+- Point to: {text}
+== case.point.scan
+- the scanner, at the panel
