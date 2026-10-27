@@ -30,3 +30,4 @@ The user, ~03:58 UTC: "After step 6 publish though": Step 6 ships (full round + 
 
 ## Results
 - 0.94.0 published ~10:23 UTC (6:23 AM Eastern) on NEW links: Playtest https://claude.ai/artifact/7hQ14AcwZHCi5EvL1AKiMU , Dev https://claude.ai/artifact/KEyaHvon6ZaVHHFRdAe18m . Old links untouched. claude/integration NOT yet fast-forwarded (waits for the user).
+| 6 | Night 3 (Day 24): Kowal is reserve/away, Reyes + Jovanovic off, so the engine crew is Keane alone; a team needs two. | **Picker = Keane + the night Watch ratings (Garcia, Park: ready 20 min later, slower on a coil)**; good pick ~46-52 min, poor pick runs over the hour, never fails (MA6). | Keeps the roster's facts and gives a real choice. |
