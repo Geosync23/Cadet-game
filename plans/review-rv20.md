@@ -270,3 +270,60 @@ playerTap.
 B5 check list (planned): cadet_test vs 5957d244; promo_beats_check (on copy, all parts) and t3off (off); dev_arrow pu3;
 saves promo3; controller promo3; career_check --s5; arrows_check step5 (and teachoff, track); day_check 15, 16;
 check_fast; plus plans/rv20-pu-live.py.
+
+## Resumed (lead 40: finish by 00:45 UTC). Verdicts
+### b7e84f81 (team arrow): PASS
+mech_check teamgoal m8 OK (and teamgoal FAILS on c79a66dc, as it should); cadet_test vs c79a66dc ALL IDENTICAL (renderer
+noise only); check_fast OK in 419 s. arrows_check not run by me (B2: OK).
+
+### deefa61a (B2 M19 + turn 2 + B1's ladder merge): PASS for B2's work; the build carries B1's machine_check FAIL
+All three musts done: M1 (asked on Day 17 with m15 / m17 untrained), M2 (Calder in the relay room from 10:53 for 11:00),
+M3 (your training relay stop by stop by tap). cadet_test vs c79a66dc ALL IDENTICAL; on copy mech m19 m15 wstap OK;
+controller_check m19 OK.
+**machine_check "traced faults", the same twice False, on the on copy.** Bisected (each a copy with P5_STEP5 = true):
+283aed60 OK, 3da2b3a1 OK, B2's 3c38a65f OK, **51b1a9c6 FAIL**, deefa61a FAIL, e7ff9253 FAIL; off builds OK. So it is B1's
+last commit (ladder order: ladderBigP5 / ladderClearDay read eventDay and evBeatsOn; the m15 fold-in onSim; psAsk /
+p5Escort). Sent to B5 (owner of 24 core now) as a must. No Step 5 branch carrying 51b1a9c6 should merge until it's fixed.
+
+### e7ff9253 (B5: the Senior Officer promotion, with B1 51b1a9c6 and VB2 69eb706d): FIXES NEEDED (M1 only)
+| Check | Build | Result |
+|---|---|---|
+| cadet_test vs 5957d244 | e7ff9253 off | ALL IDENTICAL (renderer noise only) |
+| check_fast | e7ff9253 | QUICK CHECK OK in 330 s |
+| promo_beats_check (all parts) | on copy | PROMO BEATS CHECK OK |
+| machine_check | on copy | FAILED: traced faults, not the same twice (51b1a9c6, above) |
+| played, 390 x 844 (plans/rv20-pu-live.py) | e7ff9253 ?p5s5 | below |
+Not run (time): arrows_check step5 / teachoff / track, dev_arrow pu3, saves promo3, controller promo3, career --s5,
+day_check 15 / 16 (B5 reports all OK).
+
+Played (Dev "Set career to Day 13", then 15; my probe hooked twice after the second Set, so every logged line after it
+shows twice: not the game):
+- Day 14, the all-clear party in the bow lounge, 19:06: Calder is in the lounge and the scene pu3.offer.party plays;
+  then the Mail ("As I said: tomorrow, 09:00...") and the urgent notice "Your Tier 3 test: tomorrow, 09:00, the job board
+  in the Works bay." In person first, Mail as the record. Friends' luck Mails at 20:08 (Tomas, Yara). Good.
+- Day 15: 08:40 the urgent notice "Today: your Tier 3 test, 09:00..." (its toast again at 08:43); 08:44 Calder in the bay
+  "Morning. Nine o'clock it goes on the board. You've eaten?"; the level 1 arrow (pu3:testday) and Tracked "09:00 Your
+  Tier 3 test". Good. (The test itself not played by hand: promo_beats_check and B5's arrows step5 cover it.)
+- Day 16 08:02: Calder in her office; the arrow (pu3:result) and Tracked "08:15 Your result: the Chief's office". At 08:15
+  the result scene with Calder seated at her desk and you in the visitor chair (shot pu_result_mid: readable). Then
+  tier 3, rank senior; the Captain's Mail "Your bar, 16:30"; friends' Mails.
+- 16:05 the urgent notice "The Captain pins your bar at 16:30... Go now." and Calder "Observation room. Half four. Go.";
+  the arrow (pu3:bar). At 16:30 the bar scene in the observation room with the Captain, Vance, Calder, Torres and the crowd
+  standing (shot pu_bar_mid "By the Survey Service, I make you a Senior Officer of the Wren."). Good.
+- Day 17 18:40 the urgent notice for the toast, the arrow (pu3:toast); at 19:00 the toast scene in the Captain's quarters
+  with Marrow, Vance and Calder there. Good.
+
+**Must:** M1 the machine_check FAIL above (B5 owns 24 core).
+**Should:**
+- S1. Friends' Mails at 08:16 on the result day say "Heard at lunch" (it's breakfast time).
+- S2. "Works reputation down: New officer" toasts straight after the promotion (the new tier's band starts low): reads
+  as a demotion at the happiest moment. Say it as the new tier's start, or skip the toast on promotion.
+- S3. An empty toast titled "Visitor chair" as you sit for the result.
+- S4. Dev mode's presets for Days 17 and 18 still train m15 and m17, unlike EP2's ladder order (m15 folds into m19, m17
+  waits): the Dev career doesn't match the game.
+**Old, not Step 5 (for the backlog):** a "Tonight?" Mail from Tomas whose body is "(c, p) => tradText(t, 'ask', c, p) Tomas"
+(a function printed as text): the same code is in 5957d244 (section 18 traditions, ask: a function passed where text is
+read).
+
+The promotion itself meets the user's three rules in play: every beat in person first, a level 1 arrow and notices
+each day, staged scenes with the right people in the right rooms. Controller and arrows not re-run by me.

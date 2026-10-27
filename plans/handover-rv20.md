@@ -17,7 +17,7 @@ link for the user).
 | B3 shutdowns | 5ad090ff | FIXES NEEDED (M1 teacher: B5's e7ff9253; M2, M3: B3's 9ab93abf, not reviewed) |
 | B2 tap fix (0.93.4) | c79a66dc | PASS |
 | EN1 careerOff hook | cd4196d5 | OK (one-line career review for lead 40 / RV21) |
-Open: b7e84f81, deefa61a, e7ff9253, 9ab93abf (status in review-rv20.md).
+Open: 9ab93abf (B3 shutdown fixes, not started). Done since: b7e84f81 PASS; deefa61a PASS for B2 (the build carries 51b1a9c6's machine_check FAIL); e7ff9253 FIXES NEEDED (that FAIL; shoulds S1-S4). See review-rv20.md, last section.
 
 ## Builders
 B2 mechanics A session_015mjNkxuGoEZGKA2ksBPz9u (claude/p5s5-mech-a, claude/workstep-tap-fix); B3 session_014FBmsiTsA9QymoN2qt4NyL
