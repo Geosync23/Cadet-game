@@ -17,7 +17,7 @@
 | arrows_pointer_check | OK | arrows_pointer_check: OK |
 | dev_arrow_check | OK | DEV ARROW CHECK OK |
 | arrows_check (default parts) | OK | ARROWS CHECK OK |
-| arrows_check step5 | handed to R3 (free slot), see R3's notes | |
+| arrows_check step5 | OK (run by R3, taken from R1) | exit 0, ARROWS CHECK OK (plans/checks-s6-r3.md) |
 | arrows_check step6 asis / teachoff / track / skiptea | **FAIL (NEW)** x4 | stuck from Day 23 22:20 at m23:badge "Take a badge" (Deck 6); "the welcome: its level-1 arrow (pu4:welcome) never led" |
 
 ## The step6 FAIL: one game gap, one check gap
@@ -34,5 +34,8 @@
   running hot. Coil 2 a little cool."); the follower read "cool" and pressed + on Coil 1 from 00:29 to about 05:50, so
   night 1 ran over and pu4:welcome never led. It now reads its own coil (the card's heading). Also: m23 in S6_RX and two
   beats, 'engine work (night 1)' (side.m23.d1) and 'the reactor (night 2)' (side.m23.d2).
+
+DA6's fix (claude/p5s6-deck 39d69ae: badge, return -> '6-dosi-rack'; reactor -> '6-reactor-1-svc', which is what
+panelPlace('6-reactor-1') gives) is the one tested above.
 
 **R1: NO-GO on e0084ca9** until 28c's night 2 arrows are fixed; then step6 x4 again with the fixed check.
