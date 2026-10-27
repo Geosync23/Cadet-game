@@ -7,7 +7,8 @@ Cap rule: at most 5 seats working at once; read only until RV23 says it has gone
 ## Verdicts
 | Branch | Verdict | Sha |
 |---|---|---|
-| claude/p5s6-deck (DA6): S6-5 nights 1-2, keepsakes to room B, door fix | PASS (1 should: frames not visible in my shot) | 2df6bfce |
+| claude/p5s6-promo4 (W8): S6-7, S6-9, MA6-2, refit, DM rows, RV24's fixes | PASS (2 shoulds) | 6f13b61a |
+| claude/p5s6-deck (DA6): S6-5 nights 1-2, keepsakes to room B, door fix | PASS (1 should: frames not visible in my shot) | 2df6bfce, 5c27b740 |
 | claude/m24-pick-pointer (AS1): night 3's pick ring | PASS | 5f649b45 |
 | claude/escort-seated-check (PZ6, test only) | code read OK (glance, lead 42); run later | 775c3ca |
 
@@ -72,3 +73,11 @@ Code read (no runs yet):
 ## DA6 2df6bfce: PASS (sent 17:2x)
 - cadet identical (abf496f3 clean vs 40f3bdac; alone run of 2df6bfce pending); deck_check ON OK; d2b_look.py: home 2-B, all three
   keepsakes on Deck 2 room B, tappable, 147 calls; should: frames not made out on the west wall at 390x844. Door fix read (inside R: open).
+
+## W8 6f13b61a: PASS (sent ~17:30)
+- 618c2901 cq_play miss: "Calder wants a word" leads from 19:30 (deck 3), she asks 19:45 (MUST fixed). 6f13b61a: promo_beats cq cq2 OK;
+  cq_play sit: arrow 5-tea-1, Calder at 5-tea-2, ask 19:06. shoulds: the ask opens while you walk to the seat (PLAYER_PLACE is set at
+  actStart); Basil's later steps only on paper (my probe takes no job). AS1's skiptea confirms the fix independently.
+- Alone cadet re-runs pending: 6f13b61a, 5c27b740, 5f649b45 vs 40f3bdac.
+- Still to do: AS1 arrows-step6 75f6262c (test only); PZ6 775c3ca run; Day 22 coherent play on merged staging (RV23's item 3);
+  Tier 3 offer live (optional).
