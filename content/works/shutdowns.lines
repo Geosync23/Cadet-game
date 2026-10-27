@@ -1,0 +1,111 @@
+@bank all
+// B3 (2026-10-26, Pillar 5 Step 5, S5-4; lead 39: no writer seat, the builder writes its own leftovers): M18 Shutdowns
+// (24w), the keys the code reads that SW3's m18.lines (claude/p5s5-words) doesn't have. Same style: short labels for the
+// phone, plain words. {where}: the branch ("the galley circuit"); {text}: rooms; {thing}: what an hour clashes with;
+// {time}: 14:00; {day}: a day number or "tomorrow"; {n}: a count. Keep these keys out of m18.lines (one home each).
+
+// ---- the planning screen: headings and states ----
+== sd.none.untrained
+- Calder shows you shutdowns once you're a Senior Officer.
+== sd.booked.head
+- Booked
+== sd.booked.open
+- settles at 22:00 the evening before
+== sd.booked.set
+- settled: the crew have planned round it
+== sd.settled
+- This one's settled: Day {day}, {time}. Be at the junction then.
+== sd.step.job
+- 1. The job
+== sd.step.branch
+- 2. The branch to switch off
+== sd.step.keep
+- 3. Keep power to
+== sd.step.hour
+- 4. The hour
+== sd.step.warn
+- 5. Warn who's affected
+// toggles: "Keep on: Galley" until pressed, then "Kept on: Galley" (the code adds the space and the room)
+== sd.keep.off
+- Keep on:
+== sd.keep.on
+- Kept on:
+== sd.hour.bad
+- Clashes with {thing}.
+== sd.hour.quietest
+- Quietest hour
+// what an hour clashes with, joined into sd.hour.bad
+== sd.mark.breakfast
+- breakfast
+== sd.mark.dinner
+- dinner
+== sd.mark.event
+- a ship event
+== sd.warn.none
+- Nobody to warn at that hour.
+// beside Brennan's name while he hasn't been told face to face
+== sd.warn.brennan
+- tell him in person before 22:00
+// more than six people: one notice for everyone
+== sd.warn.all
+- Post a ship notice: warn all {n}
+== sd.warn.alldone
+- Ship notice posted: all {n} warned.
+== sd.notice.title
+- Ship notice
+== sd.notice.posted
+- Posted: power off in {text}, {time}. {n} people warned.
+== sd.rebook
+- Change the booking
+== sd.blocked
+- That hour can't be booked. Pick another.
+== sd.bad.warn
+- You can book it, but people will feel it.
+== sd.title
+- Shutdown booked
+// a warned person's answer (picked by index)
+== sd.warn.reply
+- Thanks for the warning. I'll work round it.
+- Noted. I'll be elsewhere.
+- An hour? Fine. Thanks for telling me.
+
+// ---- the job board and the Schedule ----
+== sd.why
+- needs a shutdown: book one in Works
+== sd.why.booked
+- shutdown booked: {day}, {time}
+== sd.row
+- Your shutdown: {where}
+
+// ---- the training, while the booking waits (once a ship hour, Calder) ----
+== sd.train.remind
+- Your shutdown plan: book it before the shift ends.
+
+// ---- the day: the crew in the branch's rooms, in their bubbles (picked by index) ----
+== sd.crew.off
+- Lights! Oh, the shutdown.
+- There it goes. Right on time.
+- Power's off in here. As promised.
+== sd.crew.back
+- And we're back. Thanks for the warning.
+- Lights on. Quick work.
+- Back on. Barely noticed.
+== sd.crew.grumble
+- In the middle of dinner? Really?
+- Whose idea was this hour?
+- Eating by torchlight. Lovely.
+
+// ---- the parts (RV20's M3): named at booking, in the 22:00 Mail and the morning's notice ({thing}: "a breaker and a bracket") ----
+== sd.parts.bring
+- Bring {thing}.
+== sd.parts.make
+- (make the {thing} in the machine shop)
+== sd.parts.none
+- nothing to fetch
+== sd.morning
+- Shutdown at {time}, {where}. Take the job now and get {thing} first.
+== sd.notice.parts
+- You still need {thing}.
+// the hour ran out with the power off and the work not done (Calder)
+== sd.over
+- Hour's up. Power back on: it never stays off past the booking. Finish it on the next one.

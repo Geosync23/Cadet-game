@@ -12,6 +12,7 @@
 #   nosave:  ?nosave never shows the app or reads the slot; Dev (#dev) slots carry "-dev"; Dev mode's Copy my real game
 #            copies the Playtest slot being played and changes no Playtest slot
 #   shot:    the Saves page at phone size (saves_check_page.png)
+#   shut:    (S5-4) a shutdown booking saved before 22:00 reads back unsettled; after 22:00, settled (P5_STEP5 on in a copy)
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 saves_check.py BUILD.html [part ...]   Good is SAVES CHECK OK (exit 0); a failure exits 1.
 import sys, os, re, json, pathlib
@@ -266,7 +267,31 @@ def part_shot(b):
     pg.close()
     print('  shot: saves_check_page.png')
 
-PARTS = [('migrate', part_migrate), ('switch', part_switch), ('download', part_download), ('load', part_load), ('nosave', part_nosave), ('shot', part_shot)]
+# (S5-4, B3) shutdowns (24w, P5_M18) in the save: a booking made on Day 18 and saved before 22:00 reads back unsettled
+# (the job still waits for its shutdown); played on to 22:00 it settles, and a save after reads back settled, the job
+# held, Day 19's plan with the booked rooms closed. Runs on a copy with P5_STEP5 switched on; without the switch line,
+# "not yet" (never a pass)
+P5_LINE = "const P5_STEP5 = URL_FLAGS.has('p5s5');"
+def part_shut(b):
+    if P5_LINE not in SRC or 'function sdBook' not in SRC: print('  shut: not yet (no P5_STEP5 switch line or no shutdowns in this build)'); return
+    tmp = WORK / 'test' / ('_saves_check_p5_' + RUN_ID + '.html'); tmp.write_text(instrument(SRC.replace(P5_LINE, 'const P5_STEP5 = true;')))
+    ctx = new_ctx(b); pg = Page(ctx, '', tmp); pg.sign()
+    j = pg.ev("""(() => { introSkip(); setShipNow(17 * 1440 + 600); machinesNow(); const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.m18 = 18;
+      const id = jobReserve('6-junction-1', 18, 600, 43, { tier: 3 }); sdMark(shipNow()); const b = sdBook(id, 840, 'galley', ['3|K'], { warned: ['brennan'], inPerson: ['brennan'] });
+      updateClock(); saveGame(); return [id, !!b]; })()""")
+    check(j[1], f'shut: the booking was not made ({j})')
+    pg.go('', tmp)
+    a = pg.ev(f"""(() => {{ const S = SHIP.works && SHIP.works.sd, j = SHIP.jobs.find(x => x.id === {json.dumps(j[0])}); return {{ day: SHIP.time.day, book: S ? S.book.map(b => [b.day, b.at, b.branch, b.keep.join(), b.inPerson.join()]) : null, set: S ? Object.keys(S.set) : null, job: j ? [j.status, !!j.shut, !!j.reserved] : null }}; }})()""")
+    print('  shut: saved before 22:00:', a)
+    check(a['book'] == [[19, 840, 'galley', '3|K', 'brennan']] and a['set'] == [] and a['job'] == ['waiting', True, True], f'shut: an unsettled booking did not read back as it was ({a})')
+    pg.ev("(() => { for (let t = shipNow(); t <= 17 * 1440 + 1325; t += 5) { setShipNow(t); machinesNow(); worksCareerTick(t); } updateClock(); saveGame(); })()")
+    pg.go('', tmp)
+    c = pg.ev(f"""(() => {{ const S = SHIP.works && SHIP.works.sd, j = SHIP.jobs.find(x => x.id === {json.dumps(j[0])}), L = sdShutList(19); return {{ book: S ? S.book.length : null, set: S && S.set[19] ? S.set[19].map(b => [b.at, b.branch, b.keep.join()]) : null, job: j ? [j.status, !!j.reserved] : null, rooms: L ? [...L[0].rooms] : null }}; }})()""")
+    print('  shut: saved after 22:00:', c)
+    check(c['book'] == 0 and c['set'] == [[840, 'galley', '3|K']] and c['job'] == ['waiting', True] and c['rooms'] == ['3|M'], f'shut: the settled booking did not read back ({c})')
+    pg.close(); tmp.unlink(missing_ok=True)
+
+PARTS = [('migrate', part_migrate), ('switch', part_switch), ('download', part_download), ('load', part_load), ('nosave', part_nosave), ('shot', part_shot), ('shut', part_shut)]
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     for name, f in PARTS + LATER:   # LATER: Step 5's parts (S5-2's promo3)

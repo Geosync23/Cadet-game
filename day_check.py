@@ -10,7 +10,7 @@
 #   rooms in use over the week (every place type, with those nobody used listed) and the crew's needs through the day
 # Setup and environment as for cadet_test.py.
 # Run:  python3 day_check.py BUILD.html [DAY]     (DAY defaults to 1, a Monday)
-import sys, json
+import sys, json, os
 exec(open(__file__.replace('day_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
 
@@ -105,6 +105,15 @@ with sync_playwright() as pw:
     # stop the game's own loop from moving anything between our steps: we drive the crew ourselves
     g.ev("window.__realTick = tickShip; tickShip = () => {}")
     g.ev("player.steer = null; player.stop()")
+    # (S5-4, B3) DAY_SD=at:branch[:keep] (e.g. 1080:galley): a shutdown settled for DAY, as if booked the evening before
+    # (needs a build with P5_M18 on: a copy with P5_STEP5 switched on). The day's plans are made with it; nothing else changes
+    if os.environ.get('DAY_SD'):
+        at, br, *kp = os.environ['DAY_SD'].split(':')
+        sd = g.ev(f"""(() => {{ if (typeof P5_M18 === 'undefined' || !P5_M18) return null; const W = worksInit(Math.max(1020, ({DAY} - 2) * 1440 + 1320)); if (!W) return null;
+          const S = sdData(); S.set[{DAY}] = [{{ day: {DAY}, at: {int(at)}, branch: {json.dumps(br)}, keep: {json.dumps(kp)}, warned: [], inPerson: ['brennan'], job: null }}];
+          SHIP_DAYS.clear(); MACH_USE.clear(); const L = sdShutList({DAY}); return L ? [...L[0].rooms] : null; }})()""")
+        print(f"  a shutdown settled for Day {DAY} at {at} on {br} (DAY_SD): rooms closed {sd}")
+        if sd is None: fail('DAY_SD given, but this build has no shutdowns switched on (P5_M18)')
     print(f"Day {DAY} ({g.ev(f'WEEKDAYS[weekday({DAY})]')}), {g.ev(f'schedPeople().filter(p => aboard(p, {DAY})).length')} people aboard ({g.ev(f'schedPeople().filter(p => p.guest && aboard(p, {DAY})).length')} of them guests)")
 
     # 1. the schedules

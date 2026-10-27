@@ -10463,6 +10463,7 @@ function schedBuild(p, d, occ, S) {
           if (pref && (pass === 0 ? !pref.has(pl.id) || avoid.has(pl.id) : pass === 1 ? pref.has(pl.id) || avoid.has(pl.id) : !avoid.has(pl.id))) continue;
           if (!mine && !isFree(pl.id, s, end, o.tag)) continue;
           if (shut && evClosed(pl, B + s, o.event, B + end)) continue;   // closed for the event
+          if (P5_STEP5 && sdPlanShut(d, occ, pl, B + s, B + end, p)) continue;   // Step 5's settled records (24w): a shutdown booked for that hour, a routine moved (24k's P9); read only from records settled at 22:00 the evening before
           if (act === 'leisure' && type.startsWith('work:') && (S.deskOf(pl.id) || (occ.rotIds && occ.rotIds.has(pl.id)))) continue;   // a guest at a work type: never someone's desk, nor today's stand-in's
           const lead = () => { if (!fromXY || dk !== deck) return;   // the walk (#9): they set off earlier, out of the end of what they were doing (at most half of it; never an event meeting, F0b)
             const l = segs[segs.length - 1], cut = l && l.to === t && l.deck === deck && l.act !== 'commute' && !(typeof eventMeetTag === 'function' && eventMeetTag(l.tag)) && !l.kept ? Math.min(walkLead(fromXY(dk), pl), Math.floor((l.to - l.from) / 2)) : 0;
@@ -11753,6 +11754,7 @@ function devDay(d) {
       out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckIn(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room, ...(b.stand ? { place: b.stand } : {}) }); } catch (e) { /* not yet */ }   // place: where you stand for it (item 81: the room's middle was the Chief's own seat, under her)
   try { if (typeof puItems === 'function') out.push(...puItems(d)); } catch (e) { /* not yet */ }   // 24u (S5-2): the Senior Officer promotion's steps, with P5_PROMO3
   try { if (typeof promoBeatsItems === 'function') out.push(...promoBeatsItems(d)); } catch (e) { /* not yet */ }   // FX28: the promotion's steps (24p), with PROMO_BEATS_ON
+  try { if (typeof sdItems === 'function') out.push(...sdItems(d)); } catch (e) { /* not yet */ }   // 24w (S5-4): your booked shutdown, with P5_M18
   return out.sort((x, y) => x.from - y.from);
 }
 const DEV_BEATS = { 'd1-briefing': 'Morning briefing with the Chief', 'd2-solo': 'The Chief\'s office: your first solo job', 'd2-booths': 'Calling home', 'd3-store': 'The crew store' };   // titles (stand-ins; the beats' own words are section 21's)
@@ -38320,12 +38322,22 @@ const LINES = JSON.parse([
   '{"text":"worn","id":"avojtu"}]',
   ',"scan.title":[',
   '{"text":"Scanner · {machine}","id":"d8gjl2"}]',
+  ',"sd.bad.warn":[',
+  '{"text":"You can book it, but people will feel it.","id":"1mbegd8"}]',
+  ',"sd.blocked":[',
+  '{"text":"That hour can\'t be booked. Pick another.","id":"1q7e99k"}]',
   ',"sd.book":[',
   '{"text":"Book for tomorrow","id":"8qu3da"}]',
   ',"sd.booked":[',
   '{"text":"Booked: {where}, tomorrow at {time}. It\'s settled at 22:00 tonight.","id":"c9glo"}]',
+  ',"sd.booked.head":[',
+  '{"text":"Booked","id":"nsvetj"}]',
+  ',"sd.booked.open":[',
+  '{"text":"settles at 22:00 the evening before","id":"cb5vf8"}]',
   ',"sd.booked.row":[',
   '{"text":"Booked: tomorrow {time}","id":"1h5aq50"}]',
+  ',"sd.booked.set":[',
+  '{"text":"settled: the crew have planned round it","id":"18rduk3"}]',
   ',"sd.busyhour":[',
   '{"text":"People will feel this one. Book it anyway?","id":"8yam6u"}]',
   ',"sd.cancel":[',
@@ -38334,6 +38346,18 @@ const LINES = JSON.parse([
   '{"text":"Booking cancelled. Nobody\'s day changes.","id":"dirl05"}]',
   ',"sd.class":[',
   '{"text":"A class is on in one of these rooms","id":"fw96tv"}]',
+  ',"sd.crew.back":[',
+  '{"text":"And we\'re back. Thanks for the warning.","id":"s5pcc4"},',
+  '{"text":"Lights on. Quick work.","id":"12znboz"},',
+  '{"text":"Back on. Barely noticed.","id":"lru6hs"}]',
+  ',"sd.crew.grumble":[',
+  '{"text":"In the middle of dinner? Really?","id":"1sax5ob"},',
+  '{"text":"Whose idea was this hour?","id":"1awu7fh"},',
+  '{"text":"Eating by torchlight. Lovely.","id":"184bsuw"}]',
+  ',"sd.crew.off":[',
+  '{"text":"Lights! Oh, the shutdown.","id":"jfy437"},',
+  '{"text":"There it goes. Right on time.","id":"4iuzuy"},',
+  '{"text":"Power\'s off in here. As promised.","id":"sdpoex"}]',
   ',"sd.done":[',
   '{"text":"Power back on. {where} is running again.","id":"1g6fmaj"}]',
   ',"sd.feeds":[',
@@ -38348,19 +38372,35 @@ const LINES = JSON.parse([
   '{"text":"A shutdown at the quiz? I had the answer to number six.","id":"17bn54z","tone":"funny"}]',
   ',"sd.head":[',
   '{"text":"Jobs that need the power off","id":"d0fb8g"}]',
+  ',"sd.hour.bad":[',
+  '{"text":"Clashes with {thing}.","id":"1fd05bh"}]',
+  ',"sd.hour.quietest":[',
+  '{"text":"Quietest hour","id":"nma86n"}]',
   ',"sd.job":[',
   '{"text":"{machine}: needs the power off","id":"1wqrkrw"}]',
   ',"sd.keep":[',
   '{"text":"Keeps power","id":"1d893sc"}]',
   ',"sd.keep.none":[',
   '{"text":"Nothing kept on","id":"1j3smnt"}]',
+  ',"sd.keep.off":[',
+  '{"text":"Keep on:","id":"swnmqv"}]',
+  ',"sd.keep.on":[',
+  '{"text":"Kept on:","id":"1yak3ty"}]',
   ',"sd.lapsed":[',
   '{"text":"We moved our whole morning for that shutdown. It never came.","id":"kxd4s9"},',
   '{"text":"Was the power going off or not? We waited.","id":"u8f4fp"}]',
+  ',"sd.mark.breakfast":[',
+  '{"text":"breakfast","id":"f9vod0"}]',
+  ',"sd.mark.dinner":[',
+  '{"text":"dinner","id":"1irgtq0"}]',
+  ',"sd.mark.event":[',
+  '{"text":"a ship event","id":"1xz2up7"}]',
   ',"sd.meal":[',
   '{"text":"Mealtime: the galley needs power","id":"xikfp4"}]',
   ',"sd.missed":[',
   '{"text":"You missed your hour. The booking\'s gone; the crew moved their day for nothing.","id":"6nhklx"}]',
+  ',"sd.morning":[',
+  '{"text":"Shutdown at {time}, {where}. Take the job now and get {thing} first.","id":"190p7ue"}]',
   ',"sd.needbook":[',
   '{"text":"This needs the power off. Book a shutdown first: Works app, Shutdowns.","id":"13ldvdn"}]',
   ',"sd.next":[',
@@ -38369,33 +38409,81 @@ const LINES = JSON.parse([
   '{"text":"Pick another hour","id":"qif8l5"}]',
   ',"sd.none":[',
   '{"text":"No jobs need a shutdown. When one does, it shows here.","id":"157n8ya"}]',
+  ',"sd.none.untrained":[',
+  '{"text":"Calder shows you shutdowns once you\'re a Senior Officer.","id":"5thoon"}]',
   ',"sd.notice":[',
   '{"text":"Your shutdown at {time}: the junction on Deck {deck}. Go now.","id":"10vc93v"}]',
+  ',"sd.notice.parts":[',
+  '{"text":"You still need {thing}.","id":"1msqa9y"}]',
+  ',"sd.notice.posted":[',
+  '{"text":"Posted: power off in {text}, {time}. {n} people warned.","id":"3clt1g"}]',
+  ',"sd.notice.title":[',
+  '{"text":"Ship notice","id":"gtq33d"}]',
   ',"sd.off":[',
   '{"text":"Lights. Right. That\'s the shutdown, then.","id":"jkc9hw"},',
   '{"text":"There it goes. Right on time.","id":"1usv76n"},',
   '{"text":"I was warned. I was warned. Still made me jump.","id":"1vjwdux","tone":"funny"},',
   '{"text":"Power\'s off in here. Tea break, then.","id":"6c71hr","tone":"funny"}]',
+  ',"sd.over":[',
+  '{"text":"Hour\'s up. Power back on: it never stays off past the booking. Finish it on the next one.","id":"bp8q4e"}]',
+  ',"sd.parts.bring":[',
+  '{"text":"Bring {thing}.","id":"1f940hr"}]',
+  ',"sd.parts.make":[',
+  '{"text":"(make the {thing} in the machine shop)","id":"1i350m4"}]',
+  ',"sd.parts.none":[',
+  '{"text":"nothing to fetch","id":"1bx4b2t"}]',
   ',"sd.prev":[',
   '{"text":"Earlier","id":"xas8mr"}]',
   ',"sd.ptr":[',
   '{"text":"Your shutdown, {time}: switch it off","id":"14t1jwm"}]',
   ',"sd.ptr.back":[',
   '{"text":"Your shutdown: bring it back","id":"1vxpymo"}]',
+  ',"sd.rebook":[',
+  '{"text":"Change the booking","id":"golzhp"}]',
+  ',"sd.row":[',
+  '{"text":"Your shutdown: {where}","id":"fnwip7"}]',
+  ',"sd.settled":[',
+  '{"text":"This one\'s settled: Day {day}, {time}. Be at the junction then.","id":"5vtfkc"}]',
+  ',"sd.step.branch":[',
+  '{"text":"2. The branch to switch off","id":"rf4fse"}]',
+  ',"sd.step.hour":[',
+  '{"text":"4. The hour","id":"gi2fiq"}]',
+  ',"sd.step.job":[',
+  '{"text":"1. The job","id":"12f2sxn"}]',
+  ',"sd.step.keep":[',
+  '{"text":"3. Keep power to","id":"1s44gg"}]',
+  ',"sd.step.warn":[',
+  '{"text":"5. Warn who\'s affected","id":"uvjp86"}]',
   ',"sd.tab":[',
   '{"text":"Shutdowns","id":"s3vqny"}]',
   ',"sd.thanks":[',
   '{"text":"Thanks for warning us about the power. Very tidy.","id":"d1k3rr"},',
   '{"text":"That shutdown? Didn\'t even notice. That\'s good, isn\'t it?","id":"xaf8xf"},',
   '{"text":"You picked a quiet hour. Thank you for that.","id":"yjucwd"}]',
+  ',"sd.title":[',
+  '{"text":"Shutdown booked","id":"1sqakix"}]',
   ',"sd.trad":[',
   '{"text":"A ship tradition is on then","id":"1xx0hig"}]',
+  ',"sd.train.remind":[',
+  '{"text":"Your shutdown plan: book it before the shift ends.","id":"7qds5o"}]',
   ',"sd.warn":[',
   '{"text":"Warn","id":"1egbsti"}]',
+  ',"sd.warn.all":[',
+  '{"text":"Post a ship notice: warn all {n}","id":"n82z1w"}]',
+  ',"sd.warn.alldone":[',
+  '{"text":"Ship notice posted: all {n} warned.","id":"1binmih"}]',
   ',"sd.warn.ask":[',
   '{"text":"About tomorrow\'s shutdown","id":"blk5qd"}]',
+  ',"sd.warn.brennan":[',
+  '{"text":"tell him in person before 22:00","id":"1vv4pxn"}]',
+  ',"sd.warn.none":[',
+  '{"text":"Nobody to warn at that hour.","id":"njwtcp"}]',
   ',"sd.warn.notice":[',
   '{"text":"{name}: power off tomorrow, {time}, {where}. About an hour.","id":"6b3tok"}]',
+  ',"sd.warn.reply":[',
+  '{"text":"Thanks for the warning. I\'ll work round it.","id":"rrj8zw"},',
+  '{"text":"Noted. I\'ll be elsewhere.","id":"ywnrre"},',
+  '{"text":"An hour? Fine. Thanks for telling me.","id":"1n3ta34"}]',
   ',"sd.warn.sent":[',
   '{"text":"{name} is warned.","id":"lqlid0"}]',
   ',"sd.warned":[',
@@ -38412,6 +38500,10 @@ const LINES = JSON.parse([
   '{"text":"{n} people in those rooms then","id":"h8gu0g"}]',
   ',"sd.who.none":[',
   '{"text":"Nobody\'s in those rooms then. A quiet hour.","id":"1cnwowb"}]',
+  ',"sd.why":[',
+  '{"text":"needs a shutdown: book one in Works","id":"1oehklf"}]',
+  ',"sd.why.booked":[',
+  '{"text":"shutdown booked: {day}, {time}","id":"ixnvgq"}]',
   ',"sd.yes":[',
   '{"text":"Book it anyway","id":"ltxur4"}]',
   ',"seek":[',
@@ -49723,7 +49815,8 @@ function chatShow() {
   const gift = !C.ask && !C.offer && !talking && giftInHands(); if (gift) buttons.push(r.giftWeek === socWeek() + 1 ? { id: 'give', label: 'Given this week', off: true } : { id: 'give', label: 'Give ' + gift });
   if (!C.ask && !C.offer && !talking && typeof caseAskButton === 'function') { const cb = caseAskButton(p); if (cb) buttons.push(cb); }
   if (!C.ask && !C.offer && !talking && typeof shopMenuButton === 'function') { const mb = shopMenuButton(p); if (mb) buttons.push(mb); }   // patch #24: Buy something, from a storekeeper at the counter
-  if (!C.ask && !C.offer && !talking && typeof shopGiveButton === 'function') { const sb = shopGiveButton(p); if (sb) buttons.push(sb); }   // 24j: Give the thing you made them (M10)   // 24k P2: Ask about the fault (only a witness, only after Tomas's word)
+  if (!C.ask && !C.offer && !talking && typeof shopGiveButton === 'function') { const sb = shopGiveButton(p); if (sb) buttons.push(sb); }
+  if (!C.ask && !C.offer && !talking && typeof sdChatButton === 'function') { const sd = sdChatButton(p); if (sd) buttons.push(sd); }   // 24w (S5-4): Brennan, before a galley shutdown: tell him in person   // 24j: Give the thing you made them (M10)   // 24k P2: Ask about the fault (only a witness, only after Tomas's word)
   const v = { who: p.name, role: typeof rankCardRole === 'function' ? rankCardRole(p) : p.role, tier: REL_NAMES[relTier(p.id)],   /* patch #21: the rank first (off: p.role) */ line: C.line.text, say: C.line.say !== false, buttons };
   const el = chatEl(); el.hidden = false;
   (CHAT_SKIN.draw || chatDraw)(el, v);
@@ -49782,6 +49875,7 @@ function chatDo(id) {
   else if (id === 'ask') { C.ask = true; chatShow(); }
   else if (id === 'shop-menu' && typeof shopMenuOpen === 'function') shopMenuOpen(p);   // patch #24
   else if (id === 'shop-give') chatSay((typeof shopGiveSay === 'function' && shopGiveSay(p)) || 'Thanks.');   // 24j: an order handed over (M10)
+  else if (id === 'sd-tell') chatSay((typeof sdChatSay === 'function' && sdChatSay(p)) || 'Thanks for telling me.');   // 24w (S5-4)
   else if (id === 'case-ask') chatSay((typeof caseAskSay === 'function' && caseAskSay(p)) || 'Didn\'t notice a thing. Sorry.');   // 24k P2: their witness line
   else if (id === 'give') { const g = giftInHands(), res = g && giftGive(p, g); if (res) chatSay(res.text); }
   else if (id === 'sit') { const mo = C.line.moment; if (mo && typeof momentShow === 'function') { chatClose(); momentShow(mo); } }
@@ -60376,6 +60470,390 @@ if (P5_M19 && typeof jobKindAdd === 'function') {
 // ---------------------------------------------------------------------
 
 // ---- slot: Shutdowns (section 24w). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// S5-4 (B3 for lead 39), behind P5_M18. Some of your Tier 3 power jobs need the power off: a repair on a junction, a power
+// junction, an inverter or a battery bank, once you're trained in shutdowns (j.shut: 24w marks them on the board for you,
+// held for you in slot SD_SLOT, status 'waiting' "needs a shutdown", without changing section 17). You book one for
+// tomorrow (the Works app's Shutdowns tab): an hour, the branch it cuts (SHUT_BRANCHES), the rooms you keep powered, who
+// you warned. At 22:00 the evening before, the booking settles into sd.set[day] (saved); the crew's plans for that day read
+// only that, through section 14's one hook sdPlanShut (the planner rule, as recPlanShut): the branch's rooms, minus the
+// kept ones, are closed for the hour, so the crew go elsewhere. A plan of that day made before 22:00 is dropped then and
+// made again (SHIP_DAYS, as machinesReset drops the rec deck's). Nothing reads a booking live.
+//   SHIP.works.sd (saved as ship.works.sd) = { book: [{ day, at, branch, keep: ['deck|room'], warned: [id], inPerson: [id],
+//   job, all? (a ship notice warned everyone), st? ('off' | 'done' | 'lapsed', on the day), said? (the day's beats given, bits) }], set: { day: [the same, settled] }, done: [day], miss: [day] }
+// Job slots: SD_TRAIN_SLOT 42 (the training's real job), SD_SLOT 43 (the jobs marked for a shutdown).
+// The tables are built on first use (sdBranches), so a plan made while the file is still loading never meets an
+// uninitialised name; the save's sd is read back below and any plan already made for a settled day is dropped.
+const SD_SLOT = 43, SD_TRAIN_SLOT = 42, SD_SETTLE = 1320, SD_LEN = 60, SD_HOURS = [480, 1200];   // settles at 22:00; an hour; bookable from 08:00 to 20:00 starts (breakfast and dinner included: question 3)
+const SD_MEALS_OK = true;                                // question 3 (the user's answer, the spec's recommendation): meal and tradition hours may be booked, marked plainly, and the crew grumble. false: those hours can't be picked
+const SD_KINDS = new Set(['junction', 'powerjunction', 'inverter', 'battery']);
+var SD_B = null;                                         // var: read by sdBranches before this line has run
+function sdBranches() {                                  // { id: { junction, name, rooms: [[deck, room]], keep: [[deck, room]] } } (rooms agreed with the deck architect: to confirm)
+  return SD_B || (SD_B = Object.freeze({
+    galley: { junction: '6-junction-1', name: 'the galley circuit', rooms: [[3, 'K'], [3, 'M']], keep: [[3, 'K']] },
+    gym: { junction: '6-junction-1', name: 'the gym and laundry circuit', rooms: [[3, 'F'], [4, 'l']], keep: [[4, 'l']] },
+    junior: { junction: '6-junction-2', name: 'the junior deck circuit', rooms: [[4, 'j'], [4, 'n']], keep: [[4, 'n']] },
+    lounge: { junction: '6-junction-2', name: 'the bow lounge circuit', rooms: [[3, 'L'], [3, 'B']], keep: [[3, 'B']] },
+    science: { junction: '2-breaker-1', name: 'the science corridor', rooms: [[2, 'L'], [2, 'M'], [2, 'J']], keep: [[2, 'M'], [2, 'J']] },
+    bridge: { junction: '1-junction-1', name: 'the observation room circuit', rooms: [[1, 'O'], [1, 'R']], keep: [[1, 'R']] },
+    works: { junction: '5-inverter-1', name: 'the Works bay circuit', rooms: [[5, 't'], [5, 'f']], keep: [[5, 'f']] } }));
+}
+var SHUT_BRANCHES = sdBranches();                         // the spec's name, for S5-2's test and S5-6's P9
+const SD_FEEDS = { '2-junction-1': '2-breaker-1' };      // a machine that shares another's branches (Deck 2's closet); Deck 5's batteries go through the inverter
+function sdFeed(machineId) { const m = typeof machineById === 'function' ? machineById(machineId) : null; if (!m) return null; return SD_FEEDS[m.id] || (m.kind === 'battery' && m.deck === 5 ? '5-inverter-1' : m.id); }
+const sdBranchesFor = machineId => { const f = sdFeed(machineId), B = sdBranches(); return f ? Object.keys(B).filter(k => B[k].junction === f) : []; };
+const sdRoomKey = r => r[0] + '|' + r[1];
+const SD_NONE = Object.freeze({ book: Object.freeze([]), set: Object.freeze({}), done: Object.freeze([]), miss: Object.freeze([]) });
+const sdPeek = () => SHIP.works && SHIP.works.sd && Array.isArray(SHIP.works.sd.book) ? SHIP.works.sd : SD_NONE;   // read only: drawing the screen never makes the record
+function sdData() { const W = SHIP.works; if (!W) return null; if (!W.sd || typeof W.sd !== 'object' || !Array.isArray(W.sd.book)) W.sd = { book: [], set: {}, done: [], miss: [] }; return W.sd; }
+function sdClean(s) {                                    // a save's sd read back: junk dropped
+  const int = v => Number.isInteger(v) && v >= 0 && v < 99999, B = sdBranches(), ids = a => Array.isArray(a) ? a.filter(x => typeof x === 'string').slice(0, 8).map(x => x.slice(0, 40)) : [];
+  const one = b => b && int(b.day) && int(b.at) && B[b.branch] ? { day: b.day, at: b.at, branch: b.branch, keep: ids(b.keep).filter(k => B[b.branch].keep.some(r => sdRoomKey(r) === k)), warned: ids(b.warned), inPerson: ids(b.inPerson), job: typeof b.job === 'string' ? b.job.slice(0, 80) : null, ...(b.all === true ? { all: true } : {}), ...(b.askB === true ? { askB: true } : {}), ...(/^(off|done|lapsed)$/.test(b.st) ? { st: b.st } : {}), ...(Number.isInteger(b.said) ? { said: b.said & 7 } : {}) } : null;
+  const set = {}; if (s && s.set && typeof s.set === 'object') for (const k of Object.keys(s.set).slice(0, 20)) if (/^\d{1,4}$/.test(k) && Array.isArray(s.set[k])) set[k] = s.set[k].map(one).filter(Boolean).slice(0, 6);
+  const days = a => Array.isArray(a) ? a.filter(int).slice(-20) : [];
+  return { book: Array.isArray(s && s.book) ? s.book.map(one).filter(Boolean).slice(0, 6) : [], set, done: days(s && s.done), miss: days(s && s.miss) };
+}
+if (P5_M18) (() => { const s = SAVED && SAVED.ship && SAVED.ship.works; if (SHIP.works && s && s.sd) { SHIP.works.sd = sdClean(s.sd);
+  for (const k of Object.keys(SHIP.works.sd.set)) { SHIP_DAYS.delete(+k); MACH_USE.delete(+k); } } })();   // a plan made while loading, before the record was read back
+// section 14's hook (take(), the room rules, the sim engineer's): is place pl closed by a settled shutdown between ship
+// minutes a and b of day d? Reads only sd.set[d] (settled at 22:00 the evening before), cached on the day's occ
+// p: the person being planned. WORKS_PLAN_RULES (others' rules on this same hook, e.g. 24k's P9 moving a routine: each
+// (d, occ, pl, a, b, p) -> true to pass that place by; it must read only records settled at 22:00, as this does)
+var WORKS_PLAN_RULES = WORKS_PLAN_RULES || [];           // var: the planner may ask before this line has run (and a section loaded before this one may have made it)
+var WORKS_SETTLE = WORKS_SETTLE || [];                                   // others' 22:00 settles: fn(day) -> true if day's record changed (its plans are then made again)
+function sdPlanShut(d, occ, pl, a, b, p) {
+  if (!pl) return false;
+  if (typeof p9PlanRule === 'function' && p9PlanRule(d, occ, pl, a, b, p)) return true;   // 24k's P9 (B4): a routine moved by the clash's fix, its record settled at 22:00
+  for (const f of WORKS_PLAN_RULES || []) { try { if (f(d, occ, pl, a, b, p)) return true; } catch (e) { /* a rule's own fault: not closed */ } }
+  if (!P5_M18) return false;
+  let L = occ && occ.sdShut;
+  if (L === undefined) { L = sdShutList(d); if (occ) occ.sdShut = L; }
+  if (!L) return false;
+  const key = pl.deck + '|' + pl.room;
+  for (const x of L) if (x.from < b && a < x.to && x.rooms.has(key)) return true;
+  return false;
+}
+function sdShutList(d) {                                  // [{ from, to, rooms: Set('deck|room') }] for day d's settled bookings, or null
+  const S = SHIP.works && SHIP.works.sd, set = S && S.set && S.set[d]; if (!Array.isArray(set) || !set.length) return null;
+  const B = sdBranches(), out = [];
+  for (const e of set) { const br = B[e.branch]; if (!br) continue; const keep = new Set(e.keep || []);
+    out.push({ from: (d - 1) * 1440 + e.at, to: (d - 1) * 1440 + e.at + SD_LEN, rooms: new Set(br.rooms.map(sdRoomKey).filter(k => !keep.has(k))) }); }
+  return out.length ? out : null;
+}
+// 22:00: tomorrow's bookings settle (and the plans already made for that day are made again); a booking for a day that
+// has come without settling (a Dev clock jump) lapses. Old records go after a few days
+function sdSettle(t) {
+  const S = SHIP.works && SHIP.works.sd; if (!S) return;
+  const d = worksDay(t), m = t - (d - 1) * 1440, rest = [];
+  for (const b of S.book) {
+    if (b.day === d + 1 && m >= SD_SETTLE) { (S.set[b.day] = S.set[b.day] || []).push(b); SHIP_DAYS.delete(b.day); MACH_USE.delete(b.day); simNote('sdSettled', { day: b.day, at: b.at, branch: b.branch });
+      if (typeof mailSend === 'function') { const tx = worksText('mail.sd.settled', 'Tomorrow\'s shutdown | Settled. {where}, {time}. The crew\'s day is planned round it now. Be at the junction at quarter to.', { where: sdBranches()[b.branch].name.replace(/^./, x => x.toUpperCase()), time: hhmm(b.at) }) + (sdParts(SHIP.jobs.find(x => x.id === b.job)) ? ' ' + worksText('sd.parts.bring', 'Bring {thing}.', { thing: sdParts(SHIP.jobs.find(x => x.id === b.job)) }) : ''), i = tx.indexOf(' | ');
+        mailSend({ at: t, from: worksName('calder'), subject: i > 0 ? tx.slice(0, i) : 'Tomorrow\'s shutdown', body: i > 0 ? tx.slice(i + 3) : tx, quiet: true }); } }   // the Mail is the record (said in person at the booking)
+    else if (b.day <= d) { if (!S.miss.includes(b.day)) S.miss.push(b.day); simNote('sdLapsed', { day: b.day, branch: b.branch }); }
+    else rest.push(b);
+  }
+  S.book = rest;
+  for (const k of Object.keys(S.set)) if (+k < d - 3) delete S.set[k];
+}
+function worksSettleOthers(t) {                        // the others' 22:00 records (WORKS_SETTLE), on the same clock as sdSettle
+  const d = worksDay(t); if (t - (d - 1) * 1440 < SD_SETTLE) return;
+  const fs = (typeof p9Settle === 'function' ? [p9Settle] : []).concat(WORKS_SETTLE || []);   // 24k's P9 by name (it loads before this section)
+  for (const f of fs) { let ch = false; try { ch = !!f(d + 1); } catch (e) { ch = false; } if (ch) { SHIP_DAYS.delete(d + 1); MACH_USE.delete(d + 1); } }
+}
+// book a shutdown for job jobId on day `day` at minute `at` (from midnight): returns the booking or null. Only for a
+// day not yet settled (tomorrow before 22:00, else the day after), an hour in SD_HOURS, one of the job's branches
+function sdTarget(t = shipNow()) { const d = worksDay(t); return t - (d - 1) * 1440 < SD_SETTLE ? d + 1 : d + 2; }
+function sdBook(jobId, at, branch, keep = [], o = {}) {
+  const S = sdData(), j = SHIP.jobs.find(x => x.id === jobId); if (!S || !j || !j.shut || j.status === 'done') return null;
+  const day = o.day || sdTarget(), br = sdBranches()[branch];
+  if (day !== sdTarget() || !br || !sdBranchesFor(j.machine).includes(branch) || !Number.isInteger(at) || at < SD_HOURS[0] || at > SD_HOURS[1] || at % 60) return null;
+  S.book = S.book.filter(b => b.job !== jobId);
+  const b = { day, at, branch, keep: keep.filter(k => br.keep.some(r => sdRoomKey(r) === k)), warned: (o.warned || []).slice(0, 8), inPerson: (o.inPerson || []).slice(0, 8), job: jobId, ...(o.all ? { all: true } : {}), ...(o.askB ? { askB: true } : {}) };   // askB: the screen asked you to tell Brennan in person
+  S.book.push(b); j.sdDay = day; if (Number.isFinite(j.until)) j.until = Math.max(j.until, day * 1440 + dayShiftEnd(day + 1));   // held at least till the day after
+  j.why = worksText('sd.why.booked', 'shutdown booked: {day}, {time}', { day: 'Day ' + day, time: hhmm(at) });
+  simNote('sdBooked', { day, at, branch, job: jobId });
+  return b;
+}
+function sdCancel(jobId) {
+  const S = sdPeek(), i = S.book.findIndex(b => b.job === jobId); if (i < 0) return false;
+  S.book.splice(i, 1); const j = SHIP.jobs.find(x => x.id === jobId); if (j) { delete j.sdDay; j.why = sdWhy(); }
+  return true;
+}
+const sdWhy = () => worksText('sd.why', 'needs a shutdown: book one in Works');
+// a job that needs the power off: a repair on a power junction, inverter or battery bank with a branch, Tier 3, yours to take
+const sdNeeds = j => !!(j && j.machine && j.kind === 'repair' && j.status !== 'done' && !j.claimedBy && sdBranchesFor(j.machine).length && SD_KINDS.has((machineById(j.machine) || {}).kind) && jobTier(j) >= 3);
+// once a ship minute, once trained: such jobs on the board for you are marked, held for you and wait for a booking
+function sdMark(t) {
+  const W = SHIP.works; if (!W || W.tr.m18 === undefined) return 0; let n = 0;
+  for (const j of SHIP.jobs) if (!j.shut && j.status === 'open' && j.found <= t && sdNeeds(j) && (heldForYou(j) || forYou(j) && t < leaveEnd(j))) {
+    j.shut = true; j.status = 'waiting'; j.why = sdWhy(); if (!j.reserved) { j.reserved = SD_SLOT; delete j.until; } n++; MACH_REV++;
+  }
+  return n;
+}
+if (P5_M18) WORK_TICKS.push((t, skip) => { sdSettle(t); sdMark(t); });
+if (P5_STEP5) WORK_TICKS.push(t => worksSettleOthers(t));
+// ---- the planning screen: the Works app's Shutdowns tab (S5-4 turn 2). Every control is a plain button in the
+// device's panel (the controller walks it: section 26's padPanel). SD_UI is the draft on screen, live only (not saved):
+// the job, its branch, the hour, the rooms kept, who you warned; Book copies it into sd.book ----
+const SD_SHOW = 6;                                       // people listed by name to warn; more than that: one ship notice for all
+const SD_UI = { job: null, branch: null, at: null, keep: [], warned: [], inPerson: [], all: false };
+function sdJobs() { return (SHIP.jobs || []).filter(j => j.shut && j.status !== 'done' && !(j.claimedBy && j.claimedBy !== 'you')); }   // the jobs that need one
+const sdJobName = j => { const m = machineById(j.machine), r = m && DECKS[m.deck] && DECKS[m.deck].rooms[m.room]; return (MACHINE_KINDS[m.kind] || { name: 'Machine' }).name + ', ' + (r ? r.name.replace(/^./, x => x.toLowerCase()) : 'the closet') + ' (' + deckWord(m.deck) + ')'; };
+const sdRoomName = k => { const [dk, rm] = k.split('|'), r = DECKS[dk] && DECKS[dk].rooms[rm]; return r ? r.name : k; };
+// who'd be in the branch's rooms (minus the kept ones) during that hour of `day`, from that day's plans as they stand
+// (the screen only: a plan made before 22:00 doesn't hold the shutdown yet, which is what you're asking). [{ id, rooms, acts }]
+function sdAffected(day, branch, at, keep = []) {
+  const br = sdBranches()[branch]; if (!br) return [];
+  const ks = new Set(keep), rooms = new Set(br.rooms.map(sdRoomKey).filter(k => !ks.has(k))), a = (day - 1) * 1440 + at, b = a + SD_LEN, who = new Map();
+  let D = null; try { D = shipDay(day); } catch (e) { D = null; } if (!D) return [];
+  for (const [pid, segs] of D.plans) for (const s of segs) {
+    if (!s.placeId || !(s.from < b && a < s.to)) continue;
+    const pl = placeById(s.placeId), k = pl && pl.deck + '|' + pl.room; if (!k || !rooms.has(k)) continue;
+    const e = who.get(pid) || who.set(pid, { id: pid, rooms: [], acts: [], tags: [] }).get(pid);
+    if (!e.rooms.includes(k)) e.rooms.push(k); if (!e.acts.includes(s.act)) e.acts.push(s.act); if (s.tag && !e.tags.includes(s.tag)) e.tags.push(s.tag);
+  }
+  return [...who.values()].sort((x, y) => x.id < y.id ? -1 : 1);
+}
+// what makes an hour a bad one (question 3): a meal in the branch's rooms, or a tradition there. [words]
+function sdHourMarks(aff) {
+  const out = [], acts = new Set(aff.flatMap(e => e.acts)), tags = new Set(aff.flatMap(e => e.tags));
+  if (acts.has('breakfast')) out.push(worksText('sd.mark.breakfast', 'breakfast'));
+  if (acts.has('dinner')) out.push(worksText('sd.mark.dinner', 'dinner'));
+  for (const tg of tags) { if (!/^ev-/.test(tg)) continue; const t = (typeof TRADITIONS !== 'undefined' ? TRADITIONS : []).find(x => tg === 'ev-' + x.id || tg.startsWith('ev-' + x.id + '-'));
+    const w = t ? t.name : worksText('sd.mark.event', 'a ship event'); if (!out.includes(w)) out.push(w); }
+  return out;
+}
+function sdDraft() {                                     // the draft kept in step with the board: a job that still needs one, its branch, an hour
+  const L = sdJobs(), S = sdPeek(); if (!L.length) { SD_UI.job = null; return null; }
+  let j = L.find(x => x.id === SD_UI.job); if (!j) { j = L[0]; Object.assign(SD_UI, { job: j.id, branch: null, at: null, keep: [], warned: [], inPerson: [], all: false });
+    const b = S && S.book.find(x => x.job === j.id); if (b) Object.assign(SD_UI, { branch: b.branch, at: b.at, keep: b.keep.slice(), warned: b.warned.slice(), inPerson: b.inPerson.slice(), all: !!b.all }); }
+  const brs = sdBranchesFor(j.machine); if (!brs.includes(SD_UI.branch)) { SD_UI.branch = brs[0]; SD_UI.keep = []; }
+  if (!Number.isInteger(SD_UI.at)) SD_UI.at = 600;
+  SD_UI.at = Math.max(SD_HOURS[0], Math.min(SD_HOURS[1], SD_UI.at));
+  return j;
+}
+const sdBooked = jobId => { const S = SHIP.works && SHIP.works.sd; if (!S) return null; const b = S.book.find(x => x.job === jobId); if (b) return { b, set: false };
+  for (const k in S.set) { const x = S.set[k].find(y => y.job === jobId); if (x) return { b: x, set: true }; } return null; };
+const sdBtn = (label, verb, arg) => ({ label, action: { app: 'works', do: 'sd:' + verb, arg } });
+function sdView() {
+  const B = [], say = (text, mark) => B.push({ kind: 'text', text, mark }), W = SHIP.works;
+  if (!W || W.tr.m18 === undefined && !(W.cur && W.cur.id === 'm18')) { say(worksText('sd.none.untrained', 'Calder will show you shutdowns once you\'re a Senior Officer.')); return B; }
+  const j = sdDraft(), day = sdTarget(), S = sdPeek();
+  say(worksText('sd.head', 'Plan a shutdown for {day}. Bookings settle at 22:00 the evening before.', { day: day === SHIP.time.day + 1 ? 'tomorrow (Day ' + day + ')' : 'Day ' + day }), 'hot');
+  const all = [].concat(S.book.map(b => [b, false]), ...Object.keys(S.set).map(k => S.set[k].map(b => [b, true])));
+  if (all.length) { say(worksText('sd.booked.head', 'Booked'), 'head'); B.push({ kind: 'list', rows: all.map(([b, set]) => ({ text: 'Day ' + b.day + ', ' + hhmm(b.at) + '-' + hhmm(b.at + SD_LEN) + ': ' + sdBranches()[b.branch].name, sub: set ? worksText('sd.booked.set', 'settled: the crew have planned round it') : worksText('sd.booked.open', 'settles at 22:00 the evening before') })) }); }
+  if (!j) { say(worksText('sd.none', 'No jobs need the power off just now.')); return B; }
+  const L = sdJobs();
+  if (L.length > 1) { say(worksText('sd.step.job', '1. The job'), 'head'); B.push({ kind: 'buttons', items: L.map(x => ({ ...sdBtn(sdJobName(x), 'job', x.id), on: x.id === j.id })) }); }
+  else say('1. ' + worksText('sd.job', '{machine}: needs the power off', { machine: sdJobName(j) }), 'head');
+  const bk = sdBooked(j.id);
+  if (bk && bk.set) { say(worksText('sd.settled', 'This one\'s settled: Day {day}, {time}. Be at the junction then.', { day: bk.b.day, time: hhmm(bk.b.at) }), 'urgent'); return B; }
+  const brs = sdBranchesFor(j.machine), br = sdBranches()[SD_UI.branch];
+  say(worksText('sd.step.branch', '2. The branch to switch off'), 'head');
+  if (brs.length > 1) B.push({ kind: 'buttons', items: brs.map(k => ({ ...sdBtn(sdBranches()[k].name.replace(/^./, x => x.toUpperCase()), 'branch', k), on: k === SD_UI.branch })) });
+  say(worksText('sd.feeds.rooms', '{where}: {text}', { where: br.name.replace(/^./, x => x.toUpperCase()), text: br.rooms.map(r => sdRoomName(sdRoomKey(r))).join(', ') }) + '.');
+  say(worksText('sd.step.keep', '3. Keep power to'), 'head');
+  B.push({ kind: 'buttons', items: br.keep.map(r => { const k = sdRoomKey(r), on = SD_UI.keep.includes(k); return { ...sdBtn((on ? worksText('sd.keep.on', 'Kept on:') : worksText('sd.keep.off', 'Keep on:')).trim() + ' ' + sdRoomName(k), 'keep', k), on }; }) });
+  const aff = sdAffected(day, SD_UI.branch, SD_UI.at, SD_UI.keep), marks = sdHourMarks(aff), bad = marks.length > 0;
+  say(worksText('sd.step.hour', '4. The hour'), 'head');
+  say(hhmm(SD_UI.at) + '-' + hhmm(SD_UI.at + SD_LEN) + ': ' + (aff.length ? worksText('sd.who.n', '{n} people in those rooms then', { n: aff.length }) : worksText('sd.who.none', 'nobody in those rooms then: a quiet hour')) + (bad ? '. ' + worksText('sd.hour.bad', 'Clashes with {thing}.', { thing: marks.join(', ') }) : '.'), bad ? 'urgent' : aff.length ? null : 'up');
+  { let cl = null; try { cl = typeof p9ShutClash === 'function' ? p9ShutClash({ day, at: SD_UI.at, branch: SD_UI.branch, keep: SD_UI.keep.slice() }) : null; } catch (e) { cl = null; }   // 24k's P9 (B4): a crew routine in those rooms then; pure, asked on each draw
+    if (cl && cl.who) say(worksText('case.p9.shut', 'Your shutdown hour clashes with {name}\'s {thing}. Move one of them.', { name: worksName(cl.who), thing: cl.thing || '' }), 'urgent'); }
+  B.push({ kind: 'buttons', items: [sdBtn(worksText('sd.prev', 'Earlier hour'), 'hour', -1), sdBtn(worksText('sd.next', 'Later hour'), 'hour', 1), sdBtn(worksText('sd.hour.quietest', 'Quietest hour'), 'quiet', 0)] });
+  say(worksText('sd.step.warn', '5. Warn who\'s affected'), 'head');
+  if (!aff.length) say(worksText('sd.warn.none', 'Nobody to warn at that hour.'));
+  else {                                                 // the people who work there and Brennan first, then a few more; a crowd gets one ship notice
+    const key = e => (e.id === 'brennan' ? 0 : e.acts.includes('work') ? 1 : 2), shown = aff.slice().sort((x, y) => key(x) - key(y) || (x.id < y.id ? -1 : 1)).slice(0, SD_SHOW);
+    B.push({ kind: 'list', rows: shown.map(e => { const done = SD_UI.warned.includes(e.id) || SD_UI.inPerson.includes(e.id), brennan = e.id === 'brennan';
+      return { text: worksName(e.id), sub: e.rooms.map(sdRoomName).join(', ') + (brennan && !SD_UI.inPerson.includes('brennan') ? ' · ' + worksText('sd.warn.brennan', 'tell him in person before 22:00') : ''),
+        button: done ? null : worksText('sd.warn', 'Warn'), action: done ? null : { app: 'works', do: 'sd:warn', arg: e.id }, mark: done ? 'up' : null }; }) });
+    if (aff.length > SD_SHOW) { const left = aff.filter(e => !SD_UI.warned.includes(e.id)).length;
+      if (left) B.push({ kind: 'buttons', items: [sdBtn(worksText('sd.warn.all', 'Post a ship notice: warn all {n}', { n: aff.length }), 'warnall', 0)] }); else say(worksText('sd.warn.alldone', 'Ship notice posted: all {n} warned.', { n: aff.length }), 'up'); }
+  }
+  const blocked = bad && !SD_MEALS_OK;
+  B.push({ kind: 'buttons', items: [sdBtn(bk ? worksText('sd.rebook', 'Change the booking') : worksText('sd.book', 'Book for {day}', { day: day === SHIP.time.day + 1 ? 'tomorrow' : 'Day ' + day }), 'book', j.id)].concat(bk ? [sdBtn(worksText('sd.cancel', 'Cancel the booking'), 'cancel', j.id)] : []) });
+  if (blocked) say(worksText('sd.blocked', 'That hour can\'t be booked: pick another.'), 'down');
+  else if (bad) say(worksText('sd.bad.warn', 'You can book it, but the crew will grumble.'), 'down');
+  return B;
+}
+function sdAct(verb, arg) {
+  const v = String(verb).replace(/^sd:/, ''), j = sdDraft(); if (!j && v !== 'job') return;
+  if (v === 'job') { if (sdJobs().some(x => x.id === arg)) { SD_UI.job = null; Object.assign(SD_UI, { job: arg, branch: null, at: null, keep: [], warned: [], inPerson: [], all: false }); const b = sdBooked(arg); if (b && !b.set) Object.assign(SD_UI, { branch: b.b.branch, at: b.b.at, keep: b.b.keep.slice(), warned: b.b.warned.slice(), inPerson: b.b.inPerson.slice(), all: !!b.b.all }); } }
+  else if (v === 'branch') { if (sdBranchesFor(j.machine).includes(arg)) { SD_UI.branch = arg; SD_UI.keep = []; } }
+  else if (v === 'keep') { const i = SD_UI.keep.indexOf(arg); if (i >= 0) SD_UI.keep.splice(i, 1); else if (sdBranches()[SD_UI.branch].keep.some(r => sdRoomKey(r) === arg)) SD_UI.keep.push(arg); }
+  else if (v === 'hour') SD_UI.at = Math.max(SD_HOURS[0], Math.min(SD_HOURS[1], SD_UI.at + 60 * (arg < 0 ? -1 : 1)));
+  else if (v === 'quiet') { let best = null; for (let at = SD_HOURS[0]; at <= SD_HOURS[1]; at += 60) { const a = sdAffected(sdTarget(), SD_UI.branch, at, SD_UI.keep), n = a.length + (sdHourMarks(a).length ? 100 : 0); if (!best || n < best[1]) best = [at, n]; } if (best) SD_UI.at = best[0]; }
+  else if (v === 'warn') sdWarn(arg);
+  else if (v === 'warnall') { const aff = sdAffected(sdTarget(), SD_UI.branch, SD_UI.at, SD_UI.keep); for (const e of aff) if (e.id !== 'brennan' && !SD_UI.warned.includes(e.id)) sdWarn(e.id, true); SD_UI.all = true; { const b = sdPeek().book.find(x => x.job === SD_UI.job); if (b) b.all = true; }
+    try { toast(worksText('sd.notice.title', 'Ship notice'), worksText('sd.notice.posted', 'Posted: power off in {text}, {time}. {n} people warned.', { text: sdBranches()[SD_UI.branch].rooms.map(r => sdRoomName(sdRoomKey(r))).join(' and '), time: hhmm(SD_UI.at), n: aff.length })); } catch (e) { /* no UI */ } }
+  else if (v === 'book') { if (!SD_MEALS_OK && sdHourMarks(sdAffected(sdTarget(), SD_UI.branch, SD_UI.at, SD_UI.keep)).length) return;
+    const b = sdBook(j.id, SD_UI.at, SD_UI.branch, SD_UI.keep, { warned: SD_UI.warned, inPerson: SD_UI.inPerson, all: SD_UI.all, askB: sdAffected(sdTarget(), SD_UI.branch, SD_UI.at, SD_UI.keep).some(e => e.id === 'brennan') });
+    if (b) { try { toast(worksText('sd.title', 'Shutdown booked'), worksText('sd.booked', 'Booked: {where}, Day {day} at {time}. It settles at 22:00 tonight.', { day: b.day, time: hhmm(b.at), where: sdBranches()[b.branch].name }) + (sdParts(j) ? ' ' + worksText('sd.parts.bring', 'Bring {thing}.', { thing: sdParts(j) }) : '')); } catch (e) { /* no UI */ }
+      if (typeof sdBookedHook === 'function') sdBookedHook(b); } }
+  else if (v === 'cancel') sdCancel(j.id);
+  if (typeof deviceRefresh === 'function') try { deviceRefresh(); } catch (e) { /* none */ }
+}
+// Warn: a note to their device, and their answer (stand-ins until the head writer's m18.lines)
+function sdWarn(id, quiet) {
+  if (SD_UI.warned.includes(id)) return false; SD_UI.warned.push(id);
+  const S = sdPeek(), b = S.book.find(x => x.job === SD_UI.job); if (b && !b.warned.includes(id) && b.warned.length < 8) b.warned.push(id);
+  const k = Math.floor(schedU(strSeed(id), SHIP.time.day, 853) * 3);
+  if (!quiet) try { toast(worksName(id), worksText('sd.warn.reply', ['Thanks for the warning. I\'ll work round it.', 'Noted. I\'ll be elsewhere.', 'An hour? Fine. Thanks for telling me.'][k], null, k)); } catch (e) { /* no UI */ }
+  simNote('sdWarned', { who: id, all: !!quiet });
+  return true;
+}
+// Brennan in person (section 20's chat card asks): before a galley one, a talk option. Told is kept on the draft and the booking
+const sdGalley = b => !!b && sdBranches()[b.branch].rooms.some(r => (r[0] === 3 && (r[1] === 'K' || r[1] === 'M')) && !(b.keep || []).includes(sdRoomKey(r)));
+function sdChatButton(p) {
+  if (!P5_M18 || !p || p.id !== 'brennan' || !SHIP.works) return null;
+  const S = sdPeek(), draft = SD_UI.job && sdJobs().some(x => x.id === SD_UI.job) && sdAffected(sdTarget(), SD_UI.branch, SD_UI.at, SD_UI.keep).some(e => e.id === 'brennan') ? { inPerson: SD_UI.inPerson } : null;
+  const want = [draft].concat(S.book.filter(b => b.askB)).filter(Boolean);   // only when he's on the list (the screen says to tell him)
+  if (!want.length || want.every(b => (b.inPerson || []).includes('brennan'))) return null;
+  return { id: 'sd-tell', label: worksText('sd.warn.ask', 'About tomorrow\'s shutdown') };
+}
+function sdChatSay(p) {
+  if (!p || p.id !== 'brennan') return null;
+  if (!SD_UI.inPerson.includes('brennan')) SD_UI.inPerson.push('brennan');
+  for (const b of sdPeek().book) if ((b.askB || sdGalley(b)) && !b.inPerson.includes('brennan')) b.inPerson.push('brennan');
+  simNote('sdWarned', { who: 'brennan', inPerson: true });
+  return (worksVoice('brennan', 'sd.warn.brennan') || [])[0] || worksText('sd.chat.brennan', 'Thanks for telling me to my face. I\'ll get the stock pot on early and we\'ll manage.');
+}
+if (P5_M18) worksTabAdd({ id: 'shut', title: worksText('sd.tab', 'Shutdowns'), order: 40, verbs: 'sd', view: sdView, act: sdAct, badge: () => SHIP.works && (SHIP.works.tr.m18 !== undefined || SHIP.works.cur && SHIP.works.cur.id === 'm18') ? sdJobs().filter(j => !sdBooked(j.id)).length : 0 });
+// ---- the training (S5-4 turn 3): Thursday Day 18, Calder at Deck 6's port junction (the ladder row's where). The ask as
+// every training (24 core's trainOffer: her Mail and a word, the meeting at 09:00 or 09:15), then her talk there
+// (train.m18.calder: a stand-in until the head writer's), then the planning screen opens on a real job of yours (slot 42,
+// the port junction, marked for a shutdown) and she names each step; your first booking trains you. On the day: an urgent
+// notice once you're up, a level-1 arrow to the junction from 15 minutes before (whatever the Teaching arrows setting),
+// Schedule and Tracked rows. Not booked by the shift's end: as every training, offered again on your next workday ----
+const SD_SAY = {                                          // Calder's stand-in words (the head writer's m18.lines replace them: train.m18.<key> under her work lines)
+  open: ['Here\'s one for tomorrow. Open Works, Shutdowns: it\'s on your screen now.', 'One: the branch. What does it feed? Two: the hour. Who\'s in those rooms then?', 'Three: warn them. Four: book it before 22:00. I\'m watching.'],
+  booked: ['Booked. That settles at ten tonight, and the crew plan round it.', 'Tomorrow, be at the junction on the hour. Don\'t make them wait in the dark.'],
+  bad: 'Dinner hour? Your call. They\'ll grumble, and they\'ll be right to.', remind: 'Your shutdown plan: book it before the shift ends.' };
+function sdStandIn() {                                    // her meeting, if the head writer's isn't baked yet (made at the ask, never at load)
+  const k = 'train.m18.calder'; if (MEETING_SCRIPTS[k] || MEETING_SCRIPTS['train.m18']) return;
+  MEETING_SCRIPTS[k] = { title: 'Shutdowns', from: worksName('calder'), gist: 'Calder showed you how to plan a shutdown: the branch, a quiet hour, who to warn, and Brennan in person if it\'s the galley.',
+    lines: [{ who: 'calder', text: 'Some repairs need the power off. Never a whole deck: one branch.', pose: 'gesture', to: 'you' },
+      { who: 'calder', text: 'This junction feeds the galley and the mess on one side, the gym and the laundry on the other.' },
+      { who: 'calder', text: 'You pick the hour. Look at who\'s in those rooms then. A quiet hour costs nobody anything.' },
+      { who: 'calder', text: 'Dinner hour? The whole ship eats in the dark. You can. You\'ll hear about it.' },
+      { choice: [{ text: 'So I warn whoever\'s there.', reply: { who: 'calder', text: 'Every one. A note on their device is the least of it.' } },
+        { text: 'What can stay powered?', reply: { who: 'calder', text: 'Some rooms can be kept on. Fewer rooms off, fewer people put out.' } }] },
+      { who: 'calder', text: 'And if it touches the galley, you tell Brennan to his face. Before ten. Not a note.', pose: 'nod' },
+      { who: 'calder', text: 'Bookings settle at ten at night. After that the crew have planned round you.' },
+      { who: 'calder', text: 'Right. Your device. Let\'s plan a real one for tomorrow.' }] };
+}
+function sdTrainReserve(d, at) {                          // the training's real job: the port junction, marked, held for you until tomorrow's shift ends
+  const id = jobReserve('6-junction-1', d, at, SD_TRAIN_SLOT, { tier: 3, train: 'm18', until: d * 1440 + dayShiftEnd(d + 1) }), j = id && SHIP.jobs.find(x => x.id === id);
+  if (!j) return null;
+  j.shut = true; j.status = 'waiting'; j.why = sdWhy(); MACH_REV++;
+  Object.assign(SD_UI, { job: id, branch: null, at: null, keep: [], warned: [], inPerson: [], all: false });
+  if (typeof worksTabShow === 'function' && !SIM_AT) try { worksTabShow('shut'); } catch (e) { /* no device */ }
+  { const v = ['feeds', 'hour', 'warn', 'keep'].flatMap(k => worksVoice('calder', 'train.m18.follow.' + k) || []), L = v.length ? v : SD_SAY.open, still = () => { const c = SHIP.works && SHIP.works.cur; return !!c && c.id === 'm18' && c.st === 'do'; };
+    L.forEach((l, i) => { if (!i) worksSay('calder', l); else if (typeof simTimeout === 'function') simTimeout(() => { if (still()) worksSay('calder', l); }, 5200 * i); }); }   // (RV20's S1) not after you've booked   // the writer's flags (SW3), else the stand-ins
+  simNote('sdTrain', { job: id, day: d });
+  return id;
+}
+function sdBookedHook(b) {                                // your first booking trains you (the training's job, or any)
+  const W = SHIP.works, c = W && W.cur; if (!W) return;
+  if (c && c.id === 'm18' && c.st === 'do') { worksSayAll('calder', worksVoice('calder', 'train.m18.follow.book') || SD_SAY.booked); if (sdHourMarks(sdAffected(b.day, b.branch, b.at, b.keep)).length) worksSay('calder', (worksVoice('calder', 'train.m18.follow.meal') || [])[0] || worksText('sd.say.bad', SD_SAY.bad)); worksTrained('m18'); }
+}
+if (P5_M18) WORK_MECH.m18 = { self: true, noJob: false, at: d => { sdStandIn(); return 540; }, reserve: (d, at) => sdTrainReserve(d, at) };
+// the beats while it's under way: the morning notice, the level-1 arrow, the screen's reminder each hour. Once a ship minute
+function sdTrainBeats(now) {
+  const W = SHIP.works, c = W && W.cur; if (!c || c.id !== 'm18') return;
+  const r = c.st === 'meet' && SHIP.occasions.find(x => x.key === c.occ), d = worksDay(now);
+  if (r && c.told && now >= r.at - 30 && !flag('sd.train.notice.' + d) && !(typeof promoBusy === 'function' && promoBusy())) {   // 30 minutes before (RV20's S1: at wake it came straight after the ask's own toast)
+    flagSet('sd.train.notice.' + d, 1);
+    const text = worksText('m18.notice', 'Today: shutdowns with Calder, {time}, the port power junction on Deck 6.', { time: hhmm(r.at % 1440) });
+    if (typeof promoNotice === 'function') promoNotice(text, worksName('calder')); else try { toast(worksName('calder'), text); } catch (e) { /* no UI */ }
+  }
+  if (r && typeof guideAsk === 'function') guideAsk({ id: 'sd:train:' + d, level: 1, owner: '24w (S5-4)', from: r.at - 15, until: r.at + r.len,
+    goal: () => ({ deck: 6, room: 'j', label: worksText('m18.ptr', 'Shutdowns with Calder, {time}', { time: hhmm(r.at % 1440) }) }), done: () => { const x = SHIP.works && SHIP.works.cur; return !x || x.id !== 'm18' || x.st !== 'meet'; } });
+  if (c.st === 'do' && now % 60 === 0 && !SIM_AT && !(typeof promoBusy === 'function' && promoBusy())) try { toast(worksName('calder'), worksText('sd.train.remind', SD_SAY.remind)); } catch (e) { /* no UI */ }
+}
+if (P5_M18) WORK_TICKS.push((t, skip) => { if (!skip) sdTrainBeats(Math.floor(t)); });
+// ---- the day itself (S5-4 turn 4): a settled booking (sd.set[today]). 30 minutes before: an urgent notice; from 15
+// before: the job opens for you, a level-1 arrow to the board and its Take it rung and named; taken, the job's own arrow
+// leads to the junction. Taken in the hour: the branch goes off (the crew in those rooms say so),
+// and when the work's done it's back on (thanks, or a grumble for a meal or tradition hour). Not taken by the hour's
+// end: the booking lapses, the crew moved their day for nothing (a grumble, a reputation dip), and the job waits for a
+// new booking. Brennan not told in person before a galley one: his grumble that morning and a small dip. Saved: sd.done,
+// sd.miss, and on each settled booking its state (st: 'off' | 'done' | 'lapsed', said: the morning beats given) ----
+const SD_BEAT = { notice: 30, arrow: 15 }, SD_XP = { done: 2, lapse: -3, grumble: -1 };
+const SD_CREW = { off: ['Lights! Oh, the shutdown.', 'There it goes. Right on time.', 'Power\'s off in here. As promised.'], back: ['And we\'re back. Thanks for the warning.', 'Lights on. Quick work.', 'Back on. Barely noticed.'],
+  grumble: ['In the middle of dinner? Really?', 'Whose idea was this hour?', 'Eating by torchlight. Lovely.'], brennan: 'Nobody told me about the galley going dark today. A note on a screen isn\'t telling me.' };
+function sdToday(now) { const S = SHIP.works && SHIP.works.sd, d = worksDay(now); return S && Array.isArray(S.set[d]) ? S.set[d] : []; }
+// the crew in the branch's rooms on your deck say a line in their bubbles (else nothing: a toast says it for you)
+function sdCrewSay(b, kind, now) {
+  const br = sdBranches()[b.branch], keep = new Set(b.keep || []), rooms = new Set(br.rooms.map(sdRoomKey).filter(k => !keep.has(k)));
+  let n = 0; const L = SD_CREW[kind] || SD_CREW.off;
+  try { for (const a of (typeof DECK_CREW !== 'undefined' ? DECK_CREW : [])) { if (n >= 3 || !a.p || !deckDef) break; const r = roomAt(Math.floor(a.x), Math.floor(a.z)); if (!rooms.has(deckDef.num + '|' + r)) continue;
+    const k = Math.floor(schedU(strSeed(a.p.id), worksDay(now), 853) * L.length); bubbleSay(a.h, worksText('sd.crew.' + kind, L[k], null, k), 5); n++; } } catch (e) { /* no deck */ }
+  return n;
+}
+// what the job needs, in words ("a breaker and a bracket (make the bracket in the machine shop)"), and whether you have it
+// all: taken by you and its next stop is the junction's, not a fetch or a make (RV20's M3: the power goes off only then)
+function sdParts(j) { if (!j || !Array.isArray(j.parts) || !j.parts.length || typeof partList !== 'function') return ''; return partList(j.parts) + (j.make ? worksText('sd.parts.make', ' (make the {thing} in the machine shop)', { thing: j.make }) : ''); }
+function sdReady(j) { if (!j || j.claimedBy !== 'you') return false; let st = []; try { st = jobStops(j); } catch (e) { st = []; } const nx = st.find(x => !x.done); return !!nx && nx.step !== 'fetch' && nx.step !== 'make'; }
+function sdDayTick(now) {
+  const W = SHIP.works, S = W && W.sd; if (!S) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, live = now >= shipNow() - 1 && !SIM_AT, B = (d - 1) * 1440;
+  for (const b of sdToday(now)) {
+    const j = SHIP.jobs.find(x => x.id === b.job); b.said = b.said || 0;
+    const where = sdBranches()[b.branch].name, Where = where.replace(/^./, x => x.toUpperCase()), parts = sdParts(j);
+    // Brennan's grumble: only when the screen asked you to tell him (he was on the list at booking, RV20's M2) and you didn't
+    if (!b.st && m >= 360 && !(b.said & 1) && b.askB && !(b.inPerson || []).includes('brennan') && live) { b.said |= 1; worksSay('brennan', (worksVoice('brennan', 'sd.grumble.brennan') || [])[0] || worksText('sd.brennan.grumble', SD_CREW.brennan)); worksXp(SD_XP.grumble); simNote('sdGrumble', { who: 'brennan', day: d }); }
+    if (!j || j.status === 'done' || (!b.st && j.workDone)) { if (!b.st || b.st === 'off') { b.st = 'done'; if (!S.done.includes(d)) S.done.push(d); } continue; }   // done (by you, early, or the crew got to it first)
+    // from 06:00 the job is yours to take, so you can fetch (and make) its parts before the hour; the power stays on till then
+    if (!b.st && m >= 360 && m < b.at + SD_LEN && j.status === 'waiting') { j.status = 'open'; delete j.why; MACH_REV++; }
+    if (!b.st && m >= 360 && m < b.at - SD_BEAT.notice && !(b.said & 4) && live && !(typeof promoBusy === 'function' && promoBusy())) {
+      b.said |= 4; const text = worksText('sd.morning', 'Shutdown at {time}, {where}. Take the job now and get {thing} first.', { time: hhmm(b.at), where, thing: parts || worksText('sd.parts.none', 'nothing to fetch') });
+      if (typeof promoNotice === 'function') promoNotice(text, worksName('calder')); else try { toast('Works', text); } catch (e) { /* no UI */ }
+    }
+    if (!b.st && m >= b.at - SD_BEAT.notice && m < b.at + SD_LEN && !(b.said & 2) && live && !(typeof promoBusy === 'function' && promoBusy() && m < b.at)) {
+      b.said |= 2; const ready = sdReady(j), text = worksText('sd.notice', 'Your shutdown, {time}: {where}. Take the job at the board, then the junction on Deck {deck}.', { time: hhmm(b.at), where, deck: (machineById(j.machine) || { deck: 6 }).deck })
+        + (ready || !parts ? '' : ' ' + worksText('sd.notice.parts', 'You still need {thing}.', { thing: parts }));
+      if (typeof promoNotice === 'function') promoNotice(text, worksName('calder')); else try { toast('Works', text); } catch (e) { /* no UI */ }
+    }
+    if (!b.st && m >= b.at - SD_BEAT.arrow && m < b.at + SD_LEN && typeof guideAsk === 'function') {
+      const lab = worksText('sd.ptr', 'Your shutdown, {time}: switch it off', { time: hhmm(b.at) });
+      guideAsk({ id: 'sd:day:' + d + ':' + b.at, level: 1, owner: '24w (S5-4)', from: B + b.at - SD_BEAT.arrow, until: B + b.at + SD_LEN,
+        goal: () => { let mj = null; try { mj = myJob(); } catch (e) { mj = null; } if (mj && mj.id === b.job) return null; return { deck: 5, item: /job board/i, room: 'w', label: lab }; },   // yours: the job's own arrow (the shelves, the machine shop, the junction)
+        done: () => { let mj = null; try { mj = myJob(); } catch (e) { mj = null; } return !!mj && mj.id === b.job || b.st === 'done' || b.st === 'lapsed'; } });
+      if (typeof pointAsk === 'function' && typeof pointBoard === 'function' && typeof POINT_ON !== 'undefined' && POINT_ON)
+        pointAsk({ id: 'p:sd:' + d + ':' + b.at, force: true, path: pointBoard(b.job, lab), until: B + b.at + SD_LEN, done: () => { let mj = null; try { mj = myJob(); } catch (e) { mj = null; } return !!mj; } });
+    }
+    // off: in the hour, the job yours and its parts in hand (RV20's M3)
+    if (!b.st && sdReady(j) && m >= b.at && m < b.at + SD_LEN) { b.st = 'off'; simNote('sdOff', { day: d, branch: b.branch }); if (live && !sdCrewSay(b, 'off', now)) try { toast('Works', worksText('sd.day.off', '{where}: power off.', { where: Where })); } catch (e) { /* no UI */ } }
+    if (b.st === 'off' && j.workDone) {                  // the work's done: power back on
+      b.st = 'done'; if (!S.done.includes(d)) S.done.push(d); worksUse('m18'); worksXp(SD_XP.done);
+      const bad = sdHourMarks(sdAffected(d, b.branch, b.at, b.keep)).length > 0; if (bad) worksXp(SD_XP.grumble);
+      simNote('sdBack', { day: d, branch: b.branch, grumble: bad });
+      if (live && !sdCrewSay(b, bad ? 'grumble' : 'back', now)) try { toast('Works', worksText('sd.done', 'Power back on. {where} is running again.', { where: Where })); } catch (e) { /* no UI */ }
+      continue;
+    }
+    if (m < b.at + SD_LEN || b.st === 'done' || b.st === 'lapsed') continue;
+    // the hour's over: the power is never left off past it (back on, the job to book again), nor booked for nothing
+    const was = b.st; b.st = 'lapsed'; if (!S.miss.includes(d)) S.miss.push(d); worksXp(was === 'off' ? SD_XP.grumble : SD_XP.lapse);
+    if (j.claimedBy === 'you' && typeof dropJob === 'function') dropJob(j.id);
+    if (!j.claimedBy) { j.status = 'waiting'; j.why = sdWhy(); delete j.sdDay; MACH_REV++; }
+    simNote('sdLapsed', { day: d, branch: b.branch, missed: was !== 'off', over: was === 'off' });
+    if (was === 'off') {
+      if (live && !sdCrewSay(b, 'back', now)) try { toast('Works', worksText('sd.done', 'Power back on. {where} is running again.', { where: Where })); } catch (e) { /* no UI */ }
+      worksSay('calder', worksText('sd.over', 'Hour\'s up. Power back on: it never stays off past the booking. Finish it on the next one.'));
+    } else {
+      if (typeof mailSend === 'function') mailSend({ at: now, from: worksName('calder'), ...(t => { const i = t.indexOf(' | '); return { subject: i > 0 ? t.slice(0, i) : 'Your shutdown', body: i > 0 ? t.slice(i + 3) : t }; })(worksText('mail.sd.missed', 'Your shutdown | You booked {time} and never came. The crew moved their day for nothing. Book it again.', { time: hhmm(b.at) })) });
+      if (live) try { toast(worksName('calder'), worksText('sd.missed', 'You missed your shutdown. Book it again.')); } catch (e) { /* no UI */ }
+    }
+  }
+}
+if (P5_M18) WORK_TICKS.push((t, skip) => sdDayTick(Math.floor(t)));
+// the Schedule and Tracked rows (section 15's devDay asks, one line): a settled or booked shutdown on day d; the training's meeting is the occasion's own row
+function sdItems(d) {
+  const S = P5_M18 && SHIP.works && SHIP.works.sd; if (!S) return [];
+  const all = (S.set[d] || []).concat(S.book.filter(b => b.day === d));
+  return all.filter(b => !b.st || b.st === 'off').map(b => { const j = SHIP.jobs.find(x => x.id === b.job), m = j && machineById(j.machine);
+    return { from: b.at, to: b.at + SD_LEN, title: worksText('sd.row', 'Your shutdown: {where}', { where: sdBranches()[b.branch].name }), where: m ? (DECKS[m.deck].rooms[m.room] || { name: 'the junction' }).name + ', ' + deckWord(m.deck) : 'the junction', kind: 'beat', deck: m ? m.deck : 6, room: m ? m.room : 'j' }; });
+}
 // ---- end of slot: Shutdowns ----
 
 // ---------------------------------------------------------------------

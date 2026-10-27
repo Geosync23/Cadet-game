@@ -40,7 +40,7 @@ __import__('atexit').register(lambda: [f.unlink(missing_ok=True) for f in (WORK 
 ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
 GAME = pathlib.Path(ARGS[0])
-ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'door', 'reach', 'day', 'games', 'unplug', 'odd',
+ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'door', 'reach', 'day', 'games', 'unplug', 'odd', 'shut',
              'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'm19']
 PARTS = ARGS[1:] or ALL_PARTS
 SHOTS = WORK / 'test' / 'ctl_shots'; SHOTS.mkdir(parents=True, exist_ok=True)
@@ -365,7 +365,13 @@ CANDS = r"""(() => [...document.body.children].filter(e => (e.hidden || getCompu
   (e.matches('[role=dialog],[aria-modal=true],dialog') || e.querySelector('button,input,select,textarea,a[href],[role=button],h1,h2,h3'))).map(e => e.id))()"""
 OPEN_NOW = r"""((ids) => ids.filter(id => { const e = document.getElementById(id); if (!e || e.hidden) return false; const b = e.getBoundingClientRect();
   return b.width > 0 && b.height > 0 && getComputedStyle(e).display !== 'none' && getComputedStyle(e).visibility !== 'hidden'; }))"""
-SITUATIONS = ['bedtime']   # (CP5) Sweep.situation: set up as a player gets there (#sleepAsk: the alarm card at bedtime)
+SITUATIONS = ['bedtime', 'shutdowns']   # (CP5) Sweep.situation: set up as a player gets there (#sleepAsk: the alarm card at bedtime)
+# (S5-4, B3) the shutdowns planning screen (24w, with P5_M18): Day 18 after the training, a job marked for a shutdown, the
+# Works app open on its Shutdowns tab at the dinner hour (the clash line and the ship-notice button show). False with it off
+SD_SETUP = r"""(() => { if (typeof P5_M18 === 'undefined' || !P5_M18 || typeof sdView !== 'function') return false;
+  setShipNow(17 * 1440 + 600); machinesNow(); const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.m18 = 18;
+  const id = jobReserve('6-junction-1', 18, 600, 43, { tier: 3 }); sdMark(shipNow()); sdDraft(); SD_UI.at = 1080;
+  WORKS_TAB = 'shut'; deviceShow('works'); return !!id; })()"""
 NOT_FROM_NEW_GAME = {}   # id: the reason it can't open in a new game at a test URL (filled as the sweep finds them, each with a reason)
 DECK_TARGETS = r"""(() => { const out = [], seen = new Set(), v = new THREE.Vector3();
   const add = (name, x, y, z) => { if (seen.has(name)) return; seen.add(name); out.push({ name, x, y, z }); };
@@ -439,6 +445,8 @@ class Sweep:
     def situation(self, name):
         # (CP5) a panel that only a moment of the day brings, set up the way a player gets there: bedtime is 22:00, your
         # bunk's deck, a tap on your bunk (you lie down and the alarm card comes)
+        if name == 'shutdowns':   # (S5-4) the planning screen, set up on paper (no player route to Day 18 from a new game)
+            ok = self.r.ev(SD_SETUP); self.r.step(20); return bool(ok)
         if name != 'bedtime': return False
         self.r.ev("skipTo((SHIP.time.day - 1) * 1440 + 22 * 60)"); self.r.step(20)
         b = self.r.ev(MY_BUNK_AT)
@@ -556,6 +564,21 @@ def part_reach(pw, src, tag):
     if 'panels' in built and '--inventory' not in FLAGS: fails += part_reach_pad(pw, src, tag, sw.states)
     return fails
 REACH_INVENTORY = {}
+
+# (S5-4, B3) the shutdowns planning screen by pad: the touch half from its situation only (its own buttons, a level deep),
+# then the pad half on each screen found: every Warn, the hour buttons, the keep choices, Book, Cancel reached and pressed.
+# With P5_M18 off in the game (and in the copy here: P5_STEP5 is switched on in it), "not yet", never a pass
+def part_shut(pw, src, tag):
+    on = src.replace("const P5_STEP5 = URL_FLAGS.has('p5s5');", "const P5_STEP5 = true;", 1)
+    if on == src or not re.search(r'\bconst P5_M18\s*=', src): return ['not yet: no P5_STEP5 switch line or no P5_M18 in this build']
+    sw = Sweep(pw, on, f'{tag}_shut'); sw.MAX_DEPTH = 2
+    sw.r = Run(pw, on, f'{tag}_shut_sweep', h=2400, quiet=REACH_QUIET); sw.r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); sw.r.step(20)   # a tall page: the whole screen in sight (the touch half lists only what's on screen; the pad half scrolls)
+    if not sw.press(sw.scan(), '@sit:shutdowns'): sw.r.close(); return ['the shutdowns screen did not open (SD_SETUP)']
+    sw.crawl(('@sit:shutdowns',), 1); sw.r.close()
+    mine = {k: v for k, v in sw.states.items() if any('Book for' in i.get('label', '') or 'Later hour' in i.get('label', '') for i in v['items'])}
+    print(f'  by touch: {len(sw.states)} screens, {len(mine)} with the planning screen; {sw.presses} presses')
+    if not mine: return ['the planning screen was never seen (no Book, no Later hour)']
+    return part_reach_pad(pw, on, tag, mine)
 
 # ---- the pad half (panels): every thing on every screen the touch half found, reached and pressed by pad --------------
 # For each screen with a panel open: get there by the touch half's own presses, then move the highlight (the page's real
@@ -2444,8 +2467,8 @@ OLD_NAME = {'pick': 'pick1'}   # CT1's pick beside this check's own
 
 # parts that need a package: 'not yet' until PAD_BUILT names it
 NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick'], 'door': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'],
-         'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck']}
-PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day}   # 'reach' joins when the pad half is written
+         'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck'], 'shut': ['panels']}
+PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day, 'shut': part_shut}   # 'reach' joins when the pad half is written
 for k, v in OLD_NEEDS.items(): NEEDS[OLD_NAME.get(k, k)] = v; PART_FN[OLD_NAME.get(k, k)] = legacy(k)
 
 # ---- Pillar 5 Step 5's pieces (plans/p5-step5-spec.html section 9): each part runs on a copy with P5_STEP5 on, and only
