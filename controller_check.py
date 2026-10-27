@@ -1668,16 +1668,20 @@ def part_ending(pw, src, tag):
     said = r.ev("SHIP.end.said.slice()")
     print(f'  Day 34: the Captain by pad: ring {got}, the button {res}, choices {cs}, Not sure {res2}, said {said}')
     if not said or said[-1][1] != 'unsure': fails.append(f'Day 34: Not sure by pad not kept ({said})')
-    fr = r.ev("(() => { for (const id of (typeof endFriendsOf === 'function' ? endFriendsOf() : [])) { const p = schedPeople().find(p => p.id === id), b = p && endFriendButton(p); if (b) return id; } return null; })()")
-    if fr:
+    frs = r.ev("(typeof endFriendsOf === 'function' ? endFriendsOf() : []).filter(id => { const p = schedPeople().find(p => p.id === id); return p && endFriendButton(p); })")
+    tried = []
+    for fr in frs:                                       # the first friend the ring can open (in a crowd someone in front can hide a person from the ring)
+        if r.ev("!document.getElementById('chat').hidden"): r.ev("chatClose()")
         r.ev(f"""(() => {{ const p = schedPeople().find(p => p.id === '{fr}'), w = whereIs(p, shipNow()); if (deckDef.num !== w.deck) goToDeck(w.deck); deckCrewFill(); const a = DECK_CREW.find(a => a.p && a.p.id === '{fr}');
           if (a) player.obj.position.copy(cellPos(...nearestOpen(a.x + 1.5, a.z + 1.5, player))); player.stop(); }})()"""); r.step(10)
         g2 = end_near(r, fr) and ring_and_A(r, [fr.split('-')[0]] + [w.lower() for w in r.ev(f"schedPeople().find(p => p.id === '{fr}').name").split()], 24)
         fl = r.ev(f"(() => {{ const b = endFriendButton(schedPeople().find(p => p.id === '{fr}')); return b && b.label; }})()")
         res3 = press_in_panel(r, f"[...document.querySelectorAll('#chat button.act')].find(b => b.textContent === {json.dumps(fl)})") if r.ev("!document.getElementById('chat').hidden") else 'no chat card'
-        print(f'  Day 34: a friend ({fr}) by pad: ring {g2}, "{fl}" {res3}')
-        if res3 != 'ok': fails.append(f'Day 34: "{fl}" on {fr}\'s chat card by pad: {res3}')
-    else: print('  Day 34: no friend with "About the transfer" today (the friends come on Friday)')
+        tried.append((fr, g2 is not None and g2 is not False, res3))
+        if res3 == 'ok': break
+    print(f'  Day 34: a friend\'s "About the transfer" by pad: {tried}')
+    if frs and not any(t[2] == 'ok' for t in tried): fails.append(f'Day 34: no friend\'s "About the transfer" pressed by pad ({tried})')
+    if not frs: print('  Day 34: no friend with "About the transfer" today')
     if r.errors: fails.append(f'Day 34: page errors {r.errors[:2]}')
     r.close()
     # Day 35, 14:40: the oath, led by pad
@@ -1714,6 +1718,8 @@ def part_ending(pw, src, tag):
         if not nx: break
         if not end_near(r, nx, 2.4): fails.append(f'Monday: could not walk to {nx} by the stick'); break
         if nx != 'torres-zeke':
+            end_near(r, nx, 1.3); r.step(20)               # walking right up to them is how a goodbye comes (within 1.8), by the stick alone
+            if r.ev(f"!!SHIP.end.f['bye:{nx}']"): byes.append(nx); continue
             h = ring_and_A(r, [nx.split('-')[0]] + [w.lower() for w in r.ev(f"schedPeople().find(p => p.id === '{nx}').name").split()], 24); r.step(4)
             bl = r.ev("endText('ending.btn.bye', 'Goodbye')")
             res = press_in_panel(r, f"[...document.querySelectorAll('#chat button.act')].find(b => b.textContent === {json.dumps(bl)})") if r.ev("!document.getElementById('chat').hidden") else 'no chat card'
