@@ -61,3 +61,13 @@ switch lines: ask first).
   (one line, sim engineer reviews), the Watch told in and out, the badge returned); WORK_MECH.m23 reserve slot 35;
   checks: mech_check m23 + the reactor, machine_check, day_check 23, controller_check presets on nights 1 and 2.
 - Gotcha: run cadet_test on its own (beside another browser check it showed false differences).
+
+## S6-5 M23 (section 28c, P5_M23) — turns 1-3
+- Night 1 (Day 22 from 22:45): side job `m23night` (11 stops: coil listen/service, coolant read/pick loop/top up at
+  `6-control-board`, board lamp/pull/seat/test, two coil dials). Night 2 (Day 23 from 21:00): permit card on the bridge,
+  badge (dosiOut), "Going in" card, side job `m23reactor` (3 stops at `6-reactor-1-svc`), "Coming out" card, badge back
+  -> trained W.tr.m23 = 23. State side.m23 { j1, d1, permit, told, j2, out, back, word, d2 }.
+- Lines outside 28c: section 14 doorOpenFor (m23DoorOpen) and devDay (m23Items), both for the sim engineer to review;
+  15b ixChoreLast + ixSideOwn (the interactions engineer to review); 4d places 6-control-board.
+- Checks: mech_check m23 (both nights), controller_check m23 (both nights by pad), deck6.
+- Not done (ask the lead): "the night's incident" on night 1; Torres by day (S6-3's forYou line); real words (m23.lines).

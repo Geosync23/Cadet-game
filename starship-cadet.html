@@ -8396,7 +8396,7 @@ function deck6P5Places() {
   DECK6_P5.team.forEach(([c, r, face], k) => D.places.push({ id: '6-coil-team-' + (k + 1), type: 'event', event: 'team-job', team: '6-coil-1', works: true, at: [c, r], face, pose: 'stand', anim: 'work', room: 'E' }));
   D.places.push({ id: '6-dosi-rack', type: 'event', event: 'dosimeter', at: [22, 7], face: 'w', pose: 'stand', room: 'K' },
     { id: '6-watch-board', type: 'event', event: 'watch-board', at: [10, 1], face: 'n', pose: 'stand', room: 'E' },
-    { id: '6-control-board', type: 'event', event: 'engine', at: [24, 4], xy: [24.9, 4.6], face: 'e', pose: 'stand', room: 'K' });   // at engine control's board (S6-5's coolant and board swap)
+    { id: '6-control-board', type: 'event', event: 'engine', at: [25, 4], xy: [25.65, 4.85], face: 'e', pose: 'stand', room: 'K' });   // at engine control's board (S6-5's coolant and board swap)
   deck2P5Places();
   SAVE_EXTRA.push(s => { const o = dosiOut(); if (o !== null) s.ship.dosi = { out: o }; });
   onSim('newGame', () => { DOSI = { out: null, mesh: [] }; });
@@ -8458,7 +8458,7 @@ Object.assign(WALL_KIT, {
 // rack and the board. Only with P5_DECK6
 function deck6P5Dress() {
   DECK6_P5.coils.forEach(([, , f, x]) => place('E', 'coilPanel', x, f === 's' ? 6.86 : 5.14, f));   // tapped as the coil: a real machine now, so section 15b's machine tap reads it out
-  place('R', 'reactorConsole', 1.05, 3.5, 'w');                   // tapped as the reactor (section 15b's machine tap), from inside only
+  place('R', 'reactorConsole', 1.05, 3.5, 'w', { it: IT('Reactor local console', 'The reactor\'s own readings, just inside the shielded door.') });   // on its tile the machine's tap reads the reactor out; on night 2 it's S6-5's visit
   const D = dosiState(); D.mesh = []; if (typeof PLAYER_TAPS !== 'undefined' && !PLAYER_TAPS.includes(dosiTap)) PLAYER_TAPS.push(dosiTap);
   placeWall('K', 'dosiRack', 'w', 3.5, { mine: D.mesh, hitW: .9, it: IT('Dosimeter rack', 'A badge for everyone who might go through the reactor door. Take one before you go in; hang it back when you come out.') });
   dosiShow();
@@ -10172,6 +10172,7 @@ function doorOpenFor(room, who, t = shipNow(), deck = typeof deckDef !== 'undefi
   if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof occasionDoorOpen === 'function' && occasionDoorOpen(deck, room, t)) return true;   // section 18's occasions: a summons, the Captain's table
   if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof jobDoorOpen === 'function' && jobDoorOpen(deck, room)) return true;   // section 15: your job's next stop is in there (0.28.52)
   if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof worksHomeOpen === 'function' && worksHomeOpen(deck, room)) return true;   // section 24p: your own cabin, once you're an officer
+  if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof m23DoorOpen === 'function' && m23DoorOpen(deck, room, t)) return true;   // 28c (S6-5): the reactor's shielded door, with a permit, a badge and the Watch told
   for (const a of apptList()) {
     if (!apptOn(a) || !/^(invite|summons|meeting|checkup|work|social)$/.test(a.kind || 'social')) continue;
     const pl = apptPlace(a); if (!pl || pl.deck !== deck || pl.room !== room) continue;
@@ -16498,13 +16499,14 @@ const ixStepwise = j => !!(j && j.machine && typeof JOB_KINDS === 'object' && JO
 const ixSides = () => typeof mySideJobs === 'function' && typeof jobStops === 'function' ? mySideJobs().filter(j => typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind] && !j.machine && !j.workDone && !(j.found > shipNow())) : [];   // only once it's announced (the drill: 14:50, AR2's A1)
 const ixChores = () => [...ixSides(), ixChore()].filter(Boolean);
 function ixNextStop(j) { const st = jobStops(j), k = st.findIndex(x => !x.done); return k < 0 ? null : { k, s: st[k] }; }
+const ixSideOwn = s => { const nx = ixNextStop(s), pl = nx && nx.s.places[0] && PLACE_OF.get(nx.s.places[0]); return !!(pl && pl.machine); };   // a side job's next stop is a machine's panel (S6-5)
 // first tips (Pillar 3, C13: 15b says when, the device draws them): tipShow(id, text) shows each once, when it's there
 function ixTip(id, text) { if (typeof tipShow === 'function') { try { tipShow(id, text); } catch (e) { /* the tips aren't ours */ } } }
 // 0.28.55 (the lead): at a chore's stop a thing you can use does its own thing. Section 15's playerTap asks ixChoreLast
 // last of all (scenery with nothing of its own to do), and with own = true just before machineTap, for a stop that is that
 // machine's own panel (section 18's stormBallasts at the lights). The floor at the stop and the Repair button: jobHere
 function ixChoreLast(it, at, own) {
-  for (const s of ixSides()) if (!own && ixChoreTap(it, at, s)) return true;   // the drill's stop first (its stops are never a machine's panel)
+  for (const s of ixSides()) if ((!own || ixSideOwn(s)) && ixChoreTap(it, at, s)) return true;   // the drill's stop first (its stops are never a machine's panel); 28c's night jobs' are (S6-5: at the panel, before the machine's own tap)
   const j = ixChore(), nx = j && !j.workDone ? ixNextStop(j) : null, pl = nx && nx.s.places[0] && PLACE_OF.get(nx.s.places[0]);
   return own && !(pl && pl.machine) ? false : ixChoreTap(it, at);
 }
@@ -65393,8 +65395,8 @@ if (P5_M21) {
 // control board swap (read the fault lamp, pull it, seat the new one, test: its steps one by one on the device), and
 // balancing two coils (24e's turn control used twice, at coil 1's panel then coil 2's: each card shows both coils, and each
 // coil's setting pulls on the other's reading until both are settled). Reyes teaches as you go (his bubble when he's on
-// the deck, else a toast). Night 2 (Day 23, from 21:00): the reactor, in turn 2. Trained (W.tr.m23) when both are done.
-// Saved: SHIP.works.side.m23 = { j1, d1, ... } (cleaned on read); the job keeps its own coil, low loop, fault board and
+// the deck, else a toast). Night 2 (Day 23, from 21:00): the reactor (below). Trained (W.tr.m23) when night 2's done.
+// Saved: SHIP.works.side.m23 = { j1, d1, permit, told, j2, out, back, word, d2 } (cleaned on read); the job keeps its own coil, low loop, fault board and
 // balance (j.coil, j.loop, j.board, j.bal). Job slot M23_SLOT 35. schedU keys 1080 (the low loop), 1081 (the fault board).
 // Words: content/works/m23.lines (stand-ins here until the head writer's). No R(). Off (P5_M23 false): nothing registers.
 const M23_N1 = 22, M23_N2 = 23, M23_SLOT = 35, M23_BY = 'reyes-alejandro', M23_COILS = ['6-coil-1', '6-coil-2', '6-coil-3'], M23_BOARD = '6-control-board';
@@ -65403,7 +65405,7 @@ function m23State() {                                    // side.m23, cleaned (a
   const A = s.m23;
   if (!A || typeof A !== 'object' || !s.m23Ok) {
     const int = v => Number.isInteger(v) && v >= 0 ? Math.min(v, 999999) : 0, str = v => typeof v === 'string' ? v.slice(0, 80) : null;
-    s.m23 = { j1: str(A && A.j1), d1: int(A && A.d1) };
+    s.m23 = { j1: str(A && A.j1), d1: int(A && A.d1), permit: int(A && A.permit), told: int(A && A.told), j2: str(A && A.j2), out: int(A && A.out), back: int(A && A.back), word: int(A && A.word), d2: int(A && A.d2) };
     Object.defineProperty(s, 'm23Ok', { value: true, enumerable: false, configurable: true });
   }
   return s.m23;
@@ -65418,7 +65420,7 @@ function m23Coil() {                                     // the coil to service:
   const c = id => (SHIP.machines[id] || { cond: 100 }).cond;
   return M23_COILS.filter(id => machineById(id) && panelPlace(id)).sort((a, b) => c(a) - c(b) || (a < b ? -1 : 1))[0] || null;
 }
-const m23Board = () => PLACE_OF && PLACE_OF.has(M23_BOARD) ? M23_BOARD : panelPlace(M23_COILS[1]);
+const m23Board = () => placeById(M23_BOARD) ? M23_BOARD : panelPlace(M23_COILS[1]);   // ship-wide (PLACE_OF is the deck you're on)
 const m23Loops = (bad, ok, low) => [1, 2, 3].map(i => worksText('m23.loop', 'Loop {n}', { n: i }) + ' ' + (i - 1 === bad ? low : ok)).join(' · ');
 // the balance: the coil you're turning shows its own dial; the other's reading is its own setting plus half this one's
 // (whole steps), so turning one moves the other; each settled at its mark (0), both read steady
@@ -65479,7 +65481,8 @@ function m23Done(j, t, by) {
 function m23Post(now) {
   const S = m23State(), n = p5NightOf(M23_N1), coil = m23Coil(); if (!S || S.j1 || !coil) return null;
   const d = M23_N1, key = machSeed('m23');
-  const j = jobMake('m23night', { id: 'm23night:' + coil + '@' + Math.floor(now / 60), machine: coil, deck: 6, room: 'E', h: Math.floor(now / 60), tier: 4, urgency: 1,
+  const j = jobMake('m23night', { id: 'm23night:' + coil + '@' + Math.floor(now / 60), deck: 6, room: 'E',   // no j.machine: a side job's stops are tapped like a chore's (15b's ixSides)
+    h: Math.floor(now / 60), tier: 4, urgency: 1,
     title: worksText('m23.card', 'Night 1 with Reyes: a coil, the coolant, a board, a balance'), coil, loop: Math.floor(schedU(key, d, 1080) * 3) % 3, board: Math.floor(schedU(key, d, 1081) * 6) % 6,
     bal: [2, -2], wrongs: 0, reserved: M23_SLOT, until: n.to, train: 'm23' });
   j.posted = j.found = j.start = Math.floor(now); j.claimedBy = 'you'; j.status = 'claimed';   // yours from the start: never on the board
@@ -65495,16 +65498,107 @@ function m23Beats(now) {
     promoNotice(worksText('m23.n1.notice', 'Your first night: engine work with Reyes. He\'s in the engine room, Deck 6.'), worksName(M23_BY));
     worksSay(M23_BY, worksText('m23.n1.say', 'Specialist. Kettle\'s on. First, a coil: come and listen to it with me.')); }
 }
-// the Schedule's row (section 14's devDay): night 1's engine work until it's done
+// the Schedule's row (section 14's devDay): each night's engine work until it's done
 function m23Items(d) {
-  if (d !== M23_N1 || !m23On(d)) return [];
-  const S = m23State(), n = p5NightOf(d), B = (d - 1) * 1440; if (!S || S.d1) return [];
-  return [{ from: n.from - B, to: n.to - B, title: worksText('m23.row.n1', 'Engine work with Reyes'), where: 'the engine room, Deck 6', kind: 'beat', deck: 6, room: 'E' }];
+  if (!m23On(d)) return [];
+  const S = m23State(), n = p5NightOf(d), B = (d - 1) * 1440; if (!S || (d === M23_N1 ? S.d1 : S.d2)) return [];
+  return [{ from: n.from - B, to: n.to - B, title: d === M23_N1 ? worksText('m23.row.n1', 'Engine work with Reyes') : worksText('m23.row.n2', 'The reactor: permit, badge, the Watch'), where: 'the engine room, Deck 6', kind: 'beat', deck: 6, room: d === M23_N1 ? 'E' : 'R' }];
+}
+// ---- night 2 (Day 23, from 21:00): the reactor. In order: "Sign the permit" (a card with the night watch officer on the
+// bridge, Deck 1), "Take a badge" (S6-4's dosimeter rack in engine control: dosiOut()), "Tell the Watch" you're going in
+// (a card on Deck 6), a short careful visit through the reactor's shielded door (it opens for you only with all three:
+// m23DoorOpen, asked by section 14's doorOpenFor; a side job at the reactor's local console: the shield readings, the
+// seals, the core), the Watch told you're out (a card as you finish), the badge back on its hook. A badge not back half
+// an hour after you're out: a word from the Watch (once). A notice at 20:30, a level 1 arrow with its ring line for each
+// step. Trained (W.tr.m23) and the Mail when the badge is back. Saved in side.m23: permit, told, j2, out, back, word, d2.
+const M23_WATCH = 'kowalczyk', M23_LATE = 30;
+function m23Night2Step(S) {                              // the step that's next, or null (all done)
+  if (!S || S.d2) return null;
+  const j = S.j2 && SHIP.jobs.find(x => x.id === S.j2);
+  return !S.permit ? 'permit' : !S.told && dosiOut() === null ? 'badge' : !S.told ? 'tell' : !S.out ? (j && j.workDone ? 'outcard' : 'reactor') : dosiOut() !== null ? 'return' : null;
+}
+// the shielded door: open for you with a permit, a badge and the Watch told, until you're out (and while you're still inside)
+function m23DoorOpen(deck, room, t = shipNow()) {
+  if (!P5_M23 || deck !== 6 || room !== 'R' || !m23On(M23_N2)) return false;
+  const S = m23State(), n = p5NightOf(M23_N2); if (!S || !S.permit || !S.told || !n || t < n.from || t >= n.to + 60) return false;
+  if (!S.out) return dosiOut() !== null;
+  try { return deckDef.num === 6 && roomAt(...player.here()) === 'R'; } catch (e) { return false; }   // out, but still inside: let you out
+}
+function m23ReactorStops() {
+  const pp = panelPlace('6-reactor-1'); if (!pp) return [];
+  const st = (tag, how, mins, opts) => ({ deck: 6, placeId: pp, mins, tag, how, ...(opts ? { opts } : {}) });
+  return [st('shield', 'look', 1, { secs: 3, text: worksText('m23.r.shield', 'Shield readings: all green, the badge on your collar ticking slowly. Nothing here to stay for.') }),
+    st('seals', 'hold', 5), st('core', 'look', 1, { secs: 3, text: worksText('m23.r.core', 'The core\'s glow through the inspection port: even, calm. Logged. Out you go.') })];
+}
+function m23ReactorDone(j, t, by) {
+  j.status = 'done'; j.end = Math.floor(t);
+  if (by === 'you') worksSay(M23_WATCH, worksText('m23.r.done', 'Readings logged. Tell the Watch you\'re out, then the badge back on its hook.'));
+  simNote('m23', { step: 'reactor', by: by || null });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+function m23ReactorPost(now) {
+  const S = m23State(), n = p5NightOf(M23_N2); if (!S || S.j2 || !panelPlace('6-reactor-1')) return null;
+  const j = jobMake('m23reactor', { id: 'm23reactor:6-reactor-1@' + Math.floor(now / 60), reactor: '6-reactor-1', deck: 6, room: 'R', h: Math.floor(now / 60), tier: 4, urgency: 1,
+    title: worksText('m23.r.card', 'The reactor: readings, seals, the core'), reserved: M23_SLOT, until: n.to, train: 'm23' });
+  j.posted = j.found = j.start = Math.floor(now); j.claimedBy = 'you'; j.status = 'claimed';
+  SHIP.jobs.push(j); S.j2 = j.id; if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  return j;
+}
+const m23OnBridge = () => { try { return deckDef.num === 1 && roomAt(...player.here()) === 'B'; } catch (e) { return false; } };
+const m23OnDeck6 = () => { try { return deckDef.num === 6; } catch (e) { return false; } };
+// the cards (deviceChoose: touch or pad), each once it's due and you're where it's signed; the choice is the step
+function m23Permit(now) { const S = m23State(); if (!S || S.permit) return false; S.permit = Math.floor(now); worksSay(M23_WATCH, worksText('m23.permit.said', 'Signed. Two hours on it. Badge from the rack, and tell me when you\'re in.')); simNote('m23', { step: 'permit' }); return true; }
+function m23Tell(now, out) {
+  const S = m23State(); if (!S) return false;
+  if (!out) { if (S.told || !S.permit || dosiOut() === null) return false; S.told = Math.floor(now); m23ReactorPost(now); }
+  else { const j = S.j2 && SHIP.jobs.find(x => x.id === S.j2); if (S.out || !j || !j.workDone) return false; S.out = Math.floor(now); }
+  promoNotice(out ? worksText('m23.watch.out', 'The Watch: you\'re out of the reactor, logged at {time}. Badge back on its hook, please.', { time: hhmm(Math.floor(now) % 1440) })
+    : worksText('m23.watch.in', 'The Watch: you\'re going into the reactor, logged at {time}. Ten minutes, no more.', { time: hhmm(Math.floor(now) % 1440) }), 'The Watch');
+  simNote('m23', { step: out ? 'out' : 'in' }); return true;
+}
+let M23_ASKED = -1;
+function m23Card(now) {
+  const S = m23State(), k = m23Night2Step(S); if (!k || now - M23_ASKED < 1 || typeof deviceChoose !== 'function') return;
+  if (typeof DEV !== 'undefined' && (DEV.choose || DEV.open)) return;
+  let c = null;
+  if (k === 'permit' && m23OnBridge()) c = { title: worksText('m23.permit.title', 'Reactor entry permit'), text: worksText('m23.permit.text', 'The watch officer reads it through with you: one person, a badge, ten minutes, the Watch told in and out.'), choices: [worksText('m23.permit.sign', 'Sign the permit')], go: () => m23Permit(now) };
+  else if (k === 'tell' && m23OnDeck6()) c = { title: worksText('m23.tell.title', 'Tell the Watch'), text: worksText('m23.tell.text', 'Permit signed, badge on. Tell the bridge you\'re going in.'), choices: [worksText('m23.tell.in', 'Going in')], go: () => m23Tell(now, false) };
+  else if (k === 'outcard') c = { title: worksText('m23.tell.title', 'Tell the Watch'), text: worksText('m23.tell.outtext', 'Readings done. Tell the bridge you\'re coming out.'), choices: [worksText('m23.tell.out', 'Coming out')], go: () => m23Tell(now, true) };
+  if (!c) return;
+  const ok = deviceChoose({ title: c.title, text: c.text, choices: c.choices }, i => { M23_ASKED = shipNow(); if (i === 0) c.go(); });
+  if (ok) M23_ASKED = now;
+}
+function m23Ring(k) {
+  return { permit: worksText('m23.ptr.permit', 'Sign the permit'), badge: worksText('m23.ptr.badge', 'Take a badge'), tell: worksText('m23.ptr.tell', 'Tell the Watch'),
+    reactor: worksText('m23.ptr.reactor', 'The reactor'), outcard: worksText('m23.ptr.tell', 'Tell the Watch'), return: worksText('m23.ptr.return', 'Hang the badge back') }[k];
+}
+const M23_GOAL = { permit: { deck: 1, room: 'B' }, badge: { deck: 6, room: 'K' }, tell: { deck: 6, room: 'K' }, reactor: { deck: 6, room: 'R' }, outcard: { deck: 6, room: 'R' }, return: { deck: 6, room: 'K' } };
+function m23Beats2(now) {
+  if (!m23On(M23_N2)) return;
+  const S = m23State(), n = p5NightOf(M23_N2); if (!S || S.d2 || now < n.from - 30 || now >= n.to) return;
+  if (!flag('m23.n2.notice') && !promoBusy()) { flagSet('m23.n2.notice', Math.floor(now));
+    promoNotice(worksText('m23.n2.notice', 'Tonight, the reactor: a permit from the bridge, a badge from the rack, and the Watch told in and out.'), worksName('calder')); }
+  if (now < n.from) return;
+  const k = m23Night2Step(S);
+  if (S.out && dosiOut() !== null && !S.word && now >= S.out + M23_LATE) {   // the badge not back: a word from the Watch, once
+    S.word = Math.floor(now); promoNotice(worksText('m23.watch.badge', 'The Watch: your dosimeter badge isn\'t back on its hook. Rack in engine control, please.'), 'The Watch'); simNote('m23', { step: 'word' });
+  }
+  if (S.out && dosiOut() === null && !S.d2) {          // all done: the badge is back
+    S.back = S.back || Math.floor(now); S.d2 = Math.floor(now); const W = SHIP.works;
+    if (W && W.tr.m23 === undefined) { W.tr.m23 = M23_N2; if (typeof worksXp === 'function') worksXp(3); simNote('trained', { mech: 'm23' }); }
+    if (typeof mailSend === 'function') { const tx = worksText('m23.mail.n2', 'The reactor | Permit signed, badge out and back, the Watch told in and out. Readings logged.'), i = tx.indexOf(' | ');
+      mailSend({ at: Math.floor(now), from: 'Works', subject: i > 0 ? tx.slice(0, i) : 'The reactor', body: i > 0 ? tx.slice(i + 3) : tx, quiet: true }); }
+    simNote('m23', { step: 'n2' }); return;
+  }
+  if (!k || typeof guideAsk !== 'function') return;
+  if (!(GUIDE.list || []).some(x => x.id === 'm23:' + k))
+    guideAsk({ id: 'm23:' + k, level: 1, owner: '28c', from: n.from, until: n.to, goal: () => ({ ...M23_GOAL[k], label: m23Ring(k) }), done: () => m23Night2Step(m23State()) !== k || !m23On(M23_N2) });
 }
 if (P5_M23 && typeof jobKindAdd === 'function') {
   jobKindAdd('m23night', { tier: 4, work: 0, side: true, text: 'Engine work', stops: m23Stops, stepDone: m23StepDone, done: m23Done, veto: true, crew: { can: () => false, mins: 60 } });
   WORK_MECH.m23 = { own: true, noJob: true };            // run here on your nights, never by the ladder (a night day has no ladder)
-  WORK_TICKS.push((now, skip) => { if (!skip) m23Beats(now); });
+  jobKindAdd('m23reactor', { tier: 4, work: 0, side: true, text: 'The reactor', stops: m23ReactorStops, done: m23ReactorDone, crew: { can: () => false, mins: 60 } });
+  WORK_TICKS.push((now, skip) => { if (!skip) { m23Beats(now); m23Beats2(now); m23Card(now); } });
 }
 // ---- end of slot: Engine work ----
 

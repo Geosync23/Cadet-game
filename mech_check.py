@@ -1769,7 +1769,65 @@ def part_m23(g):
     check(not o['on'] and not o['job'] and not o['notices'], f"m23: none for a Senior Officer (the promotion's on) ({o})")
     o2 = g.ev(f"({M23})({{ day: 24 }})")
     check(not o2['job'] and not o2['notices'], f"m23: nothing on night 3 ({o2})")
-PARTS['m23'] = part_m23
+
+# night 2 (Day 23 from 21:00): the door shut without a permit (and without a badge, and before the Watch is told), each
+# step's arrow in order, the cards' steps, the visit, the Watch's word when the badge isn't back after half an hour,
+# trained and the Mail once it is
+M23N2 = r"""((opt) => {
+  opt = opt || {};
+  const out = { notices: [], arrows: [], door: {} };
+  SHIP.works = null; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = []; MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; GUIDE.list = [];
+  DOSI = { out: null, mesh: [] };
+  const pn = promoNotice; promoNotice = (text, from) => { if (/reactor|permit|badge|Watch/i.test(text)) out.notices.push([shipNow() % 1440, from || '', text.slice(0, 40)]); };
+  const dc = deviceChoose; deviceChoose = () => false;   // the cards are played by calling their steps here (controller_check plays them by pad)
+  try {
+    const d = 23; setShipNow((d - 1) * 1440 + 1200); machinesNow(); const W = worksInit(); W.tier = 4; W.rank = 'specialist';
+    for (const r of CAREER_LADDER) if (r.id !== 'm23') { W.tr[r.id] = 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); }
+    const tick = (a, b) => { for (let t = a; t <= b; t++) { setShipNow(t); machinesNow(); worksCareerTick(t); for (const e of GUIDE.list || []) if (/^m23:/.test(e.id) && !out.arrows.some(x => x[0] === e.id)) out.arrows.push([e.id, e.level, t % 1440]); } };
+    const door = () => doorOpenFor('R', 'player', shipNow(), 6);
+    tick(shipNow(), (d - 1) * 1440 + 1265);
+    out.door.none = door();
+    dosiUse(); out.door.badgeOnly = door(); dosiUse();      // a badge, no permit: still shut
+    out.tellEarly = m23Tell(shipNow(), false);
+    m23Permit(shipNow()); tick(shipNow() + 1, shipNow() + 3);
+    out.door.permitOnly = door();
+    out.tellNoBadge = m23Tell(shipNow(), false);
+    dosiUse(); tick(shipNow() + 1, shipNow() + 3);
+    out.door.notTold = door();
+    m23Tell(shipNow(), true);                               // out before in: nothing
+    m23Tell(shipNow(), false); tick(shipNow() + 1, shipNow() + 3);
+    out.door.told = door();
+    const S = m23State(), j = SHIP.jobs.find(x => x.id === S.j2); out.job = j ? [j.claimedBy, j.status, jobStops(j).length] : null;
+    if (j) for (let k = 0; k < jobStops(j).length; k++) { jobStepDone(j.id, k, {}); tick(shipNow() + 1, shipNow() + 2); }
+    out.outEarly = !!S.out;
+    m23Tell(shipNow(), true); tick(shipNow() + 1, shipNow() + 2);
+    out.door.outside = door();
+    tick(shipNow() + 1, shipNow() + (opt.late ? 35 : 5));
+    out.word = S.word > 0;
+    dosiUse(); tick(shipNow() + 1, shipNow() + 2);
+    out.end = [S.d2 > 0, W.tr.m23 === undefined ? null : W.tr.m23, SHIP.mail.filter(x => x.subject === 'The reactor').length, j && j.status];
+    out.step = m23Night2Step(S);
+    return out;
+  } finally { promoNotice = pn; deviceChoose = dc; }
+})"""
+def part_m23n2(g):
+    a = g.ev(f"({M23N2})({{}})")
+    print(f"  m23 night 2: door {a['door']}, notices {a['notices']}, arrows {a['arrows']}, job {a.get('job')}, end {a.get('end')}")
+    dr = a['door']
+    check(not dr['none'] and not dr['badgeOnly'] and not dr['permitOnly'] and not dr['notTold'], f"m23: the reactor door stays shut without a permit, a badge and the Watch told ({dr})")
+    check(dr['told'] and not dr['outside'], f"m23: it opens with all three, and shuts once you're out ({dr})")
+    check(not a['tellEarly'] and not a['tellNoBadge'], "m23: no telling the Watch before the permit and the badge")
+    check([x[0] for x in a['arrows']] == ['m23:permit', 'm23:badge', 'm23:tell', 'm23:reactor', 'm23:outcard', 'm23:return'] and all(x[1] == 1 for x in a['arrows']), f"m23: a level 1 arrow for each step, in order ({a['arrows']})")
+    check(a['arrows'][:1] and a['arrows'][0][2] == 1260, f"m23: the first arrow at 21:00 ({a['arrows'][:1]})")
+    n = a['notices']
+    check(n[:1] and n[0][0] == 1230 and len([x for x in n if x[1] == 'The Watch']) == 2, f"m23: the notice at 20:30, the Watch told in and out ({n})")
+    check(a.get('job') and a['job'][0] == 'you' and a['job'][2] == 3 and not a['outEarly'], f"m23: the visit, yours, three stops ({a.get('job')})")
+    check(not a['word'], "m23: no word from the Watch when the badge is back in time")
+    check(a['end'][:4] == [True, 23, 1, 'done'] and a['step'] is None, f"m23: trained on Day 23 with the badge back, one Mail ({a['end']})")
+    b = g.ev(f"({M23N2})({{ late: true }})")
+    check(b['word'] and len([x for x in b['notices'] if 'badge' in x[2].lower()]) >= 1, f"m23: the badge not back after half an hour: a word from the Watch ({b['notices']})")
+def part_m23_all(g): part_m23(g); part_m23n2(g)
+PARTS['m23'] = part_m23_all
 
 # ---- favour cases (24l, seat E2 on H's behalf; not a ladder row, so it runs after the rows as EXTRA['fcase']): every
 # script has three clue places and its answer (sus.1) among the options; a friend asks (Mail, an offered favour) on the

@@ -28,6 +28,7 @@
 #   odd       a pad that doesn't report the standard layout, and two pads (deck)
 #   s5cases   Step 5 (S5-6): the old-mysteries board by pad (ring, A, Take) and a head-scratcher's Fault notes (suspects, Call it), P5_STEP5 on (pick, panels)
 #   s6cases   Step 6 (S6-8): P6, P7 and P8 in Fault notes by pad at the Day 25 19:00 preset (a suspect and Call it, a grid cell, a toggle and To the rig), P5_STEP6 on (pick, panels)
+#   m23       Step 6 (S6-5): night 1's engine work and night 2's reactor by pad (the loop card, both coil dials, the board swap; the permit, the badge, the Watch, the door), P5_STEP6 on (pick, panels)
 #   deck6     Step 6 (S6-4): Deck 6 on Day 23 at 21:00 by pad: the dosimeter rack (take, return), the coils' panels, the reactor door, P5_STEP6 on (pick)
 #   vessel    A Veyli vessel needs help by pad, in a copy switched on: Calder and the sheet, the ramp's replies, the chain, the helper card and the making steps (VB1)
 # --inventory: with reach, runs its touch half even before the panels package (the list of what there is to reach).
@@ -2971,6 +2972,94 @@ def part_m24(pw, src, tag):
     if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
 PART_FN['m24'] = part_m24; NEEDS['m24'] = ['panels']; P6_PARTS['m24'] = 'S6-6 leading a team'
+# (S6-5, DA6) engine work and the reactor by pad, at the spec's presets. Night 1 (Day 22, 22:46): each stop of the night's
+# job reached with the ring and A (stood at its place), the loop card's wrong pick then the right one by the D-pad and A,
+# both coil dials settled with − and + by pad, the board swap's steps one by one. Night 2 (Day 23, 21:00, on the bridge):
+# "Sign the permit" by pad, the badge from the rack, "Going in", through the reactor's shielded door to its console by the
+# ring and A, the readings, "Coming out", the badge back on its hook
+P6_M23 = r"""((d, at, deck) => { skipTo((d - 1) * 1440 + at); machinesNow(); if (DIALOGUE) dialogueEnd(true); const W = worksInit(); W.tier = 4; W.rank = 'specialist';
+  for (const r of CAREER_LADDER) if (r.id !== 'm23') { W.tr[r.id] = 1; W.use[r.id] = 9; }
+  for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; worksCareerTick(shipNow()); goToDeck(deck); player.stop(); return true; })"""
+M23_STAND = r"""((id, k) => { const j = SHIP.jobs.find(x => x.id === id), st = j && jobStops(j)[k]; if (!st) return null; const pl = placeById((st.places || [])[0]), w = pl.walk || pl.at;
+  if (deckDef.num !== pl.deck) goToDeck(pl.deck); player.obj.position.copy(cellPos(w[0], w[1])); player.stop(); target.copy(player.obj.position).setY(.7); return { how: st.how || 'hold', tag: st.step || st.tag }; })"""
+M23_JOB = "((kind) => { const j = SHIP.jobs.find(x => x.kind === kind && x.status !== 'done') || SHIP.jobs.find(x => x.kind === kind); return j ? { id: j.id, n: jobStops(j).length, done: (j.stepsDone || []).slice(), work: !!j.workDone, card: !!DEV.choose, title: DEV.choose ? DEV.choose.title || '' : '', bal: j.bal || null, loop: j.loop } : null; })"
+def m23_card(r, label):
+    return press_in_panel(r, f"[...document.querySelectorAll('#devDlg button')].find(b => b.textContent.trim() === {json.dumps(label)})")
+def m23_pad_job(r, kind, words, fails, tag, stand_at=None):
+    s = r.ev(f"({M23_JOB})({json.dumps(kind)})")
+    if not s: fails.append(f'{tag}: no job'); return None
+    said, wrong, turns = [], False, 0
+    for n in range(4 * s['n'] + 6):
+        s = r.ev(f"({M23_JOB})({json.dumps(kind)})")
+        if s['work']: break
+        k = min(i for i in range(s['n']) if i not in s['done'])
+        if not s['card']:
+            if stand_at: r.ev(stand_at); r.step(10); stand_at = None
+            else: st = r.ev(f"({M23_STAND})({json.dumps(s['id'])}, {k})"); r.step(10)
+            h = ring_and_A(r, words, 14)
+            if not h: fails.append(f'{tag}: the ring never named stop {k} ({hint_now(r)})'); return None
+            said.append(h)
+        for q in range(60):                              # walking there, then the step runs (a look, a hold) or its card opens
+            s = r.ev(f"({M23_JOB})({json.dumps(kind)})")
+            if s['card'] or k in s['done']: break
+            r.step(10)
+        if s['card']:
+            if kind == 'm23night' and k >= s['n'] - 2:   # the last two stops: the coil dials (− and +)
+                for q in range(8):
+                    s = r.ev(f"({M23_JOB})({json.dumps(kind)})")
+                    if not s['card']: break
+                    v = s['bal'][0] if (s['n'] - 2) not in s['done'] else s['bal'][1]
+                    if v == 0: break
+                    res = m23_card(r, '−' if v > 0 else '+'); turns += 1; r.step(6)
+                    if res != 'ok': fails.append(f'{tag}: the coil dial by pad: {res}'); return None
+            elif s['loop'] is not None and kind == 'm23night':
+                pick = f"Loop {(s['loop'] + 1) % 3 + 1}" if not wrong else f"Loop {s['loop'] + 1}"
+                res = m23_card(r, pick); r.step(10)
+                if res != 'ok': fails.append(f'{tag}: the loop card\'s "{pick}" by pad: {res} (the card: {r.ev("[DEV.choose && DEV.choose.title, [...document.querySelectorAll('#devDlg button')].map(b => b.textContent.trim())]")}; done {s["done"]})'); return None
+                if not wrong:
+                    wrong = True; after = r.ev(f"({M23_JOB})({json.dumps(kind)})")
+                    if k in after['done']: fails.append(f'{tag}: a wrong loop should leave its stop open')
+    s = r.ev(f"({M23_JOB})({json.dumps(kind)})")
+    print(f'  {tag}: the ring said {said[:3]}...; stops done {len(s["done"])} of {s["n"]}; work done {s["work"]}; a wrong pick {wrong}; dial presses {turns}')
+    if not s['work']: fails.append(f'{tag}: not finished by pad (stops done {s["done"]} of {s["n"]})')
+    return s
+def part_m23(pw, src, tag):
+    fails = []
+    r = end_run(pw, src, f'{tag}_m23', f"({P6_M23})(22, 1366, 6)")
+    s = m23_pad_job(r, 'm23night', ['coil', 'board', 'engine', 'control', 'night'], fails, 'night 1 (Day 22)')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close()
+    r = end_run(pw, src, f'{tag}_m23b', f"({P6_M23})(23, 1261, 1)")
+    r.ev("(() => { player.obj.position.copy(cellPos(...(() => { const t = []; DECKS[1].map.forEach((row, j) => { for (let i = 0; i < row.length; i++) if (row[i] === 'B') t.push([i, j]); }); return t[Math.floor(t.length / 2)]; })())); player.stop(); })()"); r.step(40)
+    if not r.ev("!!DEV.choose"): r.step(60)
+    res = m23_card(r, 'Sign the permit'); r.step(10)
+    if res != 'ok' or not r.ev("m23State().permit > 0"): fails.append(f'night 2: "Sign the permit" by pad ({res}, permit {r.ev("m23State().permit")})')
+    else: print('  night 2: "Sign the permit" signed by pad on the bridge')
+    r.ev("(() => { goToDeck(6); player.obj.position.copy(cellPos(23, 6)); player.stop(); })()"); r.step(20)
+    if r.ev("!!DEV.choose"): fails.append('night 2: the "Going in" card came before the badge')
+    h = ring_and_A(r, ['dosimeter'], 14); r.step(150)
+    if not h or r.ev("dosiOut()") is None: fails.append(f'night 2: the badge from the rack by pad ({h})')
+    for q in range(10):
+        if r.ev("!!DEV.choose"): break
+        r.step(10)
+    res = m23_card(r, 'Going in'); r.step(10)
+    if res != 'ok' or not r.ev("m23State().told > 0"): fails.append(f'night 2: "Going in" by pad ({res})')
+    else: print('  night 2: the badge taken and the Watch told by pad')
+    s = m23_pad_job(r, 'm23reactor', ['console'], fails, 'night 2: the reactor', stand_at="(() => { player.obj.position.copy(cellPos(25, 3)); player.stop(); target.copy(player.obj.position).setY(.7); })()")
+    for q in range(20):
+        if r.ev("!!DEV.choose"): break
+        r.step(10)
+    res = m23_card(r, 'Coming out'); r.step(10)
+    if res != 'ok' or not r.ev("m23State().out > 0"): fails.append(f'night 2: "Coming out" by pad ({res})')
+    r.ev("(() => { player.obj.position.copy(cellPos(23, 6)); player.stop(); target.copy(player.obj.position).setY(.7); })()"); r.step(20)
+    r.ev("toastEl.classList.remove('show'); typeof TOAST_AT !== 'undefined' && (TOAST_AT = -1e9)"); r.step(4)
+    h = ring_and_A(r, ['dosimeter'], 14); r.step(150); r.step(60)
+    end = r.ev("[dosiOut(), m23State().d2 > 0, SHIP.works.tr.m23]")
+    print(f'  night 2: the badge back {end[0] is None}, done {end[1]}, trained {end[2]}')
+    if end[0] is not None or not end[1]: fails.append(f'night 2: the badge back on its hook by pad, and done ({end})')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close(); return fails
+PART_FN['m23'] = part_m23; NEEDS['m23'] = ['pick', 'panels']; P6_PARTS['m23'] = 'S6-5 engine work and the reactor'; ALL_PARTS.append('m23')
 # (S5-5, B3) 24x's calibration job by pad only: the ring names the array and A starts each stop; "Pick the star" by the D-pad
 # and A; the dial's card turned with − / + by pad till it settles; then the rack's amber module (the ring, A)
 P5_M20JOB = r"""(() => { skipTo(22 * 1440 + 570); machinesNow(); if (DIALOGUE) dialogueEnd(true); if (ACT && typeof actEnd === 'function') actEnd(true); if (DEV.choose) devChosen(-1); const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.t3 = 15; W.tr.m20 = 19;
