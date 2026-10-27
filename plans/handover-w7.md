@@ -23,7 +23,8 @@
 - **Parked: the refit odd job** ("Refit the visitors' suite", from Day 23; T.move.refit; its effect: 24t's touches follow you to 2-B) until S6-4 adds Deck 2's cabin spots. Don't add it to ODD_ROWS directly: the odd-job stream's seeded order would change with the switch on; post it as its own job, its row only in fixTable's byId.
 - Presets for Days 21 and 26 come with S6-7/S6-9 (and N6's nights).
 - Judgement: the move never happens by Mail alone (the spec: notice and arrow each day until you've stepped in).
-- Next: S6-7 mentoring Basil (28e), then S6-9 (28f); all Step 6 DM_CAREER rows at the end (lead 41: I'm the one owner); the refit job after DA6's Deck 2 cabin spots; pu4Place to DA6's '6-coil-N-svc'; RV23's should: a controller_check part for the Tier 4 test at the board.
+- Next: S6-7 mentoring Basil (28e), then S6-9 (28f); all Step 6 DM_CAREER rows at the end (lead 41: I'm the one owner); the refit job after DA6's Deck 2 cabin spots; pu4Place to DA6's '6-coil-N-svc'.
+- Done (s6.8): controller_check part promo4 (RV23's should).
 
 ## How to test
 - On copy: `sed "s/^const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');/const P5_STEP6 = P5_STEP5 \&\& true;/" starship-cadet.html > ON6.html`.
