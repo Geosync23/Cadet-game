@@ -322,6 +322,7 @@ FOLLOW = r"""(() => {
   { const gq = typeof GUIDE_ON !== 'undefined' && GUIDE_ON ? goalNow() : null, call = IX_GOAL && /^career:/.test(IX_GOAL.trk || '') ? IX_GOAL : gq && /^(inc|promo|pu3):/.test(gq.guide || '') && !/^pu3:step/.test(gq.guide || '') ? gq : null;   // S5-2: the Senior Officer's beats (pu3:*; not the test's own steps)   // DV1: and the promotion's beats (the queue's promo:*)   // FX10 (backlog 15): with the arrows on, Calder's call is the queue's level-1 'inc:m6', not IX_GOAL
     if (ACT && ACT.phase !== 'walk' && call) { const l = call.label; actEnd(true); return 'leave it for: ' + l; } }   // an urgent career arrow (Calder's call) over your work: you stop and go, as a player would (the repair's time is kept; FX4)
   { const c = SHIP.works && SHIP.works.cur, r = c && c.st === 'meet' && SHIP.occasions.find(x => x.key === c.occ), n = shipNow(); if (r && !r.met && r.status === 'asked' && n >= r.at && n < r.at + r.len && deckDef.num === r.deck && roomAt(...player.here()) === r.room && !DIALOGUE && !ACT) return null; }   // in a training meeting's room while it's on: stay a moment for it to start (FX4)
+  if (ACT && ACT.kind === 'lie' && ACT.phase !== 'walk' && !(typeof sleeping !== 'undefined' && sleeping) && goalNow() && !/sleep|bed|bunk/i.test(goalNow().label || '')) { actEnd(); return 'get up: ' + goalNow().label; }   // awake in bed with somewhere to be: up, as a player tapping away would (PZ6)
   if (ACT) { if (IX_ACTS[ACT.kind] && ACT.phase !== 'walk' && (ACT.done || 0) >= ((ACT.def && ACT.def.mins) || 0)) { const k = ACT.kind; actEnd(); return 'stand up: ' + k; } return null; }   // a sit-down (tea, a lounge) once its minutes are in: up again, as a player would (AC2)
   const cs = document.getElementById('clockScreen');
   if (cs && !cs.hidden && getComputedStyle(cs).display !== 'none') {
@@ -715,6 +716,7 @@ def part_step6(ctx, path, way):
         while pg.ev('shipNow()') < t:
             n = pg.ev('shipNow()')
             if os.environ.get('S6_WATCH') and re.search(os.environ['S6_WATCH'], pg.ev('clockText()')): print('   watch', pg.ev(S6_WATCH_JS))   # (debugging) the state each step
+            if pg.ev("typeof sleeping !== 'undefined' && sleeping"): pg.page.wait_for_timeout(250); pg.step(3, 50); continue   # asleep: the game's own sleep runs to the alarm and wakes after its fade (real-time timers); skipping on would outrun the wake (PZ6)
             if pg.ev(S6_DUE): f.run(min(t, n + 10)); continue
             stop = min([x for x in S6_STOPS if x > n + 1] or [t])
             pg.ev(f"devmodeSkipTo({min(t, n + 20, stop)}); for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 70)"); pg.step(3, 50)
