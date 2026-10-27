@@ -43,7 +43,7 @@ ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
 GAME = pathlib.Path(ARGS[0])
 ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'door', 'reach', 'day', 'games', 'unplug', 'odd', 'shut',
-             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'm19', 'm20', 's5cases', 'vessel', 'ending']
+             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'm19', 'm20', 's5cases', 'vessel', 'ending', 'm21']
 PARTS = ARGS[1:] or ALL_PARTS
 SHOTS = WORK / 'test' / 'ctl_shots'; SHOTS.mkdir(parents=True, exist_ok=True)
 ARGS_GL = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
@@ -2828,6 +2828,37 @@ def part_m19(pw, src, tag):
     if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
 PART_FN['m19'] = part_m19; NEEDS['m19'] = ['pick', 'panels']
+# ---- Pillar 5 Step 6's pieces (plans/p5-step6-spec.html section 9): each part runs on a copy with P5_STEP6 on (the build
+# has P5_STEP5 on since 0.94.0); "not yet" only with no P5_STEP6 switch line ----
+P6_PARTS = {'m21': 'S6-2 the Monday briefing'}
+def p6_on(src): return bool(re.search(r'\bconst P5_STEP6\s*=\s*(true|P5_STEP5 && true)\s*;', src))
+def p6_copy(src): return re.sub(r"\bconst P5_STEP6\s*=\s*P5_STEP5 && URL_FLAGS\.has\('p5s6'\)", 'const P5_STEP6 = P5_STEP5 && true', src, count=1)
+# (S6-2, MA6) the Monday briefing by pad: a Senior Officer on Day 22 at 08:25 (the preset), standing in the observation
+# room; the ring names the seat; at 08:30 the meeting plays: Go on with A, each of the three choices reached with the D-pad,
+# the third (the parts order) taken with A; then the order is in the record
+P6_M21 = r"""(() => { skipTo(21 * 1440 + 505); machinesNow(); if (DIALOGUE) dialogueEnd(true); const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.t3 = 15; worksCareerTick(shipNow());
+  goToDeck(1); player.stop();   // at the lift: the ring leads to the seat
+  const r = m21Rec(22); return r ? [r.id, r.at % 1440] : null; })()"""
+def part_m21(pw, src, tag):
+    fails = []
+    r = end_run(pw, src, f'{tag}_m21', P6_M21)
+    s = r.ev("m21Rec(22) && [m21Rec(22).id, m21Rec(22).at % 1440]")
+    if s != ['m21.brief', 510]: r.close(); return [f'm21: Day 22\'s briefing not booked for 08:30 ({s})']
+    h = r.ev("(() => { GUIDE.key = ''; const g = goalNow(); return g ? g.label : null; })()"); print(f'  08:25 at the lift: the arrow says "{h}"')
+    if 'seat at the table' not in (h or '').lower(): fails.append(f'm21: the arrow\'s ring line should name your seat at the table ("{h}")')
+    r.ev("(() => { const pl = placeById('1-conf-10'), w = pl.walk || pl.at; player.obj.position.copy(cellPos(w[0], w[1] - 1)); player.stop(); })()")   # in the observation room by your seat
+    for k in range(80):
+        if r.ev("!!DIALOGUE"): break
+        r.step(30)
+    if not r.ev("!!DIALOGUE"): r.close(); return fails + [f'm21: the briefing never played in the observation room (08:30; now {r.ev("hhmm(shipNow() % 1440)")})']
+    r.shot(f'{tag}_m21_briefing')
+    n = end_dialogue(r, fails, 'the Monday briefing', pick=2)
+    st = r.ev("JSON.stringify(m21State())"); print(f'  the briefing by pad: {n} choice screen(s); the record {st}')
+    if n != 1: fails.append(f'm21: one choice screen expected by pad ({n})')
+    if '"pick":2' not in st or '"order":25' not in st: fails.append(f'm21: the parts order picked by pad should be in the record ({st})')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close(); return fails
+PART_FN['m21'] = part_m21; NEEDS['m21'] = ['panels']
 # (S5-5, B3) 24x's calibration job by pad only: the ring names the array and A starts each stop; "Pick the star" by the D-pad
 # and A; the dial's card turned with − / + by pad till it settles; then the rack's amber module (the ring, A)
 P5_M20JOB = r"""(() => { skipTo(22 * 1440 + 570); machinesNow(); if (DIALOGUE) dialogueEnd(true); if (ACT && typeof actEnd === 'function') actEnd(true); if (DEV.choose) devChosen(-1); const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.t3 = 15; W.tr.m20 = 19;
@@ -3145,6 +3176,10 @@ with sync_playwright() as pw:
             if not p5_on(SRC) and p5_copy(psrc) == psrc: print(f'  not yet ({P5_PARTS[part]}: no P5_STEP5 switch line)'); RESULTS.append((part, 'not yet', 'no P5_STEP5 line')); continue
             if not p5_on(SRC): print(f'  (on a copy with P5_STEP5 switched on)')
             psrc = p5_copy(psrc)
+        if part in P6_PARTS:                             # Step 6's: on a copy with P5_STEP6 switched on
+            if not p6_on(SRC) and p6_copy(psrc) == psrc: print(f'  not yet ({P6_PARTS[part]}: no P5_STEP6 switch line)'); RESULTS.append((part, 'not yet', 'no P5_STEP6 line')); continue
+            if not p6_on(SRC): print(f'  (on a copy with P5_STEP6 switched on)')
+            psrc = p6_copy(psrc)
         fails = PART_FN[part](br, psrc, 'g')
         for f in fails: check(False, f'{part}: {f}')
         RESULTS.append((part, 'FAIL' if fails else 'OK', f'{len(fails)} problems' if fails else ''))
