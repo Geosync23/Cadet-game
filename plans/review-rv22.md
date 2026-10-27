@@ -18,6 +18,7 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
 | Branch | Piece | Verdict | Sha |
 |---|---|---|---|
 | claude/p5s5-promo (B5) | machine_check fix (RV20 M1) | FIXES NEEDED (1 must: mid-line comment kills the sort) | cbca3e3e |
+| claude/p5s5-promo (B5) | machine_check fix + RV20 S1-S4 | PASS (1 should: friends' Mail future-dated) | f00d93c1 |
 
 ## Log
 - 2026-10-26 ~23:30 UTC: started; told lead 40, VB1, VB2, B3. Test kit in /tmp/cadet-work and /tmp/cadet-work2. No new
@@ -63,3 +64,9 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
   dated in the future (mailSend files it immediately; section 18 clamps such dates with Math.min(shipNow(), at)). Running:
   machine_check ON, promo_beats_check ON, cadet_test 5957d244 vs f00d93c1.
 - 01:37 UTC: VB2 says claude/ending-checks is ready (571b073f, test only on d1a61402; arrows endstay/endgo 7 ways OK, controller ending OK, day 31/50 ON OK). Note to check: farewells in a crowd by walking up, not the pad ring. Queued after B3.
+- **B5 f00d93c1: PASS (1 should).** machine_check ON: MACHINE CHECK OK, traced faults the same twice True; promo_beats ON OK
+  (t3shoulds friends ['13:00','12:30'], no toasts, presets m15:17 m17:- m19:17); cadet 5957d244 vs f00d93c1 ALL
+  IDENTICAL; GitHub quick check success. Should: friends' Mail filed at the promotion, dated 12:30 (future-dated).
+  The same ladder fix must reach B2 deefa61a and B3 fa1e152c (lead 40 told).
+- VB1 **0340b6f9** (df796cab venue/places; 0f53dd16 EV_MEET_TAGS + day_check tea excuse; 0340b6f9 my 3 notes): diff read OK
+  (tea excuse narrow: only people with an eventMeetTag segment in the tea hour). Re-running on it.
