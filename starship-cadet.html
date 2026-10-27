@@ -8184,10 +8184,10 @@ const DECK_DRESS = {
   // ({ id, day }, from the occasion): its menu card, signed, in a dark frame on the wall above your keepsake shelf: the
   // bunk's, or your officer cabin's once SHIP.works.home is '4-23' (moved with the next deck build). Shown only while the
   // storm update is on (`on`, read by dressShow), so a game with it off stays as it was. 2 draw calls
-  framedMenu: { deck: 4, on: () => typeof EV_STORM_ON !== 'undefined' && EV_STORM_ON, what: 'the menu from the Captain\'s table, framed above your shelf', make(g, o) {
-    const cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = cab ? 'W' : 'a', along = cab ? .5 : 2.5;
-    const s = dressAt(g, room, 'n', along);
-    dressBox(s, .24, .3, .025, '#2e2620', 0, 2.47, .0125);           // the frame, flat on the wall
+  framedMenu: { get deck() { return deck2Home() ? 2 : 4; }, on: () => typeof EV_STORM_ON !== 'undefined' && EV_STORM_ON, what: 'the menu from the Captain\'s table, framed above your shelf', make(g, o) {
+    const B = deck2Home(), cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = B ? 'B' : cab ? 'W' : 'a', along = B ? DECK2_HOME.menu : cab ? .5 : 2.5, wl = B ? 'w' : 'n', y = B ? DECK2_HOME.y : 2.47;   // S6-4: room B's west wall, above the bookcase, once it's yours
+    const s = dressAt(g, room, wl, along);
+    dressBox(s, .24, .3, .025, '#2e2620', 0, y, .0125);           // the frame, flat on the wall
     const t = tex(192, 240, (c, w, h) => {
       c.fillStyle = '#f4efe2'; c.fillRect(0, 0, w, h);
       c.fillStyle = '#7a2e2a'; c.textAlign = 'center'; c.font = '700 15px Georgia,serif'; c.fillText('THE CAPTAIN\'S TABLE', w / 2, 30);
@@ -8197,8 +8197,8 @@ const DECK_DRESS = {
       c.strokeStyle = '#1f3c6e'; c.lineWidth = 1.5;                    // the signatures: a few loops of pen along the bottom
       for (let k = 0; k < 6; k++) { const x0 = 22 + (k % 3) * 52, y0 = 196 + Math.floor(k / 3) * 22; c.beginPath(); c.moveTo(x0, y0); for (let i = 1; i <= 8; i++) c.lineTo(x0 + i * 4.5, y0 - 5 * Math.sin(i * (1.3 + k * .2))); c.stroke(); }
     });
-    const p = new THREE.Mesh(new THREE.PlaneGeometry(.2, .26), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 2.47, .031); s.add(p);   // .006 in front of the frame (PR4: no shimmer at phone distance)
-    return { t: 'Framed menu', x: 'The menu from the Captain\'s table, signed by everyone who sat at it.', wall: [room, 'n', along], y: 2.47, w: .26, h: .32 };
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.2, .26), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, y, .031); s.add(p);   // .006 in front of the frame (PR4: no shimmer at phone distance)
+    return { t: 'Framed menu', x: 'The menu from the Captain\'s table, signed by everyone who sat at it.', wall: [room, wl, along], y, w: .26, h: .32 };
   } },
   // Crossing the Line (EV5, L3, the deck architect's stand-in; PR4 reviews; all behind EV_LINE_ON by `on`, so a game with it
   // off never shows them). lineRibbons, the ceremony (Sunday 14:30-15:15, section 18's dressing; gone before the reading
@@ -8242,18 +8242,18 @@ const DECK_DRESS = {
   // lineCertificate: your Line certificate (section 18's settleTraces, from the oath's end), framed beside the
   // Captain's table menu above your keepsake shelf: the bunk's, or your officer cabin's once SHIP.works.home is '4-23'
   // (moved with the next deck build, as framedMenu is). 2 draw calls
-  lineCertificate: { deck: 4, on: () => typeof EV_LINE_ON !== 'undefined' && EV_LINE_ON, what: 'your Line certificate, framed above your shelf', make(g) {
-    const cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = cab ? 'W' : 'a', along = cab ? .9 : 2.05;
-    const s = dressAt(g, room, 'n', along), name = (typeof SHIP !== 'undefined' && SHIP.player && SHIP.player.name) || 'Cadet', back = typeof crossingBackDone === 'function' && crossingBackDone();
-    dressBox(s, .22, .28, .025, '#3a3024', 0, 2.45, .0125);
+  lineCertificate: { get deck() { return deck2Home() ? 2 : 4; }, on: () => typeof EV_LINE_ON !== 'undefined' && EV_LINE_ON, what: 'your Line certificate, framed above your shelf', make(g) {
+    const B = deck2Home(), cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = B ? 'B' : cab ? 'W' : 'a', along = B ? DECK2_HOME.cert : cab ? .9 : 2.05, wl = B ? 'w' : 'n', y = B ? DECK2_HOME.y : 2.45;   // S6-4: room B, as framedMenu
+    const s = dressAt(g, room, wl, along), name = (typeof SHIP !== 'undefined' && SHIP.player && SHIP.player.name) || 'Cadet', back = typeof crossingBackDone === 'function' && crossingBackDone();
+    dressBox(s, .22, .28, .025, '#3a3024', 0, y, .0125);
     const t = tex(176, 224, (c, w, h) => {
       c.fillStyle = '#f6efd8'; c.fillRect(0, 0, w, h); c.strokeStyle = '#c9a23e'; c.lineWidth = 5; c.strokeRect(8, 8, w - 16, h - 16);
       c.fillStyle = '#7a5a1e'; c.textAlign = 'center'; c.font = '700 14px Georgia,serif'; c.fillText('THE LINE', w / 2, 40);
       c.fillStyle = '#2b2b2b'; c.font = 'italic 500 12px Georgia,serif'; ['This is to say that', name, 'crossed into the', 'Veyli reach, Day 7'].concat(back ? ['and back, Day 35'] : []).forEach((l, k) => c.fillText(l, w / 2, 76 + k * 22));   // the ending (E-1): the second date
       c.strokeStyle = '#1f3c6e'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(52, 192); for (let i = 1; i <= 16; i++) c.lineTo(52 + i * 4.5, 192 - 5 * Math.sin(i * 1.4)); c.stroke();   // the Captain's signature
     });
-    const p = new THREE.Mesh(new THREE.PlaneGeometry(.18, .24), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 2.45, .028); s.add(p);
-    return { t: 'Line certificate', x: (back && typeof evWord === 'function' && evWord('event.crossingBack.keepsake')) || (typeof evWord === 'function' && evWord('event.crossingLine.keepsake')) || 'Your Line certificate, signed by the Captain.', wall: [room, 'n', along], y: 2.45, w: .24, h: .3 };
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.18, .24), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, y, .028); s.add(p);
+    return { t: 'Line certificate', x: (back && typeof evWord === 'function' && evWord('event.crossingBack.keepsake')) || (typeof evWord === 'function' && evWord('event.crossingLine.keepsake')) || 'Your Line certificate, signed by the Captain.', wall: [room, wl, along], y, w: .24, h: .3 };
   } },
   // 0.38.31: spiceJars: the jars on the mess hall's spice shelf, one more after each Spice shelf supper. A trace ({ id:
   // 'spiceJars', day, n }): n jars when given, else one for each week since day (from the first supper), up to 12. 4 draw calls
@@ -8496,6 +8496,10 @@ function dosiTap(it, at) {                               // section 15's PLAYER_
 // cabin touches have four spots (DECKS[2].cabinSpots['2-B'], the shape of '4-23''s, plus `wall`: the wall each faces away
 // from, for drawing; places `2-B-rug`, `-desk`, `-shelf`, `-ledge`). Places type 'event' (inert). Only with P5_DECK6
 const deck2Mine = () => P5_DECK6 && typeof worksHome === 'function' && worksHome() === '2-B';
+// your framed keepsakes (4d's framedMenu and lineCertificate, section 18's vesselSketchShelf) follow you to room B: on its west
+// wall above the bookcase by the bed (wall-along metres from the room's north edge; y the frames' middle, top the bookcase's)
+const DECK2_HOME = { menu: 3.55, cert: 4.12, sketch: 3.85, y: 1.72, top: 1.15 };
+const deck2Home = () => deck2Mine();
 function deck2P5Places() {
   const D = DECKS[2], ev = (id, c, r, xy, face) => ({ id, type: 'event', event: 'side', at: [c, r], xy, face, pose: 'stand', room: 'B' });
   D.places.push(ev('2-B-wardrobe', 13, 17, [13.0, 17.6], 'w'), ev('2-B-keepsake', 13, 19, [13.2, 19.6], -36),
@@ -50619,11 +50623,11 @@ function vesselDress() {
     } },
     // the sketch Taavek gives you, leaning at the back of your keepsake shelf (the bunk's, or 4-23's once SHIP.works.home is
     // '4-23'), between the Line certificate and the framed menu: a trace { id: 'vesselSketchShelf', day } (vesselShelve)
-    vesselSketchShelf: { deck: 4, on, what: 'Taavek\'s sketch on your shelf', make(g) {
-      const cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = cab ? 'W' : 'a', along = cab ? .5 : 2.5;
-      const s = dressAt(g, room, 'n', along - .235), c = new THREE.Group(); c.position.set(0, 2.17, .03); c.rotation.x = -.13; s.add(c);   // its foot on the shelf (top 2.17), leaning back
+    vesselSketchShelf: { get deck() { return typeof deck2Home === 'function' && deck2Home() ? 2 : 4; }, on, what: 'Taavek\'s sketch on your shelf', make(g) {
+      const B = typeof deck2Home === 'function' && deck2Home(), cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = B ? 'B' : cab ? 'W' : 'a', along = B ? DECK2_HOME.sketch + .235 : cab ? .5 : 2.5, wl = B ? 'w' : 'n', top = B ? DECK2_HOME.top : 2.17;   // S6-4: room B's bookcase once it's yours
+      const s = dressAt(g, room, wl, along - .235), c = new THREE.Group(); c.position.set(0, top, .03); c.rotation.x = -.13; s.add(c);   // its foot on the shelf (top 2.17; room B's bookcase 1.15), leaning back
       vesselCard(c, .1, 0, 'you', .16, .19);
-      return { t: vesselW('tap.sketchShelf.t', 'Taavek\'s sketch'), x: vesselW('tap.sketch.shelf', 'Taavek\'s sketch of you at the foot of the Tern\'s ramp, the round one in your hands. Underneath, in careful letters: "For you. The one who meets."'), wall: [room, 'n', along - .235], y: 2.27, w: .2, h: .24 };
+      return { t: vesselW('tap.sketchShelf.t', 'Taavek\'s sketch'), x: vesselW('tap.sketch.shelf', 'Taavek\'s sketch of you at the foot of the Tern\'s ramp, the round one in your hands. Underneath, in careful letters: "For you. The one who meets."'), wall: [room, wl, along - .235], y: top + .1, w: .2, h: .24 };
     } },
   });
 }
