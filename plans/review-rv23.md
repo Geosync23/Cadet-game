@@ -17,6 +17,7 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
 | claude/p5s6-promo4 (W6/W7): S6-3 turns 1-4b | FIXES NEEDED (must: Calder stuck in the lift car, no offer in person) | 9ac35bfd |
 | claude/p5s6-deck (DA6): S6-4 Deck 6 kit | PASS | 469b606b |
 | claude/p5s6-mech-a (MA6): M24 leading a team | PASS | 8f943e82 |
+| claude/p5s6-deck (DA6): turns 2-3, the rack and Deck 2 | PASS | dd32a9a7 |
 | VB2's ending leftovers (arrows endgo teachoff, track) | PASS | staging-0.94.0 d69473b7 |
 
 ## VB1 03b63d95
@@ -92,4 +93,5 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
 - W7 9ac35bfd: cadet identical at every turn; MUST above; should: controller part for the Tier 4 test at the board.
 - DA6 469b606b: PASS. cadet identical vs 3e502ca; d6_look.py: coil service spots reachable in E, 104-107 calls; kit tappable.
 - MA6 8f943e82: PASS. cadet identical vs 3e502ca; mech_check m24 OK; controller m24 OK (pick, book, six calls by pad).
-- Queued: DA6 dd32a9a7 (cadet vs 5dc0f13, controller deck6).
+- DA6 dd32a9a7: PASS. cadet identical vs 5dc0f13; controller deck6 OK (rack take/return, coils 1-3, reactor door by pad).
+- Waiting: W7 and N6 fixes for the lift-car escort.
