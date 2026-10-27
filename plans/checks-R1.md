@@ -35,4 +35,19 @@ I made a copy with that one line put back to the off form and ran it: `PUZZLE CH
 four Step 5 parts run. BM19 agreed and fixed puzzle_check.py on staging-0.94.0 (when the build is on, it makes its
 own off copy), and confirmed the copy's result stands for this round.
 
+## Extra checks taken on (asked by lead 41, BM19, R2 and R3)
+
+These use the check files from staging f4914555 (test-only fixes; game unchanged, sha256 04cc0cb6...0dbf).
+
+| Check | Result | Key lines |
+|---|---|---|
+| controller_check walk (run alone, lead 41) | PASS (rc 0, 127 s) | all 4 views walked four directions, with no #rot timeout; `CONTROLLER CHECK OK` |
+| cadet_test OLD (0.93.3) vs BUILD (run alone, from R2) | PASS (rc 0, 55 s) | `ALL IDENTICAL (apart from renderer noise: some pixels 1 level off)`; only j_steer1 6 px max 1; errors A [] B [] |
+| saves_check (f4914555) | PASS (rc 0, 206 s) | shut and promo3 really ran (Day 18 before/after 22:00; promo3 to tier 3 senior); `SAVES CHECK OK` |
+| ending_check (f4914555, from R3) | PASS (rc 0, 143 s) | `ENDING CHECK OK`, 0 FAIL |
+| arrows_check endgo asis (from BM19) | PASS (rc 0, 249 s) | Days 31-36, settled go Day 35, oath; `ARROWS CHECK OK` |
+| arrows_check endgo teachoff | PASS (rc 0, 255 s) | settled go Day 35; `ARROWS CHECK OK` |
+| arrows_check endgo track | PASS (rc 0, 185 s) | settled go Day 35; `ARROWS CHECK OK` |
+| arrows_check endgo change | n/a by design | the check skips change for go (line 764: "the change of mind ends in the endgame: endstay's"); 1 s, nothing run |
+
 Result: R1 OK.
