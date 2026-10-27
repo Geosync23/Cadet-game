@@ -474,7 +474,7 @@
 - Put Taavek's sketch on your shelf
 // the sketch, on your shelf (VB2's prop)
 == event.veyliVessel.tap.sketch.shelf
-- Taavek's sketch of you at the foot of the Tern's ramp, the round one in your hands. Underneath, in careful letters: "For you. The one who meets."
+- Taavek's sketch: you at the ramp, the round one in hand. "For you. The one who meets."
 // Taavek's sketch of the Works bay, pinned by the tool wall for good (VB2's prop)
 == event.veyliVessel.tap.sketch.wall
 - Taavek's sketch of the Works bay, pinned by the tool wall. Calder is in it, hovering.
@@ -516,14 +516,14 @@
 - Taavek is bringing you the round one
 // Sunday 13:00, the round one missed even so (a notice; its gist comes by Mail)
 == event.veyliVessel.notice.roundOne.missed
-- Taavek showed Calder and Zeke the round one at the bench: it will have to be made, tomorrow, in the machine shop.
+- Taavek showed Calder and Zeke the round one: it'll be made tomorrow, in the machine shop.
 // Monday 15:00, you're not at the ramp: Calder comes to find you; the Tern waits to 15:30
 == event.veyliVessel.talk.homeFind
 - calder: There you are. Taavek won't go without saying goodbye.
 - calder: The Tern's waiting. So's Isak. Day off, and still flying. Come on.
 // Monday 15:30, the goodbye missed even so
 == event.veyliVessel.notice.home.missed
-- Taavek went home on the Tern. They left a sketch for you with Chief Calder: it's on your shelf.
+- Taavek went home on the Tern. They left you a sketch with Calder: it's on your shelf.
 // the Record when Zeke met Taavek and you met them at the bench
 == event.veyliVessel.record.met.bench
 - Met Taavek at the Works bay bench.
@@ -532,7 +532,7 @@
 - Down gently. One guest, one crate, one broken thing. Ramp's opening.
 // you sign the parts chain sheet
 == event.veyliVessel.signed
-- You sign the sheet: Sunday, 13:00, Main storage to the Tern. A pen on a string, and your name near the top.
+- You sign the sheet: Sunday, 13:00, Main storage to the Tern. Your name near the top.
 // Monday, making step 2: the stock card (stock.1 is the right one; the game shuffles them)
 == event.veyliVessel.stock.title
 - Choose the stock
