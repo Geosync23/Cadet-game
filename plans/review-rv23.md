@@ -8,6 +8,7 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
 | claude/vessel (VB1): RV22's must (round-one fetch) + 2 shoulds | PASS | 03b63d95 (game 705c6fc5) |
 | claude/talk-close (B3): talk only up close | PASS (1 should) | f52e2abc |
 | claude/p5s6-core (W6): Step 6 first turn, all off | PASS (1 note) | 95ef6947 (game 7c13cfe7) |
+| claude/talk-close-fix (W6): the far card closes | PASS | 6dfc4ec1 (game ea9e0f3c) |
 | VB2's ending leftovers (arrows endgo teachoff, track) | PASS | staging-0.94.0 d69473b7 |
 
 ## VB1 03b63d95
@@ -44,5 +45,10 @@ Lead: lead 41 (session_01GKuymjWR1dqfbCw1MyEP9j). Notes-only branch `claude/revi
 - Read: accepts 'crossingBack' as the event left at Day 31 00:00, and __vfresh logs only calendar rows before the vessel. Looks right;
   no reply sent (BM19: reply only on a problem). Could be tighter (accept crossingBack only with the ending on), not needed.
 
+## W6 talk-close-fix 6dfc4ec1 (game ea9e0f3c): PASS
+- Far card closes 1.5 m further off than it opened or after TALK_FAR_STAY (6 ship min) unless Walk over; full card only after Walk over.
+  talk_play.py on it alone (Walk over clicked with force=True): all cases as before; no full card unasked. W6: cadet identical, player,
+  controller pick/day, check_fast OK.
+
 ## Next
-- W6's claude/talk-close-fix (the far card closing): quick verdict with talk_play.py when the sha comes.
+- Nothing queued. Waiting for lead 41.
