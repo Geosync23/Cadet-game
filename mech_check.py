@@ -1630,6 +1630,8 @@ def part_m21(g):
     check(o['book'] is None and not o['notices'], f"m21: none for an Officer ({o['book']})")
     t = g.ev(f"({M21})(1, {{ day: 23 }})")
     check(t['book'] is None, "m21: none on a Tuesday")
+    dr = g.ev("(() => { const r = m21Door(); return r ? [r.deck, DECKS[1].map[r.tile[1]][r.tile[0]]] : null; })()")
+    check(dr == [1, 'O'], f"m21: Calder's spot at the briefing's end (28a's night.on): a tile of the observation room by its way out ({dr})")
     sv = json.loads(g.ev(M21_SAVE))
     check(sv == {'first': 0, 'last': 0, 'pick': -1, 'order': 0, 'got': 3, 'sd': 0}, f"m21: the save read back, junk cleaned ({sv})")
     b = [g.ev(f"({M21})({k})") for k in range(3)]
@@ -1663,7 +1665,7 @@ M24 = r"""((opt) => {
     if (opt.good) { m24SpotSet(keane, 2); tick(shipNow() + 1, (m24State().ready[rating] || 0) + 1); }
     const j = m24Book(shipNow(), true); if (!j) return out;
     out.job = [j.start % 1440, j.start - shipNow() >= 45, j.team.slice().sort(), j.spots.you];
-    out.spots0 = [j.spots[keane], j.spots[rating]];
+    out.spots0 = [j.spots[keane], j.spots[rating]]; out.sp = m24Spots();
     if (opt.swap) { m24SpotSet(keane, m24State().spots[keane] === 1 ? 2 : 1); out.spots1 = [j.spots[keane], j.spots[rating], j.seq.filter(s => s.part === 'lift')[0].who]; }
     tick(shipNow() + 1, j.start - 1);
     let t = j.start, calls = 0;
@@ -1693,14 +1695,15 @@ def part_m24(g):
     check(a['said'] == ['yes', 'later'], f"m24: Keane says yes, a Watch rating after their round ({a['said']})")
     check(not a['bookEarly'] and not a['notHere'], "m24: no booking before the team is picked, nor off the bridge")
     check(a.get('job') and a['job'][1] and a['job'][2] == sorted(['keane-davi', a['crew'][1]]), f"m24: the Watch's hour at least 45 minutes on, the two you picked ({a.get('job')})")
-    check(a.get('spots0') == ['6-engine-2', '6-engine-1'] and poor.get('spots0') == ['6-engine-1', '6-engine-2'], f"m24: the spots on the job as you gave them ({a.get('spots0')}, {poor.get('spots0')})")
+    sp = a.get('sp') or ['?', '?', '?']   # [the coupling, the lifting frame, yours]: S6-4's team spots with P5_DECK6, else the engine places
+    check(a.get('spots0') == [sp[1], sp[0]] and poor.get('spots0') == [sp[0], sp[1]] and a['job'][3] == sp[2], f"m24: the spots on the job as you gave them, yours the drive panel's ({a.get('spots0')}, {poor.get('spots0')}, {sp})")
     e, p = a.get('end') or [], poor.get('end') or []
     check(e[:1] == ['done'] and e[1] <= 55 and e[2] == 6 and e[3] and e[4] == 24, f"m24: a good team and quick calls: done early (55 minutes or less), six calls, trained ({e})")
     check(p[:1] == ['done'] and p[1] > 60 and p[3], f"m24: a poor pick runs over the hour, and is still done ({p})")
     check(not a['lateSpot'], "m24: no spot change once the run has started")
     check(a['mailDone'] == 1, f"m24: one Mail at the end ({a['mailDone']})")
     s = g.ev(f"({M24})({{ swap: true }})")
-    check(s.get('spots1') and s['spots1'][0] == '6-engine-2' and s['spots1'][2] == 'keane-davi', f"m24: a spot changed before the start: the job follows ({s.get('spots1')})")
+    check(s.get('spots1') and s['spots1'][0] == (s.get('sp') or [None, None])[1] and s['spots1'][2] == 'keane-davi', f"m24: a spot changed before the start: the job follows ({s.get('spots1')})")
     w = g.ev(f"({M24})({{ away: true }})")
     print(f"  m24 not coming: {w.get('end')}")
     check(w.get('end') and w['end'][0] == 'done' and w['end'][5] and w['end'][4] is None, f"m24: not there: Keane finishes it, not trained ({w.get('end')})")
@@ -1710,6 +1713,8 @@ def part_m24(g):
     check(not o2['notices'] and not o2['arrows'] and not o2['mails'], f"m24: nothing on another night ({o2})")
     it = g.ev(M24_ITEMS)
     check(it[0] and it[0][0][1].startswith('Plan the coil swap') and any('coil swap' in x[1] and x[0] == it[2] for x in it[1]), f"m24: Schedule rows: the planning, then the slot ({it})")
+    cl = g.ev("(() => { SHIP.works = null; setShipNow(24 * 1440 + 100); const W = worksInit(); W.tier = 4; const S = m24State(); S.pick = ['keane-davi']; S.ready = { 'keane-davi': 0 }; return [m24SlotFor(24 * 1440 + 30) % 1440, m24SlotFor(24 * 1440 + 60) % 1440]; })()")
+    check(cl[0] == 75 and cl[1] == 210, f"m24: the Watch's hour keeps clear of night 3's incident, 02:30-03:30 (booked at 00:30: 01:15 = {cl[0]}; at 01:00, 01:45 would cross it, so 03:30 = {cl[1]})")
     sv = json.loads(g.ev(M24_SAVE))
     check(sv == {'day': 24, 'pick': ['keane-davi', 'x'], 'said': {'keane-davi': 'yes'}, 'ready': {'b': 40}, 'slot': 0, 'spots': {'keane-davi': 2}, 'job': None, 'done': 0, 'mins': 30}, f"m24: the save read back, junk cleaned ({sv})")
     good2 = g.ev(f"({M24})({{ good: true }})")
