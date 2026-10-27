@@ -1611,7 +1611,9 @@ OLD_FAKEPAD = r"""
 # Line by A; and a whole Monday Day 36 (Go) by pad: the lift and the mess for breakfast, the bay, each farewell (the ring on
 # them, A, their "Goodbye"), Zeke's scene at the ramp, up the ramp into the Tern by the stick, and the end page's buttons
 # (the highlight on its first, the D-pad to the next, A on Keep this ending). No ending in the build: says so, nothing fails.
-def ending_src(src): return src.replace("const EV_ENDING_ON = URL_FLAGS.has('ending');", 'const EV_ENDING_ON = true;', 1)
+def ending_src(src):   # (BM19, R3's find, 0.95.0) the ending's parts jump to Day 32's offer: with Step 6 on it waits for Calder's question, so Step 6 off here
+    src = re.sub(r"^const P5_STEP6 = P5_STEP5 && true;", "const P5_STEP6 = P5_STEP5 && URL_FLAGS.has('p5s6');", src, count=1, flags=re.M)
+    return src.replace("const EV_ENDING_ON = URL_FLAGS.has('ending');", 'const EV_ENDING_ON = true;', 1)
 DLG_BTNS = "(() => { const d = document.getElementById('devDlg'); return d && !d.hidden ? [...d.querySelectorAll('button.act, button.next')].map(b => b.className + ':' + b.textContent.trim()) : null; })()"
 def end_dialogue(r, fails, scene, pick=0, cap=60):
     """a scene on the phone, by pad: Go on with A on its next button; at a choice, every choice highlighted by the D-pad, then A on choice `pick`"""
@@ -2967,6 +2969,7 @@ def part_m21(pw, src, tag):
     st = r.ev("JSON.stringify(m21State())"); print(f'  the briefing by pad: {n} choice screen(s); the record {st}')
     if n != 1: fails.append(f'm21: one choice screen expected by pad ({n})')
     if '"pick":2' not in st or '"order":25' not in st: fails.append(f'm21: the parts order picked by pad should be in the record ({st})')
+    r.ev("for (const k of NEED_KEYS) SHIP.player.needs[k] = 90")   # (BM19, R3's find) fed, so no hunger card takes the tap box
     sc = r.ev("(() => { const t = ROOM_TILES.O[0]; return [m21Screen({ t: 'Wall screen', front: 0, depth: 0 }, cellPos(t[0], t[1])), m21Screen({ t: 'Wall screen', front: 0, depth: 0 }, cellPos(...DECKS[1].lift))]; })()"); r.step(300)
     shown = r.ev("document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent"); print(f'  the wall screen: {sc}, "{shown}"')
     if sc != [True, False] or 'Works: your item' not in shown: fails.append(f'm21: the wall screen in the observation room should show the agenda, and only there ({sc}, "{shown}")')
