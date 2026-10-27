@@ -19,17 +19,17 @@ Lead 41 = session_01GKuymjWR1dqfbCw1MyEP9j, branch claude/lead-41-e86n0x, hourly
 - Tons of arrows, in person first, staged scenes with dialogue, controller, phones first. Times for the user in US Eastern, plain words, no emojis.
 - Old account's links can't be updated from here; never publish over 6daNCLCJAcsLCZn27CEthq.
 
-## Seats (new account)
-- BM19 build master session_01GKuymncYhRTKs8t4byNfdj (claude/staging-0.94.0 done; now merges Step 6 pieces into claude/staging-p5s6; has the Step 6 seat list).
-- RV23 reviewer session_01GKuymoDm1XbC5G8TvaCNLr (Step 6 reviewer).
-- PUB2 publisher session_01GKuymkDxLVyt4rjtcJxdab (idle; handover-publisher-2.md on claude/publish-26).
-- W8 career engineer session_01GKuymk95u5t4uDsahatkPN (from W7's handover: casePoint swap in S6-7, S6-9 the end, refit job + '2-B' asks, all DM_CAREER rows). W7 (archived after W8 confirms) session_01GKuymjghu82TGWPLR1wTKw (claude/p5s6-promo4; S6-3 done in day parts, now night parts, then S6-7, S6-9; owns 24 core/24u/section 28 helpers/switch lines; adds all DM_CAREER rows at the end).
-- N6 nights session_01GKuymnDA25R2a5yZGYpaBS (claude/p5s6-nights; S6-1; RV23 FIXES NEEDED on c806c78: Calder doesn't come Day 22 09:15; loosen fetch reach).
-- MA6 mechanics A session_01GKuymj1UEDuEYMnG9rmFkc (claude/p5s6-mech-a; S6-2 merged; S6-6 team turn 1 8f943e82 in review).
-- PZ6 puzzles session_01GKuymjrmdGE4vaHHHGkvYF (S6-8 merged; HOLDING live bug MA6-1 until a seat frees: team job turn can't be tapped; fix on claude/team-turn-fix from staging-0.94.0).
-- DA6 deck architect session_01GKuymjJ4sU5hfdU8bH49UW (claude/p5s6-deck; S6-4 turn 1 469b606b in review; names 6-coil-1..3, 6-reactor-1, 6-coil-team-1..3, *-svc).
-- Not hired yet: mechanics B for S6-5 engine work (needs DA6's machines).
-- Archived: W6, R1, R2, R3.
+## Seats (new account) — state at ~14:00 UTC Oct 27
+- BM19 build master session_01GKuymncYhRTKs8t4byNfdj: merges RV23-passed Step 6 pieces into **claude/staging-p5s6** (last known ce113792+; it was merging: escort-follow-fix cffe8187, promo4 up to 9dcd0b1a, nights 992a4b0; next team-turn-fix 12afb4a on PASS, MA6 db56362e, PZ6 91710ce, W8's turns, DA6's S6-5). Has the seat list; tells builders when staging moves. Then: the Step 6 gate, switch-on (P5_STEP6 true; older switches stay off), the full round, GO.
+- RV23 reviewer session_01GKuymoDm1XbC5G8TvaCNLr (~50% memory; will hand over at 60%). Queue: team-turn-fix 12afb4a, N6 992a4b0 cadet, PZ6 91710ce, MA6 db56362e, W7/W8 S6-7 turns 2-4 (promo4 3cb048f2..92e5b38f), DA6 S6-5 turns.
+- W8 career engineer session_01GKuymk95u5t4uDsahatkPN (claude/p5s6-promo4; from handover-w7.md): casePoint swap in S6-7, S6-9 the end (Calder's question Day 26 18:40), refit odd job + '2-B' leftovers (24t, 8b, HUD "Visitors' suite"), ALL Step 6 DM_CAREER rows.
+- DA6 session_01GKuymjJ4sU5hfdU8bH49UW (claude/p5s6-deck): S6-4 DONE+merged; now S6-5 engine work (turn 1 9332d5a1 PASS w/ 2 shoulds; night 2 next: permit, badge, door, Watch; then controller part night 1).
+- MA6 session_01GKuymj1UEDuEYMnG9rmFkc (claude/p5s6-mech-a): S6-2 + S6-6 DONE+merged (db56362e guard in review); now building arrows_check part 'step6' (the arrow-follower through all Step 6 beats, 3 ways).
+- N6 session_01GKuymnDA25R2a5yZGYpaBS (claude/p5s6-nights): S6-1 DONE (992a4b0 PASS with the escort fix); idle for round fixes. Backlog N6-1: a let-go save doesn't load (pre-existing, section 20).
+- PZ6 session_01GKuymjrmdGE4vaHHHGkvYF: S6-8 DONE+merged; team-turn-fix 12afb4a (LIVE bug MA6-1) in review; casePoint 91710ce in review; QUEUED for it when a seat frees: a check part proving a follow escort reaches a SEATED player (pu3) on top of escort-follow-fix.
+- PUB2 publisher session_01GKuymkDxLVyt4rjtcJxdab (idle; handover-publisher-2.md on claude/publish-26). Step 6 publish: ask the user whether to update the new links (7hQ1/KEya) or make new ones (with a push notification).
+- Archived: W6, W7, R1, R2, R3.
+- Step 6 left to build: S6-5 (DA6), S6-9 + DM rows (W8), arrows step6 (MA6). Then the round + publish.
 
 ## Gotchas
 - 0.94.0 is the first build with switches set to `true`: many checks looked for the OFF line. BM19 + W6 fixed puzzle, ending, saves, controller, events, promo_beats, mech; watch for more as Step 6 switches go on.

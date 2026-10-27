@@ -1730,3 +1730,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~13:43 UTC: **W7 S6-7 DONE** (promo4 36e8cf5a: 3cb048f2 hello/follow/watch, 66d35044 stuck clue (stand-in) + late talk, 92e5b38f Basil's first job alone, Record, Dev preset Day 26, controller mentor; cadet identical; promo_beats mt1-4 OK) -> RV23. W7 at ~55-60%: handing over. **Hired W8** session_01GKuymk95u5t4uDsahatkPN (claude/p5s6-promo4): casePoint swap, S6-9 the end, refit job + '2-B' asks, all DM_CAREER rows.
 - ~13:43 UTC: W7 handover pushed (promo4 8d13dab4); W7 idle -> archive when W8 confirms. QUEUED (cap): a check part proving a follow escort reaches a SEATED player (pu3) on top of escort-follow-fix -> PZ6 when a seat frees.
 - ~13:44 UTC: W8 confirmed. **W7 archived.**
+- ~13:57 UTC check-in (lead 41 at ~57% memory): handing over to lead 42 now (Step 6 round + publish are big). handover-lead41.md updated with seat states.
