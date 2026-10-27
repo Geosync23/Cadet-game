@@ -96,7 +96,7 @@ def part_on(pg):
     pg.ev("clockScreen()"); p = ptr(pg)
     print('  S2 pointer:', p)
     check(p['up'] and p['now'] == 'p:clock:in' and p['text'] == 'Clock in', f'S2: on the clock screen, the pointer on Clock in ({p})')
-    pg.ev("POINT.aim.click()"); pg.step(2); pg.ev("document.getElementById('clockScreen').hidden = true"); shift(pg)
+    pg.step(30); pg.ev("POINT.aim.click()"); pg.step(2); pg.ev("document.getElementById('clockScreen').hidden = true"); shift(pg)   # (R3, 0.95.0) step past patch #6's 500 ms tap guard first: the check's clock only moves with step
     r = pg.ev("({ inn: careerClockedIn(9), live: guideList().some(e => e.id === 'shift:in:9') })"); p = ptr(pg)
     check(r['inn'] and not r['live'] and not p['up'] and pg.ev("!POINT_Q.some(x => x.id === 'p:clock:in')"), f'S2: pressed: clocked in, the entry and the pointer gone ({r}, {p})')
     # S3: take a job (all other open jobs claimed by the crew, so the first row is ours)
@@ -153,7 +153,7 @@ def part_on(pg):
     pg.ev("clockScreen()"); p = ptr(pg)
     print('  S7 pointer:', p)
     check(p['up'] and p['now'] == 'p:clock:out' and p['text'] == 'Clock out', f'S7: the pointer on Clock out ({p})')
-    pg.ev("POINT.aim.click()"); pg.step(2); pg.ev("document.getElementById('clockScreen').hidden = true"); shift(pg)
+    pg.step(30); pg.ev("POINT.aim.click()"); pg.step(2); pg.ev("document.getElementById('clockScreen').hidden = true"); shift(pg)
     r = pg.ev("({ out: careerClockedOut(9), live: guideList().some(e => e.id === 'shift:out:9'), lab: (GUIDE.key = '', (goalNow() || {}).label || null) })")
     check(r['out'] and not r['live'] and r['lab'] != 'Shift over: clock out', f'S7: pressed: clocked out, gone ({r})')
     # clocked out: the job arrow rests (lead 29: off shift you're free); a job you hold stays in Tracked
