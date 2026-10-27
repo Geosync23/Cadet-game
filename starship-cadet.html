@@ -34653,7 +34653,7 @@ const LINES = JSON.parse([
   '{"text":"calder: Good chain. Water, then off you go.","id":"16ttzhe"}]',
   ',"event.veyliVessel.talk.homeFind":[',
   '{"text":"calder: There you are. Taavek won\'t go without saying goodbye.","id":"1am2pf0"},',
-  '{"text":"calder: The Tern\'s waiting. So\'s Isak, on his day off. Come on.","id":"kvsh0a"}]',
+  '{"text":"calder: The Tern\'s waiting. So\'s Isak. Day off, and still flying. Come on.","id":"1bdidqt"}]',
   ',"event.veyliVessel.talk.lap":[',
   '{"text":"tomas: Taavek! Walk the lap with us? It\'s just walking. Round the ship.","id":"14v7vdy"},',
   '{"text":"taavek: Round! A round one. I come. I draw while I walk.","id":"1z0k9lf"}]',
@@ -46367,9 +46367,12 @@ if (EV_VESSEL_ON && EVENTS_ON) {
     ask: w('gather.chain.ask') || 'Parts chain at one. Storage door to the ramp. Bring your arms.', here: w('gather.chain.here') || 'Find a gap in the line. Face the next person. I\'ll call the count.',
     thanks: c => evWord('event.veyliVessel.gather.chain.thanks', c) || 'Zeke waves you into a gap in the line. The first crate is already coming down it toward you.' });
   // RV21: about twenty watch Taavek come down the Tern's ramp, Sunday 09:20-09:50 (k 360; the shuttle bay's crowd spots,
-  // as the rotation's Off the Tern): Works and Comms off duty, by a hash. A turn-up gathering, nothing to tap
+  // as the rotation's Off the Tern): Works and Comms off duty, by a hash. A turn-up gathering, nothing to tap. No venue:
+  // a venue's crowd spots are held for its goers alone (eventPools' ev:<id>), and the ramp meeting's cast (Calder, Zeke,
+  // Lindqvist, from 09:25) stands in the same bay; the spots come from places, held for nobody (RV22's bigevents)
   SHIP_EVENTS.veyliVessel.moments.push({ id: 'vesselArrival', name: w('gather.arrival.name') || 'Taavek comes aboard', phase: 'onset', at: [1, 560], len: 30, k: 360,
-    where: { venue: 'shuttle-bay', deck: 5, room: /^Shuttle bay$/ }, gathering: true, who: vesselArrivalWho, anim: null, easy: true, lead: lineLead, from: 'Zeke Torres',
+    where: { deck: 5, room: /^Shuttle bay$/ }, gathering: true, who: vesselArrivalWho, anim: null, easy: true, lead: lineLead, from: 'Zeke Torres',
+    places: [{ deck: 5, pool: '@gather-shuttle-bay' }],
     ask: w('gather.arrival.ask') || 'Their engineer comes down the Tern\'s ramp at half nine. Come and see.', here: w('gather.arrival.here') || 'There. The ramp\'s opening.',
     thanks: c => evWord('event.veyliVessel.gather.arrival.thanks', c) || 'You stand with the crowd at the shuttle bay as the Tern\'s ramp comes down.' });
   SHIP_EVENTS.veyliVessel.routines.onset = [{ who: 'all', rule: 'standEasy', at: [555, 590], not: ['dept:command', 'dept:helm', 'dept:watch', 'dept:galley'] }, { who: 'all', rule: 'standEasy', at: [780, 840], not: ['dept:command', 'dept:helm', 'dept:watch', 'dept:galley'] }];
@@ -48678,6 +48681,9 @@ function vesselStatus(ph, c) {
 function vesselLate(from, log, current) {
   return !!VESSEL && Number.isInteger(from) && from >= VESSEL.late && !(log || []).some(l => l.id === 'veyliVessel') && !(current && current.id === 'veyliVessel');
 }
+// standing easy on shift for the arrival crowd and the parts chain counts as work, the walk there and back too, as the
+// Line's ceremony (section 14's dayReport reads eventMeetTag): their tags join the meetings' (RV22's day_check 28)
+if (EV_VESSEL_ON && EVENTS_ON) for (const t of ['ev-vesselArrival', 'ev-vesselArrival-talk', 'ev-vesselChain', 'ev-vesselChain-talk']) EV_MEET_TAGS.add(t);
 if (EV_VESSEL_ON && EVENTS_ON && VESSEL) {
   SHIP.vesselFrom = SAVED && SAVED.ship && Number.isInteger(SAVED.ship.vesselFrom) ? SAVED.ship.vesselFrom : SHIP.time ? SHIP.time.day : 0;
   SAVE_EXTRA.push(s => { if (SHIP.vesselFrom != null) s.ship.vesselFrom = SHIP.vesselFrom; });
@@ -48930,10 +48936,10 @@ function vesselFind(v) { vesselFetch(v, 'calder', 'vessel:found', 'talk.rampFind
 // the writers' "who: line" lines there, and goes back after `mins`; once a run (the flag). Live only
 function vesselFetch(v, who, flag, key, alt, mins) {
   if (typeof crewComeTo !== 'function' || typeof deckDef === 'undefined' || !deckDef || v.e.mine[flag]) return;
-  v.e.mine[flag] = 1;
   const p = player.obj.position, mine = roomAt(...player.here()), P = (DECKS[deckDef.num].places || []).filter(pl => pl.room === mine && !pl.machine && pl.pose !== 'lie' && !(typeof heldBy === 'function' && heldBy(pl.id)));
   const pl = P.map(q => { const c = q.xy ? cellPos(q.xy[0] - .5, q.xy[1] - .5) : cellPos(...q.at); return [q, Math.hypot(c.x - p.x, c.z - p.z)]; }).sort((x, y) => x[1] - y[1] || (x[0].id < y[0].id ? -1 : 1))[0];
-  if (!pl) return;
+  if (!pl) return;                                      // nowhere free to stand by you (the lift car, a full room): tried again next minute (RV22)
+  v.e.mine[flag] = 1;
   const L = (vesselWords(key) || alt).map(t => evFill(t.slice(t.indexOf(': ') + 2), evCtx(v.e)));
   crewComeTo(who, pl[0].id, a => { a.talking = 2; bubbleSay(friSpeaker(a), L[0], 6); if (L[1]) simTimeout(() => { try { bubbleSay(friSpeaker(a), L[1], 6); } catch (err) { /* gone */ } }, 4500); }, { until: v.now + mins });
 }
@@ -49271,7 +49277,7 @@ function vesselShopTap(it, at) {
   const M = v.e.mine, s = M['vessel:step'] | 0; if (!M['vessel:job'] || s < 1 || s > 5 || M['vessel:part']) return false;
   if (DIALOGUE || typeof ACT !== 'undefined' && ACT && ACT.kind === 'vesselStep') return true;
   if ((M['vessel:wait'] || 0) > v.now) { toast('Machine shop', vesselW('wait', 'The lathe\'s still turning. Taavek holds up ten fingers, then fewer.')); return true; }
-  if (shopMachineOf(it) !== VESSEL_STEPS[s].at) { toast('Machine shop', vesselW('ring.step.' + s, 'Taavek\'s part first') + ': ' + (VESSEL_STEPS[s].at === '5-shop-lathe' ? 'at the lathe.' : 'at the bench.')); return true; }
+  if (shopMachineOf(it) !== VESSEL_STEPS[s].at) { toast('Machine shop', vesselW('ring.step.' + s, 'Taavek\'s part first') + ': ' + (VESSEL_STEPS[s].at === '5-shop-lathe' ? 'at the lathe.' : 'at the fabricator.')); return true; }
   vesselStepStart(v, s); return true;
 }
 // live (vesselWhere asks): Monday, your two helpers in the machine shop with Taavek from the card to the test fit

@@ -214,7 +214,9 @@ with sync_playwright() as pw:
     # tea corner's seats at once, and nobody in Works on Deck 5 has a tea outside it; most of those at work go
     wt = g.ev(f"""(() => {{ if (typeof WORKS_TEA === 'undefined') return null; const B = ({DAY} - 1) * 1440, out = {{ on: 0, went: 0, outside: [], peak: 0 }}, at = new Map();
       for (const p of schedPeople().filter(p => p.dept === 'works' && p.shift !== 'night' && p.work && p.work.deck === 5)) {{
-        const segs = planDay(p, {DAY}); if (!segs.some(s => s.act === 'work')) continue; out.on++;
+        const segs = planDay(p, {DAY}); if (!segs.some(s => s.act === 'work')) continue;
+        if (typeof eventMeetTag === 'function' && segs.some(s => eventMeetTag(s.tag) && s.from < B + WORKS_TEA.until && s.to > B + WORKS_TEA.at)) {{ out.easy = (out.easy || 0) + 1; continue; }}   // standing easy for an event in the tea hour (the Veyli vessel's parts chain, Day 28 13:00-14:00): that's their break
+        out.on++;
         const tea = segs.filter(s => s.tag === 'tea' && s.deck === 5); if (tea.length) out.went++;   // posted to another deck that day: their own tea there
         for (const s of tea) {{ if (s.from < B + WORKS_TEA.at || s.to > B + WORKS_TEA.until + WORKS_TEA.wait) out.outside.push(p.id + ' ' + hhmm(s.from - B)); for (let m = s.from; m < s.to; m++) at.set(m, (at.get(m) || 0) + 1); }}
       }}
