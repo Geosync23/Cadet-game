@@ -19896,7 +19896,7 @@ const HOLD_MAX = 4;                                      // small jobs held for 
 // SHARE_KEEP held on the board: so you see the Works crew doing the jobs you do ("Bea on it")
 const SHARE_EVERY = 3, SHARE_KEEP = 2;
 let SHARE_ON = true;                                    // machine_check turns it off where it needs a job left for you
-const forYou = j => j.urgency < 2 && jobTier(j) <= playerTier() && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && rankOk('you', j) && (!j.junior || playerRank() === 'junior') && !bridgeBars(j);
+const forYou = j => j.urgency < 2 && jobTier(j) <= playerTier() && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind) && !(P5_PROMO4 && pu4EngineByDay())) && rankOk('you', j) && (!j.junior || playerRank() === 'junior') && !bridgeBars(j);
 function leaveEnd(j) {
   if (!forYou(j) || j.released) return j.found;
   if (j.cargo === 'meals') return j.found + 60;
@@ -63553,6 +63553,7 @@ function puDevSteps() {                                  // [{ label, at (absolu
 }
 function puDevNext() {                                   // the Dev career arrow's next Senior Officer beat: { when, soon, g } or null
   const W = SHIP.works, T = puT3(); if (!P5_PROMO3 || !W) return null;
+  { const n4 = P5_PROMO4 ? pu4DevNext() : null; if (n4) return n4; }   // (S6-3) the Engine Specialist's next beat
   const now = Math.floor(shipNow()), d = worksDay(now), abs = (dd, m) => (dd - 1) * 1440 + m;
   if (!T) { if (W.tier !== 2 || !ladderNeeds((ladderRow('t3') || {}).needs, W)) return null;
     const dd = Math.max(d, PU.offerFrom), p = puPartyAt(dd), at = p !== null ? p + 5 : PU.seekAt;
@@ -64002,6 +64003,36 @@ function pu4MoveGuide(now) {                             // the level 1 arrow wh
 }
 const pu4HomeOpen = (deck, room) => { const W = SHIP.works; return !!(P5_PROMO4 && W && (W.home === PU4_M.home || PU4_LIVE.mv) && deck === PU4_M.room.deck && room === PU4_M.room.room); };   // worksHomeOpen asks
 if (P5_PROMO4) WORK_TICKS.push((now, skip) => { pu4MoveTick(now, skip); if (!skip) pu4MoveGuide(now); if (worksHome() === PU4_M.home && typeof clothesCollect === 'function') clothesCollect(now); });
+// ---- S6-3 turn 4b (W7): Dev mode. Its promotion list (devmodePromoSteps asks pu4DevSteps) and its career arrow (puDevNext
+// asks pu4DevNext first: the next Engine Specialist beat, where and when); the presets (section 25's DM_BEATS, Days 22-25)
+function pu4DevSteps() {                                 // [{ label, at (absolute minutes), done }], in order
+  const T = P5_PROMO4 && puT4(); if (!T) return [];
+  const abs = (d, m) => (d - 1) * 1440 + m, out = [{ label: 'Your Tier 4 test', at: abs(T.day, PU4_T.jobAt), done: !!T.passed }];
+  if (!T.passed) return out;
+  out.push({ label: 'Your Tier 4 result', at: pu4ResWhen(), done: !!T.res }); if (!T.res) return out;
+  const bd = T.badge || pu4BadgeDay(); out.push({ label: 'Your engine badge, from the Captain', at: abs(bd, promoCerTimes(bd).at), done: !!T.badge });
+  if (T.move && T.move.ready) out.push({ label: 'Your Deck 2 quarters', at: abs(T.move.walked || T.move.ready, 1140), done: !!T.move.walked });
+  return out;
+}
+function pu4DevNext() {                                  // the Dev career arrow's next Engine Specialist beat: { when, soon, g } or null
+  const W = SHIP.works, T = puT4(); if (!P5_PROMO4 || !W || W.tier < 3) return null;
+  const now = Math.floor(shipNow()), d = worksDay(now), abs = (dd, m) => (dd - 1) * 1440 + m;
+  if (!T) { const t3 = puT3(); if (W.tier !== 3 || t3 && !t3.toast || !ladderNeeds((ladderRow('t4') || {}).needs, W)) return null;
+    for (let dd = Math.max(d, PU4.offerFrom); dd < Math.max(d, PU4.offerFrom) + 8; dd++) { let wd = 0; try { wd = weekday(dd); } catch (e) { wd = 0; }
+      const at = playerShiftOn(dd) ? PU4.seekAt : wd === 6 ? PU4.dinnerAt : null; if (at === null || abs(dd, PU4.seekBy) <= now) continue;
+      return { when: Math.max(now, abs(dd, at)), soon: 15, g: at === PU4.dinnerAt ? { deck: 3, room: 'M', label: 'The Tier 4 offer: Calder at Sunday dinner' } : { deck: 5, room: 'w', label: 'The Tier 4 offer: Calder comes to find you' } }; }
+    return null; }
+  if (!T.passed) { const j = pu4TestJob(); if (j && j.claimedBy === 'you') { let g = null; try { g = typeof ixJobGoal !== 'undefined' && ixJobGoal ? { ...ixJobGoal } : null; } catch (e) { g = null; } return { when: now, g: g ? { ...g, label: 'Your Tier 4 test · ' + g.label } : { deck: 6, room: 'E', label: 'Your Tier 4 test' } }; }
+    return { when: abs(T.day, PU4_T.jobAt), soon: 30, g: { deck: 5, item: /job board/i, room: 'w', label: 'Your Tier 4 test job, at the board' } }; }
+  if (!T.res) return { when: pu4ResWhen(), soon: 15, g: { deck: 1, room: 'O', label: 'Your Tier 4 result: Calder finds you' } };
+  if (!T.badge) { const bd = pu4BadgeDay(); return { when: abs(bd, promoCerTimes(bd).at), soon: 15, g: { deck: 1, place: '1-ceremony-you', room: 'O', label: 'Your engine badge, the observation room' } }; }
+  if (T.move && T.move.ready && !T.move.walked) { const dd = Math.max(d, T.move.ready), f = pu4MoveFrom(dd);
+    return { when: abs(dd, f === null ? 1140 : f), soon: 15, g: PU4_LIVE.mv ? { deck: 2, room: 'B', label: 'Go with Vance: your quarters, Deck 2' } : { deck: 3, room: 'M', label: 'Dinner, then Vance walks you to Deck 2' } }; }
+  return null;
+}
+function pu4EngineByDay() {                              // section 17's forYou asks: engine machines' jobs are yours by day, an Engine Specialist after the nights
+  try { return playerRank() === 'specialist' && SHIP.time.day > Math.max(...Object.keys(P5_NIGHTS).map(Number)); } catch (e) { return false; }
+}
 // ---- end of slot: Later promotions ----
 
 // ---------------------------------------------------------------------
@@ -69330,10 +69361,13 @@ if (P5_STEP5) {                                         // Pillar 5 Step 5 (S5-1
     { day: 17, train: ['m19', 'm15', 'p4'], band: 'reliable' }, { day: 18, train: ['m18', 'p5'], defer: ['m17'], band: 'reliable' },   // (RV20 S4) the new ladder order: m15 folds into m19 the same day; m17 waits for a clear day (Day 31, past DM_MAXDAY)
     { day: 19, train: ['m20', 'p9'], band: 'trusted' }, { day: 21, train: ['mys'], band: 'trusted' });
 }
+if (P5_PROMO4) {                                        // Pillar 5 Step 6 (S6-3, W7): the Tier 4 test passed Day 22, Engine Specialist that night, the badge Day 23, Deck 2 from Day 25 (approximate)
+  const i = DM_CAREER.findIndex(r => r.day === 23 && r.later); if (i >= 0) DM_CAREER.splice(i, 1, { day: 22, train: ['t4'], rank: 'specialist', band: 'new', promo4: true });
+}
 const DM_MAXDAY = 30, DM_SEED = 8;                      // the seed: no sick day (section 20's sickDue) before Day 46, so you never land unwell (devmode_check)
 function devmodeCareerFor(n) {                           // pure: SHIP.works's career part by the end of day n
   const rows = DM_CAREER.filter(r => r.day <= n), last = k => { for (let i = rows.length - 1; i >= 0; i--) if (rows[i][k] !== undefined) return rows[i][k]; return undefined; };
-  const promo = rows.some(r => r.promo), promo3 = rows.some(r => r.promo3), tier = promo3 ? 3 : promo ? 2 : 1, rank = last('rank') || 'junior', B = WORK_BANDS[tier] || WORK_BANDS[1];   // promo3: Step 5's Senior Officer (P5_STEP5's rows)
+  const promo = rows.some(r => r.promo), promo3 = rows.some(r => r.promo3), promo4 = rows.some(r => r.promo4), tier = promo4 ? 4 : promo3 ? 3 : promo ? 2 : 1, rank = last('rank') || 'junior', B = WORK_BANDS[tier] || WORK_BANDS[1];   // promo3: Step 5's Senior Officer (P5_STEP5's rows)
   const out = { tier, rank, xp: (B.find(b => b[1] === (last('band') || 'new')) || B[0])[0], tr: {}, op: {}, use: {}, tools: {}, test: null, home: promo ? PROMO.home : 'bunk', done: [], ms: [] };
   for (const r of rows) for (const id of r.train || []) {
     const row = ladderRow(id); if (!row) continue;
@@ -69344,6 +69378,8 @@ function devmodeCareerFor(n) {                           // pure: SHIP.works's c
   if (rows.some(r => r.test)) out.test = { tier: 2, day: 9, tries: 1, passed: true };
   if (promo) { out.done = ['summons2', 'cake2', 'move2', 'ceremony2']; out.ms = [['officer', 10], ['commissioned', Math.min(n, 11)]]; }
   if (rows.some(r => r.test3)) { out.pu = { t3: { day: 15, tries: 1, passed: true, res: promo3 ? 16 : null, bar: promo3 ? 16 : null, toast: n >= 17 ? 17 : null } }; if (promo3) out.ms.push(['senior', 16]); }   // S5-2's record (24u)
+  if (promo4 && out.pu) { out.pu.t4 = { day: 22, tries: 1, passed: true, res: 22, badge: n >= 23 ? 23 : null, move: n >= 23 ? { ready: 25, walked: n >= 25 ? 25 : null, refit: false } : null };   // S6-3's record (24u)
+    out.ms.push(['specialist', 22]); if (n >= 23) out.ms.push(['specialist.badge', 23]); if (n >= 25) out.home = '2-B'; }
   return out;
 }
 function devmodeCareerSet(n, now) {                      // SHIP.works set to day n's (the log, notes and side jobs kept)
@@ -69373,7 +69409,7 @@ function devmodeWeekMet(upTo) {                          // the first week's bea
 }
 function devmodeWake() {                                 // into your bed's room, beside it (the bunk room, or cabin 4-23)
   const id = playerBed(), n = deckOf(id), bed = (DECKS[n].places || []).find(p => p.id === id); if (!bed) return null;
-  const room = roomAt(...bed.at); return devmodeMove(n, () => cellPos(...bed.at), r => r === room);
+  const room = n !== deckDef.num && bed.room ? bed.room : roomAt(...bed.at); return devmodeMove(n, () => cellPos(...bed.at), r => r === room);   // (S6-3) another deck's bed (Deck 2's 2-B): its own room, not this deck's tile
 }
 // the story's beats as shortcuts (the user's q3: they go on to the beat's time and place): the career by the end of
 // day `by`, then the clock to `at` on `day` and you in the room, with `set` for what the beat waits on
@@ -69381,6 +69417,11 @@ const DM_BEATS = [
   { id: 't2', label: 'Day 9: the test job', day: 9, by: 8, at: 530, where: { deck: 5, room: 'w' }, set: W => { W.test = { tier: 2, day: 9, tries: 0, passed: false }; } },   // 08:50 in the Works bay: Calder's test, held from 09:00
   { id: 'promo', label: 'Day 10: the promotion', day: 10, by: 9, get at() { return promoBeatsOn() ? PB_TIMES.summonsAt - 10 : 650; }, where: { deck: 5, room: 'w' } },   // 10:50 in the Works bay: her summons at 11:00 (08:05 for 08:15 with FX28's PROMO_BEATS_ON)
 ];
+if (P5_PROMO4) DM_BEATS.push(                           // Pillar 5 Step 6 (S6-3, W7): the Engine Specialist's beats
+  { id: 't4', label: 'Day 22: the Tier 4 test', day: 22, by: 21, at: 560, where: { deck: 5, room: 'w' }, set: () => { if (!puT4()) pu4Set(22); flagSet('pu4.told', 21); flagSet('pu4.notice', 21); } },   // 09:20 in the Works bay: the test on the board at 09:30
+  { id: 't4res', label: 'Day 22: your Tier 4 result', day: 22, by: 21, at: 1350, where: { deck: 1, room: 'O' }, set: W => { const T = puT4() || pu4Set(22); T.passed = true; T.tries = T.tries || 1; T.day = 22; W.tr.t4 = 22; } },   // 22:30 at the comet: Calder finds you at 22:40
+  { id: 't4badge', label: 'Day 23: the engine badge', day: 23, by: 22, at: 960, where: { deck: 1, room: 'O' } },   // 16:00 in the observation room: the Captain at 16:30
+  { id: 't4move', label: 'Day 25: your Deck 2 quarters', day: 25, by: 24, at: 1110, where: { deck: 3, room: 'M' } });   // 18:30 in the mess: dinner, then Vance
 // starting friendships (the user's q1: the people a steady player meets, approximate): [id, points by about Day 10, from day]
 // (REL_TIERS: 10 an acquaintance, 30 a colleague, 60 a friend), through section 20's relAdd ('intro:' so openness leaves them as given)
 const DM_FRIENDS = [['torres-zeke', 70, 1], ['tomas', 65, 1], ['pell', 50, 3], ['calder', 35, 1], ['halloran-emeka', 32, 1], ['esposito-yara', 30, 3], ['brennan', 22, 1],
@@ -69510,6 +69551,7 @@ function devmodePromoSteps() {                           // the promotion's beat
     out.push({ label: 'The ceremony', at: abs(P.ceremony.day, P.ceremony.at), done: promoDone('ceremony2') });
   }
   try { if (typeof puDevSteps === 'function') out.push(...puDevSteps()); } catch (e) { /* none */ }   // Pillar 5 Step 5's Senior Officer (24u, S5-2), after the first promotion's
+  try { if (P5_PROMO4 && typeof pu4DevSteps === 'function') out.push(...pu4DevSteps()); } catch (e) { /* none */ }   // Step 6's Engine Specialist (24u, S6-3)
   return promoBeatsOn() ? out.sort((a, b) => a.at - b.at) : out;   // FX28: the pip before the cake and your cabin
 }
 function devmodePromoNext() {

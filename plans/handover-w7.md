@@ -9,6 +9,7 @@
 ## Done
 - **Turn 3 (s6.4):** the result at 22:40 and the Captain's badge (see DEV_NOTES "The Engine Specialist promotion", Turn 3).
 - **Turn 4a (s6.5):** the move to 2-B with Vance after dinner, laundry collected (DEV_NOTES Turn 4a).
+- **Turn 4b (s6.6):** Dev mode (career table, four presets, steps, arrow), forYou's engine line.
 - Approved MA6's 24 core touch in 27166be (WORK_MECH.m21.own skipped by ladderTick).
 
 ## Judgement calls (overrule any)
@@ -18,7 +19,8 @@
 - The Record's title: "Engine Specialist" alone (never "Engine Specialist · Specialist").
 
 ## Still to do
-- **Turn 4b:** the refit odd job (section 17's ODD_ROWS, one row, from Day 23, "Refit the visitors' suite"; T.move.refit; with it 24t's touches follow you: cabinMine reads 4-23 only today), forYou's engine line (17), Dev mode puDevSteps/puDevNext for Tier 4 and presets Days 21-26 (section 25).
+- **Parked: the refit odd job** ("Refit the visitors' suite", from Day 23; T.move.refit; its effect: 24t's touches follow you to 2-B) until S6-4 adds Deck 2's cabin spots. Don't add it to ODD_ROWS directly: the odd-job stream's seeded order would change with the switch on; post it as its own job, its row only in fixTable's byId.
+- Presets for Days 21 and 26 come with S6-7/S6-9 (and N6's nights).
 - Judgement: the move never happens by Mail alone (the spec: notice and arrow each day until you've stepped in).
 - Wave 2: the comet/welcome night parts, then S6-7 (28e), S6-9 (28f).
 

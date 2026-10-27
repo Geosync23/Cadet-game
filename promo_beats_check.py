@@ -418,6 +418,23 @@ def part_t4move(g):
     check(r['by20'] and r['gone22'] and not r['before26'] and r['next26'], f"t4move: no dinner, at 20:00 anyway; open till 22:00, then the next day at your shift's end ({r})")
     check(r['coll'] == 26 and r['back'] == [5, None], f"t4move: laundry collected at 10:00, back clean the next morning ({r['coll']}, {r['back']})")
 
+# ---- S6-3 turn 4b (W7): Dev mode's Tier 4 rows, steps, career arrow and presets; forYou's engine line
+def part_t4dev(g):
+    if not t4on(g, 't4dev'): return
+    print('(t4dev) Dev mode: the career table to Day 25, the promotion list, the career arrow, the presets; engine jobs by day:')
+    r = g.ev("""(() => { const out = {}; const c = n => { const x = devmodeCareerFor(n); return [x.tier, x.rank, x.home, JSON.stringify(x.pu && x.pu.t4 || null), x.ms.map(m => m[0]).filter(k => /^specialist/.test(k)).join(',')]; };
+      out.c21 = c(21); out.c22 = c(22); out.c23 = c(23); out.c25 = c(25); out.later = DM_CAREER.filter(r => r.later).map(r => r.later);
+      out.beats = DM_BEATS.map(b => b.id + ' ' + b.day + ' ' + hhmm(b.at));
+      """ + T4_RES + """ out.steps = devmodePromoSteps().filter(x => /Tier 4|engine|Deck 2/.test(x.label)).map(x => x.label + ' ' + hhmm(x.at % 1440) + (x.done ? ' done' : ''));
+      setShipNow(21 * 1440 + 900); out.next1 = (puDevNext() || { g: {} }).g.label; pu4Promote(21 * 1440 + 1361, 'met'); out.next2 = (puDevNext() || { g: {} }).g.label; pu4Badge(22 * 1440 + 1000, 'met'); out.next3 = (puDevNext() || { g: {} }).g.label;
+      out.steps2 = devmodePromoSteps().filter(x => /Tier 4|engine|Deck 2/.test(x.label)).map(x => x.label + (x.done ? ' done' : ''));
+      setShipNow(23 * 1440 + 600); out.eng24 = pu4EngineByDay(); setShipNow(24 * 1440 + 600); out.eng25 = pu4EngineByDay() && /pu4EngineByDay/.test(String(forYou)); return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['c21'][0] == 3 and r['c22'][:2] == [4, 'specialist'] and '"badge":null' in r['c22'][3] and '"badge":23' in r['c23'][3] and r['c25'][2] == '2-B' and '"walked":25' in r['c25'][3] and r['c23'][4] == 'specialist,specialist.badge' and not any('Engine Specialist' in l for l in r['later']), f"t4dev: the career table: Tier 4 from Day 22, the badge Day 23, Deck 2 from Day 25 ({r['c21']}, {r['c22']}, {r['c23']}, {r['c25']}, {r['later']})")
+    check([b.split()[0] for b in r['beats']][-4:] == ['t4', 't4res', 't4badge', 't4move'], f"t4dev: the presets for Days 22, 22, 23, 25 ({r['beats']})")
+    check(r['steps'] == ['Your Tier 4 test 09:30 done', 'Your Tier 4 result 22:40'] and 'result' in r['next1'] and 'badge' in r['next2'] and 'Vance' in r['next3'] and r['steps2'][-1] == 'Your Deck 2 quarters', f"t4dev: the promotion list and the career arrow ({r['steps']}, {r['next1']}, {r['next2']}, {r['next3']}, {r['steps2']})")
+    check(r['eng24'] is False and r['eng25'] is True, f"t4dev: engine jobs yours by day after the nights, not before ({r})")
+
 def part_t3pointer(g):
     if not t3on(g, 't3pointer'): return
     print('(t3pointer) the test morning and the board:')
@@ -555,7 +572,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4badge', part_t4badge), ('t4move', part_t4move)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3passed', part_t3passed), ('t3result', part_t3result), ('t3bar', part_t3bar), ('t3toast', part_t3toast), ('t3shoulds', part_t3shoulds), ('t4off', part_t4off), ('t4before', part_t4before), ('t4test', part_t4test), ('t4passed', part_t4passed), ('t4badge', part_t4badge), ('t4move', part_t4move), ('t4dev', part_t4dev)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')
