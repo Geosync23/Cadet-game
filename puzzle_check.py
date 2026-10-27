@@ -1057,8 +1057,11 @@ def part_p9(g, path):
     if not R['hook']: print("  p9: section 14's hook (B3's sdPlanShut, 24w) is not in this build: the planner side is checked on a merge with claude/p5s5-mech-b")
     return 'done'
 
+S5_TRUE = re.compile(r"^const P5_STEP5 = true;.*$", re.M)   # (BM19) switched on in 0.94.0: the build itself is the on copy
+
 def s5_copy(path):
     src = pathlib.Path(path).read_text()
+    if S5_TRUE.search(src): return pathlib.Path(path)
     if S5_ON not in src: return None
     out = WORK / 'test' / f'_s5on_{os.getpid()}_{pathlib.Path(path).name}'
     out.write_text(src.replace(S5_ON, 'const P5_STEP5 = true;')); _RUN_FILES.append(out)
@@ -1122,7 +1125,10 @@ S5_RUN = {'p4': part_p4, 'p5': part_p5, 'p9': part_p9, 'board': part_board}
 
 def run_s5(path, parts):
     with sync_playwright() as pw:
-        g = Game(pw, path, 390, 844); g.step(2)
+        offp = path; src = pathlib.Path(path).read_text()
+        if S5_TRUE.search(src):   # (BM19) a build with Step 5 on: the off test on a copy with the switch line put back to its off form
+            offp = WORK / 'test' / f'_s5off_{os.getpid()}_{pathlib.Path(path).name}'; offp.write_text(S5_TRUE.sub(S5_ON, src, count=1)); _RUN_FILES.append(offp); offp = str(offp)
+        g = Game(pw, offp, 390, 844); g.step(2)
         off = g.ev(S5_OFF); g.close()
         check(not off['kinds'] and not off['mech'] and not off['on'] and not off['app'] and not off['job'] and not off['clash'], f"switch off: nothing of Step 5's registered: {off}")
         on = s5_copy(path)
