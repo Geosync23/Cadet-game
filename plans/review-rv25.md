@@ -40,3 +40,8 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
 - EV1 12:10: check slip fixed in 2e4e070; dinner words fixed in its next push; its own career_check has a NEW fail (steady
   Senior 54 not Trusted 55 by Day 19), sent to lead 43 for a call.
 - day_check 19 OK; promo_beats OK; bigevents OK (visit phases and meetings Days 16-19, no clash).
+- arrows_check OK (cf67777). New tip 8c91437 (e316a3e words: one formal dinner, new line ids; 8c91437 lead 43's option b:
+  the visit's own jobs top up your xp to your tier's worth): game sha256 e82e6955...59ad. Code read: the listener is in the
+  swap block (section 18) and calls section 24's worksXp; j.event is set on event jobs; it is registered at load before
+  section 24's turn-in listener, so it runs first, not after as its comment says (same xp total; a band word could toast
+  twice if both cross a band: note). Re-running on it: cadet, career, events (lane 1); lines, promo_beats, vis_play (lane 2).
