@@ -18,3 +18,5 @@ Recommended shape (lead 42's call; change if the audit says otherwise):
 | 1 | Publish the controller update overnight? | No: build + full round overnight, publish after the user's OK in the morning. | The current links just got 0.95.0; the user should choose when PAD_ON reaches them. |
 | 2 | Keep BM19 as build master? | Hire a fresh build master (BM20) from handover-bm19.md; archive BM19. | BM19 stalled twice tonight waiting for a human yes; memory ~50%+. |
 | 3 | Dev mode update? | Stays on hold. | The user, 00:57 UTC. |
+| 4 | Who does the controller audit and builds? (lead 43) | CA1 audit seat first (read-only, waves), BM20 fresh build master on claude/staging-pad from b5199dc3; builders hired per the audit's waves (at most 3 + reviewer + BM20). | Lead 42's recommended shape; keeps the cap of 5. |
+| 5 | Fold the two test-only check fixes (R3 88999f2, AS1 238c46d8) in now? | Yes, into claude/staging-pad first (game byte-identical). | Test only; needed for the controller round anyway. |
