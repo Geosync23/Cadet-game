@@ -3865,6 +3865,121 @@ def part_mentor(pw, src, tag):
     return fails
 
 PART_FN['mentor'] = part_mentor; NEEDS['mentor'] = ['panels']; ALL_PARTS.append('mentor')   # (S6-7, W7)
+# ---- (Wave C, SD2 for lead 43; plans/controller-audit.md H, J, L) sound for a pad-only player, the Saves app by pad,
+# and the "tap" words with the pad in use. Each runs on the PAD_ON copy (ON_SRC), as every pad part does.
+SND_STATE = "typeof SND !== 'undefined' && SND._ ? SND._.state() : 'none'"
+SND_TOAST = "(() => { const t = document.getElementById('tx'); return (t ? t.textContent : '') + ' | ' + document.body.innerText; })().includes('Sound starts at your first tap')"
+SND_REFUSE = r"""(() => { const AC = window.AudioContext || window.webkitAudioContext; window.AudioContext = window.webkitAudioContext = function (o) {   // a browser that never counts a pad press as a tap
+  const c = new AC(o); c.suspend(); Object.defineProperty(c, 'state', { get: () => 'suspended' }); c.resume = () => Promise.reject(new Error('no tap yet')); return c; }; return true; })()"""
+def part_sound(pw, src, tag):
+    if 'Sound starts at your first tap' not in src: return ['not yet: no Wave C sound hook in this build']
+    fails = []
+    for how in ('allowed', 'refused'):
+        r = Run(pw, src, f'{tag}_snd_{how}', mode='pad', plug={}, w=390, h=844, query='?nosave&debug&sound')
+        r.js('window.cadetPopupsNow = true'); r.step(10)   # pop-ups at once (section 15b's test hook), not behind the welcome in the queue
+        before = r.ev(SND_STATE)
+        if before != 'off': fails.append(f'{how}: sound started before any press ({before!r})')
+        if how == 'refused': r.ev(SND_REFUSE)
+        r.press('RS'); r.step(4); r.page.wait_for_timeout(1000); r.step(4)
+        st, note = r.ev(SND_STATE), r.ev(SND_TOAST)
+        print(f'  {how}: after the first pad press the sound is {st!r}, the once-note {"shown" if note else "not shown"}')
+        if st == 'off': fails.append(f'{how}: a pad press never started the sound')
+        if st != 'running' and not note: fails.append(f'{how}: the sound did not start and no "Sound starts at your first tap" note')
+        if how == 'refused':
+            # once a load: hand back to touch (an untrusted pointerdown only ends the pad's use), use the pad again: no second note
+            r.ev("typeof toastTimer !== 'undefined' && clearTimeout(toastTimer); document.getElementById('tx').textContent = ''; document.getElementById('toast').classList.remove('show'); true")
+            r.js("dispatchEvent(new PointerEvent('pointerdown'))"); r.step(2)
+            r.press('RS'); r.step(4); r.page.wait_for_timeout(1000); r.step(4)
+            if r.ev("document.getElementById('tx').textContent.includes('first tap')"): fails.append('refused: the note came back on the second use (it is once a load)')
+        if r.errors: fails.append(f'{how}: page errors: ' + ' | '.join(r.errors[:3]))
+        r.close()
+    r = Run(pw, src, f'{tag}_snd_mute', mode='pad', plug={}, w=390, h=844, query='?nosave&debug&mute')
+    r.js('window.cadetPopupsNow = true'); r.step(10); r.press('RS'); r.step(4); r.page.wait_for_timeout(900); r.step(2)
+    if r.ev(SND_STATE) != 'off': fails.append('mute: a pad press started the sound with ?mute')
+    if r.ev(SND_TOAST): fails.append('mute: the once-note showed with sound not allowed')
+    r.close()
+    return fails
+PART_FN['sound'] = part_sound; NEEDS['sound'] = ['base']; ALL_PARTS.append('sound')   # (Wave C, H)
+MUTANTS['sound'] = {'Wave C: no hook from the pad': ('src', "  if (PAD_ON) padOn('use', () => {\n    if (!ALLOWED || !S.prefs.on) return;", "  if (false) padOn('use', () => {\n    if (!ALLOWED || !S.prefs.on) return;"),
+                    'Wave C: no once-note': ('src', "if (typeof toast === 'function') toast('Sound', 'Sound starts at your first tap.');", "if (false) toast('Sound', 'Sound starts at your first tap.');")}
+SAVES_SEED = "(() => { saveGame(); const v = localStorage.getItem(slotKey(1)); if (!v) return false; localStorage.setItem(slotKey(2), v); return true; })()"
+def part_saves(pw, src, tag):
+    if 'With a controller: Download and Load' not in src: return ['not yet: no Wave C Saves hint in this build']
+    fails = []
+    r = Run(pw, src, f'{tag}_saves', mode='pad', plug={}, w=390, h=844, query='?debug')
+    r.ev("introSkip()"); r.step(10)
+    for k in range(6):   # setup, not under test: the arrival form (it comes a moment after introSkip) signed when it's up
+        r.ev("(() => { const m = typeof INTRO_UI !== 'undefined' && INTRO_UI.manifest; if (m) { const i = m.querySelector('input'); if (i && !i.value) i.value = 'Ash'; } if (m) m.querySelector('form').dispatchEvent(new Event('submit', { cancelable: true })); return !!m; })()"); r.step(20)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(4)   # past the arrival: the device is yours
+    if not r.ev(SAVES_SEED): r.close(); return ['setup: no save to copy into Slot 2']
+    for k in range(3):
+        if r.ev("DEV.open"): break
+        r.press('Y'); r.step(6)
+    if not r.ev("DEV.open"): why = r.ev("[document.activeElement && document.activeElement.id, !!DIALOGUE, PAUSE.on, document.body.className]"); r.close(); return [f'Y did not open the device ({why})']
+    if not s5_pad_to(r, r'Saves'):
+        why = r.ev("[document.activeElement && (document.activeElement.textContent || '').trim().slice(0, 30), [...document.querySelectorAll('#devBody button')].map(b => b.textContent.trim().slice(0, 20)).slice(0, 30)]"); r.close(); return [f'the D-pad never reached the Saves app ({why})']
+    r.press('A'); r.step(4)
+    body = r.ev("document.getElementById('devBody').textContent")
+    if 'Download my save' not in body: r.step(10); body = r.ev("document.getElementById('devBody').textContent")
+    if 'Download my save' not in body: f = r.ev(S5_FOCUS); r.close(); return [f'A did not open the Saves app (focus {f!r}; {body[:160]!r})']
+    if 'With a controller: Download and Load' not in body: fails.append('the one-line hint for a controller is missing')
+    for rx in (r'^Play$', r'^New game$'):
+        if not s5_pad_to(r, rx): fails.append(f'the D-pad never reached {rx}')
+    if not s5_pad_to(r, r'^Delete$'): fails.append('the D-pad never reached Delete')
+    else:
+        r.press('A'); r.step(4)
+        if 'Delete Slot 2?' not in r.ev("document.getElementById('devBody').textContent"): fails.append("Delete's guard did not ask")
+        elif not s5_pad_to(r, r'^Keep it$'): fails.append("the D-pad never reached Keep it")
+        else:
+            r.press('A'); r.step(4)
+            if not r.ev("!!localStorage.getItem(slotKey(2))"): fails.append('Keep it lost Slot 2')
+    if not s5_pad_to(r, r'^Download my save$'): fails.append('the D-pad never reached Download my save')
+    else:
+        try:
+            with r.page.expect_download(timeout=6000) as d: r.press('A'); r.step(4)
+            print(f'  Download by pad: a file, {d.value.suggested_filename}')
+        except Exception: fails.append('Download my save by pad gave no file in the test browser')
+    if not s5_pad_to(r, r'^Load a save file$'): fails.append('the D-pad never reached Load a save file')
+    else:
+        try:
+            with r.page.expect_file_chooser(timeout=4000): r.press('A'); r.step(4)
+            print('  Load by pad: the file picker opened')
+        except Exception: print('  Load by pad: no file picker in the test browser (the hint covers it; on the real-device list)')
+    r.press('B'); r.step(3)
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close()
+    return fails
+PART_FN['saves'] = part_saves; NEEDS['saves'] = ['panels']; ALL_PARTS.append('saves')   # (Wave C, L)
+MUTANTS['saves'] = {'Wave C: no hint': ('src', "if (PAD_ON && typeof PAD !== 'undefined' && PAD.used) B.push({ kind: 'text', text: 'With a controller", "if (false) B.push({ kind: 'text', text: 'With a controller")}
+WORDS_PROBE = r"""(() => [introDevPoint(), introTapWords('You set your laundry hamper down. Tap it to pick it up again.'),
+  introTapWords('Knitting is one of your hobbies now: sit down and tap Hobby.'), introTapWords('then tap any shelf in main storage.'),
+  tipWords('Tap where you want to go, or press and hold to walk.')])()"""
+WORDS_TIP = r"""(() => { const D = SHIP.device; D.settings.tips = true; delete D.tipsSeen.walk; TIP_Q.length = 0; DEVICE_SKIN.tip(null);
+  tipShow('walk', 'Tap where you want to go, or press and hold to walk.'); const c = document.getElementById('devTip'); return c && !c.hidden ? c.textContent : null; })()"""
+def part_words(pw, src, tag):
+    if 'function introTapWords' not in src: return ['not yet: no Wave C words in this build']
+    fails = []
+    r = Run(pw, src, f'{tag}_words', mode='pad', plug={}, w=390, h=844)
+    r.step(6)
+    before = r.ev(WORDS_PROBE)
+    if before[0] != 'Tap your device' or 'Tap it' not in before[1] or not before[4].startswith('Tap where'): fails.append(f'the touch words changed before any pad press: {before}')
+    r.press('RS'); r.step(3)
+    on = r.ev(WORDS_PROBE); print(f'  with the pad in use: {on}')
+    if not on[0].startswith('Press '): fails.append(f'the device pointer still says {on[0]!r}')
+    for w in on[1:]:
+        if re.search(r'\btap\b', w, re.I): fails.append(f'"tap" still shown with the pad in use: {w!r}')
+    if 'left stick' not in on[4]: fails.append(f'the walking tip has no pad words: {on[4]!r}')
+    card = r.ev(WORDS_TIP); print(f'  the walking tip card with the pad in use: {card!r}')
+    if card is not None and re.search(r'\btap\b', card, re.I): fails.append(f'the tip card says "tap" with the pad in use: {card!r}')
+    r.js("dispatchEvent(new PointerEvent('pointerdown'))"); r.step(2)
+    back = r.ev(WORDS_PROBE)
+    if back != before: fails.append(f'back to touch, the words did not come back: {back}')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close()
+    return fails
+PART_FN['words'] = part_words; NEEDS['words'] = ['base']; ALL_PARTS.append('words')   # (Wave C, J)
+MUTANTS['words'] = {'Wave C: pointer words not switched': ('src', "return introPad() ? 'Press ' + padWord('y') + ' for your device' : INTRO_DEV_POINT;", "return INTRO_DEV_POINT;"),
+                    'SD2-1: tips not switched': ('src', "  try { if (!PAD_ON || typeof introPad !== 'function' || !introPad()) return s; } catch (e) { return s; }", "  return s;")}
 # ---- run ----------------------------------------------------------------------------------------------------------
 if '--selftest' in FLAGS:
     if pad_switch(SRC) is not None: print('--selftest is for a build without section 26 (it plants its own PAD_ON)'); sys.exit(1)
