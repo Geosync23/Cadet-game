@@ -16,3 +16,7 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
 
 ## Log
 - Waiting for RV24's word that it has handed over; reading only until then.
+- 11:25 SD3 asks me to review sound 667ad05e (room B home chime; plus cacfba97's design-doc "Sound" and the audio-todo
+  line), saying RV24 passed it to me. Asked RV24 to confirm the handover (its handover note is still 2026-10-27's).
+  Worktrees ready in /tmp/rv25: wt-visit (cf67777), wt-base (staging-pad e01bcee), wt-e158 (e158dcf, the base of
+  visit-on and sound-r3), wt-snd (667ad05).
