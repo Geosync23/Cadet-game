@@ -25,3 +25,6 @@ Scan clean (only cdnjs three.js r128 and the SVG namespace; no fetch/eval/iframe
 
 ## 0.95.0 (2026-10-28)
 GO from lead 42 (BM19 on hold). sha256 checked, scan clean, published over the same two links as v2. Phone test 390x844 on both: PASS (same checks as 0.94.0, GAME_BUILD 0.95.0, 0 console errors). 6daN... untouched.
+
+## 0.96.0 controller test (2026-10-28)
+Lead 44 asked for a separate page for the user's real-controller test (not the release): https://claude.ai/artifact/JV6CSUWQHftaDkSisYjQCG v1 = claude/staging-pad fe11cd66 (game 33292500…129e, PAD_ON true), {downloads}, title "Starship Cadet 0.96.0 controller test", no Dev. Scratchpad source pad/starship-cadet-0.96.0-controller-test.html. Load check at 390x844: PASS, 0 console errors. Lead 44 is the lead now (session_01GKuymj3tKpX7xwDZwBh8RM).
