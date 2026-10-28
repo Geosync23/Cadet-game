@@ -72564,6 +72564,9 @@ const PAD_FIRST = { device: '#devBody' };                 // where to land first
 const PAD_HUD = { id: 'hud', hud: true };
 // (and the cards a tap puts away or opens: someone who'd like a word, the heads-up and its Go there, the address, a tip)
 const PAD_HUD_SEL = '#pauseBtn, .controls button, #devBtn, #trkBtn, #needStrip, #handBtns button, #putDown, #ixBoard, #seek, #devHu, #devHu button, #devAddr, #devTip';
+// wave A (PA1): after those, never the first landing: the needs strip's fold, the goal's pin (A taps it), and with #dev
+// in the link the clock card (Dev mode's opener) and the "reload" bar
+const PAD_HUD_MORE = '#needStrip .nsFold, #ixGoal.tap .ixpin, .hud[role=button], #dmLink button';
 const PAD_FOCUS = { hud: false, layer: null, css: false, stick: '', held: 0, rep: 0, last: null, el: null, tabs: new Set() };   // last: where the highlight was, for a redraw; el: the button the pad put the highlight on; tabs: the boxes it made focusable
 // a touch or the mouse takes over: the pad's own highlight goes (a focus the game set itself stays), and so do the tabIndex it added
 padOn('unuse', () => {
@@ -72572,7 +72575,7 @@ padOn('unuse', () => {
 });
 const PAD_FOCUSABLE = 'button, [role=button], a[href], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])';
 function padItems(L) {                                     // the buttons the highlight can land on in layer L, as shown
-  const els = L === PAD_HUD ? document.querySelectorAll(PAD_HUD_SEL) : L.querySelectorAll(PAD_FOCUSABLE);
+  const els = L === PAD_HUD ? [...document.querySelectorAll(PAD_HUD_SEL), ...document.querySelectorAll(PAD_HUD_MORE)] : L.querySelectorAll(PAD_FOCUSABLE);
   return [...els].filter(e => !e.disabled && !e.closest('[hidden]') && e.getAttribute('aria-hidden') !== 'true' && e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden');
 }
 function padFocusTo(el) {
@@ -72688,10 +72691,11 @@ padOn('lb', () => { if (!padInDevice()) return; return padClick('devBack') || tr
 padOn('rb', () => { if (!padInDevice()) return; return padClick('devHome') || true; });   // and Home
 padOn('lt', e => { const L = padLayer(); if (!L) return; if (!padOwnDo('lt', L, e)) padScroll(-innerHeight * .6); return true; });
 padOn('rt', e => { const L = padLayer(); if (!L) return; if (!padOwnDo('rt', L, e)) padScroll(innerHeight * .6); return true; });
+const PAD_X_IDS = ['repairBtn', 'hobbyBtn', 'seatBtn', 'liftBtn', 'putDown'];   // X's buttons, first shown first (wave A: Take a seat and Lift before Put down, so a tray is sat with, not put down)
 padOn('x', e => {                                          // the action button that's showing, bottom right
   const L = padLayer(); if (L) return padOwnDo('x', L, e) || undefined;
   if (ride || FREEZE.frozen) return;
-  for (const id of ['repairBtn', 'hobbyBtn', 'putDown']) if (padClick(id)) return true;
+  for (const id of PAD_X_IDS) if (padClick(id)) return true;
 });
 // ---- P2 (controller package 2): the mini-games and special screens (plans/controller-plan.html section 4), on the
 // panel helper (padOwn). Tiles: the D-pad moves square by square (the helper's nearest-button move on the board's own
@@ -72823,7 +72827,7 @@ function padMarkCss() {
   document.head.appendChild(st);
 }
 // the buttons that get a mark: [the button, or a function giving it; the pad button that presses it]
-const PAD_MARKS = [['devBtn', 'y'], ['pauseBtn', 'menu'], ['trkBtn', 'view'], [() => ['repairBtn', 'hobbyBtn', 'putDown'].map(id => document.getElementById(id)).find(padShown), 'x'],
+const PAD_MARKS = [['devBtn', 'y'], ['pauseBtn', 'menu'], ['trkBtn', 'view'], [() => PAD_X_IDS.map(id => document.getElementById(id)).find(padShown), 'x'],
   [() => DISC.view && DISC.view.leave, 'b']];
 function padMarksSync() {                                  // each mark on its button, in the pad's style (a redrawn button loses its mark: put back)
   const fam = padFam(), on = new Set();
@@ -73058,6 +73062,31 @@ padOn('use', () => {                                       // toasts are read ou
 });
 padOn('unuse', () => {                                     // a touch takes back: the toast as it was
   if (!PAD_A11Y.toast) return; for (const a of PAD_A11Y.toast) toastEl.removeAttribute(a); PAD_A11Y.toast = false;
+});
+// ---- wave A (PA1 for lead 43, 2026-10-28; plans/controller-audit.md section 3, gaps A, B, C, G, I): panels and the
+// screen's edge. The chat card and the shop menu land on their first choice, not the × (the first A used to close them).
+// The time clock: while its 5 s Undo is open, the highlight sits on the ×, not on the Undo the screen focuses after a
+// punch, so a second A can't undo (lead 43's call); Undo is a D-pad press away, and the touch layout is unchanged. The
+// screen's edge (PAD_HUD_MORE, above) also reaches the needs strip's fold, the goal's pin (A taps it, as a finger does)
+// and, with #dev in the link, Dev mode's card (A opens the Dev panel; B closes it) and its "reload" bar. X presses Take a
+// seat and Lift too (PAD_X_IDS, with X's mark). B puts away the cards only a tap put away: the need warning and a wave
+// from someone who'd like a word (as its own time-out does; a knock at your door stays for A) on the deck, and a tip
+// card over the open device (before B's Back).
+PAD_FIRST.chat = '#chat .btns .act:not([disabled]), #chat .row button:not([disabled])';   // either skin's buttons; all greyed out: the ×
+PAD_FIRST.shopMenu = '#shopMenu .act:not([disabled])';  // the first thing you can afford (none: the ×)
+padOwn(L => !!(L && L.id === 'clockScreen' && CLOCK_UNDO), { frame: () => {
+  const el = document.getElementById('clockScreen'), a = document.activeElement, x = el.querySelector(':scope > button.x');
+  if (x && a && a !== x && a !== PAD_FOCUS.el && el.contains(a)) padFocusTo(x);   // the screen's own focus (Undo, after a punch); one the pad put there stays
+} });
+padOwn(L => L === PAD_HUD, { a: () => {                    // the goal's pin: a tap on it (it takes pointer presses, not clicks)
+  const a = document.activeElement; if (!a || !a.classList || !a.classList.contains('ixpin')) return;
+  PAD_FOCUS.hud = false; a.blur(); ixGoalTap(); return true;
+} });
+padOwn(L => !!(L && L.id === 'device' && padShown(document.getElementById('devTip'))), { b: () => { document.getElementById('devTip').click(); return true; } });
+(PAD.on.b = PAD.on.b || []).unshift(() => {               // B on the deck, before turn 2's (a tip, the address, else a toast)
+  if (padLayer() || ['devTip', 'devAddr'].some(id => padShown(document.getElementById(id)))) return;
+  const np = document.getElementById('needPop'); if (padShown(np)) { np.click(); return true; }
+  if (SEEK && !SEEK.visit && padShown(document.getElementById('seek'))) { seekEnd(); return true; }
 });
 // ---- end of slot: Controller engineer ----
 
