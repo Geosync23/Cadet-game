@@ -33,3 +33,19 @@
   seat); the lead's call. Reported to BM20 and lead 44 at once.
 
 **R1: one NEW FAIL (puzzle_check, the visit), everything else OK.**
+
+## Targeted rerun: fe11cd66 (EV1's p9Stage retry, tjFirst, one words line)
+
+- Game sha256 `332925003934b49686c080515e154131a07f7fe7a3c14fbe0f6f7684933a129e` (matched). BM20's GO 17:26 UTC.
+
+| Check | Result | Key lines |
+|---|---|---|
+| puzzle_check | OK | PUZZLE CHECK OK; cases 1; p9 retried, Day 22: Quist's "Winner Stays On" (trips Day 14, 21), staged |
+| arrows_check (default parts) | OK | ARROWS CHECK OK (1765 s) |
+| arrows_pointer_check | OK | arrows_pointer_check: OK |
+| dev_arrow_check | OK | DEV ARROW CHECK OK |
+| devmode_check | OK | DEVMODE CHECK OK |
+| talk_check | OK | TALK CHECK OK |
+| social_check | OK | SOCIAL CHECK OK |
+
+**R1: OK on fe11cd66** (the puzzle_check FAIL is fixed).
