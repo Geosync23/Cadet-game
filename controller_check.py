@@ -3591,6 +3591,27 @@ D6_SETUP = r"""(() => { skipTo(22 * 1440 + 1260); const W = worksInit(shipNow())
 D6_ITEM_AT = r"""((t) => { const it = ITEMS.find(i => i.t === t); if (!it) return null; const v = new THREE.Vector3(); it.hit.getWorldPosition(v); return { x: v.x, y: v.y, z: v.z }; })"""
 D6_TOAST = "(() => { const e = document.getElementById('toast'); return e ? e.textContent : ''; })()"
 D6_CLEAR = "toastEl.classList.remove('show'); typeof TOAST_AT !== 'undefined' && (TOAST_AT = -1e9); typeof GUIDE !== 'undefined' && GUIDE.tq && (GUIDE.tq.length = 0)"
+# wave A's planted faults (PA1): each a line of section 26's wave A changes, put back or broken
+MUTANTS['cards'] = {
+  'chat card lands on the close cross': ('src', "PAD_FIRST.chat = '#chat .btns .act:not([disabled]), #chat .row button:not([disabled])';", ''),
+  'shop menu lands on the close cross': ('src', "PAD_FIRST.shopMenu = '#shopMenu .act:not([disabled])';", ''),
+}
+MUTANTS['clock'] = {
+  'the highlight stays on Undo after a punch': ('src', "if (x && a && a !== x && a !== PAD_FOCUS.el && el.contains(a)) padFocusTo(x);", "if (false) padFocusTo(x);"),
+}
+MUTANTS['devpad'] = {
+  'no Dev card on the edge': ('src', "#ixGoal.tap .ixpin, .hud[role=button], #dmLink button';", "#ixGoal.tap .ixpin, #dmLink button';"),
+  'no reload bar on the edge': ('src', "#ixGoal.tap .ixpin, .hud[role=button], #dmLink button';", "#ixGoal.tap .ixpin, .hud[role=button]';"),
+  'the Dev card is the first landing': ('src', "[...document.querySelectorAll(PAD_HUD_SEL), ...document.querySelectorAll(PAD_HUD_MORE)]", "[...document.querySelectorAll(PAD_HUD_MORE), ...document.querySelectorAll(PAD_HUD_SEL)]"),
+}
+MUTANTS['edge'] = {
+  'X skips Take a seat and Lift': ('src', "const PAD_X_IDS = ['repairBtn', 'hobbyBtn', 'seatBtn', 'liftBtn', 'putDown'];", "const PAD_X_IDS = ['repairBtn', 'hobbyBtn', 'putDown'];"),
+  'B leaves the need warning': ('src', "if (padShown(np)) { np.click(); return true; }", "if (false) { }"),
+  'B puts a knock at the door away': ('src', "if (SEEK && !SEEK.visit && padShown(", "if (SEEK && padShown("),
+  'B over the device ignores the tip': ('src', "padOwn(L => !!(L && L.id === 'device' && padShown(document.getElementById('devTip'))), { b: () => { document.getElementById('devTip').click(); return true; } });", ''),
+  'A on the pin does nothing': ('src', "PAD_FOCUS.hud = false; a.blur(); ixGoalTap(); return true;", "return;"),
+  'no needs strip fold on the edge': ('src', "const PAD_HUD_MORE = '#needStrip .nsFold, ", "const PAD_HUD_MORE = '"),
+}
 def d6_ring(r, word, tries=12):
     seen = []
     for k in range(tries):
