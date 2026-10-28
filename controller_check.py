@@ -199,10 +199,13 @@ CENSUS = r"""
   add.call(document, 'click', e => { window.__census.lastClick = e.target; }, true);   // which element the last click reached
 })();
 """
-# listeners: every kind asked for, less the two waiting ones (gamepadconnected, gamepaddisconnected) allowed at load
+# listeners: every kind asked for, less the two waiting ones (gamepadconnected, gamepaddisconnected) allowed at load.
+# (CA1, RV24's find) the toast's 'show' class is left out of the hash: the game hides a toast on a real-time timer
+# (section 11's toastTimer, by design), so whether it still shows at a snapshot depends on the machine's speed. Its words
+# are still compared (scenario's 'toast'); pictures are unaffected (QUIET hides #toast)
 PAGE_STATE = r"""(() => {
   let h = 0; const mix = s => { for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; };
-  let n = 0; for (const e of document.querySelectorAll('*')) { n++; mix(e.tagName + '|' + e.id + '|' + e.className + '|' + (e.getAttribute('style') || '') + '|' + (e.hidden ? 'h' : '') + (e === document.activeElement ? 'F' : '')); if (e.tagName !== 'SCRIPT' && e.tagName !== 'STYLE') for (const c of e.childNodes) if (c.nodeType === 3) mix(c.textContent); }
+  let n = 0; for (const e of document.querySelectorAll('*')) { n++; mix(e.tagName + '|' + e.id + '|' + (e.id === 'toast' ? e.className.replace(/\s*\bshow\b/, '') : e.className) + '|' + (e.getAttribute('style') || '') + '|' + (e.hidden ? 'h' : '') + (e === document.activeElement ? 'F' : '')); if (e.tagName !== 'SCRIPT' && e.tagName !== 'STYLE') for (const c of e.childNodes) if (c.nodeType === 3) mix(c.textContent); }
   let rules = 0; for (const s of document.styleSheets) { try { rules += s.cssRules.length; } catch (e) {} }
   const ls = []; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); ls.push(k + '=' + localStorage.getItem(k).length); } } catch (e) {}
   return { elements: n, domHash: h, sheets: document.styleSheets.length, rules, storage: ls.sort(), listeners: Object.fromEntries(Object.entries(window.__census.counts).filter(([k]) => k !== 'gamepadconnected' && k !== 'gamepaddisconnected')), focus: document.activeElement && (document.activeElement.id || document.activeElement.tagName) };
