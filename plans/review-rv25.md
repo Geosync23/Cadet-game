@@ -56,3 +56,14 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
   the Dev Day 16 test toast.
 
 ## Next: sound 667ad05e + e748f560 (SD3), then Dev mode J4 c7489b5 (DM1, session_01GKuymkR7Z42FfTQyt2VWe3)
+- Lead 44 (13:12): run day_check 16-19 and lines --day on the final game too (8c91437 = a1917dd's game): queued (lanes 6, 7).
+  bigevents_check edits read as owner: fine.
+
+## Sound 667ad05e + 451e00e5 + e748f560 (SD3): PASS (~14:0x, to lead 44, SD3, BM20)
+- cadet vs e158dcf ALL IDENTICAL (off); sound_check OK as is and on an ON copy (r3fx room B: first opening r3Home, second
+  not); base e158dcf FAILS the four r3 parts by e748f560's intended rule. Code read section 27 only. design-doc Sound
+  (cacfba97) and 667ad05e's lines read: match. Notes: the move flag is memory only; a crew-opened door near you counts.
+
+## Dev mode J4 c7489b5 (DM1): code read
+- DV_MORE night, m21 (first), mtcq, end, event; score's `first`; endBye at bayAt + 1. Finding to confirm: 'event' source
+  has no evInvited(m) check, so the vessel's meetings (ranks: []) would get an "Event:" arrow.
