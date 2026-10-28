@@ -11,7 +11,7 @@ Lead 42 = session_01GKuymjnCHnpwDqB94PVwmV, branch claude/lead-42, hourly check-
 
 ## Right after publish (the user's orders)
 1. **Hire a balance researcher (BAL1)**: analyze balance only, NO fixes. Reads the numbers (needs decay, rep, job/lesson times, promotion gates, prices/wages) against design-doc.md; runs paper/sim players (styles: does every job, socialiser, skips meals, misses lessons) through Days 0-30+ with the existing check machinery (career_check-style); report as an artifact page: findings + evidence + suggested ranges, and a list of what only the user's own play can judge. Read-only on the game.
-2. **At the same time start the Dev mode update**: one builder (DM1) first writes a short scope plan for the user (Dev mode jumps/presets/Set career for every tradition, ship-wide event, Step 5/6 beat, vessel, ending; devmode_check + dev_arrow_check covering each), then builds after the user OKs it; RV24 reviews; BM19 merges; full round before publish.
+2. **Dev mode update: ON HOLD (the user, 00:57 UTC Oct 28: do not start yet; wait for their word).** When cleared:: one builder (DM1) first writes a short scope plan for the user (Dev mode jumps/presets/Set career for every tradition, ship-wide event, Step 5/6 beat, vessel, ending; devmode_check + dev_arrow_check covering each), then builds after the user OKs it; RV24 reviews; BM19 merges; full round before publish.
 3. Plan order after that: controller update (its own project: audit every feature since controller support was made, pad reaches all, then PAD_ON on) -> optimization (incl. backlog BM19-1 trim SHIP.works Step 6 records) -> playtest patches (backlog: BM19-2 p5nWordTick null guard, W8-1 Calder misses Four weeks aboard, W8-2 section 10 tea-seat cases, W8-3, PZ6-1, N6-1 ended-career save won't load, Day 22 briefing-skipped 13-min seam, Taavek sketch heads-up wording).
 
 ## Seats (cap: at most 5 ACTIVELY working)
@@ -27,4 +27,4 @@ Lead 42 = session_01GKuymjnCHnpwDqB94PVwmV, branch claude/lead-42, hourly check-
 - Checks written for a switch being off break when it goes on: sweep for the off line; ending_check/controller ending need a Step-6-off copy (assign window.P5_STEP6 in the copy, the script is wrapped in a function).
 - More than ~2-3 browsers per machine gives false timeouts: re-run alone before calling a FAIL.
 - BM19 sometimes waits for a human yes before acting on the lead's word (it stalled ~1 h on 27 Oct before round 3): check it moved; if not, send GO to the runners yourself.
-- Questions for the user: also a PushNotification. Times in US Eastern.
+- Questions for the user AND important milestones (a release live, a report ready): always a PushNotification (the user, Oct 28). Times in US Eastern.
