@@ -1847,3 +1847,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~04:24 UTC: Dev mode plan final: devmode-plan-2 **77fe2db**, page v6 (same link), 8 questions (8 = End and undo, rec drop). Push sent to the user. DM1 idle for J0.
 - ~04:24 UTC: Dev mode plan devmode-plan-2 **c441a3d**, page v7 (q8 keep option wording). Final; DM1 idle.
 - ~04:57 UTC: **RV24 PASS wave C 336b00c2** (held for order A, B, C). controller_check idle = old intermittent (b3247d6: 1 fail, 1 pass alone; device-page DOM hash pair, PAD_ON off too) -> **CA1** steadies it on claude/pad-idle-fix (test only unless game-side; report first). Wave A 818ec0b full run in RV24.
+- ~04:58 UTC: SD2 wave C 18315775 (docs only after PASS: backlog SD2-1 first-run walking tip still 'Tap where you want to go' with the pad). Lead: SD2 fixes SD2-1 in tipShow (sec 21) on pad-wave-c, RV24 quick re-look.
