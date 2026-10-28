@@ -1900,3 +1900,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~12:22 UTC: SD3 sound-r3 tip **e748f560** (checks only): a missing SND_R3_ON line now FAILs (shown on base e158dcff); ON copy: every r3 part really runs (r3music 9, r3mess 5, r3fx 20 incl. room B chime, r3hooks), all OK. -> RV25.
 - ~13:03 UTC: **Lead 43 handing over** (~53%, before the 0.96.0 round). plans/handover-lead43.md final. Hiring lead 44.
 - ~13:04 UTC: **Hired lead 44** session_01GKuymj3tKpX7xwDZwBh8RM (claude/lead-44 from claude/lead-43 3b2ba5fb). Lead 43 waits for its got-it + check-in id, then disables trig_016hWJy9BqDVX2tpcnNbzTdR and goes idle.
+- ~13:05 UTC: lead 44 got it; its check-in trig_01EEPqBFzhAHmVbvZKyhHXWs. Lead 43 disabled trig_016hWJy9BqDVX2tpcnNbzTdR, idle.
