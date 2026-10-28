@@ -15,6 +15,7 @@ Built on DP1's v3.1 (kept as `plans/devmode-plan-v3.1.html` / `.md`). The user's
 - F8 (second pass, d5fb07c): End and undo put to the user as question 8: (c) drop it, recommended; (a) keep the event's first-morning Dev save (~116 KB) to go back to, about 2 h more; no section 18 change either way (no restore point inside a jump's run; ending without logging restarts the event; its purpose is now guaranteed by the fixed calendar). Undo my last Dev action covers going back.
 - F9: threads - and + greyed once e.mine.settled; after End and keep the day's crew plans are made again (as devmodeTradsAgain).
 - F1 is also a live bug in today's Set career (Days 27-30): backlog DM1-1, fixed by J0.
+- CA1's PASS note: J0's devmodeCareerFor takes a "week slow" day offset for the slower career's ending, so J3 never edits J0's lines.
 - J0 is now 4 h (it owns devmodeCareerSteps and devmodeCareerSet); total about 22 h.
 
 ## What changed from v3.1
