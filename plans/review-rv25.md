@@ -2,7 +2,7 @@
 
 Took over from RV24 (session_01GKuymnJuoJTWnmYunbN7EP; notes plans/review-rv24.md and plans/handover-rv24.md on
 claude/review-rv24). Lead 43 (session_01GKuymjoDoY2kA9yCK12NG1). My session:
-session_01GKuymnwhXNmtzwcz4BjQ6n. Notes-only branch claude/review-rv25: I never change the game or push to builders' branches.
+session_01GKuymnnpKvNH4Ki69KEzwG. Notes-only branch claude/review-rv25: I never change the game or push to builders' branches.
 Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkwGmjJ2nokvg).
 
 ## Priorities (lead 43)
@@ -20,3 +20,15 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
   line), saying RV24 passed it to me. Asked RV24 to confirm the handover (its handover note is still 2026-10-27's).
   Worktrees ready in /tmp/rv25: wt-visit (cf67777), wt-base (staging-pad e01bcee), wt-e158 (e158dcf, the base of
   visit-on and sound-r3), wt-snd (667ad05).
+- 11:27 RV24 handed over (handover-rv24.md d199c59f): open are visit-on (not started), DM1 J3 2b88ad2 (RV24 may send its
+  verdict; else I re-run devmode_check and dev_arrow_check), sound 667ad05e. My session id is session_01GKuymnnpKvNH4Ki69KEzwG
+  (my first commits and messages gave a wrong one; corrected to RV24 and SD3).
+
+## EV1 visit-on cf67777 (base e158dcf)
+- Code read: draft cleared under EVENTS_ON in the swap block; gifts 09:00, farewell 09:30 on @gather-shuttle-bay;
+  eventGuestDays falls back to evCalPlan() (fixed for the game: the calendar, EV_SKIPPED, endCalClosed), so the planner
+  rule holds; they/them words; no she/her left for the Veyli in the game or content.
+- Words (should/fix): content/reactions/guests.lines still says two formal dinners: "Brennan's planning two formal
+  dinners" (warning, galley), "Second formal dinner tonight" and "Two formal dinners in three days" (escalation). The short
+  visit has one dinner (Day 18), and these now show in real play.
+- Runs: cadet vs e158dcf ALL IDENTICAL (1-level noise); day_check 16 OK, 17 OK.
