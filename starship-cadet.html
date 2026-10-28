@@ -73859,6 +73859,7 @@ const SND = (() => {
         o.connect(g); conn(g, ROUTE.ui); o.start(t); o.stop(t + 2.8); bell(t + 2.55, 1760, 0.9, 0.05, { wet: 0.25 }); },
       r3Bronze: t => { thud(t, { gain: 0.3, d: 0.1, f: 300, body: 150 }); noise(t, 0.03, { f: 700, q: 2, gain: 0.06 }); const u = t + 0.9;   // the bronze bar C: the dull bar, then the one that sings (18's vessel slot)
         noise(u, 0.01, { f: 3000, q: 1, gain: 0.08 }); fmBell(u, 392, 4.5, 0.08, 2.76, 1.0, 0); ring(u, [392, 1081], 0.6, { d: 1.2, q: 60 }); },
+      r3Home: t => { bell(t, 523.25, 1.2, 0.06, { wet: 0.3 }); bell(t + 0.4, 783.99, 1.6, 0.05, { wet: 0.3 }); },   // your new quarters (room B) C: the home chime, the first time you open its door
       r3ClockUndo: t => lv(0.9, () => { clack(t, 0.08, { f: 1500 }); noise(t + 0.08, 0.18, { f: 1400, fTo: 700, q: 3, gain: 0.03, swell: 0.3 }); thud(t + 0.3, { gain: 0.2, d: 0.12, f: 220 });   // clock Undo A: the lever back (15)
         for (let i = 0; i < 4; i++) clack(t + 0.42 + i * 0.055, 0.05, { f: 1700 - i * 120 }); }),
     };
@@ -73873,7 +73874,7 @@ const SND = (() => {
         [os, o2, l].forEach(n => { try { n.stop(t + f + 0.1); } catch (e) {} }); setTimeout(() => { try { out.disconnect(); } catch (e) {} }, (f + 2) * 1000); } };
       LOOPS.add(L); return L;
     }
-    const W = { badge: undefined, dlg: null, said: undefined, tern: undefined, ask: false, sd: {}, coil: {}, rank: undefined, room: null, duck: false };
+    const W = { home: undefined, homeNew: false, badge: undefined, dlg: null, said: undefined, tern: undefined, ask: false, sd: {}, coil: {}, rank: undefined, room: null, duck: false };
     const has = f => typeof f === 'function';
     const here = () => { try { return deckDef && player ? deckDef.num + '|' + roomAt(...player.here()) : null; } catch (e) { return null; } };
     const play = (n, o) => { W.last = n; S.fx(n, o); };
@@ -73912,6 +73913,10 @@ const SND = (() => {
       let s = null; try { s = SHIP.end && Array.isArray(SHIP.end.said) ? SHIP.end.said.length : null; } catch (e) { s = null; }
       if (W.said !== undefined && s != null && s > (W.said || 0)) { const a = SHIP.end.said[s - 1][1]; if (a === 'stay' || a === 'go') play(a === 'stay' ? 'r3Stay' : 'r3Go', { long: 4 }); }
       W.said = s;
+      // the move to Deck 2's room B (24u, Day 25): seen happen, its door's first opening gets the home chime (homeDoor)
+      let h = null; try { h = has(worksHome) ? worksHome() : null; } catch (e) { h = null; }
+      if (W.home !== undefined && h === '2-B' && W.home !== '2-B') W.homeNew = true;
+      W.home = h;
       // promotions: your rank going up (Senior Officer, Engine Specialist)
       const rk = SHIP.works && SHIP.works.rank;
       if (W.rank !== undefined && rk !== W.rank && (rk === 'senior' || rk === 'specialist')) play('r3Promotion', { long: 5 });
@@ -73949,7 +73954,12 @@ const SND = (() => {
       } catch (e) { /* nothing special */ }
       return null;
     }
-    return { W, watch: r3Watch, tick: r3Tick, actPick: r3ActPick };
+    function homeDoor(d) {   // the door watcher asks as a door near you opens: room B's door, the first time since the move (once)
+      if (!W.homeNew || !deckDef || deckDef.num !== 2) return false;
+      const B = [[0.6, 0], [-0.6, 0], [0, 0.6], [0, -0.6]].some(([dx, dz]) => { try { return roomAt(...cellAt(d.cx + dx, d.cz + dz)) === 'B'; } catch (e) { return false; } });
+      if (B) W.homeNew = false; return B;
+    }
+    return { W, watch: r3Watch, tick: r3Tick, actPick: r3ActPick, homeDoor };
   })() : null;
   if (R3) S.onFrame.push(() => { try { R3.watch(); } catch (e) {} });
   function ambTick() {
@@ -74004,6 +74014,7 @@ const SND = (() => {
       const opening = was < 0.04 && d.open >= 0.04, closing = was > 0.96 && d.open <= 0.96;
       if (!opening && !closing) continue;
       const mine = Math.hypot(d.cx - p.x, d.cz - p.z) < 1.9;
+      if (R3 && opening && mine && R3.homeDoor(d)) S.fx('r3Home', { long: 3 });   // the sound update: your new quarters' home chime (C), with the door
       if (SND_R3_ON && opening && deckDef.num === 6 && d.e.key === 'v,27,3') { S.fx('r3ReactorDoor', { x: d.cx, z: d.cz, long: 4 }); continue; }   // the sound update, turn 3: the reactor's shielded door (A)
       S.fx(d.svc ? (opening ? 'hatchOpen' : 'hatchClose') : (opening ? 'doorOpen' : 'doorClose'), { x: d.cx, z: d.cz, crew: !mine });
     }

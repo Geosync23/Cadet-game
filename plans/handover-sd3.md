@@ -23,7 +23,7 @@ Branch **`claude/sound-r3`** (from `claude/staging-pad` e158dcff). The sound upd
 ## Loose ends
 
 - Waiting on RV24's review of all four turns, and the owners' review of the turn 4 hook lines (player engineer: 15, 28a; Works career engineer: 24x, 28d; traditions engineer: 18's vessel slot).
-- The room B door: no pick yet (lead 43 is asking the user). When picked: the recipe is on `plans/sound/round3.html` (`roomb`, B or C); it plays the first time you open your Deck 2 room B door (24u's move, Day 25).
+- The room B door: built (C, the home chime), commit after cacfba97.
 - Not checked in a real playthrough (stood in for in sound_check): the knock, the team calls, calibration, the bronze bar, the coil steps on a real Tier 4 job and night 3, the Tern landing, Calder's question, Stay or Go. The full round at the switch-on should play through them.
 - Levels: the feature sounds use the page's levels as they are (same bus and trim as the page). Worth a listen at the switch-on.
 

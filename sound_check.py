@@ -435,7 +435,7 @@ def check_r3mess(pw, path):
         if pe: check(False, 'r3mess: page errors: ' + ' | '.join(pe[:3]))
     finally: g.close()
 CHECKS += [check_r3music, check_r3_off]   # the sound update (SD2), turn 1
-R3_FX = ['r3BadgeTake', 'r3BadgeBack', 'r3ReactorDoor', 'r3CoilOff', 'r3CoilOn', 'r3Winding', 'r3Lathe', 'r3Promotion', 'r3Calder', 'r3Stay', 'r3Go', 'r3TernLand', 'r3ShutOff', 'r3ShutOn', 'r3ClockAsk', 'r3TestFit']
+R3_FX = ['r3BadgeTake', 'r3BadgeBack', 'r3ReactorDoor', 'r3CoilOff', 'r3CoilOn', 'r3Winding', 'r3Lathe', 'r3Promotion', 'r3Calder', 'r3Stay', 'r3Go', 'r3TernLand', 'r3ShutOff', 'r3ShutOn', 'r3ClockAsk', 'r3TestFit', 'r3Home']
 def check_r3fx(pw, path):
     """turn 3: the feature sounds a watcher sees (each moment stood in for, the watcher run directly, then put back)"""
     on = r3_copy(path)
@@ -503,6 +503,18 @@ def check_r3fx(pw, path):
         g.ev(f"({R3_AT})({json.dumps([1440 + 610, 5, 'S'])})"); g.step(3)
         g.ev("window.__vn = vesselNow; vesselNow = () => ({ k: 1 }); TERN.target = 0; SND.r3.watch()")
         got = heard('the Tern lands', "TERN.target = 1", undo="vesselNow = __vn"); check('r3TernLand' in got, 'r3fx: the Tern landing while you are in the bay')
+        # your new quarters: the move seen (worksHome to 2-B), then room B's door opening near you plays the home chime, once
+        g.ev("window.__wk = SHIP.works; SHIP.works = { ...(SHIP.works || {}), home: 'bunk' }; SND.r3.tick(); SHIP.works.home = '2-B'; SND.r3.tick()")
+        check(g.ev(W + ".homeNew") is True, 'r3fx: the move to room B is seen')
+        g.ev(f"({R3_AT})({json.dumps([1440 + 615, 2, 'B'])})"); g.page.wait_for_timeout(700); g.step(5)
+        DB = "DOOR_OBJS.find(d => [[0.6, 0], [-0.6, 0], [0, 0.6], [0, -0.6]].some(([x, z]) => roomAt(...cellAt(d.cx + x, d.cz + z)) === 'B'))"
+        for n in (1, 2):
+            g.ev(f"(() => {{ const d = {DB}; player.obj.position.set(d.cx + 0.3, 0, d.cz + 0.3); SND.log.length = 0; }})()")
+            for v in (0.0, 0.5, 1.0, 0.5, 0.0):
+                g.ev(f"(() => {{ const d = {DB}; d.open = {v}; d.force = {1 if v >= 0.5 else 0}; }})()"); g.step(1)
+            got = g.ev("SND.log.map(x => x.name)"); print(f'  r3fx room B door, opening {n}:', got); g.ev(f"delete {DB}.force")
+            check(('r3Home' in got) == (n == 1), f'r3fx: the home chime the first time only (opening {n})')
+        g.ev("SHIP.works = __wk; SND.r3.tick()")
         # the reactor door: the door watcher, its door opening near you (frames)
         g.ev(f"({R3_AT})({json.dumps([1440 + 620, 6, 'K'])})"); g.page.wait_for_timeout(700); g.step(5)
         D6 = "DOOR_OBJS.find(x => x.e.key === 'v,27,3')"
