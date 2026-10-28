@@ -35,3 +35,8 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
 - day_check 18 OK. events_check FAILED (1891 s): (a) "the live storm didn't end cleanly": a check slip, D.left = SHIP.event
   (a record) tested against 'diplomatic' (line 847); traces and the 'how it went' Mail present. (b) reading-corner day 7
   "not reached farouk-olu>3-lounge-28 16:00": base e158dcf's events_check queued to compare. Sent to EV1 and lead 43 (12:3x).
+- 12:0x lead 43: reading corner (farouk-olu, Day 7) is known-old FX24-2; J3 already PASSed by RV24. Order: visit-on, sound
+  (667ad05e + SD3's check commits, tip e748f560), then DM1 J4 (claude/devmode-j4 c7489b5).
+- EV1 12:10: check slip fixed in 2e4e070; dinner words fixed in its next push; its own career_check has a NEW fail (steady
+  Senior 54 not Trusted 55 by Day 19), sent to lead 43 for a call.
+- day_check 19 OK; promo_beats OK; bigevents OK (visit phases and meetings Days 16-19, no clash).
