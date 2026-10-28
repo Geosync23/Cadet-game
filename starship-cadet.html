@@ -72350,9 +72350,10 @@ function padWhat(cx, cy, want) {                           // what a tap at (cx,
   if (ud.youLock) return 'lock:' + ud.youLock;
   if (ud.closedDoor) return 'door:' + ud.closedDoor;
   if (ud.door && typeof adoorShut === 'function' && adoorShut(EDGES.get(ud.door), player)) return 'door:' + ud.door;   // a door shut to you (Doors setting, 0.93.3): A opens it
-  if (want && !/^(job|crate|hamper|wardrobe|place:)/.test(want)) return 'floor';
+  if (want && !/^(job|crate|hamper|wardrobe|place:|beam)/.test(want)) return 'floor';
   const p = h.point;                                     // the floor: playerFloorTap's order, read only
-  if (typeof jobHere === 'function' && jobHere(p, true)) return 'job';
+  if (padBeamOn()) { const sp = placeSpot('5-beam-1'); if (Math.hypot(p.x - sp.x, p.z - sp.z) <= BEAM_REACH) return 'beam'; }   // Name on the beam: section 18's beamFloorTap, asked first (wave B)
+  if (typeof jobHere === 'function' && jobHere(p, true)) return padJobAt(p);
   const c = SHIP.player.crate; if (c && c.deck === deckDef.num && Math.hypot(p.x - c.x, p.z - c.z) <= PUT_NEAR) return 'crate';
   if (typeof CLOTHES_ON !== 'undefined' && CLOTHES_ON) {
     const hm = SHIP.clothes.hamper; if (hm && hm.at === 'floor' && hm.deck === deckDef.num && Math.hypot(p.x - hm.x, p.z - hm.z) <= HAMPER_NEAR) return 'hamper';
@@ -72365,6 +72366,16 @@ function padWhat(cx, cy, want) {                           // what a tap at (cx,
   }
   return best ? 'place:' + best.id : null;
 }
+// (wave B) which job's stop a floor tap at p goes to: jobHere's order (15b), each job its own key, so every job with a stop
+// on this deck is offered, not only the first held one; the machine job's panel is the rest (jobHere's last test)
+function padJobAt(p) {
+  for (const j of typeof ixChores === 'function' ? ixChores() : []) if (!j.workDone) {
+    const nx = ixNextStop(j), pid = nx && nx.s.step !== 'fetch' && nx.s.deck === deckDef.num ? nx.s.places[0] : null, s = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null;
+    if (s && (Math.hypot(s.x - p.x, s.z - p.z) < JOB_REACH || jobRayDist(s) < JOB_RAY)) return 'job:' + j.id;
+  }
+  const mj = myJob(); return 'job:' + (mj ? mj.id : '');
+}
+const padBeamOn = () => typeof beamOn === 'function' && deckDef.num === 5 && beamOn() && !!placeSpot('5-beam-1');   // (wave B) Name on the beam's floor, while you can paint
 function padPlaces() {                                     // the places a floor tap can use (playerFloorTap's rule), with their spots, once a deck
   const P = PAD_PICK; if (P.pof === deckDef && P.places) return P.places;
   P.pof = deckDef; P.places = [];
@@ -72381,7 +72392,8 @@ function padLabel(key) {                                   // the line at the bo
   if (k === 'item') { const it = ITEMS[+v]; return it ? it.t : 'Look'; }
   if (k === 'lift') return 'Lift';
   if (k === 'door' || k === 'lock') { const c = CLOSED_DOORS[v]; return c && c.t ? c.t : 'Door'; }
-  if (k === 'job') return 'Your job';
+  if (k === 'job') { const j = SHIP.jobs.find(x => String(x.id) === v); return j && j.title ? 'Your job: ' + j.title : 'Your job'; }   // (wave B) named: two can be in reach
+  if (k === 'beam') return 'Paint your name';
   if (k === 'crate') return 'Your crate';
   if (k === 'hamper') return 'Laundry hamper';
   if (k === 'wardrobe') return 'Your wardrobe';
@@ -72429,17 +72441,35 @@ function padRaw() {                                       // what's in reach, be
   };
   if (crowd.visible) for (const a of DECK_CREW) add('crew:' + a.p.id, a.x, a.z, [(a.settled && a.spot ? a.spot.pose : a.pose) === 'lie' ? .15 : .9, .5, 1.3].map(h => a.y + h), 0);
   for (const w of crew) if (w.active && !w.isPlayer) add('walker:' + w.spec.name, w.obj.position.x, w.obj.position.z, [.9, .5, 1.3], 0);
-  if (PAD_PICK.of !== ITEMS) {                             // the items' middles and heights, once a deck (they don't move)
-    const box = new THREE.Box3(), c = new THREE.Vector3(); PAD_PICK.of = ITEMS;
-    PAD_PICK.items = ITEMS.map((it, i) => { if (!it.hit) return null; box.setFromObject(it.hit); box.getCenter(c); return [it.lift ? 'lift' : 'item:' + i, c.x, c.z, [c.y, (c.y + box.max.y) / 2, (c.y + box.min.y) / 2]]; }).filter(Boolean);
+  // the items' middles and heights, worked out again only for an item that's new, moved or renumbered (wave B: props that
+  // appear while you're in the room, the birthday cake, the parts sheet, Tiles night's boards, the cabin spots, a Wednesday's
+  // crates, go into the same list, which was read once a deck). An item over 2 m across (the Lightdisc court) is offered at
+  // its nearest point too, 0.3 m in from its edge: its middle can be far out of reach while you stand at its side
+  const IC = PAD_PICK.ic || (PAD_PICK.ic = new WeakMap()), box = PAD_PICK.box || (PAD_PICK.box = new THREE.Box3()), c = _pp;
+  for (let i = 0; i < ITEMS.length; i++) {
+    const it = ITEMS[i]; if (!it.hit) continue;
+    let o = IC.get(it), e = it.hit.matrixWorld.elements;
+    if (!o || o.i !== i || o.m.some((v, k) => v !== e[k])) {   // (setFromObject brings the hit's matrix up to date: read it after)
+      box.setFromObject(it.hit); box.getCenter(c); e = it.hit.matrixWorld.elements;
+      o = { i, m: e.slice(), key: it.lift ? 'lift' : 'item:' + i, x: c.x, z: c.z, ys: [c.y, (c.y + box.max.y) / 2, (c.y + box.min.y) / 2],
+        big: box.max.x - box.min.x > 2 || box.max.z - box.min.z > 2 ? [box.min.x + .3, box.max.x - .3, box.min.z + .3, box.max.z - .3] : null };
+      IC.set(it, o);
+    }
+    add(o.key, o.x, o.z, o.ys, .25);
+    if (o.big) { const [x0, x1, z0, z1] = o.big; add(o.key, Math.min(Math.max(pp.x, x0), x1), Math.min(Math.max(pp.z, z0), z1), o.ys, .25); }
   }
-  for (const [key, x, z, ys] of PAD_PICK.items) add(key, x, z, ys, .25);
   for (const dobj of DOOR_OBJS) {                         // the lift and shut doors (an open doorway is only somewhere to walk)
     const hit = dobj.g.children.find(o => o.userData.liftDoor || o.userData.youLock || o.userData.closedDoor || o.userData.door && typeof adoorShut === 'function' && adoorShut(dobj.e, player)), ud = hit ? hit.userData : null; if (!ud) continue;   // and a door shut to you (the Doors setting, 0.93.3)
     add(ud.liftDoor ? 'lift' : ud.youLock ? 'lock:' + ud.youLock : 'door:' + (ud.closedDoor || ud.door), dobj.cx, dobj.cz, ud.door && !ud.closedDoor ? [1.1, .55, 1.65].map(y => y * (dobj.g.scale.y || 1)) : [1, .5, 1.5], .2);   // a door shut to you (0.93.3): at its height now, cut down near the camera
   }
-  if (typeof jobHere === 'function' && jobsOn() && typeof ixChore === 'function') { const j = (typeof ixChores === 'function' ? ixChores() : [ixChore()]).find(x => x && !x.workDone && ixNextStop(x)), nx = j && !j.workDone && ixNextStop(j),   // a side job's stop first, as jobHere takes the tap (MA6-1: a team job's turn)
-    pid = nx && nx.s.deck === deckDef.num && nx.s.places[0], sp = pid && PLACE_OF.has(pid) && placeSpot(pid); if (sp) add('job', sp.x, sp.z, [.05, .4, .8], .2); }
+  if (typeof jobHere === 'function' && jobsOn() && typeof ixChores === 'function') {   // every held job's next stop on this deck, each its own (wave B; was the first held job's, often a side job's on another deck)
+    for (const j of ixChores()) { const nx = !j.workDone && ixNextStop(j), pid = nx && nx.s.step !== 'fetch' && nx.s.deck === deckDef.num && nx.s.places[0], sp = pid && PLACE_OF.has(pid) && placeSpot(pid); if (sp) add('job:' + j.id, sp.x, sp.z, [.05, .4, .8], .2); }
+    const mj = myJob(), m = mj && mj.machine && !mj.workDone ? machineById(mj.machine) : null, pid = m && m.deck === deckDef.num && panelPlace(m.id), sp = pid && PLACE_OF.has(pid) && placeSpot(pid);   // and a machine job's panel (jobHere's last test)
+    if (sp) add('job:' + mj.id, sp.x, sp.z, [.05, .4, .8], .2);
+  }
+  if (padBeamOn()) { const sp = placeSpot('5-beam-1'), d = Math.hypot(pp.x - sp.x, pp.z - sp.z), a0 = Math.atan2(pp.x - sp.x, pp.z - sp.z);   // Name on the beam: the floor at the beam's
+    add('beam', sp.x, sp.z, [.05, .3], .3);              // spot, and 1.3 m out from it your way and to either side (within section 18's BEAM_REACH; the crew gather round it)
+    if (d > .5) for (const da of [0, .9, -.9, 1.8, -1.8]) add('beam', sp.x + 1.3 * Math.sin(a0 + da), sp.z + 1.3 * Math.cos(a0 + da), [.05, .3], .3); }
   const cr = SHIP.player.crate; if (cr && cr.deck === deckDef.num) add('crate', cr.x, cr.z, [.05, .3], .15);
   if (typeof CLOTHES_ON !== 'undefined' && CLOTHES_ON) { const hm = SHIP.clothes.hamper; if (hm && hm.at === 'floor' && hm.deck === deckDef.num) add('hamper', hm.x, hm.z, [.05, .3], .15);
     const w = PAD_PICK.wr; if (w) add('wardrobe', w.x, w.z, [.05, .5, 1], .2); }
@@ -72455,14 +72485,16 @@ function padSearch(budget) {
   if (!P.job) { P.cs = padCrewSeen(); P.wr = typeof CLOTHES_ON !== 'undefined' && CLOTHES_ON ? clothesWardrobe() : null; P.job = { raw: padRaw(), i: 0, out: [], cs: P.cs, wr: P.wr }; }
   const J = P.job; P.cs = J.cs; P.wr = J.wr; P.used = 0;
   try {
-    while (padMore(J) && P.used < budget) { const t = J.raw[J.i++]; if (J.out.some(o => o.key === t.key) || J.out.length >= P.max && t.key !== 'lift') continue; t.s = padFind(t.key, t.x, t.z, t.ys, t.r); if (t.s) J.out.push(t); }
+    while (padMore(J) && P.used < budget) { const t = J.raw[J.i++]; if (J.out.some(o => o.key === t.key) || J.out.length >= P.max && !PAD_SEEK.includes(t.key)) continue; t.s = padFind(t.key, t.x, t.z, t.ys, t.r); if (t.s) J.out.push(t); }
   } finally { P.cs = null; P.wr = null; }
   if (padMore(J)) return null;
   P.job = null; return J.out;
 }
 // (CP5, KC1) the lift is the way off the deck: when the list is full of people, benches and things before the search
-// gets to it, it goes on searching for the lift alone, and the lift comes last in the list (D-pad left from the first)
-const padMore = J => J.i < J.raw.length && (J.out.length < PAD_PICK.max || !J.out.some(o => o.key === 'lift') && J.raw.some((t, i) => i >= J.i && t.key === 'lift'));
+// gets to it, it goes on searching for the lift alone, and the lift comes last in the list (D-pad left from the first).
+// (wave B) The same for Name on the beam's floor: the crew stand round the beam, and the free floor is often further off
+const PAD_SEEK = ['lift', 'beam'];
+const padMore = J => J.i < J.raw.length && (J.out.length < PAD_PICK.max || PAD_SEEK.some(k => !J.out.some(o => o.key === k) && J.raw.some((t, i) => i >= J.i && t.key === k)));
 const padTargets = () => { PAD_PICK.job = null; return padSearch(Infinity); };   // all at once: [{ key, x, z, d, s: [cx, cy] }], best first
 function padPickShow(on) {                                 // the ring and the line, made at the first use
   const P = PAD_PICK;
