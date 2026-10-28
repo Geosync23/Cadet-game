@@ -16001,6 +16001,7 @@ function clockPunch(early) {                             // a punch from the scr
 }
 function clockUndo() {                                   // Undo: the kept copy back; the side effects never happen
   const u = CLOCK_UNDO; if (!u) return null; CLOCK_UNDO = null;
+  if (SND_R3_ON) sndFx('r3ClockUndo');                   // section 27's sound update: the lever back (A)
   const C = careerInit(); C.ci = u.keep.ci; C.co = u.keep.co; if (flag('shiftSent') === u.keep.sent) C.on = u.keep.on;   // section 14 started the shift in the window (its shiftStart note is out): that stands
   if (u.keep.log === undefined) delete SHIP.player.clockLog[u.d]; else SHIP.player.clockLog[u.d] = u.keep.log;
   return u.what;
@@ -49817,6 +49818,7 @@ function vesselMaking(v) {
 function vesselStepStart(v, s) {
   const M = v.e.mine, S = VESSEL_STEPS[s], H = M['vessel:helpers'] || [], who = H[(s + 1) % 2] || H[0];
   const [tw, tt] = vesselLine('taavek.step.' + s, '', 'taavek'); if (tt) vesselSay(tw || 'taavek', tt, 6);
+  if (SND_R3_ON && s === 2) sndFx('r3Bronze', { long: 5 });   // section 27's sound update: Taavek taps the bars, the dull one and the one that sings (C)
   if (who) { const [hw, ht] = vesselLine('help.' + who + '.step.' + s, '', who); if (ht) simTimeout(() => vesselSay(hw || who, ht, 5), 2500); }
   const go = () => {
     actStart('vesselStep', S.at, { title: 'Machine shop', after: S.after });
@@ -65860,7 +65862,7 @@ function arrStops(j) {
 function arrStepDone(j, k, res) {
   const st = arrStops(j)[k]; if (!st) return true;
   if (k > 0 && !(j.stepsDone || []).includes(k - 1)) return false;   // in order: the star, the dial, the module
-  if (st.tag === 'turn') { const v = res && res.value; if (v !== 0) return false; const i = arrStops(j).slice(0, k).filter(x => x.tag === 'turn').length; if (Array.isArray(j.cal)) j.cal[i] = 0; return true; }   // the dial settled on the star (section 15's turn card sends { value })
+  if (st.tag === 'turn') { const v = res && res.value; if (v !== 0) return false; const i = arrStops(j).slice(0, k).filter(x => x.tag === 'turn').length; if (Array.isArray(j.cal)) j.cal[i] = 0; if (SND_R3_ON) sndFx('r3Calibrate', { long: 4 }); return true; }   // the dial settled on the star (and section 27's sound update: the lock, A) (section 15's turn card sends { value })
   if (st.tag === 'pick') {
     const pick = res && res.pick, o = arrStars(j).find(x => x.id === pick); if (!o) return false;
     j.star = o.label;
@@ -66151,7 +66153,8 @@ function p5nKnockAt(abs, now = shipNow()) {               // the night you'd sle
 }
 function p5nKnock(wake) {                                 // section 13's sleepGo asks: { at, say } or null
   const now = shipNow(), today = (SHIP.time.day - 1) * 1440 + wake, abs = today > now ? today : today + 1440, n = p5nKnockAt(abs, now); if (!n) return null;
-  return { at: n.at, say: () => { if (n.day === 22 && P5_PROMO4) { simNote('p5night', { step: 'knock', day: n.day }); return; }   // night 1 with S6-3: 24u's own knock notice and Calder's fetch say it
+  return { at: n.at, say: () => { if (SND_R3_ON) sndFx('r3Knock');   // section 27's sound update: the door chime (the user's B)
+    if (n.day === 22 && P5_PROMO4) { simNote('p5night', { step: 'knock', day: n.day }); return; }   // night 1 with S6-3: 24u's own knock notice and Calder's fetch say it
     const who = n.day === 22 ? 'calder' : null, by = who && typeof worksName === 'function' ? worksName(who) : p5nText('night.knock.from', 'The night crew');
     const t = n.day === 22 ? p5nText('night.knock.1', 'A knock at your bunk. Calder: "Up you get. Night shift. I\'ll see you down there."') : p5nText('night.knock', 'A knock at your bunk: your night shift starts at {time}.', { time: hhmm(n.from % 1440) });
     if (typeof promoNotice === 'function') promoNotice(t, by); else toast('Your bunk', t); simNote('p5night', { step: 'knock', day: n.day }); } };
@@ -66848,6 +66851,7 @@ function m24Team(n) {
   if (st && n.by !== 'you' && st.who === n.by) worksSay(n.by, worksText('m24.reply.' + j.seq[n.step].part, { isolate: 'Isolating. Coupling\'s cold.', unbolt: 'Bolts coming out. Mind your toes.', lift: 'Lifting. Easy, easy.', seat: 'Seating the new one. Gently.', test: 'Testing. Readings coming up.' }[j.seq[n.step].part] || 'On it.'));
   if (n.step !== j.seq.length || S.done) return;
   const t = Math.floor(shipNow()), mins = Math.max(0, t - j.start); S.done = t; S.mins = mins;   // whole ship minutes (the save keeps integers)
+  if (SND_R3_ON) sndFx('r3TeamDone', { long: 3 });         // section 27's sound update: job done, bigger (B)
   const res = mins <= M24_LEN - 5 ? 'early' : mins <= M24_LEN ? 'on' : 'slow';   // a good team and quick calls about 52 minutes; a poor pick over the hour
   worksSay(j.lead, worksText('m24.done.' + res, { early: 'Done early. That was a good team.', on: 'Done, on the hour. Clean work.', slow: 'Done. Slow, but done. The coil doesn\'t mind.' }[res]));
   if (typeof mailSend === 'function') { const tx = worksText('m24.mail.done', 'The coil swap | Done in {n} minutes with {a} and {b}. Logged for Calder.', { n: mins, a: worksFirst(j.team[0]), b: worksFirst(j.team[1] || j.team[0]) }), i = tx.indexOf(' | ');
@@ -66865,7 +66869,7 @@ function m24Call(now) {
   if (s.who !== 'you' || k < 0 || (j.stepsDone || []).includes(k) || !teamAtSpot(j) || now - M24_ASKED < 1 || typeof deviceChoose !== 'function') return;
   if (typeof DEV !== 'undefined' && (DEV.choose || DEV.open)) return;
   if (typeof ACT !== 'undefined' && ACT) return;          // already doing it by a tap at the spot (15b's taps reach team stops once claude/team-turn-fix is in, PZ6): no card over it
-  const ok = deviceChoose({ title: teamLabel(j), text: worksText('team.turn.' + s.part, TEAM_PART[s.part]), choices: [worksText('m24.next', 'Next step')] }, c => { M24_ASKED = shipNow(); if (c === 0) jobStepDone(j.id, k, {}); });
+  const ok = deviceChoose({ title: teamLabel(j), text: worksText('team.turn.' + s.part, TEAM_PART[s.part]), choices: [worksText('m24.next', 'Next step')] }, c => { M24_ASKED = shipNow(); if (c === 0) { if (SND_R3_ON) sndFx('r3TeamCall'); jobStepDone(j.id, k, {}); } });   // section 27's sound update: the intercom (A)
   if (ok) M24_ASKED = now;
 }
 // the beats, in play while it's your night and the swap's to do
@@ -73158,6 +73162,9 @@ padOwn(L => !!(L && L.id === 'device' && padShown(document.getElementById('devTi
 // =====================================================================
 // sndFx: the hook lines' way in. A function declaration (hoisted), safe to call before section 27 has run (it does nothing then).
 function sndFx(name, o) { try { return SND.fx(name, o); } catch (e) { return false; } }
+// the sound update (SD2, plans/sound/r3-build-plan.md; the user's Round 3 picks and the mess hall, 2026-10-28): event music
+// for the picked traditions and events (turn 1), the mess hall (turn 2), the feature sounds (turns 3-4). Off: the sound as before
+const SND_R3_ON = false;
 const SND = (() => {
   const S = { ctx: null, bus: {}, onFrame: [], log: URL_FLAGS.has('soundlog') ? [] : null };
   const ALLOWED = URL_FLAGS.has('sound') || !(navigator.webdriver || URL_FLAGS.has('mute') || NOSAVE);
@@ -73690,7 +73697,7 @@ const SND = (() => {
   }
   S.act = (phase, A, abort) => {                         // from actBegin ('begin') and actEnd ('end'); reads the activity, changes nothing
     if (!A) return;
-    const p = actPick(A);
+    const p = (R3 && phase === 'begin' && R3.actPick(A)) || actPick(A);   // R3: the sound update's own (winding, the lathe)
     actThenClear(); ACT_OF = phase === 'begin' ? A : null;
     if (phase === 'begin') { actLoopStop(0.2); if (!p) return; if (p.one) S.fx(p.one, { long: 4 }); if (p.then) for (const [n, d] of p.then) actThen.push(setTimeout(() => { if (ACT_OF === A) S.fx(n); }, d * 1000)); if (p.loop) actLoopStart(p.loop); return; }
     actLoopStop(0.5);
@@ -73720,6 +73727,283 @@ const SND = (() => {
       (h.nodes || []).forEach(n => { try { n.stop(t + f + 0.05); } catch (e) {} }); LOOPS.delete(L); setTimeout(() => { try { out.disconnect(); } catch (e) {} }, (f + 1) * 1000); } };
     LOOPS.add(L); amb[name] = L;
   }
+  // the sound update, turn 2 (SND_R3_ON; the user's picks, 2026-10-28, plans/sound/messhall.html version 2): the mess hall.
+  // The galley behind the counter (the extractor, a sizzle, a pan, the hatch, the order-up bell) and the room's clatter, with
+  // the warm low hum of talk on top; every layer follows how many are in the mess (the crew there, plus you), silent with no
+  // crew there; only while you're in it, fading as you leave. Read once a second from ambTick; Math.random only.
+  const MESS_SND = SND_R3_ON ? (() => {
+    const VOWELS = [[730, 1090], [530, 1840], [270, 2290], [570, 840], [440, 1020], [660, 1720], [490, 1350]];   // vowel bands for a wordless voice: never a word
+    const VOICES = [[105, -0.7], [128, 0.5], [160, -0.2], [210, 0.8], [118, 0.15], [190, -0.55], [140, 0.65], [235, -0.85], [98, 0.3], [175, -0.35], [150, 0.9], [220, 0.05]];   // [pitch, side] round the room
+    const CLINK = {   // the room's sounds, one at a time (t: when, w: how loud)
+      cutlery: (t, w, pan) => ring(t, [rand(2600, 3400), rand(4200, 5600)], 0.9 * w, { d: 0.12, q: 35, pan, wet: 0.3 }),
+      fork: (t, w, pan) => { ring(t, [rand(3000, 3800)], 0.6 * w, { d: 0.07, q: 30, pan }); ring(t + rand(0.05, 0.12), [rand(3000, 3800)], 0.4 * w, { d: 0.06, q: 30, pan }); },
+      cup: (t, w, pan) => { ring(t, [rand(1800, 2300), rand(3900, 4600)], 1.1 * w, { d: 0.18, q: 45, pan, wet: 0.3 }); thud(t, { gain: 0.06 * w, d: 0.04, f: 900, body: 300 }); },
+      tray: (t, w, pan) => { thud(t, { gain: 0.22 * w, d: 0.1, f: 500, body: 140 }); ring(t, [rand(420, 520), rand(980, 1150)], 1.4 * w, { d: 0.22, q: 18, pan, wet: 0.3 }); },
+      plate: (t, w, pan) => { ring(t, [rand(1300, 1600), rand(2700, 3100)], 1 * w, { d: 0.2, q: 30, pan, wet: 0.3 }); thud(t, { gain: 0.08 * w, d: 0.05, f: 700, body: 220 }); },
+      chair: (t, w, pan) => noise(t, rand(0.25, 0.45), { f: rand(260, 380), fTo: rand(450, 650), q: 4, gain: 0.05 * w, swell: 0.35, pan }),
+      stack: (t, w, pan) => { for (let i = 0; i < 3; i++) ring(t + i * rand(0.06, 0.1), [rand(1300, 1700), rand(2800, 3300)], 0.7 * w, { d: 0.15, q: 30, pan }); },
+      hatch: (t, w) => { slide(t, 0.4, { f0: 300, f1: 520, gain: 0.25 * w, rate: 30, rough: 0.2, bus: ROUTE.ui, pan: 0.5 }); clack(t + 0.42, 0.05 * w, { f: 900, pan: 0.5 }); },
+      pan: (t, w) => ring(t, [rand(500, 640), rand(1500, 1800)], 1.2 * w, { d: 0.3, q: 20, pan: 0.6, wet: 0.35 }),
+      ding: (t, w) => bell(t, 1567.98, 0.8, 0.02 * w, { wet: 0.3, pan: 0.55 }),
+    };
+    const BG_CLATTER = { cutlery: 3, fork: 2, cup: 3, tray: 2, plate: 2, chair: 1, hatch: 1, pan: 1, ding: 0.5 };
+    const BG_LV = 1.5, VOICE_LV = 1.6;   // the page's trims (measured against the Commons hum): full, the background about 7 dB under it, the voices about 1 dB more
+    const M = { n: 0, full: 0, room: null, scene: null, clinks: 0 };
+    const busyD = (n = M.n) => Math.min(1, n / Math.max(1, M.full));
+    // each layer at n people: the galley's two levels, the clatter's rate (sounds a second) and how many voices talk
+    const galleyAt = n => n ? [0.02 + 0.05 * busyD(n), 0.003 + 0.011 * busyD(n)] : [0, 0];
+    const clatterAt = n => n ? 0.12 + 2.1 * busyD(n) + (n <= 2 ? 0 : 0.1) : 0;
+    const voicesAt = n => n > 0 ? Math.min(12, Math.max(1, Math.round(12 * Math.min(1, n / (M.full / 2))))) : 0;   // about one for every two or three people, at least one
+    M.at = n => ({ galley: galleyAt(n), clatter: clatterAt(n), voices: voicesAt(n) });   // for sound_check
+    function voice2(out, o) {   // one wordless voice: phrases of soft syllables, then a pause; o.live(t): whether it's there now
+      const osc = ctx.createOscillator(), f1 = ctx.createBiquadFilter(), f2 = ctx.createBiquadFilter(), g = ctx.createGain(), g2 = ctx.createGain(), p = ctx.createStereoPanner();
+      osc.type = 'sawtooth'; osc.frequency.value = o.f0; f1.type = f2.type = 'bandpass'; f1.Q.value = 5; f2.Q.value = 7; g.gain.value = 0; g2.gain.value = 0.45; p.pan.value = o.pan;
+      osc.connect(f1); osc.connect(f2); f1.connect(g); f2.connect(g2); g2.connect(g); g.connect(p); p.connect(out);
+      const t0 = ctx.currentTime; osc.start(t0); let next = t0 + Math.random() * (o.gap[1] * 0.6 + 0.3);
+      const gap = o.gap, syl = o.syl || [3, 12], len = o.len || 1;
+      return { nodes: [osc], tick(u) {
+        while (next < u) {
+          if (!o.live(next)) { next += 0.8 + Math.random() * 1.5; continue; }
+          const n = syl[0] + ((Math.random() * (syl[1] - syl[0] + 1)) | 0), lift = Math.random() < 0.12 ? 1.25 : 1; let t = next;
+          for (let i = 0; i < n; i++) {
+            const d = (0.11 + Math.random() * 0.15) * len, V = VOWELS[(Math.random() * VOWELS.length) | 0];
+            f1.frequency.setTargetAtTime(V[0], t, 0.025); f2.frequency.setTargetAtTime(V[1], t, 0.025);
+            osc.frequency.setTargetAtTime(o.f0 * lift * (1 + (Math.random() - 0.45) * 0.22 - (i / n) * 0.12), t, 0.04);
+            g.gain.setTargetAtTime(o.g * (0.55 + Math.random() * 0.45), t, 0.018); g.gain.setTargetAtTime(0, t + d * 0.75, 0.03);
+            t += d + Math.random() * 0.05;
+          }
+          next = t + gap[0] + Math.random() * (gap[1] - gap[0]);
+        }
+      } };
+    }
+    function scene() {   // the page's messScene2 with the background D and the voices "warm", reading M.n live
+      const t0 = ctx.currentTime, out = ctx.createGain(); out.gain.setValueAtTime(0, t0); out.gain.linearRampToValueAtTime(1, t0 + 1.2); out.connect(BUS.ui);
+      const bg = ctx.createGain(); bg.gain.value = BG_LV; bg.connect(out);
+      const room = { ...BUS, ui: bg }, loops = [], nodes = [];
+      // the galley behind the counter: the extractor and a sizzle, louder as more are being fed; nothing when empty
+      const ex = ctx.createBufferSource(); ex.buffer = BROWN; ex.loop = true; const exf = ctx.createBiquadFilter(); exf.type = 'lowpass'; exf.frequency.value = 240; const exg = ctx.createGain(); exg.gain.value = 0;
+      const sz = ctx.createBufferSource(); sz.buffer = WHITE; sz.loop = true; const szf = ctx.createBiquadFilter(); szf.type = 'bandpass'; szf.frequency.value = 5200; szf.Q.value = 0.7; const szg = ctx.createGain(); szg.gain.value = 0;
+      const gp = ctx.createStereoPanner(); gp.pan.value = 0.55; ex.connect(exf); exf.connect(exg); exg.connect(gp); sz.connect(szf); szf.connect(szg); szg.connect(gp); gp.connect(bg);
+      ex.start(t0); sz.start(t0); nodes.push(ex, sz);
+      let lastN = -1;
+      const galley = () => { if (M.n === lastN) return; lastN = M.n; const [e, z] = galleyAt(M.n), t = ctx.currentTime;
+        exg.gain.setTargetAtTime(e, t, 0.6); szg.gain.setTargetAtTime(z, t, 0.6); };
+      galley();
+      const bag = Object.entries(BG_CLATTER).flatMap(([n, w]) => Array(Math.max(1, Math.round(w * 2))).fill(n));
+      let nextC = t0 + 0.4;
+      loops.push({ tick(u) { galley();
+        while (nextC < u) {
+          if (!M.n) { nextC += 0.5; continue; }
+          const rate = clatterAt(M.n);
+          try { CLINK[pick(bag)](nextC, rand(0.5, 1) * (0.7 + 0.3 * busyD()), rand(-0.8, 0.8)); } catch (e) {}
+          if (Math.random() < 0.05) noise(nextC, 0.03, { f: rand(3000, 6000), q: 3, gain: 0.02, pan: 0.55 });
+          M.clinks++; nextC += (-Math.log(1 - Math.random())) / rate;
+        }
+      } });
+      // the warm low hum of talk on top (voicesAt: none when empty)
+      const vb = ctx.createGain(); vb.gain.value = VOICE_LV; vb.connect(out);
+      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 650; lp.connect(vb);
+      const sv = ctx.createGain(); sv.gain.value = 0.7; lp.connect(sv); sv.connect(BUS.verb);
+      VOICES.forEach(([f, p], i) => loops.push(voice2(lp, { f0: f * 0.8, pan: p * 0.6, g: 0.035, gap: [0.1, 0.9], len: 1.3, live: t => i < voicesAt(M.n) })));
+      const L = { label: 'mess', loops,
+        tick(u) { const p = ROUTE; ROUTE = room; try { loops.forEach(l => l.tick(u)); } finally { ROUTE = p; } },
+        stop(f = 1.5) { LOOPS.delete(L); const t = ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + f);
+          loops.forEach(l => (l.nodes || []).forEach(n => { try { n.stop(t + f + 0.1); } catch (e) {} })); nodes.forEach(n => { try { n.stop(t + f + 0.1); } catch (e) {} });
+          setTimeout(() => { try { out.disconnect(); } catch (e) {} }, (f + 3) * 1000); },
+      };
+      LOOPS.add(L); L.tick(t0 + 0.4);
+      return L;
+    }
+    function count() {   // people in the mess hall (the crew there, plus you), or -1 when you're not in it
+      if (!deckDef || deckDef.num !== 3) return -1;
+      const rooms = deckDef.rooms || {}, k = M.room && rooms[M.room] && rooms[M.room].name === 'Mess hall' ? M.room : Object.keys(rooms).find(x => rooms[x].name === 'Mess hall');
+      if (!k || roomAt(...player.here()) !== k) return -1;
+      if (M.room !== k) { M.room = k; M.full = Math.max(8, (deckDef.places || []).filter(p => p.room === k && p.pose === 'sit').length + 1); }   // full: every seat taken, and you
+      const crew = DECK_CREW.filter(a => a && isFinite(a.x) && roomAt(...cellAt(a.x, a.z)) === k).length;
+      return crew ? crew + 1 : 0;   // with no crew there it's empty: silent
+    }
+    return {
+      M,
+      tick() {
+        let n = -1; try { n = count(); } catch (e) { n = -1; }
+        M.n = Math.max(0, n);
+        const on = n >= 0 && !!ctx && ctx.state === 'running' && S.prefs.on;
+        if (on && !M.scene) { if (S.log) S.log.push({ name: 'mess', loop: true }); M.scene = scene(); }
+        else if (!on && M.scene) { M.scene.stop(1.5); M.scene = null; }   // fades as you leave
+      },
+    };
+  })() : null;
+  // the sound update, turn 3 (SND_R3_ON; the user's Round 3 picks, 2026-10-28, recipes from plans/sound/round3.html): the
+  // feature sounds a watcher can see. The FX below, and r3Watch (each frame) and r3Tick (once a second, from ambTick) that
+  // read the game and play them; r3ActPick gives two activities their own sound. Reads only; Math.random only.
+  const R3 = SND_R3_ON ? (() => {
+    const lv = (l, fn) => { const prev = ROUTE; ROUTE = { ...ROUTE, ui: trim(l, ROUTE.ui) }; try { fn(); } finally { ROUTE = prev; } };   // the page's withLv
+    const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+    function held(t, d, f, g0, g1, o = {}) {   // a steady tone (a coil's hum, a throb), fading from g0 to g1
+      const b = o.bus || ROUTE.ui, os = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), g2 = ctx.createGain();
+      os.frequency.value = f; o2.type = 'triangle'; o2.frequency.value = f * 2; g2.gain.value = 0.25;
+      g.gain.setValueAtTime(Math.max(0.0001, g0), t); g.gain.exponentialRampToValueAtTime(Math.max(0.0001, g1), t + d);
+      os.connect(g); o2.connect(g2); g2.connect(g);
+      conn(g, b, o.pan, o.wet); os.start(t); o2.start(t); os.stop(t + d + 0.05); o2.stop(t + d + 0.05);
+    }
+    function whine(t, d, f0, f1, gain, o = {}) {   // a motor or a coil spinning: a filtered saw that follows its speed
+      const b = o.bus || ROUTE.ui, os = ctx.createOscillator(), o2 = ctx.createOscillator(), bp = ctx.createBiquadFilter(), g = ctx.createGain(), g2 = ctx.createGain();
+      os.type = 'sawtooth'; [os, o2].forEach((x, i) => { x.frequency.setValueAtTime(f0 * (i + 1), t); x.frequency.exponentialRampToValueAtTime(f1 * (i + 1), t + d); });
+      bp.type = 'bandpass'; bp.Q.value = o.q ?? 3; bp.frequency.setValueAtTime(f0 * 2, t); bp.frequency.exponentialRampToValueAtTime(f1 * 2, t + d);
+      const a = o.a ?? Math.min(0.4, d * 0.3), r = o.r ?? Math.min(0.6, d * 0.4);
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(gain, t + a); g.gain.setValueAtTime(gain, t + d - r); g.gain.linearRampToValueAtTime(0.0001, t + d);
+      g2.gain.value = 0.4; os.connect(bp); bp.connect(g); o2.connect(g2); g2.connect(g); conn(g, b, o.pan, o.wet);
+      os.start(t); o2.start(t); os.stop(t + d + 0.05); o2.stop(t + d + 0.05);
+    }
+    const ticks = (t, d, rate, f0, f1, g) => { const n = Math.round(d * rate); for (let i = 0; i < n; i++) clack(t + i / rate, g, { f: f0 + (f1 - f0) * i / Math.max(1, n - 1) }); };
+    const chips = (t, d, n, g) => { for (let i = 0; i < n; i++) noise(t + Math.random() * d, 0.02, { f: rand(3000, 6000), q: 3, gain: g * rand(0.5, 1) }); };
+    function pad(t, notes, d, g, bright = 1) {   // the music's wide slow pad (SX.pad), on the sound's own bus
+      const out = ROUTE.ui;
+      notes.forEach((m, i) => [['sawtooth', -7, -0.5], ['sawtooth', 7, 0.5], ['triangle', 0, 0]].forEach(([type, c, pan]) => {
+        const o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), e = ctx.createGain(); let node = e;
+        o.type = type; o.frequency.value = mtof(m); o.detune.value = c + (i % 2 ? 2 : -2);
+        lp.type = 'lowpass'; lp.Q.value = 0.5; lp.frequency.setValueAtTime(300 * bright, t); lp.frequency.linearRampToValueAtTime(900 * bright, t + d * 0.5); lp.frequency.linearRampToValueAtTime(350 * bright, t + d + 2);
+        const k = type === 'triangle' ? 1.4 : 1;
+        e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(g * k, t + Math.min(3, d * 0.45)); e.gain.setValueAtTime(g * k, t + d); e.gain.linearRampToValueAtTime(0, t + d + 2.5);
+        o.connect(lp); lp.connect(e);
+        if (pan && ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = pan; e.connect(p); node = p; }
+        node.connect(out); o.start(t); o.stop(t + d + 2.6);
+      }));
+    }
+    const chime = (t, m, g) => fmBell(t, mtof(m), 4, g, 2.01, 0.45, 0);
+    const tri = (t, f, d) => tone(t, f, d, { gain: 0.04, type: 'triangle' });
+    const fx = {
+      r3BadgeTake: t => { clack(t, 0.08, { f: 1800 }); tri(t + 0.08, 1318.5, 0.06); tri(t + 0.16, 1760, 0.09); },   // the badge rack A: the clip, two notes up
+      r3BadgeBack: t => { clack(t, 0.08, { f: 1500 }); tri(t + 0.08, 1760, 0.06); tri(t + 0.16, 1318.5, 0.1); },   // and back: a click, two notes down
+      r3ReactorDoor: t => lv(0.19, () => { for (let i = 0; i < 3; i++) { clack(t + i * 0.28, 0.16, { f: 600 }); thud(t + i * 0.28 + 0.02, { gain: 0.25, d: 0.12, f: 200, body: 70 }); }   // the reactor door A: three bolts, a breath, a slow roll, a deep stop
+        const s = t + 0.95; hiss(s, 0.7, 0.07); slide(s + 0.1, 1.8, { f0: 80, f1: 200, gain: 1.3, rate: 14, rough: 0.5, wet: 0.2 }); thud(s + 1.9, { gain: 0.6, d: 0.35, f: 140, body: 46, wet: 0.3 }); ring(s + 1.9, [120, 310, 560], 2.2, { d: 0.5 }); }),
+      r3CoilOff: t => { whine(t, 2.4, 440, 70, 0.05); thud(t + 2.4, { gain: 0.35, d: 0.2, f: 160, body: 50 }); clack(t + 2.42, 0.08, { f: 600 }); },   // a coil off A: spins down to a clunk
+      r3CoilOn: t => { whine(t, 2.6, 70, 440, 0.05, { r: 0.3 }); held(t + 2.3, 1.8, 110, 0.05, 0.0001); },   // and on: climbs back and settles
+      r3Winding: t => { ticks(t, 3, 10, 1200, 1700, 0.04); noise(t, 3, { f: 1800, q: 4, gain: 0.03, swell: 0.5 }); },   // winding A: the geared crank
+      r3Lathe: t => { whine(t, 5, 180, 180, 0.02, { q: 1.5 }); chips(t + 1, 3, 10, 0.03); },   // the lathe B: a soft motor and a few chips
+      r3Promotion: t => { pad(t, [55, 62, 66, 69, 74], 3.5, 0.0055, 1.2); chime(t + 3, 86, 0.04); chime(t + 3.35, 91, 0.03); },   // promotions A: a rising swell, two chimes
+      r3Calder: t => pad(t, [52, 59, 63, 66, 71], 6, 0.004, 0.8),   // Calder's question B: a soft pad holds
+      r3Stay: t => { pad(t, [48, 55, 60, 64, 67], 2.5, 0.005, 0.8); bell(t + 0.2, 523.25, 1.6, 0.04, { wet: 0.3 }); },   // Stay or Go B: warm and settled
+      r3Go: t => { pad(t, [53, 60, 65, 67, 72], 2.5, 0.005, 1.3); bell(t + 0.2, 783.99, 0.9, 0.04, { wet: 0.3 }); bell(t + 0.45, 1174.7, 1.4, 0.04, { wet: 0.3 }); },   // or open and rising
+      r3TernLand: t => { lv(0.2, () => { slide(t, 1.6, { f0: 70, f1: 160, gain: 1.2, rate: 12, rough: 0.5, wet: 0.3 }); thud(t + 1.6, { gain: 0.5, d: 0.3, f: 140, body: 46 }); });   // the Tern B: lighter doors, a soft landing
+        noise(t + 2.2, 2, { brown: true, ft: 'lowpass', f: 260, gain: 0.1, swell: 0.6 }); thud(t + 4.1, { gain: 0.25, d: 0.35, f: 120, body: 44 }); },
+      r3ShutOff: t => { clack(t, 0.16, { f: 500 }); thud(t, { gain: 0.35, d: 0.2, f: 180, body: 60 }); whine(t + 0.05, 2, 240, 60, 0.03); },   // a booked shutdown A: the switch, the hum winding down
+      r3ShutOn: t => { clack(t, 0.16, { f: 500 }); thud(t, { gain: 0.35, d: 0.2, f: 180, body: 60 }); whine(t + 0.05, 2, 60, 240, 0.03); },   // and back up
+      r3ClockAsk: t => { tone(t, 587.33, 0.25, { type: 'triangle', gain: 0.08, lp: 1800 }); tone(t + 0.18, 659.25, 0.35, { type: 'triangle', gain: 0.08, lp: 1800 }); },   // the early clock-out question B
+      r3TestFit: t => { clack(t, 0.1, { f: 900 }); thud(t, { gain: 0.15, d: 0.08, f: 400, body: 160 }); const u = t + 0.4;   // the test fit B: seat, spin, settle
+        whine(u, 3.2, 90, 420, 0.03, { q: 2, r: 0.05 }); whine(u + 3.1, 2.2, 420, 60, 0.03, { q: 2, a: 0.05 }); clack(u + 5.3, 0.05, { f: 1200 }); },
+      // turn 4: the five moments other sections tell us about, through a one-line sndFx(...) in theirs
+      r3Knock: t => { bell(t, 659.25, 0.9, 0.07, { wet: 0.2 }); bell(t + 0.32, 523.25, 1.2, 0.07, { wet: 0.2 }); },   // the knock on your door B: the door's call chime (28a)
+      r3TeamCall: t => { noise(t, 0.012, { f: 2000, q: 1, gain: 0.06 }); tone(t + 0.03, 880, 0.08, { type: 'triangle', gain: 0.05, lp: 2500 }); tone(t + 0.13, 1174.7, 0.12, { type: 'triangle', gain: 0.05, lp: 2500 }); noise(t + 0.3, 0.012, { f: 1800, q: 1, gain: 0.05 }); },   // "Next step" A: the intercom (28d)
+      r3TeamDone: t => { SFX.jobDone(t); [1046.5, 1318.5, 1568].forEach((f, i) => bell(t + 0.55 + i * 0.08, f, 1.6, 0.035, { wet: 0.35 })); },   // the team job done B: job done, bigger (28d)
+      r3Calibrate: t => { held(t, 2.6, 880, 0.0001, 0.02); const o = ctx.createOscillator(), g = ctx.createGain();   // calibration A: two tones slide together, then the lock (24x)
+        o.frequency.setValueAtTime(940, t); o.frequency.exponentialRampToValueAtTime(880, t + 2.4); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.02, t + 0.6); g.gain.setValueAtTime(0.02, t + 2.4); g.gain.exponentialRampToValueAtTime(0.0001, t + 2.7);
+        o.connect(g); conn(g, ROUTE.ui); o.start(t); o.stop(t + 2.8); bell(t + 2.55, 1760, 0.9, 0.05, { wet: 0.25 }); },
+      r3Bronze: t => { thud(t, { gain: 0.3, d: 0.1, f: 300, body: 150 }); noise(t, 0.03, { f: 700, q: 2, gain: 0.06 }); const u = t + 0.9;   // the bronze bar C: the dull bar, then the one that sings (18's vessel slot)
+        noise(u, 0.01, { f: 3000, q: 1, gain: 0.08 }); fmBell(u, 392, 4.5, 0.08, 2.76, 1.0, 0); ring(u, [392, 1081], 0.6, { d: 1.2, q: 60 }); },
+      r3Home: t => { bell(t, 523.25, 1.2, 0.06, { wet: 0.3 }); bell(t + 0.4, 783.99, 1.6, 0.05, { wet: 0.3 }); },   // your new quarters (room B) C: the home chime, the first time you open its door
+      r3ClockUndo: t => lv(0.9, () => { clack(t, 0.08, { f: 1500 }); noise(t + 0.08, 0.18, { f: 1400, fTo: 700, q: 3, gain: 0.03, swell: 0.3 }); thud(t + 0.3, { gain: 0.2, d: 0.12, f: 220 });   // clock Undo A: the lever back (15)
+        for (let i = 0; i < 4; i++) clack(t + 0.42 + i * 0.055, 0.05, { f: 1700 - i * 120 }); }),
+    };
+    Object.assign(FX, fx);
+    // inside the reactor room A: a slow throb under the Deck 6 hum, only in that room (a loop, like the mess)
+    function throb() {
+      const t0 = ctx.currentTime, out = ctx.createGain(); out.gain.setValueAtTime(0.0001, t0); out.gain.exponentialRampToValueAtTime(0.065, t0 + 1.5); out.connect(BUS.ui);
+      const os = ctx.createOscillator(), o2 = ctx.createOscillator(), g2 = ctx.createGain(), am = ctx.createGain(), l = ctx.createOscillator(), lg = ctx.createGain();
+      os.frequency.value = 46; o2.type = 'triangle'; o2.frequency.value = 92; g2.gain.value = 0.25; l.frequency.value = 0.7; lg.gain.value = 0.45; am.gain.value = 0.55;
+      l.connect(lg); lg.connect(am.gain); os.connect(am); o2.connect(g2); g2.connect(am); am.connect(out); [os, o2, l].forEach(n => n.start(t0));
+      const L = { label: 'reactorRoom', stop(f = 1.5) { LOOPS.delete(L); const t = ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + f);
+        [os, o2, l].forEach(n => { try { n.stop(t + f + 0.1); } catch (e) {} }); setTimeout(() => { try { out.disconnect(); } catch (e) {} }, (f + 2) * 1000); } };
+      LOOPS.add(L); return L;
+    }
+    const W = { home: undefined, homeNew: false, badge: undefined, dlg: null, said: undefined, tern: undefined, ask: false, sd: {}, coil: {}, rank: undefined, room: null, duck: false };
+    const has = f => typeof f === 'function';
+    const here = () => { try { return deckDef && player ? deckDef.num + '|' + roomAt(...player.here()) : null; } catch (e) { return null; } };
+    const play = (n, o) => { W.last = n; S.fx(n, o); };
+    function r3Watch() {   // each frame while sound runs
+      // the badge rack: taken (dosiOut() a minute) and back (null)
+      let b = null; try { b = has(dosiOut) ? dosiOut() : null; } catch (e) { b = null; }
+      if (W.badge !== undefined && (b != null) !== (W.badge != null)) play(b != null ? 'r3BadgeTake' : 'r3BadgeBack');
+      W.badge = b;
+      // the scenes, by line: the test fit as you turn it, Calder's question as the answers show (the music ducked while she asks), the engine badge
+      const D = typeof DIALOGUE !== 'undefined' ? DIALOGUE : null, dk = D ? D.id + ':' + D.i : null;
+      if (dk !== W.dlg) {
+        const l = D && D.queue ? D.queue[D.i] : null;
+        if (D && D.id === 'vesselTestFit' && D.i === 1) play('r3TestFit', { long: 6 });
+        if (D && D.id === 'end.ask' && l && l.choice) play('r3Calder', { long: 8 });
+        if (D && D.id === 'pu4.badge' && D.i === 0) play('r3Promotion', { long: 5 });
+        W.dlg = dk;
+      }
+      const duck = !!(D && D.id === 'end.ask');
+      if (duck !== W.duck && BUS.music) { W.duck = duck; BUS.music.gain.setTargetAtTime(duck ? 0 : 1, ctx.currentTime, duck ? 0.8 : 1.5); }
+      // the early clock-out question: the screen asks (its "Clock out early" and Cancel)
+      const cs = document.getElementById('clockScreen'); let ask = false;
+      if (cs && !cs.hidden) { const w = has(csText) ? csText('earlyyes', 'Clock out early') : 'Clock out early'; ask = [...cs.querySelectorAll('button')].some(x => x.textContent === w); }
+      if (ask && !W.ask) play('r3ClockAsk');
+      W.ask = ask;
+      // the Tern landing in the shuttle bay for the Veyli vessel, while you're there: its ramp coming down
+      let tn = null; try { tn = typeof TERN !== 'undefined' && has(vesselNow) && vesselNow() && here() === '5|S' ? TERN.target : null; } catch (e) { tn = null; }
+      if (W.tern != null && tn === 1 && W.tern < 1) play('r3TernLand', { long: 5 });
+      W.tern = tn;
+      // inside the reactor room: the throb
+      const inR = here() === '6|R';
+      if (inR && !W.room) { if (S.log) S.log.push({ name: 'reactorRoom', loop: true }); W.room = throb(); }
+      else if (!inR && W.room) { W.room.stop(1.5); W.room = null; }
+    }
+    function r3Tick() {   // once a second
+      // your answer to the offer: Stay or Go (the answer as it's saved; "not sure" has none)
+      let s = null; try { s = SHIP.end && Array.isArray(SHIP.end.said) ? SHIP.end.said.length : null; } catch (e) { s = null; }
+      if (W.said !== undefined && s != null && s > (W.said || 0)) { const a = SHIP.end.said[s - 1][1]; if (a === 'stay' || a === 'go') play(a === 'stay' ? 'r3Stay' : 'r3Go', { long: 4 }); }
+      W.said = s;
+      // the move to Deck 2's room B (24u, Day 25): seen happen, its door's first opening gets the home chime (homeDoor)
+      let h = null; try { h = has(worksHome) ? worksHome() : null; } catch (e) { h = null; }
+      if (W.home !== undefined && h === '2-B' && W.home !== '2-B') W.homeNew = true;
+      W.home = h;
+      // promotions: your rank going up (Senior Officer, Engine Specialist)
+      const rk = SHIP.works && SHIP.works.rank;
+      if (W.rank !== undefined && rk !== W.rank && (rk === 'senior' || rk === 'specialist')) play('r3Promotion', { long: 5 });
+      W.rank = rk;
+      // a booked shutdown: its power off (st 'off'), and back (done or lapsed after being off)
+      const sd = SHIP.works && SHIP.works.sd && SHIP.works.sd.set ? SHIP.works.sd.set[SHIP.time.day] : null;
+      (Array.isArray(sd) ? sd : []).forEach((x, i) => { const k = SHIP.time.day + ':' + i, was = W.sd[k];
+        if (k in W.sd && x.st !== was) { if (x.st === 'off') play('r3ShutOff', { long: 3 }); else if (was === 'off') play('r3ShutOn', { long: 3 }); }
+        W.sd[k] = x.st; });
+      // a drive coil off the cycle and back: the Tier 4 test's and night 3's swap's steps, as they're done (at the coil, near you)
+      if (deckDef && deckDef.num === 6 && Array.isArray(SHIP.jobs) && has(jobStops)) for (const j of SHIP.jobs) {
+        const mid = j.mach || j.machine, team = Array.isArray(j.seq) && j.seq.some(x => x.part === 'cup'); if (!team && !/^6-coil-/.test(mid || '')) continue;
+        const m = /^6-coil-/.test(mid || '') && typeof machineById === 'function' ? machineById(mid) : null, at = m && m.at ? cellPos(...m.at) : null, o = at ? { x: at.x, z: at.z, long: 5 } : { long: 5 };
+        const sound = tag => { if (tag === 'isolate') play('r3CoilOff', o); else if (tag === 'cycle' || tag === 'cup') play('r3CoilOn', o); };
+        if (team) {   // night 3's swap (24h's steps): each step passed (j.cur moving on)
+          const c = j.cur | 0, was = W.coil[j.id]; W.coil[j.id] = c;
+          if (Number.isInteger(was)) for (let i = was; i < Math.min(c, j.seq.length); i++) sound(j.seq[i].part);
+          continue;
+        }
+        if (j.status === 'done') continue;
+        const done = j.stepsDone || [], seen = W.coil[j.id]; W.coil[j.id] = done.slice();
+        if (!seen) continue;
+        let st = []; try { st = jobStops(j); } catch (e) { st = []; }
+        for (const k of done) if (!seen.includes(k)) { const x = st[k] || {}; sound(x.step || x.tag); }
+      }
+    }
+    function r3ActPick(A) {   // an activity's own sound: winding in the new coil (the Tier 4 test's 'wind' stop), the lathe for Taavek's part (step 3)
+      try {
+        if (A.kind === 'vesselStep' && A.placeId === '5-shop-lathe' && SHIP.event && (SHIP.event.mine['vessel:step'] | 0) === 3) return { one: 'r3Lathe' };
+        if (deckDef.num === 6 && A.kind !== 'fetch' && has(jobStops)) {
+          const j = (SHIP.jobs || []).find(x => x.kind === 'tier4' && x.status !== 'done' && !x.workDone); if (!j) return null;
+          const st = jobStops(j), k = st.findIndex(x => (x.step || x.tag) === 'wind'), done = j.stepsDone || [];
+          if (k > 0 && !done.includes(k) && done.includes(k - 1)) return { one: 'r3Winding' };
+        }
+      } catch (e) { /* nothing special */ }
+      return null;
+    }
+    function homeDoor(d) {   // the door watcher asks as a door near you opens: room B's door, the first time since the move (once)
+      if (!W.homeNew || !deckDef || deckDef.num !== 2) return false;
+      const B = [[0.6, 0], [-0.6, 0], [0, 0.6], [0, -0.6]].some(([dx, dz]) => { try { return roomAt(...cellAt(d.cx + dx, d.cz + dz)) === 'B'; } catch (e) { return false; } });
+      if (B) W.homeNew = false; return B;
+    }
+    return { W, watch: r3Watch, tick: r3Tick, actPick: r3ActPick, homeDoor };
+  })() : null;
+  if (R3) S.onFrame.push(() => { try { R3.watch(); } catch (e) {} });
   function ambTick() {
     let cook = false, wash = false;
     try {
@@ -73729,6 +74013,8 @@ const SND = (() => {
     } catch (e) { cook = wash = false; }
     ambSet('sizzle', cook); ambSet('washer', wash);
     if (cook && Math.random() < 0.12) S.fx(pick(['chop', 'chop', 'stove', 'ovenOpen', 'ovenClose']), { long: 3 });
+    if (MESS_SND) MESS_SND.tick();   // the sound update, turn 2: the mess hall
+    if (R3) try { R3.tick(); } catch (e) {}   // turn 3: the feature sounds read once a second
   }
   let actTickSet = false;
   S.onFrame.push(() => { if (!actTickSet) { actTickSet = true; S.actTick = actTick; } });   // once, on the first frame: S.whenReady and the core's S.actTick = null come later in the block
@@ -73770,6 +74056,8 @@ const SND = (() => {
       const opening = was < 0.04 && d.open >= 0.04, closing = was > 0.96 && d.open <= 0.96;
       if (!opening && !closing) continue;
       const mine = Math.hypot(d.cx - p.x, d.cz - p.z) < 1.9;
+      if (R3 && opening && mine && R3.homeDoor(d)) S.fx('r3Home', { long: 3 });   // the sound update: your new quarters' home chime (C), with the door
+      if (SND_R3_ON && opening && deckDef.num === 6 && d.e.key === 'v,27,3') { S.fx('r3ReactorDoor', { x: d.cx, z: d.cz, long: 4 }); continue; }   // the sound update, turn 3: the reactor's shielded door (A)
       S.fx(d.svc ? (opening ? 'hatchOpen' : 'hatchClose') : (opening ? 'doorOpen' : 'doorClose'), { x: d.cx, z: d.cz, crew: !mine });
     }
     // turn 5: your footsteps, by the floor under you; none while riding or doing something; a crawlway is softer
@@ -74192,6 +74480,17 @@ const SND = (() => {
       // the comet (0.93.2, FX25's event; plans/events-plan-2.html A6): slow and bright, played only while you watch it
       comet:      { name: 'Comet', time: 'Event', key: 54, mode: 'lydian', bpm: 52, a: [0, 1], b: [0, 3, 1, 2], c: [4, 1], seed: 433, slow: true, bells: true, wet: 0.7, bright: 1.15, note: 'The comet going by: slow, bright Lydian pads, a chime tune and wide open space. Only at the windows, on the night it passes.' },
     };
+    if (SND_R3_ON) Object.assign(SPACE, {   // the sound update, turn 1: the traditions and events the user picked music for (Round 3, 2026-10-28), event tracks like the comet's
+      beam:        { name: 'Name on the beam', time: 'Event', key: 55, mode: 'lydian', bpm: 72, a: [0, 1], b: [3, 0, 1, 2], c: [4, 1], seed: 541, pulse: true, bells: true, pattern: [0, 1, 2, 3, 2, 1, 2, 0], note: 'Short and proud: a soft pulse, a sequence and a chime tune while the name goes up.' },
+      cup:         { name: 'Cup day', time: 'Event', key: 52, mode: 'mixo', bpm: 80, a: [0, 1], b: [0, 3, 1, 2], c: [4, 2], seed: 571, pulse: true, pattern: [0, 2, 1, 3, 1, 2, 0, 3], note: 'The liveliest, still without drums: a soft pulse, a quick sequence and a singing lead.' },
+      farewellsup: { name: 'Farewell supper', time: 'Event', key: 50, mode: 'dorian', bpm: 54, a: [0, 2], b: [1, 0, 3, 2], c: [4, 1], seed: 547, slow: true, bells: true, wet: 0.7, note: 'Tender, never sad: slow Dorian chimes, high stars and a quiet singing line.' },
+      goodbye:     { name: 'The goodbye', time: 'Event', key: 52, mode: 'ionian', bpm: 56, a: [0, 1], b: [2, 1, 3, 0], c: [4, 2], seed: 601, wet: 0.7, note: 'The last track: slow Ionian pads, a singing lead and an answering chime.' },
+      harvest:     { name: 'Harvest table', time: 'Event', key: 48, mode: 'ionian', bpm: 66, a: [0, 1], b: [2, 1, 3, 0], c: [4, 1], seed: 523, note: 'A plain, warm tune for the two garden suppers.' },
+      lantern:     { name: 'Lantern walk', time: 'Event', key: 52, mode: 'dorian', bpm: 56, a: [0, 1], b: [2, 0, 3, 1], c: [4, 2], seed: 521, slow: true, bells: true, bright: 0.9, note: 'Dorian pads and a rocking chime tune, lanterns swinging along the promenade.' },
+      line:        { name: 'Crossing the Line', time: 'Event', key: 49, mode: 'lydian', bpm: 60, a: [0, 1], b: [0, 3, 1, 2], c: [4, 1], seed: 577, wet: 0.7, bright: 1.1, note: 'Bright, wide Lydian space music for crossing into the Veyli reach.' },
+      veyli:       { name: 'Veyli welcome', time: 'Event', key: 50, mode: 'mixo', bpm: 54, a: [0, 1], b: [3, 1, 0, 2], c: [4, 2], seed: 593, lg: 0.035, note: 'A held drone and a struck bronze bar for the Veyli, under the Wren\'s own pads.' },
+      farewell:    { name: 'Farewell song', time: 'Event', key: 43, mode: 'dorian', bpm: 50, a: [0, 2], b: [3, 0], c: [4, 1], seed: 613, bright: 0.55, wet: 0.7, note: 'Low and sparse under the crew\'s singing at the Veyli farewell: a held drone, dark pads, a low bronze bar, one high chime (the user\'s A).' },
+    });
     for (const [k, d] of Object.entries(SPACE)) TRACKS[k] = space(d);
     const SPACE_LV = {dawn: 0.417, wake: 0.442, firstlight: 0.525, systems: 0.631, morning: 0.479, tea: 0.479, midday: 0.417, lunch: 0.452, promenade: 0.537, afternoon: 0.452, circuits: 0.525, golden: 0.49, evening: 0.468, porthole: 0.468, watch: 0.452, lullaby: 0.447, latenight: 0.484, deepspace: 0.484, shift: 0.513, steady: 0.495, rounds: 0.495};   // levels for the space tracks (set by measuring against the hum)
     for (const k of Object.keys(SPACE)) MLV[k] = SPACE_LV[k] ?? 1;
@@ -74234,10 +74533,24 @@ const SND = (() => {
     }
     const SHAPED = ['tea', 'lunch', 'porthole', 'watch', 'lullaby', 'latenight', 'deepspace', 'comet'];
     SHAPED.forEach(shaped);
+    if (SND_R3_ON) {   // the sound update, turn 1: the event tracks take the reshaped form (phrases, a moving bass), as the comet does
+      Object.assign(PARTS, {
+        sDrone: c => { if (c.bar % 4 === 0) { SX.swell(c.t, c.root, c.s * c.beats * 4, 0.06, c.out); SX.swell(c.t, c.root + 7, c.s * c.beats * 4, 0.03, c.out); } },   // the home note and its fifth, held (the Veyli)
+        sBronze: c => { const m = c.mel && c.mel[0]; if (m) fmBell(c.t + m[0] * c.s, mtof(m[1] + 12), 3.5, c.lg * 0.7, 2.76, 1.1, 0, c.out); },   // a struck bronze bar on the tune's first note
+        sBronzeLow: c => { if (c.bar % 2 === 1) fmBell(c.t + c.s, mtof(c.ch[1] + 12), 4.5, 0.016, 2.76, 0.9, 0, c.out); },   // the farewell song: a low bronze bar every other bar
+        sHighChime: c => { if (c.bar % 3 === 1) fmBell(c.t + 2 * c.s, mtof(c.ch[c.ch.length - 1] + 24), 5, 0.009, 2.01, 0.45, 0, c.out); },   // and one high chime now and then
+      });
+      ['beam', 'cup', 'farewellsup', 'goodbye', 'harvest', 'lantern', 'line', 'veyli', 'farewell'].forEach(shaped);
+      const V = TRACKS.veyli; V.form = () => longForm([sec('Arrival', 'A', 4, ['sPad', 'sDrone'], 1)],
+        [sec('Bronze', 'A', 8, ['sPad', 'sDrone', 'sBronze'], 1), sec('Both ships', 'B', 8, ['sPad', 'sDrone', 'sBronze', 'sSing'], 2), sec('Drift', 'C', 8, ['sPad', 'sStars', 'sChime'], 1)],
+        [sec('Closing', 'A', 4, ['sPad', 'sStars'], 1)], V.bpm, 4, 10, ['x']);
+      TRACKS.farewell.form = () => [sec('Hush', 'A', 2, ['sDrone', 'sPad'], 1), sec('Song', 'A', 4, ['sDrone', 'sPad', 'sBronzeLow'], 1), sec('Last line', 'B', 2, ['sDrone', 'sPad', 'sHighChime'], 1)];   // the user's A (bronze and drone): about 40 s, once
+    }
     const SHAPE_LV = {};   // levels for the reshaped tracks (set by measuring)
     for (const k of SHAPED) MLV[k] = SHAPE_LV[k] ?? MLV[k];
     for (const [k, f] of Object.entries({ lunch: 1.3, latenight: 1.3, deepspace: 1.4, systems: 1.3, dawn: 1.3 })) MLV[k] *= f;   // the quieter ones up 2-3 dB (measured)
     MLV.comet = 0.65;   // the comet's level (measured against the hum)
+    if (SND_R3_ON) Object.assign(MLV, { beam: 0.6, cup: 0.6, farewellsup: 0.57, goodbye: 0.55, harvest: 0.62, lantern: 0.6, line: 0.56, veyli: 0.6, farewell: 1.39 });   // the event tracks' levels: matched to the comet's (measured offline, within 1 dB); the farewell song about 6 dB under, for the voices on top
 
     for (const k of ['morning', 'evening', 'latenight', 'shift', 'steady', 'rounds', 'firstlight', 'midday', 'lunch', 'afternoon', 'tea', 'golden', 'watch', 'lullaby', 'wake', 'systems', 'dawn', 'promenade', 'circuits', 'porthole', 'deepspace']) { const d = TRACKS[k]; delete TRACKS[k]; TRACKS[k] = d; }   // v7's order (its list and Next), as before the old definitions were left out
     // ---- the schedule: ship time of day, and a working set while you're on shift
@@ -74380,6 +74693,36 @@ const SND = (() => {
   const musTime = () => ({ day: SHIP.time.day, min: SHIP.time.min, onShift: musShift() });
   const musPeriod = min => { let p = MUS_PERIOD[MUS_PERIOD.length - 1][0]; for (const [n, from] of MUS_PERIOD) if (min >= from) p = n; return p; };
   S.music = null; S.musicLog = S.log ? [] : null;
+  // the sound update, turn 1 (SND_R3_ON): which event track fits where you are now, or null. Reads the game only.
+  // Traditions: while one the user picked is on and you're in one of its rooms. Events: the Line's ceremony (the bow
+  // lounge) and supper (the mess), there and back; the Veyli's arrival (the shuttle bay) and formal dinner (the Captain's
+  // quarters); the farewell song at their send-off (the shuttle bay, 08:55-09:20); the ending's goodbye in the bay and the end page.
+  const R3_TRAD = { beam: ['name-on-the-beam', 'name-on-the-beam-new'], cup: ['rec-cup', 'rec-regatta', 'department-cup'], farewellsup: ['farewell-supper'], harvest: ['harvest-supper', 'first-fruits'], lantern: ['lantern-walk'] };
+  function r3EventMusic() {
+    if (typeof deckDef === 'undefined' || !deckDef || typeof roomAt !== 'function') return null;
+    const key = roomAt(...player.here()), here = deckDef.num + '|' + key, room = (deckDef.rooms && deckDef.rooms[key] || {}).name || '';
+    const t = shipNow(), d = Math.floor(t / 1440) + 1, B = (d - 1) * 1440, m = t - B;
+    if (typeof eventsOn === 'function') for (const e of eventsOn(d)) {
+      const k = Object.keys(R3_TRAD).find(x => R3_TRAD[x].includes(e.id)); if (!k || t < B + e.from || t >= B + e.to) continue;
+      const rooms = e.rooms || (e.ev && typeof eventRooms === 'function' ? eventRooms(e.ev) : null); if (rooms && rooms.has(here)) return k;
+    }
+    const n = typeof eventNow === 'function' ? eventNow() : null;
+    if (n && (n.id === 'crossingLine' || n.id === 'crossingBack') && (n.phase === 'onset' && /^Bow lounge$/.test(room) || n.phase === 'resolution' && m >= 1080 && m < 1155 && /^Mess hall$/.test(room))) return 'line';
+    if (n && n.id === 'diplomatic') {
+      if (n.phase === 'onset' && m >= 600 && m < 660 && /^Shuttle bay$/.test(room)) return 'veyli';
+      if (n.phase === 'escalation' && m >= 1110 && m < 1260 && deckDef.num === 2 && key === 'C') return 'veyli';
+      if (n.phase === 'resolution' && m >= 535 && m < 560 && /^Shuttle bay$/.test(room)) return 'farewell';
+    }
+    if (typeof EV_ENDING_ON !== 'undefined' && EV_ENDING_ON && typeof endGoing === 'function') {
+      const pg = document.getElementById('endPage'); if (pg && !pg.hidden) return 'goodbye';
+      const W = endGoing() && typeof endWeek === 'function' ? endWeek() : null;
+      if (W && typeof endInBay === 'function' && endInBay() && endDayOf(t) >= W.leave && m >= 480 && m < 630) return 'goodbye';
+    }
+    return null;
+  }
+  if (SND_R3_ON) S.r3Event = r3EventMusic;   // for sound_check
+  if (MESS_SND) S.r3Mess = MESS_SND.M;   // for sound_check: the mess hall's count and scene
+  if (R3) S.r3 = R3;   // for sound_check: turn 3's watchers
   S.makeMusic = createWrenMusic;                          // for sound_check: the module on a test clock
   S.onFrame.push(() => {                                  // the first frame with sound running makes it (this slot comes before S.whenReady and the settings)
     if (!S.music) { musPrefs(); S.music = createWrenMusic({ ctx: S.ctx, dest: S.bus.music, shipTime: musTime, enabled: MP.on, volume: MP.vol, mode: MP.mode, heard: MP.heard,
@@ -74388,6 +74731,7 @@ const SND = (() => {
         if (/^Playing /.test(tx) && S.music) { MP.heard = S.music.state().heard; S.savePrefs(); if (typeof DEV !== 'undefined' && DEV.open && DEV.app === 'music') deviceRefresh(); }   // the rotation carries on across days; a live Now playing
       } }); }
     let ev = null; try { ev = typeof cometMusicOn === 'function' && cometMusicOn() ? 'comet' : null; } catch (e) { ev = null; }   // section 18's comet (FX25): its own track while you watch
+    if (SND_R3_ON && !ev) { try { ev = r3EventMusic(); } catch (e) { ev = null; } }   // the sound update: a picked tradition or event, while you're in its room
     S.music.setEvent(ev);
     S.music.update();
   });
