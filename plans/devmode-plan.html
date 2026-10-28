@@ -1,0 +1,330 @@
+<title>Dev Mode Jumps Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one reading column, cards only for the things that are separate objects (questions, turns). Dark first, like the game's own panels. */
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e8c06a;--rose:#e58f8f;--mag:#ff5ad2;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--bg:#121a27;--ok:#6fcf8e;--part:#e9c46a;--miss:#e58f8f;color-scheme:dark;
+--body:"Avenir Next","Segoe UI",system-ui,sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--ink:#18232b;--muted:#4f6168;--teal:#167e72;--gold:#8a6510;--rose:#a33b3b;--mag:#a3237f;--glass:rgba(255,255,255,.86);--line:rgba(30,80,76,.22);--bg:#eef2f3;--ok:#1d7a43;--part:#8a6510;--miss:#a33b3b;color-scheme:light}}
+:root[data-theme="light"]{--ink:#18232b;--muted:#4f6168;--teal:#167e72;--gold:#8a6510;--rose:#a33b3b;--mag:#a3237f;--glass:rgba(255,255,255,.86);--line:rgba(30,80,76,.22);--bg:#eef2f3;--ok:#1d7a43;--part:#8a6510;--miss:#a33b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.5}
+main{max-width:860px;margin:0 auto;padding-block:16px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-size:21px;font-weight:600;margin:4px 0 0;text-wrap:balance}
+h2{font-size:17px;font-weight:600;margin:30px 0 8px;color:var(--teal);text-wrap:balance}
+h3{font-size:15px;font-weight:600;margin:14px 0 4px}
+p,li{font-size:14px}
+.sub{font-size:13px;color:var(--muted);margin-top:4px}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
+.card.rule{border-color:var(--gold)}
+code{font-family:var(--mono);font-size:12.5px;background:rgba(127,160,170,.14);padding:0 4px;border-radius:4px;word-break:break-word}
+.tw{overflow-x:auto;margin:6px 0}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:560px}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+td.num,th.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;border-radius:999px;padding:0 7px;border:1px solid;white-space:nowrap}
+.ok{color:var(--ok);border-color:var(--ok)}.part{color:var(--part);border-color:var(--part)}.miss{color:var(--miss);border-color:var(--miss)}
+.legend{font-size:12px;color:var(--muted)}
+.phone{display:flex;gap:14px;flex-wrap:wrap;margin:10px 0}
+.screen{width:300px;max-width:100%;border:2px solid var(--gold);border-radius:18px;padding:10px;background:#0d1521;color:#e8eef0;font-size:12px}
+.screen .hd{color:#e8c06a;font-weight:600;font-size:13px;margin-bottom:6px}
+.screen .tabs,.screen .row{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:5px}
+.screen b.t,.screen b.btn{display:block;border:1px solid rgba(150,200,196,.35);border-radius:8px;padding:6px 4px;text-align:center;font-weight:500;min-height:30px}
+.screen b.on{border-color:#e8c06a;color:#e8c06a}
+.screen b.ask{background:#e8c06a;color:#1a1408;border-color:#e8c06a}
+.screen .item{border-bottom:1px solid rgba(150,200,196,.18);padding:6px 2px;display:flex;justify-content:space-between;gap:6px;align-items:center}
+.screen .item small{display:block;color:#93a6ae}
+.screen .go{border:1px solid #e8c06a;color:#e8c06a;border-radius:8px;padding:5px 9px;white-space:nowrap}
+.screen h4{margin:8px 0 2px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#93a6ae}
+.screen .note{color:#f1d79a;margin-top:4px}
+.q{background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:12px 0}
+.q .qh{font-size:12px;color:var(--rose);font-weight:600;letter-spacing:.03em}
+.q .qt{font-size:14.5px;font-weight:600;margin:3px 0 8px}
+.q label{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;padding:5px 0;cursor:pointer}
+.q input[type=radio]{margin-top:4px;accent-color:var(--teal)}
+.rec{font-size:11px;color:var(--bg);background:var(--teal);border-radius:999px;padding:0 7px;margin-left:4px;white-space:nowrap}
+textarea{width:100%;min-height:58px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:13.5px;margin-top:6px}
+.why{font-size:12.5px;color:var(--muted);margin:2px 0 0 24px}
+#savebtn{appearance:none;border:1px solid var(--teal);background:var(--teal);color:var(--bg);font:inherit;font-size:14px;font-weight:600;border-radius:10px;padding:10px 18px;min-height:44px;cursor:pointer}
+#savebtn:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#savestate{font-size:13px;color:var(--muted)}
+</style>
+
+<main>
+<p class="sub">Starship Cadet · Dev mode, the next update · DM1 for lead 43 · 2026-10-28 · branch claude/devmode-plan (from claude/staging-pad, 0.95.0 with the controller work)</p>
+<h1>Dev mode: jump to anything in the game</h1>
+<p class="sub">A plan only. Nothing in the game or the checks changes until the controller round has passed and you say go. Your answers go at the bottom of the page.</p>
+
+<div class="card rule">
+<p><b>In short.</b> Dev mode today can move the clock, take you to any room, start any tradition, and set your career to any day up to Day 30 with eight story shortcuts. It can't reach the ship-wide events, most of Steps 5 and 6, the Veyli vessel or the ending, and its career arrow goes quiet after the Deck 2 move.</p>
+<p>The plan adds one tab, <b>Jump to</b> (it replaces the empty "Big events" tab), with about 40 jumps in four groups: <b>Career</b>, <b>Nights</b>, <b>Ship events</b> and <b>The ending</b>. Each jump starts a fresh Dev game and runs the ship forward to that moment, the same way Set career does now. So the event or beat is the game's own, on its own day, never a fake. Set career gains one button per rank, the Traditions tab gains "Go to its next showing", and the career arrow follows you to the end of the game.</p>
+<p>About <b>20 hours of building in 6 turns</b>: one short groundwork turn, then three builders side by side, then the arrow and the write-up. Your real game is never touched, as now.</p>
+</div>
+
+<h2>1. What Dev mode can do now</h2>
+<p>Read from the code on claude/staging-pad (section 25, lines 71098-72188, and the Dev hooks in 24u, 18f and 20c). <span class="pill ok">WORKS</span> built and checked; <span class="pill part">PARTLY</span> some of it; <span class="pill miss">MISSING</span> not there.</p>
+<div class="tw"><table>
+<tr><th>What you'd want to test</th><th>Now</th><th>What's there, and where</th></tr>
+<tr><td>Move the clock, keep needs, excuse workdays</td><td><span class="pill ok">WORKS</span></td><td>Clock tab: next morning, +1 hour, +3 hours, +1 day, +7 days, any time. <code>devmodeSkipTo</code>. Nights 22-24 counted as worked (<code>devmodeNightsWorked</code>).</td></tr>
+<tr><td>Take me to a room, Mark, Undo, Copy my real game</td><td><span class="pill ok">WORKS</span></td><td>Quick tab. <code>devmodeMove</code>, <code>devmodeMark</code>, <code>devmodeUndo</code>.</td></tr>
+<tr><td>Every tradition</td><td><span class="pill part">PARTLY</span></td><td>Traditions tab starts any tradition by name (in 20 minutes, at its usual time, tomorrow). Not there: a cake or invitation (decided ahead), a story flag, and the traditions that only happen during an event (they're refused on an event day). No way to go to a tradition's <i>real</i> next showing, where all of that is in place.</td></tr>
+<tr><td>Set career, by day</td><td><span class="pill part">PARTLY</span></td><td>Set career tab, Days 0-30 (<code>DM_MAXDAY = 30</code>), table <code>DM_CAREER</code> with Steps 5 and 6 rows. Stops before the vessel (Day 27-30), the crossing back (31-35) and the ending (32-36).</td></tr>
+<tr><td>Every rank and tier</td><td><span class="pill part">PARTLY</span></td><td>By day only. The Career tab's rank buttons know Junior and Officer; Senior Officer and Engine Specialist only come from picking the right day.</td></tr>
+<tr><td>Step 3: Day 9 test, Day 10 promotion</td><td><span class="pill ok">WORKS</span></td><td><code>DM_BEATS</code> t2 and promo; Career tab's "Open the test now" and "Next step".</td></tr>
+<tr><td>Step 5: Tier 3 test, result, bar, toast</td><td><span class="pill part">PARTLY</span></td><td>"Next step" walks them (<code>puDevSteps</code>); Set career Day 15/16 lands near them. No shortcut that puts you at the test or the bar.</td></tr>
+<tr><td>Step 6: Tier 4 test, result, badge, Deck 2 move</td><td><span class="pill ok">WORKS</span></td><td><code>DM_BEATS</code> t4, t4res, t4badge, t4move; devmode_check part <code>t4beats</code>.</td></tr>
+<tr><td>Monday briefing (Day 22)</td><td><span class="pill miss">MISSING</span></td><td>Section 28b. Reachable only by clock.</td></tr>
+<tr><td>Night 1 (Reyes), night 2 (the reactor), night 3 (the coil swap)</td><td><span class="pill miss">MISSING</span></td><td>Sections 28a, 28c, 28d. The clock can skip past them; nothing lands you at their start.</td></tr>
+<tr><td>Mentoring Basil (Day 26)</td><td><span class="pill ok">WORKS</span></td><td><code>DM_BEATS</code> mt.</td></tr>
+<tr><td>Calder's question (Day 26)</td><td><span class="pill part">PARTLY</span></td><td><code>DM_BEATS</code> cq lands you at the tea; the answer isn't set for later jumps (the ending's post depends on it).</td></tr>
+<tr><td>Ship-wide events: the Line, the storm, the comet, the vessel, the crossing back</td><td><span class="pill miss">MISSING</span></td><td>The "Big events" tab is a placeholder ("Coming in Stop 3"). Set career runs the storm and the Line in the background but can't land you in them.</td></tr>
+<tr><td>Running event: next phase, end it now</td><td><span class="pill miss">MISSING</span></td><td>The events base already made <code>eventFinish</code> safe for an early end ("Dev mode's End"), but nothing calls it.</td></tr>
+<tr><td>The ending: offer, your answer, the address, the goodbye, the end page, staying on</td><td><span class="pill miss">MISSING</span></td><td>Section 29. Out of Set career's range.</td></tr>
+<tr><td>First week: Day 1 briefing, Day 2 solo job</td><td><span class="pill part">PARTLY</span></td><td>Only by playing Day 0-1 once and Marking (the panel says so).</td></tr>
+<tr><td>Career arrow (magenta DEV)</td><td><span class="pill part">PARTLY</span></td><td>Covers the first week, trainings, Steps 3, 5 and the Engine Specialist beats (<code>dvCareerNext</code>, <code>puDevNext</code>, <code>pu4DevNext</code>). Silent for the nights, the briefing, mentoring, Calder's question, the events and the ending.</td></tr>
+<tr><td>Speed card</td><td><span class="pill ok">WORKS</span></td><td>Speed tab.</td></tr>
+</table></div>
+<p class="legend">Not in the game now, so not in this plan: the Diplomatic visit (still a draft, off), and anything parked as cut.</p>
+
+<h2>2. How a jump works</h2>
+<p>Every jump is the existing Set career with a landing spot. That one choice is what keeps it safe:</p>
+<ol>
+<li><b>A fresh Dev game</b>, started the Skip-to-Monday way, as Set career does now. Two taps ("Tap again: a new Dev game"), and Undo brings back the game you had.</li>
+<li><b>The ship runs forward day by day</b> to the jump's day, with the career set each morning from the table, workdays excused, needs kept. Every ship-wide event in that time happens on its own calendar day by the game's own rules, so when you land in the storm it's the real storm with its real Mail, crew plans and broken machines.</li>
+<li><b>Your part on the way is filled in through the game's own functions</b>, at the moment you'd have done it: Calder's question answered with <code>cqAnswer</code>, the offer heard with <code>endOfferDone</code>, your answer given with <code>endSay</code>. Dev mode never writes those records by hand.</li>
+<li><b>The clock stops a few minutes before the moment</b>, and you're placed in the room. Then you play it.</li>
+</ol>
+<p>Safety rules, from DEV_NOTES "Rules that keep it working":</p>
+<ul>
+<li><b>Your real save:</b> never written. All of this lives in the Dev save (keys ending in "-dev"), with the space check before every write.</li>
+<li><b>No R():</b> nothing in section 25 calls it. A jump only uses the game's seeded parts, so two jumps to the same moment give the same save, byte for byte (the check proves it for one jump in each group).</li>
+<li><b>The crew's planner</b> only reads records it's allowed to (the settled ones the game itself makes: Basil's day, Calder's question). Where a jump settles one, that day's plans are made again, as the mentoring shortcut already does.</li>
+<li><b>No events off their calendar day.</b> Events are tied to their days (the nights, the storm's Saturday, the comet's sky, the career guard), so starting one on another day is where things would break. A running event can be moved to its next phase, or ended early through <code>eventFinish</code>.</li>
+<li><b>Without the Dev link</b> nothing of this exists, as now. The checks prove it.</li>
+<li><b>Section 26</b> (the controller, now adding a Dev card at the screen's edge) is not touched. The new rows are ordinary Dev panel buttons, so the controller reaches them the way it reaches the panel today.</li>
+</ul>
+
+<h2>3. The new rows, at phone size</h2>
+<p>Drawn for 390 × 844, inside the Dev sheet (lower 56% of the screen), 44px buttons as now.</p>
+<div class="phone">
+<div class="screen" aria-label="Sketch: the Jump to tab">
+<div class="hd">Dev mode: not your real game</div>
+<div class="tabs"><b class="t">Quick</b><b class="t">Clock</b><b class="t">Traditions</b><b class="t">Career</b><b class="t">Set career</b><b class="t on">Jump to</b><b class="t">Speed</b></div>
+<div class="row"><b class="btn ask">Career</b><b class="btn">Nights</b><b class="btn">Ship events</b></div>
+<div class="row"><b class="btn">The ending</b></div>
+<h4>Career (Step 5)</h4>
+<div class="item"><span>Your Tier 3 test<small>Day 15 · 08:50 · Works bay</small></span><b class="go">Go</b></div>
+<div class="item"><span>Your bar, from the Captain<small>Day 16 · observation room</small></span><b class="go">Go</b></div>
+<div class="item"><span>The Captain's toast<small>Day 17 · her quarters</small></span><b class="go">Go</b></div>
+<div class="note">Tap Go twice: a new Dev game, about 20 s.</div>
+</div>
+<div class="screen" aria-label="Sketch: a ship event running">
+<div class="hd">Dev mode: not your real game</div>
+<h4>Running now</h4>
+<div>Ion storm · escalation (Day 13) · ends Day 17</div>
+<div class="row"><b class="btn">Next phase ›</b><b class="btn">Its meeting</b><b class="btn">End it now</b></div>
+<h4>Ship events</h4>
+<div class="item"><span>Crossing the Line: the oath<small>Day 7 · 14:25 · bow lounge</small></span><b class="go">Go</b></div>
+<div class="item"><span>Ion storm: the front hits<small>Day 12 · 13:55 · Works bay</small></span><b class="go">Go</b></div>
+<div class="item"><span>Comet viewing<small>Day 22 · 21:25 · the bow</small></span><b class="go">Go</b></div>
+</div>
+<div class="screen" aria-label="Sketch: Set career rank buttons and the ending answer">
+<div class="hd">Set career</div>
+<h4>By rank (its first morning)</h4>
+<div class="row"><b class="btn">Cadet</b><b class="btn">Officer</b><b class="btn">Senior</b></div>
+<div class="row"><b class="btn">Engine Specialist</b></div>
+<h4>The ending · your answers</h4>
+<div>Calder's question:</div>
+<div class="row"><b class="btn ask">Engines</b><b class="btn">Bridge</b><b class="btn">Teach</b></div>
+<div class="row"><b class="btn">Unsure</b></div>
+<div>The offer:</div>
+<div class="row"><b class="btn">Stay</b><b class="btn ask">Go</b><b class="btn">Unsure</b></div>
+</div>
+</div>
+<p class="legend">The answers row sits above the ending's jumps and is used by any jump that needs it. The tab bar stays three rows; turn J0 may make it 4 + 3 to give the list a little more room.</p>
+
+<h2>4. The jumps</h2>
+<p>Each row: what you land at, the day and time the clock stops at (a few minutes before), and where. Times marked ~ come from the piece's own table and are read from it, never copied.</p>
+<h3>Career</h3>
+<div class="tw"><table>
+<tr><th>Jump</th><th>Lands</th><th>Where</th><th>Status</th></tr>
+<tr><td>By rank: Cadet / Officer / Senior Officer / Engine Specialist</td><td>Day 2, 11, 17, 23 at 06:00</td><td>your bed</td><td>new (Set career)</td></tr>
+<tr><td>Day 1: Calder's briefing</td><td>Day 1 ~08:45</td><td>Works bay</td><td>new, if the Skip-to-Monday start can hold it (question 6)</td></tr>
+<tr><td>Day 9: the test job · Day 10: the promotion</td><td>as now</td><td>Works bay</td><td>kept</td></tr>
+<tr><td>Day 12: Power safety</td><td>Day 12, its lesson ~</td><td>its room</td><td>new</td></tr>
+<tr><td>Day 15: your Tier 3 test</td><td>Day 15 ~08:50</td><td>Works bay</td><td>new</td></tr>
+<tr><td>Day 16: your Tier 3 result, your bar</td><td>Day 16 ~</td><td>Calder's office, observation room</td><td>new (two rows)</td></tr>
+<tr><td>Day 17: the Captain's toast</td><td>Day 17 ~</td><td>her quarters, Deck 2</td><td>new</td></tr>
+<tr><td>Day 18: shutdowns training</td><td>Day 18 ~09:00</td><td>Works bay</td><td>new</td></tr>
+<tr><td>Day 22: Monday briefing</td><td>Day 22 08:20</td><td>observation room</td><td>new</td></tr>
+<tr><td>Day 22: Tier 4 test · result · Day 23 badge · Day 25 Deck 2</td><td>as now</td><td></td><td>kept</td></tr>
+<tr><td>Day 26: Basil with you · Calder's question</td><td>as now</td><td></td><td>kept (the question now uses the answers row for later jumps)</td></tr>
+</table></div>
+<h3>Nights</h3>
+<div class="tw"><table>
+<tr><th>Jump</th><th>Lands</th><th>Where</th></tr>
+<tr><td>Night 1: engine work with Reyes</td><td>Day 22 22:35</td><td>the time clock, Deck 5</td></tr>
+<tr><td>Night 2: the reactor (permit, badge, the Watch)</td><td>Day 23 20:50</td><td>the time clock</td></tr>
+<tr><td>Night 3: the coil swap, your team</td><td>Day 24 20:50</td><td>the time clock</td></tr>
+<tr><td>Night 3: the slot itself (team picked, slot booked)</td><td>5 minutes before the booked slot</td><td>engine room, Deck 6</td></tr>
+</table></div>
+<h3>Ship events</h3>
+<div class="tw"><table>
+<tr><th>Event</th><th>Jumps (each a few minutes before)</th></tr>
+<tr><td>Crossing the Line (Days 6-8)</td><td>Vance's Mail (Day 6 17:55) · the horn and the oath (Day 7 ~14:25) · the Line supper (Day 7 ~17:55)</td></tr>
+<tr><td>Ion storm (Days 11-16)</td><td>Calder's briefing (Day 11 morning) · the front (Day 12 13:55) · the worst of it (Day 13 05:55) · storm Saturday · the all-clear (Day 14 09:55) · the lantern supper</td></tr>
+<tr><td>Comet viewing (Day 22)</td><td>the viewing (21:25) · the turn back (22:35)</td></tr>
+<tr><td>A Veyli vessel needs help (Days 27-30)</td><td>the call and the address (Day 27 07:55) · the Tern brings Taavek (Day 28 09:25) · the test fit (Day 29) · the engine lights (Day 29 17:35) · it leaves (Day 30 09:10)</td></tr>
+<tr><td>Crossing back (Days 31-35)</td><td>Vance asks you to lead the oath (Day 31 07:55) · Saruth off the bow (Day 34 09:55) · you host the oath (Day 35 14:25)</td></tr>
+</table></div>
+<p class="legend">Exact moments are read from each event's own <code>phases</code>, <code>meetings</code> and <code>moments</code>, so a later change to an event moves its jump with it.</p>
+<h3>The ending</h3>
+<div class="tw"><table>
+<tr><th>Jump</th><th>Lands</th></tr>
+<tr><td>The offer from headquarters</td><td>Day 32 15:50, outside the ready room (needs Calder's question answered: the answers row)</td></tr>
+<tr><td>Your answer still open</td><td>Day 34 17:55 (the arrow and the Captain's search to come)</td></tr>
+<tr><td>The Captain's address at the crossing back</td><td>Day 35 ~14:50, with your answer from the answers row</td></tr>
+<tr><td>The goodbye (you said Go)</td><td>Day 36 morning, before the Tern's ramp</td></tr>
+<tr><td>The end page</td><td>straight to it, after the goodbye</td></tr>
+<tr><td>Staying on (you said Stay)</td><td>Day 36 06:00, the endgame's first morning</td></tr>
+</table></div>
+<p class="legend">Set career's range goes from Day 30 to Day 40 so these fit. A slow career's later offer (a week on) is not a jump; the clock reaches it.</p>
+<h3>Traditions and the arrow</h3>
+<ul>
+<li><b>Go to its next showing</b> on each tradition's card: the clock (in this Dev game, with Undo) to 10 minutes before its next day on the calendar, so the cake, invitation and story flags are the real ones. Refused when that's more than 14 days off; then the card says which Set career day reaches it.</li>
+<li><b>The career arrow</b> follows the nights, the briefing, Basil, Calder's question and the ending, read from each piece's own Schedule rows (<code>p5nItems</code>, <code>m23Items</code>, <code>m24Items</code>, <code>mtItems</code>, <code>cqItems</code>, <code>endItems</code>), so no other section changes. During an event it can also name the event's own meeting for you, labelled "Event:" (question 8).</li>
+</ul>
+
+<h2>5. Build turns</h2>
+<p>All of it is in section 25, my seat's own slot, with no hooks in other sections. To let three builders work at once without touching the same lines, turn J0 lays down the shared parts and an empty labelled block for each builder, in the game and in both checks.</p>
+<div class="tw"><table>
+<tr><th>Turn</th><th>Who</th><th>What</th><th>Lines it owns</th><th class="num">Hours</th></tr>
+<tr><td>J0</td><td>builder A</td><td>The jump list (<code>DM_JUMPS</code>, one registration call <code>devmodeJump({ id, group, label, day, by, at, where, set, answers })</code>), the Jump to tab in place of Big events, the runner (Set career with a landing and the answers row), <code>DM_MAXDAY</code> 40, the rank buttons, the Day 1 try. Empty blocks J1-J3 in section 25, and stub parts <code>jumps</code>, <code>beats</code>, <code>events</code>, <code>ending</code> in devmode_check and <code>s6</code>, <code>ev</code>, <code>end</code> in dev_arrow_check, so later turns never edit a shared line. Measures how long a jump to Day 36 takes.</td><td>DM_TABS, DM_LATER, devmodeDraw, devmodeSet, DM_CAREER's end, the check files' part lists</td><td class="num">3</td></tr>
+<tr><td>J1</td><td>builder A</td><td>Career and Nights rows (section 4 tables), check part <code>beats</code>.</td><td>block "J1: career and nights"</td><td class="num">4</td></tr>
+<tr><td>J2</td><td>builder B</td><td>Ship events rows, the Running now card (next phase, its meeting, end it now), check part <code>events</code>.</td><td>block "J2: ship events"</td><td class="num">4</td></tr>
+<tr><td>J3</td><td>builder C</td><td>The ending rows and the answers row, Go to its next showing on the Traditions card, check part <code>ending</code> and an addition to <code>trad</code>.</td><td>block "J3: the ending", one line in devmodeTrad</td><td class="num">4</td></tr>
+<tr><td>J4</td><td>first one free</td><td>The career arrow from the Schedule rows, and event meetings; dev_arrow_check parts <code>s6</code>, <code>ev</code>, <code>end</code>.</td><td>the DV block only</td><td class="num">3</td></tr>
+<tr><td>J5</td><td>builder A</td><td>DEV_NOTES and design-doc "Dev mode", the build table, review fixes, the full round on six runners.</td><td></td><td class="num">2</td></tr>
+<tr><td></td><td></td><td><b>Total</b></td><td></td><td class="num"><b>about 20</b></td></tr>
+</table></div>
+<p class="legend">Order: J0 is merged first (with check_fast), then J1, J2, J3 and J4 run side by side, each bringing in the shared branch at the start of its turn. Everything here is Dev-only, so the game without #dev stays identical: regressions on every deck must be pixel-identical, and the off parts of both checks prove nothing of it runs.</p>
+
+<h2>6. The checks</h2>
+<ul>
+<li><b>devmode_check <code>jumps</code></b> (J0): every registered jump has a known group, a day within Set career's range, a landing room that exists, and an id used once; jumps behind a switch only appear with it on.</li>
+<li><b><code>beats</code></b> (J1), <b><code>events</code></b> (J2), <b><code>ending</code></b> (J3): every jump in its group is run: the clock, deck and room it lands at, the record it needs (the test set, the night's record, <code>SHIP.event</code> and its phase, <code>SHIP.end</code>), no miss, no notes Mail, no errors; one jump per group twice, byte-identical; Undo after one. Events also: next phase, end it now (one debrief, the log written). Ending: each answer (Stay, Go, Unsure) and each of Calder's four answers reaches the right post and page.</li>
+<li><b><code>trad</code></b> (J3): Go to its next showing lands on the real day with the cake or invitation in place.</li>
+<li><b>dev_arrow_check <code>s6</code>, <code>ev</code>, <code>end</code></b> (J4): at each landing, the arrow names the right step (or the event's meeting) and points at the right deck and room; still none without #dev.</li>
+<li><b>Timing:</b> a jump is a whole new game run forward (Set career to Day 26 is in today's check). Each group is its own part so no part runs much over 5 minutes, and the full round spreads them over the six runners. J0 measures the real cost first.</li>
+</ul>
+
+<h2>7. Risks</h2>
+<ul>
+<li><b>Long jumps on your phone.</b> A jump to Day 36 runs 36 ship days. If J0 finds it takes more than about 30 seconds on a phone, the fallback is to let a jump start from your Mark when the Mark is earlier the same run (question 9).</li>
+<li><b>A piece's own record vs the table.</b> Set career sets the career by a table, approximately. A later piece may read something the table doesn't set (a night's record, a side job). Each jump's check catches this; the fix goes in the table, not in the piece.</li>
+<li><b>Your part in events is empty.</b> Landing in the storm, the ship scored it without you so far. The debrief and commendation follow from what you then do. Approximate, and said so on the panel.</li>
+<li><b>Traditions tied to an event</b> can only be reached through the event's jump, not the Traditions tab. The tab will say so on their cards.</li>
+<li><b>Section 26 is moving</b> (the controller's Dev card). Nothing here touches it; the controller seat checks its card still opens the sheet after J0.</li>
+<li><b>Merge clashes</b>: the blocks and stub parts from J0 keep the three builders apart; the two build-number lines stay the build master's.</li>
+</ul>
+
+<h2>Questions for you</h2>
+<form id="answers" data-collection="answers" data-doc="devmode-jumps-plan" onsubmit="return false">
+
+<div class="q" data-qid="dj-q1"><div class="qh">QUESTION 1 · A FRESH GAME EACH TIME</div><div class="qt">Should every jump start a fresh Dev game, run forward to the moment?</div>
+<label><input type="radio" name="dj-q1" value="fresh"><span>Yes, always fresh (Undo brings your Dev game back) <span class="rec">recommended</span></span></label><div class="why">The moment is then exactly what a steady player would get, and the same every time.</div>
+<label><input type="radio" name="dj-q1" value="current"><span>Jump inside the Dev game I'm playing when it can</span></label><div class="why">Faster, but the result depends on what you did before, and some beats wouldn't line up.</div>
+<textarea id="dj-q1-c" name="dj-q1-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="dj-q2"><div class="qh">QUESTION 2 · EVENTS ON OTHER DAYS</div><div class="qt">Should Dev mode be able to start a ship-wide event on any day, not just its calendar day?</div>
+<label><input type="radio" name="dj-q2" value="calendar"><span>No: jump to it on its own day; while it runs, Next phase and End it now <span class="rec">recommended</span></span></label><div class="why">Events are tied to their days (the nights, the comet's sky, the career guard), so a free start is where things break.</div>
+<label><input type="radio" name="dj-q2" value="any"><span>Yes, start any event now (about 6 hours more, and some will look odd)</span></label>
+<textarea id="dj-q2-c" name="dj-q2-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="dj-q3"><div class="qh">QUESTION 3 · THE DIPLOMATIC VISIT</div><div class="qt">The Diplomatic visit is built but still switched off as a draft. Include it?</div>
+<label><input type="radio" name="dj-q3" value="later"><span>Not until it's switched on in the game <span class="rec">recommended</span></span></label><div class="why">Dev mode tests what's in the game now. Its jumps take an hour once it's on.</div>
+<label><input type="radio" name="dj-q3" value="now"><span>Yes, as a Dev-only preview</span></label>
+<textarea id="dj-q3-c" name="dj-q3-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="dj-q4"><div class="qh">QUESTION 4 · YOUR ANSWERS ON THE WAY</div><div class="qt">Later jumps need your answer to Calder's question and to the offer. How should they be chosen?</div>
+<label><input type="radio" name="dj-q4" value="row"><span>An answers row on the Jump tab: Engines, Bridge, Teach, Unsure; Stay, Go, Unsure. Engines and Go picked to start <span class="rec">recommended</span></span></label><div class="why">Every post and both endings stay reachable, and the panel says which answer was used.</div>
+<label><input type="radio" name="dj-q4" value="fixed"><span>Always the same answers (fewer buttons)</span></label>
+<textarea id="dj-q4-c" name="dj-q4-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="dj-q5"><div class="qh">QUESTION 5 · HOW THE STORM WENT</div><div class="qt">The storm's result (smoothly, bumpily, roughly) depends on what you did. Jumping in, the ship has scored it without you. Should Dev mode let you set the result?</div>
+<label><input type="radio" name="dj-q5" value="asis"><span>No, leave it to what happens; add it later if testing needs it <span class="rec">recommended</span></span></label>
+<label><input type="radio" name="dj-q5" value="set"><span>Yes, a Smooth / Bumpy / Rough choice on the running event (about 2 hours)</span></label>
+<textarea id="dj-q5-c" name="dj-q5-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="dj-q6"><div class="qh">QUESTION 6 · THE FIRST WEEK'S MEETINGS</div><div class="qt">The Day 1 briefing and Day 2 solo job today need Day 0-1 played once. Try a jump to them?</div>
+<label><input type="radio" name="dj-q6" value="try"><span>Try it in J0; if the arrival's records won't hold, keep the play-once recipe <span class="rec">recommended</span></span></label>
+<label><input type="radio" name="dj-q6" value="skip"><span>Leave it as it is</span></label>
+<textarea id="dj-q6-c" name="dj-q6-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="dj-q7"><div class="qh">QUESTION 7 · RANK BY HAND</div><div class="qt">The Career tab sets Junior or Officer by hand. For Senior Officer and Engine Specialist?</div>
+<label><input type="radio" name="dj-q7" value="presets"><span>Rank buttons on Set career (that rank's first morning, everything consistent) <span class="rec">recommended</span></span></label><div class="why">A rank set by hand skips the records the later pieces read, so they'd misbehave.</div>
+<label><input type="radio" name="dj-q7" value="hand"><span>Also by hand on the Career tab, marked approximate</span></label>
+<textarea id="dj-q7-c" name="dj-q7-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="dj-q8"><div class="qh">QUESTION 8 · THE ARROW DURING EVENTS</div><div class="qt">Should the magenta DEV arrow also point at an event's meeting for you (the storm briefing, the oath you host)?</div>
+<label><input type="radio" name="dj-q8" value="yes"><span>Yes, labelled "Event:" <span class="rec">recommended</span></span></label><div class="why">It only reads, and it shows you where to be in a test.</div>
+<label><input type="radio" name="dj-q8" value="no"><span>No, career steps only</span></label>
+<textarea id="dj-q8-c" name="dj-q8-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="dj-q9"><div class="qh">QUESTION 9 · IF LONG JUMPS ARE SLOW</div><div class="qt">If a jump near the end takes over half a minute on your phone, what then?</div>
+<label><input type="radio" name="dj-q9" value="measure"><span>Measure it in J0 and tell you; if slow, let jumps start from an earlier Mark <span class="rec">recommended</span></span></label>
+<label><input type="radio" name="dj-q9" value="wait"><span>Half a minute is fine, keep it simple</span></label>
+<textarea id="dj-q9-c" name="dj-q9-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="dj-q10"><div class="qh">QUESTION 10 · BUILDERS</div><div class="qt">After J0, three builders side by side, or one after another?</div>
+<label><input type="radio" name="dj-q10" value="three"><span>Three side by side (about 2 days less) <span class="rec">recommended</span></span></label><div class="why">J0's blocks keep them out of each other's lines.</div>
+<label><input type="radio" name="dj-q10" value="one"><span>One builder, in turn order</span></label>
+<textarea id="dj-q10-c" name="dj-q10-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="dj-general"><div class="qh">ANYTHING ELSE</div><div class="qt">Anything you'd want to jump to that isn't here?</div>
+<textarea id="dj-general" name="dj-general" placeholder="Your thoughts"></textarea></div>
+
+<button type="button" id="savebtn">Save my answers</button>
+<p id="savestate"></p>
+</form>
+<p class="legend">Planned by DM1 (the Dev mode engineer) for lead 43. Read: section 25 (all), 24u's Dev hooks, 18 (the calendar and the events), 18f, 28-28f, 29-29c, devmode_check.py, dev_arrow_check.py, DEV_NOTES "Dev mode", design-doc "Dev mode". The earlier plan (v3.1, DP1) is kept as plans/devmode-plan-v3.1.html.</p>
+</main>
+<script>
+(function () {
+  const form = document.getElementById('answers'), btn = document.getElementById('savebtn'), st = document.getElementById('savestate');
+  const COLL = form.dataset.collection, DOC = form.dataset.doc;
+  let db = null, user = null;
+  function read() {
+    const out = {};
+    for (const q of form.querySelectorAll('.q[data-qid]')) {
+      const r = q.querySelector('input[type=radio]:checked'); if (r) out[q.dataset.qid] = r.value;
+      const t = q.querySelector('textarea'); if (t && t.value.trim()) out[t.name] = t.value.trim();
+    }
+    return out;
+  }
+  function fill(d) {
+    if (!d) return;
+    for (const k in d) {
+      const r = form.querySelector('input[type=radio][name="' + k + '"][value="' + String(d[k]).replace(/"/g, '') + '"]'); if (r) r.checked = true;
+      const t = form.querySelector('textarea[name="' + k + '"]'); if (t && typeof d[k] === 'string') t.value = d[k];
+    }
+  }
+  btn.addEventListener('click', async function () {
+    if (!db) { st.textContent = 'Saving isn\'t available in this view. Please copy your answers into a message instead.'; return; }
+    st.textContent = 'Saving...';
+    try {
+      const data = read(); data.savedAt = new Date().toISOString();
+      if (user) { try { data.by = await user.id(); } catch (e) { /* fine */ } }
+      await db.collection(COLL).doc(DOC).set(data);
+      st.textContent = 'Saved. You can change your answers and save again any time.';
+    } catch (e) { st.textContent = 'Couldn\'t save (' + ((e && (e.code || e.message)) || 'error') + '). Try again, or send your answers in a message.'; }
+  });
+  (async function () {
+    try {
+      if (!window.claude || !window.claude.use) return;
+      db = await window.claude.use('db'); user = await window.claude.use('user');
+      if (db) { const s = await db.collection(COLL).doc(DOC).get(); if (s && s.exists) fill(s.data()); }
+    } catch (e) { /* the page still reads; saving says so */ }
+  })();
+})();
+</script>
