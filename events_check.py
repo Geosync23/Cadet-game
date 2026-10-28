@@ -57,6 +57,7 @@ PLANS = r"""(days => {
     const S = schedData(), went = {}, places = {};
     for (const p of schedPeople()) for (const s of planDay(p, d)) {
       if (!s.tag || !/^ev-/.test(s.tag) || (typeof eventMeetTag === 'function' && eventMeetTag(s.tag))) continue;   // a ship-wide event's meeting (F0b), not a tradition
+      { const m = /^ev-(\w+)-/.exec(s.tag); if (m && SHIP_EVENTS[m[1]] && !SHIP_TRADITIONS.some(e => e.id === s.tag.slice(3))) continue; }   // an event guest's own steps (Taavek's ev-veyliVessel-ramp...), not a tradition (EV1: the guests' days are on paper from Day 1 now)
       const id = tagId(s.tag), e = on.find(x => x.id === id), B = (d - 1) * 1440;
       if (!e) { out.bad.push(d + ' ' + p.id + ' at ' + id + ', which is not on'); continue; }
       if (s.from < B + e.from - Math.max(e.ev.early || 0, p.id === e.ev.host || typeof P926_TRADS !== 'undefined' && P926_TRADS && /^rec-(wren|chiefs)-talk$/.test(e.id) && recSpeaker(p, d) ? 5 : 0, e.ev.meal && typeof TRAD_LINE !== 'undefined' ? TRAD_LINE[1] : 0, e.ev.lead ? 35 : 0) ||   // the sim plans a host 5 minutes early; a meal tradition's diners sit as the line serves them, up to TRAD_LINE[1] early (sim 0.26.41); the Captain's address seats them up to 30 minutes early (18f's friLead), its host 5 more
@@ -160,6 +161,7 @@ STORM = r"""(() => {
       sig.push(k + ':' + m.join(',')); mods[k] = m;
       if (n && n.phase === 'escalation') eventScore('blackout', 1);   // a stand-in: a minute of blackout per step of the escalation
       const g = eventMod('galley', 'menu', t); if (g) mods.menu = g;
+      if (SHIP.eventLog.some(l => l.id === 'ionStorm')) break;   // the storm's own run: the visit starts on Day 16 now it's on (EV1)
     }
     if (send) mailSend = send;
     if (real) { for (const x of NEWS.splice(n0)) { news.push(fmt(x)); delete SHIP.knows[x.id]; } } else delete window.newsAdd;
@@ -601,7 +603,8 @@ with sync_playwright() as pw:
         storm_cal = g.ev("typeof EV_CAL_ON !== 'undefined' && EV_CAL_ON")
         if g.ev("typeof P926_TRADS !== 'undefined' && P926_TRADS"): PLAN['rec-chiefs-talk'] = PLAN['rec-chiefs-talk'] + [32]; PLAN['rec-wren-talk'] = PLAN['rec-wren-talk'] + [36, 39]   # 0.92.6 (FX17): the full talk rota
         dress = g.ev("(() => { const o = {}; if (typeof EV_DAY_DRESS !== 'undefined') for (const [k, v] of EV_DAY_DRESS) { const [id, d] = k.split('@'); ((o[id] = o[id] || { drop: [], add: [] })[v.drop ? 'drop' : 'add']).push(+d); } return o; })()")
-        rc = g.ev("""(() => { const out = { on: {}, n: {}, hosts: [], talks: [] };
+        rc = g.ev("""(() => { const out = { on: {}, n: {}, hosts: [], talks: [], paused: {} };
+          for (const ev of SHIP_TRADITIONS) if (/^rec-/.test(ev.id)) for (let d = 1; d <= 42; d++) if (eventPauses(ev, d)) (out.paused[ev.id] = out.paused[ev.id] || []).push(d);   // a ship-wide event's quiet hours (the visit's greeting day, Day 17: EV1)
           for (let d = 1; d <= 42; d++) for (const e of eventsOn(d)) if (/^rec-/.test(e.id)) {
             (out.on[e.id] = out.on[e.id] || []).push(d);
             const went = schedPeople().filter(p => planDay(p, d).some(s => evTagId(s.tag) === e.id)).map(p => p.id);
@@ -615,6 +618,7 @@ with sync_playwright() as pw:
             if k == 'rec-wso': want = [d for d in want if d != 28]
             if k == 'rec-slow-stretch' and storm_cal: want = [d for d in want if d != 14]   # Sunday Day 14 08:00: the calendar's storm (escalation) pauses it
             want = sorted((set(want) - set(dress.get(k, {}).get('drop', []))) | set(d for d in dress.get(k, {}).get('add', []) if d <= 42))   # a ship-wide event's day dress (the storm update: talent night a week on)
+            want = [d for d in want if d not in rc['paused'].get(k, [])]
             if got != want: fail(f"{k} on days {got}, the plan says {want}")
         print('Rec deck traditions, days 1-42 (people at each):', '; '.join(f"{k} {v}" for k, v in sorted(rc['n'].items())))
         for x in rc['hosts']: fail(x)
