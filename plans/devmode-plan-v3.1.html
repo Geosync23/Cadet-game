@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dev Mode Plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e07a7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--bg:#121a27;--field:#0e1520;--phone:#0b1119}
+:root[data-theme="light"]{--ink:#1d2a30;--muted:#55666d;--teal:#1f8a7e;--gold:#a67c12;--rose:#b54848;--glass:rgba(255,255,255,.85);--line:rgba(40,80,80,.2);--bg:#eef2f3;--field:#fff;--phone:#dfe7ea}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--ink:#1d2a30;--muted:#55666d;--teal:#1f8a7e;--gold:#a67c12;--rose:#b54848;--glass:rgba(255,255,255,.85);--line:rgba(40,80,80,.2);--bg:#eef2f3;--field:#fff;--phone:#dfe7ea}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif;line-height:1.5}
+main{max-width:1000px;margin:0 auto;padding:16px}
+h1{font-size:21px;margin:4px 0 2px;font-weight:600;padding-right:100px}
+h2{font-size:17px;margin:26px 0 8px;color:var(--teal);font-weight:600}
+h3{font-size:15px;margin:14px 0 4px}
+.sub{font-size:13px;color:var(--muted)}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:10px 0}
+.card.key{border-color:var(--teal)}
+p,li{font-size:14px}
+ul,ol{padding-left:20px;margin:6px 0}
+details{background:var(--glass);border:1px solid var(--line);border-radius:12px;margin:8px 0;padding:0 14px}
+details[open]{padding-bottom:10px}
+summary{cursor:pointer;padding:10px 0;font-size:14px;font-weight:600}
+summary:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tbc{color:var(--gold);font-size:12px}
+code{font-size:12.5px}
+/* the phone sketches: a 390 x 844 screen drawn smaller */
+.phones{display:flex;flex-wrap:wrap;gap:16px;margin:10px 0}
+.ph{width:250px;flex:0 0 auto;background:var(--phone);border:2px solid var(--line);border-radius:26px;padding:10px 9px 12px}
+.ph .cap{font-size:12px;color:var(--muted);margin:6px 2px 0}
+.scr{border-radius:16px;overflow:hidden;background:linear-gradient(#1d3140,#0f1d27);height:470px;position:relative;font-size:10.5px;color:#e8eef0}
+.hudc{position:absolute;top:6px;left:8px;border:1.5px solid #e9c46a;border-radius:8px;padding:3px 7px;background:rgba(13,21,33,.8);font-size:9.5px;line-height:1.35}
+.hudc .dv{display:inline-block;background:#e9c46a;color:#1b1b1b;font-weight:700;border-radius:4px;padding:0 4px;margin-right:4px;font-size:8.5px}
+.hudc i{font-style:normal;color:#93a6ae}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:rgba(10,16,24,.95);border-top:1px solid rgba(150,200,196,.35);border-radius:14px 14px 0 0;padding:7px 8px 8px}
+.sheet .ttl{font-size:9.5px;color:#e9c46a;margin-bottom:4px;display:flex;justify-content:space-between}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-bottom:6px}
+.tabs span{text-align:center;height:22px;line-height:22px;border-radius:7px;background:#1b2838;font-size:10px;color:#b9c8ce}
+.tabs span.on{background:#4cc3b5;color:#0c1118;font-weight:700}
+.btns{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:4px 0}
+.btns.two{grid-template-columns:repeat(2,1fr)}
+.btns b{font-weight:600;background:#1b2838;border:1px solid rgba(150,200,196,.3);border-radius:8px;padding:0 4px;font-size:10px;height:27px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1}
+.btns b.go{background:#4cc3b5;color:#0c1118;border-color:#4cc3b5}
+.btns b.rose{border-color:#e07a7a;color:#e07a7a}
+.ln{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid rgba(150,200,196,.12);gap:6px}
+.ln i{font-style:normal;color:#93a6ae;text-align:right}
+.lab2{color:#93a6ae;font-size:9.5px;margin-top:4px}
+.bar2{height:7px;border-radius:4px;background:#1b2838;overflow:hidden;margin:2px 0 4px}
+.bar2 span{display:block;height:100%;background:#4cc3b5}
+.note{font-size:9.5px;color:#e9c46a;margin-top:3px}
+/* questions: one block per question; data-qid is the question's id for saving */
+.q{background:var(--glass);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:12px;padding:10px 14px;margin:12px 0}
+.q h3{font-size:14.5px;margin:0 0 4px}
+.q .why{font-size:13px;color:var(--muted);margin:0 0 6px}
+.q fieldset{border:0;margin:0;padding:0}
+.q legend{position:absolute;left:-9999px}
+.q label.opt{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;padding:5px 0;cursor:pointer}
+.q label.opt input{margin-top:3px;accent-color:var(--teal)}
+.q .recd{font-size:11px;color:var(--teal);border:1px solid var(--teal);border-radius:999px;padding:0 6px;margin-left:4px;white-space:nowrap}
+.q textarea{width:100%;min-height:54px;background:var(--field);color:var(--ink);border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;padding:6px 8px}
+.q textarea:focus-visible{outline:2px solid var(--teal)}
+.q .cl{font-size:12px;color:var(--muted);display:block;margin:4px 0 2px}
+.theme{float:right;appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-size:12px;padding:5px 10px;border-radius:999px;cursor:pointer}
+@media (max-width:560px){.ph{width:100%}.scr{height:450px}}
+</style>
+</head>
+<body>
+<main>
+<button class="theme" id="theme" aria-label="Switch light or dark">Light / dark</button>
+<h1>Dev mode: the plan</h1>
+<div class="sub">Dev mode planner DP1, 2026-10-20, <b>version 3: the lean Dev mode</b>, after your answers (12:05) and your talk with lead 20. Branch <code>claude/devmode-plan</code>, based on <code>claude/integration</code> (0.64.2 and step 2). Planning only: the game is unchanged. Version 2.1, with both reviews behind it, is in git history (6c37f52). The full day-jump replay is parked in section 7, with its design and measurements.</div>
+
+<div class="card key">
+<b>In short</b>
+<ul>
+<li><b>Dev mode is a hidden testing panel.</b> You open it with a ready Dev link (the game's link with <code>#dev</code>). Without that link it doesn't exist in the game.</li>
+<li><b>Three stops, about 9-10 turns:</b>
+<ul>
+<li><b>Stop 1a, the patch kit:</b> move the clock (workdays excused), keep your needs and top them up, "Take me to…", "Mark / Back to mark", "Undo my last Dev action", "Copy my real game", "Clear Dev save".</li>
+<li><b>Stop 1b:</b> start any ship tradition.</li>
+<li><b>Stop 2, Set career:</b> pick a day from 0 to 30. Dev mode moves the clock there and gives you what a steady player has by that day: rank, trainings, tools, reputation and the story beats so far. This is <b>approximate</b>, and marked so. The Career tab comes with it.</li>
+<li><b>Stop 3, Big events:</b> start, phases, threads, End and undo.</li>
+</ul></li>
+<li><b>The steady-player replay is parked, not deleted.</b> That's the exact day jump, where the game plays a player's days from Day 0. It's much bigger: 13-17 turns, with every career part's owner writing a line. Its design and measurements are kept in section 7 for later.</li>
+<li><b>3 new questions</b> are in section 6. Your earlier answers are recorded there as decided.</li>
+</ul>
+</div>
+
+<h2>1. Opening it, and keeping your real game safe</h2>
+<ul>
+<li><b>The Dev link</b> (your answer to q1).
+<ul>
+<li>The lead gives you the playable link with <code>#dev</code> on the end, to tap or bookmark.</li>
+<li>Stop 1a checks that it works in the Claude app, in a phone browser and after a reload.</li>
+<li>In Dev mode the place-and-clock card at the top left gets a gold outline and the word <b>DEV</b>. Tapping the card opens the panel, and the panel's title says "Dev mode: not your real game".</li>
+</ul></li>
+<li><b>Dev mode's own save.</b>
+<ul>
+<li>Your q2 answer was "no saving". After your talk with the lead, the plan keeps a <b>separate Dev save</b>, because "Mark / Back to mark", "Undo" and a page reload all need somewhere to keep your test.</li>
+<li>Your real save is never touched either way. The game's two storage names get "-dev" added in Dev mode.</li>
+<li>Dev mode doesn't use the tests' "no saving" switch, because that also turns off the arrival and the clothes.</li>
+<li>You confirmed this after the talk.</li>
+</ul></li>
+<li><b>Storage.</b>
+<ul>
+<li>Dev mode keeps three small things: its save, one Mark and one Undo, about 120 KB each. They're well inside the browser's space for this site.</li>
+<li>There's a space check before every Dev write, it never removes anything of your real game's, and "Clear Dev save" empties it.</li>
+<li>A check proves your real save still writes, and is byte for byte the same after a Dev session.</li>
+<li>With no kept days there's nothing big to store, so the separate store (IndexedDB) isn't needed.</li>
+</ul></li>
+<li><b>Copy my real game into Dev:</b> reads your real save (it never writes it), so you can test from the moment you found a bug.</li>
+<li><b>Every Dev action:</b>
+<ul>
+<li>keeps an Undo first;</li>
+<li>settles what's in progress (a conversation ends with its gist in Mail, an activity stops, a game closes);</li>
+<li>refuses during a lift ride or sleep;</li>
+<li>freezes the game while it works, so the result doesn't depend on the phone's speed.</li>
+</ul></li>
+</ul>
+
+<h2>2. The panel at phone size</h2>
+<p class="sub">A sheet across the lower screen (on the right in landscape). Six tabs in two rows of three, 44-point buttons, at most three to a row.</p>
+<div class="phones">
+<div class="ph"><div class="scr"><div class="hudc"><span class="dv">DEV</span>Works Chief's office<br><i>Deck 5 · Day 2, Tuesday 08:30</i></div>
+<div class="sheet"><div class="ttl"><span>Dev mode: not your real game</span><span>▾</span></div>
+<div class="tabs"><span class="on">Quick</span><span>Clock</span><span>Traditions</span><span>Career</span><span>Set career</span><span>Big events</span></div>
+<div class="lab2">Take me to…</div>
+<div class="btns"><b class="go">Next appointment</b><b>A room…</b><b>The ladder</b></div>
+<div class="lab2">This moment</div>
+<div class="btns"><b>Mark here</b><b>Back to mark</b><b class="rose">Undo my last Dev action</b></div>
+<div class="btns"><b>Top up needs</b><b>Copy my real game</b><b>Clear Dev save</b></div>
+<div class="ln"><span>Mark</span><i>Day 2 08:30, Works Chief's office</i></div>
+</div></div><div class="cap">1. Quick (Stop 1a).</div></div>
+
+<div class="ph"><div class="scr"><div class="hudc"><span class="dv">DEV</span>Works bay<br><i>Deck 5 · Day 4, Thursday 10:20</i></div>
+<div class="sheet"><div class="ttl"><span>Dev mode: not your real game</span><span>▾</span></div>
+<div class="tabs"><span>Quick</span><span class="on">Clock</span><span>Traditions</span><span>Career</span><span>Set career</span><span>Big events</span></div>
+<div class="ln"><span>Now</span><i>Day 4 Thu 10:20 · clocked in</i></div>
+<div class="btns"><b class="go">Next morning</b><b>+1 hour</b><b>To a time…</b></div>
+<div class="btns"><b>To 08:55</b><b>To 16:55</b><b>To 21:40</b></div>
+<div class="btns"><b>+1 day</b><b>+7 days</b><b>+3 hours</b></div>
+<div class="note">Workdays you skip are excused. Needs kept as a normal day.</div>
+</div></div><div class="cap">2. Clock (Stop 1a).</div></div>
+
+<div class="ph"><div class="scr"><div class="hudc"><span class="dv">DEV</span>Your cabin (4-23)<br><i>Deck 4 · Day 12, Saturday 06:00</i></div>
+<div class="sheet"><div class="ttl"><span>Dev mode: not your real game</span><span>▾</span></div>
+<div class="tabs"><span>Quick</span><span>Clock</span><span>Traditions</span><span>Career</span><span class="on">Set career</span><span>Big events</span></div>
+<div class="btns"><b>Day 1</b><b>Day 2 solo job</b><b>Day 5</b></div>
+<div class="btns"><b>Day 9 test</b><b class="go">Day 12</b><b>Day…</b></div>
+<div class="ln"><span>Rank</span><i>Works Officer · Tier 2</i></div>
+<div class="ln"><span>Trained</span><i>10 of 19 · tools: clipboard, scanner, pipe kit</i></div>
+<div class="ln"><span>Reputation</span><i>Steady (Tier 2)</i></div>
+<div class="note">Approximate: friendships and your work log are thin. See the panel's "What's set" list.</div>
+</div></div><div class="cap">3. Set career (Stop 2).</div></div>
+</div>
+
+<h2>3. Stop 1: the playtest kit</h2>
+<h3>Stop 1a, the patch kit (D1-D4)</h3>
+<ul>
+<li><b>Clock:</b> next morning, +1 hour, to a time…, to 08:55, to 16:55, to 21:40, +3 hours, +1 day, +7 days.
+<ul>
+<li>It uses the game's own time jump (what sleeping uses), in 30-minute steps, frozen.</li>
+<li><b>Workdays you skip are excused</b> (your q5), as leave days. Under the hood, the career engineer adds a Dev-only list read by <code>careerOff</code>, plus one line in <code>careerTick</code> for today.</li>
+<li>Skipping while clocked in keeps you clocked in.</li>
+</ul></li>
+<li><b>Needs</b> (your q15) are kept as a normal day would leave them, and <b>Top up needs</b> fills them. This is a Dev-only hook in the player engineer's skip step.</li>
+<li><b>Take me to…</b> (q14): your next appointment, any room, or the testing spots (ladder, time clock, job board).
+<ul>
+<li>It moves you as the lift does, and the clock doesn't move.</li>
+<li>It's refused, with the reason, during the arrival evening and inside a meeting.</li>
+</ul></li>
+<li><b>Mark here / Back to mark</b> (q14): one saved moment. Back to mark reloads the page into it, which is exact because it's the same save.</li>
+<li><b>Undo my last Dev action</b> (q11), <b>Copy my real game</b>, <b>Clear Dev save</b>.</li>
+<li><b>The Day 2 meeting recipe:</b>
+<ol>
+<li>Play Day 0 and Day 1 once in a new Dev game, or Copy my real game.</li>
+<li>On Day 2, go to 08:30.</li>
+<li>Take me to: next appointment.</li>
+<li>Mark here.</li>
+<li>Watch, then Back to mark as often as needed.</li>
+</ol>
+If a skip passes one of the first week's meetings, the panel says so in words ("Skipped: the Day 1 briefing counted as missed"), because those meetings need you in the room.</li>
+</ul>
+<p><b>Published as Stop 1a</b> (your q16) with your Dev link and phone screenshots, so the playtest patch can be checked against it.</p>
+<h3>Stop 1b, traditions (D5)</h3>
+<ul>
+<li>Search all 60 traditions and start one: in 20 minutes, at its usual time, or tomorrow, with its Mail if you want it. The panel shows how many are going and offers Take me there.</li>
+<li><b>Under the hood:</b>
+<ul>
+<li>A Dev list in the Dev save, read by one line in <code>eventsOn</code>. The traditions engineer reviews it first.</li>
+<li>Today's plans are made again, so about 20 of the 74 crew move at once and 57 evenings change. The deck refreshes under the lift's fade (your q7).</li>
+<li>Things decided earlier, like a cake or an invitation, don't appear for a Dev-started tradition, and the panel says so.</li>
+</ul></li>
+<li><b>Handled:</b>
+<ul>
+<li>birthdays and rotation teas ask whose;</li>
+<li>flag traditions set their flag in the Dev save only;</li>
+<li>it's refused on Day 0 and during a big event, with the reason.</li>
+</ul></li>
+</ul>
+
+<h2>4. Stop 2: Set career (D6-D7)</h2>
+<h3>4.1 What it does</h3>
+<ol>
+<li>Pick a day from 0 to 30. The shortcuts are the story's beats: Day 1, the Day 2 solo job, Day 5, the Day 9 test, Day 10, Day 12, Day 16, Day 26, Day 30.</li>
+<li>Dev mode starts a <b>new Dev game</b> the "Skip to Monday" way (Day 1, 06:00; new question 2), then moves the clock day by day to that day at 06:00, with every workday excused. It doesn't start by shuttle, because the arrival holds the clock at Day 0 17:30 until you sign aboard (DR1 ran it). A new Dev save also has the arrival's start-up switched on, so Dev mode clears that when it starts its game (a section 21 hook).</li>
+<li>Each morning, before that day runs, it sets the career to what a steady player has by then, from the table below. It records each training as both <b>trained</b> and <b>opened</b> on its day (<code>W.tr</code> and <code>W.op</code>, since the ladder reads <code>W.op</code>), so the ladder doesn't open or ask for them again. After setting the rank it calls the game's own <code>promoPip()</code>, so your collar shows it.</li>
+<li>The ship itself (machines, jobs, galley, Mail, traditions, the ion storm, the crew's habits) runs through those days with the game's own catch-up code, as when you sleep. Your part in the storm is "none", and the storm's briefing notes arrive as Mail, as for anyone who missed the briefing.</li>
+<li><b>Set career doesn't depend on the first week's meetings happening, so it works even while the Day 2 meeting is broken.</b> Before the skip passes each one, it marks the arrival week as attended: the Day 1 briefing, the Day 2 solo job, the Settling-in items, and the Day 1 shadow shift the career starts from. Later systems then treat you as having been there.</li>
+<li>The first week's beats are marked as met, the promotion's beats as done (ceremony, cabin 4-23, the pip), and friendships with the people a steady player meets get a starting level (new question 1).</li>
+<li>You wake at 06:00 in your bed: the bunk room as a Junior, your cabin as an Officer.</li>
+</ol>
+<p>Everything Set career gave you is listed on the panel ("What's set"), and the Dev save is marked "career set to Day 12, approximate".</p>
+
+<h3>4.2 The table: what a steady player has by day N</h3>
+<p class="sub">From the career ladder in the game (each training's day) and the Pillar 5 plan's dates (Officer on Day 10, Senior Officer on Day 16, Engine Specialist on Day 23, Calder's question on Day 26). career_check's steady player checks these days. The rows for Senior and Engine Specialist are filled in by Pillar 5 Steps 5 and 6 when they build those ranks.</p>
+<div class="scroll"><table>
+<tr><th>By day</th><th>Rank</th><th>New trainings</th><th>Tools</th><th>Works reputation</th></tr>
+<tr><td>0</td><td>arriving</td><td>none</td><td></td><td></td></tr>
+<tr><td>1</td><td>Junior Technician</td><td>Day 1 shadow shift done</td><td></td><td>New</td></tr>
+<tr><td>2</td><td>Junior</td><td>Rounds</td><td>clipboard</td><td>Steady</td></tr>
+<tr><td>3</td><td>Junior</td><td>Hauling and stores, the drill</td><td></td><td>Reliable</td></tr>
+<tr><td>4</td><td>Junior</td><td>Tuning, the inspection</td><td></td><td>Trusted</td></tr>
+<tr><td>5</td><td>Junior</td><td>The scanner, What's been tried?</td><td>scanner</td><td>Trusted</td></tr>
+<tr><td>8</td><td>Junior</td><td>Making it safe, your work uniform</td><td></td><td>Relied on (end of Day 8)</td></tr>
+<tr><td>9</td><td>Junior</td><td>the Tier 2 test job, passed</td><td></td><td>Relied on</td></tr>
+<tr><td>10</td><td><b>Works Officer</b>, Tier 2</td><td>the promotion (summons, cabin 4-23, pip; ceremony on Day 11)</td><td></td><td>New (Tier 2)</td></tr>
+<tr><td>11</td><td>Officer</td><td>Team jobs</td><td></td><td>New</td></tr>
+<tr><td>12</td><td>Officer</td><td>Tracing, When does it happen?, the workshop, tool upkeep, the logbook, leak hunting</td><td>pipe kit</td><td>Steady</td></tr>
+<tr><td>13</td><td>Officer</td><td>Garden irrigation</td><td></td><td>Steady</td></tr>
+<tr><td>15</td><td>Officer</td><td>Who saw what?</td><td></td><td>Reliable</td></tr>
+<tr><td>16</td><td><i>Senior Officer</i> once built (Officer until then)</td><td></td><td></td><td></td></tr>
+<tr><td>17</td><td>Officer</td><td>Rewiring</td><td>conduit tester</td><td>Trusted</td></tr>
+<tr><td>18</td><td>Officer</td><td>The lift roof</td><td></td><td>Trusted</td></tr>
+<tr><td>23</td><td><i>Engine Specialist</i> once built</td><td></td><td></td><td></td></tr>
+<tr><td>26-30</td><td>as built by then</td><td>Calder's question (26); the visit finale once the events plan builds it</td><td></td><td></td></tr>
+</table></div>
+<ul>
+<li>The xp numbers behind each band come from the game's own band table (<code>WORK_BANDS</code>). The table lives in Dev mode's section as data, and devmode_check compares its days with <code>CAREER_LADDER</code>, so a moved training shows up as a failed check, not a silent mismatch.</li>
+<li>Days not listed carry on from the row before.</li>
+<li>The band words are a first guess, to be settled in D6 against career_check. Tier 1 is fixed by the check ("Relied on" by the end of Day 8, never before Day 5). Tier 2 is about a dozen steady workdays to "Relied on" (<code>WORK_BANDS</code>).</li>
+</ul>
+
+<h3>4.3 What approximate gets wrong (said on the panel)</h3>
+<div class="scroll"><table>
+<tr><th>Part</th><th>After Set career</th></tr>
+<tr><td>Rank, trainings, tools, band, the promotion</td><td>Set from the table: right for a steady player</td></tr>
+<tr><td>Machines, jobs, galley, Mail, traditions, news, the ion storm</td><td>Real: the game ran those days (with you away)</td></tr>
+<tr><td>Friendships and stories</td><td>Thin: a starting level with the people a steady player meets (question 1), no story beats played</td></tr>
+<tr><td>The first week's small ticks (the mug, the seedling, the Settling-in list)</td><td>Ticked as done: listed in "What's set"</td></tr>
+<tr><td>Your work log, "right first time" counts, commendations</td><td>Empty: no jobs were really done</td></tr>
+<tr><td>The storm's result and your part</td><td>As if you weren't there: no commendation</td></tr>
+<tr><td>Tool wear, the Works app's history, tips already seen</td><td>Fresh</td></tr>
+<tr><td>Needs, clothes</td><td>A normal morning</td></tr>
+</table></div>
+
+<h3>4.4 The Career tab (D7)</h3>
+<ul>
+<li>Shows trainings by name, with the code small ("Making it safe (m6)"): rank, Works reputation, tools, missed shifts and ship reputation.</li>
+<li><b>Set by hand</b> (your q8): xp up or down, the next band, the next training, tools.</li>
+<li><b>The promotion test</b> shows its needs with ticks: Day 9 or later, Relied on, Making it safe, a teacher on shift, before 14:00. If only the day is missing, "Open the test now" calls the ladder's own <code>ladderOpen</code>, which section 24's owner agrees first. "Next step ›" moves the clock to each of its beats.</li>
+<li><b>Set rank</b> directly is marked approximate.</li>
+</ul>
+
+<h2>5. Stop 3: Big events (D8-D9; the events plan's F6)</h2>
+<ul>
+<li>Lists the ion storm (on), the diplomatic visit (switched off) and the comet once it's drafted, with each one's phases and threads in words.</li>
+<li><b>Start</b> sets the event's day: today if its first phase is still ahead, else tomorrow.</li>
+<li><b>Next phase</b> moves the clock to the next phase. Jumps across several phases are labelled unreliable until the events plan's F4.</li>
+<li><b>Threads</b> show numbers and bands, with − and +.</li>
+<li><b>End and undo</b> (the default) puts back a copy of all the event state taken at the start, so later events don't move. <b>End and keep</b> waits for the event's ending to be split out of <code>eventAdvance</code> (section 18, its owner first, in the events plan's turns).</li>
+</ul>
+
+<h2>6. Turns, risks, hooks and questions</h2>
+<h3>6.1 The turns (about 9-10)</h3>
+<div class="scroll"><table>
+<tr><th>Turn</th><th>What's built</th><th>Proof</th></tr>
+<tr><td>D1</td><td>The switch <code>DEVMODE</code>, the Dev save (and section 13's order), the card as the way in, the empty sheet, section 25</td><td>cadet_test ALL IDENTICAL; devmode_check: the real save untouched (also with <code>#dev.debug</code>), nothing without <code>#dev</code></td></tr>
+<tr><td>D2</td><td>The space check, Clear, Undo my last Dev action, Copy my real game, the freeze and settling</td><td>Storage filled and the real save still writes; an Undo round trip</td></tr>
+<tr><td>D3</td><td>Clock, Excused, needs kept, Top up</td><td>+1 day like sleeping, no missed shifts; leave_check unchanged</td></tr>
+<tr><td>D4</td><td>Take me to… (with its refusals), Mark / Back to mark, the "skipped a meeting" notice</td><td>Every room on every deck; refused during the escort; Mark and Back give the same save</td></tr>
+<tr><td colspan="3"><b>Stop 1a, the patch kit:</b> your Dev link and phone screenshots.</td></tr>
+<tr><td>D5</td><td>Traditions</td><td>events_check and join_check unchanged; 5 kinds started; people go</td></tr>
+<tr><td colspan="3"><b>Stop 1b.</b></td></tr>
+<tr><td>D6</td><td>Set career: the table, the excused skip day by day, the beats set, waking in the right bed</td><td>Days 2, 10, 12 and 26 set; <b>Set career to Day 10 from a fresh Dev game: the career exists, rank Officer, no "missed meeting" Mail; then play Day 11 and no trained row opens again</b>; two Set careers to Day 12, byte-identical (the Dev seed); career_check and mech_check unchanged; the table's days match the ladder</td></tr>
+<tr><td>D7</td><td>The Career tab</td><td>The promotion opened from Day 9 runs to the ceremony</td></tr>
+<tr><td colspan="3"><b>Stop 2.</b></td></tr>
+<tr><td>D8-D9</td><td>Big events</td><td>events_check unchanged; the storm started, through its phases, undone (later dates unchanged)</td></tr>
+<tr><td>(D10)</td><td>Fixes from the reviews</td><td></td></tr>
+<tr><td colspan="3"><b>Stop 3.</b></td></tr>
+</table></div>
+
+<h3>6.2 Risks</h3>
+<div class="scroll"><table>
+<tr><th>Risk</th><th>What's done</th></tr>
+<tr><td>Dev mode changes the normal game</td><td>One switch, <code>DEVMODE</code> (<code>DEV</code> is already the device's), with CSS under <code>.devmode</code>. Every hook is empty when it's off. Each turn: cadet_test ALL IDENTICAL, day_check, names_check, check_fast.</td></tr>
+<tr><td>The real save touched or crowded out</td><td>Its own names, a space check, Clear, and a check that the real save writes and stays byte-identical.</td></tr>
+<tr><td>Set career's state misleads a test</td><td>Marked approximate. A "What's set" list on the panel. The table checked against the ladder. For a bug that depends on how you really played, use Copy my real game.</td></tr>
+<tr><td>The table goes stale as the career grows</td><td>devmode_check compares it with <code>CAREER_LADDER</code>. Steps 5-6 add their rows in the same turn as their ranks.</td></tr>
+<tr><td>A skip that can't be taken back</td><td>Undo my last Dev action, Mark, Clear.</td></tr>
+<tr><td>Traditions and events out of their slot</td><td>Refusals with reasons, the plans made again under the fade, End and undo.</td></tr>
+</table></div>
+
+<h3>6.3 Hooks in other sections (each owner reviews first)</h3>
+<ul>
+<li><b>13 (sim engineer):</b> <code>DEVMODE</code> read before <code>SAVE_KEY</code>, "-dev" added to the save's name; the freeze through <code>freezeSync</code>.</li>
+<li><b>21 (onboarding):</b> <code>INTRO_KEY</code> "-dev", and <code>introWanted</code> uses it. Set career starts with <code>newGameStart(false)</code> + <code>introSkip()</code> and clears <code>INTRO_BOOT</code> for its game. Set career marks the first week's beats as met through section 21's own records.</li>
+<li><b>20 (career engineer):</b> the excused list in <code>careerOff</code>, plus one line in <code>careerTick</code>; and a one-line Dev seed for the career's random <code>gs</code>, so devmode_check can compare two Set careers byte for byte.</li>
+<li><b>20 (social engineer):</b> Set career gives the starting friendships through section 20's own <code>relAdd</code> (question 1).</li>
+<li><b>15 (player engineer):</b> needs kept in the skip step (<code>needsDrain</code>).</li>
+<li><b>18 (traditions engineer):</b> one line in <code>eventsOn</code>. Later, the ending split (events plan).</li>
+<li><b>24 and 24p (Works career engineer):</b> Set career writes <code>SHIP.works</code> (rank, tier, trained rows, tools, xp, the promotion's record) in the shape <code>worksClean</code> keeps; <code>ladderOpen</code> for the test; <code>W.op</code> alongside <code>W.tr</code>; <code>promoPip()</code> after the rank.</li>
+<li><b>page (HUD seat):</b> the card's outline and tap target, and the sheet's CSS.</li>
+<li><b>New section 25 "DEV MODE":</b> the rest, inside <code>if (DEVMODE)</code>, with no <code>R()</code>.</li>
+</ul>
+
+<h3>6.4 Your earlier answers, now decided</h3>
+<div class="scroll"><table>
+<tr><th>Question</th><th>Decided</th></tr>
+<tr><td>q1 opening</td><td>A ready Dev link (<code>#dev</code>); tap the card</td></tr>
+<tr><td>q2 saving</td><td>Its own Dev save (you chose "none" at first, then confirmed a separate Dev save after the talk)</td></tr>
+<tr><td>q3 day jump</td><td>Parked (the replay); Set career instead</td></tr>
+<tr><td>q4 player kinds</td><td>Parked with the replay</td></tr>
+<tr><td>q5 shifts</td><td>Excused</td></tr>
+<tr><td>q6 arrival in a jump</td><td>No longer applies</td></tr>
+<tr><td>q7 tradition today</td><td>Today, under the lift's fade</td></tr>
+<tr><td>q8 career by hand</td><td>Test needs shown, open early when only the day is missing, set rank approximate</td></tr>
+<tr><td>q9 order</td><td>Three stops</td></tr>
+<tr><td>q10 published game</td><td>Keep it, behind the Dev link</td></tr>
+<tr><td>q11 Undo</td><td>Undo my last Dev action</td></tr>
+<tr><td>q12, q13 kept days, phone wait</td><td>No longer apply</td></tr>
+<tr><td>q14 Take me to, Mark</td><td>Both, in Stop 1a</td></tr>
+<tr><td>q15 needs</td><td>Kept, plus Top up</td></tr>
+<tr><td>q16 split Stop 1</td><td>Stop 1a, then 1b</td></tr>
+</table></div>
+
+<h3>6.5 New questions</h3>
+<p class="sub">Pick an option and add a comment if you like. My recommendation is marked.</p>
+<form id="answers" onsubmit="return false">
+
+<div class="q" data-qid="dm-v3-q1">
+<h3>1. After Set career, how friendly is the crew?</h3>
+<p class="why">A real steady player gets to know Zeke, Tomas, Calder, Sato and others. Set career plays no conversations.</p>
+<fieldset><legend>Question 1</legend>
+<label class="opt"><input type="radio" name="dm-v3-q1" value="starting"> Give the people a steady player meets a starting friendship for that day (from the parked replay's measured numbers), marked approximate <span class="recd">recommended</span></label>
+<label class="opt"><input type="radio" name="dm-v3-q1" value="none"> Leave friendships as the skip leaves them (thin)</label>
+<label class="opt"><input type="radio" name="dm-v3-q1" value="pick"> Let me set a friendship by hand on the Career tab</label>
+<label class="opt"><input type="radio" name="dm-v3-q1" value="other"> Something else (say below)</label>
+</fieldset>
+<label class="cl" for="dm-v3-q1-c">Your comment</label><textarea id="dm-v3-q1-c" name="dm-v3-q1-comment"></textarea>
+</div>
+
+<div class="q" data-qid="dm-v3-q2">
+<h3>2. Does Set career start a new Dev game, or carry on from the one you're in?</h3>
+<p class="why">A new game gives the same result every time. Carrying on keeps what you've done, but mixes your play with the table.</p>
+<fieldset><legend>Question 2</legend>
+<label class="opt"><input type="radio" name="dm-v3-q2" value="new"> Always a new Dev game (Undo brings back the one you had) <span class="recd">recommended</span></label>
+<label class="opt"><input type="radio" name="dm-v3-q2" value="carry"> Carry on from the current Dev game, forwards only</label>
+<label class="opt"><input type="radio" name="dm-v3-q2" value="ask"> Ask each time</label>
+<label class="opt"><input type="radio" name="dm-v3-q2" value="other"> Something else (say below)</label>
+</fieldset>
+<label class="cl" for="dm-v3-q2-c">Your comment</label><textarea id="dm-v3-q2-c" name="dm-v3-q2-comment"></textarea>
+</div>
+
+<div class="q" data-qid="dm-v3-q3">
+<h3>3. Where do you wake after Set career?</h3>
+<p class="why">Most tests start from the morning. Some start at a beat (the Day 2 solo job at 08:45, the Day 9 test).</p>
+<fieldset><legend>Question 3</legend>
+<label class="opt"><input type="radio" name="dm-v3-q3" value="morning"> 06:00 in your bed; the beat shortcuts go on to the beat's time and place <span class="recd">recommended</span></label>
+<label class="opt"><input type="radio" name="dm-v3-q3" value="always-morning"> Always 06:00 in your bed</label>
+<label class="opt"><input type="radio" name="dm-v3-q3" value="time"> Let me pick the time each time</label>
+<label class="opt"><input type="radio" name="dm-v3-q3" value="other"> Something else (say below)</label>
+</fieldset>
+<label class="cl" for="dm-v3-q3-c">Your comment</label><textarea id="dm-v3-q3-c" name="dm-v3-q3-comment"></textarea>
+</div>
+
+<div class="q" data-qid="dm-v3-general">
+<h3>Anything else?</h3>
+<label class="cl" for="dm-v3-general-c">Your comment</label><textarea id="dm-v3-general-c" name="dm-v3-general-comment"></textarea>
+</div>
+</form>
+
+<h2>7. Parked for later: the steady-player replay</h2>
+<p class="sub">Parked on 2026-10-20, the user's call: a lean Dev mode first. It's kept in full in version 2.1 (git 6c37f52, <code>plans/devmode-plan.html</code>), with DR1's and DR2's reviews of it. Its names (<code>DEV_PLAYER</code>, kept days) stay retired for it.</p>
+<details><summary>What it was, and what was measured</summary>
+<ul>
+<li><b>The design:</b>
+<ul>
+<li>A shared steady player (<code>DEV_PLAYER</code>), with one line per career part written by that part's owner. It plays the days from the Day 0 arrival with the game's own code, in a fresh page, frozen, with a fixed career seed.</li>
+<li>The first week's meetings are attended in person.</li>
+<li>Kept days go in IndexedDB, stamped with a fingerprint of the game's script, the player's version and the seed.</li>
+<li>Exact and repeatable. 13-17 turns.</li>
+</ul></li>
+<li><b>Measured</b> (headless, 4 cores, page load not counted):
+<ul>
+<li>From the Day 0 arrival with saving on and seed 1: Day 2 08:40 in 1.2-1.4 s, Day 10 in 6.3-7.3 s, Day 26 in 15.7-17.1 s, the same twice.</li>
+<li>From Day 1 with no saving: Day 10 in 7.5-8.1 s and Day 26 in 18.9-20.5 s; slowed 4×, 40.4 s and 101.9 s.</li>
+<li>DJ1, a careful player (to be confirmed): Day 10 in ~11 s, Day 26 in ~43 s, Day 30 in ~56 s; a phone estimate of 3-5 minutes to Day 30. Officer by Day 16, 19 trainings by Day 26.</li>
+</ul></li>
+<li><b>What it found:</b>
+<ul>
+<li>The simple players stayed Juniors because they never answered the incident call for "Making it safe".</li>
+<li>Trainings need minute-level steps.</li>
+<li>A replay after New game isn't repeatable, so it needs a fresh page.</li>
+<li>With saving on, the career's random seed makes runs differ unless it's fixed.</li>
+<li>The first week's meetings need the player in the room on the drawn deck.</li>
+</ul></li>
+<li><b>When to unpark:</b> when approximate career state stops being enough, for example for testing friendships and stories at a given day (the "Talk a while" pack), or for checks that want a believable day without playing it.</li>
+</ul></details>
+
+<h2>8. What changed in version 3</h2>
+<ul>
+<li>Stop 2 is now <b>Set career</b>: a table, the excused skip and the beats set. It replaces the replay, which is parked in section 7.</li>
+<li>No kept days and no IndexedDB. A one-line Dev seed is kept, so devmode_check can compare two Set careers byte for byte (Mark and Undo restore exactly anyway).</li>
+<li>About 9-10 turns, down from 13-17.</li>
+<li>Your answers are recorded as decided (6.4), with 3 new questions (<code>dm-v3-q1</code> to <code>q3</code>, plus <code>dm-v3-general</code>; a fourth, about the Dev save, was answered: yes).</li>
+<li>Stop 1 (1a and 1b) and Stop 3 are as in version 2.1, with both reviewers' re-checks taken in.</li>
+</ul>
+<h3>Version 3.1 (DR1's check of Set career, run on a scratch copy: it works)</h3>
+<ul>
+<li>It starts the "Skip to Monday" way (<code>newGameStart(false)</code> + <code>introSkip()</code>), not by shuttle. The first-week meetings are marked met before the skip passes them.</li>
+<li>Trainings are written as opened (<code>W.op</code>) as well as trained (<code>W.tr</code>); devmode_check plays the next day and expects nothing re-opened.</li>
+<li>The arrival's start-up switch is cleared in a new Dev save (a section 21 hook).</li>
+<li>Also: the storm's briefing Mail is mentioned, the small first-week ticks are listed in "What's set", the Dev seed is kept for byte comparisons, <code>promoPip()</code> is called after the rank, and section 20 social and 21's <code>introSkip</code> / <code>INTRO_BOOT</code> are added to the hooks.</li>
+</ul>
+</main>
+<script>
+(function(){
+  const root=document.documentElement,btn=document.getElementById('theme');
+  try{const t=localStorage.getItem('dm-theme');if(t)root.dataset.theme=t;}catch(e){}
+  btn.addEventListener('click',()=>{const dark=root.dataset.theme?root.dataset.theme==='dark':!matchMedia('(prefers-color-scheme: light)').matches;root.dataset.theme=dark?'light':'dark';try{localStorage.setItem('dm-theme',root.dataset.theme);}catch(e){}});
+})();
+</script>
+</body>
+</html>
