@@ -74162,7 +74162,7 @@ const SND = (() => {
       lantern:     { name: 'Lantern walk', time: 'Event', key: 52, mode: 'dorian', bpm: 56, a: [0, 1], b: [2, 0, 3, 1], c: [4, 2], seed: 521, slow: true, bells: true, bright: 0.9, note: 'Dorian pads and a rocking chime tune, lanterns swinging along the promenade.' },
       line:        { name: 'Crossing the Line', time: 'Event', key: 49, mode: 'lydian', bpm: 60, a: [0, 1], b: [0, 3, 1, 2], c: [4, 1], seed: 577, wet: 0.7, bright: 1.1, note: 'Bright, wide Lydian space music for crossing into the Veyli reach.' },
       veyli:       { name: 'Veyli welcome', time: 'Event', key: 50, mode: 'mixo', bpm: 54, a: [0, 1], b: [3, 1, 0, 2], c: [4, 2], seed: 593, lg: 0.035, note: 'A held drone and a struck bronze bar for the Veyli, under the Wren\'s own pads.' },
-      farewell:    { name: 'Farewell song', time: 'Event', key: 43, mode: 'dorian', bpm: 50, a: [0, 2], b: [3, 0], c: [4, 1], seed: 617, bright: 0.5, wet: 0.75, note: 'Low and sparse under the crew\'s singing at the Veyli farewell: dark pads, a slow swell, one high chime (the user\'s B).' },
+      farewell:    { name: 'Farewell song', time: 'Event', key: 43, mode: 'dorian', bpm: 50, a: [0, 2], b: [3, 0], c: [4, 1], seed: 613, bright: 0.55, wet: 0.7, note: 'Low and sparse under the crew\'s singing at the Veyli farewell: a held drone, dark pads, a low bronze bar, one high chime (the user\'s A).' },
     });
     for (const [k, d] of Object.entries(SPACE)) TRACKS[k] = space(d);
     const SPACE_LV = {dawn: 0.417, wake: 0.442, firstlight: 0.525, systems: 0.631, morning: 0.479, tea: 0.479, midday: 0.417, lunch: 0.452, promenade: 0.537, afternoon: 0.452, circuits: 0.525, golden: 0.49, evening: 0.468, porthole: 0.468, watch: 0.452, lullaby: 0.447, latenight: 0.484, deepspace: 0.484, shift: 0.513, steady: 0.495, rounds: 0.495};   // levels for the space tracks (set by measuring against the hum)
@@ -74210,18 +74210,20 @@ const SND = (() => {
       Object.assign(PARTS, {
         sDrone: c => { if (c.bar % 4 === 0) { SX.swell(c.t, c.root, c.s * c.beats * 4, 0.06, c.out); SX.swell(c.t, c.root + 7, c.s * c.beats * 4, 0.03, c.out); } },   // the home note and its fifth, held (the Veyli)
         sBronze: c => { const m = c.mel && c.mel[0]; if (m) fmBell(c.t + m[0] * c.s, mtof(m[1] + 12), 3.5, c.lg * 0.7, 2.76, 1.1, 0, c.out); },   // a struck bronze bar on the tune's first note
+        sBronzeLow: c => { if (c.bar % 2 === 1) fmBell(c.t + c.s, mtof(c.ch[1] + 12), 4.5, 0.016, 2.76, 0.9, 0, c.out); },   // the farewell song: a low bronze bar every other bar
+        sHighChime: c => { if (c.bar % 3 === 1) fmBell(c.t + 2 * c.s, mtof(c.ch[c.ch.length - 1] + 24), 5, 0.009, 2.01, 0.45, 0, c.out); },   // and one high chime now and then
       });
       ['beam', 'cup', 'farewellsup', 'goodbye', 'harvest', 'lantern', 'line', 'veyli', 'farewell'].forEach(shaped);
       const V = TRACKS.veyli; V.form = () => longForm([sec('Arrival', 'A', 4, ['sPad', 'sDrone'], 1)],
         [sec('Bronze', 'A', 8, ['sPad', 'sDrone', 'sBronze'], 1), sec('Both ships', 'B', 8, ['sPad', 'sDrone', 'sBronze', 'sSing'], 2), sec('Drift', 'C', 8, ['sPad', 'sStars', 'sChime'], 1)],
         [sec('Closing', 'A', 4, ['sPad', 'sStars'], 1)], V.bpm, 4, 10, ['x']);
-      TRACKS.farewell.form = () => [sec('Hush', 'A', 2, ['sPad', 'sSwell'], 1), sec('Song', 'A', 4, ['sPad', 'sSwell', 'sChime'], 1), sec('Last line', 'B', 2, ['sPad', 'sStars'], 1)];   // about 40 s, once
+      TRACKS.farewell.form = () => [sec('Hush', 'A', 2, ['sDrone', 'sPad'], 1), sec('Song', 'A', 4, ['sDrone', 'sPad', 'sBronzeLow'], 1), sec('Last line', 'B', 2, ['sDrone', 'sPad', 'sHighChime'], 1)];   // the user's A (bronze and drone): about 40 s, once
     }
     const SHAPE_LV = {};   // levels for the reshaped tracks (set by measuring)
     for (const k of SHAPED) MLV[k] = SHAPE_LV[k] ?? MLV[k];
     for (const [k, f] of Object.entries({ lunch: 1.3, latenight: 1.3, deepspace: 1.4, systems: 1.3, dawn: 1.3 })) MLV[k] *= f;   // the quieter ones up 2-3 dB (measured)
     MLV.comet = 0.65;   // the comet's level (measured against the hum)
-    if (SND_R3_ON) Object.assign(MLV, { beam: 0.6, cup: 0.6, farewellsup: 0.57, goodbye: 0.55, harvest: 0.62, lantern: 0.6, line: 0.56, veyli: 0.6, farewell: 1.15 });   // the event tracks' levels: matched to the comet's (measured offline, within 1 dB); the farewell song about 6 dB under, for the voices on top
+    if (SND_R3_ON) Object.assign(MLV, { beam: 0.6, cup: 0.6, farewellsup: 0.57, goodbye: 0.55, harvest: 0.62, lantern: 0.6, line: 0.56, veyli: 0.6, farewell: 1.39 });   // the event tracks' levels: matched to the comet's (measured offline, within 1 dB); the farewell song about 6 dB under, for the voices on top
 
     for (const k of ['morning', 'evening', 'latenight', 'shift', 'steady', 'rounds', 'firstlight', 'midday', 'lunch', 'afternoon', 'tea', 'golden', 'watch', 'lullaby', 'wake', 'systems', 'dawn', 'promenade', 'circuits', 'porthole', 'deepspace']) { const d = TRACKS[k]; delete TRACKS[k]; TRACKS[k] = d; }   // v7's order (its list and Next), as before the old definitions were left out
     // ---- the schedule: ship time of day, and a working set while you're on shift

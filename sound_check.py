@@ -358,6 +358,7 @@ def check_r3music(pw, path):
         check(got == [], f'r3music: every event track exists (missing {got})')
         check(g.ev(f"!SND.music.LIST.some(x => x.tracks.some(t => {json.dumps(R3_KEYS)}.includes(t.key)))"), 'r3music: none of them is on the Music app list')
         check(g.ev("SND.music.TRACKS.farewell.form().reduce((a, x) => a + x.bars, 0)") == 8, 'r3music: the farewell song is short (8 bars, about 40 s)')
+        check(g.ev("(p => p.includes('sDrone') && p.includes('sBronzeLow') && !p.includes('sSwell'))(SND.music.TRACKS.farewell.form().flatMap(x => x.parts))"), 'r3music: the farewell song is the user\'s A (the drone and the bronze bar)')
         def at(name, t, deck, room, want):
             k = g.ev(f"({R3_AT})({json.dumps([t, deck, room])})"); g.page.wait_for_timeout(500); g.step(4)
             got = g.ev("SND.r3Event()"); print(f'  r3music {name}: room {k!r} -> {got!r}')
