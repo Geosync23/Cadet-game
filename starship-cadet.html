@@ -61160,7 +61160,7 @@ if (P5_CASES5) {
 // section 14's planner reads through one hook (p9PlanRule, from B3's sdPlanShut): the laundry closed to them for that
 // hour, so their wash leaves that hour (the planner finds no other slot that evening: skipped that night, done another day; a true move needs a second section 14 hook, backlog). Saved: SHIP.works.side.p9 = { ask, moves: [{ who, wd, a, b, from }],
 // set: { [day]: [{ who, a, b }] } } (cleaned on read). The first when the p9 row opens (slot 38); none fair: none.
-const P9_BAND = { sus: [4, 5], clues: [3, 6], fewest: 2, decks: 1 }, P9_SLOT = 38, P9_LOOK = 14, P9_ASK = 2.5;
+const P9_BAND = { sus: [4, 5], clues: [3, 6], fewest: 2, decks: 1 }, P9_SLOT = 38, P9_LOOK = 14, P9_ASK = 2.5, P9_RETRY = 7;   // P9_RETRY: days the first case keeps looking for a clash after the row opens (EV1, 0.96.0: the visit's greeting day dropped Day 19's)
 const P9_SKIP = new Set(['meal', 'shift', 'off', 'appt', 'beat', 'tea']);
 const p9Laundry = () => (DECKS[4] && DECKS[4].places || []).filter(q => q.type === 'laundry').map(q => q.id);
 function p9State() {
@@ -61267,11 +61267,19 @@ function p9PlanRule(d, occ, pl, a, b, p) {
   return occ.p9.some(r => r.who === p.id && a < r.b && r.a < b);
 }
 // the case: staged when the row opens (and retried each ship hour till it is); the washer nearest their place
+let P9_MISS = null;
 function p9Stage() {
   if (flag('case.p9.first') !== undefined || !SHIP.works || !caseOpened('p9')) return;
   const W = SHIP.works, C = caseState(); if (!C) return;
   if (W.tr && W.tr.p9 !== undefined) { flagSet('case.p9.first', 'none'); return; }
-  const now = shipNow(), d = caseDay(now), F = p9Find(d); if (!F) { flagSet('case.p9.first', 'none'); return; }
+  if (C.open.some(c => c.kind === 'p9')) { flagSet('case.p9.first', 'none'); return; }   // you already have a p9 case: no first one as well
+  const now = shipNow(), d = caseDay(now); if (P9_MISS === d) return;   // looked today already (not saved: after a load, one look)
+  const F = p9Find(d);
+  if (!F) {                                              // no clash in the last fortnight yet: look again each day for a week from the row's opening (an event day can drop a calendar item), then give up
+    const o = Object.keys(W.op || {}).map(Number).filter(k => Array.isArray(W.op[k]) && W.op[k].includes('p9')).sort((a, b) => a - b)[0];
+    if (Number.isInteger(o) && d < o + P9_RETRY) { P9_MISS = d; return; }
+    flagSet('case.p9.first', 'none'); return;
+  }
   const wpl = placeById((F.washes.find(w => w.who === F.A) || {}).pl), ws = machineList().filter(m => m.kind === 'washer' && m.deck === 4 && caseCauses(m).some(x => x.id === 'clash'));
   const m = ws.slice().sort((x, y) => { const px = placeById(panelPlace(x.id)), py = placeById(panelPlace(y.id)); const dx = q => q && wpl ? Math.hypot(q.at[0] - wpl.at[0], q.at[1] - wpl.at[1]) : 99; return dx(px) - dx(py) || (x.id < y.id ? -1 : 1); })
     .find(x => !SHIP.jobs.some(j => j.machine === x.id && j.status !== 'done' && (j.claimedBy || j.case || j.reserved)));
