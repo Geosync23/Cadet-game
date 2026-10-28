@@ -24,7 +24,7 @@ with sync_playwright() as pw:
     print('pick 38', ok); pg.wait_for_timeout(300); print('after pick', ev("document.getElementById('dmSheet').innerText.slice(0, 300)"))
     t0 = time.time()
     for k in range(2):
-        b = ev("""(() => { const bs = [...document.querySelectorAll('#dmSheet button')]; const b = bs.find(x => /^(Set career to Day|Again)/.test(x.textContent.trim())); if (b) { b.click(); return b.textContent.trim(); } return null; })()"""); print('press', b); pg.wait_for_timeout(300)
+        b = ev("""(() => { const bs = [...document.querySelectorAll('#dmSheet button')]; const b = bs.find(x => /^(Set career to Day|Again|Tap again)/.test(x.textContent.trim())); if (b) { b.click(); return b.textContent.trim(); } return null; })()"""); print('press', b); pg.wait_for_timeout(300)
     pg.wait_for_timeout(1500); pg.screenshot(path=f'{OUT}/dm_running.png'); print('running', ev("[!!DM_UI.run, document.getElementById('dmSheet').innerText.slice(0, 300)]"))
     for k in range(240):
         pg.wait_for_timeout(1000)
