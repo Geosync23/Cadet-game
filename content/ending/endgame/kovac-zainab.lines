@@ -1,0 +1,19 @@
+@crew kovac-zainab
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- Oh. You stayed. Um. Good. Very good. Sorry. Just good.   #warm
+? endgame:early
+- Timed a scrubber. Nine minutes twenty. I wanted to tell someone who'd still be here.   #funny
+? endgame
+- I'm knitting you a thing. It's not a scarf. Don't ask. It's a scarf.   #funny
+- Ordinary week. Filters, seals, the spanners in order. I like knowing tomorrow's the same.
+? endgame:early beat:kovac.2
+- I'd planned to hold the lift rail for you on Monday. To the Tern. I'm glad I needn't.   #warm
+
+== near
+? endgame act:work
+- Pass me the eleven. No. The other eleven. Thank you. You know the wall now.

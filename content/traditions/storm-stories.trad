@@ -1,0 +1,56 @@
+@tradition storm-stories
+// Storm stories by torchlight (FX26, 0.93.2; the user's pick of CS1's options, via lead 37, 2026-10-26). The ion storm's
+// Saturday (Day 13 in a new game), 21:00-21:45, after the lantern supper: the junior common room, main lights off,
+// torches. Matthias Oduya hosts (tap him to join); everyone tells the worst storm they've been in, torch under the chin,
+// a little worse than the truth. Never on its own rhythm: the storm adds it to its Saturday (STORM_SAT_ON, the storm's
+// dayDress), so a game without the storm (or with the switch off) never has it. Holt and Mensah are on duty then.
+// CS1's words (plans/storm-stories-words.txt on claude/crew-stories-pitch c7e67663); the eight tellers' snippets are
+// among the `here` lines; while it runs they're also said aloud in turn (section 18's stormStoriesFrame), with Oduya's
+// close lines near the end (in the game, as the format has no place for them): "That's the last torch. Lights stay low. Sleep well, and let the storm do its job." and "Good
+// stories. Mostly true. Off to bed, and leave your torch by the door."; his join lines are the join toast (join.lines).
+k: 474
+title: Storm stories by torchlight
+when: year day 13 until day 1
+at: 21:00-21:45
+min: 20
+// a place kept for you in the circle (RV18's S1: the room filled and you stood in the corridor)
+spare: 1
+where: 4 pool common-room
+hold: 1
+who: oduya always, holt never, mensah never, night-owl 70%, juniors 40%, everyone 25%
+anim: oduya talk
+host: oduya
+from: oduya
+invite: host=oduya odds=40% line="Storm stories tonight, after the supper. Bring a torch and your worst storm."
+
+== mail
+- Storm stories tomorrow night, {time}, the junior common room, after the lantern supper. Lights off, torches on. Bring the worst storm you've ever been in. You may exaggerate.
+
+== ask
+- Storm stories after the supper. Oduya says to bring a torch.
+- Have you got a worst storm? Everyone's got a worst storm.
+- Torchlight in the common room tonight. I'm telling the one about the roof.   #funny
+
+== here
+- And then the window just... went. Whoosh. Well. Creaked.   #funny
+- Torch under your chin. No, higher. There. Terrifying.   #funny
+- That's not the worst storm. That's weather.   #funny
+- Shh, the lights. Oh. No, just a flicker. Carry on.
+- I'd have hidden under the table. I did hide under the table.   #funny
+- Tell it again, but bigger this time.
+- Hailstones the size of eggs on the farm moon. We ate the hail. It was not eggs.   #funny
+- Our station lost power for a whole night. We played cards by the light of the fish tank.
+- A dust storm on Marra. Three days indoors. My brother learnt every song I hate.   #funny
+- The ferry rocked so much the soup went sideways. All of it. Onto the captain.   #funny
+- Wind took our washing line clean off. We found a sock in the next village.   #funny
+- Lightning hit the radio mast. Every radio in town played the same song for a week.
+- I slept through the worst storm in forty years. I'm still annoyed about it.   #funny
+- Snowed in at Gran's with one book. I know that book by heart now.   #warm
+
+== thanks
+- In the dark common room, crewmates take turns telling the worst storm they've ever been in, torch under the chin. Each one a little worse than the truth.   #warm
+
+== chatter
+- Storm stories last night. Somebody's hail was the size of melons by the third telling.   #funny
+- I didn't think I'd laugh on a storm night. Then the torch stories.   #warm
+- Oduya told one too. Just one. It was the best one.

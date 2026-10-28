@@ -1,0 +1,14 @@
+@bank all
+// Pillar 5 Step 4, M17 the lift roof (24s; seat E4, after head writer W2 retired, in W2's style). Texts said by nobody
+// except works.ask.m17 (Halloran's Mail, "Subject | body", unsigned; {time} {place}). roof.shut replaces W2's roof.held
+// ("Stairs, please." has crew use the ladder, which the design rules out; the lead's call): 24s reads roof.shut.
+== roof.card
+- Lift hour. Ride the roof down the spine and grease each guide?
+== roof.up
+- Hatch up, harness clipped. You're on the roof.
+== roof.free
+- Half four. The lift's back in service.
+== roof.shut
+- The lift is held for maintenance until 16:30. Everyone waits, even you.
+== works.ask.m17
+- The lift roof | Thursday is lift day. Meet me at the lift, {place}, at {time}. Bring your gloves.

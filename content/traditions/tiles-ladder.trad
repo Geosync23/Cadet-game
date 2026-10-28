@@ -1,20 +1,22 @@
 @tradition tiles-ladder
 // Tiles ladder (0.60.7, the user's pick): a friendly weekly Tiles round-robin on Saturday afternoons in the bow lounge,
-// with a chalkboard for the week's winner. Olu Farouk keeps the ladder. The boards are Tiles night's (decor tilesNight);
-// the results would be the Tiles engineer's (section 23).
+// with a chalkboard for the week's winner. Olu Farouk keeps the ladder. Patch 0.92.5 item 20 (the user: "the group should
+// stand around the tiles table watching two people play"): everyone going stands in the ring round the bow lounge's Tiles
+// station (the deck architect's '3-ladder-*' spots, tagged tiles-ladder), and two at a time play at its stools (section 18's
+// tladMinute); the lounge seats only if the ring's full. No boards on the lounge tables any more (was decor tilesNight).
 k: 450
 title: Tiles ladder
 when: weekly saturday
 at: 15:00-16:30
 min: 25
 jitter: 15
+where: 3 pool @tiles-ladder
 where: 3 room Bow lounge: lounge-seat
 hold: 1
 who: farouk-olu always, rina 90%, lounge-regular 40%, everyone 10%
-anim: play
+anim: talk
 host: farouk-olu
 from: farouk-olu
-ties: decor tilesNight
 invite: host=farouk-olu odds=30% line="Tiles ladder this afternoon. You're on the board. Bottom rung, but on the board."
 
 

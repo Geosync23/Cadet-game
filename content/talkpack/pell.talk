@@ -1,0 +1,385 @@
+@talks pell
+// TW1, the Talk a while pack: Pell Okafor's own talks. Easygoing, chatty; "Oi oi", "Right, so"; stories that go
+// sideways; teases fondly about sleep and food. Mum's shop from tier friend only; not the opened messages (beat pell.6).
+
+only: own
+
+== screw-tin
+topic: hobby
+them: Right, so. This tin. Screws from seven ships. One from every ship I've fixed something on.
+them: This one's from a ferry. I fixed a kettle. On a ferry. Long story. Bit long.   #funny
+ask: Do you keep anything like that? A little collection?
+listen: Which screw's your favourite?
+  them: The bent one. Holds the whole tin together, morally.   #funny
+share: Not yet. I might start one.
+  them: Do! I'll give you your first. A Wren one. Then you're official.   #warm
+cheer: I collect naps. Like you.
+  them: Oi oi! Slander. Accurate, but slander.   #funny
+
+== sticky-panel
+topic: work
+when: tier>=acquaintance
+them: Want a secret? The Deck 5 panel that sticks. You lift and push. Not push and lift.
+them: Calder doesn't know. She definitely knows. She knows everything. Lift and push, though.   #funny
+ask: What's the best trick anyone's taught you aboard?
+listen: Who taught you all this?
+  them: Nobody. An old manual and a lot of getting it wrong. Mostly the getting it wrong.
+share: Check the board before breakfast.
+  them: Smart. I check it after breakfast. Second breakfast, sometimes.   #funny
+cheer: Where the grab shelf is.
+  them: The most important room on the ship. Well. Shelf. You get it.   #funny
+
+== sleep
+topic: day
+when: tier>=colleague
+them: I can sleep anywhere. Parts store. Tea corner. Standing up in the lift, once.
+them: Except my bunk. At night. Rina says it's a medical mystery. She's writing it down.   #funny
+ask: Be honest. How much are you actually sleeping?
+listen: Do you really talk in your sleep?
+  them: About engines, apparently. Rina says I once told a pump it was "doing great".   #funny
+share: Not enough. The days are full.
+  them: Same. Grab a nap at tea. Nobody minds. I've checked. Extensively.   #funny
+cheer: Loads. I'm a champion sleeper.
+  them: Teach me! I'll give you a screw. A good one. Not the bent one.   #funny
+
+== mum-shop
+topic: home
+when: tier>=friend
+them: My mum's got a little mending shop back home. Kettles, radios, coats. Anything.
+them: There's a scrapyard out back. Found my first engine manual there. And a dog, mostly ears.   #warm
+ask: Who taught you the stuff that really stuck?
+listen: What was it like, growing up in a shop?
+  them: Loud. Everything ticking. One radio that only gets one station. I miss the station.   #warm
+share: My family. Little things, every day.
+  them: That's how it sticks. Little things, every day. Same as here.   #warm
+cheer: Trial and error. Mostly error.
+  them: Ha! Best teacher going. Bit rough. Very thorough.   #funny
+
+// ---- SW1 (2026-10-24, patch 0.92.3 item 15, plans/talk-main-plan.md): 26 more of Pell's own, laddered (10 with no tier
+// gate, the rest acquaintance, colleague, friend, close). Same gates as above: Mum's shop from friend; no practical, no
+// opened messages, no "nearly left" (his arc's beats); no music boxes (his arc's); the secret tins stay secret.
+
+== good-drawer
+topic: work
+them: Right, so. Third drawer down in the bay. That's where the good spanners live.
+them: The top drawer's for show. Calder knows. She uses the third drawer too.   #funny
+ask: Which tool would you never lend? Go on. There's always one.
+listen: Which one's yours?
+  them: The ten-mil with the chipped handle. It's seen things. Mostly the floor.   #funny
+share: The torch. Can't fix what I can't see.
+  them: Wise. Half of fixing is looking. The other half's saying "blast" quietly.   #funny
+cheer: The biscuit tin. Does that count?
+  them: It's not a tool. It's essential equipment. Different form. Same drawer.   #funny
+
+== toast-maths
+topic: food
+when: time:morning
+them: Toast maths. One slice to wake up, one to feel human, one because it's there.
+ask: How do you take breakfast? Fast or proper?
+listen: Is there ever a fourth slice?
+  them: On rest days. The fourth's the reward for getting through the first three.   #funny
+share: Proper. I sit down for it.
+  them: Respect. I sit down for it too. Then I'm late. Then I run with toast.   #funny
+cheer: Breakfast? I just do a lap of the shelf.
+  them: A late plate person. I knew it. Welcome. We meet at odd hours.   #warm
+
+== bunk-two
+topic: crew
+when: tier>=acquaintance
+them: Bunk 2, next door to you. Rina's the boss of it. Nobody voted. She just started.
+them: She says "lights out" and we all do it. Even Erik, and Erik argues with lamps.   #funny
+ask: What's your bunk room like? Noisy lot?
+listen: Who's the loudest in yours?
+  them: Me. Asleep. Rina's measured it. It's not a competition. I'm winning anyway.   #funny
+share: Quiet. I like it quiet.
+  them: Lucky. Come next door when you miss the noise. We've got plenty spare.
+cheer: Loud, but the nice kind of loud.
+  them: The best kind. Like a good engine. Steady, and nothing's broken.   #warm
+
+== odd-jobs
+topic: hobby
+when: tier>=acquaintance
+them: Off shift, people bring me things. A torch. A clock. Ivo's hairdryer, three times.
+them: I fix them in the common room. Small screwdriver, big cup of tea.
+ask: Got an off-shift thing yet? A thing that's yours?
+listen: Do you ever say no?
+  them: Once. A toaster with a grudge. I said "not today". It's still waiting.   #funny
+share: Still working that out.
+  them: Take your time. This ship's got an evening for everything. Some have three.
+cheer: Fall asleep, mostly.
+  them: Oi oi. That's my evening. Get your own.   #funny
+
+== old-girl
+topic: ship
+them: The Wren's older than both of us put together. Twice, probably.
+ask: What do you reckon she was like, brand new?
+listen: Who'd know?
+  them: Holt. Holt knows everything about her. He'll tell you about a tenth of it.   #funny
+share: Shinier. Less interesting.
+  them: Exactly. A new ship hasn't got a single story. She's got hundreds now.   #warm
+cheer: Still had a panel that sticks.
+  them: Ha! Factory fitted. I bet that panel came with her. Free with every ship.   #funny
+
+== monday
+topic: day
+when: weekday:mon
+them: Monday. The board's full and my brain's still in Sunday. They'll meet by lunch.
+ask: Are you a Monday person? Be honest.
+listen: How do you get going?
+  them: Toast. Tea. Then I look at the board and pretend I'm choosing. I take the nearest.   #funny
+share: I don't mind Mondays. Fresh start.
+  them: Fresh start. I like that. I'm having it. I'll say it at the briefing like it's mine.
+cheer: Nobody's a Monday person.
+  them: Calder is. Calder's a Monday person all week long. It's very impressive.   #funny
+
+== onion-news
+topic: news
+when: tier>=acquaintance
+them: Right, so. News. Tariq beat Lukas at onion chopping. First time this month.
+them: He's unbearable. He's wearing it like a medal. Not the onion. Nearly the onion.   #funny
+ask: Heard anything good lately? Kind gossip only.
+listen: Where do you hear it all?
+  them: The lift. People talk in lifts. Then they remember I'm in it.   #funny
+share: Not yet. Tell me more.
+  them: That's all I've got. Small ship. One onion a week, tops.   #funny
+cheer: Good for Tariq.
+  them: Don't say that near Lukas. Say it near me. I'll pass it on. Loudly.   #funny
+
+== squeaky-lid
+topic: tradition
+when: weekday:fri
+them: Friday tea. Real biscuits, in the tin with the squeaky lid. Halloran hands them round.
+ask: What's your Friday thing? Everyone needs one.
+listen: Why does the lid squeak?
+  them: So nobody sneaks one. Halloran's idea. I've learnt to lift and twist. Silent.   #funny
+share: Sleeping in on Saturday.
+  them: Proper. Friday's the night before a lie-in. Best night of the week, that.
+cheer: Friday tea, now. You've won me over.
+  them: Get in. Another one for the biscuit cause.   #funny
+
+== one-word-notes
+topic: work
+when: tier>=colleague
+them: Calder leaves a note on finished jobs. One word. "Fine." "Good." Once, "Tidy."
+them: I got "Tidy" in my second year. Still got the note. It's in the screw tin.   #warm
+ask: What's the best feedback anyone's ever given you?
+listen: What's the worst word she's left?
+  them: "Again." Just that. On a pump I'd rushed. Fair. I did it again. Properly.
+share: Someone said I listen well.
+  them: You do. You let me finish my stories. Nobody lets me finish my stories.   #warm
+cheer: Still waiting for my first word.
+  them: It'll come. Mine took eleven jobs. I counted. I count everything she writes.   #funny
+
+== three-pages
+topic: food
+them: Brennan's got a book of everyone's favourite dish. I'm three pages. She ran out of room.
+them: It's mostly puddings. And one salad, so it looks balanced.   #funny
+ask: Has she asked you yours yet? What did you say?
+listen: What's on your three pages?
+  them: Sponge. Crumble. The one with custard that's technically breakfast.   #funny
+share: I couldn't pick just one.
+  them: She'll pick for you. She watches what you go back for. She's never wrong.   #warm
+cheer: Whatever you're not eating.
+  them: Oi oi. That's my answer. She's got it in writing. Page two.   #funny
+
+== tool-roll
+topic: plans
+them: I'm saving for a proper tool roll. Leather. A pocket for everything. Even the bent screw.
+ask: Saving up for anything yourself?
+listen: Where would you even get one?
+  them: The store can order one in. Three months. I've been "nearly ordering" for a year.   #funny
+share: Something small for home. A present.
+  them: Nice. Presents from a ship are the best. They come with a story.   #warm
+cheer: Biscuits. Long-term investment.
+  them: Wise. Biscuits always pay out. Never once lost on a biscuit.   #funny
+
+== warm-pipe
+topic: ship
+them: There's a pipe behind the laundry that's always warm. Always. I've checked at three.
+them: I lean on it when I can't sleep. Just me and the pipe. Old friends.   #funny
+ask: What helps you sleep, when nothing does?
+listen: Does the pipe actually help?
+  them: Not a bit. But it's warm, and it doesn't ask questions. That's half of it.   #funny
+share: Reading till my eyes give up.
+  them: Tried that. I read one page of a manual and fixed the bunk light instead.   #funny
+cheer: You humming engine noises next door.
+  them: Oi. That's not humming. That's asleep. Free concert, though.   #funny
+
+== grey-day
+topic: day
+when: tier>=colleague mood:low
+them: Bit of a flat one. Nothing's wrong. The day's just grey round the edges.
+them: I'll be all right after tea. I'm always all right after tea.
+ask: What sorts you out, when it's grey like this?
+listen: Want to sit for a bit?
+  them: Yeah. Go on. You don't have to say anything. I'll do the talking. I always do.   #warm
+share: Walk round the ship. The long way.
+  them: Past the big windows. Yeah. That does it, usually. Slowly, but it does.
+cheer: Find the good biscuits.
+  them: Ha. You know me. Come on, then. I'll show you where. Nearly where.   #warm
+
+== spanner-joke
+topic: crew
+when: tier>=acquaintance time:morning
+them: Halloran told a joke at breakfast. Something about a spanner and a nut. I laughed.
+them: I didn't get it. Laughed anyway. You've got to support the arts.   #funny
+ask: Do you laugh at bad jokes? Honestly?
+listen: How did the joke go?
+  them: No idea. I was laughing too much to hear the end. That's the trick.   #funny
+share: Always. The worse the better.
+  them: Same. A bad joke at breakfast. It's how you know the day's started.   #warm
+cheer: Only Halloran's.
+  them: Everyone's soft for Halloran's. He's earned it. Years of awful.   #funny
+
+== team-name
+topic: tradition
+them: Our quiz team needs a new name. We've been "Team Pell" for a year. Rina hates it.
+ask: Go on. What should we be called?
+listen: What were the other ideas?
+  them: "The Spanners". "Second Breakfast". "Rina Is Always Right", from Rina.   #funny
+share: Something with engines in it.
+  them: "Coil Three". Zeke would cry. Happy crying. We'd lose, but he'd cry.   #funny
+cheer: "Fourth Out of Five."
+  them: Ha! Honest. Very us. I'm putting it to the vote. I'm the only vote.   #funny
+
+== initials
+topic: work
+when: tier>=colleague
+them: Tip. Leave a note inside anything you fix. The date and your initials.
+them: Years on someone opens it up and goes, "Oh. Pell." That's the job, really.   #warm
+ask: What would you want people to find, years on?
+listen: Have you found anyone else's?
+  them: Loads. A fan on Deck 6 has five sets. The oldest's faded right out.
+share: That it still works.
+  them: That's the best one. Nobody writes "still works". It just does. That's the note.   #warm
+cheer: A biscuit, taped inside.
+  them: Somebody would eat it. Me. Years on, and I'd still eat it.   #funny
+
+== the-clunk
+topic: home
+when: tier>=friend
+them: Mum's shop has a bell over the door. Broken since before I was born.
+them: It goes "clunk", not "ding". Back home, popping in is "giving it a clunk".   #warm
+ask: What's the sound of home, for you?
+listen: Why's nobody fixed it?
+  them: Me? Fix the clunk? I'd be run out of town. Some things you leave broken.   #warm
+share: Our kettle, just before it boils.
+  them: Kettles are good for that. Ours whistled a bit late. Like me, everywhere.   #funny
+cheer: My own snoring, apparently.
+  them: Ha. Rina says that's mine. Very loud family, the Wren.   #funny
+
+== missing-pages
+topic: work
+when: tier>=colleague
+them: My first manual had pages missing. Four to nine. So I worked out four to nine myself.
+them: Got a full copy here, years later. Read four to nine. I'd got most of it right.   #warm
+ask: Ever taught yourself something the hard way?
+listen: What did you get wrong?
+  them: Chapter seven. A valve I'd done backwards for years. It worked. Don't tell Calder.   #funny
+share: Most things, I think.
+  them: Best way, if you've got the time. You never forget the bits you had to find.
+cheer: Toast. Still learning.
+  them: Toast's a lifelong study. I'm still on chapter one.   #funny
+
+== lights-off
+topic: crew
+when: tier>=colleague
+them: Can I tell you about Rina? She acts like she doesn't care. She cares about everything.
+them: She checked my bunk light was off every night for a year. Never said a word.   #warm
+ask: Have you got a Rina? Someone who'd never admit it?
+listen: Does she know you know?
+  them: Course not. If she found out, she'd stop. Or deny it. Both, probably.   #funny
+share: I think so. Still finding out.
+  them: That's how it goes. You find out by accident. Usually at three in the morning.   #warm
+cheer: Pretty sure it's you.
+  them: Oi. Caught. I'll deny it, mind. Rina taught me.   #funny
+
+== new-hand-one-day
+topic: plans
+when: tier>=friend
+them: One day I'd like a new hand of my own. Show them the panel. The good drawer. The shelf.
+them: Not yet. I'm still learning the panel myself. Some days it wins.   #funny
+ask: What would you pass on to someone, one day?
+listen: What would you teach first?
+  them: Eat before a long job. Then the panel. Then everything else, in no order at all.   #funny
+share: What it's like at the start.
+  them: Yeah. That's the one. You remember the start, so you're kind about it.   #warm
+cheer: You can practise on me.
+  them: Oi oi. You're past that. You know the good drawer. You're dangerous now.   #funny
+
+== cold-pie
+topic: food
+when: tier>=acquaintance time:night
+them: The mess at night's a different place. Lights low. Cold store humming. Me and a plate.
+ask: Ever up this late on purpose?
+listen: What's on tonight's plate?
+  them: Pie. Cold pie at night beats hot pie at lunch. That's science. Pell science.   #funny
+share: Only when I can't sleep.
+  them: Same club. Members get the last slice. Those are the rules. I wrote them.   #funny
+cheer: Only when you're here.
+  them: Then I'll keep being here. Someone's got to hold the fort. And the pie.   #warm
+
+== the-list
+topic: day
+when: tier>=acquaintance weekday:tue
+them: Rest day. I had a list. I've done the first thing on it, which was "lie in".
+them: The rest of the list is still there. Glaring at me. I'm ignoring it gently.   #funny
+ask: What's a perfect day off, for you?
+listen: What was on the list?
+  them: Lie in. Fix Ivo's lamp. Write to Mum. Lie in again. Halfway, if you squint.
+share: Nothing planned at all.
+  them: That's the dream. No list. I'd only lose the list anyway.
+cheer: Watching you not do your list.
+  them: Oi oi. It's a spectator sport now. Tickets are one biscuit.   #funny
+
+== rusty-one
+topic: hobby
+when: tier>=close
+them: The first screw in the tin isn't from a ship. It's from the scrapyard. I cheat a bit.
+them: Mum gave it me the day I left. "One from home," she said. Don't tell the bent one.   #warm
+ask: What did you bring from home? The thing you'd grab first?
+listen: Does she know it's still in there?
+  them: She asks every call. "Still got the screw?" Still got it, Mum.   #warm
+share: Something small. I keep it close.
+  them: The small ones are the important ones. Nobody nicks a small thing. Keep it close.
+cheer: My appetite. Same as you.
+  them: Travels well, that. Never once got lost on the way.   #funny
+
+== pen-not-pencil
+topic: crew
+when: tier>=close
+them: I keep a list on my bunk wall. People who've been good to me on the Wren.
+them: Brennan's on it. Calder too, in pencil, so she can't tell. You're on it. In pen.   #warm
+ask: Who'd be on yours?
+listen: Who was first on the list?
+  them: Halloran. He hung my mug before I'd even unpacked. That's how you get on a list.
+share: You'd be on it.
+  them: Oi. Don't. I'll go soft and I've got a reputation. Cheers. Really.   #warm
+cheer: The grab shelf. Top spot.
+  them: It's on mine too. Above the line. It's in a category of its own.   #funny
+
+== repair-corner
+topic: plans
+when: tier>=friend
+them: Big plan. Don't laugh. A repair corner in the common room. Bench, lamp, a little sign.
+them: Like Mum's shop, but on a ship. I asked Calder. She said she'd think. She's thinking.   #funny
+ask: If you had a corner of the ship, what would you do with it?
+listen: What would the sign say?
+  them: "Bring it to Pell. Bring a biscuit." The second bit's optional. It isn't.   #funny
+share: Somewhere to sit and talk.
+  them: Then you'd have the busiest corner on the Wren. I'd move my bench next to it.   #warm
+cheer: Keep the good spanners. Third drawer.
+  them: Ha. You've been listening. That's dangerous. I like it.   #funny
+
+== mum-asks
+topic: home
+when: tier>=close
+them: Mum asks about you now. "How's your friend in Works?" Every call. I give a report.
+them: Fed, rested, good with the panel. She approves. She's very strict about fed.   #funny
+ask: What would your people back home want to know about me?
+listen: What else does she ask?
+  them: Whether you've got a warm jumper. I said yes. Have you? Say yes.   #warm
+share: That you're kind. And always hungry.
+  them: Both true. She'd like that. She'd feed you inside a minute.   #warm
+cheer: That you're a terrible influence.
+  them: She knows. She raised me. She'd say you're a good one anyway.   #funny

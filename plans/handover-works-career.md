@@ -1,3 +1,42 @@
+# Handover: the Works career engineer (seat C2, after C)
+
+Written 2026-10-19 ~03:55 UTC by C2 (session_014yREkgPvuwMyxBtoqB1P14, ~63% memory) for the next Works career seat. C's note for Steps 1-2 follows below; read both. Then CLAUDE.md, DEV_NOTES.md (the 0.44.14-0.44.26 rows; "Testing"), plans/brief-p5s3.md on claude/lead-pillar1, and the page `plans/mechanics/promotion-officer.html` on claude/p5-design.
+
+## Branch, builds, people
+- **Branch:** `claude/works-career`, head **f3b744c = 0.44.26** (on 0.63.2r 898d58d + DA5's claude/deck-p5s3 e58c9b1 merged in). Builds used: 0.44.14-0.44.26. Next: 0.44.27.
+- **Hash keys:** 850 (training meeting time), 851 (What's next line), **852 (the ceremony's friend tie, promoGuests)**; 853-854 spare.
+- People (2026-10-19): lead 16 session_01UMyfd16GqSdgNyz5PE8qSv; BM6 session_01F8k6hqdBRoxDJMzqAuiHqR; R3 session_01AR6tGFiSZF7hL1LfVpWgng; X crew sim session_01SNaWA6X5E9i2ZKfMnPTHJf; W2 writer session_01866TWKzGRgZmFcxiYRi4db; U HUD session_01FcMPTX7mMTHkyr4pxDfNcS; S2 systems session_01Wiqm2pAvvyJYGQyUgbsfXY; M2 session_016kzZEwTjU6H1miJmA13TRh; M3 session_01WJczDg7E7y1jR96aCMbNew; H2 session_01SixL3TcPYoHEP1DPv8cBRZ. DA5 and P have handed over.
+
+## What C2 built
+- **Playtest 1 (0.44.14-0.44.16):** the day shift 09:00-17:00 (`DAY_SHIFT` [540,1020], `DEV_SHIFT`, `shiftTick`, time clock opens 08:00 = `CAREER.clockIn`, leave bookable to 08:30, Day 1-3 times +1 h); the morning round still held to 11:00 (`ROUND_HELD` 120); more board jobs (CHORES per up ~1/day, `HOLD_MAX` 4). Breakfast 06:00-09:00 is X's.
+- **The bridge by invitation (0.44.17, 0.44.22):** section 20 after the career occasions: `SHIP.bridgeInvited` (saved), `bridgeBarred(edge)` (asked by DA5's `YOU_LOCKS[1]` in section 4: edges v,10,5 / v,10,6 / h,14,10; exempt: already inside, doorOpenFor on B or R), `bridgeDoorTap`, `bridgeTick` (toast near the doors), `bridgeInviteReady(d)` (Vance's invite after the first ship-wide event; day 22 in a new game). S2 keeps bridge-room jobs off your board until invited.
+- **24p THE FIRST PROMOTION (0.44.18-0.44.26)**, end of section 24: part 1 the test job (`promoAnnounce` Day 8, `WORK_MECH.t2.offer`: jobReserve(scrubber, d, 540, slot 20, { tier 2, train t2, until 15:00, cause filter, drift 2 }), `promoPassed` via worksDone, `promoDelay` +2 workdays, tuneSet at the repair stop); part 2 the summons (`OCCASIONS.promoSummons` 11:00 Calder's office, 10:30 urgent notice, 11:15 Calder follows you via `promoEscort`, scene `promo.officer` with onPick/onEnd hooks, `promoPromote` by 12:00 at the latest; friends' Mail; `promoPlan()` for X); Brennan's cake 16:30-17:00 (`promoCakeTick`, X's crewScene); part 3 the move (`promoMoveTick` 17:00 or up to 30 min later, `promoMoveEscort` lead to 4/W, `promoMoved` by 17:30, `worksHome()`, `worksHomeOpen` in doorOpenFor, simNote moveStart/moved); part 4 the ceremony (`OCCASIONS.promoCeremony` Day+1 17:15 1/O, `promoGuests` with key 852, X sets the appointment's `places`, `promoCommission` (keepsake from marrow, ms commissioned), `promoPip` (rank pips 0->1, rebuilt like playerKit), Calder leads you at 17:30, Mail by 19:00).
+- **Shared bits:** ladder rows m8, m9, p1, p2 in 24 core's table (M2, M3, H2 sub-blocks); `SHIP.works.said`; `careerJobIn` fills `j.gains` for U's turn-in card (rep in words only, S2's j.meters as meters).
+- **Line keys:** W2's final set (both name sets read; see DEV_NOTES 0.44.24/25).
+
+## Loose ends (for Step 4 / the next seat)
+- **`WORK_BANDS[2]` is provisional** [0,12,28,45,60]: Step 4's page should set the officer bands.
+- **Section 15's locker and hobby texts that name Bunk 1 directly** are not switched to 4-23 after the move (P's note, plans/handover-player.md on claude/player-p5); the kit bag's bagLockerTap only runs on arrival day.
+- Keepsakes aren't drawn anywhere yet; `DECKS[4].homeKeepsakes['4-23']` + `worksHome()` are ready.
+- machine_check on this branch alone fails on DA5's dampers (S2's 'damper' kind): fine in BM6's merge order.
+- H2 is switching p1Stage to `WORK_MECH.m9` (the P1-first puzzle_check clash in BM6's trial) — check it landed.
+- `SHIP.works.mv` / `W.cake` are not kept by worksClean (a reload mid-walk restarts the walk; the cake toast may repeat once). Harmless.
+
+## Gotchas
+- **Never `pkill -f` a pattern in your own command line** (kills your shell); use `pgrep -f "[x]yz"`.
+- The `simNotes` ring drops old notes after about a day: in long paper runs, record notes with `onSim` as they happen (career_check (j) does).
+- `openJobs('you')` returns summaries, not job objects: look up `SHIP.jobs` by id for fields like `reserved`.
+- Don't put a `//` comment in the middle of a one-line object entry (it ate `slot:` once); `node --check` the extracted script before a run.
+- Check renames with W2 before switching: messages cross; I now read both sets.
+
+## How to test
+DEV_NOTES "Testing" setup (pip playwright; three r128 in /tmp/cadet-work/three; `CADET_CHROME=/opt/pw-browsers/chromium`). Per push: `career_check.py` (sections (h) bridge, (i) test job, (j) summons/move/ceremony/save/twice, (k) turn-in gains), `mech_check.py`, `leave_check.py`, `puzzle_check.py`, `deck_check.py`, `interactions_check.py`, `events_check.py`, `player_check.py`, `intro_check.py BUILD --week`, `cadet_test.py OLD NEW`. Run them one at a time from a script that logs each result (TEAM.md "Long check runs").
+
+## Open questions for the user
+- None from this seat; design calls (Tier 2 bands, dropping the work-40 need from t2, the cake's 16:30 slot) are with lead 16.
+
+---
+
 # Handover: the Works career engineer (Pillar 5, seat C)
 
 Written 2026-10-18 ~14:50 UTC by session_01LgTgzjeqLNrjeCa2iRzbYx (about 58% memory) for a fresh session taking the seat for Step 3 (Officer, Days 9-15). Read CLAUDE.md, DEV_NOTES.md ("Pillar 5: your Works career, section 24 core", the 0.44.x build rows, the hook register), `plans/pillar5-plan.md` (Part 1, Part 3, Part 6 seat C) and `plans/mechanics/foundation.html` + the Step 3 pages on `claude/p5-design` first.

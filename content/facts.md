@@ -28,7 +28,19 @@ in section 20, the meetings in section 18) are canon too: never contradict a bea
   **Hesper Dock** (a big station-port: market stalls, boats, rain), **Kesh**, **Lisk** (a place: "letters home to Lisk"), **Valo**, **Coriel**,
   **Marra Station** (rebuilt twice; Kim collects its old maps), **New Aberdeen**, **the Ostrander colonies**, **the Tevan belt**, and Tomas's **farm moon** (unnamed: "the farm moon", a sky that is always the same
   grey). Pell's home town and the others not listed are unnamed until a writer needs one: ask.
-- **Time:** a ship day is 18 waking hours of play; breakfast 06:00-09:00 (seat X, playtest 1: the night shift eats at 06:00), 09:00 shift, dinner 17:00-20:30 (design-doc). The day shift runs
+- **Out of the windows** (the Wren's route; the user's pick, 2026-10-20, via EW1): **the Pale Shoals**, a pale smudge of
+  dust behind us ("we left them six weeks ago" on Day 1), and **Tavessa**, a star cluster the Veyli named, dead ahead past
+  the Line (crossed into the Veyli reach on Day 7). Raman names both at First Light Cocoa. Ask before adding more.
+- **The Veyli reach:** the Wren was last in the reach two years ago, on a quiet charting run (nothing happened; never
+  tie an incident to it). So crew aboard under two years are first-timers at the Line (Day 7), and older hands crossed
+  then (Pell, for one). Checked by EW1 against Holt's and Saruth's arcs: no clash (Holt's bad day is "years ago, on a
+  border patrol", no ship or date; never link the two).
+- **What the Line means** (the user, 2026-10-21, line-q10 A: "guests in someone else's sky"): the Line is where the
+  Veyli reach begins. Past it the Concord's charts are thin (a few runs, never a full survey; they grow thin, they
+  don't end), every star already has a Veyli name, and the nearest Concord port is a long way behind. The Wren travels
+  there as a guest (only "as guests": never by anyone's leave, permission or agreement). Help is a long way off (about
+  distance, never danger), so the old oath is a promise to each other. Survey's real work of the tour starts there.
+- **Time:** a ship day is 18 waking hours of play; breakfast 07:00-09:00 (the user's playtest notes, patch 1; it was 06:00-09:00 from seat X, playtest 1: the night shift now unwinds for an hour, eats at 07:00, then showers), 09:00 shift, dinner 17:00-20:30 (design-doc). The day shift runs
   09:00-17:00 (the user, playtest 1); Calder's briefing at ten to nine; the night shift is its own world (Bunk 8, the inner cabins). Tea and biscuits at 13:00 in the Works tea corner (replaced the half-ten tea, playtest 1).
 - **The ship's year:** 364 days, 52 weeks, Day 1 a Monday. Four seasons named for the garden: **Sowing** (days 1-91),
   **Greening** (92-182), **Harvest** (183-273), **Lanterns** (274-364). You arrive on **Day 0**, a Sunday, the last evening
@@ -48,7 +60,7 @@ in section 20, the meetings in section 18) are canon too: never contradict a bea
 | Deck | What's there | How crew talk about it |
 | --- | --- | --- |
 | 1 Bridge | bridge, command ring, the Captain's ready room (mind the step; everyone trips on it), observation room | "up top", rare to visit |
-| 2 Command & Science | senior cabins on the looped corridor, the portrait gallery of past captains, Survey lab, chart room, observatory, comms, Watch office, the array | "the senior corridor", "the observatory" |
+| 2 Officer's Quarters - Science (was Command & Science; patch #25) | senior cabins on the looped corridor, the portrait gallery of past captains, Survey lab, chart room, observatory, comms, Watch office, the array | "the senior corridor", "the observatory" |
 | 3 Commons | mess and galley (Brennan's), cold store, bow lounge and bar (curved windows), infirmary, garden (hydroponics), gym, crew store, call-home booths | where everyone meets |
 | 4 Quarters | junior wing: Bunk 1-8, two washrooms, laundry, junior common room (stern windows); officers' corridor (cabins 4-05 to 4-22) and the music room with the record cabinet | "the junior wing", "the music room" |
 | 5 Operations | Works bay and the job board, the Chief's glass office, the tea corner behind the parts racks, main storage, machine shop, cargo hold, Cart bay, shuttle bay | "the bay", "below" for Works crew |
@@ -271,7 +283,7 @@ player has **no partner** back home, and nothing in a call genders the player. F
 
 | Contact | Relation to the player | Pronouns | Calls you | Canon (approved) |
 | --- | --- | --- | --- | --- |
-| **Mum** (`mum`) | your mother | she / her | {me}, "pet" | drives the number nine bus; takes up pottery; turns your old room into her pottery room (your shelf stays); posts you a lopsided mug |
+| **Mum** (`mum`) | your mother | she / her | {me}, "chick" (was "pet" before patch 0.92.5) | drives the number nine bus; takes up pottery; turns your old room into her pottery room (your shelf stays); posts you a lopsided mug |
 | **Gran** (`gran`) | Mum's mum; lives with Mum | she / her | {me}, "petal" | records into "the box" ("Is the light on?"); the allotment was **Grandad**'s plot first (he died years ago; gentle, never a scene); her rival **Number Fourteen** (only ever the house number; no name, no pronoun); the village show; a marrow named **the Captain**; a fall by the water butt and a new hip; she recovers and wins first prize |
 | **Jo** (`jo`) | your older sibling | they / them | "kid" | checks forms at the freight office; a stapler called **Steve**; Saturdays at the boatyard by the water with the old boatwright **Wick** (they / them); an apprenticeship; their first boat, **the Little Wren** |
 | **Sam** (`sam`) | your best friend since school (you met at seven, on the bench by the school gate); **plainly platonic**: an old friend, never a partner, no romantic "I miss you" | they / them | {me}, "you absolute idiot" (fondly) | reshelves at the library (the trolley with the wonky wheel); the café quiz on Thursdays (your old team, **the Bench**); **Mrs Abbot** at the café; the Sunday story swap |
@@ -483,7 +495,7 @@ introduces them), unless noted.
 | "Calder is the clock" (Works joke); in Teague's comic she's a very tidy cloud who says "Fair." | Works | writer-works, batch 2 |
 | The Veyli like their cabins warm | the delegation | writer-commons, reactions |
 | Captain Varga started the portrait gallery | Marrow | writer-command, batch 3 |
-| Vance's regulations: six (shoes off in cabins), nine (rest), eleven section two (leave at port on request); he breakfasts at 06:05 | Vance | writer-command, batch 3 and arcs |
+| Vance's regulations: six (shoes off in cabins), nine (rest), eleven section two (leave at port on request); he breakfasts at 07:05 (06:05 until patch 1) | Vance | writer-command, batch 3 and arcs |
 | Tomas is fourth on Vance's treadmill board | Vance, Tomas | writer-command, batch 3 |
 | The blue crate in the Works bay is Calder's (don't sit on it) | Works | the voice bible; Moleth asks about it |
 | Saruth: "Do not bow. Most of you do it wrong."; humans knock twice; the cord tied loose means "you are expected"; Saruth respects Holt's plain distrust as "a kind of honesty" | Saruth | writer-command, batch 3 |
@@ -530,3 +542,28 @@ introduces them), unless noted.
 | Career lines (0.48.61): Calder keeps a note on every tech she's trained (her certified list's sibling); Pell gives a let-go friend a screw from the Wren "for your tin"; at the send-off Calder "came to check the ramp seals"; Vance's regulation nine is rest (Marrow jokes about it) | Calder, Pell, Marrow | head writer 4 |
 | Calls home are one-sided scenes (the user, 2026-10-17): Mum's pottery teacher **Rolf** (forty years at it; sells her his old wheel; packs "like he's posting a baby"); **Mrs Ellery** next door (the hedge, buys a bowl for her keys); old **Mr Pask** the number nine waits for; Mum's Saturday market stall (after beat 6) | Mum | head writer 4 |
 | Pillar 5 (design-doc "Works progression"): titles **Junior Technician** (Tier 1), **Technician** (Tier 2, Officer), **Senior Technician** (Tier 3), **Engine Specialist** (Tier 4); Works reputation words New, Steady, Reliable, Trusted, Relied on; Torres gives you his old scanner (Day 5, through Calder: he is off on Fridays) with a note "Mine's older than you. Look after it. Z."; the Chief's notes (a page per kind of head-scratcher) | Works | head writer, seat W |
+
+## The rec dec (W3, rec deck R12; plans/recdeck-plan.html v5 and plans/rec-traditions-plan.html)
+
+- **Where:** between Deck 4 (Quarters) and Deck 5 (Operations). The lift says **R** ("Recreation Deck"); crew say
+  **"the rec dec"** (their nickname, in speech only). Written texts (lead 18): signs and formal texts "Recreation
+  Deck" (the directory: "Recreation Deck (R)"); narration, Mail, news and UI mid-sentence "the rec deck". Never "Deck 7" (that's only the code's number). It went in at the Wren's **last refit**, between
+  two old decks, which is why it has a letter: **"They ran out of numbers."** Seven decks in all now.
+- **Open 06:00 to midnight**; closed for quiet overnight (it lies under Deck 4's officers' corridor).
+- **Rooms:** the **auditorium** (76 violet seats, a stage with the stars behind; the music room is right above it),
+  the **Lightdisc court** (glowing lines, a force-field net, a scoreboard) and its **stands**, the **pool** (four short
+  lanes under the hull windows, the Wren in mosaic on the bottom), the **river hall** (a slow channel and white water,
+  kayaks from the dock, a pebble beach, the **climbing wall**: four routes in red, yellow, blue and green holds, an
+  auto-belay each, a **brass bell** at the top), the **float room** (a fifth of a g, coral padding, slow light orbs),
+  the foyer (the season's **bell board**, the **Cup board**), kit hire (self-serve; a lone flipper on the counter),
+  changing rooms. Rec kit: teal with a coral stripe.
+- **Lightdisc** is the court's game (one disc, returned by standing in its way; move as it meets you and it curves;
+  three returns in a row and the next is charged).
+- **Who:** nobody staffs it. **Maeve Volkov** looks after its machines ("Maeve's deck"). Pell keeps the chalkboard for
+  **Winner Stays On**; Rina is annoyingly good at Lightdisc; Commander Vance has rung the wall's bell more than anyone,
+  and counts; Chief Holt runs **Paddle club** and starts the regatta heats with a horn (he has been in the float room
+  twice this week, for his back); the Counsellor prescribes the float room ("Twenty minutes. Counsellor's orders.").
+- **Traditions there:** Winner Stays On (Sun), the Lightdisc Cup (every 4 weeks), Dawn swim (Tue, Thu, Rina), Paddle
+  club (Wed, Holt), the river regatta (every 4 weeks), Wall night (Tue, Tomas belays), Float hour (Wed, Matthias Oduya),
+  Slow stretch (Sun 08:00, Dr. Nandakumar), Wren talks (Mon, Thu), film night (Sat; moves from the junior common room after
+  the first all-hands), talent night (every 4 weeks, Lucia Ferreira hosts, Maeve on lights), the Captain's all-hands.

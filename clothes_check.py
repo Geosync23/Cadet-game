@@ -2,11 +2,12 @@
 # Run:  CADET_CHROME=/opt/pw-browsers/chromium python3 clothes_check.py BUILD.html     (about 2 minutes)
 # Uses cadet_test.py's Game (?nosave&debug) and switches clothes on (CLOTHES_ON; ?clothes in a real URL does the same).
 # Checks, by real taps where a person would tap: the arrival's one spare outfit and the change on Day 1 (one minute,
-# Settling-in's 'clothes' note), yesterday's clothes from 10:00 (hygiene drains faster, the status note, one toast a
+# Settling-in's 'clothes' note; playtest patch 1: +CLOTHES_FRESH hygiene at once), yesterday's clothes from 10:00 (hygiene drains faster, the status note, one toast a
 # day), Day 2's empty wardrobe giving the hamper (the tip, the arrow to the laundry, the holding pose), Put down and
 # picking it up again, a washer (busy and broken ones send you to a free one; all busy: which finishes first), the
 # toast when it's done, taking it out, putting it away (the full kit: five outfits, and you change), the save round
-# trip mid-wash, a new game by shuttle and on Monday, and that with clothes off nothing answers.
+# trip mid-wash, a new game by shuttle and on Monday, and that with clothes off nothing answers. Patch 0.92.3 #26: dirty
+# clothes' green tips (once each), the clothes.grubby flag, a passer-by's remark in their own voice.
 import sys, os
 HERE = os.path.dirname(os.path.abspath(__file__))
 exec(open(os.path.join(HERE, 'cadet_test.py')).read().split("a, shots = run(")[0])
@@ -20,6 +21,8 @@ def check(ok, what):
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(30); E = g.ev
+    # The teaching arrows are on from 0.92.0: here every pop-up shows at once (the pop-up queue is arrows_check's)
+    E("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")
     toast = lambda: E("document.getElementById('toast').innerText")
     E("window.__toasts = []; { const t0 = toast; toast = (a, b) => { window.__toasts.push(a + ': ' + b); return t0(a, b); }; }")
     said = lambda: ' || '.join(E('window.__toasts.slice(-4)'))
@@ -41,8 +44,11 @@ with sync_playwright() as pw:
     E("CLOTHES_ON = true; simNote('newGame', { arrival: true })")
     check(E("SHIP.clothes.clean === 1 && SHIP.clothes.kit === false && SHIP.clothes.changed === 0"), 'by shuttle: one spare outfit, no full kit')
     heard = E("(() => { window.__acts = []; onSim('act', n => window.__acts.push(n.act)); return true; })()")
+    E("SHIP.player.needs.hygiene = 50"); fresh = E("typeof CLOTHES_FRESH !== 'undefined' ? CLOTHES_FRESH : 0")
     tap_wardrobe()
     check(until("!!ACT && ACT.kind === 'clothes'"), 'Day 1: a tap on the wardrobe starts changing')
+    h1 = E("SHIP.player.needs.hygiene")   # playtest patch 1, #8: clean clothes give hygiene at once
+    check(fresh > 0 and 50 + fresh - 1 <= h1 <= 50 + fresh, f'changing ticks hygiene up: 50 -> {h1:.1f} (CLOTHES_FRESH {fresh})')
     check(E("SHIP.clothes.clean === 0 && SHIP.clothes.changed === SHIP.time.day"), 'changed into the spare: none left')
     check('spare outfit' in toast() and 'laundry before tomorrow' in toast(), 'the toast: your one spare, laundry before tomorrow')
     check(E("window.__acts.includes('clothes')"), "the 'clothes' note for Settling-in")
@@ -57,8 +63,21 @@ with sync_playwright() as pw:
     E("SHIP.time.min = 10*60+1; FX_MIN = -1"); g.step(3)
     check(E("clothesYesterday() && Math.abs(fxD(playerFx(), 'hygiene') - CLOTHES_DRAIN * fxD(shipEffects(deckDef.num), 'hygiene')) < 1e-9"), "from 10:00: hygiene drains x" + str(E("CLOTHES_DRAIN")))
     check(E("playerFx().notes[0].text === \"In yesterday's clothes\""), 'the status note')
-    check("yesterday's clothes" in said() and 'no clean ones left' in said(), 'one toast, pointing at the laundry')
-    check(E("SHIP.clothes.told === 2"), 'told once today')
+    # 0.92.6 #17 (the user's): the device's Home says the outfit, clean or dirty (lead 35's words), and doesn't repeat the note
+    home = "DEVICE_APPS.get('home').view().blocks.map(b => b.text || '').join(' | ')"
+    oh = E("(() => { const m0 = SHIP.time.min, out = {}; out.late = [outfitLine(), " + home + "]; SHIP.time.min = 9*60+50; FX_MIN = -1; out.early = outfitLine();"
+           " const c0 = SHIP.clothes.changed; SHIP.clothes.changed = SHIP.time.day; out.clean = outfitLine(); const g0 = SHIP.clothes.grime; SHIP.clothes.grime = 1; out.grubby = outfitLine();"
+           " SHIP.clothes.grime = g0; SHIP.clothes.changed = c0; SHIP.time.min = m0; FX_MIN = -1; return out; })()")
+    print('  the outfit line:', oh)
+    check(oh['late'][0] == "Dirty outfit: yesterday's. Change at your wardrobe." and oh['late'][0] in oh['late'][1] and "In yesterday's clothes" not in oh['late'][1], f"Home: yesterday's outfit after 10:00 is dirty, said once (0.92.6 #17): {oh['late']}")
+    hb = oh['late'][1].split(' | '); si = next((k for k, x in enumerate(hb) if x.startswith('Season')), 0)
+    check(oh['late'][0] in hb and hb.index(oh['late'][0]) == si + 1, f'the outfit line is at the top of Home, right under the clock and season (0.92.6 #17, lead 36): {hb[:4]}')
+    check(oh['early'] == "Yesterday's outfit: change before 10:00." and oh['clean'] == 'Clean outfit on.' and oh['grubby'] == 'Dirty outfit: grubby from work. Change at your wardrobe.', f'the outfit line before 10:00, clean, and grubby (0.92.6 #17): {oh}')
+    if E("typeof clothesDirtyTick === 'function'"):   # playtest patch 1, #8: the extra drain shows as '−2 Hygiene' in the needs strip
+        fl = E("(() => { FLOAT_LOG.length = 0; CLOTHES_DIRTY.at = null; CLOTHES_DIRTY.v = 0; const m0 = SHIP.time.min; for (let k = 0; k <= 120; k += 5) { SHIP.time.min = m0 + k; FX_MIN = -1; clothesDirtyTick(); } SHIP.time.min = m0; FX_MIN = -1; return FLOAT_LOG.slice(); })()")
+        check(any(x == '\u2212' + '2 Hygiene' for x in fl), f"two hours in yesterday's clothes show the extra drain: {fl}")
+    else: check(False, 'no clothesDirtyTick (playtest patch 1, #8)')
+    check("yesterday's clothes" not in said().lower(), "no \"Yesterday's clothes\" pop-up (cut, 0.92.4 item B: the green tips say it)")
 
     # Day 2: the hamper
     E("SHIP.player.carry.push('relay')"); tap_wardrobe(); until("false", 30)
@@ -130,6 +149,41 @@ with sync_playwright() as pw:
     check(E("window.__uni[window.__uni.length - 1] === 'clean'"), "simNote('uniform', { state: 'clean' })")
     E("actEnd(true); SHIP.clothes.grime = .8; simAct('wash'); SHIP.player.needs.hygiene = 100"); g.step(5)
     check(E("SHIP.clothes.grime === .8 && uniformState() === 'grubby'"), 'a wash (the shower\'s note, hygiene full) leaves the grime')
+    # patch 0.92.3 #26 (FX4): dirty clothes: a green tip the first time each (grubby, yesterday's), the clothes.grubby flag
+    # while grubby (the writers' lines are gated on it), and someone passing remarks in their own voice (socLine), once a day
+    E("SHIP.device.settings.tips = true; delete SHIP.device.tipsSeen['clothes.grubby']; delete SHIP.device.tipsSeen['clothes.yesterday']; TIP_Q.length = 0; SHIP.clothes.changed = SHIP.time.day")
+    g.step(5)
+    gt = E("[!!SHIP.device.tipsSeen['clothes.grubby'], (TIP_Q.find(x => x.id === 'clothes.grubby') || {}).text || null, !!flag('clothes.grubby')]")
+    g.step(5); gn = E("TIP_Q.filter(x => x.id === 'clothes.grubby').length")
+    print('     grubby: tip seen, text, flag:', gt, '| still once:', gn)
+    check(gt[0] and gt[1] and 'grubby' in gt[1] and gt[2] and gn <= 1, f"0.92.3 #26: a grubby uniform gets its green tip once and sets clothes.grubby ({gt}, {gn})")
+    RM = r"""(() => { const C = SHIP.clothes, p = player.obj.position, a = DECK_CREW.find(x => x.p && x.p.id && x.h && x.p.id !== INTRO_ESCORT); if (!a) return null;
+      p.set(a.x + .6, 0, a.z); C.said.remark = -1; const kb = bubbleSay; let said = null; bubbleSay = (h, t) => { said = t; };
+      try { clothesFrame(); CLOTHES_SCAN = 0; clothesFrame(); } finally { bubbleSay = kb; }
+      const bank = (LINES['clothes.remark'] || []).map(e => e.text); return { who: a.p.id, said, bank: said ? bank.some(b => said.includes(b.replace(/\{[^}]+\}/g, '').trim().slice(0, 12))) : null, day: C.said.remark }; })()"""
+    rg = E(RM)
+    print('     a remark on the grubby uniform:', rg)
+    check(rg and rg['said'] and rg['bank'] is False and rg['day'] == E('SHIP.time.day'), f"0.92.3 #26: someone passing remarks on the grubby uniform, a grubby line, not yesterday's ({rg})")
+    E("SHIP.clothes.grime = 0; SHIP.clothes.changed = SHIP.time.day - 1; SHIP.time.min = 10 * 60 + 30; FX_MIN = -1"); g.step(5)
+    yt = E("[!!SHIP.device.tipsSeen['clothes.yesterday'], (TIP_Q.find(x => x.id === 'clothes.yesterday') || {}).text || null, !!flag('clothes.grubby'), uniformState()]")
+    print('     yesterday\'s: tip seen, text, grubby flag, state:', yt)
+    check(yt[0] and yt[1] and "yesterday" in yt[1] and not yt[2] and yt[3] == 'yesterday', f"0.92.3 #26: yesterday's clothes get their green tip; the grubby flag clears ({yt})")
+    # 0.92.4 item B (the user): still in yesterday's clothes on a later day, a second green tip, once; not the same day
+    g.step(5); same = E("!!SHIP.device.tipsSeen['clothes.yesterday2']")
+    E("TIP_Q.length = 0; SHIP.time.day += 1; SHIP.clothes.changed = SHIP.time.day - 2; SHIP.time.min = 10 * 60 + 30; FX_MIN = -1"); g.step(5)
+    y2 = E("[!!SHIP.device.tipsSeen['clothes.yesterday2'], (TIP_Q.find(x => x.id === 'clothes.yesterday2') || {}).text || null, uniformState()]")
+    E("SHIP.time.day -= 1")
+    print('     the next day, still in yesterday\'s:', y2, '| the same day:', same)
+    check(not same and y2[0] and y2[1] and y2[2] == 'yesterday', f"0.92.4 B: a second green tip the next day if you're still in yesterday's clothes, not the same day ({y2}, {same})")
+    # RV11: out of clean clothes (none left, no clean hamper), both tips send you to the laundry, not to an empty wardrobe
+    lt = E("""(() => { const C = SHIP.clothes, keep = [C.clean, C.hamper, C.changed, C.said.ytip, SHIP.time.day, SHIP.time.min], out = [];
+      C.clean = 0; C.hamper = null; delete SHIP.device.tipsSeen['clothes.yesterday']; delete SHIP.device.tipsSeen['clothes.yesterday2']; TIP_Q.length = 0;
+      SHIP.time.min = 10 * 60 + 30; C.changed = SHIP.time.day - 1; clothesDirtyTip('yesterday'); out.push((TIP_Q.find(x => x.id === 'clothes.yesterday') || {}).text || null);
+      TIP_Q.length = 0; SHIP.time.day += 1; C.changed = SHIP.time.day - 2; clothesDirtyTip('yesterday'); out.push((TIP_Q.find(x => x.id === 'clothes.yesterday2') || {}).text || null);
+      [C.clean, C.hamper, C.changed, C.said.ytip, SHIP.time.day, SHIP.time.min] = keep; TIP_Q.length = 0; return out; })()""")
+    print('     out of clean clothes, the tips:', lt)
+    check(all(t and 'laundry' in t and 'fresh set' not in t for t in lt), f"0.92.4 B (RV11): out of clean clothes, both tips send you to the laundry, not a fresh set ({lt})")
+    E("SHIP.time.min = 9*60+50; SHIP.clothes.changed = SHIP.time.day; SHIP.clothes.grime = .8; TIP_Q.length = 0; FX_MIN = -1"); g.step(3)
     E("SHIP.clothes.grime = 0")
 
     # the cabin Mail and Day 1's training beats (0.42.48)

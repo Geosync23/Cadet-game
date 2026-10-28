@@ -1,0 +1,403 @@
+@bank all
+// Pillar 5 Step 4 (head writer W2): texts said by nobody, for the side jobs (seats E1, E2, E3; D3's pages on
+// claude/p5-design). Keys in content/works/keys-p5.md, "Step 4". Mails are "Subject | body", unsigned.
+
+// ---- the ladder rows
+== works.mech.m10
+- the workshop
+== works.mech.m11
+- tool upkeep
+== works.mech.m12
+- the logbook
+== works.mech.m13
+- leak hunting
+== works.mech.m14
+- irrigation
+== works.mech.m15
+- rewiring
+== works.mech.m17
+- the lift roof
+== works.mech.tickets
+- fault-finder tickets
+
+// ---- M10 the workshop (E3, 24j; E3's names): an order's ask (said by the crew member, on the order card) and their
+// thanks when you hand it over ({name} is them), per thing id; a quiet Mail when an order sat a week untaken.
+== works.order.ask.guitar-hook
+- A hook for my guitar, please. It keeps sliding off the bunk.
+== works.order.thanks.guitar-hook
+- A guitar hook! It hasn't fallen once. Thank you.
+== works.order.ask.mug-rack
+- A little rack for mugs? Ours are stacked like a tower.
+== works.order.thanks.mug-rack
+- The mug rack's perfect. The tower is no more.
+== works.order.ask.book-stand
+- A stand for my book, please. My arms get tired reading.
+== works.order.thanks.book-stand
+- A book stand! I read two chapters hands-free. Thank you.
+== works.order.ask.lamp-arm
+- Could you make an arm for my lamp? It lights the wall, not the page.
+== works.order.thanks.lamp-arm
+- The lamp arm works. I can see my page. Thank you.
+== works.order.ask.plant-hanger
+- A hanger for my plant? It wants to be nearer the light.
+== works.order.thanks.plant-hanger
+- The plant's up and happy. So am I. Thank you.
+== works.order.ask.fan-spindle
+- My desk fan's spindle snapped. Could you turn me a new one?
+== works.order.thanks.fan-spindle
+- The fan spins again. Better than new, honestly.
+== works.order.ask.drawer-pull
+- My drawer's lost its pull. I open it with a spoon.
+== works.order.thanks.drawer-pull
+- A proper drawer pull. Goodbye, spoon. Thank you.
+== works.order.ask.tablet-stand
+- A stand for my reader, please. I keep propping it on socks.
+== works.order.thanks.tablet-stand
+- The stand's lovely. My socks are free again. Thanks.
+== works.order.lapse
+- I made do, don't worry. Thanks anyway.
+
+// ---- M11 tool upkeep (E1, 24m)
+== works.toolstate.charged
+- Charged
+== works.toolstate.low
+- Getting low
+== works.toolstate.due
+- Due
+== tool.due.scanner
+- Your scanner's charge is low. The bench will sort it.
+== tool.due.pipekit
+- Your pipe kit wants cleaning and a new seal. Bench, when you can.
+== tool.due.logger
+- Your logger's due a check. Bench, when you can.
+== bench.scanner
+- Recharge the scanner
+== bench.pipekit
+- Clean and re-seal the pipe kit
+== bench.logger
+- Check the logger
+== bench.charging
+- The scanner's on charge. Ready at {time}. No need to wait.
+== bench.charging.now
+- on charge
+== bench.rack
+- The team's tools
+== bench.rack.done
+- Rack's tidy. Someone's been busy.
+== bench.done
+- Good as new. Well, good as yesterday.
+
+// ---- M12 the logbook (E1, 24n): the terminal, workdays 16:30-17:30. You pick one of three summaries; E1 builds them
+// from these parts and joins them with "; ".
+== works.log.write
+- Write the log
+== works.log.pick
+- Which one's your log for today?
+== log.fixed
+- {machine}: {part} replaced
+== log.serviced
+- {machine} serviced
+== log.found
+- {machine} {shows}, left for tomorrow
+== log.open
+- {machine} still open
+== log.quiet
+- A quiet day. Nothing to report
+== log.saved
+- Logged. Calder will read it. She reads everything.
+// stage 2: flag a machine for the night crew's 22:00 look
+== log.flag
+- Flag {machine} for the night crew
+== log.flagged
+- Flagged. The night crew will look at 22:00.
+// stage 3: your old log line as a clue in a head-scratcher
+== case.log.note
+- From your log, day {n}: "{text}"
+
+// ---- M13 leak hunting (E2, 24o)
+== leak.card
+- A pipe drips somewhere on Deck {deck}
+== leak.look.above
+- It's coming from above, towards {place}.
+== leak.look.warmer
+- Wetter here. You're close.
+== leak.look.here
+- There. A joint, weeping.
+== leak.worn
+- Worn right through. Tightening won't hold it. It needs a new joint from stores.
+== leak.turning
+- A quarter turn. Still a bead of water. A bit more.
+== leak.tight
+- Snug. The drip stops.
+== leak.fix.tighten
+- Tighten the joint
+== leak.fix.replace
+- Replace the joint ({part})
+== leak.done
+- Dry. Found it yourself.
+== leak.found.crew
+- The crew found the drip on Deck {deck}. The long way.
+
+// ---- M14 irrigation (E2, 24r): harvest mornings, the garden's three racks
+== noz.plant
+- The irrigation plant hums along. You check its filter and the pressure while you're here.
+== irr.title
+- Rack {n} · nozzles
+== irr.clear
+- Clear the nozzles
+== irr.cleared
+- Clear. The water runs even again.
+== irr.flush
+- Flush the line
+== irr.flushed
+- Flushed. The racks drink properly now.
+== irr.salad
+- Tonight's salad is extra crunchy. The garden says thank you.
+
+// ---- M15 rewiring (E2, 24q)
+== rewire.card
+- Rewire junction {junction}
+== rewire.pop
+- Pop. That pair's wrong. Swap them and try again.
+== rewire.right
+- Right first time.
+== rewire.done
+- Junction {junction} rewired. Lights steady.
+== rewire.faded
+- This one's faded. Which colour was it?
+== rewire.check
+- Flick the lights. See which one goes off.
+== wire.red
+- red
+== wire.blue
+- blue
+== wire.yellow
+- yellow
+== wire.green
+- green
+== wire.white
+- white
+== wire.black
+- black
+
+// ---- favour cases (E2, 24l): six small mysteries a friend brings you. Each: the ask (chat, or Mail), the Fault
+// notes title, suspects (sus.1 is the real one), clues, the solve line, the thanks. Gifts are E2's.
+== favour.lamp.ask
+- My lamp flickers, but only when Pell plays guitar next door. Is that mad?
+== mail.favour.lamp
+- My lamp | My lamp flickers, but only when Pell plays his guitar next door. Is that mad? Could you have a look?
+== favour.lamp.title
+- A lamp that flickers when the guitar plays
+== favour.lamp.sus.1
+- they share a circuit, and the amp pulls hard
+== favour.lamp.sus.2
+- a loose bulb
+== favour.lamp.sus.3
+- the lamp's switch is worn
+== favour.lamp.clue.1
+- New bulb, seated tight. Still flickers.
+== favour.lamp.clue.2
+- Pell: "I only plug the amp in for the loud ones."
+== favour.lamp.clue.3
+- Both cabins come off the same junction.
+== favour.lamp.solved
+- Shared circuit. The amp on the other socket, and the lamp's steady.
+
+== favour.cold.ask
+- My cabin's freezing, and nobody else's is. Is it me?
+== mail.favour.cold
+- Cold cabin | My cabin's freezing and nobody else's is. The heating's on, I checked. Could you look?
+== favour.cold.title
+- A cabin colder than its neighbours
+== favour.cold.sus.1
+- something's blocking the vent
+== favour.cold.sus.2
+- the heat loop's low
+== favour.cold.sus.3
+- a draught at the door
+== favour.cold.clue.1
+- The cabins either side are warm. Same loop.
+== favour.cold.clue.2
+- No draught at the door. You checked with your hand.
+== favour.cold.clue.3
+- A storage box sits snug against the wall, low down.
+== favour.cold.solved
+- The box was over the vent. Moved it. Warm in ten minutes.
+
+== favour.squeak.ask
+- My door squeaks. Only at night. I'm not imagining it.
+== mail.favour.squeak
+- My door | My door squeaks, but only at night. In the day it's silent. Am I imagining it?
+== favour.squeak.title
+- A door that only squeaks at night
+== favour.squeak.sus.1
+- the frame cools at night and the door rubs
+== favour.squeak.sus.2
+- the hinge wants oil
+== favour.squeak.sus.3
+- someone leans on it
+== favour.squeak.clue.1
+- Oiled the hinge yesterday, they say. Still squeaks at night.
+== favour.squeak.clue.2
+- The corridor's two degrees cooler after 22:00.
+== favour.squeak.clue.3
+- A shiny rubbed spot near the top of the frame.
+== favour.squeak.solved
+- The frame shrinks in the cool. A shave off the top, and it's quiet.
+
+== favour.shower.ask
+- My shower goes cold. But only when the laundry's running. Weird?
+== mail.favour.shower
+- Cold shower | My shower goes cold, but only when the laundry's running. Is that a thing?
+== favour.shower.title
+- A shower that runs cold when the laundry runs
+== favour.shower.sus.1
+- the shower and the washers share a line
+== favour.shower.sus.2
+- the shower's mixer is worn
+== favour.shower.sus.3
+- the water's low ship-wide
+== favour.shower.clue.1
+- Fine at 07:00. Cold at 11:00, when the washers fill.
+== favour.shower.clue.2
+- The next shower along is fine all day.
+== favour.shower.clue.3
+- One pipe feeds this shower and the laundry, by the map.
+== favour.shower.solved
+- A shared line. A balancing valve in, and the shower keeps its heat.
+
+== favour.clock.ask
+- My clock runs slow. A few minutes a day. I'm always late.
+== mail.favour.clock
+- My clock | My clock loses a few minutes every day. I've been late twice. Could you take a look?
+== favour.clock.title
+- A clock that runs slow
+== favour.clock.sus.1
+- the power dips on that circuit
+== favour.clock.sus.2
+- the clock's tired
+== favour.clock.sus.3
+- someone keeps setting it wrong
+== favour.clock.clue.1
+- The same clock ran fine in the mess for a day.
+== favour.clock.clue.2
+- The lights in that cabin dim when the heater kicks in.
+== favour.clock.clue.3
+- Nobody else touches it. They'd know.
+== favour.clock.solved
+- Power dips. A steadier socket, and the clock keeps time.
+
+== favour.speaker.ask
+- My speaker buzzes. Only near the scrubber. Can you help?
+== mail.favour.speaker
+- My speaker | My little speaker buzzes, but only when I'm near the scrubber. Elsewhere it's fine. Any ideas?
+== favour.speaker.title
+- A speaker that buzzes near the scrubber
+== favour.speaker.sus.1
+- the scrubber's motor makes interference
+== favour.speaker.sus.2
+- the speaker's cone is torn
+== favour.speaker.sus.3
+- a loose cable
+== favour.speaker.clue.1
+- It plays clean in the common room.
+== favour.speaker.clue.2
+- The buzz rises and falls with the scrubber's fan.
+== favour.speaker.clue.3
+- The cable's snug at both ends.
+== favour.speaker.solved
+- Interference. Moved it a metre away, and the buzz is gone.
+
+// choosing the cause, and a wrong pick (E2)
+== favour.call
+- What's causing it?
+== favour.not
+- Not that. Look again.
+// the lapse, after 3 days: they ask someone else (the game adds who)
+== favour.lapse
+- {name} asked someone else in the end. No harm done.
+// the Fault notes heading for a favour
+== favour.head
+- A favour for {name}
+
+// ---- fault-finder tickets (E2): Calder's Mail (Day 13), the Works board, the grade and the pin
+== mail.ticket.first
+- A ticket case | A ticket case, when you're ready. It's on the Works board. Harder than the others. Take your time.
+== ticket.card
+- Ticket case: {machine} {shows}
+== ticket.nohint
+- It's a ticket: no hints till you've looked at three things yourself.
+== ticket.wrong
+- Not yet. Next week.
+== ticket.solved
+- Ticket solved. Calder's initials on it.
+== works.grade.1
+- Fault-finder
+== works.grade.2
+- Trusted fault-finder
+== works.grade.3
+- The ship's fault-finder
+== works.ms.grade
+- {grade}, Day {n}.
+== works.pin
+- your fault-finder pin
+
+// ---- off shift: cabin touches (24t; E4, was E3): the sentence when you put a thing in a spot (rug desk shelf ledge).
+// E4's code adds " The <old thing> is back in your hands." when it swaps one.
+== cabin.spot.rug
+- Down it goes. The floor feels like yours now.
+== cabin.spot.desk
+- On the desk it goes. It looks like yours now.
+== cabin.spot.shelf
+- On the shelf, where you'll see it. It looks like yours now.
+== cabin.spot.ledge
+- On the ledge by the door. It looks like yours now.
+
+// ---- star logging (24t; E4): the observatory telescope, 20:00-23:30, one a night. {a} {b} the chart's two stars.
+== star.title
+- Star log
+== star.pick
+- Your chart has {a} and {b} here. The eyepiece shows three. Which one is new?
+== star.right
+- Logged: {star}. Survey will see it in the morning.
+== star.wrong
+- That one's already on the chart. Look again.
+== star.name
+- Wren {n}
+// ten stars logged
+== star.done
+- Ten stars logged. Survey has put your name in the catalogue.
+== works.ms.stars
+- Star logger
+
+// ---- Step 4 stages (E1): rounds stage 2 and 3, hauling, the stocktake; team parts (E2)
+== round.title.first
+- Your first round, Deck {deck}
+== round.last
+- last looked {n} days ago
+== round.last.never
+- not looked at yet
+== round.doorway
+- From the doorway: {machine}, {word}.
+== haul.tidy
+- A tidy run.
+== stock.count
+- {shelf}: count what's there.
+== stock.short
+- {shelf} is short of {part}.
+== stock.job
+- Restock: {shelf}
+== stock.fine
+- {shelf}: all present.
+== mail.team.parts
+- Bring the parts | {job} tomorrow at {time}. {name} asks you to bring the parts from stores: {parts}.
+== team.parts.late
+- {name} fetched the parts. Ten minutes late. Nobody minds. Much.
+
+// ---- M17 the lift roof (E3, 24s): Thursdays 15:30-16:30 from Day 18
+== roof.held
+- The lift is held for maintenance until 16:30. Stairs, please.
+== roof.result
+- The lift runs a little smoother.
+== roof.resume
+- You'd saved on the lift roof. You're back at the top deck.

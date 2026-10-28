@@ -1,0 +1,24 @@
+@meeting promo.result
+// FX28 (2026-10-26, the user's playtest notes; lead 38's plan D): with PROMO_BEATS_ON the summons is your result, first
+// thing the next workday (08:15, Calder's glass office). She tells you you've passed and gives you the Technician's
+// badge; the pip is the Captain's, this afternoon. One reply, which she remembers (C2 stores promo.reply 1-3 by the
+// choices' order: proud, surprised, about time; keep it). If she had to come and find you (08:30), it plays where you
+// are. Drafted by FX28 for SW2 to polish.
+title: Your result
+from: Chief Ines Calder
+gist: Calder gave you your result: you passed. You're a Works Officer now, Technician, Tier 2. The Captain pins your pip this afternoon.
+== lines
+calder > you: Door. Thank you. Two minutes.   [gesture]
+calder: Your scrubber. Four bolts, one filter, no notes from me.
+calder: Result: passed. You're an Officer from today. Technician, Tier 2.
+calder: Your badge. Pin it level. I'll know if it isn't.
+? choice
+* Thank you, Chief. I'll do it properly.   rel:calder+2
+  calder: You already do. That's what the badge is for.   [nod]
+* Really? This soon?   rel:calder+1
+  calder: Really. Soon isn't the measure. Ready is. You're ready.
+* I wondered when you'd say so.   rel:calder+1
+  calder: Hm. So did Torres. Out loud. Daily.   [nod]
+calder: The pip isn't mine to give. The Captain pins it this afternoon, observation room. Clean uniform.
+calder: Tier 2 work on the board from tomorrow. Tonight, after dinner, I walk you to your cabin. 4-23.
+calder: Go on, then. They're waiting outside.

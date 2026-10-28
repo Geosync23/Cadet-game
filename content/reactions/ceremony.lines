@@ -1,0 +1,12 @@
+@reactions ceremony
+// Pillar 5 Step 3 (head writer W2): after the officer ceremony (Day 11), from the guests and anyone who heard. Cue
+// ceremony.you.
+? cue:ceremony.you tier>=friend
+- The Captain pinned it herself. I saw. It's straight.   #warm
+- You looked very official. I nearly didn't laugh.   #funny
+- Thanks for having me there. I won't forget it.   #warm
+? cue:ceremony.you tier>=acquaintance
+- Commissioned, then. Congratulations, Officer.
+- Did the Captain ask you her question? She always does.
+?
+- There was a ceremony up top. A new officer.

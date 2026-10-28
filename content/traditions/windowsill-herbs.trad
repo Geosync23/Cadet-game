@@ -1,0 +1,37 @@
+@tradition windowsill-herbs
+// Round 2: four people grow herbs on their windowsills for the galley; once a month they compare pots in the garden and the best bunch goes to Brennan. Every 4 weeks from week 6 (Days 36, 64...).
+// Rules: FX24 (0.93.2, behind TRAD_0932_ON in section 13). Words: CS1 (plans/trad-0932-words.txt, claude/crew-stories-pitch 7b1e7300).
+k: 1307
+title: Windowsill herbs
+when: every 4 weeks monday week 2 from day 36
+at: 17:30-18:00
+min: 20
+after-shift: yes
+where: 3 pool garden
+who: janssen-hugo always, quist-ilse always, ishikawa-orla always, nakamura-bilal always, gardener 35%, garden-lover 30%, everyone 5%
+anim: water
+host: janssen-hugo
+from: janssen-hugo
+invite: host=janssen-hugo odds=25% line="Windowsill herbs in the garden. Bring a pot, or just a nose."
+
+== mail
+- Windowsill herbs tomorrow, {time}, in the garden. The windowsill growers bring their pots, swap cuttings, and the best bunch goes to Brennan. Come and sniff.
+
+== ask
+- Herb swap in the garden later. Hugo's mint is enormous.
+- Windowsill herbs. Somebody's basil is going to the galley. Not mine.   #funny
+- Do you grow anything on your windowsill? Bring it. They'll judge it nicely.
+
+== here
+- Smell that. That's rosemary that loves you.   #warm
+- A cutting for a cutting. Fair.
+- Whose thyme is this? It's very tidy.
+- Brennan's coming to choose. Look busy.   #funny
+
+== thanks
+- The windowsill growers line up their pots in the garden, swap cuttings and argue gently about whose basil is best. The best bunch goes to the galley.
+
+== chatter
+- Hugo's mint won the windowsill herbs. Brennan took the lot.
+- I swapped a cutting at the herb swap. Now I have a plant. Help.   #funny
+- The garden smelled of basil all evening after the herb swap.

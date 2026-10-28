@@ -1,0 +1,32 @@
+@bank all
+// SW2, 0.92.6 item 9, the cheap fix (the user: yes): any appointment you make with someone plays one of their own
+// "Talk a while" talks when you're both sat down (talkpack/<id>.talk, their talk.start / talk.sit / talk.end frames).
+// These are the few shared lines around it, said by whoever you meet, for the moments the talk frames don't cover.
+// Voice tokens make them sound like the speaker. FX22: the keys, read as LINES['appt.<what>'].
+//   appt.arrive   they arrive and sit with you (before their talk.start).
+//   appt.wait     you arrive and they're already there.
+//   appt.late     you arrive late (kind; never a guilt trip).
+//   appt.notalk   for anyone with no talk pack: a short chat line, then appt.bye.
+//   appt.bye      the appointment's time is up.
+
+== appt.arrive
+- {hi}. Right, I'm here. All yours.
+- {hi}, {nick}. Sorry, the lift was full.
+- There you are. I saved you a seat. Well, I sat near one.   #funny
+- {hi}. I've been looking forward to this, honestly.   #warm
+== appt.wait
+- {hi}. You found it, then. Sit down.
+- I was early. I'm never early. Don't get used to it.   #funny
+- {hi}, {nick}. Sit. I've got ten minutes before anyone needs me.
+== appt.late
+- There you are. I was about to send the Watch out.   #funny
+- No harm done. Sit. I've only just got comfy.
+- {hi}. Late's fine. Here's better than not at all.   #warm
+== appt.notalk
+- So. How's it going, really? The board treating you all right?
+- Tell me one good thing about your week. Just one.
+- I like this. Sitting still. We should do it more.   #warm
+== appt.bye
+- Right, that's me. Same again some time?
+- {bye}. Thanks for this. I mean it.   #warm
+- Time's up, I'm afraid. The ship calls. {bye}.

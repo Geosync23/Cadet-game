@@ -1,0 +1,37 @@
+@tradition seed-packet-day
+// Round 2 (seasonal): Ravi Hart draws next season's seed packets and everyone folds and fills one with their own drawing. Once a season, week 4's Saturday (Day 27, 118...).
+// Rules: FX24 (0.93.2, behind TRAD_0932_ON in section 13). Words: CS1 (plans/trad-0932-words.txt, claude/crew-stories-pitch 7b1e7300).
+// Host check (FX24): the card's 11:00 is inside Ravi's garden shift (06:00-14:00, Saturdays), and garden hour has the garden 14:00-15:00, so 16:30-17:15.
+k: 1313
+title: Seed packet day
+when: quarter week 4 saturday
+at: 16:30-17:15
+min: 20
+where: 3 pool garden
+who: hart-ravi always, cruz-tove 70%, gardener 45%, garden-lover 35%, everyone 8%
+anim: hart-ravi talk, everyone fold
+host: hart-ravi
+from: hart-ravi
+invite: host=hart-ravi odds=25% line="Seed packet day in the garden. Draw your packet. Cruz sows what's in it next season."
+
+== mail
+- Seed packet day tomorrow, {time}, in the garden. Fold a packet, fill it, draw on the front. Next season's sowing comes out of them. I'll bring the pencils.
+
+== ask
+- Seed packet day in the garden. Ravi's drawing the beans. They look like ducks.   #funny
+- Making seed packets later. Your drawing goes in the garden for a season.
+- Coming to seed packet day? It's once a season. Don't miss it.
+
+== here
+- Fold, fill, seal. Then draw.
+- What's yours? Carrots? Draw a carrot.
+- That's a good packet. Cruz will like that one.
+- Don't drop the seeds. They're very small and very fast.   #funny
+
+== thanks
+- You fold a seed packet, fill it from the jar, and draw on the front. Next season, Cruz sows it.   #warm
+
+== chatter
+- My seed packet has a drawing of a tomato. It's mostly a circle.   #funny
+- Cruz kept all the seed packets in a tin. Every single one.   #warm
+- Seed packet day means a new season's coming. Feels like it, anyway.

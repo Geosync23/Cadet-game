@@ -1,0 +1,11 @@
+from pp import *
+g = start(); g.step(10); sign(g); g.secs(2)
+g.ev("""(() => { for (let t = shipNow(); t <= 20*60+30; t++) { setShipNow(t); introAdvance(t, null); } })()""")
+g.ev("skipTo(1440 + 8*60+0)")
+print(g.ev("JSON.stringify((DECKS[5].places||[]).filter(q => q.room==='o').map(q=>[q.id,q.type,q.at]))"))
+print(g.ev("(() => { const S=schedData(); return JSON.stringify((DECKS[5].places||[]).filter(q=>q.room==='o').map(q=>[q.id, S.owner.has(q.id), !!S.deskOf(q.id), !!q.machine])); })()"))
+print('beats', g.ev("JSON.stringify(introBeats('calder',2))"), g.ev("JSON.stringify(introPlan(ROSTER.find(p=>p.id==='calder'),2))"))
+print(g.ev("JSON.stringify(planDay(ROSTER.find(p=>p.id==='calder'),2).filter(s=>s.to>1440+7*60&&s.from<1440+10*60).map(s=>[hhmm(s.from-1440),hhmm(s.to-1440),s.deck,s.placeId,s.act,s.tag]))"))
+print('soto', g.ev("JSON.stringify(ROSTER.find(p=>p.id==='soto-marta'))")[:400])
+print('calder', g.ev("JSON.stringify(ROSTER.find(p=>p.id==='calder'))")[:400])
+print('heads-up', g.ev("JSON.stringify(typeof scheduleItems==='function'?1:0)"))

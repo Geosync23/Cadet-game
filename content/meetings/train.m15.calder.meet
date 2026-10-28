@@ -1,0 +1,15 @@
+@meeting train.m15.calder
+// Pillar 5 Step 4, M15 rewiring (Day 17, Wednesday morning): Calder at a junction in the officers' corridor. Seat E2.
+title: Rewiring
+from: Chief Ines Calder
+gist: Calder showed you rewiring: match each wire to the chart, test, and if a fuse pops, redo only that pair.
+== lines
+calder: Junction box. Open it. Don't touch anything yet.   [gesture]
+calder > you: The chart says which goes where. Match the colours. Pair by pair.
+calder: Then test. If a fuse pops, that pair's wrong. Only that pair. Swap it.
+calder: Nothing here bites if you test first. Test first.
+? choice
+* What if the colours have faded?   rel:calder+2 flavour:practical
+  calder: Then you switch things off one at a time and see what goes dark. Later. Today they're fresh.
+* Pair by pair. Got it.   rel:calder+1
+  calder: Good. Begin.

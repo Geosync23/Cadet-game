@@ -1,0 +1,394 @@
+@talks rina
+// TW1, the Talk a while pack: Rina Deshi's own talks. Dry, quick, deadpan; teases the people she likes; health advice
+// as orders; keeps count. Never the qualifying exam (beat rina.5) or her hard year (close); never says she's scared.
+// SW2, patch 0.92.3 item 15: 26 more after TW1's four (her own pool only). needs: cheer, so the cheer answer is the
+// warm one. Not used: the exam (no studying for it), her hard year, saying she's scared; Gran only after beat rina.4.
+only: own
+
+== the-count
+topic: hobby
+them: Forty-three. That's the count. Undefeated, junior common room, Tiles.
+them: It's in a notebook. Dated and signed. Don't look at me like that.   #funny
+ask: Do you play anything? You can lie. I'll find out.
+listen: Who came closest to beating you?
+  them: Pell. Once. He sneezed and knocked the board. We don't count that game.   #funny
+share: A bit. I'm not very good.
+  them: Good. I mean, that's a shame. Come and play. I'll be gentle. I won't.   #funny
+cheer: I'll be forty-four.
+  them: Bold. I like bold. I'll write your name in the notebook. In pencil.   #funny
+
+== water
+topic: day
+when: tier>=acquaintance
+them: Have you had any water today? Actual water. Tea doesn't count.
+them: That's not a suggestion. Nandakumar says it to me. Now I say it to everyone.
+ask: What are you worst at, looking after yourself?
+listen: Who looks after you, then?
+  them: Nandakumar. My gran, by message. You, apparently, right now. Weird.   #funny
+share: Sleep. I stay up too late.
+  them: Honestly. Bed by eleven. I'll check. I'm next door, I'll know.
+cheer: Not eating biscuits.
+  them: Biscuits are food. Technically. Drink some water with them.   #funny
+
+== sister
+topic: home
+when: tier>=colleague
+them: My sister's messaged again. She's a doctor on a station. She has opinions.
+them: We argue about everything. Today it was soup. Whether soup is a drink.   #funny
+ask: Have you got someone you argue with, just because?
+listen: Who's right about the soup?
+  them: Me. Obviously. Don't tell her I asked you. She'll want a vote.   #funny
+share: Yes. Someone back home. I miss it.
+  them: Yeah. Annoying, isn't it? Missing the arguing. Honestly.   #warm
+cheer: You, now. Starting today.
+  them: Fine. Soup is a drink. Prove me wrong.   #funny
+
+== gran
+topic: crew
+when: tier>=friend beat:rina.4
+them: Gran's back to cheating. Fully recovered. Took three tiles off me by message.
+them: She asked after you. "The friend who listened." She's very nosy. Gets it from me.   #warm
+ask: Who taught you the rules you actually live by?
+listen: How does she cheat by message?
+  them: She just says she won. Very confidently. It works on everyone except me.   #funny
+share: My family. Mostly by example.
+  them: Same. Gran's example is mostly cheating. But kindly.   #warm
+cheer: Nobody. I make them up as I go.
+  them: That's what Gran says. Then she cheats. Watch yourself.   #funny
+
+// ---- SW2: any tier and acquaintance (14)
+
+== triage
+topic: work
+them: Infirmary rule. If you walk in, you wait. If you're carried in, you go first.
+them: Pell once got Tariq to carry him in. For a splinter. He waited twice as long.   #funny
+ask: Are you a patient patient? Be honest. I'll find out anyway.
+listen: Was it a big splinter?
+  them: Tiny. He named it. He was very brave about it, out loud, for twenty minutes.   #funny
+share: No. I hate waiting.
+  them: Everyone does. Bring a book. Or bleed less. Those are the options.
+cheer: Very. I'll wait all day for a biscuit.
+  them: Hm. Good answer. There's a tin under the desk. You didn't hear that from me.   #warm
+
+== sleep-score
+topic: day
+them: I score everyone's sleep at breakfast. By their face. Out of ten.
+them: Pell was a four. Tomas was a seven. Holt is always a nine. Nobody knows how.   #funny
+ask: How did you sleep? I've got a number. I want to see if you agree.
+listen: What number am I?
+  them: Six. Could be worse. Could be Pell. Drink some water and you're a seven.
+share: Badly. I kept waking up.
+  them: Thought so. Less tea after dinner. That's an order, not a tip.
+cheer: Like a log. A ten, surely.
+  them: Nobody's a ten. Ten is a myth. You're a solid eight, though. Fine. Well done.   #warm
+
+== eleven-seconds
+topic: work
+them: I can wrap a hand bandage in eleven seconds. Timed. It's in the notebook.
+them: Nandakumar does it in nine. I'm not bitter. I'm practising on Pell.   #funny
+ask: What are you fastest at? There's always something.
+listen: Does Pell mind?
+  them: He says it's restful. He falls asleep by the second wrap. Good patient.   #funny
+share: Clearing a job off the board.
+  them: Good. Fast and right, though. Fast and wrong is just loud.
+cheer: Eating. Nobody's faster.
+  them: I've seen Pell eat. You've got competition. I'd put money on you, mind.   #warm
+
+== strong-tea
+topic: food
+them: My tea's strong enough to stand a spoon in. Brennan says it's a crime. Makes it anyway.
+them: One sugar. Milk last. Anyone who puts milk first is wrong, and I've told them.   #funny
+ask: How do you take your tea? This matters. I'm judging.
+listen: Who puts the milk in first?
+  them: My sister. Of course my sister. We've argued about it for nine years.   #funny
+share: Weak, with lots of milk.
+  them: That's not tea. That's warm milk with a rumour. Fine. Your choice. Wrong, though.   #funny
+cheer: Whichever way gets me a biscuit.
+  them: Ha. The correct answer, actually. Tea's just the excuse for the biscuit.   #warm
+
+== kesh-wind
+topic: home
+when: tier>=acquaintance
+them: Where I'm from, on Kesh, it's windy. All the time. Everyone walks leaning forward.
+them: I still lean on the promenade. Pell asked if I was all right. I'm from Kesh. That's all.   #funny
+ask: Has home left anything in you? A habit you can't shake?
+listen: Is it windy all year?
+  them: All year. Kites never come down. We had one stuck up for three summers.   #funny
+share: I still check the sky before I go out.
+  them: Yeah. You can't help it. Nothing up there here but ceiling. Still check, though.
+cheer: I still expect the floor to be dirt.
+  them: Fine. Good. The Works floor gets close, some days. Don't tell Calder I said so.   #warm
+
+== sour-ranks
+topic: food
+them: I've ranked every sweet in the crew store. Sour first. Soft ones last. Out of the list.
+them: Number one is the green ones. They make your eyes water. That's how you know.   #funny
+ask: What's your favourite sweet? I'll tell you where it ranks.
+listen: Where do the soft ones rank?
+  them: They don't. I took them off the list. They know what they did.   #funny
+share: Chocolate. Every time.
+  them: Fourth. Solid choice. Boring. But solid. I respect boring.
+cheer: The green ones. Obviously.
+  them: Right answer. You can stay. I'll save you one. You've earned it.   #warm
+
+== wake-order
+topic: crew
+when: tier>=acquaintance
+them: Bunk 2 wakes in order. Erik's alarm. Then Tariq's. Then Esme groans at both.
+them: I'm up before all of them. I like to watch. It's the best show on the ship.   #funny
+ask: Are you first up, or last? In your bunk.
+listen: Who's last up in Bunk 2?
+  them: Pell. Always. I've seen him sleep through Erik's alarm, Tariq's, and a drill.   #funny
+share: Last. Every time.
+  them: Thought so. You've got a last-up face. It's not an insult. It's a diagnosis.
+cheer: I don't sleep. I recharge.
+  them: Hm. Then recharge for eight hours. That's a prescription. Signed.   #warm
+
+== second-thing
+topic: news
+when: tier>=acquaintance
+them: People tell you things in the infirmary. While you take their pulse. They can't help it.
+them: I don't pass any of it on. I just know a lot. Very quietly.   #funny
+ask: Who do you tell things to, without meaning to?
+listen: What's the best thing you've heard?
+  them: Can't say. But someone aboard can juggle. Badly. That's all you're getting.   #funny
+share: Whoever's next to me at breakfast.
+  them: Dangerous. Sit next to me. I'll just tell you to eat.
+cheer: My pillow. Very discreet.
+  them: Good choice. Pillows never repeat a word. Unlike Chloe Tran. Very wise.   #warm
+
+== dropped-stitches
+topic: tradition
+them: I go to knit and natter. I don't knit. I count Zeke's dropped stitches.
+them: Twelve last week. He says nine. I've got it written down. He knows I have.   #funny
+ask: Is there something you go to just to watch? Not join in. Watch.
+listen: Does Kovac drop stitches?
+  them: Never. Not once. I've checked. It's unsettling. I like her very much.   #funny
+share: The jam. I never play anything.
+  them: Good. Somebody has to listen. Clap on the beat, though. People notice.
+cheer: You. Losing at Tiles.
+  them: Honestly. Fair. That's a very good show. Free, too. Every evening. Bring tea.   #warm
+
+== bed-three
+topic: ship
+them: Bed three, in the infirmary. Against the wall. Nobody's in it most days.
+them: I sit on it on my break. Quietest place on the ship. Don't tell anyone. They'll want it.   #funny
+ask: Have you found a quiet spot yet? Somewhere that's yours?
+listen: Why is it so quiet?
+  them: Thick wall. The cold store's behind it. Just the hum. You can hear yourself think.
+share: The window seat in the common room.
+  them: Tomas's spot. You'll have to fight him for it. He'll lose. He'll thank you.   #funny
+cheer: My bunk, with the curtain shut.
+  them: Classic. Good. Sleep in it, though, don't just hide in it. Eight hours.   #warm
+
+== plant-names
+topic: plans
+them: I'm learning the name of every plant in the garden. Cruz quizzes me. I'm at sixty-one.
+them: Cruz says there are three hundred. I think Cruz is making some up. I can't prove it yet.   #funny
+ask: Are you learning anything just because? Not for work. Just because.
+listen: Is Cruz making some up?
+  them: There's one called "Little Gerald's Cousin". That's not a plant. That's a story.   #funny
+share: The names of everyone on the ship.
+  them: Good. Seventy-odd. Test yourself at dinner. I'll check your answers.
+cheer: How to beat you at Tiles.
+  them: Hm. Bold. Learn slowly. I've got a count to protect. Good luck. Mean it.   #warm
+
+== steady-hands
+topic: hobby
+when: tier>=acquaintance
+them: People call my steady hands luck. It's practice. I thread needles in the dark.
+them: Started at nine. Gran's sewing box. Don't ask what I sewed. It was mostly my sleeve.   #funny
+ask: What do you do with your hands, when you want to switch off?
+listen: Can you really do it in the dark?
+  them: Nearly. Lights out, Bunk 2. Three goes. Pell slept through it. Of course.   #funny
+share: Fix things. Anything that's broken.
+  them: Works through and through. Good. Fix my lamp while you're at it. Joking. Mostly.
+cheer: Hold a biscuit. Eat the biscuit.
+  them: Classic technique. Very steady. I'll allow it. Drink some water after.   #warm
+
+== hiccups
+topic: day
+them: Someone came in with hiccups today. I scared them out of them. Clipboard, dropped. Loud.
+them: Nandakumar called it unorthodox. Then she wrote it down. That's a yes, from her.   #funny
+ask: What's your cure for hiccups? Everybody's got one. They're all wrong.
+listen: Who had the hiccups?
+  them: Can't say. Patient's privacy. But it was someone senior. Very senior. Hm.   #funny
+share: Hold my breath and count to twenty.
+  them: Wrong. It works sometimes. It's still wrong. Drink water upside down. Also wrong.
+cheer: Ask Rina to drop a clipboard.
+  them: Ha. Fine. I'll keep one handy. For you. Free of charge. Don't make it a habit.   #warm
+
+== quiet-eight
+topic: ship
+when: time:evening
+them: The infirmary at eight in the evening. Lights low, nobody in. Best room on the ship.
+them: I do the cupboards. Count the bandages. It's very calming. Don't look at me like that.   #funny
+ask: What's your favourite time of day aboard? Pick one. No "all of them".
+listen: How many bandages are there?
+  them: Two hundred and four. Two hundred and three. Pell took one for his splinter.   #funny
+share: First thing, before anyone's up.
+  them: Good choice. Quiet and nobody's asked you for anything yet. Drink water then too.
+cheer: Dinner. Every time.
+  them: Fine. Dinner's a good answer. Honestly, it's my second. Don't tell the cupboards.   #warm
+
+// ---- SW2: colleague (6)
+
+== she-or-it
+topic: ship
+when: tier>=colleague
+them: My sister and I argued about the Wren. She says a ship's an "it". I say "she".
+them: Two days. By message. She sent me a diagram. I sent her the Captain's address.   #funny
+ask: The Wren. "She" or "it"? Choose carefully. I'm keeping score.
+listen: Who won?
+  them: Me. She went quiet. Quiet means I won. She'll say she was busy. She wasn't.   #funny
+share: "She". She's got moods.
+  them: Exactly. Coil three alone. Zeke would back us. I'll forward him the diagram.
+cheer: "She." With a capital S.
+  them: Hm. A capital S. That's going straight to my sister. She'll hate it. Perfect.   #warm
+
+== second-thing-said
+topic: crew
+when: tier>=colleague
+them: Nandakumar taught me something besides water. Listen to the second thing a patient says.
+them: The first thing is what they think you want to hear. The second is the truth. Usually.   #warm
+ask: Who taught you something you use every single day?
+listen: What's the second thing, usually?
+  them: "I haven't been sleeping." Nearly every time. Then I say drink some water. It helps.
+share: My first chief. How to ask for help.
+  them: That's a hard one to teach. They did well. You ask. I've noticed. Good.
+cheer: You. "Drink some water."
+  them: Ha. Then I've done my job. Pass it on. Annoy someone with it. It's tradition.   #warm
+
+== biscuit-rule
+topic: plans
+when: tier>=colleague
+them: If I ran an infirmary, there'd be a biscuit tin by the door. Not for patients. For me.
+them: And a sign. "If you're fine, say so twice." Most people can't. Then I know.   #funny
+ask: If you ran a whole department, what's the one rule you'd make?
+listen: Why say it twice?
+  them: Once is a reflex. Twice, you have to think about it. Try it. Go on. Say "I'm fine".
+share: Tea break at the same time, always.
+  them: Good. Works already does that. Halloran made it a religion. Fine. I approve.
+cheer: Biscuits for everyone. Not just you.
+  them: Hm. Generous. Fine. Two tins. Mine's the one with the lock. Good rule.   #warm
+
+== fine-face
+topic: day
+when: tier>=colleague
+them: You've got the face. The "I'm fine" face. I know it. I invented it.
+them: You don't have to tell me anything. I'm just saying I've seen it. That's all.
+ask: So. How are you, really? Short answer is fine. Not "fine", though.
+listen: How do you always know?
+  them: Practice. Mine. I do the face in the washroom mirror. It's very good. Yours is worse.   #funny
+share: Tired. A long week.
+  them: Thought so. Early night. Water. Tomorrow's shorter. They usually are, after a long one.   #warm
+cheer: Better now I've been seen through.
+  them: Good. That's the idea. Sit there a minute. I'll pretend I'm reading.   #warm
+
+== burnt-bread
+topic: home
+when: tier>=colleague
+them: On Kesh we eat flatbread with everything. Spiced. My sister always burnt it. Always.
+them: I asked Brennan to make some. Perfect. Not burnt. I didn't like it as much. Annoying.   #funny
+ask: Is there a food from home you only like the way someone ruins it?
+listen: Did you tell your sister?
+  them: Never. She'd be unbearable. She'd send me a burnt one by post if she could.   #funny
+share: My family's soup. Always too salty.
+  them: Yes. Exactly that. The wrong thing is the right thing. Honestly. Families.
+cheer: Toast. Burnt toast. Every time.
+  them: Fine. You'd get on with my sister. Don't meet her. I'd never win again.   #warm
+
+== opposite-pell
+topic: tradition
+when: tier>=colleague
+them: At the Sunday table I sit opposite Pell. On purpose. So he doesn't get thirds.
+them: He gets thirds anyway. But slower. I count the spoons. It's very relaxing.   #funny
+ask: At the Sunday table, who do you try to sit near?
+listen: How many thirds has he had?
+  them: Eleven Sundays out of twelve. The twelfth he had seconds twice. I'm counting it.   #funny
+share: Whoever's on their own.
+  them: Good. That's the right answer. Annoyingly right. Fine. I'll sit there too.
+cheer: The gravy, mainly.
+  them: Hm. Honest. Sit by me, then. Pell can't reach it from his side. I've measured.   #warm
+
+// ---- SW2: friend (3)
+
+== why-count
+topic: hobby
+when: tier>=friend
+them: Do you know why I count? The Tiles. All of it. It's not the winning. Not all of it.
+them: Every number's an evening I was here. Sat down. Stayed. It adds up. That's all.
+ask: Have you got a way of keeping track? Of being somewhere?
+listen: What number are you on now?
+  them: Forty-three. Dated. Signed. Every one of them a night I didn't leave. There.   #warm
+share: I keep the little notes people leave me.
+  them: Good. That's the same thing. Paper's better than numbers. Keep them somewhere dry.
+cheer: I count the times you've won. It's zero.
+  them: Honestly. Correct. Keep counting. One day it'll be one. I'll let you have that day.   #warm
+
+== gran-new-game
+topic: home
+when: tier>=friend beat:rina.4
+them: Gran's found a new game to cheat at. Dominoes. With her neighbour. By message, again.
+them: The neighbour's ninety. Gran says that's no excuse. I've never been so proud.   #funny
+ask: Who's your favourite person to lose to? Not mine. Yours.
+listen: How do you cheat at dominoes by message?
+  them: She sends a picture of a different table. Very old trick. I taught it to her. Kidding.   #funny
+share: Someone back home. They never let me win.
+  them: Good. Letting people win is rude. Gran says so. Gran's very rude. I love her.
+cheer: You, apparently. Every single evening.
+  them: Ha. Right answer. You're my favourite to beat. Don't make it a thing. It's a thing.   #warm
+
+== short-list
+topic: crew
+when: tier>=friend
+them: I keep a list of people I don't worry about. They drink water, sleep, eat. It's short.
+them: You're on it. Since last week. In pen. Don't let me down, {nick}.   #warm
+ask: Who do you worry about, aboard? You don't have to say names.
+listen: Who else is on the list?
+  them: Nandakumar. Holt. That's it. Pell's on the other list. The long one. With Tomas.   #funny
+share: Tomas. He thanks too many doors.
+  them: Yeah. He's on my other list too. We'll keep an eye. You on the left. Me on the right.
+cheer: Pell. Pell's on every list.
+  them: Hm. He is. He's on lists he doesn't know exist. Good. Keep watching him with me.   #warm
+
+// ---- SW2: close friend (3)
+
+== pulse
+topic: work
+when: tier>=close
+them: Give me your wrist. No, really. Count with me. Fifteen seconds. Go.
+them: Seventeen. Times four. Sixty-eight. Good. Steady. That's my favourite number this week.   #warm
+ask: When did you last stop, properly? Just sat and did nothing at all?
+listen: Is sixty-eight good?
+  them: Very good. Calm. Better than mine, and I'm the one who knows what it means.   #warm
+share: Right now. Here. With you counting.
+  them: Hm. Me too, actually. Don't tell anyone. They'll want their wrists done. Queue.
+cheer: Never. I'm too busy beating you.
+  them: Ha. Liar. Sixty-eight says you're very relaxed about losing. Good. Stay like that.   #warm
+
+== first-patient
+topic: plans
+when: tier>=close beat:rina.5
+them: When I'm a ship's doctor, my own infirmary, you're my first patient. On day one.
+them: Not because you'll need it. Because you'll argue less than anyone else. Probably.   #funny
+ask: Where do you think you'll be, in a few years? Honest answer. I'll write it down.
+listen: What's day one going to look like?
+  them: A clean floor. A full biscuit tin. And somebody's wrist to count. Yours. That's the plan.   #warm
+share: Still on the Wren, I hope.
+  them: Good. Me too. Mostly. The Wren's all right. Don't tell her I said so. Ships hear things.
+cheer: In your infirmary. Arguing.
+  them: Fine. I knew it. You'd argue. You'd lose. You'd stay anyway. That's the job.   #warm
+
+== let-win
+topic: hobby
+when: tier>=close
+them: I've never let anyone win. At anything. Not Gran, not my sister. Not once.
+them: You're the only one I'd think about it for. I haven't. I'm just saying I'd think about it.   #warm
+ask: Is there someone you'd let win? Just once. Just because it's them.
+listen: Would you, really?
+  them: No. Yes. I'd think about it. For a long time. Then I'd win. But I'd think about it.   #funny
+share: My family. Every board game.
+  them: That's kind. That's very kind. You're too kind, honestly. It's annoying. Never stop.   #warm
+cheer: No. I'd want to beat you fairly.
+  them: Hm. Good. That's the answer. That's exactly the answer. Sit down. Board's set.   #warm

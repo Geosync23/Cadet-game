@@ -1,0 +1,387 @@
+@talks torres-zeke
+// TW1, the Talk a while pack: Zeke Torres's own talks. Quick, warm, tumbling; machines as moody people; asks back
+// and listens; "Right, onward"; "properly". Never his father (until beat torres.4) or the Specialist list (beat 2).
+
+only: own
+
+== coil-three
+topic: work
+them: Coil three sulked all morning. Wouldn't settle. I sat with her a bit.
+them: Reyes leaves me notes. Today's said "She's not sulking. She's shy." Shy.   #funny
+ask: Go on, then. Which machine aboard do you think has the most personality?
+listen: Do you really talk to the coils?
+  them: Course. Properly, too. They don't answer. Well. They hum differently.   #funny
+share: The washer on Deck 4. It hates Tuesdays.
+  them: Ha! It does. You've been listening to it. That's the whole job, that.   #warm
+cheer: The coffee machine. Pure drama.
+  them: The coffee machine's not a machine, it's a character actor.   #funny
+
+== scarf-rows
+topic: hobby
+when: tier>=colleague mem:moment.torres.scarf
+them: Two more rows on your scarf. Don't look. Fine, look. It's coming along.   #funny
+them: Kovac says my tension's "brave". I think that's a compliment.
+ask: Have you got a colour you'd wear every day, if you could?
+listen: Who taught you to knit?
+  them: Kovac, mostly. Dahl tried first. Dahl gave up. Kovac doesn't give up.   #funny
+share: Something warm. Orange, maybe.
+  them: Orange! Works orange. Good. Because that's what it is. Too late now.   #funny
+cheer: Whatever hides the gravy.
+  them: Ha! Practical. I'll knit a gravy row in at the end. For you.   #funny
+
+== record-cabinet
+topic: crew
+when: tier>=colleague
+them: Settle something for me. The lighthouse song in the record cabinet. Second verse.
+them: I say "the light came home". Takahashi: "the night came home". A year, we've argued.   #funny
+ask: Is there a song that takes you right back somewhere?
+listen: Who's right, honestly?
+  them: Me. Probably. Farouk says it's both. Farouk's a diplomat.   #funny
+share: One from home. I'd know it anywhere.
+  them: Hum it at the jam on Friday. Someone'll pick it up. Someone always does.   #warm
+cheer: I'll just sing "came home" and mumble.
+  them: That's what the rest of the ship does. The mumble's very popular.   #funny
+
+== first-day
+topic: ship
+when: tier>=friend
+them: I still think about your first evening. Off the Tern, holding your bag like it might bolt.
+them: And look at you now. You know where the good spanners are.   #warm
+ask: What do you remember most, from that first day?
+listen: What was your first day like, here?
+  them: Calder had me on scrubbers for a month. Best month. Don't tell her.   #funny
+share: You meeting me. It helped.
+  them: Ah. Well. That's, er. Right. That's lovely. Right, onward.   #warm
+cheer: The lift. I said "Four, please" to a wall.
+  them: Ha! I remember. The wall was very understanding.   #funny
+
+// ---- SW1 (2026-10-24, patch 0.92.3 item 15, plans/talk-main-plan.md): 26 more of Zeke's own, laddered (10 with no tier
+// gate, the rest acquaintance, colleague, friend, close). His dad only after beat torres.4, and only well and retiring (the
+// user's change). No Specialist list, no scarf (his arc and scarf-rows have those), no beat retold.
+
+== the-overlook
+topic: ship
+them: There's a window over the engine room. The overlook. You can see all three coils.
+them: I eat lunch there sometimes. Me, a sandwich, and three coils humming along.
+ask: Have you been down to see the engines yet?
+listen: What's it like down there?
+  them: Warm. Loud, then not loud, once you're used to it. Like standing inside a song.   #warm
+share: Not yet. I'd like to.
+  them: Come with me one day. I'll introduce you. Formally. They like manners.   #funny
+cheer: Once. Wrong lift button.
+  them: Best way to find anything aboard. I found the laundry by accident. Twice.   #funny
+
+== silly-questions
+topic: work
+them: Best thing a new hand can do? Ask questions. Lots. Even the ones that feel silly.
+them: The silly ones are usually the ones nobody else dared to ask.
+ask: What's something you've wanted to ask, but haven't?
+listen: Were you a question-asker, back then?
+  them: Constantly. Calder once answered three in a row without looking up. A record.   #funny
+share: Why the bay's painted orange.
+  them: Good question. Annoying, but good. I don't know. I'll find out. Properly.   #funny
+cheer: Where the good biscuits are kept.
+  them: In plain sight. Second shelf. Nobody ever looks at the second shelf.   #funny
+
+== plate-kept
+topic: day
+when: time:morning
+them: Last in to breakfast again. Brennan slid a plate across and said nothing at all.
+them: She keeps one back for me. I've never asked. I'm too scared to ask.   #funny
+ask: Are you a first-in person or a last-in person?
+listen: Why are you always last?
+  them: I say good morning to the coils. Then I check they heard. It adds up.   #funny
+share: First in. I like a quiet mess.
+  them: Oh, that's lovely. The mess before anyone's in it. Like a held breath.   #warm
+cheer: Whenever my legs agree.
+  them: Fair. Legs get a vote. Mine vote "coils" and I'm out-voted every time.   #funny
+
+== half-a-song
+topic: hobby
+them: I hum when I think. Something about a lighthouse. I've never known the rest of it.
+ask: Do you hum or sing, when nobody's listening?
+listen: How does the lighthouse bit go?
+  them: Mm-hm, lighthouse, mm-hm. That's the whole of it. It's very moving.   #funny
+share: In the washroom. Badly.
+  them: Best echo aboard. Till ten. Then the water's cold and you sing faster.   #funny
+cheer: Only when you've started it.
+  them: It's catching. Half the bay hums my lighthouse now. Calder doesn't. Calder taps.   #funny
+
+== note-box
+topic: crew
+when: tier>=acquaintance
+them: Reyes and I have swapped notes for a year. I've kept every one. There's a box.
+them: Mostly coils. Sometimes just "Tired. Good night." That's coils too, really.
+ask: Notes and letters. Keeper, or thrower-out?
+listen: What's the best note so far?
+  them: "She sang tonight. Thought you'd want to know." Coil three. I nearly cried.   #warm
+share: Keeper. I can't throw a note away.
+  them: Same. Paper's light. You can carry a lot of it before it gets heavy.   #warm
+cheer: Only the ones with biscuits.
+  them: Reyes left a biscuit once. Best note of the lot. Didn't keep that one.   #funny
+
+== then-the-tool
+topic: work
+when: tier>=acquaintance
+them: When I show you something, I do it once. Then I hand you the tool. That's the deal.
+them: Calder did that with me. I hated it. Then I loved it. Then I pinched it.   #funny
+ask: Do you learn better by watching, or by doing?
+listen: What if I get it wrong?
+  them: Then we find out why. That's the best bit. Right first time teaches you half as much.   #warm
+share: Doing. Watching makes me fidgety.
+  them: Me too. I'm hopeless at watching. My hands keep reaching for things.
+cheer: Wrong first, then watching.
+  them: Very thorough. It's the long way round, but you see all the scenery.   #funny
+
+== bring-anything
+topic: tradition
+when: weekday:tue
+them: It's Knit and natter tonight. Come and make something. A sketch. Socks to darn.
+them: Nobody has to knit. I just like a room full of people making things.   #warm
+ask: What would you bring, if you came?
+listen: What actually happens there?
+  them: Tea. Talking. Kovac fixing my dropped stitches without a word. That's the main event.   #funny
+share: Just myself. Is that allowed?
+  them: More than allowed. Half the circle comes to sit. The other half talks. Both count.
+cheer: Something to eat. Is that making?
+  them: Bring biscuits and you'll be very popular. Kovac likes the plain ones.   #funny
+
+== same-sleeves
+topic: news
+when: tier>=acquaintance
+them: Big news from the circle. Dahl finished a jumper. Both sleeves the same length.
+them: We all stood up and clapped. Dahl sat down. It was very moving.   #funny
+ask: What's the best thing you've finished lately?
+listen: Have yours ever matched?
+  them: Never. My things have a long sleeve and a hopeful sleeve. It's a style.   #funny
+share: A long job off the board.
+  them: That's a good finish. The panel going back on. Click. Lovely sound.   #warm
+cheer: A whole dinner. And seconds.
+  them: That counts. Brennan would say that counts more than sleeves.   #funny
+
+== just-counting
+topic: crew
+when: tier>=colleague
+them: People think Calder's cold. She isn't. She's counting. Everything. All the time.
+them: She knows every fan aboard by its sound. That's not cold. That's caring, in numbers.   #warm
+ask: What do you make of the Chief, honestly?
+listen: How long have you worked for her?
+  them: Long enough to tell her "Hm"s apart. There are six. I'm learning a seventh.   #funny
+share: Strict, but fair.
+  them: That's her. Fair first. She'd be pleased you said fair. She'd never show it.
+cheer: Terrifying. The good kind.
+  them: The best kind. Like a good storm. At least you know where you stand.   #funny
+
+== coil-two
+topic: work
+them: Everyone asks after coil three. Nobody asks after coil two. Coil two does the work.
+them: Steady as anything. Never sulks. I'll say hello to her later. She's earned it.   #warm
+ask: Is there someone aboard who does loads and never gets noticed?
+listen: What's coil one like, then?
+  them: The eldest. Bit grumpy in the mornings. Fine by lunch. Like me, really.   #funny
+share: The night shift. All of them.
+  them: Yes. Reyes. Keane. They keep her going while we sleep. Nobody thanks the night.   #warm
+cheer: The tea urn. Never a day off.
+  them: Halloran polishes it on Fridays. That's as near to thanks as an urn gets.   #funny
+
+== right-words
+topic: plans
+when: tier>=acquaintance
+them: This year I'm going to learn one song properly. All the words. The right words.
+them: Takahashi says I'll never do it. Takahashi will eat those words. The right ones.   #funny
+ask: Got something you want to get properly good at?
+listen: Which song are you learning?
+  them: Not the lighthouse one. Too risky. A short one with a chorus. Choruses forgive you.   #funny
+share: My work. I want to be really good.
+  them: You will be. You already ask the right things. The rest is just time.   #warm
+cheer: Sleeping through the night.
+  them: Aim high. Pell's tried for years. He sleeps everywhere else instead.   #funny
+
+== sing-quieter
+topic: day
+when: tier>=acquaintance mood:high
+them: Good day. I've been singing all shift. Halloran's asked me to sing quieter. Twice.
+ask: What's put a song in you lately?
+listen: Go on. Tell me the good things.
+  them: Coil three settled first try. And there was pie. Two good things. A great day.   #warm
+share: Getting one thing properly done.
+  them: Yes. One thing, properly. Then you can sing about it. I do.   #funny
+cheer: Nobody asking me to sing quieter.
+  them: You'll never have my problem. Unless you start singing. Do start singing.   #funny
+
+== eleven-minutes
+topic: day
+when: tier>=acquaintance weekday:thu
+them: Day off. I meant to sit still. I've sat still for eleven minutes. A personal best.   #funny
+ask: Are you good at days off? Properly good?
+listen: What did you do after minute eleven?
+  them: Went to see the coils. Just to say hello. Came back. Went again.   #funny
+share: Very. I could teach a class.
+  them: Please do. I'll sit at the front. I'll fidget, but I'll sit at the front.   #funny
+cheer: Worse than you, probably.
+  them: Nobody's worse than me. Calder once sent me home. On my day off. From the bay.   #funny
+
+== tambourine
+topic: tradition
+them: The Friday jam. Someone always starts a song nobody knows the end of. It's wonderful.
+ask: What would you play, if you played something?
+listen: What do you play?
+  them: Nothing, really. I sing. Loudly. Someone hands me a tambourine to keep me busy.   #funny
+share: I'd like to learn something. Anything.
+  them: Come on Friday. Someone'll lend you something. Farouk lends everyone everything.
+cheer: The tambourine. Low risk.
+  them: High risk, in my hands. Ask anyone. Ask the tambourine.   #funny
+
+== count-forty
+topic: food
+them: I make tea the way Kovac told me. Bag in, count forty, bag out. Forty. Not thirty-nine.
+them: She checked once. I'd done thirty-eight. She didn't say a word. She didn't need to.   #funny
+ask: How do you take your tea? Or don't you?
+listen: Does forty really matter?
+  them: To Kovac. So to me. And honestly? It's better at forty. Don't tell her I said so.   #funny
+share: Strong. Stand-a-spoon-in strong.
+  them: A Works brew. Halloran would approve. The whole mug rack would approve.   #funny
+cheer: However the machine does it.
+  them: Brave. The machine has moods. Worse than coil three. I've seen it make something grey.   #funny
+
+== low-for-me
+topic: home
+them: My cabin's the one with the music. Sorry. I play it low. Low for me.   #funny
+them: Something always on. A ship's too quiet for me without it.
+ask: Do you like quiet, or a bit of noise?
+listen: What do you play most?
+  them: Whatever's on top of the pile. Then I sing over it with the wrong words. Every night.   #funny
+share: A bit of noise. Like home.
+  them: Yes. Home's never silent, is it. Someone's always clattering. Comforting, that.   #warm
+cheer: Quiet. I'll avoid your corridor.
+  them: Fair. Knock and I'll turn it down. A bit. I'll turn it down a bit.   #funny
+
+== street-lamps
+topic: home
+when: tier>=friend beat:torres.4
+them: Dad's counting his last shifts in coils. "Nine more mornings with her," he says.
+them: He says he'll take up fishing. He's never fished. He'll fish near an engine.   #funny
+ask: What would you do with your days, if you stopped working?
+listen: What's he like, away from engines?
+  them: Restless. Like me. Calder would say it runs in the family. She'd be right.   #warm
+share: Learn to cook. Properly.
+  them: Properly! Good. That's the word. I'll come and eat it. Properly.   #funny
+cheer: Sleep. For about a year.
+  them: Dad tried a lie-in once. Woke at six and fixed the kitchen fan. Out of habit.   #funny
+
+== stitch-finder
+topic: crew
+when: tier>=colleague
+them: Kovac's been teaching me to knit for two years. Never once lost her patience.
+them: I've dropped hundreds of stitches. She finds every one. Quietly. Like a medic.   #warm
+ask: Who's the most patient person you know?
+listen: Does she ever knit for herself?
+  them: Hardly. Everything she makes walks off on someone else. Usually someone cold.   #warm
+share: Someone back home. Never rushed me.
+  them: That's a gift, that. Never being rushed. You remember it all your life.   #warm
+cheer: You, with all my questions.
+  them: Fair trade. You answered mine. I asked hundreds. I loved every answer.   #warm
+
+== upside-down
+topic: work
+when: tier>=colleague
+them: My first fault on my own, I put a panel back on upside down. It fitted. Somehow.
+them: Ran a week. Then Calder opened it, looked at me, and turned it round. Not a word.   #funny
+ask: What's a mistake you're glad you made?
+listen: Did she ever mention it?
+  them: Once. At my third-year tea. "Upside down." Two words. Everyone laughed. Me most.   #funny
+share: Getting lost on purpose, my first weeks.
+  them: Yes. You learn the ship that way. The quick route's for when you know where you are.   #warm
+cheer: Coming aboard. Kidding. Mostly.
+  them: Too late now. You know where the tea is. There's no going back from that.   #funny
+
+== breathing-out
+topic: ship
+when: tier>=friend time:night
+them: You up too? I go down to the coils some nights. Not for work. Just to listen.
+them: At night she sounds different. Slower. Like she's breathing out.   #warm
+ask: Is there a sound that settles you?
+listen: Can I come down sometime?
+  them: Course. Bring a jumper. Don't talk for the first minute. Just listen. You'll see.   #warm
+share: Rain. I miss rain.
+  them: Oh. Yes. No rain out here. Stand by the Deck 6 vents. It's nearly rain. Nearly.
+cheer: The kettle. Always the kettle.
+  them: Fair. Kettles are coils that make tea. Very respectable machines.   #funny
+
+== corner-rota
+topic: food
+when: tier>=colleague
+them: Brennan made crumble. Reyes's note this morning just said "CRUMBLE." In capitals.
+them: Two engine officers, one crumble. We take turns with the corner bit. It's in the log.   #funny
+ask: What's the one dish you'd fight someone for? Politely.
+listen: Whose turn is the corner tonight?
+  them: Reyes's. Calder initialled the log. There's no arguing with initials.   #funny
+share: Something from home. Nobody else makes it.
+  them: Then that's the one. Tell Brennan. She'll try. She'll get close, and that's lovely.   #warm
+cheer: Crumble. I'm joining the rota.
+  them: Three officers, one corner. We'll need a bigger crumble. Or a smaller rota.   #funny
+
+== left-a-bit
+topic: tradition
+when: tier>=colleague
+them: Observatory nights, I go for the stars. I stay for Rossi naming the same star every time.
+them: Rossi swears it's a different one. It isn't. We all nod.   #funny
+ask: Do you look up much, out here? Or not really?
+listen: Which star is it?
+  them: "The bright one, left a bit." That's as far as anyone's got. It's enough.   #warm
+share: Every night. I can't help it.
+  them: Same. You'd think you'd get used to it. You don't. That's the good bit.   #warm
+cheer: Only when I trip over something.
+  them: Then look up on the way down. Best of both.   #funny
+
+== kind-bit
+topic: work
+when: tier>=friend
+them: Know why I asked to train new hands? Someone trained me. Kindly. But badly.
+them: I'd keep the kind bit and fix the rest. Turns out the kind bit's most of it.   #warm
+ask: What's the kindest thing someone did when you were new?
+listen: Who trained you?
+  them: An old hand on my first ship. Gone home now. Still writes, every New Year.   #warm
+share: You. Remembering my name, day one.
+  them: Course I did. I'd been saying it all week. Practising. Out loud. In the lift.   #warm
+cheer: Saving me the last biscuit.
+  them: Mostly saving it. There's a difference. Most of a biscuit is Works hospitality.   #funny
+
+== every-hinge
+topic: home
+when: tier>=close flag:torres.applied
+them: Dad's retired now. Week one, he fixed every hinge in the house. Week two, next door's.
+them: He's started on the street lamps. Someone should stop him. Nobody wants to.   #funny
+ask: What do you think you'll be like, when you stop?
+listen: Is he happy?
+  them: Very. He writes more now. Always one line about engines, right at the end.   #warm
+share: Busy. I don't think I could stop.
+  them: Then you'll be out fixing street lamps too. I'll hold the ladder.   #funny
+cheer: Asleep in a garden. At last.
+  them: You say that. Give it a week. You'll be oiling the garden gate.   #funny
+
+== fourth-hour
+topic: plans
+when: tier>=close flag:torres.applied
+them: No word on the application yet. Calder says these things take time. Then more time.
+them: I'm fine. I've stopped checking every hour. Every two hours. That's progress.   #funny
+ask: How do you wait for something you really want?
+listen: How do you feel about it, honestly?
+  them: Ready. That's new. Not sure I'll get it. Sure I'd be good at it. Funny, that.   #warm
+share: Keep busy. Pretend I'm not waiting.
+  them: That's what I'm doing. Badly. I've knitted a tea cosy. I don't own a teapot.   #funny
+cheer: Biscuits. Many biscuits.
+  them: I've had a few. The tin's noticed. Pell's noticed. Pell notices biscuits.   #funny
+
+== coil-three-agrees
+topic: crew
+when: tier>=close
+them: Know who I'd trust with coil three? Very few. I don't hand that out.
+them: Reyes. Calder. Kovac. And you, now. Coil three agrees. She hummed when I said it.   #warm
+ask: Who would you trust with the thing you care about most?
+listen: And if coil three liked me best?
+  them: I'd sulk. Like her. We'd sulk together. It'd be very loud and nobody would sleep.   #funny
+share: You. I'd trust you with it.
+  them: Then we've a deal. Your thing, my coils. Both looked after. Properly.   #warm
+cheer: Whoever brings the most biscuits.
+  them: Pell, then. That's a worrying answer. Let's keep thinking.   #funny

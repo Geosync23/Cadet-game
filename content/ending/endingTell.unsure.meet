@@ -1,0 +1,17 @@
+@meeting endingTell.unsure
+// SW6 (ending writer A), your answer: NOT SURE YET (ending spec, "Your answer"; section 1, "Changing your mind").
+// She gives you until her address at the Line on Sunday, where she'll ask you at the front with Stay and Go only.
+// Sets end.now.unsure (EN1).
+title: The Captain
+from: Captain Odile Marrow
+gist: You told the Captain you're not sure yet. She'll ask you at the Line on Sunday, in front of everyone.
+== lines
+marrow: You've come about the letter. Go on. I'm listening.   [listen]
+marrow > you: Not sure yet. That's honest. I'd rather have honest than quick.   [nod]
+marrow: Then you have until Sunday. At the Line, after the oath, I'll ask you. In front of everyone, I'm afraid.
+? choice
+* In front of everyone?   flavour:share
+  marrow: It's a ship. They'll have heard most of it already. Better from you.   [laugh]
+* What would you do?   flavour:listen
+  marrow: I was offered a desk once. I said no. I've never been sorry. That's me, though. Not you.
+marrow: Talk to people. Zeke. Your friends. Your family. Then come and tell me. Carry on, {me}.

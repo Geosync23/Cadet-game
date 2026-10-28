@@ -9,7 +9,12 @@ starship-cadet.html), everything between these markers, which sit in section 22 
     // ---- BEGIN LINES ...       // ---- END LINES ----        VOICE_TEMPLATES, VOICE, LINES, CONVOS, MOMENTS, MOMENT_THEMES,
                                                                  HOME_CONTACTS, HOME_MOMENTS, HOME_SEND, HOME_CHAT
     // ---- BEGIN MEETINGS ...    // ---- END MEETINGS ----     MEETINGS_BAKED (merged into MEETING_SCRIPTS)
+    // ---- BEGIN TALKS ...       // ---- END TALKS ----        TALKS, the Talk a while pack (content/talkpack/*.talk)
     // ---- BEGIN TRADITIONS ...  // ---- END TRADITIONS ----   TRADITIONS, an array (section 18's loader; plans/trad-format.md)
+    // ---- BEGIN ADDRESSES ...   // ---- END ADDRESSES ----    FRI_ADDRESSES, the Captain's Friday addresses (content/addresses/*.address;
+                                                                 section 18f's player, the Fridays builder's)
+    // ---- BEGIN APPT_WORDS ...       // ---- END APPT_WORDS ----        APPT_WORDS, the appointments' words (content/appointments/*.appt; 0.92.6 item 9,
+                                                                 section 18's appointment code, FX22)
 
 Nobody hand-edits a generated block. Running it again with no changes to content/ gives byte-identical output.
 --check changes nothing and exits 1 if the game file is out of date. The shapes are the social plan's Part 9
@@ -39,6 +44,9 @@ COND_KEYS = {
     'trad': 'lines', 'dept': 'lines', 'rank': 'lines', 'trait': 'lines', 'habit': 'lines', 'act': 'lines',
     'birthday': 'lines', 'pair': 'lines', 'topic': 'lines', 'who': 'lines', 'with': 'lines', 'gift': 'lines',
     'came': 'lines', 'friend': 'lines',
+    'thread': 'lines',                       # the speaker's roster thread (the struggle theme): the Talk a while pack's
+    'day': 'lines', 'here': 'lines',         # crew stories (FX21, 0.92.6): the ship day (21, 3-21, 15-, -20), and someone in the scene
+    'endgame': 'lines',                      # the ending (section 29c): you stayed (endgame, endgame:early, endgame:false; !endgame is endgame:false)
 }
 NUM_KEYS = ('w', 'odds')                     # numbers, not conditions: a weight, and a seeded chance
 TONES = ('light', 'funny', 'warm', 'serious')
@@ -89,6 +97,15 @@ def parse_conds(text, where):
             tok = 'beatIs:' + tok[5:]
         if tok == 'newhere':                       # a bare word: arrived within the last 7 days
             tok = 'newhere:true'
+        if tok in ('endgame', 'endgame:true', 'endgame:false'):   # the ending (29c): a bare word; !endgame means "not stayed",
+            v = (tok != 'endgame:false') != neg        # never "an hour the endgame lines rest" (the game's 'true' settles after 14 days)
+            c['endgame'] = 'true' if v else 'false'
+            continue
+        if tok == 'endgame:early':                 # the endgame's first 14 days only
+            if neg:
+                raise GenError(f'{where}: "!endgame:early" can\'t be said: use endgame (or endgame:false)')
+            c['endgame'] = 'early'
+            continue
         if ':' not in tok:
             raise GenError(f'{where}: "{tok}" is not a condition (key:value or tier>=...)')
         k, v = tok.split(':', 1)
@@ -102,10 +119,14 @@ def parse_conds(text, where):
             raise GenError(f'{where}: unknown condition "{k}" (see content/README.md, "Conditions")')
         if not v:
             raise GenError(f'{where}: "{tok}" has no value')
+        if k == 'day' and not re.fullmatch(r'\d+(,\d+)*|\d+-\d*|-\d+', v):
+            raise GenError(f'{where}: day is a ship day (21), a few (19,26), a span (3-21), from (15-) or until (-20)')
         if k in dst:                              # the same key twice: all must hold
             dst[k] = (dst[k] if isinstance(dst[k], list) else [dst[k]]) + [v]
         else:
             dst[k] = v
+    if c.get('not') == {}:                     # only a !endgame (made positive above)
+        del c['not']
     return c
 
 
@@ -228,6 +249,178 @@ def parse_lines_file(path, rel, out):
         raise GenError(f'{where}: not understood (lines start with "- ", conditions with "? ", kinds with "== ")')
 
 
+TALK_REPLY_KEYS = ('listen', 'share', 'cheer')       # the three replies a talk's question offers, in button order
+TALK_WORK_POOLS = ('works', 'watch', 'survey', 'bridge', 'comms', 'infirmary', 'galley', 'garden', 'store')   # @talks work:<pool> (plans/work-pools-plan.md)
+TALK_SMALL = re.compile(r'(small|done)(\.[a-z][a-z0-9-]*)?')   # smalltalk.talk's kinds: small, done, small.<crewId>, done.<crewId>
+
+
+def parse_talk_file(path, rel, out):
+    """content/talkpack/*.talk, the "Talk a while" pack (plans/talk-pack-plan.md "The file format") into out['TALKS']:
+    { pool: [talk], own: { crewId: [talk] }, work: { <pool>: [talk] }, small: { small|done|small.<id>|done.<id>: [{ text, tone? }] } }, a talk being
+    { id, topic, when?, lines: [{ text, tone? }], ask: { text, tone? }, replies: { listen|share|cheer: { text, ans: { text, tone? } } } }.
+    Ids are written by hand (pool.<topic>.<slug>, <crewId>.<slug>), never hashed: they're what a save's fired list holds.
+    The shape is checked here (1-3 them:, one ask:, all three replies each with one answer); style is lines_check's."""
+    lines = read_lines(path)
+    hd = header(lines, path)
+    if hd[0] != 'talks' or len(hd) != 2:
+        raise GenError(f'{path}: a .talk file starts "@talks pool", "@talks <crewId>" or "@talks smalltalk"')
+    whose = hd[1]
+    T = out['TALKS']
+    if whose == 'smalltalk':
+        kind = None
+        for i, l in lines:
+            where, s = f'{path}:{i}', l.strip()
+            if not s or s.startswith('@'):
+                continue
+            if s.startswith('=='):
+                kind = s[2:].strip()
+                if not TALK_SMALL.fullmatch(kind):
+                    raise GenError(f'{where}: "{kind}" is not a small talk kind (small, done, small.<crewId>, done.<crewId>)')
+                if kind in T['small']:
+                    raise GenError(f'{where}: "== {kind}" twice')
+                T['small'][kind] = []
+                continue
+            if s.startswith('- ') and kind:
+                text, tone = split_tone(s[2:], where)
+                if not text or any(text == e['text'] for e in T['small'][kind]):
+                    raise GenError(f'{where}: an empty line, or the same line twice in one kind')
+                T['small'][kind].append(dict({'text': text}, **({'tone': tone} if tone != 'light' else {})))
+                continue
+            raise GenError(f'{where}: not understood (small talk lines start with "- ", after an "== small" or "== done")')
+        return
+    pool, work = whose == 'pool', whose[5:] if whose.startswith('work:') else None
+    if work is not None and work not in TALK_WORK_POOLS:
+        raise GenError(f'{path}: "@talks {whose}": the work pools are {", ".join(TALK_WORK_POOLS)}')
+    if not pool and work is None and not re.fullmatch(r'[a-z][a-z0-9-]*', whose):
+        raise GenError(f'{path}: "@talks {whose}": pool, work:<pool>, smalltalk or a crew id')
+    ftopic, cur, talks = ('work' if work else None), None, []
+
+    def said(s, where):
+        text, tone = split_tone(s, where)
+        if not text:
+            raise GenError(f'{where}: an empty line')
+        return dict({'text': text}, **({'tone': tone} if tone != 'light' else {}))
+
+    def close():
+        if not cur:
+            return
+        t, where = cur['t'], cur['where']
+        if not t['topic']:
+            raise GenError(f'{where}: talk "{cur["slug"]}" has no topic: (a "topic:" line under its "==")')
+        most = 6 if t['first'] else 3                    # a first-talk scene may say more (the card holds its question until they're said: talkPackHold)
+        if not 1 <= len(t['lines']) <= most:
+            raise GenError(f'{where}: talk "{cur["slug"]}" has {len(t["lines"])} them: lines before its ask: (1-{most})')
+        if not t['ask']:
+            raise GenError(f'{where}: talk "{cur["slug"]}" has no ask:')
+        for k in TALK_REPLY_KEYS:
+            if k not in t['replies']:
+                raise GenError(f'{where}: talk "{cur["slug"]}" has no {k}: reply')
+            if 'ans' not in t['replies'][k]:
+                raise GenError(f'{where}: talk "{cur["slug"]}": its {k}: reply has no answer (an indented "  them:" under it)')
+        t['id'] = f'pool.{t["topic"]}.{cur["slug"]}' if pool else f'work.{work}.{cur["slug"]}' if work else f'{whose}.{cur["slug"]}'
+        talks.append({k: t[k] for k in ('id', 'topic', 'first', 'when', 'lines', 'ask', 'replies') if t.get(k)})
+
+    for i, l in lines:
+        where, s = f'{path}:{i}', l.strip()
+        if not s or s.startswith('@'):
+            continue
+        if s.startswith('=='):
+            close()
+            slug = s[2:].strip()
+            if not re.fullmatch(r'[a-z0-9][a-z0-9-]*', slug):
+                raise GenError(f'{where}: "{slug}" is not a talk slug (lower case, digits and -)')
+            cur = {'slug': slug, 'where': where, 'last': None,
+                   't': {'topic': ftopic, 'when': None, 'first': None, 'lines': [], 'ask': None, 'replies': {}}}
+            continue
+        m = re.fullmatch(r'([a-z]+):\s*(.*)', s)
+        if not m:
+            raise GenError(f'{where}: not understood (topic:, when:, them:, ask:, listen:, share:, cheer:, or "== slug")')
+        key, val = m.groups()
+        if key == 'only':                                  # item 15: "only: own" (file level) = Talk a while uses only this person's own talks
+            if cur is not None or pool or work is not None or val != 'own':
+                raise GenError(f'{where}: "only: own" goes in a person\'s own .talk file, before the first "=="')
+            T.setdefault('only', set()).add(whose)
+            continue
+        if key == 'first':                                 # item 15: "first: yes" = the first-talk scene (straight under its "==")
+            if cur is None or pool or work is not None or val != 'yes':
+                raise GenError(f'{where}: "first: yes" goes straight under an own talk\'s "=="')
+            if cur['t']['first'] or cur['t']['lines'] or cur['t']['when']:
+                raise GenError(f'{where}: first: goes once, before when: and the them: lines')
+            cur['t']['first'] = 1
+            continue
+        if key == 'topic':
+            if not re.fullmatch(r'[a-z]+', val):
+                raise GenError(f'{where}: topic: takes one word')
+            if work:
+                raise GenError(f'{where}: a work pool\'s talks have no topic: line (their topic is always work)')
+            if cur is None:
+                ftopic = val                               # a pool file's topic: every talk's, and frozen into its id
+            elif pool:
+                raise GenError(f'{where}: a pool talk takes its file\'s topic: (it\'s part of the id: never override it)')
+            elif cur['t']['lines'] or cur['t']['when']:
+                raise GenError(f'{where}: topic: goes first, straight under the "=="')
+            else:
+                cur['t']['topic'] = val
+            continue
+        if cur is None:
+            raise GenError(f'{where}: "{key}:" before any "== slug"')
+        t = cur['t']
+        if key == 'when':
+            if t['when'] is not None or t['lines']:
+                raise GenError(f'{where}: one when: line, before the them: lines')
+            c = parse_conds(val, where)
+            for k in NUM_KEYS:
+                if k in c:
+                    raise GenError(f'{where}: {k}: isn\'t used in talks')
+            t['when'] = entry(rel, 'talk', '', 'light', c)
+            for k in ('text', 'id'):
+                del t['when'][k]
+            continue
+        if key == 'them' and l.startswith(' '):            # an answer: indented under its reply
+            r = cur['last']
+            if not r or 'ans' in t['replies'][r]:
+                raise GenError(f'{where}: an indented answer goes once, under listen:, share: or cheer:')
+            t['replies'][r]['ans'] = said(val, where)
+            continue
+        if l.startswith(' '):
+            raise GenError(f'{where}: only an answer ("  them:") is indented')
+        if key == 'them':
+            if t['ask']:
+                raise GenError(f'{where}: them: lines come before the ask:')
+            t['lines'].append(said(val, where))
+        elif key == 'ask':
+            if t['ask']:
+                raise GenError(f'{where}: one ask: a talk')
+            t['ask'] = said(val, where)
+        elif key in TALK_REPLY_KEYS:
+            if not t['ask']:
+                raise GenError(f'{where}: the replies come after the ask:')
+            if key in t['replies']:
+                raise GenError(f'{where}: {key}: twice')
+            if re.search(r'[{}]|\s#\w+\s*$', val):
+                raise GenError(f'{where}: a reply is a button: no placeholders, voice tokens or tone')
+            if not val.strip():
+                raise GenError(f'{where}: an empty reply')
+            t['replies'][key] = {'text': val.strip()}
+            cur['last'] = key
+        else:
+            raise GenError(f'{where}: unknown "{key}:" (topic, when, them, ask, listen, share, cheer)')
+    close()
+    if not talks:
+        raise GenError(f'{path}: no talks')
+    if pool:
+        T['pool'] += talks
+    elif work:
+        if work in T['work']:
+            raise GenError(f'{path}: a second file for the work pool {work}')
+        T['work'][work] = talks
+    else:                                          # a person may have several files (item 15): <id>.talk first, then the rest by name
+        main = os.path.basename(path) == whose + '.talk'
+        T['own'][whose] = talks + T['own'].get(whose, []) if main else T['own'].get(whose, []) + talks
+        if sum(1 for x in T['own'][whose] if x.get('first')) > 1:
+            raise GenError(f'{path}: {whose} has two "first: yes" talks (one first-talk scene a person)')
+
+
 def parse_overheard(lines, path, rel, topic, out):
     conds, cur, n = {}, None, 0
 
@@ -286,7 +479,7 @@ def parse_voice_file(path, rel, out):
     lines = read_lines(path)
     hd = header(lines, path)
     if hd[0] == 'voice' and len(hd) == 2:
-        card = out['VOICE'].setdefault(hd[1], {})
+        card = out['STORY_VOICE' if rel.startswith('stories/') else 'VOICE'].setdefault(hd[1], {})   # content/stories: crew stories' cards, read only while STORIES_ON (FX21)
     elif hd[0] == 'template' and len(hd) == 2:
         card = out['VOICE_TEMPLATES'].setdefault(hd[1], {})
     else:
@@ -316,8 +509,54 @@ def parse_voice_file(path, rel, out):
             raise GenError(f'{where}: unknown voice card field "{k}"')
 
 
+def meet_line(l, s, where, body, choice):
+    """One line of a meeting script (a .meet file's == lines, an .appt file's scenes) into body; returns the open choice."""
+    if s == '? choice':
+        choice = {'choice': []}
+        body.append(choice)
+        return choice
+    if s.startswith('* '):
+        if choice is None:
+            raise GenError(f'{where}: a "* choice" outside "? choice"')
+        parts = re.split(r'\s+(?=(?:rel|job|flavour|mem|flag|favour):)', s[2:].strip())
+        ch = {'text': parts[0]}
+        for p in parts[1:]:
+            k, v = p.split(':', 1)
+            if k == 'rel':
+                ch['rel'] = {}
+                for r in v.split(','):
+                    m = re.fullmatch(r'([\w-]+)([+-]\d+)', r)
+                    if not m:
+                        raise GenError(f'{where}: rel is like calder+2,tech2+1')
+                    ch['rel'][m.group(1)] = int(m.group(2))
+            else:
+                ch[k] = v
+        choice['choice'].append(ch)
+        return choice
+    pin = s.endswith(' {pin}')                      # Pillar 5 Step 3: the line where the insignia is pinned (seat C2's pin: true)
+    if pin:
+        s = s[:-len(' {pin}')].rstrip()
+    m = re.fullmatch(r'([\w-]+)(?:\s*>\s*([\w-]+))?:\s*(.+?)(?:\s+\[(\w+)\])?', s)
+    if not m:
+        raise GenError(f'{where}: meeting lines are "who: text [pose]"')
+    ln = {'who': m.group(1), 'text': m.group(3)}
+    if pin:
+        ln['pin'] = True
+    if m.group(4):
+        ln['pose'] = m.group(4)
+    if m.group(2):
+        ln['to'] = m.group(2)
+    if l.startswith(' ') and choice is not None and choice['choice']:
+        choice['choice'][-1]['reply'] = ln
+        return choice
+    choice = None
+    body.append(ln)
+    return choice
+
+
 def parse_meeting(path, rel, out):
-    """@meeting <id>; title/from/gist/notify: fields; == lines; 'who: text [pose]' or 'who > to: text';
+    """@meeting <id>; title/from/gist/notify: fields; == lines; 'who: text [pose]' or 'who > to: text' (a trailing ' {pin}'
+    bakes pin: true on that line);
     '? choice' then '* reply text  rel:calder+2,tech2+1 job:x flavour:listen mem:k flag:k favour:k' with an
     indented 'who: text [pose]' under each choice as its reply."""
     lines = read_lines(path)
@@ -341,63 +580,96 @@ def parse_meeting(path, rel, out):
                 raise GenError(f'{where}: before "== lines" only title:, from:, gist:, notify:')
             sc[m.group(1)] = m.group(2)
             continue
-        if s == '? choice':
-            choice = {'choice': []}
-            body.append(choice)
-            continue
-        if s.startswith('* '):
-            if choice is None:
-                raise GenError(f'{where}: a "* choice" outside "? choice"')
-            parts = re.split(r'\s+(?=(?:rel|job|flavour|mem|flag|favour):)', s[2:].strip())
-            ch = {'text': parts[0]}
-            for p in parts[1:]:
-                k, v = p.split(':', 1)
-                if k == 'rel':
-                    ch['rel'] = {}
-                    for r in v.split(','):
-                        m = re.fullmatch(r'([\w-]+)([+-]\d+)', r)
-                        if not m:
-                            raise GenError(f'{where}: rel is like calder+2,tech2+1')
-                        ch['rel'][m.group(1)] = int(m.group(2))
-                else:
-                    ch[k] = v
-            choice['choice'].append(ch)
-            continue
-        m = re.fullmatch(r'([\w-]+)(?:\s*>\s*([\w-]+))?:\s*(.+?)(?:\s+\[(\w+)\])?', s)
-        if not m:
-            raise GenError(f'{where}: meeting lines are "who: text [pose]"')
-        ln = {'who': m.group(1), 'text': m.group(3)}
-        if m.group(4):
-            ln['pose'] = m.group(4)
-        if m.group(2):
-            ln['to'] = m.group(2)
-        if l.startswith(' ') and choice is not None and choice['choice']:
-            choice['choice'][-1]['reply'] = ln
-            continue
-        choice = None
-        body.append(ln)
+        choice = meet_line(l, s, where, body, choice)
     if not body:
         raise GenError(f'{path}: no "== lines"')
     sc['lines'] = body
     out['MEETINGS_BAKED'][hd[1]] = sc
 
 
+APPT_FIELDS = ('title', 'starts', 'host', 'gate', 'when', 'at', 'where', 'who', 'once', 'mem', 'flag', 'record')
+APPT_TEXTS = ('invite', 'ask', 'busy', 'mail', 'here', 'thanks', 'after')       # "- text  #tone" lists
+APPT_SCENES = ('scene', 'stops', 'tend', 'harvest')                             # meeting-format lines (meet_line)
+
+
+def parse_appt(path, rel, out):
+    """@appointment <id> (0.92.6 item 9, FX22; content/appointments/README.md): fields, then == sections. A per-host file's
+    'where <id>:' / 'at <id>:' fields and '== scene <id>' / '== after <id>' sections are keyed by that host. Baked into
+    APPT_WORDS[id] = { fields..., where: {id: ...} when per host, invite: [{text, tone?}], ..., scene: {'' | id: [lines]},
+    stops / tend / harvest: [lines] }; the rules (who, when, where on the deck) are section 18's appointment code's."""
+    lines = read_lines(path)
+    hd = header(lines, path)
+    if hd[0] != 'appointment' or len(hd) != 2:
+        raise GenError(f'{path}: an .appt file starts with "@appointment <id>"')
+    a, sec, key, body, choice = {}, None, None, None, None
+    for i, l in lines:
+        where = f'{path}:{i}'
+        s = l.strip()
+        if not s or s.startswith('@'):
+            continue
+        if s.startswith('=='):
+            m = re.fullmatch(r'==\s*([a-z]+)(?:\s+([\w-]+))?', s)
+            if not m or m.group(1) not in APPT_TEXTS + APPT_SCENES:
+                raise GenError(f'{where}: "{s}" is not an appointment section ({", ".join(APPT_TEXTS + APPT_SCENES)})')
+            sec, key, choice = m.group(1), m.group(2) or '', None
+            if sec in APPT_SCENES:
+                body = []
+                if sec == 'scene':
+                    if key in a.setdefault('scene', {}):
+                        raise GenError(f'{where}: "== scene {key}" twice')
+                    a['scene'][key] = body
+                elif key or sec in a:
+                    raise GenError(f'{where}: "== {sec}" takes no id and comes once')
+                else:
+                    a[sec] = body
+            continue
+        if sec is None:
+            m = re.fullmatch(r'([a-z]+)(?:\s+([\w-]+))?:\s*(.+)', s)
+            if not m or m.group(1) not in APPT_FIELDS or m.group(2) and m.group(1) not in ('where', 'at'):
+                raise GenError(f'{where}: before the first "==" only the fields {", ".join(APPT_FIELDS)} (and "where <id>:", "at <id>:")')
+            if m.group(2):
+                a.setdefault(m.group(1) + 'Of', {})[m.group(2)] = m.group(3)
+            else:
+                a[m.group(1)] = m.group(3)
+            continue
+        if sec in APPT_TEXTS:
+            if not s.startswith('- '):
+                raise GenError(f'{where}: "== {sec}" lines start with "- "')
+            text, tone = split_tone(s[2:], where)
+            e = {'text': text}
+            if tone != 'light':
+                e['tone'] = tone
+            if key:
+                a.setdefault(sec + 'Of', {}).setdefault(key, []).append(e)
+            else:
+                a.setdefault(sec, []).append(e)
+            continue
+        choice = meet_line(l, s, where, body, choice)
+    for f in ('title', 'starts', 'host'):
+        if f not in a:
+            raise GenError(f'{path}: no "{f}:"')
+    if 'scene' not in a:
+        raise GenError(f'{path}: no "== scene"')
+    out['APPT_WORDS'][hd[1]] = a
+
+
 MOMENT_TONES = ('light', 'heartfelt', 'serious', 'resolution')
 MOMENT_FIELDS = ('tone', 'where', 'when', 'tier', 'metDays', 'gapDays', 'duty', 'crisis', 'hint', 'mem', 'flag', 'keepsake',
-                 'learn', 'mail', 'needs', 'via')
+                 'learn', 'mail', 'needs', 'via', 'crescendo', 'quiet', 'follows', 'lead', 'title', 'invite', 'cast')   # the last seven: crew stories (FX21)
 THEMES = ('homesick', 'exams', 'family', 'stuck', 'notgood', 'lonely', 'loss', 'talent', 'burnout', 'leaving', 'rivalry',
           'startover')                    # social B's frozen theme names
 FLAVOURS = ('listen', 'cheer', 'practical', 'share')
 
 
-def parse_arc(path, rel, out, home=False):
+def parse_arc(path, rel, out, home=False, store='MOMENTS'):
     """A story arc (content/arcs/<arcId>.arc: '@arc <arcId>' then 'who: <crewId>') or a struggle theme
     (content/themes/<theme>.arc: '@theme <theme>'). Each '== beat <n>' has fields, then the script:
       tone: light|heartfelt|serious|resolution   where: calm|visit|appt|<room name>   when: <conditions>
       tier: <0-4 or a tier name>  metDays: <n>  gapDays: <n>  duty: true  crisis: true  hint: <the tap line while ready>
       mem: <word>  flag: <key set when it's told>  keepsake: <text>  learn: <one line>  mail: <minutes> | <subject> | <body>
       needs: home, family (themes: the roster fields a beat needs)
-    then lines 'who: text [pose]' (who: a crew id, them (the arc's person), or you), '? choice', and
+    then lines 'who: text [pose]' (who: a crew id, them (the arc's person), or you), each may start 'if <conditions> | '
+    (played only when they hold, judged as the scene starts: crew stories, FX21), '? choice', and
     '* reply  flavour:listen mem:word flag:key favour:job' with its answer indented under it ('  them: text [pose]')
     and, optionally, a warmer answer for the person whose needs it fits ('  + them: text').
     Baked: MOMENTS['<crewId>:<n>'] = { who, thread: 'arc:<arcId>', beat, ...fields, lines } and
@@ -471,6 +743,30 @@ def parse_arc(path, rel, out, home=False):
                 cur['after'] = {'mail': {'after': int(parts[0]), 'subject': parts[1], 'body': parts[2]}}
             elif k == 'needs':
                 cur[k] = [x.strip() for x in v.split(',') if x.strip()]
+            elif k in ('crescendo', 'quiet', 'follows', 'lead', 'title', 'invite', 'cast') and not rel.startswith('stories/'):
+                raise GenError(f'{where}: {k}: is for crew stories (content/stories) only')
+            elif k == 'crescendo':                 # crew stories (FX21): the beat plays at this gathering (section 20c's storySlots)
+                if not re.fullmatch(r'(trad|event):[\w-]+|farewell|meal:(breakfast|dinner)', v):
+                    raise GenError(f'{where}: crescendo is trad:<id>, event:<id>, farewell or meal:breakfast|dinner')
+                cur[k] = v
+            elif k in ('quiet', 'lead'):
+                if not v.isdigit():
+                    raise GenError(f'{where}: {k} is a whole number ({"the quiet ending beat" if k == "quiet" else "minutes before the gathering"})')
+                cur[k] = int(v)
+            elif k == 'follows':
+                if not re.fullmatch(r'\d+(\|\d+)*', v):
+                    raise GenError(f'{where}: follows is a beat or beats (4|6): it plays after either')
+                cur[k] = [int(x) for x in v.split('|')]
+            elif k == 'cast':                      # the people a crescendo needs there (it waits for them, in its booking)
+                ids = [x for x in re.split(r'[\s,]+', v) if x]
+                if not ids or not all(re.fullmatch(r'[\w-]+', x) for x in ids):
+                    raise GenError(f'{where}: cast is crew ids (pell, calder, ...)')
+                cur[k] = ids
+            elif k == 'invite':
+                parts = [x.strip() for x in v.split('|')]
+                if len(parts) != 2 or not all(parts):
+                    raise GenError(f'{where}: invite is "<subject> | <body>" (the Mail the evening before a crescendo)')
+                cur[k] = {'subject': parts[0], 'body': parts[1]}
             elif k == 'via':
                 if not home or v not in ('reply', 'live'):
                     raise GenError(f'{where}: via: is reply or live, in calls home only')
@@ -496,6 +792,10 @@ def parse_arc(path, rel, out, home=False):
             choice['choice'].append(ch)
             continue
         warm = s.startswith('+ ')
+        lif = None
+        mi = re.fullmatch(r'if\s+(.+?)\s+\|\s+(.+)', s)
+        if mi and not warm:                    # a line with its own conditions (crew stories, FX21)
+            lif, s = parse_conds(mi.group(1), where), mi.group(2)
         m = re.fullmatch(r'([\w-]+)(?:\s*>\s*([\w-]+))?:\s*(.+?)(?:\s+\[(\w+)\])?', s[2:].strip() if warm else s)
         if not m:
             raise GenError(f'{where}: script lines are "who: text [pose]" ("? choice", "* reply ...", indented answers)')
@@ -507,6 +807,10 @@ def parse_arc(path, rel, out, home=False):
             ln['pose'] = m.group(4)
         if m.group(2):
             ln['to'] = m.group(2)
+        if lif is not None:
+            if l.startswith(' '):
+                raise GenError(f'{where}: "if ... |" goes on a script line, not on an answer')
+            ln['if'] = lif
         if l.startswith(' ') and choice is not None and choice['choice']:
             ch = choice['choice'][-1]
             if warm:
@@ -544,9 +848,9 @@ def parse_arc(path, rel, out, home=False):
     else:
         for b in beats:
             mid = f'{who}:{b["beat"]}'
-            if mid in out['MOMENTS']:
+            if mid in out[store]:
                 raise GenError(f'{path}: moment {mid} is defined twice')
-            out['MOMENTS'][mid] = {'who': who, 'thread': 'arc:' + aid, **{k: b[k] for k in order if k in b}}
+            out[store][mid] = {'who': who, 'thread': 'arc:' + aid, **{k: b[k] for k in order if k in b}}
 
 
 def parse_home_rest(lines, path, rel, cid, who, out):
@@ -614,8 +918,110 @@ def parse_home_rest(lines, path, rel, cid, who, out):
     out['HOME_CHAT'][cid] = [{k: c[k] for k in ('when', 'lines') if k in c} for c in chats]
 
 
+# the Captain's Friday addresses (content/addresses/*.address, README there; the Fridays builder's, section 18f). A file:
+# "@address <id>", header lines "day:", "from:", "mail:" ("Subject | body"), then "== <beat>" sections (a dated speech
+# has one, "== lines"; the weekly one a pool a beat, with "pick: 2" for two). Lines: "who: text [pose] #tone",
+# "who > you: text", or "- text" (Marrow's). "? terms" limits the lines under it until the next "?" or "==" (a bare
+# "?" clears it): every term must hold, "!" turns one round, "a|b" inside a term is either. Read when she speaks
+# (section 18f), so the terms here are only checked for their words
+ADDR_KEYS = ('band', 'done', 'commended', 'arriving', 'myrank', 'myshift', 'season', 'cue', 'nod', 'health', 'week', 'swap', 'comet')   # swap: the event swap (0.93.2), section 13's EV_SWAP_ON; comet: the comet on Day 22 (0.93.2, EV_COMET_ON)
+ADDR_SLOTS = ('me', 'stormjobs', 'myjobs', 'leavers', 'sunleavers', 'arrivals', 'dept', 'trad1', 'day1', 'winner')
+ADDR_POSES = ('nod', 'gesture', 'laugh', 'sigh', 'listen', 'play')
+ADDR_WHO = ('marrow', 'vance')
+
+
+def parse_address(path, rel, out):
+    lines = read_lines(path)
+    hd = header(lines, path)
+    if hd[0] != 'address' or len(hd) != 2:
+        raise GenError(f'{path}: the header is "@address <id>"')
+    aid = hd[1]
+    if aid in out['ADDRESSES']:
+        raise GenError(f'{path}: a second address "{aid}"')
+    a, beat, cond, seen = {}, None, None, set()
+    started = False
+    for i, l in lines:
+        where = f'{path}:{i}'
+        t = l.strip()
+        if not t:
+            continue
+        if not started:
+            started = True                         # the @address line
+            continue
+        if t.startswith('=='):
+            beat = {'id': t[2:].strip(), 'pick': 1, 'lines': []}
+            if not beat['id'] or beat['id'] in seen:
+                raise GenError(f'{where}: a beat needs a name of its own ("== open")')
+            seen.add(beat['id'])
+            a.setdefault('beats', []).append(beat)
+            cond = None
+            continue
+        if beat is None:
+            m = re.fullmatch(r'(day|from|mail):\s*(.+)', t)
+            if not m:
+                raise GenError(f'{where}: before the first "==", only day:, from: and mail:')
+            k, v = m.groups()
+            if k == 'day':
+                if not v.isdigit():
+                    raise GenError(f'{where}: day needs a number')
+                v = int(v)
+            elif k == 'mail':
+                if v.count('|') != 1:
+                    raise GenError(f'{where}: mail is "Subject | body"')
+                v = [x.strip() for x in v.split('|')]
+            a[k] = v
+            continue
+        m = re.fullmatch(r'pick:\s*(\d+)', t)
+        if m:
+            beat['pick'] = int(m.group(1))
+            continue
+        if t.startswith('?'):
+            terms = t[1:].split()
+            for term in terms:                     # key:value, key:a|b (either value), !key:value; commended and arriving alone
+                k, _, v = term.lstrip('!').partition(':')
+                bare = k in ('commended', 'arriving', 'swap', 'comet')
+                if k not in ADDR_KEYS or bare == bool(v) or any(not x for x in v.split('|')) and not bare:
+                    raise GenError(f'{where}: unknown condition "{term}" ({", ".join(ADDR_KEYS)}: see content/addresses/README.md)')
+            cond = terms or None
+            continue
+        m = re.fullmatch(r'(?:(\w+)\s*(>\s*you)?\s*:|-)\s*(.+)', t)
+        if not m:
+            raise GenError(f'{where}: a line is "who: text", "who > you: text" or "- text"')
+        who, to, text = m.group(1) or 'marrow', m.group(2), m.group(3)
+        if who not in ADDR_WHO:
+            raise GenError(f'{where}: only {" and ".join(ADDR_WHO)} speak in an address')
+        text, tone = split_tone(text, where)
+        pose = None
+        pm = re.search(r'\s*\[(\w+)\]\s*$', text)
+        if pm:
+            pose, text = pm.group(1), text[:pm.start()].strip()
+            if pose not in ADDR_POSES:
+                raise GenError(f'{where}: unknown pose [{pose}] ({", ".join(ADDR_POSES)})')
+        for slot in re.findall(r'\{([^}]*)\}', text):
+            if slot not in ADDR_SLOTS:
+                raise GenError(f'{where}: unknown slot {{{slot}}} ({", ".join("{" + x + "}" for x in ADDR_SLOTS)})')
+        if '{' in re.sub(r'\{\w+\}', '', text) or '}' in re.sub(r'\{\w+\}', '', text):
+            raise GenError(f'{where}: a stray brace')
+        e = {'id': line_id(rel, beat['id'], text), 'who': who, 'text': text}
+        if to:
+            e['to'] = 'you'
+        if pose:
+            e['pose'] = pose
+        if tone != 'light':
+            e['tone'] = tone
+        if cond:
+            e['if'] = cond
+        beat['lines'].append(e)
+    if not a.get('beats') or not any(b['lines'] for b in a['beats']):
+        raise GenError(f'{path}: no lines')
+    if 'from' not in a or 'mail' not in a:
+        raise GenError(f'{path}: an address needs from: and mail:')
+    out['ADDRESSES'][aid] = a
+
+
 def bake():
-    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': []}
+    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'STORY_MOMENTS': {}, 'STORY_VOICE': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': [], 'ADDRESSES': {}, 'APPT_WORDS': {},
+           'TALKS': {'pool': [], 'own': {}, 'work': {}, 'small': {}}}
     files = []
     for d, _, fs in os.walk(CONTENT):
         for f in fs:
@@ -629,10 +1035,18 @@ def bake():
             parse_voice_file(path, rel, out)
         elif ext == 'meet':
             parse_meeting(path, rel, out)
+        elif ext == 'arc' and rel.startswith('stories/'):   # crew stories (FX21, 0.92.6): the new beats, read only while STORIES_ON (section 20c)
+            parse_arc(path, rel, out, store='STORY_MOMENTS')
         elif ext == 'arc':
             parse_arc(path, rel, out)
         elif ext == 'call':
             parse_arc(path, rel, out, home=True)
+        elif ext == 'talk':
+            parse_talk_file(path, rel, out)
+        elif ext == 'address':
+            parse_address(path, rel, out)
+        elif ext == 'appt':
+            parse_appt(path, rel, out)
     # traditions: the traditions engineer's grammar and shape (plans/trad-format.md), read by their trad_parse.read_all
     # (the interface is theirs and frozen). Baked as one array: const TRADITIONS = [ one tradition a line ];
     tdir = os.path.join(CONTENT, 'traditions')
@@ -643,6 +1057,11 @@ def bake():
             out['TRADITIONS'] = trad_parse.read_all(tdir)
         except trad_parse.TradError as e:
             raise GenError('content/traditions/' + str(e))
+    talk_ids = {}                                  # the pack's ids: unique across every file (a save's fired list holds them)
+    for t in out['TALKS']['pool'] + [t for d in ('own', 'work') for ts in out['TALKS'][d].values() for t in ts]:
+        if t['id'] in talk_ids:
+            raise GenError(f'two talks share the id {t["id"]}: slugs are never reused (plans/talk-pack-plan.md "Talk ids")')
+        talk_ids[t['id']] = 1
     ids = {}
     for kind, es in out['LINES'].items():
         for e in es:
@@ -738,15 +1157,46 @@ def js_cards(name, d):
 
 
 def blocks(out):
-    lines = js_cards('VOICE_TEMPLATES', out['VOICE_TEMPLATES']) + cards_parsed('VOICE', out['VOICE']) \
+    lines = js_cards('VOICE_TEMPLATES', out['VOICE_TEMPLATES']) + cards_parsed('VOICE', out['VOICE']) + cards_parsed('STORY_VOICE', out['STORY_VOICE']) \
         + lists_parsed('LINES', out['LINES']) + ['const CONVOS = ['] + [f'  {js(c)},' for c in out['CONVOS']] + ['];'] \
         + ['const MOMENTS = {'] + [f'  {js(k)}: {js(out["MOMENTS"][k])},' for k in sorted(out['MOMENTS'])] + ['};'] \
+        + ['const STORY_MOMENTS = {'] + [f'  {js(k)}: {js(out["STORY_MOMENTS"][k])},' for k in sorted(out['STORY_MOMENTS'])] + ['};'] \
         + ['const MOMENT_THEMES = {'] + [f'  {js(k)}: {js(out["MOMENT_THEMES"][k])},' for k in sorted(out['MOMENT_THEMES'])] + ['};'] \
         + sum(([f'const {n} = {{'] + [f'  {js(k)}: {js(out[n][k])},' for k in sorted(out[n])] + ['};']
                for n in ('HOME_CONTACTS', 'HOME_MOMENTS', 'HOME_SEND', 'HOME_CHAT')), [])
     meet = ['const MEETINGS_BAKED = {'] + [f'  {js(k)}: {js(out["MEETINGS_BAKED"][k])},' for k in sorted(out['MEETINGS_BAKED'])] + ['};']
     trad = ['const TRADITIONS = ['] + [f'  {js(t)},' for t in out['TRADITIONS']] + ['];']
-    return {'LINES': lines, 'MEETINGS': meet, 'TRADITIONS': trad}
+    addr = ['const FRI_ADDRESSES = {']
+    for k in sorted(out['ADDRESSES']):
+        a = out['ADDRESSES'][k]
+        addr.append(f'  {js(k)}: {{' + ', '.join(f'{js(f)}: {js(a[f])}' for f in ('day', 'from', 'mail') if f in a) + ', "beats": [')
+        for b in a['beats']:
+            addr.append(f'    {{"id": {js(b["id"])}, "pick": {b["pick"]}, "lines": [')
+            addr += [f'      {js(e)},' for e in b['lines']]
+            addr.append('    ]},')
+        addr.append('  ]},')
+    addr.append('};')
+    appt = ['const APPT_WORDS = {'] + [f'  {js(k)}: {js(out["APPT_WORDS"][k])},' for k in sorted(out['APPT_WORDS'])] + ['};']
+    return {'LINES': lines, 'MEETINGS': meet, 'TRADITIONS': trad, 'TALKS': talks_parsed('TALKS', out['TALKS']), 'ADDRESSES': addr, 'APPT_WORDS': appt}
+
+
+def talks_parsed(name, T):
+    """TALKS (the Talk a while pack): { pool: [talk], own: { crewId: [talk] } (sorted), work: { pool: [talk] } (sorted), small: { kind: [lines] } (sorted);
+    one piece a talk, so rewording a talk changes one line of the file"""
+    p = ['{"pool":[']
+    p += [cj(t) + (',' if i < len(T['pool']) - 1 else '') for i, t in enumerate(T['pool'])]
+    p.append('],"own":{')
+    for n, cid in enumerate(sorted(T['own'])):
+        ts = T['own'][cid]
+        p.append(('' if n == 0 else ',') + cj(cid) + ':[')
+        p += [cj(t) + (',' if i < len(ts) - 1 else ']') for i, t in enumerate(ts)]
+    p.append('},"work":{')
+    for n, w in enumerate(sorted(T['work'])):
+        ts = T['work'][w]
+        p.append(('' if n == 0 else ',') + cj(w) + ':[')
+        p += [cj(t) + (',' if i < len(ts) - 1 else ']') for i, t in enumerate(ts)]
+    p.append('},"small":' + cj({k: T['small'][k] for k in sorted(T['small'])}) + (',"only":' + cj(sorted(T['only'])) if T.get('only') else '') + '}')
+    return js_parsed(name, p)
 
 
 def splice(html, name, body):
@@ -773,7 +1223,8 @@ def main(argv):
         return 2
     n = sum(len(v) for v in out['LINES'].values()) + sum(len(es) for c in list(out['VOICE'].values()) + list(out['VOICE_TEMPLATES'].values()) for es in c.get('lines', {}).values())
     summary = (f'{n} lines, {len(out["VOICE"])} voice cards, {len(out["VOICE_TEMPLATES"])} templates, {len(out["CONVOS"])} conversations, '
-               f'{len(out["MOMENTS"])} moments, {len(out["MOMENT_THEMES"])} themes, {len(out["HOME_CONTACTS"])} home contacts, {len(out["MEETINGS_BAKED"])} meetings, {len(out["TRADITIONS"])} traditions')
+               f'{len(out["MOMENTS"])} moments, {len(out["MOMENT_THEMES"])} themes, {len(out["HOME_CONTACTS"])} home contacts, {len(out["MEETINGS_BAKED"])} meetings, {len(out["TRADITIONS"])} traditions, {len(out["ADDRESSES"])} addresses, '
+               f'{len(out["TALKS"]["pool"]) + sum(len(v) for d in ("own", "work") for v in out["TALKS"][d].values())} talks, {len(out["APPT_WORDS"])} appointments')
     if check:
         print(('up to date: ' if new == html else 'OUT OF DATE: ') + summary)
         return 0 if new == html else 1

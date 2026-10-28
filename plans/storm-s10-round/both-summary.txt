@@ -1,0 +1,6 @@
+big exit 0 158s BIGEVENTS CHECK OK
+day12 exit 0 287s DAY CHECK OK
+day13 exit 0 294s DAY CHECK OK
+day14 exit 0 302s DAY CHECK OK
+fridays exit 1 562s FRIDAYS CHECK FAILED (1)
+DONE

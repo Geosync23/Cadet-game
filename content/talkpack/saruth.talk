@@ -1,0 +1,55 @@
+@talks saruth
+// TW1, the Talk a while pack: Envoy Saruth's own talks (they/them). Formal and exact, NO contractions; unhurried;
+// names small courtesies; a dry joke a sentence late. Guests don't draw the pool, so Saruth has these, then small
+// talk. Never why they were sent (until close); never Veyli rites in full; never a nickname before close.
+
+== knock-twice
+topic: ship
+them: May I ask you something about your people? You knock twice. Always twice. Never once.
+them: I have counted. Not one human aboard knocks three times. It is very consistent.   #funny
+ask: Why twice? I would like the true answer, if there is one.
+listen: How do the Veyli ask to come in?
+  them: A cord on the door. Tied loose, you are expected. Otherwise, by invitation only.
+share: Once is an accident. Twice is a person.
+  them: Ah. That is a good answer. I will write it down. Thank you.   #warm
+cheer: Three is showing off.
+  them: ... Yes. I see. That was a joke. I have caught it. Late, but I have it.   #funny
+
+== tea-hour
+topic: day
+when: tier>=acquaintance
+them: Each day I take tea at the same hour. Kneeling, at a low table. Your crew find it strange.
+them: To me, the strange thing is your tea queue. Everyone, at once, standing, in a hurry.   #funny
+ask: Is there something you do at the same hour every day?
+listen: What does the hour mean, for you?
+  them: That the day has a still place in it. However the rest goes. It is not a small thing.
+share: Breakfast. Same seat, most days.
+  them: Then you understand. A fixed point is a kindness you give yourself.   #warm
+cheer: Get lost on Deck 2. Reliably.
+  them: That is also a ritual. A very human one. I have seen several of you perform it.   #funny
+
+== seedlings
+topic: hobby
+when: tier>=colleague
+them: I keep Veyli seedlings in a corner of the garden. Cruz waters them when I forget.
+them: I never forget. Cruz waters them anyway. I have decided this is affection.   #warm
+ask: What do your people do, when they want to show someone they care?
+listen: Do the seedlings like it here?
+  them: They lean towards the lamps. All of them, the same way. Like juniors at dinner.   #funny
+share: Feed them. Or sit with them.
+  them: We sit. Often without speaking. Your people find the silence hard. You do not, I notice.   #warm
+cheer: Bring biscuits. Always biscuits.
+  them: Chef Brennan has explained biscuits to me. At length. I accept them now.   #funny
+
+== exhausting
+topic: crew
+when: tier>=friend
+them: Here is something I have not said to the Captain. Your people are exhausting.
+them: And very kind. Often at once. I did not expect both. I am still deciding what to do.
+ask: And the Veyli? What do you find hardest about my people? Be honest.
+listen: What's hardest about us, for you?
+  them: The noise. Everyone speaks, all the time, kindly. I have learned to listen faster.
+share: I don't know you well enough yet.
+  them: An honest answer. Then we are both still learning. I find that a comfort.   #warm
+cheer: Knowing when you've made a joke.
+  them: Ah. We have the same trouble with you. A sentence late, every time. We are even.   #funny

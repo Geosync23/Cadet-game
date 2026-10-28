@@ -1,0 +1,35 @@
+@tradition rec-slow-stretch
+// W3 (rec writer; lead 18: fields from plans/rec-traditions-plan.html FINAL and the brief; RA owns the format).
+// Slow stretch: Sundays 08:00-08:45 from Day 7 (lead 18: moved from 08:30), the float room; Dr. Nandakumar leads a stretch
+// at a fifth of a g, 3 to 6 people. Tap to join (the float animation, slower).
+k: 493
+title: Slow stretch
+when: weekly sunday from day 7
+at: 08:00-08:45
+min: 25
+wake: 30
+where: 7 room Float room: rec:float
+who: nandakumar always, infirmary 30%, everyone 6%
+anim: everyone talk
+host: nandakumar
+from: nandakumar
+flag: rec.on
+
+== mail
+- Slow stretch tomorrow, {time} in the float room. Dr. Nandakumar leads a gentle stretch at a fifth of a g. Bring water. She'll ask.
+
+== ask
+- Slow stretch this morning. It's like stretching in honey. In a good way.
+- Coming to slow stretch? Nandakumar says it's good for us. That settles it.
+
+== here
+- Slowly. Slower than that.
+- Breathe out. Now drink some water.   #funny
+- Reach. And float. And reach.
+
+== thanks
+- You join the small circle in the float room. Dr. Nandakumar counts, slowly, and your whole back says thank you.   #warm
+
+== chatter
+- My back's never been happier than after slow stretch.
+- Water break at slow stretch. In low gravity. It went everywhere.   #funny

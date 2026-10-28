@@ -1,0 +1,123 @@
+@talks pool
+topic: tradition
+// TW1, the Talk a while pack: shared pool, topic tradition. {trad} is the next tradition on the calendar (as today's
+// topic does). Named traditions need trad: or came: conditions; only quiz and observatory night are named, and gently.
+
+== something-on
+them: That's the thing about the Wren. There's always something on.
+them: You don't have to go to everything. Pick the ones you like.
+ask: Have you been to anything yet? Which one?
+listen: Which one do you never miss?
+  them: Hard to pick. The quiet ones, maybe. Where nobody's in charge.
+share: Not yet. I'm a bit nervous, honestly.
+  them: Don't be. Nobody minds a new face. They like it.   #warm
+cheer: All of them. I'll sleep next month.
+  them: That's the spirit. Then the tiredness. Then the spirit again.   #funny
+
+== first-week
+when: !newhere
+them: My first week, I went to everything. I was so tired.   #funny
+them: Fell asleep at the third one. Someone put a blanket on me.
+ask: How are you finding the ship's evenings?
+listen: Who put the blanket on you?
+  them: Never found out. That's the Wren for you.   #warm
+share: Busy. Good busy. A lot to take in.
+  them: Pace yourself. They'll all come round again.
+cheer: Full. Like me after dinner.
+  them: Ha! Same. Both are worth it.   #funny
+
+== coming
+when: tier>=acquaintance
+them: {trad}'s coming up. I'm going. Are you?
+them: It's better with more people. Most things are.
+ask: Do you like a crowd, or something smaller?
+listen: What happens at it?
+  them: Come and see. Explaining it never does it justice.
+share: Smaller, mostly. A few faces I know.
+  them: Then come with me. That's one face you know.   #warm
+cheer: A crowd. More people to blame if I'm bad.
+  them: Excellent tactic. Very Wren.   #funny
+
+== meet-people
+when: tier>=acquaintance
+them: The best way to meet people aboard? Just turn up to things.
+them: Sit down. Say hello. Someone will talk to you. They always do.
+ask: Who have you met at the ship's evenings so far?
+listen: Who did you meet that way?
+  them: Half my friends. Honestly. The other half, in the lift.   #funny
+share: A few people. I'm slowly learning names.
+  them: Names come. Faces first. You're doing it right.
+cheer: Mostly the snacks.
+  them: The snacks are excellent company. Quiet. Reliable.   #funny
+
+== two-at-once
+when: tier>=acquaintance
+them: Some nights there are two things on at once. You just pick one.
+them: Then you hear the other one was amazing. Every time.   #funny
+ask: How do you choose, when two things clash?
+listen: What do you usually pick?
+  them: Whichever my friends are at. The thing matters less.   #warm
+share: Whichever's closer to my bunk.
+  them: Sensible. Lazy, but sensible.   #funny
+cheer: I flip a coin. Then ignore it.
+  them: That's how everyone does it. Admit it.   #funny
+
+== quiz
+when: tier>=acquaintance
+them: Been back to quiz night yet? People take it very seriously.
+them: Too seriously. I love it.   #funny
+ask: What would you be good at, in a quiz?
+listen: Who usually wins?
+  them: Depends who's asking the questions. There are grudges.   #funny
+share: Engines, maybe. One day.
+  them: A Works brain on the team. Everyone will want you.
+cheer: Knowing what's for dinner.
+  them: Underrated round. You'd clean up.   #funny
+
+== observatory
+when: tier>=acquaintance
+them: Have you lain on the floor at observatory night yet?
+them: Lights off, everyone looking up. Nobody talks much.
+ask: Do you like the stars, or are they just there?
+listen: What do you look for, up there?
+  them: Nothing. That's the point. You just look.   #warm
+share: I love them. I still can't believe the view.
+  them: Don't lose that. Some of us did. Then found it again.   #warm
+cheer: I like them. They don't ask questions.
+  them: Unlike me. Sorry. Ha.   #funny
+
+== own-one
+when: tier>=colleague !who:vance|brennan
+them: If you could start a tradition aboard, what would it be?
+them: I'd have a slipper night. Everyone in slippers. That's it.   #funny
+ask: Go on. What would yours be?
+listen: Why slippers?
+  them: Nobody can take themselves seriously in slippers. Even Vance.   #funny
+share: Something for the new hands. A welcome.
+  them: There's a new hand's tea already. Make it bigger. Tell someone.   #warm
+cheer: Second dinner night.
+  them: Brennan would cry. Then do it. Then cry again.   #funny
+
+== missed
+when: tier>=colleague !who:vance
+them: I missed one last week. Fell asleep before it started.
+them: Everyone told me about it at breakfast. In detail. Rude.   #funny
+ask: Do you ever skip things, just to rest?
+listen: Was it a good one?
+  them: The best one, apparently. Of course it was.   #funny
+share: Yes. Sometimes my bunk wins.
+  them: Good. Rest is a tradition too. Vance would quote a rule.   #funny
+cheer: Never. I have a reputation.
+  them: Ha! A reputation for turning up. A good one to have.   #funny
+
+== why-go
+when: tier>=friend !who:rina
+them: Do you know why I keep going to things? Even tired?
+them: Because one night I went, sad, and came back less sad.   #warm
+ask: What cheers you up, when you're low?
+listen: What happened that night?
+  them: Nothing much. People were kind. That was enough.   #warm
+share: Talking to someone. Like this.
+  them: Then come and find me. Any night. I mean it.   #warm
+cheer: A long shower. Before ten.
+  them: The classic cure. After ten it's character-building.   #funny

@@ -1,0 +1,42 @@
+@tradition tasting-table-late
+// Brennan's tasting table, reworked (0.93.2, FX24 for lead 37; the user: "doesn't work, doesn't do anything, no host. It
+// should take place later after dinner in the kitchen, Brennan should host and offer unique food to try"). With
+// TRAD_0932_ON it loads as tasting-table in place of the old one (section 18's loader), so the galley's tastes, the tally,
+// Sunday's side and the Mail keep their id. Wednesdays after dinner (serving ends 20:30), in the galley round the prep
+// island (the cook-along's places 3-cookalong-*), then the mess seats nearest; not a meal: people eat, then come.
+// Brennan hosts from her station: her last stint on Wednesdays is the tasting (section 16's galleyPlan). Two new small
+// dishes a week (the tally's choices, two a week in turn); you join by tapping her, taste both and pick a jar.
+// Rules: FX24. Words: CS1 (plans/trad-0932-words.txt and plans/tasting-table-late-words.md, claude/crew-stories-pitch 7b1e7300).
+k: 1314
+title: Brennan's tasting table
+when: weekly wednesday
+at: 20:00-20:45
+min: 15
+where: 3 pool @cook-along
+where: 3 room Mess hall: mess-seat
+hold: 1
+who: brennan always, lingers-at-meals 50%, galley 30%, everyone 22%
+anim: drink
+host: brennan
+from: brennan
+ties: galley meal=dinner extra=tasting batch=20
+ties: decor tastingTable
+ties: tally tasting choices=smoked-salt-caramels|seaweed-crackers|lentil-dumplings|green-tomato-oatcakes|cardamom-rice-pudding|chilli-lime-popcorn|cold-beetroot-soup|thyme-honey-flatbread|black-bean-fritters|mushroom-broth-cup|pear-ginger-crumble|pickled-carrot-ribbons|sesame-noodle-nest|baked-plum-custard|herb-omelette-roll|sweet-potato-cakes per=2
+invite: host=brennan odds=25% line="After dinner, come through to the galley. Something new to try. Small spoons, honest answers."
+
+== mail
+- Tasting table tomorrow after dinner, {time}, in the galley itself. Two small things you've never had. Taste both, pick a jar. Honest answers only, love.
+
+== here
+- Small spoon. Big opinion.   #funny
+- Go on, love. Tell me the truth.
+- That's new. That's very new.
+- Can I have the recipe? No? Fair.   #funny
+
+== thanks
+- After dinner Brennan brings you through to the galley and sets down something you've never tasted, and waits for your honest answer.   #warm
+
+== chatter
+- Brennan's tasting table last night. I've never had cold soup. I've now had cold soup.   #funny
+- The galley after dinner smells of whatever Brennan's trying. Last night it was caramel.   #warm
+- Brennan watched me taste it. I've never chewed so carefully.   #funny

@@ -1,0 +1,72 @@
+@bank all
+// FX28 (2026-10-26, the user's playtest notes: the Tier 2 test and the promotion "very very hard to miss"; lead 38's
+// plan A-G), for 24p's worksText with PROMO_BEATS_ON. Drafted by FX28 in the house voice, for SW2 to polish. Calder
+// speaks unless noted: exact, numbers not adjectives, never "well done" (her arc's payoff), no "!". Mails are
+// "Subject | body", unsigned (the game adds the sender). {day}: "tomorrow" or a weekday; {time}: a time like 08:15.
+
+// the board's gold ring on the test's Take it (forced, whatever Teaching arrows says)
+== pb.ptr.test
+- Your Tier 2 test: take it
+
+// the Schedule's and Tracked's rows, said by nobody
+== pb.row.test
+- Your Tier 2 test
+== pb.row.result
+- Your result with the Chief
+== pb.row.pip
+- Your pip, from the Captain
+== pb.row.cabin
+- Your new cabin, after dinner
+
+// A: the evening before, from up to two friends (Mail, 20:00; one each)
+== mail.pb.luck
+- Good luck | Big day tomorrow. You'll be fine. You've done harder jobs than this one with half the bay watching.
+- Tomorrow | Heard about your test. Get some sleep and eat a proper breakfast. That's an order, from a friend.
+// A: the test morning, once you're up (a device notice, said by nobody)
+== pb.morning.notice
+- Today: your Tier 2 test, 09:00. It goes up on the job board in the Works bay.
+// A: Calder, as you come into the bay that morning (her own lines under flag pb.promo.morning come first)
+== pb.morning.say
+- Morning. Your test's on the board at nine. Take it when you're ready.
+
+// B: holding another job while the test waits on the board (a notice, once an hour; {time}: when the test comes off)
+== pb.busy.notice
+- Your Tier 2 test waits on the job board till {time}. Turn in or drop this job first.
+
+// C: passed. Her word at the turn-in, the Mail, the notice
+== pb.passed.say
+- That's the test done. Your result {day}, first thing. My office, {time}.
+== mail.pb.passed
+- Your test | Done. Your result {day}, {time}, my office. Not before.
+== pb.passed.notice
+- Your Tier 2 test is done. Your result: {day}, {time}, the Chief's office.
+
+// D: the result day. The Mail at 06:00, the notice once you're up, and her toast at 08:00 (pb.promo.summons)
+== mail.pb.result
+- Your result | My office, {time}. Before your shift. Clock in on the way if you like.
+== pb.result.notice
+- Your Tier 2 result: {time}, the Chief's office, Works bay. Before your shift.
+== pb.promo.summons
+- Chief Calder: My office, 08:15. Your result. — C.
+// her words by Mail if you never came to her office (promo.mail's switch-on twin)
+== mail.pb.promo
+- Your result | You weren't about, so you'll read it instead. You passed. As of today you're an Officer: Technician, Tier 2. Your badge is on my desk. The Captain pins your pip this afternoon, observation room. Clean uniform. Ten minutes early.
+
+// E: the pip, the same day (the Captain's Mail after the result; the invite; the notice 30 minutes before)
+== mail.pb.captain
+- Congratulations | Chief Calder tells me you've passed. I'd like to pin your pip myself: this afternoon, in the observation room on Deck 1. Bring one honest answer: what should an officer never forget? I'll ask.
+== mail.pb.invite
+- Your pip, {time} | Today at {time}, the observation room, Deck 1. The Captain pins your pip. Clean uniform. It takes ten minutes. There will be tea.
+== pb.pip.notice
+- The Captain pins your pip at {time}: the observation room, Deck 1. Go now.
+== pb.pip.say
+- It's nearly time. Up to Deck 1. Don't keep the Captain waiting.
+
+// F: your cabin after dinner. The notice as she sets off to find you ({name}: Calder, or Vance), and her word when she reaches you
+== pb.move.notice
+- Your cabin, 4-23: {name} is coming to find you and take you there.
+== pb.walk.met
+- There you are. Your cabin, then. With me.
+// Calder's Mail at 17:00
+== mail.pb.cabin
+- Your cabin | After dinner I'll walk you to 4-23. Eat first. Your things are on their way.

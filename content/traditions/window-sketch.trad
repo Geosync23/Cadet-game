@@ -1,0 +1,44 @@
+@tradition window-sketch
+// SW2, 0.92.6 item 7(a), week 7 (FX17's shape: Saturday 11:45, a quiet room: the observatory, not the bridge deck).
+// Window sketching: every 8 weeks from Day 48. Paper and pencils at the observatory windows; everyone draws what's
+// outside (Tavessa ahead, the dust, the hull). Luca Alvarez hosts (Survey; off Saturdays; takes his Gerald to the
+// observatory). Theo Teague, who drew comics, left on Day 21 (CS1). Quiet: anim read.
+// FROM DAY 104 (lead 36, FX17): Alvarez leaves on the Day 77 rotation, so from Day 104 the host is Lumi Achebe
+// (achebe-lumi: Survey cadet, arrives in his place; off Saturdays; shy, tidy; likes the stars and has never seen a
+// nebula; no pronouns in the roster, so the lines use the name). FX17: host, from, who's "always" and the invite
+// switch to achebe-lumi from Day 104; Lumi's invite line is the commented one below. The texts use {host}, so both fit.
+// invite (from Day 104): host=achebe-lumi odds=25% line="Um. Window sketching, at the observatory? I've got spare pencils. If you'd like."
+k: 714
+title: Window sketching
+when: every 8 weeks saturday week 7 from day 43
+at: 11:45-12:30
+min: 20
+where: 2 room Observatory: common-room
+where: 2 room Science corridor: bench
+hold: 1
+who: alvarez-luca always, stargazer 50%, window-seat 40%, quiet-corner 30%, everyone 8%
+anim: read
+host: alvarez-luca
+from: alvarez-luca
+invite: host=alvarez-luca odds=25% line="Window sketching at the observatory! Bring nothing. I've got pencils. And Gerald."
+
+== mail
+- Window sketching tomorrow, {time}, at the observatory. Paper and pencils provided. Draw what's out there. Nobody has to be good at it.
+
+== ask
+- Window sketching at the observatory this morning. {host} brings the pencils.
+- Sketching later. I can't draw. That's allowed, apparently.   #funny
+
+== here
+- Shh. I'm doing the stars. All of them.   #funny
+- That's Tavessa. The smudge. My smudge is better.   #funny
+- Can I borrow the grey pencil?
+- Pencils are on the sill. Draw anything. Badly is fine.
+
+== thanks
+- You take a pencil and a sheet of paper to the observatory window. Everyone draws what's out there, quietly.   #warm
+
+== chatter
+- I drew Tavessa at window sketching. It looks like a sneeze.   #funny
+- {host} put everyone's sketch up on the wall after. Mine too.   #warm
+- Window sketching. The quietest hour I've had all week.

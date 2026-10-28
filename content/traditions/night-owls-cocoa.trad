@@ -1,0 +1,43 @@
+@tradition night-owls-cocoa
+// Night owls' cocoa (FX14, 0.92.5 item 16; SW1's pitch): Saturday late, after film night and the observatory, Davi Keane
+// makes a big pot of cocoa in the bow lounge with the lights down low. Behind WEEKEND_ON.
+// Host Kofi Mensah since FX9 (lead 34, 2026-10-24: Keane goes to bed at 22:46, too early to host; he stays a regular).
+k: 463
+title: Night owls' cocoa
+// (the user, 2026-10-25: spread across weeks, two new a weekend; was: weekly saturday)
+when: every 4 weeks saturday week 4 from day 1
+at: 22:30-23:30
+min: 20
+// (DS1, RV14: a full room had you standing beside the leader; a seated weekend join keeps a seat for you)
+spare: 1
+jitter: 15
+where: 3 room Bow lounge: lounge-seat, bench
+hold: 1
+who: mensah always, keane-davi always, night-owl 80%, late-sleeper 50%, stargazer 30%, everyone 8%
+anim: drink
+host: mensah
+ties: decor cocoaPot
+from: mensah
+
+== mail
+- Night owls' cocoa tomorrow from {time}, the bow lounge. Lights low, cocoa sweet. I'll pour. Pyjamas welcome, and so are bad jokes.
+
+== ask
+- Night owls' cocoa after film night. Mensah makes it far too sweet. It's perfect.   #funny
+- Not ready for bed? Bow lounge, half ten. Cocoa and the stars.
+- Mensah's pouring cocoa tonight. Go for the cocoa, stay for the stories.   #funny
+
+== here
+- Shh. Low voices. It's nearly midnight.
+- Another mug? Go on, then. It's Saturday.   #warm
+- Look at the windows. You never see them like this in the day.
+- Mensah's telling the one about the airlock again. Still funny.   #funny
+- Keane's on his third mug. It's his morning, really.   #funny
+
+== thanks
+- You curl up in the bow lounge with a mug. The lamps are low, the stars fill the curved windows, and Kofi Mensah keeps the cocoa coming and the stories going.
+
+== chatter
+- Stayed for night owls' cocoa. Slept like a stone. Recommended.   #funny
+- Mensah's cocoa is mostly sugar. Nobody's complained yet.   #funny
+- The late hour in the bow lounge is worth staying up for.   #warm

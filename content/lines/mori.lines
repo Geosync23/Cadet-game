@@ -112,3 +112,26 @@
 - The charts office is very tidy. Too tidy. I've taped a star chart over my nameplate again.
 ? tier>=friend
 - I named a tiny rock on the last survey. After the Wren's tea corner. That's all I'll say.
+
+// ---- Pillar 5 Step 4 (head writer W2): star logging (24t, E3). Every third log. Kind 'cue', flag stars.talk.
+== cue
+? flag:stars.talk
+- I saw your logs. They're very tidy. Thank you.
+- Three more points. The charts are a bit fuller because of you.   #warm
+? flag:stars.paid
+- The array uses your logs now. I checked them twice. They're right.
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-5): the sensor array, her words while you calibrate (flags train.m20.follow.*)
+// and the friendship moment when your readings first feed Survey's charts (flag m20.survey)
+== work
+? flag:train.m20.follow.pick
+- Pick one. Any of them. Well, not any. One of those three.
+? flag:train.m20.follow.turn
+- Small turns. Smaller. Oh, that's tidy.
+? flag:train.m20.follow.module
+- The amber one. Gently. They're older than they look.
+? flag:train.m20.follow.done
+- It agrees. The array agrees. Thank you. That's lovely.   #warm
+? flag:m20.survey
+- Your sweep's on the chart. Look. That line is yours.   #warm
+- I put your name in the margin. Small. Sato won't notice.   #funny

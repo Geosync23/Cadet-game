@@ -121,3 +121,18 @@
 - Early finish. Rest up, if that's what it is.
 ? tier>=friend
 - Off early? Find me at dinner if you want company.   #warm
+
+== clock.remind.in
+// CK1, playtest patch 1 note 20: a Works crew member near you, when your shift's on and you haven't clocked in
+- Clocked in yet? The clock's past the tool wall, by the tea corner.
+- Don't forget the clock, {nick}. Your card's the one in pencil.
+- Clock first, then the board. The Chief reads the cards.
+- You'll want to clock in. Tea corner end of the bay.
+- Card in the clock, {nick}. Then we'll find you a job.
+
+== clock.remind.out
+// CK1, note 20: your shift's over and you haven't clocked out
+- Clock out before you go, {nick}. The clock's by the tea corner.
+- Shift's done. Clock out, or your card says you're still here.   #funny
+- Don't walk off without clocking out. I did once. Once.   #funny
+- Card, then dinner. Clock out on your way past.

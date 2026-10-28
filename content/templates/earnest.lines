@@ -1,0 +1,44 @@
+@template earnest
+// ZW1 (writer), patch 0.92.3 item 26: crew comment when you wear dirty clothes. clothes.remark: yesterday's clothes
+// (flag:clothes.stale); clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3). Bubbles, 60 characters or fewer.
+// Kind, never mean: the joke is on the clothes, not on you.
+== clothes.remark
+? flag:clothes.stale
+- I think that's yesterday's shirt? Sorry. Just saying.
+- I wore mine twice once. Nobody minded. Much.   #funny
+? flag:clothes.stale tier>=friend
+- If you're short of clean ones, the laundry's easy. Honest.   #warm
+== clothes.grubby
+? flag:clothes.grubby
+- Oh, you've got grime on you. Quite a lot, actually.
+- Hard job? It looks like a hard job. On your sleeves.   #funny
+? flag:clothes.grubby tier>=friend
+- You should change. Not that you look bad. Just oily.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 5: more lines for the chat card's opener (greet, near), so a tap doesn't repeat.
+// Heard after a person's own lines are used up (FX13's no-repeat). {hi}, {nick} and {me} are the speaker's own words.
+== greet
+- Oh, hello! I'm glad it's you. Really.
+- {hi}! How are you? Properly, I mean.
+- {hi}, {nick}. I was hoping I'd see you today.
+- Hello! Sorry, was I in the way? I think I was.
+- {hi}. Can I ask you something? Later, maybe.
+- {hi}! I'm doing my best today. You?
+- Oh, hi. I've been meaning to say hello. Hello.
+- {hi}. I learned something new today. Two things.
+? tier>=acquaintance
+- {hi}, {nick}! You're one of the people I trust here.
+- {hi}. Thanks for last time. I don't think I said.
+? time:morning
+- Good morning! I'm trying to be a morning person.
+? time:evening
+- Evening! Did today go well for you? I hope so.
+== near
+- I'm trying to get this right. Is it right? I think so.
+- {room}. I've nearly got the hang of this place.
+- Sorry, one second. I don't want to lose my place.
+- I'm being careful. Being careful takes ages.
+- Can you watch? Tell me if I do it wrong.
+- I've done this three times. Fourth time's lucky.
+- It's harder than it looks. Everything is.
+- Almost done! Then I can talk properly.

@@ -1,0 +1,17 @@
+@meeting endingTell.unsure.slow
+// SW6 (ending writer A), NOT SURE YET on a SLOWER CAREER (the offer came after the crossing back, so there's no
+// address at the Line to settle it): she gives you until Sunday evening and will come and ask (endingAsk.slow).
+// Sets end.now.unsure (EN1). Replaces endingTell.unsure on that path.
+title: The Captain
+from: Captain Odile Marrow
+gist: You told the Captain you're not sure yet. She'll come and ask you on Sunday evening.
+== lines
+marrow: You've come about the letter. Go on. I'm listening.   [listen]
+marrow > you: Not sure yet. That's honest. I'd rather have honest than quick.   [nod]
+marrow: Then you have until Sunday evening. I'll come and find you, and you can tell me then. Stay or go.
+? choice
+* What if I still don't know?   flavour:listen
+  marrow: You'll know more than you do now. That's usually enough. It was for me.   [nod]
+* What would you do?   flavour:share
+  marrow: I was offered a desk once. I said no. I've never been sorry. That's me, though. Not you.
+marrow: Talk to people. Zeke. Your friends. Your family. Then tell me. Carry on, {me}.

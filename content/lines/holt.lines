@@ -434,3 +434,108 @@
 - Something on. Doors open. Watch posted.
 ? trad:hull-lights
 - Hm. Lights. Good.
+
+// W3, rec deck R12: Paddle club and the regatta horn; the float room "is not a toy" (he's been in it twice this week)
+== chat
+- The float room is not a toy.
+- Paddle club. Wednesdays, half six. Bring a helmet. Wear it.
+- A kayak teaches you to watch the water. The water always tells you first.
+? tier>=friend
+- Hm. I may have been in the float room. Twice. For my back. Not a word.   #funny
+? weekday:sun time:morning
+- Regatta mornings, I start the heats. One horn. Nobody goes before it. Nobody.
+== smalltalk
+- Helmets on. All of you.
+- The float room is not a toy.   #funny
+
+== disc.charged
+- Brace.
+- Hm. Charged.
+== disc.curve
+- Watch the disc, not me.
+- It turns. Learn that.
+== disc.point
+- Steady.
+- Hm.
+- Straight and simple.
+== disc.win
+- Good game, Cadet.
+- Adequate effort. Again sometime.
+== disc.lose
+- Hm. Well played.
+- Adequate. More than.   #warm
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Sit. This is {title}. It's a true story. Hm.
+== talk.answer
+- Hm. Fair question. The answer is: procedure. And luck.
+== talk.listen
+- Right. That's all. Off with you. Safely.
+
+// ---- SW3, 2026-10-24 (patch 0.92.3 item 15): his own Talk a while card frames, in place of the shared ones.
+== talk.start
+- Hm. Fine. Five minutes. Talk.
+- Right. Sit, if you're sitting. I'll stand. No. I'll sit.   #funny
+- Hm. You. Go on, then. I'm listening.
+? tier>=friend
+- {nick}. Good. Sit. Long day. Talk to me.   #warm
+- Hm. Was hoping you'd turn up. Don't spread it about.   #warm
+?
+
+== talk.sit
+- Take the chair by the wall. I'll have the one by the door.
+- Sit. Back to something solid. Habit.
+- Not there. That's Mensah's. He'd never let me hear the end of it.   #funny
+
+== talk.filler
+- Hm. Quiet. Good.
+- Door's shut properly. Good. Go on.
+- Deck's quiet. That's how I like it.
+- Mensah would've told a joke by now. I'm not going to.   #funny
+- Hm. You're all right to talk to. Don't let it go to your head.   #warm
+- Footsteps. That's Rina, walking quick. Late for something.
+
+== talk.end
+- Right. That'll do. Adequate chat.   #funny
+- Hm. Good talk. That's twice this week. Don't let it get about.   #funny
+- Right. Rounds. You've been useful. Hm.
+- That helped. Won't say how. It did.   #warm
+- Done. Go and eat something. Then sleep. In that order.
+
+== talk.stop
+- Hm. Leave it there. Pick it up later.
+- Right. Another time. I'll be on rounds. You'll find me.
+- Hm. Off you go, then. We'll finish it.
+
+== talk.go.shift
+- Watch office. On in five. Walk with me or don't.
+- Shift. Can't stop. Find me on rounds.
+
+== talk.go.bed
+- Bed. Early start. Five o'clock rounds don't walk themselves.
+- Hm. Done in. Bed. Tomorrow.
+
+== talk.go.trad
+- {trad}. I'm on the door. Coming?
+- {trad}'s starting. Someone's got to watch the door. Me.   #funny
+// ---- ZW1 (writer), patch 0.92.3 item 26: you in dirty clothes. clothes.remark: yesterday's clothes (flag:clothes.stale);
+// clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3's hook). Bubbles, 60 characters or fewer; kind, never mean.
+== clothes.remark
+? flag:clothes.stale
+- Hm. Yesterday's uniform. Not adequate.
+- Clean uniform tomorrow, cadet. I'll notice.
+== clothes.grubby
+? flag:clothes.grubby
+- Hm. Filthy. Change before you walk my decks.
+- That uniform needs a wash. So do you.
+
+// ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
+== bday.circle
+- Hm. Happy birthday, {other}. Adequate cake.   #funny
+- Happy birthday. Don't make it a habit.   #funny
+== bday.circle.you
+- Hm. Happy birthday, {me}. Carry on.   #warm
+== bday.thanks
+- Hm. Thank you. Don't tell anyone I smiled.   #funny
+- Thank you. All of you. That'll do.   #warm

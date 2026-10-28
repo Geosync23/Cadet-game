@@ -110,3 +110,77 @@
 - The station has a lab and a window. The tea here is weak. I've brought my own. Obviously.
 ? tier>=friend
 - Found a good rock today. Labelled it in my own hand. Thought of the Wren's specimen store.
+
+// ---- Pillar 5 Step 4 (head writer W2): star logging (24t, E3). Every third log; and Day 19 (the sensor array),
+// your logging paid off. Kind 'cue', flags stars.talk / stars.paid.
+== cue
+? flag:stars.talk
+- You've been logging! Three new points. Do you know what that's worth?
+- Your logs are good. Neat. Better than mine, frankly.   #funny
+? flag:stars.paid
+- Your star logs helped calibrate the array. Your name's on the report.   #warm
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Right. You all saw it. Tonight: {title}. Don't pretend you were eating.
+== talk.answer
+- Good question. Write it down. Then write the answer down. That's Survey.
+== talk.listen
+- No questions? Then tea. Survey's tea. Nobody else will drink it.
+
+// ---- SW2, patch 0.92.3 item 15: her own Talk a while card frames (FX13: main characters skip the shared ones)
+== talk.start
+- Yes. Good. Talk. I was halfway through a thought. It'll keep.
+- Oh, good. Someone to explain things to. Sit. This might take a while.   #funny
+- Fine. Ten minutes. The array can wait. The array always waits.
+? tier>=friend
+- Ah. You. Good. I've been saving a question for you. I've lost it. Sit anyway.   #warm
+- Oh, good, it's you. You ask the right wrong questions. Go on.   #warm
+?
+
+== talk.sit
+- Sit. Move the notebooks. Gently. They're in an order. Mine.
+- There's a chair under those samples. Probably. Yes. Sit.   #funny
+- Sit down. Tea? No? Nobody ever does. Sit anyway.   #funny
+
+== talk.filler
+- Mm. Sorry. I was thinking about dust. Carry on. I'm listening. Mostly.   #funny
+- The sky's doing nothing at all tonight. Lovely. Honest work.
+- Where was I? No. Where were you? You were saying something. Good.   #funny
+- Interesting. No, not you. That label. Never mind. You too, though.   #funny
+- I like this. Thinking out loud with someone. It's faster.
+- Mm. Mori would say I've stopped listening. I haven't. Not quite.   #funny
+
+== talk.end
+- Good. That was useful. I'll think about it at three in the morning.   #funny
+- Right. Back to it. Thank you. That helped. I'm not sure how. Yet.
+- Good talk. I've forgotten half of it already. The good half stays.   #funny
+- That was nice. Don't tell Mori I said nice. She'll write it down.   #funny
+- Off you go. Come and argue with me again soon. You're good at it.   #warm
+
+== talk.stop
+- Fine. Go. I'll finish the thought on my own. Badly.   #funny
+- Yes, yes. Later. I'll remember. I won't. Remind me.   #funny
+- Off you go. Mind the labels on your way out.
+
+== talk.go.shift
+- The array. Sorry. It's pinging. It's always pinging when I'm talking.
+- Back to the lab. Mori's giving me the look. You can't see it. I can.   #funny
+
+== talk.go.bed
+- Bed. Mori's orders. I'm obeying. Tonight. Don't spread it about.   #funny
+- I'm tired. I'm smiling at things. That's my sign. Goodnight.
+
+== talk.go.trad
+- {trad}'s starting. Come up. Bring questions. Good ones. Bad ones too.
+- Sorry. {trad}. I said I'd be there. I'm only a little late. Yet.   #funny
+
+// ---- ZW1 (writer), patch 0.92.5 item 5: more chat-card openers, so a tap doesn't repeat (FX13's no-repeat).
+== greet
+? tier>=acquaintance
+- Oh, good. {me}. Tea? Fine. Just checking. I'll ask again.   #funny
+- {me}. I had a thought about the third comet. It still doesn't count.   #funny
+- Ah. You. Don't touch the labels. I know you wouldn't. Hello.   #funny
+- {hi}. Survey's found something. Possibly. Probably nothing. Exciting.
+- {me}! Good. I needed someone to say "really?" at the right moment.   #funny
+- Hello. Mid-thought. Hold on. Gone. Hello, {me}.   #funny

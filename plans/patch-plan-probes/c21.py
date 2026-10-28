@@ -1,0 +1,16 @@
+from pp import *
+g = start('?nosave&debug')
+g.step(5)
+# 10:00 Day 1 on Deck 3 by the crew store: Esposito on duty
+g.ev("(() => { skipTo(600); goToDeck(3); player.obj.position.copy(cellPos(33, 15)); target.copy(player.obj.position).setY(.7); return 1; })()")
+g.secs(3)
+print(g.ev("DECK_CREW.filter(a => /store/.test(a.goalId || '') || a.p.dept === 'store').map(a => [a.p.id, a.goalId, a.settled, cellAt(a.x, a.z)])"))
+print(g.ev("(() => { const a = DECK_CREW.find(a => a.p.id === 'esposito-yara'); if (!a) return 'no'; a.talking = 6; return chatOpen(a.p); })()"))
+g.secs(1)
+print(g.ev("document.getElementById('chat').innerText"))
+g.snap('21-tap-crew-card')
+g.ev("chatClose()")
+g.ev("openLiftPanel()"); g.step(3)
+print(g.ev("document.getElementById('liftList').innerText"))
+g.snap('25-lift-panel')
+g.close()

@@ -1,0 +1,12 @@
+@bank all
+// Playtest 2 (item 14, head writer W2): anyone near the beam, not only Works, after your name goes up (seat X plays
+// beam.congrats from everyone close by). Bubbles, 60 characters. The Works crew have their own in beam.lines.
+== beam.congrats
+- Welcome aboard, {me}. Properly, now.   #warm
+- There it is! Your name on the Wren.
+- Nice letters. That'll be there for years.
+- Welcome to the ship. We're glad you came.   #warm
+- Ha! You'll walk past that every day now.   #funny
+- Good to have you, {me}.
+- A cheer for the new name! Hooray!   #funny
+- That's you, then. One of the Wren.   #warm

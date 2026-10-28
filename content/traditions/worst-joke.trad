@@ -1,0 +1,41 @@
+@tradition worst-joke
+// SW2, 0.92.6 item 7(a), week 12 (FX17's shape: Thursday 17:15, a big laugh, 20+ people). Worst joke night: every 8
+// weeks from Day 81, in the mess before dinner gets busy. Everyone tells their worst joke; Chief Holt judges by not
+// laughing, and the loudest groan wins. Kofi Mensah (the only one who can make Holt laugh) has a go if he's free.
+// Holt hosts. Ends 18:00, so it's clear of postcard night and the Wren talk later.
+k: 719
+title: Worst joke night
+when: every 8 weeks thursday week 4 from day 78
+at: 17:15-18:00
+min: 20
+where: 3 room Mess hall: mess-seat
+where: 3 room Bow lounge: lounge-seat
+hold: none
+who: holt always, mensah always, halloran-emeka 80%, juniors 40%, watch 40%, everyone 25%
+anim: talk
+host: holt
+from: The Watch
+invite: host=holt odds=20% line="Hm. Worst joke night, the mess. Bring a bad one. I won't laugh."
+
+== mail
+- Worst joke night tomorrow, {time}, in the mess. Bring your worst joke. Chief Holt judges. The loudest groan wins. He has never laughed. Yet.
+
+== ask
+- Worst joke night later. I've got a terrible one. Truly terrible.   #funny
+- Coming to worst joke night? Holt judges. He doesn't laugh. That's the point.   #funny
+- Bring a joke to the mess later. The worse the better.
+
+== here
+- Why did the spanner blush? It saw the bolt undone. Sorry.   #funny
+- Oh, that was awful. Do another.   #funny
+- He's smiling. Is Holt smiling? No. False alarm.   #funny
+- The groans in here. Brilliant.
+
+== thanks
+- The mess fills up for worst joke night. Joke after joke lands with a groan, and Chief Holt sits at the front, not laughing. Nearly.   #funny
+
+== chatter
+- Worst joke night was the loudest the mess has ever been.   #funny
+- Holt nearly laughed at worst joke night. Nearly. Mensah swears he saw it.   #funny
+- I told the airlock joke. Everyone groaned. I've never been prouder.   #funny
+- Halloran brought the book to worst joke night. Holt didn't stand a chance.   #funny

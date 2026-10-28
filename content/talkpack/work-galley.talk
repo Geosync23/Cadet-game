@@ -1,0 +1,101 @@
+@talks work:galley
+// TW1, the Talk a while work pools: Galley (plans/work-pools-plan.html, decided 2026-10-20). Ids work.galley.<slug>;
+// topic always "work". Brennan has her own talks and skips these. Bartenders: madsen-ivo, haddad-tamsin (leaves day
+// 203); they skip the dinner-rush talk. Dlamini covers for Brennan Fri-Sat. Cadet: sorensen-agnes.
+// Notgood (Walsh, Dlamini), exams (Haddad): no doubt or exam talk.
+
+== rush
+when: tier>=acquaintance !who:brennan|madsen-ivo
+them: Dinner rush: seventy-five people in three hours. You stop being a person. You're hands.
+them: Then it's over, you sit on an upturned crate, and it's the best seat on the ship.   #warm
+ask: When in your day do you finally get to sit down?
+listen: Do you ever get to eat hot?
+  them: Never. Cold dinner, standing up, half eight. Wouldn't change it. Mostly.   #funny
+share: After my shift. The first chair I find.
+  them: The first chair's always the best one. That's science.   #funny
+cheer: I don't. I just lean on things.
+  them: Leaning's sitting for people with jobs. You'll do.   #funny
+
+== onions
+when: tier>=acquaintance !who:brennan|madsen-ivo|varga-tariq|dlamini-lukas
+them: I chopped forty onions this morning. My eyes have given up crying. They've seen too much.
+them: There's a count, you know. Who's chopped the most this season. It's very serious.   #funny
+ask: Is there a bit of your job that's just repetition?
+listen: Who's winning the onion count?
+  them: Varga, by three. Dlamini says it's rigged. It's not. Varga's just fast.   #funny
+share: Scrubbers. Same steps every time.
+  them: Then you know. Same steps, every time, and one day you're fast without trying.
+cheer: Walking to work. Very repetitive.
+  them: Ha. The commute's the same here too. One lift.   #funny
+
+== bar-stories
+when: tier>=acquaintance who:madsen-ivo|haddad-tamsin
+them: Behind the bar you hear everything. Not on purpose. People just tell a bartender.
+them: I never repeat a word. That's the job. Pour the drink, keep the secret.   #warm
+ask: Who do you tell things to, aboard?
+listen: What's the oddest thing anyone's told you?
+  them: Can't say. Bar rules. But it involved a cactus and a love of opera.   #funny
+share: My bunkmates. And now you.
+  them: Good. Everyone needs someone. I'm glad you've got a few.   #warm
+cheer: The lift. It's a great listener.
+  them: The lift's very discreet. Bartender-level discreet.   #funny
+
+== six-trays
+when: tier>=colleague who:madsen-ivo|walsh-esme|varga-tariq|dlamini-lukas
+them: I can carry six trays at once. It took a year and a lot of broken cups.
+them: Now I do it without thinking. Brennan says it's the only show-off she allows.   #funny
+ask: What's a skill you've got that once seemed impossible?
+listen: How many cups broke?
+  them: Thirty-one. Brennan kept count. She keeps count of everything.   #funny
+share: Stripping a scrubber in one go.
+  them: Then you know the feeling. Impossible, then hard, then just Tuesday.
+cheer: Eating while walking. Perfectly.
+  them: A galley skill too. We could hire you.   #funny
+
+== learned-by-ear
+when: tier>=colleague !who:brennan|sorensen-agnes
+them: Brennan cooks by ear. She taught me to listen to a pan. I thought she was joking.
+them: Now I hear "done" from across the galley. It's a hiss that goes quiet. You'll laugh.   #funny
+ask: Who taught you to do something by feel, not by the book?
+listen: What does "nearly done" sound like?
+  them: Busier. Then a click, a sort of sigh. Then you take it off.
+share: Someone at home. Fixing things by ear.
+  them: Same school, different pan. Everyone good learns that way eventually.   #warm
+cheer: Nobody. I use the timer.
+  them: Brennan would take the timer off you. Gently. Then firmly.   #funny
+
+== again
+when: tier>=friend !who:brennan|walsh-esme|dlamini-lukas
+them: My first month, I burnt a whole tray of the Sunday bread. Brennan's bread.
+them: She didn't shout. She handed me the flour and said "Again." We were there till midnight.   #warm
+ask: Who taught you the thing you're proudest of?
+listen: What did she say after?
+  them: Nothing. Next Sunday she let me take it out of the oven. That said everything.   #warm
+share: Someone who stayed late to help me.
+  them: Those are the ones you remember. Not the hard bit. The staying.   #warm
+cheer: Nobody. I'm self-taught. Badly.
+  them: Self-taught still counts. Brennan would say so too.   #warm
+
+== feed-people
+when: tier>=friend !who:brennan
+them: Know what this job means to me? Every person on this ship eats today. Every single one.
+them: Doesn't matter what kind of day they've had. There's a hot plate. That's us.   #warm
+ask: What's the simplest good thing your work gives people?
+listen: Does anyone ever skip dinner?
+  them: Sometimes. Then there's a covered plate on the grab shelf with their name on it. Always.   #warm
+share: Hot water. Nobody thinks about it.
+  them: Hot water, hot dinner. Nobody thinks about either. Everybody's glad.   #warm
+cheer: Working lamps. Very bright work.
+  them: Ha. Bright work. We'll put that on a sign.   #funny
+
+== galley-habit
+when: tier>=friend !who:brennan
+them: The galley gave me a habit. I can't eat anywhere without checking how they cut the onions.
+them: On leave at a café I sent a note to the kitchen. A nice one. They were confused.   #funny
+ask: What does your job make you notice that nobody else would?
+listen: What did the note say?
+  them: "Lovely onions. Very even. Well done." I stand by it.   #funny
+share: Every machine that's slightly off.
+  them: Ha. Then we'd be awful together on leave. Noticing everything.   #funny
+cheer: Which knife is sharpest.
+  them: That's not a habit. That's survival. Respect.   #funny

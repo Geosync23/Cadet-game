@@ -1,0 +1,37 @@
+@tradition garden-walk
+// SW2, 0.92.6 item 7(a), week 9 (FX17's shape: Sunday morning, the garden or the promenade). Garden walk: every 8 weeks
+// from Day 63, after Slow stretch (08:00-08:45); 09:15 since RV14 (FX17: the host was still at breakfast at 08:45). Tove Cruz (they/them) leads a slow walk round the garden and names
+// every bed by the week it was sown; you may pick one leaf to taste. Cruz hosts.
+k: 716
+title: Garden walk
+when: every 8 weeks sunday week 1 from day 57
+at: 09:15-10:00
+min: 20
+where: 3 pool garden
+where: 3 room Promenade: bench
+hold: none
+who: cruz-tove always, gardener 70%, garden-lover 60%, early-riser 30%, everyone 8%
+anim: talk
+host: cruz-tove
+from: cruz-tove
+invite: host=cruz-tove odds=25% line="Garden walk. Sunday, early. I'll show you the week-nine beans. They're lovely."
+
+== mail
+- Garden walk tomorrow, {time}. A slow lap of the garden, every bed and the week it was sown. One leaf each to taste. Not the chillies.
+
+== ask
+- Garden walk this morning. Cruz knows every plant by its week.
+- Coming on the garden walk? Bring your slow feet.   #funny
+
+== here
+- That's a week-four lettuce, apparently. Lovely age.
+- Don't touch the chillies. Just don't.   #funny
+- Smell the basil. Go on.
+
+== thanks
+- Cruz leads a slow walk round the garden, naming every bed by the week it was sown. You get one leaf to taste.   #warm
+
+== chatter
+- Cruz knew the week every bed was sown. Every one.
+- Garden walk this morning. I tasted a leaf. I'm a changed person.   #funny
+- Nicest way to start a Sunday, that walk.   #warm

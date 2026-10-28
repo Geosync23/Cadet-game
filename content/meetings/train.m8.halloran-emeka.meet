@@ -1,0 +1,20 @@
+@meeting train.m8.halloran-emeka
+// Pillar 5 Step 3, M8 team jobs (Day 11, Thursday, 09:30): the main version. Emeka Halloran (Works systems officer,
+// he/him) at the recycler on Deck 3, a team of four; Torres is off on Thursdays. He gives each a spot; yours is the
+// housing brace: brace, pass the cartridge, brace again. Seat M2 plays it. Head writer W2.
+title: Recycler membrane change
+from: Emeka Halloran
+gist: Emeka showed you team jobs: be at your spot, wait for the call, do your part. Brace, pass, brace.
+== lines
+halloran-emeka: Morning, morning. Four of us, one recycler. Lovely.   [gesture]
+halloran-emeka > you: You're the housing brace. That side. Feet wide.
+halloran-emeka: I call each step. When I say your name, it's your turn. Not before.
+halloran-emeka: Brace. Then pass me the new cartridge from the crate. Then brace again while it seats.
+halloran-emeka: Everyone else knows their bit. Nobody rushes. Recyclers bite fingers.
+? choice
+* What if I get it wrong?   rel:halloran-emeka+2 flavour:listen
+  halloran-emeka: Then we do it again. That's why there are four of us.   [nod]
+* Feet wide. Got it.   rel:halloran-emeka+1 flavour:practical
+  halloran-emeka: Wider. There. Lovely.   [laugh]
+* (Take your spot)
+  halloran-emeka: Good. Right, everyone. On my call.

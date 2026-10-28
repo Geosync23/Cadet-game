@@ -1,0 +1,18 @@
+@meeting endingTell.go
+// SW6 (ending writer A), your answer: GO. As endingTell.stay. Sets end.now.go (EN1), and the kept copy is made the
+// If you'd said Stay before, play endingTell.change.go instead. The user (2026-10-26): no way back from the end page,
+// so the Captain says plainly that Monday's Tern is final.
+title: The Captain
+from: Captain Odile Marrow
+gist: You told the Captain you're taking the post at headquarters. The Tern leaves Monday, the day after the crossing back.
+== lines
+marrow: You've come about the letter. Go on. I'm listening.   [listen]
+marrow > you: Going. Then we'll make it a proper send-off.   [nod]
+marrow > you: Be sure, though. You can change your mind until Sunday. Once the Tern's away on Monday, it's done.   [listen]
+marrow: I'll write to headquarters tonight. They'll be very pleased with themselves. Let them be.
+? choice
+* Was it the right answer?   flavour:listen
+  marrow: It was your answer. That's the only kind that's right. You'll be very good there.   [nod]
+* I'll miss the Wren.   flavour:share
+  marrow: Good. You should. She'll miss you. So will I, and I'm not supposed to say so.   [sigh]
+marrow: On Sunday I tell the crew. Either way, I'm proud of you. Carry on, {me}.

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Work Pools Plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul,ol{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+b{color:#eef6f4}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:8px 0}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:#bdeee6;font-weight:600}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13.5px;margin:8px 0}
+.flow span{border:1px solid var(--line);border-radius:999px;padding:4px 10px;background:var(--chip)}
+.flow span.new{border-color:var(--gold);background:rgba(233,196,106,.15)}
+.flow i{color:var(--muted);font-style:normal}
+.talk{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(0,0,0,.18);font-size:13.5px}
+.talk .id{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;color:var(--muted)}
+.talk .them{margin:4px 0;color:#e8eef0}
+.talk .ask{margin:6px 0;color:#ffe08a}
+.talk .rep{margin:6px 0 0;padding-left:10px;border-left:2px solid var(--teal)}
+.talk .rep b{display:inline;color:#6ff0dc;font-size:12px;letter-spacing:.04em;margin-right:4px}
+.talk .ans{color:#cfd9dc;margin:2px 0 0 0}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:rgba(255,255,255,.06);border-radius:4px;padding:0 4px;word-break:break-word}
+.q{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:10px 0;background:rgba(255,255,255,.025)}
+.q p{margin:0 0 6px}
+.q label{display:block;font-size:14px;color:#d6e0e3;margin:5px 0;padding-left:26px;text-indent:-26px}
+.q input[type=radio]{width:18px;height:18px;margin:0 8px 0 0;vertical-align:-3px;accent-color:var(--teal)}
+.rec{font-size:11.5px;color:#14202a;background:var(--teal);border-radius:999px;padding:1px 7px;margin-left:4px;text-indent:0}
+textarea{width:100%;min-height:64px;margin-top:6px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--ink);font:inherit;font-size:14px;padding:8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Talk a while: work pools <span class="draft">Decided 2026-10-20</span></h1>
+  <div class="sub">TW1, the Talk a while writer, for the user and lead 20; reviewed by TR1 and its fixes folded in. Your ask: a pool of talks for each type of work aboard, so people can talk about something a little more personal. <b>This is in addition:</b> the 160 talks already written (the shared pool, the 15 people's own talks, the small talk), with your 20 October decision and TR1's fixes, stay exactly as they are. Nothing is written or built yet beyond the samples here.</div>
+</header>
+<nav><div>
+  <a href="#idea">The idea</a><a href="#pools">The pools</a><a href="#personal">More personal</a><a href="#order">Picking order</a><a href="#size">Size and time</a><a href="#engineer">For the engineer</a><a href="#samples">Samples</a><a href="#decided">Decided</a>
+</div></nav>
+<main>
+
+<section id="idea">
+<h2>The idea in one minute</h2>
+<ul>
+  <li>Everyone aboard has a job. A <b>work pool</b> is a set of talks only people in that job can have: the Watch talk about rounds and doors, the galley about the dinner rush, Survey about samples and the sky.</li>
+  <li>They're <b>more personal</b> than the shared pool: what the job is really like, why they chose it, who taught them, what it means to them, who they do it for, a moment they're proud of. The warmer ones wait until you're friends.</li>
+  <li>Every talk keeps <b>the question</b>: they ask you something, you pick one of three replies (curious, about you, light), and they answer. Same as now.</li>
+  <li>Same rules as the rest of the pack: <b>no repeats</b>, people's own stories never told early, cozy and light, nothing romantic.</li>
+</ul>
+</section>
+
+<section id="pools">
+<h2>The pools: one per type of work</h2>
+<p>Taken from the game's own crew list: 86 crew in all, 74 aboard from Day 1 and 12 who arrive later in the year as others leave. Guests (the Envoy, visitors) have no work pool, and nor does anyone in the roster's "civilian" group (nobody is in it today): they get the shared pool only.</p>
+<div class="grid">
+  <div class="card"><b>Works · your department</b>Chief Calder, Works techs, systems officers, engine officers and techs (Torres, Pell, Kovac, Halloran...).<span class="meta">20 from Day 1 + 3 later. Talks to you as a workmate ("you'll know this one"). Engine-room talks for the engine crew: 6 at a time, 7 over the year (Keane leaves on day 161 as Kowal arrives).</span></div>
+  <div class="card"><b>Watch</b>Chief Holt, Mensah, Watch officers and ratings (Tomas...).<span class="meta">12 + 2. Five on nights from Day 1: rounds, doors, the airlocks.</span></div>
+  <div class="card"><b>Survey</b>Dr. Sato, Mori, Survey officers and assistants.<span class="meta">11 + 3. Many juniors ("carry samples and dream of naming a star").</span></div>
+  <div class="card"><b>Bridge</b>Helm (Raman, the helm officers and ratings) and command (the Captain, Vance, Kowalczyk, Zielinski).<span class="meta">9 + 1. Helm talks only for helm, command talks only for command. Command crew all have stories about the job itself, so their few talks stay on plain work (the log, the rota, the long night watch) at acquaintance and colleague.</span></div>
+  <div class="card"><b>Comms</b>Ferreira, Comms officers and ratings.<span class="meta">5 + 1. Messages, the relay, languages (Ferreira's Veyli).</span></div>
+  <div class="card"><b>Infirmary</b>Dr. Nandakumar, Dr. Yoon, the aides (Rina...), and Oduya the Counsellor.<span class="meta">6 + 1. Oduya is a counsellor, not a medic: talks about wounds and bones skip him; two or three "listening" talks suit him best, kept clear of grief.</span></div>
+  <div class="card"><b>Galley</b>Chef Brennan, the galley hands, the bartenders.<span class="meta">6 + 1. Bar talks for Madsen and Haddad; Haddad leaves on day 203, so for most of the year it's Madsen alone. Bartenders skip the dinner-rush talks.</span></div>
+  <div class="card"><b>Garden</b>Cruz, O'Neill, Hart.<span class="meta">3. Small pool, small team.</span></div>
+  <div class="card"><b>Store</b>Esposito (mornings), Ishikawa (afternoons).<span class="meta">2. Smallest; could join the Garden (question 3).</span></div>
+</div>
+<p class="note"><b>Rotating crew:</b> people who arrive later draw their pool from their first day; people who leave stop. Four arrivals are brand-new cadets (Works day 35, Survey day 77, Watch day 161, Galley day 203): talks with a past in the job ("who taught me", "my first month") skip them. A talk that names a crewmate skips that person, and everyone once that crewmate has left, as the shared pool already does. Your own talks with the 15 named crew come first, as now.</p>
+</section>
+
+<section id="personal">
+<h2>What makes them "a little more personal"</h2>
+<p>The shared pool is about the ship and the day. Work talks are about <b>them, through their job</b>, climbing with friendship:</p>
+<div class="grid">
+  <div class="card"><b>Acquaintance: the job up close</b>A day in the job, a favourite corner of it, a small gripe, what the work leaves on you (oil on your hands, a tune stuck in your head from the bar).<span class="meta">about 3 in 10 talks</span></div>
+  <div class="card"><b>Colleague: why this job</b>Why they chose it, who taught them, the part nobody sees, a skill they're proud of.<span class="meta">about 4 in 10</span></div>
+  <div class="card"><b>Friend: what it means</b>What the job means to them, who they do it for, a moment they're proud of, a habit it gave them that they can't switch off, what they'd teach you if you had a week.<span class="meta">about 3 in 10</span></div>
+</div>
+<ul>
+  <li><b>No stranger-tier work talks.</b> Strangers still get the shared pool.</li>
+  <li><b>Still cozy.</b> Nobody is bad at their job; serious lines stay rare and only behind friendship (the voice bible's rule).</li>
+  <li><b>Not the struggle stories.</b> "A mistake that still haunts me", "I'm not sure I'm good enough", "should I leave?", "I can't say no": those belong to the crew's own struggle stories (42 of the 86 crew have one, or a story arc). Work talks stay off them, so they don't spoil those stories and don't have to skip half of each team.</li>
+  <li><b>Never ahead of someone's story.</b> Torres's Specialist list, Pell's practical, Rina's and Tomas's exams, Brennan's offer, Calder's first chief: work talks skip those people where they'd tell it early.</li>
+</ul>
+</section>
+
+<section id="order">
+<h2>Where they sit in the picking order</h2>
+<p>My recommendation, after TR1's review (question 1 has the other choices):</p>
+<div class="flow"><span>their own talks</span><i>→</i><span class="new">work and shared, taking turns</span><i>→</i><span>small talk</span></div>
+<ul>
+  <li><b>Taking turns:</b> after someone's own talks, their work talks and the shared talks alternate, preferring whichever you haven't had with them lately. Otherwise your Works crewmates, the people you see most, would talk only shop for weeks.</li>
+  <li>Work talks start at acquaintance, so strangers get the shared pool. A work talk that isn't ready yet (tier too low) waits, like own talks do; it isn't lost.</li>
+  <li><b>No repeats:</b> you chose "once per save" for the shared pool on 20 October. My suggestion is that work talks follow it: if a Watch rating has told you how a tired door sounds, no other Watch rating tells it again (question 2).</li>
+  <li><b>How the run-out changes:</b> with about 120 work talks on top of the 100 shared ones, a keen player reaches small talk in roughly two months across the whole ship instead of one; sooner with your own department, whose pool you'll use fastest. More talks were already planned for when the game grows past Day 30.</li>
+</ul>
+</section>
+
+<section id="size">
+<h2>Size and time</h2>
+<p>Sized by who can actually tell them, not just by headcount:</p>
+<div class="tw"><table>
+<tr><th>Pool</th><th>Talks</th><th>Lines</th></tr>
+<tr><td>Works (incl. 8 engine room)</td><td class="n">36</td><td class="n">324</td></tr>
+<tr><td>Watch</td><td class="n">20</td><td class="n">180</td></tr>
+<tr><td>Survey</td><td class="n">20</td><td class="n">180</td></tr>
+<tr><td>Bridge (6 helm, 4 command)</td><td class="n">10</td><td class="n">90</td></tr>
+<tr><td>Infirmary (incl. 3 listening)</td><td class="n">8</td><td class="n">72</td></tr>
+<tr><td>Galley (incl. 2 at the bar)</td><td class="n">8</td><td class="n">72</td></tr>
+<tr><td>Comms</td><td class="n">8</td><td class="n">72</td></tr>
+<tr><td>Garden</td><td class="n">6</td><td class="n">54</td></tr>
+<tr><td>Store</td><td class="n">4</td><td class="n">36</td></tr>
+<tr><td><b>Total</b></td><td class="n"><b>120</b></td><td class="n"><b>1,080</b></td></tr>
+</table></div>
+<ul>
+  <li><b>Writing:</b> two writer seats in parallel (one takes Works, Galley, Garden, Store; the other Watch, Survey, Bridge, Comms, Infirmary), each about one working session. Then a review by TR1 and a round of fixes. One seat alone: about two sessions.</li>
+  <li><b>Wiring:</b> small for the engineer (below).</li>
+</ul>
+</section>
+
+<section id="engineer">
+<h2>For the engineer (TE1, already told)</h2>
+<ul>
+  <li><b>Reader change:</b> accept <code>@talks work:&lt;pool&gt;</code> with <code>&lt;pool&gt;</code> from the nine; files <code>content/talkpack/work-&lt;pool&gt;.talk</code>; same talk shape; the topic is always <code>work</code> (no <code>topic:</code> line in work files); baked to <code>TALKS.work = { works: [...], ... }</code>.</li>
+  <li><b>Ids:</b> <code>work.&lt;pool&gt;.&lt;slug&gt;</code>, written by hand and frozen, unique across the shared pool, own talks and work talks together; fired in the same save record (<code>{ id: [day, crewId] }</code>).</li>
+  <li><b>Who draws which pool:</b> one data table, <code>TALK_WORK_POOLS</code>: works, watch, survey → themselves; helm and command → bridge; comms, infirmary, galley, garden, store → themselves; guests and civilians: none. Read at talk time, so someone who arrives later draws it from day one. Question 3's "fewer" or "more" is then a table edit.</li>
+  <li><b>Picker:</b> TE1's picker already takes an ordered list of sources (own, then the shared pool); the work pool is one more source. Taking turns (the recommended order) needs one small rule: alternate work and shared per person, preferring the one not had lately.</li>
+  <li><b>Conditions:</b> no new words. Helm and command are split by <code>dept:</code>; engine crew, bartenders and the Counsellor are short <code>who:</code> lists (seven, two and one names).</li>
+</ul>
+</section>
+
+<section id="samples">
+<h2>Samples: a feel for the tone</h2>
+<p class="note">Ten samples from five pools, with the conditions they'd carry. Final text gets the usual checks and TR1's review.</p>
+<div class="grid">
+
+<div class="talk"><div class="id">work.works.first-fault · colleague · Works · not Calder, not on the "not good enough" story</div>
+<div class="them">Do you remember your first proper fault? Not a job off the board. A real one.</div>
+<div class="them">Mine was a pump on Deck 6 at two in the morning. I was shaking. It was a loose clip.</div>
+<div class="ask">What's the job that made you feel you belong here?</div>
+<div class="rep"><b>LISTEN</b>Did anyone come to help?<div class="ans">Nobody. I fixed it, wrote it up, and went back to bed grinning.</div></div>
+<div class="rep"><b>SHARE</b>The first one I didn't check twice.<div class="ans">Good. That's the day it stops being a test and starts being yours.</div></div>
+<div class="rep"><b>CHEER</b>Any job that ends at the tea corner.<div class="ans">Fair. That's most of them, if you plan it right.</div></div></div>
+
+<div class="talk"><div class="id">work.works.hands · acquaintance · Works juniors</div>
+<div class="them">Machine oil. Two washes, and my hands still smell of it at dinner.</div>
+<div class="them">My bunkmates call me "the engine room". I've stopped arguing.</div>
+<div class="ask">What does the job leave on you, at the end of a day?</div>
+<div class="rep"><b>LISTEN</b>Do you mind it?<div class="ans">No. It's proof I did something. Only the soap minds.</div></div>
+<div class="rep"><b>SHARE</b>Sore feet. And a head full of numbers.<div class="ans">That's Works. The numbers go quiet after dinner. Mostly.</div></div>
+<div class="rep"><b>CHEER</b>Grease. In places I can't explain.<div class="ans">Welcome. That never stops either.</div></div></div>
+
+<div class="talk"><div class="id">work.works.asleep-upstairs · friend · Works</div>
+<div class="them">Know what I think about on a long shift? Who's asleep upstairs because the air's right.</div>
+<div class="them">Seventy-odd people. Not one of them knows my name was on that job. I like that.</div>
+<div class="ask">Who do you do the job for, really?</div>
+<div class="rep"><b>LISTEN</b>Doesn't it bother you, nobody knowing?<div class="ans">No. I know. Calder knows. That's plenty of people.</div></div>
+<div class="rep"><b>SHARE</b>My family. And the crew, now.<div class="ans">Both is right. Out here they're the same thing, nearly.</div></div>
+<div class="rep"><b>CHEER</b>Whoever's on the tea rota.<div class="ans">Honest. Tea's a fine reason to keep a ship running.</div></div></div>
+
+<div class="talk"><div class="id">work.infirmary.bench · colleague · Infirmary · suits Oduya best</div>
+<div class="them">People think the hard part's the cuts and burns. It's not. It's the bench by the door.</div>
+<div class="them">Someone sits on the bench pretending they're fine. You learn to see it from the door.</div>
+<div class="ask">How do you tell, when someone's not all right?</div>
+<div class="rep"><b>LISTEN</b>How do you see it?<div class="ans">They sit very straight. Fine people slouch. Nobody believes me. It's true.</div></div>
+<div class="rep"><b>SHARE</b>They go quiet. Or too loud.<div class="ans">That's it exactly. You'd be good in here.</div></div>
+<div class="rep"><b>CHEER</b>They say "I'm fine" twice.<div class="ans">Twice is the giveaway. Once is usually true.</div></div></div>
+
+<div class="talk"><div class="id">work.infirmary.one-nurse · friend · Infirmary · not Rina, not Oduya, not on the exams story</div>
+<div class="them">I chose this because of one nurse. I was nine, my arm was broken. She explained it all.</div>
+<div class="them">Every bone, every step. I stopped being scared halfway through.</div>
+<div class="ask">Did someone show you what you wanted to be?</div>
+<div class="rep"><b>LISTEN</b>Do you explain things like she did?<div class="ans">I try. Every patient. Even the ones who'd rather I just got on with it.</div></div>
+<div class="rep"><b>SHARE</b>Someone back home. They fixed everything.<div class="ans">Then you're doing their job out here. They'd like that, I think.</div></div>
+<div class="rep"><b>CHEER</b>A very patient mechanic.<div class="ans">The best kind of teacher. Patient and greasy.</div></div></div>
+
+<div class="talk"><div class="id">work.galley.rush · acquaintance · Galley · not the bartenders</div>
+<div class="them">Dinner rush: seventy-five people in three hours. You stop being a person. You're hands.</div>
+<div class="them">Then it's over, you sit on an upturned crate, and it's the best seat on the ship.</div>
+<div class="ask">When in your day do you finally get to sit down?</div>
+<div class="rep"><b>LISTEN</b>Do you ever get to eat hot?<div class="ans">Never. Cold dinner, standing up, half eight. Wouldn't change it. Mostly.</div></div>
+<div class="rep"><b>SHARE</b>After my shift. The first chair I find.<div class="ans">The first chair's always the best one. That's science.</div></div>
+<div class="rep"><b>CHEER</b>I don't. I just lean on things.<div class="ans">Leaning's sitting for people with jobs. You'll do.</div></div></div>
+
+<div class="talk"><div class="id">work.galley.again · friend · Galley · not Brennan</div>
+<div class="them">My first month, I burnt a whole tray of the Sunday bread. Brennan's bread.</div>
+<div class="them">She didn't shout. She handed me the flour and said "Again." We were there till midnight.</div>
+<div class="ask">Who taught you the thing you're proudest of?</div>
+<div class="rep"><b>LISTEN</b>What did she say after?<div class="ans">Nothing. Next Sunday she let me take it out of the oven. That said everything.</div></div>
+<div class="rep"><b>SHARE</b>Someone who stayed late to help me.<div class="ans">Those are the ones you remember. Not the hard bit. The staying.</div></div>
+<div class="rep"><b>CHEER</b>Nobody. I'm self-taught. Badly.<div class="ans">Self-taught still counts. Brennan would say so too.</div></div></div>
+
+<div class="talk"><div class="id">work.watch.door-sounds · acquaintance · Watch · not Holt</div>
+<div class="them">A good door goes "tunk". A tired one goes "tank". I know them by sound now.</div>
+<div class="them">I report the tanks. Then someone from Works turns up with a spanner.</div>
+<div class="ask">Is there a sound on this ship you'd know anywhere?</div>
+<div class="rep"><b>LISTEN</b>What happens to the tired doors?<div class="ans">Works gets a note. Then someone like you fixes it. That's the circle.</div></div>
+<div class="rep"><b>SHARE</b>The lift chime. It means nearly home.<div class="ans">Good one. That's on my list too.</div></div>
+<div class="rep"><b>CHEER</b>The kettle at the tea corner.<div class="ans">So's the whole ship. It boils, we come.</div></div></div>
+
+<div class="talk"><div class="id">work.watch.switch-off · friend · Watch juniors</div>
+<div class="them">On the Watch you think about what could go wrong, all shift. Then you take it to dinner.</div>
+<div class="them">I check my own bunk ladder before I climb it. Every night. My bunkmates laugh.</div>
+<div class="ask">How do you leave the day behind, at the end of it?</div>
+<div class="rep"><b>LISTEN</b>Does it ever switch off?<div class="ans">On rest days, by midday. Well. Teatime. Nearly.</div></div>
+<div class="rep"><b>SHARE</b>A shower, and somebody to talk to.<div class="ans">Somebody to talk to. Yes. That's most of it, I think.</div></div>
+<div class="rep"><b>CHEER</b>I don't. I bring it to dinner.<div class="ans">Then sit with me. We'll worry about doors together.</div></div></div>
+
+<div class="talk"><div class="id">work.bridge.long-turn · colleague · Bridge, helm only</div>
+<div class="them">A long turn takes four hours. You hardly touch anything. You watch, wait, stay ready.</div>
+<div class="them">People think helm is steering. It's mostly patience in a very big chair.</div>
+<div class="ask">What's the most patient you've ever had to be?</div>
+<div class="rep"><b>LISTEN</b>What do you think about, all that time?<div class="ans">The numbers. Then home. Then the numbers again. It goes round.</div></div>
+<div class="rep"><b>SHARE</b>Waiting for news from home. Days, once.<div class="ans">That's harder than any turn. I'm glad the news came.</div></div>
+<div class="rep"><b>CHEER</b>Waiting for the lift on a Monday.<div class="ans">The longest wait aboard. Even the helm can't hurry it.</div></div></div>
+
+</div>
+</section>
+
+<section id="decided">
+<h2>Decided (the user, 2026-10-20)</h2>
+<p>You took every recommendation, with no comments:</p>
+<ul>
+  <li><b>Order:</b> their own talks first, then work and shared talks take turns (preferring whichever you haven't had with them lately), then small talk.</li>
+  <li><b>No repeats:</b> work talks follow your once-per-save rule: once heard, nobody in that job tells it again.</li>
+  <li><b>Pools:</b> the nine as listed (helm and command together as Bridge).</li>
+  <li><b>Size:</b> about 120 talks (Works 36, Watch 20, Survey 20, Bridge 10, Infirmary 8, Galley 8, Comms 8, Garden 6, Store 4).</li>
+  <li><b>Friend tier:</b> what the job means to them, who they do it for, a proud moment, a habit it gave them, ending warm.</li>
+  <li><b>Works:</b> its talks treat you as a workmate.</li>
+</ul>
+<p class="note">Next: TW1 writes the pools, biggest first; TE1 wires them; TR1 reviews.</p>
+</section>
+
+
+</main>
+</body>
+</html>

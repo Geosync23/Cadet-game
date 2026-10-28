@@ -1,0 +1,98 @@
+@bank all
+// ZW1 (writer), patch 0.92.5 item 10: the redone birthday. The birthday person sits at a table with a cake; a group
+// circles round and says these in speech bubbles; you can tap the cake for a slice. For the events builder to wire.
+// Kinds. The bubble kinds go through lineFor(speaker, kind, ctx), so a person's own lines of the same kind win over these;
+// the TEXT kinds (bday.slice*) are said by nobody: read LINES[kind] directly (like the clothes tips), one at random.
+//   bday.circle      a crew member in the circle, to the birthday person (a crew member). Bubble, 60 chars or fewer.
+//                    {other} = the birthday person's name: pass ctx.other = their crew id. Lines without {other} work too.
+//   bday.circle.you  the same, when the birthday person is you. {me} = your name. Bubble.
+//   bday.thanks      the birthday person (crew), thanking the circle. Bubble. Say one or two, at the end.
+//   bday.slice       TEXT (a toast, not a bubble), when you tap the cake and take a slice. 90 chars or fewer.
+//   bday.slice.you   TEXT, the same at your own party.
+// Own lines (same kinds) are in content/lines/ for Zeke, Brennan, Calder, Holt, Pell, Rina, Tomas, Kovac, Marrow and
+// Vance. Pick a different line for each person in the circle (the no-repeat FX13 builds, or LINE_RECENT does it).
+
+== bday.circle
+- Happy birthday, {other}!
+- Happy birthday! Make a wish. A big one.
+- Many happy returns, {other}.
+- Happy birthday! Cake first, speeches never.   #funny
+- Here's to you, {other}. Happy birthday.   #warm
+- Happy birthday! You don't look a day older.   #funny
+- Another year round the sun. Well, round a lot of suns.   #funny
+- Happy birthday, {other}. The ship's lucky to have you.   #warm
+- Blow them out! All of them! In one go!
+- Happy birthday! Who made the cake? It's perfect.
+- Cheers, {other}. Have a lovely day.   #warm
+- Happy birthday! Go on, cut it. We're all waiting.   #funny
+- Many happy returns! Save me a corner piece.   #funny
+- Happy birthday, {other}. You make this place better.   #warm
+- Hip hip! Come on, everyone. Hip hip!
+- Happy birthday! You've earned a day off. Nearly.   #funny
+- To {other}! Happy birthday!
+- Happy birthday. I brought my appetite. And good wishes.   #funny
+- Happy birthday, {other}. Thanks for all the help this year.   #warm
+- A whole cake, just for you. Well. For us. For you.   #funny
+- Happy birthday! Did you make a wish? Don't tell us.
+- Happy birthday, {other}. Have the biggest slice.   #warm
+- Happy birthday! I'd sing, but nobody wants that.   #funny
+- Here's to many more, {other}. Happy birthday.   #warm
+- Happy birthday! Look at that cake. Look at it.
+- Happy birthday! The best thing about today is you.   #warm
+- Happy birthday, {other}. Mind the candles.   #funny
+- Happy birthday! I wrote you a card. It's mostly stars.   #warm
+- Happy birthday! Another year of putting up with us.   #funny
+- Many happy returns, {other}. Truly.   #warm
+- Happy birthday! Speech! Speech! No? Fair enough.   #funny
+- Happy birthday, {other}. Enjoy every crumb.
+- Happy birthday! You're the best kind of crewmate.   #warm
+- Happy birthday! Somebody find a candle that's still lit.   #funny
+- Happy birthday, {other}. Same time next year?   #warm
+- Happy birthday! Who's counting candles? Not me.   #funny
+- Happy birthday! I've been looking forward to this all week.
+- Happy birthday, {other}. Here's to a smooth year.   #warm
+- Happy birthday! Cut it, cut it, cut it!   #funny
+- Happy birthday, {other}. We'd be lost without you.   #warm
+- Happy birthday! It smells amazing. The cake, I mean.   #funny
+- Happy birthday, {other}! Best day of the week.
+- Happy birthday! A wish, a slice, and a nap.   #funny
+- Happy birthday, {other}. You deserve a fuss. So: fuss.   #warm
+
+== bday.circle.you
+- Happy birthday, {me}!
+- Happy birthday, {me}! Make a wish.   #warm
+- Happy birthday, new hand! Your first one aboard?   #warm
+- Many happy returns, {me}!
+- Happy birthday, {me}! Speech! Kidding. Cake!   #funny
+- Happy birthday! You've fitted right in, {me}.   #warm
+- Happy birthday, {me}. Glad you're one of us.   #warm
+- Blow them out, {me}! All of them!
+- Happy birthday! First slice is yours, {me}.
+- Happy birthday, {me}! The whole ship knows, sorry.   #funny
+- To {me}! Happy birthday!
+- Happy birthday, {me}. Here's to your first year.   #warm
+
+== bday.thanks
+- Thank you, all of you. Really.   #warm
+- Oh, stop it. No, don't stop. Thank you.   #funny
+- You lot. Thank you. This is lovely.   #warm
+- Thank you! Now, who wants the first slice?
+- Thank you. I didn't want a fuss. I loved the fuss.   #funny
+- Thanks, everyone. Best birthday in a long while.   #warm
+- Thank you! I'm not making a speech. Thank you, though.   #funny
+- Cake for everyone. That's my thank-you.
+- Thank you. I'll remember this one.   #warm
+- You're all very kind. Now eat. Please.   #funny
+
+== bday.slice
+- You take a slice. It's soft, sweet and still a little warm.
+- A slice of birthday cake, on a little plate. It's very good.
+- You cut yourself a slice. Someone's already eyeing the last corner.
+- You take a slice of cake. Thick icing, light sponge. Lovely.
+- A slice for you. The candle smoke still hangs over the table.
+- You take a slice and a napkin. Somebody cheers, for no reason.
+
+== bday.slice.you
+- You cut the first slice of your own cake. Everyone cheers.
+- Your birthday cake, your slice. It tastes even better for that.
+- You take a slice of your cake. The circle cheers you on.

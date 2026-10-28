@@ -1,0 +1,113 @@
+@bank all
+// MA6 (2026-10-27, Pillar 5 Step 6, S6-6, stand-in words until the head writer's): M24 Leading a team (section 28d).
+// Night 3 (Day 24, from 21:00): a coil swap while the drive runs slow. You pick your team in the Works app's Team tab,
+// book the slot with the Watch on the bridge, give each a spot, then call each step at the drive panel. Night 3 has one
+// engine tech aboard (Davi Keane, he/him); the night Watch ratings help too ("after my round"). Said by nobody unless noted.
+
+// the beats: the notice as your night starts, a crew member in person, the Mail (the record), the ring lines, the hourly notice
+== m24.notice
+- Tonight you lead the coil swap. Pick your team: Works, the Team tab.
+== m24.say
+// one of the night crew, near you before you've picked
+- Calder says the coil swap's yours tonight. Pick your team, boss.
+== m24.mail
+- Tonight: the coil swap | You lead it. Pick your team, book the Watch, a spot each.
+== m24.ptr.pick
+- Pick your team
+== m24.ptr.book
+- Book the slot with the Watch
+== m24.ptr.spots
+- A spot for each, then the coil swap at {time}
+== m24.busy
+- The coil swap waits for you: {text}. Turn in or drop this job first.
+
+// the answers when you pick someone (said by them)
+== m24.pick.yes
+- Yes. Where do you want me?
+== m24.pick.friend
+- For you? Yes. Now.
+== m24.pick.later
+- After my round. Twenty minutes.
+
+// the Watch (the bridge's night watch officer, Anja Kowalczyk, she/her) books the slot
+== m24.watch
+- The Watch gives you {from} to {to}. The drive goes to slow on your call.
+
+// your calls (the toast as each comes up) and the crew's replies as their step starts
+== team.turn.cslow
+- Your call: drive to slow. Next step, at the drive panel.
+== team.turn.cunbolt
+- Your call: unbolt it.
+== team.turn.clift
+- Your call: lift it out.
+== team.turn.cseat
+- Your call: seat the new coil.
+== team.turn.ctest
+- Your call: test it.
+== team.turn.cup
+- Your call: bring the drive back up.
+== m24.next
+// the button on your call's card
+- Next step
+== m24.reply.isolate
+- Isolating. Coupling's cold.
+== m24.reply.unbolt
+- Bolts coming out. Mind your toes.
+== m24.reply.lift
+- Lifting. Easy, easy.
+== m24.reply.seat
+- Seating the new one. Gently.
+== m24.reply.test
+- Testing. Readings coming up.
+
+// the end (said by the team's first), the Mail (the record)
+== m24.done.early
+- Done early. That was a good team.
+== m24.done.on
+- Done, on the hour. Clean work.
+== m24.done.slow
+- Done. Slow, but done. The coil doesn't mind.
+== m24.mail.done
+- The coil swap | Done in {n} minutes with {a} and {b}. Logged for Calder.
+
+// the Works app's Team tab
+== m24.tab
+- Team
+== m24.tab.none
+- Team jobs you lead show here. Nothing tonight.
+== m24.tab.done
+- The coil swap: done in {n} minutes.
+== m24.tab.head
+- Tonight's coil swap: the drive runs slow for an hour while your team changes a coil.
+== m24.step.pick
+- 1. Pick your team
+== m24.said.yes
+- yes
+== m24.said.later
+- after their round
+== m24.step.book
+- 2. Book the slot with the Watch (on the bridge, Deck 1)
+== m24.booked
+- Booked: {from} to {to}.
+== m24.book
+- Book the slot
+== m24.book.go
+- Book the slot (go to the bridge)
+== m24.book.no
+- Pick your team first.
+== m24.book.where
+- The Watch books it: go up to the bridge, Deck 1.
+== m24.step.spots
+- 3. A spot for each
+== m24.spot.1
+- The coupling
+== m24.spot.2
+- The lifting frame
+== m24.step.run
+- 4. At the drive panel, call each step: Next step.
+== m24.card
+- The coil swap, {time}, Deck 6: your team
+== m24.row.plan
+- Plan the coil swap: your team, the Watch
+== m24.row.swap
+- The coil swap, your team

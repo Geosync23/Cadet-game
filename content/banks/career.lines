@@ -36,10 +36,78 @@
 == career.tip.clock
 - Clock in by the tea corner at shift start, out at the end. Leave and sick days need none.
 
+// CK1, playtest patch 1 note 20 (the user's "we need a lot of reminders about clocking in and out"): section 15's
+// clock reminders (clockRemindTick). Toasts, the Tracked row, the arrow's label and two Mails. {time}: a clock time
+// filled in by the game (the shift's start or end, 12:30, or when the clock signs you out). Variants rotate by day.
+== career.clock.title
+- Time clock
+
+== career.clock.pre
+- Your shift starts at {time}. Clock in at the time clock in the Works bay, by the tea corner.
+- Shift at {time}. Head down to the Works bay, Deck 5, and clock in at the time clock.
+
+== career.clock.start
+- {time}: your shift's started. Clock in at the time clock, by the tea corner.
+- Shift's on. Tap the time clock in the Works bay to clock in, then take a job.
+
+== career.clock.late
+- You haven't clocked in yet. Your shift started at {time}. The time clock's by the tea corner.
+- Not clocked in. Your shift began at {time}: the time clock's past the tool wall, Works bay.
+
+== career.clock.later
+- Still not clocked in. The time clock's in the Works bay, Deck 5. Late is better than missed.
+
+== career.clock.last
+- Clock in by {time}, or today counts as a missed shift.
+
+== career.clock.last.week1
+- Clock in soon. From next week, no clock-in by {time} counts as a missed shift.
+
+== career.clock.end0
+- Ten minutes left on your shift. Clock out at the time clock before you go.
+
+== career.clock.end
+- {time}: shift's done. Clock out at the time clock before you go.
+- That's your shift. Clock out at the time clock, by the tea corner.
+
+== career.clock.left
+- You left without clocking out. Pop back to the time clock, or it signs you out for you at {time}.
+
+== career.clock.stillin
+- You're still clocked in. Clock out at the time clock in the Works bay, Deck 5.
+
+== career.clock.goal.in
+- Clock in at the time clock
+
+== career.clock.goal.out
+- Clock out at the time clock
+
+== career.clock.trk.in
+- Clock in
+
+== career.clock.trk.out
+- Clock out
+
+== career.clock.trk.where
+- The time clock, Works bay, Deck 5
+
+== career.mail.clock.in
+- No clock-in today | The time clock has no card from you today. Working? Clock in in the Works bay, by the tea corner.
+
+== career.mail.clock.out
+- You didn't clock out | The clock signed you out at {time}. Next time, tap it on your way out, by the tea corner.
+
 == clock.auto
 - The clock signed you out at 17:00. It does that.
 - 17:00. The clock signed you out for you. Go and eat.
 - Shift over: the clock signed you out at 17:00.
+
+== clock.auto.friday
+// FR1, Short Fridays (plans/fridays-build-brief.md): a short Friday's shift ends at 15:30 and the clock signs you out
+// at 16:00, logged at 15:30. Read only when SHORT_FRIDAY is on (section 20's careerTick); EW1 may reword
+- The clock signed you out at half three. Short Friday. It does that.
+- Half three. The clock signed you out for you. The Captain's at four.
+- Short Friday: the clock signed you out at 15:30.
 
 == career.mail.chief
 - My office | Come to my office, Deck 5, today. Missed shifts. We'll talk it through.

@@ -1,0 +1,19 @@
+@crew pell
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== greet
+? endgame:early
+- Oi oi, the one who stayed! Biscuit? Half? It's a celebration half.   #funny
+
+== chat
+? endgame:early
+- I had a whole speech ready for the ramp. A good one. Wasted. I'll save it for Basil.   #funny
+? endgame
+- No more promotions, eh? Welcome to my world. It's lovely here. Lots of naps.   #funny
+- Proper ordinary Tuesday. Pump, lunch, panel, nap. Best kind of day, honestly.
+? endgame:early tier>=friend
+- Told Mum you stayed. Fourth message this week: "Good. Make them eat." So. Eat.   #funny
+? endgame:early tier>=close
+- I nearly went, my first month. You nearly went, last week. We're a club now, spanner.   #warm

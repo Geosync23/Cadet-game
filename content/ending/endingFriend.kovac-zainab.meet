@@ -1,0 +1,17 @@
+@meeting endingFriend.kovac-zainab
+// SW6 (ending writer A), "About the transfer" on Kovac's chat card (Friday Day 33). Kovac won't say: shy, exact, a
+// word then a pause. She gives you a measured, careful non-answer and something knitted. Canon: the lift (she holds
+// the rail), perfect scarves, scrubbers in ten minutes (nine and a half).
+title: Zainab Kovac
+from: Zainab Kovac
+gist: Kovac heard about the transfer. She wouldn't tell you what to do. She said she'd knit faster.
+== lines
+kovac-zainab: Oh. Hi. I heard. About headquarters. Sorry. Everyone's heard.   [sigh]
+kovac-zainab > you: I'm not going to say. What you should do. It's not mine to say.
+kovac-zainab: I wrote two lists. Stay and go. They came out the same length. I checked twice.
+? choice
+* What was on them?   flavour:listen
+  kovac-zainab: Things. Private things. One of them was tea at one. That one was on both.   [laugh]
+* Thank you for not saying.   flavour:share
+  kovac-zainab: Oh. Okay. Good. That was the hardest bit. Not saying.
+kovac-zainab: I'm going to knit faster. Just in case. That's all. Bye, then.

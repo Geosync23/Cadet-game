@@ -1,17 +1,21 @@
 @tradition late-piano
-// Late piano (weekly, seat 15). The Captain plays the music-room piano on Wednesday and Thursday nights (the user's
-// answer: two evenings; her musician habit already); a few listen. Starts at 21:45, after the tasting table and the
-// quiz; it's on Deck 4, so never on a deck with them, and it gives way on hull-lights Wednesdays (one in four).
-// Small and quiet on purpose: few go. Design note: plans/trad-notes-weekly.md.
+// Late piano (weekly, seat 15). The Captain plays the music-room piano on Tuesday and Thursday nights (the user's
+// answer: two evenings; her musician habit already; 0.92.5, the user: "don't have them two nights in a row", so not
+// Wednesday and Thursday any more); a few listen. Starts at 21:40, after the quiz; it's on Deck 4, so never on a deck
+// with the evening's others. to-bed (0.92.5, the user: "no one actually comes, not even the captain"): it runs past
+// most bedtimes, so whoever goes to bed in it still comes for 20 minutes or more and leaves 20 minutes before bed;
+// and it starts at 21:40 (was 21:45), ten minutes after Tuesday's knit-and-natter and tiles and Thursday's quiz end (and a one-off show in the music room to 21:30 keeps its seats: section 14 holds a tradition's from 5 minutes before), so the Captain plays longer.
+// Small and quiet on purpose. Design note: plans/trad-notes-weekly.md.
 k: 438
 title: Late piano
-when: weekly wednesday,thursday
-at: 21:45-22:30
+when: weekly tuesday,thursday
+at: 21:40-22:25
 min: 20
 jitter: 10
+to-bed: yes
 where: 4 pool music
 hold: 1
-who: marrow always, music 55%, musician 40%, night-owl 25%, everyone 4%
+who: marrow always, music 55%, musician 40%, night-owl 25%, everyone 10%
 anim: marrow play, everyone none
 host: marrow
 from: The music room

@@ -1,0 +1,19 @@
+@bank all
+// Playtest 2 (item 5, head writer W2): the alarm clock when you go to bed (seat U). TEXTS. {time} the wake time,
+// {n} the energy you'll wake with (a percentage), {start} your shift's start.
+== alarm.title
+- Alarm
+== alarm.wake
+- Wake at {time}
+== alarm.energy
+- You'll wake with about {n}% energy.
+== alarm.more
+- Sleep longer, wake fresher.
+== alarm.set
+- Set alarm
+== alarm.late
+- That's after your shift starts at {start}. Set it earlier?
+== alarm.toast
+- Alarm set for {time}.
+== alarm.ring
+- Morning. Your alarm's going.

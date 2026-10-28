@@ -1,0 +1,15 @@
+@meeting train.m17.halloran-emeka
+// Pillar 5 Step 4, M17 the lift roof (Thursdays 15:30-16:30 from Day 18): Halloran looks after the lift. At the top
+// deck, before the climb. His words on the ride are his kind work, flags roof.<step>. Seat E3. Head writer W2.
+title: The lift roof
+from: Emeka Halloran
+gist: Emeka took you onto the lift roof: grease the guide rails at each deck on the way down the spine.
+== lines
+halloran-emeka: Thursday! Lift day. My favourite hour of the week.   [gesture]
+halloran-emeka > you: We ride on the roof. Slowly. At each deck, grease the guides.
+halloran-emeka: Harness on. Hold the rail. Never lean out. Lovely view, though.
+? choice
+* We ride on top?   rel:halloran-emeka+2 flavour:listen
+  halloran-emeka: Best seat on the ship. Don't tell the Captain I said so.   [laugh]
+* Harness on.   rel:halloran-emeka+1 flavour:practical
+  halloran-emeka: Click. Hear that? Good. Up you get.

@@ -1,0 +1,43 @@
+@tradition garden-picnic
+// Garden picnic (FX14, 0.92.5 item 16; SW1's pitch, the user's yes 2026-10-24): Saturday lunch in paper parcels, eaten in
+// the garden just before the garden hour. On the garden's EXISTING benches and the beds' edges, no new seats (the user's
+// rule: extra meal seats only inside the mess). The crew have no lunch in the sim, so it isn't a meal: for you, a parcel
+// fills you up (its join, section 18's slot). Behind WEEKEND_ON.
+k: 466
+title: Garden picnic
+// (the user, 2026-10-25: spread across weeks, two new a weekend; was: weekly saturday)
+when: every 4 weeks saturday week 3 from day 1
+at: 13:00-13:50
+min: 20
+jitter: 10
+where: 3 room Hydroponics garden: garden, ids ^3-garden-
+where: 3 pool garden-tend
+where: 3 pool @stretch-garden
+hold: 1
+who: cruz-tove always, garden-lover 50%, lingers-at-meals 50%, juniors 25%, everyone 8%
+anim: talk
+host: cruz-tove
+ties: decor picnicBasket
+from: brennan
+
+== mail
+- Picnic in the garden tomorrow at {time}. Lunch is in paper parcels at the servery, one each. Eat it under the big tree, love. Mind the beds.
+
+== ask
+- Picnic in the garden at one. Brennan's tied the parcels up with string.
+- Lunch under the big tree today? Grab a parcel on the way.
+- Garden picnic. Cruz says we can sit anywhere except the beans.   #funny
+
+== here
+- Careful of the beds. The basil's very sensitive.   #funny
+- Swap you my pear for your biscuit?
+- You can hear the misters from here. Lovely.
+- Crumbs go in the compost. Cruz is watching.   #funny
+
+== thanks
+- You take a paper parcel from the servery and eat it on a bench under the big tree, the misters hissing softly and someone lying back to look up into the leaves.
+
+== chatter
+- Brennan ties every picnic parcel with a little bow. Every single one.   #warm
+- Ate my picnic under the big tree and dozed off. Nobody minded.   #funny
+- The best lunch going is the one in the garden.

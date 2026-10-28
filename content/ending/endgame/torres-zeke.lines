@@ -1,0 +1,32 @@
+@crew torres-zeke
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== greet
+? endgame:early
+- {hi}! Still here. I keep checking. I told coil three, she'd been fretting.   #funny
+
+== chat
+? endgame
+- Day nought, you held the rail on the ramp like it owed you money. Look at you now.   #funny
+- No more lists to get on. Strange, isn't it? Good strange. Right, onward. To nothing much.   #warm
+- So there's no next step. Fine. What would you learn just for fun? Properly, I mean.
+? endgame:early
+- Reyes left a note: "Coil three is glad." Coil three doesn't write notes. Reyes does.   #funny
+? endgame beat:torres.6
+- I've cast on another scarf. Shorter. Days-off colours. For you. Don't look.   #funny
+? endgame:early beat:torres.4 tier>=friend
+- Dad had a good day. He asked, "That new one of yours, did they stay?" I said yes, Dad.   #warm
+
+== near
+? endgame deck:6
+- Hear that? She's settled. Ships know who's staying. Don't laugh. She does.
+
+== feel
+? endgame mood:high
+- Sang to the coils all shift. They didn't complain. Neither did Calder. Two firsts.   #funny
+
+== bye
+? endgame
+- Right, onward. Same time tomorrow. And the day after. I like saying that now.   #warm

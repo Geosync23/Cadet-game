@@ -1,0 +1,35 @@
+@tradition rec-chiefs-talk
+// W3 (rec writer; lead 18: fields from plans/rec-traditions-plan.html FINAL and the brief; RA owns the format).
+// Wren talks, the chiefs': every 2 weeks on a Thursday 19:00-19:45 (days 18, 32, 46...), in the auditorium seats (house
+// lights half up, the speaker on a stool, no lectern; 20 to 40, a gathering). FOR RA: plus the one-off Monday on Day 8
+// (Dr. Sato, 'What lives between the stars', talk.sato, after the creature leaves at 18:40); the format has no one-off
+// day (year day 8 would repeat every year). The rota: 8 sato talk.sato; 18 calder talk.calder ('The Wren's first refit',
+// ends 19:45 before Echo Signal at 20:30); 32 holt; 46 ferreira (talks to come). The speaker is the host (the rota).
+k: 495
+title: Chief's talk
+when: every 2 weeks thursday from day 18
+at: 19:00-19:45
+min: 30
+jitter: 10
+where: 7 room Auditorium: rec:seat
+hold: none
+who: officers 35%, juniors 30%, everyone 25%
+anim: everyone talk
+from: The Wren talks
+flag: rec.on
+
+== mail
+- A chief's talk tomorrow, {time} in the auditorium. Twenty-five minutes of their department's best story, then questions. Come and ask one.
+== ask
+- Chief's talk tonight. The whole department's going. Well, they've been told to.   #funny
+- Are you going to the chief's talk? Sit near the front. They notice who asks.
+== here
+- Shh. The chief's on.
+- Good turnout. Look at that.
+- Hands up for questions. Go on.
+== thanks
+- You find a seat as the house lights come half up. The chief sits on a stool at the front of the stage and begins.
+== chatter
+- The chief's talk was brilliant. I didn't know half of that.   #warm
+- Somebody asked a question at the chief's talk and the chief said "good question". Twice.   #funny
+- Chiefs' talks every two weeks. I've marked mine on the Calendar.

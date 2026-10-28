@@ -356,3 +356,16 @@ them: I'm glad you've got someone up there. Honestly.
 them: You were never any good at being on your own. You used to chat to the toaster.
 them: Tell {friend} you snore. They should know. It's only fair.
 them: Someone has to make sure you eat the crisps. Bye.   [laugh]
+--
+// W3, rec deck R12: Sam wants to know if you've beaten anyone at Lightdisc yet
+them: {me}. Important question. Have you beaten anyone at Lightdisc yet? Yes or no. You can't answer. I'll decide.
+them: I've decided no. You're trying very hard, though. I can tell. You've got a trying face.   [laugh]
+them: I looked it up at the library. There's nothing. Lightdisc doesn't exist down here. You've got a secret sport.
+them: I've made my own version. It's a frisbee and the café wall. Mrs Abbot has banned it.
+them: Beat someone. Then tell me their name, so I can be smug on your behalf. Bye, idiot.
+--
+when: weekday:mon
+them: Hi. Monday. Did you play Lightdisc at the weekend? You did. I bet you did. Did you win?
+them: Don't tell me. If you won I'll be jealous, and if you lost I'll be mean about it. Both are fun.   [laugh]
+them: I'm picturing you diving for a glowing disc. Very heroic. Slightly ridiculous. That's you, really.
+them: Next call, tell me the score. Real score. Not the one you'd like. Bye, {me}.

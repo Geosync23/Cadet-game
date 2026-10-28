@@ -1,0 +1,16 @@
+@crew saruth
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame
+- You chose to remain. There is a Veyli word for that. I will tie it for you, not say it.   #warm
+- You held the door again. Some things do not change. I find that I am glad of it.   #warm
+- An ordinary day. Your people say it as though it were small. It is not small.
+? endgame:early
+- Ferreira asked how to say "they stayed" in Veyli. I told her. She said it wrongly. Kindly.   #funny
+? endgame tier>=friend
+- Tea is at the proper hour, as always. The cord will be tied loose. You are expected.   #warm
+? endgame:early beat:holt.5
+- Chief Holt told me you were staying. Formally. Then he sat for tea. On the wrong day.   #funny

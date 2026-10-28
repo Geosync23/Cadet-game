@@ -1,11 +1,11 @@
 # Starship Cadet: food check (keep in the repo, next to day_check.py)
 # The galley (section 16) over whole ship days with ?nosave, deterministically:
-#   food is ready when each serving window opens (06:00 and 17:00), and the grab shelf has something on it
+#   food is ready when each serving window opens (07:00 and 17:00), and the grab shelf has something on it
 #   nobody waits more than WAIT_MAX ship minutes for food, and nobody gives up
 #   portions and grab items taken equal the crew who came to eat
 #   the dish pit clears: no dirty plates and none still out at the end of the day
 #   the cold store never runs dry, with its daily top-up
-#   the rota: a chef up by 04:45 and at the stoves by 05:00, an early and a late hand every day, no station
+#   the rota: a chef up by 05:45 and at the stoves by 06:00 (an hour later from patch 1, with breakfast from 07:00), an early and a late hand every day, no station
 #   held by two people at once
 #   the same start gives the same days, and the live galley (galleyAdvance) matches the report
 #   on Deck 3: food in the pans while serving, covers when they're empty, the grab shelf's stock (when the shelf is
@@ -49,20 +49,35 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.ev("window.__realTick = tickShip; tickShip = () => {}")
     g.ev("player.steer = null; player.stop()")
+    # (S5-4, B3) DAY_SD=at:branch[:keep] (e.g. 1080:galley): a shutdown settled for DAY, as if booked the evening before
+    # (a build with P5_M18 on: a copy with P5_STEP5 switched on); the galley must still feed everyone
+    if os.environ.get('DAY_SD'):
+        at, br, *kp = os.environ['DAY_SD'].split(':')
+        sd = g.ev(f"""(() => {{ if (typeof P5_M18 === 'undefined' || !P5_M18) return null; const W = worksInit(Math.max(1020, ({DAY} - 2) * 1440 + 1320)); if (!W) return null;
+          const S = sdData(); S.set[{DAY}] = [{{ day: {DAY}, at: {int(at)}, branch: {json.dumps(br)}, keep: {json.dumps(kp)}, warned: [], inPerson: ['brennan'], job: null }}];
+          SHIP_DAYS.clear(); MACH_USE.clear(); const L = sdShutList({DAY}); return L ? [...L[0].rooms] : null; }})()""")
+        print(f"A shutdown settled for Day {DAY} at {at} on {br} (DAY_SD): rooms closed {sd}")
+        if sd is None: fail('DAY_SD given, but this build has no shutdowns switched on (P5_M18)')
     print('Food reaches the cold store by:', g.ev("FOOD.restock === 'carts' && typeof cartClaim === 'function' ? 'hover cart only (cartClaim)' : 'the 10:30 top-up'"))
     print(f"Days {DAY}-{DAY + DAYS - 1} from {g.ev(f'WEEKDAYS[weekday({DAY})]')}, {g.ev('schedPeople().length')} people, {g.ev('galleyStaff().length')} galley staff")
+    # the forecasts below (4b, 4c, 4e, and 4k's garden) read the machines' record, whose last hour stands for every hour after it: after
+    # the live visits (Deck 3 at 18:00, the menu board) that's whatever is broken then (two cookers faulty on Day 11 since
+    # 0.64.7's First Light Cocoa moved Day 1's evenings: dinner 30 portions, not 40, for four weeks). So each starts the
+    # machines afresh at the load time, as part 1 read them (machinesNow: a clock before the machines' starts afresh)
+    T0 = g.ev("shipNow()")
+    fresh = lambda: g.ev(f"setShipNow({T0}); machinesNow(); 0")
 
     # 1. the days
     rep = g.ev(f"galleyReport({DAY}, {DAYS})")
     for st in rep:
         d, r = st['day'], st['ready']
-        print(f"Day {d} ({g.ev(f'WEEKDAYS[weekday({d})]')}): came to eat {st['ate']}, hot {st['eaten']}, grab {st['grabbed']}; ready at 06:00 {r['breakfast']['portions']}"
+        print(f"Day {d} ({g.ev(f'WEEKDAYS[weekday({d})]')}): came to eat {st['ate']}, hot {st['eaten']}, grab {st['grabbed']}; ready at 07:00 {r['breakfast']['portions']}"
               f" (+{r['breakfast']['grab']} grab), at 17:00 {r['dinner']['portions']}; waited {st['waited']}, longest {st['maxWait']} min {st['maxWho']};"
               f" cooked {st['cooked']}, baked {st['baked']}, wasted {st['waste']}, spoiled {st['spoiled']}; cold store low {st['coldMin']}, end {st['end']['cold']}")
         print('  staff:', ', '.join(f"{s['id']} {s['role']}" + (f" up {s['wake'] // 60:02d}:{s['wake'] % 60:02d}" if s['wake'] is not None else '') for s in st['staff']))
         for meal in ('breakfast', 'dinner'):
             if r[meal]['portions'] < READY_MIN: fail(f"day {d}: only {r[meal]['portions']} portions ready when {meal} opened")
-        if r['breakfast']['grab'] <= 0: fail(f"day {d}: grab shelf empty at 06:00")
+        if r['breakfast']['grab'] <= 0: fail(f"day {d}: grab shelf empty at 07:00")
         if st['busy']: print('  busy:', ', '.join(f"{b['kind']} at {b['meal']}" for b in st['busy']), f"- longest wait breakfast {st['mealMax']['breakfast']}, dinner {st['mealMax']['dinner']} min")
         if not wait_ok(st): fail(f"day {d}: {st['maxWho']} waited {st['maxWait']} minutes ({st['mealMax']}, busy {st['busy']})")
         if st['missed']: fail(f"day {d}: gave up waiting: {st['missed'][:6]}")
@@ -72,7 +87,7 @@ with sync_playwright() as pw:
         if st['spoiled']: fail(f"day {d}: {st['spoiled']} meals spoiled with the chiller as new")
         roles = [s['role'] for s in st['staff']]
         chef = [s for s in st['staff'] if s['role'] == 'chef']
-        if not chef or chef[0]['wake'] > 285 or chef[0]['first'] > 300: fail(f"day {d}: no chef up by 04:45 and cooking by 05:00: {chef}")
+        if not chef or chef[0]['wake'] > 345 or chef[0]['first'] > 360: fail(f"day {d}: no chef up by 05:45 and cooking by 06:00: {chef}")
         if 'early' not in roles or 'late' not in roles: fail(f"day {d}: roles {roles}")
 
     # 2. no station held by two people at once
@@ -100,8 +115,8 @@ with sync_playwright() as pw:
     # 4. Deck 3: what you see, and the player eating
     B = (DAY - 1) * 1440
     vis = {}
-    g.ev(f"setShipNow({B} + 6 * 60 + 30); SHIP.galley = null; goToDeck(3); (() => {{ const c = cellPos(32, 6); player.obj.position.copy(c); target.copy(c).setY(.7); }})()")
-    for t, name in [(6 * 60 + 30, '06:30'), (9 * 60, '09:00'), (18 * 60, '18:00')]:
+    g.ev(f"setShipNow({B} + 7 * 60 + 30); SHIP.galley = null; goToDeck(3); (() => {{ const c = cellPos(32, 6); player.obj.position.copy(c); target.copy(c).setY(.7); }})()")
+    for t, name in [(7 * 60 + 30, '07:30'), (9 * 60, '09:00'), (18 * 60, '18:00')]:
         g.ev(f"setShipNow({B} + {t}); deckCrewFill()")
         g.step(3)
         vis[name] = g.ev("({ calls: renderer.info.render.calls, p: SHIP.galley.servery.portions, dirty: SHIP.galley.dirty, food: GV && GV.food ? GV.food.count : -1, covers: GV && GV.covers ? GV.covers.count : -1, plates: GV && GV.plates ? GV.plates.count : -1, grab: SHIP.galley.grab.items, shelf: GV && GV.grab ? GV.grab.count : -1, text: galleyText() })")
@@ -109,21 +124,21 @@ with sync_playwright() as pw:
         if vis[name]['calls'] > BUDGET: fail(f"{name}: {vis[name]['calls']} draw calls")
         if vis[name]['shelf'] >= 0 and vis[name]['shelf'] != min(8, -(-vis[name]['grab'] // 2)): fail(f"{name}: grab shelf shows {vis[name]['shelf']} for {vis[name]['grab']} items")
         if vis[name]['p'] > 0 and vis[name]['food'] != 5 or vis[name]['p'] == 0 and vis[name]['covers'] != 5: fail(f"{name}: pans don't match the servery")
-    eat = g.ev(f"(() => {{ setShipNow({B} + 6 * 60 + 40); const a = galleyAdvance(shipNow()).servery.portions, ok = takePortion('player'); return [a, ok, SHIP.galley.servery.portions]; }})()")
-    print('The player eats at 06:40:', eat)
+    eat = g.ev(f"(() => {{ setShipNow({B} + 7 * 60 + 40); const a = galleyAdvance(shipNow()).servery.portions, ok = takePortion('player'); return [a, ok, SHIP.galley.servery.portions]; }})()")
+    print('The player eats at 07:40:', eat)
     # with section 10's live line, those ahead are served first (here: taken out), then yours takes a serve
     q = g.ev(f"(() => {{ setShipNow({B} + 18 * 60); const j = galleyJoin('player'), early = galleyTurn('player'); if (j.line) {{ for (const id of servLine().filter(x => x !== 'player')) lineLeave(id); galleyTurn('player'); setShipNow(shipNow() + GALLEY_SERVE.you + .01); }} else setShipNow(j.turnAt + .01); const on = galleyTurn('player'), ate = takePortion('player'); return [j.ahead, early, on, ate, galleyTurn('player'), free(...j.at)]; }})()")
     print('The player queues at 18:00 (ahead, turn too soon, turn, ate, turn after, spot free):', q)
     if q[1:] != [False, True, True, False, True]: fail(f"galleyJoin / galleyTurn: {q}")
     if not (eat[1] and eat[2] == eat[0] - 1): fail(f"takePortion: {eat}")
     # an empty cold store: no food at breakfast, so people wait at the servery, each in their own spot
-    hold = g.ev(f"""(() => {{ const was = FOOD.restock; FOOD.restock = 'rule'; setShipNow({B} + 6 * 60 + 40); SHIP.galley = null; galleyAdvance({B}); SHIP.galley.cold.meals = 0; SHIP.galley.grab.items = 0;
-      galleyAdvance({B} + 6 * 60 + 40); const S = SHIP.galley, ids = S.wait.map(w => w[0]);
+    hold = g.ev(f"""(() => {{ const was = FOOD.restock; FOOD.restock = 'rule'; setShipNow({B} + 7 * 60 + 40); SHIP.galley = null; galleyAdvance({B}); SHIP.galley.cold.meals = 0; SHIP.galley.grab.items = 0;
+      galleyAdvance({B} + 7 * 60 + 40); const S = SHIP.galley, ids = S.wait.map(w => w[0]);
       const spots = schedPeople().filter(p => ids.includes(p.id)).map(p => galleyHold(p, shipNow()));
       const named = spots.filter(x => x), out = {{ waiting: ids.length, named: named.length, distinct: new Set(named).size, nulls: spots.filter(x => x === null).length,
         others: schedPeople().filter(p => !ids.includes(p.id)).some(p => galleyHold(p, shipNow()) !== undefined) }};
       SHIP.galley = null; FOOD.restock = was; return out; }})()""")
-    print('Cold store empty at 06:40 (no deliveries):', hold)
+    print('Cold store empty at 07:40 (no deliveries):', hold)
     if not hold['waiting'] or hold['named'] != hold['distinct'] or hold['named'] != min(4, hold['waiting']) or hold['others']: fail(f"galleyHold: {hold}")
     rt = g.ev("(() => { const s = galleySave(); const was = JSON.stringify(SHIP.galley); galleyLoad(JSON.parse(JSON.stringify(s))); const same = JSON.stringify(SHIP.galley) === was; const bad = galleyLoad({ junk: 1 }); galleyLoad(s); return [same, bad]; })()")
     print('Save and load:', rt)
@@ -132,6 +147,7 @@ with sync_playwright() as pw:
     # 4b. hover carts (B3): the cold store fed only by cartClaim. Section 17's rule when it's there, else a stand-in of
     # the agreed rule (a daily run from 09:00 when under 250, an urgent one under 90; carry up to 150, never past the
     # cap; 40 minutes on the way). A week with no shortage, then no carts on days 2 and 3, to show the shortage and the queue
+    fresh()
     carts = g.ev(f"""(() => {{ const real = typeof cartClaim === 'function', was = FOOD.restock;
       if (!real) window.__sc("cartClaim = (t, cold) => {{ const md = t % 1440, n = Math.min(150, FOOD.coldCap - cold); return n > 0 && (cold < 90 || (cold < 250 && md >= 540 && md < 1020)) ? {{ meals: n, arriveAt: t + 40 }} : null; }}");
       FOOD.restock = 'carts';
@@ -147,8 +163,10 @@ with sync_playwright() as pw:
 
     # 4c. spoilage: a broken chiller for a week, through a stand-in chillerAt (section 17's, 0.33.17: spoil 0.05 an hour
     # at its worst), which the galley reads before shipEffectsAt
+    fresh()
     sp = g.ev(f"""(() => {{ window.__keepCh = typeof chillerAt === 'function' ? chillerAt : undefined; window.__sc("chillerAt = t => ({{ cond: 0, state: 'broken', spoil: .05 }})");
       const week = galleyReport({DAY}, {DAYS}).map(st => ({{ spoiled: st.spoiled, coldOut: st.coldOut, coldMin: st.coldMin, maxWait: st.maxWait, mealMax: st.mealMax, busy: st.busy }}));
+      setShipNow({B} + 1440 + 9 * 60 + 30); machinesNow();   // the machines' own Mail (stores run out) before the galley's is caught
       const mail = []; window.__keepMail = window.mailSend; window.__sc("mailSend = x => window.__mailBox.push(x)"); window.__mailBox = mail;
       SHIP.galley = null; setShipNow({B} + 1440 + 9 * 60 + 30); goToDeck(3); galleyAdvance(shipNow()); galleyTick();
       const out = {{ week, mail: mail.map(x => x.subject + ' ' + x.at + ': ' + x.body), bin: SHIP.galley.bin, bags: GV && GV.bin ? GV.bin.count : -1, text: galleyText('cold') }};
@@ -178,6 +196,7 @@ with sync_playwright() as pw:
     if not bd['text'].startswith(('Serving: ' + bd['dinner'] + '.', 'The pans')) or not str(bd['board']).startswith(f"{DAY}|") or bd['dinner'] not in bd['tap']: fail(f"menu: servery or board: {bd}")
 
     # 4e. busy windows over four weeks: queues only in them, nobody gives up, and rushes make queues
+    fresh()
     bz = g.ev(f"""(() => {{ for (const E of GALLEY_EV.values()) E.k = 0;
       return galleyReport({DAY}, 28).map(st => ({{ day: st.day, busy: st.busy, mealMax: st.mealMax, waited: st.waited, missed: st.missed.length }})); }})()""")
     rush = [x for x in bz if any(b['kind'] == 'rush' for b in x['busy'])]
@@ -296,6 +315,7 @@ with sync_playwright() as pw:
     # 4k. the garden's carry, crew and Mail (0.29.24): the crates wait while the carry job (a stand-in) says so and land
     # when it's done or when you unload (galleyCarryLand); no gardener on duty means no daily pick; a dry harvest morning
     # sends a Mail
+    fresh()                                # the garden reads the machines too (irrigation, grow lights): as part 1 did
     gk = g.ev(f"""(() => {{ const d = {DAY} + 1, B = (d - 1) * 1440, posted = [], held = new Set(); const mail = []; window.__mailBox = mail; window.__keepMail = window.mailSend; window.__sc("mailSend = x => window.__mailBox.push(x)");
       GALLEY_TEST.gardenCarry = o => {{ posted.push(o); const id = 'garden@' + o.at; held.add(id); return id; }}; GALLEY_TEST.carryWaiting = id => held.has(id);
       SHIP.galley = null; setShipNow(B + 11 * 60); galleyAdvance(shipNow()); const out = {{ posted: posted.map(o => o.title), waiting: SHIP.galley.garden.crates.length, produce: produceMeals(SHIP.galley) }};
@@ -334,7 +354,7 @@ with sync_playwright() as pw:
         : d === sup ? [{{ id: 'harvest-supper', tie: {{ meal: 'dinner', dish: 'harvest-supper', batch: 60 }} }}] : d === fw ? [{{ id: 'farewell-supper', honorees: [who], tie: {{ meal: 'dinner', dish: 'favourite' }} }}] : [];
       {clr}
       const M = galleyMenu(sat), rota = galleyRota(sat), roles = [...rota.values()].filter(x => x.role), blk = r => (roles.find(x => x.role === r) || {{ blocks: [] }}).blocks;
-      const cookTo = Math.max(...blk('chef').filter(b => b.from < 840 && (b.task === 'cook' || b.task === 'prep')).map(b => b.to)), lineTo = Math.max(...blk('early').filter(b => b.from < 600 && b.from >= 360 && (b.task === 'serve' || b.task === 'wash')).map(b => b.to));
+      const cookTo = Math.max(...blk('chef').filter(b => b.from < 840 && (b.task === 'cook' || b.task === 'prep')).map(b => b.to)), lineTo = Math.max(...blk('early').filter(b => b.from < 600 && b.from >= 420 && (b.task === 'serve' || b.task === 'wash')).map(b => b.to));
       const rep = galleyReport(sat, 4), at = (st, h) => st.hours.find(x => x[0] === h);
       SHIP.galley = null; setShipNow((sat - 1) * 1440 + 9 * 60 + 15); const txt = galleyText('servery'), board = galleyBoard(sat);
       const out = {{ sat, breakfast: M.breakfast, bnote: M.bnote, end: galleyServeEnd(sat, 'breakfast'), close: galleyClose(sat, 'breakfast'), endSun: galleyServeEnd(sat + 1, 'breakfast'), cookTo, lineTo,
@@ -358,7 +378,7 @@ with sync_playwright() as pw:
     # 'galley' extra: 'tasting', and its 'tally') for the cooking: 20 tastes an hour before, two for each taster, the
     # rest wasted, the week's two choices, the plates on Deck 3. With section 18's tallies (tallyOf) and a real tasting
     # table: the galley shows the tally's dishes and votes, your token goes through tallyVote once, and Sunday's side
-    # is the tally's winner
+    # is the tally's winner (the real one at its own times and, with 0.93.2's TRAD_0932_ON, CS1's dish names: tasteName)
     ts = g.ev(f"""(() => {{ let wed = {DAY} + 60; while (weekday(wed) !== 2) wed++; const CH = ['herb-flatbread', 'pickled-beans', 'tomato-jam-oatcakes', 'root-crisps', 'miso-greens', 'bean-fritters', 'carrot-ginger-soup', 'chilli-lime-corn'];
       GALLEY_TEST.tradTies = (kind, d) => d === wed ? (kind === 'galley' ? [{{ id: 'tasting-stand-in', from: 1095, to: 1155, tie: {{ meal: 'dinner', extra: 'tasting', batch: 20 }} }}] : kind === 'tally' ? [{{ id: 'tasting-stand-in', tie: {{ kind: 'tasting', choices: CH }} }}] : []) : [];
       {clr} GALLEY_TASTE.clear();
@@ -372,11 +392,12 @@ with sync_playwright() as pw:
         const rw = [...Array(28)].map((_, k) => {DAY} + 7 + k).find(d => galleyTasting(d)), keepVotes = JSON.stringify(SHIP.events.votes || {{}});
         if (rw) {{
           const z = galleyTasting(rw), r = tallyOf(z.id, rw), RB = (rw - 1) * 1440;
-          out.real = {{ day: rw, choices: z.choices, votes: z.votes, tally: r && r.choices.map(c => r.counts[c]), tallyChoices: r && r.choices, winner: z.winner, voters: z.voters.length, n: r && r.n }};
-          setShipNow(RB + 18 * 60 + 20); galleyTick(); out.real.left = SHIP.galley.tasting && SHIP.galley.tasting.left;
+          const lab = c => (typeof TRAD_0932_ON !== 'undefined' && TRAD_0932_ON && typeof tasteName === 'function' && tasteName(c)) || String(c).replace(/-/g, ' ');   // 0.93.2 (FX24): CS1's dish names with the switch on
+          out.real = {{ day: rw, choices: z.choices, votes: z.votes, tally: r && r.choices.map(c => r.counts[c]), tallyChoices: r && r.choices, tallyLabels: r && r.choices.map(lab), winner: z.winner, voters: z.voters.length, n: r && r.n }};
+          setShipNow(RB + z.from + 5); galleyTick(); out.real.left = SHIP.galley.tasting && SHIP.galley.tasting.left;
           out.real.vote = galleyVote(z.choices[1]); out.real.again = galleyVote(0); const z1 = galleyTasting(rw); out.real.you = z1.you; out.real.votes1 = z1.votes; out.real.after = SHIP.galley.tasting && SHIP.galley.tasting.left;
-          setShipNow(RB + 19 * 60 + 20); galleyTick(); out.real.result = galleyText('tasting');
-          const sun = rw + 4, tl = typeof tallyLast === 'function' ? tallyLast(z.id, sun) : null; out.real.sun = {{ side: galleyMenu(sun).side, note: galleyMenu(sun).note, tallyLast: tl && tl.winner, sideTie: !!(galleyTies(sun).dinner && galleyTies(sun).dinner.side) }};
+          setShipNow(RB + z.to + 5); galleyTick(); out.real.result = galleyText('tasting');
+          const sun = rw + 4, tl = typeof tallyLast === 'function' ? tallyLast(z.id, sun) : null; out.real.sun = {{ side: galleyMenu(sun).side, note: galleyMenu(sun).note, tallyLast: tl && tl.winner && lab(tl.winner), sideTie: !!(galleyTies(sun).dinner && galleyTies(sun).dinner.side) }};
         }}
         SHIP.events.votes = JSON.parse(keepVotes); GALLEY_MENU.clear(); SHIP.galley = null;
       }}
@@ -392,9 +413,9 @@ with sync_playwright() as pw:
     if R:
         print(f"   real (section 18's tally), day {R['day']}: {R['choices']}, votes {R['votes']} (tally {R['tallyChoices']} {R['tally']}, {R['n']} went; {R['voters']} came to taste) -> {R['winner']}")
         print(f"   your vote {R['vote']}, again {R['again']}, you {R['you']}, votes {R['votes1']}, tastes {R['left']} -> {R['after']} | {R['result']} | Sunday {R['sun']}")
-        if [c.replace('-', ' ') for c in R['tallyChoices'][:2]] != R['choices'] or R['votes'] != R['tally'][:2] or not R['vote'] or R['again'] or R['you'] != 1 or R['votes1'][1] != R['votes'][1] + 1: fail(f"tasting with the tally: {R}")
+        if R['tallyLabels'][:2] != R['choices'] or R['votes'] != R['tally'][:2] or not R['vote'] or R['again'] or R['you'] != 1 or R['votes1'][1] != R['votes'][1] + 1: fail(f"tasting with the tally: {R}")
         if R['left'] is not None and R['after'] != max(0, R['left'] - 2): fail(f"your tastes: {R}")
-        if R['sun']['sideTie'] and (R['sun']['side'] != (R['sun']['tallyLast'] or '').replace('-', ' ') or "Wednesday's winner" not in R['sun']['note']): fail(f"Sunday's side: {R['sun']}")
+        if R['sun']['sideTie'] and (R['sun']['side'] != (R['sun']['tallyLast'] or '') or "Wednesday's winner" not in R['sun']['note']): fail(f"Sunday's side: {R['sun']}")
     else: print('   no section 18 tally with a tasting table in this build: the vote is not checked')
 
     # 4o. late meals (0.29.28): simNote('lateMeal', { who, meal, late, how, deck }) live, once per person and meal; heard
@@ -523,7 +544,7 @@ with sync_playwright() as pw:
     else:
         off = g.ev(f"""(() => {{ const out = [];
           for (const p of galleyStaff()) for (const k of galleyDay(p, {DAY}).blocks) {{ const w = whereIs(p, {B} + (k.from + k.to) / 2);
-            if (w.deck !== 3 || w.placeId !== k.placeId) out.push(p.id + ' ' + hhmm(k.from) + ' ' + k.placeId + ' -> ' + w.deck + ' ' + w.placeId); }}
+            if ((w.deck !== 3 || w.placeId !== k.placeId) && !(typeof eventMeetTag === 'function' && eventMeetTag(w.tag))) out.push(p.id + ' ' + hhmm(k.from) + ' ' + k.placeId + ' -> ' + w.deck + ' ' + w.placeId); }}   // an event meeting during a stint (F0b: Crossing the Line's oath casts Brennan) is a break, there and back
           return out; }})()""")
         print("Galley staff at the rota's stations (mid-block):", 'all' if not off else f"{len(off)} not")
         if off: fail(f"rota vs plans: {off[:6]}")
@@ -532,3 +553,4 @@ with sync_playwright() as pw:
     if g.errors: ok = False
     print('FOOD CHECK OK' if ok else 'FOOD CHECK FAILED')
     g.close()
+    sys.exit(0 if ok else 1)   # so a failing check fails for the computer too (check_fast.sh, GitHub)

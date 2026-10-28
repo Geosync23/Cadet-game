@@ -1,0 +1,22 @@
+@meeting endingFirstMorning
+// SW6 (ending writer A), the first morning after (ending spec, "If you stay": Monday Day 36, breakfast, the mess).
+// The Captain sits down with you; the mess is pleased with itself. After the weekly briefing if there is one (08:30),
+// so at breakfast before it. Then the endgame (Writer B's pool) takes over. The Admiral: one mention, never explained.
+title: The first morning
+from: Captain Odile Marrow
+gist: The morning after the Line, the Captain sat down with you at breakfast. The Wren is back on her course, and you're on her.
+== lines
+marrow: Is this seat taken? Good. I never eat in the mess. Today I'm eating in the mess.   [gesture]
+brennan: Captain, love. Sorry. Captain. Porridge?   [laugh]
+marrow: Porridge, thank you. Don't apologise. I've been called worse by better cooks.   [laugh]
+marrow > you: Headquarters wrote back. One word: "pity". I've framed it. Not really. Nearly.
+pell: The whole mess has been looking at you for ten minutes. We're very pleased with ourselves.
+marrow > you: So. No more letters from headquarters. Just the ship, and you on her. How does that feel?   [listen]
+? choice
+* Like coming home.   flavour:share
+  marrow: Good. That's what she's for.   [nod]
+* Like I should get to work.   flavour:practical
+  marrow: Spoken like Works. The Chief will be thrilled. She won't show it.   [laugh]
+* Honestly? Quiet. In a good way.   flavour:listen
+  marrow: Quiet is the best thing a ship can be. Nobody thanks it. That's how you know.   [nod]
+marrow: The Admiral sends his regards. He sends them to almost nobody. Eat up. Then the board.

@@ -1,0 +1,37 @@
+@tradition five-minute-skills
+// Round 2: each time Bilal Nakamura brings a crewmate to teach one small thing in five minutes, then everyone tries. Even weeks from week 2.
+// Rules: FX24 (0.93.2, behind TRAD_0932_ON in section 13). Words: CS1 (plans/trad-0932-words.txt, claude/crew-stories-pitch 7b1e7300).
+k: 1301
+title: Five-minute skills
+when: every 2 weeks monday week 2
+at: 18:15-18:45
+min: 20
+after-shift: yes
+where: 3 room Bow lounge: lounge-seat
+who: nakamura-bilal always, watch 30%, juniors 30%, everyone 10%
+anim: nakamura-bilal talk, everyone fold
+host: nakamura-bilal
+from: nakamura-bilal
+invite: host=nakamura-bilal odds=25% line="Five-minute skills, the bow lounge. Someone teaches one thing. You learn it. That's all."
+
+== mail
+- Five-minute skills tomorrow, {time}, the bow lounge. One crewmate, one small skill, five minutes. Then everyone tries. This time's is a surprise.
+
+== ask
+- Five-minute skills in the bow lounge. Last time was tying a bowline.
+- Bilal's got someone teaching how to fold a fitted sheet. Nobody can.   #funny
+- Learn one thing in five minutes? I can manage that. Just.
+
+== here
+- Over, under, through. Pull. There.
+- Watch the hands, not the face.
+- Again. Slower this time. Good.
+- That's a skill now. Yours.   #warm
+
+== thanks
+- A crewmate teaches one small skill in five minutes, Bilal keeps time, and then everyone has a go. You leave knowing one more thing.   #warm
+
+== chatter
+- I can splice a cable now. Bilal timed it. Six minutes, but still.
+- Five-minute skills. I finally folded a fitted sheet. It took eleven.   #funny
+- Bilal says everyone aboard knows one thing worth teaching. He's working through the list.

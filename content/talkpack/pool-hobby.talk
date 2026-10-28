@@ -1,0 +1,124 @@
+@talks pool
+topic: hobby
+// TW1, the Talk a while pack: shared pool, topic hobby. Format: plans/talk-pack-plan.md.
+// Anyone can say these (crew, not guests, unless a talk says so). {hobby} is the roster's phrase.
+
+== one-hour
+when: !thread:talent
+them: I've been {hobby} again. It's the one hour my head goes quiet.
+them: Nobody needs anything from me. Nobody even knows where I am.   #funny
+ask: Have you got a thing yet? Something you do just because?
+listen: How did you get started?
+  them: Someone showed me, years back. Now I can't put it down.   #warm
+share: Still looking. I might try a few.
+  them: Try a few. One will stick. It usually finds you.
+cheer: Sleep. I'm very good at sleep.
+  them: Underrated hobby. You'll go far.   #funny
+
+== bad-at-it
+when: !thread:talent !who:rina|calder
+them: Here's a secret. I'm not very good at the thing I do for fun.
+them: Years at it. Still not good. Don't care.   #funny
+ask: Is there anything you love doing that you're bad at?
+listen: Why keep at it, then?
+  them: Because nobody's marking it. That's rare on a ship.
+share: Singing. I sing anyway.
+  them: Good. The washrooms have a dawn chorus. You'd fit right in.   #funny
+cheer: Most things, honestly.
+  them: Then you've got plenty to enjoy. That's the right way round.   #funny
+
+== new-thing
+when: tier>=acquaintance
+them: I want to try something new. Something nobody aboard does yet.
+them: Problem is, someone aboard does everything.   #funny
+ask: What would you try, if you could try anything?
+listen: What are you thinking of?
+  them: I don't know yet. That's the fun bit. The thinking.
+share: Something with my hands. Making things.
+  them: Works will sort that out for you. You'll be making things daily.
+cheer: Juggling. In the lift.
+  them: The lift would never recover. Nor would the people in it.   #funny
+
+== gerald
+when: tier>=acquaintance !who:cruz-tove
+them: Have you noticed every cactus aboard is called Gerald?
+them: Nobody remembers who started it. The name comes with the plant.
+ask: Would you take a Gerald, if Cruz offered you one?
+listen: Who started it, do you think?
+  them: Someone with one cactus and no ideas. Now there are dozens.   #funny
+share: I'd love one. My bunk needs something green.
+  them: Ask Cruz in the garden. Say please. Cruz likes please.
+cheer: Only if I can call it Gerald Two.
+  them: Bold. Cruz may refuse on principle.   #funny
+
+== comics-wall
+when: tier>=acquaintance !who:teague-theo|hart-ravi|abara-rosa !moved:teague-theo
+them: Have you looked at the comics wall in the junior common room?
+them: Teague, Hart and Abara draw life aboard. Sometimes you're in one.
+ask: Would you want to turn up in one?
+listen: Have you ever been drawn?
+  them: Once. I was a very small person holding a very large mug.   #funny
+share: I'd be honoured. Terrified, but honoured.
+  them: That's the right feeling. They're kind. Mostly.
+cheer: Only if they draw me taller.
+  them: Ask nicely. They take requests. Then ignore them.   #funny
+
+== portraits
+when: tier>=acquaintance !who:bakshi-sol|strand-erik|oneill-imani
+them: Someone left a tiny painted portrait on my pillow last week.
+them: It's very good. Nobody's owned up.
+ask: If you found one of you, what would you do?
+listen: Do you know who paints them?
+  them: Three suspects. Bakshi, Strand, O'Neill. They all look innocent.   #funny
+share: Keep it. Probably show everyone.
+  them: That's what I did. Now it's on my shelf, watching me.   #funny
+cheer: Check it got my good side.
+  them: Mine was. Very generous with the hair.   #funny
+
+== starting-young
+when: tier>=colleague !who:tomas|halloran-emeka
+them: Funny what you pack. I brought half of {home} in one small bag.
+them: Some things you pack without thinking.
+ask: What did you bring aboard that you couldn't leave behind?
+listen: What did you bring?
+  them: A cup that matches nothing aboard. It's perfect.   #warm
+share: Something small from home. It's by my bunk.
+  them: Good. Everyone needs one thing that isn't the ship.   #warm
+cheer: My bad jokes. Still got them.
+  them: Halloran will want to trade. Brace yourself.   #funny
+
+== teach-me
+when: tier>=colleague !who:pell|kowalczyk|achterberg-lars|moreau-signe|soto-marta|vasquez-uma|kim-yusuf|castellano-jem !thread:talent
+them: I've been teaching {friend} a bit of {hobbyNoun}.
+them: It's nice, showing someone. You see it fresh again.
+ask: Is there something you'd teach someone, if they asked?
+listen: Are they any good?
+  them: Better than me already. I'm pretending not to mind.   #funny
+share: A few small things, maybe.
+  them: Small things are the best to teach. People actually remember them.
+cheer: How to nap anywhere. Pell taught me.
+  them: Pell's a master. You'd be second at best.   #funny
+
+== guitar-book
+when: tier>=acquaintance !who:lindqvist-isak|park-noor|larsen-hamid|haddad-tamsin !moved:lindqvist-isak !moved:haddad-tamsin
+them: There's a battered guitar book in the music room.
+them: Four people learn from it. They argue whose turn it is.   #funny
+ask: Would you ever learn an instrument?
+listen: Are any of them any good yet?
+  them: Getting there. Slowly. Through the wall, mostly.   #funny
+share: I'd like to. I've always wanted to.
+  them: Then do. Book's on the shelf. Join the queue.
+cheer: Only the triangle. Low risk.
+  them: Nobody's ever argued over the triangle. Smart.   #funny
+
+== rest-day
+when: tier>=friend !thread:talent
+them: I nearly gave up {hobby} last year. Honestly.
+them: Too tired after shifts. Then I missed it. Properly missed it.
+ask: Do you get enough time for yourself, out here?
+listen: What brought you back to it?
+  them: A bad week. I picked it up and the week got smaller.   #warm
+share: Not always. The days fill up fast.
+  them: Then guard an hour. Tell people it's an appointment. It is.   #warm
+cheer: I'm making time right now.
+  them: You are. With me. Good use of it, I'd say.   #warm

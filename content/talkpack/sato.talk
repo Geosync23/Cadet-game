@@ -1,0 +1,395 @@
+@talks sato
+// TW1, the Talk a while pack: Dr. Imra Sato's own talks (she/her). Fast, clever bursts; starts in the middle; drifts
+// mid-thought; explains the tea at length; "No." is a sentence; forgets names, remembers sample numbers. Never that
+// the survey she's proudest of was luck (until close); never admits the third comet matters.
+// SW2, patch 0.92.3 item 15: 26 more after TW1's four (her own pool only). needs: cheer (her voice card), so the cheer
+// answer is the warm one. Not used: the lucky survey, the third comet mattering, photographs (the game has none).
+only: own
+
+== the-tea
+topic: food
+them: No, the other tea. The good one. Smoked leaf, dried kelp, a pinch of pepper.
+them: Nobody else drinks it. I offer it to everyone. It's a test. Mostly of them.   #funny
+ask: Will you try it? Honestly. I'll know if you're being polite.
+listen: Why kelp, of all things?
+  them: Salt, body, and it reminds me of a shore I've never been to. Interesting, no?
+share: Go on. One sip.
+  them: Good. Brave. Your face is doing something very honest. Write that down. No, I will.   #funny
+cheer: Only if I can add a biscuit.
+  them: No. Well. Yes, fine. Mori does that too. Mori's wrong. Have a biscuit.   #funny
+
+== comets
+topic: work
+when: tier>=acquaintance
+them: Three comets named. Two of them count. The third one doesn't count.
+them: Why not? Because it was small. And late. And. Never mind. It doesn't count.   #funny
+ask: What would you name a comet, if you found one?
+listen: Why doesn't the third count?
+  them: It. Hm. It just doesn't. Next question. Better question.   #funny
+share: After someone at home.
+  them: Good. That's what most people do. That's what I. Never mind. Good choice.
+cheer: Gerald. Obviously.
+  them: Ha! The cactus lobby would be thrilled. I'd allow it. Probably.   #funny
+
+== labels
+topic: crew
+when: tier>=colleague
+them: Someone labelled a sample in my store in their own handwriting. Not mine.
+them: I've re-labelled it. And the twelve beside it. My store, my handwriting.   #funny
+ask: Is there something you're particular about? Very particular?
+listen: Does Mori mind?
+  them: Mori runs the labs while I run everyone. It works. Don't tell Mori I said "runs".   #funny
+share: My toolbelt. Everything in its place.
+  them: Good. Order is how you notice the odd thing. The odd thing is the science.
+cheer: My place in the dinner queue.
+  them: Sensible. Queues are data. I've a chart somewhere. I'll find it. I won't.   #funny
+
+== frontier
+topic: plans
+when: tier>=friend
+them: I turned down a university post to come out here. Everyone said I was mad.
+them: Some days I still think they were right. Then I look out of the observatory.   #warm
+ask: What made you choose this, out of everything?
+listen: Do you ever regret it?
+  them: No. Not yet. I say "yet" about most things. It keeps me honest.
+share: I wanted to see what's out there.
+  them: Good. Same. Now you're in it. Keep looking. Don't stop looking.   #warm
+cheer: The tea, clearly. Yours, specifically.
+  them: Liar. Kind liar. I'll make you a cup anyway.   #funny
+
+// ---- SW2: any tier and acquaintance (14)
+
+== back-window
+topic: ship
+them: No, the other window. The observatory's back one. Two degrees colder. I think better cold.
+them: Mori says I'll catch a chill. I've been thinking there for seven years. No chill yet.   #funny
+ask: Where do you do your best thinking? Everyone has a place.
+listen: Why does cold help?
+  them: Warm rooms want you to sit still. Cold ones want you to do something. Simple.
+share: Walking. Anywhere. Corridors.
+  them: Good. Moving feet, moving thoughts. Don't walk into Holt. He doesn't move.   #funny
+cheer: In the lift, between decks.
+  them: Mm. Eleven seconds of perfect quiet. I've timed it. You're cleverer than you look.   #warm
+
+== sample-number
+topic: crew
+them: You're... don't tell me. Sample four four seven one. No. You carried four four seven one.
+them: The grey one, with the stripe. I never forget a sample. Names, yes. Samples, never.   #funny
+ask: Are you good with names? Or are you like me, and good with something else?
+listen: What's special about four four seven one?
+  them: It's the most ordinary rock we've ever found. Perfectly ordinary. That's very rare.   #funny
+share: Names, mostly. Faces too.
+  them: Useful. You can stand next to me at dinner and whisper. I'll pay you in tea.   #funny
+cheer: I'm good with biscuits.
+  them: Ha! A real skill. Mori's good with biscuits. Mori's good with everything. Join Mori.   #warm
+
+== three-am
+topic: work
+them: The array pinged at three this morning. I sleep with the alert on. Always have.
+them: It was a cloud of dust. Very ordinary dust. I watched it for an hour anyway. Lovely dust.   #funny
+ask: What would get you out of bed at three in the morning?
+listen: Do you ever turn the alert off?
+  them: No. The one night I do, the sky will do something wonderful. It's waiting for me.
+share: Someone at home, calling.
+  them: Yes. Good. People first, then dust. I have the order wrong. I know.
+cheer: A fire alarm. And even then, slowly.
+  them: Good. Honest. Very sensible. Survey would be a terrible job for you. Stay in Works.   #warm
+
+== lisk-sky
+topic: home
+when: tier>=acquaintance
+them: Lisk, where I grew up, has a sky like milk. Thin cloud, all year. You never see a star.
+them: So I read about them. Then I came to look. They were better than the books. Rare, that.   #warm
+ask: What did you look at, as a child? When you looked up?
+listen: Do you miss the milk sky?
+  them: No. Yes. On grey days here I find it in the cold store window. Brennan doesn't know.   #funny
+share: Clouds. I made up shapes.
+  them: Good. That's survey, that is. Shapes first. Then names. Then data. You're halfway.
+cheer: The ceiling. I wasn't a dreamy child.
+  them: Mm. Ceilings are underrated. Very reliable. Never cloudy. I'll allow it.   #warm
+
+== new-blend
+topic: food
+them: Week four of the new blend. It tastes of a library. Old paper and a bit of dust.
+them: Week three tasted of a boot. So this is progress. I think. Yes. Progress.   #funny
+ask: What does your favourite drink taste of? Not "nice". Actual words.
+listen: What's in it this week?
+  them: Smoked leaf, a bark from the garden, and something Cruz gave me without labelling it.   #funny
+share: Warm milk. Like being little.
+  them: Oh. That's a very good answer. I can't brew that. I'll try anyway. Week five.
+cheer: Like a library. Apparently.
+  them: No. Well. Yes. You'd drink it, then? Good. Two of us. That's a survey. A small one.   #warm
+
+== question-jar
+topic: work
+them: I keep a jar of questions juniors have asked me that I couldn't answer. Yet.
+them: Thirty-one in it. "Why is the dark dark?" is my favourite. A cadet asked it. Brilliant.   #warm
+ask: What's a question you've always wanted answered? Any size.
+listen: Have you answered any?
+  them: Four. I took them out and framed them. No. I labelled them. Same thing, for me.   #funny
+share: Why the stars twinkle and planets don't.
+  them: Oh, that's not jar material. I can tell you. Sit. This takes twenty minutes. Fine, ten.
+cheer: Where my left sock goes.
+  them: Mm. That's going in the jar. Under "unknowns, domestic". You've started a new section.   #warm
+
+== glasses
+topic: day
+them: Have you seen my glasses? No. Don't say it. They're on my head. They're always on my head.
+them: Mori finds them four times a day. She doesn't say anything. She just points upward.   #funny
+ask: What do you lose the most? Everyone loses one thing over and over.
+listen: Have you tried a string?
+  them: Yes. I lost the string. Then I found it on my head. With the glasses. No help at all.   #funny
+share: My mug. Every day.
+  them: Same, after the glasses. Mugs walk. I've written "SATO" on the bottom. They walk anyway.
+cheer: Track of time, mostly.
+  them: Mm. Yes. I lose that daily. Brennan sends someone with a plate. That's how I know.   #warm
+
+== small-dull
+topic: tradition
+them: At observatory night everyone wants something big. A comet. A nebula. Fireworks.
+them: The best things are small and dull. A faint star, slightly the wrong colour. Exciting.   #funny
+ask: Which do you like more? Big and dramatic, or small and quiet?
+listen: Why the wrong colour?
+  them: Wrong means something's happening. Something we don't know yet. That's the fun part.
+share: Small and quiet. Always.
+  them: Good. You'd do well up there. Bring tea. Bring patience. The tea's optional.
+cheer: Big and dramatic. With snacks.
+  them: Ha! Honest. Fine. I'll find you something big. Then show you the small thing beside it.   #warm
+
+== mixer
+topic: news
+them: The array picked up a regular signal on Tuesday. Pulsing. Every four seconds.
+them: I was very excited for an hour. It was the galley's mixer, two decks down. Bread day.   #funny
+ask: Have you ever got very excited over something that turned out to be nothing?
+listen: Did you tell anyone?
+  them: Only Mori. And the Captain. And half the bridge. Brennan sent up a roll. Very kind.   #funny
+share: A message from home. It was a mistake.
+  them: Oh, the worst kind. Still, being excited is practice. You'll be ready for a real one.
+cheer: Every time the lift door opens.
+  them: Good. Optimist. Good. Survey needs those. Each door might be a comet. Usually it's Pell.   #warm
+
+== packed-bag
+topic: plans
+when: tier>=acquaintance
+them: A long sweep starts next week. Nights at the array. I've packed my notebooks four times.
+them: Which notebooks come up with me. It's a very serious decision. The most serious.   #funny
+ask: Are you an early packer, or a night-before one? For anything.
+listen: Which notebooks win?
+  them: The empty ones. Always the empty ones. The full ones already know what they think.
+share: Night before. Then I forget something.
+  them: Good. Forgetting something means you'll find out what you need. That's research.
+cheer: I don't pack. I just wear everything.
+  them: Oh, that's interesting. Efficient. Mori would admire it. Then send you back to change.   #warm
+
+== argue-vance
+topic: crew
+when: tier>=acquaintance
+them: Vance says the survey schedule is a regulation. I say it's a suggestion with numbers.
+them: Six years we've argued it. Every Monday. I think we both enjoy it. Don't tell him.   #funny
+ask: Is there someone you argue with, and secretly like it?
+listen: Who's winning?
+  them: Nobody. That's the point. If anyone won, we'd stop. Then what would Mondays be for?
+share: Someone back home. Every time we talk.
+  them: Good. That's love, of a sort. Arguing means you're still listening. Keep at it.
+cheer: You, now. The tea's terrible.
+  them: Mm. No. The tea's misunderstood. There. We've started. Every Monday. Bring your case.   #warm
+
+== lunch
+topic: day
+them: What time is it? No. Don't say. Then I'll realise I haven't eaten, and I'll have to.
+them: Brennan sends a plate up at two if I'm not in the mess. Every day. Seven years.   #funny
+ask: Do you forget to eat when you're busy? Or are you sensible?
+listen: Who brings the plate up?
+  them: Someone different every time. I think she sends whoever looks like they need a walk.   #warm
+share: Sometimes. Then I get grumpy.
+  them: Same. Mori says I get "pointy". I don't know what that means. I suspect I know.   #funny
+cheer: Never. I'm always thinking about lunch.
+  them: Mm. Good. Think about it for me. Tell me when it's time. I'll pay you in data.   #warm
+
+== bedtime-logs
+topic: hobby
+when: tier>=acquaintance
+them: Before I sleep I read old survey logs. Other ships, years ago. Very dull. Very soothing.
+them: "Day forty. Nothing. Day forty-one. Nothing. Day forty-two. Oh." I love the "oh".   #warm
+ask: What do you read, or do, before you go to sleep?
+listen: What came after the "oh"?
+  them: A new moon. Small. Grey. The person who found it wrote "oh" and then a whole page.   #warm
+share: Messages from home, again.
+  them: Good. Read them twice. The second time you hear the voice. That's the useful part.
+cheer: The back of my eyelids. Quickly.
+  them: Mm. Enviable. I have to read about nothing for an hour first. You're very efficient.   #warm
+
+== honest-sky
+topic: ship
+when: time:night
+them: Night is when the sky's honest. By day the ship's lights get in the way. Now it's just us.
+them: I'm not on shift. I'm just looking. Mori says that's the same thing, for me. Fair.   #funny
+ask: Are you a night person or a day person, really?
+listen: Is it really different at night?
+  them: Only a little. Fewer lights, fewer people. It feels more different than it is. Fine.
+share: Night. Everything's quieter.
+  them: Good. Then you know. Come up one night. Don't talk. I won't either. Mostly.
+cheer: Whichever one has breakfast in it.
+  them: Ha! Practical. Breakfast is daytime, so you're a day person. Data. Done.   #warm
+
+// ---- SW2: colleague (6)
+
+== not-yet
+topic: work
+when: tier>=colleague
+them: I never say "I don't know". I say "I don't know yet". The "yet" does all the work.
+them: Without it, you stop. With it, you're halfway there. It's one word. It's the whole job.   #warm
+ask: What's something you don't know yet? Something you'd like to?
+listen: Did someone teach you that?
+  them: My first supervisor. It was on her mug. I stole the mug. Well. Borrowed it. For years.   #funny
+share: How to fix the drive coils.
+  them: Good. Ask Zeke. He'll explain for an hour. You'll be very nearly there after.
+cheer: What's in your tea, exactly.
+  them: Good. Nobody knows that. Not even me. That's a "yet" for both of us.   #warm
+
+== weekly-number
+topic: home
+when: tier>=colleague
+them: My partner's on a research station. Every week we send each other one number. Just one.
+them: Nothing else. A depth, a count, a temperature. We guess what it means. It's our letter.   #warm
+ask: How do you keep in touch with someone far away? What works?
+listen: What was this week's number?
+  them: Nine. I've no idea. I've guessed eleven things. I think it's the number of biscuits left.   #funny
+share: Short messages. Often.
+  them: Good. Short and often beats long and rare. That's survey too. Small data, every day.
+cheer: Very long messages. Very rarely.
+  them: Good. I'd be the same, if I could write long. I can't. One number. It's enough.   #warm
+
+== mori-drawer
+topic: crew
+when: tier>=colleague
+them: Mori has a drawer in the lab labelled "Sato". Spare glasses. Spare pens. A spare mug.
+them: If I went missing, she'd find a spare me in there too. Labelled in her hand. Not mine.   #funny
+ask: Who keeps you on track, aboard? Everyone's got someone.
+listen: Have you looked in the drawer?
+  them: Once. There was a biscuit labelled "for emergencies, not Tuesdays". I didn't ask.   #funny
+share: My chief. Calder notices everything.
+  them: Yes. Calder would label a drawer. Calder would label the label. Good. You're safe.
+cheer: Nobody. I'm a free spirit.
+  them: Mm. Nobody's a free spirit on a ship. Somebody's watching your lunch. Ask Brennan.   #warm
+
+== glad-wrong
+topic: work
+when: tier>=colleague
+them: A junior told me I was wrong on Tuesday. In front of the lab. They were right. Completely.
+them: Best Tuesday I've had this year. I've put them on the next sweep. They're terrified.   #funny
+ask: When were you last glad to be wrong about something?
+listen: What were you wrong about?
+  them: A decimal point. Small. Important. The sort of thing that moves a moon. They caught it.
+share: About the Wren. I thought I'd be lonely.
+  them: Good. That's the best kind of wrong. Mine was the same, seven years ago. Still wrong.   #warm
+cheer: I'm never wrong. Ask anyone.
+  them: Mm. Then I'll argue with you every Monday, like Vance. You'll learn. Gently.   #warm
+
+== no-stopping
+topic: plans
+when: tier>=colleague
+them: People ask when I'll retire. I won't. I'll be labelled one day, and put in the store.
+them: "Sato. Survey. Mostly tea." On a shelf, between the ordinary rocks. Very peaceful.   #funny
+ask: What's one thing you never want to stop doing?
+listen: Is it the work, or the looking?
+  them: The looking. The work is how I'm allowed to look. Clever trick, no?
+share: Learning. Something new, every week.
+  them: Good. Then you'll never retire either. We'll be on the same shelf. Neighbours.   #warm
+cheer: Eating. I'll never stop eating.
+  them: Mm. Sensible. Brennan would want that on your label. "Ate well." Very good epitaph.   #warm
+
+== a-choice
+topic: tradition
+when: tier>=colleague
+them: I brought my tea to Brennan's tasting table. Somebody has to be brave.
+them: She tasted it. "Well, that's a choice." The kindest thing a cook's ever said to me.   #warm
+ask: What's the kindest thing anyone's said about something you made?
+listen: Did anyone else try it?
+  them: Holt. One sip. He said nothing at all, for a long time. I'm counting it as a yes.   #funny
+share: "I'll keep this." About a card.
+  them: That's very kind. That's better than mine. A thing kept is a thing that worked.
+cheer: "It's mostly edible."
+  them: Ha! That's high praise. "Mostly" is where all the good science is. Mostly.   #warm
+
+// ---- SW2: friend (3)
+
+== tea-plant
+topic: hobby
+when: tier>=friend
+them: I'm growing one tea plant in the garden. One. It has four leaves. It had five on Monday.
+them: Cruz says I talk to it too much. I'm not talking. I'm taking notes out loud.   #funny
+ask: Is there something you're bad at, and keep doing anyway, because you like it?
+listen: What happened to the fifth leaf?
+  them: I don't know. Yet. I've a theory involving Pell. I'm keeping it to myself, for now.   #funny
+share: Singing. Very badly. In the washroom.
+  them: Good. Badly and gladly. That's the best way to do anything. My plant agrees.
+cheer: Your tea. I'm bad at drinking it.
+  them: Good. You keep trying, though. That counts. Most people stop at one sip. You don't.   #warm
+
+== time-to-explain
+topic: crew
+when: tier>=friend
+them: You know why I explain things at length? Everyone says I do. I know I do.
+them: My mother never had time to explain. Always busy. So I promised I always would.   #warm
+ask: Who explained the world to you, when you were small?
+listen: Did she ever have time, later?
+  them: Later, yes. Now she asks me. I explain the tea. She says "Imra, that's enough." It isn't.   #funny
+share: My family. One question at a time.
+  them: Good. That's how it should be done. One question, all the time in the world. Lucky.
+cheer: Books. And very patient librarians.
+  them: Good. Librarians are the true scientists. I'd hire every one. I'd give them the store.   #warm
+
+== tired-smile
+topic: day
+when: tier>=friend
+them: I'm tired. I know because I'm smiling at the labels. I only do that when I'm tired.
+them: Mori sent me to bed. I came here instead. Don't tell her. Well. Mori always knows.   #funny
+ask: How do you know when you're tired? Before you've said it out loud?
+listen: Why do you smile when you're tired?
+  them: Everything gets funny. The labels look so serious. Little serious labels. Very sweet.   #funny
+share: I stop finishing my sentences.
+  them: Same. I'm doing it now. I've been doing it for. Hm. Never mind. Yes. Same.   #funny
+cheer: I start agreeing with Pell.
+  them: Mm. That's a serious sign. Go to bed immediately. Doctor's orders. Wrong doctor. Still.   #warm
+
+// ---- SW2: close friend (3)
+
+== your-label
+topic: work
+when: tier>=close
+them: I wrote your name on a label today. By accident. I was thinking about something you said.
+them: On a rock. Small, grey, very steady. It suits it. I've left it. It's yours now.   #warm
+ask: What do you think you'd be, if you were a sample? Be honest.
+listen: What did I say that made you think?
+  them: That you didn't know yet. You said "yet". I've taught you something. Don't tell anyone.   #warm
+share: Something ordinary. Useful, though.
+  them: Yes. Exactly that rock. Ordinary is very rare, I've told you. I don't say it lightly.   #warm
+cheer: Something shiny, obviously.
+  them: Mm. No. You're grey and steady. Shiny things get lost. Steady ones get labelled.   #warm
+
+== explain-to-you
+topic: plans
+when: tier>=close
+them: When I'm stuck on something, I imagine explaining it to you. Out loud, in the lab.
+them: You ask the right wrong questions. Then I hear the answer. Mori's started doing it too.   #warm
+ask: Who do you imagine talking to, when you're stuck?
+listen: What do I usually ask?
+  them: "But why?" Every time. It's maddening. It's exactly right. Never stop asking it.   #warm
+share: You, sometimes. You'd make it a story.
+  them: Mm. I'd make it an hour. With tea. Fine. We help each other, then. Good. Data.
+cheer: Pell. He just says "Sounds broken."
+  them: Ha! And he's usually right. Simplest answer. I'll add Pell to my imaginary lab.   #funny
+
+== name-the-tea
+topic: food
+when: tier>=close
+them: If anyone ever names anything after me, don't let them pick a comet. Or a rock.
+them: Name the tea. "Sato's Blend". And put a warning on the tin. Small print. Kindly worded.   #funny
+ask: If something were named after you, what would you want it to be?
+listen: What would the warning say?
+  them: "Mostly safe. Acquired taste. Acquire slowly." And then the recipe. I'm not hiding it.   #funny
+share: A bench somewhere. A good one.
+  them: Oh, that's lovely. A bench is the kindest thing to be. People sit on you. They stay.   #warm
+cheer: A pudding. A big one.
+  them: Good. Brennan would make it. Then you'd be on a Friday. Better than a comet, honestly.   #warm

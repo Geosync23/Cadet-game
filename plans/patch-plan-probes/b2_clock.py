@@ -1,0 +1,28 @@
+from pp import *
+g = start(); g.step(10); sign(g); g.secs(2)
+g.ev("""(() => { for (let t = shipNow(); t <= 20*60+30; t++) { setShipNow(t); introAdvance(t, null); } })()""")
+g.ev("skipTo(2*1440 + 8*60+50)")   # Day 3 08:50
+g.ev("goToDeck(5)"); g.step(5); g.ev("SHIP.player.carry.length = 0")
+g.ev("(() => { const q = (DECKS[5].places||[]).find(p => p.id==='5-timeclock-1'); const n = nearestOpen(cellPos(...q.at).x, cellPos(...q.at).z, player); player.obj.position.copy(cellPos(...n)); target.copy(player.obj.position).setY(.7); })()")
+g.step(5)
+g.ev("clockScreen()"); g.step(2)
+b = g.page.locator('#clockScreen button.act').first.bounding_box(); print('in button', b)
+g.snap('06-clock-in-screen')
+x, y = b['x'] + b['width']/2, b['y'] + b['height']/2
+g.page.mouse.click(x, y); g.step(2)
+print('after one tap:', g.ev("({ in: careerClockedIn(), out: careerClockedOut(), text: document.getElementById('clockScreen').innerText.replace(/\\n/g,' | ') })"))
+g.snap('06-clock-after-in')
+g.shipmins(60)
+g.ev("clockScreen()"); g.step(2)
+b2 = g.page.locator('#clockScreen button.act').first.bounding_box(); print('out button', b2)
+x, y = b2['x'] + b2['width']/2, b2['y'] + b2['height']/2
+g.page.mouse.click(x, y); g.step(1)
+print('after 1st out tap:', g.ev("document.getElementById('clockScreen').innerText.replace(/\\n/g,' | ')"))
+b3 = g.page.locator('#clockScreen button.act').first.bounding_box(); print('confirm button', b3)
+g.snap('06-clock-out-ask')
+g.page.mouse.click(x, y); g.step(2)
+print('after 2nd tap same spot:', g.ev("({ t: clockText(), in: careerClockedIn(), out: careerClockedOut(), text: document.getElementById('clockScreen').innerText.replace(/\\n/g,' | ') })"))
+g.snap('06-clock-out-double-tap')
+g.ev("clockScreen()"); g.step(2)
+print('reopen:', g.ev("document.getElementById('clockScreen').innerText.replace(/\\n/g,' | ')"))
+print(g.errors[:4])

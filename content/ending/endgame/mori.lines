@@ -1,0 +1,18 @@
+@crew mori
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- Oh, hello. Sato's told everyone you stayed. Twice. I counted. Sorry. I count things.   #funny
+? endgame
+- I've a list of things to show you, now there's time. It has a list inside it. Sorry.   #funny
+- Ordinary days in the chart room. Ink drying, nobody talking. I'd missed them.
+- The new juniors keep asking me who to ask. I've started saying your name.
+? endgame tier>=friend
+- I've named a rock after you. A small one. Don't tell anyone. It's a secret rock.   #warm
+
+== bye
+? endgame
+- Bye. Um. See you tomorrow. That's nice to be able to say.

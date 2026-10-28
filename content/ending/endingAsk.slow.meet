@@ -1,0 +1,17 @@
+@meeting endingAsk.slow
+// SW6 (ending writer A), Sunday evening on a SLOWER CAREER, when your answer is still "not sure" or never given: the
+// Captain finds you (escort) and asks, Stay and Go only (the game never decides for you). The replies set end.stay /
+// end.go (EN1); the crew learn it from mail.ending.settled.slow.stay | .go (ui.lines) and from each other.
+title: The Captain's question
+from: Captain Odile Marrow
+gist: On Sunday evening the Captain came to find you and asked: stay aboard the Wren, or go to headquarters.
+== lines
+marrow: There you are. I said Sunday evening. It's Sunday evening. I'm sorry. I did warn you.   [gesture]
+marrow > you: I won't make a speech of it. Stay with the Wren, or go to headquarters? Either is a good answer.
+marrow: This one's for keeps. Take a breath first. I'll wait.   [listen]
+? choice
+* I'm staying.   flavour:share flag:end.stay
+  marrow: Then we're keeping you. Selfishly, good.   [laugh]
+* I'm going.   flavour:share flag:end.go
+  marrow: Then we'll see you off properly. Monday, the Tern. I'll tell the ship tonight.   [nod]
+marrow: Thank you for telling me. Carry on, {me}.

@@ -1,0 +1,449 @@
+@talks holt
+// TW1, the Talk a while pack: Chief Bram Holt's own talks. Gruff, few words, statements; "Hm."; tests you with a
+// question; dry by accident; formal when uncomfortable. Never "sorry" plainly; never the bad day (beat holt.3); the
+// Veyli only as plain distrust, argued with, never a sneer. Not the suit-locker test (beat 1) or the Envoy's tea (beat 4).
+
+only: own
+
+== doors
+topic: ship
+them: Hm. Cadet. Every door on this ship has a number. I know all of them.
+them: Not to show off. Because one night someone will need to know, and I'll be awake.
+ask: What do you check before you sleep? Everybody checks something.
+listen: Do you really know every door?
+  them: Every one. Ask me one. Go on. Thought not.   #funny
+share: That my boots are where I can find them.
+  them: Boots by the bunk, facing out. Adequate.
+cheer: Under the bunk. Just in case.
+  them: Fair. The Watch checks the rest. That's what we're for.   #funny
+
+== rounds
+topic: day
+when: tier>=acquaintance
+them: Walked every deck before breakfast. The long way. Every door where it should be.
+them: Five in the morning, the ship's honest. Nobody's pretending to be busy.
+ask: When's the ship at her best, in your view?
+listen: Every deck? Every morning?
+  them: Every one. Somebody should. I'd rather it was me.
+share: Evenings. When people stop to talk.
+  them: Softer answer than mine. Fair one, though.
+cheer: Breakfast. Obviously breakfast.
+  them: Hm. Mensah says that. You've been talking to Mensah.   #funny
+
+== mensah
+topic: crew
+when: tier>=colleague
+them: Mensah told me a joke yesterday. Why don't airlocks keep secrets.
+them: Too much pressure. I laughed. Don't spread it about. He keeps a count.   #funny
+ask: Who on this ship makes you laugh?
+listen: What's his count up to?
+  them: He won't say. Higher than I'd like. Lower than he'd like.   #funny
+share: My bunk room. Most nights.
+  them: Good. A bunk room that laughs is a bunk room that looks out for itself.
+cheer: You, Chief. Right now.
+  them: Hm. Then that's two of us surprised.   #funny
+
+== saruth
+topic: crew
+when: tier>=friend beat:holt.2
+them: The Envoy's door. Cord tied loose today. Means "you are expected". Didn't know I was.
+them: I don't trust the Veyli. Told them so. They thanked me. Don't know what to make of it.
+ask: You talk to the Envoy. What do you make of them?
+listen: Did you go in?
+  them: No. Stood at the door a while. Walked on. Another time, maybe.
+share: Courteous. Kind, under the formal bit.
+  them: Maybe. You see more of them than I let myself. That's fair to say.
+cheer: Exhausting and very kind. Like you.
+  them: That's their line about us. They'd laugh. Slowly.   #funny
+
+// ---- SW3, 2026-10-24 (patch 0.92.3 item 15, plans/talk-main-plan.md): 26 more, own pool only. Weighted early: 16 at
+// any tier or acquaintance, 7 from colleague, 4 from friend, 3 from close. His needs: practical, so the listen answer
+// is the warm one. Never the bad day, Hanne Rook, the six hours, the knot or the Envoy's tea (his beats); never
+// "sorry" plainly; nothing against the Captain; the Veyli left alone here.
+
+== honest-door
+topic: ship
+them: Door on Deck 6 whistles when it's not quite shut. Thin little note.
+them: I like that door. Honest door. Tells you straight.
+ask: Do you trust machines more than people, or the other way round?
+listen: Should we fix the whistle?
+  them: No. Leave it. A door that tells you it's wrong is worth ten that don't.   #warm
+share: People. Machines don't care if I'm there.
+  them: Hm. Fair. Machines don't miss you. People do. That's worth something.
+cheer: Machines. They don't tell jokes.
+  them: You've met Mensah, then. Hm.   #funny
+
+== short-log
+topic: work
+them: Watch log. My entries are three words. "Deck 3. Quiet." That's a good night.
+them: Mensah writes paragraphs. With feelings in. I read them. Every word.   #funny
+ask: Short reports or long ones: which do you trust?
+listen: Ever written a long one?
+  them: Seven words. A storm. "Every door held. Every person accounted for." Best seven I wrote.   #warm
+share: Long ones. I like knowing why.
+  them: Hm. Then read Mensah's. You'll know why about everything. Including his lunch.   #funny
+cheer: Short. I lose interest by word four.
+  them: Then you'd suit the Watch. Write less, notice more.
+
+== faces
+topic: crew
+them: I learn faces before names. Names stay the same. Faces tell you who's tired.
+them: Three tired faces on Deck 3 this morning. Sent Mensah. He's better at that bit.
+ask: What do you clock first, meeting someone?
+listen: What does Mensah do for them?
+  them: Sits with them. Tells a joke. Bad one. They laugh at how bad it is. Works every time.   #warm
+share: Whether they look happy to be here.
+  them: Good thing to notice. Most aren't looking. You were.
+cheer: Their shoes. I don't know why.
+  them: Hm. Shoes tell you plenty. Who's been in the garden. Who's been running. Go on.
+
+== one-more-page
+topic: day
+when: time:night
+them: Lights out on Deck 4 at eleven. Somebody always wants one more page.
+them: I walk past slow. They get their page. Then I walk past again.
+ask: One more page, one more song, or one more biscuit?
+listen: Do you ever stop and tell them?
+  them: Once, my first year. Never again. A junior with a book is a junior who's all right.   #warm
+share: One more page. Always.
+  them: Then I've walked past you. Probably twice. Finish the chapter. Then sleep.
+cheer: One more biscuit. Then a page.
+  them: Crumbs in the bunk. Hm. Your bunkmates will report it. To me.   #funny
+
+== fed-first
+topic: food
+them: After a night drill, Brennan feeds the Watch first. Never asked. Just does it.
+them: Plate's there when we come off. Hot. She doesn't stay to be thanked.
+ask: Who looks after you without being asked?
+listen: Does she know you notice?
+  them: Once. She told me to sit down and eat it before it went cold. So. Yes.   #warm
+share: My bunkmates. In small ways.
+  them: Small ways are the ones that count. Watch for them. Do some back.
+cheer: The grab shelf. It never lets me down.
+  them: Brennan stocks that too. She's looking after you. You just don't see her do it.
+
+== alarm-tones
+topic: ship
+them: Three alarm tones aboard. Most juniors know one. That's two short.
+them: Learn all three. Then you're not guessing, when it counts.
+ask: Can you name them all, without your device?
+listen: Will you test me on them?
+  them: Hm. Tomorrow. Before breakfast. On the long way round. Bring your ears.   #warm
+share: One. Honestly, just the fire one.
+  them: Honest. Better than a guess. The device has the other two. Learn them tonight.
+cheer: The loud one, the louder one...
+  them: And the one that means "go to your post". Learn its name. It has one.   #funny
+
+== hypothetically
+topic: hobby
+when: tier>=acquaintance
+them: We're not discussing the gym. Agreed. But. Hypothetically.
+them: If someone wanted to know how much I lift. Hypothetically. More than Vance.   #funny
+ask: Is there something you do that you'd rather nobody watched?
+listen: Is it more than Vance, though?
+  them: Yes. Don't tell him. He'd start a board. I'd have to beat it. Weekly.   #funny
+share: Singing. In the washroom. Badly.
+  them: The whole wing knows. The whole wing doesn't mind. That's a good wing.   #warm
+cheer: Dancing. Even badly is generous.
+  them: Hm. Not on my rounds. Off my rounds, I see nothing.   #funny
+
+== four-minutes
+topic: crew
+when: tier>=acquaintance
+them: Mensah has nights. I have days. We meet at shift change for four minutes.
+them: Handover. Doors, people, anything odd. Then he tells me a joke. Always.
+ask: Who do you hand your day over to, in a way?
+listen: Do you ever tell him one back?
+  them: Never. It would break something. Four minutes, one joke, his. That's the rule.   #warm
+share: My bunkmate, just before lights out.
+  them: Good. Say it out loud and it's lighter. Mensah taught me that. Don't tell him.
+cheer: My pillow. It listens very well.
+  them: Hm. Good listener, a pillow. Doesn't argue. Doesn't tell jokes.   #funny
+
+== lost-once
+topic: work
+them: Every new hand gets lost once. I find them. I don't say I was looking.
+them: Last season it was a junior in the cargo hold. Looking for the gym. Very lost.   #funny
+ask: Where did you get lost, your first week?
+listen: How do you always find them?
+  them: Most people walk downhill when they're lost. I start at the bottom. Works.   #warm
+share: The officers' corridor. Twice.
+  them: Hm. Everyone does. It loops. I've asked for signs. I'm still asking.
+cheer: I'm lost right now, Chief.
+  them: You're on Deck 3, by the mess. Not lost. Hungry, maybe.   #funny
+
+== no-shouting
+topic: crew
+when: tier>=acquaintance
+them: I don't shout. Never have. People think I do. That's the face.
+them: Mensah says I could look kinder. I've tried. This is the result.   #funny
+ask: Do people get you wrong at first?
+listen: Do you mind it, Chief?
+  them: Not much. They learn. Usually by the second drill. It's the moustache, I think.   #funny
+share: Yes. They think I'm shy.
+  them: Shy and quiet aren't the same. Quiet notices more. Keep it.
+cheer: They think I'm sensible. Fools.
+  them: Hm. Your secret's safe. I've seen you with a biscuit tin.   #funny
+
+== beans
+topic: food
+when: tier>=acquaintance
+them: On border patrol we ate from tins for weeks. I still can't face a tin of beans.
+them: Brennan knows. She's never served me a bean. Not once. Never asked why.
+ask: Is there a food you can't face any more?
+listen: Did Brennan just notice?
+  them: She notices everything about food. She looked at my plate once. That was that.   #warm
+share: Something I ate too much as a kid.
+  them: Hm. Everyone's got one. Keep it off your plate. Nobody needs to know why.
+cheer: Cold toast. It's a crime.
+  them: Agreed. If you see cold toast, report it. To Brennan. Not me.   #funny
+
+== open-door
+topic: tradition
+when: tier>=acquaintance weekday:wed
+them: Wednesday. Open-door tea in Works. I go to check the door's actually open.
+them: It is. Every week. Then I stay for a biscuit. Purely to be polite.   #funny
+ask: What would you add to the ship's calendar, if it were yours?
+listen: Ever missed a Wednesday?
+  them: Never. Doors are my job. An open one's the best kind to check.   #warm
+share: A morning walk, everyone welcome.
+  them: Hm. Already exists. Five in the morning. The long way. Attendance: low.   #funny
+cheer: Biscuit Thursday. And Friday.
+  them: Brennan would want a word. Several words. I'd stand well back.   #funny
+
+== first-aid
+topic: work
+them: The Watch does first aid twice a year with Dr. Nandakumar. I go too.
+them: She makes me practise on Mensah. He enjoys it far too much.   #funny
+ask: Could you help someone who's hurt, right now, if you had to?
+listen: Can I sit in on the next one?
+  them: Yes. Infirmary, next month. Tell Nandakumar I sent you. She'll find you a sling.   #warm
+share: A little. I'd want a refresher.
+  them: Honest. Most people say yes and mean "I'd panic". You'd be fine. Learn more anyway.
+cheer: I'd shout for you, Chief.
+  them: Hm. Good answer, half of it. Then do something useful while I'm coming.   #funny
+
+== morning-question
+topic: crew
+them: The Captain asks me one thing every morning. "Anything I should know?"
+them: Most days the answer's no. That's the job done. That's a good morning.
+ask: What do you ask yourself first thing?
+listen: What if the answer's yes?
+  them: Then I tell her straight, and short, and what I've already done. In that order.   #warm
+share: "Did I sleep?" Usually no.
+  them: Hm. Then sleep. That's an order. A rare one, from me. Mean it.
+cheer: "Where are my socks?"
+  them: Under the bunk. Facing out. Always. Adequate system.   #funny
+
+== junior-wing
+topic: ship
+when: tier>=acquaintance time:evening
+them: Junior wing, evenings. Music, laughing, someone losing at Tiles.
+them: I walk through slower than I need to. Don't put that about.
+ask: What's the best noise on the ship, for you?
+listen: Why walk slower?
+  them: It's the sound of people who feel safe. I'd stand there all night if I could.   #warm
+share: The mess at breakfast. Everyone at once.
+  them: Hm. Good one. Fifty people and one queue. Never a fight. That's a ship that works.
+cheer: Pell snoring. It's soothing.
+  them: Hm. Soothing isn't the word the bunk room uses.   #funny
+
+== airlocks
+topic: ship
+them: People think airlocks are frightening. They're the most careful machines aboard.
+them: Three checks before anything opens. Every time. They never get bored of it.
+ask: What's something that looks frightening but isn't?
+listen: Can you show me the three checks?
+  them: Hm. Yes. Watch office, any morning. Bring a pencil. You'll want notes.   #warm
+share: The deep ship. Deck 6. It's just loud.
+  them: Loud and honest. Like a good Chief. Not me. Calder.
+cheer: You, Chief. A bit.
+  them: Hm. That's the moustache. Ask Mensah. He'll vouch I'm harmless. Mostly.   #funny
+
+// ---- from colleague
+
+== first-count
+topic: work
+when: tier>=colleague
+them: First posting, I was a rating. My Chief had me count every door on the ship.
+them: Took me a week. Got it wrong. Did it again. Got it right. Never forgot it.
+ask: What's the first thing you'd teach a new hand?
+listen: How many doors were there?
+  them: Four hundred and six. I can still name the odd ones. Don't make me.   #funny
+share: Where the kettle is. And who to ask.
+  them: Hm. Fair. In that order, probably. The rest follows from tea and a name.   #warm
+cheer: How to look busy near Calder.
+  them: Doesn't work. She hears it. You'll learn that the hard way. Everyone does.   #funny
+
+== bad-at
+topic: hobby
+when: tier>=colleague
+them: I can't sing. I can't dance. I can stand very still for a very long time.
+them: Mensah says it's a talent. He means it as a joke. It is a talent.   #funny
+ask: What are you surprisingly bad at?
+listen: Have you tried singing?
+  them: Once. The jam. Mensah stopped the music to ask if I was all right. Never again.   #funny
+share: Keeping track of time.
+  them: Hm. That one I can help with. Set two alarms. Trust the second.
+cheer: Standing still. Hopeless.
+  them: Then we'd make a good pair on watch. You move. I don't. Covers everything.   #funny
+
+== grey-day
+topic: day
+when: tier>=colleague mood:low
+them: More "Hm" than usual today. Mensah's counted. Tired. Nothing more.
+them: I'll walk an extra deck. It'll pass. It always does.
+ask: What gets you through a grey day?
+listen: Want company for the extra deck?
+  them: Hm. Yes. Don't talk. Just walk. That's the best kind of company there is.   #warm
+share: Someone to sit with for a bit.
+  them: Then sit. I'm here. I'll not say much. That's how I sit with people.
+cheer: Pudding. Two, if it's very grey.
+  them: Hm. I'll allow two. Today only. Watch's orders.   #funny
+
+== all-adequate
+topic: day
+when: tier>=colleague mood:high
+them: Everything's adequate today. All of it. The doors, the drill, breakfast.
+them: Don't look at me like that. It's a good day. That's what it sounds like.   #funny
+ask: Tell me a proper good day, then. What's in it?
+listen: What made it adequate?
+  them: A junior did the right thing before I'd said a word. That's the whole of it.   #warm
+share: Good work, then good company.
+  them: Hm. Same as mine. In the same order. You'll do.
+cheer: You saying "more than adequate".
+  them: Don't push it. Tomorrow, maybe. If the doors behave.   #funny
+
+== stand-in-front
+topic: crew
+when: tier>=colleague
+them: My juniors. Tomas, Vasquez, Nakamura, the rest. They think I'm hard on them.
+them: I'd stand in front of any one of them. Without a word. They don't need to know that.
+ask: Who would you stand up for, without being asked?
+listen: Do they know, really?
+  them: Some do. Tomas does. He pretends not to. That's how I know he knows.   #warm
+share: Anyone in my bunk room. No question.
+  them: Good. Then you're Watch already, in the way that counts. The rest is drills.
+cheer: Anyone Brennan's cross with.
+  them: Brave. Foolish. Hm. I'd stand behind you.   #funny
+
+== own-company
+topic: work
+when: tier>=colleague
+them: Patrol nights were long, and very dark. You learn your own company.
+them: I'm decent company. Quiet. Doesn't interrupt. Agrees with me mostly.   #funny
+ask: Are you good company for yourself?
+listen: Did you ever get lonely out there?
+  them: Some nights. You learn to keep a list of people to tell things to later. Helped.   #warm
+share: Some days. Not every day.
+  them: Hm. Honest. Start with a book and a quiet corner. Builds up from there.
+cheer: Terrible company. I talk too much.
+  them: Then you'd suit Mensah. He talks to himself on rounds. Says it's company.   #funny
+
+== pencil
+topic: plans
+when: tier>=colleague
+them: Planning next month's drills. I write them in pencil. Things change.
+them: Pen's for after. When it happened. Pencil's honest about before.
+ask: Do you plan in pen or in pencil?
+listen: What's in next month's plan?
+  them: Can't say. Spoils the drill. You'll know when the tone goes. Be at your post.   #funny
+share: Pencil. I change my mind a lot.
+  them: Good. A plan that can't change isn't a plan. It's a hope.
+cheer: I plan on a napkin. Then lose it.
+  them: Hm. Then plan nothing. Turn up early. Same result, fewer napkins.   #funny
+
+// ---- from friend
+
+== kinds-of-hm
+topic: crew
+when: tier>=friend
+them: Mensah says I've eleven kinds of "Hm". I've two.
+them: One means yes. The other means also yes, but I'm not saying so.   #funny
+ask: Is there something you say that only friends understand?
+listen: Which one was that, just now?
+  them: Hm. The second one. You're learning. Don't tell Mensah. He'll want a twelfth.   #funny
+share: A word from home. Means everything's fine.
+  them: Keep it. Out here, a word from home is worth a deck of anything.   #warm
+cheer: "Hm." I've caught it off you.
+  them: Hm. That's yours now. Use it carefully. It carries.   #funny
+
+== marra
+topic: home
+when: tier>=friend
+them: I grew up on Marra Station. They rebuilt it twice while I lived there.
+them: Never the same corridor two years running. You learnt the doors or you got lost.
+ask: What did you grow up looking at?
+listen: Is that where the doors started?
+  them: Hm. Yes. Counted every one, every rebuild. Never stopped. Now you know why.   #warm
+share: Rooftops. Lots of them. And rain.
+  them: Then you had weather. Marra had pipes and the old maps. I'd swap, some days.
+cheer: A wall. Very good wall, though.
+  them: Hm. Walls are honest. On Marra they moved them every few years. Rude.   #funny
+
+== badly-done
+topic: crew
+when: tier>=friend
+them: I was short with a junior today. Over nothing. A door, half shut.
+them: That was badly done. By me. I told her so. Then I fixed the door myself.
+ask: How do you put things right, after?
+listen: Did she mind?
+  them: She said "Adequate, Chief." Mensah's been teaching them. I'll have words. Fond ones.   #funny
+share: Say it plainly. Then do better.
+  them: Hm. Yes. The doing better's the part that counts. Words are the start.   #warm
+cheer: Biscuits. Biscuits fix most things.
+  them: Not most. Some. Today, I took her a biscuit as well. Belt and braces.   #funny
+
+== my-joke
+topic: crew
+when: tier>=friend
+them: I told Mensah a joke. First in years. He laughed so hard he had to sit down.
+them: I've retired from jokes. Undefeated. One for one. He's still recovering.   #funny
+ask: Whose laugh is the best on the ship?
+listen: Will you tell me the joke?
+  them: Not telling. He'd want it back. It's mine. I'll keep it for an emergency.   #funny
+share: Yours, Chief. It's rare. That's why.
+  them: Hm. Don't spread it about. Rare's how I like it.   #warm
+cheer: Pell's. It sounds like a kettle.
+  them: It does. The whole of Deck 4 knows when Pell's heard something good.   #funny
+
+// ---- from close friend
+
+== kid
+topic: crew
+when: tier>=close
+them: I called you "Cadet" a long while. Mensah says it's time I stopped.
+them: I'm considering "kid". Not soft. Just right. Hm. Object now or it sticks.
+ask: What do your friends call you, when it's just them?
+listen: Why "kid"?
+  them: My first Chief called me it. Took me ten years to see he meant it kindly.   #warm
+share: Just my name. Said nicely.
+  them: Then I'll say it nicely. When I remember. "Kid" when I don't.   #warm
+cheer: "Trouble". They're not wrong.
+  them: Hm. I'll stick with "kid". "Trouble" goes in the log.   #funny
+
+== someone-checks
+topic: crew
+when: tier>=close
+them: Everyone needs somebody who checks on them. Mine's Mensah. Don't tell him.
+them: He walks past my door at night. Twice. Thinks I don't hear. I hear.
+ask: Who checks on you, when you've had a long day?
+listen: Could I be one, too?
+  them: Hm. You already are. That's why I said it. Don't make a thing of it.   #warm
+share: My family, by message. And you, lately.
+  them: Hm. Good. Both of those. Keep them both. I'll walk past your door as well.   #warm
+cheer: Nobody. I'm famously fine.
+  them: Hm. That's what I say. It's not true for me either. I'll check. Twice.
+
+== the-gym
+topic: hobby
+when: tier>=close
+them: The gym. All right. I'll discuss it. Once. Then never again.
+them: My back. The doctor's orders. Weights, after shift. It's working. Hm. There.
+ask: Is there something you started for one reason and kept for another?
+listen: Is your back better?
+  them: Much. Walked the long way twice yesterday. No twinge. Nandakumar was insufferable.   #funny
+share: The Wren. A job first, then the people.
+  them: Hm. Same. For a posting. Then for the people. You're one of them. That's all.   #warm
+cheer: Biscuits. For energy. Now for joy.
+  them: Fair. I'll not report it. Not today.   #funny

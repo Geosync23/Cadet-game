@@ -1,0 +1,63 @@
+@address friday-d26
+// EW1 (events writer), 2026-10-20. Day 26: four weeks, and guests. The Veyli visit's warning is today (Vance's memo
+// was Monday, Day 22; his Mail comes this evening and keeps its own time: she points to it, she doesn't give it). The
+// greeting is tomorrow, Saturday Day 27, 10:00 in the shuttle bay (Deck 5): the crew line the bay. Speaker Teshavi
+// leads the delegation (each Veyli has their own pronouns, facts.md 4; "the Speaker" is safe). Four weeks aboard is tonight at 18:40 in the Works
+// tea corner: its cake is a surprise ("We're not saying who"), so she doesn't say "cake". Calder's question (Pillar
+// 5) is at that tea too: not mentioned. Beats: a month of Fridays (who came, who went, the storm remembered); what
+// you've become (rank, work); the Veyli, who they are and how we host them; what she asks of everyone; four weeks
+// aboard tonight, and the close.
+// Versions: band: (the storm's result: the roster in the tea corner, or the scorch mark, both real traces);
+// myrank:; the placeholder {myjobs} (jobs you've closed since you came aboard).
+// A player let go on Day 20 has left on the Tern, so there's no version for them.
+day: 26
+from: Captain Odile Marrow
+mail: All hands: the Captain's Friday address | Four Fridays, a storm and a comet behind us, and a month of good work. My thanks, all of you. Four weeks aboard is tonight, in the Works tea corner.
+== lines
+vance: Settle, please. The Captain.   [nod]
+marrow: Afternoon, everyone. Our fourth Friday. For some of you, that's every Friday you've had.
+// beat 1: a month of Fridays: who came, who went, the storm remembered
+? !swap
+marrow: A month ago {me} came aboard. Since then: the Line, a storm, a comet.   [gesture]
+? swap
+marrow: A month since {me} came aboard: the Line, a storm, our first guests, a comet.   [gesture]
+?
+? band:smooth
+marrow: The storm crew's roster is still pinned up in the tea corner. I read it some evenings.   #warm
+? band:bumpy|rough
+marrow: There's still a scorch mark in the relay room. Chief Calder wants to keep it. So do I.
+// beat 2: what you've become (your rank, your work)
+? myrank:specialist
+marrow > you: {me}: a junior four weeks ago, an Engine Specialist today. Rare.   #warm
+? myrank:senior
+marrow > you: {me}: a junior four weeks ago, a Senior Officer today. The junctions behave for you.   #warm
+? myrank:officer
+marrow > you: {me}: a junior four weeks ago, an Officer today, with your own key.   #warm
+? myrank:junior
+marrow > you: {me}, four weeks with us. The good roads up are rarely quick.   #warm
+?
+marrow: Jobs on the Works board with your name on them: {myjobs}. The ship runs better for it.
+marrow: Rank is nice. The people you sit with at dinner matter more. Find them. Keep them.
+// beat 3: the Veyli, who they are and how we host them (swap: Monday's comet, looked back on; the event swap, 0.93.2,
+// FX22b's draft for SW2 to polish: the visit was Days 16-19, the comet Monday Day 22 at 21:30; no Veyli tomorrow;
+// comet without the swap: Monday's comet, looked back on, before the Veyli; FX25, 0.93.2)
+? swap
+marrow: On Monday night, the comet. Half the ship at the windows, and not a word said.   [gesture]
+marrow: After a storm and three days of guests, I think the sky owed us that one.   #warm
+marrow: What I ask: keep looking up. Out here there's nearly always something worth seeing.   #warm
+? !swap comet
+marrow: On Monday night, the comet. Half the ship at the windows, and not a word said.   [gesture]
+? !swap
+marrow: Now, guests. Tomorrow at ten, a Veyli delegation comes aboard, led by Speaker Teshavi.
+marrow: The Veyli are our cousins out here. They came this way long before us.
+marrow: Proud, careful, and very good at noticing. Ask them about the long ship. They like that.
+marrow: Envoy Saruth asks me to remind you: do not bow. Most of us do it wrong.   #funny
+marrow: Commander Vance will brief you tonight. He has a list. Of course he has a list.   #funny
+vance: Three items. It's a short list.   [nod]
+// beat 4: what she asks of everyone
+marrow: What I ask: be yourselves, be kind, and answer their questions. They'll have a great many.
+marrow: Line the shuttle bay with me tomorrow, if you're free. Let's show them the ship we are.   #warm
+?
+// beat 5: four weeks aboard tonight, and the close
+marrow: Works has something for {me} after dinner. I'm not allowed to say what.   #funny
+marrow: Dinner's at five. Enjoy your weekend, those of you who have one.   [gesture]

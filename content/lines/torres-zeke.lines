@@ -154,9 +154,21 @@
 // 'free' step, or you leave the table after introChief); then the first-night bed arrow. Sim engineer 5's key; said IN
 // ORDER, one flag key per line. Replaces walk.free (removed 0.48.58).
 ? flag:walk.goodnight.1
-- Right, that's me. Evening's yours. Have a wander, explore.
+- Right, that's me. Breakfast from seven, shift at nine, tea at one.
 ? flag:walk.goodnight.2
+- Off at five. Dinner till half eight. Weekends off, like most of Works.
+? flag:walk.goodnight.3
+- Then the evening's yours. Have a wander. Gym, lounge, Tiles, bed.
+? flag:walk.goodnight.4
 - Shift's at nine tomorrow. Get some sleep soon.   #warm
+// step: the end of training day (the patch, #18/#19): at 16:50 on Day 1 he comes to find you and says these in order
+// (section 21b's introDayEndTick), then the arrow goes to the time clock and, once you've clocked out, to the beam.
+? flag:walk.trainend.1
+- Good job today. Proper work, that.   #warm
+? flag:walk.trainend.2
+- Tomorrow you're on your own. You'll be fine. Read the card twice.
+? flag:walk.trainend.3
+- Clock out first, then come to the beam. They're waiting for you.   #warm
 
 // ---- Day 1: his talk-through on the shadow job (said as bubbles while you work; replaces INTRO_JOB_LINES on
 // claude/arrival). Each step is gated by flag:walk.job.<step>, which the onboarding hook sets. 60 characters or fewer.
@@ -273,7 +285,7 @@
 ? flag:walk.lift.1
 - The lift. Runs right up the spine of the ship.
 ? flag:walk.lift.2
-- Six decks. Bridge at the top, engines at the bottom.
+- Seven decks. Bridge at the top, engines at the bottom. R is the fun one.
 ? flag:walk.lift.3
 - Four, please. Go on, the panel's all yours.
 ? flag:walk.lift.4
@@ -284,7 +296,7 @@
 ? flag:walk.wing.1
 - Deck 4. Quarters. The junior wing's this way.
 ? flag:walk.wing.2
-- Eight bunk rooms. You're in One. Good room, One.
+- Eight bunk rooms. You're in One. First, we drop your bag.
 ? flag:walk.wing.3
 - Washrooms. Hot water till ten, then it's character-building.   #funny
 ? flag:walk.wing.4
@@ -292,7 +304,7 @@
 ? flag:walk.wing.5
 - Don't play Rina at Tiles. Or do. Just don't expect to win.   #funny
 ? flag:walk.wing.6
-- Laundry there. Put your name in everything. Trust me.   #funny
+- Laundry's on the far corridor, past Bunk 4. Put your name in everything.   #funny
 // point: officers
 ? flag:walk.officers.1
 - Officers' corridor. Cabins, all the way along.
@@ -325,7 +337,7 @@
 - Lounge at the bow. Big curved windows. Best seats aboard.
 // point: servery
 ? flag:walk.servery.1
-- Tray first, then the servery. Take what smells best.
+- The servery. Trays here. Food after a sit-down.
 ? flag:walk.servery.2
 - That's Chef Brennan. Thank her on the way past. It matters.
 ? flag:walk.servery.3
@@ -353,7 +365,7 @@
 ? flag:walk.more.2
 - First month, Calder had me on scrubbers. Every single one.   #funny
 ? flag:walk.more.3
-- Ask me anything, by the way. Tap me. Questions are the best bit.
+- Forget my name? Tap me. I won't be offended. Much.   #funny
 ? flag:walk.more.4
 - I talk to the coils. Out loud. You'll get used to it.   #funny
 ? flag:walk.more.5
@@ -373,6 +385,7 @@
 
 // ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
 == smalltalk
+? time:morning
 - Ten more minutes with the coils. Breakfast in five.
 ? mem:moment.torres.scarf
 - Row forty-two of the scarf. It's getting long.   #funny
@@ -795,10 +808,11 @@
 // Day 1: the training-day opener at the briefing's end
 ? flag:walk.train.open.1
 - Morning! It's a training day today. I'm with you all day.
+// (the user, patch 0.92.3 #7: clock in right after his hello, then the rest; the two lines swapped, none removed)
 ? flag:walk.train.open.2
-- Anything you're not sure of, ask. That's what I'm here for.   #warm
-? flag:walk.train.open.3
 - First, clock in. The time clock's by the tea corner.
+? flag:walk.train.open.3
+- Anything you're not sure of, ask. That's what I'm here for.   #warm
 // Day 1 dinner: you can't do every tradition (after walk.dinner.eve.1-3)
 ? flag:walk.eve.choose.1
 - You can't do every tradition in a day. Nobody can.
@@ -837,7 +851,7 @@
 
 // Zeke's welcome Mail on your device (the arrival evening: he tells you to open it). "Subject | body", unsigned.
 == mail.zeke.cabin
-- Everything I didn't say | Your device has the lot: Mail, Schedule, Calendar, the Map and your Needs. Breakfast's from six till nine. Shift starts at nine in the Works bay; Calder's briefing is at ten to nine. Clean clothes live in your wardrobe: change each morning, and do your laundry on Deck 4 when they run out. Tea and biscuits at one. Ask me anything, any time.
+- Everything I didn't say | Your device has the lot: Mail, Schedule, Calendar, the Map and your Needs. Breakfast's from seven till nine. Shift starts at nine in the Works bay; Calder's briefing is at ten to nine. Clean clothes live in your wardrobe: change each morning, and do your laundry on Deck 4 when they run out. Tea and biscuits at one. Ask me anything, any time.
 
 // Name on the beam (first Monday after shift, the Works bay cross beam; seat T's flags trad.beam.<n>, in order).
 // Restored in playtest 1: 2799442 (0.48.82) cut these by mistake. He hands you the pen and tells you to tap the beam.
@@ -850,3 +864,198 @@
 - Tap the beam where you want it. Next to mine, if you like.   #warm
 ? flag:trad.beam.4
 - There. You're part of the bay now. Properly.   #warm
+
+// ---- Pillar 5 Step 3 (head writer W2): the test job and promotion (C2), team jobs (M2), P2's word (H2). Kind 'work',
+// flags as in content/works/keys-p5.md "Step 3".
+== work
+// Day 9 (Tuesday): he comes by at the end of your test job
+? flag:train.t2.torres
+- Saw that. Don't tell her, but that was tidy.
+// M8: his calls when he leads
+? flag:team.call.start
+- Right, team. Spots. Wait for your name.
+? flag:team.call.brace
+- Brace. That's it.
+? flag:team.call.pass
+- Pass it over. Lovely.
+? flag:team.call.hold
+- Hold it there. Don't sneeze.   #funny
+? flag:team.call.crank
+- Crank. Steady does it.
+? flag:team.call.tip
+- Tip it back. Hold.
+? flag:team.call.valves
+- Valves. Left to right.
+? flag:team.call.open
+- Open them up again.
+? flag:team.call.drain
+- Drain it. Mind your boots.
+? flag:team.call.done
+- Done! Tea's on me. Well. Tea's on the kettle.   #funny
+// P2 (Day 15): his word, if Tomas's isn't given
+? flag:train.p2.word
+- Asking about that scrubber? Ask who sleeps near it.
+- And check they were in. The Roster knows.
+
+// the crew at the board after your promotion (seat X plays them as you come out)
+== promoted
+- There you are! Officer {nick}!   #warm
+- Knew it. Knew it on your first day.
+
+// ---- Pillar 5 Step 4 (head writer W2): rounds stage 2 (E1): when you find two or more worn machines on one round.
+== work
+? flag:round.two
+- Two worn on one round? You've got the eye now.
+- That's the job. Catch them worn. Proud of you.   #warm
+
+// ---- Pillar 5 Step 4 (head writer W2): M10 the workshop (E3): the first lesson at the lathe. Kind work, in order.
+== work
+? flag:train.m10.lead
+- Set it spinning. Go and have a tea. Ten minutes.
+- Now finish it by hand. That's where it gets good.
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Hey, everyone! This is {title}. Coil three sends its regards.
+== talk.answer
+- Great question! Right, so, picture a coil. A moody one.
+== talk.listen
+- Thanks for listening! Right, onward. Mind the coils.
+
+// ---- EW1 (events writer), short Fridays part E (plans/fridays-plan.md; moved in by FR2, turn 8): two goodnight lines
+// on Day 0, said between walk.goodnight.2 and walk.goodnight.3 only when SHORT_FRIDAY is on (section 18f's
+// friNightKeys; off, nothing asks for these keys)
+== week1
+? flag:walk.goodnight.friday.1
+- Fridays we knock off at half three.
+? flag:walk.goodnight.friday.2
+- Captain talks to all of us at four, then dinner.
+
+// ---- ZW1 (writer), the Day 0 device hand-over in bubbles (the user, 2026-10-23: no green box, no question; the mix
+// in plans/zeke-words.md). DS1's claude/zeke-tour plays walk.hand IN FILE ORDER, a bubble every 3.6 s; the device
+// is handed over on the 3rd line (INTRO_HAND.give = 3) and opens on mail.zeke.land after the last; walk.hand.after
+// plays once you close the Mail. walk.hand lines 3 and 7 and both walk.hand.after lines are his old introDevice.meet
+// lines, kept word for word (the last one split in two at its comma, for the bubble).
+== week1
+? flag:walk.hand
+- Oh, hold on. Nearly forgot the important bit.
+- Hands out. Careful, it's still warm from my pocket.   #funny
+- And this is yours. Your device.
+- There. Officially handed over. I'm a witness.   #funny
+- Most important thing you'll own aboard.
+- More than your boots. Slightly less than your mug.   #funny
+- Mail, Schedule, the Map, your Needs. The lot. Don't lose it.
+- It knows where you're meant to be before you do.
+- Annoying, but useful.
+- The Roster's in there. Every name aboard. Mine's best.   #funny
+- Lose it and you'll spend a week asking strangers what day it is.   #funny
+- There. Officially crew.   #warm
+- I left you a note in there. Have a look.
+? flag:walk.hand.after
+- Right, onward. The mess is on Deck 3.
+- And Brennan doesn't hold plates for anyone.
+
+// Zeke's Mail, written that Sunday morning before you landed (DS1's words, the user's pick): the device opens on it
+// after the last walk.hand line. "Subject | body", like mail.zeke.cabin (one line: Mail bodies are plain text).
+== mail.zeke.land
+- Before you land | New hand, I'm writing this before the Tern docks, so by the time you read it I'll have handed you this in person and said most of it already. Here's the rest. What do you do first? Dinner. Always dinner first. Then everything else. Is it always this much? First night, yes. By Thursday it's just home with a lift in it. And if you're the quiet sort, good. The quiet ones last longest. Tomorrow, ten to nine, the Works bay. I'll be the one with the tea. Zeke
+
+// ---- SW1 (2026-10-24, patch 0.92.3 item 15): his own Talk a while frames (main characters don't use the shared ones)
+== talk.start
+- Oh, hello. A proper chat? Yes. Sit. Tell me things.
+- There you are. Go on, then. What's the news?
+- A chat? Happy to. The coils can manage without me for a bit.   #funny
+? tier>=friend
+- {nick}. Good. I was hoping it'd be you.   #warm
+- Oh, brilliant. I've been saving a question for you.   #warm
+
+== talk.sit
+- Sit, sit. Mind the wool. There's always wool.   #funny
+- Grab a seat. I'll budge up. I budge very well.   #funny
+- Sit down. Properly. Feet up, if you like.
+
+== talk.filler
+- Sorry. Was I humming? I was humming.   #funny
+- Listen. That's coil two. Steady as anything.
+- I like this. Just talking. No board. No sulking coils.   #warm
+- Where was I? Doesn't matter. Go on, you talk.
+- Funny, isn't it. A whole ship humming, and us just sitting here.
+- I've learnt more from your questions than you'd think.   #warm
+
+== talk.end
+- Right, onward. That was lovely. Thank you.   #warm
+- Good talk. Properly good. Same again soon?
+- Off you go, then. I'll be thinking about that all shift.
+- That's set me up. I might even sing. You've been warned.   #funny
+- Thanks for sitting with me. It helps. It always helps.   #warm
+
+== talk.stop
+- Oh. Right. Off you go. We'll finish it properly another time.
+- No, go on. I'll hold the thought. I'll knit it into something.   #funny
+- Of course. Mind the coils on your way.
+
+== talk.go.shift
+- Ah, I'm on in five. Coil three's waiting. Later?
+- Sorry, shift's starting. Find me at the overlook after?
+
+== talk.go.bed
+- Bed for me. I'll say goodnight to the coils on the way. Tomorrow?
+- I'm yawning at you. That's rude. Tomorrow, properly?   #funny
+
+== talk.go.trad
+- I'm running {trad} tonight. Come and help me start it?
+- Sorry, {trad}'s starting. Walk down with me?
+// ---- ZW1 (writer), patch 0.92.3 item 26: you in dirty clothes. clothes.remark: yesterday's clothes (flag:clothes.stale);
+// clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3's hook). Bubbles, 60 characters or fewer; kind, never mean.
+== clothes.remark
+? flag:clothes.stale
+- Yesterday's shirt? I won't tell Calder. She'll know anyway.   #funny
+- Same clothes as yesterday? Wardrobe, {me}. Properly.
+? flag:clothes.stale tier>=friend
+- I did a whole week in one shirt once. Don't. Ask Reyes.   #funny
+== clothes.grubby
+? flag:clothes.grubby
+- Look at you. Proper Works grime. I'm almost proud.   #funny
+- Coil three did that to me once. Change before tea.   #funny
+? flag:clothes.grubby tier>=friend
+- Good job, by the look of you. Now change. Properly.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
+== bday.circle
+- Happy birthday, {other}! Coil three sends her best.   #funny
+- Happy birthday! I'd knit you a scarf, but you'd see it.   #funny
+== bday.circle.you
+- Happy birthday, {me}! Proper cake, proper candles. Properly.   #warm
+== bday.thanks
+- Thanks, all! Right, cake. Then onward. Properly.   #warm
+- You lot. I'm going to hum. Sorry. Thank you.   #funny
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-2): the Senior Officer promotion
+== work
+// his word at the end of the Tier 3 test, if he's near (train.t3.torres)
+? flag:train.t3.torres
+- That came back on first time? Properly first time? Brilliant.
+- I'd have warned three people and the coils. Good job.   #funny
+// outside the glass during your result (pu3.promo.glass): a thumbs up, then this
+? flag:pu3.promo.glass
+- Well? Well? Your face. You passed. I knew it.   #warm
+// the bay that evening, after the test
+? flag:pu3.promo.passed
+- Don't tell me. I'll know tomorrow. I'll know by your walk.   #funny
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-6): his word for P4 (flag train.p4.word) and at the old-mysteries board (mys.word)
+== work
+? flag:train.p4.word
+- Two gauges on this one, and they don't agree. One's fibbing.
+- Get a third reading. The scanner doesn't take sides.
+? flag:mys.word
+- Old ones. Nobody's cracked them. I've tried the Tuesday hum twice.
+- Take one if you like. No rush. They've waited years.
+- Calder pinned the first. She says it's not personal. It's personal.   #funny
+
+// PZ6 (2026-10-27, Pillar 5 Step 6, S6-8): stand-ins for his words for P7 and P8 (flags train.p7.word, train.p8.word)
+== work
+? flag:train.p7.word
+- Labels on that panel? Gone. Years ago. Make a grid. It's oddly relaxing.
+? flag:train.p8.word
+- Five alike, one bad. The rig says how many, not which. Three goes. Plan them.

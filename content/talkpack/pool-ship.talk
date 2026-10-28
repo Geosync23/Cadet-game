@@ -1,0 +1,121 @@
+@talks pool
+topic: ship
+// TW1, the Talk a while pack: shared pool, topic ship (the Wren herself). Facts from content/facts.md, sections 1-2.
+
+== hum
+them: Listen. You hear that hum? That's the Wren, thinking.
+them: You stop hearing it after a week. Then you miss it on leave.
+ask: What do you think of her so far? The Wren?
+listen: Does she ever go quiet?
+  them: Almost never. If she does, Works is already running.   #funny
+share: I like her. She feels lived in.
+  them: Lived in. That's it exactly. She's a home.   #warm
+cheer: She's lovely. Bit far from the shops.
+  them: The crew store's a shop! Sort of. It has socks.   #funny
+
+== favourite-spot
+them: Found a favourite spot aboard yet? Everyone has one.
+them: Mine changes. Right now it's a seat by a window.
+ask: Where do you go when you want a bit of quiet?
+listen: Which window?
+  them: I'm not telling. Then it wouldn't be quiet.   #funny
+share: My bunk, with a book.
+  them: A bunk and a book. The smallest holiday aboard. Perfect.
+cheer: The mess. Right by the toast.
+  them: That's not quiet. That's breakfast. Still counts.   #funny
+
+== smells
+when: !who:sato|brennan|calder
+them: Every deck smells different. Have you noticed?
+them: Five is oil. Three is toast. The garden's rain.
+ask: Which deck's your favourite smell?
+listen: What does Deck 2 smell of?
+  them: Paper and polish. And whatever Sato's brewing.   #funny
+share: Three. Toast, every time.
+  them: Correct answer. Brennan would be proud.
+cheer: Five. I like oil. Is that odd?
+  them: Very Works of you. Calder would approve. Quietly.   #funny
+
+== corners
+when: tier>=acquaintance
+them: I still find corners I've never seen. After all this time.
+them: Last week, a little seat behind a pipe. Someone had left a cushion.
+ask: What's the oddest place you've found aboard?
+listen: Whose cushion was it?
+  them: No idea. I left it there. It's someone's secret.   #warm
+share: I'm still finding the normal places.
+  them: That's fine. The odd ones find you later.
+cheer: The way back to my bunk. Daily.
+  them: The ship moves the corridors at night. Everyone knows.   #funny
+
+== lift
+when: tier>=acquaintance !who:kovac-zainab|cruz-tove|keane-davi
+them: The lift's the heart of the ship, really. Everyone meets in it.
+them: "Four, please." I say it in my sleep.   #funny
+ask: Who's the best person you've shared the lift with?
+listen: Who do you meet in it most?
+  them: The same five people. We nod. It's a club now.   #funny
+share: Someone who told me where everything was.
+  them: Lift guides. The best kind. Pass it on.
+cheer: Myself. Reflected in the door.
+  them: Good company. Doesn't talk back.   #funny
+
+== creaks
+when: tier>=acquaintance
+them: She creaks at night, the Wren. Little ticks and settles.
+them: Old ships talk. She's just telling us she's fine.
+ask: Do the night noises bother you?
+listen: How old is she?
+  them: Old enough to have stories. Young enough to keep going.
+share: Not any more. I like them now.
+  them: Me too. It's like rain on a roof. Nearly.   #warm
+cheer: Only when they sound like footsteps.
+  them: That's the Watch on rounds. Probably.   #funny
+
+== portraits
+when: tier>=acquaintance !who:marrow
+them: Have you looked at the portrait gallery on Deck 2?
+them: Every captain the Wren's had. All very serious.
+ask: Do you ever wonder about the people who were here before us?
+listen: Which captain do you like best?
+  them: Varga. Started the gallery. Looks like they're about to laugh.
+share: Yes. Who sat in my bunk before me.
+  them: Somebody who left it fine for you. That's the deal, really.   #warm
+cheer: Only whether they had better biscuits.
+  them: Unknowable. But probably not. Brennan's are the best.   #funny
+
+== windows
+when: tier>=colleague
+them: There's a window aboard where the stars just pour past.
+them: I stood there twenty minutes once. Forgot I was going somewhere.
+ask: What do you think about, looking out there?
+listen: Where were you going?
+  them: Dinner. I was late. Totally worth it.   #funny
+share: Home, mostly. How far it is.
+  them: Far. But the stars are the same ones. Some of them.   #warm
+cheer: Whether anyone's looking back at us.
+  them: Waving, probably. Wave back. Just in case.   #funny
+
+== kind-ship
+when: tier>=colleague !who:brennan
+them: She's old, but she's kind, the Wren. Like a good boot.   #funny
+them: She's had seventy-odd people at a time in her for years. You feel it.
+ask: What makes a ship good, do you think? Not the engines.
+listen: Has she always been like this?
+  them: Longer than anyone aboard can say. Ask the portraits.
+share: The people. Always the people.
+  them: Right answer. The engines are just how we get about.   #warm
+cheer: A good mess. Everything else follows.
+  them: Brennan would agree. Loudly.   #funny
+
+== leave-her
+when: tier>=friend !who:tomas|marrow|brennan !thread:leaving
+them: Sometimes I wonder how I'll feel the day I leave her. Silly.
+them: Not soon. Not planning to. Just, one day. Everyone does.
+ask: Do you think you'll stay on the Wren a long time?
+listen: What would you miss most?
+  them: The people. Then the hum. Then the toast, honestly.   #warm
+share: I hope so. I'd like to.
+  them: Good. I'd like that too. Selfishly.   #warm
+cheer: They'll have to carry me off.
+  them: I'll help carry. Slowly. Very slowly.   #funny

@@ -16,6 +16,10 @@
 - {hi}. Don't worry, nobody knows where anything is for a week.   #funny
 - Hello, new face. You'll be fine. Everyone's friendly here.
 - {hi}. If you get lost, follow the smell of toast to the mess.   #funny
+- {hi}. Found your way about yet? Deck signs help. Mostly.
+- Oh, {hi}. Still learning names? Me too, some days.   #funny
+- {hi}. Good to see a new face about the place.
+- {hi}. Ask anyone anything. We all had a first week.
 ? tier=acquaintance
 - {hi}, {nick}. Getting the hang of the place?
 - Oh, {hi}. Good to see you again.
@@ -59,6 +63,12 @@
 - I'd like that. Go on, what's new?
 - Talk? Always. Tell me everything.
 - Course. I was hoping someone would stop.   #warm
+- Go on, then. I could do with a sit and a natter.
+- Oh, yes please. My head's full of nothing much.   #funny
+- Mm, go on. Five minutes, then I'm all yours. Well, fifteen.   #funny
+- Nice. I was just thinking it's been a quiet one.
+- Yes. Let's. What's the news with you?
+- Always time for a chat. That's a ship rule. I just made it up.   #funny
 ? tier>=friend
 - For you? I've always got time.   #warm
 - Oh good. I've been saving things up to tell you.
@@ -68,6 +78,8 @@
 - Grab a seat. This one's comfy, I checked.   #funny
 - Oh, have a seat. I was getting bored of me.   #funny
 - Sit. Get comfy. I'm not going anywhere.
+- Have a seat. The good one's taken, but this one's fine.   #funny
+- Sit down. Feet up, if nobody's looking.
 
 == talk.filler
 - Anyway. What was I saying? Oh, never mind. It's nice, this.
@@ -80,6 +92,16 @@
 - You've got a good laugh. Use it more.   #warm
 - Sorry, I'm rambling. Stop me if I ramble.   #funny
 - Tea would make this perfect. Next time, tea.
+- Hark at us. Two people having a proper chat. Rare, that.   #funny
+- It's nice, isn't it? Just talking. Nobody needing anything.   #warm
+- Hm. I've lost my thread. Never mind, it'll turn up.
+- Listen to the vents. You stop hearing them after a month.
+- I keep thinking I should be doing something. Then I don't.   #funny
+- Nobody's called me on the comm in an hour. That's a record.   #funny
+- Funny, the things you end up talking about out here.
+- I'll remember this bit. The quiet bit. It's my favourite.
+- Where does the time go on a ship? Into the walls, I reckon.   #funny
+- Mm. That's a good question. I'll think about it later.
 
 == talk.end
 - That was nice. Let's do it again soon.   #warm
@@ -87,6 +109,16 @@
 - Good chat. I feel better for that.   #warm
 - Same time tomorrow? Only half joking.   #funny
 - That's the best part of my day sorted. Off you go.   #warm
+- Right. Back to it. That did me good, that.
+- Lovely. Let's not leave it so long next time.
+- Well, that went quickly. Good chats always do.
+- Thanks for stopping. Most people just wave.
+- I'll let you go. Same again some time?
+- That was a proper talk. I'd forgotten how nice they are.   #warm
+- Off you pop. I'll save my next story for you.   #funny
+- Good. That's put me in a better mood. Mind how you go.
+- Right, enough of me. Go and do something fun.
+- {thanks}. That was the nicest fifteen minutes I've had today.
 - Thanks, {nick}. I needed that.
 ? tier>=friend
 - You're good company, you know that? Go on, scoot.   #warm
@@ -97,6 +129,9 @@
 - Right you are. Finish this another day.
 - Go on, I'll keep the rest for next time.
 - No worries. I'll be here. Probably.   #funny
+- Off you go, then. We'll pick it up later.
+- Fair enough. Remind me where we were, next time.
+- Course. Go on, I'll hold the thought.
 
 == talk.go.shift
 - Shift in five. Catch me later?
@@ -154,6 +189,11 @@
 == roster.none
 - Nobody yet. Say hello to someone.
 
+// ---------------------------------------------------------------- PARKED (2026-10-20, TR1's call via lead 20)
+// The talk.<topic>.open/more/ask/reply/ans lines below (ten topics, hobby to plans) are UNUSED while TALK_PACK_ON is on:
+// the "Talk a while" pack (content/talkpack/*.talk, plans/talk-pack-plan.md) replaces them. They are kept, keys and
+// lines unchanged, for the switch-off path (TALK_PACK_ON off plays them as before). Marked cut, never deleted; taking
+// them out of the file is its own reviewed step. Recorded in design-doc.md ("Talking") and plans/talk-pack-plan.md.
 // ---------------------------------------------------------------- topic: hobby
 == talk.hobby.open
 - I've been {hobby} again. Can't stop, honestly.
@@ -461,3 +501,23 @@
 == talk.plans.ans.cheer
 - Now that's a plan I can get behind.   #funny
 - Best plan on the ship. What's on tonight?
+
+// ---------------------------------------------------------------- the rank on a crew card (patch #21; texts)
+// Shown before the title ("Junior Officer · Storekeeper"), not where the title already says it (Captain, XO, Head of …).
+== card.rank.captain
+- Captain
+
+== card.rank.xo
+- Commander
+
+== card.rank.chief
+- Department Chief
+
+== card.rank.senior
+- Senior Officer
+
+== card.rank.officer
+- Officer
+
+== card.rank.junior
+- Junior Officer

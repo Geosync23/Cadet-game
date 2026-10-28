@@ -1,0 +1,18 @@
+@crew amadi-asha
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- You stayed! Good. The best window on Deck 5 this week is yours. I've decided.   #warm
+? endgame:early
+- I sang at the window seat this morning. On purpose. Short version of why: you.   #funny
+? endgame
+- Ordinary shift. Coils, overlook, a cold tea by the glass. Sounds dull. It isn't.
+- The stars look the same from here as before. Somehow better. That's a technical term.   #funny
+- Bright side of staying: the dawn chorus keeps its audience. Dry side: the dawn chorus.   #funny
+
+== bye
+? endgame
+- Bye! Find a window. There's always a good one.

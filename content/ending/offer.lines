@@ -1,0 +1,97 @@
+@bank all
+// SW6 (ending writer A), the offer's lines (ending spec, section 1 and section 9: content/ending/offer.lines). The
+// scenes are meetings beside this file: endingOffer (the ready room), endingTell.stay | .go | .unsure,
+// endingTell.change.stay | .change.go, endingSearch (Saturday 19:30), crossingBackAddress.ask (the address's question).
+// FLAGS (agreed with lead 39 / EN1): end.calder.<engines|bridge|teach|unsure> (Calder's answer, SHIP.works.end);
+// end.offer (the offer's been made); end.now.<stay|go|unsure>; end.stay / end.go (settled at the address).
+// CANON: the offer is from Concord headquarters, through the Captain. The Admiral is her fish, never explained.
+
+// ---- the post, inserted into endingOffer after "It's a post, and it's yours if you want it." (two lines, in order;
+// meeting lines, 140 at most; said by the Captain). Coloured by your answer to Calder's question (Step 6, Day 26).
+== ending.offer.post.engines.1
+- The fleet's engine office. Every drive coil in the Concord, on one desk. Yours, partly.
+== ending.offer.post.engines.2
+- The Chief says you wanted to stay with the engines. Well. This is a lot of engines.
+== ending.offer.post.bridge.1
+- The command school. A place in the next class. People who start there end up in my chair.
+== ending.offer.post.bridge.2
+- The Chief says you wanted to learn the bridge. Well. This is where they teach it properly.
+== ending.offer.post.teach.1
+- The cadet academy. Teaching new ones before they ever see a ship. Where it all starts.
+== ending.offer.post.teach.2
+- The Chief tells me you said you wanted to teach. Well. They've noticed.
+== ending.offer.post.unsure.1
+- It doesn't say what, which is unusual. It says, and I quote, "Come and find out."
+== ending.offer.post.unsure.2
+- The Chief says you told her you didn't know yet. Headquarters thinks that's a fine start.
+== ending.offer.post.plain.1
+- Headquarters' engineering office. They decide what every Concord ship is built with.
+== ending.offer.post.plain.2
+- Your record went a long way up. Further than records usually go.
+// a slower player (the offer comes after the crossing back): replaces endingOffer's "change your mind" line
+== ending.offer.slow.change
+- And you can change your mind until Sunday evening. After that, I tell the ship.
+
+// ---- Calder, after: she walks out with you down from the ready room (the escort's walk, Thursday 16:30). Bubbles in
+// order, 60 at most, by her answer key; .plain when Calder's question was never answered.
+== ending.calder.walk.engines.1
+- You said you wanted to stay with the engines.
+== ending.calder.walk.engines.2
+- Well. That's a lot more engine than Deck 6.
+== ending.calder.walk.engines.3
+- I'm not telling you what to do. I'd notice, though.
+== ending.calder.walk.bridge.1
+- You said you wanted to learn the bridge.
+== ending.calder.walk.bridge.2
+- Well. That's the door to it. A big one.
+== ending.calder.walk.bridge.3
+- Whatever you pick, pick it properly. Like a job.
+== ending.calder.walk.teach.1
+- You said you wanted to teach. Well.
+== ending.calder.walk.teach.2
+- You taught Basil a coil in a day. I timed it.
+== ending.calder.walk.teach.3
+- I'd hate to lose you. Don't tell anyone I said that.
+== ending.calder.walk.unsure.1
+- You said you didn't know yet. Still don't?
+== ending.calder.walk.unsure.2
+- Good. Means you're thinking. Most people guess.
+== ending.calder.walk.unsure.3
+- Saturday's a long way off. Use all of it.
+== ending.calder.walk.plain.1
+- My two lines to them? Not telling. Both true.
+== ending.calder.walk.plain.2
+- Don't ask me what to do. I'd say stay. Unfair.
+== ending.calder.walk.plain.3
+- Saturday. Take all of it. Board's there meanwhile.
+// her last line at the foot of the stairs, every version
+== ending.calder.walk.close
+- Right. Back to it. The board doesn't know.
+
+// ---- the Captain's "About the transfer" button on her chat card (Thursday 16:30 until her address) and its choices
+== ending.ui.captain.button
+- About the transfer
+== ending.ui.captain.ask
+- You've come about the letter. Take your time. What's your answer?
+? flag:end.now.stay
+- Still staying? Or have you come to tell me something else?
+? flag:end.now.go
+- Still going? Or have you come to tell me something else?
+? flag:end.now.unsure
+- Still thinking? That's allowed. Or have you decided?
+== ending.ui.choice.stay
+- I'm staying on the Wren.
+== ending.ui.choice.go
+- I'm taking the post.
+== ending.ui.choice.unsure
+- I'm not sure yet.
+== ending.ui.choice.back
+- Not yet. I'll come back.
+// once it's settled at the address, the button's gone; her chat card line about it after
+== ending.captain.after
+? flag:end.stay
+- Headquarters wrote back. They said "pity". I said "quite".   #funny
+- I've told the Admiral you're staying. He took it well.   #funny
+? flag:end.go
+- The Tern's fuelled. I checked. Twice. Don't tell Vance.   #funny
+- I'll write to you. Badly, but I'll write.   #warm

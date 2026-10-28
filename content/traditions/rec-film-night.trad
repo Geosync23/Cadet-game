@@ -1,0 +1,36 @@
+@tradition rec-film-night
+// W3 (rec writer; lead 18: fields from plans/rec-traditions-plan.html FINAL and the brief; RA owns the format).
+// Film night in the auditorium: Saturdays 20:00-22:15, from the first Saturday after the first Captain's all-hands (lead
+// 17's call 1: when ship-wide events exist). It waits on the flag rec.film.moved (RA sets it, and stops the hand-written
+// junior common room film night then; the JCR becomes a quiet Saturday hangout). The screen comes down, the house lights
+// go down, popcorn from the galley. A gathering.
+k: 496
+title: Film night
+when: weekly saturday
+at: 20:00-22:15
+min: 45
+jitter: 30
+where: 7 room Auditorium: rec:seat
+hold: none
+who: juniors 50%, everyone 35%
+anim: everyone talk
+from: The rec deck
+flag: rec.film.moved
+
+== mail
+- Film night tomorrow, {time} in the auditorium. The screen comes down, the lights go down, and there's popcorn from the galley.
+
+== ask
+- Film tonight. I'm sitting at the back. I always fall asleep in the good bit.   #funny
+- Are you coming to film night? Bring a cushion, or come early for the good seats.
+
+== here
+- Shh, it's starting.
+- Pass the popcorn. Please. Thank you.
+
+== thanks
+- You find a seat as the lights go down. The film starts with a long shot of a lighthouse. Somebody sighs happily.   #warm
+
+== chatter
+- What's on at film night? Nobody ever knows till it starts.
+- I cried at the film. It was the lighthouse. It's always the lighthouse.   #funny

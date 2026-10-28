@@ -41,6 +41,13 @@
 - Torres has something for you to wear. Find him.
 == next.t2
 - Calder has a test job for you: Tier 2.
+// FX3: before the test job is set, the real condition (next.t2 only once it's open). {band}: your reputation now
+== next.t2.rep
+- Calder sets your Tier 2 test once people rely on you. You're at {band}.
+== next.t2.soon
+- You're ready for your Tier 2 test. Calder will set the day.
+== next.t2.set
+- Your Tier 2 test job: {day}, nine o'clock in the Works bay.
 == next.band.new
 - Keep at it: the board will teach you plenty.
 == next.band.steady
@@ -51,3 +58,29 @@
 - The real faults come to you first now. Show them why.
 == next.band.relied
 - Calder relies on you. That's not nothing.
+
+// ---- Pillar 5 Step 3 (head writer W2): the first promotion (C2), team jobs (M2), tracing (M3), P1 and P2 (H2)
+== next.wait.t2
+- Your test job is on the board. Calder's watching. Take it.
+== next.summons
+- Calder wants you in her office. Don't keep her waiting.
+== next.move
+- Tonight you move to cabin 4-23. Calder walks you there at five.
+== next.ceremony
+- The Captain commissions you at 17:15, Deck 1. Clean uniform.
+== next.m8
+- Team jobs: big machines, four pairs of hands, yours one of them.
+== next.wait.m8
+- A team job's posted. Be at your spot when it starts.
+== next.m9
+- Tracing: a fault that starts somewhere else. Calder, Friday.
+== next.wait.m9
+- Calder has the pipe kit for you. Go and see her.
+== next.p1
+- Some faults only show at some times. Calder has one.
+== next.wait.p1
+- Calder has a head-scratcher. Ask her when it happens.
+== next.p2
+- Someone saw the fault and you didn't. Tomas has an idea.
+== next.wait.p2
+- Find Tomas. He's got a word for you about the scrubber.

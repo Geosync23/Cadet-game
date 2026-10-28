@@ -1,0 +1,393 @@
+@talks brennan
+// TW1, the Talk a while pack: Chef Auda Brennan's own talks. Warm, quick, in charge; "love"; asks if you've eaten
+// first; pans that talk back. Never the fire, Port Halloran or Nell Arrowby (beat brennan.3); never criticises a cook.
+// SW2, patch 0.92.3 item 15: 26 more after TW1's four (her own pool only). needs: share, so the share answer is the
+// warm one. Not used: the fire, the old restaurant, Nell, blue sage, her mother's soup, the book (beat 1).
+only: own
+
+== eaten
+topic: food
+them: Have you eaten? Don't make that face, love. Have you actually eaten?
+them: Right. There's a covered plate on the grab shelf. It's yours. Go after.
+ask: What did your family cook when someone was poorly?
+listen: Do you ask everyone that?
+  them: Everyone. The Captain. The Envoy. The cold store, if it'd answer.   #funny
+share: Soup. Always soup, at ours.
+  them: Course it was. Soup's a hug you can eat. I'll remember that.   #warm
+cheer: Toast. Lots of toast. Endless toast.
+  them: That's a family that knows what's what. Bless them.   #funny
+
+== cold-store
+topic: work
+when: tier>=acquaintance
+them: The cold store ran warm again last night. Two degrees, love. Two.
+them: I was very polite to it this morning. Very polite. It knows what that means.   #funny
+ask: What's the one thing that gets under your skin, every time?
+listen: Has Works looked at it?
+  them: Calder's lot are on it. Lovely people. I'll still be watching it.   #funny
+share: Things left half done.
+  them: Oh, you'd do well in a kitchen. Finish it or don't start it. That's my rule.
+cheer: Cold tea. Like you and warm stores.
+  them: Ha! We understand each other, you and me. Cold where it should be, hot where it should.   #funny
+
+== pans
+topic: hobby
+when: tier>=colleague
+them: Hear that? That's a pan nearly done. Three minutes from done, that one.
+them: My mum used to sing to her pans, every night. I hum. Close enough.   #warm
+ask: Is there something you just know how to do, without thinking?
+listen: What does "done" sound like?
+  them: Quieter. Like a crowd settling. You'll hear it if you stand with me a while.   #warm
+share: Fixing small things. My hands know.
+  them: That's the best kind of knowing. Don't let anyone talk you out of it.
+cheer: Finding food. Wherever it is.
+  them: I've noticed. Biscuit tin's on the left shelf. I didn't tell you that.   #funny
+
+== bread
+topic: day
+when: tier>=friend
+them: Sunday mornings I bake bread. The juniors come and knead. Badly. Wonderfully.
+them: Some weeks it's the best hour I have. Floury hands, everyone talking.   #warm
+ask: When do you feel most at home aboard, love?
+listen: Why bread, out of everything?
+  them: It takes its time. You can't hurry it. Good for me, that. I'm a hurrier.   #funny
+share: Right now, honestly. Here.
+  them: Oh, love. Well. Then stay as long as you like.   #warm
+cheer: Sunday mornings. Apparently.
+  them: Sunday mornings. Floury ones. The best kind.   #funny
+
+// ---- SW2: any tier and acquaintance (14)
+
+== steamed-up
+topic: day
+them: Every time I open an oven, my glasses steam up. I cook half of dinner blind, love.
+them: Lukas offered to buy me a cloth on a string. Round my neck. Like a gran. Cheek.   #funny
+ask: What's the first thing you do when you start work? Before anything else?
+listen: How do you cook blind?
+  them: By ear, love. And by nose. My eyes are just for finding the spoon.   #funny
+share: Wash my hands. Then the board.
+  them: Good. Tea first would be better. I'll have a word with the board.   #warm
+cheer: Look for the biscuits.
+  them: That's the right order. Biscuits, then the day. I've raised you well already.   #funny
+
+== the-wave
+topic: work
+them: Six o'clock, the mess fills all at once. I call it the wave. You hear it coming.
+them: Trays, voices, the queue round the corner. My favourite ten minutes of the day, love.   #warm
+ask: What's the busiest bit of your day? The bit you brace for?
+listen: How do you hear it coming?
+  them: The lift goes three times in a minute. Then the doors. Then Pell. Always Pell first.   #funny
+share: The morning. Everyone wants Works at once.
+  them: Course they do. Have a proper breakfast, then. You can't ride a wave hungry.   #warm
+cheer: Getting to the front of your queue.
+  them: Oh, love! You'd be surprised how many people try that. I see you all, love.   #funny
+
+== pudding-vote
+topic: food
+them: Pudding's a vote, love. Whatever's left on the trolley at the end, that's lost.
+them: Rice pudding's lost four weeks running. I keep making it. Someone's got to back it.   #funny
+ask: What's your favourite pudding? I'm taking a count.
+listen: Who actually eats the rice pudding?
+  them: Holt. Every time. Never says a word about it. I put the jam on the side for him.   #warm
+share: Anything warm with custard.
+  them: Oh, love. That's a proper answer. Custard's on Thursday. I'll make extra. Just for you.   #warm
+cheer: Whichever one Pell hasn't seen yet.
+  them: Ha! Then you'll be eating fast. That boy finds a pudding like a dog finds a bone.   #funny
+
+== ship-timer
+topic: hobby
+when: tier>=acquaintance
+them: A junior gave me a kitchen timer once. Shaped like a little ship. Lovely thing.
+them: I've never set it. Not once. It holds the galley door open. It's very good at that.   #funny
+ask: Have you got a present you've never used, but you'd never give away?
+listen: Why don't you use timers?
+  them: The pans tell me. A timer only tells you what the clock thinks. The pans know.
+share: A scarf from home. Far too warm here.
+  them: Keep it, love. You'll want it one day. Things from home come round again.   #warm
+cheer: Pell's gift. A sock. Just the one.
+  them: Oh, love. That sounds like Pell. Keep it safe. It'll find its partner. They always do.   #funny
+
+== herb-jobs
+topic: hobby
+them: Every pot on my windowsill has a job. The thyme's on breakfast. The mint's on Fridays.
+them: Nobody picks them but me. I know how many leaves are on each one. Near enough.   #funny
+ask: If you had a windowsill and one pot, what would you grow?
+listen: Do you really count the leaves?
+  them: Not all of them, love. Just the basil. The basil knows I'm counting. It behaves.   #funny
+share: Something that smells like home.
+  them: Oh, that's the best answer there is. Tell me what. I'll ask Tove for a cutting.   #warm
+cheer: Biscuits. A biscuit tree.
+  them: If Tove could grow one, she would. Don't ask her. She'll try for a year.   #funny
+
+== fast-clock
+topic: ship
+them: The mess clock runs two minutes fast. I set it like that. Don't tell anyone, love.
+them: Everybody thinks they're late, so nobody is. Works a treat. Even on Commander Vance.   #funny
+ask: Are you an early person or a late one? Honestly, now.
+listen: Does Commander Vance know?
+  them: I think he does. He's never said. He sets his watch by it anyway. Lovely man.   #funny
+share: Early. Being late makes me itch.
+  them: Same here, love. I'm up before the ovens. We'll get on, you and me.   #warm
+cheer: Two minutes late, apparently.
+  them: Bless you. Then you're right on time. That's the trick of it. You've worked it out.   #funny
+
+== envoy-bows
+topic: crew
+them: The Envoy eats everything I put out. Slowly. Then bows to the empty plate. Every meal.
+them: I don't know what it means, love. But I've never been so pleased by a bow in my life.   #warm
+ask: Is there something polite you do at meals that came from home?
+listen: Have you asked the Envoy what it means?
+  them: Not yet. I'd hate to get it wrong. I just bow back. To the plate. Seems fair.   #funny
+share: We always said thank you to the cook.
+  them: Oh, bless your family. You've done it here every night. I noticed. I always notice.   #warm
+cheer: Clear my plate before anyone sees.
+  them: Oh, love. I do see, love. I see everything from that servery. Very tidy, though.   #funny
+
+== sit-on-hands
+topic: tradition
+them: Lukas runs the cook-along on Saturdays. My day off. I go. I sit at the back. On my hands.
+them: Twenty people, twenty bowls, one recipe. Twenty different pancakes. I don't say a word.   #funny
+ask: Do you cook at all? Even a little? Toast counts. Nearly.
+listen: Do you really not say anything?
+  them: Not a word. I nod. Lukas says my nodding's louder than shouting. He's not wrong.   #funny
+share: A bit. Simple things. Nothing fancy.
+  them: Simple's the hardest, love. Anyone can do fancy. Come on Saturday. I'll sit by you.   #warm
+cheer: A decent sandwich, on a good day.
+  them: That's a start. Lukas will have you on pancakes in a week. Hands on, love.   #funny
+
+== surprise
+topic: news
+when: tier>=acquaintance
+them: I always know when a birthday's coming. Somebody asks me, very casually, what they like.
+them: Then they stand there pretending they haven't asked. I bake. I never say a word.   #warm
+ask: Are you good at keeping a surprise? Or does it show on your face?
+listen: Has anyone ever guessed?
+  them: Only the Captain. She guessed her own cake from the smell in the lift. Can't fool her.   #funny
+share: It shows. I start smiling.
+  them: Ha! Same. I have to hide in the cold store. Good place for it. Nobody follows.   #warm
+cheer: Very good. You'll never know.
+  them: Oh, I'll know, love. You'll ask me what someone likes. Casually. I'll be ready.   #funny
+
+== week-off
+topic: plans
+them: One day I'll take a whole week off and eat someone else's cooking. Three meals a day.
+them: I'll be very polite about it. I'll only go in the galley twice. Maybe three times.   #funny
+ask: What would you do with a whole week off, love? No jobs. Nothing.
+listen: Whose cooking would you eat?
+  them: Lukas's. All week. And I'd say "lovely" every time, and mean it. Mostly.   #funny
+share: Sleep, mostly. Then call home.
+  them: That's a good week. Sleep first. The people at home can wait one morning.   #warm
+cheer: Eat your cooking. Every meal.
+  them: Oh, love! Well, that's my week off gone, then. Flatterer. Here. Biscuit.   #funny
+
+== spoon
+topic: work
+them: This spoon's thirty years old, love. Wooden. Burnt at the end. My first one.
+them: I've pointed it at captains. I've pointed it at Pell. It's done more than most officers.   #funny
+ask: Have you got a tool you'd never let anyone replace?
+listen: Who gave it to you?
+  them: Mum. My first day in a proper kitchen. "Point it, don't wave it." Best advice I've had.   #warm
+share: My first spanner. It's bent. I keep it.
+  them: Course you do. Bent's how you know it's yours. Never let anyone straighten it.   #warm
+cheer: My fork. Specifically my fork.
+  them: Ha! After my own heart, you are. Forks are very underrated, love.   #funny
+
+== steam-window
+topic: home
+when: tier>=acquaintance
+them: Back home I'd cook with the rain on the window. No rain here. Just steam on the porthole.
+them: I draw in it sometimes. A little cat. Esme drew a hat on it once. I've kept it in mind.   #funny
+ask: What weather do you miss most, now you're out here?
+listen: Do you miss the rain?
+  them: Some mornings. Mostly the sound. The pans and the rain, both talking at once.   #warm
+share: Wind. A proper windy day.
+  them: Oh, I know. Out here everything's so still. Open the cold store. That's a breeze.   #funny
+cheer: None. I've got the cold store.
+  them: Ha! The cold store's weather enough for anyone. Moody, cold, never as promised.   #funny
+
+== humming
+topic: day
+when: tier>=acquaintance mood:high
+them: I'm humming, aren't I? Lukas says I hum when it's going well. He can hear it in the mess.
+them: Everything's risen, nothing's caught and the cold store's behaving. Three in a row, love.   #warm
+ask: What do you do when a day's going well? Some people whistle.
+listen: What do you hum?
+  them: Whatever Mum sang to her pans. I don't know the words. I've never known the words.   #warm
+share: Tell someone. Usually my family.
+  them: Good. Good days want telling. Go and call them. Then come back and tell me.   #warm
+cheer: Worry. It can't last.
+  them: Oh, love. It can. Sit down. Have a scone. Let it last a bit.   #funny
+
+== waste-not
+topic: food
+them: Nothing goes in the bin in my galley. Yesterday's bread is today's pudding.
+them: Tomorrow it's crumbs on top of a pie. By Friday it's had a whole career.   #funny
+ask: Are you a waste-not person? Or does it go in the bin?
+listen: What happens to the last crumbs?
+  them: The garden. Tove takes them for the compost. Then they grow the tomatoes. Round it goes.   #warm
+share: Waste-not. My family saved everything.
+  them: Good families do. I could tell. You scrape your plate. You don't leave a pea.   #warm
+cheer: It goes in Pell. Same thing.
+  them: Bless you. Pell's my best bin. Don't tell him. He'll want paying.   #funny
+
+// ---- SW2: colleague (6)
+
+== not-nice
+topic: work
+when: tier>=colleague
+them: When a junior tastes for me, they can't say "nice". "Nice" isn't a taste, love.
+them: "Too sharp." "Needs salt." "Tastes like Sunday." That's what I want. Tell me something.   #warm
+ask: Go on, then. Describe your favourite food. No "nice" allowed.
+listen: Who's given you the best answer?
+  them: Tomas, about a stew. "It tastes like being picked up from school." I nearly cried.   #warm
+share: Warm and salty. Like a kitchen at home.
+  them: Oh, love. That's a real answer. That's the best kind. I'll cook to that.   #warm
+cheer: Crunchy. Then soft. Then gone.
+  them: Oh, love. That's a biscuit, that is. That's very accurate. You could taste for me.   #funny
+
+== first-dish
+topic: hobby
+when: tier>=colleague
+them: First thing I ever cooked, I was seven. Scrambled eggs, for Mum. With the shell in.
+them: She ate every bit. Said "Lovely, Auda." Then picked shell out of her teeth for an hour.   #funny
+ask: What's the first thing you ever made? Anything at all.
+listen: Did you ever tell her you knew?
+  them: Years later. She said "I know you knew." That's mothers for you, love.   #warm
+share: A birthday card. Covered in glue.
+  them: Oh, the glue ones are the best. Somebody kept it, I bet. Somebody always keeps those.   #warm
+cheer: A mess. A big one.
+  them: Ha! That's how every cook starts. I made a lovely mess. Then a lovely egg.   #funny
+
+== calder-cup
+topic: crew
+when: tier>=colleague
+them: Calder takes her tea the same strength every day. I've never once seen her taste it.
+them: She just knows. I make it before she asks now. She's never said a word. She's noticed.   #warm
+ask: Is there someone aboard whose habits you know by heart now?
+listen: How do you know she's noticed?
+  them: She nods at the cup. Once. From Calder, love, that's a whole conversation.   #funny
+share: My bunk. I know every snore.
+  them: Oh, love! That's love, that is. Knowing every snore. Bunks make families.   #warm
+cheer: Pell's. All of them involve food.
+  them: That's no secret, love. The whole ship knows Pell's habits. The grab shelf knows.   #funny
+
+== night-plates
+topic: work
+when: tier>=colleague
+them: Before I go to bed I leave plates out for the night shift. Names on the cloths.
+them: In the morning there's a note on a napkin. Dr. Yoon writes a joke. Always a terrible one.   #funny
+ask: Who looks after the people who work while we sleep, do you think?
+listen: Was the last one any good?
+  them: Something about a sleepy egg. I didn't get it. I laughed anyway. That's manners.   #funny
+share: Each other. And whoever's awake.
+  them: That's right, love. And me, with a plate. That's my bit. Everyone's got a bit.   #warm
+cheer: The coffee machine.
+  them: Ha! It works hardest of all of us. Only Yoon can make it behave, mind.   #funny
+
+== veyli-tea
+topic: plans
+when: tier>=colleague
+them: I'm learning to make Veyli tea properly. For the Envoy. The proper way, not my way.
+them: Every step takes as long as it takes. No hurrying it. I'm a hurrier, love. It's hard.   #funny
+ask: Is there something you'd like to learn from someone very different from you?
+listen: How's it going?
+  them: The Envoy says it's "very nearly tea". I've decided that's a compliment. I'm keeping it.   #funny
+share: How to slow down. Like the Envoy.
+  them: Oh, love. Me too. Sit with me one morning. We'll try it together. Very slowly.   #warm
+cheer: How to win at quiz night.
+  them: Ha! Ask Sato. Or Vance. Or don't. They'll explain for an hour. I'll bring sandwiches.   #funny
+
+== last-orders
+topic: day
+when: tier>=colleague
+them: There's a bell at the servery for last orders. One night I forgot to ring it. Once.
+them: Half the mess sat waiting till ten. Nobody wanted to be the first to leave. Bless them.   #funny
+ask: What's the smallest thing you do that would be missed if you stopped?
+listen: Did anyone say anything?
+  them: Holt rang it himself in the end. Very gently. Then went to bed. Kindest thing he's done.   #warm
+share: Saying good morning to everyone.
+  them: Oh, that'd be missed, love. It's the little bells that hold a place together.   #warm
+cheer: Eating the last biscuit.
+  them: Bless you. That's a duty, that is. Somebody's got to. Ring a bell before you do it.   #funny
+
+// ---- SW2: friend (3)
+
+== bossier
+topic: home
+when: tier>=friend
+them: Mum's started a cooking club for her street. Wednesday nights. She's bossier than me.
+them: She wrote: "Nobody on this street can hear a pan, Auda." I laughed all shift.   #funny
+ask: Who are you most like, in your family? Honestly.
+listen: Is she really bossier than you?
+  them: Oh, much. I learnt it all from her. I'm the gentle one, love. Ask anyone. Don't ask Pell.   #funny
+share: My mum, I think. More every year.
+  them: Oh, that's a lovely thing. You'll hear her in your own voice one day. I do. Every pan.   #warm
+cheer: Nobody. I'm the odd one out.
+  them: Every family needs one, love. Mine had me. Look how well I turned out.   #funny
+
+== why-love
+topic: crew
+when: tier>=friend
+them: You know why I call everyone love? My mum did. The postman. The cat. The milkman.
+them: I tried to stop once, my first year. Lasted a day. Then I called the Captain "love".   #funny
+ask: Is there a word you picked up from someone, that you can't stop saying?
+listen: What did the Captain say?
+  them: "Good morning, Chef." Not a flicker. Then she asked for seconds. I've loved her since.   #warm
+share: "Sorted." Everything's sorted, at home.
+  them: That's a good one. It sounds like a hug. Keep saying it, love. It suits you.   #warm
+cheer: "Love", now. Thanks to you.
+  them: Oh, love. It's catching, isn't it? Well. There's worse things to catch. Love.   #funny
+
+== table-four
+topic: ship
+when: tier>=friend
+them: Ten minutes after dinner. Everyone gone. Pans soaking. I sit at table four, by the window.
+them: Just sit. Feet up on the next chair. Nobody's allowed to ask me anything. Except you.   #warm
+ask: What do you do with ten minutes to yourself, if you get them?
+listen: Why table four?
+  them: You can see the whole mess. All the chairs pushed in a bit wrong. It's a good sight.   #warm
+share: Sit by a window. Same as you.
+  them: Then come and sit at four. Bring a tea. We'll not say a word. Lovely.   #warm
+cheer: Eat something. Every time.
+  them: Ha! Course you do. There's a biscuit in my apron. Always. Here.   #funny
+
+// ---- SW2: close friend (3)
+
+== slower
+topic: food
+when: tier>=close
+them: You eat slower now than when you came. Did you know that? I've watched. I watch everyone.
+them: First week, you ate like the tray might leave. Now you sit and talk. That's settled.   #warm
+ask: When did this ship start to feel like yours, love? Do you know?
+listen: Can you really tell from how people eat?
+  them: Always. Fast is new. Slow is home. Seconds is happy. You're on slow and seconds.   #warm
+share: When I stopped counting the days.
+  them: Oh, love. That's the moment. I stopped counting too, once. Never started again.   #warm
+cheer: When I found the grab shelf.
+  them: Bless you. The grab shelf's home to lots of us. Pell lives on it. Visit any time.   #funny
+
+== one-dish
+topic: plans
+when: tier>=close
+them: Before long, I'm teaching you one dish. Something you can make anywhere, for anyone.
+them: Not for you. Because one day someone will be sad, and you'll know what to do.   #warm
+ask: If you could make one dish perfectly, love, what would it be?
+listen: What dish will you teach me?
+  them: Eggs. Proper ones. No shell. You'd be amazed what eggs can do for a sad person.   #warm
+share: Something from home. For my family.
+  them: Then that's the one. Bring me how it goes. We'll get it right between us. Every bit.   #warm
+cheer: Pudding. Lots of pudding.
+  them: Ha! Pudding it is, then. Custard first. A cook who can do custard is never lonely.   #funny
+
+== happy-pans
+topic: ship
+when: tier>=close
+them: Somebody laughs at table two, the pans sound happier. I swear it, love. They do.
+them: You laughed at something Pell said last night. Every pan in the galley settled at once.   #warm
+ask: What makes a place feel like home, do you think? Really?
+listen: Do the pans really change?
+  them: They do. Don't tell Calder. She'd want it measured. Some things you just hear.   #warm
+share: People who notice when you're not there.
+  them: Yes. That's it exactly. And I notice, love. Every dinner. You know I do.   #warm
+cheer: A full plate. And a fuller one after.
+  them: Ha! You'd make a good cook. Feed them, then feed them again. That's the whole secret.   #funny

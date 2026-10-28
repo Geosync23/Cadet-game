@@ -1,0 +1,22 @@
+@crew halloran-emeka
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== greet
+? endgame:early time:morning
+- {hi}. Why did the cadet stay? For the tea! Ha. No, that's the whole joke.   #funny
+
+== chat
+? endgame:early
+- Lovely news. Lovely. Have you eaten? It's a scone sort of news.   #warm
+? endgame:early
+- Your mug's still on its hook. I'd got the paper out to wrap it. So glad I didn't.   #warm
+? endgame
+- No more promotion teas, so I've invented Tuesday tea. It's the same tea. On a Tuesday.   #funny
+? endgame:early
+- Brennan's given me an oven on Sunday. Says it's for you. I needed a visa. You're my visa.   #funny
+
+== bye
+? endgame
+- Off you go. Mind the rack on the way out, the end hook bites. Lovely.

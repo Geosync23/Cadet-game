@@ -1,0 +1,17 @@
+@meeting endingTell.stay
+// SW6 (ending writer A), your answer: STAY (ending spec, "Your answer"). Told to the Captain in person, from her
+// "About the transfer" button wherever she is (Thursday 16:30 to Sunday's address), or at her 19:30 Saturday search.
+// Two replies and her close. Sets end.now.stay (EN1). If you'd said Go before, play endingTell.change.stay instead.
+title: The Captain
+from: Captain Odile Marrow
+gist: You told the Captain you're staying aboard the Wren. She's writing to headquarters.
+== lines
+marrow: You've come about the letter. Go on. I'm listening.   [listen]
+marrow > you: Staying. Good. Selfishly, good.   [laugh]
+marrow: I'll write to headquarters tonight. Politely. They'll be disappointed, and they'll live.
+? choice
+* Was it the right answer?   flavour:listen
+  marrow: It was your answer. That's the only kind that's right. And yes. I think so.   [nod]
+* Tell them thank you, from me.   flavour:share
+  marrow: I will. In my best handwriting. Which is still not good.   [laugh]
+marrow: You can still change your mind until Sunday. I don't think you will. Carry on, {me}.

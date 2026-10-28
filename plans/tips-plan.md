@@ -58,7 +58,7 @@ The user's three asks after playing 0.60.3. All in section 15 (plus one no-prop 
 | t:sit | Energy first under 50 | Tired? Sit down anywhere for a bit: it slows the tiredness. Lying on your bunk rests you properly. |
 | t:food | Food first under 50, outside meal times | Missed a meal? The grab-and-go shelf in the mess on Deck 3 is always open. |
 | t:loo | Bathroom first under 50 | Public washrooms are on Deck 4 (the junior wing) and Deck 3. Cabin bathrooms are private. |
-| t:gym | Fitness first under 50 | The gym on Deck 3 has treadmills and weights. A workout every few days keeps you fit and quick on your feet. |
+| t:gym | Fitness first under 50 | The gym on Deck 3 has treadmills and weights. A workout most days keeps you fit and quick on your feet. |
 | t:call | Social first under 50 | Missing home? The call-home booths on Deck 3 put you through to family. |
 | t:bonus | First time a need gives a bonus (75+) | Needs kept high give bonuses: well rested, tasks go faster. The Needs app on your device shows what's helping and what's holding you back. |
 | t:view | About 5 minutes into play | Rotate turns the view and Walls lowers them so you can see into rooms. Pinch or scroll to zoom. |

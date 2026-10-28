@@ -1,0 +1,44 @@
+@template dreamy
+// ZW1 (writer), patch 0.92.3 item 26: crew comment when you wear dirty clothes. clothes.remark: yesterday's clothes
+// (flag:clothes.stale); clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3). Bubbles, 60 characters or fewer.
+// Kind, never mean: the joke is on the clothes, not on you.
+== clothes.remark
+? flag:clothes.stale
+- Yesterday's clothes. They've got a whole day in them.
+- That shirt's seen a sunrise already. Well, a shift.
+? flag:clothes.stale tier>=friend
+- Clean clothes feel like a new page. You'll see.   #warm
+== clothes.grubby
+? flag:clothes.grubby
+- You've got a little map of oil on you. Pretty, almost.
+- Is that grime? It looks like a tiny nebula.   #funny
+? flag:clothes.grubby tier>=friend
+- Go and change. Then tell me what made all that.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 5: more lines for the chat card's opener (greet, near), so a tap doesn't repeat.
+// Heard after a person's own lines are used up (FX13's no-repeat). {hi}, {nick} and {me} are the speaker's own words.
+== greet
+- Oh. {hi}. I was miles away. Light years.
+- {hi}. Have you noticed the hum today? It's softer.
+- {hi}, {nick}. You look like a good thought.
+- Hello. I was counting the lights. I lost count.
+- {hi}. Did you hear that? No. Maybe I didn't.
+- Oh, it's you. Lovely. Sit, if you like.
+- {hi}. The windows were very pretty this morning.
+- {hi}. I had a dream about the ship. She was happy.
+? tier>=acquaintance
+- {hi}, {nick}. You always turn up at the nice bits.
+- {hi}. I kept a thought for you. Now I've lost it.
+? time:night
+- Late, isn't it? The ship's quietest now. I like it.
+? time:morning
+- Morning. Everything's a bit new still. Isn't it?
+== near
+- I was supposed to be doing something. This, I think.
+- {room} has a nice echo. Listen. No? Oh well.
+- Don't mind me. I'm drifting, but I'm working.
+- This takes patience. I've got lots. Somewhere.
+- Look how the light falls here. Sorry. Hello.
+- I'll finish soon. Or later. It'll get finished.
+- Have you ever really looked at a bolt? They're lovely.
+- I'm humming, aren't I. I didn't notice.

@@ -1,0 +1,122 @@
+@talks pool
+topic: food
+// TW1, the Talk a while pack: shared pool, topic food. {dish} is today's dish. Brennan never says the Brennan ones.
+
+== seconds
+when: !who:brennan
+them: I always go back for seconds. Brennan pretends not to see.   #funny
+them: She sees. She just puts a bigger spoon in.
+ask: What's your favourite thing from the mess so far?
+listen: Does she ever say anything?
+  them: Once. She said "Good." and walked off. I felt knighted.   #funny
+share: Today's. I'd have it every day.
+  them: Tell her. She keeps a book of everyone's favourite.
+cheer: Whatever's still warm when I get there.
+  them: A practical eater. Respect.   #funny
+
+== soup-day
+them: Soup day is the best day. That's not up for debate.
+them: I'll hear arguments. I won't accept them.   #funny
+ask: Breakfast or dinner? If you could only keep one?
+listen: What makes a good soup, then?
+  them: Time. And someone stirring it who actually cares.   #warm
+share: Breakfast. I need it to function.
+  them: Wise. Nobody's at their best before toast.
+cheer: Second breakfast.
+  them: That's not a choice. That's a lifestyle. Fine, though.   #funny
+
+== tried-to-cook
+when: !who:brennan|dlamini-lukas|varga-tariq|madsen-ivo|walsh-esme|haddad-tamsin|halloran-emeka|tran-chloe|yilmaz-karin|mbeki-bo|mwangi-rafe|achebe-lumi|quaye-hiro|kowal-priya
+them: I tried to cook once, on leave. Never again.   #funny
+them: The smoke alarm and I are still not speaking.
+ask: Can you cook? Honestly?
+listen: What did you try to make?
+  them: Toast. I burnt toast. Twice. Same slice.   #funny
+share: A few things. Nothing fancy.
+  them: A few things is more than me. You're a chef, by my count.
+cheer: I can boil water. Mostly.
+  them: Mostly is the key word. Stay away from Brennan's pans.   #funny
+
+== herbs
+when: tier>=acquaintance !who:brennan
+them: The garden lot bring fresh herbs up. You can taste it.
+them: Some people grow them on their windowsills, for the galley.
+ask: Have you been up to the garden yet?
+listen: Who grows them?
+  them: Quite a few. Brennan collects. She knows every pot by heart.
+share: Yes. It smells like rain in there.
+  them: It does! I go there just to breathe, some days.   #warm
+cheer: Only to look at the big tree.
+  them: Everyone does. Don't climb it. Someone does, apparently.   #funny
+
+== grab-shelf
+when: tier>=acquaintance !who:pell
+them: Did you know about the grab shelf in the mess?
+them: Covered plates for anyone who misses dinner. For emergencies, and Pell.   #funny
+ask: Have you ever had to raid it?
+listen: Why is Pell on the list?
+  them: Pell misses dinner and is never sorry about it.   #funny
+share: Once. After a late job. It saved me.
+  them: That's what it's for. Brennan would be pleased.
+cheer: Not yet. I'm saving it for a bad day.
+  them: Good plan. It's best when you really need it.
+
+== biscuits
+when: tier>=acquaintance !who:brennan
+them: Someone's been leaving biscuits in the junior wing again.
+them: Everyone knows it's Brennan. Nobody says so.
+ask: Sweet or savoury, if you had to pick?
+listen: Why doesn't anyone say?
+  them: She'd stop if we made a fuss. So we eat them quietly.   #funny
+share: Sweet. Always sweet.
+  them: You and half the ship. The biscuit tin never lasts.
+cheer: Both. At once. In one bite.
+  them: Chaos. I love it.   #funny
+
+== chillies
+when: tier>=acquaintance !who:brennan|nandakumar|holt
+them: Nandakumar grows chillies in the garden. Brennan complains about them.
+them: Then she uses every single one.   #funny
+ask: How do you like your food? Hot or mild?
+listen: Are they really that hot?
+  them: Hot enough to make Holt blink. I've seen it.   #funny
+share: Mild, please. I'm new to the spicy ones.
+  them: Start small. Brennan will notice. She notices everything.
+cheer: Hot. Make my eyes water.
+  them: Brave. Brennan will approve.   #funny
+
+== home-dish
+when: tier>=colleague !who:brennan|tomas
+them: Brennan made a dish from {home} last week. Just for me, I think.
+them: I didn't ask. She just knew. I nearly cried into it.   #warm
+ask: What's a food that means home to you?
+listen: How did she know?
+  them: She keeps a book. Everyone's in it. That's all she'll say.
+share: Something my family makes on cold days.
+  them: Tell her. She'll try. She'll get it nearly right. Then right.
+cheer: Anything someone else cooks.
+  them: Ha! That's the best food there is, honestly.   #funny
+
+== baking
+when: tier>=colleague !who:brennan
+them: Brennan lets people bake on rest days. One oven at a time.
+them: She inspects the results. It's like an exam with crumbs.   #funny
+ask: If you baked for the whole ship, what would you make?
+listen: Has anyone failed the inspection?
+  them: Nobody fails. Some get a look. The look is enough.   #funny
+share: Bread. Something simple, done right.
+  them: Simple done right is the hardest. You'd pass.
+cheer: One giant biscuit. Everyone gets a corner.
+  them: Brennan would ask how. Then she'd want to try.   #funny
+
+== supper
+when: tier>=friend !who:pell
+them: Sometimes the best meal is a late one. A grab-shelf plate, whoever's still up.
+them: Two of us at one table, eating cold stew. Lovely.   #warm
+ask: Who do you like eating with, aboard?
+listen: Who do you eat late with?
+  them: Whoever's about. Not many. That's the nice bit.   #warm
+share: My bunkmates. And you, now.
+  them: Good company makes it taste better. Fact.   #warm
+cheer: Anyone who doesn't steal my pudding.
+  them: That narrows it down. Pell's out.   #funny

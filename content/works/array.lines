@@ -1,0 +1,37 @@
+@bank all
+// B3 (2026-10-26, Pillar 5 Step 5, S5-5; lead 40: no writer seat, the builder writes its own leftovers): M20 The sensor
+// array (24x), the keys the code reads that SW3's m20.lines (claude/p5s5-words) doesn't have. Same style. {time}: 10:00.
+// Keep these keys out of m20.lines (one home each).
+
+// the job board's cards
+== m20.card.cal
+- Calibrate the sensor array
+== m20.card.sweep
+- A full sweep: the sensor array
+// the dial's card title names it ({machine} in SW3's m20.cal.title)
+== m20.array.name
+- the sensor array
+// the array's modules, read at the panel ("M1 green · M2 amber ...")
+== m20.module.green
+- green
+== m20.module.amber
+- amber
+// said in person after the ask, the first time you're near the teacher (Mori, or Calder on Mori's days off)
+== m20.ask.say
+- You're the one Calder sent? {time}, the array room on Deck 2. Bring your eyes.
+// Mori wasn't at the lesson (her day off): her word the first time you're near her after it
+== m20.mori.later
+- Calder says you calibrated my array without me. I checked your numbers. Good.
+// the lesson in the teacher's own name (Calder on Mori's days off: RV21's S2; {name}: the teacher)
+== m20.ptr.with
+- The sensor array with {name}, {time}
+== m20.notice.with
+- The sensor array with {name} at {time}: the array room, Deck 2. Go at quarter to.
+== m20.ask.say.calder
+- The sensor array today, {time}, Deck 2. Hana's off, so it's me. Don't be late.
+// the Mail, after the word in person or the 09:30 notice (the record; "Subject | body")
+== m20.mail
+- Training: the sensor array | {time}, the array room on Deck 2, with {name}.
+// your turn after watching the lesson (the arrow to the job board)
+== m20.turn
+- Your turn: the sensor array, at the job board

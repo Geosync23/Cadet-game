@@ -1,0 +1,15 @@
+@meeting train.m8.torres-zeke
+// Pillar 5 Step 3, M8 team jobs: the fallback when Torres is the Works officer on shift (the by-list's first). Not on
+// Day 11 as planned (he's off on Thursdays). Seat M2 plays it. Head writer W2.
+title: Many hands
+from: Zeke Torres
+gist: Torres showed you team jobs: be at your spot, wait for the call, do your part.
+== lines
+torres-zeke: Big one today. Takes four pairs of hands. Yours are one.   [gesture]
+torres-zeke > you: Your spot's there. Brace when I say. Pass when I say. Easy.
+torres-zeke: The trick is waiting. Everyone wants to help early. Don't.
+? choice
+* Wait for the call.   rel:torres-zeke+1 flavour:practical
+  torres-zeke: That's the whole job. And not dropping things.   [laugh]
+* (Find your spot)
+  torres-zeke: Right. On my call, everyone.

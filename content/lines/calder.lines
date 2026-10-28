@@ -135,7 +135,7 @@
 ? week1:true weekday:mon
 - Briefing's done. You're with Torres. Watch his hands, not his mouth.
 ? week1:true weekday:tue
-- Your first job's mine. Glass office, quarter to nine. I'll pick it. You'll do it.
+- Your first solo job's mine. Glass office, quarter to nine. I'll pick it. You'll do it.
 - Rina has you at two. Health check. Go. It isn't optional.
 ? week1:true weekday:wed
 - Pick your own job today. Read the whole card. Then pick.
@@ -537,3 +537,306 @@
 ? flag:clothes.grubby
 - Change before you go near the galley.
 - Uniform. Wardrobe. Today.
+
+// ---- Pillar 5 Step 3 (head writer W2): the test job and the first promotion (seat C2), team jobs (M2), tracing (M3),
+// P1 (H2). Kind 'work', flags as in content/works/keys-p5.md "Step 3". Every line under a flag plays in order.
+== work
+// Day 9: the test job, Calder following you (C2: train.t2.step.take/fetch/make/job/tune/done/turnin; look and scan if 24a/24g add stops)
+? flag:train.t2.step.look
+- Round first. Find it yourself.
+? flag:train.t2.step.take
+- Take it from the board. Go on.
+? flag:train.t2.step.scan
+- Scan it. Read me the lowest.
+? flag:train.t2.step.fetch
+- One filter. You know the shelf.
+? flag:train.t2.step.make
+- Steady hands. Nobody's timing you. I am, but ignore me.   #funny
+? flag:train.t2.step.job
+- Old filter out. Mind the dust. New one seated.
+? flag:train.t2.step.tune
+- Fan's off true. Settle it. Listen to the hum.
+? flag:train.t2.step.done
+- Filter in. Fan settled. Turn it in.
+? flag:train.t2.step.turnin
+- That'll do. I'll write it up.
+// she comes to find you
+? flag:promo.fetch.summons
+- There you are. My office was the plan. Here will do.
+? flag:promo.fetch.move
+- Five o'clock was the plan. Down tools. Walk with me.
+? flag:promo.fetch.ceremony
+- The Captain's waiting. Nobody keeps the Captain waiting.
+// at the ceremony in a grubby uniform (C2: her look as you come in)
+? flag:promo.grubby
+- That uniform. Never mind. Too late now.
+// Day 10, about 17:00: the walk to 4-23 (C2 0.44.24, final: flags promo.walk.start/lift/corridor/door/inside; the box is X's)
+? flag:promo.walk.start
+- Right. Your things are already moving. With me.
+? flag:promo.walk.lift
+- Officers' corridor. You'll know it in a week.
+? flag:promo.walk.corridor
+- Your door's your own now. Knock on other people's.
+- Quiet hours after 23:00. Officers set the example.
+- People will ask you over. Go. Ask them back.
+? flag:promo.walk.door
+- Your name's already up. Don't make me change it.
+? flag:promo.walk.inside
+- Your things. Your key. Your cabin. Goodnight, Officer.
+// FX28 (2026-10-26, PROMO_BEATS_ON; drafted for SW2): the test morning in the bay, the result held at the turn-in, the
+// pip's half hour, and the walk to 4-23 after your dinner
+? flag:pb.promo.morning
+- Morning. Nine o'clock it goes on the board. Eat something first.
+? flag:pb.promo.passed
+- That's the test. Filter in, fan settled.
+- Result tomorrow, first thing. My office, 08:15. Not before.
+? flag:pb.promo.pip
+- Observation room. The Captain doesn't wait. Neither do I.
+? flag:pb.promo.fetch.move
+- Dinner's done, then. Walk with me.
+? flag:pb.promo.walk.start
+- Your things went up an hour ago. With me.
+// M8 team jobs: her calls when she leads
+? flag:team.call.start
+- Spots. Nobody moves until I say.
+? flag:team.call.brace
+- Brace. Hold it there.
+? flag:team.call.pass
+- Pass it. Both hands.
+? flag:team.call.hold
+- Hold. Steady.
+? flag:team.call.crank
+- Crank. Slowly.
+? flag:team.call.tip
+- Tip it. Hold it there.
+? flag:team.call.valves
+- Valves. One, two, three. In order.
+? flag:team.call.open
+- Open them. Same order.
+? flag:team.call.drain
+- Drain it down. Watch the gauge.
+? flag:team.call.done
+- Done. Good. Clean up before you go.
+// M9 tracing (Day 12): the walk along the water line
+? flag:train.m9.follow.give
+- Clip it on. Panel first, then read.
+? flag:train.m9.follow.map
+- The middle's the Deck 5 pumps. Start there.
+? flag:train.m9.follow.read
+- Full here. So it's downstream. Next.
+? flag:train.m9.follow.wrong
+- That's upstream. We know it's fine there. Walk.
+? flag:train.m9.follow.found
+- Full before, low after. There's your problem.
+? flag:train.m9.follow.done
+- Valve's in. Showers on Four run full. That's tracing.
+// P1 (Day 12, after tracing): her word
+? flag:train.p1.word
+- Here's one the pipe kit won't settle.
+- When does it happen? That's the question.
+
+// ---- Pillar 5 Step 4 (head writer W2): side jobs. Kind 'work', flags as in content/works/keys-p5.md "Step 4".
+== work
+// M11 stage 3: she notices you looking after the team's tool rack
+? flag:upkeep.rack
+- Somebody's been keeping the tool rack. It shows. Thank you.
+// M12: talking about your recent log entries ({machine} from your log)
+? flag:log.talk
+- Read your log. {machine}, good catch.
+- Your log's tidy. The night crew noticed. So did I.
+// tickets: her word when you solve your first
+? flag:ticket.solved
+- A ticket, solved. That's a fault-finder. Wear the pin.
+
+// ---- Pillar 5 Step 4 (head writer W2): M10 the workshop (E3): the first lesson at the lathe. Kind work, in order.
+== work
+? flag:train.m10.lead
+- Set it going. Come back in ten. Not nine.
+- Finish it by hand. Machines don't do edges.
+
+// W3, rec deck R12: the pool filters; the court net on a Sunday morning
+== chat
+- Pool filters. Seventy-five people and they all shed.
+- The court net, Sunday morning. Most popular job aboard. Forty people watch you fix it.   #funny
+- The pool sits over Deck 5 storage. If storage drips, look up.
+? rep:known
+- The rec dec is Maeve's round. Take a job down there and she'll time you. Ignore her.   #funny
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Evening. This will take twenty-five minutes. I've timed it. {title}.
+== talk.answer
+- Good question. Short answer: look there first.
+== talk.listen
+- No questions. Good. The board's waiting in the morning.
+
+// ---- SW1 (2026-10-24, patch 0.92.3 item 15): her own Talk a while frames (main characters don't use the shared
+// ones). The same NEVERs: no "well done", no exclamation marks.
+== talk.start
+- Five minutes. Fine.
+- Sit. I'm listening.
+- Talk. I've a gap. They're rare.
+? tier>=friend
+- {me}. Good. I hoped you'd stop.   #warm
+- Sit. I kept the good chair free. Don't tell anyone.   #warm
+
+== talk.sit
+- That chair. The other one wobbles. Two millimetres.   #funny
+- Sit there. You'll see the board. Don't look at it.   #funny
+- Sit. Mug's on the side. It's clean.
+
+== talk.filler
+- That's the Deck 5 fans. Every one in tune. Rare.
+- Hm.
+- I'm not good at this part. The talking. I'm better at fans.   #funny
+- The board's at eleven. I'm not looking at it. I am. I'm stopping.   #funny
+- Quiet's good. Not everything needs saying.
+- Torres would fill this with a song. I won't.   #funny
+
+== talk.end
+- Right. Back to it. That was useful.
+- Good. Same time next week. If the board allows.
+- That's my talking done for a month. I mean that kindly.   #funny
+- Thank you. I don't do this often. I'm glad I did.   #warm
+- Go on. The board won't clear itself. Neither will mine.
+
+== talk.stop
+- Fine. Go.
+- Another time. I'll remember where we were.
+- Understood. Off you go.
+
+== talk.go.shift
+- Shift. I'm never late. I won't start now.
+- Board at nine. I'm at it at ten to. Later.
+
+== talk.go.bed
+- Bed. Seven hours. Not six. Not eight.
+- I'm done for the day. So are you. Sleep.
+
+== talk.go.trad
+- {trad}. I said I'd look in. I keep my word.
+- Can't. {trad}. I'm expected, and I'm never late.
+// ---- ZW1 (writer), patch 0.92.3 item 26: you in dirty clothes. clothes.remark: yesterday's clothes (flag:clothes.stale);
+// clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3's hook). Bubbles, 60 characters or fewer; kind, never mean.
+== clothes.remark
+? flag:clothes.stale
+- Yesterday's uniform. Change it.
+- Same shirt. Second day. Wardrobe.
+
+// ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
+== bday.circle
+- Nobody tells me. Take an hour, {other}. That's an order.   #funny
+- Birthday? Nobody tells me. One slice each. I'm counting.   #funny
+== bday.circle.you
+- Is it? Nobody tells me. Happy birthday, then, {me}.   #funny
+== bday.thanks
+- Thank you. Back to work in ten minutes. Eleven.   #funny
+- Thanks. All of you. That's all I'll say.   #warm
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-2): the Senior Officer promotion. Her words at each step of the Tier 3 test
+// (worksTeach('t3', 'calder', key): flag train.t3.<key>; every line under a flag plays in order), and around it
+// (flags pu3.promo.<beat>, read as the first promotion's pb.promo.*).
+== work
+// nearly there: passing you in the bay once you're Trusted as an Officer (once)
+? flag:pu3.promo.near
+- Trusted. One more step. And Power safety, with me.
+// the test: at the board as you take it
+? flag:train.t3.take
+- That's the one. Deck 6, port junction. Bring the clipboard.
+// the planning talk at the junction (the branch from SHUT_BRANCHES; she never names it, the screen does)
+? flag:train.t3.plan
+- Before you touch it: what does it feed? Read it to me.
+- Three rooms on that branch. Who's in them at ten?
+- Nobody's eating. No class. That's why ten. Quiet hour.
+- Two people will feel it. Go and tell them. In person.
+// as you set off to warn them
+? flag:train.t3.warn
+- Face to face. A notice is a backup, not a warning.
+// one of the two can't be found within 30 minutes
+? flag:train.t3.warn.late
+- I'll tell them. Note it. Next time, start looking sooner.
+// switching it off
+? flag:train.t3.off
+- Both told. Good. Now the switch. Then check it's dead.
+- Tester on it. Dead is a number, not a feeling.
+// changing the breaker by hand
+? flag:train.t3.breaker
+- Old breaker out. Look at the scorch on it. That's why.
+- New one seated. Square. Push till it clicks.
+// bringing it back
+? flag:train.t3.back
+- Bring it back. Slowly. Listen.
+- Hear that? That's three rooms with power. Nobody noticed.
+// turned in (pu3.passed.say follows)
+? flag:train.t3.done
+- Turn it in. That's the job.
+// not taken by 15:00, or dropped: what to practise (the Mail mail.pu3.again follows)
+? flag:train.t3.again
+- Not today. That's not a fail. We go again in two days.
+- Practise the order. Warn, off, check, then touch.
+// the test morning, as you come into the bay
+? flag:pu3.promo.morning
+- Morning. Nine o'clock it goes on the board. You've eaten?
+// at the turn-in, as for Tier 2
+? flag:pu3.promo.passed
+- That's the test. Warned, off, changed, back.
+- Result tomorrow, first thing. My office, 08:15. Don't be early.
+// 08:30: you weren't in her office, so she comes to find you (the meeting pu3.result plays where you are)
+? flag:pu3.promo.fetch.result
+- There you are. My office was empty. So we'll do it here.
+// in the bay as the bar nears (pu3.bar.say "Go." if this is missing)
+? flag:pu3.promo.bar
+- Observation room. Half four. Go.
+// the cake, after the bar (one line; she takes a slice too)
+? flag:pu3.promo.cake
+- One slice. Then back to work tomorrow. Not tonight.   #funny
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-3): M19 Power and relays (B2's code: worksTeach('m19', 'calder', 'tester'))
+== work
+? flag:train.m19.tester
+- You'll want this. The conduit tester. Clip it on, read the feed. It's yours.
+// the drill, the first time you run the Works part
+? flag:drill.works.you
+- Your drill now. Three calls. Clear voice. Don't rush.
+? flag:drill.works.you.done
+- Clean drill. Good. Good.
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-4): M18 Shutdowns, at the planning screen with you (flags train.m18.follow.<step>)
+== work
+? flag:train.m18.follow.feeds
+- Read me what it feeds. All of it.
+? flag:train.m18.follow.hour
+- Who's in those rooms at that hour? Look before you pick.
+? flag:train.m18.follow.meal
+- That's dinner. You can. You'll hear about it. I would.
+? flag:train.m18.follow.warn
+- Warn them. Each one. Brennan in person, if it's hers.
+? flag:train.m18.follow.keep
+- What keeps power? Think of the cold store. Always.
+? flag:train.m18.follow.book
+- Book it. Then it's yours. Tomorrow, be there early.
+// the day itself, at the junction as you switch it off and bring it back
+? flag:sd.day.off
+- Your booking. Your switch. Check it's dead.
+? flag:sd.day.back
+- Back on. On time. Good.
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-5): the sensor array, her one line at the end
+== work
+? flag:train.m20.calder
+- Survey's happy. That's rare. Back to Works after lunch.
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-6): her words for P5 and P9 (flags train.p5.word, train.p9.word)
+== work
+? flag:train.p5.word
+- Long line. One fault. Don't walk it all. Halve it.
+? flag:train.p9.word
+- Every part's fine. Still goes wrong at the same hour. Think.
+- Some faults are people. Nicely. Ask, don't tell.
+
+// PZ6 (2026-10-27, Pillar 5 Step 6, S6-8): stand-ins for her words for P6, P7 (flags train.p6.word, train.p7.word)
+== work
+? flag:train.p6.word
+- Something's going missing. Read the meters in pairs. The pair that won't add up is yours.
+? flag:train.p7.word
+- The labels on that panel wore off years ago. Work out which relay feeds what.

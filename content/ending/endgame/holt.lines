@@ -1,0 +1,20 @@
+@crew holt
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame
+- Hm. You. Still on my rounds list. Good. I'd have had to redo the list.   #funny
+? endgame:early
+- Half the ship said you'd go. I said you'd stay. Mensah owes me a tea.   #funny
+? endgame
+- Quiet night. Every hatch shut, every door where it should be. You'll learn to like it.
+? endgame:early
+- Adequate decision. Better than adequate. Don't repeat that.   #warm
+? endgame:early beat:holt.5
+- The Envoy asked whether you'd stayed. I said yes. We had tea about it. Out of turn.
+
+== bye
+? endgame
+- Go on. Take the long way round. You've the time for it now.

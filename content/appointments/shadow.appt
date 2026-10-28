@@ -1,0 +1,106 @@
+@appointment shadow
+// SW2, 0.92.6 item 9 (the user: yes). An hour in another department: you ask a colleague from another department if
+// you can follow them for an hour on shift. You watch, they explain, and once you try one small thing. Five places,
+// one scene each (`== scene <id>`), with each host's room and hour as `where <id>:` / `at <id>:`. Never the bridge
+// (the user's rule: the bridge stays special). The infirmary never shows anyone's medical details: only the room.
+// FX22: once a week; the Record line names the department; a little standing with that department.
+title: An hour in another department
+starts: ask
+host: per-host
+gate: tier>=colleague (the host), host's department isn't yours, host on shift
+when: weekday, once a week
+at: 60 minutes inside the host's shift
+where dlamini-lukas: 3 room Galley: work:galley
+at dlamini-lukas: 07:30-08:30
+where nandakumar: 3 room Infirmary: work:infirmary
+at nandakumar: 09:30-10:30
+where mori: 2 room Survey lab: work:survey
+at mori: 14:00-15:00
+where hart-ravi: 3 room Hydroponics garden: garden
+at hart-ravi: 06:30-07:30
+where holt: 2 room Watch office: work:watch
+at holt: 10:00-11:00
+who: host, you
+once: weekly
+mem: appt.shadow.<dept>
+record: Spent an hour with {dept}.
+
+== ask
+- Can I follow you for an hour on shift?
+- {yes}. Come at the start of the hour. Watch, don't touch. Then you can try one thing.
+- {yes}. Bring sensible shoes and a question.
+
+== busy
+- Not this week. We're short-handed. Ask me again next week?
+
+== mail
+- Tomorrow, {time}: an hour with {dept}. Watch, ask, and try one thing.
+
+== scene dlamini-lukas
+dlamini-lukas: Galley. Breakfast. Two hundred eggs. Stand there. Not there. There.   [gesture]
+dlamini-lukas: Breakfast is mine. Brennan says it runs itself. It doesn't.   [laugh]
+dlamini-lukas: Everything has a minute. Porridge at seven. Toast at five past. Nobody waits.
+dlamini-lukas: Your turn. Stir the beans. Slowly. Like you're not in a hurry. You're not.
+? choice
+* Stir slowly, like he said.   flavour:practical mem:appt.shadow.galley
+  dlamini-lukas: Good. Not one bean on the floor. You can come back.   [nod]
+* Ask what the number on the board means.   flavour:listen mem:appt.shadow.galley
+  dlamini-lukas: Days to home. Mine. Don't tell Brennan I said it out loud.   [nod]
+dlamini-lukas: That's breakfast. Two hundred eggs, none wasted. Off you go.
+
+== scene nandakumar
+nandakumar: Wash your hands. Thank you. Now stand by the cupboard and touch nothing blue.   [gesture]
+nandakumar: Morning clinic. Mostly sore hands and people who forgot to drink water.
+nandakumar: What anyone tells me stays in this room. So you'll see the room, not the people.   [nod]
+nandakumar: Everything here has a label and a place. Rina did the labels. Rina does everything.
+nandakumar: Your turn. Restock the bandages. Smallest at the front. Count them as you go.
+? choice
+* Count them out loud.   flavour:practical mem:appt.shadow.infirmary
+  nandakumar: Forty. Correct. Rina will be pleased, and she's never pleased.   [laugh]
+* Ask why she became a doctor.   flavour:listen mem:appt.shadow.infirmary
+  nandakumar: Someone has to tell everyone to drink water. It may as well be me.   [laugh]
+nandakumar: That's the hour. Drink some water on your way out. That's not advice.
+
+== scene mori
+mori: Hello. Sorry. This is the Survey lab. It's tidier than it looks. It's tidy.   [laugh]
+mori: These are samples from the last survey. Dust, ice, one rock. Every jar has a label in Dr. Sato's hand.
+mori: My job is the list. What's here, where it came from, which shelf. The list is everything.   [nod]
+mori: You can do one. Write the label for this jar. Date, place, then what it is. In that order.
+? choice
+* Write the label slowly and neatly.   flavour:practical mem:appt.shadow.survey
+  mori: Oh. That's very neat. Neater than mine. Don't tell anyone that.   [laugh]
+* Ask which sample is her favourite.   flavour:listen mem:appt.shadow.survey
+  mori: This one. Grey dust. Very plain. It came from further out than anything else we have.   [nod]
+mori: Thank you. That's... thank you. Come back. I mean it.
+
+== scene hart-ravi
+hart-ravi: Morning. It's half six. I hate it. Don't tell anyone I love it.   [laugh]
+hart-ravi: First watering. Every bed, every morning, before the misting starts at seven.
+hart-ravi: Cruz sows them. I keep them alive till breakfast. It's a team.   [nod]
+hart-ravi: Here. The small can. Water the seedlings by the wall. At the roots, not the leaves.
+? choice
+* Water at the roots, slowly.   flavour:practical mem:appt.shadow.garden
+  hart-ravi: Good. They'll be taller by Friday. You won't notice. I will.   [nod]
+* Ask what the bed by the tree is.   flavour:listen mem:appt.shadow.garden
+  hart-ravi: Herbs for the galley. Brennan counts the basil leaves. I'm not joking.   [laugh]
+hart-ravi: That's the watering. Go and get breakfast. You've earned it. I haven't, yet.
+
+== scene holt
+holt: Hm. You. Sit there. Don't touch the board.   [gesture]
+holt: The Watch knows where everyone is. Not to spy. So that if anything goes wrong, we know who to find.
+holt: Every door, every airlock, every deck, checked twice a shift. The board shows it all.
+holt: Your turn. Read the board. Tell me which airlock was last checked.
+? choice
+* Read it carefully, then answer.   flavour:practical mem:appt.shadow.watch
+  holt: Correct. Took you a while. Took the last junior longer. Adequate.   [nod]
+* Ask why he walks every deck himself.   flavour:listen mem:appt.shadow.watch
+  holt: The board can't hear a door that sounds wrong. I can.   [nod]
+holt: That's an hour. Off with you. Mention the board to no one.
+
+== thanks
+- An hour on someone else's shift. You watched, you asked, and you got to try one thing yourself.   #warm
+
+== after
+- You did well in the galley. Lukas said "fine". From Lukas, that's a medal.   #funny
+- Holt says you read the Watch board right first time. He looked almost pleased.   #funny
+- Mori's still talking about your label. It's on the shelf now.   #warm
