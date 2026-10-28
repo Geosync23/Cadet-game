@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.95.0
+   STARSHIP CADET: CSV Wren                           build 0.96.0
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9486,7 +9486,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.95.0';                            // keep in step with the header's build line
+const GAME_BUILD = '0.96.0';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -72226,7 +72226,7 @@ if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }   // last, once e
 // view, menu, ls, rs (stick clicks), up, down, left, right (the D-pad). Turns add what each press does through
 // padOn(name, fn): fn(e) with e = { name, pad }, called on the press (and on D-pad repeats, e.repeat).
 // =====================================================================
-const PAD_ON = false;                                     // the switch (controller support)
+const PAD_ON = true;                                      // the switch (controller support); switched on in 0.96.0 (lead 43/44, overnight; it was false)
 const PAD_BTN = ['a', 'b', 'x', 'y', 'lb', 'rb', 'lt', 'rt', 'view', 'menu', 'ls', 'rs', 'up', 'down', 'left', 'right'];   // the standard layout's order
 const PAD_DEAD = { stick: .22, trig: .12 };               // how far a stick or trigger moves before it counts
 const PAD_REP = { first: .5, every: .25 };                // a held D-pad repeats: after half a second, then four steps a second
@@ -73164,7 +73164,7 @@ padOwn(L => !!(L && L.id === 'device' && padShown(document.getElementById('devTi
 function sndFx(name, o) { try { return SND.fx(name, o); } catch (e) { return false; } }
 // the sound update (SD2, plans/sound/r3-build-plan.md; the user's Round 3 picks and the mess hall, 2026-10-28): event music
 // for the picked traditions and events (turn 1), the mess hall (turn 2), the feature sounds (turns 3-4). Off: the sound as before
-const SND_R3_ON = false;
+const SND_R3_ON = true;   // switched on in 0.96.0 (the user: the sound update is on when published; via lead 43/44)
 const SND = (() => {
   const S = { ctx: null, bus: {}, onFrame: [], log: URL_FLAGS.has('soundlog') ? [] : null };
   const ALLOWED = URL_FLAGS.has('sound') || !(navigator.webdriver || URL_FLAGS.has('mute') || NOSAVE);

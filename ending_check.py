@@ -380,7 +380,7 @@ PAD_INIT = r"""(() => { const B = Array(17).fill(0); window.__padB = B;
 def part_pad(pw, src):
     print('(pad) the end page by controller:')
     pc = WORK / 'test' / ('ending_pad_' + pathlib.Path(sys.argv[1]).name)
-    pc.write_text(src.replace(SWITCH, "const EV_ENDING_ON = true;").replace("const PAD_ON = false;", "const PAD_ON = true;"))
+    pc.write_text(src.replace(SWITCH, "const EV_ENDING_ON = true;").replace("const PAD_ON = false;", "const PAD_ON = true;"))   # (0.96.0) PAD_ON is on in the game itself now: the PAD_ON replace finds nothing and the part runs on the build as shipped
     g = Game(pw, str(pc)); g.page.evaluate(PAD_INIT); g.step(2); g.ev(SETUP)
     press = lambda b: (g.page.evaluate(f'__padB[{b}] = 1'), g.step(3), g.page.evaluate(f'__padB[{b}] = 0'), g.step(3))
     g.ev("(() => { dispatchEvent(Object.assign(new Event('gamepadconnected'), { gamepad: navigator.getGamepads()[0] })); })()"); g.step(5)
