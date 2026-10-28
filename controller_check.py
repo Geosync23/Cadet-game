@@ -2882,12 +2882,217 @@ def part_vessel(pw, src, tag):
     r.close()
     return fails
 
+# ---- wave A (PA1 for lead 43; plans/controller-audit.md section 3): panels and the screen's edge, on the PAD_ON copy.
+#   cards   the chat card and the shop menu land on their first choice, not the ×: the first A presses a real choice
+#           (Say hello; a thing you can afford), B closes; with no credits the shop menu lands on the ×
+#   clock   Clock in by pad, then A again after the tap guard: still clocked in (the highlight sits on the × during the
+#           5 s Undo); Undo is reachable by moving to it, and undoes; B closes the screen
+#   devpad  with #dev: D-pad up still lands on Pause, the Dev card is reachable, A opens the Dev panel, a tab by pad, a
+#           row highlighted, B closes; the "reload" bar is among the edge buttons; without #dev the card isn't
+#   savesland  (lead 43, RV24's find) the Saves app by pad lands on the device's Back, never another slot's New game or
+#           Play: A there goes back home, the game and its slot unchanged; New game is still reachable
+#   edge    X presses Take a seat (a tray in the mess) and Lift (in the car), with X's mark on it; B puts away the need
+#           warning and a wave (not a knock at your door); B over the open device puts a tip away first; the needs
+#           strip's fold and the goal's pin reached on the edge and pressed by A
+WA_FOCUS = "(() => { const f = document.activeElement; return f && f !== document.body ? { id: f.id, cls: String(f.className), text: (f.textContent || '').trim().slice(0, 40), x: f.classList.contains('x') } : null; })()"
+WA_START = "(() => { introSkip(); if (SHIP.device && SHIP.device.settings) SHIP.device.settings.tips = false; return true; })()"
+def wa_run(pw, src, tag, **kw):
+    r = Run(pw, src, tag, mode='pad', plug={}, w=390, h=844, **kw)
+    r.ev(WA_START); r.step(10); r.press('B'); r.step(2)   # the pad in use (B on the deck: a toast away)
+    return r
+def part_cards(pw, src, tag):
+    fails = []
+    r = wa_run(pw, src, f'{tag}_cards')
+    r.ev("(() => { skipTo(Math.max(shipNow(), 1440 + 15 * 60)); goToDeck(3); })()"); r.step(20)
+    who = r.ev("(() => { for (const a of DECK_CREW) { chatClose(); if (chatOpen(a.p) && CHAT && !document.getElementById('chat').hidden) return a.p.id; } return null; })()"); r.step(3)
+    if not who: fails.append('chat: nobody awake on Deck 3 at 15:00 to talk to')
+    else:
+        f = r.ev(WA_FOCUS); print(f'  chat card ({who}): lands on {f}')
+        if not f or f['x'] or not r.ev("document.getElementById('chat').contains(document.activeElement)"): fails.append(f'chat: the highlight did not land on a choice ({f})')
+        r.press('A'); r.step(4)
+        st = r.ev("({ open: !!CHAT && !document.getElementById('chat').hidden, hello: relGet(" + json.dumps(who) + ").chatDay === SHIP.time.day })"); print(f'  chat card: first A -> {st}')
+        if not st['open'] or not st['hello']: fails.append(f'chat: the first A did not say hello with the card still open ({st})')
+        r.press('B'); r.step(3)
+        if r.ev("!!CHAT || !document.getElementById('chat').hidden"): fails.append('chat: B did not close the card')
+    p = r.ev("(() => { const a = DECK_CREW[0]; return a ? a.p.id : null; })()")
+    for credits, want in ((200, 'buy'), (0, 'x')):
+        r.ev(f"(() => {{ chatClose(); basket = null; SHIP.player.credits = {credits}; shopMenuOpen(DECK_CREW[0].p); }})()"); r.step(3)
+        f = r.ev(WA_FOCUS); print(f'  shop menu, {credits} credits: lands on {f}')
+        if want == 'x':
+            if not f or not f['x']: fails.append(f'shop menu with no credits: not on the × ({f})')
+            r.press('A'); r.step(3)
+            if not r.ev("document.getElementById('shopMenu').hidden"): fails.append('shop menu with no credits: A on the × did not close it')
+            continue
+        if not f or f['x'] or 'act' not in f['cls']: fails.append(f'shop menu: the highlight did not land on the first goods ({f})')
+        first = r.ev("(() => { const b = document.querySelector('#shopMenu .act:not([disabled])'); return b && b.textContent; })()")
+        r.press('A'); r.step(3)
+        got = r.ev("({ hidden: document.getElementById('shopMenu').hidden, basket: basket ? basket.name : null })"); print(f'  shop menu: first A -> {got} (first goods "{first}")')
+        if not got['hidden'] or not got['basket'] or not first or not first.lower().startswith(got['basket'].replace('a ', '', 1).replace('an ', '', 1).lower()[:6]): fails.append(f'shop menu: the first A did not buy the first goods ({got}, "{first}")')
+        r.ev("(() => { player.stop(); if (ACT) actEnd(true); basket = null; shopMenuOpen(DECK_CREW[0].p); })()"); r.step(3)
+        r.press('B'); r.step(3)
+        if not r.ev("document.getElementById('shopMenu').hidden"): fails.append('shop menu: B did not close it')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close()
+    return fails
+WA_CLOCK = r"""(() => { let d = SHIP.time.day; while (!playerShiftOn(d) || careerClockedIn(d)) d++;
+  const t = (d - 1) * 1440 + 8 * 60 + 40; if (t > shipNow()) skipTo(t); goToDeck(5); player.stop(); clockScreen(); return SHIP.time.day; })()"""
+WA_CK = "(() => { const c = document.getElementById('clockScreen'); return { open: !!c && !c.hidden, inn: careerClockedIn(SHIP.time.day), undo: !!CLOCK_UNDO, focus: document.activeElement && document.activeElement.textContent }; })()"
+def part_clock(pw, src, tag):
+    if 'CLOCK_UNDO_ON' not in src: return ['not yet: no clock Undo in this build']
+    fails = []
+    r = wa_run(pw, src, f'{tag}_clock')
+    r.ev("CLOCK_UNDO_ON = true")
+    d = r.ev(WA_CLOCK); r.step(30)                         # (past the screen's 500 ms tap guard: the check's clock moves with step)
+    s = r.ev(WA_CK); print(f'  Day {d}, the clock: {s}')
+    if not s['open'] or s['focus'] != 'Clock in': fails.append(f'the clock did not open on Clock in ({s})')
+    r.press('A'); r.step(3); s = r.ev(WA_CK); print(f'  A: {s}')
+    if not s['inn'] or not s['undo']: fails.append(f'A on Clock in did not clock in with Undo open ({s})')
+    if s['focus'] != '×': fails.append(f'after the punch the highlight is not on the × ({s["focus"]!r})')
+    # Undo by moving to it: it undoes
+    if not pad_to(r, '#clockScreen .btns button:not([disabled])'): fails.append('Undo not reachable by the D-pad')
+    else:
+        r.step(30); r.press('A'); r.step(3); s = r.ev(WA_CK); print(f'  moved to Undo, A: {s}')
+        if s['inn']: fails.append(f'A on Undo (moved to it) did not undo ({s})')
+    # a double A: Clock in, then A again after the guard, within the Undo window: still clocked in
+    r.step(30); s = r.ev(WA_CK)
+    if s['focus'] != 'Clock in': fails.append(f'after Undo the highlight is not on Clock in ({s})')
+    r.press('A'); r.step(30); r.press('A'); r.step(3); s = r.ev(WA_CK); print(f'  Clock in, A again 1 s later: {s}')
+    if not s['inn']: fails.append(f'a second A within the Undo window undid the punch ({s})')
+    # B closes the screen
+    r.ev("clockScreen()"); r.step(3); r.press('B'); r.step(3)
+    if r.ev(WA_CK)['open']: fails.append('B did not close the clock screen')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close()
+    return fails
+WA_HUD_DEV = "padItems(PAD_HUD).some(e => e.classList.contains('hud'))"
+def part_devpad(pw, src, tag):
+    fails = []
+    r = wa_run(pw, src, f'{tag}_dev0')
+    if r.ev(WA_HUD_DEV): fails.append('without #dev the clock card is among the edge buttons')
+    r.close()
+    r = wa_run(pw, src, f'{tag}_dev', query='?debug#dev')
+    if not r.ev("DEVMODE"): r.close(); return fails + ['#dev did not turn Dev mode on in the test page']
+    if r.page.locator('text=Sign and go aboard').count():   # Dev mode has its own save: the arrival's manifest first
+        r.page.fill('form input', 'Ada'); r.page.click('text=Sign and go aboard'); r.step(30); r.press('B'); r.step(2)
+    r.press('UP'); r.step(2); f = r.ev(WA_FOCUS); print(f'  D-pad up in Dev mode lands on {f}')
+    if not f or f['id'] != 'pauseBtn': fails.append(f'D-pad up in Dev mode did not land on Pause first ({f})')
+    if not pad_to(r, '.hud'): fails.append(f'the Dev card not reachable on the edge (focus {r.ev(WA_FOCUS)})')
+    else:
+        r.press('A'); r.step(3)
+        st = r.ev("({ open: DM_UI.open, layer: (padLayer() || {}).id })"); print(f'  A on the Dev card: {st}')
+        if not st['open'] or st['layer'] != 'dmSheet': fails.append(f'A on the Dev card did not open the Dev panel ({st})')
+        if pad_to(r, '#dmSheet .dmTabs button[data-tab="clock"]'):
+            r.press('A'); r.step(3)
+            if r.ev("DM_UI.tab") != 'clock': fails.append(f'A on the Clock tab did not open it ({r.ev("DM_UI.tab")})')
+        else: fails.append('the Dev panel\'s Clock tab not reachable by the D-pad')
+        if not pad_to(r, '#dmSheet .dmRow button:not([disabled])'): fails.append('no Dev row button reachable by the D-pad')
+        r.press('B'); r.step(3)
+        if r.ev("DM_UI.open"): fails.append('B did not close the Dev panel')
+    r.js("location.hash = ''"); r.step(3)
+    bar = r.ev("(() => { const b = document.querySelector('#dmLink button'); return { bar: !!b, edge: !!b && padItems(PAD_HUD).includes(b) }; })()"); print(f'  the Dev link removed: {bar}')
+    if not bar['bar'] or not bar['edge']: fails.append(f'the "reload" bar is not among the edge buttons ({bar})')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close()
+    return fails
+def part_savesland(pw, src, tag):
+    fails = []
+    r = wa_run(pw, src, f'{tag}_sv', query='?debug')       # the Saves app needs real saving (a fresh browser's storage)
+    if r.page.locator('text=Sign and go aboard').count():
+        r.page.fill('form input', 'Ada'); r.page.click('text=Sign and go aboard'); r.step(30); r.press('B'); r.step(2)
+    if not r.ev("DEVICE_APPS.has('saves')"): r.close(); return fails + ['setup: no Saves app in this build']
+    r.press('Y'); r.step(6); r.ev("deviceShow('saves')"); r.step(4)
+    f = r.ev(WA_FOCUS); slot = r.ev("SAVE_SLOT"); print(f'  the Saves app (playing Slot {slot}) lands on {f}')
+    if not f or f['id'] != 'devBack': fails.append(f'the Saves app did not land on Back ({f})')
+    if not pad_to(r, '#devBody button'): fails.append('no slot button reachable by the D-pad in the Saves app')
+    r.press('B'); r.step(4); r.ev("deviceShow('saves')"); r.step(4)   # back home by B, then the app again: Back again, not where you were
+    f = r.ev(WA_FOCUS)
+    if not f or f['id'] != 'devBack': fails.append(f'the Saves app opened again did not land on Back ({f})')
+    r.press('A'); r.step(6)
+    st = r.ev("({ app: DEV.app, open: DEV.open, slot: SAVE_SLOT, sure: SLOT_UI.sure })"); print(f'  first A: {st}')
+    if st['app'] != 'home' or st['slot'] != slot: fails.append(f'the first A in the Saves app did not just go back home ({st})')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close()
+    return fails
+WA_SEAT = r"""(() => { skipTo(Math.max(shipNow(), 1440 + 15 * 60)); goToDeck(3); player.stop(); SHIP.player.tray = 'a bowl of soup'; SHIP.player.trayLeft = 0;
+  const pp = [...PLACE_OF.values()].filter(pl => pl.type === 'mess-seat' && pl.pose === 'sit' && !privatePlace(pl) && !heldBy(pl.id)).map(pl => placeSpot(pl.id)).filter(sp => sp && sp.pose === 'sit');
+  for (const sp of pp) { const c = nearestOpen(sp.x, sp.z, player); if (!c) continue; const q = cellPos(c[0], c[1]); player.obj.position.set(q.x, player.obj.position.y, q.z); handTick(true); if (seatBtnSeat()) return true; }
+  return false; })()"""
+WA_LIFT = r"""(() => { LIFT_BTN_ON = true; goToDeck(4); player.stop(); const k = Object.keys(ROOMS).find(k => ROOMS[k].floor === 'lift' && ROOM_TILES[k]); if (!k) return false;
+  const q = cellPos(...ROOM_TILES[k][0]); player.obj.position.set(q.x, player.obj.position.y, q.z); handTick(true); return !document.getElementById('liftBtn').hidden; })()"""
+def part_edge(pw, src, tag):
+    fails = []
+    r = wa_run(pw, src, f'{tag}_edge', quiet=REACH_QUIET)
+    # the edge: the goal's pin (first, from where the game starts: an item near you on screen)
+    r.ev("(() => { window.__pin = 0; const o = ixGoalTap; ixGoalTap = () => { window.__pin++; return o(); }; })()")
+    for k in range(10):                                    # an item near you, so its pin is on screen
+        r.ev(f"(() => {{ const p = player.obj.position, v = new THREE.Vector3(); const it = ITEMS.filter(i => i.hit).map(i => [i, i.hit.getWorldPosition(v).distanceTo(p)]).sort((a, b) => a[1] - b[1])[{k}]; window.__wa = it ? it[0].t : null; setGoal({{ deck: deckDef.num, item: window.__wa, label: 'Test' }}); }})()"); r.step(4)
+        if r.ev("!!document.querySelector('#ixGoal.tap .ixpin')"): break
+    if not r.ev("!!document.querySelector('#ixGoal.tap .ixpin')"): fails.append(f'setup: the goal\'s pin over "{r.ev("window.__wa")}" does not take taps')
+    else:
+        r.press('UP'); r.step(2)
+        if not pad_to(r, '#ixGoal.tap .ixpin'): fails.append(f'the goal\'s pin not reachable on the edge (focus {r.ev(WA_FOCUS)}, pin {r.ev("document.getElementById(\'ixGoal\').className")})')
+        else:
+            r.press('A'); r.step(3); st = r.ev("({ taps: window.__pin, hud: PAD_FOCUS.hud })"); print(f'  the goal\'s pin, A: {st}')
+            if st['taps'] != 1 or st['hud']: fails.append(f'A on the goal\'s pin did not tap it once and go back to walking ({st})')
+    r.ev("setGoal(null); player.stop(); if (ACT) actEnd(true)"); r.press('B'); r.step(2)
+    # X: Take a seat with a tray (its mark on it)
+    if not r.ev(WA_SEAT): fails.append('setup: no Take a seat in the Deck 3 mess with a tray')
+    else:
+        r.step(12); mk = r.ev("!!document.querySelector('#seatBtn > .padk')")
+        r.press('X'); r.step(4); st = r.ev("({ act: ACT ? ACT.kind : null, tray: SHIP.player.tray })"); print(f'  Take a seat: X\'s mark {mk}, X -> {st}')
+        if not mk: fails.append('Take a seat shown, but X\'s mark is not on it')
+        if not st['act'] or st['act'] not in ('eat', 'sit'): fails.append(f'X did not press Take a seat ({st})')
+        r.ev("(() => { if (ACT) actEnd(true); SHIP.player.tray = null; player.stop(); })()"); r.step(4)
+    # X: Lift, in the car
+    if not r.ev(WA_LIFT): fails.append('setup: no Lift button in the Deck 4 car')
+    else:
+        r.step(12); mk = r.ev("!!document.querySelector('#liftBtn > .padk')")
+        r.press('X'); op = False
+        for k in range(12):                                # you step up to the panel first
+            r.step(10); op = r.ev("!document.getElementById('lift').hidden")
+            if op: break
+        print(f'  Lift: X\'s mark {mk}, X opens the panel {op}')
+        if not mk or not op: fails.append(f'X and the Lift button ({mk}, {op})')
+        r.press('B'); r.step(4)
+        if r.ev("!document.getElementById('lift').hidden"): fails.append('B did not close the lift panel')
+    r.ev("(() => { LIFT_BTN_ON = false; goToDeck(4); player.stop(); handTick(true); })()"); r.step(10)
+    # B: the need warning, then a wave
+    r.ev("needPop('hunger')"); r.step(2); r.press('B'); r.step(2)
+    if r.ev("padShown(document.getElementById('needPop'))"): fails.append('B did not put the need warning away')
+    w = r.ev("(() => { const a = DECK_CREW[0]; if (!a) return null; seekShow(a.p, SHIP.time.min, null, null); return a.p.id; })()"); r.step(2)
+    if not w: fails.append('setup: nobody on Deck 4 to wave')
+    else:
+        r.press('B'); r.step(2); st = r.ev("({ seek: !!SEEK, shown: padShown(document.getElementById('seek')), chat: !!CHAT })"); print(f'  a wave, B: {st}')
+        if st['seek'] or st['shown'] or st['chat']: fails.append(f'B did not put the wave away (or opened a chat) ({st})')
+        r.ev(f"(() => {{ seekShow(DECK_CREW[0].p, SHIP.time.min, null, null); SEEK.visit = true; }})()"); r.step(2); r.press('B'); r.step(2)
+        if not r.ev("!!SEEK && padShown(document.getElementById('seek'))"): fails.append('B put a knock at your door away (A answers it; it should stay)')
+        r.ev("seekEnd()")
+    # B over the open device: the tip first, then Back
+    r.press('Y'); r.step(6)
+    r.ev("(() => { SHIP.device.settings.tips = true; delete SHIP.device.tipsSeen['wa-test']; tipShow('wa-test', 'A test tip.'); })()"); r.step(2)
+    if not r.ev("padShown(document.getElementById('devTip'))"): fails.append('setup: the tip card did not show over the device')
+    else:
+        r.press('B'); r.step(3); st = r.ev("({ tip: padShown(document.getElementById('devTip')), dev: DEV.open })"); print(f'  tip over the device, B: {st}')
+        if st['tip'] or not st['dev']: fails.append(f'B over the device did not put the tip away first ({st})')
+    r.ev("SHIP.device.settings.tips = false; if (DEV.open) deviceClose()"); r.step(4)
+    # the edge: the needs strip's fold
+    r.press('UP'); r.step(2)
+    if not pad_to(r, '#needStrip .nsFold'): fails.append(f'the needs strip\'s fold not reachable on the edge (focus {r.ev(WA_FOCUS)})')
+    else:
+        r.press('A'); r.step(3)
+        if not r.ev("document.getElementById('needStrip').classList.contains('fold')"): fails.append('A on the fold did not fold the needs strip')
+    r.ev("stripFold(false)"); r.press('B'); r.step(2)
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close()
+    return fails
+
 # parts that need a package: 'not yet' until PAD_BUILT names it
 NEEDS = {'ending': ['base', 'deck', 'pick', 'panels'], 'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick'], 'door': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'], 'vessel': ['base', 'deck', 'pick', 'panels'],
          'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck'], 'shut': ['panels'], 's5cases': ['pick', 'panels'], 's6cases': ['pick', 'panels'], 'team': ['pick']}
 PART_FN = {'ending': part_ending, 'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day, 'shut': part_shut, 's5cases': part_s5cases, 's6cases': part_s6cases, 'team': part_team, 'vessel': part_vessel}   # 'reach' joins when the pad half is written
 if 'function mysOpen' not in SRC or (S5_LINE not in SRC and not re.search(r'\bconst P5_STEP5\s*=\s*true\b', SRC)): PART_FN.pop('s5cases')   # (BM19) or already on (0.94.0)   # no board in this build: "not yet", never a pass
 for k, v in OLD_NEEDS.items(): NEEDS[OLD_NAME.get(k, k)] = v; PART_FN[OLD_NAME.get(k, k)] = legacy(k)
+for k, f in (('cards', part_cards), ('clock', part_clock), ('devpad', part_devpad), ('edge', part_edge), ('savesland', part_savesland)): PART_FN[k] = f; NEEDS[k] = ['panels']; ALL_PARTS.append(k)   # wave A (PA1)
 
 # ---- Pillar 5 Step 5's pieces (plans/p5-step5-spec.html section 9): each part runs on a copy with P5_STEP5 on, and only
 # when the build has it on or CTL_P5S5=1 is set (a builder's branch before the switch-on); else "not yet", never a pass ----
@@ -3407,6 +3612,30 @@ D6_SETUP = r"""(() => { skipTo(22 * 1440 + 1260); const W = worksInit(shipNow())
 D6_ITEM_AT = r"""((t) => { const it = ITEMS.find(i => i.t === t); if (!it) return null; const v = new THREE.Vector3(); it.hit.getWorldPosition(v); return { x: v.x, y: v.y, z: v.z }; })"""
 D6_TOAST = "(() => { const e = document.getElementById('toast'); return e ? e.textContent : ''; })()"
 D6_CLEAR = "toastEl.classList.remove('show'); typeof TOAST_AT !== 'undefined' && (TOAST_AT = -1e9); typeof GUIDE !== 'undefined' && GUIDE.tq && (GUIDE.tq.length = 0)"
+# wave A's planted faults (PA1): each a line of section 26's wave A changes, put back or broken
+MUTANTS['cards'] = {
+  'chat card lands on the close cross': ('src', "PAD_FIRST.chat = '#chat .btns .act:not([disabled]), #chat .row button:not([disabled])';", ''),
+  'shop menu lands on the close cross': ('src', "PAD_FIRST.shopMenu = '#shopMenu .act:not([disabled])';", ''),
+}
+MUTANTS['clock'] = {
+  'the highlight stays on Undo after a punch': ('src', "if (x && a && a !== x && a !== PAD_FOCUS.el && el.contains(a)) padFocusTo(x);", "if (false) padFocusTo(x);"),
+}
+MUTANTS['devpad'] = {
+  'no Dev card on the edge': ('src', "#ixGoal.tap .ixpin, .hud[role=button], #dmLink button';", "#ixGoal.tap .ixpin, #dmLink button';"),
+  'no reload bar on the edge': ('src', "#ixGoal.tap .ixpin, .hud[role=button], #dmLink button';", "#ixGoal.tap .ixpin, .hud[role=button]';"),
+  'the Dev card is the first landing': ('src', "[...document.querySelectorAll(PAD_HUD_SEL), ...document.querySelectorAll(PAD_HUD_MORE)]", "[...document.querySelectorAll(PAD_HUD_MORE), ...document.querySelectorAll(PAD_HUD_SEL)]"),
+}
+MUTANTS['savesland'] = {
+  'the Saves app lands on its first button': ('src', "device: () => DEV.app === 'saves' && document.getElementById('devBack') || document.querySelector('#devBody') };", "device: '#devBody' };"),
+}
+MUTANTS['edge'] = {
+  'X skips Take a seat and Lift': ('src', "const PAD_X_IDS = ['repairBtn', 'hobbyBtn', 'seatBtn', 'liftBtn', 'putDown'];", "const PAD_X_IDS = ['repairBtn', 'hobbyBtn', 'putDown'];"),
+  'B leaves the need warning': ('src', "if (padShown(np)) { np.click(); return true; }", "if (false) { }"),
+  'B puts a knock at the door away': ('src', "if (SEEK && !SEEK.visit && padShown(", "if (SEEK && padShown("),
+  'B over the device ignores the tip': ('src', "padOwn(L => !!(L && L.id === 'device' && padShown(document.getElementById('devTip'))), { b: () => { document.getElementById('devTip').click(); return true; } });", ''),
+  'A on the pin does nothing': ('src', "PAD_FOCUS.hud = false; a.blur(); ixGoalTap(); return true;", "return;"),
+  'no needs strip fold on the edge': ('src', "const PAD_HUD_MORE = '#needStrip .nsFold, ", "const PAD_HUD_MORE = '"),
+}
 def d6_ring(r, word, tries=12):
     seen = []
     for k in range(tries):
