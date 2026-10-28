@@ -1,4 +1,6 @@
-# Dev mode plan v4.2: summary
+# Dev mode plan v4.3: summary
+
+**The user's answers (2026-10-28, doc devmode-plan-v4): decided.** 1 calendar day; 2 "later", with the comment "Switch it on now" (lead 43 asking what they mean; not acted on); 3 answers row; 4 try in J0; 5 arrow at event meetings yes; 6 ALL (full ~45 jumps / ~22 h, not the first cut); 7 three builders; 8 drop End and undo (cut, recorded in design-doc). Design-doc "Dev mode" updated. J0 waits for the controller round (lead 43's go).
 
 DM1 (Dev mode engineer) for lead 43, 2026-10-28. Branch `claude/devmode-plan-2`, from `claude/staging-pad` (0.95.0 + controller work). Full page: `plans/devmode-plan.html` (published for the user, answers saved on the page as doc `devmode-plan-v4`). Plan only: no game or check change. Building waits until the controller round passes and the user says go.
 
