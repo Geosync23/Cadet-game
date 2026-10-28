@@ -9,6 +9,7 @@
 #          Teaching arrows Off and tracking off, and on another deck it points at the lift with the deck named
 #   s5:    Pillar 5 Step 5 with P5_STEP5 on (B1): Power safety's arrow, the Tier 3 rows, the Senior Officer presets
 #   pu3:   the Senior Officer promotion with P5_STEP5 on (S5-2, B5): the offer, the test at the board, the result, the bar, the toast
+#   s6, ev, end: J4's parts (plan v4.4: the arrow's later sources), stubs until then
 #   look:  the arrow is drawn (its own element, the DEV tag), holds still over frames, its pin never on the game's pin
 #          when both point at the same thing; Hide it and Show it from the Quick tab, the choice kept over a reload
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
@@ -217,9 +218,14 @@ def part_pu3(b):
     check(not pg.errors, f'pu3: errors {pg.errors[:3]}')
     ctx.close()
 
+# ---- stubs (plan v4.4, J0): J4 fills its own parts here, so nobody edits the part list again
+def part_s6(b): print('  s6: not built yet (J4: the nights, the briefing, Basil, Calder\'s question)')
+def part_ev(b): print('  ev: not built yet (J4: event meetings)')
+def part_end(b): print('  end: not built yet (J4: the ending)')
+
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
-    for name, part in (('off', part_off), ('walk', part_walk), ('look', part_look), ('s5', part_s5), ('pu3', part_pu3)):
+    for name, part in (('off', part_off), ('walk', part_walk), ('look', part_look), ('s5', part_s5), ('pu3', part_pu3), ('s6', part_s6), ('ev', part_ev), ('end', part_end)):
         if ONLY and name not in ONLY: continue
         try: part(b)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')

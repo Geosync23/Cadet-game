@@ -26,6 +26,11 @@
 #          people going and at the room; whose for a birthday; a clash with a Dev start, too late, a usual time gone
 #          refused; a calendar tradition in the same room gives way; its Mail now; the starts ride in the Dev save and
 #          through Undo; Stop it puts the day back to its calendar; the list, the search, 44px buttons
+#   jumps: Jump to's groundwork (plan v4.4, J0): the jump list sound; the week-slow offset; Set career to Day 36 twice (the
+#          same save, timed) with your answers put in on the way (Calder's question Engines, the offer Stay), settled Stay,
+#          the endgame, the Day 26 milestones kept (CA1's F1); a Go jump settles Go on Day 35; Senior Officer and Engine
+#          Specialist by hand; the panel's Stop; the Jump to and Set career tabs at 390 px (DEVMODE_SHOTS=folder: a shot)
+#   beats, events1, events2, ending1, ending2: the later turns' parts (J1-J3), stubs until then
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 devmode_check.py BUILD.html [part ...]   (parts: only those)   Good is DEVMODE CHECK OK (exit 0); a failure exits 1.
 import sys, os, re, json, pathlib
@@ -47,6 +52,7 @@ REAL = ('starship-cadet-save', 'starship-cadet-arrived')
 DEV_OWN = ('starship-cadet-dev-mark', 'starship-cadet-dev-undo')   # Dev mode's Mark and Undo (D2, D4)
 GAME = sys.argv[1]
 ONLY = set(sys.argv[2:])                          # optional: run only these parts (e.g. trad)
+SHOTS = pathlib.Path(os.environ['DEVMODE_SHOTS']) if os.environ.get('DEVMODE_SHOTS') else None   # (J0) a folder for the new tabs' screenshots, if wanted
 TMP = WORK / 'test' / ('_devmode_check_' + RUN_ID + '.html')
 TMP.write_text(instrument(pathlib.Path(GAME).read_text()))
 
@@ -425,7 +431,7 @@ def part_set(b):
     bad = pg.ev("""(() => { const out = [], seen = new Set();
       for (const r of DM_CAREER) for (const id of r.defer || []) seen.add(id);   // (S5-2, RV20 S4) a row the Step 5 ladder puts off past its day (m17: Day 31)
       for (const r of DM_CAREER) for (const id of r.train || []) { seen.add(id); const row = ladderRow(id); if (!row || row.day !== r.day) out.push(id + ': table ' + r.day + ', ladder ' + (row ? row.day : 'none')); }
-      for (const row of CAREER_LADDER) if (row.day <= DM_MAXDAY && !seen.has(row.id)) out.push(row.id + ': on the ladder (Day ' + row.day + '), not in the table');
+      for (const row of CAREER_LADDER) if (row.day <= devmodeTableEnd() && !seen.has(row.id)) out.push(row.id + ': on the ladder (Day ' + row.day + '), not in the table');   // (J0, F1) up to the table's last day: after it the career is the game's own
       return out; })()""")
     check(not bad, f'set: the table and CAREER_LADDER disagree: {bad}')
     setc = lambda n: pg.ev(f"devmodeRun('Set career to Day {n}', () => devmodeSetCareerTo({n}))")
@@ -444,7 +450,7 @@ def part_set(b):
         check(S['bed'] and S['deck'] == S['bdeck'] in (4, 2), f'set: Day {n}: not woken in your bed\'s room ({S["room"]})')
         check(S['ms'] == 0 and S['st'] == 0 and not S['missed'] and not S['open'], f'set: Day {n}: a miss, a first-week meeting\'s notes, a summons or something still asking: {S}')
         check(S['met'] and S['set']['day'] == n and (S['settle'] == (n > 7)), f'set: Day {n}: the first week or the Dev record: {S}')
-    sick = pg.ev("Array.from({ length: DM_MAXDAY + 15 }, (_, i) => i + 1).filter(d => sickDue(d))")
+    sick = pg.ev("Array.from({ length: DM_JUMPMAX }, (_, i) => i + 1).filter(d => sickDue(d))")   # (J0) to the latest jump's day: the Dev seed has none before Day 46
     check(not sick and not pg.ev('sickNow()'), f'set: the Dev seed brings sick days {sick}')
     check(got[10]['rank'] == 'officer' and got[10]['tier'] == 2 and got[10]['pip'] == 1 and got[2]['pip'] == 0, f'set: Day 10 isn\'t an officer with the pip: {got[10]}')
     check(got[10]['room'] != got[2]['room'], f'set: Day 10 not woken in cabin 4-23: {got[10]["room"]}')
@@ -573,6 +579,95 @@ def part_t4beats(b):
     check(not pg.errors, f't4beats: errors {pg.errors[:3]}')
     pg.close(); ctx.close()
 
+# ---- J0 (plan v4.4, DM1): Jump to's groundwork: the jump list, the runner's stops (your answers on the way, CA1's F2),
+# the table keeping what the game wrote (F1, backlog DM1-1), plain Set career past Day 32 saying Stay (F3), the week-slow
+# offset, rank by hand (Senior, Specialist), the Stop, the tabs at phone size, and how long a Day 36 run takes
+def part_jumps(b):
+    import time
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = Page(ctx, '#dev'); pg.sign(); pg.step(20)
+    bad = pg.ev("""(() => { const out = [], seen = new Set(), G = DM_JUMP_GROUPS.map(g => g[0]);
+      for (const j of DM_JUMPS) {
+        if (seen.has(j.id)) out.push('twice: ' + j.id); seen.add(j.id);
+        if (!G.includes(j.group)) out.push(j.id + ': group ' + j.group);
+        if (!(Number.isInteger(j.day) && j.day >= 1 && j.day <= DM_JUMPMAX) || !(j.at >= 0 && j.at < 1440)) out.push(j.id + ': day ' + j.day + ', at ' + j.at);
+        if (j.by != null && !(j.by >= 1 && j.by <= j.day)) out.push(j.id + ': by ' + j.by);
+        if (j.where && !(DECKS[j.where.deck] && DECKS[j.where.deck].rooms && DECKS[j.where.deck].rooms[j.where.room])) out.push(j.id + ': no room ' + JSON.stringify(j.where));
+        if (typeof j.label !== 'string' || !j.label) out.push(j.id + ': no label');
+      }
+      return out; })()""")
+    check(not bad, f'jumps: the jump list: {bad}')
+    n = pg.ev("DM_JUMPS.length"); onN = pg.ev("DM_JUMPS.filter(devmodeJumpOn).length")
+    # the week-slow offset (pure): every row a week later
+    S = pg.ev("({ a: devmodeCareerFor(16).rank, b: devmodeCareerFor(17, 7).rank, c: devmodeCareerFor(23, 7).rank, d: devmodeCareerFor(30, 7).rank, t: devmodeCareerFor(30, 7).tr.m1, t0: devmodeCareerFor(30).tr.m1, ms: devmodeCareerFor(30, 7).ms })")
+    check(S['a'] == 'senior' and S['b'] == 'officer' and S['c'] == 'senior' and S['d'] == 'specialist' and S['t'] == S['t0'] + 7, f'jumps: the week-slow offset: {S}')
+    # plain Set career to Day 36: timed; the answers put in on the way (Calder's question, then the offer, Stay); the
+    # milestones the game wrote on Day 26 still there (F1); the endgame (F3); twice the same save
+    # (each in a fresh browser, as two testers would: within one page, leftovers from the game before make the first run
+    # differ from later ones, on the starting build too: backlog DM1-2 and DM1-3)
+    times, saves = [], []
+    for k in range(2):
+        if k: pg.close(); ctx.close(); ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1); pg = Page(ctx, '#dev'); pg.sign(); pg.step(20)
+        t0 = time.time(); r = pg.ev("devmodeRun('Set career to Day 36', () => devmodeSetCareerTo(36))"); times.append(time.time() - t0)
+        check(r is True, f'jumps: Set career to Day 36 refused: {pg.ev("DM_UI.msg")}')
+        pg.ev('saveGame()'); saves.append(pg.ev('localStorage.getItem(SAVE_KEY)'))
+    pg.step(20)
+    E = pg.ev("""({ clock: clockText(), rank: SHIP.works.rank, ms: SHIP.works.ms.map(x => x[0]), q: SHIP.works.end && SHIP.works.end.answer, offer: SHIP.end && SHIP.end.offer, settled: SHIP.end && SHIP.end.settled,
+      stay: typeof endgameDay === 'function' ? endgameDay() : null, set: devmodeState().set, msg: DM_UI.msg, room: ROOMS[roomAt(...player.here())].name })""")
+    print('    Day 36:', {k: E[k] for k in ('clock', 'rank', 'ms', 'q', 'settled', 'stay', 'set', 'room')})
+    check(E['clock'].startswith('Day 36,') and E['clock'].endswith('06:00') and E['rank'] == 'specialist', f'jumps: Day 36 landed: {E["clock"]} {E["rank"]}')
+    check(all(k in E['ms'] for k in ('nights', 'question', 'officer', 'senior', 'specialist')), f'jumps: Day 36 lost milestones (F1): {E["ms"]}')
+    check(E['q'] == 'engines' and E['offer'] and E['offer'].get('met') and E['settled'] and E['settled']['choice'] == 'stay' and E['stay'], f'jumps: Day 36 answers on the way (F2, F3): question {E["q"]}, offer {E["offer"]}, settled {E["settled"]}, endgame {E["stay"]}')
+    check(E['set'] and E['set'].get('ans') == {'cq': 'engines', 'offer': 'stay'} and 'Your answers on the way' in E['msg'], f'jumps: the answers used not recorded or said: {E["set"]} / {E["msg"][-160:]}')
+    if saves[0] != saves[1]:
+        a, c = json.loads(saves[0]), json.loads(saves[1]); fail(f'jumps: two Set careers to Day 36 (fresh browsers) give different saves: {sorted(k for k in set(a.get("ship", {})) | set(c.get("ship", {})) if a["ship"].get(k) != c["ship"].get(k))} {sorted(k for k in set(a) | set(c) if a.get(k) != c.get(k))}')
+    # a jump with its own answer (Go): the address settles Go on Day 35
+    pg.ev("devmodeRun('Jump: test go', () => devmodeSetCareerTo(35, { id: 'test-go', label: 'test', day: 35, by: 34, at: 16 * 60, where: null, ans: { offer: 'go' } }))")
+    G = pg.ev("({ clock: clockText(), settled: SHIP.end && SHIP.end.settled, set: devmodeState().set })")
+    check(G['clock'].endswith('16:00') and G['settled'] and G['settled']['choice'] == 'go' and G['settled']['day'] == 35, f'jumps: a Go jump: {G}')
+    # rank by hand: Senior Officer, then Engine Specialist (approximate), from a Day 12 officer
+    pg.ev("devmodeRun('Set career to Day 12', () => devmodeSetCareerTo(12))")
+    pg.ev("DM_HOLD = false; devmodeRank('senior')"); pg.page.wait_for_timeout(700); pg.step(5)
+    R1 = pg.ev("({ rank: SHIP.works.rank, tier: SHIP.works.tier, t3: SHIP.works.pu && SHIP.works.pu.t3 && SHIP.works.pu.t3.passed, ms: SHIP.works.ms.map(x => x[0]), tr: Object.keys(SHIP.works.tr).length })")
+    pg.ev("devmodeRank('specialist')"); pg.page.wait_for_timeout(700); pg.step(5)
+    R2 = pg.ev("({ rank: SHIP.works.rank, tier: SHIP.works.tier, t4: SHIP.works.pu && SHIP.works.pu.t4 && SHIP.works.pu.t4.passed, ms: SHIP.works.ms.map(x => x[0]), tr: Object.keys(SHIP.works.tr).length })")
+    check(R1['rank'] == 'senior' and R1['tier'] == 3 and R1['t3'] and 'senior' in R1['ms'], f'jumps: Senior Officer by hand: {R1}')
+    check(R2['rank'] == 'specialist' and R2['tier'] == 4 and R2['t4'] and R2['tr'] == R1['tr'], f'jumps: Engine Specialist by hand (trainings kept): {R2}')
+    # the panel's Stop: a Set career to Day 20 stopped after a few days: saved where it got to, the hold let go
+    pg.ev('devmodeOpen(true); DM_UI.tab = "set"; DM_UI.day = 20; DM_UI.msg = ""; devmodeDraw()')
+    pg.page.click('#dmSheet button:has-text("Set career to Day 20")'); pg.page.click('#dmSheet button:has-text("Tap again")')
+    for _ in range(100):
+        pg.page.wait_for_timeout(50)
+        if pg.ev("/Setting career: Day [3-9] /.test(DM_UI.msg)"): break
+    stopped = pg.page.locator('#dmSheet button:has-text("Stop")').count()
+    if stopped: pg.page.click('#dmSheet button:has-text("Stop")', timeout=5000)
+    for _ in range(100):
+        pg.page.wait_for_timeout(50)
+        if not pg.ev('DM_HOLD'): break
+    T = pg.ev("({ msg: DM_UI.msg, day: SHIP.time.day, hold: DM_HOLD, run: DM_UI.run, saved: JSON.parse(localStorage.getItem(SAVE_KEY)).dev.set })")
+    check(stopped and T['msg'].startswith('Stopped:') and 1 < T['day'] < 20 and not T['hold'] and T['run'] is None and T['saved'] and T['saved']['day'] == T['day'], f'jumps: Stop: {T}')
+    # the tabs at phone size: Jump to (its groups, the career beats with Go), Set career (By rank)
+    pg.ev('DM_UI.tab = "jump"; DM_UI.jg = "career"; DM_UI.msg = ""; devmodeDraw()')
+    J = pg.ev("""({ tabs: [...document.querySelectorAll('#dmSheet .dmTabs button')].map(b => b.textContent), groups: [...document.querySelectorAll('#dmSheet .dmGroups button')].map(b => b.textContent),
+      rows: [...document.querySelectorAll('#dmSheet .dmJump')].map(r => r.firstChild.textContent), wide: document.querySelector('#dmSheet .dmBody').scrollWidth > document.querySelector('#dmSheet .dmBody').clientWidth,
+      small: [...document.querySelectorAll('#dmSheet button')].filter(b => b.offsetParent && b.getBoundingClientRect().height < 44).map(b => b.textContent) })""")
+    check(J['tabs'] == ['Quick', 'Clock', 'Traditions', 'Career', 'Set career', 'Jump to', 'Speed'] and J['groups'] == ['Career', 'Nights', 'Ship events', 'The ending'], f'jumps: the tabs and groups: {J["tabs"]} {J["groups"]}')
+    check(len(J['rows']) >= 2 and not J['wide'] and not J['small'], f'jumps: the Jump to tab at 390 px: {J}')
+    pg.shot(str(SHOTS / 'jump-career-390.png')) if SHOTS else None
+    pg.ev('DM_UI.tab = "set"; DM_UI.day = null; devmodeDraw()')
+    txt = pg.ev("document.querySelector('#dmSheet .dmBody').textContent")
+    check('By rank (its first morning)' in txt and 'Engine Specialist' in txt, f'jumps: Set career\'s By rank: {txt[:200]}')
+    check(not pg.errors, f'jumps: errors {pg.errors[:3]}')
+    pg.close(); ctx.close()
+    print(f'  jumps: {n} jumps ({onN} on), the list sound; week-slow offset; Day 36 in {times[0]:.1f} s and {times[1]:.1f} s, the same save twice, Engines and Stay put in on the way, settled Stay, the endgame, milestones kept; a Go jump settles Go on Day 35; Senior and Specialist by hand; Stop; the tabs at 390 px')
+
+# ---- stubs (plan v4.4, J0): each later turn fills its own part here, so nobody edits the part list again
+def part_beats(b): print('  beats: not built yet (J1)')
+def part_events1(b): print('  events1: not built yet (J2)')
+def part_events2(b): print('  events2: not built yet (J2)')
+def part_ending1(b): print('  ending1: not built yet (J3)')
+def part_ending2(b): print('  ending2: not built yet (J3)')
+
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
@@ -580,7 +675,8 @@ with sync_playwright() as pw:
         if ONLY and name not in ONLY: continue
         try: part(ctx)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
-    for name, part in (('clock', part_clock), ('move', part_move), ('slow', part_slow), ('trad', part_trad), ('set', part_set), ('career', part_career), ('t4beats', part_t4beats)):
+    for name, part in (('clock', part_clock), ('move', part_move), ('slow', part_slow), ('trad', part_trad), ('set', part_set), ('career', part_career), ('t4beats', part_t4beats),
+                       ('jumps', part_jumps), ('beats', part_beats), ('events1', part_events1), ('events2', part_events2), ('ending1', part_ending1), ('ending2', part_ending2)):
         if ONLY and name not in ONLY: continue
         try: part(b)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
