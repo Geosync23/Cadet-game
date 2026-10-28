@@ -7,6 +7,7 @@ Cap rule: at most 5 seats working at once; read only until RV23 says it has gone
 ## Verdicts
 | Branch | Verdict | Sha |
 |---|---|---|
+| claude/pad-wave-c (SD2): controller wave C, sound hook, pad words, Saves hint | PASS (1 should: the walk tip says Tap) | 336b00c2 |
 | claude/p5s6-promo4 (W8): S6-7, S6-9, MA6-2, refit, DM rows, RV24's fixes | PASS (should 1 fixed in 9063aafe) | 6f13b61a, 9063aafe |
 | claude/p5s6-deck (DA6): S6-5 nights 1-2, keepsakes to room B, door fix | PASS (frames should cleared in 4a84e153) | 2df6bfce, 5c27b740, 4a84e153 |
 | claude/m24-pick-pointer (AS1): night 3's pick ring | PASS | 5f649b45 |
@@ -103,3 +104,13 @@ Code read (no runs yet):
 - Lead decisions: pad Undo window lands on the close cross; Dev card on the screen edge with #dev; sound on first pad press
   (wave C); no on-screen keyboard.
 - Baseline running: controller_check on b3247d6, all parts but reach (base_ctrl*.txt in /tmp/rv24/pad).
+
+## Controller runs
+- Baseline b3247d6, controller_check all parts but reach: all OK except idle (8 problems: device-page DOM hash -1556429587 ->
+  978430068, incl. its own no-pad-twice steadiness line). Re-run alone: OK once. idle is an old intermittent FAIL.
+- Wave C 336b00c2: PASS. cadet identical vs c62a292b; sound_check OK; controller all-but-reach OK but idle (2 problems; re-run: the
+  same hash pair, in PAD_ON-off cases too: old). pad_look wavec: the four lines read well with the pad, revert after a touch; Saves
+  hint present. Scratch merge A 818ec0b + C: saves savesland words sound OK (build-table conflict only).
+- Wave A 092245c -> 8d511a1 (MUTANTS) -> 818ec0b (Saves lands on Back): cadet identical vs b3247d6 (noise beside another browser);
+  pad_look wavea: chat lands on Say hello, shop on the first goods, the clock's highlight on the x after a punch, the Dev card on the
+  edge with #dev and A opens the panel; savesland OK. Full run on 818ec0b going.
