@@ -3720,19 +3720,25 @@ def part_saves(pw, src, tag):
 PART_FN['saves'] = part_saves; NEEDS['saves'] = ['panels']; ALL_PARTS.append('saves')   # (Wave C, L)
 MUTANTS['saves'] = {'Wave C: no hint': ('src', "if (PAD_ON && typeof PAD !== 'undefined' && PAD.used) B.push({ kind: 'text', text: 'With a controller", "if (false) B.push({ kind: 'text', text: 'With a controller")}
 WORDS_PROBE = r"""(() => [introDevPoint(), introTapWords('You set your laundry hamper down. Tap it to pick it up again.'),
-  introTapWords('Knitting is one of your hobbies now: sit down and tap Hobby.'), introTapWords('then tap any shelf in main storage.')])()"""
+  introTapWords('Knitting is one of your hobbies now: sit down and tap Hobby.'), introTapWords('then tap any shelf in main storage.'),
+  tipWords('Tap where you want to go, or press and hold to walk.')])()"""
+WORDS_TIP = r"""(() => { const D = SHIP.device; D.settings.tips = true; delete D.tipsSeen.walk; TIP_Q.length = 0; DEVICE_SKIN.tip(null);
+  tipShow('walk', 'Tap where you want to go, or press and hold to walk.'); const c = document.getElementById('devTip'); return c && !c.hidden ? c.textContent : null; })()"""
 def part_words(pw, src, tag):
     if 'function introTapWords' not in src: return ['not yet: no Wave C words in this build']
     fails = []
     r = Run(pw, src, f'{tag}_words', mode='pad', plug={}, w=390, h=844)
     r.step(6)
     before = r.ev(WORDS_PROBE)
-    if before[0] != 'Tap your device' or 'Tap it' not in before[1]: fails.append(f'the touch words changed before any pad press: {before}')
+    if before[0] != 'Tap your device' or 'Tap it' not in before[1] or not before[4].startswith('Tap where'): fails.append(f'the touch words changed before any pad press: {before}')
     r.press('RS'); r.step(3)
     on = r.ev(WORDS_PROBE); print(f'  with the pad in use: {on}')
     if not on[0].startswith('Press '): fails.append(f'the device pointer still says {on[0]!r}')
     for w in on[1:]:
         if re.search(r'\btap\b', w, re.I): fails.append(f'"tap" still shown with the pad in use: {w!r}')
+    if 'left stick' not in on[4]: fails.append(f'the walking tip has no pad words: {on[4]!r}')
+    card = r.ev(WORDS_TIP); print(f'  the walking tip card with the pad in use: {card!r}')
+    if card is not None and re.search(r'\btap\b', card, re.I): fails.append(f'the tip card says "tap" with the pad in use: {card!r}')
     r.js("dispatchEvent(new PointerEvent('pointerdown'))"); r.step(2)
     back = r.ev(WORDS_PROBE)
     if back != before: fails.append(f'back to touch, the words did not come back: {back}')
@@ -3740,7 +3746,8 @@ def part_words(pw, src, tag):
     r.close()
     return fails
 PART_FN['words'] = part_words; NEEDS['words'] = ['base']; ALL_PARTS.append('words')   # (Wave C, J)
-MUTANTS['words'] = {'Wave C: pointer words not switched': ('src', "return introPad() ? 'Press ' + padWord('y') + ' for your device' : INTRO_DEV_POINT;", "return INTRO_DEV_POINT;")}
+MUTANTS['words'] = {'Wave C: pointer words not switched': ('src', "return introPad() ? 'Press ' + padWord('y') + ' for your device' : INTRO_DEV_POINT;", "return INTRO_DEV_POINT;"),
+                    'SD2-1: tips not switched': ('src', "  try { if (!PAD_ON || typeof introPad !== 'function' || !introPad()) return s; } catch (e) { return s; }", "  return s;")}
 # ---- run ----------------------------------------------------------------------------------------------------------
 if '--selftest' in FLAGS:
     if pad_switch(SRC) is not None: print('--selftest is for a build without section 26 (it plants its own PAD_ON)'); sys.exit(1)

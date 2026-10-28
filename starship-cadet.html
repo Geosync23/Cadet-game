@@ -12146,6 +12146,12 @@ function tipSeen(id) {
   const i = TIP_Q.findIndex(x => x.id === id); if (i > 0) TIP_Q.splice(i, 1);
   if (D.tipsSeen[id]) return false; D.tipsSeen[id] = true; return true;
 }
+// with a controller in use (Wave C, backlog SD2-1): a tip's "tap" words name the button instead, as it's shown (21b's
+// introTapWords; the walking tip its own words); back to touch words on a touch. PAD_ON off: the words as written
+function tipWords(s) {
+  try { if (!PAD_ON || typeof introPad !== 'function' || !introPad()) return s; } catch (e) { return s; }
+  return introTapWords(String(s).replace(/^Tap where you want to go, or press and hold to walk\.$/, 'Walk with the left stick, and press ' + padWord('a') + ' on anything to use it.'));
+}
 function tipDone() { TIP_Q.shift(); if (TIP_Q.length) DEVICE_SKIN.tip(TIP_Q[0]); else DEVICE_SKIN.tip(null); }
 // the camera's framing on a phone (C11): while the sheet covers the bottom two thirds, the view eases down so you
 // stay in the visible top part, and eases back on close. deviceFrame(on); the eased amount (0 to 1) is DEV.fr.
@@ -12392,7 +12398,7 @@ const DEVICE_SKIN = (() => {
       let c = $('devTip');
       if (!c) { c = mk('div', 'devtip'); c.id = 'devTip'; c.setAttribute('role', 'status'); c.hidden = true; document.body.appendChild(c); c.onclick = () => tipDone(); }
       simClear(c._t); c.hidden = !t; if (!t || document.body.classList.contains('dlgon')) return;   // no tips over a meeting
-      devHeadsBack(); c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = ''; c.append(mk('b', '', 'TIP'), mk('span', '', t.text));
+      devHeadsBack(); c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = ''; c.append(mk('b', '', 'TIP'), mk('span', '', tipWords(t.text)));
       c._t = simTimeout(() => tipDone(), 9000);   // section 13's frozen clock (0.28.50): a pause holds it
     },
     dialogue(v) {                              // the meeting panel: a strip across the bottom, in the screen's style
