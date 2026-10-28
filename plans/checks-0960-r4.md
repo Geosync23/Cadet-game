@@ -31,3 +31,16 @@ No NEW FAILs.
   the game); the second run is the one recorded above.
 - At the start two copies of interactions_check were launched by mistake; both were stopped within a minute, their
   browsers cleaned up, and one copy restarted alone at 15:25:50. The recorded run is that single copy.
+
+## Targeted rerun (BM20's GO, 2026-10-28 17:26)
+
+- Candidate (NEW): claude/staging-pad fe11cd66c865d5c9c5926ba7ebcac1b1ffa56540
+- Game sha256: 332925003934b49686c080515e154131a07f7fe7a3c14fbe0f6f7684933a129e (matches BM20's)
+- What changed: section 24k p9Stage, section 18 tjFirst, one words line.
+
+| Check | Result | Key lines |
+|---|---|---|
+| interactions_check (whole, alone, detached) | OK (exit 0, 2911 s) | `INTERACTIONS CHECK OK`, no FAIL lines |
+| career_check | FAIL, known old (backlog 12) | `FAIL busy: "Relied on" before Day 5` (the only FAIL), same as OLD b5199dc3 above |
+
+No NEW FAILs.
