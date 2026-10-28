@@ -24,3 +24,9 @@ controller_check: 57 parts (all 58 in its list but reach, which BM20 runs), ever
 ## FAILs
 
 None.
+
+## Extra: mech_check for R5 (lead 44's ask, BM20 told)
+
+- staging-pad 652297471f (check-only lamp fix in mech_check.py; game sha256 c62d6399...a74e, unchanged).
+- mech_check whole: OK, exit 0 (569 s), MECH CHECK OK, no FAIL lines.
+- Offered R4 help; R4 had nothing left to hand over, so nothing else was run.
