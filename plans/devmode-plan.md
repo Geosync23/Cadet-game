@@ -1,4 +1,4 @@
-# Dev mode plan v4.1: summary
+# Dev mode plan v4.2: summary
 
 DM1 (Dev mode engineer) for lead 43, 2026-10-28. Branch `claude/devmode-plan-2`, from `claude/staging-pad` (0.95.0 + controller work). Full page: `plans/devmode-plan.html` (published for the user, answers saved on the page as doc `devmode-plan-v4`). Plan only: no game or check change. Building waits until the controller round passes and the user says go.
 
@@ -12,7 +12,7 @@ Built on DP1's v3.1 (kept as `plans/devmode-plan-v3.1.html` / `.md`). The user's
 - F5: stub parts events1/events2, ending1/ending2; J0 measures a whole part; answer combinations from one Day 26 landing with Undo.
 - F6: added jumps: M19 lesson (Day 17), M20 training (Day 19), old mysteries (Day 21), first rotation (Day 21), Short Friday 15:30 and the Friday address (Day 5), the slower career's ending.
 - F7: the page says it's the larger option (~22 h) and offers a first cut (~12 h: Career and Nights, the ending's three landings, one jump per event, the running card) as question 6.
-- F8 (second pass, d5fb07c): End and undo dropped (no restore point inside a jump's run; ending without logging restarts the event; its purpose is now guaranteed by the fixed calendar). Undo my last Dev action covers going back.
+- F8 (second pass, d5fb07c): End and undo put to the user as question 8: (c) drop it, recommended; (a) keep the event's first-morning Dev save (~116 KB) to go back to, about 2 h more; no section 18 change either way (no restore point inside a jump's run; ending without logging restarts the event; its purpose is now guaranteed by the fixed calendar). Undo my last Dev action covers going back.
 - F9: threads - and + greyed once e.mine.settled; after End and keep the day's crew plans are made again (as devmodeTradsAgain).
 - F1 is also a live bug in today's Set career (Days 27-30): backlog DM1-1, fixed by J0.
 - J0 is now 4 h (it owns devmodeCareerSteps and devmodeCareerSet); total about 22 h.
@@ -44,3 +44,4 @@ Built on DP1's v3.1 (kept as `plans/devmode-plan-v3.1.html` / `.md`). The user's
 5. Arrow at event meetings: yes, "Event:".
 6. A first cut (~12 h) first, the rest after the user has tried it.
 7. Three builders side by side after J0.
+8. End and undo: drop it (recommended), or keep a copy of the event's first morning.
