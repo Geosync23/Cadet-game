@@ -27,7 +27,7 @@ The container restarted at 23:56 (interactions and Day 19 lost mid-run; both res
 | food_check 1 7 | OK | FOOD CHECK OK |
 | food_check 11 4 | OK | FOOD CHECK OK |
 | join_check | OK | JOIN CHECK OK, run alone (no other browser) |
-| interactions_check | with R1 (AS1) | Handed over by lead 42 after the restart; AS1 runs it alone from 00:16 UTC |
+| interactions_check | OK (run by R1) | INTERACTIONS CHECK OK, 0 FAIL, 3279 s alone (AS1, from 00:16 UTC; handed over by lead 42 after the restart) |
 
 ## Candidate 2 (82b02fb9)
 
