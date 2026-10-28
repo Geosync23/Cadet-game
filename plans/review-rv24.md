@@ -7,6 +7,7 @@ Cap rule: at most 5 seats working at once; read only until RV23 says it has gone
 ## Verdicts
 | Branch | Verdict | Sha |
 |---|---|---|
+| claude/sound-r3 (SD2, SD3 now): event music turn 1 | PASS | 64077a69 |
 | claude/pad-wave-b (PB1): controller wave B, props mid-visit, every job stop, beam floor, court edge | PASS | 177793b6 |
 | claude/pad-wave-a (PA1): controller wave A, landings, clock x, Dev card, X, B, Saves on Back | PASS | 818ec0b |
 | claude/pad-wave-c (SD2): controller wave C, sound hook, pad words, Saves hint | PASS (should cleared in a29a0f48) | 336b00c2, a29a0f48 |
@@ -123,3 +124,4 @@ Code read (no runs yet):
   staging-pad 56e98a56 + C a29a0f48 + B: 13 wave parts + m23 OK (controller_check end block conflict: keep both). PB1-1 noted (cake).
 - All three controller waves PASS: A 818ec0b, B 177793b6, C a29a0f48. Idle after.
 - Sound r3 turn 1 (64077a69): mine (lead 43); findings to SD3 session_01GKuymir9eBj7X6kLtwLRmq + lead. Farewell song changes to A in SD3's next turn. Priority: EV1 visit-on, DM1 J0, then sound.
+- Sound r3 64077a69: PASS. cadet identical vs e158dcff; sound_check OK incl. check_r3music (right track only in the right room and time) and check_r3_off; timing not measurable (frozen page clock), eventsOn cached per day.
