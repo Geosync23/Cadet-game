@@ -92,3 +92,14 @@ Code read (no runs yet):
 - d22_play.py (scratch merge staging d0d381e0 + W8 6f13b61a, one 4d conflict: keep both) stalled at 08:47 in my probe; stopped for the round.
 
 ## Idle (lead 42, 17:47: the round is on, cap BM19 + 4 runners). Skipped on the lead's word: PZ6 775c3ca run, arrows-step6 runs.
+
+## Controller update (lead 43, 2026-10-28 02:23): I review it
+- Read plans/controller-audit.md (claude/controller-audit 199fa2b). Builders: PA1 wave A (claude/pad-wave-a: chat/shop landing, clock
+  Undo, Dev card, Take a seat/Lift on X, cards put away by B), PB1 wave B (claude/pad-wave-b: props mid-visit, every job stop on
+  this deck, beam floor, court edge; register part_promo3). Base claude/staging-pad b3247d6, PAD_ON off. Wave C later.
+- Per item: cadet identical (PAD_ON off) vs b3247d6; controller_check all parts on a PAD_ON copy (the check makes its own copies;
+  I leave out `reach`, which has never finished, unless the lead wants it); a live pad play at 390x844 of what changed.
+  Verdicts to the builder, lead 43 (session_01GKuymjoDoY2kA9yCK12NG1) and BM20 (session_01GKuymiwDEgkwGmjJ2nokvg).
+- Lead decisions: pad Undo window lands on the close cross; Dev card on the screen edge with #dev; sound on first pad press
+  (wave C); no on-screen keyboard.
+- Baseline running: controller_check on b3247d6, all parts but reach (base_ctrl*.txt in /tmp/rv24/pad).
