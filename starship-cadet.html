@@ -46610,7 +46610,7 @@ SHIP_EVENTS.diplomatic = {
   address: {
     onset: ['This is the Captain. Our Veyli guests are aboard.', 'They are here as friends. Make them welcome, answer their questions, and mind your manners.', 'Marrow out.'],
     resolution: c => ['This is the Captain. The delegation leaves us this morning.',
-      { smooth: 'Speaker Teshavi tells me she has rarely been made so welcome. Thank you.', bumpy: 'It was a busy five days, and you carried it well. Thank you.',
+      { smooth: 'Speaker Teshavi tells me they have rarely been made so welcome. Thank you.', bumpy: 'It was a busy five days, and you carried it well. Thank you.',
         rough: 'Not everything went to plan. They leave as friends all the same, and we\'ll do better next time.' }[c.band], 'Marrow out.'],
   },
   mail: {
@@ -46636,8 +46636,8 @@ const VEYLI_RETELL = {
 };
 // ---- the event swap (FX22b, 0.93.2; the user's answers on plans/trad-variety-pitch.html section 5, option A; lead 37):
 // the diplomatic visit comes before the comet. Behind EV_SWAP_ON (section 13; ?evswap previews); off: the order above.
-// Here, before EV_SHIPWIDE is made, as the storm update does. Both events stay drafts (off) until the user switches
-// them on. The old order is kept above and in design-doc's history.
+// Here, before EV_SHIPWIDE is made, as the storm update does. The visit's draft flag is cleared here (the user's "Turn it
+// on", 2026-10-28), so it runs only in its agreed place. The old order is kept above and in design-doc's history.
 if (EV_SWAP_ON) {
   // the calendar: the visit Tuesday Day 16 (the storm's five days end Monday Day 15), the comet Monday Day 22 at 21:30
   // (the user, 2026-10-26: earlier than Day 26; EP1's plans/events-plan-2.html Part A), and A Veyli vessel needs help
@@ -46646,19 +46646,21 @@ if (EV_SWAP_ON) {
   EVENT_ORDER.push('comet');                             // storm, visit, comet
   // the career beats the visit carried: Vance's memo into the warning morning, the senior briefing before the farewell
   Object.assign(EV_BEATS.find(b => b.id === 'mondayBriefing'), { day: 16, at: [510, 570] });    // Tuesday 08:30, before the Senior Officer scene at 10:00
-  Object.assign(EV_BEATS.find(b => b.id === 'seniorBriefing'), { day: 19, at: [480, 500] });    // Friday 08:00, before the gift exchange at 08:20
+  Object.assign(EV_BEATS.find(b => b.id === 'seniorBriefing'), { day: 19, at: [480, 500] });    // Friday 08:00, before the gift exchange (09:00)
   // the visit, short (option A): Tuesday the warning (Vance's Mail, the prep jobs); Wednesday 10:00 the Veyli come aboard
-  // in the shuttle bay; Thursday one formal dinner; Friday the gift exchange 08:20 and the farewell 09:00, gone by ten,
-  // before the Friday hold (the Captain's address that afternoon can talk about it). Guests aboard Wednesday to Friday
+  // in the shuttle bay; Thursday one formal dinner; Friday the gift exchange 09:00 and the farewell 09:30, gone at ten
+  // (GUEST_AT), before the Friday hold (the Captain's address that afternoon can talk about it). Guests aboard Wednesday
+  // to Friday. (EV1, turning it on: 08:20 and 09:00 before, when the crew named for the gifts were still at breakfast)
   const V = SHIP_EVENTS.diplomatic;
+  if (EVENTS_ON) delete V.draft;                         // on: the visit runs in a real game, Days 16-19 (the user, 2026-10-28: "Turn it on"; EV1). Still a draft without the storm update (its storm runs into Day 16) or the swap (Day 26 isn't its agreed place)
   Object.assign(V, { days: 4, guestsArrive: 1, guestStay: 2, keep: ['birthday', 'captains-address'],
     phases: [{ id: 'warning', at: [0, 540] }, { id: 'onset', at: [1, 600] }, { id: 'escalation', at: [2, 360] },
-      { id: 'resolution', at: [3, 500], clears: true }, { id: 'afterglow', at: [3, 600], clears: true }] });
+      { id: 'resolution', at: [3, 540], clears: true }, { id: 'afterglow', at: [3, 600], clears: true }] });
   V.galley = { ...V.galley, escalation: { ...V.galley.escalation, batch: n => n.day === 2 ? { meals: 10, label: 'the Veyli dinner in the Captain\'s quarters' } : null } };
   const at = { 'veyli-moleth': [2, 600], 'veyli-clash': [2, 1260], 'veyli-told': [3, 720] };
   V.news = V.news.map(n => at[n.id] ? { ...n, at: at[n.id] } : n);
-  V.moments = V.moments.map(m => m.id === 'farewell' ? { ...m, at: [3, 540], ask: 'The Veyli leave at nine. I want to see them off.' } : m);
-  V.meetings = V.meetings.map(m => m.id === 'veyliGreeting' ? { ...m, at: [1, 600] } : m.id === 'veyliGifts' ? { ...m, at: [3, 500] } : m);
+  V.moments = V.moments.map(m => m.id === 'farewell' ? { ...m, at: [3, 570], ask: 'The Veyli leave at ten. I want to see them off.', places: [{ deck: 5, pool: '@gather-shuttle-bay' }] } : m);   // the bay's crowd spots (as Off the Tern's): it has no seats
+  V.meetings = V.meetings.map(m => m.id === 'veyliGreeting' ? { ...m, at: [1, 600] } : m.id === 'veyliGifts' ? { ...m, at: [3, 540] } : m);
   V.mail = { ...V.mail, warning: { ...V.mail.warning, body: V.mail.warning.body.replace('arrives in two days', 'arrives tomorrow') } };
   const res = V.address.resolution; V.address = { ...V.address, resolution: c => res(c).map(l => typeof l === 'string' ? l.replace('a busy five days', 'a busy few days') : l) };
   // the comet: its own block below (FX25, EV_COMET_ON; FX22b's draft here, from plans/comet-viewing-draft.js, is replaced by
@@ -47090,7 +47092,8 @@ const evRuleOff = (r, day, t) => !!r.off && r.off.some(([dd, a, b]) => { const m
 // onset's day) and stay `stay` days. null when that event isn't running, logged or due. Pure
 function eventGuestDays(g) {
   const def = g && SHIP_EVENTS[g.event]; if (!def) return null;
-  const e = SHIP.event && SHIP.event.id === g.event ? SHIP.event : [...SHIP.eventLog].reverse().find(l => l.id === g.event) || (() => { const d = eventDueDay(); return d && d.id === g.event ? { startDay: d.day } : null; })();
+  const e = SHIP.event && SHIP.event.id === g.event ? SHIP.event : [...SHIP.eventLog].reverse().find(l => l.id === g.event) || (() => { const d = eventDueDay(); return d && d.id === g.event ? { startDay: d.day } : null; })()
+    || (EV_CAL_ON && (r => r ? { startDay: r.day } : null)(evCalPlan().find(r => r.id === g.event)));   // not yet due: its day in the calendar's plan (EV1, the visit on: the plans for Days 16-19 made earlier agree)
   if (!e) return null;
   const on = def.phases.find(p => p.id === 'onset'), off = g.arriveOffset != null ? g.arriveOffset : def.guestsArrive != null ? def.guestsArrive : on ? on.at[0] : 0;
   return [e.startDay + off, e.startDay + off + (def.guestStay || g.stay || 1)];   // def.guestStay: the event's own stay for all its guests (the short visit, 0.93.2)
@@ -47544,7 +47547,7 @@ MEETING_SCRIPTS.calderProgress = {
 // the diplomatic visit's two meetings (its data is with the storm's, above)
 MEETING_SCRIPTS.veyliGreeting = {
   title: 'The Veyli greeting', from: 'Commander Teo Vance',
-  gist: 'The Veyli delegation came aboard at 10:00: Speaker Teshavi, her aide Kesrin, the scholar Moleth and their pilot Ithra. They\'re in the visitors\' cabin and the guest cabins on Deck 4 for five days.',
+  gist: 'The Veyli delegation came aboard at 10:00: Speaker Teshavi, the Speaker\'s aide Kesrin, the scholar Moleth and their pilot Ithra. They\'re in the visitors\' cabin and the guest cabins on Deck 4 ' + (EV_SWAP_ON ? 'until Friday.' : 'for five days.'),   // the swap's short visit: Wednesday to Friday (EV1)
   lines: [
     { who: 'marrow', text: 'Speaker Teshavi. Welcome aboard the Wren.', pose: 'gesture' },
     { who: 'teshavi', text: 'Captain. Your ship is warmer than the reports said. That is a compliment.', pose: 'nod' },
