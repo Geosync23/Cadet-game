@@ -37955,6 +37955,10 @@ const LINES = JSON.parse([
   '{"text":"Every song: sing through the record cabinet in the music room, whatever the words are. Leisure and social up.","id":"noql83"}]',
   ',"join.every-song.tip":[',
   '{"text":"Tap {name} to join Every song","id":"v4imo9"}]',
+  ',"join.farewell.notice":[',
+  '{"text":"The Veyli farewell: stand with Envoy Saruth in the shuttle bay and see the delegation off. Social and leisure up.","id":"vafgtb"}]',
+  ',"join.farewell.tip":[',
+  '{"text":"Tap Saruth to see the Veyli off","id":"dajabk"}]',
   ',"join.garden-hour.notice":[',
   '{"text":"Garden hour: tend the beds with the gardeners. Leisure and social up.","id":"19agqhd"}]',
   ',"join.garden-hour.tip":[',
@@ -45726,7 +45730,7 @@ function tjActs() { for (const [id, s] of Object.entries(TRAD_JOIN)) if (!s.act 
   PLAYER_ACTS['tj:' + id] = def; if (typeof IX_ACTS !== 'undefined') IX_ACTS['tj:' + id] = def;
 } }
 tjActs();
-const tradJoinable = e => !!(e && TRAD_JOIN[e.id] && (evIsTrad(e.ev) || P926_APPT && e.ev.appt || EV_COMET_ON && !!e.ev.when && e.ev.when.ship === 'comet' || EV_VESSEL_ON && !!e.ev.when && e.ev.when.ship === 'veyliVessel'));   // the comet's four gatherings too (FX25); the Veyli vessel's engine lights (VB1)   // an appointment's one-off too (0.92.6 item 9, FX22)
+const tradJoinable = e => !!(e && TRAD_JOIN[e.id] && (evIsTrad(e.ev) || P926_APPT && e.ev.appt || EV_COMET_ON && !!e.ev.when && e.ev.when.ship === 'comet' || EV_VESSEL_ON && !!e.ev.when && e.ev.when.ship === 'veyliVessel' || !!e.ev.when && e.ev.when.ship === 'diplomatic'));   /* the visit's farewell (EV1, visit-pointer) */   // the comet's four gatherings too (FX25); the Veyli vessel's engine lights (VB1)   // an appointment's one-off too (0.92.6 item 9, FX22)
 const tradWords = (e, k, ctx) => { const t = quizText('join.' + e.id + '.' + k, e.day, ctx); return t; };
 // the people going (their plan has them there today), and the leader: the tradition's host, else the spec's, when going;
 // else the spec's pick or the first of the goers by a hash of the day. Cached per day
@@ -46660,14 +46664,18 @@ if (EV_SWAP_ON) {
   V.galley = { ...V.galley, escalation: { ...V.galley.escalation, batch: n => n.day === 2 ? { meals: 10, label: 'the Veyli dinner in the Captain\'s quarters' } : null } };
   const at = { 'veyli-moleth': [2, 600], 'veyli-clash': [2, 1260], 'veyli-told': [3, 720] };
   V.news = V.news.map(n => at[n.id] ? { ...n, at: at[n.id] } : n);
-  V.moments = V.moments.map(m => m.id === 'farewell' ? { ...m, at: [3, 570], ask: 'The Veyli leave at ten. I want to see them off.', places: [{ deck: 5, pool: '@gather-shuttle-bay' }] } : m);   // the bay's crowd spots (as Off the Tern's): it has no seats
-  V.meetings = V.meetings.map(m => m.id === 'veyliGreeting' ? { ...m, at: [1, 600] } : m.id === 'veyliGifts' ? { ...m, at: [3, 540] } : m);
+  V.moments = V.moments.map(m => m.id === 'farewell' ? { ...m, at: [3, 570], ask: 'The Veyli leave at ten. I want to see them off.', places: [{ deck: 5, pool: '@gather-shuttle-bay' }], host: 'saruth' } : m);   // the bay's crowd spots (as Off the Tern's): it has no seats; Envoy Saruth hosts (no shift: there at 09:30), for tap to join
+  V.meetings = V.meetings.map(m => m.id === 'veyliGreeting' ? { ...m, at: [1, 600] } : m.id === 'veyliGifts' ? { ...m, at: [3, 540], notify: 'The gift exchange with the Veyli, in the observation room (Deck 1) at 09:00.' } : m);   // the gift exchange's device note, as the storm's meetings (EV1, visit-pointer; the user via lead 44)
+  // the farewell: tap to join, as the comet's and the vessel's gatherings (section 18's TRAD_JOIN: the marker over Saruth,
+  // the arrow once you're in the bay, the tip). Saruth is they/them
+  Object.assign(TRAD_JOIN, { farewell: { host: 'saruth', pose: 'talk', need: 'social', gain: 10, also: { leisure: 6 }, verb: 'see the Veyli off', what: 'stand with Saruth in the shuttle bay and see the delegation off' } });
+  tjActs();
   V.mail = { ...V.mail, warning: { ...V.mail.warning, body: V.mail.warning.body.replace('arrives in two days', 'arrives tomorrow') } };
   V.debrief = { ...V.debrief, smooth: V.debrief.smooth.replace('Dinners on time', 'The dinner on time') };   // one formal dinner now (EV1)
   V.threads = V.threads.map(th => th.id === 'dinnersLate' ? { ...th, label: 'The dinner on time' } : th);
   // the visit's own jobs earn your tier's worth (lead 43, 2026-10-28, option b: a chore's 1 xp, topped up to 2 for an
   // Officer, 3 for a Senior), so a steady Senior who takes them is as far on by Day 19 as before the visit was on. Your
-  // turn-in only (section 24 pays the 1 first); j.xp 0 (paid elsewhere) is left alone
+  // turn-in only (registered before section 24's, so it runs first; the total is the same); j.xp 0 (paid elsewhere) is left alone
   if (EVENTS_ON && typeof onSim === 'function') onSim('job', n => {
     if (!n || n.step !== 'turnin' || !SHIP.works || !(SHIP.works.tier > 1) || typeof worksXp !== 'function') return;
     const j = (SHIP.jobs || []).find(x => x.id === n.id); if (j && j.event === 'diplomatic' && j.xp !== 0) worksXp(SHIP.works.tier - 1);
