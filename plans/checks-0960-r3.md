@@ -30,3 +30,16 @@ None.
 - staging-pad 652297471f (check-only lamp fix in mech_check.py; game sha256 c62d6399...a74e, unchanged).
 - mech_check whole: OK, exit 0 (569 s), MECH CHECK OK, no FAIL lines.
 - Offered R4 help; R4 had nothing left to hand over, so nothing else was run.
+
+## Targeted rerun on fe11cd66 (BM20's GO)
+
+- staging-pad fe11cd66c865d5c9c5926ba7ebcac1b1ffa56540, game sha256 332925003934b49686c080515e154131a07f7fe7a3c14fbe0f6f7684933a129e (matches).
+  Game change since 6db1cdd2: section 24k p9Stage (P9_RETRY), section 18 tjFirst (Envoy/Speaker names), one join words line.
+- controller_check, chosen parts (tap-to-join and names, the ring and labels, traditions, works and puzzle cases, base):
+
+| Run | Parts | Result |
+|---|---|---|
+| lane A | base pick pick1 day words edge | all 6 OK, exit 0 (1025 s), CONTROLLER CHECK OK |
+| lane B | vessel beam court team jobs2 props s5cases s6cases mentor ending | all 10 OK, exit 0 (1319 s), CONTROLLER CHECK OK |
+
+No FAIL lines.
