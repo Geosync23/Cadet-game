@@ -88,3 +88,28 @@ tell, reactor, out, badge back), the coil swap (Day 24), the move (Day 25), ment
 | Check | Result | Key lines |
 |---|---|---|
 | interactions_check (whole, no time limit, alone on the machine) | OK | exit 0, INTERACTIONS CHECK OK, 324 lines, no FAIL (2095 s, about 35 min) |
+
+## Round 3: candidate 3
+
+- Build: `claude/staging-p5s6` b5199dc3 (patch E's rank card, clock undo and shop menu switched on), game sha256
+  `b18d2b6487e71ba5b1d806997821b6c11368a92659b8d4f6e97d9ffbb434238a` (matched); OLD 0.94.0 6f1915cb (matched, not
+  needed). Lead 42's GO. Two browsers, each its own CADET_WORK; interactions alone afterwards.
+
+| Check | Result | Key lines |
+|---|---|---|
+| arrows_check step6 asis / teachoff / track / skiptea | OK x4 | ARROWS CHECK OK each |
+| arrows_check step5 | OK | ARROWS CHECK OK |
+| arrows_check (default parts) | OK | ARROWS CHECK OK (2297 s) |
+| dev_arrow_check | OK | DEV ARROW CHECK OK |
+| player_check (with the night part) | OK | PLAYER CHECK OK |
+| devmode_check | OK | DEVMODE CHECK OK |
+| bubble_check | OK | BUBBLE CHECK OK |
+| puzzle_check | OK | PUZZLE CHECK OK |
+| social_check | OK | SOCIAL CHECK OK |
+| talk_check | OK | TALK CHECK OK |
+| day_check 4 | OK | DAY CHECK OK |
+| day_check 11 | OK | DAY CHECK OK |
+| arrows_pointer_check | OK with the check fix (238c46d8); FAIL as shipped in b5199dc3 | "clocked in: gone" at all four sizes: the check clicked Clock in inside CLOCK_UNDO_ON's 500 ms tap guard (the same cause as R3's arrows_d); with 30 frames first, OK at all sizes. A check gap, not the game (lead 42: counts OK with the fix) |
+| interactions_check (R4's; whole, alone, no limit) | OK | INTERACTIONS CHECK OK, 0 FAIL (3279 s) |
+
+**R1: OK on b5199dc3** (with arrows_pointer_check 238c46d8).
