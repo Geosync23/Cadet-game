@@ -46664,6 +46664,13 @@ if (EV_SWAP_ON) {
   V.mail = { ...V.mail, warning: { ...V.mail.warning, body: V.mail.warning.body.replace('arrives in two days', 'arrives tomorrow') } };
   V.debrief = { ...V.debrief, smooth: V.debrief.smooth.replace('Dinners on time', 'The dinner on time') };   // one formal dinner now (EV1)
   V.threads = V.threads.map(th => th.id === 'dinnersLate' ? { ...th, label: 'The dinner on time' } : th);
+  // the visit's own jobs earn your tier's worth (lead 43, 2026-10-28, option b: a chore's 1 xp, topped up to 2 for an
+  // Officer, 3 for a Senior), so a steady Senior who takes them is as far on by Day 19 as before the visit was on. Your
+  // turn-in only (section 24 pays the 1 first); j.xp 0 (paid elsewhere) is left alone
+  if (EVENTS_ON && typeof onSim === 'function') onSim('job', n => {
+    if (!n || n.step !== 'turnin' || !SHIP.works || !(SHIP.works.tier > 1) || typeof worksXp !== 'function') return;
+    const j = (SHIP.jobs || []).find(x => x.id === n.id); if (j && j.event === 'diplomatic' && j.xp !== 0) worksXp(SHIP.works.tier - 1);
+  });
   const res = V.address.resolution; V.address = { ...V.address, resolution: c => res(c).map(l => typeof l === 'string' ? l.replace('a busy five days', 'a busy few days') : l) };
   // the comet: its own block below (FX25, EV_COMET_ON; FX22b's draft here, from plans/comet-viewing-draft.js, is replaced by
   // EP1's design, plans/events-plan-2.html Part A). With EV_COMET_ON off the swap's calendar row is passed over (no entry)
