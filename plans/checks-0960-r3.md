@@ -48,3 +48,8 @@ No FAIL lines.
 
 - Nothing else running on the machine. join_check: OK, exit 0 (228 s), JOIN CHECK OK, no FAIL lines.
   BM20's run under load stopped at a page reload (Page.goto 30 s timeout, line 153); alone it passes, so that was load.
+
+## path_check and arc_check on fe11cd66 (from R2's queue, lead 44's ask)
+
+- path_check (default args): OK, exit 0 (72 s), PATH CHECK OK, no FAIL lines.
+- arc_check (default args): OK, exit 0 (22 s), ARC CHECK OK, no FAIL lines.
