@@ -76,3 +76,12 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
 - J4 de25560 (evInvited filter, evScriptOf title): cadet ALL IDENTICAL; devmode_check OK; dev_arrow_check OK; j4_event.py:
   the Captain at the glass on, no Event arrow on the vessel's holds. **VERDICT J4 de25560: PASS** (~15:0x, lead 44, DM1).
   Note for DM1: Dev career Day 27 Specialist still offered m17 (lift roof); Dev career Day 16 Senior told of the Tier 3 test.
+
+## EV1 visit-pointer 6db1cdd (game a9364fd, base 44ea40ef, PAD and sound on): PASS (~15:4x, lead 44, EV1, BM20)
+- cadet vs 44ea40ef ALL IDENTICAL; check_fast OK (334 s).
+- vp_play.py / vp_gifts.py (pad, 390x844): greeting heads-up 09:45 Day 17 and scene 10:00; gift exchange heads-up 08:47
+  (pointer/gifts_hu_0848.png) and 09:07, scene in the observation room; Calder's pu4 offer can open first, the gifts then open
+  in their 20 minutes; farewell arrow "Tap Saruth to see the Veyli off" with the star marker (pointer/d19_by_saruth.png),
+  pad A on crew:saruth joins tj:farewell. tradJoinable: only 'farewell' has a TRAD_JOIN key among the visit's moments.
+- Gotchas: controller_check's QUIET hides #devHu (pass quiet= without it to see heads-ups); my probe names must not shadow
+  controller_check's globals (ST, log, D...), else "game failed to start".
