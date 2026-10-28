@@ -18,3 +18,19 @@ Candidate: claude/staging-pad 6db1cdd2 (later 652297471f, check-only), game sha2
 | arrows endstay / endgo | moved | lead 44 moved them to R1 / R2 |
 
 Not in the gate: controller_check reach (detached, after the final game).
+
+## Targeted rerun on fe11cd66 (game sha256 332925003934b49686c080515e154131a07f7fe7a3c14fbe0f6f7684933a129e)
+
+EV1's fixes (puzzle_check to Day 33, p9's week of retries, tjFirst + the vessel lights' tip), RV25 PASS. 17:26-18:24 UTC.
+
+| Check | Result |
+|---|---|
+| check_fast | OK, 313 s (on this tree before the push) |
+| cadet vs 0.95.0 | ALL IDENTICAL (renderer noise) |
+| lines, lines --day | PASS, PASS |
+| join | farewell now OK; my run under load stopped at the page reload after the Sunday table (Page.goto 30 s); R3 ran it alone: JOIN CHECK OK, 228 s |
+| promo_beats, bigevents, fridays | OK |
+| events | known-old FX24-2 only |
+| day_check 16, 17, 18, 19, 20, 22 | all OK |
+
+controller_check reach: started detached 18:25 UTC on fe11cd66 (CTL_STATES / CTL_PADDONE in my scratchpad, so it resumes).
