@@ -335,6 +335,68 @@ def check_comet_sound(pw, path):
 CHECKS += [check_comet_sound]   # the comet (SD1 for FX25)
 # (activities and music add theirs here)
 
+# ---- the sound update (SD2, plans/sound/r3-build-plan.md), behind SND_R3_ON: each part runs on a copy switched on ----
+R3_LINE = 'const SND_R3_ON = false;'
+def r3_copy(path):
+    src = pathlib.Path(path).read_text()
+    if R3_LINE not in src: return None
+    f = WORK / 'test' / f'_r3on_{os.getpid()}.html'; f.parent.mkdir(parents=True, exist_ok=True); f.write_text(src.replace(R3_LINE, 'const SND_R3_ON = true;', 1)); return str(f)
+R3_KEYS = ['beam', 'cup', 'farewellsup', 'goodbye', 'harvest', 'lantern', 'line', 'veyli', 'farewell']
+# put the player in a room (deck, room name or key) at an absolute ship minute, then ask which event track fits
+R3_AT = r"""(([t, deck, room]) => { skipTo(t); goToDeck(deck); const R = DECKS[deck].rooms, k = R[room] ? room : Object.keys(R).find(x => R[x].name === room);
+  const tl = ROOM_TILES[k]; if (!tl || !tl.length) return 'no tiles for ' + room; player.obj.position.copy(cellPos(...tl[(tl.length / 2) | 0])); return k; })"""
+def check_r3music(pw, path):
+    """turn 1: the picked traditions' and events' own tracks, while you're in their rooms (SND_R3_ON on a copy)"""
+    on = r3_copy(path)
+    if not on: print('  r3music: not yet (no SND_R3_ON line)'); return
+    g = Game(pw, on)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000); g.step(5)
+        check(g.ev("!!SND.music && typeof SND.r3Event === 'function'"), 'r3music: the music is up and the event pick is there')
+        got = g.ev(f"{json.dumps(R3_KEYS)}.filter(k => !(SND.music.TRACKS[k] && SND.music.TRACKS[k].time === 'Event'))")
+        check(got == [], f'r3music: every event track exists (missing {got})')
+        check(g.ev(f"!SND.music.LIST.some(x => x.tracks.some(t => {json.dumps(R3_KEYS)}.includes(t.key)))"), 'r3music: none of them is on the Music app list')
+        check(g.ev("SND.music.TRACKS.farewell.form().reduce((a, x) => a + x.bars, 0)") == 8, 'r3music: the farewell song is short (8 bars, about 40 s)')
+        def at(name, t, deck, room, want):
+            k = g.ev(f"({R3_AT})({json.dumps([t, deck, room])})"); g.page.wait_for_timeout(500); g.step(4)
+            got = g.ev("SND.r3Event()"); print(f'  r3music {name}: room {k!r} -> {got!r}')
+            check(got == want, f'r3music: {name}: wanted {want!r}, got {got!r}')
+            if want: g.step(3); check(g.ev("SND.music.eventOn()") == want, f'r3music: {name}: the music takes the {want} track')
+        # a tradition the user picked, found in the calendar (its first day in two weeks), in one of its rooms
+        tr = g.ev("""(() => { for (let d = 1; d <= 30; d++) for (const e of eventsOn(d)) if (['lantern-walk', 'name-on-the-beam', 'farewell-supper', 'harvest-supper', 'first-fruits', 'rec-cup', 'department-cup', 'rec-regatta'].includes(e.id)) {
+          const r = [...(e.rooms || eventRooms(e.ev))][0]; if (r) return [e.id, (d - 1) * 1440 + e.from + 5, +r.split('|')[0], r.split('|')[1]]; } return null; })()""")
+        if not check(tr is not None, 'r3music: no picked tradition in the first 30 days'): return
+        key = {'lantern-walk': 'lantern', 'name-on-the-beam': 'beam', 'farewell-supper': 'farewellsup', 'harvest-supper': 'harvest', 'first-fruits': 'harvest', 'rec-cup': 'cup', 'department-cup': 'cup', 'rec-regatta': 'cup'}[tr[0]]
+        at('the tradition ' + tr[0], tr[1], tr[2], tr[3], key)
+        at('the same room after it', tr[1] + 300, tr[2], tr[3], None)
+        at('the Line, the ceremony', 6 * 1440 + 880, 3, 'Bow lounge', 'line')
+        at('the Line supper', 6 * 1440 + 1090, 3, 'Mess hall', 'line')
+        at('the Line day, the gym', 6 * 1440 + 1090, 3, 'Gym', None)
+        # the visit (Days 17-20): under skipTo from a fresh game the events base doesn't start it here, so section 18's
+        # eventNow is stood in for (as the comet check stands in for cometMusicOn), and put back after
+        g.ev("window.__enReal = eventNow")
+        g.ev("eventNow = () => ({ id: 'diplomatic', phase: 'onset', day: 1 })"); at('the Veyli arrival', 17 * 1440 + 610, 5, 'Shuttle bay', 'veyli')
+        at('the arrival, the Works bay', 17 * 1440 + 610, 5, 'Works bay', None)
+        g.ev("eventNow = () => ({ id: 'diplomatic', phase: 'resolution', day: 3 })"); at('the Veyli farewell', 19 * 1440 + 545, 5, 'Shuttle bay', 'farewell')
+        at('after the farewell', 19 * 1440 + 600, 5, 'Shuttle bay', None)
+        g.ev("eventNow = window.__enReal")
+        g.step(3); check(g.ev("SND.music.eventOn()") is None, 'r3music: back to the schedule after')
+        pe = [e for e in g.errors if e.startswith('pageerror')]
+        if pe: check(False, 'r3music: page errors: ' + ' | '.join(pe[:3]))
+    finally: g.close()
+def check_r3_off(pw, path):
+    """off (as shipped): none of the update is there"""
+    g = Game(pw, path)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000); g.step(5)
+        if g.ev("typeof SND_R3_ON !== 'undefined' && SND_R3_ON"): print('  r3off: SND_R3_ON is on in this build (nothing to check)'); return
+        check(g.ev(f"typeof SND.r3Event === 'undefined' && {json.dumps(R3_KEYS)}.every(k => !SND.music.TRACKS[k] || k === 'comet')"), 'r3off: with SND_R3_ON off there are no event tracks and no event pick')
+    finally: g.close()
+CHECKS += [check_r3music, check_r3_off]   # the sound update (SD2), turn 1
+
+if os.environ.get('SOUND_ONLY'): CHECKS = [c for c in CHECKS if re.search(os.environ['SOUND_ONLY'], c.__name__)]   # run only the named checks (a regex), while building
 with sync_playwright() as pw:
     for c in CHECKS:
         try: c(pw, sys.argv[1])
