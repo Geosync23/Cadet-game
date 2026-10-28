@@ -3669,7 +3669,7 @@ def part_sound(pw, src, tag):
     return fails
 PART_FN['sound'] = part_sound; NEEDS['sound'] = ['base']; ALL_PARTS.append('sound')   # (Wave C, H)
 MUTANTS['sound'] = {'Wave C: no hook from the pad': ('src', "  if (PAD_ON) padOn('use', () => {\n    if (!ALLOWED || !S.prefs.on) return;", "  if (false) padOn('use', () => {\n    if (!ALLOWED || !S.prefs.on) return;"),
-                    'Wave C: no once-note': ('src', "toast('Sound', 'Sound starts at your first tap.')", "void 0")}
+                    'Wave C: no once-note': ('src', "if (typeof toast === 'function') toast('Sound', 'Sound starts at your first tap.');", "if (false) toast('Sound', 'Sound starts at your first tap.');")}
 SAVES_SEED = "(() => { saveGame(); const v = localStorage.getItem(slotKey(1)); if (!v) return false; localStorage.setItem(slotKey(2), v); return true; })()"
 def part_saves(pw, src, tag):
     if 'With a controller: Download and Load' not in src: return ['not yet: no Wave C Saves hint in this build']
