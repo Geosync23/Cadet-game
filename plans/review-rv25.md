@@ -32,3 +32,6 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
   dinners" (warning, galley), "Second formal dinner tonight" and "Two formal dinners in three days" (escalation). The short
   visit has one dinner (Day 18), and these now show in real play.
 - Runs: cadet vs e158dcf ALL IDENTICAL (1-level noise); day_check 16 OK, 17 OK.
+- day_check 18 OK. events_check FAILED (1891 s): (a) "the live storm didn't end cleanly": a check slip, D.left = SHIP.event
+  (a record) tested against 'diplomatic' (line 847); traces and the 'how it went' Mail present. (b) reading-corner day 7
+  "not reached farouk-olu>3-lounge-28 16:00": base e158dcf's events_check queued to compare. Sent to EV1 and lead 43 (12:3x).
