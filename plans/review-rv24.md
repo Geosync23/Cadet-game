@@ -7,6 +7,7 @@ Cap rule: at most 5 seats working at once; read only until RV23 says it has gone
 ## Verdicts
 | Branch | Verdict | Sha |
 |---|---|---|
+| claude/pad-wave-b (PB1): controller wave B, props mid-visit, every job stop, beam floor, court edge | PASS | 177793b6 |
 | claude/pad-wave-a (PA1): controller wave A, landings, clock x, Dev card, X, B, Saves on Back | PASS | 818ec0b |
 | claude/pad-wave-c (SD2): controller wave C, sound hook, pad words, Saves hint | PASS (should cleared in a29a0f48) | 336b00c2, a29a0f48 |
 | claude/p5s6-promo4 (W8): S6-7, S6-9, MA6-2, refit, DM rows, RV24's fixes | PASS (should 1 fixed in 9063aafe) | 6f13b61a, 9063aafe |
@@ -117,3 +118,7 @@ Code read (no runs yet):
   edge with #dev and A opens the panel; savesland OK. Full run on 818ec0b going.
 - Wave C a29a0f48 (SD2-1 tipWords): words OK, the tip card reads 'Walk with the left stick, and press A on anything to use it.'; PASS carries.
 - Wave A 818ec0b: PASS. cadet ALL IDENTICAL alone vs b3247d6; controller all-but-reach 48 OK, idle FAIL (old hash pairs). Waiting for wave B.
+- Wave B 177793b6: PASS. cadet identical vs b3247d6; controller all-but-reach 48 OK, idle old (hash pairs). pad_look waveb: "Your job:
+  A pipe drips..." beside a held team job; cabin spots offered mid-visit; "Paint your name" from 1.9 m, 177 calls. Scratch merge
+  staging-pad 56e98a56 + C a29a0f48 + B: 13 wave parts + m23 OK (controller_check end block conflict: keep both). PB1-1 noted (cake).
+- All three controller waves PASS: A 818ec0b, B 177793b6, C a29a0f48. Idle after.
