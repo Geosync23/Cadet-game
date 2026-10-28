@@ -51,3 +51,16 @@ and `perf-run2.txt`.
 - Reading: a small, steady rise in script time a frame, likely from what 0.96.0 switches on (controller, sound,
   the visit). Draw calls and memory are fine. Not on the known-old list (backlog 14 memory, backlog 32 one-off
   spikes), so **NEW**; reported to BM20 and lead 44 at once. Whether it blocks is the build master's and lead's call.
+
+## Bisect (lead 44): fe11cd66 with only SND_R3_ON = false, vs 0.95.0, alone
+
+Section 27, line 73185, `const SND_R3_ON = true;` -> `false` (the only difference from fe11cd66). Log:
+`plans/checks-0960-r2-logs/perf-bisect-snd-off.txt`.
+
+- perf_check exit 1, `9 problem(s)`, all game ms a frame; draw calls, geometries and memory as OLD; JS heap still
+  87 -> 93 MB (so the heap rise is not the sound).
+- Sunday dinner, the mess, portrait-wide: OLD 4.99 -> variant 2.15 ms (no longer slower).
+- lantern supper, the mess, trifold-folded: OLD 2.13 -> variant 3.27 ms (still flagged).
+- All 127 views: mean 1.97 -> 1.93 ms, median 1.84 -> 1.74; the variant slower in 64 of 127 (a coin toss),
+  against +12% and 76/84 of 127 with the sound on.
+- Reading: with the sound update off the steady rise is gone; what is left moves from scene to scene like noise.
