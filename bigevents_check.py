@@ -143,10 +143,11 @@ PAPER = r"""(() => {
   for (const b of out.beats.filter(b => b.what === 'meeting' && !b.draft && Array.isArray(b.who))) for (const id of b.who) {
     if (typeof id !== 'string' || /:/.test(id)) { out.called.push({ meet: b.id, day: b.day, at: b.at, id: String(id), slot: true }); continue; }   // a cast slot ('works:2') is filled from who's there (F7b checks it live)
     const p = pById(id); if (!p) { out.called.push({ meet: b.id, day: b.day, at: b.at, id, aboard: false }); continue; }
-    const off = !isWorkDay(p, b.day), c = has('eventCalledIn') ? !!eventCalledIn(p, b.day) : null;
+    const off = !!p.work && !isWorkDay(p, b.day), c = has('eventCalledIn') ? !!eventCalledIn(p, b.day) : null;   // no rota (Saruth, a guest): never off duty, so never called in (EV1, the visit on)
     const seg = planDay(p, b.day).find(s => s.from <= b.t && b.t < s.to);
     const pl = seg && seg.placeId && S.byId.get(seg.placeId), rm = pl && DECKS[pl.deck] && DECKS[pl.deck].rooms && DECKS[pl.deck].rooms[pl.room];
-    const there = !!seg && seg.deck === b.deck && !!rm && (!b.room || (rm.name || '').toLowerCase() === b.room);
+    const arriving = !!seg && !!p.guest && seg.tag === 'arrive' && seg.deck === b.deck;   // a guest stepping off the shuttle into the bay that minute (the Veyli at their greeting, GUEST_AT 10:00)
+    const there = arriving || !!seg && seg.deck === b.deck && !!rm && (!b.room || (rm.name || '').toLowerCase() === b.room);
     out.called.push({ meet: b.id, day: b.day, at: b.at, id, aboard: true, off, called: c, deck: seg ? seg.deck : null, act: seg ? seg.act : null, place: seg ? seg.placeId || null : null, roomName: rm ? rm.name : null, want: b.deck, wantRoom: b.room, there });
   }
   if (has('eventCalledIn')) for (const d of [...new Set(out.beats.filter(b => !b.draft).map(b => b.day))])

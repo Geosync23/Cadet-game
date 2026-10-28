@@ -101,7 +101,7 @@ SETUP = r"""(() => {
 PAPER = r"""(() => {
   const C0 = caseState(); C0.open = []; C0.done = []; C0.n = 0; for (const k in CASE_STATS) CASE_STATS[k] = k === 'why' ? {} : 0;
   const rankOf = d => d < 10 ? 'junior' : d < 16 ? 'officer' : d < 23 ? 'senior' : 'specialist';
-  const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, end = 26 * 1440;
+  const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, end = 33 * 1440;   // to Day 33 (EV1, 0.96.0): the visit (Days 17-19) and the comet (22) are event days, kept case-free on purpose (caseOffer's eventDay), so Days 5-26 alone were too thin a sample
   const jr = jobRun; jobRun = () => null;               // the Works crew claim nothing: the slow crew below does the jobs
   MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
   const out = { cases: [], perRank: {}, over: [], bad: [] }, seen = new Set(), firstAt = new Map();
@@ -560,7 +560,7 @@ def run(path):
         cs = A['cases']
         print(f"cases: {len(cs)}; per rank: {A['perRank']}; stats: {A['stats']}")
         for c in cs[:4]: print('  ', c['id'], 'day', c['day'], c['hour'], c['band'], c['cause'], c['sus'], [(k['at'], k['kills']) for k in c['clues']], c['title'])
-        if st['hookOffer']: check(len(cs) >= 1, f'cases were posted over Days 5-26 on paper: {len(cs)}')
+        if st['hookOffer']: check(len(cs) >= 1, f'cases were posted over Days 5-33 on paper: {len(cs)}')
         else: print(f'  (section 17 has no real faults yet: {len(cs)} cases on paper; the sweep below makes them)')
         Sw = g.ev(SWEEP); Sw2 = g.ev(SWEEP)
         print(f"sweep: {len(Sw['cases'])} cases; per rank: {Sw['perRank']}")
@@ -974,8 +974,13 @@ P9 = r"""(() => {
   C.open = []; delete SHIP.flags['case.p9.first']; W.rank = 'senior'; W.tier = 3; W.tr = { t3: 15 }; W.side = {};
   const said = []; const ws = worksSay, wa = worksSayAll; worksSay = (id, t) => said.push([id, t]); worksSayAll = (id, L) => said.push([id, L[0]]);
   W.op = { 19: ['p9'] }; setShipNow(18 * 1440 + 330); machinesNow();
-  const F = p9Find(19); out.find = F && { A: F.A, title: F.title, wd: F.wd, trips: F.trips, others: F.others.length };
   WORK_MECH.p9.open(ladderRow('p9'), 19);
+  // (EV1, 0.96.0) no clash on Days 19-21 (the visit's greeting day dropped Day 17's tasting table): p9Stage waits, unflagged,
+  // and looks again each day for a week from the opening; the first day it finds one, it stages (Day 22: Winner Stays On)
+  out.retry = flag('case.p9.first') === undefined && !p9Find(19);
+  let day = 19; while (day < 26 && flag('case.p9.first') === undefined) { day++; setShipNow((day - 1) * 1440 + 330); machinesNow(); p9Stage(); }
+  out.day = day; const B0 = (day - 1) * 1440;
+  const F = p9Find(day); out.find = F && { A: F.A, title: F.title, wd: F.wd, trips: F.trips, others: F.others.length };
   const id = flag('case.p9.first'), c = caseById(id), j = c && caseJob(c); out.staged = id;
   if (!c) { worksSay = ws; worksSayAll = wa; Object.assign(W, keep); return out; }
   const P = p9Of(c); out.machine = j.machine; out.cause = c.cause; out.sus = c.sus.slice(); out.reserved = j.reserved; out.hidden = caseHidden(j); out.fewest = c.fewest; out.lim = caseBandOf('p9', c.band);
@@ -987,7 +992,7 @@ P9 = r"""(() => {
   out.othersOk = c.sus.filter(s => /^r:/.test(s)).every(s => F.trips.every(({ d: dd, t }) => !washesOf(s.slice(2), dd).some(([a, b]) => a <= t && t < b)));
   out.rotaOk = c.clues.filter(k => k.src.who).every(k => k.src.ws.every(([dd, a]) => washesOf(k.src.who, dd).some(([x]) => x === a)));
   out.partsOut = c.clues.find(k => k.id === 't0').kills.slice().sort().join() === c.sus.filter(s => !/^r:/.test(s) && s !== 'clash').sort().join();
-  setShipNow(18 * 1440 + 545); machinesNow(); caseTick();
+  setShipNow(B0 + 545); machinesNow(); caseTick();
   out.shown = !c.wait; out.title = j.title; out.by = c.by; out.come = CASE_COME.by; if (out.come) { CASE_COME.at = 0; caseComeTick(shipNow()); } out.said = said.slice();
   out.labels = c.sus.map(s => caseSus(c, s).label);
   claimJob(j.id); caseTick(); for (const k of c.clues) caseClue(c.id, k.id);
@@ -997,11 +1002,12 @@ P9 = r"""(() => {
   turnInJob(j.id); caseTick(); out.closed = !caseById(c.id); out.trained = W.tr.p9;
   // the ask, in person: away, nothing; beside them, the answer and the move
   const pa = schedPeople().find(x => x.id === P.A); p9AskTick(shipNow(), false); out.askArrow = !!GUIDE.list.find(e => e.id === 'p9:ask' && e.level === 1); out.notYet = !!S.ask;
-  const fake = { p: pa, x: player.obj.position.x + 1, z: player.obj.position.z }; DECK_CREW.push(fake);
+  out.dlg = typeof DIALOGUE !== 'undefined' && DIALOGUE ? DIALOGUE.id || 'open' : null; if (out.dlg) dialogueEnd(true);   // a scene still open from the days stepped through (Day 22: Zeke's m2 training): the ask waits for none
+  const fake = { p: pa, x: player.obj.position.x + 1, z: player.obj.position.z }; DECK_CREW.unshift(fake);   // first: they may be on this deck too, further off (EV1: Ilse Quist on Day 22)
   said.length = 0; p9AskTick(shipNow(), false); DECK_CREW.splice(DECK_CREW.indexOf(fake), 1);
   out.answered = said.some(w => w[0] === P.A); out.moves = S.moves.slice(); out.askGone = !S.ask;
   // settled at 22:00 for the next such weekday, once; the rule for them only, in the laundry, at that hour
-  let nd = 20; while (weekday(nd) !== P.wd) nd++;
+  let nd = day + 1; while (weekday(nd) !== P.wd) nd++;
   out.settle = [p9Settle(nd), p9Settle(nd), p9Settle(nd - 1)]; out.set = S.set[nd];
   const lp = placeById([...L][0]), occ = {}, A0 = (nd - 1) * 1440;
   const other = schedPeople().find(x => x.id !== P.A);
@@ -1032,6 +1038,7 @@ def part_p9(g, path):
     if not g.ev("typeof p9Stage === 'function'"): return 'not yet'
     R = g.ev(P9); print('p9:', R)
     check(R.get('find') and R.get('staged') and R['staged'] != 'none', f"p9: a clash found in the last fortnight's plans and staged: {R.get('find')} {R.get('staged')}")
+    check(R.get('day', 99) < 26 and (R['day'] == 19 or R.get('retry')), f"p9: staged the day the row opens, or (no clash yet) on a later day within the week, unflagged till then: day {R.get('day')} retry {R.get('retry')}")
     if not R.get('staged') or R['staged'] == 'none': return 'done'
     from itertools import combinations
     sus, clues, L = R['sus'], R['clues'], R['lim']
@@ -1043,7 +1050,7 @@ def part_p9(g, path):
     check(R['tripsOk'] and R['othersOk'] and R['rotaOk'] and R['partsOut'], f"p9: honest against the plans: trips {R['tripsOk']}, others {R['othersOk']}, rota {R['rotaOk']}, the log rules the parts out {R['partsOut']}")
     check(all(k['reach'] for k in clues) and len({k['deck'] for k in clues if k['deck'] is not None}) <= 1, f"p9: every clue reachable, one deck")
     check(R['shown'] and 'only on' in R['title'] and R['by'] == 'calder' and any(w[0] == 'calder' for w in R['said']), f"p9: shown with Calder's word: {R['title']!r} {R['said']}")
-    check(R['stops'][1] and 0 in R['stops'][1] and R['fixed'] and R['ask'] == R['find']['A'] and R['closed'] and R['trained'] == 19, f"p9: called, no part to fetch, the reset fixes it, the ask is next, trained: {R['stops']} {R['fixed']} {R['ask']} {R['trained']}")
+    check(R['stops'][1] and 0 in R['stops'][1] and R['fixed'] and R['ask'] == R['find']['A'] and R['closed'] and R['trained'] == R['day'], f"p9: called, no part to fetch, the reset fixes it, the ask is next, trained: {R['stops']} {R['fixed']} {R['ask']} {R['trained']}")
     check(R['askArrow'] and R['notYet'] and R['answered'] and R['askGone'] and len(R['moves']) == 1 and R['moves'][0]['who'] == R['find']['A'], f"p9: a level 1 arrow to them; asked in person, their answer, the move: {R['askArrow']} {R['answered']} {R['moves']}")
     check(R['settle'] == [True, False, False] and R['set'] and R['set'][0]['who'] == R['find']['A'], f"p9: settled once at 22:00 for the next such day only: {R['settle']} {R['set']}")
     check(R['rule'] == [True, False, False, False], f"p9: the planner's rule closes the laundry for them only, at that hour, on that day: {R['rule']}")

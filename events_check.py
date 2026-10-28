@@ -57,6 +57,7 @@ PLANS = r"""(days => {
     const S = schedData(), went = {}, places = {};
     for (const p of schedPeople()) for (const s of planDay(p, d)) {
       if (!s.tag || !/^ev-/.test(s.tag) || (typeof eventMeetTag === 'function' && eventMeetTag(s.tag))) continue;   // a ship-wide event's meeting (F0b), not a tradition
+      { const m = /^ev-(\w+)-/.exec(s.tag); if (m && SHIP_EVENTS[m[1]] && !SHIP_TRADITIONS.some(e => e.id === s.tag.slice(3))) continue; }   // an event guest's own steps (Taavek's ev-veyliVessel-ramp...), not a tradition (EV1: the guests' days are on paper from Day 1 now)
       const id = tagId(s.tag), e = on.find(x => x.id === id), B = (d - 1) * 1440;
       if (!e) { out.bad.push(d + ' ' + p.id + ' at ' + id + ', which is not on'); continue; }
       if (s.from < B + e.from - Math.max(e.ev.early || 0, p.id === e.ev.host || typeof P926_TRADS !== 'undefined' && P926_TRADS && /^rec-(wren|chiefs)-talk$/.test(e.id) && recSpeaker(p, d) ? 5 : 0, e.ev.meal && typeof TRAD_LINE !== 'undefined' ? TRAD_LINE[1] : 0, e.ev.lead ? 35 : 0) ||   // the sim plans a host 5 minutes early; a meal tradition's diners sit as the line serves them, up to TRAD_LINE[1] early (sim 0.26.41); the Captain's address seats them up to 30 minutes early (18f's friLead), its host 5 more
@@ -160,6 +161,7 @@ STORM = r"""(() => {
       sig.push(k + ':' + m.join(',')); mods[k] = m;
       if (n && n.phase === 'escalation') eventScore('blackout', 1);   // a stand-in: a minute of blackout per step of the escalation
       const g = eventMod('galley', 'menu', t); if (g) mods.menu = g;
+      if (SHIP.eventLog.some(l => l.id === 'ionStorm')) break;   // the storm's own run: the visit starts on Day 16 now it's on (EV1)
     }
     if (send) mailSend = send;
     if (real) { for (const x of NEWS.splice(n0)) { news.push(fmt(x)); delete SHIP.knows[x.id]; } } else delete window.newsAdd;
@@ -307,12 +309,14 @@ HOOKS = r"""(() => {
   return R;
 })()"""
 
-# the diplomatic visit (event 2, 0.34.16) on paper, twice: after the storm (logged, ending day 16) it's due from day 23;
+# the diplomatic visit (event 2, 0.34.16) on paper, twice, as the build has it (EV1, 2026-10-28: on in a real game with
+# the event swap; no longer forced on here: a build where it's still a draft is skipped, and failed if the swap is on):
+# after the storm (logged, ending day 16) it's due from day 23;
 # run from day 23 to its end; phases, addresses, Mail, meetings, the farewell as a gathering, the guests' days, the
 # formal dinners' galley batch on days 3 and 5 only, and the greeting's cast with the Veyli names
 DIPLO = r"""(() => {
-  const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice(), m: MEETINGS.splice(0), draft: SHIP_EVENTS.diplomatic.draft };
-  SHIP_EVENTS.diplomatic.draft = false;                  // as it will be when it's switched on
+  if (SHIP_EVENTS.diplomatic.draft) return { draft: true };   // off in this build: nothing to run
+  const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice(), m: MEETINGS.splice(0) };
   const D = SHIP_EVENTS.diplomatic, on = D.phases.find(p => p.id === 'onset').at[0], fw = D.moments.find(m => m.id === 'farewell').at[0];   // the greeting's and the farewell's days (2 and 7; 1 and 3 with the event swap, 0.93.2)
   const run = () => {
     SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0; MEETINGS.length = 0; EV_DAYS.clear();
@@ -344,7 +348,6 @@ DIPLO = r"""(() => {
   for (let t = (sd - 1 + on) * 1440 + 581; t <= (sd - 1 + on) * 1440 + 602; t++) { setShipNow(t); eventsTick(); }
   const live = { room: roomAt(...player.here()), open: DIALOGUE ? DIALOGUE.id : null, first: DIALOGUE ? dialogueView().who : null };
   if (DIALOGUE) dialogueEnd(true); if (typeof deviceAddress === 'function') deviceAddress(null);
-  SHIP_EVENTS.diplomatic.draft = keep.draft;
   SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr); MEETINGS.length = 0; MEETINGS.push(...keep.m); EV_DAYS.clear();
   return { a, same: JSON.stringify(a) === JSON.stringify(b), names, live };
 })()"""
@@ -600,7 +603,8 @@ with sync_playwright() as pw:
         storm_cal = g.ev("typeof EV_CAL_ON !== 'undefined' && EV_CAL_ON")
         if g.ev("typeof P926_TRADS !== 'undefined' && P926_TRADS"): PLAN['rec-chiefs-talk'] = PLAN['rec-chiefs-talk'] + [32]; PLAN['rec-wren-talk'] = PLAN['rec-wren-talk'] + [36, 39]   # 0.92.6 (FX17): the full talk rota
         dress = g.ev("(() => { const o = {}; if (typeof EV_DAY_DRESS !== 'undefined') for (const [k, v] of EV_DAY_DRESS) { const [id, d] = k.split('@'); ((o[id] = o[id] || { drop: [], add: [] })[v.drop ? 'drop' : 'add']).push(+d); } return o; })()")
-        rc = g.ev("""(() => { const out = { on: {}, n: {}, hosts: [], talks: [] };
+        rc = g.ev("""(() => { const out = { on: {}, n: {}, hosts: [], talks: [], paused: {} };
+          for (const ev of SHIP_TRADITIONS) if (/^rec-/.test(ev.id)) for (let d = 1; d <= 42; d++) if (eventPauses(ev, d)) (out.paused[ev.id] = out.paused[ev.id] || []).push(d);   // a ship-wide event's quiet hours (the visit's greeting day, Day 17: EV1)
           for (let d = 1; d <= 42; d++) for (const e of eventsOn(d)) if (/^rec-/.test(e.id)) {
             (out.on[e.id] = out.on[e.id] || []).push(d);
             const went = schedPeople().filter(p => planDay(p, d).some(s => evTagId(s.tag) === e.id)).map(p => p.id);
@@ -614,6 +618,7 @@ with sync_playwright() as pw:
             if k == 'rec-wso': want = [d for d in want if d != 28]
             if k == 'rec-slow-stretch' and storm_cal: want = [d for d in want if d != 14]   # Sunday Day 14 08:00: the calendar's storm (escalation) pauses it
             want = sorted((set(want) - set(dress.get(k, {}).get('drop', []))) | set(d for d in dress.get(k, {}).get('add', []) if d <= 42))   # a ship-wide event's day dress (the storm update: talent night a week on)
+            want = [d for d in want if d not in rc['paused'].get(k, [])]
             if got != want: fail(f"{k} on days {got}, the plan says {want}")
         print('Rec deck traditions, days 1-42 (people at each):', '; '.join(f"{k} {v}" for k, v in sorted(rc['n'].items())))
         for x in rc['hosts']: fail(x)
@@ -791,7 +796,8 @@ with sync_playwright() as pw:
     if not any('Storm prep' in x for x in a['mails']) or not any('how it went' in x for x in a['mails']): fail(f"the storm's Mail: {a['mails']}")
     if len(a['news']) != 7 or not all('@10 ' in x for x in a['news']): fail(f"the storm's news: {a['news']}")
     bt = g.ev("hhmm(SHIP_EVENTS.ionStorm.meetings.find(m => m.id === 'stormBriefing').at[1])")   # 09:15, or 14:00 with the storm update
-    if a['on'] != ['10:0 warning@360', '11:1 warning@0 onset@840', '13:3 escalation@0 resolution@600 afterglow@1320', '16:-'] or f'stormBriefing works-bay {bt}' not in a['gath'][0] or 'party bow-lounge 19:00' not in a['gath'][1]: fail(f"eventOn / eventGatherings: {a['on']} {a['gath']}")
+    von = g.ev("!!SHIP_EVENTS.diplomatic && !SHIP_EVENTS.diplomatic.draft")   # the visit on (EV1): its warning is Day 16 09:00, the day after the storm
+    if a['on'] != ['10:0 warning@360', '11:1 warning@0 onset@840', '13:3 escalation@0 resolution@600 afterglow@1320', '16:0 warning@540' if von else '16:-'] or f'stormBriefing works-bay {bt}' not in a['gath'][0] or 'party bow-lounge 19:00' not in a['gath'][1]: fail(f"eventOn / eventGatherings: {a['on']} {a['gath']}")
     if len(a['meets']) != 2: fail(f"the storm's meetings: {a['meets']}")
     if m.get('menu') != 'stormStew': fail('eventMod at t: no storm stew in the escalation')
     if a['log'] and 'calls' not in a['log'][0]['threads']: fail('the call-home backlog was not scored')
@@ -838,7 +844,7 @@ with sync_playwright() as pw:
     if not L['feel'] or 'jolt' not in L['feel'][0] or not L['banner'] or not L['flicker']: fail('the front was not felt (jolt, banner, flicker)')
     if not L['allClear'] or L['allClear']['name'] not in ('Captain Odile Marrow', 'Commander Teo Vance') or not L['walked'] or not any('The all-clear (notes)' in x for x in L['mails']): fail('the all-clear did not open, or walking out sent no gist')   # the writers' all-clear (the storm update) opens with Vance
     if max(L['calls1'], L['calls2'], L['calls3']) >= 450: fail('draw calls over 450 in the storm')
-    if len(L['log']) != 1 or L['left'] is not None or not L['traces'] or not any('how it went' in x for x in L['mails']): fail(f"the live storm didn't end cleanly: {L['log']}")
+    if len(L['log']) != 1 or (L['left'] or {}).get('id', L['left']) not in (None, 'diplomatic') or not L['traces'] or not any('how it went' in x for x in L['mails']): fail(f"the live storm didn't end cleanly: {L['log']}")
 
     # 7. occasions (C10)
     O = g.ev(OCC)
@@ -865,27 +871,31 @@ with sync_playwright() as pw:
     if not H['added'] or H['again'] or H['today'] or 'pell-show' not in H['oneOffOn'] or not H['oneOffGoing'] or (H['hostFree'] and not H['hostFlag']): fail('eventOneOff')
 
     # 9. the diplomatic visit on paper
-    V = g.ev(DIPLO); a = V['a']
-    print('Diplomatic visit on paper: due', a['due'], '| the same twice:', V['same'])
-    [print('  day ' + x) for x in a['steps']]
-    print('  galley batch at 15:00 by day:', a['batch'], '| guests (days from the start):', a['guests'])
-    print('  addresses:', a['addr']); print('  Mail:', a['mails']); print('  meetings:', a['meets'])
-    print('  farewell:', a['farewell'], 'going', a['going'], '| result', a['log'], a['traces'])
-    print('  greeting speakers:', V['names'], '| guests flag on days', a['guestsOn'])
-    print('  live greeting (in the shuttle bay at 10:00):', V['live'])
-    if V['live']['open'] != 'veyliGreeting' or V['live']['first'] != 'Captain Odile Marrow': fail(f"the live greeting: {V['live']}")
+    V = g.ev(DIPLO)
     SW = g.ev("typeof EV_SWAP_ON !== 'undefined' && EV_SWAP_ON")   # the event swap (0.93.2): the short visit, Days 16-19, before the comet
-    if SW: print('  (the event swap is on: the short visit, Tuesday to Friday)')
-    if a['guestsOn'] != ([1, 2] if SW else [2, 3, 4, 5, 6]): fail(f"the 'guests' effect: {a['guestsOn']}")
-    if not a['due'] or a['due']['id'] != 'diplomatic' or (a['due']['day'] != 16 if SW else a['due']['day'] < 23) or not V['same']: fail(f"the diplomatic visit's start or repeatability: {a['due']} {V['same']}")
-    want = ['warning', 'onset', 'escalation', 'resolution', 'afterglow', 'end']
-    vs = a['steps']; e = next((i for i, x in enumerate(vs) if x.split(' ')[2:3] == ['end']), len(vs) - 1); vs = vs[:e + 1]   # the visit's own run: with the swap on, the comet starts inside the window
-    if [w for x in vs for w in want if (' ' + w) in x.replace('phase ', ' ')] != want: fail(f"diplomatic phases: {a['steps']}")
-    bd = dict(x.split(':') for x in a['batch'])
-    if (bd.get('2') != '10' or any(v != '-' for k, v in bd.items() if k != '2')) if SW else (bd.get('3') != '10' or bd.get('5') != '10' or bd.get('4') != '-' or bd.get('1') != '-'): fail(f"the formal dinners' batch: {a['batch']}")
-    if len(a['addr']) != 2 or len(a['meets']) != 2 or not a['farewell'] or a['going'] < 3: fail('the visit\'s addresses, meetings or farewell')
-    if a['guests'][0] != ('teshavi:1-3' if SW else 'teshavi:2-7') and a['guests'][0] != 'teshavi:-': fail(f"the guests' days: {a['guests']}")
-    if 'Speaker Teshavi' not in V['names'] or 'Envoy Saruth' not in V['names']: fail(f"the greeting's cast: {V['names']}")
+    if V.get('draft'):
+        (fail if SW else print)("the diplomatic visit is still a draft in this build" + (": with the event swap on it should run in a real game (the user, 2026-10-28)" if SW else " (no event swap): not run"))
+    else:
+        a = V['a']
+        print('Diplomatic visit on paper: due', a['due'], '| the same twice:', V['same'])
+        [print('  day ' + x) for x in a['steps']]
+        print('  galley batch at 15:00 by day:', a['batch'], '| guests (days from the start):', a['guests'])
+        print('  addresses:', a['addr']); print('  Mail:', a['mails']); print('  meetings:', a['meets'])
+        print('  farewell:', a['farewell'], 'going', a['going'], '| result', a['log'], a['traces'])
+        print('  greeting speakers:', V['names'], '| guests flag on days', a['guestsOn'])
+        print('  live greeting (in the shuttle bay at 10:00):', V['live'])
+        if V['live']['open'] != 'veyliGreeting' or V['live']['first'] != 'Captain Odile Marrow': fail(f"the live greeting: {V['live']}")
+        if SW: print('  (the event swap is on: the short visit, Tuesday to Friday)')
+        if a['guestsOn'] != ([1, 2] if SW else [2, 3, 4, 5, 6]): fail(f"the 'guests' effect: {a['guestsOn']}")
+        if not a['due'] or a['due']['id'] != 'diplomatic' or (a['due']['day'] != 16 if SW else a['due']['day'] < 23) or not V['same']: fail(f"the diplomatic visit's start or repeatability: {a['due']} {V['same']}")
+        want = ['warning', 'onset', 'escalation', 'resolution', 'afterglow', 'end']
+        vs = a['steps']; e = next((i for i, x in enumerate(vs) if x.split(' ')[2:3] == ['end']), len(vs) - 1); vs = vs[:e + 1]   # the visit's own run: with the swap on, the comet starts inside the window
+        if [w for x in vs for w in want if (' ' + w) in x.replace('phase ', ' ')] != want: fail(f"diplomatic phases: {a['steps']}")
+        bd = dict(x.split(':') for x in a['batch'])
+        if (bd.get('2') != '10' or any(v != '-' for k, v in bd.items() if k != '2')) if SW else (bd.get('3') != '10' or bd.get('5') != '10' or bd.get('4') != '-' or bd.get('1') != '-'): fail(f"the formal dinners' batch: {a['batch']}")
+        if len(a['addr']) != 2 or len(a['meets']) != 2 or not a['farewell'] or a['going'] < 3: fail('the visit\'s addresses, meetings or farewell')
+        if a['guests'][0] != ('teshavi:1-3' if SW else 'teshavi:2-7') and a['guests'][0] != 'teshavi:-': fail(f"the guests' days: {a['guests']}")
+        if 'Speaker Teshavi' not in V['names'] or 'Envoy Saruth' not in V['names']: fail(f"the greeting's cast: {V['names']}")
 
     # 9b. tradOn (0.34.37, social B's calls home): the Sunday long table's window (Letters evening, its first user, went in 0.62.0) in absolute ship minutes, null outside it
     T = g.ev("""(() => { const d = [...Array(28).keys()].map(x => x + 1).find(x => eventsOn(x).some(e => e.id === 'sunday-table')); if (!d) return null;

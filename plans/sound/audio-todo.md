@@ -14,6 +14,8 @@ The sound designer (SD1) keeps this list. Newest decisions first in each part. T
 
 ## Building (after the next release)
 
+- **The sound update (Round 3 and the mess hall):** built on `claude/sound-r3` behind `SND_R3_ON` (off) by SD2 and SD3, 2026-10-28: event music (turn 1), the farewell song A (the user's later answer), the mess hall (turn 2), the watcher sounds (turn 3, with the test fit B), six one-line hooks (turn 4), and your new quarters' home chime C (the user's room B door pick, through lead 43; the first time you open room B's door after the move). Next: review, merge, then the switch-on and a listening pass.
+
 - **Sound in the game:** after 0.92.6 ships, on the user's go. The plan is `plans/sound/integration-plan.md`. It covers the decided sounds: hums, device and job sounds, doors, hatches, the lift and footsteps.
 - **Activity sounds in the game:** approved; hooks and an estimate (about 4 to 6 builder hours) are in the integration plan. Round 2 is picked, so this is one more build turn.
 - **Music in the game:** approved and built as `plans/sound/music-module.js`, ready to go in as one turn after the sound build (hooks, the Music app, a music check, about 3.5 to 5 builder hours; 21 tracks, rotating). Not in the game yet, by the user's word. The Music app is designed and mocked up on the Wren Music Player page.

@@ -877,7 +877,7 @@ PARTS['m18'] = part_m18
 # a second run nobody takes is withdrawn at its time; the Wednesday manifest still posts beside an open parts run
 MRUN = r"""(() => {
   SHIP.works = null; SHIP.notes = []; SHIP.jobs = []; setShipNow(17 * 1440 + 600); machinesNow(); const W = worksInit(), out = {};
-  SHIP.stores.filter = 3; SHIP.stores.pump = 3;   // on the shelves
+  SHIP.stores.filter = 3; SHIP.stores.pump = 3; SHIP.stores.lamp = 3;   // on the shelves (the lamp too, for the withdrawn run below: by Day 17 the crew's repairs and the visit's lamp job have used the shelf's lamps; EV1, 0.96.0)
   const s0 = { ...SHIP.stores }, id = manifestRun(['filter', 'pump'], '5-scrubber-1', { for: 'team-x', until: shipNow() + 120 });
   const j = SHIP.jobs.find(x => x.id === id); out.job = j && [j.kind, j.src, j.reserved, heldForYou(j), j.crates.length, jobStops(j).map(x => x.step + ':' + x.places[0])];
   out.claimed = claimJob(id); jobStops(j).forEach((x, k) => jobStepDone(id, k));

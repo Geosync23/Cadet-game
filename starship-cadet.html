@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.95.0
+   STARSHIP CADET: CSV Wren                           build 0.96.0
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9486,7 +9486,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.95.0';                            // keep in step with the header's build line
+const GAME_BUILD = '0.96.0';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -16001,6 +16001,7 @@ function clockPunch(early) {                             // a punch from the scr
 }
 function clockUndo() {                                   // Undo: the kept copy back; the side effects never happen
   const u = CLOCK_UNDO; if (!u) return null; CLOCK_UNDO = null;
+  if (SND_R3_ON) sndFx('r3ClockUndo');                   // section 27's sound update: the lever back (A)
   const C = careerInit(); C.ci = u.keep.ci; C.co = u.keep.co; if (flag('shiftSent') === u.keep.sent) C.on = u.keep.on;   // section 14 started the shift in the window (its shiftStart note is out): that stands
   if (u.keep.log === undefined) delete SHIP.player.clockLog[u.d]; else SHIP.player.clockLog[u.d] = u.keep.log;
   return u.what;
@@ -33451,7 +33452,7 @@ const LINES = JSON.parse([
   '{"text":"Whole bunk heard about your present. In a good way.","id":"fiq5b5","cue":["gift","gift.you"],"rank":"junior","not":{"cue":"gift.you@me"}},',
   '{"text":"Guests coming. Everyone\'s polishing everything. I polished a mop.","id":"155jv5o","tone":"funny","cue":["event.diplomatic","event.diplomatic.warning"]},',
   '{"text":"A Veyli delegation, they say. Best uniforms on. Mine\'s been in a drawer since the academy.","id":"s4gig9","cue":["event.diplomatic","event.diplomatic.warning"]},',
-  '{"text":"Guests on the way. Brennan\'s planning two formal dinners. We\'re all a bit pale.","id":"pnk05v","tone":"funny","cue":["event.diplomatic","event.diplomatic.warning"],"dept":"galley"},',
+  '{"text":"Guests on the way. Brennan\'s planning a formal dinner. We\'re all a bit pale.","id":"1ozxfa9","tone":"funny","cue":["event.diplomatic","event.diplomatic.warning"],"dept":"galley"},',
   '{"text":"Everyone wants polish. We\'ve run out of polish. I didn\'t know you could run out of polish.","id":"wxlijs","tone":"funny","cue":["event.diplomatic","event.diplomatic.warning"],"dept":"store"},',
   '{"text":"The guests are aboard. Have you seen them yet? Very tall. Very calm.","id":"nbpmjd","cue":["event.diplomatic","event.diplomatic.onset"]},',
   '{"text":"They bowed to me in the corridor. I bowed back. I think I did it right.","id":"18x7a6q","cue":["event.diplomatic","event.diplomatic.onset"]},',
@@ -33459,8 +33460,8 @@ const LINES = JSON.parse([
   '{"text":"Guests aboard. Formal dinner soon. Brennan\'s been tasting the soup since five.","id":"1210lct","cue":["event.diplomatic","event.diplomatic.onset"],"dept":"galley"},',
   '{"text":"A guest stood with the garden herbs for ten minutes. Just stood. I liked that.","id":"1p2on4m","tone":"warm","cue":["event.diplomatic","event.diplomatic.onset"],"dept":"garden"},',
   '{"text":"The guest cabins are warm as an oven. The Veyli like it that way.","id":"1k7lhg2","cue":["event.diplomatic","event.diplomatic.escalation"]},',
-  '{"text":"Second formal dinner tonight. Everyone\'s walking very straight.","id":"1v5t99p","tone":"funny","cue":["event.diplomatic","event.diplomatic.escalation"]},',
-  '{"text":"Two formal dinners in three days. My feet have filed a complaint.","id":"8w0ax9","tone":"funny","cue":["event.diplomatic","event.diplomatic.escalation"],"dept":"galley"},',
+  '{"text":"Formal dinner tonight. Everyone\'s walking very straight.","id":"hwiwuj","tone":"funny","cue":["event.diplomatic","event.diplomatic.escalation"]},',
+  '{"text":"Formal dinner in dress shoes. My feet have filed a complaint.","id":"1neztje","tone":"funny","cue":["event.diplomatic","event.diplomatic.escalation"],"dept":"galley"},',
   '{"text":"The guests have gone. The ship feels bigger without them. Quieter.","id":"1dhjrn3","cue":["event.diplomatic","event.diplomatic.afterglow"]},',
   '{"text":"I\'ll miss the bowing. I\'d got quite good at it.","id":"c95twd","tone":"funny","cue":["event.diplomatic","event.diplomatic.afterglow"]},',
   '{"text":"They left the mess a little bowl. Nobody knows what it\'s for. It\'s biscuits now.","id":"1cc2q5a","tone":"funny","cue":["event.diplomatic","event.diplomatic.afterglow"]},',
@@ -37954,6 +37955,10 @@ const LINES = JSON.parse([
   '{"text":"Every song: sing through the record cabinet in the music room, whatever the words are. Leisure and social up.","id":"noql83"}]',
   ',"join.every-song.tip":[',
   '{"text":"Tap {name} to join Every song","id":"v4imo9"}]',
+  ',"join.farewell.notice":[',
+  '{"text":"The Veyli farewell: stand with Envoy Saruth in the shuttle bay and see the delegation off. Social and leisure up.","id":"vafgtb"}]',
+  ',"join.farewell.tip":[',
+  '{"text":"Tap Saruth to see the Veyli off","id":"dajabk"}]',
   ',"join.garden-hour.notice":[',
   '{"text":"Garden hour: tend the beds with the gardeners. Leisure and social up.","id":"19agqhd"}]',
   ',"join.garden-hour.tip":[',
@@ -38081,6 +38086,8 @@ const LINES = JSON.parse([
   '{"text":"Tiles night: sit at a board and play a few friendly games. Leisure and social up.","id":"1wbaxf7"}]',
   ',"join.tiles-night.tip":[',
   '{"text":"Tap {name} to join Tiles night","id":"1cchihf"}]',
+  ',"join.vesselLights.tip":[',
+  '{"text":"Tap Saruth to watch the little ship from the glass","id":"vdcdru"}]',
   ',"join.works-tea.notice":[',
   '{"text":"Works Friday tea: tea, biscuits and the week\'s news with Works. Social up, and a little food.","id":"6qvotp"}]',
   ',"join.works-tea.tip":[',
@@ -45725,7 +45732,7 @@ function tjActs() { for (const [id, s] of Object.entries(TRAD_JOIN)) if (!s.act 
   PLAYER_ACTS['tj:' + id] = def; if (typeof IX_ACTS !== 'undefined') IX_ACTS['tj:' + id] = def;
 } }
 tjActs();
-const tradJoinable = e => !!(e && TRAD_JOIN[e.id] && (evIsTrad(e.ev) || P926_APPT && e.ev.appt || EV_COMET_ON && !!e.ev.when && e.ev.when.ship === 'comet' || EV_VESSEL_ON && !!e.ev.when && e.ev.when.ship === 'veyliVessel'));   // the comet's four gatherings too (FX25); the Veyli vessel's engine lights (VB1)   // an appointment's one-off too (0.92.6 item 9, FX22)
+const tradJoinable = e => !!(e && TRAD_JOIN[e.id] && (evIsTrad(e.ev) || P926_APPT && e.ev.appt || EV_COMET_ON && !!e.ev.when && e.ev.when.ship === 'comet' || EV_VESSEL_ON && !!e.ev.when && e.ev.when.ship === 'veyliVessel' || !!e.ev.when && e.ev.when.ship === 'diplomatic'));   /* the visit's farewell (EV1, visit-pointer) */   // the comet's four gatherings too (FX25); the Veyli vessel's engine lights (VB1)   // an appointment's one-off too (0.92.6 item 9, FX22)
 const tradWords = (e, k, ctx) => { const t = quizText('join.' + e.id + '.' + k, e.day, ctx); return t; };
 // the people going (their plan has them there today), and the leader: the tradition's host, else the spec's, when going;
 // else the spec's pick or the first of the goers by a hash of the day. Cached per day
@@ -45739,7 +45746,7 @@ function tradLeader(e) {
   if (TJ_LEAD.size > 40) TJ_LEAD.clear(); TJ_LEAD.set(key, p ? p.id : null);
   return p ? p.id : null;
 }
-const tjFirst = id => { const p = schedPeople().find(q => q.id === id); return p ? shortName(p) : id; };   // section 14's: 'Dr. Sato', 'Chief Calder', 'Tomas' (reviewer R3, 0.70.3)
+const tjFirst = id => { const p = schedPeople().find(q => q.id === id); if (!p) return id; const w = p.name.split(' '); return w.length === 2 && /^(Envoy|Speaker)$/.test(w[0]) ? w[1] : shortName(p); };   // a Veyli's title with one name ('Envoy Saruth'): the name, as the tips say (RV25, 0.96.0; shortName gives 'Envoy')   // section 14's: 'Dr. Sato', 'Chief Calder', 'Tomas' (reviewer R3, 0.70.3)
 const tjAgent = id => typeof DECK_CREW !== 'undefined' ? DECK_CREW.find(c => c.p && c.p.id === id) || null : null;
 // the tradition on now that you could join on this deck: { e, key, lead (id), agent } or null (once a ship minute)
 let TJ_NOW = null;
@@ -46610,7 +46617,7 @@ SHIP_EVENTS.diplomatic = {
   address: {
     onset: ['This is the Captain. Our Veyli guests are aboard.', 'They are here as friends. Make them welcome, answer their questions, and mind your manners.', 'Marrow out.'],
     resolution: c => ['This is the Captain. The delegation leaves us this morning.',
-      { smooth: 'Speaker Teshavi tells me she has rarely been made so welcome. Thank you.', bumpy: 'It was a busy five days, and you carried it well. Thank you.',
+      { smooth: 'Speaker Teshavi tells me they have rarely been made so welcome. Thank you.', bumpy: 'It was a busy five days, and you carried it well. Thank you.',
         rough: 'Not everything went to plan. They leave as friends all the same, and we\'ll do better next time.' }[c.band], 'Marrow out.'],
   },
   mail: {
@@ -46636,8 +46643,8 @@ const VEYLI_RETELL = {
 };
 // ---- the event swap (FX22b, 0.93.2; the user's answers on plans/trad-variety-pitch.html section 5, option A; lead 37):
 // the diplomatic visit comes before the comet. Behind EV_SWAP_ON (section 13; ?evswap previews); off: the order above.
-// Here, before EV_SHIPWIDE is made, as the storm update does. Both events stay drafts (off) until the user switches
-// them on. The old order is kept above and in design-doc's history.
+// Here, before EV_SHIPWIDE is made, as the storm update does. The visit's draft flag is cleared here (the user's "Turn it
+// on", 2026-10-28), so it runs only in its agreed place. The old order is kept above and in design-doc's history.
 if (EV_SWAP_ON) {
   // the calendar: the visit Tuesday Day 16 (the storm's five days end Monday Day 15), the comet Monday Day 22 at 21:30
   // (the user, 2026-10-26: earlier than Day 26; EP1's plans/events-plan-2.html Part A), and A Veyli vessel needs help
@@ -46646,20 +46653,35 @@ if (EV_SWAP_ON) {
   EVENT_ORDER.push('comet');                             // storm, visit, comet
   // the career beats the visit carried: Vance's memo into the warning morning, the senior briefing before the farewell
   Object.assign(EV_BEATS.find(b => b.id === 'mondayBriefing'), { day: 16, at: [510, 570] });    // Tuesday 08:30, before the Senior Officer scene at 10:00
-  Object.assign(EV_BEATS.find(b => b.id === 'seniorBriefing'), { day: 19, at: [480, 500] });    // Friday 08:00, before the gift exchange at 08:20
+  Object.assign(EV_BEATS.find(b => b.id === 'seniorBriefing'), { day: 19, at: [480, 500] });    // Friday 08:00, before the gift exchange (09:00)
   // the visit, short (option A): Tuesday the warning (Vance's Mail, the prep jobs); Wednesday 10:00 the Veyli come aboard
-  // in the shuttle bay; Thursday one formal dinner; Friday the gift exchange 08:20 and the farewell 09:00, gone by ten,
-  // before the Friday hold (the Captain's address that afternoon can talk about it). Guests aboard Wednesday to Friday
+  // in the shuttle bay; Thursday one formal dinner; Friday the gift exchange 09:00 and the farewell 09:30, gone at ten
+  // (GUEST_AT), before the Friday hold (the Captain's address that afternoon can talk about it). Guests aboard Wednesday
+  // to Friday. (EV1, turning it on: 08:20 and 09:00 before, when the crew named for the gifts were still at breakfast)
   const V = SHIP_EVENTS.diplomatic;
+  if (EVENTS_ON) delete V.draft;                         // on: the visit runs in a real game, Days 16-19 (the user, 2026-10-28: "Turn it on"; EV1). Still a draft without the storm update (its storm runs into Day 16) or the swap (Day 26 isn't its agreed place)
   Object.assign(V, { days: 4, guestsArrive: 1, guestStay: 2, keep: ['birthday', 'captains-address'],
     phases: [{ id: 'warning', at: [0, 540] }, { id: 'onset', at: [1, 600] }, { id: 'escalation', at: [2, 360] },
-      { id: 'resolution', at: [3, 500], clears: true }, { id: 'afterglow', at: [3, 600], clears: true }] });
+      { id: 'resolution', at: [3, 540], clears: true }, { id: 'afterglow', at: [3, 600], clears: true }] });
   V.galley = { ...V.galley, escalation: { ...V.galley.escalation, batch: n => n.day === 2 ? { meals: 10, label: 'the Veyli dinner in the Captain\'s quarters' } : null } };
   const at = { 'veyli-moleth': [2, 600], 'veyli-clash': [2, 1260], 'veyli-told': [3, 720] };
   V.news = V.news.map(n => at[n.id] ? { ...n, at: at[n.id] } : n);
-  V.moments = V.moments.map(m => m.id === 'farewell' ? { ...m, at: [3, 540], ask: 'The Veyli leave at nine. I want to see them off.' } : m);
-  V.meetings = V.meetings.map(m => m.id === 'veyliGreeting' ? { ...m, at: [1, 600] } : m.id === 'veyliGifts' ? { ...m, at: [3, 500] } : m);
+  V.moments = V.moments.map(m => m.id === 'farewell' ? { ...m, at: [3, 570], ask: 'The Veyli leave at ten. I want to see them off.', places: [{ deck: 5, pool: '@gather-shuttle-bay' }], host: 'saruth' } : m);   // the bay's crowd spots (as Off the Tern's): it has no seats; Envoy Saruth hosts (no shift: there at 09:30), for tap to join
+  V.meetings = V.meetings.map(m => m.id === 'veyliGreeting' ? { ...m, at: [1, 600] } : m.id === 'veyliGifts' ? { ...m, at: [3, 540], notify: 'The gift exchange with the Veyli, in the observation room (Deck 1) at 09:00.' } : m);   // the gift exchange's device note, as the storm's meetings (EV1, visit-pointer; the user via lead 44)
+  // the farewell: tap to join, as the comet's and the vessel's gatherings (section 18's TRAD_JOIN: the marker over Saruth,
+  // the arrow once you're in the bay, the tip). Saruth is they/them
+  Object.assign(TRAD_JOIN, { farewell: { host: 'saruth', pose: 'talk', need: 'social', gain: 10, also: { leisure: 6 }, verb: 'see the Veyli off', what: 'stand with Saruth in the shuttle bay and see the delegation off' } });
+  tjActs();
   V.mail = { ...V.mail, warning: { ...V.mail.warning, body: V.mail.warning.body.replace('arrives in two days', 'arrives tomorrow') } };
+  V.debrief = { ...V.debrief, smooth: V.debrief.smooth.replace('Dinners on time', 'The dinner on time') };   // one formal dinner now (EV1)
+  V.threads = V.threads.map(th => th.id === 'dinnersLate' ? { ...th, label: 'The dinner on time' } : th);
+  // the visit's own jobs earn your tier's worth (lead 43, 2026-10-28, option b: a chore's 1 xp, topped up to 2 for an
+  // Officer, 3 for a Senior), so a steady Senior who takes them is as far on by Day 19 as before the visit was on. Your
+  // turn-in only (registered before section 24's, so it runs first; the total is the same); j.xp 0 (paid elsewhere) is left alone
+  if (EVENTS_ON && typeof onSim === 'function') onSim('job', n => {
+    if (!n || n.step !== 'turnin' || !SHIP.works || !(SHIP.works.tier > 1) || typeof worksXp !== 'function') return;
+    const j = (SHIP.jobs || []).find(x => x.id === n.id); if (j && j.event === 'diplomatic' && j.xp !== 0) worksXp(SHIP.works.tier - 1);
+  });
   const res = V.address.resolution; V.address = { ...V.address, resolution: c => res(c).map(l => typeof l === 'string' ? l.replace('a busy five days', 'a busy few days') : l) };
   // the comet: its own block below (FX25, EV_COMET_ON; FX22b's draft here, from plans/comet-viewing-draft.js, is replaced by
   // EP1's design, plans/events-plan-2.html Part A). With EV_COMET_ON off the swap's calendar row is passed over (no entry)
@@ -47090,7 +47112,8 @@ const evRuleOff = (r, day, t) => !!r.off && r.off.some(([dd, a, b]) => { const m
 // onset's day) and stay `stay` days. null when that event isn't running, logged or due. Pure
 function eventGuestDays(g) {
   const def = g && SHIP_EVENTS[g.event]; if (!def) return null;
-  const e = SHIP.event && SHIP.event.id === g.event ? SHIP.event : [...SHIP.eventLog].reverse().find(l => l.id === g.event) || (() => { const d = eventDueDay(); return d && d.id === g.event ? { startDay: d.day } : null; })();
+  const e = SHIP.event && SHIP.event.id === g.event ? SHIP.event : [...SHIP.eventLog].reverse().find(l => l.id === g.event) || (() => { const d = eventDueDay(); return d && d.id === g.event ? { startDay: d.day } : null; })()
+    || (EV_CAL_ON && (r => r ? { startDay: r.day } : null)(evCalPlan().find(r => r.id === g.event)));   // not yet due: its day in the calendar's plan (EV1, the visit on: the plans for Days 16-19 made earlier agree)
   if (!e) return null;
   const on = def.phases.find(p => p.id === 'onset'), off = g.arriveOffset != null ? g.arriveOffset : def.guestsArrive != null ? def.guestsArrive : on ? on.at[0] : 0;
   return [e.startDay + off, e.startDay + off + (def.guestStay || g.stay || 1)];   // def.guestStay: the event's own stay for all its guests (the short visit, 0.93.2)
@@ -47544,7 +47567,7 @@ MEETING_SCRIPTS.calderProgress = {
 // the diplomatic visit's two meetings (its data is with the storm's, above)
 MEETING_SCRIPTS.veyliGreeting = {
   title: 'The Veyli greeting', from: 'Commander Teo Vance',
-  gist: 'The Veyli delegation came aboard at 10:00: Speaker Teshavi, her aide Kesrin, the scholar Moleth and their pilot Ithra. They\'re in the visitors\' cabin and the guest cabins on Deck 4 for five days.',
+  gist: 'The Veyli delegation came aboard at 10:00: Speaker Teshavi, the Speaker\'s aide Kesrin, the scholar Moleth and their pilot Ithra. They\'re in the visitors\' cabin and the guest cabins on Deck 4 ' + (EV_SWAP_ON ? 'until Friday.' : 'for five days.'),   // the swap's short visit: Wednesday to Friday (EV1)
   lines: [
     { who: 'marrow', text: 'Speaker Teshavi. Welcome aboard the Wren.', pose: 'gesture' },
     { who: 'teshavi', text: 'Captain. Your ship is warmer than the reports said. That is a compliment.', pose: 'nod' },
@@ -49805,6 +49828,7 @@ function vesselMaking(v) {
 function vesselStepStart(v, s) {
   const M = v.e.mine, S = VESSEL_STEPS[s], H = M['vessel:helpers'] || [], who = H[(s + 1) % 2] || H[0];
   const [tw, tt] = vesselLine('taavek.step.' + s, '', 'taavek'); if (tt) vesselSay(tw || 'taavek', tt, 6);
+  if (SND_R3_ON && s === 2) sndFx('r3Bronze', { long: 5 });   // section 27's sound update: Taavek taps the bars, the dull one and the one that sings (C)
   if (who) { const [hw, ht] = vesselLine('help.' + who + '.step.' + s, '', who); if (ht) simTimeout(() => vesselSay(hw || who, ht, 5), 2500); }
   const go = () => {
     actStart('vesselStep', S.at, { title: 'Machine shop', after: S.after });
@@ -61138,7 +61162,7 @@ if (P5_CASES5) {
 // section 14's planner reads through one hook (p9PlanRule, from B3's sdPlanShut): the laundry closed to them for that
 // hour, so their wash leaves that hour (the planner finds no other slot that evening: skipped that night, done another day; a true move needs a second section 14 hook, backlog). Saved: SHIP.works.side.p9 = { ask, moves: [{ who, wd, a, b, from }],
 // set: { [day]: [{ who, a, b }] } } (cleaned on read). The first when the p9 row opens (slot 38); none fair: none.
-const P9_BAND = { sus: [4, 5], clues: [3, 6], fewest: 2, decks: 1 }, P9_SLOT = 38, P9_LOOK = 14, P9_ASK = 2.5;
+const P9_BAND = { sus: [4, 5], clues: [3, 6], fewest: 2, decks: 1 }, P9_SLOT = 38, P9_LOOK = 14, P9_ASK = 2.5, P9_RETRY = 7;   // P9_RETRY: days the first case keeps looking for a clash after the row opens (EV1, 0.96.0: the visit's greeting day dropped Day 19's)
 const P9_SKIP = new Set(['meal', 'shift', 'off', 'appt', 'beat', 'tea']);
 const p9Laundry = () => (DECKS[4] && DECKS[4].places || []).filter(q => q.type === 'laundry').map(q => q.id);
 function p9State() {
@@ -61245,11 +61269,19 @@ function p9PlanRule(d, occ, pl, a, b, p) {
   return occ.p9.some(r => r.who === p.id && a < r.b && r.a < b);
 }
 // the case: staged when the row opens (and retried each ship hour till it is); the washer nearest their place
+let P9_MISS = null;
 function p9Stage() {
   if (flag('case.p9.first') !== undefined || !SHIP.works || !caseOpened('p9')) return;
   const W = SHIP.works, C = caseState(); if (!C) return;
   if (W.tr && W.tr.p9 !== undefined) { flagSet('case.p9.first', 'none'); return; }
-  const now = shipNow(), d = caseDay(now), F = p9Find(d); if (!F) { flagSet('case.p9.first', 'none'); return; }
+  if (C.open.some(c => c.kind === 'p9')) { flagSet('case.p9.first', 'none'); return; }   // you already have a p9 case: no first one as well
+  const now = shipNow(), d = caseDay(now); if (P9_MISS === d) return;   // looked today already (not saved: after a load, one look)
+  const F = p9Find(d);
+  if (!F) {                                              // no clash in the last fortnight yet: look again each day for a week from the row's opening (an event day can drop a calendar item), then give up
+    const o = Object.keys(W.op || {}).map(Number).filter(k => Array.isArray(W.op[k]) && W.op[k].includes('p9')).sort((a, b) => a - b)[0];
+    if (Number.isInteger(o) && d < o + P9_RETRY) { P9_MISS = d; return; }
+    flagSet('case.p9.first', 'none'); return;
+  }
   const wpl = placeById((F.washes.find(w => w.who === F.A) || {}).pl), ws = machineList().filter(m => m.kind === 'washer' && m.deck === 4 && caseCauses(m).some(x => x.id === 'clash'));
   const m = ws.slice().sort((x, y) => { const px = placeById(panelPlace(x.id)), py = placeById(panelPlace(y.id)); const dx = q => q && wpl ? Math.hypot(q.at[0] - wpl.at[0], q.at[1] - wpl.at[1]) : 99; return dx(px) - dx(py) || (x.id < y.id ? -1 : 1); })
     .find(x => !SHIP.jobs.some(j => j.machine === x.id && j.status !== 'done' && (j.claimedBy || j.case || j.reserved)));
@@ -65848,7 +65880,7 @@ function arrStops(j) {
 function arrStepDone(j, k, res) {
   const st = arrStops(j)[k]; if (!st) return true;
   if (k > 0 && !(j.stepsDone || []).includes(k - 1)) return false;   // in order: the star, the dial, the module
-  if (st.tag === 'turn') { const v = res && res.value; if (v !== 0) return false; const i = arrStops(j).slice(0, k).filter(x => x.tag === 'turn').length; if (Array.isArray(j.cal)) j.cal[i] = 0; return true; }   // the dial settled on the star (section 15's turn card sends { value })
+  if (st.tag === 'turn') { const v = res && res.value; if (v !== 0) return false; const i = arrStops(j).slice(0, k).filter(x => x.tag === 'turn').length; if (Array.isArray(j.cal)) j.cal[i] = 0; if (SND_R3_ON) sndFx('r3Calibrate', { long: 4 }); return true; }   // the dial settled on the star (and section 27's sound update: the lock, A) (section 15's turn card sends { value })
   if (st.tag === 'pick') {
     const pick = res && res.pick, o = arrStars(j).find(x => x.id === pick); if (!o) return false;
     j.star = o.label;
@@ -66139,7 +66171,8 @@ function p5nKnockAt(abs, now = shipNow()) {               // the night you'd sle
 }
 function p5nKnock(wake) {                                 // section 13's sleepGo asks: { at, say } or null
   const now = shipNow(), today = (SHIP.time.day - 1) * 1440 + wake, abs = today > now ? today : today + 1440, n = p5nKnockAt(abs, now); if (!n) return null;
-  return { at: n.at, say: () => { if (n.day === 22 && P5_PROMO4) { simNote('p5night', { step: 'knock', day: n.day }); return; }   // night 1 with S6-3: 24u's own knock notice and Calder's fetch say it
+  return { at: n.at, say: () => { if (SND_R3_ON) sndFx('r3Knock');   // section 27's sound update: the door chime (the user's B)
+    if (n.day === 22 && P5_PROMO4) { simNote('p5night', { step: 'knock', day: n.day }); return; }   // night 1 with S6-3: 24u's own knock notice and Calder's fetch say it
     const who = n.day === 22 ? 'calder' : null, by = who && typeof worksName === 'function' ? worksName(who) : p5nText('night.knock.from', 'The night crew');
     const t = n.day === 22 ? p5nText('night.knock.1', 'A knock at your bunk. Calder: "Up you get. Night shift. I\'ll see you down there."') : p5nText('night.knock', 'A knock at your bunk: your night shift starts at {time}.', { time: hhmm(n.from % 1440) });
     if (typeof promoNotice === 'function') promoNotice(t, by); else toast('Your bunk', t); simNote('p5night', { step: 'knock', day: n.day }); } };
@@ -66836,6 +66869,7 @@ function m24Team(n) {
   if (st && n.by !== 'you' && st.who === n.by) worksSay(n.by, worksText('m24.reply.' + j.seq[n.step].part, { isolate: 'Isolating. Coupling\'s cold.', unbolt: 'Bolts coming out. Mind your toes.', lift: 'Lifting. Easy, easy.', seat: 'Seating the new one. Gently.', test: 'Testing. Readings coming up.' }[j.seq[n.step].part] || 'On it.'));
   if (n.step !== j.seq.length || S.done) return;
   const t = Math.floor(shipNow()), mins = Math.max(0, t - j.start); S.done = t; S.mins = mins;   // whole ship minutes (the save keeps integers)
+  if (SND_R3_ON) sndFx('r3TeamDone', { long: 3 });         // section 27's sound update: job done, bigger (B)
   const res = mins <= M24_LEN - 5 ? 'early' : mins <= M24_LEN ? 'on' : 'slow';   // a good team and quick calls about 52 minutes; a poor pick over the hour
   worksSay(j.lead, worksText('m24.done.' + res, { early: 'Done early. That was a good team.', on: 'Done, on the hour. Clean work.', slow: 'Done. Slow, but done. The coil doesn\'t mind.' }[res]));
   if (typeof mailSend === 'function') { const tx = worksText('m24.mail.done', 'The coil swap | Done in {n} minutes with {a} and {b}. Logged for Calder.', { n: mins, a: worksFirst(j.team[0]), b: worksFirst(j.team[1] || j.team[0]) }), i = tx.indexOf(' | ');
@@ -66853,7 +66887,7 @@ function m24Call(now) {
   if (s.who !== 'you' || k < 0 || (j.stepsDone || []).includes(k) || !teamAtSpot(j) || now - M24_ASKED < 1 || typeof deviceChoose !== 'function') return;
   if (typeof DEV !== 'undefined' && (DEV.choose || DEV.open)) return;
   if (typeof ACT !== 'undefined' && ACT) return;          // already doing it by a tap at the spot (15b's taps reach team stops once claude/team-turn-fix is in, PZ6): no card over it
-  const ok = deviceChoose({ title: teamLabel(j), text: worksText('team.turn.' + s.part, TEAM_PART[s.part]), choices: [worksText('m24.next', 'Next step')] }, c => { M24_ASKED = shipNow(); if (c === 0) jobStepDone(j.id, k, {}); });
+  const ok = deviceChoose({ title: teamLabel(j), text: worksText('team.turn.' + s.part, TEAM_PART[s.part]), choices: [worksText('m24.next', 'Next step')] }, c => { M24_ASKED = shipNow(); if (c === 0) { if (SND_R3_ON) sndFx('r3TeamCall'); jobStepDone(j.id, k, {}); } });   // section 27's sound update: the intercom (A)
   if (ok) M24_ASKED = now;
 }
 // the beats, in play while it's your night and the swap's to do
@@ -72439,7 +72473,7 @@ if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }   // last, once e
 // view, menu, ls, rs (stick clicks), up, down, left, right (the D-pad). Turns add what each press does through
 // padOn(name, fn): fn(e) with e = { name, pad }, called on the press (and on D-pad repeats, e.repeat).
 // =====================================================================
-const PAD_ON = false;                                     // the switch (controller support)
+const PAD_ON = true;                                      // the switch (controller support); switched on in 0.96.0 (lead 43/44, overnight; it was false)
 const PAD_BTN = ['a', 'b', 'x', 'y', 'lb', 'rb', 'lt', 'rt', 'view', 'menu', 'ls', 'rs', 'up', 'down', 'left', 'right'];   // the standard layout's order
 const PAD_DEAD = { stick: .22, trig: .12 };               // how far a stick or trigger moves before it counts
 const PAD_REP = { first: .5, every: .25 };                // a held D-pad repeats: after half a second, then four steps a second
@@ -72591,9 +72625,10 @@ function padWhat(cx, cy, want) {                           // what a tap at (cx,
   if (ud.youLock) return 'lock:' + ud.youLock;
   if (ud.closedDoor) return 'door:' + ud.closedDoor;
   if (ud.door && typeof adoorShut === 'function' && adoorShut(EDGES.get(ud.door), player)) return 'door:' + ud.door;   // a door shut to you (Doors setting, 0.93.3): A opens it
-  if (want && !/^(job|crate|hamper|wardrobe|place:)/.test(want)) return 'floor';
+  if (want && !/^(job|crate|hamper|wardrobe|place:|beam)/.test(want)) return 'floor';
   const p = h.point;                                     // the floor: playerFloorTap's order, read only
-  if (typeof jobHere === 'function' && jobHere(p, true)) return 'job';
+  if (padBeamOn()) { const sp = placeSpot('5-beam-1'); if (Math.hypot(p.x - sp.x, p.z - sp.z) <= BEAM_REACH) return 'beam'; }   // Name on the beam: section 18's beamFloorTap, asked first (wave B)
+  if (typeof jobHere === 'function' && jobHere(p, true)) return padJobAt(p);
   const c = SHIP.player.crate; if (c && c.deck === deckDef.num && Math.hypot(p.x - c.x, p.z - c.z) <= PUT_NEAR) return 'crate';
   if (typeof CLOTHES_ON !== 'undefined' && CLOTHES_ON) {
     const hm = SHIP.clothes.hamper; if (hm && hm.at === 'floor' && hm.deck === deckDef.num && Math.hypot(p.x - hm.x, p.z - hm.z) <= HAMPER_NEAR) return 'hamper';
@@ -72606,6 +72641,16 @@ function padWhat(cx, cy, want) {                           // what a tap at (cx,
   }
   return best ? 'place:' + best.id : null;
 }
+// (wave B) which job's stop a floor tap at p goes to: jobHere's order (15b), each job its own key, so every job with a stop
+// on this deck is offered, not only the first held one; the machine job's panel is the rest (jobHere's last test)
+function padJobAt(p) {
+  for (const j of typeof ixChores === 'function' ? ixChores() : []) if (!j.workDone) {
+    const nx = ixNextStop(j), pid = nx && nx.s.step !== 'fetch' && nx.s.deck === deckDef.num ? nx.s.places[0] : null, s = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null;
+    if (s && (Math.hypot(s.x - p.x, s.z - p.z) < JOB_REACH || jobRayDist(s) < JOB_RAY)) return 'job:' + j.id;
+  }
+  const mj = myJob(); return 'job:' + (mj ? mj.id : '');
+}
+const padBeamOn = () => typeof beamOn === 'function' && deckDef.num === 5 && beamOn() && !!placeSpot('5-beam-1');   // (wave B) Name on the beam's floor, while you can paint
 function padPlaces() {                                     // the places a floor tap can use (playerFloorTap's rule), with their spots, once a deck
   const P = PAD_PICK; if (P.pof === deckDef && P.places) return P.places;
   P.pof = deckDef; P.places = [];
@@ -72622,7 +72667,8 @@ function padLabel(key) {                                   // the line at the bo
   if (k === 'item') { const it = ITEMS[+v]; return it ? it.t : 'Look'; }
   if (k === 'lift') return 'Lift';
   if (k === 'door' || k === 'lock') { const c = CLOSED_DOORS[v]; return c && c.t ? c.t : 'Door'; }
-  if (k === 'job') return 'Your job';
+  if (k === 'job') { const j = SHIP.jobs.find(x => String(x.id) === v); return j && j.title ? 'Your job: ' + j.title : 'Your job'; }   // (wave B) named: two can be in reach
+  if (k === 'beam') return 'Paint your name';
   if (k === 'crate') return 'Your crate';
   if (k === 'hamper') return 'Laundry hamper';
   if (k === 'wardrobe') return 'Your wardrobe';
@@ -72670,17 +72716,33 @@ function padRaw() {                                       // what's in reach, be
   };
   if (crowd.visible) for (const a of DECK_CREW) add('crew:' + a.p.id, a.x, a.z, [(a.settled && a.spot ? a.spot.pose : a.pose) === 'lie' ? .15 : .9, .5, 1.3].map(h => a.y + h), 0);
   for (const w of crew) if (w.active && !w.isPlayer) add('walker:' + w.spec.name, w.obj.position.x, w.obj.position.z, [.9, .5, 1.3], 0);
-  if (PAD_PICK.of !== ITEMS) {                             // the items' middles and heights, once a deck (they don't move)
-    const box = new THREE.Box3(), c = new THREE.Vector3(); PAD_PICK.of = ITEMS;
-    PAD_PICK.items = ITEMS.map((it, i) => { if (!it.hit) return null; box.setFromObject(it.hit); box.getCenter(c); return [it.lift ? 'lift' : 'item:' + i, c.x, c.z, [c.y, (c.y + box.max.y) / 2, (c.y + box.min.y) / 2]]; }).filter(Boolean);
+  // the items' middles and heights, worked out again only for an item that's new, moved or renumbered (wave B: props that
+  // appear while you're in the room, the birthday cake, the parts sheet, Tiles night's boards, the cabin spots, a Wednesday's
+  // crates, go into the same list, which was read once a deck). An item over 2 m across whose middle is out of reach (the
+  // Lightdisc court from its gate) is offered at its nearest point instead, 0.3 m in from its edge
+  const IC = PAD_PICK.ic || (PAD_PICK.ic = new WeakMap()), box = PAD_PICK.box || (PAD_PICK.box = new THREE.Box3()), c = _pp;
+  for (let i = 0; i < ITEMS.length; i++) {
+    const it = ITEMS[i]; if (!it.hit) continue;
+    let o = IC.get(it), e = it.hit.matrixWorld.elements;
+    if (!o || o.i !== i || o.m.some((v, k) => v !== e[k])) {   // (setFromObject brings the hit's matrix up to date: read it after)
+      box.setFromObject(it.hit); box.getCenter(c); e = it.hit.matrixWorld.elements;
+      o = { i, m: e.slice(), key: it.lift ? 'lift' : 'item:' + i, x: c.x, z: c.z, ys: [c.y, (c.y + box.max.y) / 2, (c.y + box.min.y) / 2],
+        big: box.max.x - box.min.x > 2 || box.max.z - box.min.z > 2 ? [box.min.x + .3, box.max.x - .3, box.min.z + .3, box.max.z - .3] : null };
+      IC.set(it, o);
+    }
+    add(o.key, o.x, o.z, o.ys, .25);
+    if (o.big && Math.hypot(o.x - pp.x, o.z - pp.z) > R) { const [x0, x1, z0, z1] = o.big; add(o.key, Math.min(Math.max(pp.x, x0), x1), Math.min(Math.max(pp.z, z0), z1), o.ys, .25); }
   }
-  for (const [key, x, z, ys] of PAD_PICK.items) add(key, x, z, ys, .25);
   for (const dobj of DOOR_OBJS) {                         // the lift and shut doors (an open doorway is only somewhere to walk)
     const hit = dobj.g.children.find(o => o.userData.liftDoor || o.userData.youLock || o.userData.closedDoor || o.userData.door && typeof adoorShut === 'function' && adoorShut(dobj.e, player)), ud = hit ? hit.userData : null; if (!ud) continue;   // and a door shut to you (the Doors setting, 0.93.3)
     add(ud.liftDoor ? 'lift' : ud.youLock ? 'lock:' + ud.youLock : 'door:' + (ud.closedDoor || ud.door), dobj.cx, dobj.cz, ud.door && !ud.closedDoor ? [1.1, .55, 1.65].map(y => y * (dobj.g.scale.y || 1)) : [1, .5, 1.5], .2);   // a door shut to you (0.93.3): at its height now, cut down near the camera
   }
-  if (typeof jobHere === 'function' && jobsOn() && typeof ixChore === 'function') { const j = (typeof ixChores === 'function' ? ixChores() : [ixChore()]).find(x => x && !x.workDone && ixNextStop(x)), nx = j && !j.workDone && ixNextStop(j),   // a side job's stop first, as jobHere takes the tap (MA6-1: a team job's turn)
-    pid = nx && nx.s.deck === deckDef.num && nx.s.places[0], sp = pid && PLACE_OF.has(pid) && placeSpot(pid); if (sp) add('job', sp.x, sp.z, [.05, .4, .8], .2); }
+  if (typeof jobHere === 'function' && jobsOn() && typeof ixChores === 'function') {   // every held job's next stop on this deck, each its own (wave B; was the first held job's, often a side job's on another deck)
+    for (const j of ixChores()) { const nx = !j.workDone && ixNextStop(j), pid = nx && nx.s.step !== 'fetch' && nx.s.deck === deckDef.num && nx.s.places[0], sp = pid && PLACE_OF.has(pid) && placeSpot(pid); if (sp) add('job:' + j.id, sp.x, sp.z, [.05, .4, .8], .2); }
+  }   // (a machine job is the machine's own tap, an item: its panel's floor isn't offered, as before)
+  if (padBeamOn()) { const sp = placeSpot('5-beam-1'), d = Math.hypot(pp.x - sp.x, pp.z - sp.z), a0 = Math.atan2(pp.x - sp.x, pp.z - sp.z);   // Name on the beam: the floor at the beam's
+    add('beam', sp.x, sp.z, [.05, .3], .3);              // spot, and 1.3 m out from it your way and to either side (within section 18's BEAM_REACH; the crew gather round it)
+    if (d > .5) for (const da of [0, .9, -.9, 1.8, -1.8]) add('beam', sp.x + 1.3 * Math.sin(a0 + da), sp.z + 1.3 * Math.cos(a0 + da), [.05, .3], .3); }
   const cr = SHIP.player.crate; if (cr && cr.deck === deckDef.num) add('crate', cr.x, cr.z, [.05, .3], .15);
   if (typeof CLOTHES_ON !== 'undefined' && CLOTHES_ON) { const hm = SHIP.clothes.hamper; if (hm && hm.at === 'floor' && hm.deck === deckDef.num) add('hamper', hm.x, hm.z, [.05, .3], .15);
     const w = PAD_PICK.wr; if (w) add('wardrobe', w.x, w.z, [.05, .5, 1], .2); }
@@ -72696,14 +72758,16 @@ function padSearch(budget) {
   if (!P.job) { P.cs = padCrewSeen(); P.wr = typeof CLOTHES_ON !== 'undefined' && CLOTHES_ON ? clothesWardrobe() : null; P.job = { raw: padRaw(), i: 0, out: [], cs: P.cs, wr: P.wr }; }
   const J = P.job; P.cs = J.cs; P.wr = J.wr; P.used = 0;
   try {
-    while (padMore(J) && P.used < budget) { const t = J.raw[J.i++]; if (J.out.some(o => o.key === t.key) || J.out.length >= P.max && t.key !== 'lift') continue; t.s = padFind(t.key, t.x, t.z, t.ys, t.r); if (t.s) J.out.push(t); }
+    while (padMore(J) && P.used < budget) { const t = J.raw[J.i++]; if (J.out.some(o => o.key === t.key) || J.out.length >= P.max && !PAD_SEEK.includes(t.key)) continue; t.s = padFind(t.key, t.x, t.z, t.ys, t.r); if (t.s) J.out.push(t); }
   } finally { P.cs = null; P.wr = null; }
   if (padMore(J)) return null;
   P.job = null; return J.out;
 }
 // (CP5, KC1) the lift is the way off the deck: when the list is full of people, benches and things before the search
-// gets to it, it goes on searching for the lift alone, and the lift comes last in the list (D-pad left from the first)
-const padMore = J => J.i < J.raw.length && (J.out.length < PAD_PICK.max || !J.out.some(o => o.key === 'lift') && J.raw.some((t, i) => i >= J.i && t.key === 'lift'));
+// gets to it, it goes on searching for the lift alone, and the lift comes last in the list (D-pad left from the first).
+// (wave B) The same for Name on the beam's floor: the crew stand round the beam, and the free floor is often further off
+const PAD_SEEK = ['lift', 'beam'];
+const padMore = J => J.i < J.raw.length && (J.out.length < PAD_PICK.max || PAD_SEEK.some(k => !J.out.some(o => o.key === k) && J.raw.some((t, i) => i >= J.i && t.key === k)));
 const padTargets = () => { PAD_PICK.job = null; return padSearch(Infinity); };   // all at once: [{ key, x, z, d, s: [cx, cy] }], best first
 function padPickShow(on) {                                 // the ring and the line, made at the first use
   const P = PAD_PICK;
@@ -73345,6 +73409,9 @@ padOwn(L => !!(L && L.id === 'device' && padShown(document.getElementById('devTi
 // =====================================================================
 // sndFx: the hook lines' way in. A function declaration (hoisted), safe to call before section 27 has run (it does nothing then).
 function sndFx(name, o) { try { return SND.fx(name, o); } catch (e) { return false; } }
+// the sound update (SD2, plans/sound/r3-build-plan.md; the user's Round 3 picks and the mess hall, 2026-10-28): event music
+// for the picked traditions and events (turn 1), the mess hall (turn 2), the feature sounds (turns 3-4). Off: the sound as before
+const SND_R3_ON = true;   // switched on in 0.96.0 (the user: the sound update is on when published; via lead 43/44)
 const SND = (() => {
   const S = { ctx: null, bus: {}, onFrame: [], log: URL_FLAGS.has('soundlog') ? [] : null };
   const ALLOWED = URL_FLAGS.has('sound') || !(navigator.webdriver || URL_FLAGS.has('mute') || NOSAVE);
@@ -73877,7 +73944,7 @@ const SND = (() => {
   }
   S.act = (phase, A, abort) => {                         // from actBegin ('begin') and actEnd ('end'); reads the activity, changes nothing
     if (!A) return;
-    const p = actPick(A);
+    const p = (R3 && phase === 'begin' && R3.actPick(A)) || actPick(A);   // R3: the sound update's own (winding, the lathe)
     actThenClear(); ACT_OF = phase === 'begin' ? A : null;
     if (phase === 'begin') { actLoopStop(0.2); if (!p) return; if (p.one) S.fx(p.one, { long: 4 }); if (p.then) for (const [n, d] of p.then) actThen.push(setTimeout(() => { if (ACT_OF === A) S.fx(n); }, d * 1000)); if (p.loop) actLoopStart(p.loop); return; }
     actLoopStop(0.5);
@@ -73907,6 +73974,283 @@ const SND = (() => {
       (h.nodes || []).forEach(n => { try { n.stop(t + f + 0.05); } catch (e) {} }); LOOPS.delete(L); setTimeout(() => { try { out.disconnect(); } catch (e) {} }, (f + 1) * 1000); } };
     LOOPS.add(L); amb[name] = L;
   }
+  // the sound update, turn 2 (SND_R3_ON; the user's picks, 2026-10-28, plans/sound/messhall.html version 2): the mess hall.
+  // The galley behind the counter (the extractor, a sizzle, a pan, the hatch, the order-up bell) and the room's clatter, with
+  // the warm low hum of talk on top; every layer follows how many are in the mess (the crew there, plus you), silent with no
+  // crew there; only while you're in it, fading as you leave. Read once a second from ambTick; Math.random only.
+  const MESS_SND = SND_R3_ON ? (() => {
+    const VOWELS = [[730, 1090], [530, 1840], [270, 2290], [570, 840], [440, 1020], [660, 1720], [490, 1350]];   // vowel bands for a wordless voice: never a word
+    const VOICES = [[105, -0.7], [128, 0.5], [160, -0.2], [210, 0.8], [118, 0.15], [190, -0.55], [140, 0.65], [235, -0.85], [98, 0.3], [175, -0.35], [150, 0.9], [220, 0.05]];   // [pitch, side] round the room
+    const CLINK = {   // the room's sounds, one at a time (t: when, w: how loud)
+      cutlery: (t, w, pan) => ring(t, [rand(2600, 3400), rand(4200, 5600)], 0.9 * w, { d: 0.12, q: 35, pan, wet: 0.3 }),
+      fork: (t, w, pan) => { ring(t, [rand(3000, 3800)], 0.6 * w, { d: 0.07, q: 30, pan }); ring(t + rand(0.05, 0.12), [rand(3000, 3800)], 0.4 * w, { d: 0.06, q: 30, pan }); },
+      cup: (t, w, pan) => { ring(t, [rand(1800, 2300), rand(3900, 4600)], 1.1 * w, { d: 0.18, q: 45, pan, wet: 0.3 }); thud(t, { gain: 0.06 * w, d: 0.04, f: 900, body: 300 }); },
+      tray: (t, w, pan) => { thud(t, { gain: 0.22 * w, d: 0.1, f: 500, body: 140 }); ring(t, [rand(420, 520), rand(980, 1150)], 1.4 * w, { d: 0.22, q: 18, pan, wet: 0.3 }); },
+      plate: (t, w, pan) => { ring(t, [rand(1300, 1600), rand(2700, 3100)], 1 * w, { d: 0.2, q: 30, pan, wet: 0.3 }); thud(t, { gain: 0.08 * w, d: 0.05, f: 700, body: 220 }); },
+      chair: (t, w, pan) => noise(t, rand(0.25, 0.45), { f: rand(260, 380), fTo: rand(450, 650), q: 4, gain: 0.05 * w, swell: 0.35, pan }),
+      stack: (t, w, pan) => { for (let i = 0; i < 3; i++) ring(t + i * rand(0.06, 0.1), [rand(1300, 1700), rand(2800, 3300)], 0.7 * w, { d: 0.15, q: 30, pan }); },
+      hatch: (t, w) => { slide(t, 0.4, { f0: 300, f1: 520, gain: 0.25 * w, rate: 30, rough: 0.2, bus: ROUTE.ui, pan: 0.5 }); clack(t + 0.42, 0.05 * w, { f: 900, pan: 0.5 }); },
+      pan: (t, w) => ring(t, [rand(500, 640), rand(1500, 1800)], 1.2 * w, { d: 0.3, q: 20, pan: 0.6, wet: 0.35 }),
+      ding: (t, w) => bell(t, 1567.98, 0.8, 0.02 * w, { wet: 0.3, pan: 0.55 }),
+    };
+    const BG_CLATTER = { cutlery: 3, fork: 2, cup: 3, tray: 2, plate: 2, chair: 1, hatch: 1, pan: 1, ding: 0.5 };
+    const BG_LV = 1.5, VOICE_LV = 1.6;   // the page's trims (measured against the Commons hum): full, the background about 7 dB under it, the voices about 1 dB more
+    const M = { n: 0, full: 0, room: null, scene: null, clinks: 0 };
+    const busyD = (n = M.n) => Math.min(1, n / Math.max(1, M.full));
+    // each layer at n people: the galley's two levels, the clatter's rate (sounds a second) and how many voices talk
+    const galleyAt = n => n ? [0.02 + 0.05 * busyD(n), 0.003 + 0.011 * busyD(n)] : [0, 0];
+    const clatterAt = n => n ? 0.12 + 2.1 * busyD(n) + (n <= 2 ? 0 : 0.1) : 0;
+    const voicesAt = n => n > 0 ? Math.min(12, Math.max(1, Math.round(12 * Math.min(1, n / (M.full / 2))))) : 0;   // about one for every two or three people, at least one
+    M.at = n => ({ galley: galleyAt(n), clatter: clatterAt(n), voices: voicesAt(n) });   // for sound_check
+    function voice2(out, o) {   // one wordless voice: phrases of soft syllables, then a pause; o.live(t): whether it's there now
+      const osc = ctx.createOscillator(), f1 = ctx.createBiquadFilter(), f2 = ctx.createBiquadFilter(), g = ctx.createGain(), g2 = ctx.createGain(), p = ctx.createStereoPanner();
+      osc.type = 'sawtooth'; osc.frequency.value = o.f0; f1.type = f2.type = 'bandpass'; f1.Q.value = 5; f2.Q.value = 7; g.gain.value = 0; g2.gain.value = 0.45; p.pan.value = o.pan;
+      osc.connect(f1); osc.connect(f2); f1.connect(g); f2.connect(g2); g2.connect(g); g.connect(p); p.connect(out);
+      const t0 = ctx.currentTime; osc.start(t0); let next = t0 + Math.random() * (o.gap[1] * 0.6 + 0.3);
+      const gap = o.gap, syl = o.syl || [3, 12], len = o.len || 1;
+      return { nodes: [osc], tick(u) {
+        while (next < u) {
+          if (!o.live(next)) { next += 0.8 + Math.random() * 1.5; continue; }
+          const n = syl[0] + ((Math.random() * (syl[1] - syl[0] + 1)) | 0), lift = Math.random() < 0.12 ? 1.25 : 1; let t = next;
+          for (let i = 0; i < n; i++) {
+            const d = (0.11 + Math.random() * 0.15) * len, V = VOWELS[(Math.random() * VOWELS.length) | 0];
+            f1.frequency.setTargetAtTime(V[0], t, 0.025); f2.frequency.setTargetAtTime(V[1], t, 0.025);
+            osc.frequency.setTargetAtTime(o.f0 * lift * (1 + (Math.random() - 0.45) * 0.22 - (i / n) * 0.12), t, 0.04);
+            g.gain.setTargetAtTime(o.g * (0.55 + Math.random() * 0.45), t, 0.018); g.gain.setTargetAtTime(0, t + d * 0.75, 0.03);
+            t += d + Math.random() * 0.05;
+          }
+          next = t + gap[0] + Math.random() * (gap[1] - gap[0]);
+        }
+      } };
+    }
+    function scene() {   // the page's messScene2 with the background D and the voices "warm", reading M.n live
+      const t0 = ctx.currentTime, out = ctx.createGain(); out.gain.setValueAtTime(0, t0); out.gain.linearRampToValueAtTime(1, t0 + 1.2); out.connect(BUS.ui);
+      const bg = ctx.createGain(); bg.gain.value = BG_LV; bg.connect(out);
+      const room = { ...BUS, ui: bg }, loops = [], nodes = [];
+      // the galley behind the counter: the extractor and a sizzle, louder as more are being fed; nothing when empty
+      const ex = ctx.createBufferSource(); ex.buffer = BROWN; ex.loop = true; const exf = ctx.createBiquadFilter(); exf.type = 'lowpass'; exf.frequency.value = 240; const exg = ctx.createGain(); exg.gain.value = 0;
+      const sz = ctx.createBufferSource(); sz.buffer = WHITE; sz.loop = true; const szf = ctx.createBiquadFilter(); szf.type = 'bandpass'; szf.frequency.value = 5200; szf.Q.value = 0.7; const szg = ctx.createGain(); szg.gain.value = 0;
+      const gp = ctx.createStereoPanner(); gp.pan.value = 0.55; ex.connect(exf); exf.connect(exg); exg.connect(gp); sz.connect(szf); szf.connect(szg); szg.connect(gp); gp.connect(bg);
+      ex.start(t0); sz.start(t0); nodes.push(ex, sz);
+      let lastN = -1;
+      const galley = () => { if (M.n === lastN) return; lastN = M.n; const [e, z] = galleyAt(M.n), t = ctx.currentTime;
+        exg.gain.setTargetAtTime(e, t, 0.6); szg.gain.setTargetAtTime(z, t, 0.6); };
+      galley();
+      const bag = Object.entries(BG_CLATTER).flatMap(([n, w]) => Array(Math.max(1, Math.round(w * 2))).fill(n));
+      let nextC = t0 + 0.4;
+      loops.push({ tick(u) { galley();
+        while (nextC < u) {
+          if (!M.n) { nextC += 0.5; continue; }
+          const rate = clatterAt(M.n);
+          try { CLINK[pick(bag)](nextC, rand(0.5, 1) * (0.7 + 0.3 * busyD()), rand(-0.8, 0.8)); } catch (e) {}
+          if (Math.random() < 0.05) noise(nextC, 0.03, { f: rand(3000, 6000), q: 3, gain: 0.02, pan: 0.55 });
+          M.clinks++; nextC += (-Math.log(1 - Math.random())) / rate;
+        }
+      } });
+      // the warm low hum of talk on top (voicesAt: none when empty)
+      const vb = ctx.createGain(); vb.gain.value = VOICE_LV; vb.connect(out);
+      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 650; lp.connect(vb);
+      const sv = ctx.createGain(); sv.gain.value = 0.7; lp.connect(sv); sv.connect(BUS.verb);
+      VOICES.forEach(([f, p], i) => loops.push(voice2(lp, { f0: f * 0.8, pan: p * 0.6, g: 0.035, gap: [0.1, 0.9], len: 1.3, live: t => i < voicesAt(M.n) })));
+      const L = { label: 'mess', loops,
+        tick(u) { const p = ROUTE; ROUTE = room; try { loops.forEach(l => l.tick(u)); } finally { ROUTE = p; } },
+        stop(f = 1.5) { LOOPS.delete(L); const t = ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + f);
+          loops.forEach(l => (l.nodes || []).forEach(n => { try { n.stop(t + f + 0.1); } catch (e) {} })); nodes.forEach(n => { try { n.stop(t + f + 0.1); } catch (e) {} });
+          setTimeout(() => { try { out.disconnect(); } catch (e) {} }, (f + 3) * 1000); },
+      };
+      LOOPS.add(L); L.tick(t0 + 0.4);
+      return L;
+    }
+    function count() {   // people in the mess hall (the crew there, plus you), or -1 when you're not in it
+      if (!deckDef || deckDef.num !== 3) return -1;
+      const rooms = deckDef.rooms || {}, k = M.room && rooms[M.room] && rooms[M.room].name === 'Mess hall' ? M.room : Object.keys(rooms).find(x => rooms[x].name === 'Mess hall');
+      if (!k || roomAt(...player.here()) !== k) return -1;
+      if (M.room !== k) { M.room = k; M.full = Math.max(8, (deckDef.places || []).filter(p => p.room === k && p.pose === 'sit').length + 1); }   // full: every seat taken, and you
+      const crew = DECK_CREW.filter(a => a && isFinite(a.x) && roomAt(...cellAt(a.x, a.z)) === k).length;
+      return crew ? crew + 1 : 0;   // with no crew there it's empty: silent
+    }
+    return {
+      M,
+      tick() {
+        let n = -1; try { n = count(); } catch (e) { n = -1; }
+        M.n = Math.max(0, n);
+        const on = n >= 0 && !!ctx && ctx.state === 'running' && S.prefs.on;
+        if (on && !M.scene) { if (S.log) S.log.push({ name: 'mess', loop: true }); M.scene = scene(); }
+        else if (!on && M.scene) { M.scene.stop(1.5); M.scene = null; }   // fades as you leave
+      },
+    };
+  })() : null;
+  // the sound update, turn 3 (SND_R3_ON; the user's Round 3 picks, 2026-10-28, recipes from plans/sound/round3.html): the
+  // feature sounds a watcher can see. The FX below, and r3Watch (each frame) and r3Tick (once a second, from ambTick) that
+  // read the game and play them; r3ActPick gives two activities their own sound. Reads only; Math.random only.
+  const R3 = SND_R3_ON ? (() => {
+    const lv = (l, fn) => { const prev = ROUTE; ROUTE = { ...ROUTE, ui: trim(l, ROUTE.ui) }; try { fn(); } finally { ROUTE = prev; } };   // the page's withLv
+    const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+    function held(t, d, f, g0, g1, o = {}) {   // a steady tone (a coil's hum, a throb), fading from g0 to g1
+      const b = o.bus || ROUTE.ui, os = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), g2 = ctx.createGain();
+      os.frequency.value = f; o2.type = 'triangle'; o2.frequency.value = f * 2; g2.gain.value = 0.25;
+      g.gain.setValueAtTime(Math.max(0.0001, g0), t); g.gain.exponentialRampToValueAtTime(Math.max(0.0001, g1), t + d);
+      os.connect(g); o2.connect(g2); g2.connect(g);
+      conn(g, b, o.pan, o.wet); os.start(t); o2.start(t); os.stop(t + d + 0.05); o2.stop(t + d + 0.05);
+    }
+    function whine(t, d, f0, f1, gain, o = {}) {   // a motor or a coil spinning: a filtered saw that follows its speed
+      const b = o.bus || ROUTE.ui, os = ctx.createOscillator(), o2 = ctx.createOscillator(), bp = ctx.createBiquadFilter(), g = ctx.createGain(), g2 = ctx.createGain();
+      os.type = 'sawtooth'; [os, o2].forEach((x, i) => { x.frequency.setValueAtTime(f0 * (i + 1), t); x.frequency.exponentialRampToValueAtTime(f1 * (i + 1), t + d); });
+      bp.type = 'bandpass'; bp.Q.value = o.q ?? 3; bp.frequency.setValueAtTime(f0 * 2, t); bp.frequency.exponentialRampToValueAtTime(f1 * 2, t + d);
+      const a = o.a ?? Math.min(0.4, d * 0.3), r = o.r ?? Math.min(0.6, d * 0.4);
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(gain, t + a); g.gain.setValueAtTime(gain, t + d - r); g.gain.linearRampToValueAtTime(0.0001, t + d);
+      g2.gain.value = 0.4; os.connect(bp); bp.connect(g); o2.connect(g2); g2.connect(g); conn(g, b, o.pan, o.wet);
+      os.start(t); o2.start(t); os.stop(t + d + 0.05); o2.stop(t + d + 0.05);
+    }
+    const ticks = (t, d, rate, f0, f1, g) => { const n = Math.round(d * rate); for (let i = 0; i < n; i++) clack(t + i / rate, g, { f: f0 + (f1 - f0) * i / Math.max(1, n - 1) }); };
+    const chips = (t, d, n, g) => { for (let i = 0; i < n; i++) noise(t + Math.random() * d, 0.02, { f: rand(3000, 6000), q: 3, gain: g * rand(0.5, 1) }); };
+    function pad(t, notes, d, g, bright = 1) {   // the music's wide slow pad (SX.pad), on the sound's own bus
+      const out = ROUTE.ui;
+      notes.forEach((m, i) => [['sawtooth', -7, -0.5], ['sawtooth', 7, 0.5], ['triangle', 0, 0]].forEach(([type, c, pan]) => {
+        const o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), e = ctx.createGain(); let node = e;
+        o.type = type; o.frequency.value = mtof(m); o.detune.value = c + (i % 2 ? 2 : -2);
+        lp.type = 'lowpass'; lp.Q.value = 0.5; lp.frequency.setValueAtTime(300 * bright, t); lp.frequency.linearRampToValueAtTime(900 * bright, t + d * 0.5); lp.frequency.linearRampToValueAtTime(350 * bright, t + d + 2);
+        const k = type === 'triangle' ? 1.4 : 1;
+        e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(g * k, t + Math.min(3, d * 0.45)); e.gain.setValueAtTime(g * k, t + d); e.gain.linearRampToValueAtTime(0, t + d + 2.5);
+        o.connect(lp); lp.connect(e);
+        if (pan && ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = pan; e.connect(p); node = p; }
+        node.connect(out); o.start(t); o.stop(t + d + 2.6);
+      }));
+    }
+    const chime = (t, m, g) => fmBell(t, mtof(m), 4, g, 2.01, 0.45, 0);
+    const tri = (t, f, d) => tone(t, f, d, { gain: 0.04, type: 'triangle' });
+    const fx = {
+      r3BadgeTake: t => { clack(t, 0.08, { f: 1800 }); tri(t + 0.08, 1318.5, 0.06); tri(t + 0.16, 1760, 0.09); },   // the badge rack A: the clip, two notes up
+      r3BadgeBack: t => { clack(t, 0.08, { f: 1500 }); tri(t + 0.08, 1760, 0.06); tri(t + 0.16, 1318.5, 0.1); },   // and back: a click, two notes down
+      r3ReactorDoor: t => lv(0.19, () => { for (let i = 0; i < 3; i++) { clack(t + i * 0.28, 0.16, { f: 600 }); thud(t + i * 0.28 + 0.02, { gain: 0.25, d: 0.12, f: 200, body: 70 }); }   // the reactor door A: three bolts, a breath, a slow roll, a deep stop
+        const s = t + 0.95; hiss(s, 0.7, 0.07); slide(s + 0.1, 1.8, { f0: 80, f1: 200, gain: 1.3, rate: 14, rough: 0.5, wet: 0.2 }); thud(s + 1.9, { gain: 0.6, d: 0.35, f: 140, body: 46, wet: 0.3 }); ring(s + 1.9, [120, 310, 560], 2.2, { d: 0.5 }); }),
+      r3CoilOff: t => { whine(t, 2.4, 440, 70, 0.05); thud(t + 2.4, { gain: 0.35, d: 0.2, f: 160, body: 50 }); clack(t + 2.42, 0.08, { f: 600 }); },   // a coil off A: spins down to a clunk
+      r3CoilOn: t => { whine(t, 2.6, 70, 440, 0.05, { r: 0.3 }); held(t + 2.3, 1.8, 110, 0.05, 0.0001); },   // and on: climbs back and settles
+      r3Winding: t => { ticks(t, 3, 10, 1200, 1700, 0.04); noise(t, 3, { f: 1800, q: 4, gain: 0.03, swell: 0.5 }); },   // winding A: the geared crank
+      r3Lathe: t => { whine(t, 5, 180, 180, 0.02, { q: 1.5 }); chips(t + 1, 3, 10, 0.03); },   // the lathe B: a soft motor and a few chips
+      r3Promotion: t => { pad(t, [55, 62, 66, 69, 74], 3.5, 0.0055, 1.2); chime(t + 3, 86, 0.04); chime(t + 3.35, 91, 0.03); },   // promotions A: a rising swell, two chimes
+      r3Calder: t => pad(t, [52, 59, 63, 66, 71], 6, 0.004, 0.8),   // Calder's question B: a soft pad holds
+      r3Stay: t => { pad(t, [48, 55, 60, 64, 67], 2.5, 0.005, 0.8); bell(t + 0.2, 523.25, 1.6, 0.04, { wet: 0.3 }); },   // Stay or Go B: warm and settled
+      r3Go: t => { pad(t, [53, 60, 65, 67, 72], 2.5, 0.005, 1.3); bell(t + 0.2, 783.99, 0.9, 0.04, { wet: 0.3 }); bell(t + 0.45, 1174.7, 1.4, 0.04, { wet: 0.3 }); },   // or open and rising
+      r3TernLand: t => { lv(0.2, () => { slide(t, 1.6, { f0: 70, f1: 160, gain: 1.2, rate: 12, rough: 0.5, wet: 0.3 }); thud(t + 1.6, { gain: 0.5, d: 0.3, f: 140, body: 46 }); });   // the Tern B: lighter doors, a soft landing
+        noise(t + 2.2, 2, { brown: true, ft: 'lowpass', f: 260, gain: 0.1, swell: 0.6 }); thud(t + 4.1, { gain: 0.25, d: 0.35, f: 120, body: 44 }); },
+      r3ShutOff: t => { clack(t, 0.16, { f: 500 }); thud(t, { gain: 0.35, d: 0.2, f: 180, body: 60 }); whine(t + 0.05, 2, 240, 60, 0.03); },   // a booked shutdown A: the switch, the hum winding down
+      r3ShutOn: t => { clack(t, 0.16, { f: 500 }); thud(t, { gain: 0.35, d: 0.2, f: 180, body: 60 }); whine(t + 0.05, 2, 60, 240, 0.03); },   // and back up
+      r3ClockAsk: t => { tone(t, 587.33, 0.25, { type: 'triangle', gain: 0.08, lp: 1800 }); tone(t + 0.18, 659.25, 0.35, { type: 'triangle', gain: 0.08, lp: 1800 }); },   // the early clock-out question B
+      r3TestFit: t => { clack(t, 0.1, { f: 900 }); thud(t, { gain: 0.15, d: 0.08, f: 400, body: 160 }); const u = t + 0.4;   // the test fit B: seat, spin, settle
+        whine(u, 3.2, 90, 420, 0.03, { q: 2, r: 0.05 }); whine(u + 3.1, 2.2, 420, 60, 0.03, { q: 2, a: 0.05 }); clack(u + 5.3, 0.05, { f: 1200 }); },
+      // turn 4: the five moments other sections tell us about, through a one-line sndFx(...) in theirs
+      r3Knock: t => { bell(t, 659.25, 0.9, 0.07, { wet: 0.2 }); bell(t + 0.32, 523.25, 1.2, 0.07, { wet: 0.2 }); },   // the knock on your door B: the door's call chime (28a)
+      r3TeamCall: t => { noise(t, 0.012, { f: 2000, q: 1, gain: 0.06 }); tone(t + 0.03, 880, 0.08, { type: 'triangle', gain: 0.05, lp: 2500 }); tone(t + 0.13, 1174.7, 0.12, { type: 'triangle', gain: 0.05, lp: 2500 }); noise(t + 0.3, 0.012, { f: 1800, q: 1, gain: 0.05 }); },   // "Next step" A: the intercom (28d)
+      r3TeamDone: t => { SFX.jobDone(t); [1046.5, 1318.5, 1568].forEach((f, i) => bell(t + 0.55 + i * 0.08, f, 1.6, 0.035, { wet: 0.35 })); },   // the team job done B: job done, bigger (28d)
+      r3Calibrate: t => { held(t, 2.6, 880, 0.0001, 0.02); const o = ctx.createOscillator(), g = ctx.createGain();   // calibration A: two tones slide together, then the lock (24x)
+        o.frequency.setValueAtTime(940, t); o.frequency.exponentialRampToValueAtTime(880, t + 2.4); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.02, t + 0.6); g.gain.setValueAtTime(0.02, t + 2.4); g.gain.exponentialRampToValueAtTime(0.0001, t + 2.7);
+        o.connect(g); conn(g, ROUTE.ui); o.start(t); o.stop(t + 2.8); bell(t + 2.55, 1760, 0.9, 0.05, { wet: 0.25 }); },
+      r3Bronze: t => { thud(t, { gain: 0.3, d: 0.1, f: 300, body: 150 }); noise(t, 0.03, { f: 700, q: 2, gain: 0.06 }); const u = t + 0.9;   // the bronze bar C: the dull bar, then the one that sings (18's vessel slot)
+        noise(u, 0.01, { f: 3000, q: 1, gain: 0.08 }); fmBell(u, 392, 4.5, 0.08, 2.76, 1.0, 0); ring(u, [392, 1081], 0.6, { d: 1.2, q: 60 }); },
+      r3Home: t => { bell(t, 523.25, 1.2, 0.06, { wet: 0.3 }); bell(t + 0.4, 783.99, 1.6, 0.05, { wet: 0.3 }); },   // your new quarters (room B) C: the home chime, the first time you open its door
+      r3ClockUndo: t => lv(0.9, () => { clack(t, 0.08, { f: 1500 }); noise(t + 0.08, 0.18, { f: 1400, fTo: 700, q: 3, gain: 0.03, swell: 0.3 }); thud(t + 0.3, { gain: 0.2, d: 0.12, f: 220 });   // clock Undo A: the lever back (15)
+        for (let i = 0; i < 4; i++) clack(t + 0.42 + i * 0.055, 0.05, { f: 1700 - i * 120 }); }),
+    };
+    Object.assign(FX, fx);
+    // inside the reactor room A: a slow throb under the Deck 6 hum, only in that room (a loop, like the mess)
+    function throb() {
+      const t0 = ctx.currentTime, out = ctx.createGain(); out.gain.setValueAtTime(0.0001, t0); out.gain.exponentialRampToValueAtTime(0.065, t0 + 1.5); out.connect(BUS.ui);
+      const os = ctx.createOscillator(), o2 = ctx.createOscillator(), g2 = ctx.createGain(), am = ctx.createGain(), l = ctx.createOscillator(), lg = ctx.createGain();
+      os.frequency.value = 46; o2.type = 'triangle'; o2.frequency.value = 92; g2.gain.value = 0.25; l.frequency.value = 0.7; lg.gain.value = 0.45; am.gain.value = 0.55;
+      l.connect(lg); lg.connect(am.gain); os.connect(am); o2.connect(g2); g2.connect(am); am.connect(out); [os, o2, l].forEach(n => n.start(t0));
+      const L = { label: 'reactorRoom', stop(f = 1.5) { LOOPS.delete(L); const t = ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + f);
+        [os, o2, l].forEach(n => { try { n.stop(t + f + 0.1); } catch (e) {} }); setTimeout(() => { try { out.disconnect(); } catch (e) {} }, (f + 2) * 1000); } };
+      LOOPS.add(L); return L;
+    }
+    const W = { home: undefined, homeNew: false, badge: undefined, dlg: null, said: undefined, tern: undefined, ask: false, sd: {}, coil: {}, rank: undefined, room: null, duck: false };
+    const has = f => typeof f === 'function';
+    const here = () => { try { return deckDef && player ? deckDef.num + '|' + roomAt(...player.here()) : null; } catch (e) { return null; } };
+    const play = (n, o) => { W.last = n; S.fx(n, o); };
+    function r3Watch() {   // each frame while sound runs
+      // the badge rack: taken (dosiOut() a minute) and back (null)
+      let b = null; try { b = has(dosiOut) ? dosiOut() : null; } catch (e) { b = null; }
+      if (W.badge !== undefined && (b != null) !== (W.badge != null)) play(b != null ? 'r3BadgeTake' : 'r3BadgeBack');
+      W.badge = b;
+      // the scenes, by line: the test fit as you turn it, Calder's question as the answers show (the music ducked while she asks), the engine badge
+      const D = typeof DIALOGUE !== 'undefined' ? DIALOGUE : null, dk = D ? D.id + ':' + D.i : null;
+      if (dk !== W.dlg) {
+        const l = D && D.queue ? D.queue[D.i] : null;
+        if (D && D.id === 'vesselTestFit' && D.i === 1) play('r3TestFit', { long: 6 });
+        if (D && D.id === 'end.ask' && l && l.choice) play('r3Calder', { long: 8 });
+        if (D && D.id === 'pu4.badge' && D.i === 0) play('r3Promotion', { long: 5 });
+        W.dlg = dk;
+      }
+      const duck = !!(D && D.id === 'end.ask');
+      if (duck !== W.duck && BUS.music) { W.duck = duck; BUS.music.gain.setTargetAtTime(duck ? 0 : 1, ctx.currentTime, duck ? 0.8 : 1.5); }
+      // the early clock-out question: the screen asks (its "Clock out early" and Cancel)
+      const cs = document.getElementById('clockScreen'); let ask = false;
+      if (cs && !cs.hidden) { const w = has(csText) ? csText('earlyyes', 'Clock out early') : 'Clock out early'; ask = [...cs.querySelectorAll('button')].some(x => x.textContent === w); }
+      if (ask && !W.ask) play('r3ClockAsk');
+      W.ask = ask;
+      // the Tern landing in the shuttle bay for the Veyli vessel, while you're there: its ramp coming down
+      let tn = null; try { tn = typeof TERN !== 'undefined' && has(vesselNow) && vesselNow() && here() === '5|S' ? TERN.target : null; } catch (e) { tn = null; }
+      if (W.tern != null && tn === 1 && W.tern < 1) play('r3TernLand', { long: 5 });
+      W.tern = tn;
+      // inside the reactor room: the throb
+      const inR = here() === '6|R';
+      if (inR && !W.room) { if (S.log) S.log.push({ name: 'reactorRoom', loop: true }); W.room = throb(); }
+      else if (!inR && W.room) { W.room.stop(1.5); W.room = null; }
+    }
+    function r3Tick() {   // once a second
+      // your answer to the offer: Stay or Go (the answer as it's saved; "not sure" has none)
+      let s = null; try { s = SHIP.end && Array.isArray(SHIP.end.said) ? SHIP.end.said.length : null; } catch (e) { s = null; }
+      if (W.said !== undefined && s != null && s > (W.said || 0)) { const a = SHIP.end.said[s - 1][1]; if (a === 'stay' || a === 'go') play(a === 'stay' ? 'r3Stay' : 'r3Go', { long: 4 }); }
+      W.said = s;
+      // the move to Deck 2's room B (24u, Day 25): seen happen, its door's first opening gets the home chime (homeDoor)
+      let h = null; try { h = has(worksHome) ? worksHome() : null; } catch (e) { h = null; }
+      if (W.home !== undefined && h === '2-B' && W.home !== '2-B') W.homeNew = true;
+      W.home = h;
+      // promotions: your rank going up (Senior Officer, Engine Specialist)
+      const rk = SHIP.works && SHIP.works.rank;
+      if (W.rank !== undefined && rk !== W.rank && (rk === 'senior' || rk === 'specialist')) play('r3Promotion', { long: 5 });
+      W.rank = rk;
+      // a booked shutdown: its power off (st 'off'), and back (done or lapsed after being off)
+      const sd = SHIP.works && SHIP.works.sd && SHIP.works.sd.set ? SHIP.works.sd.set[SHIP.time.day] : null;
+      (Array.isArray(sd) ? sd : []).forEach((x, i) => { const k = SHIP.time.day + ':' + i, was = W.sd[k];
+        if (k in W.sd && x.st !== was) { if (x.st === 'off') play('r3ShutOff', { long: 3 }); else if (was === 'off') play('r3ShutOn', { long: 3 }); }
+        W.sd[k] = x.st; });
+      // a drive coil off the cycle and back: the Tier 4 test's and night 3's swap's steps, as they're done (at the coil, near you)
+      if (deckDef && deckDef.num === 6 && Array.isArray(SHIP.jobs) && has(jobStops)) for (const j of SHIP.jobs) {
+        const mid = j.mach || j.machine, team = Array.isArray(j.seq) && j.seq.some(x => x.part === 'cup'); if (!team && !/^6-coil-/.test(mid || '')) continue;
+        const m = /^6-coil-/.test(mid || '') && typeof machineById === 'function' ? machineById(mid) : null, at = m && m.at ? cellPos(...m.at) : null, o = at ? { x: at.x, z: at.z, long: 5 } : { long: 5 };
+        const sound = tag => { if (tag === 'isolate') play('r3CoilOff', o); else if (tag === 'cycle' || tag === 'cup') play('r3CoilOn', o); };
+        if (team) {   // night 3's swap (24h's steps): each step passed (j.cur moving on)
+          const c = j.cur | 0, was = W.coil[j.id]; W.coil[j.id] = c;
+          if (Number.isInteger(was)) for (let i = was; i < Math.min(c, j.seq.length); i++) sound(j.seq[i].part);
+          continue;
+        }
+        if (j.status === 'done') continue;
+        const done = j.stepsDone || [], seen = W.coil[j.id]; W.coil[j.id] = done.slice();
+        if (!seen) continue;
+        let st = []; try { st = jobStops(j); } catch (e) { st = []; }
+        for (const k of done) if (!seen.includes(k)) { const x = st[k] || {}; sound(x.step || x.tag); }
+      }
+    }
+    function r3ActPick(A) {   // an activity's own sound: winding in the new coil (the Tier 4 test's 'wind' stop), the lathe for Taavek's part (step 3)
+      try {
+        if (A.kind === 'vesselStep' && A.placeId === '5-shop-lathe' && SHIP.event && (SHIP.event.mine['vessel:step'] | 0) === 3) return { one: 'r3Lathe' };
+        if (deckDef.num === 6 && A.kind !== 'fetch' && has(jobStops)) {
+          const j = (SHIP.jobs || []).find(x => x.kind === 'tier4' && x.status !== 'done' && !x.workDone); if (!j) return null;
+          const st = jobStops(j), k = st.findIndex(x => (x.step || x.tag) === 'wind'), done = j.stepsDone || [];
+          if (k > 0 && !done.includes(k) && done.includes(k - 1)) return { one: 'r3Winding' };
+        }
+      } catch (e) { /* nothing special */ }
+      return null;
+    }
+    function homeDoor(d) {   // the door watcher asks as a door near you opens: room B's door, the first time since the move (once)
+      if (!W.homeNew || !deckDef || deckDef.num !== 2) return false;
+      const B = [[0.6, 0], [-0.6, 0], [0, 0.6], [0, -0.6]].some(([dx, dz]) => { try { return roomAt(...cellAt(d.cx + dx, d.cz + dz)) === 'B'; } catch (e) { return false; } });
+      if (B) W.homeNew = false; return B;
+    }
+    return { W, watch: r3Watch, tick: r3Tick, actPick: r3ActPick, homeDoor };
+  })() : null;
+  if (R3) S.onFrame.push(() => { try { R3.watch(); } catch (e) {} });
   function ambTick() {
     let cook = false, wash = false;
     try {
@@ -73916,6 +74260,8 @@ const SND = (() => {
     } catch (e) { cook = wash = false; }
     ambSet('sizzle', cook); ambSet('washer', wash);
     if (cook && Math.random() < 0.12) S.fx(pick(['chop', 'chop', 'stove', 'ovenOpen', 'ovenClose']), { long: 3 });
+    if (MESS_SND) MESS_SND.tick();   // the sound update, turn 2: the mess hall
+    if (R3) try { R3.tick(); } catch (e) {}   // turn 3: the feature sounds read once a second
   }
   let actTickSet = false;
   S.onFrame.push(() => { if (!actTickSet) { actTickSet = true; S.actTick = actTick; } });   // once, on the first frame: S.whenReady and the core's S.actTick = null come later in the block
@@ -73957,6 +74303,8 @@ const SND = (() => {
       const opening = was < 0.04 && d.open >= 0.04, closing = was > 0.96 && d.open <= 0.96;
       if (!opening && !closing) continue;
       const mine = Math.hypot(d.cx - p.x, d.cz - p.z) < 1.9;
+      if (R3 && opening && mine && R3.homeDoor(d)) S.fx('r3Home', { long: 3 });   // the sound update: your new quarters' home chime (C), with the door
+      if (SND_R3_ON && opening && deckDef.num === 6 && d.e.key === 'v,27,3') { S.fx('r3ReactorDoor', { x: d.cx, z: d.cz, long: 4 }); continue; }   // the sound update, turn 3: the reactor's shielded door (A)
       S.fx(d.svc ? (opening ? 'hatchOpen' : 'hatchClose') : (opening ? 'doorOpen' : 'doorClose'), { x: d.cx, z: d.cz, crew: !mine });
     }
     // turn 5: your footsteps, by the floor under you; none while riding or doing something; a crawlway is softer
@@ -74379,6 +74727,17 @@ const SND = (() => {
       // the comet (0.93.2, FX25's event; plans/events-plan-2.html A6): slow and bright, played only while you watch it
       comet:      { name: 'Comet', time: 'Event', key: 54, mode: 'lydian', bpm: 52, a: [0, 1], b: [0, 3, 1, 2], c: [4, 1], seed: 433, slow: true, bells: true, wet: 0.7, bright: 1.15, note: 'The comet going by: slow, bright Lydian pads, a chime tune and wide open space. Only at the windows, on the night it passes.' },
     };
+    if (SND_R3_ON) Object.assign(SPACE, {   // the sound update, turn 1: the traditions and events the user picked music for (Round 3, 2026-10-28), event tracks like the comet's
+      beam:        { name: 'Name on the beam', time: 'Event', key: 55, mode: 'lydian', bpm: 72, a: [0, 1], b: [3, 0, 1, 2], c: [4, 1], seed: 541, pulse: true, bells: true, pattern: [0, 1, 2, 3, 2, 1, 2, 0], note: 'Short and proud: a soft pulse, a sequence and a chime tune while the name goes up.' },
+      cup:         { name: 'Cup day', time: 'Event', key: 52, mode: 'mixo', bpm: 80, a: [0, 1], b: [0, 3, 1, 2], c: [4, 2], seed: 571, pulse: true, pattern: [0, 2, 1, 3, 1, 2, 0, 3], note: 'The liveliest, still without drums: a soft pulse, a quick sequence and a singing lead.' },
+      farewellsup: { name: 'Farewell supper', time: 'Event', key: 50, mode: 'dorian', bpm: 54, a: [0, 2], b: [1, 0, 3, 2], c: [4, 1], seed: 547, slow: true, bells: true, wet: 0.7, note: 'Tender, never sad: slow Dorian chimes, high stars and a quiet singing line.' },
+      goodbye:     { name: 'The goodbye', time: 'Event', key: 52, mode: 'ionian', bpm: 56, a: [0, 1], b: [2, 1, 3, 0], c: [4, 2], seed: 601, wet: 0.7, note: 'The last track: slow Ionian pads, a singing lead and an answering chime.' },
+      harvest:     { name: 'Harvest table', time: 'Event', key: 48, mode: 'ionian', bpm: 66, a: [0, 1], b: [2, 1, 3, 0], c: [4, 1], seed: 523, note: 'A plain, warm tune for the two garden suppers.' },
+      lantern:     { name: 'Lantern walk', time: 'Event', key: 52, mode: 'dorian', bpm: 56, a: [0, 1], b: [2, 0, 3, 1], c: [4, 2], seed: 521, slow: true, bells: true, bright: 0.9, note: 'Dorian pads and a rocking chime tune, lanterns swinging along the promenade.' },
+      line:        { name: 'Crossing the Line', time: 'Event', key: 49, mode: 'lydian', bpm: 60, a: [0, 1], b: [0, 3, 1, 2], c: [4, 1], seed: 577, wet: 0.7, bright: 1.1, note: 'Bright, wide Lydian space music for crossing into the Veyli reach.' },
+      veyli:       { name: 'Veyli welcome', time: 'Event', key: 50, mode: 'mixo', bpm: 54, a: [0, 1], b: [3, 1, 0, 2], c: [4, 2], seed: 593, lg: 0.035, note: 'A held drone and a struck bronze bar for the Veyli, under the Wren\'s own pads.' },
+      farewell:    { name: 'Farewell song', time: 'Event', key: 43, mode: 'dorian', bpm: 50, a: [0, 2], b: [3, 0], c: [4, 1], seed: 613, bright: 0.55, wet: 0.7, note: 'Low and sparse under the crew\'s singing at the Veyli farewell: a held drone, dark pads, a low bronze bar, one high chime (the user\'s A).' },
+    });
     for (const [k, d] of Object.entries(SPACE)) TRACKS[k] = space(d);
     const SPACE_LV = {dawn: 0.417, wake: 0.442, firstlight: 0.525, systems: 0.631, morning: 0.479, tea: 0.479, midday: 0.417, lunch: 0.452, promenade: 0.537, afternoon: 0.452, circuits: 0.525, golden: 0.49, evening: 0.468, porthole: 0.468, watch: 0.452, lullaby: 0.447, latenight: 0.484, deepspace: 0.484, shift: 0.513, steady: 0.495, rounds: 0.495};   // levels for the space tracks (set by measuring against the hum)
     for (const k of Object.keys(SPACE)) MLV[k] = SPACE_LV[k] ?? 1;
@@ -74421,10 +74780,24 @@ const SND = (() => {
     }
     const SHAPED = ['tea', 'lunch', 'porthole', 'watch', 'lullaby', 'latenight', 'deepspace', 'comet'];
     SHAPED.forEach(shaped);
+    if (SND_R3_ON) {   // the sound update, turn 1: the event tracks take the reshaped form (phrases, a moving bass), as the comet does
+      Object.assign(PARTS, {
+        sDrone: c => { if (c.bar % 4 === 0) { SX.swell(c.t, c.root, c.s * c.beats * 4, 0.06, c.out); SX.swell(c.t, c.root + 7, c.s * c.beats * 4, 0.03, c.out); } },   // the home note and its fifth, held (the Veyli)
+        sBronze: c => { const m = c.mel && c.mel[0]; if (m) fmBell(c.t + m[0] * c.s, mtof(m[1] + 12), 3.5, c.lg * 0.7, 2.76, 1.1, 0, c.out); },   // a struck bronze bar on the tune's first note
+        sBronzeLow: c => { if (c.bar % 2 === 1) fmBell(c.t + c.s, mtof(c.ch[1] + 12), 4.5, 0.016, 2.76, 0.9, 0, c.out); },   // the farewell song: a low bronze bar every other bar
+        sHighChime: c => { if (c.bar % 3 === 1) fmBell(c.t + 2 * c.s, mtof(c.ch[c.ch.length - 1] + 24), 5, 0.009, 2.01, 0.45, 0, c.out); },   // and one high chime now and then
+      });
+      ['beam', 'cup', 'farewellsup', 'goodbye', 'harvest', 'lantern', 'line', 'veyli', 'farewell'].forEach(shaped);
+      const V = TRACKS.veyli; V.form = () => longForm([sec('Arrival', 'A', 4, ['sPad', 'sDrone'], 1)],
+        [sec('Bronze', 'A', 8, ['sPad', 'sDrone', 'sBronze'], 1), sec('Both ships', 'B', 8, ['sPad', 'sDrone', 'sBronze', 'sSing'], 2), sec('Drift', 'C', 8, ['sPad', 'sStars', 'sChime'], 1)],
+        [sec('Closing', 'A', 4, ['sPad', 'sStars'], 1)], V.bpm, 4, 10, ['x']);
+      TRACKS.farewell.form = () => [sec('Hush', 'A', 2, ['sDrone', 'sPad'], 1), sec('Song', 'A', 4, ['sDrone', 'sPad', 'sBronzeLow'], 1), sec('Last line', 'B', 2, ['sDrone', 'sPad', 'sHighChime'], 1)];   // the user's A (bronze and drone): about 40 s, once
+    }
     const SHAPE_LV = {};   // levels for the reshaped tracks (set by measuring)
     for (const k of SHAPED) MLV[k] = SHAPE_LV[k] ?? MLV[k];
     for (const [k, f] of Object.entries({ lunch: 1.3, latenight: 1.3, deepspace: 1.4, systems: 1.3, dawn: 1.3 })) MLV[k] *= f;   // the quieter ones up 2-3 dB (measured)
     MLV.comet = 0.65;   // the comet's level (measured against the hum)
+    if (SND_R3_ON) Object.assign(MLV, { beam: 0.6, cup: 0.6, farewellsup: 0.57, goodbye: 0.55, harvest: 0.62, lantern: 0.6, line: 0.56, veyli: 0.6, farewell: 1.39 });   // the event tracks' levels: matched to the comet's (measured offline, within 1 dB); the farewell song about 6 dB under, for the voices on top
 
     for (const k of ['morning', 'evening', 'latenight', 'shift', 'steady', 'rounds', 'firstlight', 'midday', 'lunch', 'afternoon', 'tea', 'golden', 'watch', 'lullaby', 'wake', 'systems', 'dawn', 'promenade', 'circuits', 'porthole', 'deepspace']) { const d = TRACKS[k]; delete TRACKS[k]; TRACKS[k] = d; }   // v7's order (its list and Next), as before the old definitions were left out
     // ---- the schedule: ship time of day, and a working set while you're on shift
@@ -74567,6 +74940,36 @@ const SND = (() => {
   const musTime = () => ({ day: SHIP.time.day, min: SHIP.time.min, onShift: musShift() });
   const musPeriod = min => { let p = MUS_PERIOD[MUS_PERIOD.length - 1][0]; for (const [n, from] of MUS_PERIOD) if (min >= from) p = n; return p; };
   S.music = null; S.musicLog = S.log ? [] : null;
+  // the sound update, turn 1 (SND_R3_ON): which event track fits where you are now, or null. Reads the game only.
+  // Traditions: while one the user picked is on and you're in one of its rooms. Events: the Line's ceremony (the bow
+  // lounge) and supper (the mess), there and back; the Veyli's arrival (the shuttle bay) and formal dinner (the Captain's
+  // quarters); the farewell song at their send-off (the shuttle bay, 08:55-09:20); the ending's goodbye in the bay and the end page.
+  const R3_TRAD = { beam: ['name-on-the-beam', 'name-on-the-beam-new'], cup: ['rec-cup', 'rec-regatta', 'department-cup'], farewellsup: ['farewell-supper'], harvest: ['harvest-supper', 'first-fruits'], lantern: ['lantern-walk'] };
+  function r3EventMusic() {
+    if (typeof deckDef === 'undefined' || !deckDef || typeof roomAt !== 'function') return null;
+    const key = roomAt(...player.here()), here = deckDef.num + '|' + key, room = (deckDef.rooms && deckDef.rooms[key] || {}).name || '';
+    const t = shipNow(), d = Math.floor(t / 1440) + 1, B = (d - 1) * 1440, m = t - B;
+    if (typeof eventsOn === 'function') for (const e of eventsOn(d)) {
+      const k = Object.keys(R3_TRAD).find(x => R3_TRAD[x].includes(e.id)); if (!k || t < B + e.from || t >= B + e.to) continue;
+      const rooms = e.rooms || (e.ev && typeof eventRooms === 'function' ? eventRooms(e.ev) : null); if (rooms && rooms.has(here)) return k;
+    }
+    const n = typeof eventNow === 'function' ? eventNow() : null;
+    if (n && (n.id === 'crossingLine' || n.id === 'crossingBack') && (n.phase === 'onset' && /^Bow lounge$/.test(room) || n.phase === 'resolution' && m >= 1080 && m < 1155 && /^Mess hall$/.test(room))) return 'line';
+    if (n && n.id === 'diplomatic') {
+      if (n.phase === 'onset' && m >= 600 && m < 660 && /^Shuttle bay$/.test(room)) return 'veyli';
+      if (n.phase === 'escalation' && m >= 1110 && m < 1260 && deckDef.num === 2 && key === 'C') return 'veyli';
+      if (n.phase === 'resolution' && m >= 535 && m < 560 && /^Shuttle bay$/.test(room)) return 'farewell';
+    }
+    if (typeof EV_ENDING_ON !== 'undefined' && EV_ENDING_ON && typeof endGoing === 'function') {
+      const pg = document.getElementById('endPage'); if (pg && !pg.hidden) return 'goodbye';
+      const W = endGoing() && typeof endWeek === 'function' ? endWeek() : null;
+      if (W && typeof endInBay === 'function' && endInBay() && endDayOf(t) >= W.leave && m >= 480 && m < 630) return 'goodbye';
+    }
+    return null;
+  }
+  if (SND_R3_ON) S.r3Event = r3EventMusic;   // for sound_check
+  if (MESS_SND) S.r3Mess = MESS_SND.M;   // for sound_check: the mess hall's count and scene
+  if (R3) S.r3 = R3;   // for sound_check: turn 3's watchers
   S.makeMusic = createWrenMusic;                          // for sound_check: the module on a test clock
   S.onFrame.push(() => {                                  // the first frame with sound running makes it (this slot comes before S.whenReady and the settings)
     if (!S.music) { musPrefs(); S.music = createWrenMusic({ ctx: S.ctx, dest: S.bus.music, shipTime: musTime, enabled: MP.on, volume: MP.vol, mode: MP.mode, heard: MP.heard,
@@ -74575,6 +74978,7 @@ const SND = (() => {
         if (/^Playing /.test(tx) && S.music) { MP.heard = S.music.state().heard; S.savePrefs(); if (typeof DEV !== 'undefined' && DEV.open && DEV.app === 'music') deviceRefresh(); }   // the rotation carries on across days; a live Now playing
       } }); }
     let ev = null; try { ev = typeof cometMusicOn === 'function' && cometMusicOn() ? 'comet' : null; } catch (e) { ev = null; }   // section 18's comet (FX25): its own track while you watch
+    if (SND_R3_ON && !ev) { try { ev = r3EventMusic(); } catch (e) { ev = null; } }   // the sound update: a picked tradition or event, while you're in its room
     S.music.setEvent(ev);
     S.music.update();
   });
