@@ -73,3 +73,6 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
 - J4 runs: cadet vs e158dcf ALL IDENTICAL; devmode_check OK; dev_arrow_check OK; j4_event.py (rv25-shots/j4_event-c7489b5.txt):
   the "Event:" arrow on the vessel's ranks: [] planning holds (Day 27 09:50-12:00, Day 28 09:25, Day 29 09:15 and 14:25).
 - **VERDICT J4 c7489b5: FIXES** (add evInvited(m) to the 'event' source's filter), to DM1, lead 44 (BM20 copied via lead).
+- J4 de25560 (evInvited filter, evScriptOf title): cadet ALL IDENTICAL; devmode_check OK; dev_arrow_check OK; j4_event.py:
+  the Captain at the glass on, no Event arrow on the vessel's holds. **VERDICT J4 de25560: PASS** (~15:0x, lead 44, DM1).
+  Note for DM1: Dev career Day 27 Specialist still offered m17 (lift roof); Dev career Day 16 Senior told of the Tier 3 test.
