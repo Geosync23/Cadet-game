@@ -1,7 +1,10 @@
 # Review of the Dev mode jumps plan v4 (DM1)
 
-CA1 for lead 43, 2026-10-28. An adversarial technical review of `plans/devmode-plan.html` / `.md` on claude/devmode-plan
-fa0c1fa (published at https://claude.ai/artifact/X2GVBU4c5hZdt1R3dNxqy4). Read and run only: no game or check change.
+CA1 for lead 43, 2026-10-28. An adversarial technical review of `plans/devmode-plan.html` / `.md` on
+**claude/devmode-plan-2 cd43ba6** (page version 2, https://claude.ai/artifact/X2GVBU4c5hZdt1R3dNxqy4), built on the user's
+v2.1 and v3 answers. (An earlier pass read fa0c1fa by mistake; everything measured there holds for cd43ba6, which keeps
+the same runner and jumps and adds the agreed Stop 3 tools: threads − and +, End and undo, End and keep. F8 and F9 are
+about those.) Read and run only: no game or check change.
 Game read: 0.95.0 (the plan's base, claude/staging-pad, has the same game file). Runs: headless Chromium, 4 cores, the
 real Set career code (`devmodeSetCareerTo`) under `devmodeRun`, `#dev` with the arrival marked done; probe scripts in
 CA1's scratchpad (not kept).
@@ -10,7 +13,7 @@ CA1's scratchpad (not kept).
 
 The idea holds up: a jump built as Set career plus a landing does reach the late game, every ship-wide event happens on
 its own calendar day, the ending can be driven through the game's own functions, the real save is never touched, and two
-runs give the same save byte for byte. But three things must change before building (F1-F3), and four should (F4-F7).
+runs give the same save byte for byte. But four things must change before building (F1-F3, F8), and five should (F4-F7, F9).
 
 ## What I measured
 
@@ -52,13 +55,26 @@ leaves on Day 36). Fix: plain Set career beyond Day 32 uses the same runner stop
 Stay for Set career and Go only for the ending's Go jumps), and the panel says which answers were used. Set career's new
 range (to Day 40) then means "the endgame, staying on".
 
+**F8. End and undo has nothing to go back to, and the event starts again.** In 3.1 the event was started by Dev
+mode, so "undo" was the Undo copy taken just before that start. In v4 the event starts on its own inside the jump's run,
+so there is no saved moment "before it started"; Undo my last Dev action goes back to the Dev game before the jump. And
+ending a run without logging it doesn't stop it: the calendar's next event is the first one not in `SHIP.eventLog`
+(`evCalDue`, ~47775), so on the next tick `eventAdvance` starts the same event again. `EV_SKIPPED` is rebuilt at load from
+the log and the start day (~47748; the vessel adds to it at run time, but that isn't saved), so a skip added by Dev mode
+would be lost on the next reload. Fix, pick one before J2: (a) End and undo = the Dev save from the morning of the
+event's first day, kept by the runner when the jump passes it (one more record of about 116 KB, inside `DM_ROOM`), with
+the event then running again as the calendar says, and the panel saying so; or (b) a saved "skipped by Dev" mark that
+`evSkippedFor` reads, which is a change in section 18 (the events base's owner, EC1) and breaks v4's "no hooks in other
+sections"; or (c) drop End and undo and keep End and keep, Next phase and the threads. I recommend (c), or (a) if the user
+still wants it: (b) touches the calendar every later event depends on.
+
 ## Should fix
 
 **F4. Long jumps are about a minute on a phone. The user already answered this.** A Day 36 jump is 15 s here and 65 s
 with the CPU slowed 4 times (the factor the parked replay measured for phones). That's over the plan's 30 s line, so
-question 9's fallback (start from an earlier Mark) would come into play. But the user answered this kind of question on
+question 6's fallback (start from an earlier Mark) would come into play. But the user answered this kind of question on
 the v2.1 page (question 13, "Is a first long jump of a few minutes on a phone acceptable?": **ok**, with a progress bar),
-and on v3.1 chose the lean Dev mode and parked the replay's kept days. Recommendation: drop question 9 and the Mark
+and on v3.1 chose the lean Dev mode and parked the replay's kept days. Recommendation: drop question 6's Mark
 fallback (it brings back the parked kept days' complexity, and a reloaded save then run on is not proven byte-identical
 to a fresh run). Keep the progress line Set career already has, add a Stop, and tell the user "about a minute on a phone
 for the ending's jumps".
@@ -78,11 +94,15 @@ landing (one fresh run, then the four Calder answers each from an Undo or a Mark
 - a Short Friday's 15:30 clock-out and the Captain's Friday address (18f, every Friday from Day 5; not a tradition, so the Traditions tab can't reach it);
 - the slower career's ending (Calder's question on a later Friday, so the offer comes a week on). The plan rules it out, but it's a real branch with its own lines (`endSlow`, `endingAsk.slow`). Suggest one jump that sets the career a week slow.
 
-**F7. Fit with the user's earlier answers.**
+**F7. Fit with the user's earlier answers.** (cd43ba6 already lists the 20 October answers as decided and keeps them; this point is only about size.)
 - On v2.1 the user wrote "I'm questioning the need for this much complexity. I want to be able to test the traditions and career progression" and "Would it be easier to select a day and just add tradition testing?". v3.1 then went lean.
 - v4 is 40 jumps and about 20 hours. It is built on the lean Set career, not the parked replay, which fits. But the page should say plainly that it is the larger option.
 - Offer a smaller first cut: the Career and Nights groups, the ending's three landings, and one jump per ship event (about 12 hours). The rest can follow.
 - Don't reuse the parked names (`DEV_PLAYER`, "kept days"), as the user's rule says.
+
+**F9. The running-event tools need two guards.**
+- **The threads' − and + stop counting at the storm's all-clear.** They go through `eventScore`, which ignores changes once `e.mine.settled` is set (~47092). So the buttons must grey out after that, or the band won't move and the check's "threads − and + change the band" fails late in the storm.
+- **After End and keep, the crew's plans for the rest of the day still have the event in them.** Today's plans were made with the event running. Make that day's plans again and refill the deck, the way the Traditions tab already does (`devmodeTradsAgain`), and check that nobody heads for an event meeting that's gone.
 
 ## Checked and fine
 
@@ -104,15 +124,16 @@ landing (one fresh run, then the four Calder answers each from an Undo or a Mark
 
 ## Answers I'd give to the plan's questions
 
-| Question | Answer |
+| Question (cd43ba6) | Answer |
 |---|---|
-| 1. Fresh game each time | Yes |
-| 2. Events on other days | No |
-| 3. Diplomatic visit | Not yet |
-| 4. Answers row | Yes, but Stay for plain Set career (F3), and the row's state is J0's (F2) |
-| 5. Storm's result | No |
-| 6. First week in J0 | Try it, but expect the arrival's records to need the play-once recipe (v2.1's reviewers found the Day 2 meeting needs the arrival played) |
-| 7. Rank buttons | Yes |
-| 8. Arrow at event meetings | Yes |
-| 9. Slow jumps | Already answered by the user (F4): progress and Stop, no Mark fallback |
-| 10. Builders | Three side by side after J0, with F1, F2 and F5's stubs in J0 |
+| 1. Events: jump to their day, plus the running tools | Yes; but End and undo as F8 says |
+| 2. Diplomatic visit | Not yet |
+| 3. Answers row | Yes, but Stay for plain Set career (F3), and the row's state is J0's (F2) |
+| 4. First week in J0 | Try it, but expect the arrival's records to need the play-once recipe (v2.1's reviewers found the Day 2 meeting needs the arrival played) |
+| 5. Arrow at event meetings | Yes |
+| 6. Slow jumps | Already answered by the user (F4): progress and Stop, no Mark fallback |
+| 7. Builders | Three side by side after J0, with F1, F2 and F5's stubs in J0 |
+
+Rank by hand for Senior Officer and Engine Specialist (J0, following the user's 20 October answer): fine as long as it
+stays marked approximate. A rank set by hand skips the records later pieces read (the Tier 3 and 4 test records in
+`W.pu`, the Deck 2 move), so the panel should point to the rank buttons for anything past Day 16.
