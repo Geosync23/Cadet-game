@@ -43,3 +43,8 @@ None.
 | lane B | vessel beam court team jobs2 props s5cases s6cases mentor ending | all 10 OK, exit 0 (1319 s), CONTROLLER CHECK OK |
 
 No FAIL lines.
+
+## join_check alone on fe11cd66 (BM20's ask)
+
+- Nothing else running on the machine. join_check: OK, exit 0 (228 s), JOIN CHECK OK, no FAIL lines.
+  BM20's run under load stopped at a page reload (Page.goto 30 s timeout, line 153); alone it passes, so that was load.
