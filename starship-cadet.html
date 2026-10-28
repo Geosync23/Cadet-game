@@ -38086,6 +38086,8 @@ const LINES = JSON.parse([
   '{"text":"Tiles night: sit at a board and play a few friendly games. Leisure and social up.","id":"1wbaxf7"}]',
   ',"join.tiles-night.tip":[',
   '{"text":"Tap {name} to join Tiles night","id":"1cchihf"}]',
+  ',"join.vesselLights.tip":[',
+  '{"text":"Tap Saruth to watch the little ship from the glass","id":"vdcdru"}]',
   ',"join.works-tea.notice":[',
   '{"text":"Works Friday tea: tea, biscuits and the week\'s news with Works. Social up, and a little food.","id":"6qvotp"}]',
   ',"join.works-tea.tip":[',
@@ -45744,7 +45746,7 @@ function tradLeader(e) {
   if (TJ_LEAD.size > 40) TJ_LEAD.clear(); TJ_LEAD.set(key, p ? p.id : null);
   return p ? p.id : null;
 }
-const tjFirst = id => { const p = schedPeople().find(q => q.id === id); return p ? shortName(p) : id; };   // section 14's: 'Dr. Sato', 'Chief Calder', 'Tomas' (reviewer R3, 0.70.3)
+const tjFirst = id => { const p = schedPeople().find(q => q.id === id); if (!p) return id; const w = p.name.split(' '); return w.length === 2 && /^(Envoy|Speaker)$/.test(w[0]) ? w[1] : shortName(p); };   // a Veyli's title with one name ('Envoy Saruth'): the name, as the tips say (RV25, 0.96.0; shortName gives 'Envoy')   // section 14's: 'Dr. Sato', 'Chief Calder', 'Tomas' (reviewer R3, 0.70.3)
 const tjAgent = id => typeof DECK_CREW !== 'undefined' ? DECK_CREW.find(c => c.p && c.p.id === id) || null : null;
 // the tradition on now that you could join on this deck: { e, key, lead (id), agent } or null (once a ship minute)
 let TJ_NOW = null;
