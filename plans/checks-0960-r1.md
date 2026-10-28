@@ -49,3 +49,5 @@
 | social_check | OK | SOCIAL CHECK OK |
 
 **R1: OK on fe11cd66** (the puzzle_check FAIL is fixed).
+
+| p926_check (taken from R2's queue, lead 44) | OK | exit 0, P926 CHECK OK, no FAIL |
