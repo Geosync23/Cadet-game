@@ -72253,7 +72253,7 @@ function dvCareerNext() {                                // the next career step
   }
   if (!C.length) return null;
   if (C.some(x => x.k === 'promo' || x.k === 'pu3')) for (let i = C.length - 1; i >= 0; i--) if (/^(row|small):/.test(C[i].k) || /^train:t3:/.test(C[i].k) && C.some(x => x.k === 'pu3')) C.splice(i, 1);   // (S5-2: the Tier 3 test's own entry, not the ladder's)   // lead 34: the promotion's beats before the next row's ask
-  const score = x => x.when <= now || x.soon && x.when - x.soon <= now ? now - 1 + C.indexOf(x) / 100 : x.when + C.indexOf(x) / 100;   // started or close: now, in the order above; else by its time
+  const score = x => x.when <= now || x.soon && x.when - x.soon <= now ? now - 1 - (x.first ? 1 : 0) + C.indexOf(x) / 100 : x.when + C.indexOf(x) / 100;   // started or close: now, in the order above (a source marked first, before the rest: J4's Monday briefing, held before the day's work); else by its time
   const best = C.slice().sort((a, b) => score(a) - score(b))[0];
   return { ...best.g, when: best.when, key: best.k, label: best.g.label + (best.when > now ? ', ' + dvWhen(best.when) : '') };
 }
@@ -72366,7 +72366,7 @@ DV_MORE.push(['night', now => {                          // your night shift: th
 }]);
 DV_MORE.push(['m21', now => {                            // the Monday briefing: your seat at the table
   const r = (SHIP.occasions || []).find(o => o.id === 'm21.brief' && o.status === 'asked' && now < o.at + (o.len || 45)); if (!r) return null;
-  return { when: r.at, soon: 15, g: { deck: r.deck, room: r.room, label: 'The Monday briefing, your seat' } };
+  return { when: r.at, soon: 15, first: true, g: { deck: r.deck, room: r.room, label: 'The Monday briefing, your seat' } };   // first: its hour is held, before the day's work (a Tier 4 test at 09:30)
 }]);
 DV_MORE.push(['mtcq', now => {                           // Basil's day with you; Calder's question at the Friday tea
   const d = worksDay(now), rows = [].concat(typeof mtItems === 'function' ? mtItems(d) : [], typeof cqItems === 'function' ? cqItems(d) : []), B = (d - 1) * 1440, r = rows.find(x => now < B + x.to);
