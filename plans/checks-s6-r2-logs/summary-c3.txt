@@ -1,0 +1,16 @@
+lines exit 0 6s :: lines_check: PASS (0 errors, 112 warnings)
+lines--day exit 0 751s :: lines_check --day: PASS (0 errors)
+day21 exit 0 526s :: DAY CHECK OK
+day22 exit 0 521s :: DAY CHECK OK
+day23 exit 0 525s :: DAY CHECK OK
+day24 exit 0 523s :: DAY CHECK OK
+intro exit 0 3771s :: OK
+path exit 0 111s :: PATH CHECK OK
+arc exit 0 28s :: ARC CHECK OK
+laneA done
+p926 exit 0 1146s :: P926 CHECK OK
+laneB done
+round done
+perf exit 1 4617s :: PERF CHECK: 6 problem(s) (2 skipped: switch not in this build; 0 waiting: not built yet)
+perf-re exit 1 974s :: PERF CHECK: 6 problem(s)
+perf-swap exit 1 897s :: PERF CHECK: 5 problem(s)

@@ -1,0 +1,20 @@
+== OLD /home/user/Cadet-game/starship-cadet.html
+  Sunday dinner, the mess 18:30              [Mess hall]  portrait 261c/464gl 568kt 2.5ms 67p  portrait-wide 418c/634gl 523kt 2.52ms 67p  landscape 294c/463gl 571kt 2.82ms 67p
+  breakfast rush, the mess 07:10             [Mess hall]  portrait 252c/450gl 414kt 1.68ms 27p  portrait-wide 409c/620gl 439kt 2.09ms 27p  landscape 285c/449gl 417kt 1.24ms 27p
+  Friday dinner, the mess 17:20              [Mess hall] (switched on: SHORT_FRIDAY)  portrait 204c/354gl 439kt 1.58ms 51p  portrait-wide 361c/524gl 440kt 1.8ms 51p  landscape 237c/353gl 442kt 2.27ms 51p  trifold-folded 211c/368gl 440kt 1.6ms 51p  trifold-folded-turned 253c/373gl 473kt 1.7ms 51p  trifold-open 188c/303gl 438kt 2.02ms 51p  trifold-open-turned 177c/289gl 436kt 2ms 51p
+  lantern supper, the mess Sat 18:30         [Mess hall] (switched on: EVENTS_ON)  portrait 260c/462gl 547kt 2.01ms 61p  portrait-wide 417c/632gl 453kt 2.45ms 61p  landscape 293c/461gl 550kt 2.54ms 61p  trifold-folded 267c/476gl 547kt 2.08ms 61p  trifold-folded-turned 309c/481gl 580kt 2.23ms 61p  trifold-open 244c/411gl 545kt 2.78ms 61p  trifold-open-turned 233c/397gl 543kt 2.45ms 61p
+  the Line supper, the mess Sun 18:30        [Mess hall] (switched on: EVENTS_ON, EV_LINE_ON)  portrait 261c/464gl 568kt 2.76ms 67p  portrait-wide 418c/634gl 523kt 2.1ms 67p  landscape 294c/463gl 571kt 2.47ms 67p  trifold-folded 268c/478gl 569kt 2.17ms 67p  trifold-folded-turned 310c/483gl 602kt 2.44ms 67p  trifold-open 245c/413gl 567kt 2.18ms 67p  trifold-open-turned 234c/399gl 564kt 2.29ms 67p
+  file 8.24 MB, load [9.8, 8.9, 9.3] s
+== NEW /tmp/r2/old.html
+  Sunday dinner, the mess 18:30              [Mess hall]  portrait 261c/464gl 568kt 3.14ms 67p  portrait-wide 418c/634gl 523kt 2.34ms 67p  landscape 294c/463gl 571kt 2.77ms 67p
+  breakfast rush, the mess 07:10             [Mess hall]  portrait 252c/450gl 414kt 1.35ms 27p  portrait-wide 409c/620gl 439kt 1.68ms 27p  landscape 285c/449gl 417kt 1.78ms 27p
+  Friday dinner, the mess 17:20              [Mess hall] (switched on: SHORT_FRIDAY)  portrait 204c/354gl 439kt 3.24ms 51p  portrait-wide 361c/524gl 440kt 1.91ms 51p  landscape 237c/353gl 442kt 2.08ms 51p  trifold-folded 211c/368gl 440kt 1.7ms 51p  trifold-folded-turned 253c/373gl 473kt 2.52ms 51p  trifold-open 188c/303gl 438kt 2.06ms 51p  trifold-open-turned 177c/289gl 436kt 1.75ms 51p
+  lantern supper, the mess Sat 18:30         [Mess hall] (switched on: EVENTS_ON)  portrait 260c/462gl 547kt 2.63ms 61p  portrait-wide 417c/632gl 453kt 3.65ms 61p  landscape 293c/461gl 550kt 2.27ms 61p  trifold-folded 267c/476gl 547kt 3.09ms 61p  trifold-folded-turned 309c/481gl 580kt 2.66ms 61p  trifold-open 244c/411gl 545kt 3.8ms 61p  trifold-open-turned 233c/397gl 543kt 2.72ms 61p
+  the Line supper, the mess Sun 18:30        [Mess hall] (switched on: EVENTS_ON, EV_LINE_ON)  portrait 261c/464gl 568kt 2.67ms 67p  portrait-wide 418c/634gl 523kt 2.29ms 67p  landscape 294c/463gl 571kt 4.69ms 67p  trifold-folded 268c/478gl 569kt 3.13ms 67p  trifold-folded-turned 310c/483gl 602kt 2.92ms 67p  trifold-open 245c/413gl 567kt 2.72ms 67p  trifold-open-turned 234c/399gl 564kt 2.95ms 67p
+  file 7.95 MB, load [9.2, 8.7, 8.6] s
+PROBLEM Friday dinner, the mess 17:20 portrait: js 1.58 -> 3.24 ms a frame
+PROBLEM lantern supper, the mess Sat 18:30 portrait-wide: js 2.45 -> 3.65 ms a frame
+PROBLEM lantern supper, the mess Sat 18:30 trifold-folded: js 2.08 -> 3.09 ms a frame
+PROBLEM lantern supper, the mess Sat 18:30 trifold-open: js 2.78 -> 3.8 ms a frame
+PROBLEM the Line supper, the mess Sun 18:30 landscape: js 2.47 -> 4.69 ms a frame
+PERF CHECK: 5 problem(s)
