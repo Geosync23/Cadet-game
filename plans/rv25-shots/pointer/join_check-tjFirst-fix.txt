@@ -1,0 +1,73 @@
+55 joinable traditions (plus the beam): running, department-cup, lap-of-the-wren, lantern-walk, sunrise-stretch, cook-along, first-light, garden-hour, pick-your-own, sowing, harvest, tiles-night, tiles-ladder, quiz, jam, book-circle, knit-and-natter, postcard-night, observatory-night, open-lab, works-tea, storm-stories, farewell, cometLounge, cometScope, cometStern, cometCaptain, vesselLights, vesselChain, saturday-run, every-song, night-owls-cocoa, sunday-story, gerald-clinic, garden-picnic, bread-day, big-jigsaw, one-week-aboard, market, reading-corner, tasting-table, scone-morning, five-minute-skills, coffee-trials, jar-day, beginners-guitar, midnight-toast, whodunnit-club, windowsill-herbs, sounds-from-home, row-for-the-board, playlist-duel, rec-lamplight-paddle, rec-ring-the-bell, seed-packet-day
+  running day 1: leader dahl-mira, arrow 'Tap Mira to join Gym club', marker True; tap -> joined True (+12 social), ['gym', '3-gym-9', 'lie:lift']
+  department-cup day 22: leader vance, arrow 'Tap Commander Vance to join the cup', marker True; tap -> joined True (+12 social), ['gym', '3-gym-6', 'lie:bench']
+  lap-of-the-wren day 7: leader tomas, arrow 'Tap Tomas to join the lap', marker True; tap -> joined True (+12 social), walk
+  lantern-walk day 316: leader holt, arrow 'Tap Chief Holt to join the lantern walk', marker True; tap -> joined True (+12 social), walk
+  sunrise-stretch day 1: leader rina, arrow 'Tap Rina to join the stretch', marker True; tap -> joined True (+12 social), ['tj:sunrise-stretch', '3-stretchg-1', 'stretch']
+  cook-along day 6: leader dlamini-lukas, arrow 'Tap Lukas to join the cook-along', marker True; tap -> joined True (+12 social), ['tj:cook-along', '3-cookalong-4', 'cook']
+  first-light day 1: leader raman, arrow 'Tap Dev to join First Light', marker True; tap -> joined True (+12 social), ['tj:first-light', '3-lounge-3', 'sit:cocoa']
+  garden-hour day 6: leader cruz-tove, arrow 'Tap Tove to join garden hour', marker True; tap -> joined True (+12 social), ['ixGarden', '3-tend-15', 'water']
+  pick-your-own day 3: leader alvarez-luca, arrow 'Tap Luca to pick fruit', marker True; tap -> joined True (+12 social), ['ixGarden', '3-tend-14', 'water']
+  sowing day 6: leader cruz-tove, arrow 'Tap Tove to help with the sowing', marker True; tap -> joined True (+12 social), ['ixGarden', '3-tend-4', 'water']
+  harvest day 6: leader cruz-tove, arrow 'Tap Tove to help with the harvest', marker True; tap -> joined True (+12 social), ['ixGarden', '3-tend-15', 'water']
+  tiles-night day 2: leader rina, arrow 'Tap Rina to join Tiles night', marker True; tap -> joined True (+12 social), ['tj:tiles-night', '3-lounge-15', 'sit:play']
+  tiles-ladder day 6: leader farouk-olu, arrow 'Tap Olu to join the Tiles ladder', marker True; tap -> joined True (+12 social), ['tj:tiles-ladder', '3-ladder-2', 'talk']
+  quiz day 4: leader tomas, arrow 'Tap Tomas to join the quiz', marker True; tap -> joined True (+12 social), ['tj:quiz', '3-lounge-25', 'sit:talk']
+  jam day 5: leader larsen-hamid, arrow 'Tap Hamid to join the jam', marker True; tap -> joined True (+12 social), ['tj:jam', '4-song-1', 'play']
+  book-circle day 15: leader oduya, arrow 'Tap Matthias to join the book circle', marker True; tap -> joined True (+12 social), ['tj:book-circle', '4-common-3', 'sit:read']
+  knit-and-natter day 2: leader torres-zeke, arrow 'Tap Zeke to join the circle', marker True; tap -> joined True (+12 social), ['tj:knit-and-natter', '4-common-9', 'sit:read']
+  postcard-night day 11: leader eklund-leila, arrow 'Tap Leila to write a postcard', marker True; tap -> joined True (+12 social), ['tj:postcard-night', '3-bench-12', 'sit:read']
+  observatory-night day 6: leader sato, arrow 'Tap Dr. Sato to join observatory night', marker True; tap -> joined True (+12 social), ['ixStars', '2-armchair-12', 'sit']
+  open-lab day 9: leader sato, arrow 'Tap Dr. Sato to join the open lab', marker True; tap -> joined True (+12 social), ['tj:open-lab', '2-beanbag-2', 'sit:talk']
+  works-tea day 19: leader calder, arrow 'Tap Chief Calder to join Friday tea', marker True; tap -> joined True (+12 social), ['tj:works-tea', '5-bench-you', 'wash']
+  storm-stories day 13: leader oduya, arrow 'Tap Matthias for storm stories by torchlight', marker True; tap -> joined True (+12 social), ['tj:storm-stories', '4-common-3', 'sit:talk']
+  farewell day 19: leader saruth, arrow 'Tap Saruth to see the Veyli off', marker True; tap -> joined True (+12 social), ['tj:farewell', '5-shuttle-bay-crowd-17', 'talk']
+  cometLounge day 22: leader sato, arrow 'Tap Dr. Sato to stand with her at the bow glass', marker True; tap -> joined True (+12 social), ['tj:cometLounge', '3-bow-lounge-line-crowd-1', 'talk']
+  cometScope day 22: leader mori, arrow 'Tap Hana to take a turn at the scope', marker True; tap -> joined True (+12 social), ['ixStars', '2-obsnight-5', 'stand']
+  cometStern day 22: leader tomas, arrow 'Tap Tomas to take a blanket', marker True; tap -> joined True (+12 social), ['tj:cometStern', '4-common-8', 'sit:talk']
+  cometCaptain day 22: leader marrow, arrow 'Tap Captain Marrow to take a cup of tea', marker True; tap -> joined True (+12 social), ['tj:cometCaptain', '1-observation-crowd-9', 'cocoa']
+  vesselLights day 29: leader saruth, arrow 'Tap Saruth to stand at the glass with Saruth', marker True; tap -> joined True (+12 social), ['tj:vesselLights', '3-bow-lounge-line-crowd-2', 'talk']
+  vesselChain day 28: leader torres-zeke, arrow 'Tap Zeke to take a gap in the chain', marker True; tap -> joined True (+12 social), ['tj:vesselChain', '5-vchain-18', 'stand']
+  saturday-run day 6: leader nandakumar, arrow 'Tap Dr. Nandakumar to join the run', marker True; tap -> joined True (+12 social), walk
+  every-song day 69: leader torres-zeke, arrow 'Tap Zeke to join Every song', marker True; tap -> joined True (+12 social), ['tj:every-song', None, 'talk']
+  night-owls-cocoa day 27: leader mensah, arrow 'Tap Kofi for a late cocoa', marker True; tap -> joined True (+12 social), ['tj:night-owls-cocoa', '3-lounge-5', 'sit:cocoa']
+  sunday-story day 28: leader holt, arrow 'Tap Chief Holt to listen', marker True; tap -> joined True (+12 social), ['tj:sunday-story', '4-common-3', 'sit:read']
+  gerald-clinic day 14: leader cruz-tove, arrow 'Tap Tove to join the Gerald clinic', marker True; tap -> joined True (+12 social), ['tj:gerald-clinic', '3-tend-12', 'water']
+  garden-picnic day 20: leader cruz-tove, arrow 'Tap Tove to join the picnic', marker True; tap -> joined True (+12 social), ['tj:garden-picnic', '3-stretchg-8', 'talk']
+  bread-day day 7: leader brennan, arrow 'Tap Chef Brennan to knead a loaf', marker True; tap -> joined True (+12 social), ['tj:bread-day', '3-cookalong-4', 'cook']
+  big-jigsaw day 21: leader raman, arrow 'Tap Dev to join the jigsaw', marker True; tap -> joined True (+12 social), ['tj:big-jigsaw', '1-conf-8', 'sit:read']
+  one-week-aboard day 7: leader torres-zeke, arrow 'Tap Zeke to sit down for tea', marker True; tap -> joined True (+12 social), ['tj:one-week-aboard', '3-lounge-16', 'sit:drink']
+  market day 7: leader ishikawa-orla, arrow 'Tap Orla to join the swap meet', marker True; tap -> joined True (+12 social), ['tj:market', '3-swap-stall-2', 'talk']
+  reading-corner day 7: leader walsh-esme, arrow 'Tap Esme to join the reading corner', marker True; tap -> joined True (+12 social), ['tj:reading-corner', '3-lounge-25', 'sit:read']
+  tasting-table day 3: leader brennan, arrow 'Tap Chef Brennan to taste with them', marker True; tap -> joined True (+12 social), ['tj:tasting-table', None, 'drink']
+  scone-morning day 70: leader halloran-emeka, arrow 'Tap Emeka to have a scone', marker True; tap -> joined True (+12 social), ['tj:scone-morning', None, 'drink']
+  five-minute-skills day 8: leader nakamura-bilal, arrow 'Tap Bilal to learn it with them', marker True; tap -> joined True (+12 social), ['tj:five-minute-skills', '3-lounge-5', 'sit:fold']
+  coffee-trials day 27: leader volkov-maeve, arrow 'Tap Maeve to taste the coffees', marker True; tap -> joined True (+12 social), ['tj:coffee-trials', '3-lounge-6', 'sit:drink']
+  jar-day day 20: leader varga-tariq, arrow 'Tap Tariq to fill a jar', marker True; tap -> joined True (+12 social), ['tj:jar-day', '3-cookalong-4', 'cook']
+  beginners-guitar day 23: leader larsen-hamid, arrow 'Tap Hamid to play a chord with them', marker True; tap -> joined True (+12 social), ['tj:beginners-guitar', '4-song-1', 'play']
+  midnight-toast day 26: leader garcia-greta, arrow 'Tap Greta to have some toast', marker True; tap -> joined True (+12 social), ['tj:midnight-toast', '3-mess-1', 'sit:drink']
+  whodunnit-club day 38: leader achterberg-lars, arrow 'Tap Lars to guess whodunnit', marker True; tap -> joined True (+12 social), ['tj:whodunnit-club', '3-lounge-4', 'sit:read']
+  windowsill-herbs day 36: leader janssen-hugo, arrow 'Tap Hugo to compare the herbs', marker True; tap -> joined True (+12 social), ['tj:windowsill-herbs', '3-tend-2', 'water']
+  sounds-from-home day 46: leader vasquez-uma, arrow 'Tap Uma to listen with them', marker True; tap -> joined True (+12 social), ['tj:sounds-from-home', '4-song-1', 'talk']
+  row-for-the-board day 51: leader lindqvist-isak, arrow 'Tap Isak to row for the board', marker True; tap -> joined True (+12 social), ['tj:row-for-the-board', None, 'talk']
+  playlist-duel day 57: leader oneill-imani, arrow 'Tap Imani to judge the duel', marker True; tap -> joined True (+12 social), ['tj:playlist-duel', '4-song-1', 'talk']
+  rec-lamplight-paddle day 69: leader silva-bea, arrow 'Tap Bea to paddle with them', marker True; tap -> joined True (+12 social), ['recKayak', None, None]
+  rec-ring-the-bell day 77: leader chen-carmen, arrow 'Tap Carmen to climb for the bell', marker True; tap -> joined True (+12 social), ['recWait', None, 'stand']
+  seed-packet-day day 27: leader hart-ravi, arrow 'Tap Ravi to fill a seed packet', marker True; tap -> joined True (+12 social), ['tj:seed-packet-day', '3-tend-15', 'fold']
+Birthday (turn up): {'d': 4, 'joined': True, 'tj': False}
+Lap of the Wren on days [7, 15, 21, 28] weekdays [6] moved by an event [7, 15]
+The lap: {'lead': 'tomas', 'ok': True, 'n': 16, 'max': 11, 'on': False, 'toast': 'One lap of the Wren. Lovely walk.', 't': '21:07'}
+Dropping out of the lap: {'was': True, 'now': False}
+Name on the beam: {'early': {'goal': None, 'ready': False, 'tap': True, 'tr': 0, 'toast': 'The Works crew are gathering at the beam. Your turn comes in a moment.'}, 'opened': '17:19', 'said': ['Right. This is the beam. Every name on it has worked this bay.', 'First day in Works, your first name goes up there. Every one of us did it.', "See the Chief's? Tiny letters, dead straight. Mine's the one that's far too big.", 'Go on, then. Your turn. Right on the end, next to the rest of us.'], 'goal': 'Tap the beam to paint your name', 'tell': True, 'joined0': 0, 'tr0': 0, 'tap': True, 'tr': ['nameYours'], 'joined': ['name-on-the-beam@1'], 'free': 7, 'goalAfter': None}
+A late arrival at 17:32: {'at': '17:34', 'ready': True, 'inTime': True, 'said': 1, 'tap': True, 'tr': ['nameYours']}
+Your name on the beam: {'east': True, 'top': True, 'gap': 0.164, 'arrow': 0.431}
+New Works hands on the beam: {'names': ['Basil@22', 'Rafe@78', 'Priya@162'], 'on': [22, 78, 162], 'depts': ['works', 'works', 'works']}
+Sunday table's long tables: {'before': False, 'on': True, 'end': True, 'after': False, 'slept': False, 'deck': False}
+nameNew traces after a reload at day 100: ['Basil@22', 'Rafe@78']
+The Tiles ladder at 15:02 : {'t': '15:02', 'seated': [['rina', '3-tiles-1', 'sit:play'], ['ferreira', '3-tiles-2', 'sit:play']], 'ring': [['farouk-olu', '3-ladder-3', 44]], 'lounge': [], 'boards': False}
+            at 15:15 : {'t': '15:15', 'seated': [['ferreira', '3-tiles-2', 'sit:play'], ['farouk-olu', '3-tiles-1', 'sit:play']], 'ring': [['rina', '3-ladder-6', 44], ['raman', '3-ladder-9', 0], ['ibarra-rafael', '3-ladder-4', 44], ['shah-dara', '3-ladder-1', 44]], 'lounge': [], 'boards': False}
+A tap on the ladder: {'ok': True, 'id': 'tiles.ladder', 'choices': ['Play the next game', 'Watch'], 'joined': True}
+Playing the next game: {'t': '15:24', 'act': 'tiles', 'place': '3-tiles-2', 'opp': 'farouk-olu', 'across': 'farouk-olu'}
+After your game: 15:26 [['rina', '3-tiles-2', 'sit:play'], ['farouk-olu', '3-tiles-1', 'sit:play']]
+An appointment (the big scope, booked): {'id': 1, 'day': 4, 'from': 1140} {'ok': True, 'lead': 'sato', 'open': True, 'done': True, 'joined': True}
+JOIN CHECK OK

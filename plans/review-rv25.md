@@ -87,3 +87,7 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
   controller_check's globals (ST, log, D...), else "game failed to start".
 - 15:1x lead 44: 0.96.0 round on (BM20 + 4 runners); I'm idle until called. Memory ~29%.
 - 16:2x EV1 6522974 (mech_check MRUN: SHIP.stores.lamp = 3; the visit's Day 16 lamp job empties the shelf): PASS on a code read, no browser during the round (to EV1, lead 44, BM20). Idle again.
+- 16:4x round finding (lead 44): join_check farewell "don't name the same person" on 65229747. Cause: marker '★ ' + tjFirst
+  = shortName('Envoy Saruth') = 'Envoy', the tip banked "Tap Saruth". Game gap (also the vessel lights' "Tap Envoy to stand
+  at the glass with Saruth" since 0.94.0). Fix proposed: tjFirst gives the second word of a two-word Envoy/Speaker name.
+  Scratch copy: JOIN CHECK OK (pointer/join_check-tjFirst-fix.txt). Sent to lead 44, EV1, BM20; EV1 to commit after puzzle.
