@@ -85,3 +85,4 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
   pad A on crew:saruth joins tj:farewell. tradJoinable: only 'farewell' has a TRAD_JOIN key among the visit's moments.
 - Gotchas: controller_check's QUIET hides #devHu (pass quiet= without it to see heads-ups); my probe names must not shadow
   controller_check's globals (ST, log, D...), else "game failed to start".
+- 15:1x lead 44: 0.96.0 round on (BM20 + 4 runners); I'm idle until called. Memory ~29%.
