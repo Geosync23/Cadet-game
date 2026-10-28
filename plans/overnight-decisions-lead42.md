@@ -28,3 +28,4 @@ Recommended shape (lead 42's call; change if the audit says otherwise):
 | 11 | On-screen keyboard for memos / Dev search (audit Q4) | No, leave as is. | About 4 hours; the user's earlier answer was about the name only. |
 | 12 | Save file Download/Load from a pad (audit Q5) | Needs a test on the user's real controller before the switch-on goes live; wave C adds a one-line hint meanwhile. | Can't be tested headless; ask the user in the morning. |
 | 13 | Wave C timing | After SD2's sound page is done (cap of 5). Merge order A, B, C. | Cap; C touches the sound section SD2 knows best. |
+| 14 | Where should the Saves app land with a controller? (RV24 found it lands on Slot 2's New game) | On the slot you're playing (its Play/Continue, or the first safe choice); never another slot's New game. PA1, in wave A. | A first A press must never start a new game by accident. |
