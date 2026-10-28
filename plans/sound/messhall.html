@@ -116,31 +116,43 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid var(--lamp); o
 .humrow .chip.small { min-height: 32px; padding: 5px 10px; font-size: 12.5px; }
 #count { font-family: var(--mono); font-size: 11px; color: var(--live); margin-left: auto; }
 @media (prefers-reduced-motion: reduce) { .play { transition: none; } }
+.steps { display: flex; flex-wrap: wrap; gap: 6px; }
+.chosen { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--hull); background: var(--live); border-radius: 999px; padding: 1px 7px; vertical-align: 2px; }
+.v-row { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: start; }
+.v-row > div { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.play.on { background: var(--live); color: var(--hull); border-color: var(--live); }
 </style>
 
 <div class="wrap">
   <header>
-    <div class="eyebrow">CSV Wren · the mess hall · for choosing</div>
+    <div class="eyebrow">CSV Wren · the mess hall · version 2</div>
     <h1>Wren Sounds: Mess hall</h1>
-    <p class="lede">Four ways a busy mess hall could sound, each in a quiet hour and at the rush. On 25 October the pick was "no crowd chatter", so A, C and D bring voices back only as a soft wordless murmur (never words you could follow), and B keeps to no voices at all. Everything is made live, like the other Wren pages.</p>
-    <div class="summary"><b>My recommendation</b><ul><li><b>C, Fills and thins</b>: the room sounds as busy as it looks, and quiet hours stay calm. D is the cosiest if you'd like to hear the galley too.</li></ul></div>
-    <p class="hint">Turn on the Commons hum in the bottom bar to hear it as in the game (the mess hall is on Deck 3). Each sound loops until you press Stop. <span id="store">Checking where answers save...</span></p>
+    <div class="v2"><b>Your pick (2026-10-28)</b><ul><li>D without voices: the galley behind the counter and the clatter. Now it follows how busy the room is, and an empty mess is silent.</li><li>Below: six voice options to try on top of it.</li></ul></div>
+    <p class="hint">Choose how busy the mess is, then play the background alone or with a voice option. You can change how busy it is while it plays. Turn on the Commons hum in the bottom bar to hear it as in the game. <span id="store">Checking where answers save...</span></p>
   </header>
-  <section class="card" aria-labelledby="h-mess">
-    <div class="card-head"><span class="tag">Four options</span><h2 id="h-mess">The mess hall</h2></div>
-    <div id="mess"></div>
+  <section class="card" aria-labelledby="h-busy">
+    <div class="card-head"><span class="tag">How busy</span><h2 id="h-busy">People in the mess hall</h2><p class="note">The mess seats about 60. Every layer follows this: how often things clatter, how loud the galley is, and how many voices you hear.</p></div>
+    <div class="steps" role="radiogroup" aria-label="How busy" id="steps"></div>
+  </section>
+  <section class="card" aria-labelledby="h-bg">
+    <div class="card-head"><span class="tag">Background</span><h2 id="h-bg">D without voices <span class="chosen">Chosen</span></h2>
+      <p class="note">The galley behind the counter (the extractor, a pan sizzling, a pan set down, the hatch, the "order up" bell) and the room's clatter (trays, cups, plates, cutlery, chairs). Empty: nothing at all. One or two people: a tray now and then, the galley very low. Full: steady clatter and the galley working hard.</p></div>
+    <div class="v-row"><button class="play" type="button" data-voice="none" data-label="Play the background" aria-label="Play the background"></button><div><h4>Background only</h4><p class="note">As you picked it, at the busy level above.</p></div></div>
+  </section>
+  <section class="card" aria-labelledby="h-voices">
+    <div class="card-head"><span class="tag">Voices on top</span><h2 id="h-voices">Six ways to hear the people</h2><p class="note">Each plays over the background, at the busy level above, and is silent when the mess is empty. None of them ever makes real words, and all sit well under the hum, so the speech bubbles stay the voices you read.</p></div>
+    <div id="voices"></div>
   </section>
   <section class="card" aria-labelledby="h-scale">
     <div class="card-head"><span class="tag">In the game</span><h2 id="h-scale">How it would follow the real crowd</h2></div>
     <ul class="plain">
-      <li><b>By who's there:</b> the game knows how many people are sitting in the mess. The murmur and the clatter follow that: with a handful at a quiet hour you'd hear two or three voices, and with the room full at 18:30 all twelve, with clatter about four times as often. An empty mess makes no crowd sound at all.</li>
-      <li><b>Only in the room:</b> like the galley and laundry sounds, it plays only while you're in the mess hall, and fades as you leave.</li>
-      <li><b>Under the hum, and never words:</b> the voices are shaped sounds, not speech, so nothing competes with the speech bubbles. The levels here are set against the Commons hum.</li>
+      <li><b>By who's there:</b> the game counts the people in the mess hall, and every layer follows that count, as the steps above do. An empty mess makes no sound of its own.</li>
+      <li><b>Only in the room:</b> it plays while you're in the mess hall and fades as you leave, like the galley and laundry sounds now.</li>
       <li><b>Your tray and seat</b> keep their own sounds on top, as now.</li>
     </ul>
   </section>
   <section class="card" aria-labelledby="h-pick">
-    <div class="card-head"><span class="tag">Your pick</span><h2 id="h-pick">Which one?</h2><p class="note">Or "None" to keep the mess as it is now (the hum and your own sounds only).</p></div>
+    <div class="card-head"><span class="tag">Your pick</span><h2 id="h-pick">Which voices?</h2><p class="note">The background stays as you chose it. Pick a voice option, or "No voices".</p></div>
     <div id="pick"></div>
   </section>
 </div>
@@ -570,49 +582,115 @@ const CLINK = {
   pan: (t, w) => ring(t, [rand(500, 640), rand(1500, 1800)], 1.2 * w, { d: 0.3, q: 20, pan: 0.6, wet: 0.35 }),
   ding: (t, w) => bell(t, 1567.98, 0.8, 0.02 * w, { wet: 0.3, pan: 0.55 }),
 };
-const MESS = {
-  A: { name: 'Murmur and cutlery', note: 'A soft wordless murmur from the tables (never words you could follow), with cutlery, cups and trays now and then.',
-    talk: 1, clatter: { cutlery: 4, fork: 3, cup: 3, tray: 2, plate: 2, chair: 1 }, rate: [0.5, 2.2] },
-  B: { name: 'Clatter only', note: 'No voices at all: trays, cups, plates, cutlery, chairs and the serving hatch. The closest to the old "no chatter" rule.',
-    talk: 0, clatter: { cutlery: 4, fork: 3, cup: 3, tray: 3, plate: 3, chair: 2, stack: 1, hatch: 1 }, rate: [0.7, 3.4] },
-  C: { name: 'Fills and thins', note: 'Like A, but it follows the meal: thin when the room is quiet, a fuller murmur and more clatter at the breakfast and dinner rush. Try "Dinner rush" to hear it fill and empty.',
-    talk: 1, clatter: { cutlery: 4, fork: 3, cup: 3, tray: 3, plate: 2, chair: 2, stack: 1 }, rate: [0.35, 2.8], fill: true },
-  D: { name: 'Busy but cosy', note: 'A softer, warmer murmur with the galley behind the counter: a pan sizzling, the extractor, a pan set down, the hatch and a little "order up" bell.',
-    talk: 0.75, warm: true, galley: true, clatter: { cutlery: 3, fork: 2, cup: 3, tray: 2, plate: 2, chair: 1, hatch: 1, pan: 1, ding: 0.5 }, rate: [0.45, 2] },
+
+/* ---------- version 2 (the user, 2026-10-28: "D but no voices", more voice options, all tied to how busy it is, nothing if empty) ---------- */
+// how busy: people in the mess hall (it seats about 60); 0 is total silence
+const BUSY = [{ k: 'empty', n: 0, name: 'Empty' }, { k: 'two', n: 2, name: '1 or 2 people' }, { k: 'few', n: 8, name: 'A few' }, { k: 'half', n: 30, name: 'Half full' }, { k: 'full', n: 60, name: 'Full, the 18:30 rush' }];
+const MESS_STATE = { n: 30 };
+const busyN = () => MESS_STATE.n, busyD = () => Math.min(1, MESS_STATE.n / 60);
+// a voice, more general than v1's talker: o = { f0, pan, g, gap: [min, max] s between phrases, syl: [min, max] syllables,
+// len: syllable length scale, click: a soft consonant tick at some syllables, live(t): whether this voice is there now }
+function voice2(out, o) {
+  const osc = ctx.createOscillator(), f1 = ctx.createBiquadFilter(), f2 = ctx.createBiquadFilter(), g = ctx.createGain(), g2 = ctx.createGain(), p = ctx.createStereoPanner();
+  osc.type = 'sawtooth'; osc.frequency.value = o.f0; f1.type = f2.type = 'bandpass'; f1.Q.value = 5; f2.Q.value = 7; g.gain.value = 0; g2.gain.value = 0.45; p.pan.value = o.pan;
+  osc.connect(f1); osc.connect(f2); f1.connect(g); f2.connect(g2); g2.connect(g); g.connect(p); p.connect(out);
+  const t0 = ctx.currentTime; osc.start(t0); let next = t0 + Math.random() * (o.gap[1] * 0.6 + 0.3);
+  const gap = o.gap, syl = o.syl || [3, 12], len = o.len || 1;
+  return { nodes: [osc], tick(u) {
+    while (next < u) {
+      if (!o.live(next)) { next += 0.8 + Math.random() * 1.5; continue; }
+      const n = syl[0] + ((Math.random() * (syl[1] - syl[0] + 1)) | 0), lift = Math.random() < 0.12 ? 1.25 : 1; let t = next;
+      for (let i = 0; i < n; i++) {
+        const d = (0.11 + Math.random() * 0.15) * len, V = VOWELS[(Math.random() * VOWELS.length) | 0];
+        f1.frequency.setTargetAtTime(V[0], t, 0.025); f2.frequency.setTargetAtTime(V[1], t, 0.025);
+        osc.frequency.setTargetAtTime(o.f0 * lift * (1 + (Math.random() - 0.45) * 0.22 - (i / n) * 0.12), t, 0.04);
+        g.gain.setTargetAtTime(o.g * (0.55 + Math.random() * 0.45), t, 0.018); g.gain.setTargetAtTime(0, t + d * 0.75, 0.03);
+        if (o.click && Math.random() < 0.45) noise(t, 0.018, { f: rand(2800, 5200), q: 2, gain: o.g * o.click, pan: o.pan, bus: out });
+        t += d + Math.random() * 0.05;
+      }
+      next = t + gap[0] + Math.random() * (gap[1] - gap[0]);
+    }
+  } };
+}
+// a laugh: four to six falling "ha"s with a breath; w: how loud
+function laugh(t, out, f0, pan, w) {
+  const n = 4 + ((Math.random() * 3) | 0);
+  for (let i = 0; i < n; i++) {
+    const s = t + i * rand(0.15, 0.2), o = ctx.createOscillator(), b1 = ctx.createBiquadFilter(), b2 = ctx.createBiquadFilter(), g = ctx.createGain(), p = ctx.createStereoPanner();
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(f0 * (1.15 - i * 0.05), s); o.frequency.exponentialRampToValueAtTime(f0 * (1.05 - i * 0.05), s + 0.12);
+    b1.type = b2.type = 'bandpass'; b1.frequency.value = 760; b1.Q.value = 5; b2.frequency.value = 1150; b2.Q.value = 6; p.pan.value = pan;
+    const k = w * (1 - i / (n + 1)); g.gain.setValueAtTime(0.0001, s); g.gain.exponentialRampToValueAtTime(k, s + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, s + 0.13);
+    o.connect(b1); o.connect(b2); b1.connect(g); b2.connect(g); g.connect(p); p.connect(out); o.start(s); o.stop(s + 0.16);
+    noise(s, 0.06, { f: 1600, q: 0.8, gain: k * 0.35, pan, bus: out });   // the breath in each
+  }
+}
+// the voices to try over the chosen background. Each: how many voices are there at this many people, and how they sound
+const VOICE_OPTS = {
+  none: { name: 'No voices', note: 'The background on its own, as you picked it.' },
+  murmur: { name: 'Soft murmur', note: 'The first page\'s murmur: up to twelve soft voices round the room, blurred so no word ever comes through.',
+    make: (bus, live) => VOICES.map(([f, p], i) => voice2(bus, { f0: f, pan: p, g: 0.03, gap: [0.3, 2.5], live: t => live(t, i, 12) })), lp: 1500, verb: 0.55 },
+  warm: { name: 'Warm low hum of talk', note: 'Lower and rounder, the talk melted into one warm hum, like hearing the room through a wall. Calm even when full.',
+    make: (bus, live) => VOICES.map(([f, p], i) => voice2(bus, { f0: f * 0.8, pan: p * 0.6, g: 0.035, gap: [0.1, 0.9], len: 1.3, live: t => live(t, i, 12) })), lp: 650, verb: 0.7 },
+  laughs: { name: 'Laughs only', note: 'No talk, just a laugh from a table now and then: rare in a quiet hour, more often at the rush.',
+    laughs: [0.02, 0.22] },
+  near: { name: 'Ship talk close by', note: 'Up to three clearer voices near you in a made-up ship babble (soft consonants, never real words), over a thin murmur further off. The liveliest.',
+    make: (bus, live, near) => [...VOICES.slice(0, 8).map(([f, p], i) => voice2(bus, { f0: f, pan: p, g: 0.016, gap: [0.4, 2.5], live: t => live(t, i, 8) })),
+      ...[[150, -0.35], [205, 0.4], [118, 0.1]].map(([f, p], i) => voice2(near, { f0: f, pan: p, g: 0.03, gap: [0.6, 3], click: 0.6, live: t => i < Math.min(3, busyN()) }))], lp: 1400, verb: 0.55, nearLp: 2600 },
+  tables: { name: 'Table by table', note: 'Talk comes in pockets from the tables where people sit, left and right: one table chats, then another answers. More tables join as the room fills.',
+    make: (bus, live) => { const out = []; const T = [-0.85, -0.5, -0.15, 0.2, 0.55, 0.9]; T.forEach((pan, ti) => [[115, 0], [165, 1], [210, 2]].forEach(([f, j]) => out.push(voice2(bus, { f0: f * (1 + ti * 0.03), pan: pan + (j - 1) * 0.06, g: 0.026, gap: [0.2, 1.4], syl: [4, 10],
+      live: t => { const tables = Math.ceil(T.length * busyD()), on = ti < tables && j < (busyN() <= 2 ? 1 : 3); if (!on) return false; const ph = (t / 7 + ti * 0.37) % 1; return ph < 0.55; } })))); return out; }, lp: 1500, verb: 0.5 },
+  sparse: { name: 'The odd word-shape and a laugh', note: 'Very sparse: a short phrase from somewhere every few seconds, and a laugh once in a while. Mostly the background.',
+    make: (bus, live) => VOICES.slice(0, 6).map(([f, p], i) => voice2(bus, { f0: f, pan: p, g: 0.03, gap: [4, 12 - 6 * busyD()], syl: [2, 6], live: t => live(t, i, 6) })), lp: 1600, verb: 0.55, laughs: [0.01, 0.06] },
 };
-const MESS_LV = { A: 1.7, B: 2.0, C: 2.2, D: 1.5 };   // trims set by measuring against the Commons hum
-function messScene(k, how) {
+const VOICE_LV = { murmur: 1.6, warm: 1.6, laughs: 1.3, near: 1.6, tables: 1.6, sparse: 1.6 };   // trims set by measuring against the Commons hum
+const BG_LV = 1.5;
+const BG_CLATTER = { cutlery: 3, fork: 2, cup: 3, tray: 2, plate: 2, chair: 1, hatch: 1, pan: 1, ding: 0.5 };
+// the scene: the chosen background (D without its murmur), and one voice option on top, both following MESS_STATE.n live
+function messScene2(vk) {
   ensure();
-  const M = MESS[k], t0 = ctx.currentTime, LEN = 60;
-  // how full the room is, 0..1: quiet hour 0.3, rush 1, or the dinner rush (fills over 20 s, holds, thins)
-  const dens = how === 'quiet' ? () => 0.3 : how === 'rush' ? () => 1 : t => { const e = (t - t0) % LEN; return e < 20 ? 0.25 + 0.75 * e / 20 : e < 38 ? 1 : Math.max(0.25, 1 - 0.75 * (e - 38) / 18); };
-  const out = ctx.createGain(); out.gain.setValueAtTime(0, t0); out.gain.linearRampToValueAtTime(MESS_LV[k], t0 + 1.5); out.connect(B.ui);
-  const prevR = R; const room = Object.assign({}, B, { ui: out }); R = room;
+  const t0 = ctx.currentTime, V = VOICE_OPTS[vk] || VOICE_OPTS.none;
+  const out = ctx.createGain(); out.gain.setValueAtTime(0, t0); out.gain.linearRampToValueAtTime(1, t0 + 1.2); out.connect(B.ui);
+  const bg = ctx.createGain(); bg.gain.value = BG_LV; bg.connect(out);
+  const prevR = R, room = Object.assign({}, B, { ui: bg }); R = room;
   const loops = [], nodes = [];
-  if (M.talk) {
-    const mb = ctx.createGain(), lp = ctx.createBiquadFilter(), sv = ctx.createGain(); lp.type = 'lowpass'; lp.frequency.value = M.warm ? 1100 : 1500; mb.gain.value = 0.9 * M.talk;
-    mb.connect(lp); lp.connect(out); sv.gain.value = 0.55; lp.connect(sv); sv.connect(B.verb);
-    VOICES.forEach(([f, p], i) => loops.push(talker(mb, f, p, 0.03, t => i < Math.round(VOICES.length * dens(t)))));
-  }
-  if (M.galley) {   // behind the counter, on the right: the extractor and a pan sizzling
-    const ex = ctx.createBufferSource(); ex.buffer = BROWN; ex.loop = true; const exf = ctx.createBiquadFilter(); exf.type = 'lowpass'; exf.frequency.value = 240; const exg = ctx.createGain(); exg.gain.value = 0.06;
-    const sz = ctx.createBufferSource(); sz.buffer = WHITE; sz.loop = true; const szf = ctx.createBiquadFilter(); szf.type = 'bandpass'; szf.frequency.value = 5200; szf.Q.value = 0.7; const szg = ctx.createGain(); szg.gain.value = 0.012;
-    const gp = ctx.createStereoPanner(); gp.pan.value = 0.55; ex.connect(exf); exf.connect(exg); exg.connect(gp); sz.connect(szf); szf.connect(szg); szg.connect(gp); gp.connect(out);
-    ex.start(t0); sz.start(t0); nodes.push(ex, sz);
-  }
-  const bag = Object.entries(M.clatter).flatMap(([n, w]) => Array(Math.max(1, Math.round(w * 2))).fill(n));
+  // the galley behind the counter: the extractor and a pan, louder as more people are being fed; nothing when empty
+  const ex = ctx.createBufferSource(); ex.buffer = BROWN; ex.loop = true; const exf = ctx.createBiquadFilter(); exf.type = 'lowpass'; exf.frequency.value = 240; const exg = ctx.createGain(); exg.gain.value = 0;
+  const sz = ctx.createBufferSource(); sz.buffer = WHITE; sz.loop = true; const szf = ctx.createBiquadFilter(); szf.type = 'bandpass'; szf.frequency.value = 5200; szf.Q.value = 0.7; const szg = ctx.createGain(); szg.gain.value = 0;
+  const gp = ctx.createStereoPanner(); gp.pan.value = 0.55; ex.connect(exf); exf.connect(exg); exg.connect(gp); sz.connect(szf); szf.connect(szg); szg.connect(gp); gp.connect(bg);
+  ex.start(t0); sz.start(t0); nodes.push(ex, sz);
+  let lastN = -1;
+  const galley = () => { const n = busyN(); if (n === lastN) return; lastN = n; const d = busyD(), t = ctx.currentTime;
+    exg.gain.setTargetAtTime(n ? 0.02 + 0.05 * d : 0, t, 0.6); szg.gain.setTargetAtTime(n ? 0.003 + 0.011 * d : 0, t, 0.6); };
+  galley();
+  const bag = Object.entries(BG_CLATTER).flatMap(([n, w]) => Array(Math.max(1, Math.round(w * 2))).fill(n));
   let nextC = t0 + 0.4;
-  loops.push({ tick(u) {
+  loops.push({ tick(u) { galley();
     while (nextC < u) {
-      const d = dens(nextC), rate = M.rate[0] + (M.rate[1] - M.rate[0]) * (d - 0.3) / 0.7;
-      const n = pick(bag); try { CLINK[n](nextC, rand(0.5, 1), rand(-0.8, 0.8)); } catch (e) {}
-      if (M.galley && Math.random() < 0.05) noise(nextC, 0.03, { f: rand(3000, 6000), q: 3, gain: 0.02, pan: 0.55 });   // a spit from the pan
-      nextC += (-Math.log(1 - Math.random())) / Math.max(0.2, rate);
+      const n = busyN(); if (!n) { nextC += 0.5; continue; }
+      const rate = 0.12 + 2.1 * busyD() + (n <= 2 ? 0 : 0.1);
+      const k = pick(bag); try { CLINK[k](nextC, rand(0.5, 1) * (0.7 + 0.3 * busyD()), rand(-0.8, 0.8)); } catch (e) {}
+      if (Math.random() < 0.05) noise(nextC, 0.03, { f: rand(3000, 6000), q: 3, gain: 0.02, pan: 0.55 });
+      nextC += (-Math.log(1 - Math.random())) / rate;
     }
   } });
+  // the voices on top
+  if (V.make || V.laughs) {
+    const vb = ctx.createGain(); vb.gain.value = VOICE_LV[vk] ?? 1; vb.connect(out);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = V.lp || 1500; lp.connect(vb);
+    const sv = ctx.createGain(); sv.gain.value = V.verb ?? 0.55; lp.connect(sv); sv.connect(B.verb);
+    let near = lp;
+    if (V.nearLp) { const nl = ctx.createBiquadFilter(); nl.type = 'lowpass'; nl.frequency.value = V.nearLp; nl.connect(vb); const ns = ctx.createGain(); ns.gain.value = 0.25; nl.connect(ns); ns.connect(B.verb); near = nl; }
+    // voices there: about one talking for every two or three people, at least one with anyone there, none when empty
+    const live = (t, i, of) => { const n = busyN(); return n > 0 && i < Math.min(of, Math.max(1, Math.round(of * Math.min(1, n / 30)))); };
+    if (V.make) V.make(lp, live, near).forEach(l => loops.push(l));
+    if (V.laughs) { let nextL = t0 + 1 + Math.random() * 3; const LF = [[280, -0.6], [340, 0.4], [230, 0.1], [390, -0.2], [260, 0.75]];
+      loops.push({ tick(u) { while (nextL < u) { const n = busyN(); if (!n) { nextL += 1; continue; }
+        const [f, p] = pick(LF); laugh(nextL, lp, f * rand(0.92, 1.08), p, 0.05);
+        const rate = V.laughs[0] + (V.laughs[1] - V.laughs[0]) * busyD(); nextL += (-Math.log(1 - Math.random())) / Math.max(0.005, rate); } } }); }
+  }
   R = prevR;
   const S = {
-    label: M.name, t0, dens,
+    label: vk, t0,
     tick(u) { const p = R; R = room; try { loops.forEach(l => l.tick(u)); } finally { R = p; } },
     stop(f = 1.2) { LOOPS.delete(S); const t = ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + f);
       loops.forEach(l => (l.nodes || []).forEach(n => { try { n.stop(t + f + 0.1); } catch (e) {} })); nodes.forEach(n => { try { n.stop(t + f + 0.1); } catch (e) {} });
@@ -624,43 +702,47 @@ function messScene(k, how) {
 /* ---------- page ---------- */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+const PLAY_SVG = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>', STOP_SVG = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="3.5" width="9" height="9" rx="1"/></svg>';
+const REC = 'tables';
 let NOW = null, NOW_BTN = null, HUM = null;
-function stopScene() { if (NOW) { NOW.stop(1); NOW = null; } if (NOW_BTN) { NOW_BTN.setAttribute('aria-pressed', 'false'); NOW_BTN = null; } }
-$('#mess').innerHTML = Object.entries(MESS).map(([k, m]) => `<article class="item${k === 'C' ? ' is-rec' : ''}"><h4>${k} · ${esc(m.name)}${k === 'C' ? ' <span class="pick">Recommended</span>' : ''}</h4>
-  <p class="note">${esc(m.note)}</p><div class="chips">
-  <button class="chip" type="button" data-scene="${k}" data-how="quiet" aria-pressed="false"><span class="dot"></span>Quiet hour</button>
-  <button class="chip" type="button" data-scene="${k}" data-how="rush" aria-pressed="false"><span class="dot"></span>Rush</button>
-  ${m.fill ? `<button class="chip" type="button" data-scene="${k}" data-how="fill" aria-pressed="false"><span class="dot"></span>Dinner rush (fills and empties, 60 s)</button>` : ''}</div></article>`).join('');
-$$('[data-scene]').forEach(b => b.addEventListener('click', () => {
-  const same = NOW_BTN === b; stopScene(); if (same) { $('#status').textContent = 'Stopped'; return; }
-  NOW = messScene(b.dataset.scene, b.dataset.how); NOW_BTN = b; b.setAttribute('aria-pressed', 'true');
-  $('#status').textContent = `Playing: ${b.dataset.scene}, ${MESS[b.dataset.scene].name}, ${b.textContent.trim().toLowerCase()}`;
-}));
-setInterval(() => { if (NOW && ctx) { const d = NOW.dens(ctx.currentTime); $('#prog').style.width = Math.round(d * 100) + '%'; } else $('#prog').style.width = '0'; }, 250);
+function stopScene() { if (NOW) { NOW.stop(1); NOW = null; } if (NOW_BTN) { NOW_BTN.innerHTML = PLAY_SVG; NOW_BTN.classList.remove('on'); NOW_BTN.setAttribute('aria-label', NOW_BTN.dataset.label); NOW_BTN = null; } }
+const busyName = () => (BUSY.find(b => b.n === MESS_STATE.n) || {}).name || '';
+function status() { $('#status').textContent = NOW ? `${NOW_BTN.dataset.label.replace(/^Play /, '')}, ${busyName().toLowerCase()}${MESS_STATE.n ? '' : ': silent'}` : 'Tap any play button'; $('#prog').style.width = Math.round(busyD() * 100) + '%'; }
+$('#steps').innerHTML = BUSY.map(b => `<button class="chip" type="button" role="radio" data-n="${b.n}" aria-checked="${b.n === MESS_STATE.n}" aria-pressed="${b.n === MESS_STATE.n}"><span class="dot"></span>${esc(b.name)}</button>`).join('');
+$$('#steps .chip').forEach(b => b.addEventListener('click', () => { MESS_STATE.n = +b.dataset.n; $$('#steps .chip').forEach(x => { const on = x === b; x.setAttribute('aria-pressed', String(on)); x.setAttribute('aria-checked', String(on)); }); status(); }));
+$('#voices').innerHTML = Object.entries(VOICE_OPTS).filter(([k]) => k !== 'none').map(([k, v]) => `<article class="item${k === REC ? ' is-rec' : ''}"><div class="v-row">
+  <button class="play" type="button" data-voice="${k}" data-label="Play ${esc(v.name)}" aria-label="Play ${esc(v.name)}"></button><div>
+  <h4>${esc(v.name)}${k === REC ? ' <span class="pick">Recommended</span>' : ''}</h4><p class="note">${esc(v.note)}</p></div></div></article>`).join('');
+$$('[data-voice]').forEach(b => { b.innerHTML = PLAY_SVG; b.addEventListener('click', () => {
+  const same = NOW_BTN === b; stopScene(); if (same) { status(); return; }
+  NOW = messScene2(b.dataset.voice); NOW_BTN = b; b.innerHTML = STOP_SVG; b.classList.add('on'); b.setAttribute('aria-label', 'Stop'); status();
+}); });
 $$('[data-hum]').forEach(b => b.addEventListener('click', () => { ensure(); if (HUM) { HUM.stop(1); HUM = null; } $$('[data-hum]').forEach(x => x.setAttribute('aria-pressed', String(x === b))); if (b.dataset.hum !== 'off') HUM = startHum(b.dataset.hum, 1, 1.5); }));
 $('#stopAll').addEventListener('click', () => { stopScene(); if (HUM) { HUM.stop(0.6); HUM = null; $$('[data-hum]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.hum === 'off'))); } $('#status').textContent = 'Stopped'; });
-/* the pick, saved to the page's store (collection "picks", doc "mess") */
+status();
+/* the pick, saved to the page's store (collection "picks", doc "mess-voices"; the first page's "mess" doc stays as it is) */
+const CHOICES = [['tables', 'Table by table'], ['murmur', 'Soft murmur'], ['warm', 'Warm low hum'], ['laughs', 'Laughs only'], ['near', 'Ship talk close by'], ['sparse', 'Odd word-shape and a laugh'], ['none', 'No voices']];
 const ANS = {}; let DB = null;
-$('#pick').innerHTML = `<div class="pickbox" data-id="mess"><div class="pb-row" role="radiogroup" aria-label="Your pick">${['A', 'B', 'C', 'D', 'None'].map(c => `<button class="pb" type="button" role="radio" aria-checked="false" data-v="${c}">${c}${c === 'C' ? '<span class="rec">Rec.</span>' : ''}</button>`).join('')}</div>
-  <label class="pb-note"><span>Notes (optional)</span><textarea id="note-mess" rows="3" placeholder="More or less busy? Louder, quieter, more galley?"></textarea></label><span class="saved" aria-live="polite"></span></div>`;
-function show() { const a = ANS.mess || {}; $$('.pb').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === a.pick))); const ta = $('#note-mess'); if (document.activeElement !== ta) ta.value = a.note || ''; }
+$('#pick').innerHTML = `<div class="pickbox" data-id="mess-voices"><div class="pb-row" role="radiogroup" aria-label="Your pick">${CHOICES.map(([k, n]) => `<button class="pb" type="button" role="radio" aria-checked="false" data-v="${k}">${esc(n)}${k === REC ? '<span class="rec">Rec.</span>' : ''}</button>`).join('')}</div>
+  <label class="pb-note"><span>Notes (optional)</span><textarea id="note-mess" rows="3" placeholder="Louder, quieter, more or fewer voices?"></textarea></label><span class="saved" aria-live="polite"></span></div>`;
+function show() { const a = ANS.v || {}; $$('.pb').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === a.pick))); const ta = $('#note-mess'); if (document.activeElement !== ta) ta.value = a.note || ''; }
 let tm = null;
 function save(patch) {
-  ANS.mess = { ...(ANS.mess || {}), ...patch, at: new Date().toISOString() }; show();
-  try { localStorage.setItem('wren-mess', JSON.stringify(ANS.mess)); } catch (e) {}
+  ANS.v = { ...(ANS.v || {}), ...patch, at: new Date().toISOString() }; show();
+  try { localStorage.setItem('wren-mess-voices', JSON.stringify(ANS.v)); } catch (e) {}
   const mark = t => $('.saved').textContent = t;
   if (!DB) { mark('Kept in this browser only'); return; }
   clearTimeout(tm); mark('Saving...');
-  tm = setTimeout(() => DB.collection('picks').doc('mess').set({ item: 'mess', pick: ANS.mess.pick || '', note: ANS.mess.note || '', at: ANS.mess.at }).then(() => mark('Saved'), () => mark('Not saved, try again')), 500);
+  tm = setTimeout(() => DB.collection('picks').doc('mess-voices').set({ item: 'mess-voices', background: 'D without voices', pick: ANS.v.pick || '', note: ANS.v.note || '', at: ANS.v.at }).then(() => mark('Saved'), () => mark('Not saved, try again')), 500);
 }
-document.addEventListener('click', e => { const b = e.target.closest('.pb'); if (b) save({ pick: (ANS.mess || {}).pick === b.dataset.v ? '' : b.dataset.v }); });
+document.addEventListener('click', e => { const b = e.target.closest('.pb'); if (b) save({ pick: (ANS.v || {}).pick === b.dataset.v ? '' : b.dataset.v }); });
 $('#note-mess').addEventListener('input', e => save({ note: e.target.value }));
-try { const v = localStorage.getItem('wren-mess'); if (v) ANS.mess = JSON.parse(v); } catch (e) {}
+try { const v = localStorage.getItem('wren-mess-voices'); if (v) ANS.v = JSON.parse(v); } catch (e) {}
 show();
 (async () => {
   try { DB = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { DB = null; }
   $('#store').textContent = DB ? 'Your pick saves as you go, and the lead can read it.' : 'Your pick is kept in this browser only here.';
-  if (DB) DB.collection('picks').onSnapshot(s => s.docs.forEach(d => { const v = d.data() || {}; if (v.item === 'mess') { ANS.mess = { pick: v.pick, note: v.note, at: v.at }; show(); } }), () => {});
+  if (DB) DB.collection('picks').onSnapshot(s => s.docs.forEach(d => { const v = d.data() || {}; if (v.item === 'mess-voices') { ANS.v = { pick: v.pick, note: v.note, at: v.at }; show(); } }), () => {});
 })();
 /* level meter in the bottom bar */
 const meter = $('#meter'), mc = meter.getContext('2d');
