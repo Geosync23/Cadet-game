@@ -395,7 +395,47 @@ def check_r3_off(pw, path):
         if g.ev("typeof SND_R3_ON !== 'undefined' && SND_R3_ON"): print('  r3off: SND_R3_ON is on in this build (nothing to check)'); return
         check(g.ev(f"typeof SND.r3Event === 'undefined' && {json.dumps(R3_KEYS)}.every(k => !SND.music.TRACKS[k] || k === 'comet')"), 'r3off: with SND_R3_ON off there are no event tracks and no event pick')
     finally: g.close()
+def check_r3mess(pw, path):
+    """turn 2: the mess hall (the galley, the clatter and the warm talk), following how many are there; silent when empty; only in the mess"""
+    on = r3_copy(path)
+    if not on: print('  r3mess: not yet (no SND_R3_ON line)'); return
+    g = Game(pw, on)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000); g.step(5)
+        check(g.ev("!!SND.r3Mess"), 'r3mess: the mess hall sound is there')
+        def at(name, t, deck, room, secs=4):
+            k = g.ev(f"({R3_AT})({json.dumps([t, deck, room])})"); g.step(40)
+            c0 = g.ev("SND.r3Mess.clinks")
+            for _ in range(secs * 2): g.page.wait_for_timeout(500); g.step(2)
+            r = g.ev("(M => ({ n: M.n, full: M.full, on: !!M.scene, clinks: M.clinks }))(SND.r3Mess)"); r['per_s'] = (r['clinks'] - c0) / secs
+            print(f'  r3mess {name}: room {k!r} {r}'); return r
+        night = at('3 am, the mess', 1440 + 180, 3, 'Mess hall')
+        check(night['on'], 'r3mess: the scene runs while you are in the mess')
+        if night['n'] == 0: check(night['per_s'] == 0, f'r3mess: empty mess is silent (clatter {night["per_s"]}/s)')
+        else: print('  r3mess: someone in the mess at 3 am, the empty case is checked by hand below')
+        full = at('the dinner rush', 1440 + 1110, 3, 'Mess hall')
+        check(full['n'] >= 3, f'r3mess: people in the mess at the dinner rush ({full["n"]})')
+        check(full['per_s'] > 0.4, f'r3mess: the clatter at the rush ({full["per_s"]}/s)')
+        # every layer follows the count: none at 0, more as the room fills (the scene reads M.at's levels live)
+        lv = g.ev("[0, 1, 2, 8, 25, SND.r3Mess.full].map(n => [n, SND.r3Mess.at(n)])"); print('  r3mess layers', lv)
+        check(lv[0][1] == {'galley': [0, 0], 'clatter': 0, 'voices': 0}, 'r3mess: no one there, every layer silent')
+        for (n0, a), (n1, b) in zip(lv, lv[1:]):
+            if n0 == 0: continue
+            check(b['clatter'] >= a['clatter'] and b['voices'] >= a['voices'] and b['galley'][0] >= a['galley'][0], f'r3mess: {n1} people no quieter than {n0}')
+        check(lv[-1][1]['voices'] == 12 and lv[1][1]['voices'] == 1, 'r3mess: one voice for a couple, all twelve when full')
+        g.ev("SND.r3Mess.n = 0"); g.page.wait_for_timeout(1200)
+        gone = at('the gym, the same evening', 1440 + 1112, 3, 'Gym', secs=2)
+        check(not gone['on'], 'r3mess: it stops (fading) when you leave the mess')
+        oth = at('Deck 4, the evening', 1440 + 1114, 4, 'Laundry', secs=2)
+        check(not oth['on'], 'r3mess: nothing on another deck')
+        log = g.ev("(SND.log || []).filter(x => x.name === 'mess').length")
+        check(log >= 1, 'r3mess: the mess scene was logged')
+        pe = [e for e in g.errors if e.startswith('pageerror')]
+        if pe: check(False, 'r3mess: page errors: ' + ' | '.join(pe[:3]))
+    finally: g.close()
 CHECKS += [check_r3music, check_r3_off]   # the sound update (SD2), turn 1
+CHECKS += [check_r3mess]   # the sound update (SD3), turn 2
 
 if os.environ.get('SOUND_ONLY'): CHECKS = [c for c in CHECKS if re.search(os.environ['SOUND_ONLY'], c.__name__)]   # run only the named checks (a regex), while building
 with sync_playwright() as pw:

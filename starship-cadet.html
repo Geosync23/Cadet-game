@@ -73681,6 +73681,112 @@ const SND = (() => {
       (h.nodes || []).forEach(n => { try { n.stop(t + f + 0.05); } catch (e) {} }); LOOPS.delete(L); setTimeout(() => { try { out.disconnect(); } catch (e) {} }, (f + 1) * 1000); } };
     LOOPS.add(L); amb[name] = L;
   }
+  // the sound update, turn 2 (SND_R3_ON; the user's picks, 2026-10-28, plans/sound/messhall.html version 2): the mess hall.
+  // The galley behind the counter (the extractor, a sizzle, a pan, the hatch, the order-up bell) and the room's clatter, with
+  // the warm low hum of talk on top; every layer follows how many are in the mess (the crew there, plus you), silent with no
+  // crew there; only while you're in it, fading as you leave. Read once a second from ambTick; Math.random only.
+  const MESS_SND = SND_R3_ON ? (() => {
+    const VOWELS = [[730, 1090], [530, 1840], [270, 2290], [570, 840], [440, 1020], [660, 1720], [490, 1350]];   // vowel bands for a wordless voice: never a word
+    const VOICES = [[105, -0.7], [128, 0.5], [160, -0.2], [210, 0.8], [118, 0.15], [190, -0.55], [140, 0.65], [235, -0.85], [98, 0.3], [175, -0.35], [150, 0.9], [220, 0.05]];   // [pitch, side] round the room
+    const CLINK = {   // the room's sounds, one at a time (t: when, w: how loud)
+      cutlery: (t, w, pan) => ring(t, [rand(2600, 3400), rand(4200, 5600)], 0.9 * w, { d: 0.12, q: 35, pan, wet: 0.3 }),
+      fork: (t, w, pan) => { ring(t, [rand(3000, 3800)], 0.6 * w, { d: 0.07, q: 30, pan }); ring(t + rand(0.05, 0.12), [rand(3000, 3800)], 0.4 * w, { d: 0.06, q: 30, pan }); },
+      cup: (t, w, pan) => { ring(t, [rand(1800, 2300), rand(3900, 4600)], 1.1 * w, { d: 0.18, q: 45, pan, wet: 0.3 }); thud(t, { gain: 0.06 * w, d: 0.04, f: 900, body: 300 }); },
+      tray: (t, w, pan) => { thud(t, { gain: 0.22 * w, d: 0.1, f: 500, body: 140 }); ring(t, [rand(420, 520), rand(980, 1150)], 1.4 * w, { d: 0.22, q: 18, pan, wet: 0.3 }); },
+      plate: (t, w, pan) => { ring(t, [rand(1300, 1600), rand(2700, 3100)], 1 * w, { d: 0.2, q: 30, pan, wet: 0.3 }); thud(t, { gain: 0.08 * w, d: 0.05, f: 700, body: 220 }); },
+      chair: (t, w, pan) => noise(t, rand(0.25, 0.45), { f: rand(260, 380), fTo: rand(450, 650), q: 4, gain: 0.05 * w, swell: 0.35, pan }),
+      stack: (t, w, pan) => { for (let i = 0; i < 3; i++) ring(t + i * rand(0.06, 0.1), [rand(1300, 1700), rand(2800, 3300)], 0.7 * w, { d: 0.15, q: 30, pan }); },
+      hatch: (t, w) => { slide(t, 0.4, { f0: 300, f1: 520, gain: 0.25 * w, rate: 30, rough: 0.2, bus: ROUTE.ui, pan: 0.5 }); clack(t + 0.42, 0.05 * w, { f: 900, pan: 0.5 }); },
+      pan: (t, w) => ring(t, [rand(500, 640), rand(1500, 1800)], 1.2 * w, { d: 0.3, q: 20, pan: 0.6, wet: 0.35 }),
+      ding: (t, w) => bell(t, 1567.98, 0.8, 0.02 * w, { wet: 0.3, pan: 0.55 }),
+    };
+    const BG_CLATTER = { cutlery: 3, fork: 2, cup: 3, tray: 2, plate: 2, chair: 1, hatch: 1, pan: 1, ding: 0.5 };
+    const BG_LV = 1.5, VOICE_LV = 1.6;   // the page's trims (measured against the Commons hum): full, the background about 7 dB under it, the voices about 1 dB more
+    const M = { n: 0, full: 0, room: null, scene: null, clinks: 0 };
+    const busyD = (n = M.n) => Math.min(1, n / Math.max(1, M.full));
+    // each layer at n people: the galley's two levels, the clatter's rate (sounds a second) and how many voices talk
+    const galleyAt = n => n ? [0.02 + 0.05 * busyD(n), 0.003 + 0.011 * busyD(n)] : [0, 0];
+    const clatterAt = n => n ? 0.12 + 2.1 * busyD(n) + (n <= 2 ? 0 : 0.1) : 0;
+    const voicesAt = n => n > 0 ? Math.min(12, Math.max(1, Math.round(12 * Math.min(1, n / (M.full / 2))))) : 0;   // about one for every two or three people, at least one
+    M.at = n => ({ galley: galleyAt(n), clatter: clatterAt(n), voices: voicesAt(n) });   // for sound_check
+    function voice2(out, o) {   // one wordless voice: phrases of soft syllables, then a pause; o.live(t): whether it's there now
+      const osc = ctx.createOscillator(), f1 = ctx.createBiquadFilter(), f2 = ctx.createBiquadFilter(), g = ctx.createGain(), g2 = ctx.createGain(), p = ctx.createStereoPanner();
+      osc.type = 'sawtooth'; osc.frequency.value = o.f0; f1.type = f2.type = 'bandpass'; f1.Q.value = 5; f2.Q.value = 7; g.gain.value = 0; g2.gain.value = 0.45; p.pan.value = o.pan;
+      osc.connect(f1); osc.connect(f2); f1.connect(g); f2.connect(g2); g2.connect(g); g.connect(p); p.connect(out);
+      const t0 = ctx.currentTime; osc.start(t0); let next = t0 + Math.random() * (o.gap[1] * 0.6 + 0.3);
+      const gap = o.gap, syl = o.syl || [3, 12], len = o.len || 1;
+      return { nodes: [osc], tick(u) {
+        while (next < u) {
+          if (!o.live(next)) { next += 0.8 + Math.random() * 1.5; continue; }
+          const n = syl[0] + ((Math.random() * (syl[1] - syl[0] + 1)) | 0), lift = Math.random() < 0.12 ? 1.25 : 1; let t = next;
+          for (let i = 0; i < n; i++) {
+            const d = (0.11 + Math.random() * 0.15) * len, V = VOWELS[(Math.random() * VOWELS.length) | 0];
+            f1.frequency.setTargetAtTime(V[0], t, 0.025); f2.frequency.setTargetAtTime(V[1], t, 0.025);
+            osc.frequency.setTargetAtTime(o.f0 * lift * (1 + (Math.random() - 0.45) * 0.22 - (i / n) * 0.12), t, 0.04);
+            g.gain.setTargetAtTime(o.g * (0.55 + Math.random() * 0.45), t, 0.018); g.gain.setTargetAtTime(0, t + d * 0.75, 0.03);
+            t += d + Math.random() * 0.05;
+          }
+          next = t + gap[0] + Math.random() * (gap[1] - gap[0]);
+        }
+      } };
+    }
+    function scene() {   // the page's messScene2 with the background D and the voices "warm", reading M.n live
+      const t0 = ctx.currentTime, out = ctx.createGain(); out.gain.setValueAtTime(0, t0); out.gain.linearRampToValueAtTime(1, t0 + 1.2); out.connect(BUS.ui);
+      const bg = ctx.createGain(); bg.gain.value = BG_LV; bg.connect(out);
+      const room = { ...BUS, ui: bg }, loops = [], nodes = [];
+      // the galley behind the counter: the extractor and a sizzle, louder as more are being fed; nothing when empty
+      const ex = ctx.createBufferSource(); ex.buffer = BROWN; ex.loop = true; const exf = ctx.createBiquadFilter(); exf.type = 'lowpass'; exf.frequency.value = 240; const exg = ctx.createGain(); exg.gain.value = 0;
+      const sz = ctx.createBufferSource(); sz.buffer = WHITE; sz.loop = true; const szf = ctx.createBiquadFilter(); szf.type = 'bandpass'; szf.frequency.value = 5200; szf.Q.value = 0.7; const szg = ctx.createGain(); szg.gain.value = 0;
+      const gp = ctx.createStereoPanner(); gp.pan.value = 0.55; ex.connect(exf); exf.connect(exg); exg.connect(gp); sz.connect(szf); szf.connect(szg); szg.connect(gp); gp.connect(bg);
+      ex.start(t0); sz.start(t0); nodes.push(ex, sz);
+      let lastN = -1;
+      const galley = () => { if (M.n === lastN) return; lastN = M.n; const [e, z] = galleyAt(M.n), t = ctx.currentTime;
+        exg.gain.setTargetAtTime(e, t, 0.6); szg.gain.setTargetAtTime(z, t, 0.6); };
+      galley();
+      const bag = Object.entries(BG_CLATTER).flatMap(([n, w]) => Array(Math.max(1, Math.round(w * 2))).fill(n));
+      let nextC = t0 + 0.4;
+      loops.push({ tick(u) { galley();
+        while (nextC < u) {
+          if (!M.n) { nextC += 0.5; continue; }
+          const rate = clatterAt(M.n);
+          try { CLINK[pick(bag)](nextC, rand(0.5, 1) * (0.7 + 0.3 * busyD()), rand(-0.8, 0.8)); } catch (e) {}
+          if (Math.random() < 0.05) noise(nextC, 0.03, { f: rand(3000, 6000), q: 3, gain: 0.02, pan: 0.55 });
+          M.clinks++; nextC += (-Math.log(1 - Math.random())) / rate;
+        }
+      } });
+      // the warm low hum of talk on top (voicesAt: none when empty)
+      const vb = ctx.createGain(); vb.gain.value = VOICE_LV; vb.connect(out);
+      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 650; lp.connect(vb);
+      const sv = ctx.createGain(); sv.gain.value = 0.7; lp.connect(sv); sv.connect(BUS.verb);
+      VOICES.forEach(([f, p], i) => loops.push(voice2(lp, { f0: f * 0.8, pan: p * 0.6, g: 0.035, gap: [0.1, 0.9], len: 1.3, live: t => i < voicesAt(M.n) })));
+      const L = { label: 'mess', loops,
+        tick(u) { const p = ROUTE; ROUTE = room; try { loops.forEach(l => l.tick(u)); } finally { ROUTE = p; } },
+        stop(f = 1.5) { LOOPS.delete(L); const t = ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + f);
+          loops.forEach(l => (l.nodes || []).forEach(n => { try { n.stop(t + f + 0.1); } catch (e) {} })); nodes.forEach(n => { try { n.stop(t + f + 0.1); } catch (e) {} });
+          setTimeout(() => { try { out.disconnect(); } catch (e) {} }, (f + 3) * 1000); },
+      };
+      LOOPS.add(L); L.tick(t0 + 0.4);
+      return L;
+    }
+    function count() {   // people in the mess hall (the crew there, plus you), or -1 when you're not in it
+      if (!deckDef || deckDef.num !== 3) return -1;
+      const rooms = deckDef.rooms || {}, k = M.room && rooms[M.room] && rooms[M.room].name === 'Mess hall' ? M.room : Object.keys(rooms).find(x => rooms[x].name === 'Mess hall');
+      if (!k || roomAt(...player.here()) !== k) return -1;
+      if (M.room !== k) { M.room = k; M.full = Math.max(8, (deckDef.places || []).filter(p => p.room === k && p.pose === 'sit').length + 1); }   // full: every seat taken, and you
+      const crew = DECK_CREW.filter(a => a && isFinite(a.x) && roomAt(...cellAt(a.x, a.z)) === k).length;
+      return crew ? crew + 1 : 0;   // with no crew there it's empty: silent
+    }
+    return {
+      M,
+      tick() {
+        let n = -1; try { n = count(); } catch (e) { n = -1; }
+        M.n = Math.max(0, n);
+        const on = n >= 0 && !!ctx && ctx.state === 'running' && S.prefs.on;
+        if (on && !M.scene) { if (S.log) S.log.push({ name: 'mess', loop: true }); M.scene = scene(); }
+        else if (!on && M.scene) { M.scene.stop(1.5); M.scene = null; }   // fades as you leave
+      },
+    };
+  })() : null;
   function ambTick() {
     let cook = false, wash = false;
     try {
@@ -73690,6 +73796,7 @@ const SND = (() => {
     } catch (e) { cook = wash = false; }
     ambSet('sizzle', cook); ambSet('washer', wash);
     if (cook && Math.random() < 0.12) S.fx(pick(['chop', 'chop', 'stove', 'ovenOpen', 'ovenClose']), { long: 3 });
+    if (MESS_SND) MESS_SND.tick();   // the sound update, turn 2: the mess hall
   }
   let actTickSet = false;
   S.onFrame.push(() => { if (!actTickSet) { actTickSet = true; S.actTick = actTick; } });   // once, on the first frame: S.whenReady and the core's S.actTick = null come later in the block
@@ -74394,6 +74501,7 @@ const SND = (() => {
     return null;
   }
   if (SND_R3_ON) S.r3Event = r3EventMusic;   // for sound_check
+  if (MESS_SND) S.r3Mess = MESS_SND.M;   // for sound_check: the mess hall's count and scene
   S.makeMusic = createWrenMusic;                          // for sound_check: the module on a test clock
   S.onFrame.push(() => {                                  // the first frame with sound running makes it (this slot comes before S.whenReady and the settings)
     if (!S.music) { musPrefs(); S.music = createWrenMusic({ ctx: S.ctx, dest: S.bus.music, shipTime: musTime, enabled: MP.on, volume: MP.vol, mode: MP.mode, heard: MP.heard,
