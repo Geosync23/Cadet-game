@@ -1,5 +1,5 @@
 # RV24: a pretend-pad look at 390x844 (controller update reviews): reuses controller_check.py's Run (FAKEPAD) from the game's folder.
-# Usage: python3 pad_look.py BUILD.html OUTDIR part   (parts: wavec, wavea)
+# Usage: python3 pad_look.py BUILD.html OUTDIR part   (parts: wavec, wavea, waveb)
 import sys, os, re, json, pathlib
 G = sys.argv[1]; OUT = sys.argv[2]; PART = sys.argv[3]; os.makedirs(OUT, exist_ok=True)
 cc = os.path.join(os.path.dirname(os.path.abspath(G)), 'controller_check.py')
@@ -57,3 +57,25 @@ with sync_playwright() as pw:
         r.press('UP'); r.step(2); ok = pad_to(r, '.hud'); print('dev card reached', ok, r.ev(WA_FOCUS)); r.page.screenshot(path=f'{OUT}/wa_devcard.png')
         r.press('A'); r.step(3); print('dev panel', r.ev("DM_UI.open")); r.page.screenshot(path=f'{OUT}/wa_devpanel.png')
         print('errors', r.errors[:5]); r.close()
+    if PART == 'waveb':
+        r = wb_start(pw, ON, 'rv24', 'wbc'); r.ev(TAP_SPY)
+        c = r.ev(PROPS_CABIN); r.step(30); wb_quiet(r); r.press('RIGHT'); r.step(20)
+        r.ev("SHIP.works.home = '4-23'")
+        for k in range(60):
+            r.step(10)
+            if r.ev("ITEMS.some(i => i.cabin)"): break
+        r.step(20); wb_quiet(r); r.press('RIGHT'); r.step(10)
+        print('cabin ring', r.ev("PAD_PICK.list.map(t => padLabel(t.key))")); r.page.screenshot(path=f'{OUT}/wb_cabin.png')
+        print('errors', r.errors[:3]); r.close()
+        r = wb_start(pw, ON, 'rv24', 'wbj'); r.ev(TAP_SPY)
+        T = r.ev(JOBS2_SET); print('jobs2 setup', T); r.step(20); wb_quiet(r); r.press('RIGHT'); r.step(10)
+        print('jobs2 ring', r.ev("PAD_PICK.list.map(t => padLabel(t.key))")); r.page.screenshot(path=f'{OUT}/wb_jobs2.png')
+        print('errors', r.errors[:3]); r.close()
+        r = wb_start(pw, ON, 'rv24', 'wbb')
+        B = r.ev(BEAM_SET); print('beam setup', B)
+        for k in range(120):
+            r.step(30)
+            if r.ev('beamReady()'): break
+        wb_quiet(r); r.press('RIGHT'); r.step(20); wb_quiet(r)
+        print('beam ring', r.ev("PAD_PICK.list.map(t => padLabel(t.key))"), 'calls', r.ev("renderer.info.render.calls")); r.page.screenshot(path=f'{OUT}/wb_beam.png')
+        print('errors', r.errors[:3]); r.close()
