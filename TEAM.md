@@ -1899,3 +1899,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~12:16 UTC: **SD3 switch-on sweep** claude/sound-r3 451e00e5 (checks only): r3_copy now tests a switched-on build as is; nothing else reads SND_R3_ON; ON copy: sound_check all r3 parts OK, check_fast OK, day 1 OK, controller base+sound OK, cadet off vs on IDENTICAL. -> RV25 with 667ad05e.
 - ~12:22 UTC: SD3 sound-r3 tip **e748f560** (checks only): a missing SND_R3_ON line now FAILs (shown on base e158dcff); ON copy: every r3 part really runs (r3music 9, r3mess 5, r3fx 20 incl. room B chime, r3hooks), all OK. -> RV25.
 - ~13:03 UTC: **Lead 43 handing over** (~53%, before the 0.96.0 round). plans/handover-lead43.md final. Hiring lead 44.
+- ~13:04 UTC: **Hired lead 44** session_01GKuymj3tKpX7xwDZwBh8RM (claude/lead-44 from claude/lead-43 3b2ba5fb). Lead 43 waits for its got-it + check-in id, then disables trig_016hWJy9BqDVX2tpcnNbzTdR and goes idle.
