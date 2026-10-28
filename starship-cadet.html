@@ -72320,6 +72320,10 @@ function devmodeArrowRow(body) {                         // the Quick tab's swit
 // board (Day 21 is a Sunday: it comes with a job, no beat of its own) and night 3's booked slot (picking the team and
 // booking the Watch are the beat). Nothing here calls R().
 const DM_J1 = () => typeof P5_STEP5 !== 'undefined' && P5_STEP5;
+if (P5_PROMO4) {                                          // (J1, lead 43 for RV24's note) an Engine Specialist one band up by Day 26 (Steady), as a steady player: from Day 23 the table said New
+  let r = DM_CAREER.find(x => x.day === 26 && !x.later); if (!r) { r = { day: 26 }; DM_CAREER.push(r); DM_CAREER.sort((a, b) => a.day - b.day); }
+  r.band = 'steady';
+}
 devmodeJump({ id: 'ps', group: 'career', label: 'Day 12: Power safety', day: 12, by: 12, at: WAKE_AT, where: null, on: DM_J1,
   set: W => { delete W.tr.ps; delete W.use.ps; } });   // open (W.op keeps it), not trained: Calder asks once you're up
 devmodeJump({ id: 't3', group: 'career', label: 'Day 15: your Tier 3 test', day: 15, by: 14, at: 530, where: { deck: 5, room: 'w' }, on: () => DM_J1() && !!P5_PROMO3 });   // the test on the board at 09:00 (the game sets it the evening before)
