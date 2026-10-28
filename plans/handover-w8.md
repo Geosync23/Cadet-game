@@ -1,6 +1,6 @@
 # Handover: W8 (the Works career engineer for Pillar 5 Step 6, after W7)
 
-- **Role:** Works career engineer for Step 6, for lead 42 (session_01GKuymjnCHnpwDqB94PVwmV; lead 41 session_01GKuymjWR1dqfbCw1MyEP9j forwards). Reviewer now RV24 (ask the lead for the id); before that Reviewer RV23 (session_01GKuymoDm1XbC5G8TvaCNLr), build master BM19 (session_01GKuymncYhRTKs8t4byNfdj). My session: session_01GKuymk95u5t4uDsahatkPN.
+- **Role:** Works career engineer for Step 6, for lead 43 (session_01GKuymjoDoY2kA9yCK12NG1, from 2026-10-28; before: lead 42 session_01GKuymjnCHnpwDqB94PVwmV, lead 41). Reviewer now RV24 (ask the lead for the id); before that Reviewer RV23 (session_01GKuymoDm1XbC5G8TvaCNLr), build master BM19 (session_01GKuymncYhRTKs8t4byNfdj). My session: session_01GKuymk95u5t4uDsahatkPN.
 - **Read first:** plans/handover-w7.md and plans/handover-w6.md (what came before), the spec `plans/p5-step6-spec.html` on claude/p5-specs, DEV_NOTES "Mentoring Basil" and "Calder's question".
 - **I own:** 24 core, 24u, section 28's shared helpers, 28e, 28f, the Step 6 switch lines, all Step 6 DM_CAREER rows (section 25). Other seats ask me before touching them.
 - **Branch:** `claude/p5s6-promo4`. Rows `0.94.0-s6.N`. Never touch the two build-number lines.
@@ -20,6 +20,8 @@
 - **s6.20:** Calder's seat 5-tea-2 (no stand-up through the wall); the parked M20 returns on a clear day (Day 29+), intended.
 
 - **RV24 PASS** on 6f13b61a (the whole W8 item). **s6.21:** staging d0d381e0 merged; her question waits until you've sat (cqSat).
+
+- **0.95.0-w8.1 (d079af8d):** check only: promo_beats t4passed's setup closes the night word t4test leaves open (whole promo_beats OK on 0.95.0, Step 6 switched on).
 
 ## Still to do
 1. stories_check / fridays_check / events_check / bigevents_check on Day 26 with Step 6 on (the full round's; career_check --s6 is done, s6.15).
