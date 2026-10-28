@@ -53,3 +53,12 @@ No FAIL lines.
 
 - path_check (default args): OK, exit 0 (72 s), PATH CHECK OK, no FAIL lines.
 - arc_check (default args): OK, exit 0 (22 s), ARC CHECK OK, no FAIL lines.
+
+## Perf bisect: fe11cd66 with only PAD_ON false, vs OLD 0.95.0 (lead 44's ask)
+
+- Copy of fe11cd66's game with `const PAD_ON = false;` (the only changed line; sha256 2733e1fa...b9fd). Run alone on the
+  machine: `perf_check.py padoff.html old.html` (fe11cd66's perf_check), exit 0 (3226 s), PERF CHECK OK.
+- Sunday dinner, the mess 18:30, portrait-wide: OLD 2.15 ms, PAD_ON off 1.79 ms.
+- Lantern supper, the mess Sat 18:30, trifold-folded: OLD 1.84 ms, PAD_ON off 1.59 ms.
+- Mean over all 121 measured frames-times (every scene and size): OLD 1.250 ms, PAD_ON off 1.197 ms (about 4% lower).
+- Draw calls, triangles, geometries, textures the same as OLD; heap 93 MB both after a week (OLD 87 after day 1).
