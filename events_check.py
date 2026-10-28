@@ -796,7 +796,8 @@ with sync_playwright() as pw:
     if not any('Storm prep' in x for x in a['mails']) or not any('how it went' in x for x in a['mails']): fail(f"the storm's Mail: {a['mails']}")
     if len(a['news']) != 7 or not all('@10 ' in x for x in a['news']): fail(f"the storm's news: {a['news']}")
     bt = g.ev("hhmm(SHIP_EVENTS.ionStorm.meetings.find(m => m.id === 'stormBriefing').at[1])")   # 09:15, or 14:00 with the storm update
-    if a['on'] != ['10:0 warning@360', '11:1 warning@0 onset@840', '13:3 escalation@0 resolution@600 afterglow@1320', '16:-'] or f'stormBriefing works-bay {bt}' not in a['gath'][0] or 'party bow-lounge 19:00' not in a['gath'][1]: fail(f"eventOn / eventGatherings: {a['on']} {a['gath']}")
+    von = g.ev("!!SHIP_EVENTS.diplomatic && !SHIP_EVENTS.diplomatic.draft")   # the visit on (EV1): its warning is Day 16 09:00, the day after the storm
+    if a['on'] != ['10:0 warning@360', '11:1 warning@0 onset@840', '13:3 escalation@0 resolution@600 afterglow@1320', '16:0 warning@540' if von else '16:-'] or f'stormBriefing works-bay {bt}' not in a['gath'][0] or 'party bow-lounge 19:00' not in a['gath'][1]: fail(f"eventOn / eventGatherings: {a['on']} {a['gath']}")
     if len(a['meets']) != 2: fail(f"the storm's meetings: {a['meets']}")
     if m.get('menu') != 'stormStew': fail('eventMod at t: no storm stew in the escalation')
     if a['log'] and 'calls' not in a['log'][0]['threads']: fail('the call-home backlog was not scored')
@@ -843,7 +844,7 @@ with sync_playwright() as pw:
     if not L['feel'] or 'jolt' not in L['feel'][0] or not L['banner'] or not L['flicker']: fail('the front was not felt (jolt, banner, flicker)')
     if not L['allClear'] or L['allClear']['name'] not in ('Captain Odile Marrow', 'Commander Teo Vance') or not L['walked'] or not any('The all-clear (notes)' in x for x in L['mails']): fail('the all-clear did not open, or walking out sent no gist')   # the writers' all-clear (the storm update) opens with Vance
     if max(L['calls1'], L['calls2'], L['calls3']) >= 450: fail('draw calls over 450 in the storm')
-    if len(L['log']) != 1 or L['left'] is not None or not L['traces'] or not any('how it went' in x for x in L['mails']): fail(f"the live storm didn't end cleanly: {L['log']}")
+    if len(L['log']) != 1 or L['left'] not in (None, 'diplomatic') or not L['traces'] or not any('how it went' in x for x in L['mails']): fail(f"the live storm didn't end cleanly: {L['log']}")
 
     # 7. occasions (C10)
     O = g.ev(OCC)
