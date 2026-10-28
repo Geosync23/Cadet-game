@@ -70,3 +70,6 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
 - 13:59 lead 44: the user wants a player pointer for the visit's three events in 0.96.0 (my note 2). EV1 builds it on
   claude/visit-pointer (from 736b23a); top priority when it arrives, ahead of J4.
 - 8c91437: day_check 16, 17, 18, 19 OK; lines --day PASS. visit-on PASS confirmed on the final game (to lead 44, BM20).
+- J4 runs: cadet vs e158dcf ALL IDENTICAL; devmode_check OK; dev_arrow_check OK; j4_event.py (rv25-shots/j4_event-c7489b5.txt):
+  the "Event:" arrow on the vessel's ranks: [] planning holds (Day 27 09:50-12:00, Day 28 09:25, Day 29 09:15 and 14:25).
+- **VERDICT J4 c7489b5: FIXES** (add evInvited(m) to the 'event' source's filter), to DM1, lead 44 (BM20 copied via lead).
