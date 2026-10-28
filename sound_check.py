@@ -349,7 +349,7 @@ R3_AT = r"""(([t, deck, room]) => { skipTo(t); goToDeck(deck); const R = DECKS[d
 def check_r3music(pw, path):
     """turn 1: the picked traditions' and events' own tracks, while you're in their rooms (SND_R3_ON on a copy)"""
     on = r3_copy(path)
-    if not on: print('  r3music: not yet (no SND_R3_ON line)'); return
+    if not on: check(False, 'r3music: no SND_R3_ON line in this build, so nothing was tested'); return
     g = Game(pw, on)
     try:
         open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
@@ -399,7 +399,7 @@ def check_r3_off(pw, path):
 def check_r3mess(pw, path):
     """turn 2: the mess hall (the galley, the clatter and the warm talk), following how many are there; silent when empty; only in the mess"""
     on = r3_copy(path)
-    if not on: print('  r3mess: not yet (no SND_R3_ON line)'); return
+    if not on: check(False, 'r3mess: no SND_R3_ON line in this build, so nothing was tested'); return
     g = Game(pw, on)
     try:
         open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
@@ -440,7 +440,7 @@ R3_FX = ['r3BadgeTake', 'r3BadgeBack', 'r3ReactorDoor', 'r3CoilOff', 'r3CoilOn',
 def check_r3fx(pw, path):
     """turn 3: the feature sounds a watcher sees (each moment stood in for, the watcher run directly, then put back)"""
     on = r3_copy(path)
-    if not on: print('  r3fx: not yet (no SND_R3_ON line)'); return
+    if not on: check(False, 'r3fx: no SND_R3_ON line in this build, so nothing was tested'); return
     g = Game(pw, on)
     try:
         open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
@@ -533,7 +533,7 @@ R3_HOOKS = [('p5nKnock', 'r3Knock'), ('m24Call', 'r3TeamCall'), ('m24Team', 'r3T
 def check_r3hooks(pw, path):
     """turn 4: the one-line hooks in the owners' sections (each behind SND_R3_ON), their sounds, and clock Undo played for real"""
     on = r3_copy(path)
-    if not on: print('  r3hooks: not yet (no SND_R3_ON line)'); return
+    if not on: check(False, 'r3hooks: no SND_R3_ON line in this build, so nothing was tested'); return
     g = Game(pw, on)
     try:
         open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
