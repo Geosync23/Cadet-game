@@ -6,7 +6,7 @@
 - Guests coming. Everyone's polishing everything. I polished a mop.   #funny
 - A Veyli delegation, they say. Best uniforms on. Mine's been in a drawer since the academy.
 ? cue:event.diplomatic.warning dept:galley
-- Guests on the way. Brennan's planning two formal dinners. We're all a bit pale.   #funny
+- Guests on the way. Brennan's planning a formal dinner. We're all a bit pale.   #funny
 ? cue:event.diplomatic.warning dept:store
 - Everyone wants polish. We've run out of polish. I didn't know you could run out of polish.   #funny
 
@@ -21,9 +21,9 @@
 
 ? cue:event.diplomatic.escalation
 - The guest cabins are warm as an oven. The Veyli like it that way.
-- Second formal dinner tonight. Everyone's walking very straight.   #funny
+- Formal dinner tonight. Everyone's walking very straight.   #funny
 ? cue:event.diplomatic.escalation dept:galley
-- Two formal dinners in three days. My feet have filed a complaint.   #funny
+- Formal dinner in dress shoes. My feet have filed a complaint.   #funny
 
 ? cue:event.diplomatic.afterglow
 - The guests have gone. The ship feels bigger without them. Quieter.

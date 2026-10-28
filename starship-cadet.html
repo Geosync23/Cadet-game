@@ -33451,7 +33451,7 @@ const LINES = JSON.parse([
   '{"text":"Whole bunk heard about your present. In a good way.","id":"fiq5b5","cue":["gift","gift.you"],"rank":"junior","not":{"cue":"gift.you@me"}},',
   '{"text":"Guests coming. Everyone\'s polishing everything. I polished a mop.","id":"155jv5o","tone":"funny","cue":["event.diplomatic","event.diplomatic.warning"]},',
   '{"text":"A Veyli delegation, they say. Best uniforms on. Mine\'s been in a drawer since the academy.","id":"s4gig9","cue":["event.diplomatic","event.diplomatic.warning"]},',
-  '{"text":"Guests on the way. Brennan\'s planning two formal dinners. We\'re all a bit pale.","id":"pnk05v","tone":"funny","cue":["event.diplomatic","event.diplomatic.warning"],"dept":"galley"},',
+  '{"text":"Guests on the way. Brennan\'s planning a formal dinner. We\'re all a bit pale.","id":"1ozxfa9","tone":"funny","cue":["event.diplomatic","event.diplomatic.warning"],"dept":"galley"},',
   '{"text":"Everyone wants polish. We\'ve run out of polish. I didn\'t know you could run out of polish.","id":"wxlijs","tone":"funny","cue":["event.diplomatic","event.diplomatic.warning"],"dept":"store"},',
   '{"text":"The guests are aboard. Have you seen them yet? Very tall. Very calm.","id":"nbpmjd","cue":["event.diplomatic","event.diplomatic.onset"]},',
   '{"text":"They bowed to me in the corridor. I bowed back. I think I did it right.","id":"18x7a6q","cue":["event.diplomatic","event.diplomatic.onset"]},',
@@ -33459,8 +33459,8 @@ const LINES = JSON.parse([
   '{"text":"Guests aboard. Formal dinner soon. Brennan\'s been tasting the soup since five.","id":"1210lct","cue":["event.diplomatic","event.diplomatic.onset"],"dept":"galley"},',
   '{"text":"A guest stood with the garden herbs for ten minutes. Just stood. I liked that.","id":"1p2on4m","tone":"warm","cue":["event.diplomatic","event.diplomatic.onset"],"dept":"garden"},',
   '{"text":"The guest cabins are warm as an oven. The Veyli like it that way.","id":"1k7lhg2","cue":["event.diplomatic","event.diplomatic.escalation"]},',
-  '{"text":"Second formal dinner tonight. Everyone\'s walking very straight.","id":"1v5t99p","tone":"funny","cue":["event.diplomatic","event.diplomatic.escalation"]},',
-  '{"text":"Two formal dinners in three days. My feet have filed a complaint.","id":"8w0ax9","tone":"funny","cue":["event.diplomatic","event.diplomatic.escalation"],"dept":"galley"},',
+  '{"text":"Formal dinner tonight. Everyone\'s walking very straight.","id":"hwiwuj","tone":"funny","cue":["event.diplomatic","event.diplomatic.escalation"]},',
+  '{"text":"Formal dinner in dress shoes. My feet have filed a complaint.","id":"1neztje","tone":"funny","cue":["event.diplomatic","event.diplomatic.escalation"],"dept":"galley"},',
   '{"text":"The guests have gone. The ship feels bigger without them. Quieter.","id":"1dhjrn3","cue":["event.diplomatic","event.diplomatic.afterglow"]},',
   '{"text":"I\'ll miss the bowing. I\'d got quite good at it.","id":"c95twd","tone":"funny","cue":["event.diplomatic","event.diplomatic.afterglow"]},',
   '{"text":"They left the mess a little bowl. Nobody knows what it\'s for. It\'s biscuits now.","id":"1cc2q5a","tone":"funny","cue":["event.diplomatic","event.diplomatic.afterglow"]},',
@@ -46662,6 +46662,8 @@ if (EV_SWAP_ON) {
   V.moments = V.moments.map(m => m.id === 'farewell' ? { ...m, at: [3, 570], ask: 'The Veyli leave at ten. I want to see them off.', places: [{ deck: 5, pool: '@gather-shuttle-bay' }] } : m);   // the bay's crowd spots (as Off the Tern's): it has no seats
   V.meetings = V.meetings.map(m => m.id === 'veyliGreeting' ? { ...m, at: [1, 600] } : m.id === 'veyliGifts' ? { ...m, at: [3, 540] } : m);
   V.mail = { ...V.mail, warning: { ...V.mail.warning, body: V.mail.warning.body.replace('arrives in two days', 'arrives tomorrow') } };
+  V.debrief = { ...V.debrief, smooth: V.debrief.smooth.replace('Dinners on time', 'The dinner on time') };   // one formal dinner now (EV1)
+  V.threads = V.threads.map(th => th.id === 'dinnersLate' ? { ...th, label: 'The dinner on time' } : th);
   const res = V.address.resolution; V.address = { ...V.address, resolution: c => res(c).map(l => typeof l === 'string' ? l.replace('a busy five days', 'a busy few days') : l) };
   // the comet: its own block below (FX25, EV_COMET_ON; FX22b's draft here, from plans/comet-viewing-draft.js, is replaced by
   // EP1's design, plans/events-plan-2.html Part A). With EV_COMET_ON off the swap's calendar row is passed over (no entry)
