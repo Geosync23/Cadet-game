@@ -32,6 +32,11 @@
 #   deck6     Step 6 (S6-4): Deck 6 on Day 23 at 21:00 by pad: the dosimeter rack (take, return), the coils' panels, the reactor door, P5_STEP6 on (pick)
 #   team      (MA6-1) an ordinary team job's turn by pad: at your spot at your turn the ring names the job, A starts your turn, it finishes (pick)
 #   vessel    A Veyli vessel needs help by pad, in a copy switched on: Calder and the sheet, the ramp's replies, the chain, the helper card and the making steps (VB1)
+#   props     (wave B) things that appear while you stand there, no deck change: cabin 4-23's spots as it becomes yours, a Wednesday's crates as they're shown: the ring offers them, A taps them (pick)
+#   jobs2     (wave B) a team job held beside a leak on another deck: the ring offers the leak's stop on this deck, A starts it (pick)
+#   beam      (wave B) Name on the beam by its floor from about 2 m, the crowd round the beam: the ring offers it, A starts painting (pick)
+#   court     (wave B) the Lightdisc court from its gate (its middle out of reach): the ring offers it, A taps it (pick)
+#   promo3    (S5-2) the Senior Officer promotion by pad (registered by wave B: written, never run before) (pick, panels)
 # --inventory: with reach, runs its touch half even before the panels package (the list of what there is to reach).
 # --selftest: runs the parts on a copy with this check's own small stand-in driver (to prove the parts before section 26).
 # --mutants: plants faults in copies of the game (each part's own list) and checks the part FAILS on every one.
@@ -3980,6 +3985,150 @@ def part_words(pw, src, tag):
 PART_FN['words'] = part_words; NEEDS['words'] = ['base']; ALL_PARTS.append('words')   # (Wave C, J)
 MUTANTS['words'] = {'Wave C: pointer words not switched': ('src', "return introPad() ? 'Press ' + padWord('y') + ' for your device' : INTRO_DEV_POINT;", "return INTRO_DEV_POINT;"),
                     'SD2-1: tips not switched': ('src', "  try { if (!PAD_ON || typeof introPad !== 'function' || !introPad()) return s; } catch (e) { return s; }", "  return s;")}
+# ---- wave B (PB1 for lead 43; plans/controller-audit.md section 3, gaps D, E, F): picking on the deck. Each part plays
+# by pad on the switch-on copy: props (a prop that appears while you're in the room, with no deck change: cabin 4-23's
+# spots as it becomes yours, and a Wednesday's crates, whose tap box rises from under the floor; the birthday cake can't
+# be the case: its tap box is inside the long table's, so no tap reaches it, backlog), jobs2 (a team job held beside
+# a leak: the leak's stop on this deck is offered, and A starts it), beam (Name on the beam by its floor, about 2 m from
+# the beam's spot), court (the Lightdisc court from its gate, its middle out of reach). A spy at the front of section
+# 15's PLAYER_TAPS writes down what each tap reached (window.__taps), and hands it on
+TAP_SPY = "(() => { window.__taps = []; PLAYER_TAPS.unshift(it => { window.__taps.push(it && it.t); return false; }); return true; })()"
+PROPS_CABIN = r"""(() => { const S = DECKS[4].cabinSpots && DECKS[4].cabinSpots['4-23']; if (!S) return null; if (!SHIP.works) worksInit(Math.max(shipNow(), WORKS_START)); SHIP.works.home = 'bunk';
+  goToDeck(4); const [x, , z] = Object.values(S)[0].at; player.obj.position.copy(cellPos(...nearestOpen(x - OX, z - OZ, player))); target.copy(player.obj.position).setY(.7); player.stop();
+  for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; window.__items = ITEMS; return [ITEMS.some(i => i.cabin)]; })()"""
+PROPS_CRATES = r"""(() => { goToDeck(5); const it = ITEMS.find(i => i.delivery); if (!it) return null; const v = it.hit.getWorldPosition(new THREE.Vector3());
+  player.obj.position.copy(cellPos(...nearestOpen(v.x, v.z + 1.4, player))); target.copy(player.obj.position).setY(.7); player.stop(); window.__items = ITEMS; return [v.y]; })()"""
+CRATES_SHOW = "(() => { let n = 0; deckRoot.traverse(o => { if (o.isMesh && o.material === DELIVERY_MAT && o.parent && !o.parent.visible) { o.parent.visible = true; n++; } }); return n; })()"
+def wb_start(pw, src, tag, name):
+    r = Run(pw, src, f'{tag}_{name}', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    return r
+def wb_quiet(r): r.ev("toastEl.classList.remove('show'); typeof TOAST_AT !== 'undefined' && (TOAST_AT = -1e9); typeof GUIDE !== 'undefined' && GUIDE.tq && (GUIDE.tq.length = 0)")
+def part_props(pw, src, tag):
+    fails = []
+    r = wb_start(pw, src, tag, 'props'); r.ev(TAP_SPY)
+    # cabin 4-23 becomes yours (the first promotion's move) while you stand in it: its spots go into the same list at the next tick
+    c = r.ev(PROPS_CABIN)
+    if not c: r.close(); return ['no cabin 4-23 spots on Deck 4']
+    r.step(30); wb_quiet(r); r.press('RIGHT'); r.step(20)   # the pad in use, the ring's list made without the spots
+    if c[0]: fails.append('the cabin\'s spots were there before it was yours (the case needs them to appear while you stand there)')
+    r.ev("SHIP.works.home = '4-23'")
+    for k in range(60):
+        r.step(10)
+        if r.ev("ITEMS.some(i => i.cabin)"): break
+    if not r.ev("ITEMS.some(i => i.cabin)"): fails.append('the cabin\'s spots never came (cabinDraw at the Works tick)')
+    else:
+        if not r.ev("ITEMS === window.__items"): print('  (note: the item list was replaced as the spots came: the push case not tested)')
+        r.step(20); wb_quiet(r)
+        h = ring_and_A(r, ['the desk', 'the shelf', 'the ledge', 'the floor']); r.step(30)
+        if not h: fails.append(f'the cabin\'s spots, come while you stood there, never offered by the ring ({r.ev("PAD_PICK.list.map(t => padLabel(t.key))")})')
+        elif not any(t in ('The desk', 'The shelf', 'The ledge', 'The floor') for t in r.ev("window.__taps")): fails.append(f'A on {h!r} did not tap the spot ({r.ev("window.__taps")})')
+        else: print(f'  a cabin spot by pad: ring {h!r}, A')
+    # a Wednesday's crates: the tap box sits under the floor until they're shown, then rises (the same list, moved)
+    c = r.ev(PROPS_CRATES)
+    if not c: fails.append('no Wednesday delivery item on Deck 5')
+    else:
+        r.step(20); wb_quiet(r); r.press('RIGHT'); r.step(20)
+        n = r.ev(CRATES_SHOW); r.step(20); y = r.ev("(() => ITEMS.find(i => i.delivery).hit.getWorldPosition(new THREE.Vector3()).y)()")
+        if not n or y < 0: fails.append(f'the crates never showed ({n} shown, the tap box at {y})')
+        else:
+            wb_quiet(r); h = ring_and_A(r, ['wednesday delivery']); r.step(60)
+            if not h: fails.append(f'the crates, shown while you stood by them, never offered by the ring ({r.ev("PAD_PICK.list.map(t => padLabel(t.key))")})')
+            elif 'Wednesday delivery' not in r.ev("window.__taps"): fails.append(f'A on {h!r} did not tap the crates ({r.ev("window.__taps")})')
+            else: print(f'  the crates by pad: ring {h!r}, A')
+    pe = [e for e in r.errors if e.startswith('pageerror')]
+    if pe: fails.append(f'page errors: {pe[:2]}')
+    r.close(); return fails
+
+JOBS2_SET = r"""(() => { const reset = t => { machinesNew(); SHIP.jobs = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; worksInit(t); SHIP.works.team = { plan: {} }; SHIP.works.inc = { plan: {}, open: null }; };
+  reset(15 * 1440 + 900); SHIP.works.rank = 'officer'; SHIP.works.tier = 2; let j = null;
+  for (let t = 15 * 1440 + 900; t <= 16 * 1440 + 900; t += 5) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); j = SHIP.jobs.find(x => x.kind === 'team' && x.claimedBy === 'you'); if (j) break; }
+  if (!j) return 'no team job held (the Day 17 rota)';
+  const id = leakPost(shipNow()); if (!id) return 'no leak posted'; if (!claimJob(id)) return 'the leak could not be taken';
+  const L = SHIP.jobs.find(x => x.id === id), nx = ixNextStop(L); if (!nx) return 'the leak has no first stop';
+  for (const k of NEED_KEYS) SHIP.player.needs[k] = 90;
+  goToDeck(nx.s.deck); const s = placeSpot(nx.s.places[0]); if (!s) return 'the leak\'s first stop has no spot'; player.obj.position.copy(cellPos(...nearestOpen(s.x + 1.2, s.z, player))); target.copy(player.obj.position).setY(.7); player.stop();
+  const tn = ixNextStop(j);
+  return { team: j.id, teamFirst: ixChores()[0] === j, teamStop: tn && [tn.s.deck, tn.s.places[0]], leak: id, title: L.title, deck: nx.s.deck }; })()"""
+def part_jobs2(pw, src, tag):
+    fails = []
+    r = wb_start(pw, src, tag, 'jobs2'); r.ev(TAP_SPY)
+    T = r.ev(JOBS2_SET)
+    if not isinstance(T, dict): r.close(); return [f'the setup: {T}']
+    print(f"  held: the team job {T['team']} (first in the list: {T['teamFirst']}, its next stop {T['teamStop']}) and the leak {T['leak']} on Deck {T['deck']}")
+    r.step(20); wb_quiet(r)
+    word = T['title'].lower()[:14]
+    h = ring_and_A(r, [word])
+    if not h: fails.append(f'the leak\'s stop on this deck never offered ({r.ev("PAD_PICK.list.map(t => padLabel(t.key))")})')
+    else:
+        done = False
+        for k in range(40):
+            r.step(10)
+            if r.ev(f"(() => {{ const j = SHIP.jobs.find(x => x.id === {json.dumps(T['leak'])}); return (j.stepsDone || []).includes(0) || !!(ACT && ACT.o && ACT.o.job === j.id); }})()"): done = True; break
+        if not done: fails.append(f'A on {h!r} did not start the leak\'s puddle stop (ACT {r.ev("ACT && [ACT.kind, ACT.o && ACT.o.job]")})')
+        else: print(f'  the leak by pad: ring {h!r}, A, its stop started')
+    pe = [e for e in r.errors if e.startswith('pageerror')]
+    if pe: fails.append(f'page errors: {pe[:2]}')
+    r.close(); return fails
+
+BEAM_SET = r"""(() => { goToDeck(5); actEnd(true); clearGoal(); const d = 1, e = eventsOn(d).find(x => x.id === 'name-on-the-beam'); if (!e) return 'no Name on the beam on Day 1';
+  SHIP.traces.length = 0; SHIP.events.joined = []; setShipNow((d - 1) * 1440 + e.from + 1); deckCrewFill(); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90;
+  const sp = placeSpot('5-beam-1'); let best = null;
+  for (const [dx, dz] of [[2, 0], [-2, 0], [0, 2], [0, -2], [1.5, 1.5], [-1.5, 1.5], [1.5, -1.5], [-1.5, -1.5]]) { const c = cellPos(...nearestOpen(sp.x + dx, sp.z + dz, player)), d2 = Math.hypot(c.x - sp.x, c.z - sp.z); if (d2 >= 1.6 && d2 <= 2.4 && roomAt(c.x, c.z) === roomAt(sp.x, sp.z)) { best = c; break; } }
+  if (!best) return 'no open tile about 2 m from the beam\'s spot';
+  player.obj.position.copy(best); target.copy(player.obj.position).setY(.7); player.stop(); EV_MIN = -1; eventsTick();
+  return { d: Math.hypot(best.x - sp.x, best.z - sp.z) }; })()"""
+def part_beam(pw, src, tag):
+    fails = []
+    r = wb_start(pw, src, tag, 'beam')
+    B = r.ev(BEAM_SET)
+    if not isinstance(B, dict): r.close(); return [f'the setup: {B}']
+    for k in range(120):
+        r.step(30)
+        if r.ev('beamReady()'): break
+    if not r.ev('beamReady()'): r.close(); return ['the beam never opened for your name (the crew gathering, its words)']
+    r.ev("(() => { const sp = placeSpot('5-beam-1'), p = player.obj.position; return Math.hypot(p.x - sp.x, p.z - sp.z); })()")
+    wb_quiet(r); r.press('RIGHT'); r.step(20); wb_quiet(r)
+    h = ring_and_A(r, ['paint your name'])
+    if not h: fails.append(f'Name on the beam\'s floor never offered from {B["d"]:.1f} m ({r.ev("PAD_PICK.list.map(t => padLabel(t.key))")})')
+    else:
+        for k in range(60):
+            r.step(10)
+            if r.ev("SHIP.traces.some(x => x.id === 'nameYours') || !!(ACT && ACT.o && ACT.o.beam)"): break
+        if not r.ev("SHIP.traces.some(x => x.id === 'nameYours') || !!(ACT && ACT.o && ACT.o.beam)"): fails.append(f'A on {h!r} did not start painting your name')
+        else: print(f'  the beam by pad from {B["d"]:.1f} m: ring {h!r}, A, painting')
+    pe = [e for e in r.errors if e.startswith('pageerror')]
+    if pe: fails.append(f'page errors: {pe[:2]}')
+    r.close(); return fails
+
+COURT_SET = r"""(() => { skipTo(2 * 1440 + 19 * 60 + 10); goToDeck(7); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90;
+  const g = ITEMS.find(i => i.t === 'Ask someone to play'), ct = ITEMS.find(i => i.t === 'Lightdisc court'); if (!g || !ct) return 'no court or gate panel on the rec deck';
+  const v = g.hit.getWorldPosition(new THREE.Vector3()); player.obj.position.copy(cellPos(...nearestOpen(v.x, v.z, player))); target.copy(player.obj.position).setY(.7); player.stop();
+  const m = new THREE.Box3().setFromObject(ct.hit).getCenter(new THREE.Vector3()), p = player.obj.position; return { d: Math.hypot(m.x - p.x, m.z - p.z) }; })()"""
+def part_court(pw, src, tag):
+    fails = []
+    r = wb_start(pw, src, tag, 'court'); r.ev(TAP_SPY)
+    C = r.ev(COURT_SET)
+    if not isinstance(C, dict): r.close(); return [f'the setup: {C}']
+    if C['d'] <= 3.2: print(f'  (note: the court\'s middle is {C["d"]:.1f} m from the gate, within reach: not the far case)')
+    r.step(20); wb_quiet(r); r.press('RIGHT'); r.step(20); wb_quiet(r)
+    h = ring_and_A(r, ['lightdisc court']); r.step(20)
+    if not h: fails.append(f'the Lightdisc court never offered at its gate (its middle {C["d"]:.1f} m away; {r.ev("PAD_PICK.list.map(t => padLabel(t.key))")})')
+    elif 'Lightdisc court' not in r.ev("window.__taps"): fails.append(f'A on {h!r} did not tap the court ({r.ev("window.__taps")})')
+    else: print(f'  the court by pad from its gate (middle {C["d"]:.1f} m): ring {h!r}, A')
+    pe = [e for e in r.errors if e.startswith('pageerror')]
+    if pe: fails.append(f'page errors: {pe[:2]}')
+    r.close(); return fails
+
+for _k, _f in (('props', part_props), ('jobs2', part_jobs2), ('beam', part_beam), ('court', part_court)): PART_FN[_k] = _f; NEEDS[_k] = ['pick']; ALL_PARTS.append(_k)
+MUTANTS['props'] = {'items pushed after the first look never offered (wave B gap D)': ('src', "for (let i = 0; i < ITEMS.length; i++) {\n    const it = ITEMS[i]; if (!it.hit) continue;", "for (let i = 0; i < (PAD_PICK.n0 = PAD_PICK.n0 || ITEMS.length); i++) {\n    const it = ITEMS[i]; if (!it.hit) continue;"),
+                    'a moved item kept where it was first seen': ('src', "if (!o || o.i !== i || o.m.some((v, k) => v !== e[k])) {", "if (!o || o.i !== i) {")}
+MUTANTS['jobs2'] = {'only the first held job\'s stop offered (wave B gap E)': ('src', "for (const j of ixChores()) { const nx", "for (const j of ixChores().slice(0, 1)) { const nx")}
+MUTANTS['beam'] = {'no beam floor in the ring (wave B gap F)': ('src', "if (padBeamOn()) { const sp = placeSpot('5-beam-1'), d =", "if (false) { const sp = placeSpot('5-beam-1'), d =")}
+MUTANTS['court'] = {'big items by their middle only (wave B gap F)': ('src', "if (o.big && Math.hypot(o.x - pp.x, o.z - pp.z) > R) { const", "if (false) { const")}
+PART_FN['promo3'] = part_promo3; NEEDS['promo3'] = ['pick', 'panels']; ALL_PARTS.append('promo3')   # (wave B, the audit's find) written for S5-2, never registered
+
+
 # ---- run ----------------------------------------------------------------------------------------------------------
 if '--selftest' in FLAGS:
     if pad_switch(SRC) is not None: print('--selftest is for a build without section 26 (it plants its own PAD_ON)'); sys.exit(1)
