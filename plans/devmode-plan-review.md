@@ -137,3 +137,18 @@ landing (one fresh run, then the four Calder answers each from an Undo or a Mark
 Rank by hand for Senior Officer and Engine Specialist (J0, following the user's 20 October answer): fine as long as it
 stays marked approximate. A rank set by hand skips the records later pieces read (the Tier 3 and 4 test records in
 `W.pu`, the Deck 2 move), so the panel should point to the rank buttons for anything past Day 16.
+
+## Final check of v4.2 (claude/devmode-plan-2 b549aa4): PASS
+
+All nine findings are folded in:
+- **F1:** the table only adds, stops after its last day, is J0's, and is checked by a Day 36 jump. The live Set career bug is in the backlog as DM1-1.
+- **F2:** the runner's stops and the answers' state are J0's, and no later turn edits the runner.
+- **F3:** plain Set career past Day 32 says Stay, and Day 38 is checked to be in the endgame.
+- **F4:** progress line and Stop, no Mark shortcut.
+- **F5:** the parts are split (`events1/2`, `ending1/2`), J0 measures a whole part, and the answer combinations run from one Day 26 landing.
+- **F6:** the six jumps are added.
+- **F7:** a first cut is offered as question 6.
+- **F8:** End and undo is dropped and shown to the user as a change; Undo my last Dev action covers going back.
+- **F9:** the threads are greyed once settled, and the crew is replanned after End and keep, both in the check.
+
+One small note, not blocking: the slower career's jump (J3) needs a career "a week slow". That comes from the table (`devmodeCareerFor`, which v4.2 gives to J0), so J0 should lay down that option, for example a day offset, so J3 doesn't edit J0's lines.
