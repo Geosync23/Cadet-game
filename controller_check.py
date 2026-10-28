@@ -3004,7 +3004,10 @@ def part_savesland(pw, src, tag):
     f = r.ev(WA_FOCUS); slot = r.ev("SAVE_SLOT"); print(f'  the Saves app (playing Slot {slot}) lands on {f}')
     if not f or f['id'] != 'devBack': fails.append(f'the Saves app did not land on Back ({f})')
     if not pad_to(r, '#devBody button'): fails.append('no slot button reachable by the D-pad in the Saves app')
-    r.ev("deviceShow('home'); deviceShow('saves')"); r.step(4); r.press('A'); r.step(6)
+    r.press('B'); r.step(4); r.ev("deviceShow('saves')"); r.step(4)   # back home by B, then the app again: Back again, not where you were
+    f = r.ev(WA_FOCUS)
+    if not f or f['id'] != 'devBack': fails.append(f'the Saves app opened again did not land on Back ({f})')
+    r.press('A'); r.step(6)
     st = r.ev("({ app: DEV.app, open: DEV.open, slot: SAVE_SLOT, sure: SLOT_UI.sure })"); print(f'  first A: {st}')
     if st['app'] != 'home' or st['slot'] != slot: fails.append(f'the first A in the Saves app did not just go back home ({st})')
     if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
