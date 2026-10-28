@@ -12,12 +12,12 @@ For a fresh session taking over the Dev mode update (plan v4.4). Read this first
 |---|---|---|---|
 | J0 groundwork | claude/devmode-j0 eef5b56 | 0.95.0-dm.1 | RV24 PASS, the trunk |
 | J1 Career and Nights jumps | claude/devmode-j1 d9b7b3c | 0.95.0-dm.2 | RV24 PASS, merged (trunk = d9b7b3c) |
-| J3 the ending, answers row, Its next showing | claude/devmode-j3 2b88ad2 | 0.95.0-dm.3 | with RV24; on PASS fast-forward the trunk to it |
-| J4 the arrow's later sources | claude/devmode-j4 (from d9b7b3c) | 0.95.0-dm.4 | checks running at handover; see below |
+| J3 the ending, answers row, Its next showing | claude/devmode-j3 2b88ad2 | 0.95.0-dm.3 | RV24 PASS, merged (trunk = 2b88ad2) |
+| J4 the arrow's later sources | claude/devmode-j4 (the trunk with J3 merged in) | 0.95.0-dm.4 | to RV25 (session_01GKuymnnpKvNH4Ki69KEzwG, RV24's successor); on PASS fast-forward the trunk to it |
 | J2 ship events | not started | | waits for the Diplomatic visit to be really on (below) |
 | J5 notes, full round | not started | | after J2 |
 
-J3 and J4 both branch from d9b7b3c and touch separate blocks (J3: its block + one line in devmodeTrad; J4: its block + the score line in dvCareerNext + DV_MORE's m21 `first`), so they merge cleanly in either order; after the first is in, merge the trunk into the second and rerun devmode_check + dev_arrow_check + cadet.
+J4 already has J3 merged in (the only clash was DEV_NOTES, both notes kept). J4 also moved the goodbye jump to 09:16 (RV24's note on J3).
 
 ## What each turn built (details in DEV_NOTES)
 - **J0:** Jump to tab (DM_JUMPS, `devmodeJump({ id, group, label, day, at, by?, where?, set?, ans?, stops?, slow?, on? })`), the runner with stops (`devmodeAnsStops`, `devmodeRunTo`), `DM_UI.ans` (cq, offer), plain Set career says Stay past Day 32, the table only adds and stops after its last day (F1, DM1-1), `devmodeCareerFor(n, slow)`, DM_MAXDAY 40, DM_JUMPMAX 45, By rank, Senior/Specialist by hand, progress in place + Stop, tabs four to a row, empty blocks J1-J4, DV_MORE. devmode_check `jumps`.
