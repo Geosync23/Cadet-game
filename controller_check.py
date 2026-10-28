@@ -2970,6 +2970,8 @@ def part_devpad(pw, src, tag):
     r.close()
     r = wa_run(pw, src, f'{tag}_dev', query='?debug#dev')
     if not r.ev("DEVMODE"): r.close(); return fails + ['#dev did not turn Dev mode on in the test page']
+    if r.page.locator('text=Sign and go aboard').count():   # Dev mode has its own save: the arrival's manifest first
+        r.page.fill('form input', 'Ada'); r.page.click('text=Sign and go aboard'); r.step(30); r.press('B'); r.step(2)
     r.press('UP'); r.step(2); f = r.ev(WA_FOCUS); print(f'  D-pad up in Dev mode lands on {f}')
     if not f or f['id'] != 'pauseBtn': fails.append(f'D-pad up in Dev mode did not land on Pause first ({f})')
     if not pad_to(r, '.hud'): fails.append(f'the Dev card not reachable on the edge (focus {r.ev(WA_FOCUS)})')
@@ -2999,6 +3001,19 @@ WA_LIFT = r"""(() => { LIFT_BTN_ON = true; goToDeck(4); player.stop(); const k =
 def part_edge(pw, src, tag):
     fails = []
     r = wa_run(pw, src, f'{tag}_edge', quiet=REACH_QUIET)
+    # the edge: the goal's pin (first, from where the game starts: an item near you on screen)
+    r.ev("(() => { window.__pin = 0; const o = ixGoalTap; ixGoalTap = () => { window.__pin++; return o(); }; })()")
+    for k in range(10):                                    # an item near you, so its pin is on screen
+        r.ev(f"(() => {{ const p = player.obj.position, v = new THREE.Vector3(); const it = ITEMS.filter(i => i.hit).map(i => [i, i.hit.getWorldPosition(v).distanceTo(p)]).sort((a, b) => a[1] - b[1])[{k}]; window.__wa = it ? it[0].t : null; setGoal({{ deck: deckDef.num, item: window.__wa, label: 'Test' }}); }})()"); r.step(4)
+        if r.ev("!!document.querySelector('#ixGoal.tap .ixpin')"): break
+    if not r.ev("!!document.querySelector('#ixGoal.tap .ixpin')"): fails.append(f'setup: the goal\'s pin over "{r.ev("window.__wa")}" does not take taps')
+    else:
+        r.press('UP'); r.step(2)
+        if not pad_to(r, '#ixGoal.tap .ixpin'): fails.append(f'the goal\'s pin not reachable on the edge (focus {r.ev(WA_FOCUS)}, pin {r.ev("document.getElementById(\'ixGoal\').className")})')
+        else:
+            r.press('A'); r.step(3); st = r.ev("({ taps: window.__pin, hud: PAD_FOCUS.hud })"); print(f'  the goal\'s pin, A: {st}')
+            if st['taps'] != 1 or st['hud']: fails.append(f'A on the goal\'s pin did not tap it once and go back to walking ({st})')
+    r.ev("setGoal(null); player.stop(); if (ACT) actEnd(true)"); r.press('B'); r.step(2)
     # X: Take a seat with a tray (its mark on it)
     if not r.ev(WA_SEAT): fails.append('setup: no Take a seat in the Deck 3 mess with a tray')
     else:
@@ -3011,7 +3026,11 @@ def part_edge(pw, src, tag):
     if not r.ev(WA_LIFT): fails.append('setup: no Lift button in the Deck 4 car')
     else:
         r.step(12); mk = r.ev("!!document.querySelector('#liftBtn > .padk')")
-        r.press('X'); r.step(4); op = r.ev("!document.getElementById('lift').hidden"); print(f'  Lift: X\'s mark {mk}, X opens the panel {op}')
+        r.press('X'); op = False
+        for k in range(12):                                # you step up to the panel first
+            r.step(10); op = r.ev("!document.getElementById('lift').hidden")
+            if op: break
+        print(f'  Lift: X\'s mark {mk}, X opens the panel {op}')
         if not mk or not op: fails.append(f'X and the Lift button ({mk}, {op})')
         r.press('B'); r.step(4)
         if r.ev("!document.getElementById('lift').hidden"): fails.append('B did not close the lift panel')
@@ -3042,16 +3061,6 @@ def part_edge(pw, src, tag):
         r.press('A'); r.step(3)
         if not r.ev("document.getElementById('needStrip').classList.contains('fold')"): fails.append('A on the fold did not fold the needs strip')
     r.ev("stripFold(false)"); r.press('B'); r.step(2)
-    # the edge: the goal's pin
-    r.ev("(() => { const it = ITEMS.find(i => i.hit && /bunk|bed|locker|wardrobe/i.test(i.t)) || ITEMS.find(i => i.hit); window.__wa = it ? it.t : null; setGoal({ deck: deckDef.num, item: window.__wa, label: 'Test' }); window.__pin = 0; const o = ixGoalTap; ixGoalTap = () => { window.__pin++; return o(); }; })()"); r.step(10)
-    if not r.ev("!!document.querySelector('#ixGoal.tap .ixpin')"): fails.append(f'setup: the goal\'s pin over "{r.ev("window.__wa")}" does not take taps')
-    else:
-        r.press('UP'); r.step(2)
-        if not pad_to(r, '#ixGoal.tap .ixpin'): fails.append(f'the goal\'s pin not reachable on the edge (focus {r.ev(WA_FOCUS)})')
-        else:
-            r.press('A'); r.step(3); st = r.ev("({ taps: window.__pin, hud: PAD_FOCUS.hud })"); print(f'  the goal\'s pin, A: {st}')
-            if st['taps'] != 1 or st['hud']: fails.append(f'A on the goal\'s pin did not tap it once and go back to walking ({st})')
-    r.ev("setGoal(null)")
     if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
     r.close()
     return fails
