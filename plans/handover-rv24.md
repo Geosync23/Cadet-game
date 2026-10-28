@@ -25,5 +25,7 @@ session_01GKuymjJ4sU5hfdU8bH49UW (claude/p5s6-deck). AS1 session_01GKuymmdgtDvbd
   as it goes, so don't sed-edit a lane script that's already waiting (my DA6 lane3 ran the old sha); copying promo_beats_check.py
   under another name breaks its cadet_test lookup (it uses its own file name); git push can hang: use `timeout 60 git push`.
 
+## Priorities (lead 43, 10:03): EV1 visit-on first (gates the 0.96.0 round), then DM1 J0, then sound (SD3 session_01GKuymir9eBj7X6kLtwLRmq owns claude/sound-r3; SD2 archived). Hand over at ~60%.
+
 ## Open questions for the user
 None from me.

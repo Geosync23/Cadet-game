@@ -122,3 +122,4 @@ Code read (no runs yet):
   A pipe drips..." beside a held team job; cabin spots offered mid-visit; "Paint your name" from 1.9 m, 177 calls. Scratch merge
   staging-pad 56e98a56 + C a29a0f48 + B: 13 wave parts + m23 OK (controller_check end block conflict: keep both). PB1-1 noted (cake).
 - All three controller waves PASS: A 818ec0b, B 177793b6, C a29a0f48. Idle after.
+- Sound r3 turn 1 (64077a69): mine (lead 43); findings to SD3 session_01GKuymir9eBj7X6kLtwLRmq + lead. Farewell song changes to A in SD3's next turn. Priority: EV1 visit-on, DM1 J0, then sound.
