@@ -30,14 +30,14 @@ FOLLOW = """(() => { const g = goalNow(); if (!g || DIALOGUE || ACT) return null
   if (!s && g.room && ROOM_TILES[g.room]) s = cellPos(...ROOM_TILES[g.room][Math.floor(ROOM_TILES[g.room].length / 2)]);
   if (!s && typeof ixGoalWorld === 'function') { try { const w = ixGoalWorld(g); if (w) s = w; } catch (e) {} }
   if (!s) return 'no spot';
-  const d = Math.hypot(s.x - player.obj.position.x, s.z - player.obj.position.z); if (d < 1.2) return null;
+  const d = Math.hypot(s.x - player.obj.position.x, s.z - player.obj.position.z); if (d < 1.2) { if (/^Clock (in|out)/.test(g.label)) { try { clockPunch(false); return 'punched'; } catch (e) { return 'punch ' + e; } } return null; }
   player.obj.position.set(s.x, player.obj.position.y, s.z); player.stop(); return 'moved ' + (g.place || g.crew || g.room || '?'); })()"""
 D = lambda d, h, m: (d - 1) * 1440 + h * 60 + m
 def watch(g, frm, to, tag, shots=(), every_min=5):
     g.ev(f"devmodeSkipTo({frm}); for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 85)"); g.step(10)
     log(g, f'== {tag} from'); last = None; shot = set()
     while g.ev('shipNow()') < to:
-        g.step(15, 100)
+        g.step(30, 100)
         if g.ev("!!DIALOGUE"):
             s = log(g, ' scene'); g.shot(f'{OUT}/{tag}_scene_{s["clock"].replace(":", "")}.png'); play(g); g.step(5); log(g, ' after scene')
         f = g.ev(FOLLOW)
@@ -57,20 +57,22 @@ with sync_playwright() as pw:
     g.page.goto('file://' + str(tmp) + '#dev'); g.page.wait_for_function('window.__sc !== undefined', timeout=120000)
     g.page.add_style_tag(content='*,*::before,*::after{transition:none!important;animation:none!important}')
     g.ev = lambda src: g.page.evaluate('s => window.__sc(s)', src)
-    g.step = lambda n, dt=1000/30: g.page.evaluate(f'window.__step({n}, {dt})')
+    g.step = lambda n, dt=1000/30: g.page.evaluate(f'(() => {{ window.__skip = true; if ({n} > 1) window.__step({n} - 1, {dt}); window.__skip = false; window.__step(1, {dt}); }})()')
     g.shot = lambda path: g.page.screenshot(path=path)
+    g.ev(SKIP_SWITCH)
     g.step(20)
     if g.page.locator('text=Sign and go aboard').count(): g.page.fill('form input', 'Ada'); g.page.click('text=Sign and go aboard'); g.step(30)
     g.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)")
     print('set', g.ev("devmodeRun('Set career to Day 16', () => devmodeSetCareerTo(16))")); g.step(30); g.ev(RVHOOK)
     print('works', g.ev("JSON.stringify({ tier: SHIP.works.tier, rank: SHIP.works.rank })"), 'plan', g.ev("JSON.stringify(evCalPlan())"), 'log', g.ev("JSON.stringify(SHIP.eventLog.map(l => [l.id, l.startDay, l.endDay]))"))
     log(g, 'start')
-    watch(g, D(16, 7, 30), D(16, 11, 0), 'd16', shots=(510, 600))
+    watch(g, D(16, 8, 10), D(16, 8, 50), 'd16', shots=(515,))
+    watch(g, D(16, 9, 50), D(16, 10, 20), 'd16b', shots=(600,))
     print('mail16', g.ev("SHIP.mail.filter(m => m.day >= 15).map(m => m.day + ' ' + m.from + ': ' + m.subject)"))
-    watch(g, D(17, 9, 30), D(17, 11, 0), 'd17', shots=(595, 605, 620))
-    watch(g, D(18, 18, 0), D(18, 21, 0), 'd18', shots=(1140, 1200))
-    watch(g, D(19, 7, 40), D(19, 10, 20), 'd19', shots=(480, 545, 575, 600))
-    watch(g, D(19, 15, 40), D(19, 17, 0), 'd19pm', shots=(965, 990))
+    watch(g, D(17, 9, 45), D(17, 10, 40), 'd17', shots=(595, 605, 620))
+    watch(g, D(18, 18, 30), D(18, 20, 0), 'd18', shots=(1140, 1170))
+    watch(g, D(19, 7, 50), D(19, 10, 10), 'd19', shots=(485, 545, 575, 600))
+    watch(g, D(19, 15, 50), D(19, 16, 30), 'd19pm', shots=(965, 985))
     print('mail', g.ev("SHIP.mail.filter(m => m.day >= 15).map(m => m.day + ' ' + m.from + ': ' + m.subject)"))
     print('eventLog', g.ev("JSON.stringify(SHIP.eventLog.map(l => [l.id, l.startDay, l.endDay, l.band]))"))
     print('errors', g.errors[:8]); br.close()

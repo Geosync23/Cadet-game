@@ -1,0 +1,226 @@
+set True
+works {"tier":3,"rank":"senior"} plan [{"id":"crossingLine","day":6,"kind":"short"},{"id":"ionStorm","day":11,"kind":"main"},{"id":"diplomatic","day":16,"kind":"main"},{"id":"comet","day":22,"kind":"short"},{"id":"veyliVessel","day":27,"kind":"short"},{"id":"crossingBack","day":31,"kind":"short"}] log [["crossingLine",6,9],["ionStorm",11,16]]
+start {"clock": "Day 16, Tuesday 06:00", "day": null, "deck": 4, "room": "Spare cabin 4-23", "goal": null, "dlg": null, "ev": ["diplomatic", null], "near": [], "crew": 47, "calls": 171}
+== d16 from {"clock": "Day 16, Tuesday 08:10", "day": null, "deck": 4, "room": "Spare cabin 4-23", "goal": ["Clock in: shift at 09:00", 5, "5-timeclock-1"], "dlg": null, "ev": ["diplomatic", null], "near": [], "crew": 21, "calls": 171}
+   follow deck 5 Day 16, Tuesday 08:11
+  {"clock": "Day 16, Tuesday 08:11", "day": null, "deck": 5, "room": "Main lift", "goal": ["Clock in: shift at 09:00", 5, "5-timeclock-1"], "dlg": null, "ev": ["diplomatic", null], "near": [], "crew": 4, "calls": 184}
+   toast Day 16, Tuesday 08:10 Works: Your Tier 3 test: tomorrow, 09:00, the job board in the Works bay.
+   follow moved 5-timeclock-1 Day 16, Tuesday 08:12
+   follow punched Day 16, Tuesday 08:13
+   follow moved w Day 16, Tuesday 08:14
+  {"clock": "Day 16, Tuesday 08:16", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", null], "near": [], "crew": 5, "calls": 184}
+   toast Day 16, Tuesday 08:11 Your device: 14 new messages. Open your device to read them.
+   toast Day 16, Tuesday 08:13 Time clock: Don't forget to clock in: the time clock is past the tool wall, by the tea corner.
+   say Day 16, Tuesday 08:16 [object Object]: It's over. Comms are back.
+  {"clock": "Day 16, Tuesday 08:21", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", null], "near": [], "crew": 6, "calls": 184}
+  {"clock": "Day 16, Tuesday 08:26", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", null], "near": [], "crew": 7, "calls": 184}
+   say Day 16, Tuesday 08:22 [object Object]: Could've been worse. Could've been a lot better.
+   say Day 16, Tuesday 08:26 [object Object]: Isak and Erik are always together these days.
+  {"clock": "Day 16, Tuesday 08:31", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", null], "near": [], "crew": 7, "calls": 185}
+   say Day 16, Tuesday 08:31 [object Object]: I hear the drive coils are happy again. Whatever happy means for a coil.
+ shot 515 {"clock": "Day 16, Tuesday 08:35", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", null], "near": [], "crew": 7, "calls": 184}
+  {"clock": "Day 16, Tuesday 08:36", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", null], "near": [], "crew": 7, "calls": 185}
+  {"clock": "Day 16, Tuesday 08:41", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", null], "near": [], "crew": 9, "calls": 168}
+   say Day 16, Tuesday 08:37 [object Object]: We've got a new works cadet coming next week.
+   say Day 16, Tuesday 08:41 [object Object]: Good job on that pump.
+  {"clock": "Day 16, Tuesday 08:46", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", null], "near": [], "crew": 10, "calls": 168}
+== d16 to {"clock": "Day 16, Tuesday 08:50", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", null], "near": [], "crew": 10, "calls": 168}
+   say Day 16, Tuesday 08:47 [object Object]: Farah and Signe are always together these days.
+== d16b from {"clock": "Day 16, Tuesday 09:50", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", "warning"], "near": [], "crew": 10, "calls": 184}
+   toast Day 16, Tuesday 09:50 Your device: New mail from Stores: Out of membranes.
+  {"clock": "Day 16, Tuesday 09:51", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", "warning"], "near": [], "crew": 10, "calls": 184}
+   say Day 16, Tuesday 09:51 [object Object]: Board's light today.
+  {"clock": "Day 16, Tuesday 09:56", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", "warning"], "near": [], "crew": 10, "calls": 184}
+   say Day 16, Tuesday 09:51 [object Object]: Then it'll be heavy tomorrow. It always is.
+   say Day 16, Tuesday 09:56 [object Object]: Have you noticed Zofia and Chloe? Best of friends now.
+ shot 600 {"clock": "Day 16, Tuesday 10:00", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", "warning"], "near": [], "crew": 10, "calls": 184}
+   say Day 16, Tuesday 10:00 [object Object]: Gym club went well. Nobody fell off the treadmill. A record.
+  {"clock": "Day 16, Tuesday 10:01", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", "warning"], "near": [], "crew": 10, "calls": 184}
+   say Day 16, Tuesday 10:00 [object Object]: Yesterday's clothes. They've got a whole day in them.
+  {"clock": "Day 16, Tuesday 10:06", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", "warning"], "near": [], "crew": 9, "calls": 179}
+   say Day 16, Tuesday 10:06 [object Object]: A Veyli delegation, they say. Best uniforms on. Mine's been in a drawer since the academy.
+  {"clock": "Day 16, Tuesday 10:11", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", "warning"], "near": [], "crew": 9, "calls": 179}
+   say Day 16, Tuesday 10:10 [object Object]: Chief Holt and Dara aren't speaking.
+  {"clock": "Day 16, Tuesday 10:16", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", "warning"], "near": [], "crew": 8, "calls": 179}
+   say Day 16, Tuesday 10:14 [object Object]: Greta and Noor are always together these days.
+== d16b to {"clock": "Day 16, Tuesday 10:20", "day": null, "deck": 5, "room": "Works bay", "goal": ["Take a job at the board", 5, "w"], "dlg": null, "ev": ["diplomatic", "warning"], "near": [], "crew": 6, "calls": 179}
+   say Day 16, Tuesday 10:18 [object Object]: Have you noticed Maeve and Saad? Best of friends now.
+mail16 []
+== d17 from {"clock": "Day 17, Wednesday 09:45", "day": null, "deck": 5, "room": "Works bay", "goal": ["Clock in: shift at 09:00", 5, "5-timeclock-1"], "dlg": null, "ev": ["diplomatic", "warning"], "near": [], "crew": 11, "calls": 167}
+   toast Day 16, Tuesday 18:20 Time clock: 17:00. The clock signed you out for you. Go and eat.
+   toast Day 17, Wednesday 08:20 Time clock: Don't forget to clock in: the time clock is past the tool wall, by the tea corner.
+   toast Day 17, Wednesday 09:45 Your device: 3 new messages. Open your device to read them.
+   toast Day 17, Wednesday 09:45 Chief Ines Calder: Your first Senior training. The relay room, Deck 1. Bring your hands; I'll bring the relays. 11:00, Relay room on Deck 1.
+   toast Day 17, Wednesday 09:45 Scrubber fan change: Your turn: hold it steady
+   toast Day 17, Wednesday 09:45 Scrubber fan change: Emeka started without you. They'll manage. Slower.
+   toast Day 17, Wednesday 09:45 Your device: New mail from Works time clock: You didn't clock out.
+   say Day 17, Wednesday 09:45 [object Object]: 11:00, the bridge's relay room. Power and relays. I'll meet you there.
+  {"clock": "Day 17, Wednesday 09:46", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "warning"], "near": [], "crew": 11, "calls": 168}
+   toast Day 17, Wednesday 09:45 Scrubber fan change: Your turn: hold it steady
+   toast Day 17, Wednesday 09:46 Your device: New job: Cold store chiller (milk going off), Deck 3 · galley plant. Take it at the job board in the Works bay, Deck 5.
+   say Day 17, Wednesday 09:46 [object Object]: A Veyli delegation is coming aboard. Four of them.
+  {"clock": "Day 17, Wednesday 09:51", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "warning"], "near": [], "crew": 11, "calls": 168}
+   toast Day 17, Wednesday 09:46 Scrubber fan change: Emeka started without you. They'll manage. Slower.
+   toast Day 17, Wednesday 09:47 Your device: New mail from Works time clock: You didn't clock out.
+   toast Day 17, Wednesday 09:48 Your device: New job: Cold store chiller (milk going off), Deck 3 · galley plant. Take it at the job board in the Works bay, Deck 5.
+ shot 595 {"clock": "Day 17, Wednesday 09:55", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "warning"], "near": [], "crew": 11, "calls": 168}
+   say Day 17, Wednesday 09:51 [object Object]: Two gauges on this one, and they don't agree. One's fibbing.
+   say Day 17, Wednesday 09:53 [object Object]: Get a third reading. The scanner doesn't take sides.
+   say Day 17, Wednesday 09:54 [object Object]: Watch is doubling up on the Deck 2 corridor.
+  {"clock": "Day 17, Wednesday 09:56", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "warning"], "near": ["marrow@6.1", "vance@3.9"], "crew": 13, "calls": 184}
+   toast Day 17, Wednesday 09:56 Time clock: Not clocked in. Your shift began at 09:00: the time clock's past the tool wall, Works bay.
+   say Day 17, Wednesday 09:56 [object Object]: Clocked in yet? The clock's past the tool wall, by the tea corner.
+  {"clock": "Day 17, Wednesday 10:01", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "onset"], "near": ["teshavi@5.7", "kesrin@5.7", "moleth@4.2", "ithra@5.7", "saruth@6.6", "marrow@6.8", "vance@7.1"], "crew": 19, "calls": 169}
+   toast Day 17, Wednesday 10:00 Your device: 2 new messages. Open your device to read them.
+   say Day 17, Wednesday 09:59 [object Object]: Commander Vance and Oona are always together these days.
+   say Day 17, Wednesday 10:00 [object Object]: That shirt's seen a sunrise already. Well, a shift.
+ shot 605 {"clock": "Day 17, Wednesday 10:05", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "onset"], "near": ["teshavi@5.7", "kesrin@5.7", "moleth@4.2", "ithra@5.7", "saruth@11.4", "marrow@12.7", "vance@12.9"], "crew": 18, "calls": 164}
+   say Day 17, Wednesday 10:03 [object Object]: The range is back. Lukas stopped muttering.
+  {"clock": "Day 17, Wednesday 10:06", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "onset"], "near": ["teshavi@5.7", "kesrin@5.7", "moleth@4.2", "ithra@5.7", "saruth@11.4", "marrow@12.7", "vance@12.9"], "crew": 18, "calls": 164}
+   toast Day 17, Wednesday 10:06 Time clock: Still not clocked in. The time clock's in the Works bay, Deck 5. Late is better than missed.
+  {"clock": "Day 17, Wednesday 10:11", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "onset"], "near": ["teshavi@4.5", "kesrin@4.3", "saruth@11.4", "marrow@12.7", "vance@12.9"], "crew": 17, "calls": 164}
+   say Day 17, Wednesday 10:09 [object Object]: The lights are steady again. Someone deserves a biscuit.
+  {"clock": "Day 17, Wednesday 10:16", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "onset"], "near": ["teshavi@9.4", "kesrin@10.1", "saruth@11.4", "marrow@12.7", "vance@12.9"], "crew": 15, "calls": 164}
+   say Day 17, Wednesday 10:15 [object Object]: Wall night was busy. The bell rang so often Tomas stopped counting. Vance didn't.
+ shot 620 {"clock": "Day 17, Wednesday 10:20", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "onset"], "near": ["teshavi@10.2", "kesrin@11.4", "saruth@11.4", "marrow@12.7", "vance@12.9"], "crew": 14, "calls": 164}
+   say Day 17, Wednesday 10:19 [object Object]: Theo is leaving us. The Heron, in ten days.
+  {"clock": "Day 17, Wednesday 10:21", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "onset"], "near": ["teshavi@8.7", "kesrin@9.7", "saruth@11.4", "marrow@12.7", "vance@12.9"], "crew": 13, "calls": 164}
+  {"clock": "Day 17, Wednesday 10:26", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "onset"], "near": ["teshavi@5", "kesrin@4.5", "saruth@11.4", "marrow@5.7", "vance@12.9"], "crew": 13, "calls": 163}
+   say Day 17, Wednesday 10:23 [object Object]: The Envoy said good morning to me. By name. I don't know how they knew it.
+  {"clock": "Day 17, Wednesday 10:31", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "onset"], "near": ["saruth@5.5", "vance@12.9"], "crew": 10, "calls": 164}
+   toast Day 17, Wednesday 10:30 Works: Power and relays with Calder at 11:00: Relay room, Deck 1. Go at quarter to.
+   say Day 17, Wednesday 10:27 [object Object]: Rina won again at Tiles. That’s 3 Tuesdays running.
+  {"clock": "Day 17, Wednesday 10:36", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "onset"], "near": ["vance@12.9"], "crew": 10, "calls": 164}
+   say Day 17, Wednesday 10:33 [object Object]: The main fan on Deck 5 has been rattling all week.
+== d17 to {"clock": "Day 17, Wednesday 10:40", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "onset"], "near": ["vance@11.3"], "crew": 11, "calls": 169}
+   say Day 17, Wednesday 10:38 [object Object]: Have you noticed Kofi and Greta? Best of friends now.
+== d18 from {"clock": "Day 18, Thursday 18:30", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+   toast Day 18, Thursday 18:30 Your device: 4 new messages. Open your device to read them.
+   toast Day 18, Thursday 18:30 Your device: 2 new messages. Open your device to read them.
+  {"clock": "Day 18, Thursday 18:31", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+   toast Day 18, Thursday 18:30 Your device: 2 new messages. Open your device to read them.
+  {"clock": "Day 18, Thursday 18:36", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+  {"clock": "Day 18, Thursday 18:41", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+  {"clock": "Day 18, Thursday 18:46", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 166}
+  {"clock": "Day 18, Thursday 18:51", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+  {"clock": "Day 18, Thursday 18:56", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+ shot 1140 {"clock": "Day 18, Thursday 19:00", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+   toast Day 18, Thursday 19:00 Your device: New job: Climbing holds, Rec deck · river hall, and 1 more. Take it at the job board in the Works bay, Deck 5.
+  {"clock": "Day 18, Thursday 19:01", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+  {"clock": "Day 18, Thursday 19:06", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 166}
+  {"clock": "Day 18, Thursday 19:11", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+  {"clock": "Day 18, Thursday 19:16", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+  {"clock": "Day 18, Thursday 19:21", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+  {"clock": "Day 18, Thursday 19:26", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+ shot 1170 {"clock": "Day 18, Thursday 19:30", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+  {"clock": "Day 18, Thursday 19:31", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+  {"clock": "Day 18, Thursday 19:36", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+  {"clock": "Day 18, Thursday 19:41", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+  {"clock": "Day 18, Thursday 19:46", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+  {"clock": "Day 18, Thursday 19:51", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+  {"clock": "Day 18, Thursday 19:56", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+== d18 to {"clock": "Day 18, Thursday 20:00", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 0, "calls": 167}
+   toast Day 18, Thursday 20:00 Your device: New job: Tune, Deck 3 · galley, and 1 more. Take it at the job board in the Works bay, Deck 5.
+== d19 from {"clock": "Day 19, Friday 07:50", "day": null, "deck": 5, "room": "Works bay", "goal": ["Emeka wants a word", 3, "halloran-emeka"], "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 1, "calls": 166}
+   toast Day 19, Friday 06:00 Chief Ines Calder: Your first Senior training. The relay room, Deck 1. Bring your hands; I'll bring the relays. 11:00, Relay room on Deck 1.
+   toast Day 19, Friday 07:50 Your device: New mail from Chef Brennan: Spoiled food binned.
+   follow deck 3 Day 19, Friday 07:51
+  {"clock": "Day 19, Friday 07:51", "day": null, "deck": 3, "room": "Main lift", "goal": ["Emeka wants a word", 3, "halloran-emeka"], "dlg": null, "ev": ["diplomatic", "escalation"], "near": ["teshavi@11.9", "moleth@9.1", "ithra@10.5", "saruth@7.6", "vance@9.5"], "crew": 53, "calls": 243}
+   toast Day 19, Friday 07:50 Chief Ines Calder: Your first Senior training. The relay room, Deck 1. Bring your hands; I'll bring the relays. 11:00, Relay room on Deck 1.
+   follow moved halloran-emeka Day 19, Friday 07:52
+  {"clock": "Day 19, Friday 07:56", "day": null, "deck": 3, "room": "Mess hall", "goal": ["Emeka wants a word", 3, "halloran-emeka"], "dlg": null, "ev": ["diplomatic", "escalation"], "near": ["teshavi@7.5", "moleth@12.3", "ithra@6.4", "saruth@1.1", "vance@3.8"], "crew": 54, "calls": 250}
+   toast Day 19, Friday 07:51 Your device: New mail from Chef Brennan: Spoiled food binned.
+   say Day 19, Friday 07:52 brennan: Got a minute after lunch tomorrow, love? Galley, half two. I need a taster.
+   say Day 19, Friday 07:55 [object Object]: Something about who stands where at the door. It got frosty.
+   say Day 19, Friday 07:55 [object Object]: You're asking around about the scrubber?
+   say Day 19, Friday 07:56 [object Object]: Ask who sleeps near it. And check they were in.
+   follow deck 5 Day 19, Friday 08:00
+   follow moved 5-timeclock-1 Day 19, Friday 08:01
+  {"clock": "Day 19, Friday 08:01", "day": null, "deck": 5, "room": "Works bay", "goal": ["Clock in: shift at 09:00", 5, "5-timeclock-1"], "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 4, "calls": 190}
+   toast Day 19, Friday 08:00 Your device: New job: Clear a fault, Deck 4 · laundry, and 1 more. Take it at the job board in the Works bay, Deck 5.
+   say Day 19, Friday 08:00 [object Object]: Their scholar wants to see the engine room. Torres is thrilled.
+   follow punched Day 19, Friday 08:02
+   follow moved w Day 19, Friday 08:03
+ shot 485 {"clock": "Day 19, Friday 08:05", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 5, "calls": 168}
+   toast Day 19, Friday 08:02 Time clock: Don't forget to clock in: the time clock is past the tool wall, by the tea corner.
+   say Day 19, Friday 08:04 [object Object]: The infirmary's lamp is back. Very clean in there now.
+  {"clock": "Day 19, Friday 08:06", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 6, "calls": 168}
+  {"clock": "Day 19, Friday 08:11", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 7, "calls": 167}
+   say Day 19, Friday 08:10 [object Object]: Have you heard? The air scrubber on Deck 2 is rattling again.
+  {"clock": "Day 19, Friday 08:16", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 8, "calls": 168}
+   say Day 19, Friday 08:14 [object Object]: Someone should look at the air scrubber on Deck 2. It keeps rattling.
+  {"clock": "Day 19, Friday 08:21", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 7, "calls": 168}
+   say Day 19, Friday 08:19 [object Object]: Pump's fine. Smells of the garden.
+  {"clock": "Day 19, Friday 08:26", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 8, "calls": 168}
+   say Day 19, Friday 08:24 [object Object]: Somebody fixed the dryer. Hero.
+  {"clock": "Day 19, Friday 08:31", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 8, "calls": 168}
+   say Day 19, Friday 08:30 [object Object]: Did you hear about quiz night? Two teams tied on the reactor question. Again.
+  {"clock": "Day 19, Friday 08:36", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 9, "calls": 168}
+   say Day 19, Friday 08:35 [object Object]: Did you know it's Imani's birthday?
+  {"clock": "Day 19, Friday 08:41", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 9, "calls": 168}
+  {"clock": "Day 19, Friday 08:46", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 10, "calls": 168}
+  {"clock": "Day 19, Friday 08:51", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 13, "calls": 169}
+   say Day 19, Friday 08:47 [object Object]: Anything happen overnight?
+   say Day 19, Friday 08:47 [object Object]: The tea ran out at three.
+   say Day 19, Friday 08:48 [object Object]: A crisis, then.
+   say Day 19, Friday 08:49 [object Object]: We coped.
+  {"clock": "Day 19, Friday 08:56", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "escalation"], "near": [], "crew": 13, "calls": 169}
+  {"clock": "Day 19, Friday 09:01", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "resolution"], "near": [], "crew": 13, "calls": 167}
+   toast Day 19, Friday 09:00 Your device: New mail from Chef Brennan: Spoiled food binned.
+   say Day 19, Friday 08:57 [object Object]: Dev and Erik have become thick as thieves.
+   say Day 19, Friday 09:01 [object Object]: No more blinking lights. My eyes thank whoever it was.
+ shot 545 {"clock": "Day 19, Friday 09:05", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "resolution"], "near": [], "crew": 13, "calls": 167}
+  {"clock": "Day 19, Friday 09:06", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "resolution"], "near": [], "crew": 12, "calls": 168}
+  {"clock": "Day 19, Friday 09:11", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "resolution"], "near": [], "crew": 12, "calls": 168}
+   say Day 19, Friday 09:07 [object Object]: Warm again. The heat pump's back.
+  {"clock": "Day 19, Friday 09:16", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "resolution"], "near": [], "crew": 11, "calls": 168}
+   say Day 19, Friday 09:13 [object Object]: Missed you at the quiz. We could've used someone who knows engines.
+  {"clock": "Day 19, Friday 09:21", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "resolution"], "near": [], "crew": 10, "calls": 167}
+   say Day 19, Friday 09:18 [object Object]: Have you heard? The galley plant on Deck 3 is playing up again.
+  {"clock": "Day 19, Friday 09:26", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "resolution"], "near": [], "crew": 10, "calls": 167}
+  {"clock": "Day 19, Friday 09:31", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "resolution"], "near": [], "crew": 10, "calls": 168}
+   say Day 19, Friday 09:30 [object Object]: Once more, slowly. There.
+ shot 575 {"clock": "Day 19, Friday 09:35", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "resolution"], "near": ["teshavi@5.2", "kesrin@4.2", "saruth@6.1"], "crew": 25, "calls": 169}
+   say Day 19, Friday 09:35 [object Object]: Is that scarf for you?
+  {"clock": "Day 19, Friday 09:36", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "resolution"], "near": ["teshavi@5.8", "kesrin@4.9", "saruth@7.2"], "crew": 25, "calls": 169}
+   say Day 19, Friday 09:35 [object Object]: It's for whoever stands still longest.
+  {"clock": "Day 19, Friday 09:41", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "resolution"], "near": ["teshavi@12.8", "kesrin@11.7", "saruth@13.3"], "crew": 25, "calls": 169}
+   say Day 19, Friday 09:36 [object Object]: I'm moving. I'm moving.
+   say Day 19, Friday 09:41 [object Object]: The basil's showing off again.
+  {"clock": "Day 19, Friday 09:46", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "resolution"], "near": ["teshavi@12.7", "kesrin@12.2", "saruth@13.3"], "crew": 25, "calls": 169}
+  {"clock": "Day 19, Friday 09:51", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "resolution"], "near": ["teshavi@7.7", "kesrin@12.2", "moleth@4.2", "ithra@5.7", "saruth@13.3"], "crew": 27, "calls": 170}
+   say Day 19, Friday 09:48 [object Object]: Ten more minutes with the coils. Breakfast in five.
+   say Day 19, Friday 09:50 [object Object]: Don't look. I mean it. Don't look.
+  {"clock": "Day 19, Friday 09:56", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "resolution"], "near": ["teshavi@7.7", "kesrin@12.2", "moleth@4.2", "ithra@5.7", "saruth@13.3"], "crew": 27, "calls": 170}
+   say Day 19, Friday 09:55 [object Object]: Laundry's running again. Deck 4 rejoices.
+ shot 600 {"clock": "Day 19, Friday 10:00", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "afterglow"], "near": ["teshavi@7.5", "kesrin@12", "saruth@13.3"], "crew": 25, "calls": 169}
+   toast Day 19, Friday 10:00 Your device: New job: Lab gas plant, Deck 2 · lab gas plant. Take it at the job board in the Works bay, Deck 5.
+   say Day 19, Friday 10:00 [object Object]: Yesterday's clothes. They've got a whole day in them.
+  {"clock": "Day 19, Friday 10:01", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "afterglow"], "near": ["teshavi@5.4", "kesrin@9.3", "saruth@13.3"], "crew": 25, "calls": 169}
+   say Day 19, Friday 10:01 [object Object]: Have you noticed Lars and Noor? Best of friends now.
+  {"clock": "Day 19, Friday 10:06", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "afterglow"], "near": ["kesrin@5", "saruth@6"], "crew": 24, "calls": 164}
+   say Day 19, Friday 10:05 [object Object]: I'll miss the bowing. I'd got quite good at it.
+== d19 to {"clock": "Day 19, Friday 10:10", "day": null, "deck": 5, "room": "Works bay", "goal": ["Your head-scratcher lesson", 5, "w"], "dlg": null, "ev": ["diplomatic", "afterglow"], "near": [], "crew": 14, "calls": 164}
+   say Day 19, Friday 10:10 [object Object]: Dr. Nandakumar and Matthias have become thick as thieves.
+== d19pm from {"clock": "Day 19, Friday 15:50", "day": null, "deck": 5, "room": "Works bay", "goal": ["Shift over: clock out", 5, "5-timeclock-1"], "dlg": null, "ev": ["diplomatic", "afterglow"], "near": [], "crew": 1, "calls": 167}
+   toast Day 19, Friday 15:50 Your device: New mail from Chef Brennan: Cake tonight.
+   toast Day 19, Friday 15:50 Your device: 2 new messages. Open your device to read them.
+   follow moved 5-timeclock-1 Day 19, Friday 15:51
+  {"clock": "Day 19, Friday 15:51", "day": null, "deck": 5, "room": "Works bay", "goal": ["Shift over: clock out", 5, "5-timeclock-1"], "dlg": null, "ev": ["diplomatic", "afterglow"], "near": [], "crew": 1, "calls": 190}
+   toast Day 19, Friday 15:50 Your device: 2 new messages. Open your device to read them.
+  {"clock": "Day 19, Friday 15:56", "day": null, "deck": 5, "room": "Works bay", "goal": ["Shift over: clock out", 5, "5-timeclock-1"], "dlg": null, "ev": ["diplomatic", "afterglow"], "near": [], "crew": 1, "calls": 170}
+  {"clock": "Day 19, Friday 16:01", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "afterglow"], "near": [], "crew": 1, "calls": 171}
+   toast Day 19, Friday 16:00 Time clock: Half three. The clock signed you out for you. The Captain's at four.
+   toast Day 19, Friday 16:00 Your device: New mail from Works time clock: You didn't clock out.
+   toast Day 19, Friday 16:00 Your device: New mail from Works time clock: You didn't clock out.
+ shot 965 {"clock": "Day 19, Friday 16:05", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "afterglow"], "near": [], "crew": 1, "calls": 171}
+  {"clock": "Day 19, Friday 16:06", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "afterglow"], "near": [], "crew": 1, "calls": 169}
+  {"clock": "Day 19, Friday 16:11", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "afterglow"], "near": [], "crew": 1, "calls": 170}
+  {"clock": "Day 19, Friday 16:16", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "afterglow"], "near": [], "crew": 1, "calls": 170}
+  {"clock": "Day 19, Friday 16:21", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "afterglow"], "near": [], "crew": 1, "calls": 170}
+ shot 985 {"clock": "Day 19, Friday 16:25", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "afterglow"], "near": [], "crew": 1, "calls": 170}
+  {"clock": "Day 19, Friday 16:26", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "afterglow"], "near": [], "crew": 1, "calls": 170}
+== d19pm to {"clock": "Day 19, Friday 16:30", "day": null, "deck": 5, "room": "Works bay", "goal": null, "dlg": null, "ev": ["diplomatic", "afterglow"], "near": [], "crew": 1, "calls": 170}
+mail []
+eventLog [["crossingLine",6,9,"smooth"],["ionStorm",11,16,"bumpy"]]
+errors []

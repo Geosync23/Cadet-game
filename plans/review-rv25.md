@@ -45,3 +45,14 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
   swap block (section 18) and calls section 24's worksXp; j.event is set on event jobs; it is registered at load before
   section 24's turn-in listener, so it runs first, not after as its comment says (same xp total; a band word could toast
   twice if both cross a band: note). Re-running on it: cadet, career, events (lane 1); lines, promo_beats, vis_play (lane 2).
+- 8c91437 runs: cadet ALL IDENTICAL; career only the old backlog 12; events only the old FX24-2; lines PASS; promo_beats OK.
+  cf67777: fridays OK, lines --day PASS, arrows OK.
+- vis_play.py (8c91437, Dev career Day 16, frames skipped between draws, clock-in by clockPunch): warning chatter Day 16;
+  onset message 10:00 Day 17 (shot visit/d17_1005.png); Veyli aboard Wed-Fri; farewell crowd at the shuttle bay 09:35 Day 19
+  (visit/d19_0935.png), gone at 10:00; afterglow chatter; calls 164-184; no page errors. No arrow to the greeting, gifts or
+  farewell (by design: notify / tap to join). Dev career Day 16: a Senior told "Your Tier 3 test: tomorrow" (DM1 note).
+- **VERDICT visit-on: PASS at a1917dd** (game 8c91437, e82e6955...59ad), sent ~13:5x to lead 44 (now the lead,
+  session_01GKuymj3tKpX7xwDZwBh8RM), EV1, BM20. Notes: listener order comment; no arrows to the visit's meetings (question);
+  the Dev Day 16 test toast.
+
+## Next: sound 667ad05e + e748f560 (SD3), then Dev mode J4 c7489b5 (DM1, session_01GKuymkR7Z42FfTQyt2VWe3)
