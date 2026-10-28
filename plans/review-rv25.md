@@ -107,3 +107,5 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
 - Code read: times from event data via evBeatAt/evCalPlan; VESSEL set at load; no R(); dmEvMeet by evInvited; End and
   keep's message names DM2-1's limit. Note: the formal dinner jump lands in the closed, empty Captain's quarters.
 - 21:59 lead 44: the 0.96.0 round finished; two browsers fine again.
+- J5 86958252 (game 67728794...8cbb): **PASS** (~23:1x, DM2, lead 44, BM20). cadet vs fe11cd66 ALL IDENTICAL; devmode_check
+  events1 OK: evVisitDinner Day 18 18:55 Galley (3 'K'). design-doc Dev mode text matches. Dev mode J0-J5 fully reviewed.
