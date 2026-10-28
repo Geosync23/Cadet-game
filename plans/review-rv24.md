@@ -8,7 +8,7 @@ Cap rule: at most 5 seats working at once; read only until RV23 says it has gone
 | Branch | Verdict | Sha |
 |---|---|---|
 | claude/devmode-j0 (DM1): Dev mode J0, Jump to tab, runner with Stop, Day 40, ranks | PASS | eef5b56 |
-| claude/sound-r3 (SD2, SD3 now): event music turn 1, farewell song A | PASS | 64077a69, dc3014b6 |
+| claude/sound-r3 (SD2, SD3 now): event music turn 1, farewell song A | PASS | 64077a69, dc3014b6, a09b32b7 (mess hall) |
 | claude/pad-wave-b (PB1): controller wave B, props mid-visit, every job stop, beam floor, court edge | PASS | 177793b6 |
 | claude/pad-wave-a (PA1): controller wave A, landings, clock x, Dev card, X, B, Saves on Back | PASS | 818ec0b |
 | claude/pad-wave-c (SD2): controller wave C, sound hook, pad words, Saves hint | PASS (should cleared in a29a0f48) | 336b00c2, a29a0f48 |
@@ -130,3 +130,4 @@ Code read (no runs yet):
   tab, Set career Day 38 (Tap again), progress + Stop, 18 s, Day 38 06:00 Engine Specialist with milestones kept. Rep "New" from Day 26:
   same on the base (per-rank reputation).
 - Sound r3 dc3014b6 (farewell song A): PASS (SOUND_ONLY=r3 OK).
+- Sound r3 turn 2 a09b32b7 (mess hall): PASS. cadet identical; sound_check OK incl. r3mess (silent empty, ~3 clinks/s at 44/50, off outside the mess).
