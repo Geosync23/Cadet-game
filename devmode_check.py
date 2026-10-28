@@ -713,10 +713,11 @@ def part_beats(b):
             if id == 'n2': check(N['on23'] and N['rows'], f'beats: n2: night 2\'s reactor not on: {N["rows"]}')
             if id == 'n3': check(N['on24'] and N['rows'], f'beats: n3: night 3\'s coil swap not on: {N["rows"]}')
     for k, v in got.items(): print('   ', k, str(v)[:160])
-    # Undo after a jump brings back the one before
-    last = on[-1]; prev = on[-2] if len(on) > 1 else None
+    # Undo puts back the last Dev action: after the last night's clock-in skip, its landing (the jump itself before that)
+    last = on[-1]; land = pg.ev(f"'Day ' + devmodeJumpOf('{last}').day + ','")
     pg.ev_reload('devmodeUndo()')
-    check(prev is None or pg.ev("devmodeState().set && devmodeState().set.beat") == prev, f'beats: Undo after {last}: {pg.ev("devmodeState().set")}')
+    U = pg.ev("({ beat: devmodeState().set && devmodeState().set.beat, clock: clockText() })")
+    check(U['beat'] == last and U['clock'].startswith(land), f'beats: Undo after {last}\'s clock skip: {U}')
     check(not pg.errors, f'beats: errors {pg.errors[:3]}')
     pg.close(); ctx.close()
     # the same jump in two fresh browsers: the same save (within one page, see backlog DM1-3)
