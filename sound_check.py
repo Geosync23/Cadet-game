@@ -339,6 +339,7 @@ CHECKS += [check_comet_sound]   # the comet (SD1 for FX25)
 R3_LINE = 'const SND_R3_ON = false;'
 def r3_copy(path):
     src = pathlib.Path(path).read_text()
+    if 'const SND_R3_ON = true;' in src: return path   # switched on in the build itself (0.96.0): test it as it is
     if R3_LINE not in src: return None
     f = WORK / 'test' / f'_r3on_{os.getpid()}.html'; f.parent.mkdir(parents=True, exist_ok=True); f.write_text(src.replace(R3_LINE, 'const SND_R3_ON = true;', 1)); return str(f)
 R3_KEYS = ['beam', 'cup', 'farewellsup', 'goodbye', 'harvest', 'lantern', 'line', 'veyli', 'farewell']
