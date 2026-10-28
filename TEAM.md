@@ -1852,3 +1852,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~05:11 UTC: SD2 **SD2-1 fixed** claude/pad-wave-c a29a0f48: every tip card uses pad words while the pad is in use (sec 19 tipWords; walking tip 'Walk with the left stick, and press A on anything to use it'), back on touch; words part + mutant; cadet identical, check_fast OK. RV24 quick re-look. SD2 idle ~44%.
 - ~05:12 UTC: **RV24 PASS wave C a29a0f48** (final C tip; held for A, B). Wave A 818ec0b full run going.
 - ~05:59 UTC check-in (lead 43, ~23%): RV24 (~49%) reading wave A 818ec0b full-run summary; PB1 (~29%) rest of controller_check + reach still running; CA1 (~45%) idle-fix planted-fault run (~30-40 min); SD2, DM1, PA1 idle; BM20 waiting. No stalls.
+- ~06:00 UTC: **RV24 PASS wave A 818ec0b** (48 parts OK, idle old; cadet identical; 390x844 landings OK). **BM20 GO: merge A.** C waits for B.
