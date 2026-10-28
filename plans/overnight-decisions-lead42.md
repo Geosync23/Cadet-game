@@ -22,3 +22,9 @@ Recommended shape (lead 42's call; change if the audit says otherwise):
 | 5 | Fold the two test-only check fixes (R3 88999f2, AS1 238c46d8) in now? | Yes, into claude/staging-pad first (game byte-identical). | Test only; needed for the controller round anyway. |
 | 6 | Which "sound samples" for the morning report? (the user, 10:13 PM ET, did not say which) | One new page, Wren Sounds: Round 3 (SD2): tradition music samples (the held pick from 25 Oct), the Veyli farewell song, and A/B/C sounds for features added since the 0.93.0 sound build. Nothing into the game. | These are all the open sound items in plans/sound/audio-todo.md and handover-sound.md; the user can say if they meant something else. |
 | 7 | Dev mode update | Off hold (the user, 10:13 PM ET): starts right after the controller update passes its round. | The user's words. |
+| 8 | Sound for a pad-only player (audit Q1) | Start sound from the first pad press where the browser allows; a once-only note where it doesn't. | CA1's recommendation; a pad-only player otherwise hears nothing. |
+| 9 | Time clock Undo with a pad (audit Q2) | Land on the close cross during the 5 s Undo window. | A double A press can't undo a punch by accident; keeps the touch layout. |
+| 10 | Dev mode by pad (audit Q3) | Add the Dev card to the screen-edge buttons when #dev is in the link. | The user and testers use Dev mode. |
+| 11 | On-screen keyboard for memos / Dev search (audit Q4) | No, leave as is. | About 4 hours; the user's earlier answer was about the name only. |
+| 12 | Save file Download/Load from a pad (audit Q5) | Needs a test on the user's real controller before the switch-on goes live; wave C adds a one-line hint meanwhile. | Can't be tested headless; ask the user in the morning. |
+| 13 | Wave C timing | After SD2's sound page is done (cap of 5). Merge order A, B, C. | Cap; C touches the sound section SD2 knows best. |
