@@ -12,6 +12,9 @@ Built on DP1's v3.1 (kept as `plans/devmode-plan-v3.1.html` / `.md`). The user's
 - F5: stub parts events1/events2, ending1/ending2; J0 measures a whole part; answer combinations from one Day 26 landing with Undo.
 - F6: added jumps: M19 lesson (Day 17), M20 training (Day 19), old mysteries (Day 21), first rotation (Day 21), Short Friday 15:30 and the Friday address (Day 5), the slower career's ending.
 - F7: the page says it's the larger option (~22 h) and offers a first cut (~12 h: Career and Nights, the ending's three landings, one jump per event, the running card) as question 6.
+- F8 (second pass, d5fb07c): End and undo dropped (no restore point inside a jump's run; ending without logging restarts the event; its purpose is now guaranteed by the fixed calendar). Undo my last Dev action covers going back.
+- F9: threads - and + greyed once e.mine.settled; after End and keep the day's crew plans are made again (as devmodeTradsAgain).
+- F1 is also a live bug in today's Set career (Days 27-30): backlog DM1-1, fixed by J0.
 - J0 is now 4 h (it owns devmodeCareerSteps and devmodeCareerSet); total about 22 h.
 
 ## What changed from v3.1
