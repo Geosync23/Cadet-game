@@ -71619,6 +71619,7 @@ function devmodeTrad(body) {
     devmodeText(body, 'Usually ' + devmodeWhen(sel) + ', ' + hhmm(sel.at[0]) + '-' + hhmm(sel.at[1]) + (devmodeWhere(sel) ? ', ' + devmodeWhere(sel) : '') + '. ' + (nx == null ? 'Not on the calendar in the next 60 days.' : nx === today ? 'On today.' : 'Next: Day ' + nx + '.'));
     devmodeRow(body, [['In 20 minutes', () => devmodeTradStart(sel.id, 'soon'), { ask: true }], ['At its usual time', () => devmodeTradStart(sel.id, 'usual')], ['Tomorrow', () => devmodeTradStart(sel.id, 'tomorrow')]]);
     devmodeRow(body, [[DM_UI.tmail ? 'Its Mail now: on' : 'Its Mail now: off', () => { DM_UI.tmail = !DM_UI.tmail; devmodeDraw(); }, { ask: !!DM_UI.tmail }], ['Back to the list', () => { DM_UI.trad = null; DM_UI.who = null; devmodeDraw(); }]]);
+    devmodeRow(body, [['Its next showing', () => devmodeTradNextGo(sel), { aria: 'Its next showing by the calendar: the clock to 10 minutes before' }]]);   // (J3, plan v4.4) the real one: its cake, invitation and flag in place
     if (devmodeWhose(sel)) devmodeTradWho(body, sel);
     if (sel.cake || sel.invite || sel.flag) devmodeText(body, (sel.cake || sel.invite ? 'Decided ahead, so not there for a Dev start: ' + [sel.cake ? 'the cake' : '', sel.invite ? 'the invitation' : ''].filter(Boolean).join(' and ') + '. ' : '') + (sel.flag ? 'It waits on a story beat: shown once without it.' : ''));
     return;
@@ -72342,6 +72343,41 @@ devmodeJump({ id: 'n3', group: 'nights', label: 'Night 3: the coil swap, your te
 // ---- J2 (plan v4.4): Ship events jumps and the running-event card (builder B). devmodeJump({ group: 'events', ... }), DM_JUMP_HEAD ----
 // ---- end of J2 ----
 // ---- J3 (plan v4.4): the ending's jumps, the answers row (DM_UI.ans, drawn through DM_JUMP_DRAW.ending), the Traditions card's next showing (builder C) ----
+// The ending (section 29) by its own week: the offer (Day 32 16:00, the ready room), your answer still open (Day 34, after
+// you said Unsure), the Captain's address at the crossing back (Day 35, the bow lounge), the goodbye (Day 36, the shuttle
+// bay from 09:15) and the end page if you said Go, the endgame's first morning if you said Stay, and the slower career's
+// offer a week on (the career a week slow: Calder asks on Day 33, the offer Thursday Day 39). Your answers are put in on
+// the way by J0's stops: the answers row (the user's q3) picks Calder's question and the offer for the offer and the
+// address; the goodbye, the end page, staying on and "still open" say their own. The Traditions card's Its next showing
+// moves the clock (in this Dev game) to 10 minutes before the tradition's next day on the calendar, where its cake,
+// invitation and story flag are the real ones. Nothing here calls R().
+const DM_J3 = () => typeof EV_ENDING_ON !== 'undefined' && EV_ENDING_ON && typeof P5_END !== 'undefined' && P5_END;
+const DM_ANS = { cq: [['engines', 'Engines'], ['bridge', 'Bridge'], ['teach', 'Teach'], ['unsure', 'Unsure']], offer: [['stay', 'Stay'], ['go', 'Go'], ['unsure', 'Unsure']] };
+DM_JUMP_DRAW.ending = body => {                           // the answers row (its state, DM_UI.ans, is J0's)
+  devmodeHead(body, 'Your answers on the way');
+  devmodeText(body, 'Calder\'s question (Day 26):');
+  devmodeRow(body, DM_ANS.cq.map(([k, l]) => [l, () => { DM_UI.ans.cq = k; devmodeDraw(); }, { ask: DM_UI.ans.cq === k, aria: 'Calder\'s question: ' + l }])).classList.add('dmGroups');
+  devmodeText(body, 'The offer (Day 32), for the offer and the address:');
+  devmodeRow(body, DM_ANS.offer.map(([k, l]) => [l, () => { DM_UI.ans.offer = k; devmodeDraw(); }, { ask: DM_UI.ans.offer === k, aria: 'The offer: ' + l }])).classList.add('dmGroups');
+  devmodeText(body, 'The goodbye and the end page say Go, staying on says Stay, still open says Unsure, whatever this row says. Plain Set career always says Stay.');
+};
+const DM_GO = { offer: 'go' }, DM_STAY = { offer: 'stay' };
+devmodeJump({ id: 'endOffer', group: 'ending', label: 'Day 32: the offer from headquarters', day: 32, by: 31, get at() { return END_T.offerAt - 10; }, where: { deck: 1, room: 'R' }, on: DM_J3 });   // 16:00, the ready room
+devmodeJump({ id: 'endOpen', group: 'ending', label: 'Day 34: your answer still open', day: 34, by: 33, at: 1075, where: { deck: 3, room: 'M' }, ans: { offer: 'unsure' }, on: DM_J3 });   // 17:55: you said Unsure; due by 20:00, the Captain's search at 19:30
+devmodeJump({ id: 'endAddress', group: 'ending', label: 'Day 35: the Captain\'s address', day: 35, by: 34, at: 865, where: { deck: 3, room: 'L' }, on: DM_J3 });   // 14:25, the bow lounge: the oath you host, then her address by your answer (the row's)
+devmodeJump({ id: 'endBye', group: 'ending', label: 'Day 36: the goodbye (you said Go)', day: 36, by: 35, get at() { return END_T.bayAt - 5; }, where: { deck: 5, room: 'S' }, ans: DM_GO, on: DM_J3 });   // 09:10, the shuttle bay
+devmodeJump({ id: 'endPage', group: 'ending', label: 'Day 36: the end page (you said Go)', day: 36, by: 35, get at() { return END_T.rampAt + 5; }, where: { deck: 5, room: 'S' }, ans: DM_GO, on: DM_J3,
+  stops: [{ id: 'end:page', at: () => 35 * 1440 + END_T.rampAt + 5, fn: () => { endTheEnd(); return true; } }] });   // straight to the page, as after the Tern
+devmodeJump({ id: 'endStay', group: 'ending', label: 'Day 36: staying on (you said Stay)', day: 36, by: 35, at: WAKE_AT, where: null, ans: DM_STAY, on: DM_J3 });   // the endgame's first morning, in your bed
+devmodeJump({ id: 'endSlow', group: 'ending', label: 'Day 39: the offer, a slower career', day: 39, by: 38, get at() { return END_T.offerAt - 10; }, where: { deck: 1, room: 'R' }, slow: 7, on: DM_J3 });   // a week slow: Calder asks on Day 33, the offer the Thursday after
+const DM_NEXTMAX = 14;                                    // Its next showing: no further than two weeks on
+function devmodeTradNextGo(ev) {                          // the clock to 10 minutes before the tradition's next showing by the calendar
+  const now = shipNow(), today = SHIP.time.day, at = d => { const e = eventsOn(d).find(x => x.id === ev.id && !x.dev); return e ? (d - 1) * 1440 + Math.max(0, e.from - 10) : null; };
+  let d = devmodeTradNext(ev, today); if (d != null && !(at(d) > now)) d = devmodeTradNext(ev, today + 1);
+  if (d == null) return devmodeSay(ev.name + ' isn\'t on the calendar in the next 60 days.' + (ev.when && ev.when.ship ? ' It comes with a ship-wide event: Jump to (Ship events) reaches it.' : ''));
+  if (d - today > DM_NEXTMAX) return devmodeSay(ev.name + '\'s next showing is Day ' + d + ', more than ' + DM_NEXTMAX + ' days on: Set career to Day ' + d + ', then try again.');
+  devmodeGo('to ' + ev.name + '\'s next showing', () => at(d));
+}
 // ---- end of J3 ----
 // ---- J4 (plan v4.4): the career arrow's later sources (DV_MORE.push([key, fn])) ----
 // ---- end of J4 ----

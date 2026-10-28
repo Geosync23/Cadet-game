@@ -32,7 +32,9 @@
 #          Specialist by hand; the panel's Stop; the Jump to and Set career tabs at 390 px (DEVMODE_SHOTS=folder: a shot)
 #   beats: J1's Career and Nights jumps: each lands at its time and room and the game books or starts its beat (played
 #          where it needs you up: Power safety, the nights once clocked in); Undo; one jump twice in fresh browsers
-#   events1, events2, ending1, ending2: the later turns' parts (J2-J3), stubs until then
+#   ending1: J3's answers row and the ending's list at 390 px; the offer, still open, before the address; Calder's four answers give their posts
+#   ending2: J3's goodbye, end page, staying on, the slower career's offer; the Traditions card's Its next showing
+#   events1, events2: J2's parts, stubs until then
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 devmode_check.py BUILD.html [part ...]   (parts: only those)   Good is DEVMODE CHECK OK (exit 0); a failure exits 1.
 import sys, os, re, json, pathlib
@@ -729,8 +731,79 @@ def part_beats(b):
     print(f'  beats: {len(on)} jumps landed at their time and room, each beat booked or started (Power safety asked once up, the test held, result, bar, toast, the lessons, the briefing, the nights once clocked in); Undo; t3res twice the same save')
 def part_events1(b): print('  events1: not built yet (J2)')
 def part_events2(b): print('  events2: not built yet (J2)')
-def part_ending1(b): print('  ending1: not built yet (J3)')
-def part_ending2(b): print('  ending2: not built yet (J3)')
+def j3_page(b):
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = Page(ctx, '#dev'); pg.sign(); pg.step(20); return ctx, pg
+
+def j3_jump(pg, id, ans=None):                    # a jump from the list, with the answers row set to ans first
+    if ans: pg.ev(f"Object.assign(DM_UI.ans, {json.dumps(ans)})")
+    r = pg.ev(f"devmodeRun('Jump', () => devmodeSetCareerTo(devmodeJumpOf('{id}').day, devmodeJumpOf('{id}')))"); pg.step(10)
+    L = pg.ev(f"""(() => {{ const j = devmodeJumpOf('{id}'), w = j.where, E = SHIP.end || {{}};
+      return {{ clock: clockText(), want: 'Day ' + j.day + ',', at: hhmm(j.at), deck: deckDef.num, room: (ROOMS[roomAt(...player.here())] || {{}}).name || '', wdeck: w ? w.deck : null, wroom: w ? DECKS[w.deck].rooms[w.room].name : null,
+        q: SHIP.works.end && SHIP.works.end.answer, qday: SHIP.works.end && SHIP.works.end.day, offer: E.offer || null, said: typeof endSaid === 'function' ? endSaid() : null, settled: E.settled || null, ended: E.ended || null,
+        stay: typeof endgameDay === 'function' ? endgameDay() : null, oday: typeof endOfferDay === 'function' ? endOfferDay() : null, post: typeof endPostKind === 'function' ? endPostKind() : null,
+        occ: (SHIP.occasions || []).filter(o => o.id === 'endingOffer' && o.status === 'asked').map(o => [hhmm(o.at % 1440), o.deck, o.room]), set: devmodeState().set }}; }})()""")
+    check(r is True and L['clock'].startswith(L['want']) and L['clock'].endswith(L['at']) and (L['wdeck'] is None or (L['deck'] == L['wdeck'] and L['room'] == L['wroom'])) and L['set'] and L['set'].get('beat') == id,
+          f'{id}: landed: {L} ({pg.ev("DM_UI.msg")[:120]})')
+    return L
+
+def part_ending1(b):
+    # J3 (plan v4.4): the answers row draws; the offer (Day 32: Calder's question answered on the way, the offer booked at
+    # 16:00 in the ready room, not yet heard); your answer still open (Day 34: heard, Unsure, not settled); the address
+    # (Day 35: the row's answer, Stay, said and not yet settled); the four answers to Calder's question each give their post
+    ctx, pg = j3_page(b)
+    if not pg.ev("DM_J3()"): print('  ending1: the ending off in this build'); pg.close(); ctx.close(); return
+    pg.ev('devmodeOpen(true); DM_UI.tab = "jump"; DM_UI.jg = "ending"; DM_UI.msg = ""; devmodeDraw()')
+    J = pg.ev("""({ heads: [...document.querySelectorAll('#dmSheet h3')].map(h => h.textContent), rows: [...document.querySelectorAll('#dmSheet .dmJump')].length,
+      on: [...document.querySelectorAll('#dmSheet .dmGroups button.dmAsk')].map(b => b.textContent), wide: document.querySelector('#dmSheet .dmBody').scrollWidth > document.querySelector('#dmSheet .dmBody').clientWidth,
+      small: [...document.querySelectorAll('#dmSheet button')].filter(b => b.offsetParent && b.getBoundingClientRect().height < 44).map(b => b.textContent) })""")
+    check('Your answers on the way' in J['heads'] and J['rows'] == 7 and 'Engines' in J['on'] and 'Stay' in J['on'] and not J['wide'] and not J['small'], f'ending1: the ending\'s list and answers row at 390 px: {J}')
+    pg.shot(str(SHOTS / 'jump-ending-390.png')) if SHOTS else None
+    L = j3_jump(pg, 'endOffer')
+    check(L['q'] == 'engines' and L['oday'] == 32 and L['occ'] == [['16:00', 1, 'R']] and not (L['offer'] or {}).get('met'), f'ending1: the offer: {L}')
+    L = j3_jump(pg, 'endOpen', {'offer': 'go'})   # its own answer (Unsure) wins over the row
+    check(L['offer'] and L['offer'].get('met') and L['said'] == 'unsure' and not L['settled'], f'ending1: still open: {L}')
+    L = j3_jump(pg, 'endAddress', {'offer': 'stay'})
+    check(L['offer'] and L['offer'].get('met') and L['said'] == 'stay' and not L['settled'], f'ending1: before the address: {L}')
+    posts = {}
+    for k in ('engines', 'bridge', 'teach', 'unsure'):
+        pg.ev(f"devmodeRun('Set career', () => devmodeSetCareerTo(27, null, {{ ans: {{ cq: '{k}' }} }}))")
+        posts[k] = pg.ev("({ a: SHIP.works.end && SHIP.works.end.answer, post: endPostKind() })")
+    check(all(posts[k]['a'] == k for k in posts) and [posts[k]['post'] for k in ('engines', 'bridge', 'teach', 'unsure')] == ['engines', 'bridge', 'teach', 'unsure'], f'ending1: Calder\'s four answers and their posts: {posts}')
+    pg.ev("Object.assign(DM_UI.ans, { cq: 'engines', offer: 'stay' })")
+    check(not pg.errors, f'ending1: errors {pg.errors[:3]}')
+    pg.close(); ctx.close()
+    print(f'  ending1: the list (7) and the answers row at 390 px; the offer booked 16:00 in the ready room (Engines put in on the way); still open (Unsure, its own); before the address (Stay); the four answers give their four posts')
+
+def part_ending2(b):
+    # J3: the goodbye (Day 36: settled Go, the shuttle bay, going); the end page (ended, the page up); staying on (the
+    # endgame from Day 36, in bed); the slower career (Calder asks Day 33, the offer Day 39 in the ready room); and the
+    # Traditions card's Its next showing (the clock to 10 minutes before its next calendar day, refused past 14 days)
+    ctx, pg = j3_page(b)
+    if not pg.ev("DM_J3()"): print('  ending2: the ending off in this build'); pg.close(); ctx.close(); return
+    L = j3_jump(pg, 'endBye')
+    check(L['settled'] and L['settled']['choice'] == 'go' and pg.ev("endGoing()"), f'ending2: the goodbye: {L}')
+    L = j3_jump(pg, 'endPage')
+    pg.step(5); page = pg.ev("!!document.querySelector('#endPage') && !document.querySelector('#endPage').hidden")
+    check(L['ended'] and page, f'ending2: the end page: ended {L["ended"]}, page {page}')
+    pg.reload()   # the page holds the screen: a fresh load (the Dev save keeps the ended game)
+    L = j3_jump(pg, 'endStay')
+    check(L['settled'] and L['settled']['choice'] == 'stay' and L['stay'] == 36 and not L['ended'], f'ending2: staying on: {L}')
+    L = j3_jump(pg, 'endSlow')
+    check(L['qday'] == 33 and L['q'] == 'engines' and L['oday'] == 39 and L['occ'] == [['16:00', 1, 'R']] and L['set'].get('slow') == 7, f'ending2: the slower career: {L}')
+    # Its next showing (from a Day 3 game): quiz night's next Thursday, 10 minutes before; a tradition weeks off refused
+    pg.ev("devmodeRun('Set career to Day 3', () => devmodeSetCareerTo(3))")
+    q = pg.ev("SHIP_TRADITIONS.find(e => /quiz/i.test(e.name)).id")
+    pg.ev(f"DM_HOLD = false; devmodeTradNextGo(SHIP_TRADITIONS.find(e => e.id === '{q}'))"); pg.page.wait_for_timeout(800); pg.step(5)
+    N = pg.ev(f"(() => {{ const e = eventsOn(SHIP.time.day).find(x => x.id === '{q}'); return {{ clock: clockText(), from: e ? e.from : null, min: SHIP.time.min, msg: DM_UI.msg }}; }})()")
+    check(N['from'] is not None and round(N['min']) == N['from'] - 10, f'ending2: Its next showing (quiz night): {N}')
+    far = pg.ev("(() => { const d = SHIP.time.day; const e = SHIP_TRADITIONS.find(x => { const n = devmodeTradNext(x, d); return n != null && n - d > DM_NEXTMAX; }); return e ? e.id : null; })()")
+    if far:
+        before = pg.ev("clockText()"); pg.ev(f"devmodeTradNextGo(SHIP_TRADITIONS.find(e => e.id === '{far}'))")
+        check(pg.ev("clockText()") == before and 'more than' in pg.ev("DM_UI.msg"), f'ending2: a showing weeks off not refused: {far} {pg.ev("DM_UI.msg")}')
+    check(not pg.errors, f'ending2: errors {pg.errors[:3]}')
+    pg.close(); ctx.close()
+    print(f'  ending2: the goodbye (settled Go, the bay); the end page; staying on (the endgame from Day 36); the slower career (asked Day 33, the offer Day 39); Its next showing (quiz night, {N["clock"]}), and refused weeks off ({far})')
 
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
