@@ -10,7 +10,7 @@
 #   s5:    Pillar 5 Step 5 with P5_STEP5 on (B1): Power safety's arrow, the Tier 3 rows, the Senior Officer presets
 #   pu3:   the Senior Officer promotion with P5_STEP5 on (S5-2, B5): the offer, the test at the board, the result, the bar, the toast
 #   s6:    J4 (plan v4.4): Night 2's landing (the time clock), clocked in (the night's work), the Monday briefing, Basil, Calder's question
-#   ev:    J4: a ship-wide event's next meeting, labelled Event:
+#   ev:    J4: a ship-wide event's meeting, labelled Event:, from 15 minutes before it (10 minutes before the first one found)
 #   end:   J4: the ending: the offer, your answer still open, the goodbye
 #   look:  the arrow is drawn (its own element, the DEV tag), holds still over frames, its pin never on the game's pin
 #          when both point at the same thing; Hide it and Show it from the Quick tab, the choice kept over a reload
@@ -255,7 +255,8 @@ def part_ev(b):
     got = None
     for day in (11, 7, 35, 31):
         pg.ev(f"devmodeRun('Set career', () => devmodeSetCareerTo({day}))")
-        g = pg.ev("(() => { const f = DV_MORE.find(x => x[0] === 'event'); const r = f && f[1](Math.floor(shipNow()), SHIP.works); return r ? { day: SHIP.time.day, label: r.g.label, deck: r.g.deck, room: r.g.room, at: hhmm(r.when % 1440), ev: SHIP.event && SHIP.event.id } : null; })()")
+        pg.ev("(() => { const m = SHIP.event && MEETINGS.filter(x => x.event === SHIP.event.id && x.at > shipNow() && x.at < shipNow() + 1440).sort((a, b) => a.at - b.at)[0]; if (m) devmodeRun('Clock', () => devmodeSkipTo(m.at - 10)); })()")   # 10 minutes before its next meeting
+        g = pg.ev("(() => { const f = DV_MORE.find(x => x[0] === 'event'); const r = f && f[1](Math.floor(shipNow()), SHIP.works); return r ? { day: SHIP.time.day, label: r.g.label, deck: r.g.deck, room: r.g.room, at: hhmm(r.when % 1440), ev: SHIP.event && SHIP.event.id, arrow: dvCareerNext().label } : null; })()")
         if g: got = g; break
     print('    ev', got)
     check(got and got['label'].startswith('Event: ') and got['deck'] and got['room'], f'ev: no event meeting for the arrow on Days 11, 7, 35, 31: {got}')

@@ -72349,8 +72349,8 @@ devmodeJump({ id: 'n3', group: 'nights', label: 'Night 3: the coil swap, your te
 // night's own work from its Schedule rows (28c's m23Items, 28d's m24Items) in the engine room. The Monday briefing
 // (28b's occasion), Basil's day (28e's mtItems) and Calder's question (28f's cqItems) at their time and room. The ending
 // (29): the offer in the ready room, then your answer (the Captain, wherever she is: 29a's endWhere), the address in the
-// bow lounge once you've answered, the goodbye in the shuttle bay. And a ship-wide event's next meeting for you (the
-// user's q5), labelled "Event:". Nothing here calls R().
+// bow lounge once you've answered, the goodbye in the shuttle bay. And a ship-wide event's meeting for you (the user's
+// q5), labelled "Event:", from 15 minutes before it until it ends (so a career step ahead of it keeps the arrow till then). Nothing here calls R().
 const dvRoomKey = (deck, room) => room instanceof RegExp ? Object.keys((DECKS[deck] || {}).rooms || {}).find(k => room.test(DECKS[deck].rooms[k].name || '')) || null : room;
 DV_MORE.push(['night', now => {                          // your night shift: the time clock, then the night's work
   if (typeof P5_NIGHT === 'undefined' || !P5_NIGHT || typeof p5NightOf !== 'function') return null;
@@ -72381,9 +72381,9 @@ DV_MORE.push(['end', now => {                            // the ending's steps: 
   if (E.settled.choice === 'go' && typeof endGoing === 'function' && endGoing()) return { when: abs(W.leave, END_T.bayAt), soon: 30, g: { deck: 5, room: 'S', label: 'The goodbye: the shuttle bay' } };
   return null;
 }]);
-DV_MORE.push(['event', now => {                          // a ship-wide event's next meeting for you (within 12 hours), not yet over
+DV_MORE.push(['event', now => {                          // a ship-wide event's meeting for you, from 15 minutes before it until it ends
   if (!SHIP.event || typeof MEETINGS === 'undefined') return null;
-  const m = MEETINGS.filter(x => x.event === SHIP.event.id && x.where && x.where.deck && now < x.at + (x.len || 15) && x.at <= now + 720).sort((a, b) => a.at - b.at)[0]; if (!m) return null;
+  const m = MEETINGS.filter(x => x.event === SHIP.event.id && x.where && x.where.deck && now < x.at + (x.len || 15) && x.at - 15 <= now).sort((a, b) => a.at - b.at)[0]; if (!m) return null;   // from 15 minutes before it until it ends: a career step ahead of it keeps the arrow till then
   const room = dvRoomKey(m.where.deck, m.where.room), s = typeof MEETING_SCRIPTS !== 'undefined' && MEETING_SCRIPTS[m.script];
   return room ? { when: m.at, soon: 15, g: { deck: m.where.deck, room, label: 'Event: ' + ((s && s.title) || (SHIP_EVENTS[SHIP.event.id] || {}).title || 'a meeting') } } : null;
 }]);
