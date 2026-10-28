@@ -69,3 +69,4 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
   has no evInvited(m) check, so the vessel's meetings (ranks: []) would get an "Event:" arrow.
 - 13:59 lead 44: the user wants a player pointer for the visit's three events in 0.96.0 (my note 2). EV1 builds it on
   claude/visit-pointer (from 736b23a); top priority when it arrives, ahead of J4.
+- 8c91437: day_check 16, 17, 18, 19 OK; lines --day PASS. visit-on PASS confirmed on the final game (to lead 44, BM20).
