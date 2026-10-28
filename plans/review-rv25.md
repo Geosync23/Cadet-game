@@ -67,3 +67,5 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
 ## Dev mode J4 c7489b5 (DM1): code read
 - DV_MORE night, m21 (first), mtcq, end, event; score's `first`; endBye at bayAt + 1. Finding to confirm: 'event' source
   has no evInvited(m) check, so the vessel's meetings (ranks: []) would get an "Event:" arrow.
+- 13:59 lead 44: the user wants a player pointer for the visit's three events in 0.96.0 (my note 2). EV1 builds it on
+  claude/visit-pointer (from 736b23a); top priority when it arrives, ahead of J4.
