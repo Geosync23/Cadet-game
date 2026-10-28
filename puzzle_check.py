@@ -101,7 +101,7 @@ SETUP = r"""(() => {
 PAPER = r"""(() => {
   const C0 = caseState(); C0.open = []; C0.done = []; C0.n = 0; for (const k in CASE_STATS) CASE_STATS[k] = k === 'why' ? {} : 0;
   const rankOf = d => d < 10 ? 'junior' : d < 16 ? 'officer' : d < 23 ? 'senior' : 'specialist';
-  const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, end = 26 * 1440;
+  const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, end = 33 * 1440;   // to Day 33 (EV1, 0.96.0): the visit (Days 17-19) and the comet (22) are event days, kept case-free on purpose (caseOffer's eventDay), so Days 5-26 alone were too thin a sample
   const jr = jobRun; jobRun = () => null;               // the Works crew claim nothing: the slow crew below does the jobs
   MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
   const out = { cases: [], perRank: {}, over: [], bad: [] }, seen = new Set(), firstAt = new Map();
@@ -560,7 +560,7 @@ def run(path):
         cs = A['cases']
         print(f"cases: {len(cs)}; per rank: {A['perRank']}; stats: {A['stats']}")
         for c in cs[:4]: print('  ', c['id'], 'day', c['day'], c['hour'], c['band'], c['cause'], c['sus'], [(k['at'], k['kills']) for k in c['clues']], c['title'])
-        if st['hookOffer']: check(len(cs) >= 1, f'cases were posted over Days 5-26 on paper: {len(cs)}')
+        if st['hookOffer']: check(len(cs) >= 1, f'cases were posted over Days 5-33 on paper: {len(cs)}')
         else: print(f'  (section 17 has no real faults yet: {len(cs)} cases on paper; the sweep below makes them)')
         Sw = g.ev(SWEEP); Sw2 = g.ev(SWEEP)
         print(f"sweep: {len(Sw['cases'])} cases; per rank: {Sw['perRank']}")
