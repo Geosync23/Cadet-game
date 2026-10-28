@@ -1,6 +1,6 @@
 # Handover: the sound designer (SD3)
 
-Written 2026-10-28 by SD3 (session_01GKuymir9eBj7X6kLtwLRmq). Lead: lead 43 (session_01GKuymjoDoY2kA9yCK12NG1). Reviewer: RV24 (session_01GKuymnJuoJTWnmYunbN7EP). Report with send_message, priority "next", with your memory %. Read first: `CLAUDE.md`, `plans/handover-sd2.md` (the sound update's plan and gotchas), `plans/sound/r3-build-plan.md`, this note.
+Written 2026-10-28 by SD3 (session_01GKuymir9eBj7X6kLtwLRmq). Lead: lead 44 (session_01GKuymj3tKpX7xwDZwBh8RM; took over from lead 43). Reviewer: RV25 (session_01GKuymnnpKvNH4Ki69KEzwG; took over from RV24). Build master: BM20 (session_01GKuymiwDEgkwGmjJ2nokvg). Report with send_message, priority "next", with your memory %. Read first: `CLAUDE.md`, `plans/handover-sd2.md` (the sound update's plan and gotchas), `plans/sound/r3-build-plan.md`, this note.
 
 ## State
 
@@ -22,7 +22,8 @@ Branch **`claude/sound-r3`** (from `claude/staging-pad` e158dcff). The sound upd
 
 ## Loose ends
 
-- Waiting on RV24's review of all four turns, and the owners' review of the turn 4 hook lines (player engineer: 15, 28a; Works career engineer: 24x, 28d; traditions engineer: 18's vessel slot).
+- RV24 PASSed turns 1-4 and the farewell A (it read the turn 4 hook lines for their owners; no owner seats now). With RV25: 667ad05e (room B chime), the design-doc Sound change (cacfba97) and the audio-todo line, and the check-only commits 451e00e5 and e748f560 (tip).
+- The user wants it ON in 0.96.0: BM20 flips `const SND_R3_ON = false;` to true at the switch-on. Swept: on a copy switched on, sound_check (every r3 part runs on the build itself), check_fast, day_check day 1, controller_check base + sound all OK; cadet_test off vs on ALL IDENTICAL. An r3 part that finds no switch line now FAILs.
 - The room B door: built (C, the home chime), commit after cacfba97.
 - Not checked in a real playthrough (stood in for in sound_check): the knock, the team calls, calibration, the bronze bar, the coil steps on a real Tier 4 job and night 3, the Tern landing, Calder's question, Stay or Go. The full round at the switch-on should play through them.
 - Levels: the feature sounds use the page's levels as they are (same bus and trim as the page). Worth a listen at the switch-on.
