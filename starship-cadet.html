@@ -72344,6 +72344,49 @@ devmodeJump({ id: 'n3', group: 'nights', label: 'Night 3: the coil swap, your te
 // ---- J3 (plan v4.4): the ending's jumps, the answers row (DM_UI.ans, drawn through DM_JUMP_DRAW.ending), the Traditions card's next showing (builder C) ----
 // ---- end of J3 ----
 // ---- J4 (plan v4.4): the career arrow's later sources (DV_MORE.push([key, fn])) ----
+// Read only, as the rest of the arrow. The nights (28a): from an hour before a night opens (the clock opens then: P5N.open)
+// the time clock, "clock in" (RV24's note: a night jump lands at 20:50 and the arrow is there at once); clocked in, the
+// night's own work from its Schedule rows (28c's m23Items, 28d's m24Items) in the engine room. The Monday briefing
+// (28b's occasion), Basil's day (28e's mtItems) and Calder's question (28f's cqItems) at their time and room. The ending
+// (29): the offer in the ready room, then your answer (the Captain, wherever she is: 29a's endWhere), the address in the
+// bow lounge once you've answered, the goodbye in the shuttle bay. And a ship-wide event's next meeting for you (the
+// user's q5), labelled "Event:". Nothing here calls R().
+const dvRoomKey = (deck, room) => room instanceof RegExp ? Object.keys((DECKS[deck] || {}).rooms || {}).find(k => room.test(DECKS[deck].rooms[k].name || '')) || null : room;
+DV_MORE.push(['night', now => {                          // your night shift: the time clock, then the night's work
+  if (typeof P5_NIGHT === 'undefined' || !P5_NIGHT || typeof p5NightOf !== 'function') return null;
+  const d = worksDay(now);
+  for (const k of [d - 1, d]) {
+    const N = p5NightOf(k); if (!N || now >= N.to || typeof playerNightOn === 'function' && !playerNightOn(k)) continue;
+    const R = SHIP.works && SHIP.works.ns && SHIP.works.ns[k];
+    if (!(R && R.in)) return now >= N.from + P5N.missBy ? null : { when: N.from, soon: P5N.open, g: dvClock('Night shift from ' + hhmm(N.from % 1440) + ': clock in') };
+    const rows = [].concat(typeof m23Items === 'function' ? m23Items(k) : [], typeof m24Items === 'function' ? m24Items(k) : []), B = (k - 1) * 1440, r = rows.find(x => now < B + x.to);
+    return r ? { when: Math.max(now, B + r.from), soon: 15, g: { deck: r.deck || 6, room: r.room || 'E', label: 'Night ' + (k - 21) + ': ' + r.title } } : null;
+  }
+  return null;
+}]);
+DV_MORE.push(['m21', now => {                            // the Monday briefing: your seat at the table
+  const r = (SHIP.occasions || []).find(o => o.id === 'm21.brief' && o.status === 'asked' && now < o.at + (o.len || 45)); if (!r) return null;
+  return { when: r.at, soon: 15, g: { deck: r.deck, room: r.room, label: 'The Monday briefing, your seat' } };
+}]);
+DV_MORE.push(['mtcq', now => {                           // Basil's day with you; Calder's question at the Friday tea
+  const d = worksDay(now), rows = [].concat(typeof mtItems === 'function' ? mtItems(d) : [], typeof cqItems === 'function' ? cqItems(d) : []), B = (d - 1) * 1440, r = rows.find(x => now < B + x.to);
+  return r && r.deck ? { when: B + r.from, soon: 15, g: { deck: r.deck, room: r.room, label: r.title } } : null;
+}]);
+DV_MORE.push(['end', now => {                            // the ending's steps: the offer, your answer, the address, the goodbye
+  if (typeof EV_ENDING_ON === 'undefined' || !EV_ENDING_ON || !SHIP.end || typeof endWeek !== 'function') return null;
+  const E = SHIP.end, W = endWeek(), abs = (d, m) => (d - 1) * 1440 + m; if (!W || E.ended || !E.offer) return null;
+  if (!E.offer.met) return { when: abs(E.offer.day, END_T.offerAt), soon: 15, g: { deck: 1, room: 'R', label: 'The offer: the Captain\'s ready room' } };
+  if (!E.settled && !endFirm()) { const g = endWhere('marrow', now); return g ? { when: now, g: { ...g, label: 'Your answer: tell the Captain' } } : null; }
+  if (!E.settled) return { when: Math.min(endSettleAt(), abs(W.settle, 870)), soon: 30, g: { deck: 3, room: dvRoomKey(3, /^Bow lounge$/), label: 'The crossing back: the bow lounge, then the Captain\'s address' } };
+  if (E.settled.choice === 'go' && typeof endGoing === 'function' && endGoing()) return { when: abs(W.leave, END_T.bayAt), soon: 30, g: { deck: 5, room: 'S', label: 'The goodbye: the shuttle bay' } };
+  return null;
+}]);
+DV_MORE.push(['event', now => {                          // a ship-wide event's next meeting for you (within 12 hours), not yet over
+  if (!SHIP.event || typeof MEETINGS === 'undefined') return null;
+  const m = MEETINGS.filter(x => x.event === SHIP.event.id && x.where && x.where.deck && now < x.at + (x.len || 15) && x.at <= now + 720).sort((a, b) => a.at - b.at)[0]; if (!m) return null;
+  const room = dvRoomKey(m.where.deck, m.where.room), s = typeof MEETING_SCRIPTS !== 'undefined' && MEETING_SCRIPTS[m.script];
+  return room ? { when: m.at, soon: 15, g: { deck: m.where.deck, room, label: 'Event: ' + ((s && s.title) || (SHIP_EVENTS[SHIP.event.id] || {}).title || 'a meeting') } } : null;
+}]);
 // ---- end of J4 ----
 if (DEVMODE) { dvBuild(); requestAnimationFrame(dvFrame); }
 if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }   // last, once every Dev mode name above exists

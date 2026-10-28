@@ -9,7 +9,9 @@
 #          Teaching arrows Off and tracking off, and on another deck it points at the lift with the deck named
 #   s5:    Pillar 5 Step 5 with P5_STEP5 on (B1): Power safety's arrow, the Tier 3 rows, the Senior Officer presets
 #   pu3:   the Senior Officer promotion with P5_STEP5 on (S5-2, B5): the offer, the test at the board, the result, the bar, the toast
-#   s6, ev, end: J4's parts (plan v4.4: the arrow's later sources), stubs until then
+#   s6:    J4 (plan v4.4): Night 2's landing (the time clock), clocked in (the night's work), the Monday briefing, Basil, Calder's question
+#   ev:    J4: a ship-wide event's next meeting, labelled Event:
+#   end:   J4: the ending: the offer, your answer still open, the goodbye
 #   look:  the arrow is drawn (its own element, the DEV tag), holds still over frames, its pin never on the game's pin
 #          when both point at the same thing; Hide it and Show it from the Quick tab, the choice kept over a reload
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
@@ -219,9 +221,61 @@ def part_pu3(b):
     ctx.close()
 
 # ---- stubs (plan v4.4, J0): J4 fills its own parts here, so nobody edits the part list again
-def part_s6(b): print('  s6: not built yet (J4: the nights, the briefing, Basil, Calder\'s question)')
-def part_ev(b): print('  ev: not built yet (J4: event meetings)')
-def part_end(b): print('  end: not built yet (J4: the ending)')
+def j4_page(b):
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = Page(ctx, '#dev'); pg.sign(); return ctx, pg
+def j4_go(pg, day, beat):                          # a Dev jump (or an ad-hoc landing) by Set career, then the arrow
+    pg.ev(f"devmodeRun('Jump', () => devmodeSetCareerTo({day}, {beat}))"); return pg.next()
+
+def part_s6(b):
+    # J4 (plan v4.4): the nights (the time clock from an hour before: RV24's 20:50 note; clocked in, the night's work in the
+    # engine room), the Monday briefing, Basil's day and Calder's question
+    ctx, pg = j4_page(b)
+    if not pg.ev("typeof P5_NIGHT !== 'undefined' && P5_NIGHT && !!devmodeJumpOf('n2')"): print('  s6: Step 6 off: skipped'); ctx.close(); return
+    out = {}
+    out['n2'] = j4_go(pg, 23, "devmodeJumpOf('n2')")
+    pg.ev("devmodeRun('Clock', () => devmodeSkipTo(p5NightOf(23).from + 2))"); pg.ev("p5nClock(Math.floor(shipNow()), () => {})")
+    out['n2in'] = pg.next()
+    out['m21'] = j4_go(pg, 22, "devmodeJumpOf('m21')")
+    out['mt'] = j4_go(pg, 26, "devmodeJumpOf('mt')")
+    out['cq'] = j4_go(pg, 26, "devmodeJumpOf('cq')")
+    for k, v in out.items(): print('   ', k, v)
+    check('clock in' in out['n2'].get('label', '') and out['n2'].get('deck') == 5, f"s6: Night 2's landing (20:50): the time clock: {out['n2']}")
+    check(out['n2in'].get('label', '').startswith('Night 2:') and out['n2in'].get('deck') == 6, f"s6: Night 2 clocked in: the night's work: {out['n2in']}")
+    check('briefing' in out['m21'].get('label', '') and out['m21'].get('deck') == 1, f"s6: the Monday briefing: {out['m21']}")
+    check('Basil' in out['mt'].get('label', '') and out['mt'].get('deck') == 5, f"s6: Basil's day: {out['mt']}")
+    check('Calder' in out['cq'].get('label', '') and out['cq'].get('deck') == 5, f"s6: Calder's question: {out['cq']}")
+    check(not pg.errors, f's6: errors {pg.errors[:3]}')
+    ctx.close()
+
+def part_ev(b):
+    # J4: a ship-wide event's next meeting for you, labelled "Event:" (the first event day that has one)
+    ctx, pg = j4_page(b)
+    if not pg.ev("typeof EVENTS_ON !== 'undefined' && EVENTS_ON"): print('  ev: events off: skipped'); ctx.close(); return
+    got = None
+    for day in (11, 7, 35, 31):
+        pg.ev(f"devmodeRun('Set career', () => devmodeSetCareerTo({day}))")
+        g = pg.ev("(() => { const f = DV_MORE.find(x => x[0] === 'event'); const r = f && f[1](Math.floor(shipNow()), SHIP.works); return r ? { day: SHIP.time.day, label: r.g.label, deck: r.g.deck, room: r.g.room, at: hhmm(r.when % 1440), ev: SHIP.event && SHIP.event.id } : null; })()")
+        if g: got = g; break
+    print('    ev', got)
+    check(got and got['label'].startswith('Event: ') and got['deck'] and got['room'], f'ev: no event meeting for the arrow on Days 11, 7, 35, 31: {got}')
+    check(not pg.errors, f'ev: errors {pg.errors[:3]}')
+    ctx.close()
+
+def part_end(b):
+    # J4: the ending: the offer (the ready room), your answer still open (the Captain), the goodbye (the shuttle bay)
+    ctx, pg = j4_page(b)
+    if not pg.ev("typeof EV_ENDING_ON !== 'undefined' && EV_ENDING_ON && P5_END"): print('  end: the ending off: skipped'); ctx.close(); return
+    out = {}
+    out['offer'] = j4_go(pg, 32, "{ id: 'a', label: 'a', day: 32, by: 31, at: 950, where: { deck: 1, room: 'R' } }")
+    out['open'] = j4_go(pg, 34, "{ id: 'b', label: 'b', day: 34, by: 33, at: 1075, where: { deck: 3, room: 'M' }, ans: { offer: 'unsure' } }")
+    out['bye'] = j4_go(pg, 36, "{ id: 'c', label: 'c', day: 36, by: 35, at: 550, where: { deck: 5, room: 'S' }, ans: { offer: 'go' } }")
+    for k, v in out.items(): print('   ', k, v)
+    check('offer' in out['offer'].get('label', '') and out['offer'].get('deck') == 1, f"end: the offer: {out['offer']}")
+    check('Your answer' in out['open'].get('label', ''), f"end: your answer still open: {out['open']}")
+    check('goodbye' in out['bye'].get('label', '') and out['bye'].get('deck') == 5, f"end: the goodbye: {out['bye']}")
+    check(not pg.errors, f'end: errors {pg.errors[:3]}')
+    ctx.close()
 
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
