@@ -100,3 +100,10 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
   (rv25-shots/pad_prof.py, pad_time.py, pad_same.py) on fe11cd66, Sunday dinner: PAD.live false; crowd/crew hash identical
   on/off; profile shows no section 26 function; timing medians on 3.21 / off 3.98 ms with ~1-2 ms run-to-run spread.
   Reported: no cause, can't reproduce; suggest re-measuring alone, alternated, several times.
+
+## Dev mode J2 93449f7 (DM2, session_01GKuymoBtAFGaak9qYYXS24): PASS (~22:4x, DM2, lead 44)
+- cadet vs fe11cd66 ALL IDENTICAL; devmode_check OK (events1, events2); dev_arrow_check OK.
+- j2_list.py: 28 rows on, 5 min before each moment; visit gifts Day 19 08:55 Observation room, farewell 09:25 Shuttle bay.
+- Code read: times from event data via evBeatAt/evCalPlan; VESSEL set at load; no R(); dmEvMeet by evInvited; End and
+  keep's message names DM2-1's limit. Note: the formal dinner jump lands in the closed, empty Captain's quarters.
+- 21:59 lead 44: the 0.96.0 round finished; two browsers fine again.
