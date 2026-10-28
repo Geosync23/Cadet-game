@@ -95,3 +95,8 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
   shot (truly identical). puzzle_check OK (p9 staged Day 22 after retries); join_check OK (farewell and vesselLights name
   Saruth). 72bb4a3 owner read (24k): staged sets case.p9.first; trained or open p9 -> 'none'; retry window from saved W.op;
   P9_MISS memory only (one extra look after a load, harmless); t4 needs no p9. 8eef718 check only.
+- 18:xx lead 44 asked why PAD_ON costs script time with no pad (perf bisect). Code read: all per-frame pad work is inside
+  padTick, which the main loop runs only if PAD.live (set by gamepadconnected); no observers/intervals. Probes
+  (rv25-shots/pad_prof.py, pad_time.py, pad_same.py) on fe11cd66, Sunday dinner: PAD.live false; crowd/crew hash identical
+  on/off; profile shows no section 26 function; timing medians on 3.21 / off 3.98 ms with ~1-2 ms run-to-run spread.
+  Reported: no cause, can't reproduce; suggest re-measuring alone, alternated, several times.
