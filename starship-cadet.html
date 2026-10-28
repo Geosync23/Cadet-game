@@ -13366,6 +13366,7 @@ function slotsView() {
   B.push({ kind: 'text', text: 'Keep a copy of this game, or bring one back' },
     { kind: 'buttons', items: [{ label: 'Download my save', action: { app: 'saves', do: 'download' } }, ...(SLOT_UI.copy ? [{ label: 'Copy save as text', action: { app: 'saves', do: 'copy' } }] : []),
       { label: 'Load a save file', action: { app: 'saves', do: 'load' } }] });
+  if (PAD_ON && typeof PAD !== 'undefined' && PAD.used) B.push({ kind: 'text', text: 'With a controller: Download and Load open your phone\'s or browser\'s own screens, which may need a tap.' });   // Wave C (plans/controller-audit.md L): browsers may not count a pad press as a tap
   return { title: 'Saves', blocks: B };
 }
 if (SAVE_SLOTS_ON && !NOSAVE) {
@@ -55836,7 +55837,7 @@ function wardrobeUse() {
   if (clothesHandsFull()) { toast('Wardrobe', 'No clean clothes left. Your hamper\'s in here, but your hands are full: put things down first.'); return; }
   C.hamper = { state: 'dirty', at: 'hands', deck: 0, x: 0, z: 0, washer: null, until: 0, done: false };
   toast('Wardrobe', clothesText('clothes.empty', {}, 'No clean clothes left. Take the hamper to the laundry on Deck 4.') + ' You take your laundry hamper.');
-  if (typeof ixTip === 'function') ixTip('laundry', clothesText('tip.laundry', {}, 'Laundry: carry your hamper to a free washer in the Deck 4 laundry and tap it. It runs half an hour, and you can leave. Take the clean washing out and put it away at your wardrobe.'));
+  if (typeof ixTip === 'function') ixTip('laundry', introTapWords(clothesText('tip.laundry', {}, 'Laundry: carry your hamper to a free washer in the Deck 4 laundry and tap it. It runs half an hour, and you can leave. Take the clean washing out and put it away at your wardrobe.')));
   clothesGoal('washer');
 }
 // the washers (section 17's machines, kind 'washer', in the Deck 4 laundry): free, busy (anyone's run, MACH_RUN) or broken
@@ -55894,7 +55895,7 @@ function hamperPut() {                                   // section 15b's Put do
   if (!hamperHeld()) return '';
   const h = SHIP.clothes.hamper, p = player.obj.position, f = player.face || 0;
   h.at = 'floor'; h.deck = deckDef.num; h.x = p.x + Math.sin(f) * .45; h.z = p.z + Math.cos(f) * .45;
-  return 'You set your laundry hamper down. Tap it to pick it up again.';
+  return introTapWords('You set your laundry hamper down. Tap it to pick it up again.');
 }
 // the arrow: to a free washer (or the laundry) with the dirty washing, back to your wardrobe with the clean
 let CLOTHES_GOAL = null;
@@ -55931,7 +55932,7 @@ const CLOTHES_BEATS = [
     keys: () => [['beat.d2-laundry', 'walk.laundry']], lines: () => ['Laundry today, remember? After shift\'s quietest.'] },
   { id: 'd2-knit', day: 2, at: 18 * 60 + 30, till: 21 * 60, who: INTRO_ESCORT, where: 'seek', seek: true, settle: 'hobby', when: () => typeof hobbyHas !== 'function' || !hobbyHas('knit'),
     keys: () => ['walk.knit'], lines: () => ['Want to learn to knit? I\'ve got spare needles.'],
-    then: () => { if (typeof hobbyGive === 'function' && hobbyGive('knit')) toast('Knitting', 'Zeke gives you a pair of spare needles and some wool. Knitting is one of your hobbies now: sit down and tap Hobby.'); } },
+    then: () => { if (typeof hobbyGive === 'function' && hobbyGive('knit')) toast('Knitting', introTapWords('Zeke gives you a pair of spare needles and some wool. Knitting is one of your hobbies now: sit down and tap Hobby.')); } },
   // your first delivery (plan-0607 "Stores and the lift": Day 3, your first Wednesday, Yara Esposito mentions it; offered,
   // never forced): while section 17's Wednesday delivery is on the board and nobody has it (held for you till 14:00),
   // she comes and finds you and says the writers' stores.delivery card lines (gate flag delivery.first)
@@ -55939,7 +55940,7 @@ const CLOTHES_BEATS = [
     own: () => clothesVoice('esposito-yara', 'stores.delivery', 'delivery.first'),
     lines: () => ['Wednesday. Delivery day. There\'s a stack of crates in the hold.', 'Fancy unloading it? Cart, crates, shelves. It\'s on the board.', 'No pressure. If it\'s still there at two, someone else gets it.'],
     first: () => introFlagSet('delivery.first'),
-    then: () => { if (clothesDelivery()) toast('The Wednesday delivery', 'It\'s on the job board in the Works bay, Deck 5, until 14:00: take it there if you\'d like to. A hover cart from the Cart bay, the crates in the cargo hold, then tap any shelf in main storage.'); } },
+    then: () => { if (clothesDelivery()) toast('The Wednesday delivery', introTapWords('It\'s on the job board in the Works bay, Deck 5, until 14:00: take it there if you\'d like to. A hover cart from the Cart bay, the crates in the cargo hold, then tap any shelf in main storage.')); } },
 ];
 // (playtest patch 1, #4, the lead's reading of the user's "Get rid of Zeke's message?") PARKED: it repeated what he now says
 // in person (the bag, the wardrobe, the device). Off; the function, its text and its key stay (CLAUDE.md: cut is parked)
@@ -56147,6 +56148,10 @@ function introHush() {
 // it (section 19's SHIP.device.booted), its ring pulses and a small "Tap your device" sits under it; both go on the first
 // open and never come back. Only with the intro on (test URLs never), so nothing changes elsewhere.
 const INTRO_DEV_POINT = 'Tap your device', INTRO_DEV_POINT_MS = 30000;
+// with a controller in use (Wave C, plans/controller-audit.md J): "tap it" words become the button that does it
+function introPad() { return PAD_ON && typeof PAD !== 'undefined' && PAD.used && typeof padWord === 'function'; }
+function introDevPoint() { return introPad() ? 'Press ' + padWord('y') + ' for your device' : INTRO_DEV_POINT; }
+function introTapWords(s) { return !introPad() || typeof s !== 'string' ? s : s.replace(/\b([Tt])ap (it|them|the|a|any)\b/g, (m, t, w) => (t === 'T' ? 'Press ' : 'press ') + padWord('a') + ' on ' + w).replace(/\btap Hobby\b/g, 'choose Hobby'); }
 const INTRO_DEV_SEEN = { ms: 0, at: 0, xy: '' };   // real ms the pointer has shown (not saved: a reload shows it again)
 let INTRO_DEV_GLOW = false;
 function introDevGlowTick() {
@@ -56161,7 +56166,8 @@ function introDevGlowTick() {
   const show = !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && INTRO_DEV_SEEN.ms < INTRO_DEV_POINT_MS;
   if (!show) { if (pt) pt.remove(); return; }
   INTRO_DEV_SEEN.ms += dt;
-  if (!pt) { pt = document.createElement('div'); pt.id = 'devPoint'; pt.textContent = INTRO_DEV_POINT; document.body.appendChild(pt); INTRO_DEV_SEEN.xy = ''; }
+  if (!pt) { pt = document.createElement('div'); pt.id = 'devPoint'; pt.textContent = introDevPoint(); document.body.appendChild(pt); INTRO_DEV_SEEN.xy = ''; }
+  else if (PAD_ON && pt.textContent !== introDevPoint()) pt.textContent = introDevPoint();   // the controller picked up or put down while it shows
   const r = b.getBoundingClientRect(), xy = Math.round(r.left) + ',' + Math.round(r.bottom + 8);
   if (xy !== INTRO_DEV_SEEN.xy) { INTRO_DEV_SEEN.xy = xy; pt.style.left = Math.round(r.left) + 'px'; pt.style.top = Math.round(r.bottom + 8) + 'px'; }
 }
@@ -74369,6 +74375,14 @@ const SND = (() => {
   S.start = start;
   const gesture = e => { if (!e.isTrusted) return; start(); if (ctx && ctx.state !== 'running' && S.prefs.on && !document.hidden) ctx.resume().catch(() => {}); };   // Safari only resumes inside a tap (after a call or a hidden tab)
   addEventListener('pointerdown', gesture, true); addEventListener('keydown', gesture, true);
+  // a pad-only player (Wave C, plans/controller-audit.md H; lead 43's call): the first pad press starts sound where the
+  // browser lets it; most don't count a pad press as a tap, so then a quiet note once a load: sound starts at the first tap
+  if (PAD_ON) padOn('use', () => {
+    if (!ALLOWED || !S.prefs.on) return;
+    start(); if (!ctx) return;
+    if (ctx.state !== 'running' && !document.hidden) ctx.resume().catch(() => {});
+    setTimeout(() => { if (ctx && ctx.state !== 'running' && !document.hidden && !S.padNote) { S.padNote = true; if (typeof toast === 'function') toast('Sound', 'Sound starts at your first tap.'); } }, 700);
+  });
 
   // ---- each frame (the main loop): suspend with pause, Tiles, a hidden tab or Sound off; tick the loops ----
   let busy = false, lastSec = -1;
