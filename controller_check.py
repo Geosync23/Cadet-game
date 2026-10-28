@@ -410,7 +410,7 @@ class Sweep:
     """The touch half of the reachability sweep: from the deck and from every panel it can open, press every clickable
     by mouse (a real click at its middle, as a finger would) and record each screen state reached: the pressable things
     in it, read from the page. Back to the state before with Escape, else by reloading and replaying the presses."""
-    MAX_DEPTH, MAX_PRESSES = int(os.environ.get('CTL_DEPTH', 6)), int(os.environ.get('CTL_PRESSES', 700))
+    MAX_DEPTH, MAX_PRESSES = int(os.environ.get('CTL_DEPTH', 8)), int(os.environ.get('CTL_PRESSES', 1000))   # (PB1) the first whole run (0.95.0 wave B) stopped at 700 presses, and at depth 6 in New appointment's map: with the deck row as one, Pick on the map > a deck > a room > Meet here ends at 8
     SKIP = set()   # (was {'#newgame'}: the HUD's New game button, gone from 0.91.0, now in Settings)
     def __init__(self, pw, src, tag):
         self.pw, self.src, self.tag = pw, src, tag
@@ -440,6 +440,9 @@ class Sweep:
     # a panel's own fixed keys (the device's Back, Home and Close) are pressed like the rest but don't make a screen new:
     # Back comes and goes with the app, so home after an app would look like another screen
     FIXED = {'#devBack', '#devHome', '#devClose'}
+    # (PB1) a map's deck row (Maps, Pick on the map: one button a deck, "N" once digits are hidden, "R" the rec deck) shows
+    # the same map for another deck: a press on it is no level deeper (the first whole run stopped there at depth 6)
+    DECK_ROW = re.compile(r'\[[NR]\](#\d+)?$')
     @classmethod
     def sig(cls, sc): return (sc.get('deck'), tuple(sorted(sc['dialogs'])), tuple(sorted(i['k'] for i in cls.inner(sc) if i['k'] not in cls.FIXED)))
     def deck_tap(self, key, t=None):
@@ -512,13 +515,14 @@ class Sweep:
             return
         todo = list(self.inner(sc))
         if not sc['dialogs'] and all(not k.startswith('@tap:') for k in path):
-            # on a deck: its tappable things too (each name once in the whole sweep), then the other decks
+            # on a deck: the moments of the day first (PB1: last, the press cap came before bedtime), its tappable things
+            # (each name once in the whole sweep), then the other decks
+            if not path: todo += [{'k': '@sit:' + n} for n in SITUATIONS]   # (CP5) panels only a moment of the day brings
             for t in self.r.ev(DECK_TARGETS):
                 if t['name'] not in self.tapped: self.tapped.add(t['name']); todo.append({'k': '@tap:' + t['name']})
             if not path:
                 for n in self.r.ev("(typeof DECK_ORDER !== \"undefined\" ? DECK_ORDER : Object.keys(DECKS).map(Number)).filter(n => n !== player.deck)"):
                     todo.append({'k': f'@deck:{n}'})
-                todo += [{'k': '@sit:' + n} for n in SITUATIONS]   # (CP5) panels only a moment of the day brings
         for it in todo:
             if self.presses >= self.MAX_PRESSES: self.capped.add(f'{self.MAX_PRESSES} presses reached'); return
             if it['k'] in self.pressed or (it['k'] in self.SKIP and path): continue
@@ -540,7 +544,7 @@ class Sweep:
             after = self.scan()
             if after['url'] != sc['url']: self.lost.append('left the page: ' + it['k']); self.replay(list(path)); continue
             if self.sig(after) != sg or it['k'].startswith('@deck:'):
-                self.crawl(tuple(path) + (it['k'],), depth + 1)
+                self.crawl(tuple(path) + (it['k'],), depth + (0 if self.DECK_ROW.search(it['k']) else 1))
                 left = [i['k'] for i in todo if i['k'] not in self.pressed and not i['k'].startswith('@')]
                 self.back_to(list(path), sg, left[:1])
     def run(self):
