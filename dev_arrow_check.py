@@ -260,6 +260,13 @@ def part_ev(b):
         if g: got = g; break
     print('    ev', got)
     check(got and got['label'].startswith('Event: ') and got['deck'] and got['room'], f'ev: no event meeting for the arrow on Days 11, 7, 35, 31: {got}')
+    # (RV25) only meetings for you: the Veyli vessel's crew-planning holds (ranks: []) never show; at Day 27 10:00 its
+    # parts sheet (vesselSheet, the crew's, 09:50-12:00) is on and no meeting of yours is
+    if pg.ev("typeof EV_VESSEL_ON !== 'undefined' && EV_VESSEL_ON"):
+        pg.ev("devmodeRun('Set career', () => devmodeSetCareerTo(27, { id: 'v', label: 'v', day: 27, by: 26, at: 600, where: null }))")
+        V = pg.ev("(() => { const f = DV_MORE.find(x => x[0] === 'event'), r = f[1](Math.floor(shipNow()), SHIP.works), on = MEETINGS.filter(m => SHIP.event && m.event === SHIP.event.id && m.at <= shipNow() && shipNow() < m.at + (m.len || 15)); return { ev: SHIP.event && SHIP.event.id, r: r && r.g.label, on: on.map(m => [m.id, evInvited(m)]) }; })()")
+        print('    vessel', V)
+        check(V['ev'] == 'veyliVessel' and not any(not inv for _, inv in V['on'] if V['r']) and (V['r'] is None) == all(not inv for _, inv in V['on']), f'ev: the vessel\'s Day 27 10:00: a meeting not for you on the arrow: {V}')
     check(not pg.errors, f'ev: errors {pg.errors[:3]}')
     ctx.close()
 

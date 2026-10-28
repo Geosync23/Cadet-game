@@ -72419,8 +72419,8 @@ DV_MORE.push(['end', now => {                            // the ending's steps: 
 }]);
 DV_MORE.push(['event', now => {                          // a ship-wide event's meeting for you, from 15 minutes before it until it ends
   if (!SHIP.event || typeof MEETINGS === 'undefined') return null;
-  const m = MEETINGS.filter(x => x.event === SHIP.event.id && x.where && x.where.deck && now < x.at + (x.len || 15) && x.at - 15 <= now).sort((a, b) => a.at - b.at)[0]; if (!m) return null;   // from 15 minutes before it until it ends: a career step ahead of it keeps the arrow till then
-  const room = dvRoomKey(m.where.deck, m.where.room), s = typeof MEETING_SCRIPTS !== 'undefined' && MEETING_SCRIPTS[m.script];
+  const m = MEETINGS.filter(x => x.event === SHIP.event.id && (typeof evInvited !== 'function' || evInvited(x)) && x.where && x.where.deck && now < x.at + (x.len || 15) && x.at - 15 <= now).sort((a, b) => a.at - b.at)[0]; if (!m) return null;   // (RV25) only yours: a meeting for other ranks (the crew's planning holds) isn't on your Schedule (18's F5)   // from 15 minutes before it until it ends: a career step ahead of it keeps the arrow till then
+  const room = dvRoomKey(m.where.deck, m.where.room), s = typeof MEETING_SCRIPTS !== 'undefined' && MEETING_SCRIPTS[typeof evScriptOf === 'function' ? evScriptOf(m) : m.script];   // your rank's script, as the game plays it
   return room ? { when: m.at, soon: 15, g: { deck: m.where.deck, room, label: 'Event: ' + ((s && s.title) || (SHIP_EVENTS[SHIP.event.id] || {}).title || 'a meeting') } } : null;
 }]);
 // ---- end of J4 ----
