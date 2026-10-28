@@ -30,7 +30,9 @@
 #          same save, timed) with your answers put in on the way (Calder's question Engines, the offer Stay), settled Stay,
 #          the endgame, the Day 26 milestones kept (CA1's F1); a Go jump settles Go on Day 35; Senior Officer and Engine
 #          Specialist by hand; the panel's Stop; the Jump to and Set career tabs at 390 px (DEVMODE_SHOTS=folder: a shot)
-#   beats, events1, events2, ending1, ending2: the later turns' parts (J1-J3), stubs until then
+#   beats: J1's Career and Nights jumps: each lands at its time and room and the game books or starts its beat (played
+#          where it needs you up: Power safety, the nights once clocked in); Undo; one jump twice in fresh browsers
+#   events1, events2, ending1, ending2: the later turns' parts (J2-J3), stubs until then
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 devmode_check.py BUILD.html [part ...]   (parts: only those)   Good is DEVMODE CHECK OK (exit 0); a failure exits 1.
 import sys, os, re, json, pathlib
@@ -662,7 +664,68 @@ def part_jumps(b):
     print(f'  jumps: {n} jumps ({onN} on), the list sound; week-slow offset; Day 36 in {times[0]:.1f} s and {times[1]:.1f} s, the same save twice, Engines and Stay put in on the way, settled Stay, the endgame, milestones kept; a Go jump settles Go on Day 35; Senior and Specialist by hand; Stop; the tabs at 390 px')
 
 # ---- stubs (plan v4.4, J0): each later turn fills its own part here, so nobody edits the part list again
-def part_beats(b): print('  beats: not built yet (J1)')
+def part_beats(b):
+    # J1 (plan v4.4): every Career and Nights jump J1 added lands at its time and room, and the game then books or starts
+    # its beat: Power safety asked once you're up (played), the Tier 3 test held for you, its result, the bar and the
+    # toast booked, each lesson's meeting and the briefing booked in their room, and each night's work once you clock in
+    # at the time clock (played). One jump twice in fresh browsers gives the same save; Undo after a jump
+    J1 = ['ps', 't3', 't3res', 't3bar', 't3toast', 'm19', 'm18', 'm20', 'm21', 'n1', 'n2', 'n3']
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = Page(ctx, '#dev'); pg.sign(); pg.step(20)
+    on = pg.ev(f"{json.dumps(J1)}.filter(id => {{ const j = devmodeJumpOf(id); return j && devmodeJumpOn(j); }})")
+    if not on: print('  beats: none on in this build'); pg.close(); ctx.close(); return
+    play = lambda mins: pg.step(int(mins * 50) + 10)   # 0.6 ship minutes a real second: 50 frames a ship minute
+    occ = lambda id: pg.ev(f"(SHIP.occasions || []).filter(o => o.id === '{id}' && o.status === 'asked').map(o => [hhmm(o.at % 1440), o.deck, o.room])")
+    got = {}
+    for id in on:
+        r = pg.ev(f"devmodeRun('Jump', () => devmodeSetCareerTo(devmodeJumpOf('{id}').day, devmodeJumpOf('{id}')))")
+        pg.step(10)
+        L = pg.ev(f"""(() => {{ const j = devmodeJumpOf('{id}'), w = j.where, here = roomAt(...player.here());
+          return {{ ok: {str(True).lower()}, clock: clockText(), want: 'Day ' + j.day + ',', at: hhmm(j.at), deck: deckDef.num, room: (ROOMS[here] || {{}}).name || '', wdeck: w ? w.deck : null, wroom: w ? DECKS[w.deck].rooms[w.room].name : null,
+            rank: SHIP.works.rank, set: devmodeState().set }}; }})()""")
+        check(r is True and L['clock'].startswith(L['want']) and L['clock'].endswith(L['at']) and (L['wdeck'] is None or (L['deck'] == L['wdeck'] and L['room'] == L['wroom'])) and L['set'] and L['set'].get('beat') == id,
+              f'beats: {id} landed: {L} ({pg.ev("DM_UI.msg")[:120]})')
+        if id == 'ps':
+            play(20); o = occ('works.ps'); got[id] = o
+            check(o and pg.ev("SHIP.works.tr.ps === undefined && worksOpened(SHIP.works).has('ps')"), f'beats: ps: Power safety not asked once up: {o}')
+        elif id == 't3':
+            T = pg.ev("({ cur: SHIP.works.cur && SHIP.works.cur.id + ':' + SHIP.works.cur.st, t3: puT3() })"); got[id] = T
+            check(T['cur'] == 't3:do' and T['t3'] and T['t3']['day'] == 15 and not T['t3']['passed'], f'beats: t3: the test not held for you: {T}')
+        elif id in ('t3res', 't3bar', 't3toast'):
+            o = occ({'t3res': 'pu3Result', 't3bar': 'pu3Bar', 't3toast': 'pu3Toast'}[id]); got[id] = o
+            check(len(o) == 1 and o[0][1] == L['wdeck'], f'beats: {id}: its occasion not booked here: {o}')
+            if id != 't3res': check(L['rank'] == 'senior', f'beats: {id}: not a Senior Officer: {L["rank"]}')
+        elif id in ('m19', 'm18', 'm20'):
+            o = occ('works.' + id); c = pg.ev("SHIP.works.cur && SHIP.works.cur.id + ':' + SHIP.works.cur.st"); got[id] = (o, c)
+            check(len(o) == 1 and o[0][1] == L['wdeck'] and c == id + ':meet', f'beats: {id}: its meeting not booked: {o} {c}')
+        elif id == 'm21':
+            o = occ('m21.brief'); got[id] = o
+            check(len(o) == 1 and o[0][0] == '08:30' and o[0][1] == 1, f'beats: m21: the briefing not booked: {o}')
+        else:   # the nights: on to the night's start, clock in at the time clock (p5nClock, as its tap does), then play
+            n = {'n1': 22, 'n2': 23, 'n3': 24}[id]
+            pg.ev(f"devmodeRun('Clock', () => devmodeSkipTo(p5NightOf({n}).from + 2))")
+            ci = pg.ev("p5nClock(Math.floor(shipNow()), () => {})"); play(6)
+            N = pg.ev(f"""({{ in: (SHIP.works.ns || {{}})[{n}] && SHIP.works.ns[{n}].in > 0, m23: m23State(), m24: m24State(), rows: [].concat(m23Items({n}), m24Items({n})).map(r => r.title), on23: m23On({n}), on24: m24On({n}),
+              j1: (SHIP.jobs || []).some(j => j.type === 'm23night' && j.claimedBy === 'you') }})""")
+            got[id] = {k: N[k] for k in ('in', 'rows', 'j1')}
+            check(ci == 'in' and N['in'], f'beats: {id}: not clocked in for the night: {ci} {N["in"]}')
+            if id == 'n1': check(N['on23'] and (N['j1'] or (N['m23'] and N['m23'].get('j1'))), f'beats: n1: night 1\'s work with Reyes not posted: {N["m23"]} {N["rows"]}')
+            if id == 'n2': check(N['on23'] and N['rows'], f'beats: n2: night 2\'s reactor not on: {N["rows"]}')
+            if id == 'n3': check(N['on24'] and N['rows'], f'beats: n3: night 3\'s coil swap not on: {N["rows"]}')
+    for k, v in got.items(): print('   ', k, str(v)[:160])
+    # Undo after a jump brings back the one before
+    last = on[-1]; prev = on[-2] if len(on) > 1 else None
+    pg.ev_reload('devmodeUndo()')
+    check(prev is None or pg.ev("devmodeState().set && devmodeState().set.beat") == prev, f'beats: Undo after {last}: {pg.ev("devmodeState().set")}')
+    check(not pg.errors, f'beats: errors {pg.errors[:3]}')
+    pg.close(); ctx.close()
+    # the same jump in two fresh browsers: the same save (within one page, see backlog DM1-3)
+    saves = []
+    for _ in range(2):
+        c2 = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1); p2 = Page(c2, '#dev'); p2.sign(); p2.step(20)
+        p2.ev("devmodeRun('Jump', () => devmodeSetCareerTo(16, devmodeJumpOf('t3res')))"); p2.ev('saveGame()'); saves.append(p2.ev('localStorage.getItem(SAVE_KEY)')); p2.close(); c2.close()
+    check(saves[0] == saves[1], 'beats: the Tier 3 result jump twice (fresh browsers) gives different saves')
+    print(f'  beats: {len(on)} jumps landed at their time and room, each beat booked or started (Power safety asked once up, the test held, result, bar, toast, the lessons, the briefing, the nights once clocked in); Undo; t3res twice the same save')
 def part_events1(b): print('  events1: not built yet (J2)')
 def part_events2(b): print('  events2: not built yet (J2)')
 def part_ending1(b): print('  ending1: not built yet (J3)')

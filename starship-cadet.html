@@ -72311,6 +72311,28 @@ function devmodeArrowRow(body) {                         // the Quick tab's swit
   devmodeText(body, 'The magenta DEV arrow: ' + (g ? g.label + (g.deck !== (deckDef && deckDef.num) ? ' (' + deckWord(g.deck) + ')' : '') : 'no career step ahead') + '.');
 }
 // ---- J1 (plan v4.4): Career and Nights jumps (builder A). devmodeJump({ group: 'career' | 'nights', ... }) rows only ----
+// Each lands a few minutes before its beat with the career as the table has it by the day before (`by`), and the game
+// books the beat itself on the way (DM1 ran each: the test's job, the result, the bar, the toast, each lesson's meeting
+// and the briefing come at the times and rooms below). Power safety is asked only while you're up (its minute tick), so
+// its jump wakes you at 06:00 on Day 12 with it open, not trained; Calder then books it. The nights (28a) land at the
+// time clock before the night opens: clock in there, and night 1's work with Reyes, night 2's reactor and night 3's
+// coil swap start as in play (the table's career by that day: an Engine Specialist). Not jumps: the old mysteries
+// board (Day 21 is a Sunday: it comes with a job, no beat of its own) and night 3's booked slot (picking the team and
+// booking the Watch are the beat). Nothing here calls R().
+const DM_J1 = () => typeof P5_STEP5 !== 'undefined' && P5_STEP5;
+devmodeJump({ id: 'ps', group: 'career', label: 'Day 12: Power safety', day: 12, by: 12, at: WAKE_AT, where: null, on: DM_J1,
+  set: W => { delete W.tr.ps; delete W.use.ps; } });   // open (W.op keeps it), not trained: Calder asks once you're up
+devmodeJump({ id: 't3', group: 'career', label: 'Day 15: your Tier 3 test', day: 15, by: 14, at: 530, where: { deck: 5, room: 'w' }, on: () => DM_J1() && !!P5_PROMO3 });   // the test on the board at 09:00 (the game sets it the evening before)
+devmodeJump({ id: 't3res', group: 'career', label: 'Day 16: your Tier 3 result', day: 16, by: 15, get at() { return PU_R.at - 10; }, where: { deck: 5, room: 'o' }, on: () => DM_J1() && !!P5_PROMO3 });   // Calder's office, 08:15
+devmodeJump({ id: 't3bar', group: 'career', label: 'Day 16: your bar, from the Captain', day: 16, by: 15, get at() { return promoCerTimes(16).at - 10; }, where: { deck: 1, room: 'O' }, on: () => DM_J1() && !!P5_PROMO3 });   // the observation room, 16:30 (your result by Mail on the way)
+devmodeJump({ id: 't3toast', group: 'career', label: 'Day 17: the Captain\'s toast', day: 17, by: 16, get at() { return PU_R.toastAt - 10; }, where: { deck: 2, room: 'C' }, on: () => DM_J1() && !!P5_PROMO3 });   // her quarters, 19:00
+devmodeJump({ id: 'm19', group: 'career', label: 'Day 17: power and relays', day: 17, by: 16, at: 650, where: { deck: 1, room: 'u' }, on: () => DM_J1() && !!P5_M19 });   // Calder's meeting, 11:00
+devmodeJump({ id: 'm18', group: 'career', label: 'Day 18: shutdowns training', day: 18, by: 17, at: 545, where: { deck: 6, room: 'j' }, on: () => DM_J1() && !!P5_M18 });   // 09:15
+devmodeJump({ id: 'm20', group: 'career', label: 'Day 19: the sensor array', day: 19, by: 18, at: 590, where: { deck: 2, room: 'A' }, on: () => DM_J1() && !!P5_M20 });   // Mori and Calder, 10:00
+devmodeJump({ id: 'm21', group: 'career', label: 'Day 22: the Monday briefing', day: 22, by: 21, get at() { return M21_AT - 10; }, where: { deck: 1, room: 'O' }, on: () => DM_J1() && typeof P5_M21 !== 'undefined' && !!P5_M21 });   // 08:30, the conference table
+devmodeJump({ id: 'n1', group: 'nights', label: 'Night 1: engine work with Reyes', day: 22, by: 22, at: 1355, where: { deck: 5, room: 'w' }, on: () => typeof P5_M23 !== 'undefined' && !!P5_M23 });   // the time clock, the night from 22:45
+devmodeJump({ id: 'n2', group: 'nights', label: 'Night 2: the reactor', day: 23, by: 23, at: 1250, where: { deck: 5, room: 'w' }, on: () => typeof P5_M23 !== 'undefined' && !!P5_M23 });   // the night from 21:00: permit, badge, the Watch
+devmodeJump({ id: 'n3', group: 'nights', label: 'Night 3: the coil swap, your team', day: 24, by: 24, at: 1250, where: { deck: 5, room: 'w' }, on: () => typeof P5_M24 !== 'undefined' && !!P5_M24 });   // from 21:00: plan it in the Works app's Team tab
 // ---- end of J1 ----
 // ---- J2 (plan v4.4): Ship events jumps and the running-event card (builder B). devmodeJump({ group: 'events', ... }), DM_JUMP_HEAD ----
 // ---- end of J2 ----
