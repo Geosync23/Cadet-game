@@ -7,6 +7,28 @@ Runner R4 (session_01GKuymignKdueCaz2pftLEC). Build master BM19, lead 42. 2026-1
 - OLD = 0.94.0, claude/integration 6f1915cb, game sha256 `5f4c5415814c78eb4c93eaad76ecc35dfa53f1f7cbb4c1f5af541f3971900a0f`.
 - Two browsers at a time (BM19's limit), each in its own CADET_WORK (/tmp/work-r4a, /tmp/work-r4b), on 4 cores.
 
+## Candidate 3 (b5199dc3): the round lead 42 called
+
+claude/staging-p5s6 **b5199dc3** (patch E's rank card, clock undo and shop menu on), game sha256
+`b18d2b6487e71ba5b1d806997821b6c11368a92659b8d4f6e97d9ffbb434238a` (confirmed). Checks from b5199dc3. Started 22:55 UTC.
+The container restarted at 23:56 (interactions and Day 19 lost mid-run; both restarted, nothing finished was lost).
+
+| Check | Result | Key lines |
+|---|---|---|
+| career_check | known old only | `FAIL busy: "Relied on" before Day 5` (backlog 12); nothing else |
+| day_check 6, 8, 12, 13, 16 | OK | DAY CHECK OK each |
+| day_check 19, 25, 26, 27 | OK | DAY CHECK OK each |
+| appt_check | OK | APPT CHECK OK |
+| saves_check | OK | SAVES CHECK OK |
+| stories_check | OK | STORIES CHECK OK |
+| clothes_check | OK | ALL OK |
+| disc_check | OK | ALL OK |
+| tiles_check | OK | ALL OK |
+| food_check 1 7 | OK | FOOD CHECK OK |
+| food_check 11 4 | OK | FOOD CHECK OK |
+| join_check | OK | JOIN CHECK OK, run alone (no other browser) |
+| interactions_check | with R1 (AS1) | Handed over by lead 42 after the restart; AS1 runs it alone from 00:16 UTC |
+
 ## Candidate 2 (82b02fb9)
 
 | Check | Result | Key lines |
