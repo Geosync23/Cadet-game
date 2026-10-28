@@ -16001,6 +16001,7 @@ function clockPunch(early) {                             // a punch from the scr
 }
 function clockUndo() {                                   // Undo: the kept copy back; the side effects never happen
   const u = CLOCK_UNDO; if (!u) return null; CLOCK_UNDO = null;
+  if (SND_R3_ON) sndFx('r3ClockUndo');                   // section 27's sound update: the lever back (A)
   const C = careerInit(); C.ci = u.keep.ci; C.co = u.keep.co; if (flag('shiftSent') === u.keep.sent) C.on = u.keep.on;   // section 14 started the shift in the window (its shiftStart note is out): that stands
   if (u.keep.log === undefined) delete SHIP.player.clockLog[u.d]; else SHIP.player.clockLog[u.d] = u.keep.log;
   return u.what;
@@ -49805,6 +49806,7 @@ function vesselMaking(v) {
 function vesselStepStart(v, s) {
   const M = v.e.mine, S = VESSEL_STEPS[s], H = M['vessel:helpers'] || [], who = H[(s + 1) % 2] || H[0];
   const [tw, tt] = vesselLine('taavek.step.' + s, '', 'taavek'); if (tt) vesselSay(tw || 'taavek', tt, 6);
+  if (SND_R3_ON && s === 2) sndFx('r3Bronze', { long: 5 });   // section 27's sound update: Taavek taps the bars, the dull one and the one that sings (C)
   if (who) { const [hw, ht] = vesselLine('help.' + who + '.step.' + s, '', who); if (ht) simTimeout(() => vesselSay(hw || who, ht, 5), 2500); }
   const go = () => {
     actStart('vesselStep', S.at, { title: 'Machine shop', after: S.after });
@@ -65848,7 +65850,7 @@ function arrStops(j) {
 function arrStepDone(j, k, res) {
   const st = arrStops(j)[k]; if (!st) return true;
   if (k > 0 && !(j.stepsDone || []).includes(k - 1)) return false;   // in order: the star, the dial, the module
-  if (st.tag === 'turn') { const v = res && res.value; if (v !== 0) return false; const i = arrStops(j).slice(0, k).filter(x => x.tag === 'turn').length; if (Array.isArray(j.cal)) j.cal[i] = 0; return true; }   // the dial settled on the star (section 15's turn card sends { value })
+  if (st.tag === 'turn') { const v = res && res.value; if (v !== 0) return false; const i = arrStops(j).slice(0, k).filter(x => x.tag === 'turn').length; if (Array.isArray(j.cal)) j.cal[i] = 0; if (SND_R3_ON) sndFx('r3Calibrate', { long: 4 }); return true; }   // the dial settled on the star (and section 27's sound update: the lock, A) (section 15's turn card sends { value })
   if (st.tag === 'pick') {
     const pick = res && res.pick, o = arrStars(j).find(x => x.id === pick); if (!o) return false;
     j.star = o.label;
@@ -66139,7 +66141,8 @@ function p5nKnockAt(abs, now = shipNow()) {               // the night you'd sle
 }
 function p5nKnock(wake) {                                 // section 13's sleepGo asks: { at, say } or null
   const now = shipNow(), today = (SHIP.time.day - 1) * 1440 + wake, abs = today > now ? today : today + 1440, n = p5nKnockAt(abs, now); if (!n) return null;
-  return { at: n.at, say: () => { if (n.day === 22 && P5_PROMO4) { simNote('p5night', { step: 'knock', day: n.day }); return; }   // night 1 with S6-3: 24u's own knock notice and Calder's fetch say it
+  return { at: n.at, say: () => { if (SND_R3_ON) sndFx('r3Knock');   // section 27's sound update: the door chime (the user's B)
+    if (n.day === 22 && P5_PROMO4) { simNote('p5night', { step: 'knock', day: n.day }); return; }   // night 1 with S6-3: 24u's own knock notice and Calder's fetch say it
     const who = n.day === 22 ? 'calder' : null, by = who && typeof worksName === 'function' ? worksName(who) : p5nText('night.knock.from', 'The night crew');
     const t = n.day === 22 ? p5nText('night.knock.1', 'A knock at your bunk. Calder: "Up you get. Night shift. I\'ll see you down there."') : p5nText('night.knock', 'A knock at your bunk: your night shift starts at {time}.', { time: hhmm(n.from % 1440) });
     if (typeof promoNotice === 'function') promoNotice(t, by); else toast('Your bunk', t); simNote('p5night', { step: 'knock', day: n.day }); } };
@@ -66836,6 +66839,7 @@ function m24Team(n) {
   if (st && n.by !== 'you' && st.who === n.by) worksSay(n.by, worksText('m24.reply.' + j.seq[n.step].part, { isolate: 'Isolating. Coupling\'s cold.', unbolt: 'Bolts coming out. Mind your toes.', lift: 'Lifting. Easy, easy.', seat: 'Seating the new one. Gently.', test: 'Testing. Readings coming up.' }[j.seq[n.step].part] || 'On it.'));
   if (n.step !== j.seq.length || S.done) return;
   const t = Math.floor(shipNow()), mins = Math.max(0, t - j.start); S.done = t; S.mins = mins;   // whole ship minutes (the save keeps integers)
+  if (SND_R3_ON) sndFx('r3TeamDone', { long: 3 });         // section 27's sound update: job done, bigger (B)
   const res = mins <= M24_LEN - 5 ? 'early' : mins <= M24_LEN ? 'on' : 'slow';   // a good team and quick calls about 52 minutes; a poor pick over the hour
   worksSay(j.lead, worksText('m24.done.' + res, { early: 'Done early. That was a good team.', on: 'Done, on the hour. Clean work.', slow: 'Done. Slow, but done. The coil doesn\'t mind.' }[res]));
   if (typeof mailSend === 'function') { const tx = worksText('m24.mail.done', 'The coil swap | Done in {n} minutes with {a} and {b}. Logged for Calder.', { n: mins, a: worksFirst(j.team[0]), b: worksFirst(j.team[1] || j.team[0]) }), i = tx.indexOf(' | ');
@@ -66853,7 +66857,7 @@ function m24Call(now) {
   if (s.who !== 'you' || k < 0 || (j.stepsDone || []).includes(k) || !teamAtSpot(j) || now - M24_ASKED < 1 || typeof deviceChoose !== 'function') return;
   if (typeof DEV !== 'undefined' && (DEV.choose || DEV.open)) return;
   if (typeof ACT !== 'undefined' && ACT) return;          // already doing it by a tap at the spot (15b's taps reach team stops once claude/team-turn-fix is in, PZ6): no card over it
-  const ok = deviceChoose({ title: teamLabel(j), text: worksText('team.turn.' + s.part, TEAM_PART[s.part]), choices: [worksText('m24.next', 'Next step')] }, c => { M24_ASKED = shipNow(); if (c === 0) jobStepDone(j.id, k, {}); });
+  const ok = deviceChoose({ title: teamLabel(j), text: worksText('team.turn.' + s.part, TEAM_PART[s.part]), choices: [worksText('m24.next', 'Next step')] }, c => { M24_ASKED = shipNow(); if (c === 0) { if (SND_R3_ON) sndFx('r3TeamCall'); jobStepDone(j.id, k, {}); } });   // section 27's sound update: the intercom (A)
   if (ok) M24_ASKED = now;
 }
 // the beats, in play while it's your night and the swap's to do
@@ -73846,6 +73850,17 @@ const SND = (() => {
       r3ClockAsk: t => { tone(t, 587.33, 0.25, { type: 'triangle', gain: 0.08, lp: 1800 }); tone(t + 0.18, 659.25, 0.35, { type: 'triangle', gain: 0.08, lp: 1800 }); },   // the early clock-out question B
       r3TestFit: t => { clack(t, 0.1, { f: 900 }); thud(t, { gain: 0.15, d: 0.08, f: 400, body: 160 }); const u = t + 0.4;   // the test fit B: seat, spin, settle
         whine(u, 3.2, 90, 420, 0.03, { q: 2, r: 0.05 }); whine(u + 3.1, 2.2, 420, 60, 0.03, { q: 2, a: 0.05 }); clack(u + 5.3, 0.05, { f: 1200 }); },
+      // turn 4: the five moments other sections tell us about, through a one-line sndFx(...) in theirs
+      r3Knock: t => { bell(t, 659.25, 0.9, 0.07, { wet: 0.2 }); bell(t + 0.32, 523.25, 1.2, 0.07, { wet: 0.2 }); },   // the knock on your door B: the door's call chime (28a)
+      r3TeamCall: t => { noise(t, 0.012, { f: 2000, q: 1, gain: 0.06 }); tone(t + 0.03, 880, 0.08, { type: 'triangle', gain: 0.05, lp: 2500 }); tone(t + 0.13, 1174.7, 0.12, { type: 'triangle', gain: 0.05, lp: 2500 }); noise(t + 0.3, 0.012, { f: 1800, q: 1, gain: 0.05 }); },   // "Next step" A: the intercom (28d)
+      r3TeamDone: t => { SFX.jobDone(t); [1046.5, 1318.5, 1568].forEach((f, i) => bell(t + 0.55 + i * 0.08, f, 1.6, 0.035, { wet: 0.35 })); },   // the team job done B: job done, bigger (28d)
+      r3Calibrate: t => { held(t, 2.6, 880, 0.0001, 0.02); const o = ctx.createOscillator(), g = ctx.createGain();   // calibration A: two tones slide together, then the lock (24x)
+        o.frequency.setValueAtTime(940, t); o.frequency.exponentialRampToValueAtTime(880, t + 2.4); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.02, t + 0.6); g.gain.setValueAtTime(0.02, t + 2.4); g.gain.exponentialRampToValueAtTime(0.0001, t + 2.7);
+        o.connect(g); conn(g, ROUTE.ui); o.start(t); o.stop(t + 2.8); bell(t + 2.55, 1760, 0.9, 0.05, { wet: 0.25 }); },
+      r3Bronze: t => { thud(t, { gain: 0.3, d: 0.1, f: 300, body: 150 }); noise(t, 0.03, { f: 700, q: 2, gain: 0.06 }); const u = t + 0.9;   // the bronze bar C: the dull bar, then the one that sings (18's vessel slot)
+        noise(u, 0.01, { f: 3000, q: 1, gain: 0.08 }); fmBell(u, 392, 4.5, 0.08, 2.76, 1.0, 0); ring(u, [392, 1081], 0.6, { d: 1.2, q: 60 }); },
+      r3ClockUndo: t => lv(0.9, () => { clack(t, 0.08, { f: 1500 }); noise(t + 0.08, 0.18, { f: 1400, fTo: 700, q: 3, gain: 0.03, swell: 0.3 }); thud(t + 0.3, { gain: 0.2, d: 0.12, f: 220 });   // clock Undo A: the lever back (15)
+        for (let i = 0; i < 4; i++) clack(t + 0.42 + i * 0.055, 0.05, { f: 1700 - i * 120 }); }),
     };
     Object.assign(FX, fx);
     // inside the reactor room A: a slow throb under the Deck 6 hum, only in that room (a loop, like the mess)

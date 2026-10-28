@@ -516,7 +516,32 @@ def check_r3fx(pw, path):
         if pe: check(False, 'r3fx: page errors: ' + ' | '.join(pe[:3]))
     finally: g.close()
 CHECKS += [check_r3mess]   # the sound update (SD3), turn 2
+R3_HOOKS = [('p5nKnock', 'r3Knock'), ('m24Call', 'r3TeamCall'), ('m24Team', 'r3TeamDone'), ('arrStepDone', 'r3Calibrate'), ('vesselStepStart', 'r3Bronze'), ('clockUndo', 'r3ClockUndo')]
+def check_r3hooks(pw, path):
+    """turn 4: the one-line hooks in the owners' sections (each behind SND_R3_ON), their sounds, and clock Undo played for real"""
+    on = r3_copy(path)
+    if not on: print('  r3hooks: not yet (no SND_R3_ON line)'); return
+    g = Game(pw, on)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000); g.step(5)
+        names = [n for _, n in R3_HOOKS]
+        bad = g.ev(f"""(() => {{ const out = []; for (const n of {json.dumps(names)}) {{ const f = SND._.FX[n]; if (!f) {{ out.push(n + ': missing'); continue; }}
+          try {{ f(SND.ctx.currentTime + 0.05, {{}}); }} catch (e) {{ out.push(n + ': ' + e.message); }} }} return out; }})()""")
+        check(bad == [], f'r3hooks: every hook sound plays ({bad})')
+        for fn, n in R3_HOOKS:   # the hook line is in its function, behind the switch
+            src = g.ev(f"typeof {fn} === 'function' ? String({fn}) : ''")
+            check(f"if (SND_R3_ON) sndFx('{n}'" in src or f"if (SND_R3_ON && s === 2) sndFx('{n}'" in src, f'r3hooks: {fn} calls {n} behind SND_R3_ON')
+        # clock Undo, for real: clock in at the clock on Day 2 (08:50), then Undo
+        g.ev("skipTo(1440 + 530)"); g.page.wait_for_timeout(500); g.step(10)
+        got = g.ev("(() => { SND.log.length = 0; const r = clockPunch(false); const u = clockUndo(); return [r, u, SND.log.map(x => x.name)]; })()")
+        print('  r3hooks clock in, Undo:', got)
+        check(got[0] == 'in' and got[1] == 'in' and 'clockIn' in got[2] and 'r3ClockUndo' in got[2], 'r3hooks: Undo on the time clock plays the lever back')
+        pe = [e for e in g.errors if e.startswith('pageerror')]
+        if pe: check(False, 'r3hooks: page errors: ' + ' | '.join(pe[:3]))
+    finally: g.close()
 CHECKS += [check_r3fx]   # the sound update (SD3), turn 3
+CHECKS += [check_r3hooks]   # the sound update (SD3), turn 4
 
 if os.environ.get('SOUND_ONLY'): CHECKS = [c for c in CHECKS if re.search(os.environ['SOUND_ONLY'], c.__name__)]   # run only the named checks (a regex), while building
 with sync_playwright() as pw:
