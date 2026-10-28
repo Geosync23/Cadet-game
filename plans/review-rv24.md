@@ -7,6 +7,7 @@ Cap rule: at most 5 seats working at once; read only until RV23 says it has gone
 ## Verdicts
 | Branch | Verdict | Sha |
 |---|---|---|
+| claude/pad-wave-a (PA1): controller wave A, landings, clock x, Dev card, X, B, Saves on Back | PASS | 818ec0b |
 | claude/pad-wave-c (SD2): controller wave C, sound hook, pad words, Saves hint | PASS (should cleared in a29a0f48) | 336b00c2, a29a0f48 |
 | claude/p5s6-promo4 (W8): S6-7, S6-9, MA6-2, refit, DM rows, RV24's fixes | PASS (should 1 fixed in 9063aafe) | 6f13b61a, 9063aafe |
 | claude/p5s6-deck (DA6): S6-5 nights 1-2, keepsakes to room B, door fix | PASS (frames should cleared in 4a84e153) | 2df6bfce, 5c27b740, 4a84e153 |
@@ -115,3 +116,4 @@ Code read (no runs yet):
   pad_look wavea: chat lands on Say hello, shop on the first goods, the clock's highlight on the x after a punch, the Dev card on the
   edge with #dev and A opens the panel; savesland OK. Full run on 818ec0b going.
 - Wave C a29a0f48 (SD2-1 tipWords): words OK, the tip card reads 'Walk with the left stick, and press A on anything to use it.'; PASS carries.
+- Wave A 818ec0b: PASS. cadet ALL IDENTICAL alone vs b3247d6; controller all-but-reach 48 OK, idle FAIL (old hash pairs). Waiting for wave B.
