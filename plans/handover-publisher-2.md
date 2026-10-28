@@ -5,8 +5,8 @@ Session session_01GKuymkDxLVyt4rjtcJxdab, branch `claude/publish-26` (this note 
 ## Pages
 | Page | Link | Version / build | Capabilities | Rule |
 |---|---|---|---|---|
-| Playtest (current, new account) | https://claude.ai/artifact/7hQ14AcwZHCi5EvL1AKiMU | v2 = 0.95.0 (staging-p5s6 b5199dc3, game b18d2b64…238a), version id 1793152899-9c9f (v1 = 0.94.0) | downloads | updated each release |
-| Dev (current, new account) | https://claude.ai/artifact/KEyaHvon6ZaVHHFRdAe18m | v2 = 0.95.0, version id 1793152902-3ea2 (v1 = 0.94.0) | downloads | updated each release |
+| Playtest (current, new account) | https://claude.ai/artifact/7hQ14AcwZHCi5EvL1AKiMU | v3 = 0.96.0 (staging-pad fe11cd66, game 33292500…129e), version id 1793227170-ac7f (v2 = 0.95.0, v1 = 0.94.0) | downloads | updated each release |
+| Dev (current, new account) | https://claude.ai/artifact/KEyaHvon6ZaVHHFRdAe18m | v3 = 0.96.0, version id 1793227172-551c (v2 = 0.95.0, v1 = 0.94.0) | downloads | updated each release |
 | Playtest (old account) | https://claude.ai/artifact/3HqM5XiXaHXzgrpq7JbesJ | v7 = 0.93.3 | downloads | old account: can't be updated from here |
 | Dev (old account) | https://claude.ai/artifact/9ZWAgqiZCvkJvVjjhjVkEr | v7 = 0.93.3 | downloads | old account |
 | Dev: promotion preview (old account) | https://claude.ai/artifact/AvpWrMumcGiw4UYUpXd2X5 | v1 = p5s5-promo 5703dfb6 | downloads | old account |
@@ -28,3 +28,6 @@ GO from lead 42 (BM19 on hold). sha256 checked, scan clean, published over the s
 
 ## 0.96.0 controller test (2026-10-28)
 Lead 44 asked for a separate page for the user's real-controller test (not the release): https://claude.ai/artifact/JV6CSUWQHftaDkSisYjQCG v1 = claude/staging-pad fe11cd66 (game 33292500…129e, PAD_ON true), {downloads}, title "Starship Cadet 0.96.0 controller test", no Dev. Scratchpad source pad/starship-cadet-0.96.0-controller-test.html. Load check at 390x844: PASS, 0 console errors. Lead 44 is the lead now (session_01GKuymj3tKpX7xwDZwBh8RM).
+
+## 0.96.0 release (2026-10-28)
+The user said publish (via lead 44). sha256 checked, published over the same two links as v3, {downloads}. Phone check 390x844 on both: PASS, 0 console errors. 6daN untouched.
