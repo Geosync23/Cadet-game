@@ -18,7 +18,7 @@ Lead 43 = session_01GKuymjoDoY2kA9yCK12NG1, branch claude/lead-43, hourly check-
 
 ## Seats
 - BM20 build master session_01GKuymiwDEgkwGmjJ2nokvg (~18%), staging-pad. Merges only on lead's word; sometimes goes quiet on long checks: ask for progress lines.
-- RV24 reviewer session_01GKuymnJuoJTWnmYunbN7EP (~51%): priority EV1 > Dev mode > sound. Hire RV25 at ~60%.
+- RV24 reviewer session_01GKuymnJuoJTWnmYunbN7EP (~55%, handing over); RV25 session_01GKuymnnpKvNH4Ki69KEzwG takes over. Priority EV1 > Dev mode > sound.
 - EV1 events session_01GKuymmJANJaZkFuhsM9bBt (claude/visit-on).
 - DM1 Dev mode session_01GKuymkR7Z42FfTQyt2VWe3 (~40%).
 - SD3 sound session_01GKuymir9eBj7X6kLtwLRmq (~15%).
