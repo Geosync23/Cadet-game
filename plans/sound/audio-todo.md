@@ -1,10 +1,15 @@
 # Audio to-do
 
-The sound designer (SD1) keeps this list. Newest decisions first in each part. Times are US Eastern.
+The sound designer (SD1, then SD2 from 2026-10-28) keeps this list. Newest decisions first in each part. Times are US Eastern.
 
 ## Waiting on the user
 
 - **Tradition music** (the user, 2026-10-25, 12:40 PM): only some traditions get music, and the user decides which. The old "Tradition night" waltz is on hold until then; it isn't on the Sound Lab page.
+- **Round 3 page, for the morning report** (SD2, 2026-10-28, about 2:45 AM): Wren Sounds: Round 3, https://claude.ai/artifact/CzoYwmjJgVZoYDm2S1QTYs (`plans/sound/round3.html`). Answers save to the page's store (collection `picks`, one doc per item: `music:<id>`, `trad:<tradition id>`, `farewell`, `fx:<id>`, `general`; fields item, pick, note, at). Three parts:
+  1. **Tradition music:** 14 samples (30-60 s, the v7 space style, no drums or noise), recommended: Year's end, Lantern walk, Harvest table (harvest and first-fruit suppers), Name on the beam, Farewell supper, Lap of the Wren, Crossing the Line, Veyli welcome, The goodbye (ending). Maybes: Midtour, Milestone tea, Sunrise stretch, Cup day, Storm lantern supper. Every other tradition listed with a switch, grouped by why it has no music (the crew's own music, talks, meals, garden, sport).
+  2. **Veyli farewell song:** A (bronze and drone, recommended) or B (low pad only), each playable with stand-in singers. For the visit's farewell (Day 19, 09:00); could also play at Taavek's ramp.
+  3. **Sounds for features since 0.93.0** (A/B/C each, recommendation marked): knock on your door (nights), the shielded reactor door, the dosimeter badge rack, inside the reactor room, a coil off and on, winding the coil, team "Next step" calls, team job done, promotions and the engine badge, room B, Calder's question, Basil, a booked shutdown, sensor calibration, the Tern landing (the old shuttle-bay item), the lathe, the bronze bar, the test fit, the HQ offer, Stay or Go, the clock's early-out question and Undo, the shop menu, save slots, Works tabs. Plus a list of new features that need no sound.
+  Levels set offline against the Quarters hum (-19.5 momentary max): music samples about -21 to -25, the farewell song alone about -26 (the singers on top), feature sounds under the hum.
 
 ## For the listening pass (0.93.0)
 
@@ -20,6 +25,8 @@ The sound designer (SD1) keeps this list. Newest decisions first in each part. T
 - **design-doc "Sound" section:** on `claude/sound-sd1`; merge it with the sound build. Update it when music and activity sounds are picked.
 
 ## Pages
+
+- For choosing (SD2): Wren Sounds: Round 3, https://claude.ai/artifact/CzoYwmjJgVZoYDm2S1QTYs (`plans/sound/round3.html`).
 
 - Decided sounds: Wren Soundscape, https://claude.ai/artifact/PP6pDpiZw8jzaNoLygCTgC (`plans/sound/soundscape.html`).
 - Approved activity sounds: Wren Sounds: Activities, https://claude.ai/artifact/5sjuT5XCJqCvMP68AipdZP (`plans/sound/activities.html`).
