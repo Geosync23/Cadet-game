@@ -72443,8 +72443,8 @@ function padRaw() {                                       // what's in reach, be
   for (const w of crew) if (w.active && !w.isPlayer) add('walker:' + w.spec.name, w.obj.position.x, w.obj.position.z, [.9, .5, 1.3], 0);
   // the items' middles and heights, worked out again only for an item that's new, moved or renumbered (wave B: props that
   // appear while you're in the room, the birthday cake, the parts sheet, Tiles night's boards, the cabin spots, a Wednesday's
-  // crates, go into the same list, which was read once a deck). An item over 2 m across (the Lightdisc court) is offered at
-  // its nearest point too, 0.3 m in from its edge: its middle can be far out of reach while you stand at its side
+  // crates, go into the same list, which was read once a deck). An item over 2 m across whose middle is out of reach (the
+  // Lightdisc court from its gate) is offered at its nearest point instead, 0.3 m in from its edge
   const IC = PAD_PICK.ic || (PAD_PICK.ic = new WeakMap()), box = PAD_PICK.box || (PAD_PICK.box = new THREE.Box3()), c = _pp;
   for (let i = 0; i < ITEMS.length; i++) {
     const it = ITEMS[i]; if (!it.hit) continue;
@@ -72456,7 +72456,7 @@ function padRaw() {                                       // what's in reach, be
       IC.set(it, o);
     }
     add(o.key, o.x, o.z, o.ys, .25);
-    if (o.big) { const [x0, x1, z0, z1] = o.big; add(o.key, Math.min(Math.max(pp.x, x0), x1), Math.min(Math.max(pp.z, z0), z1), o.ys, .25); }
+    if (o.big && Math.hypot(o.x - pp.x, o.z - pp.z) > R) { const [x0, x1, z0, z1] = o.big; add(o.key, Math.min(Math.max(pp.x, x0), x1), Math.min(Math.max(pp.z, z0), z1), o.ys, .25); }
   }
   for (const dobj of DOOR_OBJS) {                         // the lift and shut doors (an open doorway is only somewhere to walk)
     const hit = dobj.g.children.find(o => o.userData.liftDoor || o.userData.youLock || o.userData.closedDoor || o.userData.door && typeof adoorShut === 'function' && adoorShut(dobj.e, player)), ud = hit ? hit.userData : null; if (!ud) continue;   // and a door shut to you (the Doors setting, 0.93.3)
@@ -72464,9 +72464,7 @@ function padRaw() {                                       // what's in reach, be
   }
   if (typeof jobHere === 'function' && jobsOn() && typeof ixChores === 'function') {   // every held job's next stop on this deck, each its own (wave B; was the first held job's, often a side job's on another deck)
     for (const j of ixChores()) { const nx = !j.workDone && ixNextStop(j), pid = nx && nx.s.step !== 'fetch' && nx.s.deck === deckDef.num && nx.s.places[0], sp = pid && PLACE_OF.has(pid) && placeSpot(pid); if (sp) add('job:' + j.id, sp.x, sp.z, [.05, .4, .8], .2); }
-    const mj = myJob(), m = mj && mj.machine && !mj.workDone ? machineById(mj.machine) : null, pid = m && m.deck === deckDef.num && panelPlace(m.id), sp = pid && PLACE_OF.has(pid) && placeSpot(pid);   // and a machine job's panel (jobHere's last test)
-    if (sp) add('job:' + mj.id, sp.x, sp.z, [.05, .4, .8], .2);
-  }
+  }   // (a machine job is the machine's own tap, an item: its panel's floor isn't offered, as before)
   if (padBeamOn()) { const sp = placeSpot('5-beam-1'), d = Math.hypot(pp.x - sp.x, pp.z - sp.z), a0 = Math.atan2(pp.x - sp.x, pp.z - sp.z);   // Name on the beam: the floor at the beam's
     add('beam', sp.x, sp.z, [.05, .3], .3);              // spot, and 1.3 m out from it your way and to either side (within section 18's BEAM_REACH; the crew gather round it)
     if (d > .5) for (const da of [0, .9, -.9, 1.8, -1.8]) add('beam', sp.x + 1.3 * Math.sin(a0 + da), sp.z + 1.3 * Math.cos(a0 + da), [.05, .3], .3); }

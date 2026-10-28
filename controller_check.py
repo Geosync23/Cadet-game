@@ -3778,7 +3778,7 @@ MUTANTS['props'] = {'items pushed after the first look never offered (wave B gap
                     'a moved item kept where it was first seen': ('src', "if (!o || o.i !== i || o.m.some((v, k) => v !== e[k])) {", "if (!o || o.i !== i) {")}
 MUTANTS['jobs2'] = {'only the first held job\'s stop offered (wave B gap E)': ('src', "for (const j of ixChores()) { const nx", "for (const j of ixChores().slice(0, 1)) { const nx")}
 MUTANTS['beam'] = {'no beam floor in the ring (wave B gap F)': ('src', "if (padBeamOn()) { const sp = placeSpot('5-beam-1'), d =", "if (false) { const sp = placeSpot('5-beam-1'), d =")}
-MUTANTS['court'] = {'big items by their middle only (wave B gap F)': ('src', "if (o.big) { const", "if (false) { const")}
+MUTANTS['court'] = {'big items by their middle only (wave B gap F)': ('src', "if (o.big && Math.hypot(o.x - pp.x, o.z - pp.z) > R) { const", "if (false) { const")}
 PART_FN['promo3'] = part_promo3; NEEDS['promo3'] = ['pick', 'panels']; ALL_PARTS.append('promo3')   # (wave B, the audit's find) written for S5-2, never registered
 
 
