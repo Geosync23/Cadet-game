@@ -148,7 +148,7 @@ def run(path):
             g.step(2); g.ev("(() => { const b = clockButton('in'); if (b) b.id = '__in'; })()"); p = where('#__in'); shot('clock')
             check(ck['btn'] and p['up'] and p['target'] and p['around'] and p['onScreen'], f'the clock: on Clock in ({ck}, {p})')
             if ck['btn']:
-                g.page.click('#__in'); g.step(3); p = where()
+                g.step(30); g.page.click('#__in'); g.step(3); p = where()   # (AS1) past 0.95.0's 500 ms tap guard on the clock screen (CLOCK_UNDO_ON, patch #6)
                 check(not p['up'] and g.ev("careerClockedIn(SHIP.time.day)"), f'clocked in: gone ({p})')
             g.ev("document.getElementById('clockScreen').hidden = true; pointDrop('x:clock')")
             # (d2) the lift's deck picker: one marker for the arrow's deck, the row's own "→ Tracked", with Teaching arrows on
