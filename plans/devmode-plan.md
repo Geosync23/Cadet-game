@@ -1,4 +1,6 @@
-# Dev mode plan v4.3: summary
+# Dev mode plan v4.4: summary
+
+**v4.4 (lead 43, 2026-10-28):** the user's q2 comment "Switch it on now" = include the Diplomatic visit. Its jumps are added to Ship events (J2 +1.5 h; total about 24 h, about 50 jumps): Vance's memo Day 16 08:25, the Veyli aboard Day 17 09:55 (shuttle bay), the guests' day Day 18, the formal dinner Day 18 evening, the gift exchange Day 19 08:15, the farewell Day 19 08:55. Found: `SHIP_EVENTS.diplomatic` still has `draft: true` (staging-pad line ~46550; the swap block reshapes it but never clears it; evCalPlan passes drafts over), so the visit doesn't run in a real game (CA1's Day 36 runs: no visit; events_check sets draft false only while it tests). Reported to lead 43 for the events side; the jumps work once the mark is removed.
 
 **The user's answers (2026-10-28, doc devmode-plan-v4): decided.** 1 calendar day; 2 "later", with the comment "Switch it on now" (lead 43 asking what they mean; not acted on); 3 answers row; 4 try in J0; 5 arrow at event meetings yes; 6 ALL (full ~45 jumps / ~22 h, not the first cut); 7 three builders; 8 drop End and undo (cut, recorded in design-doc). Design-doc "Dev mode" updated. J0 waits for the controller round (lead 43's go).
 

@@ -51,7 +51,7 @@ textarea{width:100%;min-height:58px;background:transparent;color:var(--ink);bord
 </style>
 
 <main>
-<p class="sub">Starship Cadet · Dev mode plan, version 4.3 (your answers of 28 October in; CA1's review passed) · DM1 for lead 43 · 2026-10-28 · branch claude/devmode-plan-2 (from claude/staging-pad, 0.95.0 with the controller work). Version 3.1 (DP1, 20 October) is kept as plans/devmode-plan-v3.1.html.</p>
+<p class="sub">Starship Cadet · Dev mode plan, version 4.4 (your answers of 28 October in; CA1's review passed) · DM1 for lead 43 · 2026-10-28 · branch claude/devmode-plan-2 (from claude/staging-pad, 0.95.0 with the controller work). Version 3.1 (DP1, 20 October) is kept as plans/devmode-plan-v3.1.html.</p>
 <h1>Dev mode: jump to anything in the game</h1>
 <p class="sub">A plan only. Nothing in the game or the checks changes until the controller round has passed. Your answers are in (below) and decided.</p>
 
@@ -59,11 +59,11 @@ textarea{width:100%;min-height:58px;background:transparent;color:var(--ink);bord
 <p><b>Your answers, 28 October: decided.</b></p>
 <ol>
 <li>Ship-wide events: jumped to on their own calendar day only.</li>
-<li>The Diplomatic visit: not in Dev mode yet. You wrote "Switch it on now"; lead 43 is asking you what you mean (switching the visit on in the game is its own reviewed step). Its jumps follow once it's on.</li>
+<li>The Diplomatic visit: you wrote "Switch it on now", so it's in: its jumps are added to Ship events (below, about 1.5 hours in J2). One thing found while adding them: the visit was moved to Days 16-19 when you switched the swap on (26 October), but the code still marks the visit itself as a draft (<code>SHIP_EVENTS.diplomatic.draft</code>), and the calendar passes drafts over. So in a real game today the visit doesn't happen: CA1's measured runs had the Line, the storm, the comet, the vessel and the crossing back, but no visit. Lead 43 is taking that to the events side. Removing the mark is a one-line change there; the visit's jumps work as soon as it runs.</li>
 <li>An answers row (Engines and Stay to start; the ending's Go jumps say Go).</li>
 <li>The first week's meetings: tried in J0; if the arrival's records won't hold, the play-once recipe stays.</li>
 <li>The arrow also points at an event's meeting for you, labelled "Event:".</li>
-<li>All of it: the full plan, about 45 jumps and 22 hours, not the first cut.</li>
+<li>All of it: the full plan, about 50 jumps and 24 hours with the visit, not the first cut.</li>
 <li>Three builders side by side after J0.</li>
 <li>End and undo dropped (cut, kept on record in the design doc).</li>
 </ol>
@@ -71,17 +71,17 @@ textarea{width:100%;min-height:58px;background:transparent;color:var(--ink);bord
 
 <div class="card rule">
 <p><b>In short.</b> Version 3.1, which you answered on 20 October, is built and live: the clock, Take me to, Mark and Undo, traditions, Set career and the Career tab. Its Stop 3, Big events, was never built. Since then the game has grown well past it: Steps 5 and 6, the comet, the Veyli vessel, the crossing back and the ending. Dev mode can't reach most of that, and its career arrow goes quiet after the Deck 2 move.</p>
-<p>Version 4 finishes Stop 3 and adds one thing on top of Set career: <b>jumps</b>. The Big events tab becomes <b>Jump to</b>, with about 45 jumps in four groups: <b>Career</b>, <b>Nights</b>, <b>Ship events</b> and <b>The ending</b>. A jump is Set career with a landing spot: a new Dev game, run to that beat's time and place, as you chose for the beat shortcuts on 20 October. While an event runs, the Stop 3 tools you agreed are there: Next phase, the threads with − and +, and End and keep. End and undo can't work as planned any more; question 8 asks what to do about it. Set career gets rank buttons and goes to Day 40, the Traditions tab gets "Go to its next showing", and the career arrow follows you to the end of the game.</p>
-<p>It stays lean, as you asked ("I want to be able to test the traditions and career progression"): no new machinery, only Set career pointed at more moments. It is the larger option: about <b>22 hours in 6 turns</b> for everything, which you chose (question 6). Your real game is never touched, as now.</p>
+<p>Version 4 finishes Stop 3 and adds one thing on top of Set career: <b>jumps</b>. The Big events tab becomes <b>Jump to</b>, with about 50 jumps in four groups: <b>Career</b>, <b>Nights</b>, <b>Ship events</b> and <b>The ending</b>. A jump is Set career with a landing spot: a new Dev game, run to that beat's time and place, as you chose for the beat shortcuts on 20 October. While an event runs, the Stop 3 tools you agreed are there: Next phase, the threads with − and +, and End and keep. End and undo can't work as planned any more; question 8 asks what to do about it. Set career gets rank buttons and goes to Day 40, the Traditions tab gets "Go to its next showing", and the career arrow follows you to the end of the game.</p>
+<p>It stays lean, as you asked ("I want to be able to test the traditions and career progression"): no new machinery, only Set career pointed at more moments. It is the larger option: about <b>24 hours in 6 turns</b> for everything, which you chose (question 6). Your real game is never touched, as now.</p>
 </div>
 
 <h2>What changed from version 3.1</h2>
 <div class="tw"><table>
 <tr><th>Part</th><th>Version 3.1 (20 Oct)</th><th>Version 4</th></tr>
 <tr><td>Stops 1a, 1b, 2</td><td>Planned</td><td>Built and live (DB1, DB2). Kept as they are.</td></tr>
-<tr><td>Set career</td><td>Days 0-30; shortcuts to the story's beats</td><td>Days 0-40; rank buttons; about 45 beats as jumps (they were 8)</td></tr>
+<tr><td>Set career</td><td>Days 0-30; shortcuts to the story's beats</td><td>Days 0-40; rank buttons; about 50 beats as jumps (they were 8)</td></tr>
 <tr><td>Big events (Stop 3)</td><td>Start an event today or tomorrow; Next phase; threads − and +; End and undo; End and keep later</td><td>Jump to each event on its calendar day (question 1); Next phase, threads − and + and End and keep kept as agreed (End and keep is now possible: the events base split out the event's end). End and undo: question 8. Its purpose, that later events don't move, is now always true because events sit on fixed days; and since a jump starts the event inside its run there's no "before" to go back to (CA1, F8). Recommended: drop it; Undo my last Dev action after End and keep puts the event back, running.</td></tr>
-<tr><td>Events in the game</td><td>The storm; the visit off; the comet not drafted</td><td>The Line, the storm, the comet, the Veyli vessel, the crossing back, all on a fixed calendar. The visit is still off.</td></tr>
+<tr><td>Events in the game</td><td>The storm; the visit off; the comet not drafted</td><td>The Line, the storm, the visit (Days 16-19, but still marked a draft in the code, so it doesn't run yet), the comet, the Veyli vessel, the crossing back, all on a fixed calendar.</td></tr>
 <tr><td>Steps 5 and 6, the ending</td><td>"Filled in when they're built"</td><td>Built. Their rows and beats go in (Tier 3 and 4, nights 1-3, the briefing, Basil, Calder's question, the offer, the goodbye, staying on)</td></tr>
 <tr><td>Traditions</td><td>Start any; no cake or invitation</td><td>Also "Go to its next showing", where the cake, invitation and flags are real</td></tr>
 <tr><td>Long jumps</td><td>You accepted a long first jump with a progress bar and a Stop (v2.1 question 13)</td><td>Kept: about a minute on a phone for the ending's jumps, with the progress line and a Stop button. No shortcut from a Mark (that would bring back the parked kept days).</td></tr>
@@ -127,7 +127,7 @@ textarea{width:100%;min-height:58px;background:transparent;color:var(--ink);bord
 <tr><td>Career arrow (magenta DEV)</td><td><span class="pill part">PARTLY</span></td><td>Covers the first week, trainings, Steps 3, 5 and the Engine Specialist beats (<code>dvCareerNext</code>, <code>puDevNext</code>, <code>pu4DevNext</code>). Silent for the nights, the briefing, mentoring, Calder's question, the events and the ending.</td></tr>
 <tr><td>Speed card</td><td><span class="pill ok">WORKS</span></td><td>Speed tab.</td></tr>
 </table></div>
-<p class="legend">Not in the game now, so not in this plan: the Diplomatic visit (still a draft, off), and anything parked as cut.</p>
+<p class="legend">The Diplomatic visit is moved to Days 16-19 but still marked a draft in the code, so it doesn't run in a game today (CA1's runs confirm it). Its jumps are in the plan and work once it's switched on. Anything parked as cut stays out.</p>
 
 <h2>2. How a jump works</h2>
 <p>Every jump is the existing Set career with a landing spot. That one choice is what keeps it safe:</p>
@@ -223,6 +223,7 @@ textarea{width:100%;min-height:58px;background:transparent;color:var(--ink);bord
 <tr><th>Event</th><th>Jumps (each a few minutes before)</th></tr>
 <tr><td>Crossing the Line (Days 6-8)</td><td>Vance's Mail (Day 6 17:55) · the horn and the oath (Day 7 ~14:25) · the Line supper (Day 7 ~17:55)</td></tr>
 <tr><td>Ion storm (Days 11-16)</td><td>Calder's briefing (Day 11 morning) · the front (Day 12 13:55) · the worst of it (Day 13 05:55) · storm Saturday · the all-clear (Day 14 09:55) · the lantern supper</td></tr>
+<tr><td>Diplomatic visit (Days 16-19, once it runs)</td><td>Vance's memo and the prep jobs (Day 16 08:25) · the Veyli come aboard, the shuttle bay (Day 17 09:55) · the guests' day aboard (Day 18 morning) · the formal dinner in the Captain's quarters (Day 18 evening) · the gift exchange (Day 19 08:15) · the farewell (Day 19 08:55)</td></tr>
 <tr><td>Comet viewing (Day 22)</td><td>the viewing (21:25) · the turn back (22:35)</td></tr>
 <tr><td>A Veyli vessel needs help (Days 27-30)</td><td>the call and the address (Day 27 07:55) · the Tern brings Taavek (Day 28 09:25) · the test fit (Day 29) · the engine lights (Day 29 17:35) · it leaves (Day 30 09:10)</td></tr>
 <tr><td>Not an event, but ship-wide</td><td>A Short Friday: clock out at 15:30 (Day 5 15:20) · the Captain's Friday address (Day 5 15:50, the rec deck auditorium; not a tradition, so the Traditions tab can't reach it) · the first crew rotation (Day 21)</td></tr>
@@ -253,11 +254,11 @@ textarea{width:100%;min-height:58px;background:transparent;color:var(--ink);bord
 <tr><th>Turn</th><th>Who</th><th>What</th><th>Lines it owns</th><th class="num">Hours</th></tr>
 <tr><td>J0</td><td>builder A</td><td>The jump list (<code>DM_JUMPS</code>, one registration call <code>devmodeJump({ id, group, label, day, by, at, where, set, answers })</code>), the Jump to tab in place of Big events, the runner (Set career with a landing, the stops list for your answers, the answers' state with its defaults, a Stop button; the career set by the table only up to its last day and added to, not replaced; a "week slow" day offset in <code>devmodeCareerFor</code> for the slower career's ending, so J3 never edits J0's lines), <code>DM_MAXDAY</code> 40, the rank buttons, Senior Officer and Engine Specialist by hand on the Career tab (approximate, as you decided for rank by hand), the Day 1 try. Empty blocks J1-J3 in section 25, and stub parts <code>jumps</code>, <code>beats</code>, <code>events1</code>, <code>events2</code>, <code>ending1</code>, <code>ending2</code> in devmode_check and <code>s6</code>, <code>ev</code>, <code>end</code> in dev_arrow_check, so later turns never edit a shared line. Measures a whole check part, not just one jump. No later turn edits the runner.</td><td>DM_TABS, DM_LATER, devmodeDraw, devmodeSet, devmodeCareerSteps, devmodeCareerSet, DM_CAREER's end, the check files' part lists</td><td class="num">4</td></tr>
 <tr><td>J1</td><td>builder A</td><td>Career and Nights rows (section 4 tables, with the power and relays lesson, the sensor array and the old mysteries), check part <code>beats</code>.</td><td>block "J1: career and nights"</td><td class="num">4</td></tr>
-<tr><td>J2</td><td>builder B</td><td>Ship events rows (with the Short Friday, the Friday address and the first rotation), the Running now card (Next phase, the threads − and +, its meeting, End and keep, the crew's plans made again after it), check parts <code>events1</code> and <code>events2</code>.</td><td>block "J2: ship events"</td><td class="num">4</td></tr>
+<tr><td>J2</td><td>builder B</td><td>Ship events rows (with the Diplomatic visit, the Short Friday, the Friday address and the first rotation), the Running now card (Next phase, the threads − and +, its meeting, End and keep, the crew's plans made again after it), check parts <code>events1</code> and <code>events2</code>.</td><td>block "J2: ship events"</td><td class="num">5.5</td></tr>
 <tr><td>J3</td><td>builder C</td><td>The ending rows (with the slower career's), drawing the answers row (its state is J0's), Go to its next showing on the Traditions card, check parts <code>ending1</code> and <code>ending2</code> and an addition to <code>trad</code>.</td><td>block "J3: the ending", one line in devmodeTrad</td><td class="num">4</td></tr>
 <tr><td>J4</td><td>first one free</td><td>The career arrow from the Schedule rows, and event meetings; dev_arrow_check parts <code>s6</code>, <code>ev</code>, <code>end</code>.</td><td>the DV block only</td><td class="num">3</td></tr>
 <tr><td>J5</td><td>builder A</td><td>DEV_NOTES and design-doc "Dev mode", the build table, review fixes, the full round on six runners.</td><td></td><td class="num">2</td></tr>
-<tr><td></td><td></td><td><b>Total</b></td><td></td><td class="num"><b>about 22</b></td></tr>
+<tr><td></td><td></td><td><b>Total</b></td><td></td><td class="num"><b>about 24</b></td></tr>
 </table></div>
 <p class="legend">Order: J0 is merged first (with check_fast), then J1, J2, J3 and J4 run side by side, each bringing in the shared branch at the start of its turn. Everything here is Dev-only, so the game without #dev stays identical: regressions on every deck must be pixel-identical, and the off parts of both checks prove nothing of it runs.</p>
 
@@ -289,7 +290,7 @@ textarea{width:100%;min-height:58px;background:transparent;color:var(--ink);bord
 <label><input type="radio" name="dm-v4-q1" value="start"><span>Keep 3.1's Start today or tomorrow as well, marked "may look odd" (about 6 hours more)</span></label>
 <textarea id="dm-v4-q1-c" name="dm-v4-q1-comment" placeholder="Anything to add"></textarea></div>
 
-<div class="q" data-qid="dm-v4-q2"><div class="qh">QUESTION 2 · THE DIPLOMATIC VISIT</div><div class="qt">The Diplomatic visit is built but still switched off as a draft. Include it?</div>
+<div class="q" data-qid="dm-v4-q2"><div class="qh">QUESTION 2 · THE DIPLOMATIC VISIT</div><div class="qt">The Diplomatic visit is built but still switched off as a draft. Include it? (Answered: "Switch it on now": it's in.)</div>
 <label><input type="radio" name="dm-v4-q2" value="later"><span>Not until it's switched on in the game <span class="rec">recommended</span></span></label><div class="why">Dev mode tests what's in the game now. Its jumps take an hour once it's on.</div>
 <label><input type="radio" name="dm-v4-q2" value="now"><span>Yes, as a Dev-only preview</span></label>
 <textarea id="dm-v4-q2-c" name="dm-v4-q2-comment" placeholder="Anything to add"></textarea></div>
