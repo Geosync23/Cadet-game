@@ -4,8 +4,9 @@ The sound designer (SD1, then SD2 from 2026-10-28) keeps this list. Newest decis
 
 ## Waiting on the user
 
-- **Tradition music** (the user, 2026-10-25, 12:40 PM): only some traditions get music, and the user decides which. The old "Tradition night" waltz is on hold until then; it isn't on the Sound Lab page.
-- **Round 3 page, for the morning report** (SD2, 2026-10-28, about 2:45 AM): Wren Sounds: Round 3, https://claude.ai/artifact/CzoYwmjJgVZoYDm2S1QTYs (`plans/sound/round3.html`). Answers save to the page's store (collection `picks`, one doc per item: `music:<id>`, `trad:<tradition id>`, `farewell`, `fx:<id>`, `general`; fields item, pick, note, at). Three parts:
+- **Mess hall soundscape** (the user, 2026-10-28, about 5:20 AM: "give me sample soundscapes for a busy mess hall"; reopens "no crowd chatter" for the mess): Wren Sounds: Mess hall, https://claude.ai/artifact/11WXFue17xQsVrShWejD21 (`plans/sound/messhall.html`). A murmur and cutlery, B clatter only (no voices), C fills and thins with the meal (recommended), D busy but cosy with the galley; each a quiet hour and a rush. Levels against the Commons hum (-20): averages 8-15 dB under, single clinks up to about the hum. In the game it would follow the people seated in the mess (an empty mess: nothing), in the room only. Pick saved to the page's store (collection `picks`, doc `mess`).
+- **Farewell song, the room B door sound, the test fit:** no pick saved on Round 3; ask again.
+- **Round 3 page (picked 2026-10-28, see Done)** (SD2, 2026-10-28, about 2:45 AM): Wren Sounds: Round 3, https://claude.ai/artifact/CzoYwmjJgVZoYDm2S1QTYs (`plans/sound/round3.html`). Answers save to the page's store (collection `picks`, one doc per item: `music:<id>`, `trad:<tradition id>`, `farewell`, `fx:<id>`, `general`; fields item, pick, note, at). Three parts:
   1. **Tradition music:** 14 samples (30-60 s, the v7 space style, no drums or noise), recommended: Year's end, Lantern walk, Harvest table (harvest and first-fruit suppers), Name on the beam, Farewell supper, Lap of the Wren, Crossing the Line, Veyli welcome, The goodbye (ending). Maybes: Midtour, Milestone tea, Sunrise stretch, Cup day, Storm lantern supper. Every other tradition listed with a switch, grouped by why it has no music (the crew's own music, talks, meals, garden, sport).
   2. **Veyli farewell song:** A (bronze and drone, recommended) or B (low pad only), each playable with stand-in singers. For the visit's farewell (Day 19, 09:00); could also play at Taavek's ramp.
   3. **Sounds for features since 0.93.0** (A/B/C each, recommendation marked): knock on your door (nights), the shielded reactor door, the dosimeter badge rack, inside the reactor room, a coil off and on, winding the coil, team "Next step" calls, team job done, promotions and the engine badge, room B, Calder's question, Basil, a booked shutdown, sensor calibration, the Tern landing (the old shuttle-bay item), the lathe, the bronze bar, the test fit, the HQ offer, Stay or Go, the clock's early-out question and Undo, the shop menu, save slots, Works tabs. Plus a list of new features that need no sound.
@@ -26,7 +27,8 @@ The sound designer (SD1, then SD2 from 2026-10-28) keeps this list. Newest decis
 
 ## Pages
 
-- For choosing (SD2): Wren Sounds: Round 3, https://claude.ai/artifact/CzoYwmjJgVZoYDm2S1QTYs (`plans/sound/round3.html`).
+- Mess hall, for choosing (SD2): Wren Sounds: Mess hall, https://claude.ai/artifact/11WXFue17xQsVrShWejD21 (`plans/sound/messhall.html`).
+- Picked (SD2): Wren Sounds: Round 3, https://claude.ai/artifact/CzoYwmjJgVZoYDm2S1QTYs (`plans/sound/round3.html`).
 
 - Decided sounds: Wren Soundscape, https://claude.ai/artifact/PP6pDpiZw8jzaNoLygCTgC (`plans/sound/soundscape.html`).
 - Approved activity sounds: Wren Sounds: Activities, https://claude.ai/artifact/5sjuT5XCJqCvMP68AipdZP (`plans/sound/activities.html`).
@@ -37,6 +39,7 @@ The sound designer (SD1, then SD2 from 2026-10-28) keeps this list. Newest decis
 
 ## Done
 
+- 2026-10-28, about 5:15 AM: **Round 3 picked** (design-doc "Sound", Round 3 picks). Tradition music for 8: beam, cup, farewell supper, the goodbye, harvest, lantern walk, Crossing the Line, Veyli welcome; none for lap, midtour, milestone, stretch, Year's end. Feature sounds: badge A, Basil A (none), bronze C, Calder B, calibrate A, clock confirm B, clock Undo A, coil A, HQ A (Mail), knock B, lathe B, promotion A, reactor door A, reactor room A, saves A (none), shutdown A, Stay or Go B, tabs A (none), team call A, team done B, Tern B, winding A. No pick: the shop menu (so none), the farewell song, room B, the test fit.
 - 2026-10-25, 2:02 PM: music v7. Station dawn, Wake cycle, First light and Systems online back to their earlier versions (noise layer silenced); seven ambient tracks given more shape (phrases, moving bass, more sequence, a build); the rest kept from v6.
 - 2026-10-25, 1:50 PM: space music pass. All 21 tracks rebuilt as contemplative, planetarium-style space music: no noise layers, no drums (a soft pulse on working and midday), slow modal harmony, pads, sequences, chimes, swells and singing leads. Some renamed. Before/After on the player page.
 - 2026-10-25, 1:33 PM: sci-fi synth pass. Festive voices (marimba-like pluck, music box, whistle, square lead, shaker) re-voiced as synths in every track, and the bounciest tempos slowed. A before-and-after list is on the Wren Music Player page.

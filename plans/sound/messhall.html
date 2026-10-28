@@ -1,0 +1,710 @@
+<title>Wren Sounds: Mess hall</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column like a ship's audio console (the same look as Rounds 1 and 2); a card per part, a sticky bar with the hum and Stop at the bottom. One dark look on purpose. */
+:root {
+  --hull: #131b24;      /* page ground, night hull */
+  --panel: #1b2632;     /* cards */
+  --panel-2: #233140;   /* buttons at rest */
+  --line: #2f4052;
+  --text: #ebe4d6;      /* warm lamp-lit text */
+  --muted: #a3b0bb;
+  --lamp: #f2b45e;      /* amber accent: the Wren's warm lamps */
+  --live: #7cc9bb;      /* playing and chosen: soft teal */
+  --display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+html { background: var(--hull); }
+body {
+  background: var(--hull); color: var(--text); font-family: var(--body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 150px;
+}
+.wrap { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+header { display: flex; flex-direction: column; gap: 8px; padding-top: 4px; }
+.eyebrow { font-family: var(--mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--lamp); }
+h1 { font-family: var(--display); font-weight: 600; font-size: 32px; line-height: 1.1; margin: 0; letter-spacing: .01em; text-wrap: balance; }
+h2 { font-family: var(--display); font-weight: 600; font-size: 21px; margin: 0; text-wrap: balance; }
+h3, h4 { margin: 0; }
+h4 { font-family: var(--display); font-weight: 500; font-size: 16px; letter-spacing: .02em; text-wrap: balance; }
+p { margin: 0; }
+.lede { color: var(--muted); max-width: 62ch; }
+.lede a { color: var(--lamp); }
+.hint { font-size: 13px; color: var(--muted); border-left: 2px solid var(--line); padding-left: 10px; }
+section.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.card-head { display: flex; flex-direction: column; gap: 4px; }
+.card-head .tag { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+.group { display: flex; flex-direction: column; gap: 12px; }
+.group + .group { border-top: 1px solid var(--line); padding-top: 14px; }
+.group-title { font-family: var(--mono); font-weight: 500; color: var(--lamp); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+.item { display: flex; flex-direction: column; gap: 10px; background: color-mix(in srgb, var(--hull) 45%, var(--panel)); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+.item.is-rec { border-color: color-mix(in srgb, var(--lamp) 45%, var(--line)); }
+.row, .opt { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: start; }
+.row > div, .opt > div { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.opts { display: flex; flex-direction: column; gap: 10px; }
+.opt b { font-weight: 700; font-size: 14.5px; }
+.opt.ref b { color: var(--muted); font-weight: 400; font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; }
+.opt .dash { width: 44px; height: 44px; border-radius: 50%; border: 1px dashed var(--line); display: grid; place-items: center; color: var(--muted); font-family: var(--mono); font-size: 13px; }
+.note { font-size: 13.5px; color: var(--muted); }
+.when { font-size: 13px; color: var(--text); opacity: .85; }
+.why { font-size: 13.5px; color: var(--text); }
+.why b { color: var(--lamp); font-weight: 700; }
+.play {
+  width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel-2); color: var(--text);
+  display: grid; place-items: center; cursor: pointer; padding: 0; transition: background .15s, border-color .15s;
+}
+.play svg { width: 16px; height: 16px; fill: currentColor; }
+.play:hover { border-color: var(--lamp); }
+.play.flash, .play.on { background: var(--live); color: var(--hull); border-color: var(--live); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.chip {
+  font-family: var(--body); font-size: 14px; color: var(--text); background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 999px; padding: 9px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 40px;
+}
+.chip:hover { border-color: var(--lamp); }
+.chip.small { padding: 7px 12px; min-height: 36px; font-size: 13.5px; }
+.chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); flex: none; }
+.chip[aria-pressed="true"] { border-color: var(--live); background: color-mix(in srgb, var(--live) 18%, var(--panel-2)); }
+.chip[aria-pressed="true"] .dot { background: var(--live); }
+.pick { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--hull); background: var(--lamp); border-radius: 999px; padding: 1px 7px; vertical-align: 2px; white-space: nowrap; }
+/* the pick box */
+.pickbox { display: flex; flex-direction: column; gap: 8px; border-top: 1px dashed var(--line); padding-top: 10px; }
+.pb-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.pb-row:empty { display: none; }
+.pb { font-family: var(--body); font-size: 14px; color: var(--text); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; min-height: 38px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.pb:hover { border-color: var(--lamp); }
+.pb[aria-checked="true"] { background: var(--live); color: var(--hull); border-color: var(--live); font-weight: 700; }
+.pb .rec { font-family: var(--mono); font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: var(--lamp); }
+.pb[aria-checked="true"] .rec { color: var(--hull); }
+.pb-note { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--muted); }
+textarea { font-family: var(--body); font-size: 15px; color: var(--text); background: var(--hull); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; resize: vertical; width: 100%; box-sizing: border-box; }
+textarea:focus { border-color: var(--lamp); outline: none; }
+.saved { font-family: var(--mono); font-size: 11px; color: var(--live); min-height: 1em; }
+/* the no-music list */
+.nm { display: flex; flex-direction: column; gap: 6px; }
+.nm + .nm { border-top: 1px solid var(--line); padding-top: 12px; }
+.tgs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tg { font-family: var(--body); font-size: 13px; color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 6px 11px; min-height: 34px; cursor: pointer; }
+.tg:hover { border-color: var(--lamp); color: var(--text); }
+.tg[aria-pressed="true"] { color: var(--hull); background: var(--live); border-color: var(--live); }
+.sub { display: flex; flex-direction: column; gap: 8px; }
+.sub + .sub { border-top: 1px solid var(--line); padding-top: 14px; }
+ul.plain { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--muted); }
+ul.plain b { color: var(--text); }
+.summary { font-size: 14px; display: flex; flex-direction: column; gap: 6px; }
+.summary ul { margin: 0; padding-left: 18px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+button:focus-visible, textarea:focus-visible { outline: 2px solid var(--lamp); outline-offset: 2px; }
+/* bottom bar */
+.bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; background: color-mix(in srgb, var(--hull) 92%, transparent);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-top: 1px solid var(--line);
+  padding-top: 8px; padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.bar-in { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 6px; }
+.bar-row { display: flex; align-items: center; gap: 10px; }
+.track { height: 4px; background: var(--panel-2); border-radius: 2px; overflow: hidden; }
+.track i { display: block; height: 100%; width: 0; background: var(--live); }
+#meter { width: 52px; height: 26px; flex: none; }
+#status { flex: 1; min-width: 0; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#stopAll { font-family: var(--body); font-size: 14px; background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; cursor: pointer; min-height: 38px; flex: none; }
+.humrow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
+.humrow .chip.small { min-height: 32px; padding: 5px 10px; font-size: 12.5px; }
+#count { font-family: var(--mono); font-size: 11px; color: var(--live); margin-left: auto; }
+@media (prefers-reduced-motion: reduce) { .play { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">CSV Wren · the mess hall · for choosing</div>
+    <h1>Wren Sounds: Mess hall</h1>
+    <p class="lede">Four ways a busy mess hall could sound, each in a quiet hour and at the rush. On 25 October the pick was "no crowd chatter", so A, C and D bring voices back only as a soft wordless murmur (never words you could follow), and B keeps to no voices at all. Everything is made live, like the other Wren pages.</p>
+    <div class="summary"><b>My recommendation</b><ul><li><b>C, Fills and thins</b>: the room sounds as busy as it looks, and quiet hours stay calm. D is the cosiest if you'd like to hear the galley too.</li></ul></div>
+    <p class="hint">Turn on the Commons hum in the bottom bar to hear it as in the game (the mess hall is on Deck 3). Each sound loops until you press Stop. <span id="store">Checking where answers save...</span></p>
+  </header>
+  <section class="card" aria-labelledby="h-mess">
+    <div class="card-head"><span class="tag">Four options</span><h2 id="h-mess">The mess hall</h2></div>
+    <div id="mess"></div>
+  </section>
+  <section class="card" aria-labelledby="h-scale">
+    <div class="card-head"><span class="tag">In the game</span><h2 id="h-scale">How it would follow the real crowd</h2></div>
+    <ul class="plain">
+      <li><b>By who's there:</b> the game knows how many people are sitting in the mess. The murmur and the clatter follow that: with a handful at a quiet hour you'd hear two or three voices, and with the room full at 18:30 all twelve, with clatter about four times as often. An empty mess makes no crowd sound at all.</li>
+      <li><b>Only in the room:</b> like the galley and laundry sounds, it plays only while you're in the mess hall, and fades as you leave.</li>
+      <li><b>Under the hum, and never words:</b> the voices are shaped sounds, not speech, so nothing competes with the speech bubbles. The levels here are set against the Commons hum.</li>
+      <li><b>Your tray and seat</b> keep their own sounds on top, as now.</li>
+    </ul>
+  </section>
+  <section class="card" aria-labelledby="h-pick">
+    <div class="card-head"><span class="tag">Your pick</span><h2 id="h-pick">Which one?</h2><p class="note">Or "None" to keep the mess as it is now (the hum and your own sounds only).</p></div>
+    <div id="pick"></div>
+  </section>
+</div>
+
+<div class="bar"><div class="bar-in">
+  <div class="track"><i id="prog"></i></div>
+  <div class="bar-row"><canvas id="meter" width="104" height="52" aria-hidden="true"></canvas><span id="status" aria-live="polite">Tap any play button</span><button id="stopAll" type="button">Stop all</button></div>
+  <div class="humrow" role="group" aria-label="Ship hum underneath">Hum:
+    <button class="chip small" type="button" data-hum="off" aria-pressed="true">Off</button>
+    <button class="chip small" type="button" data-hum="commons" aria-pressed="false">Commons</button>
+    <span id="count"></span></div>
+</div></div>
+
+<script>
+'use strict';
+/* ---------- engine ---------- */
+let ctx = null, B = null, R = null, WHITE = null, BROWN = null, ANALYSER = null;
+const LOOPS = new Set();
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[(Math.random() * a.length) | 0];
+
+function makeBuffers(c) {
+  const sr = c.sampleRate;
+  const w = c.createBuffer(1, sr * 3, sr), wd = w.getChannelData(0);
+  for (let i = 0; i < wd.length; i++) wd[i] = Math.random() * 2 - 1;
+  const b = c.createBuffer(1, sr * 4, sr), bd = b.getChannelData(0);
+  let last = 0;
+  for (let i = 0; i < bd.length; i++) { last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02; bd[i] = last * 3.5; }
+  // smooth the loop seam
+  const n = 2000; for (let i = 0; i < n; i++) { const k = i / n; bd[i] = bd[i] * k + bd[bd.length - n + i] * (1 - k); }
+  const ir = c.createBuffer(2, sr * 1.8, sr);
+  for (let ch = 0; ch < 2; ch++) {
+    const d = ir.getChannelData(ch); let lp = 0;
+    for (let i = 0; i < d.length; i++) { const t = i / sr; lp = lp * 0.6 + (Math.random() * 2 - 1) * 0.4; d[i] = lp * Math.exp(-t * 3.2) * (t < 0.012 ? t / 0.012 : 1); }
+  }
+  return { w, b, ir };
+}
+
+// Builds the mixing desk for a context: four layer buses -> master -> soft limiter -> out.
+function buildGraph(c, dest) {
+  const buf = makeBuffers(c);
+  const comp = c.createDynamicsCompressor();
+  comp.threshold.value = -16; comp.knee.value = 12; comp.ratio.value = 4; comp.attack.value = 0.008; comp.release.value = 0.3;
+  const master = c.createGain(); master.gain.value = 1;
+  master.connect(comp); comp.connect(dest);
+  const verb = c.createConvolver(); verb.buffer = buf.ir;
+  const verbOut = c.createGain(); verbOut.gain.value = 0.9; verb.connect(verbOut); verbOut.connect(master);
+  const g = {};
+  // fixed trims set by measuring each layer against the hum (see __measure below)
+  const TRIM = { hum: 0.4, steps: 1.0, ui: 1, music: 0.55 };
+  for (const k of ['hum', 'steps', 'ui', 'music']) { g[k] = c.createGain(); const tr = c.createGain(); tr.gain.value = TRIM[k]; g[k].connect(tr); tr.connect(master); }
+  return { buf, comp, master, verb, ...g };
+}
+
+function ensure() {
+  if (!ctx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    ctx = new AC({ latencyHint: 'interactive' });
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+    B = buildGraph(ctx, ctx.destination);
+    WHITE = B.buf.w; BROWN = B.buf.b; R = B;
+    ANALYSER = ctx.createAnalyser(); ANALYSER.fftSize = 512; B.comp.connect(ANALYSER);
+    applyFaders();
+    setInterval(() => { if (ctx && ctx.state === 'running') { const u = ctx.currentTime + 0.35; LOOPS.forEach(l => l.tick && l.tick(u)); } }, 60);
+    requestAnimationFrame(drawMeter);
+  }
+  if (ctx.state !== 'running') ctx.resume();
+  return ctx;
+}
+
+function conn(node, bus, pan, wet) {
+  let out = node;
+  if (pan && ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = pan; node.connect(p); out = p; }
+  out.connect(bus);
+  if (wet) { const s = ctx.createGain(); s.gain.value = wet; out.connect(s); s.connect(B.verb); }
+}
+function env(g, t, peak, a, d) {
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(peak, t + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + a + d);
+}
+function tone(t, f, d, o = {}) {
+  const osc = ctx.createOscillator(), g = ctx.createGain(), a = o.a ?? 0.006;
+  osc.type = o.type || 'sine';
+  osc.frequency.setValueAtTime(f, t);
+  if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t + (o.toT ?? d * 0.7));
+  env(g, t, o.gain ?? 0.2, a, d);
+  if (o.lp) { const f2 = ctx.createBiquadFilter(); f2.type = 'lowpass'; f2.frequency.value = o.lp; osc.connect(f2); f2.connect(g); } else osc.connect(g);
+  conn(g, o.bus || R.ui, o.pan, o.wet);
+  osc.start(t); osc.stop(t + a + d + 0.05);
+}
+function noise(t, d, o = {}) {
+  const src = ctx.createBufferSource(); src.buffer = o.brown ? BROWN : WHITE;
+  const f = ctx.createBiquadFilter(); f.type = o.ft || 'bandpass';
+  f.frequency.setValueAtTime(o.f || 1000, t);
+  if (o.fTo) f.frequency.exponentialRampToValueAtTime(o.fTo, t + (o.fT ?? d));
+  f.Q.value = o.q ?? 1;
+  const g = ctx.createGain();
+  if (o.swell) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(o.gain, t + d * o.swell); g.gain.exponentialRampToValueAtTime(0.0001, t + d); }
+  else env(g, t, o.gain ?? 0.1, o.a ?? 0.003, d);
+  src.connect(f); f.connect(g); conn(g, o.bus || R.ui, o.pan, o.wet);
+  src.loop = d > src.buffer.duration - 0.3;
+  src.start(t, src.loop ? 0 : Math.random() * (src.buffer.duration - d - 0.2)); src.stop(t + d + 0.1);
+}
+// Soft bell: a sine with two quieter overtones that fade faster.
+function bell(t, f, d, gain, o = {}) {
+  tone(t, f, d, { gain, a: 0.004, ...o });
+  tone(t, f * 2, d * 0.55, { gain: gain * 0.22, a: 0.003, ...o });
+  tone(t, f * 3.01, d * 0.25, { gain: gain * 0.07, a: 0.002, ...o });
+}
+function marimba(t, f, gain, o = {}) {
+  tone(t, f, 0.42, { gain, a: 0.003, ...o });
+  tone(t, f * 4, 0.07, { gain: gain * 0.18, a: 0.002, ...o });
+}
+
+/* ---------- one-shot sounds ---------- */
+const N = { C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, A5: 880, C6: 1046.5, D6: 1174.7, E6: 1318.5, G4: 392, A4: 440, C4: 261.63, E4: 329.63 };
+const SFX = {
+  tapA: t => { tone(t, 1760, 0.04, { type: 'triangle', gain: 0.06, lp: 3000 }); tone(t, 880, 0.035, { gain: 0.05 }); },
+  tapB: t => tone(t, 620, 0.07, { gain: 0.1, to: 940, toT: 0.05 }),
+  tapC: t => { noise(t, 0.025, { f: 2400, q: 5, gain: 0.16 }); tone(t, 1180, 0.03, { gain: 0.04 }); },
+  open: t => { tone(t, N.C5, 0.12, { gain: 0.11, type: 'triangle', lp: 2400 }); tone(t + 0.07, N.G5, 0.2, { gain: 0.11, type: 'triangle', lp: 2400 }); },
+  close: t => { tone(t, N.G5, 0.1, { gain: 0.09, type: 'triangle', lp: 2400 }); tone(t + 0.07, N.C5, 0.18, { gain: 0.09, type: 'triangle', lp: 2400 }); },
+  jobPosted: t => { marimba(t, N.E5, 0.13); marimba(t + 0.13, N.A5, 0.12); },
+  jobDone: t => { marimba(t, N.C5, 0.08); marimba(t + 0.09, N.E5, 0.08); marimba(t + 0.18, N.G5, 0.08); bell(t + 0.27, N.C6, 1.1, 0.08, { wet: 0.25 }); },
+  mailA: t => { tone(t, 480, 0.11, { gain: 0.12, to: 760, toT: 0.08 }); tone(t + 0.14, 640, 0.14, { gain: 0.12, to: 1020, toT: 0.09 }); },
+  mailB: t => { bell(t, N.G5, 0.9, 0.09, { wet: 0.2 }); bell(t + 0.03, N.D6, 0.8, 0.05, { wet: 0.2 }); },
+  headsA: t => { bell(t, N.A5, 0.6, 0.1, { wet: 0.2 }); bell(t + 0.24, N.A5, 0.9, 0.08, { wet: 0.2 }); },
+  headsB: t => { [N.A4, N.C5 * 1.0595, N.E5].forEach((f, i) => tone(t + i * 0.09, f, 0.7 - i * 0.1, { type: 'triangle', gain: 0.07, a: 0.06, lp: 1800, wet: 0.2 })); },
+  no: t => { tone(t, N.E4, 0.12, { type: 'triangle', gain: 0.12, lp: 1100 }); tone(t + 0.16, N.C4, 0.2, { type: 'triangle', gain: 0.12, lp: 1000 }); },
+  arch: t => noise(t, 0.7, { brown: true, ft: 'lowpass', f: 260, fTo: 900, fT: 0.35, q: 0.5, gain: 0.22, swell: 0.45 }),
+};
+
+/* ---------- doors, version 2: a pneumatic release, a heavy panel rolling on its track, a solid stop. No tones. ---------- */
+// The panel's rumble: low noise through a moving band, roughened by a fast wobble like rollers on a track.
+function slide(t, d, o) {
+  const src = ctx.createBufferSource(); src.buffer = BROWN; src.loop = true;
+  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = o.q ?? 0.9;
+  bp.frequency.setValueAtTime(o.f0, t); bp.frequency.linearRampToValueAtTime(o.f1, t + d);
+  const rough = ctx.createGain(); rough.gain.value = 1;
+  const lfo = ctx.createOscillator(); lfo.type = 'triangle'; lfo.frequency.setValueAtTime(o.rate, t); lfo.frequency.linearRampToValueAtTime(o.rate * 0.7, t + d);
+  const lg = ctx.createGain(); lg.gain.value = o.rough; lfo.connect(lg); lg.connect(rough.gain);
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(o.gain, t + d * 0.22); g.gain.setValueAtTime(o.gain, t + d * 0.65); g.gain.linearRampToValueAtTime(0.0001, t + d);
+  src.connect(bp); bp.connect(rough); rough.connect(g);
+  let out = g;
+  if (o.pan !== undefined && ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.setValueAtTime(o.pan, t); p.pan.linearRampToValueAtTime(o.panTo ?? o.pan, t + d); g.connect(p); out = p; }
+  out.connect(o.bus || R.ui);
+  if (o.wet) { const sg = ctx.createGain(); sg.gain.value = o.wet; out.connect(sg); sg.connect(B.verb); }
+  noise(t, d, { f: o.f1 * 4, q: 0.8, gain: o.gain * 0.1, swell: 0.4, bus: o.bus, pan: o.panTo }); // the edge brushing its seal
+  src.start(t, Math.random() * 2); src.stop(t + d + 0.05); lfo.start(t); lfo.stop(t + d + 0.05);
+}
+// A body impact: a burst of deep noise with a short low push under it.
+function thud(t, o) {
+  const d = o.d ?? 0.18, b = o.bus || R.ui, body = o.body ?? 68;
+  noise(t, d, { brown: true, ft: 'lowpass', f: o.f ?? 180, q: 0.7, gain: o.gain, a: 0.002, bus: b, wet: o.wet });
+  tone(t, body, d, { gain: o.gain * 0.5, to: body * 0.6, toT: d * 0.6, a: 0.002, bus: b });
+}
+// Air: a bright rush with a deeper body under it, both falling as the pressure drops.
+function hiss(t, d, gain, o = {}) {
+  const f = o.f ?? 3800;
+  noise(t, d, { f, fTo: f * 0.5, q: 0.6, gain, a: 0.012, bus: o.bus, pan: o.pan, wet: 0.15 });
+  noise(t, d * 0.8, { f: 650, fTo: 400, q: 0.7, gain: gain * 0.8, a: 0.015, bus: o.bus, pan: o.pan });
+}
+// A latch or lever: a short hard knock of metal on metal.
+function clack(t, gain, o = {}) {
+  noise(t, 0.012, { ft: 'highpass', f: 1500, gain, a: 0.0008, bus: o.bus, pan: o.pan });
+  noise(t, 0.04, { f: o.f ?? 900, q: 4, gain: gain * 1.4, a: 0.001, bus: o.bus, pan: o.pan });
+}
+// Struck metal or wood: noise exciting narrow bands, so it rings like a body, not like a beep.
+function ring(t, freqs, gain, o = {}) {
+  freqs.forEach((f, i) => noise(t, o.d ?? 0.25, { f, q: o.q ?? 25, gain: gain / (1 + i * 0.6), a: 0.001, bus: o.bus, pan: o.pan, wet: o.wet ?? 0.25 }));
+}
+const DOORS = {
+  roomA: { lv: 0.33, d: 0.55, f: [200, 520], g: 0.9, rate: 30, rough: 0.3, hiss: 0.09, hissD: 0.5, thud: 0.5, seal: 0.25 },
+  roomB: { lv: 0.2, d: 0.75, f: [130, 340], g: 1.2, rate: 21, rough: 0.45, hiss: 0.04, hissD: 0.3, thud: 0.7, seal: 0.3, ring: [170, 430], ringG: 2 },
+  roomC: { lv: 0.5, d: 0.5, f: [260, 600], g: 0.6, rate: 38, rough: 0.18, hiss: 0.05, hissD: 0.35, thud: 0.35, seal: 0.18 },
+  hatchA: { lv: 0.2, d: 1.0, f: [100, 260], g: 1.3, rate: 16, rough: 0.5, hiss: 0.04, hissD: 0.35, thud: 0.8, seal: 0.25, latch: 2, ring: [150, 395, 720], ringG: 3 },
+  hatchB: { lv: 0.24, d: 0.8, f: [120, 300], g: 1.1, rate: 19, rough: 0.35, hiss: 0.16, hissD: 0.9, thud: 0.75, seal: 0.35, lever: true },
+  hatchC: { lv: 0.48, d: 0.45, f: [300, 760], g: 0.7, rate: 44, rough: 0.6, hiss: 0.03, hissD: 0.25, thud: 0.35, seal: 0.15, latch: 1, ring: [510, 1290], ringG: 1.5 },
+};
+// a level trim per door, so each one sits under the hum (set by measuring)
+function trim(level, bus) { const g = ctx.createGain(); g.gain.value = level; g.connect(bus || R.ui); return g; }
+function door(t, open, k, o = {}) {
+  const p = typeof k === 'string' ? DOORS[k] : k, b = trim(p.lv, o.bus);
+  let s = t;
+  if (open) {
+    if (p.latch) { for (let i = 0; i < p.latch; i++) clack(s + i * 0.11, 0.18, { bus: b }); s += 0.1 + p.latch * 0.11; }
+    if (p.lever) { clack(s, 0.2, { f: 500, bus: b }); thud(s + 0.02, { gain: 0.35, d: 0.12, f: 220, bus: b }); s += 0.18; }
+    hiss(s, p.hissD, p.hiss, { bus: b }); s += 0.05;
+  }
+  slide(s, p.d, { f0: open ? p.f[0] : p.f[1], f1: open ? p.f[1] : p.f[0], gain: p.g, rate: p.rate, rough: p.rough, bus: b, wet: 0.15, pan: o.pan, panTo: o.panTo });
+  const e = s + p.d;
+  thud(e - 0.01, { gain: open ? p.thud * 0.6 : p.thud, bus: b, wet: 0.2 });
+  if (p.ring) ring(e, p.ring, p.ringG * (open ? 0.5 : 1), { bus: b });
+  if (!open) {
+    noise(e - 0.03, 0.22, { brown: true, ft: 'lowpass', f: 420, gain: p.seal, swell: 0.3, bus: b }); // the seal closing
+    hiss(e + 0.06, 0.25, p.hiss * 0.5, { f: 2400, bus: b });
+    if (p.latch) clack(e + 0.16, 0.15, { bus: b });
+    if (p.lever) clack(e + 0.2, 0.18, { f: 500, bus: b });
+  }
+}
+
+/* ---------- the lift, version 2: its own doors, ride, settle and chime ---------- */
+const LIFTS = {
+  A: { note: 'Grand: wide doors parting from the middle, a smooth ride with soft rail joints, a deep clunk as the car settles, and two notes on a struck metal chime with a gentle shimmer.',
+    door: { lv: 0.3, d: 0.85, f: [120, 320], g: 1.0, rate: 22, rough: 0.3, hiss: 0.08, hissD: 0.5, thud: 0.6, seal: 0.25 },
+    ride: { lv: 0.6, rumble: 0.35, clack: 0.12, gap: 0.65, whoosh: 0.12 }, arrive: 1, clunk: 1, chime: [[466.16, 0], [349.23, 0.42]], ratio: 3.5, index: 2.2, trem: 5.2 },
+  B: { note: 'Service: heavier and more mechanical. The doors rumble, the ride rattles over every rail joint, the brake grabs with a ratchet, and one deep chime bar rings out.',
+    door: { lv: 0.22, d: 1.0, f: [100, 260], g: 1.3, rate: 16, rough: 0.5, hiss: 0.05, hissD: 0.35, thud: 0.8, seal: 0.3 },
+    ride: { lv: 0.56, rumble: 0.45, clack: 0.22, gap: 0.42, whoosh: 0.06 }, arrive: 0.85, clunk: 1.0, ratchet: true, chime: [[174.61, 0]], ratio: 2.76, index: 3, trem: 0 },
+  C: { note: 'Smooth: quieter doors, a gliding ride with a rising rush of air and no rail joints, a soft settle, and three falling notes on the chime.',
+    door: { lv: 0.37, d: 0.7, f: [160, 420], g: 0.8, rate: 30, rough: 0.2, hiss: 0.1, hissD: 0.55, thud: 0.45, seal: 0.22 },
+    ride: { lv: 1, rumble: 0.25, clack: 0, gap: 1, whoosh: 0.2 }, arrive: 0.8, clunk: 0.7, chime: [[622.25, 0], [466.16, 0.28], [392, 0.56]], ratio: 4, index: 1.5, trem: 4.5 },
+};
+// Two door leaves parting from the middle, one heard on each side.
+function liftDoors(t, open, v, b) {
+  const p = LIFTS[v].door;
+  if (open) clack(t, 0.14 * p.lv, { f: 700, bus: b }); // the interlock lets go
+  const t2 = open ? t + 0.08 : t;
+  door(t2, open, p, { bus: b, pan: open ? -0.15 : -0.85, panTo: open ? -0.85 : -0.15 });
+  door(t2 + 0.012, open, p, { bus: b, pan: open ? 0.15 : 0.85, panTo: open ? 0.85 : 0.15 });
+}
+// A real button: a firm mechanical press, not a device beep.
+// Version 4: the deck button is the Mail B soft bell made short, with a soft press under it and its own notes.
+const PRESS = {
+  A: { note: 'Press: a soft press, then one short high bell. Mail rings two notes together and lingers; this is one note, quickly gone.', notes: [[N.E6, 0, 0.32, 0.07]] },
+  B: { note: 'Two-step: a soft press, then two bell notes one after the other, quickly rising, like the button lighting up.', notes: [[N.C6, 0, 0.22, 0.055], [1567.98, 0.07, 0.34, 0.05]] },
+  C: { note: 'Low press: a firmer press and one lower, rounder bell note. The calmest, and pitched below Mail.', notes: [[N.D5, 0, 0.4, 0.08]], firm: true },
+};
+let pressV = 'B';                                        // the user's pick
+function liftPress(t, b, v = pressV) {
+  const p = PRESS[v];
+  noise(t, 0.012, { ft: 'lowpass', f: 1400, gain: p.firm ? 0.05 : 0.03, a: 0.001, bus: b });                  // the button going in
+  tone(t, p.firm ? 150 : 190, 0.05, { gain: p.firm ? 0.06 : 0.04, to: 110, a: 0.002, bus: b });
+  p.notes.forEach(([f, dt, d, g]) => bell(t + 0.03 + dt, f, d, g, { wet: 0.15, bus: b }));
+}
+function liftRide(t, d, v, b) {
+  const r = LIFTS[v].ride; b = trim(r.lv, b);
+  noise(t, d, { brown: true, ft: 'lowpass', f: 140, fTo: 220, fT: d * 0.5, q: 0.8, gain: r.rumble, swell: 0.35, bus: b }); // the car's rumble
+  noise(t, d, { f: 300, fTo: 900, fT: d * 0.5, q: 0.7, gain: r.whoosh, swell: 0.5, bus: b, wet: 0.2 });                  // air in the shaft
+  if (r.clack) for (let s = t + 0.5; s < t + d - 0.5; s += r.gap * (1 + rand(-0.08, 0.08))) {                           // rail joints going by
+    const k = Math.sin(Math.PI * (s - t) / d);
+    thud(s, { gain: r.clack * k, d: 0.07, f: 300, bus: b });
+    clack(s + 0.06, r.clack * 0.25 * k, { f: 600, bus: b });
+  }
+}
+// Struck chime bar: a bell made by frequency modulation, so it rings like metal and sits apart from the device beeps.
+function fmBell(t, f, d, gain, ratio, index, trem, b) {
+  const car = ctx.createOscillator(), mod = ctx.createOscillator(), mg = ctx.createGain(), g = ctx.createGain();
+  car.frequency.value = f; mod.frequency.value = f * ratio;
+  mg.gain.setValueAtTime(f * index, t); mg.gain.exponentialRampToValueAtTime(f * 0.05, t + d * 0.5);
+  mod.connect(mg); mg.connect(car.frequency);
+  env(g, t, gain, 0.002, d);
+  let src = car;
+  if (trem) { const tg = ctx.createGain(); tg.gain.value = 0.75; const l = ctx.createOscillator(); l.frequency.value = trem; const lg = ctx.createGain(); lg.gain.value = 0.25; l.connect(lg); lg.connect(tg.gain); car.connect(tg); src = tg; l.start(t); l.stop(t + d + 0.1); }
+  src.connect(g); conn(g, b || R.ui, 0, 0.35);
+  car.start(t); mod.start(t); car.stop(t + d + 0.1); mod.stop(t + d + 0.1);
+}
+// The car arrives: the brake takes it with a deep clunk, it settles, the brake air lets go, then the chime. Returns when the doors can open.
+function liftArrive(t, v, b) {
+  const L = LIFTS[v], w = L.clunk; b = trim(L.arrive, b);
+  thud(t, { gain: 0.55 * w, d: 0.35, f: 120, body: 50, bus: b, wet: 0.25 });
+  clack(t, 0.12 * w, { f: 450, bus: b });
+  thud(t + 0.2, { gain: 0.22 * w, d: 0.2, f: 100, body: 46, bus: b });
+  thud(t + 0.36, { gain: 0.1 * w, d: 0.15, f: 90, body: 44, bus: b });
+  if (L.ratchet) for (let i = 0; i < 5; i++) clack(t + 0.05 + i * 0.045, 0.08 * (1 - i * 0.15), { f: 1400, bus: b });
+  hiss(t + 0.5, 0.45, 0.05, { f: 2600, bus: b });
+  const c = t + 0.85;
+  L.chime.forEach(([f, dt]) => fmBell(c + dt, f, 2.2, 0.09, L.ratio, L.index, L.trem, b));
+  return c + 0.5 + L.chime[L.chime.length - 1][1];
+}
+function liftTrip(t, v, b) {
+  liftPress(t, b); liftDoors(t + 0.4, false, v, b);
+  const rs = t + 0.4 + LIFTS[v].door.d + 0.5, rd = 3.6;
+  liftRide(rs, rd, v, b);
+  liftDoors(liftArrive(rs + rd - 0.2, v, b), true, v, b);
+}
+
+/* ---------- hum ---------- */
+const HUMS = {
+  quarters: { f: 55, h: [[1, .5], [2, .32], [3, .2], [4, .1], [6, .04]], lp: 420, n: .22, nf: 450, br: .07, bd: .22,
+    note: 'Quarters: the home hum. Warm and low, with the slow breath of the air plant. This is the one you fall asleep to.' },
+  commons: { f: 58.27, h: [[1, .45], [2, .3], [3, .2], [4, .12], [5, .05]], lp: 540, n: .26, nf: 650, br: .06, bd: .2,
+    note: 'Commons: a touch brighter and airier than Quarters, a lived-in room tone under the promenade.' },
+  engine: { f: 41.2, h: [[1, .6], [2, .45], [3, .32], [4, .18], [6, .1], [8, .04]], lp: 340, n: .32, nf: 320, br: .045, bd: .18, throb: .9, td: 140,
+    note: 'Engineering: deeper, with a slow turning throb, as if the engine were just through the wall. Warm, not menacing.' },
+  garden: { f: 65.4, h: [[1, .22], [2, .14], [3, .07]], lp: 700, n: .5, nf: 1500, br: .11, bd: .4,
+    note: 'Garden: the machine sound pulled right back, more moving air, a slower, deeper breath. The quietest deck.' },
+  bridge: { f: 73.4, h: [[1, .32], [2, .2], [1.5, .13], [3, .08], [4, .04]], lp: 1100, n: .1, nf: 2600, br: .04, bd: .12,
+    note: 'Bridge: cleaner and steadier, built on a tidy fifth. Cool, like its lighting.' },
+};
+function startHum(key, level = 1, fade = 1.5) {
+  const p = HUMS[key], now = ctx.currentTime, nodes = [];
+  const out = ctx.createGain(); out.gain.setValueAtTime(0, now); out.gain.linearRampToValueAtTime(level, now + fade);
+  const breath = ctx.createGain(); breath.gain.value = 1 - p.bd / 2;
+  const lfo = ctx.createOscillator(); lfo.frequency.value = p.br; const lg = ctx.createGain(); lg.gain.value = p.bd / 2;
+  lfo.connect(lg); lg.connect(breath.gain); nodes.push(lfo);
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = p.lp; lp.Q.value = 0.7;
+  const drift = ctx.createOscillator(); drift.frequency.value = 0.031; const dg = ctx.createGain(); dg.gain.value = 0.25; drift.connect(dg); nodes.push(drift);
+  p.h.forEach(([m, g], i) => {
+    const o = ctx.createOscillator(); o.frequency.value = p.f * m; o.detune.value = i % 2 ? 4 : -3;
+    dg.connect(o.frequency);
+    const og = ctx.createGain(); og.gain.value = g * 0.22; o.connect(og); og.connect(lp); nodes.push(o);
+  });
+  lp.connect(breath);
+  const ns = ctx.createBufferSource(); ns.buffer = BROWN; ns.loop = true;
+  const nf = ctx.createBiquadFilter(); nf.type = 'lowpass'; nf.frequency.value = p.nf;
+  const ng = ctx.createGain(); ng.gain.value = p.n * 0.5; ns.connect(nf); nf.connect(ng); ng.connect(breath); nodes.push(ns);
+  if (p.throb) { const t2 = ctx.createOscillator(); t2.frequency.value = p.throb; const tg = ctx.createGain(); tg.gain.value = p.td; t2.connect(tg); tg.connect(lp.frequency); nodes.push(t2); }
+  breath.connect(out); out.connect(R.hum);
+  nodes.forEach(n => n.start(now));
+  return {
+    out, label: key,
+    stop(f = 1.2, at, from) { const t = at ?? ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(from ?? out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + f); nodes.forEach(n => n.stop(t + f + 0.1)); },
+  };
+}
+
+/* ---------- footsteps ---------- */
+// Version 3: every floor is the soft carpet step; only a gentle hint tells them apart.
+function softStep(t, pan, b, o = {}) {
+  const br = o.bright ?? 1;
+  tone(t, rand(75, 85) * (o.pitch ?? 1), 0.07, { gain: 0.16, to: 55, a: 0.006, bus: b, pan });
+  noise(t, 0.09, { ft: 'lowpass', f: 520 * br, gain: 0.13, a: 0.012, bus: b, pan });
+  noise(t + 0.05, 0.07, { ft: 'lowpass', f: 900 * br, gain: 0.035, a: 0.01, bus: b, pan });
+}
+const STEP = {
+  plating(t, pan, b) { softStep(t, pan, b, { bright: 1.25, pitch: 1.08 }); noise(t, 0.03, { f: 1800, q: 2, gain: 0.025, a: 0.002, bus: b, pan }); },  // a faint firm tap
+  carpet(t, pan, b) { softStep(t, pan, b); },
+  planks(t, pan, b) { softStep(t, pan, b, { bright: 1.1, pitch: 1.15 }); noise(t, 0.05, { f: rand(380, 430), q: 4, gain: 0.05, a: 0.002, bus: b, pan }); }, // a faint hollow knock
+  garden(t, pan, b) {
+    softStep(t, pan, b, { bright: 0.9 });
+    for (let i = 0; i < 4; i++) noise(t + rand(0, 0.12), 0.014, { f: rand(2400, 4800), q: 2, gain: rand(0.015, 0.03), bus: b, pan }); // a little grit
+  },
+};
+function startWalk(surface, segs) {
+  const route = R;
+  const w = {
+    label: surface, next: ctx.currentTime + 0.05, foot: 0, pace: 1.85,
+    tick(u) {
+      while (this.next < u) {
+        let s = surface;
+        if (segs) { const seg = segs.find(x => this.next >= x[0] && this.next < x[1]); s = seg && seg[2]; }
+        if (s) STEP[s](this.next, this.foot ? 0.12 : -0.12, route.steps);
+        this.foot ^= 1; this.next += (1 / this.pace) * (1 + rand(-0.03, 0.03));
+      }
+    },
+    stop() { LOOPS.delete(w); },
+  };
+  LOOPS.add(w);
+  return w;
+}
+
+/* ---------- round 2 sounds ---------- */
+// rounded clicks, as on the Sound Lab: a band instead of a bare high-pass and a 2 ms attack, so nothing spikes
+clack = function (t, gain, o = {}) {
+  noise(t, 0.014, { f: 3200, q: 0.8, gain: gain * 0.8, a: 0.002, bus: o.bus, pan: o.pan });
+  noise(t, 0.04, { f: o.f ?? 900, q: 4, gain: gain * 1.4, a: 0.002, bus: o.bus, pan: o.pan });
+};
+const cardSlide = (t, d, up) => noise(t, d, { f: up ? 900 : 1600, fTo: up ? 1600 : 900, q: 1.6, gain: 0.05, swell: 0.4 });
+const stamp = (t, w = 1) => { thud(t, { gain: 0.45 * w, d: 0.2, f: 160, body: 58 }); clack(t, 0.12 * w, { f: 700 }); ring(t, [220, 560, 1250], 1.4 * w, { d: 0.22, q: 22 }); };
+const dateWheel = (t, n, up) => { for (let i = 0; i < n; i++) clack(t + i * 0.055, 0.05, { f: up ? 1300 + i * 120 : 1700 - i * 120 }); };
+// in: a bright ending (rising); out: a calmer ending (falling), so you can tell them apart without looking
+const CLOCK = {
+  A: { name: 'Punch clock', note: 'A card slides in, the big stamp comes down with a chunk, the date wheel clicks round, the card pops out, and a small bell.',
+    play(t, isIn) { cardSlide(t, 0.25, false); clack(t + 0.24, 0.08, { f: 1100 }); stamp(t + 0.4); dateWheel(t + 0.62, 4, isIn); cardSlide(t + 0.95, 0.2, true);
+      bell(t + 1.15, isIn ? 1318.5 : 987.8, 0.7, 0.05, { wet: 0.2 }); } },
+  B: { name: 'Big stamp', note: 'A heavy lever comes down: a creak, a deep stamp and the lift back up, then two marimba notes: going up when you clock in, down when you clock out.',
+    play(t, isIn) { noise(t, 0.3, { f: 420, q: 7, gain: 0.05, swell: 0.6 }); stamp(t + 0.3, 1.2); noise(t + 0.6, 0.25, { f: 520, q: 7, gain: 0.035, swell: 0.4 }); clack(t + 0.85, 0.06, { f: 1000 });
+      const n = isIn ? [N.C5, N.G5] : [N.G5, N.C5]; marimba(t + 1.0, n[0], 0.09); marimba(t + 1.14, n[1], 0.09); } },
+  C: { name: 'Lever and latch', note: 'You pull a lever: a ratchet clicks, a latch drops with a clunk and the spring snaps back. Clocking in ratchets up, clocking out ratchets down.',
+    play(t, isIn) { dateWheel(t, 6, isIn); thud(t + 0.38, { gain: 0.3, d: 0.15, f: 220 }); clack(t + 0.38, 0.11, { f: 800 }); ring(t + 0.38, [300, 780], 1, { d: 0.18, q: 20 });
+      noise(t + 0.6, 0.18, { f: isIn ? 700 : 1400, fTo: isIn ? 1400 : 700, q: 3, gain: 0.03, swell: 0.3 }); clack(t + 0.78, 0.06, { f: 1500 }); } },
+};
+// tapping a crew member: soft and friendly, lower and rounder than the device tap, and short, unlike the Mail bell
+const MOOD = { happy: { k: 1.122, sp: 0.85, g: 1 }, fine: { k: 1, sp: 1, g: 1 }, low: { k: 0.891, sp: 1.25, g: 0.8 } };
+const HELLO = {
+  A: { name: 'Hello', note: 'Two soft wooden notes going up, like a little "hi there".',
+    play(t, m) { marimba(t, 329.63 * m.k, 0.08 * m.g); marimba(t + 0.09 * m.sp, 440 * m.k, 0.07 * m.g); } },
+  B: { name: 'Bubble', note: 'One rounded "bloop" that lifts at the end, with a tiny breath. The friendliest.',
+    play(t, m) { tone(t, 300 * m.k, 0.14 * m.sp, { gain: 0.1 * m.g, to: 460 * m.k, toT: 0.1 * m.sp, a: 0.01 }); noise(t, 0.06, { f: 900, q: 1, gain: 0.015 * m.g }); } },
+  C: { name: 'Kalimba', note: 'A single plucked kalimba note with a soft lower note under it. Warm and a touch musical.',
+    play(t, m) { const f = 523.25 * m.k; tone(t, f, 0.45 * m.sp, { gain: 0.07 * m.g, a: 0.002 }); tone(t, f * 4.6, 0.05, { gain: 0.012 * m.g, a: 0.001 }); tone(t + 0.02, f * 0.667, 0.4 * m.sp, { gain: 0.045 * m.g, a: 0.003 }); } },
+};
+
+const LV = {"clockAin": 0.7, "clockAout": 0.7, "clockBin": 0.68, "clockBout": 0.66, "clockCin": 0.9, "clockCout": 0.75, "helloA": 0.65, "helloB": 2.9, "helloC": 0.9};
+function lvPlay(key, fn) { const prev = R; R = Object.assign({}, B, { ui: trim(LV[key] ?? 1, B.ui) }); try { fn(); } finally { R = prev; } }
+const FADERS = []; function applyFaders() {}
+
+/* ---------- the mess hall: crowd soundscapes (wordless murmur, clatter, the galley), all made live ---------- */
+// vowel targets [first band, second band] for a wordless voice: nothing here is ever a word
+const VOWELS = [[730, 1090], [530, 1840], [270, 2290], [570, 840], [440, 1020], [660, 1720], [490, 1350]];
+const VOICES = [[105, -0.7], [128, 0.5], [160, -0.2], [210, 0.8], [118, 0.15], [190, -0.55], [140, 0.65], [235, -0.85], [98, 0.3], [175, -0.35], [150, 0.9], [220, 0.05]];   // [pitch, side] round the room
+function talker(out, f0, pan, g0, live) {   // one table voice: phrases of soft syllables, then a pause; live(t) says if this seat is taken
+  const osc = ctx.createOscillator(), f1 = ctx.createBiquadFilter(), f2 = ctx.createBiquadFilter(), g = ctx.createGain(), g2 = ctx.createGain(), p = ctx.createStereoPanner();
+  osc.type = 'sawtooth'; osc.frequency.value = f0; f1.type = f2.type = 'bandpass'; f1.Q.value = 5; f2.Q.value = 7; g.gain.value = 0; g2.gain.value = 0.45; p.pan.value = pan;
+  osc.connect(f1); osc.connect(f2); f1.connect(g); f2.connect(g2); g2.connect(g); g.connect(p); p.connect(out);
+  const t0 = ctx.currentTime; osc.start(t0); let next = t0 + Math.random() * 3;
+  return {
+    nodes: [osc],
+    tick(u) {
+      while (next < u) {
+        if (!live(next)) { next += 1 + Math.random() * 2; continue; }
+        const n = 3 + ((Math.random() * 10) | 0), lift = Math.random() < 0.15 ? 1.3 : 1; let t = next;   // now and then a laugh-like lift
+        for (let i = 0; i < n; i++) {
+          const d = 0.11 + Math.random() * 0.15, V = VOWELS[(Math.random() * VOWELS.length) | 0];
+          f1.frequency.setTargetAtTime(V[0], t, 0.025); f2.frequency.setTargetAtTime(V[1], t, 0.025);
+          osc.frequency.setTargetAtTime(f0 * lift * (1 + (Math.random() - 0.45) * 0.22 - (i / n) * 0.12), t, 0.04);
+          g.gain.setTargetAtTime(g0 * (0.55 + Math.random() * 0.45), t, 0.018); g.gain.setTargetAtTime(0, t + d * 0.75, 0.03);
+          t += d + Math.random() * 0.05;
+        }
+        next = t + 0.3 + Math.random() * 2.2;
+      }
+    },
+  };
+}
+// the room's sounds, one at a time (t: when, w: how loud), all quieter than the hum
+const CLINK = {
+  cutlery: (t, w, pan) => ring(t, [rand(2600, 3400), rand(4200, 5600)], 0.9 * w, { d: 0.12, q: 35, pan, wet: 0.3 }),
+  fork: (t, w, pan) => { ring(t, [rand(3000, 3800)], 0.6 * w, { d: 0.07, q: 30, pan }); ring(t + rand(0.05, 0.12), [rand(3000, 3800)], 0.4 * w, { d: 0.06, q: 30, pan }); },
+  cup: (t, w, pan) => { ring(t, [rand(1800, 2300), rand(3900, 4600)], 1.1 * w, { d: 0.18, q: 45, pan, wet: 0.3 }); thud(t, { gain: 0.06 * w, d: 0.04, f: 900, body: 300 }); },
+  tray: (t, w, pan) => { thud(t, { gain: 0.22 * w, d: 0.1, f: 500, body: 140 }); ring(t, [rand(420, 520), rand(980, 1150)], 1.4 * w, { d: 0.22, q: 18, pan, wet: 0.3 }); },
+  plate: (t, w, pan) => { ring(t, [rand(1300, 1600), rand(2700, 3100)], 1 * w, { d: 0.2, q: 30, pan, wet: 0.3 }); thud(t, { gain: 0.08 * w, d: 0.05, f: 700, body: 220 }); },
+  chair: (t, w, pan) => noise(t, rand(0.25, 0.45), { f: rand(260, 380), fTo: rand(450, 650), q: 4, gain: 0.05 * w, swell: 0.35, pan }),
+  stack: (t, w, pan) => { for (let i = 0; i < 3; i++) ring(t + i * rand(0.06, 0.1), [rand(1300, 1700), rand(2800, 3300)], 0.7 * w, { d: 0.15, q: 30, pan }); },
+  hatch: (t, w) => { slide(t, 0.4, { f0: 300, f1: 520, gain: 0.25 * w, rate: 30, rough: 0.2, bus: R.ui, pan: 0.5 }); clack(t + 0.42, 0.05 * w, { f: 900, pan: 0.5 }); },
+  pan: (t, w) => ring(t, [rand(500, 640), rand(1500, 1800)], 1.2 * w, { d: 0.3, q: 20, pan: 0.6, wet: 0.35 }),
+  ding: (t, w) => bell(t, 1567.98, 0.8, 0.02 * w, { wet: 0.3, pan: 0.55 }),
+};
+const MESS = {
+  A: { name: 'Murmur and cutlery', note: 'A soft wordless murmur from the tables (never words you could follow), with cutlery, cups and trays now and then.',
+    talk: 1, clatter: { cutlery: 4, fork: 3, cup: 3, tray: 2, plate: 2, chair: 1 }, rate: [0.5, 2.2] },
+  B: { name: 'Clatter only', note: 'No voices at all: trays, cups, plates, cutlery, chairs and the serving hatch. The closest to the old "no chatter" rule.',
+    talk: 0, clatter: { cutlery: 4, fork: 3, cup: 3, tray: 3, plate: 3, chair: 2, stack: 1, hatch: 1 }, rate: [0.7, 3.4] },
+  C: { name: 'Fills and thins', note: 'Like A, but it follows the meal: thin when the room is quiet, a fuller murmur and more clatter at the breakfast and dinner rush. Try "Dinner rush" to hear it fill and empty.',
+    talk: 1, clatter: { cutlery: 4, fork: 3, cup: 3, tray: 3, plate: 2, chair: 2, stack: 1 }, rate: [0.35, 2.8], fill: true },
+  D: { name: 'Busy but cosy', note: 'A softer, warmer murmur with the galley behind the counter: a pan sizzling, the extractor, a pan set down, the hatch and a little "order up" bell.',
+    talk: 0.75, warm: true, galley: true, clatter: { cutlery: 3, fork: 2, cup: 3, tray: 2, plate: 2, chair: 1, hatch: 1, pan: 1, ding: 0.5 }, rate: [0.45, 2] },
+};
+const MESS_LV = { A: 1.7, B: 2.0, C: 2.2, D: 1.5 };   // trims set by measuring against the Commons hum
+function messScene(k, how) {
+  ensure();
+  const M = MESS[k], t0 = ctx.currentTime, LEN = 60;
+  // how full the room is, 0..1: quiet hour 0.3, rush 1, or the dinner rush (fills over 20 s, holds, thins)
+  const dens = how === 'quiet' ? () => 0.3 : how === 'rush' ? () => 1 : t => { const e = (t - t0) % LEN; return e < 20 ? 0.25 + 0.75 * e / 20 : e < 38 ? 1 : Math.max(0.25, 1 - 0.75 * (e - 38) / 18); };
+  const out = ctx.createGain(); out.gain.setValueAtTime(0, t0); out.gain.linearRampToValueAtTime(MESS_LV[k], t0 + 1.5); out.connect(B.ui);
+  const prevR = R; const room = Object.assign({}, B, { ui: out }); R = room;
+  const loops = [], nodes = [];
+  if (M.talk) {
+    const mb = ctx.createGain(), lp = ctx.createBiquadFilter(), sv = ctx.createGain(); lp.type = 'lowpass'; lp.frequency.value = M.warm ? 1100 : 1500; mb.gain.value = 0.9 * M.talk;
+    mb.connect(lp); lp.connect(out); sv.gain.value = 0.55; lp.connect(sv); sv.connect(B.verb);
+    VOICES.forEach(([f, p], i) => loops.push(talker(mb, f, p, 0.03, t => i < Math.round(VOICES.length * dens(t)))));
+  }
+  if (M.galley) {   // behind the counter, on the right: the extractor and a pan sizzling
+    const ex = ctx.createBufferSource(); ex.buffer = BROWN; ex.loop = true; const exf = ctx.createBiquadFilter(); exf.type = 'lowpass'; exf.frequency.value = 240; const exg = ctx.createGain(); exg.gain.value = 0.06;
+    const sz = ctx.createBufferSource(); sz.buffer = WHITE; sz.loop = true; const szf = ctx.createBiquadFilter(); szf.type = 'bandpass'; szf.frequency.value = 5200; szf.Q.value = 0.7; const szg = ctx.createGain(); szg.gain.value = 0.012;
+    const gp = ctx.createStereoPanner(); gp.pan.value = 0.55; ex.connect(exf); exf.connect(exg); exg.connect(gp); sz.connect(szf); szf.connect(szg); szg.connect(gp); gp.connect(out);
+    ex.start(t0); sz.start(t0); nodes.push(ex, sz);
+  }
+  const bag = Object.entries(M.clatter).flatMap(([n, w]) => Array(Math.max(1, Math.round(w * 2))).fill(n));
+  let nextC = t0 + 0.4;
+  loops.push({ tick(u) {
+    while (nextC < u) {
+      const d = dens(nextC), rate = M.rate[0] + (M.rate[1] - M.rate[0]) * (d - 0.3) / 0.7;
+      const n = pick(bag); try { CLINK[n](nextC, rand(0.5, 1), rand(-0.8, 0.8)); } catch (e) {}
+      if (M.galley && Math.random() < 0.05) noise(nextC, 0.03, { f: rand(3000, 6000), q: 3, gain: 0.02, pan: 0.55 });   // a spit from the pan
+      nextC += (-Math.log(1 - Math.random())) / Math.max(0.2, rate);
+    }
+  } });
+  R = prevR;
+  const S = {
+    label: M.name, t0, dens,
+    tick(u) { const p = R; R = room; try { loops.forEach(l => l.tick(u)); } finally { R = p; } },
+    stop(f = 1.2) { LOOPS.delete(S); const t = ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + f);
+      loops.forEach(l => (l.nodes || []).forEach(n => { try { n.stop(t + f + 0.1); } catch (e) {} })); nodes.forEach(n => { try { n.stop(t + f + 0.1); } catch (e) {} });
+      setTimeout(() => { try { out.disconnect(); } catch (e) {} }, (f + 3) * 1000); },
+  };
+  LOOPS.add(S); S.tick(t0 + 0.4);
+  return S;
+}
+/* ---------- page ---------- */
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+let NOW = null, NOW_BTN = null, HUM = null;
+function stopScene() { if (NOW) { NOW.stop(1); NOW = null; } if (NOW_BTN) { NOW_BTN.setAttribute('aria-pressed', 'false'); NOW_BTN = null; } }
+$('#mess').innerHTML = Object.entries(MESS).map(([k, m]) => `<article class="item${k === 'C' ? ' is-rec' : ''}"><h4>${k} · ${esc(m.name)}${k === 'C' ? ' <span class="pick">Recommended</span>' : ''}</h4>
+  <p class="note">${esc(m.note)}</p><div class="chips">
+  <button class="chip" type="button" data-scene="${k}" data-how="quiet" aria-pressed="false"><span class="dot"></span>Quiet hour</button>
+  <button class="chip" type="button" data-scene="${k}" data-how="rush" aria-pressed="false"><span class="dot"></span>Rush</button>
+  ${m.fill ? `<button class="chip" type="button" data-scene="${k}" data-how="fill" aria-pressed="false"><span class="dot"></span>Dinner rush (fills and empties, 60 s)</button>` : ''}</div></article>`).join('');
+$$('[data-scene]').forEach(b => b.addEventListener('click', () => {
+  const same = NOW_BTN === b; stopScene(); if (same) { $('#status').textContent = 'Stopped'; return; }
+  NOW = messScene(b.dataset.scene, b.dataset.how); NOW_BTN = b; b.setAttribute('aria-pressed', 'true');
+  $('#status').textContent = `Playing: ${b.dataset.scene}, ${MESS[b.dataset.scene].name}, ${b.textContent.trim().toLowerCase()}`;
+}));
+setInterval(() => { if (NOW && ctx) { const d = NOW.dens(ctx.currentTime); $('#prog').style.width = Math.round(d * 100) + '%'; } else $('#prog').style.width = '0'; }, 250);
+$$('[data-hum]').forEach(b => b.addEventListener('click', () => { ensure(); if (HUM) { HUM.stop(1); HUM = null; } $$('[data-hum]').forEach(x => x.setAttribute('aria-pressed', String(x === b))); if (b.dataset.hum !== 'off') HUM = startHum(b.dataset.hum, 1, 1.5); }));
+$('#stopAll').addEventListener('click', () => { stopScene(); if (HUM) { HUM.stop(0.6); HUM = null; $$('[data-hum]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.hum === 'off'))); } $('#status').textContent = 'Stopped'; });
+/* the pick, saved to the page's store (collection "picks", doc "mess") */
+const ANS = {}; let DB = null;
+$('#pick').innerHTML = `<div class="pickbox" data-id="mess"><div class="pb-row" role="radiogroup" aria-label="Your pick">${['A', 'B', 'C', 'D', 'None'].map(c => `<button class="pb" type="button" role="radio" aria-checked="false" data-v="${c}">${c}${c === 'C' ? '<span class="rec">Rec.</span>' : ''}</button>`).join('')}</div>
+  <label class="pb-note"><span>Notes (optional)</span><textarea id="note-mess" rows="3" placeholder="More or less busy? Louder, quieter, more galley?"></textarea></label><span class="saved" aria-live="polite"></span></div>`;
+function show() { const a = ANS.mess || {}; $$('.pb').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === a.pick))); const ta = $('#note-mess'); if (document.activeElement !== ta) ta.value = a.note || ''; }
+let tm = null;
+function save(patch) {
+  ANS.mess = { ...(ANS.mess || {}), ...patch, at: new Date().toISOString() }; show();
+  try { localStorage.setItem('wren-mess', JSON.stringify(ANS.mess)); } catch (e) {}
+  const mark = t => $('.saved').textContent = t;
+  if (!DB) { mark('Kept in this browser only'); return; }
+  clearTimeout(tm); mark('Saving...');
+  tm = setTimeout(() => DB.collection('picks').doc('mess').set({ item: 'mess', pick: ANS.mess.pick || '', note: ANS.mess.note || '', at: ANS.mess.at }).then(() => mark('Saved'), () => mark('Not saved, try again')), 500);
+}
+document.addEventListener('click', e => { const b = e.target.closest('.pb'); if (b) save({ pick: (ANS.mess || {}).pick === b.dataset.v ? '' : b.dataset.v }); });
+$('#note-mess').addEventListener('input', e => save({ note: e.target.value }));
+try { const v = localStorage.getItem('wren-mess'); if (v) ANS.mess = JSON.parse(v); } catch (e) {}
+show();
+(async () => {
+  try { DB = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { DB = null; }
+  $('#store').textContent = DB ? 'Your pick saves as you go, and the lead can read it.' : 'Your pick is kept in this browser only here.';
+  if (DB) DB.collection('picks').onSnapshot(s => s.docs.forEach(d => { const v = d.data() || {}; if (v.item === 'mess') { ANS.mess = { pick: v.pick, note: v.note, at: v.at }; show(); } }), () => {});
+})();
+/* level meter in the bottom bar */
+const meter = $('#meter'), mc = meter.getContext('2d');
+let mdata = null;
+function drawMeter() {
+  requestAnimationFrame(drawMeter);
+  if (!ANALYSER) return;
+  if (!mdata) mdata = new Float32Array(ANALYSER.fftSize);
+  ANALYSER.getFloatTimeDomainData(mdata);
+  mc.clearRect(0, 0, meter.width, meter.height);
+  const bars = 12, per = mdata.length / bars, live = getComputedStyle(document.body).getPropertyValue('--live') || '#7cc9bb';
+  for (let i = 0; i < bars; i++) {
+    let s = 0; for (let j = 0; j < per; j++) { const v = mdata[(i * per + j) | 0]; s += v * v; }
+    const rms = Math.sqrt(s / per), h = Math.max(2, Math.min(1, rms * 5) * meter.height);
+    mc.fillStyle = live.trim() || '#7cc9bb'; mc.globalAlpha = 0.85;
+    mc.fillRect(i * (meter.width / bars) + 2, (meter.height - h) / 2, meter.width / bars - 4, h);
+  }
+}
+
+/* pause with the page, like the game */
+document.addEventListener('visibilitychange', () => {
+  if (!ctx) return;
+  if (document.hidden) ctx.suspend(); else ctx.resume();
+});
+
+/* offline loudness check, used while tuning (not needed by the page) */
+window.__measure = async function (fn, secs = 3) {
+  const sr = 44100, oc = new OfflineAudioContext(2, sr * secs, sr);
+  const save = [ctx, B, R, WHITE, BROWN], loops = [...LOOPS]; LOOPS.clear();
+  // rough K-weighting so a low hum and a high beep are compared the way ears hear them
+  const hp = oc.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 60; hp.Q.value = 0.5;
+  const sh = oc.createBiquadFilter(); sh.type = 'highshelf'; sh.frequency.value = 1500; sh.gain.value = 4;
+  hp.connect(sh); sh.connect(oc.destination);
+  ctx = oc; B = buildGraph(oc, hp); R = B; WHITE = B.buf.w; BROWN = B.buf.b;
+  try { fn(0.05); LOOPS.forEach(l => l.tick && l.tick(secs)); } catch (e) { [ctx, B, R, WHITE, BROWN] = save; throw e; }
+  const buf = await oc.startRendering();
+  [ctx, B, R, WHITE, BROWN] = save; LOOPS.clear(); loops.forEach(l => LOOPS.add(l));
+  const L = buf.getChannelData(0), Rr = buf.getChannelData(1), win = sr * 0.4, hop = sr * 0.1;
+  let peak = 0, maxM = -120, sum = 0;
+  for (let i = 0; i < L.length; i++) { peak = Math.max(peak, Math.abs(L[i]), Math.abs(Rr[i])); sum += L[i] * L[i] + Rr[i] * Rr[i]; }
+  for (let s = 0; s + win <= L.length; s += hop) {
+    let e = 0; for (let i = s; i < s + win; i++) e += L[i] * L[i] + Rr[i] * Rr[i];
+    maxM = Math.max(maxM, 10 * Math.log10(e / win + 1e-12));
+  }
+  return { peakDb: +(20 * Math.log10(peak + 1e-12)).toFixed(1), momentaryMax: +maxM.toFixed(1), avg: +(10 * Math.log10(sum / L.length + 1e-12)).toFixed(1) };
+};
+</script>
