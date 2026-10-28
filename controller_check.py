@@ -2889,6 +2889,8 @@ def part_vessel(pw, src, tag):
 #           5 s Undo); Undo is reachable by moving to it, and undoes; B closes the screen
 #   devpad  with #dev: D-pad up still lands on Pause, the Dev card is reachable, A opens the Dev panel, a tab by pad, a
 #           row highlighted, B closes; the "reload" bar is among the edge buttons; without #dev the card isn't
+#   savesland  (lead 43, RV24's find) the Saves app by pad lands on the device's Back, never another slot's New game or
+#           Play: A there goes back home, the game and its slot unchanged; New game is still reachable
 #   edge    X presses Take a seat (a tray in the mess) and Lift (in the car), with X's mark on it; B puts away the need
 #           warning and a wave (not a knock at your door); B over the open device puts a tip away first; the needs
 #           strip's fold and the goal's pin reached on the edge and pressed by A
@@ -2992,6 +2994,22 @@ def part_devpad(pw, src, tag):
     if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
     r.close()
     return fails
+def part_savesland(pw, src, tag):
+    fails = []
+    r = wa_run(pw, src, f'{tag}_sv', query='?debug')       # the Saves app needs real saving (a fresh browser's storage)
+    if r.page.locator('text=Sign and go aboard').count():
+        r.page.fill('form input', 'Ada'); r.page.click('text=Sign and go aboard'); r.step(30); r.press('B'); r.step(2)
+    if not r.ev("DEVICE_APPS.has('saves')"): r.close(); return fails + ['setup: no Saves app in this build']
+    r.press('Y'); r.step(6); r.ev("deviceShow('saves')"); r.step(4)
+    f = r.ev(WA_FOCUS); slot = r.ev("SAVE_SLOT"); print(f'  the Saves app (playing Slot {slot}) lands on {f}')
+    if not f or f['id'] != 'devBack': fails.append(f'the Saves app did not land on Back ({f})')
+    if not pad_to(r, '#devBody button'): fails.append('no slot button reachable by the D-pad in the Saves app')
+    r.ev("deviceShow('home'); deviceShow('saves')"); r.step(4); r.press('A'); r.step(6)
+    st = r.ev("({ app: DEV.app, open: DEV.open, slot: SAVE_SLOT, sure: SLOT_UI.sure })"); print(f'  first A: {st}')
+    if st['app'] != 'home' or st['slot'] != slot: fails.append(f'the first A in the Saves app did not just go back home ({st})')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close()
+    return fails
 WA_SEAT = r"""(() => { skipTo(Math.max(shipNow(), 1440 + 15 * 60)); goToDeck(3); player.stop(); SHIP.player.tray = 'a bowl of soup'; SHIP.player.trayLeft = 0;
   const pp = [...PLACE_OF.values()].filter(pl => pl.type === 'mess-seat' && pl.pose === 'sit' && !privatePlace(pl) && !heldBy(pl.id)).map(pl => placeSpot(pl.id)).filter(sp => sp && sp.pose === 'sit');
   for (const sp of pp) { const c = nearestOpen(sp.x, sp.z, player); if (!c) continue; const q = cellPos(c[0], c[1]); player.obj.position.set(q.x, player.obj.position.y, q.z); handTick(true); if (seatBtnSeat()) return true; }
@@ -3071,7 +3089,7 @@ NEEDS = {'ending': ['base', 'deck', 'pick', 'panels'], 'touch': ['base'], 'walk'
 PART_FN = {'ending': part_ending, 'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day, 'shut': part_shut, 's5cases': part_s5cases, 's6cases': part_s6cases, 'team': part_team, 'vessel': part_vessel}   # 'reach' joins when the pad half is written
 if 'function mysOpen' not in SRC or (S5_LINE not in SRC and not re.search(r'\bconst P5_STEP5\s*=\s*true\b', SRC)): PART_FN.pop('s5cases')   # (BM19) or already on (0.94.0)   # no board in this build: "not yet", never a pass
 for k, v in OLD_NEEDS.items(): NEEDS[OLD_NAME.get(k, k)] = v; PART_FN[OLD_NAME.get(k, k)] = legacy(k)
-for k, f in (('cards', part_cards), ('clock', part_clock), ('devpad', part_devpad), ('edge', part_edge)): PART_FN[k] = f; NEEDS[k] = ['panels']; ALL_PARTS.append(k)   # wave A (PA1)
+for k, f in (('cards', part_cards), ('clock', part_clock), ('devpad', part_devpad), ('edge', part_edge), ('savesland', part_savesland)): PART_FN[k] = f; NEEDS[k] = ['panels']; ALL_PARTS.append(k)   # wave A (PA1)
 
 # ---- Pillar 5 Step 5's pieces (plans/p5-step5-spec.html section 9): each part runs on a copy with P5_STEP5 on, and only
 # when the build has it on or CTL_P5S5=1 is set (a builder's branch before the switch-on); else "not yet", never a pass ----
@@ -3603,6 +3621,9 @@ MUTANTS['devpad'] = {
   'no Dev card on the edge': ('src', "#ixGoal.tap .ixpin, .hud[role=button], #dmLink button';", "#ixGoal.tap .ixpin, #dmLink button';"),
   'no reload bar on the edge': ('src', "#ixGoal.tap .ixpin, .hud[role=button], #dmLink button';", "#ixGoal.tap .ixpin, .hud[role=button]';"),
   'the Dev card is the first landing': ('src', "[...document.querySelectorAll(PAD_HUD_SEL), ...document.querySelectorAll(PAD_HUD_MORE)]", "[...document.querySelectorAll(PAD_HUD_MORE), ...document.querySelectorAll(PAD_HUD_SEL)]"),
+}
+MUTANTS['savesland'] = {
+  'the Saves app lands on its first button': ('src', "device: () => DEV.app === 'saves' && document.getElementById('devBack') || document.querySelector('#devBody') };", "device: '#devBody' };"),
 }
 MUTANTS['edge'] = {
   'X skips Take a seat and Lift': ('src', "const PAD_X_IDS = ['repairBtn', 'hobbyBtn', 'seatBtn', 'liftBtn', 'putDown'];", "const PAD_X_IDS = ['repairBtn', 'hobbyBtn', 'putDown'];"),

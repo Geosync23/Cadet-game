@@ -72560,7 +72560,7 @@ function padPanelAdd(sel, o = {}) {
 }
 const PAD_FOCUS_CSS = 'body.pad :focus{outline:4px solid #4cc3b5!important;outline-offset:3px!important;box-shadow:0 0 0 3px #0d1521,0 0 0 9px #0d1521!important}'
   + '@media (forced-colors:active){body.pad :focus{outline:4px solid Highlight!important;box-shadow:none!important}}';   // P5: thick, with a dark edge both sides
-const PAD_FIRST = { device: '#devBody' };                 // where to land first in a panel, when not on its first button
+const PAD_FIRST = { device: () => DEV.app === 'saves' && document.getElementById('devBack') || document.querySelector('#devBody') };   // where to land first in a panel, when not on its first button: a selector, or a function giving the element (wave A: the Saves app on Back, never another slot's New game or Play; lead 43, RV24's find)
 const PAD_HUD = { id: 'hud', hud: true };
 // (and the cards a tap puts away or opens: someone who'd like a word, the heads-up and its Go there, the address, a tip)
 const PAD_HUD_SEL = '#pauseBtn, .controls button, #devBtn, #trkBtn, #needStrip, #handBtns button, #putDown, #ixBoard, #seek, #devHu, #devHu button, #devAddr, #devTip';
@@ -72588,7 +72588,7 @@ function padFocusTo(el) {
 const padCtx = L => L && L.id === 'device' ? 'device:' + DEV.app : padKey(L);   // the same screen (a device app counts as its own)
 const padName = e => (e.getAttribute('aria-label') || '') + '|' + e.textContent.trim();
 function padFocusIn(L) {                                   // land in a layer: keep a focus already in it (the lift's goal deck), else the first button
-  const a = document.activeElement, items = padItems(L), k = padKey(L), first = PAD_FIRST[k] && document.querySelector(PAD_FIRST[k]);
+  const a = document.activeElement, items = padItems(L), k = padKey(L), f = PAD_FIRST[k], first = !f ? null : typeof f === 'function' ? f() : document.querySelector(f);   // (a function: wave A's Saves app)
   if (a && items.includes(a) && (!first || first.contains(a))) return;   // (the device puts its own focus on Close)
   const was = PAD_FOCUS.last;                              // the same screen drawn again (a choice pressed): the same button, by name, else by place
   if (was && was.L === L && was.ctx === padCtx(L) && items.length) { padFocusTo(items.find(e => padName(e) === was.name) || items[Math.min(was.i, items.length - 1)]); return; }
