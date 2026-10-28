@@ -7,6 +7,7 @@ Cap rule: at most 5 seats working at once; read only until RV23 says it has gone
 ## Verdicts
 | Branch | Verdict | Sha |
 |---|---|---|
+| claude/devmode-j3 (DM1): Dev mode J3, the ending jumps and answers row | PASS (1 note: goodbye arrow) | 2b88ad2 |
 | claude/devmode-j1 (DM1): Dev mode J1, 12 career and night jumps | PASS (1 note) | d9b7b3c |
 | claude/devmode-j0 (DM1): Dev mode J0, Jump to tab, runner with Stop, Day 40, ranks | PASS | eef5b56 |
 | claude/sound-r3 (SD2, SD3 now): event music turn 1, farewell song A | PASS | 64077a69, dc3014b6, a09b32b7 (mess hall), f58803b1 (feature sounds), cacfba97 (hooks; owner read by me) |
@@ -135,3 +136,4 @@ Code read (no runs yet):
 - Dev mode J1 d9b7b3c: PASS. cadet identical (noise); devmode_check beats + jumps OK; dev_arrow OK; dm_jump.py: briefing Day 22 08:20 with its arrow, Night 2 Day 23 20:50 (no arrow yet at 20:50: note).
 - Sound r3 turn 3 f58803b1: PASS (cadet identical; sound_check OK incl. r3fx).
 - Sound r3 turn 4 cacfba97: PASS (cadet identical; sound_check OK incl. r3hooks; owner read of the six hooks in 15, 18, 24x, 28a, 28d). design-doc Sound diff NOT read (told SD3).
+- Dev mode J3 2b88ad2: PASS (cadet identical; devmode_check ending1/ending2 OK; dev_arrow OK; offer and goodbye by taps). Handed over to RV25 (session_01GKuymnnpKvNH4Ki69KEzwG); idle.

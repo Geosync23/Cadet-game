@@ -11,7 +11,7 @@ session_01GKuymnnpKvNH4Ki69KEzwG: check TEAM.md).
 ## Exactly what's open
 1. **EV1 visit-on (claude/visit-on cf67777): NOT STARTED by me.** First priority: it gates the 0.96.0 round. I hadn't seen it
    arrive; nothing run.
-2. **Dev mode J3 (DM1, claude/devmode-j3 2b88ad2, from J1 d9b7b3c): runs mostly done, verdict pending.** cadet vs d9b7b3c ALL
+2. **Dev mode J3 2b88ad2: DONE, PASS sent (devmode_check, dev_arrow OK).** Earlier notes: cadet vs d9b7b3c ALL
    IDENTICAL (clean); dm_jump.py by taps: "the offer" -> Day 32 15:50 Ready room, Engine Specialist Steady, arrow "The Captain",
    Calder's answer put in; "the goodbye" -> Day 36 09:10 Shuttle bay, Go recorded, but the arrow says "Breakfast in the mess, your
    last one" (pointing out of the bay just before the goodbye: the ending's arrows, probably because the jump skipped breakfast;
