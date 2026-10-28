@@ -1,5 +1,5 @@
 # RV24: a pretend-pad look at 390x844 (controller update reviews): reuses controller_check.py's Run (FAKEPAD) from the game's folder.
-# Usage: python3 pad_look.py BUILD.html OUTDIR part   (parts: wavec)
+# Usage: python3 pad_look.py BUILD.html OUTDIR part   (parts: wavec, wavea)
 import sys, os, re, json, pathlib
 G = sys.argv[1]; OUT = sys.argv[2]; PART = sys.argv[3]; os.makedirs(OUT, exist_ok=True)
 cc = os.path.join(os.path.dirname(os.path.abspath(G)), 'controller_check.py')
@@ -40,4 +40,20 @@ with sync_playwright() as pw:
         body = r.ev("document.getElementById('devBody').textContent")
         print('saves reached', ok, 'hint' if 'With a controller' in body else 'NO HINT', body[:200])
         r.page.screenshot(path=f'{OUT}/wc_saves.png')
+        print('errors', r.errors[:5]); r.close()
+    if PART == 'wavea':
+        r = wa_run(pw, ON, 'rv24_wa')
+        r.ev("(() => { skipTo(Math.max(shipNow(), 1440 + 15 * 60)); goToDeck(3); })()"); r.step(20)
+        who = r.ev("(() => { for (const a of DECK_CREW) { chatClose(); if (chatOpen(a.p) && CHAT && !document.getElementById('chat').hidden) return a.p.id; } return null; })()"); r.step(3)
+        print('chat', who, r.ev(WA_FOCUS)); r.page.screenshot(path=f'{OUT}/wa_chat.png')
+        r.press('B'); r.step(3)
+        r.ev("(() => { chatClose(); basket = null; SHIP.player.credits = 200; shopMenuOpen(DECK_CREW[0].p); })()"); r.step(3)
+        print('shop', r.ev(WA_FOCUS)); r.page.screenshot(path=f'{OUT}/wa_shop.png'); r.press('B'); r.step(3)
+        r.ev("CLOCK_UNDO_ON = true"); d = r.ev(WA_CLOCK); r.step(30); r.press('A'); r.step(3)
+        print('clock after A', r.ev(WA_CK)); r.page.screenshot(path=f'{OUT}/wa_clock.png'); r.press('B'); r.step(3)
+        print('errors', r.errors[:5]); r.close()
+        r = wa_run(pw, ON, 'rv24_wad', query='?debug#dev')
+        if r.page.locator('text=Sign and go aboard').count(): r.page.fill('form input', 'Ada'); r.page.click('text=Sign and go aboard'); r.step(30); r.press('B'); r.step(2)
+        r.press('UP'); r.step(2); ok = pad_to(r, '.hud'); print('dev card reached', ok, r.ev(WA_FOCUS)); r.page.screenshot(path=f'{OUT}/wa_devcard.png')
+        r.press('A'); r.step(3); print('dev panel', r.ev("DM_UI.open")); r.page.screenshot(path=f'{OUT}/wa_devpanel.png')
         print('errors', r.errors[:5]); r.close()
