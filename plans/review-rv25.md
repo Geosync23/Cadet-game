@@ -91,3 +91,7 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
   = shortName('Envoy Saruth') = 'Envoy', the tip banked "Tap Saruth". Game gap (also the vessel lights' "Tap Envoy to stand
   at the glass with Saruth" since 0.94.0). Fix proposed: tjFirst gives the second word of a two-word Envoy/Speaker name.
   Scratch copy: JOIN CHECK OK (pointer/join_check-tjFirst-fix.txt). Sent to lead 44, EV1, BM20; EV1 to commit after puzzle.
+- 17:3x EV1 fixes on claude/visit-pointer fe11cd66: **PASS** (to lead 44, BM20, EV1). cadet vs 6522974 alone: 0 px in every
+  shot (truly identical). puzzle_check OK (p9 staged Day 22 after retries); join_check OK (farewell and vesselLights name
+  Saruth). 72bb4a3 owner read (24k): staged sets case.p9.first; trained or open p9 -> 'none'; retry window from saved W.op;
+  P9_MISS memory only (one extra look after a load, harmless); t4 needs no p9. 8eef718 check only.
