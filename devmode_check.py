@@ -34,7 +34,8 @@
 #          where it needs you up: Power safety, the nights once clocked in); Undo; one jump twice in fresh browsers
 #   ending1: J3's answers row and the ending's list at 390 px; the offer, still open, before the address; Calder's four answers give their posts
 #   ending2: J3's goodbye, end page, staying on, the slower career's offer; the Traditions card's Its next showing
-#   events1, events2: J2's parts, stubs until then
+#   events1: J2's Ship events jumps: each lands at its day, time and room with the event running by the calendar; Undo; one twice
+#   events2: J2's Running now card: threads − and +, Next phase, Its meeting, settled greys the threads, End and keep, Undo
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 devmode_check.py BUILD.html [part ...]   (parts: only those)   Good is DEVMODE CHECK OK (exit 0); a failure exits 1.
 import sys, os, re, json, pathlib
@@ -729,8 +730,116 @@ def part_beats(b):
         p2.ev("devmodeRun('Jump', () => devmodeSetCareerTo(16, devmodeJumpOf('t3res')))"); p2.ev('saveGame()'); saves.append(p2.ev('localStorage.getItem(SAVE_KEY)')); p2.close(); c2.close()
     check(saves[0] == saves[1], 'beats: the Tier 3 result jump twice (fresh browsers) gives different saves')
     print(f'  beats: {len(on)} jumps landed at their time and room, each beat booked or started (Power safety asked once up, the test held, result, bar, toast, the lessons, the briefing, the nights once clocked in); Undo; t3res twice the same save')
-def part_events1(b): print('  events1: not built yet (J2)')
-def part_events2(b): print('  events2: not built yet (J2)')
+def j2_click(pg, text, wait=900):                 # a button on the open panel by its words (a Dev action: wait out its fade; wait 0: an ask, not redrawn)
+    n = pg.ev(f"(() => {{ const b = [...document.querySelectorAll('#dmSheet button')].find(x => x.textContent === {json.dumps(text)}); if (!b || b.disabled) return b ? 'off' : 'none'; b.click(); return 'ok'; }})()")
+    if n == 'ok' and wait: pg.page.wait_for_timeout(wait); pg.step(5)
+    if wait: pg.ev('devmodeDraw()')
+    return n
+
+def j2_card(pg):                                  # the Running now card as drawn: its words and buttons
+    return pg.ev("""(() => { const s = document.querySelector('#dmSheet .dmBody'), h = [...s.querySelectorAll('h3')].map(x => x.textContent);
+      return { head: h.find(x => /^Running now/.test(x)) || null, text: s.textContent, buttons: Object.fromEntries([...s.querySelectorAll('button')].map(b => [b.textContent, !b.disabled])),
+        wide: s.scrollWidth > s.clientWidth, small: [...document.querySelectorAll('#dmSheet button')].filter(b => b.offsetParent && b.getBoundingClientRect().height < 44).map(b => b.textContent) }; })()""")
+
+J2_STATE = """(() => { const j = devmodeJumpOf(%s), w = j.where, n = eventNow(), t = (j.day - 1) * 1440 + j.at;
+  return { clock: clockText(), want: 'Day ' + j.day + ',', at: hhmm(j.at), deck: deckDef.num, room: (ROOMS[roomAt(...player.here())] || {}).name || '', wdeck: w ? w.deck : null, wroom: w ? DECKS[w.deck].rooms[w.room].name : null,
+    set: devmodeState().set, ev: SHIP.event && SHIP.event.id, ph: SHIP.event && SHIP.event.phase, now: n && n.id, nph: n && n.phase, want_ev: j.ev || null,
+    meet: MEETINGS.filter(m => m.event === j.ev && m.at === t + 5).map(m => m.id), log: SHIP.eventLog.map(l => l.id),
+    missed: SHIP.mail.filter(m => /missed/i.test(m.subject || '') || Object.values(INTRO_MEETINGS).some(x => m.subject === x.title + ' (notes)')).map(m => m.subject),
+    sat: typeof stormSatDay === 'function' && stormSatDay() === j.day && playerCalledIn(j.day), fri: friShort(j.day), addr: eventsOn(j.day).some(e => e.id === 'captains-address' && e.from === j.at + 10),
+    tern: typeof rotTernArrivals === 'function' ? rotTernArrivals(j.day).length : 0 }; })()"""
+
+def part_events1(b):
+    # J2 (plan v4.4): every Ship events jump lands at its day, time and room, a new Dev game run there with the event
+    # started by the calendar's own rules (SHIP.event the jump's event, its phase caught up with eventNow; none yet before its first), the meetings
+    # it lands before booked at their minute, no missed shift and no first-week notes; the Short Friday, the Friday address
+    # and the rotation on their day; Undo after the last; one jump twice in fresh browsers gives the same save
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = Page(ctx, '#dev'); pg.sign(); pg.step(20)
+    on = pg.ev("DM_JUMPS.filter(j => j.group === 'events' && devmodeJumpOn(j)).sort((a, b) => a.day - b.day || a.at - b.at).map(j => j.id)")
+    if not on: print('  events1: none on in this build'); pg.close(); ctx.close(); return
+    import time
+    t0, got = time.time(), {}
+    for id in on:
+        r = pg.ev(f"devmodeRun('Jump', () => devmodeSetCareerTo(devmodeJumpOf('{id}').day, devmodeJumpOf('{id}')))"); pg.step(10)
+        L = pg.ev(J2_STATE % json.dumps(id))
+        got[id] = f"{L['clock']} {L['room'] or '-'} {L['ev'] or ''}:{L['ph'] or ''}{' meet ' + ','.join(L['meet']) if L['meet'] else ''}"
+        check(r is True and L['clock'].startswith(L['want']) and L['clock'].endswith(L['at']) and (L['wdeck'] is None or (L['deck'] == L['wdeck'] and L['room'] == L['wroom'])) and L['set'] and L['set'].get('beat') == id,
+              f'events1: {id} landed: {L} ({pg.ev("DM_UI.msg")[:120]})')
+        check(not L['missed'], f'events1: {id}: a missed shift or first-week notes: {L["missed"]}')
+        if L['want_ev']:
+            check(L['ev'] == L['want_ev'] and L['now'] in (L['want_ev'], None) and L['ph'] == L['nph'] and L['want_ev'] not in L['log'], f'events1: {id}: the event not running as the calendar has it: {L}')
+        if id in ('evStormBrief', 'evStormClear', 'evVisitAboard', 'evVisitGifts'): check(L['meet'], f'events1: {id}: its meeting not booked at its minute: {L["meet"]}')
+        if id == 'evStormSat': check(L['sat'], f'events1: storm Saturday: not called in: {L}')
+        if id == 'evShortFri': check(L['fri'], f'events1: the Short Friday: not a short Friday: {L}')
+        if id == 'evFriAddress': check(L['addr'], f'events1: the Friday address not on its day at its time: {L}')
+        if id == 'evRotation': check(L['tern'] > 0, f'events1: the rotation: nobody off the Tern: {L}')
+    dt = time.time() - t0
+    for k, v in got.items(): print('   ', k, v[:150])
+    # Undo after the last jump: the one before it, back
+    before = on[-2]; land = pg.ev(f"'Day ' + devmodeJumpOf('{before}').day + ','")
+    pg.ev_reload('devmodeUndo()')
+    U = pg.ev("({ beat: devmodeState().set && devmodeState().set.beat, clock: clockText() })")
+    check(U['beat'] == before and U['clock'].startswith(land), f'events1: Undo after {on[-1]}: {U}')
+    check(not pg.errors, f'events1: errors {pg.errors[:3]}')
+    pg.close(); ctx.close()
+    saves = []
+    for _ in range(2):   # fresh browsers (within one page, see backlog DM1-3)
+        c2 = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1); p2 = Page(c2, '#dev'); p2.sign(); p2.step(20)
+        p2.ev("devmodeRun('Jump', () => devmodeSetCareerTo(devmodeJumpOf('evVisitAboard').day, devmodeJumpOf('evVisitAboard')))"); p2.ev('saveGame()'); saves.append(p2.ev('localStorage.getItem(SAVE_KEY)')); p2.close(); c2.close()
+    check(saves[0] == saves[1], 'events1: the Veyli aboard jump twice (fresh browsers) gives different saves')
+    print(f'  events1: {len(on)} jumps landed at their day, time and room in {dt:.0f} s, each event running by the calendar (its phase caught up), the meetings ahead booked, no miss or first-week notes; the Short Friday, the address, the rotation; Undo; the visit\'s jump twice the same save')
+
+def part_events2(b):
+    # J2: the Running now card. From the front (Day 12 13:55): the card at 390 px; a thread's + twice moves its band and
+    # the event's, − puts it back; Next phase to the onset (14:00); Its meeting takes you to its room, the clock still. The
+    # all-clear (Day 14): Next phase settles it, the threads greyed. The visit (Day 17): End and keep, one debrief, logged
+    # once, SHIP.event cleared, today's plans made again; not started again, no second debrief by its last day; Undo
+    # brings it back running. Nothing drawn without an event
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = Page(ctx, '#dev'); pg.sign(); pg.step(20)
+    if not pg.ev("devmodeJumpOn(devmodeJumpOf('evStormFront')) && devmodeJumpOn(devmodeJumpOf('evVisitAboard'))"): print('  events2: the storm or the visit off in this build'); pg.close(); ctx.close(); return
+    pg.ev('devmodeOpen(true); DM_UI.tab = "jump"; DM_UI.jg = "events"; DM_UI.msg = ""; devmodeDraw()')
+    check(j2_card(pg)['head'] is None, 'events2: a Running now card with no event running')
+    pg.ev("devmodeRun('Jump', () => devmodeSetCareerTo(12, devmodeJumpOf('evStormFront')))"); pg.step(10)
+    pg.ev('DM_UI.tab = "jump"; DM_UI.jg = "events"; DM_UI.msg = ""; devmodeDraw()')
+    C = j2_card(pg)
+    check(C['head'] == 'Running now: Ion storm' and 'the warning' in C['text'] and C['buttons'].get('Next phase ›') and C['buttons'].get('Its meeting') and C['buttons'].get('End and keep') and not C['wide'] and not C['small'], f'events2: the card at 390 px: {C["head"]} {C["buttons"]} wide {C["wide"]} small {C["small"]}')
+    pg.shot(str(SHOTS / 'jump-events-390.png')) if SHOTS else None
+    th = pg.ev("(() => { const t = SHIP_EVENTS.ionStorm.threads[0]; return { id: t.id, label: t.label, k: dmEvStep(t) }; })()")
+    B = lambda: pg.ev(f"({{ v: SHIP.event.threads['{th['id']}'] || 0, band: threadBand(SHIP_EVENTS.ionStorm.threads[0], SHIP.event.threads['{th['id']}'] || 0), all: eventBand('ionStorm', SHIP.event.threads) }})")
+    b0 = B(); j2_click(pg, f"{th['label']} + {th['k']}"); j2_click(pg, f"{th['label']} + {th['k']}"); b2 = B(); j2_click(pg, f"{th['label']} − {th['k']}"); j2_click(pg, f"{th['label']} − {th['k']}"); b4 = B()
+    check(b0['v'] == 0 and b2['v'] == 2 * th['k'] and b2['band'] != b0['band'] and b4 == b0, f'events2: the threads − and +: {b0} {b2} {b4}')
+    j2_click(pg, 'Next phase ›'); P = pg.ev("({ clock: clockText(), ph: SHIP.event && SHIP.event.phase })")
+    check(P['clock'].endswith('14:00') and P['ph'] == 'onset', f'events2: Next phase: {P}')
+    G = pg.ev("(() => { const g = dmEvMeet(SHIP.event, SHIP_EVENTS[SHIP.event.id], shipNow()); return g && { deck: g.deck, room: DECKS[g.deck].rooms[g.room].name, label: g.label }; })()")
+    clk = pg.ev('clockText()'); j2_click(pg, 'Its meeting')
+    M = pg.ev("({ deck: deckDef.num, room: (ROOMS[roomAt(...player.here())] || {}).name, clock: clockText() })")
+    check(G and M['deck'] == G['deck'] and M['room'] == G['room'] and M['clock'] == clk, f'events2: Its meeting: {G} -> {M}')
+    # the all-clear settles the result: the threads greyed
+    pg.ev("devmodeRun('Jump', () => devmodeSetCareerTo(14, devmodeJumpOf('evStormClear')))"); pg.step(10)
+    pg.ev('DM_UI.msg = ""; devmodeDraw()'); j2_click(pg, 'Next phase ›'); C = j2_card(pg)
+    tb = {k: v for k, v in C['buttons'].items() if re.search(r' [−+] \d+$', k)}
+    check(pg.ev("!!(SHIP.event && SHIP.event.mine.settled)") and tb and not any(tb.values()) and 'settled' in C['text'], f'events2: settled at the all-clear, the threads greyed: {pg.ev("SHIP.event && SHIP.event.mine.settled")} {tb}')
+    # End and keep on the visit (Day 17 09:55)
+    pg.ev("devmodeRun('Jump', () => devmodeSetCareerTo(17, devmodeJumpOf('evVisitAboard')))"); pg.step(10)
+    pg.ev('DM_UI.msg = ""; devmodeDraw()')
+    deb = "SHIP.mail.filter(m => m.subject === SHIP_EVENTS.diplomatic.title + ': how it went').length"
+    pg.ev("window.__j2day = SHIP_DAYS.get(SHIP.time.day)")
+    j2_click(pg, 'End and keep', 0); j2_click(pg, 'Tap again: end it')
+    E = pg.ev(f"({{ ev: SHIP.event && SHIP.event.id, log: SHIP.eventLog.filter(l => l.id === 'diplomatic').length, deb: {deb}, replan: SHIP_DAYS.get(SHIP.time.day) !== window.__j2day, msg: DM_UI.msg, card: !!document.querySelector('#dmSheet h3') && [...document.querySelectorAll('#dmSheet h3')].some(h => /^Running now/.test(h.textContent)) }})")
+    check(E['ev'] is None and E['log'] == 1 and E['deb'] == 1 and E['replan'] and not E['card'] and 'ended now and kept' in E['msg'], f'events2: End and keep: {E}')
+    pg.ev_reload('devmodeUndo()')   # Undo: the visit back, running
+    U = pg.ev("({ ev: SHIP.event && SHIP.event.id, log: SHIP.eventLog.filter(l => l.id === 'diplomatic').length, clock: clockText() })")
+    check(U['ev'] == 'diplomatic' and U['log'] == 0, f'events2: Undo after End and keep: {U}')
+    pg.ev('devmodeOpen(true); DM_UI.tab = "jump"; DM_UI.jg = "events"; DM_UI.msg = ""; devmodeDraw()')
+    j2_click(pg, 'End and keep', 0); j2_click(pg, 'Tap again: end it')
+    pg.ev("devmodeRun('Clock', () => devmodeSkipTo(19 * 1440 - 30))"); pg.step(10)   # on to the end of its last day (Day 19)
+    A = pg.ev(f"({{ ev: SHIP.event && SHIP.event.id, log: SHIP.eventLog.filter(l => l.id === 'diplomatic').length, deb: {deb}, clock: clockText() }})")
+    check(A['ev'] != 'diplomatic' and A['log'] == 1 and A['deb'] == 1, f'events2: after End and keep, to its last day: started again or a second debrief: {A}')
+    check(not pg.errors, f'events2: errors {pg.errors[:3]}')
+    pg.close(); ctx.close()
+    print(f'  events2: no card without an event; the card at 390 px; {th["label"]} + and − move its band and back; Next phase to the onset; Its meeting ({G["room"] if G else "-"}); settled at the all-clear, threads greyed; End and keep on the visit (one debrief, logged once, replanned, not again by Day 19); Undo back to running')
 def j3_page(b):
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
     pg = Page(ctx, '#dev'); pg.sign(); pg.step(20); return ctx, pg

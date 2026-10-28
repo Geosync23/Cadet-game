@@ -72375,6 +72375,105 @@ devmodeJump({ id: 'n2', group: 'nights', label: 'Night 2: the reactor', day: 23,
 devmodeJump({ id: 'n3', group: 'nights', label: 'Night 3: the coil swap, your team', day: 24, by: 24, at: 1250, where: { deck: 5, room: 'w' }, on: () => typeof P5_M24 !== 'undefined' && !!P5_M24 });   // from 21:00: plan it in the Works app's Team tab
 // ---- end of J1 ----
 // ---- J2 (plan v4.4): Ship events jumps and the running-event card (builder B). devmodeJump({ group: 'events', ... }), DM_JUMP_HEAD ----
+// Each ship-wide event by its own calendar day (the user's q1: never started on another day), landing a few minutes
+// before the moment: its day and minute are read when asked from the event's own data (its row in evCalPlan, its
+// phases, meetings, moments, Mail, the day dressing, VESSEL's times), so an event moved in the calendar moves its jumps
+// with it; a row whose event isn't in the plan (switched off, a draft) isn't listed. The one copied minute is Saruth at
+// the bow on the crossing back's Saturday (10:00, inline in crossingBackTick). Not events but ship-wide: the first Short
+// Friday, the Captain's Friday address and the first crew rotation off the Tern. The Running now card (DM_JUMP_HEAD, at
+// the top of Jump to while an event runs): its phase, the threads with − and + (eventScore: greyed once its result is
+// settled, when the game ignores them), Next phase, Its meeting (Take me to), and End and keep (the game's own
+// eventFinish: the debrief, the log, the traces; then the days' plans made again, as a Dev tradition start does). End and
+// undo is cut (the user's q8): Undo my last Dev action puts the event back, running. Nothing here calls R().
+const DM_EV_GO = 5;                                        // minutes before the moment a jump lands
+const dmEvRow = id => { try { return EVENTS_ON && SHIP_EVENTS[id] ? evCalPlan().find(r => r.id === id) || null : null; } catch (e) { return null; } };
+const dmEvBit = (id, kind, key) => { const d = SHIP_EVENTS[id], x = d && (kind === 'phase' ? d.phases : kind === 'mail' ? null : d[kind + 's'] || []); return kind === 'mail' ? d && d.mail && d.mail[key] && d.mail[key].at || null : (x && x.find(o => o.id === key) || {}).at || null; };
+function dmEvJump(o) {                                     // { id, label, ev, at() -> [event day, min] | null, where?() -> { deck, room } | null, before? }
+  const t = () => { const r = dmEvRow(o.ev), a = r && o.at(); return a ? evBeatAt(r.day, a) - (o.before != null ? o.before : DM_EV_GO) : null; };
+  return devmodeJump({ id: o.id, group: 'events', label: o.label, ev: o.ev, on: () => t() != null,
+    get day() { const x = t(); return x == null ? 0 : Math.floor(x / 1440) + 1; }, get at() { const x = t(); return x == null ? 0 : ((x % 1440) + 1440) % 1440; },
+    get where() { return o.where ? o.where() : null; } });
+}
+const dmEvPlace = (id, kind, key) => () => { const x = (SHIP_EVENTS[id][kind + 's'] || []).find(m => m.id === key), w = x && x.where; const room = w && w.deck ? dvRoomKey(w.deck, w.room) : null; return room ? { deck: w.deck, room } : null; };
+const dmRoom = (deck, room) => () => ({ deck, room });
+const DM_MESS = dmRoom(3, 'M'), DM_WORKS = dmRoom(5, 'w'), DM_LOUNGE = dmRoom(3, 'L');
+// Crossing the Line (Days 6-8)
+dmEvJump({ id: 'evLineMail', label: 'The Line: Vance\'s Mail', ev: 'crossingLine', at: () => dmEvBit('crossingLine', 'mail', 'vanceLine'), where: DM_MESS });   // Saturday 18:00
+dmEvJump({ id: 'evLineOath', label: 'The Line: the horn and the oath', ev: 'crossingLine', at: () => dmEvBit('crossingLine', 'phase', 'onset'), where: dmEvPlace('crossingLine', 'meeting', 'crossingCeremony') });   // the horn 14:30, the oath 14:40
+dmEvJump({ id: 'evLineSupper', label: 'The Line supper', ev: 'crossingLine', at: () => { const s = (SHIP_EVENTS.crossingLine.dayDress || []).find(x => x.trad === 'sunday-table'); return s ? [s.day, s.set.at[0]] : null; }, where: DM_MESS });   // the Sunday table re-dressed, 18:00
+// the ion storm (Days 11-15)
+dmEvJump({ id: 'evStormBrief', label: 'Ion storm: Calder\'s briefing', ev: 'ionStorm', at: () => dmEvBit('ionStorm', 'meeting', 'stormBriefing'), where: dmEvPlace('ionStorm', 'meeting', 'stormBriefing') });   // Thursday 14:00, the Works bay
+dmEvJump({ id: 'evStormFront', label: 'Ion storm: the front hits', ev: 'ionStorm', at: () => dmEvBit('ionStorm', 'phase', 'onset'), where: DM_WORKS });   // Friday 14:00
+dmEvJump({ id: 'evStormWorst', label: 'Ion storm: the worst of it', ev: 'ionStorm', at: () => dmEvBit('ionStorm', 'phase', 'escalation') });   // Saturday 06:00, in your bed
+dmEvJump({ id: 'evStormSat', label: 'Ion storm: storm Saturday, called in', ev: 'ionStorm', at: () => { const r = dmEvRow('ionStorm'), d = typeof stormSatDay === 'function' ? stormSatDay() : null; return r && d ? [d - r.day, SHIFTS.day[0]] : null; }, where: DM_WORKS });   // the shift from 09:00, storm repairs only
+dmEvJump({ id: 'evStormLantern', label: 'Ion storm: the lantern supper', ev: 'ionStorm', at: () => dmEvBit('ionStorm', 'moment', 'lanternSupper'), where: dmEvPlace('ionStorm', 'moment', 'lanternSupper') });   // Saturday 18:00, the mess
+dmEvJump({ id: 'evStormClear', label: 'Ion storm: the all-clear', ev: 'ionStorm', at: () => dmEvBit('ionStorm', 'meeting', 'allClear'), where: dmEvPlace('ionStorm', 'meeting', 'allClear') });   // Sunday 10:00, the observation room
+// the Diplomatic visit (Days 16-19)
+dmEvJump({ id: 'evVisitMemo', label: 'The visit: Vance\'s memo, the prep jobs', ev: 'diplomatic', at: () => dmEvBit('diplomatic', 'phase', 'warning'), where: DM_WORKS });   // Tuesday 09:00, the jobs on the board
+dmEvJump({ id: 'evVisitAboard', label: 'The visit: the Veyli come aboard', ev: 'diplomatic', at: () => dmEvBit('diplomatic', 'meeting', 'veyliGreeting'), where: dmEvPlace('diplomatic', 'meeting', 'veyliGreeting') });   // Wednesday 10:00, the shuttle bay
+dmEvJump({ id: 'evVisitDay', label: 'The visit: the guests\' day aboard', ev: 'diplomatic', at: () => dmEvBit('diplomatic', 'phase', 'escalation') });   // Thursday 06:00, in your bed
+dmEvJump({ id: 'evVisitDinner', label: 'The visit: the formal dinner', ev: 'diplomatic', at: () => { const p = SHIP_EVENTS.diplomatic.phases.find(x => x.id === 'escalation'), g = SHIP_EVENTS.diplomatic.galley.escalation, b = g && typeof g.batch === 'function' ? g.batch({ day: p.at[0] }) : null; return b ? [p.at[0], b.at || 1140] : null; }, where: dmRoom(2, 'C') });   // Thursday 19:00 (section 16's batch dinner), the Captain's quarters
+dmEvJump({ id: 'evVisitGifts', label: 'The visit: the gift exchange', ev: 'diplomatic', at: () => dmEvBit('diplomatic', 'meeting', 'veyliGifts'), where: dmEvPlace('diplomatic', 'meeting', 'veyliGifts') });   // Friday 09:00, the observation room
+dmEvJump({ id: 'evVisitBye', label: 'The visit: the farewell', ev: 'diplomatic', at: () => dmEvBit('diplomatic', 'moment', 'farewell'), where: dmEvPlace('diplomatic', 'moment', 'farewell') });   // Friday 09:30, the shuttle bay (Saruth hosts)
+// the comet (Day 22)
+dmEvJump({ id: 'evComet', label: 'Comet viewing', ev: 'comet', at: () => dmEvBit('comet', 'phase', 'onset'), where: DM_LOUNGE });   // Monday 21:30
+dmEvJump({ id: 'evCometBack', label: 'Comet viewing: the turn back', ev: 'comet', at: () => dmEvBit('comet', 'phase', 'resolution'), where: DM_LOUNGE });   // 22:40
+// A Veyli vessel needs help (Days 27-30)
+const dmVes = k => () => typeof VESSEL !== 'undefined' && VESSEL ? k(VESSEL) : null;
+dmEvJump({ id: 'evVesselCall', label: 'The Veyli ship: the call, the address', ev: 'veyliVessel', at: dmVes(V => V.addressAt.sat), where: DM_MESS });   // Saturday 08:00, the Captain's address
+dmEvJump({ id: 'evVesselTern', label: 'The Veyli ship: Taavek off the Tern', ev: 'veyliVessel', at: dmVes(V => [SHIP_EVENTS.veyliVessel.guestsArrive, V.arrive]), where: dmRoom(5, 'S') });   // Sunday 09:30, the ramp's foot
+dmEvJump({ id: 'evVesselFit', label: 'The Veyli ship: the test fit', ev: 'veyliVessel', at: () => dmEvBit('veyliVessel', 'meeting', 'vesselJob'), where: DM_WORKS });   // Monday 09:20, Calder's word
+dmEvJump({ id: 'evVesselLights', label: 'The Veyli ship: the engine lights', ev: 'veyliVessel', at: () => dmEvBit('veyliVessel', 'moment', 'vesselLights'), where: dmEvPlace('veyliVessel', 'moment', 'vesselLights') });   // Monday 17:30, the bow glass
+dmEvJump({ id: 'evVesselGo', label: 'The Veyli ship: it leaves', ev: 'veyliVessel', at: dmVes(V => V.addressAt.tue), where: DM_LOUNGE });   // Tuesday 09:15
+// the crossing back (Days 31-35; the ending's own jumps are under The ending)
+dmEvJump({ id: 'evBackWord', label: 'Crossing back: Vance\'s word', ev: 'crossingBack', at: () => dmEvBit('crossingBack', 'phase', 'warning'), where: DM_MESS });   // Wednesday 08:00 (he comes to find you from 08:30)
+dmEvJump({ id: 'evBackBow', label: 'Crossing back: the ship off the bow', ev: 'crossingBack', at: () => [3, 600], where: DM_LOUNGE });   // Saturday 10:00, Saruth at the glass (crossingBackTick's own minute)
+dmEvJump({ id: 'evBackOath', label: 'Crossing back: the oath you host', ev: 'crossingBack', at: () => dmEvBit('crossingBack', 'phase', 'onset'), where: dmEvPlace('crossingBack', 'meeting', 'crossingBackOath') });   // Sunday 14:30
+// ship-wide, not events
+const dmFri = () => { for (let d = 1; d <= 7; d++) if (typeof friShort === 'function' && friShort(d)) return d; return 0; };
+devmodeJump({ id: 'evShortFri', group: 'events', label: 'The first Short Friday: clock out', get day() { return dmFri(); }, get at() { return WEEK_SHAPE[4].end - 10; }, where: { deck: 5, room: 'w' }, on: () => !!SHORT_FRIDAY && dmFri() > 0 });   // 15:30, the time clock
+devmodeJump({ id: 'evFriAddress', group: 'events', label: 'The Captain\'s Friday address', get day() { let d = Math.max(1, FRI_ADDRESS.when.from || 1); while (weekday(d) !== FRI_ADDRESS.when.weekday) d++; return d; }, get at() { return FRI_ADDRESS.at[0] - 10; },
+  where: { deck: 7, room: 'A' }, on: () => !!SHORT_FRIDAY && !!REC_TRAD_ON && !!REC_DECK });   // 16:00, the rec deck auditorium (not a tradition the Traditions tab starts)
+devmodeJump({ id: 'evRotation', group: 'events', label: 'The first crew rotation, off the Tern', get day() { return ROSTER_ROTATIONS[0].day; }, get at() { return ROTA_ON - 10; }, where: { deck: 5, room: 'S' }, on: () => !!ROT_TERN && ROSTER_ROTATIONS.length > 0 });   // 17:40, the Tern's ramp
+// the Running now card
+const DM_PHASE = { warning: 'the warning', onset: 'the onset', escalation: 'the escalation', resolution: 'the resolution', afterglow: 'the afterglow' };
+const dmEvStep = th => Math.max(1, Math.round((th.bad - th.good) / 4));   // a tap's worth: a quarter of the way from smooth to rough
+function dmEvMeet(e, def, now) {                           // the event's next place for you: a meeting of yours, else a gathering with a room
+  const m = MEETINGS.filter(x => x.event === e.id && evInvited(x) && x.where && x.where.deck && now < x.at + (x.len || 15)).sort((a, b) => a.at - b.at)[0];
+  if (m) { const s = MEETING_SCRIPTS[typeof evScriptOf === 'function' ? evScriptOf(m) : m.script]; return { deck: m.where.deck, room: dvRoomKey(m.where.deck, m.where.room), at: m.at, label: (s && s.title) || 'its meeting' }; }
+  const g = (def.moments || []).map(x => ({ x, at: evBeatAt(e.startDay, x.at) })).filter(o => o.x.where && o.x.where.deck && o.x.where.room && now < o.at + (o.x.len || 30)).sort((a, b) => a.at - b.at)[0];
+  return g ? { deck: g.x.where.deck, room: dvRoomKey(g.x.where.deck, g.x.where.room), at: g.at, label: g.x.name || 'its gathering' } : null;
+}
+function devmodeEventEnd() {                               // End and keep: the game's own end of a run, then the days' plans again
+  devmodeDo('Event: end and keep', () => {
+    const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) return 'No ship-wide event is running.';
+    const out = eventFinish(e, def, shipNow()), band = (out.find(x => /^end /.test(x)) || 'end ?').slice(4);
+    devmodeTradsAgain(e.startDay + def.days);
+    return def.title + ' ended now and kept: ' + band + ', logged, its debrief in Mail' + (out.includes('commended') ? ', your commendation too' : '') + '. Its days\' routines on the calendar still run to Day ' + (e.startDay + def.days - 1) + '.';
+  }, () => SHIP.event ? null : 'No ship-wide event is running.');
+}
+function devmodeEventScore(th, n) {
+  devmodeDo('Event: ' + th.label + ' ' + (n > 0 ? '+' : '−') + Math.abs(n), () => {
+    const e = SHIP.event; if (!e || e.mine.settled) return 'Settled: the result is final.';
+    eventScore(th.id, Math.max(n, -(e.threads[th.id] || 0)));
+    return th.label + ': ' + (e.threads[th.id] || 0) + ' (' + threadBand(th, e.threads[th.id] || 0) + '). The event: ' + eventBand(e.id, e.threads) + '.';
+  }, () => !SHIP.event ? 'No ship-wide event is running.' : SHIP.event.mine.settled ? 'Settled: the result is final.' : null);
+}
+DM_JUMP_HEAD.push(body => {
+  const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) return;
+  const now = shipNow(), i = def.phases.findIndex(p => p.id === e.phase), next = def.phases[i + 1], end = (e.startDay - 1 + def.days) * 1440, settled = !!e.mine.settled;
+  devmodeHead(body, 'Running now: ' + def.title);
+  devmodeText(body, (e.phase ? DM_PHASE[e.phase] || e.phase : 'before its first phase') + ' (' + (i + 1) + ' of ' + def.phases.length + '), its Day ' + (SHIP.time.day - e.startDay) + ' (Day ' + SHIP.time.day + '); ends Day ' + (e.startDay + def.days - 1) + '.');
+  if (def.threads.length) {
+    devmodeText(body, def.threads.map(th => th.label + ' ' + (e.threads[th.id] || 0) + ': ' + threadBand(th, e.threads[th.id] || 0)).join(' · ') + '. Overall ' + eventBand(e.id, e.threads) + (settled ? ' (settled: final)' : '') + '.');
+    for (const th of def.threads) { const k = dmEvStep(th), v = e.threads[th.id] || 0; devmodeRow(body, [[th.label + ' − ' + k, () => devmodeEventScore(th, -k), { off: settled || v <= 0, aria: th.label + ': less ' + k }], [th.label + ' + ' + k, () => devmodeEventScore(th, k), { off: settled, aria: th.label + ': more ' + k }]]); }
+  } else devmodeText(body, 'No threads: it has no score.');
+  const g = dmEvMeet(e, def, now), to = next ? evBeatAt(e.startDay, next.at) : end;
+  devmodeRow(body, [[next ? 'Next phase ›' : 'To its end ›', () => devmodeGo(next ? 'to ' + def.title + ', ' + (DM_PHASE[next.id] || next.id) : 'to the end of ' + def.title, () => to), { off: !(to > now), aria: next ? 'Next phase: ' + (DM_PHASE[next.id] || next.id) + ', Day ' + (Math.floor(to / 1440) + 1) + ' ' + hhmm(to % 1440) : 'To its end' }],
+    ['Its meeting', () => g && g.room ? devmodeTake(g.label, g.deck, () => ixGoalWorld({ room: g.room }), r => r === g.room) : devmodeSay('Nothing of ' + def.title + ' left for you to go to.'), { off: !(g && g.room) }],
+    ['End and keep', b => devmodeTwice(b, 'Tap again: end it', devmodeEventEnd)]]);
+  devmodeText(body, (g ? 'Its meeting: ' + g.label + ', Day ' + (Math.floor(g.at / 1440) + 1) + ' ' + hhmm(g.at % 1440) + '. ' : '') + 'Next phase moves the clock to ' + (next ? DM_PHASE[next.id] || next.id : 'its end') + ' (Day ' + (Math.floor(to / 1440) + 1) + ' ' + hhmm(to % 1440) + '). End and keep ends it now, as the game would at its end: the debrief, the log, its traces.');
+});
 // ---- end of J2 ----
 // ---- J3 (plan v4.4): the ending's jumps, the answers row (DM_UI.ans, drawn through DM_JUMP_DRAW.ending), the Traditions card's next showing (builder C) ----
 // The ending (section 29) by its own week: the offer (Day 32 16:00, the ready room), your answer still open (Day 34, after
