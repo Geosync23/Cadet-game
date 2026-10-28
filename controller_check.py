@@ -3644,7 +3644,7 @@ def part_sound(pw, src, tag):
     fails = []
     for how in ('allowed', 'refused'):
         r = Run(pw, src, f'{tag}_snd_{how}', mode='pad', plug={}, w=390, h=844, query='?nosave&debug&sound')
-        r.step(10)
+        r.js('window.cadetPopupsNow = true'); r.step(10)   # pop-ups at once (section 15b's test hook), not behind the welcome in the queue
         before = r.ev(SND_STATE)
         if before != 'off': fails.append(f'{how}: sound started before any press ({before!r})')
         if how == 'refused': r.ev(SND_REFUSE)
@@ -3662,7 +3662,7 @@ def part_sound(pw, src, tag):
         if r.errors: fails.append(f'{how}: page errors: ' + ' | '.join(r.errors[:3]))
         r.close()
     r = Run(pw, src, f'{tag}_snd_mute', mode='pad', plug={}, w=390, h=844, query='?nosave&debug&mute')
-    r.step(10); r.press('RS'); r.step(4); r.page.wait_for_timeout(900); r.step(2)
+    r.js('window.cadetPopupsNow = true'); r.step(10); r.press('RS'); r.step(4); r.page.wait_for_timeout(900); r.step(2)
     if r.ev(SND_STATE) != 'off': fails.append('mute: a pad press started the sound with ?mute')
     if r.ev(SND_TOAST): fails.append('mute: the once-note showed with sound not allowed')
     r.close()
@@ -3675,22 +3675,28 @@ def part_saves(pw, src, tag):
     if 'With a controller: Download and Load' not in src: return ['not yet: no Wave C Saves hint in this build']
     fails = []
     r = Run(pw, src, f'{tag}_saves', mode='pad', plug={}, w=390, h=844, query='?debug')
-    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10)
+    r.ev("introSkip()"); r.step(10)
+    for k in range(6):   # setup, not under test: the arrival form (it comes a moment after introSkip) signed when it's up
+        r.ev("(() => { const m = typeof INTRO_UI !== 'undefined' && INTRO_UI.manifest; if (m) { const i = m.querySelector('input'); if (i && !i.value) i.value = 'Ash'; } if (m) m.querySelector('form').dispatchEvent(new Event('submit', { cancelable: true })); return !!m; })()"); r.step(20)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(4)   # past the arrival: the device is yours
     if not r.ev(SAVES_SEED): r.close(); return ['setup: no save to copy into Slot 2']
-    r.press('B'); r.step(2)
-    if not r.ev("typeof DEV !== 'undefined' && DEV.open"): r.press('Y'); r.step(4)
-    if not r.ev("DEV.open"): r.close(); return ['Y did not open the device']
-    if not s5_pad_to(r, r'^Saves'): r.close(); return [f'the D-pad never reached the Saves app (focus {r.ev(S5_FOCUS)!r})']
+    for k in range(3):
+        if r.ev("DEV.open"): break
+        r.press('Y'); r.step(6)
+    if not r.ev("DEV.open"): why = r.ev("[document.activeElement && document.activeElement.id, !!DIALOGUE, PAUSE.on, document.body.className]"); r.close(); return [f'Y did not open the device ({why})']
+    if not s5_pad_to(r, r'Saves'):
+        why = r.ev("[document.activeElement && (document.activeElement.textContent || '').trim().slice(0, 30), [...document.querySelectorAll('#devBody button')].map(b => b.textContent.trim().slice(0, 20)).slice(0, 30)]"); r.close(); return [f'the D-pad never reached the Saves app ({why})']
     r.press('A'); r.step(4)
-    body = r.ev("document.getElementById('devBody').innerText")
-    if 'Download my save' not in body: r.close(); return ['A did not open the Saves app']
+    body = r.ev("document.getElementById('devBody').textContent")
+    if 'Download my save' not in body: r.step(10); body = r.ev("document.getElementById('devBody').textContent")
+    if 'Download my save' not in body: f = r.ev(S5_FOCUS); r.close(); return [f'A did not open the Saves app (focus {f!r}; {body[:160]!r})']
     if 'With a controller: Download and Load' not in body: fails.append('the one-line hint for a controller is missing')
     for rx in (r'^Play$', r'^New game$'):
         if not s5_pad_to(r, rx): fails.append(f'the D-pad never reached {rx}')
     if not s5_pad_to(r, r'^Delete$'): fails.append('the D-pad never reached Delete')
     else:
         r.press('A'); r.step(4)
-        if 'Delete Slot 2?' not in r.ev("document.getElementById('devBody').innerText"): fails.append("Delete's guard did not ask")
+        if 'Delete Slot 2?' not in r.ev("document.getElementById('devBody').textContent"): fails.append("Delete's guard did not ask")
         elif not s5_pad_to(r, r'^Keep it$'): fails.append("the D-pad never reached Keep it")
         else:
             r.press('A'); r.step(4)
