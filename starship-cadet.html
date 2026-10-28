@@ -73651,7 +73651,7 @@ const SND = (() => {
   }
   S.act = (phase, A, abort) => {                         // from actBegin ('begin') and actEnd ('end'); reads the activity, changes nothing
     if (!A) return;
-    const p = actPick(A);
+    const p = (R3 && phase === 'begin' && R3.actPick(A)) || actPick(A);   // R3: the sound update's own (winding, the lathe)
     actThenClear(); ACT_OF = phase === 'begin' ? A : null;
     if (phase === 'begin') { actLoopStop(0.2); if (!p) return; if (p.one) S.fx(p.one, { long: 4 }); if (p.then) for (const [n, d] of p.then) actThen.push(setTimeout(() => { if (ACT_OF === A) S.fx(n); }, d * 1000)); if (p.loop) actLoopStart(p.loop); return; }
     actLoopStop(0.5);
@@ -73787,6 +73787,156 @@ const SND = (() => {
       },
     };
   })() : null;
+  // the sound update, turn 3 (SND_R3_ON; the user's Round 3 picks, 2026-10-28, recipes from plans/sound/round3.html): the
+  // feature sounds a watcher can see. The FX below, and r3Watch (each frame) and r3Tick (once a second, from ambTick) that
+  // read the game and play them; r3ActPick gives two activities their own sound. Reads only; Math.random only.
+  const R3 = SND_R3_ON ? (() => {
+    const lv = (l, fn) => { const prev = ROUTE; ROUTE = { ...ROUTE, ui: trim(l, ROUTE.ui) }; try { fn(); } finally { ROUTE = prev; } };   // the page's withLv
+    const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+    function held(t, d, f, g0, g1, o = {}) {   // a steady tone (a coil's hum, a throb), fading from g0 to g1
+      const b = o.bus || ROUTE.ui, os = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), g2 = ctx.createGain();
+      os.frequency.value = f; o2.type = 'triangle'; o2.frequency.value = f * 2; g2.gain.value = 0.25;
+      g.gain.setValueAtTime(Math.max(0.0001, g0), t); g.gain.exponentialRampToValueAtTime(Math.max(0.0001, g1), t + d);
+      os.connect(g); o2.connect(g2); g2.connect(g);
+      conn(g, b, o.pan, o.wet); os.start(t); o2.start(t); os.stop(t + d + 0.05); o2.stop(t + d + 0.05);
+    }
+    function whine(t, d, f0, f1, gain, o = {}) {   // a motor or a coil spinning: a filtered saw that follows its speed
+      const b = o.bus || ROUTE.ui, os = ctx.createOscillator(), o2 = ctx.createOscillator(), bp = ctx.createBiquadFilter(), g = ctx.createGain(), g2 = ctx.createGain();
+      os.type = 'sawtooth'; [os, o2].forEach((x, i) => { x.frequency.setValueAtTime(f0 * (i + 1), t); x.frequency.exponentialRampToValueAtTime(f1 * (i + 1), t + d); });
+      bp.type = 'bandpass'; bp.Q.value = o.q ?? 3; bp.frequency.setValueAtTime(f0 * 2, t); bp.frequency.exponentialRampToValueAtTime(f1 * 2, t + d);
+      const a = o.a ?? Math.min(0.4, d * 0.3), r = o.r ?? Math.min(0.6, d * 0.4);
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(gain, t + a); g.gain.setValueAtTime(gain, t + d - r); g.gain.linearRampToValueAtTime(0.0001, t + d);
+      g2.gain.value = 0.4; os.connect(bp); bp.connect(g); o2.connect(g2); g2.connect(g); conn(g, b, o.pan, o.wet);
+      os.start(t); o2.start(t); os.stop(t + d + 0.05); o2.stop(t + d + 0.05);
+    }
+    const ticks = (t, d, rate, f0, f1, g) => { const n = Math.round(d * rate); for (let i = 0; i < n; i++) clack(t + i / rate, g, { f: f0 + (f1 - f0) * i / Math.max(1, n - 1) }); };
+    const chips = (t, d, n, g) => { for (let i = 0; i < n; i++) noise(t + Math.random() * d, 0.02, { f: rand(3000, 6000), q: 3, gain: g * rand(0.5, 1) }); };
+    function pad(t, notes, d, g, bright = 1) {   // the music's wide slow pad (SX.pad), on the sound's own bus
+      const out = ROUTE.ui;
+      notes.forEach((m, i) => [['sawtooth', -7, -0.5], ['sawtooth', 7, 0.5], ['triangle', 0, 0]].forEach(([type, c, pan]) => {
+        const o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), e = ctx.createGain(); let node = e;
+        o.type = type; o.frequency.value = mtof(m); o.detune.value = c + (i % 2 ? 2 : -2);
+        lp.type = 'lowpass'; lp.Q.value = 0.5; lp.frequency.setValueAtTime(300 * bright, t); lp.frequency.linearRampToValueAtTime(900 * bright, t + d * 0.5); lp.frequency.linearRampToValueAtTime(350 * bright, t + d + 2);
+        const k = type === 'triangle' ? 1.4 : 1;
+        e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(g * k, t + Math.min(3, d * 0.45)); e.gain.setValueAtTime(g * k, t + d); e.gain.linearRampToValueAtTime(0, t + d + 2.5);
+        o.connect(lp); lp.connect(e);
+        if (pan && ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = pan; e.connect(p); node = p; }
+        node.connect(out); o.start(t); o.stop(t + d + 2.6);
+      }));
+    }
+    const chime = (t, m, g) => fmBell(t, mtof(m), 4, g, 2.01, 0.45, 0);
+    const tri = (t, f, d) => tone(t, f, d, { gain: 0.04, type: 'triangle' });
+    const fx = {
+      r3BadgeTake: t => { clack(t, 0.08, { f: 1800 }); tri(t + 0.08, 1318.5, 0.06); tri(t + 0.16, 1760, 0.09); },   // the badge rack A: the clip, two notes up
+      r3BadgeBack: t => { clack(t, 0.08, { f: 1500 }); tri(t + 0.08, 1760, 0.06); tri(t + 0.16, 1318.5, 0.1); },   // and back: a click, two notes down
+      r3ReactorDoor: t => lv(0.19, () => { for (let i = 0; i < 3; i++) { clack(t + i * 0.28, 0.16, { f: 600 }); thud(t + i * 0.28 + 0.02, { gain: 0.25, d: 0.12, f: 200, body: 70 }); }   // the reactor door A: three bolts, a breath, a slow roll, a deep stop
+        const s = t + 0.95; hiss(s, 0.7, 0.07); slide(s + 0.1, 1.8, { f0: 80, f1: 200, gain: 1.3, rate: 14, rough: 0.5, wet: 0.2 }); thud(s + 1.9, { gain: 0.6, d: 0.35, f: 140, body: 46, wet: 0.3 }); ring(s + 1.9, [120, 310, 560], 2.2, { d: 0.5 }); }),
+      r3CoilOff: t => { whine(t, 2.4, 440, 70, 0.05); thud(t + 2.4, { gain: 0.35, d: 0.2, f: 160, body: 50 }); clack(t + 2.42, 0.08, { f: 600 }); },   // a coil off A: spins down to a clunk
+      r3CoilOn: t => { whine(t, 2.6, 70, 440, 0.05, { r: 0.3 }); held(t + 2.3, 1.8, 110, 0.05, 0.0001); },   // and on: climbs back and settles
+      r3Winding: t => { ticks(t, 3, 10, 1200, 1700, 0.04); noise(t, 3, { f: 1800, q: 4, gain: 0.03, swell: 0.5 }); },   // winding A: the geared crank
+      r3Lathe: t => { whine(t, 5, 180, 180, 0.02, { q: 1.5 }); chips(t + 1, 3, 10, 0.03); },   // the lathe B: a soft motor and a few chips
+      r3Promotion: t => { pad(t, [55, 62, 66, 69, 74], 3.5, 0.0055, 1.2); chime(t + 3, 86, 0.04); chime(t + 3.35, 91, 0.03); },   // promotions A: a rising swell, two chimes
+      r3Calder: t => pad(t, [52, 59, 63, 66, 71], 6, 0.004, 0.8),   // Calder's question B: a soft pad holds
+      r3Stay: t => { pad(t, [48, 55, 60, 64, 67], 2.5, 0.005, 0.8); bell(t + 0.2, 523.25, 1.6, 0.04, { wet: 0.3 }); },   // Stay or Go B: warm and settled
+      r3Go: t => { pad(t, [53, 60, 65, 67, 72], 2.5, 0.005, 1.3); bell(t + 0.2, 783.99, 0.9, 0.04, { wet: 0.3 }); bell(t + 0.45, 1174.7, 1.4, 0.04, { wet: 0.3 }); },   // or open and rising
+      r3TernLand: t => { lv(0.2, () => { slide(t, 1.6, { f0: 70, f1: 160, gain: 1.2, rate: 12, rough: 0.5, wet: 0.3 }); thud(t + 1.6, { gain: 0.5, d: 0.3, f: 140, body: 46 }); });   // the Tern B: lighter doors, a soft landing
+        noise(t + 2.2, 2, { brown: true, ft: 'lowpass', f: 260, gain: 0.1, swell: 0.6 }); thud(t + 4.1, { gain: 0.25, d: 0.35, f: 120, body: 44 }); },
+      r3ShutOff: t => { clack(t, 0.16, { f: 500 }); thud(t, { gain: 0.35, d: 0.2, f: 180, body: 60 }); whine(t + 0.05, 2, 240, 60, 0.03); },   // a booked shutdown A: the switch, the hum winding down
+      r3ShutOn: t => { clack(t, 0.16, { f: 500 }); thud(t, { gain: 0.35, d: 0.2, f: 180, body: 60 }); whine(t + 0.05, 2, 60, 240, 0.03); },   // and back up
+      r3ClockAsk: t => { tone(t, 587.33, 0.25, { type: 'triangle', gain: 0.08, lp: 1800 }); tone(t + 0.18, 659.25, 0.35, { type: 'triangle', gain: 0.08, lp: 1800 }); },   // the early clock-out question B
+      r3TestFit: t => { clack(t, 0.1, { f: 900 }); thud(t, { gain: 0.15, d: 0.08, f: 400, body: 160 }); const u = t + 0.4;   // the test fit B: seat, spin, settle
+        whine(u, 3.2, 90, 420, 0.03, { q: 2, r: 0.05 }); whine(u + 3.1, 2.2, 420, 60, 0.03, { q: 2, a: 0.05 }); clack(u + 5.3, 0.05, { f: 1200 }); },
+    };
+    Object.assign(FX, fx);
+    // inside the reactor room A: a slow throb under the Deck 6 hum, only in that room (a loop, like the mess)
+    function throb() {
+      const t0 = ctx.currentTime, out = ctx.createGain(); out.gain.setValueAtTime(0.0001, t0); out.gain.exponentialRampToValueAtTime(0.065, t0 + 1.5); out.connect(BUS.ui);
+      const os = ctx.createOscillator(), o2 = ctx.createOscillator(), g2 = ctx.createGain(), am = ctx.createGain(), l = ctx.createOscillator(), lg = ctx.createGain();
+      os.frequency.value = 46; o2.type = 'triangle'; o2.frequency.value = 92; g2.gain.value = 0.25; l.frequency.value = 0.7; lg.gain.value = 0.45; am.gain.value = 0.55;
+      l.connect(lg); lg.connect(am.gain); os.connect(am); o2.connect(g2); g2.connect(am); am.connect(out); [os, o2, l].forEach(n => n.start(t0));
+      const L = { label: 'reactorRoom', stop(f = 1.5) { LOOPS.delete(L); const t = ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + f);
+        [os, o2, l].forEach(n => { try { n.stop(t + f + 0.1); } catch (e) {} }); setTimeout(() => { try { out.disconnect(); } catch (e) {} }, (f + 2) * 1000); } };
+      LOOPS.add(L); return L;
+    }
+    const W = { badge: undefined, dlg: null, said: undefined, tern: undefined, ask: false, sd: {}, coil: {}, rank: undefined, room: null, duck: false };
+    const has = f => typeof f === 'function';
+    const here = () => { try { return deckDef && player ? deckDef.num + '|' + roomAt(...player.here()) : null; } catch (e) { return null; } };
+    const play = (n, o) => { W.last = n; S.fx(n, o); };
+    function r3Watch() {   // each frame while sound runs
+      // the badge rack: taken (dosiOut() a minute) and back (null)
+      let b = null; try { b = has(dosiOut) ? dosiOut() : null; } catch (e) { b = null; }
+      if (W.badge !== undefined && (b != null) !== (W.badge != null)) play(b != null ? 'r3BadgeTake' : 'r3BadgeBack');
+      W.badge = b;
+      // the scenes, by line: the test fit as you turn it, Calder's question as the answers show (the music ducked while she asks), the engine badge
+      const D = typeof DIALOGUE !== 'undefined' ? DIALOGUE : null, dk = D ? D.id + ':' + D.i : null;
+      if (dk !== W.dlg) {
+        const l = D && D.queue ? D.queue[D.i] : null;
+        if (D && D.id === 'vesselTestFit' && D.i === 1) play('r3TestFit', { long: 6 });
+        if (D && D.id === 'end.ask' && l && l.choice) play('r3Calder', { long: 8 });
+        if (D && D.id === 'pu4.badge' && D.i === 0) play('r3Promotion', { long: 5 });
+        W.dlg = dk;
+      }
+      const duck = !!(D && D.id === 'end.ask');
+      if (duck !== W.duck && BUS.music) { W.duck = duck; BUS.music.gain.setTargetAtTime(duck ? 0 : 1, ctx.currentTime, duck ? 0.8 : 1.5); }
+      // the early clock-out question: the screen asks (its "Clock out early" and Cancel)
+      const cs = document.getElementById('clockScreen'); let ask = false;
+      if (cs && !cs.hidden) { const w = has(csText) ? csText('earlyyes', 'Clock out early') : 'Clock out early'; ask = [...cs.querySelectorAll('button')].some(x => x.textContent === w); }
+      if (ask && !W.ask) play('r3ClockAsk');
+      W.ask = ask;
+      // the Tern landing in the shuttle bay for the Veyli vessel, while you're there: its ramp coming down
+      let tn = null; try { tn = typeof TERN !== 'undefined' && has(vesselNow) && vesselNow() && here() === '5|S' ? TERN.target : null; } catch (e) { tn = null; }
+      if (W.tern != null && tn === 1 && W.tern < 1) play('r3TernLand', { long: 5 });
+      W.tern = tn;
+      // inside the reactor room: the throb
+      const inR = here() === '6|R';
+      if (inR && !W.room) { if (S.log) S.log.push({ name: 'reactorRoom', loop: true }); W.room = throb(); }
+      else if (!inR && W.room) { W.room.stop(1.5); W.room = null; }
+    }
+    function r3Tick() {   // once a second
+      // your answer to the offer: Stay or Go (the answer as it's saved; "not sure" has none)
+      let s = null; try { s = SHIP.end && Array.isArray(SHIP.end.said) ? SHIP.end.said.length : null; } catch (e) { s = null; }
+      if (W.said !== undefined && s != null && s > (W.said || 0)) { const a = SHIP.end.said[s - 1][1]; if (a === 'stay' || a === 'go') play(a === 'stay' ? 'r3Stay' : 'r3Go', { long: 4 }); }
+      W.said = s;
+      // promotions: your rank going up (Senior Officer, Engine Specialist)
+      const rk = SHIP.works && SHIP.works.rank;
+      if (W.rank !== undefined && rk !== W.rank && (rk === 'senior' || rk === 'specialist')) play('r3Promotion', { long: 5 });
+      W.rank = rk;
+      // a booked shutdown: its power off (st 'off'), and back (done or lapsed after being off)
+      const sd = SHIP.works && SHIP.works.sd && SHIP.works.sd.set ? SHIP.works.sd.set[SHIP.time.day] : null;
+      (Array.isArray(sd) ? sd : []).forEach((x, i) => { const k = SHIP.time.day + ':' + i, was = W.sd[k];
+        if (k in W.sd && x.st !== was) { if (x.st === 'off') play('r3ShutOff', { long: 3 }); else if (was === 'off') play('r3ShutOn', { long: 3 }); }
+        W.sd[k] = x.st; });
+      // a drive coil off the cycle and back: the Tier 4 test's and night 3's swap's steps, as they're done (at the coil, near you)
+      if (deckDef && deckDef.num === 6 && Array.isArray(SHIP.jobs) && has(jobStops)) for (const j of SHIP.jobs) {
+        const mid = j.mach || j.machine, team = Array.isArray(j.seq) && j.seq.some(x => x.part === 'cup'); if (!team && !/^6-coil-/.test(mid || '')) continue;
+        const m = /^6-coil-/.test(mid || '') && typeof machineById === 'function' ? machineById(mid) : null, at = m && m.at ? cellPos(...m.at) : null, o = at ? { x: at.x, z: at.z, long: 5 } : { long: 5 };
+        const sound = tag => { if (tag === 'isolate') play('r3CoilOff', o); else if (tag === 'cycle' || tag === 'cup') play('r3CoilOn', o); };
+        if (team) {   // night 3's swap (24h's steps): each step passed (j.cur moving on)
+          const c = j.cur | 0, was = W.coil[j.id]; W.coil[j.id] = c;
+          if (Number.isInteger(was)) for (let i = was; i < Math.min(c, j.seq.length); i++) sound(j.seq[i].part);
+          continue;
+        }
+        if (j.status === 'done') continue;
+        const done = j.stepsDone || [], seen = W.coil[j.id]; W.coil[j.id] = done.slice();
+        if (!seen) continue;
+        let st = []; try { st = jobStops(j); } catch (e) { st = []; }
+        for (const k of done) if (!seen.includes(k)) { const x = st[k] || {}; sound(x.step || x.tag); }
+      }
+    }
+    function r3ActPick(A) {   // an activity's own sound: winding in the new coil (the Tier 4 test's 'wind' stop), the lathe for Taavek's part (step 3)
+      try {
+        if (A.kind === 'vesselStep' && A.placeId === '5-shop-lathe' && SHIP.event && (SHIP.event.mine['vessel:step'] | 0) === 3) return { one: 'r3Lathe' };
+        if (deckDef.num === 6 && A.kind !== 'fetch' && has(jobStops)) {
+          const j = (SHIP.jobs || []).find(x => x.kind === 'tier4' && x.status !== 'done' && !x.workDone); if (!j) return null;
+          const st = jobStops(j), k = st.findIndex(x => (x.step || x.tag) === 'wind'), done = j.stepsDone || [];
+          if (k > 0 && !done.includes(k) && done.includes(k - 1)) return { one: 'r3Winding' };
+        }
+      } catch (e) { /* nothing special */ }
+      return null;
+    }
+    return { W, watch: r3Watch, tick: r3Tick, actPick: r3ActPick };
+  })() : null;
+  if (R3) S.onFrame.push(() => { try { R3.watch(); } catch (e) {} });
   function ambTick() {
     let cook = false, wash = false;
     try {
@@ -73797,6 +73947,7 @@ const SND = (() => {
     ambSet('sizzle', cook); ambSet('washer', wash);
     if (cook && Math.random() < 0.12) S.fx(pick(['chop', 'chop', 'stove', 'ovenOpen', 'ovenClose']), { long: 3 });
     if (MESS_SND) MESS_SND.tick();   // the sound update, turn 2: the mess hall
+    if (R3) try { R3.tick(); } catch (e) {}   // turn 3: the feature sounds read once a second
   }
   let actTickSet = false;
   S.onFrame.push(() => { if (!actTickSet) { actTickSet = true; S.actTick = actTick; } });   // once, on the first frame: S.whenReady and the core's S.actTick = null come later in the block
@@ -73838,6 +73989,7 @@ const SND = (() => {
       const opening = was < 0.04 && d.open >= 0.04, closing = was > 0.96 && d.open <= 0.96;
       if (!opening && !closing) continue;
       const mine = Math.hypot(d.cx - p.x, d.cz - p.z) < 1.9;
+      if (SND_R3_ON && opening && deckDef.num === 6 && d.e.key === 'v,27,3') { S.fx('r3ReactorDoor', { x: d.cx, z: d.cz, long: 4 }); continue; }   // the sound update, turn 3: the reactor's shielded door (A)
       S.fx(d.svc ? (opening ? 'hatchOpen' : 'hatchClose') : (opening ? 'doorOpen' : 'doorClose'), { x: d.cx, z: d.cz, crew: !mine });
     }
     // turn 5: your footsteps, by the floor under you; none while riding or doing something; a crawlway is softer
@@ -74502,6 +74654,7 @@ const SND = (() => {
   }
   if (SND_R3_ON) S.r3Event = r3EventMusic;   // for sound_check
   if (MESS_SND) S.r3Mess = MESS_SND.M;   // for sound_check: the mess hall's count and scene
+  if (R3) S.r3 = R3;   // for sound_check: turn 3's watchers
   S.makeMusic = createWrenMusic;                          // for sound_check: the module on a test clock
   S.onFrame.push(() => {                                  // the first frame with sound running makes it (this slot comes before S.whenReady and the settings)
     if (!S.music) { musPrefs(); S.music = createWrenMusic({ ctx: S.ctx, dest: S.bus.music, shipTime: musTime, enabled: MP.on, volume: MP.vol, mode: MP.mode, heard: MP.heard,

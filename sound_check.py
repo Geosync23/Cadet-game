@@ -435,7 +435,88 @@ def check_r3mess(pw, path):
         if pe: check(False, 'r3mess: page errors: ' + ' | '.join(pe[:3]))
     finally: g.close()
 CHECKS += [check_r3music, check_r3_off]   # the sound update (SD2), turn 1
+R3_FX = ['r3BadgeTake', 'r3BadgeBack', 'r3ReactorDoor', 'r3CoilOff', 'r3CoilOn', 'r3Winding', 'r3Lathe', 'r3Promotion', 'r3Calder', 'r3Stay', 'r3Go', 'r3TernLand', 'r3ShutOff', 'r3ShutOn', 'r3ClockAsk', 'r3TestFit']
+def check_r3fx(pw, path):
+    """turn 3: the feature sounds a watcher sees (each moment stood in for, the watcher run directly, then put back)"""
+    on = r3_copy(path)
+    if not on: print('  r3fx: not yet (no SND_R3_ON line)'); return
+    g = Game(pw, on)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000); g.step(5)
+        check(g.ev("!!SND.r3"), 'r3fx: the watchers are there')
+        # every sound builds without an error (called straight, so a mistake shows)
+        bad = g.ev(f"""(() => {{ const out = []; for (const n of {json.dumps(R3_FX)}) {{ const f = SND._.FX[n]; if (!f) {{ out.push(n + ': missing'); continue; }}
+          try {{ f(SND.ctx.currentTime + 0.05, {{}}); }} catch (e) {{ out.push(n + ': ' + e.message); }} }} return out; }})()""")
+        check(bad == [], f'r3fx: every sound plays ({bad})')
+        g.step(2)
+        def heard(name, setup, run='SND.r3.watch()', undo=''):
+            g.ev(f"(() => {{ SND.log.length = 0; {setup}; {run}; }})()")
+            got = g.ev("SND.log.map(x => x.name)"); g.ev(f"(() => {{ {undo}; }})()")
+            print(f'  r3fx {name}: {got}')
+            return got
+        W = 'SND.r3.W'
+        # the badge rack
+        g.ev("SND.r3.watch()")
+        got = heard('badge taken', "dosiState().out = shipNow()"); check('r3BadgeTake' in got, 'r3fx: taking a badge')
+        got = heard('badge back', "dosiState().out = null"); check('r3BadgeBack' in got, 'r3fx: hanging it back')
+        # the scenes, by line
+        got = heard('the test fit', "DIALOGUE = { id: 'vesselTestFit', i: 0, queue: [{}, {}] }; SND.r3.watch(); DIALOGUE.i = 1", undo="DIALOGUE = null; SND.r3.watch()"); check('r3TestFit' in got, 'r3fx: the test fit as you turn it')
+        got = heard("Calder's question", "DIALOGUE = { id: 'end.ask', i: 2, queue: [{}, {}, {}, { choice: [] }] }; SND.r3.watch(); DIALOGUE.i = 3")
+        check('r3Calder' in got, "r3fx: Calder's question, the pad as the answers show")
+        check(g.ev(W + ".duck") is True, "r3fx: the music ducked while she asks")
+        g.ev("DIALOGUE = null; SND.r3.watch()"); check(g.ev(W + ".duck") is False, 'r3fx: the music back after')
+        got = heard('the engine badge', "DIALOGUE = { id: 'pu4.badge', i: 0, queue: [{}] }", undo="DIALOGUE = null; SND.r3.watch()"); check('r3Promotion' in got, 'r3fx: the engine badge scene')
+        # the early clock-out question
+        got = heard('the clock asks', "SND.r3.watch(); clockScreen(null, true)", undo="document.getElementById('clockScreen').hidden = true; SND.r3.watch()")
+        check('r3ClockAsk' in got, 'r3fx: the early clock-out question')
+        # the once-a-second ones: Stay or Go, a promotion, a booked shutdown
+        g.ev("window.__keep = { end: SHIP.end, works: SHIP.works }; SHIP.works = { ...(SHIP.works || {}), rank: 'officer' }; SHIP.end = { said: [] }; SND.r3.tick()")
+        got = heard('stay', "SHIP.end.said.push([SHIP.time.day, 'stay'])", run='SND.r3.tick()'); check('r3Stay' in got, 'r3fx: Stay')
+        got = heard('not sure', "SHIP.end.said.push([SHIP.time.day, 'unsure'])", run='SND.r3.tick()'); check(not any(x in got for x in ('r3Stay', 'r3Go')), 'r3fx: nothing for "not sure"')
+        got = heard('go', "SHIP.end.said.push([SHIP.time.day, 'go'])", run='SND.r3.tick()'); check('r3Go' in got, 'r3fx: Go')
+        got = heard('promotion', "SHIP.works.rank = 'senior'", run='SND.r3.tick()'); check('r3Promotion' in got, 'r3fx: a promotion')
+        g.ev("SHIP.works.sd = { set: { [SHIP.time.day]: [{}] } }; SND.r3.tick()")
+        got = heard('power off', "SHIP.works.sd.set[SHIP.time.day][0].st = 'off'", run='SND.r3.tick()'); check('r3ShutOff' in got, 'r3fx: a booked shutdown, power off')
+        got = heard('power back', "SHIP.works.sd.set[SHIP.time.day][0].st = 'done'", run='SND.r3.tick()'); check('r3ShutOn' in got, 'r3fx: and back')
+        g.ev("SHIP.end = __keep.end; SHIP.works = __keep.works; SND.r3.tick()")
+        # rooms: the reactor room's throb, the Tern landing in the shuttle bay (the vessel stood in for)
+        g.ev(f"({R3_AT})({json.dumps([1440 + 600, 6, 'R'])})"); g.step(3)
+        check(g.ev(W + ".room !== null") and g.ev("SND.log.some(x => x.name === 'reactorRoom')"), 'r3fx: the throb inside the reactor room')
+        g.ev(f"({R3_AT})({json.dumps([1440 + 602, 6, 'E'])})"); g.step(3); g.ev("SND.r3.watch()"); check(g.ev(W + ".room === null"), 'r3fx: none outside it')
+        # a coil off and on (the Tier 4 test's steps; its stops stood in for), next to coil 1
+        g.ev("window.__js = jobStops; jobStops = () => [{ step: 'fetch' }, { step: 'isolate' }, { step: 'read' }, { step: 'wind' }, { step: 'cycle' }]; window.__fj = { id: 'r3test', kind: 'tier4', mach: '6-coil-1', status: 'open', stepsDone: [0] }; SHIP.jobs.push(__fj); SND.r3.tick()")
+        got = heard('coil off', "__fj.stepsDone = [0, 1]", run='SND.r3.tick()'); check('r3CoilOff' in got, 'r3fx: the coil off the cycle')
+        w = g.ev("(SND.r3.actPick({ kind: 'job' }) || {}).one"); check(w is None, f'r3fx: not winding before the windings are read ({w})')
+        g.ev("__fj.stepsDone = [0, 1, 2]; SND.r3.tick()")
+        w = g.ev("(SND.r3.actPick({ kind: 'job' }) || {}).one"); check(w == 'r3Winding', f'r3fx: winding in the new coil ({w})')
+        got = heard('coil on', "__fj.stepsDone = [0, 1, 2, 3, 4]", run='SND.r3.tick()'); check('r3CoilOn' in got, 'r3fx: and back into the cycle')
+        g.ev("SHIP.jobs.splice(SHIP.jobs.indexOf(__fj), 1); jobStops = __js")
+        # night 3's team swap: its steps passing (j.cur), the coil slowed and brought back up
+        g.ev("window.__tj = { id: 'r3team', kind: 'team', status: 'open', cur: 0, seq: [['you', 'cslow'], [1, 'isolate'], ['you', 'cunbolt'], [1, 'test'], ['you', 'cup']].map(([who, part]) => ({ who, part })) }; SHIP.jobs.push(__tj); SND.r3.tick()")
+        got = heard('team: isolate done', "__tj.cur = 2", run='SND.r3.tick()'); check(got == ['r3CoilOff'], f'r3fx: the team swap takes the coil off ({got})')
+        got = heard('team: drive back up', "__tj.cur = 5; __tj.status = 'done'", run='SND.r3.tick()'); check(got == ['r3CoilOn'], f'r3fx: and back up at the end ({got})')
+        g.ev("SHIP.jobs.splice(SHIP.jobs.indexOf(__tj), 1)")
+        g.ev("window.__ev = SHIP.event; SHIP.event = { id: 'x', mine: { 'vessel:step': 3 } }")
+        w = g.ev("(SND.r3.actPick({ kind: 'vesselStep', placeId: '5-shop-lathe' }) || {}).one"); check(w == 'r3Lathe', f'r3fx: the lathe for Taavek\'s part ({w})')
+        g.ev("SHIP.event = __ev")
+        g.ev(f"({R3_AT})({json.dumps([1440 + 610, 5, 'S'])})"); g.step(3)
+        g.ev("window.__vn = vesselNow; vesselNow = () => ({ k: 1 }); TERN.target = 0; SND.r3.watch()")
+        got = heard('the Tern lands', "TERN.target = 1", undo="vesselNow = __vn"); check('r3TernLand' in got, 'r3fx: the Tern landing while you are in the bay')
+        # the reactor door: the door watcher, its door opening near you (frames)
+        g.ev(f"({R3_AT})({json.dumps([1440 + 620, 6, 'K'])})"); g.page.wait_for_timeout(700); g.step(5)
+        D6 = "DOOR_OBJS.find(x => x.e.key === 'v,27,3')"
+        dk = g.ev(f"(() => {{ const d = {D6}; if (!d) return null; player.obj.position.set(d.cx + 0.5, 0, d.cz); SND.log.length = 0; return [d.cx, d.cz]; }})()")
+        if check(dk is not None, 'r3fx: the reactor door is there'):
+            for v in (0.0, 0.5, 1.0, 0.5):   # driven by hand, as the core check does
+                g.ev(f"(() => {{ const d = {D6}; d.open = {v}; d.force = {1 if v >= 0.5 else 0}; }})()"); g.step(1)
+            got = g.ev("SND.log.map(x => x.name)"); print('  r3fx the reactor door:', got); g.ev(f"delete {D6}.force")
+            check(got.count('r3ReactorDoor') == 1 and 'hatchOpen' not in got and 'doorOpen' not in got, 'r3fx: the reactor door has its own sound (once), not the usual door')
+        pe = [e for e in g.errors if e.startswith('pageerror')]
+        if pe: check(False, 'r3fx: page errors: ' + ' | '.join(pe[:3]))
+    finally: g.close()
 CHECKS += [check_r3mess]   # the sound update (SD3), turn 2
+CHECKS += [check_r3fx]   # the sound update (SD3), turn 3
 
 if os.environ.get('SOUND_ONLY'): CHECKS = [c for c in CHECKS if re.search(os.environ['SOUND_ONLY'], c.__name__)]   # run only the named checks (a regex), while building
 with sync_playwright() as pw:
