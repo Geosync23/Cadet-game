@@ -140,3 +140,4 @@ browsers fine; the user wants faster turnarounds.
   DV1-2, RV18-C2, FX3-1, RV18-C1, RV23-3, CP5-1. Note (old words): the sketch shelf row says "your cabin, Deck 4" after the
   Day 25 move to Deck 2.
 - Gotcha: a third browser (with two checks running) times out loading the page (Page.goto 30 s).
+- Queue (04:4x): BB1 runs finishing; TB1 title screen claude/title-099 8d2a708 (session_01GKuymo2ikX7y7GA88GPXQP, off); EV2 visit dinner + words claude/visit-099 cc84b4c (session_01GKuymn7YSDpEbeNYGxup6N).
