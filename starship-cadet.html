@@ -17156,7 +17156,7 @@ function ixFrame() {
   ixTips(); ixHealth.tick(); trkDoneCheck(); trackFresh();
   const el = document.getElementById('ixGoal');
   if (typeof deckDef === 'undefined' || !deckDef || typeof player === 'undefined') { el.hidden = true; return; }
-  const mj = typeof myJob === 'function' ? myJob() : null, m = Math.floor(shipNow()), key = m + '|' + (mj ? mj.id + (mj.workDone ? '+' : '') + (mj.stepsDone || []).length : '') + '|' + SHIP.player.carry.length + '|' + (SHIP.player.work ? SHIP.player.work.fitted.length + '|' + !!SHIP.player.work.make : '');
+  const mj = typeof myJob === 'function' ? myJob() : null, m = Math.floor(shipNow()), key = m + '|' + (mj ? mj.id + (mj.workDone ? '+' : '') + (mj.stepsDone || []).length : '') + '|' + SHIP.player.carry.length + '|' + (SHIP.player.work ? SHIP.player.work.fitted.length + '|' + !!SHIP.player.work.make : '') + '|' + (SHIP.career ? SHIP.career.ci : '');   // and clocking in (backlog 30: "Clock in" stayed up to the next ship minute)
   if (ixGoalAt !== key) { ixGoalAt = key; try { ixJobGoal = ixJobStep(); } catch (e) { ixJobGoal = null; } }
   const g = goalNow();                                   // the job's step only while it's tracked (goalNow: the arrow queue first when it's on)
   adoorWay(g); adoorHint();                              // the doors on the arrow's way open by themselves; stopped at a shut one, how it opens (15b, FX29)
