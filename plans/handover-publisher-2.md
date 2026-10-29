@@ -5,8 +5,8 @@ Session session_01GKuymkDxLVyt4rjtcJxdab, branch `claude/publish-26` (this note 
 ## Pages
 | Page | Link | Version / build | Capabilities | Rule |
 |---|---|---|---|---|
-| Playtest (current, new account) | https://claude.ai/artifact/7hQ14AcwZHCi5EvL1AKiMU | v4 = 0.97.0 (staging-pad 610ad7f1, game 0bd1b5b6…b36f), version id 1793238589-6278 (v3 = 0.96.0, v2 = 0.95.0, v1 = 0.94.0) | downloads | updated each release |
-| Dev (current, new account) | https://claude.ai/artifact/KEyaHvon6ZaVHHFRdAe18m | v4 = 0.97.0, version id 1793238591-4a8d (v3 = 0.96.0, v2 = 0.95.0, v1 = 0.94.0) | downloads | updated each release |
+| Playtest (current, new account) | https://claude.ai/artifact/7hQ14AcwZHCi5EvL1AKiMU | v5 = 0.98.0 (staging-098d 37b858b4, game 81c07a05…59b1), version id 1793276913-848d (v4 = 0.97.0, v3 = 0.96.0, v2 = 0.95.0, v1 = 0.94.0) | downloads | updated each release |
+| Dev (current, new account) | https://claude.ai/artifact/KEyaHvon6ZaVHHFRdAe18m | v5 = 0.98.0, version id 1793276915-86af (v4 = 0.97.0, v3 = 0.96.0, v2 = 0.95.0, v1 = 0.94.0) | downloads | updated each release |
 | Playtest (old account) | https://claude.ai/artifact/3HqM5XiXaHXzgrpq7JbesJ | v7 = 0.93.3 | downloads | old account: can't be updated from here |
 | Dev (old account) | https://claude.ai/artifact/9ZWAgqiZCvkJvVjjhjVkEr | v7 = 0.93.3 | downloads | old account |
 | Dev: promotion preview (old account) | https://claude.ai/artifact/AvpWrMumcGiw4UYUpXd2X5 | v1 = p5s5-promo 5703dfb6 | downloads | old account |
@@ -37,3 +37,6 @@ The user said publish (via lead 44). sha256 checked, published over the same two
 
 ## Title screen preview (2026-10-29)
 Lead 45 asked for a preview page (not a release): https://claude.ai/artifact/GLSzgGfn55Kk9LFCaoGevR v1 = claude/title-on-099 b980518 (game 4390780e…0303, TITLE_ON true, GAME_BUILD still 0.97.0), {downloads}, title "Title screen preview". Scratchpad source title/title-screen-preview.html. The title screen is hidden under automated browsers (navigator.webdriver) unless the link has #title: the headless check opens it with #title. 390x844: shows, 0 console errors. Lead 45 is the lead now (session_01GKuymnu4NeXJhwPe21FWk7).
+
+## 0.98.0 release (2026-10-29)
+The user OK'd it (via lead 45). sha256 checked, published over the same two links as v5, {downloads}. Phone check 390x844 on both: PASS, 0 console errors (Dev: Jump to tab opens). 6daN untouched.
