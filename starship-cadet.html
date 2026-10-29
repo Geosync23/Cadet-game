@@ -67577,6 +67577,7 @@ function part(pv, geo, color, x, y, z, sx = 1, sy = 1, sz = 1, rx = 0, ry = 0, r
 }
 function bake(root) {
   const joints = []; root.traverse(o => { if (o.userData.parts) joints.push(o); });
+  const J = [];
   for (const pv of joints) {
     const P = [], N = [], C = [];
     for (const p of pv.userData.parts) {
@@ -67585,14 +67586,9 @@ function bake(root) {
       for (let i = 0; i < pa.length; i += 3) { P.push(pa[i], pa[i + 1], pa[i + 2]); N.push(na[i], na[i + 1], na[i + 2]); C.push(p.c.r, p.c.g, p.c.b); }
       g.dispose();
     }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
-    geo.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3));
-    geo.setAttribute('color', new THREE.Float32BufferAttribute(C, 3));
-    geo.computeBoundingSphere();
-    const mesh = new THREE.Mesh(geo, CHAR_MAT); mesh.castShadow = mesh.receiveShadow = true;
-    pv.add(mesh); delete pv.userData.parts;
+    J.push({ pv, P, N, C }); delete pv.userData.parts;
   }
+  bodyBake(root, J);                                     // 0.98 (RB1): one skinned mesh for the whole body, one draw (8b's Performance slot)
 }
 
 function makeCharacter(spec, finish = bake) {          // finish: what to do with the queued parts (the crowd keeps them)
@@ -69198,6 +69194,107 @@ if (typeof EV_VESSEL_ON !== 'undefined' && EV_VESSEL_ON || typeof EV_ENDING_ON !
   } };
   ACT_SEATED.add('wave'); for (const k of ['bow', 'wave']) CROWD_ANIMS.add(k);
 }
+// ---- one draw per full body (0.98 turn 3, RB1 for lead 44; plans/opt-098-plan.html item 1). bake (section 8) hands each
+// joint's corners here, and the body is drawn as one mesh: you and each full-body crew member are 2 draws with the shadow
+// pass, not about 32. Pixel-identical by construction: three.js drew each joint's own mesh with its matrices (model,
+// camera x model, the normal matrix, sun's shadow camera x model); bodyTick works out exactly those numbers, the same
+// way, for every joint each time the scene is drawn (scene.onBeforeRender, after three updates the world matrices),
+// into a small float texture (16 x 32: a row per joint, four matrices of four texels). The body's shader reads its
+// joint's row (the corner's bodyJ) in place of the mesh's uniforms, so every corner goes through the same sums.
+// - Taps: each joint keeps a mesh of its own corners (a view of the body's position array, nothing copied) on
+//   BODY_LAYER: neither camera draws that layer, the tap ray (section 11) tests it, so taps hit exactly what they hit
+//   before. Those meshes are also where the matrices come from (their world matrix is what three used).
+// - Material: the body wears its twin of whatever its joints' meshes wear (CHAR_MAT, or 24b's UNIFORM_MAT after
+//   playerUniformTint swaps them), read at draw time; a twin is a clone with the shader change, made on first use.
+// - Culling: one sphere round the root (1.9 heights, as the crowd's). The texture and twins go when the body's geometry
+//   is disposed (every rig's dispose does that).
+// - Without float vertex textures (rare on phones now) bodies are baked as before, a mesh per joint.
+// Props in hand stay their own meshes. No R(), no colours (they're the parts' own, already through col()).
+const BODY_LAYER = 1, BODIES = new Set(), _bodyMV = new THREE.Matrix4(), _bodyN = new THREE.Matrix3();
+const BODY_PARS = `
+uniform highp sampler2D bodyTex;
+attribute float bodyJ;
+mat4 bodyMat( const in float m ) {
+  float y = ( bodyJ + 0.5 ) / 32.0, x = m * 4.0 + 0.5;
+  return mat4( texture2D( bodyTex, vec2( x / 16.0, y ) ), texture2D( bodyTex, vec2( ( x + 1.0 ) / 16.0, y ) ), texture2D( bodyTex, vec2( ( x + 2.0 ) / 16.0, y ) ), texture2D( bodyTex, vec2( ( x + 3.0 ) / 16.0, y ) ) );
+}`;
+const bodyProject = m => `vec4 mvPosition = vec4( transformed, 1.0 );
+mvPosition = bodyMat( ${m} ) * mvPosition;
+gl_Position = projectionMatrix * mvPosition;`;
+function bodyShader(sh, b, depth) {                      // three's lines with the matrices read from the body's texture
+  sh.uniforms.bodyTex = b.u;
+  let v = sh.vertexShader.replace('#include <common>', '#include <common>' + BODY_PARS).replace('#include <project_vertex>', bodyProject(depth ? '3.0' : '1.0'));
+  if (!depth) v = v.replace('#include <defaultnormal_vertex>', `vec3 transformedNormal = objectNormal;
+transformedNormal = mat3( bodyMat( 2.0 ) ) * transformedNormal;
+#ifdef FLIP_SIDED
+  transformedNormal = - transformedNormal;
+#endif`).replace('#include <worldpos_vertex>', `#if defined( USE_ENVMAP ) || defined( DISTANCE ) || defined ( USE_SHADOWMAP )
+  vec4 worldPosition = vec4( transformed, 1.0 );
+  worldPosition = bodyMat( 0.0 ) * worldPosition;
+#endif`);
+  sh.vertexShader = v;
+}
+const bodyKey = () => 'rb1-body', bodyDepthKey = () => 'rb1-body-depth';
+function bodyTwin(b, m) {
+  let t = b.mats.get(m);
+  if (!t) { t = m.clone(); t.onBeforeCompile = sh => bodyShader(sh, b, false); t.customProgramCacheKey = bodyKey; b.mats.set(m, t); }
+  return t;
+}
+function bodyBake(root, J) {
+  if (!renderer.capabilities.floatVertexTextures) {     // as bake always did: a mesh per joint
+    for (const j of J) {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(j.P, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(j.N, 3));
+      geo.setAttribute('color', new THREE.Float32BufferAttribute(j.C, 3)); geo.computeBoundingSphere();
+      const mesh = new THREE.Mesh(geo, CHAR_MAT); mesh.castShadow = mesh.receiveShadow = true; j.pv.add(mesh);
+    }
+    return;
+  }
+  let n = 0; for (const j of J) n += j.P.length / 3;
+  const P = new Float32Array(n * 3), N = new Float32Array(n * 3), C = new Float32Array(n * 3), BJ = new Float32Array(n);
+  const b = { root, joints: [], mats: new Map(), d: new Float32Array(16 * 32 * 4) };
+  let o = 0;
+  J.forEach((j, k) => {
+    const c = j.P.length / 3; P.set(j.P, o * 3); N.set(j.N, o * 3); C.set(j.C, o * 3); BJ.fill(k, o, o + c);
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P.subarray(o * 3, (o + c) * 3), 3)); g.computeBoundingSphere();
+    const m = new THREE.Mesh(g, CHAR_MAT); m.castShadow = m.receiveShadow = true; m.layers.set(BODY_LAYER);
+    j.pv.add(m); b.joints.push(m); o += c;
+  });
+  b.tex = new THREE.DataTexture(b.d, 16, 32, THREE.RGBAFormat, THREE.FloatType); b.u = { value: b.tex };
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(P, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(N, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(C, 3)); geo.setAttribute('bodyJ', new THREE.BufferAttribute(BJ, 1));
+  const sph = new THREE.Sphere();
+  Object.defineProperty(geo, 'boundingSphere', { configurable: true, set() {}, get() {
+    const e = root.matrixWorld.elements; sph.center.set(e[12], e[13], e[14]); sph.radius = 1.9 * root.matrixWorld.getMaxScaleOnAxis(); return sph;
+  } });
+  const mesh = b.mesh = new THREE.Mesh(geo, CHAR_MAT), first = b.joints[0];
+  Object.defineProperty(mesh, 'material', { configurable: true, set() {}, get: () => bodyTwin(b, first.material) });
+  mesh.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking });   // as three's own shadow depth material
+  mesh.customDepthMaterial.onBeforeCompile = sh => bodyShader(sh, b, true); mesh.customDepthMaterial.customProgramCacheKey = bodyDepthKey;
+  mesh.castShadow = mesh.receiveShadow = true; mesh.matrixAutoUpdate = false;
+  mesh.updateMatrixWorld = () => {};                     // its world matrix stays identity: the texture carries the joints'
+  mesh.raycast = () => {};                               // taps hit the joints' own meshes (BODY_LAYER)
+  geo.addEventListener('dispose', () => { BODIES.delete(b); b.tex.dispose(); mesh.customDepthMaterial.dispose(); for (const t of b.mats.values()) t.dispose(); });
+  root.add(mesh); BODIES.add(b);
+}
+function bodyTick(cam) {                                 // each body's joint matrices for this drawing, as three works them out per mesh
+  if (!BODIES.size) return;
+  const sc = renderer.shadowMap.enabled && sun.castShadow ? (sun.shadow.updateMatrices(sun), sun.shadow.camera) : null;   // what the shadow pass will use (it does the same)
+  for (const b of BODIES) {
+    if (!isShown(b.mesh)) continue;
+    const d = b.d, js = b.joints;
+    for (let k = 0; k < js.length; k++) {
+      const M = js[k].matrixWorld, o = k * 64;
+      _bodyMV.multiplyMatrices(cam.matrixWorldInverse, M); _bodyN.getNormalMatrix(_bodyMV);
+      d.set(M.elements, o); d.set(_bodyMV.elements, o + 16);
+      const e = _bodyN.elements; for (let c = 0; c < 3; c++) { d[o + 32 + c * 4] = e[c * 3]; d[o + 33 + c * 4] = e[c * 3 + 1]; d[o + 34 + c * 4] = e[c * 3 + 2]; }
+      if (sc) { _bodyMV.multiplyMatrices(sc.matrixWorldInverse, M); d.set(_bodyMV.elements, o + 48); }
+    }
+    b.tex.needsUpdate = true;
+  }
+}
+scene.onBeforeRender = (r, s, cam) => bodyTick(cam);
 // ---- end of slot: Performance engineer ----
 
 // =====================================================================
@@ -70833,6 +70930,7 @@ function approach(center, frontAngle, depth, done) {
   playerGo(goal, finish);
 }
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), _wp = new THREE.Vector3();
+ray.layers.enable(BODY_LAYER);                           // 0.98 (8b): the full bodies' joints are tapped on their own layer, never drawn
 ray.camera = camera;
 function isShown(o) { while (o) { if (!o.visible) return false; o = o.parent; } return true; }
 function pick(cx, cy) {
