@@ -281,6 +281,13 @@ body.dlgon .devhu{display:none}
   #title .tiCrt>*{grid-column:1;width:auto;margin-left:0;margin-right:0}#title .tiCrt>:first-child{margin-top:0}#title #tiMenu,#title #tiAsk{grid-column:2;grid-row:1 / span 5;align-self:center}
   #title .tiBig{font-size:36px;margin:10px 0}#title .tiLoad{margin-top:8px;padding-top:0}#title button{min-height:44px;padding:5px 10px}}
 body.tiDev .device,body.tiDev .devdlg,body.tiDev .devtip{z-index:71}
+/* the gate (0.99.1, the user's pick): asleep, the terminal shows only its wake line; a tap, a key or a pad press wakes it
+   (and starts the title's music: browsers allow sound only after one), then the boot lines and the menu as before */
+#title #tiWake{display:none}
+#title.asleep .tiCrt{display:flex}
+#title.asleep .tiCrt>*{display:none}
+#title.asleep .tiCrt>#tiWake{display:block;width:auto;margin:auto;padding:12px 8px;text-align:center;white-space:nowrap;font-size:min(var(--crt-size),4.2vw);color:var(--crt-hot);letter-spacing:.04em}
+#title.asleep #tiWake::before{content:none}
 </style>
 </head>
 <body>
@@ -324,7 +331,8 @@ body.tiDev .device,body.tiDev .devdlg,body.tiDev .devtip{z-index:71}
   <div class="keys"><button id="devBack" aria-label="Back">Back</button><button id="devHome" aria-label="Home screen">Home</button><button id="devClose" aria-label="Close your device">Close</button></div>
 </div>
 <div id="fade"></div>
-<div id="title" role="dialog" aria-modal="true" aria-label="Starship Cadet" data-ph="cyan" hidden><div class="tiCrt">
+<div id="title" class="asleep" role="dialog" aria-modal="true" aria-label="Starship Cadet" data-ph="cyan" hidden><div class="tiCrt">
+  <button type="button" id="tiWake">&gt; TAP TO WAKE THE TERMINAL<span class="tiCur"></span></button>
   <div class="tiDim">CONCORD SURVEY SERVICE</div><div class="tiDim">CSV WREN · CREW TERMINAL</div><div id="tiFound">&gt; checking crew record<span class="tiCur"></span></div>
   <h1 class="tiBig">STARSHIP<br>CADET</h1>
   <div id="tiMenu"><button type="button" id="tiGo" data-v="go" hidden>CONTINUE<small id="tiWhere"></small></button><button type="button" id="tiNew" data-v="new">NEW GAME</button><button type="button" id="tiSaves" data-v="saves">SAVES</button><button type="button" id="tiSet" data-v="settings">SETTINGS</button></div>
@@ -354,8 +362,10 @@ body.tiDev .device,body.tiDev .devdlg,body.tiDev .devtip{z-index:71}
   const mark = b => btns().forEach(x => x.classList.toggle('on', x === b));
   const pick = b => { if (!b || el.dataset.pick) return; mark(b); el.dataset.pick = b.dataset.v; $('tiLine').textContent = b.dataset.v === 'go' ? 'BOARDING ...' : 'ONE MOMENT ...'; };
   mark(btns()[0]); el.hidden = false;
-  el.addEventListener('click', el.tiC = e => pick(e.target.closest('#tiMenu button')));
+  const wake = () => { if (!el.classList.contains('asleep')) return false; el.classList.remove('asleep'); el.dataset.awake = '1'; return true; };   // the gate: the first tap or key only wakes it
+  el.addEventListener('click', el.tiC = e => { if (!wake()) pick(e.target.closest('#tiMenu button')); });
   addEventListener('keydown', el.tiK = e => {
+    if (wake()) { e.preventDefault(); return; }
     const b = btns(), i = b.findIndex(x => x.classList.contains('on'));
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); mark(b[(i + (e.key === 'ArrowDown' ? 1 : b.length - 1)) % b.length]); }
     else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(b[i]); }
@@ -76374,6 +76384,13 @@ function titleFocus(b) {                                   // the highlight, and
   if (!b) return; titleMark(b);
   if (document.body.classList.contains('pad') && typeof padFocusTo === 'function') padFocusTo(b); else try { b.focus({ preventScroll: true }); } catch (e) { /* fine */ }
 }
+const titleAsleep = () => { const el = document.getElementById('title'); return !!(el && el.classList.contains('asleep')); };
+function titleWake() {                                     // the gate (0.99.1): the first tap, key or pad press wakes the terminal and starts the music; false if it was awake
+  if (!TITLE.on || !titleAsleep()) return false;
+  document.getElementById('title').classList.remove('asleep'); titleMusic();
+  const b = titleOnBtn(); if (document.body.classList.contains('pad')) titleFocus(b); else titleMark(b);
+  return true;
+}
 function titleMusic(on = true) { if (TITLE.music === on || on && !TITLE.on) return; TITLE.music = on; try { if (SND.title) SND.title(on); } catch (e) { /* section 27's */ } }
 function titleStep(n) {                                    // the loading bar, on real steps: 10 (the page), 90 (the deck built: this section runs), 100 (the first frame drawn)
   const bar = document.getElementById('tiBar'), ln = document.getElementById('tiLine'); if (!bar || !TITLE.on) return;
@@ -76415,6 +76432,7 @@ function titleClose(how) {                                 // hand over: the scr
 function titleKey(e) {                                     // keys (window, capture): the title takes them all while it's up, except over the device
   if (!TITLE.on || TITLE.away) return;
   e.stopImmediatePropagation(); if (TITLE.closing) return;
+  if (titleWake()) { e.preventDefault(); return; }    // asleep: any key only wakes it
   titleMusic();
   const b = titleBtns(), i = b.indexOf(titleOnBtn());
   const dn = e.key === 'ArrowDown' || e.key === 'Tab' && !e.shiftKey;   // Tab stays on the title's lines (the HUD under it never takes the focus)
@@ -76427,16 +76445,16 @@ function titleBoot() {                                     // once, here: take o
   if (el && el.tiC) el.removeEventListener('click', el.tiC);   // the page's first script's own (a choice it took waits in data-pick)
   if (el && el.tiK) removeEventListener('keydown', el.tiK, true);
   if (el && titleWanted()) {
-    const pick = el.dataset.pick, t = SAVED && SAVED.time; delete el.dataset.pick;
+    const pick = el.dataset.pick, t = SAVED && SAVED.time, woke = !!el.dataset.awake; delete el.dataset.pick; delete el.dataset.awake;
     el.dataset.ph = SHIP.device.settings.phosphor; el.classList.toggle('fx', !!SHIP.device.settings.fx);
     $('tiGo').hidden = !SAVED;                             // the real saveOk() decides (the page's script only guessed)
     if (SAVED) $('tiWhere').textContent = 'DAY ' + t.day + ' · ' + WEEKDAYS[weekday(t.day)].slice(0, 3).toUpperCase() + ' ' + hhmm(t.min) + ' · ' + titleDeck();
     $('tiFound').firstChild.nodeValue = SAVED ? '> crew record found' : '> no crew record: new cadet';
     TITLE.on = true; el.hidden = false;
     titleMark(SAVED ? $('tiGo') : $('tiNew'));
-    el.addEventListener('click', e => { const b = e.target.closest('#title button'); if (b && !b.hidden) { titleFocus(b); titleAct(b.dataset.v); } });
+    el.addEventListener('click', e => { if (titleWake()) return; const b = e.target.closest('#title button'); if (b && !b.hidden && b.dataset.v) { titleFocus(b); titleAct(b.dataset.v); } });   // asleep: the tap only wakes it
     const follow = e => { const b = e.target.closest('#title button'); if (b && !b.hidden && !TITLE.closing) titleMark(b); };   // the highlight follows your finger (or a mouse that really moves, not a menu redrawn under it)
-    el.addEventListener('pointerdown', e => { titleMusic(); follow(e); });
+    el.addEventListener('pointerdown', e => { if (!titleAsleep()) { titleMusic(); follow(e); } });
     el.addEventListener('pointermove', e => { if (e.movementX || e.movementY || e.pointerType !== 'mouse') follow(e); });
     el.addEventListener('focusin', e => { if (e.target.matches('#title button')) titleMark(e.target); });
     addEventListener('keydown', titleKey, true);
@@ -76447,11 +76465,14 @@ function titleBoot() {                                     // once, here: take o
     });
     onSim('newGame', () => { if (TITLE.on) TITLE.newGame = true; });
     if (typeof padPanelAdd === 'function' && typeof PAD !== 'undefined') {   // section 26: on top of every panel while it's up; Start is Continue (asked before Pause)
-      padPanelAdd('title', { on: () => TITLE.on && !TITLE.away && !TITLE.closing, before: 'pauseCard', first: () => titleOnBtn(), back: () => { if (TITLE.ask) titleAct('keep'); } });
-      (PAD.on.menu = PAD.on.menu || []).unshift(() => { if (!TITLE.on || TITLE.away) return; if (!TITLE.ask && SAVED) titleAct('go'); return true; });
+      padPanelAdd('title', { on: () => TITLE.on && !TITLE.away && !TITLE.closing, before: 'pauseCard', first: () => titleAsleep() ? document.getElementById('tiWake') : titleOnBtn(), back: () => { if (TITLE.ask) titleAct('keep'); } });
+      (PAD.on.menu = PAD.on.menu || []).unshift(() => { if (!TITLE.on || TITLE.away) return; if (titleWake()) return true; if (!TITLE.ask && SAVED) titleAct('go'); return true; });
+      const wakeOnly = () => titleWake() || undefined;   // asleep: any pad press only wakes it (a pad press may not count for sound in every browser)
+      padOwn(() => TITLE.on && !TITLE.away && titleAsleep(), { move: wakeOnly, a: wakeOnly, b: wakeOnly, x: wakeOnly, lt: wakeOnly, rt: wakeOnly });
     }
     titleStep(90);
     requestAnimationFrame(() => requestAnimationFrame(() => titleStep(100)));   // after the main loop's first frame
+    if (woke) { titleMusic(); try { SND.start(); } catch (e) { /* section 27's */ } }   // woken before the game had loaded: that tap already let sound start
     if (pick) titleAct(pick);
   } else if (el && !el.hidden) el.hidden = true;
 }

@@ -5,7 +5,9 @@
 
 Makes a copy with the switch on (TITLE_ON and the page's TITLE_EARLY made true by text) and opens it with ?title at
 phone size (390 x 844), in real time (the title's hand-over is on real timers). Checks:
-  the switch as it is in the build: no title, nothing held (with ?title too);
+  the switch as it is in the build;
+  the gate (0.99.1, the user's pick): asleep, only "> TAP TO WAKE THE TERMINAL"; a tap, a key or a pad press wakes it
+  (and asks for the title's music) without choosing anything, before three.js too and in landscape;
   the page's first script paints the title while three.js is still on its way (10%), and a Continue chosen then waits
   ("BOARDING ...") and goes in once the game has loaded;
   the loading bar reaches 100 (READY); the ship is held while it's up (the clock and FREEZE), nothing is written to
@@ -82,6 +84,10 @@ with sync_playwright() as pw:
         try: pg.wait_for_function('s => window.__sc(s)', arg=cond, timeout=ms); return True
         except Exception: return False
     gone = "document.getElementById('title').hidden && !TITLE.on"
+    asleep = lambda pg: js(pg, "document.getElementById('title').classList.contains('asleep')")
+    shown = lambda pg, sel: js(pg, f"(e => !!(e && e.getClientRects().length))(document.querySelector('{sel}'))")
+    def wake(pg):                                          # the gate (0.99.1): one tap on the wake line
+        pg.click('#tiWake'); return not asleep(pg)
 
     # ---- the switch as the build has it ----
     pg = page(); go(pg, AS_IS, '?title'); pg.wait_for_timeout(800)
@@ -107,6 +113,10 @@ with sync_playwright() as pw:
     # ---- no save ----
     pg = page(); with_save(pg, None); go(pg, ON, '?title')
     check(up(pg) and js(pg, "document.getElementById('tiGo').hidden"), 'no save: the title, and no Continue')
+    check(asleep(pg) and shown(pg, '#tiWake') and not shown(pg, '#tiMenu') and not shown(pg, '.tiBig') and not shown(pg, '.tiLoad'), 'the gate: asleep, only the wake line shows')
+    check(not ev(pg, 'SND.titleOn'), 'the gate: no title music before the wake')
+    pg.keyboard.press('Enter')
+    check(not asleep(pg) and shown(pg, '#tiMenu') and shown(pg, '.tiBig') and up(pg) and ev(pg, 'SND.titleOn'), 'the gate: a key wakes it (the music on), the menu shows, nothing chosen')
     check(js(pg, "document.querySelector('#title button.on').id") == 'tiNew', 'no save: NEW GAME highlighted first')
     ready(pg); c0 = clock(pg); pg.wait_for_timeout(1500)
     js(pg, "dispatchEvent(new Event('pagehide')); document.dispatchEvent(new Event('visibilitychange'))")
@@ -119,7 +129,7 @@ with sync_playwright() as pw:
     pg.context.close()
 
     # ---- a save: the Continue line, the phosphor, Continue unchanged ----
-    pg = page(); with_save(pg, MON); go(pg, ON, '?title'); ready(pg)
+    pg = page(); with_save(pg, MON); go(pg, ON, '?title'); ready(pg); wake(pg)
     check(js(pg, "document.getElementById('tiWhere').textContent") == 'DAY 12 · FRI 07:40 · DECK 4', 'a save: the Continue line ' + js(pg, "document.getElementById('tiWhere').textContent"))
     check(js(pg, "document.querySelector('#title button.on').id") == 'tiGo', 'a save: CONTINUE highlighted first')
     check(js(pg, "getComputedStyle(document.getElementById('tiFound')).color") == 'rgb(255, 179, 71)', 'a save: the amber phosphor from the save')
@@ -137,7 +147,7 @@ with sync_playwright() as pw:
     pg.context.close()
 
     # ---- New game with a save: the question ----
-    pg = page(); with_save(pg, MON); go(pg, ON, '?title'); ready(pg)
+    pg = page(); with_save(pg, MON); go(pg, ON, '?title'); ready(pg); wake(pg)
     pg.keyboard.press('Tab'); pg.keyboard.press('Tab'); check(js(pg, "document.activeElement.id") == 'tiSaves', 'Tab moves along the title\'s lines only')
     pg.click('#tiNew'); check(js(pg, "!document.getElementById('tiAsk').hidden && document.getElementById('tiMenu').hidden"), 'New game asks: ' + js(pg, "document.querySelector('#tiAsk p').textContent"))
     check(js(pg, "document.querySelector('#title button.on').id") == 'tiKeep', 'the question: KEEP PLAYING highlighted first')
@@ -149,7 +159,7 @@ with sync_playwright() as pw:
     pg.context.close()
 
     # ---- Settings and Saves on top, and back ----
-    pg = page(); with_save(pg, MON); go(pg, ON, '?title'); ready(pg)
+    pg = page(); with_save(pg, MON); go(pg, ON, '?title'); ready(pg); wake(pg)
     for btn, app in [('#tiSet', 'settings'), ('#tiSaves', 'saves')]:
         pg.click(btn); pg.wait_for_timeout(300)
         z = js(pg, "+getComputedStyle(document.getElementById('device')).zIndex")
@@ -159,7 +169,7 @@ with sync_playwright() as pw:
     pg.click('#tiSet'); pg.wait_for_timeout(200); ev(pg, "devNewAct('newgame'); devNewAct('newgo')"); until(pg, gone)
     check(not up(pg), 'Settings > New game > Start over: the title goes')
     pg.context.close()
-    pg = page(); with_save(pg, ARR); go(pg, ON, '?title'); ready(pg)
+    pg = page(); with_save(pg, ARR); go(pg, ON, '?title'); ready(pg); wake(pg)
     pg.click('#tiSet'); pg.wait_for_timeout(200)
     st = ev(pg, "[DEV.open, document.getElementById('tiLine').textContent, TITLE.on, SHIP.intro && SHIP.intro.step]")
     check(not st[0] and 'ISSUED' in st[1] and st[2], f'the arrival (device not yet yours): Settings says so, the title stays {st}')
@@ -170,7 +180,9 @@ with sync_playwright() as pw:
     def press(k):
         frames = 'new Promise(r => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(r))))'   # the pad is read once a frame
         js(pg, f'__pad({BTN[k]}, 1)'); pg.evaluate(frames); js(pg, f'__pad({BTN[k]}, 0)'); pg.evaluate(frames); pg.wait_for_timeout(100)
-    press('DOWN'); press('DOWN'); press('DOWN')   # (the first press only says hello; the second lands on the first button)
+    press('DOWN'); press('DOWN')   # (the first press only says hello; the second wakes the terminal)
+    check(not asleep(pg) and up(pg), 'pad: a press wakes the gate, nothing chosen')
+    press('DOWN')
     check(js(pg, "document.activeElement && document.activeElement.id") in ('tiNew', 'tiSaves') and js(pg, "document.querySelector('#title button.on') === document.activeElement"), 'pad: the D-pad moves the highlight (' + str(js(pg, "document.activeElement.id")) + ')')
     for _ in range(4): press('UP')
     press('DOWN'); check(js(pg, "document.activeElement.id") == 'tiNew', 'pad: on NEW GAME')
@@ -185,21 +197,25 @@ with sync_playwright() as pw:
     held[0] = True; pg.on('dialog', lambda d: d.dismiss())
     go(pg, ON, '?title', wait=False); pg.wait_for_function("document.getElementById('tiLine') && !document.getElementById('title').hidden", timeout=20000)
     check(len(held) >= 2 and js(pg, "document.getElementById('tiLine').textContent").endswith('10%') and js(pg, "!document.getElementById('tiGo').hidden"), 'before three.js: the title painted (' + js(pg, "document.getElementById('tiLine').textContent") + '), Continue there')
+    check(asleep(pg) and not shown(pg, '#tiGo'), 'before three.js: asleep, the wake line only')
+    pg.click('#tiWake'); check(not asleep(pg) and shown(pg, '#tiGo') and js(pg, "document.getElementById('tiLine').textContent").endswith('10%'), 'before three.js: a tap wakes it, nothing chosen')
     pg.click('#tiGo'); check(js(pg, "document.getElementById('tiLine').textContent") == 'BOARDING ...', 'before three.js: Continue waits (BOARDING ...)')
     for r in held[1:]: r.fulfill(body=THREE, content_type='application/javascript')
     pg.wait_for_function('window.__sc !== undefined', timeout=90000)
     try: pg.wait_for_function("document.getElementById('title').hidden", timeout=15000)
     except Exception: pass
     check(not up(pg) and clock(pg)[0] == 12, 'before three.js: the Continue went in once loaded')
+    check(not ev(pg, 'SND.titleOn'), 'before three.js: the music asked for at load, and off again after Continue')
     pg.context.close()
 
     # ---- reduced motion, landscape, the phosphors ----
-    pg = page(motion='reduce'); with_save(pg, MON); go(pg, ON, '?title'); ready(pg)
+    pg = page(motion='reduce'); with_save(pg, MON); go(pg, ON, '?title'); ready(pg); wake(pg)
     check(js(pg, "getComputedStyle(document.querySelector('#title .tiCrt'), '::before').animationName") == 'none', 'reduced motion: no roll or flicker')
     pg.click('#tiGo'); pg.wait_for_timeout(60)
     check(js(pg, "getComputedStyle(document.getElementById('title')).animationName") == 'tifade', 'reduced motion: the plain fade')
     pg.context.close()
     pg = page(844, 390); with_save(pg, MON); go(pg, ON, '?title'); ready(pg)
+    check(asleep(pg) and shown(pg, '#tiWake') and not shown(pg, '#tiMenu'), 'landscape: the gate too'); wake(pg)
     lm, lt = js(pg, "document.getElementById('tiMenu').getBoundingClientRect().left"), js(pg, "document.querySelector('.tiBig').getBoundingClientRect().left")
     check(lm > lt + 200, f'landscape: two columns (title at {lt:.0f}, menu at {lm:.0f})')
     for ph, ink in [('cyan', 'rgb(111, 240, 220)'), ('green', 'rgb(93, 255, 138)'), ('amber', 'rgb(255, 179, 71)')]:
