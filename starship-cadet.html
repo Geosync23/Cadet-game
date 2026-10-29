@@ -49599,7 +49599,7 @@ function vesselItems(d) {
   if (k === 2 && M['vessel:job'] && !M['vessel:part'] && (M['vessel:step'] | 0) >= 1) row(600, 805, 'tracked.step.' + (M['vessel:step'] | 0), 'Taavek\'s part, in the machine shop', 'the machine shop, Deck 5', 5, 'f');
   if (k === 2 && M['vessel:part'] && !M['vessel:testfit']) row(810, 870, 'tracked.testfit', 'Taavek\'s part: the test fit, 13:30', 'the machine shop, Deck 5', 5, 'f');
   if (k === 2 && !M['vessel:home']) row(VESSEL.leave - 15, VESSEL.leave, 'sched.home', 'Taavek goes home, 15:00, the shuttle bay', 'the Tern\'s ramp, the shuttle bay, Deck 5', 5, 'S');
-  if (k >= 3 && M['vessel:sketch'] && !M['vessel:shelved']) { row(720, 1439, 'tracked.shelf', 'Put Taavek\'s sketch on your shelf', 'your cabin, Deck 4', 4, null); out[out.length - 1].todo = true; }   // a to-do, not an event: its heads-up says so (backlog RV23-3)
+  if (k >= 3 && M['vessel:sketch'] && !M['vessel:shelved']) { const bed = playerBed(), bd = deckOf(bed), bp = placeById(bed); row(720, 1439, 'tracked.shelf', 'Put Taavek\'s sketch on your shelf', 'your cabin, Deck ' + bd, bd, bp ? bp.room : null); out[out.length - 1].todo = true; }   // a to-do, not an event: its heads-up says so (backlog RV23-3) (RV25-1: the cabin where you live now, Deck 2's room B once you've moved up)
   return out;
 }
 // the crowd's lines over their heads (the comet's way: a line every 4 ship minutes while you're in the room, in order,
