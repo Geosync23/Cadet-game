@@ -165,3 +165,12 @@ Queue (lead 45, 2026-10-29): 1. TB1 title screen claude/title-099; 2. EV2 seated
   track clears and the hum is back (gain 0.86 at +4 s, 1 by +12 s; the +2 s reading still showed the title's state:
   slow first frames in headless, as on title-on-099). No page errors.
 - **VERDICT title-music-c febdf8a: PASS.**
+
+## Lead 46 (session_01GKuymiks9CC1WYr2may5nM) took over from lead 45 (~13:00): report to lead 46 and BM21.
+
+## RB1 222ec28 (controller_check day only: clear the last toast before reading the bedtime ring's line)
+- Diff: 3 lines, the same clearing as the check's own load-time line (RV5, line 169); the game's toastTimer / toastEl
+  exist at top level. Game unchanged.
+- controller_check day with the fix on 0.98.0's game (7a2ae7d2), twice side by side: CONTROLLER CHECK OK both
+  (bedtime: "ABunk", the alarm card, Set alarm by pad ok).
+- **VERDICT 222ec28: PASS** (cherry-pick alone; the branch head carries turn 4 WIP).
