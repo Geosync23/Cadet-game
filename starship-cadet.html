@@ -66441,12 +66441,13 @@ function p5nGuide(now) {                                  // live, once a ship m
   const d = worksDay(now), m = now - (d - 1) * 1440, owner = '28a (S6-1)', P = typeof POINT_ON !== 'undefined' && POINT_ON && typeof pointAsk === 'function', bed = () => (typeof playerBed === 'function' ? playerBed() : '4-1');
   const sleepRing = (id, w, until) => { if (P) pointAsk({ id, force: true, until, done: () => !p5nDayBed(), path: [{ open: () => !sleepEl.hidden, el: () => null }, { el: () => document.getElementById('sleepYes'), label: p5nText('night.ptr.bed', 'Sleep until {time}', { time: hhmm(w) }) }] }); };
   const S = playerNightOn(d) && yourShift(d);              // Day 22's afternoon: sleep now
-  if (S && S.day && m >= S.day[1] && p5nDayBed(now)) {
+  const from = S && (S.day ? S.day[1] : Math.min(Math.floor(m), P5N.dayEnd));   // (0.98, AS1's find) no day part (not on duty: you never clocked in that morning): the day sleep is due all the same, from 12:30 (or now, if earlier), as p5nDayBed says; a whole minute, so the queue counts it live
+  if (S && (S.day ? m >= S.day[1] : !playerNightOn(d - 1)) && p5nDayBed(now)) {   // (after a night, the day sleep's own ask below, as before)
     if (flag('p5n.sleep.' + d) === undefined && !promoBusy()) { flagSet('p5n.sleep.' + d, 1); promoNotice(p5nText('night.sleep.notice', 'Sleep now: night shift tonight. Your bunk, until 16:45.'), p5nCalder()); }
     if (careerClockedIn(d) && !careerClockedOut(d)) { const lab = p5nText('night.ptr.dayout', 'Clock out, then sleep');   // the day part's punch first
-      guideAsk({ id: 'p5n:dayout:' + d, level: 1, owner, from: (d - 1) * 1440 + S.day[1], until: (d - 1) * 1440 + P5N_WAKE[d] - 30, goal: () => guideClock(lab), done: () => careerClockedOut(d) });
+      guideAsk({ id: 'p5n:dayout:' + d, level: 1, owner, from: (d - 1) * 1440 + from, until: (d - 1) * 1440 + P5N_WAKE[d] - 30, goal: () => guideClock(lab), done: () => careerClockedOut(d) });
       if (P) pointAsk({ id: 'p:p5n:dayout:' + d, force: true, path: pointClock('out', lab), until: (d - 1) * 1440 + P5N_WAKE[d] - 30, done: () => careerClockedOut(d) }); }
-    else guideAsk({ id: 'p5n:bed:' + d, level: 1, owner, from: (d - 1) * 1440 + S.day[1], until: (d - 1) * 1440 + P5N_WAKE[d] - 30, goal: () => ({ deck: 4, place: bed(), label: p5nText('night.ptr.bed.22', 'Sleep now: night shift tonight') }), done: () => !p5nDayBed() });
+    else guideAsk({ id: 'p5n:bed:' + d, level: 1, owner, from: (d - 1) * 1440 + from, until: (d - 1) * 1440 + P5N_WAKE[d] - 30, goal: () => ({ deck: 4, place: bed(), label: p5nText('night.ptr.bed.22', 'Sleep now: night shift tonight') }), done: () => !p5nDayBed() });
     sleepRing('p:p5n:bed:' + d, P5N_WAKE[d], (d - 1) * 1440 + P5N_WAKE[d] - 30);
   }
   for (const k of [d - 1, d]) {
