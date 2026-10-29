@@ -2029,3 +2029,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~14:37 UTC: R2 15/16 OK, no FAIL (cadet: only expected mem/calls/tris + d_wallslow 8 px, i_tap2 1 px; no bubble shift); perf_check alone to ~15:40 UTC.
 - ~14:49 UTC check-in (lead 46): 0.99.0 round a4c9febe running, no FAIL reported. R1 AS1 15 checks running (memory 47%); R2 15/16 OK, perf alone to ~15:40; R3 DM2 two lanes, nothing failed (38%); R4 interactions running 30 min, no FAIL (10%); R5 BM21 running (23%).
 - ~14:50 UTC: **R4 OK** 7/7 on a4c9febe (interactions whole 2516 s, career no "Relied on" FAIL = backlog 12 closed, appt, saves, title_check, day 6, 8; claude/checks-0990-r4 00b6344b).
+- ~15:24 UTC: **R1 AS1 OK** 15/15 on a4c9febe (arrows step6 day-sleep arrow fixed all four ways = BM20-1 closed; claude/checks-0990-r1). R4 offered help to R1/R3. Waiting R2 perf, R3, R5.
