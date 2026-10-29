@@ -6,6 +6,9 @@
 Makes a copy with the switch on (TITLE_ON and the page's TITLE_EARLY made true by text) and opens it with ?title at
 phone size (390 x 844), in real time (the title's hand-over is on real timers). Checks:
   the switch as it is in the build;
+  New game and Start over (0.99.2): the terminal stays up until the shuttle's manifest is drawn (or the deck, for Monday), so
+  the old deck never shows in between (a per-frame record); for a player who has arrived before, the device's question
+  shows on top of the terminal;
   the gate (0.99.1, the user's pick): asleep, only "> TAP TO WAKE THE TERMINAL"; a tap, a key or a pad press wakes it
   (and asks for the title's music) without choosing anything, before three.js too and in landscape;
   the page's first script paints the title while three.js is still on its way (10%), and a Continue chosen then waits
@@ -86,6 +89,13 @@ with sync_playwright() as pw:
     gone = "document.getElementById('title').hidden && !TITLE.on"
     asleep = lambda pg: js(pg, "document.getElementById('title').classList.contains('asleep')")
     shown = lambda pg, sel: js(pg, f"(e => !!(e && e.getClientRects().length))(document.querySelector('{sel}'))")
+    # (0.99.2) every frame after New game: is the screen covered, by the terminal (T), the terminal switching off (O) over
+    # the manifest, or the manifest (M)? A frame with neither (the terminal gone or going and no manifest) shows the old deck
+    FLASH = """(() => { window.__fr = []; const f = () => { const t = document.getElementById('title'), m = typeof INTRO_UI !== 'undefined' && !!INTRO_UI.manifest;
+      window.__fr.push((t && !t.hidden ? (t.classList.contains('off') ? 'O' : 'T') : '-') + (m ? 'M' : '-')); if (window.__fr.length < 300) requestAnimationFrame(f); }; requestAnimationFrame(f); })()"""
+    def flash_start(pg): ev(pg, FLASH)
+    def flash_count(pg):
+        fr = ev(pg, 'window.__fr'); return sum(1 for x in fr if x[0] in '-O' and x[1] == '-'), ''.join(x[0] for x in fr[:40])
     def wake(pg):                                          # the gate (0.99.1): one tap on the wake line
         pg.click('#tiWake'); return not asleep(pg)
 
@@ -122,7 +132,8 @@ with sync_playwright() as pw:
     js(pg, "dispatchEvent(new Event('pagehide')); document.dispatchEvent(new Event('visibilitychange'))")
     check(clock(pg) == c0 and ev(pg, 'FREEZE.frozen && titleHold()'), f'no save: the ship held while it is up {c0}')
     check(js(pg, 'localStorage.length') == 0, 'no save: nothing written to localStorage while it is up (pagehide too)')
-    pg.click('#tiNew'); until(pg, gone + " && !!document.querySelector('form input') && !FREEZE.frozen")
+    flash_start(pg); pg.click('#tiNew'); until(pg, gone + " && !!document.querySelector('form input') && !FREEZE.frozen")
+    fc = flash_count(pg); check(fc[0] == 0, f'no save, New game: the old deck never shows before the manifest ({fc[0]} frames; {fc[1]})')
     check(not up(pg) and not ev(pg, 'titleHold()'), 'no save: New game closes the title and lets the ship go')
     sv = (json.loads(js(pg, "localStorage.getItem('starship-cadet-save')") or 'null') or {}).get('time')
     check(js(pg, "document.body.textContent.includes('PASSENGER MANIFEST')") and sv == {'day': 0, 'min': 1035}, f'no save: New game is the arrival (the manifest), saved at Day 0 17:15 ({sv})')
@@ -153,10 +164,25 @@ with sync_playwright() as pw:
     check(js(pg, "document.querySelector('#title button.on').id") == 'tiKeep', 'the question: KEEP PLAYING highlighted first')
     pg.keyboard.press('Escape'); check(js(pg, "document.getElementById('tiAsk').hidden") and up(pg), 'Escape is Keep playing')
     pg.click('#tiNew'); pg.click('#tiKeep'); check(js(pg, "document.getElementById('tiAsk').hidden") and up(pg) and clock(pg) == [12, 460], 'Keep playing: back to the menu, nothing changed')
-    pg.click('#tiNew'); pg.click('#tiOver'); until(pg, gone + " && (!document.getElementById('devDlg').hidden || SHIP.time.day !== 12)")
+    pg.click('#tiNew'); flash_start(pg); pg.click('#tiOver'); until(pg, gone + " && (!document.getElementById('devDlg').hidden || SHIP.time.day !== 12)")
+    fc = flash_count(pg); check(fc[0] == 0, f'Start over: the old deck never shows before the manifest ({fc[0]} frames; {fc[1]})')
     dlg = js(pg, "(d => d && !d.hidden ? d.textContent : '')(document.getElementById('devDlg'))")
     check(not up(pg) and ('How do you want to start' in dlg or clock(pg) != [12, 460]), 'Start over: the title closes and New game starts (' + (dlg[:40] or str(clock(pg))) + ')')
     pg.context.close()
+
+    # ---- Start over for a player who has arrived before: the device asks how, on top of the terminal (0.99.2) ----
+    for choice, want in [('Skip to Monday morning', 'monday'), ('Arrive by shuttle', 'arrive')]:
+        pg = page(); with_save(pg, MON); js(pg, "localStorage.setItem('starship-cadet-arrived', '1')"); go(pg, ON, '?title'); ready(pg); wake(pg)
+        pg.click('#tiNew'); flash_start(pg); pg.click('#tiOver'); until(pg, "!document.getElementById('devDlg').hidden")
+        z = js(pg, "+getComputedStyle(document.getElementById('devDlg')).zIndex")
+        check(up(pg) and z > 70, f'arrived before, Start over: "How do you want to start?" on top of the terminal (z {z}), the terminal still up')
+        pg.click(f"#devDlg button:has-text('{choice}')")
+        if want == 'monday':
+            t = clock(pg) if until(pg, gone) else [0, 0]; check(t[0] == 1 and 360 <= t[1] < 362, f'{choice}: the terminal goes onto Monday 06:00 {t}')
+        else:
+            until(pg, gone + " && !!document.querySelector('form input')")
+            fc = flash_count(pg); check(not up(pg) and fc[0] == 0, f'{choice}: the manifest, and the old deck never shows ({fc[0]} frames; {fc[1]})')
+        pg.context.close()
 
     # ---- Settings and Saves on top, and back ----
     pg = page(); with_save(pg, MON); go(pg, ON, '?title'); ready(pg); wake(pg)

@@ -76420,14 +76420,29 @@ function titleDevice(id) {                                 // Saves and Settings
 function titleClose(how) {                                 // hand over: the screen switches off (0.3 s; a 0.2 s fade with reduced motion), then the ship runs
   if (!TITLE.on || TITLE.closing) return;
   TITLE.closing = true; titleMusic(false);
-  const el = document.getElementById('title'), a = document.activeElement; el.classList.add('off'); if (a && el.contains(a)) a.blur();
-  setTimeout(() => {
-    el.hidden = true; el.classList.remove('off'); TITLE.on = false; TITLE.closing = false;
-    removeEventListener('keydown', titleKey, true);
+  const el = document.getElementById('title'), a = document.activeElement; if (a && el.contains(a)) a.blur();
+  const ms = matchMedia('(prefers-reduced-motion: reduce)').matches ? 220 : 320;
+  const off = () => { el.classList.add('off'); setTimeout(() => { el.hidden = true; el.classList.remove('off'); TITLE.closing = false; document.body.classList.remove('tiDev'); }, ms); };
+  const go = () => {                                     // the ship runs again
+    TITLE.on = false; removeEventListener('keydown', titleKey, true);
     if (TITLE.refused) { TITLE.refused = false; saveGame(); }
     if (how === 'go') toast(deckWord(deckDef.num) + ', CSV Wren', welcomeBack());   // the load's own welcome was under the title
     if (how === 'over') newGameGo();                     // section 13's: arrive by shuttle, or the choice for a player who has arrived before
-  }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 220 : 320);
+  };
+  if (how === 'go') { off(); setTimeout(go, ms); return; }   // Continue: the screen switches off onto your game
+  // a new game (0.99.2, the user: the old deck flashed before the signing screen): the ship runs under the terminal, which
+  // stays up until the new game is ready (the shuttle's manifest drawn, or the deck for a Monday start); the device's
+  // "How do you want to start?" shows on top of it meanwhile (body.tiDev). Then it switches off onto that
+  document.body.classList.add('tiDev'); go();
+  let n = 0, t0 = performance.now();
+  const wait = () => {
+    const man = typeof INTRO_UI !== 'undefined' && !!INTRO_UI.manifest, I = SHIP.intro;
+    if (DEV.choose) t0 = performance.now();              // (no time limit while you choose)
+    const busy = !man && (INTRO_BOOT || !!DEV.choose || !!(I && I.on && I.step === 'manifest'));
+    if ((++n < 3 || busy) && performance.now() - t0 < 4000) { requestAnimationFrame(wait); return; }
+    off();
+  };
+  requestAnimationFrame(wait);
 }
 function titleKey(e) {                                     // keys (window, capture): the title takes them all while it's up, except over the device
   if (!TITLE.on || TITLE.away) return;
