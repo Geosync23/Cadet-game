@@ -15206,6 +15206,9 @@ function dinnerTick() {
   dinnerSat(playerSitNear(cp.deck, cp.tile));
 }
 const handsFix = what => bagHeld() ? 'Put your bag in your locker first' : giftHeld() ? 'Give the gift away first' : what;
+// where a job's parts come from, for the Job taken words (backlog FX10-1): the shelves, the lathe, or both
+const partsFrom = j => { const a = j.parts || [], mk = a.filter(p => !(SHIP.stores[p] > 0) && !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p))).length;
+  return !mk ? 'from main storage on Deck 5' : mk < a.length ? 'from main storage and the machine shop on Deck 5' : 'made in the machine shop on Deck 5'; };
 const partList = a => { const n = {}; for (const k of a) n[k] = (n[k] || 0) + 1; return Object.entries(n).map(([k, c]) => (c > 1 ? c + ' × ' : /^[aeiou]/i.test(k) ? 'an ' : 'a ') + k).join(' and '); };
 const machineName = m => (typeof MACHINE_KINDS !== 'undefined' && MACHINE_KINDS[m.kind] ? MACHINE_KINDS[m.kind].name : m.kind).toLowerCase();
 // a tap (section 11, through playerTap): main storage, or the machine of the job you hold. False: not the job's business
@@ -16952,7 +16955,7 @@ const ixBoard = (() => {
       const j = myJob(), [title, where] = jobCard(j), clash = lessonClash(j, est ? est.mins : 0);
       SHIP.player.track = j.id; clearGoal();             // a job taken is tracked (the device's Track switch: null = off), over any older arrow (playtest 1)
       api.close(); device.refresh(); ixGoalAt = -1;
-      toast('Job taken', (j.title || title) + ', ' + where + '. Follow the marker' + (j.parts && j.parts.length ? ': parts first, from main storage on Deck 5.' : '.') + (clash ? ' ' + clash : ''));
+      toast('Job taken', (j.title || title) + ', ' + where + '. Follow the marker' + (j.parts && j.parts.length ? ': parts first, ' + partsFrom(j) + '.' : '.') + (clash ? ' ' + clash : ''));
       ixTip('taken', 'Track it on your device; the marker shows the way.');
       return true;
     },
@@ -56166,7 +56169,7 @@ function introSoloGive(now) {
   if (!claimJob(id)) { toast('Your first solo job', what + '. It\'s on the job board in the Works bay, asked for you: take it once your job\'s done.'); return false; }
   SHIP.player.track = id; if (typeof clearGoal === 'function') clearGoal();
   if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
-  toast('Your first solo job', what + '. It\'s yours and tracked: follow the marker' + (j.parts && j.parts.length ? ', parts first, from main storage on Deck 5.' : '.'));
+  toast('Your first solo job', what + '. It\'s yours and tracked: follow the marker' + (j.parts && j.parts.length ? ', parts first, ' + partsFrom(j) + '.' : '.'));
   return true;
 }
 const introSoloHold = now => introOn() && Math.floor(now / 1440) + 1 === 2 && (SHIP.intro.done['d2-solo:met'] === undefined || SHIP.intro.done['d2-solo:met'] >= 0 && SHIP.intro.done['d2-solo:end'] === undefined);   // Tuesday until her meeting is over
