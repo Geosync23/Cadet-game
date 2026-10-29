@@ -60,3 +60,12 @@ Queue (lead 45, 2026-10-29): 1. TB1 title screen claude/title-099; 2. EV2 seated
   (70 min), the scene starts for you from its first line, eating to ~20:10, kept. No page errors.
 - Note: the Schedule row shows 18:50 while the Mail says 19:00 (EV2 flagged it); arriving early is harmless.
 - **VERDICT EV2 60287f2: PASS.**
+
+## EV2 follow-up 2, claude/visit-099 3dda559 (appointment back at 19:00; a.early read by section 14's apptWhere)
+- Diff: occasionAdd books at the occasion's own time and sets a.early (like a.places); apptWhere (section 14, the sim
+  engineer's): go = a.at - min(30, a.early if > 0) - walk; the end unchanged; no a.early = as before (Number() guards junk).
+- Read: only the set-off time moves (they're shown at their chair from go); apptFree/apptReply and the 'kept' rule still
+  use a.at; only section 18's occasions set early, so day plans without one are untouched (cadet identical).
+- cadet vs 610ad7f1 ALL IDENTICAL; day_check 18 OK; probe from 18:40: all seven seated by 18:55, scene 19:00, you eating
+  to ~20:07, diners leave 20:15. No page errors.
+- **VERDICT EV2 3dda559: PASS.** Section 14 line: fine on my read; per owners.md the sim engineer may still want a look.
