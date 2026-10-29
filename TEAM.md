@@ -2052,3 +2052,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~19:25 UTC check-in (lead 46): 0.99.1 R1, R4, R5 OK; R2 perf alone (to ~19:40); R3 DM2 running, no FAIL reported.
 - ~19:35 UTC: 0.99.1: **R2 OK** 16/16 (cadet identical, perf OK first time; claude/checks-0991-r2 d912ab2d). Only R3 DM2 left.
 - ~20:09 UTC (4:09 PM ET): **R3 DM2 OK** (claude/devmode-j2 a1a26761). **0.99.1 ROUND GREEN** (all five). Lead verified f77c26d9 game 8e4ac545...2d9d, ff from integration OK. **PUB2 GO** (user pre-approved) over 7hQ1 + KEya, never 6daN.
+- ~20:10 UTC (4:10 PM ET): **0.99.1 LIVE**: Playtest 7hQ1 v7, Dev KEya v7 (PUB2; game 8e4ac545...2d9d; 390x844 PASS both; title tap-to-wake check OK; 6daN untouched). **claude/integration fast-forwarded 6d5684ba -> bc4579aa** (f77c26d9 + docs). Next: 1.0 = user's playtest notes; code review undecided (would be 0.99.x). All seats idle.
