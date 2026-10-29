@@ -2063,3 +2063,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~22:01 UTC (6:01 PM ET): **RV27 PASS both 0.99.2 pieces**: SD3 bc6c6029 (melody ~4-5 s after the tap, no silence) + TB1 ced89283 (no old-deck frames; new check fails on 0.99.1); cadet identical; merge clean (two doc clashes for BM21). BM21 GO staging-0992 + turn + full round.
 - ~22:19 UTC (6:19 PM ET): **0.99.2 ROUND STARTED**: claude/staging-0992 60d477e8 (bc4579aa + SD3 bc6c6029 + TB1 ced89283 + turn), game sha256 27d605e7...3920; gates names/check_fast/title/sound OK, cadet identical. GO R1-R4, BM21 R5. OLD bc4579aa. Publish needs the user's OK.
 - ~22:24 UTC check-in (lead 46): 0.99.2 round running (5 min in), no FAIL. ETA green ~8:30-9:00 PM ET, then ask the user.
+- ~22:26 UTC: **USER: publish 0.99.2 without asking** (this one). On green + BM21 GO (verify sha): PUB2 GO, ff integration, tell the user.
