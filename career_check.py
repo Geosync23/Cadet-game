@@ -372,17 +372,17 @@ def s6_career(ev, SUM):
     check(st['size'] < 6000 and sl['size'] < 6000, f"s6: ship.works small by Day 26 ({st['size']}, {sl['size']} bytes)")
     same = json.dumps(st, sort_keys=True) == json.dumps(again, sort_keys=True)
     check(same, 's6: the steady run twice is not identical' + ('' if same else ': ' + next((f"Day {a['d']}: {a} vs {b}" for a, b in zip(st['days'], again['days']) if a != b), 'the end state differs')))
-    # (0.99 balance, BAL2; the user's f1 answer) a Senior who is "Trusted" only after the Day 22 test: the retest the next
-    # workday (Day 26, not Monday Day 29), and a Friday test's result that afternoon, so Engine Specialist on Day 26 (it was
-    # Day 29). In the page only: Tier 3's "Trusted" line at 62 (the steady run is 60 on Day 19, 66 on Day 22), and no
+    # (0.99 balance, BAL2; the user's f1 answer, 2026-10-29: the slower player is Engine Specialist on Days 29-30, the steady
+    # one on Day 23) a Senior who is "Trusted" only after the Day 22 test: the retest the next workday, Friday Day 26, its
+    # result when the next shift starts, Monday Day 29, Engine Specialist from Day 29. In the page only: Tier 3's "Trusted" line at 62 (the steady run is 60 on Day 19, 66 on Day 22), and no
     # reputation lost for the nights (the paper player can't clock in at night; in play you work them)
     keep = ev("JSON.stringify([WORK_BANDS[3], WORK_XP.missed, WORK_XP.abandoned])")
     ev("WORK_BANDS[3] = [[0, 'new'], [14, 'steady'], [30, 'reliable'], [62, 'trusted'], [75, 'relied']]; WORK_XP.missed = 0; WORK_XP.abandoned = 0")
-    lt = ev(f"({S6})({{ plan: 'steady', days: 27, t2: 'real' }})"); t4 = ev("SHIP.works && SHIP.works.pu && SHIP.works.pu.t4 ? { ...SHIP.works.pu.t4 } : null")
+    lt = ev(f"({S6})({{ plan: 'steady', days: 30, t2: 'real' }})"); t4 = ev("SHIP.works && SHIP.works.pu && SHIP.works.pu.t4 ? { ...SHIP.works.pu.t4 } : null")
     ev(f"(([b, m, a]) => {{ WORK_BANDS[3] = b; WORK_XP.missed = m; WORK_XP.abandoned = a; }})({keep})")
     print(f"  late Trusted: " + ', '.join(f"D{x['d']} T{x['tier']} {x['xp']} {x['band']}" for x in lt['days'] if x['d'] >= 21) + f"; t4 {t4}")
-    check(day(lt, 21).get('tier') == 3 and day(lt, 22).get('band') == 'trusted' and t4 and t4.get('passed') and t4.get('day') == 26 and t4.get('res') == 26 and day(lt, 26).get('tier') == 4 and day(lt, 26).get('rank') == 'specialist',
-          f"s6: Trusted on Day 22, after the test: the retest on Friday Day 26 and its result that afternoon, Engine Specialist on Day 26 ({t4}, D26 T{day(lt, 26).get('tier')} {day(lt, 26).get('rank')})")
+    check(day(lt, 21).get('tier') == 3 and day(lt, 22).get('band') == 'trusted' and t4 and t4.get('passed') and t4.get('day') == 26 and t4.get('res') == 29 and day(lt, 28).get('tier') == 3 and day(lt, 29).get('tier') == 4 and day(lt, 29).get('rank') == 'specialist',
+          f"s6: Trusted on Day 22, after the test: the retest on Friday Day 26, its result on Monday Day 29, Engine Specialist from Day 29 ({t4}, D28 T{day(lt, 28).get('tier')}, D29 T{day(lt, 29).get('tier')} {day(lt, 29).get('rank')})")
 
 
 with sync_playwright() as pw:
