@@ -115,3 +115,4 @@ render turns 3-4: pixel-identical, or a picture for the user first); OP1 (0.98 w
 SD3 (SD3-2 music cache); BB1 = BT1 session_01GKuymne2zVMSTZjvCCmXKH (0.99 backlog batches, claude/backlog-099). Two
 browsers fine; the user wants faster turnarounds.
 - Base ready: /tmp/rv25/old0970.html (0.97.0, claude/integration 610ad7f1, sha256 0bd1b5b6...). Waiting for the first turn.
+- Correction (lead 44): BB1's 0.99 backlog fixes land on claude/backlog-triage (restarted from staging-pad 610ad7f1), not claude/backlog-099.
