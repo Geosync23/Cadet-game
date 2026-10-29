@@ -130,3 +130,4 @@ browsers fine; the user wants faster turnarounds.
 - cadet vs 0.97.0 ALL IDENTICAL; career_check OK, --s6 OK (late Trusted D22 -> test/result D26, badge D27); player_check OK;
   promo_beats OK. Notes: pu4DevNext (Dev arrow) keeps the old offer timing; Day 26 full and a Saturday badge (lead's call).
 - 03:29 lead 45: hold BAL2 2b46f96e (my PASS was already sent): the user dropped the night-day retest so late players promote Day 29-30; a new tip comes, review that.
+- BAL2 12814bd6 (pu4DevNext follows pu4OfferTick's rule; Dev only): code read OK; full re-review at BAL2's next tip (user's change).
