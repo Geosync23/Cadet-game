@@ -76,8 +76,10 @@ PLANS = r"""(days => {
     // bar) sits in one then (0.34.51, the user: no tradition shares a room or place with a meal or other use)
     for (const e of on) {
       const held = new Set(eventPlaces(e)), B = (d - 1) * 1440;
-      for (const p of schedPeople()) for (const s of planDay(p, d)) if (s.placeId && held.has(s.placeId) && s.from < B + e.to && B + e.from < s.to && tagId(s.tag || '') !== e.id)
-        out.bad.push(d + ' ' + p.id + ' in ' + s.placeId + ' (' + (s.tag || s.act) + ') ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ', held for ' + e.id);
+      for (const p of schedPeople()) { const pd = planDay(p, d); for (let i = 0; i < pd.length; i++) { const s = pd[i];
+        if (s.tag === 'walk' && pd[i + 1] && pd[i + 1].placeId === s.placeId && pd[i + 1].from === s.to && tagId(pd[i + 1].tag || '') === e.id) continue;   // FX24-2 (0.98): the walk there just before their own stay at it, not someone else using the place
+        if (s.placeId && held.has(s.placeId) && s.from < B + e.to && B + e.from < s.to && tagId(s.tag || '') !== e.id)
+        out.bad.push(d + ' ' + p.id + ' in ' + s.placeId + ' (' + (s.tag || s.act) + ') ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ', held for ' + e.id); } }
     }
     const r = dayReport(d);
     for (const k of ['short', 'meals', 'work', 'double', 'gaps']) if (r[k].length) out.bad.push(d + ' dayReport ' + k + ': ' + r[k].slice(0, 4).join(', '));
