@@ -51,7 +51,7 @@
 - I've never seen a Veyli ship up close. Only the delegation's shuttle, last week.
 // Saruth at breakfast, to you, if you're near them (one tap)
 == event.veyliVessel.saruth.breakfast
-- They ask for company. It is a very old way of asking. The Speaker will be glad we answered it.
+- They ask for company. A very old way of asking. The Speaker will be glad we answered it.
 // the notice when you sit down to breakfast
 == event.veyliVessel.notice.breakfast
 - Something's happening: a Veyli ship has called the Wren.
@@ -63,10 +63,10 @@
 - marrow: A small Veyli ship has lost its coolant pump. It's drifting, a day off our course.
 - marrow: They've called us. Not for help: for company. That's their word, and a good one.
 - marrow: At half past eight we turn toward them. You'll feel it. Hold on to your cups.
-- marrow: Their Speaker sat at our table last week. Tonight we keep their neighbours company. Marrow out.
+- marrow: Their Speaker sat at our table last week. Tonight we keep company. Marrow out.
 // from the Captain
 == event.veyliVessel.mail.address.sat
-- A Veyli ship asks for company | A small Veyli ship has lost its coolant pump and is drifting, a day off our course. They've called us, not for help but for company: the Envoy says that's the word. We turn toward them at 08:30 and hold station off their bow until they're under way. Works will tell you what's needed. We were guests in their sky for a month, and their Speaker sat at our table last week. Tonight we can be good company.
+- A Veyli ship asks for company | A small Veyli ship has lost its coolant pump and is drifting, a day off our course. They've called us, not for help but for company: the Envoy says that's the word. We turn toward them at 08:30 and hold station off their bow until they're under way. Works will tell you what's needed. Last week their Speaker was our guest. Tonight we keep company.
 == event.veyliVessel.notice.turn
 - The Wren is turning toward the Veyli ship.
 
@@ -455,7 +455,7 @@
 - marrow: This is the Captain. Our neighbours are under way, and so are we.
 - marrow: They sent a message for the whole ship. The Envoy will read it. Envoy?
 - saruth: They say: the Wren kept company well. Their engine is warm.
-- saruth: They will remember the ship, and the hands. So will the Speaker, when I write to them.
+- saruth: They will remember the ship, and the hands. So will the Speaker, when I write.
 - marrow: Thank you, Works, and the chain. And {me}, who met their engineer.
 - marrow: Back on our course. Back to it. Marrow out.
 // from the Captain
