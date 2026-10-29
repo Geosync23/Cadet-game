@@ -1577,6 +1577,9 @@ def part_day(pw, src, tag):
         if bp and walk_to(r, bp[0], bp[1]):
             # your own bunk, not a neighbour's (the game offers sleep only within 1.2 m of your bed): its ring key
             mine = r.ev(MY_BUNK); got = None
+            # (RB1, 0.98) a toast hides the ring's line (padPickShow) and closes on a real-time 5.6 s timer, so whether the day's
+            # last one ("Bursting", the toilet) still showed here depended on the machine's speed: put it away first, every run the same
+            r.ev("typeof toastTimer !== 'undefined' && clearTimeout(toastTimer); typeof toastEl !== 'undefined' && toastEl.classList.remove('show')")
             for k in range(12):
                 sel = r.ev(RING_SEL)
                 if sel and mine and sel['key'] == mine: got = r.ev(HINT); break
