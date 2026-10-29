@@ -109,3 +109,8 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
 - 21:59 lead 44: the 0.96.0 round finished; two browsers fine again.
 - J5 86958252 (game 67728794...8cbb): **PASS** (~23:1x, DM2, lead 44, BM20). cadet vs fe11cd66 ALL IDENTICAL; devmode_check
   events1 OK: evVisitDinner Day 18 18:55 Galley (3 'K'). design-doc Dev mode text matches. Dev mode J0-J5 fully reviewed.
+
+## 2026-10-29 01:5x lead 44: 0.97.0 is live. Tonight's queue (as they arrive): RB1 session_01GKuymkqMpME5GQvc5vTBqR (0.98
+render turns 3-4: pixel-identical, or a picture for the user first); OP1 (0.98 walk-estimate fix: FX24-2, FX12-1, TQ1-1);
+SD3 (SD3-2 music cache); BB1 = BT1 session_01GKuymne2zVMSTZjvCCmXKH (0.99 backlog batches, claude/backlog-099). Two
+browsers fine; the user wants faster turnarounds.
