@@ -257,7 +257,7 @@ body.dlgon .devhu{display:none}
   <button id="crew" aria-pressed="true" aria-label="Show or hide visiting crew"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.8-3.6 3.2-5.5 6-5.5s5.2 1.9 6 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.6c2.4.2 4 1.9 4.5 4.6"/></svg><span>Crew</span></button>
   <button id="light" aria-label="Switch to night lighting"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><span>Night</span></button>
 </div>
-<div class="toast" id="toast"><b id="tt"></b><span id="tx"></span></div>
+<div class="toast" id="toast" role="status" aria-live="polite"><b id="tt"></b><span id="tx"></span></div>
 <div class="lift" id="lift" role="dialog" aria-modal="true" aria-labelledby="liftT" hidden>
   <h2 id="liftT">Main lift</h2><p>Choose a deck. Deck 1 is at the top of the ship.</p>
   <div class="decks" id="liftList"></div>
@@ -11730,7 +11730,7 @@ function walkLaneStep(a, dt, mid) {                    // mid: ease to the middl
 // a steady glide (CREW_UP_V tiles a second: 0.7 tiles in under a third of a second), so the body steps off the place
 // instead of hopping. Only a short one (CREW_UP_MAX: the usual seat, bed or station): a longer move (a rec-deck stand's
 // 4 tiles, a few mess seats') would glide over the furniture between, so it stays as it was (lead 34)
-const CREW_UP_V = 2.5, CREW_UP_MAX = 1.2;
+const CREW_UP_V = 2.5, CREW_UP_MAX = 1.2, CREW_UP_MV = 8;   // CREW_UP_MV: from a rec deck place's own moves (a swimmer mid-lap, a climber), over water or the mat (backlog FX8-1)
 function crewUpEase(a, dt) {
   if (!a.hx && !a.hz) return;
   const d = Math.hypot(a.hx, a.hz), m = d - dt * CREW_UP_V;
@@ -12061,7 +12061,7 @@ function devHeadsTick(t) {
     devHear(k);
     if (x.kind === 'tradition' && devOnShift() && R.per[x.tkind] !== true && !beam && !mine) { DEV.notes.calendar = (DEV.notes.calendar || 0) + 1; continue; }   // on shift: a quiet badge
     for (let i = HU_Q.length - 1; i >= 0; i--) if (HU_Q[i].key === key) HU_Q.splice(i, 1);   // the start replaces a waiting 'soon'
-    HU_Q.push({ key, stage, at, title: devHuName(x), where: x.where, goal: devItemGoal(x), ...(beam ? { beam: true } : {}) });
+    HU_Q.push({ key, stage, at, title: devHuName(x), where: x.where, goal: devItemGoal(x), ...(beam ? { beam: true } : {}), ...(x.todo ? { todo: true } : {}) });
   }
   for (const a of SHIP.device.appts) if (a && a.kind === 'invite' && a.status === 'asked' && a.by && Number.isFinite(a.at)) {   // 0.72.6 (playtest 2, item 12): an invitation still waiting for your answer reminds you too, like an appointment
     const at = a.at, key = 'invite|' + a.id; if (at - R.ahead > t || at + 3 <= t) continue;
@@ -12082,7 +12082,7 @@ function devHeadsShow(t = shipNow()) {
   if (devHuBusy()) return;
   if (typeof introHoldNudges === 'function' && introHoldNudges()) { const k = HU_Q.findIndex(h => !/^meal\|/.test(h.key)); if (k < 0) return; if (k > 0) HU_Q.unshift(HU_Q.splice(k, 1)[0]); }   // section 21: training day's end, the beam first: a meal's heads-up waits (the patch, #19)
   const h = HU_Q[0], left = Math.max(1, Math.round(h.at - t));
-  DEV.hu = h; DEVICE_SKIN.heads({ text: h.stage === 'soon' ? h.title + (h.beam ? ' starts at the end of shift in the Works department' : ' starts in ' + left + ' min') : h.title + (h.title === 'Your shift' ? ' starts now' : ' is starting'),
+  DEV.hu = h; DEVICE_SKIN.heads({ text: h.todo ? 'To do: ' + h.title : h.stage === 'soon' ? h.title + (h.beam ? ' starts at the end of shift in the Works department' : ' starts in ' + left + ' min') : h.title + (h.title === 'Your shift' ? ' starts now' : ' is starting'),
     where: h.beam && h.stage === 'soon' ? '' : h.where, soft: h.stage === 'start', go: !!h.goal });
 }
 function devHeadsReset() { SHIP.device.calendarRemind.heard = []; HU_Q.length = 0; DEV.hu = null; DEVICE_SKIN.heads(null); }   // a new game, and the checks
@@ -15231,6 +15231,9 @@ function dinnerTick() {
   dinnerSat(playerSitNear(cp.deck, cp.tile));
 }
 const handsFix = what => bagHeld() ? 'Put your bag in your locker first' : giftHeld() ? 'Give the gift away first' : what;
+// where a job's parts come from, for the Job taken words (backlog FX10-1): the shelves, the lathe, or both
+const partsFrom = j => { const a = j.parts || [], mk = a.filter(p => !(SHIP.stores[p] > 0) && !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p))).length;
+  return !mk ? 'from main storage on Deck 5' : mk < a.length ? 'from main storage and the machine shop on Deck 5' : 'made in the machine shop on Deck 5'; };
 const partList = a => { const n = {}; for (const k of a) n[k] = (n[k] || 0) + 1; return Object.entries(n).map(([k, c]) => (c > 1 ? c + ' × ' : /^[aeiou]/i.test(k) ? 'an ' : 'a ') + k).join(' and '); };
 const machineName = m => (typeof MACHINE_KINDS !== 'undefined' && MACHINE_KINDS[m.kind] ? MACHINE_KINDS[m.kind].name : m.kind).toLowerCase();
 // a tap (section 11, through playerTap): main storage, or the machine of the job you hold. False: not the job's business
@@ -16568,7 +16571,7 @@ function ixTip(id, text) { if (typeof tipShow === 'function') { try { tipShow(id
 // last of all (scenery with nothing of its own to do), and with own = true just before machineTap, for a stop that is that
 // machine's own panel (section 18's stormBallasts at the lights). The floor at the stop and the Repair button: jobHere
 function ixChoreLast(it, at, own) {
-  for (const s of ixSides()) if ((!own || ixSideOwn(s)) && ixChoreTap(it, at, s)) return true;   // the drill's stop first (its stops are never a machine's panel); 28c's night jobs' are (S6-5: at the panel, before the machine's own tap)
+  for (const s of ixSides()) if ((!own || ixSideOwn(s) || s.kind === 'team') && ixChoreTap(it, at, s)) return true;   // a team job's spot stands among its machines: your turn there before the machine's own tap (backlog DV1-2)   // the drill's stop first (its stops are never a machine's panel); 28c's night jobs' are (S6-5: at the panel, before the machine's own tap)
   const j = ixChore(), nx = j && !j.workDone ? ixNextStop(j) : null, pl = nx && nx.s.places[0] && PLACE_OF.get(nx.s.places[0]);
   return own && !(pl && pl.machine) ? false : ixChoreTap(it, at);
 }
@@ -16977,7 +16980,7 @@ const ixBoard = (() => {
       const j = myJob(), [title, where] = jobCard(j), clash = lessonClash(j, est ? est.mins : 0);
       SHIP.player.track = j.id; clearGoal();             // a job taken is tracked (the device's Track switch: null = off), over any older arrow (playtest 1)
       api.close(); device.refresh(); ixGoalAt = -1;
-      toast('Job taken', (j.title || title) + ', ' + where + '. Follow the marker' + (j.parts && j.parts.length ? ': parts first, from main storage on Deck 5.' : '.') + (clash ? ' ' + clash : ''));
+      toast('Job taken', (j.title || title) + ', ' + where + '. Follow the marker' + (j.parts && j.parts.length ? ': parts first, ' + partsFrom(j) + '.' : '.') + (clash ? ' ' + clash : ''));
       ixTip('taken', 'Track it on your device; the marker shows the way.');
       return true;
     },
@@ -17040,11 +17043,13 @@ function ixJobStep() {
   const m = machineById(j.machine); if (!m) return null;
   const P = SHIP.player, w = P.work && P.work.job === j.id ? P.work : { fitted: [], make: null };
   const need = jobNeeds(j, w, P.carry), name = machineName(m);
+  { const cz = typeof caseOf === 'function' ? caseOf(j) : null; if (cz && !cz.wait && cz.fits && cz.calls.length <= cz.fits) return { deck: deckDef ? deckDef.num : m.deck, label: worksText('case.goal.call', 'Make your next call in Fault notes (your device)') }; }   // a head-scratcher after a wrong fix waits for your next call: no pin on the deck (backlog FX3-1, lead 45's OK; the first visit is as before)
   if (need.length && P.carry.length < CARRY_MAX && !(typeof scanFirst === 'function' && scanFirst(j))) {   // (24g's scanFirst: with the scanner, a faulty machine is read before its part is named)
-    const lathe = typeof MAKE_AT !== 'undefined' ? MAKE_AT.find(id => typeof placeById === 'function' && placeById(id)) || null : null;   // the machine you need (FX3, the user's "arrow to the needed machine"): the lathe, not the room
+    const lathe = typeof MAKE_AT !== 'undefined' ? MAKE_AT.find(id => typeof placeById === 'function' && placeById(id) && !(typeof heldBy === 'function' && heldBy(id))) || MAKE_AT.find(id => typeof placeById === 'function' && placeById(id)) || null : null;   // a free lathe first (backlog FX3-2)   // the machine you need (FX3, the user's "arrow to the needed machine"): the lathe, not the room
     if (w.make && w.make.part) return { deck: 5, room: 'f', place: lathe, label: 'Make ' + partList([w.make.part]) + (lathe ? ' at the lathe' : ' in the machine shop') };
     if (need.some(p => SHIP.stores[p] > 0)) { const on = need.filter(p => SHIP.stores[p] > 0), sh = ixShelf(on); return { deck: 5, room: 'r', place: sh.place, label: 'Fetch ' + partList(on) + sh.say }; }
     if (need.some(p => !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p)))) return { deck: 5, room: 'f', place: lathe, label: 'Make ' + partList([need.find(p => !NO_MAKE.has(p))]) + (lathe ? ' at the lathe' : ' in the machine shop') };
+    return { deck: 5, room: 'r', place: null, label: 'No ' + [...new Set(need)].join(' or ') + ' in storage, and it can\'t be made: a restock brings more' };   // none on the shelves and none to make (backlog DV1-3: it said "Look over the" machine, and tapping it did nothing)
   }
   const pid = typeof panelPlace === 'function' ? panelPlace(m.id) : null;
   return { deck: m.deck, place: pid, at: m.at, room: m.room, label: (j.kind === 'chore' && !need.length && j.title) || (need.length || typeof scanFirst === 'function' && scanFirst(j) ? 'Look over the ' : j.kind === 'tune' ? 'Tune the ' : 'Repair the ') + name };   // a chore on a machine says what it is ("Calibrate the galley plant": FX3); a tune job (24e) is tuned, scan first (p5-fix2)
@@ -17180,7 +17185,7 @@ function ixFrame() {
   ixTips(); ixHealth.tick(); trkDoneCheck(); trackFresh();
   const el = document.getElementById('ixGoal');
   if (typeof deckDef === 'undefined' || !deckDef || typeof player === 'undefined') { el.hidden = true; return; }
-  const mj = typeof myJob === 'function' ? myJob() : null, m = Math.floor(shipNow()), key = m + '|' + (mj ? mj.id + (mj.workDone ? '+' : '') + (mj.stepsDone || []).length : '') + '|' + SHIP.player.carry.length + '|' + (SHIP.player.work ? SHIP.player.work.fitted.length + '|' + !!SHIP.player.work.make : '');
+  const mj = typeof myJob === 'function' ? myJob() : null, m = Math.floor(shipNow()), key = m + '|' + (mj ? mj.id + (mj.workDone ? '+' : '') + (mj.stepsDone || []).length : '') + '|' + SHIP.player.carry.length + '|' + (SHIP.player.work ? SHIP.player.work.fitted.length + '|' + !!SHIP.player.work.make : '') + '|' + (SHIP.career ? SHIP.career.ci : '');   // and clocking in (backlog 30: "Clock in" stayed up to the next ship minute)
   if (ixGoalAt !== key) { ixGoalAt = key; try { ixJobGoal = ixJobStep(); } catch (e) { ixJobGoal = null; } }
   const g = goalNow();                                   // the job's step only while it's tracked (goalNow: the arrow queue first when it's on)
   adoorWay(g); adoorHint();                              // the doors on the arrow's way open by themselves; stopped at a shut one, how it opens (15b, FX29)
@@ -17471,7 +17476,7 @@ function adoorHint() {
   const p = player.obj.position, d = DOOR_OBJS.find(o => o.e.type === 'door' && Math.hypot(o.cx - p.x, o.cz - p.z) < .6 && (o.cx - p.x) * s.x + (o.cz - p.z) * s.z > .1 && adoorShut(o.e, player));
   if (!d) return;
   ADOOR.hints++; ADOOR.hintAt = now;
-  toast('A private room', typeof PAD !== 'undefined' && PAD.used ? 'Press A, or tap the door, to open it.' : 'Tap the door to open it.');
+  toast(adoorPrivate(d.e.key) ? 'A private room' : 'A door', typeof PAD !== 'undefined' && PAD.used ? 'Press A, or tap the door, to open it.' : 'Tap the door to open it.');   // a public door says so too, with every door on taps (backlog RV18-D1)
 }
 function adoorTapSelf() { const k = adoorSelfKey(); return !!k && adoorTap(k); }   // a tap on you right by a shut door: that door
 function adoorSet(mode) {                                 // the Settings row: 'all' | 'private' | 'none' (true / false: 0.93.2's on / off)
@@ -17708,8 +17713,8 @@ function guideShift() {
   const intro = d <= 1 && typeof introOn === 'function' && introOn();   // training day: the intro's own arrows (only the lesson's pointer below rings: FX15, patch 0.92.5 #22)
   const E = yourDayEnd(d), inn = careerClockedIn(d), out = careerClockedOut(d), owner = '15b (piece D)';
   if (!intro && !inn && m >= CAREER.clockIn && m < E) {            // S2
-    guideAsk({ id: 'shift:in:' + d, level: 4, owner, from: base + CAREER.clockIn, until: base + E, goal: () => guideClock('Clock in: shift at ' + hhmm(DAY_SHIFT[0])), done: () => careerClockedIn(d) });
-    if (P) pointAsk({ id: 'p:clock:in', once: 3, path: pointClock('in', 'Clock in'), until: base + E, done: () => careerClockedIn(d) });
+    guideAsk({ id: 'shift:in:' + d, level: 4, owner, from: base + CAREER.clockIn, until: base + E, goal: () => guideClock('Clock in: shift at ' + hhmm(DAY_SHIFT[0])), done: () => careerClockedIn(d) || !playerOnDuty(d) });   // or the day stopped being a workday (backlog RV23-2: Day 32's offer, the arrow stood from 16:03 over a day off)
+    if (P) pointAsk({ id: 'p:clock:in', once: 3, path: pointClock('in', 'Clock in'), until: base + E, done: () => careerClockedIn(d) || !playerOnDuty(d) });
   }
   { let mn = null; try { mn = myJob(); } catch (e) { mn = null; }   // (DS1, patch 0.92.5 #12) your lesson's job on the board: the pointer rings its Take it each time it waits, clocked in or not (FX10's, once)
     const les = !mn && m < E && boardLesson(), cur = SHIP.works && SHIP.works.cur, lj = les && SHIP.jobs.find(x => x.id === les), key = lj && (cur && cur.j === les ? cur.id : lj.train || 'intro' + lj.reserved);   // (FX15: a training job no lesson put up, by its own name)
@@ -45693,7 +45698,7 @@ function recActCard(e, d, now) {
   const did = k => { if (typeof leisureAdd === 'function') leisureAdd(10, 'talent');
     if (typeof newsAdd === 'function') newsAdd({ id: 'rec-talent-you@' + d, about: 'you', lines: [['Did you see the new hand at talent night?', 'The new hand got up at talent night! Brave.', 'Talent night: the new hand\'s act. People are still talking about it.'][k]], seed: ['ferreira', 'volkov-maeve'], weight: .7, life: 4 }); };
   const baked = MEETING_SCRIPTS['rec.talent.you'];          // the writer's act card (W3), when it's baked: its first three choices are acts
-  if (baked) { baked.onPick = k => { if (k < 3) did(k); }; dialogueShow('rec.talent.you', { id: 'rec.talent@' + d, who: [q.id], at: now }); return; }
+  if (baked) { baked.onPick = k => { if (k < 3) did(k); }; dialogueShow('rec.talent.you', { id: 'rec.talent@' + d, who: [q.id], at: now, ...cardWhere(e) }); return; }
   MEETING_SCRIPTS['rec.talent'] = { title: 'Talent night', gist: 'Talent night in the auditorium.',
     onPick: k => { if (k < 3) did(k); },
     lines: [{ who: q.id, text: say('talent.ask', 'You\'re on the sheet if you want to be. One act. Nobody fails at talent night.') },
@@ -45701,7 +45706,7 @@ function recActCard(e, d, now) {
         { text: 'Tell a ship joke', rel: { [q.id]: 2 }, reply: { who: q.id, text: say('talent.joke', 'They laughed! Mostly at the right bit.') } },
         { text: 'A Works trick', rel: { [q.id]: 2 }, reply: { who: q.id, text: say('talent.trick', 'A spanner, a bolt and a lot of nerve. Brilliant.') } },
         { text: 'Just watch', reply: { who: q.id, text: say('talent.watch', 'Next time, then. Enjoy the show.') } }] }] };
-  dialogueShow('rec.talent', { id: 'rec.talent@' + d, who: [q.id], at: now });
+  dialogueShow('rec.talent', { id: 'rec.talent@' + d, who: [q.id], at: now, ...cardWhere(e) });   // its room (backlog FX17-1: with no where, meetingsTick closed it the next minute)
 }
 // the Wren talks' panel (0.83.2): the speaker's opening, then a choice: ask one question (a friendship step with the
 // speaker; a chief remembers who asked) or just listen. Words: the speaker's own lines (kinds talk.open, talk.answer,
@@ -48096,7 +48101,7 @@ DECK_DRESS.birthdayTable = { deck: 3, what: 'a birthday: the cake on the head of
   cy(.22, .02, '#e6e0d3', .783); cy(.16, .13, '#f2d7a0', .858); cy(.165, .03, '#f7f1e8', .917);   // the plate, the cake, the icing (as EV_KIT's)
   for (const [dx, dz] of [[-.06, -.03], [.05, -.04], [0, .06]]) { const c = new THREE.Mesh(new THREE.CylinderGeometry(.008, .008, .07, 6), dressMat('#c45a3f')); c.position.set(x + dx, .967, z + dz); s.add(c);
     const fl = new THREE.Mesh(new THREE.SphereGeometry(.012, 8, 6), dressMat('#ffd27a')); fl.position.set(x + dx, 1.01, z + dz); s.add(fl); }   // three candles and their flames
-  return { t: 'Birthday cake', x: 'A lemon cake with white icing and three candles, on the head of the long table. Tap it for a slice.', floor: ['M', x, z], y: .9, w: .5, h: .3, d: .5, tag: { bdayCake: true } };
+  return { t: 'Birthday cake', x: 'A lemon cake with white icing and three candles, on the head of the long table. Tap it for a slice.', floor: ['M', x, z], y: .9, w: .5, h: .3, d: .5, tag: { bdayCake: true, onTop: true } };   // onTop: pick() takes it over the long table it stands on (backlog PB1-1)
 } };
 let BDAY_LIVE = null, SLICE = null, BDAY_SLICE_DAY = null;   // the party's bubbles now; the slice in your hand { d, from }; the day you had one
 function bdayFrame() {
@@ -49067,7 +49072,7 @@ function cometTick(now) {
   if (m >= 1325 && !e.mine.named) { e.mine.named = 1; e.mine.namedBy = 'sato'; }   // nobody named it at the card: the crew shout names and Sato picks the one about the storm
   if (m >= 1320 && m < 1335 && lounge && joined && !e.mine.knot && !(IX_GOAL && IX_GOAL.comet)) {
     const label = cometW('knot.tip') || 'Tap Saruth to tie a comet knot';
-    if (!IX_GOAL || IX_GOAL.tj) setGoal({ deck: 3, crew: 'saruth', label, comet: 'knot' }); ixTip('t:comet:knot', label + '. To the Veyli a comet is a guest crossing their sky.');
+    if (!IX_GOAL || IX_GOAL.tj || typeof NEED_GOAL !== 'undefined' && NEED_GOAL && IX_GOAL.label === NEED_GOAL.label) setGoal({ deck: 3, crew: 'saruth', label, comet: 'knot' });   // over a need's marker too (backlog RV18-C1: the bunk's held it at 22:02); the need's comes back after ixTip('t:comet:knot', label + '. To the Veyli a comet is a guest crossing their sky.');
   }
   if ((m >= 1335 || e.mine.knot) && IX_GOAL && IX_GOAL.comet === 'knot') clearGoal();
 }
@@ -49147,12 +49152,12 @@ function cometTalk(d, m) {
   const L = baked ? baked.concat(COMET_TALK[id].filter(x => x[2] || typeof x[1] === 'function')) : COMET_TALK[id];
   const going = q => planDay(q, d).some(sg => sg.tag && sg.tag.startsWith('ev-' + id));
   for (let k = 0; k < L.length; k++) {
-    const i = (S.n + k) % L.length; if (L[i][2] && m < L[i][2]) continue;
+    const i = (S.n + k) % L.length; if (L[i][2] && m < L[i][2] || S.said.has(i)) continue;   // each line once a night (backlog RV18-C2: with one speaker there, theirs came round every 4 minutes)
     const p = schedPeople().find(q => q.id === L[i][0]); if (!p || !going(p)) continue;   // not at this window tonight: passed over
     const a = DECK_CREW.find(c => c.h && c.p && c.p.id === L[i][0]);
     const sp = a && a.spot ? (placeSpot(a.spot.id) || a.spot) : null;
     if (!a || here !== deckDef.num + '|' + roomAt(...cellAt(a.x, a.z)) || (sp && sp.x != null && Math.hypot(a.x - sp.x, a.z - sp.z) > 1.5)) continue;   // still coming: tried again next time
-    bubbleSay(friSpeaker(a), typeof L[i][1] === 'function' ? L[i][1]() : L[i][1], 5); S.at = m; S.n = i + 1; return;
+    bubbleSay(friSpeaker(a), typeof L[i][1] === 'function' ? L[i][1]() : L[i][1], 5); S.at = m; S.n = i + 1; S.said.add(i); return;
   }
 }
 // your Record's line for the comet (eventRecord asks the event's `record`): the window you joined (SHIP.events.joined),
@@ -49634,7 +49639,7 @@ function vesselItems(d) {
   if (k === 2 && M['vessel:job'] && !M['vessel:part'] && (M['vessel:step'] | 0) >= 1) row(600, 805, 'tracked.step.' + (M['vessel:step'] | 0), 'Taavek\'s part, in the machine shop', 'the machine shop, Deck 5', 5, 'f');
   if (k === 2 && M['vessel:part'] && !M['vessel:testfit']) row(810, 870, 'tracked.testfit', 'Taavek\'s part: the test fit, 13:30', 'the machine shop, Deck 5', 5, 'f');
   if (k === 2 && !M['vessel:home']) row(VESSEL.leave - 15, VESSEL.leave, 'sched.home', 'Taavek goes home, 15:00, the shuttle bay', 'the Tern\'s ramp, the shuttle bay, Deck 5', 5, 'S');
-  if (k >= 3 && M['vessel:sketch'] && !M['vessel:shelved']) row(720, 1439, 'tracked.shelf', 'Put Taavek\'s sketch on your shelf', 'your cabin, Deck 4', 4, null);
+  if (k >= 3 && M['vessel:sketch'] && !M['vessel:shelved']) { const bed = playerBed(), bd = deckOf(bed), bp = placeById(bed); row(720, 1439, 'tracked.shelf', 'Put Taavek\'s sketch on your shelf', 'your cabin, Deck ' + bd, bd, bp ? bp.room : null); out[out.length - 1].todo = true; }   // a to-do, not an event: its heads-up says so (backlog RV23-3) (RV25-1: the cabin where you live now, Deck 2's room B once you've moved up)
   return out;
 }
 // the crowd's lines over their heads (the comet's way: a line every 4 ship minutes while you're in the room, in order,
@@ -51915,7 +51920,7 @@ function socInvites(h) {
     const who = SOC.crew.filter(p => relTier(p.id) >= 2 && going(p, e.id)).sort((a, b) => (b.id === hostId) - (a.id === hostId) || relTier(b.id) - relTier(a.id) || schedU(a.seed, d, 654) - schedU(b.seed, d, 654))[0];
     if (!who) continue;
     const appt = socialInvite({ trad: e.id, day: d, from: who.id }); if (!appt) continue;
-    I.push({ day: d, from: who.id, trad: e.id, kind: 'trad', appt, said: false, line: iv.line || (e.ev && e.ev.ask) || null }); n++;
+    I.push({ day: d, from: who.id, trad: e.id, kind: 'trad', appt, said: false, line: evText(iv.line || (e.ev && e.ev.ask), e, who) || null }); n++;   // the words, not the tradition's line maker (backlog TM-1: a Mail printed its code)
   }
   for (const p of SOC.crew.filter(q => relTier(q.id) >= 3).sort((a, b) => schedU(a.seed, d, 655) - schedU(b.seed, d, 655))) {
     if (n >= INVITE_MAX) break;
@@ -51923,7 +51928,7 @@ function socInvites(h) {
     const v = typeof VOICE !== 'undefined' && VOICE[p.id], kinds = (v && Array.isArray(v.invites) && v.invites.length ? v.invites : [...new Set((p.habits || []).map(x => INVITE_HABIT[x]).filter(Boolean))]).concat(['dinner']);
     let hit = null;
     const trad = kinds.map(k => (typeof eventsOn === 'function' ? eventsOn(d) : []).find(e => e.id === k && going(p, e.id))).find(Boolean);   // a voice card's invites may name a tradition: they ask you along when they're going
-    if (trad && !I.some(x => x.day === d && x.trad === trad.id)) { const appt = socialInvite({ trad: trad.id, day: d, from: p.id }); if (appt) { r.inviteDay = d; I.push({ day: d, from: p.id, trad: trad.id, kind: 'trad', appt, said: false, line: (trad.ev && trad.ev.invite && trad.ev.invite.line) || (trad.ev && trad.ev.ask) || null }); n++; continue; } }
+    if (trad && !I.some(x => x.day === d && x.trad === trad.id)) { const appt = socialInvite({ trad: trad.id, day: d, from: p.id }); if (appt) { r.inviteDay = d; I.push({ day: d, from: p.id, trad: trad.id, kind: 'trad', appt, said: false, line: evText((trad.ev && trad.ev.invite && trad.ev.invite.line) || (trad.ev && trad.ev.ask), trad, p) || null }); n++; continue; } }
     const bed = S.byId.get(p.bed), at8 = (d - 1) * 1440 + 1200, w8 = planWhere(p, at8);   // close friends ask you round to their quarters (doorOpenFor lets you in)
     if (relTier(p.id) >= 4 && bed && w8 && !w8.moving && (w8.act === 'leisure' || w8.act === 'off') && schedU(p.seed, d, 662) < .3) hit = { k: 'quarters', seg: { from: at8, to: at8 + 45, placeId: bed.id } };
     if (!hit) for (const k of kinds) {
@@ -52532,7 +52537,7 @@ function careerCard(on) {
       k => { if (k === 0) newGameStart(true); else { newGameStart(false); if (typeof introSkip === 'function') introSkip(); } }); };
   el.hidden = false;
 }
-if (SHIP.career && SHIP.career.end) careerCard(true);    // a save that ended: the card again
+if (SHIP.career && SHIP.career.end) queueMicrotask(() => careerCard(true));    // a save that ended: the card again, once the whole script has run (backlog N6-1: its words need chatName, made further down)
 const movedOn = () => (socInit(), (SHIP.social.moved || []).map(x => { const p = SOC.idx.has(x.id) && SOC.crew[SOC.idx.get(x.id)]; return p ? { id: x.id, name: p.name, role: p.role, day: x.day, to: p.transferTo || null } : null; }).filter(Boolean));
 // ---- guiding a newcomer (0.36.65, A10; plans/social-deep-plan.md Part 8b) ----
 // Only after you've been promoted (the user's rule: the flag 'promoted', onboarding's and mine; off in normal play until
@@ -52844,7 +52849,7 @@ function socialChatter(m) {
   if (typeof bubbleSay !== 'function' || typeof DECK_CREW === 'undefined') return;
   if (typeof bubbles !== 'undefined' && bubbles) bubbles.hidden = !!CHAT;
   if (!CHAT && !sleeping && cheerTick(m)) return;
-  if (CHAT || sleeping || simNow() - CHATTER_AT < CHATTER_GAP * 1000 || schedU(m, 0, 635) >= CHATTER_ODDS) return;
+  if (CHAT || (typeof DIALOGUE !== 'undefined' && DIALOGUE) || sleeping || simNow() - CHATTER_AT < CHATTER_GAP * 1000 || schedU(m, 0, 635) >= CHATTER_ODDS) return;   // none over a moment or a meeting's card either (backlog FX21-1)
   if (typeof introHush === 'function' && introHush()) return;   // section 21: Zeke's goodnight bubbles on the arrival evening (the patch, #4)
   const t = shipNow(), heard = new Set(SHIP.heard.map(x => x.id)), P = player.obj.position;
   const v = new THREE.Vector3(), onScreen = a => { v.set(a.x, (a.y || 0) + 1.6, a.z).project(camera); return Math.abs(v.x) < .7 && v.y < .8 && v.y > -.9; };   // well inside the screen, so the bubble fits
@@ -53293,16 +53298,21 @@ function chatWalk(C) {                                   // walk to a free tile 
   const goal = nearestOpen(a.x, a.z, player); if (!goal) return;
   C.walking = shipNow(); a.talking = Math.max(a.talking || 0, 6); playerGo(goal, () => {}); chatShow();
 }
+// a visiting guest aboard (backlog 15, lead 45: Envoy Saruth): the chat card and Talk a while with the talk pack's guest
+// lines; no friendship is kept (relAdd counts the crew only)
+const chatGuest = p => typeof ROSTER_GUESTS !== 'undefined' && ROSTER_GUESTS.includes(p) && typeof DECK_CREW !== 'undefined' && DECK_CREW.some(x => x.p === p);
+const chatGuestLine = (p, k = 0) => { const S = typeof TALKS !== 'undefined' && TALKS.small || {}, a = S['small.' + p.id] || (talkPackVeyli(p) && S['small.saruth']) || [], e = a[Math.floor(schedU(p.seed, Math.floor(shipNow() / 60), 661 + k) * a.length)];   // their own small talk, never the crew's
+  return { text: e ? linesFill(e.text, p, { t: shipNow() }) || e.text : p.role + '.', kind: 'guest', say: true }; };
 function chatOpen(p, greet, line, o) {                    // greet: they came to you (socialSeek), so they say hello first; line: one to open with (a visit); o.tap: your tap (or their chip) from wherever you are
   if (!p || !p.id) return false;
-  socInit(); if (!SOC.idx.has(p.id)) return false;
+  socInit(); if (!SOC.idx.has(p.id) && !chatGuest(p)) return false;
   const w = typeof whereIs === 'function' ? whereIs(p, shipNow()) : null;
   if (w && w.act === 'sleep') { chatClose(); toast(p.name, p.role + '. Fast asleep. Better not wake them.'); return true; }
   { const a0 = o && o.tap && typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === p);   // (the user, 2026-10-27) talk only up close: from further off, their card says who and what they're doing, and Walk over; reach: move further off than now (not walking over) and it closes (RV23)
     if (a0 && Math.hypot(a0.x - player.obj.position.x, a0.z - player.obj.position.z) > TALK_NEAR) { if (CHAT && CHAT.p !== p) chatClose(); CHAT = { p, far: true, greet, open: line || null, line: { text: chatDoing(p, w), say: false }, ask: false, at: shipNow(), reach: Math.hypot(a0.x - player.obj.position.x, a0.z - player.obj.position.z) + 1.5 }; if (typeof toastEl !== 'undefined') toastEl.classList.remove('show'); chatShow(); return true; } }
   const r = relGet(p.id); if (r.met === null) r.met = Math.floor(shipNow());
   const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === p), d = a ? Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) : 0;
-  CHAT = { p, line: line || (greet ? socGreet(p) : chatLine(p)), ask: false, fav: favourOf(p), at: shipNow(), reach: Math.max(4, d + 1.5) };   // walk off further than that and it closes
+  CHAT = { p, line: line || (chatGuest(p) ? chatGuestLine(p) : greet ? socGreet(p) : chatLine(p)), ask: false, fav: favourOf(p), at: shipNow(), reach: Math.max(4, d + 1.5) };   // walk off further than that and it closes
   if (CHAT.line.news) playerHeard(CHAT.line.news, p.id);
   if (CHAT.line.kind === 'story') arcTold(p);
   if (CHAT.line.kind === 'invite') CHAT.line.invite.said = true;
@@ -53324,6 +53334,7 @@ function chatDo(id) {
   if (id === 'chat') {
     if (r.chatDay === SHIP.time.day) return;
     r.chatDay = SHIP.time.day;
+    if (chatGuest(p)) { if (typeof playerChat === 'function') playerChat(p); chatSay(chatGuestLine(p, 1).text); return; }   // a guest's hello: their own small talk, nothing kept (backlog 15)
     if (typeof playerChat === 'function') playerChat(p);  // section 15: social for you (half when you're grubby)
     const before = r.tier, after = relAdd(p.id, 'chat', REL_PTS.hello);   // Say hello, the old Chat: +1 (0.36.82; was REL_PTS.chat)
     const grubby = SHIP.player && SHIP.player.needs && typeof NEED_LOW !== 'undefined' && SHIP.player.needs.hygiene < NEED_LOW;
@@ -53459,7 +53470,7 @@ function talkStart(C) {
   if (seated) { C.talk.sits = true; C.reach = Math.max(C.reach, 5); }
   else if (sits && typeof playerSitNear === 'function' && playerSitNear(deckDef.num, cellAt(a.x, a.z), 'Talking with ' + shortName(p))) { C.talk.sits = true; C.reach = Math.max(C.reach, 5); }   // a seat beside them
   const pk = typeof talkPackStart === 'function' ? talkPackStart(C) : null;   // section 22: the Talk a while pack's talk (TE1), fired now; it clears C.talk.topic
-  const open = pk || (C.talk.topic && talkSays(C, 'talk.' + topic + '.open')), hi = C.talk.pack && C.talk.pack.first ? null : talkSays(C, sits ? 'talk.sit' : 'talk.start');   // section 22's first-talk scene (item 15): their own first words
+  const open = pk || (C.talk.topic && talkSays(C, 'talk.' + topic + '.open')), hi = C.talk.pack && C.talk.pack.first || chatGuest(p) ? null : talkSays(C, sits ? 'talk.sit' : 'talk.start');   // section 22's first-talk scene (item 15): their own first words
   if (typeof playerChat === 'function') playerChat(p);   // the hello's little social (section 15)
   const mt = C.talk.pack ? C.talk.pack.topic : topic; memAdd(p.id, 'talk' + (mt ? '.' + mt : ''));
   chatSay([hi, open].filter(Boolean).join(' ') || talkNext(C) || 'Go on then. What\'s new?');
@@ -53467,6 +53478,7 @@ function talkStart(C) {
 function talkNext(C) {                                    // their next line while you talk: the topic's, a filler, else their usual chat
   const T = C.talk, p = C.p;
   const pk = typeof talkPackNext === 'function' && talkPackNext(C); if (pk) return pk;   // section 22: the pack's next line first
+  if (chatGuest(p)) { T.wrap = true; return null; }   // a guest: their pack's words only (backlog 15)
   if (typeof talkPackQuiet === 'function' && talkPackQuiet(C)) { T.wrap = true; return null; }   // section 22: nothing new left to say (no filler over and over; DL1, playtest 1): the talk wraps up
   const l = (T.topic && talkSays(C, 'talk.' + T.topic + '.more')) || talkSays(C, 'talk.filler');
   if (l) return l;
@@ -53497,8 +53509,8 @@ function talkEnd(C, why, quiet) {                         // why: 'full' | 'stop
   const T = C.talk; if (!T || T.end) return; T.end = why; T.ask = false;
   if (why === 'full') { if (typeof leisureAdd === 'function') try { leisureAdd(5, 'talk'); } catch (e) { /* section 15's */ } if (typeof simNote === 'function') simNote('talk', { id: C.p.id, mins: TALK_MINS }); }
   if (quiet) return;
-  const l = talkSays(C, why === 'full' ? 'talk.end' : 'talk.stop');
-  chatSay(l || (why === 'full' ? 'That was nice. Let\'s do it again.' : 'Another time, then.'));
+  const l = chatGuest(C.p) ? null : talkSays(C, why === 'full' ? 'talk.end' : 'talk.stop');   // a guest: no crew words (backlog 15)
+  chatSay(l || (why === 'full' ? (chatGuest(C.p) ? 'Thank you. That was a good talk.' : 'That was nice. Let\'s do it again.') : 'Another time, then.'));
 }
 function talkStep(C) {                                    // every frame while you talk
   const T = C.talk, t = shipNow(), dm = Math.max(0, Math.min(1, t - T.last)); T.last = t;
@@ -56271,7 +56283,7 @@ function introSoloGive(now) {
   if (!claimJob(id)) { toast('Your first solo job', what + '. It\'s on the job board in the Works bay, asked for you: take it once your job\'s done.'); return false; }
   SHIP.player.track = id; if (typeof clearGoal === 'function') clearGoal();
   if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
-  toast('Your first solo job', what + '. It\'s yours and tracked: follow the marker' + (j.parts && j.parts.length ? ', parts first, from main storage on Deck 5.' : '.'));
+  toast('Your first solo job', what + '. It\'s yours and tracked: follow the marker' + (j.parts && j.parts.length ? ', parts first, ' + partsFrom(j) + '.' : '.'));
   return true;
 }
 const introSoloHold = now => introOn() && Math.floor(now / 1440) + 1 === 2 && (SHIP.intro.done['d2-solo:met'] === undefined || SHIP.intro.done['d2-solo:met'] >= 0 && SHIP.intro.done['d2-solo:end'] === undefined);   // Tuesday until her meeting is over
@@ -62466,7 +62478,7 @@ function teamNext(j, t) {                                // the next step (or th
   simNote('team', { id: j.id, step: j.cur, by: s.who, kind: s.who === 'you' ? 'turn' : 'step' });
   if (s.who === 'you') {
     try { toast(teamLabel(j), teamText('team.turn.' + s.part, 'Your turn: ' + TEAM_PART[s.part] + '.', { job: teamLabel(j) })); } catch (e) { /* no UI */ }
-    const pl = placeById(j.spots && j.spots.you); if (pl && typeof setGoal === 'function') setGoal({ deck: pl.deck, room: pl.room, label: TEAM_PART[s.part], team: j.id });
+    const pl = placeById(j.spots && j.spots.you); if (pl && typeof setGoal === 'function') setGoal({ deck: pl.deck, room: pl.room, place: pl.id, label: TEAM_PART[s.part], team: j.id });   // at your spot, not the room's middle (backlog DV1-2: a tap at the pin there did nothing)
   } else if (teamYours(j)) worksTeach('m8', j.lead, 'call.' + s.part, null);
   return true;
 }
@@ -70016,7 +70028,8 @@ class CrewAgent {
     const atSpot = this.spot && (this.settled || !this.path.length);
     let from = atSpot ? this.spot.walk : this.here();
     if (!free(...from)) from = nearestOpen(this.x, this.z, null) || from;
-    if (atSpot && !this.spot.onTile || !free(...this.here())) { const w = cellPos(...from); if (atSpot && Math.hypot(this.x - w.x, this.z - w.z) <= CREW_UP_MAX) { this.hx += this.x - w.x; this.hz += this.z - w.z; } this.x = w.x; this.z = w.z; }   // up from the seat (drawn: eased off it, hx/hz, FX8)
+    if (atSpot && !this.spot.onTile || !free(...this.here())) { const w = cellPos(...from), mv = atSpot && this.spot.mv && this.rdx != null, sx = mv ? this.rdx : this.x, sz = mv ? this.rdz : this.z;   // a place with its own moves (a lane, the wall): from where the body is drawn, mid-lap (backlog FX8-1)
+      if (atSpot && Math.hypot(sx - w.x, sz - w.z) <= (mv ? CREW_UP_MV : CREW_UP_MAX)) { this.hx += sx - w.x; this.hz += sz - w.z; } this.x = w.x; this.z = w.z; this.rdx = null; }   // up from the seat (drawn: eased off it, hx/hz, FX8)
     this.goalId = goalId; this.path = [];
     this.settled = false; this.spot = null;
     let goal = null;
@@ -70611,11 +70624,12 @@ const recMix = x => { x = Math.imul(x ^ x >>> 15, 2246822507); x = Math.imul(x ^
 function recCrewSet(a, dt) {                             // false: not a move (the agent sets the body as usual)
   const M = a.settled && a.spot ? a.spot.mv : null, want = M ? (M.kit !== undefined ? M.kit : REC_KITS[M.kind] || '') : '';
   if (want !== (a.rkH === a.h ? a.rk : '')) recCrewKit(a, want); else if (a.rkH !== a.h) a.rk = '';   // a new body since (crewDetail's): in uniform
-  const fn = M && REC_CREW[M.kind]; if (!fn) return false;
+  const fn = M && REC_CREW[M.kind]; if (!fn) { a.rdx = null; return false; }
   if (a.mtId !== a.spot.id) { a.mtId = a.spot.id; a.mt = 0; a.fs = idHash(a.p.id); }
   a.mt += dt; const o = _rcp; o.x = a.x; o.y = a.y; o.z = a.z; o.f = a.face;
   const pose = fn(a, M, a.mt, o, recCrewC(M));
   if (a.mt < 1.5) { const k = ss(a.mt / 1.5); o.x = L(a.x, o.x, k); o.z = L(a.z, o.z, k); }
+  a.rdx = o.x; a.rdz = o.z;   // where the body is drawn: getting up glides from here (backlog FX8-1)
   a.h.set(o, o.f, pose); return true;
 }
 function recCrewKit(a, k) {                              // into rec kit or grip socks and back: a new body of the same kind
@@ -70943,7 +70957,9 @@ ray.camera = camera;
 function isShown(o) { while (o) { if (!o.visible) return false; o = o.parent; } return true; }
 function pick(cx, cy) {
   ndc.set(cx / innerWidth * 2 - 1, -(cy / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera);
-  return ray.intersectObjects(pickables, true).find(h => !h.object.isSprite && !h.object.isPoints && isShown(h.object) && !(h.object.userData.walker && h.object.userData.walker.isPlayer));
+  const hs = ray.intersectObjects(pickables, true).filter(h => !h.object.isSprite && !h.object.isPoints && isShown(h.object) && !(h.object.userData.walker && h.object.userData.walker.isPlayer));
+  const top = hs.length > 1 && hs.find(h => h.object.userData.item && h.object.userData.item.onTop);   // a small thing standing on furniture (item.onTop: the birthday cake) wins over the furniture's own box around it (backlog PB1-1)
+  return top && top.distance - hs[0].distance < 1.2 ? top : hs[0];
 }
 // the two tiles either side of a door edge, with the angle you face it from: [i, j, angle]
 const doorSides = e => e.horiz ? [[e.i, e.j - 1, Math.PI], [e.i, e.j, 0]] : [[e.i - 1, e.j, -Math.PI / 2], [e.i, e.j, Math.PI / 2]];
