@@ -64661,7 +64661,7 @@ function pu4Next(k) {                                    // puNext's line for th
   if (!T) { const B = WORK_BANDS[3], at = b => B.findIndex(x => x[1] === b);
     return at(worksBand()) >= at('steady') && !ladderNeeds((ladderRow('t4') || {}).needs || { rep: 'trusted' }, W) ? worksText('next.t4.steps', 'Your Tier 4 test needs Trusted and power and relays. You\'re {band} now.', { band: worksBandWord() }, k) : null; }
   if (!T.passed) return worksText('next.wait.t4', 'Your Tier 4 test: {day}, {time}, the engine room, Deck 6.', { day: pu4DayWord(T.day, d), time: hhmm(PU4.testAt) }, k);
-  if (!T.res) { const at = pu4ResWhen(); return at === null ? null : worksText('next.wait.t4res', 'Your Tier 4 result: {day}, {time}, when your shift starts. Calder will find you.', { day: pu4DayWord(worksDay(at), d), time: hhmm(at % 1440) }, k); }
+  if (!T.res) { const at = pu4ResWhen(); return at === null ? null : pu4ResLate() ? worksText('next.wait.t4res.eve', 'Your Tier 4 result: {day}, {time}. Calder will find you.', { day: pu4DayWord(worksDay(at), d), time: hhmm(at % 1440) }, k) : worksText('next.wait.t4res', 'Your Tier 4 result: {day}, {time}, when your shift starts. Calder will find you.', { day: pu4DayWord(worksDay(at), d), time: hhmm(at % 1440) }, k); }
   return null;
 }
 function pu4Items(d) {                                   // puItems' Tier 4 rows on day d
@@ -64729,11 +64729,12 @@ function pu4Passed(t) {                                  // turned in: passed, w
   const W = SHIP.works, T = puT4(), c = W && W.cur; if (!W || !T || T.passed) return false;
   const by = (c && c.by) || 'calder', d = worksDay(t);
   T.passed = true; T.day = d; W.tr.t4 = d; if (c && c.id === 't4') W.cur = null;
-  worksSayAll(by, worksVoice(by, 'pu4.promo.passed') || [worksText('pu4.passed.say', 'That\'s the test. Your result when your shift starts. I\'ll find you.')]);
+  const eve = pu4ResLate();   // (0.99 balance) days off next: the result this afternoon
+  worksSayAll(by, worksVoice(by, 'pu4.promo.passed') || [eve ? worksText('pu4.passed.say.eve', 'That\'s the test. Your result this afternoon. I\'ll find you.') : worksText('pu4.passed.say', 'That\'s the test. Your result when your shift starts. I\'ll find you.')]);
   try { if (puNearMe('torres-zeke', CHATTER_NEAR)) simTimeout(() => worksSayAll('torres-zeke', worksVoice('torres-zeke', 'pu4.promo.passed') || ['Proper job.']), 6000); } catch (e) { /* not in play */ }
   flagSet('pu4.passed', d);
-  promoMail('mail.pu4.passed', 'Your test | Done. Your result when your shift starts. I\'ll find you.', null, t);
-  if (t >= shipNow() - 1) promoNotice(worksText('pu4.passed.notice', 'Your Tier 4 test is done. Your result: Calder will find you when your shift starts.'), worksName(by));
+  if (eve) promoMail('mail.pu4.passed.eve', 'Your test | Done. Your result this afternoon. I\'ll find you.', null, t); else promoMail('mail.pu4.passed', 'Your test | Done. Your result when your shift starts. I\'ll find you.', null, t);
+  if (t >= shipNow() - 1) promoNotice(eve ? worksText('pu4.passed.notice.eve', 'Your Tier 4 test is done. Your result: Calder will find you this afternoon.') : worksText('pu4.passed.notice', 'Your Tier 4 test is done. Your result: Calder will find you when your shift starts.'), worksName(by));
   try { crewSceneEnd('torres-zeke'); } catch (e) { /* none */ }
   if (typeof MACH_REV !== 'undefined') MACH_REV++;
   simNote('pu4', { step: 'passed', day: d });
@@ -64816,12 +64817,17 @@ const PU4_R = { early: 5, find: 30, walk: 45, badgeWait: 3 };
 OCCASIONS.pu4Badge = { title: 'Your engine badge', kind: 'meeting', by: 'marrow', with: ['vance', 'calder', 'torres-zeke'], deck: 1, room: 'O', at: 990, len: 25, script: 'pu4.badge', due: () => false, mail: null };
 function pu4ResWhen() {                                  // when your result comes (absolute minutes): your shift's start after the test day's 12:30
   const T = puT4(); if (!T || !T.passed) return null;
-  const t = (T.day - 1) * 1440 + PU4_T.until;
+  const t = (T.day - 1) * 1440 + PU4_T.until, at = pu4ResNext(T, t);
+  return worksDay(at) > T.day + 1 ? pu4ResEve(T, t) : at;   // (0.99 balance, BAL2, the user's yes to (b)) days off next: the result that afternoon (pu4ResEve)
+}
+function pu4ResNext(T, t) {
   for (let d = T.day; d < T.day + 14; d++) { const B = (d - 1) * 1440, n = P5_NIGHTS[d];   // the nights are fixed by the day (section 28)
     if (d > T.day && playerShiftOn(d) && !(n && P5_NIGHT)) return B + DAY_SHIFT[0];
     if (n && B + n[0] - PU4_R.early >= t) return B + n[0] - PU4_R.early; }
   return T.day * 1440 + DAY_SHIFT[0];
 }
+const pu4ResEve = (T, t) => t + 60;                      // 13:30, an hour after the test's window: done by the Friday address (16:00)
+const pu4ResLate = () => { const T = puT4(); return !!T && T.passed && pu4ResWhen() === pu4ResEve(T, (T.day - 1) * 1440 + PU4_T.until); };   // the result comes this afternoon, not when a shift starts
 const pu4MoveDay = d => { for (let k = d + 1; k < d + 8; k++) { try { if (weekday(k) === 3) return k; } catch (e) { return d + 2; } } return d + 2; };   // the Thursday after
 function pu4BadgeDay() {                                 // the Captain's afternoon: the day after a night's result (the same day after a morning's), later if you slept through it
   const T = puT4(); if (!T || !T.res) return null;
