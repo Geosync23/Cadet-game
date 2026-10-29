@@ -5,8 +5,8 @@
 | 0.96.0 | Controller, the Diplomatic visit (+ pointers), sound update ON | LIVE 6:42 PM ET Oct 28 |
 | 0.97.0 | Dev mode update (J0-J5) | full round running Oct 28 evening |
 | 0.98.0 | Optimization pass: game speed on phones, plus fix the two long-standing check failures (career backlog 12, events FX24-2) (the user, 8:3x PM ET; an earlier "Both" was an accidental answer) | OP1 plan page first |
-| 0.99.0 | Balance | from the balance report (https://claude.ai/artifact/R1NgKLKRoP2Gu5sfgmMumm) once the user answers it |
-| 1.0 | One last big playtest patch + a title screen (the user, 8:4x PM ET) | the user's own whole-game playthrough on a real phone (incl. the controller test) |
+| 0.99.0 | Balance + the 26 backlog fixes (moved from the 1.0 patch) + the title screen (B) | from the balance report (https://claude.ai/artifact/R1NgKLKRoP2Gu5sfgmMumm) once the user answers it |
+| 1.0 | One last big playtest patch: the user's own playthrough notes only | the user's own whole-game playthrough on a real phone (incl. the controller test) |
 
 After 1.0 there can still be patches, but this is the map to 1.0.
 Each version: plan page first where it's new work, then build, review, full round, the user's OK, publish.
@@ -38,3 +38,7 @@ Backlog to 1.0 (the user's answers on BT1's page, Oct 28 ~9:40 PM ET; plans/back
 - 1.0 patch (26): FX17-1, N6-1, PB1-1, TM-1, DV1-1/2/3, 15, CP5-1, 30, 31, JB1-1, FX3-1/2, FX10-1, FX8-1, FX21-1, RV18-C1/C2/D1, EV1-1,
   SD3-1, V-1 seated formal dinner (no Dev jump needed), V-2 vessel nod, RV23-2/3; + the title screen (B).
 - Dropped: 28, BAL-1, BAL-2, EV1-2, 1, 5, 6, CP5-2, LD1-1, DM1-4, DM1-5, DM2-1. Everything in groups C/D left alone.
+
+Update (the user, Oct 28 ~9:50 PM ET): "just go to .99; my playthrough notes will be 1.0". The 26 backlog fixes and the title screen
+move into 0.99 (with the balance pass). 1.0 = the user's playthrough notes only. The clash re-asked: earlier answers stand
+(FX24-2 + FX12-1 + TQ1-1 in 0.98; backlog 12 balanced in 0.99).
