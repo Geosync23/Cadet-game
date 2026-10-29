@@ -17,9 +17,9 @@ old triage commits merged back in (a merge commit, no history rewrite). Build li
 - No change: 31, JB1-1 (already fixed on 0.97.0); EV1-1 (lead 45: no change). Not reproduced: DV1-1.
 - Left for others (lead's call): V-1 seated formal dinner and V-2 vessel nod (events side), SD3-1 (SD3).
 
-## In progress
-- RV23-2: the follower's stale "Clock in: shift at 09:00" from 16:03 the day before (Day 32) and "air plant, Deck 5" on Day 31, from
-  RV23's arrows endgo track run. Reproducing with `arrows_check.py BUILD endgo track` (about 25 min).
+## Follow-up
+- RV23-2 done (e69b2235): Day 32 stops being a workday after the career offer, so "Clock in" (asked at 08:00) never cleared; its done
+  now also reads !playerOnDuty(d). arrows_check endgo track: stuck 1 -> 0. The Day 31 "air plant" arrow didn't show in two runs.
 
 ## How I tested
 Probes in Playwright reuse cadet_test.py's prelude (exec of its top, as day_check does) and `Game(pw, path)`; each fix was run on
