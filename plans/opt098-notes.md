@@ -50,3 +50,18 @@ Measured on claude/integration fe11cd66 (0.96.0), one browser, a quiet 4-core co
 Two pages (old and new) open in one browser, the same scene, batches alternated A B A B ... 15-20 times; report the
 median of the paired differences and how many pairs went each way (a sign test), not two separate runs. Include the
 drawn frame's render() JavaScript, not only game code. Pixel proof: cadet_test ALL IDENTICAL plus the scene shots.
+
+## After the user's answers (28 Oct, ~10:45 PM ET)
+
+- **Turn 1 dropped.** `opt098-probes/nodebug_proof.py` (OLD vs NEW, no ?debug, 10 alternating rounds): first picture
+  2.95/2.98/2.90/3.23/3.05/3.14/3.03/3.24/2.89/3.18 s OLD vs 2.89/3.07/3.05/2.91/3.04/3.07/2.98/3.17/3.12/3.23 s NEW;
+  6 of 10 pairs faster, median difference about 0.03 s: noise. The earlier 0.25-0.3 s (gl_split, 3 runs) always ran OLD
+  first (backlog 32's order effect). three r128 reads each program's uniforms right after linking, which syncs anyway.
+  Pixels after 60 frames identical.
+- **Turn 2 parked.** In the mess, every still mesh casting its own shadow is either noMerge (moves or changes) or added
+  after the build (event decor, frozen): about 10 safe draws, ~0.1 ms, against rebuilding stand-ins when decor changes.
+- **Turn 6 widened** (the user's backlog list): FX24-2 + FX12-1 + TQ1-1 share the planner's walk estimate (walkLead,
+  WALK_DETOUR 1.6; the commute minutes C). First step: measure planned vs real arrivals (lift to room at evening
+  gatherings; same-deck moves; toilets), then one calibrated change. A first narrow FX24-2 draft (take()'s `longLead`,
+  `tradWalkMin()` = 10, the generic tradition take in leisureUntil) is kept aside, not committed.
+- SD3-2 proposed to SD3 (section 27's owner).

@@ -56,7 +56,9 @@ a{color:var(--teal)}
 
 <div class="card rule"><b>The rules this plan keeps.</b> The game looks the same: every change is checked picture for picture against the build before it (cadet_test must say ALL IDENTICAL). If a change can't be made pixel-identical, it isn't merged until you've seen the difference and said yes (question 1). The crew's days come out the same. Every change runs the full round of checks before it's merged. Only the faster checks are out of scope: 0.98 is game speed only, as you asked.</div>
 
-<div class="card rule"><b>Your answers (28 October, evening, through lead 44).</b> (1) Items 1 and 2: show you a before and after picture first; only incredibly minor visual changes are acceptable, pixel-identical is preferred, and anything visible needs your OK. (2) No 60 fps cap. (3) No battery saver. (4) Backlog 12 is not fixed in 0.98: you'll balance it in 0.99, and it stays a known old failure. (5) FX24-2: yes, book walking time only for long walks to a tradition. So item 5 and the backlog 12 half of item 6 are set aside (kept on record below). Builders: OP1 builds turns 1, 2 and the FX24-2 fix from tonight; a fresh render builder takes turns 3 and 4; RV25 reviews each turn.</div>
+<div class="card rule"><b>Your answers (28 October, evening, through lead 44).</b> (1) Items 1 and 2: show you a before and after picture first; only incredibly minor visual changes are acceptable, pixel-identical is preferred, and anything visible needs your OK. (2) No 60 fps cap. (3) No battery saver. (4) Backlog 12 is not fixed in 0.98: you'll balance it in 0.99, and it stays a known old failure. (5) FX24-2: yes, book walking time only for long walks to a tradition. So item 5 and the backlog 12 half of item 6 are set aside (kept on record below). Builders: OP1 builds the crew walking-time fix from tonight; a fresh render builder takes turns 3 and 4; RV25 reviews each turn.</div>
+
+<div class="card rule"><b>Update, 28 October, about 10:45 PM ET.</b> Items 3 and 4 were measured again more carefully and are set aside: neither saves enough to be worth a change. <b>Item 3:</b> 10 runs, alternating old and new without the debug switch: 2.89-3.24 s against 2.89-3.23 s, a typical difference of 0.03 s. The earlier 0.25-0.3 s came from always measuring the old build first. <b>Item 4:</b> the leftover shadows are moving parts and the day's decorations; about 10 draws could change safely, about 0.1 ms. The real speed wins are items 1 and 2. Added to 0.98 by your backlog answers: crew reach evening gatherings late (FX12-1), crew queue at an empty toilet (TQ1-1), and the music lookup four times a second (SD3-2, by the sound designer). FX12-1 and TQ1-1 come from the same walking-time estimate as FX24-2, so the three are fixed together (item 6).</div>
 
 <h2>What I found, in short</h2>
 <div class="card">
@@ -105,13 +107,13 @@ a{color:var(--teal)}
 <p><b>Proof:</b> cadet_test; every deck at the four phone sizes, day and night; the paired timing.</p>
 </div></details>
 
-<details class="item"><summary><span class="n">3</span><span class="t">Stop checking each shader for errors while you play</span><span class="chips"><span class="chip gain">0.25-0.3 s faster start here, likely more on a phone</span><span class="chip risk">low risk</span></span></summary><div class="body">
+<details class="item"><summary><span class="n">3</span><span class="t">Stop checking each shader for errors while you play</span><span class="chips"><span class="chip">set aside 28 October: no real gain when measured in alternating order</span></span></summary><div class="body">
 <p><b>What:</b> three.js stops after preparing each graphics program to ask whether it had errors, which makes the browser wait for each one in turn. One switch turns that off (<code>renderer.debug.checkShaderErrors</code>). It stays on in Dev mode and in the checks, so a broken shader would still be caught.</p>
 <p><b>Gain:</b> first picture 2.72-2.97 s instead of 3.03-3.24 s here (3 of 3 alternating runs faster). On a phone the programs can be prepared side by side, so the saving should be larger; the Dev Speed card will show it on your phone.</p>
 <p><b>Proof:</b> pixels identical by design (nothing about the picture changes); cadet_test; devmode_check for the Dev mode side.</p>
 </div></details>
 
-<details class="item"><summary><span class="n">4</span><span class="t">The rest of the still furniture casts shadows the cheap way</span><span class="chips"><span class="chip gain">about 20-40 fewer shadow jobs</span><span class="chip risk">low to medium risk</span></span></summary><div class="body">
+<details class="item"><summary><span class="n">4</span><span class="t">The rest of the still furniture casts shadows the cheap way</span><span class="chips"><span class="chip">set aside 28 October: about 10 safe draws, about 0.1 ms</span></span></summary><div class="body">
 <p><b>What:</b> since 0.27 most still things cast their shadow through a few plain stand-in shapes. About 20 merged furniture shapes in the mess, and some event decorations added after a deck is built, still cast their own. They'd join the stand-ins.</p>
 <p><b>Gain:</b> small but steady: fewer shadow jobs in every room.</p>
 <p><b>Proof:</b> the same triangles cast the same shadows (the rule the stand-ins already follow); cadet_test; shots of each changed room with shadows on.</p>
@@ -123,10 +125,11 @@ a{color:var(--teal)}
 <p><b>Proof:</b> with the cap, every picture is identical (cadet_test steps frames itself, so it's untouched); with the saver off, the game is identical.</p>
 </div></details>
 
-<details class="item"><summary><span class="n">6</span><span class="t">Fix the reading corner check failure (FX24-2)</span><span class="chips"><span class="chip risk">changes the game's behaviour a little</span><span class="chip">backlog 12 set aside for 0.99 (your answer)</span></span></summary><div class="body">
+<details class="item"><summary><span class="n">6</span><span class="t">The crew's walking time: the reading corner (FX24-2), late to evening gatherings (FX12-1), queueing at an empty toilet (TQ1-1)</span><span class="chips"><span class="chip risk">changes the game's behaviour a little</span><span class="chip">backlog 12 set aside for 0.99 (your answer)</span></span></summary><div class="body">
 <p><b>career_check, "Relied on before Day 5" (backlog 12): set aside, your answer of 28 October.</b> You'll balance it in the 0.99 pass; it stays a known old failure. On record: a very busy cadet earns enough on Day 4 to be called "Relied on" a day early (one point over since 0.92.6). The check is right: the fix goes in the game, never in the check. Smallest fix: the word waits for Day 5. Owner: the Works career engineer.</p>
 <p><b>events_check, the reading corner on Day 7 (FX24-2).</b> Farouk's plan has him in the garden until 16:00 and in the bow lounge from 16:00, but the walk takes over 20 ship minutes, so he arrives as his stay ends. The planner leaves no walking time for a move on the same deck. Smallest fix: book the walking time only for long walks to a tradition. A planner-wide fix would move many people's plans on every tradition day. Owner: the sim engineer.</p>
-<p><b>Proof:</b> both checks pass on the new build and fail on the old one in the same way as now; day_check, events_check and food_check over the event days; the rest of the full round.</p>
+<p><b>Late to gatherings (FX12-1)</b> and <b>queueing at an empty toilet (TQ1-1)</b> come from the same estimate of how long a walk takes: too short from the lift to a room, too long to a toilet. The fix measures the planned against the real walks first, then corrects the estimate once for all three. This moves many crew plans by a few minutes on every deck; each difference in cadet_test is explained before it's merged.</p>
+<p><b>Proof:</b> events_check walks the reading corner and passes; arrivals at gatherings and toilet waits measured before and after; day_check, events_check and food_check over the event days; the rest of the full round.</p>
 </div></details>
 
 <h3>Measured and set aside</h3>
@@ -145,15 +148,16 @@ a{color:var(--teal)}
 <h2>Turns and timing</h2>
 <div class="tw"><table>
 <tr><th>Turn</th><th>What</th><th class="num">Building</th><th>Who</th></tr>
-<tr><td>1</td><td>Shader checks off outside Dev mode (item 3)</td><td class="num">about 1 h</td><td>OP1, tonight</td></tr>
-<tr><td>2</td><td>Shadow stand-ins for the rest (item 4)</td><td class="num">about 2 h</td><td>OP1, tonight</td></tr>
+<tr><td>1</td><td>Set aside: no gain when measured carefully (item 3)</td><td class="num">none</td><td></td></tr>
+<tr><td>2</td><td>Set aside: too small (item 4)</td><td class="num">none</td><td></td></tr>
 <tr><td>3</td><td>One piece per full body (item 1), before and after pictures to you first</td><td class="num">about 4 h</td><td>a fresh render builder</td></tr>
 <tr><td>4</td><td>Furniture colours (item 2), before and after pictures to you first</td><td class="num">about 5 h</td><td>the render builder</td></tr>
 <tr><td>5</td><td>Set aside (your answer): no cap, no saver</td><td class="num">none</td><td></td></tr>
-<tr><td>6</td><td>The reading corner walk (FX24-2); backlog 12 waits for 0.99</td><td class="num">about 3 h</td><td>OP1, with the sim engineer's section reviewed by RV25</td></tr>
+<tr><td>6</td><td>The crew's walking time (FX24-2, FX12-1, TQ1-1); backlog 12 waits for 0.99</td><td class="num">about 6 h</td><td>OP1, reviewed by RV25</td></tr>
+<tr><td>7</td><td>The music lookup remembered, not repeated four times a second (SD3-2)</td><td class="num">about 1 h</td><td>the sound designer, if the lead agrees</td></tr>
 <tr><td></td><td>Review, then the full round on the combined build</td><td class="num">about 4 h</td><td>reviewer, build master, runners</td></tr>
 </table></div>
-<p><b>Estimate:</b> OP1 starts turns 1, 2 and 6 tonight (Wednesday, October 28); the render builder works on turns 3 and 4 on Thursday, with your picture check before they're merged. The full round runs Thursday night, so 0.98.0 would be ready for your OK on <b>Friday, October 30, by about noon ET</b>. Each turn is merged on its own, so if one runs long, the others still go out.</p>
+<p><b>Estimate:</b> OP1 starts turn 6 tonight (Wednesday, October 28); the render builder works on turns 3 and 4 on Thursday, with your picture check before they're merged. The full round runs Thursday night, so 0.98.0 would be ready for your OK on <b>Friday, October 30, by about noon ET</b>. Each turn is merged on its own, so if one runs long, the others still go out.</p>
 
 <h2>Your answers</h2>
 <form id="answers" data-collection="answers" data-doc="opt-098" onsubmit="return false">
