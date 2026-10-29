@@ -2533,6 +2533,8 @@ def legacy_parts(GAME, ON, fails):
         return out
     def part_a11y(pw):
         p = Pad(pw, ON)
+        toast0 = p.ev("[toastEl.getAttribute('role'), toastEl.getAttribute('aria-live')]")   # the page's own (backlog CP5-1: a polite live region for everyone since 0.99)
+        check(toast0 == ['status', 'polite'], f'a11y: the toast should be read out for everyone, pad or not (role status, polite): {toast0}')
         p.plug(); p.press('x'); p.log(); p.step(3)
         # no holds: the stick walks only while pushed, and stops the frame it's let go
         p.axes([0, -1, 0, 0]); p.step(6); walking = p.ev('!!player.steer')
@@ -2554,7 +2556,7 @@ def legacy_parts(GAME, ON, fails):
         # toasts are read out once the controller is in use
         check(p.ev("toastEl.getAttribute('role') === 'status' && toastEl.getAttribute('aria-live') === 'polite'"), 'a11y: the toast should be a polite live region once the pad is used')
         p.js("document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))"); p.step(2)
-        check(p.ev("!toastEl.hasAttribute('role') && !toastEl.hasAttribute('aria-live')"), 'a11y: a touch taking back should leave the toast as it was')
+        check(p.ev("[toastEl.getAttribute('role'), toastEl.getAttribute('aria-live')]") == toast0, 'a11y: a touch taking back should leave the toast as it was')
         p.press('x'); p.step(2)
         # the highlight: thick, teal, with a dark edge
         p.press('up'); p.step(2)
@@ -2696,7 +2698,10 @@ def part_s5cases(pw, src, tag):
     # P4's first case in Fault notes, by pad
     r.ev("(() => { deviceClose(); const W = SHIP.works; W.op = Object.assign({}, W.op, { 21: ['p4'] }); delete SHIP.flags['case.p4.first']; p4Stage(); const c = caseById(flag('case.p4.first')); if (c) caseShow(c, caseJob(c)); return !!c; })()")
     r.ev("(typeof worksTabAdd === 'function' ? (deviceShow('works'), deviceDo({ app: 'works', do: 'tab', arg: 'faults' }), deviceShow('works')) : deviceShow('faultnotes'))"); r.step(6)
-    sus = s5_pad_to(r, r'^(Seal|Compressor|Bearing|Temperature sensor)')
+    # the suspects are the case's own (its machine depends on which faults the week brought: a cooler's Seal, Compressor,
+    # Bearing, Temperature sensor; a light's Relay, Lamp, Cable; 0.98's walk times moved Day 21's case to a light)
+    words = r.ev("(() => { const c = caseById(flag('case.p4.first')); return c ? c.sus : []; })()") or []
+    sus = s5_pad_to(r, '^(' + '|'.join(re.escape(w[:1].upper() + w[1:]) for w in words) + ')') if words else None
     if not sus: fails.append(f'the D-pad never reached a suspect in Fault notes (focus {r.ev(S5_FOCUS)!r}; device {r.ev("[DEV.open, DEV.app, typeof WORKS_TAB !== \'undefined\' && WORKS_TAB, !!caseById(flag(\'case.p4.first\'))]")})')
     call = s5_pad_to(r, r'^Call it')
     if not call: fails.append('the D-pad never reached Call it')
@@ -3544,8 +3549,7 @@ MUTANTS['a11y'] = {   # CP5, claude/controller-p5 4892a0b
   'outline 3px': ('src', "outline:4px solid #4cc3b5!important;outline-offset:3px", "outline:3px solid #4cc3b5!important;outline-offset:3px"),
   'one dark shadow, not two': ('src', "box-shadow:0 0 0 3px #0d1521,0 0 0 9px #0d1521!important", "box-shadow:0 0 0 3px #0d1521!important"),
   'padStill false': ('src', "  return !!(A.rmq && A.rmq.matches);", "  return false;"),
-  'no toast role': ('src', "  if (!toastEl.hasAttribute('role')) { toastEl.setAttribute('role', 'status'); PAD_A11Y.toast.push('role'); }", "  if (0) { }"),
-  'the toast role kept after a touch': ('src', "toastEl.removeAttribute(a);", "void a;"),
+  'no toast role': ('src', '<div class="toast" id="toast" role="status" aria-live="polite">', '<div class="toast" id="toast" aria-live="polite">'),   # (backlog CP5-1: the role is the page's own now; section 26's adding it is for a page without it)
   "Maps' deck buttons nameless": ('src', "'Deck ' + el.textContent.trim() : ''", "''"),
   'one-handed layout broken': ('src', "lb: 'x', lt: 'y', down: 'b', view: 'menu', ls: 'a' },", "lb: 'x', lt: 'y', down: 'b', view: 'menu', ls: 'lt' },"),
 }

@@ -11,7 +11,7 @@ Started by the ways-of-working engineer WW1 (2026-10-20). **Whoever moves code, 
 - **Who uses a function or table outside its section:** `node tools/shared.js --min 1 | grep -A1 ' NAME '`.
 - Plain grep still works: `grep -n "^function NAME\|^const NAME\|^let NAME" starship-cadet.html`.
 
-**The file's order is not the sections' number order.** Sections were added where they had to load (a section must come after what it reads at load). Today's order: page, 1, 2, 3, 4 (4a-4e), 5, **13, 14, 19, 15, 15b, 15r, 16, 17, 22, 18, 20, 20c, 21, 21b, 23, 23b, 24 (24a ... 24p, then 24u-24x), 28 (28a-28f)**, 6, 7, 8, 8b, 9, 10, 8c, 11, 25, 26, 27, 29 (29a-29c), 12. A section heading is a column-0 line `// 19. DEVICE` or `// 24a ROUNDS`, between two `// ====` or `// ----` rule lines.
+**The file's order is not the sections' number order.** Sections were added where they had to load (a section must come after what it reads at load). Today's order: page, 1, 2, 3, 4 (4a-4e), 5, **13, 14, 19, 15, 15b, 15r, 16, 17, 22, 18, 20, 20c, 21, 21b, 23, 23b, 24 (24a ... 24p, then 24u-24x), 28 (28a-28f)**, 6, 7, 8, 8b, 9, 10, 8c, 11, 25, 26, 27, 29 (29a-29c), 30, 12. A section heading is a column-0 line `// 19. DEVICE` or `// 24a ROUNDS`, between two `// ====` or `// ----` rule lines.
 
 ## Each seat's slot (from step 2)
 
@@ -58,6 +58,7 @@ One labelled, empty block per seat at the end of its main section, where that se
 | Ending offer (the ending engineer) | 29a (section 29, after 27, before the main loop) |
 | Ending goodbye (the ending engineer) | 29b |
 | Endgame (the dialogue engineer, the Works career engineer) | 29c |
+| Title screen (the title seat) | 30 |
 
 No slot for the crew designer (section 9's roster is generated). A new feature (Dev mode, step 3) gets its own section and slot from its plan page; another slot for a seat: ask the lead.
 
@@ -105,6 +106,7 @@ No slot for the crew designer (section 9's roster is generated). A new feature (
 | The main loop: rides, doors, spins, cutaway, fades | `12` | |
 | Dev mode: the hidden testing panel (`#dev`), its save, Undo, Mark, the Dev clock, Take me to | `25` | `DEVMODE` (13), `devmodeHold`, `devmodeRun`, `devmodeSkipTo`, `devmodeMove` |
 | The ending: the offer, your answer, the goodbye, the end page, the endgame (`EV_ENDING_ON`) | `29` (29a-29c) | `SHIP.end`; the crossing back itself is section 18's |
+| The title screen, the crew terminal (`TITLE_ON`) | `30`, and the page (`#title`, its first script `tiEarly`, the `#title` CSS after the bubbles) | `titleHold()` in 13's `freezeSync` and `saveGame`; `SND.title(on)` (27) |
 
 ## Outside the game file
 

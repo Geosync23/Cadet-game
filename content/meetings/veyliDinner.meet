@@ -1,0 +1,26 @@
+@meeting veyliDinner
+// EV2 for lead 45 (V-1, the user's "Formal dinner", 2026-10-29): the visit's formal dinner, Thursday Day 18, 19:00, the
+// Captain's quarters, seated (section 18's OCCASIONS.veyliDinner, slot 'Visit dinner'). The Captain at the head, the
+// Speaker on her right, Saruth on her left, Vance, Kesrin, Moleth, Ithra (facing the door); you at the foot. Every Veyli
+// is they/them. Written by the builder in the guests' voices (content/lines/teshavi, moleth, ithra, kesrin); a writer may polish.
+title: The Veyli dinner
+from: Captain Odile Marrow
+gist: The Captain's formal dinner for the Veyli, in her quarters: eight at the table, Brennan's spiced grains, and a toast from the Speaker. Your chair at the foot was kept for you.
+== lines
+marrow > you: There you are. The foot of the table, facing me. By Wren custom the newest hand sits there.   [gesture]
+teshavi: Captain. Among my people, the youngest at the table is asked the first question. It keeps the old ones humble.
+marrow: Then we're in good company. Speaker, the first question is yours.   [nod]
+teshavi: I give it to Moleth. Moleth has been holding it since the shuttle. One question. Only one.
+moleth > you: Only one! Then: what do you miss most, from before the ship?   [listen]
+? choice
+* Home cooking. Though this is close.   rel:moleth+1,marrow+1
+  moleth: Close! I will write that down. The Chef will be pleased. Or will she pretend not to be?   [laugh]
+* The sky. A real one, with weather in it.   rel:moleth+1,teshavi+1
+  teshavi: We have a word for that. The roof you were born under. Your ship is a good roof also.   [nod]
+* Nothing yet. I'm too busy learning this one.   rel:moleth+1,vance+1
+  vance: Accurate. I've seen the logs.   [nod]
+ithra: Door's shut. Good.
+kesrin: Ithra says that at every dinner. It is a compliment. The highest.   [laugh]
+saruth: Speaker, Chef Brennan cooked tonight. She has been tasting the sauce since five.
+teshavi: Then we must eat it slowly. Captain: to the Wren, and to the roof she keeps over all of us.   [gesture]
+marrow: To the Wren, and to our guests. Now eat, everyone, before Brennan comes up to ask why not.   [laugh]

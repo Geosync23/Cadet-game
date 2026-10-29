@@ -384,6 +384,13 @@ def check_r3music(pw, path):
         at('after the farewell', 19 * 1440 + 600, 5, 'Shuttle bay', None)
         g.ev("eventNow = window.__enReal")
         g.step(3); check(g.ev("SND.music.eventOn()") is None, 'r3music: back to the schedule after')
+        # 0.98 (SD3-2): the pick is asked about 4 times a second, not every frame
+        import time as _t
+        n0, t0 = g.ev("SND.r3Ev.n"), _t.perf_counter()
+        for _ in range(4): g.step(30); g.page.wait_for_timeout(300)   # 120 frames over at least a real second (RV25)
+        n1, t1 = g.ev("SND.r3Ev.n"), _t.perf_counter()
+        print(f'  r3music: {n1 - n0} asks in 120 frames, {t1 - t0:.2f} s')
+        check(1 <= n1 - n0 <= (t1 - t0) / 0.25 + 2 and n1 - n0 < 120, f'r3music: the event pick is asked again, about 4 times a second ({n1 - n0} in 120 frames, {t1 - t0:.2f} s)')
         pe = [e for e in g.errors if e.startswith('pageerror')]
         if pe: check(False, 'r3music: page errors: ' + ' | '.join(pe[:3]))
     finally: g.close()
@@ -504,17 +511,21 @@ def check_r3fx(pw, path):
         g.ev(f"({R3_AT})({json.dumps([1440 + 610, 5, 'S'])})"); g.step(3)
         g.ev("window.__vn = vesselNow; vesselNow = () => ({ k: 1 }); TERN.target = 0; SND.r3.watch()")
         got = heard('the Tern lands', "TERN.target = 1", undo="vesselNow = __vn"); check('r3TernLand' in got, 'r3fx: the Tern landing while you are in the bay')
-        # your new quarters: the move seen (worksHome to 2-B), then room B's door opening near you plays the home chime, once
-        g.ev("window.__wk = SHIP.works; SHIP.works = { ...(SHIP.works || {}), home: 'bunk' }; SND.r3.tick(); SHIP.works.home = '2-B'; SND.r3.tick()")
-        check(g.ev(W + ".homeNew") is True, 'r3fx: the move to room B is seen')
-        g.ev(f"({R3_AT})({json.dumps([1440 + 615, 2, 'B'])})"); g.page.wait_for_timeout(700); g.step(5)
+        # your new quarters: moved to room B (worksHome 2-B, 24u's move day today, stood in for), then room B's door: not for a
+        # crew member at the door; the home chime on your first opening; none the second time (0.99, SD3-1)
+        MOVED = "SHIP.works = { ...(SHIP.works || {}), home: '2-B', pu: { t4: { move: { walked: SHIP.time.day } } } }; SND.r3.W.homeHad = undefined; SND.r3.tick()"
+        g.ev(f"({R3_AT})({json.dumps([1440 + 615, 2, 'B'])})"); g.page.wait_for_timeout(700); g.step(5)   # the deck first (its build reads the real Tier 4 record)
+        g.ev("window.__wk = SHIP.works; " + MOVED)
+        check(g.ev(W + ".homeNew") is True, 'r3fx: moved to room B, the chime is waiting')
         DB = "DOOR_OBJS.find(d => [[0.6, 0], [-0.6, 0], [0, 0.6], [0, -0.6]].some(([x, z]) => roomAt(...cellAt(d.cx + x, d.cz + z)) === 'B'))"
-        for n in (1, 2):
+        for n, crew in ((0, True), (1, False), (2, False)):
+            if crew: g.ev(f"(() => {{ const d = {DB}, a = DECK_CREW.find(x => x.p); window.__cw = [a, a.x, a.z, a.settled]; a.x = d.cx - 0.3; a.z = d.cz - 0.3; a.settled = false; }})()")   # someone walking through it
             g.ev(f"(() => {{ const d = {DB}; player.obj.position.set(d.cx + 0.3, 0, d.cz + 0.3); SND.log.length = 0; }})()")
             for v in (0.0, 0.5, 1.0, 0.5, 0.0):
                 g.ev(f"(() => {{ const d = {DB}; d.open = {v}; d.force = {1 if v >= 0.5 else 0}; }})()"); g.step(1)
-            got = g.ev("SND.log.map(x => x.name)"); print(f'  r3fx room B door, opening {n}:', got); g.ev(f"delete {DB}.force")
-            check(('r3Home' in got) == (n == 1), f'r3fx: the home chime the first time only (opening {n})')
+            if crew: g.ev("(([a, x, z, st]) => { a.x = x; a.z = z; a.settled = st; })(__cw)")
+            got = g.ev("SND.log.map(x => x.name)"); print(f'  r3fx room B door, {"a crew member opening it" if crew else "your opening " + str(n)}:', got); g.ev(f"delete {DB}.force")
+            check(('r3Home' in got) == (n == 1), f'r3fx: the home chime on your first opening only ({"crew" if crew else n})')
         g.ev("SHIP.works = __wk; SND.r3.tick()")
         # the reactor door: the door watcher, its door opening near you (frames)
         g.ev(f"({R3_AT})({json.dumps([1440 + 620, 6, 'K'])})"); g.page.wait_for_timeout(700); g.step(5)
@@ -529,6 +540,34 @@ def check_r3fx(pw, path):
         if pe: check(False, 'r3fx: page errors: ' + ' | '.join(pe[:3]))
     finally: g.close()
 CHECKS += [check_r3mess]   # the sound update (SD3), turn 2
+def check_r3home(pw, path):
+    """0.99 (SD3-1): the home chime's note survives a reload (a sound-only note per save slot; the game saving, not ?nosave)"""
+    on = r3_copy(path)
+    if not on: check(False, 'r3home: no SND_R3_ON line in this build, so nothing was tested'); return
+    g = Game(pw, on)
+    try:
+        MOVED = "SHIP.works = { ...(SHIP.works || {}), home: '2-B', pu: { t4: { move: { walked: SHIP.time.day } } } }; SND.r3.W.homeHad = undefined; SND.r3.tick()"
+        def up():
+            open_with(g, '?debug&sound&soundlog'); g.step(30); click_world(g)
+            g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000); g.step(5)
+        up(); g.ev(f"({R3_AT})({json.dumps([615, 2, 'B'])})"); g.page.wait_for_timeout(700); g.step(5)
+        g.ev("window.__wk = SHIP.works; localStorage.removeItem('starship-cadet-sound-home:' + SAVE_KEY)"); g.ev(MOVED)
+        check(g.ev("SND.r3.W.homeNew") is True, 'r3home: moved, the chime is waiting')
+        played = g.ev("(() => { const d = DOOR_OBJS.find(d => [[0.6, 0], [-0.6, 0], [0, 0.6], [0, -0.6]].some(([x, z]) => roomAt(...cellAt(d.cx + x, d.cz + z)) === 'B')); return SND.r3.homeDoor(d); })()")
+        note = g.ev("[localStorage.getItem('starship-cadet-sound-home:' + SAVE_KEY), String(SHIP.time.day)]")
+        print('  r3home first opening:', played, 'note', note)
+        check(played is True and note[0] == note[1], 'r3home: the first opening chimes and keeps its note')
+        g.ev("SHIP.works = __wk")   # the stand-in out before the reload (the save keeps the real record)
+        up(); g.ev("window.__wk = SHIP.works; " + MOVED)
+        check(g.ev("SND.r3.W.homeNew") is False, 'r3home: after a reload it does not chime again')
+        g.ev("localStorage.removeItem('starship-cadet-sound-home:' + SAVE_KEY)"); g.ev(MOVED)
+        check(g.ev("SND.r3.W.homeNew") is True, 'r3home: without the note (a reload between the move and the door) it is still waiting')
+        g.ev("localStorage.setItem('starship-cadet-sound-home:' + SAVE_KEY, String(SHIP.time.day)); SHIP.works = __wk; newGameStart(false)"); g.page.wait_for_timeout(700); g.step(5)
+        left = g.ev("[localStorage.getItem('starship-cadet-sound-home:' + SAVE_KEY), SND.r3.W.homeHad]"); print('  r3home after New game:', left)
+        check(left == [None, None], 'r3home: a New game clears the note (a second game in the slot hears the chime)')
+        pe = [e for e in g.errors if e.startswith('pageerror')]
+        if pe: check(False, 'r3home: page errors: ' + ' | '.join(pe[:3]))
+    finally: g.close()
 R3_HOOKS = [('p5nKnock', 'r3Knock'), ('m24Call', 'r3TeamCall'), ('m24Team', 'r3TeamDone'), ('arrStepDone', 'r3Calibrate'), ('vesselStepStart', 'r3Bronze'), ('clockUndo', 'r3ClockUndo')]
 def check_r3hooks(pw, path):
     """turn 4: the one-line hooks in the owners' sections (each behind SND_R3_ON), their sounds, and clock Undo played for real"""
@@ -555,6 +594,36 @@ def check_r3hooks(pw, path):
     finally: g.close()
 CHECKS += [check_r3fx]   # the sound update (SD3), turn 3
 CHECKS += [check_r3hooks]   # the sound update (SD3), turn 4
+CHECKS += [check_r3home]   # 0.99 (SD3-1): the home chime across a reload
+
+def check_title_music(pw, path):
+    """0.99 (SD3): the title screen's track (SND_TITLE, through section 30's SND.title): the three candidates exist and loop
+    (about a minute each, not on the Music app's list); with the title on, the track plays while the ship is held (the
+    context stays running), the hum hushes and the ship's rooms are quiet; off, it fades and the hum comes back"""
+    g = Game(pw, path)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000); g.step(5)
+        pick = g.ev("typeof SND_TITLE !== 'undefined' ? SND_TITLE : 'none'")
+        if not check(pick != 'none', 'title: no SND_TITLE in this build, so nothing was tested'): return
+        tr = g.ev("['titleA', 'titleB', 'titleC'].map(k => { const T = SND.music.TRACKS[k]; return T ? [k, T.time, T.form().reduce((a, x) => a + x.bars, 0) * 4 * 60 / T.bpm] : [k, null, 0]; })")
+        print('  title candidates:', tr)
+        check(all(t[1] == 'Event' and 45 <= t[2] <= 100 for t in tr), 'title: the three candidates exist, each a loop of about a minute')
+        check(g.ev("!SND.music.LIST.some(x => x.tracks.some(t => /^title/.test(t.key)))"), 'title: none of them is on the Music app list')
+        if not pick: print('  title: SND_TITLE is null (silent title)'); return
+        g.ev("SND.log.length = 0; SND.title(true)"); g.step(5)
+        for _ in range(4): g.ev("SND.frame(false)")   # the ship held under the title: run is false
+        st = g.ev("[SND._.state(), SND.titleSnd.list.length, SND.titleSnd.hush, SND.log.map(x => x.name)]"); print('  title on:', st)
+        check(st[0] == 'running' and st[1] == 1 and st[2] is True and ('title' + pick) in st[3], f'title: on, its track plays with the ship held and the hum hushed ({st})')
+        g.ev("(L => { const T = L[0], at = SND.ctx.currentTime + 2; T.endsAt = () => at; })(SND.titleSnd.list)"); g.ev("SND.frame(false)")
+        check(g.ev("SND.titleSnd.list.length") == 2, 'title: the next copy starts before the last ends (a loop with no gap)')
+        g.ev("SND.title(false)"); g.step(3)
+        st = g.ev("[SND.titleSnd.list.length, SND.titleSnd.hush]"); print('  title off:', st)
+        check(st == [0, False], 'title: off, the track fades and the hum comes back')
+        pe = [e for e in g.errors if e.startswith('pageerror')]
+        if pe: check(False, 'title: page errors: ' + ' | '.join(pe[:3]))
+    finally: g.close()
+CHECKS += [check_title_music]   # 0.99 (SD3): the title screen's track
 
 if os.environ.get('SOUND_ONLY'): CHECKS = [c for c in CHECKS if re.search(os.environ['SOUND_ONLY'], c.__name__)]   # run only the named checks (a regex), while building
 with sync_playwright() as pw:
