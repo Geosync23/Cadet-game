@@ -17020,6 +17020,7 @@ function ixJobStep() {
     if (w.make && w.make.part) return { deck: 5, room: 'f', place: lathe, label: 'Make ' + partList([w.make.part]) + (lathe ? ' at the lathe' : ' in the machine shop') };
     if (need.some(p => SHIP.stores[p] > 0)) { const on = need.filter(p => SHIP.stores[p] > 0), sh = ixShelf(on); return { deck: 5, room: 'r', place: sh.place, label: 'Fetch ' + partList(on) + sh.say }; }
     if (need.some(p => !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p)))) return { deck: 5, room: 'f', place: lathe, label: 'Make ' + partList([need.find(p => !NO_MAKE.has(p))]) + (lathe ? ' at the lathe' : ' in the machine shop') };
+    return { deck: 5, room: 'r', place: null, label: 'No ' + [...new Set(need)].join(' or ') + ' in storage, and it can\'t be made: a restock brings more' };   // none on the shelves and none to make (backlog DV1-3: it said "Look over the" machine, and tapping it did nothing)
   }
   const pid = typeof panelPlace === 'function' ? panelPlace(m.id) : null;
   return { deck: m.deck, place: pid, at: m.at, room: m.room, label: (j.kind === 'chore' && !need.length && j.title) || (need.length || typeof scanFirst === 'function' && scanFirst(j) ? 'Look over the ' : j.kind === 'tune' ? 'Tune the ' : 'Repair the ') + name };   // a chore on a machine says what it is ("Calibrate the galley plant": FX3); a tune job (24e) is tuned, scan first (p5-fix2)
