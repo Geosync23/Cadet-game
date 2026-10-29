@@ -123,3 +123,17 @@ Queue (lead 45, 2026-10-29): 1. TB1 title screen claude/title-099; 2. EV2 seated
   shared record (as p4's does), so a second p6 a fault opened by 09:05 on 0.98 isn't counted; out.others names it;
   saveSame still round-trips the whole SHIP.works.cases. My run on 7a2ae7d2's game (byte-identical): PUZZLE CHECK OK,
   saveBytes 1924, others ['p6']. The whole save's size stays player_check --long's job. **PASS.**
+
+## OP1 claude/nights-dayarrow 79a87ea (0.99 game fix; base 1086518 = 7a2ae7d2's game; sha256 9eb28dce...)
+- Diff (28a p5nGuide, 3 lines): with no day part (S.day null) the day-sleep block runs too, unless you worked a night
+  the day before (its own ask stays); `from` = S.day end, else min(now, 12:30) as a whole minute. With S.day set: as before.
+- arrows_check step6 asis: FAIL on 7a2ae7d2 ("sleep by day: its level-1 arrow (p5n:bed:22) never led"); OK on the fix.
+- cadet vs 7a2ae7d2 ALL IDENTICAL; day_check 22 OK (the branch's own day_check).
+- My slip, for the record: day_check 22 first FAILed for me on both builds ("the Commons hold fewer ... 61 v 62") because I
+  ran my branch's older day_check, without OP1's 0.98 walk-led rule (3307e84). Merged staging-pad into claude/review-rv26;
+  from now on I run each build's own checks.
+- Note (not blocking): p5nDayBed counts the day sleep from 05:30 when there's no day part, so on a Day 22 with no day
+  shift at all (a leave or sick morning with the night still on, if that can happen) the arrow and the "Sleep now" notice
+  would come from 05:30 (from = now). That matches p5nDayBed's own rule (the bed already offers it); only worth a look
+  if a whole-day-off-but-night case exists.
+- **VERDICT nights-dayarrow 79a87ea: PASS.**
