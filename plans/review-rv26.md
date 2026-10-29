@@ -137,3 +137,5 @@ Queue (lead 45, 2026-10-29): 1. TB1 title screen claude/title-099; 2. EV2 seated
   would come from 05:30 (from = now). That matches p5nDayBed's own rule (the bed already offers it); only worth a look
   if a whole-day-off-but-night case exists.
 - **VERDICT nights-dayarrow 79a87ea: PASS.**
+- AS1 (11:52): the whole arrows_check on nights-dayarrow 79a87eac (sha matched), alone: ARROWS CHECK OK, 0 FAIL (2629 s).
+  Supports the PASS.
