@@ -60,6 +60,8 @@ section.group{display:flex;flex-direction:column;gap:12px}
 .saved{font-size:.82rem;color:var(--muted);align-self:center}
 .gen{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px;display:flex;flex-direction:column;gap:10px}
 .gen textarea{min-height:96px;resize:vertical;width:100%}
+.savebar{font-weight:700;border:1px solid var(--line);border-left:4px solid var(--d);background:var(--panel);border-radius:6px;padding:10px 14px}
+.savebar[data-state="pending"]{border-left-color:var(--b)}
 .note{font-size:.88rem;color:var(--muted);max-width:65ch;margin:0}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
@@ -80,13 +82,15 @@ section.group{display:flex;flex-direction:column;gap:12px}
     <div class="vers" id="vers"></div>
   </div>
 
+  <div class="savebar" id="savebar" role="status" aria-live="polite">Connecting to save your answers...</div>
+
   <div class="filters" role="toolbar" aria-label="Show a group" id="filters"></div>
 
   <div id="groups"></div>
 
   <section class="gen" aria-labelledby="genh">
     <h2 id="genh">Anything else?</h2>
-    <p class="note">Write anything about the list as a whole here: an item I missed, a group you'd rather shape differently. Each item above also has its own box. What you save is kept on this page for the lead and the build master to read.</p>
+    <p class="note">Write anything about the list as a whole here: an item I missed, a group you'd rather shape differently. Each item above also has its own box, and those save by themselves the moment you pick or type. What you write is kept on this page for the lead and the build master to read.</p>
     <textarea id="gen-note" aria-label="General comments"></textarea>
     <div style="display:flex;gap:10px;align-items:center"><button class="save" id="gen-save" type="button">Save</button><span class="saved" id="gen-saved"></span></div>
   </section>
@@ -228,22 +232,56 @@ function renderTop() {
   }
 }
 
+// Each answer lives in LOCAL (what is on screen) until the database has it. Nothing ever redraws an answer from the
+// database while it has unsaved changes, and a copy stays in this browser until it is saved.
+const LOCAL = {}, ROWS = {}, DRAFT_KEY = 'bt1-backlog-drafts-v2';
+function draftsSave() { try { const o = {}; for (const k in LOCAL) if (LOCAL[k].dirty) o[k] = { id: LOCAL[k].id, call: LOCAL[k].call, note: LOCAL[k].note }; localStorage.setItem(DRAFT_KEY, JSON.stringify(o)); } catch (e) { /* storage blocked: the database save still runs */ } }
+function draftsLoad() { try { const o = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}'); for (const k in o) if (o[k] && o[k].id) LOCAL[k] = { id: o[k].id, call: o[k].call || '', note: o[k].note || '', dirty: true }; } catch (e) { /* none */ } }
+function localOf(k, id) { if (!LOCAL[k]) { const a = ANS[k] || {}; LOCAL[k] = { id, call: a.call || '', note: a.note || '', dirty: false }; } return LOCAL[k]; }
+function rowStatus(k) {
+  const r = ROWS[k], L = LOCAL[k]; if (!r || !L) return;
+  r.st.textContent = !DB ? (L.dirty ? 'Kept in this browser; saving starts when the page connects.' : '') : L.err ? 'Not saved: ' + L.err + ' (it will try again)' : L.saving || L.dirty ? 'Saving...' : (ANS[k] && ANS[k].at ? 'Saved' : '');
+}
+function statusBar() {
+  const n = ITEMS.filter(x => { const k = key(x[0]); return LOCAL[k] && LOCAL[k].dirty; }).length;
+  const saved = Object.keys(ANS).filter(k => k !== '_general' && (ANS[k].call || ANS[k].note)).length;
+  const b = document.getElementById('savebar'); if (!b) return;
+  b.textContent = !DB ? (n ? n + ' answer' + (n > 1 ? 's' : '') + ' kept in this browser, waiting to save.' : 'Connecting to save your answers...')
+    : n ? n + ' answer' + (n > 1 ? 's' : '') + ' not saved yet. Saving...' : 'All your answers are saved (' + saved + ' item' + (saved === 1 ? '' : 's') + ' answered).';
+  b.dataset.state = n ? 'pending' : 'ok';
+}
+let TIMERS = {};
+function changed(k, id) {
+  const r = ROWS[k], L = localOf(k, id); L.call = r.sel.value; L.note = r.ta.value; L.dirty = true; L.err = null;
+  draftsSave(); rowStatus(k); statusBar();
+}
+async function saveItem(k) {
+  const L = LOCAL[k]; if (!DB || !L || !L.dirty) return;
+  if (L.saving) { L.again = true; return; }                  // one write at a time per answer; the newest text goes next
+  L.saving = true; L.again = false; rowStatus(k);
+  const sent = { call: L.call, note: L.note };
+  try {
+    await DB.collection('answers').doc(k).set({ item: L.id, call: sent.call, note: String(sent.note).slice(0, 4000), at: new Date().toISOString() });
+    if (L.call === sent.call && L.note === sent.note) L.dirty = false;
+    ANS[k] = { item: L.id, call: sent.call, note: sent.note, at: new Date().toISOString() };
+  } catch (e) { L.err = e && e.message ? e.message : 'no connection'; }
+  L.saving = false; draftsSave(); rowStatus(k); statusBar();
+  if (L.again || (L.dirty && !L.err)) saveItem(k);
+  else if (L.err) setTimeout(() => saveItem(k), 5000);
+}
 function answerRow(id) {
-  const k = key(id), a = ANS[k] || {};
+  const k = key(id), L = localOf(k, id);
   const sel = el('select', { id: 'call-' + k, 'aria-label': 'Your call on ' + id });
   for (const [v, t] of [['', 'Your call...'], ['agree', 'Agree'], ['A', 'Move to A (must fix)'], ['B', 'Move to B (nice)'], ['C', 'Move to C (after 1.0)'], ['D', 'Close it'], ['ask', 'I have a question']]) sel.append(el('option', { value: v, text: t }));
-  sel.value = a.call || '';
-  const ta = el('textarea', { id: 'note-' + k, 'aria-label': 'Note on ' + id, placeholder: 'A note (optional)' }); ta.value = a.note || '';
-  const st = el('span', { class: 'saved', text: a.at ? 'Saved' : '' });
-  const btn = el('button', { class: 'save', type: 'button', text: 'Save' });
-  if (!DB) { btn.disabled = true; st.textContent = 'Saving works on the published page when you are signed in.'; }
-  btn.onclick = async () => {
-    if (!DB) return; btn.disabled = true; st.textContent = 'Saving...';
-    try { await DB.collection('answers').doc(k).set({ item: id, call: sel.value, note: ta.value.slice(0, 2000), at: new Date().toISOString() }); st.textContent = 'Saved'; }
-    catch (e) { st.textContent = 'Not saved: ' + (e && e.message ? e.message : 'try again'); }
-    btn.disabled = false;
-  };
-  return el('div', { class: 'ans' }, sel, ta, btn, st);
+  sel.value = L.call;
+  const ta = el('textarea', { id: 'note-' + k, 'aria-label': 'Note on ' + id, placeholder: 'A note (optional). Saves by itself as you type.' }); ta.value = L.note;
+  const st = el('span', { class: 'saved' });
+  ROWS[k] = { sel, ta, st };
+  sel.onchange = () => { changed(k, id); saveItem(k); };    // a pick saves at once
+  ta.oninput = () => { changed(k, id); clearTimeout(TIMERS[k]); TIMERS[k] = setTimeout(() => saveItem(k), 1000); };
+  ta.onblur = () => { clearTimeout(TIMERS[k]); saveItem(k); };
+  rowStatus(k);
+  return el('div', { class: 'ans' }, sel, ta, st);
 }
 
 function renderGroups() {
@@ -266,29 +304,41 @@ function renderGroups() {
   }
 }
 
-function render() { renderTop(); renderGroups(); }
-render();
+renderTop();
+
+draftsLoad(); renderGroups(); statusBar();
+addEventListener('beforeunload', e => { if (Object.values(LOCAL).some(L => L.dirty)) { e.preventDefault(); e.returnValue = ''; } });
 
 (async () => {
   let db = null;
   try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
   const gs = document.getElementById('gen-save'), gst = document.getElementById('gen-saved'), gn = document.getElementById('gen-note');
-  if (!db) { gs.disabled = true; gst.textContent = 'Saving works on the published page when you are signed in.'; return; }
+  if (!db) { gs.disabled = true; gst.textContent = 'Saving works on the published page when you are signed in.'; statusBar(); return; }
   DB = db;
-  let first = true;
+  let genDirty = false;
+  gn.oninput = () => { genDirty = true; };
   db.collection('answers').onSnapshot(snap => {
-    const next = {}; for (const d of snap.docs) next[d.id] = d.data() || {};
-    ANS = next;
-    if (next._general && document.activeElement !== gn) gn.value = next._general.note || '';
-    if (first || !document.activeElement || !/^(note|call)-/.test(document.activeElement.id || '')) renderGroups();
-    first = false;
+    for (const d of snap.docs) ANS[d.id] = d.data() || {};
+    if (ANS._general && !genDirty) gn.value = ANS._general.note || '';
+    // never redraw: fill in only the answers with no unsaved change on screen
+    for (const k in ROWS) {
+      const L = LOCAL[k], a = ANS[k]; if (!L || L.dirty || L.saving || !a) continue;
+      L.call = a.call || ''; L.note = a.note || '';
+      if (ROWS[k].sel.value !== L.call) ROWS[k].sel.value = L.call;
+      if (ROWS[k].ta.value !== L.note && document.activeElement !== ROWS[k].ta) ROWS[k].ta.value = L.note;
+      rowStatus(k);
+    }
+    statusBar();
   }, () => {});
+  for (const k in LOCAL) if (LOCAL[k].dirty) saveItem(k);   // drafts kept in this browser from before
+  for (const k in ROWS) rowStatus(k);
+  statusBar();
   gs.onclick = async () => {
     gs.disabled = true; gst.textContent = 'Saving...';
-    try { await db.collection('answers').doc('_general').set({ item: 'general', note: gn.value.slice(0, 5000), at: new Date().toISOString() }); gst.textContent = 'Saved'; }
+    for (const k in LOCAL) if (LOCAL[k].dirty) saveItem(k);   // and any item answer still waiting
+    try { await db.collection('answers').doc('_general').set({ item: 'general', note: gn.value.slice(0, 5000), at: new Date().toISOString() }); genDirty = false; gst.textContent = 'Saved'; }
     catch (e) { gst.textContent = 'Not saved: ' + (e && e.message ? e.message : 'try again'); }
     gs.disabled = false;
   };
-  renderGroups();
 })();
 </script>
