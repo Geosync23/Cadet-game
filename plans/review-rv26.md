@@ -158,3 +158,10 @@ Queue (lead 45, 2026-10-29): 1. TB1 title screen claude/title-099; 2. EV2 seated
   past one"); the stairs stand-in after an afternoon result says "tomorrow afternoon ... Torres" (pu4ResLate, still valid
   with T.res set); the offer stand-in says "Tomorrow" when the test is the next day (capitalised at the line's start), else
   the weekday. career_check --s6 OK on 6eacbe1 (my run). **PASS.**
+
+## SD3 claude/title-music-c febdf8a (the user's pick C; on staging-099 33a3afe, title on)
+- Diff: SND_TITLE 'A' -> 'C' (one line), design-doc Sound, audio-todo, build table.
+- tm_flow2.py on this build: a tap on the title plays titleC with the ship held and the hum's gain 0; after New game the
+  track clears and the hum is back (gain 0.86 at +4 s, 1 by +12 s; the +2 s reading still showed the title's state:
+  slow first frames in headless, as on title-on-099). No page errors.
+- **VERDICT title-music-c febdf8a: PASS.**
