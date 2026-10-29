@@ -386,9 +386,11 @@ def check_r3music(pw, path):
         g.step(3); check(g.ev("SND.music.eventOn()") is None, 'r3music: back to the schedule after')
         # 0.98 (SD3-2): the pick is asked about 4 times a second, not every frame
         import time as _t
-        n0, t0 = g.ev("SND.r3Ev.n"), _t.perf_counter(); g.step(120); n1, t1 = g.ev("SND.r3Ev.n"), _t.perf_counter()
+        n0, t0 = g.ev("SND.r3Ev.n"), _t.perf_counter()
+        for _ in range(4): g.step(30); g.page.wait_for_timeout(300)   # 120 frames over at least a real second (RV25)
+        n1, t1 = g.ev("SND.r3Ev.n"), _t.perf_counter()
         print(f'  r3music: {n1 - n0} asks in 120 frames, {t1 - t0:.2f} s')
-        check(n1 - n0 <= (t1 - t0) / 0.25 + 2 and n1 - n0 < 120, f'r3music: the event pick is asked about 4 times a second ({n1 - n0} in 120 frames, {t1 - t0:.2f} s)')
+        check(1 <= n1 - n0 <= (t1 - t0) / 0.25 + 2 and n1 - n0 < 120, f'r3music: the event pick is asked again, about 4 times a second ({n1 - n0} in 120 frames, {t1 - t0:.2f} s)')
         pe = [e for e in g.errors if e.startswith('pageerror')]
         if pe: check(False, 'r3music: page errors: ' + ' | '.join(pe[:3]))
     finally: g.close()
