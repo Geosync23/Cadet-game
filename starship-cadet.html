@@ -17018,6 +17018,7 @@ function ixJobStep() {
   const m = machineById(j.machine); if (!m) return null;
   const P = SHIP.player, w = P.work && P.work.job === j.id ? P.work : { fitted: [], make: null };
   const need = jobNeeds(j, w, P.carry), name = machineName(m);
+  { const cz = typeof caseOf === 'function' ? caseOf(j) : null; if (cz && !cz.wait && cz.fits && cz.calls.length <= cz.fits) return { deck: deckDef ? deckDef.num : m.deck, label: worksText('case.goal.call', 'Make your next call in Fault notes (your device)') }; }   // a head-scratcher after a wrong fix waits for your next call: no pin on the deck (backlog FX3-1, lead 45's OK; the first visit is as before)
   if (need.length && P.carry.length < CARRY_MAX && !(typeof scanFirst === 'function' && scanFirst(j))) {   // (24g's scanFirst: with the scanner, a faulty machine is read before its part is named)
     const lathe = typeof MAKE_AT !== 'undefined' ? MAKE_AT.find(id => typeof placeById === 'function' && placeById(id) && !(typeof heldBy === 'function' && heldBy(id))) || MAKE_AT.find(id => typeof placeById === 'function' && placeById(id)) || null : null;   // a free lathe first (backlog FX3-2)   // the machine you need (FX3, the user's "arrow to the needed machine"): the lathe, not the room
     if (w.make && w.make.part) return { deck: 5, room: 'f', place: lathe, label: 'Make ' + partList([w.make.part]) + (lathe ? ' at the lathe' : ' in the machine shop') };
@@ -49031,7 +49032,7 @@ function cometTick(now) {
   if (m >= 1325 && !e.mine.named) { e.mine.named = 1; e.mine.namedBy = 'sato'; }   // nobody named it at the card: the crew shout names and Sato picks the one about the storm
   if (m >= 1320 && m < 1335 && lounge && joined && !e.mine.knot && !(IX_GOAL && IX_GOAL.comet)) {
     const label = cometW('knot.tip') || 'Tap Saruth to tie a comet knot';
-    if (!IX_GOAL || IX_GOAL.tj) setGoal({ deck: 3, crew: 'saruth', label, comet: 'knot' }); ixTip('t:comet:knot', label + '. To the Veyli a comet is a guest crossing their sky.');
+    if (!IX_GOAL || IX_GOAL.tj) setGoal({ deck: 3, crew: 'saruth', label, comet: 'knot' });
   }
   if ((m >= 1335 || e.mine.knot) && IX_GOAL && IX_GOAL.comet === 'knot') clearGoal();
 }
