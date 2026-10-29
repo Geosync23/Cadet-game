@@ -30,3 +30,11 @@ Title screen B build plan: plans/title-screen-plan.md on claude/title-screen-pla
 (+ mirrored TITLE_EARLY), never shown under webdriver/nosave/dev, ~2 working days + a sound seat for 2-3 music candidates.
 Questions for the user before building (ask at the 1.0 patch): keep Saves on the menu? a "tap to log in" gate so music starts
 before choosing (TS1: no)? "Back to title" in Settings later?
+
+Backlog to 1.0 (the user's answers on BT1's page, Oct 28 ~9:40 PM ET; plans/backlog-1.0-final.md on claude/backlog-triage 68c806bf):
+- 0.98: FX24-2 + FX12-1 + TQ1-1 (planner walk estimate), SD3-2 (music lookup 4x/s). Clash resolved by the user: earlier answers stand
+  (FX24-2 fixed in 0.98; backlog 12 balanced in 0.99).
+- 0.99: backlog 12; row 22 cookers (keep the rate, add a small bottom message saying why dinner is late); the two balance-list items.
+- 1.0 patch (26): FX17-1, N6-1, PB1-1, TM-1, DV1-1/2/3, 15, CP5-1, 30, 31, JB1-1, FX3-1/2, FX10-1, FX8-1, FX21-1, RV18-C1/C2/D1, EV1-1,
+  SD3-1, V-1 seated formal dinner (no Dev jump needed), V-2 vessel nod, RV23-2/3; + the title screen (B).
+- Dropped: 28, BAL-1, BAL-2, EV1-2, 1, 5, 6, CP5-2, LD1-1, DM1-4, DM1-5, DM2-1. Everything in groups C/D left alone.
