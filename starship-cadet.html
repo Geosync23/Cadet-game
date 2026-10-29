@@ -13711,7 +13711,10 @@ const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitne
 // 0.92.3 (the user's playtest notes 3, 4, 5, 18; FX9, the lead's): fitness .6/.3 -> 1.4/.35 (about 25 a day: a workout most
 // days), leisure .8 -> 2.4 awake (a day off about 38, a shift about 62 with WORK_LEISURE), social 3/.25 -> 4.5/.5 (about 76 a
 // day: a call home, company at meals and a few chats), hunger asleep 2 -> 6 (48 a night: you wake hungry, about 35)
-const NEED_DRAIN = { hunger: [4, 6], energy: [4.8, 0], hygiene: [2.5, 1], fitness: [1.4, .35], social: [4.5, .5], bathroom: [6, 1.5], leisure: [2.4, 0] };   // bathroom halved in 0.28.62 (the 0.60.7 plan: about two visits a day); energy 4.4 -> 4.8 in 0.73.0 (playtest 2, the lead's tuning: a normal 16-hour day ends near 20-25)
+// 0.99 balance pass (BAL2, the user's go via lead 45, 2026-10-29; BAL1's report findings 4 and 5): hunger asleep 6 -> 4 (32 a
+// night: breakfast and dinner are enough, a careful player is Hungry about 2% of waking time, was 26-32%), fitness 1.4/.35 ->
+// .9/.3 (about 17 a day: the gym every other day keeps you in shape, never going still leaves you out of shape)
+const NEED_DRAIN = { hunger: [4, 4], energy: [4.8, 0], hygiene: [2.5, 1], fitness: [.9, .3], social: [4.5, .5], bathroom: [6, 1.5], leisure: [2.4, 0] };   // bathroom halved in 0.28.62 (the 0.60.7 plan: about two visits a day); energy 4.4 -> 4.8 in 0.73.0 (playtest 2, the lead's tuning: a normal 16-hour day ends near 20-25)
 const SLEEP_GAIN = 12.5;                                 // energy per ship hour asleep: 8 hours fills it
 const SLEEP_TAPER = [90, 1 / 3];                         // above 90, sleep gives a third as much (the patch's #27, the user's "100 after 8 hours"): bed at 22:00 wakes at 100, 23:00 at about 95
 const NEEDS_FRESH = { hunger: 60, energy: 100, hygiene: 60, fitness: 70, social: 70, bathroom: 60, leisure: 70 };   // a new game: just woken, before breakfast
@@ -13729,7 +13732,7 @@ const NEED_FX = {   // need: { hi: [effects, reason], lo: [effects, reason] }
   fitness: { hi: [{ drain: .94, walk: 1.05 }, 'Fit: a spring in your step, and you tire more slowly.'], lo: [{ walk: SLOW_SPEED, drain: 1.06 }, 'Out of shape: you walk slower and tire sooner.'] },
   hunger:  { hi: [{ drain: .96 }, 'Well fed: you tire a little more slowly.'], lo: [{ task: .85 }, 'Hungry: tasks go 15% slower.'] },
   hygiene: { hi: [{ socialGain: 1.5 }, 'Fresh and clean: chatting does you more good.'], lo: [{ socialGain: .5 }, 'You could do with a wash: chatting does half the good.'] },
-  social:  { hi: [{ task: 1.1 }, 'In good spirits: tasks go 10% faster.'], lo: [{ drain: 1.05 }, 'Lonely: you tire a little sooner.'] },
+  social:  { hi: [{ task: 1.1 }, 'In good spirits: tasks go 10% faster.'], lo: [{ drain: 1.05, task: .95 }, 'Lonely: you tire a little sooner, and tasks go 5% slower.'] },   // task .95: the 0.99 balance pass (the user's "a little more pressure, not a lot")
   bathroom: { hi: [{ task: 1.05 }, 'Comfortable: tasks go 5% faster.'], lo: [{ task: .9 }, 'You need the toilet: it\'s hard to concentrate, tasks go 10% slower.'] },
   leisure: { hi: [{ friendGain: 1.25 }, 'In good spirits: talking makes friends 25% faster.'], lo: [{ task: .9 }, 'Restless: tasks go 10% slower.'] },   // 0.28.61; friendGain: section 20's Talk a while
 };
@@ -13989,7 +13992,7 @@ const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown wh
   ['t:loo', c => c.n.bathroom < 50, 'Public washrooms are in the junior wing on Deck 4, and on Deck 3. Cabin bathrooms are private.'],
   ['t:food', c => c.n.hunger < 50 && !teachMeal(c.min), 'Missed a meal? The grab shelf in the mess, Deck 3, is always open.'],
   ['t:sit', c => c.n.energy < 50, 'Tired? Sit down anywhere for a bit; it slows the tiredness. Lying on your bunk rests you properly.'],
-  ['t:gym', c => c.n.fitness < 50, 'The gym on Deck 3 has treadmills and weights. A workout most days keeps you fit and quick on your feet.'],
+  ['t:gym', c => c.n.fitness < 50, 'The gym on Deck 3 has treadmills and weights. A workout every other day keeps you fit and quick on your feet.'],
   ['t:call', c => c.n.social < 50, 'Missing home? The call-home booths on Deck 3 put you through to Mum, Gran, Jo or Sam.'],
   ['t:bonus', c => c.now - c.S.start > 600000 && Object.values(needEffects(c.n).marks).some(m => m[0] === 'up'), 'Needs kept high give bonuses: well rested, you work faster. The Needs app shows what\'s helping and what isn\'t.'],
   ['t:pause', c => c.now - c.S.start > 900000, 'Need a break? Pause, at the top, stops the ship\'s clock and everyone in it. Tap anywhere to carry on.'],
@@ -45756,7 +45759,7 @@ function eventJoin(e, d, now, notice) {
   if (e.ev.trace) traceAdd(e.ev.trace, d);              // e.g. Sowing morning plants your seedling (the deck architect's seedlingYours)
   const bb = typeof bondBest === 'function' && typeof DECK_CREW !== 'undefined' ? Math.max(1, bondBest(DECK_CREW.filter(c => c.settled && c.spot && e.rooms.has(deckDef.num + '|' + c.spot.room)).map(c => (c.p || c).id))) : 1;   // 0.28.43: by the best bond there
   const n = SHIP.player && SHIP.player.needs; if (n && typeof n.social === 'number') n.social = Math.min(100, n.social + Math.min(20, 12 * bb));   // at most +20 even among close friends (0.28.49, the lead)
-  if (typeof leisureAdd === 'function') leisureAdd(15, 'tradition');   // 0.34.51: going to a tradition fills leisure (PE6's 7th need, +15 in the plan)
+  if (typeof leisureAdd === 'function') leisureAdd(25, 'tradition');   // 0.34.51: going to a tradition fills leisure (PE6's 7th need, +15 in the plan); +25 in the 0.99 balance pass (BAL1's finding 6, the user's go)
   toast(e.name, notice || evText(e.ev.thanks, e), { keep: true });   // the join notice: never dropped from the pop-up queue (LEAD31-3)
   if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
   if (e.id === 'quiz') quizStart(d, now);
@@ -64776,10 +64779,11 @@ const pu4TestDay = d => Math.max(PU4.testFrom, promoWorkday(d));
 const pu4DayWord = (day, d) => day === d ? 'today' : day === d + 1 ? 'tomorrow' : dayName(day);
 function pu4AtDinner() { try { return !!ACT && ACT.kind === 'eat' && deckDef.num === 3; } catch (e) { return false; } }   // at your table in the mess (Deck 3)
 function pu4Script(v, hook) {                            // a live copy of the writer's scene (else a stand-in), our hooks on it; the dinner's without anyone who isn't near
-  const id = 'pu4.offer' + v, base = MEETING_SCRIPTS[id] || MEETING_SCRIPTS['pu4.offer'] || { title: 'Your next test', from: 'Chief Ines Calder', stub: true, gist: 'Calder told you in person: your Tier 4 test is set, Monday at 09:30. A drive coil. Pass it and you\'re an Engine Specialist.',
+  const tday = (() => { try { return dayName(pu4TestDay(worksDay(shipNow()))); } catch (e) { return 'Monday'; } })();   // the stand-in's day (0.99 balance: it always said Monday)
+  const id = 'pu4.offer' + v, base = MEETING_SCRIPTS[id] || MEETING_SCRIPTS['pu4.offer'] || { title: 'Your next test', from: 'Chief Ines Calder', stub: true, gist: 'Calder told you in person: your Tier 4 test is set, ' + tday + ' at 09:30. A drive coil. Pass it and you\'re an Engine Specialist.',
     lines: [{ who: 'calder', text: 'There you are. Trusted, and the relays done. That\'s all of it.', to: 'you' },
-      { who: 'calder', text: 'Monday. A drive coil. Tier 4.' },
-      { choice: [{ text: 'I\'ll be ready.', reply: { who: 'calder', text: 'I know. That\'s why it\'s Monday.' } },
+      { who: 'calder', text: tday + '. A drive coil. Tier 4.' },
+      { choice: [{ text: 'I\'ll be ready.', reply: { who: 'calder', text: 'I know. That\'s why it\'s ' + tday + '.' } },
         { text: 'A drive coil? Me?', reply: { who: 'calder', text: 'With me and Torres watching. Half past nine, the engine room.' } }] },
       ...(v === '.dinner' ? [{ who: 'pell', text: 'Torres is pretending not to be proud.' }] : [])] };
   let lines = base.lines;
@@ -64855,7 +64859,7 @@ function pu4Next(k) {                                    // puNext's line for th
   if (!T) { const B = WORK_BANDS[3], at = b => B.findIndex(x => x[1] === b);
     return at(worksBand()) >= at('steady') && !ladderNeeds((ladderRow('t4') || {}).needs || { rep: 'trusted' }, W) ? worksText('next.t4.steps', 'Your Tier 4 test needs Trusted and power and relays. You\'re {band} now.', { band: worksBandWord() }, k) : null; }
   if (!T.passed) return worksText('next.wait.t4', 'Your Tier 4 test: {day}, {time}, the engine room, Deck 6.', { day: pu4DayWord(T.day, d), time: hhmm(PU4.testAt) }, k);
-  if (!T.res) { const at = pu4ResWhen(); return at === null ? null : worksText('next.wait.t4res', 'Your Tier 4 result: {day}, {time}, when your shift starts. Calder will find you.', { day: pu4DayWord(worksDay(at), d), time: hhmm(at % 1440) }, k); }
+  if (!T.res) { const at = pu4ResWhen(); return at === null ? null : pu4ResLate() ? worksText('next.wait.t4res.eve', 'Your Tier 4 result: {day}, {time}. Calder will find you.', { day: pu4DayWord(worksDay(at), d), time: hhmm(at % 1440) }, k) : worksText('next.wait.t4res', 'Your Tier 4 result: {day}, {time}, when your shift starts. Calder will find you.', { day: pu4DayWord(worksDay(at), d), time: hhmm(at % 1440) }, k); }
   return null;
 }
 function pu4Items(d) {                                   // puItems' Tier 4 rows on day d
@@ -64923,11 +64927,12 @@ function pu4Passed(t) {                                  // turned in: passed, w
   const W = SHIP.works, T = puT4(), c = W && W.cur; if (!W || !T || T.passed) return false;
   const by = (c && c.by) || 'calder', d = worksDay(t);
   T.passed = true; T.day = d; W.tr.t4 = d; if (c && c.id === 't4') W.cur = null;
-  worksSayAll(by, worksVoice(by, 'pu4.promo.passed') || [worksText('pu4.passed.say', 'That\'s the test. Your result when your shift starts. I\'ll find you.')]);
+  const eve = pu4ResLate();   // (0.99 balance) days off next: the result this afternoon
+  worksSayAll(by, worksVoice(by, 'pu4.promo.passed') || [eve ? worksText('pu4.passed.say.eve', 'That\'s the test. Your result this afternoon. I\'ll find you.') : worksText('pu4.passed.say', 'That\'s the test. Your result when your shift starts. I\'ll find you.')]);
   try { if (puNearMe('torres-zeke', CHATTER_NEAR)) simTimeout(() => worksSayAll('torres-zeke', worksVoice('torres-zeke', 'pu4.promo.passed') || ['Proper job.']), 6000); } catch (e) { /* not in play */ }
   flagSet('pu4.passed', d);
-  promoMail('mail.pu4.passed', 'Your test | Done. Your result when your shift starts. I\'ll find you.', null, t);
-  if (t >= shipNow() - 1) promoNotice(worksText('pu4.passed.notice', 'Your Tier 4 test is done. Your result: Calder will find you when your shift starts.'), worksName(by));
+  if (eve) promoMail('mail.pu4.passed.eve', 'Your test | Done. Your result this afternoon. I\'ll find you.', null, t); else promoMail('mail.pu4.passed', 'Your test | Done. Your result when your shift starts. I\'ll find you.', null, t);
+  if (t >= shipNow() - 1) promoNotice(eve ? worksText('pu4.passed.notice.eve', 'Your Tier 4 test is done. Your result: Calder will find you this afternoon.') : worksText('pu4.passed.notice', 'Your Tier 4 test is done. Your result: Calder will find you when your shift starts.'), worksName(by));
   try { crewSceneEnd('torres-zeke'); } catch (e) { /* none */ }
   if (typeof MACH_REV !== 'undefined') MACH_REV++;
   simNote('pu4', { step: 'passed', day: d });
@@ -65010,12 +65015,17 @@ const PU4_R = { early: 5, find: 30, walk: 45, badgeWait: 3 };
 OCCASIONS.pu4Badge = { title: 'Your engine badge', kind: 'meeting', by: 'marrow', with: ['vance', 'calder', 'torres-zeke'], deck: 1, room: 'O', at: 990, len: 25, script: 'pu4.badge', due: () => false, mail: null };
 function pu4ResWhen() {                                  // when your result comes (absolute minutes): your shift's start after the test day's 12:30
   const T = puT4(); if (!T || !T.passed) return null;
-  const t = (T.day - 1) * 1440 + PU4_T.until;
+  const t = (T.day - 1) * 1440 + PU4_T.until, at = pu4ResNext(T, t);
+  return worksDay(at) > T.day + 1 ? pu4ResEve(T, t) : at;   // (0.99 balance, BAL2, the user's yes to (b)) days off next: the result that afternoon (pu4ResEve)
+}
+function pu4ResNext(T, t) {
   for (let d = T.day; d < T.day + 14; d++) { const B = (d - 1) * 1440, n = P5_NIGHTS[d];   // the nights are fixed by the day (section 28)
     if (d > T.day && playerShiftOn(d) && !(n && P5_NIGHT)) return B + DAY_SHIFT[0];
     if (n && B + n[0] - PU4_R.early >= t) return B + n[0] - PU4_R.early; }
   return T.day * 1440 + DAY_SHIFT[0];
 }
+const pu4ResEve = (T, t) => t + 60;                      // 13:30, an hour after the test's window: done by the Friday address (16:00)
+const pu4ResLate = () => { const T = puT4(); return !!T && T.passed && pu4ResWhen() === pu4ResEve(T, (T.day - 1) * 1440 + PU4_T.until); };   // the result comes this afternoon, not when a shift starts
 const pu4MoveDay = d => { for (let k = d + 1; k < d + 8; k++) { try { if (weekday(k) === 3) return k; } catch (e) { return d + 2; } } return d + 2; };   // the Thursday after
 function pu4BadgeDay() {                                 // the Captain's afternoon: the day after a night's result (the same day after a morning's), later if you slept through it
   const T = puT4(); if (!T || !T.res) return null;
