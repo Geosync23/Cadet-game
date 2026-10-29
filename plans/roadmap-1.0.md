@@ -4,7 +4,7 @@
 |---|---|---|
 | 0.96.0 | Controller, the Diplomatic visit (+ pointers), sound update ON | LIVE 6:42 PM ET Oct 28 |
 | 0.97.0 | Dev mode update (J0-J5) | full round running Oct 28 evening |
-| 0.98.0 | Optimization pass: BOTH game speed on phones AND faster, less noisy checks (the user, 8:2x PM ET) | OP1 plan page first |
+| 0.98.0 | Optimization pass: game speed on phones (the user, 8:3x PM ET; an earlier "Both" was an accidental answer) | OP1 plan page first |
 | 0.99.0 | Balance | from the balance report (https://claude.ai/artifact/R1NgKLKRoP2Gu5sfgmMumm) once the user answers it |
 | 1.0 | One last big playtest patch | the user's playtest notes |
 
