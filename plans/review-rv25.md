@@ -123,3 +123,4 @@ browsers fine; the user wants faster turnarounds.
 - SD3-1 5ba395a1 (claude/sound-099; room B chime kept across reloads by a localStorage note per slot, crew openings
   excluded): **FIXES** (~02:4x, SD3, lead 45). cadet ALL IDENTICAL; sound_check OK. The note (= move day, ~always 25) is
   never cleared on New game / Delete / Load file: a second game in the slot never chimes. Suggested onSim('newGame') clear.
+- SD3-2 check follow-up fb603947 (needs >= 1 ask over a real second): PASS on a code read; SD3-2 tip fb603947.
