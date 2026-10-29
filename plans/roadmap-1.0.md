@@ -21,7 +21,7 @@ Decisions (the user, Oct 28 ~9:20 PM ET):
 - Design-doc open questions: close them all (lead's suggestions: Calder, night shift, fault diagnosis, engine watch closed as built;
   passed over = only delayed; character shaping = no; device colour = as built; the diplomacy game = not part of this game;
   the board jobs' reputation and the upkeep pace move to the 0.99 balance list).
-- Title screen: option B, the crew terminal (DOM/CSS, the device's phosphor screen, menu as a list + loading bar). Credits and title sound: to ask.
+- Title screen: option B, the crew terminal (DOM/CSS, the device's phosphor screen, menu as a list + loading bar). No Credits screen. A music track on the title (the user, ~9:25 PM ET).
 - 0.98: any visual change from turns 3-4 shown to the user as a before/after picture first; only incredibly minor changes accepted.
   No 60 fps cap. No battery saver. Backlog 12 (career "Relied on" before Day 5) NOT fixed in 0.98: the user will balance it in 0.99
   (it stays known-old until then). FX24-2: yes, book walking time only for long walks to a tradition.
