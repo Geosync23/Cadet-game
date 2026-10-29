@@ -45655,7 +45655,7 @@ function recActCard(e, d, now) {
   const did = k => { if (typeof leisureAdd === 'function') leisureAdd(10, 'talent');
     if (typeof newsAdd === 'function') newsAdd({ id: 'rec-talent-you@' + d, about: 'you', lines: [['Did you see the new hand at talent night?', 'The new hand got up at talent night! Brave.', 'Talent night: the new hand\'s act. People are still talking about it.'][k]], seed: ['ferreira', 'volkov-maeve'], weight: .7, life: 4 }); };
   const baked = MEETING_SCRIPTS['rec.talent.you'];          // the writer's act card (W3), when it's baked: its first three choices are acts
-  if (baked) { baked.onPick = k => { if (k < 3) did(k); }; dialogueShow('rec.talent.you', { id: 'rec.talent@' + d, who: [q.id], at: now }); return; }
+  if (baked) { baked.onPick = k => { if (k < 3) did(k); }; dialogueShow('rec.talent.you', { id: 'rec.talent@' + d, who: [q.id], at: now, ...cardWhere(e) }); return; }
   MEETING_SCRIPTS['rec.talent'] = { title: 'Talent night', gist: 'Talent night in the auditorium.',
     onPick: k => { if (k < 3) did(k); },
     lines: [{ who: q.id, text: say('talent.ask', 'You\'re on the sheet if you want to be. One act. Nobody fails at talent night.') },
@@ -45663,7 +45663,7 @@ function recActCard(e, d, now) {
         { text: 'Tell a ship joke', rel: { [q.id]: 2 }, reply: { who: q.id, text: say('talent.joke', 'They laughed! Mostly at the right bit.') } },
         { text: 'A Works trick', rel: { [q.id]: 2 }, reply: { who: q.id, text: say('talent.trick', 'A spanner, a bolt and a lot of nerve. Brilliant.') } },
         { text: 'Just watch', reply: { who: q.id, text: say('talent.watch', 'Next time, then. Enjoy the show.') } }] }] };
-  dialogueShow('rec.talent', { id: 'rec.talent@' + d, who: [q.id], at: now });
+  dialogueShow('rec.talent', { id: 'rec.talent@' + d, who: [q.id], at: now, ...cardWhere(e) });   // its room (backlog FX17-1: with no where, meetingsTick closed it the next minute)
 }
 // the Wren talks' panel (0.83.2): the speaker's opening, then a choice: ask one question (a friendship step with the
 // speaker; a chief remembers who asked) or just listen. Words: the speaker's own lines (kinds talk.open, talk.answer,
