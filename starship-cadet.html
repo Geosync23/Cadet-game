@@ -257,7 +257,7 @@ body.dlgon .devhu{display:none}
   <button id="crew" aria-pressed="true" aria-label="Show or hide visiting crew"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.8-3.6 3.2-5.5 6-5.5s5.2 1.9 6 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.6c2.4.2 4 1.9 4.5 4.6"/></svg><span>Crew</span></button>
   <button id="light" aria-label="Switch to night lighting"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><span>Night</span></button>
 </div>
-<div class="toast" id="toast"><b id="tt"></b><span id="tx"></span></div>
+<div class="toast" id="toast" role="status" aria-live="polite"><b id="tt"></b><span id="tx"></span></div>
 <div class="lift" id="lift" role="dialog" aria-modal="true" aria-labelledby="liftT" hidden>
   <h2 id="liftT">Main lift</h2><p>Choose a deck. Deck 1 is at the top of the ship.</p>
   <div class="decks" id="liftList"></div>
