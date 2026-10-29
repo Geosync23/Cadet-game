@@ -154,3 +154,7 @@ Queue (lead 45, 2026-10-29): 1. TB1 title screen claude/title-099; 2. EV2 seated
   Friday test's badge is a Saturday 16:30 (the lead's call, as RV25 noted); the ".eve" lines are placeholders until a
   writer words them.
 - **VERDICT BAL2 96dd584: PASS** (the full six-runner round still needed before the merge, as BAL2 says).
+- BAL2 follow-up 6eacbe1 (words in 24u only): the four ".eve" lines worded (Calder: lunch, "this afternoon, about half
+  past one"); the stairs stand-in after an afternoon result says "tomorrow afternoon ... Torres" (pu4ResLate, still valid
+  with T.res set); the offer stand-in says "Tomorrow" when the test is the next day (capitalised at the line's start), else
+  the weekday. career_check --s6 OK on 6eacbe1 (my run). **PASS.**
