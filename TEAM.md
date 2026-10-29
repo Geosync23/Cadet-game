@@ -2066,3 +2066,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~22:26 UTC: **USER: publish 0.99.2 without asking** (this one). On green + BM21 GO (verify sha): PUB2 GO, ff integration, tell the user.
 - ~23:06 UTC: 0.99.2: R2 on a ~2.5x slower host (final ~01:30-02:00 UTC), no FAIL. Lead: R2 hands unstarted checks (perf first) to R4 / R1 as they free up.
 - ~23:24 UTC check-in (lead 46): 0.99.2: **R4 OK** 7/7 (title_check hand-over 0 old-deck frames; claude/checks-0990-r4 74a58001); R4 now runs R2's perf_check alone; BM21 takes R2's day 0, 1, 5 + arrows endgo after its share; R2 keeps the rest. No FAIL.
+- ~23:40 UTC: 0.99.2: **R1 AS1 OK** 15/15 (claude/checks-0990-r1); offered R2's not-started checks.
