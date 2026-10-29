@@ -1982,3 +1982,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~02:12 UTC: **Hired BAL2** session_01GKuymm7ApobKpq9JW9FJgF (claude/balance-099 from 610ad7f1): f1 sooner retest (dynamic), f4/f5/f6 try, social a little more pressure, backlog 12 check-expectation fix, design-doc numbers. Plan with numbers first (lead shows the user), then build. Next when a seat frees: title screen builder (TS plan) and EV1 for V-1 seated formal dinner + V-2 vessel nod.
 - ~02:16 UTC: **Lead 44 handing over** (~68% memory). plans/handover-lead44.md final. Hiring lead 45.
 - ~02:17 UTC: **Hired lead 45** session_01GKuymnu4NeXJhwPe21FWk7 (claude/lead-45 from claude/lead-44 4fa533ab). Lead 44 stays only to hand over the check-in, then idle.
+- ~02:20 UTC: chain depth: lead 44 = 3/8, lead 45 = 4. Note added to handover: at lead 45 handover, the USER starts lead 46 from claude.ai (resets depth).

@@ -48,3 +48,8 @@ Pages that collect answers: check the answers really saved (the backlog page los
 
 ## Backlog notes from today (not on the user's 1.0 list unless noted)
 EV1-1 (double reputation toast; in 0.99 list), DM2-1 (End and keep; dropped), Deck 4 piano crowding (new), DM1-5 (dropped).
+
+## Session chain depth (the user asked, Oct 28 10:20 PM ET)
+Lead 44 is depth 3 of a limit of 8; lead 45 is depth 4, its helpers depth 5. Each lead-to-lead handover adds one level.
+At lead 45's handover: ask the USER to start lead 46 themselves from claude.ai (short prompt pointing at plans/handover-lead45.md),
+which resets the chain to depth 1. Don't create lead 46 from lead 45.
