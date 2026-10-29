@@ -34,3 +34,6 @@ The user said publish (via lead 44). sha256 checked, published over the same two
 
 ## 0.97.0 release (2026-10-29)
 The user said publish (via lead 44). sha256 checked, published over the same two links as v4, {downloads}. Phone check 390x844 on both: PASS, 0 console errors; on Dev the phone.js script now also opens the Dev panel (devmodeOpen(true)) and clicks the Jump to tab (.dmTabs button[data-tab=jump]). 6daN untouched.
+
+## Title screen preview (2026-10-29)
+Lead 45 asked for a preview page (not a release): https://claude.ai/artifact/GLSzgGfn55Kk9LFCaoGevR v1 = claude/title-on-099 b980518 (game 4390780e…0303, TITLE_ON true, GAME_BUILD still 0.97.0), {downloads}, title "Title screen preview". Scratchpad source title/title-screen-preview.html. The title screen is hidden under automated browsers (navigator.webdriver) unless the link has #title: the headless check opens it with #title. 390x844: shows, 0 console errors. Lead 45 is the lead now (session_01GKuymnu4NeXJhwPe21FWk7).
