@@ -73812,7 +73812,7 @@ function sndFx(name, o) { try { return SND.fx(name, o); } catch (e) { return fal
 // the sound update (SD2, plans/sound/r3-build-plan.md; the user's Round 3 picks and the mess hall, 2026-10-28): event music
 // for the picked traditions and events (turn 1), the mess hall (turn 2), the feature sounds (turns 3-4). Off: the sound as before
 // the title screen's track (section 30): one of three candidates for the user to pick (plans/sound/title-music.html); SD3, 0.99
-const SND_TITLE = 'A';   // 'A' Night terminal | 'B' Phosphor glow | 'C' Ship's log | null (silent, as TB1 built it)
+const SND_TITLE = 'C';   // the user's pick, 2026-10-29 (Ship's log). 'A' Night terminal | 'B' Phosphor glow | 'C' Ship's log | null (silent, as TB1 built it)
 const SND_R3_ON = true;   // switched on in 0.96.0 (the user: the sound update is on when published; via lead 43/44)
 const SND = (() => {
   const S = { ctx: null, bus: {}, onFrame: [], log: URL_FLAGS.has('soundlog') ? [] : null };
