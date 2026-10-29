@@ -2,7 +2,9 @@
 
 Read this first in any new session, together with **design-doc.md** and **starship-cadet.html**. The design doc is the source of truth for what the game is (update it when a design decision is made); these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
 
-**0.97.0 (2026-10-28, candidate on `claude/staging-pad`, BM20 for lead 44).** 0.96.0 (live, claude/integration fe11cd66) plus the Dev mode update J0-J5 (DM2, `claude/devmode-j2` 86958252, RV25 PASS; plans/devmode-plan-v3.1.md): Dev mode only, behind `#dev`, so the game without the Dev link is unchanged (cadet vs fe11cd66 identical).
+**0.98.0 (2026-10-29, hedge candidate (d) on `claude/staging-098d`, BM20 for lead 45).** 0.97.0 (live, integration 610ad7f1) plus SD3-2's event-music pick four times a second (`claude/sound-098` fb603947) and OP1's walk-time fix, a long walk to a tradition comes first, which closes FX24-2 and FX12-1 (`claude/opt-098-build` 3307e843); join_check's 120 s reload and OP1's s5cases / puzzle p6 check fixes. RB1's render turn 3 is NOT in this candidate (controller bedtime FAIL, 0.98.0 round): it moves to 0.99 with its fix. Known old gap: backlog BM20-1.
+
+**0.97.0 (2026-10-28, published; BM20 for lead 44).** 0.96.0 (live, claude/integration fe11cd66) plus the Dev mode update J0-J5 (DM2, `claude/devmode-j2` 86958252, RV25 PASS; plans/devmode-plan-v3.1.md): Dev mode only, behind `#dev`, so the game without the Dev link is unchanged (cadet vs fe11cd66 identical).
 
 **0.96.0 (2026-10-28, published; build master BM20 for leads 43/44).** 0.95.0 plus controller support switched on (`PAD_ON`: waves A, B, C from `plans/controller-audit.md`; controller_check's parts make their own off and on copies), the sound update switched on (`SND_R3_ON`: SD2/SD3, `plans/sound/r3-build-plan.md`; sound_check tests a build already switched on as it is, and an r3 part that finds no switch line FAILs), and the Diplomatic visit running (EV1, `claude/visit-on`). The full round on 0.96.0 is the gate. controller_check `reach` takes 8 h or more: run it detached with CTL_STATES/CTL_PADDONE so it can resume.
 
