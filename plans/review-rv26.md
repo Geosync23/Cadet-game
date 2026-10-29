@@ -69,3 +69,29 @@ Queue (lead 45, 2026-10-29): 1. TB1 title screen claude/title-099; 2. EV2 seated
 - cadet vs 610ad7f1 ALL IDENTICAL; day_check 18 OK; probe from 18:40: all seven seated by 18:55, scene 19:00, you eating
   to ~20:07, diners leave 20:15. No page errors.
 - **VERDICT EV2 3dda559: PASS.** Section 14 line: fine on my read; per owners.md the sim engineer may still want a look.
+
+## Handover from RV25 (lead 45, ~06:55): RB1's 0.98 render turns, BB1 FX8-1 swim look, BAL2's new tip. RV25 idle.
+- OP1 claude/join-timeout c27ebb88 (join_check's real reload waits 120 s): PASS on a read. a.early across save/reload:
+  confirmed on 3dda559 (deviceLoad maps { ...a, named fields }), for OP1's section 14 owner note.
+
+## RB1 0.98 turn 3, claude/opt-098-render 8d7a314 (base b9b7e3d7 = 0.97.0; session_01GKuymkqMpME5GQvc5vTBqR)
+- Code read: bake collects each joint's corners; bodyBake makes one mesh (bodyJ attribute, a 16x32 float DataTexture,
+  NearestFilter by default, so texels are exact); bodyTick on scene.onBeforeRender (r128 calls it after
+  scene.updateMatrixWorld and before the shadow pass) writes matrixWorld, camera inverse x matrixWorld, its normal
+  matrix and the sun's shadow camera x matrixWorld in float64 then float32, as three does per mesh; the shader swaps
+  project_vertex, defaultnormal_vertex and worldpos_vertex (r128's own lines, instancing parts unused). One
+  renderer.render in the game; no other scene.onBeforeRender; nothing else on layer 1. Joints never drawn (layer test in
+  both passes); taps via the joints' meshes. isShown skips hidden roots (player.obj hidden in activities; crowd
+  visibility). playerUniformTint swaps every joint, the body follows the first. All rig disposals traverse and dispose
+  geometry (player swaps, recBody, V.opp, ROOF.mate, crew swaps), so BODIES never leaks. No float vertex textures: the
+  old code verbatim.
+- cadet vs b9b7e3d7 run alone: 0 px in all 15 shots, taps same; state differs only in calls 173 -> 142 and memory
+  (geometries 453 -> 422, textures 34 -> 36), as intended.
+- pix_rb.py (mine): 7 scenes on Decks 1, 2, 3 (dinner, breakfast), 4 (night), 5, 7 (rec Day 6), each plain and rotated,
+  390x844: 0 px in all 14; draw calls 15-30 fewer per scene.
+- deck_check OK; Deck 4 memory flat over the round trips (346 geometries, 39 textures each time).
+- **VERDICT RB1 turn 3 8d7a314: PASS.**
+
+## BB1 FX8-1 swimmer look (claude/backlog-triage 564b8a5): in progress (paused for RB1)
+- swim_up.py fixed to read the drawn spot (rdx/rdz) on a place with moves. Day 6 14:00: Holt off the kayak glides
+  74 frames, biggest step 0.08, no wall; Ishikawa off the float: 4 frames, one step 0.67, no wall. Day 6 16:00, Day 7 to do.
