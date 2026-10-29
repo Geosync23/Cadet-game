@@ -73590,6 +73590,8 @@ padOwn(L => !!(L && L.id === 'device' && padShown(document.getElementById('devTi
 function sndFx(name, o) { try { return SND.fx(name, o); } catch (e) { return false; } }
 // the sound update (SD2, plans/sound/r3-build-plan.md; the user's Round 3 picks and the mess hall, 2026-10-28): event music
 // for the picked traditions and events (turn 1), the mess hall (turn 2), the feature sounds (turns 3-4). Off: the sound as before
+// the title screen's track (section 30): one of three candidates for the user to pick (plans/sound/title-music.html); SD3, 0.99
+const SND_TITLE = 'A';   // 'A' Night terminal | 'B' Phosphor glow | 'C' Ship's log | null (silent, as TB1 built it)
 const SND_R3_ON = true;   // switched on in 0.96.0 (the user: the sound update is on when published; via lead 43/44)
 const SND = (() => {
   const S = { ctx: null, bus: {}, onFrame: [], log: URL_FLAGS.has('soundlog') ? [] : null };
@@ -74917,6 +74919,11 @@ const SND = (() => {
       veyli:       { name: 'Veyli welcome', time: 'Event', key: 50, mode: 'mixo', bpm: 54, a: [0, 1], b: [3, 1, 0, 2], c: [4, 2], seed: 593, lg: 0.035, note: 'A held drone and a struck bronze bar for the Veyli, under the Wren\'s own pads.' },
       farewell:    { name: 'Farewell song', time: 'Event', key: 43, mode: 'dorian', bpm: 50, a: [0, 2], b: [3, 0], c: [4, 1], seed: 613, bright: 0.55, wet: 0.7, note: 'Low and sparse under the crew\'s singing at the Veyli farewell: a held drone, dark pads, a low bronze bar, one high chime (the user\'s A).' },
     });
+    Object.assign(SPACE, {   // the title screen's candidates (SND_TITLE): calm, the crew terminal's phosphor glow, a loop of about a minute and a half
+      titleA: { name: 'Night terminal', time: 'Event', key: 50, mode: 'dorian', bpm: 60, a: [0, 2], b: [3, 0, 1, 2], c: [4, 1], seed: 701, pattern: [0, 2, 1, 3, 2, 1, 3, 1], bright: 0.75, wet: 0.65, note: 'A soft arpeggio ticking like a terminal over dark Dorian pads; a few high stars. Calm, a little mysterious.' },
+      titleB: { name: 'Phosphor glow', time: 'Event', key: 53, mode: 'lydian', bpm: 54, a: [0, 1], b: [2, 1, 3, 0], c: [4, 1], seed: 709, slow: true, bright: 0.9, wet: 0.7, note: 'Wide, warm Lydian pads with a slow sequence and a chime now and then, like a screen glowing in a quiet room.' },
+      titleC: { name: 'Ship\'s log', time: 'Event', key: 48, mode: 'mixo', bpm: 66, a: [0, 1], b: [3, 1, 0, 2], c: [4, 2], seed: 719, pattern: [0, 1, 2, 1, 3, 2, 1, 2], lg: 0.03, bright: 0.85, note: 'A gentle pulse, a sequence and a quiet singing line: the ship ticking over, ready for your shift.' },
+    });
     for (const [k, d] of Object.entries(SPACE)) TRACKS[k] = space(d);
     const SPACE_LV = {dawn: 0.417, wake: 0.442, firstlight: 0.525, systems: 0.631, morning: 0.479, tea: 0.479, midday: 0.417, lunch: 0.452, promenade: 0.537, afternoon: 0.452, circuits: 0.525, golden: 0.49, evening: 0.468, porthole: 0.468, watch: 0.452, lullaby: 0.447, latenight: 0.484, deepspace: 0.484, shift: 0.513, steady: 0.495, rounds: 0.495};   // levels for the space tracks (set by measuring against the hum)
     for (const k of Object.keys(SPACE)) MLV[k] = SPACE_LV[k] ?? 1;
@@ -74959,6 +74966,10 @@ const SND = (() => {
     }
     const SHAPED = ['tea', 'lunch', 'porthole', 'watch', 'lullaby', 'latenight', 'deepspace', 'comet'];
     SHAPED.forEach(shaped);
+    ['titleA', 'titleB', 'titleC'].forEach(shaped);   // the title's candidates: a short form, looped by S.title (the same 16 bars round again)
+    TRACKS.titleA.form = () => [sec('Boot', 'A', 2, ['sPad', 'sStars'], 1), sec('Ticking', 'A', 6, ['sPad', 'sSeq', 'sStars'], 1), sec('Turn', 'B', 4, ['sPad', 'sSeq', 'sChime'], 2), sec('Settle', 'A', 4, ['sPad', 'sSeqSlow', 'sStars'], 1)];
+    TRACKS.titleB.form = () => [sec('Glow', 'A', 4, ['sPad', 'sSwell'], 1), sec('Lines', 'A', 4, ['sPad', 'sSwell', 'sSeqSlow', 'sChime'], 1), sec('Lift', 'B', 4, ['sPad', 'sStars', 'sSeqSlow'], 2), sec('Fade', 'A', 4, ['sPad', 'sStars'], 1)];
+    TRACKS.titleC.form = () => [sec('Hum', 'A', 2, ['sPad', 'sPulse'], 1), sec('Log', 'A', 6, ['sPad', 'sPulse', 'sSeq'], 1), sec('Entry', 'B', 4, ['sPad', 'sPulse', 'sSeq', 'sSing'], 2), sec('Rest', 'A', 4, ['sPad', 'sStars'], 1)];
     if (SND_R3_ON) {   // the sound update, turn 1: the event tracks take the reshaped form (phrases, a moving bass), as the comet does
       Object.assign(PARTS, {
         sDrone: c => { if (c.bar % 4 === 0) { SX.swell(c.t, c.root, c.s * c.beats * 4, 0.06, c.out); SX.swell(c.t, c.root + 7, c.s * c.beats * 4, 0.03, c.out); } },   // the home note and its fifth, held (the Veyli)
@@ -74976,6 +74987,7 @@ const SND = (() => {
     for (const k of SHAPED) MLV[k] = SHAPE_LV[k] ?? MLV[k];
     for (const [k, f] of Object.entries({ lunch: 1.3, latenight: 1.3, deepspace: 1.4, systems: 1.3, dawn: 1.3 })) MLV[k] *= f;   // the quieter ones up 2-3 dB (measured)
     MLV.comet = 0.65;   // the comet's level (measured against the hum)
+    Object.assign(MLV, { titleA: 4.5, titleB: 1.15, titleC: 3.1 });   // the title's candidates, matched to the comet's level (offline renders, the energy mean of four, within 1 dB)
     if (SND_R3_ON) Object.assign(MLV, { beam: 0.6, cup: 0.6, farewellsup: 0.57, goodbye: 0.55, harvest: 0.62, lantern: 0.6, line: 0.56, veyli: 0.6, farewell: 1.39 });   // the event tracks' levels: matched to the comet's (measured offline, within 1 dB); the farewell song about 6 dB under, for the voices on top
 
     for (const k of ['morning', 'evening', 'latenight', 'shift', 'steady', 'rounds', 'firstlight', 'midday', 'lunch', 'afternoon', 'tea', 'golden', 'watch', 'lullaby', 'wake', 'systems', 'dawn', 'promenade', 'circuits', 'porthole', 'deepspace']) { const d = TRACKS[k]; delete TRACKS[k]; TRACKS[k] = d; }   // v7's order (its list and Next), as before the old definitions were left out
@@ -75158,9 +75170,25 @@ const SND = (() => {
       } }); }
     let ev = null; try { ev = typeof cometMusicOn === 'function' && cometMusicOn() ? 'comet' : null; } catch (e) { ev = null; }   // section 18's comet (FX25): its own track while you watch
     if (SND_R3_ON && !ev) { try { ev = r3EventMusic(); } catch (e) { ev = null; } }   // the sound update: a picked tradition or event, while you're in its room
+    if (SND_TITLE && (S.titleOn || TITLE_SND.list.length || TITLE_SND.hush)) { titleTick(); if (S.titleOn) return; }   // the title screen: its own track, nothing else
     S.music.setEvent(ev);
     S.music.update();
   });
+  // the title screen's track (SND_TITLE, section 30's SND.title): the picked candidate looped (each copy starts 4 s before the
+  // last ends, so it runs on with no gap), the deck's hum hushed; on the hand-over to the game it fades in 2 s and the
+  // ship's music and hum carry on as before. With the Music app off: no title track either
+  const TITLE_SND = { list: [], hush: false };
+  function titleTick() {
+    const now = S.ctx.currentTime, on = S.titleOn && MP.on, L = TITLE_SND.list;
+    for (let i = L.length - 1; i >= 0; i--) if (now > L[i].endsAt() + 1) L.splice(i, 1);
+    if (on) {
+      const last = L[L.length - 1];
+      if (!last || now >= last.endsAt() - 4) { const T = S.music.play('title' + SND_TITLE, { fadeIn: last ? 4 : 3 }); L.push(T); if (S.log) S.log.push({ name: 'title' + SND_TITLE, loop: true }); }
+      L.forEach(T => T.tick(now + 1));
+    } else { L.forEach(T => T.fadeOut(now, 2)); L.length = 0; }
+    if (S.titleOn !== TITLE_SND.hush && S.bus.hum) { TITLE_SND.hush = S.titleOn; S.bus.hum.gain.setTargetAtTime(S.titleOn ? 0 : 1, now, S.titleOn ? 0.3 : 1); }
+  }
+  S.titleSnd = TITLE_SND;   // for sound_check
   S.musicView = () => {
     musPrefs(); const st = S.music ? S.music.state() : null, sched = MP.mode === 'schedule', t = musTime();
     const now = !MP.on ? 'Music is off' : t.day < 1 ? 'Quiet tonight' : st && st.track ? st.name : 'Quiet between tracks';
@@ -75223,7 +75251,7 @@ const SND = (() => {
   // the title screen's track (section 30, plans/title-screen-plan.md "The title music"): section 30 calls SND.title(true) on
   // the first touch of the title and SND.title(false) as it hands over to the game. The sound seat wires the user's pick
   // in here (note: the ship is frozen under the title, so S.frame suspends the context then); until then, silence
-  S.title = on => { S.titleOn = !!on; };
+  S.title = on => { S.titleOn = !!on; };   // the music slot plays SND_TITLE's track while it's on (SD3, 0.99)
   const gesture = e => { if (!e.isTrusted) return; start(); if (ctx && ctx.state !== 'running' && S.prefs.on && !document.hidden) ctx.resume().catch(() => {}); };   // Safari only resumes inside a tap (after a call or a hidden tab)
   addEventListener('pointerdown', gesture, true); addEventListener('keydown', gesture, true);
   // a pad-only player (Wave C, plans/controller-audit.md H; lead 43's call): the first pad press starts sound where the
@@ -75240,7 +75268,7 @@ const SND = (() => {
   S.actTick = null; S.musicTick = null;   // the slots set these: called once a second while sound runs
   S.frame = run => {
     if (!ctx) return;
-    const want = run && !document.hidden && S.prefs.on;
+    const want = (run || !!(SND_TITLE && S.titleOn)) && !document.hidden && S.prefs.on;   // the title's track plays while the ship is held under it
     if (!busy && want && ctx.state === 'suspended') { busy = true; ctx.resume().then(() => busy = false, () => busy = false); }
     else if (!busy && !want && ctx.state === 'running') { busy = true; ctx.suspend().then(() => busy = false, () => busy = false); }
     if (ctx.state !== 'running') return;
@@ -75248,7 +75276,7 @@ const SND = (() => {
     for (let k = 0; k < S.onFrame.length; k++) try { S.onFrame[k](run); } catch (e) {}
     if (ctx.currentTime - lastSec >= 1) {   // once a second: the activity and music slots' own ticks (set S.actTick / S.musicTick)
       lastSec = ctx.currentTime;
-      if (S.actTick) try { S.actTick(run); } catch (e) {}
+      if (S.actTick && !S.titleOn) try { S.actTick(run); } catch (e) {}   // under the title: none of the rooms' sounds
       if (S.musicTick) try { S.musicTick(run); } catch (e) {}
     }
   };
