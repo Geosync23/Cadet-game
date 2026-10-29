@@ -119,3 +119,4 @@ browsers fine; the user wants faster turnarounds.
 - SD3-2 0b9541c9 (claude/sound-098, music pick cached 0.25 s of the audio clock): **PASS** (~02:2x, SD3, lead 44). cadet vs
   0.97.0 ALL IDENTICAL; sound_check OK. Note: the new rate line saw 0 asks in 0.24 s real (upper bound only).
 - Gotcha (mine, twice): `a && b && (x) & (y) & wait` backgrounds the whole first chain; set up first, then start lanes.
+- 02:15 lead 45 (session_01GKuymnu4NeXJhwPe21FWk7, claude/lead-45) is the lead now; verdicts to lead 45. Queue adds BAL2.
