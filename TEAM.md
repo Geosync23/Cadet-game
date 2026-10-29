@@ -2049,3 +2049,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~18:25 UTC check-in (lead 46): 0.99.1 round on f77c26d9 running since 17:46, no FAIL reported yet. PUB2 has 0.99.1 staged (390x844 PASS), waiting GO. ETA live ~4:30-5:00 PM ET.
 - ~18:54 UTC: 0.99.1: **R4 OK** 7/7 (title_check gate + wake-only first press OK; claude/checks-0990-r4 8561f28b). R2 15/16 OK, cadet identical, perf alone to ~19:40.
 - ~19:13 UTC: 0.99.1: **R1 OK** 15/15, **R5 BM21 OK** 21/21 (handover-bm21 879215bf). R4 OK. Waiting R2 perf + R3 DM2.
+- ~19:25 UTC check-in (lead 46): 0.99.1 R1, R4, R5 OK; R2 perf alone (to ~19:40); R3 DM2 running, no FAIL reported.
