@@ -69305,11 +69305,12 @@ scene.onBeforeRender = (r, s, cam) => bodyTick(cam);
 // rounds it), and white x c, c x texel are the same sums as before. Only on WebGL2 (flat needs it); otherwise nothing changes.
 // Left out (their own bucket, as before): anything see-through, alpha-tested, double-sided or back-sided, with a shadow
 // side, already vertex-coloured, hidden, with its own shader changes, and the materials recoloured while you play
-// (GD.leaves wilting, 17's machine looks; RK.film, the rec deck's screen). Same triangles, same order within a piece.
+// (GD.leaves wilting, 17's machine looks; RK.film, the rec deck's screen; anything in PULSES, the glows that breathe).
+// Same triangles, same order within a piece.
 function mergeTint(m) {                                  // the key of everything but colour, or '' if it mustn't share
   if (!renderer.capabilities.isWebGL2 || !(m.isMeshStandardMaterial && m.type === 'MeshStandardMaterial' || m.isMeshBasicMaterial)) return '';
   if (m.transparent || m.opacity !== 1 || m.alphaTest > 0 || m.side !== THREE.FrontSide || m.shadowSide != null || m.vertexColors || !m.visible) return '';
-  if (m.onBeforeCompile !== THREE.Material.prototype.onBeforeCompile || (GD.leaves.includes(m)) || (typeof RK !== 'undefined' && RK && RK.film === m)) return '';
+  if (m.onBeforeCompile !== THREE.Material.prototype.onBeforeCompile || GD.leaves.includes(m) || (typeof RK !== 'undefined' && RK && RK.film === m) || PULSES.some(p => p.m === m)) return '';
   const out = [m.type];
   for (const k of Object.keys(m).sort()) {
     if (k === 'uuid' || k === 'id' || k === 'name' || k === 'color' || k === 'version') continue;
