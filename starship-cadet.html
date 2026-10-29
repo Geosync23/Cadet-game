@@ -51809,7 +51809,7 @@ function socInvites(h) {
     const who = SOC.crew.filter(p => relTier(p.id) >= 2 && going(p, e.id)).sort((a, b) => (b.id === hostId) - (a.id === hostId) || relTier(b.id) - relTier(a.id) || schedU(a.seed, d, 654) - schedU(b.seed, d, 654))[0];
     if (!who) continue;
     const appt = socialInvite({ trad: e.id, day: d, from: who.id }); if (!appt) continue;
-    I.push({ day: d, from: who.id, trad: e.id, kind: 'trad', appt, said: false, line: iv.line || (e.ev && e.ev.ask) || null }); n++;
+    I.push({ day: d, from: who.id, trad: e.id, kind: 'trad', appt, said: false, line: evText(iv.line || (e.ev && e.ev.ask), e, who) || null }); n++;   // the words, not the tradition's line maker (backlog TM-1: a Mail printed its code)
   }
   for (const p of SOC.crew.filter(q => relTier(q.id) >= 3).sort((a, b) => schedU(a.seed, d, 655) - schedU(b.seed, d, 655))) {
     if (n >= INVITE_MAX) break;
@@ -51817,7 +51817,7 @@ function socInvites(h) {
     const v = typeof VOICE !== 'undefined' && VOICE[p.id], kinds = (v && Array.isArray(v.invites) && v.invites.length ? v.invites : [...new Set((p.habits || []).map(x => INVITE_HABIT[x]).filter(Boolean))]).concat(['dinner']);
     let hit = null;
     const trad = kinds.map(k => (typeof eventsOn === 'function' ? eventsOn(d) : []).find(e => e.id === k && going(p, e.id))).find(Boolean);   // a voice card's invites may name a tradition: they ask you along when they're going
-    if (trad && !I.some(x => x.day === d && x.trad === trad.id)) { const appt = socialInvite({ trad: trad.id, day: d, from: p.id }); if (appt) { r.inviteDay = d; I.push({ day: d, from: p.id, trad: trad.id, kind: 'trad', appt, said: false, line: (trad.ev && trad.ev.invite && trad.ev.invite.line) || (trad.ev && trad.ev.ask) || null }); n++; continue; } }
+    if (trad && !I.some(x => x.day === d && x.trad === trad.id)) { const appt = socialInvite({ trad: trad.id, day: d, from: p.id }); if (appt) { r.inviteDay = d; I.push({ day: d, from: p.id, trad: trad.id, kind: 'trad', appt, said: false, line: evText((trad.ev && trad.ev.invite && trad.ev.invite.line) || (trad.ev && trad.ev.ask), trad, p) || null }); n++; continue; } }
     const bed = S.byId.get(p.bed), at8 = (d - 1) * 1440 + 1200, w8 = planWhere(p, at8);   // close friends ask you round to their quarters (doorOpenFor lets you in)
     if (relTier(p.id) >= 4 && bed && w8 && !w8.moving && (w8.act === 'leisure' || w8.act === 'off') && schedU(p.seed, d, 662) < .3) hit = { k: 'quarters', seg: { from: at8, to: at8 + 45, placeId: bed.id } };
     if (!hit) for (const k of kinds) {
