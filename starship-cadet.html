@@ -336,7 +336,7 @@ body.tiDev .device,body.tiDev .devdlg,body.tiDev .devtip{z-index:71}
 // Read-only: it reads the save slot only for the screen colour and the Continue line, and writes nothing. A choice made
 // before the game has loaded waits in data-pick for section 30
 (() => {
-  const TITLE_EARLY = false;                               // mirrors section 30's TITLE_ON (names_check fails if they differ)
+  const TITLE_EARLY = true;                                // mirrors section 30's TITLE_ON (names_check fails if they differ)
   const el = document.getElementById('title'), q = new URLSearchParams(location.search), hs = location.hash.slice(1).split('.').map(t => t.split('-')[0]);
   const has = k => q.has(k) || hs.includes(k), nosave = ['nosave', 'crowd', 'poses', 'seats'].some(has);
   const ls = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
@@ -76079,7 +76079,7 @@ if (EV_ENDING_ON) {
 // music: SND.title(on) (section 27's hook; the sound seat's track). Nothing here calls R(); no draw calls.
 // Off (TITLE_ON false): nothing shows, nothing is held, nothing is hooked: the game as before.
 // ---- slot: Title screen (section 30). New code of this seat's goes here, above the end line (plans/owners.md) ----
-const TITLE_ON = false;                                    // the switch; the page's first script mirrors it as TITLE_EARLY (names_check holds them equal)
+const TITLE_ON = true;                                     // the switch; the page's first script mirrors it as TITLE_EARLY (names_check holds them equal)
 var TITLE = { on: false, refused: false, ask: false, away: false, closing: false, ready: false, want: null, newGame: false, music: false };   // (var: section 13 may ask before this line has run)
 function titleHold(save) { if (save && TITLE && TITLE.on) TITLE.refused = true; return !!(TITLE && TITLE.on); }   // section 13: true while the title is up (save: a save was asked for)
 const titleWanted = () => TITLE_ON && !DEVMODE && !URL_FLAGS.has('dev') && !SLOT_NEW && (URL_FLAGS.has('title') || !(navigator.webdriver || NOSAVE || DEBUG));
