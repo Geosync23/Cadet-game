@@ -110,3 +110,12 @@ Queue (lead 45, 2026-10-29): 1. TB1 title screen claude/title-099; 2. EV2 seated
   showed the title's state: taken under load before a frame had run; not seen again.)
 - **VERDICT title-on-099 b980518: PASS.** Note: with the title on, only title_check ever sees it (every other check runs
   under webdriver).
+
+## OP1 claude/s5cases-fix 34adecc (check only; the 0.98.0 blocker, staging-pad 7a2ae7d2)
+- Reproduced on 7a2ae7d2 with the old check: s5cases FAIL (the D-pad never reached a suspect; never reached Call it).
+- Diff: the suspect regex is built from the P4 case's own c.sus (first letter capitalised) instead of a cooler's four.
+  Game file identical to 7a2ae7d2. With the fix: s5cases OK ('Relay', 'Call it: relay'), CONTROLLER CHECK OK.
+- Note (not blocking): c.sus holds ids; the chips show caseSus(c, s).label. They match except P4's 'sensor' (label
+  "temperature sensor"), so on a cooler the regex has "Sensor" where the chip says "Temperature sensor"; harmless while
+  any other suspect matches. caseSus(c, s).label would be exact.
+- **VERDICT s5cases-fix 34adecc: PASS.**
