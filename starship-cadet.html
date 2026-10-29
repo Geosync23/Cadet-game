@@ -17688,8 +17688,8 @@ function guideShift() {
   const intro = d <= 1 && typeof introOn === 'function' && introOn();   // training day: the intro's own arrows (only the lesson's pointer below rings: FX15, patch 0.92.5 #22)
   const E = yourDayEnd(d), inn = careerClockedIn(d), out = careerClockedOut(d), owner = '15b (piece D)';
   if (!intro && !inn && m >= CAREER.clockIn && m < E) {            // S2
-    guideAsk({ id: 'shift:in:' + d, level: 4, owner, from: base + CAREER.clockIn, until: base + E, goal: () => guideClock('Clock in: shift at ' + hhmm(DAY_SHIFT[0])), done: () => careerClockedIn(d) });
-    if (P) pointAsk({ id: 'p:clock:in', once: 3, path: pointClock('in', 'Clock in'), until: base + E, done: () => careerClockedIn(d) });
+    guideAsk({ id: 'shift:in:' + d, level: 4, owner, from: base + CAREER.clockIn, until: base + E, goal: () => guideClock('Clock in: shift at ' + hhmm(DAY_SHIFT[0])), done: () => careerClockedIn(d) || !playerOnDuty(d) });   // or the day stopped being a workday (backlog RV23-2: Day 32's offer, the arrow stood from 16:03 over a day off)
+    if (P) pointAsk({ id: 'p:clock:in', once: 3, path: pointClock('in', 'Clock in'), until: base + E, done: () => careerClockedIn(d) || !playerOnDuty(d) });
   }
   { let mn = null; try { mn = myJob(); } catch (e) { mn = null; }   // (DS1, patch 0.92.5 #12) your lesson's job on the board: the pointer rings its Take it each time it waits, clocked in or not (FX10's, once)
     const les = !mn && m < E && boardLesson(), cur = SHIP.works && SHIP.works.cur, lj = les && SHIP.jobs.find(x => x.id === les), key = lj && (cur && cur.j === les ? cur.id : lj.train || 'intro' + lj.reserved);   // (FX15: a training job no lesson put up, by its own name)
