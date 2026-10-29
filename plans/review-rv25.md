@@ -149,3 +149,8 @@ browsers fine; the user wants faster turnarounds.
   endgo track OK (e9637f54). **VERDICT BB1: PASS** (~05:4x, BB1, lead 45). FX8-1 swimmer look queued again (no shots).
 - BB1 RV25-1 564b8a50 (sketch shelf row names your cabin's deck and room): PASS on a code read; branch tip 564b8a50 PASS.
 - 05:55 lead 45: RV26 (session_01GKuymjwVsweGh8p9EbTGHU) takes the 0.99 reviews (TB1, EV2, SD3 title music); I keep 0.98 (OP1, RB1), BB1's follow-ups, BAL2's new tip. My TB1/EV2 notes sent to RV26; their queued runs cancelled; swim probe after OP1.
+
+## OP1 walk-time fix, claude/opt-098-build 3307e843 (game c85781d8): PASS (~06:5x, lead 45, OP1, BM20)
+- cadet ALL IDENTICAL; events OK (FX24-2 passes now); day 4 OK (mori, tomas tolerated by name), day 7 OK; weekend OK; appt OK.
+- join_check failed 3x at line 153's real reload (goto 30 s): timed with 300 s, 28.6 s on OP1 and 28.4 s on 0.97.0, both
+  OK. A slow-box timeout, not OP1's. Suggested: timeout=120000 on that goto and reload (checks' owner).
