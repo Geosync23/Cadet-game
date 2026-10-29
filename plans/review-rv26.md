@@ -119,3 +119,7 @@ Queue (lead 45, 2026-10-29): 1. TB1 title screen claude/title-099; 2. EV2 seated
   "temperature sensor"), so on a cooler the regex has "Sensor" where the chip says "Temperature sensor"; harmless while
   any other suspect matches. caseSus(c, s).label would be exact.
 - **VERDICT s5cases-fix 34adecc: PASS.**
+- s5cases-fix 1086518 (second check-only commit): puzzle_check p6's first measures its save size as this case plus the
+  shared record (as p4's does), so a second p6 a fault opened by 09:05 on 0.98 isn't counted; out.others names it;
+  saveSame still round-trips the whole SHIP.works.cases. My run on 7a2ae7d2's game (byte-identical): PUZZLE CHECK OK,
+  saveBytes 1924, others ['p6']. The whole save's size stays player_check --long's job. **PASS.**
