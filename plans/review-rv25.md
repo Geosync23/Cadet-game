@@ -124,3 +124,4 @@ browsers fine; the user wants faster turnarounds.
   excluded): **FIXES** (~02:4x, SD3, lead 45). cadet ALL IDENTICAL; sound_check OK. The note (= move day, ~always 25) is
   never cleared on New game / Delete / Load file: a second game in the slot never chimes. Suggested onSim('newGame') clear.
 - SD3-2 check follow-up fb603947 (needs >= 1 ask over a real second): PASS on a code read; SD3-2 tip fb603947.
+- SD3-1 7529b1e4 (homeForget on newGame and at load with no save): **PASS** (~03:0x, SD3, lead 45). sound_check OK (r3home after New game [None, None]).
