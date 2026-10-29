@@ -2048,3 +2048,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~17:46 UTC (1:46 PM ET): **0.99.1 ROUND STARTED**: claude/staging-0991 f77c26d9 (6d5684ba + TB1 812dd3a0 + 0.99.1 turn), game sha256 8e4ac545...2d9d; gates names/check_fast/title/sound OK, cadet vs 0.99.0 identical. GO R1-R4, BM21 R5. OLD 6d5684ba. Publish on green without asking (user pre-OK).
 - ~18:25 UTC check-in (lead 46): 0.99.1 round on f77c26d9 running since 17:46, no FAIL reported yet. PUB2 has 0.99.1 staged (390x844 PASS), waiting GO. ETA live ~4:30-5:00 PM ET.
 - ~18:54 UTC: 0.99.1: **R4 OK** 7/7 (title_check gate + wake-only first press OK; claude/checks-0990-r4 8561f28b). R2 15/16 OK, cadet identical, perf alone to ~19:40.
+- ~19:13 UTC: 0.99.1: **R1 OK** 15/15, **R5 BM21 OK** 21/21 (handover-bm21 879215bf). R4 OK. Waiting R2 perf + R3 DM2.
