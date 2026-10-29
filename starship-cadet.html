@@ -47501,8 +47501,8 @@ function occasionAdd(id, at, quiet, len) {
   if (!o || SHIP.occasions.some(x => x.key === key)) return null;
   const r = { id, key, at, len: len || o.len, deck: o.deck, room: o.room, by: o.by, kind: o.kind, status: 'asked' };
   SHIP.occasions.push(r);
-  if (!o.chance && typeof apptAdd === 'function') { const a = apptAdd({ id: key, with: [o.by, ...(o.with || [])], at, len: o.len, where: o.deck + '|' + o.room, kind: o.kind, status: 'yes', by: o.by, title: o.title });
-    if (a && o.places && !a.places) a.places = { ...o.places }; }   // each guest's own chair (the Veyli dinner, V-1)
+  if (!o.chance && typeof apptAdd === 'function') { const a = apptAdd({ id: key, with: [o.by, ...(o.with || [])], at: at - (o.early || 0), len: o.len + (o.early || 0), where: o.deck + '|' + o.room, kind: o.kind, status: 'yes', by: o.by, title: o.title });
+    if (a && o.places && !a.places) a.places = { ...o.places }; }   // each guest's own chair, and `early`: they're booked that many minutes before it starts, so they're seated when it does (the Veyli dinner, V-1)
   if (o.mail && typeof mailSend === 'function') mailSend({ at: Math.min(shipNow(), at), from: o.mail.from, subject: o.mail.subject, body: evText(o.mail.body, r), quiet: !!quiet });
   return r;
 }
@@ -50874,7 +50874,7 @@ function friText(kind, k = 0) { const L = typeof LINES !== 'undefined' && LINES[
 // veyliDinnerTable, 3 draw calls, Deck 2 only). A hold in EV_BEATS keeps the guard's other scenes (the Senior Officer toast) off those minutes.
 // Off (VISIT_DINNER_ON false): the Thursday as before
 const VISIT_DINNER_ON = EVENTS_ON && EV_SWAP_ON;         // the user's "Formal dinner" (2026-10-29, via lead 45); needs the visit in its agreed place (the swap)
-const VD = { at: 1140, len: 75, arrow: 1125, you: '2-captable-6',
+const VD = { at: 1140, len: 75, early: 10, arrow: 1125, you: '2-captable-6',   // early: the diners' appointments from 18:50, so the table is full at 19:00 (RV26's note 1)
   places: { marrow: '2-captable-5', teshavi: '2-captable-7', saruth: '2-captable-1', vance: '2-captable-2', kesrin: '2-captable-8', moleth: '2-captable-4', ithra: '2-captable-3' } };
 // the dinner's day: the visit's third (its start day in the calendar's plan, + 2), only while it runs for real. Pure
 function vdDay() {
@@ -50883,10 +50883,12 @@ function vdDay() {
 }
 if (VISIT_DINNER_ON) {
   const day = (EV_CALENDAR.find(r => r.id === 'diplomatic') || {}).day;
+  // the hold's day is the calendar's (EV_BEATS rows are fixed at load); vdDay() reads the calendar's plan, which differs
+  // only if the visit itself ran late (RV26's note 4)
   if (day) EV_BEATS.push({ id: 'veyliDinner', kind: 'beat', day: day + 2, at: [VD.at - 15, VD.at + VD.len] });   // 18:45-20:15 on Day 18 (a 'beat': kind 'captain' would close the whole day to the Captain's other scenes, the 16:00 summons too)
   const w = (k, f) => evWord('event.diplomatic.dinner.' + k) || f;
   OCCASIONS.veyliDinner = { title: w('title', 'The Veyli dinner'), kind: 'invite', by: 'marrow', with: Object.keys(VD.places).filter(id => id !== 'marrow'), deck: 2, room: 'C',
-    at: VD.at, len: VD.len, script: 'veyliDinner', places: VD.places, due: d => d === vdDay(),
+    at: VD.at, len: VD.len, early: VD.early, script: 'veyliDinner', places: VD.places, due: d => d === vdDay(),
     mail: (m => ({ from: 'Captain Odile Marrow', subject: m.split(' | ')[0], body: m.split(' | ').slice(1).join(' | ') }))(w('mail', 'Dinner for our Veyli guests | Tonight, 19:00, my quarters, Deck 2. By Wren custom the newest hand aboard sits at a formal table: you. Your chair is at the foot, facing mine. Dress uniform.')) };
   if (!MEETING_SCRIPTS.veyliDinner) MEETING_SCRIPTS.veyliDinner = { title: 'The Veyli dinner', from: 'Captain Odile Marrow', stub: true,
     gist: 'The Captain\'s formal dinner for the Veyli, in her quarters: eight at the table and a toast from the Speaker. Your chair at the foot was kept for you.',
@@ -50912,13 +50914,14 @@ if (VISIT_DINNER_ON) {
 }
 // once a ship minute in play (section 18's eventsTick): the level 1 arrow to your chair from 18:45 to the dinner's end;
 // in the room from 18:55, you take your chair and dinner is served (once: the Captain's chairs are hers, so a tap on
-// one doesn't sit you, section 15's sitTap). Eaten through the scene: 40 ship minutes, as a meal from the servery feeds you
+// one doesn't sit you, section 15's sitTap). Eaten to the dinner's end (RV26's note 2: you stood up at 19:31), fed as a meal
+// from the servery feeds you; tap to get up, as at any meal
 function vdTick(now) {
   if (!VISIT_DINNER_ON) return;
   const q = SHIP.occasions.find(x => x.id === 'veyliDinner' && x.status === 'asked'), f = q && (q.f || (q.f = {}));
   if (q && !f.sat && now >= q.at - 5 && now < q.at + q.len - 10 && deckDef.num === 2 && roomAt(...player.here()) === 'C' && typeof actStart === 'function') {
     f.sat = 1; actStart('eat', VD.you, { title: evWord('event.diplomatic.dinner.title') || 'The Veyli dinner', fed: true, dish: GALLEY_EV_DISH.veyli, pose: 'sit' });
-    if (ACT && ACT.placeId === VD.you) Object.assign(ACT.def, { mins: 40, done: evWord('event.diplomatic.dinner.done') || 'The plates are cleared. Brennan looks in, pretending not to check.' });
+    if (ACT && ACT.placeId === VD.you) Object.assign(ACT.def, { mins: Math.max(20, Math.round(q.at + q.len - now)), done: evWord('event.diplomatic.dinner.done') || 'The plates are cleared. Brennan looks in, pretending not to check.' });
   }
   if (typeof guideAsk !== 'function') return;
   const r = q && !q.met ? q : null;
