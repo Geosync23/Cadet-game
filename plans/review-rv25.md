@@ -144,3 +144,4 @@ browsers fine; the user wants faster turnarounds.
 - Queue adds OP1 walk-time fix claude/opt-098-build de59683f.. (game c85781d8; session_01GKuymkG9JWDcSK9pMb28aj); code read:
   ahead() equals the old cut for toilets; long walks never out of work/meetings/kept; isFree for the walk; ex.walk; note:
   eventOf/now counts a walker as at the tradition for those minutes. Runs queued (lanes G, H after TB1 and EV2).
+- 04:49 lead 45: 0.98 first (OP1, then RB1 when it comes), ahead of TB1 and EV2 (0.99). Lanes reordered: G/H (OP1) after BB1's A/C, then D (TB1), E/F (EV2).
