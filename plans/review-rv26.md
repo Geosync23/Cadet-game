@@ -94,4 +94,19 @@ Queue (lead 45, 2026-10-29): 1. TB1 title screen claude/title-099; 2. EV2 seated
 
 ## BB1 FX8-1 swimmer look (claude/backlog-triage 564b8a5): in progress (paused for RB1)
 - swim_up.py fixed to read the drawn spot (rdx/rdz) on a place with moves. Day 6 14:00: Holt off the kayak glides
-  74 frames, biggest step 0.08, no wall; Ishikawa off the float: 4 frames, one step 0.67, no wall. Day 6 16:00, Day 7 to do.
+  74 frames, biggest step 0.08, no wall; Ishikawa off the float: 4 frames, one step 0.67, no wall. Day 6 16:00: Halloran
+  out of lane 3 glides 51 frames across the pool to the changing rooms, biggest step 0.12, no wall; two fans off the
+  stands 0.075 / 0.09. Day 7 10:00: a fan 0.09. No glide through a wall anywhere.
+- **FX8-1 look: no wall glide, BB1's PASS stands.** Note: the float's get-up is short (4 frames) with one 0.67 step.
+  RV25-1 (564b8a5) was already PASS from RV25 (code read): nothing more needed.
+
+## TB1 title-on-099 b980518 (title switched ON over SD3's 19798c3)
+- Diff: only TITLE_EARLY and TITLE_ON to true (plus DEV_NOTES, build table). names_check OK (the switches agree).
+- cadet vs 610ad7f1 ALL IDENTICAL (1-level renderer noise only; run beside a probe): every check runs under webdriver,
+  so no title there; title_check (as built, switched on) TITLE CHECK OK.
+- The hum (lead's question): tm_flow2.py on this build, reading the hum bus's real gain: 0.33 at 0.4 s after the tap
+  (ramping down before the hum has even started), then 0 while the title is up with hum:quarters running: the hum is
+  started but silent. After New game: track list 0, hush off, gain 1 within 2 s. (One earlier reading at +4 s still
+  showed the title's state: taken under load before a frame had run; not seen again.)
+- **VERDICT title-on-099 b980518: PASS.** Note: with the title on, only title_check ever sees it (every other check runs
+  under webdriver).

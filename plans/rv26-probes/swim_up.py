@@ -11,7 +11,7 @@ F = """(ids => { const out = {}; for (const a of DECK_CREW) if (a.p && ids.inclu
   out[a.p.id] = [+dx.toFixed(3), +dz.toFixed(3), a.settled ? 1 : 0, a.spot && a.spot.mv ? 1 : 0, wall ? 1 : 0, a.rdx != null ? 1 : 0, +(a.hx || 0).toFixed(2), +(a.hz || 0).toFixed(2), (ROOMS[roomAt(...cellAt(dx, dz))] || {}).name || roomAt(...cellAt(dx, dz))]; } return out; })"""
 with sync_playwright() as pw:
     g = Game(pw, G); g.page.set_viewport_size({'width': 390, 'height': 844})
-    for when in ((5 * 1440 + 14 * 60, 'd6'), (5 * 1440 + 16 * 60, 'd6b'), (6 * 1440 + 10 * 60, 'd7')):
+    for when in ((5 * 1440 + 16 * 60, 'd6b'), (6 * 1440 + 10 * 60, 'd7')):
         g.ev(f"skipTo({when[0]}); goToDeck(7)"); g.step(30)
         movers = g.ev(W); print(when[1], 'on places with moves:', movers); ids = [m.split(':')[0] for m in movers]
         if not ids: continue
