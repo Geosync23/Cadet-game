@@ -49111,12 +49111,12 @@ function cometTalk(d, m) {
   const L = baked ? baked.concat(COMET_TALK[id].filter(x => x[2] || typeof x[1] === 'function')) : COMET_TALK[id];
   const going = q => planDay(q, d).some(sg => sg.tag && sg.tag.startsWith('ev-' + id));
   for (let k = 0; k < L.length; k++) {
-    const i = (S.n + k) % L.length; if (L[i][2] && m < L[i][2]) continue;
+    const i = (S.n + k) % L.length; if (L[i][2] && m < L[i][2] || S.said.has(i)) continue;   // each line once a night (backlog RV18-C2: with one speaker there, theirs came round every 4 minutes)
     const p = schedPeople().find(q => q.id === L[i][0]); if (!p || !going(p)) continue;   // not at this window tonight: passed over
     const a = DECK_CREW.find(c => c.h && c.p && c.p.id === L[i][0]);
     const sp = a && a.spot ? (placeSpot(a.spot.id) || a.spot) : null;
     if (!a || here !== deckDef.num + '|' + roomAt(...cellAt(a.x, a.z)) || (sp && sp.x != null && Math.hypot(a.x - sp.x, a.z - sp.z) > 1.5)) continue;   // still coming: tried again next time
-    bubbleSay(friSpeaker(a), typeof L[i][1] === 'function' ? L[i][1]() : L[i][1], 5); S.at = m; S.n = i + 1; return;
+    bubbleSay(friSpeaker(a), typeof L[i][1] === 'function' ? L[i][1]() : L[i][1], 5); S.at = m; S.n = i + 1; S.said.add(i); return;
   }
 }
 // your Record's line for the comet (eventRecord asks the event's `record`): the window you joined (SHIP.events.joined),
