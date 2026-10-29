@@ -42,3 +42,14 @@ Backlog to 1.0 (the user's answers on BT1's page, Oct 28 ~9:40 PM ET; plans/back
 Update (the user, Oct 28 ~9:50 PM ET): "just go to .99; my playthrough notes will be 1.0". The 26 backlog fixes and the title screen
 move into 0.99 (with the balance pass). 1.0 = the user's playthrough notes only. The clash re-asked: earlier answers stand
 (FX24-2 + FX12-1 + TQ1-1 in 0.98; backlog 12 balanced in 0.99).
+
+Balance answers (the user, on BAL1's report https://claude.ai/artifact/R1NgKLKRoP2Gu5sfgmMumm, Oct 28 ~10 PM ET), all in 0.99:
+- f1 Engine Specialist cliff: OTHER: "promotion dynamic, not fixed, but give another chance to test much, much sooner"
+  (missing Trusted by the Day 22 test must not mean an 8-10 day wait: a retest as soon as you reach Trusted).
+- f1b late story beats: KEEP for now ("I need to play this through first, we may change later").
+- f2 promotions follow the calendar: KEEP. -> backlog 12 (career_check "Relied on" before Day 5) becomes a check-expectation
+  fix, not a game change (lead's reading; told the user).
+- f3 missed shifts: KEEP.  f7 money: KEEP.  f8 ship meters: KEEP.  f9 traditions: KEEP.
+- f4 food, f5 fitness, f6 leisure: TRY the report's ranges (measure, pick, show the user the numbers).
+- f10: the user asked "is this the way it is now or the way you want it to be": it is how the game is now; no change proposed.
+- The two design-doc balance-list items (board jobs' reputation, upkeep pace) close as KEEP with f2 and f8.
