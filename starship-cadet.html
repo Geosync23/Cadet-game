@@ -16546,7 +16546,7 @@ function ixTip(id, text) { if (typeof tipShow === 'function') { try { tipShow(id
 // last of all (scenery with nothing of its own to do), and with own = true just before machineTap, for a stop that is that
 // machine's own panel (section 18's stormBallasts at the lights). The floor at the stop and the Repair button: jobHere
 function ixChoreLast(it, at, own) {
-  for (const s of ixSides()) if ((!own || ixSideOwn(s)) && ixChoreTap(it, at, s)) return true;   // the drill's stop first (its stops are never a machine's panel); 28c's night jobs' are (S6-5: at the panel, before the machine's own tap)
+  for (const s of ixSides()) if ((!own || ixSideOwn(s) || s.kind === 'team') && ixChoreTap(it, at, s)) return true;   // a team job's spot stands among its machines: your turn there before the machine's own tap (backlog DV1-2)   // the drill's stop first (its stops are never a machine's panel); 28c's night jobs' are (S6-5: at the panel, before the machine's own tap)
   const j = ixChore(), nx = j && !j.workDone ? ixNextStop(j) : null, pl = nx && nx.s.places[0] && PLACE_OF.get(nx.s.places[0]);
   return own && !(pl && pl.machine) ? false : ixChoreTap(it, at);
 }
@@ -62364,7 +62364,7 @@ function teamNext(j, t) {                                // the next step (or th
   simNote('team', { id: j.id, step: j.cur, by: s.who, kind: s.who === 'you' ? 'turn' : 'step' });
   if (s.who === 'you') {
     try { toast(teamLabel(j), teamText('team.turn.' + s.part, 'Your turn: ' + TEAM_PART[s.part] + '.', { job: teamLabel(j) })); } catch (e) { /* no UI */ }
-    const pl = placeById(j.spots && j.spots.you); if (pl && typeof setGoal === 'function') setGoal({ deck: pl.deck, room: pl.room, label: TEAM_PART[s.part], team: j.id });
+    const pl = placeById(j.spots && j.spots.you); if (pl && typeof setGoal === 'function') setGoal({ deck: pl.deck, room: pl.room, place: pl.id, label: TEAM_PART[s.part], team: j.id });   // at your spot, not the room's middle (backlog DV1-2: a tap at the pin there did nothing)
   } else if (teamYours(j)) worksTeach('m8', j.lead, 'call.' + s.part, null);
   return true;
 }
