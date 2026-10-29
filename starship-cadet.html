@@ -10146,7 +10146,7 @@ function apptWhere(p, t) {
     const end = a.at + (a.status === 'kept' || a.occ ? (a.len || 30) : APPT_WAIT), pl = apptPlaceOf(a, p.id); if (!pl) continue;   // an occasion's host (section 18 via apptAdd, `occ`) stays the whole time, you or no you (0.26.34)
     // they set off in time to be there at a.at: the walk from the lift (about 1.3 x the straight line, at CREW_SPEED)
     const lift = DECKS[pl.deck].lift || pl.at, walk = Math.ceil(1.3 * Math.hypot(pl.at[0] - lift[0], pl.at[1] - lift[1]) / 1.15 * SHIP_RATE) + 1;   // ship minutes
-    const go = a.at - walk, C = SCHED_COMMUTE;
+    const go = a.at - (Number(a.early) > 0 ? Math.min(30, +a.early) : 0) - walk, C = SCHED_COMMUTE;   // a.early: seated that many minutes before it starts (section 18's occasions, the Veyli dinner)
     if (t < go - C - 3 || t >= end) continue;
     if (t < go - C) return null;                         // still finishing what they were doing
     const w = planWhere(p, go - C - 1);
@@ -47501,8 +47501,8 @@ function occasionAdd(id, at, quiet, len) {
   if (!o || SHIP.occasions.some(x => x.key === key)) return null;
   const r = { id, key, at, len: len || o.len, deck: o.deck, room: o.room, by: o.by, kind: o.kind, status: 'asked' };
   SHIP.occasions.push(r);
-  if (!o.chance && typeof apptAdd === 'function') { const a = apptAdd({ id: key, with: [o.by, ...(o.with || [])], at: at - (o.early || 0), len: o.len + (o.early || 0), where: o.deck + '|' + o.room, kind: o.kind, status: 'yes', by: o.by, title: o.title });
-    if (a && o.places && !a.places) a.places = { ...o.places }; }   // each guest's own chair, and `early`: they're booked that many minutes before it starts, so they're seated when it does (the Veyli dinner, V-1)
+  if (!o.chance && typeof apptAdd === 'function') { const a = apptAdd({ id: key, with: [o.by, ...(o.with || [])], at, len: o.len, where: o.deck + '|' + o.room, kind: o.kind, status: 'yes', by: o.by, title: o.title });
+    if (a && o.places && !a.places) a.places = { ...o.places }; if (a && o.early) a.early = o.early; }   // each guest's own chair, and `early`: they come that many minutes before it starts (section 14's apptWhere), so they're seated when it does; your Schedule keeps its time (the Veyli dinner, V-1)
   if (o.mail && typeof mailSend === 'function') mailSend({ at: Math.min(shipNow(), at), from: o.mail.from, subject: o.mail.subject, body: evText(o.mail.body, r), quiet: !!quiet });
   return r;
 }
@@ -50874,7 +50874,7 @@ function friText(kind, k = 0) { const L = typeof LINES !== 'undefined' && LINES[
 // veyliDinnerTable, 3 draw calls, Deck 2 only). A hold in EV_BEATS keeps the guard's other scenes (the Senior Officer toast) off those minutes.
 // Off (VISIT_DINNER_ON false): the Thursday as before
 const VISIT_DINNER_ON = EVENTS_ON && EV_SWAP_ON;         // the user's "Formal dinner" (2026-10-29, via lead 45); needs the visit in its agreed place (the swap)
-const VD = { at: 1140, len: 75, early: 10, arrow: 1125, you: '2-captable-6',   // early: the diners' appointments from 18:50, so the table is full at 19:00 (RV26's note 1)
+const VD = { at: 1140, len: 75, early: 10, arrow: 1125, you: '2-captable-6',   // early: the diners come to their chairs from 18:50, so the table is full at 19:00 (RV26's note 1); the appointment itself is 19:00
   places: { marrow: '2-captable-5', teshavi: '2-captable-7', saruth: '2-captable-1', vance: '2-captable-2', kesrin: '2-captable-8', moleth: '2-captable-4', ithra: '2-captable-3' } };
 // the dinner's day: the visit's third (its start day in the calendar's plan, + 2), only while it runs for real. Pure
 function vdDay() {
