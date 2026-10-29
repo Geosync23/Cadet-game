@@ -2028,3 +2028,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~13:41 UTC (9:41 AM ET): **0.99.0 ROUND STARTED**: claude/staging-099 = a4c9febe, game sha256 041a699c...4ee2, OLD 0.98.0 37b858b4. GO sent to R1 AS1, R2, R3 DM2, R4; BM21 R5 (+ controller reach detached if browsers allow).
 - ~14:37 UTC: R2 15/16 OK, no FAIL (cadet: only expected mem/calls/tris + d_wallslow 8 px, i_tap2 1 px; no bubble shift); perf_check alone to ~15:40 UTC.
 - ~14:49 UTC check-in (lead 46): 0.99.0 round a4c9febe running, no FAIL reported. R1 AS1 15 checks running (memory 47%); R2 15/16 OK, perf alone to ~15:40; R3 DM2 two lanes, nothing failed (38%); R4 interactions running 30 min, no FAIL (10%); R5 BM21 running (23%).
+- ~14:50 UTC: **R4 OK** 7/7 on a4c9febe (interactions whole 2516 s, career no "Relied on" FAIL = backlog 12 closed, appt, saves, title_check, day 6, 8; claude/checks-0990-r4 00b6344b).
