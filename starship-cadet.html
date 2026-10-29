@@ -74262,7 +74262,7 @@ const SND = (() => {
         [os, o2, l].forEach(n => { try { n.stop(t + f + 0.1); } catch (e) {} }); setTimeout(() => { try { out.disconnect(); } catch (e) {} }, (f + 2) * 1000); } };
       LOOPS.add(L); return L;
     }
-    const W = { home: undefined, homeNew: false, badge: undefined, dlg: null, said: undefined, tern: undefined, ask: false, sd: {}, coil: {}, rank: undefined, room: null, duck: false };
+    const W = { homeNew: false, homeMv: null, homeHad: undefined, badge: undefined, dlg: null, said: undefined, tern: undefined, ask: false, sd: {}, coil: {}, rank: undefined, room: null, duck: false };
     const has = f => typeof f === 'function';
     const here = () => { try { return deckDef && player ? deckDef.num + '|' + roomAt(...player.here()) : null; } catch (e) { return null; } };
     const play = (n, o) => { W.last = n; S.fx(n, o); };
@@ -74301,10 +74301,10 @@ const SND = (() => {
       let s = null; try { s = SHIP.end && Array.isArray(SHIP.end.said) ? SHIP.end.said.length : null; } catch (e) { s = null; }
       if (W.said !== undefined && s != null && s > (W.said || 0)) { const a = SHIP.end.said[s - 1][1]; if (a === 'stay' || a === 'go') play(a === 'stay' ? 'r3Stay' : 'r3Go', { long: 4 }); }
       W.said = s;
-      // the move to Deck 2's room B (24u, Day 25): seen happen, its door's first opening gets the home chime (homeDoor)
-      let h = null; try { h = has(worksHome) ? worksHome() : null; } catch (e) { h = null; }
-      if (W.home !== undefined && h === '2-B' && W.home !== '2-B') W.homeNew = true;
-      W.home = h;
+      // the move to Deck 2's room B (24u, Day 25): until its door's first opening has had the home chime (homeDoor), within a
+      // week of the move day (24u's move.walked). Kept across a reload (0.99, SD3-1): a sound-only note per save slot, never the save
+      let h = null, mv = null; try { h = has(worksHome) ? worksHome() : null; const T = has(puT4) ? puT4() : null; mv = T && T.move && Number.isInteger(T.move.walked) ? T.move.walked : null; } catch (e) { h = mv = null; }
+      W.homeMv = mv; W.homeNew = h === '2-B' && mv !== null && SHIP.time.day - mv <= 7 && !homeHad(mv);
       // promotions: your rank going up (Senior Officer, Engine Specialist)
       const rk = SHIP.works && SHIP.works.rank;
       if (W.rank !== undefined && rk !== W.rank && (rk === 'senior' || rk === 'specialist')) play('r3Promotion', { long: 5 });
@@ -74342,10 +74342,23 @@ const SND = (() => {
       } catch (e) { /* nothing special */ }
       return null;
     }
-    function homeDoor(d) {   // the door watcher asks as a door near you opens: room B's door, the first time since the move (once)
+    // the home chime's note: the move day it has played for, per save slot (localStorage; not with ?nosave, where it's memory only)
+    const homeKey = () => 'starship-cadet-sound-home' + (typeof SAVE_KEY === 'string' ? ':' + SAVE_KEY : '');
+    function homeHad(mv) {
+      if (W.homeHad === undefined) { W.homeHad = null; if (!NOSAVE) try { const v = localStorage.getItem(homeKey()); W.homeHad = v === null ? null : +v; } catch (e) { W.homeHad = null; } }
+      return W.homeHad === mv;
+    }
+    // a new game in the slot (section 13's New game, or a fresh start in an empty slot after Delete) starts the note again (RV25)
+    const homeForget = () => { W.homeHad = null; W.homeNew = false; if (!NOSAVE) try { localStorage.removeItem(homeKey()); } catch (e) {} };
+    if (typeof onSim === 'function') onSim('newGame', homeForget);
+    if (typeof SAVED !== 'undefined' && !SAVED) homeForget();
+    function homeDoor(d) {   // the door watcher asks as a door near you opens: room B's door, the first time since the move (once); yours, not crew's
       if (!W.homeNew || !deckDef || deckDef.num !== 2) return false;
       const B = [[0.6, 0], [-0.6, 0], [0, 0.6], [0, -0.6]].some(([dx, dz]) => { try { return roomAt(...cellAt(d.cx + dx, d.cz + dz)) === 'B'; } catch (e) { return false; } });
-      if (B) W.homeNew = false; return B;
+      if (!B) return false;
+      try { const r = 1.15 + (d.span - SEG) / 2; if (DECK_CREW.some(a => !a.settled && Math.hypot(a.x - d.cx, a.z - d.cz) <= r)) return false; } catch (e) { /* as yours */ }   // crew walking through it opened it (section 10's crewNearDoor reach; that one also counts your own way in): kept for yours
+      W.homeNew = false; W.homeHad = W.homeMv; if (!NOSAVE) try { localStorage.setItem(homeKey(), String(W.homeMv)); } catch (e) {}
+      return true;
     }
     return { W, watch: r3Watch, tick: r3Tick, actPick: r3ActPick, homeDoor };
   })() : null;
