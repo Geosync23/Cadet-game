@@ -968,23 +968,25 @@ Done so far:
 
 ## Open questions
 
-**The game:**
+None open: the user closed them all on 2026-10-28 (about 21:20 ET, via lead 44). Each is in Answered below.
 
-- The board keeps up (playtest patch 1, note 13): should the extra small jobs earn Works reputation? For now they don't, so the career's pace stays as it was until the balancing pass (a busy player could otherwise reach "Relied on" in about three days). Also for that pass: a player doing 9 or more jobs a shift has the ship's upkeep all done (every meter near the top) by about Day 11, after which turn-ins show few or no meter chips; a faster upkeep creep would keep your impact visible.
-- The Works Chief is Chief Ines Calder. Her personality and how she judges your work are still to be designed, before Pillar 2, because she runs the job board and certifies the player.
-- Should the player ever work the night shift, for example as part of on-call duty?
-- How does diagnosing a fault look on screen: a simple panel with labelled components, or something more hands-on? Prototype it in Pillar 2.
-- Can the player be passed over for certification, or only delayed?
-- Should the player customise or shape their character at the start?
-- Which phosphor colour does the device screen use: amber, green or the Wren's cyan? Chosen at Pillar 3's first check-in.
-- Does the diplomacy-and-story starship game become its own future project?
+**For the 0.99 balance pass** (the user, 2026-10-28; plans/roadmap-1.0.md on claude/lead-44):
 
-**The decks:**
-
-- Who keeps the engine watch on Deck 6: is there a watch on both shifts, and are they Works crew?
+- The board keeps up (playtest patch 1, note 13): should the extra small jobs earn Works reputation? For now they don't, so the career's pace stays as it was (a busy player could otherwise reach "Relied on" in about three days).
+- The upkeep pace: a player doing 9 or more jobs a shift has the ship's upkeep all done (every meter near the top) by about Day 11, after which turn-ins show few or no meter chips; a faster upkeep creep would keep your impact visible.
 
 **Answered:**
 
+- The open questions closed (2026-10-28, about 21:20 ET, the user, via lead 44):
+  - The Works Chief, Chief Ines Calder: built. She runs the job board, gives the tests and their results, and asks the final question.
+  - The night shift: yes, as an Engine Specialist (Pillar 5 Step 6, 0.95.0).
+  - Diagnosing a fault: built as Look it over, the scanner and the head-scratcher cases.
+  - Passed over for certification: only delayed; a failed test is retried later.
+  - Shaping your character at the start: no.
+  - The device screen colour: as built.
+  - The diplomacy-and-story starship game: not part of this game.
+  - Deck 6's engine watch: built in Pillar 5 Step 6.
+  - The board jobs' reputation and the upkeep pace: moved to the 0.99 balance pass (above).
 - Controller support, the sound update and the Diplomatic visit go in switched on in 0.96.0 (2026-10-28, the user, via lead 43/44: the sound update must be on when published, and "turn on" the visit): `PAD_ON` and `SND_R3_ON` are true, and the visit runs (`SHIP_EVENTS.diplomatic` no longer a draft; EV1, claude/visit-on).
 - Three patch-E features go in switched on in 0.95.0 (2026-10-27, the user, via lead 42): the rank first on crew cards (#21, `RANK_CARD_ON`), the time clock's fixed buttons with a short Undo and a confirmed early clock-out (#6, `CLOCK_UNDO_ON`), and "Buy something" from a storekeeper (#24, `SHOP_MENU_ON`). The rest of patch batch E stays off for now.
 - Pillar 5 Step 6 goes in switched on (2026-10-27, the user's rule that everything built goes in on, via lead 42): 0.95.0 switches on `P5_STEP6`, Engine Specialist and the end of the career (the night shift, the Monday briefing, the Tier 4 test and the Engine Specialist promotion with your Deck 2 quarters, Deck 6's engine machines, engine work and the reactor, leading a team, mentoring Basil, the head-scratchers P6-P8, the end of the career and Calder's question). The older switches TRAY_TRAVELS, INTRO_ASK_ON, ZEKE_CABIN_MAIL and PAD_ON stay off; END_WAY_BACK stays cut. The live fixes for the escort and your turn in a team job ship with it (no 0.94.1).

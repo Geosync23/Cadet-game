@@ -10,7 +10,9 @@ Read this first in any new session, together with **design-doc.md** and **starsh
 
 **Now: step 2, the new ways of working on the one file (no cut; the user's call, 2026-10-20),** on claude/ways-of-working: check_fast.sh before every push, names_check.js, every check exits 1 on failure, one labelled slot per seat, the build master sets the build number, early merging into `claude/integration`, `plans/owners.md`, `plans/map.md`, `plans/backlog.md`, the build table in `plans/build-table.md` (CLAUDE.md "How we work"; `plans/roadmap-after-recdeck.md`).
 
-**Next:** Dev mode (a hidden testing panel: move the clock, set career progress, start any tradition; plan page first, built switched off), then Pillar 5 Steps 5 and 6, then the ship-wide events up to the end of the promotions (plan on claude/events-plan, awaiting the user's answers). TEAM.md has who's working on what. The "Next" section further down is older history (Decks and the Living Ship's start).
+**Road to 1.0** (lead 44, 2026-10-28; details plans/roadmap-1.0.md on claude/lead-44): 0.97.0 Dev mode; 0.98.0 game speed on phones and the FX24-2 fix; 0.99.0 balance (backlog 12 among it); 1.0 the last playtest patch and title screen option B (the crew terminal).
+
+**Next (older):** Dev mode (a hidden testing panel: move the clock, set career progress, start any tradition; plan page first, built switched off), then Pillar 5 Steps 5 and 6, then the ship-wide events up to the end of the promotions (plan on claude/events-plan, awaiting the user's answers). TEAM.md has who's working on what. The "Next" section further down is older history (Decks and the Living Ship's start).
 
 
 ## Builds
