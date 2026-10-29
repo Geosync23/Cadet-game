@@ -3214,7 +3214,7 @@ function tallSync() {
 // (opt-probes/merge_bytes.py). A piece in a form this doesn't read (interleaved, not 3 + 3 + 2 numbers a corner) is
 // copied and transformed the old way first (g below), then read the same way.
 const MERGE_N3 = new THREE.Matrix3();
-function mergeMeshes(root) {
+function mergeMeshes(root, tint = false) {             // tint (0.99, RB1): materials that differ only in colour share one bucket (mergeTint, 8b)
   root.updateMatrixWorld(true);
   const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), m4 = new THREE.Matrix4();
   const buckets = new Map(), done = [], jobs = [];
@@ -3229,20 +3229,21 @@ function mergeMeshes(root) {
     const parts = [];
     for (const gr of groups) {
       const mat = mats[gr.materialIndex]; if (!mat) continue;
-      const key = mat.uuid + (o.userData.noShadow ? '-ns' : '');
-      let b = buckets.get(key); if (!b) buckets.set(key, b = { mat, need: 0, n: 0, shadow: !o.userData.noShadow });
-      b.need += Math.max(0, gr.count); parts.push([gr, b]);
+      const tk = tint && mergeTint(mat), key = (tk ? 'tint ' + tk : mat.uuid) + (o.userData.noShadow ? '-ns' : '');
+      let b = buckets.get(key); if (!b) buckets.set(key, b = { mat: tk ? mergeTwin(mat) : mat, tint: !!tk, need: 0, n: 0, shadow: !o.userData.noShadow });
+      b.need += Math.max(0, gr.count); parts.push([gr, b, mat.color]);
     }
     jobs.push({ o, g, parts }); done.push(o);
   });
-  for (const b of buckets.values()) { b.P = new Float32Array(b.need * 3); b.N = new Float32Array(b.need * 3); b.U = new Float32Array(b.need * 2); }
+  for (const b of buckets.values()) { b.P = new Float32Array(b.need * 3); b.N = new Float32Array(b.need * 3); b.U = new Float32Array(b.need * 2); if (b.tint) b.C = new Float32Array(b.need * 3); }
   for (const { o, g, parts } of jobs) {                  // 2: the corners, in the same order
     const A = (g || o.geometry).attributes, ix = !g && o.geometry.index ? o.geometry.index.array : null;
     const P = A.position.array, Nn = A.normal.array, U = A.uv ? A.uv.array : null;
     if (!g) m4.multiplyMatrices(inv, o.matrixWorld);
     const e = m4.elements, n3 = MERGE_N3.getNormalMatrix(m4).elements;
-    for (const [gr, b] of parts) {
-      const BP = b.P, BN = b.N, BU = b.U, end = gr.start + gr.count;
+    for (const [gr, b, c] of parts) {
+      const BP = b.P, BN = b.N, BU = b.U, BC = b.C, end = gr.start + gr.count;
+      if (BC) for (let v = b.n, e3 = (b.n + gr.count) * 3; v * 3 < e3; v++) { BC[v * 3] = c.r; BC[v * 3 + 1] = c.g; BC[v * 3 + 2] = c.b; }   // each corner carries its piece's colour
       for (let v = gr.start; v < end; v++, b.n++) {
         const s = ix ? ix[v] : v, k = b.n * 3;
         if (g) { BP[k] = P[s * 3]; BP[k + 1] = P[s * 3 + 1]; BP[k + 2] = P[s * 3 + 2]; BN[k] = Nn[s * 3]; BN[k + 1] = Nn[s * 3 + 1]; BN[k + 2] = Nn[s * 3 + 2]; }   // already moved
@@ -3266,6 +3267,7 @@ function mergeMeshes(root) {
     geo.setAttribute('position', new THREE.Float32BufferAttribute(b.P, 3));
     geo.setAttribute('normal', new THREE.Float32BufferAttribute(b.N, 3));
     geo.setAttribute('uv', new THREE.Float32BufferAttribute(b.U, 2));
+    if (b.C) geo.setAttribute('color', new THREE.Float32BufferAttribute(b.C, 3));
     geo.computeBoundingSphere();
     const mesh = new THREE.Mesh(geo, b.mat); mesh.castShadow = b.shadow; mesh.receiveShadow = true; root.add(mesh);
   }
@@ -3691,7 +3693,7 @@ function buildDeck(def) {
   }
   while (LAMPS.length < LAMP_SLOTS) addLamp(deckRoot, 0, -3, 0, .01, 0, 0);   // dark spares under the floor
 
-  mergeMeshes(staticRoot);
+  mergeMeshes(staticRoot, true);                         // 0.99 (RB1): furniture that differs only in colour drawn together
   // tall pieces: give each its own copies of its materials (textures stay shared), then merge it on its own
   for (const t of TALL) {
     const clones = new Map();
@@ -69505,6 +69507,37 @@ function bodyTick(cam) {                                 // each body's joint ma
   }
 }
 scene.onBeforeRender = (r, s, cam) => bodyTick(cam);
+// ---- furniture that differs only in colour, drawn together (0.99, RB1; plans/opt-098-plan.html item 2). mergeMeshes
+// (4b) merges a deck's still furniture into one mesh per material; with `tint` (the furniture's own merge in buildDeck),
+// materials that are the same in everything but colour share one mesh, each corner carrying its piece's colour, drawn with
+// a twin of the first of them: its colour white (so white x the corner's colour is exactly the old colour) and
+// vertexColors on. Pixel-identical by construction: the colour reaches the pixel unblended ('flat', so no interpolation
+// rounds it), and white x c, c x texel are the same sums as before. Only on WebGL2 (flat needs it); otherwise nothing changes.
+// Left out (their own bucket, as before): anything see-through, alpha-tested, double-sided or back-sided, with a shadow
+// side, already vertex-coloured, hidden, with its own shader changes, and the materials recoloured while you play
+// (GD.leaves wilting, 17's machine looks; RK.film, the rec deck's screen; anything in PULSES, the glows that breathe).
+// Same triangles, same order within a piece.
+function mergeTint(m) {                                  // the key of everything but colour, or '' if it mustn't share
+  if (!renderer.capabilities.isWebGL2 || !(m.isMeshStandardMaterial && m.type === 'MeshStandardMaterial' || m.isMeshBasicMaterial)) return '';
+  if (m.transparent || m.opacity !== 1 || m.alphaTest > 0 || m.side !== THREE.FrontSide || m.shadowSide != null || m.vertexColors || !m.visible) return '';
+  if (m.onBeforeCompile !== THREE.Material.prototype.onBeforeCompile || GD.leaves.includes(m) || (typeof RK !== 'undefined' && RK && RK.film === m) || PULSES.some(p => p.m === m)) return '';
+  const out = [m.type];
+  for (const k of Object.keys(m).sort()) {
+    if (k === 'uuid' || k === 'id' || k === 'name' || k === 'color' || k === 'version') continue;
+    const v = m[k];
+    if (typeof v === 'function') return '';
+    out.push(k + '=' + (v === null || typeof v !== 'object' ? String(v) : v.isColor ? v.r + ',' + v.g + ',' + v.b : v.isTexture ? v.uuid : v.isVector2 ? v.x + ',' + v.y : JSON.stringify(v)));
+  }
+  return out.join(';');
+}
+function mergeFlat(sh) {                                 // the corner colour unblended
+  for (const k of ['vertexShader', 'fragmentShader']) sh[k] = sh[k].replace(/#include <color_pars_(vertex|fragment)>/, '#ifdef USE_COLOR\nflat varying vec3 vColor;\n#endif');
+}
+const mergeFlatKey = () => 'rb1-flat';
+function mergeTwin(m) {
+  const t = m.clone(); t.color.setRGB(1, 1, 1); t.vertexColors = true; t.onBeforeCompile = mergeFlat; t.customProgramCacheKey = mergeFlatKey;
+  return t;
+}
 // ---- end of slot: Performance engineer ----
 
 // =====================================================================
