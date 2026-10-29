@@ -1978,3 +1978,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~02:00 UTC check-in: handover-lead44.md drafted; trigger prompt updated (0.97.0 live, roadmap, seats).
 - ~02:02 UTC: SD3 SD3-2 done 0b9541c9 on claude/sound-098 (r3EventMusic cached 0.25 s; sound_check OK; cadet identical; check_fast OK) -> RV25. SD3 now on SD3-1 (room B chime flag across reload + only your opening) on claude/sound-099.
 - ~02:15 UTC: **USER answered the balance report**: f1 OTHER (dynamic promotion + much sooner retest), f1b keep (play first), f2/f3/f7/f8/f9 keep, f4/f5/f6 TRY, f10 question (= how it is now). All in 0.99. Recorded in roadmap. Balance builder to hire when SD3 frees a seat.
+- ~02:20 UTC: **USER: social gets a little more pressure (not a lot); rest of f10 unchanged. "You now have everything you need to bring this project to the edge of 1.0."** Lead drives 0.98 + 0.99 to done.

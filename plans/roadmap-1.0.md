@@ -53,3 +53,7 @@ Balance answers (the user, on BAL1's report https://claude.ai/artifact/R1NgKLKRo
 - f4 food, f5 fitness, f6 leisure: TRY the report's ranges (measure, pick, show the user the numbers).
 - f10: the user asked "is this the way it is now or the way you want it to be": it is how the game is now; no change proposed.
 - The two design-doc balance-list items (board jobs' reputation, upkeep pace) close as KEEP with f2 and f8.
+- f10 follow-up (the user, ~10:20 PM ET): leave finding 10 as it is EXCEPT social: "a little more pressure on it but not a lot"
+  (social easy to keep up; a player who never talks is lonely almost always but the cost is tiny: energy drains 5% faster).
+- The user: "You now have everything you need to bring this project to the edge of 1.0." -> drive 0.98 and 0.99 to done; 1.0 = the
+  user's playthrough notes.
