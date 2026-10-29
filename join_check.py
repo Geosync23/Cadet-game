@@ -150,9 +150,9 @@ with sync_playwright() as pw:
     if st != {'before': False, 'on': True, 'end': True, 'after': False, 'slept': False, 'deck': False}: fail(f"the Sunday table's dressing should go 15 minutes after it ends: {st}")
     # the save (0.70.1): nameNew traces come back after a real reload (a page without ?nosave)
     url = g.page.url.split('?')[0]
-    g.page.goto(url + '?debug'); g.page.wait_for_function('window.__sc !== undefined', timeout=60000)
+    g.page.goto(url + '?debug', timeout=120000); g.page.wait_for_function('window.__sc !== undefined', timeout=120000)   # a real load takes ~28.5 s on a busy box: 30 s (the default) flaked on any build (RV25)
     g.ev("(() => { SHIP.traces.length = 0; skipTo(100 * 1440); saveGame(); })()")
-    g.page.reload(); g.page.wait_for_function('window.__sc !== undefined', timeout=60000)
+    g.page.reload(timeout=120000); g.page.wait_for_function('window.__sc !== undefined', timeout=120000)
     rt = g.ev("SHIP.traces.filter(t => t && t.id === 'nameNew').map(t => t.name + '@' + t.day)")
     g.ev("localStorage.clear()")
     print('nameNew traces after a reload at day 100:', rt)
