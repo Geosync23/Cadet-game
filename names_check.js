@@ -74,6 +74,10 @@ for (const t of acorn.tokenizer(src, { ecmaVersion: 2022 })) {
   texts++;
   if (/\bDeck 7\b/.test(String(t.value))) bad.push(`"Deck 7" in text that can reach the screen: ${at(t.start)}`);
 }
+// the title screen's two switches (section 30's TITLE_ON and the page's first script's TITLE_EARLY) must agree
+{ const on = /const TITLE_ON = (true|false);/.exec(html), early = /const TITLE_EARLY = (true|false);/.exec(html);
+  if (!on !== !early) bad.push(`the title screen's switch ${on ? 'TITLE_ON' : 'TITLE_EARLY'} is there without ${on ? 'TITLE_EARLY (the page)' : 'TITLE_ON (section 30)'}`);
+  else if (on && on[1] !== early[1]) bad.push(`the title screen's switches differ: TITLE_ON = ${on[1]} (section 30), TITLE_EARLY = ${early[1]} (the page)`); }
 console.log(`names_check: ${seen.size} top-level names, ${keys.size} shared-table keys, ${regs.size} registrations, ${texts} strings` + `, ${SECTIONS.length} sections`);
 for (const x of bad) console.log('FAIL ' + x);
 if (!bad.length) console.log('names_check: OK');
