@@ -141,3 +141,6 @@ browsers fine; the user wants faster turnarounds.
   Day 25 move to Deck 2.
 - Gotcha: a third browser (with two checks running) times out loading the page (Page.goto 30 s).
 - Queue (04:4x): BB1 runs finishing; TB1 title screen claude/title-099 8d2a708 (session_01GKuymo2ikX7y7GA88GPXQP, off); EV2 visit dinner + words claude/visit-099 cc84b4c (session_01GKuymn7YSDpEbeNYGxup6N).
+- Queue adds OP1 walk-time fix claude/opt-098-build de59683f.. (game c85781d8; session_01GKuymkG9JWDcSK9pMb28aj); code read:
+  ahead() equals the old cut for toilets; long walks never out of work/meetings/kept; isFree for the walk; ex.walk; note:
+  eventOf/now counts a walker as at the tradition for those minutes. Runs queued (lanes G, H after TB1 and EV2).
