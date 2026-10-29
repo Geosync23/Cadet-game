@@ -52426,7 +52426,7 @@ function careerCard(on) {
       k => { if (k === 0) newGameStart(true); else { newGameStart(false); if (typeof introSkip === 'function') introSkip(); } }); };
   el.hidden = false;
 }
-if (SHIP.career && SHIP.career.end) careerCard(true);    // a save that ended: the card again
+if (SHIP.career && SHIP.career.end) queueMicrotask(() => careerCard(true));    // a save that ended: the card again, once the whole script has run (backlog N6-1: its words need chatName, made further down)
 const movedOn = () => (socInit(), (SHIP.social.moved || []).map(x => { const p = SOC.idx.has(x.id) && SOC.crew[SOC.idx.get(x.id)]; return p ? { id: x.id, name: p.name, role: p.role, day: x.day, to: p.transferTo || null } : null; }).filter(Boolean));
 // ---- guiding a newcomer (0.36.65, A10; plans/social-deep-plan.md Part 8b) ----
 // Only after you've been promoted (the user's rule: the flag 'promoted', onboarding's and mine; off in normal play until
