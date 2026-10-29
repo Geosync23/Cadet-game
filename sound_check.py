@@ -424,7 +424,10 @@ def check_r3mess(pw, path):
         else: print('  r3mess: someone in the mess at 3 am, the empty case is checked by hand below')
         full = at('the dinner rush', 1440 + 1110, 3, 'Mess hall')
         check(full['n'] >= 3, f'r3mess: people in the mess at the dinner rush ({full["n"]})')
-        check(full['per_s'] > 0.4, f'r3mess: the clatter at the rush ({full["per_s"]}/s)')
+        if g.ev("SND.r3Mess.bg !== false"): check(full['per_s'] > 0.4, f'r3mess: the clatter at the rush ({full["per_s"]}/s)')
+        else:   # 0.99.3: the galley noise and the clatter parked (MESS_BG false); only the murmur
+            check(full['clinks'] == 0, f'r3mess: no clatter with the background parked ({full["clinks"]} clinks)')
+            check(g.ev("(sc => !!sc && sc.loops.length === 12)(SND.r3Mess.scene)"), 'r3mess: the murmur alone plays at the rush (its twelve voices, no galley or clatter)')
         # every layer follows the count: none at 0, more as the room fills (the scene reads M.at's levels live)
         lv = g.ev("[0, 1, 2, 8, 25, SND.r3Mess.full].map(n => [n, SND.r3Mess.at(n)])"); print('  r3mess layers', lv)
         check(lv[0][1] == {'galley': [0, 0], 'clatter': 0, 'voices': 0}, 'r3mess: no one there, every layer silent')
