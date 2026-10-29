@@ -1,5 +1,7 @@
 # 0.98 optimization plan: working notes (OP1, paused 2026-10-29 ~00:45 UTC, 8:45 PM ET Oct 28, on the lead's word)
 
+**Plan page:** plans/opt-098-plan.html, published privately at https://claude.ai/artifact/N6veQ6xkcMh5WTg6E8rCJX (answers kept in its `answers/opt-098` store). Resumed and finished 2026-10-28 ~9:15 PM ET.
+
 Scope (lead 44, the user's correction): **game speed on phones only** (loading, busy-scene frames, memory/battery, draw
 calls). Test-speed work dropped, except a measuring method strong enough to prove the gains through the noise.
 Also a turn in the plan: fix the two long-standing check failures (career_check "Relied on" before Day 5, backlog 12;
