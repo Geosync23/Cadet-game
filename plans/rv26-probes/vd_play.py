@@ -9,7 +9,7 @@ with sync_playwright() as p:
     b = p.chromium.launch(executable_path=os.environ.get('CADET_CHROME'), args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
     pg = Page(ctx, '#dev'); pg.sign(); pg.step(20)
-    r = pg.ev("devmodeRun('Jump', () => devmodeSetCareerTo(18, { ...devmodeJumpOf('evVisitDinner'), at: 1120, where: " + os.environ.get('VD_WHERE', '{ deck: 2, room: "C" }') + " }))"); pg.step(10)
+    r = pg.ev("devmodeRun('Jump', () => devmodeSetCareerTo(18, { ...devmodeJumpOf('evVisitDinner'), at: " + os.environ.get('VD_AT', '1120') + ", where: " + os.environ.get('VD_WHERE', '{ deck: 2, room: "C" }') + " }))"); pg.step(10)
     print('jump', r)
     if os.environ.get('VD_PRE'): print('pre', pg.ev(os.environ['VD_PRE']))
     S = """(() => { const q = SHIP.occasions.find(x => x.id === 'veyliDinner'); const ids = ['marrow','teshavi','saruth','vance','kesrin','moleth','ithra'];

@@ -50,3 +50,13 @@ Queue (lead 45, 2026-10-29): 1. TB1 title screen claude/title-099; 2. EV2 seated
   it). Music app off: no title track (the hum still hushed: a silent title). SND_TITLE 'A' is the provisional pick
   until the user chooses on plans/sound/title-music.html.
 - **VERDICT SD3 19798c3: PASS.**
+
+## EV2 follow-up, claude/visit-099 60287f2 (my four notes)
+- Diff: occasionAdd's optional `early` (appointment from at - early, len + early; only veyliDinner sets it, 10);
+  your meal lasts to the dinner's end (min 20); comment on the hold's day; backlog EV2-1 (Dev jump). Others unchanged.
+- cadet vs 610ad7f1 ALL IDENTICAL; day_check 18 OK.
+- Probe (vd_play.py now takes VD_AT): from 18:40 in room C, all seven seated by ~18:55, the scene at 19:00 with the
+  table full, you eating (80 min) to ~20:08, kept 20:15, diners leave. Walk-in at 19:05 (VD_AT 1145): seated at once
+  (70 min), the scene starts for you from its first line, eating to ~20:10, kept. No page errors.
+- Note: the Schedule row shows 18:50 while the Mail says 19:00 (EV2 flagged it); arriving early is harmless.
+- **VERDICT EV2 60287f2: PASS.**
