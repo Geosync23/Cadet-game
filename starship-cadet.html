@@ -7406,10 +7406,11 @@ DECKS[1].visits = { 'ready-room': { name: 'the Captain\'s ready room', room: 'R'
   conference: { name: 'the conference table', room: 'O', door: null, host: '1-observation-lead-1', places: ['1-conf-10', '1-conf-1', '1-conf-2', '1-conf-3', '1-conf-4', '1-conf-5', '1-conf-6', '1-conf-7', '1-conf-8', '1-conf-9'] } };
 DECKS[2].visits = { 'captain-table': { name: 'the Captain\'s table', room: 'C', door: 'v,7,10', host: '2-captable-5', places: ['2-captable-6', '2-captable-1', '2-captable-2', '2-captable-4', '2-captable-3'] } };
 // the two chairs on the table's west side that had no seat (V-1, the Veyli dinner; EV2 for lead 45): event-only, so
-// nobody sits in them day to day (the pool '2|@veyliDinner'); section 18's OCCASIONS.veyliDinner seats its guests there
+// nobody sits in them day to day (the pool '2|@veyliDinner'); section 18's OCCASIONS.veyliDinner seats its guests there.
+// Their walk tiles are the nearest ones that can be stood on ([3,10], [3,11] and [2,11] can't), the chairs at xy
 DECKS[2].places.push(
-  { id: '2-captable-7', type: 'event', event: 'veyliDinner', at: [3, 10], xy: [3.61, 10.5], face: 'e', pose: 'sit', y: 0.5, anim: 'talk', room: 'C' },
-  { id: '2-captable-8', type: 'event', event: 'veyliDinner', at: [3, 11], xy: [3.61, 11.5], face: 'e', pose: 'sit', y: 0.5, anim: 'talk', room: 'C' });
+  { id: '2-captable-7', type: 'event', event: 'veyliDinner', at: [2, 10], xy: [3.61, 10.5], face: 'e', pose: 'sit', y: 0.5, anim: 'talk', room: 'C' },
+  { id: '2-captable-8', type: 'event', event: 'veyliDinner', at: [3, 12], xy: [3.61, 11.5], face: 'e', pose: 'sit', y: 0.5, anim: 'talk', room: 'C' });
 // ---- Pillar 4, seat 8 (0.38.9; plans/pillar4-plan.md, Part 6 and the social plan's interfaces): the arrival evening ----
 // keepsakes: the shelf above your bunk (Bunk 1, berth 4's bunk); `slots` are where section 8b's one instanced keepsake mesh
 // puts each gift (tile units for x and z, metres for y); `place` is where you stand to look at it (yours: its id starts
@@ -50870,7 +50871,7 @@ function friText(kind, k = 0) { const L = typeof LINES !== 'undefined' && LINES[
 // in the room, its gist by Mail if you're not. The Captain at the north end, the Speaker on her right (west), Saruth on
 // her left; Vance and Kesrin, Moleth and Ithra (the west side, facing the door); you at the south end, facing her.
 // The Mail that morning; a level 1 arrow to your chair from 18:45; the food on the table 18:45-20:15 (DECK_DRESS
-// veyliDinnerTable, 3 draw calls, Deck 2 only). A hold in EV_BEATS keeps the guard's other Captain's scenes off it.
+// veyliDinnerTable, 3 draw calls, Deck 2 only). A hold in EV_BEATS keeps the guard's other scenes (the Senior Officer toast) off those minutes.
 // Off (VISIT_DINNER_ON false): the Thursday as before
 const VISIT_DINNER_ON = EVENTS_ON && EV_SWAP_ON;         // the user's "Formal dinner" (2026-10-29, via lead 45); needs the visit in its agreed place (the swap)
 const VD = { at: 1140, len: 75, arrow: 1125, you: '2-captable-6',
@@ -50882,7 +50883,7 @@ function vdDay() {
 }
 if (VISIT_DINNER_ON) {
   const day = (EV_CALENDAR.find(r => r.id === 'diplomatic') || {}).day;
-  if (day) EV_BEATS.push({ id: 'veyliDinner', kind: 'captain', day: day + 2, at: [VD.at - 15, VD.at + VD.len] });   // 18:45-20:15 on Day 18
+  if (day) EV_BEATS.push({ id: 'veyliDinner', kind: 'beat', day: day + 2, at: [VD.at - 15, VD.at + VD.len] });   // 18:45-20:15 on Day 18 (a 'beat': kind 'captain' would close the whole day to the Captain's other scenes, the 16:00 summons too)
   const w = (k, f) => evWord('event.diplomatic.dinner.' + k) || f;
   OCCASIONS.veyliDinner = { title: w('title', 'The Veyli dinner'), kind: 'invite', by: 'marrow', with: Object.keys(VD.places).filter(id => id !== 'marrow'), deck: 2, room: 'C',
     at: VD.at, len: VD.len, script: 'veyliDinner', places: VD.places, due: d => d === vdDay(),
