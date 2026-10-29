@@ -11712,7 +11712,7 @@ function walkLaneStep(a, dt, mid) {                    // mid: ease to the middl
 // a steady glide (CREW_UP_V tiles a second: 0.7 tiles in under a third of a second), so the body steps off the place
 // instead of hopping. Only a short one (CREW_UP_MAX: the usual seat, bed or station): a longer move (a rec-deck stand's
 // 4 tiles, a few mess seats') would glide over the furniture between, so it stays as it was (lead 34)
-const CREW_UP_V = 2.5, CREW_UP_MAX = 1.2;
+const CREW_UP_V = 2.5, CREW_UP_MAX = 1.2, CREW_UP_MV = 8;   // CREW_UP_MV: from a rec deck place's own moves (a swimmer mid-lap, a climber), over water or the mat (backlog FX8-1)
 function crewUpEase(a, dt) {
   if (!a.hx && !a.hz) return;
   const d = Math.hypot(a.hx, a.hz), m = d - dt * CREW_UP_V;
@@ -69922,7 +69922,8 @@ class CrewAgent {
     const atSpot = this.spot && (this.settled || !this.path.length);
     let from = atSpot ? this.spot.walk : this.here();
     if (!free(...from)) from = nearestOpen(this.x, this.z, null) || from;
-    if (atSpot && !this.spot.onTile || !free(...this.here())) { const w = cellPos(...from); if (atSpot && Math.hypot(this.x - w.x, this.z - w.z) <= CREW_UP_MAX) { this.hx += this.x - w.x; this.hz += this.z - w.z; } this.x = w.x; this.z = w.z; }   // up from the seat (drawn: eased off it, hx/hz, FX8)
+    if (atSpot && !this.spot.onTile || !free(...this.here())) { const w = cellPos(...from), mv = atSpot && this.spot.mv && this.rdx != null, sx = mv ? this.rdx : this.x, sz = mv ? this.rdz : this.z;   // a place with its own moves (a lane, the wall): from where the body is drawn, mid-lap (backlog FX8-1)
+      if (atSpot && Math.hypot(sx - w.x, sz - w.z) <= (mv ? CREW_UP_MV : CREW_UP_MAX)) { this.hx += sx - w.x; this.hz += sz - w.z; } this.x = w.x; this.z = w.z; this.rdx = null; }   // up from the seat (drawn: eased off it, hx/hz, FX8)
     this.goalId = goalId; this.path = [];
     this.settled = false; this.spot = null;
     let goal = null;
@@ -70517,11 +70518,12 @@ const recMix = x => { x = Math.imul(x ^ x >>> 15, 2246822507); x = Math.imul(x ^
 function recCrewSet(a, dt) {                             // false: not a move (the agent sets the body as usual)
   const M = a.settled && a.spot ? a.spot.mv : null, want = M ? (M.kit !== undefined ? M.kit : REC_KITS[M.kind] || '') : '';
   if (want !== (a.rkH === a.h ? a.rk : '')) recCrewKit(a, want); else if (a.rkH !== a.h) a.rk = '';   // a new body since (crewDetail's): in uniform
-  const fn = M && REC_CREW[M.kind]; if (!fn) return false;
+  const fn = M && REC_CREW[M.kind]; if (!fn) { a.rdx = null; return false; }
   if (a.mtId !== a.spot.id) { a.mtId = a.spot.id; a.mt = 0; a.fs = idHash(a.p.id); }
   a.mt += dt; const o = _rcp; o.x = a.x; o.y = a.y; o.z = a.z; o.f = a.face;
   const pose = fn(a, M, a.mt, o, recCrewC(M));
   if (a.mt < 1.5) { const k = ss(a.mt / 1.5); o.x = L(a.x, o.x, k); o.z = L(a.z, o.z, k); }
+  a.rdx = o.x; a.rdz = o.z;   // where the body is drawn: getting up glides from here (backlog FX8-1)
   a.h.set(o, o.f, pose); return true;
 }
 function recCrewKit(a, k) {                              // into rec kit or grip socks and back: a new body of the same kind
