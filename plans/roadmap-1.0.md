@@ -16,3 +16,12 @@ EV1-1/2, DM1-5) are slotted into 0.98 (tidy/perf) or 1.0 (playtest patch) as the
 Decisions (the user, Oct 28 ~8:40 PM ET): no old-save compatibility work (nobody has played yet); switched-off pieces
 (TRAY_TRAVELS, INTRO_ASK_ON, ZEKE_CABIN_MAIL, END_WAY_BACK) stay off; backlog sorted by BT1 into a list for the user
 before any action; the user does the whole-game real-phone playthrough themself; a title screen for 1.0 (TS1 mockups).
+
+Decisions (the user, Oct 28 ~9:20 PM ET):
+- Design-doc open questions: close them all (lead's suggestions: Calder, night shift, fault diagnosis, engine watch closed as built;
+  passed over = only delayed; character shaping = no; device colour = as built; the diplomacy game = not part of this game;
+  the board jobs' reputation and the upkeep pace move to the 0.99 balance list).
+- Title screen: option B, the crew terminal (DOM/CSS, the device's phosphor screen, menu as a list + loading bar). Credits and title sound: to ask.
+- 0.98: any visual change from turns 3-4 shown to the user as a before/after picture first; only incredibly minor changes accepted.
+  No 60 fps cap. No battery saver. Backlog 12 (career "Relied on" before Day 5) NOT fixed in 0.98: the user will balance it in 0.99
+  (it stays known-old until then). FX24-2: yes, book walking time only for long walks to a tradition.
