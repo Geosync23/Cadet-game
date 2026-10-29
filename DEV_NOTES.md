@@ -2,7 +2,7 @@
 
 Read this first in any new session, together with **design-doc.md** and **starship-cadet.html**. The design doc is the source of truth for what the game is (update it when a design decision is made); these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
 
-**0.98.0 (2026-10-29, candidate on `claude/staging-pad`, BM20 for lead 45).** 0.97.0 (live, integration 610ad7f1) plus three speed and fix pieces: SD3-2's event-music pick four times a second, not every frame (`claude/sound-098` fb603947); OP1's walk-time fix, a long walk to a tradition comes first, which closes FX24-2 and FX12-1 (`claude/opt-098-build` 3307e843; events_check now fully OK); RB1's render turn 3, one draw per full body (`claude/opt-098-render` 8d7a3148; 0 px against 0.97.0). Also join_check's real reload waits 120 s (OP1, check only). RB1's turn 4 moves to 0.99 (`claude/staging-099`).
+**0.98.0 (2026-10-29, hedge candidate (d) on `claude/staging-098d`, BM20 for lead 45).** 0.97.0 (live, integration 610ad7f1) plus SD3-2's event-music pick four times a second (`claude/sound-098` fb603947) and OP1's walk-time fix, a long walk to a tradition comes first, which closes FX24-2 and FX12-1 (`claude/opt-098-build` 3307e843); join_check's 120 s reload and OP1's s5cases / puzzle p6 check fixes. RB1's render turn 3 is NOT in this candidate (controller bedtime FAIL, 0.98.0 round): it moves to 0.99 with its fix. Known old gap: backlog BM20-1.
 
 **0.97.0 (2026-10-28, published; BM20 for lead 44).** 0.96.0 (live, claude/integration fe11cd66) plus the Dev mode update J0-J5 (DM2, `claude/devmode-j2` 86958252, RV25 PASS; plans/devmode-plan-v3.1.md): Dev mode only, behind `#dev`, so the game without the Dev link is unchanged (cadet vs fe11cd66 identical).
 

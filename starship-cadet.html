@@ -64781,10 +64781,11 @@ const pu4TestDay = d => Math.max(PU4.testFrom, promoWorkday(d));
 const pu4DayWord = (day, d) => day === d ? 'today' : day === d + 1 ? 'tomorrow' : dayName(day);
 function pu4AtDinner() { try { return !!ACT && ACT.kind === 'eat' && deckDef.num === 3; } catch (e) { return false; } }   // at your table in the mess (Deck 3)
 function pu4Script(v, hook) {                            // a live copy of the writer's scene (else a stand-in), our hooks on it; the dinner's without anyone who isn't near
-  const tday = (() => { try { return dayName(pu4TestDay(worksDay(shipNow()))); } catch (e) { return 'Monday'; } })();   // the stand-in's day (0.99 balance: it always said Monday)
+  const tday = (() => { try { const d = worksDay(shipNow()), k = pu4TestDay(d); return k === d + 1 ? 'tomorrow' : dayName(k); } catch (e) { return 'Monday'; } })();   // the stand-in's day (0.99 balance: it always said Monday)
+  const Tday = tday.charAt(0).toUpperCase() + tday.slice(1);
   const id = 'pu4.offer' + v, base = MEETING_SCRIPTS[id] || MEETING_SCRIPTS['pu4.offer'] || { title: 'Your next test', from: 'Chief Ines Calder', stub: true, gist: 'Calder told you in person: your Tier 4 test is set, ' + tday + ' at 09:30. A drive coil. Pass it and you\'re an Engine Specialist.',
     lines: [{ who: 'calder', text: 'There you are. Trusted, and the relays done. That\'s all of it.', to: 'you' },
-      { who: 'calder', text: tday + '. A drive coil. Tier 4.' },
+      { who: 'calder', text: Tday + '. A drive coil. Tier 4.' },
       { choice: [{ text: 'I\'ll be ready.', reply: { who: 'calder', text: 'I know. That\'s why it\'s ' + tday + '.' } },
         { text: 'A drive coil? Me?', reply: { who: 'calder', text: 'With me and Torres watching. Half past nine, the engine room.' } }] },
       ...(v === '.dinner' ? [{ who: 'pell', text: 'Torres is pretending not to be proud.' }] : [])] };
@@ -64861,7 +64862,7 @@ function pu4Next(k) {                                    // puNext's line for th
   if (!T) { const B = WORK_BANDS[3], at = b => B.findIndex(x => x[1] === b);
     return at(worksBand()) >= at('steady') && !ladderNeeds((ladderRow('t4') || {}).needs || { rep: 'trusted' }, W) ? worksText('next.t4.steps', 'Your Tier 4 test needs Trusted and power and relays. You\'re {band} now.', { band: worksBandWord() }, k) : null; }
   if (!T.passed) return worksText('next.wait.t4', 'Your Tier 4 test: {day}, {time}, the engine room, Deck 6.', { day: pu4DayWord(T.day, d), time: hhmm(PU4.testAt) }, k);
-  if (!T.res) { const at = pu4ResWhen(); return at === null ? null : pu4ResLate() ? worksText('next.wait.t4res.eve', 'Your Tier 4 result: {day}, {time}. Calder will find you.', { day: pu4DayWord(worksDay(at), d), time: hhmm(at % 1440) }, k) : worksText('next.wait.t4res', 'Your Tier 4 result: {day}, {time}, when your shift starts. Calder will find you.', { day: pu4DayWord(worksDay(at), d), time: hhmm(at % 1440) }, k); }
+  if (!T.res) { const at = pu4ResWhen(); return at === null ? null : pu4ResLate() ? worksText('next.wait.t4res.eve', 'Your Tier 4 result: {day}, {time}. Calder will find you wherever you are.', { day: pu4DayWord(worksDay(at), d), time: hhmm(at % 1440) }, k) : worksText('next.wait.t4res', 'Your Tier 4 result: {day}, {time}, when your shift starts. Calder will find you.', { day: pu4DayWord(worksDay(at), d), time: hhmm(at % 1440) }, k); }
   return null;
 }
 function pu4Items(d) {                                   // puItems' Tier 4 rows on day d
@@ -64930,11 +64931,11 @@ function pu4Passed(t) {                                  // turned in: passed, w
   const by = (c && c.by) || 'calder', d = worksDay(t);
   T.passed = true; T.day = d; W.tr.t4 = d; if (c && c.id === 't4') W.cur = null;
   const eve = pu4ResLate();   // (0.99 balance) days off next: the result this afternoon
-  worksSayAll(by, worksVoice(by, 'pu4.promo.passed') || [eve ? worksText('pu4.passed.say.eve', 'That\'s the test. Your result this afternoon. I\'ll find you.') : worksText('pu4.passed.say', 'That\'s the test. Your result when your shift starts. I\'ll find you.')]);
+  worksSayAll(by, worksVoice(by, 'pu4.promo.passed') || [eve ? worksText('pu4.passed.say.eve', 'That\'s the test. Go and get some lunch. I\'ll find you this afternoon with your result.') : worksText('pu4.passed.say', 'That\'s the test. Your result when your shift starts. I\'ll find you.')]);
   try { if (puNearMe('torres-zeke', CHATTER_NEAR)) simTimeout(() => worksSayAll('torres-zeke', worksVoice('torres-zeke', 'pu4.promo.passed') || ['Proper job.']), 6000); } catch (e) { /* not in play */ }
   flagSet('pu4.passed', d);
-  if (eve) promoMail('mail.pu4.passed.eve', 'Your test | Done. Your result this afternoon. I\'ll find you.', null, t); else promoMail('mail.pu4.passed', 'Your test | Done. Your result when your shift starts. I\'ll find you.', null, t);
-  if (t >= shipNow() - 1) promoNotice(eve ? worksText('pu4.passed.notice.eve', 'Your Tier 4 test is done. Your result: Calder will find you this afternoon.') : worksText('pu4.passed.notice', 'Your Tier 4 test is done. Your result: Calder will find you when your shift starts.'), worksName(by));
+  if (eve) promoMail('mail.pu4.passed.eve', 'Your test | Done. Eat something. I\'ll find you this afternoon with your result.', null, t); else promoMail('mail.pu4.passed', 'Your test | Done. Your result when your shift starts. I\'ll find you.', null, t);
+  if (t >= shipNow() - 1) promoNotice(eve ? worksText('pu4.passed.notice.eve', 'Your Tier 4 test is done. Your result: Calder will find you this afternoon, about half past one.') : worksText('pu4.passed.notice', 'Your Tier 4 test is done. Your result: Calder will find you when your shift starts.'), worksName(by));
   try { crewSceneEnd('torres-zeke'); } catch (e) { /* none */ }
   if (typeof MACH_REV !== 'undefined') MACH_REV++;
   simNote('pu4', { step: 'passed', day: d });
@@ -65037,7 +65038,7 @@ function pu4BadgeDay() {                                 // the Captain's aftern
 function pu4ResultScript() {                             // the writer's pu4.stairs, or a stand-in; our hook on it
   if (!MEETING_SCRIPTS['pu4.stairs']) MEETING_SCRIPTS['pu4.stairs'] = { title: 'Your result', from: 'Chief Ines Calder', stub: true, gist: 'Calder found you and told you: you passed. You\'re an Engine Specialist, Tier 4. The badge is the Captain\'s.',
     lines: [{ who: 'calder', text: 'There you are. Walk with me.', to: 'you' }, { who: 'calder', text: 'Mind the step. You passed, by the way. Engine Specialist.', pose: 'nod' },
-      { who: 'calder', text: 'The badge is the Captain\'s, tomorrow. Reyes has the kettle on.' },
+      { who: 'calder', text: pu4ResLate() ? 'The badge is the Captain\'s, tomorrow afternoon. Torres has the kettle on.' : 'The badge is the Captain\'s, tomorrow. Reyes has the kettle on.' },   // (0.99 balance) a Friday's afternoon result: Reyes is on nights
       { choice: [{ text: 'Engine Specialist.', reply: { who: 'calder', text: 'Get used to it. Come on.' } }] }] };
   puHook('pu4.stairs', k => flagSet('pu4.reply.res', k + 1), () => pu4Promote(shipNow(), 'met'));
   return 'pu4.stairs';
@@ -73855,7 +73856,7 @@ function sndFx(name, o) { try { return SND.fx(name, o); } catch (e) { return fal
 // the sound update (SD2, plans/sound/r3-build-plan.md; the user's Round 3 picks and the mess hall, 2026-10-28): event music
 // for the picked traditions and events (turn 1), the mess hall (turn 2), the feature sounds (turns 3-4). Off: the sound as before
 // the title screen's track (section 30): one of three candidates for the user to pick (plans/sound/title-music.html); SD3, 0.99
-const SND_TITLE = 'A';   // 'A' Night terminal | 'B' Phosphor glow | 'C' Ship's log | null (silent, as TB1 built it)
+const SND_TITLE = 'C';   // the user's pick, 2026-10-29 (Ship's log). 'A' Night terminal | 'B' Phosphor glow | 'C' Ship's log | null (silent, as TB1 built it)
 const SND_R3_ON = true;   // switched on in 0.96.0 (the user: the sound update is on when published; via lead 43/44)
 const SND = (() => {
   const S = { ctx: null, bus: {}, onFrame: [], log: URL_FLAGS.has('soundlog') ? [] : null };

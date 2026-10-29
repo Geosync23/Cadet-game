@@ -14,6 +14,8 @@ The sound designer (SD1) keeps this list. Newest decisions first in each part. T
 
 ## Building (after the next release)
 
+- **Title screen music:** the user picked C, Ship's log (2026-10-29, on Title Music Picks). Set as `SND_TITLE = 'C'` on `claude/title-music-c` (SD3).
+
 - **The sound update (Round 3 and the mess hall):** built on `claude/sound-r3` behind `SND_R3_ON` (off) by SD2 and SD3, 2026-10-28: event music (turn 1), the farewell song A (the user's later answer), the mess hall (turn 2), the watcher sounds (turn 3, with the test fit B), six one-line hooks (turn 4), and your new quarters' home chime C (the user's room B door pick, through lead 43; the first time you open room B's door after the move). Next: review, merge, then the switch-on and a listening pass.
 
 - **Sound in the game:** after 0.92.6 ships, on the user's go. The plan is `plans/sound/integration-plan.md`. It covers the decided sounds: hums, device and job sounds, doors, hatches, the lift and footsteps.
