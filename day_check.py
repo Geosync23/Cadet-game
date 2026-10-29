@@ -184,7 +184,12 @@ with sync_playwright() as pw:
             COUNT = f"""(() => {{ const sd = shipDay({DAY}), h = Array.from(sd.occ.heads.slice(1020, 1440)), r = sd.occ.rec ? Array.from(sd.occ.rec.slice(1020, 1440)) : null;
               // at a gathering (or riding to and from one: the ride is counted on the deck)
               const gath = r ? Array.from({{ length: 420 }}, (_, i) => schedPeople().filter(p => planDay(p, {DAY}).some(s => s.deck === 7 && /^ev-/.test(s.tag || '') && s.from - 5 <= ({DAY} - 1) * 1440 + 1020 + i && s.to + 5 > ({DAY} - 1) * 1440 + 1020 + i)).length) : null;
-              return {{ h, r, gath, cap: typeof REC_CAP !== 'undefined' ? REC_CAP.busy : null, trads: eventsOn({DAY}).filter(e => /^rec-/.test(e.id)).map(e => e.id) }}; }})()"""
+              // 0.98 (FX24-2): who is on Deck 3 then only because they set off early for a tradition (a stay that starts with a walk, s.walk: from 5 minutes before it, the lift and the ride, to its arrival)
+              const B = ({DAY} - 1) * 1440, wl = Array.from({{ length: 420 }}, () => []), on3 = Array.from({{ length: 420 }}, () => []);
+              for (const p of schedPeople()) {{ const pd = planDay(p, {DAY});
+                for (const s of pd) if (s.deck === 3) for (let m = Math.max(1020, s.from - B); m < Math.min(1440, s.to - B); m++) on3[m - 1020].push(p.id);
+                for (const s of pd) if (s.deck === 3 && s.walk > 0 && /^ev-/.test(s.tag || '')) for (let m = Math.max(1020, s.from - B - 30); m < Math.min(1440, s.from - B + s.walk); m++) wl[m - 1020].push(p.id); }}
+              return {{ wl, on3, h, r, gath, cap: typeof REC_CAP !== 'undefined' ? REC_CAP.busy : null, trads: eventsOn({DAY}).filter(e => /^rec-/.test(e.id)).map(e => e.id) }}; }})()"""
             res = {}
             for k, text in (('on', on_src), ('off', off_src), ('bare', bare_src)):
                 if text == src: res[k] = g.ev(COUNT); continue
@@ -200,6 +205,17 @@ with sync_playwright() as pw:
             if shut: print('  the rec deck is shut for the ship-wide event this evening (the storm update): its evening comparison is skipped')
             elif not on['r'] or not bare['r'] or max(bare['r']) == 0: fail('the rec deck is on but nobody came to it in the evening (no rec counts): the comparison would prove nothing')   # R6
             lower = [i for i in range(420) if bare['h'][i] < off['h'][i]]
+            # 0.98 (FX24-2, lead 45's call): fewer by at most the people named below is the walk to a tradition starting a little later with the rec
+            # deck (an early start is cut from what came just before, which the rec deck changes), not the rec deck drawing
+            # people away: tolerated only at a minute where that many people are on Deck 3 without it, heading for a walk-led
+            # tradition stay there, and aren't on Deck 3 with it. Every tolerated minute is named.
+            walked = {}
+            for i in lower:
+                who = sorted(x for x in set(off['wl'][i]) & set(off['on3'][i]) if x not in set(bare['on3'][i]))   # on Deck 3 without the rec deck, heading for a walk-led tradition stay there, not on Deck 3 with it
+                if who and off['h'][i] - bare['h'][i] <= len(who):
+                    for x in who: walked.setdefault(x, []).append(i)
+            for pid, ms in walked.items(): print(f"  one fewer at {len(ms)} minutes from {1020 + ms[0]}: {pid} set off earlier for a tradition without the rec deck (a walk-led stay, FX24-2), tolerated")
+            lower = [i for i in lower if not any(i in ms for ms in walked.values())]
             if lower: fail(f"the Commons hold fewer with the rec deck's everyday use at {len(lower)} minutes, first {1020 + lower[0]} ({bare['h'][lower[0]]} v {off['h'][lower[0]]})")
             if on['r'] and on['cap']:
                 over = [i for i in range(420) if on['r'][i] - on['gath'][i] > on['cap']]
