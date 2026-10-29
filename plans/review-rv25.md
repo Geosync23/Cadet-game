@@ -145,3 +145,5 @@ browsers fine; the user wants faster turnarounds.
   ahead() equals the old cut for toilets; long walks never out of work/meetings/kept; isFree for the walk; ex.walk; note:
   eventOf/now counts a walker as at the tradition for those minutes. Runs queued (lanes G, H after TB1 and EV2).
 - 04:49 lead 45: 0.98 first (OP1, then RB1 when it comes), ahead of TB1 and EV2 (0.99). Lanes reordered: G/H (OP1) after BB1's A/C, then D (TB1), E/F (EV2).
+- BB1 runs: interactions OK (5732 s); controller a11y/pick/team/touch OK; social OK; day 6 OK; events only FX24-2; arrows
+  endgo track OK (e9637f54). **VERDICT BB1: PASS** (~05:4x, BB1, lead 45). FX8-1 swimmer look queued again (no shots).
