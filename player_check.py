@@ -348,10 +348,12 @@ with sync_playwright() as pw:
       for (const k of NEED_KEYS) n[k] = 100; needsDrain(8 * 60, true); day.hunger = r(100 - n.hunger);
       for (const k of NEED_KEYS) n[k] = 100; needsDrain(16 * 60, false); needsDrain(8 * 60, true); day.fitnessDay = r(100 - n.fitness); day.socialDay = r(100 - n.social); return day; })()""")
     print('  a neglected day: lost', nd)
-    check(24 <= nd['fitnessDay'] <= 27, f"fitness should fall about 25 a day (a workout most days), not {nd['fitnessDay']}")
+    # the 0.99 balance pass (BAL2, the user's go, 2026-10-29): fitness .9/.3 an hour (about 17 a day: the gym every other day),
+    # hunger 4 an hour asleep (32 a night: breakfast and dinner are enough)
+    check(15.5 <= nd['fitnessDay'] <= 18, f"fitness should fall about 17 a day (a workout every other day), not {nd['fitnessDay']}")
     check(74 <= nd['socialDay'] <= 78, f"social should fall about 76 a day, not {nd['socialDay']}")
     check(36 <= nd['leisure'] <= 40, f"leisure should fall about 38 over a day off, not {nd['leisure']}")
-    check(46 <= nd['hunger'] <= 50, f"hunger should fall about 48 over an 8-hour sleep (you wake hungry), not {nd['hunger']}")
+    check(30 <= nd['hunger'] <= 34, f"hunger should fall about 32 over an 8-hour sleep, not {nd['hunger']}")
 
     print('The speed rule:')
     sp = g.ev(r"""(() => { const n = SHIP.player.needs, out = {};
@@ -614,7 +616,7 @@ with sync_playwright() as pw:
     print('  [walk, task, drain, socialGain, marks]', ne)
     check(ne['mid'] == [1, 1, 1, 1, ''], f"in between, nothing: {ne['mid']}")
     check(ne['high'][:4] == [1.05, 1.265, .902, 1.5] and ne['high'][4] == 'energy,fitness,hunger,hygiene,social', f"all high: {ne['high']}")
-    check(ne['low'][:4] == [.64, .85, 1.113, .5] and ne['low'][4] == 'energy,fitness,hunger,hygiene,social', f"all low: {ne['low']}")
+    check(ne['low'][:4] == [.64, .808, 1.113, .5] and ne['low'][4] == 'energy,fitness,hunger,hygiene,social', f"all low: {ne['low']}")   # .808: hungry .85 times lonely .95 (the 0.99 balance pass)
     check(ne['edge'] == [.8, 1, 1.018, 1, 'fitness,hunger'], f"75 counts as high, 25 isn't low: {ne['edge']}")
     dv = g.ev(r"""(() => { Object.assign(SHIP.player.needs, { hunger: 80, energy: 50, hygiene: 10, fitness: 50, social: 50 }); device.open('needs');
       const b = document.getElementById('devBody'), out = [[...b.querySelectorAll('.need em')].map(e => e.className + ':' + e.textContent), [...b.querySelectorAll('p.fx')].map(p => p.textContent)];
