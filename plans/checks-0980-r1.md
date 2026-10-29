@@ -14,7 +14,7 @@
 | arrows_pointer_check | OK | arrows_pointer_check: OK |
 | player_check (with the night part) | OK | PLAYER CHECK OK |
 | bubble_check | OK | BUBBLE CHECK OK |
-| puzzle_check | **FAIL (NEW)** | "p6's first: the save round trip mid-case (3514 bytes)" (budget 2600; OLD 1924; reproduced) |
+| puzzle_check | OK with OP1's check fix (staging-pad 10865180, RV26 PASS; game unchanged); FAIL as shipped in 7a2ae7d2 | "p6's first: the save round trip mid-case (3514 bytes)" (budget 2600; OLD 1924; reproduced) |
 | social_check | OK | SOCIAL CHECK OK |
 | talk_check | OK | TALK CHECK OK |
 | day_check 4 | OK | DAY CHECK OK |
@@ -37,4 +37,7 @@ The p6 case is identical on OLD and NEW; the save round trip reads back the same
 only the first), so the saved cases are 3514 bytes against the check's 2600. A check budget that assumes one open case;
 the owner's call (24k / puzzle_check), with a look at why a second case is open there now.
 
-**R1: two NEW FAILs (one game gap in 28a, one check budget), the other 13 OK.**
+Note for 24k's owner (BM20 asked it be kept): the second open case at p6's first, `c3-filter-1@536`, is new in 0.98.0
+(the walk-time change moves which machines wear, per OP1).
+
+**R1: one NEW FAIL left (arrows step6, a game gap in 28a; with OP1 for a verdict); puzzle OK with its check fix; the other 13 OK.**
