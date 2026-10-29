@@ -74348,6 +74348,10 @@ const SND = (() => {
       if (W.homeHad === undefined) { W.homeHad = null; if (!NOSAVE) try { const v = localStorage.getItem(homeKey()); W.homeHad = v === null ? null : +v; } catch (e) { W.homeHad = null; } }
       return W.homeHad === mv;
     }
+    // a new game in the slot (section 13's New game, or a fresh start in an empty slot after Delete) starts the note again (RV25)
+    const homeForget = () => { W.homeHad = null; W.homeNew = false; if (!NOSAVE) try { localStorage.removeItem(homeKey()); } catch (e) {} };
+    if (typeof onSim === 'function') onSim('newGame', homeForget);
+    if (typeof SAVED !== 'undefined' && !SAVED) homeForget();
     function homeDoor(d) {   // the door watcher asks as a door near you opens: room B's door, the first time since the move (once); yours, not crew's
       if (!W.homeNew || !deckDef || deckDef.num !== 2) return false;
       const B = [[0.6, 0], [-0.6, 0], [0, 0.6], [0, -0.6]].some(([dx, dz]) => { try { return roomAt(...cellAt(d.cx + dx, d.cz + dz)) === 'B'; } catch (e) { return false; } });

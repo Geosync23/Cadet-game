@@ -555,7 +555,9 @@ def check_r3home(pw, path):
         check(g.ev("SND.r3.W.homeNew") is False, 'r3home: after a reload it does not chime again')
         g.ev("localStorage.removeItem('starship-cadet-sound-home:' + SAVE_KEY)"); g.ev(MOVED)
         check(g.ev("SND.r3.W.homeNew") is True, 'r3home: without the note (a reload between the move and the door) it is still waiting')
-        g.ev("SHIP.works = __wk; localStorage.removeItem('starship-cadet-sound-home:' + SAVE_KEY)")
+        g.ev("localStorage.setItem('starship-cadet-sound-home:' + SAVE_KEY, String(SHIP.time.day)); SHIP.works = __wk; newGameStart(false)"); g.page.wait_for_timeout(700); g.step(5)
+        left = g.ev("[localStorage.getItem('starship-cadet-sound-home:' + SAVE_KEY), SND.r3.W.homeHad]"); print('  r3home after New game:', left)
+        check(left == [None, None], 'r3home: a New game clears the note (a second game in the slot hears the chime)')
         pe = [e for e in g.errors if e.startswith('pageerror')]
         if pe: check(False, 'r3home: page errors: ' + ' | '.join(pe[:3]))
     finally: g.close()
