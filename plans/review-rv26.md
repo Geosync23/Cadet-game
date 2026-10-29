@@ -174,3 +174,19 @@ Queue (lead 45, 2026-10-29): 1. TB1 title screen claude/title-099; 2. EV2 seated
 - controller_check day with the fix on 0.98.0's game (7a2ae7d2), twice side by side: CONTROLLER CHECK OK both
   (bedtime: "ABunk", the alarm card, Set alarm by pad ok).
 - **VERDICT 222ec28: PASS** (cherry-pick alone; the branch head carries turn 4 WIP).
+
+## RB1 turn 4, claude/opt-098-render e7bce5a (furniture that differs only in colour drawn together; base staging-099 536748f; sha256 8a0cbb86... matched)
+- Code read: mergeMeshes(root, tint) only from buildDeck's furniture merge; mergeTint keys every own property but
+  uuid/id/name/color/version (textures by uuid), '' (own bucket, as before) for non-Standard/Basic, see-through, alpha
+  test, not FrontSide, shadowSide, vertex colours, hidden, own onBeforeCompile, GD.leaves, RK.film, PULSES, or no WebGL2.
+  The twin is white with vertexColors and a flat colour varying: white x texel x c = the old c x texel (1 x t exact),
+  per piece one colour so flat loses nothing. The risk is a merged material changed while you play (the twin is a copy):
+  every runtime material change in the file is on an excluded material (GD.leaves, RK.film, PULSES), a noMerge object
+  (MED screen, belt, Lightdisc's V.*, the cake), a transparent one (marker, 21265's glow; never merged), the tall
+  pieces' own clones (merged on their own, not tinted), or a light (hemi/sun for night, events' feel), so none reaches a
+  tinted bucket. RB1's probe (every deck at 06:00, 13:00, 22:30) agrees.
+- cadet vs 536748f: d_wallslow 8 px (max 18), i_tap2 1 px (max 24): the corners the user approved; state differs in
+  mem (geometries 422 -> 414), calls, tris only.
+- pix_rb.py, 7 scenes x 2 views (Decks 1, 2, 3, 4 night, 5, 7): 0 px in all 14; draw calls 3-25 fewer per scene.
+- deck_check (the branch's own) OK; Deck 4 memory flat (322 geometries, 39 textures each round trip).
+- **VERDICT RB1 turn 4 e7bce5a: PASS.**
