@@ -9,6 +9,9 @@
 #          Teaching arrows Off and tracking off, and on another deck it points at the lift with the deck named
 #   s5:    Pillar 5 Step 5 with P5_STEP5 on (B1): Power safety's arrow, the Tier 3 rows, the Senior Officer presets
 #   pu3:   the Senior Officer promotion with P5_STEP5 on (S5-2, B5): the offer, the test at the board, the result, the bar, the toast
+#   s6:    J4 (plan v4.4): Night 2's landing (the time clock), clocked in (the night's work), the Monday briefing, Basil, Calder's question
+#   ev:    J4: a ship-wide event's meeting, labelled Event:, from 15 minutes before it (10 minutes before the first one found)
+#   end:   J4: the ending: the offer, your answer still open, the goodbye
 #   look:  the arrow is drawn (its own element, the DEV tag), holds still over frames, its pin never on the game's pin
 #          when both point at the same thing; Hide it and Show it from the Quick tab, the choice kept over a reload
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
@@ -217,9 +220,74 @@ def part_pu3(b):
     check(not pg.errors, f'pu3: errors {pg.errors[:3]}')
     ctx.close()
 
+# ---- stubs (plan v4.4, J0): J4 fills its own parts here, so nobody edits the part list again
+def j4_page(b):
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = Page(ctx, '#dev'); pg.sign(); return ctx, pg
+def j4_go(pg, day, beat):                          # a Dev jump (or an ad-hoc landing) by Set career, then the arrow
+    pg.ev(f"devmodeRun('Jump', () => devmodeSetCareerTo({day}, {beat}))"); return pg.next()
+
+def part_s6(b):
+    # J4 (plan v4.4): the nights (the time clock from an hour before: RV24's 20:50 note; clocked in, the night's work in the
+    # engine room), the Monday briefing, Basil's day and Calder's question
+    ctx, pg = j4_page(b)
+    if not pg.ev("typeof P5_NIGHT !== 'undefined' && P5_NIGHT && !!devmodeJumpOf('n2')"): print('  s6: Step 6 off: skipped'); ctx.close(); return
+    out = {}
+    out['n2'] = j4_go(pg, 23, "devmodeJumpOf('n2')")
+    pg.ev("devmodeRun('Clock', () => devmodeSkipTo(p5NightOf(23).from + 2))"); pg.ev("p5nClock(Math.floor(shipNow()), () => {})")
+    out['n2in'] = pg.next()
+    out['m21'] = j4_go(pg, 22, "devmodeJumpOf('m21')")
+    out['mt'] = j4_go(pg, 26, "devmodeJumpOf('mt')")
+    out['cq'] = j4_go(pg, 26, "devmodeJumpOf('cq')")
+    for k, v in out.items(): print('   ', k, v)
+    check('clock in' in out['n2'].get('label', '') and out['n2'].get('deck') == 5, f"s6: Night 2's landing (20:50): the time clock: {out['n2']}")
+    check(out['n2in'].get('label', '').startswith('Night 2:') and out['n2in'].get('deck') == 6, f"s6: Night 2 clocked in: the night's work: {out['n2in']}")
+    check('briefing' in out['m21'].get('label', '') and out['m21'].get('deck') == 1, f"s6: the Monday briefing: {out['m21']}")
+    check('Basil' in out['mt'].get('label', '') and out['mt'].get('deck') == 5, f"s6: Basil's day: {out['mt']}")
+    check('Calder' in out['cq'].get('label', '') and out['cq'].get('deck') == 5, f"s6: Calder's question: {out['cq']}")
+    check(not pg.errors, f's6: errors {pg.errors[:3]}')
+    ctx.close()
+
+def part_ev(b):
+    # J4: a ship-wide event's next meeting for you, labelled "Event:" (the first event day that has one)
+    ctx, pg = j4_page(b)
+    if not pg.ev("typeof EVENTS_ON !== 'undefined' && EVENTS_ON"): print('  ev: events off: skipped'); ctx.close(); return
+    got = None
+    for day in (11, 7, 35, 31):
+        pg.ev(f"devmodeRun('Set career', () => devmodeSetCareerTo({day}))")
+        pg.ev("(() => { const m = SHIP.event && MEETINGS.filter(x => x.event === SHIP.event.id && x.at > shipNow() && x.at < shipNow() + 1440).sort((a, b) => a.at - b.at)[0]; if (m) devmodeRun('Clock', () => devmodeSkipTo(m.at - 10)); })()")   # 10 minutes before its next meeting
+        g = pg.ev("(() => { const f = DV_MORE.find(x => x[0] === 'event'); const r = f && f[1](Math.floor(shipNow()), SHIP.works); return r ? { day: SHIP.time.day, label: r.g.label, deck: r.g.deck, room: r.g.room, at: hhmm(r.when % 1440), ev: SHIP.event && SHIP.event.id, arrow: dvCareerNext().label } : null; })()")
+        if g: got = g; break
+    print('    ev', got)
+    check(got and got['label'].startswith('Event: ') and got['deck'] and got['room'], f'ev: no event meeting for the arrow on Days 11, 7, 35, 31: {got}')
+    # (RV25) only meetings for you: the Veyli vessel's crew-planning holds (ranks: []) never show; at Day 27 10:00 its
+    # parts sheet (vesselSheet, the crew's, 09:50-12:00) is on and no meeting of yours is
+    if pg.ev("typeof EV_VESSEL_ON !== 'undefined' && EV_VESSEL_ON"):
+        pg.ev("devmodeRun('Set career', () => devmodeSetCareerTo(27, { id: 'v', label: 'v', day: 27, by: 26, at: 600, where: null }))")
+        V = pg.ev("(() => { const f = DV_MORE.find(x => x[0] === 'event'), r = f[1](Math.floor(shipNow()), SHIP.works), on = MEETINGS.filter(m => SHIP.event && m.event === SHIP.event.id && m.at <= shipNow() && shipNow() < m.at + (m.len || 15)); return { ev: SHIP.event && SHIP.event.id, r: r && r.g.label, on: on.map(m => [m.id, evInvited(m)]) }; })()")
+        print('    vessel', V)
+        check(V['ev'] == 'veyliVessel' and not any(not inv for _, inv in V['on'] if V['r']) and (V['r'] is None) == all(not inv for _, inv in V['on']), f'ev: the vessel\'s Day 27 10:00: a meeting not for you on the arrow: {V}')
+    check(not pg.errors, f'ev: errors {pg.errors[:3]}')
+    ctx.close()
+
+def part_end(b):
+    # J4: the ending: the offer (the ready room), your answer still open (the Captain), the goodbye (the shuttle bay)
+    ctx, pg = j4_page(b)
+    if not pg.ev("typeof EV_ENDING_ON !== 'undefined' && EV_ENDING_ON && P5_END"): print('  end: the ending off: skipped'); ctx.close(); return
+    out = {}
+    out['offer'] = j4_go(pg, 32, "{ id: 'a', label: 'a', day: 32, by: 31, at: 950, where: { deck: 1, room: 'R' } }")
+    out['open'] = j4_go(pg, 34, "{ id: 'b', label: 'b', day: 34, by: 33, at: 1075, where: { deck: 3, room: 'M' }, ans: { offer: 'unsure' } }")
+    out['bye'] = j4_go(pg, 36, "{ id: 'c', label: 'c', day: 36, by: 35, at: 550, where: { deck: 5, room: 'S' }, ans: { offer: 'go' } }")
+    for k, v in out.items(): print('   ', k, v)
+    check('offer' in out['offer'].get('label', '') and out['offer'].get('deck') == 1, f"end: the offer: {out['offer']}")
+    check('Your answer' in out['open'].get('label', ''), f"end: your answer still open: {out['open']}")
+    check('goodbye' in out['bye'].get('label', '') and out['bye'].get('deck') == 5, f"end: the goodbye: {out['bye']}")
+    check(not pg.errors, f'end: errors {pg.errors[:3]}')
+    ctx.close()
+
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
-    for name, part in (('off', part_off), ('walk', part_walk), ('look', part_look), ('s5', part_s5), ('pu3', part_pu3)):
+    for name, part in (('off', part_off), ('walk', part_walk), ('look', part_look), ('s5', part_s5), ('pu3', part_pu3), ('s6', part_s6), ('ev', part_ev), ('end', part_end)):
         if ONLY and name not in ONLY: continue
         try: part(b)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
