@@ -52739,7 +52739,7 @@ function socialChatter(m) {
   if (typeof bubbleSay !== 'function' || typeof DECK_CREW === 'undefined') return;
   if (typeof bubbles !== 'undefined' && bubbles) bubbles.hidden = !!CHAT;
   if (!CHAT && !sleeping && cheerTick(m)) return;
-  if (CHAT || sleeping || simNow() - CHATTER_AT < CHATTER_GAP * 1000 || schedU(m, 0, 635) >= CHATTER_ODDS) return;
+  if (CHAT || (typeof DIALOGUE !== 'undefined' && DIALOGUE) || sleeping || simNow() - CHATTER_AT < CHATTER_GAP * 1000 || schedU(m, 0, 635) >= CHATTER_ODDS) return;   // none over a moment or a meeting's card either (backlog FX21-1)
   if (typeof introHush === 'function' && introHush()) return;   // section 21: Zeke's goodnight bubbles on the arrival evening (the patch, #4)
   const t = shipNow(), heard = new Set(SHIP.heard.map(x => x.id)), P = player.obj.position;
   const v = new THREE.Vector3(), onScreen = a => { v.set(a.x, (a.y || 0) + 1.6, a.z).project(camera); return Math.abs(v.x) < .7 && v.y < .8 && v.y > -.9; };   // well inside the screen, so the bubble fits
