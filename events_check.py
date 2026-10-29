@@ -60,7 +60,7 @@ PLANS = r"""(days => {
       { const m = /^ev-(\w+)-/.exec(s.tag); if (m && SHIP_EVENTS[m[1]] && !SHIP_TRADITIONS.some(e => e.id === s.tag.slice(3))) continue; }   // an event guest's own steps (Taavek's ev-veyliVessel-ramp...), not a tradition (EV1: the guests' days are on paper from Day 1 now)
       const id = tagId(s.tag), e = on.find(x => x.id === id), B = (d - 1) * 1440;
       if (!e) { out.bad.push(d + ' ' + p.id + ' at ' + id + ', which is not on'); continue; }
-      if (s.from < B + e.from - Math.max(e.ev.early || 0, p.id === e.ev.host || typeof P926_TRADS !== 'undefined' && P926_TRADS && /^rec-(wren|chiefs)-talk$/.test(e.id) && recSpeaker(p, d) ? 5 : 0, e.ev.meal && typeof TRAD_LINE !== 'undefined' ? TRAD_LINE[1] : 0, e.ev.lead ? 35 : 0) ||   // the sim plans a host 5 minutes early; a meal tradition's diners sit as the line serves them, up to TRAD_LINE[1] early (sim 0.26.41); the Captain's address seats them up to 30 minutes early (18f's friLead), its host 5 more
+      if (s.from + (s.walk || 0) < B + e.from - Math.max(e.ev.early || 0, p.id === e.ev.host || typeof P926_TRADS !== 'undefined' && P926_TRADS && /^rec-(wren|chiefs)-talk$/.test(e.id) && recSpeaker(p, d) ? 5 : 0, e.ev.meal && typeof TRAD_LINE !== 'undefined' ? TRAD_LINE[1] : 0, e.ev.lead ? 35 : 0) ||   // the sim plans a host 5 minutes early; a meal tradition's diners sit as the line serves them, up to TRAD_LINE[1] early (sim 0.26.41); the Captain's address seats them up to 30 minutes early (18f's friLead), its host 5 more
          s.to > B + e.to + LINGER) out.bad.push(d + ' ' + p.id + ' at ' + id + ' ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ' outside ' + hhmm(e.from) + '-' + hhmm(e.to));
       const pools = (e.ev.whereFor ? e.ev.whereFor(p, d, eventOpts(e.ev, p)) : eventOpts(e.ev, p)).map(([n, k]) => S.shared.get(n + '|' + k) || []).flat().map(pl => pl.id);   // a place by person too (whereFor: the comet's hosts at their own spots, FX25)
       if (!pools.includes(s.placeId) && !(s.act === 'commute' && !s.placeId)) out.bad.push(d + ' ' + p.id + ' at ' + id + ' in ' + s.placeId + ', not one of its places');
@@ -76,10 +76,8 @@ PLANS = r"""(days => {
     // bar) sits in one then (0.34.51, the user: no tradition shares a room or place with a meal or other use)
     for (const e of on) {
       const held = new Set(eventPlaces(e)), B = (d - 1) * 1440;
-      for (const p of schedPeople()) { const pd = planDay(p, d); for (let i = 0; i < pd.length; i++) { const s = pd[i];
-        if (s.tag === 'walk' && pd[i + 1] && pd[i + 1].placeId === s.placeId && pd[i + 1].from === s.to && tagId(pd[i + 1].tag || '') === e.id) continue;   // FX24-2 (0.98): the walk there just before their own stay at it, not someone else using the place
-        if (s.placeId && held.has(s.placeId) && s.from < B + e.to && B + e.from < s.to && tagId(s.tag || '') !== e.id)
-        out.bad.push(d + ' ' + p.id + ' in ' + s.placeId + ' (' + (s.tag || s.act) + ') ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ', held for ' + e.id); } }
+      for (const p of schedPeople()) for (const s of planDay(p, d)) if (s.placeId && held.has(s.placeId) && s.from < B + e.to && B + e.from < s.to && tagId(s.tag || '') !== e.id)
+        out.bad.push(d + ' ' + p.id + ' in ' + s.placeId + ' (' + (s.tag || s.act) + ') ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ', held for ' + e.id);
     }
     const r = dayReport(d);
     for (const k of ['short', 'meals', 'work', 'double', 'gaps']) if (r[k].length) out.bad.push(d + ' dayReport ' + k + ': ' + r[k].slice(0, 4).join(', '));
