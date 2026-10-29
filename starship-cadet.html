@@ -75067,6 +75067,8 @@ const SND = (() => {
     return null;
   }
   if (SND_R3_ON) S.r3Event = r3EventMusic;   // for sound_check
+  const R3EV = { at: -1, key: null, n: 0 };               // r3EventMusic's last answer, when (audio clock) and how many asks, for the frame code below
+  if (SND_R3_ON) S.r3Ev = R3EV;                           // for sound_check
   if (MESS_SND) S.r3Mess = MESS_SND.M;   // for sound_check: the mess hall's count and scene
   if (R3) S.r3 = R3;   // for sound_check: turn 3's watchers
   S.makeMusic = createWrenMusic;                          // for sound_check: the module on a test clock
@@ -75077,7 +75079,10 @@ const SND = (() => {
         if (/^Playing /.test(tx) && S.music) { MP.heard = S.music.state().heard; S.savePrefs(); if (typeof DEV !== 'undefined' && DEV.open && DEV.app === 'music') deviceRefresh(); }   // the rotation carries on across days; a live Now playing
       } }); }
     let ev = null; try { ev = typeof cometMusicOn === 'function' && cometMusicOn() ? 'comet' : null; } catch (e) { ev = null; }   // section 18's comet (FX25): its own track while you watch
-    if (SND_R3_ON && !ev) { try { ev = r3EventMusic(); } catch (e) { ev = null; } }   // the sound update: a picked tradition or event, while you're in its room
+    if (SND_R3_ON && !ev) {   // the sound update: a picked tradition or event, while you're in its room; asked 4 times a second (0.98, SD3-2: the music changes only at a section end)
+      const now = S.ctx.currentTime; if (!(now - R3EV.at < 0.25 && now >= R3EV.at)) { R3EV.at = now; R3EV.n++; try { R3EV.key = r3EventMusic(); } catch (e) { R3EV.key = null; } }
+      ev = R3EV.key;
+    }
     S.music.setEvent(ev);
     S.music.update();
   });

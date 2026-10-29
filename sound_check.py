@@ -384,6 +384,11 @@ def check_r3music(pw, path):
         at('after the farewell', 19 * 1440 + 600, 5, 'Shuttle bay', None)
         g.ev("eventNow = window.__enReal")
         g.step(3); check(g.ev("SND.music.eventOn()") is None, 'r3music: back to the schedule after')
+        # 0.98 (SD3-2): the pick is asked about 4 times a second, not every frame
+        import time as _t
+        n0, t0 = g.ev("SND.r3Ev.n"), _t.perf_counter(); g.step(120); n1, t1 = g.ev("SND.r3Ev.n"), _t.perf_counter()
+        print(f'  r3music: {n1 - n0} asks in 120 frames, {t1 - t0:.2f} s')
+        check(n1 - n0 <= (t1 - t0) / 0.25 + 2 and n1 - n0 < 120, f'r3music: the event pick is asked about 4 times a second ({n1 - n0} in 120 frames, {t1 - t0:.2f} s)')
         pe = [e for e in g.errors if e.startswith('pageerror')]
         if pe: check(False, 'r3music: page errors: ' + ' | '.join(pe[:3]))
     finally: g.close()
