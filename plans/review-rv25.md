@@ -125,3 +125,7 @@ browsers fine; the user wants faster turnarounds.
   never cleared on New game / Delete / Load file: a second game in the slot never chimes. Suggested onSim('newGame') clear.
 - SD3-2 check follow-up fb603947 (needs >= 1 ask over a real second): PASS on a code read; SD3-2 tip fb603947.
 - SD3-1 7529b1e4 (homeForget on newGame and at load with no save): **PASS** (~03:0x, SD3, lead 45). sound_check OK (r3home after New game [None, None]).
+
+## BAL2 0.99 balance pass, claude/balance-099 2b46f96e (session_01GKuymm7ApobKpq9JW9FJgF): PASS (~03:5x, BAL2, lead 45)
+- cadet vs 0.97.0 ALL IDENTICAL; career_check OK, --s6 OK (late Trusted D22 -> test/result D26, badge D27); player_check OK;
+  promo_beats OK. Notes: pu4DevNext (Dev arrow) keeps the old offer timing; Day 26 full and a Saturday badge (lead's call).
