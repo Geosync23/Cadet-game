@@ -17450,7 +17450,7 @@ function adoorHint() {
   const p = player.obj.position, d = DOOR_OBJS.find(o => o.e.type === 'door' && Math.hypot(o.cx - p.x, o.cz - p.z) < .6 && (o.cx - p.x) * s.x + (o.cz - p.z) * s.z > .1 && adoorShut(o.e, player));
   if (!d) return;
   ADOOR.hints++; ADOOR.hintAt = now;
-  toast('A private room', typeof PAD !== 'undefined' && PAD.used ? 'Press A, or tap the door, to open it.' : 'Tap the door to open it.');
+  toast(adoorPrivate(d.e.key) ? 'A private room' : 'A door', typeof PAD !== 'undefined' && PAD.used ? 'Press A, or tap the door, to open it.' : 'Tap the door to open it.');   // a public door says so too, with every door on taps (backlog RV18-D1)
 }
 function adoorTapSelf() { const k = adoorSelfKey(); return !!k && adoorTap(k); }   // a tap on you right by a shut door: that door
 function adoorSet(mode) {                                 // the Settings row: 'all' | 'private' | 'none' (true / false: 0.93.2's on / off)
