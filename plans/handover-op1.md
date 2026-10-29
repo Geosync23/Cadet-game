@@ -48,3 +48,16 @@ fix. Leads: 44, then 45 (`session_01GKuymnu4NeXJhwPe21FWk7`). Reviewer: RV25. Bu
 - Compare builds alternately (A B A B), never OLD-then-NEW.
 - Background bash jobs end at 30 minutes and kill their children. Use nohup for long check lists.
 - `cd x && export ... && (a) & (b)`: the `&` backgrounds the whole chain, so (b) runs without the export.
+
+## Update, 2026-10-29 ~7 AM ET (after the 0.98.0 round)
+The walk-time fix moved some crew plans, so the week's machine wear moved, so later checks met different faults. Three new FAILs in the 0.98.0 round traced to that.
+- **controller_check s5cases** (check only): the suspects now come from the case's own `c.sus`.
+- **puzzle_check p6's first save size** (check only): the size counts this case plus the shared record.
+- Both are on `claude/s5cases-fix` 34adecc7 and 10865180. RV26 PASS; they went into 0.98.0.
+- **arrows step6 p5n:bed:22** (a real 28a gap, AS1's find): if you never clock in on Day 22, the day-sleep arrow was never asked. Fixed on `claude/nights-dayarrow` 79a87eac **for 0.99** (lead 45). Its fields:
+  - p5nGuide's day-sleep block also runs when there's no day part;
+  - `from` is a whole minute, because the queue skips entries with now < from;
+  - it never runs the morning after a night.
+  - Proof: step6 in all four ways OK, step5 OK, day 22 OK, cadet ALL IDENTICAL, check_fast OK. RV26 is reviewing, AS1 is running the whole arrows_check, and BM21 has it for 0.99.
+- Also done: join_check's real reload now waits up to 120 s (`claude/join-timeout` c27ebb88, RV26 PASS). The owner read of EV2's apptWhere a.early: OK.
+- **Lesson:** a planner change moves wear and faults, and so which case and machine every later check meets. Before merging one, run the case and arrows checks: controller s5cases/s6cases, puzzle, arrows step5/step6.
