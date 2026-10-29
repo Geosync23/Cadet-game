@@ -116,3 +116,6 @@ SD3 (SD3-2 music cache); BB1 = BT1 session_01GKuymne2zVMSTZjvCCmXKH (0.99 backlo
 browsers fine; the user wants faster turnarounds.
 - Base ready: /tmp/rv25/old0970.html (0.97.0, claude/integration 610ad7f1, sha256 0bd1b5b6...). Waiting for the first turn.
 - Correction (lead 44): BB1's 0.99 backlog fixes land on claude/backlog-triage (restarted from staging-pad 610ad7f1), not claude/backlog-099.
+- SD3-2 0b9541c9 (claude/sound-098, music pick cached 0.25 s of the audio clock): **PASS** (~02:2x, SD3, lead 44). cadet vs
+  0.97.0 ALL IDENTICAL; sound_check OK. Note: the new rate line saw 0 asks in 0.24 s real (upper bound only).
+- Gotcha (mine, twice): `a && b && (x) & (y) & wait` backgrounds the whole first chain; set up first, then start lanes.
