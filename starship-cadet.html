@@ -7405,6 +7405,12 @@ DECKS[1].visits = { 'ready-room': { name: 'the Captain\'s ready room', room: 'R'
   // you at the far end. The room has open glass doors, so there's nothing to unlock (door: null)
   conference: { name: 'the conference table', room: 'O', door: null, host: '1-observation-lead-1', places: ['1-conf-10', '1-conf-1', '1-conf-2', '1-conf-3', '1-conf-4', '1-conf-5', '1-conf-6', '1-conf-7', '1-conf-8', '1-conf-9'] } };
 DECKS[2].visits = { 'captain-table': { name: 'the Captain\'s table', room: 'C', door: 'v,7,10', host: '2-captable-5', places: ['2-captable-6', '2-captable-1', '2-captable-2', '2-captable-4', '2-captable-3'] } };
+// the two chairs on the table's west side that had no seat (V-1, the Veyli dinner; EV2 for lead 45): event-only, so
+// nobody sits in them day to day (the pool '2|@veyliDinner'); section 18's OCCASIONS.veyliDinner seats its guests there.
+// Their walk tiles are the nearest ones that can be stood on ([3,10], [3,11] and [2,11] can't), the chairs at xy
+DECKS[2].places.push(
+  { id: '2-captable-7', type: 'event', event: 'veyliDinner', at: [2, 10], xy: [3.61, 10.5], face: 'e', pose: 'sit', y: 0.5, anim: 'talk', room: 'C' },
+  { id: '2-captable-8', type: 'event', event: 'veyliDinner', at: [3, 12], xy: [3.61, 11.5], face: 'e', pose: 'sit', y: 0.5, anim: 'talk', room: 'C' });
 // ---- Pillar 4, seat 8 (0.38.9; plans/pillar4-plan.md, Part 6 and the social plan's interfaces): the arrival evening ----
 // keepsakes: the shelf above your bunk (Bunk 1, berth 4's bunk); `slots` are where section 8b's one instanced keepsake mesh
 // puts each gift (tile units for x and z, metres for y); `place` is where you stand to look at it (yours: its id starts
@@ -10140,7 +10146,7 @@ function apptWhere(p, t) {
     const end = a.at + (a.status === 'kept' || a.occ ? (a.len || 30) : APPT_WAIT), pl = apptPlaceOf(a, p.id); if (!pl) continue;   // an occasion's host (section 18 via apptAdd, `occ`) stays the whole time, you or no you (0.26.34)
     // they set off in time to be there at a.at: the walk from the lift (about 1.3 x the straight line, at CREW_SPEED)
     const lift = DECKS[pl.deck].lift || pl.at, walk = Math.ceil(1.3 * Math.hypot(pl.at[0] - lift[0], pl.at[1] - lift[1]) / 1.15 * SHIP_RATE) + 1;   // ship minutes
-    const go = a.at - walk, C = SCHED_COMMUTE;
+    const go = a.at - (Number(a.early) > 0 ? Math.min(30, +a.early) : 0) - walk, C = SCHED_COMMUTE;   // a.early: seated that many minutes before it starts (section 18's occasions, the Veyli dinner)
     if (t < go - C - 3 || t >= end) continue;
     if (t < go - C) return null;                         // still finishing what they were doing
     const w = planWhere(p, go - C - 1);
@@ -34545,6 +34551,18 @@ const LINES = JSON.parse([
   '{"text":"Tomorrow at 14:30 we cross the Line into the Veyli reach.","id":"mnvjhf"}]',
   ',"event.crossingLine.tap.punch":[',
   '{"text":"Brennan\'s Line punch. Green, faintly fizzy. Nobody will tell you what\'s in it.","id":"3da9n7","tone":"funny"}]',
+  ',"event.diplomatic.dinner.done":[',
+  '{"text":"The plates are cleared. Brennan looks in, pretending not to check.","id":"nygyfu"}]',
+  ',"event.diplomatic.dinner.mail":[',
+  '{"text":"Dinner for our Veyli guests | Tonight, 19:00, my quarters, Deck 2. By Wren custom the newest hand aboard sits at a formal table: you. Your chair is at the foot, facing mine. Dress uniform.","id":"1ugb3nu"}]',
+  ',"event.diplomatic.dinner.ptr":[',
+  '{"text":"The Veyli dinner: your chair, the Captain\'s quarters","id":"cui2bf"}]',
+  ',"event.diplomatic.dinner.tap":[',
+  '{"text":"Veyli spiced grains with garden herbs, plated like a painting. Brennan\'s best china, too.","id":"1foq9z1"}]',
+  ',"event.diplomatic.dinner.tap.title":[',
+  '{"text":"The Veyli dinner","id":"vzysjw"}]',
+  ',"event.diplomatic.dinner.title":[',
+  '{"text":"The Veyli dinner","id":"1eitf6t"}]',
   ',"event.ionStorm.address.onset.1":[',
   '{"text":"This is the Captain. We\'re in it.","id":"7u0nc0"}]',
   ',"event.ionStorm.address.onset.2":[',
@@ -34636,12 +34654,12 @@ const LINES = JSON.parse([
   '{"text":"marrow: A small Veyli ship has lost its coolant pump. It\'s drifting, a day off our course.","id":"nztllr"},',
   '{"text":"marrow: They\'ve called us. Not for help: for company. That\'s their word, and a good one.","id":"fv1qpz"},',
   '{"text":"marrow: At half past eight we turn toward them. You\'ll feel it. Hold on to your cups.","id":"e607xs"},',
-  '{"text":"marrow: We were guests in their sky for a month. Tonight we can be good ones. Marrow out.","id":"1po25qz"}]',
+  '{"text":"marrow: Their Speaker sat at our table last week. Tonight we keep company. Marrow out.","id":"1bdky8i"}]',
   ',"event.veyliVessel.address.tue":[',
   '{"text":"marrow: This is the Captain. Our neighbours are under way, and so are we.","id":"qefjwg"},',
   '{"text":"marrow: They sent a message for the whole ship. The Envoy will read it. Envoy?","id":"1gehfj5"},',
   '{"text":"saruth: They say: the Wren kept company well. Their engine is warm.","id":"16lxpig"},',
-  '{"text":"saruth: They will remember the ship, and the hands.","id":"elq4dk"},',
+  '{"text":"saruth: They will remember the ship, and the hands. So will the Speaker, when I write.","id":"pjge1y"},',
   '{"text":"marrow: Thank you, Works, and the chain. And {me}, who met their engineer.","id":"m62a6f"},',
   '{"text":"marrow: Back on our course. Back to it. Marrow out.","id":"157p2p9"}]',
   ',"event.veyliVessel.chain.count":[',
@@ -34780,7 +34798,7 @@ const LINES = JSON.parse([
   ',"event.veyliVessel.lights.you.calder":[',
   '{"text":"calder: Good part, {me}. Don\'t let it go to your head.","id":"lv3vc3"}]',
   ',"event.veyliVessel.mail.address.sat":[',
-  '{"text":"A Veyli ship asks for company | A small Veyli ship has lost its coolant pump and is drifting, a day off our course. They\'ve called us, not for help but for company: the Envoy says that\'s the word. We turn toward them at 08:30 and hold station off their bow until they\'re under way. Works will tell you what\'s needed. We were guests in their sky for a month. Tonight we can be good ones.","id":"1k96wdi"}]',
+  '{"text":"A Veyli ship asks for company | A small Veyli ship has lost its coolant pump and is drifting, a day off our course. They\'ve called us, not for help but for company: the Envoy says that\'s the word. We turn toward them at 08:30 and hold station off their bow until they\'re under way. Works will tell you what\'s needed. Last week their Speaker was our guest. Tonight we keep company.","id":"ijud9v"}]',
   ',"event.veyliVessel.mail.address.tue":[',
   '{"text":"Company kept | The Veyli ship is under way. The Envoy read their message to us: \\"The Wren kept company well. Our engine is warm. We will remember the ship, and the hands.\\" Thank you, Works, for the part; thank you, everyone on the chain; and thank you, {me}, who met their engineer at the foot of the ramp.","id":"sdv3s7"}]',
   ',"event.veyliVessel.mail.commendation":[',
@@ -34806,7 +34824,7 @@ const LINES = JSON.parse([
   ',"event.veyliVessel.news.coming.7":[',
   '{"text":"If it\'s a pump, it\'s Works. Somebody tell the Chief.","id":"1vg7kqz"}]',
   ',"event.veyliVessel.news.coming.8":[',
-  '{"text":"I\'ve never seen a Veyli ship up close. Only the Envoy\'s shuttle.","id":"1nx7v1j"}]',
+  '{"text":"I\'ve never seen a Veyli ship up close. Only the delegation\'s shuttle, last week.","id":"1qhclti"}]',
   ',"event.veyliVessel.news.told.1":[',
   '{"text":"Did you see it light up? Three flashes. I had a lump in my throat.","id":"1q1zb0m"}]',
   ',"event.veyliVessel.news.told.2":[',
@@ -34900,7 +34918,7 @@ const LINES = JSON.parse([
   ',"event.veyliVessel.ring.testfit":[',
   '{"text":"The test fit","id":"1wgdkqw"}]',
   ',"event.veyliVessel.saruth.breakfast":[',
-  '{"text":"They ask for company. It is a very old way of asking. Thank you for answering it.","id":"nuwetv"}]',
+  '{"text":"They ask for company. A very old way of asking. The Speaker will be glad we answered it.","id":"1wj8ye8"}]',
   ',"event.veyliVessel.sched.chain":[',
   '{"text":"The parts chain, 13:00, Main storage","id":"120yvi3"}]',
   ',"event.veyliVessel.sched.home":[',
@@ -43127,6 +43145,7 @@ const MEETINGS_BAKED = {
   "vesselRoundOne": {"title": "The round one", "from": "Taavek", "gist": "At the Works bay bench, Taavek showed you the broken part: an impeller for their coolant pump, cracked through the hub. Nothing in the Wren's stores is like it. It will have to be made.", "lines": [{"who": "taavek", "text": "Here. The round one.", "pose": "gesture"}, {"who": "taavek", "text": "From the pump. For the cold. It goes round, round, round. Now it goes clunk.", "pose": "laugh"}, {"who": "torres-zeke", "text": "Look at the hub. Cracked right through. That's been a long time coming."}, {"who": "calder", "text": "Twelve blades. Ours have nine. Nothing in stores this shape."}, {"who": "taavek", "text": "I draw it. You look. Then you say.", "pose": "gesture"}, {"who": "calder", "text": "{me}. What is it?", "pose": "listen", "to": "you"}, {"choice": [{"text": "An impeller. It pushes their coolant round.", "flavour": "practical", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Good. Write it on the sketch.", "pose": "nod"}}, {"text": "A fan, sort of? For the cold side?", "flavour": "listen", "rel": {"torres-zeke": 1}, "reply": {"who": "torres-zeke", "text": "Close. An impeller. It shoves the coolant round, not air.", "pose": "nod"}}, {"text": "The round one.", "flavour": "cheer", "rel": {"taavek": 1}, "reply": {"who": "taavek", "text": "Yes! The round one. You learn very fast.", "pose": "laugh"}}]}, {"who": "taavek", "text": "Impeller. A good word. Long. I keep \"the round one\".", "pose": "laugh"}, {"who": "calder", "text": "Nothing like it aboard. It will have to be made."}, {"who": "taavek", "text": "Made. Yes. Here? With your machines?", "pose": "listen"}, {"who": "calder", "text": "Tomorrow, in the machine shop. Today, the chain. One o'clock.", "pose": "gesture"}]},
   "vesselSheet": {"title": "The parts chain sheet", "from": "Chief Ines Calder", "gist": "Chief Calder asked you to sign up for the parts chain (Sunday 13:00, Main storage to the Tern) and to meet the Veyli ship's engineer at the foot of the Tern's ramp, Sunday 09:30.", "lines": [{"who": "calder", "text": "There you are. It's my day off. The Veyli didn't check.", "pose": "gesture"}, {"who": "calder", "text": "A sheet. The parts chain, tomorrow at one. Our spare pump, fittings, coolant. Main storage to the Tern, by hand."}, {"who": "calder", "text": "The lift's too slow and the trolleys won't take the ramp. People will."}, {"who": "calder", "text": "And one more thing. You're meeting their engineer. Foot of the ramp, half nine.", "pose": "nod", "to": "you"}, {"choice": [{"text": "Me? Why me?", "flavour": "listen", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Someone met you, four weeks ago. Now you know how it's done.", "pose": "nod"}}, {"text": "Foot of the ramp. Got it.", "flavour": "practical", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Quarter past nine, then. Then you're early.", "pose": "nod"}}]}, {"who": "calder", "text": "I'll be beside you. Also my day off. Sign the sheet.", "pose": "gesture"}]},
   "vesselTestFit": {"title": "The test fit", "from": "Taavek", "gist": "The new impeller went into its housing on the bench and spun true. Taavek said a long word in Veyli, then: \"Good. Very good. The round one.\"", "lines": [{"who": "taavek", "text": "Now. In it goes. Slowly. You turn it.", "pose": "gesture"}, {"who": "taavek", "text": "Ah. Ah!", "pose": "listen"}, {"who": "taavek", "text": "No common word for this. In Veyli, it is long. It means: good, and also, I will tell everyone.", "pose": "laugh"}, {"who": "taavek", "text": "Good. Very good. The round one.", "pose": "nod", "to": "you"}, {"choice": [{"text": "We made it together.", "flavour": "share", "rel": {"taavek": 1}, "reply": {"who": "taavek", "text": "Together. Yes. Your hands, my drawing. Good trade.", "pose": "nod"}}, {"text": "Tell everyone, then.", "flavour": "cheer", "rel": {"taavek": 1}, "reply": {"who": "taavek", "text": "I will! First my ship. Then everyone. Then everyone again.", "pose": "laugh"}}]}, {"who": "taavek", "text": "Now I pack it. Carefully. Like an egg. A very hard egg.", "pose": "laugh"}]},
+  "veyliDinner": {"title": "The Veyli dinner", "from": "Captain Odile Marrow", "gist": "The Captain's formal dinner for the Veyli, in her quarters: eight at the table, Brennan's spiced grains, and a toast from the Speaker. Your chair at the foot was kept for you.", "lines": [{"who": "marrow", "text": "There you are. The foot of the table, facing me. By Wren custom the newest hand sits there.", "pose": "gesture", "to": "you"}, {"who": "teshavi", "text": "Captain. Among my people, the youngest at the table is asked the first question. It keeps the old ones humble."}, {"who": "marrow", "text": "Then we're in good company. Speaker, the first question is yours.", "pose": "nod"}, {"who": "teshavi", "text": "I give it to Moleth. Moleth has been holding it since the shuttle. One question. Only one."}, {"who": "moleth", "text": "Only one! Then: what do you miss most, from before the ship?", "pose": "listen", "to": "you"}, {"choice": [{"text": "Home cooking. Though this is close.", "rel": {"moleth": 1, "marrow": 1}, "reply": {"who": "moleth", "text": "Close! I will write that down. The Chef will be pleased. Or will she pretend not to be?", "pose": "laugh"}}, {"text": "The sky. A real one, with weather in it.", "rel": {"moleth": 1, "teshavi": 1}, "reply": {"who": "teshavi", "text": "We have a word for that. The roof you were born under. Your ship is a good roof also.", "pose": "nod"}}, {"text": "Nothing yet. I'm too busy learning this one.", "rel": {"moleth": 1, "vance": 1}, "reply": {"who": "vance", "text": "Accurate. I've seen the logs.", "pose": "nod"}}]}, {"who": "ithra", "text": "Door's shut. Good."}, {"who": "kesrin", "text": "Ithra says that at every dinner. It is a compliment. The highest.", "pose": "laugh"}, {"who": "saruth", "text": "Speaker, Chef Brennan cooked tonight. She has been tasting the sauce since five."}, {"who": "teshavi", "text": "Then we must eat it slowly. Captain: to the Wren, and to the roof she keeps over all of us.", "pose": "gesture"}, {"who": "marrow", "text": "To the Wren, and to our guests. Now eat, everyone, before Brennan comes up to ask why not.", "pose": "laugh"}]},
 };
 // ---- END MEETINGS ----
 // ---- BEGIN TRADITIONS (generated by content_gen.py from content/: never hand-edit; edit content/ and re-run it) ----
@@ -46145,6 +46164,7 @@ function eventsTick() {
   eventHelpKeep();                                       // the storm update S4: your prep jobs noted as they're done (inert while off)
   eventsDress(now);                                      // its dressing and the traces left by past events
   occasionsTick(now);                                    // C10: summons, invitations, progress talks
+  if (typeof vdTick === 'function') vdTick(now);         // the Veyli dinner's arrow to your chair (V-1, slot 'Visit dinner')
   if (REC_DECK) { recShowCue(now); recMyTalk(now); }    // the auditorium's show state for rec engineer B's recShow; your own talk's ask (0.83.1, RA)
 }
 // the auditorium's state for its dressing (the film screen down, the house lights, the stage pools: rec engineer B's
@@ -47481,7 +47501,8 @@ function occasionAdd(id, at, quiet, len) {
   if (!o || SHIP.occasions.some(x => x.key === key)) return null;
   const r = { id, key, at, len: len || o.len, deck: o.deck, room: o.room, by: o.by, kind: o.kind, status: 'asked' };
   SHIP.occasions.push(r);
-  if (!o.chance && typeof apptAdd === 'function') apptAdd({ id: key, with: [o.by, ...(o.with || [])], at, len: o.len, where: o.deck + '|' + o.room, kind: o.kind, status: 'yes', by: o.by, title: o.title });
+  if (!o.chance && typeof apptAdd === 'function') { const a = apptAdd({ id: key, with: [o.by, ...(o.with || [])], at, len: o.len, where: o.deck + '|' + o.room, kind: o.kind, status: 'yes', by: o.by, title: o.title });
+    if (a && o.places && !a.places) a.places = { ...o.places }; if (a && o.early) a.early = o.early; }   // each guest's own chair, and `early`: they come that many minutes before it starts (section 14's apptWhere), so they're seated when it does; your Schedule keeps its time (the Veyli dinner, V-1)
   if (o.mail && typeof mailSend === 'function') mailSend({ at: Math.min(shipNow(), at), from: o.mail.from, subject: o.mail.subject, body: evText(o.mail.body, r), quiet: !!quiet });
   return r;
 }
@@ -50842,6 +50863,72 @@ function friText(kind, k = 0) { const L = typeof LINES !== 'undefined' && LINES[
   SHIP_TRADITIONS.push(FRI_ADDRESS);
   if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // anything planned before now is planned again, with the address
 })();
+
+// ---- slot: Visit dinner (section 18; EV2 for lead 45, V-1 on plans/backlog-1.0-final.md: "Formal dinner", the user). New code of this seat's goes here ----
+// The visit's Thursday dinner, seated (it was only the galley's 10 meals for 19:00): an occasion like the Captain's table.
+// 19:00-20:15 on the visit's third day (Day 18), the Captain's quarters: everyone's appointment brings them to their own
+// chair (o.places), the door opens for them and for you, the scene (content/meetings/veyliDinner.meet) plays when you're
+// in the room, its gist by Mail if you're not. The Captain at the north end, the Speaker on her right (west), Saruth on
+// her left; Vance and Kesrin, Moleth and Ithra (the west side, facing the door); you at the south end, facing her.
+// The Mail that morning; a level 1 arrow to your chair from 18:45; the food on the table 18:45-20:15 (DECK_DRESS
+// veyliDinnerTable, 3 draw calls, Deck 2 only). A hold in EV_BEATS keeps the guard's other scenes (the Senior Officer toast) off those minutes.
+// Off (VISIT_DINNER_ON false): the Thursday as before
+const VISIT_DINNER_ON = EVENTS_ON && EV_SWAP_ON;         // the user's "Formal dinner" (2026-10-29, via lead 45); needs the visit in its agreed place (the swap)
+const VD = { at: 1140, len: 75, early: 10, arrow: 1125, you: '2-captable-6',   // early: the diners come to their chairs from 18:50, so the table is full at 19:00 (RV26's note 1); the appointment itself is 19:00
+  places: { marrow: '2-captable-5', teshavi: '2-captable-7', saruth: '2-captable-1', vance: '2-captable-2', kesrin: '2-captable-8', moleth: '2-captable-4', ithra: '2-captable-3' } };
+// the dinner's day: the visit's third (its start day in the calendar's plan, + 2), only while it runs for real. Pure
+function vdDay() {
+  const V = SHIP_EVENTS.diplomatic; if (!VISIT_DINNER_ON || !V || V.draft) return null;
+  const r = evCalPlan().find(x => x.id === 'diplomatic'); return r ? r.day + 2 : null;
+}
+if (VISIT_DINNER_ON) {
+  const day = (EV_CALENDAR.find(r => r.id === 'diplomatic') || {}).day;
+  // the hold's day is the calendar's (EV_BEATS rows are fixed at load); vdDay() reads the calendar's plan, which differs
+  // only if the visit itself ran late (RV26's note 4)
+  if (day) EV_BEATS.push({ id: 'veyliDinner', kind: 'beat', day: day + 2, at: [VD.at - 15, VD.at + VD.len] });   // 18:45-20:15 on Day 18 (a 'beat': kind 'captain' would close the whole day to the Captain's other scenes, the 16:00 summons too)
+  const w = (k, f) => evWord('event.diplomatic.dinner.' + k) || f;
+  OCCASIONS.veyliDinner = { title: w('title', 'The Veyli dinner'), kind: 'invite', by: 'marrow', with: Object.keys(VD.places).filter(id => id !== 'marrow'), deck: 2, room: 'C',
+    at: VD.at, len: VD.len, early: VD.early, script: 'veyliDinner', places: VD.places, due: d => d === vdDay(),
+    mail: (m => ({ from: 'Captain Odile Marrow', subject: m.split(' | ')[0], body: m.split(' | ').slice(1).join(' | ') }))(w('mail', 'Dinner for our Veyli guests | Tonight, 19:00, my quarters, Deck 2. By Wren custom the newest hand aboard sits at a formal table: you. Your chair is at the foot, facing mine. Dress uniform.')) };
+  if (!MEETING_SCRIPTS.veyliDinner) MEETING_SCRIPTS.veyliDinner = { title: 'The Veyli dinner', from: 'Captain Odile Marrow', stub: true,
+    gist: 'The Captain\'s formal dinner for the Veyli, in her quarters: eight at the table and a toast from the Speaker. Your chair at the foot was kept for you.',
+    lines: [{ who: 'marrow', text: 'There you are. The foot of the table, facing me. Sit.', to: 'you' }, { who: 'teshavi', text: 'Captain. To the Wren.' }] };
+  // the food on the table (section 4d's DECK_DRESS: merged by colour, no shadows, colours through col(), no R()): a bowl
+  // of Brennan's spiced grains on each of the eight plates, a sprig on each, two serving dishes on the runner between
+  // the candles. The table's own frame (KIT.diningTable, placed at 2.3, 6.4 in room C, facing north)
+  DECK_DRESS.veyliDinnerTable = { deck: 2, what: 'the Veyli dinner served on the Captain\'s table', make(g) {
+    const s = dressAt(g, 'C', 'floor', 2.3, 6.4), plates = [[-.492, -1], [-.492, 0], [-.492, 1], [.492, -1], [.492, 0], [.492, 1], [0, -1.335], [0, 1.335]];
+    const dome = (r, c, x, y, z) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), dressMat(c)); m.scale.y = .45; m.position.set(x, y, z); s.add(m); return m; };
+    for (const [x, z] of plates) {
+      const b = new THREE.Mesh(new THREE.CylinderGeometry(.07, .05, .04, 14), dressMat('#e8dfcc')); b.position.set(x, .825, z); s.add(b);   // the bowl, its foot above the plate's top (.802)
+      dome(.06, '#c98a3a', x, .845, z);                  // the grains, a low mound from the bowl's rim
+      const h = new THREE.Mesh(new THREE.SphereGeometry(.016, 6, 4), dressMat('#5f8f3a')); h.position.set(x + .012, .868, z - .01); s.add(h);   // the herbs
+    }
+    for (const z of [-.3, .3]) {                         // the serving dishes, on the runner (its top .825) between the candles
+      const d = new THREE.Mesh(new THREE.CylinderGeometry(.12, .1, .04, 16), dressMat('#e8dfcc')); d.position.set(0, .848, z); s.add(d);
+      dome(.1, '#c98a3a', 0, .868, z);
+    }
+    return { t: w('tap.title', 'The Veyli dinner'), x: w('tap', 'Veyli spiced grains with garden herbs, plated like a painting. Brennan\'s best china, too.'), floor: ['C', 2.3, 6.4], y: .87, w: .4, h: .1, d: .9 };
+  } };
+  SHIP_EVENTS.diplomatic.dressing = { ...SHIP_EVENTS.diplomatic.dressing, escalation: [{ id: 'veyliDinnerTable', at: [2, VD.at - 15, VD.at + VD.len] }] };
+}
+// once a ship minute in play (section 18's eventsTick): the level 1 arrow to your chair from 18:45 to the dinner's end;
+// in the room from 18:55, you take your chair and dinner is served (once: the Captain's chairs are hers, so a tap on
+// one doesn't sit you, section 15's sitTap). Eaten to the dinner's end (RV26's note 2: you stood up at 19:31), fed as a meal
+// from the servery feeds you; tap to get up, as at any meal
+function vdTick(now) {
+  if (!VISIT_DINNER_ON) return;
+  const q = SHIP.occasions.find(x => x.id === 'veyliDinner' && x.status === 'asked'), f = q && (q.f || (q.f = {}));
+  if (q && !f.sat && now >= q.at - 5 && now < q.at + q.len - 10 && deckDef.num === 2 && roomAt(...player.here()) === 'C' && typeof actStart === 'function') {
+    f.sat = 1; actStart('eat', VD.you, { title: evWord('event.diplomatic.dinner.title') || 'The Veyli dinner', fed: true, dish: GALLEY_EV_DISH.veyli, pose: 'sit' });
+    if (ACT && ACT.placeId === VD.you) Object.assign(ACT.def, { mins: Math.max(20, Math.round(q.at + q.len - now)), done: evWord('event.diplomatic.dinner.done') || 'The plates are cleared. Brennan looks in, pretending not to check.' });
+  }
+  if (typeof guideAsk !== 'function') return;
+  const r = q && !q.met ? q : null;
+  if (r && now >= r.at - (VD.at - VD.arrow)) guideAsk({ id: 'vd:dinner', level: 1, owner: 'EV2 (V-1)', from: r.at - (VD.at - VD.arrow), until: r.at + r.len,
+    goal: () => ({ deck: 2, room: 'C', place: VD.you, label: evWord('event.diplomatic.dinner.ptr') || 'The Veyli dinner: your chair, the Captain\'s quarters' }), done: () => !!r.met || r.status !== 'asked' });
+}
+// ---- end of slot: Visit dinner ----
 
 // ---- slot: Fridays builder (section 18f). New code of this seat's goes here, above the end line (plans/owners.md) ----
 // ---- the speech (part C, turn 6): the Captain's words, line by line, from the baked FRI_ADDRESSES (content/addresses/) ----
