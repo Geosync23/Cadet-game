@@ -23,3 +23,10 @@
 - title_check (TB1's) 61 OK on ced89283: 0 old-deck frames on New game, Start over, Arrive by shuttle; the device's question on top (z 71); Monday 06:00.
 - The same title_check on bc4579aa FAILS the new rows (1 and 2 old-deck frames), so it catches the real flash.
 - Merge with SD3 bc6c6029: the game file merges clean; DEV_NOTES and build-table clash (keep both: TB1's hand-over line + SD3's Music line; both rows).
+- cadet_test vs bc4579aa, run alone: SD3 bc6c6029 ALL IDENTICAL; TB1 ced89283 ALL IDENTICAL; no page errors.
+- Merged game (bc6c6029 + ced89283, game file auto-merged, sha 60786c45...): title_check 61 OK, sound_check title OK.
+
+## Verdicts (2026-10-29 ~22:20 UTC)
+- SD3 title-music-0992 bc6c6029: PASS.
+- TB1 title-0992 ced89283: PASS.
+- To BM21: merge both; only DEV_NOTES (keep TB1's hand-over line + SD3's Music line, drop the old "a hook only" Music text) and the build table (both rows) clash.
