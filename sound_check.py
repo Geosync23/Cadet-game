@@ -596,6 +596,35 @@ CHECKS += [check_r3fx]   # the sound update (SD3), turn 3
 CHECKS += [check_r3hooks]   # the sound update (SD3), turn 4
 CHECKS += [check_r3home]   # 0.99 (SD3-1): the home chime across a reload
 
+def check_title_music(pw, path):
+    """0.99 (SD3): the title screen's track (SND_TITLE, through section 30's SND.title): the three candidates exist and loop
+    (about a minute each, not on the Music app's list); with the title on, the track plays while the ship is held (the
+    context stays running), the hum hushes and the ship's rooms are quiet; off, it fades and the hum comes back"""
+    g = Game(pw, path)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000); g.step(5)
+        pick = g.ev("typeof SND_TITLE !== 'undefined' ? SND_TITLE : 'none'")
+        if not check(pick != 'none', 'title: no SND_TITLE in this build, so nothing was tested'): return
+        tr = g.ev("['titleA', 'titleB', 'titleC'].map(k => { const T = SND.music.TRACKS[k]; return T ? [k, T.time, T.form().reduce((a, x) => a + x.bars, 0) * 4 * 60 / T.bpm] : [k, null, 0]; })")
+        print('  title candidates:', tr)
+        check(all(t[1] == 'Event' and 45 <= t[2] <= 100 for t in tr), 'title: the three candidates exist, each a loop of about a minute')
+        check(g.ev("!SND.music.LIST.some(x => x.tracks.some(t => /^title/.test(t.key)))"), 'title: none of them is on the Music app list')
+        if not pick: print('  title: SND_TITLE is null (silent title)'); return
+        g.ev("SND.log.length = 0; SND.title(true)"); g.step(5)
+        for _ in range(4): g.ev("SND.frame(false)")   # the ship held under the title: run is false
+        st = g.ev("[SND._.state(), SND.titleSnd.list.length, SND.titleSnd.hush, SND.log.map(x => x.name)]"); print('  title on:', st)
+        check(st[0] == 'running' and st[1] == 1 and st[2] is True and ('title' + pick) in st[3], f'title: on, its track plays with the ship held and the hum hushed ({st})')
+        g.ev("(L => { const T = L[0], at = SND.ctx.currentTime + 2; T.endsAt = () => at; })(SND.titleSnd.list)"); g.ev("SND.frame(false)")
+        check(g.ev("SND.titleSnd.list.length") == 2, 'title: the next copy starts before the last ends (a loop with no gap)')
+        g.ev("SND.title(false)"); g.step(3)
+        st = g.ev("[SND.titleSnd.list.length, SND.titleSnd.hush]"); print('  title off:', st)
+        check(st == [0, False], 'title: off, the track fades and the hum comes back')
+        pe = [e for e in g.errors if e.startswith('pageerror')]
+        if pe: check(False, 'title: page errors: ' + ' | '.join(pe[:3]))
+    finally: g.close()
+CHECKS += [check_title_music]   # 0.99 (SD3): the title screen's track
+
 if os.environ.get('SOUND_ONLY'): CHECKS = [c for c in CHECKS if re.search(os.environ['SOUND_ONLY'], c.__name__)]   # run only the named checks (a regex), while building
 with sync_playwright() as pw:
     for c in CHECKS:
