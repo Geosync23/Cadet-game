@@ -2693,7 +2693,10 @@ def part_s5cases(pw, src, tag):
     # P4's first case in Fault notes, by pad
     r.ev("(() => { deviceClose(); const W = SHIP.works; W.op = Object.assign({}, W.op, { 21: ['p4'] }); delete SHIP.flags['case.p4.first']; p4Stage(); const c = caseById(flag('case.p4.first')); if (c) caseShow(c, caseJob(c)); return !!c; })()")
     r.ev("(typeof worksTabAdd === 'function' ? (deviceShow('works'), deviceDo({ app: 'works', do: 'tab', arg: 'faults' }), deviceShow('works')) : deviceShow('faultnotes'))"); r.step(6)
-    sus = s5_pad_to(r, r'^(Seal|Compressor|Bearing|Temperature sensor)')
+    # the suspects are the case's own (its machine depends on which faults the week brought: a cooler's Seal, Compressor,
+    # Bearing, Temperature sensor; a light's Relay, Lamp, Cable; 0.98's walk times moved Day 21's case to a light)
+    words = r.ev("(() => { const c = caseById(flag('case.p4.first')); return c ? c.sus : []; })()") or []
+    sus = s5_pad_to(r, '^(' + '|'.join(re.escape(w[:1].upper() + w[1:]) for w in words) + ')') if words else None
     if not sus: fails.append(f'the D-pad never reached a suspect in Fault notes (focus {r.ev(S5_FOCUS)!r}; device {r.ev("[DEV.open, DEV.app, typeof WORKS_TAB !== \'undefined\' && WORKS_TAB, !!caseById(flag(\'case.p4.first\'))]")})')
     call = s5_pad_to(r, r'^Call it')
     if not call: fails.append('the D-pad never reached Call it')
