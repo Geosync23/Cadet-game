@@ -17016,7 +17016,7 @@ function ixJobStep() {
   const P = SHIP.player, w = P.work && P.work.job === j.id ? P.work : { fitted: [], make: null };
   const need = jobNeeds(j, w, P.carry), name = machineName(m);
   if (need.length && P.carry.length < CARRY_MAX && !(typeof scanFirst === 'function' && scanFirst(j))) {   // (24g's scanFirst: with the scanner, a faulty machine is read before its part is named)
-    const lathe = typeof MAKE_AT !== 'undefined' ? MAKE_AT.find(id => typeof placeById === 'function' && placeById(id)) || null : null;   // the machine you need (FX3, the user's "arrow to the needed machine"): the lathe, not the room
+    const lathe = typeof MAKE_AT !== 'undefined' ? MAKE_AT.find(id => typeof placeById === 'function' && placeById(id) && !(typeof heldBy === 'function' && heldBy(id))) || MAKE_AT.find(id => typeof placeById === 'function' && placeById(id)) || null : null;   // a free lathe first (backlog FX3-2)   // the machine you need (FX3, the user's "arrow to the needed machine"): the lathe, not the room
     if (w.make && w.make.part) return { deck: 5, room: 'f', place: lathe, label: 'Make ' + partList([w.make.part]) + (lathe ? ' at the lathe' : ' in the machine shop') };
     if (need.some(p => SHIP.stores[p] > 0)) { const on = need.filter(p => SHIP.stores[p] > 0), sh = ixShelf(on); return { deck: 5, room: 'r', place: sh.place, label: 'Fetch ' + partList(on) + sh.say }; }
     if (need.some(p => !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p)))) return { deck: 5, room: 'f', place: lathe, label: 'Make ' + partList([need.find(p => !NO_MAKE.has(p))]) + (lathe ? ' at the lathe' : ' in the machine shop') };
