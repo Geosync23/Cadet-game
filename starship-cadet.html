@@ -12036,7 +12036,7 @@ function devHeadsTick(t) {
     devHear(k);
     if (x.kind === 'tradition' && devOnShift() && R.per[x.tkind] !== true && !beam && !mine) { DEV.notes.calendar = (DEV.notes.calendar || 0) + 1; continue; }   // on shift: a quiet badge
     for (let i = HU_Q.length - 1; i >= 0; i--) if (HU_Q[i].key === key) HU_Q.splice(i, 1);   // the start replaces a waiting 'soon'
-    HU_Q.push({ key, stage, at, title: devHuName(x), where: x.where, goal: devItemGoal(x), ...(beam ? { beam: true } : {}) });
+    HU_Q.push({ key, stage, at, title: devHuName(x), where: x.where, goal: devItemGoal(x), ...(beam ? { beam: true } : {}), ...(x.todo ? { todo: true } : {}) });
   }
   for (const a of SHIP.device.appts) if (a && a.kind === 'invite' && a.status === 'asked' && a.by && Number.isFinite(a.at)) {   // 0.72.6 (playtest 2, item 12): an invitation still waiting for your answer reminds you too, like an appointment
     const at = a.at, key = 'invite|' + a.id; if (at - R.ahead > t || at + 3 <= t) continue;
@@ -12057,7 +12057,7 @@ function devHeadsShow(t = shipNow()) {
   if (devHuBusy()) return;
   if (typeof introHoldNudges === 'function' && introHoldNudges()) { const k = HU_Q.findIndex(h => !/^meal\|/.test(h.key)); if (k < 0) return; if (k > 0) HU_Q.unshift(HU_Q.splice(k, 1)[0]); }   // section 21: training day's end, the beam first: a meal's heads-up waits (the patch, #19)
   const h = HU_Q[0], left = Math.max(1, Math.round(h.at - t));
-  DEV.hu = h; DEVICE_SKIN.heads({ text: h.stage === 'soon' ? h.title + (h.beam ? ' starts at the end of shift in the Works department' : ' starts in ' + left + ' min') : h.title + (h.title === 'Your shift' ? ' starts now' : ' is starting'),
+  DEV.hu = h; DEVICE_SKIN.heads({ text: h.todo ? 'To do: ' + h.title : h.stage === 'soon' ? h.title + (h.beam ? ' starts at the end of shift in the Works department' : ' starts in ' + left + ' min') : h.title + (h.title === 'Your shift' ? ' starts now' : ' is starting'),
     where: h.beam && h.stage === 'soon' ? '' : h.where, soft: h.stage === 'start', go: !!h.goal });
 }
 function devHeadsReset() { SHIP.device.calendarRemind.heard = []; HU_Q.length = 0; DEV.hu = null; DEVICE_SKIN.heads(null); }   // a new game, and the checks
@@ -49599,7 +49599,7 @@ function vesselItems(d) {
   if (k === 2 && M['vessel:job'] && !M['vessel:part'] && (M['vessel:step'] | 0) >= 1) row(600, 805, 'tracked.step.' + (M['vessel:step'] | 0), 'Taavek\'s part, in the machine shop', 'the machine shop, Deck 5', 5, 'f');
   if (k === 2 && M['vessel:part'] && !M['vessel:testfit']) row(810, 870, 'tracked.testfit', 'Taavek\'s part: the test fit, 13:30', 'the machine shop, Deck 5', 5, 'f');
   if (k === 2 && !M['vessel:home']) row(VESSEL.leave - 15, VESSEL.leave, 'sched.home', 'Taavek goes home, 15:00, the shuttle bay', 'the Tern\'s ramp, the shuttle bay, Deck 5', 5, 'S');
-  if (k >= 3 && M['vessel:sketch'] && !M['vessel:shelved']) row(720, 1439, 'tracked.shelf', 'Put Taavek\'s sketch on your shelf', 'your cabin, Deck 4', 4, null);
+  if (k >= 3 && M['vessel:sketch'] && !M['vessel:shelved']) { row(720, 1439, 'tracked.shelf', 'Put Taavek\'s sketch on your shelf', 'your cabin, Deck 4', 4, null); out[out.length - 1].todo = true; }   // a to-do, not an event: its heads-up says so (backlog RV23-3)
   return out;
 }
 // the crowd's lines over their heads (the comet's way: a line every 4 ship minutes while you're in the room, in order,
