@@ -49032,7 +49032,7 @@ function cometTick(now) {
   if (m >= 1325 && !e.mine.named) { e.mine.named = 1; e.mine.namedBy = 'sato'; }   // nobody named it at the card: the crew shout names and Sato picks the one about the storm
   if (m >= 1320 && m < 1335 && lounge && joined && !e.mine.knot && !(IX_GOAL && IX_GOAL.comet)) {
     const label = cometW('knot.tip') || 'Tap Saruth to tie a comet knot';
-    if (!IX_GOAL || IX_GOAL.tj) setGoal({ deck: 3, crew: 'saruth', label, comet: 'knot' });
+    if (!IX_GOAL || IX_GOAL.tj || typeof NEED_GOAL !== 'undefined' && NEED_GOAL && IX_GOAL.label === NEED_GOAL.label) setGoal({ deck: 3, crew: 'saruth', label, comet: 'knot' });   // over a need's marker too (backlog RV18-C1: the bunk's held it at 22:02); the need's comes back after ixTip('t:comet:knot', label + '. To the Veyli a comet is a guest crossing their sky.');
   }
   if ((m >= 1335 || e.mine.knot) && IX_GOAL && IX_GOAL.comet === 'knot') clearGoal();
 }
