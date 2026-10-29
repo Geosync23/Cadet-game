@@ -190,3 +190,14 @@ Queue (lead 45, 2026-10-29): 1. TB1 title screen claude/title-099; 2. EV2 seated
 - pix_rb.py, 7 scenes x 2 views (Decks 1, 2, 3, 4 night, 5, 7): 0 px in all 14; draw calls 3-25 fewer per scene.
 - deck_check (the branch's own) OK; Deck 4 memory flat (322 geometries, 39 textures each round trip).
 - **VERDICT RB1 turn 4 e7bce5a: PASS.**
+
+## TB1 0.99.1-tb.1 claude/title-0991 812dd3a (the title's tap-to-wake gate; base integration 6d5684ba = 0.99.0 live)
+- sha256 1b4cba91... matched. Code read: page and section 30 only; asleep shows only #tiWake; the first script's wake()
+  only wakes (data-awake), never picks; section 30's click/key/pad wake first and choose nothing (#tiWake has no
+  data-v and the click handler checks it); pointerdown skips music while asleep (the click wakes); woken before load ->
+  titleMusic() + SND.start() at boot (the page already had a user gesture). Off/webdriver paths untouched.
+- cadet vs 6d5684ba ALL IDENTICAL (1-level noise only, run beside a probe). title_check (branch's) 55 ok, TITLE CHECK OK.
+- tm_gate.py (real flow, ?title): loaded "asleep", no music, ship held; one tap: class "fx" (awake), title still up,
+  TITLE.music on, titleC playing, hum gain 0, nothing chosen; NEW GAME: title gone, track cleared, hum back to 1.
+- Known limit (TB1's note, not blocking): a pad press may not count as a sound gesture in Chromium.
+- **VERDICT title-0991 812dd3a: PASS.**
