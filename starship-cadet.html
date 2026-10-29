@@ -65082,8 +65082,9 @@ function pu4DevNext() {                                  // the Dev career arrow
   const now = Math.floor(shipNow()), d = worksDay(now), abs = (dd, m) => (dd - 1) * 1440 + m;
   if (!T) { const t3 = puT3(); if (W.tier !== 3 || t3 && !t3.toast || !ladderNeeds((ladderRow('t4') || {}).needs, W)) return null;
     for (let dd = Math.max(d, PU4.offerFrom); dd < Math.max(d, PU4.offerFrom) + 8; dd++) { let wd = 0; try { wd = weekday(dd); } catch (e) { wd = 0; }
-      const at = playerShiftOn(dd) ? PU4.seekAt : wd === 6 ? PU4.dinnerAt : null; if (at === null || abs(dd, PU4.seekBy) <= now) continue;
-      return { when: Math.max(now, abs(dd, at)), soon: 15, g: at === PU4.dinnerAt ? { deck: 3, room: 'M', label: 'The Tier 4 offer: Calder at Sunday dinner' } : { deck: 5, room: 'w', label: 'The Tier 4 offer: Calder comes to find you' } }; }
+      const work = playerShiftOn(dd), night = !work && typeof p5NightOf === 'function' ? p5NightOf(dd) : null;   // pu4OfferTick's rule (the 0.99 balance pass): a night day from the night's start, a day off before a workday at dinner
+      const at = work ? PU4.seekAt : night ? night.from - (dd - 1) * 1440 : wd === 6 || playerShiftOn(dd + 1) ? PU4.dinnerAt : null; if (at === null || abs(dd, PU4.seekBy) <= now) continue;
+      return { when: Math.max(now, abs(dd, at)), soon: 15, g: at === PU4.dinnerAt && !work && !night ? { deck: 3, room: 'M', label: wd === 6 ? 'The Tier 4 offer: Calder at Sunday dinner' : 'The Tier 4 offer: Calder at dinner' } : { deck: 5, room: 'w', label: 'The Tier 4 offer: Calder comes to find you' } }; }
     return null; }
   if (!T.passed) { const j = pu4TestJob(); if (j && j.claimedBy === 'you') { let g = null; try { g = typeof ixJobGoal !== 'undefined' && ixJobGoal ? { ...ixJobGoal } : null; } catch (e) { g = null; } return { when: now, g: g ? { ...g, label: 'Your Tier 4 test · ' + g.label } : { deck: 6, room: 'E', label: 'Your Tier 4 test' } }; }
     return { when: abs(T.day, PU4_T.jobAt), soon: 30, g: { deck: 5, item: /job board/i, room: 'w', label: 'Your Tier 4 test job, at the board' } }; }
