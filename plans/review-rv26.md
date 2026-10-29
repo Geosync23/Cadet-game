@@ -139,3 +139,18 @@ Queue (lead 45, 2026-10-29): 1. TB1 title screen claude/title-099; 2. EV2 seated
 - **VERDICT nights-dayarrow 79a87ea: PASS.**
 - AS1 (11:52): the whole arrows_check on nights-dayarrow 79a87eac (sha matched), alone: ARROWS CHECK OK, 0 FAIL (2629 s).
   Supports the PASS.
+
+## BAL2 0.99 balance pass, claude/balance-099 96dd584 (whole diff vs 610ad7f1; session_01GKuymm7ApobKpq9JW9FJgF)
+- Code read: NEED_DRAIN hunger asleep 6 -> 4, fitness 1.4/.35 -> .9/.3; Lonely adds task .95; the gym tip "every other
+  day"; eventJoin leisure +25. pu4ResWhen: the old loop is pu4ResNext unchanged; when its time falls after the day after
+  the test (days off next), the result is the test day's 13:30 (pu4ResEve = 12:30 + 60), before the Friday address.
+  pu4ResLate drives the "this afternoon" words (new keys only; old keys unchanged), set after T.passed and T.day, so in
+  order. pu4Script's stand-in names the real test day (pu4TestDay(today), the same rule pu4Offered sets T.day with); no
+  writer pu4.offer scene exists, so the stand-in is what plays. pu4OfferTick and pu4DevNext as in 610ad7f1.
+- Checks (each build's own): cadet vs 610ad7f1 ALL IDENTICAL; career_check OK (busy: "Relied on" from Day 4, printed,
+  backlog 12/17 closed); career_check --s6 OK (late Trusted: D22 trusted, t4 day 26, res 26, badge 27, T4 from D26);
+  player_check OK; promo_beats_check OK.
+- Notes (not blocking): the stand-in says the weekday even when the test is tomorrow ("Tuesday", not "tomorrow"); a
+  Friday test's badge is a Saturday 16:30 (the lead's call, as RV25 noted); the ".eve" lines are placeholders until a
+  writer words them.
+- **VERDICT BAL2 96dd584: PASS** (the full six-runner round still needed before the merge, as BAL2 says).
