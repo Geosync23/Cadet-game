@@ -60,3 +60,15 @@ At Day 1 22:35; the breakfast, talk and job board steps before it pass. day alon
 | 7a2ae7d2 NEW | FAIL (in G1's rest, and alone, 476 s) |
 
 Not fixed here (neither is R3's to fix): reported to BM20 and lead 45 as each was found.
+
+## Follow-ups (BM20's and lead 45's asks), each alone on the machine
+
+| Build | Part | Result |
+|---|---|---|
+| hedge (d): claude/staging-098d 37b858b4, game sha256 81c07a05...59b1 (matches; 0.97.0 + the sound tick + OP1's walk fix + check fixes, no RB1 turn 3) | controller day | OK, exit 0 (480 s) |
+| the same | controller walk | OK, exit 0 (188 s) |
+| the same, its fixed controller_check | controller s5cases | OK, exit 0 (34 s) |
+| claude/staging-pad 10865180 (game = 7a2ae7d2's, sha256 22f8939d...918f), its fixed controller_check (check-only fix) | controller s5cases | OK, exit 0 (35 s) |
+
+So NEW 1 (s5cases) was the check's, now fixed. NEW 2 (day bedtime) remains with RB1's render turn 3 (RB1 has the repro);
+the hedge build without that turn passes day, walk and s5cases.
