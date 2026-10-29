@@ -76106,7 +76106,8 @@ function titleKey(e) {                                     // keys (window, capt
   e.stopImmediatePropagation(); if (TITLE.closing) return;
   titleMusic();
   const b = titleBtns(), i = b.indexOf(titleOnBtn());
-  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); titleFocus(b[(i + (e.key === 'ArrowDown' ? 1 : b.length - 1)) % b.length]); }
+  const dn = e.key === 'ArrowDown' || e.key === 'Tab' && !e.shiftKey;   // Tab stays on the title's lines (the HUD under it never takes the focus)
+  if (dn || e.key === 'ArrowUp' || e.key === 'Tab') { e.preventDefault(); titleFocus(b[(i + (dn ? 1 : b.length - 1)) % b.length]); }
   else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (b[i]) titleAct(b[i].dataset.v); }
   else if (e.key === 'Escape') { e.preventDefault(); if (TITLE.ask) titleAct('keep'); }
 }

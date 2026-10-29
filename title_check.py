@@ -138,6 +138,7 @@ with sync_playwright() as pw:
 
     # ---- New game with a save: the question ----
     pg = page(); with_save(pg, MON); go(pg, ON, '?title'); ready(pg)
+    pg.keyboard.press('Tab'); pg.keyboard.press('Tab'); check(js(pg, "document.activeElement.id") == 'tiSaves', 'Tab moves along the title\'s lines only')
     pg.click('#tiNew'); check(js(pg, "!document.getElementById('tiAsk').hidden && document.getElementById('tiMenu').hidden"), 'New game asks: ' + js(pg, "document.querySelector('#tiAsk p').textContent"))
     check(js(pg, "document.querySelector('#title button.on').id") == 'tiKeep', 'the question: KEEP PLAYING highlighted first')
     pg.keyboard.press('Escape'); check(js(pg, "document.getElementById('tiAsk').hidden") and up(pg), 'Escape is Keep playing')
