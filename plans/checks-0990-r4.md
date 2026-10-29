@@ -19,4 +19,6 @@ title_check, day_check 6, 8.
 | day_check 8 | PASS | 466 s | DAY CHECK OK |
 | interactions_check (whole, alone) | PASS | 2516 s | INTERACTIONS CHECK OK |
 
-No FAILs, so no OLD comparison runs were needed. Result: **R4: OK**.
+appt_check prints 4 `FAIL planted ...` lines (scope x3, teach-me x1): those are its own planted-fault runs on a broken copy, proving it catches them; OLD prints the same 4 and the check ends OK on both.
+
+No real FAILs, so no OLD comparison runs were needed. Result: **R4: OK**.
