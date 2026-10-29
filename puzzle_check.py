@@ -1215,7 +1215,9 @@ P6FIRST = r"""(() => {
   out.view = document.getElementById('devBody').textContent.includes('Missing'); deviceClose();
   const wrong = c.sus.find(s => s !== c.cause); caseCall(c.id, wrong); let n = jobStops(j).length; for (let k = 0; k < n; k++) jobStepDone(j.id, k);
   out.wrongFit = { done: !!j.workDone, known: c.known.includes(wrong) };
-  const sv = JSON.stringify(SHIP.works.cases); out.saveBytes = sv.length; out.saveSame = JSON.stringify(caseClean(JSON.parse(sv))) === JSON.stringify(caseClean(SHIP.works.cases));
+  const sv = JSON.stringify(SHIP.works.cases); out.saveSame = JSON.stringify(caseClean(JSON.parse(sv))) === JSON.stringify(caseClean(SHIP.works.cases));
+  out.saveBytes = JSON.stringify(Object.assign({}, SHIP.works.cases, { open: SHIP.works.cases.open.filter(x => x.id === c.id) })).length;   // this case and the shared record: another case a fault opened meanwhile (the week's wear follows the crew's plans: 0.98's walk times opened a second p6 by 09:05) isn't this one's size
+  out.others = SHIP.works.cases.open.filter(x => x.id !== c.id).map(x => x.kind);
   caseCall(c.id, c.cause); n = jobStops(j).length; for (let k = 0; k < n; k++) jobStepDone(j.id, k);
   out.fixed = !!j.workDone; turnInJob(j.id); caseTick(); out.closed = !caseById(c.id); out.trained = W.tr.p6;
   worksSay = ws; worksSayAll = wa; Object.assign(W, keep); C.open = [];
