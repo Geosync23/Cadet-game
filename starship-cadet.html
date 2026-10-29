@@ -75254,10 +75254,11 @@ const SND = (() => {
     }
     const SHAPED = ['tea', 'lunch', 'porthole', 'watch', 'lullaby', 'latenight', 'deepspace', 'comet'];
     SHAPED.forEach(shaped);
-    ['titleA', 'titleB', 'titleC'].forEach(shaped);   // the title's candidates: a short form, looped by S.title (the same 16 bars round again)
+    ['titleA', 'titleB', 'titleC'].forEach(shaped);   // the title's candidates: a short form, looped by S.title (the same bars round again: 16 for A and B, 13 for C)
+    // titleC (the user's pick): its singing line comes in on bar 2, about 4 s in, 5 s after the wake tap (0.99.2, the user: "Melody should be in at 5 seconds"), over the hum and pulse; the sequence layers in after; a 13-bar loop, about 47 s
     TRACKS.titleA.form = () => [sec('Boot', 'A', 2, ['sPad', 'sStars'], 1), sec('Ticking', 'A', 6, ['sPad', 'sSeq', 'sStars'], 1), sec('Turn', 'B', 4, ['sPad', 'sSeq', 'sChime'], 2), sec('Settle', 'A', 4, ['sPad', 'sSeqSlow', 'sStars'], 1)];
     TRACKS.titleB.form = () => [sec('Glow', 'A', 4, ['sPad', 'sSwell'], 1), sec('Lines', 'A', 4, ['sPad', 'sSwell', 'sSeqSlow', 'sChime'], 1), sec('Lift', 'B', 4, ['sPad', 'sStars', 'sSeqSlow'], 2), sec('Fade', 'A', 4, ['sPad', 'sStars'], 1)];
-    TRACKS.titleC.form = () => [sec('Hum', 'A', 2, ['sPad', 'sPulse'], 1), sec('Log', 'A', 6, ['sPad', 'sPulse', 'sSeq'], 1), sec('Entry', 'B', 4, ['sPad', 'sPulse', 'sSeq', 'sSing'], 2), sec('Rest', 'A', 4, ['sPad', 'sStars'], 1)];
+    TRACKS.titleC.form = () => [sec('Hum', 'A', 1, ['sPad', 'sPulse'], 1), sec('Entry', 'B', 4, ['sPad', 'sPulse', 'sSing'], 2), sec('Log', 'A', 4, ['sPad', 'sPulse', 'sSeq', 'sSing'], 2), sec('Rest', 'A', 4, ['sPad', 'sStars'], 1)];
     if (SND_R3_ON) {   // the sound update, turn 1: the event tracks take the reshaped form (phrases, a moving bass), as the comet does
       Object.assign(PARTS, {
         sDrone: c => { if (c.bar % 4 === 0) { SX.swell(c.t, c.root, c.s * c.beats * 4, 0.06, c.out); SX.swell(c.t, c.root + 7, c.s * c.beats * 4, 0.03, c.out); } },   // the home note and its fifth, held (the Veyli)
