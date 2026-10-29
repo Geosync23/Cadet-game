@@ -48056,7 +48056,7 @@ DECK_DRESS.birthdayTable = { deck: 3, what: 'a birthday: the cake on the head of
   cy(.22, .02, '#e6e0d3', .783); cy(.16, .13, '#f2d7a0', .858); cy(.165, .03, '#f7f1e8', .917);   // the plate, the cake, the icing (as EV_KIT's)
   for (const [dx, dz] of [[-.06, -.03], [.05, -.04], [0, .06]]) { const c = new THREE.Mesh(new THREE.CylinderGeometry(.008, .008, .07, 6), dressMat('#c45a3f')); c.position.set(x + dx, .967, z + dz); s.add(c);
     const fl = new THREE.Mesh(new THREE.SphereGeometry(.012, 8, 6), dressMat('#ffd27a')); fl.position.set(x + dx, 1.01, z + dz); s.add(fl); }   // three candles and their flames
-  return { t: 'Birthday cake', x: 'A lemon cake with white icing and three candles, on the head of the long table. Tap it for a slice.', floor: ['M', x, z], y: .9, w: .5, h: .3, d: .5, tag: { bdayCake: true } };
+  return { t: 'Birthday cake', x: 'A lemon cake with white icing and three candles, on the head of the long table. Tap it for a slice.', floor: ['M', x, z], y: .9, w: .5, h: .3, d: .5, tag: { bdayCake: true, onTop: true } };   // onTop: pick() takes it over the long table it stands on (backlog PB1-1)
 } };
 let BDAY_LIVE = null, SLICE = null, BDAY_SLICE_DAY = null;   // the party's bubbles now; the slice in your hand { d, from }; the day you had one
 function bdayFrame() {
@@ -70837,7 +70837,9 @@ ray.camera = camera;
 function isShown(o) { while (o) { if (!o.visible) return false; o = o.parent; } return true; }
 function pick(cx, cy) {
   ndc.set(cx / innerWidth * 2 - 1, -(cy / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera);
-  return ray.intersectObjects(pickables, true).find(h => !h.object.isSprite && !h.object.isPoints && isShown(h.object) && !(h.object.userData.walker && h.object.userData.walker.isPlayer));
+  const hs = ray.intersectObjects(pickables, true).filter(h => !h.object.isSprite && !h.object.isPoints && isShown(h.object) && !(h.object.userData.walker && h.object.userData.walker.isPlayer));
+  const top = hs.length > 1 && hs.find(h => h.object.userData.item && h.object.userData.item.onTop);   // a small thing standing on furniture (item.onTop: the birthday cake) wins over the furniture's own box around it (backlog PB1-1)
+  return top && top.distance - hs[0].distance < 1.2 ? top : hs[0];
 }
 // the two tiles either side of a door edge, with the angle you face it from: [i, j, angle]
 const doorSides = e => e.horiz ? [[e.i, e.j - 1, Math.PI], [e.i, e.j, 0]] : [[e.i - 1, e.j, -Math.PI / 2], [e.i, e.j, Math.PI / 2]];
