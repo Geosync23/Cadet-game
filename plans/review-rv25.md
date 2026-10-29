@@ -129,3 +129,4 @@ browsers fine; the user wants faster turnarounds.
 ## BAL2 0.99 balance pass, claude/balance-099 2b46f96e (session_01GKuymm7ApobKpq9JW9FJgF): PASS (~03:5x, BAL2, lead 45)
 - cadet vs 0.97.0 ALL IDENTICAL; career_check OK, --s6 OK (late Trusted D22 -> test/result D26, badge D27); player_check OK;
   promo_beats OK. Notes: pu4DevNext (Dev arrow) keeps the old offer timing; Day 26 full and a Saturday badge (lead's call).
+- 03:29 lead 45: hold BAL2 2b46f96e (my PASS was already sent): the user dropped the night-day retest so late players promote Day 29-30; a new tip comes, review that.
