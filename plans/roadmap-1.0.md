@@ -25,3 +25,8 @@ Decisions (the user, Oct 28 ~9:20 PM ET):
 - 0.98: any visual change from turns 3-4 shown to the user as a before/after picture first; only incredibly minor changes accepted.
   No 60 fps cap. No battery saver. Backlog 12 (career "Relied on" before Day 5) NOT fixed in 0.98: the user will balance it in 0.99
   (it stays known-old until then). FX24-2: yes, book walking time only for long walks to a tradition.
+
+Title screen B build plan: plans/title-screen-plan.md on claude/title-screen-plan (TS1): new section 30 behind TITLE_ON
+(+ mirrored TITLE_EARLY), never shown under webdriver/nosave/dev, ~2 working days + a sound seat for 2-3 music candidates.
+Questions for the user before building (ask at the 1.0 patch): keep Saves on the menu? a "tap to log in" gate so music starts
+before choosing (TS1: no)? "Back to title" in Settings later?
