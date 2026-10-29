@@ -5,7 +5,7 @@ Session session_01GKuymkDxLVyt4rjtcJxdab, branch `claude/publish-26` (this note 
 ## Pages
 | Page | Link | Version / build | Capabilities | Rule |
 |---|---|---|---|---|
-| Playtest (current, new account) | https://claude.ai/artifact/7hQ14AcwZHCi5EvL1AKiMU | v7 = 0.99.1 (staging-0991 f77c26d9, game 8e4ac545…2d9d), version id 1793304548-4dd2 (v6 = 0.99.0, v5 = 0.98.0, v4 = 0.97.0, v3 = 0.96.0, v2 = 0.95.0, v1 = 0.94.0) | downloads | updated each release |
+| Playtest (current, new account) | https://claude.ai/artifact/7hQ14AcwZHCi5EvL1AKiMU | v7 = 0.99.1 (staging-0991 bc4579aa = f77c26d9 + docs, game 8e4ac545…2d9d), version id 1793304548-4dd2 (v6 = 0.99.0, v5 = 0.98.0, v4 = 0.97.0, v3 = 0.96.0, v2 = 0.95.0, v1 = 0.94.0) | downloads | updated each release |
 | Dev (current, new account) | https://claude.ai/artifact/KEyaHvon6ZaVHHFRdAe18m | v7 = 0.99.1, version id 1793304551-2764 (v6 = 0.99.0, v5 = 0.98.0, v4 = 0.97.0, v3 = 0.96.0, v2 = 0.95.0, v1 = 0.94.0) | downloads | updated each release |
 | Playtest (old account) | https://claude.ai/artifact/3HqM5XiXaHXzgrpq7JbesJ | v7 = 0.93.3 | downloads | old account: can't be updated from here |
 | Dev (old account) | https://claude.ai/artifact/9ZWAgqiZCvkJvVjjhjVkEr | v7 = 0.93.3 | downloads | old account |
