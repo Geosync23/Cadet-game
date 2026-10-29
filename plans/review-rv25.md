@@ -148,3 +148,4 @@ browsers fine; the user wants faster turnarounds.
 - BB1 runs: interactions OK (5732 s); controller a11y/pick/team/touch OK; social OK; day 6 OK; events only FX24-2; arrows
   endgo track OK (e9637f54). **VERDICT BB1: PASS** (~05:4x, BB1, lead 45). FX8-1 swimmer look queued again (no shots).
 - BB1 RV25-1 564b8a50 (sketch shelf row names your cabin's deck and room): PASS on a code read; branch tip 564b8a50 PASS.
+- 05:55 lead 45: RV26 (session_01GKuymjwVsweGh8p9EbTGHU) takes the 0.99 reviews (TB1, EV2, SD3 title music); I keep 0.98 (OP1, RB1), BB1's follow-ups, BAL2's new tip. My TB1/EV2 notes sent to RV26; their queued runs cancelled; swim probe after OP1.
