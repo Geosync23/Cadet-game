@@ -114,3 +114,4 @@ Verdicts (PASS / FIXES) to the builder, lead 43 and BM20 (session_01GKuymiwDEgkw
 render turns 3-4: pixel-identical, or a picture for the user first); OP1 (0.98 walk-estimate fix: FX24-2, FX12-1, TQ1-1);
 SD3 (SD3-2 music cache); BB1 = BT1 session_01GKuymne2zVMSTZjvCCmXKH (0.99 backlog batches, claude/backlog-099). Two
 browsers fine; the user wants faster turnarounds.
+- Base ready: /tmp/rv25/old0970.html (0.97.0, claude/integration 610ad7f1, sha256 0bd1b5b6...). Waiting for the first turn.
