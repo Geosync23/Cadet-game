@@ -30,3 +30,9 @@
 - SD3 title-music-0992 bc6c6029: PASS.
 - TB1 title-0992 ced89283: PASS.
 - To BM21: merge both; only DEV_NOTES (keep TB1's hand-over line + SD3's Music line, drop the old "a hook only" Music text) and the build table (both rows) clash.
+
+## 0.99.3 prep (lead 46: SD3 mess-sound-0993, CH1 chief-0993)
+- Probe plans/rv27-probes/ch_dinner.py WORKTREE [--dawdle]: the build's own intro_check part 8 with a per-frame tracker
+  (card, Calder's pose, metres from her away seat / your-table seat, step, INTRO_UI.calder).
+- 0.99.1 (bc4579aa) baseline, normal and --dawdle: Calder sits through Zeke's cards 0-6, stands on card 7 "Look who's coming
+  over" (INTRO_UI.calder true there), walks ~3 game minutes, sits, then introChief. (The check taps cards quickly.)
