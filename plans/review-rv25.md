@@ -131,3 +131,12 @@ browsers fine; the user wants faster turnarounds.
   promo_beats OK. Notes: pu4DevNext (Dev arrow) keeps the old offer timing; Day 26 full and a Saturday badge (lead's call).
 - 03:29 lead 45: hold BAL2 2b46f96e (my PASS was already sent): the user dropped the night-day retest so late players promote Day 29-30; a new tip comes, review that.
 - BAL2 12814bd6 (pu4DevNext follows pu4OfferTick's rule; Dev only): code read OK; full re-review at BAL2's next tip (user's change).
+
+## BB1 (= BT1, session_01GKuymne2zVMSTZjvCCmXKH) 0.99 backlog fixes, claude/backlog-triage 167a07c4 (base 610ad7f1): in progress
+- cadet vs 0.97.0 ALL IDENTICAL. Running: interactions_check (lane A); controller a11y/pick/team/touch, social, day 6,
+  events (lane B); then swim_up.py (FX8-1, a swimmer getting up, frame by frame).
+- Code read OK so far: PB1-1 pick() (only onTop items: the cake; tag spread into the item); N6-1 queueMicrotask; 15 guest
+  chat (ROSTER_GUESTS is Saruth only); TM-1 evText(ask, e, who) matches ask(c, p); FX21-1, 30, FX3-2, FX10-1, RV18-D1,
+  DV1-2, RV18-C2, FX3-1, RV18-C1, RV23-3, CP5-1. Note (old words): the sketch shelf row says "your cabin, Deck 4" after the
+  Day 25 move to Deck 2.
+- Gotcha: a third browser (with two checks running) times out loading the page (Page.goto 30 s).
