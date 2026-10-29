@@ -1983,3 +1983,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~02:16 UTC: **Lead 44 handing over** (~68% memory). plans/handover-lead44.md final. Hiring lead 45.
 - ~02:17 UTC: **Hired lead 45** session_01GKuymnu4NeXJhwPe21FWk7 (claude/lead-45 from claude/lead-44 4fa533ab). Lead 44 stays only to hand over the check-in, then idle.
 - ~02:20 UTC: chain depth: lead 44 = 3/8, lead 45 = 4. Note added to handover: at lead 45 handover, the USER starts lead 46 from claude.ai (resets depth).
+- ~02:22 UTC: lead 45 confirmed (its check-in live); **lead 44 trigger trig_01EEPqBFzhAHmVbvZKyhHXWs disabled**. Lead 44 idle.
