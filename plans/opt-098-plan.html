@@ -56,6 +56,8 @@ a{color:var(--teal)}
 
 <div class="card rule"><b>The rules this plan keeps.</b> The game looks the same: every change is checked picture for picture against the build before it (cadet_test must say ALL IDENTICAL). If a change can't be made pixel-identical, it isn't merged until you've seen the difference and said yes (question 1). The crew's days come out the same. Every change runs the full round of checks before it's merged. Only the faster checks are out of scope: 0.98 is game speed only, as you asked.</div>
 
+<div class="card rule"><b>Your answers (28 October, evening, through lead 44).</b> (1) Items 1 and 2: show you a before and after picture first; only incredibly minor visual changes are acceptable, pixel-identical is preferred, and anything visible needs your OK. (2) No 60 fps cap. (3) No battery saver. (4) Backlog 12 is not fixed in 0.98: you'll balance it in 0.99, and it stays a known old failure. (5) FX24-2: yes, book walking time only for long walks to a tradition. So item 5 and the backlog 12 half of item 6 are set aside (kept on record below). Builders: OP1 builds turns 1, 2 and the FX24-2 fix from tonight; a fresh render builder takes turns 3 and 4; RV25 reviews each turn.</div>
+
 <h2>What I found, in short</h2>
 <div class="card">
 <p><b>1. The busiest scenes spend most of their time preparing the picture, not running the game.</b> At Sunday dinner in the mess, zoomed out, the game's own work (the crew, the clock, the galley) takes 2.7 ms a frame. Then three.js, the drawing library, spends another 6.5 ms getting 638 drawing jobs ready for the graphics chip. Our speed check (perf_check) never sees that second part, because it skips drawing to save time.</p>
@@ -115,14 +117,14 @@ a{color:var(--teal)}
 <p><b>Proof:</b> the same triangles cast the same shadows (the rule the stand-ins already follow); cadet_test; shots of each changed room with shadows on.</p>
 </div></details>
 
-<details class="item"><summary><span class="n">5</span><span class="t">Battery: no more than 60 pictures a second, and an optional saver setting</span><span class="chips"><span class="chip gain">up to half the drawing in calm scenes on a 120 Hz screen</span><span class="chip q">questions 2 and 3</span></span></summary><div class="body">
+<details class="item"><summary><span class="n">5</span><span class="t">Battery: no more than 60 pictures a second, and an optional saver setting</span><span class="chips"><span class="chip">set aside: your answer, 28 October (no cap, no saver)</span></span></summary><div class="body">
 <p><b>What:</b> the game draws a new picture every time the screen refreshes. Many phones, foldables included, refresh 120 times a second, so in a calm room the game draws twice as many pictures as a 60 Hz phone for the same movement. A cap at 60 keeps every picture the same, just fewer of them. Separately, a "battery saver" in the device's settings (off unless you turn it on) could draw at a slightly lower sharpness and with softer shadows: that one changes the look, so only when chosen.</p>
 <p><b>Gain:</b> can't be measured in our test browser (it has no real screen); your phone's Dev Speed card would show frames a second before and after.</p>
 <p><b>Proof:</b> with the cap, every picture is identical (cadet_test steps frames itself, so it's untouched); with the saver off, the game is identical.</p>
 </div></details>
 
-<details class="item"><summary><span class="n">6</span><span class="t">Fix the two long-standing check failures</span><span class="chips"><span class="chip risk">changes the game's behaviour a little</span><span class="chip q">questions 4 and 5</span></span></summary><div class="body">
-<p><b>career_check, "Relied on before Day 5" (backlog 12).</b> A very busy cadet earns enough on Day 4 to be called "Relied on" a day early (one point over since 0.92.6). The check is right: the fix goes in the game, never in the check. Smallest fix: the word waits for Day 5. Owner: the Works career engineer.</p>
+<details class="item"><summary><span class="n">6</span><span class="t">Fix the reading corner check failure (FX24-2)</span><span class="chips"><span class="chip risk">changes the game's behaviour a little</span><span class="chip">backlog 12 set aside for 0.99 (your answer)</span></span></summary><div class="body">
+<p><b>career_check, "Relied on before Day 5" (backlog 12): set aside, your answer of 28 October.</b> You'll balance it in the 0.99 pass; it stays a known old failure. On record: a very busy cadet earns enough on Day 4 to be called "Relied on" a day early (one point over since 0.92.6). The check is right: the fix goes in the game, never in the check. Smallest fix: the word waits for Day 5. Owner: the Works career engineer.</p>
 <p><b>events_check, the reading corner on Day 7 (FX24-2).</b> Farouk's plan has him in the garden until 16:00 and in the bow lounge from 16:00, but the walk takes over 20 ship minutes, so he arrives as his stay ends. The planner leaves no walking time for a move on the same deck. Smallest fix: book the walking time only for long walks to a tradition. A planner-wide fix would move many people's plans on every tradition day. Owner: the sim engineer.</p>
 <p><b>Proof:</b> both checks pass on the new build and fail on the old one in the same way as now; day_check, events_check and food_check over the event days; the rest of the full round.</p>
 </div></details>
@@ -143,15 +145,15 @@ a{color:var(--teal)}
 <h2>Turns and timing</h2>
 <div class="tw"><table>
 <tr><th>Turn</th><th>What</th><th class="num">Building</th><th>Who</th></tr>
-<tr><td>1</td><td>Shader checks off outside Dev mode (item 3)</td><td class="num">about 1 h</td><td>render seat</td></tr>
-<tr><td>2</td><td>Shadow stand-ins for the rest (item 4)</td><td class="num">about 2 h</td><td>render seat</td></tr>
-<tr><td>3</td><td>One piece per full body (item 1), after question 1</td><td class="num">about 4 h</td><td>render seat</td></tr>
-<tr><td>4</td><td>Furniture colours (item 2), after question 1</td><td class="num">about 5 h</td><td>render seat</td></tr>
-<tr><td>5</td><td>60 a second and the saver (item 5), if you say yes</td><td class="num">about 3 h</td><td>second builder</td></tr>
-<tr><td>6</td><td>The two old check failures (item 6)</td><td class="num">about 4 h</td><td>second builder, with each owner's review</td></tr>
+<tr><td>1</td><td>Shader checks off outside Dev mode (item 3)</td><td class="num">about 1 h</td><td>OP1, tonight</td></tr>
+<tr><td>2</td><td>Shadow stand-ins for the rest (item 4)</td><td class="num">about 2 h</td><td>OP1, tonight</td></tr>
+<tr><td>3</td><td>One piece per full body (item 1), before and after pictures to you first</td><td class="num">about 4 h</td><td>a fresh render builder</td></tr>
+<tr><td>4</td><td>Furniture colours (item 2), before and after pictures to you first</td><td class="num">about 5 h</td><td>the render builder</td></tr>
+<tr><td>5</td><td>Set aside (your answer): no cap, no saver</td><td class="num">none</td><td></td></tr>
+<tr><td>6</td><td>The reading corner walk (FX24-2); backlog 12 waits for 0.99</td><td class="num">about 3 h</td><td>OP1, with the sim engineer's section reviewed by RV25</td></tr>
 <tr><td></td><td>Review, then the full round on the combined build</td><td class="num">about 4 h</td><td>reviewer, build master, runners</td></tr>
 </table></div>
-<p><b>Estimate:</b> with two builders working side by side from Thursday morning (October 29), the turns finish Thursday evening and the full round runs Thursday night, so 0.98.0 would be ready for your OK on <b>Friday, October 30, by about noon ET</b>. Each turn is merged on its own, so if one runs long, the others still go out.</p>
+<p><b>Estimate:</b> OP1 starts turns 1, 2 and 6 tonight (Wednesday, October 28); the render builder works on turns 3 and 4 on Thursday, with your picture check before they're merged. The full round runs Thursday night, so 0.98.0 would be ready for your OK on <b>Friday, October 30, by about noon ET</b>. Each turn is merged on its own, so if one runs long, the others still go out.</p>
 
 <h2>Your answers</h2>
 <form id="answers" data-collection="answers" data-doc="opt-098" onsubmit="return false">
