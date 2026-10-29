@@ -21,6 +21,13 @@ old triage commits merged back in (a merge commit, no history rewrite). Build li
 - RV23-2 done (e69b2235): Day 32 stops being a workday after the career offer, so "Clock in" (asked at 08:00) never cleared; its done
   now also reads !playerOnDuty(d). arrows_check endgo track: stuck 1 -> 0. The Day 31 "air plant" arrow didn't show in two runs.
 
+## After the fixes
+- RV25 then RV26: the whole branch PASS at 564b8a50 (FX8-1 swimmer-leaving look: no glide through a wall).
+- RV25-1 (the sketch shelf's Schedule row names your cabin now: Deck 2's room B after the move) fixed in 564b8a50, PASS.
+- 0.98.0 full round, share R4 on staging-pad 7a2ae7d2: OK (career only backlog 12, the same on 0.97.0). Notes: plans/checks-0980-r4.md.
+- Nothing open. A fresh session taking BB1's role starts from the lead's brief; my branch is merge-ready for the build master.
+- Scratch: a detached worktree /home/user/r4 (the 0.98.0 candidate) can be removed with `git worktree remove /home/user/r4`.
+
 ## How I tested
 Probes in Playwright reuse cadet_test.py's prelude (exec of its top, as day_check does) and `Game(pw, path)`; each fix was run on
 0.97.0 (git show 610ad7f1:starship-cadet.html) and on the branch. Then cadet_test vs 610ad7f1, the area's checks, check_fast.
