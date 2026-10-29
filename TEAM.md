@@ -2064,3 +2064,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~22:19 UTC (6:19 PM ET): **0.99.2 ROUND STARTED**: claude/staging-0992 60d477e8 (bc4579aa + SD3 bc6c6029 + TB1 ced89283 + turn), game sha256 27d605e7...3920; gates names/check_fast/title/sound OK, cadet identical. GO R1-R4, BM21 R5. OLD bc4579aa. Publish needs the user's OK.
 - ~22:24 UTC check-in (lead 46): 0.99.2 round running (5 min in), no FAIL. ETA green ~8:30-9:00 PM ET, then ask the user.
 - ~22:26 UTC: **USER: publish 0.99.2 without asking** (this one). On green + BM21 GO (verify sha): PUB2 GO, ff integration, tell the user.
+- ~23:06 UTC: 0.99.2: R2 on a ~2.5x slower host (final ~01:30-02:00 UTC), no FAIL. Lead: R2 hands unstarted checks (perf first) to R4 / R1 as they free up.
