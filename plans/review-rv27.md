@@ -46,3 +46,13 @@
 - Docs: design-doc Sound records the change with the user's words; DEV_NOTES notes the parked code.
 - sound_check OK (r3mess: 0 clinks at the rush, empty silent, off in the gym and on Deck 4); cadet_test vs bc4579aa (run alone) ALL IDENTICAL.
 - **Verdict: PASS** (sent to SD3, BM21, lead 46).
+
+## CH1 claude/chief-0993 9346b1c3 (game cc1fdddf...a651), from bc4579aa
+- Diff (section 21): chat = card >= len-2 and not the choice card (the reply card); the clock reason I.done.chief + 10 is gone
+  (it fired mid-chat for a player reading ~3 s a card: the clock runs during the chat); new reason = table done, its chat neither
+  showing nor queued (reload / no chat). Welcome waits till she's up and sat, 10 min cap from INTRO_UI.calderAt. A reload before her
+  welcome queues it again (chief:met and chiefD set in the same step as dialogueShow, so no double queue). introSeat fixed during the steps.
+- ch_dinner probe (5 s a card, CH1's part 8): normal and --dawdle: sat on cards 1-6 incl. the choice, up on the reply card (card 7 of 8
+  after the choice), walking as "Look who's coming over" shows, then the welcome. My 0.99.1 baseline used fast taps, so it missed the bug.
+- ch_reload probe (real save + page reload): card 1: OK. Card 6: part 20's own "seated before the save" row fails because she's
+  rightly up on card 6 (expected, the probe's choice); after the reload she got up again 18:40, sat, welcome 18:42-18:47 in full.
