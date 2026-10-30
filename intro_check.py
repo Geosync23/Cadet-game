@@ -17,6 +17,7 @@
 #   14. Tuesday's first solo job (the playtest patch 1, #7): after the Chief's meeting the arrow leads to it, Take it at the board
 #   18. (item 81) Tuesday 08:51: the solo job's Tracked arrow at your spot in her office; a real tap on the Chief walks you in and it
 #      starts; at 08:35 (before it) and 10:05 a tap on her doesn't (--solotap: this part alone)
+#   20. (CH1) a save and reload on the third card of Zeke's dinner chat: the Chief sat till then, then over and her welcome (--dinner: this part alone)
 #   Later waves (shown as "not yet"): the reserved jobs, the week in play, Sowing's draw calls.
 # Setup and environment as for cadet_test.py.
 # Run:  python3 intro_check.py BUILD.html
@@ -533,6 +534,41 @@ def late_dinner(g):
     if not all(near): fail('part 17: the walker lost him (the check needs you with him all the way)')
     if m: fail(f'Calder\'s "Missed you at dinner" Mail came while he was still with you: {m}')
 
+# part 20 (CH1, the user on 0.99.1): a save and reload in the middle of Zeke's dinner chat. The chat is not replayed; the Chief,
+# still at the next table, gets up then (there's no chat left to wait for), walks over, sits, and gives her welcome
+def dinner_reload(g):
+    print('20. A reload mid-dinner: the Chief sat through the chat\'s first cards, then over to your table and her welcome after the reload')
+    url = g.page.url.split('?')[0]
+    g.page.evaluate('localStorage.clear()')
+    g.page.goto(url + '?debug', timeout=RELOAD_MS); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(5)
+    if not g.ev("!!document.querySelector('form input[maxlength=\"24\"]')"): g.ev('localStorage.clear(); newGameStart(true)'); g.step(5)
+    g.ev('CLOTHES_ON = true')
+    g.ev("(() => { if (DIALOGUE) dialogueEnd(true); const f = document.querySelector('form input[maxlength=\"24\"]'); f.value = 'Sam'; f.form.requestSubmit(); })()"); g.step(160)
+    for k in range(3000):
+        g.step(20)
+        if g.ev("!!DIALOGUE && /^introDinner/.test(DIALOGUE.id || '')"): break
+        g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
+    if not g.ev("!!DIALOGUE && /^introDinner/.test(DIALOGUE.id || '')"): fail('part 20: the dinner chat never began'); return
+    g.step(80); before = []
+    for _ in range(3):   # three cards at a player's pace (5 s a card), then save
+        g.step(150); before.append([g.ev('DIALOGUE ? DIALOGUE.i : null'), g.ev('!!INTRO_UI.calder'), g.ev(CALDER_AWAY)])
+        g.ev('(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); })()')
+    saved = g.ev("(() => { saveGame(); return clockText(); })()")
+    g.page.goto(url + '?debug', timeout=RELOAD_MS); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(10)
+    up, welcome, end = None, None, None
+    for k in range(400):
+        g.step(30)
+        if up is None and g.ev('!!INTRO_UI.calder'): up = g.ev('clockText()')
+        if welcome is None and g.ev("!!DIALOGUE && /^introChief/.test(DIALOGUE.id || '')"): welcome = { 't': g.ev('clockText()'), 'in': g.ev('introCalderIn()') }
+        if g.ev('!!DIALOGUE'): g.ev('(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); })()')
+        end = g.ev("SHIP.intro.done['chief:end']")
+        if end is not None or g.ev('shipNow() >= introAbs(0, 20 * 60)'): break
+    print(f"  before the save at {saved} (card, the Chief up, m from her seat at the next table): {before}; after the reload she got up at {up}, her welcome {welcome}, ended {end}")
+    if any(b[1] or b[2] is None or b[2] >= 1 for b in before): fail(f'part 20: the Chief left the next table during the first cards of the chat: {before}')
+    if not up: fail('part 20: after a reload mid-dinner the Chief never got up to come over')
+    if not welcome or not welcome['in']: fail(f"part 20: after a reload mid-dinner her welcome never played, or began before she'd sat at your table: {welcome}")
+    elif end is None: fail('part 20: after a reload mid-dinner her welcome never ended')
+
 # part 19 (DS1, the user's patch 0.92.3 items 1, 7-10), in one new game: the bedtime tip with the bunk's arrow on Day 0; Day 1's
 # wardrobe arrow till you've changed; Tomas's wake-up lines without the towel one (its key retired, the next still said);
 # Zeke's opener says clock in right after his hello; his "quiet days / the ship gets lively" pair comes early on the
@@ -702,6 +738,10 @@ with sync_playwright() as pw:
         g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
     if BESIDE_ONLY:
         beside_walk(g); late_dinner(g)
+        if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
+        g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
+    if '--dinner' in sys.argv:   # part 20 alone (CH1)
+        dinner_reload(g)
         if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
         g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
     if P923_ONLY:
@@ -898,11 +938,29 @@ with sync_playwright() as pw:
                 hm = dinner['t'].split()[-1]; tmin = int(hm[:2]) * 60 + int(hm[3:])
                 if tmin > START_MIN + 90 and not DAWDLE: fail(f'the walk is too long: you reach the table at {hm}, more than 90 minutes after the arrival (reviewer 1c; the scenes wait till the Chief\'s step ends)')   # 0.42.27; playtest patch 1: from INTRO_START
             if chat is None and g.ev("!!DIALOGUE && /^introDinner/.test(DIALOGUE.id || '')"):   # the dinner chat at your table (0.42.63, the user: the game sits you down for it)
-                for _ in range(4): g.step(20); g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'stand'])   # stop steering: let the game sit you
+                for _ in range(4): g.step(20)   # stop steering: let the game sit you (CH1: no taps, so every card of the chat is read below)
                 chat = { 't': g.ev('clockText()'), 'seat': g.ev("introSeat('you')"), 'sat': g.ev("typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null"), 'calder': g.ev(CALDER_D), 'away': g.ev(CALDER_AWAY) }
                 print(f"  the dinner chat at {chat['t']}: sat down by the game in {chat['sat']} (your seat {chat['seat']}); the Chief {chat['calder']} m from her seat at your table, {chat['away']} m from hers at the next table")
                 if chat['seat'] and chat['sat'] != chat['seat'] and not DAWDLE: fail(f"you weren't sat down at your table for the dinner chat: {chat}")
                 if chat['away'] is None or chat['away'] >= 2: fail(f"the Chief wasn't at the next table when the dinner chat began (the patch #3: she eats there, in view, and walks over on \"Look who's coming over\"): {chat}")
+                # (CH1, the user on 0.99.1: she got up mid-chat, ten ship minutes after you sat) read the chat at a player's pace, 5 s a card
+                # (3 ship minutes): she stays sat at the next table through his lines and the question, gets up on the card before his last
+                # ("Look who's coming over", the reply to your answer), and is on her way or sat across from you by that last card
+                cards = []
+                for _ in range(20):
+                    if not g.ev("!!DIALOGUE && /^introDinner/.test(DIALOGUE.id || '')"): break
+                    g.step(150)
+                    c = g.ev("(() => { const D = DIALOGUE; if (!D || !/^introDinner/.test(D.id || '')) return null; const l = D.queue[D.i]; return { i: D.i, n: D.queue.length, choice: !!(l && l.choice), up: !!INTRO_UI.calder, t: clockText().slice(-5) }; })()")
+                    if not c: break
+                    c['away'] = g.ev(CALDER_AWAY); cards.append(c)
+                    g.ev('(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); })()')
+                print('  the dinner chat card by card (card/of, the Chief up, m from her seat at the next table):', ' '.join(f"{c['t']} {c['i'] + 1}/{c['n']}{'?' if c['choice'] else ''} {'up' if c['up'] else 'sat'} {c['away']}" for c in cards))
+                early = [c for c in cards if c['up'] and (c['i'] < c['n'] - 2 or c['choice'])]
+                last = cards[-1] if cards else None
+                if early: fail(f"the Chief got up before the card ahead of \"Look who's coming over\" (CH1, the user on 0.99.1): {early[0]}")
+                if not last or last['i'] != last['n'] - 1 or not last['up']: fail(f"the Chief had not got up by \"Look who's coming over\": {last}")
+                elif len(cards) >= 2 and not cards[-2]['up']: fail(f"the Chief got up on \"Look who's coming over\" itself, not the card before it: {cards[-2:]}")
+                if any(not c['up'] and (c['away'] is None or c['away'] >= 1) for c in cards): fail(f"the Chief left her seat at the next table before getting up: {cards}")
             if chiefAt is None and g.ev("!!DIALOGUE && /^introChief/.test(DIALOGUE.id || '')"):   # her welcome: she's walked over and sat first, after you and the chat
                 chiefAt = { 't': g.ev('clockText()'), 'calder': g.ev(CALDER_D), 'in': g.ev('introCalderIn()'), 'chat': chat is not None, 'you': g.ev("typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null") }
                 print(f"  the Chief's welcome at {chiefAt['t']}: she's {chiefAt['calder']} m from her seat (at it: {chiefAt['in']}), after the chat {chiefAt['chat']}, you in {chiefAt['you']}")
@@ -1111,6 +1169,7 @@ with sync_playwright() as pw:
     beside_walk(g)
     late_dinner(g)
     patch923(g)
+    dinner_reload(g)
     bunk_leave(g)   # last: its reload leaves the page on a saving URL
     solo(g)
     solo_tap(g)

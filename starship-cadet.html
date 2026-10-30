@@ -55155,7 +55155,7 @@ function introUiReset() {
   const U = INTRO_UI; (U.said || []).forEach(simClear); U.night = null; U.chiefD = null;
   const own = typeof IX_GOAL !== 'undefined' && IX_GOAL && (IX_GOAL.label === INTRO_BED_GOAL || IX_GOAL.label === 'Zeke Torres' || INTRO_ARROW_LABELS.has(IX_GOAL.label));
   if (own && typeof clearGoal === 'function') clearGoal();
-  Object.assign(U, { tableD: null, arrow: null, arrowAt: 0, min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, calder: false, calls: 0, beat: null, sow: false, hand: null });   // hand: DS1's device hand-over
+  Object.assign(U, { tableD: null, arrow: null, arrowAt: 0, min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, calder: false, calderAt: null, calls: 0, beat: null, sow: false, hand: null });   // hand: DS1's device hand-over
   if ('pilotAt' in U) Object.assign(U, { pilotAt: 0, ternOpened: false, ternShut: false });
 }
 // section 14 plans the crew again when this changes (introBeats depends on nothing else)
@@ -55849,13 +55849,14 @@ function introTick() {
     introAdvance(now, { deck: deckDef.num, tile: player.here() });
     // a meeting step you've just reached plays its script (walking out of the room closes it; its gist comes by Mail)
     for (const id of Object.keys(I.done).slice(done)) { const st = introStepById(id); if (st && st.meeting && st.checkpoint && !I.missed.includes(id)) INTRO_UI.meet.push(st); }   // the evening's (the week's are introWeekMeetings')
+    if ((I.step === 'chief' || I.step === 'free') && I.done.chief !== undefined && !I.missed.includes('chief') && I.done['chief:met'] === undefined && I.done['chief:end'] === undefined && !INTRO_UI.chiefD && !INTRO_UI.meet.some(x => x.id === 'chief')) INTRO_UI.meet.push(introStepById('chief'));   // (CH1) a reload at dinner before her welcome: it's still owed (the chat isn't replayed)
     // waiting while another dialogue is open; if you've left its room by then, the gist comes by Mail instead
     for (const st of INTRO_UI.meet.slice()) {
       if (typeof dialogueShow !== 'function') { INTRO_UI.meet.length = 0; break; }
       const cp = st.checkpoint, room = st.near || st.beside && I.done['beside:' + st.id] ? /./ : new RegExp('^' + cp.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'), m = { id: 'intro-' + st.id, who: INTRO_MEETINGS[st.meeting].cast.filter(w => !/:/.test(w)), where: { deck: cp.deck, room }, at: now };
       if (!inMeeting(m)) { INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); if (typeof meetingGist === 'function') meetingGist(st.meeting); if (st.id === 'chief') I.done['chief:end'] = null; if (st.id === 'table' && I.done['table:end'] === undefined) I.done['table:end'] = now; continue; }
       if (DIALOGUE || INTRO_UI.tour.some(q => q.core.length)) break;   // after the tour's last core lines
-      if (st.id === 'chief' && !introCalderIn() && now < (I.done.chief !== undefined ? I.done.chief : now) + 10) break;   // she's still on her way over
+      if (st.id === 'chief' && !introCalderIn() && now < (INTRO_UI.calderAt != null ? INTRO_UI.calderAt : now) + 10) break;   // she's still on her way over (CH1: or not up yet; ten minutes from when she got up, not from the step)
       INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); dialogueShow(introScriptHere(st.meeting, m, st.who), m);
       if (st.id === 'table') INTRO_UI.tableD = DIALOGUE;   // its last line sends the Chief over
       if (st.id === 'device') introDeviceGive();           // its first line: "And this is yours. Your device." (playtest patch 1, #3)
@@ -55872,10 +55873,12 @@ function introTick() {
   // `away`) and comes over once the dinner chat with Torres is on its last line ("Look who's coming over") or over,
   // or the chat never happened; her own welcome waits until she's sat at your table (introCalderIn), ten minutes at most
   if (INTRO_UI.tableD && DIALOGUE !== INTRO_UI.tableD) { INTRO_UI.tableD = null; if (I.done['table:end'] === undefined) I.done['table:end'] = now; }
-  const chat = INTRO_UI.tableD && DIALOGUE === INTRO_UI.tableD && DIALOGUE.i >= DIALOGUE.queue.length - 1;
-  const calderGo = I.done['table:end'] !== undefined || chat || I.missed.includes('table') || I.step === 'free' && I.done['chief:met'] !== undefined || I.done.chief !== undefined && now >= I.done.chief + 10;   // (the last: a reload mid-chat, or a chat that never came)
+  // (CH1, the user on 0.99.1: she got up mid-chat, ten ship minutes after you sat, however far the chat had got) she gets up on the card
+  // before his last line (the reply to your answer), so "Look who's coming over" lands as she walks over; tied to the cards, not the clock
+  const chat = INTRO_UI.tableD && DIALOGUE === INTRO_UI.tableD && DIALOGUE.i >= DIALOGUE.queue.length - 2 && !(DIALOGUE.queue[DIALOGUE.i] || {}).choice;
+  const calderGo = I.done['table:end'] !== undefined || chat || I.missed.includes('table') || I.step === 'free' && I.done['chief:met'] !== undefined || I.done.table !== undefined && !INTRO_UI.tableD && !INTRO_UI.meet.some(x => x.id === 'table');   // (the last: a reload mid-chat, or a chat that never came; never while it's showing or waiting to)
   if ((I.step === 'chief' || I.step === 'free') && calderGo && !INTRO_UI.calder && introSeat('calder') && typeof crewComeTo === 'function' && deckDef.num === 3) {
-    INTRO_UI.calder = true; crewComeTo('calder', introSeat('calder'), null, { until: introAbs(0, INTRO_CALDER_UNTIL) });   // (playtest patch 1, #5) until her welcome's over (below), not a clock time
+    INTRO_UI.calder = true; INTRO_UI.calderAt = now; crewComeTo('calder', introSeat('calder'), null, { until: introAbs(0, INTRO_CALDER_UNTIL) });   // (playtest patch 1, #5) until her welcome's over (below), not a clock time
   }
   // (playtest patch 1, #6: "they stand up and walk off straight after speaking") once her welcome is over she stays at your
   // table INTRO_LINGER minutes more, then goes back to her own evening (her beat's seat at the next table, then her plan)
