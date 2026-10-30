@@ -36,3 +36,11 @@
   (card, Calder's pose, metres from her away seat / your-table seat, step, INTRO_UI.calder).
 - 0.99.1 (bc4579aa) baseline, normal and --dawdle: Calder sits through Zeke's cards 0-6, stands on card 7 "Look who's coming
   over" (INTRO_UI.calder true there), walks ~3 game minutes, sits, then introChief. (The check taps cards quickly.)
+
+## SD3 claude/mess-sound-0993 2348a5e6 (game 37fd7559...8756)
+- Diff: MESS_BG = false wraps the galley (brown + white noise) and the clatter loop in scene(); every name in the block is local
+  to it; the murmur (12 voices) unchanged. M.bg for sound_check; r3mess checks no clinks and 12 loops when parked.
+- Probe plans/rv27-probes/mess_level.py (Day 1 in the mess, 6 s, real output by band):
+  0.99.1 dinner (44 people): 0-250 Hz -39.6, 250-2k -49.7, 2-6k -55.9, 6k+ -61.7 dB; 35 clinks. Lunch (45): 133 clinks.
+  new dinner: -40.3, -51.4, -90.9, -117.6 dB; 0 clinks; 12 voices. Lunch: 0 clinks, -88.2 / -105.5 above 2k. No page errors.
+- Docs: design-doc Sound records the change with the user's words; DEV_NOTES notes the parked code.
