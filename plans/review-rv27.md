@@ -44,3 +44,5 @@
   0.99.1 dinner (44 people): 0-250 Hz -39.6, 250-2k -49.7, 2-6k -55.9, 6k+ -61.7 dB; 35 clinks. Lunch (45): 133 clinks.
   new dinner: -40.3, -51.4, -90.9, -117.6 dB; 0 clinks; 12 voices. Lunch: 0 clinks, -88.2 / -105.5 above 2k. No page errors.
 - Docs: design-doc Sound records the change with the user's words; DEV_NOTES notes the parked code.
+- sound_check OK (r3mess: 0 clinks at the rush, empty silent, off in the gym and on Deck 4); cadet_test vs bc4579aa (run alone) ALL IDENTICAL.
+- **Verdict: PASS** (sent to SD3, BM21, lead 46).
