@@ -70,3 +70,10 @@
   A smooth 3 s fade to ~2 s of silence at 43-44 s after the tap (song ~48.5-50.5 s, Rest, between its pads), back at 45.4 s:
   the 0.99.1 song's own quiet patch (0.99.1 showed the same shape), not from this change.
 - **Verdict: PASS** (sent to SD4, BM21, lead 46).
+- ef799975 (game 75b56049...fbb9, on 7ac282dc): beforeZero wraps start/stop on each source node type that exists (typeof); the
+  hasOwnProperty check keeps one wrap each. sound_check title OK; tm_level alone: sound from 1 s, louder ~25 s, no silence, no errors.
+  **PASS.** (cadet not rerun: the change is sound-only, and SD4's cadet on ef799975 is ALL IDENTICAL.)
+- Finding about my own probe: the short silences seen with tm_level (017d961d 36.5 s, 0.99.1 41 s, 7ac282dc 43 s, ef799975 7 s when run
+  next to sound_check) come from frame stalls with two browsers busy: titleTick schedules only 1 s ahead (T.tick(now + 1)), from the
+  frame. Alone, no silence. Real but old (0.99.0): a phone frame stall over 1 s (loading behind the title) would gap the music. Backlog
+  suggestion for the sound seat: schedule 2-3 s ahead or from a timer.
