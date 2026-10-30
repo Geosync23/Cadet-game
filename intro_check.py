@@ -17,6 +17,7 @@
 #   14. Tuesday's first solo job (the playtest patch 1, #7): after the Chief's meeting the arrow leads to it, Take it at the board
 #   18. (item 81) Tuesday 08:51: the solo job's Tracked arrow at your spot in her office; a real tap on the Chief walks you in and it
 #      starts; at 08:35 (before it) and 10:05 a tap on her doesn't (--solotap: this part alone)
+#   13. (CH2) the Day 0 call-home card waits till you've finished eating your dinner (tray in hand, or eating: no card)
 #   20. (CH1) a save and reload on the third card of Zeke's dinner chat: the Chief sat till then, then over and her welcome (--dinner: this part alone)
 #   Later waves (shown as "not yet"): the reserved jobs, the week in play, Sowing's draw calls.
 # Setup and environment as for cadet_test.py.
@@ -661,11 +662,29 @@ def firsts(g):
     g.ev("(() => { if (DIALOGUE) dialogueEnd(); INTRO_UI.chiefD = null; SHIP.intro.done['chief:met'] = SHIP.intro.done['chief:end'] = Math.floor(shipNow()); SHIP.player.tray = null; delete SHIP.intro.done['ate:last']; clearGoal(); })()"); g.step(20)
     eat = g.ev(G); card0 = g.ev("SHIP.intro.done['call:tip'] !== undefined")
     g.ev("SHIP.player.tray = 'Stew'"); g.step(10); eat2 = g.ev(G); card = ''
+    # (CH2, the user 2026-10-30: "the offer to track calling home on the first night should come after you eat") a tray in
+    # hand, then sitting down to it: no card; up from the finished meal: the card
+    held = []
+    for i in range(6):
+        g.step(15); held.append(g.ev("SHIP.intro.done['call:tip'] !== undefined"))
+    seat = g.ev("(() => { const pl = [...PLACE_OF.values()].find(p => p.type === 'mess-seat' && !heldBy(p.id)); player.obj.position.copy(cellPos(...pl.walk)); actStart('sit', pl.id); return pl.id; })()")
+    for i in range(40):
+        g.step(10)
+        if g.ev("!!ACT && ACT.kind === 'eat' && ACT.phase === 'do'"): break
+    sat = g.ev("!!ACT && ACT.kind === 'eat' && !!ACT.o.fed && ACT.phase === 'do'")
+    for i in range(6):
+        g.step(15); held.append(g.ev("SHIP.intro.done['call:tip'] !== undefined"))
+    print(f"  the call card with a tray, then eating at {seat} (sat {sat}), up?: {held}")
+    if not sat: fail('part 13: could not sit down to eat the tray')
+    if any(held): fail("the call-home card came up before you'd finished eating your dinner (CH2)")
+    g.ev("if (ACT && ACT.kind === 'eat') ACT.done = ACT.def.mins"); g.step(20)
+    g.ev("(() => { INTRO_UI.chiefD = null; INTRO_UI.meet.length = 0; if (DIALOGUE) dialogueEnd(); })()")   # (the meal took long enough for the Chief's real visit to begin at your seat: over, as at the start)
+    print('  meal over:', g.ev("({ act: ACT && ACT.kind, tray: SHIP.player.tray, meal: SHIP.intro.done['ate:meal'] })"))
     for i in range(10):
         g.step(15); card = g.ev("(() => { const c = document.getElementById('devDlg'); return c && !c.hidden ? c.textContent : ''; })()")
         if 'Call home' in card: break
     if 'Call home' not in card: print('  (no card:', g.ev("({ dlg: DIALOGUE && DIALOGUE.id, choose: !!DEV.choose, panel: (document.getElementById('devDlg') || {}).hidden, keys: Object.keys(SHIP.intro.done).filter(k => /call|arrow|ate|chief/.test(k)).map(k => k + '=' + SHIP.intro.done[k]), arrow: INTRO_UI.arrow, chiefD: !!INTRO_UI.chiefD })"), ')')
-    print(f"  the Chief says eat, no tray: arrow '{eat}', call card held back {not card0}; with a tray: arrow '{eat2}', call card {'up' if 'Call home' in card else 'not up'}")
+    print(f"  the Chief says eat, no tray: arrow '{eat}', call card held back {not card0}; with a tray: arrow '{eat2}'; the meal eaten: call card {'up' if 'Call home' in card else 'not up'}")
     if eat != 'Get your dinner at the servery': fail(f'no servery arrow after the Chief told you to eat: {eat}')
     if eat2 == 'Get your dinner at the servery' or card0: fail(f'the servery arrow stayed with a tray in hand ({eat2}) or the call card came first ({card0})')
     if 'Call home' not in card: fail('no call-home card after the Chief\'s visit')
@@ -687,6 +706,16 @@ def firsts(g):
         g.step(20)
         end = g.ev("({ g: " + G + ", end: SHIP.intro.done['call:end'] !== undefined, act: ACT && ACT.kind })")
         g.ev("actEnd(true)")
+        # (CH2) no dinner eaten (and, again, the Chief's visit missed): the card waits for the dinner to close at 20:30, on paper
+        fb = g.ev("""(() => { const I = SHIP.intro, keep = I.done, miss = I.missed.slice(), P = SHIP.player, tr = P.tray, a = ACT, out = [];
+          P.tray = null; ACT = null; if (DIALOGUE) dialogueEnd(true);   // (the call's own lines)
+          for (const met of [true, false]) {
+            I.done = met ? { 'chief:met': -500, 'chief:end': -480, 'arrow:eat': -470 } : { 'arrow:eat': -470 }; if (!met) I.missed.push('chief');
+            for (const m of [20 * 60 + 29, 20 * 60 + 30]) { introCallTick(introAbs(0, m)); out.push(I.done['call:tip'] !== undefined); if (DEV.choose) devChosen(-1); }
+          }
+          I.done = keep; I.missed.length = 0; I.missed.push(...miss); P.tray = tr; ACT = a; return out; })()""")
+        print(f"  no dinner eaten: the card at 20:29, 20:30 {fb[:2]}; the Chief missed too {fb[2:]}")
+        if fb != [False, True, False, True]: fail(f'without a dinner eaten the call card did not come when the dinner closed at 20:30 (CH2): {fb}')
         print(f"  Track it: arrow '{tr}'; in the booths: arrow {mid['g']} on {mid['place']}, done {mid['end']}; the call begun ({end['act']}): arrow {end['g']}, done {end['end']}")
         if not tr or 'booth' not in tr.lower() or end['g'] == tr or not end['end'] or end['act'] != 'call': fail(f'the call-home arrow went wrong: {tr}, {end}')
         if mid['g'] != tr or not (mid['place'] or '').startswith('3-callhome-') or mid['end'] or g.ev(f"!!heldBy('{mid['place']}')"): fail(f"in the booths' room the arrow went before the call began, or isn't on a free booth (FX5): {mid}")
