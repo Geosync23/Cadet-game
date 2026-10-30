@@ -56,3 +56,5 @@
   after the choice), walking as "Look who's coming over" shows, then the welcome. My 0.99.1 baseline used fast taps, so it missed the bug.
 - ch_reload probe (real save + page reload): card 1: OK. Card 6: part 20's own "seated before the save" row fails because she's
   rightly up on card 6 (expected, the probe's choice); after the reload she got up again 18:40, sat, welcome 18:42-18:47 in full.
+- intro_check whole OK (incl. part 8 card by card, part 20 reload); day_check 0 OK; cadet_test vs bc4579aa ALL IDENTICAL.
+- **Verdict: PASS** (sent to CH1, BM21, lead 46). Docs: DEV_NOTES explains the cause; design-doc's arrival paragraph updated.
