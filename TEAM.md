@@ -2103,3 +2103,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~05:15 UTC (1:15 AM ET): **0.99.3 ROUND STARTED**: claude/staging-0993 df74ce0f (d180a704 + SD3 2348a5e6 + CH2 ce742cb7 incl. CH1 9346b1c3 + SD4 27caa4c3 + turn), game sha256 04c821fe...c2a9; gates names/check_fast/sound/title/day 0/intro --dinner/--firsts OK, cadet identical. GO R1-R4, BM21 R5 (~56%: hand over after this release). OLD d180a704.
 - ~05:24 UTC check-in (overnight): 0.99.3 round 10 min in, no FAIL reported. BM21 ~57%: finishes this release, then hands over (plans/handover-bm21.md 8747ad88).
 - ~06:14 UTC: 0.99.3: **R4 OK** 7/7 (claude/checks-0990-r4 1fc5db88); offered to take R2's not-started checks (perf first). R2 ETA ~07:45.
+- ~06:27 UTC check-in (overnight): 0.99.3 round 1 h 12 in: R4 OK (now R2's perf), R2 11 OK + rest to ~06:40; R1, R3, R5 running; no FAIL.
