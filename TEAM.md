@@ -2075,3 +2075,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~00:24 UTC check-in (lead 46): 0.99.2 waiting R2 final; 0.99.3: mess sound PASS, CH1 building the Chief fix.
 - ~00:46 UTC (8:46 PM ET): **0.99.2 ROUND GREEN** (R2 OK incl. BM21's day 0/1/5/endgo + R4's perf; R1, R3, R4, R5 OK). Lead verified 60d477e8 game 27d605e7...3920, ff OK. **PUB2 GO** (user pre-OK).
 - ~00:49 UTC (8:49 PM ET): **0.99.2 LIVE**: Playtest 7hQ1 v8, Dev KEya v8 (PUB2; game 27d605e7...3920; 390x844 PASS; tap-to-wake, New game -> manifest on dark, no old deck; 6daN untouched). **claude/integration ff bc4579aa -> d180a704.** Next: 0.99.3 (mess sound PASS + CH1 Chief) from d180a704.
+- ~00:59 UTC: USER asked for a 0.99.1 link: PUB2 published it separately (private) https://claude.ai/artifact/YaJsaCgvpb3QXvcgestTSt v1 (bc4579aa, game 8e4ac545...2d9d); 7hQ1/KEya/6daN untouched.
