@@ -20,3 +20,26 @@ Chief on the cards; the call-home card after you eat; the original title song ba
 | interactions_check (whole, alone) | PASS | 2052 s | INTERACTIONS CHECK OK |
 
 No real FAILs, so no OLD runs needed. Result: **R4: OK**.
+
+## perf_check NEW OLD (for R2)
+
+Taken from R2 (agreed with R2, lead 46 and BM21 copied; R2's own copy skipped). Run alone after the share (4251 s):
+`perf_check.py NEW OLD`, from a scratch folder.
+
+- Full run: `PERF CHECK: 2 problem(s) (2 skipped: switch not in this build; 0 waiting: not built yet)`, exit 1.
+- The two PROBLEMs (frame time only):
+  - `Sowing / harvest morning, garden 10:00 landscape: js 1.51 -> 2.85 ms a frame`
+  - `Captain's address, auditorium Fri 16:10 trifold-folded: js 1.65 -> 3.03 ms a frame`
+- Re-measured both scenes alone twice (`PERF_SCENES='Sowing|Captain.s address'`): both runs `PERF CHECK OK`, exit 0.
+  NEW/OLD ms a frame (perf_check prints OLD's block first):
+
+  | Scene, view | full run | re 1 | re 2 |
+  |---|---|---|---|
+  | Sowing morning, landscape | 2.85 / 1.51 | 1.35 / 1.42 | 1.63 / 1.40 |
+  | Captain's address, trifold-folded | 3.03 / 1.65 | 1.34 / 2.46 | 1.66 / 2.20 |
+
+  Neither repeated (the backlog 32 pattern): **noise, not counted**.
+- Memory: a week of play 470/41/93 -> 471/41/93; deck round trips 470/41/93 x3 (flat on NEW and OLD).
+- Draw calls: the same on NEW and OLD in these scenes (161c landscape, 103c trifold-folded).
+
+perf_check result: **OK** (after the re-measure).
