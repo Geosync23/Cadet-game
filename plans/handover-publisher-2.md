@@ -49,3 +49,6 @@ The user pre-approved it (via lead 46). sha256 checked, published over the same 
 
 ## 0.99.2 release (2026-10-30)
 The user pre-approved it (via lead 46). sha256 checked, published over the same two links as v8, {downloads}. Phone check 390x844 on both: PASS, 0 console errors. titleplay.js now also taps NEW GAME and screenshots (newgame.png): the shuttle manifest on a dark screen, no old deck behind it. 6daN untouched.
+
+## 0.99.1 on its own link (2026-10-30)
+The user asked for a link to 0.99.1 (via lead 46): https://claude.ai/artifact/YaJsaCgvpb3QXvcgestTSt v1 = claude/staging-0991 bc4579aa (game 8e4ac545…2d9d), {downloads}, title "Starship Cadet 0.99.1", Playtest style (no Dev). Scratchpad source v0991/starship-cadet-0.99.1.html. 390x844 load + title tap + New game: PASS, 0 console errors.
