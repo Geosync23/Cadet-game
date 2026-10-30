@@ -2108,3 +2108,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~07:24 UTC check-in (overnight): 0.99.3: R1, R3 (devmode-j2 71d27a4b), R4, R5 OK; R2 waiting R4's perf (~07:25). Then BM21 GO -> PUB2.
 - ~07:40 UTC (3:40 AM ET): **0.99.3 ROUND GREEN** (R4 did R2's perf: OK after re-measure, two spikes not repeated, memory flat). Lead verified df74ce0f game 04c821fe...c2a9, ff OK. **PUB2 GO** (user pre-OK).
 - ~07:44 UTC (3:44 AM ET): **0.99.3 LIVE**: Playtest 7hQ1 v9, Dev KEya v9 (PUB2; game 04c821fe...c2a9; 390x844 PASS; title music starts on the tap, New game stops it -> manifest -> HUD; 6daN untouched). **claude/integration ff d180a704 -> 9c0103e3.** BM21 handed over (~60%, handover-bm21 132be46c): next build master is fresh. All seats idle; waiting for the user (morning summary).
+- ~08:28 UTC check-in (overnight): quiet 1 of 3. 0.99.3 live, all seats idle, waiting for the user.
