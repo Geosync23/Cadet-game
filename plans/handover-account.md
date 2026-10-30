@@ -7,8 +7,9 @@ Everything that matters lives in this GitHub repository; nothing important lives
 ## 1. Where things stand (0.99.3, live since 3:44 AM ET, Oct 30)
 
 - **Latest release:** 0.99.3. Branch `claude/integration` = commit `9c0103e3` (game file sha256 `04c821fe...c2a9`).
-  `claude/integration` is always the latest released game. **`main` is old** (0.63.2r, Oct 18) and has not been used
-  since; see section 5.
+  `claude/integration` is the latest released game, and **`main` was brought up to the same 0.99.3 on Oct 30** (the
+  user's OK) so a new session opening the default branch sees the current game and rules. Keep them equal: after
+  each release, update both.
 - **The road to 1.0 (the user's rules):** every update now is a 0.99.x; **1.0 is only the user's own playtest notes**,
   nothing else. Each publish needs the user's OK unless they say otherwise for that one release.
 - **Every game change runs the full round of checks before it is published** (`plans/testing-guide.md`, the user's
@@ -69,8 +70,6 @@ Everything that matters lives in this GitHub repository; nothing important lives
 
 ## 5. Before switching: things the user may want to decide
 
-- **Bring `main` up to date.** New sessions open the default branch, `main`, which is still 0.63.2r. Updating `main`
-  to `claude/integration` (0.99.3) means a fresh session sees the current game and rules straight away. This changes
-  the default branch on GitHub, so it waits for the user's OK.
+- ~~Bring `main` up to date~~: done on Oct 30 (the user's OK); `main` = `claude/integration` = 0.99.3.
 - **Share or re-publish the links** (section 2), and **download saves** before switching.
 - The hourly lead check-in (a scheduled task on this account) is switched off; it does not move to a new account.

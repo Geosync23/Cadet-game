@@ -35,5 +35,5 @@ is switched off; make your own if you need one.
 
 ## Open
 - Code review for waste/inefficiency: user still deciding; do not start without them.
-- `main` is still 0.63.2r: ask the user before bringing it up to date (plans/handover-account.md section 5).
+- `main` brought up to 0.99.3 on Oct 30 (user OK); main = claude/integration. After each release update both.
 - BM21 handed over at ~60%: the next 0.99.x needs a fresh build master from plans/handover-bm21.md.
