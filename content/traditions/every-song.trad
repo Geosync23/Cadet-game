@@ -1,0 +1,39 @@
+@tradition every-song
+// Every song (FX14, 0.92.5 item 16; SW1's pitch): Saturdays before dinner, the five who know every song in the record
+// cabinet sing through it in the music room, one record at a time, arguing about the second verse. Behind WEEKEND_ON.
+// 17:15 (lead 34, 2026-10-24): Zeke works the Saturday shift to 17:00, so he hosts from the start.
+k: 459
+title: Every song
+// (the user, 2026-10-25: spread across weeks, two new a weekend; was: weekly saturday)
+when: every 4 weeks saturday week 2 from day 1
+at: 17:15-18:05
+min: 20
+jitter: 10
+where: 4 pool music
+hold: 1
+who: torres-zeke always, takahashi-wen always, farouk-olu always, achterberg-lars always, haddad-tamsin always, musician 50%, music 50%, everyone 6%
+anim: musician play, everyone talk
+host: torres-zeke
+from: torres-zeke
+
+== mail
+- Every song, tomorrow at {time}, the music room. This time: the lighthouse one. I'm right about the second verse. Come and tell Takahashi.
+
+== ask
+- Every song tonight. Five people, one record, five different sets of words.   #funny
+- Coming to the music room later? Everyone sings. Nobody agrees.   #funny
+- Sing-along at quarter past five. You don't need to know the words. Nobody does.   #funny
+
+== here
+- It's "light". The light came home. I've said it for a year.   #funny
+- Second verse. Here it comes. Brace yourselves.   #funny
+- Everyone in for the chorus. Even you at the back.
+- Takahashi's singing the other words again. Loudly.   #funny
+
+== thanks
+- You squeeze in by the record cabinet. A record goes on, five people start the same song with different words, and by the chorus the whole room sings whichever is loudest.
+
+== chatter
+- Every song ran over. The second verse took twenty minutes.   #funny
+- Achterberg brought sheet music to Every song. Nobody could read it. We sang anyway.   #funny
+- I went to Every song not knowing a single word. Turns out that's normal.   #warm

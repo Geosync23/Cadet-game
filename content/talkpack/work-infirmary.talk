@@ -1,0 +1,108 @@
+@talks work:infirmary
+// TW1, the Talk a while work pools: Infirmary (plans/work-pools-plan.html, decided 2026-10-20). Ids
+// work.infirmary.<slug>; topic always "work". Never anyone's medical details. Oduya (Counsellor) skips the wound and
+// bone talks; the "listening" talks suit him, kept clear of grief (his thread is loss). Rina: never the exam or why
+// she wants to be a doctor (her arc). Nandakumar has her own talks. Grieve (exams), Larsen (notgood): no doubt talk.
+
+// ---------------------------------------------------------------- acquaintance: the job up close
+
+== beds
+when: tier>=acquaintance !who:nandakumar|oduya
+them: Changed every bed in here before breakfast. Corners tight. Nobody's slept in one all week.
+them: That's a good week, in the infirmary. Empty beds and a tidy cupboard.   #warm
+ask: What does a good week look like in your job?
+listen: Do you ever wish it was busier?
+  them: Never. Bored is good, in here. Bored means everyone's well.
+share: A quiet board. Nothing breaking.
+  them: Same as us, then. A quiet week's a kind week.   #warm
+cheer: A clean bench at the end of it.
+  them: That's a good week too. A tidy one.   #funny
+
+== night-doctor
+when: tier>=acquaintance who:yoon-elif
+them: Three in the morning, someone comes in with a cough that's really can't-sleep.
+them: Tea, a blanket, ten minutes of talk. Most nights that's the whole treatment.   #warm
+ask: What helps you, when you can't sleep?
+listen: Do you mind the night shift?
+  them: I like it. People talk more at three. They've taken the day's armour off.   #warm
+share: Talking to someone. Or a book.
+  them: Both good medicine. The book's quieter.   #funny
+cheer: Counting the rungs on my bunk ladder.
+  them: How many? No, don't tell me. I'll count mine tonight.   #funny
+
+== blood-types
+when: tier>=acquaintance who:grieve-thea|larsen-hamid|nordqvist-dmitri|rina
+them: I know everyone's blood type. Not on purpose. It just went in, like song words.
+them: Pass someone in the corridor and their type pops up. It's a very odd superpower.   #funny
+ask: What's something you know without meaning to?
+listen: Do you know mine?
+  them: Of course. Not telling. Medical records are private. Even the fun ones.
+share: Which panels stick, all over the ship.
+  them: That's a superpower too. More useful at parties.   #funny
+cheer: Everyone's favourite biscuit.
+  them: Brennan has that one in a book. You're competing with a professional.   #funny
+
+// ---------------------------------------------------------------- colleague: why this job and listening
+
+== bench
+when: tier>=colleague !who:nandakumar
+them: People think the hard part's the cuts and burns. It's not. It's the bench by the door.
+them: Someone sits on the bench pretending they're fine. You learn to see it from the door.
+ask: How do you tell, when someone's not all right?
+listen: How do you see it?
+  them: They sit very straight. Fine people slouch. Nobody believes me. It's true.   #funny
+share: They go quiet. Or too loud.
+  them: That's it exactly. You'd be good in here.   #warm
+cheer: They say "I'm fine" twice.
+  them: Twice is the giveaway. Once is usually true.   #warm
+
+== just-listen
+when: tier>=colleague !who:nandakumar
+them: Half of what we do is listen. Properly. Not waiting to talk. Just listening.
+them: People leave lighter. Nothing's been fixed. Something's been heard.   #warm
+ask: Who's the best listener you know?
+listen: How do you listen properly?
+  them: Stop planning what to say back. That's all. It's harder than it sounds.
+share: Someone at home. They never interrupted.
+  them: Rare and precious. I hope you tell them, sometime.   #warm
+cheer: The lift. It never interrupts.
+  them: True. Terrible advice, though. Very short conversations.   #funny
+
+== bandage-hands
+when: tier>=colleague !who:nandakumar|oduya|rina !thread:exams
+them: I chose this job for my hands. They're steady. Always have been. Even when I'm not.
+them: Somebody once said steady hands are a gift you should give away. So I do.   #warm
+ask: What's a gift you have that you give away?
+listen: Are you ever nervous, then?
+  them: Inside, yes. My hands don't know. I've never told them.   #funny
+share: Patience. I'm good at waiting.
+  them: Then you give it away daily. People are grateful. Even when they don't say.   #warm
+cheer: Opening stuck jars.
+  them: Underrated. The galley would hire you on the spot.   #funny
+
+// ---------------------------------------------------------------- friend: what it means
+
+== infirmary-means
+when: tier>=friend !who:nandakumar|rina
+them: What does the infirmary mean to me? Nobody aboard is ever alone when they're poorly.
+them: Any hour, any day, there's always someone here. Today, maybe me.   #warm
+ask: Who do you do the job for, if you had to say?
+listen: Does it ever feel like too much?
+  them: Some days. Then someone says thanks with their eyes and it's light again.   #warm
+share: The people who'll never know I did it.
+  them: Quiet care. The best kind there is. Keep it up.   #warm
+cheer: For the quiet afternoons.
+  them: The rarest medicine aboard. Treasure them.   #funny
+
+== listening-habit
+when: tier>=friend !who:nandakumar
+them: The job gave me a habit. I listen to how people breathe. The mess, the lift, everywhere.
+them: Fast, slow, a sigh. You can tell a whole day from it. I try not to. I can't stop.   #warm
+ask: What do you notice about people that you wish you didn't?
+listen: Do you notice it on yourself?
+  them: Never. Doctors are terrible patients. Aides are worse.   #funny
+share: When someone's tired before they say it.
+  them: Then you've got it too. Careful. It doesn't switch off.   #warm
+cheer: Who's skipped the washroom queue.
+  them: That's not medicine. That's the Watch. Report it.   #funny
+

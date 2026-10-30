@@ -1,0 +1,54 @@
+@meeting crossingBackOath
+// SW6 (ending writer A), the crossing back (ending spec, Sunday Day 35, about 14:40-14:55, the bow lounge): the mirror
+// of crossingCeremony (Day 7). You lead the oath: the Captain's Day 7 lines are now yours, said as one-reply choices
+// (press A for each), so the words are in your mouth. Basil Bramwell is the only first-timer and answers; Tomas, on
+// watch on Day 7, is here this time; Pell crossed twice before. Basil's answer goes on the plaque under Day 7's
+// (flag:back.answer.feel | .colonies | .slow; plaque texts event.crossingBack.plaque.<answer>). FOR EN2: a choice with
+// one reply is on purpose (the oath's lines, said by you). If you're not there the Captain reads it herself as on Day 7
+// and the plaque has event.crossingBack.plaque.missed. Then crossingBackSignal (Saruth), then the address.
+title: The oath, the other way
+from: Captain Odile Marrow
+gist: You crossed back over the Line. You led the old oath from the front, Basil answered for the first-timers, and you drank Brennan's punch again. Your certificate has a second date.
+== lines
+marrow: Thank you all for coming. Four weeks ago I read this. Today I'm only listening.   [gesture]
+marrow > you: {me}. The front, please. It's yours.   [nod]
+bramwell-basil: Do I have to say anything? Is there a right thing? Is it long?
+pell: That's what they asked last time. Word for word.   [laugh]
+? choice
+* One of you does, at the end. I'll do the hard part. Listen.
+  marrow: Good. That's exactly how it goes.   [nod]
+? choice
+* Four weeks ago the Captain said this to me. It's the same promise both ways. Here it is.
+  bramwell-basil: Oh. Both ways. That's good. Sorry. Go on.
+? choice
+* "We have crossed the Line. We left the near stars behind us, and we did not go alone."
+  tomas: Not alone. Not on watch, either. Not this time.   [laugh]
+? choice
+* "Whatever is out here, we meet it as one crew, and we bring each other home."
+  pell: Every time. Gets me every time.   [sigh]
+? choice
+* "From today, this reach knows our names."
+  marrow: There. That's the oath. It's older than the ship. It sounds right from you.   [nod]
+bramwell-basil: That's it? I thought there'd be more. I mean, that's perfect. That's it?
+? choice
+* Now. Who answers for the first-timers?   flavour:share
+  bramwell-basil: It's only me. So it's me. Is it me? It's me.   [gesture]
+? choice
+* Just say what you feel.   flavour:listen flag:back.answer.feel
+  bramwell-basil: Right. Brilliant. We were new. We're not, quite. Thank you for having us. That's it.
+  marrow: That's going on the plaque. Under the last one.   [nod]
+* Tell them the Ostrander colonies did it first.   flavour:funny flag:back.answer.colonies
+  bramwell-basil: The Ostrander colonies did it first. Not as well. There. Did I do it?   [laugh]
+  marrow: You did. That's going on the plaque, I'm afraid.   [laugh]
+* Take your time. We'll wait.   flavour:listen flag:back.answer.slow
+  bramwell-basil: Hello, reach. Thank you. Goodbye, reach. Sorry. That's all I had.
+  marrow: That's plenty. That's going on the plaque.   [nod]
+brennan: Line punch. One mug each. Both ways, same rule. You drink it all.   [gesture]
+bramwell-basil: It's... green. Why is it green?
+brennan > you: Go on, love. You know the answer.
+? choice
+* Tradition. Drink.   flavour:funny
+  brennan: That's my cadet.   [laugh]
+tomas: I'm having one this time. Fresh. Not dregs. I checked my watch twice.
+pell: Dregs were character-building. Cheers, Lind.   [laugh]
+marrow: There. Line-crossers, both ways. Stay a minute. The Envoy has something to read us.

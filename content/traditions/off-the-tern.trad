@@ -1,0 +1,38 @@
+@tradition off-the-tern
+// Off the Tern (patch builder PT1, the user 2026-10-21: "the Tern brings a new junior aboard the way the player
+// arrived"): on a crew rotation day (when: rotation +0) the Sunday shuttle lands its new crew at 17:40. The ramp shuts
+// as the Tern comes in, Dev Raman says a word, the ramp opens and the arrivals walk down it to someone from their
+// department at its foot (Zeke for Works). This brings it to the Schedule, a heads-up and Mail the evening before;
+// the ramp and the walk down are section 14's rotTern (ROT_TERN). The greeter isn't counted here (section 14 plans
+// them). Placeholder words by PT1 until the head writer's.
+k: 454
+title: Off the Tern
+when: rotation +0
+at: 17:35-17:55
+min: 10
+prio: 2
+early: 5
+venue: shuttle-bay
+where: 5 pool @gather-shuttle-bay
+hold: none
+who: dept-of-honoree 40%, bunk-of-honoree 40%, everyone 5%
+anim: talk
+from: The Wren
+
+== mail
+- The Tern brings {names} aboard tomorrow at 17:40. Come down to the shuttle bay and say hello.
+
+== ask
+- New crew on the Tern tonight. Coming down to the bay?
+- {first} lands at twenty to six. I want to be there when the ramp opens.   #warm
+
+== here
+- There's the ramp. Welcome to the Wren, {first}!   #warm
+- Remember your first time down that ramp? Legs like jelly.   #funny
+- Wave, everyone. Make it look like we do this every day.   #funny
+
+== thanks
+- You're in the shuttle bay to see the Tern's ramp come down for {names}. Kitbags, nervous smiles, a wave from the top.   #warm
+
+== chatter
+- New hand on the Tern today. {first}, I think.

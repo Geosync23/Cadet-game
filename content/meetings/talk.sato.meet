@@ -1,0 +1,22 @@
+@meeting talk.sato
+// W3, Wren talks (plans/rec-traditions-plan.html): Day 8, Monday 19:00, a chief's talk in the auditorium seats (house
+// lights half up, the speaker on a stool, no lectern). Dr. Imra Sato, head of Survey: "What lives between the stars",
+// about the creature everyone saw swim past at dinner (it left at 18:40). Listen; one question, and she remembers who asked.
+title: What lives between the stars
+from: Dr. Imra Sato
+gist: Dr. Sato's talk on the creature that swam past the Wren at dinner, and what else might live out there.
+== lines
+sato: Right. You all saw it. Don't pretend you were eating. Nobody was eating.   [gesture]
+sato: Long, pale, slow. It kept pace with us for nine minutes, then turned away at twenty to seven. Rude, really.   [laugh]
+sato: We don't have a name for them yet. Survey's arguing about it. We think they feed on the dust between stars.
+sato: Here's the thing. Everything we know about them fits on one card. I've brought the card. It's a small card.
+sato: Tonight that card got longer. Every one of you who stood at a window is now a witness. Survey will want your notes.
+sato: That's the job, really. Look properly, write it down, and admit when you don't know. Questions? Go on.   [nod]
+? choice
+* Will it come back?   rel:sato+2 flavour:listen mem:talk.sato.asked
+  sato: Maybe. They follow the dust lanes, and so do we. If it does, I'll ring the mess.   [laugh]
+* What do I write in my notes?   rel:sato+2 flavour:practical mem:talk.sato.asked
+  sato: The time, where you stood, what you saw. Not what you think it was. Good question.   [nod]
+* (Just listen)
+  sato: No more? Then tea. Survey's tea. Nobody else will drink it, but it's there.   [laugh]
+sato: Thank you all. Go and write it down before you forget.

@@ -56,6 +56,18 @@
 - Which stop next?
 == haul.goodroute.note
 - a good route
+// FX3 (AR2): each stop's words on the arrow ({thing}: the crate, {a} of {b}: which load; {where}: the stop)
+== haul.goal.cart
+- Take a hover cart from the Cart bay
+== haul.goal.load
+- Load the {thing} ({a} of {b})
+== haul.goal.deliver
+- {thing} to {where}
+== haul.goal.return
+- Cart back to its dock
+// FX3: a dropped job's part still in your hands (15b's arrow; a cart won't take full hands)
+== job.putback
+- Put the {part} back: main storage
 == stock.title
 - Stocktake
 == stock.look
@@ -98,6 +110,14 @@
 - Locker tidy. Nothing loose.
 == inspect.reminder
 - Inspection at 06:30: clean uniform, bed made, locker tidy.
+== inspect.goal.uniform
+- Fresh uniform for inspection: your wardrobe
+== inspect.goal.bed
+- Make your bed: your bunk
+== inspect.goal.locker
+- Tidy your locker: your bunk
+== inspect.goal.here
+- Inspection at 06:30: your berth
 == inspect.mail.subject
 - This morning's inspection
 
@@ -158,6 +178,20 @@
 - Safe, clean, fixed.
 == inc.missed
 - The crew dealt with it. You'll hear about it at dinner.
+// FX3: the training (Day 8): Calder's word when it's set (Mail "Subject | body", and a toast) and ten minutes before;
+// the arrow as she walks you to the pipe; your turn, yours at once; not followed, the next try with its day, time and place
+== inc.warn
+- This morning | At {time} I'll show you how to make an incident safe. Stay on Deck 5.
+== inc.warn.soon
+- Ten minutes. Stay on Deck 5.
+== inc.goal.follow
+- Follow {name} to the burst pipe, Deck {deck}
+== inc.do.yours
+- Your turn. Make it safe. I'm right behind you.
+== inc.back
+- Back to it. Your job waited for you.
+== inc.again
+- Next time | The crew made it safe. We'll try again on {day}: {time}, {place}.
 
 // ---- M2 your work uniform (24b)
 == uniform.rule
@@ -166,3 +200,18 @@
 - Your uniform's grubby. Change at your wardrobe.
 == uniform.wait
 - While you wait: service {machine}
+
+// ---- Playtest 2 (item 1, head writer W2): the first round is a job on the board; the goal arrow and these green
+// tips walk you round, one per stop (seats E1 and U). Tips, 200 characters at most; {machine} the machine's name.
+== tip.round.take
+- Your first round is on the job board. Take it, and follow the arrow.
+== tip.round.go
+- Walk to {machine}. Follow the arrow.
+== tip.round.look
+- Look at {machine}. Listen to it. Then mark what you see.
+== tip.round.mark
+- Mark it: fine, worn, or something's off. Trust your eyes.
+== tip.round.next
+- Next one. Follow the arrow.
+== tip.round.done
+- Round done. Turn it in at the job board.

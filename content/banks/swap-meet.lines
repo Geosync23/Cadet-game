@@ -1,0 +1,65 @@
+@bank all
+// SW2, 0.92.6 item 2 (FX17's word list): the Sunday swap meet (tradition id market), 10:30-12:30 on the promenade
+// stalls; host Orla Ishikawa (the crew store; she keeps a list, of course), with Dara Shah on the other stall.
+// Keys and speakers, as FX17 set them:
+//   swap.open        Orla opens the meet (90 or fewer).
+//   swap.thing       one thing a line, "Name | short description"; 9 here, 3 shown a week.
+//   swap.reply.1-3   Orla's answer when you pick a thing; {thing} the thing's name as written ("A paperback").
+//   swap.after.1-3   ship chatter later, said to you, about what you took; {thing} as above.
+//   swap.stall       the two stallholders, Orla and Dara Shah (bubbles, 60 or fewer).
+//   swap.browse      any goer (bubbles, 60 or fewer).
+//   swap.close       optional: Orla closes the meet.
+// Things already canon at the swap meet: Kovac swapped a scarf for buttons; Holt buys mints; Cruz brings Gerald cuttings;
+// Pell's rusted music box came from it; everyone haggles with the Captain. Nobody here sells for credits: things swap.
+
+== swap.open
+- Good morning, everyone. Stalls are open. One thing for one thing, and be kind about it.
+- Hello, all. The swap meet's open. Swap fair. I'm keeping a list. Of course I am.   #funny
+- Morning. Lay your things out nicely. If it isn't yours to swap, it goes back. Enjoy.
+
+== swap.thing
+- A paperback | Slightly bent. The ending's good, they say.
+- A chess set | One knight's a button now. He plays just as well.
+- A puzzle of the Wren | A thousand pieces. Well. Nine hundred and ninety-eight.
+- A tea cosy | Knitted, a bit lopsided. So is the teapot.
+- Thick socks | Two pairs, clean, very warm.
+- A star map | Hand-drawn. The stars are right. The labels, mostly.
+- A wind-up torch | Wind it a minute, it shines for two.
+- A jar of buttons | Odd ones. Nobody knows where from.
+- A flower bookmark | Pressed, from the garden. Cruz didn't see.
+
+== swap.reply.1
+- {thing}? Good choice. It's been waiting for the right person. It's yours.   #warm
+== swap.reply.2
+- {thing}. Lovely. I'll write it on the list. There. Now it's properly yours.
+== swap.reply.3
+- {thing}! I nearly took that myself. Look after it.   #funny
+
+== swap.after.1
+- Heard what you took home from the swap meet. {thing}. Good pick.
+== swap.after.2
+- Who swapped for it on Sunday? {thing}, I mean. Oh, it was you. Lucky.   #funny
+== swap.after.3
+- {thing}, off to a good home from Sunday's swap meet. Yours.   #warm
+
+== swap.stall
+- Everything must go. Well. Some things.   #funny
+- One thing for one thing. That's the rule.
+- Have a look. No pressure. Lots of socks.   #funny
+- Fair swaps only. It all goes on the list.
+- Mind that jar. It's full of buttons.
+- Swapping a puzzle. Most of the pieces are in.   #funny
+
+== swap.browse
+- Ooh, what's that one?
+- Is that a whole chess set? Nearly whole?
+- I've got nothing to swap. I'm just nosy.   #funny
+- Came for a scarf. Leaving with a puzzle.   #funny
+- Someone's swapping Gerald cuttings. Of course they are.
+- Who knitted the tea cosy? It's lovely.
+- I'll give you a biscuit for that. Two biscuits.
+- Last week's paperback is back. Somebody didn't like it.   #funny
+
+== swap.close
+- That's the swap meet. Take your things home, and thank you. The list balances.   #warm
+- Half past twelve, everyone. Lovely swapping. Same time next Sunday.

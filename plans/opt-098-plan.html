@@ -1,0 +1,246 @@
+<title>0.98 Phone Speed Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one reading column; measured numbers in tables, the changes as open-able rows, questions as answer cards at the end. Same look as the other plan pages. */
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--amber:#e9c46a;--rose:#e58f8f;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--bg:#121a27;--chip:rgba(127,160,170,.14);color-scheme:dark}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--ink:#18232b;--muted:#4f6168;--teal:#167e72;--amber:#8a6510;--rose:#a33b3b;--glass:rgba(255,255,255,.86);--line:rgba(30,80,76,.22);--bg:#eef2f3;--chip:rgba(30,80,76,.08);color-scheme:light}}
+:root[data-theme="light"]{--ink:#18232b;--muted:#4f6168;--teal:#167e72;--amber:#8a6510;--rose:#a33b3b;--glass:rgba(255,255,255,.86);--line:rgba(30,80,76,.22);--bg:#eef2f3;--chip:rgba(30,80,76,.08);color-scheme:light}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{line-height:1.5;margin:0}
+main{max-width:860px;margin:0 auto;padding-block:16px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-size:21px;font-weight:600;margin:4px 0 0;text-wrap:balance}
+h2{font-size:17px;font-weight:600;margin:30px 0 8px;color:var(--teal);text-wrap:balance}
+h3{font-size:15px;font-weight:600;margin:12px 0 4px}
+p,li{font-size:14px}
+.sub{font-size:13px;color:var(--muted);margin-top:4px}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
+.card.rule{border-color:var(--amber)}
+details.item{background:var(--glass);border:1px solid var(--line);border-radius:12px;margin:8px 0;padding:0}
+details.item>summary{cursor:pointer;padding:10px 12px;list-style:none;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+details.item>summary::-webkit-details-marker{display:none}
+details.item>summary:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+details.item>summary .n{font-weight:700;color:var(--teal);min-width:30px}
+details.item>summary .t{flex:1;font-size:14.5px;min-width:200px}
+details.item[open]>summary{border-bottom:1px solid var(--line)}
+.body{padding:8px 12px 12px}
+.body p{margin:6px 0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 0 38px;width:100%}
+.chip{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:1px 9px;color:var(--muted)}
+.chip.gain{border-color:var(--teal);color:var(--teal)}
+.chip.risk{border-color:var(--amber);color:var(--amber)}
+.chip.q{border-color:var(--rose);color:var(--rose)}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:var(--chip);padding:0 4px;border-radius:4px;word-break:break-word}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+td.num,th.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tw{overflow-x:auto}
+.q{background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:12px 0}
+.q .qh{font-size:12px;color:var(--rose);font-weight:600;letter-spacing:.04em}
+.q .qt{font-size:14.5px;font-weight:600;margin:3px 0 8px}
+.q label{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;padding:5px 0;cursor:pointer}
+.q input[type=radio]{margin-top:4px;accent-color:var(--teal)}
+.rec{font-size:11px;color:var(--bg);background:var(--teal);border-radius:999px;padding:0 7px;margin-left:4px;white-space:nowrap}
+textarea{width:100%;min-height:58px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:13.5px;margin-top:6px}
+.why{font-size:12.5px;color:var(--muted);margin:2px 0 0 24px}
+#savebtn{appearance:none;border:1px solid var(--teal);background:var(--teal);color:var(--bg);font:inherit;font-size:14px;font-weight:600;padding:9px 18px;border-radius:999px;cursor:pointer;margin-top:6px}
+#savebtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+#savestate{font-size:13px;color:var(--muted);min-height:1.5em}
+a{color:var(--teal)}
+.legend{font-size:12.5px;color:var(--muted)}
+</style>
+<main>
+<h1>0.98 Phone Speed Plan</h1>
+<div class="sub">The optimization pass for 0.98.0: a faster start, smoother busy scenes, less work for the phone's battery. Planned by OP1 on 28 October 2026, 9 PM ET, from measurements of 0.96.0 (claude/integration fe11cd66). Your answers are at the end.</div>
+
+<div class="card rule"><b>The rules this plan keeps.</b> The game looks the same: every change is checked picture for picture against the build before it (cadet_test must say ALL IDENTICAL). If a change can't be made pixel-identical, it isn't merged until you've seen the difference and said yes (question 1). The crew's days come out the same. Every change runs the full round of checks before it's merged. Only the faster checks are out of scope: 0.98 is game speed only, as you asked.</div>
+
+<div class="card rule"><b>Your answers (28 October, evening, through lead 44).</b> (1) Items 1 and 2: show you a before and after picture first; only incredibly minor visual changes are acceptable, pixel-identical is preferred, and anything visible needs your OK. (2) No 60 fps cap. (3) No battery saver. (4) Backlog 12 is not fixed in 0.98: you'll balance it in 0.99, and it stays a known old failure. (5) FX24-2: yes, book walking time only for long walks to a tradition. So item 5 and the backlog 12 half of item 6 are set aside (kept on record below). Builders: OP1 builds the crew walking-time fix from tonight; a fresh render builder takes turns 3 and 4; RV25 reviews each turn.</div>
+
+<div class="card rule"><b>Update, 28 October, about 10:45 PM ET.</b> Items 3 and 4 were measured again more carefully and are set aside: neither saves enough to be worth a change. <b>Item 3:</b> 10 runs, alternating old and new without the debug switch: 2.89-3.24 s against 2.89-3.23 s, a typical difference of 0.03 s. The earlier 0.25-0.3 s came from always measuring the old build first. <b>Item 4:</b> the leftover shadows are moving parts and the day's decorations; about 10 draws could change safely, about 0.1 ms. The real speed wins are items 1 and 2. Added to 0.98 by your backlog answers: crew reach evening gatherings late (FX12-1), crew queue at an empty toilet (TQ1-1), and the music lookup four times a second (SD3-2, by the sound designer). FX12-1 and TQ1-1 come from the same walking-time estimate as FX24-2, so the three are fixed together (item 6).</div>
+
+<h2>What I found, in short</h2>
+<div class="card">
+<p><b>1. The busiest scenes spend most of their time preparing the picture, not running the game.</b> At Sunday dinner in the mess, zoomed out, the game's own work (the crew, the clock, the galley) takes 2.7 ms a frame. Then three.js, the drawing library, spends another 6.5 ms getting 638 drawing jobs ready for the graphics chip. Our speed check (perf_check) never sees that second part, because it skips drawing to save time.</p>
+<p><b>2. Two things cause a quarter to a third of those drawing jobs, and both can be cut.</b> You and up to 3 crew standing near you are each drawn as 16 separate pieces, twice (once for the picture, once for the shadows): about 128 jobs. The furniture is merged by material, and many materials differ only in colour: on Deck 3, 182 materials become 65 if colour is kept on the shape instead.</p>
+<p><b>3. Opening the game:</b> about half of the start-up wait is preparing the graphics chip's programs (shaders) for the first picture. One switch saves 0.25-0.3 s of it here, in all 3 paired runs, with identical pixels.</p>
+<p><b>4. Memory is fine.</b> It stays flat over two tours of every deck. No work planned there.</p>
+</div>
+
+<h2>The baseline (0.96.0)</h2>
+<p class="sub">Measured in a cloud test browser (4 cores, software drawing) with nothing else running. A phone runs the game's code roughly 4 to 5 times slower than this machine, so a 6 ms cost here is roughly 25-30 ms on a mid-range phone, against a 16.7 ms budget for smooth 60 frames a second. The drawing itself (the graphics chip's part) can't be timed in a software browser, so it's counted in drawing jobs instead. Phone portrait, zoomed out (0.7), the busiest view.</p>
+<div class="tw"><table>
+<tr><th>Scene</th><th class="num">Drawing jobs (picture + shadows)</th><th class="num">People</th><th class="num">Game code, ms a frame</th><th class="num">three.js preparing the picture, ms</th><th class="num">of which three.js itself</th></tr>
+<tr><td>Sunday dinner, the mess</td><td class="num">418 + 216</td><td class="num">67</td><td class="num">2.7</td><td class="num">6.5</td><td class="num">4.2-4.6</td></tr>
+<tr><td>The Line supper, the mess</td><td class="num">418 + about 216</td><td class="num">67</td><td class="num">3.2</td><td class="num">6.7</td><td class="num">not split</td></tr>
+<tr><td>Lantern supper, the mess</td><td class="num">417 + about 210</td><td class="num">61</td><td class="num">1.9</td><td class="num">7.1</td><td class="num">not split</td></tr>
+<tr><td>Veyli vessel, engine lights, bow lounge</td><td class="num">385 + 196</td><td class="num">63</td><td class="num">3.2</td><td class="num">5.5-5.7</td><td class="num">3.2-3.3</td></tr>
+<tr><td>Veyli vessel, parts chain, Works bay</td><td class="num">301</td><td class="num">31</td><td class="num">1.2</td><td class="num">4.0-4.6</td><td class="num">2.1-2.4</td></tr>
+<tr><td>Captain's address, auditorium</td><td class="num">203</td><td class="num">48</td><td class="num">1.9</td><td class="num">3.9-4.5</td><td class="num">2.3</td></tr>
+</table></div>
+<p class="sub">"three.js itself" is the drawing library's own work, with the calls to the graphics chip taken out; the rest is the cost of the calls (about 3,900 a frame at Sunday dinner). Game code is the median of 15 batches; it moves run to run (Sunday dinner 2.0-3.7 ms), which is why each change is proved by the paired method below.</p>
+
+<div class="tw"><table>
+<tr><th>Opening the game (phone portrait)</th><th class="num">Time here</th></tr>
+<tr><td>The page and three.js load, the game's script is read</td><td class="num">0.4 s</td></tr>
+<tr><td>The game script sets up: texture speckle 0.65 s, building Deck 4 0.48 s, the crew's day plans about 0.35 s, ship events 0.16 s</td><td class="num">1.9-2.9 s</td></tr>
+<tr><td>The first picture: almost all preparing 15 shader programs</td><td class="num">2.8-4.5 s</td></tr>
+<tr><td><b>In all, to the first picture</b></td><td class="num"><b>5.2-8.7 s</b></td></tr>
+</table></div>
+<p class="sub">Also measured: changing decks, 0.05-0.4 s to build the deck plus 0.5-1.8 s for its first picture here (mostly software drawing, far quicker on a phone's graphics chip). Memory: 22-29 MB of game data after cleaning up, flat across two tours. The file is 8.3 MB (2.45 MB compressed); 37% of it is the dialogue.</p>
+
+<h2>The changes, ranked</h2>
+<p class="sub">Gains are estimates from the measurements above until each is built and proved. Open a row for the details.</p>
+
+<details class="item"><summary><span class="n">1</span><span class="t">You and the crew near you drawn as one piece each, not 16</span><span class="chips"><span class="chip gain">about 120 fewer drawing jobs at dinner (a fifth)</span><span class="chip risk">medium risk</span><span class="chip q">question 1</span></span></summary><div class="body">
+<p><b>What:</b> the crowd is already drawn as one shape per 12 people, with their joints moved by the graphics chip. You, and the up to 3 story crew who get a full body when they're within about 4 tiles, are still 16 pieces each (head, arms, legs and so on), each drawn twice. The same baked shapes would become one shape per person, moved the same way the crowd's are.</p>
+<p><b>Gain:</b> Sunday dinner from 638 drawing jobs to about 515; three.js's preparing time about 1-1.5 ms less here (roughly 4-6 ms on a phone), in every scene where someone is near you.</p>
+<p><b>Risk:</b> the pieces' positions get worked out on the graphics chip instead of before it. The sums are the same, but rounding can land differently, so a few edge pixels may come out one shade apart. Your uniform's tint, props in your hands, and the rank pips all have to carry over; the builder checks each.</p>
+<p><b>Proof:</b> cadet_test against the build before; close-up shots of you and a full-body crew member standing, sitting, walking, carrying, at the four phone sizes; a difference picture if any pixel moves (question 1); the paired timing below.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">2</span><span class="t">Furniture that differs only in colour drawn together</span><span class="chips"><span class="chip gain">about 80-90 fewer drawing jobs at dinner</span><span class="chip risk">medium risk</span><span class="chip q">question 1</span></span></summary><div class="body">
+<p><b>What:</b> after a deck is built, its furniture is merged into one shape per material. Many materials differ only in colour (182 on Deck 3, 65 if colour is ignored; 106 to 49 on Deck 4). Keeping each piece's colour on its own corners lets those share one shape. Only solid materials take part; see-through ones stay as they are.</p>
+<p><b>Gain:</b> the mess's 142 furniture jobs fall to about 55; less on quieter decks. Together with item 1, Sunday dinner zoomed out goes from 418 picture jobs to roughly 270, well under the 450 budget, which leaves room for new events in the mess.</p>
+<p><b>Risk:</b> the colour is the same number either way, but it reaches each pixel by a slightly different route, so a rare pixel may come out one shade apart. Furniture would also be drawn in a different order, which doesn't change solid things (no two surfaces share a plane, by the phone rules).</p>
+<p><b>Proof:</b> cadet_test; every deck at the four phone sizes, day and night; the paired timing.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">3</span><span class="t">Stop checking each shader for errors while you play</span><span class="chips"><span class="chip">set aside 28 October: no real gain when measured in alternating order</span></span></summary><div class="body">
+<p><b>What:</b> three.js stops after preparing each graphics program to ask whether it had errors, which makes the browser wait for each one in turn. One switch turns that off (<code>renderer.debug.checkShaderErrors</code>). It stays on in Dev mode and in the checks, so a broken shader would still be caught.</p>
+<p><b>Gain:</b> first picture 2.72-2.97 s instead of 3.03-3.24 s here (3 of 3 alternating runs faster). On a phone the programs can be prepared side by side, so the saving should be larger; the Dev Speed card will show it on your phone.</p>
+<p><b>Proof:</b> pixels identical by design (nothing about the picture changes); cadet_test; devmode_check for the Dev mode side.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">4</span><span class="t">The rest of the still furniture casts shadows the cheap way</span><span class="chips"><span class="chip">set aside 28 October: about 10 safe draws, about 0.1 ms</span></span></summary><div class="body">
+<p><b>What:</b> since 0.27 most still things cast their shadow through a few plain stand-in shapes. About 20 merged furniture shapes in the mess, and some event decorations added after a deck is built, still cast their own. They'd join the stand-ins.</p>
+<p><b>Gain:</b> small but steady: fewer shadow jobs in every room.</p>
+<p><b>Proof:</b> the same triangles cast the same shadows (the rule the stand-ins already follow); cadet_test; shots of each changed room with shadows on.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">5</span><span class="t">Battery: no more than 60 pictures a second, and an optional saver setting</span><span class="chips"><span class="chip">set aside: your answer, 28 October (no cap, no saver)</span></span></summary><div class="body">
+<p><b>What:</b> the game draws a new picture every time the screen refreshes. Many phones, foldables included, refresh 120 times a second, so in a calm room the game draws twice as many pictures as a 60 Hz phone for the same movement. A cap at 60 keeps every picture the same, just fewer of them. Separately, a "battery saver" in the device's settings (off unless you turn it on) could draw at a slightly lower sharpness and with softer shadows: that one changes the look, so only when chosen.</p>
+<p><b>Gain:</b> can't be measured in our test browser (it has no real screen); your phone's Dev Speed card would show frames a second before and after.</p>
+<p><b>Proof:</b> with the cap, every picture is identical (cadet_test steps frames itself, so it's untouched); with the saver off, the game is identical.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">6</span><span class="t">The crew's walking time: the reading corner (FX24-2), late to evening gatherings (FX12-1), queueing at an empty toilet (TQ1-1)</span><span class="chips"><span class="chip risk">changes the game's behaviour a little</span><span class="chip">backlog 12 set aside for 0.99 (your answer)</span></span></summary><div class="body">
+<p><b>career_check, "Relied on before Day 5" (backlog 12): set aside, your answer of 28 October.</b> You'll balance it in the 0.99 pass; it stays a known old failure. On record: a very busy cadet earns enough on Day 4 to be called "Relied on" a day early (one point over since 0.92.6). The check is right: the fix goes in the game, never in the check. Smallest fix: the word waits for Day 5. Owner: the Works career engineer.</p>
+<p><b>events_check, the reading corner on Day 7 (FX24-2).</b> Farouk's plan has him in the garden until 16:00 and in the bow lounge from 16:00, but the walk takes over 20 ship minutes, so he arrives as his stay ends. The planner leaves no walking time for a move on the same deck. Smallest fix: book the walking time only for long walks to a tradition. A planner-wide fix would move many people's plans on every tradition day. Owner: the sim engineer.</p>
+<p><b>Late to gatherings (FX12-1)</b> and <b>queueing at an empty toilet (TQ1-1)</b> come from the same estimate of how long a walk takes: too short from the lift to a room, too long to a toilet. The fix measures the planned against the real walks first, then corrects the estimate once for all three. This moves many crew plans by a few minutes on every deck; each difference in cadet_test is explained before it's merged.</p>
+<p><b>Proof:</b> events_check walks the reading corner and passes; arrivals at gatherings and toilet waits measured before and after; day_check, events_check and food_check over the event days; the rest of the full round.</p>
+</div></details>
+
+<h3>Measured and set aside</h3>
+<ul>
+<li><b>Adding the texture speckle in one batch</b> at start-up: the same pixels (checked, all 17 textures), but no time saved (6 alternating runs: 5.2-5.9 s against 5.3-5.8 s). Making the speckle faster any other way changes the look (decided 21 October).</li>
+<li><b>Lighter crowd posing</b> and <b>smaller crowd uploads</b>: measured in the first optimization pass at under 0.2 ms a frame; still true.</li>
+<li><b>Planning the crew's day later at start-up</b> (about 0.35 s here): it would bend the rule that a day's plan comes out the same whenever it's made.</li>
+<li><b>Instanced things set up again every frame</b> (about 450 extra graphics calls a frame at dinner): a habit of three.js itself, which we load as it is; not worth patching.</li>
+</ul>
+
+<h2>How each gain is proved, through the noise</h2>
+<div class="card">
+<p>Run-to-run timing moves by 1-2 ms, more than some of these changes. So each change is proved with the old and new builds open side by side in one quiet browser, in the same scene, measured in turns (old, new, old, new... 15 times). The result is the typical difference between each pair and how many pairs went each way, not two separate runs. The drawing-job counts are exact and need no repeats. The timing now includes three.js preparing the picture, not only the game code. The measuring scripts are in <code>plans/opt098-probes/</code>.</p>
+</div>
+
+<h2>Turns and timing</h2>
+<div class="tw"><table>
+<tr><th>Turn</th><th>What</th><th class="num">Building</th><th>Who</th></tr>
+<tr><td>1</td><td>Set aside: no gain when measured carefully (item 3)</td><td class="num">none</td><td></td></tr>
+<tr><td>2</td><td>Set aside: too small (item 4)</td><td class="num">none</td><td></td></tr>
+<tr><td>3</td><td>One piece per full body (item 1), before and after pictures to you first</td><td class="num">about 4 h</td><td>a fresh render builder</td></tr>
+<tr><td>4</td><td>Furniture colours (item 2), before and after pictures to you first</td><td class="num">about 5 h</td><td>the render builder</td></tr>
+<tr><td>5</td><td>Set aside (your answer): no cap, no saver</td><td class="num">none</td><td></td></tr>
+<tr><td>6</td><td>The crew's walking time (FX24-2, FX12-1, TQ1-1); backlog 12 waits for 0.99</td><td class="num">about 6 h</td><td>OP1, reviewed by RV25</td></tr>
+<tr><td>7</td><td>The music lookup remembered, not repeated four times a second (SD3-2)</td><td class="num">about 1 h</td><td>the sound designer, if the lead agrees</td></tr>
+<tr><td></td><td>Review, then the full round on the combined build</td><td class="num">about 4 h</td><td>reviewer, build master, runners</td></tr>
+</table></div>
+<p><b>Estimate:</b> OP1 starts turn 6 tonight (Wednesday, October 28); the render builder works on turns 3 and 4 on Thursday, with your picture check before they're merged. The full round runs Thursday night, so 0.98.0 would be ready for your OK on <b>Friday, October 30, by about noon ET</b>. Each turn is merged on its own, so if one runs long, the others still go out.</p>
+
+<h2>Your answers</h2>
+<form id="answers" data-collection="answers" data-doc="opt-098" onsubmit="return false">
+
+<div class="q" data-qid="op-pixels"><div class="qh">QUESTION 1 &middot; THE LOOK</div><div class="qt">Items 1 and 2 may leave a few pixels one shade different. What do I do if they're not pixel-identical?</div>
+<label><input type="radio" name="op-pixels" value="a" id="op-pixels-a"><span>Try for identical first. If it isn't, show me the difference picture side by side and I decide <span class="rec">recommended</span></span></label>
+<label><input type="radio" name="op-pixels" value="b" id="op-pixels-b"><span>Strict: only merge it if it's pixel-identical; otherwise set it aside</span></label>
+<label><input type="radio" name="op-pixels" value="c" id="op-pixels-c"><span>A pixel or two one shade apart is fine if nobody could see it; just tell me</span></label>
+<textarea name="op-pixels-note" id="op-pixels-note" placeholder="Anything to add (optional)"></textarea></div>
+
+<div class="q" data-qid="op-cap"><div class="qh">QUESTION 2 &middot; BATTERY</div><div class="qt">Should the game draw at most 60 pictures a second on fast-refresh screens?</div>
+<label><input type="radio" name="op-cap" value="a" id="op-cap-a"><span>Yes, cap it at 60. The pictures are the same, just fewer, and the battery lasts longer <span class="rec">recommended</span></span></label>
+<label><input type="radio" name="op-cap" value="b" id="op-cap-b"><span>No, keep drawing as fast as the screen can show</span></label>
+<label><input type="radio" name="op-cap" value="c" id="op-cap-c"><span>Make it a setting on the device, 60 by default</span></label>
+<textarea name="op-cap-note" id="op-cap-note" placeholder="Anything to add (optional)"></textarea></div>
+
+<div class="q" data-qid="op-saver"><div class="qh">QUESTION 3 &middot; BATTERY</div><div class="qt">Add a "battery saver" setting (slightly softer picture and shadows), off unless you turn it on?</div>
+<label><input type="radio" name="op-saver" value="a" id="op-saver-a"><span>Yes, in the device's settings, off by default <span class="rec">recommended</span></span></label>
+<label><input type="radio" name="op-saver" value="b" id="op-saver-b"><span>Not now</span></label>
+<textarea name="op-saver-note" id="op-saver-note" placeholder="Anything to add (optional)"></textarea></div>
+
+<div class="q" data-qid="op-b12"><div class="qh">QUESTION 4 &middot; THE OLD FAILURES</div><div class="qt">"Relied on" a day early for a very busy cadet (backlog 12). How should it be fixed?</div>
+<label><input type="radio" name="op-b12" value="a" id="op-b12-a"><span>The word waits for Day 5, whatever the points. The smallest change <span class="rec">recommended</span></span></label>
+<label><input type="radio" name="op-b12" value="b" id="op-b12-b"><span>Slow a busy cadet's points a little (a balance change)</span></label>
+<label><input type="radio" name="op-b12" value="c" id="op-b12-c"><span>Leave it for the 0.99 balance pass</span></label>
+<textarea name="op-b12-note" id="op-b12-note" placeholder="Anything to add (optional)"></textarea></div>
+
+<div class="q" data-qid="op-fx242"><div class="qh">QUESTION 5 &middot; THE OLD FAILURES</div><div class="qt">Farouk misses the reading corner because his plan leaves no time to walk there (FX24-2). How should it be fixed?</div>
+<label><input type="radio" name="op-fx242" value="a" id="op-fx242-a"><span>Book walking time only for long walks to a tradition. A narrow change <span class="rec">recommended</span></span></label>
+<label><input type="radio" name="op-fx242" value="b" id="op-fx242-b"><span>Book walking time for every move to a gathering (wider: many plans move on tradition days)</span></label>
+<label><input type="radio" name="op-fx242" value="c" id="op-fx242-c"><span>Leave it as a known old failure</span></label>
+<textarea name="op-fx242-note" id="op-fx242-note" placeholder="Anything to add (optional)"></textarea></div>
+
+<div class="q" data-qid="op-general"><div class="qh">ANYTHING ELSE</div><div class="qt">Scenes that feel slow on your phone, or anything about the plan?</div>
+<textarea name="op-general" id="op-general" placeholder="Your thoughts"></textarea></div>
+
+<button type="button" id="savebtn">Save my answers</button>
+<p id="savestate" aria-live="polite"></p>
+</form>
+<p class="legend">Planned by OP1 for lead 44 on claude/opt-098-plan. Measurements: plans/opt098-notes.md and plans/opt098-probes/ (frame_probe, render_split, render_prof, draw_mix, grain_defer, sizes), with the first pass's probes in plans/opt-probes/. Earlier pass: plans/opt-plan.html and plans/opt-measure.md.</p>
+</main>
+<script>
+(function () {
+  const form = document.getElementById('answers'), btn = document.getElementById('savebtn'), st = document.getElementById('savestate');
+  const COLL = form.dataset.collection, DOC = form.dataset.doc;
+  let db = null, user = null;
+  function read() {
+    const out = {};
+    for (const q of form.querySelectorAll('.q[data-qid]')) {
+      const r = q.querySelector('input[type=radio]:checked');
+      if (r) out[q.dataset.qid] = r.value;
+      const t = q.querySelector('textarea');
+      if (t && t.value.trim()) out[t.name] = t.value.trim();
+    }
+    return out;
+  }
+  function fill(d) {
+    if (!d) return;
+    for (const k in d) {
+      const r = form.querySelector('input[type=radio][name="' + k + '"][value="' + String(d[k]).replace(/"/g, '') + '"]');
+      if (r) r.checked = true;
+      const t = form.querySelector('textarea[name="' + k + '"]');
+      if (t && typeof d[k] === 'string') t.value = d[k];
+    }
+  }
+  btn.addEventListener('click', async function () {
+    if (!db) { st.textContent = 'Saving is not available in this view. Please send your answers in a message instead.'; return; }
+    st.textContent = 'Saving...';
+    try {
+      const data = read(); data.savedAt = new Date().toISOString();
+      if (user) { try { data.by = await user.id(); } catch (e) { /* fine without it */ } }
+      await db.collection(COLL).doc(DOC).set(data);
+      st.textContent = 'Saved. You can change your answers and save again any time.';
+    } catch (e) {
+      st.textContent = 'Could not save (' + ((e && (e.code || e.message)) || 'error') + '). Please try again, or send your answers in a message.';
+    }
+  });
+  (async function () {
+    try {
+      if (!window.claude || !window.claude.use) return;
+      db = await window.claude.use('db'); user = await window.claude.use('user');
+      if (db) { const s = await db.collection(COLL).doc(DOC).get(); if (s && s.exists) fill(s.data()); }
+    } catch (e) { /* the page still reads; saving says so */ }
+  })();
+})();
+</script>

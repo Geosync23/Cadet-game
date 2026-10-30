@@ -1,0 +1,22 @@
+@meeting endingBreakfast
+// SW6 (ending writer A), the last morning (ending spec, "If you go": Monday Day 36, breakfast, the mess): friends sit
+// with you; Brennan's last plate (from her book of everyone's favourite dish); the Captain's word in the mess. Cast:
+// brennan, pell, tomas, rina, marrow (EN1: swap pell/tomas/rina for whichever close friends are at breakfast if that's
+// simpler; their lines here are plain enough to move). Then the bubbles in goodbye.lines (ending.breakfast.here).
+title: The last breakfast
+from: Chef Auda Brennan
+gist: Your last breakfast on the Wren. Brennan made your favourite, friends squeezed onto your bench, and the Captain stopped by.
+== lines
+brennan: Sit, love. No, not there. There. That's your seat. It's been your seat for weeks.   [gesture]
+brennan > you: Your favourite. From the book. I've written today's date by it. Don't you dare leave any.
+pell: She made extra. For you. I've been told to keep my fork to myself. Officially.   [laugh]
+tomas: I've packed you a corner of the star map. The bit with the Wren on it. In pencil. It's in your bag already.
+rina: I've checked his packing. He packed it three times. It's very safe.   [laugh]
+? choice
+* This is the best breakfast I've ever had.   flavour:share
+  brennan: Course it is. I made it. Oh, love. Eat. Eat before I start.   [sigh]
+* Save me a seat. Just in case.   flavour:cheer
+  pell: Always. Nobody sits there. I'll put a screw on it.   [laugh]
+marrow: Don't get up, anyone. I'm only passing. Good morning, {me}.   [nod]
+marrow > you: Half nine, the shuttle bay. Eat first. That's an order, and the last one I'll give you.
+brennan: Hear that? Captain's orders. Plate clean. Then you can go.   [nod]

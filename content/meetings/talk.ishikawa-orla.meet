@@ -1,0 +1,22 @@
+@meeting talk.ishikawa-orla
+// SW2, 0.92.6 item 13 (FX17's word list): a small Wren talk, 19:00-19:40 on the auditorium stage (a ring of eight
+// chairs, house dark, the stars behind, tea from the kettle). Day 53, Thursday (her day off). Orla Ishikawa, the crew store.
+title: Every credit in the ledger
+from: Orla Ishikawa
+gist: Orla's small talk on the crew store's ledger, and the one credit she stayed late to find.
+== lines
+ishikawa-orla: Oh, hello. Thank you for coming. I've brought the ledger. I won't read it all.   [laugh]
+ishikawa-orla: Every sale at the crew store goes in here. Every credit, in and out.
+ishikawa-orla: At closing time I add it up. If it balances, that's the best bit of my day.
+ishikawa-orla: Once it didn't. One credit short. I stayed an hour late and found it.   [nod]
+ishikawa-orla: It had rolled under the till. I keep it in an envelope now. Here it is.   [gesture]
+ishikawa-orla: The ledger knows the ship. Socks sell before a cold week. Biscuits sell after a storm.
+ishikawa-orla: That's my talk. Questions are welcome. Take your time.
+? choice
+* What sells the most?   rel:ishikawa-orla+2 flavour:practical mem:talk.ishikawa-orla.asked
+  ishikawa-orla: Biscuits. Then socks. Then biscuits again. Yara says it's a law of nature.   [laugh]
+* Why keep the lost credit?   rel:ishikawa-orla+2 flavour:listen mem:talk.ishikawa-orla.asked
+  ishikawa-orla: To remind me it's always somewhere. You only have to keep looking.   [nod]
+* (Just listen)
+  ishikawa-orla: Thank you for listening so kindly. Mind how you go.
+ishikawa-orla: Thank you all. Come and see the ledger at the store. It's very tidy.

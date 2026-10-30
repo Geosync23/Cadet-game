@@ -120,3 +120,13 @@
 == week1
 ? flag:pilot.ramp
 - Down gently. Ramp's opening. Welcome to the Wren.
+
+// ---- ZW1 (writer), patch 0.92.5 item 5: more chat-card openers, so a tap doesn't repeat (FX13's no-repeat).
+== greet
+? tier>=acquaintance
+- {hi}, {me}. Gentle watch today. Not a ripple.
+- {hi}. Dusted the model again. Don't tell my cabin.   #funny
+- {me}. Good to see you. Steady as she goes, I hope.   #warm
+- {hi}. We turned a degree this morning. Nobody spilt a drop.
+- {hi}, {me}. The Wren's flying beautifully. I'd say so even if she wasn't.   #funny
+- {me}. You're walking like someone with a good day. Good.

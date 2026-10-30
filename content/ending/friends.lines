@@ -1,0 +1,111 @@
+@bank all
+// SW6 (ending writer A), the friends (ending spec, "The news gets out", Friday Day 33 until Saturday 20:00, and the
+// call home; section 9: content/ending/friends.lines). The close friends' own scenes are meetings beside this file:
+// endingFriend.pell | .tomas | .kovac-zainab | .bramwell-basil | .halloran-emeka | .rina; Zeke's are endingZekeFriday
+// and endingZekeSunday.stay | .go. These lines are for everyone else at the friend tiers, the chat card's button, the
+// news going round, and what friends say once you've answered and once it's settled.
+// FLAGS (agreed with lead 39 / EN1): end.offer; end.now.<stay|go|unsure>; end.stay / end.go (settled at the address).
+
+// ---- the chat card's button (a friend's card, Friday Day 33 until her address) and its use
+== ending.ui.friend.button
+- About the transfer
+
+// ---- a friend's own take, on their card (90 at most), for friends without their own scene. Some say stay, some say
+// go, some won't say. The engine picks one per person, so each friend gets their own.
+== ending.friend.talk
+? tier>=friend
+- Headquarters! {wow}. I'd go. I mean, I'd miss you. But I'd go.   #warm
+- Stay. Sorry. You asked. Stay. The Wren's better with you on her.   #warm
+- I won't say. Whatever I say, you'll hear the other one louder. That's how it works.
+- You did in four weeks what takes most people a year. They noticed. Course they did.   #warm
+- Go and see what it's like. You can always come back out. People do.
+- I'd stay. But I've never wanted a desk in my life. You might. That's allowed.
+- My gut says stay. My head says go. My stomach says it's nearly dinner.   #funny
+- Big choice. Don't make it hungry. Don't make it tired. Then make it.
+- Whatever you pick, I'll be on the right side of it. Which is your side.   #warm
+? tier>=close
+- I don't want you to go. There. That's selfish and true. Now forget I said it and choose.   #warm
+- You'd be brilliant there. You'd be brilliant here. That's the trouble with you.   #warm
+- If you go, write. If you stay, I'll stop pretending I wasn't worried.   #warm
+? dept:works tier>=friend
+- Works without you? The board'd notice. The board notices everything.   #funny
+- Calder's been quiet all day. Quieter. You know what that means.
+? dept:galley tier>=friend
+- Brennan's put your favourite on for Sunday. Just in case. Don't tell her I told you.   #warm
+? dept:watch tier>=friend
+- The Watch knew before you did. We're sorry. It's the lift. It hears everything.   #funny
+? dept:survey tier>=friend
+- Our charts go to headquarters to be read. Go and read them. Or stay and make them.
+
+// ---- Zeke on his card, before his Friday evening talk (he wants it at the tea corner, after dinner)
+== ending.friend.talk.torres-zeke
+? !flag:end.zeke.friday
+- Not here. Not with coil three listening. After dinner, tea corner. I'll find you.
+?
+- I said what I had to say. The rest's yours. I'm here, though.   #warm
+
+// ---- the news going round, Friday and Saturday (bubbles, 60 at most; anyone who knows you)
+== ending.rumour
+- Did you hear? Headquarters wants the new hand.
+- Headquarters asked for {me}. By name, someone said.
+- Is it true about the transfer? Everyone's asking.
+- The Captain had the new hand up to the ready room. Big news.
+- They'll be at headquarters by next week. Or not. Who knows?
+? dept:works
+- Works might be losing one. Calder hasn't said a word.
+? place:mess
+- Brennan's heard. Brennan always hears first.   #funny
+
+// ---- after you've told the Captain, before her address (chat card lines, 90 at most). It isn't settled yet: they
+// speak of it as what you've said, not what will happen.
+== ending.friend.told
+? flag:end.now.stay tier>=friend
+- You told her you're staying? I heard. I'm trying very hard not to celebrate yet.   #warm
+- Staying, they say. Good. I hadn't packed you a goodbye. I'm terrible at those.   #funny
+- You're staying? Don't change your mind. Unless you want to. But don't.   #funny
+? flag:end.now.go tier>=friend
+- You told her yes. Headquarters. I'm happy for you. Give me a day to look happy.   #warm
+- Going, then. I knew you'd be brilliant somewhere bigger. I just liked you here.   #warm
+- You said yes? Good. Proper good. I'm not crying. That's the scrubber dust.   #funny
+? flag:end.now.unsure tier>=friend
+- Still thinking? Good. Anyone who's sure about that is lying.
+- Not sure yet? The Captain'll ask you on Sunday, in front of everyone. No pressure.   #funny
+
+// ---- settled at the address (Sunday, from about 15:00). Stay lasts until Monday's first morning (Writer B's endgame
+// pool takes over then). Go lasts until the ramp.
+== ending.friend.settled
+? flag:end.stay
+- You're staying! Good. Right. That's that, then. Good.   #warm
+- I heard the Captain's speech. "We're keeping them." I'm keeping that line.   #warm
+- Staying. Excellent. I owe Halloran a scone. Long story.   #funny
+- You're staying, so you can help with the board on Monday. Welcome back. You never went.   #funny
+? flag:end.go
+- Tomorrow, then. I'll be in the bay. Half nine. I won't be late.   #warm
+- Headquarters. Look at you. Write to us. Real letters.   #warm
+- I don't like goodbyes. I'll do this one properly anyway.   #warm
+- You'll be back out here one day. They always come back to the frontier.
+? flag:end.go tier>=close
+- I'm not saying goodbye today. Tomorrow. One at a time.   #warm
+
+// ---- the call home about the transfer (the booths' option "Call home about the transfer", level 2, once, Thursday
+// 16:30 to Saturday). One-sided, as every call home since 0.62.0: Mum on the line (she/her; calls you "chick"), with
+// Gran in the room. Proud, and careful not to choose for you. In order, 8 lines (moment lines, 140 at most).
+// Canon: Mum drives the number nine bus and does pottery; Gran has the allotment and the box ("Is the light on?").
+== ending.call.mum.1
+- Chick! Your letter came. I read it twice. Then I read it to Gran. Then she read it to me.   #warm
+== ending.call.mum.2
+- Headquarters. Headquarters! I told the whole number nine bus. A man in the back clapped.   #funny
+== ending.call.mum.3
+- Now listen. I'm not going to tell you what to do. I've promised Gran. She's watching me.   #warm
+== ending.call.mum.4
+- When you went out there, I cried at the port for an hour. I'd do it again tomorrow.   #warm
+== ending.call.mum.5
+- Gran says: "The allotment says go." I don't know what that means. Nor does she.   #funny
+== ending.call.mum.6
+- Jo says whatever you pick is right, because you picked it. Steve the stapler agrees.   #funny
+== ending.call.mum.7
+- Your shelf's still here. It'll be here either way. That's all I wanted to say, really.   #warm
+== ending.call.mum.8
+- We're proud of you, chick. Here, there, anywhere. Love to you. Gran says love too.   #warm
+== ending.ui.booth.option
+- Call home about the transfer

@@ -1,0 +1,15 @@
+@reactions event.ionStorm.resolution
+// EW1 (events writer), the storm update: Sunday Day 14 (the all-clear at 10:00, the booths' rush, the party at 19:00).
+? cue:event.ionStorm.resolution
+- Talent night's moved to next week. Tonight's for the party.
+- The lounge is open again. I'm going to sit in every chair.   #funny
+
+// EW2 (events writer 2), story A "Sixty by lamplight": the crew retell the lantern supper on Sunday
+? cue:event.ionStorm.resolution !who:dlamini-lukas
+- Lukas's lantern supper: two rings. Or six. Ask around.   #funny
+? cue:event.ionStorm.resolution dept:galley !who:brennan|dlamini-lukas
+- Supper was all Lukas. We carried bowls and kept quiet.   #warm
+? cue:event.ionStorm.resolution who:varga-tariq
+- Lukas fed sixty-one. Still slower than me at onions.   #funny
+? cue:event.ionStorm.resolution who:brennan
+- Back in my galley. Pans nearly where I left them. Nearly.   #funny

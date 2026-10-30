@@ -1,0 +1,344 @@
+<title>Backlog before 1.0</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a ship's job board. One column of item cards under a summary strip; each group is a labelled section with a coloured tag. */
+:root{
+  --bg:#f3f6f7; --panel:#ffffff; --ink:#15222a; --muted:#5a6b74; --line:#d5dee2; --accent:#0f7f74;
+  --a:#b3261e; --a-bg:#fbe9e7; --b:#9a6300; --b-bg:#fdf2dc; --c:#4f5f6a; --c-bg:#e8edf0; --d:#2e7d32; --d-bg:#e5f3e6;
+  --f-display:"Saira Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c1519; --panel:#132028; --ink:#e3eef0; --muted:#93a7ae; --line:#24363f; --accent:#5fe3d0;
+  --a:#ff8a80; --a-bg:#3a1916; --b:#ffc260; --b-bg:#33260e; --c:#a9bac2; --c-bg:#1d2b33; --d:#8ad68e; --d-bg:#16301a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c1519; --panel:#132028; --ink:#e3eef0; --muted:#93a7ae; --line:#24363f; --accent:#5fe3d0;
+  --a:#ff8a80; --a-bg:#3a1916; --b:#ffc260; --b-bg:#33260e; --c:#a9bac2; --c-bg:#1d2b33; --d:#8ad68e; --d-bg:#16301a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+.wrap{max-width:860px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:28px}
+h1,h2{font-family:var(--f-display);font-weight:700;letter-spacing:.01em;text-wrap:balance;margin:0;line-height:1.1}
+h1{font-size:2.4rem}
+h2{font-size:1.6rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.eyebrow{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.lede{max-width:65ch;color:var(--ink);margin:6px 0 0}
+.lede p{margin:0 0 10px}
+.muted{color:var(--muted)}
+.counts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.counts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.count{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;border-top:4px solid var(--g)}
+.count b{font-family:var(--f-display);font-size:2.1rem;line-height:1;font-variant-numeric:tabular-nums;color:var(--g)}
+.count span{font-size:.92rem}
+.count small{color:var(--muted);font-size:.8rem}
+.ga{--g:var(--a);--gbg:var(--a-bg)} .gb{--g:var(--b);--gbg:var(--b-bg)} .gc{--g:var(--c);--gbg:var(--c-bg)} .gd{--g:var(--d);--gbg:var(--d-bg)}
+.vers{display:flex;flex-wrap:wrap;gap:8px;font-size:.9rem}
+.vers span{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:3px 10px;font-variant-numeric:tabular-nums}
+.filters{display:flex;flex-wrap:wrap;gap:8px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding-block:8px;z-index:5;border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.filters button{font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.filters button:focus-visible,select:focus-visible,textarea:focus-visible,.save:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+section.group{display:flex;flex-direction:column;gap:12px}
+.tag{font-family:var(--f-mono);font-size:.8rem;font-weight:500;background:var(--gbg);color:var(--g);border-radius:4px;padding:2px 8px;letter-spacing:.04em}
+.gdesc{margin:0;color:var(--muted);max-width:65ch}
+.item{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--g);border-radius:6px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 12px}
+.id{font-family:var(--f-mono);font-size:.82rem;color:var(--muted)}
+.ver{font-family:var(--f-mono);font-size:.78rem;border:1px solid var(--g);color:var(--g);border-radius:4px;padding:1px 6px;white-space:nowrap}
+.what{margin:0;font-weight:700;max-width:68ch}
+.why{margin:0;max-width:68ch}
+.why b{font-weight:700}
+.chk{margin:0;font-size:.85rem;color:var(--muted)}
+.ans{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;border-top:1px dashed var(--line);padding-top:10px}
+.ans select,.ans textarea,.gen textarea{font:inherit;font-size:.92rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:6px 8px}
+.ans textarea{flex:1 1 220px;min-height:38px;resize:vertical;min-width:0}
+.save{font:inherit;font-size:.9rem;background:var(--accent);color:var(--panel);border:0;border-radius:4px;padding:7px 14px;cursor:pointer;font-weight:700}
+.save[disabled]{opacity:.5;cursor:default}
+.saved{font-size:.82rem;color:var(--muted);align-self:center}
+.gen{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.gen textarea{min-height:96px;resize:vertical;width:100%}
+.savebar{font-weight:700;border:1px solid var(--line);border-left:4px solid var(--d);background:var(--panel);border-radius:6px;padding:10px 14px}
+.savebar[data-state="pending"]{border-left-color:var(--b)}
+.note{font-size:.88rem;color:var(--muted);max-width:65ch;margin:0}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Starship Cadet &middot; 0.96.0 &middot; backlog triage BT1 &middot; Oct 29, 2026</div>
+    <h1>Backlog before 1.0</h1>
+    <div class="lede">
+      <p>Every known small problem on the list, checked against the game as it is now (0.96.0), and sorted into four groups. Nothing has been changed in the game and no row has been closed: this is the list for you to agree or change first.</p>
+      <p class="muted">How each was checked: by reading the game's code, plus one run of the Day 3 check in a test browser. Where an item could not be confirmed, the reason says so. Switched-off pieces (the tray that travels, the intro question, Zeke's cabin Mail, the way-back ending) and old-save work are left out, as you decided.</p>
+    </div>
+  </header>
+
+  <div class="counts" id="counts"></div>
+  <div>
+    <div class="eyebrow" style="margin-bottom:6px">Where the A and B items would go</div>
+    <div class="vers" id="vers"></div>
+  </div>
+
+  <div class="savebar" id="savebar" role="status" aria-live="polite">Connecting to save your answers...</div>
+
+  <div class="filters" role="toolbar" aria-label="Show a group" id="filters"></div>
+
+  <div id="groups"></div>
+
+  <section class="gen" aria-labelledby="genh">
+    <h2 id="genh">Anything else?</h2>
+    <p class="note">Write anything about the list as a whole here: an item I missed, a group you'd rather shape differently. Each item above also has its own box, and those save by themselves the moment you pick or type. What you write is kept on this page for the lead and the build master to read.</p>
+    <textarea id="gen-note" aria-label="General comments"></textarea>
+    <div style="display:flex;gap:10px;align-items:center"><button class="save" id="gen-save" type="button">Save</button><span class="saved" id="gen-saved"></span></div>
+  </section>
+</div>
+
+<script>
+const G = {
+  A: { name: 'Must fix before 1.0', desc: 'Something a player would hit that is broken, stuck or wrong on screen, or a check failure you asked to have fixed in 0.98.', cls: 'ga' },
+  B: { name: 'Nice before 1.0', desc: 'Worth doing, small, and fits a version on the road: speed items in 0.98, balance items in 0.99, everything else in the 1.0 playtest patch.', cls: 'gb' },
+  C: { name: 'After 1.0, or never', desc: 'Only affects the tests, a switched-off case, or something no player will notice. Kept on record, not planned.', cls: 'gc' },
+  D: { name: 'Already fixed, or no longer applies', desc: 'Fixed since it was written down, or the thing it was about has changed. These rows can be closed once you agree.', cls: 'gd' }
+};
+// id, group, version, what (plain), why (reason), how it was checked
+const ITEMS = [
+// ---------- A ----------
+['12', 'A', '0.98', 'A very busy player reaches the top Works standing ("Relied on") on Day 4, and the career check says that should not come before Day 5.', 'One of the two long-standing check failures you asked to have fixed in 0.98. It is really a pacing question, so the fix (a small slowdown of points early on, or agreeing a new day) should be checked against the 0.99 balance answers so it isn\'t done twice. Rows FX28-1 and the old "Works reputation pace" row are the same thing.', 'Still fails in every recent round (0.96.0 and 0.97.0 lists it as known).'],
+['FX24-2', 'A', '0.98', 'On Day 7 Farouk never reaches the reading corner: the crew\'s planner gives no time to walk from one room to another on the same deck, so he arrives as his visit ends.', 'The other long-standing check failure you asked to have fixed in 0.98. The fix (give a walk time before a gathering) moves many people\'s plans, so it needs the full round. Three B items below share this cause and can be looked at with it.', 'Still fails in every recent round (events check, known-old).'],
+['FX17-1', 'A', '1.0', 'At the rec deck\'s talent night, the card asking if you\'d like to do an act closes by itself within a ship minute, before you can choose.', 'A tradition the player is invited to that doesn\'t work. The fix is one small addition to one line (tell the card where it is being held).', 'Code read: the card still opens with no place given, and the game still closes any card with no place at the next minute.'],
+['N6-1', 'A', '1.0', 'If your career has ended (you were let go) and the game was saved, loading that save stops the game from starting at all.', 'A save that won\'t load is the worst kind of bug, even if few players get there. The fix is to show the ending card a moment later, once the game is running.', 'Code read: the line that shows the card at load still runs before the name it needs is ready.'],
+['PB1-1', 'A', '1.0', 'At a birthday party, tapping the cake sits you at the table instead of giving you a slice.', 'The cake is one of the party\'s main things to do and can\'t be used, on touch or controller. Fix: make the cake\'s tap area stand a little above the table\'s.', 'Code read: the cake\'s tap area is still inside the table\'s.'],
+['TM-1', 'A', '1.0', 'A "Tonight?" Mail from a crew member (seen from Tomas) can show a line of program code as its message instead of words.', 'Visible garbage on screen. It happens when a tradition\'s invitation has no written line for that person, so the game prints the code that should have made the line. Not in the backlog file yet: found by reviewer RV20 and logged in TEAM.md.', 'Code read: the invitation still stores that code as its line and the Mail uses it as is.'],
+['DV1-3', 'A', '1.0', 'When a repair needs a part that is out of stock and can\'t be made, the arrow just says "Look over the machine", so the player taps it over and over with no idea why nothing happens.', 'A player can lose a whole shift to this. Fix: the arrow says the part isn\'t available (and what to do instead).', 'Code read: the arrow still falls through to "Look over the" in that case.'],
+['DV1-1', 'A', '1.0', 'A cart delivery got stuck on "Pick up a hover cart for 1 crate" on Deck 3: the arrow stayed on the same spot for 45 ship minutes or more.', 'If it still happens, a player following the arrow is stranded. Needs a short look first to see whether it still happens.', 'Not looked into by anyone yet; not re-tested here.'],
+// ---------- B 0.98 ----------
+['FX12-1', 'B', '0.98', 'Crew reach evening gatherings 15 to 20 ship minutes after their plan says, because the walk takes longer than the planner allows.', 'Same cause as FX24-2 (the planner\'s walking time). Best decided together with that fix in 0.98 rather than on its own.', 'Code read: the planner\'s walking time is unchanged.'],
+['28', 'B', '0.98', 'A slow door on Deck 3\'s corridor holds walkers up for several minutes, so people arrive late.', 'Same walking-time family as FX24-2; look at it alongside.', 'Not re-tested; nothing in the record says it was fixed.'],
+['TQ1-1', 'B', '0.98', 'Crew sometimes stand in the toilet queue while the toilet is empty, because they set off much too early.', 'Here the planner\'s walking time is too long, the opposite of FX12-1. Both point at the same estimate, so one look at it in 0.98 can settle both.', 'Code read: the walking estimate is unchanged.'],
+['SD3-2', 'B', '0.98', 'The new sound update works out which music to play four times a second; it could remember the answer instead.', 'A small speed tidy for the speed version. The cost today is tiny (under a hundredth of a millisecond a frame), so it is nice, not needed.', 'From SD3\'s note; code read shows the four-times-a-second work.'],
+// ---------- B 0.99 ----------
+['22', 'B', '0.99', 'The galley\'s cookers break down every few days, and when two break at once dinner queues reach about half an hour.', 'Breakdowns making meals late is designed; how often is a balance question for 0.99.', 'From the food engineer\'s note; nothing changed since.'],
+['EV1-2', 'B', '0.99', 'A Senior crew member gets few random head-scratchers on Days 16 to 22, because the visit and the comet days have none on purpose.', 'Balance, as the lead said. (It is numbered EV1-1 in the backlog file and EV1-2 in TEAM.md: the same item.)', 'Code read: case days still skip event days.'],
+['BAL-1', 'B', '0.99', 'If you become a Specialist late, Calder\'s question still says "Four weeks aboard" even when it comes in week five or six.', 'Words that only go wrong for slower players, so it belongs with balance. From the balance report\'s story note; not in the backlog file yet.', 'From BAL1\'s confirmed note in TEAM.md.'],
+['BAL-2', 'B', '0.99', 'A player who never reaches the top tier gets no badge, no move, no Calder question and no ending: there is no fallback.', 'Your call, tied to the balance report\'s first finding (how hard the top tier is).', 'From BAL1\'s note in TEAM.md; a design gap, not a bug.'],
+// ---------- B 1.0 ----------
+['1', 'B', '1.0', 'A typing slip in the page\'s styles means two rules for the device\'s app tiles never apply (bigger icons, and long labels wrapping inside their tile).', 'Fixing it changes how the device home screen looks, so you\'d want to see screenshots first.', 'Code read: the slip is still there.'],
+['5', 'B', '1.0', 'On a very small phone (320 pixels wide), the Tracked panel fills almost the whole screen.', 'Worth a look on your real-phone playthrough; very small phones are rare now.', 'Not re-tested in a browser.'],
+['6', 'B', '1.0', 'On phones, a tip card sits on top of the needs strip, Tracked and the activity bar while it shows.', 'Only changed if you want it; your playthrough will show whether it bothers you.', 'Code read: the card is still placed at a fixed height near the top.'],
+['15', 'B', '1.0', 'Envoy Saruth can\'t be talked to with "Talk a while", so Saruth\'s four written talks are never heard, even now that the visit is on.', 'The visit is live in 0.96.0, so this content is waiting. A modest change (add guests to the people you can chat with).', 'Code read: the chat list still holds only the crew.'],
+['CP5-1', 'B', '1.0', 'Pop-up messages (toasts) aren\'t read out by screen readers for touch and mouse players.', 'One attribute on one element fixes it for everyone.', 'Code read: still missing.'],
+['CP5-2', 'B', '1.0', 'The left-hand one-handed controller layout has no way to zoom.', 'Controller support is now on, so this is reachable. You didn\'t ask for it; your controller test can decide.', 'From the review note; the layout is unchanged.'],
+['30', 'B', '1.0', 'The arrow keeps saying "Clock in" for up to a ship minute after you\'ve clocked in.', 'Small and visible; one word added to a check.', 'Code read: still as described.'],
+['31', 'B', '1.0', 'If you stop tracking something by hand, your job\'s arrow doesn\'t come back on by itself.', 'Small; one line.', 'Code read: still as described.'],
+['LD1-1', 'B', '1.0', 'On Deck 5, the lift brake sits in front of the ladder on screen, so taps meant for the ladder show the brake instead.', 'Your work deck, so you\'ll meet it often in the playthrough.', 'Code read: the brake\'s tap area is unchanged.'],
+['JB1-1', 'B', '1.0', 'The same extra job can come up on the board twice in one day (for example "Calibrate the cold store chiller" at 13:01 and again at 16:30).', 'Harmless but looks careless. A few lines.', 'Code read: the board only skips jobs not yet done.'],
+['FX3-1', 'B', '1.0', 'While a head-scratcher waits for your decision, the arrow says "Repair the machine"; tapping it repeats a repair that fails, and nothing points to Fault notes.', 'Confusing for a first head-scratcher. The arrow could point to where the decision is made.', 'Code read: the arrow still says "Repair the" there.'],
+['FX3-2', 'B', '1.0', 'The "make a part" arrow always points at the first lathe, even when someone is using it and the second one is free.', 'Small, visible.', 'Code read: it still picks the first lathe.'],
+['FX10-1', 'B', '1.0', 'The "Job taken" message says "parts first, from main storage on Deck 5" even when the part has to be made in the machine shop.', 'Words only.', 'Code read: the message is unchanged.'],
+['FX8-1', 'B', '1.0', 'A swimmer leaving the pool (or a climber leaving the wall) jumps up to about five tiles in one frame.', 'Visible on the rec deck. A fix would end the lap first or glide from where they are drawn.', 'From the note; not re-tested.'],
+['FX21-1', 'B', '1.0', 'Crew can make one-line chatter bubbles in the middle of a conversation card or a meeting.', 'Small; one condition added.', 'Code read: the chatter still doesn\'t check for an open card.'],
+['DV1-2', 'B', '1.0', 'A team job got stuck on "brace the housing" on Deck 3.', 'Probably the same as MA6-1 (your turn in a team job couldn\'t be tapped), which has been fixed. Worth one run to confirm, then close.', 'Code read: the MA6-1 fix is in; this one wasn\'t re-run.'],
+['RV18-C1', 'B', '1.0', 'At the comet viewing, the bedtime arrow can hide the arrow to Saruth\'s knot.', 'A story moment you\'ll see in the playthrough. Was planned for 0.93.3 and nothing in the record says it was done.', 'Not re-tested here.'],
+['RV18-C2', 'B', '1.0', 'At the comet viewing, a speaker on their own can repeat their line.', 'Same as above.', 'Not re-tested here.'],
+['RV18-D1', 'B', '1.0', 'In the "every door needs a tap" setting, the door hint says "A private room" even at a public door.', 'Words only.', 'Code read: the hint\'s title is fixed text.'],
+['EV1-1', 'B', '1.0', 'During the visit, a reputation pop-up may show twice.', 'Unconfirmed; worth watching for in the playthrough and fixing if seen. (Its other half, a code comment, is done.)', 'From RV25\'s note in TEAM.md; not re-tested.'],
+['SD3-1', 'B', '1.0', 'A room\'s door chime forgets that it has rung if you reload, and a crew member opening the door also counts as "you".', 'Small sound tidy-up.', 'From SD3\'s note.'],
+['DM1-4', 'B', '1.0', 'In Dev mode, setting the career to Day 16 tells a Senior "Tier 3 test tomorrow", and shows the first Senior training pop-up again on Day 19.', 'Dev mode only, but it could mislead your own testing.', 'From DM1\'s note.'],
+['DM1-5', 'B', '1.0', 'In Dev mode, an Engine Specialist is told "lift roof training: Emeka asks you" on Days 27 to 29.', 'Dev mode only; same reason.', 'From DM1\'s note.'],
+['DM2-1', 'B', '1.0', 'After Dev mode\'s "End and keep" on an event, the event\'s background routines still run until its calendar end.', 'Dev mode only; a one-line fix on the events side.', 'From DM2\'s note.'],
+['V-1', 'B', '1.0', 'The visit has no seated formal dinner on its Thursday; dinner is just an ordinary galley meal.', 'A feature idea from EV1, your call. Dev mode\'s jump to it lands in the galley for now.', 'From TEAM.md.'],
+['V-2', 'B', '1.0', 'The Veyli vessel\'s words could mention the visit that happened two weeks before.', 'Words only, your call.', 'From TEAM.md.'],
+['RV23-2', 'B', '1.0', 'An arrow-follower saw "Clock in: shift at 09:00" from 16:03 the day before (Day 32), and "air plant, Deck 5" hanging on Day 31.', 'Logged for the playtest patch by reviewer RV23. Small, visible.', 'From TEAM.md; not re-tested.'],
+['RV23-3', 'B', '1.0', 'The heads-up "Put Taavek\'s sketch on your shelf is starting" reads as if it were an event, not a to-do.', 'Words only, logged for the playtest patch.', 'From TEAM.md.'],
+// ---------- C ----------
+['2', 'C', 'after 1.0', 'A small gear on Deck 5\'s bay door is never added to the scene (a mistake in the code hides it).', 'Nobody will miss it, and adding it costs a drawing step on phones, the opposite of 0.98.', 'Code read: still hidden.'],
+['4', 'C', 'after 1.0', 'The rec talent night only moves out of the way of the yearly talent night, not of other busy days.', 'A design choice left for you; nothing breaks.', 'Code read: unchanged.'],
+['7', 'C', 'never', 'Some Deck 4 signs say "Seven decks" even when the rec deck is switched off.', 'The rec deck is on for good, so it never shows.', 'Code read.'],
+['8', 'C', 'after 1.0', 'A set of rec deck habit texts is written but never used.', 'Players never see it; a tidy-up only.', 'Code read: still never read.'],
+['10', 'C', 'after 1.0', 'One random "seed" number is used for two different things (Maeve\'s rec round and the Cup\'s draw).', 'Harmless; changing it changes everyone\'s random choices and every test picture.', 'Code read: still shared.'],
+['13', 'C', 'after 1.0', 'Some parts of the machine check share leftover state from earlier parts.', 'Test only; they pass.', 'From the note.'],
+['16', 'C', 'after 1.0', 'The picture test\'s first shot can differ by one speech bubble\'s position from run to run (also row FX17-2).', 'Test only; a rerun clears it.', 'From the notes.'],
+['17', 'C', 'after 1.0', 'When about 20 "ate late" notes land in the same minute, other ship notes that minute get pushed out of the list.', 'Hardly visible; crew just mention something else.', 'Code read: the cap is unchanged.'],
+['23', 'C', 'after 1.0', 'The food check started on Day 7 says too little fresh produce gets used (also row RV14-1).', 'Only that one start day; the round\'s food runs pass.', 'From the notes.'],
+['27', 'C', 'never', 'Two corner cases in how intro scenes hold a seat, which nothing reaches today.', 'Nothing hits it.', 'From the note.'],
+['32', 'C', 'after 1.0', 'The speed check reports a one-off slow frame as a problem even when it doesn\'t repeat.', 'Test only. OP1 may want it fixed to measure 0.98 cleanly; that is OP1\'s call.', 'From the notes; still seen as noise in the 0.96.0 round.'],
+['PB2-1', 'C', 'never', 'On galley rota days a tradition meal isn\'t counted, and tradition Sundays waste a few more meals.', 'Nothing doubles today; the lead left it as is.', 'From the note.'],
+['LD1-2', 'C', 'after 1.0', 'No standing test that tapping the ladder opens the ladder panel.', 'Test only.', 'From the note.'],
+['FX9-1', 'C', 'after 1.0', 'Far-away crew bodies sometimes step half a metre to two metres in one frame.', 'Mostly distant walkers; not known to be visible.', 'From the note.'],
+['FX21-2', 'C', 'after 1.0', 'The story check doesn\'t follow the four newer story people.', 'Test only; another check covers them.', 'From the note.'],
+['BM18-2', 'C', 'never', 'Moving the clock backwards can drop a job not yet posted.', 'Only Dev skips and tests move the clock back.', 'From the note.'],
+['BM18-1b', 'C', 'after 1.0', 'The interactions check now takes about an hour instead of about 8 minutes.', 'Test speed only; you said 0.98 is game speed only.', 'From the note.'],
+['B4-1', 'C', 'after 1.0', 'When the laundry clashes, the wash is skipped that evening rather than moved to another hour.', 'The words already say "skip", so nothing reads wrong.', 'From the note.'],
+['RV23-1', 'C', 'never', 'Reloading while Taavek is coming to find you loses that small "come find you" state.', 'The arrow still leads to Taavek; nothing is lost.', 'Code read: still not saved.'],
+['W8-2', 'C', 'after 1.0', 'Someone getting up from a seat with a wall behind it can start on the far side of the wall and walk the long way round.', 'The one place it was seen is fixed; other seats are unknown.', 'From the note.'],
+['BM19-1', 'C', 'after 1.0', 'The Works part of the save grew to about 3.3 KB.', 'Far under the save\'s size budget.', 'From the note.'],
+['BM19-2', 'C', 'never', 'A night-shift word routine doesn\'t guard against missing Works records.', 'Can\'t happen in play.', 'Code read: still unguarded.'],
+['PB1-2', 'C', 'after 1.0', 'The controller check can read a stale list of nearby things.', 'Test only.', 'From the note.'],
+['DM1-2', 'C', 'never', 'In Dev mode, the clock-in log carries over when a new game is started in the same page.', 'Players\' New game reloads the page, so only Dev mode and tests see it.', 'Code read.'],
+['DM1-3', 'C', 'after 1.0', 'The first run in a page differs slightly from later runs (about six storm Mails).', 'Dev mode and tests only.', 'From the note.'],
+['BAL-3', 'C', 'after 1.0', 'The machine check fails two lines when run over 28 days instead of 14.', 'Test only; the normal run passes.', 'From TEAM.md.'],
+['VB2-1', 'C', 'after 1.0', 'The controller\'s ring can\'t pick out a person standing behind another in a crowd.', 'Touch still works; a small controller nicety.', 'From TEAM.md.'],
+['RV24-1', 'C', 'never', 'If you skip the Day 22 briefing, the Tier 4 test waits about 13 minutes.', 'Nothing is lost; only if you want it tighter.', 'From TEAM.md.'],
+// ---------- D ----------
+['9', 'D', 'done', 'The lightdisc message "The rec dec\'s closed till six."', 'It now says "The rec deck\'s closed till six."', 'Code read.'],
+['11', 'D', 'done', 'Two crew sitting in one breakfast seat on Day 3.', 'The Day 3 check passes today with nothing booked twice.', 'Ran day_check Day 3 on 0.96.0: OK.'],
+['14', 'D', 'done', 'The speed check saw two extra shapes kept in memory after deck trips (also 18d).', 'Recent rounds report memory flat.', 'From the 0.95.0 to 0.97.0 round notes.'],
+['18b', 'D', 'done', 'The speed check stood you in the wrong room.', 'The check now passes a position, as suggested.', 'Code read.'],
+['19', 'D', 'done', 'The join check wanted First Light Cocoa, which was switched off (also 18c).', 'It is switched on and the join check passes.', 'Code read and round notes.'],
+['21', 'D', 'done', 'The Dev mode check\'s clock part could fail once in a while.', 'It now uses a fixed seed and has passed every round since.', 'Round notes.'],
+['18, 20, 24, 25, 26', 'D', 'done', 'Rows already marked fixed in the file (the rec deck on Day 12, Halloran\'s mug beat, the seat checks, intro seats, the tiles check).', 'Fixed long ago; only the file\'s layout keeps them in the open table.', 'Build table.'],
+['PB2-2, PB2-3, FX24-1', 'D', 'done', 'The farewell salad, two jobs on one panel, two galley hands at one station.', 'Marked fixed in the file.', 'Build table.'],
+['FX17-3, FX18-1, FX27-1', 'D', 'done', 'Three check fixes (rides line, fixed-name copies, saves check storage).', 'Marked fixed in the file.', 'Build table.'],
+['BM18-1', 'D', 'done', 'The promotion test\'s arrow didn\'t lead.', 'Fixed in 0.93.1.', 'Build table.'],
+['CR1-W1', 'D', 'done', 'The arrows check\'s week walk got stuck on Deck 4.', 'Fixed in the check (FX30); passes since.', 'TEAM.md.'],
+['B1-1', 'D', 'done', 'The test picker had no command for Days 17 and 22.', 'Both are there now.', 'Code read.'],
+['B2-1', 'D', 'done', 'Rewiring was played as a plain repair.', 'Fixed; the step-by-step path is in.', 'Code read.'],
+['MA6-1', 'D', 'done', 'Your turn in a team job couldn\'t be tapped.', 'Team jobs are now offered at your spot.', 'Code read.'],
+['MA6-2, W8-3', 'D', 'done', 'A missed lesson held up the Tier 3 or Tier 4 test.', 'Fixed with Step 6, which is on.', 'Code read: the switch is on.'],
+['W8-1', 'D', 'done', 'Calder missed her own Four weeks aboard.', 'With the career ending on (it is), she walks there herself.', 'Code read: the switch is on.'],
+['PZ6-1', 'D', 'done', 'An escort bug with no real-play path.', 'Fixed and kept as a guard.', 'From the note.'],
+['W6-1, W6-2', 'D', 'done', 'Two career check failures.', 'Fixed in the check.', 'From the notes.'],
+['SD2-1', 'D', 'done', 'First-run tips said "tap" with a controller.', 'Fixed in 0.95.0.', 'From the note.'],
+['FX11-1', 'D', 'done', 'The disc game didn\'t start from the lift.', 'Withdrawn: not a bug.', 'From the note.'],
+['CP4-1', 'D', 'done', 'The controller tiles part was flaky.', 'Fixed in the check.', 'From the note.'],
+['Tern, promo talk', 'D', 'done', 'The Tern\'s tap text on rotation days; the promotion\'s office talk closing early.', 'Both marked fixed.', 'From the notes.'],
+['3', 'D', 'dropped', 'The "double clock hold" in the evenings.', 'Dropped in October: no record of it anywhere.', 'From the file.']
+];
+const VER_ORDER = ['0.98', '0.99', '1.0'];
+let SHOW = 'all', DB = null, ANS = {};
+
+function el(tag, attrs, ...kids) { const e = document.createElement(tag); for (const k in attrs || {}) { if (k === 'class') e.className = attrs[k]; else if (k === 'text') e.textContent = attrs[k]; else e.setAttribute(k, attrs[k]); } for (const c of kids) if (c) e.append(c); return e; }
+const key = id => id.replace(/[^A-Za-z0-9-]/g, '_');
+
+function renderTop() {
+  const c = document.getElementById('counts'); c.textContent = '';
+  for (const g of 'ABCD') {
+    const n = ITEMS.filter(x => x[1] === g).length;
+    c.append(el('div', { class: 'count ' + G[g].cls }, el('b', { text: String(n) }), el('span', { text: g + ': ' + G[g].name }), el('small', { text: g === 'D' ? 'rows (some group several)' : 'items' })));
+  }
+  const v = document.getElementById('vers'); v.textContent = '';
+  for (const ver of VER_ORDER) {
+    const a = ITEMS.filter(x => x[1] === 'A' && x[2] === ver).length, b = ITEMS.filter(x => x[1] === 'B' && x[2] === ver).length;
+    v.append(el('span', { text: ver + (ver === '0.98' ? ' speed' : ver === '0.99' ? ' balance' : ' playtest patch') + ': ' + a + ' A, ' + b + ' B' }));
+  }
+  const f = document.getElementById('filters'); f.textContent = '';
+  for (const s of ['all', 'A', 'B', 'C', 'D']) {
+    const b = el('button', { type: 'button', 'aria-pressed': String(SHOW === s), text: s === 'all' ? 'All' : s + ' ' + G[s].name });
+    b.onclick = () => { SHOW = s; renderTop(); renderGroups(); };
+    f.append(b);
+  }
+}
+
+// Each answer lives in LOCAL (what is on screen) until the database has it. Nothing ever redraws an answer from the
+// database while it has unsaved changes, and a copy stays in this browser until it is saved.
+const LOCAL = {}, ROWS = {}, DRAFT_KEY = 'bt1-backlog-drafts-v2';
+function draftsSave() { try { const o = {}; for (const k in LOCAL) if (LOCAL[k].dirty) o[k] = { id: LOCAL[k].id, call: LOCAL[k].call, note: LOCAL[k].note }; localStorage.setItem(DRAFT_KEY, JSON.stringify(o)); } catch (e) { /* storage blocked: the database save still runs */ } }
+function draftsLoad() { try { const o = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}'); for (const k in o) if (o[k] && o[k].id) LOCAL[k] = { id: o[k].id, call: o[k].call || '', note: o[k].note || '', dirty: true }; } catch (e) { /* none */ } }
+function localOf(k, id) { if (!LOCAL[k]) { const a = ANS[k] || {}; LOCAL[k] = { id, call: a.call || '', note: a.note || '', dirty: false }; } return LOCAL[k]; }
+function rowStatus(k) {
+  const r = ROWS[k], L = LOCAL[k]; if (!r || !L) return;
+  r.st.textContent = !DB ? (L.dirty ? 'Kept in this browser; saving starts when the page connects.' : '') : L.err ? 'Not saved: ' + L.err + ' (it will try again)' : L.saving || L.dirty ? 'Saving...' : (ANS[k] && ANS[k].at ? 'Saved' : '');
+}
+function statusBar() {
+  const n = ITEMS.filter(x => { const k = key(x[0]); return LOCAL[k] && LOCAL[k].dirty; }).length;
+  const saved = Object.keys(ANS).filter(k => k !== '_general' && (ANS[k].call || ANS[k].note)).length;
+  const b = document.getElementById('savebar'); if (!b) return;
+  b.textContent = !DB ? (n ? n + ' answer' + (n > 1 ? 's' : '') + ' kept in this browser, waiting to save.' : 'Connecting to save your answers...')
+    : n ? n + ' answer' + (n > 1 ? 's' : '') + ' not saved yet. Saving...' : 'All your answers are saved (' + saved + ' item' + (saved === 1 ? '' : 's') + ' answered).';
+  b.dataset.state = n ? 'pending' : 'ok';
+}
+let TIMERS = {};
+function changed(k, id) {
+  const r = ROWS[k], L = localOf(k, id); L.call = r.sel.value; L.note = r.ta.value; L.dirty = true; L.err = null;
+  draftsSave(); rowStatus(k); statusBar();
+}
+async function saveItem(k) {
+  const L = LOCAL[k]; if (!DB || !L || !L.dirty) return;
+  if (L.saving) { L.again = true; return; }                  // one write at a time per answer; the newest text goes next
+  L.saving = true; L.again = false; rowStatus(k);
+  const sent = { call: L.call, note: L.note };
+  try {
+    await DB.collection('answers').doc(k).set({ item: L.id, call: sent.call, note: String(sent.note).slice(0, 4000), at: new Date().toISOString() });
+    if (L.call === sent.call && L.note === sent.note) L.dirty = false;
+    ANS[k] = { item: L.id, call: sent.call, note: sent.note, at: new Date().toISOString() };
+  } catch (e) { L.err = e && e.message ? e.message : 'no connection'; }
+  L.saving = false; draftsSave(); rowStatus(k); statusBar();
+  if (L.again || (L.dirty && !L.err)) saveItem(k);
+  else if (L.err) setTimeout(() => saveItem(k), 5000);
+}
+function answerRow(id) {
+  const k = key(id), L = localOf(k, id);
+  const sel = el('select', { id: 'call-' + k, 'aria-label': 'Your call on ' + id });
+  for (const [v, t] of [['', 'Your call...'], ['agree', 'Agree'], ['A', 'Move to A (must fix)'], ['B', 'Move to B (nice)'], ['C', 'Move to C (after 1.0)'], ['D', 'Close it'], ['ask', 'I have a question']]) sel.append(el('option', { value: v, text: t }));
+  sel.value = L.call;
+  const ta = el('textarea', { id: 'note-' + k, 'aria-label': 'Note on ' + id, placeholder: 'A note (optional). Saves by itself as you type.' }); ta.value = L.note;
+  const st = el('span', { class: 'saved' });
+  ROWS[k] = { sel, ta, st };
+  sel.onchange = () => { changed(k, id); saveItem(k); };    // a pick saves at once
+  ta.oninput = () => { changed(k, id); clearTimeout(TIMERS[k]); TIMERS[k] = setTimeout(() => saveItem(k), 1000); };
+  ta.onblur = () => { clearTimeout(TIMERS[k]); saveItem(k); };
+  rowStatus(k);
+  return el('div', { class: 'ans' }, sel, ta, st);
+}
+
+function renderGroups() {
+  const root = document.getElementById('groups'); root.textContent = '';
+  for (const g of 'ABCD') {
+    if (SHOW !== 'all' && SHOW !== g) continue;
+    const list = ITEMS.filter(x => x[1] === g).sort((x, y) => VER_ORDER.indexOf(x[2]) - VER_ORDER.indexOf(y[2]));
+    const sec = el('section', { class: 'group ' + G[g].cls, 'aria-labelledby': 'h-' + g },
+      el('h2', { id: 'h-' + g }, el('span', { class: 'tag', text: g }), document.createTextNode(G[g].name + ' (' + list.length + ')')),
+      el('p', { class: 'gdesc', text: G[g].desc }));
+    for (const [id, , ver, what, why, chk] of list) {
+      sec.append(el('article', { class: 'item' },
+        el('div', { class: 'head' }, el('span', { class: 'id', text: id }), el('span', { class: 'ver', text: ver === 'after 1.0' || ver === 'never' || ver === 'done' || ver === 'dropped' ? ver : 'goes in ' + ver })),
+        el('p', { class: 'what', text: what }),
+        el('p', { class: 'why' }, el('b', { text: 'Why: ' }), document.createTextNode(why)),
+        el('p', { class: 'chk', text: 'Checked: ' + chk }),
+        answerRow(id)));
+    }
+    root.append(sec);
+  }
+}
+
+renderTop();
+
+draftsLoad(); renderGroups(); statusBar();
+addEventListener('beforeunload', e => { if (Object.values(LOCAL).some(L => L.dirty)) { e.preventDefault(); e.returnValue = ''; } });
+
+(async () => {
+  let db = null;
+  try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+  const gs = document.getElementById('gen-save'), gst = document.getElementById('gen-saved'), gn = document.getElementById('gen-note');
+  if (!db) { gs.disabled = true; gst.textContent = 'Saving works on the published page when you are signed in.'; statusBar(); return; }
+  DB = db;
+  let genDirty = false;
+  gn.oninput = () => { genDirty = true; };
+  db.collection('answers').onSnapshot(snap => {
+    for (const d of snap.docs) ANS[d.id] = d.data() || {};
+    if (ANS._general && !genDirty) gn.value = ANS._general.note || '';
+    // never redraw: fill in only the answers with no unsaved change on screen
+    for (const k in ROWS) {
+      const L = LOCAL[k], a = ANS[k]; if (!L || L.dirty || L.saving || !a) continue;
+      L.call = a.call || ''; L.note = a.note || '';
+      if (ROWS[k].sel.value !== L.call) ROWS[k].sel.value = L.call;
+      if (ROWS[k].ta.value !== L.note && document.activeElement !== ROWS[k].ta) ROWS[k].ta.value = L.note;
+      rowStatus(k);
+    }
+    statusBar();
+  }, () => {});
+  for (const k in LOCAL) if (LOCAL[k].dirty) saveItem(k);   // drafts kept in this browser from before
+  for (const k in ROWS) rowStatus(k);
+  statusBar();
+  gs.onclick = async () => {
+    gs.disabled = true; gst.textContent = 'Saving...';
+    for (const k in LOCAL) if (LOCAL[k].dirty) saveItem(k);   // and any item answer still waiting
+    try { await db.collection('answers').doc('_general').set({ item: 'general', note: gn.value.slice(0, 5000), at: new Date().toISOString() }); genDirty = false; gst.textContent = 'Saved'; }
+    catch (e) { gst.textContent = 'Not saved: ' + (e && e.message ? e.message : 'try again'); }
+    gs.disabled = false;
+  };
+})();
+</script>

@@ -1,0 +1,17 @@
+@meeting endingFriend.tomas
+// SW6 (ending writer A), "About the transfer" on Tomas's chat card (Friday Day 33). Tomas says go: he left home
+// because he was afraid of staying put, and he can't tell anyone else not to go. Then he worries about the bunk.
+// Canon: the star map under the bunk above his; his little brother; the farm moon's grey sky.
+title: Tomas
+from: Tomas Lind
+gist: Tomas heard about the transfer. He thinks you should go, and then he worried about who'd have your bunk.
+== lines
+tomas: Is it true? Headquarters? That's... that's huge. That's the biggest thing I've ever heard.   [gesture]
+tomas > you: I think you should go. I mean, I don't want you to. But I think you should. Sort of.
+tomas: I left home because I was scared of staying the same forever. I can't tell anyone not to go somewhere.
+? choice
+* You'd really be all right?   flavour:listen
+  tomas: I'd write. Every week. Like I do to my brother. I'd make the Wren sound more exciting than it is.   [laugh]
+* What if I stay?   flavour:share
+  tomas: Then I get my bunkmate. And the star map stays two people's. That's fine too. That's better, sort of.
+tomas: Whatever you do, I'm marking it on the map. In pencil. Then you can always find your way back.

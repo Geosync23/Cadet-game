@@ -1,0 +1,19 @@
+@crew grieve-thea
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- You stayed. I was worried about it. Then I was worried I was worried. Now I'm not.
+? endgame
+- Ordinary week. Corners square, beds made, nobody pale. I like ordinary very much.
+? endgame:early
+- I gave a sock back from the box this morning. To celebrate. It wasn't yours, sorry.   #funny
+? endgame
+- Have you eaten? Sit down. You're staying, so I'm allowed to ask every day now.   #warm
+- One, Two and Three are well, my sister says. Everyone's where they should be this week.   #warm
+
+== bye
+? endgame
+- Bye. Please drink some water. Rina would want me to say that.

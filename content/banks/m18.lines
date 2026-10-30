@@ -1,0 +1,34 @@
+@bank all
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-4): the crew around your shutdowns. Bubbles, 60 characters.
+// sd.warned: a person you warned from the screen or in person (their answer).
+// sd.off: someone in a fed room when the power goes off at the booked hour.
+// sd.thanks: the next day or after, someone whose room was off and who was warned (a quiet hour).
+// sd.grumble: the same, when the hour clashed with a meal, a class or a tradition, or they weren't told.
+// sd.lapsed: the day after a missed hour (they moved their day for nothing).
+== sd.warned
+- Tomorrow? Thanks for saying. I'll plan round it.
+- An hour off? Fine. I'll go somewhere else.
+- Good of you to tell me. Most just switch it off.
+- Noted. Thanks. I'll save my work first.
+
+== sd.off
+- Lights. Right. That's the shutdown, then.
+- There it goes. Right on time.
+- I was warned. I was warned. Still made me jump.   #funny
+- Power's off in here. Tea break, then.   #funny
+
+== sd.thanks
+- Thanks for warning us about the power. Very tidy.
+- That shutdown? Didn't even notice. That's good, isn't it?
+- You picked a quiet hour. Thank you for that.
+
+== sd.grumble
+- Power off at mealtime? Really? I was hungry.
+- Nobody told me about the power. I was mid-wash.
+- The gym class moved for your shutdown. Twice the stairs.   #funny
+- Next time, maybe not right in the middle of dinner?
+- A shutdown at the quiz? I had the answer to number six.   #funny
+
+== sd.lapsed
+- We moved our whole morning for that shutdown. It never came.
+- Was the power going off or not? We waited.

@@ -1,0 +1,19 @@
+@meeting endingSearch
+// SW6 (ending writer A), Saturday 19:30: you haven't told her yet, so the Captain finds you (escort) and asks (ending
+// spec, "Your answer"). FOR EN1: the three replies set end.now.stay | end.now.go | end.now.unsure; then play
+// endingTell.stay | .go | .unsure from its SECOND line (her answer). The bare "Ah." replies are only a bridge into
+// endingTell.*: never build this as the whole scene. (On a slower career, this is the Saturday after the offer.)
+title: The Captain finds you
+from: Captain Odile Marrow
+gist: On Saturday evening the Captain came to find you, to ask about the letter from headquarters.
+== lines
+marrow: There you are. I've walked two decks. Vance timed me.   [laugh]
+marrow > you: It's half seven on Saturday. I said eight. I'm early, because I'm curious. Forgive me.
+marrow > you: Headquarters, or the Wren? Or are you still thinking? That's an answer too.   [listen]
+? choice
+* I'm staying.   flavour:share
+  marrow: Ah.   [nod]
+* I'm going.   flavour:share
+  marrow: Ah.   [nod]
+* I'm not sure yet.   flavour:listen
+  marrow: Ah.   [nod]

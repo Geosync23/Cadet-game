@@ -1,0 +1,22 @@
+@meeting train.m20.mori
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-5): M20 The sensor array, Friday Day 19, 10:00, Deck 2's array room (A). Hana
+// Mori (Survey, she/her: quiet, precise, too fast when nervous, finishes lists) with Calder. She gives you the
+// calibration rig; "Pick the star" (m20.pick.*) follows; Calder's one line. One choice.
+title: The sensor array
+from: Hana Mori
+gist: Hana Mori from Survey showed you the sensor array, gave you the calibration rig, and let you pick the star to calibrate against.
+== lines
+mori > you: Oh, hello. You're early. That's good. Sorry. Hello.   [gesture]
+mori: This is the array. It's how the Wren sees. Stars, dust, ships, everything. Well. Most things.
+mori: Every few weeks it drifts. A little. So we point it at a star we know and see if it agrees.
+mori: This is the calibration rig. It's Survey's spare. It's yours now. Please don't drop it.
+calder: She means it. The last one she lent came back with a dent. Not mine.
+mori > you: Three stars are up tonight. Well, today. They're always up. You pick one.
+? choice
+* Which one would you pick?   rel:mori+2
+  mori: Oh. The quiet one. Nobody ever picks it. But it's your choice. Really.   [laugh]
+* Do you have a favourite star?   rel:mori+2
+  mori: All of them. No. One. I'll tell you another day. Maybe.   [laugh]
+* (Look at the readings)
+  mori: Yes. Good. Readings first. You'd do well in Survey.   [nod]
+calder: Pick it, calibrate, then the amber module. Mori runs the readings. I watch.

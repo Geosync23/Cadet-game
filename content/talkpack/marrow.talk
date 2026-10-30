@@ -1,0 +1,416 @@
+@talks marrow
+// TW1, the Talk a while pack: Captain Odile Marrow's own talks. Calm, unhurried, curious; real questions, and she
+// remembers the answers; a quiet joke folded in; "we" for the ship. Never her daughter before friend; never retiring
+// before close; never what the Admiral is. Not her one question or the Admiral's theories (beats 1-2).
+
+only: own
+
+== the-step
+topic: ship
+them: The ready room step. Everyone trips. I had it measured. A perfectly ordinary step.
+them: Commander Vance has tripped on it twice. He would like that kept quiet.   #funny
+ask: Is there a spot aboard that always catches you out?
+listen: Why not have it fixed?
+  them: It's older than I am. Some things you keep because they keep you humble.
+share: The lift doors. Every time.
+  them: They're quick. Step in like you mean it. That's most of command, too.   #warm
+cheer: My own feet, mostly.
+  them: Join the club. It's a large club. I'm in it.   #funny
+
+== portraits
+topic: crew
+when: tier>=acquaintance
+them: I know every captain in the gallery by name. Varga started it. I'm on the end.
+them: I don't like mine. The painter made me look as if I'd just been told something.   #funny
+ask: Who do you think of, when you think of someone you'd like to be?
+listen: What had you just been told?
+  them: That we'd be on time. I'm still waiting to find out if it was true.   #funny
+share: Someone at home. Kind to everyone.
+  them: That's a good one to pick. Kind to everyone is harder than it sounds.   #warm
+cheer: Whoever runs the biscuit tins.
+  them: I'll tell Brennan. She'll be pleased. And worried about the tins.   #funny
+
+== quiz-third
+topic: tradition
+when: tier>=colleague
+them: Our quiz team came third. Third. I have commanded this ship for six years.
+them: Commander Vance says third is a podium. He said it very quietly.   #funny
+ask: What would you be hopeless at, in a quiz? Be honest. I was.
+listen: What was your weak round?
+  them: Engines. Calder answered every one before I'd read it. I held the pencil.   #funny
+share: Anything with dates. I'm hopeless.
+  them: So am I. I remember people, not dates. It's a fair trade, most days.   #warm
+cheer: Every round. I'd bring moral support.
+  them: Then you'd be our most useful member. I'll save you a chair.   #funny
+
+== piano
+topic: hobby
+when: tier>=friend
+them: I play the piano late on Thursdays. Nobody's supposed to know. Everybody knows.
+them: I learnt as a girl. Took it up again my first command. It quiets the day down.   #warm
+ask: What quiets the day down for you?
+listen: What do you play last, on Thursdays?
+  them: The same piece, always. Someday I'll tell you why. Not tonight.
+share: Talking with people I like.
+  them: Then I'm honoured to be one of them. Thank you. I mean that.   #warm
+cheer: The ship humming. And a quiet corner.
+  them: A good pairing. I may borrow it for Thursdays.   #funny
+
+// ---- SW3, 2026-10-24 (patch 0.92.3 item 15, plans/talk-main-plan.md): her welcome, 26 more talks and her own small
+// talk. Never the general pool (only: own). Her small and done lines were dropped (CS1, 2026-10-24: the engine repeats
+// her own talks instead). Weighted early: players stay strangers with the Captain a long time. Her needs: share, so the share answer is the warm one. Not her ready-room question
+// (beat 1), the theories, page forty, her loneliness in the chair, the letters or the academy post (her beats).
+
+== welcome
+first: yes
+topic: crew
+them: Hello. We haven't met properly. I'm Odile Marrow. I command the Wren.
+them: She's not the biggest ship, or the fastest. She's the kindest I've served on.
+them: Six years in her chair, and she still surprises me most weeks. Kindly, mostly.
+them: I'm up before the bridge watch changes, most mornings. Say hello, if you're up too.
+them: Seventy-five of us now, counting you. Welcome aboard, {me}. We're glad you came.   #warm
+ask: What made you sign up? The short answer will do.
+listen: Why did you sign up, Captain?
+  them: To see what's past the last chart. All these years on, I still want to.
+share: I wanted to be useful somewhere far.
+  them: Then you've come to the right ship. It's far, and there's always something.   #warm
+cheer: Honestly? The shuttle looked fun.
+  them: Don't tell Raman. He'll fly you round the bay to prove it.   #funny
+
+// ---- any tier and acquaintance (at least 12 with no tier gate, for strangers: FX13)
+
+== evening-walk
+topic: ship
+when: time:evening
+them: Some evenings I walk the whole ship. Every deck. I tell myself it's exercise.
+them: It isn't. I like to hear her settle. Doors closing, kettles, someone laughing.
+ask: Where do you go when the day's been long?
+listen: Do you ever skip a deck?
+  them: Never the reactor door. I say good night to it. It doesn't answer, thankfully.   #funny
+share: My bunk, and something to read.
+  them: A good choice. A bunk and a book have seen me through a great deal.   #warm
+cheer: The grab shelf. Every time.
+  them: You and half the junior wing. Brennan counts the plates, you know.   #funny
+
+== first-posting
+topic: work
+them: My first captain asked me the same thing every evening: "What did you notice today?"
+them: For a month I had nothing. Then one night I'd noticed the cook was limping. That was it.
+ask: What's a lesson that's stayed with you, from anyone?
+listen: Was the cook all right?
+  them: A sprained ankle. Two days' rest. But I'd seen it, and nobody else had. I was hooked.   #warm
+share: To ask before I assume.
+  them: That's one I learnt late. You've got it early. Hold on to it.   #warm
+cheer: How to look busy. Badly.
+  them: Everyone learns that one. Nobody learns it well. Captains least of all.   #funny
+
+== same-breakfast
+topic: food
+when: time:morning
+them: Toast, and whatever's hot. The same breakfast for six years. Brennan's stopped asking.
+them: She sends me a different jam on Fridays. I think it's a test.
+ask: Are you a same-breakfast person, or a surprise one?
+listen: What is the jam test, do you think?
+  them: Whether I'll notice. I always do. I never say. We're both enjoying it.   #funny
+share: Same, every day. It steadies me.
+  them: Then we're alike. Some days the toast is the only thing that goes to plan.   #warm
+cheer: Surprise. I take whatever's left.
+  them: Brave. The grab shelf at nine is not for the faint of heart.   #funny
+
+== names
+topic: crew
+them: With a new crew I learn every name in the first week. It took me nine days this time.
+them: Eklund was last. I kept calling her Esposito. They both forgave me, eventually.   #funny
+ask: How do you keep names in your head?
+listen: Who's the hardest to remember?
+  them: Nobody now. Except the cacti. Every one of them is Gerald. I've given up.   #funny
+share: I tie each one to something they said.
+  them: That's how I do it too. A name sticks to a story. Never to a face.   #warm
+cheer: I don't. I say "you" a lot.
+  them: That works for about a week. Then they notice. Then they're kind about it.
+
+== logbook
+topic: work
+them: Every evening I write the ship's log. Most days it's two lines. "All well. On course."
+them: I like those days best. Nothing to explain to anyone.
+ask: If you wrote today in two lines, what would they say?
+listen: What's the longest entry you've written?
+  them: Four pages, once, in a storm. I'd rather write two lines for the rest of my life.
+share: "Learnt something. Ate well."
+  them: That's a good day, written plainly. I may borrow it.   #warm
+cheer: "Still haven't found the lift."
+  them: I'll put it in mine. Commander Vance will ask questions.   #funny
+
+== rest-day
+topic: day
+when: tier>=acquaintance weekday:sat|sun
+them: My rest day. I've walked the garden twice and not gone to the bridge three times.
+them: The not going is the hard part. The garden's the easy part.
+ask: What does a proper rest day look like for you?
+listen: Do you ever give in and go up?
+  them: Once a rest day, for five minutes. Vance pretends not to see me. It's a kindness.
+share: A long breakfast and nothing planned.
+  them: That's the right kind of nothing. I'm still learning it, after all these years.   #warm
+cheer: Asleep until someone notices.
+  them: Very sensible. I'll suggest it to the bridge. Not for me, sadly.   #funny
+
+== the-chair
+topic: ship
+them: The captain's chair is the least comfortable seat aboard. I asked for it that way.
+them: A comfortable captain stops looking round. That's the theory.
+ask: Do you work better comfortable, or a little uncomfortable?
+listen: Is the theory true?
+  them: Mostly. Also the cushion's been lost since before my time. Nobody will admit it.   #funny
+share: A little uncomfortable keeps me sharp.
+  them: Then you understand the chair. Most people only see the view from it.   #warm
+cheer: Comfortable. Very. With a blanket.
+  them: Honest. I'll think of you on a long watch, and be jealous.   #funny
+
+== newsletter
+topic: news
+them: The ship's newsletter came out. I read it front to back. Even the poem.
+them: Especially the poem. Gull has outdone Gull this week. I'm not sure in which direction.   #funny
+ask: Which page of the newsletter do you read first?
+listen: Do you know who Gull is?
+  them: I know a great many things. I'm keeping most of them.   #funny
+share: The notices. Who's lost a glove.
+  them: The best page. You learn more about a ship from her lost gloves than her reports.   #warm
+cheer: The poem. For the wrong reasons.
+  them: There are no wrong reasons to read Gull. Only wrong reasons to write him.   #funny
+
+== friday-address
+topic: tradition
+when: weekday:fri
+them: Friday. The address is at four. I write it on Thursday and cut half of it today.
+them: The half I cut is always the half I liked best. That's how you know.
+ask: If you had two minutes to say something to the whole ship, what would it be?
+listen: What did you cut this week?
+  them: A joke about the lift. It was a good joke. The lift has suffered enough.   #funny
+share: Thank you. Just that, to everyone.
+  them: That's the best address anyone could give. Some weeks it's all I say.   #warm
+cheer: Hands off the thermostat, please.
+  them: Half the ship would cheer. The other half would sneak back and turn it up.   #funny
+
+// ---- from colleague (and more at acquaintance below, moved down for the early ladder)
+
+== first-week
+topic: work
+when: tier>=colleague
+them: I read every junior's first week in the logs. Not to judge. To see what we forgot to say.
+them: There's always something. Last season it was the hot water. Ten o'clock, every time.
+ask: What did nobody tell you, your first week?
+listen: Do you change things, when you find it?
+  them: Where I can. The rest I tell the next new hand myself, which is slower.
+share: Which lift buttons stick.
+  them: I'll have that in the welcome notes by Friday. Thank you. Truly useful.   #warm
+cheer: That the step is real.
+  them: Everyone's told about the step. Nobody believes it. The step doesn't mind.   #funny
+
+== washing-up
+topic: food
+them: Once a month I ask Brennan if I can wash up in the galley. She says no.
+them: I ask again the next month. It's become a small tradition. Hers is to refuse.   #funny
+ask: Is there a job you'd do just to be near the people doing it?
+listen: Why the washing up?
+  them: It's where everyone talks. And nobody looks at you while your hands are wet.
+share: Anything at the tea corner, honestly.
+  them: That's a good instinct. The real meetings on a ship happen near a kettle.   #warm
+cheer: Biscuit tester. I'd volunteer.
+  them: Brennan has a waiting list for that. Longer than the Commander's for records.   #funny
+
+== thin-charts
+topic: plans
+them: Past the Line our charts go thin. A few old runs, a lot of blank.
+them: I find I like a thin chart. It leaves room for us.
+ask: Would you rather know the road, or find it as you go?
+listen: Does a thin chart ever worry you?
+  them: It keeps me careful. Careful and worried aren't the same. I'm careful.
+share: Find it. That's why I came out here.
+  them: Then you're in the right part of the sky. We're finding it together.   #warm
+cheer: Know it. With snacks marked on.
+  them: Survey would love a snack chart. Sato would label every crumb.   #funny
+
+== same-voice
+topic: crew
+when: tier>=colleague
+them: Six years, and Commander Vance says "Captain" in exactly the same voice every morning.
+them: Not a note different. I've listened for it. I'd miss it terribly if he changed.
+ask: Is there something small someone does that you'd miss if it stopped?
+listen: Have you ever told him?
+  them: Never. He'd start doing it on purpose. Then it would be different.   #funny
+share: My bunkmate's humming at night.
+  them: Then don't tell them either. Some things only work while nobody says.   #warm
+cheer: The coffee machine's groan.
+  them: Works would like to fix that groan. Please don't let them. Not yet.   #funny
+
+== good-mood
+topic: day
+when: tier>=acquaintance mood:high
+them: I'm in a good mood and I've no idea why. I'm trying not to look into it.
+them: Is your day good? Is everyone's? I keep asking people. They look worried.   #funny
+ask: What puts you in a good mood for no reason at all?
+listen: Shall I spread the rumour you're happy?
+  them: Please don't. The bridge would think we'd been given an inspection.   #funny
+share: Clean socks and a hot breakfast.
+  them: Two of the finest things on any ship. I'm adding them to my list.   #warm
+cheer: Seeing the Captain in a good mood.
+  them: Then we're both set for the day. Good. Carry on.
+
+== never-seen
+topic: hobby
+when: tier>=acquaintance
+them: I've never seen a sea. Not once. Big water, with weather on top of it.
+them: I read about them every night. I could tell you the tides of places I'll never stand.
+ask: Is there something you love that you've never actually seen?
+listen: Which sea would you see first?
+  them: A grey one. A cold one, with gulls. The books always make the grey ones sound kind.
+share: Snow. I've only read about snow.
+  them: Then we'll both keep reading. One day one of us writes to the other: "I've seen it."   #warm
+cheer: A tidy bunk. Never seen one.
+  them: Holt has. He reports them to me as if they were comets.   #funny
+
+== long-day
+topic: day
+when: tier>=colleague mood:low
+them: I'm tired. I'd say that to you and to nobody else on this deck. Rank.
+them: Nothing's wrong. The ship asked a lot today and I gave it.
+ask: What do you do when you're tired and can't stop yet?
+listen: Can I fetch you anything?
+  them: No. Well. Tea. Strong. Don't tell Dr. Nandakumar how late it is.   #funny
+share: I make a list. Then I do one thing.
+  them: One thing. Yes. I'll do that. Thank you. That's very good advice.   #warm
+cheer: Pretend I'm a scrubber. Just hum.
+  them: I'll hum on the bridge. Vance will log it as a fault.   #funny
+
+== who-thanks
+topic: crew
+when: tier>=acquaintance
+them: I asked who fixed the lounge lamp. Four people said Works. Works said Pell.
+them: Pell was asleep. In the parts store. Calder knows. Everybody knows.   #funny
+ask: Who aboard do you think nobody thanks enough?
+listen: Did Pell fix it, in the end?
+  them: In his sleep, possibly. I've stopped asking how. I just say thank you.   #funny
+share: The night crew. We never see them.
+  them: You're right. I'll go up one night soon and say so. Remind me.   #warm
+cheer: The air. Nobody thanks the air.
+  them: That's Calder's line. She'll be pleased you stole it. She won't show it.   #funny
+
+// ---- from friend (the tiers below are as each when: says; most moved to acquaintance)
+
+== birthday-cards
+topic: home
+when: tier>=friend
+them: When my daughter was small she thought the Wren was a person. She sent her birthday cards.
+them: "Dear Wren, happy birthday, please look after Mum." I kept every one.   #warm
+ask: What did you believe as a child that you half believe still?
+listen: Did the Wren look after you?
+  them: Every day. I don't say that to the bridge. I'll say it to you.   #warm
+share: That ships can hear you if you're kind.
+  them: Then we agree, and so did she. I talk to the Wren most nights. Quietly.   #warm
+cheer: That the lift had a favourite.
+  them: It has. It's Pell. It never sticks for Pell. I've seen it.   #funny
+
+== ask-me
+topic: crew
+when: tier>=acquaintance
+them: I ask everyone a question. Fair's fair. You can ask me one.
+them: Anything. I may not answer. But you can ask.
+ask: Go on, then. What would you ask the Captain?
+listen: Is there anything you miss, Captain?
+  them: Weather. A window with rain on it. Out here it's always clear. Too clear, some nights.
+share: Were you ever a nervous junior?
+  them: Terribly. I was sick before every inspection. I'm told I hid it well. I didn't.   #warm
+cheer: What is the Admiral?
+  them: A very good question. Next?   #funny
+
+== small-calls
+topic: work
+when: tier>=acquaintance
+them: The big decisions are the easy ones. Everyone helps with those.
+them: It's the small ones that are mine. Who works the holiday. Who gets the window cabin.
+ask: Which is harder for you: a big choice, or a lot of small ones?
+listen: How do you decide the small ones?
+  them: Slowly, and I write down why. In a year I read it back. I'm usually fair. Not always.
+share: The small ones. They pile up.
+  them: They do. Pick one a day. Leave the rest for the morning. That's all I do.   #warm
+cheer: Big ones. I just flip a coin.
+  them: We have no coins aboard. Only credits. You'd have to flip your device.   #funny
+
+== a-first
+topic: plans
+when: tier>=acquaintance
+them: Somewhere on this tour there's a star nobody's charted. Not even the Veyli.
+them: I'd like to be on the bridge when we find it. That's my plan. That's the whole plan.
+ask: What do you want to have done by the end of this tour?
+listen: Would you name it?
+  them: No. Survey names things. I'd just like to be the one who says "Look."
+share: Done something here I'm proud of.
+  them: You will. You may already have. People rarely notice their own, at first.   #warm
+cheer: Beaten Rina at Tiles. Once.
+  them: Aim high. I'd settle for losing to her by less.   #funny
+
+== calm-kind
+topic: day
+when: tier>=colleague
+them: When I'm worried I go very calm and very kind. The bridge knows. They get nervous.
+them: Calder brings me numbers. Numbers help. She knows they do.
+ask: How can people tell when you're worried?
+listen: What were you worried about today?
+  them: Nothing much. A long turn ahead. It went well. I'm calm and kind for nothing.   #funny
+share: I go quiet and tidy everything.
+  them: Then I'll know to bring you numbers. Or tea. Which?   #warm
+cheer: I bake. Badly.
+  them: Then we should never be worried on the same day. The galley couldn't take it.   #funny
+
+
+== after-me
+topic: plans
+when: tier>=close
+them: I think about who'll sit in the chair after me. I can't picture it. Then I can.
+them: And it's fine. Someone careful, who asks questions. The Wren will make sure of it.
+ask: Do you ever think about what comes after this?
+listen: Does it frighten you?
+  them: A little. Less than it did. Saying it to you makes it smaller.
+share: Sometimes. I like not knowing yet.
+  them: So do I, I'm learning. Not knowing used to be my least favourite thing.   #warm
+cheer: Lunch. I think about lunch.
+  them: Wise. Lunch is the right size of future. I'll think about lunch too.   #funny
+
+== outlast
+topic: ship
+when: tier>=acquaintance
+them: The Wren's older than I am, and she'll outlast me. I find that a comfort.
+them: Most nights. Some nights I'd like her to need me a bit more.   #warm
+ask: What's something you hope lasts longer than you?
+listen: Does she need you?
+  them: She needs someone in the chair who listens. Today that's me. That's plenty.
+share: Something I made with my hands.
+  them: Then make it well. You will. I've seen your work in the log.   #warm
+cheer: My name on the beam. Spelt right.
+  them: I'll check the spelling myself. Captain's privilege.   #funny
+
+// ---- more at acquaintance
+
+== lost-property
+topic: news
+them: There are four lost-property boxes aboard now. Four decks. Four keepers.
+them: Each of them thinks they're the only one. I haven't the heart to tell them.   #funny
+ask: What have you lost since you came aboard?
+listen: Which box should I try first?
+  them: Deck 3. It's the one with the most socks. Socks always go to Deck 3.   #funny
+share: A good pen. I miss that pen.
+  them: Ask all four boxes. Pens travel. I've had mine come back from Deck 6.   #warm
+cheer: My sense of direction. Day one.
+  them: Nobody's ever handed one of those in. I'll ask the keepers to watch for it.   #funny
+
+== veyli-names
+topic: ship
+them: Every star out here has a Veyli name. I'm learning a few, slowly.
+them: Envoy Saruth corrects me, very kindly. Most days I get the first half right.
+ask: Is there a word you've picked up since you came aboard?
+listen: Have you a favourite among them?
+  them: Tavessa. Saruth says I say it like a sneeze. Saruth is right.   #funny
+share: "Bunk." I never said it before.
+  them: Ship words stick. In a year you'll say "deck" at home and your family will laugh.   #warm
+cheer: "Blast." From Works, mostly.
+  them: The strongest word aboard. Use it wisely. Calder rations hers.   #funny

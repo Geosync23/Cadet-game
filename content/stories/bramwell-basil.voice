@@ -1,0 +1,33 @@
+@voice bramwell-basil
+// SW2 (crew stories, CS1's call). Basil Bramwell (he/him, as the story outline): Works cadet, junior, day shift,
+// Bunk 7 (Theo Teague's old berth, 4-B7-5). Arrives on the Tern on Day 21. Optimistic, cheerful. "Brand new, and trying
+// very hard not to look it." Night owl, finds a quiet corner. Writes letters home every week; brought a plant from home
+// that isn't doing well. From the Ostrander colonies, and says it like a boast.
+//
+// HOW HE TALKS: quick and bright; three questions in one breath, then answers one himself. Says "Brilliant." about small
+// things. Tries to sound like he's been here for years, and gets a ship word slightly wrong.
+// WITH JUNIORS: you're the nearest thing to his own age in Works; he follows you round asking things.
+// WHAT HE NOTICES: what everything is called; who knows what; how the plant looks today.
+// MOOD TELLS: low = only one question; high = a question about the stars.
+// NEVER: admits he's homesick straight out; complains; is unkind about anyone.
+// RUNNING: the questions; the plant, which he checks on like a patient; the Ostrander colonies did it first, or better,
+// or bigger.
+tpl: chatty
+talk: Quick and bright; three questions in one breath, then answers one himself; tries to sound like an old hand.
+cares: the plant from home | learning every name and every word | writing home every week | not looking new
+jokes: three questions in one breath | the plant has a worse day than he does, every day | the Ostrander colonies did it bigger
+hi: Oh, hi | Hello | Hi, hi
+bye: See you, then | Right, off I go | Bye for now
+yes: Yes, course | Brilliant, yes | Oh, definitely
+thanks: Thanks, thanks | Brilliant, thank you
+wow: Oh, brilliant | Look at that
+sigh: Oh well | Ah
+nick: - | - | {me} | {me} | {me}
+needs: share
+openness: open
+loves: made
+likes: book | star
+invites: observatory
+joy: writing letters home
+keepsake: a little clay pot he painted, with the Wren on it
+avoid: his parents' repair shop | the ticket home he's saved for (never said) | reading his letters aloud

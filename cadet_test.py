@@ -9,7 +9,7 @@
 # Builds must share a random seed for screenshots to match pixel for pixel.
 # Deterministic headless runner for Starship Cadet builds.
 # Virtual clock + manual frame stepping, three.js served locally, a direct-eval hook into the game's scope.
-import json, sys, re, pathlib, hashlib, os
+import json, sys, re, pathlib, hashlib, os, atexit, itertools
 from playwright.sync_api import sync_playwright
 
 WORK = pathlib.Path(os.environ.get('CADET_WORK', '/tmp/cadet-work'))
@@ -24,6 +24,14 @@ INIT = """
 })();
 """
 HOOK = "window.__sc = src => eval(src);\n"
+# each run's copy of a build has its own name (process id, a count, then the build's name: FX18, backlog FX17-2), so
+# two checks at once in one CADET_WORK never open each other's copy (they did when both builds were called
+# starship-cadet.html); a copy goes when its Game closes, or when the check ends (a reload by URL needs it till then)
+_RUN_N = itertools.count(1)
+_RUN_FILES = []
+atexit.register(lambda: [f.unlink(missing_ok=True) for f in _RUN_FILES])
+# draw only the last frame of each step (installed once per page; Game.step puts it back after a reload)
+SKIP_SWITCH = "(() => { const rr = renderer.render.bind(renderer); window.__skip = false; renderer.render = (s, c) => { if (!window.__skip) rr(s, c); }; })()"
 
 def instrument(html):
     # expose the game's scope to tests: direct eval inside the IIFE, added just before the closing of it
@@ -41,8 +49,8 @@ class Game:
         self.page.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
         self.page.add_init_script(INIT)
         html = instrument(pathlib.Path(path).read_text())
-        tmp = WORK / 'test' / ('_run_' + pathlib.Path(path).name)
-        tmp.write_text(html)
+        tmp = self.tmp = WORK / 'test' / f'_run_{os.getpid()}_{next(_RUN_N)}_{pathlib.Path(path).name}'
+        tmp.write_text(html); _RUN_FILES.append(tmp)
         # ?nosave: tests never read or write a save (0.15.1). ?debug: shows the Night/Day button the shots use.
         # Builds before 0.15.1 ignore both.
         self.page.goto('file://' + str(tmp) + '?nosave&debug')
@@ -58,16 +66,20 @@ class Game:
         if self.page.evaluate('window.__sc === undefined'):
             raise RuntimeError('game failed to start: ' + ' | '.join(self.errors[:6]))
         # headless rendering is slow: simulate every frame, but only draw the last one of each step
-        self.ev("(() => { const rr = renderer.render.bind(renderer); window.__skip = false; renderer.render = (s, c) => { if (!window.__skip) rr(s, c); }; })()")
+        self.ev(SKIP_SWITCH)
     def ev(self, src):
         return self.page.evaluate('s => window.__sc(s)', src)
     def step(self, n, dt=1000/30):
+        # a check that reloads the page (page.goto / page.reload) gets a new page without the switch: put it back
+        # (TS1's find, plans/handover-test-speed.md: after a reload every simulated frame was drawn, ~1 s a frame)
+        self.page.evaluate('s => { if (window.__skip === undefined && window.__sc) window.__sc(s); }', SKIP_SWITCH)
         if n > 1: self.page.evaluate(f'window.__skip = true; window.__step({n - 1}, {dt}); window.__skip = false')
         self.page.evaluate(f'window.__step(1, {dt})')
     def shot(self, path):
         self.page.screenshot(path=path)
     def close(self):
         self.b.close()
+        self.tmp.unlink(missing_ok=True)
 
 import sys, json, hashlib
 import numpy as np
@@ -164,3 +176,4 @@ for s in shots:
 print('errors A', a['errors'][:3], 'errors B', b['errors'][:3])
 print('taps', [a[f'tap{k}'][0] for k in range(5)])
 print(('ALL IDENTICAL' + (' (apart from renderer noise: some pixels 1 level off)' if noise else '')) if ok else 'DIFFERENCES FOUND')
+sys.exit(0 if ok else 1)   # so a failing check fails for the computer too (check_fast.sh, GitHub)

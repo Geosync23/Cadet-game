@@ -1,0 +1,162 @@
+Day 3, Wednesday 05:52 | None | None | - | - | - | 4 | 7,1 | -
+Day 3, Wednesday 06:00 | None | m4:meet | - | - | - | 4 | 7,1 | -
+Day 3, Wednesday 08:01 | Fetch 2 × element: the Galley parts shelf | m4:meet | 3-oven-1@35 | fetch/Main storage/do | - | 5 | 32,3 | -
+    act ('Day 3, Wednesday 08:00', 'tap Time clock: true')
+    act ('Day 3, Wednesday 08:01', 'tap Job board: true')
+    act ('Day 3, Wednesday 08:01', 'tap Galley parts: true')
+Day 3, Wednesday 08:06 | Repair the oven | m4:meet | 3-oven-1@35 | job/Repairing/do | - | 3 | 37,4 | -
+    act ('Day 3, Wednesday 08:05', 'tap Ovens: true')
+Day 3, Wednesday 08:32 | Fetch a lamp: the Lights shelf | m4:meet | 3-growlight-2@39 | - | - | 5 | 26,2 | -
+    act ('Day 3, Wednesday 08:31', 'tap Job board: true')
+Day 3, Wednesday 08:34 | Fetch a lamp: the Lights shelf | m4:meet | 3-growlight-2@39 | fetch/Main storage/do | - | 5 | 26,2 | -
+    act ('Day 3, Wednesday 08:32', 'tap Lights: true')
+Day 3, Wednesday 08:36 | Make a relay in the machine shop | m4:meet | 3-growlight-2@39 | make/Machine shop/walk | - | 5 | 22,11 | -
+    act ('Day 3, Wednesday 08:35', 'tap Workbench: true')
+Day 3, Wednesday 08:38 | Make a relay in the machine shop | m4:meet | 3-growlight-2@39 | make/Machine shop/do | - | 5 | 22,12 | -
+Day 3, Wednesday 09:26 | Repair the grow lights | m4:meet | 3-growlight-2@39 | job/Repairing/in | - | 3 | 8,20 | -
+    act ('Day 3, Wednesday 09:26', 'tap Grow racks: true')
+Day 3, Wednesday 09:28 | Repair the grow lights | m4:meet | 3-growlight-2@39 | job/Repairing/do | - | 3 | 8,20 | -
+Day 3, Wednesday 09:56 | Fetch 2 × fan belt: the Galley parts shelf | m4:meet | 3-galleyplant-1@34 | fetch/Main storage/do | - | 5 | 32,3 | -
+    act ('Day 3, Wednesday 09:55', 'tap Job board: true')
+    act ('Day 3, Wednesday 09:55', 'tap Galley parts: true')
+Day 3, Wednesday 10:00 | Repair the galley plant | m4:meet | 3-galleyplant-1@34 | job/Repairing/do | - | 3 | 39,1 | -
+    act ('Day 3, Wednesday 09:59', 'tap Sign: false')
+    act ('Day 3, Wednesday 10:00', 'tap Sign: false')
+    act ('Day 3, Wednesday 10:00', 'tap the floor at the pin: Repair the galley plant (working)')
+Day 3, Wednesday 10:28 | Turn it in at the job board | m4:meet | 3-galleyplant-1@34 | - | - | 5 | 17,7 | -
+Day 3, Wednesday 10:30 | Take a hover cart from the Cart bay | m4:meet | restock-stores@58 | - | - | 5 | 19,13 | -
+    act ('Day 3, Wednesday 10:29', 'tap Job board: true')
+    act ('Day 3, Wednesday 10:29', 'tap Cart dock 1: true')
+    act ('Day 3, Wednesday 10:30', 'tap Cart dock 1: true')
+    act ('Day 3, Wednesday 10:33', 'tap Cart dock 1: true')
+    act ('Day 3, Wednesday 10:36', 'tap Cart dock 1: true')
+Day 3, Wednesday 10:39 | Take a hover cart from the Cart bay | m4:meet | restock-stores@58 | cartTake/Cart bay/do | - | 5 | 19,13 | -
+    act ('Day 3, Wednesday 10:39', 'tap Cart dock 1: true')
+Day 3, Wednesday 10:41 | Load the cart in the cargo hold | m4:meet | restock-stores@58 | cartLoad/Cargo hold/do | - | 5 | 15,12 | -
+    act ('Day 3, Wednesday 10:41', 'tap Wednesday delivery: true')
+Day 3, Wednesday 10:50 | Load the cart in the cargo hold | m4:meet | restock-stores@58 | cartLoad/Cargo hold/out | - | 5 | 15,12 | -
+Day 3, Wednesday 10:52 | Unload at main storage | m4:meet | restock-stores@58 | cartUnload/Unloading/do | - | 5 | 26,2 | -
+    act ('Day 3, Wednesday 10:50', 'tap Wednesday delivery: false')
+Day 3, Wednesday 11:01 | Load the cart in the cargo hold | m4:meet | restock-stores@58 | cartLoad/Cargo hold/do | - | 5 | 15,12 | -
+    act ('Day 3, Wednesday 10:59', 'tap Lights: false')
+    act ('Day 3, Wednesday 11:00', 'tap Wednesday delivery: true')
+Day 3, Wednesday 11:09 | Load the cart in the cargo hold | m4:meet | restock-stores@58 | - | - | 5 | 15,12 | -
+    act ('Day 3, Wednesday 11:09', 'tap Wednesday delivery: false')
+    act ('Day 3, Wednesday 11:09', 'tap the floor at the pin: Load the cart in the cargo hold')
+Day 3, Wednesday 11:11 | Unload at main storage | m4:meet | restock-stores@58 | cartUnload/Unloading/do | - | 5 | 26,2 | -
+    act ('Day 3, Wednesday 11:10', 'tap Lights: true')
+Day 3, Wednesday 11:20 | Dock the cart in the Cart bay | m4:meet | restock-stores@58 | cartBack/Cart bay/do | - | 5 | 19,13 | -
+    act ('Day 3, Wednesday 11:19', 'tap Lights: false')
+    act ('Day 3, Wednesday 11:19', 'tap the floor at the pin: Unload at main storage')
+    act ('Day 3, Wednesday 11:20', 'tap Cart dock 1: true')
+Day 3, Wednesday 11:22 | Take a job at the job board | m4:meet | 5-cartdock-2@41 | - | - | 5 | 15,0 | -
+    act ('Day 3, Wednesday 11:22', 'tap Job board: true')
+Day 3, Wednesday 11:24 | Fetch a relay: the Lights shelf | m4:meet | 5-cartdock-2@41 | fetch/Main storage/do | - | 5 | 26,2 | -
+    act ('Day 3, Wednesday 11:23', 'tap Lights: true')
+Day 3, Wednesday 11:26 | Repair the cart dock | m4:meet | 5-cartdock-2@41 | job/Repairing/do | - | 5 | 19,15 | -
+    act ('Day 3, Wednesday 11:26', 'tap Cart dock 2: true')
+Day 3, Wednesday 11:42 | Clean a vent: lift lobby | m4:meet | extra-vent:6-lift-1@59 | - | - | 6 | 16,3 | -
+    act ('Day 3, Wednesday 11:41', 'tap Job board: true')
+Day 3, Wednesday 11:44 | Clean a vent: lift lobby | m4:meet | extra-vent:6-lift-1@59 | ixStop/Cleaning the vent/do | - | 6 | 16,3 | -
+    act ('Day 3, Wednesday 11:42', 'tap Coolant riser: true')
+Day 3, Wednesday 12:03 | Calibrate the washer 3 | m4:meet | extra-calibrate:4-washer-3@60 | job/Repairing/in | - | 4 | 12,18 | -
+    act ('Day 3, Wednesday 12:02', 'tap Job board: true')
+    act ('Day 3, Wednesday 12:03', 'tap Washer 3: true')
+Day 3, Wednesday 12:05 | Calibrate the washer 3 | m4:meet | extra-calibrate:4-washer-3@60 | job/Repairing/do | - | 4 | 12,18 | -
+Day 3, Wednesday 12:16 | Turn it in at the job board | m4:meet | extra-calibrate:4-washer-3@60 | job/Repairing/do | - | 4 | 12,18 | -
+    act ('Day 3, Wednesday 12:14', 'tap Washer 3: true')
+Day 3, Wednesday 12:27 | Pick up a box of medical supplies | m4:meet | extra-delivery:medical@60 | - | - | 5 | 26,2 | -
+    act ('Day 3, Wednesday 12:26', 'tap Job board: true')
+Day 3, Wednesday 12:29 | Watch Yara: Cargo hold | m4:watch | extra-delivery:medical@60 | ixStop/Picking it up/do | - | 5 | 26,2 | -
+    act ('Day 3, Wednesday 12:28', 'tap Lights: true')
+Day 3, Wednesday 12:33 | Watch Yara: Cargo hold | m4:watch | extra-delivery:medical@60 | - | - | 5 | 16,11 | -
+    act ('Day 3, Wednesday 12:33', 'tap Wednesday delivery: false')
+    act ('Day 3, Wednesday 12:33', 'tap the floor at the pin: Watch Yara: Cargo hold')
+    act ('Day 3, Wednesday 12:36', 'tap Wednesday delivery: false')
+    act ('Day 3, Wednesday 12:36', 'tap the floor at the pin: Watch Yara: Cargo hold')
+    act ('Day 3, Wednesday 12:39', 'tap Wednesday delivery: false')
+    act ('Day 3, Wednesday 12:39', 'tap the floor at the pin: Watch Yara: Cargo hold')
+    act ('Day 3, Wednesday 12:42', 'tap Wednesday delivery: false')
+    act ('Day 3, Wednesday 12:42', 'tap the floor at the pin: Watch Yara: Cargo hold')
+Day 3, Wednesday 12:44 | Take medical supplies to the infirmary, Deck 3 | m4:do | extra-delivery:medical@60 | ixStop/Dropping it off/in | - | 3 | 13,4 | -
+    act ('Day 3, Wednesday 12:43', 'tap Supplies: true')
+Day 3, Wednesday 12:46 | Take medical supplies to the infirmary, Deck 3 | m4:do | extra-delivery:medical@60 | ixStop/Dropping it off/do | - | 3 | 13,4 | -
+Day 3, Wednesday 12:55 | Turn it in at the job board | m4:do | extra-delivery:medical@60 | - | - | 5 | 15,0 | -
+Day 3, Wednesday 12:57 | Fetch a relay: the Lights shelf | m4:do | 4-junction-1@51 | fetch/Main storage/do | - | 5 | 26,2 | -
+    act ('Day 3, Wednesday 12:55', 'tap Job board: true')
+    act ('Day 3, Wednesday 12:56', 'tap Lights: true')
+Day 3, Wednesday 13:01 | Repair the light relays | m4:do | 4-junction-1@51 | job/Repairing/do | - | 4 | 18,18 | -
+    act ('Day 3, Wednesday 13:00', 'tap Light relays: true')
+Day 3, Wednesday 13:16 | Tea and biscuits, in the Tea corner | m4:do | - | ixLounge/Taking it easy/walk | - | 5 | 23,1 | -
+    act ('Day 3, Wednesday 13:15', 'tap Job board: true')
+    act ('Day 3, Wednesday 13:16', 'tap Tea table: true')
+Day 3, Wednesday 13:18 | Take a job at the job board | m4:do | - | ixLounge/Tea and biscuits/do | - | 5 | 23,1 | -
+Day 3, Wednesday 13:38 | Take a job at the job board | m4:do | - | - | - | 5 | 15,0 | -
+    act ('Day 3, Wednesday 13:38', 'tap Job board: true')
+    act ('Day 3, Wednesday 13:39', 'tap Job board: true')
+    act ('Day 3, Wednesday 13:42', 'tap Job board: true')
+    act ('Day 3, Wednesday 13:45', 'tap Job board: true')
+    act ('Day 3, Wednesday 13:48', 'tap Job board: true')
+    act ('Day 3, Wednesday 13:51', 'tap Job board: true')
+    act ('Day 3, Wednesday 13:54', 'tap Job board: true')
+    act ('Day 3, Wednesday 13:57', 'tap Job board: true')
+    act ('Day 3, Wednesday 14:00', 'tap Job board: true')
+    act ('Day 3, Wednesday 14:03', 'tap Job board: true')
+    act ('Day 3, Wednesday 14:06', 'tap Job board: true')
+    act ('Day 3, Wednesday 14:09', 'tap Job board: true')
+    act ('Day 3, Wednesday 14:12', 'tap Job board: true')
+    act ('Day 3, Wednesday 14:15', 'tap Job board: true')
+    act ('Day 3, Wednesday 14:18', 'tap Job board: true')
+    act ('Day 3, Wednesday 14:21', 'tap Job board: true')
+    act ('Day 3, Wednesday 14:24', 'tap Job board: true')
+    act ('Day 3, Wednesday 14:27', 'tap Job board: true')
+    act ('Day 3, Wednesday 14:30', 'tap Job board: true')
+    act ('Day 3, Wednesday 14:33', 'tap Job board: true')
+    act ('Day 3, Wednesday 14:36', 'tap Job board: true')
+    act ('Day 3, Wednesday 14:39', 'tap Job board: true')
+    act ('Day 3, Wednesday 14:42', 'tap Job board: true')
+    act ('Day 3, Wednesday 14:45', 'tap Job board: true')
+    act ('Day 3, Wednesday 14:48', 'tap Job board: true')
+Day 3, Wednesday 14:51 | Fire drill, 15:00 | m4:do | - | ixStop/Your job/do | - | 5 | 15,5 | -
+    act ('Day 3, Wednesday 14:51', 'tap Fire extinguisher: true')
+Day 3, Wednesday 14:54 | Stand by the hatch | m4:do | - | ixStop/Your job/do | - | 5 | 19,9 | -
+    act ('Day 3, Wednesday 14:52', 'tap Lift brake: true')
+Day 3, Wednesday 15:04 | Take a job at the job board | m4:do | - | - | - | 5 | 15,0 | -
+    act ('Day 3, Wednesday 15:03', 'tap Fire extinguisher: true')
+    act ('Day 3, Wednesday 15:04', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:06', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:09', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:12', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:15', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:18', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:21', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:24', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:27', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:30', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:33', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:36', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:39', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:42', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:45', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:48', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:51', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:54', 'tap Job board: true')
+    act ('Day 3, Wednesday 15:57', 'tap Job board: true')
+Day 3, Wednesday 16:00 | Fetch a bearing and a pump: the Galley parts shelf | m4:do | 4-washer-1@61 | fetch/Main storage/do | - | 5 | 32,3 | -
+    act ('Day 3, Wednesday 16:00', 'tap Job board: true')
+    act ('Day 3, Wednesday 16:00', 'tap Galley parts: true')
+Day 3, Wednesday 16:05 | Repair the washer | m4:do | 4-washer-1@61 | - | - | 4 | 20,9 | -
+    act ('Day 3, Wednesday 16:05', 'tap Galley parts: true')
+Day 3, Wednesday 16:07 | Repair the washer | m4:do | 4-washer-1@61 | job/Repairing/do | - | 4 | 14,18 | -
+    act ('Day 3, Wednesday 16:05', 'tap Washer 1: true')
+Day 3, Wednesday 16:48 | Take a job at the job board | m4:do | - | - | - | 5 | 15,0 | -
+    act ('Day 3, Wednesday 16:47', 'tap Job board: true')
+    act ('Day 3, Wednesday 16:47', 'tap Job board: true')
+    act ('Day 3, Wednesday 16:48', 'tap Job board: true')
+    act ('Day 3, Wednesday 16:51', 'tap Job board: true')
+    act ('Day 3, Wednesday 16:54', 'tap Job board: true')
+    act ('Day 3, Wednesday 16:57', 'tap Job board: true')
+Day 3, Wednesday 17:01 | None | m4:again | - | - | - | 5 | 20,0 | -
+    act ('Day 3, Wednesday 17:00', 'tap Time clock: true')
+trained: {"m1":2,"m3d":3}
+errors: []

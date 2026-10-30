@@ -1,0 +1,395 @@
+@talks tomas
+// TW1, the Talk a while pack: Tomas Lind's own talks. Earnest, curious, a little lost and honest about it; lots of
+// questions; "I think", "sort of"; the stars; thanks too much. Never the failed exam or the transfer list (arc beats 5-6).
+// SW2, patch 0.92.3 item 15: 26 more after TW1's four (his own pool only, never the shared one). needs: listen, so the
+// listen answer is the warm one. Not used: the exam, why he left home, the transfer list, Tiles.
+only: own
+
+== windows
+topic: ship
+them: I've counted the windows. Twenty-two. I think. I might've counted one twice.
+them: The Watch office has the best view of the lift. And so of everyone. Sort of a perk.
+ask: Have you got a favourite window yet? Or is that odd? It might be odd.
+listen: Which window do you like best?
+  them: The junior common room, at night. You can see right out the back of us.   #warm
+share: Not yet. I'm still learning the doors.
+  them: Me too. I took the long way round Deck 2 again today. On purpose. Mostly.   #funny
+cheer: The one in the lift door. It's got me in it.
+  them: Ha! I'll count that. Twenty-three. Probably.   #funny
+
+== brother
+topic: home
+when: tier>=acquaintance
+them: I write to my little brother every week. I make the job sound really exciting.
+them: Yesterday's letter was mostly about the lift. I said it was fast. It's not that fast.   #funny
+ask: Do you write to anyone at home? What do you tell them?
+listen: What does he write back?
+  them: Questions. Hundreds. Have I seen a comet. Is the Captain tall. I'm sort of his hero.   #warm
+share: My family. I tell them it's going well.
+  them: Is it? Going well? I think it is. You look like it is.
+cheer: I tell them I'm basically in charge.
+  them: Same! Well. I say "helping". Then I underline it.   #funny
+
+== treadmill
+topic: crew
+when: tier>=colleague
+them: Commander Vance talked me onto the treadmill. I didn't say yes. I don't think I said yes.
+them: I'm fourth on his board now. He looked at me like I was a regulation he approved of.   #funny
+ask: Have you been talked into anything yet, since you came aboard?
+listen: Do you actually like running?
+  them: I sort of do? Don't tell him. He'll make a new board.   #funny
+share: A few things. All good ones, so far.
+  them: That's the Wren. You say yes to one thing and it's a whole life.   #warm
+cheer: Taking the long way round Deck 2.
+  them: That's mine! You can share it. We'll be late together.   #funny
+
+== star-map
+topic: plans
+when: tier>=friend
+them: You know my star map? See the pencil circle? Top left.
+them: Never been. Nobody I know has. I just like it there, first thing every morning.
+ask: If you could go anywhere out there, where would it be?
+listen: Why that star?
+  them: It had a nice name. That's it. I was fourteen. I'm sort of still fourteen about it.   #warm
+share: Somewhere no one's charted yet.
+  them: Yes! That. Survey might let us tag along one day. I'll ask. Will you come?
+cheer: Somewhere with better biscuits.
+  them: I'll draw a little biscuit on the map. For you. Right next to mine.   #funny
+
+// ---- SW2: any tier and acquaintance (14)
+
+== lift-buttons
+topic: ship
+them: Have you seen the lift buttons? Four's the shiniest. Worn smooth. Everyone going home.
+them: Six is still stiff. Only the engine crew go down much. And Zeke. Zeke goes everywhere.   #funny
+ask: Which deck do you think you'll end up liking best?
+listen: Why is Four the shiniest?
+  them: Bunks, washrooms, the common room. It's where everyone goes at the end of a day.   #warm
+share: Five. The Works bay feels like home.
+  them: That's lovely. The button agrees with you. Five's very shiny too. Second shiniest.
+cheer: Three. Three has the mess.
+  them: Oh! Three has the mess. That's all Three needs. That's a very good argument.   #funny
+
+== firm-friendly
+topic: work
+them: Holt says Watch is friendly on patrol and firm at the airlock. I've got friendly.
+them: I practise firm in the washroom mirror. "Halt." I sound like I'm offering a biscuit.   #funny
+ask: Which are you better at, would you say? Friendly, or firm?
+listen: What does Holt sound like, being firm?
+  them: Like the door closing before he's said anything. You just stop. I'm years off that.
+share: Friendly. Firm takes practice.
+  them: Then we'll practise. You say "Halt", I'll stop. Then we'll swap. Is that weird?
+cheer: Firm. Ask anyone about the last biscuit.
+  them: That's not firm, that's greedy. Very effective, though. I'll take notes.   #funny
+
+== servery
+topic: food
+them: I can never decide at the servery. So I have whatever the person in front has.
+them: Yesterday that was Pell. I had three puddings and no dinner. It was a good day.   #funny
+ask: What do you do when you can't decide what to eat?
+listen: Is that why you always have toast?
+  them: Sort of! Toast doesn't make you decide. Toast just is. I think that's why I love it.   #warm
+share: Pick the thing I haven't tried.
+  them: That's brave. I'll try that. Tomorrow. Probably tomorrow.
+cheer: Stand behind Brennan's favourite.
+  them: Ooh. Clever. Who is Brennan's favourite? Everyone thinks it's them.   #funny
+
+== own-map
+topic: hobby
+when: tier>=acquaintance
+them: I'm drawing my own map of the Wren. Not the proper one. Mine.
+them: There's a cross wherever I've got lost. It's mostly crosses. Deck 2 is one big cross.   #funny
+ask: Where did you last get lost? Be honest. I won't put your name on it.
+listen: Can I see the map?
+  them: Course! Don't laugh at the lift. I drew it as a box with a face. It looked right.   #warm
+share: Between the laundry and the gym.
+  them: Yes! Everyone does that. There's a door that looks like it goes somewhere and doesn't.
+cheer: I've never been lost. I've been exploring.
+  them: Oh, that's so much better. I'm changing my key. Crosses are "exploring" now.   #funny
+
+== hens
+topic: home
+when: tier>=acquaintance
+them: On the farm moon we had eleven hens. I named them all after kinds of weather.
+them: Drizzle was my favourite. She never laid an egg. She just stood there, looking grey.   #funny
+ask: Did you have animals at home? Or anything that was sort of yours?
+listen: What were the other hens called?
+  them: Fog, Mist, Dull, Damp. It was a grey moon. I ran out of names quite fast.   #funny
+share: Nothing with feathers. Lots of plants.
+  them: Plants count. Plants are quieter than hens. My brother would say that's a plus.
+cheer: A very grumpy cat. Now that's weather.
+  them: Ha! A thunder cat. I'd have named her Storm. Everyone names their cat Storm, I bet.   #funny
+
+== notice-board
+topic: news
+them: I read the notice board every morning. Watch should know what's on. That's my excuse.
+them: Best one today: "Lost: blue mug with a duck on it. The duck is not optional."   #funny
+ask: Heard anything good this week? Anything at all?
+listen: Did anyone find the duck mug?
+  them: Not yet. I'm keeping an eye out. On patrol. Very seriously. It's a big responsibility.   #funny
+share: Just that the stew's back on Thursday.
+  them: Is it? That's real news. I'll tell the bunk. They'll want to know first.
+cheer: Only that the lift's in a good mood.
+  them: Is it? It came first time this morning. I nodded at it. It's good to be polite.   #funny
+
+== long-table
+topic: tradition
+them: First Sunday table, I sat right at the end. Every dish got to me last. I got the corners.
+them: I like corners now. The crispy bits. Is that a lesson? It feels like a lesson.   #funny
+ask: Where do you like to sit at a big meal? Middle, end, near the door?
+listen: Where's the best seat, really?
+  them: Next to someone who talks. Then you don't notice what you're eating. You just laugh.   #warm
+share: Near the door. Easy to help carry.
+  them: That's so you. I'd sit by the door and then forget to help. Then help twice.
+cheer: Wherever the gravy is.
+  them: Oh, wow. The gravy seat. That's always Pell. You'd have to get there very early.   #funny
+
+== whistle
+topic: plans
+them: I'm learning to whistle. Properly, with a tune. It's harder than it looks.
+them: Holt heard me on patrol and asked who was whistling. I said it was the air vents.   #funny
+ask: Is there a small thing you'd like to be able to do? Just a small one?
+listen: Did Holt believe you?
+  them: He looked at the vent for quite a long time. Then he looked at me. Then he walked on.   #funny
+share: Juggling. Three of anything.
+  them: Oh! We could learn together. With socks. Socks can't break anything. Mostly.
+cheer: Whistle. Now I'll have to beat you.
+  them: It's on, then. First one to whistle a whole song wins. I've got a head start. Sort of.   #funny
+
+== tea-count
+topic: day
+when: time:morning
+them: Three cups of tea and I'm still not awake. My eyes are open. The rest of me isn't.
+them: Watch starts at nine. By nine I'm a person. Just about. A small person.   #funny
+ask: Are you a morning person? You look like you might be. That's not a criticism.
+listen: So when are you at your best?
+  them: Just after dinner, at the window. Which is no use to anyone. Holt doesn't do evenings.
+share: Not really. I fake it till ten.
+  them: Ten! You're a professional. I can only fake it till half nine.   #funny
+cheer: I'm a breakfast person. Close enough.
+  them: That's fair. Breakfast is the best bit of the morning. The rest is just in between.   #funny
+
+== the-tern
+topic: ship
+them: I go and look at the Tern sometimes. On its pad. It brought me here. Seems rude not to.
+them: I say "Hello." Quietly. In case the shuttle bay crew think I've gone strange.   #funny
+ask: Do you ever go back to look at where you started? Anywhere?
+listen: What's it like in the shuttle bay?
+  them: Big and cold and echoey. You can hear your own feet. I like it. It feels like a beginning.
+share: I still remember walking down the ramp.
+  them: Me too. My legs went wobbly. I pretended it was the gravity. It wasn't the gravity.
+cheer: Only to check it hasn't left without me.
+  them: Ha! It wouldn't. Would it? No. Raman always counts. I think.   #funny
+
+== star-colours
+topic: hobby
+when: tier>=acquaintance
+them: Stars have colours, if you look long enough. Red ones, blue ones, a sort of honey one.
+them: I'm sorting mine by colour. The honey one's my favourite. It's called Biscuit.   #funny
+ask: Have you got a favourite colour? For a sky, I mean. Any sky.
+listen: Why is it called Biscuit?
+  them: It looked like the edge of one. That sounds silly out loud. It's still right.   #warm
+share: The blue just before it gets dark.
+  them: Oh, yes. We never had that at home. It just went from grey to darker grey.
+cheer: Whatever colour means "dinner's ready".
+  them: That's orange. The mess lights are orange. You're right. That's a lovely colour.   #funny
+
+== handover
+topic: crew
+when: tier>=acquaintance
+them: When I come on shift, the night Watch hands over the log. Mensah always asks me one thing.
+them: "What did you see from the window this morning?" Every day. I make sure I've looked.   #warm
+ask: Is there someone aboard who asks you the same thing every day?
+listen: What did you tell him today?
+  them: That the stars were sharp. He said "Good. Keep them sharp." I don't know how. I'll try.
+share: Brennan. "Have you eaten?" Every day.
+  them: Oh! Mine too. And Halloran. I'm the best-fed person on the ship, I think.   #funny
+cheer: The lift. "Which deck?" Every time.
+  them: The lift does ask a lot. You'd think it would learn by now.   #funny
+
+== crossing
+topic: tradition
+when: week1:true
+them: Is there really a ceremony when the ship crosses the Line? Rina says yes. Pell says yes.
+them: Then they both laughed. So now I don't know anything. I've stopped asking people.   #funny
+ask: Do you believe what people tell you on your first month? Or check?
+listen: What do you think happens?
+  them: Something with water, I think. And Vance in a hat. I'd pay to see Vance in a hat.   #funny
+share: I check. Quietly. Then I believe it.
+  them: That's very sensible. I'm going to do that. Check quietly. I'll start with the hat.
+cheer: I believe everything. It's more fun.
+  them: It is more fun! Even when it's wrong. Especially then. I'll go back to believing.   #funny
+
+== laundry-day
+topic: day
+them: I did all my washing at once and now I've got nothing to wear but the itchy jumper.
+them: It's not even a rest day. I'm on patrol in a jumper. Holt hasn't noticed yet. He will.   #funny
+ask: What's your worst habit? A small one. I've told you mine. Everyone knows mine.
+listen: Has Holt ever said anything?
+  them: Once. "Lind. Jumper." That was it. Two words. I went back and changed. Ran there and back.
+share: I leave the washing till the last sock.
+  them: Same! The last sock is a warning. When you see it, it's already too late.   #funny
+cheer: Saying "one more minute" to my bunk.
+  them: That one's never one minute. It's always twenty. The bunk lies.   #funny
+
+// ---- SW2: colleague (6)
+
+== someone-asked
+topic: ship
+when: tier>=colleague
+them: Someone asked me the way today! Me! I said "Left." It was right. They found it anyway.
+them: Then they said thank you. Like I'd helped. I sort of had. Wrongly. But I had.   #funny
+ask: When did you first feel like you knew your way round here?
+listen: Who asked you?
+  them: Someone from Survey with a box. Very lost. I knew that face. I used to wear that face.   #warm
+share: Last week. I stopped looking at signs.
+  them: That's the moment! I'm nearly there. I still look at the signs, but I nod at them now.
+cheer: I'll tell you when it happens.
+  them: Yes! Me too. We'll know at the same time. We'll have a cake. Brennan'll make it.   #funny
+
+== watch-log
+topic: work
+when: tier>=colleague
+them: I write the Watch log at the end of my patrol. Holt says I put in too much.
+them: Yesterday I wrote "Deck 3, all quiet. Nice smell from the galley." He crossed out "nice".   #funny
+ask: Are you a long-notes person, or a short-notes person?
+listen: What did he leave in?
+  them: "Smell from the galley." Which sounds much worse. I've been worrying about it all day.   #funny
+share: Short. Very short. Sometimes one word.
+  them: Holt would be thrilled. One word is his favourite number of words.   #funny
+cheer: Long. With drawings.
+  them: Drawings! I'm not brave enough. Maybe a very small star in the corner. Just one.   #funny
+
+== card-trick
+topic: crew
+when: tier>=colleague !moved:santos-zofia
+them: Zofia taught me a card trick. You pick a card, any card, and I tell you what it is.
+them: It only works if you pick the one I want you to. So it's not really a trick. It's a hope.   #funny
+ask: Do you know any tricks? Card ones, or any kind?
+listen: Can you show me the trick?
+  them: Course. Pick a card. Not that one. The one next to it. Yes! Seven of stars. Amazing.   #funny
+share: One with a coin. It mostly works.
+  them: Mostly is good! Mostly is my whole life. Will you teach me? I'll teach you mine.
+cheer: I can make a biscuit disappear.
+  them: Everyone can do that one. Pell does it twice a day. It's still impressive, though.   #funny
+
+== grey-day
+topic: day
+when: tier>=colleague mood:low
+them: Bit of a grey-sky day. Inside, I mean. Nothing's wrong. It's just grey.
+them: At home I'd go and sit with the hens. Here I sit at the window. It's nearly the same.
+ask: What do you do, on a grey day? So I can try it.
+listen: Does the window help?
+  them: It does. Everything out there's so big. My grey bit gets smaller, next to it.   #warm
+share: Go to the gym. Run it out.
+  them: Vance would be so pleased with you. Maybe I'll try it. A slow run. Very slow.
+cheer: Find Tomas and make him laugh.
+  them: Oh! That's working, actually. Look. That's a laugh. A small one. It counts.   #warm
+
+== bridge-hour
+topic: plans
+when: tier>=colleague
+them: I went to the bridge hour. Raman let me sit in the spare seat and look out the front.
+them: Just look. I didn't touch anything. I kept my hands on my knees the whole time.   #funny
+ask: If you could do someone else's job for one day, which would it be?
+listen: Would you want to fly, one day?
+  them: Sort of? Mostly I want to be the one who sees it first. The front window. Every morning.   #warm
+share: The galley. Just to see the rush.
+  them: Brave! I'd get flattened. Brennan would say "Mind out, love" and I'd be gone.   #funny
+cheer: The Captain's. For the chair.
+  them: Ha! The chair is very nice. I looked at it. I didn't sit. I'm not mad.   #funny
+
+== blue-ceiling
+topic: home
+when: tier>=colleague
+them: When I was little, I painted my bedroom ceiling blue. Because the sky outside never was.
+them: Mum said I'd ruined it. Then she sat on my bed and looked up at it for a long time.   #warm
+ask: What was your room like, growing up? If that's not a strange question.
+listen: Is it still blue?
+  them: Yes. My brother's room now. He's added stars. He says they're better. They're not.   #funny
+share: Small. Lots of things on the walls.
+  them: Like a bunk! So you were ready for the Wren before you knew. That's nice.
+cheer: Messy. Very, very messy.
+  them: Oh, wow. Like your berth. I'm joking. Sort of joking. It's a bit like your berth.   #funny
+
+// ---- SW2: friend (3)
+
+== nearly
+topic: work
+when: tier>=friend
+them: I always feel nearly good at things. Nearly good at Watch. Nearly good at whistling.
+them: Then I watch you just get on with it. You never look nearly. You just look like you.
+ask: What are you proud of, this month? Something real. I'll tell you mine.
+listen: What's yours?
+  them: That I said hello to you on your first night. I was so nervous. I'm glad I did it.   #warm
+share: Getting through the first weeks.
+  them: That's a big one. That's the biggest. You did it so well, too. I watched.   #warm
+cheer: Not getting lost for three days.
+  them: Three days! That's a record. I've never done two. You should put it on the board.   #funny
+
+== growing
+topic: home
+when: tier>=friend
+them: My brother's voice has changed. On his last message he sounded like someone else. Older.
+them: I've missed it. Not the whole thing. Just the bit where it happened.
+ask: Is there someone back home you're missing growing up? Or growing older?
+listen: Does he sound like you now?
+  them: A bit. He says "sort of" now. He got that from me. From my letters. I didn't know.   #warm
+share: My family. Every call, something's changed.
+  them: Yes. And they say the same about us, I bet. "You sound different." We do, a bit.
+cheer: My cousin. They're taller than me now.
+  them: Ha! That happens so fast. One day you're the tall one. Then you're just a cousin.   #funny
+
+== show-him
+topic: plans
+when: tier>=friend
+them: If my brother ever comes aboard, I'm going to show him everything. The windows. The bunk.
+them: And you. "This is my friend. A week newer than me." He'll be so jealous.   #funny
+ask: Who would you show round the Wren, if you could pick anyone?
+listen: What would you show him first?
+  them: The observatory. Then the long way round Deck 2. Then you. In that order. No offence.   #warm
+share: My family. They'd want to see the mess.
+  them: Of course they would. Brennan would feed them till they couldn't stand. Like us.   #funny
+cheer: Nobody. I'd keep it all for me.
+  them: Oh! I don't believe you. You'd show them the lift. Everyone shows people the lift.   #funny
+
+// ---- SW2: close friend (3)
+
+== less-new
+topic: crew
+when: tier>=close
+them: I was the newest for a week. Then you came. I thought not being newest was the best bit.
+them: It wasn't. The best bit was having someone to be lost with. Thanks for that, {nick}.   #warm
+ask: Do you remember the first thing I ever said to you?
+listen: Tell me what you remember.
+  them: That you looked as lost as me. And you said hello back. That was the whole thing, really.   #warm
+share: Something about the common room.
+  them: Was it? I think it was. I'd only just found it myself. I was very proud of it.
+cheer: "Is it left?" Probably.
+  them: Yes! It probably was. It's always "Is it left?" with me. It was left, though. I think.   #funny
+
+== short-way
+topic: ship
+when: tier>=close
+them: Funny thing. I went the short way round Deck 2 yesterday. Without thinking. I knew it.
+them: I stopped in the corridor and felt sort of sad. Like I'd lost something. Isn't that daft?
+ask: Is there something you'll miss about being new? Even a bit?
+listen: Why sad, do you think?
+  them: Being lost meant everything was new. Now it's home. That's better. I just noticed it go.   #warm
+share: Everyone being patient with me.
+  them: They still are, though. They're like that. It's the Wren. That bit doesn't stop.   #warm
+cheer: Getting away with everything.
+  them: Oh! That's true. You can't say "I'm new" any more. I tried it on Holt. Didn't work.   #funny
+
+== bunk-star
+topic: hobby
+when: tier>=close
+them: I named a new star last night. Low down, by the long cloud. It's called Bunk One.
+them: For all of us. Chloe, Zofia, Lukas, you, me. It's a very crowded star.   #warm
+ask: If you could wake up to any view at all, out of any window, what would it be?
+listen: Why Bunk One?
+  them: Because when I think of the Wren, I think of the bunk first. Everyone breathing. Home.   #warm
+share: My street at home, in the rain.
+  them: Oh, that's a good one. Rain on a street. We never had streets. I'd look at that with you.
+cheer: Breakfast, arriving on a tray.
+  them: Ha! That's not a view, that's a dream. Mine too. Toast, at the window, brought to me.   #funny

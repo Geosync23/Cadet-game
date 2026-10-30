@@ -1,0 +1,27 @@
+events exit 0 304s EVENTS CHECK OK
+big exit 1 114s BIGEVENTS CHECK FAILED
+day11 exit 0 266s DAY CHECK OK
+day12 exit 0 284s DAY CHECK OK
+day13 exit 0 274s DAY CHECK OK
+day14 exit 0 295s DAY CHECK OK
+day15 exit 0 306s DAY CHECK OK
+day7 exit 0 300s DAY CHECK OK
+food exit 1 84s FOOD CHECK FAILED
+join exit 0 154s JOIN CHECK OK
+social exit 0 25s SOCIAL CHECK OK
+devmode exit 1 186s DEVMODE CHECK FAILED
+player exit 0 1395s PLAYER CHECK OK
+interactions exit 0 476s INTERACTIONS CHECK OK
+fridays exit 1 583s FRIDAYS CHECK FAILED (1)
+clothes exit 0 90s 
+career exit 1 46s CAREER CHECK FAILED
+mech exit 1 216s MECH CHECK FAILED
+perf exit 1 615s PERF CHECK: 1 problem(s)
+deck exit 0 113s DECK CHECK OK
+machine exit 0 46s MACHINE CHECK OK
+leave exit 0 23s LEAVE CHECK OK
+device exit 0 134s 
+intro-week exit 0 238s OK
+intro-firsts exit 0 39s OK
+intro-evening exit 0 296s OK
+DONE

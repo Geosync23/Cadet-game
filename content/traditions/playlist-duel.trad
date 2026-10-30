@@ -1,0 +1,39 @@
+@tradition playlist-duel
+// Round 2: two people play three songs each from Imani O'Neill's playlists and the room picks a winner. Every 4 weeks from week 9 (Days 57, 85...).
+// Rules: FX24 (0.93.2, behind TRAD_0932_ON in section 13). Words: CS1 (plans/trad-0932-words.txt, claude/crew-stories-pitch 7b1e7300).
+// Host check (FX24): Imani's late garden shift ends at 21:00 (free from 21:15), so 21:15-22:00, not the card's 21:00.
+k: 1310
+title: Playlist duel
+when: every 4 weeks monday week 1 from day 57
+at: 21:15-22:00
+min: 20
+to-bed: yes
+where: 4 pool music
+hold: 1
+who: oneill-imani always, music 45%, musician 30%, night-owl 20%, everyone 8%
+anim: talk
+host: oneill-imani
+from: oneill-imani
+invite: host=oneill-imani odds=25% line="Playlist duel. Three songs each, the room votes. I always lose. On purpose."
+
+== mail
+- Playlist duel tomorrow, {time}, the music room. Two playlists, three songs each, the room picks. I host. I always lose. On purpose.
+
+== ask
+- Playlist duel in the music room. Imani's lost four in a row. On purpose, she says.   #funny
+- Bring a song for the playlist duel. Not the lighthouse one. Everybody brings that.   #funny
+- Coming to the playlist duel? Vote for the one with the drums.
+
+== here
+- Song two. Oh, that's a good one.
+- Hands up for the left side. Now the right.
+- That's not fair. That's my favourite.   #funny
+- Next! No skipping.
+
+== thanks
+- Two people play three songs each, and the room votes for its favourite. Imani loses again, and insists she let them win.   #funny
+
+== chatter
+- Imani lost the playlist duel again. She says it was a strategy.   #funny
+- Somebody played a song from home at the playlist duel and won by a mile.
+- I've had one song in my head since the playlist duel. Send help.   #funny

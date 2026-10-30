@@ -1,0 +1,17 @@
+@meeting endingFriend.bramwell-basil
+// SW6 (ending writer A), "About the transfer" on Basil's chat card (Friday Day 33). Basil (he/him; arrived Day 21;
+// you mentored him on Day 26): "You can't go, you're my mentor." Three questions in one breath. His plant. Never
+// admits homesickness straight out; never unkind. Neutral as to whether you've answered the Captain yet.
+title: Basil Bramwell
+from: Basil Bramwell
+gist: Basil heard about the transfer. You can't go, he said: you're his mentor. Then he took it back, mostly.
+== lines
+bramwell-basil: You can't go. You're my mentor. Is that a rule? It should be a rule. Is it a rule?   [gesture]
+bramwell-basil: Sorry. That came out all at once. Halloran told me. Is it true? Is it far? Is it very far?
+bramwell-basil > you: I've only just learnt where the tea is. And which coil sulks. You taught me that.
+? choice
+* You'd be fine without me.   flavour:cheer
+  bramwell-basil: Would I? I would. Probably. The plant wouldn't. Don't tell it.   [laugh]
+* Halloran told you?   flavour:listen
+  bramwell-basil: He tells everyone everything. He told me first, though. I felt very honoured.
+bramwell-basil: In the Ostrander colonies we'd throw you a party either way. We'll do it here. Bigger.

@@ -1,0 +1,84 @@
+@bank all
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-5 words; spec section 10): M20 The sensor array (24x), Friday Day 19, 10:00-12:00,
+// Deck 2's array room (A) with Hana Mori (she/her) and Calder. The training is meeting train.m20.mori; "Pick the star"
+// is a device card (m20.pick.*); the rig is WORK_TOOLS.arrayrig. Mori's step words are her own lines, flags
+// train.m20.follow.*. Said by nobody unless noted. 24t's logged stars are named "Wren {n}"; the five reference stars
+// below are the array's own (no capital-letter names but Tavessa, the cluster ahead: every star has a Veyli name too).
+
+== works.mech.m20
+- The sensor array
+== works.ask.m20
+- The sensor array | Hana Mori in Survey has asked for you. Calibrating the array against a star. I'll come too. {time}, {place}.
+== next.m20
+- The sensor array comes next: Deck 2's array room, with Hana Mori from Survey.
+== next.wait.m20
+- The sensor array: meet Hana Mori in the array room, Deck 2.
+== m20.ptr
+- The sensor array with Hana Mori, {time}
+== m20.notice
+- The sensor array with Hana Mori at {time}: the array room, Deck 2. Go at quarter to.
+
+// the rig given (toast), its name and its line (the Tools page)
+== m20.rig.give
+- Hana Mori gave you the calibration rig. Survey's spare, now yours.
+== works.tool.arrayrig
+- Calibration rig
+== works.tool.arrayrig.about
+- A dial and a reading. Point the array at a known star and turn till they agree.
+
+// "Pick the star": the card, the five stars (a short name for the button, and Mori's line when you pick it)
+== m20.pick.title
+- Pick the star
+== m20.pick.text
+- Hana has three reference stars in view. Pick one to calibrate against.
+== m20.star.1
+- Tavessa's brightest
+== m20.star.1.line
+- The brightest in Tavessa. It's steady. Steady is what we want.
+== m20.star.2
+- The white one, low
+== m20.star.2.line
+- Low and white. Very quiet star. It never surprises anyone.
+== m20.star.3
+- The old red giant
+== m20.star.3.line
+- Big and red and slow. It breathes, a little. Watch the reading.
+== m20.star.4
+- The close pair
+== m20.star.4.line
+- Two stars, very close. Pick the left one. Everyone picks the right.
+== m20.star.5
+- The one behind us
+== m20.star.5.line
+- We passed it six weeks ago. It's still the best-measured star we have.
+// the star you picked is one you logged (24t), if the builder can tell ({star}: its log name)
+== m20.star.yours
+- That's in your own star log: {star}. Hana noticed before you did.
+
+// the calibration (tuning's dial, 24e's turn control)
+== m20.cal.title
+- Calibrate · {machine}
+== m20.cal.text
+- Turn the dial till the array's reading and the star agree.
+== m20.cal.far
+- Far off. Keep turning.
+== m20.cal.close
+- Close. Small turns now.
+== m20.cal.on
+- On the star. The array agrees.
+// replace a failing module (the racks: 2-racks-1, -2)
+== m20.module.title
+- Array rack · {machine}
+== m20.module.look
+- One module's light is amber. The rest are green.
+== m20.module.swap
+- Swap the amber module
+== m20.module.done
+- All green. The array sees cleanly again.
+// stages and the friendship moment
+== m20.trained.stage2
+- The sensor array: you can run a full sweep now.
+== m20.trained.stage3
+- The sensor array: your sweeps feed Survey's charts now.
+== m20.sweep.done
+- Full sweep done. Survey has your readings.

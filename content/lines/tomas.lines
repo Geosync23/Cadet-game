@@ -125,7 +125,7 @@
 
 == week1
 ? week1:true weekday:mon time:morning
-- Morning! Washroom, then breakfast. Breakfast's till eight. Left at the end. Probably.
+- Morning! Washroom, then breakfast. Breakfast's till nine. Left at the end. Probably.
 ? week1:true weekday:thu
 - Inspection today. I've folded everything. I've folded my socks. Is that normal?   #funny
 ? week1:true weekday:fri tier>=acquaintance
@@ -571,9 +571,11 @@
 ? flag:beat.d1-wash.1
 - Morning! Washroom first, before the queue. Hot's best early.
 ? flag:beat.d1-wash.2
-- Breakfast's till eight. Then Works. Then everything.
-? flag:beat.d1-wash.3
-- Towel's in your locker. Top shelf. I think.
+- Breakfast's till nine. Then Works. Then everything.
+// cut (the user, 2026-10-24, patch 0.92.3 #10: "remove Tomas's towel line from the wake-up talk"); parked, its key
+// beat.d1-wash.3 retired (section 21's introBeatLines skips the gap):
+// ? flag:beat.d1-wash.3
+// - Towel's in your locker. Top shelf. I think.
 ? flag:beat.d1-wash.4
 - Out the door, then left. Probably left.   #funny
 // beat d5-invite: Friday 18:00, wherever he finds you
@@ -601,3 +603,116 @@
 == inc.mop
 - Is this a new tradition? Mopping Monday?   #funny
 - I'll walk round. Very carefully. Sort of carefully.   #funny
+
+// ---- Pillar 5 Step 3 (head writer W2): your promotion (C2, X) and P2's word (H2). Kind 'work', flags as in
+// content/works/keys-p5.md "Step 3". Earnest, a little lost, thanks people too much.
+== work
+// Day 10, 17:05: carrying your box along the officers' corridor, with Pell
+? flag:promo.box
+- Your box! We've got it. Mostly got it.
+- Is it left here? It's left. It's probably left.   #funny
+// at 4-23: his goodbye as your bunkmate
+? flag:promo.bye
+- Don't be a stranger, Officer.   #warm
+- The bunk'll be weird. Quieter. Worse, I think.
+// P2 (Day 15, breakfast): his word
+? flag:train.p2.word
+- You're asking around about the scrubber?
+- Ask who sleeps near it. And check they were in.
+
+// W3, rec deck R12: Wall night and the routes; new quiz questions about the deck
+== chat
+- Wall night on Tuesday! I belay, you climb, you ring the bell. That's the whole plan.   #warm
+- The hold colours mean something, you know. Sort of. Red's hard. Green's harder. I think.
+- I've put rec dec questions in the quiz. How many seats in the auditorium? Don't count.   #funny
+? weekday:tue time:evening
+- Wall night tonight, half six. I've chalked my hands already. Too early. Very white.   #funny
+== smalltalk
+- Climb on! Oh, you are. Sorry.   #funny
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Oh! People came. Hi. Sit anywhere. I made too much tea. This is {title}.
+== talk.answer
+- Oh, good question! I think. Sort of. Yes. Here's what I know.
+== talk.listen
+- Thanks for coming. Really. You can keep the tea. Not the cups.
+
+// ---- SW2, patch 0.92.3 item 15: his own Talk a while card frames (FX13: main characters skip the shared ones)
+== talk.start
+- Oh! A proper chat? Yes. Definitely. I mean, yes.
+- Talk? I'd like that. I've been saving up questions. Small ones.
+- Yes! Sorry. Yes. I was hoping someone would ask. Was it obvious?   #funny
+? tier>=friend
+- {nick}! Good. I've got about a hundred things to tell you. Three, really.   #warm
+- Oh, I'm so glad it's you. Go on. You first. No, me first. Sorry.   #warm
+?
+
+== talk.sit
+- Sit here. It's the best seat. I think. It's the one I always pick.
+- Have this one. The cushion's flatter, but you can see out.
+- Sit down. Mind the corner. I always hit the corner.   #funny
+
+== talk.filler
+- Is it just me, or is the ship quieter today? It might be me.
+- Sorry. I was looking out of the window again. Where were we?   #funny
+- I like this. Just talking. Nobody needs us anywhere. I think.
+- My brother would love this. Two people, chatting, on a starship.   #warm
+- Did you hear the lift just then? That was Deck 5. I'm nearly sure.   #funny
+- I'm going to remember this bit. I don't know why. I just am.   #warm
+
+== talk.end
+- Thanks for that. Really. I feel less lost. Is that silly?   #warm
+- That was good. Can we do it again? Not now. Another day.
+- Right. I'll let you go. Thanks for not getting bored. You weren't, were you?   #funny
+- I'm writing to my brother about this. Not all of it. The good bits.   #warm
+- That's made my day better. Sort of a lot better.   #warm
+
+== talk.stop
+- Oh! Course. Go. Sorry, I talk too much.
+- That's all right. We'll finish it later. I'll remember where we were. Probably.   #funny
+- Off you go. I'll be here. At the window, likely.
+
+== talk.go.shift
+- Oh, no. Patrol. Holt hates me being late. Well. Holt notices. Later?
+- I'm on in five. Sorry! I'll walk fast. I'll still be late.   #funny
+
+== talk.go.bed
+- I'm falling asleep at the window. Bed. Tomorrow, though? Promise?
+- Bunk time. I'll say goodnight to the star map for you.   #warm
+
+== talk.go.trad
+- Oh! {trad}'s starting. I said I'd go. Come with me?
+- Sorry, {trad}'s on. I've been looking forward to it all day. Coming?
+// ---- ZW1 (writer), patch 0.92.3 item 26: you in dirty clothes. clothes.remark: yesterday's clothes (flag:clothes.stale);
+// clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3's hook). Bubbles, 60 characters or fewer; kind, never mean.
+== clothes.remark
+? flag:clothes.stale
+- Is that yesterday's shirt? I only know because mine is.   #funny
+- Oh! Same clothes? I can show you the laundry. Sort of.   #funny
+== clothes.grubby
+? flag:clothes.grubby
+- Wow, you're really grubby. Was it a big job? It looks big.
+- You've got grime on your face. Just there. No, there.   #funny
+? flag:clothes.grubby tier>=friend
+- Go and change, bunkmate. I'll save you a seat. I think.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
+== bday.circle
+- Happy birthday, {other}! Is it okay if I have two slices?   #funny
+- Happy birthday! I made a wish for you. Is that allowed?   #warm
+== bday.circle.you
+- Happy birthday, bunkmate! Your first one aboard, I think!   #warm
+== bday.thanks
+- Thank you so much! Thank you. Sorry. Thank you!   #warm
+- This is the best birthday. I think. Yes. Thank you!   #warm
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-2): luck the evening before the Tier 3 test (his own beat the bank's)
+== pu3.luck
+? place:lounge
+- Tomorrow's the big one? Go to bed early. Not yet. After this song.   #funny
+?
+- Tier 3 tomorrow. I'm more nervous than you. Is that normal?   #funny
+- Good luck tomorrow. You'll be brilliant. I think. Yes.   #warm
+== pu3.senior
+- Senior Officer! I'm telling my brother. He won't know what it means.   #warm

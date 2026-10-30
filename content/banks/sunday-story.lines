@@ -1,0 +1,29 @@
+@bank all
+// SW1 (2026-10-24, patch 0.92.5, the weekend traditions): the Sunday story (sunday-story.trad), read aloud by Chief Holt
+// in the junior common room, one chapter each time it's on (the builder picks the chapter in order). Each chapter is said in order,
+// line by line. An old adventure book about a slow mail ship; no names, so nothing clashes with the roster. Holt reads
+// it plainly; the crew's lines about it are in the tradition's own file.
+
+== story.sunday.1
+- Chapter one. The mail ship was the slowest on her route, and proud of it.
+- Her pilot was old. Her cook was older. Her engine was older than both of them, and grumpier.
+- Every station on the route knew her by her hum. They'd put the kettle on before she docked.
+- That trip she carried one letter with no name on it at all. We'll stop there.
+
+== story.sunday.2
+- Chapter two. The cook held the letter up to the galley lamp. No name. No station. Just a small green star.
+- The pilot said, deliver what you're given. The cook said, to whom? The engine said nothing. Engines rarely do.
+- So they asked at every station. Nobody knew the star. Somebody always knew someone who might.
+- At the fourth station, a boy said his grandmother drew stars like that. On everything. Next time.
+
+== story.sunday.3
+- Chapter three. The grandmother lived at the far end of the last station, in a room full of green stars.
+- She looked at the letter a long time. Then she said, that's my handwriting. From forty years ago.
+- She'd written it to herself as a girl and posted it, and the post had taken its time. As post does.
+- The pilot asked if she'd like to open it. She said, not yet. Have a cup of tea first.
+
+== story.sunday.4
+- Chapter four. She opened it after the second cup. Inside was a list of things she hoped she'd do.
+- Fly in a ship. Learn to draw. Have a friend who'd sit with her when it was quiet.
+- She'd done all three. She read it out, and the cook said he had something in his eye. He hadn't.
+- The mail ship went home the long way, because nobody was in a hurry. That's the end of that one.

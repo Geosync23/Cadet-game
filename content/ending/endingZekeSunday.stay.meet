@@ -1,0 +1,19 @@
+@meeting endingZekeSunday.stay
+// SW6 (ending writer A), Zeke at the end of the day (ending spec, Sunday Day 35, 21:00; he finds you; arrow level 1
+// to the shuttle bay): by the Tern's ramp, where he met you on Day 0. STAY version (end.stay). The close mirrors his
+// first words to you ("Hello, {me}. I'm Zeke Torres. Welcome aboard.").
+title: The Tern's ramp
+from: Zeke Torres
+gist: At the end of the day Zeke took you down to the Tern's ramp, where he met you, and welcomed you aboard again.
+== lines
+torres-zeke: Here. This spot. Stand there. No, a bit left. There.   [gesture]
+torres-zeke > you: First night, you were the one on the ramp. Bag, big eyes. I was the one at the bottom, nervous.
+torres-zeke: I've been thinking about it all day. Since the Captain said. You're staying.   [sigh]
+torres-zeke: So your scarf carries on. It's going to be ridiculous now. Years of scarf.   [laugh]
+? choice
+* I couldn't leave coil three.   flavour:cheer
+  torres-zeke: She knows. She ran beautifully all afternoon. Coincidence. Probably.   [laugh]
+* Thank you for meeting me, that night.   flavour:share
+  torres-zeke: Thank you for coming down the ramp. Plenty don't. Plenty go back up.   [nod]
+torres-zeke > you: Right. Properly, then. Hello, {me}. I'm Zeke Torres. Welcome aboard.   [nod]
+torres-zeke: Again. For good this time. Right, onward. Bed. Big week. Every week is.

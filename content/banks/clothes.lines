@@ -66,3 +66,17 @@
 // Day 1 (playtest 1, O4): the clothes tip
 == tip.clothes
 - Fresh clothes are in your wardrobe: change each morning. When you run out, do your laundry on Deck 4.
+
+// ZW1 (writer), patch 0.92.3 item 26: the green tip for dirty clothes, once for each state (AC3's clothesDirtyTick,
+// worksText). Facts from section 21b: change at your wardrobe in Bunk 1; a change while grubby always takes a clean
+// outfit; a shower leaves the grime; either state makes you feel grubby sooner (one CLOTHES_DRAIN).
+== clothes.tip.yesterday
+- You're in yesterday's clothes, and people notice. Change at your wardrobe in Bunk 1.
+== clothes.tip.grubby
+- Your uniform's grubby. A shower won't fix it: change at your wardrobe in Bunk 1.
+== clothes.tip.yesterday2
+// (FX4, 0.92.4 item B: the second green tip, a later day still in yesterday's clothes; ZW1 may reword)
+- Yesterday's clothes again. A fresh set's waiting in your wardrobe in Bunk 1.
+== clothes.tip.laundry
+// (FX4, 0.92.4 item B, RV11: in yesterday's clothes with no clean ones left, either tip says this instead; ZW1 may reword)
+- No clean clothes left. Take your hamper to the laundry on Deck 4.

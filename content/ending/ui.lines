@@ -1,0 +1,172 @@
+@bank all
+// SW6 (ending writer A), the ending's UI and Mail (ending spec, section 9 "UI and Mail"; the beats tables' notices,
+// rings, Tracked and Schedule rows, the status lines, the Mails as records, the end page, the Saves app's row, the
+// Works app's last page). Rules (the user's): said in person first; Mail is only the record. Notices one line; Mail is
+// "Subject | body" (400 at most) and says who it's from at the end where it's a person. No emojis.
+// FLAGS: end.calder.<engines|bridge|teach|unsure>; end.now.<stay|go|unsure>; end.stay / end.go.
+
+// ---- the offer, Thursday Day 32
+== ending.notice.invite
+- The Captain asks to see you: the ready room, Deck 1, at 16:00.
+== ending.notice.go
+- The ready room, 16:00: time to go up. Deck 1.
+== ending.ring.captain
+- The Captain
+== ending.tracked.invite
+- The ready room, Deck 1, 16:00
+== ending.schedule.invite
+- 16:00 The Captain, the ready room
+// Calder at 16:10 if you're not there (a bubble, 60 at most; she walks you up)
+== ending.calder.fetch
+- There you are. Ready room. She's waiting. So's the step.
+- Captain's asked for you. Now's good. Walk with me.
+// the record of the offer, in Mail after the meeting (from the Captain)
+== mail.ending.offer
+- A letter from headquarters | As we said in the ready room: Concord headquarters has offered you a post, and I've passed it on with my good wishes. Tell me your answer by Saturday at 20:00, in person, wherever I am. You can change your mind until my address at the Line on Sunday. Either answer is a good one. Captain Odile Marrow
+== ending.tracked.answer
+- Your answer to the Captain: by Saturday 20:00
+== ending.schedule.answer
+- Sat 20:00 Your answer to the Captain
+== ending.ring.tell
+- Tell the Captain
+== ending.notice.tell
+- Your answer to the Captain is due tonight at 20:00. She's on her rounds: find her.
+== ending.status.offer
+- The Captain is waiting on your answer: by Saturday 20:00.
+// the record of your answer (Mail, the evening you tell her; .change when you change your mind)
+== mail.ending.answer.stay
+- Your answer | Thank you for telling me in person. I've written to headquarters to say you're staying with the Wren. Selfishly, I'm glad. Captain Odile Marrow
+== mail.ending.answer.go
+- Your answer | Thank you for telling me in person. I've written to headquarters to say yes. The Tern leaves on Monday at 10:00, the morning after the crossing back. We'll see you off properly. Captain Odile Marrow
+== mail.ending.answer.unsure
+- Your answer | Not sure yet is an honest answer. You have until my address at the Line on Sunday, where I'll ask you in front of the crew. Talk to people. Captain Odile Marrow
+== mail.ending.answer.change
+- Your answer, again | Noted, and passed on. That's what the days before Sunday are for. Captain Odile Marrow
+== ending.tracked.unsure
+- The Captain will ask you at the Line, Sunday after the oath
+// the change-of-mind row on her card once you've answered (until her address)
+== ending.tracked.change
+- You can change your mind until the Captain's address, Sunday
+
+// ---- a SLOWER CAREER (the offer comes the Thursday after Calder's question, after the crossing back): no address at
+// the Line, so the answer settles on Sunday evening (endingAsk.slow when it's still open). These replace their
+// namesakes above on that path.
+== mail.ending.offer.slow
+- A letter from headquarters | As we said in the ready room: Concord headquarters has offered you a post, and I've passed it on with my good wishes. Tell me your answer by Saturday at 20:00, in person, wherever I am. You can change your mind until Sunday evening. Either answer is a good one. Captain Odile Marrow
+== mail.ending.answer.unsure.slow
+- Your answer | Not sure yet is an honest answer. You have until Sunday evening, when I'll come and ask you. Talk to people. Captain Odile Marrow
+== ending.tracked.unsure.slow
+- The Captain will ask you on Sunday evening
+== ending.tracked.change.slow
+- You can change your mind until Sunday evening
+// the record for the crew once it's settled on that path (the Captain's Mail to everyone, Sunday night)
+== mail.ending.settled.slow.stay
+- A word from the Captain | Concord headquarters asked for one of ours this week, and I passed it on. {me} has said no, politely. We're keeping them. Carry on. Captain Odile Marrow
+== mail.ending.settled.slow.go
+- A word from the Captain | Concord headquarters asked for one of ours this week, and {me} has said yes. The Tern takes them on Monday at 10:00. The day shift is released from 09:30 to see them off. Captain Odile Marrow
+
+// ---- Zeke's two talks
+== ending.ring.zeke
+- Talk to Zeke
+== ending.notice.zeke.friday
+- Zeke wants a word after dinner: the Works tea corner.
+== ending.notice.zeke.sunday
+- Zeke's waiting for you in the shuttle bay, by the Tern's ramp.
+== ending.tracked.zeke.sunday
+- Zeke, the shuttle bay, 21:00
+
+// ---- once it's settled (the address)
+== ending.status.go
+- Tomorrow 10:00: the Tern leaves. The shuttle bay at 09:30.
+== ending.status.stay
+- The Wren is back on her course.
+== ending.notice.stay
+- The Wren is back on her course.
+== ending.tracked.go
+- Tomorrow: breakfast, then the shuttle bay at 09:30
+== mail.ending.go
+- Tomorrow | The Tern leaves at 10:00 from the Deck 5 shuttle bay, to meet the Concord courier. The day shift is released from 09:30 to see you off. Breakfast first. That is not a suggestion. Vance
+== ending.record.stay
+- Offered a post at Concord headquarters, Day 32. Stayed with the Wren.
+== ending.record.go
+- Offered a post at Concord headquarters, Day 32. Took it, and left on the Tern, Day 36.
+
+// ---- the endgame: the Works app (stay)
+== ending.works.next
+- The Wren is home. Live in it.
+== ending.works.last.title
+- The last page
+== ending.works.last.body.1
+- No more promotions: you've done them all. No more letters from headquarters.
+== ending.works.last.body.2
+- The board, the crew, the traditions and the ship go on. So do you. What's next is yours.
+
+// ---- the end page (go): a full-screen panel over the shuttle bay as the Tern pulls away. Labels for its rows.
+== ending.endpage.title
+- The Tern pulls away from the Wren
+== ending.endpage.sub
+- Your time aboard the CSV Wren
+== ending.endpage.days
+- Days aboard
+== ending.endpage.ranks
+- Your ranks
+== ending.endpage.commendations
+- Commendations
+== ending.endpage.commendations.none
+- None on record, and the crew remember you anyway.
+== ending.endpage.friends
+- Your three closest friends
+== ending.endpage.kept
+- What you kept
+== ending.endpage.calder
+- Your answer to Calder
+== ending.endpage.calder.engines
+- "Stay with the engines."
+== ending.endpage.calder.bridge
+- "Learn the bridge."
+== ending.endpage.calder.teach
+- "Teach the new cadets."
+== ending.endpage.calder.unsure
+- "I don't know yet."
+== ending.endpage.calder.none
+- You never quite said. That's allowed.
+== ending.endpage.zeke
+- Zeke's last line
+== ending.endpage.zeke.line
+- "Bag all right? Right, onward. Up you go. Get a window seat. Every time."
+== ending.endpage.close
+- The Wren goes on without you, and keeps a seat for you at breakfast.
+// the two buttons (the user, 2026-10-26: no way back from the end page; Keep this ending, or Start a new game)
+== ending.endpage.btn.keep
+- Keep this ending
+== ending.endpage.btn.keep.sub
+- This save stays ended. Loading it brings you back to this page.
+== ending.endpage.btn.new
+- Start a new game
+== ending.endpage.btn.new.sub
+- Choose a save slot and come aboard again.
+// the end page's "What you kept": your keepsakes by name (EN1; the ship's decor is left out)
+== ending.endpage.kept.lineCertificate
+- Your Line certificate
+== ending.endpage.kept.linePlaque
+- Your name on the Line plaque
+== ending.endpage.kept.tilesTrophy
+- Your Tiles trophy
+== ending.endpage.kept.seedlingYours
+- Your seedling in the garden
+== ending.endpage.kept.mugYours
+- Your own mug at the tea corner
+== ending.endpage.kept.nameYours
+- Your name on the Works beam
+== ending.endpage.kept.framedMenu
+- The framed menu from the Captain's table
+== ending.endpage.kept.cometSketch
+- Your sketch of the comet
+== ending.endpage.kept.stormLantern
+- A storm lantern from the lantern supper
+// telling the Captain you'll go: said plainly, once (the user: the Go ends this save)
+== ending.notice.go.ends
+- Going ends this save when the Tern leaves Monday. Change your mind by Sunday's address.
+// the Saves app: the ended save's label
+== ending.saves.ended
+- Ended: you left on the Tern

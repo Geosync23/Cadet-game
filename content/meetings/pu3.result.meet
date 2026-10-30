@@ -1,0 +1,21 @@
+@meeting pu3.result
+// SW3 (2026-10-26, Pillar 5 Step 5; spec "The beats", the result): Day 16 (or your next workday), 08:15, Calder's glass
+// office. Seated across her desk (24u's sit pose). She tells you you've passed, gives you the Tier 3 card; the bar is
+// the Captain's. Torres outside the glass (his bubble, flag pu3.promo.glass, after it). If she had to come and find you
+// (08:30), it plays where you are. Two replies; 24u can store pu3.reply2 1-2 by order (thanks, the junction). On a Friday
+// the bar is at 17:15: use pu3.result.fri.
+title: Your result
+from: Chief Ines Calder
+gist: Calder gave you your result: you passed. You're a Senior Officer now, Senior Technician, Tier 3. The Captain pins your bar this afternoon.
+== lines
+calder > you: Sit. Yes, sit. You've earned a chair.   [gesture]
+calder: Your junction. Two people warned, power off, breaker in, power back. In that order.
+calder: You passed. Senior Officer. Senior Technician, Tier 3.
+calder: This card's mine. Tier 3 jobs on the board for you from today.
+? choice
+* Thank you, Chief. For all of it.   rel:calder+2
+  calder: Noted. Thank you. Now, the rest.   [nod]
+* The junction was the easy part. Telling people wasn't.   rel:calder+2
+  calder: Good. That's the right way round. Most learn it later.   [nod]
+calder: The bar's the Captain's. Half four, the observation room. Clean uniform.
+calder: You stay in 4-23. Same cabin, harder work. Go on. Torres is pretending not to wait outside.

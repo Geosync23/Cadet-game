@@ -19,7 +19,7 @@ JS = r"""
   socInit();
   const play = () => { let n = 0; while (DIALOGUE && n++ < 80) { const v = dialogueView(); if (!v) break; if (v.choices) dialogueStep(0); else dialogueStep(); } };
   const at = (d, m) => { SHIP.time.day = d; SHIP.time.min = m; return (d - 1) * 1440 + m; };
-  const live = (d, m) => { const t = (d - 1) * 1440 + m; if (typeof setShipNow === 'function') setShipNow(t); else at(d, m); if (typeof socialTo === 'function') socialTo(t); return t; };   // the crew's own social hours (bonds, rivals) run too
+  const live = (d, m) => { const t = (d - 1) * 1440 + m; if (typeof setShipNow === 'function') setShipNow(t); else at(d, m); if (typeof socialTo === 'function') socialTo(t); if (typeof STORIES_ON !== 'undefined' && STORIES_ON && typeof storyTick === 'function') storyTick(t); return t; };   // the crew's own social hours (bonds, rivals) run too; and the crew stories' clock (FX21: crescendo bookings, missed windows), as socialTick runs it
   const [MO] = momentBaked();
   const ppl = MODE === 'themes' ? [] : [...new Set(Object.values(MO || {}).map(m => m.who).concat(Object.keys(STORY_ARCS)))].map(id => socP(id)).filter(Boolean);
   const last = {}; for (const p of ppl) { let n = 0; for (const k in MO || {}) if (MO[k].who === p.id) n = Math.max(n, MO[k].beat); n = Math.max(n, (STORY_ARCS[p.id] || []).length); last[p.id] = n; }
@@ -160,7 +160,7 @@ with sync_playwright() as pw:
         print('recorded message: open after 1 s', m1, '| after the lift', m2)
         if m1 != 'home:msg:gran' or m2 != 'home:msg:gran': bad.append('message')
         print('BOOTH CHECK OK' if not bad else 'BOOTH CHECK: ' + ', '.join(bad) + ' (the picker closed, or the call never ended with Mum\'s beat 1)')
-        sys.exit(0)
+        sys.exit(1 if bad else 0)   # so a failing check fails for the computer too (check_fast.sh, GitHub; R8)
     g = ct.Game(pw, sys.argv[1]); g.step(3)
     if MODE == 'calls':
         r = g.ev(CALLS); g.close()
@@ -173,7 +173,7 @@ with sync_playwright() as pw:
         bad = [k for k, v in r['solo'].items() if v['end'] != 6 or v['failed']] + [k + ' in turn' for k, v in r['beats'].items() if v != 6] + [k + ' has more news scenes than HOME_NEWS_MAX' for k, v in r['news'].items() if v > r['newsMax']]
         print('errors', g.errors[:5])
         print('CALLS CHECK OK' if not bad and not g.errors and not any(r['unheard'].values()) else 'CALLS CHECK: ' + (', '.join(bad) or 'scenes never heard'))
-        sys.exit(0)
+        sys.exit(0 if (not bad and not g.errors and not any(r['unheard'].values())) else 1)   # (R8)
     r = g.page.evaluate('([s, a]) => window.__sc("(" + s + ")(" + JSON.stringify(a) + ")")', [JS, [DAYS, MODE]])
     g.close()
     print('Finished:', ', '.join(f"{k} {v}/{r['last'][k]}" for k, v in r['done'].items()))
@@ -186,4 +186,6 @@ with sync_playwright() as pw:
     print('Theme beats nobody can have (missing details):', json.dumps({k: v for k, v in r['sim']['partial'].items() if v}))
     print('Days each beat was told:', ' '.join(l.replace(' ', '/') for l in r['log']))
     print('errors', g.errors[:5])
-    print('ARC CHECK OK' if not r['stalled'] and not g.errors and (MODE == 'themes' or (all(h.endswith(' 6') for h in r['home']) and not home_bad)) else 'ARC CHECK: STALLS')
+    arc_ok = not r['stalled'] and not g.errors and (MODE == 'themes' or (all(h.endswith(' 6') for h in r['home']) and not home_bad))
+    print('ARC CHECK OK' if arc_ok else 'ARC CHECK: STALLS')
+    sys.exit(0 if arc_ok else 1)   # so a failing check fails for the computer too (check_fast.sh, GitHub)

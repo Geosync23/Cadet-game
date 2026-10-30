@@ -1,0 +1,22 @@
+@meeting talk.volkov-maeve
+// SW2, 0.92.6 item 13 (FX17's word list): a small Wren talk, 19:00-19:40 on the auditorium stage (a ring of eight
+// chairs, house dark, the stars behind, tea from the kettle). Day 36, Monday. Maeve Volkov, who looks after the rec deck's machines.
+title: How the float room floats
+from: Maeve Volkov
+gist: Maeve's small talk on the float room: the plate under the padding, the hum, and the light orbs.
+== lines
+volkov-maeve: Hiya! Chairs in a ring, lovely. I'll be quick, the float room's waiting for me.   [gesture]
+volkov-maeve: So. The float room is a fifth of a g. You weigh a fifth of what you do out here.
+volkov-maeve: Under the coral padding there's a plate that pulls less than the rest of the deck.
+volkov-maeve: It hums, very low. If it ever stops, you land on the padding. That's what it's for.
+volkov-maeve: The light orbs aren't magic, sorry. Little fans. I clean them on Sundays with a sock.   [laugh]
+volkov-maeve: Chief Holt goes in for his back. He says it's for his back. I believe him.   [laugh]
+volkov-maeve: Right, that's how it floats. Questions? I'll time the answers.   [nod]
+? choice
+* Can I help clean the orbs?   rel:volkov-maeve+2 flavour:practical mem:talk.volkov-maeve.asked
+  volkov-maeve: Ooh, yes. Sunday morning, bring a sock. A clean one. I'll race you.   [laugh]
+* What's the best trick in there?   rel:volkov-maeve+2 flavour:cheer mem:talk.volkov-maeve.asked
+  volkov-maeve: Push off the wall, tuck in, spin. Twelve turns before you land. My record. For now.   [nod]
+* (Just listen)
+  volkov-maeve: No questions? Then go and float. Mind the orbs on your way in.
+volkov-maeve: Ta-ra, everyone. Thanks for coming.

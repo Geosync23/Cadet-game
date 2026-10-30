@@ -1,0 +1,135 @@
+@bank all
+// SW6 (ending writer A), the goodbye (ending spec, "If you go", Monday Day 36; section 9: content/ending/goodbye.lines).
+// Scenes beside this file: endingBreakfast (the last breakfast) and endingRamp (Zeke at the ramp's foot, last). Here:
+// the morning's notices and Tracked rows, the breakfast bubbles, the aisle (a ring on each person as you pass; one
+// press each; their lines in order, card lines, 90 at most), and the crowd's calls (bubbles, 60 at most).
+// The order in the aisle: each close friend in turn, then Calder, Vance, the Captain; Zeke last at the ramp.
+// Only with flag:end.go. Nobody says "leave" about the reach; you're going to Concord headquarters.
+
+// ---- the last morning: notices and Tracked rows (EN1)
+== ending.notice.lastMorning
+- Your last morning: the Tern leaves at 10:00.
+== ending.status.lastMorning
+- Today 10:00: the Tern leaves for the Concord courier.
+== ending.tracked.breakfast
+- Breakfast in the mess, your last one
+== ending.tracked.bay
+- The shuttle bay by 09:30
+== ending.tracked.ramp
+- Walk to the Tern
+== ending.ring.walk
+- Walk to the Tern
+// your cabin's things packed (the cabin touches boxed: their tap texts)
+== ending.tap.boxed
+- Packed and labelled. The label says "Wren" and then, in smaller writing, "headquarters".
+- Boxed up. It takes less room than it did on the shelf. It took more room than this in you.   #warm
+- Your keepsakes, wrapped in a Works orange scarf. Far too long. Perfect for wrapping.   #warm
+
+// ---- Monday's fetches (EN1, RV21's review): bubbles, 60 at most. Pell at 08:30 if you're not at breakfast; Zeke at
+// 10:15 if you're not in the shuttle bay
+== ending.breakfast.fetch
+- There you are! Breakfast. Brennan's holding your plate.   #funny
+== ending.bay.fetch
+- There you are. Half the ship's in the bay. With me.   #warm
+// the "Goodbye" button on a farewell's card in the bay
+== ending.btn.bye
+- Goodbye
+
+// ---- breakfast: bubbles at the tables (60 at most)
+== ending.breakfast.here
+- Last breakfast. Eat slowly. Make it last.   #warm
+- Nobody's taking the seat by you. We decided.   #warm
+- Brennan's been up since four. For you.   #warm
+- I can't eat. I'm eating. I can't.   #funny
+- Half nine, the bay. The whole shift's going.
+- Day shift's let off at half nine. All of it. For you.   #warm
+
+// ---- the aisle: each close friend's goodbye as you pass (a ring, one press; lines in order).
+== ending.goodbye.pell.1
+- Oi oi. Last time I'll say that to your face. Here. From the tin.
+== ending.goodbye.pell.2
+- A screw from the Wren. Every ship gets one. Start your own tin, spanner.   #warm
+== ending.goodbye.pell.3
+- Right. Go on. Before I do something embarrassing. I'm doing it anyway.   #funny
+== ending.goodbye.tomas.1
+- I've marked you on the map. Under the Wren. "Bunkmate." In pencil.   #warm
+== ending.goodbye.tomas.2
+- I'll write every week. I'll make it sound more exciting than it is.   #funny
+== ending.goodbye.tomas.3
+- Thank you for being new with me. That's all. Thank you.   #warm
+== ending.goodbye.kovac-zainab.1
+- Oh. Hi. Here. It's a scarf. A short one. To go with his long one.   #warm
+== ending.goodbye.kovac-zainab.2
+- It's perfect. I counted every stitch. Twice. Bye, then.   #warm
+== ending.goodbye.bramwell-basil.1
+- You can't go, you're my mentor. Sorry. I know. I practised not saying that.   #funny
+== ending.goodbye.bramwell-basil.2
+- The plant's doing better. I wanted you to know. It's got a new leaf. Look.   #warm
+== ending.goodbye.bramwell-basil.3
+- I'll be you for the next new one. Is that all right? I'll try. Brilliant. Bye!   #warm
+== ending.goodbye.halloran-emeka.1
+- Ah, look at you. There's a scone in your bag. Two. I'm not saying which pocket.   #warm
+== ending.goodbye.halloran-emeka.2
+- Your mug stays on the rack. It doesn't come down. That's the rule. Look after yourself.   #warm
+== ending.goodbye.rina.1
+- I've told the Tern's medic you need sleep and breakfast. They took notes.   #funny
+== ending.goodbye.rina.2
+- I'm still undefeated. Come back and fix that. That's an order. Medical.   #warm
+== ending.goodbye.brennan.1
+- Oh, love. Here. A tin of biscuits for the trip. Share them. Don't share them.   #warm
+== ending.goodbye.brennan.2
+- Your page stays in my book. Your dish stays on my menu. Go on. Eat something there.   #warm
+// a close friend without their own lines (the engine fills {hi}, {nick} and the rest from their voice card)
+== ending.goodbye.friend
+- {hi}, {nick}. This is me not crying. Look after yourself. Write.   #warm
+- {bye}, {nick}. The Wren's better for you having been on her.   #warm
+- Go on, then. Go and be brilliant. We'll tell everyone we knew you first.   #warm
+- {thanks}. For all of it. You know what I mean. Off you go.   #warm
+- I brought you nothing, because you'd have to carry it. I brought me. Bye.   #funny
+// a friend (not close) in the aisle, a wave as you pass (bubble, 60)
+== ending.goodbye.wave
+- Good luck up there!
+- Write to us!
+- Mind the step at headquarters!   #funny
+- Safe trip, {nick}.   #warm
+- Come back and visit!   #warm
+
+// ---- Calder, then Vance, then the Captain (in that order, after the friends)
+== ending.goodbye.calder.1
+- I'm checking the ramp seals.
+== ending.goodbye.calder.2
+- That's a lie. They're fine. I came for you.
+== ending.goodbye.calder.3
+- I keep a list of every tech I've certified. A note by each. Yours says "Good." Underlined.   #warm
+== ending.goodbye.calder.4
+- Nobody thanks the air. That's how you know it's working. You worked. Go on.   #warm
+== ending.goodbye.vance.1
+- Cadet. Regulation forty: crew departing are seen off by the duty officer. That's me.   #funny
+== ending.goodbye.vance.2
+- There is no regulation forty. I wanted to come. Your name's on my list. The good one.   #warm
+== ending.goodbye.vance.3
+- My rowing pin. Lent, not given. You'll have to bring it back one day. Carry on.   #warm
+== ending.goodbye.marrow.1
+- {me}. You answered my question, your first week. I still have it written down.   #warm
+== ending.goodbye.marrow.2
+- The Admiral asked me to see you off. He's bad at goodbyes. He's sulking in the ready room.   #funny
+== ending.goodbye.marrow.3
+- There's always a place for you on the Wren. Mind the step at headquarters. Everyone trips.   #warm
+
+// ---- the crowd (about 60 in the bay; bubbles, 60 at most) as you walk the aisle, and the cheer as you go up
+== ending.goodbye.crowd
+- There they go!
+- Good luck, {me}!
+- Three cheers on the ramp! Wait for it!
+- Who's crying? Nobody. Everyone.   #funny
+- Headquarters won't know what's hit them.   #funny
+- Best five weeks, that was.   #warm
+- Don't forget us!
+- Mind the step!   #funny
+- Wave! They're waving! Wave back!
+- I only met them once. I'm still crying.   #funny
+== ending.goodbye.crowd.cheer
+- Hip, hip!
+- Hooray!
+- To {me}!
+- Safe trip!   #warm

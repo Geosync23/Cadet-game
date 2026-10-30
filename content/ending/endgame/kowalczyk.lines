@@ -1,0 +1,19 @@
+@crew kowalczyk
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- Ah. The one who stayed. The night bridge approves. The night bridge is me.   #funny
+? endgame:early
+- I read the end of your story first. Risk management. Glad it ended here.   #funny
+? endgame
+- Quiet hours on the bridge now. Stars, the hum, a cold tea. Come up some night.
+- Ordinary nights are the good ones. Nothing to log but the time.
+? endgame tier>=friend
+- Some nights the bridge is just me and the stars. You're welcome to make it three.   #warm
+
+== bye
+? endgame
+- Go to bed. Somebody on this ship should.   #funny

@@ -1,0 +1,17 @@
+@meeting night.on
+// N6 (2026-10-27, Pillar 5 Step 6, S6-1; stand-in words, no head writer): Day 22, 09:15. Calder finds you (at the
+// observation room's door after the Monday briefing, or wherever you are). Navarro's leave; your nights Monday to
+// Wednesday. Then the urgent notice and her Mail, the record. Two replies (28a stores p5n.reply 1-2: keen, unsure).
+title: Night shift
+from: Chief Ines Calder
+gist: Calder told you in person: Navarro's on leave, so you cover his nights, Monday to Wednesday. Tonight from 22:45, after the comet; then 21:00 to 06:00.
+== lines
+calder > you: A word, before you go.   [gesture]
+calder: Navarro's on leave. Family. Someone covers his nights.
+calder: You. Monday to Wednesday. Tonight from 22:45, then 21:00 to 06:00.
+? choice
+* Nights. I can do nights.   rel:calder+2
+  calder: Good. Sleep this afternoon. Curtains shut, properly.   [nod]
+* What happens down there all night?   rel:calder+1
+  calder: The engines don't sleep. Reyes will show you.   [nod]
+calder: Watch your comet first. I'll come and get you.

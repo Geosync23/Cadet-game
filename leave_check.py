@@ -226,13 +226,13 @@ with sync_playwright() as pw:
       out.again = careerClock(at(10, 600)) === 'out'; out.done = careerClock(at(10, 1000)); out.hours = [c.ci % 1440, c.co % 1440];
       careerTick(at(11, 0)); careerClock(at(11, 480)); careerTick(at(11, 1070)); out.notYet = !(c.co > c.ci); careerTick(at(11, 1090)); out.auto = c.co % 1440;
       careerTick(at(12, 0)); careerTick(at(12, 760)); out.missedNoClock = c.md === 12;
-      out.sat = careerClock(at(13, 600));
+      out.sat = careerClock(at(14, 600));   // a day off: Sunday Day 14 (FX26, 0.93.2: Saturday Day 13 is the storm's, when you're called in)
       careerTick(at(15, 0)); out.early = careerClock(at(15, 180)); flagSet('shiftSent', null); SHIP.notes = [];
       const sent = []; const stop = onSim('shiftStart', n => sent.push(n)); careerClock(at(15, 690)); shiftTick(); at(15, 691); shiftTick(); stop();
       out.lateNote = sent.map(n => [n.late, !!n.missed]);
-      careerTick(at(22, 0)); c.ms = 2; careerClock(at(22, 480)); const w1 = careerWork(); careerClock(at(22, 600)); out.earlyDip = Math.round((w1 - careerWork()) * 10) / 10;
-      careerTick(at(22, 760)); careerTick(at(23, 0)); out.shortKeepsRun = c.ms === 2 && c.md !== 22;
-      careerClock(at(23, 480)); careerClock(at(23, 960)); careerTick(at(23, 1000)); careerTick(at(24, 0)); out.fullEndsRun = c.ms === 0;
+      careerTick(at(29, 0));   /* (N6: Days 29-31, clear of Step 6's nights: Day 23 has no day shift with P5_NIGHT on) */ c.ms = 2; careerClock(at(29, 480)); const w1 = careerWork(); careerClock(at(29, 600)); out.earlyDip = Math.round((w1 - careerWork()) * 10) / 10;
+      careerTick(at(29, 760)); careerTick(at(30, 0)); out.shortKeepsRun = c.ms === 2 && c.md !== 29;
+      careerClock(at(30, 480)); careerClock(at(30, 960)); careerTick(at(30, 1000)); careerTick(at(31, 0)); out.fullEndsRun = c.ms === 0;
       c.b.push(16); careerTick(at(16, 500)); out.leave = careerClock(at(16, 500));
       careerTick(at(17, 0)); out.back = careerBack(17);
       const S = schedData(), pl = S.byId.get('5-timeclock-1'), w = SOC.crew.filter(p => p.dept === 'works' && p.shift !== 'night' && isWorkDay(p, 10) && socAboard(p, 10) && planDay(p, 10).some(x => x.act === 'work' && /^5-/.test(x.placeId || '')));   // aboard, stationed on Deck 5
@@ -255,9 +255,13 @@ with sync_playwright() as pw:
     r = ev("""(() => { SHIP.rep = null; const w0 = careerWork(), d0 = repInit().dept.works, n0 = FLOATS.length; REP_CHIP_AT = -1e9; if (DEV.notes) delete DEV.notes.record;
       simNote('job', { id: 'x1', step: 'turnin', job: 'restock', machine: null }); const n1 = FLOATS.length, text = n1 > n0 ? FLOATS[n1 - 1][0].textContent : null;
       simNote('job', { id: 'x2', step: 'turnin', job: 'restock', machine: null }); const n2 = FLOATS.length;
-      return { text, once: n1 === n0 + 1 && n2 === n1, work: careerWork() > w0, dept: repInit().dept.works > d0, badge: DEV.notes && DEV.notes.record === 1 }; })()""")
+      const card = typeof turnInShow === 'function', words = card ? turnInGains({ gains: { rep: [{ dept: 'works' }] } }, null).map(c => c.text) : null, want = card ? (careerText('works.turnin.rep') || 'Works reputation up') : null;   // Step 3 (HUD 0.72.3): the turn-in's chips say it instead
+      return { text, once: n1 === n0 + 1 && n2 === n1, none: n1 === n0 && n2 === n0, card, words, want, work: careerWork() > w0, dept: repInit().dept.works > d0, badge: DEV.notes && DEV.notes.record === 1 }; })()""")
     print('  ', r)
-    check(r['text'] == '+ Works reputation' and r['once'], f"the reputation chip: {r['text']}, once: {r['once']}")
+    if r['card']:   # since Step 3 the board's turn-in shows the rep as a chip in its card (HUD 0.72.3); no floating chip as well
+        check(r['none'] and r['words'] == [r['want']], f"the reputation on the turn-in card: {r['words']} (the head writer's works.turnin.rep: {r['want']}), no floating chip as well: {r['none']}")
+    else:
+        check(r['text'] == '+ Works reputation' and r['once'], f"the reputation chip: {r['text']}, once: {r['once']}")
     check(r['work'] and r['dept'], 'turning in a job without a machine gave no reputation')
     check(r['badge'], 'the Record app got no mark')
 

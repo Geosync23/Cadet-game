@@ -1,0 +1,20 @@
+@crew eklund-leila
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- You stayed. Good. I'd started drawing you out of my map of the ship. In pencil, luckily.   #funny
+? endgame:early
+- Booth queue this week was eleven minutes. Half of it was people telling home you stayed.   #funny
+? endgame
+- Ordinary days. I like an ordinary day. Nothing on it to correct.
+? endgame:early
+- Gran asked who "the one who stayed" was. I said it's a long message. She likes those.   #warm
+? endgame
+- My maps are all out of date. You're not. That's a compliment, somewhere in there.   #funny
+
+== bye
+? endgame
+- Bye, then. You'll be here. That's handy.

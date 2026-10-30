@@ -1,0 +1,24 @@
+@meeting talk.brennan
+// PARKED (2026-10-25, FX17): not on the rota. Brennan cooks dinner every Monday and Thursday evening, so she is never
+// free for a 19:00 talk; Day 43 went to Yusuf Kim (talk.kim-yusuf). Kept for a day she is off, never deleted.
+// SW2, 0.92.6 item 13 (FX17's word list): a small Wren talk, 19:00-19:40 on the auditorium stage (a ring of eight
+// chairs, house dark, the stars behind, tea from the kettle). Day 43, Monday. Chef Auda Brennan. It sets up Spice shelf night. Nothing about the fire.
+title: A spice for every port
+from: Chef Auda Brennan
+gist: Brennan's small talk on the spices she brought away from every port, and the shelf in her galley.
+== lines
+brennan: Hello, loves. Have you eaten? Don't answer. There's a tray of biscuits going round.   [gesture]
+brennan: Every port I've cooked in, I brought one spice away. Like a postcard you can eat.
+brennan: Marra Station: smoked salt from a stall in the rain. The man wouldn't tell me what wood.
+brennan: Port Halloran: the pepper the fishing boats use. Hot enough to dry your socks.   [laugh]
+brennan: My mum says add a spice until the pan sounds right. Annoying. Also right.
+brennan: Half the jars on my shelf came from you lot. Every jar's got a story.   [nod]
+brennan: Right. Questions, loves. Then more biscuits.
+? choice
+* Which spice is your favourite?   rel:brennan+2 flavour:share mem:talk.brennan.asked
+  brennan: The smoked salt. One pinch and the whole mess goes quiet. Best sound there is.   [nod]
+* Can I bring one for the shelf?   rel:brennan+2 flavour:practical mem:talk.brennan.asked
+  brennan: Course, love. Next port, find a stall and bring me something I've never tasted.   [laugh]
+* (Just listen)
+  brennan: No questions? Then eat. That's the rule in here too.
+brennan: Thank you, loves. Off you go, and eat something.

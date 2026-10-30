@@ -1,0 +1,22 @@
+@meeting talk.vance
+// SW2, 0.92.6 item 13: Day 74, Thursday 19:00-19:45, a chief's talk in the auditorium seats (the writer's pick: the
+// Executive Officer). Commander Teo Vance: "Why every rule is there". Nothing about his messages home or the poems.
+title: Why every rule is there
+from: Commander Teo Vance
+gist: Commander Vance's talk on the regulations: who they protect, and how he learnt them.
+== lines
+vance: Good evening. Three parts, then questions. Please keep questions until the end.   [nod]
+vance: Part one. The Survey Service regulations run to eleven hundred pages. I've read them twice.
+vance: Part two. Nearly all of them say one thing: bring everyone home as they left.
+vance: No running in the corridors, for example. It isn't about running. It's about corners.
+vance: Part three. Every rule is there because someone, once, found out the hard way.
+vance: As a cadet, I was usually that someone. That was a joke. Moving on.   [laugh]
+vance: Learn the rules, and you'll know which ones let you help. That's the trick. Questions.
+? choice
+* Which rule did you break first?   rel:vance+2 flavour:cheer mem:talk.vance.asked
+  vance: Curfew. Then the one on climbing. Then the one about the galley. Noted, and moving on.   [laugh]
+* Which rule lets you help people?   rel:vance+2 flavour:practical mem:talk.vance.asked
+  vance: The duty officer may excuse anyone for a call home. I use that one often. Gladly.   [nod]
+* (Just listen)
+  vance: No questions. Efficient. Thank you.
+vance: That concludes the talk. Carry on.

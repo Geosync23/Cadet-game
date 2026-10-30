@@ -1,0 +1,120 @@
+@talks pool
+topic: day
+// TW1, the Talk a while pack: shared pool, topic day (their day, and yours).
+
+== cold-tea
+them: My day started with cold tea. Should've known.   #funny
+them: Then it got better. It usually does after cold tea.
+ask: How's your day been, honestly?
+listen: What made it better?
+  them: Someone said thank you, out of nowhere. Kept me going for hours.   #warm
+share: Busy. I learned a lot, though.
+  them: Busy and learning. That's a good day, that is.
+cheer: Better now. I'm sitting down.
+  them: Sitting down fixes most things. The rest, dinner fixes.   #funny
+
+== nothing-wrong
+them: Nothing went wrong today. Nothing at all.
+them: Strangely tiring, that. You keep waiting for it.   #funny
+ask: Do you like the quiet days, or the busy ones?
+listen: What do you do on a quiet day?
+  them: Tidy things that don't need it. Then tidy them again.   #funny
+share: Busy. The time goes faster.
+  them: It does. Then you look up and it's dinner.
+cheer: Quiet. Quiet with biscuits.
+  them: A connoisseur of quiet. Respect.   #funny
+
+== good-one
+them: Today was one of the good ones. Everything just worked.
+them: I want to write it down so I remember it on a bad one.
+ask: What makes a good day, for you?
+listen: What went right?
+  them: All of it. Small things, one after another. Like dominoes, but nice.
+share: A job done properly. No re-checks.
+  them: That's a proper answer. That's a Works answer.
+cheer: Nobody asking me where anything is.
+  them: Give it a month. Then you'll be the one they ask.   #funny
+
+== tired
+when: !who:rina|pell
+them: Long day. Better now I've sat down.
+them: My feet are telling me all about it.   #funny
+ask: Are you sleeping all right? You look like you're keeping up.
+listen: What kept you so busy?
+  them: Everything at once, then nothing, then everything. Ship life.
+share: Mostly. The bunk's comfier than it looks.
+  them: Good. Sleep's the whole trick out here. Ask the infirmary.
+cheer: I'm sleeping now. With my eyes open.
+  them: Advanced technique. Pell will want lessons.   #funny
+
+== morning-person
+when: time:morning|afternoon
+them: Are you a morning person? I'm trying to become one.
+them: It's not going well. I'm told it takes years.   #funny
+ask: When do you feel most awake?
+listen: Why try to become one?
+  them: Breakfast's best early. Fresh everything. Worth the pain.
+share: Evenings. I come alive after dinner.
+  them: Me too, secretly. Don't tell the morning lot.   #funny
+cheer: Never. I'm a lifelong half-awake person.
+  them: Honest, at least. Most of the ship's the same.   #funny
+
+== evening
+when: time:evening|night
+them: This is my favourite bit of the day. Shift done, nothing due.
+them: The ship goes soft round the edges in the evening.
+ask: What do you do with your evenings?
+listen: Soft how?
+  them: The lights go warm. People sit longer. Voices go down a notch.
+share: Still working that out. A bit of everything.
+  them: Good. There's a lot on. Find the ones you like.
+cheer: This. Talking. Apparently.
+  them: Excellent choice. Ten out of ten.   #funny
+
+== fixed-one
+when: tier>=acquaintance
+them: I fixed one thing today and three more broke. Typical.   #funny
+them: Not my fault, any of them. Probably.
+ask: Have you had a day like that yet?
+listen: What broke?
+  them: A drawer, a lamp and my patience. In that order.   #funny
+share: Yes. Fixed one, found two.
+  them: Welcome aboard. That's the Wren in one sentence.   #funny
+cheer: Every day. I just call it Tuesday.
+  them: Ha! Tuesday. I'll use that.   #funny
+
+== thank-you
+when: tier>=acquaintance !who:brennan
+them: Someone thanked me today for something I did last month.
+them: I'd forgotten it. They hadn't.   #warm
+ask: Who's been kind to you lately?
+listen: What did you do for them?
+  them: Took the other end of a crate. Tiny thing.
+share: Lots of people. Everyone's been kind.
+  them: Good. Pass it on, that's how it works here.   #warm
+cheer: Whoever saved me a seat at dinner.
+  them: The best kindness aboard. Small and warm.   #warm
+
+== bad-start
+when: tier>=colleague !who:holt
+them: I had a bad start today. Snapped at someone who didn't deserve it.
+them: I said sorry at tea. They said they'd forgotten. They hadn't.
+ask: How do you fix a day that starts wrong?
+listen: Are you two all right now?
+  them: We are. Sitting together at dinner. That's how you know.   #warm
+share: I talk to someone. Usually that does it.
+  them: Like now? Good. It's working, a bit.   #warm
+cheer: Start it again after tea.
+  them: The second-start rule. I like it.   #funny
+
+== best-bit
+when: tier>=friend
+them: Do you know what the best bit of my day was?
+them: This. A proper chat with a friend. Honestly.   #warm
+ask: What was the best bit of yours?
+listen: Really? Not dinner?
+  them: Dinner's a close second. Don't tell Brennan.   #funny
+share: This, as well. Truly.
+  them: Then we're agreed. Same again tomorrow.   #warm
+cheer: Finding out I'm better than dinner.
+  them: Only just. Don't get big-headed.   #funny

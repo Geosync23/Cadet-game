@@ -136,9 +136,19 @@
 == works.rank.specialist
 - Specialist
 
-// the Record's line
+// the Record's line ({title}: the title and rank together, the rank left out where it would only repeat "Junior": FX3)
 == works.record
-- {title} · {rank}. Works reputation: {band}. What's next: {next}
+- {title}. Your reputation: {band}. What's next: {next}
+
+// FX3: your reputation said when its word changes, and a missed shift's Mail ("Subject | body", from Calder)
+== works.rep.title
+- Your reputation
+== works.rep.up
+- Up to {band}. People are noticing your work.
+== works.rep.down
+- Down to {band}.
+== works.rep.missed
+- Missed shift | You missed your shift. That costs your reputation: {band} now.
 
 // the asks (toast and Mail when a row opens; the teacher sends it)
 == works.ask.m7
@@ -170,11 +180,11 @@
 == works.ask.m1
 - Fancy a walk? | Fancy a walk? I'll show you my round. Tea corner, or the bay till half eleven.
 == works.ask.m4
-- The rest of the delivery | Shelves done? Meet me at the hold. There's a manifest with your name on it.
+- The rest of the delivery | Shelves done? Meet me in {place}, {time}. There's a manifest with your name on it.
 == works.ask.m3d
 - Drill at three | Drill at three. Works bay, ten to. Fire, this week.
 == works.ask.m5
-- Galley, 10:15 | Galley, 10:15. Bring nothing.
+- Galley, {time} | {place}, {time}. Bring nothing.
 == works.ask.m3i
 - Inspection tomorrow | Inspection is Thursday at 06:30. Clean uniform, bed made, locker tidy.
 == works.ask.m6

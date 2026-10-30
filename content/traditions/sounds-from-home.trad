@@ -1,0 +1,37 @@
+@tradition sounds-from-home
+// Round 2: everyone brings one short recording of a sound from home and plays it with the lights low. Every 4 weeks from week 7 (Days 46, 74...).
+// Rules: FX24 (0.93.2, behind TRAD_0932_ON in section 13). Words: CS1 (plans/trad-0932-words.txt, claude/crew-stories-pitch 7b1e7300).
+k: 1308
+title: Sounds from home
+when: every 4 weeks thursday week 3 from day 43
+at: 20:00-20:45
+min: 20
+where: 4 pool music
+hold: 1
+who: vasquez-uma always, calls-home 45%, quiet-corner 30%, everyone 10%
+anim: vasquez-uma talk, everyone none
+host: vasquez-uma
+from: vasquez-uma
+invite: host=vasquez-uma odds=25% line="Sounds from home tonight. Bring one minute of home. Any sound at all."
+
+== mail
+- Sounds from home tomorrow, {time}, the music room. Bring one short recording from home: rain, a street, a kitchen, anything. Lights low. We'll listen together.
+
+== ask
+- Sounds from home in the music room. Uma's bringing rain.
+- Bring a sound from home tonight? Mine's a kettle. It's a very good kettle.   #funny
+- Sounds from home. It's quiet, mostly. In a good way.
+
+== here
+- Shh. Listen. That's a market.
+- Where's that? It sounds warm.
+- Play it again? Just once.   #warm
+- I know that bird. I don't know how I know it.
+
+== thanks
+- One by one, the crew play a short sound from home with the lights low, and say where it's from. Nobody talks much. Nobody needs to.   #warm
+
+== chatter
+- Somebody played a sea at sounds from home. Half the room went very quiet.   #warm
+- Uma played rain on a tin roof. She said it's her mum's porch.   #warm
+- I didn't think I'd miss traffic. Then someone played traffic.   #funny

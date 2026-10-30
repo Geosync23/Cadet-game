@@ -1,0 +1,35 @@
+@bank all
+// Pillar 5 Step 3 (head writer W2): P2 "Who saw what?" (seat H2). A witness's answer to "Ask about the fault" on
+// their chat card. Read only after Tomas's word (SHIP.works.said.p2). {time} is when they were there ("22:00"),
+// {place} the room WITH its article ("the junior common room", "Bunk 3"), {machine} a short name ("the scrubber").
+// saw: it was playing up then. quiet: it wasn't. .still: nobody came or went (the door didn't move); .door: people
+// were in and out. ask.mixup: an honest mix-up: {place} is where they really were and {machine} what they really
+// heard, so the Roster (and the place) is how you spot it. case.ask.none: nothing to say.
+== ask.saw.still
+- It was playing up at {time}. I was in {place}. Nobody came or went.
+- {time}, in {place}. Door shut, and {machine} at it the whole time.
+- About {time}. Just me in {place}, and {machine} playing up.
+? tier>=colleague
+- {time}. I was in {place}, trying to read. Nobody else. Then {machine} started.   #funny
+== ask.saw.door
+- It was playing up at {time}, just as someone came through the door.
+- {time}, in {place}. The door went, and off it went.
+- About {time}. People in and out of {place}, and {machine} playing up.
+== ask.quiet.still
+- Quiet as anything at {time}, in {place}.
+- {time}? I was in {place}, nobody about, and {machine} was fine.
+- Nothing at {time}. Just me in {place}. Not a peep.
+? tier>=colleague
+- Quiet at {time}. I'd have noticed. I notice everything in {place}.   #funny
+== ask.quiet.door
+- Quiet at {time}, and people were in and out of {place}.
+- {time}, in {place}. Door going all the time, and {machine} didn't mind.
+- Nothing at {time}. Busy in {place}, mind. Door never stopped.
+== ask.mixup
+- It was playing up at {time}! I was in {place}. Heard {machine} clear as day.
+- {time}, in {place}. It was {machine}, definitely. I'm certain.
+- About {time}. I was in {place}, and {machine} was at it.
+== case.ask.none
+- Didn't notice a thing. Sorry.
+- Can't help, I'm afraid. Wasn't near it.
+- Not a thing. I was elsewhere all day.

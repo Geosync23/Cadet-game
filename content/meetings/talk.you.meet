@@ -1,0 +1,17 @@
+@meeting talk.you
+// W3, Wren talks: your own small talk, once you're an Engine Specialist (after the career arc): "What I learned in
+// my first month". The ring of chairs on the stage; Chief Calder sits in. One choice: what you talk about.
+title: What I learned in my first month
+from: Wren talks
+gist: You gave a small talk on the auditorium stage about your first month aboard.
+== lines
+calder > you: You're on, {me}. Ring of chairs, tea's there. Take as long as you like. Not too long.   [nod]
+torres-zeke: Go on! We're all friends here. Mostly Works, but friends.   [laugh]
+? choice
+* (Talk about the first job you fixed)   rel:calder+2 flavour:practical
+  calder: Good. You told it straight, including the bit you got wrong. That's the best part of any talk.   [nod]
+* (Talk about the crew who helped)   rel:torres-zeke+2 flavour:share
+  torres-zeke: You named everyone. Even me. I'm not crying. It's the tea.   [laugh]
+* (Talk about the stars from the observatory)   flavour:listen
+  tomas: That was lovely. I'm going to look up properly next time.   [nod]
+calder: Thank you, {me}. That's the first month done properly.

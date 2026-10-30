@@ -1,0 +1,18 @@
+@crew dahl-mira
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- You stayed. Good. Now the useful question: do you want a scarf, or a hat?
+? endgame:early
+- I measured your week in rows. Thursday was a lot of rows. Sunday was fewer.   #warm
+? endgame
+- Ordinary days aboard. Patrols, tea, a scarf that grows. What more is there?
+- So you're staying. What will you do with your rest days? Think. Tell me Thursday.
+- Kovac knits perfect. I knit useful. Torres knits a lot. You'll own all three soon.   #funny
+
+== bye
+? endgame
+- Keep moving, or I'll knit you something. Bye.   #funny

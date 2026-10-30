@@ -20,7 +20,7 @@ from: calder
 invite: host=torres-zeke odds=60% line="A week aboard! Tea's on me, bow lounge, straight after shift. No arguing."
 
 == mail
-- One week aboard tomorrow. Zeke tells me you haven't broken anything yet. Well done. He'll buy you a tea in the bow lounge at {time}.
+- One week aboard tomorrow. Zeke tells me you haven't broken anything yet. Noted. He'll buy you a tea in the bow lounge at {time}.
 
 == ask
 - A whole week. Tea after shift, bow lounge. Zeke's buying.

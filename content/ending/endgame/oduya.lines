@@ -1,0 +1,19 @@
+@crew oduya
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- Hello, hello. Have a sweet. The green one. The green ones are for good decisions.   #funny
+? endgame:early
+- People often look lighter after a big choice. You do. I noticed at breakfast.   #warm
+? endgame
+- No next step can feel odd, after so many. Give it a few weeks. Then come and tell me.
+- An ordinary day is something we practise, like scales. Some of us are still on scales.
+? endgame:early tier>=friend
+- I didn't need to ask how you felt about staying. Your face told the whole bow lounge.   #warm
+
+== bye
+? endgame
+- Go gently. There's no hurry now. That's rather the point of staying.

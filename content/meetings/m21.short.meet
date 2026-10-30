@@ -1,0 +1,14 @@
+@meeting m21.short
+// MA6 (2026-10-27, S6-2, stand-in): the Monday briefing from Day 29, short: the memo and one choice, 08:30-08:50 (done
+// before the Veyli vessel's job word at 09:20). 28b says what each choice did (m21.raise.*), then the close.
+title: The Monday briefing
+from: Captain Odile Marrow
+gist: The Monday briefing went on without you. The memo is on the observation room's screen. Works raised nothing this week.
+== lines
+marrow: Morning, all. The memo's on the screen. Read it later; I'll know if you don't.   [gesture]
+marrow > you: Works. Anything for this table?
+? choice
+* A shutdown for tomorrow.   rel:marrow+1
+* I'm worried about one of our machines.   rel:calder+1
+* Our parts order.   rel:vance+1
+marrow: Thank you. Same time next week.   [nod]

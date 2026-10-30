@@ -1,0 +1,36 @@
+@tradition coffee-trials
+// Round 2: three people each say they're the best at fixing the coffee machine; each makes a cup, the room tastes them blind and votes. Even weeks from week 2, in the Tiles ladder's freed hour.
+// Rules: FX24 (0.93.2, behind TRAD_0932_ON in section 13). Words: CS1 (plans/trad-0932-words.txt, claude/crew-stories-pitch 7b1e7300).
+k: 1302
+title: The coffee machine trials
+when: every 2 weeks saturday week 2
+at: 15:00-16:00
+min: 20
+where: 3 room Bow lounge: lounge-seat
+who: volkov-maeve always, yoon-elif always, shah-dara always, bar-regular 45%, lounge-regular 35%, everyone 12%
+anim: volkov-maeve talk, yoon-elif talk, shah-dara talk, everyone drink
+host: volkov-maeve
+from: volkov-maeve
+invite: host=volkov-maeve odds=25% line="Coffee machine trials! Three cups, blind. I'm going to win. Probably."
+
+== mail
+- The coffee machine trials tomorrow, {time}, at the bow lounge bar. Elif, Dara and I each make a cup, and you vote blind. Works will remind us the machine is Works's job. It is. We know.
+
+== ask
+- Coffee machine trials at the bar. Three cups, no names, you choose.
+- Maeve says she'll win. Elif says she'll win. Dara says nothing. Dara's dangerous.   #funny
+- Are you voting at the coffee trials? Cup B. Trust me.
+
+== here
+- Cup A, cup B, cup C. No peeking.
+- Ooh, that one's strong. That one could fix a pump.   #funny
+- Which one's Maeve's? Don't tell me. Tell me.   #funny
+- The machine's making a noise. Is that part of it?
+
+== thanks
+- Three people who each fix the coffee machine best make a cup each. You taste them blind and put your token by the one you like.   #funny
+
+== chatter
+- Dara won the coffee trials. Nobody saw it coming. Least of all Maeve.   #funny
+- Calder came to the coffee trials just to say the machine is Works's job.   #funny
+- I've had three coffees. I can hear colours.   #funny

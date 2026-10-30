@@ -1,0 +1,20 @@
+@meeting crossingBackAddress.ask
+// SW6 (ending writer A), the address when you never answered or said "Not sure yet" (end.now.unsure or nothing): the
+// Captain asks you at the front, before the crowd, with Stay and Go only (the spec: the game never decides for you).
+// FOR EN1/EN2: the two replies set the answer (end.stay / end.go); then play crossingBackAddress.stay or .go from its
+// FOURTH line (from "They asked for {me}", or the whole of it if simpler; the first three lines here match it).
+title: The Captain's question
+from: Captain Odile Marrow
+gist: At the Line, in front of the crew, the Captain asked you to choose: stay aboard the Wren, or go to headquarters.
+== lines
+marrow: One more thing, and then you can all get back to your Sunday.   [gesture]
+marrow: Four weeks ago we crossed into the reach as guests. We were good ones. I'm proud of every one of you.
+marrow: A few days ago, Concord headquarters wrote to me. They asked for one of ours. A post at headquarters.   [nod]
+marrow > you: {me}, I said you could take until now. It's now. I'm sorry. I did warn you.   [listen]
+torres-zeke: Take a breath. Whatever you say, we're all still here.
+marrow > you: Stay with the Wren, or go to headquarters? Either is a good answer. This one's for keeps.
+? choice
+* I'm staying.   flavour:share flag:end.stay
+  marrow: Then we're keeping you.   [laugh]
+* I'm going.   flavour:share flag:end.go
+  marrow: Then we'll see you off properly.   [nod]

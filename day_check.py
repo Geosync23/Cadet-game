@@ -10,12 +10,14 @@
 #   rooms in use over the week (every place type, with those nobody used listed) and the crew's needs through the day
 # Setup and environment as for cadet_test.py.
 # Run:  python3 day_check.py BUILD.html [DAY]     (DAY defaults to 1, a Monday)
-import sys, json
+import sys, json, os
 exec(open(__file__.replace('day_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
 
 DAY = int(sys.argv[2]) if len(sys.argv) > 2 else 1
 BUDGET = 450
+LANE_WALL = .001               # the share of walking frames a lane may bring a body within .1 tile of a wall its tile isn't near (playtest 1, #17: a body leaving a seat, its tile still off the middle, while the lane eases in; 0.03% on Day 1's busiest deck)
+UP_JUMP = 0.35                 # tiles: the most the drawn body may move in the step someone gets up from a seat or station (0.92.4 C: it hopped about 0.7 at once); moves longer than CREW_UP_MAX still go at once and aren't counted
 STEP = 0.05                    # real seconds a step (the main loop's longest frame): 0.03 ship minutes at SHIP_RATE 0.6
 
 # run one deck through the day: the crew logic only, a step at a time; every ship hour, draw a frame or two
@@ -25,12 +27,37 @@ SIM = r"""(async ({ n, day, step, draw }) => {
   const LL = typeof LINE_LOG === 'object' ? LINE_LOG : null;   // the servery line (0.26.30): counted afresh for this deck
   if (LL) for (const k in LL) LL[k] = Array.isArray(LL[k]) ? [] : 0;
   out.trayOut = 0; out.trayWho = []; out.trayStill = 0; out.stillWho = []; const still = new Map();
+  // the drawn lane (#10; playtest 1, #17): every walker's lane within WALK_LANE, and never drawn into a wall it isn't at: a
+  // walking frame where the lane alone brings the body within .1 tile of a wall or a blocked tile (its tile position not)
+  out.laneMax = 0; out.laneWall = 0; out.laneWho = []; out.walkF = 0;
+  // getting up from a place (0.92.4 C, FX8): the drawn body's move in the step someone gets up (0.92.3: about 0.7 tiles at once)
+  out.upMax = 0; out.upWho = ''; out.ups = 0; out.upLong = 0; out.upMoving = 0; const upAt = new Map();
+  const wallE = k => { const e = EDGES.get(k); return !!e && (e.type === 'wall' || e.type === 'hull'); };
+  const wallD = (X, Z) => { const gx = X + OX, gz = Z + OZ, i = Math.floor(gx), j = Math.floor(gz), fx = gx - i, fz = gz - j; let d = 9;
+    if (wallE(`v,${i},${j}`) || !free(i - 1, j)) d = Math.min(d, fx); if (wallE(`v,${i + 1},${j}`) || !free(i + 1, j)) d = Math.min(d, 1 - fx);
+    if (wallE(`h,${i},${j}`) || !free(i, j - 1)) d = Math.min(d, fz); if (wallE(`h,${i},${j + 1}`) || !free(i, j + 1)) d = Math.min(d, 1 - fz); return d; };
   const own = new Map(schedPeople().map(p => [p.id, p.bed]));
+  // arriving (0.92.5, the user's item 21: crew flashed across the screen by the lift): a newcomer's body is drawn where it is from its
+  // first frame (it was drawn once at the deck's origin): its drawn spot (Human.set's pos) within .1 of where it is, the step it appears
+  out.born = 0; out.bornFar = 0; out.bornWho = []; const seen = new Set(DECK_CREW);
+  // the inspection walked (FX20b, RV19's S3): on Deck 4 on an inspection morning with INSPECT_ON, each ship minute 06:00-07:30,
+  // the room the walker is inside while heading for that room's door spot ('' when in a corridor or elsewhere)
+  const insW = n === 4 && typeof INSPECT_ON !== 'undefined' && INSPECT_ON && WEEK_SHAPE[weekday(day)].inspect ? inspectWalker(day) : null; out.insp = [];
   for (let k = 0; B + k * step * SHIP_RATE < B + 1440; k++) {
     setShipNow(B + k * step * SHIP_RATE);
     updateDeckCrew(step);
     const now = shipNow(), held = new Map();
+    for (const a of DECK_CREW) if (!seen.has(a)) { seen.add(a); out.born++; const hp = a.h && a.h.pos;
+      if (!hp || Math.hypot(hp.x - (a.x + a.lx + a.hx), hp.z - (a.z + a.lz + a.hz)) > .1) { out.bornFar++; if (out.bornWho.length < 6) out.bornWho.push(a.p.id + ' ' + hhmm(now - B) + (hp ? ' drawn at ' + hp.x.toFixed(1) + ',' + hp.z.toFixed(1) : '')); } }
     for (const a of DECK_CREW) {
+      { const hp = a.h && a.h.pos, dx = hp ? hp.x : a.x + a.lx, dz = hp ? hp.z : a.z + a.lz, u = upAt.get(a);   // where the body is drawn (Human.set's pos: RV11, so a drawing that ignores the glide is caught)
+        if (u && u[2] && !a.settled) { const j = Math.hypot(dx - u[0], dz - u[1]), hop = Math.hypot(a.x - u[0], a.z - u[1]);   // hop: from the place to where they now are (a long one, over CREW_UP_MAX, still moves at once: lead 34)
+          if (u[4]) out.upMoving++;   // off a place with its own drawn moves (8c's swimming lane, climbing wall: recCrewSet draws them), not the get-up's glide
+          else if (!a.hx && !a.hz && hop > (typeof CREW_UP_MAX === 'number' ? CREW_UP_MAX : 1.2) - .1) out.upLong++; else { out.ups++; if (j > out.upMax) { out.upMax = j; out.upWho = a.p.id + ' ' + hhmm(now - B) + ' ' + (u[3] || ''); } } }
+        upAt.set(a, [dx, dz, a.settled, a.spot && a.spot.id, !!(a.rk || a.settled && a.spot && a.spot.mv)]); }
+      if (typeof a.lane === 'number') out.laneMax = Math.max(out.laneMax, Math.abs(a.lane));
+      if (a.pose === 'walk') out.walkF++;
+      if (a.pose === 'walk' && (a.lx || a.lz) && wallD(a.x + a.lx, a.z + a.lz) < .1 && wallD(a.x, a.z) >= .1) { out.laneWall++; if (out.laneWho.length < 6 && !out.laneWho.some(w => w.startsWith(a.p.id + ' '))) out.laneWho.push(a.p.id + ' ' + hhmm(now - B)); }
       if (a.stuckMax > out.stuck) { out.stuck = a.stuckMax; out.stuckWho = a.p.id + ' ' + hhmm(now - B); }
       if (a.noPath && !out.noPath.includes(a.p.id)) out.noPath.push(a.p.id);
       if (a.hold === 'tray' && roomAt(...a.here()) !== 'M') { out.trayOut++; if (out.trayWho.length < 6) out.trayWho.push(a.p.id + ' ' + hhmm(now - B)); }   // a tray only in the mess hall
@@ -47,6 +74,9 @@ SIM = r"""(async ({ n, day, step, draw }) => {
     if (k % perMin === 0) {                                   // every ship minute: is everyone due here here?
       const here = new Set(DECK_CREW.map(a => a.p.id));
       for (const p of schedPeople()) { const w = whereIs(p, now); if (w.deck === n && w.act !== 'commute' && now - w.from > 1 && !here.has(p.id)) out.missing++; }
+      const im = Math.round(now - B);
+      if (insW && im >= 360 && im <= 450) { const a = DECK_CREW.find(x => x.p.id === insW), id = a && a.spot && a.spot.id || '';
+        out.insp.push([im, a && /^4-inspect-/.test(id) && roomAt(...a.here()) === id.slice(-1) ? id.slice(-1) : '']); }
     }
     if (draw && k % perHour === 0) {                         // every ship hour: a frame by the lift and one over the crowd
       for (const view of ['lift', 'crowd']) {
@@ -75,6 +105,15 @@ with sync_playwright() as pw:
     # stop the game's own loop from moving anything between our steps: we drive the crew ourselves
     g.ev("window.__realTick = tickShip; tickShip = () => {}")
     g.ev("player.steer = null; player.stop()")
+    # (S5-4, B3) DAY_SD=at:branch[:keep] (e.g. 1080:galley): a shutdown settled for DAY, as if booked the evening before
+    # (needs a build with P5_M18 on: a copy with P5_STEP5 switched on). The day's plans are made with it; nothing else changes
+    if os.environ.get('DAY_SD'):
+        at, br, *kp = os.environ['DAY_SD'].split(':')
+        sd = g.ev(f"""(() => {{ if (typeof P5_M18 === 'undefined' || !P5_M18) return null; const W = worksInit(Math.max(1020, ({DAY} - 2) * 1440 + 1320)); if (!W) return null;
+          const S = sdData(); S.set[{DAY}] = [{{ day: {DAY}, at: {int(at)}, branch: {json.dumps(br)}, keep: {json.dumps(kp)}, warned: [], inPerson: ['brennan'], job: null }}];
+          SHIP_DAYS.clear(); MACH_USE.clear(); const L = sdShutList({DAY}); return L ? [...L[0].rooms] : null; }})()""")
+        print(f"  a shutdown settled for Day {DAY} at {at} on {br} (DAY_SD): rooms closed {sd}")
+        if sd is None: fail('DAY_SD given, but this build has no shutdowns switched on (P5_M18)')
     print(f"Day {DAY} ({g.ev(f'WEEKDAYS[weekday({DAY})]')}), {g.ev(f'schedPeople().filter(p => aboard(p, {DAY})).length')} people aboard ({g.ev(f'schedPeople().filter(p => p.guest && aboard(p, {DAY})).length')} of them guests)")
 
     # 1. the schedules
@@ -84,6 +123,22 @@ with sync_playwright() as pw:
         if r[k]: fail(f"{k}: {r[k][:8]}")
     print('  peak headcount by deck:', ', '.join(f"{d}: {v[0]} at {v[1]}" for d, v in sorted(r['peak'].items())))
     if r['unplaced']: print('  moments with no place (standing about):', r['unplaced'])
+
+    # FX20 (0.93.2): the bunk inspection walked for real, on an inspection morning with INSPECT_ON (a switched-on copy):
+    # the walker at each bunk room's door in order from 06:30, done by 07:15; the juniors standing by their bunks (and the
+    # walk live on Deck 4 in part 3)
+    if g.ev(f"typeof INSPECT_ON !== 'undefined' && INSPECT_ON && !!WEEK_SHAPE[weekday({DAY})].inspect"):
+        ins = g.ev(f"""(() => {{ const d = {DAY}, w = inspectWalker(d), p = w && schedPeople().find(x => x.id === w);
+          const walk = p ? planDay(p, d).filter(s => s.tag === 'inspect').map(s => [s.placeId.slice(-1), s.from % 1440, s.to % 1440]) : [];
+          const stand = schedPeople().map(q => planDay(q, d).find(s => s.tag === 'inspection' && /-stand$/.test(s.placeId || ''))).filter(Boolean);
+          return {{ w, walk, stand: stand.length, ids: stand.map(s => s.placeId), juniors: schedPeople().filter(q => /^4-B[1-8]-[1-6]$/.test(q.bed) && aboard(q, d)).length }}; }})()""")
+        order = [x[0] for x in ins['walk']]
+        print(f"  the inspection (FX20): {ins['w']} walks {' '.join(f'{x[0]}@{x[1]}-{x[2]}' for x in ins['walk'])}; {ins['stand']} of {ins['juniors']} juniors stand by their bunks")
+        # FX20b (RV19's M1): set off for room a by 06:18 (06:30 there, the walk is all they do from then), each room in the
+        # route's order to its leaving time (inspectPass), done by 07:15
+        rooms = g.ev("INSPECT_ROOMS"); pas = g.ev("INSPECT_ROOMS.map(inspectPass)")
+        if not ins['w'] or order != rooms or ins['walk'][0][1] > 378 or [x[2] for x in ins['walk']] != pas or any(ins['walk'][i][1] != ins['walk'][i - 1][2] for i in range(1, len(ins['walk']))) or ins['walk'][-1][2] > 435: fail(f"the inspection walk: {ins['w']} {ins['walk']}")
+        if ins['stand'] < 25 or len(set(ins['ids'])) != len(ins['ids']): fail(f"the juniors standing for the inspection: {ins['stand']} of {ins['juniors']}, a stand spot twice: {len(ins['ids']) - len(set(ins['ids']))}")
 
     # rooms in use: every place type over the week from DAY (types nobody used are listed, not failed)
     rooms = g.ev(f"roomsInUse({DAY}, 7)")
@@ -96,12 +151,75 @@ with sync_playwright() as pw:
     nd = g.ev(f"""(() => {{ const out = []; for (const hm of [390, 720, 1140, 1380]) {{ const all = schedPeople().filter(p => aboardAllDay(p, {DAY})).map(p => crewNeeds(p, ({DAY} - 1) * 1440 + hm));
       out.push(hhmm(hm) + '  ' + NEEDS.map(k => {{ const v = all.map(n => n[k]).sort((a, b) => a - b); return k + ' ' + v[0] + '/' + v[v.length >> 1]; }}).join('  ')); }} return out; }})()""")
     print('Crew needs (lowest/middle):'); [print('  ' + l) for l in nd]
+    # energy at the end of the day (0.73.0, playtest 2: nobody, you included, ends a day at 0 by default play): the crew at
+    # 23:59 on paper, and you awake from 06:00 at full energy to midnight, on shift if it's a workday for you
+    en = g.ev(f"""(() => {{ const B = ({DAY} - 1) * 1440, crew = schedPeople().filter(p => aboardAllDay(p, {DAY})).map(p => [crewNeeds(p, B + 1439).energy, p.id]).sort((a, b) => a[0] - b[0]);
+      const n = SHIP.player.needs, keep = {{ ...n }}, out = {{ crewLow: crew[0] }}; Object.assign(n, NEEDS_FRESH, {{ energy: 100 }});
+      const shift = typeof playerShiftOn === 'function' && playerShiftOn({DAY}), wl = typeof WORK_LEISURE !== 'undefined' ? WORK_LEISURE : 0;
+      for (let m = 360; m < 1440; m++) {{ needsDrain(1, false); if (shift && m >= DAY_SHIFT[0] && m < DAY_SHIFT[1]) n.leisure = needClamp(n.leisure - wl / 60); if (m === 22 * 60) out.you22 = Math.round(n.energy); }}
+      out.you24 = Math.round(n.energy); out.leisure = Math.round(n.leisure); out.shift = shift; Object.assign(n, keep); return out; }})()""")
+    print('Energy at the end of the day: crew lowest', en['crewLow'], '| you (no meals, nothing): at 22:00', en['you22'], 'at midnight', en['you24'], '| leisure', en['leisure'], '| your workday', en['shift'])
+    if en['crewLow'][0] <= 0: fail(f"someone ends the day with no energy: {en['crewLow']}")
+    if en['you22'] <= 0 or en['you24'] <= 0: fail(f"you end the day with no energy: {en}")
     # a crew-change day: where each leaver waits in the shuttle bay from 14:30. The spot is one of Deck 5's
     # shuttle-bay crowd places, picked by the leaver's id (bay[strSeed(id) % count]), so it moves whenever the bay's
     # crowd places change (the walkable Tern, decks 0.38.19: 120 -> 108 places). A plan difference here alone is expected
     lv = g.ev(f"""(() => schedPeople().filter(p => !p.guest && crewLeaving(p) === {DAY}).map(p => {{ const w = planWhere(p, ({DAY} - 1) * 1440 + 885);
       return p.id + ' ' + (w && w.placeId || '-'); }}).join(', '))()""")
     if lv: print('Leavers waiting in the shuttle bay at 14:45 (the spot follows the bay\'s crowd places):', lv)
+
+    # 1b. the Commons first (the rec deck's crew, RA 0.83; plan v5 section 9): Deck 3's evening count (17:00-24:00, from the
+    # plans) beside the rec deck's, against the same build with the REC_DECK switch off. The rec deck's everyday use (the
+    # build with its traditions switched off, REC_TRAD_ON) must never leave the Commons with fewer people than without the
+    # deck, minute by minute; its traditions (gatherings, exempt from the cap like talent night) are reported beside it. The
+    # rec deck holds at most REC_CAP outside gatherings
+    rec = g.ev("typeof REC_DECK !== 'undefined' ? REC_DECK : null")
+    if rec is not None:
+        src = pathlib.Path(sys.argv[1]).read_text()
+        on_src = src.replace('const REC_DECK = false;', 'const REC_DECK = true;', 1)
+        off_src = on_src.replace('const REC_DECK = true;', 'const REC_DECK = false;', 1)
+        bare_src = on_src.replace('const REC_TRAD_ON = REC_DECK;', 'const REC_TRAD_ON = false;', 1)
+        if off_src == on_src: print('The Commons and the rec deck: no REC_DECK line to flip')
+        else:
+            COUNT = f"""(() => {{ const sd = shipDay({DAY}), h = Array.from(sd.occ.heads.slice(1020, 1440)), r = sd.occ.rec ? Array.from(sd.occ.rec.slice(1020, 1440)) : null;
+              // at a gathering (or riding to and from one: the ride is counted on the deck)
+              const gath = r ? Array.from({{ length: 420 }}, (_, i) => schedPeople().filter(p => planDay(p, {DAY}).some(s => s.deck === 7 && /^ev-/.test(s.tag || '') && s.from - 5 <= ({DAY} - 1) * 1440 + 1020 + i && s.to + 5 > ({DAY} - 1) * 1440 + 1020 + i)).length) : null;
+              // 0.98 (FX24-2): who is on Deck 3 then only because they set off early for a tradition (a stay that starts with a walk, s.walk: from 5 minutes before it, the lift and the ride, to its arrival)
+              const B = ({DAY} - 1) * 1440, wl = Array.from({{ length: 420 }}, () => []), on3 = Array.from({{ length: 420 }}, () => []);
+              for (const p of schedPeople()) {{ const pd = planDay(p, {DAY});
+                for (const s of pd) if (s.deck === 3) for (let m = Math.max(1020, s.from - B); m < Math.min(1440, s.to - B); m++) on3[m - 1020].push(p.id);
+                for (const s of pd) if (s.deck === 3 && s.walk > 0 && /^ev-/.test(s.tag || '')) for (let m = Math.max(1020, s.from - B - 30); m < Math.min(1440, s.from - B + s.walk); m++) wl[m - 1020].push(p.id); }}
+              return {{ wl, on3, h, r, gath, cap: typeof REC_CAP !== 'undefined' ? REC_CAP.busy : null, trads: eventsOn({DAY}).filter(e => /^rec-/.test(e.id)).map(e => e.id) }}; }})()"""
+            res = {}
+            for k, text in (('on', on_src), ('off', off_src), ('bare', bare_src)):
+                if text == src: res[k] = g.ev(COUNT); continue
+                f = WORK / 'test' / ('_rec_' + k + '_' + pathlib.Path(sys.argv[1]).name); f.write_text(text)
+                g2 = Game(pw, str(f)); res[k] = g2.ev(COUNT); g2.close()
+            on, off, bare = res['on'], res['off'], res['bare']
+            mean = lambda l: sum(l) / max(1, len(l))
+            print(f"The Commons and the rec deck, 17:00-24:00 (from the plans): Deck 3 mean {mean(off['h']):.1f} peak {max(off['h'])} without the rec deck;"
+                  f" {mean(bare['h']):.1f} / {max(bare['h'])} with its everyday use; {mean(on['h']):.1f} / {max(on['h'])} with its traditions too ({', '.join(on['trads']) or 'none today'})")
+            if on['r'] and bare['r']: print(f"  the rec deck: mean {mean(on['r']):.1f} peak {max(on['r'])} (everyday use alone: mean {mean(bare['r']):.1f} peak {max(bare['r'])})")
+            # the storm update shuts the rec deck on its days (S3, a 'deck:7' closed routine): nobody comes by design, so no R6 FAIL then
+            shut = g.ev(f"typeof EV_STORM_ON !== 'undefined' && EV_STORM_ON && typeof eventClosed === 'function' && eventClosed({{ deck: 7 }}, ({DAY} - 1) * 1440 + 1200)")
+            if shut: print('  the rec deck is shut for the ship-wide event this evening (the storm update): its evening comparison is skipped')
+            elif not on['r'] or not bare['r'] or max(bare['r']) == 0: fail('the rec deck is on but nobody came to it in the evening (no rec counts): the comparison would prove nothing')   # R6
+            lower = [i for i in range(420) if bare['h'][i] < off['h'][i]]
+            # 0.98 (FX24-2, lead 45's call): fewer by at most the people named below is the walk to a tradition starting a little later with the rec
+            # deck (an early start is cut from what came just before, which the rec deck changes), not the rec deck drawing
+            # people away: tolerated only at a minute where that many people are on Deck 3 without it, heading for a walk-led
+            # tradition stay there, and aren't on Deck 3 with it. Every tolerated minute is named.
+            walked = {}
+            for i in lower:
+                who = sorted(x for x in set(off['wl'][i]) & set(off['on3'][i]) if x not in set(bare['on3'][i]))   # on Deck 3 without the rec deck, heading for a walk-led tradition stay there, not on Deck 3 with it
+                if who and off['h'][i] - bare['h'][i] <= len(who):
+                    for x in who: walked.setdefault(x, []).append(i)
+            for pid, ms in walked.items(): print(f"  one fewer at {len(ms)} minutes from {1020 + ms[0]}: {pid} set off earlier for a tradition without the rec deck (a walk-led stay, FX24-2), tolerated")
+            lower = [i for i in lower if not any(i in ms for ms in walked.values())]
+            if lower: fail(f"the Commons hold fewer with the rec deck's everyday use at {len(lower)} minutes, first {1020 + lower[0]} ({bare['h'][lower[0]]} v {off['h'][lower[0]]})")
+            if on['r'] and on['cap']:
+                over = [i for i in range(420) if on['r'][i] - on['gath'][i] > on['cap']]
+                if over: fail(f"the rec deck over its cap of {on['cap']} outside gatherings at {len(over)} minutes")
 
     # 2. the same start gives the same plans
     a = g.ev(f"(() => {{ SHIP_DAYS.clear(); return JSON.stringify(schedPeople().map(p => planDay(p, {DAY}))); }})()")
@@ -112,13 +230,35 @@ with sync_playwright() as pw:
     # tea corner's seats at once, and nobody in Works on Deck 5 has a tea outside it; most of those at work go
     wt = g.ev(f"""(() => {{ if (typeof WORKS_TEA === 'undefined') return null; const B = ({DAY} - 1) * 1440, out = {{ on: 0, went: 0, outside: [], peak: 0 }}, at = new Map();
       for (const p of schedPeople().filter(p => p.dept === 'works' && p.shift !== 'night' && p.work && p.work.deck === 5)) {{
-        const segs = planDay(p, {DAY}); if (!segs.some(s => s.act === 'work')) continue; out.on++;
+        const segs = planDay(p, {DAY}); if (!segs.some(s => s.act === 'work')) continue;
+        if (typeof eventMeetTag === 'function' && segs.some(s => eventMeetTag(s.tag) && s.from < B + WORKS_TEA.until && s.to > B + WORKS_TEA.at)) {{ out.easy = (out.easy || 0) + 1; continue; }}   // standing easy for an event in the tea hour (the Veyli vessel's parts chain, Day 28 13:00-14:00): that's their break
+        out.on++;
         const tea = segs.filter(s => s.tag === 'tea' && s.deck === 5); if (tea.length) out.went++;   // posted to another deck that day: their own tea there
         for (const s of tea) {{ if (s.from < B + WORKS_TEA.at || s.to > B + WORKS_TEA.until + WORKS_TEA.wait) out.outside.push(p.id + ' ' + hhmm(s.from - B)); for (let m = s.from; m < s.to; m++) at.set(m, (at.get(m) || 0) + 1); }}
       }}
       out.peak = Math.max(0, ...at.values()); return out; }})()""")
     print('Works tea at 13:00:', wt)
     if wt and (wt['outside'] or wt['peak'] > 3 or (wt['on'] and wt['went'] < wt['on'] // 3)): fail(f'Works tea wrong: {wt}')
+
+    # the morning (the user's playtest 2, 0.71.5): the day shift wakes spread out from 05:30, not all go straight to
+    # breakfast (some work out, some have a coffee or a read first), and every one of them eats breakfast and is at
+    # work by 09:00 (the galley rota and the night shift have their own mornings)
+    mo = g.ev(f"""(() => {{ const B = ({DAY} - 1) * 1440, out = {{ n: 0, wake: {{}}, first: {{}}, late: [], noBreakfast: [] }};
+      for (const p of schedPeople()) {{
+        if (p.shift === 'night' || !p.work || !isWorkDay(p, {DAY}) || (galleyRotaOn() && p.dept === 'galley') || !aboardAllDay(p, {DAY}) || (shiftBlocks(p, {DAY}) || {{}}).blocks) continue;   // a rota of their own (the store, the galley): dayReport checks those
+        const segs = planDay(p, {DAY}), w = segs.find(s => s.act === 'work'); if (!w) continue; out.n++;
+        const sl = segs.filter(s => s.act === 'sleep' && s.from < B + 600).pop(), wk = sl ? sl.to - B : 0, h = hhmm(Math.floor(wk / 30) * 30);
+        out.wake[h] = (out.wake[h] || 0) + 1;
+        const f = segs.find(s => s.from >= B + wk && !['sleep', 'commute', 'off'].includes(s.act) && !['toilet', 'lift', 'inspection'].includes(s.tag));
+        const k = !f ? 'none' : f.act === 'breakfast' ? 'breakfast' : f.act === 'gym' ? 'workout' : f.act === 'wash' ? (segs.some(s => s.from > f.from && s.act === 'leisure' && s.from < (segs.find(x => x.act === 'breakfast') || {{ from: Infinity }}).from) ? 'wash, then a coffee or read' : 'wash') : f.act;
+        out.first[k] = (out.first[k] || 0) + 1;
+        if (w.from > B + SHIFTS.day[0]) out.late.push(p.id + ' ' + hhmm(w.from - B));
+        if (!segs.some(s => s.act === 'breakfast')) out.noBreakfast.push(p.id + (habitsOn(p, {DAY}).includes('skips-breakfast') ? ' (skips)' : ''));
+      }}
+      return out; }})()""")
+    print('Mornings of the day shift:', mo['n'], '| woke', dict(sorted(mo['wake'].items())), '| first thing', mo['first'])
+    if mo['late']: fail(f"late to the shift: {mo['late'][:8]}")
+    if [x for x in mo['noBreakfast'] if not x.endswith('(skips)')]: fail(f"no breakfast: {mo['noBreakfast'][:8]}")
 
     # 3. every deck through the day
     decks = g.ev("typeof DECK_ORDER !== 'undefined' ? DECK_ORDER.slice().sort((a, b) => a - b) : Object.keys(DECKS).map(Number)")
@@ -129,6 +269,15 @@ with sync_playwright() as pw:
         busiest = sorted(o['calls'], key=lambda c: -c[2])[:2]
         print('  busiest frames:', ', '.join(f"{c[0]} {c[1]} {c[2]} calls, {c[3]} crew" for c in busiest))
         if o['stuck'] > 10: fail(f"deck {n}: {o['stuckWho']} stuck {o['stuck']:.1f} ship minutes")
+        wl = g.ev("typeof WALK_LANE !== 'undefined' ? WALK_LANE : null")
+        if wl is not None:   # the drawn lane (#10; playtest 1, #17): within WALK_LANE, and never drawn into a wall by it alone
+            print(f"  walking lanes: widest {o['laneMax']:.2f} tiles (limit {wl}), drawn into a wall by the lane {o['laneWall']} of {o['walkF']} walking frames {o['laneWho']}")
+            if o['laneMax'] > wl + 1e-9: fail(f"deck {n}: a walking lane {o['laneMax']:.2f} tiles wide, over WALK_LANE {wl}")
+            if o['laneWall'] > LANE_WALL * o['walkF']: fail(f"deck {n}: drawn into a wall by the walking lane {o['laneWall']} frames: {o['laneWho']}")
+        print(f"  getting up from a place: {o['ups']} times, the drawn body's biggest move in that step {o['upMax']:.2f} tiles ({o['upWho']}; limit {UP_JUMP}); {o['upLong']} longer moves (over CREW_UP_MAX), at once as before; {o['upMoving']} off a place drawn moving (8c), not counted")
+        if o['upMax'] > UP_JUMP: fail(f"deck {n}: someone hops {o['upMax']:.2f} tiles in one step getting up from a place ({o['upWho']}); at most {UP_JUMP}")
+        print(f"  arriving: {o['born']} came onto the deck, {o['bornFar']} drawn somewhere else on their first frame {o['bornWho']}")
+        if o['bornFar']: fail(f"deck {n}: {o['bornFar']} arrivals drawn away from where they are on their first frame (a flash across the screen): {o['bornWho']}")
         if o['shared']: fail(f"deck {n}: two people settled in one place {o['shared']} times: {o['sharedWho']}")
         if o['notOwnBed']: fail(f"deck {n}: in someone else's bed: {sorted(set(o['notOwnBed']))[:6]}")
         if o['noPath']: fail(f"deck {n}: no way to their place: {o['noPath'][:8]}")
@@ -140,6 +289,13 @@ with sync_playwright() as pw:
             if L['left']: fail(f"deck {n}: {L['left']} gave up on the servery line: {L['who']}")
         if o['trayStill']: fail(f"deck {n}: standing still with a tray {o['trayStill']} times: {o['stillWho']}")
         if o['trayOut']: fail(f"deck {n}: a tray outside the mess hall {o['trayOut']} times: {o['trayWho']}")
+        if o.get('insp'):   # the inspection walked live (FX20b): inside each room in the route's order, room a by 06:31, two minutes or more in each, done by 07:15
+            rooms = g.ev("INSPECT_ROOMS")
+            mins = {r: [m for m, x in o['insp'] if x == r] for r in rooms}
+            firsts = [r for r in sorted(rooms, key=lambda r: mins[r][0] if mins[r] else 9999)]
+            print('  the inspection walked live: ' + ' '.join(f"{r}@{mins[r][0] // 60:02d}:{mins[r][0] % 60:02d}+{len(mins[r])}" if mins[r] else f"{r}@never" for r in rooms))
+            if any(len(mins[r]) < 2 for r in rooms) or firsts != rooms or mins['a'][0] > 391 or max(mins[rooms[-1]]) > 435:
+                fail(f"deck 4: the inspection walked live: rooms {firsts}, minutes inside {dict((r, len(mins[r])) for r in rooms)}")
 
     # jobs (section 17): the machine panels and other places the crew's jobs took them to, from the day just run
     jv = g.ev("typeof jobVisits === 'function' ? jobVisits() : null")
@@ -166,3 +322,4 @@ with sync_playwright() as pw:
     if g.errors: ok = False
     print('DAY CHECK OK' if ok else 'DAY CHECK FAILED')
     g.close()
+    sys.exit(0 if ok else 1)   # so a failing check fails for the computer too (check_fast.sh, GitHub)

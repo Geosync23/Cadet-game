@@ -1,0 +1,11 @@
+@bank all
+// Pillar 5 Step 3 (head writer W2): Mail from friends on the day you're promoted (seat C2 / social: friends and close
+// friends send one, Day 10). "Subject | body", unsigned (the game adds the sender). Up to 400.
+== mail.promo.friend
+? tier=friend
+- Officer! | Heard the news. Officer {me}. It suits you. Drinks are on you, I think that's the rule.   #funny
+- Well done | Well done, you. Properly. Come and find me when you've settled in.   #warm
+- Your own cabin | Your own cabin. Your own door. Can I come and look at it? I'm coming to look at it.
+? tier=close
+- Told you so | I said you'd be an officer before the month was out. I was right. I'm always right. Well done.   #warm
+- So proud | I know you'll be busy now. Don't you dare get too busy for tea. Congratulations, {nick}.   #warm

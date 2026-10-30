@@ -1,0 +1,18 @@
+@meeting vesselSheet
+// SW4, the Veyli vessel (plans/veyli-vessel-spec.html): Saturday Day 27, 10:00. Calder, called in on her day off, finds
+// you (the Works bay, or wherever you are) with the parts chain sheet. Signing is the ring after the scene. Her
+// parts-list Mail (event.veyliVessel.mail.partslist) comes after, as the record. Two replies.
+title: The parts chain sheet
+from: Chief Ines Calder
+gist: Chief Calder asked you to sign up for the parts chain (Sunday 13:00, Main storage to the Tern) and to meet the Veyli ship's engineer at the foot of the Tern's ramp, Sunday 09:30.
+== lines
+calder: There you are. It's my day off. The Veyli didn't check.   [gesture]
+calder: A sheet. The parts chain, tomorrow at one. Our spare pump, fittings, coolant. Main storage to the Tern, by hand.
+calder: The lift's too slow and the trolleys won't take the ramp. People will.
+calder > you: And one more thing. You're meeting their engineer. Foot of the ramp, half nine.   [nod]
+? choice
+* Me? Why me?   flavour:listen rel:calder+1
+  calder: Someone met you, four weeks ago. Now you know how it's done.   [nod]
+* Foot of the ramp. Got it.   flavour:practical rel:calder+1
+  calder: Quarter past nine, then. Then you're early.   [nod]
+calder: I'll be beside you. Also my day off. Sign the sheet.   [gesture]

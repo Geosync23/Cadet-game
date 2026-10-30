@@ -6,7 +6,7 @@
 ? tier=stranger
 - {hi}. You're new. Have you eaten? Mess is through there. Trays on the left.
 ? tier>=acquaintance time:morning
-- Morning, {nick}. Breakfast's on till eight, and I'm counting heads.
+- Morning, {nick}. Breakfast's on till nine, and I'm counting heads.
 ? tier>=acquaintance
 - {hi}. Have you eaten? Don't answer. I can see you haven't. Sit.   #funny
 ? tier>=colleague
@@ -556,3 +556,120 @@
 - Don't. Don't say it. One pan. One.   #funny
 - Sorry, love. I turned my back for a second.
 - That alarm's louder than me. Nobody's louder than me.   #funny
+
+// ---- Pillar 5 Step 3 (head writer W2): Brennan's cake at the Works tea corner after your promotion (X). Warm,
+// fierce in her kitchen.
+== cue
+? flag:promo.cake
+- Cake. For the new officer. First slice is yours.   #warm
+- Pell. It is not for you. Not yet.   #funny
+// C2 0.44.24 plays her cake lines (VOICE, flag promo.cake) within 3 m of her at the Works tea corner, 16:30-17:00
+== work
+? flag:promo.cake
+- Cake. For the new officer. First slice is yours.   #warm
+- Pell. It is not for you. Not yet.   #funny
+
+// W3, rec deck R12: pool water through the mess
+== chat
+- If one more person drips pool water through my mess hall, love, I'm serving mops.   #funny
+- Swim, then eat. Not swim, then drip on my bread. There's an order to things.   #funny
+? weekday:sat
+- Film night popcorn's on the grab shelf at quarter to eight. One bowl each. I'm counting.
+== smalltalk
+- Towels, love! Towels!   #funny
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Hello, loves. Tonight: {title}. Three jars. Sniff, don't lick.
+== talk.answer
+- Good question, love. The answer's always more garlic.
+== talk.listen
+- Off you go. Eat something. Not the jars.
+
+// ---- SW2, patch 0.92.3 item 15: her own Talk a while card frames (FX13: main characters skip the shared ones)
+== talk.start
+- Oh, a chat! Lovely. Have you eaten? Sit first. Then tell me.
+- Course, love. I've a minute. I've always got a minute for you lot.
+- Go on, then. The pans can look after themselves. For ten minutes.   #funny
+? tier>=friend
+- There you are, love. I was hoping you'd come and sit with me.   #warm
+- Oh, love. Good. I've been saving a scone and a story. You get both.   #warm
+?
+
+== talk.sit
+- Sit, love. Not there, it's wet. There. Lovely.
+- Pull up a chair. Feet up if you like. I won't tell.
+- Sit down before you fall down, love. You've been on your feet all day.
+
+== talk.filler
+- Hear that? That's the soup settling. No, that's the kettle. Same thing.   #funny
+- Have you had a biscuit yet? Have one. Go on. While I'm looking.
+- I do love the mess when it's half full. Just enough noise.   #warm
+- Oh, love. You've a crumb. There. Gone. Carry on.   #funny
+- Mm. Smell that? Tomorrow's bread. I've put it to rest. Like me.   #warm
+- You're good company, you are. Better than the cold store.   #funny
+
+== talk.end
+- That was lovely, love. Now go and eat something. Properly.
+- Right. That's done me good. Off you go. Take a biscuit.   #warm
+- Thank you, love. Come and sit with me again. Soon, mind.   #warm
+- Well, that went quick. Good chats always do. Have you eaten?
+- Bless you for that. Back to my pans. They'll have missed me.   #funny
+
+== talk.stop
+- Off you go, love. We'll finish it over dinner.
+- Course. Go on. I'll keep it warm for you. The story, I mean.   #funny
+- Right you are, love. Eat something on your way.
+
+== talk.go.shift
+- Oh, love, the dinner rush. It won't wait for me, and it shouldn't. Later?
+- That's the ovens calling. Sorry, love. Come by after the rush.
+
+== talk.go.bed
+- Bed for me, love. The ovens are up early, and so am I.
+- I'm dropping off in my chair. Night, love. Breakfast's at seven.
+
+== talk.go.trad
+- {trad}'s on, love. I've done a tray for it. Come and help me carry.
+- Sorry, love. {trad}. There'll be food. There's always food. Coming?
+// ---- ZW1 (writer), patch 0.92.3 item 26: you in dirty clothes. clothes.remark: yesterday's clothes (flag:clothes.stale);
+// clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3's hook). Bubbles, 60 characters or fewer; kind, never mean.
+== clothes.remark
+? flag:clothes.stale
+- Yesterday's top, love? Change it before you queue.
+- Busy, love? Clean shirt tomorrow. I'll be checking.   #funny
+== clothes.grubby
+? flag:clothes.grubby
+- Not in my mess like that, love. Change, then eat.
+- Love, you're half oil. Wash your hands at least.   #funny
+? flag:clothes.grubby tier>=friend
+- Go and change, love. I'll keep a plate warm. Just this once.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
+== bday.circle
+- Happy birthday, love! Don't touch the knife, I'll cut it.   #funny
+- Happy birthday, {other}. Your favourite. I asked around.   #warm
+== bday.circle.you
+- Happy birthday, love! Your favourite. I asked around.   #warm
+== bday.thanks
+- Thank you, loves. Now eat it before it goes cold. It's cake.   #funny
+- Oh, you lot. Who baked? Not me, for once. Thank you.   #warm
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-2): the cake after your bar (flag pu3.cake, as for your pip's promo.cake)
+== work
+? flag:pu3.cake
+- Cake for the new Senior. Corner piece, love. You've earned the icing.   #warm
+- Pell. Second slice. Not first. I can see you.   #funny
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-4): told in person about a galley shutdown (talk option sd.warn.ask), and the
+// grumble the next day if nobody told her by 22:00
+== work
+? flag:sd.warn.brennan
+- Tomorrow? Galley circuit? Thank you for telling me to my face, love.   #warm
+- I'll bake early. Bread at six, nothing in the ovens at your hour.
+- If my cold store warms up by one degree, I'm coming to find you.   #funny
+? flag:sd.grumble.brennan
+- Love. My ovens went off. Nobody told me. Next time, you tell me.
+- Half a tray of rolls, flat. Tell me first. That's all I ask.
+? flag:sd.thanks.brennan
+- Your shutdown was a dream, love. Didn't lose a single loaf.   #warm

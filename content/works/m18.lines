@@ -1,0 +1,113 @@
+@bank all
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-4 words; spec section 10): M18 Shutdowns (24w). The training is meeting
+// train.m18.calder at the Deck 6 port junction (j); the planning screen is a new Works app tab ("Shutdowns"). Said by
+// nobody unless noted; the crew's words are content/banks/m18.lines, Brennan's own in brennan.lines. Labels are short
+// (buttons and headings on a phone). {where}: the branch's name from SHUT_BRANCHES ("the galley circuit"; the checker's fixed token list has no {branch}); {time}: an
+// hour like 14:00; {name}: a person; {text}: the rooms it feeds, joined ("the gym and the laundry"); {n}: a count.
+
+== works.mech.m18
+- Shutdowns
+== works.ask.m18
+- Shutdowns | Planning one, properly. We book a real one for tomorrow together. The Deck 6 port junction, {time}, {place}.
+== next.m18
+- Shutdowns comes next: planning a real one with the Chief, on Deck 6.
+== next.wait.m18
+- Shutdowns: meet the Chief at the Deck 6 port junction.
+== m18.ptr
+- Shutdowns with Calder, {time}
+== m18.notice
+- Shutdowns with the Chief at {time}: the Deck 6 port junction. Go at quarter to.
+
+// ---- the planning screen (the Works app's Shutdowns tab) ----
+== sd.tab
+- Shutdowns
+== sd.none
+- No jobs need a shutdown. When one does, it shows here.
+== sd.head
+- Jobs that need the power off
+== sd.job
+- {machine}: needs the power off
+== sd.feeds
+- Feeds
+== sd.feeds.rooms
+- {where}: {text}
+== sd.when
+- Tomorrow at
+== sd.prev
+- Earlier
+== sd.next
+- Later
+== sd.who
+- Who'd notice
+== sd.who.none
+- Nobody's in those rooms then. A quiet hour.
+== sd.who.n
+- {n} people in those rooms then
+== sd.meal
+- Mealtime: the galley needs power
+== sd.class
+- A class is on in one of these rooms
+== sd.trad
+- A ship tradition is on then
+== sd.warn
+- Warn
+== sd.warned
+- Warned
+== sd.keep
+- Keeps power
+== sd.keep.none
+- Nothing kept on
+== sd.book
+- Book for tomorrow
+== sd.cancel
+- Cancel booking
+// the confirmation when you book, and when you cancel
+== sd.booked
+- Booked: {where}, tomorrow at {time}. It's settled at 22:00 tonight.
+== sd.cancelled
+- Booking cancelled. Nobody's day changes.
+== sd.booked.row
+- Booked: tomorrow {time}
+// booking an hour that's marked (a meal, a class, a tradition): the warning on the screen
+== sd.busyhour
+- People will feel this one. Book it anyway?
+== sd.yes
+- Book it anyway
+== sd.no
+- Pick another hour
+// a job that needs a shutdown, tapped before it's booked (the ring and the toast)
+== sd.needbook
+- This needs the power off. Book a shutdown first: Works app, Shutdowns.
+
+// ---- warnings ----
+// the notice on a warned person's device ({name}: you; {time}; {where})
+== sd.warn.notice
+- {name}: power off tomorrow, {time}, {where}. About an hour.
+// the toast when you warn someone from the screen
+== sd.warn.sent
+- {name} is warned.
+// the talk option on Brennan (and the other people who'd want telling in person)
+== sd.warn.ask
+- About tomorrow's shutdown
+
+// ---- the day's Mail and the day itself ----
+// 22:00 the evening before: the booking is settled (Mail, Calder; "Subject | body")
+== mail.sd.settled
+- Tomorrow's shutdown | Settled. {where}, {time}. The crew's day is planned round it now. Be at the junction at quarter to.
+// the notice 30 minutes before, the ring at the junction, the arrow's label
+== sd.notice
+- Your shutdown at {time}: the junction on Deck {deck}. Go now.
+== sd.ptr
+- Your shutdown, {time}: switch it off
+== sd.ptr.back
+- Your shutdown: bring it back
+// done; missed
+== sd.done
+- Power back on. {where} is running again.
+== sd.missed
+- You missed your hour. The booking's gone; the crew moved their day for nothing.
+== mail.sd.missed
+- Your shutdown | The hour came and went. People had moved their day for it. Book it again, and be there. I'd rather hear why from you.
+// the Training tab
+== m18.trained
+- Shutdowns: you can book them now. Works app, Shutdowns tab.

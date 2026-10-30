@@ -1,0 +1,22 @@
+@meeting talk.kovac-zainab
+// SW2, 0.92.6 item 13 (FX17's word list): a small Wren talk, 19:00-19:40 on the auditorium stage (a ring of eight
+// chairs, house dark, the stars behind, tea from the kettle). Day 71, Monday. Zainab Kovac, Works. Nothing about the lift.
+title: Seals, mesh, frame
+from: Zainab Kovac
+gist: Kovac's small talk on stripping a scrubber: the order, the spanners, and the real time.
+== lines
+kovac-zainab: Oh. Um. Hello. That's a lot of chairs. Sorry. Right. Scrubbers.   [nod]
+kovac-zainab: This is a scrubber filter. It cleans the air you're breathing. Every breath.
+kovac-zainab: People say I can strip one in ten minutes flat. That's wrong.   [gesture]
+kovac-zainab: It's nine and a half. I've timed it. Forty times.
+kovac-zainab: The trick is the order. Seals, then the mesh, then the frame. Never the frame first.
+kovac-zainab: And put the spanners back in order. Somebody never does. I won't say who.
+kovac-zainab: That's... sorry, that's it. Questions? You don't have to.
+? choice
+* Can you show me?   rel:kovac-zainab+2 flavour:practical mem:talk.kovac-zainab.asked
+  kovac-zainab: Oh. Yes. At the tea corner. I'll go slowly. Well. Nine and a half slowly.   [laugh]
+* Who's fastest after you?   rel:kovac-zainab+2 flavour:cheer mem:talk.kovac-zainab.asked
+  kovac-zainab: Maeve. She wants a rematch. She always wants a rematch.   [laugh]
+* (Just listen)
+  kovac-zainab: No questions. That's... good. Thank you for listening.
+kovac-zainab: Thank you. Um. Breathe easy. That's a scrubber joke. Sorry.   [laugh]

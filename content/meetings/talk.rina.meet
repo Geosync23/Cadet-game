@@ -1,0 +1,22 @@
+@meeting talk.rina
+// SW2, 0.92.6 item 13 (FX17's word list): a small Wren talk, 19:00-19:40 on the auditorium stage (a ring of eight
+// chairs, house dark, the stars behind, tea from the kettle). Day 64, Monday. Rina Deshi, the infirmary. Nothing about her exam.
+title: Tiles, and why you won't beat me
+from: Rina Deshi
+gist: Rina's small talk on Tiles: what her gran taught her, and what it won't help you do.
+== lines
+rina: Right. Sit. This is a talk about Tiles. It will not help you beat me.   [gesture]
+rina: Tiles is two players and one winner. In the junior common room, that's me.
+rina: My gran taught me. She cheated. I learnt more catching her than winning.   [laugh]
+rina: Watch their hands, not the board. People tell you everything with their hands.
+rina: Drink water between games. That's not a Tiles tip. That's an order.
+rina: My count's in a notebook. Dated. Signed. Going up.   [nod]
+rina: Questions. Short ones. I'm playing at eight.
+? choice
+* Will you teach me?   rel:rina+2 flavour:practical mem:talk.rina.asked
+  rina: Yes. Then I'll beat you. That's the lesson. Common room, any evening.   [laugh]
+* Has anyone ever come close?   rel:rina+2 flavour:cheer mem:talk.rina.asked
+  rina: Pell, once. He fell asleep holding a winning hand. Honestly.   [laugh]
+* (Just listen)
+  rina: No questions. Smart. You're saving them for the rematch.
+rina: That's it. Water on your way out.

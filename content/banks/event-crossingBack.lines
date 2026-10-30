@@ -1,0 +1,188 @@
+@bank all
+// SW6 (ending writer A), the crossing back (plans/ending-spec.html, E-1 and section 9; EN2 builds it). Sunday Day 35,
+// 14:30, four weeks to the hour after the first crossing. Keys mirror event.crossingLine.* (content/banks/
+// event-crossingLine.lines). Mail is "Subject | body", unsigned unless it says who. The staged scenes are meetings in
+// content/ending/: crossingBackWord (Vance, Wed), crossingBackOath (you lead it), crossingBackSignal (Saruth),
+// crossingBackAddress.stay | .go | .ask (the Captain's final address). CANON: the Wren crosses back over the Line;
+// never "permission" or "leave" about the reach; every Veyli is they/them; the comet's Veyli name is never said.
+// FLAGS read here (agreed with lead 39 / EN1): end.stay, end.go (settled at the address); end.now.stay | end.now.go |
+// end.now.unsure (your answer so far, before the address).
+
+// ---- Wednesday Day 31: Vance's word (said in person first: meeting crossingBackWord), then these as the record
+// EN2 (RV21's should): the notice as Vance sets off to find you on Wednesday, and Sunday's fetch to the oath if
+// you're not in the bow lounge by 14:35 (his notice, then his line beside you, a bubble: 60 at most)
+== event.crossingBack.notice.vanceComing
+- Commander Vance is coming to find you.
+== event.crossingBack.notice.fetch
+- Commander Vance is coming to find you: the oath is waiting for you.
+== event.crossingBack.say.fetch
+- There you are. The bow lounge. They won't start without you.
+== event.crossingBack.notice.word
+- Sunday at 14:30 the Wren crosses back over the Line. You're leading the oath.
+== event.crossingBack.status.word
+- Sunday: the Wren crosses back over the Line
+== event.crossingBack.mail.word
+- Sunday we cross back over the Line | On Sunday at 14:30 the Wren crosses back over the Line, four weeks to the hour after the first crossing. The ceremony is in the bow lounge. One first-timer: Cadet Bramwell. You will lead the oath, as discussed. Then the Line supper in the mess at 18:00. Attendance is not required. It is, however, expected. Vance
+== event.crossingBack.tracked.word
+- Sunday 14:30: lead the oath, the bow lounge
+
+// ---- Wednesday to Saturday: the ship talks (bubbles, 60 at most; the mess and the Works bay; no arrow).
+// EN2: say these while event:crossingBack is announced and before Sunday's horn. Crew remember Day 7.
+== event.crossingBack.chatter
+- Back over the Line on Sunday. Where did four weeks go?
+- Four weeks in the reach. It went by like a Tuesday.   #funny
+- Same punch both ways, I hear. Brennan won't say.   #funny
+- I'll miss the names out here. Every star's got a story.   #warm
+- Sunday's crossing back. I'm wearing the gold ribbon again.
+- Remember the first crossing? Somebody cried. It was me.   #funny
+- The new hand's leading the oath. A month ago they took it.   #warm
+- Bad luck to cross on a full stomach? Asking for Pell.   #funny
+- The charts get thick again on Sunday. Survey's in mourning.   #funny
+- I've got used to the reach. Strange, going back.
+? place:worksbay
+- Coil three's heard we're crossing back. She's sulking.   #funny
+- Calder's checking the ramp seals. For Sunday. For no reason.   #funny
+? place:mess
+- Brennan's ordering punch fruit. Or whatever's in it.   #funny
+- Line supper again on Sunday. I'm saving myself.   #funny
+? who:pell
+- My fourth Line. Two in, two out. I'm practically a fish.   #funny
+- Last time Tomas got the dregs. This time he drinks fresh.   #warm
+? who:tomas
+- I'm crossing this one. Properly. I've swapped my watch.   #warm
+- Four weeks ago I was at the Deck 2 lift. Not this time.
+? who:bramwell-basil
+- What's the oath like? Is it long? Do I have to learn it?
+- Is the punch really green? Pell says it's green. Is it?
+- I'm the only first-timer. Is that good? It feels big.
+? who:brennan
+- Punch is made, love. Don't ask me what's in it.   #funny
+? who:raman
+- Tavessa's behind us now. Say goodbye to it from the stern.   #warm
+? who:holt
+- Back over the Line. I'll admit it. It was a good month.
+? who:saruth
+- The reach will be quieter when the Wren has crossed back.   #warm
+? who:vance
+- Ribbons by 14:00 on Sunday. Gold, both sides. Regulation.   #funny
+? who:calder
+- Sunday's a working day until half two. Then it isn't.
+? tier>=friend
+- You're leading it? Course you are. You'll be good.   #warm
+- Nervous about Sunday? Don't be. Just read slowly.
+- Don't rush the last line. It's the best one.   #warm
+
+// ---- Saturday Day 34, 10:00: Taavek's ship comes back (notice, a level 2 arrow to the bow glass, once)
+// EN2: the level 2 arrow's label to the glass (a place, as every arrow's)
+== event.crossingBack.arrow.vessel
+- Taavek's ship: the bow lounge, Deck 3
+== event.crossingBack.notice.vessel
+- Taavek's ship is off the bow again: the bow lounge glass, Deck 3.
+== event.crossingBack.status.vessel
+- Taavek's ship is flying with the Wren to the Line.
+// Saruth at the glass (a bubble each as you arrive, in order; 60 at most), then the crew's at-the-glass lines
+== event.crossingBack.glass.saruth.1
+- Ah. You came to see them. So did I.
+== event.crossingBack.glass.saruth.2
+- They will fly with the Wren as far as the Line.
+== event.crossingBack.glass.saruth.3
+- Company, the other way. It is only courteous.   #warm
+== event.crossingBack.glass.here
+- That's the little ship? Running sweetly now, look.   #warm
+- Our part's in there. Spinning. I like that.   #warm
+- They came all the way back to walk us to the door.
+
+// ---- Sunday Day 35: the crossing back
+== event.crossingBack.notice.morning
+- Today at 14:30 the Wren crosses back over the Line. You lead the oath, the bow lounge.
+== event.crossingBack.notice.ceremony
+- The crossing back: the oath in the bow lounge at 14:30. You're at the front this time.
+== event.crossingBack.notice.horn
+- The ship's horn: the Wren has crossed back over the Line.
+== event.crossingBack.status.morning
+- Today 14:30: the Wren crosses back over the Line.
+== event.crossingBack.status.onset
+- Crossed back over the Line. Supper 18:00.
+== event.crossingBack.status.resolution
+- Crossed back over the Line. Line supper, the mess, 18:00.
+// the ring on the front of the bow lounge (EN2: "Lead the oath")
+== event.crossingBack.ring.oath
+- Lead the oath
+// the banner at 14:30, after the horn (the Captain on every deck, briefly, as on Day 7)
+== event.crossingBack.address.onset.1
+- This is the Captain. We've crossed back over the Line.
+== event.crossingBack.address.onset.2
+- Thank the reach for a good month. Look out of a window while it's still there.
+== event.crossingBack.address.onset.3
+- Everyone who can, to the bow lounge. I've something to say after the oath. Marrow out.
+// tap lines at the ceremony (crew), and the ask (crew asking you along, 14:00-14:30)
+== event.crossingBack.gather.ceremony.here
+- Front's yours today. We'll be at the back, laughing.   #funny
+- Read it slowly. The Captain always does.
+- Look at Basil. That was you, four weeks ago.   #warm
+== event.crossingBack.gather.ceremony.ask
+- Bow lounge at half two. You're at the front. Don't be late.
+- You're leading it? Then I'm coming. Wouldn't miss it.   #warm
+- Crossing back at half two. Gold ribbons. Bring Basil.
+== event.crossingBack.gather.ceremony.thanks
+- You stand at the front of the bow lounge and say the old oath, the stars at your back. Basil answers for the first-timers. Then a mug of Line punch, all of it, both ways now.   #warm
+== event.crossingBack.tap.punch
+- Brennan's Line punch. Green, faintly fizzy, as before. You know what's in it now.   #funny
+// the plaque's second line (under Day 7's): Basil's answer (flag:back.answer.feel | .colonies | .slow in the meeting)
+== event.crossingBack.plaque.feel
+- The CSV Wren crossed back over the Line, Day 35. "We were new. We're not, quite. Thank you for having us."
+== event.crossingBack.plaque.colonies
+- The CSV Wren crossed back over the Line, Day 35. "The Ostrander colonies did it first. Not as well."
+== event.crossingBack.plaque.slow
+- The CSV Wren crossed back over the Line, Day 35. "Hello, reach. Thank you. Goodbye, reach."
+== event.crossingBack.plaque.missed
+- The CSV Wren crossed back over the Line, Day 35. "We came a long way, and we're going home the long way."
+// the certificate's second date (the keepsake's tap text once both are on it), and the Record line
+== event.crossingBack.keepsake
+- Your Line certificate, signed by the Captain twice: "Crossed into the Veyli reach, Day 7. Crossed back, Day 35. This reach knows your name."
+== event.crossingBack.record
+- Crossed back over the Line, Day 35, and led the oath.
+== event.crossingBack.record.missed
+- Crossed back over the Line, Day 35.
+
+// ---- the Line supper, 18:00-19:15, the mess (as on Day 7), coloured by your choice: flag:end.stay or flag:end.go
+// (settled at the address). The Mail goes out at 16:00, after the address.
+== event.crossingBack.gather.lineSupper.name
+- The Line supper
+== event.crossingBack.gather.lineSupper.mail
+- The Line supper | The Line supper tonight at six, in the mess, the second this tour. Whatever the crew voted for, a pudding, and toasts. No punch. I promise again.
+== event.crossingBack.gather.lineSupper.ask
+- Line supper at six. Second one this tour. Same benches.
+? flag:end.go
+- Line supper at six. Sit with us. It's your last one.   #warm
+? flag:end.stay
+- Line supper at six. You're staying, so you're buying.   #funny
+== event.crossingBack.gather.lineSupper.thanks
+? flag:end.go
+- The mess is full, every bench taken, and somehow there's room next to you all night. People keep raising cups your way.   #warm
+? flag:end.stay
+- The mess is full and loud. Every few minutes someone leans over to say they're glad you're staying.   #warm
+?
+- The mess is full again, every bench taken. Someone budges up, and someone else passes you a plate.   #warm
+// the toasts (tap lines at the supper; card lines, 90 at most)
+== event.crossingBack.gather.lineSupper.here
+- To the reach, and to everyone who crossed it twice.   #warm
+- Supper's to get rid of the taste again. Still works.   #funny
+? flag:end.stay
+- To {me}, who's staying. Selfishly, cheers.   #warm
+- To the Wren, and the people who won't leave her.   #warm
+- You're staying! Good. I'd run out of people to sit with.   #funny
+- To the next four weeks, and the four after that.   #warm
+- Staying! I owe Pell a biscuit. I bet you'd go.   #funny
+? flag:end.go
+- To {me}. Go and be brilliant. Then write.   #warm
+- To headquarters, who don't know what they're getting.   #funny
+- Last Line supper with you. I'm eating slowly.   #warm
+- Here's to you. The Wren won't be the same. Better, a bit.   #funny
+- To the one who led the oath, and leaves on the Tern.   #warm
+== event.crossingBack.gather.lineSupper.chatter
+- Second Line supper this tour. Seconds ran out in eight minutes.   #funny
+? flag:end.stay
+- The new hand's staying. You could hear the cheer on Deck 6.   #warm
+? flag:end.go
+- The new hand goes Monday. Nobody's said it at the table yet.   #warm

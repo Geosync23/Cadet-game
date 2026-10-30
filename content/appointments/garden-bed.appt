@@ -1,0 +1,55 @@
+@appointment garden-bed
+// SW2, 0.92.6 item 9 (the user: yes). A bed of your own: Tove Cruz (they/them) gives you one small bed in the garden.
+// You plant it together (the first scene), then Cruz books three short visits over the next weeks to tend it (one
+// line each, `== tend` in order), then the harvest: you pick it and take it to Brennan, and it's in that night's
+// dinner (`== harvest`). Your bed gets a little sign. FX22: the crop is lettuce by default (a "week-N lettuce").
+title: A bed of your own
+starts: invite
+host: cruz-tove
+gate: tier>=friend !mem:appt.garden-bed
+when: Saturday morning, then three short visits about a week apart, then the harvest
+at: 10:00-10:30 (the planting); 10 minutes (each visit)
+where: 3 room Hydroponics garden: garden
+who: host, you
+once: yes
+mem: appt.garden-bed
+flag: garden.bed.planted
+record: Grew your own bed of lettuce in the garden.
+
+== invite
+- I've got a spare bed. Small. By the tree. Would you... it could be yours. Saturday?
+- There's a bed in the garden with nothing in it. It's sad. You could fix that. Saturday?
+
+== busy
+- Oh. Not this Saturday? Next one, then. The bed will wait. Beds are patient.
+
+== mail
+- Saturday, {time}: Cruz is giving you a bed in the garden. Wear old clothes. Soil gets everywhere.
+
+== scene
+cruz-tove: This one. By the tree. It gets the good light in the afternoon. It's yours now.   [gesture]
+cruz-tove: Seeds in a line. A finger deep. Not two fingers. One. Then cover them up and say hello.
+cruz-tove: That makes it a week-one lettuce. Today's its birthday.   [nod]
+? choice
+* Say hello to the seeds.   flavour:cheer mem:appt.garden-bed
+  cruz-tove: They heard you. I always know when they hear.   [laugh]
+* Ask what to call the bed.   flavour:share mem:appt.garden-bed
+  cruz-tove: I'll make a sign. Your name on it. Small letters. Plants are shy.   [nod]
+cruz-tove: I'll come and find you next week. We'll check on it. Ten minutes. It's enough.
+
+== tend
+cruz-tove: Look. Shoots. Week two. Tiny. Don't touch them, just look. Lovely.
+cruz-tove: Week three. Water at the roots. You remembered. They're leaning to the light. Good sign.
+cruz-tove: Week four. Nearly. One more week and Brennan will be after them. We'll beat her to it.
+
+== harvest
+cruz-tove: Today. Pick from the outside in. Leave the heart, it grows back. There. That's yours.   [gesture]
+cruz-tove: Take it to Brennan. She'll put it in tonight's salad, and she'll say whose.
+cruz-tove: Your first crop. I'll put a little mark on the sign. Week five. A good week.   [nod]
+
+== thanks
+- Cruz gives you a bed of your own in the garden, by the tree, with your name on a little sign.   #warm
+
+== after
+- Your lettuce was in the salad tonight. Brennan told the whole mess whose it was.   #warm
+- Your bed's doing well. Cruz checks it every morning. Don't tell them I said.   #warm

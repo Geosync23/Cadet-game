@@ -1,0 +1,137 @@
+@bank all
+// FX25 (the comet builder), 2026-10-26: the comet viewing on Monday Day 22 (plans/events-plan-2.html Part A by EP1).
+// These are EP1's samples (A4), as the builder placed them, for SW2 (the head writer) to polish. The game reads every
+// key here first and falls back to the same words in section 18 (slot 'Comet builder'). Mail is "Subject | body".
+// Saruth is they/them. The comet's Veyli name stays unspoken (new canon: ask before adding names).
+== event.comet.mail.warning
+- A comet tonight | Sol Bakshi caught a comet on the bow scanner in the night, and Hana Mori has it on the long scope. It crosses our bow from about half past nine. The helm will turn us so the bow lounge gets the head and the stern windows the tail. The observatory's open, five minutes each. Officers: the Captain has offered tea. Wrap up warm. It isn't cold. I just like saying it.
+== event.comet.status.warning
+- A comet tonight at 21:30
+== event.comet.status.onset
+- The comet is passing
+== event.comet.status.resolution
+- The comet has gone by
+== event.comet.status.afterglow
+- Last night's comet
+// the news: at breakfast (Survey, the helm, the night watch first), at lunch (everyone), the retelling on Day 23
+== event.comet.news.coming.1
+- Comet tonight. Get a window early.
+== event.comet.news.coming.2
+- Bakshi caught a comet on the bow scanner in the night. Mori's got it on the long scope.
+== event.comet.news.coming.3
+- The helm's bringing us round at half nine so the bow glass gets the head.
+== event.comet.news.lunch.1
+- Bow lounge or the blankets tonight? I can't decide.
+== event.comet.news.lunch.2
+- Tomas has never seen a comet. Not one. He's been grinning since breakfast.
+== event.comet.news.told.1
+- Did you see the blue tail? Sato says it's the storm's wind. I'm choosing to believe her.
+== event.comet.news.told.2
+- Half the ship was at the bow glass. The other half was under Tomas's blankets.
+// the heads-up at 21:15 and the bridge's notice at 21:30 (a banner, kept in Mail)
+== event.comet.notice.turn
+- The helm is bringing the bow round for the comet.
+// the four gatherings: name (the Schedule), ask (before it), here (a tap during it), thanks (your join card)
+== event.comet.gather.cometLounge.name
+- The comet at the bow glass
+== event.comet.gather.cometLounge.ask
+- The comet at half nine. The bow glass is the place.
+== event.comet.gather.cometLounge.here
+- Find a gap at the glass. It comes in from the left.
+== event.comet.gather.cometLounge.thanks
+- You stand beside Sato at the bow glass as the comet slides into view: a bright head, a long white tail and a faint blue one.
+== event.comet.gather.cometScope.name
+- The comet at the scope
+== event.comet.gather.cometScope.ask
+- The observatory's open for the comet tonight. Five minutes each at the scope.
+== event.comet.gather.cometScope.here
+- The queue's by the door. Five minutes each. It's worth the wait.
+== event.comet.gather.cometScope.thanks
+- You take your turn at the scope. The comet's head fizzes with little jets of ice turning to gas.
+== event.comet.gather.cometStern.name
+- The comet under blankets
+== event.comet.gather.cometStern.ask
+- Blankets in the junior common room tonight. The stern windows get the tail.
+== event.comet.gather.cometStern.here
+- Grab a blanket and a bit of sofa. The tail comes this way.
+== event.comet.gather.cometStern.thanks
+- Tomas hands you a blanket and shuffles up on the sofa. Everyone faces the stern windows and waits for the tail.
+== event.comet.gather.cometCaptain.name
+- Tea with the Captain
+== event.comet.gather.cometCaptain.ask
+- The Captain's pouring tea for the comet in the observation room tonight. Officers.
+== event.comet.gather.cometCaptain.here
+- Tea's poured. The comet's on its way. Find yourself a window.
+== event.comet.gather.cometCaptain.thanks
+- The Captain pours you a cup from the tin marked NOT FOR BRIEFINGS. The comet runs the length of the Wren in front of you.
+// a Cadet at the Captain's tea is sent down, kindly (Vance); the arrow's label
+== event.comet.turn.cadet
+- The best seat's downstairs tonight, cadet. The bow lounge. Go on, you'll miss the head.
+== event.comet.turn.cadet.goal
+- The comet at the bow glass
+// Sato's naming card at 21:50 (if you joined her at the glass): her ask, your three replies, the answers (answer.2 is Saruth's)
+== event.comet.name.ask
+- It needs a name for the log. I've named three. The third doesn't count. You do this one.
+== event.comet.name.reply.1
+- The Lantern. For the storm.
+== event.comet.name.answer.1
+- The Lantern. Lukas will cry. Good.
+== event.comet.name.reply.2
+- Ask the Envoy. The Veyli must have named it.
+== event.comet.name.answer.2
+- It has one. It is old. You may use it the way a guest uses a host's name: kindly.
+== event.comet.name.reply.3
+- Sato's Fourth. Make it count.
+== event.comet.name.answer.3
+- No. Absolutely not. Fine. It counts. Don't tell anyone.
+// Saruth's knot at 22:00 (a tap on Saruth, once you've joined at the glass): the tip, then their three lines
+== event.comet.knot.tip
+- Tap Saruth to tie a comet knot
+== event.comet.knot.1
+- When a guest crosses our sky, we tie a knot. So we remember it was here, and we saw it.
+== event.comet.knot.2
+- Tonight you are guests in our sky, watching another guest go by. That is worth a knot.
+== event.comet.knot.3
+- Tie yours loose. It is still travelling.
+// each room's talk while you're there, in order, one every 3 ship minutes: "<crew id>: <line>" (skipped when that
+// person isn't there tonight). Two more stay in the code: Tomas's line as the tail reaches the stern (22:20), and the
+// Captain's to you by rank (an Officer's first month; a Senior Officer's Deck 2 window)
+// SW3 (2026-10-26, Pillar 5 Step 5, spec section 10): the Senior Officer's line in the code ('Deck 2 has its perks...')
+// is wrong with plan v3.1 (a Senior Officer stays in 4-23 until Engine Specialist, Day 25). Its new words, for the
+// events seat to read here (evWordAt) in place of the code's Senior string:
+== event.comet.captain.senior
+- Senior Officers get the good window. And the tea from the tin. Don't tell the juniors.
+== event.comet.talk.cometLounge
+- sato: There. Left of the strut. That smudge is a mountain of ice, falling past us.
+- holt: It's very bright.
+- mensah: That's the whole point of it, Chief.
+- sato: The fuzz round the head is the coma. Bigger than the Wren. Much bigger.
+- sato: Don't tell the Wren.
+- farouk-olu: On my birthday. I'm counting it as mine.
+- sato: Two tails. The white one's dust. The blue one is ions.
+- sato: Blown back by the same wind that gave us the storm. So yes. The storm says hello.
+- haddad-tamsin: Fine. The bar closes at ten to eleven. Tonight only.
+== event.comet.talk.cometScope
+- mori: Five minutes each. Don't touch the focus. Everybody touches the focus.
+- mori: See the little jets on the bright side? Ice, turning straight to gas.
+- mori: It's fizzing. Like a tablet in a glass of water.
+- mori: You touched the focus. It's fine. Everyone does. I'll put it back.
+== event.comet.talk.cometStern
+- tomas: Blankets on the sofa. Take one even if you're not cold. New rule. Mine.
+- tomas: I've never seen one. Not ever. Not even a small one. Is that strange?
+- pell: My mum'll want it described. Properly. Twice.
+- rina: Twelve people under blankets and nobody's coughing. Good. Keep it that way.
+== event.comet.talk.cometCaptain
+- marrow: Tea? It's from the tin. It says not for briefings, and this isn't one.
+- vance: I'm here for the comet, not to talk about the rowing.
+// your Record's line on the device
+== event.comet.record.saw
+- Saw the comet
+== event.comet.record.named.1
+- Named it the Lantern.
+== event.comet.record.named.2
+- Gave it its Veyli name.
+== event.comet.record.named.3
+- Named it Sato's Fourth.
+== event.comet.record.knot
+- Tied a comet knot.

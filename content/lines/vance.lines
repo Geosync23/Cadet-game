@@ -112,7 +112,7 @@
 ? deck:4 time:evening
 - The good records. There's a list. You're on it. I'm the list.   #funny
 ? act:meal
-- Breakfast at 06:05. Not 06:00, there's a queue. Not 06:10, that's late.
+- Breakfast at 07:05. Not 07:00, there's a queue. Not 07:10, that's late.
 ? place:calm tier>=colleague
 - Sit. I'm off duty. Officially. I've told the bridge where I am anyway.
 
@@ -265,7 +265,7 @@
 
 == note
 ? tier>=friend
-- Called by. You were out. Correctly: it's your evening. See you at 06:05.
+- Called by. You were out. Correctly: it's your evening. See you at 07:05.
 - The waiting list moved. You're eighth. Don't let it go to your head.   #funny
 
 == smalltalk
@@ -276,7 +276,7 @@
 - For your information only.
 
 // Writer 4, batch 14: Vance's ordinary weeks, after week one. Mostly not work: the treadmill and rowing boards, the
-// good records and their waiting list, books, sweets, tea at 06:05, Gull (only as a reader with opinions), juniors.
+// good records and their waiting list, books, sweets, tea at 07:05, Gull (only as a reader with opinions), juniors.
 // Gates kept: no father or messages before beat:vance.3; never admits Gull before beat:vance.5; never late; no swearing.
 
 == greet
@@ -298,7 +298,7 @@
 ? tier>=acquaintance !week1:true
 - Did you read Gull this week? "Oh corridor, thou long and grey." Two errors of metre.   #funny
 - The good records. A waiting list exists for a reason. The reason is me.   #funny
-- Breakfast at 06:05. Porridge, toast, a small biscuit. The biscuit is not regulation.   #funny
+- Breakfast at 07:05. Porridge, toast, a small biscuit. The biscuit is not regulation.   #funny
 - I read on my rest days. Old naval histories. And, once, a mystery. Don't tell Achterberg.   #funny
 - Lindqvist set a treadmill time yesterday. I've studied it. Respectfully. Closely.   #funny
 - Rest day tomorrow. I've planned it to the minute. Most minutes say "nothing".   #funny
@@ -320,7 +320,7 @@
 
 == near
 ? act:breakfast !week1:true
-- 06:05. Porridge. The biscuit. Don't look at the biscuit.   #funny
+- 07:05. Porridge. The biscuit. Don't look at the biscuit.   #funny
 ? act:gym !week1:true
 - Treadmill. Five kilometres. Then I'll pretend not to look at the board.   #funny
 ? act:dinner !week1:true
@@ -434,3 +434,108 @@
 - Something on tonight. Be punctual.
 ? trad:hull-lights
 - Twenty-one hundred. On time. Good.
+
+// ---- Pillar 5 Step 3 (head writer W2): Commander Vance walks you to 4-23 when it's Calder's day off, or brings you up
+// to the ceremony. Kind 'work', the same flags as Calder's (keys-p5.md "Step 3"). Precise, competitive, kind underneath.
+== work
+? flag:promo.fetch.move
+- The Chief's off. I'm your escort. Shall we?
+? flag:promo.fetch.ceremony
+- The Captain is waiting. Walk briskly. Not a run.
+? flag:promo.walk.start
+- Your things are already moving. Follow me, please.
+? flag:promo.walk.lift
+- Officers' corridor. I timed it once: ninety seconds.
+? flag:promo.walk.corridor
+- Your door is your own now. Others' doors are theirs.
+- Quiet hours from 23:00. I will hear about it if not.
+- You'll be asked over. Accept. It's good for the ship.
+? flag:promo.walk.door
+- Your name. Spelled correctly. I checked.
+? flag:promo.walk.inside
+- Cabin 4-23. Yours. Goodnight, Officer.
+
+// W3, rec deck R12: has rung the bell more than anyone, and counts
+== chat
+- I have rung the climbing wall bell more than anyone aboard. I keep a count. Naturally.
+- The red route has eleven holds, three of them unhelpful. Regrettable, but fair.   #funny
+- Lightdisc, by the book: watch the disc, move early, return clean. Carry on.
+? tier>=friend
+- If you ring the bell on Wall night, I will add you to the count. Gladly.   #warm
+== smalltalk
+- Three hundred and four rings. Correct.   #funny
+
+== disc.charged
+- By the book, Cadet.
+- Page forty: the charged return.
+- Keep up.
+== disc.curve
+- A curve, as the rules allow.
+- Lateral motion. Correct.
+== disc.point
+- Point. Noted.
+- Regrettable. For you.   #funny
+- Three things: watch, move, return.
+== disc.win
+- Regulation result.
+- Well contested. Carry on.
+== disc.lose
+- Impressive. I'll note it.
+- Hm. Correct. Rematch.   #funny
+
+// ---- SW3, 2026-10-24 (patch 0.92.3 item 15): his own Talk a while card frames, in place of the shared ones.
+== talk.start
+- Very well. Ten minutes. I've set no timer. I'll know anyway.   #funny
+- Agreed. Let's talk. Informally. I'm practising informally.   #funny
+- Good timing. I'm off duty for eleven minutes. Go on.
+? tier>=friend
+- {nick}. Good. Sit. I've three things to tell you. Four, possibly.   #warm
+- Good. I've kept my evening clear. Partly for this.   #warm
+?
+
+== talk.sit
+- Sit. A straight back is optional. I'm told.   #funny
+- Take that chair. It faces the door. Holt would approve.
+- Please sit. Standing conversations are briefings.
+
+== talk.filler
+- The air's on its evening cycle. Two degrees cooler. I notice these things.
+- This is pleasant. I've noted it.   #funny
+- Hm. Correct. Where were we?
+- I'm told pauses are allowed. I'm allowing one.   #funny
+- You're easy company, {nick}. That's not in any regulation.   #warm
+- The lounge clock runs ninety seconds slow. I've reported it. Twice.   #funny
+
+== talk.end
+- Thank you. Useful and pleasant. Two of three. The third was the biscuits.   #funny
+- Carry on, {nick}. That was time well spent.   #warm
+- Good. Same again another day. I'll pencil it in. Informally.   #funny
+- That will do nicely. Thank you, {nick}.
+- Right. I'm due elsewhere in four minutes. Correctly due.
+
+== talk.stop
+- Understood. We'll resume. I'll remember where we stopped.
+- Of course. Another time. I'll hold your place.
+- Very well. Go. Punctually.   #funny
+
+== talk.go.shift
+- The bridge. I'm due in three minutes. I'll be early.
+- Duty calls. On time, as ever. Later, {nick}?
+
+== talk.go.bed
+- Twenty-two hundred. Regulation nine. I obey it now. Mostly.   #funny
+- Bed, I'm afraid. The Counsellor checks. Tomorrow?
+
+== talk.go.trad
+- {trad}. I keep the list of who's there. Walk with me?
+- I'm expected at {trad}. On time. Come, if you're free.
+
+// ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
+== bday.circle
+- Happy birthday, {other}. Cake, candles, cheer. All present.   #funny
+- Happy birthday. Regulations permit one slice. Have two.   #funny
+== bday.circle.you
+- Happy birthday, {nick}. Carry on. With cake.   #warm
+== bday.thanks
+- Thank you. Noted, appreciated, and remembered.   #warm
+- Thank you all. That didn't happen. Carry on.   #funny

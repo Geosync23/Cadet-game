@@ -1,13 +1,15 @@
 @meeting introSoloJob
-// Day 2, Tuesday 07:45, the Chief's glass office: Calder alone gives you your first solo job (the job is on your
-// device). The Works writer. Teaches the Record and progress talks. One choice, no wrong answer; no "well done".
+// Day 2, Tuesday 08:45, the Chief's glass office: Calder alone gives you your first solo job (the job is on your
+// device). The Works writer. The playtest patch 1, #7: the job is yours and tracked when she's done, and her closing
+// words say how to do it (where, the parts, the arrow, turn it in at the board); Torres no longer "on Deck 6" (he shows
+// you rounds at 10:45, and his Rounds ask waits for her talk). Teaches the Record and progress talks. One choice, no wrong answer; no "well done".
 title: Your first solo job
 from: Chief Ines Calder
-gist: Calder gave you your first solo job: it's on your device. Every job goes in your Record. Book a progress talk any time.
+gist: Calder gave you your first solo job, the other light relay on Deck 4: it's yours and tracked on your device. A relay from storage (or made in the shop if the shelf's bare), a bracket made in the shop, follow the arrow, then turn it in at the job board. Every job goes in your Record. Book a progress talk any time.
 == lines
 calder: Come in. Don't sit. This won't take long.   [gesture]
 calder > you: Your first solo job. It's on your device. Deck, machine, part. Read the whole card. Twice.
-calder: You'll do it alone. Torres is on Deck 6. He'll look in at tea. Once.
+calder: You'll do it alone. Torres has his own work. He'll look in at tea. Once.
 calder: Every job you finish goes in your Record. So does every job you leave half done. I read the Record.
 calder: Progress talks: any time. Book one on your device. I'll keep it.
 ? choice
@@ -17,4 +19,7 @@ calder: Progress talks: any time. Book one on your device. I'll keep it.
   calder: Don't let the machine down. I'll be fine.
 * (Take the job and go)
   calder: Good. That's an answer too.
+calder: The other light relay on Four. A relay off the Lights shelf, or make one in the shop if it's bare.
+calder: And a bracket. That you make in the shop. Your device's arrow takes you there. Step by step.
+calder: Lit and tested, you come back and turn it in at the board. Not before.
 calder: One more thing. Finish what you start. Off you go.

@@ -1,0 +1,16 @@
+@meeting endingFriend.rina
+// SW6 (ending writer A), "About the transfer" on Rina's chat card (Friday Day 33). Dry, steady, competitive. She
+// thinks like a doctor about it: pros, cons, sleep on it. Then Tiles. Canon: her sister on a station; her gran cheats.
+title: Rina Deshi
+from: Rina Deshi
+gist: Rina heard about the transfer. She told you to sleep on it, then beat you at Tiles to help you think.
+== lines
+rina: So. Headquarters. Pell's been sighing at the Tiles board for an hour. It's very annoying.   [sigh]
+rina > you: My advice is medical. Sleep on it. Twice. Eat something. Then decide.
+rina: My sister took a station post at your age. She hated it a month. Then she loved it. We still argue about it.
+? choice
+* Did she ever wish she'd stayed?   flavour:listen
+  rina: Every Tuesday. She says that's how you know it was a real choice.   [nod]
+* Play me at Tiles. I need to think.   flavour:cheer
+  rina: Good idea. I'll win. You'll think. Everyone's happy.   [laugh]
+rina: Whatever you choose, I'm still undefeated. You'll have to come back to fix that.

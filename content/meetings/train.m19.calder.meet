@@ -1,0 +1,22 @@
+@meeting train.m19.calder
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-3; matched to B2's 24v, claude/p5s5-mech-a 3c38a65f): M19 Power and relays,
+// Wednesday Day 17, 11:00, the bridge's relay room on Deck 1 (u). Calder swaps the stuttering relay on 1-relay-1 while
+// you watch (open, pull, seat, test: m19.train.open / .test), then 1-relay-2 is yours. If the conduit tester is new,
+// her flag train.m19.tester follows. One choice.
+title: Power and relays
+from: Chief Ines Calder
+gist: Calder showed you the bridge's relay room: watch the lamps, pull the stuttering relay, seat a new one, test. Then the next rack was yours.
+== lines
+calder > you: Your first Senior training. The bridge's relays. Every light and screen up there runs through this room.   [gesture]
+calder: Six relays a rack. A lamp each. A relay going bad stutters before it dies.
+calder: Watch the lamps. Five steady. One stutters. That's your relay.
+calder: Pull it straight. Seat the new one straight. Then test the whole rack, not just the one.
+? choice
+* And if two stutter?   rel:calder+2
+  calder: Then you swap the worse one first and watch the other. Today it's one.   [nod]
+* Why test the whole rack for one relay?   rel:calder+2
+  calder: Because the bad one was hiding a second. It usually is.   [nod]
+* (Just watch the lamps)
+  calder: Good. Patience with lamps. Most people blink first.   [nod]
+calder: Later, the battery banks on Deck 5. Cells in pairs. You find the tired one by its bar.
+calder: I'll do this rack. You watch. Then the next one's yours. I'm not timing you.

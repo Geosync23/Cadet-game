@@ -1,0 +1,27 @@
+@meeting pu3.bar
+// SW3 (2026-10-26, Pillar 5 Step 5; spec "The beats", the bar): 16:30 (17:15 on a Friday), the observation room on
+// Deck 1. Standing: the Captain, Vance, Calder, Torres and up to three friends (walk-ons; their words come after, kind
+// pu3.bar.friend in bubbles). The Captain pins the Senior Officer's bar (the line ending {pin} bakes pin: true; 24u's
+// onPick puts the bar on your collar). One choice, after the pin; 24u can store pu3.answer 1-3 by order (the people,
+// the storm, the next one). Vance's one dry line. Brennan's cake follows (24u, promoCakeWin's timing).
+title: Your bar
+from: Captain Odile Marrow
+gist: The Captain pinned your Senior Officer's bar in the observation room, with the Chief, the Commander and your friends there. The certificate is on your cabin shelf.
+== lines
+vance: Attention, please. The Captain. Again. Twice in a month is a record.   [nod]
+marrow: Thank you, Teo. Nobody sit. It'll be quick, and the cake is waiting.   [laugh]
+marrow > you: A storm, a test and a ship that noticed. That's what Chief Calder wrote. Three lines. For her, that's a novel.
+marrow: By the Survey Service, I make you a Senior Officer of the Wren. Senior Technician, Tier 3.
+marrow: Hold still. Bars are worse than pips. There. Senior Officer.   [gesture] {pin}
+marrow > you: Last time I asked you a question. One more. What did the storm teach you?
+? choice
+* That the ship is everyone in it, all at once.   rel:marrow+2 mem:pu3.answer.people
+  marrow: Yes. You only see it all at once when something goes wrong. Remember it on the quiet days.   [nod]
+* To do the next job, then the next one.   rel:marrow+2 mem:pu3.answer.next
+  marrow: That's most of command, if I'm honest. Don't tell the Admiral.   [laugh]
+* To keep a torch in my pocket.   rel:marrow+1 mem:pu3.answer.torch
+  marrow: Ha. Practical. Calder, is this your doing?   [laugh]
+calder: It's straight. I checked.   [nod]
+vance: Regulation fourteen, the bar sits a finger above the pip. It does. Carry on.
+torres-zeke: Two promotions and I cried at both. Right, onward. Cake.   [laugh]
+marrow > you: Congratulations, Senior Officer. My door's still open. Still mind the step.

@@ -1,0 +1,98 @@
+@bank all
+// N6 (2026-10-27, Pillar 5 Step 6, S6-1 the night shift; stand-in words, no head writer): the night shift's texts, for
+// 28a's p5nText (worksText). Said by nobody unless noted. Mails are "Subject | body", unsigned (the game adds Calder).
+// {time}: a time like 21:00; {from}: the night's start; {hours}: your hours tonight. Scenes: night.on, night.off.
+
+// ---- the time clock at night ----
+== night.clock.in
+- Clocked in at {time}. Night shift till 06:00.
+== night.clock.out
+- Clocked out at {time}. {hours} h tonight.
+== night.clock.early
+- An early finish: it's noted.
+== night.clock.over
+- The night shift's over. Get some sleep.
+== night.clock.done
+- You're clocked out. Bed, then.
+== night.clock.auto
+- You forgot to clock out. The clock signed you out at 06:00.
+== night.screen.ready
+- Night shift {from}-06:00. Tap to clock in.
+== night.screen.on
+- On the night shift since {time}.
+== night.screen.done
+- Night done. Sleep well.
+== night.screen.over
+- The night shift's over.
+== night.screen.hours
+- Tonight: {hours} h
+== night.screen.didin
+- Clocked in at {time}. Quiet night, with luck.
+== night.screen.didout
+- Clocked out at {time}. Bed.
+
+// ---- the Schedule and Tracked ----
+== night.row
+- Night shift, {from}-06:00
+== night.row.told
+- Night shift tonight, after the comet
+== night.row.end
+- Night shift, until 06:00
+== night.row.sleep
+- Sleep until {time}
+== night.where
+- the time clock, then the engine room, Deck 6
+
+// ---- sleeping by day, the knock, the kept plate ----
+== night.bed.until
+- Sleep until {time}
+== night.bed.on
+- You're on the night shift. Sleep after 06:00.
+== night.wake
+- Your alarm. Night shift tonight from {time}.
+== night.knock
+- A knock at your bunk: your night shift starts at {time}.
+== night.knock.1
+- A knock at your bunk. Calder: "Up you get. Night shift. I'll see you down there."
+== night.knock.from
+- The night crew
+== night.plate
+- Brennan's kept you a plate: "Night shift? Eat, then sleep." Find a seat and tap it.
+== night.plate.dish
+- the plate kept for you
+
+// ---- Calder's word (meeting night.on, Day 22 09:15) and the end (night.off, Day 25 06:00) ----
+== night.on.notice
+- Night shift tonight from 22:45, after the comet. Then 21:00 to 06:00 till Wednesday.
+== mail.night.on
+- Your nights | As I said: Navarro's on leave. You cover his nights, tonight from 22:45 (after the comet), then 21:00 to 06:00, to Wednesday. Sleep this afternoon. I'll come and get you.
+== night.off.notice
+- Your nights are done. Navarro's back Friday night. Bed: you've a cadet tomorrow.
+== mail.night.off
+- Off nights | Three clean nights. Navarro's back Friday night. Sleep today; tomorrow you've a cadet with you.
+
+// ---- the notices and the arrows at each step ----
+== night.notice
+- Night shift at {time}. Clock in at the Works bay, then the engine room on Deck 6.
+== night.notice.1
+- Night shift now. Clock in at the Works bay, then down to the engine room.
+== night.notice.busy
+- Your night shift starts at {time}. Turn in or drop this job first.
+== night.ptr.in
+- Night shift: clock in
+== night.ptr.room
+- Night shift: the engine room
+== night.ptr.out
+- Clock out: the night's done
+== night.ptr.plate
+- A plate's kept for you in the mess
+== night.ptr.bed
+- Sleep until {time}
+== night.ptr.dayout
+- Clock out, then sleep
+== night.ptr.bed.22
+- Sleep now: night shift tonight
+== night.sleep.notice
+- Sleep now: night shift tonight. Your bunk, until 16:45.
+== night.plate.notice
+- A plate's kept for you in the mess, from 06:15. Then sleep until {time}.

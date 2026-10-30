@@ -1,0 +1,76 @@
+@bank all
+// B2 (2026-10-26, Pillar 5 Step 5, S5-3 turn 2; lead 39: the builder writes them, RV20 reads them): M19's conduit runs
+// (stage 2, with the conduit tester), the Senior's part of the Wednesday drill, and Calder's two words (said through
+// worksTeach with these as her lines). Placeholders as lines_check allows: {where} the crawlway side, {text} the decks a
+// conduit feeds, {deck} and {n} a feed and its reading, {n} the call's number. No "!". The Works house style: short, plain.
+
+// conduit runs: the card, the side, the inspection box, the tester, the pick, a wrong pick, done
+== m19.card.run
+- Test the conduit run: {where} crawlway
+== m19.side.port
+- port
+== m19.side.stbd
+- starboard
+== m19.run.open
+- The inspection box. A feed for each deck above: {text}.
+== m19.run.tester
+- The tester on each feed:
+== m19.run.feed
+- Deck {deck}: {n}
+== m19.run.pick
+- Which feed reads low?
+== m19.run.option
+- Deck {deck}
+== m19.run.wrong
+- That one reads normal. Look at the numbers again.
+== m19.run.done
+- Feed tagged and logged. The run's sound again.
+
+// the Senior's drill (Wednesdays, 15:00): the card, Calder's word at 14:50, the ring line, each call's card
+== m19.drill.card
+- The drill: run the Works calls
+== m19.drill.toast
+- Drill in ten minutes. You run the Works calls today. Muster hatch, Works bay.
+== m19.drill.ring
+- Run the Works part of the drill
+== m19.drill.title
+- Your call, {n} of 3
+== m19.drill.text
+- The bay's waiting on you. What's the call?
+// the three calls (listed in a shuffled order; the right order is muster, the week's action, the bridge)
+== m19.drill.muster
+- Muster: Works team to stations
+== m19.drill.fire
+- Fire teams to the hatch, extinguishers out
+== m19.drill.pressure
+- Dog the bulkhead doors
+== m19.drill.power
+- The junior wing to reserve power
+== m19.drill.report
+- Report to the bridge: Works ready
+// the crew answering: 0 Torres, 1 Halloran (by the week's drill), 2 Calder for the bridge
+== m19.drill.ans.0
+- Works team at stations.
+== m19.drill.ans.1.fire
+- Extinguishers out. Hatch covered.
+== m19.drill.ans.1.pressure
+- Bulkhead dogged. Four turns.
+== m19.drill.ans.1.power
+- Junior wing on reserve.
+== m19.drill.ans.2
+- Bridge copies. Good.
+// Calder: a call out of order, and her word at the all-clear (clean, some out of order, missed)
+== m19.drill.order
+- Muster, then the action, then the bridge. In that order.
+== m19.drill.clean
+- Clean calls. That's how it's done.
+== m19.drill.ok
+- Muster, act, report. Next time in that order first go.
+== m19.drill.missed
+- We ran it without your calls. Next Wednesday, they're yours.
+
+// Calder in person after the ask ({time}, {where}: the relay room), and once you reach stage 2 (three relay or battery jobs)
+== m19.ask.say
+- {time}, the bridge's {where}. Power and relays. I'll meet you there.
+== m19.stage2
+- You've got relays. Next: the conduit runs under Deck 6. Bring your tester.

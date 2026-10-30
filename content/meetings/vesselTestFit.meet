@@ -1,0 +1,18 @@
+@meeting vesselTestFit
+// SW4, the Veyli vessel: Monday Day 29, 13:30, the machine shop bench. The new part goes into the cracked one's
+// housing and spins true. Taavek's long Veyli word is never spelled out (EP1's rule for new Veyli words: ask first).
+// Your two helpers react after (event.veyliVessel.testfit.<id>). Then the close.
+title: The test fit
+from: Taavek
+gist: The new impeller went into its housing on the bench and spun true. Taavek said a long word in Veyli, then: "Good. Very good. The round one."
+== lines
+taavek: Now. In it goes. Slowly. You turn it.   [gesture]
+taavek: Ah. Ah!   [listen]
+taavek: No common word for this. In Veyli, it is long. It means: good, and also, I will tell everyone.   [laugh]
+taavek > you: Good. Very good. The round one.   [nod]
+? choice
+* We made it together.   flavour:share rel:taavek+1
+  taavek: Together. Yes. Your hands, my drawing. Good trade.   [nod]
+* Tell everyone, then.   flavour:cheer rel:taavek+1
+  taavek: I will! First my ship. Then everyone. Then everyone again.   [laugh]
+taavek: Now I pack it. Carefully. Like an egg. A very hard egg.   [laugh]

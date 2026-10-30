@@ -1,0 +1,20 @@
+@crew vasquez-uma
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- Hi hi. You stayed! The Chief says "a sound decision". With a pause. I've got it down.   #funny
+? endgame:early
+- I told Mum in my message. She said the orange fish did a flip. Fish know things.   #funny
+? endgame
+- Ordinary patrol. Doors, lockers, the long way round. It's nicer with company.
+? endgame:early
+- I wrote a little poem about the week. Nobody's reading it. It's about staying.   #warm
+? endgame tier>=friend
+- Home's a long way off. It's less far with people around who stay. Thank you.   #warm
+
+== bye
+? endgame
+- "Know where your suit locker is." That's the Chief. Then a pause. Bye!   #funny

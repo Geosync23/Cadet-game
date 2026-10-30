@@ -1,0 +1,31 @@
+@crew vance
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== greet
+? endgame:early
+- {hi}, {nick}. The transfer note is off your file. It was a short note.   #funny
+
+== chat
+? endgame:early
+- The regulation on staying aboard is one line long. I've read it four times.   #funny
+? endgame
+- Three things. Breakfast on time. Rest on rest days. And you're seventh on the list now.   #funny
+- New column on the treadmill board: days aboard. You're climbing it without trying.   #funny
+? endgame:early
+- Your staying is noted, approved and filed. With some satisfaction.   #warm
+? endgame:early
+- Gull wrote a poem about the crossing back. I'm told it rhymed "Line" with "fine". Twice.   #funny
+? endgame tier>=friend
+- I'll say it once. The ship is better with you on her. As you were.   #warm
+? endgame beat:vance.5 tier>=close
+- Gull has written you a poem. Gull would like you never to read it. Gull is firm on this.   #funny
+
+== feel
+? endgame
+- I left the bridge on time three days running. The Counsellor is delighted. I'm adjusting.
+
+== bye
+? endgame
+- Carry on. At an ordinary pace. That is an order, of a kind.

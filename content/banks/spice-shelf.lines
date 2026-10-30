@@ -1,0 +1,94 @@
+@bank all
+// SW2, 0.92.6 item 15 (FX17's word list): Spice shelf supper, Tuesdays 18:15-19:15 in the mess, host Chef Auda Brennan.
+// Everyone brought one spice from home; Brennan cooks with three jars from the shelf and the mess guesses whose.
+// Keys, speakers and placeholders, as FX17 set them:
+//   spice.jars    the jars, one per line: owner id | spice | note (3-6 words). Data. Owners from the roster, not Brennan.
+//   spice.open    Brennan opens the supper (90 or fewer).
+//   spice.jar     Brennan sets out a dish with one jar in it; {spice}.
+//   spice.guess   goers' guesses (bubbles, 60 or fewer); {name} the crew member they guess.
+//   spice.reveal  Brennan says whose it was; {name} the owner, {spice}.
+//   spice.mine    the jar's owner, a goer, when it comes out (bubbles, 60 or fewer); {spice}.
+//   spice.ask     Brennan asks you to guess; {spice}.
+//   spice.right   Brennan, when you guess right; {name} the owner.
+//   spice.wrong   Brennan, when you guess wrong; {name} the real owner.
+//   spice.news    ship chatter after your right guess; {name} the owner.
+// Facts kept: Nandakumar's chillies (Brennan complains, uses every one); Calder's mug "It's a mug."; Tomas's farm moon;
+// Rina's gran; Ferreira's fourth language came from a cook; Holt's border patrol; Sato's absent-mindedness. Brennan's
+// own smoked salt (her parked Wren talk, from Marra Station) isn't a jar here: she's the cook.
+
+== spice.jars
+- nandakumar | dried chilli | grown in the garden, far too hot
+- tomas | dill seed | grown by a fence at home
+- calder | black pepper | labelled, simply, pepper
+- rina | turmeric | her gran's, in everything
+- holt | mace | carried since his patrol days
+- marrow | star anise | kept in the ready room for years
+- kovac-zainab | cardamom | sorted pod by pod
+- ferreira | sumac | from the cook who taught her
+- cruz-tove | coriander seed | saved from a garden crop
+- vance | nutmeg | to be grated, never shaken
+- pell | ground ginger | in tea, for sleeping
+- sato | saffron | labelled in three places, all different
+
+== spice.open
+- Three jars off the shelf tonight, loves. Taste, guess whose, and no peeking at labels.
+- Sit down, everyone. Three spices, three dishes, three guesses. Eat first. Then guess.
+- Right, loves. Spice shelf supper. You know the rules. Whoever guesses right gets seconds.   #funny
+
+== spice.jar
+- First dish. There's {spice} in this one. Whose jar? Don't shout, taste.
+- This stew's got {spice} in it. A good pinch. Somebody brought it a long way.
+- Here's {spice}, in the bread. Taste the crust. That's where it hides.
+- Rice with {spice}. Go gently with it, loves. Then tell me whose it is.
+- {spice} tonight. I nearly didn't use it. Then the pan told me to.   #funny
+- Soup next. That warm bit at the back? {spice}. Whose?
+- Last dish. {spice}, toasted first. Listen to it crackle. Now guess.
+- A little {spice} in the greens. Just enough. Who brought it?
+- {spice} in the sauce. I won't say more. My face gives everything away.   #funny
+- Here we are. {spice}. It came from somebody's home. Whose home?
+- Pudding with {spice} in it. Yes, pudding. Trust me, love.   #funny
+- {spice}, roasted with the roots. Smell that. Somebody's homesick already.   #warm
+
+== spice.guess
+- That's {name}'s. Has to be.
+- I'd say {name}. Look at that face.   #funny
+- {name}, surely. Too tidy to be anyone else's.
+- Is it {name}'s? It tastes like {name}.
+- Bet you a biscuit it's {name}'s.
+- {name}. Final answer. Probably.   #funny
+- Not {name}. Definitely not {name}. Maybe {name}.   #funny
+- Whoever it is, I want more of it.
+- I've no idea. I'm just eating.   #funny
+- {name} went quiet. That's a clue.
+
+== spice.reveal
+- It's {name}'s {spice}. Well done, whoever said so.
+- And that one was {name}'s. The {spice}. Hands up who knew.
+- {name}'s jar, loves. The {spice}. Isn't that lovely?   #warm
+- Whose was it? {name}'s. The {spice}. Seconds to the winners.
+
+== spice.mine
+- That's mine! That {spice}'s from home.   #warm
+- Oh. Oh, that's my {spice}.
+- I knew that {spice} from the smell. Mine.
+- She used my {spice}. Finally!   #funny
+- That {spice} tastes like my kitchen at home.   #warm
+- My {spice}. Don't look at me. Eat it.   #funny
+- I brought that {spice}. Is it all right? Tell me.
+- That's my {spice}. I'll get more next port.
+
+== spice.ask
+- Go on, love. Taste the {spice}. Whose jar is it?
+- You've not guessed yet. That {spice}: whose is it?
+== spice.right
+- Right first time! It's {name}'s. Seconds for you, love. Keep it quiet.   #funny
+- That's the one. {name}'s jar. Good tongue on you. I'll have you in my galley yet.   #warm
+== spice.wrong
+- Not this time, love. It's {name}'s. Close, though. Have another taste.
+- No, it's {name}'s. But that's a lovely guess.
+
+== spice.news
+- I hear you guessed {name}'s jar at spice supper. First try. Show-off.   #funny
+- You got {name}'s spice right! Brennan's still talking about it.
+- {name}'s jar, and you knew it straight off. How?
+- Spice supper legend, you are. {name}'s jar, first guess.   #funny

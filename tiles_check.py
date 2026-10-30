@@ -13,7 +13,8 @@
 #   member answers; a whole game played by taps ends with the result, Again / Quick game / Done, and a 'tiles' note;
 #   the first game uses the teaching layout and points at a jump; opening it adds nothing to the 3D scene
 #   sitting down (0.46.2, 0.46.4, 0.28.51): the Tiles station always, tables and boards only on Tiles night (else a plain seat);
-#   you sit (the 'tiles' activity, sit:play) and a free crew member comes over (a visit) and sits opposite, and the game
+#   you sit (the 'tiles' activity, sit:play) and a free crew member comes over (a visit) and sits opposite (on one of the
+#   table's own stools, DECKS[4].tiles.seats, within reach of the board: 0.92.0), and the game
 #   opens; someone already at the table plays you at once; nobody free (quiet hours): a toast says so and you just sit;
 #   playing stops ship time and a deck tap brings the board back; time runs again once it's over; How to play on your
 #   first game (Next, by itself as you select and step, Skip, again from the board and the Tiles app; every step about
@@ -143,9 +144,17 @@ LOOKS = r"""(() => {
 
 def board(g, path):
     for name, w, h in (('phone 320', 320, 640), ('phone 390', 390, 844), ('wide', 1280, 800)):
-        gg = Game(g, path, w, h); gg.step(3)
+        gg = Game(g, path, w, h); gg.step(3); gg.ev(SHOW_ALL)
         MEM = "[scene.children.length, renderer.info.memory.geometries, renderer.info.memory.textures]"
         gg.ev("SHIP.device.tipsSeen.device = true; deviceShow('home')"); gg.step(2)   # the device's own first open uploads its prop once
+        # on a phone the device's framing (section 19, deviceFrameStep) eases the view down on real time, about a second:
+        # count only once it has settled and been drawn, or whatever slides into view counts as the board's (backlog #26)
+        for _ in range(100):
+            if gg.ev("DEV.fr === (DEV.frOn ? 1 : 0)"): break
+            gg.page.wait_for_timeout(100); gg.step(1)
+        settled = gg.ev("DEV.fr === (DEV.frOn ? 1 : 0)")
+        check(settled, f'{name}: the device\'s framing settles within 10 s (DEV.fr {gg.ev("DEV.fr")}, frOn {gg.ev("DEV.frOn")})')
+        gg.step(1)
         m0 = gg.ev(MEM)
         gg.ev("tilesPlay('tomas', null, 'full')"); gg.step(2)
         lk = gg.ev(LOOKS)
@@ -187,9 +196,12 @@ def wait_for(gg, cond, n=60, k=10):
         gg.step(k)
         if gg.ev(cond): return True
     return False
+# the teaching arrows' pop-up queue (guideToast, 15b) holds a new toast while a fresh one is up; the team's one pattern
+# (lead 31, AC3): once after the game loads, every pop-up shows at once (the queue is arrows_check's). No-op without it
+SHOW_ALL = "if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }"
 
 def seat(pw, path):
-    gg = Game(pw, path, 390, 844); gg.step(3)
+    gg = Game(pw, path, 390, 844); gg.step(3); gg.ev(SHOW_ALL)
     r = gg.ev(SEAT + "('rina')")
     if r.get('none'): check(False, 'the Deck 4 Tiles table is there'); gg.close(); return
     check(r['act'] and r['act'][0] == 'tiles', f'the junior common room\'s Tiles table plays any time, not only on Tiles night (0.28.62): {r}')
@@ -204,12 +216,18 @@ def seat(pw, path):
     ok_on = wait_for(gg, SEATED, 80)
     st = gg.ev("(() => { const a = DECK_CREW.find(x => x.p && x.p.id === TL_GAME.opp), sp = placeSpot(ACT.o.seat); return [ACT.phase, ACT.pose, TL_GAME.opp, TL_GAME.where === ACT.placeId, DEV.open, DEV.app, !!a && Math.hypot(a.x - sp.x, a.z - sp.z) < .8, !!a && a.settled]; })()")
     check(ok_on and st[2] == w[0] and st[3] and st[4] and st[5] == 'tiles' and st[6] and st[7], f'they sit opposite and the game opens on the device: {st}')
+    # 0.92.0 (the user's "nobody sits next to you"): their seat is one of the table's own stools, they're in a sit pose
+    # and within reach of the board (before, the farthest seat within 2.4 m: an armchair across the room)
+    rs = gg.ev("(() => { const a = DECK_CREW.find(x => x.p && x.p.id === TL_GAME.opp), it = ITEMS.find(i => /^Tiles table$/.test(i.t)); return [ACT.o.seat, DECKS[4].tiles.seats.includes(ACT.o.seat), (ACT.o.board || []).every(id => DECKS[4].tiles.seats.includes(id)), a && a.pose, a && +ixDist(it, a).toFixed(2)]; })()")
+    check(rs[1] and rs[2] and str(rs[3]).startswith('sit') and rs[4] is not None and rs[4] < .5, f'the partner sits at the Tiles table itself, sitting, within reach of the board: {rs}')
     # playing stops time (the user's "Playing tiles stops time"); a tap on the deck brings the board back
     t0 = gg.ev("[SHIP.time.min, FREEZE.frozen, SHIP.player.needs.social, (SHIP.rel[TL_GAME.opp] || {}).pts || 0]"); gg.ev("deviceClose()"); gg.step(150)
     gg.page.mouse.click(195, 300); gg.step(2)
     t1 = gg.ev("[SHIP.time.min, FREEZE.frozen, DEV.open, DEV.app, document.getElementById('tx').textContent]")
     check(t1[0] == t0[0] and t0[1] and t1[1], f'while you play, ship time stands still (5 seconds: {t0[0]} -> {t1[0]})')
     check(t1[2] and t1[3] == 'tiles' and 'is waiting' in t1[4], f'a tap on the deck mid-game brings the board back: {t1[2:]}')
+    pz = gg.ev("(() => { const e = document.querySelector('#devBody .tl-pz'); return e ? (e.hidden ? 'hidden' : e.textContent) : null; })()")
+    check(bool(pz) and 'paused while you play' in pz, f'the board says the ship\'s clock is paused while you play (0.72.2): {pz}')
     # How to play: your first game runs it; steps move on with Next, and by themselves when you do the thing
     tu = gg.ev("""(() => { const G = TL_GAME, txt = () => { const e = document.querySelector('#devBody .tl-tut'); return e && !e.hidden ? e.textContent : ''; }, out = [G.tut, txt()];
       document.querySelector('#devBody .tl-tut button[data-end="tnext"]').click(); out.push(G.tut);
@@ -235,6 +253,8 @@ def seat(pw, path):
     check(res[6] >= min(100, t0[2] + 9), f'the game\'s social comes when it ends (no ship minutes passed): {t0[2]} -> {res[6]}')
     gg.step(30); t2 = gg.ev("[SHIP.time.min, FREEZE.frozen]")
     check(t2[0] > t1[0] and not t2[1], f'time runs again once the game is over: {t1[0]} -> {t2}')
+    pz = gg.ev("(deviceShow('tiles'), (() => { const e = document.querySelector('#devBody .tl-pz'); return e ? (e.hidden ? 'hidden' : e.textContent) : null; })())"); gg.step(1)
+    check(pz in (None, 'hidden'), f'once it\'s over the paused line goes (0.72.2): {pz}')
     again = gg.ev("""(() => { const id = window.__opp, p0 = (SHIP.rel[id] || {}).pts, f0 = SHIP.tiles.first[id]; SHIP.player.needs.social = 20; const s0 = SHIP.player.needs.social;
       tilesPlay(id, null, 'quick'); const G = TL_GAME, first = G.s.first; let n = 0;
       while (!G.s.over && n++ < 80) { if (G.timer) { clearTimeout(G.timer); G.timer = 0; } if (G.s.p === 0) tilesDo(tilesAI(G.s, 'medium', G.rng)); else tilesCrewMove(); }
@@ -312,7 +332,7 @@ NIGHT = r"""(() => {
 })()"""
 
 def night(pw, path):
-    gg = Game(pw, path, 900, 760); gg.step(3)
+    gg = Game(pw, path, 900, 760); gg.step(3); gg.ev(SHOW_ALL)
     r = gg.ev(NIGHT)
     check(r['same'] and r['games'] == 5 and r['out'] is None and r['everyone'] and r['rinaPlays'], f'Tiles night: 10 people, 5 games, everyone placed, the same whatever the order, Rina plays: {r["same"]}, {r["games"]}, {r["everyone"]}, {r["rinaPlays"]}')
     check(r['rina'][0] == r['rina'][1] > 50, f'Rina wins every crew game until you beat her: {r["rina"]}')

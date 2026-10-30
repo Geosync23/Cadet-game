@@ -1,0 +1,23 @@
+@meeting promo.officer
+// Pillar 5 Step 3, the first promotion (Day 10, Wednesday, 11:00): Calder's glass office in the Works bay, after the
+// summons. She tells you you've passed, gives you the Technician's badge and the Officer's collar pip; one reply, which
+// she remembers (C2 stores promo.reply 1-3 by the choices' order: proud, surprised, about time; keep it). If she had to come and find you (11:15), the same script
+// plays where you are. Seat C2 plays it. Head writer W2.
+title: My office, 11:00
+from: Chief Ines Calder
+gist: Calder promoted you to Officer: Technician, Tier 2. A badge, a collar pip, and your own cabin from tonight.
+== lines
+calder > you: Sit. No, stay standing. This won't take long.   [gesture]
+calder: The scrubber. Filter in, fan settled, nobody had to tell you twice.
+calder: You've passed. As of now you're an Officer. Technician, Tier 2.
+calder: The badge. And the pip. Collar, left side. Straight, please.
+? choice
+* Thank you, Chief. I won't let you down.   rel:calder+2
+  calder: I know. That's why you're standing here.   [nod]
+* Me? Already?   rel:calder+1
+  calder: Already. I don't promote people to be kind. I promote them because they're ready.
+* About time, honestly.   rel:calder+1
+  calder: Hm. Torres said you'd say that. He owes me a biscuit.   [laugh]
+calder: The board leaves you Tier 2 work from tomorrow. Harder faults. Fewer carts.
+calder: Tonight you move to 4-23. Your own cabin. I'll walk you there at five.
+calder: The Captain commissions you tomorrow. Clean uniform. Go on, then. They're waiting outside.

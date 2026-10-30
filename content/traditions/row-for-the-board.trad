@@ -1,0 +1,38 @@
+@tradition row-for-the-board
+// Round 2: two rowers race for Commander Vance's name at the top of the gym's rowing board, two minutes each. Every 4 weeks from week 8 (Days 51, 79...).
+// The rowers first (3-gym-4, -11, -12, anim row; RV18 S4), then the rest of the gym.
+// Rules: FX24 (0.93.2, behind TRAD_0932_ON in section 13). Words: CS1 (plans/trad-0932-words.txt, claude/crew-stories-pitch 7b1e7300).
+k: 1309
+title: Row for the board
+when: every 4 weeks tuesday week 4 from day 50
+at: 19:00-19:45
+min: 20
+where: 3 room Gym: gym, ids ^3-gym-(4|11|12)$
+where: 3 pool gym
+hold: 1,2
+who: lindqvist-isak always, santos-zofia always, vance 60%, gym-regular 45%, runner 35%, everyone 8%
+host: lindqvist-isak
+from: lindqvist-isak
+invite: host=lindqvist-isak odds=25% line="Row for the board. Two minutes each. Vance's name comes down tonight."
+
+== mail
+- Row for the board tomorrow, {time}, in the gym. Two minutes on the rower each, the gym shouts the numbers. Commander Vance's name is at the top. For now.
+
+== ask
+- Row for the board in the gym. Isak says tonight's the night. He says it every time.   #funny
+- Vance is still top of the rowing board. Isak's taking it personally.
+- Coming to shout the numbers at the rowing? Bring a voice.
+
+== here
+- Pull! Pull! Thirty seconds!
+- Four hundred metres! Keep going!
+- Is Vance watching? He's watching.   #funny
+- Breathe. Then row. Then breathe.
+
+== thanks
+- Two rowers chase the name at the top of the rowing board, two minutes each, while the gym shouts the numbers. Commander Vance watches from the treadmill.
+
+== chatter
+- Isak got within three metres of Vance's time. Three!
+- Vance watched the whole rowing race and said nothing. Then he rowed. Then he left.   #funny
+- The rowing board hasn't changed yet. It will. Isak swears it will.

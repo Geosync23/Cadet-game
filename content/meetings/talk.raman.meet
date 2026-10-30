@@ -1,0 +1,22 @@
+@meeting talk.raman
+// SW2, 0.92.6 item 13 (FX17's word list): a small Wren talk, 19:00-19:40 on the auditorium stage (a ring of eight
+// chairs, house dark, the stars behind, tea from the kettle). Day 57, Monday. Dev Raman, Senior Helm Officer.
+title: Flying like it might spill
+from: Dev Raman
+gist: Raman's small talk on flying the Wren gently, learnt on a noisy cargo hauler.
+== lines
+raman: Good evening. Please, sit. I'm used to stars in front of me, not people.   [gesture]
+raman: People say I fly the Wren like she might spill. They're right. I do.   [nod]
+raman: I learnt on a cargo hauler. Noisy. On every turn the crates shouted at me.
+raman: So now I turn the Wren like I'm carrying soup up a ladder. Slowly. Nobody's tea moves.
+raman: Twenty years, and not one cup spilt on the bridge. Well. One. It was mine.   [laugh]
+raman: Before a long turn I look at my model of the Wren. Just to remember how big she is.
+raman: That's all I know, really. Fly gently. Questions, if you like.
+? choice
+* Can a junior try the helm?   rel:raman+2 flavour:practical mem:talk.raman.asked
+  raman: The simulator, yes. We'll start with a cup of water on the console.   [laugh]
+* What's the hardest turn you've flown?   rel:raman+2 flavour:listen mem:talk.raman.asked
+  raman: Through the dust at the Line, with Chef's soup on in the galley. Not one drop. She checked.   [laugh]
+* (Just listen)
+  raman: Thank you for listening so quietly. That's how I like the bridge, too.
+raman: Good night, everyone. Mind your cups.

@@ -1,0 +1,65 @@
+diff --git a/starship-cadet.html b/starship-cadet.html
+index 038ebad6..cdb05665 100644
+--- a/starship-cadet.html
++++ b/starship-cadet.html
+@@ -10628,6 +10628,7 @@ function schedBuild(p, d, occ, S) {
+   // where you are first; `by` caps the end, `min` is the shortest stay worth having. Returns the place or null.
+   const take = (act, opts, dur, o = {}) => {
+     const fromXY = o.lead && (dk => dk !== deck ? DECKS[dk].lift : hereXY());   // o.lead: the walk there comes first (WALK_LEAD, #9)
++    const longOnly = !o.lead && o.longLead > 0 && (dk => dk !== deck ? DECKS[dk].lift : hereXY());   // o.longLead (FX24-2): only a walk of that many ship minutes or more comes first; the places are tried in their usual order
+     for (const [dk, type] of opts) {
+       if (dk === 3 && act === 'leisure' && !o.event && DECK3_EVENING_MAX < Infinity && deck3Full(t + (deck !== 3 ? C : 0), o.by !== undefined ? o.by : t + dur)) continue;
+       const ownL = (S.own.get(p.bed) || []).filter(pl => pl.type === type && pl.deck === dk);
+@@ -10658,14 +10659,25 @@ function schedBuild(p, d, occ, S) {
+           if (shut && evClosed(pl, B + s, o.event, B + end)) continue;   // closed for the event
+           if (P5_STEP5 && sdPlanShut(d, occ, pl, B + s, B + end, p)) continue;   // Step 5's settled records (24w): a shutdown booked for that hour, a routine moved (24k's P9); read only from records settled at 22:00 the evening before
+           if (act === 'leisure' && type.startsWith('work:') && (S.deskOf(pl.id) || (occ.rotIds && occ.rotIds.has(pl.id)))) continue;   // a guest at a work type: never someone's desk, nor today's stand-in's
+-          const lead = () => { if (!fromXY || dk !== deck) return;   // the walk (#9): they set off earlier, out of the end of what they were doing (at most half of it; never an event meeting, F0b)
+-            const l = segs[segs.length - 1], cut = l && l.to === t && l.deck === deck && l.act !== 'commute' && !(typeof eventMeetTag === 'function' && eventMeetTag(l.tag)) && !l.kept ? Math.min(walkLead(fromXY(dk), pl), Math.floor((l.to - l.from) / 2)) : 0;
+-            if (cut > 0) { l.to -= cut; t -= cut; }
++          const ahead = (w, hops) => {                   // set off w minutes earlier, out of the end of what they were doing (at most half of it; never an event meeting, F0b)
++            let k = segs.length - 1; if (hops) while (k > 0 && segs[k].act === 'commute' && segs[k - 1].to === segs[k].from) k--;   // FX24-2: through the lift rides just taken (from the rec deck by way of another), which move earlier with it
++            const l = segs[k], at = k < segs.length - 1 ? segs[k + 1].from : t;
++            const cut = l && l.to === at && (k < segs.length - 1 || l.deck === deck) && l.act !== 'commute' && !(hops && l.act === 'work') && !(typeof eventMeetTag === 'function' && eventMeetTag(l.tag)) && !l.kept ? Math.min(w, Math.floor((l.to - l.from) / 2)) : 0;
++            if (cut > 0) { l.to -= cut; for (let i = k + 1; i < segs.length; i++) { segs[i].from -= cut; segs[i].to -= cut; } t -= cut; }
++            return cut;
+           };
++          const longOk = w => w >= o.longLead && isFree(pl.id, s - w, s, o.tag);   // FX24-2: only a long walk, to a place nobody else holds meanwhile (and never out of a shift: ahead's hops)
++          const lead = () => { const from = fromXY || longOnly; if (!from || dk !== deck) return;   // the walk (#9) on this deck
++            const w = walkLead(from(dk), pl); if (!fromXY && !longOk(w)) return;   // FX24-2: a short walk to a tradition is planned as before
++            return ahead(w, !fromXY);
++          };
++          const leadLift = () => { if (!longOnly || dk === deck) return; const w = walkLead(DECKS[dk].lift, pl); return longOk(w) ? ahead(w, true) : 0; };   // FX12-1: from another deck, the walk from the lift too (the ride itself is the commute's)
++          let walked = 0;
+           if (o.queue && s - arrive >= (o.qMin || SHOWER_Q)) { lead(); go(dk); seg('off', s, 'booth-queue', null, { tag: o.queue }); }   // a wait worth queueing for: in the line by the place (0.71.4, the booths); o.qMin: the toilets' line from a minute's wait, and the walk comes before it (TQ1, note 19)
+-          else { linger(s - (dk !== deck ? C : 0)); go(dk); lead(); }
++          else { linger(s - (dk !== deck ? C : 0)); const wk = leadLift(); go(dk); const wk2 = lead(); walked = (wk || 0) + (wk2 || 0); }
+           if (!mine) hold(pl.id, s, end);                // held from arrival, as planned
+           const an = o.anim || placeAnim(pl), ex = {}; if (o.tag) ex.tag = o.tag; if (an) ex.anim = an;
++          if (longOnly && walked > 0) ex.walk = walked;   // FX24-2: the stay starts with this many minutes of walking there (they arrive at s, the tradition's own time)
+           seg(act, end, pl.type, pl.id, ex);
+           return pl.id;
+         }
+@@ -10933,7 +10945,7 @@ function schedBuild(p, d, occ, S) {
+         e.done = true;
+         if (e.walk) { for (const pl of S.shared.get(e.where[0].join('|')) || []) if (isFree(pl.id, t + (deck !== pl.deck ? C : 0), t + (deck !== pl.deck ? C : 0) + e.dur) && end - t > e.dur + C) { go(pl.deck); hold(pl.id, t, t + e.dur); seg('leisure', t + e.dur, pl.type, pl.id, { tag: e.tag }); } }
+         else if (e.meal && e.q) tradMeal(e, end);       // a meal tradition: the line first (0.26.41), then its table with the tray
+-        else take(e.act || 'leisure', e.where, e.dur, { wait: 5, by: end, min: e.min || (e.dur < 20 ? 5 : 15), tag: e.tag, anim: e.anim, event: true });
++        else take(e.act || 'leisure', e.where, e.dur, { wait: 5, by: end, min: e.min || (e.dur < 20 ? 5 : 15), tag: e.tag, anim: e.anim, event: true, longLead: tradWalkMin() });   // FX24-2: a long walk there comes first
+       }
+     }
+     linger(end);
+@@ -11814,6 +11826,13 @@ function rotTernTick(now, N) {
+   toast('Dev Raman, the pilot', 'Down gently. Ramp\'s opening. ' + (names.length > 1 ? 'New crew for the Wren.' : 'One new hand for the Wren.'));
+   ternRamp(true, 2.5);
+ }
++// FX24-2 (0.98, OP1; the user's answer 2026-10-28: "book walking time only for long walks to a tradition"): someone
++// joining a tradition on the same deck from far off (Farouk from the garden to the reading corner, over 20 ship minutes)
++// arrived as their stay ended, because nothing booked the walk; and crew coming by lift to an evening tradition settled
++// 15-20 minutes late (FX12-1), the walk from the lift unbooked. A walk of at least this many ship minutes to a
++// tradition's place, from where they are or from the lift, now comes first, the way the toilets' does (take()'s lead: off the end of what they were doing, at
++// most half of it); a shorter walk is planned as before, and nobody's choice of place changes. 0: off (the old plans).
++function tradWalkMin() { return 6; }
+ // ---- end of slot: Sim engineer ----
+ 
+ // =====================================================================

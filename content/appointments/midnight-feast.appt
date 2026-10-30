@@ -1,0 +1,54 @@
+@appointment midnight-feast
+// SW2, 0.92.6 item 9 (the user: yes). Midnight feast: you book a late snack in your bunk room with two or more of your
+// bunkmates (a group appointment), after 22:00 on a night before a day off. Someone brings the grab shelf's best,
+// someone tells a story, someone falls asleep first. Written for Bunk 1, your bunk: Tomas, Chloe Tran ("Lights out."
+// at ten, disapproves of gossip, then asks how it ends), Zofia Santos (stall patter, public gossip only), Lukas
+// Dlamini (up early, so he falls asleep first; says a number: days to home). Lines from anyone absent are skipped.
+// The scene plays like an overheard chat, then one choice for you.
+title: Midnight feast
+starts: ask
+host: you
+gate: two or more bunkmates free, the night before your day off
+when: after 22:00
+at: 22:00-22:45
+where: 4 pool bunk
+who: you, your bunkmates (2-4)
+once: no
+mem: appt.feast
+record: Had a midnight feast with Bunk 1.
+
+== ask
+- Midnight feast in the bunk room?
+- Yes! I'll raid the grab shelf. Don't tell Pell. He'll want in.   #funny
+- Only if I'm in bed by midnight. Fine. I'm bringing biscuits.
+
+== busy
+- Not tonight. I'm on early. Next time, I promise.
+
+== mail
+- Tonight, {time}: a midnight feast in the bunk room. Bring something from the grab shelf. Whisper.
+
+== scene
+santos-zofia: Right. I've got the grab shelf's last two plates, and I didn't even have to trade for them.   [laugh]
+tran-chloe: It's after ten. It's lights out. ...Pass me a plate.   [laugh]
+tomas: Can we tell stories? Like at camp? We never had camp. Like I imagine camp.
+dlamini-lukas: Ninety-one.   [nod]
+santos-zofia: He means days to home. He says it to the ceiling every night.
+tran-chloe: Zofia, tell the one about your stall back home. Not the gossip one. Fine, the gossip one.   [laugh]
+dlamini-lukas: Mm. Not asleep. ...Mm.   [sigh]
+tomas: He's asleep. He's always first. He says it's the early team. It's not.   [laugh]
+? choice
+* Tell a story of your own.   flavour:share mem:appt.feast
+  tomas: That was a good one! Do another. Quietly. Lukas is snoring.   [laugh]
+* Quietly take the last biscuit.   flavour:cheer mem:appt.feast
+  santos-zofia: Bold move. I'd have traded you something for that.   [laugh]
+* Just listen to everyone.   flavour:listen mem:appt.feast
+  tran-chloe: You're the only one in this bunk who listens. Don't change.   [nod]
+tran-chloe: Right. Now it's lights out. Actually. Good night, Bunk 1.
+
+== thanks
+- A midnight feast in the bunk room: the grab shelf's best, a story or two, and Lukas asleep first, as always.   #warm
+
+== after
+- Best midnight feast yet. Lukas didn't even make it to the biscuits.   #funny
+- Chloe said "lights out" four times last night. She stayed up latest.   #funny

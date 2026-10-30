@@ -39,3 +39,274 @@
 - Read every note. They're not all on the card. Check the machine.
 == chief.p3.3
 - The scanner sees what's worn. The notes see what's been tried.
+
+// ---- Pillar 5 Step 5 (SW3, 2026-10-26; S5-6, 24k's slot; spec section 10): head-scratchers P4, P5, P9 and the
+// old-mysteries board. Placeholders as above, plus {thing} a gauge's name ("the panel gauge"), {word} a reading word
+// ("high", "normal", "low"), {name} a person, and in P9 {thing} what they do ("the laundry wash"), {time} an hour, {when} as P1's.
+
+// P4 Which gauge is lying? (from Day 17, Torres's word, needs the scanner): two gauges disagree; one of them is wrong
+== works.mech.p4
+- Which gauge is lying?
+== next.p4
+- Coming up: Which gauge is lying? Torres has one for you.
+== next.wait.p4
+- Which gauge is lying? Torres is waiting with a pair that disagree.
+== case.title.p4
+- {machine}: two gauges disagree.
+== case.p4.head
+- What each one says
+== case.p4.gauge
+- {thing} reads {word}
+== case.p4.scan
+- Your scanner reads {word}
+== case.p4.call
+- Call it: {thing} is lying?
+== case.p4.right
+- Fixed. New gauge in. Now they agree.
+== case.wrong.p4
+- Replaced {thing}. They still disagree. The other one was lying.
+== case.hint.p4.1
+- A third reading settles it. What does your scanner say?
+== chief.p4.title
+- Two gauges
+== chief.p4.1
+- Two gauges, two answers. Get a third. The odd one out is lying.
+== chief.p4.2
+- A gauge that reads the same all day is stuck, not steady.
+
+// P5 Follow the line (M9's later stages; its power stage needs the conduit tester, so it waits for M19)
+== works.mech.p5
+- Follow the line
+== next.p5
+- Coming up: Follow the line. A fault somewhere along a whole line.
+== next.wait.p5
+- Follow the line: the Chief has a long one for you.
+== case.title.p5
+- {machine} {shows}. The fault is somewhere up the line.
+== case.p5.stop
+- {machine}: {word}
+== case.p5.power
+- A power line. Test each length with the conduit tester.
+== case.p5.notester
+- This one's a power line. You'll need the conduit tester first.
+== case.hint.p5.1
+- Start in the middle. Fine there? The fault is further on.
+== case.wrong.p5
+- New {part} in at {machine}. The line still {shows}. It's further along.
+== chief.p5.title
+- Long lines
+== chief.p5.1
+- Halve it. Then halve it again. Five tests find one fault in thirty.
+== chief.p5.2
+- Power's the same as water. The reading drops where the trouble is.
+
+// P9 The clash: a fault only when two routines overlap; its fix moves a crew routine (or, with shutdowns, an hour)
+== works.mech.p9
+- The clash
+== next.p9
+- Coming up: The clash. A fault that only happens when two things do.
+== next.wait.p9
+- The clash: the Chief has a fault that won't happen on its own.
+== case.title.p9
+- {machine} {shows}, but only {when}. Nothing's worn.
+== case.p9.head
+- Who's using it then
+== case.p9.who
+- {name}: {thing}, {time}
+== case.p9.move
+- Ask {name} to move {thing} to {time}?
+== case.p9.moved
+- {name} moves {thing} to {time}. Nothing broke. Nothing needed fixing.
+== case.p9.shut
+- Your shutdown hour clashes with {name}'s {thing}. Move one of them.
+== case.hint.p9.1
+- Every part is fine. So what else happens at that hour?
+== case.wrong.p9
+- New {part} in. Same hour tomorrow, same trouble. It isn't a part.
+== chief.p9.title
+- Clashes
+== chief.p9.1
+- Some faults aren't parts. They're two good things at the same time.
+== chief.p9.2
+- The fix is a conversation. Ask nicely. Offer them a better hour.
+
+// ---- the old-mysteries board (from Sunday Day 21, the Works bay beside the job board; five cases, order by schedU 854)
+== mys.board
+- Old mysteries
+== mys.board.tap
+- Old cards, pinned years ago, some in Calder's hand. Nobody's cracked them.
+== mys.board.none
+- You've taken them all. The board is bare. Torres says that's a first.
+== mys.take
+- Take this one
+== mys.taken
+- Taken. It's in your Fault notes, under the Chief's.
+== mys.solved
+- Solved. The card comes off the board. Calder adds a line to her notes.
+== mys.rep
+- Works reputation up: an old one cracked.
+== mys.chief
+- Old mystery cracked: {title}. Solved by {me}, Day {n}.
+== mys.1.title
+- The Tuesday hum
+== mys.1.line
+- A hum in the Deck 3 pipes, every Tuesday at four. Only Tuesdays. Seven years.
+== mys.2.title
+- The cold cabin
+== mys.2.line
+- One cabin on Deck 4 is always two degrees colder. Three crews have tried.
+== mys.3.title
+- The lift that waits
+== mys.3.line
+- The lift stops on Deck 3 by itself, late at night, and opens. Nobody's there.
+== mys.4.title
+- Calder's clock
+== mys.4.line
+- The bay's wall clock loses a minute a week. New clock, same minute.
+== mys.5.title
+- The garden flicker
+== mys.5.line
+- The garden lights dip for one second at dawn. Every dawn. Plants don't mind. Calder does.
+== works.mech.mys
+- The old-mysteries board
+== next.mys
+- Coming up: the old-mysteries board, in the Works bay. Old cases for a quiet day.
+== next.wait.mys
+- The old-mysteries board is up, beside the job board. Take one when you like.
+
+// ---- Step 6 (S6-8, PZ6 for lead 41): stand-ins until the head writer's (spec section 10, cases.lines additions)
+// P6 Does it add up?: sums in pairs round a line's meters; then the batteries' balance (M19's third stage)
+== works.mech.p6
+- Does it add up?
+== next.p6
+- Coming up: Does it add up? Sums at the meters, then the batteries.
+== next.wait.p6
+- Does it add up?: the Chief has a sum for you.
+== case.title.p6
+- {machine} {shows}. The sums don't add up
+== case.title.p6.power
+- The battery banks don't balance
+== case.p6.line
+- The line sends {a}. {b} arrive. {n} going missing somewhere.
+== case.p6.pair
+- {machine} and {other}: in {n}, out {a} + {b}.
+== case.p6.short
+- {n} going missing here.
+== case.p6.adds
+- It adds up.
+== case.p6.head
+- Missing: {n}. Each meter sums two feeds. Which two don't add up?
+== case.hint.p6.1
+- A pair that adds up is fine, both of them. Two short pairs share your leak.
+== case.wrong.p6
+- New {part} in at {machine}. The sums still don't add up.
+== chief.p6.title
+- Does it add up?
+== chief.p6.1
+- In must equal out. If it doesn't, something's going missing between.
+== chief.p6.2
+- A pair that adds up is fine, both feeds. Two short pairs share the culprit.
+
+// P7 Faded labels: a light-relay panel's worn labels as a grid (relays down, rooms across); then you relabel it
+== works.mech.p7
+- Faded labels
+== next.p7
+- Coming up: Faded labels. A panel whose labels have worn off.
+== next.wait.p7
+- Faded labels: the Chief has a panel nobody can read.
+== case.title.p7
+- {machine}: the labels have worn off, and one relay chatters
+== case.p7.flick
+- The flicker's in the {room}. One relay's chattering. The labels are worn off.
+== case.p7.sketch
+- Pell's old sketch: relay {a} feeds the {room}.
+== case.p7.drill
+- The power drill's log: relay {a} off first, and the {room} went dark.
+== case.p7.flip
+- You flip relay {a}'s test switch: the lights blink in the {room}.
+== case.p7.not
+- Pell's sketch, a note in the margin: relay {a} isn't the {room}.
+== case.p7.head
+- Which relay feeds which room? Tap a cell: yes, no, blank.
+== case.p7.flicker
+- flickers
+== case.p7.relay
+- Relay {a}
+== case.p7.relabel
+- You relabel the panel, A to {a}, in big clear letters. Nobody has to guess again.
+== case.hint.p7.1
+- Every relay you can place on another room isn't it. The one left over feeds the flicker.
+== case.wrong.p7
+- New relay in at {a}. Still chattering. Wrong relay.
+== chief.p7.title
+- Faded labels
+== chief.p7.1
+- Each relay feeds one room. Place the ones you can; the one left over is the culprit.
+== chief.p7.2
+- Relabel the panel when you're done. The next person will thank you.
+
+// P8 Swap testing: five alike, one bad; the machine shop's test rig says how many in a group, not which; three runs
+== works.mech.p8
+- Swap testing
+== next.p8
+- Coming up: Swap testing. Five alike, one bad, and the test rig.
+== next.wait.p8
+- Swap testing: the machine shop's rig is free.
+== case.title.p8
+- {machine}: one of five {thing}s is bad. They all look alike
+== case.p8.cart
+- cartridge
+== case.p8.module
+- coil module
+== case.p8.rig
+- On the test rig: five {thing}s from {machine}. It says how many in a group are bad.
+== case.p8.run
+- Run {n}: {thing} {text} on the rig. {word}.
+== case.p8.one
+- One bad
+== case.p8.none
+- None bad
+== case.p8.go
+- Take them to the test rig in the machine shop, Deck 5.
+== case.p8.head
+- The test rig: pick a group, run it. {n} runs left.
+== case.p8.pick
+- Which go on the rig? Tap to pick.
+== case.p8.wait
+- Running: ready at {time}.
+== case.p8.runit
+- Run the test
+== case.p8.gorig
+- To the rig
+== case.p8.rigname
+- The test rig, in the machine shop
+== case.p8.running
+- Running. Ten minutes.
+== case.p8.out
+- Out of runs. {name}: "Fit new ones all round, then."
+== case.hint.p8.1
+- Put about half on the rig. None bad? It's in the other half. One bad? It's in this half.
+== case.wrong.p8
+- New {thing} in at {a}. Still bad. It was another one.
+== chief.p8.title
+- Swap testing
+== chief.p8.1
+- The rig says how many, not which. Test half, then half of that.
+== chief.p8.2
+- Three runs find one in eight. Five is easy, if you plan the runs.
+
+// casePoint (S6-7's mentoring: point Basil to a clue; PZ6): Fault notes' point mode
+== case.point.title
+- {name}'s head-scratcher: {machine}
+== case.point.sus
+- What {name} suspects
+== case.point.out
+- ruled out
+== case.point.has
+- What {name} has read
+== case.point.ask
+- Point {name} to one more:
+== case.point.to
+- Point to: {text}
+== case.point.scan
+- the scanner, at the panel

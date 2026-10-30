@@ -1,0 +1,9 @@
+@meeting endingTell.change.go
+// SW6 (ending writer A), changing your mind: you'd said Stay (or Not sure), now Go, any time before the address. Short.
+title: The Captain
+from: Captain Odile Marrow
+gist: You changed your mind and told the Captain you're taking the post at headquarters.
+== lines
+marrow: You've come about the letter again. I wondered if you might.   [listen]
+marrow > you: Going, then. That's allowed. It's what Sunday's for.   [nod]
+marrow: Be sure. After Sunday the ship knows, and after Monday the Tern's gone. Thank you for telling me first.

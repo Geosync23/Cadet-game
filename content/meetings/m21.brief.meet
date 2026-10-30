@@ -1,0 +1,25 @@
+@meeting m21.brief
+// MA6 (2026-10-27, Pillar 5 Step 6, S6-2, stand-in words until the head writer's m21.lines): the Monday briefing, Day 22
+// 08:30-09:15 at the conference table in the observation room (Deck 1, O). The Captain chairs; Vance and the chiefs each
+// give an item (the comet tonight, Basil's first week, the parts order); you choose what Works raises. The three choices
+// have no reply here: 28b says what each one did (m21.raise.* in content/works/m21.lines), then the close.
+title: The Monday briefing
+from: Captain Odile Marrow
+gist: The Monday briefing went on without you: the comet tonight, Basil's first week, the parts order. Works raised nothing this week.
+== lines
+marrow: Good morning. Sit, all of you. The coffee is on the side.   [gesture]
+marrow > you: The far end is Works' chair now. Yours.
+marrow: The week ahead. Dr. Sato, the comet.
+sato: Closest pass tonight, about half past ten. Survey will be up all night. The observation room will be full.
+holt: The Watch has the corridors for it. Nobody on the hull, please. I mean it this time.
+vance: Our new cadet, Basil, starts his first week today. He will ask everyone everything. Answer him.
+nandakumar: The infirmary has flu jabs from Wednesday. You know who you are.
+marrow: And the parts order closes today. Chief Calder?
+calder > you: Works has an item this week. It's yours to raise.
+marrow > you: Go on, then. What does Works need from this table?
+? choice
+* A shutdown for tomorrow.   rel:marrow+1
+* I'm worried about one of our machines.   rel:calder+1
+* Our parts order.   rel:vance+1
+marrow: Good. That's the week. Thank you, everyone.   [nod]
+vance: Same time next Monday. Don't be late. I won't be.

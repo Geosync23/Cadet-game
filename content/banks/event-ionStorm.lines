@@ -1,0 +1,122 @@
+@bank all
+// EW1 (events writer), the storm update (events plan v3.2: Days 11-15). The event's own words in EV1's keys:
+// event.ionStorm.<what>.<phase>[.<band>], a text of several lines numbered .1 .2 .3. Mail is "Subject | body"
+// (unsigned; the game adds the sender: the warning is Calder's, the onset Vance's, the commendation the Captain's).
+// Placeholders: {me} your name, {dark} a deck that went dark, {band}. Keys not here keep today's words in
+// SHIP_EVENTS.ionStorm (the news lines, STORM_RETELL, the debrief): they're right as they are.
+// Gatherings (tradition-shaped, for EV_SHIPWIDE): event.ionStorm.gather.<id>.<mail|ask|here|thanks|chatter>.
+// Status lines (event.<id>.status.<phase>, the device's one-line Ship status) are 60 characters at most.
+
+// ---- warning, Thursday Day 11
+== event.ionStorm.mail.warning
+- Storm prep | Ion storm due tomorrow, about 14:00. Briefing at the job board, 14:00 today, after tea. Storm jobs go up when it ends. Until then, the usual board.
+== event.ionStorm.status.warning
+- Ion storm due tomorrow, 14:00. Prep jobs on the board.
+
+// ---- onset, Friday Day 12 (the front at 14:00; the Friday address at 16:00 is content/addresses/friday-d12)
+== event.ionStorm.address.onset.1
+- This is the Captain. We're in it.
+== event.ionStorm.address.onset.2
+- Expect flickers, and no calls home for a while. The bow lounge and rec deck are closed.
+== event.ionStorm.address.onset.3
+- Look after each other. I'll say more at four. Marrow out.
+== event.ionStorm.mail.onset
+- Storm stations | The bridge is on double shifts. The bow lounge and the rec deck are closed, except the auditorium for the Captain's address at 16:00. The call-home booths are off line until it's over.
+== event.ionStorm.status.onset
+- Ion storm. Comms down. Lounge, booths, rec deck shut.
+
+// ---- escalation, Saturday Day 13
+== event.ionStorm.status.escalation
+- Ion storm: blackouts deck by deck. Lantern supper 18:00.
+// the lantern supper, 18:00-19:45, the mess by emergency light (up to about 60, in seated sittings: nobody stands; the user, 2026-10-21).
+// Brennan is off on Saturdays; Lukas Dlamini cooks. Its notice goes out at noon (the Friday address announced it).
+== event.ionStorm.gather.lanternSupper.name
+- Lantern supper
+== event.ionStorm.gather.lanternSupper.mail
+- Lantern supper | Lantern supper tonight at six in the mess. Emergency lights, storm stew, all the bread we've got. Come and sit with everyone.
+== event.ionStorm.gather.lanternSupper.ask
+- Lantern supper at six. Bring a jumper. The mess is cold with the lights low.
+- Supper by lantern light tonight. First time I've wanted the lights off.   #funny
+- Everyone's going to the mess tonight. Come and squeeze in.   #warm
+== event.ionStorm.gather.lanternSupper.here
+- Budge up. There's room on this bench if we all breathe in.   #funny
+- Pass the bread. Not that one. The good one.
+- It's nice like this. Quiet. Everyone's faces in the lamp light.   #warm
+== event.ionStorm.gather.lanternSupper.thanks
+- You squeeze in at a long table in the lamp light. Someone passes you a bowl of stew and a heel of bread.   #warm
+== event.ionStorm.gather.lanternSupper.chatter
+- The lantern supper was the best meal of the storm. Also the only one.   #funny
+- Sixty people in the mess by lamp light. Nobody wanted to leave.   #warm
+- Lukas cut the bread so thin you could read through it. Everyone got some.   #funny
+
+// ---- resolution, Sunday Day 14 (the all-clear at 10:00: content/meetings/captainAllClear.<band>.meet)
+// the line the Captain says to you in the all-clear ({allClearYou}): commended (two storm jobs, or one and a
+// meeting), else some storm jobs, else none
+== event.ionStorm.allclear.you.commended
+- And our newest Works hand did more than their share. There's a commendation in your Mail.
+== event.ionStorm.allclear.you.jobs
+- And I'm told our newest Works hand did their share. Thank you, {me}.
+== event.ionStorm.allclear.you.none
+- Comms are back. Expect a queue at the booths.
+// the commendation letter (from the Captain, at the all-clear)
+== event.ionStorm.mail.commendation
+- Commendation: Ion storm | For your work during the ion storm, noted on your record with thanks. Chief Calder spoke well of you. I'd like to say so in person this week; Commander Vance will find a time.
+== event.ionStorm.status.resolution
+- All clear. Comms back. Party, bow lounge, 19:00.
+// the party, 19:00-21:00, the bow lounge (its moment 'party')
+== event.ionStorm.gather.party.name
+- All-clear party
+== event.ionStorm.gather.party.ask
+- Party in the bow lounge at seven. The whole ship's going.
+- All clear! The lounge is open again, and there's a party in it.   #funny
+== event.ionStorm.gather.party.here
+- To the Wren, and everyone who kept her lit.   #warm
+- I haven't sat down since Friday. This chair is the best chair.   #funny
+- Talent night's moved to next week. Tonight's for doing nothing.
+== event.ionStorm.gather.party.thanks
+- The bow lounge is full and loud and warm. Someone puts a drink in your hand, and the windows are clear again.   #warm
+
+// ---- afterglow, Sunday 22:00 to Monday Day 15 (the debrief Mail at 18:00 keeps today's words)
+== event.ionStorm.status.afterglow
+- The storm's over. Putting the ship back together.
+// Lap of the Wren moves to Monday Day 15 at 20:30, led by Tomas (the user's answer): its words that day
+== event.ionStorm.trad.lap-of-the-wren.mail
+- Lap of the Wren tomorrow night instead of Sunday, 20:30 round the promenade. Tomas leads. A slow walk to stretch the legs after the storm.
+== event.ionStorm.trad.lap-of-the-wren.ask
+- Lap of the Wren tonight. Monday, for once. My legs need it after that storm.
+- Tomas is leading the lap tonight. He's promised to walk slowly. He won't.   #funny
+== event.ionStorm.trad.lap-of-the-wren.thanks
+- You fall in with the walkers behind Tomas. After three days indoors, the long way round feels like a holiday.   #warm
+
+// ---- story A, "Sixty by lamplight" (EW2, events writer 2; storm plan v1.2, the user's choice; brief
+// plans/event-storm-lines-brief.md). GUARD RAILS: Lukas's numbers are covers, never his days until home; nothing of the
+// person he married or his worry theme. Brennan: nothing of her own story, no hint of handing the galley on. The dead
+// rings are words only: nobody says the supper was late or short. Nothing about the Veyli or the visit.
+// the first line of stormLukasFri, by the save: still in Bunk 1 (.bunk) or moved to the officers' corridor (.moved)
+== event.ionStorm.lukas.hi.bunk
+- Hey, bunkmate. Sixty.
+== event.ionStorm.lukas.hi.moved
+- Hm. Hello. Not seen you since you moved. Sixty.
+// his Mail at about 20:50 on Friday if you didn't meet him (unsigned: the game adds Lukas as the sender)
+== event.ionStorm.mail.lukas
+- Sixty | Lantern supper tomorrow, my galley. Sixty bowls by lamp light. If you've got hands, I've got onions.
+// Lukas's bubbles: the range job done; you bring back Brennan's message; the last bowl out at the supper (the covers)
+== event.ionStorm.lukas.fixed
+- Six rings. Huh. Not bad. Ta, {me}.
+== event.ionStorm.lukas.asked
+- Low and slow, lid on. My galley tonight. She said that? Huh.
+== event.ionStorm.lukas.covers
+- Sixty-one.
+// the job titles (cards)
+== event.ionStorm.job.stormRange
+- Storm: reset the galley range
+== event.ionStorm.job.stormLanterns
+- Lantern supper: carry the lanterns up from storage
+// the device notices, Saturday 14:00: the lantern job posted; .held when you promised Lukas (storm.lukas.promised)
+== event.ionStorm.notice.lanterns
+- Lantern supper: the lantern job is on the board. Deck 5 storage to the mess.
+== event.ionStorm.notice.lanterns.held
+- Lukas's lanterns: the job's held for you. Deck 5 storage to the mess.
+// the trace: the storm lantern left on the galley pass from Sunday (a tap card)
+== event.ionStorm.trace.lantern
+- A storm lantern on the galley pass. Nobody's moved it since the lantern supper.

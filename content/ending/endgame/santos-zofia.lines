@@ -1,0 +1,20 @@
+@crew santos-zofia
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- Tell you what. I'll trade you the gossip for the real reason you stayed. No? Worth a go.   #funny
+? endgame:early
+- You turned down headquarters. My five-year plan just got a new column: "or don't".   #funny
+? endgame:early
+- Ordinary messages this week. Recipes, birthdays, a lot of "they stayed!". Lovely.
+? endgame
+- Vance is still top of the rowing board. Now I've a witness for when I beat him.   #funny
+? endgame tier>=friend
+- Bottom bunk to top bunk, we've had a good run. Glad it's still running.   #warm
+
+== bye
+? endgame
+- Off you go. I'll kick your door if you oversleep. Kindly.   #funny

@@ -1,0 +1,39 @@
+@bank all
+// W3, rec talent night (every four weeks, Sunday 19:30, the auditorium; Lucia Ferreira hosts, Maeve Volkov on
+// lights). Keys for RA's show engine: talent.intro (Lucia, before each act: {name} the act's person, {thing} the act),
+// talent.act.<kind> (the performer's bubble on stage: song, piano, duet, juggle, poem, trick, joke), talent.after
+// (Lucia after an act), talent.open / talent.close (the start and the end), talent.crowd (a seated crowd bubble).
+
+== talent.open
+- Hello, hello! Welcome to talent night. Devices away. Hands ready.   #funny
+- Good evening, Wren! Eight acts tonight, all brave, all ours. Lights please, Maeve.   #warm
+== talent.intro
+- Our next act needs no introduction. I'm giving one anyway. {name}!
+- Please welcome a very brave person. {name}!   #funny
+- Next up, {name}, with {thing}. Big hand, please.
+== talent.after
+- Wasn't that lovely? Give it up for {name}!   #warm
+- {name}, everyone! Nobody fell off the stage. A good start.   #funny
+- That's going in the newsletter. Well done, {name}.
+== talent.close
+- That's talent night! Thank you, all of you. Same time in four weeks. Start practising.   #warm
+== talent.act.song
+- This one's from home. Bear with me.   #warm
+- La la... sorry, too high. Again.   #funny
+== talent.act.piano
+- I'll play the slow one. Shh.   #warm
+== talent.act.duet
+- On three. One, two... no, wait. Now.   #funny
+== talent.act.juggle
+- Three spanners. Four. Oh. Three again.   #funny
+== talent.act.poem
+- A short one. About the stars.   #warm
+== talent.act.trick
+- Pick a card. Not that one.   #funny
+== talent.act.joke
+- Why did the drive coil sulk? Coil three.   #funny
+== talent.crowd
+- Go on!
+- Oh, that's lovely.   #warm
+- Encore!   #funny
+- Brave. So brave.   #funny

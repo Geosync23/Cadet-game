@@ -1,0 +1,65 @@
+@bank all
+// W3, rec deck R12 (plans/recdeck-plan.html section 9): the rec dec in everyday talk, across the ship. Crew say
+// "the rec dec"; the lift says R. Open 06:00 to midnight. Rooms: the auditorium (76 seats), the Lightdisc court and
+// its stands, the pool (four lanes), the river hall (kayaks, white water, the climbing wall and its bell), the float
+// room (a fifth of a g). Plain lines first; the deck: and place: ones jump the queue down there.
+
+== chat
+- Coming down the rec dec after shift? I need to float for a bit.
+- My arms are dead. I rang the bell, though.   #funny
+- Who left the float room on "moon"? I nearly hit the ceiling.   #funny
+- Have you tried the white water yet? I went round twice. Backwards, once.   #funny
+- The pool's lovely in the evening. You swim right beside the stars.   #warm
+- They ran out of numbers, you know. That's why the lift says R.
+- The rec dec went in at the last refit. Squeezed between two old decks, like a sandwich.   #funny
+- Lightdisc's harder than it looks. The disc goes where you move, not where you look.
+- I tried the climbing wall. Yellow route. It's called yellow, it's not easy.   #funny
+- Bring a towel to the rec dec. Don't take a wet one back to the bunk. Learn from me.   #funny
+? time:evening
+- The rec dec will be heaving tonight. Get in early if you want a lane.
+? weekday:sun
+- Winner Stays On today. Pell's had the chalkboard out since breakfast.
+? weekday:sat time:evening
+- Film tonight. I'm sitting at the back. I fall asleep in the good bit, every time.   #funny
+? tier>=friend
+- If you ever want a quiet ten minutes, the float room at night. Nobody talks in there.   #warm
+
+== smalltalk
+- Coming down the rec dec after shift?
+- My arms are dead. Worth it.   #funny
+- Who left the float room on "moon"?   #funny
+- Lane two's mine. I've decided.   #funny
+- One more go on the white water. Just one.
+- Rang the bell. Twice. Don't tell Vance.   #funny
+- Anyone seen my other flipper?   #funny
+? weekday:sun
+- Winner stays on. I'm next. I'm always next.   #funny
+
+== near
+? deck:7
+- Mind the wet floor. It's always the wet floor.
+- Lane free? I'll wait. I'm good at waiting.
+- Grip socks on, or you'll slide into the auditorium.   #funny
+- The kit's self-serve. So's putting it back. Mostly.   #funny
+? place:pool
+- Warm, isn't it? Like a bath with a view.   #warm
+- Four lanes and everyone wants the one by the window.   #funny
+? place:river_hall
+- Go round the slow loop first. Then the white water, if you're brave.
+- Hold the paddle like you mean it.
+- Ding! Someone's rung the bell again.
+? place:float_room
+- Shh. Float. Don't think about it.   #warm
+- I've done three somersaults. On purpose. Two of them.   #funny
+? place:stands
+- Go on, go on, go on. Oh! Nearly.
+- Did you see that curve? Where did it go?   #funny
+? place:auditorium
+- I like it in here when it's empty. Just the stars behind the stage.   #warm
+- Best seats are the middle, fourth row. Don't tell anyone.
+
+== feel
+? deck:7 time:evening
+- Good tired. The rec dec sort.   #warm
+? deck:7 act:leisure
+- I came down for one swim and stayed two hours. That happens here.   #funny

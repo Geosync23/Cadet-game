@@ -1,0 +1,21 @@
+@meeting vesselHome
+// SW4, the Veyli vessel: Monday Day 29, 15:00-15:20, the shuttle bay, the Tern's ramp. About 15 (Works and friends).
+// Taavek gives you a sketch (it goes to your shelf: the ring on Tuesday). The wave pose on Taavek's last line.
+// Lindqvist, called in on his day off, flies them across.
+title: Taavek goes home
+from: Taavek
+gist: You saw Taavek off at the Tern's ramp. They gave you a sketch, labelled in Veyli: "For you. The one who meets."
+== lines
+calder: Ramp's down. Part's packed. Say it now, if you're saying it.   [nod]
+taavek: Three sketches. One for my ship. One for your bay, by the tools.   [gesture]
+taavek > you: And one for you. The one who meets.   [gesture]
+? choice
+* I'll put it on my shelf.   flavour:share rel:taavek+1
+  taavek: Good. A shelf is a good place. On my shelf, your ship.   [nod]
+* Come back and see it.   flavour:cheer rel:taavek+1
+  taavek: Yes. When we pass, I knock. Loudly.   [laugh]
+* What does the writing say?   flavour:listen rel:taavek+1
+  taavek: "For you. The one who meets." And your name. Badly. I practise.   [laugh]
+lindqvist-isak: My day off, and I'd fly this one twice. Strapped in? She wants to go.   [gesture]
+taavek: Go well. Go well, Wren.   [gesture]
+calder: Good part. Back to it.   [nod]

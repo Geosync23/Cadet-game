@@ -1,0 +1,33 @@
+@bank all
+// Patch #24 (the user: "tapping the shopkeeper opens a simple buy menu"; decided: today's goods). The storekeeper's card
+// button and the menu's words. TEXTS: said by nobody. {n} a number of credits.
+
+== shop.menu.button
+- Buy something
+
+== shop.menu.title
+- CREW STORE
+
+== shop.menu.credits
+- You have {n} credits.
+
+== shop.menu.snack
+- Snacks
+
+== shop.menu.drink
+- Drinks
+
+== shop.menu.comfort
+- Things for your locker
+
+== shop.menu.hobby
+- Hobby supplies
+
+== shop.menu.short
+- {n} more credits
+
+== shop.menu.short1
+- 1 more credit
+
+== shop.menu.close
+- Close

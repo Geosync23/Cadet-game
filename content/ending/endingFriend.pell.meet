@@ -1,0 +1,19 @@
+@meeting endingFriend.pell
+// SW6 (ending writer A), "About the transfer" on Pell's chat card (ending spec, "The news gets out", Friday Day 33:
+// friends come to you one at a time; their card's own button). Pell wants you to stay, and is bad at hiding it.
+// Canon: his tin of spare screws, one from every ship he's fixed something on; nearly left in his first month.
+// The friends' talks (all six) are neutral as to whether you've told the Captain yet: the button shows from the
+// offer until the address (or Sunday evening on a slower career).
+title: Pell
+from: Pell Okafor
+gist: Pell heard about the transfer. He'd like you to stay, and he tried very hard not to say so.
+== lines
+pell: Oi oi. So. Headquarters. Big words. Very shiny. Congratulations. I hate it.   [laugh]
+pell > you: No, I don't. I'm proud of you. I'm also going to sulk. Both. Like coil three.
+pell: I nearly left, my first month. I'm glad every day I didn't. That's not advice. It's just true.   [sigh]
+? choice
+* What would you do?   flavour:listen
+  pell: Stay. Obviously. But I'm not you, and I can't sleep at night, so ignore me.   [laugh]
+* I'd miss you, you know.   flavour:share
+  pell: Don't. You'll set me off. I've been set off twice today already.   [sigh]
+pell: Whatever you pick, there's a screw in my tin with your name on it. Right. Laters, spanner.

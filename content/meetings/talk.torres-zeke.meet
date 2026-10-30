@@ -1,0 +1,22 @@
+@meeting talk.torres-zeke
+// SW2, 0.92.6 item 13 (FX17's word list): a small Wren talk, 19:00-19:40 on the auditorium stage (a ring of eight
+// chairs, house dark, the stars behind, tea from the kettle). Day 39, Thursday. Zeke Torres, Works. Nothing about being passed over or his dad.
+title: How a drive coil sings
+from: Zeke Torres
+gist: Zeke's small talk on the drive coils: the note they sing, and what it means when it changes.
+== lines
+torres-zeke: Hey! You came. Pull a chair in. Closer, this bit's quiet.   [gesture]
+torres-zeke: Right. A drive coil sings. Not like us. One low note, under everything, all day.
+torres-zeke: Put your hand on the bulkhead in Works and you'll feel it. That's her, working properly.
+torres-zeke: When the note goes flat, she's tired. When it wobbles, she's cross. Coil three wobbles.   [laugh]
+torres-zeke: Reyes on nights says coil three's just shy. We leave each other notes about it.
+torres-zeke: The trick is listening before anything breaks. That's most of the job, honestly.
+torres-zeke: Right, onward. Questions! Good ones, annoying ones, I'll take both.   [nod]
+? choice
+* Can I hear coil three?   rel:torres-zeke+2 flavour:listen mem:talk.torres-zeke.asked
+  torres-zeke: Course. Come down tomorrow. Hand on the casing, eyes shut. She'll sulk at first.   [nod]
+* What note do they sing?   rel:torres-zeke+2 flavour:practical mem:talk.torres-zeke.asked
+  torres-zeke: Somewhere near a low D. Reyes says C. We've had that argument for two years.   [laugh]
+* (Just listen)
+  torres-zeke: Nobody? Fine. Coil three would've asked something. She's nosy.
+torres-zeke: Cheers, everyone. Mind the coils on your way down.

@@ -1,0 +1,19 @@
+@bank all
+// EV2 for lead 45 (V-1, the user's "Formal dinner", 2026-10-29): the visit's seated formal dinner, Thursday Day 18,
+// 19:00-20:15, the Captain's quarters (section 18, slot 'Visit dinner'; the scene is content/meetings/veyliDinner.meet).
+// The game reads every key here first and falls back to its own words in the slot. Mail is "Subject | body", from the Captain.
+== event.diplomatic.dinner.title
+- The Veyli dinner
+== event.diplomatic.dinner.mail
+- Dinner for our Veyli guests | Tonight, 19:00, my quarters, Deck 2. By Wren custom the newest hand aboard sits at a formal table: you. Your chair is at the foot, facing mine. Dress uniform.
+// the level 1 arrow from 18:45
+== event.diplomatic.dinner.ptr
+- The Veyli dinner: your chair, the Captain's quarters
+// the food on the table, 18:45-20:15 (the tap)
+== event.diplomatic.dinner.tap.title
+- The Veyli dinner
+== event.diplomatic.dinner.tap
+- Veyli spiced grains with garden herbs, plated like a painting. Brennan's best china, too.
+// you finish your dinner (the toast as the 40 minutes end)
+== event.diplomatic.dinner.done
+- The plates are cleared. Brennan looks in, pretending not to check.

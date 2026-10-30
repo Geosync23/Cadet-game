@@ -1,0 +1,21 @@
+@meeting talk.tomas
+// W3, Wren talks: Day 25, Thursday 19:00-19:40, a small talk on the auditorium stage (a ring of eight chairs, house dark,
+// the stars behind, tea from the utility room's kettle). Tomas, "Reading a route": the hold colours, a hold passed round.
+title: Reading a route
+from: Tomas Lind
+gist: Tomas's small talk on the climbing wall: what the hold colours mean, with a hold passed round.
+== lines
+tomas: Oh! People came. Hi. Sit anywhere. There's tea. I made too much tea.   [laugh]
+tomas: So. This is a hold. Pass it round. It's heavier than it looks. Don't drop it on Pell.   [gesture]
+tomas: Every route on the wall has its own colour. Red, yellow, blue, green. You only use your colour. That's the rule.
+tomas: Then you read it from the bottom before you start. Where your hands go, where your feet go. Like a sentence.
+tomas: I couldn't read one at all, my first week. I just went up and got stuck. Now I sort of can. Sort of.
+tomas: That's it, really. Does anyone want to ask anything? You can. I don't mind. I might not know.
+? choice
+* Which route is hardest?   rel:tomas+2 flavour:listen mem:talk.tomas.asked
+  tomas: Green. Everyone says red, but it's green. The last hold's tiny. Like a jelly bean.   [laugh]
+* Can you show me on Wall night?   rel:tomas+3 flavour:share mem:talk.tomas.asked
+  tomas: Yes! Tuesday. I'll belay. We'll read it together first. That's the best bit.   [nod]
+* (Just listen)
+  tomas: Thanks for coming. Really. You can keep the tea. Well, not the cups.   [laugh]
+tomas: Can I have the hold back? Thanks. Thanks, everyone.

@@ -48,7 +48,7 @@ One tradition per file, the file named after its id.
 | Key | Required | What it says | Examples |
 | --- | --- | --- | --- |
 | `@tradition <id>` | yes | starts a tradition; the id is lower-case letters, digits and dashes, never changed once it's in the game | `@tradition tiles-night` |
-| `k:` | yes | its hash key, **given by the traditions engineer** (434-499, each once). Ask for one; never reuse one | `k: 435` |
+| `k:` | yes | its hash key, **given by the traditions engineer** (434-499, then 710-719 (0.92.6) and 1300-1349 (0.93.2; 1300-1314 used by FX24), each once). Ask for one; never reuse one | `k: 435` |
 | `title:` | yes | the name players see (Mail subject, Calendar) | `title: Tiles night` |
 | `when:` | yes | the rhythm (below) | `when: weekly tuesday` |
 | `at:` | yes | start and end, ship time | `at: 20:00-21:30` |
@@ -72,6 +72,10 @@ One tradition per file, the file named after its id.
 | `after-shift:` | no | (0.34.51) `yes`: day workers whose shift ends inside the window come straight from it (5 minutes after), if `min:` is still left | `after-shift: yes` |
 | `spare:` | no | (0.34.51) leave this many of its places free (for you): the keenest go first, at most places minus spare | `spare: 2` |
 | `venue:` | no | (0.34.51) a big-gathering venue's standing spots (the deck architect's DECKS[n].gathers: `works-bay`, `plaza`, `bow-lounge`, `mess`, `shuttle-bay`, `observation`) as its first places, before the `where:` lines | `venue: plaza` |
+| `stay:` | no | (0.83, the rec deck) each goer drifts in and stays this many ship minutes somewhere in the window, so they need be free for only that part (Winner Stays On's five hours) | `stay: 40-120` |
+| `unless-flag:` | no | (0.83) the opposite of `flag:`: it happens only until that flag is set (film night in the junior common room, until it moves to the auditorium) | `unless-flag: rec.filmMoved` |
+| `quiet:` | no | (0.83) `career`: no Mail the evening before the career's big days (the rec deck's weekly sport ones) | `quiet: career` |
+| `to-bed:` | no | (0.92.5) `yes`: someone whose bedtime falls in it still comes, if they get 20 minutes or more (its `min`), and leaves 20 minutes before bed (late piano) | `to-bed: yes` |
 | `meal:` | no | `dinner` or `breakfast`: going to it IS that meal for those who go (the sim engineer plans them there instead of the servery); the galley's dish goes in `ties: galley ...` | `meal: dinner` |
 
 Crew ids are the roster's (`brennan`, `calder`, `torres-zeke`, `rina`, `tomas`, `pell`...: see `plans/crew-roster.html`).
@@ -84,6 +88,8 @@ Crew ids are the roster's (`brennan`, `calder`, `torres-zeke`, `rina`, `tomas`, 
 | `weekly wednesday,thursday` | two evenings a week |
 | `every 2 weeks tuesday` / `every 2 weeks tuesday week 2` | every other Tuesday (week 1 = days 1-7, the default; week 2 = days 8-14) |
 | `every 4 weeks saturday week 3` | the Saturday of every fourth week, starting with week 3 (days 20, 48, 76...) |
+| `every 8 weeks monday week 5 from day 29` | the Monday of every eighth week, starting with week 5 (0.92.6, FX17: the new traditions of weeks 5-12) |
+| `every 3 weeks saturday week 2` / `every 6 weeks sunday week 4 from day 64` | every third (or sixth) week; the week is 1-3 (1-6) of the cycle counted from Day 1, so week 10 of the tour is week 4 of a 6-week cycle (0.93.2, FX24: Scone morning, Days 70, 112...) |
 | `quarter week 1 saturday` | the first Saturday of each season (days 6, 97, 188, 279) |
 | `quarter day 1` | the first day of each season |
 | `year day 182` | one day a year (the year is 364 days, Day 1 a Monday) |
@@ -93,6 +99,7 @@ Crew ids are the roster's (`brennan`, `calder`, `torres-zeke`, `rina`, `tomas`, 
 | `birthday` | each crew member's birthday (birthdays are never moved) |
 | `rotation -1` | the day before each crew rotation day (the crew designer's `ROSTER_ROTATIONS`; the Sunday shuttle): its honorees are that rotation's leavers. `rotation +N` from 0 on: the arrivals. |
 | `rotation friday` | the first Friday after a rotation day: its honorees are that rotation's arrivals |
+| `rota wren-small` | (0.83) on the days a rota the game keeps says (section 18's `TRAD_ROTA`: `wren-small`, `wren-chief`, the Wren talks) |
 | `rotation monday dept works` | (0.70.0) any rotation rhythm may add `dept <department>`: only that department's people are its honorees, and with none it doesn't happen (Name on the beam for new Works hands) |
 
 Add any of these after the rhythm: `season greening` (or `season harvest,lanterns`), `from day 30`, `until day 200`. Example: `when: weekly wednesday season greening`.
@@ -101,6 +108,7 @@ Add any of these after the rhythm: `season greening` (or `season harvest,lantern
 
 ## `where:` places
 
+- **The rec deck's own (0.83, rec engineer A):** a tradition whose `where:` lines are all on deck 7 loads only with the rec deck switched on. Its rules live in the game (section 18's `REC_TRADS`: who sits where, the speaker, the rota); a `.trad` file with the same id brings only its words (`from`, the texts, `invite`), so write its rules as the table there says, for the check. Its pools: `rec:lane`, `rec:kayak`, `rec:climb`, `rec:float`, `rec-stand` (the stands), `rec-aud` (the auditorium's seats), `rec-ring` (the talks' chairs on the stage), `rec:stool`, `rec:lectern`, `rec:act`, `rec:booth`, `lounge-seat` (the beanbags), and the venue `river-banks`. Its hash keys are 486-499.
 - `3 pool garden`: a deck and one of the shared pools the schedules know (`gym`, `music`, `garden`, `garden-tend`, `mess-seat`, `lounge-seat`, `bench`, `common-room`...).
 - `3 room Bow lounge: lounge-seat, bench`: the shared places of those types in the room with that name. Extra words after the types: `free` (nobody's work station), `officers` (officers and up only), `ids <regexp>` (only those place ids).
 - Places the deck architect tags for your tradition (`event: '<id>'`) are always used first. Places tagged for several traditions can be named by their tag: `3 pool @long-table` (all of them), or room by room as a type, `3 room Mess hall: @long-table` then `3 room Promenade: @long-table`, so they fill in that order (the long-table seats: 4 chairs at the mess tables' ends, then a trestle table outside the mess; drawn by the longTables and harvestTables decor). `where:` lines are tried in order, and a later one is used only when every place in the earlier ones is taken for the person's whole stay.

@@ -1,0 +1,16 @@
+@bank all
+// W3, Wren talks for RA's talk panel (section 18 REC_TRADS): the speaker's kinds talk.open (they start; {title} the
+// talk), talk.answer (after you ask your question), talk.listen (you just listen). Anyone's fallback; the rota's
+// speakers have their own in their lines files. RA can also open the meetings talk.sato / talk.calder / talk.tomas /
+// talk.esposito-yara / talk.you instead (MEETINGS_BAKED, like any meeting).
+
+== talk.open
+- Hello, everyone. Sit anywhere. Tonight's talk: {title}.
+- Right. Tea's there. This one's called {title}. Here goes.
+== talk.answer
+- Good question. I'll have to think. No, I know. Here's how it goes.
+- Oh, nobody's asked me that before. I like it.   #warm
+- Ask me again on Wall night. Joking. Here's the answer.   #funny
+== talk.listen
+- Thanks for listening. Really. Same time next week, someone else.   #warm
+- That's me done. More tea, anyone?

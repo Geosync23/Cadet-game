@@ -1,0 +1,44 @@
+@template gruff
+// ZW1 (writer), patch 0.92.3 item 26: crew comment when you wear dirty clothes. clothes.remark: yesterday's clothes
+// (flag:clothes.stale); clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3). Bubbles, 60 characters or fewer.
+// Kind, never mean: the joke is on the clothes, not on you.
+== clothes.remark
+? flag:clothes.stale
+- Hm. Yesterday's shirt.
+- Change that. Then we'll talk.
+? flag:clothes.stale tier>=friend
+- Laundry. Today. You'll thank me.   #warm
+== clothes.grubby
+? flag:clothes.grubby
+- Hm. Filthy. Good work, then. Change.
+- You're dripping grime. Not on my floor.   #funny
+? flag:clothes.grubby tier>=friend
+- Clean up. You did well. Still filthy.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 5: more lines for the chat card's opener (greet, near), so a tap doesn't repeat.
+// Heard after a person's own lines are used up (FX13's no-repeat). {hi}, {nick} and {me} are the speaker's own words.
+== greet
+- Hm. You.
+- {hi}. What is it?
+- {hi}. Make it quick.
+- You again. Fine.
+- Hm. Still standing? Good.
+- {hi}. Don't just stand there.
+- {hi}. Something on your mind?
+- What. Oh. It's you. Fine.
+? tier>=acquaintance
+- {hi}, {nick}. You'll do.
+- Hm. You've been working. I can tell.
+? time:morning
+- Morning. Coffee first. Then words.
+? time:evening
+- Evening. Long day. Yours too, by the look.
+== near
+- Busy. Talk if you must.
+- Hold that. No. Like that.
+- {room}. Somebody has to.
+- Don't watch me. Do something.
+- Nearly done. Wait.
+- It's fine. It'll hold.
+- I'm working. Speak up.
+- Hm. Not bad, this. Don't tell anyone.

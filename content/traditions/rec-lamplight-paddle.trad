@@ -1,0 +1,38 @@
+@tradition rec-lamplight-paddle
+// Round 2 (the rec deck): the river hall's lights go down to lamps and a few kayaks drift the slow channel, no racing. Bea Silva leads. Every 4 weeks from week 10 (Days 69, 97...).
+// Rules: FX24 (0.93.2, behind TRAD_0932_ON in section 13). Words: CS1 (plans/trad-0932-words.txt, claude/crew-stories-pitch 7b1e7300).
+k: 1311
+title: Lamplight paddle
+when: every 4 weeks saturday week 2 from day 64
+at: 21:30-22:15
+min: 20
+to-bed: yes
+flag: rec.on
+where: 7 pool rec:kayak
+where: 7 pool rec:kayakq
+who: silva-bea always, juniors 15%, everyone 8%
+host: silva-bea
+from: silva-bea
+invite: host=silva-bea odds=25% line="Lamplight paddle tonight. The river, the lamps, nobody racing. Come and drift."
+
+== mail
+- Lamplight paddle tomorrow, {time}, the river hall. Lights down to the bank lamps, a slow drift down the channel. No racing. I'll lead, very slowly.
+
+== ask
+- Lamplight paddle on the rec deck. It's lovely. You don't have to be good.
+- Bea's taking the kayaks down the slow channel. No racing allowed.
+- Going for the lamplight paddle? Wear something you don't mind splashing.
+
+== here
+- Just drift. The river does the work.
+- Look at the lamps on the water.   #warm
+- Slow. Slower. That's it.
+- Shh. Listen to the paddles.
+
+== thanks
+- The river hall goes down to lamplight, and a few kayaks drift the slow channel with Bea at the front. Nobody hurries.   #warm
+
+== chatter
+- The lamplight paddle was the calmest I've felt all week.   #warm
+- Bea fell asleep in her kayak. Briefly. She says she was resting her eyes.   #funny
+- The river hall by lamplight. You'd never know you were on a ship.

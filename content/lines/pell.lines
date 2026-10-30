@@ -591,3 +591,115 @@
 - Grab a seat. Snacks are mine. Mostly.   #funny
 ? flag:beat.d4-quiz.5
 - Win or lose, there's biscuits after. I made sure.
+
+// ---- Pillar 5 Step 3 (head writer W2): your promotion (C2, X). Easygoing, chatty, talks you up.
+== work
+// Day 10, 17:05: carrying your box, with Tomas
+? flag:promo.box
+- What's in here? Rocks? Is it rocks?   #funny
+- Officer's box. Heavier than a junior's. Fact.
+
+== promoted
+// at the board after your promotion
+- Told you. Didn't I tell you? I told everyone.   #funny
+
+// W3, rec deck R12: Winner Stays On is his; the long stint on the court one Sunday
+== chat
+- Sunday. Winner stays on. I've been on for three hours once. Ate a sandwich between points.   #funny
+- Lightdisc tip, {nick}: be moving when the disc gets to you. Then it curves.   #funny
+- The trick's moving. Move as it hits you and it curves. Then they cry.   #funny
+- I keep the chalkboard. Don't rub your name up the list. I can tell. Different chalk.   #funny
+? weekday:sun time:morning
+- Court's open at half eleven. I'm on first. I'm always on first. That's the rule. My rule.   #funny
+? weekday:mon
+- My legs. I stayed on the court from noon till four yesterday. I may live there now.   #funny
+== smalltalk
+- Winner stays on. That's me.   #funny
+- Who's next? Name on the board.
+- Pell takes it!   #funny
+
+== disc.charged
+- Oi oi! Charged!
+- Here it comes, spanner!   #funny
+== disc.curve
+- Swerve!
+- Did you see that curve?
+- Where's it going? Who knows.   #funny
+== disc.point
+- Get in!
+- Pell scores!   #funny
+- Nearly had it. Nearly.
+== disc.win
+- Pell takes it!
+- Winner stays on!   #funny
+== disc.lose
+- Ah, nuts. Again!
+- No way. Best of five.   #funny
+
+// ---- SW1 (2026-10-24, patch 0.92.3 item 15): his own Talk a while frames (main characters don't use the shared ones)
+== talk.start
+- Oi oi. A natter? Go on. I was only pretending to work.   #funny
+- Right, so. Sit down before I start without you.
+- A chat? You've caught me between snacks. Perfect timing.   #funny
+? tier>=friend
+- {nick}! Good. I've saved up three stories and a biscuit.   #warm
+- There you are. I was just thinking I'd come and find you.   #warm
+
+== talk.sit
+- Shove up. No, you sit there. That's the warm end.
+- Sit. Mind the crumbs. They're mine, but mind them.   #funny
+- Take the comfy bit. I'll perch. I'm a good percher.   #funny
+
+== talk.filler
+- Where was I? Oh, nowhere. Nice here, though.
+- Hear that? Fan on the turn. Tomorrow's job. Not tonight's.
+- I'm going to have a biscuit. I'm thinking about it, anyway.   #funny
+- This is the good bit of a day. The sitting bit.   #warm
+- Hang on, I had a story. It's gone. It'll come back at three in the morning.   #funny
+- Rina would say I'm rambling. Rina's not here. Ramble on.   #funny
+
+== talk.end
+- Right, so. That's me sorted. Cheers for the natter.   #warm
+- Good chat, that. Better than a nap. Nearly.   #funny
+- Go on, then. I'll keep the next one warm. It's a long one.   #funny
+- That's done me good. Like second breakfast, for the ears.   #funny
+- Cheers, {nick}. You're a good one to sit with.   #warm
+
+== talk.stop
+- Off? Fair. I'll finish the story to myself. It goes well.   #funny
+- Go on. We'll pick it up. I never forget a story. Everything else, yes.   #funny
+- No bother. Laters. Bring snacks next time.
+
+== talk.go.shift
+- Ah, nuts. Shift. Calder's board waits for no one. Later?
+- Got to dash. On in five, and I've not found my spanner. Later?
+
+== talk.go.bed
+- I'm off to bed. I won't sleep. I'll try. Tomorrow?   #funny
+- Bunk's calling. It's never sure what for. Night, {nick}.   #funny
+
+== talk.go.trad
+- Can't stop. {trad}'s on. There'll be biscuits. Coming?
+- Sorry, {trad}. I promised I'd be there. Walk with me?
+// ---- ZW1 (writer), patch 0.92.3 item 26: you in dirty clothes. clothes.remark: yesterday's clothes (flag:clothes.stale);
+// clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3's hook). Bubbles, 60 characters or fewer; kind, never mean.
+== clothes.remark
+? flag:clothes.stale
+- Oi oi, yesterday's shirt! Welcome to the club, spanner.   #funny
+- Same shirt? Right, so, I respect it. I also smell it.   #funny
+== clothes.grubby
+? flag:clothes.grubby
+- Look at the state of you! Proper tech, that is.   #funny
+- You're grubbier than me. Nobody's grubbier than me.   #funny
+? flag:clothes.grubby tier>=friend
+- Change before Calder clocks it. I'll keep watch.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
+== bday.circle
+- Oi oi! Happy birthday, {other}! Corner piece is mine.   #funny
+- Happy birthday! Right, so, I'll have a slice. For you.   #funny
+== bday.circle.you
+- Oi oi, {nick}! Happy birthday! Cake time!   #warm
+== bday.thanks
+- Oi oi! Thanks, everyone! I'll stay awake for this one.   #funny
+- Right, so, you lot. Thanks. I'm touched. And hungry.   #warm

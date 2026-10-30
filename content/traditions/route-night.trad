@@ -1,0 +1,37 @@
+@tradition route-night
+// SW2, 0.92.6 item 7(a), week 6 (FX17's shape: Wednesday 19:30, the chart room, Survey or Helm). Route night: every 8
+// weeks from Day 38. Dev Raman spreads the week's route on the chart table and everyone puts a pin where they think the
+// Wren will be in seven days; the nearest pin is read out at the next one (no prize but the reading out). Raman hosts.
+k: 713
+title: Route night
+when: every 8 weeks wednesday week 6 from day 36
+at: 19:30-20:20
+min: 20
+where: 2 room Chart room: lounge-seat, common-room
+where: 2 room Observatory: common-room
+hold: 1
+who: raman always, helm 60%, survey 40%, stargazer 40%, everyone 10%
+anim: talk
+host: raman
+from: raman
+invite: host=raman odds=25% line="Route night in the chart room. Bring a guess. I'll bring the pins."
+
+== mail
+- Route night tomorrow, {time}, in the chart room. The week's route on the big table, and a pin for everyone: where will we be in seven days?
+
+== ask
+- Route night in the chart room. Put your pin in. Raman reads the closest out next time.
+- Going to route night? Raman explains every turn. Slowly. Lovingly.   #funny
+
+== here
+- My pin's there. Don't move it.
+- Raman says the turn's gentle. All his turns are gentle.   #funny
+- Look how far we've come since the Line.
+
+== thanks
+- Raman spreads the week's route over the chart table. Everyone gets a pin, and puts it where they think the Wren will be in seven days.
+
+== chatter
+- I put my pin right on the dust. Raman winced.   #funny
+- Route night's lovely. You can see the whole week on one table.
+- My pin was the closest last time. Raman read it out and everything.   #warm

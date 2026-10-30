@@ -1,0 +1,48 @@
+@overheard rec
+// W3, rec deck R12: two crew talking about the rec dec as you pass; Deck 4 above the auditorium and the regatta.
+
+? pair:any+any
+A: Coming down the rec dec after shift?
+B: If there's a lane free.
+A: There's never a lane free.
+B: Then the float room.
+
+? pair:any+any
+A: Who left the float room on "moon"?
+B: Not me.
+A: You've got a bruise on your forehead.
+B: Not me.   #funny
+
+? pair:friend
+A: My arms are dead.
+B: Did you ring the bell?
+A: I rang the bell.
+B: Then it was worth it.   #warm
+
+? place:music_room pair:any+any
+A: Talent night's in three days. I need the piano.
+B: You've had the piano all week.
+A: The officers have stopped knocking. That means they like it.   #funny
+
+? deck:4 weekday:sun time:morning pair:any+any
+A: What was that? A horn?
+B: The regatta. Holt starts every heat with it.
+A: Right under my bunk.
+
+? pair:galley+any
+A: Someone's dripped pool water all through the mess.
+B: Wasn't me.
+A: Your hair's wet.
+B: It's a damp sort of day.   #funny
+
+? deck:7 pair:any+any
+A: They ran out of numbers, you know.
+B: For the lift?
+A: That's why it says R.
+B: I thought R was for "really good".   #funny
+
+? deck:7 weekday:sun pair:any+any
+A: How long's Pell been on the court?
+B: Since half eleven.
+A: It's nearly four.
+B: He's had a sandwich.   #funny

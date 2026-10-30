@@ -1,0 +1,25 @@
+@meeting vesselRoundOne
+// SW4, the Veyli vessel: Sunday Day 28, 10:00-11:30, the Works bay bench. Taavek lays the broken part down, sketches
+// and points (the read-with-a-pad and point poses); you, Calder and Zeke work out what it is. One choice; any answer
+// is right. The sketch stays on the bench (event.veyliVessel.tap.sketch.bench).
+title: The round one
+from: Taavek
+gist: At the Works bay bench, Taavek showed you the broken part: an impeller for their coolant pump, cracked through the hub. Nothing in the Wren's stores is like it. It will have to be made.
+== lines
+taavek: Here. The round one.   [gesture]
+taavek: From the pump. For the cold. It goes round, round, round. Now it goes clunk.   [laugh]
+torres-zeke: Look at the hub. Cracked right through. That's been a long time coming.
+calder: Twelve blades. Ours have nine. Nothing in stores this shape.
+taavek: I draw it. You look. Then you say.   [gesture]
+calder > you: {me}. What is it?   [listen]
+? choice
+* An impeller. It pushes their coolant round.   flavour:practical rel:calder+1
+  calder: Good. Write it on the sketch.   [nod]
+* A fan, sort of? For the cold side?   flavour:listen rel:torres-zeke+1
+  torres-zeke: Close. An impeller. It shoves the coolant round, not air.   [nod]
+* The round one.   flavour:cheer rel:taavek+1
+  taavek: Yes! The round one. You learn very fast.   [laugh]
+taavek: Impeller. A good word. Long. I keep "the round one".   [laugh]
+calder: Nothing like it aboard. It will have to be made.
+taavek: Made. Yes. Here? With your machines?   [listen]
+calder: Tomorrow, in the machine shop. Today, the chain. One o'clock.   [gesture]

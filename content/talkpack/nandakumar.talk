@@ -1,0 +1,380 @@
+@talks nandakumar
+// TW1, the Talk a while pack: Dr. Priya Nandakumar's own talks (she/her). Short, calm sentences, mostly instructions;
+// never raises her voice; asks one question and waits for the true answer. Warm and dry off duty. Never anyone's
+// medical details. Her roster thread is burnout: hint at it, never resolve it.
+
+only: own
+
+== sign
+topic: work
+them: You've seen my door sign. IF YOU ARE BLEEDING, DECK 3.
+them: People think it's a joke. It's directions. You'd be surprised who needs them.   #funny
+ask: Where's the infirmary? From here. Without looking.
+listen: Does anyone actually read it?
+  them: Everyone reads it. Then they come in anyway, to tell me it's funny. Fine.   #funny
+share: Deck 3, past the mess.
+  them: Good. Now you'll never need it. That's how it works.
+cheer: Follow the person saying "drink some water".
+  them: That's me. Or Rina. Both correct.   #funny
+
+== chillies
+topic: hobby
+when: tier>=acquaintance
+them: My chillies are fruiting. Same seeds my mother grew. Third generation now.
+them: Brennan calls them a hazard. She's asked for more twice.   #funny
+ask: Is there something you grow, or keep, from home?
+listen: How hot are they, honestly?
+  them: Hot. Start with half. Then drink some water. That's medical advice.   #funny
+share: A habit. Something my family did.
+  them: Habits travel well. Better than seeds, sometimes. Keep it going.   #warm
+cheer: My sense of humour. It's thriving.
+  them: Good. That's a health indicator. I'll note it.   #funny
+
+== silence
+topic: work
+when: tier>=colleague
+them: I ask one question. Then I wait. People fill a silence. Then they say where it hurts.
+them: It works on everyone. Nearly everyone.
+ask: Do you find a silence easy, or do you fill it?
+listen: Who doesn't it work on?
+  them: Chief Holt. He outlasts me. We sit there like two clocks.   #funny
+share: I fill it. Every time.
+  them: Most people do. Count to five first. It's a kind thing to give someone.   #warm
+cheer: I fill it with biscuits.
+  them: Crumbs are a kind of answer. Not a good one. Drink some water.   #funny
+
+== garden-hour
+topic: plans
+when: tier>=friend
+them: I'm meant to sit in the garden for an hour off duty. Oduya's orders.
+them: I manage ten minutes. Then I think of something. I'm working on it.   #funny
+ask: When do you get to stop looking after everyone?
+listen: Does anyone look after you?
+  them: Oduya asks the right question once a week. And Rina tells me to drink water. Fair.   #funny
+share: Not often. I'm working on it.
+  them: Then we'll work on it together. Ten minutes. Then eleven.   #warm
+cheer: When I'm asleep. Mostly.
+  them: Sleep counts. Eight hours. I'll know.   #funny
+
+// ---- SW1 (2026-10-24, patch 0.92.3 item 15, plans/talk-main-plan.md): 26 more of Dr. Nandakumar's own, laddered
+// (10 with no tier gate, then acquaintance, colleague, friend, close, from her roster's "tells" lines). Never anyone's
+// medical details, no names. Her thread (tired, keeps saying yes) is hinted at close, never resolved. Rina's exam is
+// Rina's story: not here. Her card's needs are practical: the listen answers are the warm ones.
+
+== knock-once
+topic: work
+them: Clinic's eight till five. After five, knock twice. After ten, knock once and mean it.
+ask: When did you last see a doctor? Not me. Anyone.
+listen: Why knock once after ten?
+  them: Twice wakes Rina. Once wakes me. I'd rather it was me.   #warm
+share: Before I came aboard.
+  them: Then you're due a check. Not today. This week. Rina will book you.
+cheer: Does Brennan's kitchen count?
+  them: No. Though she's seen more burns than I have.   #funny
+
+== blue-trays
+topic: work
+them: The blue trays in the infirmary are sterile. Everyone touches the blue trays. Everyone.
+ask: Are you a toucher? Most people are, in a new room.
+listen: What happens if I touch one?
+  them: Rina sighs. Then she sterilises it again. The sigh is the punishment.   #funny
+share: I keep my hands in my pockets.
+  them: Wise. Pockets are underrated. Medically.   #funny
+cheer: Only the ones that look comfy.
+  them: Nothing in my infirmary looks comfy. On purpose. People get better faster.   #funny
+
+== lie-on-a-mat
+topic: tradition
+when: weekday:sun
+them: Sunday slow stretch, eight o'clock. I lead it, quietly. People think it's a class.
+them: It's mostly lying on a mat. That's allowed. That's the point.   #funny
+ask: How do your shoulders feel? Honestly.
+listen: What's the hardest stretch?
+  them: Keeping still. People can touch their toes. They can't stop fidgeting.   #warm
+share: Tight. All week.
+  them: Then come. Bring nothing. Lie down. That's the first lesson.
+cheer: Like they're carrying the ship.
+  them: They're not. The ship carries herself. Put her down.   #funny
+
+== one-a-day
+topic: food
+them: One tea a day. Ten o'clock. Strong. After that, water.
+ask: What do you drink most, honestly?
+listen: Why only the one?
+  them: One is a pleasure. Five is a symptom. Usually of a long board.   #warm
+share: Tea. Too much tea.
+  them: Swap one for water. Just one. I'm not a monster.   #funny
+cheer: Whatever's nearest.
+  them: Then I'll keep a jug nearest. Watch me.   #funny
+
+== three-laps
+topic: day
+when: time:morning
+them: I've started running before breakfast. Three laps. Nobody's joined me yet.
+them: Vance timed me once, without asking. I didn't ask the time. He told me anyway.   #funny
+ask: Are you a morning person, or do you only pretend?
+listen: Why start running now?
+  them: A patient asked if I took my own advice. I didn't. Now I run.   #warm
+share: Pretend, mostly.
+  them: Pretending counts if your feet move. Come tomorrow. Six.
+cheer: I run. To breakfast.
+  them: That's a start. Add a lap. Then breakfast.   #funny
+
+== best-air
+topic: ship
+them: The Wren's air is the best I've worked in. Three years, and nobody's had a chest cough.
+ask: Have you noticed you sleep better aboard?
+listen: Why is the air so good?
+  them: Calder. She'd say the scrubbers. It's Calder.   #warm
+share: I do. I didn't expect it.
+  them: Most people don't. Steady air, steady hum, dark corridors at night. It adds up.
+cheer: Except Pell.
+  them: Pell sleeps well. Just not at night. That's a different problem.   #funny
+
+== always-mugs
+topic: news
+them: Three coughs a week, as a rule. This week, nine. Somebody's sharing a mug.
+ask: Do you wash your own mug?
+listen: How do you know it's a mug?
+  them: It's always a mug. Twenty years. Always a mug. Never the same mug.   #warm
+share: Every time.
+  them: Good. Tell your bunk room. Kindly. With the facts.
+cheer: Most weeks.
+  them: Most weeks is how coughs start. Wash it.   #funny
+
+== chilli-terms
+topic: crew
+them: Brennan and I have terms. I grow chillies. She calls them a hazard. She uses every one.
+ask: Who aboard do you argue with, but like?
+listen: Who wins, you or Brennan?
+  them: Brennan. Then she feeds me. So do I win? Unclear. I'm not complaining.   #warm
+share: Someone back home. Every day.
+  them: That's a good person to have. Argue well. Eat together.   #warm
+cheer: My alarm clock.
+  them: Your alarm clock is on my side. Listen to it.   #funny
+
+== one-stool
+topic: hobby
+them: My corner of the garden has one stool. People ask why only one. That's why.   #funny
+ask: Do you like company when you're thinking, or none?
+listen: Could I see the corner, one day?
+  them: Yes. I'll find another stool. Don't tell anyone. They'll all want one.   #warm
+share: None. I think better alone.
+  them: Then you understand the stool.
+cheer: Company. And snacks.
+  them: Then you want Brennan's corner. Mine has chillies. Different snacks.   #funny
+
+== sideways-wind
+topic: home
+when: tier>=acquaintance
+them: I'm from New Aberdeen. Grey stone, a harbour, wind that comes in sideways.
+ask: What's the weather like, where you're from?
+listen: Do you miss the wind?
+  them: Every morning. I stand by a vent on Deck 2 some days. It isn't the same. It helps.   #warm
+share: Milder than that, I think.
+  them: Most places are. New Aberdeen builds character. And coats.   #funny
+cheer: There isn't any. It's a ship now.
+  them: Ship weather: twenty-one degrees, slightly dry. Have some water.   #funny
+
+== two-sons
+topic: home
+when: tier>=acquaintance
+them: My sons are grown, both in New Aberdeen. The eldest gardens. The younger doesn't, loudly.   #funny
+them: They write every fortnight. Taking turns. They think I don't know it's a rota.   #funny
+ask: Does your family write to you much?
+listen: What does the eldest grow?
+  them: Chillies. From my seeds. His are hotter. I haven't told him.   #warm
+share: Not as much as I'd like.
+  them: Write first. People answer. It's the first one that's hard.
+cheer: Too much. I'm behind.
+  them: Then you're loved, and behind. Both fine. Answer one tonight.   #warm
+
+== eleven-pages
+topic: day
+when: tier>=acquaintance weekday:tue
+them: Rest day. I've read eleven pages and looked in on the infirmary twice. Through the door.
+them: Rina saw me. She said "Doctor." Just that. I came away.   #funny
+ask: What do you do on a rest day that's actually rest?
+listen: Why look in at all?
+  them: Habit. A good habit, gone a bit far. I know. I'm a doctor.   #warm
+share: Sleep late. Then a slow breakfast.
+  them: Prescription noted. I'll try it tomorrow. I'm off tomorrow too. No excuse.
+cheer: Hide from the board.
+  them: I haven't got a board. I've got a door. It's harder to hide from a door.   #funny
+
+== salt-pots
+topic: food
+when: tier>=acquaintance
+them: I check the salt pots on the mess tables. Quietly. Brennan knows. We don't discuss it.
+ask: Do you salt your food before you taste it?
+listen: Do you really check them?
+  them: Weekly. Down a third this year. Brennan's cooking's got better. That's why.   #warm
+share: After. Always taste first.
+  them: Good. Taste first. That's a rule for most things.
+cheer: Before, during and after.
+  them: Then we'll talk. Not today. Soon.   #funny
+
+== plaster-box
+topic: work
+when: tier>=acquaintance weekday:mon
+them: There's a first-aid kit on every deck. I check them on Mondays.
+them: Someone always takes the plasters and leaves the box. Every week. The same deck.   #funny
+ask: Do you know where your nearest kit is?
+listen: Who takes the plasters?
+  them: I don't say. Someone with very tidy cuts and a very tidy conscience.   #funny
+share: By the lift, I think.
+  them: Close. Left of the lift. Go and look. Then you'll never forget it.
+cheer: Rina's pocket.
+  them: Fair. Rina carries plasters the way other people carry biscuits.   #funny
+
+== next-door
+topic: crew
+when: tier>=acquaintance
+them: Oduya's office is next to mine. He listens to people's heads. I listen to their chests.
+ask: Who do you go to when something's on your mind?
+listen: Do you two ever disagree?
+  them: About sleep. He says eight hours. I say eight and a half. We're both right. It's annoying.   #funny
+share: A friend. Usually over food.
+  them: That's good medicine. Better than most of mine.   #warm
+cheer: My pillow. It never argues.
+  them: Pillows are excellent listeners. Poor advice, though.   #funny
+
+== whole-face
+topic: crew
+when: tier>=colleague
+them: Rina will make a fine doctor. She listens with her whole face. People tell her things.
+them: I haven't told her. She'd argue. Then she'd work harder, and she doesn't need to.
+ask: Is there someone you think the world of, and haven't said?
+listen: When will you tell her?
+  them: When it helps her most. Not before. Timing's half of medicine.   #warm
+share: Yes. I should say it.
+  them: Then say it. This week. Don't wait for a good moment. There isn't one.
+cheer: Possibly you. Don't tell anyone.
+  them: Noted. Kept confidential. Like everything.   #funny
+
+== garden-mint
+topic: work
+when: tier>=colleague
+them: Most nights someone knocks after ten. Often it isn't their body that's sore. It's the day.
+them: I make tea either way.
+ask: What helps you, after a bad day?
+listen: What tea do you make?
+  them: Mint. From the garden. Everyone thinks it's medicine. It's mint. It helps anyway.   #warm
+share: Talking it through with someone.
+  them: Yes. Oduya's door is next to mine. That isn't an accident.
+cheer: Sleep, and pretending it didn't happen.
+  them: Sleep, yes. The pretending, less. Bad days want looking at. Briefly.
+
+== one-to-ten
+topic: hobby
+when: tier>=colleague
+them: I rate my chillies one to ten. Brennan's never gone above a four. She says she has.
+ask: How much heat can you take, honestly?
+listen: What's a ten like?
+  them: Nobody knows. I've grown one. I'm waiting for a very brave volunteer.   #funny
+share: Not much. I'm a two.
+  them: Two is honest. Most people say five and cry at three.   #funny
+cheer: Ten. Probably.
+  them: Come to the garden. We'll find out. Bring water. That isn't a joke.   #funny
+
+== six-beds
+topic: ship
+when: tier>=colleague
+them: Six beds in the infirmary. In three years they've never all been full. I like that record.
+ask: Is there a record you'd like to keep?
+listen: What's the most you've had in?
+  them: Four. One storm night. Everyone up and about by breakfast.   #warm
+share: Never missing a shift.
+  them: Keep it, but not at any cost. If you're unwell, you're unwell. Come and see me.
+cheer: Most helpings at dinner.
+  them: Pell holds that one. I've stopped watching. Professionally.   #funny
+
+== stop-a-bleed
+topic: plans
+when: tier>=colleague
+them: By the end of the year I'd like every junior to know one thing: how to stop a bleed.
+them: Ten minutes to learn. It's the sign on my door, really. Before the door.
+ask: Would you come, if I ran a session?
+listen: Is it hard to learn?
+  them: No. That's the good news. It's hard to remember when it matters. So we practise.   #warm
+share: Yes. I'd feel better knowing.
+  them: Good. I'll put it on the board. Bring a friend. Bring two.
+cheer: Only if there are biscuits.
+  them: There'll be biscuits. Afterwards. Hands washed.   #funny
+
+== eleven-floors
+topic: work
+when: tier>=friend
+them: Before the Wren I worked in a city hospital. Eleven floors. I knew almost nobody's name.
+them: Here I know all of them. Seventy-five names. I chose that.   #warm
+ask: Would you rather know everyone a little, or a few people well?
+listen: Do you miss the city?
+  them: The noise, sometimes. Never the speed. Here I get to finish a conversation.   #warm
+share: A few, well.
+  them: A good answer. A ship gives you both, if you let it.
+cheer: Everyone a little. I'm nosy.
+  them: Nosy is curiosity with a poor reputation. It's useful. In moderation.   #funny
+
+== aft-porthole
+topic: ship
+when: tier>=friend time:night
+them: The infirmary porthole faces aft. At night I look back at where we've been.
+them: Most people look ahead. I like the distance. It's proof we came a long way.
+ask: Do you look back much, or only ahead?
+listen: What can you see from there?
+  them: Nothing much. A few stars we've passed. That's enough. That's the whole view.   #warm
+share: Back, more than I'd like.
+  them: Looking back is fine. Just don't stay there. Come and have tea after.   #warm
+cheer: Ahead. Mostly to dinner.
+  them: Looking ahead to dinner is sound medical planning.   #funny
+
+== on-a-string
+topic: hobby
+when: tier>=friend
+them: My first plant aboard took a year to fruit. One chilli. I dried it. It hangs by my bunk.
+ask: Have you kept something small, from a first time?
+listen: Why dry it?
+  them: So it keeps. Some things you want to keep looking at. That's one.   #warm
+share: The first job I finished here.
+  them: Good. Remember it on a bad day. That's what first things are for.
+cheer: My first burnt toast. In spirit.
+  them: Everyone's had one. Keep the spirit. Bin the toast.   #funny
+
+== too-often
+topic: day
+when: tier>=close
+them: Can I tell you something I don't tell patients? I say yes too often.
+them: Extra clinic. A late knock. One more run. I say yes. Then I'm tired, and I say yes again.
+ask: Is there something you say yes to, that you should say no to?
+listen: What would help, right now?
+  them: Someone noticing. You have. That's a start. I'll take it from there.   #warm
+share: Staying up late. Every night.
+  them: Then we'll both practise. One no a week. I'll report back. So will you.
+cheer: Second helpings. Never once said no.
+  them: That's a yes I approve of. Keep that one.   #funny
+
+== tea-at-four
+topic: crew
+when: tier>=close
+them: Rina's started bringing me tea at four. Without asking. I've stopped arguing.
+them: I taught her to notice. She noticed me. That's fair.   #warm
+ask: Who do you let look after you, when you won't ask?
+listen: Does the tea help?
+  them: Yes. Don't tell her. She'd make it stronger.   #warm
+share: My bunk room. They just do.
+  them: Good. Let them. It's the hardest thing I teach, and I'm poor at it myself.
+cheer: Nobody. I'm very independent.
+  them: So was I. Then I had tea at four. Try it.   #funny
+
+== harbour-first
+topic: home
+when: tier>=close
+them: Next year I'll go home on leave. Walk the harbour. See my sons. Then I'll come back.
+them: I always come back. Seventy-five names. They're mine now.   #warm
+ask: Where would you go first, on your first day home?
+listen: Will your sons mind you coming back?
+  them: They'll grumble. Then they'll ask for chilli seeds. They always ask for seeds.   #warm
+share: Our kitchen. Straight there.
+  them: Good. Kitchens first. Everything else can wait.   #warm
+cheer: Somewhere that does good chips.
+  them: New Aberdeen does. I'll tell you which. Strictly off the record.   #funny

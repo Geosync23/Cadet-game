@@ -1,0 +1,24 @@
+@meeting stormLukasFri
+// EW2 (events writer 2), the ion storm story A "Sixty by lamplight" (storm plan v1.2; brief plans/event-storm-lines-brief.md).
+// Friday Day 12, a moment (section 20c, like moment:quiz) from 17:00 to 20:30 when you're near Lukas Dlamini at the
+// servery or in the galley. Brennan is off Friday and Saturday; tomorrow's lantern supper is his. FOR THE BUILDER: the
+// first line is inserted from the bank by the save: event.ionStorm.lukas.hi.bunk (you're still in Bunk 1) or
+// event.ionStorm.lukas.hi.moved (you've moved to the officers' corridor); the brief's flag:cabin.moved, the real flag
+// yours to name. GUARD RAILS: the number is tonight's covers, never his days until home; nothing of the person he
+// married, his worry theme, or the galley being hard work. If you don't meet him, his Mail (event.ionStorm.mail.lukas)
+// comes at about 20:50.
+title: Sixty
+from: Lukas Dlamini
+gist: Lukas is running the galley through the storm while Brennan's off, and tomorrow's lantern supper is his. Sixty bowls by lamp light.
+== lines
+dlamini-lukas: That's the covers. Tomorrow. The lantern supper, by lamp light.
+dlamini-lukas: Brennan's off. So it's my galley. Sixty bowls, and the lights down low.
+dlamini-lukas > you: The galley runs itself, of course. Tomorrow it runs itself sixty times.   [sigh]
+? choice
+* I'll give you a hand tomorrow.   rel:dlamini-lukas+1 flavour:practical flag:storm.lukas.promised
+  dlamini-lukas: Suppose so. Lanterns are in Deck 5 storage. Bring all of them. Appreciated.   [nod]
+* She left you in charge for a reason.   rel:dlamini-lukas+1 flavour:cheer
+  dlamini-lukas: She left me a list. Twelve lines. Eleven of them say don't panic.   [laugh]
+* What's the worst that can happen?   rel:dlamini-lukas+1 flavour:listen
+  dlamini-lukas: Sixty.   [sigh]
+dlamini-lukas: Right then. Queue's moving. See you tomorrow, {me}.

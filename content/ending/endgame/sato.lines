@@ -1,0 +1,18 @@
+@crew sato
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- No, the other news. You stayed. Mori told me. Mori tells me everything twice.   #funny
+? endgame:early
+- Tea? It's celebration tea. Same leaf, extra kelp. Nobody else will drink it either.   #funny
+? endgame
+- Now there's no exam to think about, think about comets. Everyone needs a comet.
+- Mori says you stayed for the people. I say the sky's better here. We're both right.
+- An ordinary day in the lab: three samples, one surprise. That's my ordinary.
+
+== bye
+? endgame
+- Go on. I'll forget your name by lunch and remember your sample number. Fondly.   #funny

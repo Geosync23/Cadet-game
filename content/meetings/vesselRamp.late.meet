@@ -1,0 +1,22 @@
+@meeting vesselRamp.late
+// SW4, the Veyli vessel: Sunday Day 28, you reach the ramp after 09:35 but before 10:30. Taavek and Calder waited for
+// you there (the user, 2026-10-26: up to an hour). The same replies as vesselRamp; nobody scolds you.
+title: Off the Tern
+from: Taavek
+gist: You met Taavek, the Veyli ship's engineer, at the foot of the Tern's ramp. They and Chief Calder had waited for you, with coffee.
+== lines
+calder: There you are. They waited. So did I.   [nod]
+taavek: Hello! Hello. Taavek. Engineer. Yes.   [gesture]
+taavek > you: You are the one who meets? Late one who meets. Still good.   [laugh]
+taavek: This is why I come. The round one. Broken. Very.   [sigh]
+taavek > you: When you came, someone met you, also?   [listen]
+? choice
+* Welcome aboard. Sorry I'm late. Let's see the round one.   flavour:practical rel:taavek+1
+  taavek: Late is fine. First you look, then the words. Good.   [nod]
+* Zeke did. He showed me my bunk, and he was on time.   flavour:share rel:taavek+1,torres-zeke+1
+  taavek: On time! Ha. Zeke met you, you meet me. Good. The way.   [laugh]
+* Coffee? Or have you had one?   flavour:cheer rel:taavek+1
+  taavek: Coffee second! The Chief gave me coffee first. Good Chief.   [laugh]
+calder: Chief Calder. Works. We've done the names. Twice, while we waited.   [nod]
+taavek: The crate is mine. Parts inside. Also sweets.   [gesture]
+calder: The bench is this way. Bring the round one.   [gesture]

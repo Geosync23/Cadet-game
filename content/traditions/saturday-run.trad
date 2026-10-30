@@ -1,0 +1,39 @@
+@tradition saturday-run
+// Saturday run (FX14, 0.92.5 item 16; SW1's weekend pitch, the user's yes 2026-10-24): every other Saturday before the
+// long breakfast, Dr. Nandakumar leads three easy laps of the promenade, the Lap of the Wren's loop. Behind WEEKEND_ON.
+k: 458
+title: Saturday run
+// (the user, 2026-10-25: spread across weeks, two new a weekend; was: every 2 weeks saturday week 1)
+when: every 4 weeks saturday week 1 from day 1
+at: 07:00-07:40
+min: 20
+wake: 15
+where: 3 pool @lap-of-the-wren
+where: 3 room Promenade: bench
+hold: none
+who: nandakumar always, vance 70%, runner 50%, gym-regular 50%, early-riser 20%, everyone 5%
+anim: talk
+host: nandakumar
+from: nandakumar
+
+== mail
+- Saturday run tomorrow at {time}. Three laps of the promenade, any speed. Then breakfast. Then water.
+
+== ask
+- Saturday run in the morning. Three laps. I'm aiming for two and a half.   #funny
+- Running before breakfast with the doctor? She says it's good for us. She's usually right.
+- Three slow laps, then pancakes. That's the deal I've made with myself.   #funny
+
+== here
+- Keep breathing. In, out. Any order you like.   #funny
+- Lap two. Nearly there. Well. Nearly at lap three.   #funny
+- Can you still talk? Then it's the right pace.
+- Wave at the windows. Everyone else is still asleep.   #funny
+
+== thanks
+- You fall in with the Saturday runners: three easy laps of the promenade, the big windows going by, and the long breakfast waiting at the end.
+
+== chatter
+- Ran three laps before breakfast. Ate four pancakes after. That's balance.   #funny
+- Vance turned up to the Saturday run with a stopwatch. Of course he did.   #funny
+- The doctor runs the way she does everything. Calmly, and faster than you.   #warm

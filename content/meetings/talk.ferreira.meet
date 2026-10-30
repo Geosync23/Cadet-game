@@ -1,0 +1,22 @@
+@meeting talk.ferreira
+// SW2, 0.92.6 item 13: Day 46, Thursday 19:00-19:45, a chief's talk in the auditorium seats. Lucia Ferreira, Comms
+// Chief: "Messages that came home late". She never reads a message: the talk is about delays, never about contents.
+title: Messages that came home late
+from: Lucia Ferreira
+gist: Ferreira's talk on the relay, the dust, and the birthday message that arrived a year late.
+== lines
+ferreira: Hello, hello! Sit anywhere. Chef sent biscuits, so be nice to the person passing them.   [gesture]
+ferreira: Every message home goes through my office. I never read them. I do count them.   [laugh]
+ferreira: Out past the Line the relay's slow. A message can wait days for a gap in the dust.
+ferreira: The latest one I ever delivered was a birthday message. Nearly a year late.
+ferreira: Three hundred and sixty-four days. It landed on the next birthday. Right on time.   [laugh]
+ferreira: Late isn't lost. Somebody always keeps a message safe until it can go. That's us.   [nod]
+ferreira: So write home, even when the relay's slow. Now, questions! I love questions.
+? choice
+* Where does a message wait?   rel:ferreira+2 flavour:practical mem:talk.ferreira.asked
+  ferreira: In the relay queue, safe as a letter in a drawer. When a gap opens, off it goes.   [nod]
+* Do you ever peek? Even once?   rel:ferreira+2 flavour:cheer mem:talk.ferreira.asked
+  ferreira: Never, ever. I read the addresses. That's quite enough gossip for anyone.   [laugh]
+* (Just listen)
+  ferreira: No questions? Then go and write to someone. I'll see it gets there.
+ferreira: Thank you all. Bye for now, and write home.

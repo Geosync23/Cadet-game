@@ -1,0 +1,44 @@
+@template dry
+// ZW1 (writer), patch 0.92.3 item 26: crew comment when you wear dirty clothes. clothes.remark: yesterday's clothes
+// (flag:clothes.stale); clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3). Bubbles, 60 characters or fewer.
+// Kind, never mean: the joke is on the clothes, not on you.
+== clothes.remark
+? flag:clothes.stale
+- Yesterday's shirt. Brave. Wrong, but brave.   #funny
+- I've seen that outfit before. Yesterday, mostly.   #funny
+? flag:clothes.stale tier>=friend
+- Change your shirt. I'm saying it because I like you.   #warm
+== clothes.grubby
+? flag:clothes.grubby
+- You look like you lost a fight with a machine.   #funny
+- Interesting look. Is the oil on purpose?   #funny
+? flag:clothes.grubby tier>=friend
+- Wardrobe. Now. I'll pretend I didn't see.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 5: more lines for the chat card's opener (greet, near), so a tap doesn't repeat.
+// Heard after a person's own lines are used up (FX13's no-repeat). {hi}, {nick} and {me} are the speaker's own words.
+== greet
+- Oh. It's you. Good. I was getting bored.
+- {hi}. You're still here. Impressive.
+- {hi}, {nick}. Don't tell me. You're lost.
+- {hi}. I'd stand up, but I won't.
+- Look who it is. My favourite interruption.
+- {hi}. Say something interesting. No pressure.
+- {hi}. You look awake. That makes one of us.
+- {hi}. I was just thinking about nothing. You've ruined it.
+? tier>=acquaintance
+- {hi}, {nick}. I'd say I missed you. I won't.
+- {hi}. You again. I'm almost pleased.
+? time:morning
+- Morning. Allegedly.
+? time:evening
+- Evening. You survived the day. Congratulations.
+== near
+- Working. Don't look so surprised.
+- {room}. Thrilling, as ever.
+- I'll be done when I'm done. Hello, by the way.
+- This is the exciting part. Watch closely. No, closer.
+- I'm concentrating. You can tell by the face.
+- Yes, I'm busy. No, you're not interrupting. Much.
+- Some of us work. Some of us stand there. Hello.
+- Don't touch that. Or do. See what happens.

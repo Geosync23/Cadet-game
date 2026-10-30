@@ -153,7 +153,7 @@ The rest of this note (below) was written at 0.26.18 and still holds. This part 
 ### How to test
 From a scratch folder, set `CADET_CHROME=/opt/pw-browsers/chromium`, then run:
 - `cadet_test.py OLD.html NEW.html` (must be identical);
-- `day_check.py B.html 1` and `day_check.py B.html 35` (day 35 is a crew-change Sunday; there's an arrival-on case for days 0 and 1);
+- `day_check.py B.html 1` and `day_check.py B.html 21` (day 21 is a crew-change Sunday, was 35 until PT1; there's an arrival-on case for days 0 and 1);
 - `machine_check.py`, `player_check.py`, `social_check.py` and `events_check.py`.
 A plan-diff helper (load two builds and compare `JSON.stringify(planDay(p, d))` per person and day) shows exactly whose day changed.
 

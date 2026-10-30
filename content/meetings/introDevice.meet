@@ -1,0 +1,18 @@
+@meeting introDevice
+// The arrival evening (playtest patch 1, the user's notes 2-4): once your bag's in your wardrobe, Torres hands you your
+// device in person, in Bunk 1. It replaces the second half of introBunk and his "Everything I didn't say" Mail (parked).
+// Section 21 hands the device over as the first line shows (introDeviceGive).
+title: Your device
+from: Zeke Torres
+gist: Torres handed you your device: Mail, your Schedule, the Map and your Needs.
+== lines
+torres-zeke > you: And this is yours. Your device.   [gesture]
+torres-zeke: Mail, Schedule, the Map, your Needs. The lot. Don't lose it.
+? choice
+* What do I do first?   rel:torres-zeke+1 flavour:practical
+  torres-zeke: Dinner. Always dinner first. Then everything else.   [nod]
+* Is it always this much?   rel:torres-zeke+1 flavour:share
+  torres-zeke: First night, yes. By Thursday it's just home with a lift in it.   [nod]
+* (Just nod)
+  torres-zeke: Good. The quiet ones last longest.
+torres-zeke: Right, onward. The mess is on Deck 3, and Brennan doesn't hold plates for anyone.   [gesture]

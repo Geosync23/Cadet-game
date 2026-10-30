@@ -1,0 +1,447 @@
+@talks vance
+// TW1, the Talk a while pack: Commander Teo Vance's own talks. Precise and complete; lists in threes; regulations by
+// number; a flash of dry humour he pretends didn't happen; "Noted." No swearing, not even "blast". Never that Gull is
+// him (beat vance.5), never the messages from home (beat vance.3).
+
+only: own
+
+== regulations
+topic: work
+them: Regulation two, section four. No saluting aboard. A nod will do.
+them: You'd be surprised how many people salute me anyway. Seven this month. I counted.
+ask: Is there a rule aboard you'd change, {nick}, if you could?
+listen: Have you really read them all?
+  them: Twice. Cover to cover. The second time for pleasure. That was a joke. Partly.
+share: None yet. I'm still learning them.
+  them: Correct answer. Learn them, then question them. In that order.
+cheer: Second helpings should be a regulation.
+  them: Brennan's galley has its own law. I don't interfere. Nobody interferes.   #funny
+
+== leaderboard
+topic: hobby
+when: tier>=acquaintance
+them: The rowing board in the gym. I taped it up myself. Level, clean, and in order.
+them: Three juniors are chasing my name. I am not worried. Noted.   #funny
+ask: Are you a competitive person, would you say?
+listen: Why move to the treadmill?
+  them: A new board needs a first name. Someone has to set the standard. Correctly.
+share: A little. Mostly with myself.
+  them: The hardest opponent. Also the most fair. Usually.
+cheer: Only at dinner. Against Pell.
+  them: A worthy rival. I have seen him eat. Good luck to you.   #funny
+
+== records
+topic: crew
+when: tier>=colleague
+them: The waiting list for the good records. You are ninth. I keep it current.
+them: Ahead of you: officers, juniors, a chief and the Captain. The Captain jumped the queue.   #funny
+ask: What would you play first, when it's your turn?
+listen: Did the Captain really jump it?
+  them: Rank has its privileges. I have recorded my objection. In pencil.   #funny
+share: Something from home. To hear it here.
+  them: Noted. I'll mark it. A good reason moves you up a place. Eighth.   #warm
+cheer: Whatever's loudest.
+  them: The cabinet has one. I will not say which. You will know it when it rattles the windows.   #funny
+
+== on-time
+topic: day
+when: tier>=friend
+them: I leave the bridge on time now. Counsellor's advice. I dislike it, accept it and do it.
+them: Evenings are very long. I have taken up the treadmill, the records and conversation.   #funny
+ask: What do you do with an evening, {nick}, when nothing is due?
+listen: Do you miss the late watches?
+  them: Yes. Less each week. That may be the point. Oduya is annoyingly correct.
+share: Talk to people. Like this.
+  them: Then we have the same plan. Efficient. I approve.   #warm
+cheer: Sleep. Gloriously.
+  them: Regulation nine. Rest. You have read it. Good.   #funny
+
+// ---- SW3, 2026-10-24 (patch 0.92.3 item 15, plans/talk-main-plan.md): 26 more, own pool only. Weighted early: 16 at
+// any tier or acquaintance, 7 from colleague, 4 from friend, 3 from close. His needs: practical, so the listen answer
+// is the warm one. Never Gull as him, his father or the messages, the rule he broke, or the rowing pin (his beats).
+
+== drills
+topic: work
+them: Fire drill this morning. Ninety-four seconds, deck to muster. The record is eighty-eight.
+them: We will find those six seconds. Calmly. Without running in corridors.
+ask: Where's your muster point, {nick}? Without looking.
+listen: How do you find six seconds?
+  them: Doors. People hold them for each other. Admirable. Slow. We'll practise both.   #warm
+share: Deck 4, by the laundry. I think.
+  them: Correct. "I think" is not. Walk it once today. Then you'll know.
+cheer: Wherever the biscuits are.
+  them: Regrettably, that is the galley. Not a muster point. Yet.   #funny
+
+== clipboard
+topic: work
+them: I carry a clipboard on rounds. It is mostly empty. That isn't the point.
+them: People stand up straighter when they see it. Including me.   #funny
+ask: What makes you stand up a little straighter?
+listen: What is on the clipboard?
+  them: A pencil, a blank sheet, and today's date. Correctly written. It's a start.   #warm
+share: Someone I admire walking in.
+  them: Good. Choose them well. You'll grow towards whoever that is.
+cheer: A low doorframe. Very quickly.
+  them: Deck 6 has two. I've reported both. They remain, unrepentant.   #funny
+
+== collar
+topic: crew
+them: Someone's collar was folded under on Deck 3 today. I said nothing. I wanted to.
+them: I'm told saying nothing is growth. It felt like a fault going unlogged.   #funny
+ask: Would you rather be told, or left to find out?
+listen: Should I have told them?
+  them: A quiet word, by someone they trust. Not by the XO. That was the right call.   #warm
+share: Told. Kindly, and once.
+  them: Kindly and once. Agreed. Twice is nagging. I learnt that from Rina.
+cheer: Left. Then I can blame the mirror.
+  them: The washroom mirrors are scrupulous. I've inspected them.   #funny
+
+== master-clock
+topic: day
+when: time:morning
+them: Every morning I check the bridge clock against the ship's master time.
+them: It is never wrong. Once it was. Four seconds. I reported it. I was thanked, warily.   #funny
+ask: Are you an early person, {nick}, or a just-in-time one?
+listen: Who fixed the four seconds?
+  them: Navarro, on nights. Left me a note: "Found your seconds." I kept the note.   #warm
+share: Just in time. Usually.
+  them: Usually is a start. Aim for early. It leaves room for the lift.
+cheer: Early. Asleep, but early.
+  them: That counts. Present, upright and on time. Two out of three is a pass.   #funny
+
+== threes
+topic: hobby
+when: tier>=acquaintance
+them: I'm told I speak in threes. I've counted. It's closer to four in a good week.
+them: Lindqvist keeps a tally. He thinks I don't know. I know.   #funny
+ask: Name three things that went right today. Quickly.
+listen: What's a four-thing week?
+  them: A clear board, clean drills, a good record and a surprise. Pudding, usually.   #warm
+share: Breakfast, a fixed job, this.
+  them: An excellent three. "This" is a generous entry. Noted, and appreciated.   #warm
+cheer: I woke up. That's one.
+  them: A strong start. Find two more by dinner. That's an order. A light one.   #funny
+
+== lift-manners
+topic: ship
+them: Lift manners. Face the doors, name your deck, make room for anyone with a trolley.
+them: Three rules. Nobody wrote them down. Everyone keeps them. That's a good ship.
+ask: Do you have a rule of your own, {nick}, for anywhere aboard?
+listen: Should those be written down?
+  them: No. Some rules work because nobody had to write them. I find that very moving.   #warm
+share: Say hello to whoever's already in.
+  them: A fourth rule. I'll observe it from now on. Correctly. Warmly, if I can.
+cheer: Stand by the buttons. Be useful.
+  them: The most senior position in any lift. Well chosen.   #funny
+
+== inspections
+topic: work
+them: I enjoy inspections. Nobody believes me. I enjoy them anyway.
+them: Someone careful comes to look at your work. What's not to like?
+ask: Does being checked on steady you, or rattle you?
+listen: Doesn't anything rattle you?
+  them: Lateness. Loose tape. Being thanked in public. In that order.   #funny
+share: Rattles me first. Then steadies me.
+  them: Honest. That's how most good people feel about it. The rattling is caring.   #warm
+cheer: Rattles me. I hide in the store.
+  them: Esposito would hand you over. Kindly. With a receipt.   #funny
+
+== counsellor-list
+topic: crew
+them: The Counsellor asked me how I felt. I gave him a list. A good one. Ordered.
+them: He said that wasn't the question. I said it was the answer. We're still discussing it.   #funny
+ask: When someone asks how you are, do you answer truthfully?
+listen: What was on the list?
+  them: Rested, punctual, slightly cross. He wrote down "slightly cross". Twice.   #funny
+share: Mostly. Unless I'm tired.
+  them: Then "tired" is a true answer too. I'm learning to say it. Slowly.   #warm
+cheer: "Fine." Always "fine".
+  them: The ship's most common word. Oduya says it means nothing. I say it means "fine".   #funny
+
+== wednesday-stew
+topic: food
+them: Brennan's Wednesday stew. I've never once guessed what's in it. I've tried, methodically.
+them: I keep notes. Brennan has seen them. She added a wrong answer to throw me off.   #funny
+ask: Is there a dish you could eat every week and not tire of?
+listen: Have you ever guessed right?
+  them: Once. Barley. She looked at me for a long time. The next week there was no barley.   #funny
+share: Something from home. Always.
+  them: Then tell Brennan. Precisely: the dish, the spices, the order. She'll do the rest.   #warm
+cheer: Pudding. Any pudding. Every day.
+  them: Regulations are silent on pudding. I have checked. With some hope.   #funny
+
+== forms
+topic: work
+them: Everyone sighs at forms. A good form is a kindness. It asks once and never again.
+them: I've rewritten the leave form. It's half a page now. Nobody has noticed. Good.
+ask: What's the most useful thing you've written down this week?
+listen: What did you take off the leave form?
+  them: Three boxes asking the same thing three ways. Now it asks once. Clean, quick, kind.   #warm
+share: Where I put my spare gloves.
+  them: Practical. Most lost property begins with "I'll remember".
+cheer: My name. Spelled right, finally.
+  them: An achievement. Some forms make that very difficult.   #funny
+
+== one-thing
+topic: crew
+when: tier>=acquaintance
+them: Torres and I agree about exactly one thing. Tea. How to make it.
+them: We don't discuss anything else. In case it spoils it.   #funny
+ask: Is there someone aboard you agree with about one thing only?
+listen: What else would you disagree on?
+  them: Coils having moods. Knitting at briefings. Timekeeping. I'm fond of him, regardless.   #warm
+share: Pell. On biscuits. Only biscuits.
+  them: A sound alliance. Biscuits have united stranger pairs.
+cheer: Myself, most mornings.
+  them: Then you're halfway to a quorum. Have breakfast. See if it improves.   #funny
+
+== long-way
+topic: ship
+them: Chief Holt walks every deck before breakfast. The long way. I offered him a quicker route.
+them: He looked at the route. Then at me. Then he walked the long way.   #funny
+ask: Long way or short way round the ship, usually?
+listen: Why does he take the long way?
+  them: He says the short way misses things. He's right. I've started taking it on Sundays.   #warm
+share: Long way. I'm still learning her.
+  them: Good. You'll know her better than people who've been aboard for years.
+cheer: Whichever way the lift goes.
+  them: Efficient. The lift has excellent judgement. Most days.   #funny
+
+== handwriting
+topic: hobby
+when: tier>=acquaintance
+them: My handwriting has been called "architectural". By the Captain. I believe it was praise.
+them: Pell called it "a fence". I'm less sure about that.   #funny
+ask: Is your handwriting a help or a hazard?
+listen: Did you practise it?
+  them: Every evening at the academy. One page. Same sentence. I can still write it blind.   #warm
+share: A hazard. I can't read my own lists.
+  them: Print. Capitals for verbs. It sounds strict. It works.
+cheer: It's a code. Only I can read it.
+  them: Then nobody can file it incorrectly. There's a certain safety in that.   #funny
+
+== emergency-light
+topic: ship
+them: Regulation twelve. Every bunk keeps one emergency light where it can be found in the dark.
+them: Most crew keep theirs in a drawer, under their socks. I know this. I've asked.   #funny
+ask: Where's your emergency light right now? Truthfully.
+listen: Where should it be?
+  them: Clipped by your pillow. Then you never search for it. One small thing, done once.   #warm
+share: Honestly? I'm not sure.
+  them: Honest. Find it tonight. Then clip it by your pillow. Then you'll never wonder.
+cheer: Under my socks. Obviously.
+  them: You and most of Deck 4. The socks, at least, are well lit.   #funny
+
+== monday
+topic: day
+when: tier>=acquaintance weekday:mon
+them: Monday. Every board blank, every log empty, the week not yet spoilt. My favourite morning.
+them: By Tuesday someone's moved my tape. But Monday is perfect.   #funny
+ask: What's your favourite day of the week, {nick}? And why?
+listen: Who moves your tape?
+  them: Nobody admits it. I have suspicions. I keep them in a short list. Fairly.   #funny
+share: Friday. Everyone's a bit kinder.
+  them: True. The address helps. And the tea. I'll allow Friday second place.   #warm
+cheer: Rest day. Whichever one it is.
+  them: An honest answer. Regulation nine would agree. I'm coming round to it.   #funny
+
+== brennan-look
+topic: food
+when: tier>=acquaintance
+them: The galley has one regulation of its own. Brennan's. I've studied it. It's a look.
+them: It has no section numbers. It needs none. I comply immediately.   #funny
+ask: Who aboard would you never argue with?
+listen: Have you ever argued with Brennan?
+  them: Once, about the queue. I was right. I have never been so wrong to be right.   #funny
+share: Dr. Nandakumar. She'd just smile.
+  them: Correct. The smile is worse than any regulation. Drink some water.   #funny
+cheer: The coffee machine. It's undefeated.
+  them: Works and the doctors are still disputing who owns it. I've stayed neutral.   #funny
+
+// ---- from colleague
+
+== captains-tea
+topic: crew
+when: tier>=colleague
+them: Six years at the Captain's side. I can tell her mood by how she holds her tea.
+them: Both hands, she's thinking. One hand, she's fine. No tea, I start a list.
+ask: Who aboard can you read without them saying a word?
+listen: Does the Captain know you can tell?
+  them: Never. A good XO notices and keeps quiet. That's most of the job, really.   #warm
+share: My bunkmates. Every sigh means something.
+  them: Then you're already a good shipmate. Noticing is half of looking after.
+cheer: Calder. She's always cross. Easy.
+  them: Not cross. Exact. It looks the same. It isn't. You'll learn the difference.   #funny
+
+== calluses
+topic: hobby
+when: tier>=colleague
+them: I still have rowing calluses. Twenty-two years. They're very loyal.
+them: My hands remember the oar better than I remember my academy number. Almost.   #funny
+ask: What's stayed with you from something you stopped doing?
+listen: Do you miss the water?
+  them: Every morning, for about four seconds. Then the board needs me. That's a fair trade.   #warm
+share: A song my old team used to sing.
+  them: Keep singing it. Quietly. Teams stay in the songs long after the boat's sold.   #warm
+cheer: A bruise from a bike. Still there.
+  them: Then you've a souvenir. Mine are less colourful. More regulation.   #funny
+
+== mistake-book
+topic: work
+when: tier>=colleague
+them: I keep a small book of my own mistakes. Three this month.
+them: One was a semicolon. One was a door. One I won't say. All logged, all fixed.
+ask: Do you write your mistakes down, {nick}, or let them go?
+listen: Which door was it?
+  them: I pulled a push door. In front of the bridge crew. Fixed: I now read the sign.   #funny
+share: I let them go. Mostly.
+  them: Also valid. The book is for me. Some people sleep better with it. Others without.   #warm
+cheer: I'd need a bigger book.
+  them: A bigger book is a sign of honesty. Not failure. Get the bigger book.   #warm
+
+== the-time
+topic: work
+when: tier>=colleague
+them: Juniors ask me the time. Four, five times a day. I don't know why. I always know it.
+them: Lindqvist says it's because I look like a clock. I've chosen to take that well.   #funny
+ask: What do people always come to you for?
+listen: Does it bother you, being asked?
+  them: No. Being asked means being trusted. Even with the time. Especially with the time.   #warm
+share: Directions. I don't know why either.
+  them: You must look certain. Learn the decks properly. Then you'll be right as well.
+cheer: Biscuits. I never have any.
+  them: Then keep a tin. Small. Labelled. Watch your popularity rise.   #funny
+
+== running-low
+topic: day
+when: tier>=colleague mood:low
+them: I ran six kilometres this morning. I'm still annoyed. With myself, mostly.
+them: Nothing serious. A decision I'd make differently. I'll run again tomorrow.
+ask: What do you do with a bad mood, {nick}?
+listen: What would you have done differently?
+  them: Asked one more question before deciding. Small thing. I'll do it next time. Noted.   #warm
+share: Talk it out with a friend.
+  them: Better than six kilometres. Possibly. I'm trying it now, it seems.   #warm
+cheer: Eat something sweet. Immediately.
+  them: Brennan's shortbread is three corridors away. I've just thought of that. Excuse me.   #funny
+
+== four-things
+topic: day
+when: tier>=colleague mood:high
+them: When I'm in a good mood I list four things instead of three. Lindqvist has noticed.
+them: He says "Four?" from across the bridge. I say "Allow it." It's become a ritual.   #funny
+ask: What gives you away when you're happy?
+listen: What were your four, today?
+  them: Clean drills, a straight board, a good breakfast and you asking. That's four.   #warm
+share: I hum. Badly. Everywhere.
+  them: Then I'll listen for it on Deck 4. Humming is permitted. Within reason.
+cheer: I start saying "allow it".
+  them: Then I've passed it on. Use it sparingly. It's strong.   #funny
+
+== quiet-hours
+topic: ship
+when: tier>=colleague time:night
+them: Quiet hours. I walk the senior corridor once, to check it's obeying. It always is.
+them: Then I stand at the window at the end for a minute. That part's not in any regulation.
+ask: What does the ship sound like where you sleep?
+listen: What do you think about at the window?
+  them: Whether I did today correctly. Usually yes. Sometimes I stand there longer.   #warm
+share: The air vents, and someone snoring.
+  them: The junior wing's chorus. I've heard it on rounds. It's oddly reassuring.   #warm
+cheer: Pell. Talking about engines.
+  them: Pell's sleep is the stuff of legend. I've filed nothing. Out of respect.   #funny
+
+// ---- from friend
+
+== the-crew
+topic: home
+when: tier>=friend
+them: My old academy boat still writes. Six of us. One letter a year, passed round.
+them: Everyone adds a page. Mine is always the shortest. Mine is always the neatest.   #funny
+ask: Who from before would you still want to be in a boat with?
+listen: What do you put on your page?
+  them: Where I am, how she's flying, one honest thing. They tell me it's the best page.   #warm
+share: My oldest friend. Any boat, any water.
+  them: Then write to them this week. A year goes faster than a board fills up.   #warm
+cheer: Nobody who saw me learn to swim.
+  them: A wise boundary. Some witnesses should stay ashore.   #funny
+
+== soft-spot
+topic: crew
+when: tier>=friend
+them: I'm told I have a soft spot for juniors who break a rule for a good reason.
+them: Don't tell them. They'd test it. Within a week. In order.   #funny
+ask: Have you ever broken a rule for a good reason?
+listen: Did you, once?
+  them: That is a story for another day. A much later day. Ask me again.   #warm
+share: Once. I'd do it again.
+  them: Then I didn't hear the details. And I'm glad you'd do it again. Both true.   #warm
+cheer: Never. I'm terrified of you.
+  them: Good. Keep that up for at least another week. Then relax slightly.   #funny
+
+== still
+topic: hobby
+when: tier>=friend
+them: A good record makes me sit very still. The Captain says it's the only time I do.
+them: She may be right. I haven't told her. She'd add it to her book.   #funny
+ask: What makes you go still, {nick}?
+listen: Which record does it?
+  them: A slow one. Strings. Nothing in it is late. I could listen to it on watch.   #warm
+share: Looking out of a window. Any window.
+  them: Then we'll stand at one some evening. Saying nothing. Correctly.   #warm
+cheer: A very boring briefing.
+  them: Not one of mine, I trust. Don't answer that. That's an order.   #funny
+
+== ninety
+topic: day
+when: tier>=friend
+them: Ninety seconds early. A habit, not a virtue. I'm told it can be a little much.
+them: I tried eighty. I stood outside the door for ten seconds. Pointlessly.   #funny
+ask: Which of your habits would you never give up?
+listen: Why ninety seconds?
+  them: My first watch, I was a minute late. I've had ninety seconds to spare ever since.   #warm
+share: Saying goodnight to my bunkmates.
+  them: Keep it. Small habits like that hold a ship together. More than regulations.   #warm
+cheer: Snoozing. Twice. Precisely twice.
+  them: Precise snoozing. I can't fault the discipline. Only the aim.   #funny
+
+// ---- from close friend
+
+== observation
+topic: day
+when: tier>=close
+them: Some evenings I sit in the observation room and say nothing to anybody for an hour.
+them: Nobody knows that. Now you do. It helps more than the treadmill.
+ask: Where do you go when you need to say nothing?
+listen: May I join you, one evening?
+  them: Yes. Bring nothing to say. That's the only rule. I made it. It's a good one.   #warm
+share: The garden, by the big tree.
+  them: A good choice. Plants don't ask questions. Unlike the Counsellor.   #funny
+cheer: My bunk, under the blanket.
+  them: Also valid. Regulation nine approves. So do I.
+
+== teo
+topic: crew
+when: tier>=close
+them: Off duty, you may call me Teo. Very few people do. I may not answer at first.
+them: It's not that I mind. I've simply been "Commander" a very long time.
+ask: Is there a name only a few people use for you?
+listen: Who calls you Teo?
+  them: The Captain, twice a year. My old boat. And now you. That's the full list.   #warm
+share: Yes. My family's name for me.
+  them: Then keep it close. Names like that are given carefully. I've just learnt that.   #warm
+cheer: "Oi." From most of Works.
+  them: Works may call me what it likes. Within regulations. Mostly.   #funny
+
+== wrong
+topic: work
+when: tier>=close
+them: I was wrong this week. Properly wrong. I said so on the bridge, out loud.
+them: It was not as bad as I feared. The bridge carried on. Nobody fainted.   #funny
+ask: When were you last properly wrong, {nick}?
+listen: What did saying it feel like?
+  them: Like taking off a heavy pack. I should have done it years ago. Many times.   #warm
+share: This week. I owned up. It helped.
+  them: Then we're both learning it. Late, in my case. Early, in yours. Good.   #warm
+cheer: Never. Ask anyone. Don't ask anyone.
+  them: Noted. I'll ask nobody. Correctly.   #funny

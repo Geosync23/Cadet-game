@@ -426,3 +426,17 @@
 - Tea. Biscuit. Sit. Good.
 ? trad:harvest
 - The beans. Look at the beans.
+
+// ---- Pillar 5 Step 3 (head writer W2): at the board after your promotion (X). Meticulous, shy.
+== promoted
+- Congratulations. I made a list of tips. Later.
+
+// ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
+== bday.circle
+- Happy birthday, {other}. Um. That's all. Happy birthday.   #warm
+- Happy birthday. Nice cake. Very level.   #funny
+== bday.circle.you
+- Happy birthday, {me}. I'm glad you came aboard.   #warm
+== bday.thanks
+- Oh. Thank you. Um. Thank you.   #warm
+- Thanks. Sorry. I mean, thank you. Cake?   #funny

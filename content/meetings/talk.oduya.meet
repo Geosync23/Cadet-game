@@ -1,0 +1,23 @@
+@meeting talk.oduya
+// PARKED (2026-10-25, FX17): not on the rota. The planner has the Counsellor at dinner and a visit until after 19:20 on
+// Day 81, so he never reaches the ring; Day 81 went to Emeka Halloran (talk.halloran-emeka). Kept, never deleted.
+// SW2, 0.92.6 item 13 (FX17's word list): a small Wren talk, 19:00-19:40 on the auditorium stage (a ring of eight
+// chairs, house dark, the stars behind, tea from the kettle). Day 81, Thursday. Matthias Oduya, the Counsellor.
+title: Seventy-six birthdays
+from: Matthias Oduya
+gist: The Counsellor's small talk on why he knows everyone's birthday, and why you might learn one too.
+== lines
+oduya: Good evening. Come in, take your time. The sweets bowl is going round. Green ones too.   [gesture]
+oduya: I know the birthday of everyone aboard. Seventy-six, counting you. People find that odd.   [laugh]
+oduya: Here's why. A long way from home, a birthday is the day people notice you.
+oduya: So I make sure somebody does. A card under the door, a song in the mess, a word.
+oduya: You don't need my list. Ask someone when theirs is. Then remember. That's all it takes.
+oduya: It's a small thing. Most good things on a ship are. I'll stop there and let you ask.   [nod]
+? choice
+* Who has the next birthday?   rel:oduya+2 flavour:cheer mem:talk.oduya.asked
+  oduya: Ah. That would spoil a card. Keep your ears open in the mess this week.   [laugh]
+* Who remembers yours?   rel:oduya+2 flavour:listen mem:talk.oduya.asked
+  oduya: Chef Brennan. Every year, a cake I didn't ask for. It's the best part of the day.   [nod]
+* (Just listen)
+  oduya: No questions. That's all right. Quiet is good too.
+oduya: Thank you for coming. Have a sweet as you go. Not the last green one.

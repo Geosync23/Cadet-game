@@ -1,0 +1,44 @@
+@template warm
+// ZW1 (writer), patch 0.92.3 item 26: crew comment when you wear dirty clothes. clothes.remark: yesterday's clothes
+// (flag:clothes.stale); clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3). Bubbles, 60 characters or fewer.
+// Kind, never mean: the joke is on the clothes, not on you.
+== clothes.remark
+? flag:clothes.stale
+- Yesterday's clothes, pet? Busy day? Change when you can.
+- Oh, you've not had time to change. Never mind.
+? flag:clothes.stale tier>=friend
+- Get a fresh shirt on, then come and sit with me.   #warm
+== clothes.grubby
+? flag:clothes.grubby
+- Look at you, all grimy. Hard day? Go and change.
+- Oh dear, you've brought half the machine with you.   #funny
+? flag:clothes.grubby tier>=friend
+- Change and wash, then I want to hear all about it.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 5: more lines for the chat card's opener (greet, near), so a tap doesn't repeat.
+// Heard after a person's own lines are used up (FX13's no-repeat). {hi}, {nick} and {me} are the speaker's own words.
+== greet
+- {hi}! Come here, let me look at you.
+- {hi}, {nick}. Have you eaten? Tell me you've eaten.
+- Oh, it's you. That's made my day.
+- {hi}! You look tired. Are you sleeping all right?
+- {hi}. Sit down a minute. You've earned it.
+- {hi}! I was hoping you'd come by.
+- {hi}. Everything all right? Truly?
+- {hi}! You're looking well. Settling in nicely.
+? tier>=acquaintance
+- {hi}, {nick}. My favourite face today.
+- {hi}. I'm proud of you, you know. Just saying.
+? time:morning
+- Morning! Did you sleep? Good. Breakfast next.
+? time:evening
+- Evening. Put your feet up. You've done enough.
+== near
+- Come in, come in. Don't mind me working.
+- {room}. Make yourself at home. I have.
+- I'll just finish this, then we'll have a proper chat.
+- Mind the step. There. You're fine.
+- This won't take long. Stay and keep me company.
+- I like doing this. It's calming. Mostly.
+- Could you hold that? You're a treasure.
+- Nearly done, then a cuppa. You'll join me.

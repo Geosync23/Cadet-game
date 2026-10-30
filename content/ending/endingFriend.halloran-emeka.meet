@@ -1,0 +1,16 @@
+@meeting endingFriend.halloran-emeka
+// SW6 (ending writer A), "About the transfer" on Halloran's chat card (Friday Day 33). Halloran overheard it: "It's
+// a ship. Nothing's private." Warm; laughs before the punchline; asks if you've eaten; a terrible joke. Never says no.
+title: Emeka Halloran
+from: Emeka Halloran
+gist: Halloran overheard the news, as he does. He made you a terrible joke about it and asked if you'd eaten.
+== lines
+halloran-emeka: Ah, hello, you. Don't look at me like that. It's a ship. Nothing's private.   [laugh]
+halloran-emeka: I was at the tea corner. The Chief said "headquarters" in her quiet voice. Her quiet voice carries.
+halloran-emeka > you: Have you eaten? You haven't. Big news on an empty stomach. Sit. There's a scone.
+? choice
+* What do you think I should do?   flavour:listen
+  halloran-emeka: Me? I think you should eat the scone. The rest's yours, love. You'll know.   [laugh]
+* Go on, then. Tell me the joke.   flavour:cheer
+  halloran-emeka: Why did the cadet go to headquarters? To get a head. Oh, dear me. That was awful.   [laugh]
+halloran-emeka: Stay or go, there's a mug on that rack with your name on. It doesn't come down. Lovely.

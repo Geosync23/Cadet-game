@@ -3,7 +3,7 @@
 
 == greet
 ? tier=stranger
-- {hi}. You'll be new. Have you eaten? Breakfast's in the mess till eight.
+- {hi}. You'll be new. Have you eaten? Breakfast's in the mess till nine.
 - {hi}. Emeka Halloran, systems. Tea corner's behind the parts racks, if you need me.
 ? tier>=acquaintance time:morning
 - {hi}. Why did the scrubber go to the infirmary? It had a filter cough.   #funny
@@ -171,3 +171,99 @@
 - Have you read every note? One's not on the card.
 ? flag:train.p3.hint.3
 - Pop over to the washer's panel. There's a note waiting.
+
+// ---- Pillar 5 Step 3 (head writer W2): team jobs (M2), tracing (M3), P1 (H2). Kind 'work', flags as in
+// content/works/keys-p5.md "Step 3". Kind, a little fussy, "lovely".
+== work
+? flag:team.call.start
+- Spots, everyone. On my call. Lovely.
+? flag:team.call.brace
+- Brace. Feet wide. There.
+? flag:team.call.pass
+- Pass it here, please. Both hands.
+? flag:team.call.hold
+- Hold it. Nearly. Nearly.
+? flag:team.call.crank
+- Crank away. Slow and steady.
+? flag:team.call.tip
+- Tip it. Gently. Hold.
+? flag:team.call.valves
+- The valves. One, two, three.
+? flag:team.call.open
+- Open them again. Same order.
+? flag:team.call.drain
+- Drain it down. The bucket's there.
+? flag:team.call.done
+- And seated. Lovely work, everyone.   #warm
+? flag:train.m9.follow.give
+- Clip it on the panel. Gently. Then read.
+? flag:train.m9.follow.read
+- Full here. So it's further down. Onward.
+? flag:train.m9.follow.wrong
+- That's upstream. We know it's fine. Back we go.
+? flag:train.m9.follow.found
+- Full before, low after. There it is. Lovely.
+? flag:train.m9.follow.done
+- Showers on Four run full. That's tracing, that is.
+? flag:train.p1.word
+- Here's a puzzle the pipe kit can't solve.
+- It only happens sometimes. When? That's the clue.
+
+== promoted
+- Lovely. Lovely! Well done, you.   #warm
+
+// ---- Pillar 5 Step 4 (head writer W2): M17 the lift roof (E3), his words on the first ride. Kind 'work', in order.
+== work
+? flag:roof.climb
+- Up you get. Harness clipped? Lovely.
+? flag:roof.grease
+- Rail, then grease, then a wipe. Next deck.
+- Mind your sleeve. The rails love sleeves.   #funny
+? flag:roof.view
+- Look up. That's the whole spine. Nobody sees it but us.   #warm
+? flag:roof.done
+- Smoother already. Can you feel it? Lovely work.
+
+// ---- Pillar 5 Step 4 (head writer W2): M10 the workshop (E3): the first lesson at the lathe. Kind work, in order.
+== work
+? flag:train.m10.lead
+- Set the lathe going. Come back in ten. Lovely.
+- Now the hand work. Slow strokes. There.
+
+// ---- EW1 (events writer), short Fridays part E (moved in by FR2, turn 8): Day 5 at 13:00, after he hands you your mug
+// (d5-mug), said in order as bubbles while you're in the tea corner, only when SHORT_FRIDAY is on (section 18f's
+// friBeatLines; off, nothing asks for these keys)
+== week1
+? flag:beat.d5-friday.1
+- Short day today. Half three, clock out.
+? flag:beat.d5-friday.2
+- Then the auditorium at four. Rec deck. She'll say your name.
+? flag:beat.d5-friday.3
+- Don't hide. Have a biscuit first. Have you eaten?   #funny
+
+// ---- ZW1 (writer), patch 0.92.5 item 5: more chat-card openers, so a tap doesn't repeat (FX13's no-repeat).
+== greet
+? tier>=acquaintance
+- {hi}, {me}. Lovely. Have you eaten? Go on, I'll know if you lie.
+- {hi}. Knock knock. No, I'll save it for breakfast.   #funny
+- {me}! Lovely timing. Kettle's just boiled at the tea corner.   #warm
+- {hi}. Tomatoes are coming on in the garden. I check them daily. Twice.
+- {hi}, {me}. Friday's tea rota has a gap. Just saying. Lovely.   #funny
+- {hi}. Brennan let me near the oven yesterday. Briefly. Lovely day.   #funny
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-2): his grumble about how fast it came (his own pu3.soon beats the bank's)
+== pu3.soon
+- Up for Tier 3 already? Some of us took a year.   #funny
+- I'm not bitter. I'm a little bitter. Well done, you.   #funny
+- Tier 3 at your age. I'll bake you something. Grudgingly.   #funny
+== pu3.senior
+- Senior Officer. I'm baking. Don't argue. Lovely.   #warm
+== work
+// nearly there: in the bay, near Calder (pu3.promo.near), after her line
+? flag:pu3.promo.near
+- Trusted already? Some of us were "new" for a year. Lovely.   #funny
+
+// PZ6 (2026-10-27, Pillar 5 Step 6, S6-8): a stand-in for his word for P8 (flag train.p8.word; the roster has no shop tech)
+== work
+? flag:train.p8.word
+- Five cartridges, one bad, all alike. The rig tells you how many in a group. Three goes.

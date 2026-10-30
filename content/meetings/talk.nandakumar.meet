@@ -1,0 +1,22 @@
+@meeting talk.nandakumar
+// SW2, 0.92.6 item 13: Day 60, Thursday 19:00-19:45, a chief's talk in the auditorium seats. Dr. Priya Nandakumar,
+// Head of Infirmary: "Drink some water". Never anyone's medical details: only water, sleep, food and her chillies.
+title: Drink some water
+from: Dr. Priya Nandakumar
+gist: Dr. Nandakumar's talk on the three things most people forget, and why she grows chillies.
+== lines
+nandakumar: Good evening. Sit down. There's a cup of water under every seat. That's on purpose.   [gesture]
+nandakumar: Tonight's talk is called "Drink some water". I could stop there.   [laugh]
+nandakumar: Most people through my door forgot one of three things. Water, sleep or food.
+nandakumar: Chef handles the food. I handle the other two. Mostly by nagging.
+nandakumar: Ship air is dry. You won't feel thirsty until your head aches. Then you come to me.
+nandakumar: That's why I grow chillies. Eat one of mine and you'll drink a whole jug.   [laugh]
+nandakumar: If your bunkmate looks grey, hand them a cup. That's medicine too. Questions.
+? choice
+* How much water, exactly?   rel:nandakumar+2 flavour:practical mem:talk.nandakumar.asked
+  nandakumar: Two litres a ship day. More after the gym. The mess jug holds one. So, twice.   [nod]
+* Can I try a chilli?   rel:nandakumar+2 flavour:cheer mem:talk.nandakumar.asked
+  nandakumar: Find me in the garden. Bring a jug. Chef will tell you it's a mistake.   [laugh]
+* (Just listen)
+  nandakumar: No questions. Good. Then drink your water on the way out.
+nandakumar: Thank you. And go to bed at a sensible hour.

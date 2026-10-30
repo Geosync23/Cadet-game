@@ -1,0 +1,14 @@
+@meeting stormBrennanErrand
+// EW2 (events writer 2), the ion storm story A: the errand (you chose "Ask her. I'll go." in stormLukasSat). A short
+// moment wherever Brennan's own plan has her on Deck 4 on her day off. She won't come in. GUARD RAILS: nothing of her
+// own story (the restaurant, the fire, Port Halloran, her mother's soup, blue sage, Nell Arrowby, Hesper Dock, her book,
+// leaving), and no hint of handing the galley on: "his galley" is for tonight only. Bringing the message back to Lukas
+// is his bubble event.ionStorm.lukas.asked.
+title: One pot, low and slow
+from: Chef Auda Brennan
+gist: Brennan won't come in on her day off. Her message for Lukas: one pot, low and slow, lid on. And it's his galley tonight.
+== lines
+brennan > you: Hello, love. Lukas sent you? He'd sooner eat a pan than knock on my door.   [laugh]
+brennan: Two rings. Well. I'm not coming in, love. It's his night.
+brennan > you: Tell him: one pot, low and slow, lid on. A stew doesn't want more than two rings.   [gesture]
+brennan > you: And tell him it's his galley tonight. Go on, before his onions catch.   [nod]

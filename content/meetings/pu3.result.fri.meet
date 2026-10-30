@@ -1,0 +1,17 @@
+@meeting pu3.result.fri
+// SW3: pu3.result's twin for a Friday result (the bar at 17:15, after Short Friday). Same two replies in the same order.
+title: Your result
+from: Chief Ines Calder
+gist: Calder gave you your result: you passed. You're a Senior Officer now, Senior Technician, Tier 3. The Captain pins your bar this afternoon.
+== lines
+calder > you: Sit. Short Friday, so a short meeting.   [gesture]
+calder: The junction. Warned, off, changed, back. Nothing missed.
+calder: Result: passed. Senior Officer, from today. Senior Technician, Tier 3.
+calder: Your Tier 3 card. From me. The board gives you Tier 3 work from Monday.
+? choice
+* Thank you, Chief. Really.   rel:calder+2
+  calder: Noted. Thank you. Now, the afternoon.   [nod]
+* Warning people was harder than the breaker.   rel:calder+2
+  calder: It always is. The ones who know that make good seniors.   [nod]
+calder: The bar's the Captain's. Quarter past five, after the short day. The observation room. Clean uniform.
+calder: Same cabin, 4-23. Harder work. Go. Torres has been outside the glass for ten minutes.

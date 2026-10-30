@@ -1,0 +1,38 @@
+@tradition rec-all-hands
+// W3 (rec writer; lead 18: fields from plans/rec-traditions-plan.html FINAL and the brief; RA owns the format).
+// The Captain's all-hands: the first Monday of each season, 17:45-18:10, the auditorium; Captain Marrow at the lectern,
+// Commander Vance on the stage behind her; then everyone goes to dinner. The night shift sleeps and gets it in Mail
+// (mail.rec.allhands.night). FOR RA: the first one is the Captain's address at the first ship-wide event (lead 17's call
+// 1: no invented trigger), so Day 1 is skipped here (from day 2: the next is Day 92). A gathering.
+k: 498
+title: Captain's all-hands
+when: quarter week 1 monday from day 2
+at: 17:45-18:10
+min: 20
+prio: 2
+where: 7 room Auditorium: rec:seat
+hold: none
+who: marrow always, vance always, night-shift never, officers 85%, everyone 70%
+anim: everyone talk
+host: marrow
+from: marrow
+flag: rec.on
+
+== mail
+- The Captain's all-hands is tomorrow, {time} in the auditorium. A new season, a few thanks, and then dinner. Everyone off duty, please come.
+
+== ask
+- All-hands before dinner. Comb your hair. The Captain notices. Well, Vance does.   #funny
+- Coming to the all-hands? The Captain names a few people. You never know.
+
+== here
+- Shh. The Captain's on.
+- Good turnout. She'll like that.
+
+== thanks
+- You find a seat as Captain Marrow steps to the lectern. Commander Vance stands behind her, very straight.
+
+== chatter
+- Did you hear the Captain at the all-hands? She named the whole galley.   #warm
+- The Captain tapped the mic three times. Somebody fix the mic.   #funny
+- I like the all-hands. It's short, and then there's dinner.   #funny

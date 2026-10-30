@@ -1,0 +1,39 @@
+@tradition open-house
+// SW2, 0.92.6 item 7(a), week 8 (FX17's shape: Thursday 17:15, a department's open space, 2-3 departments). Open
+// house: every 8 weeks from Day 53. Comms and the Watch office open their doors on Deck 2 after shift: Ferreira shows
+// the relay queue (counts, never messages), Holt shows the old paper log and the suit-locker test. (Survey has Open lab
+// already.) Ferreira hosts. FX17: use the comms room and the Watch office if they have places; these are stand-ins.
+k: 715
+title: Open house
+when: every 8 weeks thursday week 8 from day 50
+at: 17:15-18:15
+min: 20
+where: 2 room Comms room: work:comms, free
+where: 2 room Watch office: work:watch, free
+where: 2 room Science corridor: bench
+hold: none
+who: ferreira always, holt always, comms 60%, watch 50%, juniors 20%, everyone 10%
+anim: talk
+host: ferreira
+from: ferreira
+invite: host=ferreira odds=30% line="Open house on Deck 2 after shift. Comms and the Watch office. Come and be nosy."
+
+== mail
+- Open house tomorrow, {time}, on Deck 2. Comms and the Watch office open their doors. See the relay, the old log, and how the Watch knows where everyone is.
+
+== ask
+- Open house on Deck 2 after shift. Holt's showing people the old log.
+- Going to open house? Ferreira says you can wear the headset. For a minute.   #funny
+
+== here
+- That's the relay queue. Numbers only. Never the messages.
+- Holt asked me where the nearest suit locker was. I looked. Wrong.   #funny
+- I didn't know the Watch office had a kettle.
+
+== thanks
+- Comms and the Watch office open their doors. Ferreira shows the relay queue, and Holt hands round the oldest log, one page at a time.
+
+== chatter
+- Open house was good. I wore the comms headset for a whole minute.   #funny
+- Holt tested everyone on suit lockers at open house. I passed. Just.
+- I never knew how much the Watch keeps track of. Kind of comforting.   #warm

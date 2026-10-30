@@ -1,0 +1,37 @@
+@tradition jar-day
+// Round 2: the garden grows too much of something and Tariq Varga turns it into jars. Odd weeks from week 3, in the cook-along's freed galley hour (its places).
+// Rules: FX24 (0.93.2, behind TRAD_0932_ON in section 13). Words: CS1 (plans/trad-0932-words.txt, claude/crew-stories-pitch 7b1e7300).
+// Host check (FX24): Tariq works the galley on Saturday afternoons, so, as Lukas at the cook-along, he hosts from his station (the host leads within 6 m of its spots, even on duty).
+k: 1303
+title: Jar day
+when: every 2 weeks saturday week 1 from day 15
+at: 15:30-16:30
+min: 20
+where: 3 pool @cook-along
+who: varga-tariq always, gardener 40%, garden-lover 30%, galley 25%, everyone 8%
+anim: cook
+host: varga-tariq
+from: varga-tariq
+invite: host=varga-tariq odds=25% line="Jar day in the galley. Too much of something in the garden. Not for long."
+
+== mail
+- Jar day tomorrow, {time}, at the galley prep island. The garden's grown too much again. We're pickling it. Bring patience and a steady hand for the labels.
+
+== ask
+- Jar day in the galley. Tariq's got forty jars and a lot of beans.
+- Pickling later. Is it jam? Nobody knows yet.   #funny
+- Coming to jar day? Your jar goes on the spice shelf with your name on it.
+
+== here
+- Pack it tight. Tighter. Now the lid.
+- Label first, then shelf. Always.
+- Is this jam? It might be jam.   #funny
+- Smell that vinegar. That's work, that.
+
+== thanks
+- The garden grew too much again. Tariq turns it into jars, and you fill, seal and label one, and put it on the spice shelf.
+
+== chatter
+- My jar from jar day is on the spice shelf. Third from the left. It's beans.
+- Tariq's jars are perfect. Mine has a lean.   #funny
+- Jar day. The galley still smells of vinegar. In a nice way.

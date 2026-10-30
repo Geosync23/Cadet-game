@@ -1,0 +1,3 @@
+# Patch plan probes (PP1, 2026-10-20)
+
+The scripts used to reproduce the playtest items for `plans/patch-plan.html`, on claude/integration 5dd740c. `pp.py` is the harness: cadet_test.py's Game at phone size (390×844), with saving on so a first launch arrives on Day 0. Run from this folder with `CADET_WORK` set (DEV_NOTES "Testing"), `GAME=path/to/build.html` to pick a build. File names start with the item's group (a = arrival, b1 = training day, b2 = Day 2 and the clock, c = crew life, d = access and tuning) and often the item number (c7 = #7). They are probes, not checks: they print what they saw and pass or fail nothing. Some write screenshots to `plans/patch-plan-shots/`.

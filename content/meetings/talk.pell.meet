@@ -1,0 +1,22 @@
+@meeting talk.pell
+// SW2, 0.92.6 item 13 (FX17's word list): a small Wren talk, 19:00-19:40 on the auditorium stage (a ring of eight
+// chairs, house dark, the stars behind, tea from the kettle). Day 78, Monday. Pell Okafor, Works. Not his mum's shop or the practical.
+title: Every panel that sticks
+from: Pell Okafor
+gist: Pell's small talk on every panel aboard that sticks, and how to unstick it.
+== lines
+pell: Oi oi. Right, so. Is there food? There's food. Brilliant. Sit down, sit down.   [gesture]
+pell: Tonight: every panel on the Wren that sticks, and why. Long list. Short talk.   [laugh]
+pell: Deck 5, third panel from the lift. Sticks every damp week. Hit it here. Gently. Lovingly.
+pell: Why? Old seal. Calder knows. Calder's always known. She's waiting to see if I fix it.
+pell: Right, so, the real secret. Most things that stick just want a clean and some patience.
+pell: Same as people, my mum says. Usually about me.   [laugh]
+pell: Questions? Quick ones. There's a biscuit out there with my name on it.
+? choice
+* Why haven't you fixed it?   rel:pell+2 flavour:cheer mem:talk.pell.asked
+  pell: Then what would I talk about? No, I'm doing it. Next week. Probably.   [laugh]
+* Where do the good spanners hide?   rel:pell+2 flavour:practical mem:talk.pell.asked
+  pell: Bottom drawer, behind the tape. That was a secret. It was. Past tense.   [laugh]
+* (Just listen)
+  pell: No questions. Fair. Biscuits it is, then.
+pell: Cheers, everyone. Mind that panel.

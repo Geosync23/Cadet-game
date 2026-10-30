@@ -1,0 +1,18 @@
+@crew raman
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- Flew her back over the line like soup. Nobody spilt. I hope you stayed for that.   #funny
+? endgame
+- I've added a very small figure to the model ship. On the Works deck. Don't look for it.   #warm
+- Twenty years flying. The best years had people who stayed in them. That isn't luck.
+- Straight, slow course now. The best flying is the kind nobody notices.
+? endgame:early
+- Brennan asked what cake suits staying. I said a Wren-shaped one. She knows the shape.   #funny
+
+== bye
+? endgame
+- Off you go. Gently on the turns.

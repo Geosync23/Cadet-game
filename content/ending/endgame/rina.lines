@@ -1,0 +1,19 @@
+@crew rina
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== greet
+? endgame
+- {hi}. Water first. Then you can tell me how staying's going.
+
+== chat
+? endgame:early
+- You stayed. Fine. The Tiles count would've looked odd without you losing to me.   #funny
+? endgame:early
+- A week of people asking me if you'd go. I told every one of them to drink some water.   #funny
+? endgame
+- Ordinary days suit you. You've stopped forgetting lunch. I've been counting.
+- My sister says staying put is how you get good at something. First time she's been right.   #funny
+? endgame tier>=friend
+- I'm glad. That's all you're getting, so don't make it a thing.   #warm

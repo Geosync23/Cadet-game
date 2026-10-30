@@ -1,0 +1,38 @@
+@tradition rec-ring-the-bell
+// Round 2 (the rec deck): one climb each up the hardest route, to ring the brass bell at the top. Carmen Chen hosts. Every 4 weeks from week 11 (Days 77, 105...).
+// Rules: FX24 (0.93.2, behind TRAD_0932_ON in section 13). Words: CS1 (plans/trad-0932-words.txt, claude/crew-stories-pitch 7b1e7300).
+// Host check (FX24): Carmen works Sundays until 17:00, so after the long table, 19:15-20:05, not the card's 14:00.
+k: 1312
+title: Ring the bell
+when: every 4 weeks sunday week 3 from day 71
+at: 19:15-20:05
+min: 20
+flag: rec.on
+where: 7 pool rec:climb
+where: 7 pool rec:climbq
+who: chen-carmen always, tomas 60%, juniors 15%, everyone 8%
+host: chen-carmen
+from: chen-carmen
+invite: host=chen-carmen odds=25% line="Ring the bell, on the wall. One climb each. You could ring it. Maybe."
+
+== mail
+- Ring the bell tomorrow, {time}, the climbing wall in the river hall. One climb each, the hard route, the brass bell at the top. We'll count the seconds.
+
+== ask
+- Ring the bell at the wall. One try each. Most people don't make it.
+- Carmen's got the hard route chalked. Coming to watch, or to climb?
+- Has anyone rung it this month? Nobody? Good. Room for us.
+
+== here
+- Ten seconds! Eleven! Go on!
+- Left hand, the blue one. No, your other left.   #funny
+- So close. The rope's smiling at you.   #funny
+- Ding! Did you hear that? Ding!
+
+== thanks
+- You get one climb up the hardest route. Below you, everyone counts the seconds out loud, and the brass bell waits at the top.
+
+== chatter
+- Somebody rang the bell yesterday. The whole river hall cheered.
+- I got two holds from the top. Two! Next month.
+- Carmen climbs like she's thinking about something else. She still rang it.

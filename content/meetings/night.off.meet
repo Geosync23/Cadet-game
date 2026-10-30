@@ -1,0 +1,16 @@
+@meeting night.off
+// N6 (2026-10-27, Pillar 5 Step 6, S6-1; stand-in words): Thursday Day 25, 06:00, the end of your third night. Calder
+// comes down to you in the engine room. Navarro's real rota: Wednesday and Thursday are his nights off, so he's back
+// Friday night. Then the arrow to your bed. Two replies.
+title: Off nights
+from: Chief Ines Calder
+gist: Calder came down at 06:00: your three nights are done. Navarro's back Friday night. You've a cadet tomorrow.
+== lines
+calder > you: That's your three nights. Clean ones.   [nod]
+calder: Navarro's back Friday night. You're off nights.
+? choice
+* I could get used to nights.   rel:calder+1
+  calder: Don't. Daylight's good for you.   [nod]
+* I'm going to sleep for a week.   rel:calder+2
+  calder: Until 15:45 will do.   [nod]
+calder: You've a cadet tomorrow. Go to bed.

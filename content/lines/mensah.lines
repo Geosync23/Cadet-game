@@ -115,3 +115,13 @@
 - New posting. Walked the whole ship the first night. Smaller. Tidy. She's a good one. Not the Wren.
 ? tier>=friend
 - Told my airlock joke on the new ship. Nobody laughed. Tell Holt he's still the only one.
+
+// ---- ZW1 (writer), patch 0.92.5 item 5: more chat-card openers, so a tap doesn't repeat (FX13's no-repeat).
+== greet
+? tier>=acquaintance
+- {hi}, {me}! She's in a good mood today. I can tell.   #warm
+- {hi}! Made Holt laugh again last night. That's the count up by one.   #funny
+- {me}. Said good night to Deck 2 on my round. She said it back. Probably.   #funny
+- {hi}, {me}! You look like a day person. I forgive you.   #funny
+- {hi}. Long walk last night. Every deck. She's in good shape.
+- {me}! Good to see you in daylight. Rare for me.   #warm

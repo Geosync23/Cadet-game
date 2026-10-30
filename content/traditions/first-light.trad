@@ -1,0 +1,40 @@
+@tradition first-light
+// First Light Cocoa (the user's pick, 2026-10-20; patch plan #26, plans/patch-plan-first-light-cocoa.md): once, on your
+// first Monday, after Gym club. The bow lounge dims; Dev Raman (who flew you in) shows the crew through the big windows
+// where the Wren has been and where she's heading; cocoa goes round (a free mug for you: #30); three long-serving crew
+// each give the tip they wish they'd had on their first day; then this season's arrivals say one thing they've noticed,
+// and you pick yours (the meeting firstLightCocoa, started by section 15's flcJoin when you join; three tips of five per
+// save). A one-off, so it never clashes with a weekly Monday. Loaded only with the patch switch (FLC_ON, ?firstlight).
+// The id isn't 'first-light-cocoa' so its 'cocoa' crew tag reads apart from the id (section 18's evTagId).
+k: 453
+title: First Light Cocoa
+when: arrival monday
+at: 20:00-20:45
+min: 15
+where: 3 room Bow lounge: lounge-seat
+who: raman always, tomas always, holt always, kowalczyk always, torres-zeke always, brennan 80%, halloran-emeka 70%, sato 70%, window-seat 50%, juniors 35%, everyone 12%
+anim: cocoa
+host: raman
+from: raman
+invite: host=torres-zeke odds=100% line="Cocoa in the bow lounge at eight. First Light. It's for you, really. Come."
+
+== mail
+- First Light Cocoa tomorrow at {time}, the bow lounge. Cocoa, the big windows, and where we're going next. New faces especially welcome. Dev Raman
+
+== ask
+- First Light tonight. Raman's doing the windows. I'm doing the cocoa.
+- Cocoa at eight, bow lounge. Bring yourself. Mugs provided.
+- First Light Cocoa tonight. It's for the new ones. Which is you.   #funny
+
+== here
+- Mind the mug, it's hot. Window's that way.
+- He tells it better every year. Don't tell him I said so.   #funny
+- Look at that. Never gets old.   #warm
+
+== thanks
+- The lounge lights go down and someone puts a warm mug in your hands. Out of the big windows, the stars.   #warm
+
+== chatter
+- First Light's tonight. I still remember mine.   #warm
+- Raman always points at the wrong star first. On purpose, he says.   #funny
+- Best cocoa of the season. Brennan won't say what she puts in it.

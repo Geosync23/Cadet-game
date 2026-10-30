@@ -1,0 +1,44 @@
+@template steady
+// ZW1 (writer), patch 0.92.3 item 26: crew comment when you wear dirty clothes. clothes.remark: yesterday's clothes
+// (flag:clothes.stale); clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3). Bubbles, 60 characters or fewer.
+// Kind, never mean: the joke is on the clothes, not on you.
+== clothes.remark
+? flag:clothes.stale
+- That's yesterday's shirt. Change when you get a minute.
+- Same clothes as yesterday? Easy fix. Wardrobe.
+? flag:clothes.stale tier>=friend
+- Everyone runs out once. The laundry sorts it.   #warm
+== clothes.grubby
+? flag:clothes.grubby
+- You've worked hard. Your uniform says so.
+- Grime on you. Change before you sit down to eat.
+? flag:clothes.grubby tier>=friend
+- Good shift? Change, wash, then eat. In that order.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 5: more lines for the chat card's opener (greet, near), so a tap doesn't repeat.
+// Heard after a person's own lines are used up (FX13's no-repeat). {hi}, {nick} and {me} are the speaker's own words.
+== greet
+- {hi}. Nice to run into you.
+- {hi}. How's the day treating you?
+- {hi}, {nick}. All going well?
+- Hello. Got a minute? I've got a few.
+- {hi}. You look like you've been busy.
+- {hi}. Things ticking along your end?
+- {hi}. Glad you stopped by.
+- {hi}. Take a seat if you like.
+? tier>=acquaintance
+- {hi}, {nick}. You've a knack for good timing.
+- {hi}. You've settled in well. People say so.
+? time:morning
+- Morning. Steady start. That's the best kind.
+? time:evening
+- Evening. Nice to stop for a bit, isn't it?
+== near
+- Just finishing this. Won't be long.
+- {room}. I like it when it's tidy.
+- Slow and steady. That's the way.
+- Every job's easy once you've done it a few times.
+- Pass me that, would you? Thanks.
+- No rush. It'll get done.
+- Doing it properly. Takes a little longer.
+- Nearly there. Then I'm all ears.

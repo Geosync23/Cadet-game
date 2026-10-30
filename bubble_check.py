@@ -10,6 +10,8 @@
 #      30 px on a 33 ms frame)
 #   3. no bubble is hidden and shown again within 30 frames (a re-show replays its pop-in)
 #   4. two bubbles that overlap never swap sides or stacking from one frame to the next more than once a second
+#   5. (2026-10-22) at phone and wide sizes, with the device open no bubble, no "would like a word" chip and no low-need pop
+#      is drawn over it; shut, the chip is on top
 # Setup and environment as for cadet_test.py.  Run:  python3 bubble_check.py BUILD.html
 import sys
 exec(open(__file__.replace('bubble_check.py', 'cadet_test.py')).read().split('import sys, json, hashlib\nimport numpy')[0].replace('device_scale_factor=1', 'device_scale_factor=3'))   # a phone's pixel density
@@ -71,8 +73,81 @@ def run(path):
         g.close()
     return errs
 
+# 5. (2026-10-22, the fresh-eyes playtest: someone's "would like a word" chip sat on top of the open device, over the Mail
+# being read) with the device open, neither a speech bubble nor the chip (#seek) is the top thing anywhere they overlap
+# it; closed, the chip is on top again. (The bubble layer has pointer-events none, so it's switched on to be found.)
+TOPS = r"""(() => { const dev = document.getElementById('device'), d = dev && !dev.hidden ? dev.getBoundingClientRect() : null, out = [];
+  if (bubbles.el) bubbles.el.style.pointerEvents = 'auto';
+  const els = [document.getElementById('seek'), document.getElementById('needPop'), ...bubbles.list.filter(b => b.el.style.display !== 'none').map(b => b.card)].filter(e => e && !e.hidden);
+  for (const e of els) { const r = e.getBoundingClientRect(); let x = r.left + r.width / 2, y = r.top + r.height / 2, over = false;
+    if (d) { const L = Math.max(r.left, d.left), R = Math.min(r.right, d.right), T = Math.max(r.top, d.top), B = Math.min(r.bottom, d.bottom); over = R > L + 2 && B > T + 2; if (over) { x = (L + R) / 2; y = (T + B) / 2; } }
+    const t = document.elementFromPoint(x, y); out.push({ id: e.id || 'bubble', over, top: !!(t && (t === e || e.contains(t))), dev: !!(t && dev && dev.contains(t)) }); }
+  if (bubbles.el) bubbles.el.style.pointerEvents = 'none'; return out; })()"""
+def cover(path):
+    errs = []
+    for w, h in [(390, 844), (900, 760)]:
+      with sync_playwright() as pw:
+        g = Game(pw, path, w=w, h=h)
+        g.ev("skipTo((2 - 1) * 1440 + 720)"); g.ev("goToDeck(3)"); g.step(5)
+        g.ev("player.obj.position.set(21.5 - OX, 0, 10.5 - OZ)"); g.step(40)
+        ok = g.ev("(() => { const P = player.obj.position, a = DECK_CREW.filter(a => a.h).sort((x, y) => Math.hypot(x.x - P.x, x.z - P.z) - Math.hypot(y.x - P.x, y.z - P.z))[0]; if (!a) return false;"
+                  " seekShow(a.p, 0, null, a); bubbleSay({ x: P.x, y: 0, z: P.z }, 'A line said low on the screen, under where the device opens.', 60); return true; })()")
+        if not ok: errs.append(f'5. {w} x {h}: nobody on the deck to ask for a word'); g.close(); continue
+        g.step(3); shut = g.ev(TOPS)
+        g.ev("deviceShow('mail')"); g.step(12); g.ev("needPop('hunger')"); g.step(2); open_ = g.ev(TOPS)   # the low-need pop too (RV5's find)
+        g.ev("deviceClose()"); g.step(12); again = g.ev(TOPS)
+        print(f'  5. {w} x {h}: device shut {shut}; open {open_}; shut again {again}')
+        chip = lambda L: next((x for x in L if x['id'] == 'seek'), None)
+        if not (chip(shut) and chip(shut)['top']): errs.append(f'5. {w} x {h}: the chip should be on top with the device shut: {shut}')
+        if not any(x['over'] for x in open_): errs.append(f'5. {w} x {h}: nothing overlapped the open device, so nothing was tested: {open_}')
+        bad = [x for x in open_ if x['over'] and x['top']]   # over the device and the top thing there
+        if bad: errs.append(f'5. {w} x {h}: drawn over the open device: {bad}')
+        if not (chip(again) and chip(again)['top']): errs.append(f'5. {w} x {h}: the chip should be back on top once the device is shut: {again}')
+        if g.errors: errs.append(f'5. {w} x {h}: page errors: ' + ' | '.join(g.errors[:3]))
+        g.close()
+    return errs
+
+# 6. the comet (FX25, 0.93.2; plans/events-plan-2.html A8): on Day 22 at 21:45 in the bow lounge with the comet's crowd at the
+# glass, at phone size, Sato's line goes up over her (cometTalk) and follows her as you walk and the camera turns on uneven
+# frames: its tail on her head within 0.5 px, no shake, no jump
+def comet(path):
+    errs = []
+    with sync_playwright() as pw:
+        g = Game(pw, path, w=390, h=844)
+        if not g.ev("typeof EV_COMET_ON !== 'undefined' && EV_COMET_ON && typeof SHIP_EVENTS !== 'undefined' && !!SHIP_EVENTS.comet"):
+            print('  6. SKIP: the comet is switched off'); g.close(); return errs
+        B = 21 * 1440
+        g.ev(f"skipTo({B + 1260})"); g.ev("goToDeck(3)"); g.step(5)
+        g.ev("(() => { const sp = placeSpot('3-bow-lounge-line-crowd-20') || placeSpot('3-lounge-27'); player.obj.position.copy(cellPos(...nearestOpen(sp.x, sp.z, player))); player.stop(); })()")
+        g.ev(f"for (let t = {B + 1261}; t <= {B + 1291}; t++) {{ setShipNow(t); EV_MIN = -1; eventsTick(); }}"); g.ev(f"setShipNow({B + 1305}); deckCrewFill()"); g.step(40)
+        g.ev(f"setShipNow({B + 1305}); EV_MIN = -1; eventsTick()"); g.step(2)
+        info = g.ev("(() => ({ crowd: DECK_CREW.filter(a => roomAt(...cellAt(a.x, a.z)) === 'L').length, said: bubbles.list.map(b => [(b.who.p || {}).id, b.text.slice(0, 30)]) }))()")
+        print(f"  6. the comet at the bow glass, 21:45: {info['crowd']} in the lounge; bubbles {info['said']}")
+        if info['crowd'] < 25: errs.append(f"6. the comet: only {info['crowd']} in the bow lounge at 21:45")
+        if not any(w == 'sato' for w, _ in info['said']): errs.append(f"6. the comet: no line from Sato at the glass: {info['said']}")
+        prev, worst, shakes, jump, res = None, 0, 0, 0, {}
+        for k in range(120):
+            g.ev(f"player.obj.position.x += {.03 if (k // 40) % 2 == 0 else -.03}; azT += {.004 if k < 60 else -.004}")
+            g.step(1, 1000 / 60 if k % 2 else 1000 / 30)
+            cur = [b for b in g.ev(MEASURE)]
+            for i, b in enumerate(cur):
+                if b['shown']: worst = max(worst, abs(b['ax'] - b['hx']))
+                if prev and i < len(prev) and b['shown'] and prev[i]['shown'] and prev[i]['t'] == b['t']:
+                    p = prev[i]; rx, ry = (b['x'] - p['x']) - (b['hx'] - p['hx']), (b['y'] - p['y']) - (b['hy'] - p['hy'])
+                    jump = max(jump, abs(rx) + abs(ry)); q = res.get(b['t'])
+                    if q and any(abs(u) > 3 and abs(w) > 3 and u * w < 0 for u, w in ((rx, q[0]), (ry, q[1]))): shakes += 1
+                    res[b['t']] = (rx, ry)
+            prev = cur
+        print(f'     tail aim {worst:.2f} px (at most 0.5), shakes {shakes} (none), largest jump {jump:.1f} px (at most 45)')
+        if worst > .5: errs.append(f'6. the comet: a bubble aims {worst:.1f} px off its speaker')
+        if shakes: errs.append(f'6. the comet: {shakes} frames where a bubble shook')
+        if jump > 45: errs.append(f'6. the comet: a bubble jumped {jump:.1f} px')
+        if g.errors: errs.append('6. the comet: page errors: ' + ' | '.join(g.errors[:3]))
+        g.close()
+    return errs
+
 if __name__ == '__main__':
     print('Speech bubbles at phone size, uneven frames, you walking and the camera turning')
-    e = run(sys.argv[1])
+    e = run(sys.argv[1]) + cover(sys.argv[1]) + comet(sys.argv[1])
     for x in e: print('  FAIL', x)
     print('BUBBLE CHECK ' + ('FAILED' if e else 'OK')); sys.exit(1 if e else 0)

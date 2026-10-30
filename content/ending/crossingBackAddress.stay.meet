@@ -1,0 +1,27 @@
+@meeting crossingBackAddress.stay
+// SW6 (ending writer A), the Captain's final address at the crossing back (ending spec, Sunday Day 35, about 15:00,
+// the bow lounge, after crossingBackSignal): the version for STAY (you told her Stay, or chose Stay at
+// crossingBackAddress.ask). After this it's settled (end.stay) and the crew know. The crowd reacts. The Admiral is
+// the Captain's fish: one mention, never explained.
+title: The Captain's address
+from: Captain Odile Marrow
+gist: At the Line, the Captain told the crew you're staying aboard the Wren.
+== lines
+marrow: One more thing, and then you can all get back to your Sunday.   [gesture]
+marrow: Four weeks ago we crossed into the reach as guests. We were good ones. I'm proud of every one of you.
+marrow: A few days ago, Concord headquarters wrote to me. They asked for one of ours. A post at headquarters.   [nod]
+marrow > you: They asked for {me}. I passed it on, as I should. And {me} has given me an answer.
+marrow: The answer is no. Politely. We're keeping them.   [laugh]
+pell: Yes! I knew it. I said. Didn't I say?   [gesture]
+halloran-emeka: You said the opposite, love. Twice.   [laugh]
+calder: Good.   [nod]
+torres-zeke: Coil three's going to be unbearable about this.   [laugh]
+marrow > you: Selfishly, I'm glad. The Admiral is glad. He's hard to read, but he's glad.
+? choice
+* Thank you. All of you.   flavour:share
+  marrow: Don't thank us. You'll be fixing our lifts for years.   [laugh]
+* Somebody has to keep coil three company.   flavour:funny
+  torres-zeke: Somebody does. I'm going to cry. I'm not. I am.   [laugh]
+* (Smile and say nothing)   flavour:listen
+  marrow: Quite right. Nothing to add.   [nod]
+marrow: That's all. The supper's at six. The Wren is back on her course. Carry on, all of you.

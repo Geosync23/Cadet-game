@@ -461,7 +461,7 @@ with sync_playwright() as pw:
       step(7, 10); o.news = NEWS.some(n => n.id === 'leaving:pell') && NEWS.some(n => n.id === 'arriving:' + x.id);
       o.before = crewContacts({ all: true }).some(c => c.id === x.id);
       step(11, 18); o.bye = chatLine(pell, shipNow()).kind; o.byeText = chatLine(pell, shipNow()).text;
-      const m0 = SHIP.social.mail.length; step(19, 21); o.moved = movedOn().map(m => m.id); o.sorry = SHIP.social.mail.slice(m0).some(m => /missed you/.test(m.subject));
+      const m0 = SHIP.social.mail.length; step(19, 21); o.moved = movedOn().map(m => m.id).filter(id => !ROSTER_ROTATIONS.some(r => r.out.includes(id))); /* the roster's own leavers aside (Theo leaves on day 21 since PT1) */ o.sorry = SHIP.social.mail.slice(m0).some(m => /missed you/.test(m.subject));
       o.gone = !crewContacts({ all: true }).some(c => c.id === 'pell') && movedOff('pell') && !movedOff('tomas') && newHere(x.id, 16); o.newHere = [newHere(x, 16), newHere(x, 23)];
       const m1 = SHIP.social.mail.length; step(22, 50); o.letters = SHIP.social.mail.slice(m1).filter(m => m.from.startsWith(pell.name)).length;
       const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = s === JSON.stringify(socSave());
@@ -493,6 +493,20 @@ with sync_playwright() as pw:
     print('An asked-for wave walks to you:', walk)
     if not walk.get('skip') and (walk['walked'] != 1 or not walk['chip'] or not walk['done'] or not walk['once']): fail(f'the asked-for wave does not happen: {walk}')
     if sk['ok'] != [True, False] or sk['win'] != [False, True, False] or not sk['saved'] or sk['fav'] is False: fail(f'socialSeekAsk wrong: {sk}')
+
+    # 14b. the first promotion's sim side (0.71.2): per-person appointment places round-trip through the device save
+    # (old appointments without them load as before; junk is dropped), and a guest goes to their own seat
+    pp = g.ev(r"""(() => { const keep = JSON.stringify(SHIP.device.appts), t = Math.floor(shipNow()) + 600;
+      const a = apptAdd({ id: 'promo:test', with: ['vance', 'calder'], at: t, len: 20, where: '1-conf-1', kind: 'meeting' }); if (!a) return { skip: true };
+      a.places = { vance: '1-conf-2', calder: '1-conf-3' };
+      const back = deviceLoad({ device: JSON.parse(JSON.stringify(SHIP.device)) }).appts.find(x => x.occ === 'promo:test');
+      const old = deviceLoad({ device: { appts: [{ id: 1, at: t, with: ['vance'], where: '1-conf-1', status: 'yes' }] } }).appts[0];
+      const junk = deviceLoad({ device: { appts: [{ id: 1, at: t, with: ['vance'], where: '1-conf-1', status: 'yes', places: { vance: 7, calder: '1-conf-3' } }] } }).appts[0];
+      const w = whereIs(SOC.crew[SOC.idx.get('vance')], t + 5);
+      SHIP.device.appts = JSON.parse(keep);
+      return { back: back && back.places, old: old.places === undefined, junk: junk.places, at: w && w.placeId }; })()""")
+    print('Per-person appointment places:', pp)
+    if not pp.get('skip') and (pp['back'] != {'vance': '1-conf-2', 'calder': '1-conf-3'} or not pp['old'] or pp['junk'] != {'calder': '1-conf-3'} or pp['at'] != '1-conf-2'): fail(f'per-person appointment places wrong: {pp}')
 
     # 15. a favour handed in on the card (0.36.62): the memory and the reputation it gives
     fv = g.ev(r"""(() => { if (typeof favourPost !== 'function') return null;
@@ -620,3 +634,4 @@ with sync_playwright() as pw:
     if g.errors: ok = False
     print('SOCIAL CHECK OK' if ok else 'SOCIAL CHECK FAILED')
     g.close()
+    sys.exit(0 if ok else 1)   # so a failing check fails for the computer too (check_fast.sh, GitHub)

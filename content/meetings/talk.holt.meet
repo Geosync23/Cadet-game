@@ -1,0 +1,22 @@
+@meeting talk.holt
+// SW2, 0.92.6 item 13 (FX17's word list): Day 32, Thursday 19:00-19:45, a chief's talk in the auditorium seats (house
+// lights half up, the speaker on a stool, no lectern). Chief Bram Holt, Watch: "The oldest log in the Watch office".
+title: The oldest log in the Watch office
+from: Chief Bram Holt
+gist: Chief Holt's talk on the Watch office's oldest paper log, and every quiet night written in it.
+== lines
+holt: Hm. Sit down. Front row, you. Closer. Nobody's going to test you. Yet.   [gesture]
+holt: This is the oldest log in the Watch office. Paper. The Wren's first year.
+holt: First entry, first night: "All doors secure. Nothing to report." Signed.
+holt: Page after page of nothing to report. That's not dull. That's the Watch working.
+holt: One cadet wrote: "Heard a knock on Deck 5. Went to look. It was me." It stayed in.   [laugh]
+holt: Every line in here is someone walking a deck at night so you can sleep. Remember it.
+holt: Test. The nearest suit locker to this room. Don't look round. Hm. Questions.
+? choice
+* Can I read it?   rel:holt+2 flavour:listen mem:talk.holt.asked
+  holt: In the Watch office. Clean hands, one page at a time, and you sign the visitors' line.   [nod]
+* Who was the cadet who knocked?   rel:holt+2 flavour:cheer mem:talk.holt.asked
+  holt: Signed, so I know. Still aboard, so I'm not saying. Ask me in ten years.   [laugh]
+* (Just listen)
+  holt: No questions. Then you were listening. Adequate.
+holt: That's all. Lights up. Off with you, and walk back the long way.

@@ -21,11 +21,12 @@ import content_gen as cg
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 TOKENS = {'hi', 'bye', 'yes', 'thanks', 'wow', 'sigh', 'nick'}
-PLACEHOLDERS = {'me', 'name', 'first', 'friend', 'best', 'rival', 'partner', 'mentor', 'mentee', 'boss', 'thing', 'trad',
+PLACEHOLDERS = {'jobs', 'spice', 'me', 'name', 'first', 'friend', 'best', 'rival', 'partner', 'mentor', 'mentee', 'boss', 'thing', 'trad',
                 'machine', 'room', 'deck', 'dish', 'weekday', 'home', 'family', 'hobby', 'since', 'other',
                 'kin', 'lost', 'hobbyNoun', 'missed',
                 'time', 'hours', 'n', 'max', 'part', 'shelf', 'drink', 'answer',
-                'mech', 'job', 'tools', 'skill', 'title', 'rank', 'band', 'next', 'shows', 'drill', 'host'}   # Pillar 5 texts (content/works/keys-p5.md)   # 0.60.7 texts (keys-0607.md): the engineer fills these   # kin, lost: "my gran", "my wife" (with the my); hobbyNoun: "knitting", "the piano"
+                'mech', 'job', 'tools', 'skill', 'title', 'rank', 'band', 'next', 'shows', 'drill', 'host',
+                'system', 'dept', 'day', 'nth', 'start', 'text', 'junction', 'grade', 'star', 'parts', 'a', 'b', 'word', 'where', 'when', 'from', 'to', 'place'}   # Pillar 5 Step 3 texts (keys-p5.md "Step 3")   # Pillar 5 texts (content/works/keys-p5.md)   # 0.60.7 texts (keys-0607.md): the engineer fills these   # kin, lost: "my gran", "my wife" (with the my); hobbyNoun: "knitting", "the piano"
 PAIR_WORDS = {'same', 'bunk', 'friend', 'rival', 'senior', 'couple', 'best', 'mentor', 'mentee'}   # section 22's linePair
 NEEDS = {'home', 'family', 'hobby', 'since', 'kin', 'lost', 'hobbyNoun'}   # what a theme beat's needs: can name
 TRAD_PLACEHOLDERS = {'trad', 'host', 'names', 'first', 'season', 'weekday', 'time'}   # tradition texts: only these (plans/trad-format.md, tradFill)
@@ -33,7 +34,7 @@ VALUES = {
     'warmth': {'cold', 'warm'},
     'bond': {'best', 'friends', 'friend', 'rivals', 'rival', 'mentor', 'mentee', 'drifting', 'couple', 'partner', 'missed'},   # section 20's BOND_KINDS and bondOf's aliases 'mood': {'low', 'ok', 'high'},
     'rep': {'new', 'known', 'well', 'theirs'}, 'ship.work': {'low', 'ok', 'high'}, 'ship.kindness': {'low', 'ok', 'high'},
-    'ship.spirit': {'low', 'ok', 'high'}, 'week1': {'true', 'false'}, 'leaving': {'soon', 'you'}, 'newhere': {'true', 'false'},
+    'ship.spirit': {'low', 'ok', 'high'}, 'week1': {'true', 'false'}, 'leaving': {'soon', 'you'}, 'newhere': {'true', 'false'}, 'endgame': {'true', 'false', 'early'},
     'guide': {'true', 'false'},
     'time': {'morning', 'afternoon', 'evening', 'night'}, 'weekday': {'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'},
     'season': {'sowing', 'greening', 'harvest', 'lanterns'}, 'birthday': {'me', 'you'},
@@ -96,7 +97,8 @@ def roster(game):
     with open(game, encoding='utf-8') as f:
         html = f.read()
     people = {}
-    for name in ('ROSTER', 'ROSTER_GUESTS', 'GUESTS'):     # crew, guests living aboard, and event guests and visitors
+    for name in ('ROSTER', 'ROSTER_GUESTS', 'GUESTS', 'ROSTER_RESERVE'):   # crew, guests living aboard, event guests and visitors, and
+                                                                         # the reserve who rotate in later (ROSTER_ROTATIONS)
         m = re.search(r'^const ' + name + r' = \[\n(.*?)^\];', html, re.M | re.S)
         for l in (m.group(1).split('\n') if m else []):
             l = l.strip().rstrip(',')
@@ -142,7 +144,9 @@ def main(argv):
     trads |= {t['id'] for t in out['TRADITIONS'] if t.get('id')}
     VALUES['trad'] = (trads | {'today'}) if trads else None
     VALUES['came'] = (trads | {'any'}) if trads else None
-    for k in ('you', 'trait', 'trad', 'came'):
+    # thread: values (the Talk a while pack): the roster's struggle themes (story arcs' "arc:<id>" aren't themes)
+    VALUES['thread'] = {p['thread'] for p in people.values() if p.get('thread') and not p['thread'].startswith('arc:')} or None
+    for k in ('you', 'trait', 'trad', 'came', 'thread'):
         if not VALUES[k]:
             del VALUES[k]                                  # an older build without them: not checked
     names = set()
@@ -251,6 +255,24 @@ def main(argv):
         for l in sc['lines']:
             for x in ([l] if 'text' in l else [c for c in l['choice']] + [c['reply'] for c in l['choice'] if 'reply' in c]):
                 allx.append((f'meeting {mid}', 'moment', {'text': x['text'], 'id': mid}, None, 'meet'))
+    # the Talk a while pack (content/talkpack/*.talk; plans/talk-pack-plan.md): card lines, the ask and the answers as
+    # chat lines (90), the replies as buttons (44, plain text); the when: values like a line's; own talks' owners are crew
+    for cid in out['TALKS']['own']:
+        if cid not in people:
+            errors.append(f'talkpack/{cid}.talk: "@talks {cid}" is not a crew member or guest')
+    for t in out['TALKS']['pool'] + [t for d in ('own', 'work') for ts in out['TALKS'][d].values() for t in ts]:
+        where = f'talk {t["id"]}'
+        if t.get('when'):
+            allx.append((where, 'talk', dict(t['when'], text='', id=t['id']), None, 'talk'))
+        earned = {k: v for k, v in (t.get('when') or {}).items() if k in ('tier', 'beat', 'beatIs', 'mem', 'leaving')}   # for #serious
+        for x in t['lines'] + [t['ask']] + [r['ans'] for r in t['replies'].values()]:
+            allx.append((where, 'talk', dict(x, id=t['id'], **earned), None, 'talk'))
+        for r in t['replies'].values():
+            allx.append((where, 'talk.reply', {'text': r['text'], 'id': t['id']}, None, 'talk'))
+    for kind, es in out['TALKS']['small'].items():
+        if '.' in kind and kind.split('.', 1)[1] not in people:
+            errors.append(f'talkpack/smalltalk.talk: "== {kind}": {kind.split(".", 1)[1]} is not a crew member or guest')
+        allx += [(f'talk small', 'talk.' + kind.split('.')[0], dict(e, id='small'), None, 'talk') for e in es]
 
     allowed = set()                                    # line ids the head writer has approved past the romance check
     al = os.path.join(cg.CONTENT, 'allow.list')
@@ -265,8 +287,10 @@ def main(argv):
     seen = {}
     for where, kind, e, cid, src in allx:
         t, tag = e['text'], f'{where} [{kind}] "{e["text"][:50]}"'
-        if not t and src not in ('moment', 'home'):
+        if not t and src not in ('moment', 'home', 'talk'):
             continue
+        if kind == 'talk.reply' and re.search(r'[{}]', t):
+            errors.append(f'{tag}: a reply is a button: no placeholders or voice tokens')
         if src == 'moment' and re.search(r'\{(family|hobby)\}', t):   # story arcs and themes: the roster's descriptions don't fit a sentence
             errors.append(f'{tag}: {{family}} / {{hobby}} read as descriptions ("late wife, who I still talk about"): use {{kin}} or {{lost}} ("my gran") or {{hobbyNoun}} ("knitting")')
         if re.search(r'\bmy \{(kin|lost)\}', t, re.I):
@@ -320,7 +344,17 @@ def main(argv):
                             errors.append(f'{tag}: beat is like beat:tomas.3 (arc id, a dot, beats told)')
         # length, with names filled in
         n = len(re.sub(r'\{[^}]*\}', 'x' * NAME_W, t))
-        lim = 90 if kind in ('trad.chatter', 'trad.ask', 'trad.here') else 200 if kind in ('trad.mail', 'trad.thanks') or kind.startswith(('tip.', 'join.')) else 400 if kind == 'letter' or kind.startswith('mail.') else 60 if kind in BUBBLE_KINDS else 140 if kind.startswith(LONG_KINDS) else CARD
+        # the ship-wide events' own words (the events base; EW1's content/banks/event-<id>.lines): a Mail body 400 (as mail.*),
+        # a gathering's Mail or thanks toast, the keepsake and plaque texts 200 (as a tradition's), the device's one-line Ship
+        # status 60 (OR1's F3b review), the rest a card's 90
+        if kind.startswith('event.'):
+            lim = 400 if re.match(r'event\.[^.]+\.mail\.', kind) else 60 if re.match(r'event\.[^.]+\.status\.', kind) else 200 if re.search(r'\.(mail|thanks|keepsake)(\.\d+)?$|\.plaque\.', kind) else CARD
+        else:
+            lim = 44 if kind == 'talk.reply' else 90 if kind in ('trad.chatter', 'trad.ask', 'trad.here') else 200 if kind in ('trad.mail', 'trad.thanks') or kind.startswith(('tip.', 'join.')) else 400 if kind == 'letter' or kind.startswith('mail.') or kind in ('promo.announce.mail', 'promo.mail', 'promo.captain', 'promo.ceremony.mail', 'promo.move.mail', 'promo.ceremony.invite', 'promo.sight.mail', 'promo.ready.mail', 'promo.missing.m6', 'promo.missing.day', 'promo.dependable') else 60 if kind in BUBBLE_KINDS else 140 if kind.startswith(LONG_KINDS) else CARD
+        # one Mail longer than 400 by the user's choice: Zeke's "Before you land" (mail.zeke.land, 475 with a name filled
+        # in), the words the user picked (plans/zeke-words.md, final); it scrolls and reads whole in the device at 320x640
+        # and 390x844 (DS1, 0.92.0). Its own cap, so it can't grow further unnoticed
+        if kind == 'mail.zeke.land': lim = 480
         if not e.get('old'):
             if n > (90 if kind in BUBBLE_KINDS else lim):
                 errors.append(f'{tag}: {n} characters (at most {lim})')
@@ -365,7 +399,7 @@ def main(argv):
                                                                        'His', 'Her', 'Their', 'Our', 'Your', 'My', 'One', 'Each', 'Now', 'Then', 'So', 'Yes', 'No', 'Yesterday'):
                 warns.append(f'{tag}: "{m.group(1)}" looks like a name that isn\'t crew or a guest')
         key = (kind, t)
-        if key in seen and src not in ('convo', 'moment', 'home') and t:
+        if key in seen and src not in ('convo', 'moment', 'home', 'talk') and t:
             warns.append(f'{tag}: the same line is also in {seen[key]}')
         seen.setdefault(key, where)
 
@@ -389,7 +423,7 @@ def main(argv):
         errors.append('the baked blocks in the game file are out of date: run python3 content_gen.py')
 
     # coverage per person (their own lines) against the plan's targets
-    crew = [p for p in people.values() if p.get('rank') != 'guest']
+    crew = [p for p in people.values() if p.get('rank') != 'guest' and not p.get('reserve')]
     story = {p['id'] for p in crew if p.get('story')} | {'torres-zeke', 'calder', 'brennan', 'kovac-zainab'}
     def target(p):
         if p['id'] in story:
@@ -424,7 +458,8 @@ def main(argv):
 
     print(f'lines_check: {len(allx)} lines in {len(byfile)} places; {len(out["VOICE"])} voice cards '
           f'({with_card} with words) for {len(crew)} crew; {len(out["CONVOS"])} conversations; '
-          f'{len(out["MOMENTS"])} moments; {len(out["MOMENT_THEMES"])} themes; {len(out["MEETINGS_BAKED"])} meetings; {len(out["TRADITIONS"])} traditions')
+          f'{len(out["MOMENTS"])} moments; {len(out["MOMENT_THEMES"])} themes; {len(out["MEETINGS_BAKED"])} meetings; {len(out["TRADITIONS"])} traditions; '
+          f'{len(out["TALKS"]["pool"]) + sum(len(v) for d in ("own", "work") for v in out["TALKS"][d].values())} talks')
     if not quiet:
         print('coverage (own lines / target), people with any:')
         for c in cov:

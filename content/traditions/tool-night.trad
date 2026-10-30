@@ -1,0 +1,40 @@
+@tradition tool-night
+// SW2, 0.92.6 item 7(a), week 5 (FX17's shape: Monday 17:45, Works, hands-on, no repairs: Mend-it is cut). Tool night:
+// every 8 weeks from Day 29. Kovac lays every Works tool out on the machine shop benches, in order, and the game is
+// naming each one with your eyes shut. Nothing gets fixed. Kovac hosts (shy, exact, she counts things; Mon is a workday,
+// so she comes straight from shift). Ends 18:30, before the Wren talk at 19:00.
+k: 712
+title: Tool night
+when: every 8 weeks monday week 5 from day 29
+at: 17:45-18:30
+min: 20
+where: 5 room Machine shop: work:works, free
+where: 5 room Works bay: work:works, free
+hold: 1
+who: kovac-zainab always, works 55%, juniors 25%, everyone 8%
+anim: talk
+host: kovac-zainab
+from: kovac-zainab
+invite: host=kovac-zainab odds=30% line="Tool night. Um. In the machine shop. Every tool, in order. You could come."
+
+== mail
+- Tool night tomorrow, {time}, in the machine shop. Every tool in Works laid out in order. Name them with your eyes shut. Nothing gets fixed, I promise.
+
+== ask
+- Tool night in the machine shop later. Kovac's laid out every spanner.
+- Coming to tool night? Eyes shut, name the tool. Harder than it sounds.   #funny
+- Tool night after shift. Kovac's been sorting since lunch.
+
+== here
+- That's a seven-millimetre. No, an eight. Blast.   #funny
+- Look at the rows. Not one out of place.
+- Eyes shut. No peeking. Kovac can tell.   #funny
+- Put it back where it lives, please.
+
+== thanks
+- Kovac has laid every tool in Works out on the benches, in rows. You shut your eyes, someone hands you one, and you try to name it.   #warm
+
+== chatter
+- Tool night was brilliant. I named nine with my eyes shut.
+- Kovac knew every tool by its weight. Every single one.   #warm
+- Someone put a spoon in at tool night. Kovac named it in a second.   #funny

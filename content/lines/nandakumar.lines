@@ -110,3 +110,64 @@
 - The station hospital is large and calm. I've grown chillies on the windowsill. My mother's seeds. Drink water.
 ? tier>=friend
 - Put my sign on the new door. IF YOU ARE BLEEDING. They laughed. Then they listened. Hello.
+
+// W3, rec deck R12: Slow stretch, Sunday 08:30
+== chat
+- Slow stretch, Sundays at eight, in the float room. Your knees will thank you.
+- Stretch first, then swim. Then drink some water.
+
+// ---- SW1 (2026-10-24, patch 0.92.3 item 15): her own Talk a while frames (main characters don't use the shared ones)
+== talk.start
+- Yes. Sit. I have ten minutes.
+- Good. A chat. Tell me something that isn't a symptom.   #funny
+- Of course. Nobody's bleeding. I'm free.   #funny
+? tier>=friend
+- {me}. Good. I was hoping for a quiet ten minutes. You're good at quiet.   #warm
+- Sit. I've kept the second stool for you.   #warm
+
+== talk.sit
+- Sit there. Feet flat. Shoulders down. Good.
+- Have the chair. I'll stand. I've sat all clinic.
+- Sit. Not on the blue tray.   #funny
+
+== talk.filler
+- Mm.
+- You're breathing well. Sorry. Habit.   #funny
+- Quiet clinic today. I'll take it.
+- The chillies want watering. They can wait ten minutes.
+- I like a pause. People rush them.
+- Rina would have a question by now. You don't. That's restful.   #warm
+
+== talk.end
+- Good. That was restful. Thank you.   #warm
+- Off you go. Have some water on the way.   #funny
+- Ten minutes well spent. Same again, some time.
+- Thank you. I'll prescribe that for myself more often.   #warm
+- Right. Clinic. Look after yourself.
+
+== talk.stop
+- Of course. Go.
+- Another time. I'll be here. I'm usually here.
+- That's fine. We'll finish it later.
+
+== talk.go.shift
+- Clinic in five minutes. I'm never late for clinic. Later?
+- Rina's on her own till I'm in. I must go. Tomorrow?
+
+== talk.go.bed
+- Bed. Eight and a half hours. I'm practising what I preach.   #funny
+- I'm going to sleep. You should too. Soon.
+
+== talk.go.trad
+- {trad}. I said yes. I always say yes. Walk with me?   #warm
+- I'm due at {trad}. I'll keep you a seat by the door.
+
+// ---- ZW1 (writer), patch 0.92.5 item 5: more chat-card openers, so a tap doesn't repeat (FX13's no-repeat).
+== greet
+? tier>=acquaintance
+- {hi}, {me}. Water. Today. Before I ask again.   #funny
+- {me}. You look rested. Good. Keep that up.
+- {hi}. Chillies are ripening. Brennan's already asked. Twice.
+- {hi}, {me}. If you're here for advice, it's sleep. Get some.   #funny
+- {me}. Good. You're upright. That's my favourite kind of visitor.   #funny
+- {hi}. Quiet day in the infirmary. Let's keep it that way.

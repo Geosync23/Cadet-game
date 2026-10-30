@@ -1,0 +1,72 @@
+@bank all
+// FX28 (2026-10-26, the user's playtest notes: "crew chatter about how fast you got offered the test"; lead 38's plan
+// A-C). 24p's promoTalkTick says one in a bubble, from someone near you, each person once a beat a day: in the Works
+// bay and at meals (the evening's talk anywhere). Kinds: pb.soon (from the offer: how fast, by days aboard), pb.luck
+// (friends: the evening before and the test morning), pb.watch (you at your test job, in the bay), pb.passed (the test
+// done, the result not yet given), pb.officer (the day you're made Officer). Spoken over heads: 60 characters or fewer.
+// Drafted by FX28 for SW2 to polish (they/them for you, or your name; never a guess).
+
+== pb.soon
+? day:-9
+- Your Tier 2 test? You've been aboard nine days.
+- Not even ten days aboard. Calder must rate you.
+? day:-9 dept:works
+- Nine days and up for Tier 2. Took me three months.   #funny
+? day:10-14
+- Up for Tier 2 inside two weeks. That's quick.
+- Under two weeks aboard and a Tier 2 test. Not bad.
+- Two weeks? Calder doesn't hurry for anyone. Usually.   #funny
+? day:15-
+- Tier 2 test, then. About time, if you ask me.
+- Heard Calder's put you up for Tier 2. Good.
+?
+- Heard you've got your Tier 2 test. Already?
+- A Tier 2 test. Don't let anyone tell you it's hard.   #funny
+- Calder doesn't put just anyone up for Tier 2.
+? dept:works
+- Your test's a scrubber, I bet. It's always a scrubber.   #funny
+- Tier 2 means the scrubbers. You'll hear them in your sleep.
+? act:meal
+- Eat up. Big day coming, I hear.
+- So you're the one with the Tier 2 test. Everyone's saying.
+
+== pb.luck
+? tier>=friend
+- Good luck tomorrow. Not that you need it.   #warm
+- Sleep early tonight. You've got a test.
+- Tomorrow's the day, then. You'll be fine.   #warm
+? tier>=friend time:morning
+- Today's the day. You've got this.   #warm
+- Eat something. Tests go better on porridge.   #funny
+- Good luck. I'll want to hear all about it.   #warm
+
+== pb.watch
+? dept:works
+- Don't mind us. We're not watching. Much.   #funny
+- Steady hands. You're doing fine.
+- Calder's watching. Don't look at Calder.   #funny
+?
+- That's the test job, isn't it? Good luck.
+- Quiet, everyone. Test in progress.   #funny
+
+== pb.passed
+? tier>=friend
+- Done? How did it go? Tell me everything.   #warm
+- I bet you passed. I'd bet my pudding on it.   #funny
+- Results tomorrow? I'll be waiting. Tell me first.   #warm
+?
+- Heard you did your Tier 2 test. How was it?
+- Calder's face gives nothing away, does it?   #funny
+? dept:works
+- Tidy job on that scrubber. Saw it on the board.
+- She'll tell you tomorrow. She likes to make you wait.   #funny
+
+== pb.officer
+? tier>=friend
+- Officer! I knew it. I said so. Ask anyone.   #warm
+- Your own cabin tonight. I'm coming to see it.   #funny
+?
+- Congratulations, Officer.
+- The pip's this afternoon, I hear. With the Captain.
+? time:evening
+- Your own cabin tonight, I hear. Lucky you.

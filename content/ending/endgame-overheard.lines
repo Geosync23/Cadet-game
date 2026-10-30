@@ -1,0 +1,115 @@
+@overheard endgame
+// SW5, the endgame pool (plans/ending-spec.html section 9): two crew talking about you as you pass, only after
+// you choose to stay (the bare condition "endgame", EN2's gate). Bubbles: 60 characters. Named pairs use who:/with:.
+// "endgame:early": the news of the week, only in the first two weeks after you stay (RV21).
+
+== overheard
+? endgame
+A: {me} turned down headquarters. Did you hear?
+B: For the Wren? Course they did. Have you had the porridge?   #funny
+
+? endgame:early
+A: I was sure {me} would go.
+B: You were sure the quiz was Thursday.
+A: It was Thursday once.   #funny
+
+? endgame
+A: Funny. {me} isn't new any more, is it?
+B: Not since about week two. We just kept saying it.
+
+? endgame
+A: Saw {me} at breakfast. Looked happy.
+B: Ordinary-happy. That's the best sort.   #warm
+
+? endgame
+A: Who's the new hands' first stop now?
+B: {me}. Obviously. They ask the one who stayed.
+
+? endgame:early time:evening
+A: Quiet in here tonight.
+B: Everyone's tired from all the not-saying-goodbye.   #funny
+
+? endgame:early pair:friend
+A: I had a card ready for {me}. "Good luck out there."
+B: Cross it out. "Good luck in here."   #funny
+
+? endgame:early pair:bunk
+A: Did you hear {me} come in last night? Humming.
+B: People who've decided something hum. It's known.   #funny
+
+? endgame:early pair:senior
+A: You'd have signed {me}'s transfer, then?
+B: I'd have signed it. Slowly.   #warm
+
+? endgame:early
+A: Headquarters must be very surprised.
+B: Headquarters can come and try Brennan's Friday dish.   #funny
+
+? endgame
+A: Bet {me} gets bored of ordinary days.
+B: Nobody gets bored here. We just get busy.
+
+? endgame:early act:meal
+A: Save {me} a seat?
+B: I always do. Now I don't feel silly about it.   #warm
+
+? endgame:early who:pell with:rina
+A: Told you {me} would stay.
+B: You said "probably". Then you ate my toast.
+A: Nerves.   #funny
+
+? endgame:early who:rina with:pell
+A: You cried at the address.
+B: Dust. Ship's very dusty.
+A: Honestly.   #funny
+
+? endgame:early who:torres-zeke with:calder
+A: {me}'s staying, Chief.
+B: I know.
+A: You're smiling.
+B: I'm not.   #funny
+
+? endgame:early who:calder with:torres-zeke
+A: I've moved {me}'s name off the transfer sheet.
+B: Did it take long?
+A: Four seconds. I timed it.   #funny
+
+? endgame:early who:vance with:marrow
+A: The transfer paperwork, Captain. Returned, unsigned.
+B: My favourite kind, Commander.   #warm
+
+? endgame:early who:marrow with:vance
+A: Did the Admiral say anything?
+B: Not a word, Captain.
+A: He approves, then.   #funny
+
+? endgame:early who:brennan with:dlamini-lukas
+A: That goodbye supper I planned. Freeze it?
+B: Serve it Sunday. Call it a staying supper.   #funny
+
+? endgame:early who:holt with:mensah
+A: You owe me a tea.
+B: You never bet, Chief.
+A: I didn't bet. I knew.   #funny
+
+? endgame:early who:tomas with:bramwell-basil
+A: My bunkmate stayed. Your mentor stayed.
+B: That's two people for one person!
+A: That's how it works, I think. Sort of.   #funny
+
+? endgame:early who:kovac-zainab with:dahl-mira
+A: I'd started a goodbye scarf. For {me}.
+B: Finish it anyway. Call it a staying scarf.   #warm
+
+? endgame:early who:halloran-emeka with:pell
+A: I nearly wrapped {me}'s mug. In paper.
+B: You'd never have got it off the hook.
+A: True. That hook's very loyal.   #funny
+
+? endgame:early who:saruth with:holt
+A: Your crew is pleased. They are louder than usual.
+B: Hm. That's them pleased.   #funny
+
+? endgame:early who:oduya with:nandakumar
+A: Everyone's sleeping better this week.
+B: Everyone's stopped worrying about {me}.   #warm

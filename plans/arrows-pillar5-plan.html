@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arrows for Pillar 5</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e8c06a;--red:#e07a6a;--amber:#d9a85a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 30%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+.page{max-width:900px;margin:0 auto;padding:16px 16px 40px}
+h1{font-size:21px;font-weight:600;margin:0 0 4px}
+h2{font-size:17px;font-weight:600;margin:0;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:18px 0 6px;color:var(--gold)}
+p{margin:6px 0;font-size:14px}
+.sub{font-size:13.5px;color:var(--muted)}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:14px 0}
+.sec-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.comment-btn{appearance:none;border:1px solid var(--line);background:rgba(20,32,48,.9);color:var(--ink);font:inherit;font-size:12.5px;padding:6px 12px;border-radius:999px;cursor:pointer;min-height:36px}
+.item{border-left:3px solid var(--line);padding:6px 0 6px 10px;margin:8px 0;font-size:13.5px}
+.item b{color:#f2e3bf}
+.item .who{display:block;color:#a8e6dc;font-size:12px;margin-top:3px}
+.item .why{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.broken{border-left-color:var(--red)}
+.hidden{border-left-color:var(--amber)}
+.works{border-left-color:var(--teal)}
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:999px;margin-right:6px;vertical-align:1px;border:1px solid}
+.t-broken{color:#f3b3a8;border-color:rgba(224,122,106,.6)}
+.t-hidden{color:#f0d29a;border-color:rgba(217,168,90,.6)}
+.t-works{color:#a8e6dc;border-color:rgba(76,195,181,.6)}
+.t-new{color:#f2e3bf;border-color:rgba(232,192,106,.6)}
+.t-have{color:#a8e6dc;border-color:rgba(76,195,181,.6)}
+.moment{background:rgba(8,14,24,.55);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0;font-size:13.5px}
+.moment .n{color:var(--gold);font-weight:600;margin-right:6px}
+.moment dl{display:grid;grid-template-columns:88px 1fr;gap:2px 8px;margin:6px 0 0}
+.moment dt{color:var(--muted);font-size:12.5px}
+.moment dd{margin:0}
+.say{color:#f2e3bf}
+.piece{background:rgba(8,14,24,.55);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0;font-size:13.5px}
+.piece b{color:#bdeee6}
+.size{float:right;font-size:12px;color:var(--gold)}
+ul{margin:4px 0 4px 18px;padding:0;font-size:13.5px}
+li{margin:3px 0}
+code{font-size:12px;color:#cfe3e0;background:rgba(255,255,255,.06);padding:0 4px;border-radius:4px;word-break:break-word}
+.q{border:1px dashed rgba(232,192,106,.45);border-radius:10px;padding:8px 10px;margin:8px 0;font-size:13.5px}
+.q b{color:var(--gold)}
+.foot{font-size:12.5px;color:var(--muted);margin-top:18px}
+</style>
+</head>
+<body>
+<div class="page">
+<h1>Arrows for Pillar 5: Steps 1 and 2</h1>
+<p class="sub">The plan for arrows that teach every new thing in your Works career, from your first tracked shift to the end of your junior week (Days 1-8). Before the arrows, the list of what is broken today, found by playing build 0.64.15 in a browser. By AR1 (with AR2 on Step 2), 2026-10-22. Nothing in the game has been changed.</p>
+
+<section id="short">
+  <div class="sec-head"><h2>In short</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+  <p>The everyday work loop already has a good arrow: clock in, the job board, the part, the machine, turn it in, the next job. Played end to end it reads clearly at every step. <b>What goes wrong is everything around it.</b> The arrows the career adds (a meeting, a drill, the Chief's office, your new cabin) never go away when their moment is over, and while they are up they hide the work loop's arrow. And once you have taken a job, the career's meeting arrows never appear at all. On top of that, three things in the junior week cannot be done the way the game points you: the fire drill, the scanner lesson and the first burst pipe.</p>
+  <p>So the plan has three parts: <b>fix the broken list first</b> (the arrows would point at things that don't work), <b>then one set of arrow rules</b> (one arrow at a time, in a fixed order of importance, each one clearing itself), <b>then the arrows themselves</b>, moment by moment, in the order you meet them.</p>
+</section>
+
+<section id="broken">
+  <div class="sec-head"><h2>What is broken now (Steps 1-2)</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+  <p class="sub">Each was seen in play unless it says "from the code". The lead has given the fixes to three builders: FX1 (arrows and tracking), FX2 (the drill and side jobs, the scanner job, Tuning's words) and FX3 (the lift, the burst pipe, the small lessons, showing your reputation, the Record). Steps to see it again and the code lines are in <code>plans/arrows-pillar5-notes.md</code>.</p>
+  <h3>Your shift and the arrow (Step 1)</h3>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>Career arrows never clear, and they hide the shift's arrows.</b> A training meeting, "Meet Ines", "The Chief's office, 11:00", "Your test job", "Fire drill": each stays up for hours after its moment. While it is up you get no "Clock in", no "Take a job" and no arrow for your job. On Day 3 a player who followed the arrow never clocked in.<span class="why">Nothing in the career code clears its own arrow.</span><span class="who">Being fixed by FX1</span></div>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>Once you have taken any job, training invitations get no arrow.</b> The game remembers your last job as "tracked" forever, and the career only shows a meeting arrow when nothing is tracked. On Day 2 Torres's invitation came with no arrow; a player busy with jobs missed the meeting and only got a "(notes)" Mail.<span class="why">Same for the Tier 2 test job's arrow.</span><span class="who">Being fixed by FX1</span></div>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>Tracking "On shift" never takes you to the clock.</b> It points at the middle of the Works bay (a workbench) until 09:00 and hides the "Clock in" arrow, although the clock opens at 08:00.<span class="who">Being fixed by FX1</span></div>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>Dev mode's "Set career", and every "go" button on the device, switch your job arrow off.</b> After that there is no clock-in or job arrow until you take a job by hand. If you have been testing through Dev mode, this alone makes the career look dead.<span class="who">Being fixed by FX1</span></div>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>A fresh game starts with the job arrow switched off.</b> Until you take a job by hand, there is no clock-in, board or job arrow.<span class="why">Found by the lead's team.</span><span class="who">Being fixed by FX1</span></div>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>The "need a shower" arrow sends a junior into the Works Chief's private cabin on Deck 2</b> (place 2-shower-1), while its pop-up says "Junior wing, Deck 4". Nothing can be done there, and the arrow stays all day. Found by the arrows check.<span class="who">Being fixed by FX1</span></div>
+  <div class="item broken"><span class="tag t-broken">Needs a look</span><b>"Calibrate the galley plant" can't be started where the arrow points.</b> The pin sits where the cold store chiller takes the tap ("in good order"), and the arrow calls it "Repair the galley plant". Found by the arrows check.<span class="who">Being fixed by FX2</span></div>
+  <div class="item broken"><span class="tag t-broken">Needs a look</span><b>The main lift's service job may be impossible.</b> Its arrow points at the Deck 5 lift landing; tapping the lift panel, the brake or the spot itself did nothing, and the player was stuck on it for the rest of the shift.<span class="who">Being fixed by FX3</span></div>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>"What's next" says Calder has a test job for you when she doesn't.</b> It says so from the moment you finish the burst pipe, even if you are short of "Relied on". The real condition is never said. Your career reputation is never shown changing at all; the gold "Works reputation up" chip on the turn-in card is a different reputation with the same name.<span class="who">Being fixed by FX3 (both the "What's next" line and showing the reputation)</span></div>
+  <div class="item hidden"><span class="tag t-hidden">Missing</span><b>No clock-out word or arrow at the end of the shift</b> if you still have a job; the clock signs you out an hour later and Mails you a telling-off. <b>No word when the board is empty</b>: the arrow just vanishes.<span class="who">Being fixed by FX1 (clock out and the empty board)</span></div>
+
+  <h3>Your junior week (Step 2)</h3>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>The fire drill (Day 3, 15:00) can't be done.</b> Tapping the extinguisher does nothing, because the drill is a "side job" and the tap and arrow code only look at your main job. Calder always says you were slow, the drill is never counted, and its arrow stays up afterwards.<span class="why">The same cause breaks the Day 11 team job and the favour cases later.</span><span class="who">Being fixed by FX2</span></div>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>The scanner lesson and your first head-scratcher get skipped (Day 5).</b> The training job already lists the answer as its part, so the arrow says "Fetch a pump". Follow it and you fit the pump without ever scanning; the puzzle closes unseen and you are marked trained in the scanner anyway.<span class="who">Being fixed by FX2</span></div>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>The burst pipe (Day 8) loses you.</b> No warning before Calder's 10:30 call. After her talk the arrow still says "Meet Ines" in the office you are standing in, while she walks off to Deck 4 with nothing pointing there. If you don't follow her the lesson repeats on later days, and the Tier 2 test waits on it.<span class="who">Being fixed by FX3</span></div>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>Small lessons flash past.</b> The drill, inspection, first-puzzle and uniform talks close within a second, leaving only a quiet "(notes)" Mail. The drill and inspection talks also come after the event, not before.<span class="who">Being fixed by FX3</span></div>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>The Tuning invitation gives two times:</b> "Galley, 10:15. Bring nothing. (08:40, Galley on Deck 3.)"<span class="who">Being fixed by FX2</span></div>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>Hauling only works on a Wednesday, and then blocks the week.</b> The lesson needs Wednesday's crates. Offered on another day it fails without a word and is offered again at 06:00, before the delivery, so tuning, the scanner and the burst pipe wait a week or more behind it.<span class="why">Found by AR2.</span><span class="who">Being fixed by FX3</span></div>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>Following the arrow on Day 5 stops the career.</b> The scanner never counts as used if you follow the arrow's "parts first", and the burst pipe (Day 8) needs one scan, so the burst pipe and the Tier 2 test never open.<span class="why">Found by AR2; the same cause as the scanner lesson above.</span><span class="who">Being fixed by FX2</span></div>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>You can take the teacher's own job.</b> While the teacher is meant to show you, their job is on the board for you too; take it and the lesson is skipped. On Day 5 the scanner was marked learned without a reading, the head-scratcher finished as a plain repair, and the clue pop-ups read "undefined".<span class="why">Found by AR2.</span><span class="who">Being fixed by FX2</span></div>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>A missed meeting's Mail is wrong.</b> After you miss Torres's Rounds talk, its notes say "Your first round is on the board" when it isn't.<span class="why">Found by AR2.</span><span class="who">Being fixed by FX1</span></div>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>A dropped job leaves its part in your hands.</b> The next cart job then refuses (hands full) while the arrow points at the Cart bay.<span class="why">Found by AR2.</span><span class="who">Being fixed by FX2</span></div>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>A missed lesson comes back at 06:00, before you can clock in.</b> Its invitation lands while you are in bed, and its arrow pulls you off before your shift.<span class="why">Found by AR2.</span><span class="who">Being fixed by FX1 (the timing), with FX3 (the lesson)</span></div>
+  <div class="item broken"><span class="tag t-broken">Hidden</span><b>Hauling's arrows all say "Manifest run: 3 crates".</b> Every stop already has its own words; the arrow doesn't use them.<span class="why">Found by AR2.</span><span class="who">Being fixed by FX3, with its hauling fix</span></div>
+  <div class="item broken"><span class="tag t-broken">Hidden</span><b>Tracked picks "On shift 09:00" over "Training: the scanner 09:00"</b> when both start at once, and a training's Tracked arrow names only the room.<span class="why">Found by AR2.</span><span class="who">Being fixed by FX1</span></div>
+  <div class="item hidden"><span class="tag t-hidden">Hidden</span><b>Watching the teacher.</b> In every training you must stay within a few steps of the teacher for 10-15 minutes while they work. Nothing tells you, and no arrow follows them.<span class="who">Being fixed by the arrows plan (T2 below)</span></div>
+  <div class="item hidden"><span class="tag t-hidden">Hidden</span><b>Pop-ups wipe each other.</b> On Day 2 Torres's invitation was replaced by three other messages in the same minute.<span class="who">In the arrows plan: piece B gets a short queue for pop-ups beside the arrow queue</span></div>
+  <div class="item hidden"><span class="tag t-hidden">Hidden</span><b>The inspection (Thursday 06:30)</b> has no warning beforehand; the Calendar says 06:40. <b>Hauling's</b> invitation says "at the hold" but the meeting is in Main storage. <b>Tuning's</b> job arrow says "Repair", not "Tune". <b>The uniform</b> rule is only in a quiet Mail.<span class="who">The warning: the arrows plan (Day 4). The Calendar time, Hauling's "at the hold" and Tuning's "Repair": FX2. The uniform rule: FX3, with the small lessons</span></div>
+  <div class="item works"><span class="tag t-works">Works</span><b>Once you reach them:</b> Rounds (the best-guided lesson in the game: an arrow and a tip for each machine), hauling, tuning, the Works app (Training, Work log, Tools), your locker, the needs arrows (food, toilet), and the whole job loop.</div>
+</section>
+
+<section id="today">
+  <div class="sec-head"><h2>How the arrow works today</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+  <ul>
+    <li><b>One arrow in the world.</b> A gold ring with a pointer at the screen's edge when the spot is off screen, a bobbing pin when it's on screen, and a short label. Off your deck it says "Take the lift to Deck N".</li>
+    <li><b>Who gets it:</b> anything that asks for it (a tracked appointment, a needs arrow, a career arrow) wins; otherwise your job's next step; otherwise, on a shift day, "Clock in" then "Take a job". There is no order of importance: whoever asks last wins, and some never let go.</li>
+    <li><b>Day 1's first-time arrows</b> (clock, board, dinner, wardrobe, tea, call home) already work the right way: shown the first time you are told, never over someone else's arrow, gone once done or past its time. The new rules copy them.</li>
+    <li><b>Tips</b> (the green card at the bottom) show once each and can't point. Rounds pairs a tip with each arrow step: the model for teaching.</li>
+    <li><b>No pointer inside panels.</b> Nothing can point at a button on the job board, the clock screen, a device app or a card. That is new work.</li>
+  </ul>
+</section>
+
+<section id="rules">
+  <div class="sec-head"><h2>The new arrow rules</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+  <div class="item"><b>1. One world arrow, one panel pointer, never more.</b> The world arrow is the one we have. The panel pointer is new: the same gold ring, sitting on a button inside whatever panel is open (the job board, the clock screen, the device). Both are page elements over the 3D view, so neither adds draw calls on a phone.</div>
+  <div class="item"><b>2. A queue with an order of importance.</b> Everything that wants the arrow asks the queue; the queue shows the most important one that is live now, and the rest wait their turn:
+    <ul>
+      <li>1, right now: an emergency or a summons (the burst pipe call, the Chief's office, the drill in 10 minutes)</li>
+      <li>2, in the next 15 minutes: a meeting or event you are expected at (a training, the inspection, a team job)</li>
+      <li>3, while you are learning: the first-time steps of a new thing (watch the teacher, your first round)</li>
+      <li>4, your shift: clock in, take a job, each step of your job, turn it in, clock out</li>
+      <li>5, your body: food, toilet, sleep (raised to 1 when urgent, as today)</li>
+      <li>6, things you chose: a tradition or place you tracked yourself (raised to 2 when it starts soon)</li>
+    </ul></div>
+  <div class="item"><b>3. Every arrow knows when it is done.</b> Each one comes with its own "done when" (you arrived, the meeting started, the job is taken, the time passed) and the queue clears it. Nothing can be left up by accident.</div>
+  <div class="item"><b>4. First time, then quiet.</b> Teaching arrows (rule 2's level 3, and every panel pointer) show the first time, or the first two or three times for something you do daily, then never again (saved like tips, so a reload doesn't repeat them). The shift's own arrows (level 4) show every shift while tracking is on, as now.</div>
+  <div class="item"><b>5. Words with the arrow.</b> The arrow's label stays short (about 30 characters). A teaching step can bring one tip with it (the existing green card) when there is more to say, as Rounds does.</div>
+  <div class="item"><b>6. Your choice still wins.</b> If you switch tracking off, only levels 1 and 2 still show. If you track something yourself, it stays until it is done, and the queue's level 1 can only borrow the arrow and give it back.</div>
+</section>
+
+<section id="shift">
+  <div class="sec-head"><h2>Step 1: your shift, step by step</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+  <p class="sub">"When you track your work shift, these arrows need to take you to each next thing very clearly." In the order you meet them, every shift. <span class="tag t-have">Have</span> = the arrow exists and only needs the rules above; <span class="tag t-new">New</span> = new work.</p>
+  <div class="moment"><span class="n">S1</span><b>Waking on a shift day</b><dl><dt>When</dt><dd>From 06:00, if "On shift" is tracked or nothing else is</dd><dt>Points at</dt><dd>Nothing until the clock opens. The Tracked panel shows "On shift 09:00, clock opens 08:00".</dd><dt>Change</dt><dd>Tracking "On shift" means "lead me through my shift": it hands over to S2 at 08:00 instead of pointing at the bay's middle. <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">S2</span><b>Clock in</b><dl><dt>When</dt><dd>08:00 (the clock opens) until you clock in</dd><dt>Points at</dt><dd>The time clock (place 5-timeclock-1). Then inside the clock screen, the Clock in button.</dd><dt>Says</dt><dd class="say">Clock in: shift at 09:00</dd><dt>Goes when</dt><dd>You are clocked in</dd><dt>Kind</dt><dd>World arrow <span class="tag t-have">Have</span>; clock screen pointer, first three shifts <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">S3</span><b>Take a job</b><dl><dt>When</dt><dd>Clocked in, no job, and the board has one for you</dd><dt>Points at</dt><dd>The job board. Then inside the board, the top job's Take it button (a held training job first).</dd><dt>Says</dt><dd class="say">Take a job at the board</dd><dt>Goes when</dt><dd>You take one</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span>; board pointer, first three times <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">S4</span><b>Each step of the job</b><dl><dt>When</dt><dd>While the job is yours</dd><dt>Points at</dt><dd>The shelf itself (not the aisle in front: today the pin sits halfway between two shelves), the machine shop, the machine's panel, each stop of a chore or cart run</dd><dt>Says</dt><dd class="say">Fetch a relay: Lights shelf / Repair Oven 1 / Tune Oven 2 / Load the cart</dd><dt>Goes when</dt><dd>Each step is done</dd><dt>Kind</dt><dd><span class="tag t-have">Have</span>; two small label fixes (the shelf, "Tune") and the main lift's spot</dd></dl></div>
+  <div class="moment"><span class="n">S5</span><b>Turn it in</b><dl><dt>When</dt><dd>The work is done</dd><dt>Points at</dt><dd>The job board, then its Turn it in button</dd><dt>Says</dt><dd class="say">Turn it in at the board</dd><dt>Goes when</dt><dd>Turned in; the arrow goes straight to S3 again</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span>; board pointer, first three times <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">S6</span><b>Nothing on the board</b><dl><dt>When</dt><dd>Clocked in, no job, nothing for you</dd><dt>Points at</dt><dd>No arrow. One line once an hour: "Board's empty for now. New jobs come on the hour." Optionally the tea corner.</dd><dt>Kind</dt><dd>Words <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">S7</span><b>Clock out</b><dl><dt>When</dt><dd>From the end of the shift (17:00; 15:30 on Fridays), even with a job in hand (it waits for tomorrow)</dd><dt>Points at</dt><dd>The time clock, then its Clock out button</dd><dt>Says</dt><dd class="say">Shift over: clock out</dd><dt>Goes when</dt><dd>Clocked out, or an hour later</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span> (raise above your job); clock screen pointer <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">S8</span><b>Your first job turned in (Day 1 or 2)</b><dl><dt>Points at</dt><dd>The Device button, then the Works app, then its Work log tab</dd><dt>Says</dt><dd class="say">Your work is logged here</dd><dt>Goes when</dt><dd>You open the tab once (or skip)</dd><dt>Kind</dt><dd>Device pointer, once <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">S9</span><b>Your Works reputation moves up a word</b><dl><dt>When</dt><dd>The first time each band is reached (Steady, Reliable, Trusted, Relied on)</dd><dt>Points at</dt><dd>A short toast "Works reputation: Reliable", then the Device button and the Works app's Training tab, the first time only</dd><dt>Kind</dt><dd>Words and device pointer <span class="tag t-new">New</span>. Also fix "What's next" so it names the real condition: "Reach Relied on and Calder will set your test."</dd></dl></div>
+</section>
+
+<section id="week">
+  <div class="sec-head"><h2>Step 2: your junior week, in the order you meet it</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+  <p class="sub">Every training goes the same way, so it gets the same four arrows: <b>meet</b> (from 15 minutes before, at the teacher), <b>watch</b> (the arrow follows the teacher while they work), <b>your turn</b> (the board, then your job's own arrows), <b>trained</b> (once: where it's written down). Only what is special to each lesson is listed below. AR2 played this part; its lesson-by-lesson section follows ("Step 2 in play"), with corrections to the lines below (the main one: "look it over first" becomes the rule for every faulty-machine job once you have the scanner, not only Day 5's lesson, which is what lets Making it safe and the Tier 2 test open).</p>
+
+  <h3>Every training (the four arrows)</h3>
+  <div class="moment"><span class="n">T1</span><b>Meet</b><dl><dt>When</dt><dd>15 minutes before the meeting (the invitation's Mail and toast still come at the time they do now)</dd><dt>Points at</dt><dd>The teacher, if they are there; else the meeting room</dd><dt>Says</dt><dd class="say">Meet Zeke: Works bay, 10:45</dd><dt>Goes when</dt><dd>The meeting starts, or is missed</dd><dt>Kind</dt><dd>World, level 2 <span class="tag t-have">Have</span> (needs the rules)</dd></dl></div>
+  <div class="moment"><span class="n">T2</span><b>Watch</b><dl><dt>When</dt><dd>From the end of the meeting until the teacher's demonstration is done</dd><dt>Points at</dt><dd>The teacher, following them as they walk (the arrow can already follow a person)</dd><dt>Says</dt><dd class="say">Stay close and watch Yara</dd><dt>Goes when</dt><dd>Your turn starts. A tip the first time: "Stay near while they work. Your turn comes next."</dd><dt>Kind</dt><dd>World, level 3 <span class="tag t-new">New</span> (today: nothing)</dd></dl></div>
+  <div class="moment"><span class="n">T3</span><b>Your turn</b><dl><dt>Points at</dt><dd>The job board, then the held training job's Take it button; then the job's own steps (S4)</dd><dt>Says</dt><dd class="say">Your turn: it's on the board</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span>; board pointer <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">T4</span><b>Trained</b><dl><dt>Points at</dt><dd>The first time only: the Device button, then Works, then Training (and Tools when a tool came with it)</dd><dt>Says</dt><dd class="say">Trained: rounds. It's in Works.</dd><dt>Kind</dt><dd>Device pointer, once <span class="tag t-new">New</span></dd></dl></div>
+
+  <h3>Day 2, Tuesday: Rounds, with Torres</h3>
+  <ul>
+    <li>10:30-10:45 T1 to Torres in the Works bay (after Calder's solo-job talk, as now).</li>
+    <li>After the talk the existing Rounds guide takes over (the board, then each machine by name, with tips). Add: the board pointer on "Your first round", and a pointer on the marks card ("Pick what you saw") the first time.</li>
+    <li>From Day 3 the 07:00 morning round just appears on the board: the first time, S3's board pointer on it, label "Morning round: yours till 11".</li>
+  </ul>
+  <h3>Day 3, Wednesday: Hauling with Yara, and the fire drill</h3>
+  <ul>
+    <li>10:00 the delivery: arrow to the cargo hold, "Unload the delivery", then the board row (both exist, only need the rules).</li>
+    <li>11:45-12:00 T1 to Yara in Main storage (fix the Mail's "at the hold"). T2 follows Yara with the cart. T3: the manifest run, then the cart run's own arrows.</li>
+    <li>Drill, after it is fixed: 14:50 level 1 to the Works bay muster, "Drill: muster in the bay"; then each drill step ("Take the extinguisher", "Stand by the hatch", "Put it back"; other weeks "Turn the bulkhead wheel", "The breaker cabinet"); all cleared at the 15:15 all-clear. Calder's short word comes before, at 14:50, not after.</li>
+  </ul>
+  <h3>Day 4, Thursday: the inspection, then Tuning with Calder and Brennan</h3>
+  <ul>
+    <li>Wednesday evening: <b>moved to FX3</b>: Tomas warns you in person in Bunk 1 (18:00-21:30), else a Mail at 21:30. F2 keeps only the Thursday arrows below.</li>
+    <li>Thursday from 06:00, in this order: your wardrobe "Fresh uniform for inspection" (if not changed today), your bunk "Make your bed" (then the bunk card's "Make the bed" button), "Tidy your locker" (if untidy). Then, if you leave, back to the bunk room at 06:25 "Inspection at 06:30". All gone at 07:00. Calendar fixed to 06:30.</li>
+    <li>08:25-08:40 T1 to Calder in the Galley. T2 at Calder at Oven 1. T3: "Tune Oven 2" (fix the label), then on the tuning card a pointer on the minus button, "Watch the oven, press minus", the first time.</li>
+  </ul>
+  <h3>Day 5, Friday: the scanner, and your first head-scratcher</h3>
+  <ul>
+    <li>After the fix (the training job must not list its part until the puzzle is called): 08:45-09:00 T1 to Emeka at the board. T2 at Emeka at Washer 4.</li>
+    <li>T3: the board, then "Look Washer 2 over" at its panel (not "Fetch a pump"). The Scanner opens: a device pointer on the bars, "Read the bars".</li>
+    <li>The puzzle shows: device pointers in order: the Works app, its Fault notes tab ("Your first head-scratcher"), "Where next?" (then the world arrow to each clue, as today), a suspect chip ("Cross out what was tried"), then "Call it". After the call, the job's arrow comes back (today it doesn't).</li>
+  </ul>
+  <h3>Days 6-7: the weekend</h3>
+  <ul><li>No new teaching arrows (rule: nothing new on days off). Only what you track yourself.</li></ul>
+  <h3>Day 8, Monday: the burst pipe with Calder, and your work uniform</h3>
+  <ul>
+    <li>10:15: a warning first, "Calder wants you in her office at 10:30", with T1 to the office.</li>
+    <li>10:30 level 1: "Burst pipe: meet Calder". Cleared when her talk starts.</li>
+    <li>T2: the arrow follows Calder down to Deck 4, "Follow Calder", then the pipe's valve panel.</li>
+    <li>T3: let the job be taken at the pipe (preferred), or point back to the board. On the valve choice card, the first time: "The one nearest the wet". Then the existing arrows: the wet spots, the seal from the Plumbing shelf, the joint.</li>
+    <li>Uniform: after your first oily job turned in from Day 8, once grubby: the wardrobe in your bunk room, "Change: you're grubby". Gone after the change. Torres's word should stay on screen (today it flashes).</li>
+  </ul>
+</section>
+
+<section id="week-play">
+  <div class="sec-head"><h2>Step 2 in play: each lesson, step by step</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+  <p class="sub">Played Days 2-11 in a phone-sized window with a robot player that only follows the arrow, the job board and Tracked. For each lesson: what it is, how it opens, every step, what the game says today, whether it works; then the full chain of arrows from the invitation to "Trained", when the job is tracked. "Have" means today's arrow can already point there; "New" needs the queue, the panel pointer, or a fix first. The long form is <code>plans/arrows-p5-step2-notes.md</code>.</p>
+
+  <h3>Rounds (Day 2, Torres)</h3>
+  <div class="item hidden"><span class="tag t-hidden">Works but hidden</span><b>Walk 4-6 machines on one deck; look; mark Fine, Worn or Something's off.</b> Opens Day 2 after the shadow shift; asked at 09:00 by toast and Mail ("Fancy a walk? ... (10:45, Works bay on Deck 5.)"), with no arrow if a job is tracked. Talk at the tea corner, then your first round (Deck 4, a washer first) is on the board; the arrow and a tip lead every step (the best-guided lesson in the game). Trained at turn-in ("Round clipboard is yours now"). Then a Morning round on the board each workday at 07:00, held to 11:00; from 5 rounds you pick the machines yourself. In play: works when you arrive with free hands. Holding a job when the talk ends, the arrow says "Take your first round" but the board won't give it; at 17:00 it lapses to the next morning, 06:00, before the shift, and the whole week slides a day.</div>
+  <div class="moment"><span class="n">M1a</span><b>The invitation</b><dl><dt>When</dt><dd>09:00 if you're between jobs; else when your job is turned in, or 15 minutes before</dd><dt>Points at</dt><dd>Torres; else the tea corner</dd><dt>Says</dt><dd class="say">Rounds with Zeke, 10:45</dd><dt>Goes when</dt><dd>The talk starts, or it's missed</dd><dt>Kind</dt><dd>World <span class="tag t-new">New</span> (today: none while a job is tracked)</dd></dl></div>
+  <div class="moment"><span class="n">M1b</span><b>Hands full after the talk</b><dl><dt>When</dt><dd>The talk ends and you still hold an unfinished job</dd><dt>Points at</dt><dd>Your job's next step</dd><dt>Says</dt><dd class="say">Finish this first, then your round</dd><dt>Goes when</dt><dd>The job is turned in or dropped</dd><dt>Kind</dt><dd>World <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">M1c</span><b>Take the round</b><dl><dt>Points at</dt><dd>The board, then the round's row</dd><dt>Says</dt><dd class="say">Take your first round</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span>; row <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">M1d</span><b>Each machine</b><dl><dt>Points at</dt><dd>The machine's panel, by name; then the marks card</dd><dt>Says</dt><dd class="say">Look at Washer 1</dd><dt>Goes when</dt><dd>Marked</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span>; card pointer, first round only <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">M1e</span><b>Turn in, trained</b><dl><dt>Points at</dt><dd>The board (then T4)</dd><dt>Says</dt><dd class="say">Turn it in at the job board</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span></dd></dl></div>
+
+  <h3>Hauling (Day 3, Yara Esposito)</h3>
+  <div class="item broken"><span class="tag t-broken">Works on a Wednesday only</span><b>A manifest run: a cart, load each crate in the hold, drop each where it goes, the cart back.</b> Opens Day 3 after one round; asked at 06:00 ("Shelves done? Meet me at the hold... (12:00, Main storage on Deck 5.)"). Talk in Main storage after the delivery's unload; Yara takes the cart and loads the first crate while you're near; then "Manifest run: 3 crates" is held for you: cart (2 min), three loads, laundry (Deck 4), infirmary and crew store (Deck 3), cart back; trained at turn-in. In play on a Wednesday: works end to end in about 80 minutes, but every arrow on the run is labelled "Manifest run: 3 crates". On a Thursday (after Rounds slipped): the talk plays and the lesson silently fails, retrying at 06:00 each day before any delivery; nothing new opened until Day 11.</div>
+  <div class="moment"><span class="n">M4a</span><b>Watch Yara</b><dl><dt>Points at</dt><dd>Yara, following her between the Cart bay and the hold</dd><dt>Says</dt><dd class="say">Watch Yara load the cart</dd><dt>Goes when</dt><dd>Your run is posted</dd><dt>Kind</dt><dd>World, follow a person <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">M4b</span><b>The cart</b><dl><dt>Points at</dt><dd>The free cart dock</dd><dt>Says</dt><dd class="say">Take a hover cart</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span>; label <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">M4c</span><b>Each load</b><dl><dt>Points at</dt><dd>The crate stack in the cargo hold</dd><dt>Says</dt><dd class="say">Load the linen (1 of 3)</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span>; label <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">M4d</span><b>Each drop</b><dl><dt>Points at</dt><dd>The drop spot (laundry, infirmary, crew store), via the lift</dd><dt>Says</dt><dd class="say">Linen to the laundry, Deck 4</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span>; label <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">M4e</span><b>The cart back, turn in</b><dl><dt>Points at</dt><dd>The dock, then the board</dd><dt>Says</dt><dd class="say">Cart back to its dock</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span></dd></dl></div>
+
+  <h3>The drill (Wednesdays 15:00, Calder)</h3>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>Fire (Day 3), then pressure, then power, by week.</b> 14:50: Calder's toast and an arrow "Fire drill, 15:00" to the middle of the Works bay. No step can be started: the drill is a side job, and the taps and the arrow only read your main job. The extinguisher just shows its description; at 15:15 "All clear" and "Four and a half minutes. We'll talk about it." whatever you did; the arrow stays up after. The drill never counts, so it never trains.</div>
+  <div class="moment"><span class="n">M3a</span><b>Muster</b><dl><dt>When</dt><dd>14:50, over anything but an emergency; your job's arrow returns at 15:15</dd><dt>Points at</dt><dd>Fire: the extinguisher bracket. Pressure: the bulkhead wheel. Power: the breaker cabinet</dd><dt>Says</dt><dd class="say">Fire drill: take the extinguisher</dd><dt>Kind</dt><dd>World, level 1 <span class="tag t-new">New</span> (after the fix)</dd></dl></div>
+  <div class="moment"><span class="n">M3b</span><b>Stand by</b><dl><dt>Points at</dt><dd>The hatch to the utility closet (fire); the door (pressure)</dd><dt>Says</dt><dd class="say">Stand by the hatch</dd><dt>Goes when</dt><dd>Standing (a progress bar shows the 10 minutes)</dd><dt>Kind</dt><dd>World <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">M3c</span><b>Put it back, all clear</b><dl><dt>Points at</dt><dd>The bracket; then nothing</dd><dt>Says</dt><dd class="say">Back on its bracket</dd><dt>Goes when</dt><dd>Put back, or 15:15</dd><dt>Kind</dt><dd>World <span class="tag t-new">New</span></dd></dl></div>
+
+  <h3>The inspection (Thursdays 06:30)</h3>
+  <div class="item hidden"><span class="tag t-hidden">Works but hidden</span><b>A clean uniform, the bed made, the locker tidy; a nod or a gentle remark.</b> Opens Day 4. The check works, but nothing teaches or announces it: no Tomas scene, no evening Mail, no arrow. Tapping your bunk on a Thursday morning offers "Make the bed" and "Tidy your locker" ("The inspection is at 06:30."), and a change at your wardrobe counts as the uniform, but nothing sends you there. First word: a Mail at 06:59, "Two of the three weren't right this morning." Calendar says 06:40.</div>
+  <div class="moment"><span class="n">M3d</span><b>The evening before</b><dl><dt>When</dt><dd>Wednesday from 20:00, once (the first week: Tomas in Bunk 1)</dd><dt>Points at</dt><dd>Tomas</dd><dt>Says</dt><dd class="say">Tomas: inspection tomorrow</dd><dt>Kind</dt><dd>World, follow a person <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">M3e</span><b>Thursday 06:00, in order</b><dl><dt>Points at</dt><dd>Your wardrobe (not changed today), then your bunk (bed not made; then its card's Make the bed), then the bunk again for Tidy your locker</dd><dt>Says</dt><dd class="say">Clean uniform for inspection</dd><dt>Goes when</dt><dd>Each is done; all gone at 07:00</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span>; card <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">M3f</span><b>Stand by your bunk</b><dl><dt>When</dt><dd>06:25, if you're out of your bunk room</dd><dt>Points at</dt><dd>Your bunk</dd><dt>Says</dt><dd class="say">Inspection at 06:30</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span></dd></dl></div>
+
+  <h3>Tuning (Day 4, Calder with Brennan)</h3>
+  <div class="item hidden"><span class="tag t-hidden">Works but hidden</span><b>Turn a drifted machine back to steady with − and +, watching it.</b> Opens Day 4 after one manifest run (it drifts both ovens hot). Asked at 06:00: "Galley, 10:15. Bring nothing. (08:40, Galley on Deck 3.)" (two times; 08:40 is before the shift). Talk in the galley; "Follow me. Watch this one." while Calder tunes Oven 1 (stay within a few steps for 10 minutes, no arrow); then "Tune: Oven 2" is yours; the card says how it is ("running hot", "a little hot", "steady") but not which button; trained at turn-in, Brennan's biscuit. In play: works. Calder's Oven 1 is on your board during the watch and taking it counts as your turn. The arrow says "Repair the oven".</div>
+  <div class="moment"><span class="n">M5a</span><b>Watch Calder</b><dl><dt>Points at</dt><dd>Calder at Oven 1</dd><dt>Says</dt><dd class="say">Watch Calder tune Oven 1</dd><dt>Kind</dt><dd>World, follow a person <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">M5b</span><b>Your oven</b><dl><dt>Points at</dt><dd>Oven 2's panel</dd><dt>Says</dt><dd class="say">Tune Oven 2</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span>; label <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">M5c</span><b>The dial</b><dl><dt>Points at</dt><dd>The minus button on the card (the first time)</dd><dt>Says</dt><dd class="say">Running hot: press −, watch the glow</dd><dt>Goes when</dt><dd>Steady</dd><dt>Kind</dt><dd>Panel pointer <span class="tag t-new">New</span></dd></dl></div>
+
+  <h3>The scanner and your first head-scratcher (Day 5, Emeka Halloran)</h3>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>Look a faulty machine over: the scanner shows its parts with a bar and a word each; you pick the part.</b> Opens Day 5 after one tuning (Torres is off on Fridays, so Emeka teaches). Asked at 06:00 ("Board, when you're in. Torres left you something. (09:00, Works bay on Deck 5.)"). In play: Emeka's demonstration job (Washer 4) was on the board for me; taking it trained me on the scanner without ever reading it. The head-scratcher on Washer 2 then finished as a plain repair, no case called; its clue toasts read "undefined". Afterwards, following the arrow ("Fetch a lamp" before any look-over) never uses the scanner, so it never counts, and Making it safe (Day 8) and the Tier 2 test never open. Going to the machine first, against the arrow, does open the scanner panel.</div>
+  <div class="moment"><span class="n">M7a</span><b>Look it over first</b><dl><dt>When</dt><dd>Every job with a fault, once you have the scanner (not only the lesson)</dd><dt>Points at</dt><dd>The machine's panel, before any shelf</dd><dt>Says</dt><dd class="say">Look Washer 2 over</dd><dt>Goes when</dt><dd>The scanner panel opens</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span> (after the fix)</dd></dl></div>
+  <div class="moment"><span class="n">M7b</span><b>Read the bars, pick</b><dl><dt>Points at</dt><dd>The bars, then the Fetch button of the part (the first time)</dd><dt>Says</dt><dd class="say">The low one: fetch it</dd><dt>Kind</dt><dd>Device pointer <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">M7c</span><b>Fetch and fit</b><dl><dt>Points at</dt><dd>The shelf for the part you picked, then the panel</dd><dt>Says</dt><dd class="say">Fetch a seal: the Plumbing shelf</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span></dd></dl></div>
+  <div class="moment"><span class="n">M7d</span><b>A wrong pick</b><dl><dt>Points at</dt><dd>The shelf for the right part (the machine says which)</dd><dt>Says</dt><dd class="say">Still leaking: it's the pump</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span></dd></dl></div>
+
+  <h3>Making it safe: the burst pipe (Day 8, Calder)</h3>
+  <div class="item broken"><span class="tag t-broken">Broken</span><b>Make it safe (the right valve, upstream of the wet), clean up (mop two spots), fix (a seal at the burst).</b> Opens Day 8 after one scanner use (so, in practice, never). An urgent call, no Mail: booked for 10:30 in Calder's office; at 10:30 a burst on Deck 4, her talk ("Burst pipe. Junior wing. With me... Go."), then the arrow "Meet Ines" stays on her office on Deck 5. The watch only counts near the pipe on Deck 4, which nothing points to; the lesson lapsed at 17:00 and came back at 06:00 the next day. On paper (mech_check) every step works: the valve card ("Which valve? ... Close one.", Valve 3 right), the two mops (3 minutes each), the seal, the turn-in.</div>
+  <div class="moment"><span class="n">M6a</span><b>The call</b><dl><dt>When</dt><dd>10:30, over everything</dd><dt>Points at</dt><dd>Calder, then the valve panel on the burst's deck (via the lift)</dd><dt>Says</dt><dd class="say">Burst pipe, Deck 4: follow Calder</dd><dt>Goes when</dt><dd>You're at the panel</dd><dt>Kind</dt><dd>World, level 1 <span class="tag t-new">New</span> (today points at the office)</dd></dl></div>
+  <div class="moment"><span class="n">M6b</span><b>Make it safe</b><dl><dt>Points at</dt><dd>The valve panel; on the card, the valve nearest the wet (the first time)</dd><dt>Says</dt><dd class="say">Close the valve upstream of the wet</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span>; card <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">M6c</span><b>Clean up</b><dl><dt>Points at</dt><dd>Wet spot 1, then 2</dd><dt>Says</dt><dd class="say">Mop up (1 of 2)</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span>; label <span class="tag t-new">New</span></dd></dl></div>
+  <div class="moment"><span class="n">M6d</span><b>Fix</b><dl><dt>Points at</dt><dd>The Plumbing shelf, then the burst</dd><dt>Says</dt><dd class="say">Fit the seal at the burst</dd><dt>Kind</dt><dd>World <span class="tag t-have">Have</span></dd></dl></div>
+  <p class="sub">The stuck lift and the galley alarm follow the same pattern: the brake wheel (Deck 5) then "Check the car" (Deck 4); the alarm panel, then "Open the vents" with a wait ("ready at 14:05"), then "Look at the hood".</p>
+
+  <h3>Your work uniform (from Day 8, Torres)</h3>
+  <div class="item hidden"><span class="tag t-hidden">Works but hidden</span><b>Oily jobs make your uniform grubby; a change at your wardrobe cleans it, a shower doesn't.</b> Opens on your first oily job turned in from Day 8 (the plan said Day 5). Torres's two lines show in the meeting panel wherever you are, then "Trained: your work uniform". Grubby shows only as a slightly duller tint. Nothing points to the wardrobe. Servicing the washers (stage 2) is not built.</div>
+  <div class="moment"><span class="n">M2a</span><b>Change</b><dl><dt>When</dt><dd>After Torres's word, and whenever you're grubby between jobs (and Wednesday evening before an inspection)</dd><dt>Points at</dt><dd>Your wardrobe, Bunk 1</dd><dt>Says</dt><dd class="say">Grubby: change at your wardrobe</dd><dt>Kind</dt><dd>World, level 4 <span class="tag t-have">Have</span></dd></dl></div>
+
+  <h3>Also found in play (for the fix list)</h3>
+  <ul>
+    <li>A training that can't make its job (hauling off a Wednesday) should wait for the day it can and say so, not fail each morning.</li>
+    <li>A lesson that lapses comes back at 06:00, before the shift; it should come back after clock-in.</li>
+    <li>Dropping a job leaves its part in your hands; the next cart job refuses while the arrow points at the Cart bay. Needs a "Put the relay back: main storage" arrow.</li>
+    <li>A need arrow says "A shower, Deck 2" while its toast says Deck 4, and the Deck 2 spot has nothing to tap.</li>
+    <li>Tracked, with two things at the same time, can track the wrong one (Day 5: "On shift" instead of the scanner lesson); a training's Tracked arrow says only the room.</li>
+  </ul>
+</section>
+
+
+<section id="split">
+  <div class="sec-head"><h2>How it could be built</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+  <p class="sub">Pieces that can go to separate builders at the same time without touching the same lines. Sizes: S = part of a turn, M = about one turn, L = two or three turns. Each piece is switched off until it is switched on, like every new feature.</p>
+  <div class="piece"><span class="size">M</span><b>A. Fix the broken list (first, before any arrow).</b> Clear career arrows when their moment ends, and stop the "is a job tracked" checks blocking them. Side jobs (the drill) get their taps and their arrow. The scanner lesson's part list. The burst pipe's after-talk and the job at the pipe. Lessons that flash past. The Tuning text. "What's next". Dev mode's tracking switch. The main lift's spot. Mostly owners' fixes in their own sections: the interactions seat (job arrow, side jobs), the Works career seat (section 24 core, 24p), seat M1 (drill), seat M2 (incidents, tuning), seat H (scanner and cases), Dev mode's seat, the writer (texts).</div>
+  <div class="piece"><span class="size">M</span><b>B. The arrow queue (rules 2-6).</b> One new small block in the interactions seat's slot: things ask the queue instead of setting the arrow; the queue picks, clears, remembers what was seen. The existing callers move to it one by one, each in its own section (so B lands first, alone; the moves ride with C-F). B also gives pop-ups a short queue, so a new message waits a moment instead of wiping the one on screen (today Torres's first invitation lasts under a second).</div>
+  <div class="piece"><span class="size">M</span><b>C. The panel and device pointer.</b> A gold ring that sits on a named button: a job board row, the clock screen, a device app tile, a tab, a card button. One at a time, only while that panel is open; when it isn't, it points at what opens it (the Device button). In the device seat's slot. Can be built at the same time as B.</div>
+  <div class="piece"><span class="size">S</span><b>D. The shift chain (S1-S9).</b> The queue entries for clocking in and out, the board, turning in, the empty-board line, the first Work log and reputation moments; the two label fixes. Needs B and C.</div>
+  <div class="piece"><span class="size">S</span><b>E. The four training arrows (T1-T4)</b> in section 24 core, with "follow the teacher". Needs B (and C for T3-T4). <i>As built (2026-10-22): T1-T3 in section 15b's slot (lead 28's go), reading 24 core's training without writing to it; reviewed by RV6 and fixed by AC1. T4, the device pointer for "Trained", is not built yet (it can use piece C's pointer).</i></div>
+  <div class="piece"><span class="size">M, in four small parts</span><b>F. Each lesson's own moments</b>, each builder in their own block: F1 Rounds, Hauling and Tuning (24a, 24d, 24e); F2 the drill, the inspection and the uniform (24c, 24b); F3 the scanner and Fault notes (24g, 24k); F4 the burst pipe (24f). Need B and C; can run side by side.</div>
+  <div class="piece"><b>Words.</b> About 60 short labels and a dozen tips, for the writer seat to word, read through the game's usual text keys (stand-ins until written).</div>
+  <div class="piece"><b>Order:</b> A, then B and C together, then D, E and F1-F4 side by side. A new check (an "arrows check") would play the shift and each lesson honestly, following the arrow only, the way this report was made, and fail if the arrow ever points nowhere, at the wrong thing, or stays up after its moment.</div>
+</section>
+
+<section id="phone">
+  <div class="sec-head"><h2>On a phone</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+  <ul>
+    <li>No new draw calls: the arrow and the pointer are page elements drawn over the 3D view.</li>
+    <li>Never more than one arrow and one pointer on screen, and the pointer only inside an open panel.</li>
+    <li>The label stays short so it fits a 390-pixel screen beside the arrow; longer words go in a tip.</li>
+    <li>Teaching arrows show once (or two or three times for daily things) and are remembered, so the screen gets quieter as you learn.</li>
+    <li>Arrows don't pile up: anything waiting in the queue shows later or drops when its time has passed.</li>
+  </ul>
+</section>
+
+<section id="later">
+  <div class="sec-head"><h2>Later steps (waiting, found on the way)</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+  <p class="sub">Steps 3 and on wait, as asked. These were found while looking and are kept in the notes for then:</p>
+  <ul>
+    <li>Team jobs (Day 11) can't be done: same cause as the drill.</li>
+    <li>Favour cases can't be done (no arrow, no tap, nothing says how to accept).</li>
+    <li>After you call a head-scratcher, your job's arrow never comes back.</li>
+    <li>Tickets and "When does it happen?" puzzles name the answer in their arrow and title.</li>
+    <li>Tracing: the pipe kit only comes at the 09:20 meeting, after the job is already on the board; the arrow ignores what each reading says.</li>
+    <li>The missed-ceremony Mail reads like an invitation, sent after the event.</li>
+    <li>Side jobs open silently, one a workday; the first irrigation job comes on Day 34; the workshop's toast says "follow the marker" but there is none.</li>
+    <li>Not built yet: puzzle kinds 4-9, the cold-case board, Tier 3 and 4, Senior Officer, Engine Specialist.</li>
+  </ul>
+</section>
+
+<section id="beyond">
+  <div class="sec-head"><h2>Beyond the arrows: making Steps 1-2 playable</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+  <p class="sub">Decided 2026-10-22, 14:25 (as passed on by lead 28).</p>
+  <h3>Now</h3>
+  <div class="item"><b>A fresh-eyes player.</b> FE1 plays Days 0-8 at phone size using only what's on screen, and keeps a diary of every confusing moment.</div>
+  <div class="item"><b>A checklist for your playtests, and "Start at Day N".</b> DS1 makes a day-by-day checklist page for your playtests, and adds "Start at Day N" to the Dev page: the morning of any of Days 1-8, with a real career state.</div>
+  <h3>Later, once FX1-FX3 are in</h3>
+  <div class="item"><b>No silent "no".</b> Every tap the game refuses says why, in one line.</div>
+  <div class="item"><b>"What's next" always one tap away:</b> your next career step, when and where. FX3 does part of it.</div>
+  <div class="item"><b>The week check becomes a release rule.</b> Once arrows_check week passes, no build is published unless it still passes.</div>
+</section>
+
+<section id="questions">
+  <div class="sec-head"><h2>Questions for you</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+  <p><b>Answered, 2026-10-22</b> (as passed on by lead 27): "Go with the recommendations." So each question below is settled as recommended: fixes first; the shift's arrows always while your shift is tracked, panel pointers the first three times; a meeting may take the arrow from 15 minutes before; a Settings switch, default "first time only"; the burst pipe's job taken at the pipe.</p>
+  <p><b>Two more, from AR2's questions (2026-10-22, as passed on by lead 27):</b> <b>scan first</b>: once you have the scanner, every faulty-machine job starts with "Look it over" (FX2 builds it); <b>the inspection</b>: Tomas warns you in Bunk 1 on the first Wednesday evening (now built by FX3: in person in Bunk 1 from 18:00 to 21:30, else a Mail at 21:30), then the Thursday 06:00 arrows (piece F2).</p>
+  <div class="q"><b>1. Fixes first?</b> The plan fixes the broken list before adding arrows, so the arrows don't point at things that don't work. Recommended: yes.</div>
+  <div class="q"><b>2. The shift's arrows: always, or only in the first week?</b> Recommended: always while your shift is tracked (it's the core loop), with the panel pointers only the first three times.</div>
+  <div class="q"><b>3. May a training meeting take the arrow from your job?</b> Recommended: yes, from 15 minutes before; your job's arrow comes back straight after.</div>
+  <div class="q"><b>4. A switch in Settings for teaching arrows</b> (all / first time only / off), next to the one for tips? Recommended: yes, default "first time only".</div>
+  <div class="q"><b>5. The burst pipe's job:</b> take it at the pipe (simpler for a player), or keep going back to the board (as now)? Recommended: at the pipe.</div>
+  <p class="sub">Tap Comment on any part to answer or leave a note.</p>
+</section>
+
+<p class="foot">Raw notes, with the steps to see each problem again and the code lines: <code>plans/arrows-pillar5-notes.md</code>. How the play was done: <code>plans/arrows-tools/</code>. Builder briefs for the queue and the pointer: <code>plans/arrows-briefs.md</code>.</p>
+</div>
+<script>
+(async () => {
+  const buttons = document.querySelectorAll('.comment-btn');
+  let comments = null;
+  try { comments = await window.claude?.use?.('comments'); } catch (e) { comments = null; }
+  if (!comments) return;
+  buttons.forEach(b => {
+    b.hidden = false;
+    b.addEventListener('click', () => {
+      const sec = b.closest('section');
+      comments.openComposer({ element: sec }).catch(() => {});
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+@bank all
+// Short Fridays (FR1, plans/fridays-build-brief.md; EW1's words from content/addresses/captains-address.trad.draft).
+// Read only with SHORT_FRIDAY on (section 18f). TEXTS are shown by the game, said by nobody.
+
+== mail.fri.week1
+// the first Thursday's Mail (Day 4, your first week): the captains-address tradition's Mail that evening
+- Tomorrow's a short Friday. The day shift stops at half past three; I'll see all of you in the auditorium at four. Dinner at five. Our new hands especially.
+
+== fri.missed
+// the banner at 16:50 for anyone who wasn't in the auditorium for the Captain's Friday address (her words come by Mail)
+- You missed the Captain's address. Her words are in your Mail.
+
+// EW1 (events writer), short Fridays part E (moved in by FR2, turn 8): now and then a crew member says it at Friday
+// breakfast. flag:shortFriday is set by section 18f from SHORT_FRIDAY at load and never saved, so off these are silent.
+// Bubbles: 60 characters. Not in your first week: week 1 has its own lines (Zeke, Halloran).
+== smalltalk
+? weekday:fri act:breakfast flag:shortFriday !week1:true
+- Short one today.
+- Half three, then the Captain.
+- Short Friday. I've planned my whole afternoon. It's a nap.   #funny
+- Captain at four. I'm sitting at the back. Again.   #funny
+- Friday. Half a day's work and a whole speech.   #funny
+
+// FR2 (turn 8), the stand-in words for a short Friday's time clock and heads-up (shown by the game, said by nobody;
+// {time} is the clock's). For the writers to reword
+== fri.clock.onshift
+- Short Friday: on shift since {time}. Clock out from 15:30. The Captain's at four.
+== fri.clock.didout
+- Clocked out at {time}. The Captain's address is at four, in the rec deck auditorium.
+== fri.headsup
+- Your shift ends at 15:30. The Captain's address is at 16:00, in the rec deck auditorium.

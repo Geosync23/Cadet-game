@@ -40,7 +40,7 @@
 == join.cook-along.tip
 - Tap {name} to join the cook-along
 == join.cook-along.notice
-- Cook-along: learn one simple dish at the galley pass, then eat your portion. Food and leisure up.
+- Cook-along: learn one simple dish in the galley, then eat your portion. Food and leisure up.
 
 == join.garden-hour.tip
 - Tap {name} to join garden hour
@@ -121,3 +121,88 @@
 - Zeke hands you the pen. You paint your first name on the beam, beside everyone who's served in Works.
 == join.name-on-the-beam.notice
 - Your name is on the beam. The whole bay cheers. Welcome to Works.
+// SW2 (0.92.3 item 13, DV1's key): Zeke explains the beam before you paint, one bubble each, in order (under 80
+// characters, no placeholders). The last one hands over to you: the tap opens right after it.
+== join.name-on-the-beam.explain
+- Right. This is the beam. Every name on it has worked this bay.
+- First day in Works, your first name goes up there. Every one of us did it.
+- See the Chief's? Tiny letters, dead straight. Mine's the one that's far too big.
+- Go on, then. Your turn. Right on the end, next to the rest of us.
+
+// SW1 (2026-10-24, patch 0.92.5): the weekend traditions (WEEKEND_ON)
+== join.saturday-run.tip
+- Tap {name} to join the run
+== join.saturday-run.notice
+- Saturday run: three easy laps of the promenade before breakfast, any speed. Fitness and social up.
+== join.saturday-run.done
+- Three laps done. Breakfast has never looked better.
+== join.saturday-run.left
+- You've dropped out of the run. They'll finish the laps without you.
+
+== join.every-song.tip
+- Tap {name} to join Every song
+== join.every-song.notice
+- Every song: sing through the record cabinet in the music room, whatever the words are. Leisure and social up.
+
+== join.night-owls-cocoa.tip
+- Tap {name} for a late cocoa
+== join.night-owls-cocoa.notice
+- Night owls' cocoa: a mug and the stars in the bow lounge, lamps low. Social up, but staying up costs a little energy.
+
+== join.gerald-clinic.tip
+- Tap {name} to join the Gerald clinic
+== join.gerald-clinic.notice
+- Gerald clinic: bring a cactus to Cruz for a look, or take a new one home. Leisure and social up.
+
+== join.sunday-story.tip
+- Tap {name} to listen
+== join.sunday-story.notice
+- The Sunday story: Chief Holt reads one chapter in the common room, lights low. Leisure and social up.
+
+== join.garden-picnic.tip
+- Tap {name} to join the picnic
+== join.garden-picnic.notice
+- Garden picnic: take a parcel from the servery and eat it under the big tree. Food and social up.
+
+== join.bread-day.tip
+- Tap {name} to knead a loaf
+== join.bread-day.notice
+- Bread day: knead a loaf at the galley island for Monday's breakfast. Leisure and social up.
+
+== join.big-jigsaw.tip
+- Tap {name} to join the jigsaw
+== join.big-jigsaw.notice
+- The big jigsaw: add pieces to the Wren at the long table on Deck 1. Counts as your puzzles hobby. Leisure and social up.
+
+// SW2, 0.92.6 item 5: One week aboard (Zeke's sit-down, Day 7).
+== join.one-week-aboard.tip
+- Tap {name} to sit down for tea
+== join.one-week-aboard.notice
+- One week aboard: tea with Zeke in the bow lounge, going over your first week. Social up.
+
+// SW2, 0.92.6 item 2: the Sunday swap meet (host Orla Ishikawa).
+== join.market.tip
+- Tap {name} to join the swap meet
+== join.market.notice
+- Sunday swap meet: browse the stalls on the promenade and swap one thing for another. Social and leisure up.
+
+// SW2, 0.92.6 item 4: Reading corner (host Esme Walsh).
+== join.reading-corner.tip
+- Tap {name} to join the reading corner
+== join.reading-corner.notice
+- Reading corner: sit close in the bow lounge with a book and talk about what you're reading. Leisure and social up.
+
+== join.storm-stories.tip
+- Tap {name} for storm stories by torchlight
+== join.storm-stories.notice
+- Come in, sit anywhere. Torch under your chin when it's your turn. Storm stories by torchlight: social and leisure up.
+- Ah, good. We were just getting to the frightening part. It isn't very. Storm stories by torchlight: social and leisure up.
+- Sit with us. Listen first. Tell yours if you want to. Nobody has to. Storm stories by torchlight: social and leisure up.
+
+== join.farewell.tip
+- Tap Saruth to see the Veyli off
+== join.farewell.notice
+- The Veyli farewell: stand with Envoy Saruth in the shuttle bay and see the delegation off. Social and leisure up.
+
+== join.vesselLights.tip
+- Tap Saruth to watch the little ship from the glass

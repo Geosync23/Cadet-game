@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Controller Support Plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--amber:#e9c46a;--rose:#e58f8f;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--bg:#121a27}
+:root[data-theme="light"]{--ink:#18232b;--muted:#4f6168;--teal:#167e72;--amber:#8a6510;--rose:#a33b3b;--glass:rgba(255,255,255,.86);--line:rgba(30,80,76,.22);--bg:#eef2f3}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--ink:#18232b;--muted:#4f6168;--teal:#167e72;--amber:#8a6510;--rose:#a33b3b;--glass:rgba(255,255,255,.86);--line:rgba(30,80,76,.22);--bg:#eef2f3}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{line-height:1.5}
+main{max-width:860px;margin:0 auto;padding:16px 16px 60px}
+h1{font-size:21px;font-weight:600;margin:4px 0 0}
+h2{font-size:17px;font-weight:600;margin:30px 0 8px;color:var(--teal)}
+h3{font-size:15px;font-weight:600;margin:12px 0 4px}
+p,li{font-size:14px}
+.sub{font-size:13px;color:var(--muted);margin-top:4px}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
+.card.rule{border-color:var(--amber)}
+details.item{background:var(--glass);border:1px solid var(--line);border-radius:12px;margin:8px 0;padding:0}
+details.item>summary{cursor:pointer;padding:10px 12px;list-style:none;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+details.item>summary::-webkit-details-marker{display:none}
+details.item>summary .n{font-weight:700;color:var(--teal);min-width:30px}
+details.item>summary .t{flex:1;font-size:14.5px;min-width:200px}
+details.item>summary .s{font-size:11.5px;color:var(--muted)}
+details.item[open]>summary{border-bottom:1px solid var(--line)}
+.body{padding:8px 12px 12px}
+.body p{margin:6px 0}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:rgba(127,160,170,.14);padding:0 4px;border-radius:4px;word-break:break-word}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+td.num,th.num{text-align:right;white-space:nowrap}
+.tw{overflow-x:auto}
+.key{display:inline-block;min-width:22px;text-align:center;font-size:11.5px;font-weight:700;border:1px solid var(--teal);color:var(--teal);border-radius:6px;padding:0 5px;margin-right:2px;white-space:nowrap}
+.q{background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:12px 0}
+.q .qh{font-size:12px;color:var(--rose);font-weight:600;letter-spacing:.03em}
+.q .qt{font-size:14.5px;font-weight:600;margin:3px 0 8px}
+.q label{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;padding:5px 0;cursor:pointer}
+.q input[type=radio]{margin-top:4px;accent-color:var(--teal)}
+.rec{font-size:11px;color:var(--bg);background:var(--teal);border-radius:999px;padding:0 7px;margin-left:4px;white-space:nowrap}
+textarea{width:100%;min-height:58px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:13.5px;margin-top:6px}
+.why{font-size:12.5px;color:var(--muted);margin:2px 0 0 24px}
+#savebtn{appearance:none;border:1px solid var(--teal);background:var(--teal);color:var(--bg);font:inherit;font-size:14px;font-weight:600;padding:9px 18px;border-radius:999px;cursor:pointer;margin-top:6px}
+#savebtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+#savestate{font-size:13px;color:var(--muted);min-height:1.5em}
+a{color:var(--teal)}
+.legend{font-size:12.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+<h1>Controller Support Plan</h1>
+<div class="sub">Playing Starship Cadet with a game controller: an Xbox, PlayStation or Switch-style pad, or a controller your phone clips into. Everything the game asks of you, done without touching the screen. Studied on build 0.64.14 (claude/integration). Nothing has been built yet; your answers at the bottom decide the details.</div>
+
+<div class="card rule"><b>The one hard rule.</b> With no controller connected, the game looks and plays exactly as it does today, for touch and mouse players alike: the same pictures pixel for pixel, the same saves, the same crew. Even with the feature switched on, nothing new is drawn, added to the page or saved until a controller's button is actually pressed. Every turn proves it with the regression test (ALL IDENTICAL against the build before).</div>
+
+<h2>What you'd get</h2>
+<ul>
+<li>Walk with the left stick, turn and zoom the view with the right stick and shoulder buttons.</li>
+<li>A soft ring on the nearest thing you can use (a person, a seat, a machine, a door, the lift), with a small line at the bottom: <span class="key">A</span> Talk to Rina. Press <span class="key">A</span> and it does exactly what tapping it does.</li>
+<li>Every panel, card and menu (your device, the lift, conversations, the job board, Tiles, Lightdisc, the Pause card, Dev mode) moves a highlight with the D-pad, presses with <span class="key">A</span>, and goes back with <span class="key">B</span>.</li>
+<li>Small button pictures next to things you can press, drawn in your controller's own style, shown only while you're using the controller. Touch the screen and they vanish at once.</li>
+<li>A Controller page in your device's Settings: change any button, walking and camera sensitivity, button pictures, swap confirm and back.</li>
+</ul>
+
+<h2>How the game takes input today (what the plan builds on)</h2>
+<div class="card">
+<p><b>On the deck</b> (section 11): a tap runs <code>tap(x, y)</code>, which finds what's under your finger and does the right thing (talk, sit, use, the lift, a door, walk there). Press and hold sets <code>player.steer</code>, a direction and a speed, and you walk toward your finger. Pinch and the mouse wheel zoom; the Rotate button turns the view a quarter turn.</p>
+<p><b>Panels and menus</b> are ordinary page buttons: the device (section 19 draws every app the same way), the lift's deck list, the sleep alarm, conversations (<code>#chat</code>), the Tracked list, the job board and Ship health, the crew store, the ladder, work-step cards (choose and turn), the Pause card, the career and sick-day cards, the arrival's name box, and Dev mode's sheet. Most already close with the Escape key, and the lift and Pause card already move keyboard focus.</p>
+<p><b>The mini-games:</b> Tiles is a 6 by 6 grid of buttons inside your device. Lightdisc has its own full-screen view and already reads arrow keys into a move value.</p>
+<p>So the controller needs no new way of doing anything: it steers the way a held finger does, presses the same buttons, and calls the same tap code. That's why it can stay invisible to everyone else.</p>
+</div>
+
+<h2>1. The button map</h2>
+<p>Named by position, so it works on every pad: <span class="key">A</span> is the bottom face button (Cross on PlayStation, B on a Switch pad), <span class="key">B</span> the right one, <span class="key">X</span> the left, <span class="key">Y</span> the top. All of it can be changed in Settings.</p>
+<div class="tw"><table>
+<tr><th>Button</th><th>On the deck</th><th>In a panel or menu</th></tr>
+<tr><td>Left stick</td><td>Walk, in the direction you push it on screen, faster the further you push</td><td>Move the highlight</td></tr>
+<tr><td>D-pad</td><td>Left and right: pick the next or previous thing nearby. Up: reach the buttons on the screen's edge (Pause, Rotate, Walls, Shadows, Crew, the needs strip)</td><td>Move the highlight</td></tr>
+<tr><td>Right stick</td><td>Left and right: turn the view a quarter turn. Up and down: zoom</td><td>Scroll a long list</td></tr>
+<tr><td><span class="key">LB</span> <span class="key">RB</span></td><td>Turn the view a quarter turn left or right</td><td>Device: Back and Home</td></tr>
+<tr><td><span class="key">LT</span> <span class="key">RT</span></td><td>Zoom out and in, smoothly, by how far you squeeze</td><td>Page up and down</td></tr>
+<tr><td><span class="key">A</span></td><td>Use the ringed thing: talk, sit, use, the lift, a door</td><td>Press the highlighted button</td></tr>
+<tr><td><span class="key">B</span></td><td>Put away a message on screen</td><td>Back, or close (the same as Escape or tapping outside)</td></tr>
+<tr><td><span class="key">X</span></td><td>The action button at the bottom right when one shows: Repair, Hobby, Put down</td><td>(free)</td></tr>
+<tr><td><span class="key">Y</span></td><td>Open your device</td><td>Close your device</td></tr>
+<tr><td>View / Select</td><td>Tracked: what's on and where to go</td><td>Tracked</td></tr>
+<tr><td>Menu / Start</td><td>Pause</td><td>Pause</td></tr>
+<tr><td>Right stick click</td><td>Back to the usual zoom</td><td></td></tr>
+</table></div>
+<p class="legend">Walking with the stick is the same walk as press-and-hold, so crawlways, queues, activities you walk out of and the lift all behave as they do now. Turning the view uses the same quarter turns as the Rotate button, in either direction.</p>
+
+<h2>2. Picking things on the deck</h2>
+<div class="card">
+<p>With touch, you point at anything on screen. A controller has no finger, so the game picks for you: the nearest thing you can use within about three tiles, in the direction you face first, gets a soft ring at its feet and a line at the bottom of the screen naming it (<span class="key">A</span> Sit, <span class="key">A</span> Talk to Holt, <span class="key">A</span> Lift). D-pad left and right step through the other things nearby, nearest first. The list is the game's own list of things you can tap, so nothing new has to be marked up on any deck.</p>
+<p>Pressing <span class="key">A</span> runs the very same tap code at that thing, so every special case already built (the ladder behind glass, a sealed door's text, the lift roof job, a job stop seen through glass, seats and treadmills) works without a second copy. To get somewhere far, you walk with the stick, or pick a place in Tracked and follow the goal arrow as you do now.</p>
+<p>The ring is one small shape, drawn only while you're using the controller (one extra draw call, well inside every deck's budget).</p>
+</div>
+
+<h2>3. Panels and menus without touching the screen</h2>
+<div class="card">
+<p>One small helper knows the game's panels and which one is on top (the Pause card over everything, then Lightdisc, the career and sick-day cards, the question card, the lift, the sleep alarm, the ladder, the crew store, the clock screen, Tracked, your device, a conversation, the job board, Dev mode). When one opens, the highlight goes to its first sensible button (the lift already does this: the deck your goal is on). The D-pad moves to the nearest button in that direction, as on a TV menu. <span class="key">A</span> presses it, exactly like a tap. <span class="key">B</span> does what Escape or tapping outside does for that panel.</p>
+<p>The highlight is a clear outline in the game's teal, drawn only while the controller is in use. Screen readers hear each button's name as the highlight lands on it, because it's the page's real focus.</p>
+<p><b>The buttons on the screen's edge</b> (Pause, Rotate, Shadows, Walls, Crew, New game, the needs strip, Device, Tracked) are reached with D-pad up from the deck; <span class="key">B</span> goes back to walking. New game still needs its two presses.</p>
+<p><b>Typing</b> (your name on arrival, a memo, Dev mode's search): highlighting the box and pressing <span class="key">A</span> brings up your phone's own keyboard. See question 6 for a controller without a phone keyboard.</p>
+</div>
+
+<h2>4. The mini-games and special screens</h2>
+<div class="tw"><table>
+<tr><th>Screen</th><th>With a controller</th></tr>
+<tr><td>Tiles</td><td>The D-pad moves square by square on the board (and onto your hold and the end buttons below it); <span class="key">A</span> picks up a tile and puts it down, as tapping does. The ship's clock is paused while you play, as now.</td></tr>
+<tr><td>Lightdisc</td><td>The left stick moves you, with its full range (a light push is a slow step), like the arrow keys already do. <span class="key">A</span> is Next in the how-to-play, <span class="key">B</span> is Leave. The result card's buttons take the highlight.</td></tr>
+<tr><td>Work steps</td><td>Choose and turn cards are device-style buttons: highlight and press. "Hold" steps only ask you to stand there, so nothing changes.</td></tr>
+<tr><td>The lift</td><td>Walk in or press <span class="key">A</span> at a lift door; the deck list opens with your goal deck highlighted; <span class="key">A</span> rides, <span class="key">B</span> stays.</td></tr>
+<tr><td>Sleep</td><td>The alarm's earlier and later buttons, then Set alarm, all in reach of the D-pad.</td></tr>
+<tr><td>Dev mode</td><td>Its sheet is buttons too, so it works the same (only with the Dev link, as now).</td></tr>
+</table></div>
+
+<h2>5. Button pictures on screen</h2>
+<div class="card">
+<p>Small button marks in the controller's own style: letters for Xbox, the four shapes for PlayStation, letters in Nintendo's places for a Switch pad, worked out from the name the controller gives the browser (you can pick one in Settings). They sit beside the things they press: on the Device button (<span class="key">Y</span>), Pause (Menu), Tracked (View), Repair or Hobby (<span class="key">X</span>), Lightdisc's Leave (<span class="key">B</span>), and on the bottom line naming the ringed thing.</p>
+<p>They appear only after a controller button is pressed, and go the moment you touch the screen or use the mouse, so a phone player who picks the controller up and puts it down sees the screen go back to exactly how it was. They follow the text size setting and never cover speech bubbles (they sit on the HUD's buttons, not over the deck).</p>
+</div>
+
+<h2>6. Connecting and disconnecting mid-game</h2>
+<ul>
+<li><b>Connecting:</b> browsers only reveal a controller after its first button press (a privacy rule). That press shows a short message, once per session: "Controller connected. Press A to use the highlighted thing." Nothing else changes until then.</li>
+<li><b>Disconnecting</b> (battery, Bluetooth, unclipping the phone): you stop walking at once, and if you'd used the controller in the last half minute the game pauses with the usual Pause card, so the ship doesn't run on while you reconnect. The Pause card's line reads "Controller disconnected" in that case. Touch keeps working throughout.</li>
+<li><b>Reconnecting:</b> any button brings the highlight back; Start or <span class="key">A</span> on the Pause card resumes.</li>
+<li><b>Two controllers:</b> whichever pressed a button last is the one in charge.</li>
+<li><b>Switching back and forth:</b> touch, mouse and controller all work at the same time. Whatever you used last decides whether the marks and highlight show.</li>
+</ul>
+
+<h2>7. Settings: changing buttons and sensitivity</h2>
+<div class="card">
+<p>A <b>Controller</b> page in your device's Settings app, shown only once a controller has been seen (so the Settings app is unchanged for everyone else):</p>
+<ul>
+<li><b>Change a button:</b> each action in a list; highlight one, press <span class="key">A</span>, then press the button you want. A button already used elsewhere swaps places. "Back to normal" resets them all.</li>
+<li><b>Swap confirm and back</b> (Nintendo style, <span class="key">B</span> to confirm) in one switch.</li>
+<li><b>Walking:</b> how far the stick moves before you walk (dead zone), and full speed or gentle.</li>
+<li><b>Camera:</b> zoom speed, flip zoom up and down, and turning by flick (one quarter turn per push) or by holding (repeats).</li>
+<li><b>Button pictures:</b> automatic, Xbox, PlayStation, Nintendo, or off.</li>
+<li><b>Vibration:</b> a light buzz when you pick something up or finish a job (off unless you turn it on; question 4).</li>
+</ul>
+<p>Saved with your game, and only when you change something from normal, so a save without a controller stays byte for byte the same (about 100 bytes when you do).</p>
+</div>
+
+<h2>8. Accessibility</h2>
+<ul>
+<li>Nothing needs a button held down or pressed fast: walking stops when you let go, and every other action is one press. Holding a direction in a menu repeats at a calm pace (a pause of half a second, then four steps a second; both adjustable).</li>
+<li>Every action can be moved to any button, which also covers adaptive controllers (the Xbox Adaptive Controller shows up as an ordinary pad), and one-handed play by putting the main actions on one side.</li>
+<li>The highlight is a thick, high-contrast outline, and the ring on the deck pulses gently unless your phone asks for reduced motion, when it stays still.</li>
+<li>The highlight is the page's real focus, so screen readers read each button and panel by its existing name.</li>
+<li>Vibration is never the only sign of anything.</li>
+</ul>
+
+<h2>9. How it stays invisible to touch and mouse players</h2>
+<div class="card">
+<ul>
+<li>All of it sits behind one switch, <code>PAD_ON</code>, off until a reviewed switch-on turn (the project's rule for new features).</li>
+<li>With the switch on and no controller: no new page elements, no new styles, no new saves, no new random numbers. The only thing added is a listener that waits for a controller to say hello, and one quick "is there a controller?" check in the main loop that does nothing until one has.</li>
+<li>The controller never invents behaviour: it steers like a held finger, presses buttons like a tap, and taps the deck through the existing <code>tap()</code>. The crew's planner never sees it.</li>
+<li>The new code lives in its own section (section 26, CONTROLLER), with one-line hooks elsewhere: the main loop's poll, Lightdisc's stick, and the Pause card's line. Each owner reviews their hook.</li>
+</ul>
+</div>
+
+<h2>10. Testing without a real controller</h2>
+<div class="card">
+<p>A new check, <code>controller_check.py</code>, puts a <b>pretend controller</b> into the test browser: before the game loads it replaces the browser's controller list with one scripted pad (buttons and sticks the check sets frame by frame) and announces it the way a real one does. The check then plays the game with it:</p>
+<ol>
+<li><b>Nothing changes without a pad:</b> cadet_test ALL IDENTICAL against the build before, with the switch off and on; and with the pretend pad plugged in but never pressed.</li>
+<li><b>Touch after pad:</b> press a button, then tap the screen: the screenshot matches the no-pad one exactly.</li>
+<li><b>Walking</b> in all four view directions: pushing up walks up the screen every time; letting go stops.</li>
+<li><b>Turning and zooming</b> both ways, with the same limits as pinch.</li>
+<li><b>Picking:</b> by a crew member, a seat, a machine, a sealed door and the lift, the ringed thing is the expected one, and <span class="key">A</span> gives the same result as the regression test's tap on it.</li>
+<li><b>Every panel reachable:</b> for each panel in the list it opens it, then walks the highlight in all four directions from the first button and checks every visible button can be reached, pressed, and the panel closed with <span class="key">B</span>. This is the "nothing needs the screen" proof.</li>
+<li><b>A whole day by pad:</b> wake, eat, ride the lift, talk, do a job step, sleep, using only the pretend controller.</li>
+<li><b>Tiles</b> played to the end, and a <b>Lightdisc</b> game started, moved and left.</li>
+<li><b>Disconnecting</b> mid-walk pauses and stops; reconnecting resumes.</li>
+<li><b>Settings:</b> change a button, save, reload, the change holds; a save without changes is byte-identical.</li>
+<li>A controller that doesn't report the standard layout, and two at once.</li>
+<li>Draw calls and frame time with a pad in use, at phone size.</li>
+</ol>
+<p>Plus the usual: check_fast before every push, deck, device and interactions checks for the hooks, and names_check. A real controller test on your phone (question 7) before switch-on, because some phone browsers handle controllers their own way.</p>
+</div>
+
+<h2>11. The build turns</h2>
+<div class="tw"><table>
+<tr><th>Turn</th><th>What</th><th class="num">Hours</th></tr>
+<tr><td>1</td><td>The base: section 26 and its switch, reading the controller each frame, dead zones, connect and disconnect, "what did you use last". The pretend controller and the first controller_check cases. A tiny controller tester page for your phone (question 7).</td><td class="num">3</td></tr>
+<tr><td>2</td><td>On the deck: walking with the stick, turning, zooming, Pause, Device, Tracked.</td><td class="num">3</td></tr>
+<tr><td>3</td><td>Picking: the ring, the bottom line, stepping through nearby things, <span class="key">A</span> through the tap code.</td><td class="num">5</td></tr>
+<tr><td>4</td><td>Panels: which is on top, the highlight, D-pad moves, <span class="key">A</span> and <span class="key">B</span>, scrolling, the screen's edge buttons, the action buttons on <span class="key">X</span>.</td><td class="num">5</td></tr>
+<tr><td>5</td><td>Mini-games and special screens: Tiles, Lightdisc, work steps, the lift, sleep, Dev mode, the arrival.</td><td class="num">3</td></tr>
+<tr><td>6</td><td>Button pictures and the connect and disconnect behaviour (the Pause card's line).</td><td class="num">3</td></tr>
+<tr><td>7</td><td>The Controller settings page, saving.</td><td class="num">4</td></tr>
+<tr><td>8</td><td>Accessibility pass, the full reachability sweep, a whole day by pad, speed at phone size, DEV_NOTES and the design doc.</td><td class="num">3</td></tr>
+<tr><td>9</td><td>Switch on (its own reviewed step) and the full round of checks.</td><td class="num">2</td></tr>
+<tr><td></td><td><b>Total</b></td><td class="num"><b>about 31</b></td></tr>
+</table></div>
+<p class="legend">Builds in the 0.90.x range on claude/controller, a row in the build table each turn, check_fast before every push. Merged into claude/integration by the build master after review, early and often.</p>
+
+<h2>12. Risks</h2>
+<ul>
+<li><b>The Claude app on your phone may not pass controllers to the game.</b> Phone apps that show web pages don't always support controllers, and some phone controllers send "Back" as a phone button that can leave the page. Turn 1's tester page finds out on your phone in a minute, before the big turns. If it doesn't work there, controllers still work in a phone or computer browser.</li>
+<li><b>Picking the wrong thing</b> in a crowded mess hall. Facing direction comes first and D-pad steps through the rest; the check tests crowded rooms.</li>
+<li><b>Panels other sessions add later</b> won't be in the panel list. The reachability check fails on any open panel it doesn't know, so it gets added in the same turn.</li>
+<li><b>Merge clashes:</b> almost all the work is in its own new section; the hooks in other sections are one line each and go past their owners.</li>
+<li><b>A pad that doesn't report the usual layout</b> (some Switch pads in some browsers): a best-guess layout plus the change-a-button page.</li>
+<li><b>Speed:</b> reading a controller costs almost nothing, but the ring and the highlight are checked for draw calls and frame time at phone size.</li>
+</ul>
+
+<h2>Questions for you</h2>
+<form id="answers" data-collection="answers" data-doc="controller-plan" onsubmit="return false">
+
+<div class="q" data-qid="ct-q1"><div class="qh">QUESTION 1 · CONFIRM AND BACK ON A SWITCH PAD</div><div class="qt">On a Nintendo pad, the confirm button is on the right, not the bottom. Which should confirm?</div>
+<label><input type="radio" name="ct-q1" value="position"><span>The bottom button on every pad, with a switch in Settings to swap <span class="rec">recommended</span></span></label><div class="why">One rule for every pad; Nintendo players can swap in one press.</div>
+<label><input type="radio" name="ct-q1" value="nintendo"><span>Follow Nintendo's own habit on Nintendo pads automatically</span></label>
+<textarea name="ct-q1-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="ct-q2"><div class="qh">QUESTION 2 · CONTROLLER DISCONNECTS</div><div class="qt">If the controller drops out while you're playing, should the game pause?</div>
+<label><input type="radio" name="ct-q2" value="pause"><span>Yes, if it was used in the last half minute <span class="rec">recommended</span></span></label><div class="why">The ship doesn't run on while you reconnect.</div>
+<label><input type="radio" name="ct-q2" value="no"><span>No, just stop walking</span></label>
+<textarea name="ct-q2-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="ct-q3"><div class="qh">QUESTION 3 · GETTING AROUND</div><div class="qt">Should there be a button that walks you to your goal (like tapping far away does), or do you walk there with the stick?</div>
+<label><input type="radio" name="ct-q3" value="stick"><span>Walk with the stick, following the goal arrow; pick a place in Tracked to set it <span class="rec">recommended</span></span></label><div class="why">Closest to how touch plays now.</div>
+<label><input type="radio" name="ct-q3" value="auto"><span>Add "walk to my goal" on a button (about 2 hours more)</span></label>
+<textarea name="ct-q3-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="ct-q4"><div class="qh">QUESTION 4 · VIBRATION</div><div class="qt">A light buzz for picking things up, finishing a job, a goal reached?</div>
+<label><input type="radio" name="ct-q4" value="off"><span>Built, but off until you turn it on <span class="rec">recommended</span></span></label>
+<label><input type="radio" name="ct-q4" value="on"><span>On from the start</span></label>
+<label><input type="radio" name="ct-q4" value="none"><span>No vibration at all</span></label>
+<textarea name="ct-q4-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="ct-q5"><div class="qh">QUESTION 5 · THE KEYBOARD</div><div class="qt">The same highlight could also work with a keyboard's arrow keys and Enter. Add that too?</div>
+<label><input type="radio" name="ct-q5" value="later"><span>Not now: a separate small step later <span class="rec">recommended</span></span></label><div class="why">It would change how the keyboard behaves today, and the rule for this work is that nothing changes without a controller.</div>
+<label><input type="radio" name="ct-q5" value="now"><span>Yes, in this work</span></label>
+<textarea name="ct-q5-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="ct-q6"><div class="qh">QUESTION 6 · TYPING WITH NO PHONE KEYBOARD</div><div class="qt">On a computer or TV with only a controller, typing your name or a memo needs a keyboard. What then?</div>
+<label><input type="radio" name="ct-q6" value="default"><span>Use the system's keyboard where there is one; otherwise a suggested name (George, the user's choice) is filled in and used <span class="rec">recommended</span></span></label>
+<label><input type="radio" name="ct-q6" value="osk"><span>Build a small on-screen keyboard for the controller (about 4 hours more)</span></label>
+<textarea name="ct-q6-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="ct-q7"><div class="qh">QUESTION 7 · YOUR CONTROLLER</div><div class="qt">Turn 1 makes a tiny tester page: open it in the Claude app with your controller, press some buttons, and it shows whether the game can see them. Will you try it before the big turns?</div>
+<label><input type="radio" name="ct-q7" value="yes"><span>Yes, send me the tester after turn 1 <span class="rec">recommended</span></span></label><div class="why">It's the biggest unknown, and it takes a minute.</div>
+<label><input type="radio" name="ct-q7" value="no"><span>No, build it all and I'll try the finished thing</span></label>
+<textarea name="ct-q7-comment" placeholder="Which controller do you have (or plan to get), and which phone? A clip-on like a Backbone or Kishi, an Xbox or PlayStation pad, a Switch pad?"></textarea></div>
+
+<div class="q" data-qid="ct-q8"><div class="qh">QUESTION 8 · REVIEW</div><div class="qt">Who checks the work before it's merged?</div>
+<label><input type="radio" name="ct-q8" value="reviewer"><span>One reviewer session, every two turns <span class="rec">recommended</span></span></label><div class="why">Catches problems early; one session more while it runs.</div>
+<label><input type="radio" name="ct-q8" value="end"><span>One review at the end, before switch-on</span></label>
+<textarea name="ct-q8-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="ct-general"><div class="qh">ANYTHING ELSE</div><div class="qt">Anything about the button map, or how you'd like to play with a controller?</div>
+<textarea name="ct-general" placeholder="Your thoughts"></textarea></div>
+
+<button type="button" id="savebtn">Save my answers</button>
+<p id="savestate"></p>
+</form>
+<p class="legend">Planned by CT1 (controller support) on claude/controller from claude/integration (0.64.14). Input studied in sections 11 (tapping, steering, zoom, the lift), 19 (the device), 15 and 15b (panels, action buttons, Tracked, the job board), 20 (conversations), 23 (Tiles), 23b (Lightdisc), 24 (work steps) and 25 (Dev mode).</p>
+</main>
+<script>
+(function () {
+  const form = document.getElementById('answers'), btn = document.getElementById('savebtn'), st = document.getElementById('savestate');
+  const COLL = form.dataset.collection, DOC = form.dataset.doc;
+  let db = null, user = null;
+  function read() {
+    const out = {};
+    for (const q of form.querySelectorAll('.q[data-qid]')) {
+      const id = q.dataset.qid, r = q.querySelector('input[type=radio]:checked');
+      if (r) out[id] = r.value;
+      const t = q.querySelector('textarea');
+      if (t && t.value.trim()) out[t.name] = t.value.trim();
+    }
+    return out;
+  }
+  function fill(d) {
+    if (!d) return;
+    for (const k in d) {
+      const r = form.querySelector('input[type=radio][name="' + k + '"][value="' + String(d[k]).replace(/"/g, '') + '"]');
+      if (r) r.checked = true;
+      const t = form.querySelector('textarea[name="' + k + '"]');
+      if (t && typeof d[k] === 'string') t.value = d[k];
+    }
+  }
+  btn.addEventListener('click', async function () {
+    if (!db) { st.textContent = 'Saving is not available in this view. Please copy your answers into a message instead.'; return; }
+    st.textContent = 'Saving...';
+    try {
+      const data = read(); data.savedAt = new Date().toISOString();
+      if (user) { try { data.by = await user.id(); } catch (e) { /* fine */ } }
+      await db.collection(COLL).doc(DOC).set(data);
+      st.textContent = 'Saved. Thank you. You can change your answers and save again any time.';
+    } catch (e) {
+      st.textContent = 'Could not save (' + ((e && (e.code || e.message)) || 'error') + '). Please try again, or send your answers in a message.';
+    }
+  });
+  (async function () {
+    try {
+      if (!window.claude || !window.claude.use) return;
+      db = await window.claude.use('db'); user = await window.claude.use('user');
+      if (db) { const s = await db.collection(COLL).doc(DOC).get(); if (s && s.exists) fill(s.data()); }
+    } catch (e) { /* the page still works; saving says so */ }
+  })();
+})();
+</script>
+</body>
+</html>

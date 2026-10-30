@@ -1,0 +1,390 @@
+@talks calder
+// TW1, the Talk a while pack: Chief Ines Calder's own talks. Few words, exact; numbers, not adjectives; statements;
+// humour a beat late. NEVER "well done" (before beat calder.5), "great job" or an exclamation mark. Not the toolbox's
+// owner, not her first chief.
+
+only: own
+
+== serials
+topic: work
+them: Scrubber two on Deck 4. Serial ending four-one-seven. It's started to whistle.
+them: Not loud. A quarter-tone. You'll hear it now I've said it.
+ask: What's the first thing you notice when you walk into the bay?
+listen: How do you remember every serial?
+  them: I don't. I remember the ones that have let me down. That's most of them.
+share: The noise. It's still a lot of noise.
+  them: Give it a month. Then it's twelve noises. Then one of them's wrong.
+cheer: The tea corner. Every time.
+  them: Hm. Honest. Tea's at one.
+
+== mug
+topic: hobby
+when: tier>=acquaintance
+them: Pell asked again what my mug says. It says nothing. It's a mug.
+them: People want things to mean something. Sometimes a thing's just for tea.
+ask: Do you keep things for what they mean, or what they do?
+listen: Has anyone ever given you a mug?
+  them: Once. It had a slogan. It's in the machine shop. Holds screws. Useful now.
+share: What they mean. I've kept odd things.
+  them: Keep them. Small, though. Ships don't have much shelf.
+cheer: Both. My mug holds tea and means tea.
+  them: Hm. That's the right answer. I didn't expect it.
+
+== air
+topic: ship
+when: tier>=colleague rep:known
+them: Nobody thanks the air. That's how you know it's working.
+them: I'd rather that than the other kind of day. Prevention beats heroics. Every time.
+ask: Would you rather fix the big failure, or stop it happening?
+listen: Did you always think that way?
+  them: No. I learnt it. Slowly. Most useful things I know, I learnt slowly.
+share: Stop it. Nobody notices, but I'd know.
+  them: Good. That's the job. Keep thinking like that.
+cheer: Fix it. Then stop the next one.
+  them: Fair. Honest. Most people only say the second.
+
+== tea-break
+topic: day
+when: tier>=friend rep:well
+them: I gave up my tea break years ago. There was always one more job on the board.
+them: Halloran's started leaving a cup on my desk at one. I haven't said anything. I drink it.
+ask: What do you do when the board's never empty?
+listen: Do you ever miss the break?
+  them: Yes. Don't tell Halloran. He'll make a rota for it.
+share: Pick the right next job. Not every job.
+  them: Good. That's the answer most people take years to find.
+cheer: Hide behind the parts racks with a biscuit.
+  them: The tea corner's behind the parts racks. I've seen you. Carry on.
+
+// ---- SW1 (2026-10-24, patch 0.92.3 item 15, plans/talk-main-plan.md): 26 more of Calder's own, laddered (10 with no tier
+// gate, the rest acquaintance, colleague, friend, close; colleague up also need rep:known or rep:well). The same NEVERs:
+// no "well done" (her arc's payoff), no "great job", no exclamation marks; nothing of the toolbox's owner, her first
+// chief or the junior who left (her arc's beats). Her card's needs are practical: the listen answers are the warm ones.
+
+== deck-pitch
+topic: ship
+them: Every deck has its own pitch. Deck 5 hums at about a low G. I'm not musical.
+them: When it shifts, something's wrong. Usually a fan. Sometimes Torres singing.   #funny
+ask: Have you noticed the decks sound different?
+listen: Which deck do you like to hear most?
+  them: Deck 2 at night. Everything balanced. Nobody needs me there. I go anyway.   #warm
+share: Not yet. I'll listen now.
+  them: Good. Start at the lift. Stand still. Ten seconds. Then tell me what you heard.
+cheer: Deck 3. It sounds like dinner.
+  them: It does. Mostly the dish pit. Close enough.   #funny
+
+== card-twice
+topic: work
+them: Read the job card twice. Once for the job. Once for what it doesn't say.
+ask: What do you look for first, on a job card?
+listen: What doesn't it say?
+  them: Who did it last. How long it's been coming. The card's honest. It isn't complete.
+share: The part number. Then the deck.
+  them: Fine. Add the last date. If it's recent, the fault isn't where the card says.
+cheer: The word "easy". It's never there.
+  them: It's never there because nothing is. You've read enough cards.   #funny
+
+== margins
+topic: hobby
+when: tier>=acquaintance
+them: Day off, I read old maintenance manuals. Other ships. Other people's faults.
+them: Some read novels. Same thing. Someone gets into trouble. Someone gets out.   #funny
+ask: What do you read, when you read?
+listen: Which one stayed with you?
+  them: A freighter manual. Forty years of notes in the margins. Four different hands.   #warm
+share: Whatever's lying about the common room.
+  them: That's how most good books get found. Leave one there when you're done.
+cheer: The menu board. Daily.
+  them: Useful. Short. Accurate. Better than most manuals.   #funny
+
+== six-ten
+topic: day
+when: time:morning
+them: Board at six. Tea at five past. Walk the decks at ten past. Every day.
+ask: Have you got a routine yet?
+listen: Why walk the decks?
+  them: You hear what changed overnight. A machine tells you before the board does.
+share: Still finding one.
+  them: Find it soon. A routine leaves your head free for the hard parts.
+cheer: Alarm. Snooze. Alarm. Toast.
+  them: That's a routine. Not a good one. A routine.   #funny
+
+== third-shelf
+topic: crew
+when: tier>=acquaintance
+them: Pell naps in the parts store. Third shelf. I know. He knows I know.
+them: His work's good. Better than he thinks. I don't say. He'd stop checking it twice.
+ask: Which are you? Early to bed, or one more job?
+listen: Do you mind the napping?
+  them: No. A rested tech makes fewer mistakes. And the shelf's clean. I check.   #warm
+share: Early to bed. I'm no use tired.
+  them: Then sleep. That's an instruction. The board will be there in the morning.
+cheer: One more job. Then a nap on a shelf.
+  them: Second shelf. Third's taken.   #funny
+
+== new-maker
+topic: news
+when: tier>=acquaintance
+them: Wednesday's delivery has new filters. Different maker. Same size. Supposedly.
+them: I'll measure every one. Somebody has to.
+ask: Do you trust a new thing straight away, or check it?
+listen: Have new parts let you down before?
+  them: Once. Eight years ago. Seals two millimetres thin. I remember the date.
+share: Check it. Then trust it.
+  them: Good. In that order. Never the other way round.
+cheer: Trust it. Then blame the maker.
+  them: That's a plan. It isn't my plan.   #funny
+
+== pour-rota
+topic: tradition
+when: weekday:fri
+them: Works tea at one. Halloran keeps the pouring rota. I've never been on it. I've asked.
+them: He says the Chief doesn't pour. I say the Chief can pour. He hasn't moved.   #funny
+ask: Do you like a rota, or would you rather just pitch in?
+listen: Why won't he put you on it?
+  them: He says it's my one break. I say I don't take breaks. We disagree, politely.   #warm
+share: A rota. I like knowing where I am.
+  them: So do I. That's why I want to be on it.   #funny
+cheer: Just pitch in. Before anyone notices.
+  them: That's what I'll do. Next week. Don't warn him.   #funny
+
+== grey-floor
+topic: tradition
+when: tier>=acquaintance weekday:wed
+them: Open door this afternoon. Tea at the corner. Ask me anything. I'll answer it.
+them: Last week Kovac asked why the bay floor's grey. I answered for twenty minutes.   #funny
+ask: Go on. One question. What would it be?
+listen: Why is the floor grey?
+  them: It shows oil and hides dust. You want to see a leak. You don't need to see a crumb.   #warm
+share: How you came to be Chief.
+  them: Slowly. One job at a time. Ask me at the tea. It's a longer answer than this.
+cheer: Whether you ever take a break.
+  them: I don't. I've said so. Ask something harder. Bring it Wednesday.   #funny
+
+== back-in-five
+topic: work
+them: A half-done job's worse than one not started. Not started, you know where you are.
+ask: Do you finish things, or start lots of things?
+listen: What's the worst half-done job you've found?
+  them: A pump with three bolts in and a note. "Back in five." No date. No name.   #warm
+share: Finish. It nags me otherwise.
+  them: Good. Let it nag. That's the job talking.
+cheer: Start lots. Finish the fun ones.
+  them: Then the dull ones pile up. They always pile up. Do those first.
+
+== nine-twenty-eight
+topic: crew
+when: tier>=acquaintance
+them: Kovac strips a scrubber in nine and a half minutes. Says ten. Rounds up, to be polite.
+them: I've timed her. Twice. Nine twenty-eight, the second time.   #funny
+ask: Is there something you're quietly very good at?
+listen: Have you told her you timed her?
+  them: No. She'd start timing herself. She already does. She'd do it more.   #warm
+share: Listening. People tell me things.
+  them: Useful. Keep it. Most people listen to answer. You listen to hear.   #warm
+cheer: Eating fast. Ask Pell.
+  them: Pell's faster. It isn't close.   #funny
+
+== recycler
+topic: ship
+when: tier>=colleague rep:known
+them: The water recycler's never failed. Not once. Thirty-one years.
+them: Nobody visits it. I do. Fridays, after tea. Five minutes.
+ask: Is there a machine aboard you'd like to know better?
+listen: What do you do for five minutes?
+  them: Listen. Check the log. Say nothing. It doesn't need anything. That's the point.   #warm
+share: The coils. Zeke makes them sound alive.
+  them: Torres makes everything sound alive. The coils happen to be. In a way.
+cheer: The ovens. Brennan talks to them.
+  them: Brennan talks to everything. The ovens answer. That's her department, not mine.   #funny
+
+== the-spoon
+topic: hobby
+them: Day off, I make small things on the lathe. Brackets. Hooks. A spoon, once. Badly.
+them: The spoon's in my drawer. It works. It isn't pretty. Most good things aren't.   #funny
+ask: Do you make anything, off shift?
+listen: Why a spoon?
+  them: I'd never made a curve. You learn most from the thing you're worst at.   #warm
+share: Never tried. I'd give it a go.
+  them: Book an hour on the lathe. Saturday. I'll be there anyway. Bring scrap.
+cheer: A mess, mostly.
+  them: That's the first stage of making anything. Most people stop there. Don't.
+
+== weekend-faults
+topic: day
+when: weekday:mon
+them: Monday. Weekend faults: nine. Seven small. Two of them the Deck 4 washer.
+them: The washer and I have an understanding. It breaks. I fix it. Neither of us comments.   #funny
+ask: How do you start a week? Head down, or a look round first?
+listen: What's wrong with the washer?
+  them: A drum bearing, in about a month. It's telling me early. I appreciate that.   #warm
+share: A look round. Then the board.
+  them: Good. The board's what broke. The look round's what's about to.
+cheer: Coffee first. Then decide.
+  them: Tea. But yes.   #funny
+
+== every-egg
+topic: food
+them: Brennan feeds seventy-odd people three times a day. Never runs short. I asked her how.
+them: She said "I count." I respect that more than she knows.   #warm
+ask: Do you think about where your food comes from, aboard?
+listen: Does she really count?
+  them: Every tray. Every egg. She has a ledger. I've seen it. It's tidier than my log.   #warm
+share: When I'm in the garden, yes.
+  them: Cruz's garden. Two hundred litres a day through those pumps. I watch them.
+cheer: Only when the grab shelf's empty.
+  them: It's never empty. Brennan sees to that. Pell sees to the opposite.   #funny
+
+== two-points
+topic: plans
+when: tier>=acquaintance rep:known
+them: Next year: Deck 4 air at ninety-eight. It's ninety-six now. Two points. Twelve months.
+ask: Have you got a number you're aiming for?
+listen: Why ninety-eight, not a hundred?
+  them: A hundred's a lie. Nothing's a hundred. Ninety-eight is true, and hard.   #warm
+share: Not a number. Being sure.
+  them: Harder to measure. Measure it anyway. Write down the days you feel sure.
+cheer: Three biscuits at tea. Up from two.
+  them: Achievable. Write it down. I'll check.   #funny
+
+== through-the-glass
+topic: work
+them: People think I watch them through the glass. I watch the board. You're in front of it.
+them: Mostly. Sometimes I watch how someone holds a spanner. It tells me a lot.
+ask: Does it bother you, being watched while you work?
+listen: What can you tell from a grip?
+  them: Whether you trust it. Too tight, you don't. Too loose, you don't care. Yours is right.   #warm
+share: A bit. Less every week.
+  them: Good. In a month you won't notice. That's when I stop watching.
+cheer: I try not to look up.
+  them: Good. Don't. Look at the job. I'll do the looking.
+
+== cranes
+topic: home
+when: tier>=colleague rep:known
+them: I grew up by a shipyard. Cranes outside my window. The noise put me to sleep.
+them: Quiet still keeps me awake. The Wren's never quiet. That suits me.
+ask: What did you fall asleep to, growing up?
+listen: Do you miss the cranes?
+  them: Some nights. I listen to the lift instead. Same rhythm. Up, pause, down.   #warm
+share: Someone talking in the next room.
+  them: That's a good one. It means someone's still up. Looking after things.   #warm
+cheer: Nothing. I was asleep.
+  them: Lucky. Hold on to that.   #funny
+
+== thank-you-first
+topic: work
+when: tier>=colleague rep:known
+them: When someone tells me they've made a mistake, I say thank you first. Then we fix it.
+them: The ones who hide them worry me. Not the ones who make them.
+ask: Is it hard for you to own up to a mistake?
+listen: Did someone thank you, once?
+  them: Once. I'd broken something costly. "Thank you for telling me." I've never forgotten.   #warm
+share: Yes. But I do it anyway.
+  them: That's the whole of it. Hard, and anyway. Good.
+cheer: Easy. I blame the coils.
+  them: Torres blames the coils. You'd be in good company. Wrong, but good company.   #funny
+
+== spanner-sooner
+topic: crew
+when: tier>=friend rep:well
+them: I watched Torres teach you, your first week. He gave you the spanner sooner than I would.
+them: He was right. I don't tell him that. I'm telling you.
+ask: Who taught you the way you'd want to teach?
+listen: Why not tell him?
+  them: He'd glow for a week. The coils can't take that much singing.   #funny
+share: Zeke. He never talked down.
+  them: No. He doesn't. It's his best thing. He doesn't know it's his best thing.   #warm
+cheer: You. Terrifying, but you.
+  them: I'll take terrifying. It's accurate.   #funny
+
+== small-clocks
+topic: plans
+when: tier>=colleague rep:known
+them: When I stop, I'll mend clocks. Small ones. Nobody's air depends on a clock.   #warm
+them: That's the appeal. A clock can be wrong for a week and nobody suffers.
+ask: Is there something you'd do just because you liked it?
+listen: Can you mend clocks now?
+  them: Two. Both slow. One's four minutes slow a week, exactly. I've left it. It's consistent.   #funny
+share: Make things. No hurry.
+  them: Slowly's the luxury. Out here, slowly's the one thing nobody gets.
+cheer: Nap. Professionally.
+  them: Talk to Pell. He's been in training for years.   #funny
+
+== no-sugar
+topic: food
+when: tier>=colleague rep:known
+them: Tea. Strong, no sugar, the mug with nothing on it. Twenty-two years. I'm not changing.
+them: Halloran made it with sugar once. By mistake. He apologised for a week.   #funny
+ask: Is there something you've never changed, and won't?
+listen: And you drank it anyway?
+  them: All of it. You don't waste tea. Or an apology.   #warm
+share: How I take my tea, too.
+  them: Good. Some things should stay put. Tea's one. Torque settings are another.
+cheer: My jumper. It's older than my bunk.
+  them: Keep it. A good jumper's earned its place.
+
+== straight-lettering
+topic: tradition
+when: tier>=friend rep:well
+them: Every name on the beam since I came aboard, I watched go up.
+them: I don't go for the speeches. I go to check the lettering's straight.   #funny
+ask: What would you want next to your name, if anything?
+listen: Is any of it crooked?
+  them: One. Third row. I've never said whose. I never will. It's straight enough.   #warm
+share: Just my name. That's enough.
+  them: Good. Names are enough. The work's the rest of it.
+cheer: "Ate all the biscuits."
+  them: That's Pell's. If they did that, it'd be Pell's.   #funny
+
+== kept-spanner
+topic: crew
+when: tier>=close rep:well
+them: Second week, you stayed late to put one spanner back. Nobody asked. I saw.
+them: That's when I knew. Not the jobs. The spanner.   #warm
+ask: When did you know you'd fit in here?
+listen: Knew what, Chief?
+  them: That you'd last. People who put spanners back last. It isn't complicated.   #warm
+share: A small thing. Someone saved me a seat.
+  them: Small things are the true ones. Big things are easy to fake.
+cheer: When Pell shared his late plate.
+  them: Then you're in. Pell doesn't share plates. Not with anyone. I've watched.   #funny
+
+== one-joke
+topic: crew
+when: tier>=friend rep:well
+them: I have one joke. I tell it once a year. Works Friday tea, last week of Lanterns.
+them: It's about a bearing. Nobody laughs. Halloran laughs. He's kind.   #funny
+ask: Have you got a joke you always tell?
+listen: Go on. Tell me the joke.
+  them: No. Last week of Lanterns. You'll be there. Plan to look amused.   #funny
+share: One. It's terrible. I love it.
+  them: Then tell it. Terrible's allowed. Halloran proves it every morning.   #funny
+cheer: Your mug. "It's a mug."
+  them: That isn't a joke. It's a fact. People laugh. I don't know why.   #funny
+
+== making-spare
+topic: plans
+when: tier>=close rep:well
+them: One day I want this bay to run a week without me. That's the job. Making yourself spare.
+them: Not yet. The scrubbers still want me at quarter past six. Every morning.   #funny
+ask: What would you want to leave behind, somewhere you worked?
+listen: Would you miss being needed?
+  them: For a day. Then I'd find a clock to mend.   #warm
+share: People who know what they're doing.
+  them: Yes. That's it exactly. Machines break. People who know how stay.   #warm
+cheer: My mug. For whoever comes next.
+  them: It's a mug. They'd have to find their own meaning.   #funny
+
+== eleven-a-loaf
+topic: food
+when: tier>=close rep:well weekday:sun
+them: Sunday. Brennan lets me knead. I'm off duty. Nobody sees. I time every loaf.
+them: Eleven minutes a loaf. Brennan says eight. Brennan's wrong. Brennan's loaves are better.   #funny
+ask: Do you have something you do just for you?
+listen: Why bread?
+  them: You push it, it pushes back. Then it gives. Honest stuff, dough.   #warm
+share: Yes. I don't tell many people.
+  them: Good. Keep one thing quiet. It stays yours that way.   #warm
+cheer: Eating Brennan's bread. Counts.
+  them: It counts. Someone has to finish what I start.   #funny

@@ -1,0 +1,558 @@
+@bank all
+// SW4 (writer for the Veyli vessel), 2026-10-26: "A Veyli vessel needs help", Days 27-30 (plans/veyli-vessel-spec.html
+// on claude/p5-specs, the beats table and section 8; plans/events-plan-2.html Part C by EP1). The game reads every key
+// here first and falls back to its own words in the vessel's slot (section 18, 'Vessel builder'). Mail is
+// "Subject | body", unsigned (the game adds the sender, named on each key's comment). A talk key is a list of
+// "<crew id>: <line>", said in order, one every few ship minutes; a line is skipped when its speaker isn't there.
+// Every Veyli is they/them. Never "permission" or "leave" about the reach. The comet's Veyli name stays unspoken.
+// The staged scenes with replies are .meet files: content/meetings/vessel*.meet.
+
+// ---- the status line on the device, by phase (Sat warning, Sun onset, Mon escalation, Tue resolution, afterglow)
+== event.veyliVessel.status.warning
+- A Veyli ship has asked for company
+== event.veyliVessel.status.onset
+- Taavek is aboard
+// Sunday 08:00-09:30, before the Tern brings Taavek back
+== event.veyliVessel.status.onset.early
+- The Tern brings the Veyli engineer at 09:30
+== event.veyliVessel.status.escalation
+- Taavek is aboard: the part today
+== event.veyliVessel.status.resolution
+- The Veyli ship is under way
+== event.veyliVessel.status.afterglow
+- The Veyli ship is under way
+
+// ---- Saturday 05:40-06:30, the comms room, Deck 2: the call. Takahashi has the night comms watch, Achterberg the
+// night Watch. 05:40-05:50 the first three; Saruth's lines from 06:10, when they come to read it.
+== event.veyliVessel.talk.call
+- takahashi-wen: Veyli band. Not the Envoy's code. A small ship, close, and it's repeating.
+- achterberg-lars: Distress?
+- takahashi-wen: Not a word I know. That's not static, though. Wake the Envoy.
+- saruth: Thank you for waking me. No, it is right that you did. Let me read it.
+- saruth: They do not ask for help. We have no polite way to say it. They ask for company.
+- saruth: Tell the Captain, please. Gently. It is her day off, and she will want to come.
+
+// ---- Saturday 07:00-08:00, the mess: breakfast news. Comms and Command first (coming.1-4), then everyone.
+== event.veyliVessel.news.coming.1
+- A Veyli ship's in trouble. Wen picked it up in the night.
+== event.veyliVessel.news.coming.2
+- Their pump's gone. They're drifting a day off our course.
+== event.veyliVessel.news.coming.3
+- Saruth was in comms at six. In full robes. At six.
+== event.veyliVessel.news.coming.4
+- The Captain's coming in. On a Saturday. That's how you know.
+== event.veyliVessel.news.coming.5
+- They didn't ask for help, apparently. They asked for company.
+== event.veyliVessel.news.coming.6
+- Company. I like that. Better than a distress call.
+== event.veyliVessel.news.coming.7
+- If it's a pump, it's Works. Somebody tell the Chief.
+== event.veyliVessel.news.coming.8
+- I've never seen a Veyli ship up close. Only the delegation's shuttle, last week.
+// Saruth at breakfast, to you, if you're near them (one tap)
+== event.veyliVessel.saruth.breakfast
+- They ask for company. A very old way of asking. The Speaker will be glad we answered it.
+// the notice when you sit down to breakfast
+== event.veyliVessel.notice.breakfast
+- Something's happening: a Veyli ship has called the Wren.
+
+// ---- Saturday 08:00, the Captain's address (a banner on every deck, one line every few seconds, kept in Mail).
+// marrow, called in on her day off. 08:30 the turn's notice.
+== event.veyliVessel.address.sat
+- marrow: This is the Captain. It's my day off, so I'll be quick. My tea's going cold.
+- marrow: A small Veyli ship has lost its coolant pump. It's drifting, a day off our course.
+- marrow: They've called us. Not for help: for company. That's their word, and a good one.
+- marrow: At half past eight we turn toward them. You'll feel it. Hold on to your cups.
+- marrow: Their Speaker sat at our table last week. Tonight we keep company. Marrow out.
+// from the Captain
+== event.veyliVessel.mail.address.sat
+- A Veyli ship asks for company | A small Veyli ship has lost its coolant pump and is drifting, a day off our course. They've called us, not for help but for company: the Envoy says that's the word. We turn toward them at 08:30 and hold station off their bow until they're under way. Works will tell you what's needed. Last week their Speaker was our guest. Tonight we keep company.
+== event.veyliVessel.notice.turn
+- The Wren is turning toward the Veyli ship.
+
+// ---- Saturday 10:00, the sheet (the scene is vesselSheet.meet). Calder's parts list, from Calder, after she's told you.
+== event.veyliVessel.mail.partslist
+- Parts chain, Sunday 13:00 | For the Veyli ship, by the Tern: our spare coolant pump, 40 fittings, 12 drums of coolant, seals, the small tool kit. Main storage to the ramp, by hand: the lift is too slow and the trolleys won't take the ramp. Sign the sheet in the Works bay. Sensible shoes. Their engineer arrives 09:30; {me} meets them at the ramp, with me.
+== event.veyliVessel.ring.sheet
+- Sign the parts chain sheet
+== event.veyliVessel.notice.sheet
+- Chief Calder is looking for you: there's a sheet to sign in the Works bay.
+== event.veyliVessel.tracked.sheet
+- Sign the parts chain sheet in the Works bay
+== event.veyliVessel.sched.sheet
+- Sign the parts chain sheet, Works bay
+// the sheet's tap text, once you've signed (VB2's prop)
+== event.veyliVessel.tap.sheet
+- The parts chain sheet. Thirty-odd names already, and yours, near the top.
+== event.veyliVessel.tap.sheet.before
+- The parts chain sheet: Sunday, 13:00, Main storage to the Tern. A pen on a string.
+
+// ---- Saturday 14:00, it comes into view: the bow lounge glass, Deck 3 (optional; a level 2 arrow, once)
+== event.veyliVessel.notice.view
+- The Veyli ship is off the bow: you can see it from Deck 3's glass.
+== event.veyliVessel.goal.view
+- The Veyli ship, from the bow glass
+// a few crew at the glass now and then, 14:00-18:00 (not a gathering): one each, in order
+== event.veyliVessel.talk.view
+- tomas: That's it? It's tiny. I mean small. I mean it's lovely. Sorry.
+- sato: Slim hull, three running lights. Two of them low. They're saving power.
+- holt: Hm. Smaller than I thought.
+- mensah: Smaller than you thought, Chief? It'd fit in our shuttle bay twice.
+- hart-ravi: I'm drawing it. Don't move. I know it's not moving. Don't anyway.
+- farouk-olu: Only a few aboard, Wen thinks. A long way from anyone, until this morning.
+
+// ---- Saturday 18:00, Vance's notice of times (from Vance), after Calder has told you yours
+== event.veyliVessel.mail.tomorrow
+- Tomorrow | Times for Sunday. 08:00: the Tern goes across, Isak Lindqvist at the helm. 09:30: the Tern returns with the Veyli ship's engineer, Taavek, met at the ramp by {me} and Chief Calder. 13:00: the parts chain, Main storage to the shuttle bay. Breakfast first, sensible shoes, and be on time. Carry on.
+== event.veyliVessel.tracked.ramp
+- Meet Taavek at the foot of the Tern's ramp, 09:30
+== event.veyliVessel.sched.ramp
+- Meet Taavek, 09:30, the shuttle bay
+
+// ---- Sunday 08:00, the Tern goes across (the shuttle bay)
+== event.veyliVessel.notice.ramp
+- Taavek arrives at 09:30: you're meeting them at the foot of the Tern's ramp.
+== event.veyliVessel.talk.ternOut
+- lindqvist-isak: She's warm and she wants to go. Ramp coming up. Clear the yellow, please.
+- torres-zeke: Off she goes. Bring us back a guest, Isak.
+- lindqvist-isak: Half nine. One guest. Keep the kettle on.
+
+// ---- Sunday 09:30, off the Tern: the scene is vesselRamp.meet; the ring and the arrow from 09:10
+== event.veyliVessel.ring.ramp
+- Stand at the foot of the ramp
+== event.veyliVessel.goal.ramp
+- Meet Taavek at the foot of the Tern's ramp
+// the crowd at the bay (about 20), bubbles while the ramp comes down
+== event.veyliVessel.talk.rampCrowd
+- pell: Is that the broken bit? It's bigger than my head.
+- kovac-zainab: Oh. Twelve blades. Ours have nine.
+- halloran-emeka: Look at that. A guest, on a Sunday. Lovely.
+- rossi-femi: They brought a crate. Who brings a crate to a first meeting?
+- torres-zeke: Everyone, if they're sensible. I brought you a scarf.
+// not there by 09:35: Taavek and Calder wait at the ramp, up to an hour (the user, 2026-10-26). The notices, then
+// their bubbles while they wait (to anyone near; one every few minutes, in order).
+== event.veyliVessel.notice.rampWait
+- Taavek and Chief Calder are waiting for you at the foot of the Tern's ramp.
+== event.veyliVessel.notice.rampWait.late
+- Taavek is still waiting at the ramp. The Chief has fetched them a coffee.
+// 09:45, if you're still not there: Calder comes to find you, wherever you are, and says it in person (then the
+// arrow back to the ramp); Taavek waits at the foot with a coffee
+== event.veyliVessel.talk.rampFind
+- calder: {me}. There you are. Taavek's at the foot of the ramp. Waiting.
+- calder: They're not cross. I'm not either. Much. Come on.
+== event.veyliVessel.talk.rampWait
+- calder: Five minutes. They're coming.
+- taavek: We wait. Good. Waiting is also a kind of meeting.
+- calder: Coffee?
+- taavek: Yes! Always yes.
+- taavek: Your bay. I draw it while we wait. The crane is a good crane. Proud.
+- calder: That crane is older than me. Don't tell it.
+// an hour gone (10:30): Zeke stands in and takes Taavek to the bench; then the notice, and you meet them there
+// (vesselRamp.bench.meet)
+== event.veyliVessel.talk.rampZeke
+- torres-zeke: Right. I'll take them. Someone met me once and was late too. It was fine.
+- taavek: Zeke. Good. You are also one who meets.
+== event.veyliVessel.notice.rampZeke
+- Zeke has taken Taavek to the Works bay bench. Go and say hello.
+== event.veyliVessel.ring.rampBench
+- Say hello to Taavek
+
+// ---- Sunday 10:00, the round one at the bench: vesselRoundOne.meet; the ring on Taavek, the arrow at 09:55
+== event.veyliVessel.ring.bench
+- Join Taavek at the bench
+== event.veyliVessel.goal.bench
+- The round one, at the Works bay bench
+== event.veyliVessel.tracked.bench
+- Join Taavek at the Works bay bench, 10:00
+// the broken part on the bench (VB2's prop), before and after the scene
+== event.veyliVessel.tap.part
+- The round one: a Veyli impeller, twelve curved blades, cracked clean through the hub.
+== event.veyliVessel.tap.sketch.bench
+- Taavek's sketch of the part, every blade numbered. Someone has added IMPELLER.
+
+// ---- Sunday 10:30, the swap meet (as built), with Taavek
+== event.veyliVessel.talk.swap
+- taavek: Sweets. Veyli. One for a coffee. Good trade, yes?
+- ishikawa-orla: One sweet, one mug. That's the rate. I'm writing it down.
+- taavek: Big mug, two sweets. Small mug, one. I am an engineer. I measure.
+
+// ---- Sunday 13:00-14:00, the parts chain: Zeke hosts (tap to join), Main storage to the Tern's ramp
+== event.veyliVessel.notice.chain
+- The parts chain starts at 13:00: Main storage to the Tern. Zeke's calling the count.
+== event.veyliVessel.gather.chain.name
+- The parts chain
+== event.veyliVessel.gather.chain.ask
+- Parts chain at one. Storage door to the ramp. Bring your arms.
+== event.veyliVessel.gather.chain.here
+- Find a gap in the line. Face the next person. I'll call the count.
+== event.veyliVessel.gather.chain.thanks
+- Zeke waves you into a gap in the line. The first crate is already coming down it toward you.
+== event.veyliVessel.ring.chain
+- Join the chain
+== event.veyliVessel.ring.crate
+- Pass the crate
+== event.veyliVessel.goal.chain
+- The parts chain, Main storage
+== event.veyliVessel.tracked.chain
+- The parts chain, 13:00, Main storage to the Tern
+== event.veyliVessel.sched.chain
+- The parts chain, 13:00, Main storage
+// the crate's tap text (VB2's prop)
+== event.veyliVessel.tap.crate
+- A crate for the Veyli ship. FITTINGS, in Calder's capitals, and a tiny drawing.
+// Zeke's count, one call per crate as it reaches you (in turn, round again)
+== event.veyliVessel.chain.count
+- torres-zeke: Crate! Fittings. Light one. Pass it.
+- torres-zeke: Next one's heavy. Bend the knees. Pass it. Lovely. Next.
+- torres-zeke: Coolant. Keep it upright. Upright is the whole job.
+- torres-zeke: Seals. Gently. They're only rubber, but they're our rubber.
+- torres-zeke: Next! Don't look at it. Just pass it.
+- torres-zeke: Heavy one. Two hands. Breathe out.
+// the line's talk while it runs, in order
+== event.veyliVessel.talk.chain
+- torres-zeke: Right, everyone! Storage door to the ramp. Arm's length. Face along.
+- pell: Oi oi, who packed this one? Bricks?
+- kovac-zainab: Lift with your legs. Sorry. Not you. Well, you too. Everyone.
+- halloran-emeka: Lovely rhythm, this. Like a bakery line. Without the cake.
+- taavek: So many hands! On our ship, we are few. Here, a river of hands.
+- calder: Halfway. Nobody's dropped one. Keep it that way.
+- brennan: Drink when you get a gap, loves. I've left water by the door.
+- torres-zeke: The pump. Last and biggest. Four hands on it. {me}, with me.
+// the last crate (the cheers), and the close
+== event.veyliVessel.talk.chainEnd
+- torres-zeke: And that's the lot! Every crate, and not one dropped.
+- taavek: Thank you. All of you. My ship will say it. I say it first.
+- calder: Good chain. Water, then off you go.
+== event.veyliVessel.record.chain
+- Passed crates in the parts chain.
+
+// ---- Sunday evening, as built, with Taavek: the Sunday table, Lap of the Wren, the Sunday story
+== event.veyliVessel.talk.sundayTable
+- brennan: Coffee for our guest. Strong, love? Course it is.
+- taavek: Very bitter. Very good. Another, please. Yes.
+== event.veyliVessel.talk.lap
+- tomas: Taavek! Walk the lap with us? It's just walking. Round the ship.
+- taavek: Round! A round one. I come. I draw while I walk.
+== event.veyliVessel.talk.story
+- holt: Hm. They laughed at the bear. Nobody laughs at the bear.
+- taavek: The voices! Good voices. I understand nothing. Very good.
+
+// ---- Monday 09:20, the job: vesselJob.meet (Calder, in the Works bay), then the helper card (pick two)
+== event.veyliVessel.notice.job
+- Chief Calder has a job for you in the Works bay: Taavek's part.
+== event.veyliVessel.ring.job
+- Pick two helpers
+== event.veyliVessel.goal.job
+- Taavek's part: see Chief Calder in the Works bay
+== event.veyliVessel.help.card.title
+- Pick two helpers
+== event.veyliVessel.help.card.kovac-zainab
+- Zainab Kovac: exact. She'll count every blade twice.
+== event.veyliVessel.help.card.pell
+- Pell: practical. He knows which way every machine sticks.
+== event.veyliVessel.help.card.bramwell-basil
+- Basil Bramwell: a week aboard. Show him how it's done.
+== event.veyliVessel.help.card.torres-zeke
+- Zeke Torres: engines. He talks to machines, and they listen.
+// each helper's answer when you pick them
+== event.veyliVessel.help.kovac-zainab.pick
+- Oh. Me? Um. Yes. Twelve blades. I'll count them. Twice. Lovely part.
+== event.veyliVessel.help.pell.pick
+- Oi oi! Right, so. You turn it, I'll hold it, we both take the credit.
+== event.veyliVessel.help.bramwell-basil.pick
+- Me? Brilliant! I'll hold things. I'm very good at holding things. Is that a job?
+== event.veyliVessel.help.torres-zeke.pick
+- Yes! A Veyli pump. I've wanted to see inside one for a month. Right, onward.
+// Taavek, once both are picked
+== event.veyliVessel.help.done
+- taavek: Good. Four of us, and the round one. We make it. Together.
+
+// ---- Monday 09:30-13:00, making the round one, the machine shop: five steps, each with its ring and Tracked row,
+// Taavek's line as it starts, and a line from one of your two helpers (help.<id>.step.N). Hourly notice if you're
+// holding another job.
+== event.veyliVessel.ring.step.1
+- Look at Taavek's sketch
+== event.veyliVessel.ring.step.2
+- Choose the stock
+== event.veyliVessel.ring.step.3
+- Turn it on the lathe
+== event.veyliVessel.ring.step.4
+- Hold it while it's checked
+== event.veyliVessel.ring.step.5
+- Balance the round one
+== event.veyliVessel.tracked.step.1
+- Taavek's part: look at the sketch and the broken one
+== event.veyliVessel.tracked.step.2
+- Taavek's part: choose the stock
+== event.veyliVessel.tracked.step.3
+- Taavek's part: turn it on the lathe
+== event.veyliVessel.tracked.step.4
+- Taavek's part: hold it while your helper checks
+== event.veyliVessel.tracked.step.5
+- Taavek's part: balance it
+== event.veyliVessel.goal.shop
+- Taavek's part, in the machine shop
+== event.veyliVessel.notice.shop
+- Taavek and your helpers are waiting in the machine shop.
+== event.veyliVessel.notice.shop.hourly
+- Taavek's part is still on the bench in the machine shop.
+== event.veyliVessel.taavek.step.1
+- taavek: Here. My drawing. And here, the broken one. Twelve. All the same. Very curved.
+== event.veyliVessel.taavek.step.2
+- taavek: This one? No. Too soft. This one. Yes. Good. It sings when you tap it.
+== event.veyliVessel.taavek.step.3
+- taavek: Slow. Slow. The machine knows. We listen to it. Yes.
+== event.veyliVessel.taavek.step.4
+- taavek: Now we hold. Still. Very still. Like a sketch.
+== event.veyliVessel.taavek.step.5
+- taavek: It must go round and not wobble. Like a good dancer. No. Like a good pump.
+// a small mistake (it costs time, never the part), and the step done again
+== event.veyliVessel.taavek.mistake
+- taavek: Ah! Too deep. Small. Not bad. We go again, slower. The round one forgives.
+== event.veyliVessel.taavek.stepDone
+- taavek: Good. Next.
+// your helpers' lines, one per step for each of the four (steps 1-5; their own way)
+== event.veyliVessel.help.kovac-zainab.step.1
+- kovac-zainab: Twelve on the sketch. Twelve on the part. Sorry. Counted again. Twelve.
+== event.veyliVessel.help.kovac-zainab.step.2
+- kovac-zainab: Not that one. Sorry. That one's got a flaw. There. This bar. It's lovely.
+== event.veyliVessel.help.kovac-zainab.step.3
+- kovac-zainab: Feed's a touch quick. Just a touch. Sorry. There. Lovely.
+== event.veyliVessel.help.kovac-zainab.step.4
+- kovac-zainab: Hold it there. Don't breathe. You can breathe. Just not on it.
+== event.veyliVessel.help.kovac-zainab.step.5
+- kovac-zainab: Nearly. A hair heavy on blade seven. Sorry. Seven. There. Balanced.
+== event.veyliVessel.help.pell.step.1
+- pell: Right, so. It's a fan that does its job underwater. I've met worse.
+== event.veyliVessel.help.pell.step.2
+- pell: That bar. It's the one I'd pick, and I'm never wrong about bars.
+== event.veyliVessel.help.pell.step.3
+- pell: Lathe always pulls a bit left on this one. Lean on it. There you go.
+== event.veyliVessel.help.pell.step.4
+- pell: Checked. True to a hair. A thin hair. Don't tell Calder I said a hair.
+== event.veyliVessel.help.pell.step.5
+- pell: Wobbles a bit, see? Shave the heavy side. Little bit. Oi oi, there she spins.
+== event.veyliVessel.help.bramwell-basil.step.1
+- bramwell-basil: What's it for? Is it hot? Does it spin? It spins. Brilliant.
+== event.veyliVessel.help.bramwell-basil.step.2
+- bramwell-basil: Why that one? Because it rings? Does metal ring? It rings. Brilliant.
+== event.veyliVessel.help.bramwell-basil.step.3
+- bramwell-basil: How do you know it's slow enough? Oh. You listen. Brilliant.
+== event.veyliVessel.help.bramwell-basil.step.4
+- bramwell-basil: I'm holding it. Look. Holding. Told you I was good at this.
+== event.veyliVessel.help.bramwell-basil.step.5
+- bramwell-basil: How can you tell it's balanced? It's not wobbling. Oh. Brilliant.
+== event.veyliVessel.help.torres-zeke.step.1
+- torres-zeke: Look at that curve. It wants to spin. You can see it wanting to.
+== event.veyliVessel.help.torres-zeke.step.2
+- torres-zeke: That's the bar. Good grain. It'll turn sweet as anything.
+== event.veyliVessel.help.torres-zeke.step.3
+- torres-zeke: Hear that? That's a happy lathe. Don't push her and she'll do anything.
+== event.veyliVessel.help.torres-zeke.step.4
+- torres-zeke: Checked. It's true. Coil three would be jealous.
+// a short exchange between the two you picked, once, while the lathe runs (by pair: help.pair.<a>.<b>, ids in alphabetical order)
+== event.veyliVessel.help.torres-zeke.step.5
+- torres-zeke: Spin it. Watch the tips. Steady as coil one on a good day. Lovely.
+== event.veyliVessel.help.pair.kovac-zainab.pell
+- pell: Counted them again, Zainab?
+- kovac-zainab: Three times. I said twice. I lied. Sorry.
+== event.veyliVessel.help.pair.bramwell-basil.kovac-zainab
+- bramwell-basil: How do you count so fast?
+- kovac-zainab: Slowly. Every time. That's the trick.
+== event.veyliVessel.help.pair.kovac-zainab.torres-zeke
+- torres-zeke: Zainab, it's perfect.
+- kovac-zainab: It's nearly perfect. Your scarf is nearly perfect.
+== event.veyliVessel.help.pair.bramwell-basil.pell
+- bramwell-basil: Do you always hum at the lathe?
+- pell: Only when it's going well. Hum with me.
+== event.veyliVessel.help.pair.pell.torres-zeke
+- pell: You're talking to it, Zeke.
+- torres-zeke: It's talking back. Listen. That's a nice noise.
+== event.veyliVessel.help.pair.bramwell-basil.torres-zeke
+- bramwell-basil: Zeke, is this how you trained {me}?
+- torres-zeke: Exactly like this. Lots of questions. Lovely.
+// you're away or slow: the helpers carry on (one line from either), and it's done by about 15:00 anyway
+== event.veyliVessel.help.carryOn
+- taavek: We go on. Slow. When you come, you see. Good.
+== event.veyliVessel.help.doneWithout
+- taavek: Done. Your helpers, very good. Next time, you also. Yes?
+
+// ---- Monday 12:00, lunch (as usual), with Taavek at the Works tables
+== event.veyliVessel.talk.lunch
+- halloran-emeka: Taavek, here's one. Why don't pumps keep secrets? They always leak!
+- taavek: Ha! Secrets! Very good. Secrets.
+- halloran-emeka: That's... not the funny bit. But I'll take it. Lovely.
+- pell: These sweets taste like a sneeze. A nice sneeze. Can I have another?
+
+// ---- Monday 13:30, the test fit: vesselTestFit.meet; your helpers' reactions as it spins
+== event.veyliVessel.ring.testfit
+- The test fit
+== event.veyliVessel.goal.testfit
+- The test fit, in the machine shop
+== event.veyliVessel.tracked.testfit
+- Taavek's part: the test fit, 13:30
+== event.veyliVessel.testfit.kovac-zainab
+- Oh. It's true. It's really true. Um. Sorry. I'm just pleased.
+== event.veyliVessel.testfit.pell
+- Look at it go! Get it on the board. Get it framed.
+== event.veyliVessel.testfit.bramwell-basil
+- Did we do that? We did that! Can I write home about it? I'm writing home about it.
+== event.veyliVessel.testfit.torres-zeke
+- Listen to it. Not a wobble. That's a happy part, that is.
+// the new part on the bench (VB2's prop)
+== event.veyliVessel.tap.newpart
+- The new round one: twelve blades, Wren metal, true. A tiny Veyli mark on the hub.
+
+// ---- Monday 15:00, Taavek goes home: vesselHome.meet; the notice at 14:45, the ring on Calder
+== event.veyliVessel.notice.home
+- Taavek goes home at 15:00. See them off at the Tern's ramp.
+== event.veyliVessel.ring.home
+- See Taavek off
+== event.veyliVessel.goal.home
+- See Taavek off at the Tern's ramp
+== event.veyliVessel.tracked.home
+- See Taavek off, 15:00, the shuttle bay
+== event.veyliVessel.sched.home
+- Taavek goes home, 15:00, the shuttle bay
+
+// ---- Monday 17:30-18:00, the engine lights at the bow glass: Saruth hosts (tap to join); 17:40 the glow and three
+// slow flashes
+== event.veyliVessel.notice.lights
+- At 17:40 the Veyli ship lights its engine. The crew are gathering at the bow glass.
+== event.veyliVessel.gather.lights.name
+- The engine lights, at the bow glass
+== event.veyliVessel.gather.lights.ask
+- At twenty to six, the little ship lights its engine. Come to the glass.
+== event.veyliVessel.gather.lights.here
+- Stand with us. Watch the stern of the little ship, low on the left.
+== event.veyliVessel.gather.lights.thanks
+- Saruth makes room for you at the glass. Out in the dark, the little Veyli ship waits, its lights low.
+== event.veyliVessel.ring.lights
+- Stand at the glass
+== event.veyliVessel.goal.lights
+- The engine lights, at the bow glass
+== event.veyliVessel.sched.lights
+- The engine lights, 17:30, the bow lounge
+// the lounge's talk, in order; the flashes at 17:40 come between the fourth and fifth lines
+== event.veyliVessel.talk.lights
+- saruth: Watch the stern of the little ship. Low, on the left. It will not be long.
+- tomas: Is that it? No. That's a star. Sorry. Is that it?
+- calder: The part's in. Taavek says it spins. We'll see.
+- sato: Their engine's waking. Look, the hull's catching the glow.
+- saruth: Three, slowly. They say: company kept.
+- torres-zeke: That's the round one out there, turning. Ours. Well, theirs. Ours.
+- halloran-emeka: Dinner, everyone! Lovely. Lovely evening.
+// the line to you as the lounge cheers and looks at you (Saruth, or Calder when Saruth is busy)
+== event.veyliVessel.lights.you
+- saruth: That light is your part, turning. They will remember the one who met them.
+== event.veyliVessel.lights.you.calder
+- calder: Good part, {me}. Don't let it go to your head.
+
+// ---- Tuesday 09:00, the turn back; 09:15, the Captain's address (the banner, kept in Mail), the thanks read by Saruth
+== event.veyliVessel.notice.turnBack
+- The Veyli ship is under way. The Wren is turning back onto her course.
+== event.veyliVessel.address.tue
+- marrow: This is the Captain. Our neighbours are under way, and so are we.
+- marrow: They sent a message for the whole ship. The Envoy will read it. Envoy?
+- saruth: They say: the Wren kept company well. Their engine is warm.
+- saruth: They will remember the ship, and the hands. So will the Speaker, when I write.
+- marrow: Thank you, Works, and the chain. And {me}, who met their engineer.
+- marrow: Back on our course. Back to it. Marrow out.
+// from the Captain
+== event.veyliVessel.mail.address.tue
+- Company kept | The Veyli ship is under way. The Envoy read their message to us: "The Wren kept company well. Our engine is warm. We will remember the ship, and the hands." Thank you, Works, for the part; thank you, everyone on the chain; and thank you, {me}, who met their engineer at the foot of the ramp.
+
+// ---- Tuesday 09:30, your commendation (from the Captain; question C1: two of its jobs, or one job and a meeting)
+== event.veyliVessel.mail.commendation
+- Commendation: The Veyli ship | For your work while we kept the Veyli ship company, noted on your record with thanks. You helped their engineer, Taavek, and their part went home with them. Chief Calder says it ran true first time. Well done.
+// Tuesday 12:00, Taavek's letter (from Taavek; a few careful words, about the sketch you were given at the ramp)
+== event.veyliVessel.mail.letter
+- From Taavek | {me}. Good day. The round one goes round. Our ship is warm. I write this with help, so the words are good, but they are mine. The sketch I give you, put it on a shelf. On my shelf, your ship. Coffee next time. Go well. Taavek.
+== event.veyliVessel.ring.shelf
+- Put the sketch on your shelf
+== event.veyliVessel.tracked.shelf
+- Put Taavek's sketch on your shelf
+// the sketch, on your shelf (VB2's prop)
+== event.veyliVessel.tap.sketch.shelf
+- Taavek's sketch: you at the ramp, the round one in hand. "For you. The one who meets."
+// Taavek's sketch of the Works bay, pinned by the tool wall for good (VB2's prop)
+== event.veyliVessel.tap.sketch.wall
+- Taavek's sketch of the Works bay, pinned by the tool wall. Calder is in it, hovering.
+
+// ---- Tuesday-Wednesday, the afterglow: the crew retell it (in passing, at meals)
+== event.veyliVessel.news.told.1
+- Did you see it light up? Three flashes. I had a lump in my throat.
+== event.veyliVessel.news.told.2
+- Taavek had nine coffees on Sunday. Brennan counted.
+== event.veyliVessel.news.told.3
+- Thirty of us in that chain. My arms still know about it.
+== event.veyliVessel.news.told.4
+- Calder hovered. I saw her. She says she didn't.
+== event.veyliVessel.news.told.5
+- Taavek drew the whole Works bay. It's by the tool wall now.
+== event.veyliVessel.news.told.6
+- I've still got two Veyli sweets. Saving them. For what, I don't know.
+== event.veyliVessel.news.told.7
+- Company kept. I keep saying it. It's a good thing to be able to say.
+== event.veyliVessel.news.told.8
+- The part ran true first time. Works will be unbearable for a week.
+
+// ---- your Record's line on the device
+== event.veyliVessel.record.done
+- Kept a Veyli ship company, Days 27-30; made its part with Taavek.
+== event.veyliVessel.record.met
+- Met Taavek at the foot of the Tern's ramp.
+
+// ---- VB1's stand-ins (the writers closed, lead 39/40: written by the builder in SW4's voice; a writer may polish)
+// Saturday 10:00 and 11:30, if you're not in the Works bay: Calder comes to find you (the sheet)
+== event.veyliVessel.talk.sheetFind
+- calder: There you are. Day off, both of us. A minute?
+- calder: There's a sheet in the Works bay with a gap near the top. Your name goes in it.
+// Sunday 12:30, you weren't at the bench: Taavek comes to find you with the round one (the scene where they stop)
+== event.veyliVessel.talk.roundOneFind
+- taavek: There! The one who meets. I bring the round one to you. Look.
+- taavek: Broken. Very. Here, I show you.
+== event.veyliVessel.ring.roundFind
+- Taavek is bringing you the round one
+// Sunday 13:00, the round one missed even so (a notice; its gist comes by Mail)
+== event.veyliVessel.notice.roundOne.missed
+- Taavek showed Calder and Zeke the round one: it'll be made tomorrow, in the machine shop.
+// Monday 15:00, you're not at the ramp: Calder comes to find you; the Tern waits to 15:30
+== event.veyliVessel.talk.homeFind
+- calder: There you are. Taavek won't go without saying goodbye.
+- calder: The Tern's waiting. So's Isak. Day off, and still flying. Come on.
+// Monday 15:30, the goodbye missed even so
+== event.veyliVessel.notice.home.missed
+- Taavek went home on the Tern. They left you a sketch with Calder: it's on your shelf.
+// the Record when Zeke met Taavek and you met them at the bench
+== event.veyliVessel.record.met.bench
+- Met Taavek at the Works bay bench.
+// Sunday 09:30, the pilot as the Tern comes back in (a notice from Lindqvist)
+== event.veyliVessel.tern.in
+- Down gently. One guest, one crate, one broken thing. Ramp's opening.
+// you sign the parts chain sheet
+== event.veyliVessel.signed
+- You sign the sheet: Sunday, 13:00, Main storage to the Tern. Your name near the top.
+// Monday, making step 2: the stock card (stock.1 is the right one; the game shuffles them)
+== event.veyliVessel.stock.title
+- Choose the stock
+== event.veyliVessel.stock.text
+- Taavek taps each bar and listens.
+== event.veyliVessel.stock.1
+- The bronze bar, the one that sings
+== event.veyliVessel.stock.2
+- The soft alloy, the shiny one
+== event.veyliVessel.stock.3
+- The steel offcut from the bin
+// Sunday 09:20-09:50, the crowd watching Taavek come aboard (a turn-up gathering)
+== event.veyliVessel.gather.arrival.name
+- Taavek comes aboard
+== event.veyliVessel.gather.arrival.ask
+- Their engineer comes down the Tern's ramp at half nine. Come and see.
+== event.veyliVessel.gather.arrival.here
+- There. The ramp's opening.
+== event.veyliVessel.gather.arrival.thanks
+- You stand with the crowd in the shuttle bay as the Tern's ramp comes down.
+// Monday, a tap on the lathe while it turns the part (step 3's ten minutes)
+== event.veyliVessel.wait
+- The lathe's still turning. Taavek holds up ten fingers, then fewer.

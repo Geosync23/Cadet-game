@@ -17,7 +17,7 @@ WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 
 TONES = ('light', 'funny', 'warm', 'serious')
 TEXT_KINDS = ('mail', 'ask', 'here', 'thanks', 'chatter')
 KEY_ORDER = ('id', 'k', 'name', 'when', 'at', 'min', 'prio', 'jitter', 'early', 'where', 'hold', 'who', 'anim', 'host',
-             'from', 'cake', 'decor', 'ties', 'invite', 'trace', 'meal', 'flag', 'wake', 'afterShift', 'spare', 'venue', 'text')
+             'from', 'cake', 'decor', 'ties', 'invite', 'trace', 'meal', 'flag', 'wake', 'afterShift', 'spare', 'venue', 'unflag', 'stay', 'quiet', 'toBed', 'text')
 
 
 class TradError(Exception):
@@ -63,7 +63,7 @@ def parse_when(v, where):
     if low[:1] == ['weekly'] and len(t) >= 2:
         days = [_wd(x, where) for x in t[1].split(',') if x]   # weekly wednesday,thursday: two evenings a week
         w, i = {'weekday': days[0] if len(days) == 1 else days}, 2
-    elif low[:1] == ['every'] and len(t) >= 4 and low[2] == 'weeks' and t[1] in ('2', '4'):
+    elif low[:1] == ['every'] and len(t) >= 4 and low[2] == 'weeks' and t[1] in ('2', '3', '4', '6', '8'):   # 8: 0.92.6 (FX17); 3 and 6: 0.93.2 (FX24, the traditions variety)
         w, i = {'every': t[1] + 'weeks', 'weekday': _wd(t[3], where)}, 4
         if low[4:5] == ['week']:
             if len(t) < 6:
@@ -88,6 +88,10 @@ def parse_when(v, where):
                 w['nth'], i = _int(t[2], where, 1, 52, 'which one after arrival'), 3
     elif low[:1] == ['birthday']:
         w, i = {'birthday': True}, 1
+    elif low[:1] == ['rota'] and len(t) >= 2:              # 0.83 (RA): a rota the game keeps (section 18's TRAD_ROTA, e.g. the Wren talks)
+        if not re.fullmatch(r'[a-z0-9-]+', low[1]):
+            raise TradError(f'{where}: a rota is named in lower-case letters, digits and dashes')
+        w, i = {'rota': low[1]}, 2
     elif low[:1] == ['rotation'] and len(t) >= 2:          # crew rotation days: rotation -1 (the leavers), rotation friday (the arrivals)
         if re.fullmatch(r'[+-]\d+', t[1]):
             n = int(t[1])
@@ -115,7 +119,7 @@ def parse_when(v, where):
 
 
 def parse_where(v, where):
-    m = re.fullmatch(r'(\d)\s+pool\s+(@?[\w-]+)', v.strip())   # @<tag>: the deck architect's places tagged event: '<tag>'
+    m = re.fullmatch(r'(\d)\s+pool\s+(@?[\w:-]+)', v.strip())   # 0.83: rec deck pools like rec:lane   # @<tag>: the deck architect's places tagged event: '<tag>'
     if m:
         return {'deck': int(m.group(1)), 'pool': m.group(2)}
     m = re.fullmatch(r'(\d)\s+room\s+([^:]+):\s*(.+)', v.strip())
@@ -203,10 +207,19 @@ def parse_field(tr, key, v, where):
         tr['who'] = parse_rules(v, where, _pct)
     elif key == 'anim':
         tr['anim'] = v.lower() if ' ' not in v else parse_rules(v, where, lambda s, w: None if s.lower() == 'none' else s.lower())
-    elif key == 'flag':
+    elif key in ('flag', 'unless-flag'):
         if not re.fullmatch(r'[a-zA-Z0-9_.:-]+', v):
-            raise TradError(f'{where}: flag is one flag name, e.g. bridge.invited')
-        tr['flag'] = v
+            raise TradError(f'{where}: {key} is one flag name, e.g. bridge.invited')
+        tr['flag' if key == 'flag' else 'unflag'] = v
+    elif key == 'stay':                                    # 0.83 (RA): each goer drifts in and stays this long (Winner Stays On)
+        m = re.fullmatch(r'(\d+)\s*-\s*(\d+)', v)
+        if not m or not 5 <= int(m.group(1)) <= int(m.group(2)):
+            raise TradError(f'{where}: stay is ship minutes from-to, e.g. 40-120')
+        tr['stay'] = [int(m.group(1)), int(m.group(2))]
+    elif key == 'quiet':                                   # 0.83 (RA): no Mail on the career's big days (the weekly sport ones)
+        if v.lower() != 'career':
+            raise TradError(f'{where}: quiet is "career"')
+        tr['quiet'] = 'career'
     elif key in ('host', 'from', 'decor', 'trace', 'venue'):
         tr[key] = v
     elif key == 'meal':
@@ -217,6 +230,10 @@ def parse_field(tr, key, v, where):
         tr['afterShift'] = v.lower() in ('yes', 'true')
     elif key == 'cake':
         tr['cake'] = v.lower() in ('yes', 'true')
+    elif key == 'to-bed':                                  # 0.92.5 (FX12): someone whose bedtime falls in it still comes, and goes 20 minutes before bed
+        if v.lower() not in ('yes', 'true'):
+            raise TradError(f'{where}: to-bed is "yes"')
+        tr['toBed'] = True
     elif key == 'ties':
         parse_ties(v, where, tr.setdefault('ties', {}))
     elif key == 'invite':
@@ -233,8 +250,8 @@ def finish(tr, tid, where):
     for need in ('k', 'name', 'when', 'at', 'where', 'who'):
         if need not in tr:
             raise TradError(f'{where}: tradition {tid} has no {need}' + (' (ask the traditions engineer for one)' if need == 'k' else ''))
-    if not 434 <= tr['k'] <= 499:
-        raise TradError(f'{where}: k {tr["k"]} is outside 434-499')
+    if not (434 <= tr['k'] <= 499 or 710 <= tr['k'] <= 719 or 1300 <= tr['k'] <= 1349):   # 710-719: 0.92.6 (FX17; k and k + 100 unused by any other hash); 1300-1349: 0.93.2 (FX24, the same)
+        raise TradError(f'{where}: k {tr["k"]} is outside 434-499, 710-719 and 1300-1349')
     if any(h >= len(tr['where']) for h in tr.get('hold', [])):
         raise TradError(f'{where}: hold names a where line that is not there')
     bad = [x for x in tr.get('text', {}) if x not in TEXT_KINDS]

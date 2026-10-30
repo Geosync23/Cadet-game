@@ -1,0 +1,17 @@
+@crew rossi-femi
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- You stayed! I learnt the Veyli for it. The Envoy says I said "the soup stayed". Close.   #funny
+? endgame
+- Race you to the board in the morning. Every morning. Forever. Too much? Tuesdays, then.   #funny
+- Ordinary evenings are the best telescope evenings. Nothing to rush. Come and look.
+- Told home on my Tuesday call. They asked if you're the one who beats me to the board.   #funny
+- First star of the evening's just come up. I'm counting it for you. I'm ahead.   #funny
+
+== bye
+? endgame
+- Bye! Tomorrow's word of the day is "again". I think. I'll check.   #funny

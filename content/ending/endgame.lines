@@ -1,0 +1,183 @@
+@bank all
+// SW5, the endgame pool (plans/ending-spec.html section 9): shared lines said only after you choose to stay. Every
+// line is gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22). Neutral in voice (the
+// tokens carry the person); specific by tier and by tradition. Cards 90 characters, bubbles 60. "endgame:early"
+// marks the lines that only make sense in the first two weeks after you stay (RV21).
+
+// ---- by tier: how anyone talks to you once you've stayed ----
+
+== greet
+? endgame:early tier=acquaintance
+- {hi}. You're the one who stayed, aren't you? Good choice. The pudding's better here.   #funny
+? endgame:early tier=acquaintance
+- {hi}. Still with us, I hear. Glad of it.
+? endgame:early tier=colleague
+- {hi}, {nick}. Back to ordinary, then? It suits you.
+? endgame:early tier=colleague
+- {hi}, {nick}. Still here. Good. I'd only just learnt where you sit.   #funny
+? endgame tier>=friend
+- {hi}, {nick}. Every time I see you, I remember you stayed. Pleased all over again.   #warm
+? endgame:early tier>=friend
+- {nick}! Come here. Not for anything. Just checking you're real.   #funny
+? endgame:early tier>=friend time:morning
+- Morning, {nick}. First breakfast of the rest of it. Sit with us.   #warm
+? endgame tier>=close
+- {hi}, {nick}. Funny. I don't count the days with you any more. You're just here.   #warm
+
+== chat
+? endgame:early tier=acquaintance
+- Someone on my deck bet you'd go. I'm having that biscuit off them tonight.   #funny
+? endgame:early tier=acquaintance
+- Headquarters, eh? Lot of corridors there. We've only got the one good one.   #funny
+? endgame:early tier=acquaintance
+- So you're staying. You'll want to know the good chairs, then. Third from the window.
+? endgame:early tier=acquaintance
+- I heard the Captain's address. The bit about you. Nice, that was.
+? endgame:early tier=acquaintance
+- If you're staying, you're stuck with the grab shelf. It's mostly custard.   #funny
+? endgame:early tier=colleague
+- I'll be honest, I'd started missing you a bit early. Wasted effort. Glad.   #funny
+? endgame tier=colleague
+- No more career steps, is it? Good. Now you can be bad at a hobby, like the rest of us.   #funny
+- You'll be the one the new hands ask now. Brace yourself. It's lovely, mostly.
+? endgame:early tier=colleague
+- I'd written you a goodbye card. I've crossed out "goodbye" and put "hello again".   #funny
+? endgame tier=colleague
+- What will you do with your evenings, now there's no exam to read for?
+- Ordinary days, from here on. You'll find they're not that ordinary.
+? endgame:early tier=colleague
+- Somebody said you turned down headquarters for the Wren's porridge. I believe it.   #funny
+? endgame:early tier>=friend
+- I'd have written to you. Every week. Badly. I'm glad I don't have to.   #warm
+? endgame:early tier>=friend
+- When the Captain said it at the line, I clapped too early. Twice. Worth it.   #funny
+? endgame:early tier>=friend
+- Saturday, I couldn't eat. Sunday, I ate two dinners. That's how I knew how I felt.   #funny
+? endgame tier>=friend
+- You could have gone anywhere. You picked us. I keep thinking about that.   #warm
+- We've time now. I'll show you my favourite corner of the ship. It's boring. I love it.   #warm
+- I don't know what you'd have done at headquarters. I know what you do here. That's plenty.   #warm
+? endgame:early tier>=friend
+- Tell me honestly. Did you nearly go? Don't answer. I don't want to know.   #funny
+? endgame:early tier>=friend
+- The ship felt different the week you were deciding. Quieter. Like everyone was listening.
+? endgame:early tier>=friend
+- My people at home asked about you. "The friend who might go." Now it's just "the friend".   #warm
+? endgame tier>=friend
+- Now you're staying, I'm putting you on my birthday list. You'll get a terrible present.   #funny
+? endgame:early tier>=friend mood:low
+- Bit of a flat day. Then I remembered you're not off on Monday. Helped, a bit.   #warm
+? endgame tier>=friend time:evening
+- Let's do nothing tonight. Properly nothing. Sit at a window. We've got the evenings now.   #warm
+? endgame:early tier>=close
+- I'd made my peace with you going. Then you didn't. Best thing I've had to unmake.   #warm
+? endgame tier>=close
+- We've a lot of ordinary days ahead. I'm glad they're with you in them.   #warm
+? endgame:early tier>=close
+- I'm not good at this. So: thank you for staying. There. Done. Never again.   #warm
+? endgame tier>=close
+- You're part of the Wren now, the bit people mean when they say "the Wren". You know that?   #warm
+- You'd have been good out there. You're better here. Don't tell anyone I said so.   #warm
+? endgame tier>=close time:evening
+- Same time tomorrow? Same seat? Good. I like that we can say that.   #warm
+
+== bye
+? endgame tier>=colleague
+- {bye}. See you tomorrow. And the day after, I'm told.
+? endgame:early tier>=friend
+- {bye}, {nick}. No goodbye-goodbyes now. Just the ordinary kind.   #warm
+? endgame tier>=friend
+- {bye}. I'll save you a seat. I'll save you one every day, now.   #warm
+
+== invite
+? endgame tier>=friend
+- Now there's no rush, come to the garden with me on a rest day? We'll do nothing there.
+- Tea corner, after shift? No reason. That's the reason.   #warm
+
+== note
+? endgame:early tier>=friend
+- Glad you stayed. That's the whole note.   #warm
+? endgame:early tier>=friend
+- Saved you a biscuit. Not a goodbye one. An ordinary one. Better.   #warm
+? endgame tier>=close
+- For the one who stayed. You'll know who you are. You always did.   #warm
+
+== visit
+? endgame:early tier>=friend
+- Only passing. Wanted to see your things weren't packed. They aren't. Night.   #warm
+
+== feel
+? endgame:early tier>=colleague mood:high
+- Good day. Nothing broke, lunch was hot, and nobody's leaving on Monday.   #warm
+? endgame tier>=friend mood:ok
+- Fine. Ordinary. I've decided ordinary is a good word now. You did that.   #funny
+? endgame tier>=friend mood:low
+- Long day. But you're here at the end of it. That counts for a lot.   #warm
+
+== near
+? endgame:early tier>=friend act:meal
+- Shove up. There's room. There's always room now we're not doing a goodbye.   #funny
+? endgame tier>=friend place:calm
+- I like this. Sitting. Nobody packing anything. Just a Tuesday of a day.   #warm
+? endgame:early tier>=colleague act:work
+- Working next to you again. Same as last month. Better than last week.   #warm
+
+== life
+? endgame tier>=friend
+- I've started a list of things to do with you. Not big things. Rest-day things.   #warm
+- I told home you stayed. They said, "Is that the one you're always on about?" Yes.   #funny
+? endgame:early tier>=friend
+- I'd started saying "back when {me} was here" in my head. Practising. Glad I stopped.   #warm
+? endgame tier>=close
+- You know the oddest bit? I've stopped noticing the ship is a ship. It's just home.   #warm
+- When I'm old, I'll tell people about the week you nearly went. Then I'll say you didn't.   #warm
+
+== rumour
+? endgame:early tier>=colleague
+- Have you heard? Course you have. It's about you. You stayed!   #funny
+? endgame:early tier>=colleague
+- Word is, headquarters took it well. Word's often wrong.   #funny
+
+// ---- at the traditions: remarks you only hear after you've stayed ----
+
+== chat
+? endgame:early trad:quiz
+- Our team kept your seat. We'd have lost anyway. Now we'll lose with you.   #funny
+? endgame:early trad:works-tea
+- Friday tea, and you're still on the rota. Halloran will be unbearable about it.   #funny
+? endgame:early trad:jam
+- Play us something for staying. Anything. Out of tune is fine. We're used to it.   #funny
+? endgame:early trad:film
+- Film night. Same seats. I'd have kept yours empty a week, out of respect.   #funny
+? endgame:early trad:market
+- Swap meet. Somebody's put a "for the one who stayed" box out. It's mostly socks.   #funny
+? endgame trad:observatory-night
+- Look up. Same stars as last week. That's the nice bit about staying put.   #warm
+? endgame:early trad:running
+- Gym club. You've no excuse now, have you? No transfer to pack for.   #funny
+? endgame trad:harvest
+- Harvest morning. You'll see the whole year of these now. Every row of them.
+? endgame:early trad:hull-lights
+- Hull-lights again. First one since you stayed. Looks brighter. That's not science.   #warm
+? endgame trad:sunday-story
+- Sunday story. You'll be the one telling it one week. Start thinking.
+? endgame trad:bread-day
+- Bread day. Knead it like you're staying. Firmly. With your whole back.   #funny
+? endgame trad:tiles-night
+- Tiles night. Somebody's started a count of your games. It's not flattering.   #funny
+? endgame trad:late-piano
+- The Captain's playing something slow tonight. I think it's for you. Don't tell her I said.   #warm
+? endgame:early trad:worst-joke
+- Worst joke night. The joke's about you staying. It's terrible. You'll love it.   #funny
+? endgame trad:scone-morning
+- Scone morning. There's a scone with your name on. In jam. Halloran.   #funny
+? endgame:early trad:knit-and-natter
+- Knit and natter. Everyone's knitting you something now. Brace yourself.   #funny
+? endgame trad:rec-cup
+- Lightdisc Cup. You're on a team now. For good. No one gets out of the Cup.   #funny
+? endgame trad:name-on-the-beam-new
+- New names on the beam. Yours is up there already. It's staying up, too.   #warm
+? endgame trad:off-the-tern
+- A new hand coming off the Tern. You're on this side of the ramp now. For good.   #warm
+? endgame trad:crew-welcome-tea
+- Welcome tea for the new ones. You're the one they'll ask about the lift. Go easy.   #funny

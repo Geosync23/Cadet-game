@@ -1,0 +1,19 @@
+@crew ferreira
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- Every message this week asked about you. I read none of them. I just knew.   #funny
+? endgame
+- I've a Veyli word for "stayed". The Envoy says I say it like a door shutting. I like it.   #funny
+? endgame:early
+- Headquarters replied to your reply. I didn't read it. It was short. Short is good.
+? endgame
+- Ordinary days are the best in comms. Birthdays, recipes, a cat's news. Lovely.
+- Meet the new juniors properly. All of them. You're the one they'll ask, now.
+
+== bye
+? endgame
+- Off you go. Say hello to everyone for me. You will anyway.
