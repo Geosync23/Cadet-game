@@ -74450,6 +74450,7 @@ const SND = (() => {
       ding: (t, w) => bell(t, 1567.98, 0.8, 0.02 * w, { wet: 0.3, pan: 0.55 }),
     };
     const BG_CLATTER = { cutlery: 3, fork: 2, cup: 3, tray: 2, plate: 2, chair: 1, hatch: 1, pan: 1, ding: 0.5 };
+    const MESS_BG = false;   // 0.99.3, the user: "white noise that is way too loud", "the clinks of plates are not working, take them out. Keep the low murmur": the galley's extractor and sizzle and the clatter are parked (off); only the murmur plays
     const BG_LV = 1.5, VOICE_LV = 1.6;   // the page's trims (measured against the Commons hum): full, the background about 7 dB under it, the voices about 1 dB more
     const M = { n: 0, full: 0, room: null, scene: null, clinks: 0 };
     const busyD = (n = M.n) => Math.min(1, n / Math.max(1, M.full));
@@ -74457,7 +74458,7 @@ const SND = (() => {
     const galleyAt = n => n ? [0.02 + 0.05 * busyD(n), 0.003 + 0.011 * busyD(n)] : [0, 0];
     const clatterAt = n => n ? 0.12 + 2.1 * busyD(n) + (n <= 2 ? 0 : 0.1) : 0;
     const voicesAt = n => n > 0 ? Math.min(12, Math.max(1, Math.round(12 * Math.min(1, n / (M.full / 2))))) : 0;   // about one for every two or three people, at least one
-    M.at = n => ({ galley: galleyAt(n), clatter: clatterAt(n), voices: voicesAt(n) });   // for sound_check
+    M.at = n => ({ galley: galleyAt(n), clatter: clatterAt(n), voices: voicesAt(n) }); M.bg = MESS_BG;   // for sound_check
     function voice2(out, o) {   // one wordless voice: phrases of soft syllables, then a pause; o.live(t): whether it's there now
       const osc = ctx.createOscillator(), f1 = ctx.createBiquadFilter(), f2 = ctx.createBiquadFilter(), g = ctx.createGain(), g2 = ctx.createGain(), p = ctx.createStereoPanner();
       osc.type = 'sawtooth'; osc.frequency.value = o.f0; f1.type = f2.type = 'bandpass'; f1.Q.value = 5; f2.Q.value = 7; g.gain.value = 0; g2.gain.value = 0.45; p.pan.value = o.pan;
@@ -74483,6 +74484,7 @@ const SND = (() => {
       const t0 = ctx.currentTime, out = ctx.createGain(); out.gain.setValueAtTime(0, t0); out.gain.linearRampToValueAtTime(1, t0 + 1.2); out.connect(BUS.ui);
       const bg = ctx.createGain(); bg.gain.value = BG_LV; bg.connect(out);
       const room = { ...BUS, ui: bg }, loops = [], nodes = [];
+      if (MESS_BG) {   // parked in 0.99.3 (MESS_BG above)
       // the galley behind the counter: the extractor and a sizzle, louder as more are being fed; nothing when empty
       const ex = ctx.createBufferSource(); ex.buffer = BROWN; ex.loop = true; const exf = ctx.createBiquadFilter(); exf.type = 'lowpass'; exf.frequency.value = 240; const exg = ctx.createGain(); exg.gain.value = 0;
       const sz = ctx.createBufferSource(); sz.buffer = WHITE; sz.loop = true; const szf = ctx.createBiquadFilter(); szf.type = 'bandpass'; szf.frequency.value = 5200; szf.Q.value = 0.7; const szg = ctx.createGain(); szg.gain.value = 0;
@@ -74503,6 +74505,7 @@ const SND = (() => {
           M.clinks++; nextC += (-Math.log(1 - Math.random())) / rate;
         }
       } });
+      }
       // the warm low hum of talk on top (voicesAt: none when empty)
       const vb = ctx.createGain(); vb.gain.value = VOICE_LV; vb.connect(out);
       const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 650; lp.connect(vb);
