@@ -75489,7 +75489,7 @@ const SND = (() => {
     if (on) {
       const last = L[L.length - 1];
       if (!last || now >= last.endsAt() - 4) { const T = S.music.play('title' + SND_TITLE, last ? { fadeIn: 4 } : { fadeIn: 2.5, from: TITLE_FROM }); L.push(T); if (S.log) S.log.push({ name: 'title' + SND_TITLE, loop: true }); }
-      L.forEach(T => T.tick(now + 1));
+      L.forEach(T => T.tick(now + 3));   // 3 s ahead, so a frame stall (a phone loading behind the title) leaves no gap (0.99.3, backlog SD4-1)
     } else { L.forEach(T => T.fadeOut(now, 2)); L.length = 0; }
     if (S.titleOn !== TITLE_SND.hush && S.bus.hum) { TITLE_SND.hush = S.titleOn; S.bus.hum.gain.setTargetAtTime(S.titleOn ? 0 : 1, now, S.titleOn ? 0.3 : 1); }
   }
