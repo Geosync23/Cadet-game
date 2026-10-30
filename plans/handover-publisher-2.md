@@ -5,8 +5,8 @@ Session session_01GKuymkDxLVyt4rjtcJxdab, branch `claude/publish-26` (this note 
 ## Pages
 | Page | Link | Version / build | Capabilities | Rule |
 |---|---|---|---|---|
-| Playtest (current, new account) | https://claude.ai/artifact/7hQ14AcwZHCi5EvL1AKiMU | v8 = 0.99.2 (staging-0992 d180a704 = 60d477e8 + docs, game 27d605e7…3920), version id 1793321288-c15c (v7 = 0.99.1, v6 = 0.99.0, v5 = 0.98.0, v4 = 0.97.0, v3 = 0.96.0, v2 = 0.95.0, v1 = 0.94.0) | downloads | updated each release |
-| Dev (current, new account) | https://claude.ai/artifact/KEyaHvon6ZaVHHFRdAe18m | v8 = 0.99.2, version id 1793321290-5cf0 (v7 = 0.99.1, v6 = 0.99.0, v5 = 0.98.0, v4 = 0.97.0, v3 = 0.96.0, v2 = 0.95.0, v1 = 0.94.0) | downloads | updated each release |
+| Playtest (current, new account) | https://claude.ai/artifact/7hQ14AcwZHCi5EvL1AKiMU | v9 = 0.99.3 (staging-0993 9c0103e3 = df74ce0f + docs, game 04c821fe…c2a9), version id 1793346223-ba8c (v8 = 0.99.2, v7 = 0.99.1, v6 = 0.99.0, v5 = 0.98.0, v4 = 0.97.0, v3 = 0.96.0, v2 = 0.95.0, v1 = 0.94.0) | downloads | updated each release |
+| Dev (current, new account) | https://claude.ai/artifact/KEyaHvon6ZaVHHFRdAe18m | v9 = 0.99.3, version id 1793346225-d8bd (v8 = 0.99.2, v7 = 0.99.1, v6 = 0.99.0, v5 = 0.98.0, v4 = 0.97.0, v3 = 0.96.0, v2 = 0.95.0, v1 = 0.94.0) | downloads | updated each release |
 | Playtest (old account) | https://claude.ai/artifact/3HqM5XiXaHXzgrpq7JbesJ | v7 = 0.93.3 | downloads | old account: can't be updated from here |
 | Dev (old account) | https://claude.ai/artifact/9ZWAgqiZCvkJvVjjhjVkEr | v7 = 0.93.3 | downloads | old account |
 | Dev: promotion preview (old account) | https://claude.ai/artifact/AvpWrMumcGiw4UYUpXd2X5 | v1 = p5s5-promo 5703dfb6 | downloads | old account |
@@ -52,3 +52,6 @@ The user pre-approved it (via lead 46). sha256 checked, published over the same 
 
 ## 0.99.1 on its own link (2026-10-30)
 The user asked for a link to 0.99.1 (via lead 46): https://claude.ai/artifact/YaJsaCgvpb3QXvcgestTSt v1 = claude/staging-0991 bc4579aa (game 8e4ac545…2d9d), {downloads}, title "Starship Cadet 0.99.1", Playtest style (no Dev). Scratchpad source v0991/starship-cadet-0.99.1.html. 390x844 load + title tap + New game: PASS, 0 console errors.
+
+## 0.99.3 release (2026-10-30)
+The user pre-approved it (via lead 46). sha256 checked, published over the same two links as v9, {downloads}. Phone check 390x844 on both: PASS, 0 console errors. New music.js (scratchpad) wraps AudioContext and node start() in an init script and opens test-play.html#title.sound: no audio before the tap, title music on after it, off at New game, then sign aboard to the HUD. 6daN untouched.
