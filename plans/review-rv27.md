@@ -77,3 +77,7 @@
   next to sound_check) come from frame stalls with two browsers busy: titleTick schedules only 1 s ahead (T.tick(now + 1)), from the
   frame. Alone, no silence. Real but old (0.99.0): a phone frame stall over 1 s (loading behind the title) would gap the music. Backlog
   suggestion for the sound seat: schedule 2-3 s ahead or from a timer.
+- 27caa4c3 (game 265b5953...6cdb, on ef799975; backlog SD4-1): titleTick's T.tick(now + 1) -> now + 3. fadeOut on hand-over:
+  out gain to 0 over 2 s, disconnect 8 s later, so notes scheduled ahead are silent (no leak into the game). SD4's title_stall.py
+  (2.5 s main-thread stall, audio-thread level), each alone, twice: ef799975 gap -120 dB once of two (timing); 27caa4c3 -42 / -40 dB,
+  no gap. sound_check title OK. **PASS.**
