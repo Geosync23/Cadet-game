@@ -27,3 +27,12 @@ Candidate claude/staging-0992 60d477e8, game sha256 27d605e72510827101552b3bd3e2
 | clothes | exit 0 75s, ALL OK |
 
 All 21 OK, no FAIL. Also taken from R2 (agreed with R2, copied lead 46): day_check 0, 1, 5 and arrows endgo; results below when done.
+
+## Taken from R2 (same commit, sha256 matched)
+
+| Check | Result |
+|---|---|
+| day5 | exit 0 381s, DAY CHECK OK |
+| day0 | exit 0 385s, DAY CHECK OK |
+| day1 | exit 0 404s, DAY CHECK OK |
+| arrows_endgo | exit 0 798s, ARROWS CHECK OK |
