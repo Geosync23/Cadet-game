@@ -2105,3 +2105,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~06:14 UTC: 0.99.3: **R4 OK** 7/7 (claude/checks-0990-r4 1fc5db88); offered to take R2's not-started checks (perf first). R2 ETA ~07:45.
 - ~06:27 UTC check-in (overnight): 0.99.3 round 1 h 12 in: R4 OK (now R2's perf), R2 11 OK + rest to ~06:40; R1, R3, R5 running; no FAIL.
 - ~06:56 UTC: 0.99.3: R1 OK 15/15, R4 OK, R5 OK 21/21 (handover-bm21 9ec4da61); R2 15/16 waiting R4's perf (~07:25); R3 DM2 running.
+- ~07:24 UTC check-in (overnight): 0.99.3: R1, R3 (devmode-j2 71d27a4b), R4, R5 OK; R2 waiting R4's perf (~07:25). Then BM21 GO -> PUB2.
