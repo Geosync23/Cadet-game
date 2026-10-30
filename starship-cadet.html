@@ -55767,7 +55767,8 @@ function introArrowTick() {
   INTRO_UI.arrow = id;
 }
 // ---- call home on the first night (onboarding 5, 0.42.62; the user via lead 13): once the Chief's table visit is over
-// (and you've food, if she told you to eat), a card says to call home, with Track it (the head writer's tip.callhome,
+// and you've finished eating your dinner (CH2, the user 2026-10-30: "after you eat"; no dinner eaten, or the Chief
+// missed: once the dinner closes at 20:30; saved 'ate:sat', 'ate:meal'), a card says to call home, with Track it (the head writer's tip.callhome,
 // .button, .goal; section 19's deviceChoose). Tracked, the arrow points at a free booth in the Call-home booths on Deck 3
 // until your call there begins (or 22:00); then the default arrow, your bunk, comes back. (FX5, the user 2026-10-23: it
 // pointed at the room and went the moment you walked in, before you'd found a booth.) Saved in SHIP.intro.done: 'call:tip', 'call:track', 'call:end'.
@@ -55776,7 +55777,11 @@ function introCallTick(now) {
   const I = SHIP.intro, D = I.done; if (D['call:end'] !== undefined) return;
   if (now >= introAbs(0, 22 * 60)) { D['call:end'] = -1; return; }   // past quiet hours (and every later day)
   if (D['call:tip'] === undefined) {
-    if (D['chief:met'] === undefined || INTRO_UI.chiefD || DIALOGUE || INTRO_UI.arrow === 'eat' || D['arrow:eat'] === undefined && typeof D['chief:end'] === 'number') return;
+    const P = SHIP.player, eating = typeof ACT !== 'undefined' && ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase !== 'walk' && ACT.phase !== 'wait', shut = now >= introAbs(0, MEALS.dinner[1]);   // (CH2, the user 2026-10-30: "after you eat") the dinner's closed at 20:30
+    if (eating && D['ate:sat'] === undefined) D['ate:sat'] = now;   // sat down to your dinner: the card waits till it's over (saved, so a reload mid-meal keeps it)
+    if (D['ate:sat'] !== undefined && D['ate:meal'] === undefined && !eating && !P.tray) D['ate:meal'] = now;   // eaten, and up from the table
+    if (eating || P.tray || D['ate:meal'] === undefined && !shut) return;   // not till you've finished eating; no dinner, or the Chief missed: once the dinner's closed
+    if (D['chief:met'] === undefined && !(shut && I.missed.includes('chief')) || INTRO_UI.chiefD || DIALOGUE || INTRO_UI.arrow === 'eat' || D['arrow:eat'] === undefined && typeof D['chief:end'] === 'number') return;
     const text = introText('tip.callhome', 'Call home tonight. The call booths are on Deck 3. Tell them you arrived safely.');
     const shown = typeof deviceChoose === 'function' && deviceChoose({ title: 'Call home', text, choices: [introText('tip.callhome.button', 'Track it')], cancel: 'Not now' }, k => {
       if (k === 0 && SHIP.intro.done['call:end'] === undefined) { SHIP.intro.done['call:track'] = Math.floor(shipNow()); INTRO_UI.arrowAt = 0; } else if (SHIP.intro.done['call:track'] === undefined) SHIP.intro.done['call:end'] = Math.floor(shipNow()); });
