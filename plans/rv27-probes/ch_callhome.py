@@ -13,6 +13,9 @@ TRACK = r'''(() => { if (window.__ch) return; window.__ch = []; let last = '';
 hook = "            r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])\n"; assert hook in src
 src = src.replace(hook, hook + "            g.ev(" + repr(TRACK) + ")\n", 1)
 end = "        simnow = g.ev(\"typeof tapCrew"; assert end in src
-src = src.replace(end, "        print('RV27 CALL [t, act, tray, ate:sat, ate:meal, call:tip, chief:met, chief:end, dialogue, card, step]'); [print('  ', x) for x in g.ev('window.__ch || []')]\n" + end, 1)
+RUN = "        for _ in range(600):\n            g.step(20)\n            if g.ev(\"shipNow() >= introAbs(0, 20 * 60 + 32) || SHIP.intro.done['call:tip'] !== undefined\"): break\n"
+RUN += "        for _ in range(40): g.step(20)\n"
+RUN += "        print('RV27 call:tip at', g.ev(\"SHIP.intro.done['call:tip']\"), 'now', g.ev('clockText()'), 'card', g.ev(\"(d => d && !d.hidden ? d.textContent.slice(0, 60) : null)(document.getElementById('devDlg'))\"))\n"
+src = src.replace(end, RUN + "        print('RV27 CALL [t, act, tray, ate:sat, ate:meal, call:tip, chief:met, chief:end, dialogue, card, step]'); [print('  ', x) for x in g.ev('window.__ch || []')]\n" + end, 1)
 sys.argv = [str(WT / 'intro_check.py'), str(WT / 'starship-cadet.html'), '--dawdle' if '--dawdle' in flags else '--evening']
 os.chdir(WT); exec(compile(src, str(WT / 'intro_check.py'), 'exec'))
