@@ -2111,3 +2111,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~08:28 UTC check-in (overnight): quiet 1 of 3. 0.99.3 live, all seats idle, waiting for the user.
 - ~09:24 UTC check-in (overnight): quiet 2 of 3. Nothing changed.
 - ~10:24 UTC (6:24 AM ET): quiet 3 of 3 -> **lead 46 hourly check-in trig_01NFnDH7yZxK8uaEW1dFWLWU disabled** (re-enable when work resumes). 0.99.3 live; all seats idle; waiting for the user.
+- ~Oct 30 morning: **USER: prep the project for a handover to another account.** Lead wrote plans/handover-account.md (state, links and what changes with a new account: artifacts owned by this account, saves per link, how a new account starts a lead, where every note is, decisions: update main, share/re-publish links, download saves) and plans/handover-lead46.md.
