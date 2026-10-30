@@ -23,4 +23,14 @@ No real FAILs in the share, so no OLD runs needed. Share result: **R4: OK**.
 
 ## perf_check NEW OLD (for R2)
 
-PERF_PENDING
+Run alone after the share (4254 s): `perf_check.py NEW OLD`, from a scratch folder.
+
+- Full run: `PERF CHECK: 1 problem(s) (2 skipped: switch not in this build; 0 waiting: not built yet)`, exit 1.
+- The one PROBLEM: `the Line supper, the mess Sun 18:30 portrait-wide: js 2.11 -> 3.14 ms a frame` (frame time only).
+- Re-measured that scene alone twice (`PERF_SCENES='Line supper'`): both `PERF CHECK OK`, exit 0; portrait-wide
+  NEW/OLD 2.56/2.1 ms (re 1) and 2.35ms/2.83ms ms (re 2). Not repeated, so a one-off spike (backlog 32 pattern): **noise, not counted**.
+- Memory: a week of play 470/41/93 -> 471/41/93; deck round trips 470/41/93 -> 470/41/93 -> 470/41/93 (flat on NEW
+  and OLD; backlog 14's +2 geometries does not show).
+- Draw calls: every scene the same on NEW and OLD.
+
+perf_check result: **OK** (after the re-measure).
