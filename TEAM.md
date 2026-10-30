@@ -2098,3 +2098,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~03:17 UTC: **SD4-1 done** claude/title-song-0993 27caa4c3 (game 265b5953...6cdb): title music 3 s ahead; a 2.5 s freeze gave ~1.2 s silence before, none now; sound_check, cadet identical, check_fast OK. -> RV27, BM21.
 - ~03:24 UTC check-in (overnight): RV27 PASS on mess, Chief, title (ef799975 + SD4-1 27caa4c3). CH2 committed call-home at 03:09, idle waiting on check_fast -> nudged to push. Then BM21 merges, gates, round.
 - ~03:48 UTC: **CH2 call-home done** claude/callhome-0993 ce742cb7 (game 52a5fb02...c45): Track-it card after you finish eating; fallback when dinner closes at 20:30 (no meal / Chief missed); check_fast, cadet identical, intro_check whole/--dawdle/--dinner/--firsts, day 0 OK. -> RV27.
+- ~04:24 UTC check-in (overnight): RV27 reviewing CH2 ce742cb7 (probe pushed, checks running since ~04:02; nudged for ETA). Then BM21 merges + gates + round.
