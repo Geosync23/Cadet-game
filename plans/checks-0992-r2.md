@@ -34,6 +34,7 @@ No FAIL in this share, so nothing was run on OLD apart from the OLD halves of ca
 
 - Whole run: `PERF CHECK: 1 problem(s) (2 skipped: switch not in this build; 0 waiting)`; the only problem:
   `PROBLEM the Line supper, the mess Sun 18:30 portrait-wide: js 2.11 -> 3.14 ms a frame`.
-- Re-measured alone twice (`PERF_SCENES='Line supper'`), portrait-wide NEW/OLD: 2.56/2.1 ms and 2.35/2.83 ms, both `PERF CHECK OK`.
+- Re-measured alone twice (`PERF_SCENES='Line supper'`), portrait-wide NEW/OLD: 2.1/2.56 ms and 2.83/2.35 ms, both `PERF CHECK OK`
+  (corrected 2026-10-30: R4 first sent these the wrong way round; perf_check prints OLD first).
   The spike didn't repeat, so it doesn't count (a one-off spike is noise, backlog 32's kind).
 - Draw calls identical NEW/OLD in every scene. Memory flat: week 470/41/93 -> 471/41/93; round trips 470/41/93 three times.
