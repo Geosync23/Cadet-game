@@ -5,8 +5,8 @@ Session session_01GKuymkDxLVyt4rjtcJxdab, branch `claude/publish-26` (this note 
 ## Pages
 | Page | Link | Version / build | Capabilities | Rule |
 |---|---|---|---|---|
-| Playtest (current, new account) | https://claude.ai/artifact/7hQ14AcwZHCi5EvL1AKiMU | v7 = 0.99.1 (staging-0991 bc4579aa = f77c26d9 + docs, game 8e4ac545…2d9d), version id 1793304548-4dd2 (v6 = 0.99.0, v5 = 0.98.0, v4 = 0.97.0, v3 = 0.96.0, v2 = 0.95.0, v1 = 0.94.0) | downloads | updated each release |
-| Dev (current, new account) | https://claude.ai/artifact/KEyaHvon6ZaVHHFRdAe18m | v7 = 0.99.1, version id 1793304551-2764 (v6 = 0.99.0, v5 = 0.98.0, v4 = 0.97.0, v3 = 0.96.0, v2 = 0.95.0, v1 = 0.94.0) | downloads | updated each release |
+| Playtest (current, new account) | https://claude.ai/artifact/7hQ14AcwZHCi5EvL1AKiMU | v8 = 0.99.2 (staging-0992 d180a704 = 60d477e8 + docs, game 27d605e7…3920), version id 1793321288-c15c (v7 = 0.99.1, v6 = 0.99.0, v5 = 0.98.0, v4 = 0.97.0, v3 = 0.96.0, v2 = 0.95.0, v1 = 0.94.0) | downloads | updated each release |
+| Dev (current, new account) | https://claude.ai/artifact/KEyaHvon6ZaVHHFRdAe18m | v8 = 0.99.2, version id 1793321290-5cf0 (v7 = 0.99.1, v6 = 0.99.0, v5 = 0.98.0, v4 = 0.97.0, v3 = 0.96.0, v2 = 0.95.0, v1 = 0.94.0) | downloads | updated each release |
 | Playtest (old account) | https://claude.ai/artifact/3HqM5XiXaHXzgrpq7JbesJ | v7 = 0.93.3 | downloads | old account: can't be updated from here |
 | Dev (old account) | https://claude.ai/artifact/9ZWAgqiZCvkJvVjjhjVkEr | v7 = 0.93.3 | downloads | old account |
 | Dev: promotion preview (old account) | https://claude.ai/artifact/AvpWrMumcGiw4UYUpXd2X5 | v1 = p5s5-promo 5703dfb6 | downloads | old account |
@@ -46,3 +46,6 @@ The user said "Publish .99" (via lead 46, session_01GKuymiks9CC1WYr2may5nM). sha
 
 ## 0.99.1 release (2026-10-29)
 The user pre-approved it (via lead 46). sha256 checked, published over the same two links as v7, {downloads}. Phone check 390x844 on both: PASS, 0 console errors. The title now opens on "> TAP TO WAKE THE TERMINAL"; titleplay.js taps once (195,600) and screenshots both. 6daN untouched.
+
+## 0.99.2 release (2026-10-30)
+The user pre-approved it (via lead 46). sha256 checked, published over the same two links as v8, {downloads}. Phone check 390x844 on both: PASS, 0 console errors. titleplay.js now also taps NEW GAME and screenshots (newgame.png): the shuttle manifest on a dark screen, no old deck behind it. 6daN untouched.
