@@ -75260,11 +75260,11 @@ const SND = (() => {
     }
     const SHAPED = ['tea', 'lunch', 'porthole', 'watch', 'lullaby', 'latenight', 'deepspace', 'comet'];
     SHAPED.forEach(shaped);
-    ['titleA', 'titleB', 'titleC'].forEach(shaped);   // the title's candidates: a short form, looped by S.title (the same bars round again: 16 for A and B, 13 for C)
-    // titleC (the user's pick): its singing line comes in on bar 2, about 4 s in, 5 s after the wake tap (0.99.2, the user: "Melody should be in at 5 seconds"), over the hum and pulse; the sequence layers in after; a 13-bar loop, about 47 s
+    ['titleA', 'titleB', 'titleC'].forEach(shaped);   // the title's candidates: a short form, looped by S.title (the same 16 bars round again)
+    // titleC (the user's pick) is 0.99.1's song, unchanged (0.99.3, the user: "I really liked the other song"); only its first play under the title skips its first 5.5 s (titleTick)
     TRACKS.titleA.form = () => [sec('Boot', 'A', 2, ['sPad', 'sStars'], 1), sec('Ticking', 'A', 6, ['sPad', 'sSeq', 'sStars'], 1), sec('Turn', 'B', 4, ['sPad', 'sSeq', 'sChime'], 2), sec('Settle', 'A', 4, ['sPad', 'sSeqSlow', 'sStars'], 1)];
     TRACKS.titleB.form = () => [sec('Glow', 'A', 4, ['sPad', 'sSwell'], 1), sec('Lines', 'A', 4, ['sPad', 'sSwell', 'sSeqSlow', 'sChime'], 1), sec('Lift', 'B', 4, ['sPad', 'sStars', 'sSeqSlow'], 2), sec('Fade', 'A', 4, ['sPad', 'sStars'], 1)];
-    TRACKS.titleC.form = () => [sec('Hum', 'A', 1, ['sPad', 'sPulse'], 1), sec('Entry', 'B', 4, ['sPad', 'sPulse', 'sSing'], 2), sec('Log', 'A', 4, ['sPad', 'sPulse', 'sSeq', 'sSing'], 2), sec('Rest', 'A', 4, ['sPad', 'sStars'], 1)];
+    TRACKS.titleC.form = () => [sec('Hum', 'A', 2, ['sPad', 'sPulse'], 1), sec('Log', 'A', 6, ['sPad', 'sPulse', 'sSeq'], 1), sec('Entry', 'B', 4, ['sPad', 'sPulse', 'sSeq', 'sSing'], 2), sec('Rest', 'A', 4, ['sPad', 'sStars'], 1)];
     if (SND_R3_ON) {   // the sound update, turn 1: the event tracks take the reshaped form (phrases, a moving bass), as the comet does
       Object.assign(PARTS, {
         sDrone: c => { if (c.bar % 4 === 0) { SX.swell(c.t, c.root, c.s * c.beats * 4, 0.06, c.out); SX.swell(c.t, c.root + 7, c.s * c.beats * 4, 0.03, c.out); } },   // the home note and its fifth, held (the Veyli)
@@ -75309,6 +75309,16 @@ const SND = (() => {
     const setFor = st => st.onShift ? 'working' : periodAt(((st.min % 1440) + 1440) % 1440);
 
     // ---- one playing track
+    // beforeZero(f): run f with times before 0 taken as 0 (they would throw). Only for a song started part-way in (play's o.from)
+    // on a young context, whose first bars fall before the clock's start: their notes still sounding then carry on from 0
+    function beforeZero(f) {
+      const W = [[AudioParam.prototype, ['setValueAtTime', 'linearRampToValueAtTime', 'exponentialRampToValueAtTime', 'setTargetAtTime', 'setValueCurveAtTime'], 1], [AudioParam.prototype, ['cancelScheduledValues'], 0]], kept = [];
+      for (const n of ['AudioScheduledSourceNode', 'AudioBufferSourceNode', 'OscillatorNode', 'ConstantSourceNode']) if (typeof window[n] === 'function') W.push([window[n].prototype, ['start', 'stop'], 0]);   // (older Safari has no AudioScheduledSourceNode: start and stop on each node)
+      for (const [P, names, at] of W) for (const k of names) if (Object.prototype.hasOwnProperty.call(P, k)) {
+        const f0 = P[k]; kept.push([P, k, f0]); P[k] = function (...a) { if (a[at] < 0) a[at] = 0; return f0.apply(this, a); };
+      }
+      try { f(); } finally { for (const [P, k, f0] of kept.reverse()) P[k] = f0; }
+    }
     function play(key, o = {}) {
       const def = TRACKS[key], bars = layout(def), s = 60 / def.bpm, len = s * def.beats, t0 = ctx.currentTime + 0.1;
       const out = ctx.createGain(), fin = o.fadeIn ?? cfg.xfade, lvl = MLV[key] ?? 1;
@@ -75316,13 +75326,13 @@ const SND = (() => {
       const send = ctx.createGain(); send.gain.value = def.wet; out.connect(send); send.connect(verb);
       const rng = seeded(def.seed), nodes = [];
       if (def.vinyl) { const v = ctx.createBufferSource(); v.buffer = WHITE; v.loop = true; const hp = ctx.createBiquadFilter(); hp.type = 'bandpass'; hp.frequency.value = 3000; hp.Q.value = 0.5; const vg = ctx.createGain(); vg.gain.value = 0.004; v.connect(hp); hp.connect(vg); vg.connect(out); v.start(t0); nodes.push(v); }
-      let i = o.startBar || 0, next = t0, ending = null;
+      let i = o.startBar || 0, next = t0 - (o.from || 0), ending = null;   // o.from: start this many seconds into the song (its earlier notes are scheduled in the past, so the ones still sounding carry on)
       const T = {
-        key, def, out, len, total: bars.length * len, startAt: t0 - i * len, bars,
+        key, def, out, len, total: bars.length * len, startAt: t0 - i * len - (o.from || 0), bars,
         tick(u) {   // schedule bars up to time u; the track plays once through, then ends
           while (next < u && i < bars.length && !ending) {
             const bar = bars[i], c = { t: next, s, beats: def.beats, ch: bar.chord.notes, root: bar.chord.root, out, rng, e: bar.sec.e, sw: def.swing * s, mel: bar.mel, lead: bar.sec.lead || def.lead || 'pluck', lg: def.lg, bar: bar.b, def };
-            bar.sec.parts.forEach(p => PARTS[p](c));
+            if (next < 0) beforeZero(() => bar.sec.parts.forEach(p => PARTS[p](c))); else bar.sec.parts.forEach(p => PARTS[p](c));
             if (def.vinyl && rng() < 0.5) noise(next + rng() * len, 0.004, { f: 2500, q: 0.7, gain: 0.02, a: 0.001, bus: out });
             i++; next += len;
           }
@@ -75404,7 +75414,7 @@ const SND = (() => {
       },
       skip() { return this.next(); },
       state() { return { enabled, paused, mode, resting, heard: { ...heard }, set: curSet, track: cur && cur.key, name: cur && cur.def.name, where: cur && cur.where(), total: cur && cur.total, quietFor: cur ? 0 : Math.max(0, nextAt - ctx.currentTime), pending: !!pendingChange }; },
-      play,   // for tests: play(key, { startBar, fadeIn })
+      play,   // for tests: play(key, { startBar, from, fadeIn })
       TRACKS, SETS, PERIODS, LIST, periodAt,
     };
   }
@@ -75478,12 +75488,13 @@ const SND = (() => {
   // last ends, so it runs on with no gap), the deck's hum hushed; on the hand-over to the game it fades in 2 s and the
   // ship's music and hum carry on as before. With the Music app off: no title track either
   const TITLE_SND = { list: [], hush: false };
+  const TITLE_FROM = 5.5;   // the first copy starts 5.5 s into the song, faded in over 2.5 s: the melody about 23.5 s after the tap (0.99.3, the user's pick "A minus 5.5 s"); the copies after it play the whole song
   function titleTick() {
     const now = S.ctx.currentTime, on = S.titleOn && MP.on, L = TITLE_SND.list;
     for (let i = L.length - 1; i >= 0; i--) if (now > L[i].endsAt() + 1) L.splice(i, 1);
     if (on) {
       const last = L[L.length - 1];
-      if (!last || now >= last.endsAt() - 4) { const T = S.music.play('title' + SND_TITLE, { fadeIn: last ? 4 : 3 }); L.push(T); if (S.log) S.log.push({ name: 'title' + SND_TITLE, loop: true }); }
+      if (!last || now >= last.endsAt() - 4) { const T = S.music.play('title' + SND_TITLE, last ? { fadeIn: 4 } : { fadeIn: 2.5, from: TITLE_FROM }); L.push(T); if (S.log) S.log.push({ name: 'title' + SND_TITLE, loop: true }); }
       L.forEach(T => T.tick(now + 1));
     } else { L.forEach(T => T.fadeOut(now, 2)); L.length = 0; }
     if (S.titleOn !== TITLE_SND.hush && S.bus.hum) { TITLE_SND.hush = S.titleOn; S.bus.hum.gain.setTargetAtTime(S.titleOn ? 0 : 1, now, S.titleOn ? 0.3 : 1); }

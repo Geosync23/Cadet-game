@@ -618,8 +618,15 @@ def check_title_music(pw, path):
         for _ in range(4): g.ev("SND.frame(false)")   # the ship held under the title: run is false
         st = g.ev("[SND._.state(), SND.titleSnd.list.length, SND.titleSnd.hush, SND.log.map(x => x.name)]"); print('  title on:', st)
         check(st[0] == 'running' and st[1] == 1 and st[2] is True and ('title' + pick) in st[3], f'title: on, its track plays with the ship held and the hum hushed ({st})')
+        if pick == 'C':   # 0.99.3 (SD4): 0.99.1's song, 16 bars; its first copy starts 5.5 s in (the user's pick "A minus 5.5 s")
+            fc = g.ev("(T => [T.bars.length, T.bars.map(b => b.sec.label).filter((x, i, a) => a.indexOf(x) === i), +(T.startAt + T.total - T.endsAt()).toFixed(2), +((T.bars.length * T.len) - (T.endsAt() - T.startAt)).toFixed(2), +(SND.titleSnd.list[0].startAt - (SND.ctx.currentTime)).toFixed(2)])(SND.titleSnd.list[0])")
+            print('  title C first copy [bars, sections, -, -, startAt - now]:', fc)
+            check(fc[0] == 16 and fc[1] == ['Hum', 'Log', 'Entry', 'Rest'] and -6.5 <= fc[4] <= -4.5, f'title: C is the 0.99.1 song (16 bars, Hum Log Entry Rest) and its first copy starts about 5.5 s in ({fc})')
         g.ev("(L => { const T = L[0], at = SND.ctx.currentTime + 2; T.endsAt = () => at; })(SND.titleSnd.list)"); g.ev("SND.frame(false)")
         check(g.ev("SND.titleSnd.list.length") == 2, 'title: the next copy starts before the last ends (a loop with no gap)')
+        if pick == 'C':
+            e2 = g.ev("+(SND.titleSnd.list[1].startAt - SND.ctx.currentTime).toFixed(2)")
+            check(-0.5 <= e2 <= 0.5, f'title: the next copy plays the whole song from its start ({e2})')
         g.ev("SND.title(false)"); g.step(3)
         st = g.ev("[SND.titleSnd.list.length, SND.titleSnd.hush]"); print('  title off:', st)
         check(st == [0, False], 'title: off, the track fades and the hum comes back')
