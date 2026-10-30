@@ -58,3 +58,15 @@
   rightly up on card 6 (expected, the probe's choice); after the reload she got up again 18:40, sat, welcome 18:42-18:47 in full.
 - intro_check whole OK (incl. part 8 card by card, part 20 reload); day_check 0 OK; cadet_test vs bc4579aa ALL IDENTICAL.
 - **Verdict: PASS** (sent to CH1, BM21, lead 46). Docs: DEV_NOTES explains the cause; design-doc's arrival paragraph updated.
+
+## SD4 claude/title-song-0993 7ac282dc (game 2f6daceb...c3fd), from d180a704 (0.99.2)
+- Diff: titleC form = 0.99.1's line exactly (58 s); play(key, { from }); the first copy { fadeIn 2.5, from 5.5 }, later { fadeIn 4 }.
+  beforeZero wraps AudioParam / AudioScheduledSourceNode / AudioBufferSourceNode time methods for one synchronous call (time < 0 -> 0;
+  argument indexes right: setValueCurveAtTime / setTargetAtTime at 1, start / stop / cancelScheduledValues at 0), restored in finally.
+  Clamped envelopes land under the 2.5 s fade. cancelAndHoldAtTime is not wrapped (not used in the file). Note, not blocking:
+  AudioScheduledSourceNode needs iOS 14.5+; older Safari would throw there and the title music wouldn't start.
+- sound_check OK (C 16 bars, first copy -5.47 s); title_check 61 OK; cadet_test vs d180a704 (alone) ALL IDENTICAL.
+- tm_level (real wake tap, a fresh context, so beforeZero runs): sound from 1 s, louder from ~25 s (0.99.1 ~29-30 s), no page errors.
+  A smooth 3 s fade to ~2 s of silence at 43-44 s after the tap (song ~48.5-50.5 s, Rest, between its pads), back at 45.4 s:
+  the 0.99.1 song's own quiet patch (0.99.1 showed the same shape), not from this change.
+- **Verdict: PASS** (sent to SD4, BM21, lead 46).
