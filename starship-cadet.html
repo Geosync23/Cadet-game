@@ -75306,8 +75306,8 @@ const SND = (() => {
     // beforeZero(f): run f with times before 0 taken as 0 (they would throw). Only for a song started part-way in (play's o.from)
     // on a young context, whose first bars fall before the clock's start: their notes still sounding then carry on from 0
     function beforeZero(f) {
-      const W = [[AudioParam.prototype, ['setValueAtTime', 'linearRampToValueAtTime', 'exponentialRampToValueAtTime', 'setTargetAtTime', 'setValueCurveAtTime'], 1],
-        [AudioParam.prototype, ['cancelScheduledValues'], 0], [AudioScheduledSourceNode.prototype, ['start', 'stop'], 0], [AudioBufferSourceNode.prototype, ['start'], 0]], kept = [];
+      const W = [[AudioParam.prototype, ['setValueAtTime', 'linearRampToValueAtTime', 'exponentialRampToValueAtTime', 'setTargetAtTime', 'setValueCurveAtTime'], 1], [AudioParam.prototype, ['cancelScheduledValues'], 0]], kept = [];
+      for (const n of ['AudioScheduledSourceNode', 'AudioBufferSourceNode', 'OscillatorNode', 'ConstantSourceNode']) if (typeof window[n] === 'function') W.push([window[n].prototype, ['start', 'stop'], 0]);   // (older Safari has no AudioScheduledSourceNode: start and stop on each node)
       for (const [P, names, at] of W) for (const k of names) if (Object.prototype.hasOwnProperty.call(P, k)) {
         const f0 = P[k]; kept.push([P, k, f0]); P[k] = function (...a) { if (a[at] < 0) a[at] = 0; return f0.apply(this, a); };
       }
