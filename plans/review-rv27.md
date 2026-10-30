@@ -81,3 +81,15 @@
   out gain to 0 over 2 s, disconnect 8 s later, so notes scheduled ahead are silent (no leak into the game). SD4's title_stall.py
   (2.5 s main-thread stall, audio-thread level), each alone, twice: ef799975 gap -120 dB once of two (timing); 27caa4c3 -42 / -40 dB,
   no gap. sound_check title OK. **PASS.**
+
+## CH2 claude/callhome-0993 ce742cb7 (game 52a5fb02...2c45), on CH1 9346b1c3
+- Diff (section 21 introCallTick): eating = ACT eat, fed, past walk/wait; ate:sat when first eating, ate:meal once not eating and no
+  tray; no card while eating or with a tray, or before ate:meal unless dinner is shut (MEALS.dinner end 1230 = 20:30); chief:met or
+  (shut and chief missed). Names checked (ACT.o.fed, phases, SHIP.player.tray, MEALS). introLoad keeps any finite done key, so the
+  ate: keys survive a reload. With TRAY_TRAVELS off a tray goes when you get up or leave the mess, so the card can only wait while you
+  stand in the mess holding one; 22:00 still ends it.
+- intro_check whole OK (part 13: tray + eating no card x12, up after the meal, 20:29 none / 20:30 card, Chief met and missed);
+  day_check 0 OK; cadet_test vs 9346b1c3 (alone) ALL IDENTICAL.
+- ch_callhome probe (real evening, no dinner eaten, on to 20:32): 9346b1c3 card at 19:14; ce742cb7 none through dinner and the
+  Chief, card at 20:30 exactly.
+- **Verdict: PASS** (sent to CH2, BM21, lead 46).
