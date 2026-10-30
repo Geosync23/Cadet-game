@@ -2085,3 +2085,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~01:50 UTC: SD4 samples v3 on PaFaG6: A + A minus 4/8/12/16/20/24 s (2.5 s fade-in; melody at 25/21/17/13/9/5 s). Waiting the user's pick.
 - ~01:55 UTC: USER: "so close", try A minus 5 s and A minus 6 s (same technique) -> SD4.
 - ~01:57 UTC: **USER PICK title song: A minus 5.5 s** (original 0.99.1 song, first 5.5 s cut, 2.5 s fade-in). SD4 building on claude/title-song-0993 -> RV27 -> BM21.
+- ~01:58 UTC: **USER PRE-APPROVED publishing 0.99.3** (on a green full round + BM21 GO, verify sha).
