@@ -2086,3 +2086,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~01:55 UTC: USER: "so close", try A minus 5 s and A minus 6 s (same technique) -> SD4.
 - ~01:57 UTC: **USER PICK title song: A minus 5.5 s** (original 0.99.1 song, first 5.5 s cut, 2.5 s fade-in). SD4 building on claude/title-song-0993 -> RV27 -> BM21.
 - ~01:58 UTC: **USER PRE-APPROVED publishing 0.99.3** (on a green full round + BM21 GO, verify sha).
+- ~02:14 UTC (10:14 PM ET): status: CH1 was idle waiting for a go-ahead on the call-home item (peer-message caution) -> lead GO sent. SD4 building title A-5.5 (no branch yet). RV27 has CH1 9346b1c3. ETA 0.99.3 live ~3:30-4:30 AM ET.
