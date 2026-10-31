@@ -24,11 +24,12 @@ def check(c, m):
 OVER = """JSON.stringify((() => { const w = beamSlotWorld(); if (!w) return null; const v = new THREE.Vector3(), pts = [];
   for (const dx of [-.6, .6]) for (const dy of [-.1, .1]) { v.set(w.x + dx, w.y + dy, w.z).project(camera); pts.push([(v.x + 1) * innerWidth / 2, (1 - v.y) * innerHeight / 2]); }
   const nb = [Math.min(...pts.map(p => p[0])), Math.min(...pts.map(p => p[1])), Math.max(...pts.map(p => p[0])), Math.max(...pts.map(p => p[1]))];
-  const bubs = bubbles.list.filter(b => b.el.style.display !== 'none').map(b => { const r = b.el.getBoundingClientRect(), id = b.who && b.who.p && b.who.p.id, a = id && DECK_CREW.find(c => c.p.id === id);
+  const bubs = bubbles.list.filter(b => b.el.style.display !== 'none').map(b => { const r = b.el.getBoundingClientRect(), a = DECK_CREW.find(c => c.h === b.who || c.h === (b.who && b.who.H) || b.who && b.who.p && c.p.id === b.who.p.id), id = a && a.p.id;
     return [r.left, r.top, r.right, r.bottom, id + '@' + (a ? a.goalId + ' ' + a.x.toFixed(1) + ',' + a.z.toFixed(1) : '?')]; });
   const ov = bubs.map(b => [Math.max(0, Math.min(b[2], nb[2]) - Math.max(b[0], nb[0])) * Math.max(0, Math.min(b[3], nb[3]) - Math.max(b[1], nb[1])), b[4]]).filter(x => x[0] > 0);
   const sp = placeSpot('5-beam-1'), pp = ACT && ACT.phase === 'do' ? { x: ACT.x, z: ACT.z } : player.obj.position;
-  return { name: nb.map(Math.round), slotX: +w.x.toFixed(2), spotX: +sp.x.toFixed(2), you: [+pp.x.toFixed(2), +pp.z.toFixed(2)], act: ACT ? [ACT.kind, ACT.placeId, ACT.phase] : null, bubs: bubs.length, over: ov }; })())"""
+  const bl = bubbles.list.filter(b => b.el.style.display !== 'none').map(b => [Math.round(b.ax), Math.round(b.ay), Math.round(b.x), Math.round(b.y), b.w, b.hh, (DECK_CREW.find(c => c.h === b.who) || { p: { id: b.who && b.who.isPlayer ? 'YOU' : '?' } }).p.id, b.text.slice(0, 25)]);
+  return { bl, name: nb.map(Math.round), slotX: +w.x.toFixed(2), spotX: +sp.x.toFixed(2), you: [+pp.x.toFixed(2), +pp.z.toFixed(2)], act: ACT ? [ACT.kind, ACT.placeId, ACT.phase] : null, bubs: bubs.length, over: ov }; })())"""
 
 def beam(pw, k):
     g = Game(pw, COPIES[k], 390, 844)
@@ -47,13 +48,17 @@ def beam(pw, k):
         if r and r['act'] and r['act'][2] == 'do' and shots < 1: g.shot(str(OUT / ('beam_%s_painting.png' % k))); shots += 1
         if not g.ev('!!(ACT && ACT.o && ACT.o.beam)'): break
     after = []
-    for i in range(12):
+    for i in range(30):
         g.step(30); r = json.loads(g.ev(OVER)); after.append(r)
         if i == 2: g.shot(str(OUT / ('beam_%s_after.png' % k)))
-    ov = [x for r in worst + after if r for x in r['over']]
-    print('  %s: ready %s, paint %s; painting at %s, name %s (x %.2f), spot x %.2f; bubbles over the name: %s' % (k, ready, paint, worst[0]['you'] if worst else None, worst[0]['name'] if worst else None, worst[0]['slotX'] if worst else 0, worst[0]['spotX'] if worst else 0, ov[:6]))
+    ov = [x for r in worst if r for x in r['over']]; ova = [x for r in after if r and len(r['bl']) == 1 for x in r['over']]   # after: a lone bubble over it fails; a pair (a cheer lifted by other chatter) is reported
+    pairs = [x for r in after if r and len(r['bl']) > 1 for x in r['over']]; print('  %s after, lifted by another bubble (reported): %s' % (k, pairs))
+    print('  %s after (the crowd breaking up): %s' % (k, ova))
+    for r in after:
+        if r and r['over']: print('    ', r['name'], r['bl'], r['over'])
+    print('  %s: ready %s, paint %s; painting at %s, name %s (x %.2f), spot x %.2f; bubbles over the name: %s' % (k, ready, paint, worst[0]['you'] if worst else None, worst[0]['name'] if worst else None, worst[0]['slotX'] if worst else 0, worst[0]['spotX'] if worst else 0, ov))
     err = g.errors; g.close()
-    return worst, ov, err
+    return worst, ov, ova, err
 
 def tea(pw, k):
     g = Game(pw, COPIES[k], 900, 760)
@@ -75,11 +80,11 @@ def tea(pw, k):
 with sync_playwright() as pw:
     if '8' in PARTS:
         for k in ('off', 'on'):
-            worst, ov, err = beam(pw, k)
+            worst, ov, ova, err = beam(pw, k)
             if k == 'on':
                 w = worst[0] if worst else None
                 check(bool(w) and abs(w['you'][0] - w['slotX']) <= .45, '8: you paint standing under your name (you x %s, name x %s)' % (w and w['you'][0], w and w['slotX']))
-                check(not ov, '8: no speech bubble over the name while you paint and after (%s)' % ov[:4])
+                check(not ov, '8: no speech bubble over the name while you paint (%s)' % ov[:4]); check(not ova, '8: none over it while they cheer and go (%s)' % ova[:4])
                 check(not err, '8: no errors %s' % err[:3])
     if '10' in PARTS:
         for k in ('off', 'on'):

@@ -26,7 +26,7 @@ SAYHOOK = """(() => { window.__said = []; window.__cards = []; window.__toasts =
   if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; } })()"""
 INROOM = """(() => { const tl = ROOM_TILES['M'], c = cellPos(...tl[Math.floor(tl.length / 2)]); player.obj.position.copy(cellPos(...nearestOpen(c.x, c.z, player))); player.stop(); return 'M'; })()"""
 STATE = """JSON.stringify((() => { const b = DECK_CREW.find(a => a.p.id === 'brennan'), mk = document.getElementById('tjMark');
-  return [SHIP.time.min, b && b.spot ? b.spot.id : null, b ? !!b.settled : null, !!DIALOGUE && DIALOGUE.id, TJ_NOW ? TJ_NOW.lead : null, !!mk && mk.style.display !== 'none' && /Brennan/.test(mk.textContent),
+  return [SHIP.time.min, b && b.spot ? b.spot.id : null, b ? !!b.settled : null, !!DIALOGUE && DIALOGUE.id, TJ_NOW ? TJ_NOW.lead : null, !!mk && /Brennan/.test(mk.textContent) && !!TJ_NOW && TJ_NOW.agent && TJ_NOW.agent.p.id === 'brennan',
     IX_GOAL && IX_GOAL.tj ? IX_GOAL.crew : null, ACT ? [ACT.kind, ACT.placeId, ACT.phase, !!ACT.o.fed, ACT.o.dish || null] : null, SPICE995.step]; })())"""
 
 def supper(pw, d):

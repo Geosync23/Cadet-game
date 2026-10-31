@@ -45526,7 +45526,7 @@ function eventPools(shared, desks) {
   const taken = new Set(desks.values());
   for (const ev of evTable()) {
     const tagged = new Map();
-    if (ev.venue && !ev.seated && typeof gatherVenue === 'function') { const g = gatherVenue(ev.venue), l = g ? (shared.get(g.deck + '|event') || []).filter(pl => pl.gather === ev.venue && !pl.lead) : []; if (l.length) tagged.set(g.deck, l); }   // the architect's crowd spots
+    if (ev.venue && !ev.seated && typeof gatherVenue === 'function') { const g = gatherVenue(ev.venue), l = g ? (shared.get(g.deck + '|event') || []).filter(pl => pl.gather === ev.venue && !pl.lead && !(ev.skipSpots && ev.skipSpots.has(pl.id))) : []; if (l.length) tagged.set(g.deck, l); }   // the architect's crowd spots
     for (const l of shared.values()) for (const pl of l) if (pl.event === ev.id) (tagged.get(pl.deck) || tagged.set(pl.deck, []).get(pl.deck)).push(pl);
     for (const [n, l] of tagged) shared.set(n + '|ev:' + ev.id, [...new Set(l)]);
     ev.where.forEach((w, i) => {
@@ -46100,9 +46100,9 @@ function beamWaitTap() {                                 // a tap on the beam wh
   toast(TJ_NOW.e.name, 'The Works crew are gathering at the beam. Your turn comes in a moment.'); return true;
 }
 let BEAM_CHEERS = [];                                    // [{ c: agent, text, at: real ms }]: the welcomes, said in turn
-function tradBeamFrame() {
+function tradBeamFrame() {   // (0.99.5 note 8, TRAD995_ON) a cheer waits (3 s at most) for the bubble before it: two at once, one is lifted onto your name
   beamGather();
-  while (BEAM_CHEERS.length && simNow() >= BEAM_CHEERS[0].at) { const b = BEAM_CHEERS.shift(); if (b.c.h && DECK_CREW.includes(b.c) && typeof bubbleSay === 'function') bubbleSay(b.c.h, b.text, 4); }
+  while (BEAM_CHEERS.length && simNow() >= BEAM_CHEERS[0].at && !(TRAD995_ON && bubbles.list.some(x => x.t > 0) && simNow() < BEAM_CHEERS[0].at + 3000)) { const b = BEAM_CHEERS.shift(); if (b.c.h && DECK_CREW.includes(b.c) && typeof bubbleSay === 'function') bubbleSay(b.c.h, b.text, TRAD995_ON ? 2.4 : 4); }
   const A = typeof ACT !== 'undefined' ? ACT : null;
   if (!A || !A.o.beam || A.o.painted || !(A.phase === 'do' || A.phase === 'out') || A.done < A.def.mins) return;
   A.o.painted = true;
@@ -46111,11 +46111,11 @@ function tradBeamFrame() {
   const there = DECK_CREW.filter(c => c.p && c.p.id && (o => o && o.now && o.e.id === e.id)(eventOf(c.p, now)));
   BEAM_CHEERS = there.slice().sort((x, y) => Math.hypot(x.x - A.x, x.z - A.z) - Math.hypot(y.x - A.x, y.z - A.z)).slice(0, 8).map((c, k) => {   // everyone there, one after another (playtest 2, 0.71.3; was the nearest four at once)
     let l = null; try { l = typeof lineFor === 'function' && lineFor(c.p.id, 'beam.congrats', {}); } catch (x) { l = null; }
-    return { c, text: l && l.text || TJ_CHEER[k % TJ_CHEER.length], at: simNow() + k * 1600 };
+    return { c, text: l && l.text || TJ_CHEER[k % TJ_CHEER.length], at: simNow() + k * (TRAD995_ON ? 2600 : 1600) };   // (0.99.5 note 8) one at a time: stacked bubbles climbed onto your name
   });
   const ids = new Map();
   for (const c of there) { const sg = planDay(c.p, d).find(x => evTagId(x.tag) === e.id && x.from <= now && now < x.to); if (sg) ids.set(c.p.id, sg.to); }
-  TJ_FREE = { ids, at: now + 2, until: (d - 1) * 1440 + e.to + 30 };
+  TJ_FREE = { ids, at: now + 2 + (TRAD995_ON ? Math.ceil((BEAM_CHEERS.length * 2.6 + 2.4) * SHIP_RATE) : 0), until: (d - 1) * 1440 + e.to + 30 };   // (0.99.5 note 8, TB3) they cheer from where they stand, then go: walking off mid-cheer put the bubbles over your name
 }
 // the beam's names (0.70.0, for the deck architect's WALL_KIT.nameBeam; all first names, the user's): -> [{ id, name, day }]
 // of each new Works hand whose Name on the beam (name-on-the-beam-new: the Monday after their rotation) has begun by
@@ -48750,14 +48750,20 @@ if (TRAD995_ON) {
 // ---- 0.99.5 note 8 (TB3, lead 47's decision on TR1's finding; behind TRAD995_ON): Name on the beam ("where you stand to
 // write isn't where the name goes: scoot the player over; crew speech buttons cover the name: slide those crew over"). Your
 // name is BEAM.slots[0], along 4.98 of the bay's hull wall (x about 14.4-15.6, the next hand's under it); you painted from
-// [13, 0], 1.4 m west of it. 5-beam-1 moves under it, [14, 0] at x 14.98; the two watchers under the name (5-beam-2 [14, 1],
-// 5-beam-3 [15, 1]) move off its span, west to [13, 1] and east to [18, 1], and every watcher faces the new spot. The floor
+// [13, 0], 1.4 m west of it. 5-beam-1 moves under it, [14, 0] at x 14.98. A bubble at phone size is about 240 by 65 px over
+// its speaker's head; measured at 390 x 844 while you paint and while they cheer, anyone standing in the bay's front three
+// rows (0-2) puts theirs on the name (an east one's bubble is pushed in from the screen's edge). So the gathering stands
+// from row 3 back: the watchers move there ([19, 4], [20, 4], [11, 4], [12, 4], [13, 4]; [12, 3] and [13, 3] stay), every
+// watcher faces the new spot, and the bay's crowd spots in rows 0-2 aren't used for the beam. The cheers come one at a
+// time (stacked bubbles climb), and the crowd goes only after them (tradBeamFrame). The floor
 // tap (beamFloorTap) and the controller's (padBeamOn) read 5-beam-1's spot, so they follow
 if (TRAD995_ON) {
   const P5 = DECKS[5].places, at = (id, o) => { const pl = P5.find(q => q.id === id); if (pl) Object.assign(pl, o); };
   const X = 14.98, Z = .75;
   at('5-beam-1', { at: [14, 0], xy: [X, Z] });
-  at('5-beam-2', { at: [13, 1], xy: [13.5, 1.5] }); at('5-beam-3', { at: [18, 1], xy: [18.5, 1.5] });
+  for (const [id, c, r] of [['5-beam-2', 19, 4], ['5-beam-3', 20, 4], ['5-beam-4', 12, 4], ['5-beam-5', 11, 4], ['5-beam-6', 13, 4]]) at(id, { at: [c, r], xy: [c + .5, r + .5] });   // 5-beam-7 [12, 3], 5-beam-8 [13, 3] stay
+  for (const nb of SHIP_TRADITIONS.filter(x => x.id === 'name-on-the-beam' || x.id === 'name-on-the-beam-new'))   // the Works bay's crowd spots in rows 0-2 aren't used for it (eventPools' skipSpots)
+    nb.skipSpots = new Set([1, 2, 3, 4, 5, 7, 8, 10, 14, 15, 16].map(k => '5-works-bay-crowd-' + k));   // 16,1 16,2 17,2 15,0 17,0 14,1 18,1 18,0 13,2 13,0 19,0
   for (const pl of P5) if (/^5-beam-[2-8]$/.test(pl.id)) pl.face = Math.round(Math.atan2(X - pl.xy[0], Z - pl.xy[1]) * 180 / Math.PI);
   if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }
 }
