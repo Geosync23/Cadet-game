@@ -24,9 +24,10 @@ def check(c, m):
 OVER = """JSON.stringify((() => { const w = beamSlotWorld(); if (!w) return null; const v = new THREE.Vector3(), pts = [];
   for (const dx of [-.6, .6]) for (const dy of [-.1, .1]) { v.set(w.x + dx, w.y + dy, w.z).project(camera); pts.push([(v.x + 1) * innerWidth / 2, (1 - v.y) * innerHeight / 2]); }
   const nb = [Math.min(...pts.map(p => p[0])), Math.min(...pts.map(p => p[1])), Math.max(...pts.map(p => p[0])), Math.max(...pts.map(p => p[1]))];
-  const bubs = [...document.querySelectorAll('.bubw')].filter(e => e.style.display !== 'none').map(e => { const r = e.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom, e.textContent.slice(0, 30)]; });
+  const bubs = bubbles.list.filter(b => b.el.style.display !== 'none').map(b => { const r = b.el.getBoundingClientRect(), id = b.who && b.who.p && b.who.p.id, a = id && DECK_CREW.find(c => c.p.id === id);
+    return [r.left, r.top, r.right, r.bottom, id + '@' + (a ? a.goalId + ' ' + a.x.toFixed(1) + ',' + a.z.toFixed(1) : '?')]; });
   const ov = bubs.map(b => [Math.max(0, Math.min(b[2], nb[2]) - Math.max(b[0], nb[0])) * Math.max(0, Math.min(b[3], nb[3]) - Math.max(b[1], nb[1])), b[4]]).filter(x => x[0] > 0);
-  const sp = placeSpot('5-beam-1'), pp = player.obj.position;
+  const sp = placeSpot('5-beam-1'), pp = ACT && ACT.phase === 'do' ? { x: ACT.x, z: ACT.z } : player.obj.position;
   return { name: nb.map(Math.round), slotX: +w.x.toFixed(2), spotX: +sp.x.toFixed(2), you: [+pp.x.toFixed(2), +pp.z.toFixed(2)], act: ACT ? [ACT.kind, ACT.placeId, ACT.phase] : null, bubs: bubs.length, over: ov }; })())"""
 
 def beam(pw, k):
@@ -63,7 +64,7 @@ def tea(pw, k):
     for i in range(400):
         g.step(20)
         r = json.loads(g.ev("""JSON.stringify((() => { const m = SHIP.time.min, me = player.here(), att = DECK_CREW.filter(a => a.p && roomAt(...a.here()) === 't');
-          const door = DECK_CREW.filter(a => a.p && K(a.here()) === K([21, 1])).map(a => a.p.id);
+          const door = DECK_CREW.filter(a => a.p && a.settled && K(a.here()) === K([21, 1])).map(a => a.p.id);   // standing there, not walking through
           const out = !!findPath(me, [20, 1], occupiedBy(player), player);
           return [m, att.map(a => [a.p.id, a.goalId, a.settled ? (a.pose || '') : 'walk']), door, out, K(me)]; })())"""))
         rows.append(r)
