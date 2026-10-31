@@ -434,7 +434,9 @@ def check_r3mess(pw, path):
         for (n0, a), (n1, b) in zip(lv, lv[1:]):
             if n0 == 0: continue
             check(b['clatter'] >= a['clatter'] and b['voices'] >= a['voices'] and b['galley'][0] >= a['galley'][0], f'r3mess: {n1} people no quieter than {n0}')
-        check(lv[-1][1]['voices'] == 12 and lv[1][1]['voices'] == 1, 'r3mess: one voice for a couple, all twelve when full')
+        if g.ev("SND.r3Mess.scale === true"):   # 0.99.5 (MESS_SCALE on): nobody talks below two crew; checked in full by check_mess_scale
+            check(lv[-1][1]['voices'] == 12 and lv[1][1]['voices'] == 0, 'r3mess: none for one alone, all twelve when full')
+        else: check(lv[-1][1]['voices'] == 12 and lv[1][1]['voices'] == 1, 'r3mess: one voice for a couple, all twelve when full')
         g.ev("SND.r3Mess.n = 0"); g.page.wait_for_timeout(1200)
         gone = at('the gym, the same evening', 1440 + 1112, 3, 'Gym', secs=2)
         check(not gone['on'], 'r3mess: it stops (fading) when you leave the mess')
@@ -634,6 +636,123 @@ def check_title_music(pw, path):
         if pe: check(False, 'title: page errors: ' + ' | '.join(pe[:3]))
     finally: g.close()
 CHECKS += [check_title_music]   # 0.99 (SD3): the title screen's track
+
+# ---- 0.99.5 (SD5): the user's notes 9, 4 and 17 ----
+def switch_copy(path, line, on_line):
+    """a copy of the build with one switch on (None if the build has no such line)"""
+    src = pathlib.Path(path).read_text()
+    if on_line in src: return path
+    if line not in src: return None
+    f = WORK / 'test' / f'_sw_{os.getpid()}_{abs(hash(on_line)) % 10000}.html'; f.parent.mkdir(parents=True, exist_ok=True); f.write_text(src.replace(line, on_line, 1)); return str(f)
+HIDE = """(how => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
+  (how === 'pagehide' ? window : document).dispatchEvent(new Event(how)); })"""
+def check_hide(pw, path):
+    """note 9: the page hidden (another app or window, Android too), frozen or gone: the sound stops at once, with no frame
+    drawn after it (a hidden page gets none); back, it plays again on a drawn frame (paused by the hide: only after Resume)"""
+    g = Game(pw, path)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000)
+        for how in ['visibilitychange', 'pagehide', 'freeze']:
+            g.ev("pauseSet(false)"); g.step(5); g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000)
+            g.ev(f"({HIDE})('{how}')"); g.page.wait_for_timeout(1000)   # no frames
+            st = g.ev("[SND._.state(), PAUSE.on]"); print(f'  hide {how}: {st}')
+            check(st[0] == 'suspended', f'hide: {how} stops the sound at once, with no frame drawn ({st})')
+            g.ev("delete document.hidden; delete document.visibilityState; document.dispatchEvent(new Event('visibilitychange'))"); g.step(5); g.page.wait_for_timeout(300); g.step(2)
+            back = g.ev("[SND._.state(), PAUSE.on]")
+            check(back[0] == ('suspended' if back[1] else 'running'), f'hide: back from {how}, the sound follows the pause ({back})')
+            if back[1]: g.ev("pauseSet(false)"); g.step(5); g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000)
+        # RV30's race: hidden while a resume is still on its way (Resume or a tap, then away at once): it must end quiet
+        g.ev("pauseSet(true)"); g.step(3); g.page.wait_for_function("window.__sc('SND._.state()') === 'suspended'", timeout=10000)
+        g.ev(f"SND.ctx.resume(); ({HIDE})('visibilitychange')"); g.page.wait_for_timeout(1000)
+        st = g.ev("SND._.state()"); print(f'  hide while resuming: {st}')
+        check(st == 'suspended', f'hide: hidden while a resume is on its way, the sound ends stopped ({st})')
+        g.ev("delete document.hidden; delete document.visibilityState; document.dispatchEvent(new Event('visibilitychange'))")
+        pe = [e for e in g.errors if e.startswith('pageerror')]
+        if pe: check(False, 'hide: page errors: ' + ' | '.join(pe[:3]))
+    finally: g.close()
+def check_mess_scale(pw, path):
+    """note 4 (MESS_SCALE, on a copy): the murmur follows the head count, its level too: none for one crew member alone,
+    quieter for a few, as before from half full; when the room empties the talk fades in about a second and the scene goes"""
+    on = switch_copy(path, 'const MESS_SCALE = false;', 'const MESS_SCALE = true;')
+    if not on: print('  mess_scale: no MESS_SCALE in this build (nothing to check)'); return
+    g = Game(pw, on)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000); g.step(5)
+        check(g.ev("SND.r3Mess.scale === true"), 'mess_scale: the switch is on in the copy')
+        g.ev(f"({R3_AT})({json.dumps([1440 + 1110, 3, 'Mess hall'])})"); g.step(40)
+        for _ in range(4): g.page.wait_for_timeout(500); g.step(2)
+        full = g.ev("SND.r3Mess.full")
+        lv = g.ev(f"[0, 1, 2, 3, 4, 8, {full // 2}, {full}].map(n => [n, SND.r3Mess.at(n)])"); print('  mess_scale layers', lv)
+        d = {n: a for n, a in lv}
+        check(d[0]['voices'] == 0 and d[1]['voices'] == 0 and d[2]['voices'] == 0 and d[2]['level'] == 0, 'mess_scale: nobody, you alone, or one crew member: no murmur')
+        check(d[3]['voices'] >= 1 and 0.2 <= d[3]['level'] <= 0.35, 'mess_scale: two crew: a quiet murmur (about 12 dB under)')
+        check(all(lv[k + 1][1]['level'] >= lv[k][1]['level'] and lv[k + 1][1]['voices'] >= lv[k][1]['voices'] for k in range(len(lv) - 1)), 'mess_scale: more people, never quieter')
+        check(d[full // 2]['level'] == 1 and d[full]['level'] == 1 and d[full]['voices'] == 12, 'mess_scale: from half full, as before (level 1, all twelve)')
+        # the room empties: the talk fades at once, the scene goes after 5 s; someone comes in: it comes back
+        sc = g.ev("!!SND.r3Mess.scene"); n = g.ev("SND.r3Mess.n"); print(f'  mess_scale at the rush: n {n}, scene {sc}')
+        check(sc and n >= 3, f'mess_scale: the scene plays at the dinner rush (n {n})')
+        g.ev("SND.r3Mess.forceN = 0")
+        for _ in range(8): g.page.wait_for_timeout(250); g.step(2)   # 2 s with frames: the once-a-second count, then the fade
+        lvg = g.ev("(sc => sc ? [sc.lv, sc.lvg.gain.value] : null)(SND.r3Mess.scene)"); print('  mess_scale emptied, 2 s:', lvg)
+        check(lvg is not None and lvg[0] == 0 and lvg[1] < 0.1, f'mess_scale: emptied, the talk is down to silence within about two seconds (the count is read once a second) ({lvg})')
+        for _ in range(14): g.page.wait_for_timeout(500); g.step(2)
+        check(not g.ev("!!SND.r3Mess.scene"), 'mess_scale: still empty after 5 s, the scene goes')
+        g.ev("SND.r3Mess.forceN = 40"); g.page.wait_for_timeout(1300); g.step(2); g.page.wait_for_timeout(1100); g.step(2)
+        check(g.ev("!!SND.r3Mess.scene"), 'mess_scale: people back, the murmur comes back')
+        g.ev("delete SND.r3Mess.forceN")
+        pe = [e for e in g.errors if e.startswith('pageerror')]
+        if pe: check(False, 'mess_scale: page errors: ' + ' | '.join(pe[:3]))
+    finally: g.close()
+LATE = """(() => { if (window.__late) return; const L = window.__late = { n: 0, p: 0 }, S = AudioScheduledSourceNode.prototype, f = S.start;
+  S.start = function (...a) { const c = this.context; if (c.state === 'running' && (a[0] || 0) > 0 && a[0] < c.currentTime - 0.005) L.n++; return f.apply(this, a); };
+  const P = AudioParam.prototype, c = SND.ctx;   // and volume or pitch moves set in the past (RV30: late starts alone can miss it)
+  for (const k of ['setValueAtTime', 'linearRampToValueAtTime', 'exponentialRampToValueAtTime', 'setTargetAtTime']) { const g = P[k]; P[k] = function (...a) { if (c.state === 'running' && a[1] > 0 && a[1] < c.currentTime - 0.005) L.p++; return g.apply(this, a); }; } })()"""
+STALL = "(s => { const c = SND.ctx, t = c.currentTime; let k = 0; while (c.currentTime - t < s) k++; return k; })"   # the page held busy for s seconds of audio time
+def stall_lates(pw, path):
+    g = Game(pw, path)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000)
+        g.ev(f"({R3_AT})({json.dumps([1440 + 1110, 3, 'Mess hall'])})"); g.step(20)
+        g.ev("SND.music.setEnabled(true); SND.music.next()")
+        for _ in range(8): g.page.wait_for_timeout(500); g.step(2)
+        g.ev(LATE); res = []
+        for _ in range(4):
+            g.ev("window.__late.n = 0; window.__late.p = 0"); g.ev(f"({STALL})(1.2)"); g.step(2); g.page.wait_for_timeout(600); g.step(2)
+            res.append(g.ev("window.__late.n + window.__late.p"))
+        playing = g.ev("[SND.music.state().name, !!SND.r3Mess.scene, SND._.LOOPS.size]")
+        return res, playing, [e for e in g.errors if e.startswith('pageerror')]
+    finally: g.close()
+def check_long(pw, path):
+    """note 17 (SND_LONG): after a 1.2 s stall (a long frame) the loops and the music schedule nothing in the past (a late
+    start is a pop); with it off, as before (late starts after a stall)"""
+    on = switch_copy(path, 'const SND_LONG = false;', 'const SND_LONG = true;')
+    if not on: print('  long: no SND_LONG in this build (nothing to check)'); return
+    r_on, p_on, pe = stall_lates(pw, on); print(f'  long on: late starts and moves after each of 4 stalls {r_on}, playing {p_on}')
+    check(sum(r_on) <= 2 and p_on[0] and p_on[1], f'long: switched on, (almost) nothing starts or moves late after a stall, and the music and the mess still play ({r_on}, {p_on})')
+    if pe: check(False, 'long: page errors: ' + ' | '.join(pe[:3]))
+    if on != path:   # the build has it off: as before, for the record
+        r_off, p_off, _ = stall_lates(pw, path); print(f'  long off (as 0.99.4): late starts and moves after each stall {r_off}')
+        check(sum(r_off) > 2, f'long: the check can see the problem: with the switch off, sound starts or moves late after a stall ({r_off})')
+CHECKS += [check_hide, check_mess_scale, check_long]   # 0.99.5 (SD5): notes 9, 4, 17
+def check_buf(pw, path):
+    """note 17's option (SND_BUF_ON, on a copy): the bigger output buffer (latencyHint 'playback'): the context starts with
+    more output latency than with it off, and sound still starts on a tap and plays"""
+    on = switch_copy(path, 'const SND_BUF_ON = false;', 'const SND_BUF_ON = true;')
+    if not on: print('  buf: no SND_BUF_ON in this build (nothing to check)'); return
+    lat = []
+    for p in ([path, on] if on != path else [on]):
+        g = Game(pw, p)
+        try:
+            open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+            g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000)
+            lat.append(g.ev("[SND.ctx.baseLatency, SND.ctx.outputLatency || 0]"))
+        finally: g.close()
+    print('  buf: [base, output] latency off / on:', lat)
+    if len(lat) == 2: check(lat[1][0] + lat[1][1] > lat[0][0] + lat[0][1], f'buf: switched on, a bigger output buffer ({lat})')
+CHECKS += [check_buf]   # 0.99.5 (SD5, lead 47): note 17's bigger-buffer option
 
 if os.environ.get('SOUND_ONLY'): CHECKS = [c for c in CHECKS if re.search(os.environ['SOUND_ONLY'], c.__name__)]   # run only the named checks (a regex), while building
 with sync_playwright() as pw:
