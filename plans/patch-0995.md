@@ -42,3 +42,4 @@ a sweep of every tradition's start and trigger; also 8, 10, 16 findings), onboar
 | TB3 traditions builder | 8, 10, 19 + TR1's broken list | session_014zyJYRP1bV78VRB3vsquNz | claude/p995-traditions |
 Reviewer: RV28 session_014zyJYQKwGvytfCGdrWMoiZ (a second reviewer if the queue grows). Build master: BM22 (staging-0995).
 Each builder: step-1 report (cause + fix) to the lead, lead GO, then build.
+Reviewers split (~09:48 UTC): RV28 = OB2, SD5, TB3; **RV29** session_014zyJYM3D7UBkZN49CsZVuA (claude/review-rv29) = JB2, PL2, CT5. SW4 polishes JB2's stand-in words (claude/p995-jobs-words).
