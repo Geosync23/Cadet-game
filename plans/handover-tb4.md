@@ -33,13 +33,13 @@ tell." herself (the host names herself in the third person); the same can happen
 - cadet_test vs 8976965e with the switch off: **ALL IDENTICAL**.
 - join_check: **JOIN CHECK OK**, all nine join (marker, arrow, tip, tap, activity or the walk).
 - events_check 35: **EVENTS CHECK OK**. bigevents_check: **BIGEVENTS CHECK OK**.
-- day_check on Days 29, 38, 48, 53, 63, 64, 73, 81, 104: see the build-table row / the report to RV30.
+- day_check on Days 29, 38, 48, 53, 63, 64, 73, 81, 104 (each one's day): **all nine DAY CHECK OK**.
 - `plans/tb4-probes/t926_probe.py BUILD.html [id ...]` (switches a copy on itself): per tradition on its day: the
   leader, marker and arrow from its start minute, the tap's card (lines and the question), the activity, bubbles, a
   **real save and reload mid-way** (joined kept, no marker, no second join), the end (no activity, no marker, no arrow),
   no page errors. All nine OK; Garden walk's marker was off camera at the start (the arrow and tip were there).
   Garden walk, followed to its end: the walk goes bed to bed and ends at 10:05 with its own words.
-- check_fast on the real build before the push.
+- check_fast on the real build: **QUICK CHECK OK** (335 s).
 
 ## Loose ends, gotchas
 - After a reload you're still joined (the credit is kept) but your seat or the walk isn't resumed: the same as every
