@@ -29,3 +29,16 @@ Lead's plan (lead 47): step-1 reports first (cause and fix per note, by seat), t
 staging, full round, the user's OK. Seats: sound (4, 9, 17), controller (2, 5, 6), traditions reviewer TR1 (19 and
 a sweep of every tradition's start and trigger; also 8, 10, 16 findings), onboarding/tips (1, 7, 11, 16), jobs (14,
 15, 18), player/doors/social (3, 12, 13), traditions builder (8, 10, 19 fixes from TR1).
+
+## Seats (lead 47, 2026-10-31 ~08:07 UTC / 4:07 AM ET), all from claude/staging-0994 8976965e
+| Seat | Notes | Session | Branch |
+|---|---|---|---|
+| TR1 traditions reviewer (review only) | 19 + sweep of every tradition; findings for 8, 10, 16 | session_014zyJYMx26ZwoJgqt2dLUYL | claude/p995-tr1 |
+| SD5 sound | 4, 9, 17 | session_014zyJYPA1T75TkyU4en5qbs | claude/p995-sound |
+| CT5 controller | 2, 5, 6 | session_014zyJYR3AFNZzzKwMND31qr | claude/p995-controller |
+| OB2 onboarding + appointments | 1, 7, 11, 16 | session_014zyJYNAM2DgZ8od9tmAhMb | claude/p995-onboarding |
+| JB2 jobs | 14, 15, 18 | session_014zyJYMCGakWaNzvpk6S3h5 | claude/p995-jobs |
+| PL2 seats, doors, talk | 3, 12, 13 | session_014zyJYMwNf9vLrMDd1uuPFU | claude/p995-player |
+| (to hire after TR1's findings) traditions builder | 8, 10, 19 + TR1's broken list | | |
+Reviewer: RV28 session_014zyJYQKwGvytfCGdrWMoiZ (a second reviewer if the queue grows). Build master: BM22 (staging-0995).
+Each builder: step-1 report (cause + fix) to the lead, lead GO, then build.
