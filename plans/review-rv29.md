@@ -114,3 +114,10 @@ spoon band, worst joke night. Switch TRAD926_JOIN_ON (off; ?trad926).
   a locked room. Fix asked of PL2: a doorOpenFor branch for today's intro beat in its room, [at - 15, until], not done.
 - Re-review plan: intro_check whole; controller_check (Day 16 pad walk to the office), arrows_check, devmode_check (they
   enter the re-locked rooms); door_sweep; check_fast. Lesson: when a fix re-locks rooms, run every check that names them.
+- **Re-review PL2 75e22d2 (game commit 1c06638, game f07b738a...fccf0, verified): PASS (~18:05 UTC).** PL2 narrowed note 13 to
+  the user's ask: lbGuards(room) = a hall with a locked door into a bedroom; only there does the let-you-out rule stop. door_sweep:
+  Deck 2 cabins and Deck 4 officers' cabins shut from the corridor (and Deck 4's supply closet x, off the officers' corridor:
+  no places in it); the Works Chief's office, bay booth, specimen store, probe bay and reactor open from outside as in 0.99.4.
+  intro_check --solotap OK (PL2 ran it whole: OK); controller_check promo3 OK (Day 16 office walk); arrows_check OK; devmode_check
+  OK. PL2: check_fast OK, cadet vs 8976965e ALL IDENTICAL. Talk and seats unchanged since 6b2f135.
+  For the lead: the reactor door (in the lead's 08:22 GO list) opens from its lobby again, as in 0.99.4 (PL2's backlog PL2-1).
