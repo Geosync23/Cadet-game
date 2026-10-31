@@ -1,4 +1,5 @@
-# Starship Cadet: crew stories check (FX21, 0.92.6 item 19; stage 1: Pell, Theo, Basil, Halloran, Kovac, Saad).
+# Starship Cadet: crew stories check (FX21, 0.92.6 item 19; stage 1: Pell, Theo, Basil, Halloran, Kovac, Saad; stage 2, ST1:
+# Zeke, Calder, Dev Raman, Kowalczyk, behind STORIES2_ON).
 # Walks each crew story's beats on paper, the way arc_check does the older arcs, in a copy of the game with STORIES_ON
 # switched on by text (the build itself may have it off). Three parts:
 #   1. Off: the build as it is. With STORIES_ON off nothing of the stories is read: storyMoment is null, momentDef gives
@@ -16,6 +17,9 @@
 #        - an afterglow (follows:) comes after one of its beats;
 #        - Theo: no ordinary goodbye while his farewell crescendo stands;
 #        - no page errors.
+#      Stage 2 (ST1): the copy switches STORIES2_ON on too; the paper player is made an Engine Specialist as a steady one
+#      is (Monday Day 22, 22:40, as night 1 starts). Part 1 also checks stage 2 off: no stage 2 beat is read, Zeke's and
+#      Calder's are the old MOMENTS words, Kowalczyk and Raman aren't story people, nobody's plan has a story beat.
 #   3. A self-test: the rules above, fed planted logs that break each one, must catch every one.
 # Run: CADET_CHROME=/opt/pw-browsers/chromium python3 stories_check.py BUILD.html [DAYS]   (a few minutes)
 import sys, os, json, types, pathlib
@@ -26,6 +30,7 @@ ct = types.ModuleType('ct'); exec(src, ct.__dict__)
 BUILD = sys.argv[1]
 DAYS = int(sys.argv[2]) if len(sys.argv) > 2 else 30
 OFF_LINE, ON_LINE = 'var STORIES_ON = false;', 'var STORIES_ON = true;'
+OFF2_LINE, ON2_LINE = 'var STORIES2_ON = false;', 'var STORIES2_ON = true;'   # stage 2 (ST1)
 
 OFF = r"""
 (() => {
@@ -35,6 +40,13 @@ OFF = r"""
     const d = momentDef(k), old = MOMENTS[k]; if (old && d && d.lines.length !== old.lines.length) out.bad.push(k + ': not the old words'); if (!old && d && d.lines === STORY_MOMENTS[k].lines) out.bad.push(k + ': a story beat while off'); }
   for (const id of ['teague-theo', 'bramwell-basil', 'halloran-emeka', 'salo-saad']) { const p = socP(id), th = voiceOf(id).thread; if (p && p.thread && th !== p.thread && !(VOICE[id] && /^arc:/.test(VOICE[id].thread || ''))) out.bad.push(id + ' thread ' + th + ', the roster says ' + p.thread); }
   if (SHIP.social.stories && SHIP.social.stories.cs) out.bad.push('SHIP.social.stories.cs written while off');
+  out.bad2 = []; out.on2 = typeof STORIES2_ON !== 'undefined' && STORIES2_ON; out.table2 = typeof STORY_MOMENTS2 !== 'undefined' ? Object.keys(STORY_MOMENTS2).length : -1;
+  if (!out.on2 && out.table2 > 0) {   // stage 2 off (ST1): none of its beats is read, wherever stage 1 is
+    for (const k of Object.keys(STORY_MOMENTS2)) { if (storyMoment(k) && storyMoment(k) === STORY_MOMENTS2[k]) out.bad2.push('stage 2 beat ' + k + ' read while STORIES2_ON is off');
+      const d = momentDef(k), old = MOMENTS[k]; if (d && d.lines === STORY_MOMENTS2[k].lines) out.bad2.push(k + ': a stage 2 beat while off'); }
+    for (const id of ['raman', 'kowalczyk', 'calder', 'torres-zeke']) if (storyIdx().beats.has(id)) out.bad2.push(id + ' is a story person while stage 2 is off');
+    for (const id of ['kowalczyk', 'mensah']) if (planDay(socP(id), 24).some(x => /^intro-story-/.test(x.tag || ''))) out.bad2.push(id + ': a stage 2 plan beat while off');
+    if (storyPlanBeats('kowalczyk', 24).length) out.bad2.push('storyPlanBeats while off'); }
   return out;
 })()
 """
@@ -52,6 +64,7 @@ RUN = r"""
       const t = live((d - 1) * 1440 + m);
       if (m === 720) for (const id of ids) { const p = socP(id); if (p && socAboard(p, d)) { relAdd(id, 'chat', 2); relAdd(id, 'meal', 3); } }
       if (m === 900) repAdd('works', 1.5, { work: 1 }, 'job');
+      if (d === 22 && m === 1360 && SHIP.works && typeof STORIES2_ON !== 'undefined' && STORIES2_ON) { SHIP.works.tier = 4; SHIP.works.rank = 'specialist'; }   // stage 2: a steady player's Engine Specialist, as night 1 starts
       if (m === 360) for (const id of ids) { const p = socP(id), mid = p && momentNextId(p), dd = mid && momentDef(mid); if (!dd || !dd.crescendo || C().book[id]) continue;   // a crescendo due but not booked: why, today
         const sl = storySlots(dd.crescendo, p, d, dd.lead || 0, dd); if (!sl.length) continue; const s0 = sl[0];
         const cast = {}; for (const c of dd.cast || []) { let n = 0; for (let x = s0.from; x < s0.to; x += 5) if (storyHere(c, p, { t: x })) n++; cast[c] = n; }
@@ -167,9 +180,9 @@ def selftest():
 
 def on_copy():
     s = pathlib.Path(BUILD).read_text()
-    if ON_LINE in s: return BUILD
-    if OFF_LINE not in s: print('STORIES CHECK: no STORIES_ON line in this build'); sys.exit(1)
-    p = ct.WORK / 'test' / ('_stories_on_' + pathlib.Path(BUILD).name); p.write_text(s.replace(OFF_LINE, ON_LINE, 1)); return str(p)
+    if ON_LINE in s and OFF2_LINE not in s: return BUILD
+    if OFF_LINE not in s and ON_LINE not in s: print('STORIES CHECK: no STORIES_ON line in this build'); sys.exit(1)
+    p = ct.WORK / 'test' / ('_stories_on_' + pathlib.Path(BUILD).name); p.write_text(s.replace(OFF_LINE, ON_LINE, 1).replace(OFF2_LINE, ON2_LINE, 1)); return str(p)
 
 fails = []
 st = selftest()
@@ -177,7 +190,11 @@ for name, ok in st: print('self-test', 'ok ' if ok else 'MISSED', name)
 fails += ['self-test missed: ' + n for n, ok in st if not ok]
 with sync_playwright() as pw:
     g = ct.Game(pw, BUILD); g.step(3); r = g.ev(OFF); errs = g.errors[:5]; g.close()
-    print(f'Part 1, the build as it is: STORIES_ON {r["on"]}, {r["table"]} story beats baked')
+    print(f'Part 1, the build as it is: STORIES_ON {r["on"]}, {r["table"]} story beats baked; STORIES2_ON {r["on2"]}, {r["table2"]} stage 2 beats')
+    if r['on'] and not r['on2']:
+        for b in r['bad2']: print('  FAIL stage 2 off:', b)
+        fails += ['stage 2 off: ' + b for b in r['bad2']]
+        if not r['bad2']: print('  stage 2 off: nothing of it read (Zeke and Calder the old words, no plan beats)')
     if not r['on']:
         for b in r['bad']: print('  FAIL off:', b)
         fails += ['off: ' + b for b in r['bad']]
