@@ -73993,7 +73993,7 @@ function sndFx(name, o) { try { return SND.fx(name, o); } catch (e) { return fal
 // the title screen's track (section 30): one of three candidates for the user to pick (plans/sound/title-music.html); SD3, 0.99
 const SND_TITLE = 'C';   // the user's pick, 2026-10-29 (Ship's log). 'A' Night terminal | 'B' Phosphor glow | 'C' Ship's log | null (silent, as TB1 built it)
 const SND_R3_ON = true;   // switched on in 0.96.0 (the user: the sound update is on when published; via lead 43/44)
-const SND_LONG = false;   // 0.99.5 (SD5, the user's note 17): after a stall (a long frame) no sound is scheduled in the past, where it starts late and bunched (pops): the loops skip to now, the music looks 2 s ahead and drops bars already gone; off: as 0.99.4
+const SND_LONG = false;   // 0.99.5 (SD5, the user's note 17): after a stall (a long frame) no sound is scheduled in the past, where it starts late and bunched (pops): the loops skip to now, the music drops bars already begun (a short gap instead); off: as 0.99.4
 const SND_BUF_ON = false;   // 0.99.5 (SD5, note 17, lead 47's option for the user): a bigger output buffer (latencyHint 'playback'), more slack for a busy phone against dropouts (crackle); taps, doors and footsteps sound about 0.1-0.2 s later; off: as 0.99.4
 const MESS_SCALE = false;   // 0.99.5 (SD5, the user's note 4): the mess hall's murmur follows how many are there, its level too; none for one crew member alone; off: as 0.99.4
 const SND = (() => {
@@ -75519,7 +75519,7 @@ const SND = (() => {
       const jumped = lastMin !== null && Math.abs(st.min - lastMin) > 30 && Math.abs(st.min - lastMin) < 1410; lastMin = st.min;
       if (set !== seenSet) { if (seenSet !== null && set !== 'chosen') log(set === 'event' ? `The ${TRACKS[event].name.toLowerCase()} is on` : `Time of day is now ${set}`); seenSet = set; }
       if (cur) {
-        cur.tick(now + (typeof SND_LONG !== 'undefined' && SND_LONG ? (pendingChange ? Math.max(0.5, Math.min(2, pendingChange.at + 0.45 - now)) : 2) : 0.5));   // 0.99.5 (SND_LONG): 2 s ahead, so a stall leaves no gap; with a change coming, no further than 0.99.4 queued past it (RV30)
+        cur.tick(now + 0.5);   // 0.5 s ahead, as before, so every hand-over sounds the same (lead 47); SND_LONG's bar drop in T.tick keeps a stall from playing late notes
         if (set !== curSet) {   // time of day (or the shift) changed: cross-fade at the end of this section, or now after a jump
           if (!pendingChange) pendingChange = { at: jumped ? now : Math.min(cur.sectionEnd(), now + cfg.sectionWait) };
           else if (jumped) pendingChange.at = now;
