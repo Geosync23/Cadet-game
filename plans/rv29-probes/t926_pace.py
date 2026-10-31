@@ -3,6 +3,7 @@
 # (CARD_S), pick answer 2; record the ship minutes the card took, the activity after, and frames to +16. (B) a fresh game,
 # a tap at end-LATE (default 4) minutes, read at pace: what happens when the card ends after the tradition. (C) a fresh game,
 # a tap at +6, save on the second card and reload: the card, the marker, joined, a second tap.
+# (LOOK's m is the minute of the day, SHIP.time.min.)
 # usage: t926_pace.py WORKTREE BUILD_ON.html [id ...]   (env CARD_S, LATE, PARTS=ABC)
 import sys, os, json, pathlib
 WT, BUILD = sys.argv[1], sys.argv[2]; IDS = sys.argv[3:]
@@ -20,7 +21,7 @@ def setup(pw, i):
 def go_to(g, f, rk, at):
     g.ev(f"(() => {{ skipTo({at}); goToDeck({f['deck']}, null); }})()"); g.step(5); g.ev(SPY); g.ev(IN % rk)
 def wait_leader(g, i, d, until):
-    for k in range(4000):
+    for k in range(1500):
         g.step(10); x = json.loads(g.ev(LOOK % (i, d)))
         if x['m'] >= until and x['tj'] and not x['tj'].startswith('other'): return x
         if x['m'] > until + 30: return x
@@ -41,7 +42,7 @@ def tap(g):
 def part_a(pw, i):
     g, f, rk = setup(pw, i); d, fr, to = f['d'], f['from'], f['to']
     print(f'== {i} A: day {d} {fr // 60:02d}:{fr % 60:02d}-{to // 60:02d}:{to % 60:02d}')
-    go_to(g, f, rk, (d - 1) * 1440 + fr - 6); x = wait_leader(g, i, d, (d - 1) * 1440 + fr + 6)
+    go_to(g, f, rk, (d - 1) * 1440 + fr - 6); x = wait_leader(g, i, d, fr + 6)
     print('   at', x['m'] % 1440 // 60, x['m'] % 60, 'leader', x['tj'], 'mark', x['mark'], 'goal', x['goal'])
     print('   tap', tap(g)); g.step(3)
     lines, t0, _ = read_card(g, 'A'); t1 = g.ev("SHIP.time.min")
@@ -54,15 +55,15 @@ def part_a(pw, i):
             g.step(10); x = json.loads(g.ev(LOOK % (i, d)))
             w = x['walk'] and x['walk'][1]
             if w != last: print('     walk', x['m'] % 1440 // 60, x['m'] % 60, x['walk'], 'here', x['here']); last = w
-            if not x['walk'] or x['m'] > (d - 1) * 1440 + to + 20: break
+            if not x['walk'] or x['m'] > to + 20: break
         r = json.loads(g.ev("JSON.stringify({ toasts: window.__toasts })")); print('   toasts', [t for t in r['toasts'] if 'Garden' in t[1] or 'garden' in t[2]][-3:])
     else:
-        while json.loads(g.ev(LOOK % (i, d)))['m'] < (d - 1) * 1440 + to + 6: g.step(30)
+        while json.loads(g.ev(LOOK % (i, d)))['m'] < to + 6: g.step(30)
         x = json.loads(g.ev(LOOK % (i, d))); print(f'   after the end: act {x["act"]} mark {x["mark"]} goal {x["goal"]}')
     print('   errors', g.errors[:3]); g.close()
 def part_b(pw, i):
     g, f, rk = setup(pw, i); d, fr, to = f['d'], f['from'], f['to']
-    go_to(g, f, rk, (d - 1) * 1440 + to - LATE - 3); x = wait_leader(g, i, d, (d - 1) * 1440 + to - LATE)
+    go_to(g, f, rk, (d - 1) * 1440 + to - LATE - 3); x = wait_leader(g, i, d, to - LATE)
     print(f'== {i} B: late tap at', x['m'] % 1440 // 60, x['m'] % 60, '(ends', to // 60, to % 60, ') leader', x['tj'], 'mark', x['mark'])
     if not x['tj'] or x['tj'].startswith('other'): print('   no leader to tap'); g.close(); return
     print('   tap', tap(g)); g.step(3); lines, t0, _ = read_card(g, 'B'); print('   card lines', len(lines), 'ended at', int(g.ev("SHIP.time.min")) % 1440)
@@ -71,7 +72,7 @@ def part_b(pw, i):
     print('   errors', g.errors[:3]); g.close()
 def part_c(pw, i):
     g, f, rk = setup(pw, i); d, fr, to = f['d'], f['from'], f['to']
-    go_to(g, f, rk, (d - 1) * 1440 + fr - 6); x = wait_leader(g, i, d, (d - 1) * 1440 + fr + 6)
+    go_to(g, f, rk, (d - 1) * 1440 + fr - 6); x = wait_leader(g, i, d, fr + 6)
     print(f'== {i} C: tap', tap(g)); g.step(3); lines, t0, stopped = read_card(g, 'C', stop_at=2)
     s = g.ev(SAVEJS); x = json.loads(g.ev(LOOK % (i, d))); print('   saved on card 2: joined', x['joined'], 'dlg', x['dlg'])
     key = g.ev("SAVE_KEY"); url = g.page.url.split('?')[0]
