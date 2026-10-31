@@ -103,3 +103,6 @@ check_fast on 181d86a: QUICK CHECK OK (329 s).
 ### SW4 fac5e56 (game 0b047d75acc513507cb4d044db441aa13fa8df09e35997e7cb48be4b9f25ed1c): PASS
 Three tradition Mails reworded (Talent night, Tap night, Midtour; the user's "change the Mail to match"); only text.mail[0].t
 changed in each row. lines PASS, names OK, check_fast OK (326 s); trad_mail.py shows the three as sent (Days 5, 152, 182).
+
+### SW4 52ea327 (game b815c01de8b8712bcc7f18fddc8b887061d9dcd178fab7e5ec4e152d1b216bd0): PASS
+New hand's tea close (mug on the rack), Tap night ask, Midtour invite line; only those fields changed. lines, names, check_fast (317 s), milestones995 OK.
