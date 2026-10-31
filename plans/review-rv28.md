@@ -123,3 +123,4 @@ Patch 0.99.5 notes 14, 15, 18. Switches JOBCAP_ON, SPREAD_ON, CHECKS_ON (section
 - **Verdict (~10:05 UTC): FIXES NEEDED** JB2 c6dc9ac + SW4 7e30feb: W1 bake the words (check_fast fails as is); F1 the
   scanner's first use is still always a washer at Tier 1 (fix or correct docs: lead's call); J1 (RV29) the old round lines
   (train.m1.follow.look/.done, round.done toast) play on the tour: tour keys + SW4 words. Re-check goes to RV29 / RV30.
+- mech_check full on c6dc9ac: MECH CHECK OK. SW4's J1 words: claude/p995-jobs-words 79628be. Handed over ~10:20 UTC; idle.
