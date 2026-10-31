@@ -9752,7 +9752,7 @@ const SAVE_SLOT = SAVE_SLOTS_ON && !NOSAVE ? (n => n >= 1 && n <= SLOT_N && n % 
 const SLOT_NEW = SAVE_SLOTS_ON && !NOSAVE ? (v => v === 'arrive' || v === 'monday' ? v : null)(slotRead(SAVE_BASE + '-new', true)) : null;
 var SLOT_HOLD = false;
 const SAVE_KEY = slotKey(SAVE_SLOT), SAVE_V = 2;
-const TRAD995_ON = false || URL_FLAGS.has('trad995');   // 0.99.5 (TB3; plans/patch-0995.md notes 8, 10, 19): Spice shelf supper tap to join, Name on the beam's spots, the tea corner's doorway (section 18's Traditions slot); off: 0.99.4. `?trad995` previews
+const TRAD995_ON = true || URL_FLAGS.has('trad995');   // 0.99.5 (TB3; plans/patch-0995.md notes 8, 10, 19): Spice shelf supper tap to join, Name on the beam's spots, the tea corner's doorway (section 18's Traditions slot); off: 0.99.4. `?trad995` previews
 // the traditions variety (0.93.2, FX24 for lead 37; CS1's pitch pages plans/trad-variety-pitch.html and -2.html on claude/crew-stories-pitch):
 // six weekly ones take turns from week 2 (TRAD_0932_WHEN: their rhythm with it on; week 1 unchanged), the user's fourteen new ones
 // (TRAD_0932_NEW, loaded only with it) and Brennan's tasting table after dinner in the galley (tasting-table-late, loaded as
@@ -49153,7 +49153,7 @@ function t932Frame() {
 // garden beds behind the host (the lap's walk, TJ_WALK, on the garden's own places). Writers' words win: t926.<id>.ask,
 // .pick.1-3, .answer.1-3 (tool night: .right, .wrong with {tool}), and join.garden-walk.done; ours are stand-ins.
 // Nothing saved beyond eventJoin's; nothing calls R(); the day picks by quizH
-const TRAD926_JOIN_ON = URL_FLAGS.has('trad926');        // off until switched on (BM22 / the lead); `?trad926` previews
+const TRAD926_JOIN_ON = true || URL_FLAGS.has('trad926');        // off until switched on (BM22 / the lead); `?trad926` previews
 const T926_IDS = new Set(['tool-night', 'route-night', 'card-night', 'garden-walk', 'window-sketch', 'window-sketch-2', 'open-house', 'spoon-band', 'worst-joke']);
 // the stand-in words (a writer's to replace: plans/handover-tb4.md lists them). join: the host's greeting; ask: the
 // question; picks: your three answers; answers: the host's reply to each (tool night: right / wrong, and its tools)
@@ -74940,9 +74940,9 @@ function sndFx(name, o) { try { return SND.fx(name, o); } catch (e) { return fal
 // the title screen's track (section 30): one of three candidates for the user to pick (plans/sound/title-music.html); SD3, 0.99
 const SND_TITLE = 'C';   // the user's pick, 2026-10-29 (Ship's log). 'A' Night terminal | 'B' Phosphor glow | 'C' Ship's log | null (silent, as TB1 built it)
 const SND_R3_ON = true;   // switched on in 0.96.0 (the user: the sound update is on when published; via lead 43/44)
-const SND_LONG = false;   // 0.99.5 (SD5, the user's note 17): after a stall (a long frame) no sound is scheduled in the past, where it starts late and bunched (pops): the loops skip to now, the music drops bars already begun (a short gap instead); off: as 0.99.4
-const SND_BUF_ON = false;   // 0.99.5 (SD5, note 17, lead 47's option for the user): a bigger output buffer (latencyHint 'playback'), more slack for a busy phone against dropouts (crackle); taps, doors and footsteps sound about 0.1-0.2 s later; off: as 0.99.4
-const MESS_SCALE = false;   // 0.99.5 (SD5, the user's note 4): the mess hall's murmur follows how many are there, its level too; none for one crew member alone; off: as 0.99.4
+const SND_LONG = true;   // 0.99.5 (SD5, the user's note 17): after a stall (a long frame) no sound is scheduled in the past, where it starts late and bunched (pops): the loops skip to now, the music drops bars already begun (a short gap instead); off: as 0.99.4
+const SND_BUF_ON = true;   // 0.99.5 (SD5, note 17, lead 47's option for the user): a bigger output buffer (latencyHint 'playback'), more slack for a busy phone against dropouts (crackle); taps, doors and footsteps sound about 0.1-0.2 s later; off: as 0.99.4
+const MESS_SCALE = true;   // 0.99.5 (SD5, the user's note 4): the mess hall's murmur follows how many are there, its level too; none for one crew member alone; off: as 0.99.4
 const SND = (() => {
   const S = { ctx: null, bus: {}, onFrame: [], log: URL_FLAGS.has('soundlog') ? [] : null };
   const ALLOWED = URL_FLAGS.has('sound') || !(navigator.webdriver || URL_FLAGS.has('mute') || NOSAVE);
