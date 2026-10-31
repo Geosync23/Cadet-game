@@ -64,6 +64,12 @@ with sync_playwright() as pw:
                 pg.ev(NEXT)
             elif s['dlgId'] is None and cards and str(CFG['beat']) and CFG['beat'] in s['told']:
                 print('TOLD', json.dumps(s)[:1100]); pg.shot(str(OUT / f'{WHO}_end.png')); phase = 'done'
+        if phase == 'done' and int(os.environ.get('ST_AFTER', '0')) > 0:   # watch what comes next (Calder's question), playing it
+            for k in range(int(os.environ['ST_AFTER'])):
+                pg.step(30); a = pg.ev(S)
+                if a['dlg']: print('AFTER', a['t'], a['dlgId'], (a['dlg'] or '')[:140]); pg.ev(NEXT)
+                elif k % 10 == 0: print('AFTER', a['t'], 'no scene', a['goal'])
+            break
         if phase == 'done' or s['t'] >= CFG['end']: break
     print('LINES', len(said)); [print('  ', x[:160]) for x in said]
     print('errors', pg.errors[:5])

@@ -70,3 +70,12 @@ Base: claude/integration 57eceec4 = 0.99.3, game sha256 04c821fe...c2a9 (verifie
   is on Deck 5 while their lines play. Suggest crewHold (section 10, looks only) on the scene's speakers while storyOpen.
 - d22a5baa switch off: cadet_test vs 57eceec4 (alone) ALL IDENTICAL. **plans_same.py** (every crew member's planDay, Days
   1-30, hashed per day): d22a5baa = 0.99.3 on all 30 days; 52bbd91c differs on Day 26 (B1), so the probe catches it.
+
+## 8de1b31b (game fd52aabe...2691): W5 (lead 47's decision): Calder 5 after end.story drops "Four weeks." + SW4's bridge line. Read: fine.
+## 87126397 (game c5e267b3...6997): B6 (ev- tag on laid beats in a tradition's held room), B7 (storyHolds: crewHold while open)
+- Read: storyPlanBeats reads eventsOn (already a planner input, section 18); crewHold takes an id. Fine.
+- Switch off: plans_same Days 1-30 identical to 0.99.3.
+- Tomas real game, ~3 s/card (probe_tomas_871_pace3.log): scene 17:52-18:17, all three stay drawn in the bay (plans move
+  on underneath), told 8, skip [9]; reload fine; no errors. B5 + B7 fixed.
+- Calder real game, ~3 s/card, end.story played first (probe_calder_871_pace3.log): end.story 18:45-18:55, story 18:58-19:28
+  with the W5 lines, cast held, told 5, skip [6], reload fine; Calder's question (end.ask) follows (19:08 in a fast run).
