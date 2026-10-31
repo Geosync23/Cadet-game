@@ -45816,6 +45816,7 @@ function eventJoin(e, d, now, notice) {
   if (e.id === 'first-light' && typeof flcJoin === 'function') flcJoin(e, d, now);   // patch #26: a free cocoa, then the meeting (section 15's slot)
   if (e.id === 'one-week-aboard' && P926_TRADS) week1Card(e, d, now);
   if (e.id === 'market' && P926_TRADS) swapCard(e, d, now);   // 0.92.6 item 2: the swap (FX17)
+  if (TRAD995_ON && MS995[e.id]) ms995Card(e, d, now);   // 0.99.5 (TB3, TR1's item 2): your milestones' moment with their host (Traditions slot)
   if (e.id === 'spice-shelf-supper' && P926_TRADS) SPICE.joined = d;   // 0.92.6 item 15: your guess card once the jars are named (spiceFrame)   // 0.92.6 item 5: Zeke goes over your first week (FX17, Traditions slot)
   if (/^rec-(wren|chiefs)-talk$/.test(e.id) && !talkLater(e, d, now)) recTalkCard(e, d, now);   // 0.92.6: a spoken talk's question card waits for its end (talkTick)   // a Wren talk: listen, or ask one question (0.83.2, RA)
   if (e.id === 'rec-talent-night') recActCard(e, d, now); // talent night: do an act, or watch (0.83.1, RA)
@@ -48801,6 +48802,44 @@ function tjMarks995() {
 // stage 2) is his own: it starts by itself when you're with him, as before
 if (TRAD995_ON) {
   TRAD_JOIN['off-the-tern'] = { host: 'raman', pose: 'talk', need: 'social', gain: 10, also: { leisure: 6 }, verb: 'welcome the new crew', what: 'stand at the foot of the ramp and welcome the new crew aboard' };
+  tjActs();
+}
+// ---- 0.99.5 TR1's item 2 (TB3, lead 47; behind TRAD995_ON): your own milestones, and Open door, get a host you tap and a
+// moment, in the shape of One week aboard (its TRAD_JOIN entry and Zeke's week1.zeke card). The new hand's tea (your first
+// Friday) and Twelve weeks aboard: Calder; Six weeks aboard: Zeke. Four weeks aboard is joined by a tap but has no card of
+// ours: Calder's crew-story scene and her career question are that evening's moment. Open door (Calder's Wednesday tea):
+// a tap, no card. Words: the writers' milestone.<id>.<key> lines when baked, else these stand-ins (MS995)
+const MS995 = {
+  'new-hands-tea': { who: 'calder', title: 'New hand\'s tea', gist: 'Calder had the new hand\'s tea with you in the tea corner.',
+    open: 'Sit. It\'s your tea. The first Friday always is.', mid: 'Five days, and nothing broken that I know of. That\'s a good week.',
+    reply: [['It\'s been a lot.', 'It is. It gets less. Then it\'s just the job.'], ['I like it here.', 'Good. So does the ship, I think.'], ['(Drink your tea)', 'Quiet\'s fine. Biscuit?']],
+    close: 'Same tea every Friday. Come when you can.' },
+  'six-weeks-aboard': { who: 'torres-zeke', title: 'Six weeks aboard', gist: 'Zeke had a tea with you in the bow lounge: six weeks aboard.',
+    open: 'Six weeks! Sit down. I got you the good mug.', mid: 'Remember your first day? You held that spanner like it might bite.',
+    reply: [['It still might.', 'Ha! It won\'t. Probably.'], ['Thanks for sticking with me.', 'Any time. You made it easy. Mostly.'], ['What\'s next?', 'Bigger jobs. Calder\'s watching you. In a good way.']],
+    close: 'To six weeks. Plenty more where they came from.' },
+  'twelve-weeks-aboard': { who: 'calder', title: 'Twelve weeks aboard', gist: 'Calder raised a cup to your twelve weeks aboard, in the mess.',
+    open: 'Twelve weeks. A quarter of a year aboard.', mid: 'I don\'t give speeches. This isn\'t one.',
+    reply: [['Thank you, Chief.', 'Don\'t thank me. You did the work.'], ['Here\'s to the next twelve.', 'Here\'s to them.'], ['(Raise your cup)', 'Good.']],
+    close: 'To the new hand. Not so new now.' },
+};
+function ms995Card(e, d, now) {
+  const M = MS995[e.id]; if (!M || typeof dialogueShow !== 'function' || !schedPeople().some(p => p.id === M.who)) return;
+  const W = (k, fb) => quizText('milestone.' + e.id + '.' + k, d, {}) || fb;
+  MEETING_SCRIPTS['ms995.' + e.id] = { title: M.title, from: (evPerson(M.who) || {}).name, gist: M.gist,
+    lines: [{ who: M.who, text: W('open', M.open), pose: 'gesture' }, { who: M.who, text: W('mid', M.mid), to: 'you' },
+      { choice: M.reply.map(([t, r], k) => ({ text: W('reply.' + (k + 1), t), rel: { [M.who]: 2 }, reply: { who: M.who, text: W('answer.' + (k + 1), r) } })) },
+      { who: M.who, text: W('close', M.close), pose: 'nod' }] };
+  dialogueShow('ms995.' + e.id, { id: 'ms995.' + e.id + '@' + d, who: [M.who], at: now, ...p926Where(e) });
+}
+if (TRAD995_ON) {
+  Object.assign(TRAD_JOIN, {
+    'new-hands-tea': { host: 'calder', pose: 'sit:drink', need: 'social', gain: 15, also: { leisure: 8 }, verb: 'have your tea with her', what: 'have the new hand\'s tea with the Works crew' },
+    'four-weeks-aboard': { host: 'calder', pose: 'sit:drink', need: 'social', gain: 15, also: { leisure: 8 }, verb: 'join them', what: 'have a slice of the four-weeks cake with the Works crew' },
+    'six-weeks-aboard': { host: 'torres-zeke', pose: 'sit:drink', need: 'social', gain: 15, also: { leisure: 8 }, verb: 'sit down with him', what: 'have a tea with Zeke: six weeks aboard' },
+    'twelve-weeks-aboard': { host: 'calder', pose: 'sit:talk', need: 'social', gain: 15, also: { leisure: 8 }, verb: 'raise a cup with them', what: 'sit down for Calder\'s toast: twelve weeks aboard' },
+    'open-door': { host: 'calder', pose: 'drink', need: 'social', gain: 10, also: { leisure: 6 }, verb: 'have tea with the Chief', what: 'end-of-shift tea with the Chief' },
+  });
   tjActs();
 }
 // ---- end of slot: Traditions engineer ----
