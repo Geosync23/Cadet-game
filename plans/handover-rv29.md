@@ -10,6 +10,9 @@ session_014zyJYNgBPdEPHLxTGrM889. Branch claude/review-rv29: notes only (plans/r
   the real talk length (was a flat share of 15).
 - CT5 claude/p995-controller 7c6c2477 (game 5fae9bbf...f0cd): notes 2, 5, 6. PASS.
 
+- TB4 claude/p995-trad926 bd0fa61 (game 347b4996...d2e9, TB4 + SW4's words): the 0.92.6 traditions' Tap to join. PASS
+  (~14:10 UTC). Non-blocking note: a tap in the last ~7 min runs the card past the end (as the 0.93.2 joins).
+
 ## Probes (plans/rv29-probes; the Dev ones exec the worktree's devmode_check.py harness, the paper ones cadet_test's Game)
 - tour_play.py WT BUILD OUT: Day 2 Dev jump, Zeke's rounds talk, the first round taken, every stop walked and its card
   pressed, save + reload after stop 2, turn in; logs Zeke's lines, toasts, tips, cards.
@@ -19,6 +22,8 @@ session_014zyJYNgBPdEPHLxTGrM889. Branch claude/review-rv29: notes only (plans/r
 - crew_doors.py WT BUILD: crew rooms each minute + locked doors drawn open, a hash to compare builds.
 - talk_play.py WT BUILD N: real-game Talk a while (stands you next to a seated person), meter, lines, rewards.
 - seat_sweep.py WT BUILD, seat_shot.py WT BUILD OUT: the seat button by every public seat; a real click.
+- t926_pace.py WT BUILD_ON [ids]: TB4's traditions at a reader's pace (A), a late tap (B), reload on card 2 (C); uses TB4's
+  plans/tb4-probes/t926_probe.py helpers. LOOK's m is the minute of the day. overlap73.py WT BUILD [DAY MIN]: joinables on now.
 - seat_talk_pad.py BUILD WT: controller, seated, D-pad right through the ring, A on the 2nd and 3rd person.
 
 ## Gotchas
