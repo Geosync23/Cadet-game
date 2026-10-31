@@ -46,8 +46,20 @@ words owner) can't be reached from this account; lead 47 makes the canon calls.
 - You get one heartfelt moment a day across the crew: a player friends with everyone misses some big scenes (by design).
 - Two browser checks at a time where you can; pause for the lead's rounds.
 
+## RV28's review so far (all fixed, on claude/stories2-st1)
+- B1 (06b34775): storyCastGoes' return was inside a mid-line comment; stage 1's live hook broke with the switch off.
+  stories_check part 1 now asserts storyCastGoes(captains-address, kovac-zainab, 19/26) are true.
+- F2/F4 (d879203b): storyDayHeld holds a day only if the holder's scene can happen (its slot and storyGates); Calder 5's
+  Pell aside only if here:pell. myrank reads playerRank().
+- B5 (d22a5baa): a crescendo still on screen when its booking ends is told, not missed (storyOpen; storyDone clears the
+  skip). stories_check part 2b plays Tomas 8 across its booking's end. Stage 1's same skip: backlog ST1-1 (fixed only on).
+- W5 (8de1b31b, lead 47): after Calder's career speech (flag end.story), no second "Four weeks", and SW4's bridge line.
+- B6 (87126397): laid beats in a tradition's held room are tagged ev-<id> (they count as going). B7: storyHolds keeps an
+  open crescendo's people where they are (section 10's crewHold), released when the scene ends.
+- SW4's new invite words for Tomas 8 (b4f18593).
+
 ## Loose ends / open
-- RV28's full verdict pending at the time of writing.
+- RV28's final verdict pending at the time of writing (last sha 87126397, game c5e267b3...6997).
 - Kowalczyk's quiet ending says "If you had no night shift at all, the builders play only beat 5": not built (her beats 2-3
   are skipped when their days pass, her quiet ending still plays on Day 24).
 - Leaving your engine-room night for her dawn: the time clock signs you out at 06:00 with its usual "forgot to clock out"
