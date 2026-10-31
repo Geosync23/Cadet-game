@@ -40,7 +40,7 @@ def beam(pw, k):
     for _ in range(160):
         g.step(30)
         if g.ev('beamReady()'): break
-    ready = g.ev('beamReady()'); paint = g.ev('beamPaint()')
+    ready = g.ev('beamReady()'); opened = g.ev('hhmm(SHIP.time.min)'); print('  %s: the beam opened at %s' % (k, opened)); paint = g.ev('beamPaint()')
     worst = []; shots = 0
     for i in range(60):
         g.step(15); r = json.loads(g.ev(OVER))

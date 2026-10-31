@@ -46089,7 +46089,7 @@ function beamGather() {
     let inBay = false; try { inBay = roomAt(...player.here()) === BEAM.room; } catch (x) { inBay = false; }
     const now = shipNow(), m = now - (e.day - 1) * 1440, sp = placeSpot('5-beam-1');
     if (!inBay || !sp) return;
-    const at = DECK_CREW.filter(c => c.p && Math.hypot(c.x - sp.x, c.z - sp.z) <= BEAM_NEAR && (o => o && o.now && o.e.id === e.id)(eventOf(c.p, now))).length;
+    const at = DECK_CREW.filter(c => c.p && Math.hypot(c.x - sp.x, c.z - sp.z) <= (TRAD995_ON ? 6.5 : BEAM_NEAR)   /* (0.99.5 note 8) they stand from row 3 back now */ && (o => o && o.now && o.e.id === e.id)(eventOf(c.p, now))).length;
     if (at < BEAM_CROWD && m < e.from + BEAM_WAIT) return;
     const L = beamLines(e), per = BEAM_GAP / 1000 * SHIP_RATE, k = Math.max(0, Math.floor((e.to - m - BEAM_SPARE) / per));   // ship minutes a line takes; how many fit
     B.q = k ? L.slice(-k) : []; B.next = simNow();
