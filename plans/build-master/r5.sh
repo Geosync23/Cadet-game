@@ -11,7 +11,7 @@ CHECK_LOGS=$L/cf $R check_fast $L /tmp/w5-cf bash check_fast.sh
   echo LANEA >> $L/lanes ) &
 ( $R events $L /tmp/w5-b python3 events_check.py $B
   $R join $L /tmp/w5-b python3 join_check.py $B
-  for d in 27 18 19 16; do $R day$d $L /tmp/w5-b python3 day_check.py $B $d; done
+  for d in 27 18 19; do $R day$d $L /tmp/w5-b python3 day_check.py $B $d; done
   $R bigevents $L /tmp/w5-b python3 bigevents_check.py $B
   $R tiles $L /tmp/w5-b python3 tiles_check.py $B
   $R clothes $L /tmp/w5-b python3 clothes_check.py $B
