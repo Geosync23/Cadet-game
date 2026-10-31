@@ -120,3 +120,6 @@ Patch 0.99.5 notes 14, 15, 18. Switches JOBCAP_ON, SPREAD_ON, CHECKS_ON (section
 - SW4 words 7e30feb (on c6dc9ac; content only): **W1 not baked** (content_gen --check: OUT OF DATE, so check_fast's "words
   baked" fails). Baked in a scratch copy (game 0003683b...): content_gen up to date, names_check OK, lines_check PASS;
   jb_words.py: the tour uses every new word (tips, title, readings, 31 check points, 0 stand-ins), Zeke's talk 7 lines.
+- **Verdict (~10:05 UTC): FIXES NEEDED** JB2 c6dc9ac + SW4 7e30feb: W1 bake the words (check_fast fails as is); F1 the
+  scanner's first use is still always a washer at Tier 1 (fix or correct docs: lead's call); J1 (RV29) the old round lines
+  (train.m1.follow.look/.done, round.done toast) play on the tour: tour keys + SW4 words. Re-check goes to RV29 / RV30.
