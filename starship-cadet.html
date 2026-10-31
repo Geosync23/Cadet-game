@@ -48795,6 +48795,14 @@ function tjMarks995() {
     if (vis) el.style.transform = 'translate(' + Math.round((tjV.x + 1) * innerWidth / 2) + 'px,' + Math.round((1 - tjV.y) * innerHeight / 2 - 6) + 'px) translate(-50%,-100%)';
   });
 }
+// ---- 0.99.5 TR1's item 4 (TB3, lead 47; behind TRAD995_ON): Off the Tern, tap to join, as the design has it ("it's in your
+// Schedule with Mail the evening before, and you can tap to join"). Dev Raman hosts (he says the word at 17:40 and the ramp
+// opens); a tap on him or anyone watching stands you with them in the shuttle bay. Tomas's Day 21 scene there (crew stories
+// stage 2) is his own: it starts by itself when you're with him, as before
+if (TRAD995_ON) {
+  TRAD_JOIN['off-the-tern'] = { host: 'raman', pose: 'talk', need: 'social', gain: 10, also: { leisure: 6 }, verb: 'welcome the new crew', what: 'stand at the foot of the ramp and welcome the new crew aboard' };
+  tjActs();
+}
 // ---- end of slot: Traditions engineer ----
 // ---- slot: Events engineer 2 (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----
 // ---- the events base, F0b (EV2; plans/events-base-brief.md): called in on a day off, and an event meeting's cast in
