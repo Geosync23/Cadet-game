@@ -119,3 +119,4 @@ BM23 96d902e: the edit as agreed, PASS (check-only). Sent to BM23 and lead.
 
 ## Build job: tea fix claude/p995-tea-fix ee66e35b (game 93aed54fa9296e75c308ae199cbac32465c776c650161fe41bf22535839a5164), on 247fc12
 For lead 48 (BM23 interactions FAIL, hot water sat you in a chair). ixTeaFirst in ixTap sort (TRAD995_ON). Gates all OK. Reviewer: RV29.
+RV29 PASS on ee66e35b (sent to BM23 and lead 48).
