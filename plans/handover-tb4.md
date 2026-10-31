@@ -60,3 +60,5 @@ SW4 wrote the real words: claude/p995-trad926-words ef310be (content/banks/trad-
 All nine pass with the switch on. For the merge: on Day 73 Card night (19:30-20:30) overlaps the tasting table
 (20:00-20:45) on Deck 3 (Card night's second room is the bow lounge); without TB3's 4037a26 (the room you're in wins)
 the first one hides the other's marker. With both merged it should be fine; RV29 checks.
+TB4 re-ran its own probe on 2c3b2a7 (SW4's words in; game 347b4996...d2e9): all nine OK (Tool night and Garden walk
+earlier, the other seven now), the writer's lines on every card.
