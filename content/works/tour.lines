@@ -13,6 +13,8 @@
 - Checked
 == round.tour.goal
 - Check {thing}
+== round.tour.done
+- Tour done. Anything that wasn't right is on the board, noted by you.
 == round.tour.noted
 - Noted on the board: {machine} isn't quite right. Someone will see to it.
 
