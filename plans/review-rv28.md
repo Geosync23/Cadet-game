@@ -84,3 +84,11 @@ Base: claude/integration 57eceec4 = 0.99.3, game sha256 04c821fe...c2a9 (verifie
   day_check 21, 22, 23, 24, 25, 26 OK.
 - Words: no repeated spoken lines in stage 2; **W6** "That's the air on Deck 2" (Kowalczyk 2, writer's original): a deck
   number on screen; asked ST1 to reword.
+
+## df5057d (game 6f8e1429...633c): W6 only ("the air coming up from below"); the game differs from 87126397 by that text alone (checked); names_check OK
+## Verdict (2026-10-31 ~05:42 UTC): **PASS claude/stories2-st1 df5057d** (game 6f8e1429fe3d358fc6a52c44c35c13ad06cf72fe28c01cde0ba2e4599c0f633c)
+- Fixed on the way: B1 (stage 1 hook broken with the switch off), F2, F4, B5 (scene expiring mid-play), W5 (lead's call),
+  B6 (held places), B7 (cast walking off), W6. All checks above are on 87126397, which equals df5057d but for W6's text.
+- Non-blocking notes kept: stage 1's own mid-scene expiry (backlog ST1-1, switch-off game unchanged); storyDoorOpen runs in
+  bridgeBarred per edge on Deck 1 (switch-on, perf not measured beyond day_check draw calls); the 06:00 "You forgot to clock
+  out" toast after Kowalczyk's dawn is harmless.
