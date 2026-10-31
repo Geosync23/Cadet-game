@@ -2207,3 +2207,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~11:32 UTC: OB2 fixes claude/p995-onboarding 6c926f4 (game 572e9c6d...48cb4): health check cannot go missed once started, no rebook after it; invitations name their tradition and fold into its Calendar row. All OK. -> RV30.
 - ~11:32 UTC: PL2 handover 4de9da1. Backlog note PL2-1 (old, not this work): a full Talk a while gives +15 social in probes on 0.99.4 and 0.99.5 (design says +30) -> BM22 to add the backlog row with the round record.
 - ~11:39 UTC (7:39 AM ET) check-in: all moving. BM22 merging PL2 (2 of 7). TB3 ~48% finishing tea (a) re-run + push + handover. TB4: Tool night probe passes, probing the other seven. RV29 on CT5; RV30 on SD5 a5ce274, OB2 6c926f4, TB3. 0.99.4 waits for the user.
+- ~11:46 UTC: BM22 PL2 merged + gated + pushed (staging-0995 fd0078f7, game fca7a8e6...c2f2; + backlog PL2-1); cadet vs JB2 tip ALL IDENTICAL. 2 of 7 in.
