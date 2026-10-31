@@ -43,3 +43,10 @@ Proof it is not the build:
   clash if two player_checks share a CADET_WORK (not the case here). Both are worth a backlog row for the check's owner.
 
 **R1: OK on 8976965e** (14 of 14; player_check's one-off Saving FAIL did not repeat in four reruns on the candidate and passes on OLD).
+
+## Backlog row to add (R1-1)
+
+`plans/backlog.md` is not on this branch (it starts from claude/lead-47), so the row is here, ready to paste after
+BM22-1 in the newest table form (`| # | Bug |`):
+
+| R1-1 | **player_check's Saving part can read a reloaded page too soon on a busy host** (found by R1 in the 0.99.4 round, 2026-10-31; explained by RV28; `player_check.py`, the Saving part's `load()`). `load()` waits only for `window.__sc` before reading `SHIP`, so with two browsers on 4 cores one run read each reload as the step before it: `FAIL a v 1 save should load with needs at 80` (a fresh game's needs, day 0) and `FAIL a v 2 save should load its needs` (all 80s). It did not repeat in five reruns (the candidate x3 incl. RV28's alone, OLD x2) and the game's saving is unchanged; not a game fault. Also: the part writes a fixed page name, `WORK/test/_save_check.html`, which two player_checks sharing one CADET_WORK would overwrite (other checks use per-run names, e.g. arrows_check's `RUN_ID`). Fix (the check's owner): wait until the save has loaded (e.g. `SHIP.time.day` set from the save, or a load-done flag) before reading, and give the page a per-run name. |
