@@ -12,7 +12,7 @@ JS = r"""((n, mode, at) => { setShipNow(at); if (deckDef.num !== n) goToDeck(n);
     for (let s = 0; s < 2; s++) { const me = cs[s], far = cs[1 - s]; if (!free(...me) || !free(...far)) continue;
       const p = cellPos(...me); player.obj.position.set(p.x, 0, p.z); player.path = [];
       const path = findPath(me, far, null, player), d = DOOR_OBJS.find(o => o.e.key === k), slide = d ? crewNearDoor(d) : null;
-      out.push([k, rs[s] + '>' + rs[1 - s], !!path, slide, !!edgeBlocks(e, player), LB ? LB(rs[1 - s]) : null]); } }
+      out.push([k, rs[s] + '>' + rs[1 - s], !!path, slide, !!edgeBlocks(e, player), LB ? LB(rs[1 - s]) : null, LB ? LB(rs[s]) : null]); } }
   DECK_CREW.push(...crew0); return out; })"""
 with sync_playwright() as pw:
     g = ct.Game(pw, sys.argv[2])

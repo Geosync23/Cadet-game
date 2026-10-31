@@ -26,3 +26,18 @@ What to check (lead 47, 10:08): W1 words baked (content_gen --check, check_fast)
 rotates over the water recycler / pumps / irrigation (Tier 2 machines), never a washer, held for you with { tier: 2 } as
 the Tier 2 test job is, takeable at Tier 1, work within the 40-minute cap (rv28/jb_scan.py, days 6-30, plus a take at
 Tier 1); J1 the tour's own lines (tour_play.py); machine_check, mech_check; switches off still identical to 8976965e.
+
+### JB2 re-review on claude/p995-jobs 1e056bd (game ef0941da...7d04, verified; game last changed 21552d1)
+- Code read c6dc9ac..1e056bd: fixScanMachine up to Tier 2 (never a washer); fixScanTick reserves it with { tier: 2 } (jobReserve's
+  test-job path); the tour's follow keys train.m1.follow.tour.look/.done (onSim 'job', m1 + CHECKS_ON) and roundDone's
+  round.tour.done on j.train; SW4's words baked.
+- F1: rv28/jb_scan.py: Days 6-30 rotate over all nine Tier 2 pump machines (4-pump-1/2, 5-pump-1/2, 3-pump-1, recycler,
+  irrigation, nutrient, heater), never a washer. scan_take.py (Tier 1 player, Days 6/9/14/17): on your board, claimJob true,
+  work 24 min (board says 24), cause pump, no made part (make dropped with a cause): within 40.
+- J1: tour_play.py in the real game: after each stop "Ticked. Good look, that. Right, onward."; at the end "That's the tour.
+  Five checks, all done properly. Anything not right is on the board." and the toast "Tour done. Anything that wasn't right is
+  on the board, noted by you." No old round lines. Save/reload mid-tour fine; no page errors.
+- W1: content_gen up to date (check_fast's words baked OK); SW4's talk, tips, cards in the real game.
+- cadet_test switches off vs 8976965e: ALL IDENTICAL. check_fast: QUICK CHECK OK 317 s. mech_check m1 m7: (below).
+- Note (not blocking): after the last stop Zeke says "Right, onward." just before "That's the tour" (the look line fires on
+  every stop, the last too; the same order as 0.99.4's round).
