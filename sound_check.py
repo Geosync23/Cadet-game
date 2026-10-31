@@ -662,6 +662,12 @@ def check_hide(pw, path):
             back = g.ev("[SND._.state(), PAUSE.on]")
             check(back[0] == ('suspended' if back[1] else 'running'), f'hide: back from {how}, the sound follows the pause ({back})')
             if back[1]: g.ev("pauseSet(false)"); g.step(5); g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000)
+        # RV30's race: hidden while a resume is still on its way (Resume or a tap, then away at once): it must end quiet
+        g.ev("pauseSet(true)"); g.step(3); g.page.wait_for_function("window.__sc('SND._.state()') === 'suspended'", timeout=10000)
+        g.ev(f"SND.ctx.resume(); ({HIDE})('visibilitychange')"); g.page.wait_for_timeout(1000)
+        st = g.ev("SND._.state()"); print(f'  hide while resuming: {st}')
+        check(st == 'suspended', f'hide: hidden while a resume is on its way, the sound ends stopped ({st})')
+        g.ev("delete document.hidden; delete document.visibilityState; document.dispatchEvent(new Event('visibilitychange'))")
         pe = [e for e in g.errors if e.startswith('pageerror')]
         if pe: check(False, 'hide: page errors: ' + ' | '.join(pe[:3]))
     finally: g.close()
@@ -699,8 +705,10 @@ def check_mess_scale(pw, path):
         pe = [e for e in g.errors if e.startswith('pageerror')]
         if pe: check(False, 'mess_scale: page errors: ' + ' | '.join(pe[:3]))
     finally: g.close()
-LATE = """(() => { if (window.__late) return; const L = window.__late = { n: 0 }, S = AudioScheduledSourceNode.prototype, f = S.start;
-  S.start = function (...a) { const c = this.context; if (c.state === 'running' && (a[0] || 0) > 0 && a[0] < c.currentTime - 0.005) L.n++; return f.apply(this, a); }; })()"""
+LATE = """(() => { if (window.__late) return; const L = window.__late = { n: 0, p: 0 }, S = AudioScheduledSourceNode.prototype, f = S.start;
+  S.start = function (...a) { const c = this.context; if (c.state === 'running' && (a[0] || 0) > 0 && a[0] < c.currentTime - 0.005) L.n++; return f.apply(this, a); };
+  const P = AudioParam.prototype, c = SND.ctx;   // and volume or pitch moves set in the past (RV30: late starts alone can miss it)
+  for (const k of ['setValueAtTime', 'linearRampToValueAtTime', 'exponentialRampToValueAtTime', 'setTargetAtTime']) { const g = P[k]; P[k] = function (...a) { if (c.state === 'running' && a[1] > 0 && a[1] < c.currentTime - 0.005) L.p++; return g.apply(this, a); }; } })()"""
 STALL = "(s => { const c = SND.ctx, t = c.currentTime; let k = 0; while (c.currentTime - t < s) k++; return k; })"   # the page held busy for s seconds of audio time
 def stall_lates(pw, path):
     g = Game(pw, path)
@@ -712,8 +720,8 @@ def stall_lates(pw, path):
         for _ in range(8): g.page.wait_for_timeout(500); g.step(2)
         g.ev(LATE); res = []
         for _ in range(4):
-            g.ev("window.__late.n = 0"); g.ev(f"({STALL})(1.2)"); g.step(2); g.page.wait_for_timeout(600); g.step(2)
-            res.append(g.ev("window.__late.n"))
+            g.ev("window.__late.n = 0; window.__late.p = 0"); g.ev(f"({STALL})(1.2)"); g.step(2); g.page.wait_for_timeout(600); g.step(2)
+            res.append(g.ev("window.__late.n + window.__late.p"))
         playing = g.ev("[SND.music.state().name, !!SND.r3Mess.scene, SND._.LOOPS.size]")
         return res, playing, [e for e in g.errors if e.startswith('pageerror')]
     finally: g.close()
@@ -722,11 +730,12 @@ def check_long(pw, path):
     start is a pop); with it off, as before (late starts after a stall)"""
     on = switch_copy(path, 'const SND_LONG = false;', 'const SND_LONG = true;')
     if not on: print('  long: no SND_LONG in this build (nothing to check)'); return
-    r_on, p_on, pe = stall_lates(pw, on); print(f'  long on: late starts after each of 4 stalls {r_on}, playing {p_on}')
-    check(sum(r_on) <= 2 and p_on[0] and p_on[1], f'long: switched on, (almost) nothing starts late after a stall, and the music and the mess still play ({r_on}, {p_on})')
+    r_on, p_on, pe = stall_lates(pw, on); print(f'  long on: late starts and moves after each of 4 stalls {r_on}, playing {p_on}')
+    check(sum(r_on) <= 2 and p_on[0] and p_on[1], f'long: switched on, (almost) nothing starts or moves late after a stall, and the music and the mess still play ({r_on}, {p_on})')
     if pe: check(False, 'long: page errors: ' + ' | '.join(pe[:3]))
     if on != path:   # the build has it off: as before, for the record
-        r_off, p_off, _ = stall_lates(pw, path); print(f'  long off (as 0.99.4): late starts after each stall {r_off}')
+        r_off, p_off, _ = stall_lates(pw, path); print(f'  long off (as 0.99.4): late starts and moves after each stall {r_off}')
+        check(sum(r_off) > 2, f'long: the check can see the problem: with the switch off, sound starts or moves late after a stall ({r_off})')
 CHECKS += [check_hide, check_mess_scale, check_long]   # 0.99.5 (SD5): notes 9, 4, 17
 def check_buf(pw, path):
     """note 17's option (SND_BUF_ON, on a copy): the bigger output buffer (latencyHint 'playback'): the context starts with

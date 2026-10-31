@@ -75519,7 +75519,7 @@ const SND = (() => {
       const jumped = lastMin !== null && Math.abs(st.min - lastMin) > 30 && Math.abs(st.min - lastMin) < 1410; lastMin = st.min;
       if (set !== seenSet) { if (seenSet !== null && set !== 'chosen') log(set === 'event' ? `The ${TRACKS[event].name.toLowerCase()} is on` : `Time of day is now ${set}`); seenSet = set; }
       if (cur) {
-        cur.tick(now + (typeof SND_LONG !== 'undefined' && SND_LONG ? 2 : 0.5));   // 0.99.5 (SND_LONG): 2 s ahead, so a stall leaves no gap
+        cur.tick(now + (typeof SND_LONG !== 'undefined' && SND_LONG ? (pendingChange ? Math.max(0.5, Math.min(2, pendingChange.at + 0.45 - now)) : 2) : 0.5));   // 0.99.5 (SND_LONG): 2 s ahead, so a stall leaves no gap; with a change coming, no further than 0.99.4 queued past it (RV30)
         if (set !== curSet) {   // time of day (or the shift) changed: cross-fade at the end of this section, or now after a jump
           if (!pendingChange) pendingChange = { at: jumped ? now : Math.min(cur.sectionEnd(), now + cfg.sectionWait) };
           else if (jumped) pendingChange.at = now;
@@ -75732,7 +75732,8 @@ const SND = (() => {
   // 0.99.5 (SD5, the user's note 9): a hidden page (another app or window, on Android too) draws no more frames, so S.frame
   // above never got to suspend and the sound played on under the pause: suspend at once as the page hides, freezes or goes;
   // S.frame resumes it on a drawn frame, as before (paused by section 15, so not till Resume)
-  const hideNow = () => { if (!ctx || ctx.state !== 'running') return; busy = true; ctx.suspend().then(() => busy = false, () => busy = false); };
+  const hideNow = () => { if (!ctx || ctx.state === 'closed') return; busy = true;   // even 'suspended': a resume still on its way (a tap, then away at once) would finish after it (RV30)
+    ctx.suspend().then(() => busy = false, () => busy = false); };
   document.addEventListener('visibilitychange', () => { if (document.hidden) hideNow(); });
   addEventListener('pagehide', hideNow); document.addEventListener('freeze', hideNow);
 
