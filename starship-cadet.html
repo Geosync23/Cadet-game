@@ -9752,6 +9752,7 @@ const SAVE_SLOT = SAVE_SLOTS_ON && !NOSAVE ? (n => n >= 1 && n <= SLOT_N && n % 
 const SLOT_NEW = SAVE_SLOTS_ON && !NOSAVE ? (v => v === 'arrive' || v === 'monday' ? v : null)(slotRead(SAVE_BASE + '-new', true)) : null;
 var SLOT_HOLD = false;
 const SAVE_KEY = slotKey(SAVE_SLOT), SAVE_V = 2;
+const TRAD995_ON = false || URL_FLAGS.has('trad995');   // 0.99.5 (TB3; plans/patch-0995.md notes 8, 10, 19): Spice shelf supper tap to join, Name on the beam's spots, the tea corner's doorway (section 18's Traditions slot); off: 0.99.4. `?trad995` previews
 // the traditions variety (0.93.2, FX24 for lead 37; CS1's pitch pages plans/trad-variety-pitch.html and -2.html on claude/crew-stories-pitch):
 // six weekly ones take turns from week 2 (TRAD_0932_WHEN: their rhythm with it on; week 1 unchanged), the user's fourteen new ones
 // (TRAD_0932_NEW, loaded only with it) and Brennan's tasting table after dinner in the galley (tasting-table-late, loaded as
@@ -10753,6 +10754,7 @@ function schedBuild(p, d, occ, S) {
           const i = j % pool.length, pass = Math.floor(j / pool.length);
           const pl = pool[(fav + i) % pool.length], mine = ownL.length > 0 && S.owner.get(pl.id).length === 1;
           if (pref && (pass === 0 ? !pref.has(pl.id) || avoid.has(pl.id) : pass === 1 ? pref.has(pl.id) || avoid.has(pl.id) : !avoid.has(pl.id))) continue;
+          if (o.sit && pl.pose !== 'sit') continue;     // o.sit: seats only (the 13:00 tea, 0.99.5 note 10)
           if (!mine && !isFree(pl.id, s, end, o.tag)) continue;
           if (shut && evClosed(pl, B + s, o.event, B + end)) continue;   // closed for the event
           if (P5_STEP5 && sdPlanShut(d, occ, pl, B + s, B + end, p)) continue;   // Step 5's settled records (24w): a shutdown booked for that hour, a routine moved (24k's P9); read only from records settled at 22:00 the evening before
@@ -10838,7 +10840,7 @@ function schedBuild(p, d, occ, S) {
         e.done = true; continue;
       }
       if (kind === 'tea') { if (!take('leisure', [[wd, 'lounge-seat'], [wd, 'bench']], 15, { tag: 'tea' })) work(t + 15); }
-      else if (kind === 'wtea') { if (!take('leisure', [[5, 'lounge-seat']], WORKS_TEA.dur, { tag: 'tea', wait: WORKS_TEA.wait, min: 8, anim: 'drink' })) work(t + 5); }   // the tea corner full: back to the job
+      else if (kind === 'wtea') { if (!take('leisure', [[5, 'lounge-seat']], WORKS_TEA.dur, { tag: 'tea', wait: WORKS_TEA.wait, min: 8, anim: 'drink', sit: TRAD995_ON })) work(t + 5); }   // (0.99.5 note 10, TRAD995_ON: the user's "nobody sits down for tea": the two seats only)   // the tea corner full: back to the job
       else if (kind === 'staff') seg('dinner', t + 20, wtype, desk, { tag: 'staff' });
       else if (kind === 'recRound') recRound(to);
       else if (kind === 'call') {                       // to the booths and back on the shift's time (tag 'rush')
@@ -48641,7 +48643,6 @@ function tastJoin(e, a, notice, lead) {
 // the reveal waits for it. Words: SW1's spice.* (each jar's line fits its place: no "Last dish" first); the spice small
 // mid-sentence and capital at the start; a guess never names its speaker. SHIP.spice = { joined, asked } is saved, so a
 // reload mid-supper keeps the card (and doesn't ask twice). Nothing calls R(); the planner reads none of it
-const TRAD995_ON = false || URL_FLAGS.has('trad995');
 const SPICE995 = { day: 0, t0: 0, step: 0, last: 0, said: 0, cardAt: 0 };
 if (TRAD995_ON) {
   TRAD_JOIN['spice-shelf-supper'] = { host: 'brennan', pose: 'sit:talk', need: 'social', gain: 10, also: { leisure: 8 }, verb: 'guess the spices', what: 'sit down to supper and guess whose spices' };
@@ -48734,6 +48735,31 @@ function spiceJoin(e, a, notice) {
   const f = foodFrom('servery');
   actStart('eat', pl.id, { title, fed: true, dish: f && f.ok && f.dish ? f.dish : 'Brennan\'s spice supper', pose });
   return true;
+}
+// ---- 0.99.5 note 10 (TB3, lead 47's decision on TR1's finding; behind TRAD995_ON): Tea and biscuits ("nobody sits down
+// for tea, they just walk up to it, and they trap you in that small room"). The tea corner's standing place 5-tea-3 stood on
+// its doorway tile [21, 1] (the door v,21,1), so someone always stood by the door at the table and you couldn't get out. It
+// moves to the far corner [23, 2], facing the table (everyone who uses it follows: Open door, the promotion cake, CQ), and
+// [21, 1] is left clear; the 13:00 tea takes only the two seats (section 14's take, o.sit). Zeke's Day 1 tea spot is also
+// [23, 2] (INTRO_TEA_AT), at 13:00 on a Monday, when nobody is planned at 5-tea-3 now
+if (TRAD995_ON) {
+  const t3 = DECKS[5].places.find(pl => pl.id === '5-tea-3');
+  if (t3) Object.assign(t3, { at: [23, 2], face: -152 });
+  if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }
+}
+// ---- 0.99.5 note 8 (TB3, lead 47's decision on TR1's finding; behind TRAD995_ON): Name on the beam ("where you stand to
+// write isn't where the name goes: scoot the player over; crew speech buttons cover the name: slide those crew over"). Your
+// name is BEAM.slots[0], along 4.98 of the bay's hull wall (x about 14.4-15.6, the next hand's under it); you painted from
+// [13, 0], 1.4 m west of it. 5-beam-1 moves under it, [14, 0] at x 14.98; the two watchers under the name (5-beam-2 [14, 1],
+// 5-beam-3 [15, 1]) move off its span, west to [13, 1] and east to [18, 1], and every watcher faces the new spot. The floor
+// tap (beamFloorTap) and the controller's (padBeamOn) read 5-beam-1's spot, so they follow
+if (TRAD995_ON) {
+  const P5 = DECKS[5].places, at = (id, o) => { const pl = P5.find(q => q.id === id); if (pl) Object.assign(pl, o); };
+  const X = 14.98, Z = .75;
+  at('5-beam-1', { at: [14, 0], xy: [X, Z] });
+  at('5-beam-2', { at: [13, 1], xy: [13.5, 1.5] }); at('5-beam-3', { at: [18, 1], xy: [18.5, 1.5] });
+  for (const pl of P5) if (/^5-beam-[2-8]$/.test(pl.id)) pl.face = Math.round(Math.atan2(X - pl.xy[0], Z - pl.xy[1]) * 180 / Math.PI);
+  if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }
 }
 // ---- end of slot: Traditions engineer ----
 // ---- slot: Events engineer 2 (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----
