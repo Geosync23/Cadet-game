@@ -31,6 +31,10 @@ devmode_check "real". stories_check always with 36 days (`python3 stories_check.
 Added for 0.99.5 (bold): day 2 (JB2's first rounds tour, TB3 19's dinner seat), day 9 and day 16 (TB3 19), day 3; intro
 --dinner/--firsts and device_check whole (OB2). Already in a share and touched this time: sound_check (SD5), controller_check
 (CT5/PL2), machine/mech/career (JB2), events/bigevents/food/join (TB3), player/interactions/talk/deck (JB2/TB3/OB2), appt.
+New checks the builders add (lead 47): each runs in the share that already holds its area. BM22 fills in the exact commands as each piece is merged, before the GO:
+- R5: machine_check part 5z and mech_check round23 (JB2), as parts of machine x2 and mech; TB3's spice / tea / beam probes if they become checks (traditions, beside events and join).
+- R3: sound_check's new parts hide, mess_scale and long (SD5), inside sound_check; the controller turn parts (CT5/PL2), inside controller_check.
+- R2: OB2's intro probes (beside intro_check whole, --dinner, --firsts). R4: OB2's appt probes (beside appt).
 Not in the gate: controller_check reach (non-blocking extra).
 Whoever finishes early offers to take a check from the slowest share (agree it, copy the lead, never twice).
 Sessions: lead 47 session_014zyJYM4mt9ZDCD5H9JZDtN; BM22 session_014zyJYNgBPdEPHLxTGrM889; R1-R4: the lead hires and lists them in TEAM.md.
