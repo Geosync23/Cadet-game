@@ -91,7 +91,7 @@
 - Vance talked me onto the treadmill. I don't know how. I was walking past.   #funny
 ? tier>=colleague
 - I'm not sure I've found my place yet. I'm looking. That counts, doesn't it?
-? beat:tomas.5 tier>=friend
+? beat:tomas.5 !beat:tomas.8 tier>=friend
 - Still haven't told Holt about the exam. Don't remind me. Do remind me. Soon.
 
 == invite
@@ -172,7 +172,7 @@
 - "That's the one that counts." I wrote it inside my locker. Small. Holt won't see.   #warm
 ? told:moment.tomas.blanket
 - The blanket held! Holt stared at it for ages, then walked on. That's a pass. I think.   #funny
-? told:moment.tomas.listened
+? told:moment.tomas.listened !beat:tomas.10
 - Thanks for listening. About the list. I only read it twice a day now. Progress.   #warm
 ? told:moment.tomas.showed
 - I did show you round, didn't I? I keep thinking about that. I got one thing right.   #warm
@@ -182,7 +182,7 @@
 - Just left of the bright one. My left. You remembered! You did, didn't you?   #funny
 ? mem:moment.tomas.staying
 - Still here. Still staying. I check every morning. Still true.   #warm
-? told:moment.tomas.home
+? told:moment.tomas.home|moment.tomas.pencil !beat:tomas.8
 - Holt's put me down to meet the next shuttle. Me! I've been practising "This way."   #funny
 ? told:came.observatory-night
 - You came up! Did you see the one I named? The wobbly one. That's mine.   #funny

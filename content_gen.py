@@ -46,6 +46,7 @@ COND_KEYS = {
     'came': 'lines', 'friend': 'lines',
     'thread': 'lines',                       # the speaker's roster thread (the struggle theme): the Talk a while pack's
     'day': 'lines', 'here': 'lines',         # crew stories (FX21, 0.92.6): the ship day (21, 3-21, 15-, -20), and someone in the scene
+    'myrank': 'lines',                       # crew stories stage 2 (ST1, 2026-10-31): your own Works rank (junior, officer, senior, specialist)
     'endgame': 'lines',                      # the ending (section 29c): you stayed (endgame, endgame:early, endgame:false; !endgame is endgame:false)
 }
 NUM_KEYS = ('w', 'odds')                     # numbers, not conditions: a weight, and a seeded chance
@@ -655,7 +656,7 @@ def parse_appt(path, rel, out):
 
 MOMENT_TONES = ('light', 'heartfelt', 'serious', 'resolution')
 MOMENT_FIELDS = ('tone', 'where', 'when', 'tier', 'metDays', 'gapDays', 'duty', 'crisis', 'hint', 'mem', 'flag', 'keepsake',
-                 'learn', 'mail', 'needs', 'via', 'crescendo', 'quiet', 'follows', 'lead', 'title', 'invite', 'cast')   # the last seven: crew stories (FX21)
+                 'learn', 'mail', 'needs', 'via', 'crescendo', 'quiet', 'follows', 'lead', 'title', 'invite', 'cast', 'until', 'come')   # the last nine: crew stories (FX21; until, come: ST1)
 THEMES = ('homesick', 'exams', 'family', 'stuck', 'notgood', 'lonely', 'loss', 'talent', 'burnout', 'leaving', 'rivalry',
           'startover')                    # social B's frozen theme names
 FLAVOURS = ('listen', 'cheer', 'practical', 'share')
@@ -743,12 +744,17 @@ def parse_arc(path, rel, out, home=False, store='MOMENTS'):
                 cur['after'] = {'mail': {'after': int(parts[0]), 'subject': parts[1], 'body': parts[2]}}
             elif k == 'needs':
                 cur[k] = [x.strip() for x in v.split(',') if x.strip()]
-            elif k in ('crescendo', 'quiet', 'follows', 'lead', 'title', 'invite', 'cast') and not rel.startswith('stories/'):
+            elif k in ('crescendo', 'quiet', 'follows', 'lead', 'title', 'invite', 'cast', 'until', 'come') and not rel.startswith('stories/'):
                 raise GenError(f'{where}: {k}: is for crew stories (content/stories) only')
             elif k == 'crescendo':                 # crew stories (FX21): the beat plays at this gathering (section 20c's storySlots)
-                if not re.fullmatch(r'(trad|event):[\w-]+|farewell|meal:(breakfast|dinner)', v):
-                    raise GenError(f'{where}: crescendo is trad:<id>, event:<id>, farewell or meal:breakfast|dinner')
+                if not re.fullmatch(r'(trad|event):[\w-]+|farewell|meal:(breakfast|dinner)|at:\d\d:\d\d-\d\d:\d\d', v):
+                    raise GenError(f'{where}: crescendo is trad:<id>, event:<id>, farewell, meal:breakfast|dinner or at:HH:MM-HH:MM')
                 cur[k] = v
+            elif k == 'until':                     # crew stories stage 2 (ST1): the latest minute of the day the crescendo may start
+                m = re.fullmatch(r'(\d\d):(\d\d)', v)
+                if not m:
+                    raise GenError(f'{where}: until is a time, HH:MM (the latest the scene may start)')
+                cur[k] = int(m[1]) * 60 + int(m[2])
             elif k in ('quiet', 'lead'):
                 if not v.isdigit():
                     raise GenError(f'{where}: {k} is a whole number ({"the quiet ending beat" if k == "quiet" else "minutes before the gathering"})')
@@ -757,6 +763,11 @@ def parse_arc(path, rel, out, home=False, store='MOMENTS'):
                 if not re.fullmatch(r'\d+(\|\d+)*', v):
                     raise GenError(f'{where}: follows is a beat or beats (4|6): it plays after either')
                 cur[k] = [int(x) for x in v.split('|')]
+            elif k == 'come':                      # crew stories stage 2 (ST1): of an at: crescendo's cast, who the planner brings there (default all; none: only its teller)
+                ids = [] if v == 'none' else [x for x in re.split(r'[\s,]+', v) if x]
+                if not all(re.fullmatch(r'[\w-]+', x) for x in ids):
+                    raise GenError(f'{where}: come is crew ids, or none')
+                cur[k] = ids
             elif k == 'cast':                      # the people a crescendo needs there (it waits for them, in its booking)
                 ids = [x for x in re.split(r'[\s,]+', v) if x]
                 if not ids or not all(re.fullmatch(r'[\w-]+', x) for x in ids):
@@ -1020,7 +1031,7 @@ def parse_address(path, rel, out):
 
 
 def bake():
-    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'STORY_MOMENTS': {}, 'STORY_VOICE': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': [], 'ADDRESSES': {}, 'APPT_WORDS': {},
+    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'STORY_MOMENTS': {}, 'STORY_MOMENTS2': {}, 'STORY_VOICE': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': [], 'ADDRESSES': {}, 'APPT_WORDS': {},
            'TALKS': {'pool': [], 'own': {}, 'work': {}, 'small': {}}}
     files = []
     for d, _, fs in os.walk(CONTENT):
@@ -1035,6 +1046,8 @@ def bake():
             parse_voice_file(path, rel, out)
         elif ext == 'meet':
             parse_meeting(path, rel, out)
+        elif ext == 'arc' and rel.startswith('stories/stage2/'):   # crew stories stage 2 (ST1, 2026-10-31): read only while STORIES2_ON (section 20c)
+            parse_arc(path, rel, out, store='STORY_MOMENTS2')
         elif ext == 'arc' and rel.startswith('stories/'):   # crew stories (FX21, 0.92.6): the new beats, read only while STORIES_ON (section 20c)
             parse_arc(path, rel, out, store='STORY_MOMENTS')
         elif ext == 'arc':
@@ -1161,6 +1174,7 @@ def blocks(out):
         + lists_parsed('LINES', out['LINES']) + ['const CONVOS = ['] + [f'  {js(c)},' for c in out['CONVOS']] + ['];'] \
         + ['const MOMENTS = {'] + [f'  {js(k)}: {js(out["MOMENTS"][k])},' for k in sorted(out['MOMENTS'])] + ['};'] \
         + ['const STORY_MOMENTS = {'] + [f'  {js(k)}: {js(out["STORY_MOMENTS"][k])},' for k in sorted(out['STORY_MOMENTS'])] + ['};'] \
+        + ['const STORY_MOMENTS2 = {'] + [f'  {js(k)}: {js(out["STORY_MOMENTS2"][k])},' for k in sorted(out['STORY_MOMENTS2'])] + ['};'] \
         + ['const MOMENT_THEMES = {'] + [f'  {js(k)}: {js(out["MOMENT_THEMES"][k])},' for k in sorted(out['MOMENT_THEMES'])] + ['};'] \
         + sum(([f'const {n} = {{'] + [f'  {js(k)}: {js(out[n][k])},' for k in sorted(out[n])] + ['};']
                for n in ('HOME_CONTACTS', 'HOME_MOMENTS', 'HOME_SEND', 'HOME_CHAT')), [])

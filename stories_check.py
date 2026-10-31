@@ -1,4 +1,5 @@
-# Starship Cadet: crew stories check (FX21, 0.92.6 item 19; stage 1: Pell, Theo, Basil, Halloran, Kovac, Saad).
+# Starship Cadet: crew stories check (FX21, 0.92.6 item 19; stage 1: Pell, Theo, Basil, Halloran, Kovac, Saad; stage 2, ST1:
+# Zeke, Calder, Dev Raman, Kowalczyk, behind STORIES2_ON).
 # Walks each crew story's beats on paper, the way arc_check does the older arcs, in a copy of the game with STORIES_ON
 # switched on by text (the build itself may have it off). Three parts:
 #   1. Off: the build as it is. With STORIES_ON off nothing of the stories is read: storyMoment is null, momentDef gives
@@ -16,6 +17,9 @@
 #        - an afterglow (follows:) comes after one of its beats;
 #        - Theo: no ordinary goodbye while his farewell crescendo stands;
 #        - no page errors.
+#      Stage 2 (ST1): the copy switches STORIES2_ON on too; the paper player is made an Engine Specialist as a steady one
+#      is (Monday Day 22, 22:40, as night 1 starts). Part 1 also checks stage 2 off: no stage 2 beat is read, Zeke's and
+#      Calder's are the old MOMENTS words, Kowalczyk and Raman aren't story people, nobody's plan has a story beat.
 #   3. A self-test: the rules above, fed planted logs that break each one, must catch every one.
 # Run: CADET_CHROME=/opt/pw-browsers/chromium python3 stories_check.py BUILD.html [DAYS]   (a few minutes)
 import sys, os, json, types, pathlib
@@ -26,6 +30,7 @@ ct = types.ModuleType('ct'); exec(src, ct.__dict__)
 BUILD = sys.argv[1]
 DAYS = int(sys.argv[2]) if len(sys.argv) > 2 else 30
 OFF_LINE, ON_LINE = 'var STORIES_ON = false;', 'var STORIES_ON = true;'
+OFF2_LINE, ON2_LINE = 'var STORIES2_ON = false;', 'var STORIES2_ON = true;'   # stage 2 (ST1)
 
 OFF = r"""
 (() => {
@@ -35,29 +40,43 @@ OFF = r"""
     const d = momentDef(k), old = MOMENTS[k]; if (old && d && d.lines.length !== old.lines.length) out.bad.push(k + ': not the old words'); if (!old && d && d.lines === STORY_MOMENTS[k].lines) out.bad.push(k + ': a story beat while off'); }
   for (const id of ['teague-theo', 'bramwell-basil', 'halloran-emeka', 'salo-saad']) { const p = socP(id), th = voiceOf(id).thread; if (p && p.thread && th !== p.thread && !(VOICE[id] && /^arc:/.test(VOICE[id].thread || ''))) out.bad.push(id + ' thread ' + th + ', the roster says ' + p.thread); }
   if (SHIP.social.stories && SHIP.social.stories.cs) out.bad.push('SHIP.social.stories.cs written while off');
+  out.bad2 = [];
+  if (STORIES_ON) for (const d of [19, 26]) if (storyCastGoes('captains-address', 'kovac-zainab', d) !== true) out.bad2.push('stage 1\'s planner hook: storyCastGoes(captains-address, kovac-zainab, ' + d + ') is not true (RV28)');   // stage 1's live hook still answers
+  out.on2 = typeof STORIES2_ON !== 'undefined' && STORIES2_ON; out.table2 = typeof STORY_MOMENTS2 !== 'undefined' ? Object.keys(STORY_MOMENTS2).length : -1;
+  if (!out.on2 && out.table2 > 0) {   // stage 2 off (ST1): none of its beats is read, wherever stage 1 is
+    for (const k of Object.keys(STORY_MOMENTS2)) { if (storyMoment(k) && storyMoment(k) === STORY_MOMENTS2[k]) out.bad2.push('stage 2 beat ' + k + ' read while STORIES2_ON is off');
+      const d = momentDef(k), old = MOMENTS[k]; if (d && d.lines === STORY_MOMENTS2[k].lines) out.bad2.push(k + ': a stage 2 beat while off'); }
+    for (const id of ['raman', 'kowalczyk', 'calder', 'torres-zeke']) if (storyIdx().beats.has(id)) out.bad2.push(id + ' is a story person while stage 2 is off');
+    for (const id of ['kowalczyk', 'mensah']) if (planDay(socP(id), 24).some(x => /^intro-story-/.test(x.tag || ''))) out.bad2.push(id + ': a stage 2 plan beat while off');
+    if (storyPlanBeats('kowalczyk', 24).length) out.bad2.push('storyPlanBeats while off'); }
   return out;
 })()
 """
 
 RUN = r"""
-([DAYS, MODE]) => {
+([DAYS, MODE, DIAGS]) => {
   socInit();
-  const nobook = {}, diag = {}, ids = [...storyIdx().beats.keys()], log = [], mails = [], cal = {}, books = {}, byes = [], lines = {}, err = [];
+  const FOCUS = /^focus:/.test(MODE) ? MODE.slice(6) : null;   // stage 2 (ST1): a player who befriends only this one person
+  const DIAG = DIAGS, diagD = {}, nobook = {}, diag = {}, ids = [...storyIdx().beats.keys()], log = [], mails = [], cal = {}, books = {}, byes = [], lines = {}, err = [];
   const play = (id) => { let n = 0; const said = []; while (DIALOGUE && n++ < 80) { const v = dialogueView(); if (!v) break; if (v.text) said.push(v.text); if (v.choices) dialogueStep(0); else dialogueStep(); } lines[id] = said; };
   const live = t => { setShipNow(t); if (typeof socialTo === 'function') socialTo(t); return t; };
   const C = () => storyPeekCS();
   let mailSeen = 0;
   for (let d = 1; d <= DAYS; d++) {
-    for (let m = 360; m < 1440; m += 10) {   // every 10 minutes: a gathering can be 20 minutes long (Off the Tern)
+    const night = typeof STORIES2_ON !== 'undefined' && STORIES2_ON && d >= 23 && d <= 25;   // stage 2 (ST1): through the small hours after your nights (Days 22-24), as you'd be up
+    for (let m = night ? 0 : 360; m < 1440; m += 10) {   // every 10 minutes: a gathering can be 20 minutes long (Off the Tern)
       const t = live((d - 1) * 1440 + m);
-      if (m === 720) for (const id of ids) { const p = socP(id); if (p && socAboard(p, d)) { relAdd(id, 'chat', 2); relAdd(id, 'meal', 3); } }
-      if (m === 900) repAdd('works', 1.5, { work: 1 }, 'job');
+      if (m === 720) for (const id of ids) { if (FOCUS && id !== FOCUS) continue; const p = socP(id); if (p && socAboard(p, d)) { relAdd(id, 'chat', 2); relAdd(id, 'meal', 3); } }
+      if (m === 900) repAdd('works', typeof STORIES2_ON !== 'undefined' && STORIES2_ON ? 3 : 1.5, { work: 1 }, 'job');   // stage 2: a steady Works player (Calder's story asks rep:well)
+      if (d === 22 && m === 1360 && SHIP.works && typeof STORIES2_ON !== 'undefined' && STORIES2_ON) { SHIP.works.tier = 4; SHIP.works.rank = 'specialist'; }   // stage 2: a steady player's Engine Specialist, as night 1 starts
       if (m === 360) for (const id of ids) { const p = socP(id), mid = p && momentNextId(p), dd = mid && momentDef(mid); if (!dd || !dd.crescendo || C().book[id]) continue;   // a crescendo due but not booked: why, today
         const sl = storySlots(dd.crescendo, p, d, dd.lead || 0, dd); if (!sl.length) continue; const s0 = sl[0];
         const cast = {}; for (const c of dd.cast || []) { let n = 0; for (let x = s0.from; x < s0.to; x += 5) if (storyHere(c, p, { t: x })) n++; cast[c] = n; }
         let at = 0; for (let x = s0.from; x < s0.to; x += 5) if (storyAtSlot(p, x, dd, s0)) at++;
         (nobook[mid] || (nobook[mid] = [])).push({ d, at: s0.from % 1440, here: at, cast, gates: storyGates(p, dd, mid, s0.from, s0.trad), flags: (dd.when && dd.when.flag) ? [].concat(dd.when.flag).map(f => f + '=' + !!flag(f)) : undefined }); }
       try { storyTick(t); } catch (e) { err.push('storyTick: ' + e.message); }
+      if (DIAG.length && m % 60 === 0 && m >= 1020) for (const id of DIAG) { const p = socP(id), x = p && momentNextId(p), dd = x && momentDef(x); if (!dd) continue; let wh = null; try { wh = dd.when ? !!linesOk(dd.when, p, momentCtx(p, t, x)) : true; } catch (e) { wh = 'err'; }
+        (diagD[id] || (diagD[id] = [])).push(d + ' ' + hhmm(m) + ' ' + x + ' tier' + relTier(id) + ' met' + metDays(id, t) + ' rep' + repBand('works') + ' when:' + wh + ' where:' + momentWhere(p, t, dd) + ' ready:' + !!momentReady(p, t) + ' st.at:' + storyPeek(id).at); }
       for (const x of SHIP.social.mail.slice(mailSeen)) mails.push({ at: x.at, queued: t, from: x.from, subject: x.subject }); mailSeen = SHIP.social.mail.length;
       for (const id in C().book) { const b = C().book[id], dd = storyMoment(id + ':' + b.beat), p = socP(id);
         if (dd && t >= b.from && t < b.to) { const k = id + ':' + b.beat, x = diag[k] || (diag[k] = { steps: 0, atSlot: 0, cast: {}, where: {}, ready: 0, gates: 0 }); x.steps++;
@@ -65,11 +84,15 @@ RUN = r"""
           const w = whereIs(p, t); x.where[(w && (w.act + ':' + (w.tag || '') + ':' + (storyRoom(p, t) || 'moving'))) || 'none'] = 1; if (momentReady(p, t)) x.ready++; if (storyGates(p, dd, k, t, b.trad)) x.gates++; }
         books[id + ':' + b.beat] = { ...b };
         const rows = storyCalRows(b.day, (b.day - 1) * 1440); if (rows.length) cal[id + ':' + b.beat] = b.day; }
-      for (const id of ids) {
+      const due = id => { const p = socP(id), x = p && momentNextId(p), dd = x && momentDef(x); return dd ? storyDayHi(dd.when) : Infinity; };
+      const order = typeof STORIES2_ON !== 'undefined' && STORIES2_ON ? ids.slice().sort((a, b) => due(a) - due(b)) : ids;   // stage 2: a diligent player sees first whoever's step closes soonest (Raman's by Day 21)
+      for (const id of order) {
+        if (FOCUS && id !== FOCUS) continue;
         const p = socP(id); if (!p || !socAboard(p, d)) continue;
         const g = goodbyeMoment(p, t); if (g) byes.push(id + '@' + d);
         if (STORY_ARCS[id] && arcBeat(p, t)) arcTold(p);   // the older card beats (Pell 1-4), told on their chat card
         let mid = momentReady(p, t);
+        if (!mid && m === 840) { const nx = momentNextId(p), nd = nx && momentDef(nx); if (nd && [].concat(nd.where || []).includes('appt')) mid = momentReady(p, t, { anywhere: true }); }   // stage 2 (ST1): a beat at a progress talk (Calder 4): the paper player books one, 14:00
         const wb = C().book[id]; if (!mid && wb && wb.walk != null && t + 10 > wb.from && t < wb.to) for (let k = 1; k < 10 && !mid; k++) { if (t + k < wb.from) continue; live(t + k); mid = momentReady(p, t + k); }   // a walk booking is minutes long: try each minute (the player taps them as they pass)
         if (!mid) { if (shipNow() !== t) live(t); continue; }
         const t1 = shipNow();
@@ -97,8 +120,24 @@ RUN = r"""
         const g = STEP_GATES[dd.tone] || STEP_GATES.heartfelt, st = storyPeek(id), S = SHIP.social.stories || {}, last = dd.tone === 'resolution' ? st.hf : st.at;
         gate = { day: d, m, ready: momentReady(p, t), tierOk: relTier(id) >= (dd.tier ?? g.tier), metOk: metDays(id, t) >= (dd.metDays ?? g.met), gapOk: last === null || (t - last) / 1440 >= (dd.gapDays ?? g.gap), oneADay: !(st.at !== null && Math.floor(st.at / 1440) + 1 === d), serious: !(MOMENT_SERIOUS.has(dd.tone) && S.serious === d), dialogue: !DIALOGUE, arcDay: (SHIP.rel[id] || {}).arcDay }; }
       why[id] = { ...w0, whenOk, whereOk, both, of: n, gate, offDuty: rooms }; } }
-  return { nobook, diag, ids, log, mails, cal, books, byes, told: C().told, skip: C().skip, beats, why, err, names: Object.fromEntries(ids.map(id => [id, socP(id) ? socP(id).name : id])) };
+  return { diagD, nobook, diag, ids, log, mails, cal, books, byes, told: C().told, skip: C().skip, beats, why, err, names: Object.fromEntries(ids.map(id => [id, socP(id) ? socP(id).name : id])) };
 }
+"""
+
+LATE = r"""
+(() => {
+  socInit(); const p = socP('tomas'), C = storyCS(), B = 20 * 1440, r = relGet('tomas');
+  r.arc = 7; r.arcDay = 0; r.tier = 4; C.told.tomas = [5, 6, 7]; C.skip.tomas = [];
+  C.book.tomas = { beat: 8, day: 21, from: B + 1065, to: B + 1075, trad: null };
+  setShipNow(B + 1074); const mid = momentNextId(p); if (mid !== 'tomas:8') return { ok: false, why: 'next is ' + mid };
+  momentShow(mid); let n = 0; for (; n < 3 && DIALOGUE; n++) { const v = dialogueView(); if (v && v.choices) dialogueStep(0); else dialogueStep(); }
+  setShipNow(B + 1080); storyTick(B + 1080);              // the booking's end passes mid-scene
+  const midway = { told: (C.told.tomas || []).slice(), skip: (C.skip.tomas || []).slice(), booked: !!C.book.tomas };
+  for (let k = 0; k < 80 && DIALOGUE; k++) { const v = dialogueView(); if (!v) break; if (v.choices) dialogueStep(0); else dialogueStep(); }
+  setShipNow(B + 1110); storyTick(B + 1110);
+  const told = C.told.tomas || [], skip = C.skip.tomas || [];
+  return { ok: told.includes(8) && !skip.includes(8) && skip.includes(9) && !skip.includes(10) && !told.includes(10), midway, told, skip };
+})()
 """
 
 def rules(r, mode):
@@ -106,6 +145,7 @@ def rules(r, mode):
     bad = []
     told = {k: set(v) for k, v in r['told'].items()}; skip = {k: set(v) for k, v in r['skip'].items()}
     for id, bs in r['beats'].items():
+        if mode.startswith('focus:') and id != mode[6:]: continue   # a focus run serves only its one story
         for b in bs:
             n = b['beat']
             if n not in told.get(id, set()) and n not in skip.get(id, set()): bad.append(f'{id} beat {n}: never told or skipped (STALLED: {json.dumps(r["why"].get(id))})')
@@ -126,6 +166,7 @@ def rules(r, mode):
         if not any(m['from'] == name and m['at'] <= max(eve, m['queued']) and m['queued'] <= x['t'] for m in r['mails']): bad.append(f'{x["id"]} crescendo {x["beat"]}: no Mail from them the evening before')
         if r['cal'].get(f'{x["id"]}:{x["beat"]}') != b['day']: bad.append(f'{x["id"]} crescendo {x["beat"]}: no Calendar row on its day')
     for d, who in days.items():
+        if len(who) == 2 and set(who) == {'teague-theo', 'tomas'}: continue   # stage 2: the pair lead 47 allowed on Day 21 (a goodbye, then a hello)
         if len(who) > 1: bad.append(f'day {d}: {len(who)} crescendos ({", ".join(who)})')
     for x in r['log']:
         if x.get('posted') or not x.get('day_'): continue
@@ -138,6 +179,10 @@ def rules(r, mode):
     for x in r['log']:
         if x.get('follows') and not any(y['id'] == x['id'] and y['beat'] in x['follows'] and (y.get('posted') or y['day'] is None or (y['day'], y.get('t', 0)) <= (x['day'], x['t'])) for y in r['log']): bad.append(f'{x["id"]} beat {x["beat"]}: an afterglow before its beats {x["follows"]}')
     if mode == 'play' and any(b.startswith('teague-theo@') for b in r['byes']) and any(b['cres'] == 'farewell' for b in r['beats'].get('teague-theo', [])): bad.append('teague-theo: an ordinary goodbye while his farewell crescendo stands')
+    if mode.startswith('focus:'):                # stage 2 (ST1): the one story, played as a friend of only them: its crescendo told, in its booking
+        f = mode[6:]
+        for b in r['beats'].get(f, []):
+            if b['cres'] and b['beat'] not in told.get(f, set()): bad.append(f'{f}: crescendo {b["beat"]} not told in its focus run')
     bad += ['error: ' + e for e in r['err']]
     return bad
 
@@ -167,9 +212,9 @@ def selftest():
 
 def on_copy():
     s = pathlib.Path(BUILD).read_text()
-    if ON_LINE in s: return BUILD
-    if OFF_LINE not in s: print('STORIES CHECK: no STORIES_ON line in this build'); sys.exit(1)
-    p = ct.WORK / 'test' / ('_stories_on_' + pathlib.Path(BUILD).name); p.write_text(s.replace(OFF_LINE, ON_LINE, 1)); return str(p)
+    if ON_LINE in s and OFF2_LINE not in s: return BUILD
+    if OFF_LINE not in s and ON_LINE not in s: print('STORIES CHECK: no STORIES_ON line in this build'); sys.exit(1)
+    p = ct.WORK / 'test' / ('_stories_on_' + pathlib.Path(BUILD).name); p.write_text(s.replace(OFF_LINE, ON_LINE, 1).replace(OFF2_LINE, ON2_LINE, 1)); return str(p)
 
 fails = []
 st = selftest()
@@ -177,18 +222,25 @@ for name, ok in st: print('self-test', 'ok ' if ok else 'MISSED', name)
 fails += ['self-test missed: ' + n for n, ok in st if not ok]
 with sync_playwright() as pw:
     g = ct.Game(pw, BUILD); g.step(3); r = g.ev(OFF); errs = g.errors[:5]; g.close()
-    print(f'Part 1, the build as it is: STORIES_ON {r["on"]}, {r["table"]} story beats baked')
+    print(f'Part 1, the build as it is: STORIES_ON {r["on"]}, {r["table"]} story beats baked; STORIES2_ON {r["on2"]}, {r["table2"]} stage 2 beats')
+    if r['on'] and not r['on2']:
+        for b in r['bad2']: print('  FAIL stage 2 off:', b)
+        fails += ['stage 2 off: ' + b for b in r['bad2']]
+        if not r['bad2']: print('  stage 2 off: nothing of it read (Zeke and Calder the old words, no plan beats)')
     if not r['on']:
         for b in r['bad']: print('  FAIL off:', b)
         fails += ['off: ' + b for b in r['bad']]
     else: print('  (the build has STORIES_ON on: part 1 skipped)')
     fails += ['off, page error: ' + e for e in errs]
     on = on_copy()
-    for mode in ('play', 'miss'):
+    modes = ['play', 'miss'] + ([f'focus:{x}' for x in ('torres-zeke', 'calder', 'raman', 'kowalczyk', 'tomas')] if on != BUILD or OFF2_LINE not in pathlib.Path(BUILD).read_text() else [])
+    if ON2_LINE not in pathlib.Path(on).read_text(): modes = ['play', 'miss']   # no stage 2 in this build
+    for mode in modes:
         g = ct.Game(pw, on); g.step(3)
-        r = g.page.evaluate('([s, a]) => window.__sc("(" + s + ")(" + JSON.stringify(a) + ")")', [RUN, [DAYS, mode]])
+        r = g.page.evaluate('([s, a]) => window.__sc("(" + s + ")(" + JSON.stringify(a) + ")")', [RUN, [DAYS, mode, [x for x in os.environ.get('STORY_DIAG', '').split(',') if x]]])
         errs = g.errors[:5]; g.close()
         print(f'Part 2, run "{mode}" ({DAYS} days):')
+        for k, v in r.get('diagD', {}).items(): print('  diag', k, '\n    ' + '\n    '.join(v))   # STORY_DIAG=id,id: hourly from 17:00, the next beat's gates
         for id in r['ids']:
             got = sorted(x['beat'] for x in r['log'] if x['id'] == id)
             print(f'  {id}: told {sorted(r["told"].get(id, []))}, skipped {sorted(r["skip"].get(id, []))}; days ' + ' '.join(f'{x["beat"]}@{x["day"] if x["day"] else "mail"}' for x in sorted(r['log'], key=lambda x: (x['day'] or 99, x.get('t', 0))) if x['id'] == id))
@@ -199,5 +251,12 @@ with sync_playwright() as pw:
         bad = rules(r, mode) + ['page error: ' + e for e in errs]
         for b in bad: print('  FAIL', mode + ':', b)
         fails += [mode + ': ' + b for b in bad]
+    if ON2_LINE in pathlib.Path(on).read_text():   # stage 2 (RV28 B5): a crescendo still playing when its booking ends is told, not missed
+        g = ct.Game(pw, on); g.step(3)
+        r = g.ev(LATE); errs = g.errors[:5]; g.close()
+        print('Part 2b, a scene across its booking\'s end (Tomas 8, Day 21 17:54 -> 18:00):', json.dumps(r))
+        bad = ([] if r.get('ok') else ['late scene: ' + json.dumps(r)]) + ['late scene, page error: ' + e for e in errs]
+        for x in bad: print('  FAIL', x)
+        fails += bad
 print('STORIES CHECK OK' if not fails else f'STORIES CHECK FAILED ({len(fails)})')
 sys.exit(0 if not fails else 1)

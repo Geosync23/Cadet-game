@@ -108,6 +108,7 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `moved:<id>` | that crew member has left the Wren | `moved:okoro` |
 | `guide:` | `true` while you're guiding a newcomer | `guide:true` |
 | `here:<crewId>` | crew stories (FX21): that crew member is in the scene with the speaker (same room now); `you` always is | `here:torres-zeke` |
+| `myrank:` | crew stories stage 2 (ST1): your own Works rank is this: `junior`, `officer`, `senior`, `specialist` | `myrank:specialist` |
 | `endgame` | the ending (section 29c): you stayed aboard. Only from the first morning after the crossing back; every hour for the first 14 days, then about 4 hours in 10, so the everyday lines come back. Such a line is heard over the speaker's own everyday lines. `endgame:early`: only in those first 14 days. `endgame:false` (or `!endgame`): you haven't stayed (yet) | `endgame`, `endgame:early tier>=friend` |
 
 **About the moment** (the dialogue engine):
@@ -312,6 +313,12 @@ them: Was I any good, as your trainer?   [sigh]
   The ` | ` has a space each side (a `|` inside a value still means "either"). Script lines only, not the answers.
 - **Crew stories** (stage 1, FX21): `content/stories/<arcId>.arc`, the same format, baked into `STORY_MOMENTS` and read
   only while the game's `STORIES_ON` is on; the older words in `content/arcs/` stay the game's until then.
+- **Crew stories stage 2** (ST1, 2026-10-31): `content/stories/stage2/<arcId>.arc` (Zeke, Calder, Dev Raman, Kowalczyk),
+  baked into `STORY_MOMENTS2`, read only while `STORIES2_ON` is on too (the old `content/arcs/torres.arc` and `calder.arc`
+  are parked, and play while it's off). Three more beat fields: `crescendo: at:HH:MM-HH:MM` (a fixed time on the beat's one
+  `day:`; its teller, and any cast who doesn't work in its room, are planned there: Kowalczyk's dawn on the bridge) and
+  `come:` (of an `at:` crescendo's cast, who the planner brings there: crew ids, or `none`; default all) and `until: HH:MM` (the latest the crescendo may start: Zeke's before your 21:00 night, Calder's before her question). One
+  more condition: `myrank:` your own Works rank (`junior`, `officer`, `senior`, `specialist`).
 - **Choices:** `? choice`, then up to three `* reply` lines. Each can carry `flavour:` (`listen`, `cheer`, `practical`,
   `share`), `mem:<word>`, `flag:<key>` (set when chosen) and `favour:<job>` (a practical reply that starts a favour).
   Indent the answer under it (`  them: ...`), and if you like a warmer answer for the person this flavour suits,

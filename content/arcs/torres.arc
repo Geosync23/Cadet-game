@@ -1,5 +1,8 @@
 @arc torres
 who: torres-zeke
+// PARKED (ST1, 2026-10-31, crew stories stage 2; the user's yes via lead 47): replaced by content/stories/stage2/torres.arc while the game's
+// STORIES2_ON is on (section 20c reads STORY_MOMENTS2 first). Kept on record, never deleted (the user's rule); these
+// words still bake into MOMENTS and play while STORIES2_ON is off. The new story keeps the same mem words and flags.
 // "Ready" (content/arcs/outlines.md, section 1). The Works writer, arc batch. The man who trains you isn't sure he's
 // ready for more himself. Opens after week 1 (he's the confident one that week). needs: listen.
 // Places: written so each scene works wherever calm finds him (the overlook is named only as somewhere he goes).

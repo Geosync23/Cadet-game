@@ -1,5 +1,8 @@
 @arc calder
 who: calder
+// PARKED (ST1, 2026-10-31, crew stories stage 2; the user's yes via lead 47): replaced by content/stories/stage2/calder.arc while the game's
+// STORIES2_ON is on (section 20c reads STORY_MOMENTS2 first). Kept on record, never deleted (the user's rule); these
+// words still bake into MOMENTS and play while STORIES2_ON is off. The new story keeps the same mem words and flags.
 // "Well done" (content/arcs/outlines.md, section 2). The Works writer, arc batch. Nobody says "well done" before
 // beat 5: it's the payoff. Beats 1-2 are light and at work (duty: true); 3-5 are off duty. needs: practical.
 // Fenn is named only from beat 3; the junior on the Halcyon only from beat 4.
