@@ -52,9 +52,9 @@ OFF = r"""
 """
 
 RUN = r"""
-([DAYS, MODE]) => {
+([DAYS, MODE, DIAGS]) => {
   socInit();
-  const nobook = {}, diag = {}, ids = [...storyIdx().beats.keys()], log = [], mails = [], cal = {}, books = {}, byes = [], lines = {}, err = [];
+  const DIAG = DIAGS, diagD = {}, nobook = {}, diag = {}, ids = [...storyIdx().beats.keys()], log = [], mails = [], cal = {}, books = {}, byes = [], lines = {}, err = [];
   const play = (id) => { let n = 0; const said = []; while (DIALOGUE && n++ < 80) { const v = dialogueView(); if (!v) break; if (v.text) said.push(v.text); if (v.choices) dialogueStep(0); else dialogueStep(); } lines[id] = said; };
   const live = t => { setShipNow(t); if (typeof socialTo === 'function') socialTo(t); return t; };
   const C = () => storyPeekCS();
@@ -72,6 +72,8 @@ RUN = r"""
         let at = 0; for (let x = s0.from; x < s0.to; x += 5) if (storyAtSlot(p, x, dd, s0)) at++;
         (nobook[mid] || (nobook[mid] = [])).push({ d, at: s0.from % 1440, here: at, cast, gates: storyGates(p, dd, mid, s0.from, s0.trad), flags: (dd.when && dd.when.flag) ? [].concat(dd.when.flag).map(f => f + '=' + !!flag(f)) : undefined }); }
       try { storyTick(t); } catch (e) { err.push('storyTick: ' + e.message); }
+      if (DIAG.length && m % 60 === 0 && m >= 1020) for (const id of DIAG) { const p = socP(id), x = p && momentNextId(p), dd = x && momentDef(x); if (!dd) continue; let wh = null; try { wh = dd.when ? !!linesOk(dd.when, p, momentCtx(p, t, x)) : true; } catch (e) { wh = 'err'; }
+        (diagD[id] || (diagD[id] = [])).push(d + ' ' + hhmm(m) + ' ' + x + ' tier' + relTier(id) + ' met' + metDays(id, t) + ' rep' + repBand('works') + ' when:' + wh + ' where:' + momentWhere(p, t, dd) + ' ready:' + !!momentReady(p, t) + ' st.at:' + storyPeek(id).at); }
       for (const x of SHIP.social.mail.slice(mailSeen)) mails.push({ at: x.at, queued: t, from: x.from, subject: x.subject }); mailSeen = SHIP.social.mail.length;
       for (const id in C().book) { const b = C().book[id], dd = storyMoment(id + ':' + b.beat), p = socP(id);
         if (dd && t >= b.from && t < b.to) { const k = id + ':' + b.beat, x = diag[k] || (diag[k] = { steps: 0, atSlot: 0, cast: {}, where: {}, ready: 0, gates: 0 }); x.steps++;
@@ -114,7 +116,7 @@ RUN = r"""
         const g = STEP_GATES[dd.tone] || STEP_GATES.heartfelt, st = storyPeek(id), S = SHIP.social.stories || {}, last = dd.tone === 'resolution' ? st.hf : st.at;
         gate = { day: d, m, ready: momentReady(p, t), tierOk: relTier(id) >= (dd.tier ?? g.tier), metOk: metDays(id, t) >= (dd.metDays ?? g.met), gapOk: last === null || (t - last) / 1440 >= (dd.gapDays ?? g.gap), oneADay: !(st.at !== null && Math.floor(st.at / 1440) + 1 === d), serious: !(MOMENT_SERIOUS.has(dd.tone) && S.serious === d), dialogue: !DIALOGUE, arcDay: (SHIP.rel[id] || {}).arcDay }; }
       why[id] = { ...w0, whenOk, whereOk, both, of: n, gate, offDuty: rooms }; } }
-  return { nobook, diag, ids, log, mails, cal, books, byes, told: C().told, skip: C().skip, beats, why, err, names: Object.fromEntries(ids.map(id => [id, socP(id) ? socP(id).name : id])) };
+  return { diagD, nobook, diag, ids, log, mails, cal, books, byes, told: C().told, skip: C().skip, beats, why, err, names: Object.fromEntries(ids.map(id => [id, socP(id) ? socP(id).name : id])) };
 }
 """
 
@@ -207,9 +209,10 @@ with sync_playwright() as pw:
     on = on_copy()
     for mode in ('play', 'miss'):
         g = ct.Game(pw, on); g.step(3)
-        r = g.page.evaluate('([s, a]) => window.__sc("(" + s + ")(" + JSON.stringify(a) + ")")', [RUN, [DAYS, mode]])
+        r = g.page.evaluate('([s, a]) => window.__sc("(" + s + ")(" + JSON.stringify(a) + ")")', [RUN, [DAYS, mode, [x for x in os.environ.get('STORY_DIAG', '').split(',') if x]]])
         errs = g.errors[:5]; g.close()
         print(f'Part 2, run "{mode}" ({DAYS} days):')
+        for k, v in r.get('diagD', {}).items(): print('  diag', k, '\n    ' + '\n    '.join(v))   # STORY_DIAG=id,id: hourly from 17:00, the next beat's gates
         for id in r['ids']:
             got = sorted(x['beat'] for x in r['log'] if x['id'] == id)
             print(f'  {id}: told {sorted(r["told"].get(id, []))}, skipped {sorted(r["skip"].get(id, []))}; days ' + ' '.join(f'{x["beat"]}@{x["day"] if x["day"] else "mail"}' for x in sorted(r['log'], key=lambda x: (x['day'] or 99, x.get('t', 0))) if x['id'] == id))
