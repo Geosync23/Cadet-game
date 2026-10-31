@@ -1,0 +1,105 @@
+@bank all
+// Patch 0.99.5, the user's note 14: the first rounds as a tour of checks (JB2's build, CHECKS_ON). Words by SW4 from
+// JB2's stand-ins (CHECK_ROWS, ROUND_READ, RG_TOUR and the round.tour.* texts in the game). TEXTS; tips 200
+// characters at most. {machine} and {thing}: the stop's name ("the fire point by the lift", or a machine's).
+// A reading is what you see at a check point, plainly: no judging, no numbers of decks or days.
+
+// ---- the job and its stops
+== round.title.tour
+- Your first rounds: a tour of checks
+== round.tour.ask
+- All as it should be?
+== round.tour.checked
+- Checked
+== round.tour.goal
+- Check {thing}
+== round.tour.done
+- Tour done. Anything that wasn't right is on the board, noted by you.
+== round.tour.noted
+- Noted on the board: {machine} isn't quite right. Someone will see to it.
+
+// ---- a machine with no sign lines of its own, read plainly (healthy, worn, faulty)
+== round.read.healthy
+- Its gauge sits in the green. It runs smooth and quiet.
+== round.read.worn
+- Its gauge has crept towards the amber, and there's a roughness in the running.
+== round.read.faulty
+- Its gauge is in the red. It's labouring, and you can hear it.
+
+// ---- the tour's green tips (15b's RG_TOUR, one per step)
+== tip.tour.take
+- Your first rounds are on the job board: five quick checks. Take the job, then follow the arrow.
+== tip.tour.go
+- Head for {machine}. The arrow knows the way.
+== tip.tour.look
+- You're at {machine}. Have a good look, and read what you see.
+== tip.tour.mark
+- Everything as it should be? Tick it off.
+== tip.tour.next
+- On to the next check. Follow the arrow.
+== tip.tour.done
+- That's the tour. Hand it in at the job board.
+
+// ---- the check points' readings (CHECK_ROWS, round.check.<id>)
+== round.check.c4-ext
+- Extinguisher gauge: needle in the green. Pin and seal in place, tag dated this month.
+== round.check.c4-locker
+- Seal unbroken. Through the little window: masks, torches and blankets, all present.
+== round.check.c4-notice
+- The deck plan and the muster card are current, and easy to read from a few steps back.
+== round.check.c4-panel
+- You press each wall panel in turn. Every one sits flush. No rattles, no gaps.
+== round.check.c4-valve
+- Handle at OPEN, and the tag agrees. It turns a quarter and back without a fuss.
+== round.check.c4-vent
+- A steady breath of cool air through the grille. Nothing caught in it.
+== round.check.c4-floor
+- The non-slip strips lie flat from one end of the corridor to the other. No curled corners.
+== round.check.c4-smoke
+- The little green light blinks every few seconds, just as it should.
+== round.check.c4-exit
+- The sign glows evenly. You press the test button, and it flashes bright.
+== round.check.c4-door
+- It slides open and shut smoothly, and stops dead when you put a hand in the way.
+== round.check.c5-ext
+- Needle in the green, pin in, seal whole. The tag is this month's.
+== round.check.c5-notice
+- The muster point is marked plainly, and the card has this month's date on it.
+== round.check.c5-hatch
+- The hatch seal is soft and whole all the way round, and the wheel turns easily.
+== round.check.c5-vent
+- Cool air through the grille. Every louvre's open.
+== round.check.c5-latch
+- Every latch clicks home first time. The hold's tidy.
+== round.check.c5-strap
+- Straps tight, buckles locked, and not a frayed edge on any of them.
+== round.check.c5-lane
+- The amber floor lights along the cart lane are lit, end to end.
+== round.check.c5-water
+- Hot and cold both run clear. The filter light shows green.
+== round.check.c5-clock
+- It shows the right ship time, and takes a card first go.
+== round.check.c3-ext
+- Gauge in the green, pin and seal in place. Somebody's polished the cylinder.
+== round.check.c3-call
+- Both buttons light when you press them, and the car is on its way.
+== round.check.c3-vent
+- Air moving steadily, and the grille's clean enough to see through.
+== round.check.c3-rail
+- Firm all the way along. You give each bracket a tug. None of them moves.
+== round.check.c3-path
+- Every path light along the promenade is on and steady.
+== round.check.c3-smoke
+- Green light, blinking steady as a heartbeat.
+== round.check.c3-drain
+- You tip a jug of water down it. Gone in a second, and the grate's clean.
+== round.check.c3-cold
+- The seal grips all the way round. The door thermometer reads three degrees.
+== round.check.c3-fountain
+- A good steady stream, and properly cold.
+== round.check.c3-hose
+- Every joint is dry, and every clip is tight.
+== round.check.c3-lamp
+- All the lights on and even. No flicker anywhere.
+== round.check.c3-aid
+- Sealed, full, and everything in it in date.
