@@ -2152,3 +2152,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~07:31 UTC: R3 <-> R4 agreed: R4 takes controller_check G1 (idle save calls touch walk pick lift door day games unplug odd); R3 keeps G2 + devmode recheck. R4 also offered R2 (perf first), waiting R2.
 - ~07:31 UTC: R2 so far all OK: cadet OLD BUILD ALL IDENTICAL, intro whole, path, arc, lines, lines --day, p926, day 5/7/21/22, weekend; running day 0, 1, arrows endgo. R2 handed perf_check to R4 (R4 now: controller G1 + perf).
 - ~07:34 UTC: R3: whole devmode_check rerun on candidate OK; the "real" FAIL did not repeat (3 candidate + 2 OLD reruns): one-off timing flake. Waiting controller G2 (R3), G1 (R4).
+- ~07:35 UTC: RV28: player_check alone on 8976965e OK (old saves load right). Both round FAILs = busy host, not the build. RV28 handover pushed; idle unless needed (may be reused for 0.99.5 reviews).
