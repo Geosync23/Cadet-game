@@ -6,7 +6,8 @@ session_014zyJYNgBPdEPHLxTGrM889. Branch claude/review-rv29: notes only (plans/r
 ## State (2026-10-31 ~12:55 UTC): queue empty, all PASS, sent to builders, lead and BM22
 - JB2 claude/p995-jobs 1e056bd (game ef0941da...7d04): re-review of RV28's FIXES NEEDED (W1 words baked, F1 scanner's first
   job rotates over Tier 2 pump machines held for you, J1 the tour's own lines). PASS.
-- PL2 claude/p995-player 6b2f135 (game e462d177...bf80b): notes 3, 12, 13. PASS. Lead told: Stop partway pays its share of
+- PL2 claude/p995-player: 6b2f135 PASS withdrawn (BM23 found intro_check's Day 2 office meeting broken by the door fix;
+  I hadn't run intro_check); 75e22d2 (game f07b738a...fccf0, note 13 narrowed to cabins/bedrooms) PASS. Lead told: Stop partway pays its share of
   the real talk length (was a flat share of 15).
 - CT5 claude/p995-controller 7c6c2477 (game 5fae9bbf...f0cd): notes 2, 5, 6. PASS.
 
@@ -27,6 +28,8 @@ session_014zyJYNgBPdEPHLxTGrM889. Branch claude/review-rv29: notes only (plans/r
 - seat_talk_pad.py BUILD WT: controller, seated, D-pad right through the ring, A on the 2nd and 3rd person.
 
 ## Gotchas
+- When a fix re-locks rooms or changes doors, run every check that walks into those rooms (intro, controller promo3,
+  arrows, devmode, promo_beats, career), not just the obvious ones.
 - pip install playwright; three r128 + acorn 8.12.1 in /tmp/cw-w1, /tmp/cw-w2; CADET_CHROME=/opt/pw-browsers/chromium.
 - Never `pkill -f` a name in your own command line (it killed my shell, as RV26 warned).
 - Probe toasts: the harness's real clock is frozen, so a second toast waits behind the first (looks like a stale card).
