@@ -26,3 +26,17 @@ appt_check prints 4 `FAIL planted ...` lines (scope x3, teach-me x1): its own pl
 proving it catches them (same 4 as in the 0.99.0 round); the check ends OK.
 
 No real FAILs, so no OLD comparison runs were needed. Result: **R4: OK**.
+
+## Extra checks taken from other shares (agreed with their runners, lead copied)
+
+| Check | For | Result | Time | Key lines |
+|---|---|---|---|---|
+| controller_check G1 (idle save calls touch walk pick lift door day games unplug odd) | R3 | PASS | 1212 s | CONTROLLER CHECK OK, no FAIL lines |
+| perf_check NEW OLD (alone) | R2 | exit 1, then re-measured OK twice | 4114 s + 2x240 s | one frame-time spike that didn't repeat; draw calls identical; memory flat |
+
+perf_check full run: `PROBLEM the Line supper, the mess Sun 18:30 trifold-folded: js 2.29 -> 3.34 ms a frame` (the
+only problem; draw calls the same in both, 175c/324gl; week of play 470 -> 471 geometries and deck round trips
+470 -> 470 -> 470 on both builds, so no backlog 14 growth either). Re-measured alone twice
+(`PERF_SCENES='the Line supper' python3 perf_check.py NEW OLD`), trifold-folded OLD -> NEW: 2.66 -> 2.54 ms, then
+2.46 -> 2.44 ms; both runs PERF CHECK OK. A one-off spike that doesn't repeat: noise (backlog 32), not a FAIL.
+(Started late: my first wait-then-run script matched its own command line and never started perf; restarted 08:39 UTC.)
