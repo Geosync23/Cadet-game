@@ -20,7 +20,7 @@ don't touch those.
    mess seat with your dinner: your tray, else foodFrom('servery')); spiceFrame995 (Brennan held at 3-spice-host from 18:05
    to 19:15, the hold re-applied after a deck change: deckCrewClear clears CREW_HELD, which was why she left the shelf after
    a tap; the script timed from her being there and you in the mess: SPICE995_AT; the card once the jars are named, the
-   reveal waits up to 5 minutes for it); words (spiceFill: {spice} small mid-sentence, capital at a sentence start;
+   reveal waits while the card is open (60 real seconds at most) and 2.5 s after it); words (spiceFill: {spice} small mid-sentence, capital at a sentence start;
    spiceJarLine: "First"/"Last" lines in their place; no guess names its speaker); SHIP.spice { joined, asked } saved.
 2. Note 10, Tea and biscuits: 5-tea-3 moved from the doorway [21,1] to [23,2] (doorway always clear, the two seats used, at
    most one standing in the far corner). Seats only for the 13:00 tea was built, then dropped (lead 47's (a)): with two
