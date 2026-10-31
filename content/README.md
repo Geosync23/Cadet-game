@@ -315,9 +315,9 @@ them: Was I any good, as your trainer?   [sigh]
   only while the game's `STORIES_ON` is on; the older words in `content/arcs/` stay the game's until then.
 - **Crew stories stage 2** (ST1, 2026-10-31): `content/stories/stage2/<arcId>.arc` (Zeke, Calder, Dev Raman, Kowalczyk),
   baked into `STORY_MOMENTS2`, read only while `STORIES2_ON` is on too (the old `content/arcs/torres.arc` and `calder.arc`
-  are parked, and play while it's off). Two more beat fields: `crescendo: at:HH:MM-HH:MM` (a fixed time on the beat's one
+  are parked, and play while it's off). Three more beat fields: `crescendo: at:HH:MM-HH:MM` (a fixed time on the beat's one
   `day:`; its teller, and any cast who doesn't work in its room, are planned there: Kowalczyk's dawn on the bridge) and
-  `until: HH:MM` (the latest the crescendo may start: Zeke's before your 21:00 night, Calder's before her question). One
+  `come:` (of an `at:` crescendo's cast, who the planner brings there: crew ids, or `none`; default all) and `until: HH:MM` (the latest the crescendo may start: Zeke's before your 21:00 night, Calder's before her question). One
   more condition: `myrank:` your own Works rank (`junior`, `officer`, `senior`, `specialist`).
 - **Choices:** `? choice`, then up to three `* reply` lines. Each can carry `flavour:` (`listen`, `cheer`, `practical`,
   `share`), `mem:<word>`, `flag:<key>` (set when chosen) and `favour:<job>` (a practical reply that starts a favour).

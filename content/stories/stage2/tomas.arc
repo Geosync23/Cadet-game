@@ -101,9 +101,13 @@ tone: resolution
 gapDays: 0
 where: Shuttle bay
 when: beat:tomas.7 trad:off-the-tern day:21
-crescendo: trad:off-the-tern
-// Built (ST1): Holt out of cast: (off on Sundays; his lines are if here:, with Tomas's fallback), as SW4 offered.
+// Built (ST1): a fixed time (at:), 17:45-17:55, once Basil is down the ramp (17:43): Off the Tern is the arrival's own
+// event, so the stories' planner hook can't send Tomas to it; section 20c plans him there (come: none: Zeke greets at the
+// ramp foot and Basil comes down by their own plans). Holt out of cast: (off on Sundays; his lines are if here:, with
+// Tomas's fallback), as SW4 offered.
+crescendo: at:17:45-17:55
 cast: bramwell-basil torres-zeke
+come: none
 quiet: 9
 title: Tomas meets the Tern
 invite: The Tern | Basil's Tern lands tomorrow at {at}. Shuttle bay. I'm on the ramp: Holt wrote it in pencil, so it's official. Stand near me? Tomas

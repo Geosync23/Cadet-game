@@ -656,7 +656,7 @@ def parse_appt(path, rel, out):
 
 MOMENT_TONES = ('light', 'heartfelt', 'serious', 'resolution')
 MOMENT_FIELDS = ('tone', 'where', 'when', 'tier', 'metDays', 'gapDays', 'duty', 'crisis', 'hint', 'mem', 'flag', 'keepsake',
-                 'learn', 'mail', 'needs', 'via', 'crescendo', 'quiet', 'follows', 'lead', 'title', 'invite', 'cast', 'until')   # the last eight: crew stories (FX21; until: ST1)
+                 'learn', 'mail', 'needs', 'via', 'crescendo', 'quiet', 'follows', 'lead', 'title', 'invite', 'cast', 'until', 'come')   # the last nine: crew stories (FX21; until, come: ST1)
 THEMES = ('homesick', 'exams', 'family', 'stuck', 'notgood', 'lonely', 'loss', 'talent', 'burnout', 'leaving', 'rivalry',
           'startover')                    # social B's frozen theme names
 FLAVOURS = ('listen', 'cheer', 'practical', 'share')
@@ -744,7 +744,7 @@ def parse_arc(path, rel, out, home=False, store='MOMENTS'):
                 cur['after'] = {'mail': {'after': int(parts[0]), 'subject': parts[1], 'body': parts[2]}}
             elif k == 'needs':
                 cur[k] = [x.strip() for x in v.split(',') if x.strip()]
-            elif k in ('crescendo', 'quiet', 'follows', 'lead', 'title', 'invite', 'cast', 'until') and not rel.startswith('stories/'):
+            elif k in ('crescendo', 'quiet', 'follows', 'lead', 'title', 'invite', 'cast', 'until', 'come') and not rel.startswith('stories/'):
                 raise GenError(f'{where}: {k}: is for crew stories (content/stories) only')
             elif k == 'crescendo':                 # crew stories (FX21): the beat plays at this gathering (section 20c's storySlots)
                 if not re.fullmatch(r'(trad|event):[\w-]+|farewell|meal:(breakfast|dinner)|at:\d\d:\d\d-\d\d:\d\d', v):
@@ -763,6 +763,11 @@ def parse_arc(path, rel, out, home=False, store='MOMENTS'):
                 if not re.fullmatch(r'\d+(\|\d+)*', v):
                     raise GenError(f'{where}: follows is a beat or beats (4|6): it plays after either')
                 cur[k] = [int(x) for x in v.split('|')]
+            elif k == 'come':                      # crew stories stage 2 (ST1): of an at: crescendo's cast, who the planner brings there (default all; none: only its teller)
+                ids = [] if v == 'none' else [x for x in re.split(r'[\s,]+', v) if x]
+                if not all(re.fullmatch(r'[\w-]+', x) for x in ids):
+                    raise GenError(f'{where}: come is crew ids, or none')
+                cur[k] = ids
             elif k == 'cast':                      # the people a crescendo needs there (it waits for them, in its booking)
                 ids = [x for x in re.split(r'[\s,]+', v) if x]
                 if not ids or not all(re.fullmatch(r'[\w-]+', x) for x in ids):

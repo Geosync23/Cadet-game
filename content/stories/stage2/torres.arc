@@ -119,7 +119,8 @@ them: Right, onward. I've a letter to write. Properly.
 tone: resolution
 tier: friend
 gapDays: 1
-when: beat:torres.5 trad:knit-and-natter weekday:tue day:23-
+// Days 23-30: two Tuesdays (lead 47's 2a: Day 23, else Day 30), then the quiet ending, so the story always ends.
+when: beat:torres.5 trad:knit-and-natter weekday:tue day:23-30
 crescendo: trad:knit-and-natter
 quiet: 7
 until: 20:40
