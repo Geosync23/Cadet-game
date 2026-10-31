@@ -124,6 +124,22 @@ RUN = r"""
 }
 """
 
+LATE = r"""
+(() => {
+  socInit(); const p = socP('tomas'), C = storyCS(), B = 20 * 1440, r = relGet('tomas');
+  r.arc = 7; r.arcDay = 0; r.tier = 4; C.told.tomas = [5, 6, 7]; C.skip.tomas = [];
+  C.book.tomas = { beat: 8, day: 21, from: B + 1065, to: B + 1075, trad: null };
+  setShipNow(B + 1074); const mid = momentNextId(p); if (mid !== 'tomas:8') return { ok: false, why: 'next is ' + mid };
+  momentShow(mid); let n = 0; for (; n < 3 && DIALOGUE; n++) { const v = dialogueView(); if (v && v.choices) dialogueStep(0); else dialogueStep(); }
+  setShipNow(B + 1080); storyTick(B + 1080);              // the booking's end passes mid-scene
+  const midway = { told: (C.told.tomas || []).slice(), skip: (C.skip.tomas || []).slice(), booked: !!C.book.tomas };
+  for (let k = 0; k < 80 && DIALOGUE; k++) { const v = dialogueView(); if (!v) break; if (v.choices) dialogueStep(0); else dialogueStep(); }
+  setShipNow(B + 1110); storyTick(B + 1110);
+  const told = C.told.tomas || [], skip = C.skip.tomas || [];
+  return { ok: told.includes(8) && !skip.includes(8) && skip.includes(9) && !skip.includes(10) && !told.includes(10), midway, told, skip };
+})()
+"""
+
 def rules(r, mode):
     """The rules on one run's result -> a list of failures (plain words)."""
     bad = []
@@ -235,5 +251,12 @@ with sync_playwright() as pw:
         bad = rules(r, mode) + ['page error: ' + e for e in errs]
         for b in bad: print('  FAIL', mode + ':', b)
         fails += [mode + ': ' + b for b in bad]
+    if ON2_LINE in pathlib.Path(on).read_text():   # stage 2 (RV28 B5): a crescendo still playing when its booking ends is told, not missed
+        g = ct.Game(pw, on); g.step(3)
+        r = g.ev(LATE); errs = g.errors[:5]; g.close()
+        print('Part 2b, a scene across its booking\'s end (Tomas 8, Day 21 17:54 -> 18:00):', json.dumps(r))
+        bad = ([] if r.get('ok') else ['late scene: ' + json.dumps(r)]) + ['late scene, page error: ' + e for e in errs]
+        for x in bad: print('  FAIL', x)
+        fails += bad
 print('STORIES CHECK OK' if not fails else f'STORIES CHECK FAILED ({len(fails)})')
 sys.exit(0 if not fails else 1)

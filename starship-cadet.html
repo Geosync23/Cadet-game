@@ -54711,6 +54711,7 @@ function storyPost(p, d, now) {                           // a quiet ending for 
 function storyDone(p, d, t) {                             // momentDone told a crew story's beat
   const C = storyCS(), day = Math.floor(t / 1440) + 1;
   (C.told[p.id] || (C.told[p.id] = [])).push(d.beat);
+  if (STORIES2_ON && C.skip[p.id] && C.skip[p.id].includes(d.beat)) C.skip[p.id] = C.skip[p.id].filter(b => b !== d.beat);   // stage 2 (RV28 B5): told after all, so not missed
   if (d.quiet) (C.skip[p.id] || (C.skip[p.id] = [])).push(d.quiet);
   if (d.crescendo) { C.cday[day] = STORIES2_ON ? p.id + ':' + d.beat : 1; delete C.book[p.id]; }   // (stage 2: which one, for STORY_PAIRS)
   if (d.keepsake && d.tone !== 'resolution' && typeof giftKeepsake === 'function') giftKeepsake(p, d.keepsake);   // a quiet ending's keepsake (momentDone gives resolution beats theirs)
@@ -54778,7 +54779,7 @@ function storyDevNext(now) {
 function storyTick(now) {                                 // once a ship minute (socialTick), while STORIES_ON
   if (!STORIES_ON) return;
   storyAbout(); socInit(); const C = storyCS(), day = Math.floor(now / 1440) + 1;
-  for (const id of Object.keys(C.book)) { const b = C.book[id], p = socP(id); if (p && now >= b.to && !(C.told[id] || []).includes(b.beat)) storySkip(p, b.beat, now); else if (!p || now >= b.to) delete C.book[id]; }
+  for (const id of Object.keys(C.book)) { const b = C.book[id], p = socP(id); if (STORIES2_ON && storyOpen(id, b.beat)) continue; if (p && now >= b.to && !(C.told[id] || []).includes(b.beat)) storySkip(p, b.beat, now); else if (!p || now >= b.to) delete C.book[id]; }   // stage 2 (RV28 B5): not while its scene is still playing
   for (const fid of Object.keys(C.fav)) {                 // S3: a story favour handed back sets its flag (after its delay)
     const e = C.fav[fid], j = typeof favourById === 'function' ? favourById(fid) : null;
     if (!j || j.declined || (j.status === 'done' && j.doneBy !== 'you')) { delete C.fav[fid]; continue; }
@@ -54818,6 +54819,7 @@ function storyTick(now) {                                 // once a ship minute 
 //     18:40, with Halloran, Pell and Zeke, who'd still be at dinner by their plans). Section 14's introPlan lays them
 //     over the day like the arrival's beats. Pure: only the baked STORY_MOMENTS2 and STORIES2_ON (the planner rule)
 //   storyDoorOpen() -> a booked crescendo on the bridge is on (from 20 minutes before): section 20's bridgeBarred lets you in
+const storyOpen = (id, beat) => { const D = typeof DIALOGUE !== 'undefined' && DIALOGUE; return !!D && String(D.id) === 'moment:' + id + ':' + beat; };   // that beat's scene is on screen now (RV28 B5)
 function storyDayHeld(id, d, dd) {
   const one = x => { const v = [].concat(x && x.when && x.when.day || []); return v.length > 0 && v.every(y => /^\d+$/.test(String(y)) && +y === dd); };
   if (one(d)) return false;
