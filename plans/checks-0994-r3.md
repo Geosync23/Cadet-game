@@ -22,7 +22,11 @@
 | controller G3: m19 m20 s5cases s6cases vessel ending m21 m24 team m23 deck6 promo4 promo3 | OK, exit 0 (2066 s) | all 13 OK |
 | controller G4: nights mentor props jobs2 beam court | OK, exit 0 (370 s) | all 6 OK |
 | controller G2: shut off quiet base deck pick1 panels api lists tiles disc screens marks touch3 drop settings a11y firstuse cards clock devpad edge savesland sound saves words | OK, exit 0 (1962 s) | all 26 OK |
-| controller G1 (run by R4): idle save calls touch walk pick lift door day games unplug odd | PENDING | |
+| controller G1 (run by R4): idle save calls touch walk pick lift door day games unplug odd | OK, exit 0 (1212 s), reported by R4 | CONTROLLER CHECK OK, no FAIL lines |
+
+controller_check: 57 parts (every part but reach), every one OK, no FAIL lines.
+
+**R3: OK** (the devmode first-run FAIL is a one-off that did not repeat in three candidate reruns and two OLD runs).
 
 ## FAILs
 
