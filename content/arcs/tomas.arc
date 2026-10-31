@@ -1,5 +1,8 @@
 @arc tomas
 who: tomas
+// PARKED (ST1, 2026-10-31, crew stories stage 2; the user's yes via lead 47): beats 5-7 here are replaced by SW4's
+// content/stories/stage2/tomas.arc (beats 5-10) while the game's STORIES2_ON is on. Kept on record, never deleted (the
+// user's rule); they still bake into MOMENTS and play while STORIES2_ON is off.
 // Writer-commons, arc batch. From content/arcs/outlines.md, "3. Tomas Lind". Beats 1-4 are already in the game
 // (STORY_ARCS.tomas: the star map, his brother's birthday call, the dropped call, his brother's star map).
 // Tomas's card: needs listen, so the warmer answers sit on the listen replies.
