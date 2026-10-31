@@ -68,3 +68,5 @@ Base: claude/integration 57eceec4 = 0.99.3, game sha256 04c821fe...c2a9 (verifie
 - Tomas real game on d22a5baa at ~3 s/card (probe_tomas_d22_pace3.log): B5 fixed (17:52-18:17, told 8, skip [9], 10 to come;
   reload fine). **B7**: the cast's plans end 17:55, so Tomas, Basil, Zeke leave for dinner mid-scene; from 18:04 nobody
   is on Deck 5 while their lines play. Suggest crewHold (section 10, looks only) on the scene's speakers while storyOpen.
+- d22a5baa switch off: cadet_test vs 57eceec4 (alone) ALL IDENTICAL. **plans_same.py** (every crew member's planDay, Days
+  1-30, hashed per day): d22a5baa = 0.99.3 on all 30 days; 52bbd91c differs on Day 26 (B1), so the probe catches it.
