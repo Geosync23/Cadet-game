@@ -5,7 +5,7 @@
 - Setup: playwright (pip), three.js r128 + acorn 8.12.1 in my own CADET_WORK (/tmp/work-r2, /tmp/work-r2b), CADET_CHROME=/opt/pw-browsers/chromium; 4 cores. cadet_test strictly alone first, then two lanes (two browsers), detached, no time limit. Check scripts from the candidate commit.
 - Handed over, agreed before it started (nothing ran twice): perf_check BUILD OLD to R4 (R4 offered when its share finished; BM22 suggested it). R4 reports it to BM22 and the lead.
 
-## Result: OK (my part; perf_check is with R4)
+## Result: OK
 
 | Check | Run by | Result | Minutes | Key lines |
 |---|---|---|---|---|
@@ -24,7 +24,7 @@
 | day_check 22 | R2 | exit 0 | 6 | `DAY CHECK OK` |
 | weekend_check | R2 | exit 0 | 10 | `WEEKEND CHECK OK` |
 | arrows_check endgo | R2 | exit 0 | 12 | `ARROWS CHECK OK` (ways asis, teachoff, track, as in earlier rounds) |
-| perf_check BUILD OLD | R4 | see R4's report | | |
+| perf_check BUILD OLD | R4 (alone) | exit 1, then re-measured OK twice | 69 + 2 re-measures | one frame-time spike that didn't repeat (below); draw calls the same; memory flat |
 
 No FAIL in this share, so nothing needed a run on OLD (apart from cadet_test's OLD half).
 
@@ -33,3 +33,13 @@ No FAIL in this share, so nothing needed a run on OLD (apart from cadet_test's O
 ALL IDENTICAL: all 15 shots `differing px 0 max 0`, no script errors in either build (`errors A [] errors B []`), the
 taps the same (`['Very hungry', 'Missing people', 'Missing people', 'Your bunk', 'Your bunk']`). That's as expected:
 cadet_test plays Day 0 on Deck 4, and the new stories play on Days 21-26 and 30. It matches BM22's own cadet run.
+
+## perf_check BUILD OLD (run by R4, as R4 reported it; R4's notes: plans/checks-0994-r4.md, bb7d8854)
+
+- Run alone, 8976965e against 57eceec4: exit 1, 4114 s. The only problem:
+  `PROBLEM the Line supper, the mess Sun 18:30 trifold-folded: js 2.29 -> 3.34 ms a frame`.
+- Draw calls the same in both (175c/324gl). Memory flat in both: a week 470 -> 471, round trips 470 -> 470 -> 470
+  (no backlog 14 growth).
+- Re-measured alone twice (`PERF_SCENES='the Line supper'`), trifold-folded OLD -> NEW: 2.66 -> 2.54 and 2.46 -> 2.44
+  ms, both `PERF CHECK OK`.
+- The spike didn't repeat, so it doesn't count (a one-off spike is noise, backlog 32's kind). No FAIL in this share.
