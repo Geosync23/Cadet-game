@@ -2131,3 +2131,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~04:39 UTC check-in (lead 47): ST1 running (B5 end-of-booking fix + W5 line; check_fast, push, its checks), ~45% memory. RV28 idle waiting ST1's B5 fix (~30%). BM22 + R1-R4 set up, waiting. SW4 idle.
 - ~04:43 UTC: RV28: B5 fix d22a5baa reads right. **New blocker B6** (events_check on switch-on): Day 26 story hook seats Calder, Halloran, Zeke in the tea corner's 3 places held for Four weeks aboard as a story beat, not as going to the tradition (3 FAILs); options sent to ST1. RV28 told the W5 decision.
 - ~04:52 UTC: ST1 8de1b31b (game fd52aabe...2691): B5 fixed (d22a5baa) + W5 bridge line; check_fast OK; ~52% memory (handover-st1 pushed). Asked ST1 to take B6 before its full re-run.
+- ~04:58 UTC: ST1 87126397 (game c5e267b3...6997, check_fast OK): B6 + B7 fixed -> RV28; ST1's one full re-run on it (events 28, day 26 first). handover-st1 updated 81bb1b7d.
