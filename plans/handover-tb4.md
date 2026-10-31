@@ -52,3 +52,6 @@ tell." herself (the host names herself in the third person); the same can happen
 
 ## Open questions for the user
 - None of mine; the words are stand-ins for a writer (above).
+
+## Words (SW4, after the build)
+SW4 wrote the real words: claude/p995-trad926-words ef310be (content/banks/trad-0926.lines, baked; lines_check's PLACEHOLDERS gained 'tool'), fast-forwarded into this branch. Checked: words baked, names_check OK, lines_check PASS, check_fast OK, the probe shows the writer's lines on Tool night's and Garden walk's cards. Backlog TB4-1: Open house's own Mail says "Deck 2".
