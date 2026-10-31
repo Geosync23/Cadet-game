@@ -2256,3 +2256,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~22:14 UTC (6:14 PM ET) check-in: BM23 ran ahead on ee66e35: career, day 5 OK, cadet vs 0.99.4 as before; docs e00bfab ready, not pushed. RV29 idle with interactions run in background -> nudged for PASS. Runners, PUB3 waiting.
 - ~22:14 UTC: **RV29 PASS tea fix ee66e35b** -> BM23 pushes staging-0995 + GO R1-R4. RV29 writing handover, then stops.
 - ~22:16 UTC (6:16 PM ET): **ROUND 0995 GO** (BM23): staging-0995 e00bfabd, game 93aed54f...5164 (lead verified; integration 596712bc fast-forwards). R1-R4 + R5 (BM23) running; ~2.5 h.
+- ~22:50 UTC (6:50 PM ET): **R1 NEW FAIL** arrows_check week on e00bfabd: stuck Day 2 18:15 at 'Tap Chef Brennan to guess the spices' (TB3 spice); 'Unstick a gym locker' arrow up >3 h from Day 8 13:00. R1 re-running on OLD + candidate; RV30 asked: game or check, with probe. Round continues.
