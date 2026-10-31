@@ -68,3 +68,14 @@ Lead 48 asked for it on the candidate and on 0.99.4 (both with the puzzle_check.
 | 0.99.4 a01d1a4c | OK | PUZZLE CHECK OK; p5 first staged creserve29:3-pump-1@24810 (seal) |
 
 So the paper line is cleared; p5's first is the one FAIL left (BM23 working on it).
+
+## puzzle_check rerun with staging-0995 bb45099c (RV30's 93839bf line + BM23's P5FIRST clock-first fix; check only, game 93aed54f unchanged)
+
+| Game | Result | Lines |
+|---|---|---|
+| candidate 93aed54f | OK | PUZZLE CHECK OK (151 s); p5 first staged creserve29:3-pump-1@24810 (seal) |
+| 0.99.4 a01d1a4c | OK | PUZZLE CHECK OK (146 s); p5 first staged creserve29:3-pump-1@24810 (seal), the same |
+
+**R1, updated: OK on 0.99.5 (game 93aed54f) with the checks from claude/staging-0995 bb45099c.** Every check in the
+share passes. The two FAILs were both in the checks, and both are now fixed: arrows_check's walker (cc18dad0) and
+puzzle_check (93839bf + bb45099c). The game file never changed.
