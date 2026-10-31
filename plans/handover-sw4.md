@@ -1,54 +1,53 @@
-# Handover: SW4 (writer, "A Veyli vessel needs help")
+# Handover: SW4 (story writer, Tomas Lind's crew story)
 
-**Role:** writer for the Veyli vessel (Days 27-30), hired by lead 39 (session_019V68fz33UFv4cK5Z4iCDvi). SW4 is
-session_01DgMynb62u2rTUA9RocZi65. Took over from SW2 (session_017dLaLFBnRUQin3PQEQq6so; plans/handover-sw2.md on
-claude/stories-sw2).
-**Branch:** `claude/vessel-words`, from claude/staging-0.93.3 (d9c7e5f0). Content files only, baked into the game with
-`content_gen.py` (the baked blocks are the only game change; nothing reads the new keys until VB1's code does).
-**Sources:** plans/veyli-vessel-spec.html on claude/p5-specs (the beats table, section 8); plans/events-plan-2.html
-Part C on claude/events-plan-2 (EP1's story and canon notes).
-**Builders:** VB1 session_01UsjGN26E88zwrNPWwef4iT (events, key names), VB2 session_01KRBGtugjBpv5iGcV5WDvCP (props' tap
-texts). Send each pushed sha to lead 39 and VB1.
+Written 2026-10-31 by SW4 (session_014zyJYNzWwbPhLN9wtKdEWj). Lead: lead 47 (session_014zyJYM4mt9ZDCD5H9JZDtN).
+Builder: ST1 (session_014zyJYMy3rmgW9Tv5brJfkM, branch claude/stories2-st1). Read CLAUDE.md first, then this.
 
-## The user's answers (2026-10-26) the words follow
-
-- C1 commendation: yes (`mail.commendation`, the storm's form).
-- C2 the ship visible outside: yes (the view lines Saturday, the lights Monday).
-- C3 missed at the ramp: Taavek and Calder WAIT at the ramp up to an hour (`vesselRamp.late`, `talk.rampWait`,
-  `notice.rampWait*`); only after that Zeke stands in (`talk.rampZeke`, `notice.rampZeke`, `vesselRamp.bench`).
-- Pronounced moments with dialogue: replies where they fit, others reacting, a clear close line.
-- Not mine unless lead 39 sends it: the Day 30 ending ("Crossing back" + a transfer offer).
+## Role and branch
+- Words only, for Tomas's new-style crew story. No changes to the game file and no bake into the game.
+- Branch `claude/tomas-story-sw4`, from claude/integration. Commits: 481f209 (the story and a facts.md row), af107ba
+  (lead 47's Day 21 decision: Theo's lines out, a nod to Theo in, the afterglow from Day 25).
 
 ## What I wrote
+`content/stories/tomas.arc`, "The bottom of the ramp". Beats 1-4 are untouched (STORY_ARCS.tomas in the game). The new
+beats replace the older words in content/arcs/tomas.arc while STORIES_ON is on.
 
-| File | What |
-| --- | --- |
-| `content/banks/event-veyliVessel.lines` | every key `event.veyliVessel.*`: status by phase; the call (talk.call); breakfast news and Saruth's line; both addresses (address.sat/tue, as "marrow: ..." lists) and their Mails; Calder's parts list; Vance's "Tomorrow"; rings, notices, goals, Tracked and Schedule rows for each beat; the view, the Tern out, the ramp crowd, the wait, the swap meet, the chain (gather.*, chain.count, talk.chain, talk.chainEnd), Sunday evening, the helper card and picks, the five making steps (ring/tracked/taavek/help.<id>.step.N), pair exchanges (help.pair.<a>.<b>, ids alphabetical), lunch, test-fit reactions, going home, the lights (gather.*, talk.lights, lights.you), the turn back, commendation, Taavek's letter, the shelf, tap texts (tap.*, VB2), the afterglow (news.told.N), Record |
-| `content/meetings/vesselSheet.meet` | Sat 10:00, Calder, two replies |
-| `content/meetings/vesselRamp.meet`, `.late.meet`, `.bench.meet` | Sun 09:30 the ramp (three replies); late (they waited); Zeke stood in, met at the bench |
-| `content/meetings/vesselRoundOne.meet` | Sun 10:00, the bench, one choice |
-| `content/meetings/vesselJob.meet` | Mon 09:20, Calder; the helper card follows (bank keys) |
-| `content/meetings/vesselTestFit.meet` | Mon 13:30, two replies |
-| `content/meetings/vesselHome.meet` | Mon 15:00, the sketch, three replies |
+| Beat | Tone, window | What happens |
+| --- | --- | --- |
+| 5 | light, Days 8-20 | The Tern's list: Basil's coming. Nobody met Tomas when he arrived; he found the laundry (the long way round began). He lets slip the Watch exam he failed once. |
+| 6 | heartfelt, Days 10-20, evening | The posting near the farm moon he keeps opening; the "ramp feeling". Listen reply keeps mem `listened` (its old callback fits). |
+| 7 | light, Days 13-20 | Holt pencils him onto the rota and says take Basil the long way (Holt walks it too). Still hasn't told Holt about the exam. Your reply picks the sign's text (mem `notlost` / `bigletters` / `rehearse`). Sets `flag:tomas.meets`. |
+| 8 | CRESCENDO, Day 21 | Off the Tern (`crescendo: trad:off-the-tern`), the shuttle bay, 17:35-17:55. Cast: bramwell-basil torres-zeke holt (Holt's lines are `if here:`). He welcomes Basil, tells him about the exam, Holt knew all along; gives you the sign. One nod to Theo leaving that afternoon. |
+| 9 | quiet ending, Day 21 on | He tells you how it went; Mail "He's here". Stands alone even if 5-7 ran out of days. |
+| 10 | afterglow, light, Day 25 on, evening | He's closed the posting; his brother writes "Told you. Two skies." `follows: 8\|9`. |
 
-Key names are my proposal (sent to VB1); rename to match VB1 if they differ.
+Keepsake (beats 8 and 9): "the welcome sign from the shuttle bay, glitter coming off the B". Every resolution beat has
+its own keepsake, so the voice card's old star-map corner is never given.
+
+New canon row in `content/facts.md` (section 10): nobody met Tomas off the Tern; Holt's pencil; Holt knew about the exam.
+
+## Decisions (lead 47, 2026-10-31)
+- Day 21 is an exception to "one big moment a day": Theo's send-off at 14:30 and Tomas's scene at 17:35 are a pair.
+- Days 22-24 evenings are taken (the comet, your night shifts), so beats 9 and 10 don't need them.
+
+## Open with ST1 (sent in my messages)
+1. Basil is in `cast:` but is still on the Tern until the ramp opens: does storyHere count him in time, or should his
+   lines become `if here:` lines?
+2. Basil's beat 1 rides on the same gathering; it reads fine straight after this scene.
+3. Old callbacks in `content/lines/tomas.lines` are keyed to the old beats' memory words. Suggested: add
+   `!beat:tomas.8` to the `beat:tomas.5` exam line ("Still haven't told Holt..."). The words promised, passed,
+   blanket, showed, observatory, shown, staying and home no longer happen, so those callbacks go quiet (harmless). The
+   `told:moment.tomas.home` line could move to `told:moment.tomas.pencil`. tomas.lines isn't my file.
+
+## How I checked
+- Bake on a scratch copy: `cp starship-cadet.html $SCRATCH/game.html && python3 content_gen.py $SCRATCH/game.html &&
+  python3 lines_check.py $SCRATCH/game.html` gives PASS, the same 112 warnings as without the file.
+- `node names_check.js $SCRATCH/game.html` gives OK. It needs acorn at /tmp/cadet-work/acorn/package/dist/acorn.js
+  (`npm pack acorn@8.11.3` there and untar).
+- Repeats: a script comparing every line against content/ and the game (exact and near). No whole line repeats; two
+  short shared phrases were reworded.
 
 ## Gotchas
-
-- Bank lines are 90 characters at most, the "speaker: " prefix included. Mail bodies can be longer.
-- A bank kind can't contain `+` (hence `help.pair.<a>.<b>`).
-- A .meet choice takes only one indented reply line; anything after the choice is heard by every choice.
-- "handsome" is on the banned list (romance words).
-- Taavek's long Veyli word is never spelled out; Veyli are not described in human terms (no family words for Taavek).
-- Zeke did not give the player a pen on Day 0 (EP1's sample said so): he showed you your bunk.
-
-## How to check
-
-`python3 content_gen.py starship-cadet.html`, then `python3 lines_check.py` (PASS, 69 old warnings), names_check,
-`bash check_fast.sh`. CS1's `tools/near_dupes.py` (claude/crew-stories-pitch): zero EXACT except the meetings'
-`from:` field; the ramp versions are NEAR each other on purpose (the same moment, only one is ever heard).
-
-## Open
-
-- VB1's key names and any rank variants (myrank) they want.
-- Lead 39's review of the words.
+- No deck or day numbers in lines; no star maps beyond beats 1-4; Basil's lines keep his voice
+  (content/stories/bramwell-basil.voice) and never explain the plant (his beat 1 does).
+- "Show them the long way. It's the nice way." is already in the game: don't echo "the nice way".
