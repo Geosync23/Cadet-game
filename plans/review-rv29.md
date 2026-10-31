@@ -85,3 +85,24 @@ No switch (PAD_ON already on); section 26 only.
   then the next table; A on the 2nd and on the 3rd person opens a talk with them, still seated. No errors.
 - cadet_test vs 8976965e: ALL IDENTICAL. controller_check deck settings pick door day: CONTROLLER CHECK OK (all five).
 - **Verdict (~12:55 UTC): PASS claude/p995-controller 7c6c2477 (game 5fae9bbf...f0cd).** Notes 2, 5, 6 as the lead's GO.
+
+## TB4 claude/p995-trad926 (head bd0fa61; game 347b4996...d2e9 = TB4 e283d06 + SW4's words ef310be baked; verified), from 596712bc
+The 0.92.6 traditions get Tap to join: tool night, route night, card night, garden walk, window sketching (Luca, Lumi), open house,
+spoon band, worst joke night. Switch TRAD926_JOIN_ON (off; ?trad926).
+- Code read: all behind the switch (TRAD_JOIN entries, tjActs, T932_IDS, t926Join's card, t926Walk on the garden's own places);
+  one shared line, tradWalkEnd's "|| W.done", a no-op with it off. quizH for tool night (no R()); nothing new saved.
+- Switch off vs 8976965e (d41e762): ALL IDENTICAL. SW4's ef310be: baked words only (content_gen up to date).
+- Merge beside TB3 4037a26: the game file merges clean (names_check OK on the merge); docs clash only (design-doc's
+  Joining-in paragraph, backlog, build-table): BM22's usual.
+- Switched-on copy of the words build: events_check 35 OK, bigevents_check OK, p926_check OK.
+- TR1's sweep on d41e762 (claude/p995-tr1 4f34b1c): all nine PASS.
+- t926_pace.py (mine) on the words build, every tradition on its day, cards read at 3 s each: the host's card in SW4's words,
+  the question, three answers, the reply to the one picked, then the activity (seat, standing spot, or Garden walk's 8-stop walk
+  round the beds, ending 10:12 with its own words); clean end; reload on card 2: not joined, marker and arrow back, a second tap
+  joins. No page errors. The card takes about 7.4 ship minutes at that pace (the clock runs during cards).
+- Day 73 overlap (overlap73.py, TB4 alone and merged with TB3, both on): Card night in the junior common room shows its own star
+  and arrow; the tasting table shows its own in the galley; Card night's spare Deck 3 room is unused that day.
+- Note, not blocking (the 0.93.2 joins do the same): a tap in the last ~7 minutes runs the card past the end, so you join and
+  walk to a spot (or start the garden walk) after the tradition is over, for up to ~10 minutes. Backlog idea: no card after
+  e.to - 8, or skip the activity when the card ends after e.to.
+- **Verdict (~14:10 UTC): PASS claude/p995-trad926 bd0fa61 (game 347b4996...d2e9).**
