@@ -10754,7 +10754,6 @@ function schedBuild(p, d, occ, S) {
           const i = j % pool.length, pass = Math.floor(j / pool.length);
           const pl = pool[(fav + i) % pool.length], mine = ownL.length > 0 && S.owner.get(pl.id).length === 1;
           if (pref && (pass === 0 ? !pref.has(pl.id) || avoid.has(pl.id) : pass === 1 ? pref.has(pl.id) || avoid.has(pl.id) : !avoid.has(pl.id))) continue;
-          if (o.sit && pl.pose !== 'sit') continue;     // o.sit: seats only (the 13:00 tea, 0.99.5 note 10)
           if (!mine && !isFree(pl.id, s, end, o.tag)) continue;
           if (shut && evClosed(pl, B + s, o.event, B + end)) continue;   // closed for the event
           if (P5_STEP5 && sdPlanShut(d, occ, pl, B + s, B + end, p)) continue;   // Step 5's settled records (24w): a shutdown booked for that hour, a routine moved (24k's P9); read only from records settled at 22:00 the evening before
@@ -10840,7 +10839,7 @@ function schedBuild(p, d, occ, S) {
         e.done = true; continue;
       }
       if (kind === 'tea') { if (!take('leisure', [[wd, 'lounge-seat'], [wd, 'bench']], 15, { tag: 'tea' })) work(t + 15); }
-      else if (kind === 'wtea') { if (!take('leisure', [[5, 'lounge-seat']], WORKS_TEA.dur, { tag: 'tea', wait: WORKS_TEA.wait, min: 8, anim: 'drink', sit: TRAD995_ON })) work(t + 5); }   // (0.99.5 note 10, TRAD995_ON: the user's "nobody sits down for tea": the two seats only)   // the tea corner full: back to the job
+      else if (kind === 'wtea') { if (!take('leisure', [[5, 'lounge-seat']], WORKS_TEA.dur, { tag: 'tea', wait: WORKS_TEA.wait, min: 8, anim: 'drink' })) work(t + 5); }   // the tea corner full: back to the job
       else if (kind === 'staff') seg('dinner', t + 20, wtype, desk, { tag: 'staff' });
       else if (kind === 'recRound') recRound(to);
       else if (kind === 'call') {                       // to the booths and back on the shift's time (tag 'rush')
@@ -48745,8 +48744,8 @@ function spiceJoin(e, a, notice) {
 // for tea, they just walk up to it, and they trap you in that small room"). The tea corner's standing place 5-tea-3 stood on
 // its doorway tile [21, 1] (the door v,21,1), so someone always stood by the door at the table and you couldn't get out. It
 // moves to the far corner [23, 2], facing the table (everyone who uses it follows: Open door, the promotion cake, CQ), and
-// [21, 1] is left clear; the 13:00 tea takes only the two seats (section 14's take, o.sit). Zeke's Day 1 tea spot is also
-// [23, 2] (INTRO_TEA_AT), at 13:00 on a Monday, when nobody is planned at 5-tea-3 now
+// [21, 1] is left clear. (The 13:00 tea taking only the two seats was tried and dropped, lead 47: with two places Calder
+// had her tea less often and her crew story ran about four days late.) Zeke's Day 1 tea spot is also [23, 2] (INTRO_TEA_AT)
 if (TRAD995_ON) {
   const t3 = DECKS[5].places.find(pl => pl.id === '5-tea-3');
   if (t3) Object.assign(t3, { at: [23, 2], face: -152 });

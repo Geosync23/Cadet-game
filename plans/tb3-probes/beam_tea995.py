@@ -1,8 +1,8 @@
 # TB3 probe for 0.99.5 notes 8 (Name on the beam) and 10 (Tea and biscuits), on a copy with TRAD995_ON on (and off, to compare).
 #   8: Day 1, the beam at 390x844: where you stand to paint vs your name's spot on the beam (x), and no speech bubble's
 #      box over the name's box on the screen while you paint and after; screenshots in OUT.
-#   10: Day 3 (a Wednesday) 12:50-13:55 with you in the tea corner: every minute who is in the corner, sitting or standing,
-#      nobody on the doorway tile [21, 1], and a path out of the corner (to [20, 1]) from where you stand.
+#   10: Day 3 (a Wednesday) 12:50-13:55 with you in the tea corner: every minute who is in the corner, sitting or standing
+#      (at most one standing, at 5-tea-3 in the far corner), nobody standing on the doorway tile [21, 1], and a path out of the corner (to [20, 1]) from where you stand.
 #   python3 plans/tb3-probes/beam_tea995.py starship-cadet.html OUT_DIR [8] [10]
 import sys, json, os, pathlib
 sys.argv[0] = str(pathlib.Path(__file__).resolve().parents[2] / 'cadet_test.py')
@@ -100,7 +100,9 @@ with sync_playwright() as pw:
                 if m in mins: print('    %d: %s' % (m, mins[m][1]))
             if k == 'on':
                 check(sit > 0, '10: crew sit down for tea (%d seated minute-people)' % sit)
-                check(not stand, '10: nobody stands at 5-tea-3 for the 13:00 tea (%s)' % stand[:4])
+                per = {}
+                for (m_, who_, pl_) in stand: per.setdefault(m_, set()).add(who_)
+                check(all(len(v) <= 1 for v in per.values()), '10: at most one standing, in the far corner (5-tea-3, [23, 2]) (%s)' % stand[:4])
                 check(not door, '10: nobody on the doorway tile [21, 1] (%s)' % door[:4])
                 check(not stuck, '10: you can walk out of the corner every minute (%s)' % stuck[:6])
                 check(not err, '10: no errors %s' % err[:3])
