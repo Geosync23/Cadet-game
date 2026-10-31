@@ -11493,7 +11493,7 @@ function introPlan(p, d) {
     const near = w.tile ? cand.filter(q => q.type !== 'event').sort((a, b) => dist(a) - dist(b)) : cand;   // a tile: the places nearest it first
     const pl = w.placeId && S.byId.get(w.placeId) ? S.byId.get(w.placeId) : near[0];   // a named place (Calder's seat across from yours)
     const seat = !!(w.placeId && pl), alts = w.placeId ? null : near.map(q => q.id);   // introLay takes the first of these free then
-    return { from: x.at - (x.early != null ? x.early : seat ? INTRO_EARLY : 0), to: x.until, deck: w.deck, placeId: pl ? pl.id : null, alts, tag: 'intro-' + x.id, ...(x.act ? { act: x.act } : {}), ...(x.rideTag ? { rideTag: x.rideTag } : {}) };   // a named seat: there and sitting when it starts; a beat's own `early` (the patch, #1: the Chief 20 minutes early at her desk)
+    return { from: x.at - (x.early != null ? x.early : seat ? INTRO_EARLY : 0), to: x.until, deck: w.deck, placeId: pl ? pl.id : null, alts, tag: x.tag || 'intro-' + x.id, ...(x.act ? { act: x.act } : {}), ...(x.rideTag ? { rideTag: x.rideTag } : {}) };   // a named seat: there and sitting when it starts; a beat's own `early` (the patch, #1: the Chief 20 minutes early at her desk)
   });
 }
 function introLay(p, d, occ, segs) {
@@ -54779,6 +54779,7 @@ function storyDevNext(now) {
 function storyTick(now) {                                 // once a ship minute (socialTick), while STORIES_ON
   if (!STORIES_ON) return;
   storyAbout(); socInit(); const C = storyCS(), day = Math.floor(now / 1440) + 1;
+  if (STORIES2_ON) storyHolds();                          // RV28 B7: a crescendo's people stay while its scene is on screen
   for (const id of Object.keys(C.book)) { const b = C.book[id], p = socP(id); if (STORIES2_ON && storyOpen(id, b.beat)) continue; if (p && now >= b.to && !(C.told[id] || []).includes(b.beat)) storySkip(p, b.beat, now); else if (!p || now >= b.to) delete C.book[id]; }   // stage 2 (RV28 B5): not while its scene is still playing
   for (const fid of Object.keys(C.fav)) {                 // S3: a story favour handed back sets its flag (after its delay)
     const e = C.fav[fid], j = typeof favourById === 'function' ? favourById(fid) : null;
@@ -54842,7 +54843,19 @@ function storyPlanBeats(id, d) {
       add(m.who, span[0], 'leisure');
       const duty = q => q.shift === 'night' ? span[0] >= 1260 || span[0] < 360 : span[0] >= 480 && span[0] < 1020;   // on shift then, by their roster (Takahashi at comms through the dawn)
       for (const c of m.come || m.cast || []) { const q = schedPeople().find(x => x.id === c); if (q && !(q.work && q.work.deck === deck && duty(q))) add(c, span[0] + 5, duty(q) ? 'work' : 'leisure'); } } }   // come: who of the cast is brought (none: only its teller; Tomas at the Tern)
-  return (STORY_PLAN.get(id) || []).filter(x => x.day === d).map(x => ({ id: 'story-' + x.key.replace(':', '-'), at: x.at, until: x.until, where: { deck: x.deck, room: x.room }, act: x.act, ...(x.act === 'work' ? { rideTag: 'round' } : {}) }));   // on shift: the lift up and back is their round (dayReport counts it as work)
+  const L = (STORY_PLAN.get(id) || []).filter(x => x.day === d); if (!L.length) return [];
+  let es = []; try { es = typeof eventsOn === 'function' ? eventsOn(d) || [] : []; } catch (e) { es = []; }
+  const trad = x => es.find(e => e.from <= x.at && x.at < e.to && [].concat(e.ev && e.ev.where || []).some(w => w && w.deck === x.deck && w.room && new RegExp(w.room).test(x.room)));   // RV28 B6: a tradition holding that room then (Four weeks aboard): they're going to it
+  return L.map(x => { const e = x.act === 'leisure' && trad(x); return { id: 'story-' + x.key.replace(':', '-'), at: x.at, until: x.until, where: { deck: x.deck, room: x.room }, act: x.act, ...(e ? { tag: 'ev-' + e.id } : {}), ...(x.act === 'work' ? { rideTag: 'round' } : {}) }; });   // on shift: the lift up and back is their round (dayReport counts it as work)
+}
+var STORY_HELD = { key: null, off: [] };                  // RV28 B7: the open crescendo scene's people, held where they are (section 10's crewHold: looks only)
+function storyHolds() {
+  const D = typeof DIALOGUE !== 'undefined' && DIALOGUE, id = D && /^moment:/.test(String(D.id)) ? String(D.id).slice(7) : null, d = id && storyMoment(id), key = d && d.crescendo ? D.id : null;
+  if (key === STORY_HELD.key) return;
+  for (const f of STORY_HELD.off) try { f(); } catch (e) { /* gone */ }
+  STORY_HELD.key = key; STORY_HELD.off = [];
+  if (!key || typeof crewHold !== 'function') return;
+  for (const w of new Set([d.who].concat(d.cast || [], Array.isArray(D.m && D.m.who) ? D.m.who : [], d.lines.map(l => l.who).filter(x => x && x !== 'them' && x !== 'you')))) STORY_HELD.off.push(crewHold(w, null));
 }
 function storyDoorOpen(now = shipNow()) {
   if (!STORIES2_ON) return false;
