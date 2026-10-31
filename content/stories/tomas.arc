@@ -103,7 +103,7 @@ crescendo: trad:off-the-tern
 cast: bramwell-basil torres-zeke holt
 quiet: 9
 title: Tomas meets the Tern
-invite: The Tern | Basil's Tern lands tomorrow at {at}. Shuttle bay. I'm meeting him at the bottom of the ramp. I've made a sign. Stand near me? Tomas
+invite: The Tern | Basil's Tern lands tomorrow at {at}. Shuttle bay. I'm meeting him at the bottom of the ramp, with a sign. There's glitter. Stand near me? Tomas
 hint: It's nearly time. Stand by me? If I wave too early, pull my arm down.
 mem: welcome
 keepsake: the welcome sign from the shuttle bay, glitter coming off the B
