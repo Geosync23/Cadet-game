@@ -101,3 +101,4 @@ Base: claude/integration 57eceec4 = 0.99.3, game sha256 04c821fe...c2a9 (verifie
 - ~07:10 UTC: R1's player_check Saving FAILED on 8976965e (v 1 / v 2 saves loaded as a fresh game). Stage 2 has no load/save
   code. save_v1.py (the part's first steps alone): 8976965e and 0.99.3 both load the v 1 save right, no errors. Suspect
   player_check's fixed tmp name WORK/test/_save_check.html (line 1630) shared by two runs at once. Whole player_check alone running.
+- player_check whole on 8976965e alone: PLAYER CHECK OK (v 1 / v 2 saves load right; log plans/rv28-probes/player_8976965e.log). R3: devmode_check rerun OK x3 on the candidate.
