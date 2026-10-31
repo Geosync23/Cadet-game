@@ -470,6 +470,7 @@ introduces them), unless noted.
 | Torres's father, an engine man for forty years, losing his memory | Torres | from `beat:torres.4` |
 | The Engine Specialist list (Torres passed over twice) | Torres | from `beat:torres.2` |
 | The posting near the farm moon on the transfer list | Tomas | from `beat:tomas.6` |
+| Nobody met Tomas off the Tern: it came in early, everyone was at dinner, he waited ten minutes at the foot of the ramp, then found the laundry looking for his bunk (how the long way round began). Holt knew about the failed exam all along; Holt pencilled Tomas onto the rota to meet Basil's Tern | Tomas, Holt | the arrival from `beat:tomas.5`; Holt's pencil from `beat:tomas.7`; that Holt knew, from `beat:tomas.8` or `beat:tomas.9` (content/stories/tomas.arc, SW4) |
 | Rina hasn't sat the qualifying exam (not failed: hasn't sat) | Rina | that she studies: any time (roster); the putting off: from `beat:rina.5` |
 | Marrow's offer of a post at the Concord academy | Marrow | from `beat:marrow.5` |
 
