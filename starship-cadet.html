@@ -15434,7 +15434,7 @@ function jobHere(p, viaRay) {
 // lamp in the Captain's quarters, which you could never get into; section 14's doorOpenFor asks). Chores only. And a locked
 // room you're standing in always lets you out (0.28.55: it used to shut behind you once the lamp was in)
 function jobDoorOpen(deck, room) {
-  if (typeof deckDef !== 'undefined' && deckDef.num === deck && roomAt(...player.here()) === room) return true;   // never shut on you inside (0.28.55, reviewer 1f's softlock)
+  if (typeof deckDef !== 'undefined' && deckDef.num === deck && roomAt(...player.here()) === room && lockedBehind(room)) return true;   // never shut on you inside (0.28.55, reviewer 1f's softlock); inside the locked room only, not the corridor outside it (PL2, 0.99.5 note 13)
   const j = typeof myJob === 'function' ? myJob() : null; if (!j || !Array.isArray(j.stops) || typeof placeById !== 'function') return false;
   return j.stops.some(x => { const pl = x.placeId && placeById(x.placeId); return !!pl && pl.deck === deck && pl.room === room; });   // any stop of the job you hold, until it's turned in
 }
@@ -15490,7 +15490,7 @@ function handEl() {
   el.innerHTML = '<button type="button" id="hobbyBtn" hidden aria-label="Hobby: something to do while you sit"><svg viewBox="0 0 24 24"><path d="' + NEED_ICON.leisure + '"/></svg><span>Hobby</span></button>'   // 0.28.61
     + '<button type="button" id="repairBtn" hidden aria-label="Repair: start the work here"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L4 16.7 7.3 20l5.3-5.3a4 4 0 0 0 5.1-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg><span>Repair</span></button>'
     + '<button type="button" id="liftBtn" hidden aria-label="Lift: open the lift panel"><svg viewBox="0 0 24 24"><path d="M8 10l4-4 4 4"/><path d="M8 14l4 4 4-4"/></svg><span>Lift</span></button>'   // 0.92.6 #16
-    + '<button type="button" id="seatBtn" hidden aria-label="Take a seat: sit at the nearest free seat with your tray"><svg viewBox="0 0 24 24"><path d="M7 4v8h10"/><path d="M7 12v8M17 12v8M5 12h14"/></svg><span>Take a seat</span></button>';   // 0.93.2 (the user's): last in the stack, so just above Put down
+    + '<button type="button" id="seatBtn" hidden aria-label="Take a seat: sit at the nearest free seat"><svg viewBox="0 0 24 24"><path d="M7 4v8h10"/><path d="M7 12v8M17 12v8M5 12h14"/></svg><span>Take a seat</span></button>';   // 0.93.2 (the user's): last in the stack, so just above Put down
   document.body.appendChild(el);
   for (const b of el.querySelectorAll('button')) b.addEventListener('pointerdown', e => e.stopPropagation());   // never a tap on the deck behind
   document.getElementById('repairBtn').onclick = e => { e.stopPropagation(); const h = handRepair(); if (h) h.go(); handTick(true); };
@@ -15654,9 +15654,22 @@ function liftBtnShow() {
 // A tap is a tap on that seat: actStart('sit') with your tray eats it there (the usual sit-and-eat). Nothing it does
 // touches the ship until you tap it; it never shows without a tray, so tests and replays are unchanged
 const SEAT_BTN_NEAR = 2.2;
+// PL2 (0.99.5 note 3, the user: "Add the sit button to all chairs, not just the mess hall."; the lead's GO): without a
+// tray it shows by any free public seat (sitTap's SIT_TYPES, every deck; never a workstation, toilet, bed, booth, gym
+// machine or the rec deck's own seats) in the room you're standing in, and a tap just sits you there, as a tap on the seat
+// does. With a tray, exactly as above. The no-tray button is off at test URLs unless ?seatbtn (SEAT_BTN_ALL, as the Lift
+// button's LIFT_BTN_ON), so every deck's shots and replays are unchanged; a check sets it
+let SEAT_BTN_ALL = !NOSAVE || URL_FLAGS.has('seatbtn');
 function seatBtnSeat() {
-  if (!SHIP.player.tray || PAUSE.on || ACT || (typeof ride !== 'undefined' && ride) || (typeof DEV !== 'undefined' && DEV.open)
-    || document.body.classList.contains('dlgon') || typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 3 || typeof PLACE_OF === 'undefined') return null;
+  if (!SHIP.player.tray && !SEAT_BTN_ALL || PAUSE.on || ACT || (typeof ride !== 'undefined' && ride) || (typeof DEV !== 'undefined' && DEV.open)
+    || document.body.classList.contains('dlgon') || typeof deckDef === 'undefined' || !deckDef || typeof PLACE_OF === 'undefined') return null;
+  if (!SHIP.player.tray) {                               // no tray: a public seat in this room
+    const rm = roomAt(...player.here()), p = player.obj.position; if (!rm) return null;
+    return [...PLACE_OF.values()].filter(pl => SIT_TYPES.has(pl.type) && pl.pose === 'sit' && (pl.room || roomAt(...pl.at)) === rm && !privatePlace(pl) && !heldBy(pl.id))
+      .map(pl => [pl, placeSpot(pl.id)]).filter(([, sp]) => sp && sp.pose === 'sit' && Math.hypot(sp.x - p.x, sp.z - p.z) < SEAT_BTN_NEAR)
+      .sort((m, n) => Math.hypot(m[1].x - p.x, m[1].z - p.z) - Math.hypot(n[1].x - p.x, n[1].z - p.z))[0] || null;
+  }
+  if (deckDef.num !== 3) return null;
   if (roomName(3, roomAt(...player.here())) !== 'mess hall') return null;
   const p = player.obj.position;
   return [...PLACE_OF.values()].filter(pl => pl.type === 'mess-seat' && pl.pose === 'sit' && !privatePlace(pl) && !heldBy(pl.id))
@@ -15665,6 +15678,7 @@ function seatBtnSeat() {
 }
 function seatBtnGo() {
   const s = seatBtnSeat(); if (!s) return false;
+  if (!SHIP.player.tray) { const rm = (deckDef.rooms || {})[s[0].room || roomAt(...s[0].at)]; actStart('sit', s[0].id, { pose: s[1].pose, title: rm && rm.name || 'A seat', after: 'You sit down. Tap anywhere to get up.' }); return true; }   // PL2 (0.99.5 note 3): no tray, you just sit, as a tap on the seat
   actStart('sit', s[0].id, { pose: s[1].pose, title: 'Mess hall' }); return true;   // with your tray: kind 'eat', fed (actStart)
 }
 // the Record's words for your hobbies (0.28.63): the head writer's hobby.record.<h>, else by how often and how lately
@@ -16547,6 +16561,59 @@ function yourShift(d) {
   return { day, night };
 }
 const yourDayEnd = d => { const s = yourShift(d); return s.day ? s.day[1] : dayShiftEnd(d); };
+// ---- locked rooms stay locked (PL2, 0.99.5 note 13, the user: "All the officers' quarters rooms on Deck 4: their doors
+// open automatically even with the default door setting on. Those are private doors and should be locked.") ----
+// jobDoorOpen's "a locked room you're standing in always lets you out" (0.28.55) counted the room on either side of a
+// locked door, so standing in the Officers' corridor (or Deck 2's, or the reactor's lobby) opened every locked door off it
+// and let you in. lockedBehind(room): this deck's rooms you can only reach through a locked door ('closed', a shut hatch
+// or one of YOU_LOCKS'), found once a deck build from the lift through doors, open edges, the lift and service hatches;
+// only those let you out. No R(), no geometry, nothing saved
+const LOCKED_BEHIND = { edges: null, open: null };
+const lbRooms = e => (e.horiz ? [[e.i, e.j - 1], [e.i, e.j]] : [[e.i - 1, e.j], [e.i, e.j]]).map(c => roomAt(...c));
+function lockedBehind(room) {
+  if (typeof EDGES === 'undefined' || !EDGES || typeof deckDef === 'undefined' || !deckDef) return true;
+  if (LOCKED_BEHIND.edges !== EDGES) {
+    const you = new Set((YOU_LOCKS[deckDef.num] || []).flatMap(L => L.keys)), adj = new Map(), open = new Set(), q = [];
+    for (const [k, e] of EDGES) {
+      if (!e || you.has(k) || !(e.type === 'door' || e.type === 'open' || e.type === 'lift' || e.service)) continue;
+      const [a, b] = lbRooms(e); if (!a || !b) continue;
+      (adj.get(a) || adj.set(a, []).get(a)).push(b); (adj.get(b) || adj.set(b, []).get(b)).push(a);
+      if (e.type === 'lift') for (const r of [a, b]) if (!open.has(r)) { open.add(r); q.push(r); }
+    }
+    while (q.length) for (const r of adj.get(q.pop()) || []) if (!open.has(r)) { open.add(r); q.push(r); }
+    LOCKED_BEHIND.edges = EDGES; LOCKED_BEHIND.open = open;
+  }
+  return !LOCKED_BEHIND.open.has(room);
+}
+// 13 (c), the lead's GO: a locked door that is open to you (your own cabin, a cabin you're invited to, your job's stop,
+// a summons) follows the Doors setting like any door (section 15b's adoorKind): into a private room it waits for your tap
+// under 'Private rooms: tap to open', and every one does under 'All doors: tap to open'
+const adoorMineLocked = e => !!e && e.type === 'closed' && typeof player !== 'undefined' && !edgeBlocks(e, player);
+// ---- Talk a while lasts as long as its conversation (PL2, 0.99.5 note 12, the user: "The Talk a while function counts
+// down minutes left in the conversation and always ends early.") ----
+// The meter counted down TALK_MINS (15), but a pack talk wraps up once its own lines and its few fillers are said (section
+// 22's talkPackQuiet; RV4: a line held for 15 s read as stuck), usually 8 to 11 ship minutes in, so the count jumped to the
+// end. talkPlanEnd(C): the ship minute into the talk when it will wrap up, walked forward slot by slot (every TALK_LINE
+// minutes from the last line) the way section 20's talkStep and talkNext go: the pack's lines (dropped once the question is
+// asked, as talkPackNext does), the question at TALK_ASK (a first-talk scene's once its lines are said), the fillers still to
+// come (TALK_FILLER_MAX since the start, never one said or heard lately), then the slot where talkPackQuiet says it's done;
+// at most TALK_MINS. talkStep shows that length and fills the talk's social and friendship over it, so the count reaches 0
+// on the goodbye and a whole talk still gives a full talk's +30 social and +3 friendship. Not a pack talk (the old topic
+// lines, the heard-lines switch off): TALK_MINS, exactly as before. No R(), nothing saved
+function talkPlanEnd(C) {
+  const T = C && C.talk, P = T && T.pack;
+  if (!P || !TALK_PACK_ON || !TALK_HEARD_ON || typeof talkFillerOf !== 'function') return TALK_MINS;
+  const F = talkFillerOf(C.p), n = talkFillerSaid(T, C.p);
+  let fl = Math.max(0, Math.min(TALK_FILLER_MAX - (n - (P.fill0 || 0)), F.length - n)), lines = Math.max(0, P.lines.length - P.i);
+  let asked = !!T.asked, replied = !!P.small || !!T.asked;   // small talk has no question; once asked, the next slots come after your answer
+  for (let s = T.lineAt + TALK_LINE; s < TALK_MINS; s += TALK_LINE) {
+    if (!asked && s >= TALK_ASK && (!P.first || !lines)) { asked = replied = true; if (!P.small) lines = 0; }
+    if (lines > 0) { lines--; continue; }
+    if (replied) { if (fl <= 0) return Math.max(s, T.mins); fl--; continue; }   // nothing new left: it wraps up at this slot
+    if (fl > 0) fl--;                                      // before the question: a filler, else their usual chat
+  }
+  return TALK_MINS;
+}
 // ---- end of slot: Player engineer ----
 
 // =====================================================================
@@ -17501,15 +17568,15 @@ function adoorPrivate(key) {
   if (!s) {
     const beds = new Set((DECKS[deckDef.num].places || []).filter(p => p.type === 'bed').map(p => p.room || roomAt(...p.at)));
     s = new Set();
-    for (const [k, e] of EDGES) if (e && e.type === 'door' && (e.horiz ? [[e.i, e.j - 1], [e.i, e.j]] : [[e.i - 1, e.j], [e.i, e.j]]).some(c => beds.has(roomAt(...c)))) s.add(k);
+    for (const [k, e] of EDGES) if (e && (e.type === 'door' || e.type === 'closed') && (e.horiz ? [[e.i, e.j - 1], [e.i, e.j]] : [[e.i - 1, e.j], [e.i, e.j]]).some(c => beds.has(roomAt(...c)))) s.add(k);
     ADOOR_PRIV.set(deckDef.num, s);
   }
   return s.has(key);
 }
-function adoorKind(e) { const m = doorsMode(); return !!e && e.type === 'door' && (m === 'none' || m === 'private' && adoorPrivate(e.key)); }
+function adoorKind(e) { const m = doorsMode(); return !!e && (e.type === 'door' || e.type === 'closed' && m !== 'all' && adoorMineLocked(e)) && (m === 'none' || m === 'private' && adoorPrivate(e.key)); }   // a locked door open to you as any door (PL2, 0.99.5 note 13 c)
 function adoorNear(key, m) { const e = EDGES.get(key); if (!e || typeof player === 'undefined') return false; const p = player.obj.position; return Math.hypot(p.x - e.cx, p.z - e.cz) < m; }
 function adoorShut(e, who) {                              // true: this door keeps you out (Auto doors off, not opened for you)
-  if (!e || e.type !== 'door' || !who || !who.isPlayer || !adoorKind(e)) return false;
+  if (!e || (e.type !== 'door' && e.type !== 'closed') || !who || !who.isPlayer || !adoorKind(e)) return false;
   if (ADOOR.tap === e.key) { if (adoorNear(e.key, 3)) return false; ADOOR.tap = null; }
   if (ADOOR.here === e.key) { if (adoorNear(e.key, 1.6)) return false; ADOOR.here = null; }
   if (ADOOR.way && ADOOR.way.doors.has(e.key)) return false;   // on the arrow's way (adoorWay)
@@ -17556,7 +17623,7 @@ function adoorTap(key) {                                  // a tap on a door wit
 }
 function adoorSelfKey() {                                // the door shut to you within .9 m of you (your body covers its low strip), or null
   if (autoDoors() || typeof DOOR_OBJS === 'undefined') return null;
-  const p = player.obj.position, d = DOOR_OBJS.filter(o => o.e.type === 'door' && adoorShut(o.e, player)).map(o => [o, Math.hypot(o.cx - p.x, o.cz - p.z)]).filter(([, m]) => m < .9).sort((x, y) => x[1] - y[1])[0];
+  const p = player.obj.position, d = DOOR_OBJS.filter(o => (o.e.type === 'door' || o.e.type === 'closed') && adoorShut(o.e, player)).map(o => [o, Math.hypot(o.cx - p.x, o.cz - p.z)]).filter(([, m]) => m < .9).sort((x, y) => x[1] - y[1])[0];
   return d ? d[0].e.key : null;
 }
 const _aoA = new THREE.Vector3(), _aoB = new THREE.Vector3();
@@ -17571,7 +17638,7 @@ function adoorOnMe(cx, cy) {                              // a tap on your own b
 function adoorHint() {
   const s = player.steer; if (!s || !s.k || player.path.length || autoDoors() || ADOOR.hints >= 3 || typeof DOOR_OBJS === 'undefined') return;
   const now = performance.now(); if (now - ADOOR.hintAt < 20000) return;
-  const p = player.obj.position, d = DOOR_OBJS.find(o => o.e.type === 'door' && Math.hypot(o.cx - p.x, o.cz - p.z) < .6 && (o.cx - p.x) * s.x + (o.cz - p.z) * s.z > .1 && adoorShut(o.e, player));
+  const p = player.obj.position, d = DOOR_OBJS.find(o => (o.e.type === 'door' || o.e.type === 'closed') && Math.hypot(o.cx - p.x, o.cz - p.z) < .6 && (o.cx - p.x) * s.x + (o.cz - p.z) * s.z > .1 && adoorShut(o.e, player));
   if (!d) return;
   ADOOR.hints++; ADOOR.hintAt = now;
   toast(adoorPrivate(d.e.key) ? 'A private room' : 'A door', typeof PAD !== 'undefined' && PAD.used ? 'Press A, or tap the door, to open it.' : 'Tap the door to open it.');   // a public door says so too, with every door on taps (backlog RV18-D1)
@@ -53867,11 +53934,12 @@ function talkEnd(C, why, quiet) {                         // why: 'full' | 'stop
 function talkStep(C) {                                    // every frame while you talk
   const T = C.talk, t = shipNow(), dm = Math.max(0, Math.min(1, t - T.last)); T.last = t;
   if (T.ask || T.end || !dm) return;
-  const was = T.mins; T.mins = T.wrap ? TALK_MINS : Math.min(TALK_MINS, T.mins + dm);   // wrapping up (talkNext): the meter finishes now, with a full talk's social and friendship
-  const P = SHIP.player, fx = typeof needEffects === 'function' ? needEffects() : { socialGain: 1 }, g = (T.mins - was) / TALK_MINS * TALK_SOCIAL * (fx.socialGain || 1);
+  const E = T.endAt = typeof talkPlanEnd === 'function' ? talkPlanEnd(C) : TALK_MINS, was = T.u || 0;   // PL2 (0.99.5 note 12): the talk's real length E; T.u, the talk done in TALK_MINS's units (T.mins itself with E = TALK_MINS, as before)
+  T.mins = Math.min(E, T.mins + dm); T.u = T.wrap || T.mins >= E ? TALK_MINS : Math.min(TALK_MINS, was + dm * TALK_MINS / E);   // wrapping up (talkNext): the meter finishes now, with a full talk's social and friendship
+  const P = SHIP.player, fx = typeof needEffects === 'function' ? needEffects() : { socialGain: 1 }, g = (T.u - was) / TALK_MINS * TALK_SOCIAL * (fx.socialGain || 1);
   if (P && P.needs && typeof needClamp === 'function') { P.needs.social = needClamp(P.needs.social + g); T.gained += g; }
-  for (let k = Math.floor(was / TALK_EVERY) + 1; k <= Math.floor(T.mins / TALK_EVERY); k++) { const pts = REL_PTS.talk * talkBoost(); relAdd(C.p.id, 'talk', pts); T.pts += pts; }
-  if (T.mins >= TALK_MINS) { talkEnd(C, 'full'); return; }
+  for (let k = Math.floor(was / TALK_EVERY) + 1; k <= Math.floor(T.u / TALK_EVERY); k++) { const pts = REL_PTS.talk * talkBoost(); relAdd(C.p.id, 'talk', pts); T.pts += pts; }
+  if (T.u >= TALK_MINS) { talkEnd(C, 'full'); return; }
   if (!T.asked && T.mins >= TALK_ASK && !(typeof talkPackHold === 'function' && talkPackHold(C))) { T.asked = true; T.ask = true; T.askAt = t; chatSay((typeof talkPackAsk === 'function' && talkPackAsk(C)) || (T.topic && talkSays(C, 'talk.' + T.topic + '.ask')) || 'What do you think?'); return; }   // section 22's talkPackHold: a first-talk scene's question waits for its lines (item 15)
   if (T.mins - T.lineAt >= TALK_LINE) { T.lineAt = T.mins; const l = talkNext(C); if (l) { C.line = { text: l, say: true }; chatShow(); return; } }
   talkMeter(document.getElementById('chat'), T);
@@ -53883,7 +53951,7 @@ function talkMeter(el, T) {                               // the meter in the ca
     m.innerHTML = '<span></span><i style="display:block;height:4px;margin-top:3px;border-radius:2px;background:rgba(150,200,196,.22);overflow:hidden"><b style="display:block;height:100%;background:var(--teal,#5fc9bd);transform-origin:left center"></b></i>';
     const row = el.querySelector('.row, .btns'); el.insertBefore(m, row || null); }
   m.style.display = typeof ACT !== 'undefined' && ACT && ACT.kind === 'eat' && ACT.phase === 'do' ? 'none' : '';   // eating too: section 15's one bar says both (playtest 1)
-  const f = T.mins / TALK_MINS, txt = T.end ? (T.end === 'full' ? 'A good talk' : 'You talked a while') : T.ask ? 'Your turn' : 'Talking · ' + Math.max(1, Math.ceil(TALK_MINS - T.mins)) + ' min';
+  const f = (T.u || 0) / TALK_MINS, txt = T.end ? (T.end === 'full' ? 'A good talk' : 'You talked a while') : T.ask ? 'Your turn' : 'Talking · ' + Math.max(1, Math.ceil((T.endAt || TALK_MINS) - T.mins)) + ' min';   // PL2 (0.99.5 note 12): the minutes this talk has left, not 15's
   if (m.children[0].textContent !== txt) m.children[0].textContent = txt;
   m.children[1].children[0].style.transform = 'scaleX(' + f.toFixed(3) + ')';
 }
@@ -71476,7 +71544,7 @@ function crewNearDoor(d) {
   }
   if (d.e.type === 'closed') {                           // an invitation or summons: the door opens for you (you near it first: the cheap test)
     const p = player.obj.position;
-    if (Math.hypot(p.x - d.cx, p.z - d.cz) < r) for (let k = 0; k < R.length; k++) if (doorOpenFor(R[k], 'player')) return true;
+    if (Math.hypot(p.x - d.cx, p.z - d.cz) < r && !adoorShut(d.e, player)) for (let k = 0; k < R.length; k++) if (doorOpenFor(R[k], 'player')) return true;   // waiting for your tap under the Doors setting (PL2, 0.99.5 note 13 c)
   }
   return false;
 }
@@ -71608,6 +71676,7 @@ function tap(cx, cy) {
   if (ud.liftDoor) { enterLift(); return; }
   if (ud.youLock) { const c = youLockTap(ud.youLock); if (c) { const e = EDGES.get(ud.youLock); approach(new THREE.Vector3(e.cx, 0, e.cz), reachableSide(e)[2], 0, () => toast(c.t, c.x)); return; } }   // 0.47.11
   if (ud.closedDoor && typeof ladderTap === 'function' && ladderTap(ud.closedDoor)) return;   // patch #5: a ladder hatch opens the Spine ladder panel (LADDER_ON)
+  if (ud.closedDoor && adoorTap(ud.closedDoor)) return;   // a locked door open to you, waiting for your tap (PL2, 0.99.5 note 13 c)
   if (ud.closedDoor) {
     const e = EDGES.get(ud.closedDoor), c = CLOSED_DOORS[ud.closedDoor];
     approach(new THREE.Vector3(e.cx, 0, e.cz), reachableSide(e)[2], 0, () => toast(c.t, c.x));
