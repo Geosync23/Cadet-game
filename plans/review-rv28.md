@@ -117,3 +117,6 @@ Patch 0.99.5 notes 14, 15, 18. Switches JOBCAP_ON, SPREAD_ON, CHECKS_ON (section
   row: the tour = 5 kinds, 3 checks, Decks 5,5,5,4,4, one mark each.
 - **F1**: jb_scan.py: for a Tier 1 player every pump-fault machine but the washers is Tier 2, so fixScanMachine returns
   'washer' on every day 6-30; machine_check's FX10 line shows 4-washer-1. Note 15's "not always a washer" doesn't happen.
+- SW4 words 7e30feb (on c6dc9ac; content only): **W1 not baked** (content_gen --check: OUT OF DATE, so check_fast's "words
+  baked" fails). Baked in a scratch copy (game 0003683b...): content_gen up to date, names_check OK, lines_check PASS;
+  jb_words.py: the tour uses every new word (tips, title, readings, 31 check points, 0 stand-ins), Zeke's talk 7 lines.
