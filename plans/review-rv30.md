@@ -115,3 +115,4 @@ Queue empty.
 
 ### BM23 sound_check r3mess edit (0.99.5 candidate, MESS_SCALE on by the user's pick): PASS with a change
 3 am: expect the scene only when M.at(n).voices > 0 (not n == 0: you + one crew also gives none); at(0) compare without level, level == 0. Off: unchanged.
+BM23 96d902e: the edit as agreed, PASS (check-only). Sent to BM23 and lead.
