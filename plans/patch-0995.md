@@ -44,3 +44,10 @@ Reviewer: RV28 session_014zyJYQKwGvytfCGdrWMoiZ (a second reviewer if the queue 
 Each builder: step-1 report (cause + fix) to the lead, lead GO, then build.
 Reviewers split (~09:48 UTC): RV28 = OB2, SD5, TB3; **RV29** session_014zyJYM3D7UBkZN49CsZVuA (claude/review-rv29) = JB2, PL2, CT5. SW4 polishes JB2's stand-in words (claude/p995-jobs-words).
 Reviewers, revised (~09:50 UTC): RV28 finishes JB2 then hands over; RV29 = PL2, CT5; **RV30** session_014zyJYNFR7ewWJGvEQNUAHr (claude/review-rv30) = SD5, OB2, TB3. All builders told.
+
+## TR1's full sweep (~10:22 UTC, plans/review-tr1-traditions.md on claude/p995-tr1 82792ac)
+104 traditions and gatherings probed in the real game. Every one STARTS on time with its Mail; the problem is the TRIGGER (nothing to tap).
+Broken: Spice shelf supper; your milestones (New hand's tea D5, Four weeks D26, Six weeks D42, Twelve weeks D84) + Open door; all eight 0.92.6 new ones; the health check.
+Wrong: Off the Tern has no tap; two joinable traditions on one deck hide the second's marker. Rough: hosts missing some days, join toast length, double toast, rec deck's nine hosted ones untappable, a few Mails promise things not there.
+Assigned: TB3 = 19, 10, 8, then items 6, 5, 2 + rough. **TB4** session_014zyJYN4DfKL615tM36enbP (claude/p995-trad926) = the eight 0.92.6 ones (TRAD926_JOIN_ON). OB2 = health check.
+Questions for the user (TR1 publishing a page): all hosted meals a tap or only Spice (default only Spice); the nine rec-deck ones (default yes, as 0.99.6); Mails that promise more than happens (default reword).
