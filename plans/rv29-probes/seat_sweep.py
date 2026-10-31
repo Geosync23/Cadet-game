@@ -6,7 +6,7 @@ from playwright.sync_api import sync_playwright
 src = open(sys.argv[1] + '/cadet_test.py').read(); src = src[:src.index('import sys, json, hashlib')]
 ct = types.ModuleType('ct'); exec(src, ct.__dict__)
 JS = r"""((n) => { if (deckDef.num !== n) goToDeck(n); SEAT_BTN_ALL = true; DECK_CREW.length = 0;
-  const all = [...PLACE_OF.values()].filter(pl => pl.deck === n && pl.pose === 'sit'), types = {};
+  const all = [...PLACE_OF.values()].filter(pl => pl.pose === 'sit'), types = {};
   const pub = all.filter(pl => SIT_TYPES.has(pl.type) && !privatePlace(pl)), out = { n, sitPlaces: all.length, pub: pub.length, ok: 0, offeredOther: 0, noCell: 0, none: [], notSat: [], privOffered: [], typesOut: {} };
   for (const pl of all) if (!pub.includes(pl)) out.typesOut[pl.type + (privatePlace(pl) ? '(private)' : '')] = (out.typesOut[pl.type + (privatePlace(pl) ? '(private)' : '')] || 0) + 1;
   for (const pl of pub) { const sp = placeSpot(pl.id); if (!sp) { out.none.push(pl.id + ':nospot'); continue; }

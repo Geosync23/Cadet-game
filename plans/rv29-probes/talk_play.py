@@ -19,8 +19,8 @@ with sync_playwright() as p:
     print('jump', pg.ev(f"devmodeRun('Jump', () => devmodeSetCareerTo({day}, {{ id: 'rv29t', label: 'talk', day: {day}, by: {day - 1}, at: 755, where: {{ deck: 3, room: 'M' }} }}))")); pg.step(30)
     done = set()
     for n in range(NT):
-        who = pg.ev("""((skip) => { const pp = player.obj.position, c = DECK_CREW.filter(a => a.p && !skip.includes(a.p.id) && !(SHIP.rel[a.p.id] && SHIP.rel[a.p.id].talkDay === SHIP.time.day)).map(a => [a, Math.hypot(a.x - pp.x, a.z - pp.z)]).sort((x, y) => x[1] - y[1])[0];
-          if (!c) return null; const a = c[0], r0 = relGet(a.p.id).pts, s0 = SHIP.player.needs.social; chatOpen(a.p, false, null, { tap: true }); window.__t0 = [r0, s0]; return [a.p.id, Math.round(c[1]), r0, Math.round(s0)]; })""" + '(' + json.dumps(sorted(done)) + ')')
+        who = pg.ev("""((skip) => { const pp = player.obj.position, c = DECK_CREW.filter(a => a.p && a.settled && !/work/.test((a.spot && a.spot.type) || '') && !skip.includes(a.p.id) && !(SHIP.rel[a.p.id] && SHIP.rel[a.p.id].talkDay === SHIP.time.day)).map(a => [a, Math.hypot(a.x - pp.x, a.z - pp.z)]).sort((x, y) => x[1] - y[1])[0];
+          if (!c) return null; const a = c[0]; { let best = null; for (let i = 0; i < W; i++) for (let j = 0; j < D; j++) { if (!free(i, j)) continue; const q = cellPos(i, j), d = Math.hypot(q.x - a.x, q.z - a.z); if (d > .6 && (!best || d < best[1])) best = [q, d]; } if (best) { player.stop && player.stop(); player.obj.position.set(best[0].x, 0, best[0].z); } } const r0 = relGet(a.p.id).pts, s0 = SHIP.player.needs.social; chatOpen(a.p, false, null, { tap: true }); window.__t0 = [r0, s0]; return [a.p.id, Math.round(c[1]), r0, Math.round(s0)]; })""" + '(' + json.dumps(sorted(done)) + ')')
         if not who: print('nobody'); break
         done.add(who[0]); pg.step(10)
         print('TALK with', who, 'buttons', pg.ev(S)['buttons'])
@@ -30,7 +30,7 @@ with sync_playwright() as p:
             key = (s['line'], s['meter'], s['ask'], s['end'])
             if key != last: print('  ', json.dumps(s)[:600]); last = key
             if s['ask']:
-                pg.step(30); r = pg.ev("(() => { const b = [...document.querySelectorAll('#chat button')].find(x => !/Stop/.test(x.textContent)); if (b) { b.click(); return b.textContent; } return null; })()"); print('   reply', r)
+                pg.step(30); r = pg.ev("(() => { const b = [...document.querySelectorAll('#chat button')].find(x => !/Stop|×|Walk/.test(x.textContent)); if (b) { b.click(); return b.textContent; } return null; })()"); print('   reply', r)
             if s['end'] or s['who'] is None: break
         pg.step(60)
         print('  after', json.dumps(pg.ev(f"(() => ({{ pts: Math.round((relGet({json.dumps(who[0])}).pts - window.__t0[0]) * 10) / 10, social: Math.round((SHIP.player.needs.social - window.__t0[1]) * 10) / 10 }}))()")))

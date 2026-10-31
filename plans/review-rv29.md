@@ -42,3 +42,31 @@ Tier 1); J1 the tour's own lines (tour_play.py); machine_check, mech_check; swit
 - Note (not blocking): after the last stop Zeke says "Right, onward." just before "That's the tour" (the look line fires on
   every stop, the last too; the same order as 0.99.4's round).
 - **Verdict (~10:55 UTC): PASS claude/p995-jobs 1e056bd (game ef0941da...7d04).** W1, F1, J1 fixed; nothing new found.
+
+## PL2 claude/p995-player 6b2f135 (game commit 938f8b85; game e462d177...bf80b, verified), from 8976965e. Notes 3, 12, 13
+No feature switch (fixes live); SEAT_BTN_ALL = !NOSAVE || ?seatbtn (the no-tray seat button off at test URLs).
+- Code read: 13: jobDoorOpen's "let you out" only inside a room lockedBehind (BFS from the lift through doors, open edges, the
+  lift, service hatches; YOU_LOCKS shut; cached on EDGES); adoorMineLocked (c): a locked door open to you follows the Doors
+  setting (private: tap); crewNearDoor's player branch asks adoorShut; tap() tries adoorTap on a closed door. Crew code untouched.
+  12: talkPlanEnd(C) walks the remaining talk slots; talkStep caps T.mins at E and fills T.u (0-15) over E; meter shows E - mins.
+  Not a pack talk: E = 15 as before. 3: seatBtnSeat no tray: nearest free public SIT_TYPES seat in your room within 2.2 m; tray
+  path unchanged. No R(), nothing saved.
+- Doors (door_sweep.py, Day 3 10:00, junior; every 'closed' door side on Decks 1, 2, 4, 5, 6 x all/private/none):
+  0.99.4: every locked door on Decks 2 (34 sides), 4 (50), 5 (Works Chief's office, bay booth) and 6 (reactor) lets you in
+  from the corridor, all three settings. PL2: none lets you in; every one lets you out. Deck 1's bridge-ready room door
+  (both sides locked rooms) as before. Rooms now shut: Deck 2's cabins + guest/visitor rooms, Specimen store, Probe bay;
+  Deck 4's port supply closet; Deck 5's office, booth, bay door gear; reactor. Features into them have their own door rules
+  (visits name their doors; the office is an occasion; reactor m23DoorOpen); promo_beats_check OK, career_check OK.
+- Crew (crew_doors.py, Day 3 06:40-07:25 Deck 4, you in the officers' corridor): every crew member's room each minute
+  identical to 0.99.4 (hash fd386dfd8776bbec both); doors drawn open: the same owner openings; 0.99.4 also held h,34,6 open
+  the whole time because you stood by it, PL2 doesn't.
+- Talk (talk_play.py, Day 3 12:35 mess hall, three talks, both builds): 0.99.4 counts 15..9, the question, 8, then jumps to
+  "A good talk" (the user's note). PL2 counts 8..1 and ends on the goodbye, the same lines and end time; friendship +6/+5/+6
+  and social the same as 0.99.4.
+- Seats (seat_sweep.py, SEAT_BTN_ALL on): every public seat on Decks 1-7 offers the button and sits you there (16/16/110/20/
+  4/4/2 = 172); no private seat ever offered; rec deck seats out (117 rec:seat etc.); off with SEAT_BTN_ALL false.
+  seat_shot.py real game (Dev, a save): the button by a common-room chair and a plaza bench, a real click sits you, the card
+  "You sit down. Tap anywhere to get up."
+- cadet_test (PL2's) ALL IDENTICAL; check_fast, talk_check, social_check: (below).
+- Not probed by me: an invited friend's cabin (shares the own-cabin path PL2 probed); controller X on the seat button.
+- For the lead (PL2 flagged it): Stop partway now pays the share of the real length (6 of ~8 min = 2 friendship; was 1).
