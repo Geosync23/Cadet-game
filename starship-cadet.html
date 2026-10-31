@@ -73471,7 +73471,7 @@ padOn('frame', () => {
   if (!free || !PAD.used) { PAD_DECK.flick = 0; return; }   // (the view too, only once the pad is in use: a drift never turns or zooms it)
   // the view: a push of the right stick sideways is one quarter turn (let it come back before the next)
   const sx = PAD.rs[0];
-  if (Math.abs(sx) > .6 && !PAD_DECK.flick) { PAD_DECK.flick = Math.sign(sx); azT += PAD_DECK.flick * Math.PI / 2; }
+  if (Math.abs(sx) > .6 && !PAD_DECK.flick) { PAD_DECK.flick = -Math.sign(sx); azT += PAD_DECK.flick * Math.PI / 2; }   // (0.99.5, the user's note 6: the other way round; the hold mode turns with this sign too)
   else if (Math.abs(sx) < .3) PAD_DECK.flick = 0;
   const zr = PAD.rt - PAD.lt - PAD.rs[1] * (PAD_SET.flip ? -1 : 1), dt = PAD.dt;   // up on the stick and the right trigger zoom in (P4's Settings: flip, speed)
   if (zr && dt) setZoom(camera.zoom * Math.exp(zr * 1.4 * PAD_SET.zoom * dt));
@@ -73590,13 +73590,13 @@ function padCrewAt(cx, cy) {                               // crewAtScreen(cx, c
   return best;
 }
 function padRaw() {                                       // what's in reach, before asking where a finger would tap it: cheap, nearest first
-  const pp = player.obj.position, R = PAD_PICK.reach, out = [], seen = new Set();
-  const fx = Math.sin(player.face || 0), fz = Math.cos(player.face || 0);
+  const me = padSeated(), pp = me || player.obj.position, R = PAD_PICK.reach, out = [], seen = new Set();   // seated: from your seat (0.99.5, padSeated)
+  const fx = Math.sin((me ? me.face : player.face) || 0), fz = Math.cos((me ? me.face : player.face) || 0);
   const add = (key, x, z, ys, r) => {                     // (a thing can come twice, from two places: the lift's car and its door;
     const d = Math.hypot(x - pp.x, z - pp.z); if (d > R) return;   // the search keeps the first that a finger can reach)
     const at = Math.round(x * 10) + ',' + Math.round(z * 10); if (seen.has(key + '@' + at)) return; seen.add(key + '@' + at);
     const ahead = d > .01 ? ((x - pp.x) * fx + (z - pp.z) * fz) / d : 1;
-    out.push({ key, x, z, ys, r, d, s: null, score: ahead >= .7 ? d : d * (2.6 - .4 * ahead) });   // the way you face first (within about 45 degrees), then beside, then behind
+    out.push({ key, x, z, ys, r, d, s: null, score: me && d <= PAD_SEAT_NEAR && /^(crew|walker):/.test(key) ? d - 100 : ahead >= .7 ? d : d * (2.6 - .4 * ahead) });   // the way you face first (within about 45 degrees), then beside, then behind; seated, the people round you first
   };
   if (crowd.visible) for (const a of DECK_CREW) add('crew:' + a.p.id, a.x, a.z, [(a.settled && a.spot ? a.spot.pose : a.pose) === 'lie' ? .15 : .9, .5, 1.3].map(h => a.y + h), 0);
   for (const w of crew) if (w.active && !w.isPlayer) add('walker:' + w.spec.name, w.obj.position.x, w.obj.position.z, [.9, .5, 1.3], 0);
@@ -74061,7 +74061,7 @@ const PAD_PHY = {};                                       // the action -> its p
 const PAD_SET_CH = { dead: [.12, .22, .32], zoom: [.6, 1, 1.6], first: [.5, .8, 1.2], every: [.25, .5, 0], marks: ['auto', 'xbox', 'ps', 'nin', 'off'] };
 const PAD_SET_ACTS = [['a', 'Use, press'], ['b', 'Back'], ['x', 'Action button (Repair, Hobby, Put down)'], ['y', 'Your device'], ['view', 'Schedule tracker'], ['menu', 'Pause'],
   ['lb', 'Turn left'], ['rb', 'Turn right'], ['lt', 'Zoom out, page up'], ['rt', 'Zoom in, page down'], ['rs', 'The usual zoom'],
-  ['up', 'Up (the screen\'s edge buttons)'], ['down', 'Down'], ['left', 'Previous thing nearby'], ['right', 'Next thing nearby'], ['ls', 'Spare (does nothing)']];
+  ['up', 'Up (the screen\'s edge buttons)'], ['down', 'Down (Go there on a heads-up)'], ['left', 'Previous thing nearby'], ['right', 'Next thing nearby'], ['ls', 'Spare (does nothing)']];
 const PAD_SET_NAMES = {                                   // each pad button's name, in the pad's own style (the standard order)
   xbox: ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'View', 'Menu', 'Left stick click', 'Right stick click'],
   ps: ['Cross', 'Circle', 'Square', 'Triangle', 'L1', 'R1', 'L2', 'R2', 'Create', 'Options', 'L3', 'R3'],
@@ -74277,6 +74277,22 @@ padOwn(L => !!(L && L.id === 'device' && padShown(document.getElementById('devTi
   const np = document.getElementById('needPop'); if (padShown(np)) { np.click(); return true; }
   if (SEEK && !SEEK.visit && padShown(document.getElementById('seek'))) { seekEnd(); return true; }
 });
+// ---- 0.99.5 (CT5, the user's playtest notes 2 and 5). Note 2: seated, you're drawn at the seat (section 14's ACT.x, ACT.z,
+// ACT.face, the stand-in) while player.obj stays on the floor spot you walked to, up to 2 m off; the ring's search (padRaw)
+// measured from that spot, so the people beside you on a bench came late or not at all. Now, seated, it measures from the
+// seat, and the people within PAD_SEAT_NEAR of it come first, nearest first (beside you is 90 degrees off the way you face).
+const PAD_SEAT_NEAR = 1.6;
+function padSeated() {                                     // where you sit, { x, z, face }, or null (standing, or on your way to the seat)
+  const A = typeof ACT !== 'undefined' ? ACT : null;
+  return A && A.body && (A.phase === 'in' || A.phase === 'do') && /sit/.test(A.pose || '') && A.x !== undefined ? { x: A.x, z: A.z, face: A.face } : null;
+}
+// Note 5: the heads-up strip's Go there (section 19's heads(), the corner): D-pad down presses it while it shows (D-pad down
+// is free on the deck; its own action 'down', so a changed button keeps working), with a mark on it in the pads' style
+const padGoThere = () => { const c = document.getElementById('devHu'), g = c && !c.hidden && c.querySelector('button.act'); return g && padShown(g) ? g : null; };
+for (const f in PAD_GLYPH) if (!PAD_GLYPH[f].down) PAD_GLYPH[f].down = [PAD_SVG('<path d="M6 1.5h4v4.5h4.5v4H10v4.5H6V10H1.5V6H6z"/><path d="M6 10h4v4.5H6z" fill="currentColor"/>'), '#e6f0f1', 'D-pad down'];
+PAD_MARKS.push([padGoThere, 'down']);
+padOn('down', () => { if (!PAD.used || padLayer() || ride || FREEZE.frozen) return; const g = padGoThere(); if (!g) return; g.click(); return true; });
+padOn('use', () => { if (document.getElementById('padGoCss')) return; const st = document.createElement('style'); st.id = 'padGoCss'; st.textContent = 'body.pad #devHu button{position:relative}'; document.head.appendChild(st); });
 // ---- end of slot: Controller engineer ----
 
 // =====================================================================

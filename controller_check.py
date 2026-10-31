@@ -1916,7 +1916,7 @@ def legacy_parts(GAME, ON, fails):
         az0 = p.ev('azT'); p.press('rb'); check(abs(p.ev('azT') - az0 - 3.14159265 / 2) < 1e-6, 'deck: RB should turn a quarter turn')
         p.press('lb'); check(abs(p.ev('azT') - az0) < 1e-6, 'deck: LB should turn back')
         p.axes([0, 0, 1, 0]); p.step(20); p.axes([0, 0, 0, 0]); p.step(2); p.axes([0, 0, 1, 0]); p.step(5); p.axes([0, 0, 0, 0]); p.step(2)
-        check(abs(p.ev('azT') - az0 - 3.14159265) < 1e-6, 'deck: two pushes of the right stick should be two quarter turns')
+        check(abs(p.ev('azT') - az0 + 3.14159265) < 1e-6, 'deck: two pushes of the right stick should be two quarter turns (to the right is -pi/2 each since 0.99.5, the user\'s note 6)')
         p.axes([0, 0, -1, 0]); p.step(3); p.axes([0, 0, 0, 0]); p.step(30)
         # zooming: the right trigger in, the left out, the same limits as pinch; the stick click back to the opening zoom
         z0 = p.ev('camera.zoom'); p.btn('rt', .4); p.step(10); p.btn('rt', 0); p.step(1); z1 = p.ev('camera.zoom')
@@ -2480,7 +2480,7 @@ def legacy_parts(GAME, ON, fails):
         p.plug(); p.press('a'); p.log()
         # turning by holding: 1.3 s of the right stick turns three times (flick: once); the right stick flipped zooms out
         p.ev('azT = az = Math.PI / 4'); p.axes([1, 0, 0, 0]); p.step(39); p.axes([0, 0, 0, 0]); p.step(2)
-        turns = round(p.ev('(azT - Math.PI / 4) / (Math.PI / 2)')); check(turns == 3, f'settings: holding to turn for 1.3 s should give 3 quarter turns: {turns}')
+        turns = round(p.ev('(azT - Math.PI / 4) / (Math.PI / 2)')); check(turns == -3, f'settings: holding to turn for 1.3 s should give 3 quarter turns (the right stick pushed right: -3 since 0.99.5, the user\'s note 6): {turns}')
         p.ev('setZoom(padZoom0())'); z0 = p.ev('camera.zoom'); p.axes([0, -1, 0, 0]); p.step(6); p.axes([0, 0, 0, 0]); p.step(1)
         check(p.ev('camera.zoom') < z0, 'settings: flipped, up on the right stick should zoom out')
         p.axes([0, 0, 1, 0]); p.step(2); k = p.ev('player.steer && player.steer.k'); p.axes([0, 0, 0, 0]); p.step(2)
@@ -3446,7 +3446,7 @@ MUTANTS['touch']['PR9 c4: a touch does not hand back'] = ('src', "addEventListen
 MUTANTS['pick'] = {
     'PR9 c7: a seat ringed where the tap reaches a person': ('src', "if (a) return 'crew:' + a.p.id;", "if (a && !(want && want.startsWith('place:'))) return 'crew:' + a.p.id;"),
     'RV2 t3_noop_crew: A ignores crew': ('src', "  if (!s) return true;\n  P.chosen = false; tap(s[0], s[1]);", "  if (!s || t.key.startsWith('crew:')) return true;\n  P.chosen = false; tap(s[0], s[1]);"),
-    'RV2 t3_noface: facing ignored': ('src', "const fx = Math.sin(player.face || 0), fz = Math.cos(player.face || 0);", "const fx = 0, fz = 0;"),
+    'RV2 t3_noface: facing ignored': ('src', "const fx = Math.sin((me ? me.face : player.face) || 0), fz = Math.cos((me ? me.face : player.face) || 0);", "const fx = 0, fz = 0;"),   # (the line as of 0.99.5: seated, from the seat)
     'PR9 c5: A does nothing': ('src', "P.chosen = false; tap(s[0], s[1]); P.n = 0;", "P.chosen = false; P.n = 0;"),
     'A and B swapped': WRAP("const t = buttons[0]; buttons[0] = buttons[1]; buttons[1] = t;"),
     'the bottom line names the wrong thing': EACH_FRAME.replace('__BODY__', "const h = document.getElementById('padHint'); if (h && !h.hidden && h.textContent !== 'A Something') h.textContent = 'A Something';"),
