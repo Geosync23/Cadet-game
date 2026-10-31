@@ -10257,6 +10257,7 @@ function apptTick() {
     if (!a.tap && pl && typeof deckDef !== 'undefined' && deckDef.num === pl.deck && typeof player !== 'undefined') {   // a.tap (0.99.5 #16, section 21's health check): kept by its scene only, not by standing there
       const c = cellPos(...pl.at); if (Math.hypot(player.obj.position.x - c.x, player.obj.position.z - c.z) < 2.2) { a.status = 'kept'; a.keptAt = now; simNote('apptKept', { id: a.id, with: a.with }); continue; }
     }
+    if (a.started && now < a.started + 120) continue;     // its scene's playing (0.99.5 #16, RV30 1: section 21's health check, tapped): not missed under it
     if (now >= a.at + (a.wait || APPT_WAIT)) { a.status = 'missed'; simNote('apptMissed', { id: a.id, with: a.with }); }
   }
 }
@@ -12747,7 +12748,7 @@ deviceApp({ id: 'calendar', title: 'Calendar', icon: 'calendar', order: 15,
         rows.push({ m: x.at - B0, text: devWhen(x.at) + '  ' + x.title + (x.at < shipNow() ? ' (on now, until ' + devWhen(x.to) + ')' : ''), sub: x.where + (same.length ? ' · same time as ' + same.map(y => y.title).join(' and ') : '') + (R.on ? p === false ? ' · no reminder' : p === true ? ' · remind me, even on shift' : ' · reminder' : ''),
           button: R.on ? p === false ? 'Remind me' : 'Don\'t' : null, action: R.on ? { app: 'calendar', do: 'remind', arg: x.kind } : null });
       }
-      rows.push(...apptCalRows(d, B0));                    // your booked appointments, what they are (0.99.5 #11, the device slot)
+      rows.push(...apptCalRows(d, B0, rows));                    // your booked appointments, what they are (0.99.5 #11, the device slot)
       if (STORIES_ON && typeof storyCalRows === 'function') rows.push(...storyCalRows(d, B0));   // a crew story's crescendo, booked (FX21, section 20c's slot)
       if (rows.length) B.push({ kind: 'list', rows: rows.sort((a, b) => a.m - b.m).map(({ m, ...r }) => r) });   // in time order, the ship's items among them
     }
@@ -13202,7 +13203,7 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
     const inv = D.appts.filter(a => a.by && a.status === 'asked');
     if (inv.length) {
       B.push({ kind: 'text', text: 'Invitations', mark: 'head' });
-      for (const a of inv) B.push({ kind: 'list', rows: [{ text: apptName(a.by) + ': ' + (a.title ? a.title + ', ' : '') + apptWhereName(a.where), sub: devDayName(Math.floor(a.at / 1440) + 1) + ' ' + devWhen(a.at), mark: 'new' }] },
+      for (const a of inv) B.push({ kind: 'list', rows: [{ text: apptName(a.by) + ': ' + (a.title || apptTradName(a) ? apptWhat(a) + ', ' : '') + apptWhereName(a.where), sub: devDayName(Math.floor(a.at / 1440) + 1) + ' ' + devWhen(a.at), mark: 'new' }] },
         { kind: 'buttons', items: [{ label: 'Accept', action: { app: 'appointments', do: 'accept', arg: a.id } }, { label: 'Decline', action: { app: 'appointments', do: 'decline', arg: a.id } }] });
     }
     const up = D.appts.filter(a => a.status === 'yes' && a.at + 15 >= now).sort((a, b) => a.at - b.at);
@@ -13334,12 +13335,15 @@ deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () =
 // the 0.99.5 patch (#11, the user: "Appointments need to say what they are, not just who and where"): an appointment's
 // label, its title (Rina's "New-crew health check") and who with, else its kind's word: "Check-up with Rina Deshi".
 // Read by the Appointments app (Coming up, Earlier), the Schedule and heads-ups (untitled ones) and the Calendar
-function apptWhat(a) { return a && a.title || { checkup: 'Check-up', work: 'Work meeting', meeting: 'Meeting', summons: 'Summons', invite: 'Invitation', social: 'Meet-up' }[a && a.kind] || 'Appointment'; }
-function apptLabel(a, names) { return a.title ? a.title + (names ? ', with ' + names : '') : apptWhat(a) + (names ? ' with ' + names : ''); }
-function apptCalRows(d, B0) {                            // the Calendar's rows for day d's booked appointments ({ m, text, sub }); today's from now on
+function apptTradName(a) { const id = a && a.trad; if (!id) return null; const t = (typeof SHIP_TRADITIONS !== 'undefined' && SHIP_TRADITIONS.find(x => x.id === id)) || (typeof TRADITIONS !== 'undefined' && TRADITIONS.find(x => x.id === id)); return t && t.name || null; }   // RV30 2
+function apptWhat(a) { return a && a.title || apptTradName(a) || { checkup: 'Check-up', work: 'Work meeting', meeting: 'Meeting', summons: 'Summons', invite: 'Invitation', social: 'Meet-up' }[a && a.kind] || 'Appointment'; }
+function apptLabel(a, names) { return a.title || a.trad && apptTradName(a) ? apptWhat(a) + (names ? ', with ' + names : '') : apptWhat(a) + (names ? ' with ' + names : ''); }
+function apptCalRows(d, B0, have = []) {                            // the Calendar's rows for day d's booked appointments ({ m, text, sub }); today's from now on
   const now = shipNow(); let out = [];
   try { out = apptGroups(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && a.at >= B0 && a.at < B0 + 1440 && a.at + (a.len || 30) > now))
-    .map(({ a, names }) => ({ m: a.at - B0, text: devWhen(a.at) + '  ' + apptLabel(a, names), sub: apptWhereName(a.where) + ' · booked' })); } catch (e) { out = []; }
+    .map(({ a, names }) => { const tn = apptTradName(a), r = tn && have.find(x => x.m === a.at - B0 && x.text.includes(tn));   // a tradition you're going to: its own row says so (RV30 2)
+      if (r) { r.sub += ' · booked' + (names ? ', with ' + names : ''); return null; }
+      return { m: a.at - B0, text: devWhen(a.at) + '  ' + apptLabel(a, names), sub: apptWhereName(a.where) + ' · booked' }; }).filter(Boolean); } catch (e) { out = []; }
   return out;
 }
 // ---- Saves (0.93.2, FX27; the user's yes, 2026-10-26): section 13's three save slots, in their own app (Settings is
@@ -55734,7 +55738,7 @@ function introHealthAppt(at) {
   SHIP.intro.done['d2-health:appt'] = id; return id;
 }
 function introHealthMissed(n) {
-  const I = SHIP.intro; if (!introOn() || !n || n.id !== I.done['d2-health:appt'] || I.done['d2-health:again'] !== undefined) return;
+  const I = SHIP.intro; if (!introOn() || !n || n.id !== I.done['d2-health:appt'] || I.done['d2-health:again'] !== undefined || I.done['d2-health:met'] !== undefined) return;   // had its scene: no again (RV30 1)
   const at = (Math.floor(shipNow() / 1440) + 1) * 1440 + 14 * 60;   // tomorrow, 14:00
   if (introHealthAppt(at)) { I.done['d2-health:again'] = Math.floor(shipNow()); introMail({ from: 'Rina Deshi', subject: 'Health check, again', body: 'Missed you today. No harm done: same time tomorrow, the infirmary. Ten minutes, I promise.' }, shipNow()); }
 }
@@ -56676,7 +56680,7 @@ INTRO_ARROW_LABELS.add(INTRO_ARROWS.health.label);
 function introHealthDue(now = shipNow()) {               // the health check's booking while it's on and its scene not had, or null
   const I = SHIP.intro; if (!introOn() || I.done['d2-health:met'] !== undefined || !SHIP.device || !Array.isArray(SHIP.device.appts)) return null;
   const a = SHIP.device.appts.find(x => x.id === I.done['d2-health:appt']);
-  return a && a.tap && (a.status === 'yes' || a.status === 'kept') && now >= a.at - 2 && now < a.at + (a.len || 30) ? a : null;
+  return a && a.tap && (a.status === 'yes' || a.status === 'kept') && now >= a.at - 2 && now < Math.max(a.at + (a.len || 30), a.started ? a.started + 120 : 0) ? a : null;   // started: a reload mid-scene can tap again (RV30 1)
 }
 function introHealthWant(now) { return !!introHealthDue(now) && !(typeof DIALOGUE !== 'undefined' && DIALOGUE); }
 function introHealthTap(p) {
@@ -56689,6 +56693,7 @@ function introHealthTap(p) {
   const id = 'introHealth~tap', now = Math.floor(shipNow());
   MEETING_SCRIPTS[id] = { ...MEETING_SCRIPTS.introHealth, onEnd: () => introHealthKept(ap) };
   if (!dialogueShow(id, { id: 'intro-d2-health', who: ['rina'], where: { deck: 3, room: /^Infirmary$/ }, at: now })) return false;
+  if (!ap.started) ap.started = now;                      // section 14's apptTick won't mark it missed while it plays (RV30 1)
   if (typeof introArrowClear === 'function' && INTRO_UI.arrow === 'health') introArrowClear();
   return true;
 }
