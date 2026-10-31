@@ -79,3 +79,7 @@ Adds TR1 items 5 (TJ_ALL, stars), 8 (one notice), 4 (Off the Tern), 2 (milestone
 dropped. cadet_test vs 8976965e alone ALL IDENTICAL (switch off). TB3's twotrads995, toast995, tern995, milestones995 OK.
 Spice code unchanged: fix 1 stands (sent to TB3 and lead; TB3 is handing over).
 TB3 872fec0 switch-on: stories_check 36 OK (incl. Tomas 8 across its booking's end).
+
+### SD5 a5ce274 (game 79f0142196007b2fd091bb5d1b1f5f2a5d1cb51e092136212c2f9367743bd86c): PASS (supersedes ec312a9)
+Only change: music lookahead back to cur.tick(now + 0.5) (0.99.4's line; lead 47). sound_check hide|long|music OK (long off
+[70, 70, 110, 84], on [0, 0, 0, 0]); stall_real off 40 / 1695, on 0 / 0. Sent to lead and BM22.
