@@ -9752,6 +9752,7 @@ const SAVE_SLOT = SAVE_SLOTS_ON && !NOSAVE ? (n => n >= 1 && n <= SLOT_N && n % 
 const SLOT_NEW = SAVE_SLOTS_ON && !NOSAVE ? (v => v === 'arrive' || v === 'monday' ? v : null)(slotRead(SAVE_BASE + '-new', true)) : null;
 var SLOT_HOLD = false;
 const SAVE_KEY = slotKey(SAVE_SLOT), SAVE_V = 2;
+const TRAD995_ON = false || URL_FLAGS.has('trad995');   // 0.99.5 (TB3; plans/patch-0995.md notes 8, 10, 19): Spice shelf supper tap to join, Name on the beam's spots, the tea corner's doorway (section 18's Traditions slot); off: 0.99.4. `?trad995` previews
 // the traditions variety (0.93.2, FX24 for lead 37; CS1's pitch pages plans/trad-variety-pitch.html and -2.html on claude/crew-stories-pitch):
 // six weekly ones take turns from week 2 (TRAD_0932_WHEN: their rhythm with it on; week 1 unchanged), the user's fourteen new ones
 // (TRAD_0932_NEW, loaded only with it) and Brennan's tasting table after dinner in the galley (tasting-table-late, loaded as
@@ -14598,7 +14599,7 @@ function actBegin() {
   const what = A.kind === 'queue' ? 'You join the queue.' :   // no count (0.28.30, the user's: you see the people ahead of you)
     A.kind === 'tray' ? 'You take a tray: ' + A.o.dish + '.' : A.kind === 'eat' ? (A.spot ? 'You sit down to ' : 'You eat ') + A.o.dish + '.'
     : A.kind === 'grab' ? 'You take ' + A.o.dish + '.' : A.o.after || '';
-  toast(A.o.title || A.def.title, [A.o.flavour && A.kind !== 'eat' && A.kind !== 'tray' && !what.includes(A.o.flavour) ? A.o.flavour : '', what,   // the words once (fresh eyes #27: a seat with no tray put its words in `after` too)
+  if (!(TRAD995_ON && A.o.quiet)) toast(A.o.title || A.def.title, [A.o.flavour && A.kind !== 'eat' && A.kind !== 'tray' && !what.includes(A.o.flavour) ? A.o.flavour : '', what,   // the words once (fresh eyes #27: a seat with no tray put its words in `after` too)
     A.def.need ? (A.kind === 'recSeat' ? 'Stay as long as you like; walk away to get up.' : 'About ' + taskMins(A.def.mins) + ' minutes; walk away to stop.') : ''].filter(Boolean).join(' '));   // an auditorium seat has no set time (0.92.5 #17, the user's)
   if (A.kind === 'call' && typeof homeBooth === 'function') homeBooth();   // social B2's call picker at a booth (0.28.30)
 }
@@ -45811,7 +45812,7 @@ function eventPools(shared, desks) {
   const taken = new Set(desks.values());
   for (const ev of evTable()) {
     const tagged = new Map();
-    if (ev.venue && !ev.seated && typeof gatherVenue === 'function') { const g = gatherVenue(ev.venue), l = g ? (shared.get(g.deck + '|event') || []).filter(pl => pl.gather === ev.venue && !pl.lead) : []; if (l.length) tagged.set(g.deck, l); }   // the architect's crowd spots
+    if (ev.venue && !ev.seated && typeof gatherVenue === 'function') { const g = gatherVenue(ev.venue), l = g ? (shared.get(g.deck + '|event') || []).filter(pl => pl.gather === ev.venue && !pl.lead && !(ev.skipSpots && ev.skipSpots.has(pl.id))) : []; if (l.length) tagged.set(g.deck, l); }   // the architect's crowd spots
     for (const l of shared.values()) for (const pl of l) if (pl.event === ev.id) (tagged.get(pl.deck) || tagged.set(pl.deck, []).get(pl.deck)).push(pl);
     for (const [n, l] of tagged) shared.set(n + '|ev:' + ev.id, [...new Set(l)]);
     ev.where.forEach((w, i) => {
@@ -46101,6 +46102,7 @@ function eventJoin(e, d, now, notice) {
   if (e.id === 'first-light' && typeof flcJoin === 'function') flcJoin(e, d, now);   // patch #26: a free cocoa, then the meeting (section 15's slot)
   if (e.id === 'one-week-aboard' && P926_TRADS) week1Card(e, d, now);
   if (e.id === 'market' && P926_TRADS) swapCard(e, d, now);   // 0.92.6 item 2: the swap (FX17)
+  if (TRAD995_ON && MS995[e.id]) ms995Card(e, d, now);   // 0.99.5 (TB3, TR1's item 2): your milestones' moment with their host (Traditions slot)
   if (e.id === 'spice-shelf-supper' && P926_TRADS) SPICE.joined = d;   // 0.92.6 item 15: your guess card once the jars are named (spiceFrame)   // 0.92.6 item 5: Zeke goes over your first week (FX17, Traditions slot)
   if (/^rec-(wren|chiefs)-talk$/.test(e.id) && !talkLater(e, d, now)) recTalkCard(e, d, now);   // 0.92.6: a spoken talk's question card waits for its end (talkTick)   // a Wren talk: listen, or ask one question (0.83.2, RA)
   if (e.id === 'rec-talent-night') recActCard(e, d, now); // talent night: do an act, or watch (0.83.1, RA)
@@ -46210,9 +46212,9 @@ function tradLeader(e) {
 const tjFirst = id => { const p = schedPeople().find(q => q.id === id); if (!p) return id; const w = p.name.split(' '); return w.length === 2 && /^(Envoy|Speaker)$/.test(w[0]) ? w[1] : shortName(p); };   // a Veyli's title with one name ('Envoy Saruth'): the name, as the tips say (RV25, 0.96.0; shortName gives 'Envoy')   // section 14's: 'Dr. Sato', 'Chief Calder', 'Tomas' (reviewer R3, 0.70.3)
 const tjAgent = id => typeof DECK_CREW !== 'undefined' ? DECK_CREW.find(c => c.p && c.p.id === id) || null : null;
 // the tradition on now that you could join on this deck: { e, key, lead (id), agent } or null (once a ship minute)
-let TJ_NOW = null;
+let TJ_NOW = null, TJ_ALL = [];                        // TJ_ALL (0.99.5, TRAD995_ON): every joinable one on this deck now, each with its own marker
 function tradJoinMinute(now) {
-  TJ_NOW = null;
+  TJ_NOW = null; TJ_ALL = [];
   const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   for (const e of eventsOn(d)) {
     if (m < e.from || m >= e.to || !tradJoinable(e) || SHIP.events.joined.includes(e.id + '@' + d)) continue;
@@ -46224,8 +46226,10 @@ function tradJoinMinute(now) {
     if (ha && [...tradSpotIds(e)].some(id => { const sp = PLACE_OF.has(id) && placeSpot(id); return sp && Math.hypot(sp.x - ha.x, sp.z - ha.z) < 6; })) { lead = host; agent = ha; }
     if (!agent && P926_TRADS) { const gs = new Set(tradGoers(e).map(p => p.id)); agent = DECK_CREW.find(c => c.p && gs.has(c.p.id) && c.settled && c.spot && e.rooms.has(deckDef.num + '|' + c.spot.room)) || null; if (agent) lead = agent.p.id; }   // 0.92.6 item 8 (FX17): the leader's gone, anyone still at it leads, to its end
     if (!agent) continue;
-    TJ_NOW = { e, key: e.id + '@' + d, lead, agent }; break;
+    if (!TRAD995_ON) { TJ_NOW = { e, key: e.id + '@' + d, lead, agent }; break; }
+    TJ_ALL.push({ e, key: e.id + '@' + d, lead, agent });   // (0.99.5, TR1's item 5) not just the first: two on a deck (a Saturday on Deck 3) each get their star
   }
+  if (TRAD995_ON && TJ_ALL.length) { const at = deckDef.num + '|' + roomAt(...player.here()); TJ_NOW = TJ_ALL.find(c => c.e.rooms.has(at)) || TJ_ALL[0]; }   // the arrow and the tip: the one whose rooms you're in, else the first
   const g = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null;
   if (g && g.tj && (!TJ_NOW || g.tj !== TJ_NOW.key)) clearGoal();   // it ended, or you joined: the arrow at the leader goes
   if (!TJ_NOW) return;
@@ -46278,7 +46282,7 @@ function tradJoinTap(a) {
   if (EV_COMET_ON && COMET && cometTap(a)) return true;     // the comet: Saruth's knot; a Cadet at the Captain's tea sent to the bow lounge (slot 'Comet builder')
   if (EV_VESSEL_ON && VESSEL && vesselTap(a)) return true;  // the Veyli vessel: Calder's sheet, Taavek at the ramp or the bench (slot 'Vessel builder')
   const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
-  const o = eventOf(a.p, now), e = (o && o.now ? o.e : TJ_NOW && TJ_NOW.lead === a.p.id ? TJ_NOW.e : null) || (P926_APPT ? apptHostEvent(a, d) : null);   // 0.92.6 item 9: an appointment joined already, its host at work for it (RV17 R1)
+  const o = eventOf(a.p, now), tl = TJ_NOW && TJ_NOW.lead === a.p.id ? TJ_NOW : TRAD995_ON ? TJ_ALL.find(c => c.lead === a.p.id) : null, e = (o && o.now ? o.e : tl ? tl.e : null) || (P926_APPT ? apptHostEvent(a, d) : null);   // 0.92.6 item 9: an appointment joined already, its host at work for it (RV17 R1)
   if (e && e.id === 'tiles-ladder' && SHIP.events.joined.includes(e.id + '@' + d) && typeof tladAgain === 'function' && tladAgain(a)) return true;   // 0.92.5 item 20: watching, a tap asks for the next game
   if (!e || !tradJoinable(e) || m < e.from || m >= e.to) return false;
   if (SHIP.events.joined.includes(e.id + '@' + d)) return P926_APPT && !!e.ev.appt && apptRejoin(e, d, a);   // 0.92.6 item 9: an appointment's scene again after a reload (FX22b, Appointments builder slot)
@@ -46289,15 +46293,17 @@ function tradJoin(e, a) {
   const notice = tradWords(e, 'notice', { name }) || e.name + ': ' + s.what + '. Social and leisure up.';
   player.stop(); a.talking = 2; player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
   if (e.id === 'tiles-ladder' && typeof tladJoin === 'function') return tladJoin(e, a, notice, lead);   // 0.92.5 item 20: play the next game, or watch
+  if (TRAD995_ON && e.id === 'spice-shelf-supper') return spiceJoin(e, a, notice);   // 0.99.5 note 19 (TB3): a mess seat with your dinner
   if (TRAD_0932_ON && typeof t932Join === 'function' && t932Join(e, a, notice, lead)) return true;   // 0.93.2: the host's own words first, then the activity (FX24, Traditions slot)
   if (s.act === 'beam') { if (beamWaitTap()) return true; toast(a.p.name, '"' + (tradWords(e, 'tell', { name }) || 'Go on, tap the beam. Your name goes up there, with ours.') + '"'); return true; }
   if (s.act === 'walk') { eventJoin(e, d, now, notice); tradWalkStart(e, lead); return true; }
   const near = tjAgent(lead) || a, sp = tradSpot(e, near.x, near.z);
-  eventJoin(e, d, now, notice);
-  const kind = s.act || 'tj:' + e.id, o = { title: e.name, member: s.act === 'gym', after: notice, end: s.mins ? Math.min((d - 1) * 1440 + e.to, now + s.mins) : (d - 1) * 1440 + e.to, tj: e.id + '@' + d };   // s.mins: a turn of so long, not to the end (the big jigsaw, 0.92.5)
+  const mine = TRAD995_ON && !s.act, until = s.mins ? Math.min((d - 1) * 1440 + e.to, now + s.mins) : (d - 1) * 1440 + e.to;   // (0.99.5, TR1's item 8) one notice, with how long: not the activity's own toast too, nor "About 46 minutes" for 30
+  eventJoin(e, d, now, mine ? notice + (sp ? ' On till ' + hhmm(until) + '; walk away to stop.' : ' Every spot\'s taken just now, so you stand and chat with them.') : notice);
+  const kind = s.act || 'tj:' + e.id, o = { title: e.name, member: s.act === 'gym', after: notice, end: s.mins ? Math.min((d - 1) * 1440 + e.to, now + s.mins) : (d - 1) * 1440 + e.to, tj: e.id + '@' + d, ...(mine ? { after: null, quiet: true } : {}) };   // s.mins: a turn of so long, not to the end (the big jigsaw, 0.92.5)
   if (!sp) {                                             // every spot taken (a full music room): you stand beside the leader and join in there
     const w = nearestOpen(near.x + .9, near.z + .9, player), c = w && cellPos(...w);
-    if (!c || s.act) { toast(e.name, notice + ' Every spot\'s taken just now, so you stand and chat with them.', { keep: true }); return true; }
+    if (!c || s.act) { if (!mine) toast(e.name, notice + ' Every spot\'s taken just now, so you stand and chat with them.', { keep: true }); return true; }
     actStart('tj:' + e.id, null, { ...o, pose: tradPose(s, {}, { pose: 'stand' }), company: 1, spot: { id: null, walk: w, x: c.x, z: c.z, y: 0, face: Math.atan2(near.x - c.x, near.z - c.z), pose: 'stand' } });
     return true;
   }
@@ -46308,6 +46314,7 @@ function tradJoin(e, a) {
 // the marker over the leader's head (once a frame): a small badge, DOM only
 let TJ_MARK = null; const tjV = new THREE.Vector3();
 function tradJoinFrame() {
+  if (TRAD995_ON) tjMarks995();                         // (0.99.5) the others on this deck: their own stars (TB3's slot)
   const A = TJ_NOW && TJ_NOW.agent && DECK_CREW.includes(TJ_NOW.agent) ? TJ_NOW.agent : null;
   if (!A) { if (TJ_MARK) TJ_MARK.style.display = 'none'; return; }
   if (!TJ_MARK) {
@@ -46368,7 +46375,7 @@ function beamGather() {
     let inBay = false; try { inBay = roomAt(...player.here()) === BEAM.room; } catch (x) { inBay = false; }
     const now = shipNow(), m = now - (e.day - 1) * 1440, sp = placeSpot('5-beam-1');
     if (!inBay || !sp) return;
-    const at = DECK_CREW.filter(c => c.p && Math.hypot(c.x - sp.x, c.z - sp.z) <= BEAM_NEAR && (o => o && o.now && o.e.id === e.id)(eventOf(c.p, now))).length;
+    const at = DECK_CREW.filter(c => c.p && Math.hypot(c.x - sp.x, c.z - sp.z) <= (TRAD995_ON ? 6.5 : BEAM_NEAR)   /* (0.99.5 note 8) they stand from row 3 back now */ && (o => o && o.now && o.e.id === e.id)(eventOf(c.p, now))).length;
     if (at < BEAM_CROWD && m < e.from + BEAM_WAIT) return;
     const L = beamLines(e), per = BEAM_GAP / 1000 * SHIP_RATE, k = Math.max(0, Math.floor((e.to - m - BEAM_SPARE) / per));   // ship minutes a line takes; how many fit
     B.q = k ? L.slice(-k) : []; B.next = simNow();
@@ -46384,9 +46391,9 @@ function beamWaitTap() {                                 // a tap on the beam wh
   toast(TJ_NOW.e.name, 'The Works crew are gathering at the beam. Your turn comes in a moment.'); return true;
 }
 let BEAM_CHEERS = [];                                    // [{ c: agent, text, at: real ms }]: the welcomes, said in turn
-function tradBeamFrame() {
+function tradBeamFrame() {   // (0.99.5 note 8, TRAD995_ON) a cheer waits (3 s at most) for the bubble before it: two at once, one is lifted onto your name
   beamGather();
-  while (BEAM_CHEERS.length && simNow() >= BEAM_CHEERS[0].at) { const b = BEAM_CHEERS.shift(); if (b.c.h && DECK_CREW.includes(b.c) && typeof bubbleSay === 'function') bubbleSay(b.c.h, b.text, 4); }
+  while (BEAM_CHEERS.length && simNow() >= BEAM_CHEERS[0].at && !(TRAD995_ON && bubbles.list.some(x => x.t > 0) && simNow() < BEAM_CHEERS[0].at + 3000)) { const b = BEAM_CHEERS.shift(); if (b.c.h && DECK_CREW.includes(b.c) && typeof bubbleSay === 'function') bubbleSay(b.c.h, b.text, TRAD995_ON ? 2.4 : 4); }
   const A = typeof ACT !== 'undefined' ? ACT : null;
   if (!A || !A.o.beam || A.o.painted || !(A.phase === 'do' || A.phase === 'out') || A.done < A.def.mins) return;
   A.o.painted = true;
@@ -46395,11 +46402,11 @@ function tradBeamFrame() {
   const there = DECK_CREW.filter(c => c.p && c.p.id && (o => o && o.now && o.e.id === e.id)(eventOf(c.p, now)));
   BEAM_CHEERS = there.slice().sort((x, y) => Math.hypot(x.x - A.x, x.z - A.z) - Math.hypot(y.x - A.x, y.z - A.z)).slice(0, 8).map((c, k) => {   // everyone there, one after another (playtest 2, 0.71.3; was the nearest four at once)
     let l = null; try { l = typeof lineFor === 'function' && lineFor(c.p.id, 'beam.congrats', {}); } catch (x) { l = null; }
-    return { c, text: l && l.text || TJ_CHEER[k % TJ_CHEER.length], at: simNow() + k * 1600 };
+    return { c, text: l && l.text || TJ_CHEER[k % TJ_CHEER.length], at: simNow() + k * (TRAD995_ON ? 2600 : 1600) };   // (0.99.5 note 8) one at a time: stacked bubbles climbed onto your name
   });
   const ids = new Map();
   for (const c of there) { const sg = planDay(c.p, d).find(x => evTagId(x.tag) === e.id && x.from <= now && now < x.to); if (sg) ids.set(c.p.id, sg.to); }
-  TJ_FREE = { ids, at: now + 2, until: (d - 1) * 1440 + e.to + 30 };
+  TJ_FREE = { ids, at: now + 2 + (TRAD995_ON ? Math.ceil((BEAM_CHEERS.length * 2.6 + 2.4) * SHIP_RATE) : 0), until: (d - 1) * 1440 + e.to + 30 };   // (0.99.5 note 8, TB3) they cheer from where they stand, then go: walking off mid-cheer put the bubbles over your name
 }
 // the beam's names (0.70.0, for the deck architect's WALL_KIT.nameBeam; all first names, the user's): -> [{ id, name, day }]
 // of each new Works hand whose Name on the beam (name-on-the-beam-new: the Monday after their rotation) has begun by
@@ -48715,6 +48722,7 @@ function spiceWeek(d) {
   return ok.length >= 3 ? [0, 1, 2].map(i => ok[(wk * 3 + i) % ok.length]) : null;
 }
 function spiceFrame() {
+  if (TRAD995_ON) return spiceFrame995();   // 0.99.5 note 19 (TB3): timed from when Brennan's at the shelf, below
   const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   const e = m >= SPICE_AT.open - 3 && m < SPICE_AT.end && eventsOn(d).find(x => x.id === 'spice-shelf-supper'), jars = e && spiceWeek(d);
   const b = jars && DECK_CREW.find(a => a.p && a.p.id === 'brennan');
@@ -48915,6 +48923,211 @@ function tastJoin(e, a, notice, lead) {
       { choice: [0, 1].map(k => ({ text: cap(z.choices[k]), rel: { [q.id]: 1 }, reply: { who: q.id, text: thanks } })) }] };
   dialogueShow('tasting.table', { id: 'tasting.table@' + d, who: [q.id], at: now, ...cardWhere(e) });
   return true;
+}
+// ---- 0.99.5 note 19 (TB3; the user: "Spice shelf supper doesn't do anything. Doesn't trigger. No one to click on."), behind
+// TRAD995_ON (off: the game as 0.99.4; `?trad995` previews). Tap to join: Brennan hosts (the marker, the arrow, the tip),
+// and a tap on her or anyone at it sits you at a free mess seat with your dinner (it is your dinner: your tray if you hold
+// one, else a plate from the servery). She is held at the spice shelf (3-spice-host) for the whole supper, 18:15-19:15,
+// and her script runs from when she's there and you're in the mess, not at fixed minutes: the opening, the three jars
+// about five ship minutes apart (the mess guessing in between), then whose each was; about 25 minutes, closer together
+// when it starts late. Joined, your guess card opens once the three jars are named (at once if they already are), and
+// the reveal waits for it. Words: SW1's spice.* (each jar's line fits its place: no "Last dish" first); the spice small
+// mid-sentence and capital at the start; a guess never names its speaker. SHIP.spice = { joined, asked } is saved, so a
+// reload mid-supper keeps the card (and doesn't ask twice). Nothing calls R(); the planner reads none of it
+const SPICE995 = { day: 0, t0: 0, step: 0, last: 0, said: 0, cardAt: 0 };
+if (TRAD995_ON) {
+  TRAD_JOIN['spice-shelf-supper'] = { host: 'brennan', pose: 'sit:talk', need: 'social', gain: 10, also: { leisure: 8 }, verb: 'guess the spices', what: 'sit down to supper and guess whose spices' };
+  tjActs();
+  const s = SAVED && SAVED.ship && SAVED.ship.spice;   // the saved supper (the same keys as SPICE's)
+  if (s) for (const k of ['joined', 'asked']) if (Number.isInteger(s[k])) SPICE[k] = s[k];
+  SAVE_EXTRA.push(o => { o.ship.spice = { joined: SPICE.joined, asked: DIALOGUE && /^spice\.guess/.test(DIALOGUE.id) ? 0 : SPICE.asked }; });   // the card open: asked again after a reload
+}
+// {spice} into a line: small mid-sentence, a capital where it starts a sentence
+function spiceFill(t, ctx) {
+  const str = String(t);
+  return str.replace(/\{(\w+)\}/g, (x, w, off) => { let v = ctx && ctx[w] != null ? String(ctx[w]) : x;
+    if (w === 'spice' && v) v = /(^|[.!?]\s+)$/.test(str.slice(0, off)) ? v[0].toUpperCase() + v.slice(1) : v.toLowerCase();
+    return v; });
+}
+function spiceText(kind, k, ctx, fb) {
+  const L = typeof LINES !== 'undefined' && Array.isArray(LINES[kind]) && LINES[kind].length ? LINES[kind].map(x => x.text).filter(t => typeof t === 'string') : fb;
+  return L && L.length ? spiceFill(L[k % L.length], ctx) : null;
+}
+// jar i's line (0, 1, 2): "First ..." only for the first, "Last ..." only for the last; three different lines a night
+function spiceJarLine(d, i, spice) {
+  const L = typeof LINES !== 'undefined' && Array.isArray(LINES['spice.jar']) && LINES['spice.jar'].length ? LINES['spice.jar'].map(x => x.text).filter(t => typeof t === 'string') : ['Jar one: {spice}. Whose is it? No telling.', 'Next, {spice}. Whose?', 'Last one: {spice}. Guess away.'];
+  const first = t => /^(First|Jar one)\b/i.test(t), last = t => /^Last\b/i.test(t);
+  const fit = L.map((t, k) => [t, k]).filter(([t]) => i === 0 ? !last(t) : i === 2 ? !first(t) : !first(t) && !last(t));
+  const pool = fit.length ? fit : L.map((t, k) => [t, k]);
+  const used = [];
+  for (let j = 0; j <= i; j++) {
+    const f = pool.filter(([t, k]) => (j === 0 ? !last(t) : j === 2 ? !first(t) : !first(t) && !last(t)) && !used.includes(k)), q = f.length ? f : pool;
+    const pick = q[(d * 5 + j * 3) % q.length]; used.push(pick[1]);
+    if (j === i) return spiceFill(pick[0], { spice });
+  }
+  return null;
+}
+// the script's minutes from its start: open, the three jars, then the three reveals (your card in between)
+const SPICE995_AT = [0, 3, 9, 15, 22, 24, 26], SPICE995_LEN = 28;
+function spiceFrame995() {
+  const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  const e = eventsOn(d).find(x => x.id === 'spice-shelf-supper' && m >= x.from - 10 && m < x.to), jars = e && spiceWeek(d);
+  const b = jars && DECK_CREW.find(a => a.p && a.p.id === 'brennan');
+  if (!b) { if (SPICE.hold) { SPICE.hold(); SPICE.hold = null; } return; }
+  if (!SPICE.hold || CREW_HELD.get('brennan') !== '3-spice-host') SPICE.hold = crewHold(b.p, '3-spice-host');   // (again after a deck change: deckCrewClear lets everyone go) she leaves the galley ten minutes early, so she's at the shelf from the start, to the end
+  if (m < e.from) return;
+  const S = SPICE995; if (S.day !== d) Object.assign(S, { day: d, t0: 0, step: 0, last: 0, said: 0, cardAt: 0 });
+  const joined = SHIP.events.joined.includes(e.id + '@' + d); if (joined) SPICE.joined = d;
+  const here = friHere(e), atShelf = b.settled && b.spot && b.spot.id === '3-spice-host';
+  if (!S.t0 && atShelf && here) S.t0 = Math.max(m, e.from);
+  if (!S.t0 || typeof bubbleSay !== 'function') return;
+  const nm = j => { const p = evPerson(j[0]); return p ? shortName(p) : j[0]; };
+  const room = Math.max(6, e.to - 2 - S.t0), sc = Math.min(1, room / SPICE995_LEN), due = k => S.t0 + Math.floor(SPICE995_AT[k] * sc);
+  const t = performance.now(), card = DIALOGUE && /^spice\.guess/.test(DIALOGUE.id);
+  if (SPICE.joined === d && SPICE.asked !== d && S.step >= 4 && here && !DIALOGUE && typeof dialogueShow === 'function') { SPICE.asked = d; S.cardAt = performance.now(); spiceCard995(d, jars, now, e); return; }   // the card once the jars are named
+  if (card) S.cardSeen = t;
+  const wait = S.step >= 4 && (card && t < (S.cardAt || 0) + 60000 || !card && t < (S.cardSeen || 0) + 2500 || SPICE.joined === d && SPICE.asked !== d && here);   // the reveal waits for your guess while the card is open (60 real seconds at most, RV30: the ship clock runs on under a card, so 5 ship minutes was 8 s)
+  if (S.step < SPICE995_AT.length && !wait && m >= due(S.step) && t - S.last >= 3500 && here && atShelf) {
+    const k = S.step, text = k === 0 ? spiceText('spice.open', d, {}, ['Right, everyone. Three jars off the shelf tonight. Taste, then guess whose.'])
+      : k <= 3 ? spiceJarLine(d, k - 1, jars[k - 1][1])
+      : spiceText('spice.reveal', d * 3 + k - 4, { name: nm(jars[k - 4]), spice: jars[k - 4][1] }, ['The {spice}? That was {name}\'s. From home.']);
+    if (text) bubbleSay(friSpeaker(b), text, 5);
+    S.step++; S.last = t; return;
+  }
+  // the guesses: one bubble every few seconds from those at the supper, from the first jar to the reveal; a jar's owner
+  // sometimes owns up. A guess names a jar owner (or someone else aboard), never the speaker or Brennan
+  if (S.step < 2 || S.step > 4 || card || t - S.last < 2200 || t < SPICE.next || !here) return;
+  const at = DECK_CREW.filter(a => a.p && a.h && a.settled && a.spot && evTagId(a.tag || '') === 'spice-shelf-supper' && a.p.id !== 'brennan');
+  if (!at.length) return;
+  SPICE.next = t + 2700 + (SPICE.n % 3) * 500; S.last = t;
+  const a = at[SPICE.n % at.length], mine = jars.slice(0, Math.min(3, S.step - 1)).find(j => j[0] === a.p.id);
+  const owners = jars.map(j => evPerson(j[0])).filter(p => p && p.id !== a.p.id), crew = schedPeople().filter(p => p.id !== a.p.id && p.id !== 'brennan');
+  const who = SPICE.n % 3 !== 2 && owners.length ? owners[(SPICE.n + d) % owners.length] : crew[(SPICE.n * 7 + d) % crew.length];
+  const text = mine && SPICE.n % 4 === 3 ? spiceText('spice.mine', SPICE.n, { spice: mine[1] }, ['Not saying. But it might be mine.'])
+    : who ? spiceText('spice.guess', SPICE.n, { name: shortName(who) }, ['That\'s {name}\'s, surely?', 'Smells like {name}\'s cooking.', 'I\'d bet a pudding it\'s {name}\'s.']) : null;
+  if (text) bubbleSay(friSpeaker(a), text); SPICE.n++;
+}
+function spiceCard995(d, jars, now, e) {                   // spiceCard, with the spice small mid-sentence
+  spiceCard(d, jars, now, e);
+  const sc = MEETING_SCRIPTS['spice.guess'], j = jars[0]; if (!sc || !DIALOGUE) return;
+  sc.lines[0].text = spiceText('spice.ask', d, { spice: j[1] }, ['Your turn. The {spice}. Whose?']);
+  DIALOGUE.queue[0] = sc.lines[0]; if (typeof dialogueDraw === 'function') dialogueDraw();
+}
+// the tap (tradJoin asks first): joined, and sat at a free mess seat near Brennan with your dinner; already eating in the
+// mess, you stay put. One join notice (eventJoin's); sitting down says what's on your plate
+function spiceJoin(e, a, notice) {
+  const d = e.day, now = shipNow(); eventJoin(e, d, now, notice); SPICE.joined = d;
+  if (ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.placeId && e.rooms && e.rooms.has(deckDef.num + '|' + (PLACE_OF.get(ACT.placeId) || {}).room)) return true;
+  const b = tjAgent('brennan') || a, sp = tradSpot(e, b.x, b.z), seat = sp && sp[0].type === 'mess-seat' ? sp : null;
+  const pl = seat ? seat[0] : [...PLACE_OF.values()].filter(q => q.type === 'mess-seat' && !heldBy(q.id) && !BUSY.has(q.id) && q.id !== PLAYER_PLACE && e.rooms.has(deckDef.num + '|' + q.room))
+    .map(q => [q, placeSpot(q.id)]).filter(([, s]) => s).sort((x, y) => Math.hypot(x[1].x - b.x, x[1].z - b.z) - Math.hypot(y[1].x - b.x, y[1].z - b.z) || (x[0].id < y[0].id ? -1 : 1)).map(([q]) => q)[0];
+  if (!pl) { toast(e.name, 'Every seat\'s taken just now. Grab a tray and find a spot when one comes free.'); return true; }
+  const pose = (placeSpot(pl.id) || {}).pose || 'sit', title = e.name;
+  if (SHIP.player.tray) { actStart('eat', pl.id, { title, pose }); return true; }   // your tray: it's your supper
+  const f = foodFrom('servery');
+  actStart('eat', pl.id, { title, fed: true, dish: f && f.ok && f.dish ? f.dish : 'Brennan\'s spice supper', pose });
+  return true;
+}
+// ---- 0.99.5 note 10 (TB3, lead 47's decision on TR1's finding; behind TRAD995_ON): Tea and biscuits ("nobody sits down
+// for tea, they just walk up to it, and they trap you in that small room"). The tea corner's standing place 5-tea-3 stood on
+// its doorway tile [21, 1] (the door v,21,1), so someone always stood by the door at the table and you couldn't get out. It
+// moves to the far corner [23, 2], facing the table (everyone who uses it follows: Open door, the promotion cake, CQ), and
+// [21, 1] is left clear. (The 13:00 tea taking only the two seats was tried and dropped, lead 47: with two places Calder
+// had her tea less often and her crew story ran about four days late.) Zeke's Day 1 tea spot is also [23, 2] (INTRO_TEA_AT)
+if (TRAD995_ON) {
+  const t3 = DECKS[5].places.find(pl => pl.id === '5-tea-3');
+  if (t3) Object.assign(t3, { at: [23, 2], face: -152 });
+  if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }
+}
+// ---- 0.99.5 note 8 (TB3, lead 47's decision on TR1's finding; behind TRAD995_ON): Name on the beam ("where you stand to
+// write isn't where the name goes: scoot the player over; crew speech buttons cover the name: slide those crew over"). Your
+// name is BEAM.slots[0], along 4.98 of the bay's hull wall (x about 14.4-15.6, the next hand's under it); you painted from
+// [13, 0], 1.4 m west of it. 5-beam-1 moves under it, [14, 0] at x 14.98. A bubble at phone size is about 240 by 65 px over
+// its speaker's head; measured at 390 x 844 while you paint and while they cheer, anyone standing in the bay's front three
+// rows (0-2) puts theirs on the name (an east one's bubble is pushed in from the screen's edge). So the gathering stands
+// from row 3 back: the watchers move there ([19, 4], [20, 4], [11, 4], [12, 4], [13, 4]; [12, 3] and [13, 3] stay), every
+// watcher faces the new spot, and the bay's crowd spots in rows 0-2 aren't used for the beam. The cheers come one at a
+// time (stacked bubbles climb), and the crowd goes only after them (tradBeamFrame). The floor
+// tap (beamFloorTap) and the controller's (padBeamOn) read 5-beam-1's spot, so they follow
+if (TRAD995_ON) {
+  const P5 = DECKS[5].places, at = (id, o) => { const pl = P5.find(q => q.id === id); if (pl) Object.assign(pl, o); };
+  const X = 14.98, Z = .75;
+  at('5-beam-1', { at: [14, 0], xy: [X, Z] });
+  for (const [id, c, r] of [['5-beam-2', 19, 4], ['5-beam-3', 20, 4], ['5-beam-4', 12, 4], ['5-beam-5', 11, 4], ['5-beam-6', 13, 4]]) at(id, { at: [c, r], xy: [c + .5, r + .5] });   // 5-beam-7 [12, 3], 5-beam-8 [13, 3] stay
+  for (const nb of SHIP_TRADITIONS.filter(x => x.id === 'name-on-the-beam' || x.id === 'name-on-the-beam-new'))   // the Works bay's crowd spots in rows 0-2 aren't used for it (eventPools' skipSpots)
+    nb.skipSpots = new Set([1, 2, 3, 4, 5, 7, 8, 10, 14, 15, 16].map(k => '5-works-bay-crowd-' + k));   // 16,1 16,2 17,2 15,0 17,0 14,1 18,1 18,0 13,2 13,0 19,0
+  for (const pl of P5) if (/^5-beam-[2-8]$/.test(pl.id)) pl.face = Math.round(Math.atan2(X - pl.xy[0], Z - pl.xy[1]) * 180 / Math.PI);
+  if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }
+}
+// ---- 0.99.5 TR1's item 5 (TB3, lead 47; behind TRAD995_ON): tradJoinMinute stopped at the first joinable tradition on
+// your deck, so a second one never got its star, arrow or tip, even with you in its room (every Saturday on Deck 3: Cook-along
+// or Jar day hid the Tiles ladder; Book circle hid Playlist duel). Now it keeps them all (TJ_ALL): the arrow and the tip are
+// the one whose rooms you're in (else the first, as before), each of the others has its own star over its leader (these,
+// the same badge as #tjMark, DOM only), and a tap on any of their leaders joins that one (tradJoinTap)
+const TJ_MARKS = [];
+function tjMarks995() {
+  const others = TJ_ALL.filter(c => c !== TJ_NOW && c.agent && DECK_CREW.includes(c.agent));
+  while (TJ_MARKS.length < others.length) {
+    if (!TJ_MARKS.length) { const st = document.createElement('style');
+      st.textContent = '.tjMark2{position:fixed;left:0;top:0;z-index:2;pointer-events:none;font:600 12px system-ui,sans-serif;color:#0b2a26;background:#5fd6c6;border-radius:999px;padding:2px 8px;box-shadow:0 1px 6px rgba(0,0,0,.4);white-space:nowrap}'
+        + '.tjMark2:after{content:"";position:absolute;left:50%;bottom:-5px;margin-left:-5px;border:5px solid transparent;border-bottom:0;border-top-color:#5fd6c6}';
+      document.head.appendChild(st); }
+    const el = document.createElement('div'); el.className = 'tjMark2'; el.style.display = 'none'; document.body.appendChild(el); TJ_MARKS.push(el);
+  }
+  TJ_MARKS.forEach((el, k) => {
+    const c = others[k]; if (!c) { el.style.display = 'none'; return; }
+    const A = c.agent, txt = '★ ' + tjFirst(c.lead); if (el.textContent !== txt) el.textContent = txt;
+    tjV.set(A.x, (A.y || 0) + (A.pose === 'sit' || /^sit/.test(A.pose || '') ? 1.55 : 2.1), A.z).project(camera);
+    const vis = tjV.z < 1 && Math.abs(tjV.x) < 1.05 && Math.abs(tjV.y) < 1.05;
+    el.style.display = vis ? 'block' : 'none';
+    if (vis) el.style.transform = 'translate(' + Math.round((tjV.x + 1) * innerWidth / 2) + 'px,' + Math.round((1 - tjV.y) * innerHeight / 2 - 6) + 'px) translate(-50%,-100%)';
+  });
+}
+// ---- 0.99.5 TR1's item 4 (TB3, lead 47; behind TRAD995_ON): Off the Tern, tap to join, as the design has it ("it's in your
+// Schedule with Mail the evening before, and you can tap to join"). Dev Raman hosts (he says the word at 17:40 and the ramp
+// opens); a tap on him or anyone watching stands you with them in the shuttle bay. Tomas's Day 21 scene there (crew stories
+// stage 2) is his own: it starts by itself when you're with him, as before
+if (TRAD995_ON) {
+  TRAD_JOIN['off-the-tern'] = { host: 'raman', pose: 'talk', need: 'social', gain: 10, also: { leisure: 6 }, verb: 'welcome the new crew', what: 'stand at the foot of the ramp and welcome the new crew aboard' };
+  tjActs();
+}
+// ---- 0.99.5 TR1's item 2 (TB3, lead 47; behind TRAD995_ON): your own milestones, and Open door, get a host you tap and a
+// moment, in the shape of One week aboard (its TRAD_JOIN entry and Zeke's week1.zeke card). The new hand's tea (your first
+// Friday) and Twelve weeks aboard: Calder; Six weeks aboard: Zeke. Four weeks aboard is joined by a tap but has no card of
+// ours: Calder's crew-story scene and her career question are that evening's moment. Open door (Calder's Wednesday tea):
+// a tap, no card. Words: the writers' milestone.<id>.<key> lines when baked, else these stand-ins (MS995)
+const MS995 = {
+  'new-hands-tea': { who: 'calder', title: 'New hand\'s tea', gist: 'Calder had the new hand\'s tea with you in the tea corner.',
+    open: 'Sit. It\'s your tea. The first Friday always is.', mid: 'Five days, and nothing broken that I know of. That\'s a good week.',
+    reply: [['It\'s been a lot.', 'It is. It gets less. Then it\'s just the job.'], ['I like it here.', 'Good. So does the ship, I think.'], ['(Drink your tea)', 'Quiet\'s fine. Biscuit?']],
+    close: 'Same tea every Friday. Come when you can.' },
+  'six-weeks-aboard': { who: 'torres-zeke', title: 'Six weeks aboard', gist: 'Zeke had a tea with you in the bow lounge: six weeks aboard.',
+    open: 'Six weeks! Sit down. I got you the good mug.', mid: 'Remember your first day? You held that spanner like it might bite.',
+    reply: [['It still might.', 'Ha! It won\'t. Probably.'], ['Thanks for sticking with me.', 'Any time. You made it easy. Mostly.'], ['What\'s next?', 'Bigger jobs. Calder\'s watching you. In a good way.']],
+    close: 'To six weeks. Plenty more where they came from.' },
+  'twelve-weeks-aboard': { who: 'calder', title: 'Twelve weeks aboard', gist: 'Calder raised a cup to your twelve weeks aboard, in the mess.',
+    open: 'Twelve weeks. A quarter of a year aboard.', mid: 'I don\'t give speeches. This isn\'t one.',
+    reply: [['Thank you, Chief.', 'Don\'t thank me. You did the work.'], ['Here\'s to the next twelve.', 'Here\'s to them.'], ['(Raise your cup)', 'Good.']],
+    close: 'To the new hand. Not so new now.' },
+};
+function ms995Card(e, d, now) {
+  const M = MS995[e.id]; if (!M || typeof dialogueShow !== 'function' || !schedPeople().some(p => p.id === M.who)) return;
+  const W = (k, fb) => quizText('milestone.' + e.id + '.' + k, d, {}) || fb;
+  MEETING_SCRIPTS['ms995.' + e.id] = { title: M.title, from: (evPerson(M.who) || {}).name, gist: M.gist,
+    lines: [{ who: M.who, text: W('open', M.open), pose: 'gesture' }, { who: M.who, text: W('mid', M.mid), to: 'you' },
+      { choice: M.reply.map(([t, r], k) => ({ text: W('reply.' + (k + 1), t), rel: { [M.who]: 2 }, reply: { who: M.who, text: W('answer.' + (k + 1), r) } })) },
+      { who: M.who, text: W('close', M.close), pose: 'nod' }] };
+  dialogueShow('ms995.' + e.id, { id: 'ms995.' + e.id + '@' + d, who: [M.who], at: now, ...p926Where(e) });
+}
+if (TRAD995_ON) {
+  Object.assign(TRAD_JOIN, {
+    'new-hands-tea': { host: 'calder', pose: 'sit:drink', need: 'social', gain: 15, also: { leisure: 8 }, verb: 'have your tea with her', what: 'have the new hand\'s tea with the Works crew' },
+    'four-weeks-aboard': { host: 'calder', pose: 'sit:drink', need: 'social', gain: 15, also: { leisure: 8 }, verb: 'join them', what: 'have a slice of the four-weeks cake with the Works crew' },
+    'six-weeks-aboard': { host: 'torres-zeke', pose: 'sit:drink', need: 'social', gain: 15, also: { leisure: 8 }, verb: 'sit down with him', what: 'have a tea with Zeke: six weeks aboard' },
+    'twelve-weeks-aboard': { host: 'calder', pose: 'sit:talk', need: 'social', gain: 15, also: { leisure: 8 }, verb: 'raise a cup with them', what: 'sit down for Calder\'s toast: twelve weeks aboard' },
+    'open-door': { host: 'calder', pose: 'drink', need: 'social', gain: 10, also: { leisure: 6 }, verb: 'have tea with the Chief', what: 'end-of-shift tea with the Chief' },
+  });
+  tjActs();
 }
 // ---- end of slot: Traditions engineer ----
 // ---- slot: Events engineer 2 (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----

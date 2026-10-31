@@ -178,6 +178,7 @@ with sync_playwright() as pw:
                 g.step(30)
                 x = json.loads(g.ev("JSON.stringify([SHIP.time.min, (DECK_CREW.find(a => a.p.id === 'brennan') || {}).spot ? DECK_CREW.find(a => a.p.id === 'brennan').spot.id : null, !!DIALOGUE && DIALOGUE.id])"))
                 if x[1] == '3-spice-host' and seen is None: seen = x[0]
+                if x[0] >= 1101 and g.ev("typeof TRAD995_ON !== 'undefined' && TRAD995_ON && !SHIP.events.joined.includes('spice-shelf-supper@16')"): g.ev("tradJoinTap(DECK_CREW.find(a => a.p.id === 'brennan'))")   # 0.99.5 note 19 (TB3): tap to join, switched on
                 if x[2] == 'spice.guess' and card is None: card = x[0]
                 if card is not None and held is None and x[0] >= card + 3: held = x[2]; g.ev("dialogueStep(0)")
                 if x[0] >= 1141: break
