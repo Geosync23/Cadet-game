@@ -107,9 +107,14 @@ where: Tea corner
 hint: Stay for the tea. All of it. Near the front.
 mem: welldone
 flag: calder.welldone
-if here:pell | calder: Four weeks. Mugs down a minute. Not you, Pell. You can hold yours.
-if !here:pell | calder: Four weeks. Mugs down a minute.
+// W5 (lead 47, 2026-10-31): when her career speech at the tea (end.story, the flag it sets) has just played, no second
+// "Four weeks", and SW4's one bridge line turns from the Wren's chief before her to Fenn.
+if here:pell !flag:end.story | calder: Four weeks. Mugs down a minute. Not you, Pell. You can hold yours.
+if !here:pell !flag:end.story | calder: Four weeks. Mugs down a minute.
+if here:pell flag:end.story | calder: Mugs down a minute. Not you, Pell. You can hold yours.
+if !here:pell flag:end.story | calder: Mugs down a minute.
 calder: I don't do this in front of people. You all know that. I'm doing it anyway.   [sigh]
+if flag:end.story | calder: He talked, that one. The chief who taught me first didn't. Not a word more than the job.
 calder: My first chief wrote to me. Fenn. I answered her. Late. Four drafts.
 if mem:moment.calder.onesentence | calder: One true sentence first, then the rest. Someone told me that. It works.
 calder: She wrote back two words. Took her thirty years. I won't take that long.
