@@ -11493,7 +11493,7 @@ function introPlan(p, d) {
     const near = w.tile ? cand.filter(q => q.type !== 'event').sort((a, b) => dist(a) - dist(b)) : cand;   // a tile: the places nearest it first
     const pl = w.placeId && S.byId.get(w.placeId) ? S.byId.get(w.placeId) : near[0];   // a named place (Calder's seat across from yours)
     const seat = !!(w.placeId && pl), alts = w.placeId ? null : near.map(q => q.id);   // introLay takes the first of these free then
-    return { from: x.at - (x.early != null ? x.early : seat ? INTRO_EARLY : 0), to: x.until, deck: w.deck, placeId: pl ? pl.id : null, alts, tag: 'intro-' + x.id, ...(x.act ? { act: x.act } : {}) };   // a named seat: there and sitting when it starts; a beat's own `early` (the patch, #1: the Chief 20 minutes early at her desk)
+    return { from: x.at - (x.early != null ? x.early : seat ? INTRO_EARLY : 0), to: x.until, deck: w.deck, placeId: pl ? pl.id : null, alts, tag: 'intro-' + x.id, ...(x.act ? { act: x.act } : {}), ...(x.rideTag ? { rideTag: x.rideTag } : {}) };   // a named seat: there and sitting when it starts; a beat's own `early` (the patch, #1: the Chief 20 minutes early at her desk)
   });
 }
 function introLay(p, d, occ, segs) {
@@ -11525,11 +11525,11 @@ function introLay(p, d, occ, segs) {
     cut.sort((x, y) => x.from - y.from);
     const prev = cut.filter(x => x.to <= a).pop();          // coming from another deck: the lift ride comes out of what they were doing
     if (prev && prev.to === a && prev.deck && seg.deck && prev.deck !== seg.deck && prev.to - prev.from > SCHED_COMMUTE) {
-      prev.to = a - SCHED_COMMUTE; cut.push({ from: a - SCHED_COMMUTE, to: a, act: 'commute', deck: seg.deck, type: 'lift', placeId: null, fromDeck: prev.deck });
+      prev.to = a - SCHED_COMMUTE; cut.push({ from: a - SCHED_COMMUTE, to: a, act: 'commute', deck: seg.deck, type: 'lift', placeId: null, fromDeck: prev.deck, ...(e.rideTag ? { tag: e.rideTag } : {}) });   // (rideTag: a crew story's cast on shift, on their round: ST1)
     }
     const next = cut.find(x => x.from >= b);                // and back afterwards: the ride comes out of what's next
     if (next && next.from === b && next.deck && seg.deck && next.deck !== seg.deck && next.act !== 'commute' && next.to - next.from > SCHED_COMMUTE) {
-      next.from = b + SCHED_COMMUTE; cut.push({ from: b, to: b + SCHED_COMMUTE, act: 'commute', deck: next.deck, type: 'lift', placeId: null, fromDeck: seg.deck });
+      next.from = b + SCHED_COMMUTE; cut.push({ from: b, to: b + SCHED_COMMUTE, act: 'commute', deck: next.deck, type: 'lift', placeId: null, fromDeck: seg.deck, ...(e.rideTag ? { tag: e.rideTag } : {}) });
     }
     cut.push(seg); cut.sort((x, y) => x.from - y.from); out = cut;
     if (pl && e.tag !== 'intro-seat') { if (!occ.has(pl.id)) occ.set(pl.id, []); occ.get(pl.id).push([a, b, p.id]); if (occ.who) (occ.who.get(p.id) || occ.who.set(p.id, []).get(p.id)).push([a, b, pl.id]); }
@@ -54838,7 +54838,7 @@ function storyPlanBeats(id, d) {
       add(m.who, span[0], 'leisure');
       const duty = q => q.shift === 'night' ? span[0] >= 1260 || span[0] < 360 : span[0] >= 480 && span[0] < 1020;   // on shift then, by their roster (Takahashi at comms through the dawn)
       for (const c of m.come || m.cast || []) { const q = schedPeople().find(x => x.id === c); if (q && !(q.work && q.work.deck === deck && duty(q))) add(c, span[0] + 5, duty(q) ? 'work' : 'leisure'); } } }   // come: who of the cast is brought (none: only its teller; Tomas at the Tern)
-  return (STORY_PLAN.get(id) || []).filter(x => x.day === d).map(x => ({ id: 'story-' + x.key.replace(':', '-'), at: x.at, until: x.until, where: { deck: x.deck, room: x.room }, act: x.act }));
+  return (STORY_PLAN.get(id) || []).filter(x => x.day === d).map(x => ({ id: 'story-' + x.key.replace(':', '-'), at: x.at, until: x.until, where: { deck: x.deck, room: x.room }, act: x.act, ...(x.act === 'work' ? { rideTag: 'round' } : {}) }));   // on shift: the lift up and back is their round (dayReport counts it as work)
 }
 function storyDoorOpen(now = shipNow()) {
   if (!STORIES2_ON) return false;
