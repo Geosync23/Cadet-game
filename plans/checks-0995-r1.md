@@ -12,7 +12,7 @@
 | arrows_check step6 asis / teachoff / track / skiptea | OK x4 | ARROWS CHECK OK (824 s, one run) |
 | arrows_check endstay | OK | ARROWS CHECK OK (962 s) |
 | arrows_pointer_check | OK | arrows_pointer_check: OK (247 s) |
-| player_check (alone) | running | (result to follow) |
+| player_check (alone) | OK | PLAYER CHECK OK (400 s) |
 | bubble_check | OK | BUBBLE CHECK OK (784 s) |
 | puzzle_check | **FAIL, NEW** (twice, the same) | cases were posted over Days 5-33 on paper: 0; p5's first: hidden: none |
 | social_check | OK | SOCIAL CHECK OK |
@@ -53,3 +53,7 @@ RV30's reading (sent to lead 48 and BM23): check fragility, not the engine. The 
 (0.99.4 passes on a single case), and p5's first depends on the machine state earlier parts leave (run alone, the
 candidate stages it and 0.99.4 doesn't); the sweep is identical. As the check stands it fails on every run of this
 build (it runs on paper, so the same each time), so it's reported as NEW; lead 48 and BM23 decide how it is cleared.
+
+**R1: FAIL on 0.99.5 (game 93aed54f): puzzle_check, NEW** (both of its FAIL lines, the same on every run; passes on
+OLD). Everything else in the share is OK: 17 of 18 lines, arrows_check default parts with the fixed check from
+cc18dad0, and player_check run alone with nothing else open.
