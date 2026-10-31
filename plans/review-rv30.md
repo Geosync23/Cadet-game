@@ -71,9 +71,11 @@ minute-people, nobody at 5-tea-3 or on the doorway, a way out every minute); scr
 health_tap 18/3: kept, no rebook. appt_views: "Sunrise stretch, with Captain Odile Marrow"; Calendar folds it into the
 tradition row. New: health_tap 28/6: the scene runs 14:28-14:56; Rina walks off at 14:38 (her place ends 14:30), 20 m away in
 the Washrooms while her lines play. Fix: crewHold('rina', null) for the scene, released in its onEnd (as storyHolds).
+Checks on 6c926f4: appt_check OK, device_check OK (intro_check running).
 Not blocking: Vance's 19:32 First Light Cocoa invite not folded into the 20:00 row (different minute).
 
 ### TB3 final 872fec0 (game fbf74a320ebf8d4a9c02f26db31ab209b7e0314287e515c0e9fe25d58c8a9420): still FIXES NEEDED (fix 1)
 Adds TR1 items 5 (TJ_ALL, stars), 8 (one notice), 4 (Off the Tern), 2 (milestones + MS995 stand-in words); seats-only tea
 dropped. cadet_test vs 8976965e alone ALL IDENTICAL (switch off). TB3's twotrads995, toast995, tern995, milestones995 OK.
 Spice code unchanged: fix 1 stands (sent to TB3 and lead; TB3 is handing over).
+TB3 872fec0 switch-on: stories_check 36 OK (incl. Tomas 8 across its booking's end).
