@@ -2,6 +2,7 @@
 
 - **Role:** jobs builder for lead 47 (session_014zyJYM4mt9ZDCD5H9JZDtN). Reviewer **RV28** (session_014zyJYQKwGvytfCGdrWMoiZ; lead 47's final word: RV28 had already started; RV29 was asked by mistake and told to disregard). SW4 (session_014zyJYNzWwbPhLN9wtKdEWj) polishes the stand-in words on a branch from c6dc9ac: answer its questions. My session: session_014zyJYMCGakWaNzvpk6S3h5.
 - **Branch:** `claude/p995-jobs` from claude/staging-0994 8976965e. Game commit **ec18eec**; game sha256 `ed43ee2cbbabe369bde2b864bafdb70859529caa41e6b85704852e315100d293`. Later commits: checks, design-doc, build-table row, this note. Sent to RV28 for review (waiting).
+- **Round 2 (RV28's FIXES NEEDED: W1 bake, F1 scanner job, J1 tour words):** fixed on this branch with SW4's words merged (build-table row 0.99.5-jb.2); re-review by **RV29** (session_014zyJYM3D7UBkZN49CsZVuA). Game sha256 ef0941da2c2cd5300d6b5d5278201ac60dba60490394fee6903861e93db37d04.
 - **Lead's decisions:** the 40-minute cap is on the work (holds + fetch + make), not the walk; turning in from the device is not in this patch (the lead offers it to the user separately). Morning rounds keep marks with a plain reading. Washer life 20 (crew too). P3/P9 cases left on washers. machine_check repairs-share band widened to 40-65% (option A).
 
 ## What I built (all in section 17's systems slot, the "JB2" block at its end, plus small edits)
