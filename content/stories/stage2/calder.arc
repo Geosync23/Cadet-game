@@ -107,7 +107,8 @@ where: Tea corner
 hint: Stay for the tea. All of it. Near the front.
 mem: welldone
 flag: calder.welldone
-calder: Four weeks. Mugs down a minute. Not you, Pell. You can hold yours.
+if here:pell | calder: Four weeks. Mugs down a minute. Not you, Pell. You can hold yours.
+if !here:pell | calder: Four weeks. Mugs down a minute.
 calder: I don't do this in front of people. You all know that. I'm doing it anyway.   [sigh]
 calder: My first chief wrote to me. Fenn. I answered her. Late. Four drafts.
 if mem:moment.calder.onesentence | calder: One true sentence first, then the rest. Someone told me that. It works.
