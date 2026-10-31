@@ -45925,9 +45925,9 @@ function tradLeader(e) {
 const tjFirst = id => { const p = schedPeople().find(q => q.id === id); if (!p) return id; const w = p.name.split(' '); return w.length === 2 && /^(Envoy|Speaker)$/.test(w[0]) ? w[1] : shortName(p); };   // a Veyli's title with one name ('Envoy Saruth'): the name, as the tips say (RV25, 0.96.0; shortName gives 'Envoy')   // section 14's: 'Dr. Sato', 'Chief Calder', 'Tomas' (reviewer R3, 0.70.3)
 const tjAgent = id => typeof DECK_CREW !== 'undefined' ? DECK_CREW.find(c => c.p && c.p.id === id) || null : null;
 // the tradition on now that you could join on this deck: { e, key, lead (id), agent } or null (once a ship minute)
-let TJ_NOW = null;
+let TJ_NOW = null, TJ_ALL = [];                        // TJ_ALL (0.99.5, TRAD995_ON): every joinable one on this deck now, each with its own marker
 function tradJoinMinute(now) {
-  TJ_NOW = null;
+  TJ_NOW = null; TJ_ALL = [];
   const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   for (const e of eventsOn(d)) {
     if (m < e.from || m >= e.to || !tradJoinable(e) || SHIP.events.joined.includes(e.id + '@' + d)) continue;
@@ -45939,8 +45939,10 @@ function tradJoinMinute(now) {
     if (ha && [...tradSpotIds(e)].some(id => { const sp = PLACE_OF.has(id) && placeSpot(id); return sp && Math.hypot(sp.x - ha.x, sp.z - ha.z) < 6; })) { lead = host; agent = ha; }
     if (!agent && P926_TRADS) { const gs = new Set(tradGoers(e).map(p => p.id)); agent = DECK_CREW.find(c => c.p && gs.has(c.p.id) && c.settled && c.spot && e.rooms.has(deckDef.num + '|' + c.spot.room)) || null; if (agent) lead = agent.p.id; }   // 0.92.6 item 8 (FX17): the leader's gone, anyone still at it leads, to its end
     if (!agent) continue;
-    TJ_NOW = { e, key: e.id + '@' + d, lead, agent }; break;
+    if (!TRAD995_ON) { TJ_NOW = { e, key: e.id + '@' + d, lead, agent }; break; }
+    TJ_ALL.push({ e, key: e.id + '@' + d, lead, agent });   // (0.99.5, TR1's item 5) not just the first: two on a deck (a Saturday on Deck 3) each get their star
   }
+  if (TRAD995_ON && TJ_ALL.length) { const at = deckDef.num + '|' + roomAt(...player.here()); TJ_NOW = TJ_ALL.find(c => c.e.rooms.has(at)) || TJ_ALL[0]; }   // the arrow and the tip: the one whose rooms you're in, else the first
   const g = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null;
   if (g && g.tj && (!TJ_NOW || g.tj !== TJ_NOW.key)) clearGoal();   // it ended, or you joined: the arrow at the leader goes
   if (!TJ_NOW) return;
@@ -45993,7 +45995,7 @@ function tradJoinTap(a) {
   if (EV_COMET_ON && COMET && cometTap(a)) return true;     // the comet: Saruth's knot; a Cadet at the Captain's tea sent to the bow lounge (slot 'Comet builder')
   if (EV_VESSEL_ON && VESSEL && vesselTap(a)) return true;  // the Veyli vessel: Calder's sheet, Taavek at the ramp or the bench (slot 'Vessel builder')
   const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
-  const o = eventOf(a.p, now), e = (o && o.now ? o.e : TJ_NOW && TJ_NOW.lead === a.p.id ? TJ_NOW.e : null) || (P926_APPT ? apptHostEvent(a, d) : null);   // 0.92.6 item 9: an appointment joined already, its host at work for it (RV17 R1)
+  const o = eventOf(a.p, now), tl = TJ_NOW && TJ_NOW.lead === a.p.id ? TJ_NOW : TRAD995_ON ? TJ_ALL.find(c => c.lead === a.p.id) : null, e = (o && o.now ? o.e : tl ? tl.e : null) || (P926_APPT ? apptHostEvent(a, d) : null);   // 0.92.6 item 9: an appointment joined already, its host at work for it (RV17 R1)
   if (e && e.id === 'tiles-ladder' && SHIP.events.joined.includes(e.id + '@' + d) && typeof tladAgain === 'function' && tladAgain(a)) return true;   // 0.92.5 item 20: watching, a tap asks for the next game
   if (!e || !tradJoinable(e) || m < e.from || m >= e.to) return false;
   if (SHIP.events.joined.includes(e.id + '@' + d)) return P926_APPT && !!e.ev.appt && apptRejoin(e, d, a);   // 0.92.6 item 9: an appointment's scene again after a reload (FX22b, Appointments builder slot)
@@ -46024,6 +46026,7 @@ function tradJoin(e, a) {
 // the marker over the leader's head (once a frame): a small badge, DOM only
 let TJ_MARK = null; const tjV = new THREE.Vector3();
 function tradJoinFrame() {
+  if (TRAD995_ON) tjMarks995();                         // (0.99.5) the others on this deck: their own stars (TB3's slot)
   const A = TJ_NOW && TJ_NOW.agent && DECK_CREW.includes(TJ_NOW.agent) ? TJ_NOW.agent : null;
   if (!A) { if (TJ_MARK) TJ_MARK.style.display = 'none'; return; }
   if (!TJ_MARK) {
@@ -48766,6 +48769,30 @@ if (TRAD995_ON) {
     nb.skipSpots = new Set([1, 2, 3, 4, 5, 7, 8, 10, 14, 15, 16].map(k => '5-works-bay-crowd-' + k));   // 16,1 16,2 17,2 15,0 17,0 14,1 18,1 18,0 13,2 13,0 19,0
   for (const pl of P5) if (/^5-beam-[2-8]$/.test(pl.id)) pl.face = Math.round(Math.atan2(X - pl.xy[0], Z - pl.xy[1]) * 180 / Math.PI);
   if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }
+}
+// ---- 0.99.5 TR1's item 5 (TB3, lead 47; behind TRAD995_ON): tradJoinMinute stopped at the first joinable tradition on
+// your deck, so a second one never got its star, arrow or tip, even with you in its room (every Saturday on Deck 3: Cook-along
+// or Jar day hid the Tiles ladder; Book circle hid Playlist duel). Now it keeps them all (TJ_ALL): the arrow and the tip are
+// the one whose rooms you're in (else the first, as before), each of the others has its own star over its leader (these,
+// the same badge as #tjMark, DOM only), and a tap on any of their leaders joins that one (tradJoinTap)
+const TJ_MARKS = [];
+function tjMarks995() {
+  const others = TJ_ALL.filter(c => c !== TJ_NOW && c.agent && DECK_CREW.includes(c.agent));
+  while (TJ_MARKS.length < others.length) {
+    if (!TJ_MARKS.length) { const st = document.createElement('style');
+      st.textContent = '.tjMark2{position:fixed;left:0;top:0;z-index:2;pointer-events:none;font:600 12px system-ui,sans-serif;color:#0b2a26;background:#5fd6c6;border-radius:999px;padding:2px 8px;box-shadow:0 1px 6px rgba(0,0,0,.4);white-space:nowrap}'
+        + '.tjMark2:after{content:"";position:absolute;left:50%;bottom:-5px;margin-left:-5px;border:5px solid transparent;border-bottom:0;border-top-color:#5fd6c6}';
+      document.head.appendChild(st); }
+    const el = document.createElement('div'); el.className = 'tjMark2'; el.style.display = 'none'; document.body.appendChild(el); TJ_MARKS.push(el);
+  }
+  TJ_MARKS.forEach((el, k) => {
+    const c = others[k]; if (!c) { el.style.display = 'none'; return; }
+    const A = c.agent, txt = '★ ' + tjFirst(c.lead); if (el.textContent !== txt) el.textContent = txt;
+    tjV.set(A.x, (A.y || 0) + (A.pose === 'sit' || /^sit/.test(A.pose || '') ? 1.55 : 2.1), A.z).project(camera);
+    const vis = tjV.z < 1 && Math.abs(tjV.x) < 1.05 && Math.abs(tjV.y) < 1.05;
+    el.style.display = vis ? 'block' : 'none';
+    if (vis) el.style.transform = 'translate(' + Math.round((tjV.x + 1) * innerWidth / 2) + 'px,' + Math.round((1 - tjV.y) * innerHeight / 2 - 6) + 'px) translate(-50%,-100%)';
+  });
 }
 // ---- end of slot: Traditions engineer ----
 // ---- slot: Events engineer 2 (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----
