@@ -44,5 +44,6 @@ Read TB3's note first: plans/handover-tb3.md (everything behind TRAD995_ON, its 
 - Cross-session messages can arrive late (the lead's 12:21 redirect reached me at 13:05): check notifications before pushing.
 
 ## Open
-- Waiting for RV30's verdict on b7af35a.
+- RV30 PASS b7af35a (14:41 UTC; held card 90 s: reveals 19:07-19:11; normal pace: none while the card is open; seat notice
+  names 19:15), sent to the lead and BM23 for the next 0.99.x.
 - TB5-1 needs a planner/sim seat. TB3-1 and TB3-2 still open (see TB3's note).
