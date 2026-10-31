@@ -112,3 +112,6 @@ On 4037a26: wait capped at e.to - 8; no guesses once the reveal is due; seat toa
 spice995_paced (TB5) never/hold 90 s: reveals 19:07-19:11; reload OK. spice_paced pace 5: none while open. names OK.
 Test merge with 52ea327: clean, file 37d8c3aa98dc801bd9eed2c2f18cfebd89ac4b698c106fe7d8e35ef0a62a6a25. Sent to TB5, lead, BM23.
 Queue empty.
+
+### BM23 sound_check r3mess edit (0.99.5 candidate, MESS_SCALE on by the user's pick): PASS with a change
+3 am: expect the scene only when M.at(n).voices > 0 (not n == 0: you + one crew also gives none); at(0) compare without level, level == 0. Off: unchanged.
