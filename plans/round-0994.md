@@ -18,7 +18,7 @@ plans/checks-0994-rN.md on your own branch claude/checks-0994-rN. Known old: bac
 | R2 | fresh | intro_check (whole), perf_check BUILD OLD, cadet_test OLD BUILD, path, arc, lines, lines --day, p926, day_check 0, 1, 5, 7, 21, 22, weekend, arrows endgo |
 | R3 | fresh | controller_check (every part but reach; long: split into background scripts under 90 min), sound_check, promo_sight, arrows_d, arrows_f, ending_check; devmode_check (all parts), dev_arrow_check |
 | R4 | fresh | interactions_check (whole, alone, no time limit), career, appt, saves, title_check, day_check 6, 8, 23, 24 |
-| R5 | BM22 | check_fast.sh, machine x2, mech, bigevents, fridays, events, disc, tiles, join, food (1 7, 11 4), clothes, stories, promo_beats, day_check 12, 13, 16, 17, 18, 19, 27 |
+| R5 | BM22 | check_fast.sh, machine x2, mech, bigevents, fridays, events, disc, tiles, join, food (1 7, 11 4), clothes, stories (36 days: `stories_check.py <file> 36`; the 30-day default ends before Calder's Day 27-30 beats and fails 14),  promo_beats, day_check 12, 13, 16, 17, 18, 19, 27 |
 
 Not in the gate: controller_check reach (non-blocking extra).
 Whoever finishes early offers to take a check from the slowest share (agree it, copy the lead, never twice).
