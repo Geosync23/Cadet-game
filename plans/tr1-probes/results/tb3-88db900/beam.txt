@@ -1,0 +1,8 @@
+geometry {"i0":10,"nameWorldX":-7.02,"nameSpan":[-7.62,-6.42],"paintAt":[-7.02,-7.25],"watchers":["5-beam-1@-7.02,-7.25","5-beam-2@-2.50,-3.50","5-beam-3@-1.50,-3.50","5-beam-4@-9.50,-3.50","5-beam-5@-10.50,-3.50","5-beam-6@-8.50,-3.50","5-beam-7@-9.50,-4.50","5-beam-8@-8.50,-4.50"]}
+you in room w
+{'m': 1023, 'on': False, 'act': None, 'ready': False, 'at': [], 'name': False}
+{'m': 1032, 'on': False, 'act': None, 'ready': False, 'at': [], 'name': False}
+paint tap -> True
+{'m': 1041, 'on': False, 'act': 'tj:name-on-the-beam', 'ready': True, 'at': [], 'name': False}
+name up at 1045 you at [-7.5,-7.5]
+errors []

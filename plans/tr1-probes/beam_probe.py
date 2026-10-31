@@ -9,8 +9,8 @@ GEO = """JSON.stringify((() => { const r = ROOM_BOX['w'], nameX = X0(r.i0) + BEA
     watchers: DECKS[5].places.filter(p => /^5-beam-/.test(p.id)).map(p => { const s = placeSpot(p.id); return p.id + '@' + (s ? s.x.toFixed(2) + ',' + s.z.toFixed(2) : '?'); }) }; })())"""
 with sync_playwright() as pw:
     g = Game(pw, build, 390, 844)
-    g.ev("(() => { skipTo(17 * 60 + 2); goToDeck(5, null); SHIP.device.settings.tips = false; const sp = placeSpot('5-beam-4'); player.obj.position.set(sp.x, 0, sp.z + 1.5); player.stop(); })()")
-    g.step(10); print('geometry', g.ev(GEO))
+    g.ev("(() => { skipTo(17 * 60 + 2); goToDeck(5, null); SHIP.device.settings.tips = false; const sp = placeSpot('5-beam-1'); player.obj.position.set(sp.x + 1, 0, sp.z + 2); player.stop(); })()")
+    g.step(10); print('geometry', g.ev(GEO)); print('you in room', g.ev('roomAt(...player.here())'))
     painted = None
     for k in range(400):
         g.step(30)
