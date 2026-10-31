@@ -7,12 +7,13 @@ import sys, json
 sys.argv, ARGS = sys.argv[:1], sys.argv[1:]
 exec(open("/home/user/cadet-game/cadet_test.py").read().split("a, shots = run(")[0].replace("timeout=60000", "timeout=240000"))
 build, shard, nsh = ARGS[0], int(ARGS[1]), int(ARGS[2]); ONLY = ARGS[3:]
+LO, HI = [int(x) for x in os.environ.get('TR1_DAYS', '1-35').split('-')]   # the days to look in (first showing of each)
 SAYH = """(() => { window.__said = []; window.__cards = []; window.__toasts = []; if (window.__hook) return; window.__hook = 1;
   const bs = bubbleSay; bubbleSay = function (who, text) { window.__said.push([Math.round(SHIP.time.min), who && (who.p ? who.p.id : who.id || (who.a && who.a.p && who.a.p.id)) || '?', String(text).slice(0, 90)]); return bs.apply(this, arguments); };
   const ds = dialogueShow; dialogueShow = function (id) { window.__cards.push([Math.round(SHIP.time.min), id]); return ds.apply(this, arguments); };
   const ts = toast; toast = function (a, b) { window.__toasts.push([Math.round(SHIP.time.min), a, String(b).slice(0, 100)]); return ts.apply(this, arguments); }; SHIP.device.settings.tips = true; })()"""
 PLAN = """JSON.stringify((() => { const out = [];
-  const seen = {}; for (let d = 1; d <= 35; d++) for (const e of eventsOn(d)) { if (!seen[e.id] || (seen[e.id].d === 1 && d > 1)) seen[e.id] = { d, from: e.from, to: e.to }; }
+  const seen = {}; for (let d = %d; d <= %d; d++) for (const e of eventsOn(d)) { if (!seen[e.id] || (seen[e.id].d === 1 && d > 1)) seen[e.id] = { d, from: e.from, to: e.to }; }
   for (const [id, o] of Object.entries(seen)) out.push([id, o.d, o.from, o.to]); return out.sort(); })())"""
 LOOK = """JSON.stringify((() => { const d = %d, e = eventsOn(d).find(x => x.id === '%s'); if (!e) return { gone: 1, m: SHIP.time.min };
   if (!e.rooms) e.rooms = eventRooms(e.ev); const ids = tradSpotIds(e);
@@ -42,7 +43,7 @@ def mins(g, until, every=30, cap=900):
         g.step(every); x = json.loads(g.ev("JSON.stringify(SHIP.time.min)"))
         if x >= until: break
 with sync_playwright() as pw:
-    g = Game(pw, build, 600, 500); plan = json.loads(g.ev(PLAN)); g.close()
+    g = Game(pw, build, 600, 500); plan = json.loads(g.ev(PLAN % (LO, HI))); g.close()
     plan = [p for p in plan if (not ONLY or p[0] in ONLY)]
     plan = [p for k, p in enumerate(plan) if k % nsh == shard]
     for tid, d, fr, to in plan:

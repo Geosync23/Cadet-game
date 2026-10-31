@@ -1,0 +1,43 @@
+== Day 9 weekday 1 player at [2.5, -5.5]
+  1090.7999999999993 tj None mark False brennan ['3-galley-5', False, 'cook', None] joined False tagged 8 goal None
+  on True 1095 1155 joinable True goers 25 ['marrow', 'rina', 'nandakumar', 'ferreira', 'oduya', 'mensah', 'janssen-hugo', 'navarro-mateo', 'halloran-emeka', 'reyes-alejandro', 'torres-zeke', 'achterberg-lars', 'dahl-mira', 'cruz-tove', 'bakshi-sol', 'tran-chloe', 'rahman-farah', 'quist-ilse', 'keane-davi', 'jovanovic-petra', 'salo-saad', 'vasquez-uma', 'madsen-ivo', 'varga-tariq', 'dlamini-lukas']
+  1091.3999999999987 tj None mark False brennan ['3-galley-5', True, 'cook', None] joined False tagged 8 goal None
+  1092.5999999999976 tj None mark False brennan ['3-galley-5', True, 'cook', None] joined False tagged 9 goal None
+  1094.399999999996 tj None mark False brennan ['3-galley-5', True, 'cook', None] joined False tagged 10 goal None
+  1095.599999999995 tj ['spice-shelf-supper@9', 'brennan'] mark False brennan ['3-galley-5', True, 'cook', None] joined False tagged 11 goal Tap Chef Brennan to guess the spices
+  1097.3999999999933 tj ['spice-shelf-supper@9', 'brennan'] mark False brennan ['3-galley-5', True, 'cook', None] joined False tagged 12 goal Tap Chef Brennan to guess the spices
+  1098.5999999999922 tj ['spice-shelf-supper@9', 'brennan'] mark False brennan ['3-galley-5', True, 'cook', None] joined False tagged 14 goal Tap Chef Brennan to guess the spices
+  1099.1999999999916 tj ['spice-shelf-supper@9', 'brennan'] mark False brennan ['3-galley-5', True, 'cook', None] joined False tagged 15 goal Tap Chef Brennan to guess the spices
+  1101.5999999999894 tj ['spice-shelf-supper@9', 'brennan'] mark False brennan ['3-galley-5', True, 'cook', None] joined False tagged 17 goal Tap Chef Brennan to guess the spices
+  1102.199999999989 tj ['spice-shelf-supper@9', 'brennan'] mark False brennan ['3-galley-5', True, 'cook', None] joined False tagged 18 goal Tap Chef Brennan to guess the spices
+  1103.3999999999878 tj ['spice-shelf-supper@9', 'brennan'] mark False brennan ['3-galley-5', True, 'cook', None] joined False tagged 19 goal Tap Chef Brennan to guess the spices
+  1105.1999999999862 tj ['spice-shelf-supper@9', 'brennan'] mark False brennan ['3-galley-5', True, 'cook', None] joined False tagged 21 goal Tap Chef Brennan to guess the spices
+  1108.1999999999834 tj ['spice-shelf-supper@9', 'brennan'] mark False brennan ['3-galley-5', True, 'cook', None] joined False tagged 22 goal Tap Chef Brennan to guess the spices
+  1109.3999999999824 tj ['spice-shelf-supper@9', 'brennan'] mark False brennan ['3-spice-host', False, None, None] joined False tagged 22 goal Tap Chef Brennan to guess the spices
+  1110.5999999999813 tj ['spice-shelf-supper@9', 'brennan'] mark False brennan ['3-spice-host', False, None, None] joined False tagged 23 goal Tap Chef Brennan to guess the spices
+  1111.1999999999807 tj ['spice-shelf-supper@9', 'brennan'] mark False brennan ['3-spice-host', False, None, None] joined False tagged 24 goal Tap Chef Brennan to guess the spices
+  1111.7999999999802 tj ['spice-shelf-supper@9', 'brennan'] mark True brennan ['3-spice-host', False, None, None] joined False tagged 24 goal Tap Chef Brennan to guess the spices
+  1114.7999999999774 tj ['spice-shelf-supper@9', 'brennan'] mark False brennan ['3-spice-host', False, None, None] joined False tagged 24 goal Tap Chef Brennan to guess the spices
+  1117.1999999999753 tj ['spice-shelf-supper@9', 'brennan'] mark False brennan ['3-spice-host', False, None, None] joined False tagged 25 goal Tap Chef Brennan to guess the spices
+  1117.7999999999747 tj ['spice-shelf-supper@9', 'brennan'] mark False brennan ['3-spice-host', True, None, None] joined False tagged 25 goal Tap Chef Brennan to guess the spices
+  18:40 tap on Brennan -> tradJoinTap [True, False] settled at the mess: ['rina@3-mess-13', 'nandakumar@3-mess-34', 'ferreira@3-mess-33', 'mensah@3-mess-24', 'janssen-hugo@3-mess-16', 'navarro-mateo@3-mess-30', 'halloran-emeka@3-mess-12', 'reyes-alejandro@3-mess-32', 'torres-zeke@3-mess-38', 'achterberg-lars@3-mess-23', 'dahl-mira@3-mess-4', 'cruz-tove@3-mess-1', 'bakshi-sol@3-mess-15', 'tran-chloe@3-mess-39', 'rahman-farah@3-mess-36', 'quist-ilse@3-mess-22', 'keane-davi@3-mess-44', 'jovanovic-petra@3-mess-19', 'salo-saad@3-mess-3', 'vasquez-uma@3-mess-6', 'madsen-ivo@3-mess-27', 'varga-tariq@3-mess-35', 'dlamini-lukas@3-mess-17', 'marrow@3-mess-43', 'oduya@3-mess-14']
+  1120.799999999972 tj ['spice-shelf-supper@9', 'brennan'] mark False brennan ['3-spice-host', True, None, None] joined True tagged 25 goal None
+  1121.3999999999714 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 25 goal None
+  1121.999999999971 tj None mark False brennan [None, False, None, None] joined True tagged 25 goal None
+  1128.599999999965 tj None mark False brennan [None, False, None, None] joined True tagged 24 goal None
+  1131.5999999999622 tj None mark False brennan [None, False, None, None] joined True tagged 23 goal None
+  1137.5999999999567 tj None mark False brennan [None, False, None, None] joined True tagged 22 goal None
+  1141.1999999999534 tj None mark False brennan [None, False, None, None] joined True tagged 21 goal None
+  1142.3999999999523 tj None mark False brennan ['3-galley-1', False, 'cook', None] joined True tagged 18 goal None
+  1143.5999999999513 tj None mark False brennan ['3-galley-1', False, 'cook', None] joined True tagged 17 goal None
+  1144.1999999999507 tj None mark False brennan ['3-galley-1', False, 'cook', None] joined True tagged 13 goal None
+  1145.3999999999496 tj None mark False brennan ['3-galley-1', False, 'cook', None] joined True tagged 12 goal None
+  1146.5999999999485 tj None mark False brennan ['3-galley-1', False, 'cook', None] joined True tagged 11 goal None
+  1147.199999999948 tj None mark False brennan ['3-galley-1', False, 'cook', None] joined True tagged 9 goal None
+  1148.3999999999469 tj None mark False brennan ['3-galley-1', False, 'cook', None] joined True tagged 8 goal None
+  1149.5999999999458 tj None mark False brennan ['3-galley-1', False, 'cook', None] joined True tagged 3 goal None
+  1150.1999999999452 tj None mark False brennan ['3-galley-1', False, 'cook', None] joined True tagged 2 goal None
+  cards [[1133.0199999999609, 'spice.guess']]
+  toasts [[1091.4799999999987, "The Captain's Friday address", "You missed the Captain's address. Her words are in your Mail."], [1092.9999999999973, 'Your device', '6 new messages. Open your device to read them.'], [1101.1599999999899, 'Very hungry', 'Starving: tasks are 15% slower. Eat something. The grab shelf in the mess, Deck 3, is always open.'], [1109.3399999999824, 'Exhausted', 'Exhausted. Get to your bunk, Bunk 1 on Deck 4, and sleep it off.'], [1117.479999999975, 'Really need a shower', "You really need a shower. Chats do half the good till you've had one. Junior wing, Deck 4."], [1120.1999999999725, 'Spice shelf supper', 'Spice shelf supper: sit down to supper and guess whose spices. Social and leisure up.'], [1128.1599999999653, 'Spice shelf supper', 'Spice shelf supper: sit down to supper and guess whose spices. Social and leisure up. About 46 minutes; walk away to sto'], [1140.579999999954, 'Your device', 'New mail from Stores: Food stores low.']]
+  bubbles 10 [[1117.7399999999748, 'brennan', 'Three jars off the shelf tonight, loves. Taste, guess whose, and no peeking at labels.'], [1117.7399999999748, 'brennan', 'Rice with turmeric. Go gently with it, loves. Then tell me whose it is.'], [1117.7399999999748, 'rina', "That's Dr. Nandakumar's. Has to be."], [1119.5399999999731, 'nandakumar', "I'd say Hugo. Look at that face."], [1121.819999999971, 'ferreira', "Alejandro, surely. Too tidy to be anyone else's."], [1124.5799999999685, 'mensah', "Is it Elif's? It tastes like Elif."], [1126.379999999967, 'janssen-hugo', "Bet you a biscuit it's Femi's."], [1128.6599999999648, 'navarro-mateo', 'Zainab. Final answer. Probably.'], [1131.4399999999623, 'halloran-emeka', 'Not Asha. Definitely not Asha. Maybe Asha.'], [1133.2599999999607, 'reyes-alejandro', 'Whoever it is, I want more of it.']]
+  errors []

@@ -1,7 +1,7 @@
 # TR1: every tradition / event seen on Days 1-N on paper: first days, time, rooms, goers, host, joinable, leader
 import sys, json
 sys.argv, ARGS = sys.argv[:1], sys.argv[1:]
-exec(open('/home/user/cadet-game/cadet_test.py').read().split("a, shots = run(")[0])
+exec(open("/home/user/cadet-game/cadet_test.py").read().split("a, shots = run(")[0].replace("timeout=60000", "timeout=240000"))
 build = ARGS[0]; N = int(ARGS[1]) if len(ARGS) > 1 else 35
 with sync_playwright() as pw:
     g = Game(pw, build, 600, 500)
