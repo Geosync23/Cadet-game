@@ -35,6 +35,12 @@ Fixes:
    SND_LONG did nothing would pass. Count gain moves in the past as well (stall_real.py: off 1604, on 0) and require the off
    run to show some when the build has it off.
 
+### Re-review: PASS claude/p995-sound ec312a9 (game ff19f794116a7a7ab2eebf00f39e404bea8781ed94d6f98a756449a8dbc0a8ad)
+Fixes 1-3 in, plus SND_BUF_ON (off, latencyHint 'playback'). sound_check hide|long|buf|mess_scale OK (long off [37, 27, 84,
+42], on [0, 0, 0, 0]; buf latency 0.042 -> 0.095 s; hide while resuming: suspended); hide_loop race 2: suspended; stall_real
+on 0/0; names OK; cadet_test vs 8976965e ALL IDENTICAL. Not blocking: a time-of-day change within ~2 s of a section end
+can still let up to 2 s of already-queued bars run past it. Sent to SD5, lead, BM22.
+
 ## OB2 onboarding + appointments, claude/p995-onboarding 82e9cc5 (game 842b5ff5...0688): FIXES NEEDED (early, sent)
 
 Passing so far: cadet_test vs 8976965e alone ALL IDENTICAL; names_check OK; lines_check PASS; tip words (note 1) have no
