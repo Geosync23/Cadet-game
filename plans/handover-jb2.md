@@ -1,7 +1,7 @@
 # Handover: JB2 (patch 0.99.5, the user's notes 14, 15, 18: jobs)
 
-- **Role:** jobs builder for lead 47 (session_014zyJYM4mt9ZDCD5H9JZDtN). Reviewer RV28 (session_014zyJYQKwGvytfCGdrWMoiZ). My session: session_014zyJYMCGakWaNzvpk6S3h5.
-- **Branch:** `claude/p995-jobs` from claude/staging-0994 8976965e. Game commit **ec18eec**; game sha256 `ed43ee2cbbabe369bde2b864bafdb70859529caa41e6b85704852e315100d293`. Later commits: checks, design-doc, build-table row, this note. Sent to RV28 for review (waiting).
+- **Role:** jobs builder for lead 47 (session_014zyJYM4mt9ZDCD5H9JZDtN). Reviewer **RV29** (session_014zyJYM3D7UBkZN49CsZVuA; RV28 was asked by mistake and told to disregard). SW4 (session_014zyJYNzWwbPhLN9wtKdEWj) polishes the stand-in words on a branch from c6dc9ac: answer its questions. My session: session_014zyJYMCGakWaNzvpk6S3h5.
+- **Branch:** `claude/p995-jobs` from claude/staging-0994 8976965e. Game commit **ec18eec**; game sha256 `ed43ee2cbbabe369bde2b864bafdb70859529caa41e6b85704852e315100d293`. Later commits: checks, design-doc, build-table row, this note. Sent to RV29 for review (waiting).
 - **Lead's decisions:** the 40-minute cap is on the work (holds + fetch + make), not the walk; turning in from the device is not in this patch (the lead offers it to the user separately). Morning rounds keep marks with a plain reading. Washer life 20 (crew too). P3/P9 cases left on washers. machine_check repairs-share band widened to 40-65% (option A).
 
 ## What I built (all in section 17's systems slot, the "JB2" block at its end, plus small edits)
