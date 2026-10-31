@@ -102,3 +102,13 @@ Base: claude/integration 57eceec4 = 0.99.3, game sha256 04c821fe...c2a9 (verifie
   code. save_v1.py (the part's first steps alone): 8976965e and 0.99.3 both load the v 1 save right, no errors. Suspect
   player_check's fixed tmp name WORK/test/_save_check.html (line 1630) shared by two runs at once. Whole player_check alone running.
 - player_check whole on 8976965e alone: PLAYER CHECK OK (v 1 / v 2 saves load right; log plans/rv28-probes/player_8976965e.log). R3: devmode_check rerun OK x3 on the candidate.
+
+# JB2 claude/p995-jobs c6dc9ac (game commit ec18eec; game ed43ee2c...d293, verified), from staging-0994 8976965e
+Patch 0.99.5 notes 14, 15, 18. Switches JOBCAP_ON, SPREAD_ON, CHECKS_ON (section 17's systems slot), all on.
+- Code read: jobCapMins / jobCapMake (your minutes only; the crew's untouched); washer life 20 at load (no R()); choreNoWasher;
+  fixScanMachine returns a machine id: jobReserve takes one (machineById(kind) first). boardSpread reads SHIP.jobs (your done
+  jobs) for your board only, never the planner. Check points: 'chk:' ids in j.route; every route reader is safe:
+  roundState -> 'healthy' (so crews' roundDone finds nothing), machineFound needs a machine, 17132's arrow falls to the
+  kind's goal ("Check {thing}"), roundDoor and stage 2 picks look up machines first. schedU keys 1995-1997 new.
+- Words: the tour talk is in Zeke's voice; its one shared line with the old talk can't play twice (old one only with
+  CHECKS_ON off). No deck numbers in the new lines (the old 'Afternoon round, Deck {deck}' titles are as before).
