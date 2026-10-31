@@ -1,6 +1,6 @@
 # Handover: RV29 (second reviewer, patch 0.99.5; lead 47)
 
-Session session_014zyJYM3D7UBkZN49CsZVuA. Lead 47 session_014zyJYM4mt9ZDCD5H9JZDtN. Build master BM22
+Session session_014zyJYM3D7UBkZN49CsZVuA. Lead 48 session_014zyJYMuqdRYh4dQhmVPr8S (from ~19:13 UTC; was lead 47 session_014zyJYM4mt9ZDCD5H9JZDtN). Build master for 0.99.5: BM23 session_014zyJYPpetpQqNvn9pkGrig. Build master BM22
 session_014zyJYNgBPdEPHLxTGrM889. Branch claude/review-rv29: notes only (plans/review-rv29.md, probes in plans/rv29-probes/).
 
 ## State (2026-10-31 ~12:55 UTC): queue empty, all PASS, sent to builders, lead and BM22
