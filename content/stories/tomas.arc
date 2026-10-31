@@ -93,8 +93,8 @@ them: My name, in Holt's pencil. I'm not rubbing it out. Nobody's rubbing it out
 // CRESCENDO rides on: Off the Tern (trad off-the-tern), the shuttle bay as the ramp opens, 17:35-17:55; day: 21; cast: bramwell-basil torres-zeke holt; quiet ending: beat 9
 // Holt is off duty on Sundays and Tomas asked him; if Holt can't come, his two lines drop and Tomas's "if !here:holt"
 // line plays. Basil's beat 1 (bramwell.arc) can follow at the same gathering; nothing here says what his says.
-// If the builders join Theo's send-off to the same Tern (Theo up the ramp as Basil comes down), the two
-// "if here:teague-theo" lines play; otherwise they never do. Theo's line keeps Basil's beat 2 (the doodle) a surprise.
+// Lead 47 (2026-10-31): its own scene at 17:35, paired on purpose with Theo's send-off at 14:30 the same afternoon
+// (a goodbye, then a hello). Tomas's one nod to Theo says nothing of Basil's berth, so Basil's beat 2 doodle stays a surprise.
 tone: resolution
 gapDays: 0
 where: Shuttle bay
@@ -114,8 +114,7 @@ if mem:moment.tomas.bigletters | them: WELCOME TO THE WREN, BASIL. You can read 
 if mem:moment.tomas.rehearse | them: I've practised. You were a very good Basil. Better at it than I am at being me.   [laugh]
 if here:holt | holt: Lind. Feet apart. Shoulders down. You're greeting a cadet, not holding an airlock.
 if here:torres-zeke | torres-zeke: Ramp's opening. Coil three always hums before a big push, Tomas. Hum if it helps.
-if here:teague-theo | teague-theo: Oi, new one. Mind the shelf in your berth. It's lucky. Don't ask. That's me, gone.   [gesture]
-if here:teague-theo | them: Bye, Theo! Hello, Basil! Bye, Theo! Sorry. Busy ramp.   [laugh]
+them: Theo went up this ramp this afternoon. Now somebody's coming down it. Busy ramp. I waved at Theo too early, as well.   [sigh]
 bramwell-basil: Is that for me? Is that my name? Is that glitter? It's glitter. Hello!   [laugh]
 them: Hello! Welcome to the Wren. I'm Tomas. I'm Watch. You're not lost. That was the main bit. The rest is extra.
 them > bramwell-basil: When I came down this ramp, nobody was at the bottom. So I wanted somebody to be. Today it's lots of somebodies.
@@ -137,7 +136,8 @@ them > you: Here. Hold the sign. I need both hands for pointing. Keep it, actual
 
 == beat 9
 // QUIET ENDING for beat 8: plays only if beat 8 was missed (Basil came off the Tern anyway, and Tomas met him). It
-// stands on its own: it reads true even if beats 5-7 ran out of days before the Tern.
+// stands on its own: it reads true even if beats 5-7 ran out of days before the Tern. No time of day: it needn't take
+// the comet's evening or your night-shift evenings (Days 22-24).
 tone: light
 gapDays: 0
 where: calm
@@ -162,12 +162,13 @@ them: He said I sat the next one an hour early, shirt pressed. He knew. Every da
 them: Here. The sign. Keep it for me. I know the way now. That's a funny thing to say out loud.
 
 == beat 10
-// AFTERGLOW: plays after beat 8 or its quiet ending (beat 9), a couple of days on
+// AFTERGLOW: plays after beat 8 or its quiet ending (beat 9), from Day 25 (Day 22 is the comet, Days 22-24 your
+// night shifts, lead 47)
 tone: light
 gapDays: 2
 where: calm
 follows: 8|9
-when: day:23- time:evening|night
+when: day:25- time:evening|night
 hint: Come and look out with me? I want to tell you something. A good something.
 mem: twoskies
 learn: Tomas closed the posting near home. The Wren is home too now, he says. Basil asks him the way, and he knows it.
