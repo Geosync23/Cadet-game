@@ -47,7 +47,7 @@ hint: Night shift. Come and see the real ship. Quietly.
 mem: night
 them: Evening, or near enough. Your first night shift. Welcome to the real ship.
 them: The day shift think they run her. They're visitors. Very polite ones. They leave at five.
-them: Listen. That's the air on Deck 2. That tick's the hull cooling. That's the night helm's kettle.
+them: Listen. That's the air coming up from below. That tick's the hull cooling. That's the night helm's kettle.
 them: A few of us on the bridge, a doctor, the Watch, the engines. That's the whole night. You learn the footsteps.
 them: My father would like it up here. He keeps a beacon. Marra Station, at the edge. Thirty years.
 them: Never mind. Your job: the log, on the hour, every hour. Then leave the quiet alone. It's earned it.
