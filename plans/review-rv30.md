@@ -127,3 +127,11 @@ the walker joins at 18:17 and moves on (arrow_walk.py ... 2 18:05 19:10 [realtap
 (2) oj-d3gym-locker (stop 3-gym-1, a treadmill): a real floor tap starts ixStop at 09:30/13:00/19:30 (odd_gym.py); the walker taps
 "Treadmills" -> ACT gym, not in its held-job act list (arrow_walk.py with AW_PRE=aw_pre_gym.js). Fix: add gym to that list.
 Game note (not blocking): the locker job's stop is a treadmill. Sent to lead 48, BM23, R1.
+
+## arrows fix: claude/p995-arrows-fix cc18dad0 (check only): week OK on e00bfabd and 0.99.4 596712bc. Sent to lead 48, BM23, R1.
+
+## Round FAIL triage: puzzle_check on e00bfabd: both CHECK fragility
+(1) paper Days 5-33: sweep identical on both builds (397); paper offers 10 -> 1 case (0.99.4) vs 6 -> 0 (0.99.5, note 15's
+washers at 20 days = fewer repairs). Real game: a case opens Day 18 09:00 on both (p5_real.py). Fix: check offers, not rolls.
+(2) p5's first: state left by earlier parts; alone the candidate stages it, 0.99.4 doesn't (p5_first.py). Fix: P5FIRST resets
+every machine on the pump's line. Backlog: p5Stage gives up forever after one failed solve (both builds).
