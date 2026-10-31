@@ -416,7 +416,7 @@ with sync_playwright() as pw:
     check(r['pack'] and r['pack']['small'], 'no small talk once everything is used')
     said = [x[1] for x in r['steps']]
     check(r['pack'] and all(sum(l in x for x in said) == 1 for l in r['pack']['lines']), 'a small talk line said twice in one talk')
-    check(not r.get('asked') and all(x[2][:1] == ['Stop'] for x in r['steps'] if x[0] < 15), 'small talk asked a question or showed reply buttons')
+    check(not r.get('asked') and all(x[2][:1] == ['Stop'] for x in r['steps'][:-1] if x[0] < 15), 'small talk asked a question or showed reply buttons')   # [:-1]: since 0.99.5 (PL2, note 12) a talk ends on its goodbye, before 15 when it has said everything
     shot('talk-small')
     for e in errors2: fail(f'page error: {e}')
     g.close()

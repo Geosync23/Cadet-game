@@ -590,7 +590,7 @@ with sync_playwright() as pw:
       fresh(10); card(); chatDo('talk'); o.talking = got.slice(); const T = CHAT.talk;
       for (let k = 1; k <= 60 && !T.end; k++) { setShipNow((10 - 1) * 1440 + 720 + k * .5); talkStep(CHAT); if (T.ask) { o.ask = [T.mins, got.slice()]; chatDo('reply:' + talkSuits(tomas)); } }
       o.full = [T.end, Math.round(r.pts * 10) / 10, Math.round(n.social - 40), card().slice(0, 2)];
-      fresh(11); card(); chatDo('talk'); for (let k = 1; k <= 12; k++) { setShipNow((11 - 1) * 1440 + 720 + k * .5); talkStep(CHAT); } chatDo('talk-stop'); o.stop = [CHAT.talk.end, Math.round(r.pts * 10) / 10];
+      fresh(11); card(); chatDo('talk'); for (let k = 1; k <= 12; k++) { setShipNow((11 - 1) * 1440 + 720 + k * .5); talkStep(CHAT); } chatDo('talk-stop'); o.stop = [CHAT.talk.end, Math.round(r.pts * 10) / 10, Math.floor((CHAT.talk.u != null ? CHAT.talk.u : CHAT.talk.mins) / TALK_EVERY)];   /* [2]: friendship points earned by then (0.99.5, PL2 note 12: a talk's points come over its real length) */
       const S = JSON.stringify(socSave()); socLoad(JSON.parse(S)); o.saved = SHIP.rel.tomas.talkDay === 11;
       const sh = planDay(tomas, 12).find(x => x.act === 'work'); o.go = sh ? [socMustGo(tomas, sh.from - 5), socMustGo(tomas, sh.from - 40)] : null;
       chatClose(); CHAT_SKIN.draw = dr; n.social = s0; if (l0 !== undefined) n.leisure = l0; setShipNow(t0); socLoad(JSON.parse(keep)); return o; })()""")
@@ -600,7 +600,7 @@ with sync_playwright() as pw:
         if tk['buttons'] != ['Say hello', 'Talk a while'] or abs(tk['hello'] - m) > .15 or tk['helloAgain'] != 'Said hello today': fail(f'Say hello wrong: {tk}')
         if tk['talking'] != ['Stop'] or not tk.get('ask') or len(tk['ask'][1]) != 3 or not (6.5 <= tk['ask'][0] <= 7.5): fail(f'Talk a while meter or reply wrong: {tk}')
         if tk['full'][0] != 'full' or abs(tk['full'][1] - 5 * m * tk['fg']) > .6 or abs(tk['full'][2] - (30 + tk['cg']) * sg) > 1.5 or tk['full'][3] != ['Said hello today', 'Talked today']: fail(f'a full talk wrong: {tk}')
-        if tk['stop'][0] != 'stop' or abs(tk['stop'][1] - m) > .15 or not tk['saved']: fail(f'Stop or the save wrong: {tk}')
+        if tk['stop'][0] != 'stop' or tk['stop'][2] < 1 or abs(tk['stop'][1] - m * tk['stop'][2]) > .15 or not tk['saved']: fail(f'Stop or the save wrong: {tk}')
         if tk['go'] and (not tk['go'][0] or tk['go'][0].get('why') != 'shift' or tk['go'][1]): fail(f'got-to-go before a shift wrong: {tk}')
 
     # 18. small seams (0.36.68): the roster's short theme fields through socialFill ("" is none); the hour of the day on Day 0; one unclaimed-job dip a department a week (0.36.71)
