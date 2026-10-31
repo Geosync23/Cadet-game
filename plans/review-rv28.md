@@ -95,3 +95,6 @@ Base: claude/integration 57eceec4 = 0.99.3, game sha256 04c821fe...c2a9 (verifie
 - ~06:05 UTC: BM22's stories_check FAILED (14) on staging-0994 = the 30-day default. Reproduced on my copy: 30 days FAILED
   (14, the same list), 36 days OK. Steps due Days 31-36 cut off, not a game fault. Told BM22 to run with 36; suggested 36 as default.
 - df5057d unmodified (game 6f8e1429..., switch off; the check makes its own on-copy, all 7 runs), stories_check 36: **STORIES CHECK OK** (plans/rv28-probes/stories_df5057d_36.log)
+- ~07:00 UTC: R3's devmode_check "real" FAILED on staging-0994 8976965e (game a01d1a4c). Stage 2 diff has no storage
+  writes. Mine, alone, `devmode_check.py starship-cadet.html off real`: 4/4 OK on 8976965e, OK on 0.99.3. No wall-clock or
+  timer saves (only visibilitychange / pagehide). Told R3 to re-run alone and send the log + both saves if it repeats.
