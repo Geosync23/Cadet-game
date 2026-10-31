@@ -1,0 +1,138 @@
+self-test ok  clean log passes
+self-test ok  a stalled beat
+self-test ok  beat and its quiet ending both
+self-test ok  no Mail
+self-test ok  no Calendar
+self-test ok  outside its booking
+self-test ok  no booking
+self-test ok  two crescendos a day
+self-test ok  day: window
+self-test ok  afterglow too early
+self-test ok  miss run told a crescendo
+self-test ok  missed, no quiet ending
+self-test ok  Theo twice goodbye
+Part 1, the build as it is: STORIES_ON True, 35 story beats baked; STORIES2_ON True, 32 stage 2 beats
+  (the build has STORIES_ON on: part 1 skipped)
+Part 2, run "play" (30 days):
+  bramwell-basil: told [1, 2, 3, 4], skipped [5]; days 1@21 2@22 3@23 4@25
+  halloran-emeka: told [1, 2], skipped []; days 1@8 2@9
+  kovac-zainab: told [1, 2, 3, 4, 6], skipped [5]; days 1@8 2@9 3@12 4@19 6@21
+  pell: told [5, 6, 8, 9], skipped [7]; days 5@17 6@21 8@25 9@26
+  salo-saad: told [1, 2, 4, 5], skipped [3, 6]; days 1@6 2@10 4@13 5@20
+  teague-theo: told [1, 2, 3, 4, 5], skipped [6]; days 1@9 2@10 3@14 4@18 5@21
+  calder: told [1, 2, 3, 4], skipped [5]; days 1@8 2@9 3@27 4@30
+  kowalczyk: told [1, 2, 3, 4, 5], skipped [6]; days 1@5 2@22 3@23 4@24 5@25
+  raman: told [1, 2, 3], skipped [4, 5]; days 1@5 2@10 3@29
+  tomas: told [5, 8, 10], skipped [6, 7, 9]; days 5@16 8@21 10@25
+  torres-zeke: told [1, 2, 3, 4, 5], skipped []; days 1@5 2@11 3@19 4@22 5@25
+  bookings: salo-saad:4 day 13 08:30, kovac-zainab:4 day 19 15:10, teague-theo:5 day 21 14:30, tomas:8 day 21 17:45, kowalczyk:4 day 24 05:35, bramwell-basil:4 day 25 17:45
+  crescendo bramwell-basil:4 due, never booked on: [{"d": 24, "at": 1080, "here": 9, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}]
+  FAIL play: halloran-emeka beat 3: never told or skipped (STALLED: {"next": "halloran-emeka:3", "tier": 4, "met": 29, "when": {"beat": "halloran.2", "time": "evening"}, "where": "Hydroponics garden", "cres": null, "aboard": true, "whenOk": 70, "whereOk": 31, "both": 16, "of": 252, "gate": {"day": 24, "m": 1200, "ready": "halloran-emeka:3", "tierOk": true, "metOk": true, "gapOk": true, "oneADay": true, "serious": true, "dialogue": true, "arcDay": 9}, "offDuty": {"Tea corner": 3, "Cabin 4-13": 6, "Hydroponics garden": 31, "Pool": 8, "Concourse": 3, "Stands": 5, "Auditorium": 2, "Promenade": 4, "Bow lounge": 24, "Crew store": 1, "Laundry": 1, "Chart room": 1, "Observation room": 1, "Main storage": 3, "Gym": 2}})
+  FAIL play: halloran-emeka beat 4: never told or skipped (STALLED: {"next": "halloran-emeka:3", "tier": 4, "met": 29, "when": {"beat": "halloran.2", "time": "evening"}, "where": "Hydroponics garden", "cres": null, "aboard": true, "whenOk": 70, "whereOk": 31, "both": 16, "of": 252, "gate": {"day": 24, "m": 1200, "ready": "halloran-emeka:3", "tierOk": true, "metOk": true, "gapOk": true, "oneADay": true, "serious": true, "dialogue": true, "arcDay": 9}, "offDuty": {"Tea corner": 3, "Cabin 4-13": 6, "Hydroponics garden": 31, "Pool": 8, "Concourse": 3, "Stands": 5, "Auditorium": 2, "Promenade": 4, "Bow lounge": 24, "Crew store": 1, "Laundry": 1, "Chart room": 1, "Observation room": 1, "Main storage": 3, "Gym": 2}})
+  FAIL play: halloran-emeka beat 5: never told or skipped (STALLED: {"next": "halloran-emeka:3", "tier": 4, "met": 29, "when": {"beat": "halloran.2", "time": "evening"}, "where": "Hydroponics garden", "cres": null, "aboard": true, "whenOk": 70, "whereOk": 31, "both": 16, "of": 252, "gate": {"day": 24, "m": 1200, "ready": "halloran-emeka:3", "tierOk": true, "metOk": true, "gapOk": true, "oneADay": true, "serious": true, "dialogue": true, "arcDay": 9}, "offDuty": {"Tea corner": 3, "Cabin 4-13": 6, "Hydroponics garden": 31, "Pool": 8, "Concourse": 3, "Stands": 5, "Auditorium": 2, "Promenade": 4, "Bow lounge": 24, "Crew store": 1, "Laundry": 1, "Chart room": 1, "Observation room": 1, "Main storage": 3, "Gym": 2}})
+  FAIL play: halloran-emeka beat 6: never told or skipped (STALLED: {"next": "halloran-emeka:3", "tier": 4, "met": 29, "when": {"beat": "halloran.2", "time": "evening"}, "where": "Hydroponics garden", "cres": null, "aboard": true, "whenOk": 70, "whereOk": 31, "both": 16, "of": 252, "gate": {"day": 24, "m": 1200, "ready": "halloran-emeka:3", "tierOk": true, "metOk": true, "gapOk": true, "oneADay": true, "serious": true, "dialogue": true, "arcDay": 9}, "offDuty": {"Tea corner": 3, "Cabin 4-13": 6, "Hydroponics garden": 31, "Pool": 8, "Concourse": 3, "Stands": 5, "Auditorium": 2, "Promenade": 4, "Bow lounge": 24, "Crew store": 1, "Laundry": 1, "Chart room": 1, "Observation room": 1, "Main storage": 3, "Gym": 2}})
+  FAIL play: halloran-emeka beat 7: never told or skipped (STALLED: {"next": "halloran-emeka:3", "tier": 4, "met": 29, "when": {"beat": "halloran.2", "time": "evening"}, "where": "Hydroponics garden", "cres": null, "aboard": true, "whenOk": 70, "whereOk": 31, "both": 16, "of": 252, "gate": {"day": 24, "m": 1200, "ready": "halloran-emeka:3", "tierOk": true, "metOk": true, "gapOk": true, "oneADay": true, "serious": true, "dialogue": true, "arcDay": 9}, "offDuty": {"Tea corner": 3, "Cabin 4-13": 6, "Hydroponics garden": 31, "Pool": 8, "Concourse": 3, "Stands": 5, "Auditorium": 2, "Promenade": 4, "Bow lounge": 24, "Crew store": 1, "Laundry": 1, "Chart room": 1, "Observation room": 1, "Main storage": 3, "Gym": 2}})
+  FAIL play: calder beat 6: never told or skipped (STALLED: {"next": "calder:6", "tier": 4, "met": 23, "when": {"rep": "well", "beat": "calder.4"}, "where": "calm", "cres": null, "aboard": true, "whenOk": 252, "whereOk": 69, "both": 69, "of": 252, "gate": {"day": 24, "m": 390, "ready": null, "tierOk": true, "metOk": true, "gapOk": false, "oneADay": true, "serious": true, "dialogue": true, "arcDay": 30}, "offDuty": {"Hydroponics garden": 9, "Tea corner": 4, "Works Chief's cabin": 25, "Chart room": 8, "Stands": 10, "Concourse": 6, "Lift lobby": 4, "Float room": 4, "Auditorium": 2, "Lift plaza": 7, "Bow lounge": 8, "Works bay": 4, "Laundry": 1, "Music room": 3, "Observatory": 3, "Shuttle bay": 5, "Observation room": 3, "Bridge lobby": 1}})
+  FAIL play: calder beat 7: never told or skipped (STALLED: {"next": "calder:6", "tier": 4, "met": 23, "when": {"rep": "well", "beat": "calder.4"}, "where": "calm", "cres": null, "aboard": true, "whenOk": 252, "whereOk": 69, "both": 69, "of": 252, "gate": {"day": 24, "m": 390, "ready": null, "tierOk": true, "metOk": true, "gapOk": false, "oneADay": true, "serious": true, "dialogue": true, "arcDay": 30}, "offDuty": {"Hydroponics garden": 9, "Tea corner": 4, "Works Chief's cabin": 25, "Chart room": 8, "Stands": 10, "Concourse": 6, "Lift lobby": 4, "Float room": 4, "Auditorium": 2, "Lift plaza": 7, "Bow lounge": 8, "Works bay": 4, "Laundry": 1, "Music room": 3, "Observatory": 3, "Shuttle bay": 5, "Observation room": 3, "Bridge lobby": 1}})
+  FAIL play: raman beat 6: never told or skipped (STALLED: {"next": "raman:6", "tier": 4, "met": 22, "when": {"beat": "raman.4", "time": "morning", "not": {"event": "comet", "flag": "raman.comet"}, "day": "23-"}, "where": "Observation room", "cres": null, "aboard": true, "whenOk": 84, "whereOk": 1, "both": 0, "of": 252, "gate": null, "offDuty": {"Bow lounge": 8, "Mess hall": 23, "Sim bay": 19, "Stands": 18, "Pool": 1, "Chart room": 1, "Hydroponics garden": 5, "Observation room": 1, "Auditorium": 2, "Observatory": 4, "Lift plaza": 3, "Music room": 3, "Crew store": 1, "Laundry": 1, "Float room": 1, "Senior Helm Officer's cabin": 4, "Lift lobby": 2, "Promenade": 2}})
+  FAIL play: torres-zeke beat 6: never told or skipped (STALLED: {"next": "torres-zeke:6", "tier": 4, "met": 29, "when": {"beat": "torres.5", "trad": "knit-and-natter", "weekday": "tue", "day": "23-30"}, "where": "Junior common room", "cres": "trad:knit-and-natter", "aboard": true, "whenOk": 0, "whereOk": 0, "both": 0, "of": 252, "gate": null, "offDuty": {"Cabin 4-14": 22, "Observation room": 1, "Hydroponics garden": 11, "Lift plaza": 8, "River hall": 8, "Concourse": 3, "Bow lounge": 23, "Promenade": 6, "Laundry": 1, "Chart room": 9, "Stands": 6, "Science corridor": 2, "Crew store": 1, "Float room": 1, "Tea corner": 1, "Call-home booths": 1, "Lift lobby": 1}})
+  FAIL play: torres-zeke beat 7: never told or skipped (STALLED: {"next": "torres-zeke:6", "tier": 4, "met": 29, "when": {"beat": "torres.5", "trad": "knit-and-natter", "weekday": "tue", "day": "23-30"}, "where": "Junior common room", "cres": "trad:knit-and-natter", "aboard": true, "whenOk": 0, "whereOk": 0, "both": 0, "of": 252, "gate": null, "offDuty": {"Cabin 4-14": 22, "Observation room": 1, "Hydroponics garden": 11, "Lift plaza": 8, "River hall": 8, "Concourse": 3, "Bow lounge": 23, "Promenade": 6, "Laundry": 1, "Chart room": 9, "Stands": 6, "Science corridor": 2, "Crew store": 1, "Float room": 1, "Tea corner": 1, "Call-home booths": 1, "Lift lobby": 1}})
+Part 2, run "miss" (30 days):
+  bramwell-basil: told [1, 2, 3, 5], skipped [4]; days 1@21 2@22 3@23 5@25
+  halloran-emeka: told [1, 2, 3, 4, 6], skipped [5]; days 1@8 2@9 3@25 4@27 6@30
+  kovac-zainab: told [1, 2, 3, 5, 6], skipped [4]; days 1@8 2@9 3@12 5@19 6@21
+  pell: told [5, 6, 8, 9], skipped [7]; days 5@17 6@21 8@25 9@26
+  salo-saad: told [1, 2, 5, 6], skipped [3, 4]; days 1@6 2@10 6@16 5@20
+  teague-theo: told [1, 2, 3, 4, 6], skipped [5]; days 1@9 2@10 3@14 4@18 6@mail
+  calder: told [1, 2, 3, 4], skipped [5]; days 1@8 2@9 3@27 4@30
+  kowalczyk: told [1, 2, 3, 5, 6], skipped [4]; days 1@5 2@22 3@23 6@24 5@25
+  raman: told [1, 2, 3, 6], skipped [4, 5]; days 1@5 2@10 3@24 6@27
+  tomas: told [5, 9, 10], skipped [6, 7, 8]; days 5@16 9@21 10@25
+  torres-zeke: told [1, 2, 3, 4, 5, 7], skipped [6]; days 1@5 2@11 3@13 4@19 5@22 7@23
+  bookings: salo-saad:4 day 13 08:30, kovac-zainab:4 day 19 15:10, teague-theo:5 day 21 14:30, tomas:8 day 21 17:45, torres-zeke:6 day 23 20:00, kowalczyk:4 day 24 05:35, bramwell-basil:4 day 25 17:45, halloran-emeka:5 day 30 07:45
+  crescendo bramwell-basil:4 due, never booked on: [{"d": 24, "at": 1080, "here": 9, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}]
+  crescendo halloran-emeka:5 due, never booked on: [{"d": 29, "at": 455, "here": 10, "cast": {"pell": 0}, "gates": true, "flags": null}]
+  crescendo salo-saad:4 booked, not told: {"steps": 81, "atSlot": 81, "cast": {}, "where": {"off::4:g": 1, "breakfast:grab:3:M": 1, "work::5:f": 1, "wash:toilet:5:q": 1, "wash:hands:5:q": 1, "leisure:rest:4:g": 1, "dinner:queue:moving": 1, "dinner:ev-lanternSupper-talk:3:M": 1, "off::moving": 1, "leisure::3:G": 1, "wash:toilet:3:w": 1, "leisure::4:n": 1}, "ready": 81, "gates": 81}
+  crescendo kovac-zainab:4 booked, not told: {"steps": 3, "atSlot": 1, "cast": {}, "where": {"commute::moving": 1, "work:job:moving": 1}, "ready": 1, "gates": 3}
+  crescendo teague-theo:5 booked, not told: {"steps": 3, "atSlot": 3, "cast": {}, "where": {"off:leave:5:S": 1}, "ready": 3, "gates": 3}
+  crescendo tomas:8 booked, not told: {"steps": 1, "atSlot": 1, "cast": {"bramwell-basil": 1, "torres-zeke": 1}, "where": {"leisure:intro-story-tomas-8:5:S": 1}, "ready": 1, "gates": 1}
+  crescendo torres-zeke:6 booked, not told: {"steps": 5, "atSlot": 5, "cast": {}, "where": {"leisure:ev-knit-and-natter-read:4:j": 1}, "ready": 5, "gates": 5}
+  crescendo kowalczyk:4 booked, not told: {"steps": 2, "atSlot": 2, "cast": {"takahashi-wen": 2, "mensah": 2}, "where": {"leisure:intro-story-kowalczyk-4:1:B": 1}, "ready": 2, "gates": 2}
+  crescendo bramwell-basil:4 booked, not told: {"steps": 5, "atSlot": 5, "cast": {}, "where": {"dinner:queue:moving": 1, "dinner:queue:3:M": 1, "dinner::3:M": 1}, "ready": 5, "gates": 5}
+  crescendo halloran-emeka:5 booked, not told: {"steps": 5, "atSlot": 5, "cast": {"pell": 1}, "where": {"breakfast:queue:moving": 1, "breakfast:queue:3:M": 1, "breakfast::3:M": 1}, "ready": 1, "gates": 5}
+  FAIL miss: halloran-emeka beat 7: never told or skipped (STALLED: {"next": "halloran-emeka:7", "tier": 4, "met": 29, "when": {"time": "morning"}, "where": "meal", "cres": null, "aboard": true, "whenOk": 84, "whereOk": 12, "both": 5, "of": 252, "gate": {"day": 24, "m": 450, "ready": null, "tierOk": true, "metOk": true, "gapOk": false, "oneADay": true, "serious": true, "dialogue": true, "arcDay": 30}, "offDuty": {"Tea corner": 3, "Cabin 4-13": 6, "Hydroponics garden": 31, "Pool": 8, "Concourse": 3, "Stands": 5, "Auditorium": 2, "Promenade": 4, "Bow lounge": 24, "Crew store": 1, "Laundry": 1, "Chart room": 1, "Observation room": 1, "Main storage": 3, "Gym": 2}})
+  FAIL miss: calder: crescendo 5 missed but quiet ending 6 not told
+  FAIL miss: calder beat 6: never told or skipped (STALLED: {"next": "calder:6", "tier": 4, "met": 22, "when": {"rep": "well", "beat": "calder.4"}, "where": "calm", "cres": null, "aboard": true, "whenOk": 252, "whereOk": 69, "both": 69, "of": 252, "gate": {"day": 24, "m": 390, "ready": null, "tierOk": true, "metOk": true, "gapOk": false, "oneADay": true, "serious": true, "dialogue": true, "arcDay": 30}, "offDuty": {"Hydroponics garden": 9, "Tea corner": 4, "Works Chief's cabin": 25, "Chart room": 8, "Stands": 10, "Concourse": 6, "Lift lobby": 4, "Float room": 4, "Auditorium": 2, "Lift plaza": 7, "Bow lounge": 8, "Works bay": 4, "Laundry": 1, "Music room": 3, "Observatory": 3, "Shuttle bay": 5, "Observation room": 3, "Bridge lobby": 1}})
+  FAIL miss: calder beat 7: never told or skipped (STALLED: {"next": "calder:6", "tier": 4, "met": 22, "when": {"rep": "well", "beat": "calder.4"}, "where": "calm", "cres": null, "aboard": true, "whenOk": 252, "whereOk": 69, "both": 69, "of": 252, "gate": {"day": 24, "m": 390, "ready": null, "tierOk": true, "metOk": true, "gapOk": false, "oneADay": true, "serious": true, "dialogue": true, "arcDay": 30}, "offDuty": {"Hydroponics garden": 9, "Tea corner": 4, "Works Chief's cabin": 25, "Chart room": 8, "Stands": 10, "Concourse": 6, "Lift lobby": 4, "Float room": 4, "Auditorium": 2, "Lift plaza": 7, "Bow lounge": 8, "Works bay": 4, "Laundry": 1, "Music room": 3, "Observatory": 3, "Shuttle bay": 5, "Observation room": 3, "Bridge lobby": 1}})
+Part 2, run "focus:torres-zeke" (30 days):
+  bramwell-basil: told [], skipped [1, 2, 3, 4]; days 
+  halloran-emeka: told [], skipped []; days 
+  kovac-zainab: told [], skipped []; days 
+  pell: told [], skipped []; days 
+  salo-saad: told [], skipped []; days 
+  teague-theo: told [], skipped []; days 
+  calder: told [], skipped []; days 
+  kowalczyk: told [], skipped []; days 
+  raman: told [], skipped []; days 
+  tomas: told [], skipped []; days 
+  torres-zeke: told [1, 2, 3, 4, 5, 6], skipped [7]; days 1@5 2@11 3@13 4@15 5@18 6@23
+  bookings: torres-zeke:6 day 23 20:00
+  crescendo bramwell-basil:4 due, never booked on: [{"d": 25, "at": 1065, "here": 10, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}, {"d": 26, "at": 1030, "here": 8, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}]
+Part 2, run "focus:calder" (30 days):
+  bramwell-basil: told [], skipped [1, 2, 3, 4]; days 
+  halloran-emeka: told [], skipped []; days 
+  kovac-zainab: told [], skipped []; days 
+  pell: told [], skipped []; days 
+  salo-saad: told [], skipped []; days 
+  teague-theo: told [], skipped []; days 
+  calder: told [1, 2, 3, 4, 5, 7], skipped [6]; days 1@8 2@9 3@13 4@16 5@26 7@29
+  kowalczyk: told [], skipped []; days 
+  raman: told [], skipped []; days 
+  tomas: told [], skipped []; days 
+  torres-zeke: told [], skipped []; days 
+  bookings: calder:5 day 26 18:40
+  crescendo bramwell-basil:4 due, never booked on: [{"d": 25, "at": 1065, "here": 10, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}, {"d": 26, "at": 1030, "here": 8, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}]
+Part 2, run "focus:raman" (30 days):
+  bramwell-basil: told [], skipped [1, 2, 3, 4]; days 
+  halloran-emeka: told [], skipped []; days 
+  kovac-zainab: told [], skipped []; days 
+  pell: told [], skipped []; days 
+  salo-saad: told [], skipped []; days 
+  teague-theo: told [], skipped []; days 
+  calder: told [], skipped []; days 
+  kowalczyk: told [], skipped []; days 
+  raman: told [1, 2, 3, 4, 5], skipped [6]; days 1@5 2@10 3@13 4@15 5@22
+  tomas: told [], skipped []; days 
+  torres-zeke: told [], skipped []; days 
+  bookings: raman:5 day 22 21:30
+  crescendo bramwell-basil:4 due, never booked on: [{"d": 25, "at": 1065, "here": 10, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}, {"d": 26, "at": 1030, "here": 8, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}]
+Part 2, run "focus:kowalczyk" (30 days):
+  bramwell-basil: told [], skipped [1, 2, 3, 4]; days 
+  halloran-emeka: told [], skipped []; days 
+  kovac-zainab: told [], skipped []; days 
+  pell: told [], skipped []; days 
+  salo-saad: told [], skipped []; days 
+  teague-theo: told [], skipped []; days 
+  calder: told [], skipped []; days 
+  kowalczyk: told [1, 2, 3, 4, 5], skipped [6]; days 1@5 2@22 3@23 4@24 5@25
+  raman: told [], skipped []; days 
+  tomas: told [], skipped []; days 
+  torres-zeke: told [], skipped []; days 
+  bookings: kowalczyk:4 day 24 05:35
+  crescendo bramwell-basil:4 due, never booked on: [{"d": 25, "at": 1065, "here": 10, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}, {"d": 26, "at": 1030, "here": 8, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}]
+Part 2, run "focus:tomas" (30 days):
+  bramwell-basil: told [], skipped [1, 2, 3, 4]; days 
+  halloran-emeka: told [], skipped []; days 
+  kovac-zainab: told [], skipped []; days 
+  pell: told [], skipped []; days 
+  salo-saad: told [], skipped []; days 
+  teague-theo: told [], skipped []; days 
+  calder: told [], skipped []; days 
+  kowalczyk: told [], skipped []; days 
+  raman: told [], skipped []; days 
+  tomas: told [5, 6, 7, 8, 10], skipped [9]; days 5@16 6@18 7@19 8@21 10@25
+  torres-zeke: told [], skipped []; days 
+  bookings: tomas:8 day 21 17:45
+  crescendo bramwell-basil:4 due, never booked on: [{"d": 25, "at": 1065, "here": 10, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}, {"d": 26, "at": 1030, "here": 8, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}]
+Part 2b, a scene across its booking's end (Tomas 8, Day 21 17:54 -> 18:00): {"ok": true, "midway": {"told": [5, 6, 7], "skip": [], "booked": true}, "told": [5, 6, 7, 8], "skip": [9]}
+STORIES CHECK FAILED (14)
