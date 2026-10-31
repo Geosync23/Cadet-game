@@ -70,3 +70,6 @@ New canon row in `content/facts.md` (section 10): nobody met Tomas off the Tern;
   says "on Deck 2" (not mine; reported to the lead).
 - **TB3's milestone cards** (new hand's tea, six and twelve weeks): `claude/p995-traditions-words` 181d86a (from
   4037a26), baked. `content/banks/milestones-995.lines`. Reviewer RV30.
+- **Mails that match what happens** (the user: "Change the Mail to match"; lead 47): on `claude/p995-traditions-words`,
+  fac5e56 (Talent night, Tap night, Midtour Mails) and 52ea327 (Calder's mug line at the new hand's tea now treats the
+  13:00 handover as done; Tap night's ask; Midtour's invite). RV30 passed 181d86a. The lead: done for this patch.
