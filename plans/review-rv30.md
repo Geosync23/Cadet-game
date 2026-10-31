@@ -53,3 +53,16 @@ weekday; health arrow on from 13:59; a tap on Rina in the infirmary plays introH
    the Calendar shows "06:30 Sunrise stretch" and "06:30 Invitation with Captain Odile Marrow · booked" (appt_views.py).
 Checks on 82e9cc5 (later): intro_check whole OK, appt_check OK, device_check OK.
 Note 7: a skipped game stays on the arrival evening's steps (zeke_end.py is not a fair state; kept for the record).
+
+## TB3 traditions, claude/p995-traditions 88db900 (game 5e4c65cc...8623): FIXES NEEDED (one)
+
+Passing: switch off: cadet_test vs 8976965e alone ALL IDENTICAL (code read: o.sit false, skipSpots / TRAD_JOIN / places /
+SAVE_EXTRA only when on). Switch-on copy: events_check (28) OK; p926_check OK (taps the supper); TB3's beam_tea995.py OK
+(you paint at x -7.02 under the name at -7.02, no bubble over the name painting or cheering; 13:00 tea 30 seated
+minute-people, nobody at 5-tea-3 or on the doorway, a way out every minute); screenshots look right.
+
+1. Note 19: the reveal waits only 5 ship minutes for your guess card, but the clock runs during the card (~8 real s for 5 ship
+   min). spice_paced.py (TB3's probe, the card read at ~3.3 s a card): card open 18:32-18:38, Brennan's first reveal ("Dr.
+   Nandakumar's jar, loves. The dried chilli.") at 18:37, while the card is still open; a slower reader sees the answer
+   before picking. Fix: hold the reveal while the card is open, with the cap in real seconds (e.g. 60 s), not ship minutes.
+   (The same run has 13 bubbles, under TB3's 15: fewer guesses while the card is open; adjust the check, not a bug.)
