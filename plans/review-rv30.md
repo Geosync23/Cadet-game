@@ -116,3 +116,6 @@ Queue empty.
 ### BM23 sound_check r3mess edit (0.99.5 candidate, MESS_SCALE on by the user's pick): PASS with a change
 3 am: expect the scene only when M.at(n).voices > 0 (not n == 0: you + one crew also gives none); at(0) compare without level, level == 0. Off: unchanged.
 BM23 96d902e: the edit as agreed, PASS (check-only). Sent to BM23 and lead.
+
+## Build job: tea fix claude/p995-tea-fix ee66e35b (game 93aed54fa9296e75c308ae199cbac32465c776c650161fe41bf22535839a5164), on 247fc12
+For lead 48 (BM23 interactions FAIL, hot water sat you in a chair). ixTeaFirst in ixTap sort (TRAD995_ON). Gates all OK. Reviewer: RV29.
