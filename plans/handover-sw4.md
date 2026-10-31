@@ -31,10 +31,10 @@ New canon row in `content/facts.md` (section 10): nobody met Tomas off the Tern;
 - Days 22-24 evenings are taken (the comet, your night shifts), so beats 9 and 10 don't need them.
 
 ## Open with ST1 (sent in my messages)
-1. Basil is in `cast:` but is still on the Tern until the ramp opens: does storyHere count him in time, or should his
+1. ST1: Basil stays in cast: (the scene waits for him off the ramp); Holt is dropped from cast:. Was: does storyHere count Basil in time, or should his
    lines become `if here:` lines?
 2. Basil's beat 1 rides on the same gathering; it reads fine straight after this scene.
-3. Old callbacks in `content/lines/tomas.lines` are keyed to the old beats' memory words. Suggested: add
+3. (Written up for ST1 in plans/tomas-lines-regates.md.) Old callbacks in `content/lines/tomas.lines` are keyed to the old beats' memory words. Suggested: add
    `!beat:tomas.8` to the `beat:tomas.5` exam line ("Still haven't told Holt..."). The words promised, passed,
    blanket, showed, observatory, shown, staying and home no longer happen, so those callbacks go quiet (harmless). The
    `told:moment.tomas.home` line could move to `told:moment.tomas.pencil`. tomas.lines isn't my file.
