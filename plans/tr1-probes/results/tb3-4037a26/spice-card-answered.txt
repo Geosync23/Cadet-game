@@ -1,0 +1,46 @@
+== Day 2 weekday 1 player at [2.5, -5.5]
+  1090.7999999999993 tj None mark False brennan ['3-spice-host', False, None, None] joined False tagged 10 goal None
+  on True 1095 1155 joinable True goers 32 ['vance', 'sato', 'rina', 'nandakumar', 'farouk-olu', 'navarro-mateo', 'halloran-emeka', 'torres-zeke', 'ibarra-rafael', 'bakshi-sol', 'strand-erik', 'santos-zofia', 'tran-chloe', 'teague-theo', 'rossi-femi', 'eklund-leila', 'volkov-maeve', 'quist-ilse', 'garcia-greta', 'park-noor', 'vasquez-uma', 'shah-dara', 'nakamura-bilal', 'fonseca-arjun', 'kim-yusuf', 'yilmaz-karin', 'abara-rosa', 'alvarez-luca', 'mbeki-bo', 'grieve-thea', 'madsen-ivo', 'varga-tariq']
+  1091.3999999999987 tj None mark False brennan ['3-spice-host', False, None, None] joined False tagged 12 goal None
+  1092.5999999999976 tj None mark False brennan ['3-spice-host', False, None, None] joined False tagged 13 goal None
+  1094.399999999996 tj None mark False brennan ['3-spice-host', False, None, None] joined False tagged 15 goal None
+  1095.599999999995 tj ['spice-shelf-supper@2', 'brennan'] mark True brennan ['3-spice-host', False, None, None] joined False tagged 15 goal Tap Chef Brennan to guess the spices
+  1096.1999999999944 tj ['spice-shelf-supper@2', 'brennan'] mark False brennan ['3-spice-host', False, None, None] joined False tagged 17 goal Tap Chef Brennan to guess the spices
+  1097.3999999999933 tj ['spice-shelf-supper@2', 'brennan'] mark False brennan ['3-spice-host', False, None, None] joined False tagged 19 goal Tap Chef Brennan to guess the spices
+  1098.5999999999922 tj ['spice-shelf-supper@2', 'brennan'] mark False brennan ['3-spice-host', False, None, None] joined False tagged 20 goal Tap Chef Brennan to guess the spices
+  1099.1999999999916 tj ['spice-shelf-supper@2', 'brennan'] mark False brennan ['3-spice-host', True, None, None] joined False tagged 21 goal Tap Chef Brennan to guess the spices
+  1100.3999999999905 tj ['spice-shelf-supper@2', 'brennan'] mark False brennan ['3-spice-host', True, None, None] joined False tagged 22 goal Tap Chef Brennan to guess the spices
+  1103.3999999999878 tj ['spice-shelf-supper@2', 'brennan'] mark False brennan ['3-spice-host', True, None, None] joined False tagged 24 goal Tap Chef Brennan to guess the spices
+  1104.5999999999867 tj ['spice-shelf-supper@2', 'brennan'] mark False brennan ['3-spice-host', True, None, None] joined False tagged 25 goal Tap Chef Brennan to guess the spices
+  1105.1999999999862 tj ['spice-shelf-supper@2', 'brennan'] mark False brennan ['3-spice-host', True, None, None] joined False tagged 26 goal Tap Chef Brennan to guess the spices
+  1106.399999999985 tj ['spice-shelf-supper@2', 'brennan'] mark False brennan ['3-spice-host', True, None, None] joined False tagged 27 goal Tap Chef Brennan to guess the spices
+  1107.599999999984 tj ['spice-shelf-supper@2', 'brennan'] mark False brennan ['3-spice-host', True, None, None] joined False tagged 28 goal Tap Chef Brennan to guess the spices
+  1109.3999999999824 tj ['spice-shelf-supper@2', 'brennan'] mark False brennan ['3-spice-host', True, None, None] joined False tagged 29 goal Tap Chef Brennan to guess the spices
+  1110.5999999999813 tj ['spice-shelf-supper@2', 'brennan'] mark False brennan ['3-spice-host', True, None, None] joined False tagged 30 goal Tap Chef Brennan to guess the spices
+  1112.3999999999796 tj ['spice-shelf-supper@2', 'brennan'] mark False brennan ['3-spice-host', True, None, None] joined False tagged 32 goal Tap Chef Brennan to guess the spices
+  18:40 tap on Brennan -> tradJoinTap [True, False] settled at the mess: ['sato@3-mess-18', 'rina@3-mess-16', 'nandakumar@3-mess-26', 'farouk-olu@3-mess-9', 'navarro-mateo@3-mess-31', 'halloran-emeka@3-mess-38', 'torres-zeke@3-mess-36', 'ibarra-rafael@3-mess-30', 'bakshi-sol@3-mess-15', 'strand-erik@3-mess-17', 'santos-zofia@3-mess-21', 'tran-chloe@3-mess-39', 'teague-theo@3-mess-8', 'rossi-femi@3-mess-32', 'eklund-leila@3-mess-2', 'volkov-maeve@3-mess-24', 'quist-ilse@3-mess-25', 'garcia-greta@3-mess-20', 'park-noor@3-mess-14', 'vasquez-uma@3-mess-22', 'shah-dara@3-mess-13', 'nakamura-bilal@3-mess-7', 'fonseca-arjun@3-mess-19', 'kim-yusuf@3-mess-27', 'yilmaz-karin@3-mess-1', 'abara-rosa@3-mess-41', 'alvarez-luca@3-mess-28', 'mbeki-bo@3-mess-23', 'grieve-thea@3-mess-29', 'madsen-ivo@3-mess-34', 'varga-tariq@3-mess-10', 'vance@3-mess-3']
+  1120.799999999972 tj ['spice-shelf-supper@2', 'brennan'] mark False brennan ['3-spice-host', True, None, None] joined True tagged 32 goal None
+  1121.3999999999714 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 32 goal None
+  closing the card at 1126.199999999967 [2, False]
+  1130.3999999999633 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 31 goal None
+  1133.3999999999605 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 28 goal A toilet
+  1135.199999999959 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 26 goal A toilet
+  1137.5999999999567 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 25 goal A toilet
+  1138.1999999999562 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 24 goal A toilet
+  1139.399999999955 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 23 goal A toilet
+  1140.599999999954 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 22 goal A toilet
+  1141.1999999999534 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 17 goal A toilet
+  1142.3999999999523 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 16 goal A toilet
+  1143.5999999999513 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 15 goal A toilet
+  1144.1999999999507 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 11 goal A toilet
+  1145.3999999999496 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 7 goal A toilet
+  1146.5999999999485 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 5 goal A toilet
+  1148.3999999999469 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 4 goal A toilet
+  1149.5999999999458 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 3 goal A toilet
+  1150.1999999999452 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 1 goal A toilet
+  1153.1999999999425 tj None mark False brennan ['3-spice-host', True, None, None] joined True tagged 0 goal A toilet
+  1155.5999999999403 tj None mark False brennan ['3-galley-2', False, 'cook', None] joined True tagged 0 goal A toilet
+  cards [[1120.2199999999725, 'spice.guess']]
+  toasts [[1100.1999999999907, 'Very hungry', 'Starving: tasks are 15% slower. Eat something. The grab shelf in the mess, Deck 3, is always open.'], [1108.3799999999833, 'Exhausted', 'Exhausted. Get to your bunk, Bunk 1 on Deck 4, and sleep it off.'], [1116.5199999999759, 'Really need a shower', "You really need a shower. Chats do half the good till you've had one. Junior wing, Deck 4."], [1120.1999999999725, 'Spice shelf supper', 'Spice shelf supper: sit down to supper and guess whose spices. Social and leisure up.'], [1123.1399999999699, 'Spice shelf supper', 'You sit down to fish pie. About 31 minutes; walk away to stop.'], [1131.2999999999624, 'Bursting', "You really need the toilet, now! Deck 4 or Deck 3. Hold on, or you'll be hopping. Follow the marker."], [1152.4999999999432, 'Eating', 'You finish up and leave your tray for clearing. Good company, too. Food 55.']]
+  bubbles 16 [[1098.859999999992, 'brennan', 'Right, loves. Spice shelf supper. You know the rules. Whoever guesses right gets seconds.'], [1101.8799999999892, 'brennan', "Dried chilli, roasted with the roots. Smell that. Somebody's homesick already."], [1103.219999999988, 'rina', "That's Chief Calder's. Has to be."], [1104.8599999999865, 'rina', "I'd say Dr. Nandakumar. Look at that face."], [1106.7999999999847, 'nandakumar', "Oona, surely. Too tidy to be anyone else's."], [1108.9199999999828, 'brennan', 'A little dill seed in the greens. Just enough. Who brought it?'], [1110.2399999999816, 'farouk-olu', "Is it Chief Calder's? It tastes like Chief Calder."], [1111.8599999999801, 'navarro-mateo', "Bet you a biscuit it's Dr. Nandakumar's."], [1113.7799999999784, 'halloran-emeka', 'Leila. Final answer. Probably.'], [1115.8799999999765, 'brennan', 'Pudding with black pepper in it. Yes, pudding. Trust me, love.'], [1117.1999999999753, 'torres-zeke', 'Not Chief Calder. Definitely not Chief Calder. Maybe Chief Calder.'], [1118.8199999999738, 'ibarra-rafael', 'Whoever it is, I want more of it.'], [1126.219999999967, 'bakshi-sol', "I've no idea. I'm just eating."], [1128.3199999999651, 'brennan', "Dr. Nandakumar's jar, loves. The dried chilli. Isn't that lovely?"], [1130.4399999999632, 'brennan', "Whose was it? Tomas's. The dill seed. Seconds to the winners."], [1132.5599999999613, 'brennan', "It's Chief Calder's black pepper. Well done, whoever said so."]]
+  errors []

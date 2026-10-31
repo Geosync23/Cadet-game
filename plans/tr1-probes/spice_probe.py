@@ -20,7 +20,7 @@ with sync_playwright() as pw:
         g = Game(pw, build, 900, 760)
         g.ev("(() => { skipTo(%d * 1440 + 18 * 60 + 10); goToDeck(3, null); SHIP.device.settings.tips = false; })()" % (d - 1)); g.ev(SAY); g.step(10)
         print('== Day', d, 'weekday', g.ev('weekday(%d)' % d), 'player at', g.ev(IN))
-        last = None; tapped = None
+        last = None; tapped = None; closeAt = -1
         for k in range(400):
             g.step(30); x = json.loads(g.ev(LOOK % d))
             sig = (x['tj'] and tuple(x['tj']), x['b'] if isinstance(x['b'], str) else tuple(x['b'][:2]), x['joined'], x['mark'], x['tagged'])
@@ -29,8 +29,10 @@ with sync_playwright() as pw:
             if tapped is None and x['m'] >= 1120:
                 tapped = g.ev("(() => { const b = DECK_CREW.find(a => a.p.id === 'brennan'); return b ? [tradJoinTap(b), !!DIALOGUE && DIALOGUE.id] : 'no brennan'; })()")
                 print('  18:40 tap on Brennan -> tradJoinTap', tapped, 'settled at the mess:', x['settled'])
-                g.ev("if (DIALOGUE) dialogueStep(0)")
-            if x['m'] >= 1150: break
+                closeAt = k + int(os.environ.get("TR1_CARD_STEPS", "1"))
+            if tapped is not None and k == closeAt:
+                print('  closing the card at', x['m'], g.ev("(() => { let n = 0; while (DIALOGUE && n < 20) { try { dialogueStep(0); } catch (e) { break; } n++; } return [n, !!DIALOGUE]; })()"))
+            if x['m'] >= 1155: break
         r = json.loads(g.ev("JSON.stringify({ said: window.__said, cards: window.__cards, toasts: window.__toasts })"))
-        print('  cards', r['cards']); print('  toasts', r['toasts'][:8]); print('  bubbles', len(r['said']), r['said'][:14])
+        print('  cards', r['cards']); print('  toasts', r['toasts'][:8]); print('  bubbles', len(r['said']), r['said'])
         print('  errors', g.errors[:4]); g.close()
