@@ -46002,6 +46002,7 @@ function tradJoin(e, a) {
   const notice = tradWords(e, 'notice', { name }) || e.name + ': ' + s.what + '. Social and leisure up.';
   player.stop(); a.talking = 2; player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
   if (e.id === 'tiles-ladder' && typeof tladJoin === 'function') return tladJoin(e, a, notice, lead);   // 0.92.5 item 20: play the next game, or watch
+  if (TRAD995_ON && e.id === 'spice-shelf-supper') return spiceJoin(e, a, notice);   // 0.99.5 note 19 (TB3): a mess seat with your dinner
   if (TRAD_0932_ON && typeof t932Join === 'function' && t932Join(e, a, notice, lead)) return true;   // 0.93.2: the host's own words first, then the activity (FX24, Traditions slot)
   if (s.act === 'beam') { if (beamWaitTap()) return true; toast(a.p.name, '"' + (tradWords(e, 'tell', { name }) || 'Go on, tap the beam. Your name goes up there, with ours.') + '"'); return true; }
   if (s.act === 'walk') { eventJoin(e, d, now, notice); tradWalkStart(e, lead); return true; }
@@ -48428,6 +48429,7 @@ function spiceWeek(d) {
   return ok.length >= 3 ? [0, 1, 2].map(i => ok[(wk * 3 + i) % ok.length]) : null;
 }
 function spiceFrame() {
+  if (TRAD995_ON) return spiceFrame995();   // 0.99.5 note 19 (TB3): timed from when Brennan's at the shelf, below
   const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   const e = m >= SPICE_AT.open - 3 && m < SPICE_AT.end && eventsOn(d).find(x => x.id === 'spice-shelf-supper'), jars = e && spiceWeek(d);
   const b = jars && DECK_CREW.find(a => a.p && a.p.id === 'brennan');
@@ -48627,6 +48629,110 @@ function tastJoin(e, a, notice, lead) {
       { who: q.id, text: trLine('tasting.ask', d, {}, ['Right. Which jar gets your token? Don\'t be polite.']) },
       { choice: [0, 1].map(k => ({ text: cap(z.choices[k]), rel: { [q.id]: 1 }, reply: { who: q.id, text: thanks } })) }] };
   dialogueShow('tasting.table', { id: 'tasting.table@' + d, who: [q.id], at: now, ...cardWhere(e) });
+  return true;
+}
+// ---- 0.99.5 note 19 (TB3; the user: "Spice shelf supper doesn't do anything. Doesn't trigger. No one to click on."), behind
+// TRAD995_ON (off: the game as 0.99.4; `?trad995` previews). Tap to join: Brennan hosts (the marker, the arrow, the tip),
+// and a tap on her or anyone at it sits you at a free mess seat with your dinner (it is your dinner: your tray if you hold
+// one, else a plate from the servery). She is held at the spice shelf (3-spice-host) for the whole supper, 18:15-19:15,
+// and her script runs from when she's there and you're in the mess, not at fixed minutes: the opening, the three jars
+// about five ship minutes apart (the mess guessing in between), then whose each was; about 25 minutes, closer together
+// when it starts late. Joined, your guess card opens once the three jars are named (at once if they already are), and
+// the reveal waits for it. Words: SW1's spice.* (each jar's line fits its place: no "Last dish" first); the spice small
+// mid-sentence and capital at the start; a guess never names its speaker. SHIP.spice = { joined, asked } is saved, so a
+// reload mid-supper keeps the card (and doesn't ask twice). Nothing calls R(); the planner reads none of it
+const TRAD995_ON = false || URL_FLAGS.has('trad995');
+const SPICE995 = { day: 0, t0: 0, step: 0, last: 0, said: 0 };
+if (TRAD995_ON) {
+  TRAD_JOIN['spice-shelf-supper'] = { host: 'brennan', pose: 'sit:talk', need: 'social', gain: 10, also: { leisure: 8 }, verb: 'guess the spices', what: 'sit down to supper and guess whose spices' };
+  tjActs();
+  const s = SAVED && SAVED.ship && SAVED.ship.spice;   // the saved supper (the same keys as SPICE's)
+  if (s) for (const k of ['joined', 'asked']) if (Number.isInteger(s[k])) SPICE[k] = s[k];
+  SAVE_EXTRA.push(o => { o.ship.spice = { joined: SPICE.joined, asked: DIALOGUE && /^spice\.guess/.test(DIALOGUE.id) ? 0 : SPICE.asked }; });   // the card open: asked again after a reload
+}
+// {spice} into a line: small mid-sentence, a capital where it starts a sentence
+function spiceFill(t, ctx) {
+  const str = String(t);
+  return str.replace(/\{(\w+)\}/g, (x, w, off) => { let v = ctx && ctx[w] != null ? String(ctx[w]) : x;
+    if (w === 'spice' && v) v = /(^|[.!?]\s+)$/.test(str.slice(0, off)) ? v[0].toUpperCase() + v.slice(1) : v.toLowerCase();
+    return v; });
+}
+function spiceText(kind, k, ctx, fb) {
+  const L = typeof LINES !== 'undefined' && Array.isArray(LINES[kind]) && LINES[kind].length ? LINES[kind].map(x => x.text).filter(t => typeof t === 'string') : fb;
+  return L && L.length ? spiceFill(L[k % L.length], ctx) : null;
+}
+// jar i's line (0, 1, 2): "First ..." only for the first, "Last ..." only for the last; three different lines a night
+function spiceJarLine(d, i, spice) {
+  const L = typeof LINES !== 'undefined' && Array.isArray(LINES['spice.jar']) && LINES['spice.jar'].length ? LINES['spice.jar'].map(x => x.text).filter(t => typeof t === 'string') : ['Jar one: {spice}. Whose is it? No telling.', 'Next, {spice}. Whose?', 'Last one: {spice}. Guess away.'];
+  const first = t => /^(First|Jar one)\b/i.test(t), last = t => /^Last\b/i.test(t);
+  const fit = L.map((t, k) => [t, k]).filter(([t]) => i === 0 ? !last(t) : i === 2 ? !first(t) : !first(t) && !last(t));
+  const pool = fit.length ? fit : L.map((t, k) => [t, k]);
+  const used = [];
+  for (let j = 0; j <= i; j++) {
+    const f = pool.filter(([t, k]) => (j === 0 ? !last(t) : j === 2 ? !first(t) : !first(t) && !last(t)) && !used.includes(k)), q = f.length ? f : pool;
+    const pick = q[(d * 5 + j * 3) % q.length]; used.push(pick[1]);
+    if (j === i) return spiceFill(pick[0], { spice });
+  }
+  return null;
+}
+// the script's minutes from its start: open, the three jars, then the three reveals (your card in between)
+const SPICE995_AT = [0, 3, 9, 15, 22, 24, 26], SPICE995_LEN = 28;
+function spiceFrame995() {
+  const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  const e = eventsOn(d).find(x => x.id === 'spice-shelf-supper' && m >= x.from - 10 && m < x.to), jars = e && spiceWeek(d);
+  const b = jars && DECK_CREW.find(a => a.p && a.p.id === 'brennan');
+  if (!b) { if (SPICE.hold) { SPICE.hold(); SPICE.hold = null; } return; }
+  if (!SPICE.hold) SPICE.hold = crewHold(b.p, '3-spice-host');   // she leaves the galley ten minutes early, so she's at the shelf from the start, to the end
+  if (m < e.from) return;
+  const S = SPICE995; if (S.day !== d) Object.assign(S, { day: d, t0: 0, step: 0, last: 0, said: 0 });
+  const joined = SHIP.events.joined.includes(e.id + '@' + d); if (joined) SPICE.joined = d;
+  const here = friHere(e), atShelf = b.settled && b.spot && b.spot.id === '3-spice-host';
+  if (!S.t0 && atShelf && here) S.t0 = Math.max(m, e.from);
+  if (!S.t0 || typeof bubbleSay !== 'function') return;
+  const nm = j => { const p = evPerson(j[0]); return p ? shortName(p) : j[0]; };
+  const room = Math.max(6, e.to - 2 - S.t0), sc = Math.min(1, room / SPICE995_LEN), due = k => S.t0 + Math.floor(SPICE995_AT[k] * sc);
+  const t = performance.now(), card = DIALOGUE && /^spice\.guess/.test(DIALOGUE.id);
+  if (SPICE.joined === d && SPICE.asked !== d && S.step >= 4 && here && !DIALOGUE && typeof dialogueShow === 'function') { SPICE.asked = d; spiceCard995(d, jars, now, e); return; }   // the card once the jars are named
+  const wait = S.step >= 4 && (card || SPICE.joined === d && SPICE.asked !== d);   // the reveal waits for your guess
+  if (S.step < SPICE995_AT.length && !wait && m >= due(S.step) && t - S.last >= 3500 && here && atShelf) {
+    const k = S.step, text = k === 0 ? spiceText('spice.open', d, {}, ['Right, everyone. Three jars off the shelf tonight. Taste, then guess whose.'])
+      : k <= 3 ? spiceJarLine(d, k - 1, jars[k - 1][1])
+      : spiceText('spice.reveal', d * 3 + k - 4, { name: nm(jars[k - 4]), spice: jars[k - 4][1] }, ['The {spice}? That was {name}\'s. From home.']);
+    if (text) bubbleSay(friSpeaker(b), text, 5);
+    S.step++; S.last = t; return;
+  }
+  // the guesses: one bubble every few seconds from those at the supper, from the first jar to the reveal; a jar's owner
+  // sometimes owns up. A guess names a jar owner (or someone else aboard), never the speaker or Brennan
+  if (S.step < 2 || S.step > 4 || card || t - S.last < 2200 || t < SPICE.next || !here) return;
+  const at = DECK_CREW.filter(a => a.p && a.h && a.settled && a.spot && evTagId(a.tag || '') === 'spice-shelf-supper' && a.p.id !== 'brennan');
+  if (!at.length) return;
+  SPICE.next = t + 2700 + (SPICE.n % 3) * 500; S.last = t;
+  const a = at[SPICE.n % at.length], mine = jars.slice(0, Math.min(3, S.step - 1)).find(j => j[0] === a.p.id);
+  const owners = jars.map(j => evPerson(j[0])).filter(p => p && p.id !== a.p.id), crew = schedPeople().filter(p => p.id !== a.p.id && p.id !== 'brennan');
+  const who = SPICE.n % 3 !== 2 && owners.length ? owners[(SPICE.n + d) % owners.length] : crew[(SPICE.n * 7 + d) % crew.length];
+  const text = mine && SPICE.n % 4 === 3 ? spiceText('spice.mine', SPICE.n, { spice: mine[1] }, ['Not saying. But it might be mine.'])
+    : who ? spiceText('spice.guess', SPICE.n, { name: shortName(who) }, ['That\'s {name}\'s, surely?', 'Smells like {name}\'s cooking.', 'I\'d bet a pudding it\'s {name}\'s.']) : null;
+  if (text) bubbleSay(friSpeaker(a), text); SPICE.n++;
+}
+function spiceCard995(d, jars, now, e) {                   // spiceCard, with the spice small mid-sentence
+  spiceCard(d, jars, now, e);
+  const sc = MEETING_SCRIPTS['spice.guess'], j = jars[0]; if (!sc || !DIALOGUE) return;
+  sc.lines[0].text = spiceText('spice.ask', d, { spice: j[1] }, ['Your turn. The {spice}. Whose?']);
+  DIALOGUE.queue[0] = sc.lines[0]; if (typeof dialogueDraw === 'function') dialogueDraw();
+}
+// the tap (tradJoin asks first): joined, and sat at a free mess seat near Brennan with your dinner; already eating in the
+// mess, you stay put. One join notice (eventJoin's); sitting down says what's on your plate
+function spiceJoin(e, a, notice) {
+  const d = e.day, now = shipNow(); eventJoin(e, d, now, notice); SPICE.joined = d;
+  if (ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.placeId && e.rooms && e.rooms.has(deckDef.num + '|' + (PLACE_OF.get(ACT.placeId) || {}).room)) return true;
+  const b = tjAgent('brennan') || a, sp = tradSpot(e, b.x, b.z), seat = sp && sp[0].type === 'mess-seat' ? sp : null;
+  const pl = seat ? seat[0] : [...PLACE_OF.values()].filter(q => q.type === 'mess-seat' && !heldBy(q.id) && !BUSY.has(q.id) && q.id !== PLAYER_PLACE && e.rooms.has(deckDef.num + '|' + q.room))
+    .map(q => [q, placeSpot(q.id)]).filter(([, s]) => s).sort((x, y) => Math.hypot(x[1].x - b.x, x[1].z - b.z) - Math.hypot(y[1].x - b.x, y[1].z - b.z) || (x[0].id < y[0].id ? -1 : 1)).map(([q]) => q)[0];
+  if (!pl) { toast(e.name, 'Every seat\'s taken just now. Grab a tray and find a spot when one comes free.'); return true; }
+  const pose = (placeSpot(pl.id) || {}).pose || 'sit', title = e.name;
+  if (SHIP.player.tray) { actStart('eat', pl.id, { title, pose }); return true; }   // your tray: it's your supper
+  const f = foodFrom('servery');
+  actStart('eat', pl.id, { title, fed: true, dish: f && f.ok && f.dish ? f.dish : 'Brennan\'s spice supper', pose });
   return true;
 }
 // ---- end of slot: Traditions engineer ----
