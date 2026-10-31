@@ -56691,8 +56691,9 @@ function introHealthTap(p) {
   if (!inf(player.here()) && !inf(cellAt(a.x, a.z)) || Math.hypot(a.x - P.x, a.z - P.z) > 4) return false;   // in the infirmary, and near her
   player.stop(); a.talking = 6; player.face = Math.atan2(a.x - P.x, a.z - P.z);
   const id = 'introHealth~tap', now = Math.floor(shipNow());
-  MEETING_SCRIPTS[id] = { ...MEETING_SCRIPTS.introHealth, onEnd: () => introHealthKept(ap) };
-  if (!dialogueShow(id, { id: 'intro-d2-health', who: ['rina'], where: { deck: 3, room: /^Infirmary$/ }, at: now })) return false;
+  const off = typeof crewHold === 'function' ? crewHold('rina', null) : () => {};   // she stays for the scene, past her booking's end (RV30, as storyHolds)
+  MEETING_SCRIPTS[id] = { ...MEETING_SCRIPTS.introHealth, onEnd: () => { off(); introHealthKept(ap); } };
+  if (!dialogueShow(id, { id: 'intro-d2-health', who: ['rina'], where: { deck: 3, room: /^Infirmary$/ }, at: now })) { off(); return false; }
   if (!ap.started) ap.started = now;                      // section 14's apptTick won't mark it missed while it plays (RV30 1)
   if (typeof introArrowClear === 'function' && INTRO_UI.arrow === 'health') introArrowClear();
   return true;
