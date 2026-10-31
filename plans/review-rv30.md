@@ -88,3 +88,4 @@ Only change: music lookahead back to cur.tick(now + 0.5) (0.99.4's line; lead 47
 Fix 1: the reveal waits while the card is open (60 real s cap) and 2.5 s after. spice_paced.py Day 2: pace 5: card
 18:32-18:38, reveals 18:43/45/47; pace 9: card 18:32-18:43, reveals 18:48/50/52; OK. Only spiceFrame995 changed (switch-on
 code). names OK. Sent to TB3, lead, BM22.
+TR1 re-probe of 4037a26: PASS; edge (card left open 40-60 s near 18:40 loses the reveals past 19:15): sent to the lead for TB5's follow-up (cap the wait by ship time too, ~e.to - 8). Not blocking.
