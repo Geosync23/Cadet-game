@@ -112,3 +112,8 @@ Patch 0.99.5 notes 14, 15, 18. Switches JOBCAP_ON, SPREAD_ON, CHECKS_ON (section
   kind's goal ("Check {thing}"), roundDoor and stage 2 picks look up machines first. schedU keys 1995-1997 new.
 - Words: the tour talk is in Zeke's voice; its one shared line with the old talk can't play twice (old one only with
   CHECKS_ON off). No deck numbers in the new lines (the old 'Afternoon round, Deck {deck}' titles are as before).
+- Checks: cadet vs 8976965e as built: f/g/h differ only in Oona's Day 2 remark (washer -> water; shot compared), j_steer1
+  6 px level 1; all three switches OFF: ALL IDENTICAL (renderer noise only). machine_check OK. mech_check running; its 24a
+  row: the tour = 5 kinds, 3 checks, Decks 5,5,5,4,4, one mark each.
+- **F1**: jb_scan.py: for a Tier 1 player every pump-fault machine but the washers is Tier 2, so fixScanMachine returns
+  'washer' on every day 6-30; machine_check's FX10 line shows 4-washer-1. Note 15's "not always a washer" doesn't happen.
