@@ -728,6 +728,22 @@ def check_long(pw, path):
     if on != path:   # the build has it off: as before, for the record
         r_off, p_off, _ = stall_lates(pw, path); print(f'  long off (as 0.99.4): late starts after each stall {r_off}')
 CHECKS += [check_hide, check_mess_scale, check_long]   # 0.99.5 (SD5): notes 9, 4, 17
+def check_buf(pw, path):
+    """note 17's option (SND_BUF_ON, on a copy): the bigger output buffer (latencyHint 'playback'): the context starts with
+    more output latency than with it off, and sound still starts on a tap and plays"""
+    on = switch_copy(path, 'const SND_BUF_ON = false;', 'const SND_BUF_ON = true;')
+    if not on: print('  buf: no SND_BUF_ON in this build (nothing to check)'); return
+    lat = []
+    for p in ([path, on] if on != path else [on]):
+        g = Game(pw, p)
+        try:
+            open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+            g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000)
+            lat.append(g.ev("[SND.ctx.baseLatency, SND.ctx.outputLatency || 0]"))
+        finally: g.close()
+    print('  buf: [base, output] latency off / on:', lat)
+    if len(lat) == 2: check(lat[1][0] + lat[1][1] > lat[0][0] + lat[0][1], f'buf: switched on, a bigger output buffer ({lat})')
+CHECKS += [check_buf]   # 0.99.5 (SD5, lead 47): note 17's bigger-buffer option
 
 if os.environ.get('SOUND_ONLY'): CHECKS = [c for c in CHECKS if re.search(os.environ['SOUND_ONLY'], c.__name__)]   # run only the named checks (a regex), while building
 with sync_playwright() as pw:

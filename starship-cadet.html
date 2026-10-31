@@ -73994,6 +73994,7 @@ function sndFx(name, o) { try { return SND.fx(name, o); } catch (e) { return fal
 const SND_TITLE = 'C';   // the user's pick, 2026-10-29 (Ship's log). 'A' Night terminal | 'B' Phosphor glow | 'C' Ship's log | null (silent, as TB1 built it)
 const SND_R3_ON = true;   // switched on in 0.96.0 (the user: the sound update is on when published; via lead 43/44)
 const SND_LONG = false;   // 0.99.5 (SD5, the user's note 17): after a stall (a long frame) no sound is scheduled in the past, where it starts late and bunched (pops): the loops skip to now, the music looks 2 s ahead and drops bars already gone; off: as 0.99.4
+const SND_BUF_ON = false;   // 0.99.5 (SD5, note 17, lead 47's option for the user): a bigger output buffer (latencyHint 'playback'), more slack for a busy phone against dropouts (crackle); taps, doors and footsteps sound about 0.1-0.2 s later; off: as 0.99.4
 const MESS_SCALE = false;   // 0.99.5 (SD5, the user's note 4): the mess hall's murmur follows how many are there, its level too; none for one crew member alone; off: as 0.99.4
 const SND = (() => {
   const S = { ctx: null, bus: {}, onFrame: [], log: URL_FLAGS.has('soundlog') ? [] : null };
@@ -75687,7 +75688,7 @@ const SND = (() => {
   function start() {
     if (ctx || !ALLOWED || !S.prefs.on) return;
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
-    try { ctx = new AC({ latencyHint: 'interactive' }); } catch (e) { return; }
+    try { ctx = new AC({ latencyHint: SND_BUF_ON ? 'playback' : 'interactive' }); } catch (e) { return; }
     try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
     BUS = buildGraph(ctx, ctx.destination); WHITE = BUS.buf.w; BROWN = BUS.buf.b; ROUTE = BUS;
     S.ctx = ctx; S.bus = { master: BUS.master, ui: BUS.ui, hum: BUS.hum, steps: BUS.steps, music: BUS.music, verb: BUS.verb };
