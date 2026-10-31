@@ -59,3 +59,9 @@ Base: claude/integration 57eceec4 = 0.99.3, game sha256 04c821fe...c2a9 (verifie
 - Calder real game (probe_calder_d879.log, rep raised to well by the probe): P5_END's end.story opens itself at 18:45 in
   the booking; Calder 5 ready only after it; at real pace both overrun 19:05 (needs B5's fix). **W5** two "Four weeks"
   speeches back to back about two different first chiefs: lead / writer to choose.
+- d879203b switch-on: arc_check OK; **events_check 28 FAILED (B6)**: Day 26 calder/halloran/torres in 5-tea-1..3
+  (intro-story-calder-5) 18:40-19:05, held for four-weeks-aboard (storyPlanBeats seats them in the tradition's held places
+  without them going to it). Log plans/rv28-probes/events_d879_on.log. Sent to ST1 with options.
+
+## d22a5baa (game ae582351...69c4): B5 fixed (storyOpen; skip cleared in storyDone; switch-on only), SW4's invite
+- Read: fine. B6 still applies (planner unchanged).
