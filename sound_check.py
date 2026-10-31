@@ -419,7 +419,9 @@ def check_r3mess(pw, path):
             r = g.ev("(M => ({ n: M.n, full: M.full, on: !!M.scene, clinks: M.clinks }))(SND.r3Mess)"); r['per_s'] = (r['clinks'] - c0) / secs
             print(f'  r3mess {name}: room {k!r} {r}'); return r
         night = at('3 am, the mess', 1440 + 180, 3, 'Mess hall')
-        check(night['on'], 'r3mess: the scene runs while you are in the mess')
+        if g.ev("SND.r3Mess.scale === true") and night['n'] == 0:   # 0.99.5 (MESS_SCALE on): an empty mess has no scene (it goes after 5 s empty; check_mess_scale)
+            check(not night['on'], 'r3mess: an empty mess at 3 am has no scene (MESS_SCALE)')
+        else: check(night['on'], 'r3mess: the scene runs while you are in the mess')
         if night['n'] == 0: check(night['per_s'] == 0, f'r3mess: empty mess is silent (clatter {night["per_s"]}/s)')
         else: print('  r3mess: someone in the mess at 3 am, the empty case is checked by hand below')
         full = at('the dinner rush', 1440 + 1110, 3, 'Mess hall')
@@ -430,7 +432,7 @@ def check_r3mess(pw, path):
             check(g.ev("(sc => !!sc && sc.loops.length === 12)(SND.r3Mess.scene)"), 'r3mess: the murmur alone plays at the rush (its twelve voices, no galley or clatter)')
         # every layer follows the count: none at 0, more as the room fills (the scene reads M.at's levels live)
         lv = g.ev("[0, 1, 2, 8, 25, SND.r3Mess.full].map(n => [n, SND.r3Mess.at(n)])"); print('  r3mess layers', lv)
-        check(lv[0][1] == {'galley': [0, 0], 'clatter': 0, 'voices': 0}, 'r3mess: no one there, every layer silent')
+        check({k: v for k, v in lv[0][1].items() if k != 'level'} == {'galley': [0, 0], 'clatter': 0, 'voices': 0} and lv[0][1].get('level', 0) == 0, 'r3mess: no one there, every layer silent')   # 'level': MESS_SCALE's (0.99.5)
         for (n0, a), (n1, b) in zip(lv, lv[1:]):
             if n0 == 0: continue
             check(b['clatter'] >= a['clatter'] and b['voices'] >= a['voices'] and b['galley'][0] >= a['galley'][0], f'r3mess: {n1} people no quieter than {n0}')
