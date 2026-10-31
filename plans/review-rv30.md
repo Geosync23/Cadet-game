@@ -1,6 +1,6 @@
 # RV30 reviews (0.99.5 playtest patch)
 
-RV30 session_014zyJYNfvrKCLGhgSt6Kv8V... see TEAM.md. Lead 47 (session_014zyJYM4mt9ZDCD5H9JZDtN). Base for every review:
+RV30 session_014zyJYNFR7ewWJGvEQNUAHr, branch claude/review-rv30. Lead 47 (session_014zyJYM4mt9ZDCD5H9JZDtN). Base for every review:
 claude/staging-0994 8976965e (game a01d1a4c...bc4a). Probes in plans/rv30-probes/.
 
 ## SD5 sound, claude/p995-sound d26a11a (game d785aea6...30ff, verified): FIXES NEEDED (small)
