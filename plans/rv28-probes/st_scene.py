@@ -39,6 +39,7 @@ with sync_playwright() as pw:
     r = pg.ev("devmodeRun('Jump', () => devmodeSetCareerTo(%d, { day: %d, at: %d, where: { deck: %d, room: %s } }))" % (CFG['day'], CFG['day'], CFG['at'], CFG['deck'], json.dumps(rk))); pg.step(10)
     print('jump', r); print('setup', pg.ev(SETUP))
     phase, cards, reloaded, said = 'wait', 0, False, []
+    PACE = int(os.environ.get('ST_PACE', '1')); tick = 0   # loops (about 1 real second each) per card: 3 = a reader at about 3 s a card
     for i in range(400):
         pg.step(30)
         try: s = pg.ev(S)
@@ -47,9 +48,14 @@ with sync_playwright() as pw:
         if phase == 'wait' and s['ready'] and str(s['ready']).endswith(':' + str(CFG['beat'])):
             print('TAP ->', pg.ev("(() => { const p = socP(%s); chatOpen(p, false, null, { tap: true }); const l = chatLine ? null : null; return momentShow(%s) ? 'shown' : 'not shown'; })()" % (json.dumps(ID), json.dumps(s['ready'])))); phase = 'scene'
             pg.shot(str(OUT / f'{WHO}_start.png')); continue
-        if phase == 'wait' and s['dlgId'] and not str(s['dlgId']).startswith('moment:') and os.environ.get('ST_PLAY_OTHER'): print('OTHER', s['dlgId'], (s['dlg'] or '')[:120]); pg.ev(NEXT); continue   # another scene on screen: play it as a player would
+        if phase == 'wait' and s['dlgId'] and not str(s['dlgId']).startswith('moment:') and os.environ.get('ST_PLAY_OTHER'):
+            tick += 1
+            if tick % PACE == 0: print('OTHER', s['dlgId'], (s['dlg'] or '')[:120]); pg.ev(NEXT)
+            continue   # another scene on screen: play it as a player would
         if phase == 'scene':
             if s['dlg']:
+                tick += 1
+                if tick % PACE: continue
                 said.append(s['dlg']); cards += 1
                 if cards == 4 and not reloaded:
                     pg.shot(str(OUT / f'{WHO}_mid.png'))
