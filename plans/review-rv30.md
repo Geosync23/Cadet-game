@@ -98,3 +98,4 @@ Sent to OB2, lead, BM22. Queue: TB5's follow-up (TR1's spice edge) when it comes
 ### SW4 words, claude/p995-traditions-words 181d86a (game 62d3602b6fc35e3d58ad78b17424e3e22519a4374a9665e9e7effb4b0ce32d3c): PASS
 4037a26 + content/banks/milestones-995.lines baked (LINES only). names OK, lines PASS, milestones995 (switch on) OK with the
 new lines on the cards. Word note (not blocking): the new hand's tea close mentions Halloran's mug, already handed over at 13:00.
+check_fast on 181d86a: QUICK CHECK OK (329 s).
