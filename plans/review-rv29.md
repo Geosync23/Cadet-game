@@ -20,3 +20,9 @@ input, no verdict from me. Base for every review: claude/staging-0994 8976965e (
   identical), but on a tour with no judging they contradict Zeke's talk ("Tick it off"). Fix idea: with CHECKS_ON and
   j.train, the follow keys and roundDone's toast take tour versions (e.g. train.m1.follow.tour.look / .done,
   round.tour.done), SW4 for the words.
+
+## JB2 re-review (RV28's FIXES NEEDED ~10:05: W1, F1, J1), waiting for JB2's new commit
+What to check (lead 47, 10:08): W1 words baked (content_gen --check, check_fast); F1 option (a): the scanner's first job
+rotates over the water recycler / pumps / irrigation (Tier 2 machines), never a washer, held for you with { tier: 2 } as
+the Tier 2 test job is, takeable at Tier 1, work within the 40-minute cap (rv28/jb_scan.py, days 6-30, plus a take at
+Tier 1); J1 the tour's own lines (tour_play.py); machine_check, mech_check; switches off still identical to 8976965e.
