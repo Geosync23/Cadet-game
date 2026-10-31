@@ -1,0 +1,66 @@
+@bank all
+// SW4's words for TB3's milestone cards (0.99.5, TR1 item 2; MS995 in section 18's Traditions slot, behind TRAD995_ON).
+// Keys milestone.<id>.open / mid / reply.N (your three lines) / answer.N (the host's reply to reply N) / close. One line
+// each, so a reply always matches its answer. No placeholders: the card fills none.
+// Calder: few words, numbers not adjectives, no "well done" (her story's payoff is Four weeks aboard). Zeke: quick and
+// warm, never calls a job easy.
+
+// new-hands-tea (host calder): your first Friday, the Works tea corner
+== milestone.new-hands-tea.open
+- Sit. The first Friday's tea belongs to the new hand. The rule's older than me.
+== milestone.new-hands-tea.mid
+- Five days. Nothing of yours has come back to the board. That's the number I watch.
+== milestone.new-hands-tea.reply.1
+- It's been a lot, Chief.
+== milestone.new-hands-tea.answer.1
+- It is. Week two's less. By week three it's just the work.
+== milestone.new-hands-tea.reply.2
+- I think I'm going to like it here.
+== milestone.new-hands-tea.answer.2
+- Hm. Say that again at four weeks. I'll remember you said it.
+== milestone.new-hands-tea.reply.3
+- (Drink your tea quietly)
+== milestone.new-hands-tea.answer.3
+- Good. Quiet's allowed at this table. Most days it's encouraged.
+== milestone.new-hands-tea.close
+- Your mug's on the rack now. That's where it lives. Fridays, this corner.
+
+// six-weeks-aboard (host torres-zeke): a tea in the bow lounge
+== milestone.six-weeks-aboard.open
+- Six weeks! Sit, sit. I've borrowed the good mugs from the bar. Nobody tell the bar.
+== milestone.six-weeks-aboard.mid
+- First morning, you asked me which way the Works was. Now Pell asks you where things are.
+== milestone.six-weeks-aboard.reply.1
+- I still get lost sometimes.
+== milestone.six-weeks-aboard.answer.1
+- Course you do. So do I. I'm fairly sure coil three moves at night.
+== milestone.six-weeks-aboard.reply.2
+- Thanks for showing me the ropes, Zeke.
+== milestone.six-weeks-aboard.answer.2
+- Cheers. You asked the right questions. Loads of them. That's half of it, honestly.
+== milestone.six-weeks-aboard.reply.3
+- So what comes next?
+== milestone.six-weeks-aboard.answer.3
+- Bigger jobs. Longer rounds. One day, a new hand of your own to show round.
+== milestone.six-weeks-aboard.close
+- To six weeks. And the next six, done properly. Drink up before the bar notices.
+
+// twelve-weeks-aboard (host calder): her toast in the mess
+== milestone.twelve-weeks-aboard.open
+- Twelve weeks. A quarter of a year aboard. I checked the log.
+== milestone.twelve-weeks-aboard.mid
+- This isn't a speech. It's a cup of tea with more people standing near it.
+== milestone.twelve-weeks-aboard.reply.1
+- Thanks, Chief. For all of it.
+== milestone.twelve-weeks-aboard.answer.1
+- Don't. You did the jobs. I signed the cards. That's all it was.
+== milestone.twelve-weeks-aboard.reply.2
+- Here's to the next twelve.
+== milestone.twelve-weeks-aboard.answer.2
+- The next twelve. I'll want the numbers. I always want the numbers.
+== milestone.twelve-weeks-aboard.reply.3
+- (Raise your cup)
+== milestone.twelve-weeks-aboard.answer.3
+- Hm. Cups up, all of you. Properly up.
+== milestone.twelve-weeks-aboard.close
+- To the hand who isn't new any more. Back to it tomorrow.

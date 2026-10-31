@@ -17,7 +17,7 @@ ties: decor talentStage
 invite: host=dahl-mira odds=35% line="Talent night tonight. You don't have to get up. But you could."
 
 == mail
-- Talent night tomorrow, {time} in the bow lounge. Sing, play, juggle, read a poem, or just clap loudly. Sign up at the bar.
+- Talent night tomorrow, {time}, in the bow lounge. The ship's musicians play, and the rest of us listen and clap. A good audience is half of it.
 
 == ask
 - Talent night later. I'm doing a card trick. It works about half the time.   #funny
