@@ -99,3 +99,7 @@ Sent to OB2, lead, BM22. Queue: TB5's follow-up (TR1's spice edge) when it comes
 4037a26 + content/banks/milestones-995.lines baked (LINES only). names OK, lines PASS, milestones995 (switch on) OK with the
 new lines on the cards. Word note (not blocking): the new hand's tea close mentions Halloran's mug, already handed over at 13:00.
 check_fast on 181d86a: QUICK CHECK OK (329 s).
+
+### SW4 fac5e56 (game 0b047d75acc513507cb4d044db441aa13fa8df09e35997e7cb48be4b9f25ed1c): PASS
+Three tradition Mails reworded (Talent night, Tap night, Midtour; the user's "change the Mail to match"); only text.mail[0].t
+changed in each row. lines PASS, names OK, check_fast OK (326 s); trad_mail.py shows the three as sent (Days 5, 152, 182).
