@@ -48642,7 +48642,7 @@ function tastJoin(e, a, notice, lead) {
 // mid-sentence and capital at the start; a guess never names its speaker. SHIP.spice = { joined, asked } is saved, so a
 // reload mid-supper keeps the card (and doesn't ask twice). Nothing calls R(); the planner reads none of it
 const TRAD995_ON = false || URL_FLAGS.has('trad995');
-const SPICE995 = { day: 0, t0: 0, step: 0, last: 0, said: 0 };
+const SPICE995 = { day: 0, t0: 0, step: 0, last: 0, said: 0, cardAt: 0 };
 if (TRAD995_ON) {
   TRAD_JOIN['spice-shelf-supper'] = { host: 'brennan', pose: 'sit:talk', need: 'social', gain: 10, also: { leisure: 8 }, verb: 'guess the spices', what: 'sit down to supper and guess whose spices' };
   tjActs();
@@ -48682,9 +48682,9 @@ function spiceFrame995() {
   const e = eventsOn(d).find(x => x.id === 'spice-shelf-supper' && m >= x.from - 10 && m < x.to), jars = e && spiceWeek(d);
   const b = jars && DECK_CREW.find(a => a.p && a.p.id === 'brennan');
   if (!b) { if (SPICE.hold) { SPICE.hold(); SPICE.hold = null; } return; }
-  if (!SPICE.hold) SPICE.hold = crewHold(b.p, '3-spice-host');   // she leaves the galley ten minutes early, so she's at the shelf from the start, to the end
+  if (!SPICE.hold || CREW_HELD.get('brennan') !== '3-spice-host') SPICE.hold = crewHold(b.p, '3-spice-host');   // (again after a deck change: deckCrewClear lets everyone go) she leaves the galley ten minutes early, so she's at the shelf from the start, to the end
   if (m < e.from) return;
-  const S = SPICE995; if (S.day !== d) Object.assign(S, { day: d, t0: 0, step: 0, last: 0, said: 0 });
+  const S = SPICE995; if (S.day !== d) Object.assign(S, { day: d, t0: 0, step: 0, last: 0, said: 0, cardAt: 0 });
   const joined = SHIP.events.joined.includes(e.id + '@' + d); if (joined) SPICE.joined = d;
   const here = friHere(e), atShelf = b.settled && b.spot && b.spot.id === '3-spice-host';
   if (!S.t0 && atShelf && here) S.t0 = Math.max(m, e.from);
@@ -48692,8 +48692,8 @@ function spiceFrame995() {
   const nm = j => { const p = evPerson(j[0]); return p ? shortName(p) : j[0]; };
   const room = Math.max(6, e.to - 2 - S.t0), sc = Math.min(1, room / SPICE995_LEN), due = k => S.t0 + Math.floor(SPICE995_AT[k] * sc);
   const t = performance.now(), card = DIALOGUE && /^spice\.guess/.test(DIALOGUE.id);
-  if (SPICE.joined === d && SPICE.asked !== d && S.step >= 4 && here && !DIALOGUE && typeof dialogueShow === 'function') { SPICE.asked = d; spiceCard995(d, jars, now, e); return; }   // the card once the jars are named
-  const wait = S.step >= 4 && (card || SPICE.joined === d && SPICE.asked !== d);   // the reveal waits for your guess
+  if (SPICE.joined === d && SPICE.asked !== d && S.step >= 4 && here && !DIALOGUE && typeof dialogueShow === 'function') { SPICE.asked = d; S.cardAt = m; spiceCard995(d, jars, now, e); return; }   // the card once the jars are named
+  const wait = S.step >= 4 && (card && m < (S.cardAt || 0) + 5 || SPICE.joined === d && SPICE.asked !== d && here);   // the reveal waits for your guess (five minutes at most: a card left open doesn't stop the supper)
   if (S.step < SPICE995_AT.length && !wait && m >= due(S.step) && t - S.last >= 3500 && here && atShelf) {
     const k = S.step, text = k === 0 ? spiceText('spice.open', d, {}, ['Right, everyone. Three jars off the shelf tonight. Taste, then guess whose.'])
       : k <= 3 ? spiceJarLine(d, k - 1, jars[k - 1][1])

@@ -35,7 +35,7 @@ def supper(pw, d):
     wd = g.ev("weekday(%d)" % d); on_ = g.ev("eventsOn(%d).some(x => x.id === 'spice-shelf-supper')" % d)
     check(wd == 1 and on_, 'Day %d is a Tuesday with the supper (%s, %s)' % (d, wd, on_))
     if not on_: g.close(); return
-    g.ev("(() => { skipTo(%d * 1440 + 1090); goToDeck(3, null); SHIP.device.settings.tips = false; for (const k of NEED_KEYS) SHIP.player.needs[k] = 95; clearGoal(); })()" % (d - 1)); g.ev(SAYHOOK); g.step(5)
+    g.ev("(() => { skipTo(%d * 1440 + 1080); goToDeck(3, null); SHIP.device.settings.tips = false; for (const k of NEED_KEYS) SHIP.player.needs[k] = 95; clearGoal(); })()" % (d - 1)); g.ev(SAYHOOK); g.step(5)
     g.ev(INROOM)
     first = {}; tapped = None; spots_after = []; card_at = None; picked = False
     for i in range(400):
@@ -104,7 +104,8 @@ def reload(pw, d):
     ld = ev("[SPICE.joined, SPICE.asked, SHIP.time.day, SHIP.time.min]")
     card = None
     for i in range(200):
-        step(20); x = ev("[SHIP.time.min, !!DIALOGUE && DIALOGUE.id]")
+        step(20); x = ev("[SHIP.time.min, !!DIALOGUE && DIALOGUE.id, deckDef.num, roomAt(...player.here()), JSON.stringify(SPICE995), (DECK_CREW.find(a => a.p.id === 'brennan') || {}).goalId || null]")
+        if i % 15 == 0: print('   ', x)
         if x[1] == 'spice.guess': card = x[0]; break
         if x[0] >= 1150: break
     print('  loaded', ld, 'card at', card)
