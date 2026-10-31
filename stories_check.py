@@ -4,7 +4,7 @@
 # switched on by text (the build itself may have it off). Three parts:
 #   1. Off: the build as it is. With STORIES_ON off nothing of the stories is read: storyMoment is null, momentDef gives
 #      the old MOMENTS words (Pell 5-8, Kovac 1-4), the story people keep their roster threads, no state is written.
-#   2. On, twice over DAYS ship days (default 30) as a diligent player: a chat and a meal with each story person a day,
+#   2. On, twice over DAYS ship days (default 36; stage 2 needs it) as a diligent player: a chat and a meal with each story person a day,
 #      a Works job a day; every 10 minutes from 06:00 the stories' clock (storyTick) runs and whatever beat is ready is
 #      played (the first reply each time); a favour from a story is done at once. Run "play" goes to every crescendo;
 #      run "miss" never does. Rules checked on each run's log:
@@ -28,7 +28,7 @@ from playwright.sync_api import sync_playwright
 src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cadet_test.py')).read(); src = src[:src.index('import sys, json, hashlib')]
 ct = types.ModuleType('ct'); exec(src, ct.__dict__)
 BUILD = sys.argv[1]
-DAYS = int(sys.argv[2]) if len(sys.argv) > 2 else 30
+DAYS = int(sys.argv[2]) if len(sys.argv) > 2 else 36   # stage 2 (ST1): 36, so its later steps (Calder's quiet ending, Zeke's Day 30) finish inside the run
 OFF_LINE, ON_LINE = 'var STORIES_ON = false;', 'var STORIES_ON = true;'
 OFF2_LINE, ON2_LINE = 'var STORIES2_ON = false;', 'var STORIES2_ON = true;'   # stage 2 (ST1)
 
