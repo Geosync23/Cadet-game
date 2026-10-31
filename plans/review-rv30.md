@@ -34,3 +34,15 @@ Fixes:
 3. sound_check check_long can't fail on the bug: its own off run prints late starts [0, 0, 0, 0] too, so a build where
    SND_LONG did nothing would pass. Count gain moves in the past as well (stall_real.py: off 1604, on 0) and require the off
    run to show some when the build has it off.
+
+## OB2 onboarding + appointments, claude/p995-onboarding 82e9cc5 (game 842b5ff5...0688): FIXES NEEDED (early, sent)
+
+Passing so far: cadet_test vs 8976965e alone ALL IDENTICAL; names_check OK; lines_check PASS; tip words (note 1) have no
+weekday; health arrow on from 13:59; a tap on Rina in the infirmary plays introHealth (health_tap.py).
+
+1. Note 16 blocker: the clock runs during the scene (~0.6 ship min / real s). health_tap.py WT BUILD 18 3: tap 14:18, ~3 s a
+   card, scene 14:19-14:32; 14:30 apptTick marks it missed, introHealthMissed rebooks Day 3 14:00; scene end sets met but
+   can't keep it. Day 2 missed, Settling-in not ticked, Day 3 booking can never be kept (introHealthDue refuses once met).
+2. Note 11: accepted tradition invitations (socialInvite { trad }) read "Invitation with Captain Odile Marrow" in Coming up;
+   the Calendar shows "06:30 Sunrise stretch" and "06:30 Invitation with Captain Odile Marrow · booked" (appt_views.py).
+Note 7: a skipped game stays on the arrival evening's steps (zeke_end.py is not a fair state; kept for the record).
