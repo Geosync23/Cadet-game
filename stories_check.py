@@ -40,7 +40,9 @@ OFF = r"""
     const d = momentDef(k), old = MOMENTS[k]; if (old && d && d.lines.length !== old.lines.length) out.bad.push(k + ': not the old words'); if (!old && d && d.lines === STORY_MOMENTS[k].lines) out.bad.push(k + ': a story beat while off'); }
   for (const id of ['teague-theo', 'bramwell-basil', 'halloran-emeka', 'salo-saad']) { const p = socP(id), th = voiceOf(id).thread; if (p && p.thread && th !== p.thread && !(VOICE[id] && /^arc:/.test(VOICE[id].thread || ''))) out.bad.push(id + ' thread ' + th + ', the roster says ' + p.thread); }
   if (SHIP.social.stories && SHIP.social.stories.cs) out.bad.push('SHIP.social.stories.cs written while off');
-  out.bad2 = []; out.on2 = typeof STORIES2_ON !== 'undefined' && STORIES2_ON; out.table2 = typeof STORY_MOMENTS2 !== 'undefined' ? Object.keys(STORY_MOMENTS2).length : -1;
+  out.bad2 = [];
+  if (STORIES_ON) for (const d of [19, 26]) if (storyCastGoes('captains-address', 'kovac-zainab', d) !== true) out.bad2.push('stage 1\'s planner hook: storyCastGoes(captains-address, kovac-zainab, ' + d + ') is not true (RV28)');   // stage 1's live hook still answers
+  out.on2 = typeof STORIES2_ON !== 'undefined' && STORIES2_ON; out.table2 = typeof STORY_MOMENTS2 !== 'undefined' ? Object.keys(STORY_MOMENTS2).length : -1;
   if (!out.on2 && out.table2 > 0) {   // stage 2 off (ST1): none of its beats is read, wherever stage 1 is
     for (const k of Object.keys(STORY_MOMENTS2)) { if (storyMoment(k) && storyMoment(k) === STORY_MOMENTS2[k]) out.bad2.push('stage 2 beat ' + k + ' read while STORIES2_ON is off');
       const d = momentDef(k), old = MOMENTS[k]; if (d && d.lines === STORY_MOMENTS2[k].lines) out.bad2.push(k + ': a stage 2 beat while off'); }

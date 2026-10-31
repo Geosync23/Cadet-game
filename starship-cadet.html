@@ -54674,7 +54674,7 @@ function storyCastGoes(evId, id, d) {
   if (!STORY_CAST) { STORY_CAST = new Map(); const S = storyTable();
     for (const k in S || {}) { const m = S[k], c = /^trad:(.+)$/.exec(m.crescendo || ''), days = m.when && m.when.day; if (!c || !days) continue;
       (STORY_CAST.get(c[1]) || STORY_CAST.set(c[1], []).get(c[1])).push({ ids: [m.who].concat(m.cast || []), days: [].concat(days) }); } }
-  const L = STORY_CAST.get(evId); if (STORIES2_ON && !STORY_TAB) STORY_CAST = null;   // stage 2: made again once its table is there return !!L && L.some(x => x.ids.includes(id) && x.days.every(v => storyDayIn(v, d)));
+  const L = STORY_CAST.get(evId); if (STORIES2_ON && !STORY_TAB) STORY_CAST = null; return !!L && L.some(x => x.ids.includes(id) && x.days.every(v => storyDayIn(v, d)));   // stage 2: made again once its table is there
 }
 function storyGoes(p, d, s, now) {                        // by their plans (pure), they and the cast are at the gathering at some point in it
   for (let t = Math.max(now, s.from); t < s.to; t += 5) if (storyAtSlot(p, t, d, s) && (!Array.isArray(d.cast) || d.cast.every(c => storyHere(c, p, { t })))) return true;
