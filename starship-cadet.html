@@ -58533,7 +58533,8 @@ onSim('job', n => {
 onSim('job', n => {                                      // the teacher's word at each step of your training job
   const c = SHIP.works && SHIP.works.cur; if (!n || !c || c.st !== 'do' || n.id !== c.j || n.step === 'turnin') return;
   const key = n.step === 'stop' ? ({ job: 'hold', pickup: 'carry', drop: 'carry', cart: 'carry', load: 'carry', unload: 'carry', return: 'carry' }[n.tag] || n.tag || 'hold') : n.step;
-  const say = worksVoice(c.by, 'train.' + c.id + '.follow.' + key) || [{ take: 'Good. Take your time.', done: 'Done. Turn it in at the board.' }[key] || (n.step === 'stop' ? 'That\'s it. Next.' : null)].filter(Boolean);
+  const fk = c.id === 'm1' && typeof CHECKS_ON !== 'undefined' && CHECKS_ON && (key === 'look' || key === 'done') ? 'tour.' + key : key;   // JB2 (RV28's J1): the first rounds' tour has its own words (train.m1.follow.tour.look / .done)
+  const say = worksVoice(c.by, 'train.' + c.id + '.follow.' + fk) || [{ take: 'Good. Take your time.', done: 'Done. Turn it in at the board.' }[key] || (n.step === 'stop' ? 'That\'s it. Next.' : null)].filter(Boolean);
   worksSayAll(c.by, say);
 });
 onSim('shiftMissed', n => { worksXp(WORK_XP.missed); if (!SHIP.works || typeof mailSend !== 'function') return;   // said, not quiet (FX3, AR1): a missed shift costs your reputation
@@ -58741,7 +58742,7 @@ function roundMark(j, k, pick) {
 // a round finished: someone else's (the teacher's, the crew's) finds what's worn on it; yours counts as a use
 function roundDone(j, t, by) {
   if (by && by !== 'you') for (const id of j.route || []) if (roundState(id) !== 'healthy') roundFound(id, by);
-  if (by === 'you') { worksUse('m1'); try { toast('Round', roundText('round.done', 'Round done. Anything worn is on the board, found by you.')); } catch (e) { /* no UI */ } }
+  if (by === 'you') { worksUse('m1'); try { toast('Round', j.train && CHECKS_ON ? roundText('round.tour.done', 'Tour done. Anything that wasn\'t right is on the board.') : roundText('round.done', 'Round done. Anything worn is on the board, found by you.')); } catch (e) { /* no UI */ } }   // JB2 (RV28's J1): the tour's own word
   if (by === 'you' && !j.train && typeof roundPicks === 'function' && roundPicks() && (j.route || []).filter(id => roundState(id) === 'worn' && roundRight((j.marks || {})[id], 'worn')).length >= 2) {   // stage 2: two or more worn found (0.45.16)
     worksSayAll('torres-zeke', worksVoice('torres-zeke', 'round.two') || ['Two worn on one round? You\'ve got the eye now.']); worksSideXp(1, 'round');
   }
