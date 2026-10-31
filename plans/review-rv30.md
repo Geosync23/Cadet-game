@@ -89,3 +89,8 @@ Fix 1: the reveal waits while the card is open (60 real s cap) and 2.5 s after. 
 18:32-18:38, reveals 18:43/45/47; pace 9: card 18:32-18:43, reveals 18:48/50/52; OK. Only spiceFrame995 changed (switch-on
 code). names OK. Sent to TB3, lead, BM22.
 TR1 re-probe of 4037a26: PASS; edge (card left open 40-60 s near 18:40 loses the reveals past 19:15): sent to the lead for TB5's follow-up (cap the wait by ship time too, ~e.to - 8). Not blocking.
+
+### OB2 fb81b79 (game 7e66e20d746f0c539bd84a0429dbf17231adfd8dfae2559c7d0b272bb8d7d2dc): PASS
+crewHold('rina', null) for the scene, released in onEnd (and if dialogueShow fails). health_tap 28/6: Rina in the infirmary
+1 m away to 14:56 (scene end), kept, no rebook, no errors. intro_check whole OK on 6c926f4 (and 82e9cc5); names OK.
+Sent to OB2, lead, BM22. Queue: TB5's follow-up (TR1's spice edge) when it comes.
