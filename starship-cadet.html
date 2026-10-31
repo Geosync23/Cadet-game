@@ -16840,7 +16840,7 @@ function ixTap(it, at, point) {
   const room = roomAt(...cellAt(at.x, at.z));             // the thing's own room: never a place through a wall
   const near = [...PLACE_OF.values()].map(pl => [pl, placeSpot(pl.id), ixKind(pl, it)])   // a floor tap's stand-in (section 15's playerFloorTap: the exercise bikes) has no hit box: from the spot tapped (0.92.0)
     .filter(([pl, s, k]) => k && s && (!room || pl.room === room) && !privatePlace(pl) && (it.hit ? ixDist(it, s) : Math.hypot(s.x - at.x, s.z - at.z)) < IX_NEAR)
-    .sort((m, n) => Math.hypot(m[1].x - point.x, m[1].z - point.z) - Math.hypot(n[1].x - point.x, n[1].z - point.z));
+    .sort((m, n) => (ixTeaFirst(it) ? (m[2] === 'ixTea' ? 0 : 1) - (n[2] === 'ixTea' ? 0 : 1) : 0) || Math.hypot(m[1].x - point.x, m[1].z - point.z) - Math.hypot(n[1].x - point.x, n[1].z - point.z));   // (0.99.5, TRAD995_ON) the kettle or hot water: its standing tea place first, before a chair that's nearer the tap
   if (!near.length) return false;
   const busy = id => heldBy(id) || (typeof placeBusy === 'function' && placeBusy(id) && playerHolds() !== id);
   const free = near.find(([pl]) => !busy(pl.id));
@@ -49407,6 +49407,10 @@ if (TRAD995_ON) {
   if (t3) Object.assign(t3, { at: [23, 2], face: -152 });
   if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }
 }
+// (0.99.5, RV30 for lead 48; BM23's interactions_check: "Hot water: ixTea, got ixLounge") with 5-tea-3 in the far corner, the
+// armchair 5-tea-2 is nearer the hot water's tap point, so section 15's ixTap sat you down instead of making tea: for a
+// kettle or hot water, its standing tea place (an ixTea kind) sorts first. Off: ixTap's order as before
+function ixTeaFirst(it) { return TRAD995_ON && !!it && /kettle|hot water/i.test(it.t || ''); }
 // ---- 0.99.5 note 8 (TB3, lead 47's decision on TR1's finding; behind TRAD995_ON): Name on the beam ("where you stand to
 // write isn't where the name goes: scoot the player over; crew speech buttons cover the name: slide those crew over"). Your
 // name is BEAM.slots[0], along 4.98 of the bay's hull wall (x about 14.4-15.6, the next hand's under it); you painted from
