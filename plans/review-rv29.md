@@ -71,3 +71,16 @@ No feature switch (fixes live); SEAT_BTN_ALL = !NOSAVE || ?seatbtn (the no-tray 
 - Not probed by me: an invited friend's cabin (shares the own-cabin path PL2 probed); controller X on the seat button.
 - For the lead (PL2 flagged it): Stop partway now pays the share of the real length (6 of ~8 min = 2 friendship; was 1).
 - **Verdict (~11:55 UTC): PASS claude/p995-player 6b2f135 (game e462d177...bf80b).** Notes 3, 12, 13 fixed as the lead's GO.
+
+## CT5 claude/p995-controller 7c6c2477 (game commit 96a310d7; game 5fae9bbf...f0cd, verified), from 8976965e. Notes 2, 5, 6
+No switch (PAD_ON already on); section 26 only.
+- Code read: 6: PAD_DECK.flick = -sign(sx), the one sign both turn modes read (the hold mode repeats PAD_DECK.flick); LB/RB
+  unchanged. 2: padSeated() (ACT x/z/face while seated); padRaw measures from the seat, crew/walkers within PAD_SEAT_NEAR
+  1.6 m score d - 100 (first). 5: padGoThere (#devHu's Go there), a 'down' glyph in all three pad families, a PAD_MARKS entry,
+  padOn('down') clicks it only while it shows (no layer, ride or freeze). controller_check: two turn expectations flipped
+  (the user's ask), RV2's planted fault re-aimed at the changed line. No R(), nothing saved.
+- CT5's probe notes_2_5_6.py: OK on 7c6c2477; on 8976965e every note FAILS (turns the old way, no mark, D-pad down does
+  nothing, seated ring starts with Petra 1.53 m and a place before Raman 0.9 m).
+- seat_talk_pad.py (mine): seated in the mess hall, D-pad right: Raman, Petra, Lucia (the three tablemates), then the seat,
+  then the next table; A on the 2nd and on the 3rd person opens a talk with them, still seated. No errors.
+- cadet_test vs 8976965e: ALL IDENTICAL. controller_check deck settings pick door day: (below).
