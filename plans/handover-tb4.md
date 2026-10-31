@@ -55,3 +55,8 @@ tell." herself (the host names herself in the third person); the same can happen
 
 ## Words (SW4, after the build)
 SW4 wrote the real words: claude/p995-trad926-words ef310be (content/banks/trad-0926.lines, baked; lines_check's PLACEHOLDERS gained 'tool'), fast-forwarded into this branch. Checked: words baked, names_check OK, lines_check PASS, check_fast OK, the probe shows the writer's lines on Tool night's and Garden walk's cards. Backlog TB4-1: Open house's own Mail says "Deck 2".
+
+## TR1's re-probe (claude/p995-tr1 4f34b1c, plans/tr1-probes/results/tb4-d41e762/)
+All nine pass with the switch on. For the merge: on Day 73 Card night (19:30-20:30) overlaps the tasting table
+(20:00-20:45) on Deck 3 (Card night's second room is the bow lounge); without TB3's 4037a26 (the room you're in wins)
+the first one hides the other's marker. With both merged it should be fine; RV29 checks.
