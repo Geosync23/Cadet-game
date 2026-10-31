@@ -79,3 +79,8 @@ Base: claude/integration 57eceec4 = 0.99.3, game sha256 04c821fe...c2a9 (verifie
   on underneath), told 8, skip [9]; reload fine; no errors. B5 + B7 fixed.
 - Calder real game, ~3 s/card, end.story played first (probe_calder_871_pace3.log): end.story 18:45-18:55, story 18:58-19:28
   with the W5 lines, cast held, told 5, skip [6], reload fine; Calder's question (end.ask) follows (19:08 in a fast run).
+- 87126397 switch off: cadet_test vs 57eceec4 (alone) ALL IDENTICAL; plans_same Days 1-30 identical.
+- 87126397 switch on: events_check 28 OK; stories_check 36 OK (part 2b: Tomas 8 across its end, told 8, skip [9]);
+  day_check 21, 22, 23, 24, 25, 26 OK.
+- Words: no repeated spoken lines in stage 2; **W6** "That's the air on Deck 2" (Kowalczyk 2, writer's original): a deck
+  number on screen; asked ST1 to reword.
