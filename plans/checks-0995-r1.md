@@ -57,3 +57,14 @@ build (it runs on paper, so the same each time), so it's reported as NEW; lead 4
 **R1: FAIL on 0.99.5 (game 93aed54f): puzzle_check, NEW** (both of its FAIL lines, the same on every run; passes on
 OLD). Everything else in the share is OK: 17 of 18 lines, arrows_check default parts with the fixed check from
 cc18dad0, and player_check run alone with nothing else open.
+
+## puzzle_check rerun with staging-0995 93839bf (RV30's paper-run line; check only, game 93aed54f unchanged)
+
+Lead 48 asked for it on the candidate and on 0.99.4 (both with the puzzle_check.py from 93839bf, two browsers, each its own CADET_WORK):
+
+| Game | Result | Lines |
+|---|---|---|
+| candidate 93aed54f | FAIL | the paper line passes now (cases 0 from 6 offers, no FAIL); still `FAIL p5's first: 3-pump-1's seal, slot 29, hidden: none` (p5 first: staged 'none') |
+| 0.99.4 a01d1a4c | OK | PUZZLE CHECK OK; p5 first staged creserve29:3-pump-1@24810 (seal) |
+
+So the paper line is cleared; p5's first is the one FAIL left (BM23 working on it).
