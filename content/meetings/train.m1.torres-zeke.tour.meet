@@ -1,0 +1,21 @@
+@meeting train.m1.torres-zeke.tour
+// Patch 0.99.5, the user's note 14 (JB2): with CHECKS_ON, the first rounds are a quick tour of checks (machines and ship
+// items on Decks 5 and 4, one button each: Checked), so Torres explains that instead of marking. Stand-ins by JB2 for the
+// head writer to polish; the old train.m1.torres-zeke is kept for CHECKS_ON false.
+title: Torres's round
+from: Zeke Torres
+gist: Zeke explained rounds: a quick tour of checks around the ship. Look at each thing, read what you see, tick it off. Your first rounds are on the board.
+== lines
+torres-zeke: Got a minute? Let me tell you about rounds.   [gesture]
+torres-zeke > you: Today's your first. A quick tour of checks, round this deck and the one above.
+torres-zeke: A fire point, a hatch, a machine or two. Walk up, have a look, read what you see.
+torres-zeke: All as it should be? Tick it off. If something isn't, it goes on the board for us.
+? choice
+* What am I looking for?   rel:torres-zeke+2 flavour:practical
+  torres-zeke: Green on the gauges. Seals whole. Nothing rattling. It says what you see, plain as day.
+* Why check things that are fine?   rel:torres-zeke+1 flavour:listen
+  torres-zeke: Because one day one won't be. And you'll know what fine looks like, so you'll spot it.
+* Sounds easy.   rel:torres-zeke+1 flavour:cheer
+  torres-zeke: It is. That's the secret. Easy, every day.   [laugh]
+torres-zeke: Later on your rounds get longer, and you'll mark how the machines are running. Not today.
+torres-zeke: Your first rounds are on the board. Take them, and your device will show you the way. Off you go.

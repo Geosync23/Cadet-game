@@ -15240,7 +15240,7 @@ function careerSpeed(kind) {
 }
 const jobKindOfMachine = j => j && j.machine && typeof machineById === 'function' ? (machineById(j.machine) || {}).kind || null : null;
 const JOB_PACE = .72;                                    // your own machine jobs, every tier (the patch's #16, the user's 30 minutes for a Tier 1 repair on a normal day); the job board (17) shows the same
-const jobMins = j => JOB_TYPES[j.kind].work * JOB_PACE * (1 + .25 * ((typeof jobTier === 'function' ? jobTier(j) : 1) - 1)) * careerSpeed(jobKindOfMachine(j)) * (j.logged ? .9 : 1);   // j.logged: written up in the Works log (24n), 10% quicker
+const jobMins = j => (JOBCAP_ON && typeof jobCapMins === 'function' ? jobCapMins(j) : JOB_TYPES[j.kind].work * JOB_PACE * (1 + .25 * ((typeof jobTier === 'function' ? jobTier(j) : 1) - 1))) * careerSpeed(jobKindOfMachine(j)) * (j.logged ? .9 : 1);   // JB2 (note 18): 40 at most (section 17's slot)   // j.logged: written up in the Works log (24n), 10% quicker
 function myWork() {                                      // the job you hold, and how far you've got with it (null: none)
   const j = jobsOn() ? myJob() : null, P = SHIP.player;
   if (!j || !j.machine) { P.work = null; return null; }
@@ -15257,7 +15257,7 @@ function jobNeeds(j, w, less = []) {                     // the parts still to f
 // what's left to fetch from main storage. whereFrom: where the parts still needed come from, for the toasts.
 const madeHere = j => typeof j.make === 'string' && j.make ? j.make : null;
 function shelfNeeds(j, w, less) { const n = jobNeeds(j, w, less), i = madeHere(j) ? n.indexOf(j.make) : -1; if (i >= 0) n.splice(i, 1); return n; }
-const makeMins = j => Number.isFinite(j && j.makeMins) && j.makeMins > 0 ? j.makeMins : PLAYER_ACTS.make.mins;
+const makeMins = j => { const v = Number.isFinite(j && j.makeMins) && j.makeMins > 0 ? j.makeMins : PLAYER_ACTS.make.mins; return JOBCAP_ON && typeof jobCapMake === 'function' ? jobCapMake(v) : v; };   // JB2 (note 18): 20 at most
 const whereFrom = (j, need) => need.includes(madeHere(j)) ? 'Make the ' + j.make + ' in the machine shop on Deck 5' + (need.length > 1 ? '; the rest is in main storage next door.' : '.') : 'Main storage is on Deck 5.';
 function jobStopMark(j, step) {                          // tell section 17 a stop is done (its stepsDone, simNote('job', 'stop'))
   if (typeof jobStepDone !== 'function' || typeof jobStops !== 'function') return;
@@ -17232,6 +17232,8 @@ function ixTips() {
 const RG_TIPS = { take: 'Your first round is on the job board. Take it, and follow the arrow.', go: 'Walk to {machine}. Follow the arrow.',
   look: 'Look at {machine}. Listen to it. Then mark what you see.', mark: 'Mark it: fine, worn, or something\'s off. Trust your eyes.',
   next: 'Next one. Follow the arrow.', done: 'Round done. Turn it in at the job board.' };
+const RG_TOUR = { take: 'Your first rounds are on the job board: a quick tour of checks. Take it, and follow the arrow.', go: 'Walk to {machine}. Follow the arrow.',   // JB2 (note 14): the tour's (tip.tour.<step>; stand-ins)
+  look: 'Have a look at {machine}. Read what you see.', mark: 'All as it should be? Tick it off.', next: 'Next check. Follow the arrow.', done: 'Tour done. Turn it in at the job board.' };
 const RG_GOAL = 'Take your first round at the job board';
 let RG_LAST = '', RG_N = 0;
 function roundGuide() {
@@ -17248,7 +17250,7 @@ function roundGuide() {
   const id = 'rg:' + r.step + ':' + (r.step === 'take' || r.step === 'done' ? 0 : RG_N);
   if (SHIP.device.tipsSeen[id]) return;
   rgTips();                                              // the last step's tip gives way
-  const t = ((typeof careerText === 'function' && careerText('tip.round.' + r.step)) || RG_TIPS[r.step] || '').replace(/\{machine\}/g, r.machine || 'the machine');
+  const t = ((typeof careerText === 'function' && careerText((r.tour ? 'tip.tour.' : 'tip.round.') + r.step)) || (r.tour ? RG_TOUR : RG_TIPS)[r.step] || '').replace(/\{machine\}/g, r.machine || 'the machine');
   ixTip(id, t);
 }
 const ixV = new THREE.Vector3();
@@ -20459,16 +20461,16 @@ const CHORES = {
   vent:      { tier: 1, per: .5, parts: [], text: 'Clean a vent', helps: { kinds: ['scrubber', 'airplant', 'fan'], by: 4 },
                where: () => lobbyish().concat(placesOf(['garden']).slice(0, 1)).map(p => ({ key: p.id, title: 'Clean a vent: ' + roomName(p.deck, p.room), deck: p.deck, room: p.room, stops: [{ deck: p.deck, placeId: p.id, mins: 20, tag: 'vent' }] })) },
   calibrate: { tier: 1, per: .8, parts: [], text: 'Calibrate', helps: { self: 6 },
-               where: () => choreMachines(['oven', 'range', 'chiller', 'galleyplant', 'extractor', 'washer', 'cartdock', 'relay', 'databus', 'array', 'gasplant'])
+               where: () => choreMachines(choreNoWasher(['oven', 'range', 'chiller', 'galleyplant', 'extractor', 'washer', 'cartdock', 'relay', 'databus', 'array', 'gasplant']))
                  .map(m => ({ key: m.id, title: 'Calibrate the ' + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, tier: MACHINE_KINDS[m.kind].tier, stops: [panelStop(m, 15, 'calibrate')] })) },
   delivery:  { tier: 1, per: .6, parts: [], text: 'Delivery',
                where: () => DELIVERIES.filter(r => placeById(r.from) && placeById(r.to)).map(r => { const a = placeById(r.from), b = placeById(r.to);
                  return { key: r.key, title: r.title + ', ' + deckIn(b.deck), deck: b.deck, room: b.room, bring: r.bring, stops: [{ deck: a.deck, placeId: a.id, mins: 5, tag: 'pickup' }, { deck: b.deck, placeId: b.id, mins: 10, tag: 'drop' }] }; }) },
   round:     { tier: 1, per: .4, parts: [], text: 'Inspection round', finds: true,
-               where: () => [3, 4, 5].map(n => { const ms = choreMachines(['oven', 'range', 'chiller', 'galleyplant', 'cartdock', 'washer']).filter(m => m.deck === n), ps = ms.length >= 2 ? ms.slice(0, 3).map(m => panelStop(m, 5, 'inspect')) : lobbyish().filter(p => p.deck === n).slice(0, 3).map(p => ({ deck: n, placeId: p.id, mins: 5, tag: 'inspect' }));
+               where: () => [3, 4, 5].map(n => { const ms = choreMachines(choreNoWasher(['oven', 'range', 'chiller', 'galleyplant', 'cartdock', 'washer'])).filter(m => m.deck === n), ps = ms.length >= 2 ? ms.slice(0, 3).map(m => panelStop(m, 5, 'inspect')) : lobbyish().filter(p => p.deck === n).slice(0, 3).map(p => ({ deck: n, placeId: p.id, mins: 5, tag: 'inspect' }));
                  return ps.length ? { key: 'deck' + n, title: 'Inspection round, ' + deckIn(n), deck: n, room: (placeById(ps[0].placeId) || {}).room, stops: ps } : null; }).filter(Boolean) },
   fault:     { tier: 1, per: .4, parts: [], text: 'Small fault', leave: 30,
-               where: () => choreMachines(['lights', 'cartdock', 'washer', 'extractor']).map(m => ({ key: m.id, title: (m.kind === 'lights' ? 'Reset a tripped breaker: ' : m.kind === 'cartdock' ? 'Free a jammed cart dock: ' : 'Clear a fault: ') + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, stops: [panelStop(m, 10, 'fault')] })) },
+               where: () => choreMachines(choreNoWasher(['lights', 'cartdock', 'washer', 'extractor'])).map(m => ({ key: m.id, title: (m.kind === 'lights' ? 'Reset a tripped breaker: ' : m.kind === 'cartdock' ? 'Free a jammed cart dock: ' : 'Clear a fault: ') + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, stops: [panelStop(m, 10, 'fault')] })) },
   filter:    { tier: 2, per: 1.4, parts: ['filter'], text: 'Swap the filters', helps: { self: 10 },
                where: () => choreMachines(['scrubber', 'airplant', 'o2cell']).map(m => ({ key: m.id, title: 'Swap the filters: ' + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, tier: 2, stops: [panelStop(m, 20, 'filter')] })) },
   joint:     { tier: 1, per: 0, parts: ['seal'], text: 'Burst joint', where: () => [] },   // posted by an incident only (jointJobPost, 0.33.49)
@@ -21186,7 +21188,7 @@ function jobsSection(el) {
       : 'Take a hover cart from the Cart bay on Deck 5. In the cargo hold tap the crates' + (partsCrates() ? ' (' + partsCrates() + ' there)' : '') + ' and the cart pulls them in; in main storage tap any shelf and it unloads itself. Then bring the cart back.');
     button('Drop it', () => dropJob(mine.id));
   }
-  const open = board.filter(j => !j.claimedBy);
+  const open = boardSpread(board.filter(j => !j.claimedBy));   // JB2 (note 15): as openJobs
   if (!open.length && !mine) line('Nothing on the board. Enjoy it while it lasts.');
   for (const j of open.slice(0, 5)) {
     const [title, where, state, pri] = jobCard(j), canTake = !mine && jobTier(j) <= playerTier() && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind));
@@ -21203,17 +21205,18 @@ if (typeof device !== 'undefined' && device.addSection) device.addSection('jobs'
 // its place id or null. Take one with claimJob(id); finish it with finishJob(id); jobStops(job) gives the way there.
 function openJobs(forWho = 'you') {
   const you = forWho === 'you', tier = you ? playerTier() : hatchTier(forWho);
-  return jobsBoard().filter(j => !j.claimedBy && j.status !== 'waiting' && !(you && stormBoardHide(j)) && (jobTier(j) <= tier || (you && heldForYou(j))) && rankOk(forWho, j) && !(you && j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && (you || !heldForYou(j)) && !(you && bridgeBars(j))).map(j => {
+  const rows = jobsBoard().filter(j => !j.claimedBy && j.status !== 'waiting' && !(you && stormBoardHide(j)) && (jobTier(j) <= tier || (you && heldForYou(j))) && rankOk(forWho, j) && !(you && j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && (you || !heldForYou(j)) && !(you && bridgeBars(j))).map(j => {
     const [title, where, state] = jobCard(j), m = j.machine && machineById(j.machine);
     const stops = jobStops(j).filter(x => x.step !== 'fetch'), main = jobByStops(j) ? stops[stops.length - 1] : j.kind === 'restock' ? stops[2] : stops[0];
     const place = main && main.places[0] || null, pl = placeById(place);
-    const mins = jobKindOf(j) ? kindStops(j).reduce((a, x) => a + (x.mins || 0), 0) : j.kind === 'chore' ? j.stops.reduce((a, x) => a + x.mins, 0) : j.kind === 'restock' ? 33 : Math.round(JOB_TYPES[j.kind].work * (you && typeof JOB_PACE !== 'undefined' ? JOB_PACE : 1) * (1 + .25 * (jobTier(j) - 1)));   // yours at your pace (15's JOB_PACE, the patch's #16)
+    const mins = jobKindOf(j) ? kindStops(j).reduce((a, x) => a + (x.mins || 0), 0) : j.kind === 'chore' ? j.stops.reduce((a, x) => a + x.mins, 0) : j.kind === 'restock' ? 33 : (you && JOBCAP_ON ? Math.round(jobCapMins(j)) : Math.round(JOB_TYPES[j.kind].work * (you && typeof JOB_PACE !== 'undefined' ? JOB_PACE : 1) * (1 + .25 * (jobTier(j) - 1))));   // JB2 (note 18): as jobMins   // yours at your pace (15's JOB_PACE, the patch's #16)
     const verb = { service: 'Service', repair: 'Repair', overhaul: 'Overhaul' }[j.kind];
     const o = { id: j.id, title: jobByStops(j) ? j.title : verb ? verb + ': ' + title : title, kind: j.chore || j.kind, deck: main ? main.deck : j.deck, at: pl ? pl.at.slice() : m ? m.panel.slice() : main && main.at ? main.at.slice() : null,
              room: pl ? pl.room : m ? m.room : j.room || null, place, tier: jobTier(j), mins, parts: j.parts.slice(), bring: j.bring || (j.kind === 'restock' ? 'a hover cart' : null), urgency: j.urgency, state, where, event: j.event || null, asked: heldForYou(j) };
     if (traceHidden(j)) Object.assign(o, { deck: j.symptom.deck, at: null, room: null, place: null, symptom: { ...j.symptom } });   // a traced fault: where it shows, not the machine (0.33.59)
     return o;
   });
+  return you && SPREAD_ON ? boardSpread(rows, o => SHIP.jobs.find(x => x.id === o.id)) : rows;   // JB2 (note 15): somewhere new first
 }
 
 // ---- the shelves (0.33.41, the plan for 0.60.7, "The right part from the right shelf") ----
@@ -21932,6 +21935,7 @@ function boardTopUp(h, jobs) {
                 stops: c.stops.map(st => ({ ...st })), urgency: 0, leave: end - m, posted: t, found: t, claimedBy: null, parts: [], status: 'open', extra: true, xp: 0 };
     const jt = jobTier(j); if (jt <= tier && forYou(j)) cands.push([jt, j]);
   }
+  if (SPREAD_ON && cands.length) { const R = jobRoomsRecent(t), fresh = cands.filter(c => !R.has(jobRoomKey(c[1]))); if (fresh.length) cands.splice(0, cands.length, ...fresh); }   // JB2 (note 15): somewhere you haven't just been
   for (let k = 0; n < boardMin() && (cands.length || FIX_ON); k++) {
     if (FIX_ON && fixPost(h, jobs, t, end - m)) { n++; continue; }   // FX10: a small repair first, two top-ups in three (the slot below)
     if (!cands.length) break;
@@ -21974,11 +21978,132 @@ function boardTradePost(h, jobs, t, m, end) {
   if (W.tr.m1 !== undefined && W.tr.m1 < d && m >= BOARD_TRADE_ROUND[0] && m < BOARD_TRADE_ROUND[1] && !jobs.some(j => j.kind === 'rounds' && j.trade && j.found >= B)) {
     const n0 = roundDeck(d, false), ds = ROUND_DECKS.filter(x => x !== n0), n = ds[Math.floor(ds.length * schedU(seed, h, 2))];
     const pool = n ? roundPool(n).filter(x => free(x.id)).sort((a, b) => schedU(seed ^ a.seed, h, 3) - schedU(seed ^ b.seed, h, 3) || (a.id < b.id ? -1 : 1)) : [];
-    if (pool.length >= 4) { const route = roundWalk(pool.slice(0, 4), DECKS[n]), m0 = machineById(route[0]);
+    const mix = n && CHECKS_ON ? roundMix(n, 2, 2, s => schedU(seed ^ s.seed, h, 3), free) : null;   // JB2 (note 15): one machine of a kind, two check points
+    if (mix ? mix.length >= 4 : pool.length >= 4) { const route = mix || roundWalk(pool.slice(0, 4), DECKS[n]), m0 = roundSpot(route[0]);
       out.push(jobMake('rounds', { id: 'round-pm-d' + n + '@' + h, deck: n, room: m0.room, h, title: roundText('round.title.pm', 'Afternoon round, Deck {deck}', { deck: n }), route, marks: {}, ...o })); }
   }
   const ok = out.filter(j => forYou(j)); if (!ok.length) return null;
   const j = ok[Math.floor(ok.length * schedU(seed, h, 4))]; j.shareSeen = true; jobs.push(j); return j;
+}
+// ---- JB2 (patch 0.99.5, the user's notes 14, 15 and 18, lead 47's GO). Three switches; each off, the game is as 0.99.4.
+// JOBCAP_ON (note 18, "no job or machine shop task more than 40 min, and that not common"): your own work on a job (its
+// holds, fetching, making a part) is never over JOB_CAP_MAX ship minutes: a machine job's work is JOB_CAP_WORK (service 12,
+// repair 22, overhaul 32), +10% a tier above 1 (jobCapMins; section 15's jobMins and the board's minutes ask it); a part
+// made in the machine shop takes half its old time, 20 at most (jobCapMake: the hour is 20, the training's 30 is 15);
+// tinkering 20 at most (24j). The walk isn't counted (lead 47's decision 1). The crew's minutes are untouched.
+// SPREAD_ON (note 15, "so many washer visits"): washers last 20 loads, not 12 (the crew's too); the breaker, calibrate and
+// clear-a-fault chores leave washers out; the scanner's first use is a pump leak on a machine other than a washer
+// (fixScanMachine, schedU key 1997); and the board for you puts a job in a room you haven't had a job in for two days
+// ahead of one in a room you have (boardSpread: the urgent stay on top, never a reserved or training job; your own record, the
+// done jobs SHIP.jobs keeps for two days), and the hourly top-ups leave those rooms out when they can.
+// CHECKS_ON (note 14, "a quick tour of checks, on different machines and items"): CHECK_ROWS, check points on Decks 3-5
+// ('id|place|kind|name|reading'); a round's stop can be one ('chk:<id>' in j.route). The first round (the training's) is a
+// tour of five checks on Decks 5 and 4, each a different kind of thing, two of them machines: look, read what you see, one
+// button, "Checked" (checkTour, key 1995). Morning and afternoon rounds keep their marks (lead 47's decision 2) but take at
+// most one machine of each kind and two check points (roundMix, key 1996), and a machine with no sign lines of its own reads
+// plainly (ROUND_SIGN). No R(); nothing saved but the route's ids, as before.
+var JOBCAP_ON = true, SPREAD_ON = true, CHECKS_ON = true;   // var: section 15's jobMins and 24j's list may ask before this line has run
+function jobCapMins(j) {                                 // your work on a machine job, ship minutes, before the career's speed-up (section 15's jobMins)
+  const base = { service: 12, repair: 22, overhaul: 32 }[j.kind], tier = typeof jobTier === 'function' ? jobTier(j) : 1;
+  const raw = base !== undefined ? base * (1 + .1 * (tier - 1)) : JOB_TYPES[j.kind].work * JOB_PACE * (1 + .25 * (tier - 1));
+  return Math.min(40, raw);                              // JOB_CAP_MAX
+}
+function jobCapMake(v) { return Math.min(20, Math.round(v / 2)); }   // a part made at the lathe: half its old time, 20 at most
+if (SPREAD_ON && MACHINE_KINDS.washer) MACHINE_KINDS.washer.life = 20;   // read each hour by the wear (machineWear): nothing kept from before
+const choreNoWasher = ks => SPREAD_ON ? ks.filter(k => k !== 'washer') : ks;
+function fixScanMachine(d) {                             // the scanner's first use: a pump leak on a machine you may work on, not a washer
+  const ms = machineList().filter(m => m.kind !== 'washer' && !m.stub && panelPlace(m.id) && !ENGINE_KINDS.has(m.kind) && jobTier({ machine: m.id }) <= playerTier() && (FAULT_CAUSES[m.kind] || []).some(c => c.id === 'pump')).sort((a, b) => a.id < b.id ? -1 : 1);
+  return ms.length ? ms[Math.floor(schedU(d, 0, 1997) * ms.length) % ms.length].id : 'washer';
+}
+// the room a job of yours sends you to: 'deck:room' (its machine's, else its last stop's place, else its own)
+function jobRoomKey(j) {
+  const m = j.machine && machineById(j.machine); if (m) return m.deck + ':' + m.room;
+  const st = (j.stops || []).filter(x => x.placeId), pl = st.length && placeById(st[st.length - 1].placeId);
+  return pl ? pl.deck + ':' + pl.room : j.deck != null && j.room ? j.deck + ':' + j.room : null;
+}
+function jobRoomsRecent(t) {                             // the rooms of your jobs over the last two days (done or in hand)
+  const out = new Set(); for (const j of SHIP.jobs) if ((j.doneBy === 'you' && j.status === 'done' && j.doneAt > t - 2880) || (j.claimedBy === 'you' && j.status === 'claimed')) { const k = jobRoomKey(j); if (k) out.add(k); }
+  return out;
+}
+// boardSpread(list, get?): the jobs for you, a room you've been to lately after one you haven't, then by urgency as before (an
+// urgent one, 2 or more, stays on top; a reserved or training job never counts as lately). get(x) -> the job (list may be openJobs' rows)
+function boardSpread(list, get = x => x) {
+  if (!SPREAD_ON || list.length < 2) return list;
+  const R = jobRoomsRecent(shipNow()); if (!R.size) return list;
+  const key = x => { const j = get(x); return j && !j.reserved && !j.train && R.has(jobRoomKey(j)) ? 1 : 0; }, urg = x => { const j = get(x); return j ? j.urgency || 0 : 0; };
+  return list.map((x, i) => [x, i, key(x), urg(x)]).sort((a, b) => (b[3] >= 2) - (a[3] >= 2) || a[2] - b[2] || b[3] - a[3] || a[1] - b[1]).map(r => r[0]);
+}
+// ---- the check points (note 14). 'id|place|kind|name|reading': the place you stand at, a kind (a tour has one of each),
+// what it is, and what you see. Stand-ins for the head writer (round.check.<id> wins when the words are baked)
+const CHECK_ROWS = [
+  'c4-ext|4-lift-2|extinguisher|the fire point by the lift|The extinguisher\'s gauge is in the green, the pin and seal are in place, and the tag is dated this month.',
+  'c4-locker|4-bench-1|locker|the emergency locker|The seal\'s unbroken. Through its window: masks, torches and blankets, all there.',
+  'c4-notice|4-bench-3|notice|the muster card by the lift|The deck plan and the muster card are up to date and easy to read.',
+  'c4-panel|4-bench-4|panel|the lobby wall panels|Every panel sits flush. No rattles, no gaps.',
+  'c4-valve|4-valve-panel|valve|the corridor shut-off valve|The handle\'s at OPEN, the tag agrees, and it turns a quarter and back without a fuss.',
+  'c4-vent|4-wet-1|vent|the corridor air vent|A steady breath of cool air through the grille. Nothing caught in it.',
+  'c4-floor|4-wet-2|floor|the corridor floor strips|The non-slip strips lie flat from end to end.',
+  'c4-smoke|4-common-3|smoke|the common room smoke detector|Its little green light blinks every few seconds, as it should.',
+  'c4-exit|4-common-6|exitlight|the exit sign in the common room|It glows evenly, and the test button makes it flash bright.',
+  'c4-door|4-music-1|door|the music room door|It slides open and shut smoothly, and stops when you put a hand in the way.',
+  'c5-ext|5-lift-2|extinguisher|the fire point by the lift|The gauge is in the green, the pin\'s in, and the tag is dated this month.',
+  'c5-notice|5-lift-4|notice|the muster card by the lift|The muster point is marked and the card is current.',
+  'c5-hatch|5-valve-panel|hatch|the corridor pressure hatch|The hatch seal is soft and whole, and the wheel turns easily.',
+  'c5-vent|5-wet-1|vent|the corridor air vent|Cool air through the grille, every louvre open.',
+  'c5-latch|5-hold-1|latch|the cargo hold latches|Every latch clicks home. The hold\'s tidy.',
+  'c5-strap|5-hold-2|strap|the cargo straps|Straps tight, buckles locked, no fraying.',
+  'c5-lane|5-cart-2|exitlight|the cart lane lights|The amber floor lights along the cart lane are all lit.',
+  'c5-water|5-tea-3|water|the tea corner\'s water tap|Hot and cold both run clear, and the filter light is green.',
+  'c5-clock|5-timeclock-1|clock|the time clock|It shows the right ship time and takes a card first go.',
+  'c3-ext|3-lift-2|extinguisher|the fire point on the plaza|The gauge is in the green, the pin and seal are in place.',
+  'c3-call|3-lift-5|callpanel|the lift call panel|Both buttons light when pressed, and the car answers.',
+  'c3-vent|3-bench-5|vent|the promenade air vent|Air moving steadily, and the grille is clean.',
+  'c3-rail|3-bench-8|handrail|the promenade handrail|Firm all the way along. No loose brackets.',
+  'c3-path|3-bench-16|exitlight|the promenade path lights|Every path light is on and steady.',
+  'c3-smoke|3-lounge-2|smoke|the lounge smoke detector|Green light blinking, steady as a heartbeat.',
+  'c3-drain|3-galley-7|drain|the galley floor drain|Water runs away fast and the grate is clean.',
+  'c3-cold|3-cold-2|seal|the cold store door|The seal grips all round, and the door thermometer reads three degrees.',
+  'c3-fountain|3-gym-10|water|the gym water fountain|A good steady stream, and it\'s cold.',
+  'c3-hose|3-tend-6|hose|the garden hose joints|Every joint is dry and the clips are tight.',
+  'c3-lamp|3-shop-8|lamp|the crew store lights|All the lights on and even.',
+  'c3-aid|3-visit-2|firstaid|the infirmary first-aid box|Sealed, full, and everything in date.',
+];
+let CHECK_T = null;
+function checkTable() {                                  // the rows whose place is in the build: [{ id, place, kind, name, reading, deck, room, at }]
+  if (CHECK_T) return CHECK_T;
+  CHECK_T = CHECK_ROWS.map(s => { const [id, place, kind, name, reading] = s.split('|'), pl = placeById(place); return pl && pl.at ? { id, place, kind, name, reading, deck: pl.deck, room: pl.room, at: pl.at.slice() } : null; }).filter(Boolean);
+  return CHECK_T;
+}
+const isCheck = id => typeof id === 'string' && id.startsWith('chk:');
+const checkRow = id => isCheck(id) ? checkTable().find(r => r.id === id.slice(4)) || null : null;
+const checkName = r => { const t = worksText('round.check.' + r.id + '.name', r.name); return t; };
+// a round's stop, a machine or a check point: { id, deck, room, panel, place, name, kind, seed } (roundWalk reads panel and id)
+function roundSpot(id) {
+  const r = checkRow(id); if (r) return { id, deck: r.deck, room: r.room, panel: r.at, place: r.place, name: checkName(r), kind: 'c:' + r.kind, seed: machSeed(id), check: true };
+  const m = machineById(id); if (!m) return null;
+  return { id, deck: m.deck, room: m.room, panel: m.panel, place: panelPlace(id), name: machineLabel(m).split(',')[0], kind: m.kind, seed: m.seed, check: false };
+}
+// roundMix(n, nm, nc, rank, keep?, kinds?): up to nm machines (roundPool, keep(id)) and nc check points on Deck n, no kind
+// twice (nor one in kinds, a Set it adds to), the lowest rank first (rank(spot) -> a number), in walking order from the lift
+function roundMix(n, nm, nc, rank, keep = () => true, kinds = new Set()) {
+  const out = [], by = (a, b) => rank(a) - rank(b) || (a.id < b.id ? -1 : 1);
+  const ms = roundPool(n).filter(m => keep(m.id)).map(m => roundSpot(m.id)).sort(by);
+  for (const s of ms) if (out.length < nm && !kinds.has(s.kind)) { kinds.add(s.kind); out.push(s); }
+  const cs = checkTable().filter(r => r.deck === n).map(r => roundSpot('chk:' + r.id)).sort(by); let c = 0;
+  for (const s of cs) if (c < nc && !kinds.has(s.kind)) { kinds.add(s.kind); out.push(s); c++; }
+  return roundWalk(out, DECKS[n]);
+}
+// the first round: five checks, three on Deck 5 (where the Works is) then two on Deck 4, two of the five machines, no kind twice
+function checkTour(day) {
+  const rank = s => schedU(s.seed, day, 1995), kinds = new Set();
+  return [[5, 1, 2], [4, 1, 1]].flatMap(([n, nm, nc]) => roundMix(n, nm, nc, rank, undefined, kinds));
+}
+// a morning or afternoon round on Deck n: 4-6 stops (the day's), two of them check points, the rest machines of different kinds
+// (SPREAD_ON: those in a room of one of your jobs over the last two days last)
+function roundMixRoute(n, day, key, keep) {
+  const R = SPREAD_ON && typeof SHIP !== 'undefined' && SHIP.jobs ? jobRoomsRecent(shipNow()) : new Set();   // SPREAD_ON: a room you've had a job in lately comes last
+  const want = 4 + Math.floor(schedU(day, 0, 860) * 3), rank = s => schedU(s.seed, day, key) + (R.has(s.deck + ':' + s.room) ? 1 : 0);
+  return roundMix(n, Math.max(2, want - 2), 2, rank, keep);
 }
 // ---- end of slot: Systems engineer ----
 
@@ -43258,6 +43383,7 @@ const MEETINGS_BAKED = {
   "talk.volkov-maeve": {"title": "How the float room floats", "from": "Maeve Volkov", "gist": "Maeve's small talk on the float room: the plate under the padding, the hum, and the light orbs.", "lines": [{"who": "volkov-maeve", "text": "Hiya! Chairs in a ring, lovely. I'll be quick, the float room's waiting for me.", "pose": "gesture"}, {"who": "volkov-maeve", "text": "So. The float room is a fifth of a g. You weigh a fifth of what you do out here."}, {"who": "volkov-maeve", "text": "Under the coral padding there's a plate that pulls less than the rest of the deck."}, {"who": "volkov-maeve", "text": "It hums, very low. If it ever stops, you land on the padding. That's what it's for."}, {"who": "volkov-maeve", "text": "The light orbs aren't magic, sorry. Little fans. I clean them on Sundays with a sock.", "pose": "laugh"}, {"who": "volkov-maeve", "text": "Chief Holt goes in for his back. He says it's for his back. I believe him.", "pose": "laugh"}, {"who": "volkov-maeve", "text": "Right, that's how it floats. Questions? I'll time the answers.", "pose": "nod"}, {"choice": [{"text": "Can I help clean the orbs?", "rel": {"volkov-maeve": 2}, "flavour": "practical", "mem": "talk.volkov-maeve.asked", "reply": {"who": "volkov-maeve", "text": "Ooh, yes. Sunday morning, bring a sock. A clean one. I'll race you.", "pose": "laugh"}}, {"text": "What's the best trick in there?", "rel": {"volkov-maeve": 2}, "flavour": "cheer", "mem": "talk.volkov-maeve.asked", "reply": {"who": "volkov-maeve", "text": "Push off the wall, tuck in, spin. Twelve turns before you land. My record. For now.", "pose": "nod"}}, {"text": "(Just listen)", "reply": {"who": "volkov-maeve", "text": "No questions? Then go and float. Mind the orbs on your way in."}}]}, {"who": "volkov-maeve", "text": "Ta-ra, everyone. Thanks for coming."}]},
   "talk.you": {"title": "What I learned in my first month", "from": "Wren talks", "gist": "You gave a small talk on the auditorium stage about your first month aboard.", "lines": [{"who": "calder", "text": "You're on, {me}. Ring of chairs, tea's there. Take as long as you like. Not too long.", "pose": "nod", "to": "you"}, {"who": "torres-zeke", "text": "Go on! We're all friends here. Mostly Works, but friends.", "pose": "laugh"}, {"choice": [{"text": "(Talk about the first job you fixed)", "rel": {"calder": 2}, "flavour": "practical", "reply": {"who": "calder", "text": "Good. You told it straight, including the bit you got wrong. That's the best part of any talk.", "pose": "nod"}}, {"text": "(Talk about the crew who helped)", "rel": {"torres-zeke": 2}, "flavour": "share", "reply": {"who": "torres-zeke", "text": "You named everyone. Even me. I'm not crying. It's the tea.", "pose": "laugh"}}, {"text": "(Talk about the stars from the observatory)", "flavour": "listen", "reply": {"who": "tomas", "text": "That was lovely. I'm going to look up properly next time.", "pose": "nod"}}]}, {"who": "calder", "text": "Thank you, {me}. That's the first month done properly."}]},
   "train.m1.torres-zeke": {"title": "Torres's round", "from": "Zeke Torres", "gist": "Zeke explained rounds: walk a route of machines, look at each one, mark fine, worn or something's off. Your first round is on the board.", "lines": [{"who": "torres-zeke", "text": "Got a minute? Let me tell you about rounds.", "pose": "gesture"}, {"who": "torres-zeke", "text": "Four or five machines on one deck. Look at each. Listen. Then mark it.", "to": "you"}, {"who": "torres-zeke", "text": "Fine, worn, or something's off. That's all the clipboard wants."}, {"who": "torres-zeke", "text": "Worn's the one we're after. Catch it worn, it's a quick service. Miss it, it's a repair."}, {"choice": [{"text": "What if I mark it wrong?", "rel": {"torres-zeke": 2}, "flavour": "practical", "reply": {"who": "torres-zeke", "text": "Then nothing happens. Or I say \"looks all right to me\". Nobody gets told off."}}, {"text": "How do you know it's worn?", "rel": {"torres-zeke": 1}, "flavour": "listen", "reply": {"who": "torres-zeke", "text": "You hear it. A rattle that wasn't there. Heat where there shouldn't be. You'll see."}}, {"text": "Sounds easy.", "rel": {"torres-zeke": 1}, "flavour": "cheer", "reply": {"who": "torres-zeke", "text": "It is. That's the secret. Easy, every day.", "pose": "laugh"}}]}, {"who": "torres-zeke", "text": "Your first round's on the board. Take it, and your device will show you the way."}, {"who": "torres-zeke", "text": "I'll be about if you get stuck. Off you go."}]},
+  "train.m1.torres-zeke.tour": {"title": "Torres's round", "from": "Zeke Torres", "gist": "Zeke explained rounds: a quick tour of checks around the ship. Look at each thing, read what you see, tick it off. Your first rounds are on the board.", "lines": [{"who": "torres-zeke", "text": "Got a minute? Let me tell you about rounds.", "pose": "gesture"}, {"who": "torres-zeke", "text": "Today's your first. A quick tour of checks, round this deck and the one above.", "to": "you"}, {"who": "torres-zeke", "text": "A fire point, a hatch, a machine or two. Walk up, have a look, read what you see."}, {"who": "torres-zeke", "text": "All as it should be? Tick it off. If something isn't, it goes on the board for us."}, {"choice": [{"text": "What am I looking for?", "rel": {"torres-zeke": 2}, "flavour": "practical", "reply": {"who": "torres-zeke", "text": "Green on the gauges. Seals whole. Nothing rattling. It says what you see, plain as day."}}, {"text": "Why check things that are fine?", "rel": {"torres-zeke": 1}, "flavour": "listen", "reply": {"who": "torres-zeke", "text": "Because one day one won't be. And you'll know what fine looks like, so you'll spot it."}}, {"text": "Sounds easy.", "rel": {"torres-zeke": 1}, "flavour": "cheer", "reply": {"who": "torres-zeke", "text": "It is. That's the secret. Easy, every day.", "pose": "laugh"}}]}, {"who": "torres-zeke", "text": "Later on your rounds get longer, and you'll mark how the machines are running. Not today."}, {"who": "torres-zeke", "text": "Your first rounds are on the board. Take them, and your device will show you the way. Off you go."}]},
   "train.m11.halloran-emeka": {"title": "Torres's Friday routine", "from": "Emeka Halloran", "gist": "Emeka showed you tool upkeep at your bench: charge the scanner, clean and re-seal the pipe kit, check the logger.", "lines": [{"who": "halloran-emeka", "text": "Ah, the bench. Zeke calls this his Friday routine. He'd want you to have it.", "pose": "gesture"}, {"who": "halloran-emeka", "text": "Scanner on the charger. Pipe kit: wipe it, new seal. Logger: check the clock.", "to": "you"}, {"who": "halloran-emeka", "text": "Ten minutes a week. Saves an hour when it matters."}, {"choice": [{"text": "Why Friday?", "rel": {"halloran-emeka": 1}, "flavour": "listen", "reply": {"who": "halloran-emeka", "text": "So it's ready Monday. And so Zeke can have biscuits after. Lovely system.", "pose": "laugh"}}, {"text": "Ten minutes. Easy.", "rel": {"halloran-emeka": 1}, "flavour": "practical", "reply": {"who": "halloran-emeka", "text": "Easy to say. Easy to skip, too. Don't."}}]}, {"who": "halloran-emeka", "text": "Your tools will tell you when they're due. Listen to them."}]},
   "train.m11.torres-zeke": {"title": "My Friday routine", "from": "Zeke Torres", "gist": "Torres showed you tool upkeep at your bench: charge the scanner, clean and re-seal the pipe kit, check the logger.", "lines": [{"who": "torres-zeke", "text": "My Friday routine. Every Friday since I was your age.", "pose": "gesture"}, {"who": "torres-zeke", "text": "Scanner on charge. Pipe kit wiped, new seal. Logger, check its clock.", "to": "you"}, {"who": "torres-zeke", "text": "Look after them and they look after you. Simple as that."}, {"who": "torres-zeke", "text": "That scanner of mine you've got? Thirty years of Fridays. Still going.", "pose": "laugh"}]},
   "train.m12.calder": {"title": "The logbook", "from": "Chief Ines Calder", "gist": "Calder showed you the logbook: at the end of each shift, write what you fixed, what you found, what's still open.", "lines": [{"who": "calder", "text": "Officers write it down.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "What you fixed. What you found. What you left for tomorrow. One line."}, {"who": "calder", "text": "The night crew read it. I read it. Next week, you'll read it."}, {"choice": [{"text": "Every day?", "rel": {"calder": 1}, "flavour": "practical", "reply": {"who": "calder", "text": "Every working day. Before half five. It takes a minute."}}, {"text": "What if nothing happened?", "rel": {"calder": 2}, "flavour": "listen", "reply": {"who": "calder", "text": "Then write that. A quiet day is worth knowing too."}}]}, {"who": "calder", "text": "Go on. Today's."}]},
@@ -58152,7 +58278,8 @@ function trainSetup(row) {                               // made when first aske
   return OCCASIONS[id];
 }
 function trainScript(row, by) {                          // the writer's meeting for who teaches (train.<id>.<teacher>), else a stand-in made now
-  const id = 'train.' + row.id + '.' + by; if (MEETING_SCRIPTS[id]) return id;
+  const id = 'train.' + row.id + '.' + by; if (CHECKS_ON && row.id === 'm1' && MEETING_SCRIPTS[id + '.tour']) return id + '.tour';   // JB2 (note 14): the tour's talk
+  if (MEETING_SCRIPTS[id]) return id;
   if (MEETING_SCRIPTS['train.' + row.id]) return 'train.' + row.id;
   MEETING_SCRIPTS[id] = { title: row.name, from: worksName(by), stub: true,
     gist: worksFirst(by) + ' waited for you. ' + row.name + ' will keep: they\'ll ask again on your next workday.',
@@ -58555,6 +58682,7 @@ function roundDeck(day, train) {                         // the deck by day (4, 
 }
 // roundRoute(day, train) -> machine ids: 4-6 of the deck's machines, picked by the day, in walking order from the lift
 function roundRoute(day, train) {
+  if (CHECKS_ON) return train ? checkTour(day) : roundMixRoute(roundDeck(day, false), day, 860);   // JB2 (note 14): the first one a tour of checks; the rest with check points, one machine a kind
   const n = roundDeck(day, train), pool = roundPool(n), D = DECKS[n];
   const want = Math.min(pool.length, 4 + Math.floor(schedU(day, 0, 860) * 3));
   const pick = pool.slice().sort((a, b) => schedU(a.seed, day, 860) - schedU(b.seed, day, 860) || (a.id < b.id ? -1 : 1)).slice(0, want);
@@ -58577,10 +58705,13 @@ const ROUND_SIGN = {                                     // stand-ins until the 
   healthy: 'Clean and quiet. Nothing to see.', worn: 'Something\'s a little tired about it.', faulty: 'Not right at all: it\'s labouring.' };
 // roundSign(id, day): what you see at the machine, from its kind and its state now; the same machine in the same state the same day says the same
 function roundSign(id, day) {
+  const cr = checkRow(id); if (cr) return worksText('round.check.' + cr.id, cr.reading);   // JB2: a check point says what you see
   const m = machineById(id), st = roundSignState(roundState(id)), L = typeof LINES !== 'undefined' && m && LINES['sign.' + m.kind + '.' + st];
   if (Array.isArray(L) && L.length) { const e = L[Math.floor(schedU(machSeed(id), day, 861) * L.length) % L.length]; if (e && typeof e.text === 'string') return e.text; }
-  return ROUND_SIGN[st];
+  return CHECKS_ON ? worksText('round.read.' + st, ROUND_READ[st]) : ROUND_SIGN[st];
 }
+const ROUND_READ = {                                     // JB2 (note 14: "no indication of its performance"): a machine with no sign lines of its own, read plainly
+  healthy: 'Its gauge sits in the green, and it runs smooth and quiet.', worn: 'Its gauge has crept towards the amber, and it runs a little rough.', faulty: 'Its gauge is in the red, and it\'s labouring.' };
 // a mark is right: worn on a worn machine, worn or off on a faulty-or-worse one
 const roundRight = (pick, st) => st !== 'healthy' && (pick === 'off' || pick === 'worn');
 // a machine's job found now: section 17's machineFound(id, by) -> { id, fresh } | null (fresh: it wasn't on the board
@@ -58590,6 +58721,12 @@ const roundFound = (id, by) => typeof machineFound === 'function' ? machineFound
 // for after the step (section 15 shows a kind's stepDone text before "Done here", 0.28.73), or null
 function roundMark(j, k, pick) {
   const id = (j.route || [])[k]; if (!id || !ROUND_MARKS.some(x => x[0] === pick)) return null;
+  if (isCheck(id)) { (j.marks = j.marks || {})[id] = 'fine'; return null; }   // JB2: a check point is ticked off, nothing more
+  if (j.train && CHECKS_ON) {                            // the tour's machine: checked, never judged; anything not right is noted for the board
+    const first = !(j.marks && j.marks[id]); (j.marks = j.marks || {})[id] = 'fine';
+    const f = first && roundState(id) !== 'healthy' ? roundFound(id, 'you') : null;
+    return f && f.fresh ? roundText('round.tour.noted', 'Noted: {machine} isn\'t quite right. It\'s on the board now.', { machine: roundSpot(id).name }) : null;
+  }
   const st = roundState(id), right = roundRight(pick, st), first = !(j.marks && j.marks[id]);
   (j.marks = j.marks || {})[id] = pick; if (!j.train && typeof roundLast === 'function') roundLast()[id] = worksDay(shipNow());   // stage 2's "last looked" (0.45.16)
   const f = right && first ? roundFound(id, 'you') : null;
@@ -58615,9 +58752,9 @@ function roundDone(j, t, by) {
 function roundJob(day, at, o = {}) {
   const all = roundRoute(day, !!o.train), route = o.train ? (o.yours ? all : all.slice(0, 2)) : all;
   if (route.length < (o.train ? 1 : 4)) return null;
-  const m0 = machineById(route[0]), n = m0.deck, t = (day - 1) * 1440 + at;
+  const m0 = roundSpot(route[0]), n = m0.deck, t = (day - 1) * 1440 + at;   // JB2: a machine or a check point
   const j = jobMake('rounds', { id: 'round' + (o.slot ? o.slot : '') + '-d' + n + '@' + Math.floor(t / 60) + (o.yours ? 'y' : ''), deck: n, room: m0.room, h: Math.floor(t / 60),
-    title: o.train ? roundText('round.title.first', 'Your first round, Deck {deck}', { deck: n }) : roundText('round.title', 'Morning round, Deck {deck}', { deck: n }), route, marks: {}, ...(o.slot ? { reserved: o.slot, until: (day - 1) * 1440 + dayShiftEnd(day) } : { leave: ROUND_HELD }) });
+    title: o.train ? (CHECKS_ON ? roundText('round.title.tour', 'Your first rounds: a tour of checks') : roundText('round.title.first', 'Your first round, Deck {deck}', { deck: n })) : roundText('round.title', 'Morning round, Deck {deck}', { deck: n }), route, marks: {}, ...(o.slot ? { reserved: o.slot, until: (day - 1) * 1440 + dayShiftEnd(day) } : { leave: ROUND_HELD }) });
   j.posted = j.found = t; j.shareSeen = true;            // held to 11:00 as the page says: never shared out early (section 17's shareOut)
   return j;
 }
@@ -58628,8 +58765,11 @@ if (typeof jobKindAdd === 'function') jobKindAdd('rounds', { tier: 1, junior: fa
     if (jobs.some(j => j.kind === 'rounds' && !j.reserved && j.status !== 'done' && Math.floor(j.posted / 1440) + 1 === d)) return;
     const j = roundJob(d, ROUND_AT); if (j) jobs.push(j);
   },
-  stops: j => (j.route || []).map(id => { const m = machineById(id); return { deck: m.deck, placeId: panelPlace(id), mins: ROUND_LOOK, tag: 'look', how: 'look',
-    opts: { secs: 4, text: roundSign(id, worksDay(shipNow())), marks: ROUND_MARKS.map(([x, label]) => ({ id: x, label: roundText('round.mark.' + x, label) })) } }; }),
+  stops: j => (j.route || []).map(id => { const m = roundSpot(id), tick = m.check || (j.train && CHECKS_ON);   // JB2: a check point, or the tour's machine: one button, Checked
+    return { deck: m.deck, placeId: m.place, mins: ROUND_LOOK, tag: 'look', how: 'look',
+    opts: { secs: 4, text: roundSign(id, worksDay(shipNow())), ...(tick ? { title: m.name.charAt(0).toUpperCase() + m.name.slice(1), ask: roundText('round.tour.ask', 'Tick it off.'), marks: [{ id: 'fine', label: roundText('round.tour.checked', 'Checked') }] }
+      : { marks: ROUND_MARKS.map(([x, label]) => ({ id: x, label: roundText('round.mark.' + x, label) })) }) } }; }),
+  goal: (j, k) => { const id = (j.route || [])[k], r = checkRow(id); return r ? roundText('round.tour.goal', 'Check {thing}', { thing: checkName(r) }) : null; },   // the arrow's words at a check point (15b's ixJobStep)
   stepDone: (j, k, res) => { const said = roundMark(j, k, res && res.pick); return typeof roundDoor === 'function' ? roundDoor(j, k, said) : said; },   // stage 3: the doorway (0.45.16)
   done: roundDone,
   crew: { can: p => !!p.work && p.work.place === 'work:works', mins: 25 } });
@@ -58711,10 +58851,10 @@ function roundDoor(j, k, said) {
 function roundTrainStep() {
   const c = SHIP.works && SHIP.works.cur; if (!c || c.id !== 'm1' || c.st !== 'do') return null;
   const j = SHIP.jobs.find(x => x.id === c.j && x.kind === 'rounds'); if (!j || j.status === 'done') return null;
-  const base = { job: j.id };
+  const base = { job: j.id, ...(CHECKS_ON && j.train ? { tour: true } : {}) };   // JB2: tour: the first rounds' tips (15b's RG_TOUR)
   if (j.claimedBy !== 'you') return { ...base, step: 'take' };
   const st = jobStops(j), k = st.findIndex(s => !s.done); if (k < 0 || j.workDone) return { ...base, step: 'done' };
-  const id = j.route[k], m = machineById(id), pid = panelPlace(id), name = machineLabel(m).split(',')[0];
+  const id = j.route[k], m = roundSpot(id), pid = m.place, name = m.name;   // JB2: a machine or a check point
   const at = { ...base, machine: name, deck: m.deck, place: pid }, w = typeof wsFind === 'function' ? wsFind(j.id, k) : null;
   if (typeof ACT !== 'undefined' && ACT && ACT.kind === 'workStep' && ACT.o.job === j.id) return { ...at, step: 'look' };
   if (w && w.done > 0) return { ...at, step: 'mark' };
@@ -59747,7 +59887,7 @@ const WORKSHOP_ORDERS = [
 // tinkering: what you can make from offcuts (the last two from stage 3); all gifts (SOC_GIFTS) and cabin things (24t's cabin: the spot each fits)
 const TINKER_LIST = [
   { item: 'little lamp', mins: 20, cabin: 'desk' }, { item: 'mug tree', mins: 15, cabin: 'ledge' }, { item: 'toy rocket', mins: 15, cabin: 'shelf' },
-  { item: 'plant pot', mins: 10, cabin: 'ledge' }, { item: 'model ship', mins: 30, cabin: 'shelf', stage: 3 }, { item: 'woven rug', mins: 30, cabin: 'rug', stage: 3 },
+  { item: 'plant pot', mins: 10, cabin: 'ledge' }, { item: 'model ship', mins: JOBCAP_ON ? 20 : 30, cabin: 'shelf', stage: 3 }, { item: 'woven rug', mins: JOBCAP_ON ? 20 : 30, cabin: 'rug', stage: 3 },   // JB2 (note 18): 20 at most
 ];
 if (typeof SOC_GIFTS === 'object' && SOC_GIFTS) for (const t of TINKER_LIST) if (!SOC_GIFTS[t.item]) SOC_GIFTS[t.item] = { tag: 'made', from: 'made' };
 const shopDef = id => WORKSHOP_ORDERS.find(o => o.id === id) || null;
@@ -63801,7 +63941,7 @@ function fixScanTick(now) {                              // -> the held job's id
   const d = worksDay(now), m = now - (d - 1) * 1440, B = (d - 1) * 1440; if (d <= W.tr.m7 || !playerShiftOn(d) || m < FIX_SCAN_AT || m >= dayShiftEnd(d) - 60) return null;
   if (SHIP.jobs.some(j => j.reserved === FIX_SCAN_SLOT && j.found >= B)) return null;   // today's, held or done
   if (SHIP.jobs.some(j => j.kind === 'repair' && j.status !== 'done' && (faultCause(j) || {}).part && (j.claimedBy === 'you' || !j.claimedBy && forYou(j)))) return null;   // one's already there for you
-  return jobReserve('washer', d, FIX_SCAN_AT, FIX_SCAN_SLOT, { cause: 'pump', until: B + dayShiftEnd(d) });
+  return jobReserve(SPREAD_ON ? fixScanMachine(d) : 'washer', d, FIX_SCAN_AT, FIX_SCAN_SLOT, { cause: 'pump', until: B + dayShiftEnd(d) });   // JB2 (note 15): not always a washer
 }
 if (typeof FIX_ON !== 'undefined' && typeof jobReserve === 'function') WORK_TICKS.push(now => { fixScanTick(now); });
 // FX1 (patch-p5-fix1, bug 2): the training meeting's arrow. trainTell put it up at the ask (06:00 for a 09:00 meeting)

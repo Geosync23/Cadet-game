@@ -82,12 +82,14 @@ M1_RUN = r"""(() => {
   if (!j) return out;
   out.route = j.route.slice(); out.held = j.found <= shipNow() && shipNow() < leaveEnd(j); out.leaveEnd = leaveEnd(j) - t0;
   out.signs = j.route.map(id => roundSign(id, d));
-  const worn = j.route.filter((id, i) => i % 2 === 0), healthy = j.route.filter((id, i) => i % 2 === 1);
-  for (const id of j.route) { const s = SHIP.machines[id]; s.cond = worn.includes(id) ? 60 : 95; s.state = machineState(s.cond); }
+  const ms = j.route.filter(id => SHIP.machines[id]);   // JB2 (note 15): a round's check points (chk:...) are no machines
+  out.kinds = new Set(j.route.map(id => typeof roundSpot === 'function' ? roundSpot(id).kind : machineById(id).kind)).size; out.checks = j.route.length - ms.length;
+  const worn = ms.filter((id, i) => i % 2 === 0), healthy = ms.filter((id, i) => i % 2 === 1);
+  for (const id of ms) { const s = SHIP.machines[id]; s.cond = worn.includes(id) ? 60 : 95; s.state = machineState(s.cond); }
   SHIP.jobs = SHIP.jobs.filter(x => !(x.machine && j.route.includes(x.machine)));   // no jobs on them yet
   out.claimed = claimJob(j.id); const xp0 = W.xp;
-  out.stops = jobStops(j).map(s => [s.how, s.places[0] || null, (s.opts && s.opts.marks || []).length]);
-  const mark = (x, k) => jobStepDone(x.id, k, { pick: worn.includes(x.route[k]) ? 'worn' : k === 1 ? 'worn' : 'fine' });
+  out.stops = jobStops(j).map((s, k) => [s.how, s.places[0] || null, (s.opts && s.opts.marks || []).length, !!SHIP.machines[j.route[k]]]);
+  const mark = (x, k) => jobStepDone(x.id, k, { pick: !SHIP.machines[x.route[k]] ? 'fine' : worn.includes(x.route[k]) ? 'worn' : k === 1 ? 'worn' : 'fine' });
   mark(j, 0); mark(j, 1);
   // a save and reload mid-round: the jobs as saved (JSON), section 17's tidy, then on with the rest
   SHIP.jobs = JSON.parse(JSON.stringify(SHIP.jobs)); if (typeof jobsTidy === 'function') jobsTidy();
@@ -103,9 +105,9 @@ M1_RUN = r"""(() => {
   run(t0 + 440, t2 + 430);
   const j2 = SHIP.jobs.find(x => x.kind === 'rounds' && Math.floor(x.posted / 1440) + 1 === d2);
   out.posted2 = !!j2;
-  if (j2) { for (const id of j2.route) { const s = SHIP.machines[id]; s.cond = 60; s.state = 'worn'; } SHIP.jobs = SHIP.jobs.filter(x => !(x.machine && j2.route.includes(x.machine)));
+  if (j2) { const m2 = j2.route.filter(id => SHIP.machines[id]); for (const id of m2) { const s = SHIP.machines[id]; s.cond = 60; s.state = 'worn'; } SHIP.jobs = SHIP.jobs.filter(x => !(x.machine && j2.route.includes(x.machine)));
     run(t2 + 440, t2 + 1080); out.crew = [j2.status, j2.claimedBy || j2.doneBy, j2.doneBy !== 'you' && j2.status === 'done'];
-    out.crewFound = j2.route.filter(id => SHIP.jobs.some(y => y.machine === id && y.found <= shipNow())).length + '/' + j2.route.length; }
+    out.crewFound = m2.filter(id => SHIP.jobs.some(y => y.machine === id && y.found <= shipNow())).length + '/' + m2.length; }
   W.use.m1 = 5; out.stage5 = worksStage('m1'); W.use.m1 = 4; out.stage4 = worksStage('m1');
   out.off = [6, 7].map(dd => { SHIP.jobs = []; MACH_HOUR = null; run((dd - 1) * 1440 + 400, (dd - 1) * 1440 + 430); return SHIP.jobs.some(x => x.kind === 'rounds' && Math.floor(x.posted / 1440) + 1 === dd); });
   return out;
@@ -127,7 +129,9 @@ M1_SELF = r"""(() => {
   }
   const c = W.cur; out.st = c && c.st; if (!c || c.st !== 'do') return out;
   setShipNow(shipNow() + 2); machinesNow();   // it's posted for the next minute
-  const j = SHIP.jobs.find(x => x.id === c.j); out.job = j && [j.kind, j.train, j.route.length, machineById(j.route[0]).kind, j.title, j.claimedBy || null, heldForYou(j)];
+  const j = SHIP.jobs.find(x => x.id === c.j), sp = id => typeof roundSpot === 'function' ? roundSpot(id) : machineById(id); out.job = j && [j.kind, j.train, j.route.length, sp(j.route[0]).kind, j.title, j.claimedBy || null, heldForYou(j)];
+  out.tour = typeof CHECKS_ON !== 'undefined' && CHECKS_ON;   // JB2 (note 14): the first rounds a tour of checks
+  if (j && out.tour) { const S = j.route.map(sp); out.tourOf = { kinds: new Set(S.map(x => x.kind)).size, checks: S.filter(x => x.check).length, decks: S.map(x => x.deck), marks: jobStops(j).map(x => (x.opts.marks || []).length), text: jobStops(j).every(x => typeof x.opts.text === 'string' && x.opts.text.length > 5) }; }
   out.teacherJobs = SHIP.jobs.filter(x => x.train === 'm1' && x.id !== j.id).length;
   out.board = openJobs('you').some(x => x.id === j.id);
   const st = () => { const r = roundTrainStep(); out.steps.push(r ? r.step + (r.machine ? ':' + r.machine : '') : null); return r; };
@@ -143,7 +147,12 @@ def m1_part(g):
     print('  24a training (0.45.9):', json.dumps(s1))
     if check(s1.get('st') == 'do' and s1.get('job'), f"m1: after Torres's talk your first round is posted ({s1.get('st')})"):
         jb = s1['job']
-        check(jb[0] == 'rounds' and jb[1] == 'm1' and 4 <= jb[2] <= 6 and jb[3] == 'washer' and jb[5] is None and jb[6], f"m1: the whole training route, a washer first, held for you, not yet taken ({jb})")
+        if s1.get('tour'):   # JB2 (patch 0.99.5 note 14): five checks, three on Deck 5 then two on Deck 4, no kind twice, two machines, one button each, a reading each
+            to = s1.get('tourOf') or {}
+            check(jb[0] == 'rounds' and jb[1] == 'm1' and jb[2] == 5 and jb[5] is None and jb[6] and 'tour' in jb[4], f"m1: the first rounds, a tour of checks, held for you, not yet taken ({jb})")
+            check(to.get('kinds') == 5 and to.get('checks') == 3 and to.get('decks') == [5, 5, 5, 4, 4] and to.get('marks') == [1] * 5 and to.get('text'), f"m1: the tour: five different things, two machines, Decks 5 then 4, one button and a reading each ({to})")
+        else:
+            check(jb[0] == 'rounds' and jb[1] == 'm1' and 4 <= jb[2] <= 6 and jb[3] == 'washer' and jb[5] is None and jb[6], f"m1: the whole training route, a washer first, held for you, not yet taken ({jb})")
         check(s1['teacherJobs'] == 0 and s1['board'], 'm1: no teacher\'s round; yours is on the board')
         check(s1['claimed'] and s1['escort'] is None, 'm1: taken from the board; Torres doesn\'t follow')
         stp = [x.split(':')[0] if x else x for x in s1['steps']]
@@ -160,7 +169,8 @@ def m1_part(g):
     if not check(a['posted'], 'm1: no morning round posted on Day 3'): return
     check(4 <= len(a['route']) <= 6, f"m1: route of {len(a['route'])} (4-6 expected)")
     check(a['held'] and a['leaveEnd'] == 660, f"m1: held for you to 11:00 (ends {a['leaveEnd']})")
-    check(a['claimed'] and all(s[0] == 'look' and s[1] and s[2] == 3 for s in a['stops']), f"m1: stops {a['stops']}")
+    check(a['claimed'] and all(s[0] == 'look' and s[1] and s[2] == (3 if s[3] else 1) for s in a['stops']), f"m1: stops {a['stops']}")
+    check(a['kinds'] == len(a['route']) and (a['checks'] == 2 or not g.ev("typeof CHECKS_ON !== 'undefined' && CHECKS_ON")) or not g.ev("typeof CHECKS_ON !== 'undefined' && CHECKS_ON"), f"m1: a morning round has no kind twice and two check points (JB2, note 15: kinds {a['kinds']} of {len(a['route'])}, checks {a['checks']})")
     check(a.get('reload') and a['reload'][0] == 'you' and a['reload'][1] == 2 and a['reload'][2] == 2 and a['reload'][3] == len(a['route']), f"m1: reloaded mid-round {a.get('reload')}")
     check(a['workDone'] and a['turnin'], 'm1: the round not done and turned in')
     check(all(f and f[1] == 'you' and f[2] for f in a['found']), f"m1: worn machines found by you: {a['found']}")

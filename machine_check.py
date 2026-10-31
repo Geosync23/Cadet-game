@@ -27,6 +27,7 @@
 #   your side: a job you claim is left to you, and finishing it puts the machine right
 #   the pool leak (0.84.5, rec engineer B; a REC_DECK = true build only): a traced pool-line repair shows as a drip on Deck 5 (5y)
 #   the board keeps up (playtest patch 1 note 13, JB1): a quick player always finds a job on the shift, Day 1 included (5z)
+#     and (JB2, patch 0.99.5 notes 15, 18) washers 10% of its jobs at most, 12 rooms or more, no job's work over 40 minutes
 #     and its small repairs (FX10, patch 0.92.3 items 21, 24): none twice in the week, every row sound, never the crew's (forced too);
 #     the quick player's Days 1-7: the same job again 14% at most, 12% or more on Deck 2 (the science area)
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
@@ -1462,7 +1463,7 @@ with sync_playwright() as pw:
             const list = openJobs('you'), D = out.days[d] || (out.days[d] = { jobs: 0, empty: 0 }); out.maxBoard = Math.max(out.maxBoard, list.length);
             if (mine || (md >= 720 && md < 765)) continue;
             if (!list.length) { D.empty += 15; continue; }
-            if (claimJob(list[0].id)) { mine = list[0].id; until = t + list[0].mins + 20; D.jobs++; out.took.push([d, list[0].title, list[0].deck]); }   // FX10: what the quick player did, and where
+            if (claimJob(list[0].id)) { mine = list[0].id; until = t + list[0].mins + 20; D.jobs++; out.took.push([d, list[0].title, list[0].deck, list[0].mins, (() => { const j = SHIP.jobs.find(x => x.id === list[0].id); return j ? [(machineById(j.machine) || {}).kind || null, typeof jobRoomKey === 'function' ? jobRoomKey(j) : null] : [null, null]; })()]); }   // FX10: what the quick player did, and where
           }
           out.extras = seen.size;
           if (typeof shareOut === 'function' && SHARE_ON) {   // FX10: shareOut forced to share, with three small jobs held for you: a plain one goes to the crew, a small repair never
@@ -1514,6 +1515,18 @@ with sync_playwright() as pw:
             if od['bad'] or (od['on'] and (len(odd) - len(set(x[1] for x in odd)) or len(odecks) < 4 or od['spread'] < 5 or any(d not in odays for d in sdays) or od['min'] != 3)) or (not od['on'] and (odd or od['min'] != 2)):
                 fail("the odd jobs: every row sound; switched on, one on every day with two small jobs or more, on 4 decks or more, spread in their order, never twice in the week; switched off, none")
         # limits between the old board and FX10's (3e5c4fe2: 8% again, 21% on Deck 2; 0.92.2: 20% again, 4% on Deck 2)
+        # JB2 (patch 0.99.5, the user's notes 15 and 18): with SPREAD_ON, the quick player's Days 1-7 at washers 10% at most (the laundry
+        # was the room most visited: 4 washers of 25 Tier 1 machines, 14% of a steady player's jobs before) and in 12 rooms or more; with
+        # JOBCAP_ON every job's work as the board shows it 40 minutes at most and over 30 for 15% at most, and the caps themselves: a
+        # machine job's work at every kind and tier, a part made at the lathe, tinkering
+        jb = g.ev("""(() => { if (typeof JOBCAP_ON === 'undefined') return null; const out = { cap: JOBCAP_ON, spread: SPREAD_ON, mins: [], make: [makeMins({}), makeMins({ makeMins: 30 })], tinker: Math.max(...TINKER_LIST.map(t => t.mins)) };
+          for (const kind of ['service', 'repair', 'overhaul']) for (const tier of [1, 2, 3, 4]) { const m = machineList().find(x => jobTier({ machine: x.id }) === tier); if (m) out.mins.push(Math.round(jobMins({ kind, machine: m.id, parts: [] }))); }
+          return out; })()""")
+        if jb:
+            wash = sum(1 for t in took if len(t) > 4 and t[4][0] == 'washer'); rooms = len(set(t[4][1] for t in took if len(t) > 4 and t[4][1])); over30 = sum(1 for t in took if len(t) > 3 and t[3] > 30); top = max([t[3] for t in took if len(t) > 3] or [0])
+            print(f"  JB2 (notes 15, 18): the quick player's jobs at washers {wash} of {n} ({100 * wash / max(1, n):.0f}%), in {rooms} rooms; board minutes longest {top}, over 30 {over30}; machine work by kind and tier {jb['mins']}, a made part {jb['make']}, tinkering {jb['tinker']} (cap {jb['cap']}, spread {jb['spread']})")
+            if jb['spread'] and (wash * 100 > 10 * n or rooms < 12): fail(f"the quick player's Days 1-7: {wash} of {n} jobs at washers (want 10% at most) in {rooms} rooms (want 12 or more): note 15")
+            if jb['cap'] and (top > 40 or over30 * 100 > 15 * n or max(jb['mins']) > 40 or max(jb['make']) > 20 or jb['tinker'] > 20): fail("a job's work over 40 minutes, over 30 too often, or a made part or tinkering over 20: note 18")
         if again * 100 > 14 * n: fail(f"the quick player did the same job again {again} times in {n} (want 14% at most: note 24, \"the same things over and over\")")
         if sci * 100 < 12 * n: fail(f"the quick player's jobs on Deck 2: {sci} of {n} (want 12% or more: note 21, \"work needs to take you to the science area more\")")
         if off['days'].get('1', {}).get('empty', 0) < 120: fail('with BOARD_ON false, Day 1 should be as thin as before (this part would not see a regression)')
