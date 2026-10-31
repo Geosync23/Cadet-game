@@ -106,3 +106,9 @@ changed in each row. lines PASS, names OK, check_fast OK (326 s); trad_mail.py s
 
 ### SW4 52ea327 (game b815c01de8b8712bcc7f18fddc8b887061d9dcd178fab7e5ec4e152d1b216bd0): PASS
 New hand's tea close (mug on the rack), Tap night ask, Midtour invite line; only those fields changed. lines, names, check_fast (317 s), milestones995 OK.
+
+### TB5 b7af35a (game 6a8cae19b186c451779bbe0d9e909f97c9f66dbe3f7d1bc3d7902e084bcea504): PASS
+On 4037a26: wait capped at e.to - 8; no guesses once the reveal is due; seat toast names the supper's end (all TRAD995_ON).
+spice995_paced (TB5) never/hold 90 s: reveals 19:07-19:11; reload OK. spice_paced pace 5: none while open. names OK.
+Test merge with 52ea327: clean, file 37d8c3aa98dc801bd9eed2c2f18cfebd89ac4b698c106fe7d8e35ef0a62a6a25. Sent to TB5, lead, BM23.
+Queue empty.
