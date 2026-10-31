@@ -14600,7 +14600,7 @@ function actBegin() {
     A.kind === 'tray' ? 'You take a tray: ' + A.o.dish + '.' : A.kind === 'eat' ? (A.spot ? 'You sit down to ' : 'You eat ') + A.o.dish + '.'
     : A.kind === 'grab' ? 'You take ' + A.o.dish + '.' : A.o.after || '';
   if (!(TRAD995_ON && A.o.quiet)) toast(A.o.title || A.def.title, [A.o.flavour && A.kind !== 'eat' && A.kind !== 'tray' && !what.includes(A.o.flavour) ? A.o.flavour : '', what,   // the words once (fresh eyes #27: a seat with no tray put its words in `after` too)
-    A.def.need ? (A.kind === 'recSeat' ? 'Stay as long as you like; walk away to get up.' : 'About ' + taskMins(A.def.mins) + ' minutes; walk away to stop.') : ''].filter(Boolean).join(' '));   // an auditorium seat has no set time (0.92.5 #17, the user's)
+    A.def.need ? (A.kind === 'recSeat' ? 'Stay as long as you like; walk away to get up.' : TRAD995_ON && A.kind === 'eat' && Number.isFinite(A.o.tradTill) ? 'About ' + taskMins(A.def.mins) + ' minutes to eat; the supper\'s on till ' + hhmm(A.o.tradTill) + '. Walk away to stop.' : 'About ' + taskMins(A.def.mins) + ' minutes; walk away to stop.') : ''].filter(Boolean).join(' '));   // an auditorium seat has no set time (0.92.5 #17, the user's)
   if (A.kind === 'call' && typeof homeBooth === 'function') homeBooth();   // social B2's call picker at a booth (0.28.30)
 }
 // stop: abort (walked away, a time skip, a new deck) leaves at once; otherwise step back out first (actUpdate)
@@ -48699,7 +48699,7 @@ function spiceFrame995() {
   const t = performance.now(), card = DIALOGUE && /^spice\.guess/.test(DIALOGUE.id);
   if (SPICE.joined === d && SPICE.asked !== d && S.step >= 4 && here && !DIALOGUE && typeof dialogueShow === 'function') { SPICE.asked = d; S.cardAt = performance.now(); spiceCard995(d, jars, now, e); return; }   // the card once the jars are named
   if (card) S.cardSeen = t;
-  const wait = S.step >= 4 && (card && t < (S.cardAt || 0) + 60000 || !card && t < (S.cardSeen || 0) + 2500 || SPICE.joined === d && SPICE.asked !== d && here);   // the reveal waits for your guess while the card is open (60 real seconds at most, RV30: the ship clock runs on under a card, so 5 ship minutes was 8 s)
+  const wait = S.step >= 4 && m < e.to - 8 && (card && t < (S.cardAt || 0) + 60000 || !card && t < (S.cardSeen || 0) + 2500 || SPICE.joined === d && SPICE.asked !== d && here);   // (TB5, TR1's find) no wait of any kind past 8 ship minutes before the end, so the three reveals always come: 60 real s is about 37 ship minutes, and a card left open lost them   // the reveal waits for your guess while the card is open (60 real seconds at most, RV30: the ship clock runs on under a card, so 5 ship minutes was 8 s)
   if (S.step < SPICE995_AT.length && !wait && m >= due(S.step) && t - S.last >= 3500 && here && atShelf) {
     const k = S.step, text = k === 0 ? spiceText('spice.open', d, {}, ['Right, everyone. Three jars off the shelf tonight. Taste, then guess whose.'])
       : k <= 3 ? spiceJarLine(d, k - 1, jars[k - 1][1])
@@ -48709,7 +48709,7 @@ function spiceFrame995() {
   }
   // the guesses: one bubble every few seconds from those at the supper, from the first jar to the reveal; a jar's owner
   // sometimes owns up. A guess names a jar owner (or someone else aboard), never the speaker or Brennan
-  if (S.step < 2 || S.step > 4 || card || t - S.last < 2200 || t < SPICE.next || !here) return;
+  if (S.step < 2 || S.step > 4 || S.step === 4 && !wait && m >= due(4) || card || t - S.last < 2200 || t < SPICE.next || !here) return;   // (TB5) once the reveal's due, no more guesses in its way
   const at = DECK_CREW.filter(a => a.p && a.h && a.settled && a.spot && evTagId(a.tag || '') === 'spice-shelf-supper' && a.p.id !== 'brennan');
   if (!at.length) return;
   SPICE.next = t + 2700 + (SPICE.n % 3) * 500; S.last = t;
@@ -48736,9 +48736,10 @@ function spiceJoin(e, a, notice) {
     .map(q => [q, placeSpot(q.id)]).filter(([, s]) => s).sort((x, y) => Math.hypot(x[1].x - b.x, x[1].z - b.z) - Math.hypot(y[1].x - b.x, y[1].z - b.z) || (x[0].id < y[0].id ? -1 : 1)).map(([q]) => q)[0];
   if (!pl) { toast(e.name, 'Every seat\'s taken just now. Grab a tray and find a spot when one comes free.'); return true; }
   const pose = (placeSpot(pl.id) || {}).pose || 'sit', title = e.name;
-  if (SHIP.player.tray) { actStart('eat', pl.id, { title, pose }); return true; }   // your tray: it's your supper
+  const tradTill = (d - 1) * 1440 + e.to;                 // (TB5, TR1's note) the seat's notice says when the supper ends, not only how long you eat
+  if (SHIP.player.tray) { actStart('eat', pl.id, { title, pose, tradTill }); return true; }   // your tray: it's your supper
   const f = foodFrom('servery');
-  actStart('eat', pl.id, { title, fed: true, dish: f && f.ok && f.dish ? f.dish : 'Brennan\'s spice supper', pose });
+  actStart('eat', pl.id, { title, fed: true, dish: f && f.ok && f.dish ? f.dish : 'Brennan\'s spice supper', pose, tradTill });
   return true;
 }
 // ---- 0.99.5 note 10 (TB3, lead 47's decision on TR1's finding; behind TRAD995_ON): Tea and biscuits ("nobody sits down

@@ -180,7 +180,7 @@ with sync_playwright() as pw:
                 if x[1] == '3-spice-host' and seen is None: seen = x[0]
                 if x[0] >= 1101 and g.ev("typeof TRAD995_ON !== 'undefined' && TRAD995_ON && !SHIP.events.joined.includes('spice-shelf-supper@16')"): g.ev("tradJoinTap(DECK_CREW.find(a => a.p.id === 'brennan'))")   # 0.99.5 note 19 (TB3): tap to join, switched on
                 if x[2] == 'spice.guess' and card is None: card = x[0]
-                if card is not None and held is None and x[0] >= card + 3: held = x[2]; g.ev("dialogueStep(0)")
+                if card is not None and held is None and x[0] >= card + 3: held = x[2]; g.ev("(() => { let n = 0; while (DIALOGUE && /^spice\\.guess/.test(DIALOGUE.id) && n++ < 10) { const v = dialogueView(); dialogueStep(v && v.choices ? 0 : undefined); } })()")   # answered (TB5: with TRAD995_ON a card left open holds the reveal up to a minute)
                 if x[0] >= 1141: break
             r = json.loads(g.ev("""JSON.stringify({ said: window.__said.map(x => x[0] + ': ' + x[1]), cards: window.__cards.map(c => c[0]), joined: SHIP.events.joined.includes('spice-shelf-supper@16') })"""))
             err = g.errors; g.close(); r['seen'] = seen; r['held'] = held; return r, err
