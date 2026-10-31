@@ -687,13 +687,15 @@ def check_mess_scale(pw, path):
         # the room empties: the talk fades at once, the scene goes after 5 s; someone comes in: it comes back
         sc = g.ev("!!SND.r3Mess.scene"); n = g.ev("SND.r3Mess.n"); print(f'  mess_scale at the rush: n {n}, scene {sc}')
         check(sc and n >= 3, f'mess_scale: the scene plays at the dinner rush (n {n})')
-        g.ev("window.__dc = DECK_CREW.slice(); DECK_CREW.length = 0"); g.page.wait_for_timeout(1300); g.step(2)
-        lvg = g.ev("(sc => sc ? [sc.lv, sc.lvg.gain.value] : null)(SND.r3Mess.scene)"); print('  mess_scale emptied, 1 s:', lvg)
-        check(lvg is not None and lvg[0] == 0 and lvg[1] < 0.1, f'mess_scale: emptied, the talk is down to silence within about a second ({lvg})')
+        g.ev("SND.r3Mess.forceN = 0")
+        for _ in range(8): g.page.wait_for_timeout(250); g.step(2)   # 2 s with frames: the once-a-second count, then the fade
+        lvg = g.ev("(sc => sc ? [sc.lv, sc.lvg.gain.value] : null)(SND.r3Mess.scene)"); print('  mess_scale emptied, 2 s:', lvg)
+        check(lvg is not None and lvg[0] == 0 and lvg[1] < 0.1, f'mess_scale: emptied, the talk is down to silence within about two seconds (the count is read once a second) ({lvg})')
         for _ in range(14): g.page.wait_for_timeout(500); g.step(2)
         check(not g.ev("!!SND.r3Mess.scene"), 'mess_scale: still empty after 5 s, the scene goes')
-        g.ev("DECK_CREW.push(...window.__dc)"); g.page.wait_for_timeout(1300); g.step(2); g.page.wait_for_timeout(1100); g.step(2)
+        g.ev("SND.r3Mess.forceN = 40"); g.page.wait_for_timeout(1300); g.step(2); g.page.wait_for_timeout(1100); g.step(2)
         check(g.ev("!!SND.r3Mess.scene"), 'mess_scale: people back, the murmur comes back')
+        g.ev("delete SND.r3Mess.forceN")
         pe = [e for e in g.errors if e.startswith('pageerror')]
         if pe: check(False, 'mess_scale: page errors: ' + ' | '.join(pe[:3]))
     finally: g.close()

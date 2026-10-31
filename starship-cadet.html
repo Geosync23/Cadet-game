@@ -74653,6 +74653,7 @@ const SND = (() => {
     }
     function count() {   // people in the mess hall (the crew there, plus you), or -1 when you're not in it
       if (!deckDef || deckDef.num !== 3) return -1;
+      if (M.forceN !== undefined && M.room) return M.forceN;   // for sound_check only: the head count set by hand (you in the mess, as found before)
       const rooms = deckDef.rooms || {}, k = M.room && rooms[M.room] && rooms[M.room].name === 'Mess hall' ? M.room : Object.keys(rooms).find(x => rooms[x].name === 'Mess hall');
       if (!k || roomAt(...player.here()) !== k) return -1;
       if (M.room !== k) { M.room = k; M.full = Math.max(8, (deckDef.places || []).filter(p => p.room === k && p.pose === 'sit').length + 1); }   // full: every seat taken, and you
