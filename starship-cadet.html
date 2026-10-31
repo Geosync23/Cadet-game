@@ -14600,7 +14600,7 @@ function actBegin() {
   const what = A.kind === 'queue' ? 'You join the queue.' :   // no count (0.28.30, the user's: you see the people ahead of you)
     A.kind === 'tray' ? 'You take a tray: ' + A.o.dish + '.' : A.kind === 'eat' ? (A.spot ? 'You sit down to ' : 'You eat ') + A.o.dish + '.'
     : A.kind === 'grab' ? 'You take ' + A.o.dish + '.' : A.o.after || '';
-  toast(A.o.title || A.def.title, [A.o.flavour && A.kind !== 'eat' && A.kind !== 'tray' && !what.includes(A.o.flavour) ? A.o.flavour : '', what,   // the words once (fresh eyes #27: a seat with no tray put its words in `after` too)
+  if (!(TRAD995_ON && A.o.quiet)) toast(A.o.title || A.def.title, [A.o.flavour && A.kind !== 'eat' && A.kind !== 'tray' && !what.includes(A.o.flavour) ? A.o.flavour : '', what,   // the words once (fresh eyes #27: a seat with no tray put its words in `after` too)
     A.def.need ? (A.kind === 'recSeat' ? 'Stay as long as you like; walk away to get up.' : 'About ' + taskMins(A.def.mins) + ' minutes; walk away to stop.') : ''].filter(Boolean).join(' '));   // an auditorium seat has no set time (0.92.5 #17, the user's)
   if (A.kind === 'call' && typeof homeBooth === 'function') homeBooth();   // social B2's call picker at a booth (0.28.30)
 }
@@ -46011,11 +46011,12 @@ function tradJoin(e, a) {
   if (s.act === 'beam') { if (beamWaitTap()) return true; toast(a.p.name, '"' + (tradWords(e, 'tell', { name }) || 'Go on, tap the beam. Your name goes up there, with ours.') + '"'); return true; }
   if (s.act === 'walk') { eventJoin(e, d, now, notice); tradWalkStart(e, lead); return true; }
   const near = tjAgent(lead) || a, sp = tradSpot(e, near.x, near.z);
-  eventJoin(e, d, now, notice);
-  const kind = s.act || 'tj:' + e.id, o = { title: e.name, member: s.act === 'gym', after: notice, end: s.mins ? Math.min((d - 1) * 1440 + e.to, now + s.mins) : (d - 1) * 1440 + e.to, tj: e.id + '@' + d };   // s.mins: a turn of so long, not to the end (the big jigsaw, 0.92.5)
+  const mine = TRAD995_ON && !s.act, until = s.mins ? Math.min((d - 1) * 1440 + e.to, now + s.mins) : (d - 1) * 1440 + e.to;   // (0.99.5, TR1's item 8) one notice, with how long: not the activity's own toast too, nor "About 46 minutes" for 30
+  eventJoin(e, d, now, mine ? notice + (sp ? ' On till ' + hhmm(until) + '; walk away to stop.' : ' Every spot\'s taken just now, so you stand and chat with them.') : notice);
+  const kind = s.act || 'tj:' + e.id, o = { title: e.name, member: s.act === 'gym', after: notice, end: s.mins ? Math.min((d - 1) * 1440 + e.to, now + s.mins) : (d - 1) * 1440 + e.to, tj: e.id + '@' + d, ...(mine ? { after: null, quiet: true } : {}) };   // s.mins: a turn of so long, not to the end (the big jigsaw, 0.92.5)
   if (!sp) {                                             // every spot taken (a full music room): you stand beside the leader and join in there
     const w = nearestOpen(near.x + .9, near.z + .9, player), c = w && cellPos(...w);
-    if (!c || s.act) { toast(e.name, notice + ' Every spot\'s taken just now, so you stand and chat with them.', { keep: true }); return true; }
+    if (!c || s.act) { if (!mine) toast(e.name, notice + ' Every spot\'s taken just now, so you stand and chat with them.', { keep: true }); return true; }
     actStart('tj:' + e.id, null, { ...o, pose: tradPose(s, {}, { pose: 'stand' }), company: 1, spot: { id: null, walk: w, x: c.x, z: c.z, y: 0, face: Math.atan2(near.x - c.x, near.z - c.z), pose: 'stand' } });
     return true;
   }
