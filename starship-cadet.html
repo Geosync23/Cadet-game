@@ -10235,7 +10235,7 @@ function apptReply(p, a) {
 function apptWhere(p, t) {
   for (const a of apptList()) {
     if (!apptOn(a) || !a.with.includes(p.id)) continue;
-    const end = a.at + (a.status === 'kept' || a.occ ? (a.len || 30) : APPT_WAIT), pl = apptPlaceOf(a, p.id); if (!pl) continue;   // an occasion's host (section 18 via apptAdd, `occ`) stays the whole time, you or no you (0.26.34)
+    const end = a.at + (a.status === 'kept' || a.occ ? (a.len || 30) : a.wait || APPT_WAIT), pl = apptPlaceOf(a, p.id); if (!pl) continue;   // an occasion's host (section 18 via apptAdd, `occ`) stays the whole time, you or no you (0.26.34)
     // they set off in time to be there at a.at: the walk from the lift (about 1.3 x the straight line, at CREW_SPEED)
     const lift = DECKS[pl.deck].lift || pl.at, walk = Math.ceil(1.3 * Math.hypot(pl.at[0] - lift[0], pl.at[1] - lift[1]) / 1.15 * SHIP_RATE) + 1;   // ship minutes
     const go = a.at - (Number(a.early) > 0 ? Math.min(30, +a.early) : 0) - walk, C = SCHED_COMMUTE;   // a.early: seated that many minutes before it starts (section 18's occasions, the Veyli dinner)
@@ -10254,10 +10254,10 @@ function apptTick() {
   for (const a of apptList()) {
     if (a.status !== 'yes' || !isFinite(a.at) || now < a.at - 2) continue;
     const pl = apptPlace(a);
-    if (pl && typeof deckDef !== 'undefined' && deckDef.num === pl.deck && typeof player !== 'undefined') {
+    if (!a.tap && pl && typeof deckDef !== 'undefined' && deckDef.num === pl.deck && typeof player !== 'undefined') {   // a.tap (0.99.5 #16, section 21's health check): kept by its scene only, not by standing there
       const c = cellPos(...pl.at); if (Math.hypot(player.obj.position.x - c.x, player.obj.position.z - c.z) < 2.2) { a.status = 'kept'; a.keptAt = now; simNote('apptKept', { id: a.id, with: a.with }); continue; }
     }
-    if (now >= a.at + APPT_WAIT) { a.status = 'missed'; simNote('apptMissed', { id: a.id, with: a.with }); }
+    if (now >= a.at + (a.wait || APPT_WAIT)) { a.status = 'missed'; simNote('apptMissed', { id: a.id, with: a.with }); }
   }
 }
 // a tap on someone you're due to meet keeps it too (FX8; patch 0.92.3, #22: walking up to Rina for the health check and
@@ -10269,7 +10269,7 @@ function apptTapKeep(p, x, z) {
   const now = shipNow();
   if (typeof deckDef === 'undefined' || typeof player === 'undefined') return null;
   for (const a of apptList()) {
-    if (a.occ || a.status !== 'yes' || !isFinite(a.at) || now < a.at - 2 || now >= a.at + APPT_WAIT || !(a.with || []).includes(p.id)) continue;
+    if (a.occ || a.tap || a.status !== 'yes' || !isFinite(a.at) || now < a.at - 2 || now >= a.at + APPT_WAIT || !(a.with || []).includes(p.id)) continue;
     const pl = apptPlaceOf(a, p.id); if (!pl || deckDef.num !== pl.deck || Math.hypot(player.obj.position.x - x, player.obj.position.z - z) > 4) continue;
     const c = cellPos(...pl.at); if (roomAt(...cellAt(x, z)) !== pl.room && Math.hypot(c.x - x, c.z - z) > 2.5) continue;
     a.status = 'kept'; a.keptAt = now; simNote('apptKept', { id: a.id, with: a.with }); return a;
@@ -12045,7 +12045,7 @@ function devDay(d) {
   if (!devShiftOn(d)) out.splice(1, 1, { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'Day off', where: 'no shift today, your time is your own', kind: 'off' });
   if (d === stormSatDay()) out.splice(2, 1);             // FX26: the storm's Saturday has no dinner of its own: the lantern supper is it (section 18's event items list it)
   for (const g of apptGroups(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && a.at >= B && a.at < B + 1440)))
-    out.push({ from: g.a.at - B, to: g.a.at - B + (g.a.len || 30), title: g.a.title || 'With ' + g.names, where: apptWhereName(g.a.where), kind: 'appt', place: g.a.where, aid: g.a.grp || g.a.id });
+    out.push({ from: g.a.at - B, to: g.a.at - B + (g.a.len || 30), title: g.a.title || apptLabel(g.a, g.names), where: apptWhereName(g.a.where), kind: 'appt', place: g.a.where, aid: g.a.grp || g.a.id });
   for (const x of DEV_WEEK[weekday(d)]) if (!x.tradition) out.push({ from: x.at, to: x.at + x.len, title: x.title, where: x.where, kind: 'ship' });
   for (const x of devTraditions(B, B + 1439)) out.push({ from: x.at - B, to: P926_TRADS && x.to ? x.to - B : x.at - B + 60, title: x.title, where: x.where, kind: 'tradition', id: x.id, tkind: x.kind, deck: x.deck, room: x.room });
   for (const o of devOccasions(B, B + 1439)) out.push({ from: o.at - B, to: o.at - B + o.len, title: o.title, where: o.where, kind: 'occasion', deck: o.deck, room: o.room });
@@ -12747,6 +12747,7 @@ deviceApp({ id: 'calendar', title: 'Calendar', icon: 'calendar', order: 15,
         rows.push({ m: x.at - B0, text: devWhen(x.at) + '  ' + x.title + (x.at < shipNow() ? ' (on now, until ' + devWhen(x.to) + ')' : ''), sub: x.where + (same.length ? ' · same time as ' + same.map(y => y.title).join(' and ') : '') + (R.on ? p === false ? ' · no reminder' : p === true ? ' · remind me, even on shift' : ' · reminder' : ''),
           button: R.on ? p === false ? 'Remind me' : 'Don\'t' : null, action: R.on ? { app: 'calendar', do: 'remind', arg: x.kind } : null });
       }
+      rows.push(...apptCalRows(d, B0));                    // your booked appointments, what they are (0.99.5 #11, the device slot)
       if (STORIES_ON && typeof storyCalRows === 'function') rows.push(...storyCalRows(d, B0));   // a crew story's crescendo, booked (FX21, section 20c's slot)
       if (rows.length) B.push({ kind: 'list', rows: rows.sort((a, b) => a.m - b.m).map(({ m, ...r }) => r) });   // in time order, the ship's items among them
     }
@@ -13201,15 +13202,15 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
     const inv = D.appts.filter(a => a.by && a.status === 'asked');
     if (inv.length) {
       B.push({ kind: 'text', text: 'Invitations', mark: 'head' });
-      for (const a of inv) B.push({ kind: 'list', rows: [{ text: apptName(a.by) + ': ' + apptWhereName(a.where), sub: devDayName(Math.floor(a.at / 1440) + 1) + ' ' + devWhen(a.at), mark: 'new' }] },
+      for (const a of inv) B.push({ kind: 'list', rows: [{ text: apptName(a.by) + ': ' + (a.title ? a.title + ', ' : '') + apptWhereName(a.where), sub: devDayName(Math.floor(a.at / 1440) + 1) + ' ' + devWhen(a.at), mark: 'new' }] },
         { kind: 'buttons', items: [{ label: 'Accept', action: { app: 'appointments', do: 'accept', arg: a.id } }, { label: 'Decline', action: { app: 'appointments', do: 'decline', arg: a.id } }] });
     }
     const up = D.appts.filter(a => a.status === 'yes' && a.at + 15 >= now).sort((a, b) => a.at - b.at);
     B.push({ kind: 'text', text: 'Coming up', mark: 'head' });
     if (!up.length) B.push({ kind: 'text', text: 'Nothing booked.' });
-    for (const { a, names } of apptGroups(up)) B.push({ kind: 'list', rows: [{ text: devWhen(a.at) + '  ' + names, sub: devDayName(Math.floor(a.at / 1440) + 1) + ' · ' + apptWhereName(a.where), button: a.occ ? null : 'Cancel it', action: a.occ ? null : { app: 'appointments', do: 'drop', arg: a.id } }] });
+    for (const { a, names } of apptGroups(up)) B.push({ kind: 'list', rows: [{ text: devWhen(a.at) + '  ' + apptLabel(a, names), sub: devDayName(Math.floor(a.at / 1440) + 1) + ' · ' + apptWhereName(a.where), button: a.occ ? null : 'Cancel it', action: a.occ ? null : { app: 'appointments', do: 'drop', arg: a.id } }] });
     const past = apptGroups(D.appts.filter(a => a.status === 'kept' || a.status === 'missed')).slice(-4).reverse();
-    if (past.length) B.push({ kind: 'text', text: 'Earlier', mark: 'head' }, { kind: 'list', rows: past.map(({ a, names }) => ({ text: names + (a.status === 'kept' ? ': met' : ': missed'), sub: devDayName(Math.floor(a.at / 1440) + 1) + ' ' + devWhen(a.at) + ' · ' + apptWhereName(a.where), mark: 'past' })) });
+    if (past.length) B.push({ kind: 'text', text: 'Earlier', mark: 'head' }, { kind: 'list', rows: past.map(({ a, names }) => ({ text: apptLabel(a, names) + (a.status === 'kept' ? ': met' : ': missed'), sub: devDayName(Math.floor(a.at / 1440) + 1) + ' ' + devWhen(a.at) + ' · ' + apptWhereName(a.where), mark: 'past' })) });
     return { title: 'Appointments', blocks: B };
   } });
 
@@ -13330,6 +13331,17 @@ deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () =
 } });
 
 // ---- slot: Device engineer (section 19). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// the 0.99.5 patch (#11, the user: "Appointments need to say what they are, not just who and where"): an appointment's
+// label, its title (Rina's "New-crew health check") and who with, else its kind's word: "Check-up with Rina Deshi".
+// Read by the Appointments app (Coming up, Earlier), the Schedule and heads-ups (untitled ones) and the Calendar
+function apptWhat(a) { return a && a.title || { checkup: 'Check-up', work: 'Work meeting', meeting: 'Meeting', summons: 'Summons', invite: 'Invitation', social: 'Meet-up' }[a && a.kind] || 'Appointment'; }
+function apptLabel(a, names) { return a.title ? a.title + (names ? ', with ' + names : '') : apptWhat(a) + (names ? ' with ' + names : ''); }
+function apptCalRows(d, B0) {                            // the Calendar's rows for day d's booked appointments ({ m, text, sub }); today's from now on
+  const now = shipNow(); let out = [];
+  try { out = apptGroups(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && a.at >= B0 && a.at < B0 + 1440 && a.at + (a.len || 30) > now))
+    .map(({ a, names }) => ({ m: a.at - B0, text: devWhen(a.at) + '  ' + apptLabel(a, names), sub: apptWhereName(a.where) + ' · booked' })); } catch (e) { out = []; }
+  return out;
+}
 // ---- Saves (0.93.2, FX27; the user's yes, 2026-10-26): section 13's three save slots, in their own app (Settings is
 // full). Each slot: Day, weekday and ship time, deck, build and when it was last played (save.at, real time, written
 // only with slots on), or Empty. Play saves this game, makes that slot the one played and reloads the page; New game
@@ -13964,9 +13976,9 @@ const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown wh
   ['t:devwork', c => c.d >= 1 && c.d <= 7 && !c.app && !!ACT && ACT.phase === 'do' && WORK_ACTS.has(ACT.kind) && ACT.def.mins >= 10 && ACT.done > 0 && ACT.done < ACT.def.mins,
     () => careerText('tip.device') || 'While a long job\'s bar fills, you can open your device: check your Schedule, Mail or Schedule tracker. The work carries on.', { sure: true }],
   ['t:laund2', c => c.d === 2 && c.min >= 6 * 60 && !sleeping && !(typeof careerClockedIn === 'function' && careerClockedIn() && !careerClockedOut()),
-    () => SHIP.time.min < DAY_SHIFT[0] ? careerText('tip.laundry.day2') || 'New day: fresh clothes from your wardrobe. When they run out, take your hamper to the laundry on Deck 4.'
+    () => SHIP.time.min < DAY_SHIFT[0] ? careerText('tip.laundry.day2') || 'Clean clothes come from your wardrobe. When they run out, take your hamper to the laundry on Deck 4: load a washer, and come back when it\'s done.'
       : SHIP.time.min < DAY_SHIFT[1] ? careerText('tip.laundry.day2.late') || 'Laundry\'s for after your shift. Clock in first; the washers will wait.'
-      : careerText('tip.laundry.day2.after') || 'Laundry day: your hamper\'s in Bunk 1, the washers are on the far corridor.', { sure: true }],
+      : careerText('tip.laundry.day2.after') || 'Your hamper\'s in your wardrobe in Bunk 1. The laundry\'s on Deck 4, past the washrooms.', { sure: true }],
   ['t:rep', c => c.d >= 1 && (c.S.turnin !== undefined && shipNow() - c.S.turnin >= 30 || c.min >= 1020 || c.d >= 2), 'Not just jobs: kindness and joining in count too. Each department has its own view of you, and so does the ship.', { sure: true }],   // the user's: on the 2nd day (Monday), after your first job's turned in or at the shift's end; half an hour after the turn-in, so Zeke says his part first (0.28.50)
   // free time (0.28.63, the 0.60.7 plan's "Tips for your first evenings"; the plan's approved words): off shift, then one an evening, Days 1-4
   ['t:offshift', c => c.d >= 1 && c.min >= 1020 && c.min < 1290, 'Off shift. Your evening is yours: call home from the booths on Deck 3, go to a ship tradition (Calendar), talk a while with someone, or try a hobby.', { sure: true }],
@@ -42025,9 +42037,9 @@ const LINES = JSON.parse([
   ',"tip.laundry":[',
   '{"text":"Out of clean clothes. Carry the hamper to the laundry on Deck 4, past the washrooms in the junior wing. Load a washer, and come back when it\'s done.","id":"bsfjuc"}]',
   ',"tip.laundry.day2":[',
-  '{"text":"Tuesday is laundry day. Take your hamper to the laundry on Deck 4, before your shift or after it.","id":"1rnyvjy"}]',
+  '{"text":"Clean clothes come from your wardrobe. When they run out, take your hamper to the laundry on Deck 4: load a washer, and come back when it\'s done.","id":"18b9kjj"}]',
   ',"tip.laundry.day2.after":[',
-  '{"text":"Laundry day: your hamper\'s in Bunk 1, the washers are on the far corridor.","id":"1eagq7c"}]',
+  '{"text":"Your hamper\'s in your wardrobe in Bunk 1. The laundry\'s on Deck 4, past the washrooms.","id":"1x5pbdm"}]',
   ',"tip.laundry.day2.late":[',
   '{"text":"Laundry\'s for after your shift. Clock in first; the washers will wait.","id":"1hsjxic"}]',
   ',"tip.offshift":[',
@@ -55413,6 +55425,7 @@ function escortPlan(p, t) {
   if (introLingers(INTRO_ESCORT, t)) return { mode: 'wait', to: introStepById('chief').seats[INTRO_ESCORT] };   // (playtest patch 1, #6) and a little after it, then his own evening
   const scene = typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.m && /^intro-/.test(DIALOGUE.m.id || '');   // (the lead, 0.42.30: Calder's briefing plays in full first)
   const tea = typeof introTeaPlan === 'function' && !scene ? introTeaPlan(t) : null; if (tea) return tea;   // Zeke's Day 1 tea (0.42.61)
+  if (!scene && typeof introDayEndFollow === 'function' && introDayEndFollow(t)) return { mode: 'follow', to: { deck: 5, room: 'Works bay' } };   // (0.99.5 #7) training day's end: with you from 16:30 till you're at the beam (21b's slot)
   for (const b of INTRO_WEEK) if (b.escort && b.who === p.id && t >= introAbs(b.day, b.at) && t < introAbs(b.day, b.until) && !scene) return { mode: b.escort, to: b.where };
   return null;
 }
@@ -55678,6 +55691,7 @@ function introTernTick() {
 // file, off behind INTRO_ASK_ON
 const INTRO_ASK_ON = false;
 function introTap(p) {
+  if (introHealthTap(p)) return true;                   // (0.99.5 #16) Rina at your health check: its scene
   if (introMeetGo(p)) return true;                      // item 81: the speaker of a first-week meeting that's on takes you in
   if (!introOn() || !p || p.id !== SHIP.intro.escort || !introEscorting(introStep())) return false;
   if (typeof DIALOGUE !== 'undefined' && DIALOGUE) return false;
@@ -55716,7 +55730,7 @@ function introHealthAppt(at) {
   const D = SHIP.device, pl = typeof apptPlaces === 'function' && apptPlaces().find(x => x.deck === 3 && /infirmary/i.test(x.name)); if (!pl) return null;
   D.appts = D.appts.filter(x => !(x.by === 'rina' && x.title === INTRO_HEALTH_TITLE && x.status === 'yes' && x.at > shipNow()));
   const id = D.appts.reduce((m, x) => Math.max(m, x.id), 0) + 1;
-  D.appts.push({ id, with: ['rina'], at, len: 30, where: pl.id, kind: 'checkup', status: 'yes', by: 'rina', title: INTRO_HEALTH_TITLE });
+  D.appts.push({ id, with: ['rina'], at, len: 30, where: pl.id, kind: 'checkup', status: 'yes', by: 'rina', title: INTRO_HEALTH_TITLE, tap: 1, wait: 30 });   // (0.99.5 #16) kept by tapping Rina (introHealthTap), open its whole half hour
   SHIP.intro.done['d2-health:appt'] = id; return id;
 }
 function introHealthMissed(n) {
@@ -55847,6 +55861,7 @@ function introArrowWant(now) {
     if (typeof at === 'number') { if (late || d > 1 || now >= at + INTRO_EAT_MINS || I.done['ate:last'] !== undefined && I.done['ate:last'] >= at - 60) fin('eat'); else return 'eat'; }
     else if (d > 1 || d === 1 && late) fin('eat');
   }
+  if (introHealthWant(now)) return 'health';            // (0.99.5 #16) your health check's on: tap Rina
   if (d > 1 || typeof careerClockedIn !== 'function') { fin('clock'); fin('board'); return null; }
   if (d < 1) return typeof bagHeld === 'function' && bagHeld() && I.done.stow !== undefined ? 'stow' : null;   // (DS1) past its step (19:45), the bag's arrow still, after the others
   const out = m >= (typeof CAREER !== 'undefined' ? CAREER.clockOut : 1020);
@@ -56634,6 +56649,53 @@ function introHoldNudges() {
   if (!introOn() || SHIP.time.day !== 1) return false;
   const I = SHIP.intro, m = SHIP.time.min;
   return m >= INTRO_DAYEND.at && m < INTRO_DAYEND.end && I.done['d1-end:told'] !== null && I.done['arrow:beam'] === undefined && !introNamePainted();
+}
+// the 0.99.5 patch (#7, the user: "Zeke stops following you briefly on training day towards the end of the shift. He needs
+// to stick with you to get you to go to Name on the beam"): INTRO_WEEK's d1-lead follow ends at 16:30 and d1-end's runs
+// 16:44-17:05, so he wandered off for 14 minutes, and again at 17:05 if you weren't at the beam yet. escortPlan asks this
+// first (live only: the planner's beats are unchanged): he follows you from 16:30 until your name's painted, you're at
+// the beam (within INTRO_BEAM_AT m of its spot, or painting), 17:40 (INTRO_DAYEND.end), or there's no beam for you today
+const INTRO_BEAM_AT = 3;
+function introDayEndFollow(t) {
+  if (!introOn() || typeof deckDef === 'undefined' || typeof player === 'undefined') return false;
+  const I = SHIP.intro, d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440;
+  if (d !== 1 || m < 16 * 60 + 30 || m >= INTRO_DAYEND.end || I.done['d1-end:told'] === null || introNamePainted() || !introBeamToday()) return false;
+  if (typeof ACT !== 'undefined' && ACT && ACT.o && ACT.o.beam) return false;   // painting your name
+  if (deckDef.num === 5 && typeof placeSpot === 'function' && PLACE_OF.has('5-beam-1')) { const sp = placeSpot('5-beam-1'), p = player.obj.position; if (sp && Math.hypot(p.x - sp.x, p.z - sp.z) <= INTRO_BEAM_AT) return false; }   // at the beam: he joins the crowd
+  return true;
+}
+// the 0.99.5 patch (#16, the user: "The new crew health check does nothing, doesn't trigger. It should be like a ship
+// tradition where you tap the doctor and a moment starts"). It was kept by standing near the infirmary bench, and a tap on
+// Rina opened her chat card; the writers' introHealth scene never played. Now, like a tradition's Tap to join: while the
+// booking's on (2 minutes before to its end, the booking's own `wait`), the arrow is on Rina ("Tap Rina for your health
+// check"), and a tap on her in the infirmary (introTap, first) plays introHealth there; its end keeps the booking
+// (apptKept, so Settling-in ticks) and saves I.done['d2-health:met']. Standing there alone no longer counts (a.tap,
+// section 14's apptTick). Missed: rebooked once, as before. A reload mid-scene: tap her again
+INTRO_ARROWS.health = { deck: 3, crew: 'rina', label: 'Tap Rina for your health check' };
+INTRO_ARROW_LABELS.add(INTRO_ARROWS.health.label);
+function introHealthDue(now = shipNow()) {               // the health check's booking while it's on and its scene not had, or null
+  const I = SHIP.intro; if (!introOn() || I.done['d2-health:met'] !== undefined || !SHIP.device || !Array.isArray(SHIP.device.appts)) return null;
+  const a = SHIP.device.appts.find(x => x.id === I.done['d2-health:appt']);
+  return a && a.tap && (a.status === 'yes' || a.status === 'kept') && now >= a.at - 2 && now < a.at + (a.len || 30) ? a : null;
+}
+function introHealthWant(now) { return !!introHealthDue(now) && !(typeof DIALOGUE !== 'undefined' && DIALOGUE); }
+function introHealthTap(p) {
+  if (!p || p.id !== 'rina' || typeof DIALOGUE !== 'undefined' && DIALOGUE || typeof dialogueShow !== 'function' || !MEETING_SCRIPTS.introHealth) return false;
+  const ap = introHealthDue(); if (!ap || typeof deckDef === 'undefined' || deckDef.num !== 3) return false;
+  const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p.id === 'rina'); if (!a) return false;
+  const P = player.obj.position, inf = c => /infirmary/i.test((ROOMS[roomAt(...c)] || {}).name || '');
+  if (!inf(player.here()) && !inf(cellAt(a.x, a.z)) || Math.hypot(a.x - P.x, a.z - P.z) > 4) return false;   // in the infirmary, and near her
+  player.stop(); a.talking = 6; player.face = Math.atan2(a.x - P.x, a.z - P.z);
+  const id = 'introHealth~tap', now = Math.floor(shipNow());
+  MEETING_SCRIPTS[id] = { ...MEETING_SCRIPTS.introHealth, onEnd: () => introHealthKept(ap) };
+  if (!dialogueShow(id, { id: 'intro-d2-health', who: ['rina'], where: { deck: 3, room: /^Infirmary$/ }, at: now })) return false;
+  if (typeof introArrowClear === 'function' && INTRO_UI.arrow === 'health') introArrowClear();
+  return true;
+}
+function introHealthKept(ap) {                           // the scene's over (finished, or you walked off it): kept, once
+  const I = SHIP.intro, now = Math.floor(shipNow()); if (I.done['d2-health:met'] !== undefined) return;
+  I.done['d2-health:met'] = now;
+  if (ap.status === 'yes') { ap.status = 'kept'; ap.keptAt = now; if (typeof simNote === 'function') simNote('apptKept', { id: ap.id, with: ap.with }); }
 }
 // section 20's clock-out remark skips Zeke on training day once he's said his own good job (PR2: not twice)
 function introQuiet(id) { return introOn() && SHIP.time.day === 1 && id === SHIP.intro.escort && SHIP.intro.done['d1-end:start'] !== undefined; }

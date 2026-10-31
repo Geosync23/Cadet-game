@@ -13,12 +13,13 @@
 // item 9: once, on the training day; the patch (#13): once, while a long job's bar fills, any day of the first week
 == tip.device
 - While a long job's bar fills, you can open your device: check your Schedule, Mail or Schedule tracker. The work carries on.
-// item 19: at the start of Day 2 (the laundry day)
+// item 19: at the start of Day 2 (you arrive with one spare); the 0.99.5 patch (#1): laundry in general, no weekday (your
+// laundry day moves once your full kit's in)
 == tip.laundry.day2
-- Tuesday is laundry day. Take your hamper to the laundry on Deck 4, before your shift or after it.
+- Clean clothes come from your wardrobe. When they run out, take your hamper to the laundry on Deck 4: load a washer, and come back when it's done.
 // the patch (#28): the same tip, any time on Day 2 you're up and not clocked in. Up late, the shift already on:
 == tip.laundry.day2.late
 - Laundry's for after your shift. Clock in first; the washers will wait.
 // after the shift (17:00 on):
 == tip.laundry.day2.after
-- Laundry day: your hamper's in Bunk 1, the washers are on the far corridor.
+- Your hamper's in your wardrobe in Bunk 1. The laundry's on Deck 4, past the washrooms.

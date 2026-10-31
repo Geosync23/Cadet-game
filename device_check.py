@@ -188,11 +188,11 @@ def run(path):
               R.on = false; out.off = go(T - 15); D.appts = []; out.offMeal = go(bf - 15); R.on = true;
               devTraditions = keepTr; D.appts = keepAppts; SHIP.time.day = save.day; SHIP.time.min = save.min; devHeadsReset(); devTickMin = -1; delete DEV.notes.calendar; __ev.length = 0; __ev.push(...ev0); out.nm = nm; return out; })()""")
             print('  heads-ups:', hu)
-            check(hu['soon'].startswith('With ' + hu['nm'] + ' starts in 15 min') and hu['go'] == 'Go there' and hu['goal'] and hu['hidden'], f'heads-up: an appointment 15 min before, Go there sets the arrow: {hu}')
-            check(hu['start'].startswith('With ' + hu['nm'] + ' is starting') and hu['again'] and hu['saved'], f'heads-up: as it starts, once, remembered in the save: {hu}')
+            check(hu['soon'].startswith('Meet-up with ' + hu['nm'] + ' starts in 15 min') and hu['go'] == 'Go there' and hu['goal'] and hu['hidden'], f'heads-up: an appointment 15 min before, Go there sets the arrow: {hu}')
+            check(hu['start'].startswith('Meet-up with ' + hu['nm'] + ' is starting') and hu['again'] and hu['saved'], f'heads-up: as it starts, once, remembered in the save: {hu}')
             check(hu['meal'].startswith('Breakfast starts in 15 min') and hu['mealOff'] == '', f'heads-up: meals, and the switch for meals and shift: {hu}')
             check(hu['queue'] == [2, True] and hu['next'] and hu['busy'] == ['', 2] and hu['after'], f'heads-up: one at a time, waits behind a meeting: {hu}')
-            check(hu['inside'] and hu['tap'] == [True, 'schedule'] and hu['off'].startswith('With ') and hu['offMeal'] == '', f'heads-up: on screen, a tap opens the Schedule; switched off, only appointments: {hu}')
+            check(hu['inside'] and hu['tap'] == [True, 'schedule'] and hu['off'].startswith('Meet-up with ') and hu['offMeal'] == '', f'heads-up: on screen, a tap opens the Schedule; switched off, only appointments: {hu}')
             # 0.35.33 (reviewer 2): a showing strip steps back when a chat card opens (it waits); a group that gains a person
             # isn't announced again
             g.ev("while (TIP_Q.length) tipDone()")
