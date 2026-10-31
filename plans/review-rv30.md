@@ -120,3 +120,10 @@ BM23 96d902e: the edit as agreed, PASS (check-only). Sent to BM23 and lead.
 ## Build job: tea fix claude/p995-tea-fix ee66e35b (game 93aed54fa9296e75c308ae199cbac32465c776c650161fe41bf22535839a5164), on 247fc12
 For lead 48 (BM23 interactions FAIL, hot water sat you in a chair). ixTeaFirst in ixTap sort (TRAD995_ON). Gates all OK. Reviewer: RV29.
 RV29 PASS on ee66e35b (sent to BM23 and lead 48).
+
+## Round FAIL triage: arrows_check week on staging-0995 e00bfabd (game 93aed54f...5164): both CHECK-side
+(1) Spice join arrow {crew: brennan, tj}: FOLLOW calls chatOpen, never tradJoinTap (stuck 18:17-19:12); with a real tap on her
+the walker joins at 18:17 and moves on (arrow_walk.py ... 2 18:05 19:10 [realtap]). Fix: FOLLOW's crew branch taps for real when g.tj.
+(2) oj-d3gym-locker (stop 3-gym-1, a treadmill): a real floor tap starts ixStop at 09:30/13:00/19:30 (odd_gym.py); the walker taps
+"Treadmills" -> ACT gym, not in its held-job act list (arrow_walk.py with AW_PRE=aw_pre_gym.js). Fix: add gym to that list.
+Game note (not blocking): the locker job's stop is a treadmill. Sent to lead 48, BM23, R1.
