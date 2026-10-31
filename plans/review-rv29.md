@@ -67,6 +67,7 @@ No feature switch (fixes live); SEAT_BTN_ALL = !NOSAVE || ?seatbtn (the no-tray 
   4/4/2 = 172); no private seat ever offered; rec deck seats out (117 rec:seat etc.); off with SEAT_BTN_ALL false.
   seat_shot.py real game (Dev, a save): the button by a common-room chair and a plaza bench, a real click sits you, the card
   "You sit down. Tap anywhere to get up."
-- cadet_test (PL2's) ALL IDENTICAL; check_fast, talk_check, social_check: (below).
+- cadet_test (PL2's) ALL IDENTICAL; check_fast QUICK CHECK OK 318 s; talk_check OK (222/222 talks end full, 5.5-13.5 min); social_check OK.
 - Not probed by me: an invited friend's cabin (shares the own-cabin path PL2 probed); controller X on the seat button.
 - For the lead (PL2 flagged it): Stop partway now pays the share of the real length (6 of ~8 min = 2 friendship; was 1).
+- **Verdict (~11:55 UTC): PASS claude/p995-player 6b2f135 (game e462d177...bf80b).** Notes 3, 12, 13 fixed as the lead's GO.
