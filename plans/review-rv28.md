@@ -94,3 +94,4 @@ Base: claude/integration 57eceec4 = 0.99.3, game sha256 04c821fe...c2a9 (verifie
   out" toast after Kowalczyk's dawn is harmless.
 - ~06:05 UTC: BM22's stories_check FAILED (14) on staging-0994 = the 30-day default. Reproduced on my copy: 30 days FAILED
   (14, the same list), 36 days OK. Steps due Days 31-36 cut off, not a game fault. Told BM22 to run with 36; suggested 36 as default.
+- df5057d unmodified (game 6f8e1429..., switch off; the check makes its own on-copy, all 7 runs), stories_check 36: **STORIES CHECK OK** (plans/rv28-probes/stories_df5057d_36.log)

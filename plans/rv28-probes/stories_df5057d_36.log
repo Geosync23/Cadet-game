@@ -1,0 +1,125 @@
+self-test ok  clean log passes
+self-test ok  a stalled beat
+self-test ok  beat and its quiet ending both
+self-test ok  no Mail
+self-test ok  no Calendar
+self-test ok  outside its booking
+self-test ok  no booking
+self-test ok  two crescendos a day
+self-test ok  day: window
+self-test ok  afterglow too early
+self-test ok  miss run told a crescendo
+self-test ok  missed, no quiet ending
+self-test ok  Theo twice goodbye
+Part 1, the build as it is: STORIES_ON True, 35 story beats baked; STORIES2_ON False, 32 stage 2 beats
+  stage 2 off: nothing of it read (Zeke and Calder the old words, no plan beats)
+  (the build has STORIES_ON on: part 1 skipped)
+Part 2, run "play" (36 days):
+  bramwell-basil: told [1, 2, 3, 4], skipped [5]; days 1@21 2@22 3@23 4@25
+  halloran-emeka: told [1, 2, 3, 4, 5, 7], skipped [6]; days 1@8 2@9 3@31 4@33 5@34 7@36
+  kovac-zainab: told [1, 2, 3, 4, 6], skipped [5]; days 1@8 2@9 3@12 4@19 6@21
+  pell: told [5, 6, 8, 9], skipped [7]; days 5@17 6@21 8@25 9@26
+  salo-saad: told [1, 2, 4, 5], skipped [3, 6]; days 1@6 2@10 4@13 5@20
+  teague-theo: told [1, 2, 3, 4, 5], skipped [6]; days 1@9 2@10 3@14 4@18 5@21
+  calder: told [1, 2, 3, 4, 6], skipped [5, 7]; days 1@8 2@9 3@27 4@30 6@33
+  kowalczyk: told [1, 2, 3, 4, 5], skipped [6]; days 1@5 2@22 3@23 4@24 5@25
+  raman: told [1, 2, 3, 6], skipped [4, 5]; days 1@5 2@10 3@29 6@31
+  tomas: told [5, 8, 10], skipped [6, 7, 9]; days 5@16 8@21 10@25
+  torres-zeke: told [1, 2, 3, 4, 5, 7], skipped [6]; days 1@5 2@11 3@19 4@22 5@25 7@31
+  bookings: salo-saad:4 day 13 08:30, kovac-zainab:4 day 19 15:10, teague-theo:5 day 21 14:30, tomas:8 day 21 17:45, kowalczyk:4 day 24 05:35, bramwell-basil:4 day 25 17:45, halloran-emeka:5 day 34 07:55
+  crescendo bramwell-basil:4 due, never booked on: [{"d": 24, "at": 1080, "here": 9, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}]
+Part 2, run "miss" (36 days):
+  bramwell-basil: told [1, 2, 3, 5], skipped [4]; days 1@21 2@22 3@23 5@25
+  halloran-emeka: told [1, 2, 3, 4, 6, 7], skipped [5]; days 1@8 2@9 3@25 4@27 6@30 7@33
+  kovac-zainab: told [1, 2, 3, 5, 6], skipped [4]; days 1@8 2@9 3@12 5@19 6@21
+  pell: told [5, 6, 8, 9], skipped [7]; days 5@17 6@21 8@25 9@26
+  salo-saad: told [1, 2, 5, 6], skipped [3, 4]; days 1@6 2@10 6@16 5@20
+  teague-theo: told [1, 2, 3, 4, 6], skipped [5]; days 1@9 2@10 3@14 4@18 6@mail
+  calder: told [1, 2, 3, 4, 6], skipped [5, 7]; days 1@8 2@9 3@27 4@30 6@33
+  kowalczyk: told [1, 2, 3, 5, 6], skipped [4]; days 1@5 2@22 3@23 6@24 5@25
+  raman: told [1, 2, 3, 6], skipped [4, 5]; days 1@5 2@10 3@24 6@27
+  tomas: told [5, 9, 10], skipped [6, 7, 8]; days 5@16 9@21 10@25
+  torres-zeke: told [1, 2, 3, 4, 5, 7], skipped [6]; days 1@5 2@11 3@13 4@19 5@22 7@23
+  bookings: salo-saad:4 day 13 08:30, kovac-zainab:4 day 19 15:10, teague-theo:5 day 21 14:30, tomas:8 day 21 17:45, torres-zeke:6 day 23 20:00, kowalczyk:4 day 24 05:35, bramwell-basil:4 day 25 17:45, halloran-emeka:5 day 30 07:45
+  crescendo bramwell-basil:4 due, never booked on: [{"d": 24, "at": 1080, "here": 9, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}]
+  crescendo halloran-emeka:5 due, never booked on: [{"d": 29, "at": 455, "here": 10, "cast": {"pell": 0}, "gates": true, "flags": null}]
+  crescendo salo-saad:4 booked, not told: {"steps": 81, "atSlot": 81, "cast": {}, "where": {"off::4:g": 1, "breakfast:grab:3:M": 1, "work::5:f": 1, "wash:toilet:5:q": 1, "wash:hands:5:q": 1, "leisure:rest:4:g": 1, "dinner:queue:moving": 1, "dinner:ev-lanternSupper-talk:3:M": 1, "off::moving": 1, "leisure::3:G": 1, "wash:toilet:3:w": 1, "leisure::4:n": 1}, "ready": 81, "gates": 81}
+  crescendo kovac-zainab:4 booked, not told: {"steps": 3, "atSlot": 1, "cast": {}, "where": {"commute::moving": 1, "work:job:moving": 1}, "ready": 1, "gates": 3}
+  crescendo teague-theo:5 booked, not told: {"steps": 3, "atSlot": 3, "cast": {}, "where": {"off:leave:5:S": 1}, "ready": 3, "gates": 3}
+  crescendo tomas:8 booked, not told: {"steps": 1, "atSlot": 1, "cast": {"bramwell-basil": 1, "torres-zeke": 1}, "where": {"leisure:intro-story-tomas-8:5:S": 1}, "ready": 1, "gates": 1}
+  crescendo torres-zeke:6 booked, not told: {"steps": 5, "atSlot": 5, "cast": {}, "where": {"leisure:ev-knit-and-natter-read:4:j": 1}, "ready": 5, "gates": 5}
+  crescendo kowalczyk:4 booked, not told: {"steps": 2, "atSlot": 2, "cast": {"takahashi-wen": 2, "mensah": 2}, "where": {"leisure:intro-story-kowalczyk-4:1:B": 1}, "ready": 2, "gates": 2}
+  crescendo bramwell-basil:4 booked, not told: {"steps": 5, "atSlot": 5, "cast": {}, "where": {"dinner:queue:moving": 1, "dinner:queue:3:M": 1, "dinner::3:M": 1}, "ready": 5, "gates": 5}
+  crescendo halloran-emeka:5 booked, not told: {"steps": 5, "atSlot": 5, "cast": {"pell": 1}, "where": {"breakfast:queue:moving": 1, "breakfast:queue:3:M": 1, "breakfast::3:M": 1}, "ready": 1, "gates": 5}
+Part 2, run "focus:torres-zeke" (36 days):
+  bramwell-basil: told [], skipped [1, 2, 3, 4]; days 
+  halloran-emeka: told [], skipped []; days 
+  kovac-zainab: told [], skipped []; days 
+  pell: told [], skipped []; days 
+  salo-saad: told [], skipped []; days 
+  teague-theo: told [], skipped []; days 
+  calder: told [], skipped []; days 
+  kowalczyk: told [], skipped []; days 
+  raman: told [], skipped []; days 
+  tomas: told [], skipped []; days 
+  torres-zeke: told [1, 2, 3, 4, 5, 6], skipped [7]; days 1@5 2@11 3@13 4@15 5@18 6@23
+  bookings: torres-zeke:6 day 23 20:00
+  crescendo bramwell-basil:4 due, never booked on: [{"d": 25, "at": 1065, "here": 10, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}, {"d": 26, "at": 1030, "here": 8, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}]
+Part 2, run "focus:calder" (36 days):
+  bramwell-basil: told [], skipped [1, 2, 3, 4]; days 
+  halloran-emeka: told [], skipped []; days 
+  kovac-zainab: told [], skipped []; days 
+  pell: told [], skipped []; days 
+  salo-saad: told [], skipped []; days 
+  teague-theo: told [], skipped []; days 
+  calder: told [1, 2, 3, 4, 5, 7], skipped [6]; days 1@8 2@9 3@13 4@16 5@26 7@29
+  kowalczyk: told [], skipped []; days 
+  raman: told [], skipped []; days 
+  tomas: told [], skipped []; days 
+  torres-zeke: told [], skipped []; days 
+  bookings: calder:5 day 26 18:40
+  crescendo bramwell-basil:4 due, never booked on: [{"d": 25, "at": 1065, "here": 10, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}, {"d": 26, "at": 1030, "here": 8, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}]
+Part 2, run "focus:raman" (36 days):
+  bramwell-basil: told [], skipped [1, 2, 3, 4]; days 
+  halloran-emeka: told [], skipped []; days 
+  kovac-zainab: told [], skipped []; days 
+  pell: told [], skipped []; days 
+  salo-saad: told [], skipped []; days 
+  teague-theo: told [], skipped []; days 
+  calder: told [], skipped []; days 
+  kowalczyk: told [], skipped []; days 
+  raman: told [1, 2, 3, 4, 5], skipped [6]; days 1@5 2@10 3@13 4@15 5@22
+  tomas: told [], skipped []; days 
+  torres-zeke: told [], skipped []; days 
+  bookings: raman:5 day 22 21:30
+  crescendo bramwell-basil:4 due, never booked on: [{"d": 25, "at": 1065, "here": 10, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}, {"d": 26, "at": 1030, "here": 8, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}]
+Part 2, run "focus:kowalczyk" (36 days):
+  bramwell-basil: told [], skipped [1, 2, 3, 4]; days 
+  halloran-emeka: told [], skipped []; days 
+  kovac-zainab: told [], skipped []; days 
+  pell: told [], skipped []; days 
+  salo-saad: told [], skipped []; days 
+  teague-theo: told [], skipped []; days 
+  calder: told [], skipped []; days 
+  kowalczyk: told [1, 2, 3, 4, 5], skipped [6]; days 1@5 2@22 3@23 4@24 5@25
+  raman: told [], skipped []; days 
+  tomas: told [], skipped []; days 
+  torres-zeke: told [], skipped []; days 
+  bookings: kowalczyk:4 day 24 05:35
+  crescendo bramwell-basil:4 due, never booked on: [{"d": 25, "at": 1065, "here": 10, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}, {"d": 26, "at": 1030, "here": 8, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}]
+Part 2, run "focus:tomas" (36 days):
+  bramwell-basil: told [], skipped [1, 2, 3, 4]; days 
+  halloran-emeka: told [], skipped []; days 
+  kovac-zainab: told [], skipped []; days 
+  pell: told [], skipped []; days 
+  salo-saad: told [], skipped []; days 
+  teague-theo: told [], skipped []; days 
+  calder: told [], skipped []; days 
+  kowalczyk: told [], skipped []; days 
+  raman: told [], skipped []; days 
+  tomas: told [5, 6, 7, 8, 10], skipped [9]; days 5@16 6@18 7@19 8@21 10@25
+  torres-zeke: told [], skipped []; days 
+  bookings: tomas:8 day 21 17:45
+  crescendo bramwell-basil:4 due, never booked on: [{"d": 25, "at": 1065, "here": 10, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}, {"d": 26, "at": 1030, "here": 8, "cast": {}, "gates": false, "flags": ["bramwell.plant.done=false"]}]
+Part 2b, a scene across its booking's end (Tomas 8, Day 21 17:54 -> 18:00): {"ok": true, "midway": {"told": [5, 6, 7], "skip": [], "booked": true}, "told": [5, 6, 7, 8], "skip": [9]}
+STORIES CHECK OK
