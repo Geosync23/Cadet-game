@@ -46168,7 +46168,7 @@ function tradWalkStart(e, lead) {
 }
 function tradWalkEnd(why) {
   const W = TJ_WALK; if (!W) return; TJ_WALK = null;
-  if (why === 'done') { if (typeof leisureAdd === 'function') leisureAdd(5, 'tradition'); toast(W.e.name, tradWords(W.e, 'done', {}) || 'Round the whole promenade and back where you started. A good lap.'); }
+  if (why === 'done') { if (typeof leisureAdd === 'function') leisureAdd(5, 'tradition'); toast(W.e.name, tradWords(W.e, 'done', {}) || W.done || 'Round the whole promenade and back where you started. A good lap.'); }
   else if (why === 'left') toast(W.e.name, tradWords(W.e, 'left', {}) || 'You drop out of the line. They wave you off.');
 }
 function tradWalkFrame(dt) {
@@ -48560,6 +48560,7 @@ let T932_GO = false;                                     // true while tradJoin 
 function t932Join(e, a, notice, lead) {
   if (T932_GO || !T932_IDS.has(e.id)) return false;
   if (e.id === 'tasting-table') return tastJoin(e, a, notice, lead);
+  if (TRAD926_JOIN_ON && T926_IDS.has(e.id)) return t926Join(e, a, notice, lead);   // 0.99.5 (TB4): the 0.92.6 eight's host card and moment (below)
   const d = e.day, s = TRAD_JOIN[e.id], hid = s.host && tjAgent(s.host) ? s.host : lead || a.p.id, q = schedPeople().find(p => p.id === hid) || a.p;
   const go = () => {
     if (e.id === 'row-for-the-board') { t932Row(e, a, notice, lead); return; }   // a rower, else you shout the numbers (RV18)
@@ -48602,6 +48603,121 @@ function t932Frame() {
   if (typeof deckDef === 'undefined' || !deckDef || typeof DECK_CREW === 'undefined') return;
   for (const id of T932_IDS) tradTalk(id, t932Say);
 }
+// ---- TB4 (0.99.5, TR1's item 3; plans/review-tr1-traditions.md): the 0.92.6 eight get Tap to join (TRAD926_JOIN_ON,
+// off: none of this). Tool night, Route night, Card night, Garden walk, Window sketching (both hosts), the spoon band,
+// Worst joke night and Open house had a host, a crowd and a Mail promise, but nothing to tap. Each now has a TRAD_JOIN
+// entry (the marker over the leader, the arrow, the tip, the tap), joins the 0.93.2 shape (T932_IDS: the talk in bubbles
+// and the host's close line, t932Say) and, on the tap, the host's card (t926Join): the writer's t932.<id>.join line if
+// there is one (else ours), the moment its Mail promises as one question (name the tool eyes shut, place your pin, what
+// goes on your card, which leaf, what you draw, your instrument, your worst joke, what to see first) and the host's
+// answer; then the activity, a spot with its pose as any join (tradJoin), and for Garden walk a slow walk round the
+// garden beds behind the host (the lap's walk, TJ_WALK, on the garden's own places). Writers' words win: t926.<id>.ask,
+// .pick.1-3, .answer.1-3 (tool night: .right, .wrong with {tool}), and join.garden-walk.done; ours are stand-ins.
+// Nothing saved beyond eventJoin's; nothing calls R(); the day picks by quizH
+const TRAD926_JOIN_ON = URL_FLAGS.has('trad926');        // off until switched on (BM22 / the lead); `?trad926` previews
+const T926_IDS = new Set(['tool-night', 'route-night', 'card-night', 'garden-walk', 'window-sketch', 'window-sketch-2', 'open-house', 'spoon-band', 'worst-joke']);
+// the stand-in words (a writer's to replace: plans/handover-tb4.md lists them). join: the host's greeting; ask: the
+// question; picks: your three answers; answers: the host's reply to each (tool night: right / wrong, and its tools)
+const T926_CARD = {
+  'tool-night': { join: 'Oh. You came. Um. Eyes shut, please. Hold your hand out.', ask: 'Feel the weight of it. What is it?',
+    tools: ['a seven-millimetre spanner', 'a torque wrench', 'a seal pick', 'a pipe cutter', 'a crimping tool', 'a feeler gauge'],
+    right: 'Yes. That\'s {tool}. You\'ve got good hands. Next one\'s harder.', wrong: 'Um. No. It\'s {tool}. Close, though. Everyone gets that one wrong.' },
+  'route-night': { join: 'Here. A pin for you. Any colour you like, as long as it\'s red.', ask: 'Where will the Wren be in seven days? Put it where you think.',
+    picks: ['Just past the dust.', 'Halfway to the next beacon.', 'Right on the line, where you drew it.'],
+    answers: ['Brave. The dust is slower than it looks. I\'ll remember that one.', 'Halfway. Sensible. I like sensible pins.', 'Ha. Flattery. Pinned anyway. We\'ll see in seven days.'] },
+  'card-night': { join: 'Paper, pens, glue. There are four birthdays coming up. I won\'t say whose.', ask: 'What goes on yours?',
+    picks: ['A rocket. A wonky one.', 'The Wren, with everyone waving.', 'Gold pen. Lots of gold pen.'],
+    answers: ['Wonky is the best kind. Someone will love that.', 'Everyone waving. That\'s a lovely one. I\'ll keep it till the day.', 'The good gold pen. Careful, it never comes off.'] },
+  'garden-walk': { join: 'Slow feet, please. Every bed has its week. I\'ll tell you as we go.', ask: 'One leaf each to taste. Which one?',
+    picks: ['The basil.', 'A week-four lettuce.', 'That red one, the chilli.'],
+    answers: ['Good choice. Smell it first. Go on.', 'Lovely age, week four. Crisp, isn\'t it?', 'Not the chillies. I did say. Have some basil after.'],
+    done: 'Round every bed with Cruz, slowly, and back where you started. You know the week of each bed now. Nearly.' },
+  'window-sketch': { join: 'Pencils are on the sill. Draw what\'s out there. Badly is fine.', ask: 'What are you going to draw?',
+    picks: ['Tavessa. The smudge.', 'The stars. All of them.', 'The bit of hull you can see.'],
+    answers: ['Good. Everyone\'s smudge is different. That\'s the point.', 'All of them. Brave. Start with the bright one.', 'Nobody draws the hull. I love that. It\'s going on the wall.'] },
+  'open-house': { join: 'Come in, come in. Be nosy, that\'s what it\'s for.', ask: 'What do you want to see first?',
+    picks: ['The relay queue.', 'The old log.', 'Can I wear the headset?'],
+    answers: ['Numbers only. Never the messages. That\'s the rule, and it\'s a good one.', 'Chief Holt hands it round one page at a time. Gloves on, please.', 'For a minute. Don\'t touch the dial. Everyone touches the dial.'] },
+  'spoon-band': { join: 'You came! Brilliant. Everybody plays. No skill needed.', ask: 'Pick your instrument.',
+    picks: ['Two spoons.', 'The pan lid.', 'The jar of rice.'],
+    answers: ['Two spoons is a whole instrument. Keep up with me.', 'Pan lid! Big responsibility. Only on the fours.', 'The rice! We needed the rice. Shake on my count.'] },
+  'worst-joke': { join: 'Hm. You brought one? Go on, then. Your worst.', ask: 'Let\'s hear it.',
+    picks: ['Why did the airlock break up? It needed space.', 'What\'s a spanner\'s favourite song? Bolt from the blue.', 'I\'ve got one about the reactor. It\'s not very hot.'],
+    answers: ['That\'s awful. Sit down. ...I did not smile.', 'Hm. The groans in here. Good. Not funny. Good.', 'No. No. Next. ...That was a terrible joke. Well done.'] },
+};
+T926_CARD['window-sketch-2'] = T926_CARD['window-sketch'];
+if (TRAD926_JOIN_ON) {
+  Object.assign(TRAD_JOIN, {
+    'tool-night': { host: 'kovac-zainab', pose: 'talk', need: 'leisure', gain: 12, also: { social: 6 }, verb: 'name the tools with them', what: 'name the tools by touch, eyes shut' },
+    'route-night': { host: 'raman', pose: 'sit:talk', need: 'leisure', gain: 12, also: { social: 6 }, verb: 'put your pin in', what: 'put a pin where you think the Wren will be in seven days' },
+    'card-night': { host: 'oduya', pose: 'sit:fold', need: 'leisure', gain: 12, also: { social: 6 }, verb: 'make a card', what: 'make a card for a birthday coming up' },
+    'garden-walk': { act: 'walk', host: 'cruz-tove', verb: 'walk the garden with them', what: 'walk the garden slowly with Cruz, bed by bed, and taste one leaf' },
+    'window-sketch': { host: 'alvarez-luca', pose: 'sit:read', need: 'leisure', gain: 12, also: { social: 4 }, verb: 'sketch with them', what: 'take a pencil and sketch what\'s out of the window' },
+    'window-sketch-2': { host: 'achebe-lumi', pose: 'sit:read', need: 'leisure', gain: 12, also: { social: 4 }, verb: 'sketch with them', what: 'take a pencil and sketch what\'s out of the window' },
+    'open-house': { host: 'ferreira', pose: 'talk', need: 'leisure', gain: 12, also: { social: 6 }, verb: 'look round', what: 'look round Comms and the Watch office' },
+    'spoon-band': { host: 'rossi-femi', pose: 'sit:play', need: 'leisure', gain: 12, also: { social: 8 }, verb: 'join the spoon band', what: 'play along in the spoon band' },
+    'worst-joke': { host: 'holt', pose: 'sit:talk', need: 'leisure', gain: 12, also: { social: 8 }, verb: 'tell a bad joke', what: 'tell your worst joke, and groan at everyone else\'s' },
+  });
+  tjActs();
+  for (const id of T926_IDS) if (SHIP_TRADITIONS.some(ev => ev.id === id)) T932_IDS.add(id);   // the talk and the close line (t932Frame, t932Say)
+}
+// the tap (t932Join asks it): the host's card, the question and their answer; then the activity (go). Without a
+// dialogue, straight to it, as the 0.93.2 ones
+function t926Join(e, a, notice, lead) {
+  const d = e.day, s = TRAD_JOIN[e.id], M = T926_CARD[e.id], hid = s.host && tjAgent(s.host) ? s.host : lead || a.p.id, q = schedPeople().find(p => p.id === hid) || a.p;
+  const go = () => {
+    if (e.id === 'garden-walk') { t926Walk(e, a, notice, lead); return; }
+    T932_GO = true; try { tradJoin(e, a); } finally { T932_GO = false; }
+  };
+  if (!M || typeof dialogueShow !== 'function') { go(); return true; }
+  const W = (k, fb, ctx) => trLine('t926.' + e.id + '.' + k, d, ctx || {}, [fb]);
+  let picks, reply;
+  if (M.tools) {                                         // tool night: three tools of the day, one in your hand
+    const T = M.tools.map((t, i) => i).sort((x, y) => quizH(d, x + 31) - quizH(d, y + 31) || x - y).slice(0, 3), right = quizH(d, 77) % 3, tool = M.tools[T[right]];
+    picks = T.map(i => M.tools[i][0].toUpperCase() + M.tools[i].slice(1) + '.');
+    reply = k => W(k === right ? 'right' : 'wrong', k === right ? M.right : M.wrong, { tool });
+  } else { picks = M.picks.map((t, k) => W('pick.' + (k + 1), t)); reply = k => W('answer.' + (k + 1), M.answers[k]); }
+  MEETING_SCRIPTS['t932.join'] = { title: e.name, noCount: true, onEnd: go,   // the 0.93.2 card's script (its checks know it); no gist: a card closed early sends no notes Mail
+    lines: [{ who: q.id, text: trLine('t932.' + e.id + '.join', d, {}, null) || W('join', M.join) },
+      { who: q.id, text: W('ask', M.ask) },
+      { choice: picks.map((text, k) => ({ text, rel: { [q.id]: 1 }, reply: { who: q.id, text: reply(k) } })) }] };
+  dialogueShow('t932.join', { id: 't932.join@' + e.id + '@' + d, who: [q.id], at: shipNow(), ...cardWhere(e) });
+  return true;
+}
+// Garden walk's walk: the lap's (TJ_WALK, tradWalkFrame, tradWhere's escort roles) on the garden's beds, in a ring round
+// their middle (at most 8 stops); the host leads, those at it follow, you keep up behind. No ring (under 4 stops) or no
+// host on the deck: you stand with them by the beds to the end
+function t926GardenPath(e) {
+  const seen = new Set(), pts = [];
+  for (const id of tradSpotIds(e)) {
+    const pl = PLACE_OF.get(id), sp = pl && placeSpot(id), rm = pl && (deckDef.rooms || {})[pl.room];
+    if (!sp || !sp.walk || !rm || !/garden/i.test(rm.name || '') || seen.has(K(sp.walk))) continue;
+    seen.add(K(sp.walk)); const c = cellPos(...sp.walk); pts.push([id, c.x, c.z]);
+  }
+  if (pts.length < 4) return [];
+  const mx = pts.reduce((t, p) => t + p[1], 0) / pts.length, mz = pts.reduce((t, p) => t + p[2], 0) / pts.length;
+  pts.sort((p, r) => Math.atan2(p[2] - mz, p[1] - mx) - Math.atan2(r[2] - mz, r[1] - mx) || (p[0] < r[0] ? -1 : 1));
+  const n = Math.min(8, pts.length);
+  return Array.from({ length: n }, (_, i) => pts[Math.floor(i * pts.length / n)][0]);
+}
+function t926Walk(e, a, notice, lead) {
+  const d = e.day, now = shipNow(), M = T926_CARD[e.id], ag = tjAgent(lead) || a, path = t926GardenPath(e);
+  eventJoin(e, d, now, notice);
+  if (ag && ag.p && path.length >= 4 && !TJ_WALK) {
+    const cp = id => cellPos(...placeSpot(id).walk);
+    const k0 = path.map((id, k) => [k, Math.hypot(cp(id).x - ag.x, cp(id).z - ag.z)]).sort((x, y) => x[1] - y[1] || x[0] - y[0])[0][0];
+    const others = DECK_CREW.filter(c => c !== ag && c.p && c.p.id && (o => o && o.now && o.e.id === e.id)(eventOf(c.p, now)))
+      .sort((x, y) => Math.hypot(x.x - ag.x, x.z - ag.z) - Math.hypot(y.x - ag.x, y.z - ag.z)).slice(0, TJ_LINE);
+    const roles = new Map([[ag.p.id, { mode: 'lead', to: path[(k0 + 1) % path.length] }]]);
+    others.forEach((c, i) => roles.set(c.p.id, { mode: 'follow', after: i ? others[i - 1] : null }));
+    TJ_WALK = { e, lead: ag.p.id, path, k: k0 + 1, n: 0, roles, cb: () => {}, end: (d - 1) * 1440 + e.to + TJ_OVER, done: M && M.done ? trLine('t926.garden-walk.done', d, {}, [M.done]) : null };
+    return;
+  }
+  if (!PLAYER_ACTS['tj:' + e.id]) { const def = { need: 'leisure', gain: 12, mins: TJ_MINS, also: { social: 6 }, with: 4, title: e.id, until: tjEnd }; PLAYER_ACTS['tj:' + e.id] = def; if (typeof IX_ACTS !== 'undefined') IX_ACTS['tj:' + e.id] = def; }
+  const w = nearestOpen(ag.x + .9, ag.z + .9, player), c = w && cellPos(...w); if (!c) return;
+  actStart('tj:' + e.id, null, { title: e.name, after: notice, end: (d - 1) * 1440 + e.to, tj: e.id + '@' + d, pose: 'talk', company: 1, spot: { id: null, walk: w, x: c.x, z: c.z, y: 0, face: Math.atan2(ag.x - c.x, ag.z - c.z), pose: 'stand' } });
+}
+// ---- end of TB4's block ----
 // Brennan's dishes (CS1's tasting.dish.<key>, "name | her line"): the name players see (first letter small, for a
 // sentence), and her line setting it down
 const tasteDish = k => { const L = typeof LINES !== 'undefined' && LINES['tasting.dish.' + k]; return Array.isArray(L) && L.length ? [k, ...String(L[0].text).split(' | ')] : null; };
