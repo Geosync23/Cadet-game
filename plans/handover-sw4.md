@@ -51,3 +51,16 @@ New canon row in `content/facts.md` (section 10): nobody met Tomas off the Tern;
 - No deck or day numbers in lines; no star maps beyond beats 1-4; Basil's lines keep his voice
   (content/stories/bramwell-basil.voice) and never explain the plant (his beat 1 does).
 - "Show them the long way. It's the nice way." is already in the game: don't echo "the nice way".
+
+## Later jobs (2026-10-31), all pushed
+- **Calder's bridge line** (lead 47): after her career speech on Day 26, her story drops "Four weeks." and adds "He
+  talked, that one. The chief who taught me first didn't. Not a word more than the job." Built by ST1 (8de1b31).
+- **Tomas 8's invite** reworded so it reads true without beat 7 (7abfb23); built by ST1.
+- **The first rounds' tour of checks** (JB2, note 14): branch `claude/p995-jobs-words` (from JB2's c6dc9ac), tip
+  c96e511. `content/works/tour.lines` (round.title.tour, round.tour.*, round.read.*, tip.tour.*, round.check.<id> for
+  the 31 check points, round.tour.done), Zeke's `train.m1.follow.tour.look/.done` in content/lines/torres-zeke.lines,
+  and train.m1.torres-zeke.tour.meet rewritten in his voice. Baked into the game file at JB2's and RV28's request
+  (content_gen only, no build-number lines); check_fast OK. Open: JB2's code must read the new tour keys (RV28's J1);
+  the re-check goes to RV29 or RV30.
+- **check_fast in a fresh cloud session** needs `pip install playwright`, and /tmp/cadet-work/acorn and
+  /tmp/cadet-work/three (npm pack acorn@8.11.3 and three@0.128.0, untarred), linked into /tmp/cadet-work/lane-a and lane-b.
