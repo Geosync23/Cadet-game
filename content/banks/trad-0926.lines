@@ -1,0 +1,204 @@
+@bank all
+// SW4's words for the eight 0.92.6 traditions' join cards (TB4's build, claude/p995-trad926, behind TRAD926_JOIN_ON),
+// from TB4's stand-ins in T926_CARD. Keys (section 18, the Traditions slot):
+//   t932.<id>.join      the host's greeting when you tap them (one a day, by the day)
+//   t926.<id>.ask       the host's question, the Mail's promise
+//   t926.<id>.pick.N    your three answers (N 1-3); t926.<id>.answer.N the host's reply to answer N (one line each, so
+//                       a pick and its answer always match)
+//   t926.tool-night.right / .wrong   Kovac, after you name the tool in your hand ({tool}: "a torque wrench")
+//   t926.garden-walk.done            the end of the walk (narration, as the lap's)
+//   t932.<id>.close     the host, near the end (a bubble, once)
+// Each host in their own voice (content/voices/); Window sketching's two hosts (Luca Alvarez; Lumi Achebe, no card,
+// written plainly) get a set each. No line here repeats a tradition's own ask/here lines.
+
+// tool-night (host kovac-zainab): shy, exact, quietly funny
+== t932.tool-night.join
+- Oh. You came. Um. Hands out, eyes shut. I'll put one in your palm.
+- Hi. Sit there. Eyes closed, please. Properly closed. I'll know.
+== t926.tool-night.ask
+- Feel the weight. Feel the end of it. What is it?
+== t926.tool-night.right
+- Yes. That's {tool}. Sorry, I mean, well named. Next one's harder.
+== t926.tool-night.wrong
+- Um. Not quite. That was {tool}. It fools everyone. It fooled me once.
+== t932.tool-night.close
+- Last tool back in its row. All of them where they live. Thank you.
+- That's every one named. I'll sort them again later. Don't tell anyone.
+
+// route-night (host raman): soft and exact; flies like carrying soup
+== t932.route-night.join
+- Ah, hello. Here's your pin. Hold it by the head. The table's been dusted.
+- Good to see you. The week's laid out. Take a pin, and take your time.
+== t926.route-night.ask
+- Seven days from now. Where do you think she'll be? Show me with the pin.
+== t926.route-night.pick.1
+- Just past the dust.
+== t926.route-night.pick.2
+- Halfway to the next beacon.
+== t926.route-night.pick.3
+- Right on the line you drew.
+== t926.route-night.answer.1
+- A bold guess. The dust slows us more than people think. We'll see.
+== t926.route-night.answer.2
+- Halfway. That's a careful pin. I'd have put mine near there.
+== t926.route-night.answer.3
+- Kind of you. The line's only a hope, mind. She goes where it's safe.
+== t932.route-night.close
+- Pins stay in till next time. Then we'll know who was closest.
+- That's the week. Gentle turns, all of them. Goodnight.
+
+// card-night (host oduya): unhurried, warm, knows every birthday
+== t932.card-night.join
+- Hello, hello. Pull up a chair. A few birthdays are coming, and each one wants a card.
+- Come in, come in. Paper's in the middle, glue's going round. Whose? I'm not saying.
+== t926.card-night.ask
+- Before you start, what are you going to put on the front?
+== t926.card-night.pick.1
+- A rocket. A wonky one.
+== t926.card-night.pick.2
+- The Wren, with everyone waving.
+== t926.card-night.pick.3
+- Gold pen. Lots of gold pen.
+== t926.card-night.answer.1
+- A wonky rocket. I know someone who'll keep that on their shelf for years.
+== t926.card-night.answer.2
+- Everyone waving. That one might make somebody quiet for a moment. In a good way.
+== t926.card-night.answer.3
+- Go gently with the gold. It's the one everybody wants, and there's only the one.
+== t932.card-night.close
+- Leave them with me. I'll get each one to the right person on the right day.
+- That's a good pile. Somebody's going to have a lovely morning.
+
+// garden-walk (host cruz-tove, they/them): mumbles to people, chats to plants, dates by sowing week
+== t932.garden-walk.join
+- Mm, hello. Slowly. They don't like being rushed. Nor do I.
+- Oh. Hi. Walk behind me. Mind the edges. The edges are new.
+== t926.garden-walk.ask
+- One leaf each. You pick. Not... well. You know which not.
+== t926.garden-walk.pick.1
+- The basil.
+== t926.garden-walk.pick.2
+- One of the lettuces.
+== t926.garden-walk.pick.3
+- That red one. The chilli.
+== t926.garden-walk.answer.1
+- Basil. Week six. Rub it first, then eat it. There. That's the good bit.
+== t926.garden-walk.answer.2
+- That's a week-five one. Crunchy still. Hello, lettuce. Sorry.
+== t926.garden-walk.answer.3
+- No. Not the chillies. The Mail said. Here, a leaf of mint instead.
+== t926.garden-walk.done
+- Every bed with Cruz, slowly, and back to the start. You could nearly tell the weeks now.
+== t932.garden-walk.close
+- That's all of them. They liked the company. Mm. So did I.
+- Back where we began. Same beds next time. Bigger.
+
+// window-sketch (host alvarez-luca): cheerful and silly, says hello to things
+== t932.window-sketch.join
+- Hiya! Pencils on the sill, paper on the cushion. Wave at the stars first. Manners.
+- Hey, hey! Grab a pencil. Nobody looks at anybody's till the end.
+== t926.window-sketch.ask
+- Ooh, what are you doing? Tell me before you start.
+== t926.window-sketch.pick.1
+- Tavessa. The smudge.
+== t926.window-sketch.pick.2
+- The stars. Every one.
+== t926.window-sketch.pick.3
+- The bit of hull you can see.
+== t926.window-sketch.answer.1
+- Everyone's smudge comes out different. Mine looks like a sheep. Every time.
+== t926.window-sketch.answer.2
+- Every one! Ambitious. Start with the bright one and see how far you get.
+== t926.window-sketch.answer.3
+- Nobody draws the hull! I love it. That's going on the wall.
+== t932.window-sketch.close
+- Pencils down! Hold them up. Oh, look at them all. Lovely.
+- Time's up. Say goodbye to the stars. They'll be there next time.
+
+// window-sketch-2 (host achebe-lumi, no voice card): plain and friendly
+== t932.window-sketch-2.join
+- Hello. Paper's there, pencils are there. Draw whatever's out of the window.
+- Oh, good, another one. Find a bit of window and start anywhere.
+== t926.window-sketch-2.ask
+- What are you going to try?
+== t926.window-sketch-2.pick.1
+- That faint smudge. Tavessa.
+== t926.window-sketch-2.pick.2
+- As many stars as I can fit.
+== t926.window-sketch-2.pick.3
+- That curve of hull by the frame.
+== t926.window-sketch-2.answer.1
+- The smudge. Soft pencil for that, and don't press. It's mostly not there.
+== t926.window-sketch-2.answer.2
+- All of them? Dots, then. Lots of little dots, and no rubbing out.
+== t926.window-sketch-2.answer.3
+- The hull. Hardly anyone does. It's a good shape, once you look.
+== t932.window-sketch-2.close
+- Pencils down. Keep yours, or leave it on the sill for the wall.
+- That's time. Same window, next time.
+
+// open-house (host ferreira): quick and bright, a born host, never repeats a message
+== t932.open-house.join
+- Hello, hello! Come in. Be nosy, it's allowed today. Only today.
+- There you are! Coats off, eyes open. Ask me anything except what's in the messages.
+== t926.open-house.ask
+- So. Where shall we start?
+== t926.open-house.pick.1
+- The relay queue.
+== t926.open-house.pick.2
+- The old log.
+== t926.open-house.pick.3
+- Can I try the headset?
+== t926.open-house.answer.1
+- There it is. Counts and times, that's all you'll see. What's inside each one stays sealed.
+== t926.open-house.answer.2
+- Chief Holt keeps that. He'll turn the pages for you. Gloves, please. Obrigada.
+== t926.open-house.answer.3
+- For a minute. Listen, don't speak, and leave the dial alone. Everyone tries the dial.
+== t932.open-house.close
+- Doors close in a minute! Thank you for being nosy. It's nice to be visited.
+- That's the tour. Now you know where the voices come from.
+
+// spoon-band (host rossi-femi): bright and keen, one exclamation mark, everything a race
+== t932.spoon-band.join
+- Hello! Grab something that rattles. First to find a beat wins.
+- Hi, hi. Sit in. Anything that makes a noise counts. Even you.
+== t926.spoon-band.ask
+- Quick, before I count us in: what are you playing?
+== t926.spoon-band.pick.1
+- Two spoons.
+== t926.spoon-band.pick.2
+- The pan lid.
+== t926.spoon-band.pick.3
+- The jar of rice.
+== t926.spoon-band.answer.1
+- Spoons! Back to back, tap them on your knee. Race me to the end of the song.
+== t926.spoon-band.answer.2
+- Pan lid. Loudest job going. Only on the big beats, or the whole wing will hear.
+== t926.spoon-band.answer.3
+- The rice! Shake on my count. I tried to learn the Veyli for shake. It went.
+== t932.spoon-band.close
+- Last song! Whoever finishes last wins. That's the rule tonight.
+- That's us! Same band next time. Same spoons, if nobody bends them.
+
+// worst-joke (host holt): gruff, few words, "Hm.", dry by accident; he has never laughed
+== t932.worst-joke.join
+- Hm. Cadet. You've brought one. Sit. When I nod, you start.
+- There you are. Rules: one joke, said clearly. No explaining it after.
+== t926.worst-joke.ask
+- Go on. Your worst.
+== t926.worst-joke.pick.1
+- Why did the airlock break up? It needed space.
+== t926.worst-joke.pick.2
+- What's a spanner's favourite song? Bolt from the blue.
+== t926.worst-joke.pick.3
+- I've got one about the reactor. It's not very hot.
+== t926.worst-joke.answer.1
+- Hm. Space. That's dreadful. Note the groan at the back. Adequate.
+== t926.worst-joke.answer.2
+- Bolt from the blue. I'll be hearing that on patrol. Thank you. I think.
+== t926.worst-joke.answer.3
+- That isn't a joke. That's a weather report. Sit down. I'm not smiling.
+== t932.worst-joke.close
+- Last joke. Then the judging. My face is the same as it was. Note that.
+- Hm. The groans were loud tonight. I did not laugh. Write that down.
