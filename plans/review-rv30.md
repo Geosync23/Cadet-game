@@ -51,4 +51,5 @@ weekday; health arrow on from 13:59; a tap on Rina in the infirmary plays introH
    can't keep it. Day 2 missed, Settling-in not ticked, Day 3 booking can never be kept (introHealthDue refuses once met).
 2. Note 11: accepted tradition invitations (socialInvite { trad }) read "Invitation with Captain Odile Marrow" in Coming up;
    the Calendar shows "06:30 Sunrise stretch" and "06:30 Invitation with Captain Odile Marrow · booked" (appt_views.py).
+Checks on 82e9cc5 (later): intro_check whole OK, appt_check OK, device_check OK.
 Note 7: a skipped game stays on the arrival evening's steps (zeke_end.py is not a fair state; kept for the record).
