@@ -83,4 +83,5 @@ No switch (PAD_ON already on); section 26 only.
   nothing, seated ring starts with Petra 1.53 m and a place before Raman 0.9 m).
 - seat_talk_pad.py (mine): seated in the mess hall, D-pad right: Raman, Petra, Lucia (the three tablemates), then the seat,
   then the next table; A on the 2nd and on the 3rd person opens a talk with them, still seated. No errors.
-- cadet_test vs 8976965e: ALL IDENTICAL. controller_check deck settings pick door day: (below).
+- cadet_test vs 8976965e: ALL IDENTICAL. controller_check deck settings pick door day: CONTROLLER CHECK OK (all five).
+- **Verdict (~12:55 UTC): PASS claude/p995-controller 7c6c2477 (game 5fae9bbf...f0cd).** Notes 2, 5, 6 as the lead's GO.
