@@ -64,3 +64,9 @@ New canon row in `content/facts.md` (section 10): nobody met Tomas off the Tern;
   the re-check goes to RV29 or RV30.
 - **check_fast in a fresh cloud session** needs `pip install playwright`, and /tmp/cadet-work/acorn and
   /tmp/cadet-work/three (npm pack acorn@8.11.3 and three@0.128.0, untarred), linked into /tmp/cadet-work/lane-a and lane-b.
+- **TB4's eight 0.92.6 traditions' join cards**: `claude/p995-trad926-words` ef310be (from TB4's d41e762), baked.
+  `content/banks/trad-0926.lines` (t932.<id>.join/.close, t926.<id>.ask/.pick.N/.answer.N, Tool night's right/wrong,
+  Garden walk's done), and 'tool' added to lines_check.py's PLACEHOLDERS. Reviewer RV29. Noted: open-house.trad's Mail
+  says "on Deck 2" (not mine; reported to the lead).
+- **TB3's milestone cards** (new hand's tea, six and twelve weeks): `claude/p995-traditions-words` 181d86a (from
+  4037a26), baked. `content/banks/milestones-995.lines`. Reviewer RV30.
