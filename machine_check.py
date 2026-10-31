@@ -834,7 +834,7 @@ with sync_playwright() as pw:
     # every Tier 1 kind has a table, every part is in STOCK, no two causes of a kind share both card and sign; the pick is
     # the same twice, never a load, a setting only from Day 4, and over many hours every allowed cause comes up, the
     # commonest most. Then the real crew with a scripted steady player (from Day 2, on each shift hour with nothing in
-    # hand, takes the top job on the board and finishes it in its minutes): of the machine jobs you do, 40-60% are
+    # hand, takes the top job on the board and finishes it in its minutes): of the machine jobs you do, 40-65% are (40-60 before 0.99.5, JB2)
     # repairs, 7-12 jobs a shift day (3-6 before the patch's #16, 3-7 before playtest patch 1's note 13), ship health 85+, nothing broken, every repair from Day 2 has a cause, and Days 0-1
     # have none
     if g.ev("typeof FAULT_CAUSES === 'object'"):
@@ -910,7 +910,10 @@ with sync_playwright() as pw:
             sl = g.ev(STEADY_T.replace('DAYS', str(SHARE_DAYS))); lmach = sum(v['machine'] for v in sl['days'].values()); lrep = sum(v['repair'] for v in sl['days'].values())
             share = 100 * lrep / lmach if lmach else 0
             print(f"  the repairs' share over Days 2-{SHARE_DAYS}: machine jobs {lmach}, repairs {lrep} ({share:.0f}%)")
-        if not (40 <= share <= 60): fail(f"repairs are {share:.0f}% of the machine jobs a steady player does over Days 2-{SHARE_DAYS} (want 40-60%)")
+        # 40-65% from 2026-10-31 (lead 47, option A for JB2): the user's note 15 for 0.99.5 ("so many washer visits") means fewer
+        # washer services (washers last 20 loads, SPREAD_ON), and washers were the biggest source of quick services, so repairs
+        # are a bigger share of what's left (64% measured; 48% with SPREAD_ON false). Was 40-60% (lead 32, FX10)
+        if not (40 <= share <= 65): fail(f"repairs are {share:.0f}% of the machine jobs a steady player does over Days 2-{SHARE_DAYS} (want 40-65%)")
         if not (7 <= per <= 12): fail(f"a steady player does {per:.1f} jobs a shift day (want 7-12)")   # 3-6 until the patch's #16: 6.0 before JOB_PACE .72, 6.2 after; 3-7 until playtest patch 1's note 13 (6.8 then, 9.0 after: the board keeps up, so the job's length is the limit now, not the board's work; JB1)
         if st['minHealth'] < 85 or st['worst'] >= 4: fail('ship health or a broken machine with the steady player')
         if st['sig'] != st2['sig']: print('    first run only', sorted(set(json.loads(st['sig'])) - set(json.loads(st2['sig'])))[:6], 'second only', sorted(set(json.loads(st2['sig'])) - set(json.loads(st['sig'])))[:6])
