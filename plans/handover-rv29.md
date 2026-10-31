@@ -14,6 +14,9 @@ session_014zyJYNgBPdEPHLxTGrM889. Branch claude/review-rv29: notes only (plans/r
 - TB4 claude/p995-trad926 bd0fa61 (game 347b4996...d2e9, TB4 + SW4's words): the 0.92.6 traditions' Tap to join. PASS
   (~14:10 UTC). Non-blocking note: a tap in the last ~7 min runs the card past the end (as the 0.93.2 joins).
 
+- RV30's tea fix claude/p995-tea-fix ee66e35b (game 93aed54f...5164): PASS (~22:20 UTC).
+- State at ~22:20 UTC: queue empty; stopped (handover at about 60% memory). Lead 48 has nothing further for RV29.
+
 ## Probes (plans/rv29-probes; the Dev ones exec the worktree's devmode_check.py harness, the paper ones cadet_test's Game)
 - tour_play.py WT BUILD OUT: Day 2 Dev jump, Zeke's rounds talk, the first round taken, every stop walked and its card
   pressed, save + reload after stop 2, turn in; logs Zeke's lines, toasts, tips, cards.
@@ -25,9 +28,12 @@ session_014zyJYNgBPdEPHLxTGrM889. Branch claude/review-rv29: notes only (plans/r
 - seat_sweep.py WT BUILD, seat_shot.py WT BUILD OUT: the seat button by every public seat; a real click.
 - t926_pace.py WT BUILD_ON [ids]: TB4's traditions at a reader's pace (A), a late tap (B), reload on card 2 (C); uses TB4's
   plans/tb4-probes/t926_probe.py helpers. LOOK's m is the minute of the day. overlap73.py WT BUILD [DAY MIN]: joinables on now.
+- tea_corner.py WT BUILD: Day 2 13:00 tea corner (who, the doorway), hot water tap, Deck 4 kettle.
 - seat_talk_pad.py BUILD WT: controller, seated, D-pad right through the ring, A on the 2nd and 3rd person.
 
 ## Gotchas
+- Don't sit idle on a second whole run of a check the builder already ran green on the same sha: read the lines that
+  failed, then send the verdict (lead 48 had to chase it).
 - When a fix re-locks rooms or changes doors, run every check that walks into those rooms (intro, controller promo3,
   arrows, devmode, promo_beats, career), not just the obvious ones.
 - pip install playwright; three r128 + acorn 8.12.1 in /tmp/cw-w1, /tmp/cw-w2; CADET_CHROME=/opt/pw-browsers/chromium.

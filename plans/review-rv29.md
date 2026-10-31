@@ -121,3 +121,10 @@ spoon band, worst joke night. Switch TRAD926_JOIN_ON (off; ?trad926).
   intro_check --solotap OK (PL2 ran it whole: OK); controller_check promo3 OK (Day 16 office walk); arrows_check OK; devmode_check
   OK. PL2: check_fast OK, cadet vs 8976965e ALL IDENTICAL. Talk and seats unchanged since 6b2f135.
   For the lead: the reactor door (in the lead's 08:22 GO list) opens from its lobby again, as in 0.99.4 (PL2's backlog PL2-1).
+
+## RV30's tea fix claude/p995-tea-fix ee66e35b (game 93aed54f...5164, verified), on BM23's 247fc12 (game 5733867d)
+BM23's interactions FAIL "Deck 5 Hot water: ixTea, got ixLounge": TB3's note 10 moved 5-tea-3 to [23, 2], so the armchair 5-tea-2
+was nearer the hot water's tap point. Fix: ixTap's sort puts the ixTea place first for a kettle or hot water (ixTeaFirst, TRAD995_ON).
+- tea_corner.py, Day 2: hot water at 13:20 -> ixTea at 5-tea-3; Deck 4 kettle ixTea; 13:00 tea runs; the doorway [21, 1] only
+  crossed, never settled in. My interactions_check run: the two lines pass, no FAIL seen (RV30's whole run OK on the same file).
+- **Verdict (~22:20 UTC): PASS ee66e35b.** (Sent late: I was waiting on a second whole interactions run; lead 48 asked for it now.)
