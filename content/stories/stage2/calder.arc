@@ -99,7 +99,9 @@ tone: resolution
 when: rep:well beat:calder.4 weekday:fri day:26 myrank:specialist
 crescendo: at:18:40-19:05
 quiet: 6
-cast: halloran-emeka pell torres-zeke
+// The tea corner has three places (FX21's note): Calder, Halloran and Zeke are planned there; Pell's line plays if he's
+// there too (if here:), so four never share three seats.
+cast: halloran-emeka torres-zeke
 title: Four weeks aboard
 where: Tea corner
 hint: Stay for the tea. All of it. Near the front.
@@ -114,7 +116,7 @@ calder: {me}. Well done.   [nod]
 halloran-emeka: Oh, that's lovely. Sorry, Chief. My hands have started clapping on their own.   [laugh]
 calder: Halloran.
 calder: Fine. Carry on, then.   [gesture]
-pell: Get in. That's ours, that is. Works trained. Pell approved.   [laugh]
+if here:pell | pell: Get in. That's ours, that is. Works trained. Pell approved.   [laugh]
 torres-zeke: Nobody look at me. I'm fine. It's the tea. It's very hot tea.
 ? choice
 * Thank you, Chief.   flavour:listen mem:thankyou
