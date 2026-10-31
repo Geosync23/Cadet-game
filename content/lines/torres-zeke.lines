@@ -802,9 +802,9 @@
 ? flag:train.m1.follow.done
 - That's a round. Anything worn's on the board now. Yours.   #warm
 // The first rounds as a tour of checks (patch 0.99.5, note 14; SW4 for JB2, keys as RV28 named them): the tour's own
-// look and done lines, in place of the two above while CHECKS_ON is on.
+// lines (look: as you finish each stop; done: when the tour is done), in place of the two above while CHECKS_ON is on.
 ? flag:train.m1.follow.tour.look
-- Your stop. Look it over properly first, then tick it.
+- Ticked. Good look, that. Right, onward.
 ? flag:train.m1.follow.tour.done
 - That's the tour. Five checks, all done properly. Anything not right is on the board.   #warm
 
