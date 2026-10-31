@@ -73993,6 +73993,7 @@ function sndFx(name, o) { try { return SND.fx(name, o); } catch (e) { return fal
 // the title screen's track (section 30): one of three candidates for the user to pick (plans/sound/title-music.html); SD3, 0.99
 const SND_TITLE = 'C';   // the user's pick, 2026-10-29 (Ship's log). 'A' Night terminal | 'B' Phosphor glow | 'C' Ship's log | null (silent, as TB1 built it)
 const SND_R3_ON = true;   // switched on in 0.96.0 (the user: the sound update is on when published; via lead 43/44)
+const SND_LONG = false;   // 0.99.5 (SD5, the user's note 17): after a stall (a long frame) no sound is scheduled in the past, where it starts late and bunched (pops): the loops skip to now, the music looks 2 s ahead and drops bars already gone; off: as 0.99.4
 const MESS_SCALE = false;   // 0.99.5 (SD5, the user's note 4): the mess hall's murmur follows how many are there, its level too; none for one crew member alone; off: as 0.99.4
 const SND = (() => {
   const S = { ctx: null, bus: {}, onFrame: [], log: URL_FLAGS.has('soundlog') ? [] : null };
@@ -74304,6 +74305,7 @@ const SND = (() => {
     const w = {
       label: surface, next: ctx.currentTime + 0.05, foot: 0, pace: 1.85,
       tick(u) {
+        if (SND_LONG && this.next < ctx.currentTime) this.next = ctx.currentTime + 0.02;   // after a stall: on from now, not a burst
         while (this.next < u) {
           let s = surface;
           if (segs) { const seg = segs.find(x => this.next >= x[0] && this.next < x[1]); s = seg && seg[2]; }
@@ -74356,7 +74358,7 @@ const SND = (() => {
       const g = ctx.createGain(); g.gain.value = o.gain; src.connect(f); f.connect(g); g.connect(out); src.start(ctx.currentTime, Math.random() * 2); return { src, f, g };
     }
     const lfo = (param, rate, depth) => { const l = ctx.createOscillator(); l.frequency.value = rate; const g = ctx.createGain(); g.gain.value = depth; l.connect(g); g.connect(param); l.start(); return l; };
-    const every = (gap, fn) => { let next = ctx.currentTime + 0.05; return u => { while (next < u) { fn(next); next += typeof gap === 'function' ? gap() : gap; } }; };
+    const every = (gap, fn) => { let next = ctx.currentTime + 0.05; return u => { if (SND_LONG && next < ctx.currentTime) next = ctx.currentTime + 0.02; while (next < u) { fn(next); next += typeof gap === 'function' ? gap() : gap; } }; };
     const mt = m => 440 * Math.pow(2, (m - 69) / 12);
     const pianoNote = (t, m, g) => { const f = mt(m); tone(t, f, 1.8, { gain: g, a: 0.004 }); tone(t, f * 2, 0.9, { gain: g * 0.3, a: 0.003 }); tone(t, f * 3, 0.4, { gain: g * 0.1, a: 0.002 }); noise(t, 0.02, { ft: 'lowpass', f: 1500, gain: g * 0.4, a: 0.001 }); };
     const stringPluck = (t, m, g) => { const f = mt(m); tone(t, f, 1.6, { type: 'triangle', lp: 2400, gain: g, a: 0.002 }); tone(t, f * 2, 0.5, { gain: g * 0.25, a: 0.002 }); };
@@ -74593,6 +74595,7 @@ const SND = (() => {
       const t0 = ctx.currentTime; osc.start(t0); let next = t0 + Math.random() * (o.gap[1] * 0.6 + 0.3);
       const gap = o.gap, syl = o.syl || [3, 12], len = o.len || 1;
       return { nodes: [osc], tick(u) {
+        if (SND_LONG && next < ctx.currentTime) next = ctx.currentTime + 0.05;   // after a stall: the next phrase from now
         while (next < u) {
           if (!o.live(next)) { next += 0.8 + Math.random() * 1.5; continue; }
           const n = syl[0] + ((Math.random() * (syl[1] - syl[0] + 1)) | 0), lift = Math.random() < 0.12 ? 1.25 : 1; let t = next;
@@ -74634,11 +74637,12 @@ const SND = (() => {
       } });
       }
       // the warm low hum of talk on top (voicesAt: none when empty)
-      const vb = ctx.createGain(); vb.gain.value = VOICE_LV * (MESS_SCALE ? levelAt(M.n) : 1); vb.connect(out);
+      const vb = ctx.createGain(); vb.gain.value = VOICE_LV; vb.connect(out);
       const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 650; lp.connect(vb);
       const sv = ctx.createGain(); sv.gain.value = 0.7; lp.connect(sv); sv.connect(BUS.verb);
-      VOICES.forEach(([f, p], i) => loops.push(voice2(lp, { f0: f * 0.8, pan: p * 0.6, g: 0.035, gap: [0.1, 0.9], len: 1.3, live: t => i < voicesAt(M.n) })));
-      const L = { label: 'mess', loops, vb, lv: MESS_SCALE ? levelAt(M.n) : 1,
+      const lvg = MESS_SCALE ? ctx.createGain() : null; if (lvg) { lvg.gain.value = levelAt(M.n); lvg.connect(lp); }   // MESS_SCALE: the level, before the room's echo too
+      VOICES.forEach(([f, p], i) => loops.push(voice2(lvg || lp, { f0: f * 0.8, pan: p * 0.6, g: 0.035, gap: [0.1, 0.9], len: 1.3, live: t => i < voicesAt(M.n) })));
+      const L = { label: 'mess', loops, lvg, lv: lvg ? lvg.gain.value : 1,
         tick(u) { const p = ROUTE; ROUTE = room; try { loops.forEach(l => l.tick(u)); } finally { ROUTE = p; } },
         stop(f = 1.5) { LOOPS.delete(L); const t = ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + f);
           loops.forEach(l => (l.nodes || []).forEach(n => { try { n.stop(t + f + 0.1); } catch (e) {} })); nodes.forEach(n => { try { n.stop(t + f + 0.1); } catch (e) {} });
@@ -74664,7 +74668,7 @@ const SND = (() => {
         if (MESS_SCALE && on) {   // 0.99.5 (note 4): nobody talking for 5 s, the scene goes (it starts again when someone's there); till then the murmur's level follows the count
           if (voicesAt(M.n)) M.quiet = 0; else { M.quiet = (M.quiet || 0) + 1; if (!M.scene || M.quiet > 5) on = false; }
           const sc = M.scene, lv = levelAt(M.n);
-          if (sc && sc.vb && lv !== sc.lv) { sc.lv = lv; sc.vb.gain.setTargetAtTime(VOICE_LV * lv, ctx.currentTime, lv ? 0.5 : 0.25); }   // smoothed over about 1.5 s; to silence in about 1 s, mid-phrase
+          if (sc && sc.lvg && lv !== sc.lv) { sc.lv = lv; sc.lvg.gain.setTargetAtTime(lv, ctx.currentTime, lv ? 0.5 : 0.25); }   // smoothed over about 1.5 s; to silence in about 1 s, mid-phrase
         }
         if (on && !M.scene) { if (S.log) S.log.push({ name: 'mess', loop: true }); M.scene = scene(); }
         else if (!on && M.scene) { M.scene.stop(1.5); M.scene = null; }   // fades as you leave
@@ -75459,6 +75463,8 @@ const SND = (() => {
       const T = {
         key, def, out, len, total: bars.length * len, startAt: t0 - i * len - (o.from || 0), bars,
         tick(u) {   // schedule bars up to time u; the track plays once through, then ends
+          if (T.ticked && typeof SND_LONG !== 'undefined' && SND_LONG) while (next < ctx.currentTime - 0.05 && i < bars.length) { i++; next += len; }   // 0.99.5: after a stall, bars already begun are dropped, not played late all at once (never the first tick: a song started part-way)
+          T.ticked = true;
           while (next < u && i < bars.length && !ending) {
             const bar = bars[i], c = { t: next, s, beats: def.beats, ch: bar.chord.notes, root: bar.chord.root, out, rng, e: bar.sec.e, sw: def.swing * s, mel: bar.mel, lead: bar.sec.lead || def.lead || 'pluck', lg: def.lg, bar: bar.b, def };
             if (next < 0) beforeZero(() => bar.sec.parts.forEach(p => PARTS[p](c))); else bar.sec.parts.forEach(p => PARTS[p](c));
@@ -75511,7 +75517,7 @@ const SND = (() => {
       const jumped = lastMin !== null && Math.abs(st.min - lastMin) > 30 && Math.abs(st.min - lastMin) < 1410; lastMin = st.min;
       if (set !== seenSet) { if (seenSet !== null && set !== 'chosen') log(set === 'event' ? `The ${TRACKS[event].name.toLowerCase()} is on` : `Time of day is now ${set}`); seenSet = set; }
       if (cur) {
-        cur.tick(now + 0.5);
+        cur.tick(now + (typeof SND_LONG !== 'undefined' && SND_LONG ? 2 : 0.5));   // 0.99.5 (SND_LONG): 2 s ahead, so a stall leaves no gap
         if (set !== curSet) {   // time of day (or the shift) changed: cross-fade at the end of this section, or now after a jump
           if (!pendingChange) pendingChange = { at: jumped ? now : Math.min(cur.sectionEnd(), now + cfg.sectionWait) };
           else if (jumped) pendingChange.at = now;
