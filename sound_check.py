@@ -419,8 +419,9 @@ def check_r3mess(pw, path):
             r = g.ev("(M => ({ n: M.n, full: M.full, on: !!M.scene, clinks: M.clinks }))(SND.r3Mess)"); r['per_s'] = (r['clinks'] - c0) / secs
             print(f'  r3mess {name}: room {k!r} {r}'); return r
         night = at('3 am, the mess', 1440 + 180, 3, 'Mess hall')
-        if g.ev("SND.r3Mess.scale === true") and night['n'] == 0:   # 0.99.5 (MESS_SCALE on): an empty mess has no scene (it goes after 5 s empty; check_mess_scale)
-            check(not night['on'], 'r3mess: an empty mess at 3 am has no scene (MESS_SCALE)')
+        if g.ev("SND.r3Mess.scale === true"):   # 0.99.5 (MESS_SCALE on, the user's pick): the scene plays only while someone talks (RV30)
+            want = g.ev(f"SND.r3Mess.at({night['n']}).voices > 0")
+            check(night['on'] == want, f"r3mess: at 3 am the scene plays only when someone's talking (MESS_SCALE; n {night['n']}, on {night['on']})")
         else: check(night['on'], 'r3mess: the scene runs while you are in the mess')
         if night['n'] == 0: check(night['per_s'] == 0, f'r3mess: empty mess is silent (clatter {night["per_s"]}/s)')
         else: print('  r3mess: someone in the mess at 3 am, the empty case is checked by hand below')
