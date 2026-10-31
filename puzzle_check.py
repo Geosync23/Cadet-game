@@ -874,10 +874,11 @@ P5SWEEP = r"""(() => {
 P5FIRST = r"""(() => {
   const out = {}, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, tools: W.tools };
   C.open = []; delete SHIP.flags['case.p5.first']; W.rank = 'senior'; W.tier = 3; W.tr = { t3: 15, m19: 17, m18: 18 }; W.tools = Object.assign({}, W.tools, { pipekit: [12, 0] });
+  const said = []; const ws = worksSay; worksSay = (id, t) => said.push([id, t]);
+  W.op = { 18: ['p5'] }; setShipNow(17 * 1440 + 330); machinesNow();   // (0.99.5, BM23 for lead 48) the clock first: back from the paper run's Day 33, machinesNow resets and replays every machine, which undid the cond 90 below when it came first (p5's first staged 'none', state-dependent)
   for (const x of ['water', 'heat', 'air'].flatMap(lineIds)) if (SHIP.machines[x]) { SHIP.machines[x].cond = 90; SHIP.machines[x].state = machineState(90); }
   SHIP.jobs = SHIP.jobs.filter(x => !(x.machine && lineOf(x.machine) && x.status !== 'done'));
-  const said = []; const ws = worksSay; worksSay = (id, t) => said.push([id, t]);
-  W.op = { 18: ['p5'] }; setShipNow(17 * 1440 + 330); machinesNow(); WORK_MECH.p5.open(ladderRow('p5'), 18);
+  WORK_MECH.p5.open(ladderRow('p5'), 18);
   const id = flag('case.p5.first'), c = caseById(id), j = c && caseJob(c); out.staged = id; if (!c) { worksSay = ws; Object.assign(W, keep); return out; }
   out.machine = j.machine; out.cause = c.cause; out.sus = c.sus.slice(); out.reserved = j.reserved; out.hidden = caseHidden(j); out.wait = c.wait;
   out.reads = c.clues.map(k => [k.src.m, k.src.flow, k.kills.slice()]);
