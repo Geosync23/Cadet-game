@@ -27,3 +27,17 @@
 ## Next, if asked
 - Re-probe the traditions builder's branch: `spice_probe.py` (star from 18:15, the tap, Brennan stays at the shelf, the
   card), `sweep.py` on the changed ids, `followups.py` part (a) (no hidden stars), `tea_probe.py`, `beam_probe.py`.
+
+## Re-probes done (2026-10-31, afternoon)
+- **TB3 88db900** and **final 4037a26** (claude/p995-traditions, switch TRAD995_ON): Spice, tea corner (standing spot at
+  [23,2], doorway clear), beam, the two-on-one-deck fix (`overlap_probe.py`: before/after on Day 6), the milestones,
+  Open door and Off the Tern: all PASS. Rough edge sent to RV30: the Spice guess card left open about a minute loses
+  the reveal (the wait is 60 real s; the clock runs under the card). Results: `results/tb3-88db900/`, `results/tb3-4037a26/`.
+- **TB4 d41e762** (claude/p995-trad926, switch TRAD926_JOIN_ON): the 0.92.6 eight + window-sketch-2 all PASS my sweep
+  (`results/tb4-d41e762/`). Day 73 Card night overlaps the tasting table: covered once TB3's fix is merged. RV29 does
+  reload, words, the walk and switch-off identity (split agreed).
+- `spice_probe.py` takes `TR1_CARD_STEPS=N` (answer the guess card N steps after the tap).
+- The user's page: https://claude.ai/artifact/UfwLXgfSzGx7Eic1iyEfPE (file in my scratchpad: rebuild from
+  `Artifact read` if needed). Answers in its database: collection `answers` (q-meals, q-rec, q-promise, q-tea) and
+  `comments`; empty at the last read. Question (d) = the lead's call: only the standing spot moves.
+- Reviewers: RV30 session_014zyJYNFR7ewWJGvEQNUAHr (TB3), RV29 session_014zyJYM3D7UBkZN49CsZVuA (TB4).
