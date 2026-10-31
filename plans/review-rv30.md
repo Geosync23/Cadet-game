@@ -66,3 +66,9 @@ minute-people, nobody at 5-tea-3 or on the doorway, a way out every minute); scr
    Nandakumar's jar, loves. The dried chilli.") at 18:37, while the card is still open; a slower reader sees the answer
    before picking. Fix: hold the reveal while the card is open, with the cap in real seconds (e.g. 60 s), not ship minutes.
    (The same run has 13 bubbles, under TB3's 15: fewer guesses while the card is open; adjust the check, not a bug.)
+
+### OB2 re-review 6c926f4 (game 572e9c6d...8cb4): fixes 1, 2 work; one more (sent)
+health_tap 18/3: kept, no rebook. appt_views: "Sunrise stretch, with Captain Odile Marrow"; Calendar folds it into the
+tradition row. New: health_tap 28/6: the scene runs 14:28-14:56; Rina walks off at 14:38 (her place ends 14:30), 20 m away in
+the Washrooms while her lines play. Fix: crewHold('rina', null) for the scene, released in its onEnd (as storyHolds).
+Not blocking: Vance's 19:32 First Light Cocoa invite not folded into the 20:00 row (different minute).
