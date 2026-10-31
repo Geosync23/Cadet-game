@@ -38,6 +38,7 @@ Tier 1); J1 the tour's own lines (tour_play.py); machine_check, mech_check; swit
   Five checks, all done properly. Anything not right is on the board." and the toast "Tour done. Anything that wasn't right is
   on the board, noted by you." No old round lines. Save/reload mid-tour fine; no page errors.
 - W1: content_gen up to date (check_fast's words baked OK); SW4's talk, tips, cards in the real game.
-- cadet_test switches off vs 8976965e: ALL IDENTICAL. check_fast: QUICK CHECK OK 317 s. mech_check m1 m7: (below).
+- cadet_test switches off vs 8976965e: ALL IDENTICAL. check_fast: QUICK CHECK OK 317 s. mech_check m1 m7: MECH CHECK OK (the tour row: 5 kinds, 3 checks, Decks 5,5,5,4,4).
 - Note (not blocking): after the last stop Zeke says "Right, onward." just before "That's the tour" (the look line fires on
   every stop, the last too; the same order as 0.99.4's round).
+- **Verdict (~10:55 UTC): PASS claude/p995-jobs 1e056bd (game ef0941da...7d04).** W1, F1, J1 fixed; nothing new found.
