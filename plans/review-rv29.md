@@ -106,3 +106,11 @@ spoon band, worst joke night. Switch TRAD926_JOIN_ON (off; ?trad926).
   walk to a spot (or start the garden walk) after the tradition is over, for up to ~10 minutes. Backlog idea: no card after
   e.to - 8, or skip the activity when the card ends after e.to.
 - **Verdict (~14:10 UTC): PASS claude/p995-trad926 bd0fa61 (game 347b4996...d2e9).**
+
+### PL2: PASS withdrawn (~16:45 UTC), FIXES NEEDED (found by BM23's 0.99.5 round; my miss: intro_check not run)
+- intro_check --solotap: 8976965e OK (tap on Calder from the bay at 08:51 walks you in, intro-d2-solo 08:54); 6b2f135 FAIL
+  (not walking; the meeting never starts). The Works Chief's office is behind a 'closed' door; occasions there have
+  occasionDoorOpen (promo_beats, career OK), the intro week's beats (INTRO_WEEK) have no door rule; d2-solo is the only beat in
+  a locked room. Fix asked of PL2: a doorOpenFor branch for today's intro beat in its room, [at - 15, until], not done.
+- Re-review plan: intro_check whole; controller_check (Day 16 pad walk to the office), arrows_check, devmode_check (they
+  enter the re-locked rooms); door_sweep; check_fast. Lesson: when a fix re-locks rooms, run every check that names them.
