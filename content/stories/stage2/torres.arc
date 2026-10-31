@@ -115,15 +115,15 @@ them: Right, onward. I've a letter to write. Properly.
 // Gate: close, or friend if beat 5 was told 5+ days before (the builders' day gate)
 // As built (ST1, 2026-10-31): a steady player is made Engine Specialist as night 1 starts (Monday Day 22, 22:40) and gets the
 // badge on Tuesday Day 23, the first Knit and natter after; your night 2 starts at 21:00, so the scene starts by 20:40
-// (until:). The gate: friend, 5 days after his last heartfelt beat (beat 5).
+// (until:). The gate: friend, a day after his last heartfelt beat (beat 5 comes about Day 19-22: 5 days would miss Day 23).
 tone: resolution
 tier: friend
-gapDays: 5
+gapDays: 1
 when: beat:torres.5 trad:knit-and-natter weekday:tue day:23-
 crescendo: trad:knit-and-natter
 quiet: 7
 until: 20:40
-cast: kovac-zainab dahl-mira
+// No cast: Kovac and Dahl are often at dinner or elsewhere at 20:00, so their lines play if they're there (if here:)
 title: Knit and natter with Zeke
 where: Junior common room
 hint: Close your eyes. No. Open them. No, close them.
@@ -134,14 +134,14 @@ learn: Zeke Torres put his name forward again and finished your scarf. His dad r
 if day:23 myrank:specialist | torres-zeke: Engine Specialist. You. Today. I could knit you a second one. I won't. I might.   [laugh]
 torres-zeke: Close your eyes. Hold out your arms. Further. Further than that.   [laugh]
 torres-zeke: It's finished. Your scarf. It's far too long. You'll have to wind it round twice. Three times.
-kovac-zainab: Two dropped stitches. I counted. Um. It's perfect anyway. It is. It's perfect.
-dahl-mira: Wind it from the left. The lumps sit at the back that way. Nobody will know.   [nod]
+if here:kovac-zainab | kovac-zainab: Two dropped stitches. I counted. Um. It's perfect anyway. It is. It's perfect.
+if here:dahl-mira | dahl-mira: Wind it from the left. The lumps sit at the back that way. Nobody will know.   [nod]
 torres-zeke: I put my name forward again. Calder signed it. She said "About time," which from her is a parade.
 torres-zeke: And Dad's reply came. He wrote it on his last shift, sat by the engines. You can tell. It's short.
 torres-zeke: "She's sulking. Give her a minute. You'll know her better than I did."   [sigh]
 torres-zeke: Hang on. Again. "You'll know her better than I did."
-kovac-zainab: Oh. That's. Um. That's a very good line. Sorry. It is.
-dahl-mira: Read it again at breakfast. It'll still be true.
+if here:kovac-zainab | kovac-zainab: Oh. That's. Um. That's a very good line. Sorry. It is.
+if here:dahl-mira | dahl-mira: Read it again at breakfast. It'll still be true.
 ? choice
 * Read it once more. Slowly.   flavour:listen mem:once
   them: "You'll know her better than I did." There. That's three. I'll stop. I won't stop.

@@ -39,7 +39,8 @@ them: Right. Bed, for me. Breakfast, for you. Go on, then.
 tone: light
 tier: acquaintance
 metDays: 3
-where: Bridge lobby
+// As built (ST1): on the bridge, where she stands her night (she never waits in the lobby); the door lets you in on your nights
+where: Bridge
 duty: true
 when: beat:kowalczyk.1 time:night day:22-23
 hint: Night shift. Come and see the real ship. Quietly.
@@ -66,7 +67,8 @@ them: On the hour. I'll be at the chart table, pretending not to read.
 tone: heartfelt
 tier: acquaintance
 gapDays: 0
-where: Observation room
+// As built (ST1): on the bridge too (she's on duty there all night)
+where: Bridge
 duty: true
 when: beat:kowalczyk.2 time:night day:22-23
 hint: Still awake? Good. Sit a minute. It's late enough to say a thing.

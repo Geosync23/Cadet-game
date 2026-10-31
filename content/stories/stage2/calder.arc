@@ -92,13 +92,13 @@ them: Right. Next talk in four weeks. Book it.
 
 == beat 5
 // CRESCENDO rides on: Calder's question (the Works Friday tea, the Pillar 5 career meeting): plays just before her question; day: 26; cast: calder, halloran-emeka, pell, torres-zeke, you; quiet ending: beat 6
-// As built (ST1, 2026-10-31): Four weeks aboard (trad four-weeks-aboard, 18:40-19:30), Day 26 only, and only once you're an
-// Engine Specialist (her question is for one); it starts by 19:00, before she sits down to ask (19:05).
+// As built (ST1, 2026-10-31): Four weeks aboard (Day 26, 18:40), only once you're an Engine Specialist (her question is
+// for one), before she sits down to ask (19:05). A fixed time (at:), not the tradition: by their plans she and the cast are
+// still at dinner as it starts, so section 20c plans them at the tea corner 18:40-19:05.
 tone: resolution
 when: rep:well beat:calder.4 weekday:fri day:26 myrank:specialist
-crescendo: trad:four-weeks-aboard
+crescendo: at:18:40-19:05
 quiet: 6
-until: 19:00
 cast: halloran-emeka pell torres-zeke
 title: Four weeks aboard
 where: Tea corner

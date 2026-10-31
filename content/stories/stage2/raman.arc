@@ -52,8 +52,9 @@ them: And the docking arm in the bay keeps drooping. It wants a pin. A brass one
 them: I'll try a fourth shuttle. Slowly. The fourth one's usually the one.
 
 == beat 3
+// As built (ST1): where: calm (he's in the observation room only about one evening in three; nothing here names it)
 tone: heartfelt
-where: Observation room
+where: calm
 when: beat:raman.2 time:evening
 hint: Sit with me a while? Something I don't say much. I'd like to, to you.
 mem: lisk
@@ -76,8 +77,9 @@ them: She has my hands, you know. Steady. I've watched them. Ah, me. That's the 
 == beat 4
 // DAY: 8-21
 // friend, 2+ days after beat 3, before the comet (Days 8-21: the comet moved to Monday Day 22, FX25 / EP1's events-plan-2 A5)
+// As built (ST1): where: calm, as beat 3 (it must come by Day 21)
 tone: heartfelt
-where: Observation room
+where: calm
 when: beat:raman.3 !event:comet day:8-21
 hint: May I ask you something? It's a question for you, not about flying. Well. A bit.
 mem: trust

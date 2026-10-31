@@ -60,10 +60,11 @@ RUN = r"""
   const C = () => storyPeekCS();
   let mailSeen = 0;
   for (let d = 1; d <= DAYS; d++) {
-    for (let m = 360; m < 1440; m += 10) {   // every 10 minutes: a gathering can be 20 minutes long (Off the Tern)
+    const night = typeof STORIES2_ON !== 'undefined' && STORIES2_ON && d >= 23 && d <= 25;   // stage 2 (ST1): through the small hours after your nights (Days 22-24), as you'd be up
+    for (let m = night ? 0 : 360; m < 1440; m += 10) {   // every 10 minutes: a gathering can be 20 minutes long (Off the Tern)
       const t = live((d - 1) * 1440 + m);
       if (m === 720) for (const id of ids) { const p = socP(id); if (p && socAboard(p, d)) { relAdd(id, 'chat', 2); relAdd(id, 'meal', 3); } }
-      if (m === 900) repAdd('works', 1.5, { work: 1 }, 'job');
+      if (m === 900) repAdd('works', typeof STORIES2_ON !== 'undefined' && STORIES2_ON ? 3 : 1.5, { work: 1 }, 'job');   // stage 2: a steady Works player (Calder's story asks rep:well)
       if (d === 22 && m === 1360 && SHIP.works && typeof STORIES2_ON !== 'undefined' && STORIES2_ON) { SHIP.works.tier = 4; SHIP.works.rank = 'specialist'; }   // stage 2: a steady player's Engine Specialist, as night 1 starts
       if (m === 360) for (const id of ids) { const p = socP(id), mid = p && momentNextId(p), dd = mid && momentDef(mid); if (!dd || !dd.crescendo || C().book[id]) continue;   // a crescendo due but not booked: why, today
         const sl = storySlots(dd.crescendo, p, d, dd.lead || 0, dd); if (!sl.length) continue; const s0 = sl[0];
@@ -78,11 +79,14 @@ RUN = r"""
           const w = whereIs(p, t); x.where[(w && (w.act + ':' + (w.tag || '') + ':' + (storyRoom(p, t) || 'moving'))) || 'none'] = 1; if (momentReady(p, t)) x.ready++; if (storyGates(p, dd, k, t, b.trad)) x.gates++; }
         books[id + ':' + b.beat] = { ...b };
         const rows = storyCalRows(b.day, (b.day - 1) * 1440); if (rows.length) cal[id + ':' + b.beat] = b.day; }
-      for (const id of ids) {
+      const due = id => { const p = socP(id), x = p && momentNextId(p), dd = x && momentDef(x); return dd ? storyDayHi(dd.when) : Infinity; };
+      const order = typeof STORIES2_ON !== 'undefined' && STORIES2_ON ? ids.slice().sort((a, b) => due(a) - due(b)) : ids;   // stage 2: a diligent player sees first whoever's step closes soonest (Raman's by Day 21)
+      for (const id of order) {
         const p = socP(id); if (!p || !socAboard(p, d)) continue;
         const g = goodbyeMoment(p, t); if (g) byes.push(id + '@' + d);
         if (STORY_ARCS[id] && arcBeat(p, t)) arcTold(p);   // the older card beats (Pell 1-4), told on their chat card
         let mid = momentReady(p, t);
+        if (!mid && m === 840) { const nx = momentNextId(p), nd = nx && momentDef(nx); if (nd && [].concat(nd.where || []).includes('appt')) mid = momentReady(p, t, { anywhere: true }); }   // stage 2 (ST1): a beat at a progress talk (Calder 4): the paper player books one, 14:00
         const wb = C().book[id]; if (!mid && wb && wb.walk != null && t + 10 > wb.from && t < wb.to) for (let k = 1; k < 10 && !mid; k++) { if (t + k < wb.from) continue; live(t + k); mid = momentReady(p, t + k); }   // a walk booking is minutes long: try each minute (the player taps them as they pass)
         if (!mid) { if (shipNow() !== t) live(t); continue; }
         const t1 = shipNow();
