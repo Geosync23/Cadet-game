@@ -560,7 +560,7 @@ def run(path):
         cs = A['cases']
         print(f"cases: {len(cs)}; per rank: {A['perRank']}; stats: {A['stats']}")
         for c in cs[:4]: print('  ', c['id'], 'day', c['day'], c['hour'], c['band'], c['cause'], c['sus'], [(k['at'], k['kills']) for k in c['clues']], c['title'])
-        if st['hookOffer']: check(len(cs) >= 1, f'cases were posted over Days 5-33 on paper: {len(cs)}')
+        if st['hookOffer']: check(A['stats']['offered'] >= 1, f"repairs were offered to the case engine over Days 5-33 on paper: {A['stats']['offered']} (posted {len(cs)}: a roll of about 1 in 10 each, so 0 can happen; the sweep below proves the engine)")   # 0.99.5 (RV30, lead 48): offers, not posts (note 15's longer-lived washers mean fewer repairs, 0.99.4 passed on one case)
         else: print(f'  (section 17 has no real faults yet: {len(cs)} cases on paper; the sweep below makes them)')
         Sw = g.ev(SWEEP); Sw2 = g.ev(SWEEP)
         print(f"sweep: {len(Sw['cases'])} cases; per rank: {Sw['perRank']}")
