@@ -2156,3 +2156,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~07:36 UTC: **R2 OK 15/15** (claude/checks-0994-r2 de5c1a14); perf with R4. Waiting: R1 (player_check rerun alone), R3 (controller G2), R4 (G1 + perf), R5 BM22.
 - ~07:39 UTC check-in (overnight): 0.99.4 round: R2 OK, R4 OK (+ G1, perf), R3 devmode OK (G2 running), R1 running, R5 BM22 running. Two FAILs explained as host flakes (devmode real, player_check Saving). Patch 0.99.5 at 08:05 UTC.
 - ~07:41 UTC: **R1 OK 14/14** (claude/checks-0994-r1); Saving FAIL did not repeat in 4 reruns, OLD passes. Backlog for 0.99.5: player_check Saving load timing / fixed temp file name; devmode "real" flake under load (BM22 to add rows with the round record). Waiting R3 G2, R4 G1+perf, R5.
+- ~07:52 UTC: **R3 OK** (claude/checks-0994-r3 c7c439af; G1 by R4 OK). Left: R4 perf (R2's), R5 BM22.
