@@ -45,3 +45,17 @@ Base: claude/integration 57eceec4 = 0.99.3, game sha256 04c821fe...c2a9 (verifie
     Zeke's line "Ramp's opening" and Basil's first-sight lines then play two minutes after he's down: small, not blocking.
   - Note: Tomas 8 when: beat:tomas.7 is met by rel.arc when 6-7 ran out of days (stories_check play: told 5, 8; 6, 7
     skipped); the invite then says "Holt wrote it in pencil" (beat 7's news, never heard). Small; writer's call (SW4).
+
+## 06b34775 (game 510c65df...505f): B1 fixed (one line; identical to my patched copy). d879203b (game d979f0f6...edb): F2, F4 fixed
+- Read: storyDayHeld holds only if the holder's first slot exists and storyGates passes; Calder 5 line 1 split by here:pell;
+  lineCond myrank via playerRank(); design-doc Tomas 17:45-17:55. Fine.
+- Switch-on copy: day_check 21-26 OK (06b34775-equivalent); stories_check 36 OK (06b34775-equiv. and d879203b).
+- **B5 (blocker)** real game, Tomas (probe_tomas_d879.log): booked 17:45-17:55, played at 17:45, the clock runs during the
+  scene; storyTick's expiry skipped beat 8 at 17:55 mid-scene: told [5,6,7,8], skip [8,9,10]: afterglow 10 lost (stage
+  2's afterglow rule in storyDone). A real ~3 s/card reader needs ~30 ship min. Fix: don't expire an open scene; drop
+  d.beat from skip in storyDone.
+- Kowalczyk real game (probe_kowalczyk_d879.log): OK (cast there, door open, reload, told, quiet skipped, Mail).
+  Night shift: no location check, out at 05:35 not early, auto sign-out free (p5nClockTick). 1a holds.
+- Calder real game (probe_calder_d879.log, rep raised to well by the probe): P5_END's end.story opens itself at 18:45 in
+  the booking; Calder 5 ready only after it; at real pace both overrun 19:05 (needs B5's fix). **W5** two "Four weeks"
+  speeches back to back about two different first chiefs: lead / writer to choose.
