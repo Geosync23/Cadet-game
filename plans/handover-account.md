@@ -5,6 +5,19 @@ First written by lead 46 (2026-10-30); brought up to date by lead 48 on 2026-11-
 account"). This page is the starting point for whoever (or whichever Claude account) picks the project up next.
 Everything that matters lives in this GitHub repository; nothing important lives only in a chat session.
 
+## 0. NEW ACCOUNT (lead 49, 2026-11-01): the links to use now
+
+| Link | What | Current |
+|---|---|---|
+| https://claude.ai/artifact/2Uyqpm6jS9dvUW4ML7mb5H | Playtest (slug 0c01401d-1612-4e1c-a69a-5df090589360) | 0.99.5, version 1793497402-6c35, {downloads} |
+| https://claude.ai/artifact/JftiS793gzEPhKRekatcon | Dev (slug 8f197d97-106b-4f75-83f3-37b6695372ad) | 0.99.5, version 1793497409-d6cc, {downloads} |
+
+Built by lead 49 with PUB3's recipe (tools/publish on claude/publish-pub3) from claude/integration 6475bb30 (game 93aed54f...5164);
+the pages' sha256 match PUB3's 0.99.5 pages exactly (Playtest ef59535b...4e67, Dev 6d51b921...ef53). Scan clean; 390x844 phone
+test PASS on both, 0 console errors. The CqUG/Sm86 links below now belong to the previous account: never publish over them.
+Gotcha: publish_files only attaches files inside the working folder (copy them in, publish, delete the copy); a new page then
+needs declare_capabilities {downloads: {}} for Download my save.
+
 ## 1. Where things stand (0.99.5, live since ~9:13 PM ET, Oct 31)
 
 - **Latest release:** 0.99.5 (the user's 19-note playtest patch). `claude/integration` = `main` = commit `6475bb30`
