@@ -992,6 +992,8 @@ Done so far:
 
 None open: the user closed them all on 2026-10-28 (about 21:20 ET, via lead 44), and the 0.99.5 murmur and buffer question on 2026-10-31. Each is in Answered below.
 
+- **Smoother play options (parked, the user 2026-11-01, about 9:45 AM ET, via lead 49):** "None for now but please document these techniques in detail we will return to them." Four ways to make the phone work less (a 60 frames-a-second cap, sharpness 1.5, a smaller shadow map, no edge smoothing) are built in 0.99.6 and switched off; preview words `#pfcap`, `#pfpr`, `#pfsh`, `#pfaa`. The whole record (why, numbers, pictures, how to switch on, a possible player setting): `plans/perf-options.md`. Open: which, if any, and when.
+
 **Answered:**
 
 - Mess hall murmur and the sound buffer, note 4 and note 17 (the user, 2026-10-31 ~08:58 ET, on Mess Hall Murmur, https://claude.ai/artifact/E4ykNVcBpJjPxLgZxu3oWf, via lead 47): **the proposed murmur** (`MESS_SCALE` on in 0.99.5: silent for one crew member alone, quieter for a few, the same at a meal) and **the bigger sound buffer on** (`SND_BUF_ON` on in 0.99.5). The question was: keep the murmur as now, or the proposed version (silent for one crew member, quieter for a few, the same at a meal)? Recordings and the answer box: Mess Hall Murmur, https://claude.ai/artifact/E4ykNVcBpJjPxLgZxu3oWf. `MESS_SCALE` stays off until then. Same page: turn on the bigger sound buffer (`SND_BUF_ON`, note 17; less crackle risk, sounds about 0.1-0.2 s later)?
