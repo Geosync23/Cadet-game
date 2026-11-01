@@ -67,3 +67,13 @@ Game sha256 90dbc4f2c3f02f3dd170a4836312bbfbdaec1e789900a894baf744a0715346a7 (ma
 - check_fast on 08edb7a: QUICK CHECK OK in 486 s. perf_check NEW vs 0.99.5 is PF1's.
 - (added) interactions_check whole on 042f57e: OK switched off and OK with FIXTAP_ON on. It doesn't tap a toilet or washer
   near a small job's stop with the job yours, so it doesn't see the problem above; the FAIL for switching on stands.
+
+## 5. FX30, JB2-2 narrowed (FIXTAP_ON, off): PASS
+claude/fix-0996 6701201 (ea92324 docs on top), game sha256 24850dc3054fc498c741d1988664ef9e396903b132db6fdee77478873368d25f (matches).
+FIXTAP_ROWS = { 'oj-d3gym-locker': 'Treadmills' }: only that job, only a thing with that exact title, in the stop's room, within IX_NEAR.
+- fixtap_reach.py on a switched-on copy: of every small repair / odd job stop, exactly one thing takes the job: the locker's
+  Treadmills (ixStop) (results/fixtap_reach-6701201.txt).
+- fixtap_click.py: switched on, every click (toilet, washer, kettle, punch bag, chore rota; job yours and not) the same as
+  off (results/fixtap_click-6701201.txt). FX30's fixtap_probe OK (adds the gym vent job: Treadmills as off).
+- Off: cadet_test 0.99.5 vs 6701201 ALL IDENTICAL. check_fast on 6701201 OK (378 s).
+- Note: while the locker job is yours, a treadmill run in that spot waits till the job's done (the job's whole point).

@@ -1,0 +1,82 @@
+311 rows
+{"rid": "d1-blind", "pid": "1-window-1", "type": "lounge-seat", "kind": "ixStars", "items": [["Conference table", 1.42, false, null], ["Window seat", 0, false, null]]}
+{"rid": "d1-urn", "pid": "1-tea-1", "type": "common-room", "kind": "ixStars", "items": [["Conference table", 0.96, false, null], ["The Captain's tea", 0.42, false, null]]}
+{"rid": "d1-screen", "pid": "1-conf-1", "type": "common-room", "kind": "ixStars", "items": [["Conference table", 0.45, false, null], ["Window seat", 0.72, false, null]]}
+{"rid": "d1-chair", "pid": "1-conf-4", "type": "common-room", "kind": "ixStars", "items": [["Conference table", 0.45, false, null], ["Wall screen", 1.95, false, null]]}
+{"rid": "d1-lamp", "pid": "1-window-3", "type": "lounge-seat", "kind": "ixStars", "items": [["Conference table", 1.42, false, null], ["Window seat", 0, false, null]]}
+{"rid": "d1-tap", "pid": "1-basin-1", "type": "basin", "kind": "ixBasin", "items": [["Toilet", 0.33, false, null], ["Basin", 0.4, false, null]]}
+{"rid": "cr-seat", "pid": "2-windowseat-5", "type": "common-room", "kind": "ixRead", "items": [["Window seat", 0, false, null]]}
+{"rid": "cr-reading", "pid": "2-armchair-12", "type": "common-room", "kind": "ixRead", "items": []}
+{"rid": "ob-shutter", "pid": "2-beanbag-2", "type": "common-room", "kind": "ixStars", "items": [["Telescope", 2.39, false, null]]}
+{"rid": "ob-cushion", "pid": "2-windowseat-7", "type": "common-room", "kind": "ixStars", "items": [["Cushioned bench", 0, false, null]]}
+{"rid": "ob-floor", "pid": "2-beanbag-1", "type": "common-room", "kind": "ixStars", "items": [["Telescope", 1.83, false, null]]}
+{"rid": "ob-redlamp", "pid": "2-beanbag-2", "type": "common-room", "kind": "ixStars", "items": [["Telescope", 2.39, false, null]]}
+{"rid": "w2-tap", "pid": "2-wcbasin-1", "type": "basin", "kind": "ixBasin", "items": [["Toilet", 1.2, false, null], ["Basin", 0.05, false, null]]}
+{"rid": "oj-d2obs-blind", "pid": "2-windowseat-6", "type": "common-room", "kind": "ixStars", "items": [["Cushioned bench", 0, false, null]]}
+{"rid": "oj-d2chart-latch", "pid": "2-windowseat-3", "type": "lounge-seat", "kind": "ixRead", "items": [["Window seat", 0, false, null], ["Star chart", 2.33, false, null]]}
+{"rid": "oj-d2chart-vent", "pid": "2-windowseat-4", "type": "lounge-seat", "kind": "ixRead", "items": [["Window seat", 0, false, null]]}
+{"rid": "bl-blind", "pid": "3-lounge-20", "type": "lounge-seat", "kind": "ixLounge", "items": [["Booth", 0.33, false, null], ["Booth", 0, false, null], ["Booth", 1.73, false, null]]}
+{"rid": "bl-speaker", "pid": "3-lounge-28", "type": "lounge-seat", "kind": "ixRead", "items": [["Sofa", 1.53, false, null], ["Telescope", 0.89, false, null]]}
+{"rid": "gd-hose", "pid": "3-tend-3", "type": "garden", "kind": "ixGarden", "items": [["Grow racks", 1.19, false, null], ["Herb bed", 1.17, false, null]]}
+{"rid": "gd-trolley", "pid": "3-tend-8", "type": "garden", "kind": "ixGarden", "items": [["Salad bed", 1.75, false, null], ["Herb bed", 0.4, false, null], ["Tomatoes", 2.11, false, null], ["Flower bed", 1.25, false, null]]}
+{"rid": "gd-lamp", "pid": "3-tend-12", "type": "garden", "kind": "ixGarden", "items": [["Flower bed", 1.75, false, null], ["Herb wall", 1.14, false, null], ["Root beds", 1.85, false, null]]}
+{"rid": "gd-bench", "pid": "3-tend-16", "type": "garden", "kind": "ixGarden", "items": [["Grow racks", 1.72, false, null]]}
+{"rid": "w3-tap", "pid": "3-basin-1", "type": "basin", "kind": "ixBasin", "items": [["Basins", 0.42, false, null]]}
+{"rid": "w3-dryer", "pid": "3-basin-2", "type": "basin", "kind": "ixBasin", "items": [["Basins", 0.42, false, null]]}
+{"rid": "gy-rower", "pid": "3-gym-2", "type": "gym", "kind": "gym", "items": [["Treadmills", 0, false, null], ["Rowing machines", 1.95, false, null]]}
+{"rid": "gy-bench", "pid": "3-gym-5", "type": "gym", "kind": "gym", "items": [["Weights", 0.42, false, null], ["Water", 2.01, false, null], ["Punch bag", 1.6, false, null], ["Exercise bikes", 1.62, false, null]]}
+{"rid": "gy-tread", "pid": "3-gym-8", "type": "gym", "kind": "gym", "items": [["Stretching mats", 0, false, null], ["Rowing machines", 0.9, false, null]]}
+{"rid": "gy-lamp", "pid": "3-gym-11", "type": "gym", "kind": "gym", "items": [["Stretching mats", 0.9, false, null], ["Rowing machines", 0.5, false, null]]}
+{"rid": "gy-fountain", "pid": "3-gym-14", "type": "gym", "kind": "gym", "items": [["Stretching mats", 2.1, false, null], ["Punch bag", 2.15, false, null], ["Stretching mat", 0, false, null]]}
+{"rid": "oj-d3gym-vent", "pid": "3-gym-3", "type": "gym", "kind": "gym", "items": [["Treadmills", 2.25, false, null], ["Rowing machine", 1.8, false, null], ["Stretching mat", 2.07, false, null]]}
+{"rid": "oj-d3gym-mat", "pid": "3-gym-4", "type": "gym", "kind": "gym", "items": [["Rowing machine", 0, false, null], ["Gym rota", 1.22, false, null], ["Punch bag", 2.4, false, null]]}
+{"rid": "oj-d3gym-rack", "pid": "3-gym-6", "type": "gym", "kind": "gym", "items": [["Weights", 1.94, false, null], ["Punch bag", 1.36, false, null], ["Stretching mat", 1.42, false, null], ["Exercise bikes", 1.64, false, null], ["Exercise bikes", 1.5, false, null]]}
+{"rid": "oj-d3gym-mirror", "pid": "3-gym-9", "type": "gym", "kind": "gym", "items": [["Stretching mats", 0, false, null], ["Rowing machines", 0.93, false, null]]}
+{"rid": "oj-d3gym-fountain", "pid": "3-gym-10", "type": "gym", "kind": "ixWater", "items": [["Weights", 0.75, false, null], ["Water", 0.45, false, null], ["Exercise bikes", 1.78, false, null]]}
+{"rid": "oj-d3gym-locker", "pid": "3-gym-1", "type": "gym", "kind": "gym", "items": [["Treadmills", 0.95, true, "ixStop"], ["Rowing machines", 1.8, false, null]]}
+{"rid": "oj-d3garden-drip", "pid": "3-tend-2", "type": "garden", "kind": "ixGarden", "items": [["Grow racks", 0.45, false, null], ["Salad bed", 1.17, false, null], ["Herb bed", 1.36, false, null]]}
+{"rid": "oj-d3garden-trellis", "pid": "3-tend-5", "type": "garden", "kind": "ixGarden", "items": [["Grow racks", 1.19, false, null]]}
+{"rid": "oj-d3garden-drain", "pid": "3-tend-7", "type": "garden", "kind": "ixGarden", "items": [["Orange tree", 1.92, false, null], ["Salad bed", 0.4, false, null], ["Herb bed", 1.75, false, null], ["Tomatoes", 1.25, false, null], ["Flower bed", 2.11, false, null]]}
+{"rid": "oj-d3garden-light", "pid": "3-tend-9", "type": "garden", "kind": "ixGarden", "items": [["Herb bed", 1.75, false, null], ["Flower bed", 2.11, false, null]]}
+{"rid": "oj-d3garden-vent", "pid": "3-tend-4", "type": "garden", "kind": "ixGarden", "items": [["Herb bed", 1.9, false, null], ["Seedlings", 1, false, null]]}
+{"rid": "oj-d3garden-hose", "pid": "3-tend-6", "type": "garden", "kind": "ixGarden", "items": [["Grow racks", 0.45, false, null], ["Lemon tree", 1.5, false, null]]}
+{"rid": "jc-kettle", "pid": "4-common-kettle", "type": "common-room", "kind": "ixTea", "items": [["Sofa", 1.4, false, null], ["Kettle", 0.87, false, null]]}
+{"rid": "jc-sofa", "pid": "4-common-2", "type": "common-room", "kind": "ixLounge", "items": [["Window seat", 0, false, null]]}
+{"rid": "jc-lamp", "pid": "4-common-5", "type": "common-room", "kind": "ixLounge", "items": [["Sofa", 0, false, null], ["Chore rota", 1.96, false, null]]}
+{"rid": "jc-table", "pid": "4-common-8", "type": "common-room", "kind": "ixLounge", "items": [["Window seat", 1.82, false, null], ["Tiles table", 0.18, false, null]]}
+{"rid": "jc-screen", "pid": "4-common-10", "type": "common-room", "kind": "ixLounge", "items": [["Window seat", 1.1, false, null], ["Tiles table", 0.18, false, null]]}
+{"rid": "jc-blind", "pid": "4-common-11", "type": "common-room", "kind": "ixLounge", "items": [["Window seat", 1.58, false, null], ["Tiles table", 0.18, false, null]]}
+{"rid": "mu-player", "pid": "4-music-records", "type": "music", "kind": "ixMusic", "items": [["Record player", 1.03, false, null], ["Soundproofing", 1.23, false, null], ["Instrument rail", 1.1, false, null], ["Gig poster", 1.74, false, null]]}
+{"rid": "la-catch", "pid": "4-laundry-2", "type": "laundry", "kind": "ixFold", "items": [["Washer 1", 0.84, false, null], ["Washer 2", 0.68, false, null], ["Washer 3", 0.87, false, null], ["Washer 4", 1.63, false, null], ["Clean uniforms", 1.18, false, null], ["Folding table", 1.97, false, null], ["Laundry drop", 1.9, false, null]]}
+{"rid": "la-lamp", "pid": "4-laundry-4", "type": "laundry", "kind": "ixFold", "items": [["Washer 2", 1.68, false, null], ["Washer 3", 0.9, false, null], ["Washer 4", 0.68, false, null], ["Folding table", 0.8, false, null]]}
+{"rid": "la-table", "pid": "4-laundry-6", "type": "laundry", "kind": "ixFold", "items": [["Washer 1", 2.24, false, null], ["Washer 2", 1.76, false, null], ["Washer 3", 1.68, false, null], ["Washer 4", 1.75, false, null], ["Clean uniforms", 1.95, false, null], ["Folding table", 0.8, false, null], ["Laundry drop", 1.14, false, null]]}
+{"rid": "la-lint", "pid": "4-laundry-3", "type": "laundry", "kind": "ixFold", "items": [["Washer 1", 1.63, false, null], ["Washer 2", 0.87, false, null], ["Washer 3", 0.68, false, null], ["Washer 4", 0.84, false, null], ["Clean uniforms", 2.07, false, null], ["Folding table", 1.13, false, null], ["Laundry drop", 2.02, false, null]]}
+{"rid": "wp-tap", "pid": "4-basin-p2", "type": "basin", "kind": "ixBasin", "items": [["Shower", 2.31, false, null], ["Shower", 2.3, false, null], ["Basins", 0.85, false, null]]}
+{"rid": "wq-mirror", "pid": "4-basin-q1", "type": "basin", "kind": "ixBasin", "items": [["Shower", 2.31, false, null], ["Shower", 2.3, false, null], ["Basins", 0.85, false, null]]}
+{"rid": "oj-d4common-vent", "pid": "4-common-3", "type": "common-room", "kind": "ixLounge", "items": [["Window seat", 0, false, null]]}
+{"rid": "oj-d4common-sofa", "pid": "4-common-4", "type": "common-room", "kind": "ixLounge", "items": [["Sofa", 0, false, null]]}
+{"rid": "oj-d4common-screen", "pid": "4-common-6", "type": "common-room", "kind": "ixLounge", "items": [["Sofa", 1.71, false, null], ["Tiles table", 1.91, false, null], ["Kettle", 2.04, false, null]]}
+{"rid": "oj-d4common-table", "pid": "4-common-7", "type": "common-room", "kind": "ixLounge", "items": [["Sofa", 1.77, false, null], ["Swap shelf", 1.91, false, null], ["Chore rota", 2.21, false, null]]}
+{"rid": "oj-d4common-cup", "pid": "4-common-9", "type": "common-room", "kind": "ixLounge", "items": [["Window seat", 0.67, false, null], ["Tiles table", 0.18, false, null]]}
+{"rid": "oj-d4laundry-lint", "pid": "4-laundry-1", "type": "laundry", "kind": "ixFold", "items": [["Washer 1", 0.68, false, null], ["Washer 2", 0.9, false, null], ["Washer 3", 1.68, false, null], ["Clean uniforms", 0.7, false, null], ["Laundry drop", 1.99, false, null]]}
+{"rid": "oj-d4laundry-drain", "pid": "4-laundry-5", "type": "laundry", "kind": "ixFold", "items": [["Washer 1", 1.75, false, null], ["Washer 2", 1.68, false, null], ["Washer 3", 1.76, false, null], ["Washer 4", 2.24, false, null], ["Clean uniforms", 0.95, false, null], ["Folding table", 1.8, false, null], ["Laundry drop", 0.9, false, null]]}
+{"rid": "oj-d4music-door", "pid": "4-music-1", "type": "music", "kind": "ixMusic", "items": [["Grand piano", 0.48, false, null]]}
+{"rid": "oj-d4port-drain", "pid": "4-basin-p1", "type": "basin", "kind": "ixBasin", "items": [["Shower", 1.31, false, null], ["Shower", 1.3, false, null], ["Toilet", 1.75, false, null], ["Basins", 0.85, false, null]]}
+{"rid": "oj-d4stbd-drain", "pid": "4-basin-q2", "type": "basin", "kind": "ixBasin", "items": [["Shower", 1.31, false, null], ["Shower", 1.3, false, null], ["Toilet", 1.75, false, null], ["Basins", 0.85, false, null]]}
+{"rid": "tc-urn", "pid": "5-tea-1", "type": "lounge-seat", "kind": "ixLounge", "items": [["Tea table", 0.69, false, null], ["Armchair", 0, false, null], ["Mug rack", 2.31, false, null]]}
+{"rid": "tc-table", "pid": "5-tea-2", "type": "lounge-seat", "kind": "ixLounge", "items": [["Tea table", 0.49, false, null], ["Armchair", 1.5, false, null], ["Hot water", 1.71, false, null], ["Mug rack", 1.96, false, null]]}
+{"rid": "w5-tap", "pid": "5-basin-1", "type": "basin", "kind": "ixBasin", "items": [["Toilet", 1.3, false, null], ["Toilet", 1.3, false, null], ["Basins", 0.85, false, null]]}
+{"rid": "oj-d5tea-kettle", "pid": "5-tea-3", "type": "lounge-seat", "kind": "ixTea", "items": [["Tea table", 1.48, false, null], ["Armchair", 1.32, false, null], ["Hot water", 1.6, false, null], ["Mug rack", 1, false, null]]}
+{"rid": "oj-d5wash-drain", "pid": "5-basin-2", "type": "basin", "kind": "ixBasin", "items": [["Toilet", 2.3, false, null], ["Toilet", 2.3, false, null], ["Basins", 0.85, false, null]]}
+{"rid": "rc-lamp", "pid": "7-beanbag-1", "type": "lounge-seat", "kind": "ixLounge", "items": [["Beanbag", 0, false, null], ["Beanbag", 0.7, false, null], ["Mural", 1.94, false, null]]}
+{"rid": "oj-d7conc-vent", "pid": "7-beanbag-2", "type": "lounge-seat", "kind": "ixLounge", "items": [["Beanbag", 0.7, false, null], ["Beanbag", 0, false, null]]}
+no place: ['st-ladder', None, None, None]
+no place: ['st-light', None, None, None]
+no place: ['st-scanner', None, None, None]
+no place: ['sh-press', None, None, None]
+no place: ['sh-lamp', None, None, None]
+no place: ['sh-grinder', None, None, None]
+no place: ['oj-d4port-vent', None, None, None]
+no place: ['oj-d5lobby-sign', None, None, None]
+no place: ['oj-d5bay-clock', None, None, None]
+page errors []
