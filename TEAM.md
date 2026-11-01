@@ -2268,3 +2268,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~23:57 UTC (7:57 PM ET): BM23 found p5's first (check-side): P5FIRST set cond 90 then moved the clock back Day 33 -> 18, so machinesNow reset + replayed every machine. Fix bb45099c (puzzle_check only; whole puzzle_check OK on 0.99.5 and 0.99.4, p5 first staged same). Lead read + OK. R1 re-running puzzle with bb45099. R1 final: all else OK. Left: R1 puzzle, R2 perf.
 - ~23:59 UTC (7:59 PM ET): **R1 OK** (puzzle_check with bb45099 OK on candidate + 0.99.4). R1, R3, R4, R5 OK. Left: R2 perf (~00:50 UTC).
 - ~00:14 UTC Nov 1 (8:14 PM ET) check-in: R1, R3, R4, R5 OK; R2 perf_check running (watcher set, ETA ~00:50 UTC); BM23 round record drafted, final GO after R2. PUB3 waiting.
+- ~01:07 UTC (9:07 PM ET): **R2 OK** (perf: one-off spikes not repeating, 3 of 4 re-measures OK = noise, backlog 32; draw calls max 312, memory flat). All five shares OK; waiting BM23 final GO.
