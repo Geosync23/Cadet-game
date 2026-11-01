@@ -65,3 +65,5 @@ Game sha256 90dbc4f2c3f02f3dd170a4836312bbfbdaec1e789900a894baf744a0715346a7 (ma
   pf_switches.py (a fresh page at pixel ratio 2): none -> [2, 2048, antialias on], 120 renders in 120 frames at 120 Hz;
   #pfpr.pfsh.pfcap.pfaa -> [1.5, 1024, off], 60 renders; #pfcap-30 -> 30 renders; the ship clock keeps time; no page errors.
 - check_fast on 08edb7a: QUICK CHECK OK in 486 s. perf_check NEW vs 0.99.5 is PF1's.
+- (added) interactions_check whole on 042f57e: OK switched off and OK with FIXTAP_ON on. It doesn't tap a toilet or washer
+  near a small job's stop with the job yours, so it doesn't see the problem above; the FAIL for switching on stands.

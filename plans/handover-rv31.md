@@ -5,7 +5,10 @@ Branch claude/review-rv31 (from claude/integration 0.99.5 6475bb30): notes plans
 
 ## State
 - PASS FX30 P5-1 (6c14bc2, game 69ac3948...c645) and its follow-up (042f57e, game f535ed24...ace6e; on be3a51f JB2-2, not yet reviewed). No P5-1 notes open.
-- Waiting for: FX30's JB2-2 (gym locker stop, be3a51f, FIXTAP_ON; fixtap_probe.py), PF1's performance fixes (claude/perf-0996, session_01GKuymkwCZBPPLnKtstwj1r).
+- JB2-2 (FIXTAP_ON, be3a51f): safe while off, FAIL for switching on (any thing near a small job's stop does the job: toilet,
+  washers; 75 stops). FX30 to narrow it; re-review with fixtap_reach.py ON.html and fixtap_click.py OFF.html ON.html.
+- PASS PF1 67acc5b (game 90dbc4f2...46a7): F1 same answers (pf_f1_same.py), the four picture switches off (pf_switches.py).
+- Next: FX30's narrowed JB2-2, and anything else the lead sends.
 
 ## Setup and gotchas
 - pip install playwright numpy pillow; three r128 and acorn 8.12.1 in /tmp/cadet-work (npm pack), CADET_CHROME=/opt/pw-browsers/chromium.
