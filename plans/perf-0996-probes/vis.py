@@ -22,8 +22,8 @@ global DSF, EXTRA_Q
 with sync_playwright() as pw:
     for sname, sc in SCENES:
         for vname, q in VARS:
-            DSF=3; EXTRA_Q=q
-            g=GameQ(pw,path,390,844)
+            DSF=float(os.environ.get('VDSF','3')); EXTRA_Q=q
+            g=GameQ(pw,path,int(os.environ.get('VW','390')),int(os.environ.get('VH','844')))
             g.page.evaluate(REALNOW)
             r=g.page.evaluate(f"s => window.__sc(s)({json.dumps(sc)})", SCENE_JS)
             g.ev("camera.zoom = 1.5; camera.updateProjectionMatrix()"); g.step(90)

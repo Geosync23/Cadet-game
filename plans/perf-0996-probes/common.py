@@ -75,3 +75,7 @@ _gs=_src.split('class Game:')[1].split('\nimport sys, json, hashlib')[0]
 _gs='class GameQ:'+_gs.replace("device_scale_factor=1","device_scale_factor=DSF").replace("'?nosave&debug')","'?nosave&debug' + EXTRA_Q)")
 DSF=1; EXTRA_Q=''
 exec(_gs)
+_gu=_src.split('class Game:')[1].split('\nimport sys, json, hashlib')[0]
+_gu='class GameU:'+_gu.replace("device_scale_factor=1","device_scale_factor=DSF").replace("'?nosave&debug')","URL_SUFFIX)")
+URL_SUFFIX='?nosave&debug'
+exec(_gu)
