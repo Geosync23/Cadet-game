@@ -10,7 +10,7 @@ game 93aed54f...5164). The build-number lines are untouched (the build master's)
 |---|---|---|---|
 | 6c14bc2 | 69ac3948...c645 | P5-1: the first "Follow the line" case (p5Stage, 24k) retried each ship hour instead of given up for good after one failed set-up. `p5Ready` (24k's Puzzles slot) dry-runs the set-up first (the pump at cond 40 for a moment, the same seeded suspects and readings, put back exactly); not fair yet: nothing booked, try again next hour. RV31 PASS. | `P5_RETRY_ON` |
 | be3a51f | a11a6788...69cd | JB2-2: the gym locker job. Finding: a tap on 3-gym-1's own treadmill frame, or the floor, already started the repair. The puzzle is that the only tappable treadmill, the "Treadmills" item, stands on 3-gym-2 next to the stop, so a tap on it started a run there (that's what the arrows walker hit). The gym has no lockers to move the stop to, so the tap is fixed: `fixThingTap` (15b's Interactions slot, first in PLAYER_TAPS): with a fix or odd job yours (j.fix), a tap on a thing ixTap would use for the stop's place (same kind of place, same room, within IX_NEAR of the spot) does the job's step (ixChoreTap). Other things and other jobs as before. Not yet reviewed when I wrote this. | `FIXTAP_ON` |
-| 042f57e | f535ed24...ca6e | P5-1 follow-up (RV31's note C, lead 49's ask): (1) the dry run calls machinesNow first and leaves out the pump's own ordinary job (open, unclaimed, unreserved) as jobReserve does, so a bearing job on a faulty pump no longer holds the case up; (2) `p5Unstick`: a save at `case.p5.first` 'none' with p5 not learned and no p5 case open goes back to waiting once (`case.p5.reset` = 1); 'none' after that, or with p5 learned, stays. Sent to RV31. | `P5_RETRY_ON` |
+| 042f57e | f535ed24...ca6e | P5-1 follow-up (RV31's note C, lead 49's ask): (1) the dry run calls machinesNow first and leaves out the pump's own ordinary job (open, unclaimed, unreserved) as jobReserve does, so a bearing job on a faulty pump no longer holds the case up; (2) `p5Unstick`: a save at `case.p5.first` 'none' with p5 not learned and no p5 case open goes back to waiting once (`case.p5.reset` = 1); 'none' after that, or with p5 learned, stays. RV31 PASS. | `P5_RETRY_ON` |
 
 Each: cadet_test vs 0.99.5 ALL IDENTICAL with the switch off; check_fast OK.
 
@@ -59,7 +59,7 @@ before, often enough? If not, caseRate (24k: junior .1, officer .2, senior .25 (
 .33) could rise; the user hasn't decided, so nothing is changed.
 
 ## Loose ends
-- JB2-2 waits for review (be3a51f). The follow-up 042f57e waits for RV31.
+- JB2-2 waits for review (be3a51f; RV31 will take it when the lead sends it). P5-1 and its follow-up 042f57e: RV31 PASS.
 - Switching on: `var P5_RETRY_ON = false;` (24k, Puzzles slot) and `var FIXTAP_ON = false;` (15b, Interactions slot)
   to true, the build master's step, with the full round.
 - FIXTAP_ON covers every fix and odd job, not only the locker: with one yours, the thing at its stop is the job (for
