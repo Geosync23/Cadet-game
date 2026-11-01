@@ -17986,6 +17986,26 @@ function clockFirstTick() {
   CLOCK_FIRST.tip = d;
   tipFront('career.clock.' + d, careerText('career.tip.clock.first') || 'Clock in first: the time clock\'s in the Works bay, by the tea corner. Your shift starts at 09:00; Tracked shows you the way.');
 }
+// FX30 for lead 49 (backlog JB2-2, 0.99.6; switched off: FIXTAP_ON). "Unstick a gym locker" (oj-d3gym-locker) stops at
+// 3-gym-1, a treadmill: the one thing you can tap there, "Treadmills", stands on the treadmill next to it (3-gym-2), so
+// ixTap started a run there, not the repair (only a tap on the floor or that treadmill's own frame reached it). On:
+// while that job is yours and its stop is next, a tap on the thing named for the row in FIXTAP_ROWS (only that title,
+// in the stop's room, within IX_NEAR of its spot) does the job's step (ixChoreTap) first. A short list on purpose
+// (RV31: a rule for every row reached 75 stops, toilets, washers and kettles among them); any other thing, and every
+// other job, as before. A row that needs the same goes in the list, with its probe.
+var FIXTAP_ON = false;
+const FIXTAP_ROWS = { 'oj-d3gym-locker': 'Treadmills' };
+function fixThingTap(it, at) {
+  if (!FIXTAP_ON || !it || !it.hit || typeof ixChoreTap !== 'function') return false;
+  for (const j of ixChores()) {
+    if (!j.fix || j.workDone || FIXTAP_ROWS[j.fix] !== it.t) continue;
+    const nx = ixNextStop(j), pid = nx && nx.s.deck === deckDef.num && nx.s.places && nx.s.places[0], pl = pid && PLACE_OF.get(pid), sp = pl && placeSpot(pid);
+    if (!sp || pl.room !== roomAt(...cellAt(at.x, at.z)) || ixDist(it, sp) >= IX_NEAR) continue;
+    if (ixChoreTap(it, at, j)) return true;
+  }
+  return false;
+}
+PLAYER_TAPS.unshift(fixThingTap);
 // ---- end of slot: Interactions engineer ----
 
 // =====================================================================
@@ -62392,10 +62412,12 @@ function p5Tick(c, j) {
 // staged when the row opens (retried each ship hour): 3-pump-1's seal (its machine faulty now, as a reserved job's
 // would be within the hour, so the readings are honest); none fair: the first roll case is your first
 function p5Stage() {
+  if (P5_RETRY_ON && SHIP.works && caseOpened('p5') && caseState()) p5Unstick(SHIP.works, caseState());   // FX30 (lead 49): the old give-up, undone once
   if (flag('case.p5.first') !== undefined || !SHIP.works || !caseOpened('p5')) return;
   const W = SHIP.works, C = caseState(); if (!C) return;
   if (W.tr && W.tr.p5 !== undefined) { flagSet('case.p5.first', 'none'); return; }
   const m = machineById(P5_FIRST.machine), f = m && caseCauses(m).find(x => x.id === P5_FIRST.cause);
+  if (P5_RETRY_ON && f && p5Line(m, f) && !p5Ready(m, f)) return;   // FX30 (P5-1): not fair yet, try again next ship hour
   if (!f || !p5Line(m, f) || SHIP.jobs.some(j => j.machine === m.id && j.status !== 'done' && (j.claimedBy || j.case || j.reserved))) { flagSet('case.p5.first', 'none'); return; }
   const now = shipNow(), d = caseDay(now), id = jobReserve(m.id, d, now % 1440, P5_SLOT, { train: 'p5', tier: 2, until: now + 7 * 1440, cause: f.id }), j = id && SHIP.jobs.find(x => x.id === id);
   if (!j) return;
@@ -63131,6 +63153,34 @@ function casePointPick(id) {
   if (f) { try { f(id, id === P.key); } catch (e) { /* the caller's */ } }
 }
 if (P5_STEP6 && typeof deviceOn === 'function') deviceOn('close', () => { const P = CASE_UI.point; if (!P) return; CASE_UI.point = null; if (P.onClose) { try { P.onClose(); } catch (e) { /* the caller's */ } } });
+// FX30 for lead 49 (backlog P5-1, 0.99.6; switched off: P5_RETRY_ON). p5Stage gave the first "Follow the line" case up
+// for good ('none') when one set-up failed: the pump busy with another job, or caseSolve rejecting the readings (another
+// machine on the water line reading low at that moment). On: before it books anything, p5Ready dry-runs the set-up
+// (the pump at cond 40 for a moment, the same suspects and readings, then put back exactly), at most once a ship hour;
+// not fair yet, p5Stage waits and tries again later. It still gives up when you've learned p5 from a roll case.
+// A save already given up by the old rule waits again, once (p5Unstick).
+var P5_RETRY_ON = false;
+const P5_RETRY = { h: -1 };
+function p5Ready(m, f) {
+  const h = Math.floor(shipNow() / 60); if (h === P5_RETRY.h) return false; P5_RETRY.h = h;
+  if (SHIP.jobs.some(j => j.machine === m.id && j.status !== 'done' && (j.claimedBy || j.case || j.reserved))) return false;
+  if (typeof machinesNow === 'function') machinesNow();   // as jobReserve does first
+  const s = SHIP.machines[m.id], was = s && { cond: s.cond, state: s.state }, jobs = SHIP.jobs;
+  try {
+    SHIP.jobs = jobs.filter(j => !(j.machine === m.id && j.status === 'open' && !j.claimedBy && !j.reserved));   // (RV31) the pump's own ordinary job: jobReserve drops it, so the dry run reads the line without it
+    if (s) { s.cond = Math.min(s.cond, 40); s.state = machineState(s.cond); }
+    const j = { machine: m.id, cause: f.id }, seed = machSeed('p5-first');
+    const sus = [f.id].concat(p5Pick(j, seed, 'T3', P5_FIRST.decoys)).map((x, i) => [schedU(seed, i, 893), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+    return !caseSolve(sus, p5Clues(j, f.id, sus), 'T3', f.id, 'p5').why;
+  } finally { SHIP.jobs = jobs; if (s) { s.cond = was.cond; s.state = was.state; } }
+}
+// (lead 49) a save stuck by the old give-up: case.p5.first 'none', p5 not learned (no roll case solved, none open) goes
+// back to waiting, once (case.p5.reset), so a player already past Day 18 still gets the first case; 'none' again
+// after that (learned, or the line never fair) stays
+function p5Unstick(W, C) {
+  if (flag('case.p5.first') !== 'none' || flag('case.p5.reset') || (W.tr && W.tr.p5 !== undefined) || C.open.some(c => c.kind === 'p5')) return;
+  flagSet('case.p5.reset', 1); flagSet('case.p5.first', null);
+}
 // ---- end of slot: Puzzles seat ----
 
 // ---------------------------------------------------------------------
