@@ -22,3 +22,15 @@ Notes (not blocking):
   bearing. Only a delay, never lost. Optional: ignore open, unclaimed, unreserved jobs on the pump in the dry run, as
   jobReserve does. (The pump's own flow also differs, 0.71 dry vs 0.6 real, both under 0.8: same outcome.)
 - Saves already given up ('none') by the old behaviour stay given up; a one-time clear is the lead's call.
+
+## 2. FX30, P5-1 follow-up (still P5_RETRY_ON, off): PASS
+claude/fix-0996 042f57e (on be3a51f JB2-2, not reviewed here), game sha256 f535ed24a5fa8942e342952ced80ed1dbb827993d3eb234b2397b869632aca6e (matches).
+Changes: p5Ready calls machinesNow first and leaves the pump's open, unclaimed, unreserved jobs out of the dry run (SHIP.jobs
+swapped, put back in the finally): my note C. p5Unstick (lead 49's ask): a save at 'none' with p5 not learned and no open
+p5 case goes back to waiting once (case.p5.reset = 1). flagSet(key, null) deletes the flag, so p5Stage's "!== undefined" gate opens.
+- Off: cadet_test 0.99.5 vs 042f57e ALL IDENTICAL (covers JB2-2's switch off too).
+- FX30's p5retry_probe: OK (new cases: bearing job, stuck save resets once, learned stays).
+- My probe, updated (results/break-042f57e.txt): OK. A now runs the hour's machinesNow catch-up before each snapshot (the dry
+  run's own machinesNow is the same catch-up any later call would do); then each call leaves everything as it was. C: on now
+  matches off (stages, the bearing job dropped). D: an old 'none' save waits again once, 'none' after the reset stays.
+- puzzle_check whole OK off and on. check_fast on 042f57e OK (265 s).

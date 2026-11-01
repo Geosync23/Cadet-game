@@ -26,7 +26,7 @@ STAY = r"""(() => {
   for (let h = 0; h < 72; h++) {
     setShipNow(17 * 1440 + 330 + h * 60); machinesNow(); __low();
     for (const mm of [0, 1, 30]) {
-      setShipNow(17 * 1440 + 330 + h * 60 + mm);
+      setShipNow(17 * 1440 + 330 + h * 60 + mm); machinesNow(); __low();   // the hour's catch-up first, then the line held low at the try
       const a = JSON.stringify([SHIP.machines, SHIP.jobs, SHIP.flags, seed, caseState()]);
       if (mm === 0) WORK_MECH.p5.open(ladderRow('p5'), 18); else p5Stage(); calls++;
       const b = JSON.stringify([SHIP.machines, SHIP.jobs, SHIP.flags, seed, caseState()]);
@@ -80,7 +80,9 @@ with sync_playwright() as pw:
     check(True, f"C (note only): OFF {C['off']}  ON {C['on']}")
     # D
     g = Game(pw, ONB, 390, 844); g.step(3); g.ev(PREP)
-    D = g.ev("(() => { flagSet('case.p5.first', 'none'); setShipNow(shipNow() + 60); p5Stage(); return __fl(); })()")
-    check(D == 'none', f'D: an old save already given up stays given up: {D}')
+    D = g.ev("(() => { flagSet('case.p5.first', 'none'); __low(); setShipNow(shipNow() + 60); p5Stage(); const a = [__fl(), flag('case.p5.reset')];"
+             " flagSet('case.p5.first', 'none'); setShipNow(shipNow() + 60); __fix(); p5Stage(); return a.concat([__fl()]); })()")
+    # 042f57e on (lead 49's ask): a save given up by the old rule waits again once (case.p5.reset), the line low: still waiting; 'none' a second time stays
+    check(D == [None, 1, 'none'], f"D: an old 'none' save waits again once (line low: still waiting); 'none' after the reset stays: {D}")
     pe = [e for e in g.errors if e.startswith('pageerror')]; check(not pe, f'no page errors {pe}'); g.close()
 print('RV31 P5 BREAK OK' if ok else 'RV31 P5 BREAK FAILED')

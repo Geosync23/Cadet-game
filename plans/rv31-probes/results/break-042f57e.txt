@@ -1,0 +1,15 @@
+A {'calls': 216, 'ready': 73, 'bad': [], 'nbad': 0, 'flag': None, 'held29': 0}
+ok   A: 3 days of a low line: waits, books nothing, each call leaves machines/jobs/flags/seed/cases as they were
+ok   A: at most one dry run (caseSolve) a ship hour: 73 for 216 calls over 73 clock hours
+A fixed {'flag': 'creserve29:3-pump-1@29160', 'machine': '3-pump-1', 'cause': 'seal', 'reserved': 29, 'pump': 40}
+ok   A: after the fix, a later hour stages it
+B save [None, 'starship-cadet-save', 84694, False, False, False]
+B after reload {'t': 24870.06, 'flag': None, 'h': 414, 'pump': 89.3458241106954, 'works': True} saved at 24870
+ok   B: after a reload mid-wait: same time, still waiting, the pump not left at 40 (normal wear only)
+B fixed {'flag': 'creserve29:3-pump-1@24990.06', 'machine': '3-pump-1', 'cause': 'seal', 'reserved': 29, 'pump': 40}
+ok   B: after the reload and the fix, it stages
+C {'off': ['creserve29:3-pump-1@24810', False], 'on': ['creserve29:3-pump-1@24810', False]}
+ok   C (note only): OFF ['creserve29:3-pump-1@24810', False]  ON ['creserve29:3-pump-1@24810', False]
+ok   D: an old 'none' save waits again once (line low: still waiting); 'none' after the reset stays: [None, 1, 'none']
+ok   no page errors []
+RV31 P5 BREAK OK
