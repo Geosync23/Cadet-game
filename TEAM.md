@@ -2296,3 +2296,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~16:53 UTC: R2 started (cadet ALL IDENTICAL, day 0/1/5 OK; intro whole, day 7 running); R4 takes R2's perf_check + p926 and R1's arrows endstay + arrows_pointer (agreed, not run twice). R1 9/18 OK, ETA ~17:25.
 - ~17:07 UTC: R3 one-line sound_check FAIL beside controller_check (SND_LONG stall part, [0,0,49,0]); OLD OK; 0.99.6 changes no sound code: re-running alone twice. ~17:12: **R6 OK** (interactions whole, ~53 min); offered to take p926 from R4.
 - ~17:13 UTC: moves settled by lead (crossed messages): R6 runs arrows endgo, pf_f1_same (from R2) and p926 (from R4); R4 runs only perf_check alone; R2 keeps the rest.
+- ~17:15 UTC: p926 settled (after crossed messages): **R6 runs p926** after arrows endgo + pf_f1_same; R4 runs only perf_check. Both confirmed.
