@@ -2283,3 +2283,8 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~03:34-03:41 UTC: FX30 JB2-2 be3a51f (FIXTAP_ON), P5-1 follow-up 042f57e (game f535ed24...ca6e), JB2-3 measured (9816a4c docs only): 0.99.5 ~1 surprise case a week from Day 23 vs 1.25 on 0.99.4; none before Day 23 on both. Question for the user.
 - ~03:51 UTC: **RV31 PASS P5-1 follow-up 042f57e.** ~03:59: **RV31 JB2-2 FIXTAP_ON: safe off, FAIL for on** (too wide: toilet, washer etc. near any small job's stop do the job). FX30 asked to narrow to the gym locker only.
 - Lead built a trial page (PF1 67acc5b with PF_CAP_ON + PF_PR_ON forced on, phone test PASS) and a picture page for the user; publishing interrupted by worker restarts, retrying.
+- ~05:00 UTC: PF1 follow-up (86e52f4 docs): a real Day 29 career save runs as fast as Day 1, before and after reload; unfolded TriFold view is ~2x the drawing work; sharpness 1.5 saves 28-41% unfolded, 23-32% folded.
+- ~05:53-06:24 UTC: **RV31 PASS FX30 JB2-2 narrowed 6701201** (game 24850dc3...d25f; only the gym locker's Treadmills; interactions whole on OK). All FX30 pieces reviewed. RV31, FX30, PF1 idle.
+- ~06:12 UTC: **Trial link** (PF1 67acc5b with frame cap 60 + sharpness 1.5 forced on, {downloads}): https://claude.ai/artifact/KENCSJbbssDyUv5K2sYF5H.
+- ~13:13 UTC: **Picture page for the user** (options 1-4 with before/after, trial link, answers saved on the page via {artifact}): https://claude.ai/artifact/UhTjVkZarAfucJdXWhN6U9.
+- ~13:14 UTC: **Hired BM24** session_01GKuymnYTNkfxgLvtfFRg7w (claude/staging-0996): merge FX30 6701201 + PF1, switch on P5_RETRY_ON + FIXTAP_ON, picture options wait for the user, gates, then the round.
