@@ -35,3 +35,21 @@ fixtap_reach and fixtap_click print no verdict line of their own; judged against
 reading their output (the job-taking items listed above; off/on lines compared one by one).
 
 No real FAILs, so no OLD comparison runs were needed. Result: **R4: OK**.
+
+## Checks taken from other shares (agreed with the owners, copied to lead 49)
+
+Same candidate and sha256. p926_check was offered to R4 by R2 but in the end run by R6 (lead 49's decision); R4 did
+not run it.
+
+| Check | From | Result | Time | Key lines |
+|---|---|---|---|---|
+| arrows_check endstay | R1 | PASS | 823s | ARROWS CHECK OK; said [[34,'go'],[35,'stay']], settled day 35 stay, minutes due 353, missed 0, stuck 0 |
+| arrows_pointer_check | R1 | PASS | 192s | arrows_pointer_check: OK |
+| perf_check BUILD OLD (alone) | R2 | PASS after re-measure (backlog 32) | 3873s | 2 problems, both one-off frame-time spikes; draw calls, triangles, particles the same as OLD in every scene and layout; memory 470/41/93 -> 472/41/93 a week, round trips flat, same as OLD; load 7.5-7.7 s (OLD 7.4-7.9); 2 skipped (P5_STEP6 not in this build, same as OLD) |
+
+perf_check's two PROBLEM lines, each re-measured alone twice (`PERF_SCENES=... python3 perf_check.py BUILD OLD`):
+- "the Line ceremony, bow lounge Sun 14:45 trifold-folded: js 1.23 -> 2.32 ms": re-measures NEW 2.59 (OLD 2.36) and
+  1.63 (OLD 1.74); both PERF CHECK OK. Not repeated: noise.
+- "Veyli vessel: the parts chain, shuttle bay Sun 13:30 landscape: js 1.35 -> 2.56 ms": re-measures NEW 1.38 (OLD 1.84)
+  and 1.49 (OLD 1.52); both PERF CHECK OK. Not repeated: noise.
+Both are one-off spikes that do not repeat, the known pattern of backlog 32; no NEW FAIL.
