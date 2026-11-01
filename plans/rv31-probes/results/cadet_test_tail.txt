@@ -1,0 +1,4 @@
+errors A [] errors B []
+taps ['Very hungry', 'Missing people', 'Missing people', 'Your bunk', 'Your bunk']
+ALL IDENTICAL
+EXIT 0
