@@ -1878,6 +1878,10 @@ with
   The screen sizes it shows replace perf_check's derived `TRIFOLD` table (`perf_check.py`) and plans/opt-measure.md "The trifold's sizes".
 - **How it measures:** only in Dev mode, by wrapping three things: the main loop's frames (`requestAnimationFrame` callbacks that are `loop`), `renderer.render` and `goToDeck`. Each wrapper calls the same function with the same arguments and only reads the clock. Without #dev nothing is wrapped or stored; devmode_check's off part checks that. Its card part checks the seven tabs and the card's first line. In the test browsers the clock is virtual, so the card's times read 0 there.
 
+## Speed options, parked (0.99.6, PF1)
+
+The four picture/speed switches (`PF_CAP_ON` `#pfcap`, `PF_PR_ON` `#pfpr`, `PF_SH_ON` `#pfsh`, `PF_NOAA` `#pfaa`) are built and off; the user parked them on 2026-11-01. Full record and how to switch one on: `plans/perf-options.md`. PF1's measurements: `plans/perf-0996.md`.
+
 ## Rules that keep it working
 
 Phones:
