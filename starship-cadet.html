@@ -17986,19 +17986,21 @@ function clockFirstTick() {
   CLOCK_FIRST.tip = d;
   tipFront('career.clock.' + d, careerText('career.tip.clock.first') || 'Clock in first: the time clock\'s in the Works bay, by the tea corner. Your shift starts at 09:00; Tracked shows you the way.');
 }
-// FX30 for lead 49 (backlog JB2-2, 0.99.6; switched off: FIXTAP_ON). A small repair or odd job (j.fix: FIX_ROWS,
-// ODD_ROWS) whose stop is a place with its own use, like "Unstick a gym locker" at 3-gym-1, a treadmill: the one thing
-// you can tap there, "Treadmills", stands on the treadmill next to it (3-gym-2), so ixTap started a run there, not the
-// repair (only a tap on the floor or that treadmill's own frame reached it). On: while that job is yours, a tap on a
-// thing ixTap would use for the stop's place (the same kind of place, the same room, in reach of the stop's spot)
-// does the job's step (ixChoreTap) first. Any other thing, and every other job, as before.
+// FX30 for lead 49 (backlog JB2-2, 0.99.6; switched off: FIXTAP_ON). "Unstick a gym locker" (oj-d3gym-locker) stops at
+// 3-gym-1, a treadmill: the one thing you can tap there, "Treadmills", stands on the treadmill next to it (3-gym-2), so
+// ixTap started a run there, not the repair (only a tap on the floor or that treadmill's own frame reached it). On:
+// while that job is yours and its stop is next, a tap on the thing named for the row in FIXTAP_ROWS (only that title,
+// in the stop's room, within IX_NEAR of its spot) does the job's step (ixChoreTap) first. A short list on purpose
+// (RV31: a rule for every row reached 75 stops, toilets, washers and kettles among them); any other thing, and every
+// other job, as before. A row that needs the same goes in the list, with its probe.
 var FIXTAP_ON = false;
+const FIXTAP_ROWS = { 'oj-d3gym-locker': 'Treadmills' };
 function fixThingTap(it, at) {
   if (!FIXTAP_ON || !it || !it.hit || typeof ixChoreTap !== 'function') return false;
   for (const j of ixChores()) {
-    if (!j.fix || j.workDone) continue;
+    if (!j.fix || j.workDone || FIXTAP_ROWS[j.fix] !== it.t) continue;
     const nx = ixNextStop(j), pid = nx && nx.s.deck === deckDef.num && nx.s.places && nx.s.places[0], pl = pid && PLACE_OF.get(pid), sp = pl && placeSpot(pid);
-    if (!sp || !ixKind(pl, it) || pl.room !== roomAt(...cellAt(at.x, at.z)) || ixDist(it, sp) >= IX_NEAR) continue;
+    if (!sp || pl.room !== roomAt(...cellAt(at.x, at.z)) || ixDist(it, sp) >= IX_NEAR) continue;
     if (ixChoreTap(it, at, j)) return true;
   }
   return false;

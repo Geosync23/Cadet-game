@@ -4,7 +4,8 @@
 #   on the build as it is (FIXTAP_ON off): starts a run (gym), not the repair, as backlog JB2-2 says;
 #   on a copy with FIXTAP_ON on: starts the job's step (ixStop). The only tappable treadmill, "Treadmills", stands on
 #   3-gym-2, next to the stop: a click on it is the job; a click on another thing in the gym (the punch bag, 3-gym-13)
-#   is still that thing; with no job, "Treadmills" is a run as before.
+#   is still that thing; with no job "Treadmills" is a run as before; with another
+#   gym job (the vent, not in FIXTAP_ROWS) a tap on it does just what it does off.
 # Run:  python3 fixtap_probe.py BUILD.html
 import sys, json, os, pathlib
 exec(open(__file__.replace('fixtap_probe.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
@@ -16,7 +17,7 @@ def check(cond, msg):
     if not cond: ok = False
     return cond
 
-MK = r"""((rid) => { actEnd(true); for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; }
+MK = r"""((rid) => { actEnd(true); for (const k of NEED_KEYS) SHIP.player.needs[k] = 80;   // fresh for each tap (a fourth workout in a row is refused) for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; }
   SHIP.jobs = SHIP.jobs.filter(j => !String(j.id).startsWith('fxtap-')); SHIP.player.work = null; SHIP.player.carry = [];
   if (!rid) { MACH_REV++; return null; }
   const r = fixRow(rid), pl = placeById(r.place), t = shipNow();
@@ -35,10 +36,10 @@ def run(path):
     with sync_playwright() as pw:
         g = Game(pw, path, 390, 844); g.step(3)
         g.ev("setShipNow(1440 * 6 + 10 * 60); machinesNow(); goToDeck(3)"); g.step(5)
-        for name, rid, target in [('job', 'oj-d3gym-locker', '3-gym-1'), ('other', 'oj-d3gym-locker', '3-gym-13'), ('nojob', None, '3-gym-1')]:
+        for name, rid, target in [('job', 'oj-d3gym-locker', '3-gym-1'), ('other', 'oj-d3gym-locker', '3-gym-13'), ('nojob', None, '3-gym-1'), ('vent', 'oj-d3gym-vent', '3-gym-2')]:
             g.ev(f"({MK})({json.dumps(rid)})"); g.ev(f"({PUT})('{target}')"); g.step(60)
             a = g.ev(f"({AIM})('{target}')"); g.page.mouse.click(*a['xy']); g.step(90)
-            out[name] = (a['t'], a['d'], g.ev(ACTS)); g.ev("actEnd(true)")
+            out[name] = (a["t"], a["d"], g.ev(ACTS)); out[name + "Toast"] = g.ev("document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent")[:90]; g.ev("actEnd(true)")
         pe = [e for e in g.errors if e.startswith('pageerror')]; out['errors'] = pe
         g.close()
     return out
@@ -52,6 +53,7 @@ try:
     B = run(str(on)); print('on: ', B)
     check(B['job'][2] and B['job'][2][0] in ('ixStop', 'job'), f"switch on: the treadmill by the stop starts the job: {B['job']}")
     check(B['other'][0] == 'Punch bag' and B['other'][2] and B['other'][2][0] == 'gym' and B['other'][2][1] == '3-gym-13' and B['other'] == A['other'], f"switch on: another thing in the gym (the punch bag) is still itself, as off: {B['other']} {A['other']}")
+    check(B['vent'] == A['vent'] and B['ventToast'] == A['ventToast'], f"switch on: another job (the gym vent, its stop also a treadmill; not in FIXTAP_ROWS): a tap on Treadmills does just what it does off: {B['vent']} {B['ventToast']!r}")
     check(B['nojob'][2] and B['nojob'][2][0] == 'gym' and B['nojob'][2] == A['nojob'][2], f"switch on: with no job the treadmill is a run, as off: {B['nojob']} {A['nojob']}")
     check(not A['errors'] and not B['errors'], f"no page errors: {A['errors']} {B['errors']}")
 finally:
