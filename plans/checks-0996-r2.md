@@ -6,7 +6,7 @@
 - Handed over (agreed between runners, lead copied; I started none of them): perf_check BUILD OLD to R4 (alone on its machine); arrows endgo, pf_f1_same OLD BUILD 10 and p926_check to R6 (plans/checks-0996-r6.md on claude/checks-0996-r6).
 - intro_check (whole) and day_check 22: I restarted the lane scripts mid-run to drop the handed-over checks; those two runs carried on untouched but their exit codes weren't recorded. Judged by the last line (OK / DAY CHECK OK) and no FAIL, PROBLEM or Traceback anywhere in either log.
 
-## Result: RESULT_LINE
+## Result: OK
 
 | Check | Ran by | Result | Minutes | Key lines |
 |---|---|---|---|---|
@@ -28,4 +28,16 @@
 | arrows_check endgo | R6 | exit 0 | 11 | `ARROWS CHECK OK`; endgo:track settled day 35 'go', missed 0, stuck 0 |
 | pf_f1_same OLD BUILD 10 | R6 | exit 0 | | `fingerprints 30 differ 0 []`, `F1 checks 23674 mismatches 0 None`, `page errors [] []`, `PF F1 SAME OK` |
 | p926_check | R6 | exit 0 | | `P926 CHECK OK` |
-| perf_check BUILD OLD (alone) | R4 | PERF_RESULT | | PERF_LINES |
+| perf_check BUILD OLD (alone) | R4 | exit 1, then re-measured alone twice: OK | | `PERF CHECK: 2 problem(s) (2 skipped: switch not in this build; 0 waiting: not built yet)`, both one-off frame-time spikes (below) |
+
+No FAIL in this share apart from perf's one-off spikes, so nothing needed a run on OLD.
+
+## perf_check BUILD OLD (R4, alone, 65 min; plans/checks-0996-r4.md on claude/checks-0996-r4 f13df99)
+
+- Two problems, both frame-time spikes: `the Line ceremony, bow lounge Sun 14:45 trifold-folded: js 1.23 -> 2.32 ms` and
+  `Veyli vessel: the parts chain, shuttle bay Sun 13:30 landscape: js 1.35 -> 2.56 ms`.
+- Each re-measured alone twice (PERF_SCENES), both times `PERF CHECK OK`: Line ceremony trifold-folded NEW 2.59 / 1.63 vs
+  OLD 2.36 / 1.74; Veyli shuttle bay landscape NEW 1.38 / 1.49 vs OLD 1.84 / 1.52. Not repeated: noise (backlog 32), not a FAIL.
+- Draw calls, triangles and particles identical to OLD in every scene and layout (picture options off, as expected).
+- Memory: a week 470/41/93 -> 472/41/93, round trips 470/41/93 flat, as OLD (backlog 14 not showing). Load 7.5-7.7 s (OLD 7.4-7.9).
+- The 2 skipped: Step 6 scenes, P5_STEP6 not in this build (same on OLD).
