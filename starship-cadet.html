@@ -417,7 +417,8 @@ let H = 2.8, WALL_K = 1; const T = 0.2;   // wall height and thickness; H is 2.8
 const col = h => new THREE.Color(h).convertSRGBToLinear();
 const small = Math.min(innerWidth, innerHeight) < 700;
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+const PF_NOAA = location.search.slice(1).split('&').concat(location.hash.slice(1).split('.')).includes('pfaa');   // PF1 (0.99.6; plans/perf-0996.md): #pfaa previews the picture without antialiasing (a visual trade-off for the user to judge); without it, as before
+const renderer = new THREE.WebGLRenderer({ antialias: !PF_NOAA, alpha: false, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputEncoding = THREE.sRGBEncoding;
@@ -19697,10 +19698,11 @@ function histHour(t) {
   if (!MACH_HIST.has(h) && MACH_HIST.size) { const ks = [...MACH_HIST.keys()]; h = h < ks[0] ? ks[0] : Math.min(h, ks[ks.length - 1]); if (!MACH_HIST.has(h)) h = ks.filter(k => k <= h).pop(); }
   return h;
 }
+const FX_OF = new WeakMap();                             // PF1 (0.99.6, plans/perf-0996.md): an hour's record -> { deck: its effects }. fxFrom reads only the deck and the record (machRecord makes a new one each time), so these outlive MACH_REV: the same answers, worked out once instead of again for 8 days of hours after every change
 function shipEffectsAt(deck, t) {
   if (FX_AT_REV !== MACH_REV) { FX_AT = new Map(); FX_AT_REV = MACH_REV; }
   const h = histHour(t), key = deck + '|' + h;
-  if (!FX_AT.has(key)) FX_AT.set(key, fxFrom(deck, MACH_HIST.get(h) || null));
+  if (!FX_AT.has(key)) { const c = MACH_HIST.get(h) || null; let m = c && FX_OF.get(c); if (c && !m) FX_OF.set(c, m = {}); FX_AT.set(key, m ? m[deck] || (m[deck] = fxFrom(deck, c)) : fxFrom(deck, null)); }
   return FX_AT.get(key);
 }
 // what crew notice on the rec deck (0.84.2, rec engineer B; plans/recdeck-plan.html section 6). recShutAt(t) -> { pool, river, belays,
@@ -70613,6 +70615,21 @@ const mergeFlatKey = () => 'rb1-flat';
 function mergeTwin(m) {
   const t = m.clone(); t.color.setRGB(1, 1, 1); t.vertexColors = true; t.onBeforeCompile = mergeFlat; t.customProgramCacheKey = mergeFlatKey;
   return t;
+}
+// ---- PF1 (0.99.6): the visual trade-offs for the user to judge (plans/perf-0996.md, plans/perf-0996-visuals/). Each one is
+// off, so the game is as before; a #hash token previews it on the playable link (several join with '.', e.g. #pfpr.pfsh):
+//   PF_PR_ON   #pfpr    draw at most 1.5 device pixels per CSS pixel (today: up to 2): about 44% fewer pixels on a phone
+//   PF_SH_ON   #pfsh    a 1024 shadow map (today 2048): the shadow pass draws a quarter of the texels; shadow edges a little softer
+//   PF_CAP_ON  #pfcap   at most PF_CAP frames a second (#pfcap-30 for 30): a 120 Hz screen draws half as often; motion a little less smooth there
+//   (#pfaa, no antialiasing, is read in section 1: PF_NOAA, as the renderer is made)
+// All set once here, before the first picture is drawn (no shader is compiled yet). Nothing here calls R().
+const PF_PR_ON = URL_FLAGS.has('pfpr'), PF_SH_ON = URL_FLAGS.has('pfsh'), PF_CAP_ON = URL_FLAGS.has('pfcap');
+const PF_CAP = +urlFlag('pfcap') || 60;
+if (PF_PR_ON) { renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5)); renderer.setSize(innerWidth, innerHeight); }
+if (PF_SH_ON) sun.shadow.mapSize.set(1024, 1024);
+if (PF_CAP_ON) {                                         // the main loop's frames only: one comes when at least 1/PF_CAP s has passed (less 3 ms, so 60 on a 60 Hz screen keeps every frame)
+  const raf = window.requestAnimationFrame.bind(window), gap = 1000 / PF_CAP - 3; let last = -1e9;
+  window.requestAnimationFrame = cb => cb !== loop ? raf(cb) : raf(function pfGo(t) { if (t - last < gap) return raf(pfGo); last = t; cb(t); });
 }
 // ---- end of slot: Performance engineer ----
 
