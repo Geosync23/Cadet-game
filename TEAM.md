@@ -2300,3 +2300,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~17:15 UTC: **R1 OK** (all checks; claude/checks-0996-r1 ccc1fd3). Done: R1, R4 own share, R6 own share. Running: R2, R3 (+ sound alone x2), R4 perf, R6 endgo/pf_f1_same/p926, R5.
 - ~17:42 UTC: **R6 all OK** (interactions whole + arrows endgo, pf_f1_same 0 mismatches, p926; claude/checks-0996-r6 ca880eb). Left: R2, R3 (sound alone x2), R4 perf_check, R5.
 - ~17:53-17:59 UTC: **R2 OK** except perf_check (R4 running it). **R5 (BM24) OK 22/22.** R3 controller 57/57 OK; sound_check passed beside controller on re-run; two runs alone under way. Left: R4 perf_check, R3 sound alone x2.
+- ~18:05 UTC: **R3 OK** (claude/checks-0996-r3 ef1569e): sound_check one-off flake beside controller, then OK beside controller and OK twice alone; OLD OK. Only R4's perf_check left.
