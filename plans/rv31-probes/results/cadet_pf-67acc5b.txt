@@ -1,0 +1,2 @@
+taps ['Very hungry', 'Missing people', 'Missing people', 'Your bunk', 'Your bunk']
+ALL IDENTICAL (apart from renderer noise: some pixels 1 level off)

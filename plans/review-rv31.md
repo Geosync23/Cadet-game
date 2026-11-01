@@ -51,3 +51,17 @@ claude/fix-0996 be3a51f (game a11a6788...69cd); reviewed as part of the tip 042f
   lockers, or a "Lockers" thing to tap); or a short list of rows where the thing at the stop is the thing being fixed; at
   the least, apply ixTap's exclusions and never take things with a use of a different kind (toilets, washers, showers,
   basins, tea, the rotas and boards).
+
+## 4. PF1, performance (claude/perf-0996 67acc5b; tip 08edb7a docs only): PASS
+Game sha256 90dbc4f2c3f02f3dd170a4836312bbfbdaec1e789900a894baf744a0715346a7 (matches, at 67acc5b and 08edb7a).
+- F1 (section 17, shipEffectsAt kept on the hour's record in a WeakMap): code read: fxFrom reads only the deck, the record
+  and tables fixed at load (machineList, MACHINE_FX, MACHINE_KINDS, MACH_BRANCH, SYSTEMS); machRecord makes a new record
+  each hour and nothing writes into one after; no caller of shipEffectsAt changes the answer it gets. No R(); the planner
+  reads nothing new. plans/rv31-probes/pf_f1_same.py (results/pf_f1_same-67acc5b.txt): a new game skipped 10 ship days, three
+  samples a day: 23,674 cached answers equal to a fresh fxFrom, 0 mismatches; and the ship's fingerprint (time, machines,
+  jobs, flags, crew state, needs, R()'s seed, MACH_REV) identical to 0.99.5 at all 30 samples. Owner (systems engineer)
+  still to look, per owners.md.
+- The four picture switches, off by default: cadet_test 0.99.5 vs 67acc5b ALL IDENTICAL (renderer noise only).
+  pf_switches.py (a fresh page at pixel ratio 2): none -> [2, 2048, antialias on], 120 renders in 120 frames at 120 Hz;
+  #pfpr.pfsh.pfcap.pfaa -> [1.5, 1024, off], 60 renders; #pfcap-30 -> 30 renders; the ship clock keeps time; no page errors.
+- check_fast on 08edb7a: QUICK CHECK OK in 486 s. perf_check NEW vs 0.99.5 is PF1's.
