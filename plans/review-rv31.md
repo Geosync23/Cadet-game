@@ -77,3 +77,4 @@ FIXTAP_ROWS = { 'oj-d3gym-locker': 'Treadmills' }: only that job, only a thing w
   off (results/fixtap_click-6701201.txt). FX30's fixtap_probe OK (adds the gym vent job: Treadmills as off).
 - Off: cadet_test 0.99.5 vs 6701201 ALL IDENTICAL. check_fast on 6701201 OK (378 s).
 - Note: while the locker job is yours, a treadmill run in that spot waits till the job's done (the job's whole point).
+- (added) interactions_check whole on a FIXTAP_ON copy of 6701201: INTERACTIONS CHECK OK, no FAIL lines.
