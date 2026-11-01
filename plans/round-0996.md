@@ -45,5 +45,6 @@ Added for 0.99.6 (bold):
   picture switches), day checks and machine (F1 is read by the planner's mood and needs each hour).
 Not in the gate: controller_check reach (non-blocking extra).
 Whoever finishes early offers to take a check from the slowest share (agree it, copy the lead, never twice).
-Sessions: lead 49 session_01GKuymjPvM7XFzxM7XqFREd; BM24 session_01GKuymnYTNkfxgLvtfFRg7w; R1-R4, R6: the lead hires and lists them in TEAM.md.
+Sessions: lead 49 session_01GKuymjPvM7XFzxM7XqFREd; BM24 session_01GKuymnYTNkfxgLvtfFRg7w; R1 session_01GKuymnpcUSBmpZYiDK67GH, R2 session_01GKuymmnJnzWMxP769P9Edd, R3 session_01GKuymo7sJwyufjkoEsCacB, R4 session_01GKuymmvXPrmsnyaH858XoJ, R6 session_01GKuymjS1cBK12RvWv7L5ka.
+GO (BM24, 2026-11-01): claude/staging-0996 f3dbd11 (GO commit 5ac6864; later docs-only commits don't change the game), game sha256 f6ff5ec1e4b55c44425d046765d30c8f1173464cad9327913372b579c57db8a8.
 R6 finishes first by far: offer to take R4's device_check whole or R1's arrows_check default parts (agree it, copy the lead).
