@@ -17994,7 +17994,7 @@ function clockFirstTick() {
 // in the stop's room, within IX_NEAR of its spot) does the job's step (ixChoreTap) first. A short list on purpose
 // (RV31: a rule for every row reached 75 stops, toilets, washers and kettles among them); any other thing, and every
 // other job, as before. A row that needs the same goes in the list, with its probe.
-var FIXTAP_ON = false;
+var FIXTAP_ON = true;
 const FIXTAP_ROWS = { 'oj-d3gym-locker': 'Treadmills' };
 function fixThingTap(it, at) {
   if (!FIXTAP_ON || !it || !it.hit || typeof ixChoreTap !== 'function') return false;
@@ -63161,7 +63161,7 @@ if (P5_STEP6 && typeof deviceOn === 'function') deviceOn('close', () => { const 
 // (the pump at cond 40 for a moment, the same suspects and readings, then put back exactly), at most once a ship hour;
 // not fair yet, p5Stage waits and tries again later. It still gives up when you've learned p5 from a roll case.
 // A save already given up by the old rule waits again, once (p5Unstick).
-var P5_RETRY_ON = false;
+var P5_RETRY_ON = true;
 const P5_RETRY = { h: -1 };
 function p5Ready(m, f) {
   const h = Math.floor(shipNow() / 60); if (h === P5_RETRY.h) return false; P5_RETRY.h = h;
