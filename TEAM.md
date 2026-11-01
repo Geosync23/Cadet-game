@@ -2269,3 +2269,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~23:59 UTC (7:59 PM ET): **R1 OK** (puzzle_check with bb45099 OK on candidate + 0.99.4). R1, R3, R4, R5 OK. Left: R2 perf (~00:50 UTC).
 - ~00:14 UTC Nov 1 (8:14 PM ET) check-in: R1, R3, R4, R5 OK; R2 perf_check running (watcher set, ETA ~00:50 UTC); BM23 round record drafted, final GO after R2. PUB3 waiting.
 - ~01:07 UTC (9:07 PM ET): **R2 OK** (perf: one-off spikes not repeating, 3 of 4 re-measures OK = noise, backlog 32; draw calls max 312, memory flat). All five shares OK; waiting BM23 final GO.
+- ~01:10 UTC (9:10 PM ET): **BM23 FINAL GO 0.99.5**: staging-0995 6475bb30, game 93aed54f...5164 (lead verified; integration + main 596712bc fast-forward). All five shares OK; round fixes check-only (cc18dad, 93839bf, bb45099). Backlog P5-1, JB2-2, JB2-3. **GO to PUB3** (same Playtest CqUG + Dev Sm86 pages -> v2). BM23 writing handover.
