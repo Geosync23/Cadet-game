@@ -34,3 +34,20 @@ p5 case goes back to waiting once (case.p5.reset = 1). flagSet(key, null) delete
   run's own machinesNow is the same catch-up any later call would do); then each call leaves everything as it was. C: on now
   matches off (stages, the bearing job dropped). D: an old 'none' save waits again once, 'none' after the reset stays.
 - puzzle_check whole OK off and on. check_fast on 042f57e OK (265 s).
+
+## 3. FX30, JB2-2 (FIXTAP_ON, off): safe while off; FAIL for switching on
+claude/fix-0996 be3a51f (game a11a6788...69cd); reviewed as part of the tip 042f57e (game f535ed24...ace6e).
+- Off: fixThingTap returns at once; cadet_test 0.99.5 vs 042f57e ALL IDENTICAL; check_fast OK on 042f57e. FX30's fixtap_probe OK.
+- On: too wide. fixThingTap takes any tappable thing in the stop's room within IX_NEAR (2.4) of the stop's spot whenever
+  ixKind(stopPlace, it) is non-null, and for most stop types that is true of any thing (a gym stop: always 'gym'). It runs
+  first in PLAYER_TAPS, ahead of ixTap's own exclusions (IX_SKIP, lifts, ixTheirs, ixMachine) and the other taps.
+  plans/rv31-probes/fixtap_reach.py: 75 small repair / odd job stops reached, every thing near each one taken (results/fixtap_reach-042f57e.txt).
+  Real clicks (fixtap_click.py, results/fixtap_click-042f57e.txt), job yours, switch on:
+  w5-tap: the Toilet does the job (off: the toilet). la-lint: Washer 3 does the job (off: starts a load). jc-kettle: the
+  kettle does the job (off: tea; arguable, it's the thing being fixed). Without the job: as off.
+  This also turns round the 0.28.55 rule (the lead: at a chore's stop a thing you can use does its own thing) for every
+  small job, not just the gym locker.
+- To change: narrow it to the case JB2-2 is about. Options: fix the locker row's stop (a place whose nearest thing is the
+  lockers, or a "Lockers" thing to tap); or a short list of rows where the thing at the stop is the thing being fixed; at
+  the least, apply ixTap's exclusions and never take things with a use of a different kind (toilets, washers, showers,
+  basins, tea, the rotas and boards).
