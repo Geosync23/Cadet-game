@@ -12,7 +12,7 @@ const [file, hash, tag] = process.argv.slice(2);
   await p.waitForTimeout(3000);
   R.hash = await p.evaluate('location.hash');
   R.build = await p.evaluate("__sc('GAME_BUILD')");
-  if (tag==='play') {
+  if (tag.startsWith("play")) {
     R.wake = await p.isVisible('#tiWake'); await p.screenshot({path:`t/${tag}-title.png`});
     await p.touchscreen.tap(195,600); await p.waitForTimeout(1500);
     R.newVisible = await p.isVisible('#tiNew'); await p.screenshot({path:`t/${tag}-title2.png`});

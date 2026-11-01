@@ -1,6 +1,6 @@
 # Handover: publisher 3 (PUB3)
 
-Session session_014zyJYQ6fZqmqTjgzdCaumh, branch `claude/publish-pub3` (this note and the two test scripts only). Reports to **lead 47** (session_014zyJYM4mt9ZDCD5H9JZDtN, claude/lead-47). Read `plans/handover-publisher-1.md` (the recipe, the user's save rules) and `plans/handover-publisher-2.md` (branch claude/publish-26) first.
+Session session_014zyJYQ6fZqmqTjgzdCaumh, branch `claude/publish-pub3` (this note and the two test scripts only). Reports to **lead 48** (session_014zyJYMuqdRYh4dQhmVPr8S); before that lead 47 (session_014zyJYM4mt9ZDCD5H9JZDtN). Read `plans/handover-publisher-1.md` (the recipe, the user's save rules) and `plans/handover-publisher-2.md` (branch claude/publish-26) first.
 
 ## This account is new
 This session runs on the user's newest claude.ai account. Every link in PUB1's and PUB2's notes belongs to an earlier account: this account **cannot update them, and must never publish over them**. New pages on this account start with no save; to carry a game across, on the old page use Saves, Download my save, and on the new page Saves, Load a save file.
@@ -8,8 +8,8 @@ This session runs on the user's newest claude.ai account. Every link in PUB1's a
 ## Pages on this account
 | Page | Link | Version / build | Capabilities | Rule |
 |---|---|---|---|---|
-| Playtest (current) | https://claude.ai/artifact/CqUGjQXerhSKxuu4umhK41 | v1 = 0.99.4, version id 1793458485-59d3 | downloads | updated each release |
-| Dev (current) | https://claude.ai/artifact/Sm86UjQMH1NmBj5ybNnB2b | v1 = 0.99.4, version id 1793458487-af6d | downloads | updated each release |
+| Playtest (current) | https://claude.ai/artifact/CqUGjQXerhSKxuu4umhK41 | v2 = 0.99.5, version id 1793495480-527b (v1 = 0.99.4, 1793458485-59d3) | downloads | updated each release |
+| Dev (current) | https://claude.ai/artifact/Sm86UjQMH1NmBj5ybNnB2b | v2 = 0.99.5, version id 1793495482-9124 (v1 = 0.99.4, 1793458487-af6d) | downloads | updated each release |
 
 ## Old accounts' links (untouchable from here)
 | Page | Link | Last known |
@@ -31,6 +31,10 @@ The user: "Yes, publish 0.99.4" (via lead 47). Source claude/staging-0994 596712
   - Playtest (opened with #title): tap to wake shows, NEW GAME after a tap, manifest, Sign and go aboard, HUD up, GAME_BUILD 0.99.4, Saves shows Download my save and Load a save file.
   - Dev: the first-line script sets #dev, GAME_BUILD 0.99.4, manifest, HUD, Saves as above, Dev panel opens and the Jump to tab switches on.
 - Not tested: the live claude.ai download prompt (still a loose end since PUB1).
+
+## 0.99.5 release (2026-11-01)
+GO from lead 48 (the user pre-approved: "Notify and publish 99.5 when ready"). Source claude/staging-0995 6475bb30, game sha256 93aed54fa9296e75c308ae199cbac32465c776c650161fe41bf22535839a5164 (checked, matches), GAME_BUILD 0.99.5. Same recipe; diff shows only the title line (and the Dev script). Published page sha256: Playtest ef59535b...4e67, Dev 6d51b921...ef53. Scan clean, as for 0.99.4. Published over the same two links as Version 2, {downloads}.
+Phone test 390x844 with touch: PASS on both, 0 console errors (same checks as 0.99.4), plus a third run of Playtest with `#title.sound` (sound on, for 0.99.5's mess murmur and bigger sound buffer): PASS, 0 console errors. phone.js now treats any tag starting with "play" as the title-screen path (so `playsound` works).
 
 ## How to rebuild and test (scripts in tools/publish/ on this branch)
 1. `git show <commit>:starship-cadet.html > src.html`, sha256sum it against the lead's.
