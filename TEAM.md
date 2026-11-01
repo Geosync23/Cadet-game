@@ -2297,3 +2297,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~17:07 UTC: R3 one-line sound_check FAIL beside controller_check (SND_LONG stall part, [0,0,49,0]); OLD OK; 0.99.6 changes no sound code: re-running alone twice. ~17:12: **R6 OK** (interactions whole, ~53 min); offered to take p926 from R4.
 - ~17:13 UTC: moves settled by lead (crossed messages): R6 runs arrows endgo, pf_f1_same (from R2) and p926 (from R4); R4 runs only perf_check alone; R2 keeps the rest.
 - ~17:15 UTC: p926 settled (after crossed messages): **R6 runs p926** after arrows endgo + pf_f1_same; R4 runs only perf_check. Both confirmed.
+- ~17:15 UTC: **R1 OK** (all checks; claude/checks-0996-r1 ccc1fd3). Done: R1, R4 own share, R6 own share. Running: R2, R3 (+ sound alone x2), R4 perf, R6 endgo/pf_f1_same/p926, R5.
