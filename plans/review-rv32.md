@@ -119,3 +119,22 @@ needGoalTick, introArrowTick); arrows for d3-store, d4-quiz, d5-mug, d6-sowing. 
   Day 1: briefing met (d1-briefing:met) by its arrow, 09:01 the clock's arrow, the shadow job; Day 2: 08:31 "The Chief's
   office, 08:45: your first solo job", met; 10:32 "10:45 meet Zeke", met (m1:do 10:52: no slip, the case my CR1 walk hit);
   11:43 the leisure arrow only after. No stuck, no page errors.
+
+### 6. MV1 (claude/p997-move 00ca80f -> f2462cd -> 2e268ba): notes 2, 5, 19, 24, 45 + backlog EV1-1, MV1-2: PASS 2e268ba
+Game sha256 4558720e991dfb6e75214bde4e7ca897aa878bffd59f886f5dc1825e2a7b55af. Six switches on one line in section 13 (MV_BRIEF_ON,
+MV_WASD_ON, MV_FIT_ON, MV_RIG_ON, MV_RECWC_ON, MV_SOFA_ON). Sections: 4e, 13, 15, 21, 21b, 10, 8c, 11; 2e268ba adds one condition
+in 14's schedData (places with `you` left out of the crew's plan): the Sim engineer to look.
+- Off: cadet_test vs 0.99.6 ALL IDENTICAL: f2462cd twice on a quiet machine, 2e268ba once (renderer noise only). MV1's one
+  differing run under load did not repeat.
+- f2462cd all six on: check_fast FAILED, machine_check "food runs in live play" (a Day 7 restock-meals run left open 19:10-19:40).
+  MV1 traced it to MV_RECWC_ON alone (the rec crew's new toilet trips moved the meals); 2e268ba makes the rec toilets and
+  basins yours only. 2e268ba all six on: check_fast QUICK CHECK OK in 289 s.
+- MV1's probes on my on-copy of 2e268ba (intro on, the real game): brief_probe attend: on, the Chief at the bay's lead spot
+  from 08:50 to the panel's end (09:24), then her office; 0.99.6: at the time clock, off to the toilet at 09:10 mid-talk.
+  late: she stays till the panel closes. wasd_probe (390x844, real keys): W/A/S/D and arrows move exactly screen up/right/
+  down/left, stop on release, follow a turned view; nothing with the device open, in a text field (the letter types), with
+  Ctrl, or paused. clock_probe during: taps on the clock open the clock, not her chat (MV1-2). sofa_probe: the neighbour stays
+  seated as you sit beside him. wc_use: the rec stalls and basins work. lift_probe Deck 3 Day 1 18:00: 0.99.6 flags Vance,
+  Saruth, Marrow drawn at r [0,0]; on: none at the origin (three small in-queue steps, not drawn).
+- Not done by me: a fresh-save walk through the briefing with MV_BRIEF_ON (the briefing probe is the real game with the intro
+  on); MV_FIT_ON's numbers rest on MV1's player_check (lead approved them).
