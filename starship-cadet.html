@@ -14056,7 +14056,7 @@ function needWarnTick(now) {
   }
   if (!pick || POP.busy || DEV.open || Math.max(POP.toast, POP.card, POP.warn) > now - WARN_GAP) return null;
   const hold = typeof introHoldNudges === 'function' && introHoldNudges(); if (hold && lvl === 1) return null;   // section 21: the end of training day (the patch, #19): only the firm one, and no marker over the beam's arrow
-  const w = NEED_WARN[pick][lvl - 1]; WARN_SAID[pick] = lvl; POP.warn = POP.toast = now;
+  const w = TP998_BOOTH_ON && pick === 'social' && typeof homeCalledToday === 'function' && homeCalledToday() ? [NEED_WARN.social[lvl - 1][0], careerText('tp998.social.' + lvl) || 'Missing people. You\'ve had your call home today, so find a friendly face: the mess and the bow lounge are rarely empty.'] : NEED_WARN[pick][lvl - 1]; WARN_SAID[pick] = lvl; POP.warn = POP.toast = now;   // (TP998_BOOTH_ON, R4's find) the booths give nothing more today: not sent there
   if (lvl === 1) needPop(pick); else toast(w[0], bedText(w[1]) + (!hold && needGoal(pick) ? ' Follow the marker.' : ''));  // the first one: a pop-up in plain words (0.28.62); the firm one stays a toast, with the way (playtest 1)
   return pick;
 }
@@ -16039,6 +16039,7 @@ function needGoal(k) {
   if (k === 'hygiene' && typeof washCooling === 'function' && washCooling()) return false;   // a shower would give nothing yet (FX6)
   if (!NEED_FIX[k] || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || IX_GOAL && !(NEED_GOAL && IX_GOAL.label === NEED_GOAL.label)) return false;   // never over someone else's arrow
   if (TP997.nd1 && tp997NeedYield()) return false;        // 0.99.7 (TP1): in week 1, never over a timed meeting's arrow (Onboarding engineer slot)
+  if (TP998_BOOTH_ON && k === 'social' && typeof homeCalledToday === 'function' && homeCalledToday()) return false;   // (TP1, R4's find) your call home's had today: no marker to the booths, which give nothing more today
   if (k === 'energy' && P5_NIGHT && (p5nIn() || p5nSoon())) return false;   // 28a (S6-1): not on (or just before) your night shift
   if (k === 'energy' && !(typeof bedtime === 'function' && bedtime()) && !(typeof sickNow === 'function' && sickNow()) && !(P5_NIGHT && p5nDayBed())) return false;   // your bunk only when you can sleep there (FX3: a Day 8 "Your bunk" arrow stood all afternoon)
   const bed = typeof playerBed === 'function' ? playerBed() : null, here = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 4, pos = player.obj.position;
@@ -16061,6 +16062,7 @@ function needGoal(k) {
 }
 function needGoalClear() { if (NEED_GOAL && typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === NEED_GOAL.label) clearGoal(); NEED_GOAL = null; }
 function needGoalTick() {
+  if (TP998_BOOTH_ON && NEED_GOAL && NEED_GOAL.need === 'social' && typeof homeCalledToday === 'function' && homeCalledToday()) { needGoalClear(); return; }   // (TP1, R4's find) called home since it went up: its booth marker goes
   if (TP997.nd1 && tp997NeedHold()) return;              // 0.99.7 (TP1): stood aside for a timed meeting's arrow, back after it (Onboarding engineer slot)
   if (NEED_GOAL && (SHIP.player.needs[NEED_GOAL.need] >= WARN_REARM || NEED_GOAL.need === 'energy' && ACT && ACT.kind === 'lie')) { needGoalClear(); return; }   // (FX3) lying in your bunk is the fix for energy (no need on the act)
   if (NEED_GOAL && NEED_GOAL.need === 'hunger' && !!SHIP.player.tray !== !!NEED_GOAL.tray) { needGoalClear(); needGoal('hunger'); }   // a tray taken (a seat next) or left behind (food again): LEAD31-14
@@ -16787,6 +16789,7 @@ function tp997DevWork(now) {
 // Both TEACH rows ('sure': when due, whatever the pacing), put at the front of TEACH so nothing passes them by.
 if (TP997.n9) TEACH.unshift(['t:997trk', c => c.d >= 1 && c.d <= 3 && c.min >= 360 && !sleeping && !!trkBtn && !trkBtn.hidden && !!trkBtn.offsetWidth,
   () => careerText('tip.tp997.tracker') || 'The Schedule tracker, the target button under your needs, lists what\'s on now and next, and a few places. Tap one for an arrow; tap it again to stop.', { sure: true }]);
+if (TP998_BOOTH_ON) for (const r of TEACH) if (r[0] === 't:call' || r[0] === 't:eve-call') { const t = r[1]; r[1] = c => t(c) && !(typeof homeCalledToday === 'function' && homeCalledToday()); }   // (after 0.99.7, R4's find) the tips that send you to the booths wait for a day you haven't called yet
 if (TP997.n6) TEACH.unshift(['t:997call', c => c.d === 2 && c.min < 22 * 60 && !sleeping && (c.min >= 19 * 60 || typeof homeCalledToday === 'function' && homeCalledToday() && !(ACT && ACT.kind === 'call')),
   () => { SHIP.device.tipsSeen['t:eve-call'] = true; return careerText('tip.tp997.call') || 'One call home a day: the relay gives everyone aboard one call each ship day. The booths are yours again tomorrow.'; }, { sure: true }]);
 // 0.99.7 note 33 (TP1 for lead 49; TP997.n33; the user: "nowhere on the device to get at food you bought at the store and
@@ -43486,6 +43489,10 @@ const LINES = JSON.parse([
   '{"text":"You pay {n} credits for {item}. It\'s in your Pockets, on your device, for later.","id":"1h6hu81"}]',
   ',"tp997.pockets.title":[',
   '{"text":"Pockets","id":"1e7y5lc"}]',
+  ',"tp998.social.1":[',
+  '{"text":"A bit lonely. You\'ve had your call home today: chat with someone, or eat with company.","id":"1x6p7zh"}]',
+  ',"tp998.social.2":[',
+  '{"text":"Really missing people. Your call home\'s done today: the mess and the bow lounge are rarely empty.","id":"tl1q5e"}]',
   ',"trace.after":[',
   '{"text":"After: {word}","id":"5a9fih"}]',
   ',"trace.before":[',
