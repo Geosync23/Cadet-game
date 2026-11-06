@@ -131,3 +131,4 @@ CL1 owns the rules (no clashes, piano spacing, birthday times and spacing, arrow
 | 4 (CH1) | Sofas lose their throw cushion (it sat where the end sitter sits); mess / bow lounge sofas still touch the back by a few cm |
 | 13/29 (AV1, later) | Beside the piano or jam the live music is louder than the ship's own music (still under the engine hum); one number each if you want it softer |
 | 18 (TB6, open) | Should not passing the bunk inspection cost anything? Default: no |
+| 36 (EV1, later) | Day 6 paddle club moved from 07:00 to 14:00-15:00 (at 07:00 too few crew were up; garden hour's freed slot) |
