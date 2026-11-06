@@ -186,3 +186,13 @@
 - Tap {name} for tea with the Chief
 == join997.open-door.notice
 - Open door: an end-of-shift tea with the Chief. Social up.
+
+// RV32's find (lead 49): Day 1's arrow to the Chief's briefing (the arrow's label)
+== tp997.d1.brief
+- Morning briefing with the Chief, 08:50: the Works bay
+
+// the same: Tuesday's arrows (the Chief's meeting, then the evening at the booths)
+== tp997.d2.solo
+- The Chief's office, 08:45: your first solo job
+== tp997.d2.booths
+- Calling home, the booths on Deck 3: Leila shows you how

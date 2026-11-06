@@ -9755,7 +9755,7 @@ var SLOT_HOLD = false;
 const SAVE_KEY = slotKey(SAVE_SLOT), SAVE_V = 2;
 const TRAD995_ON = true || URL_FLAGS.has('trad995');   // 0.99.5 (TB3; plans/patch-0995.md notes 8, 10, 19): Spice shelf supper tap to join, Name on the beam's spots, the tea corner's doorway (section 18's Traditions slot); off: 0.99.4. `?trad995` previews
 var TP997_ON = false || URL_FLAGS.has('tp997');   // 0.99.7 (TP1 for lead 49; plans/patch-0997.md notes 6, 7, 9, 11, 28, 33, 53, 54): tips, the device, HUD words; off: 0.99.6. `?tp997` previews
-var TP997 = { n6: TP997_ON, n7: TP997_ON, n9: TP997_ON, n11: TP997_ON, n28: TP997_ON, n33: TP997_ON, n53: TP997_ON, n54: TP997_ON };   // each note alone: 6 Day 2's call-home tip, 7 nearest bathroom, 9 the tracker tip, 11 the device-at-work tip early, 28 the rec deck's blurb, 33 Pockets, 53 the join words, 54 Mark all as read
+var TP997 = { nd1: TP997_ON, n6: TP997_ON, n7: TP997_ON, n9: TP997_ON, n11: TP997_ON, n28: TP997_ON, n33: TP997_ON, n53: TP997_ON, n54: TP997_ON };   // each note alone: d1 Day 1's arrows to the briefing and the clock (RV32's find), 6 Day 2's call-home tip, 7 nearest bathroom, 9 the tracker tip, 11 the device-at-work tip early, 28 the rec deck's blurb, 33 Pockets, 53 the join words, 54 Mark all as read
 // the traditions variety (0.93.2, FX24 for lead 37; CS1's pitch pages plans/trad-variety-pitch.html and -2.html on claude/crew-stories-pitch):
 // six weekly ones take turns from week 2 (TRAD_0932_WHEN: their rhythm with it on; week 1 unchanged), the user's fourteen new ones
 // (TRAD_0932_NEW, loaded only with it) and Brennan's tasting table after dinner in the galley (tasting-table-late, loaded as
@@ -17978,6 +17978,7 @@ function guideShift() {
   guideShiftWords(now, P);
   if (typeof inspectDue === 'function' && typeof inspectGoal === 'function' && typeof INSPECT_AT !== 'undefined' && m >= 360 && m < INSPECT_AT && !(typeof SIM_AT !== 'undefined' && SIM_AT) && inspectDue(d))   // the inspection morning (F2, FX3's arrows in 24c): level 2, an event you're expected at; its goal empty once you're ready and there
     guideAsk({ id: 'inspect:' + d, level: 2, owner: '15b (piece D, F2)', from: base + 360, until: base + INSPECT_AT, goal: () => inspectGoal(d), done: () => !inspectDue(d) });
+  if (TP997.nd1) tp997GuideWeek(now, d, m, base);         // 0.99.7 (TP1): the first week's timed beats that had no arrow (Onboarding engineer slot)
   if (!playerOnDuty(d) || SHIP.career && SHIP.career.end) return;
   const intro = d <= 1 && typeof introOn === 'function' && introOn();   // training day: the intro's own arrows (only the lesson's pointer below rings: FX15, patch 0.92.5 #22)
   const E = yourDayEnd(d), inn = careerClockedIn(d), out = careerClockedOut(d), owner = '15b (piece D)';
@@ -18051,7 +18052,7 @@ function clockFirstTick() {
   if (typeof CAREER === 'undefined' || typeof clockRmDue !== 'function') return;
   const now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   if (d < 1 || d > CLOCK_FIRST.days + 1 || DIALOGUE) return;
-  const due = clockRmDue(now), want = !!due && due.want === 'in' && m >= CAREER.clockIn && m < CAREER.missBy && d <= CLOCK_FIRST.days;   // near 09:00 (the user's words): 08:00 till the shift counts as missed (12:30)
+  const due = clockRmDue(now), want = !!due && due.want === 'in' && m >= CAREER.clockIn && m < CAREER.missBy && d <= CLOCK_FIRST.days && !(TP997.nd1 && d === 1 && tp997BriefPending(m));   // 0.99.7 (TP1): on Day 1 not before the Chief's briefing (Onboarding engineer slot)   // near 09:00 (the user's words): 08:00 till the shift counts as missed (12:30)
   if (CLOCK_FIRST.tip) clockFirstDrop(want && CLOCK_FIRST.tip === d ? 'career.clock.' + d : null);
   if (!(due && due.want === 'in') && CLOCK_FIRST.d === d && IX_GOAL && IX_GOAL.trk === 'clock:in') { if (typeof trkDone === 'function') trkDone(IX_GOAL); else clearGoal(); }   // punched in: its arrow goes at once (not at the next minute's clockRemindTick)
   if (!want) return;
@@ -42858,6 +42859,12 @@ const LINES = JSON.parse([
   '{"text":"Your pipe kit wants cleaning and a new seal. Bench, when you can.","id":"1dwfk6k"}]',
   ',"tool.due.scanner":[',
   '{"text":"Your scanner\'s charge is low. The bench will sort it.","id":"1t2yb7w"}]',
+  ',"tp997.d1.brief":[',
+  '{"text":"Morning briefing with the Chief, 08:50: the Works bay","id":"vbp74x"}]',
+  ',"tp997.d2.booths":[',
+  '{"text":"Calling home, the booths on Deck 3: Leila shows you how","id":"vrenml"}]',
+  ',"tp997.d2.solo":[',
+  '{"text":"The Chief\'s office, 08:45: your first solo job","id":"193j09r"}]',
   ',"tp997.join.more":[',
   '{"text":"Anyone already taking part can bring you in, too.","id":"1g4qrvu"}]',
   ',"tp997.loo.none":[',
@@ -57054,6 +57061,7 @@ function introArrowWant(now) {
     if (careerClockedIn(1) || out) fin('clock');
     else {
       const brief = INTRO_WEEK.find(b => b.id === 'd1-briefing'), opened = I.done['d1-opener'] !== undefined || I.done['d1-briefing:met'] !== undefined && now >= introAbs(1, brief.until) + 5;   // Zeke's training-day opener done (onboarding 4's 'd1-opener'), or the briefing's window five minutes gone
+      if (TP997.nd1 && I.done['told:clock'] === undefined && !inBay && !DIALOGUE) { const w = tp997D1Want(m, brief); if (w === 'clock') I.done['told:clock'] = Math.floor(now); else if (w) return w; }   // 0.99.7 (TP1, RV32's find): the briefing's arrow, then the clock's from anywhere (Onboarding engineer slot)
       if (I.done['told:clock'] === undefined && inBay && !DIALOGUE && (opened || m >= INTRO_CLOCK_AUTO)) I.done['told:clock'] = Math.floor(now);   // 0.72.5 (playtest 2, item 6): from 08:50 in the Works bay it comes up by itself
       if (I.done['told:clock'] !== undefined) return 'clock';
     }
@@ -57880,6 +57888,43 @@ function introHealthKept(ap) {                           // the scene's over (fi
 }
 // section 20's clock-out remark skips Zeke on training day once he's said his own good job (PR2: not twice)
 function introQuiet(id) { return introOn() && SHIP.time.day === 1 && id === SHIP.intro.escort && SHIP.intro.done['d1-end:start'] !== undefined; }
+// 0.99.7 (TP1 for lead 49; TP997.nd1; RV32's find on 0.99.6: from a fresh save, Day 1 08:45 had no arrow at all, so a
+// player who didn't open the tracker missed the Chief's briefing and the clock-in). Day 1, the intro on, not yet told to
+// clock in, out of the Works bay (introArrowWant asks): from TP997_BRIEF_FROM until the briefing has met or its window
+// is over, the arrow to the Works bay ('brief'); after its window (or once met, if you've left the bay before
+// clocking in), the time clock's own arrow from wherever you are. In the bay before the briefing, 15b's clockFirstTick
+// no longer sends you to the clock (it led straight on to a job, and the briefing was missed): tp997BriefPending.
+const TP997_BRIEF_FROM = 8 * 60 + 20;                       // half an hour before the 08:50 briefing (time to finish breakfast and walk down)
+function tp997BriefPending(m) {                         // Day 1, the intro on, the briefing not yet met and its window not over
+  if (!(typeof introOn === 'function' && introOn())) return false;
+  const b = INTRO_WEEK.find(x => x.id === 'd1-briefing'); return !!b && SHIP.intro.done['d1-briefing:met'] === undefined && m < b.until;
+}
+function tp997D1Want(m, brief) {
+  if (typeof careerClockedIn === 'function' && careerClockedIn(1)) return null;
+  const met = SHIP.intro.done['d1-briefing:met'];
+  if (met === undefined && m >= TP997_BRIEF_FROM && m < brief.until) return 'brief';
+  if (met !== undefined || m >= brief.until) return 'clock';
+  return null;
+}
+// Days 2-3's timed beats with no arrow (RV32's walk: Tuesday's 08:45 meeting in the Chief's office was missed by a
+// player already at work from 08:00; the 18:00 evening at the booths likewise): from TP997_LEAD minutes before until it
+// has happened (met or said), its hold ends or its window closes, a level 2 entry in the arrow queue ("next 15
+// minutes"), asked from guideShift's minute tick. Wednesday's 09:00 pick (the Works bay, where your shift's arrow
+// already is) and its crew store hour (16:30, on shift) are left as they were.
+const TP997_LEAD = 15, TP997_BEATS = {
+  'd2-solo': { goal: () => ({ deck: 5, place: '5-office-visit-1', room: 'o', label: careerText('tp997.d2.solo') || 'The Chief\'s office, 08:45: your first solo job' }), key: 'met', till: b => b.hold ? b.hold.till : b.until },
+  'd2-booths': { goal: () => ({ deck: 3, room: 'B', place: '3-callhome-1', label: careerText('tp997.d2.booths') || 'Calling home, the booths on Deck 3: Leila shows you how' }), key: 'said', till: b => b.until },
+};
+function tp997GuideWeek(now, d, m, base) {
+  if (!(typeof introOn === 'function' && introOn()) || typeof guideAsk !== 'function') return;
+  for (const id in TP997_BEATS) {
+    const b = INTRO_WEEK.find(x => x.id === id), T = TP997_BEATS[id]; if (!b || b.day !== d) continue;
+    const till = T.till(b), done = () => SHIP.intro.done[id + ':' + T.key] !== undefined || SHIP.intro.done[id + ':met'] !== undefined;
+    if (m < b.at - TP997_LEAD || m >= till || done()) continue;
+    guideAsk({ id: 'tp997:' + id, level: 2, owner: '21b (TP1, 0.99.7)', from: base + b.at - TP997_LEAD, until: base + till, goal: T.goal, done });
+  }
+}
+if (TP997.nd1) { INTRO_ARROWS.brief = { deck: 5, room: 'w', label: careerText('tp997.d1.brief') || 'Morning briefing with the Chief, 08:50: the Works bay' }; INTRO_ARROW_LABELS.add(INTRO_ARROWS.brief.label); }
 // ---- end of slot: Onboarding engineer ----
 
 // =====================================================================
