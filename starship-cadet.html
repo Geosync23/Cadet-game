@@ -51859,7 +51859,7 @@ function cl997Party(d) {
 // runs, and eventsOn may be asked before; plans/handover-cl1.md's probe checks they still match): d2-booths (calling
 // home, Day 2 18:00-19:00) and d3-store (Orla's store visit, Day 3 16:30-17:30), as [day, from, to] (RV33's week-1 probe).
 // Inside the function, as eventsOn may ask before this slot has run
-function cl997Beats() { return [[2, 1080, 1140], [3, 990, 1050]]; }
+function cl997Beats() { return [[2, 1080, 1110], [3, 990, 1050]]; }   // the booths: the call itself, 18:00-18:30 (its window to 19:00 dropped the rec deck's wall night, 18:30, and its crowd filled the mess at the spice supper: join_check)
 function cl997Fixed(d) {
   const out = [], sh = WEEK_SHAPE[weekday(d)];
   if (INSPECT_ON && d >= 1 && sh && sh.inspect) out.push([INSPECT_T0 - 10, INSPECT_T0 + 20]);
