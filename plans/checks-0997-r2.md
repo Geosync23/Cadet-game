@@ -6,3 +6,11 @@
 - Share: as plans/round-0997.md names for R2 (not written yet).
 
 ## Result: waiting for the GO
+
+## fresh_walk: how it is judged (BM25, 2026-11-06)
+Run: `python3 plans/rv32-probes/fresh_walk.py BUILD 3 $CADET_WORK/fw.json` (Days 0-3, sleep 22:30). It prints no OK line; pass when all five hold:
+1. Day 1: the briefing meets (d1-briefing:met) and the Chief stays until it ends.
+2. The Day 1 arrow leads to the Works bay before 08:50, then to the clock.
+3. Day 2's 08:45 solo meeting and the 18:00 booths each get an arrow and happen.
+4. No page errors.
+5. The follower is never stuck for an hour.
