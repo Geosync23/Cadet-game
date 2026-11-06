@@ -350,7 +350,10 @@ with sync_playwright() as pw:
     print('  a neglected day: lost', nd)
     # the 0.99 balance pass (BAL2, the user's go, 2026-10-29): fitness .9/.3 an hour (about 17 a day: the gym every other day),
     # hunger 4 an hour asleep (32 a night: breakfast and dinner are enough)
-    check(15.5 <= nd['fitnessDay'] <= 18, f"fitness should fall about 17 a day (a workout every other day), not {nd['fitnessDay']}")
+    # the 0.99.7 patch, note 19 (the user: "fitness needs to drop faster"; MV1, MV_FIT_ON): 1.8/.4 an hour, about 32 a day
+    fit32 = g.ev("typeof MV_FIT_ON !== 'undefined' && !!MV_FIT_ON")
+    if fit32: check(30.5 <= nd['fitnessDay'] <= 33.5, f"fitness should fall about 32 a day with MV_FIT_ON (a workout about every day), not {nd['fitnessDay']}")
+    else: check(15.5 <= nd['fitnessDay'] <= 18, f"fitness should fall about 17 a day (a workout every other day), not {nd['fitnessDay']}")
     check(74 <= nd['socialDay'] <= 78, f"social should fall about 76 a day, not {nd['socialDay']}")
     check(36 <= nd['leisure'] <= 40, f"leisure should fall about 38 over a day off, not {nd['leisure']}")
     check(30 <= nd['hunger'] <= 34, f"hunger should fall about 32 over an 8-hour sleep, not {nd['hunger']}")

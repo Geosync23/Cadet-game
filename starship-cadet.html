@@ -9216,7 +9216,7 @@ DECKS[7] = {
     for (const x of [.65, 1.9]) place('w', 'showerStall', x, 3.38, 's', { it: IT('Shower', 'A quick rinse before the pool and after it. The hot water takes a moment to remember.') });
     place('w', 'footlocker', 5.35, .32, 'n', { it: IT('Lost property', 'Odd socks, a single earring, three water bottles, and a goggle strap with no goggles.') });
     // washroom (3 x 7): four stalls on the bow side, a row of basins opposite
-    for (const z of [1.9, 3.1, 4.3, 5.5]) place('u', 'toiletStall', 2.45, z, 'e');
+    for (const z of [1.9, 3.1, 4.3, 5.5]) place('u', 'toiletStall', 2.45, z, 'e', MV_RECWC_ON ? { it: IT('Toilet', 'Vacant. The little green light is the most trusted instrument on the ship.') } : {});   // 0.99.7 note 45: a toilet you can use (recWcPlaces)
     place('u', 'basinCounter', .38, 3.5, 'w', { w: 2.6, it: IT('Basins', 'A long row of basins for the interval queue.') });
     // the concourse: a towel bin by the lobby (0.80.2: its two benches went; the stands fill that glass now)
     // 0.80.8 (the user's: livelier, busier): the REC DEC gantry sign by the lift, bunting, murals, beanbags, plants, benches,
@@ -9520,6 +9520,15 @@ function simRunAt(k) {
   const a = typeof heldBy === 'function' ? heldBy(SIM_POD_IDS[k]) : null;   // someone of the crew settled in it (S5): a run every 15 minutes
   return a && a.settled ? (shipNow() / 15 + k * .37) % 1 : -1;
 }
+// 0.99.7 note 45 (MV1 for lead 49; switch MV_RECWC_ON, section 13 calls this after the switches): the washroom's four
+// stalls (room 'u', cols 25-27, rows 11-17) were scenery, with no toilet places, so neither you nor the crew could use
+// them. Their places, laid out as Deck 1's washroom (the same stall, the same facing: the seat .21 east of the stall's
+// middle, facing west, its walk-to tile the open one beside it), and two basins at the counter for washing your hands
+function recWcPlaces() {
+  const D = DECKS[7]; if (!D || (D.places || []).some(q => q.id === '7-toilet-1')) return;
+  D.places.push(...[12.9, 14.1, 15.3, 16.5].map((z, k) => ({ id: '7-toilet-' + (k + 1), type: 'toilet', at: [27, Math.floor(z)], xy: [27.66, z], walk: [26, Math.floor(z)], face: 'w', pose: 'sit', y: .4, room: 'u' })),
+    ...[13.85, 15.15].map((z, k) => ({ id: '7-basin-' + (k + 1), type: 'basin', at: [25, Math.floor(z)], xy: [25.98, z], walk: [26, Math.floor(z)], face: 'w', pose: 'stand', room: 'u' })));
+}
 // ---- end of slot: Rec engineer ----
 
 // =====================================================================
@@ -9766,6 +9775,13 @@ const TRAD_0932_WHEN = {                 // any: due when either rhythm is (sect
   'postcard-night': { any: [{ weekday: 3, until: 7 }, { every: '2weeks', weekday: 3, week: 2 }] }, // week 1, then even weeks
   'late-piano': { any: [{ weekday: 3 }, { every: '2weeks', weekday: 1, week: 1 }] },               // Thursdays; Tuesdays odd weeks
 };
+// the 0.99.7 playtest patch, MV1 for lead 49 (plans/patch-0997.md notes 2, 5, 19, 24, 45; var: sections 4e and 15 read
+// them, the code is in their own slots). Off: the game as 0.99.6. MV_BRIEF_ON: the Chief stays to the end of Day 1's
+// briefing (21b); MV_WASD_ON: W, A, S, D and the arrow keys walk you (11); MV_FIT_ON: fitness drains faster (15);
+// MV_RIG_ON: a story crew member's full rig is never drawn at the deck's origin for a frame (10); MV_RECWC_ON: the rec
+// deck's toilets and basins can be used (4e)
+var MV_BRIEF_ON = false, MV_WASD_ON = false, MV_FIT_ON = false, MV_RIG_ON = false, MV_RECWC_ON = false;
+if (MV_RECWC_ON && REC_DECK) recWcPlaces();
 function saveGame() {
   if (NOSAVE || SLOT_HOLD || typeof devmodeHold === 'function' && devmodeHold()) return;   // Dev mode (section 25): not while a Dev action works, nor over a save it's reloading into
   if (typeof titleHold === 'function' && titleHold(true)) return;   // the title screen (section 30): nothing saves while it's up (it saves as it hands over)
@@ -13745,7 +13761,9 @@ const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitne
 // 0.99 balance pass (BAL2, the user's go via lead 45, 2026-10-29; BAL1's report findings 4 and 5): hunger asleep 6 -> 4 (32 a
 // night: breakfast and dinner are enough, a careful player is Hungry about 2% of waking time, was 26-32%), fitness 1.4/.35 ->
 // .9/.3 (about 17 a day: the gym every other day keeps you in shape, never going still leaves you out of shape)
-const NEED_DRAIN = { hunger: [4, 4], energy: [4.8, 0], hygiene: [2.5, 1], fitness: [.9, .3], social: [4.5, .5], bathroom: [6, 1.5], leisure: [2.4, 0] };   // bathroom halved in 0.28.62 (the 0.60.7 plan: about two visits a day); energy 4.4 -> 4.8 in 0.73.0 (playtest 2, the lead's tuning: a normal 16-hour day ends near 20-25)
+// 0.99.7 note 19 (the user: "fitness needs to drop faster"; MV1, MV_FIT_ON): .9/.3 -> 1.8/.4 (about 32 a day: full to the low
+// line in about 2.3 days, was 4.5; a new game's 70 to low in about 1.4 days, was 2.7; a 30-minute workout covers about a day)
+const NEED_DRAIN = { hunger: [4, 4], energy: [4.8, 0], hygiene: [2.5, 1], fitness: MV_FIT_ON ? [1.8, .4] : [.9, .3], social: [4.5, .5], bathroom: [6, 1.5], leisure: [2.4, 0] };   // bathroom halved in 0.28.62 (the 0.60.7 plan: about two visits a day); energy 4.4 -> 4.8 in 0.73.0 (playtest 2, the lead's tuning: a normal 16-hour day ends near 20-25)
 const SLEEP_GAIN = 12.5;                                 // energy per ship hour asleep: 8 hours fills it
 const SLEEP_TAPER = [90, 1 / 3];                         // above 90, sleep gives a third as much (the patch's #27, the user's "100 after 8 hours"): bed at 22:00 wakes at 100, 23:00 at about 95
 const NEEDS_FRESH = { hunger: 60, energy: 100, hygiene: 60, fitness: 70, social: 70, bathroom: 60, leisure: 70 };   // a new game: just woken, before breakfast
@@ -55887,7 +55905,7 @@ const INTRO_WEEK = [
   // the arrival itself: a new game's clock jumps back to Day 0 and the machines start afresh after it)
   { id: 'd1-wash', day: 1, at: 6 * 60, until: 6 * 60 + 30, who: 'tomas', where: { deck: 4, room: 'Bunk 1' }, settle: 'washed' },
   { id: 'd1-briefing', day: 1, at: 8 * 60 + 50, until: 9 * 60 + 5, who: 'calder', also: [INTRO_ESCORT], where: { deck: 5, room: 'Works bay' }, meeting: 'introBriefing', settle: 'team',
-    flags: ['intro.device', 'met.calder'] },   // if you missed them on Sunday, Torres hands you the device here
+    flags: ['intro.device', 'met.calder'], ...(MV_BRIEF_ON ? { release: true, keep: 70 } : {}) },   // keep: 0.99.7 note 2 (introKeep, 21b)   // if you missed them on Sunday, Torres hands you the device here
   { id: 'd1-shadow', day: 1, at: 9 * 60 + 5, until: 13 * 60, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow', job: 'reserved:1', settle: 'shadow' },   // he stays at your side and talks you through it (introJobLines); the arrow shows the way
   { id: 'd1-lead', day: 1, at: 13 * 60, until: 16 * 60 + 30, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow', job: 'reserved:2', settle: 'lead' },
   { id: 'd1-end', day: 1, at: 16 * 60 + 44, until: 17 * 60 + 5, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow' },   // the patch (#18/#19): he comes to find you (by 16:50): good job, clock out, the beam (introDayEndTick)
@@ -56317,7 +56335,7 @@ function introBeats(id, d) {
   if (!introOn()) return [];
   const out = [];
   for (const st of INTRO_STEPS) if (st.day === d && st.who === id && st.checkpoint) { const f = st.fallback || {}, seat = (st.away && st.away[id]) || st.seats && st.seats[id], tb = st.id === 'chief' && st.seats && introStepById('table'); out.push({ id: st.id, at: tb && tb.at != null ? Math.min(st.at, tb.at) : st.at, until: f.until !== undefined ? f.until : st.at + (f.wait || 20), where: seat ? { ...st.checkpoint, placeId: seat } : st.checkpoint }); }
-  for (const b of INTRO_WEEK) if (b.day === d && (b.who === id || (b.also || []).includes(id)) && b.until) out.push(introWeekBeat(b));
+  for (const b of INTRO_WEEK) if (b.day === d && (b.who === id || (b.also || []).includes(id)) && b.until) out.push(introWeekBeat(b, id));
   return out;
 }
 
@@ -57341,15 +57359,17 @@ function clothesRemark(C, grubby = false) {               // grubby (patch 0.92.
 // yet, it starts anyway only at the later of `till` and `after` minutes from when you came in (her walk is 14); `stand`:
 // the place you're walked to when it starts (the visitor's spot by her desk: "Come in. Don't sit.").
 const INTRO_MEET_IN = {};                                // beat id -> the minute you were first in its room (not saved)
-function introWeekBeat(b) {
+function introWeekBeat(b, id) {
   const e = b.release ? SHIP.intro.done[b.id + ':end'] : undefined, d0 = introAbs(b.day, 0);
   const o = { id: b.id, at: b.at, until: e >= 0 ? Math.min(b.until, Math.max(b.at + 1, e - d0)) : b.until, where: b.where };
   if (b.early != null) o.early = b.early;
+  if (b.keep) introKeep(b, id, o);                       // 0.99.7 note 2: the speaker stays to the meeting's end
   return o;
 }
 function introReleased() {
   if (!introOn()) return '';
   let s = ''; for (const b of INTRO_WEEK) if (b.release && SHIP.intro.done[b.id + ':end'] >= 0) s += '|' + b.id;
+  for (const b of INTRO_WEEK) if (b.keep && SHIP.intro.done[b.id + ':met'] === -1) s += '|' + b.id + '-';   // 0.99.7 note 2: missed, the kept speaker goes at the usual time (introKeep)
   return s;
 }
 function introMeetFallback(b, at, m, now) {
@@ -57584,6 +57604,18 @@ function introHealthKept(ap) {                           // the scene's over (fi
 }
 // section 20's clock-out remark skips Zeke on training day once he's said his own good job (PR2: not twice)
 function introQuiet(id) { return introOn() && SHIP.time.day === 1 && id === SHIP.intro.escort && SHIP.intro.done['d1-end:start'] !== undefined; }
+// 0.99.7 note 2 (the user: "Chief walks away during the morning briefing"; MV1 for lead 49, MV_BRIEF_ON). Day 1's
+// briefing held the Chief 08:50-09:05 (25 real seconds), but its meeting starts once you're in the bay, up to 09:05, and
+// its script runs about 80 real seconds, so at 09:05 she walked off mid-talk. A beat with `keep` (and `release`): its
+// speaker's block (only the speaker's: the others keep their own times) runs up to `keep` minutes past `until`, and
+// ends when the meeting's panel closes (introMeetEnded's '<id>:end', as Day 2's), or at `until` when it was missed
+// ('<id>:met' -1; introReleased changes, so the day is planned again). The meeting's own start window is unchanged.
+// Reads only the intro's saved state (the arrival's one exception, DEV_NOTES), so the plan comes out the same.
+function introKeep(b, id, o) {
+  const I = SHIP.intro, m = I.done[b.id + ':met'], e = I.done[b.id + ':end'], d0 = introAbs(b.day, 0);
+  if (id !== b.who) { o.until = b.until; return; }
+  o.until = m === -1 ? b.until : e >= 0 ? Math.min(b.until + b.keep, Math.max(b.at + 1, e - d0)) : b.until + b.keep;
+}
 // ---- end of slot: Onboarding engineer ----
 
 // =====================================================================
@@ -72130,6 +72162,7 @@ function crewDetail() {                                  // who gets a full rig:
     if (want === !!a.h.full) continue;
     a.remove(); a.h = want ? new FullPerson(rosterSpec(a.p), a.p.id) : crowd.add(rosterSpec(a.p));
     a.h.set({ x: a.x + a.lx + a.hx, y: a.y, z: a.z + a.lz + a.hz }, a.face, heldPose(a));   // where it's drawn, glide and lane included (FX9: a swap mid get-up drew Pell .63 tiles ahead for a frame)
+    if (MV_RIG_ON && want) a.h.update(0, clock.elapsedTime);   // 0.99.7 note 24 (MV1): posed now, where it is; the rig was drawn for a frame at the deck's origin (this frame's posing loop has run)
   }
 }
 // placeBusy(id): is someone settled at that place on this deck? A Set rebuilt once a frame, so it's a cheap lookup
@@ -72398,6 +72431,7 @@ const HOLD_MS = 240, HOLD_PX = 14, groundPlane = new THREE.Plane(new THREE.Vecto
 function endSteer() { steering = false; player.steer = null; }
 // called every frame from the main loop
 function updateSteer() {
+  if (MV_WASD_ON && keyWalkStep()) return;              // 0.99.7 note 5: W, A, S, D and the arrows (keyWalkStep, this section's slot)
   if (!steering && downAt && pts.size === 1) {
     const [x, y] = pts.values().next().value;
     if (performance.now() - downAt[2] > HOLD_MS || Math.hypot(x - downAt[0], y - downAt[1]) > HOLD_PX) { steering = true; player.stop(); }
@@ -72627,6 +72661,34 @@ function liftHold(on, until) { LIFT_HOLD = on ? { from: shipNow(), until: Number
 function liftHeld(t) { if (!LIFT_HOLD) return false; if (!Number.isFinite(t)) t = shipNow(); return t >= LIFT_HOLD.from && t < LIFT_HOLD.until; }
 
 // ---- slot: HUD seat (section 11). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// 0.99.7 note 5 (the user: "on a keyboard WASD should move the character"; MV1 for lead 49, MV_WASD_ON). W, A, S, D and
+// the arrow keys walk you as the controller's left stick does (section 26): up is up the screen whichever way the view
+// faces, the same player.steer as press-and-hold, at full pace. Only on the deck, as the stick: not with a panel open
+// (26's padPanel: the device, a card, the lift panel, Lightdisc...), paused or frozen (Tiles, the title screen, Dev
+// mode at work) or riding the lift; never while typing in a text field or with Ctrl, Alt or Cmd held. A key the deck
+// doesn't take is left alone (a panel's own keys, Lightdisc's, Tab and the rest). Tap and press-and-hold win.
+const KEY_WALK = { held: new Set(), on: false, map: { w: [0, 1], arrowup: [0, 1], s: [0, -1], arrowdown: [0, -1], a: [-1, 0], arrowleft: [-1, 0], d: [1, 0], arrowright: [1, 0] } };
+const keyWalkFree = () => !ride && !FREEZE.frozen && !(typeof padPanel === 'function' && padPanel());
+function keyWalkStep() {                                 // each frame, from updateSteer: true while the keys walk you
+  const H = KEY_WALK.held; let x = 0, y = 0;
+  for (const k of H) { x += KEY_WALK.map[k][0]; y += KEY_WALK.map[k][1]; }
+  const go = (x || y) && !steering && keyWalkFree();
+  if (!go) { if (KEY_WALK.on) { KEY_WALK.on = false; if (!steering) player.steer = null; } if (H.size && !keyWalkFree()) H.clear(); return false; }
+  const rx = Math.cos(az), rz = -Math.sin(az), fx = -Math.sin(az), fz = -Math.cos(az), wx = rx * x + fx * y, wz = rz * x + fz * y, d = Math.hypot(wx, wz) || 1;
+  if (!KEY_WALK.on) { KEY_WALK.on = true; player.stop(); }
+  player.steer = { x: wx / d, z: wz / d, k: 1 };
+  return true;
+}
+addEventListener('keydown', e => {
+  if (!MV_WASD_ON) return;
+  const k = String(e.key || '').toLowerCase(), t = e.target;
+  if (!KEY_WALK.map[k] || e.ctrlKey || e.altKey || e.metaKey) return;
+  if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName || ''))) return;
+  if (!keyWalkFree()) return;
+  KEY_WALK.held.add(k); e.preventDefault();
+});
+addEventListener('keyup', e => { KEY_WALK.held.delete(String(e.key || '').toLowerCase()); });
+addEventListener('blur', () => KEY_WALK.held.clear());   // a key let go in another window
 // ---- end of slot: HUD seat ----
 
 // =====================================================================
