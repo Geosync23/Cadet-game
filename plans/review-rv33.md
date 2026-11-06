@@ -41,3 +41,27 @@ EV1 and CL1 also checked merged together for first-week clashes.
 - Area checks on the switched-on copy of 85442de: TALK CHECK OK, SOCIAL CHECK OK, lines_check PASS (0 errors, 112 warnings, as before).
 - Note 39: joined hosted tradition rec-all-hands (marrow): 0 -> 3.2 (her relGain on +4); again same day: no change; not
   joined: no change; off: no change.
+
+**6c39f3b, game f09f730c...f7ef (sha256 matched): the fix.** One line: p997WordOk no longer shuts on a flicker; only
+opening their card (p997WordSeen) shuts the day's arrow.
+- Off: cadet_test vs 0.99.6 ALL IDENTICAL.
+- sc1_arrow2.py on: arrow minutes = ready minutes, every person every day, Days 9-22 (= off; sc1_arrow2_on_6c39f3b.txt).
+- sc1_arrow_open.py on: after opening the card, 0 arrow samples the rest of the day (kovac Day 11: off 22, on 0).
+- On copy: BUBBLE CHECK OK, DAY CHECK OK. interactions_check (and check_fast on the commit) in progress.
+- stories_check FAILED (14) on the on copy, but the same 14 FAIL lines on the off copy, on 85442de-on, and on the
+  unchanged 0.99.6 build (base f6ff5ec1) in my setup: not SC1's. The 0.99.6 round (CR6) passed it, so it is my setup or
+  something that changed since (date?): rerunning runner-style (repo root, default CADET_WORK) to settle it.
+
+### AV1 sound and screens (claude/p997-av), switches SND_LIVE, SND_DISC (27), REC_FILM (4)
+**15fbf3f, game 4f081164...d5b2 (sha256 matched).** Sections 4 (one line), 4e (+83, the film, rec engineer's), 8c
+(one line), 27 (+147). All behind the three switches (const, off).
+- Off: cadet_test vs 0.99.6 ALL IDENTICAL.
+- Notes 13 and 29 in the real game (av1_levels.py, all three on, phone size, ?sound, a real tap to start the audio, skipTo
+  the tradition): late piano Day 2 +18 min: Marrow at 4-music-1 (sit:play), the piece plays, the ship's music ducked to
+  0 in the room, about half as loud just outside, nothing on Deck 3 or after it ends. Jam Day 5: Soto plays (sit:play),
+  3 parts, the same fall-off. Loudness, hum muted, whole mix: a ship's track on Deck 3 about -50 to -60 dB; the piano
+  -44 in the middle of the room, -36 beside it; the jam -33 beside the players. Louder than the ship's own music; the
+  engine hum (whole mix about -31) is above all music in the existing balance, not AV1's to change.
+- Note 42 (av1_film.py): the film canvas over a minute: lighthouse with sweeping beam, whales, the little ship and the
+  ringed planet, sunset with two on a bench, credits; on the auditorium screen it reads the right way round from the
+  seats; 133 draw calls; no page errors.
