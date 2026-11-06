@@ -92,3 +92,13 @@ Sections: 15 (fetch toast 1 line; e96ec5a: choreThingTap), 17 (jobsHour crew cla
   restarted at Day 7): science jobs posted and done Day 1 x2 (sample lab balance 10:02, science corridor light 14:04), Day 2 x1
   (+1 more posted 13:04, not taken), Day 3 x2, Day 4 x1, none Days 5-6; rec deck: Day 2 a shower job (posted 11:02, not taken,
   lapsed at shift end), Day 4 the pool drain (taken and done). As the notes ask.
+- Off e96ec5a: cadet_test vs 0.99.6 ALL IDENTICAL. On (all four, JB3_TEA_ON too): check_fast QUICK CHECK OK in 524 s.
+- Note 3: plans/rv32-probes/jb3_shelf.py (real taps at each shelf's pin, four view turns, 390x844) shows the cause in 0.99.6:
+  the pin's tap is caught by the neighbouring shelf at some turns (Filters' pin -> Lights shelf at turns 0 and 2, Galley
+  parts' pin -> Plumbing at 2 and 3, Plumbing's -> Filters at 2 and 3). I could not get a fetch step up in a ?nosave page to
+  show shelfWrong's toast, so the fix itself rests on its code read (jb3PinTap: the tap's line within JOB_RAY of the wanted
+  shelf's spot is that shelf; same rule as a machine's pin) and JB3's measurement (48 of 72 failed before, 0 of 96 after).
+  The crew's reserve (SHELF_KEEP) read: jobsHour's two crew lines only; machine_check in check_fast OK.
+- JB3_TEA_ON read: only while your round's next stop is a check point that CHECK_THING names (c5-water: Hot water, Mug rack),
+  within 3 m; tea as before otherwise.
+- Verdict: PASS e96ec5a (four switches).
