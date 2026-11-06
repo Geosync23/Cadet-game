@@ -574,7 +574,7 @@ with sync_playwright() as pw:
     print('(i) The Tier 2 test job (24p, Step 3):')
     if not ev("typeof promoPassed === 'function'"): print('  not in this build')
     else:
-        tr = ev(f"({PAPER})({{ plan: 'steady', days: 9, t2: 'real' }})")
+        tr = ev(f"({PAPER})({{ plan: 'steady', days: {TD}, t2: 'real' }})")
         print('   steady:', tr['promo'], tr['test'], tr['testJob'], 'Mail', [m for m in tr['mail'] if 'test' in m.lower()])
         check(tr['test'] and tr['test']['passed'] and tr['test']['day'] == TD and tr['test']['tries'] == 1, f"steady: the test job passed on Day {TD}, first try: {tr['test']}")
         check(any(p[0] == 'set' and p[1] == 8 for p in tr['promo']), f"steady: told \"tomorrow, your test job\" on Day 8: {tr['promo']}")
