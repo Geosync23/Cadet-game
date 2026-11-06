@@ -55,3 +55,11 @@ Update (SC1, 16:50): fresh_walk point 3's 18:00 booths: SC1's traced rerun of th
 d2-booths beat fires (intro flag 'd2-booths:said' at Day 2 18:13; Leila's lines as speech bubbles while you're in
 Booth 1). fresh_walk's JSON keeps no bubbles or intro flags, so it could not show it
 (`FW_TRACE="SHIP.intro.done['d2-booths:said']"` logs it). So fresh_walk: all five points PASS.
+
+Update (16:55): p926_check re-run whole with TB6's check fix (p926_check.py from ba33d0c on claude/staging-0997; game
+unchanged, 1b17203d...bff9): exit 0, P926 CHECK OK, no FAIL lines; item 15: Brennan at the spice shelf 19:20 (within
+25 minutes of its start), 7 lines, 7 bubbles, guess card ['t932.join', 'spice.guess'] still open 3 minutes later.
+Cleared check-side.
+
+**R4 round 0997b final: OK** (career_check and p926_check cleared check-side with the owners' check fixes; everything
+else passed first time; fresh_walk all five points.)
