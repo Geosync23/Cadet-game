@@ -3,7 +3,7 @@
 - **Role:** jobs builder for lead 49 (session_01GKuymjjreuZtZeDMBX79xn). Reviewer **RV32** (session_01GKuymkDX3gviqiGJcKLWuS).
   My session: session_01GKuymmiCEm3CMMrMTdWMEo (JB3).
 - **Branch:** `claude/p997-jobs` from claude/integration d7ad4c58 (0.99.6, game f6ff5ec1...db8a8). Build number lines untouched.
-- **Switches:** `var JB3_SHELF_ON, JB3_SCI_ON, JB3_REC_ON` in section 17's Systems slot (the JB3 block after JB2's), all
+- **Switches:** `var JB3_SHELF_ON, JB3_SCI_ON, JB3_REC_ON, JB3_TEA_ON` in section 17's Systems slot (the JB3 block after JB2's), all
   **false** on the branch (cadet_test vs 0.99.6: ALL IDENTICAL). The build master switches them on. Every test of the
   features ran on a copy with all three true.
 
@@ -28,6 +28,12 @@
 - **Note 22, a few rec deck jobs in the first week.** `REC_N` 2 small jobs on the rec deck in Days 2-7, one a shift day
   from 10:00, `REC_GAP` 2 days apart, two different rooms; flags `jb3.rec` (days posted) and `jb3.recRoom`, so a day the
   board is held for a training job just moves it on. On paper: Days 2 and 4. Nothing after week 1.
+- **Backlog CR1-2 (lead 49's extra item), `JB3_TEA_ON`:** a round's check point c5-water ("the tea corner's water tap",
+  5-tea-3) is the Hot water, but tapping it or the Mug rack made tea (ixTea) and the check was never done. Section 15's
+  `choreThingTap` asks `jb3CheckThing(j, nx, it, s)`: while a round's next stop is a check point, a tap on the thing
+  `CHECK_THING` names for it (c5-water: Hot water, Mug rack), within `CHECK_REACH` 3 m, is the stop. The follower's side
+  (it tapped the washroom Toilet through the wall; its "water" rule kept the visit going) is backlog JB3-2 (check side).
+  JB3-1: a chore whose part is out still has no lathe path (rare now with the reserve).
 - Jobs posted carry `j.jb3` ('s' or 'r'), FX10's shape (chore 'fix', fixS of their stream).
 
 ## Tests (switches on, copy)

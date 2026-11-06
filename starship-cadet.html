@@ -15486,7 +15486,8 @@ function choreThingTap(it, at, point) {
   const nx = ixNextStop(j), id = nx && nx.s.step !== 'fetch' && nx.s.deck === deckDef.num ? nx.s.places[0] : null, s = id && PLACE_OF.has(id) ? placeSpot(id) : null;
   if (!s) return false;
   const onPin = typeof ray !== 'undefined' && rayIsThisTap(point || at) && jobRayDist(s) < JOB_RAY;   // the line is this tap's (RV8: playerTap called some other way leaves the last screen tap's)
-  if (!onPin && (ixDist(it, s) >= JOB_REACH || !(carry || jobKindOf(j) && (ixMachine(at) || stubTap(it, at))))) return false;
+  const own = typeof JB3_TEA_ON !== 'undefined' && JB3_TEA_ON && jb3CheckThing(j, nx, it, s);   // JB3 (backlog CR1-2): the thing a round's check point names (the tea corner's hot water), not its tea
+  if (!onPin && !own && (ixDist(it, s) >= JOB_REACH || !(carry || jobKindOf(j) && (ixMachine(at) || stubTap(it, at))))) return false;
   return ixChoreTap({ t: j.title, x: '' }, new THREE.Vector3(s.x, 0, s.z)) !== false;
 }
 const jobSpotTap = p => { const h = jobHere(p, typeof ray !== 'undefined'); return !!(h && h.go()); };   // a tap on the floor or on anything near your job's stop
@@ -22226,7 +22227,7 @@ function roundMixRoute(n, day, key, keep) {
 // a chore that needs a lamp has no lathe to fall back on, and the arrow still said "Fetch a lamp: the Lights shelf". Now
 // the crew leave SHELF_KEEP of those parts on the shelf for your jobs and make their own at the lathe instead, as they
 // already did when the shelf was empty (jobsHour asks jb3Keep). Parts that can't be made aboard (NO_MAKE) keep nothing.
-var JB3_SHELF_ON = false, JB3_SCI_ON = false, JB3_REC_ON = false;   // off till the build master switches them on (lead 49); var: section 17's jobsHour and boardTopUp ask before this line has run
+var JB3_SHELF_ON = false, JB3_SCI_ON = false, JB3_REC_ON = false, JB3_TEA_ON = false;   // off till the build master switches them on (lead 49); var: section 17's jobsHour and boardTopUp ask before this line has run
 const SHELF_KEEP = { relay: 2, lamp: 2, breaker: 1, cable: 1 };   // the light relays' fault parts (FAULT_CAUSES.lights), all on the Lights shelf
 function jb3Keep(p) { return JB3_SHELF_ON && !NO_MAKE.has(p) && SHELF_KEEP[p] || 0; }
 // The arrow's pin for a shelf is the place in front of its aisle (5-parts-1..4), as near the shelf before it as its own:
@@ -22234,6 +22235,16 @@ function jb3Keep(p) { return JB3_SHELF_ON && !NO_MAKE.has(p) && SHELF_KEEP[p] ||
 // filters on the Lights shelf", again and again). shelfWrong asks jb3PinTap: a tap whose line passes within JOB_RAY of
 // the wanted shelf's spot (section 15's jobRayDist, as a machine's pin) is that shelf, whatever caught it first
 function jb3PinTap(id) { return typeof ray !== 'undefined' && typeof jobRayDist === 'function' && PLACE_OF.has(id) && jobRayDist(placeSpot(id)) < JOB_RAY; }
+// JB3_TEA_ON (backlog CR1-2, lead 49): a round's check point "the tea corner's water tap" (c5-water, at 5-tea-3) is the Hot
+// water dispenser, but a tap on it (or the Mug rack beside it) made you tea, and the armchair and table sat you down: the
+// check was never done (CR1's arrow-follower stood there 11:58-16:00). section 15's choreThingTap asks jb3CheckThing: while
+// your round's next stop is a check point, a tap on the thing CHECK_THING names for it, within CHECK_REACH m of the stop, is the stop
+const CHECK_THING = { 'c5-water': /^(hot water|mug rack)$/i }, CHECK_REACH = 3;
+function jb3CheckThing(j, nx, it, s) {
+  if (!j || j.kind !== 'rounds' || !nx || !it || !it.hit) return false;
+  const id = (j.route || [])[nx.k - ((j.parts || []).length ? 1 : 0)], re = typeof id === 'string' && id.startsWith('chk:') ? CHECK_THING[id.slice(4)] : null;
+  return !!re && re.test(String(it.t || '')) && ixDist(it, s) < CHECK_REACH;
+}
 // JB3_SCI_ON (note 21, "more jobs in the science area, especially early on"): FX10's science stream was only asked when the
 // board ran short, so the labs came up about once in two shifts. Now boardTopUp asks jb3Post each hour of your shift: while
 // no science-area job is up for you, one is posted from that stream's rows in the science rooms (SCI_ROOMS: the survey and
