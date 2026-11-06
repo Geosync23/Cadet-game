@@ -64,3 +64,12 @@ game sha256 298291963584a62fbf0f7953afaa402924cdd22e474d526353494ec02d22c462, bu
 | R4 | | |
 | R5 (BM27) | | |
 | R6 | | |
+
+### Finds
+
+| Item | Check (share) | Cause | Closed by |
+|---|---|---|---|
+| P | fresh_walk point 5 (R2's, run by R4): two arrows up over 3 ship hours, 'The call booths', Day 2 21:38-22:30 and Day 3 17:29-22:30 (0997b: none) | NEW, game, TP998_BOOTH_ON: section 15's needs marker for Social only knows the booths (NEED_FIX.social = ['callhome']); after the day's call a repeat booth now gives nothing, so a lonely player is sent to a booth that won't call, again and again (in 0.99.7 the repeat still gave +40 social) | open: sent to lead 50 + TP1 ~19:58 UTC (suggested: behind TP998_BOOTH_ON, no booth marker once today's call is used) |
+
+Round notes: BM27's first R5 run hit the 30-minute background limit after machine, mech and bigevents (all OK); the rest
+restarted 19:54 UTC (plans/build-master/bm27/r5rest.sh). R2 gave fresh_walk and p926 to R4 (agreed, lead copied).
