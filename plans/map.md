@@ -59,6 +59,7 @@ One labelled, empty block per seat at the end of its main section, where that se
 | Ending goodbye (the ending engineer) | 29b |
 | Endgame (the dialogue engineer, the Works career engineer) | 29c |
 | Title screen (the title seat) | 30 |
+| CH1 characters (0.99.7 patch notes 1, 4, 10, 35, 37: hair, seats, the officers' relay cabinet, the auditorium pose, soles; switches `CH_*_ON`) | 8 (at its end, before 8b) |
 
 No slot for the crew designer (section 9's roster is generated). A new feature (Dev mode, step 3) gets its own section and slot from its plan page; another slot for a seat: ask the lead.
 
