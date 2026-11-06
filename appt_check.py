@@ -234,10 +234,10 @@ with sync_playwright() as pw:
             check(g.ev(f"apptCan('scope', 'sato', {b['day']} + 7)"), 'rules: the scope again the next week')
             check(not g.ev("(() => { const r = relGet('sato'); const t = r.tier; r.tier = 0; const c = apptCan('scope', 'sato', 30); r.tier = t; return c; })()"), 'rules: a stranger can\'t ask Sato')
             g.ev(f"skipTo({b['day']} * 1440 + 1170)"); g.step(5); g.ev("goToDeck(2, null)"); g.step(20)
-            for _ in range(30):
-                where = g.ev("(() => { const a = DECK_CREW.find(c => c.p.id === 'sato'); if (!a || !a.settled) return null; player.obj.position.set(a.x + .9, 0, a.z); player.stop(); return 1; })()")
+            for _ in range(30):   # the line is said by whoever else is settled near you (apptNearMinute): beside Sato, then beside others in turn (EV1, 0.99.7: it relied on Luca Alvarez sitting near her)
+                where = g.ev("(k => { const S = DECK_CREW.filter(c => c.p && c.settled && !c.p.player), a = k % 2 === 0 ? S.find(c => c.p.id === 'sato') : S.filter(c => c.p.id !== 'sato')[(k >> 1) % Math.max(1, S.length - 1)]; if (!a) return null; player.obj.position.set(a.x + .9, 0, a.z); player.stop(); return 1; })(" + str(_) + ")")
                 g.step(45)
-                if g.ev("window.__said.some(x => x[0] === 'sato' || /Sato/.test(x[1]))"): break
+                if g.ev("window.__said.some(x => APPT_WORDS.scope.after.some(l => l.text === x[1]))"): break   # the after line itself (Sato's own invite can come first)
             said = json.loads(g.ev("JSON.stringify(window.__said.map(x => x[1]))"))
             after = json.loads(g.ev("JSON.stringify(APPT_WORDS.scope.after.map(l => l.text))"))
             check(sum(1 for t in said if t in after) == 1, f'rules: the scope\'s after line said once the next day ({[t for t in said if t in after]})')

@@ -47885,9 +47885,8 @@ if (EV997_LIGHT_ON && EV_LINE_ON && SHIP_EVENTS.crossingLine) {
   const w = k => evWord('event.lastLight.' + k), say = (k, alt) => (c, p) => evWordAt('event.lastLight.gather.glass.' + k, p ? p.seed + c.day : 0, c) || alt;
   const ln = (k, n, alt) => { const o = []; for (let i = 1; i <= n; i++) { const x = w(k + '.' + i); if (x) o.push(x); } return o.length ? o : alt; };
   EV_CALENDAR.splice(EV_CALENDAR.findIndex(r => r.id === 'crossingLine'), 0, { id: 'lastLight', day: 3, kind: 'short' });   // before the Line (Day 6): one event at a time, over by Day 5
-  // the bow lounge the gathering's alone from 13:40 (the planner reads rules in 10-minute slots: a seat held into the 13:50
-  // slot would run past 14:00; the comet's way) to the afterglow at 14:40
-  const closed = off => [{ where: '3|L', name: 'the bow lounge', rule: 'closed', gather: true, ...(off ? { off } : {}) }];
+  // the bow lounge stays open (the 0.99.7 round, R4/TB6: closing it 13:40-14:40 sent people's breaks far off, Brennan's to
+  // the garden, late for her 14:30 appointment): the gathering has its own held places at the glass, and nobody else is moved
   SHIP_EVENTS.lastLight = {
     title: w('title') || 'The Last Light', days: 2, commend: false, threads: [], pause: [], keep: [],
     phases: [{ id: 'warning', at: [0, 1080] }, { id: 'passing', at: [1, 840] }, { id: 'afterglow', at: [1, 880], clears: true }],
@@ -47895,7 +47894,7 @@ if (EV997_LIGHT_ON && EV_LINE_ON && SHIP_EVENTS.crossingLine) {
       'On Sunday afternoon we cross the Line into the Veyli reach. If there\'s a window near you, take a look.', 'First-timers: the old hands will tell you everything about the Line. Believe about half of it.']) },
     mail: { warning: { ...evBankMail('event.lastLight.mail.warning', { subject: 'The Last Light tomorrow', body: 'Tomorrow at about two we pass the Last Light, the Concord\'s last beacon this way. Sunday we cross the Line. Dr. Sato will be at the bow glass; the day shift may stand easy for half an hour to see it.' }), at: [0, 1080], from: 'Commander Teo Vance' } },
     status: { warning: w('status.warning') || 'The Last Light tomorrow, about 14:00', passing: w('status.passing') || 'Passing the Last Light', afterglow: w('status.afterglow') || 'Past the Last Light. The Line on Sunday' },
-    routines: { warning: closed([[0, 0, 1440], [1, 0, 820]]), passing: [{ who: 'all', rule: 'standEasy', at: [840, 870], not: ['dept:command', 'dept:helm', 'dept:watch', 'dept:galley'] }].concat(closed()) },
+    routines: { passing: [{ who: 'all', rule: 'standEasy', at: [840, 870], not: ['dept:command', 'dept:helm', 'dept:watch', 'dept:galley'] }] },
     galley: {},
     // crew preparing: the chatter (section 20's news) from breakfast, Brennan's punch trial and the ribbons by lunch, the
     // retelling after
@@ -51391,7 +51390,7 @@ function apptSlots(kind, host, from, n = 6) {
   for (let d = Math.max(from || 0, R.today ? today : today + 1); d <= today + (R.days || APPT_ASK_DAYS); d++) {
     if (p && typeof aboard === 'function' && !aboard(p, d)) continue;
     for (const [a, b] of R.times(p, d)) {
-      if ((d - 1) * 1440 + a < now + 30 || mine.some(x => x.day === d && x.from < b && a < x.to) || eventPauses({ id: 'appt-' + kind, at: [a, b] }, d)) continue;   // never in a ship-wide event's paused hours (the storm)
+      if ((d - 1) * 1440 + a < now + 30 || mine.some(x => x.day === d && x.from < b && a < x.to) || eventPauses({ id: 'appt-' + kind, at: [a, b] }, d) || lightBusy(d, a, b)) continue;   // never in a ship-wide event's paused hours (the storm); nor the Last Light's hour (0.99.7, EV1)
       if (R.path === 'appt') { const w = apptOverlayAt(kind, host); if (w && apptReply(p, { with: [host], at: (d - 1) * 1440 + a, len: b - a, where: w, kind: 'invite' }).answer === 'yes' && push({ day: d, from: a, to: b, shift: false })) return out; continue; }
       if (R.guests) { if (R.guests(d).filter(q => apptLate(evPerson(q), d, a, b, R)).length >= 2 && push({ day: d, from: a, to: b, shift: false })) return out; continue; }
       const sh = R.onShift(host, d), w = R.where(host)[0];
@@ -52254,6 +52253,12 @@ function lightSay(at, n, e, m) {
   const others = at.filter(a => a !== host && a.p.rank !== 'guest'); if (!others.length || n % 2 === 0 && host && n / 2 >= 8 && n % 4 === 0) return null;   // her talk done: the crowd now and then (crew only: a guest has no Line stories)
   const a = others[(n * 7 + d) % others.length];
   return [a, trLine('event.lastLight.crowd', Math.floor(n / 2) + d, {}, ['My first Line, they made me sing. Badly.', 'Is it true you get dunked? Tell me it isn\'t true.', 'One blink, then nothing behind us. Strange.', 'Every star past here has a Veyli name. Imagine.'])];
+}
+// the 0.99.7 round (R4, TB6, lead 50): an appointment is never booked over the Last Light's hour, 13:40-14:40 on its
+// Thursday (the walk there, the gathering, the walk back). Pure: the calendar's plan only. False while off
+function lightBusy(d, a, b) {
+  if (!EV997_LIGHT_ON || typeof SHIP_EVENTS === 'undefined' || !SHIP_EVENTS.lastLight) return false;
+  const r = evCalPlan().find(x => x.id === 'lastLight'); return !!r && d === r.day + 1 && a < 880 && 820 < b;
 }
 // ---- RV33's should (lead 49): while the day shift stands easy for the Last Light (its gathering on, Thursday Day 4
 // 14:00-14:30) and you've joined it or are in the bow lounge, your shift's "Take a job at the board" arrow, its board
