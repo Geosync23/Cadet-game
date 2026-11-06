@@ -4570,7 +4570,7 @@ DECKS[4] = {
     // utility closets: the junior wing's breakers at the hull end, its light relays on the wall; the officers' cabinet in y
     place('k', 'breakerCabinet', .5, 3.65, 's', { w: .7, it: IT('Breaker cabinet', 'The junior wing\'s power junction. Every bunk-room light on Deck 4 aft runs through here.') });
     placeWall('k', 'relayBoard', 'w', 2.0, { it: IT('Light relays', 'Twelve relays, twelve little lights. One of them flickers if you stare at it.') });
-    place('y', 'breakerCabinet', .5, 3.65, 's', { w: .7, it: IT('Breaker cabinet', 'The officers\' wing power junction, tucked into the narrow end of the closet.') });
+    place('y', 'breakerCabinet', .5, CH_RELAY_ON ? CH_RELAY_Z : 3.65, 's', { w: .7, it: IT('Breaker cabinet', 'The officers\' wing power junction, tucked into the narrow end of the closet.') });
     // junior stores: shelves on three sides
     for (const z of [1.5, 2.5, 3.5]) place('u', 'utilShelf', .33, z, 'w');
     for (const x of [1.5, 2.5]) place('u', 'utilShelf', x, 3.67, 's');
@@ -68963,7 +68963,7 @@ function makeCharacter(spec, finish = bake) {          // finish: what to do wit
     part(knee, cylG(.056 * bw, .06 * bw, .11), boot, 0, -LS + .06, 0);
     const ankle = pv(knee, 0, -LS, 0);
     part(ankle, GEO.sph, boot, 0, -.008, .04, .062 * bw, .042, .115);
-    part(ankle, GEO.box, sole, 0, -.045, .035, .1 * bw, .014, .2);
+    if (!CH_SOLE_ON) part(ankle, GEO.box, sole, 0, -.045, .035, .1 * bw, .014, .2);   // CH1 note 37: the flat sole goes
     rig.legs.push({ thigh, knee, ankle, side, off: side > 0 ? 0 : .5 });
   }
   // torso
@@ -69014,7 +69014,7 @@ function makeCharacter(spec, finish = bake) {          // finish: what to do wit
   part(h, GEO.sph, skin, 0, .11, .155, .02, .025, .02);
   part(h, GEO.box, shade(skin, .7), 0, .072, has('beard') ? .17 : .146, .04, .008, .01);
   // hair
-  const cap = (r, th, y, tilt, sy = 1.05) => part(h, capG(r, th), hc, 0, y, -.01, 1, sy, 1, tilt, 0, 0);
+  const cap = (r, th, y, tilt, sy = 1.05) => part(h, capG(r + (CH_HAIR_ON ? CH_HAIR_PAD : 0), th), hc, 0, y, -.01, 1, sy, 1, tilt, 0, 0);   // CH1 note 1: a little clear of the head
   switch (s.hair) {
     case 'ponytail':
       cap(.168, Math.PI * .52, .14, -.38);
@@ -69158,6 +69158,27 @@ function animateRig(rig, g, dt, t, sk, rnd = R) {      // rnd: the crowd passes 
   }
 }
 
+// ---- slot: CH1 characters (section 8; 0.99.7 patch, plans/patch-0997.md notes 1, 4, 10, 35, 37). New code of this seat's goes here, above the end line ----
+// Each note has its own switch; all false = the game as 0.99.6. Nothing here calls R().
+const CH_SOLE_ON = false;    // note 37: no flat sole box under the boots (makeCharacter); the rounded boot meets the floor
+const CH_POSE_ON = false;    // note 35: the auditorium's 'slump' (8c): hands rest at the sides on the seat, not held out in front
+const CH_RELAY_ON = false;   // note 10: Deck 4's officers' wing light relays (4-junction-2): the cabinet stands inside the curved hull
+const CH_HAIR_ON = false;    // note 1: hair caps cover the head (a margin, and the crowd's coarse caps pushed out to their true size)
+const CH_SEAT_ON = false;    // note 4: seats that clipped the people on them (CH_SEATS, read by placeSpot)
+// note 10: the cabinet stood at the closet's narrow end (lz 3.65), its back corner through the curved hull. On, it stands
+// CH_RELAY_Z (lz) instead, and the machine's lamp and drip (section 8b's machine looks, from 4-junction-2's look) move to its
+// new front. Its tile, panel and service spot stay, so jobs and paths are the same.
+// note 1: the head is a skin ellipsoid and the hair a cap sphere only about 0.001-0.01 bigger near the top, so where the
+// cap's flat faces dip below the true sphere, skin shows through. On, every hair cap is CH_HAIR_PAD bigger, and the crowd's
+// coarser caps (8b's crowdGeo) are pushed out so their flat faces lie on or outside the true sphere: the radius over the cos
+// of half a step around and half a step down (the same shape, a hair fuller; a far, coarse cap more so, too small to see)
+const CH_HAIR_PAD = .008;
+const chCapOut = (r, seg, th) => r / (Math.cos(Math.PI / seg[0]) * Math.cos(th / seg[1] / 2));
+const CH_RELAY_Z = 3.3;
+if (CH_RELAY_ON) { const m = (DECKS[4].machines || []).find(q => q.id === '4-junction-2'), d = 3.65 - CH_RELAY_Z;
+  if (m && m.look) { if (m.look.lamp) m.look.lamp[2] += d; if (m.look.drip) m.look.drip[2] += d; } }
+// ---- end of slot: CH1 characters ----
+
 // =====================================================================
 // 8b. CROWD
 // Everyone who isn't you or a close crew member is drawn here. Each person
@@ -69192,7 +69213,7 @@ const _crowdGeos = new Map();
 function crowdGeo(geo, lod) {                            // the same shape, fewer segments
   const k = geo.uuid + lod; let g = _crowdGeos.get(k); if (g) return g;
   const p = geo.parameters, d = CROWD_DETAIL[lod];
-  if (geo.type === 'SphereGeometry') g = p.thetaLength < Math.PI ? new THREE.SphereGeometry(p.radius, d.cap[0], d.cap[1], p.phiStart, p.phiLength, p.thetaStart, p.thetaLength) : new THREE.SphereGeometry(p.radius, d.sph[0], d.sph[1]);
+  if (geo.type === 'SphereGeometry') g = p.thetaLength < Math.PI ? new THREE.SphereGeometry(CH_HAIR_ON ? chCapOut(p.radius, d.cap, p.thetaLength) : p.radius, d.cap[0], d.cap[1], p.phiStart, p.phiLength, p.thetaStart, p.thetaLength) : new THREE.SphereGeometry(p.radius, d.sph[0], d.sph[1]);
   else if (geo.type === 'CylinderGeometry') g = new THREE.CylinderGeometry(p.radiusTop, p.radiusBottom, p.height, Math.min(p.radialSegments, d.cyl));
   else if (geo.type === 'TorusGeometry') g = new THREE.TorusGeometry(p.radius, p.tube, d.tor[0], d.tor[1]);
   else g = geo;
@@ -71817,7 +71838,7 @@ const REC_ACTS = {
     }
     r.torso.rotation.x = L(r.torso.rotation.x, -.3, s); r.head.rotation.x = L(r.head.rotation.x, .22 + .04 * Math.sin(t * .3 + ph), s);
     const back = Math.floor(ph * 7) % 3 === 2;            // one in three: hands behind the head
-    for (const a of r.arms) back ? armTo(a, s, -2.7, -2.35, .75, .3) : armTo(a, s, -.55, -1.5, -.1, .15);
+    for (const a of r.arms) back ? armTo(a, s, -2.7, -2.35, .75, .3) : CH_POSE_ON ? armTo(a, s, .12, -.55, .17, .2) : armTo(a, s, -.55, -1.5, -.1, .15);   // CH1 note 35: hands at the sides
   } },
   // 0.84.9 (rec engineer B2): the stage. sing (at the mic stand), juggle (the balls are recCrewBalls'), bow, and address (the lectern)
   sing: { f(r, s, t, b, ph) {                            // both hands up on the mic, a sway with the song
