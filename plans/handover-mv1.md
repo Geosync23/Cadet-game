@@ -16,7 +16,7 @@ Switching one on is changing its `false` to `true` there.
 | `MV_FIT_ON` | 19 fitness drops faster | 15 `NEED_DRAIN.fitness` | 0.9/0.3 an hour to 1.8/0.4 (about 17 to about 32 a day) |
 | `MV_RIG_ON` | 24 crew flash far from the lift | 10 `crewDetail` | a new full rig (story crew within 4.5 tiles) is posed at once; it was drawn one frame at the deck's origin |
 | `MV_SOFA_ON` | backlog EV1-1 (lead's add): tapping a seated host to join stood them up | 10 `crewWayOn`, `CrewAgent.update`'s make-way test | a crew member settled in their own seat only moves aside for the seat's own tile, and your seat's walk tile isn't kept clear while you sit; stations unchanged |
-| `MV_RECWC_ON` | 45 rec deck toilets unusable | 4e `place('u', 'toiletStall', ...)` gets a Toilet card; 4e slot `recWcPlaces()`, called from 13 after the switches | 7-toilet-1..4 and 7-basin-1..2 in room 'u'; the red stall lights work; the rec crew can take toilet breaks there |
+| `MV_RECWC_ON` | 45 rec deck toilets unusable | 4e `place('u', 'toiletStall', ...)` gets a Toilet card; 4e slot `recWcPlaces()`, called from 13 after the switches | 7-toilet-1..4 and 7-basin-1..2 in room 'u', yours only (`you: true`, left out of 14's schedData: with crew using them machine_check's food runs failed); the red stall lights work |
 
 Checks changed: player_check expects about 32 a day with `MV_FIT_ON`, 17 without.
 

@@ -9524,10 +9524,12 @@ function simRunAt(k) {
 // stalls (room 'u', cols 25-27, rows 11-17) were scenery, with no toilet places, so neither you nor the crew could use
 // them. Their places, laid out as Deck 1's washroom (the same stall, the same facing: the seat .21 east of the stall's
 // middle, facing west, its walk-to tile the open one beside it), and two basins at the counter for washing your hands
+// `you`: yours only. The crew's planner (14's schedData) leaves them out, so the crew's days are as before: with the
+// crew using them too, their toilet breaks moved the ship's meals enough for a Sunday food run to sit open (machine_check 5f)
 function recWcPlaces() {
   const D = DECKS[7]; if (!D || (D.places || []).some(q => q.id === '7-toilet-1')) return;
-  D.places.push(...[12.9, 14.1, 15.3, 16.5].map((z, k) => ({ id: '7-toilet-' + (k + 1), type: 'toilet', at: [27, Math.floor(z)], xy: [27.66, z], walk: [26, Math.floor(z)], face: 'w', pose: 'sit', y: .4, room: 'u' })),
-    ...[13.85, 15.15].map((z, k) => ({ id: '7-basin-' + (k + 1), type: 'basin', at: [25, Math.floor(z)], xy: [25.98, z], walk: [26, Math.floor(z)], face: 'w', pose: 'stand', room: 'u' })));
+  D.places.push(...[12.9, 14.1, 15.3, 16.5].map((z, k) => ({ id: '7-toilet-' + (k + 1), type: 'toilet', at: [27, Math.floor(z)], xy: [27.66, z], walk: [26, Math.floor(z)], face: 'w', pose: 'sit', y: .4, room: 'u', you: true })),
+    ...[13.85, 15.15].map((z, k) => ({ id: '7-basin-' + (k + 1), type: 'basin', at: [25, Math.floor(z)], xy: [25.98, z], walk: [26, Math.floor(z)], face: 'w', pose: 'stand', room: 'u', you: true })));
 }
 // ---- end of slot: Rec engineer ----
 
@@ -10020,7 +10022,7 @@ function schedData() {
   // below; those only for an event (type 'event', or Deck 1's handover and walk) are kept out of everyday use, while
   // everyday seats an event also uses (the observatory's window seats) stay in it
   const EVENT_ONLY = new Set(['handover', 'walk']), evPlaces = [];
-  for (const n of Object.keys(DECKS).map(Number)) if (!DECKS[n].playerOnly) for (const p of (DECKS[n].places || [])) if (!p.machine) (p.event && (p.type === 'event' || EVENT_ONLY.has(p.event)) ? evPlaces : places).push({ ...p, deck: n });
+  for (const n of Object.keys(DECKS).map(Number)) if (!DECKS[n].playerOnly) for (const p of (DECKS[n].places || [])) if (!p.machine && !p.you) (p.event && (p.type === 'event' || EVENT_ONLY.has(p.event)) ? evPlaces : places).push({ ...p, deck: n });   // p.you (0.99.7, MV1): a place for you only, never planned for the crew (the rec deck's toilets, recWcPlaces)
   const byId = new Map(places.concat(evPlaces).map(p => [p.id, p]));
   // private places: one named after a bed ('4-05-wash') belongs to whoever sleeps there, and so does any place
   // in a room with a bed place in it (an en-suite, a desk, an armchair). In a room of several beds (a bunk room)
