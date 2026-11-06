@@ -178,3 +178,13 @@ with machine_check / device_check on each branch alone, switch on:
 - ship meters (CL1 alone): a small-repair kind with no meter mapping; a gap in the existing game exposed. Sent to the lead.
 - Paddle club: EV1's Day 6 07:00 showing has 2 planned alone, 1 in the merge: on the Schedule but doesn't happen. Fix asked of EV1.
 - CL1 ba61507 (join_check skips the cut run; Day 2 booths window 18:00-18:30): join rerunning on CL1 alone and the merge.
+
+### CL1 ba61507 (game b2ab09ae...8e69): FIXES NEEDED (11:50 UTC)
+- join_check skips the cut run; the Day 2 booths item narrowed to 18:00-18:30 (CL1's own find: the wall night's crowd
+  had filled the mess at the spice supper). JOIN CHECK OK on CL1 alone (on) and on the merge (all on). device_check OK (alone).
+- **food_check FAILS (on, alone): "cake" on Tamsin's Day 4 birthday**: baked, the 19:45 text says the cake's on the
+  counter, but never shown (14:00/18:00/19:45/21:45 all False, candles 0); the sign still "Cake at 18:45", the Mail mixes
+  18:45 and 19:00. Passes on 0.99.6 and on TB6's build (birthday 18:00). Fix asked of CL1 (cake time and showing to the
+  19:00 party, the words). Found via JB3's report to me; my run confirms it on CL1 alone.
+- EV1 af18afd (paddle club to 14:00 Day 6): device_check on EV1 alone and on the merge queued.
+- Sunday food runs (machine_check): JB3 has a fix behind JB3_FOOD_ON (claude/p997-jobs 35ab083; RV32's to review).
