@@ -1,0 +1,22 @@
+ERROR bank [cal.address.call] "The whole ship meets in the auditorium on the Rec ": 97 characters (at most 90)
+ERROR bank [tp997.pockets.empty] "Your pockets are empty. Snacks and drinks from the": 106 characters (at most 90)
+ERROR bank [tp997.pockets.ate] "You eat {item}.": unknown token {item}
+ERROR bank [tp997.pockets.drank] "You drink {item}.": unknown token {item}
+ERROR bank [tp997.pockets.full] "Your pockets are full, so you have {item} on the w": unknown token {item}
+ERROR bank [tp997.pockets.paid] "You pay {n} credits for {item}. It goes in your po": unknown token {item}
+ERROR bank [tp997.pockets.paid] "You pay {n} credits for {item}. It goes in your po": 118 characters (at most 90)
+ERROR bank [join997.first-light.notice] "First Light Cocoa: a cocoa at the big windows as t": 94 characters (at most 90)
+ERROR bank [join997.tasting-table.notice] "Brennan's tasting table: try the two new dishes, t": 97 characters (at most 90)
+ERROR bank [join997.five-minute-skills.notice] "Five-minute skills: learn one small thing in five ": 97 characters (at most 90)
+ERROR bank [join997.beginners-guitar.notice] "Beginners' guitar: listen to the beginners, then p": 92 characters (at most 90)
+ERROR bank [join997.whodunnit-club.notice] "Whodunnit club: listen to the mystery, then write ": 99 characters (at most 90)
+ERROR bank [join997.sounds-from-home.notice] "Sounds from home: sit back with the lights low and": 101 characters (at most 90)
+ERROR bank [join997.rec-lamplight-paddle.notice] "Lamplight paddle: take a kayak and drift down the ": 99 characters (at most 90)
+ERROR bank [join997.seed-packet-day.notice] "Seed packet day: fold a packet, fill it, and draw ": 95 characters (at most 90)
+ERROR bank [join997.route-night.notice] "Route night: put a pin where you think the Wren wi": 93 characters (at most 90)
+ERROR bank [join997.window-sketch.notice] "Window sketching: take a pencil and sketch what yo": 97 characters (at most 90)
+ERROR bank [join997.window-sketch-2.notice] "Window sketching: take a pencil and sketch what yo": 97 characters (at most 90)
+ERROR bank [join997.worst-joke.notice] "Worst joke night: tell your worst joke, then groan": 93 characters (at most 90)
+ERROR bank [cr.ready] "That's Making it safe. And that's all of it: Relia": 116 characters (at most 90)
+ERROR bank [cr.ready.mail] "Your Tier 2 test: today | Test job today, {time}, ": 118 characters (at most 90)
+lines_check: FAIL (21 errors, 116 warnings)
