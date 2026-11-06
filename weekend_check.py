@@ -71,6 +71,8 @@ with sync_playwright() as pw:
     off_w = json.loads(g.ev(WKND)); off_t = json.loads(g.ev(OLDT))
     g.close()
     g = Game(pw, won, 900, 760)
+    CUT = g.ev("typeof CAL997_ON !== 'undefined' && CAL997_ON ? ['saturday-run'] : []")   # 0.99.7 (CL1, note 30): the Saturday run is cut (parked) with CAL997_ON: seven new ones, not eight
+    for i in CUT: TRADS.pop(i, None)
     evs = dict(json.loads(g.ev(EVS)))
     for i, d in TRADS.items(): check(i in evs[d], 'switch on: %s on Day %d' % (i, d))
     acts = json.loads(g.ev("JSON.stringify(Object.keys(TRAD_JOIN).filter(id => WEEKEND_TRADS.has(id) && !TRAD_JOIN[id].act).map(id => [id, !!PLAYER_ACTS['tj:' + id] && typeof PLAYER_ACTS['tj:' + id].until === 'function']))"))
@@ -102,10 +104,10 @@ with sync_playwright() as pw:
     ROT = [['saturday-run', 'bread-day'], ['every-song', 'gerald-clinic'], ['garden-picnic', 'big-jigsaw'], ['night-owls-cocoa', 'sunday-story']]   # lead 35's table
     want = {b[0]: ROT[((b[0] - 1) // 7) % 4][0 if b[1] == 5 else 1] for b in on_w}
     wrong = [(b[0], b[3]) for b in on_w if b[3] not in ([], [want[b[0]]])]
-    gave = [(b[0], want[b[0]], 'storm day' if not b[2] else 'gave way') for b in on_w if not b[3]]
+    gave = [(b[0], want[b[0]], 'storm day' if not b[2] else 'gave way') for b in on_w if not b[3] and want[b[0]] not in CUT]   # a cut one's days are empty by design
     print('  the rotation: none that day (the new one gave way to an old one, or a ship-wide event took the day):', gave)
     check(not wrong, 'the rotation: each weekend day has its own new one from the lead\'s table and no other (%s)' % wrong)
-    check(all(any(b[3] == [i] for b in on_w) for i in TRADS) and len(gave) <= 6, 'the rotation: each of the eight on at least once in Days 6-84, and few giving way (%s)' % gave)
+    check(all(any(b[3] == [i] for b in on_w) for i in TRADS) and len(gave) <= 6, 'the rotation: each of the %s on at least once in Days 6-84, and few giving way (%s)' % ('seven' if CUT else 'eight', gave))
     hs = json.loads(g.ev(HOSTS))
     print('  hosts and goers (id, day, host, host there, going):', hs)
     check(all(h[3] for h in hs if h[2]), 'RV14: each weekend tradition\'s host is planned at it (%s)' % [h for h in hs if h[2] and not h[3]])
