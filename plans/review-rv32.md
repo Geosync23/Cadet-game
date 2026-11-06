@@ -138,3 +138,15 @@ in 14's schedData (places with `you` left out of the crew's plan): the Sim engin
   Saruth, Marrow drawn at r [0,0]; on: none at the origin (three small in-queue steps, not drawn).
 - Not done by me: a fresh-save walk through the briefing with MV_BRIEF_ON (the briefing probe is the real game with the intro
   on); MV_FIT_ON's numbers rest on MV1's player_check (lead approved them).
+
+### 7. CH1 batch B (claude/p997-chars 8436ff6): note 4: PASS
+Game sha256 c574f6c20e200b32a2f189dbf8d9b4ea269e6147444172d985c74b4c41414434 (contains batch A). CH_SEAT_ON: CH_SEATS moves ~30 seat
+spots (armrests, chair backs), heights (Rina's infirmary chairs 0.52, rec booth, sim), feet on the step for the stands and
+the auditorium rows (chFeet, read by 8b's sit legIK and 8c's slump), no throw cushion in the 4b sofa kit. Sections: 4b, 4d, 8,
+8b, 10 (placeSpot hook), 8c: owners (deck architect, performance, sim, rec engineers) to look at the one-line hooks.
+- Off: cadet_test vs 0.99.6 ALL IDENTICAL.
+- All five CH switches on: check_fast QUICK CHECK OK in 372 s; day_check Day 1 DAY CHECK OK; interactions_check INTERACTIONS
+  CHECK OK, no FAIL lines (it needed a quiet machine: twice cut short by a timeout and a container restart).
+- Pictures (plans/rv32-probes/ch1_seatsB.py; results/seatB1/seatB2-8436ff6.jpg): Rina's infirmary chairs: 0.99.6 the person
+  sinks into the seat, on: sits on top; the mustard cushion under the end sitter gone (3-lounge-25, 4-common-4); armchairs,
+  comms, office, tea, stands, auditorium, sim and booth seats look right from beside and in front.
