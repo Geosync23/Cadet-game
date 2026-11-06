@@ -709,7 +709,7 @@ const REC_SHOWS = {
   allhands: { dim: .28, scr: 0, pools: [1, .5, 0] }, talent: { dim: .5, scr: 0, pools: [.45, 1, .8] },
 };
 const REC_SHOW = { state: null, dim: 0, scr: 0, piv: null, pools: null, ring: null, mic: null, piano: null };
-const REC_FILM = false;   // 0.99.7 (AV1, the user's note 42): a little film plays on the auditorium screen at film night (section 4e's slot, recFilmTick); off: the screen's light drifts through four colours, as 0.99.6
+const REC_FILM = true;   // 0.99.7 (AV1, the user's note 42): a little film plays on the auditorium screen at film night (section 4e's slot, recFilmTick); off: the screen's light drifts through four colours, as 0.99.6
 const deckLabel = n => +n === 7 ? 'R' : String(n);
 const deckWord = n => +n === 7 ? 'Rec deck' : 'Deck ' + n;
 const deckIn = n => +n === 7 ? 'the rec deck' : 'Deck ' + n;   // 0.84.2 (lead 18): a deck's name mid-sentence ("on the rec deck"); deckWord for labels and signs
@@ -9849,11 +9849,11 @@ const SLOT_NEW = SAVE_SLOTS_ON && !NOSAVE ? (v => v === 'arrive' || v === 'monda
 var SLOT_HOLD = false;
 const SAVE_KEY = slotKey(SAVE_SLOT), SAVE_V = 2;
 const TRAD995_ON = true || URL_FLAGS.has('trad995');
-const CAL997_ON = URL_FLAGS.has('cal997');   // 0.99.7 (CL1; plans/patch-0997.md notes 14 15 16 20 23 26 27 30 31 47): the traditions calendar's rules, the arrows to Pick-your-own, Harvest morning and the Captain's address, the address's pace (section 18's slot 'Calendar builder'); off: 0.99.6. `?cal997` previews   // 0.99.5 (TB3; plans/patch-0995.md notes 8, 10, 19): Spice shelf supper tap to join, Name on the beam's spots, the tea corner's doorway (section 18's Traditions slot); off: 0.99.4. `?trad995` previews
-var TP997_ON = false || URL_FLAGS.has('tp997');   // 0.99.7 (TP1 for lead 49; plans/patch-0997.md notes 6, 7, 9, 11, 28, 33, 53, 54): tips, the device, HUD words; off: 0.99.6. `?tp997` previews
+const CAL997_ON = true || URL_FLAGS.has('cal997');   // 0.99.7 (CL1; plans/patch-0997.md notes 14 15 16 20 23 26 27 30 31 47): the traditions calendar's rules, the arrows to Pick-your-own, Harvest morning and the Captain's address, the address's pace (section 18's slot 'Calendar builder'); off: 0.99.6. `?cal997` previews   // 0.99.5 (TB3; plans/patch-0995.md notes 8, 10, 19): Spice shelf supper tap to join, Name on the beam's spots, the tea corner's doorway (section 18's Traditions slot); off: 0.99.4. `?trad995` previews
+var TP997_ON = true || URL_FLAGS.has('tp997');   // 0.99.7 (TP1 for lead 49; plans/patch-0997.md notes 6, 7, 9, 11, 28, 33, 53, 54): tips, the device, HUD words; off: 0.99.6. `?tp997` previews
 var TP997 = { nd1: TP997_ON, n6: TP997_ON, n7: TP997_ON, n9: TP997_ON, n11: TP997_ON, n28: TP997_ON, n33: TP997_ON, n53: TP997_ON, n54: TP997_ON };   // each note alone: d1 Day 1's arrows to the briefing and the clock (RV32's find), 6 Day 2's call-home tip, 7 nearest bathroom, 9 the tracker tip, 11 the device-at-work tip early, 28 the rec deck's blurb, 33 Pockets, 53 the join words, 54 Mark all as read
-const TRAD997_ON = false || URL_FLAGS.has('trad997');   // 0.99.7 (TB6; plans/patch-0997.md notes 18, 43, 50, 51, 52): hosted traditions: the Spice shelf supper after dinner with Brennan's card, Open lab's host, Teach me your thing per teacher, Calder at your bunk, your loaf from Bread day (section 18's Traditions slot, 24c's inspection); off: 0.99.6. `?trad997` previews
-const GAMES997_ON = false || URL_FLAGS.has('games997');   // 0.99.7 (GM1; plans/patch-0997.md notes 12, 40, 41, 44): Tiles night in rounds, the Tiles tutorial step by step, Winner Stays On to watch and join (sections 23 and 23b, the Games slot; the Lightdisc music is AV1's SND_DISC). off: the game as 0.99.6
+const TRAD997_ON = true || URL_FLAGS.has('trad997');   // 0.99.7 (TB6; plans/patch-0997.md notes 18, 43, 50, 51, 52): hosted traditions: the Spice shelf supper after dinner with Brennan's card, Open lab's host, Teach me your thing per teacher, Calder at your bunk, your loaf from Bread day (section 18's Traditions slot, 24c's inspection); off: 0.99.6. `?trad997` previews
+const GAMES997_ON = true || URL_FLAGS.has('games997');   // 0.99.7 (GM1; plans/patch-0997.md notes 12, 40, 41, 44): Tiles night in rounds, the Tiles tutorial step by step, Winner Stays On to watch and join (sections 23 and 23b, the Games slot; the Lightdisc music is AV1's SND_DISC). off: the game as 0.99.6
 // the traditions variety (0.93.2, FX24 for lead 37; CS1's pitch pages plans/trad-variety-pitch.html and -2.html on claude/crew-stories-pitch):
 // six weekly ones take turns from week 2 (TRAD_0932_WHEN: their rhythm with it on; week 1 unchanged), the user's fourteen new ones
 // (TRAD_0932_NEW, loaded only with it) and Brennan's tasting table after dinner in the galley (tasting-table-late, loaded as
@@ -9871,7 +9871,7 @@ const TRAD_0932_WHEN = {                 // any: due when either rhythm is (sect
 // briefing (21b); MV_WASD_ON: W, A, S, D and the arrow keys walk you (11); MV_FIT_ON: fitness drains faster (15);
 // MV_RIG_ON: a story crew member's full rig is never drawn at the deck's origin for a frame (10); MV_RECWC_ON: the rec
 // deck's toilets and basins can be used (4e)
-var MV_BRIEF_ON = false, MV_WASD_ON = false, MV_FIT_ON = false, MV_RIG_ON = false, MV_RECWC_ON = false, MV_SOFA_ON = false;   // MV_SOFA_ON: backlog EV1-1, a seated neighbour on a sofa isn't stood up when you sit or tap to join (10's crewWayOn)
+var MV_BRIEF_ON = true, MV_WASD_ON = true, MV_FIT_ON = true, MV_RIG_ON = true, MV_RECWC_ON = true, MV_SOFA_ON = true;   // MV_SOFA_ON: backlog EV1-1, a seated neighbour on a sofa isn't stood up when you sit or tap to join (10's crewWayOn)
 if (MV_RECWC_ON && REC_DECK) recWcPlaces();
 function saveGame() {
   if (NOSAVE || SLOT_HOLD || typeof devmodeHold === 'function' && devmodeHold()) return;   // Dev mode (section 25): not while a Dev action works, nor over a save it's reloading into
@@ -22459,7 +22459,7 @@ function roundMixRoute(n, day, key, keep) {
 // a chore that needs a lamp has no lathe to fall back on, and the arrow still said "Fetch a lamp: the Lights shelf". Now
 // the crew leave SHELF_KEEP of those parts on the shelf for your jobs and make their own at the lathe instead, as they
 // already did when the shelf was empty (jobsHour asks jb3Keep). Parts that can't be made aboard (NO_MAKE) keep nothing.
-var JB3_SHELF_ON = false, JB3_SCI_ON = false, JB3_REC_ON = false, JB3_TEA_ON = false, JB3_FOOD_ON = false;   // off till the build master switches them on (lead 49); var: section 17's jobsHour and boardTopUp ask before this line has run
+var JB3_SHELF_ON = true, JB3_SCI_ON = true, JB3_REC_ON = true, JB3_TEA_ON = true, JB3_FOOD_ON = true;   // off till the build master switches them on (lead 49); var: section 17's jobsHour and boardTopUp ask before this line has run
 const SHELF_KEEP = { relay: 2, lamp: 2, breaker: 1, cable: 1 };   // the light relays' fault parts (FAULT_CAUSES.lights), all on the Lights shelf
 function jb3Keep(p) { return JB3_SHELF_ON && !NO_MAKE.has(p) && SHELF_KEEP[p] || 0; }
 // The arrow's pin for a shelf is the place in front of its aisle (5-parts-1..4), as near the shelf before it as its own:
@@ -48678,7 +48678,7 @@ if (EV_ENDING_ON && EVENTS_ON) {
 // and afterglow, never onset: eventDay stays false (section 24k's cases, Day 5's training case staged as now) and 20c's
 // calls home and story moments go on. Thursday's lesson (09:00), the 13:00 tea break and Zainab's favour (16:00) are
 // clear of it. The words: content/banks/event-lastLight.lines. Off: no entry, no calendar row (the game as 0.99.6)
-const EV997_LIGHT_ON = false;                            // notes 8 and 34: the Last Light, Thursday Day 4
+const EV997_LIGHT_ON = true;                            // notes 8 and 34: the Last Light, Thursday Day 4
 if (EV997_LIGHT_ON && EV_LINE_ON && SHIP_EVENTS.crossingLine) {
   const w = k => evWord('event.lastLight.' + k), say = (k, alt) => (c, p) => evWordAt('event.lastLight.gather.glass.' + k, p ? p.seed + c.day : 0, c) || alt;
   const ln = (k, n, alt) => { const o = []; for (let i = 1; i <= n; i++) { const x = w(k + '.' + i); if (x) o.push(x); } return o.length ? o : alt; };
@@ -53316,7 +53316,7 @@ function vdTick(now) {
 
 // ---- slot: Events 0.99.7 (section 18; EV1 for lead 49, the user's playtest notes 8, 34, 36 and 46, plans/patch-0997.md). New code of this seat's goes here ----
 // Each note behind its own switch; all three off = the game as 0.99.6 (cadet_test ALL IDENTICAL)
-const EV997_SAT_ON = false;                              // note 36: the first Saturday (Day 6) busier, top to bottom; garden hour out that day
+const EV997_SAT_ON = true;                              // note 36: the first Saturday (Day 6) busier, top to bottom; garden hour out that day
 // ---- note 36 (the user: "More traditions on Saturday morning. The first Saturday doesn't need three garden things: cut one
 // and put something else in. The first Saturday should have a lot going on top to bottom. The first Sunday is perfectly
 // paced (leave it)"). Rows in the Line's dayDress for its day 0 (Saturday Day 6 in a new game; the storm's drop/add shape),
@@ -53336,7 +53336,7 @@ if (EV997_SAT_ON && SHIP_EVENTS.crossingLine) {
   evDressMake();                                         // made again with the new rows (it's pure: the calendar's plan and the events' data)
   if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); }
 }
-const EV997_READ_ON = false;                             // note 46: Reading corner reads one book together, a part a showing (Days 21-63)
+const EV997_READ_ON = true;                             // note 46: Reading corner reads one book together, a part a showing (Days 21-63)
 // ---- note 46 (the user: "Reading corner should be an event with dialogue where crew discuss a story they're reading. A
 // series of these, spread out with a linear arc"). One book, "The Lighthouse at Coriel" (a title already on the lounge
 // shelf, reading.titles), read together on the reading corner's own Sundays: Day 7 Esme hands it round (her wrap line
@@ -57223,7 +57223,7 @@ function storyDoorOpen(now = shipNow()) {
 // Note 39: going to a tradition its host runs (the simNote('tradition') bus's host, if you joined) is worth
 // P997_HOST_PTS with the host, about a full Talk a while, once a ship day a host; an invitation you kept already gives the host its own.
 // Note 38 is section 22's (talkPackFill: the listen2 replies). Nothing here calls R().
-var P997_SOCIAL_ON = false;
+var P997_SOCIAL_ON = true;
 const P997_HOST_PTS = 4, P997_WORD = new Map(), P997_HOSTED = new Map();   // crew id -> { day, shut }; host id -> the ship day they last gave (not saved)
 function p997Beat(C) {                                    // the beat Get to know plays: their ready one, else the card's own (a goodbye's)
   if (!P997_SOCIAL_ON || !C || !C.p || C.far) return null;
@@ -67006,7 +67006,7 @@ onSim('job', n => {                                      // B: Torres comes by a
 // INC_REDO_ON (note 56): Making it safe's job (yours at the pipe) put back on the board had no Take it (15b's ixBoard.doable
 // never takes an incident at the board), so the training sat till the shift ended. Now an incident job held for you, or one
 // you put back, has a Take it like other jobs (incRetake), and the board's arrow leads to it. Nothing saved; off: as before.
-var CR_DAY8_ON = false, INC_REDO_ON = false;   // off on the branch; the build master switches them on (lead 49's rule)               // var: 15b's boardLessonName and ixBoard ask before this line has run
+var CR_DAY8_ON = true, INC_REDO_ON = true;   // off on the branch; the build master switches them on (lead 49's rule)               // var: 15b's boardLessonName and ixBoard ask before this line has run
 const CR_SAME = { by: 750, jobAt: 780, until: 960, from: 8 };
 function crSameDay() {                                   // the test is the same day Making it safe was learned (from the save)
   const W = SHIP.works; return !!(CR_DAY8_ON && W && W.tier === 1 && W.test && W.tr && W.tr.m6 !== undefined && W.test.day === W.tr.m6);
@@ -67091,7 +67091,7 @@ WORK_TICKS.push((now, skip) => { crTestOpen(now); if (!skip) crBoardArrow(now); 
 // dock on Deck 5 ("Take a hover cart from the Cart bay") and ends there ("Dock the cart in the Cart bay"); you push the cart
 // from the dock on (cartFirstHold, full once the crates are on). Hauling (24d) drew the cart from the moment you took the
 // job: now only once you've taken it from the dock. Only jobs made with the switch on; off: as before.
-var CART_FIRST_ON = false;                                // var: section 17's gardenCarry and 15b's ixJobStep and ixHold ask before this line has run
+var CART_FIRST_ON = true;                                // var: section 17's gardenCarry and 15b's ixJobStep and ixHold ask before this line has run
 function cartFirstStops(st) {                            // gardenCarry's stops: the dock first and last, when there's a dock
   const dock = CART_FIRST_ON && typeof CART_AT !== 'undefined' ? CART_AT.find(id => placeById(id)) : null; if (!dock) return st;
   return [{ deck: 5, placeId: dock, mins: 2, tag: 'cart' }].concat(st, [{ deck: 5, placeId: dock, mins: 2, tag: 'return' }]);
@@ -67112,7 +67112,7 @@ if (CART_FIRST_ON && typeof IX_STOP === 'object') Object.assign(IX_STOP, { cart:
 // shift from 10:00 (a round too, not only 13:00-15:00), and the shift's cap is BOARD_NEW_MAX (FX19's was 3); still one an
 // hour, never with under two hours left, held to the shift's end then lapsed, no reputation, seeded by the hour (no R()).
 // The other kinds (repairs for the scanner, hauling's delivery days, the later tiers) come from their own sims as before.
-var BOARD_NEW_ON = false;                                 // var: section 17's boardTopUp asks before this line has run
+var BOARD_NEW_ON = true;                                 // var: section 17's boardTopUp asks before this line has run
 const BOARD_NEW = { days: 5, max: 4 };
 // Other seats' kinds join the mix here (JB3's science and bottom-deck jobs, later tiers): boardNewAdd({ mech: a ladder id (the
 // kind counts as learned once SHIP.works.tr[mech] is set), kind: the job's kind or chore (how "one already up" is told: j.chore
@@ -71179,11 +71179,11 @@ function animateRig(rig, g, dt, t, sk, rnd = R) {      // rnd: the crowd passes 
 
 // ---- slot: CH1 characters (section 8; 0.99.7 patch, plans/patch-0997.md notes 1, 4, 10, 35, 37). New code of this seat's goes here, above the end line ----
 // Each note has its own switch; all false = the game as 0.99.6. Nothing here calls R().
-const CH_SOLE_ON = false;    // note 37: no flat sole box under the boots (makeCharacter); the rounded boot meets the floor
-const CH_POSE_ON = false;    // note 35: the auditorium's 'slump' (8c): hands rest at the sides on the seat, not held out in front
-const CH_RELAY_ON = false;   // note 10: Deck 4's officers' wing light relays (4-junction-2): the cabinet stands inside the curved hull
-const CH_HAIR_ON = false;    // note 1: hair caps cover the head (a margin, and the crowd's coarse caps pushed out to their true size)
-const CH_SEAT_ON = false;    // note 4: seats that clipped the people on them (CH_SEATS, read by placeSpot)
+const CH_SOLE_ON = true;    // note 37: no flat sole box under the boots (makeCharacter); the rounded boot meets the floor
+const CH_POSE_ON = true;    // note 35: the auditorium's 'slump' (8c): hands rest at the sides on the seat, not held out in front
+const CH_RELAY_ON = true;   // note 10: Deck 4's officers' wing light relays (4-junction-2): the cabinet stands inside the curved hull
+const CH_HAIR_ON = true;    // note 1: hair caps cover the head (a margin, and the crowd's coarse caps pushed out to their true size)
+const CH_SEAT_ON = true;    // note 4: seats that clipped the people on them (CH_SEATS, read by placeSpot)
 // note 10: the cabinet stood at the closet's narrow end (lz 3.65), its back corner through the curved hull. On, it stands
 // CH_RELAY_Z (lz) instead, and the machine's lamp and drip (section 8b's machine looks, from 4-junction-2's look) move to its
 // new front. Its tile, panel and service spot stay, so jobs and paths are the same.
@@ -77137,8 +77137,8 @@ const SND_R3_ON = true;   // switched on in 0.96.0 (the user: the sound update i
 const SND_LONG = true;   // 0.99.5 (SD5, the user's note 17): after a stall (a long frame) no sound is scheduled in the past, where it starts late and bunched (pops): the loops skip to now, the music drops bars already begun (a short gap instead); off: as 0.99.4
 const SND_BUF_ON = true;   // 0.99.5 (SD5, note 17, lead 47's option for the user): a bigger output buffer (latencyHint 'playback'), more slack for a busy phone against dropouts (crackle); taps, doors and footsteps sound about 0.1-0.2 s later; off: as 0.99.4
 const MESS_SCALE = true;   // 0.99.5 (SD5, the user's note 4): the mess hall's murmur follows how many are there, its level too; none for one crew member alone; off: as 0.99.4
-const SND_DISC = false;   // 0.99.7 (AV1, the user's note 44): a game of Lightdisc keeps the sound running (it froze the ship, and the sound with it): the track already playing carries on; off: as 0.99.6
-const SND_LIVE = false;   // 0.99.7 (AV1, the user's notes 13 and 29): the late piano's piece and the music jam's band, made here and heard from where they play, fading with distance; the ship's music fades down near them; off: as 0.99.6
+const SND_DISC = true;   // 0.99.7 (AV1, the user's note 44): a game of Lightdisc keeps the sound running (it froze the ship, and the sound with it): the track already playing carries on; off: as 0.99.6
+const SND_LIVE = true;   // 0.99.7 (AV1, the user's notes 13 and 29): the late piano's piece and the music jam's band, made here and heard from where they play, fading with distance; the ship's music fades down near them; off: as 0.99.6
 const SND = (() => {
   const S = { ctx: null, bus: {}, onFrame: [], log: URL_FLAGS.has('soundlog') ? [] : null };
   const ALLOWED = URL_FLAGS.has('sound') || !(navigator.webdriver || URL_FLAGS.has('mute') || NOSAVE);
