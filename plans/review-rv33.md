@@ -51,6 +51,7 @@ opening their card (p997WordSeen) shuts the day's arrow.
 - stories_check FAILED (14) in my first runs, the same 14 lines on the off copy, on 85442de-on and on unchanged 0.99.6:
   **my mistake: run with the default 30 days; the round runs 36 (backlog BM22-1).** The stalled beats are the ones due
   Days 24-36. Not date- or machine-dependent (cadet_test's INIT fakes Date.now; the check is on paper). Rerun with 36 below.
+- stories_check 36 on the switched-on 77e573f: STORIES CHECK OK.
 
 
 **77e573f, game 6df22594...1705 (sha256 matched): PASS** (sent to SC1 and the lead). The one change: p997HostNote skips an
