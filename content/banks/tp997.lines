@@ -212,3 +212,7 @@
 - A bit lonely. You've had your call home today: chat with someone, or eat with company.
 == tp998.social.2
 - Really missing people. Your call home's done today: the mess and the bow lounge are rarely empty.
+
+// TP998_BOOTH_ON (backlog TP1-4): the Needs line for a low Social once your call home's had today
+== tp998.social.say
+- You miss home. Your call's done today: find some company.
