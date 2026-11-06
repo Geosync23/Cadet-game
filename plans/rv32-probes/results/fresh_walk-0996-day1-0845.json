@@ -1,0 +1,749 @@
+{
+ "tips": [
+  [
+   "Day 0, Sunday 18:34",
+   "bedtime",
+   "Bedtime: tap your bunk from 20:00 to sleep. You pick when your alarm wakes you (06:00 unless you change it), and a night's sleep fills your energy. Before 20:00"
+  ],
+  [
+   "Day 1, Monday 06:00",
+   "clothes",
+   "Fresh clothes are in your wardrobe: change each morning. When you run out, do your laundry on Deck 4."
+  ],
+  [
+   "Day 1, Monday 07:48",
+   "t:deck3",
+   "Deck 3 is the Commons: the mess, the gym, the crew store, the call-home booths, the bow lounge and the promenade."
+  ]
+ ],
+ "arrows": [
+  [
+   "Day 0, Sunday 17:35",
+   "Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 18:15",
+   null
+  ]
+ ],
+ "acts": [
+  [
+   "Day 0, Sunday 17:15",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:15",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:18",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:20",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:21",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:23",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:24",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:26",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:27",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:30",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:30",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:33",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:36",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:39",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:42",
+   "tap Fire extinguisher: false"
+  ],
+  [
+   "Day 0, Sunday 17:42",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:43",
+   "lift to Deck 4"
+  ],
+  [
+   "Day 0, Sunday 17:44",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:45",
+   "tap Bench: true"
+  ],
+  [
+   "Day 0, Sunday 17:46",
+   "rv32: get up for Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:47",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:48",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:48",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:51",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:51",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:53",
+   "walk to: Put your bag in your wardrobe"
+  ],
+  [
+   "Day 0, Sunday 17:53",
+   "tap Your wardrobe: true"
+  ],
+  [
+   "Day 0, Sunday 17:53",
+   "tap Kettle: started ixTea, not the job: up again"
+  ],
+  [
+   "Day 0, Sunday 17:53",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:54",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 17:54",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 17:54",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 17:54",
+   "tap Kettle: started ixTea, not the job: up again"
+  ],
+  [
+   "Day 0, Sunday 17:54",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:55",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:56",
+   "lift to Deck 3"
+  ],
+  [
+   "Day 0, Sunday 17:57",
+   "tap Lift panel: false"
+  ],
+  [
+   "Day 0, Sunday 17:57",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 17:58",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 18:00",
+   "tap Route map: false"
+  ],
+  [
+   "Day 0, Sunday 18:00",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 18:00",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 18:01",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 18:03",
+   "tap Round table: true"
+  ],
+  [
+   "Day 0, Sunday 18:03",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 18:03",
+   "close the chat with Emeka Halloran"
+  ],
+  [
+   "Day 0, Sunday 18:03",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 18:04",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 18:05",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 18:06",
+   "tap Long table: true"
+  ],
+  [
+   "Day 0, Sunday 18:06",
+   "tap the floor at the pin: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 18:06",
+   "close the chat with Kofi Mensah"
+  ],
+  [
+   "Day 0, Sunday 18:07",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 18:09",
+   "walk to: Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 18:09",
+   "tap Long table: true"
+  ],
+  [
+   "Day 0, Sunday 18:11",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 18:11",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 18:11",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 18:11",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 18:11",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 18:11",
+   "reply: I wanted to see the stars."
+  ],
+  [
+   "Day 0, Sunday 18:12",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 18:12",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 18:22",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 18:22",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 18:22",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 18:22",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 18:22",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 18:22",
+   "reply: Looking forward to it."
+  ],
+  [
+   "Day 0, Sunday 18:23",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 18:23",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 18:23",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 18:23",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 18:23",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 18:24",
+   "rv32: get up for Get your dinner at the servery"
+  ],
+  [
+   "Day 0, Sunday 18:24",
+   "rv32: get up for Get your dinner at the servery"
+  ],
+  [
+   "Day 0, Sunday 18:24",
+   "walk to: Get your dinner at the servery"
+  ],
+  [
+   "Day 0, Sunday 18:25",
+   "tap Servery: true"
+  ],
+  [
+   "Day 0, Sunday 18:34",
+   "lift to Deck 4"
+  ],
+  [
+   "Day 0, Sunday 18:35",
+   "walk to: Head to your bunk when you're done looking around"
+  ],
+  [
+   "Day 0, Sunday 20:30",
+   "card: Track it"
+  ],
+  [
+   "Day 0, Sunday 20:30",
+   "lift to Deck 3"
+  ],
+  [
+   "Day 0, Sunday 20:30",
+   "walk to: Call home from the booths"
+  ],
+  [
+   "Day 0, Sunday 20:30",
+   "tap Booth 1: true"
+  ],
+  [
+   "Day 0, Sunday 20:30",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 20:30",
+   "reply: Call Mum"
+  ],
+  [
+   "Day 0, Sunday 20:31",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 20:31",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 20:31",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 20:31",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 20:31",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 20:32",
+   "read on"
+  ],
+  [
+   "Day 0, Sunday 20:32",
+   "read on"
+  ],
+  [
+   "Day 1, Monday 06:00",
+   "walk to: Change into clean clothes"
+  ],
+  [
+   "Day 1, Monday 06:00",
+   "tap Your wardrobe: true"
+  ],
+  [
+   "Day 1, Monday 06:11",
+   "lift to Deck 3"
+  ],
+  [
+   "Day 1, Monday 06:11",
+   "walk to: Food, Deck 3"
+  ],
+  [
+   "Day 1, Monday 06:11",
+   "tap Grab and go: true"
+  ],
+  [
+   "Day 1, Monday 07:12",
+   "walk to: A toilet"
+  ],
+  [
+   "Day 1, Monday 07:12",
+   "tap Toilet: true"
+  ]
+ ],
+ "toasts": [
+  [
+   "Day 0, Sunday 17:15",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 17:18",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 17:21",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 17:24",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 17:27",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 17:30",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 17:33",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 17:36",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 17:39",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 17:42",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 17:46",
+   "Bench",
+   "For waiting for the lift, or pretending to while someone finishes in the washroom. You sit down. Tap anywhere to get up."
+  ],
+  [
+   "Day 0, Sunday 17:48",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 17:51",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 17:53",
+   "Your wardrobe",
+   "You put your bag and your things away in your wardrobe. Your hands are free."
+  ],
+  [
+   "Day 0, Sunday 17:53",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 17:54",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 17:54",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 17:56",
+   "Zeke Torres",
+   "He hands you your device. It's yours now: tap it any time."
+  ],
+  [
+   "Day 0, Sunday 17:56",
+   "Zeke Torres",
+   "He hands you your device. It's yours now: tap it any time."
+  ],
+  [
+   "Day 0, Sunday 17:57",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 17:57",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 18:00",
+   "Zeke Torres",
+   "Engine officer. Zeke keeps glancing at the time. Knows the drive coils' moods better than anyone's."
+  ],
+  [
+   "Day 0, Sunday 18:03",
+   "Round table",
+   "In use: Isak Lindqvist is sitting there. Four chairs, two orange and two teal. Good for quiet talks and for spreading out a card game."
+  ],
+  [
+   "Day 0, Sunday 18:06",
+   "Long table",
+   "In use: Thea Grieve is sitting there. Officers tend to sit here. Not a rule, just a habit nobody breaks."
+  ],
+  [
+   "Day 0, Sunday 18:10",
+   "Long table",
+   "Scratched initials on the bench: R + P, inside a lopsided heart. Nobody admits to it. You sit down. To eat, queue at the servery for a tray, then bring it to a "
+  ],
+  [
+   "Day 0, Sunday 18:24",
+   "Mess table",
+   "You sit down at the table. Tap anywhere to get up."
+  ],
+  [
+   "Day 0, Sunday 18:25",
+   "Servery",
+   "You join the queue."
+  ],
+  [
+   "Day 0, Sunday 18:26",
+   "Servery",
+   "You join the queue."
+  ],
+  [
+   "Day 0, Sunday 18:26",
+   "Servery",
+   "Your turn. You take a tray: tacos. Find a seat and tap it to eat."
+  ],
+  [
+   "Day 0, Sunday 18:27",
+   "Servery",
+   "Your turn. You take a tray: tacos. Find a seat and tap it to eat."
+  ],
+  [
+   "Day 0, Sunday 18:34",
+   "Mess hall",
+   "You leave your tray in the mess hall. Someone will clear it."
+  ],
+  [
+   "Day 0, Sunday 20:30",
+   "Booth 1",
+   "Free. A box of tissues, a pair of headphones and the stars through the window. About 13 minutes; walk away to stop."
+  ],
+  [
+   "Day 0, Sunday 20:43",
+   "Calling home",
+   "You say goodbye and send it off. It'll be days getting there. Social 100."
+  ],
+  [
+   "Day 0, Sunday 22:30",
+   "Alarm",
+   "Alarm set for 06:00."
+  ],
+  [
+   "Day 1, Monday 06:00",
+   "Good morning",
+   "Morning. Your alarm's going. Day 1, Monday 06:00."
+  ],
+  [
+   "Day 1, Monday 06:00",
+   "Wardrobe",
+   "Clean clothes on. Much better. Your one spare outfit. The rest of your kit comes up from stores. Do your laundry before tomorrow: tap the wardrobe again for you"
+  ],
+  [
+   "Day 1, Monday 06:01",
+   "Good morning",
+   "Morning. Your alarm's going. Day 1, Monday 06:00."
+  ],
+  [
+   "Day 1, Monday 06:02",
+   "Wardrobe",
+   "Clean clothes on. Much better. Your one spare outfit. The rest of your kit comes up from stores. Do your laundry before tomorrow: tap the wardrobe again for you"
+  ],
+  [
+   "Day 1, Monday 06:11",
+   "Very hungry",
+   "Starving: tasks are 15% slower. Eat something. The grab shelf in the mess, Deck 3, is always open. Follow the marker."
+  ],
+  [
+   "Day 1, Monday 06:11",
+   "Grab and go",
+   "Rolls, fruit and juice, chilled, for anyone running late. It empties fast at 07:55. You take a hot plate of porridge and eggs. About 3 minutes; walk away to sto"
+  ],
+  [
+   "Day 1, Monday 06:12",
+   "Grab and go",
+   "Rolls, fruit and juice, chilled, for anyone running late. It empties fast at 07:55. You take a hot plate of porridge and eggs. About 3 minutes; walk away to sto"
+  ],
+  [
+   "Day 1, Monday 06:14",
+   "Grab and go",
+   "Something to eat on the way. Food 33."
+  ],
+  [
+   "Day 1, Monday 07:12",
+   "Bursting",
+   "You really need the toilet, now! Deck 4 or Deck 3. Hold on, or you'll be hopping. Follow the marker."
+  ],
+  [
+   "Day 1, Monday 07:12",
+   "Toilet",
+   "Vacant. The little green light is the most trusted instrument on the ship. About 3 minutes; walk away to stop."
+  ],
+  [
+   "Day 1, Monday 07:13",
+   "Toilet",
+   "Vacant. The little green light is the most trusted instrument on the ship. About 3 minutes; walk away to stop."
+  ],
+  [
+   "Day 1, Monday 07:16",
+   "Toilet",
+   "Now wash your hands at the basins. Bathroom 100."
+  ]
+ ],
+ "errors": [],
+ "trace": [
+  [
+   "Day 0, Sunday 17:35",
+   "Zeke Torres"
+  ],
+  [
+   "Day 0, Sunday 18:15",
+   null
+  ]
+ ],
+ "_tr": null,
+ "dump": {
+  "clock": "Day 1, Monday 08:45",
+  "at": "3:22,20",
+  "goal": null,
+  "ix": null,
+  "guideOn": true,
+  "teach": null,
+  "tracked": null,
+  "trk": [
+   [
+    "job",
+    "Clock in",
+    "09:00",
+    "The time clock, Works bay, Deck 5"
+   ],
+   [
+    "on",
+    "Breakfast",
+    "Now",
+    "the mess, Deck 3"
+   ],
+   [
+    "on",
+    "Morning briefing with the Chief",
+    "08:50",
+    "Works bay, Deck 5"
+   ],
+   [
+    "on",
+    "On shift",
+    "09:00",
+    "the Works bay, Deck 5"
+   ],
+   [
+    "on",
+    "Tea and biscuits",
+    "13:00",
+    "the Tea corner, Deck 5"
+   ],
+   [
+    "on",
+    "Dinner",
+    "17:00",
+    "the mess, Deck 3"
+   ],
+   [
+    "on",
+    "Name on the beam",
+    "17:05",
+    "Works bay, Deck 5"
+   ],
+   [
+    "on",
+    "Gym club",
+    "19:15",
+    "Gym, Deck 3"
+   ]
+  ],
+  "introOn": true,
+  "step": null,
+  "done": [
+   "d1-jobs",
+   "d1-wash",
+   "d1-wash:said"
+  ]
+ },
+ "stuck": [],
+ "long": [],
+ "seen": [
+  "walk",
+  "bedtime",
+  "clothes",
+  "t:deck3"
+ ]
+}
