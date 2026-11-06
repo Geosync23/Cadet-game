@@ -229,7 +229,7 @@ def seat(pw, path):
     pz = gg.ev("(() => { const e = document.querySelector('#devBody .tl-pz'); return e ? (e.hidden ? 'hidden' : e.textContent) : null; })()")
     check(bool(pz) and 'paused while you play' in pz, f'the board says the ship\'s clock is paused while you play (0.72.2): {pz}')
     # How to play: your first game runs it; steps move on with Next, and by themselves when you do the thing
-    tu = gg.ev("""(() => { const G = TL_GAME, txt = () => { const e = document.querySelector('#devBody .tl-tut'); return e && !e.hidden ? e.textContent : ''; }, out = [G.tut, txt()];
+    tu = gg.ev("""(() => { const G = TL_GAME, txt = () => { const e = document.querySelector('#devBody .tl-tut'); return e && !e.hidden ? (e.querySelector('p') || e).textContent : ''; }, out = [G.tut, txt()];
       document.querySelector('#devBody .tl-tut button[data-end="tnext"]').click(); out.push(G.tut);
       document.querySelector('#devBody .tl-tut button[data-end="tnext"]').click(); out.push(G.tut, txt());
       const selI = TL_TUT.findIndex(x => x.wait === 'sel'); while (G.tut >= 0 && G.tut < selI) document.querySelector('#devBody .tl-tut button[data-end="tnext"]').click();   // 0.99.7 (GM1, GAMES997_ON): the select step comes later in the twelve
