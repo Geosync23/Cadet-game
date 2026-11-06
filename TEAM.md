@@ -2450,3 +2450,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~21:02 UTC: Needs app Social line -> backlog TP1-4 (proof runs ~1 h, over the line). BM27 builds candidate 2 from cc44f94f (+ docs 108fe129) now, then round 0998b.
 - ~21:03 UTC: BM27: round 0998 finals R1, R2, R3, R4, R6 (interactions) OK; only P open; R5 ~40 min left, perf running. Candidate 2 merged locally: lines_check FAIL tp998.social.2 97 chars -> TP1 shortening. Gates after R5, then GO 0998b.
 - ~21:05 UTC: lead gave BM27 the shortened tp998.social.2 ('Really missing people. Find some company: the mess or the bow lounge.'); BM27 edits, re-bakes, lines check.
+- ~21:12 UTC: TP1 91a75b4c (Needs app Social line after the call: 'You miss home. Your call's done today: find some company.'; player + check_fast OK). BM27: candidate 2 from 91a75b4c if MV1 passes before R5 ends, else cc44f94f; plus BM27's tp998.social.2 shortening; then frozen.
