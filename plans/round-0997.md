@@ -133,3 +133,8 @@ Round 0997b, every share on candidate 2 (check files at claude/staging-0997 afte
 For the user's notes (not faults): a steady Senior can be a point short of Trusted on Day 19 (M); Lightdisc's Day 2 pair
 plays at 21:30, not 17:18 (F); the Saturday run is parked (L, note 30); backlog TP1-1 (a shutdown booked into your night
 shift's clock-in, old, in 0.99.6 too).
+
+Placed after the FINAL GO (lead 50's ask, R2's perf note "Sowing/harvest morning, garden 10:00: crew 33 -> 29"): by design,
+EV1's EV997_SAT_ON (note 36: the first Saturday busier, the garden hour out that day). BM26's probe, Deck 3 at Day 6 10:00:
+0.99.6 33 crew (10 in the garden), candidate 2 28 (9), candidate 2 with only EV997_SAT_ON off 32 (10). The one left is the
+crew plans' usual reshuffle from the other pieces. Fewer crew there means fewer draw calls, not more; perf OK.
