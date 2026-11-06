@@ -34927,12 +34927,12 @@ const LINES = JSON.parse([
   ',"event.crossingLine.trad.every-song.thanks":[',
   '{"text":"You squeeze into the music room and sing along. Nobody knows all the words. Zeke does.","id":"92xkvw","tone":"funny"}]',
   ',"event.crossingLine.trad.rec-paddle-club.ask":[',
-  '{"text":"Early paddle on the rec deck. Seven o\'clock. Holt says the water\'s flat before breakfast.","id":"1tq7ihv"},',
-  '{"text":"Kayaks at seven. Then the long breakfast. That\'s my Saturday sorted.","id":"135q1hy","tone":"funny"}]',
+  '{"text":"Paddle on the rec deck at two. Holt says the water\'s flat all afternoon.","id":"zwh4x3"},',
+  '{"text":"Kayaks at two, then the Tiles ladder. That\'s my Saturday sorted.","id":"1yky4zl","tone":"funny"}]',
   ',"event.crossingLine.trad.rec-paddle-club.mail":[',
-  '{"text":"An early paddle tomorrow, 07:00 on the rec deck\'s water. Chief Holt has the kayaks out. Half asleep is fine.","id":"1hgcq44"}]',
+  '{"text":"A Saturday paddle tomorrow, 14:00 on the rec deck\'s water. Chief Holt has the kayaks out. Beginners welcome.","id":"5swz7c"}]',
   ',"event.crossingLine.trad.rec-paddle-club.thanks":[',
-  '{"text":"You take a kayak out with Holt\'s early paddlers. The rec deck is quiet, and the water is flat as glass.","id":"o7thh1","tone":"warm"}]',
+  '{"text":"You take a kayak out with Holt\'s paddlers. The rec deck is quiet, and the water is flat as glass.","id":"exr1t0","tone":"warm"}]',
   ',"event.crossingLine.trad.window-sketch.ask":[',
   '{"text":"Sketching at the observatory this morning. Last chance to draw a Concord sky.","id":"1fdrffi"},',
   '{"text":"Luca wants everyone to draw Tavessa before we\'re in it. I can\'t draw. I\'m going anyway.","id":"1e7dvg3","tone":"funny"}]',
@@ -52160,12 +52160,12 @@ const EV997_SAT_ON = false;                              // note 36: the first S
 // paced (leave it)"). Rows in the Line's dayDress for its day 0 (Saturday Day 6 in a new game; the storm's drop/add shape),
 // so only the first Saturday changes and a save past the Line has none of it. Garden hour (weekly, 14:00) goes that day:
 // harvest morning (the dinner's salad) and sowing (the season's first) stay. In: one existing tradition on each of four
-// other decks, within the two-at-once rule beside the long breakfast, the harvest and the sowing: an early Paddle club on
-// the rec deck in the Saturday run's freed hour, Window sketching in Deck 2's observatory, the big jigsaw in Deck 1's
+// other decks, within the two-at-once rule beside the long breakfast, the harvest and the sowing: a Paddle club on
+// the rec deck in garden hour's freed hour (14:00), Window sketching in Deck 2's observatory, the big jigsaw in Deck 1's
 // observation room, and Every song in Deck 4's music room at its own 17:15 (Zeke, its host, works Saturdays to 17:00;
 // its week-2 showings fall to the storm, Day 13, and a birthday, Day 41). Their own hosts, places and joining; the first Saturday's words (content/banks/ev997-saturday.lines, event.crossingLine.trad.*)
 const EV997_SAT = [{ trad: 'garden-hour', day: 0, drop: true },
-  { trad: 'rec-paddle-club', day: 0, add: { at: [420, 465], who: [['holt', 1], ['everyone', .2]], words: 'event.crossingLine.trad.rec-paddle-club' } },   // an early hour: a little pull, or it's two paddlers
+  { trad: 'rec-paddle-club', day: 0, add: { at: [840, 900], who: [['holt', 1], ['everyone', .2]], words: 'event.crossingLine.trad.rec-paddle-club' } },   // garden hour's freed hour, everyone up (at 07:00 only Holt came once merged: RV33's device_check find); a little pull
   { trad: 'window-sketch', day: 0, add: { at: [585, 630], words: 'event.crossingLine.trad.window-sketch' } },
   { trad: 'big-jigsaw', day: 0, add: { at: [635, 700], words: 'event.crossingLine.trad.big-jigsaw' } },   // 10:35-11:40: over before Tomas's sowing invite at 11:45 (RV33)
   { trad: 'every-song', day: 0, add: { at: [1035, 1085], words: 'event.crossingLine.trad.every-song' } }];   // its own hour: Zeke works Saturdays to 17:00
