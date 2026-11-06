@@ -55774,10 +55774,10 @@ function storyDoorOpen(now = shipNow()) {
 // there's someone to introduce. Note 32: the "wants a word" arrow shows once a ship day a person: it ends for the day
 // when you open their card, or when the beat stops being ready (P997_WORD, not saved: a reload may show it once more).
 // Note 39: going to a tradition its host runs (the simNote('tradition') bus's host, if you joined) is worth
-// P997_HOST_PTS with the host, about a full Talk a while; an invitation you kept already gives the host its own.
+// P997_HOST_PTS with the host, about a full Talk a while, once a ship day a host; an invitation you kept already gives the host its own.
 // Note 38 is section 22's (talkPackFill: the listen2 replies). Nothing here calls R().
 var P997_SOCIAL_ON = false;
-const P997_HOST_PTS = 4, P997_WORD = new Map();           // crew id -> { day, shut }
+const P997_HOST_PTS = 4, P997_WORD = new Map(), P997_HOSTED = new Map();   // crew id -> { day, shut }; host id -> the ship day they last gave (not saved)
 function p997Beat(C) {                                    // the beat Get to know plays: their ready one, else the card's own (a goodbye's)
   if (!P997_SOCIAL_ON || !C || !C.p || C.far) return null;
   return (typeof momentReady === 'function' && momentReady(C.p, shipNow())) || C.line.moment || null;
@@ -55803,8 +55803,8 @@ function p997WordSeen(p) {
 function p997HostNote(d, t) {                             // a tradition's end (section 20's socApply): you joined it, so its host warms to you
   if (!P997_SOCIAL_ON || !d || !d.you || typeof d.host !== 'string' || !SOC.idx.has(d.host)) return;
   const day = Math.floor(t / 1440) + 1, asked = typeof apptList === 'function' && apptList().some(a => a.kind === 'invite' && a.trad === d.id && a.status === 'kept' && Array.isArray(a.with) && a.with.includes(d.host) && Math.floor(a.at / 1440) + 1 === day);
-  if (asked) return;                                      // their invitation, kept: it gave its own
-  relAdd(d.host, 'hosted', P997_HOST_PTS);
+  if (asked || P997_HOSTED.get(d.host) === day) return;  // their invitation, kept: it gave its own; once a ship day a host
+  P997_HOSTED.set(d.host, day); relAdd(d.host, 'hosted', P997_HOST_PTS);
 }
 // ---- end of slot: Social engineer ----
 
