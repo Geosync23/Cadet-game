@@ -41,7 +41,7 @@ FAIL fixes: a tap on Brennan opens her scene
 
 On OLD (d7ad4c58) the same lines pass: "the join offered, brennan leading it", "a tap on brennan joins you and opens
 the scene", "kept", "in the Record", "rules: the scope's after line said once the next day (["Sato says you didn't
-touch the focus. She's very impressed."])". So it is NEW.
+touch the focus. She's very impressed."])". The whole OLD run ends APPT CHECK OK (only its usual 4 planted lines). So it is NEW.
 
 TB6 bisected it (its message to R4): EV997_LIGHT_ON (the Last Light, Day 4 14:00-14:40, over the 14:30 booking); off
 on a copy, the invite part passes; TRAD997_ON and CAL997_ON off do not help. EV1's to fix. Reported to BM26 and lead 49.
