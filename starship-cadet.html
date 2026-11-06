@@ -73369,7 +73369,7 @@ function devmodeTradAt(ev, how) {
   const d = how === 'tomorrow' ? today + 1 : today, from = how === 'soon' ? Math.ceil((m + DM_SOON) / 5) * 5 : ev.at[0];
   if (how === 'usual' && from <= m) return 'Its usual time today (' + hhmm(from) + ') has gone. Try In 20 minutes, or Tomorrow.';
   if (from + len > DM_LATEST) return 'Too late tonight: it would run past ' + hhmm(DM_LATEST) + '. Try Tomorrow.';
-  const big = typeof eventOn === 'function' && eventOn(d);
+  const big0 = typeof eventOn === 'function' && eventOn(d), big = big0 && !(EV997_LIGHT_ON && big0.id === 'lastLight') ? big0 : null;   // 0.99.7 (EV1): the Last Light has no evening of its own and pauses nothing, so it doesn't refuse
   if (big) return 'Not on a big event\'s day (' + ((SHIP_EVENTS[big.id] || {}).title || big.id) + '): the ship\'s evening is the event\'s.';
   if (devmodeWhose(ev) && !(DM_UI.who && DM_UI.who.length)) return 'Pick whose first (below).';
   const me = { id: ev.id, ev, from, to: from + len }, list = eventsOn(d), clash = devmodeTradClash(me, list.filter(e => e.dev));
