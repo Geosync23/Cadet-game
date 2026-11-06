@@ -34,3 +34,5 @@ CH_RELAY_ON, CH_HAIR_ON (CH_SEAT_ON declared, note 4 not built: batch B). Sectio
 - Note 10 relay cabinet (ch1_relay.py; results/relay_sheet-3d07e66.jpg): 0.99.6 the cabinet's back (z 9.87) pokes over the
   hull rim from outside; on (z 9.08-9.52) it stands inside. Fault lamp: lamp z moves with the cabinet (in front of its face by
   0.06 both builds). Junior wing cabinet (closet k) checked too: already inside, unchanged.
+- check_fast on a copy with all four switches on: QUICK CHECK OK in 337 s (deck_check's draw calls included).
+- Verdict: PASS for notes 37, 35, 10, 1. Note 4 (CH_SEAT_ON) still to come in batch B.
