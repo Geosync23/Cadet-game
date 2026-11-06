@@ -150,11 +150,11 @@ with sync_playwright() as pw:
         r = json.loads(h.ev("JSON.stringify({ ph: ACT && ACT.phase, k: ACT && ACT.kind, ax: ACT && ACT.x, az: ACT && ACT.z, tx: target.x, tz: target.z })"))
         if r['k'] == 'recSwim' and r['ph'] == 'do' and r['ax'] is not None: gaps.append(((r['ax'] - r['tx']) ** 2 + (r['az'] - r['tz']) ** 2) ** .5)
     check(len(gaps) > 20 and max(gaps) < .5, '#17 the camera swims with you: %d frames in the pool, the camera at most %.2f m from you' % (len(gaps), max(gaps) if gaps else -1))
-    # the moment: the first time from Day 2 when two crew are planned on the baselines, there 15 minutes already and
+    # the moment (lead 50: from the plans, Day 2 first): the first time from Day 2 when two crew are planned on the baselines, there 15 minutes already and
     # 6 more to go (was Day 2 17:22 fixed; with 0.99.7's TRAD997_ON Erik's Day 2 evening changed and Marrow practised
     # alone then: GM1 for lead 49, the 0.99.7 round's R5). Read off the plans, so the same moment every run
     h2 = Game(pw, build, 390, 844)                     # its own page: the moment may be days on, and the solo look below is Day 2
-    cands = h2.ev("""(() => { actEnd(true); playerKit(null); skipTo(1440 + 960); const out = []; for (let d = 2; d < 15 && out.length < 6; d++) for (let m = 6 * 60; m < 21 * 60 + 30; m += 2) { const t = (d - 1) * 1440 + m;   // read once the ship has got to Day 2 16:00
+    cands = h2.ev("""(() => { actEnd(true); playerKit(null); skipTo(1440 + 960); const out = []; for (let d = 2; d < 15 && out.length < 6; d++) for (let m = 6 * 60; m < 22 * 60; m += 2) { const t = (d - 1) * 1440 + m;   // read once the ship has got to Day 2 16:00
       const w = schedPeople().map(p => whereIs(p, t)).filter(x => x && /^7-disc-[12]$/.test(x.placeId || ''));
       if (w.length === 2 && w[0].placeId !== w[1].placeId && w.every(x => t - x.from >= 15 && x.until - t >= 6) && !out.some(u => Math.abs(u - t) < 30)) out.push(t); } return out.length ? out : [1440 + 1040]; })()""")
     at25 = cands[0]

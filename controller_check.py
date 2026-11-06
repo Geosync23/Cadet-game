@@ -2187,7 +2187,7 @@ def legacy_parts(GAME, ON, fails):
         p.plug(); p.press('x'); p.log()
         p.ev("SHIP.device.tipsSeen.device = true; tilesPlay('tomas', null, 'full'); if (TL_GAME.timer) { clearTimeout(TL_GAME.timer); TL_GAME.timer = 0; }"); p.step(3)
         check(p.ev(TL_FOCUS) == 'etnext', f'tiles: your first game should land on How to play\'s Next, not {p.ev(TL_FOCUS)}')
-        for _ in range(12):
+        for _ in range(p.ev('TL_TUT.length') + 4):   # as many As as How to play has steps (8; 15 with 0.99.7's GAMES997_ON, GM1)
             if p.ev('TL_GAME.tut') < 0: break
             p.press('a'); p.step(1)
         check(p.ev('TL_GAME.tut') < 0, 'tiles: A on Next should go through How to play')
