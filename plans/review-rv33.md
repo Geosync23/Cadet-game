@@ -124,7 +124,9 @@ Merge note: GM1 and TB6 both add their switch line after TRAD995_ON (section 13,
   in bubbles, your question card, the answer flagged; Day 35 your answer recalled ("{me} said someone's on the island")
   and chapters 7-12. (The probe's "cadet" for {me} is the game's no-name fallback; a real save has your name.)
 - **dad2b9b, game 3920ea00...8ace (sha256 matched)**: the jigsaw 10:35-11:40 (my find), its Mail word 10:35; nothing else in the game.
-- Switched-on checks (on dad2b9b): bigevents, events, join, weekend, day 4 and 6, check_fast running.
+- Switched-on checks (on dad2b9b): BIGEVENTS, EVENTS, JOIN, WEEKEND CHECK OK; DAY CHECK OK Days 4 and 6. check_fast on the
+  commit OK (240 s). cadet_test off on dad2b9b: ALL IDENTICAL (renderer noise only, run beside other browsers).
+- **PASS** on dad2b9b (sent to EV1, lead 49, BM25). Should left: the shift arrow says "Take a job" while you're at the glass.
 
 ### CL1 traditions calendar (claude/p997-calendar), switch CAL997_ON (URL_FLAGS cal997, off)
 **5c93e8c, game eaf052ee...733b (sha256 matched).** Sections 13, 14, 16, 18 (+136, slot 'Calendar builder'), 18f, 19, 22.
