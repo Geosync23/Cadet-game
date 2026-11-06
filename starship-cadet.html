@@ -9754,6 +9754,7 @@ const SLOT_NEW = SAVE_SLOTS_ON && !NOSAVE ? (v => v === 'arrive' || v === 'monda
 var SLOT_HOLD = false;
 const SAVE_KEY = slotKey(SAVE_SLOT), SAVE_V = 2;
 const TRAD995_ON = true || URL_FLAGS.has('trad995');   // 0.99.5 (TB3; plans/patch-0995.md notes 8, 10, 19): Spice shelf supper tap to join, Name on the beam's spots, the tea corner's doorway (section 18's Traditions slot); off: 0.99.4. `?trad995` previews
+const TRAD997_ON = false || URL_FLAGS.has('trad997');   // 0.99.7 (TB6; plans/patch-0997.md notes 18, 43, 50, 51, 52): hosted traditions: the Spice shelf supper after dinner with Brennan's card, Open lab's host, Teach me your thing per teacher, Calder at your bunk, your loaf from Bread day (section 18's Traditions slot, 24c's inspection); off: 0.99.6. `?trad997` previews
 // the traditions variety (0.93.2, FX24 for lead 37; CS1's pitch pages plans/trad-variety-pitch.html and -2.html on claude/crew-stories-pitch):
 // six weekly ones take turns from week 2 (TRAD_0932_WHEN: their rhythm with it on; week 1 unchanged), the user's fourteen new ones
 // (TRAD_0932_NEW, loaded only with it) and Brennan's tasting table after dinner in the galley (tasting-table-late, loaded as
@@ -14784,6 +14785,7 @@ const TRAY_ON = (() => {
 })();
 const TRAY_REACH = .42;                                  // from your seat's spot toward the table (the long tables' benches and the round tables' chairs)
 function trayOnTable(A) {
+  if (TRAD997_ON && loaf997Table(A)) { TRAY_ON.visible = false; return; }   // 0.99.7 (TB6, note 43): Bread day's loaf on its board instead (Traditions slot)
   if (!A) { TRAY_ON.visible = false; return; }
   const f = A.to.face || 0; TRAY_ON.position.set(A.to.x + Math.sin(f) * TRAY_REACH, .78, A.to.z + Math.cos(f) * TRAY_REACH);
   TRAY_ON.rotation.y = f; TRAY_ON.visible = true;
@@ -15077,7 +15079,7 @@ function playerUpdate(dt, t) {
   if (typeof mugTick === 'function') mugTick();          // the mug in your hands (patch #30, in this section's slot; off: nothing)
   if (typeof flcTick === 'function') flcTick();          // First Light Cocoa (patch #26, in this section's slot; off: nothing)
   const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0 || typeof hamperHeld === 'function' && hamperHeld() ? true
-    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' || P.tray && (!ACT || (TRAY_TRAVELS || P.trayGo) && (ACT.phase === 'walk' || ACT.phase === 'wait')) ? 'tray' : typeof ixHold === 'function' && ixHold() || typeof mugHeld === 'function' && mugHeld() || typeof sliceHeld === 'function' && sliceHeld() || false;   // a tray from the servery to your seat (0.28.15), and in your hands on the way to anything else (FX12: it wasn't drawn); a slice of birthday cake (section 18, 0.92.5); 15b's ixHold: a job's toolbox or crate
+    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' || P.tray && (!ACT || (TRAY_TRAVELS || P.trayGo) && (ACT.phase === 'walk' || ACT.phase === 'wait')) ? (TRAD997_ON && loaf997Held() ? 'loaf' : 'tray') : typeof ixHold === 'function' && ixHold() || typeof mugHeld === 'function' && mugHeld() || typeof sliceHeld === 'function' && sliceHeld() || false;   // a tray from the servery to your seat (0.28.15), and in your hands on the way to anything else (FX12: it wasn't drawn); a slice of birthday cake (section 18, 0.92.5); 15b's ixHold: a job's toolbox or crate
   if (hold || player.holding) player.holding = hold;   // in hand (Walker.update): parts (true, the crate) or a hover cart ('cart', 'cartfull')
   player.maxV = PLAYER_V0 * playerSpeed();
   const crouch = crawlTiles().has(K(player.here()));   // a crawlway (0.28.11): crouch-walk, slower
@@ -46566,6 +46568,7 @@ function tradJoin(e, a) {
   const notice = tradWords(e, 'notice', { name }) || e.name + ': ' + s.what + '. Social and leisure up.';
   player.stop(); a.talking = 2; player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
   if (e.id === 'tiles-ladder' && typeof tladJoin === 'function') return tladJoin(e, a, notice, lead);   // 0.92.5 item 20: play the next game, or watch
+  if (TRAD997_ON && t997Join(e, a, notice, lead)) return true;   // 0.99.7 (TB6): the host's card first (Open lab, the spice supper), a teacher's own activity (Traditions slot)
   if (TRAD995_ON && e.id === 'spice-shelf-supper') return spiceJoin(e, a, notice);   // 0.99.5 note 19 (TB3): a mess seat with your dinner
   if (TRAD_0932_ON && typeof t932Join === 'function' && t932Join(e, a, notice, lead)) return true;   // 0.93.2: the host's own words first, then the activity (FX24, Traditions slot)
   if (s.act === 'beam') { if (beamWaitTap()) return true; toast(a.p.name, '"' + (tradWords(e, 'tell', { name }) || 'Go on, tap the beam. Your name goes up there, with ours.') + '"'); return true; }
@@ -46864,6 +46867,7 @@ function eventsTick() {
   if (P926_TRADS) p926Frame();                           // 0.92.6: the swap meet's, reading corner's and spice supper's talk (FX17, Traditions slot)
   if (P926_APPT) apptFrame();                            // 0.92.6 item 9: appointments (FX22, Appointments builder slot)
   if (EV_VESSEL_ON && VESSEL) vesselChainHands();        // the Veyli vessel's parts chain: each crate through your hands (slot 'Vessel builder')
+  if (TRAD997_ON) t997Frame();                           // 0.99.7 (TB6): Sato at the lab island, a teacher's coaching (Traditions slot)
   if (TRAD_0932_ON) t932Frame();                         // 0.93.2: the new traditions' talk and their hosts' closing lines (FX24, Traditions slot)
   if (EV_COMET_ON && COMET) cometFrame();                // the comet in the sky, the turn, the dimming, the crowd looking up (slot 'Comet builder')
   if (vesselOn()) vesselSkyFrame();                      // the little Veyli ship off the bow (slot 'Vessel sky', VB2; EV_VESSEL_ON)
@@ -49522,6 +49526,227 @@ if (TRAD995_ON) {
     'open-door': { host: 'calder', pose: 'drink', need: 'social', gain: 10, also: { leisure: 6 }, verb: 'have tea with the Chief', what: 'end-of-shift tea with the Chief' },
   });
   tjActs();
+}
+// ---- 0.99.7 hosted traditions (TB6 for lead 49; plans/patch-0997.md notes 50, 51, 52, 18, 43; behind TRAD997_ON, off:
+// none of this, the game as 0.99.6). The user, 2026-11-06: "Open lab needs a host; nothing happens. The doctor should talk
+// about working in the lab and what it's like"; "Spice shelf supper doesn't work. It should be after the main dinner, with
+// a host and talking"; "Teach me your thing is almost identical to the knitting event"; Calder's bunk inspection should say
+// pass or fail, more pronounced; "Bread day should make a loaf you can take, sit down and eat". Here:
+// - t997Join (one line in tradJoin, before the spice line): the host's card first (t997Card: a few lines, one question,
+//   three answers and the host's reply; script id 't932.join' like the 0.93.2 and TB4 cards, so join_check's card handling
+//   knows it), then the activity. No friendship of its own in the card: SC1's join (note 39) gives the host's.
+// - Open lab: Sato hosts at the lab island (held at her spot through it); you stand at the island beside her, the talk in
+//   bubbles (T932_IDS: the tradition's own `here` lines, her close line).
+// - Spice shelf supper: Tuesdays 19:15-20:00, after dinner (on a fresh save the first one, Day 2 18:15, sat under the
+//   call-home meeting at the booths, 18:00-19:00, and Zeke's knitting from 18:30); not a meal any more: the crew eat their
+//   dinner first. Brennan's card, then a seat and three little tasting plates; TB3/TB5's script, guesses and card as before.
+// Words: stand-ins under t997.<id>.* (a writer's lines win when baked). Nothing calls R(); the planner reads none of it
+let T997_GO = false;
+const T997_CARD = {
+  'open-lab': { host: 'sato', lines: [
+      ['You came. Good. Gloves are in the box by the door. Touch only what I hand you.', 'gesture'],
+      ['This is where Survey lives between scans. Long benches, cold light, and a label on everything. Mori labels the labels.'],
+      ['Most of the job is waiting. A sample sits under the scope for hours, and then it tells you one small true thing.', 'nod'],
+      ['That one is comet ice. Older than the sun, probably. And that one hums. Nobody knows why yet. I have a list of guesses.', 'laugh']],
+    ask: 'Go on. Ask me something. Everyone has one question.',
+    picks: ['What\'s the best part of the job?', 'Why does the rock hum?', 'Could I work in here one day?'],
+    answers: ['The first look. Nobody in the whole history of anything has seen this rock up close. Then you have. Then you write it down.',
+      'Mori says it\'s the ship. I say it\'s the rock. We have a bet. The loser does the labels for a month.',
+      'If you like waiting, and writing small numbers neatly, yes. Come and help at the next one. I mean it.'],
+    close: ['Right. Have a look round the island. Gently. They\'ve been waiting a long time.', 'nod'] },
+  'spice-shelf-supper': { host: 'brennan', lines: [
+      ['There you are, love. Dinner\'s done, so this is the fun bit. Sit, sit.', 'gesture'],
+      ['That shelf is the crew\'s. Everyone who comes aboard brings a jar from home, and it goes up there with their name on the bottom.'],
+      ['Once a week I take three down without looking. A little of each on tonight\'s plates. You taste, you guess whose.', 'nod']],
+    ask: 'Ever had a spice that tasted like home?',
+    picks: ['My gran\'s kitchen. Always.', 'I\'m not sure I\'d know.', 'Can I see the shelf?'],
+    answers: ['Then bring a jar next leave, love. It goes on the shelf, next to Kovac\'s paprika.',
+      'You will after tonight. Taste slowly. Your tongue knows more than you do.',
+      'After. Hands off the jars, mind. I know where every one of them is.'],
+    close: null },
+};
+function t997Card(e, hid, M, go) {
+  const d = e.day, W = (k, fb) => trLine('t997.' + e.id + '.' + k, d, {}, [fb]);
+  const lines = M.lines.map(([t, pose], k) => ({ who: hid, text: W('line.' + (k + 1), t), ...(pose ? { pose } : {}) }));
+  lines.push({ who: hid, text: W('ask', M.ask), to: 'you' });
+  lines.push({ choice: M.picks.map((t, k) => ({ text: W('pick.' + (k + 1), t), reply: { who: hid, text: W('answer.' + (k + 1), M.answers[k]) } })) });
+  if (M.close) lines.push({ who: hid, text: W('close', M.close[0]), ...(M.close[1] ? { pose: M.close[1] } : {}) });
+  MEETING_SCRIPTS['t932.join'] = { title: e.name, noCount: true, onEnd: go, lines };   // no gist: a card closed early sends no notes Mail
+  dialogueShow('t932.join', { id: 't932.join@' + e.id + '@' + d, who: [hid], at: shipNow(), ...cardWhere(e) });
+}
+function t997Join(e, a, notice, lead) {
+  if (T997_GO) return false;
+  if (e.id === 'appt-teach-me') return teach997Join(e, a);   // note 52: the teacher's own activity
+  const M = T997_CARD[e.id]; if (!M) return false;
+  const hid = tjAgent(M.host) ? M.host : lead || a.p.id;
+  const go = () => {
+    if (e.id === 'spice-shelf-supper') { spiceSit997(e, a, notice); return; }
+    if (e.id === 'open-lab') { labStand997(e, a, notice); return; }
+    T997_GO = T932_GO = true; try { tradJoin(e, a); } finally { T997_GO = T932_GO = false; }
+  };
+  if (typeof dialogueShow !== 'function' || !evPerson(hid)) { go(); return true; }
+  t997Card(e, hid, M, go);
+  return true;
+}
+// the supper's seat: as TB3's spiceJoin, with three tasting plates (your dinner's done) and its own notice
+function spiceSit997(e, a, notice) {
+  const d = e.day, now = shipNow(), until = (d - 1) * 1440 + e.to;
+  if (SHIP.events.joined.includes(e.id + '@' + d)) return;   // (a second tap's card)
+  eventJoin(e, d, now, trLine('t997.spice-shelf-supper.notice', d, { till: hhmm(until) }, ['Spice shelf supper: three little tasting plates, and a guess at whose jar. Social and leisure up. On till {till}.'])); SPICE.joined = d;
+  if (ACT && ACT.kind === 'eat' && ACT.placeId && e.rooms && e.rooms.has(deckDef.num + '|' + (PLACE_OF.get(ACT.placeId) || {}).room)) return;   // eating in the mess already: you stay put
+  const b = tjAgent('brennan') || a;
+  const pl = [...PLACE_OF.values()].filter(q => q.type === 'mess-seat' && !heldBy(q.id) && !BUSY.has(q.id) && q.id !== PLAYER_PLACE && e.rooms.has(deckDef.num + '|' + q.room))
+    .map(q => [q, placeSpot(q.id)]).filter(([, s]) => s).sort((x, y) => Math.hypot(x[1].x - b.x, x[1].z - b.z) - Math.hypot(y[1].x - b.x, y[1].z - b.z) || (x[0].id < y[0].id ? -1 : 1)).map(([q]) => q)[0];
+  if (!pl) { toast(e.name, 'Every seat\'s taken just now. Stand by the shelf and taste with them.'); return; }
+  const pose = (placeSpot(pl.id) || {}).pose || 'sit';
+  if (SHIP.player.tray) { actStart('eat', pl.id, { title: e.name, pose, tradTill: until }); return; }   // a tray in hand: eat it here
+  actStart('eat', pl.id, { title: e.name, fed: true, dish: trLine('t997.spice-shelf-supper.dish', d, {}, ['three little tasting plates']), pose, tradTill: until });
+}
+// Open lab: a free spot round the island (the lab's own), else you stand at the island beside Sato
+function labStand997(e, a, notice) {
+  const d = e.day, now = shipNow(), s = TRAD_JOIN[e.id], end = (d - 1) * 1440 + e.to, sato = tjAgent('sato') || a;
+  eventJoin(e, d, now, notice + ' On till ' + hhmm(end) + '; walk away to stop.');
+  const o = { title: e.name, end, tj: e.id + '@' + d, after: null, quiet: true };
+  const free = [...PLACE_OF.values()].filter(q => q.event === 'open-lab' && !heldBy(q.id) && !BUSY.has(q.id) && q.id !== PLAYER_PLACE).map(q => [q, placeSpot(q.id)]).filter(([, sp]) => sp)
+    .sort((x, y) => Math.hypot(x[1].x - sato.x, x[1].z - sato.z) - Math.hypot(y[1].x - sato.x, y[1].z - sato.z) || (x[0].id < y[0].id ? -1 : 1))[0];
+  if (free) { actStart('tj:' + e.id, free[0].id, { ...o, pose: 'talk', company: typeof ixBond === 'function' ? ixBond(free[1]) : 1 }); return; }
+  const w = nearestOpen(sato.x + .9, sato.z + .9, player), c = w && cellPos(...w); if (!c) return;
+  actStart('tj:' + e.id, null, { ...o, pose: 'talk', company: 1, spot: { id: null, walk: w, x: c.x, z: c.z, y: 0, face: Math.atan2(sato.x - c.x, sato.z - c.z), pose: 'stand' } });
+}
+// the lab's talk (tradTalk): every third bubble Sato shows something (her own lines, in turn), between them those round
+// the island (the lab's own room first) say one of the tradition's `here` lines, never the same twice running; near the
+// end her close, once
+const LAB997_SATO = ['This is dust from the Pale Shoals. Every grain has a number. I named about four hundred of them.', 'Under the scope, ice has rings, like a tree. Count them and you know how long it travelled.',
+  'Hold it to your ear. Hear that? Nor can Mori. I hear it every time.', 'We write down what we see, not what we hope. That is the whole of science, really.', 'This one came off the hull. It hitched a ride for a week before we noticed.', 'Label first, then look. A sample without a label is just a rock.'];
+function lab997Say(at, n, e, m) {
+  const d = e.day, R = TR_TALK[e.id], s = at.find(a => a.p.id === 'sato') || tjAgent('sato');
+  if (s && s.h && e.to - m <= 6) { if (R.wrap === d) return null; R.wrap = d; return [s, trLine('t997.open-lab.wrap', d, {}, ['That\'s the lab for tonight. Gloves back in the box. Thank you for asking things.'])]; }
+  if (s && s.h && n % 3 === 0) return [s, trLine('t997.open-lab.show', Math.floor(n / 3) + d, {}, LAB997_SATO)];
+  const lab = at.filter(a => a !== s && a.spot.room === 'L'), ring = lab.length ? lab : at.filter(a => a !== s); if (!ring.length) return null;
+  const a = ring[n % ring.length], H = ((e.ev.text || {}).here || []).map(x => x.t).filter(t => typeof t === 'string' && !/\{/.test(t)); if (!H.length) return null;
+  let k = (n + idHash(a.p.id)) % H.length; if (H.length > 1 && H[k] === R.last) k = (k + 1) % H.length;
+  R.last = H[k]; return [a, H[k]];
+}
+// Sato at her island spot through the open lab (as Brennan at the shelf: again after a deck change)
+const LAB997 = { hold: null };
+function lab997Frame() {
+  if (deckDef.num !== 2) { if (LAB997.hold) { LAB997.hold(); LAB997.hold = null; } return; }
+  const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  const e = eventsOn(d).find(x => x.id === 'open-lab' && m >= x.from - 5 && m < x.to), s = e && tjAgent('sato');
+  if (!s) { if (LAB997.hold) { LAB997.hold(); LAB997.hold = null; } return; }
+  if (!LAB997.hold || CREW_HELD.get('sato') !== '2-open-lab-2') LAB997.hold = crewHold(s.p, '2-open-lab-2');
+  tradTalk('open-lab', lab997Say);
+}
+if (TRAD997_ON) {
+  TRAD_JOIN['open-lab'] = { ...TRAD_JOIN['open-lab'], host: 'sato', verb: 'join Dr. Sato at the lab', what: 'look round the lab with Dr. Sato and the Survey crew' };
+  const sp = SHIP_TRADITIONS.find(ev => ev.id === 'spice-shelf-supper');
+  if (sp) { sp.at = [1155, 1200]; delete sp.meal; if (sp.ties) { const { galley, ...rest } = sp.ties; sp.ties = rest; } }   // after dinner, and not the dinner
+  tjActs();
+  if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // planned before the supper moved: planned again
+}
+// Teach me your thing (note 52; the user: "almost identical to the knitting event": every teacher had one pose, sit:read,
+// in a common room, the same as Knit and natter): each teacher their own activity once their card's done, a few coaching
+// lines in bubbles as you practise (about 5 real seconds apart, while no card is open), then a small result: a notice and
+// a flag (teach997.<hobby> = the day) a later line can read. Zeke knits a row with you; Tove has you take a cutting at a
+// bed (standing, the watering pose); Rina plays you a practice game of Tiles (seated, playing); Ravi draws a four-box comic
+// with you (seated at a table, the folding pose: hands on the table, pencil). The appointment itself is as before
+const TEACH997 = {
+  'torres-zeke': { pose: 'sit:read', title: 'Your first row', coach: ['Needle in. Wool round. Pull it through. That\'s one.', 'Don\'t pull so tight. It\'s wool, not a rope.', 'Look. That\'s a row. A whole row. Wonky, but whole.', 'Count them. Twelve? Twelve. Well done, you.'],
+    result: 'You knitted your first row with Zeke: twelve stitches, a bit wonky. He says it\'s the start of a scarf. Knitting is yours now: sit anywhere and tap Hobby.' },
+  'cruz-tove': { pose: 'water', title: 'Your mint cutting', coach: ['Under the joint. There. A clean cut. Good hands.', 'Bottom leaves off. Gently. It needs its strength.', 'Into the water. Now say hello. I mean it.', 'Look at it. It\'s yours now. Don\'t overwater it.'],
+    result: 'You took your first cutting with Tove: a sprig of week-six mint in a cup of water. It should root in a week. Tap a garden bed, off shift, to keep growing things.' },
+  rina: { pose: 'sit:play', title: 'Your first game of Tiles', coach: ['Match the edge. No, the other edge. There.', 'Block my row. Go on. Block it. Ha. Too late.', 'Watch my hands. See? I always do that before a good move.', 'Last tile. Mine. I win. But you made me work for it.'],
+    result: 'You played your first game of Tiles with Rina. She won by eleven, and says it was the best first game she\'s seen. Tiles nights are Tuesdays and Thursdays in the bow lounge.' },
+  'hart-ravi': { pose: 'sit:fold', title: 'Your first comic', coach: ['Box one. Someone wants something. Who? Draw them.', 'Box two. It goes wrong. Bigger. Make it go more wrong.', 'Box three. Worse. Yes. That\'s properly worse.', 'Box four. The duck. There it is. Perfect.'],
+    result: 'You drew your first four-box comic with Ravi. The duck is in box four. He says it can go on the comics wall when it\'s inked. Drawing is yours now: sit anywhere and tap Hobby.' },
+};
+const TEACH997_NOW = { key: null, host: null, i: 0, at: 0, done: null };
+function teach997Join(e, a) {                            // the appointment's tap: tradJoin with this teacher's pose
+  const b = typeof apptBooking === 'function' ? apptBooking(e, e.day) : null, T = b && TEACH997[b.host], s = TRAD_JOIN[e.id];
+  if (!T || !s) return false;
+  const was = s.pose; s.pose = T.pose;
+  T997_GO = true; try { tradJoin(e, a); } finally { T997_GO = false; s.pose = was; }
+  Object.assign(TEACH997_NOW, { key: e.id + '@' + e.day, host: b.host, i: 0, at: performance.now() + 2500 });
+  return true;
+}
+function teach997Frame() {
+  const N = TEACH997_NOW; if (!N.key || typeof bubbleSay !== 'function') return;
+  const T = TEACH997[N.host], A = typeof ACT !== 'undefined' ? ACT : null, mine = A && A.kind === 'tj:appt-teach-me' && A.o && A.o.tj === N.key;
+  if (!mine) { if (N.i >= T.coach.length) N.key = null; else if (!A) N.key = null; return; }   // walked off it: no more coaching
+  if (A.phase !== 'do' || DIALOGUE) { N.at = Math.max(N.at, performance.now() + 1500); return; }
+  const t = performance.now(); if (t < N.at) return;
+  const h = tjAgent(N.host), k = 'teach997.' + N.host + '.coach';
+  if (N.i < T.coach.length) { if (h) bubbleSay(friSpeaker(h), trLine(k, N.i, {}, [T.coach[N.i]]), 4.5); N.i++; N.at = t + 5000; return; }
+  if (N.done === N.key) return; N.done = N.key;
+  const hob = (APPT_TEACH[N.host] || [])[2], d = SHIP.time.day;
+  if (hob && typeof flagSet === 'function') flagSet('teach997.' + hob, d);
+  toast(trLine('teach997.' + N.host + '.title', d, {}, [T.title]), trLine('teach997.' + N.host + '.result', d, {}, [T.result]), { keep: true });
+}
+// Calder's bunk inspection (note 18, section 24c's walk; the user: "Calder should say something about passing or failing.
+// Seeing Calder do it is good; make it more pronounced"): when the walker reaches your bunk room with you in it, they stop
+// at the foot of your bunk (4-inspect-<room>, held there for the moment), turn to you, and check the three things aloud
+// one at a time (about 2.6 real seconds apart), then the verdict: a pass, or not a pass this week (no penalty: the
+// reputation comes only with a pass, as before). Then a notice with the result, and they walk on. Not there: the 07:00
+// Mail, now saying passed or not. Words: inspect997.* (worksText; a writer's lines win), else these
+const INSP997 = { d: 0, hold: null };
+const INSP997_SAY = { uniform: ['Uniform: clean. Good.', 'Uniform: that\'s yesterday\'s, cadet.'], bed: ['Bed: made. Corners and all.', 'Bed: not made.'], locker: ['Locker: tidy.', 'Locker: things on it, not in it.'] };
+const INSP997_VERDICT = { nod: 'That\'s a pass. Well done. Carry on.', uniform: 'Not a pass this week. A clean uniform next Thursday, please.', bed: 'Not a pass this week. Make the bed before you go, please.',
+  locker: 'Not a pass this week. Things in the locker, not on it.', two: 'Not a pass this week. Two out of three. Let\'s get to three.', none: 'Not a pass this week. Uniform, bed and locker. Next Thursday, all three.' };
+const INSP997_NOTE = { nod: 'Passed. Uniform, bed and locker all in order. Works reputation up.', uniform: 'Not passed this week: your uniform wasn\'t clean. Next inspection is Thursday.', bed: 'Not passed this week: your bed wasn\'t made. Next inspection is Thursday.',
+  locker: 'Not passed this week: your locker wasn\'t tidy. Next inspection is Thursday.', two: 'Not passed this week: two of the three weren\'t right. Next inspection is Thursday.', none: 'Not passed this week: uniform, bed and locker. Next inspection is Thursday.' };
+function insp997Moment(d, room) {
+  if (INSP997.d === d) return; INSP997.d = d;
+  const by = inspectOfficer(d), wk = Math.floor((d - 1) / 7), a = typeof DECK_CREW !== 'undefined' ? DECK_CREW.find(x => x.p && x.p.id === by) : null;
+  if (a) { INSP997.hold = crewHold(a.p, '4-inspect-' + room); a.talking = 2; }   // at the foot of your bunk, facing you, till the verdict
+  if (typeof ACT !== 'undefined' && ACT && ACT.kind === 'lie' && typeof actEnd === 'function') actEnd(true);   // "Stand by your berths"
+  if (a && typeof player !== 'undefined') { player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z); }
+  const it = inspectItems(d), keys = ['uniform', 'bed', 'locker'];
+  keys.forEach((k, i) => simTimeout(() => { if (inspectDue(d)) worksSay(by, worksText('inspect997.' + k + (it[k] ? '.ok' : '.no'), INSP997_SAY[k][it[k] ? 0 : 1], {}, wk)); }, 2600 * (i + 1)));
+  simTimeout(() => {
+    const free = () => { if (INSP997.hold) { INSP997.hold(); INSP997.hold = null; } };
+    if (!inspectDue(d)) { free(); return; }
+    const res = inspectRun(d, true);
+    toast(worksText('inspect997.title', 'Bunk inspection'), worksText('inspect997.note.' + res, INSP997_NOTE[res], {}, wk), { keep: true });
+    simTimeout(free, 2500);
+  }, 2600 * 4);
+}
+// Bread day's loaf (note 43; the user: "Bread day should make a loaf you can take, sit down and eat. Model a loaf"): knead
+// for 8 ship minutes or more and, when your kneading ends (at 07:50, or you walk away), Brennan swaps your dough for a
+// warm loaf from the first tins (yours still goes in Monday's basket, as before). It's in your hand like a tray (section
+// 15's tray: SHIP.player.tray holds its name, trayGo so it goes with you), on a little board (8b's PROP_KIT.loaf, HOLDS.loaf:
+// parts on your rig, no draw calls); tap any seat to sit and eat it, and it sits on the table in front of you (LOAF997_ON,
+// one small group made at load, 3 draw calls, shown only then, in the tray's place). Not saved, as a tray isn't
+const LOAF997_DISH = 'your loaf from bread day';
+const LOAF997 = { d: 0, from: 0, given: 0 };
+const LOAF997_ON = TRAD997_ON ? (() => {
+  const g = new THREE.Group();
+  box(.3, .018, .2, std('#b88a52', .8, 0), 0, 0, 0, g);                                // the board, .771-.789 on a table
+  soft(std('#c98b45', .7, 0), 0, .06, 0, .13, .065, .08, g);                            // the loaf: its foot sunk into the board
+  const sc = std('#ead2a0', .9, 0); for (const x of [-.05, .03]) box(.016, .012, .06, sc, x, .118, 0, g);   // two slashes, through the crust's surface
+  g.visible = false; scene.add(g); return g;
+})() : null;
+const loaf997Held = () => TRAD997_ON && (SHIP.player.tray === LOAF997_DISH || typeof ACT !== 'undefined' && !!ACT && ACT.o && ACT.o.dish === LOAF997_DISH);   // section 15's hold: the loaf, not a tray
+function loaf997Table(A) {                               // section 15's trayOnTable: the loaf on its board instead of the tray
+  if (!LOAF997_ON) return false;
+  if (!A || A.kind !== 'eat' || !A.o || A.o.dish !== LOAF997_DISH) { LOAF997_ON.visible = false; return false; }
+  const f = A.to.face || 0; LOAF997_ON.position.set(A.to.x + Math.sin(f) * TRAY_REACH, .78, A.to.z + Math.cos(f) * TRAY_REACH);
+  LOAF997_ON.rotation.y = f; LOAF997_ON.visible = true; return true;
+}
+function bread997Frame() {
+  const A = typeof ACT !== 'undefined' ? ACT : null, now = shipNow(), d = Math.floor(now / 1440) + 1;
+  if (A && A.kind === 'tj:bread-day' && A.phase === 'do') { if (LOAF997.d !== d) Object.assign(LOAF997, { d, from: now, given: 0 }); return; }
+  if (LOAF997.d !== d || LOAF997.given) return;
+  if (now - LOAF997.from < 8) { LOAF997.given = -1; return; }   // a minute or two's kneading: no loaf (Monday's basket still has yours)
+  LOAF997.given = 1;
+  if (SHIP.player.tray || SHIP.player.carry.length || SHIP.player.cart) { toast(trLine('t997.bread.title', d, {}, ['Your loaf']), trLine('t997.bread.later', d, {}, ['Your loaf\'s in Monday\'s basket, with your name on it. Your hands were full.'])); return; }
+  SHIP.player.tray = LOAF997_DISH; SHIP.player.trayLeft = 0; SHIP.player.trayGo = true;
+  const b = tjAgent('brennan');
+  if (b && typeof bubbleSay === 'function') bubbleSay(friSpeaker(b), trLine('t997.bread.give', d, {}, ['Here, love. One of the first tins, still warm. Fair trade: yours feeds Monday.']), 5);
+  toast(trLine('t997.bread.title', d, {}, ['Your loaf']), trLine('t997.bread.notice', d, {}, ['Brennan swaps your dough for a warm loaf from the first tins. Find a seat and tap it to sit down and eat it.']), { keep: true });
+}
+function t997Frame() {                                 // once a frame (eventsTick)
+  if (typeof deckDef === 'undefined' || !deckDef || typeof DECK_CREW === 'undefined') return;
+  lab997Frame(); teach997Frame(); bread997Frame();
 }
 // ---- end of slot: Traditions engineer ----
 // ---- slot: Events engineer 2 (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----
@@ -59784,8 +60009,8 @@ function inspectDue(d) {
 function inspectRun(d, here) {
   const it = inspectItems(d), res = inspectResult(it), by = inspectOfficer(d);
   simNote('inspection', { day: d, uniform: it.uniform, bed: it.bed, locker: it.locker, result: res, by, here });
-  if (here) worksSay(by, worksText('inspect.' + res, INSPECT_SAY[res]));
-  else if (typeof mailSend === 'function') mailSend({ at: (d - 1) * 1440 + INSPECT_MAIL, from: worksName(by), subject: worksText('inspect.mail.subject', 'This morning\'s inspection'), body: worksText('inspect.mail.' + res, INSPECT_MAILS[res]) });
+  if (here) worksSay(by, TRAD997_ON ? worksText('inspect997.verdict.' + res, INSP997_VERDICT[res]) : worksText('inspect.' + res, INSPECT_SAY[res]));   // 0.99.7 (TB6, note 18): a pass or not, said
+  else if (typeof mailSend === 'function') mailSend({ at: (d - 1) * 1440 + INSPECT_MAIL, from: worksName(by), subject: worksText('inspect.mail.subject', 'This morning\'s inspection'), body: (TRAD997_ON ? worksText('inspect997.mail.' + (res === 'nod' ? 'pass' : 'fail'), res === 'nod' ? 'Passed.' : 'Not passed this week.') + ' ' : '') + worksText('inspect.mail.' + res, INSPECT_MAILS[res]) });
   if (here || res === 'nod') worksUse('m3i');
   return res;
 }
@@ -59826,7 +60051,7 @@ function inspectWalkDo(d, m, skip) {
   if (!due) return;
   const mine = (placeById(playerBed()) || {}).room;
   if (!skip && inspectHere() && m < (INSPECT_TIMES[mine] ? INSPECT_TIMES[mine][1] + 3 : INSPECT_MAIL)) INSPECT_SAID.here = true;   // there before the walk was due to leave your room
-  if (!skip && inspectHere() && inspectWalkerAt(d) === mine) simTimeout(() => { if (!inspectDue(d)) return;
+  if (!skip && inspectHere() && inspectWalkerAt(d) === mine) TRAD997_ON ? insp997Moment(d, mine) : simTimeout(() => { if (!inspectDue(d)) return;   // 0.99.7 (TB6, note 18): the moment at your bunk, three checks and the verdict (Traditions slot)
     if (typeof ACT !== 'undefined' && ACT && ACT.kind === 'lie' && typeof actEnd === 'function') actEnd(true);   // "Stand by your berths": up off your bunk for it (FX20b: lain down at the berth's arrow, you stayed there all day)
     inspectRun(d, true); }, 2600);
   else if (INSPECT_SAID.here && INSPECT_SAID.d === d) { if (skip || m >= INSPECT_AT + 50) inspectRun(d, true); }
@@ -70504,6 +70729,17 @@ PROP_KIT.slice = p => {
   part(p, GEO.box, '#f7f1e8', 0, -.12, .145, .102, .072, .014);                      // the icing over its top, z .138-.152
 };
 HOLDS.slice = { prop: 'slice', bone: 'R', one: -1, sx: -.45, ex: -1.25, sz: .1, hx: .25, look: .14 };
+// 0.99.7 (TB6, note 43; behind TRAD997_ON): Bread day's loaf on a little board, held one-handed at the chest like the slice
+// (HOLDS.loaf; section 18's loaf997Held). About 1.6x life size, as the slice; the loaf an egg shape sunk into the board, two
+// slashes through its crust (no shared faces). Four small parts on your rig; colours through part's col(); no R()
+if (typeof TRAD997_ON !== 'undefined' && TRAD997_ON) {
+  PROP_KIT.loaf = p => {
+    part(p, GEO.box, '#b88a52', 0, -.12, .062, .2, .13, .012);                         // the board, z .056-.068
+    part(p, GEO.sph, '#c98b45', 0, -.12, .1, .09, .055, .045);                          // the loaf, z .055-.145 (its foot in the board)
+    for (const x of [-.035, .02]) part(p, GEO.box, '#ead2a0', x, -.12, .142, .012, .04, .01);   // the slashes, z .137-.147, through the crust's top
+  };
+  HOLDS.loaf = { prop: 'loaf', bone: 'R', one: -1, sx: -.45, ex: -1.25, sz: .1, hx: .25, look: .14 };
+}
 // ---- the comet (FX25, 0.93.2; plans/events-plan-2.html A7: new 'look up' and 'point' poses for the crowd at the comet's
 // windows; section 18's cometFrame sets them on those settled standing there, looks only). Standing or seated; no props, no R()
 if (typeof EV_COMET_ON !== 'undefined' && EV_COMET_ON) {
