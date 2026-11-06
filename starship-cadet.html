@@ -1445,7 +1445,7 @@ const KIT = {
     box(w - .3, .14, .41, f, 0, .37, -.085, g);
     box(w - .01, .51, .2, f, 0, .545, -.32, g);              // 0.92.5 (the user's item 7, flicker): no face shared with the base or the arms
     for (const sd of [-1, 1]) box(.17, .55, .565, f, sd * (w / 2 - .075), .4, -.1475, g);   // the arms a centimetre proud, out and back
-    soft(M.mustard, -w * .28, .58, -.12, .2, .16, .07, g).rotation.z = .2;
+    if (!CH_SEAT_ON) soft(M.mustard, -w * .28, .58, -.12, .2, .16, .07, g).rotation.z = .2;   // CH1 note 4: on, no throw cushion (it lay where an end sitter sits)
     return { w, d: .85 };
   },
   armchair(g, o = {}) {
@@ -69177,6 +69177,38 @@ const chCapOut = (r, seg, th) => r / (Math.cos(Math.PI / seg[0]) * Math.cos(th /
 const CH_RELAY_Z = 3.3;
 if (CH_RELAY_ON) { const m = (DECKS[4].machines || []).find(q => q.id === '4-junction-2'), d = 3.65 - CH_RELAY_Z;
   if (m && m.look) { if (m.look.lamp) m.look.lamp[2] += d; if (m.look.drip) m.look.drip[2] += d; } }
+// note 4: seats that clipped the people on them, found by plans/ch1-seat-probe.js (a ray probe of every seat place: something
+// solid inside the seated body, or the seat top away from the spot's height), each checked by eye. On, placeSpot (section 10)
+// moves these spots by [forward, sideways (to the person's right), seat height or null]: hips out of an armrest, a back out
+// of a chair back, a person onto the seat top (Rina's infirmary chairs had no height, so the 0.475 default: 4.5 cm into
+// the seat). And on the stands and the auditorium's raked rows the feet rest on the person's own step (fy), not 0.5 below
+// the seat (the high-stool rule), which put the shins and heels into the step's front edge.
+const CH_SEATS = {
+  '3-infirmary-1': [0, 0, .52], '3-infirmary-4': [0, 0, .52], '7-booth-1': [0, 0, .5], '7-sim-1': [0, 0, .61], '7-sim-2': [0, 0, .61],
+  '7-simq-1': [0, 0, .48], '7-simq-2': [0, 0, .48],
+  
+  '1-window-1': [.08, 0, null], '1-window-3': [.05, 0, null],
+  '2-captable-1': [.11, 0, null], '2-captable-2': [.11, 0, null], '2-captable-4': [.11, 0, null],
+  '2-armchair-1': [.05, -.12, null], '2-armchair-2': [.05, -.12, null], '2-armchair-3': [.05, -.09, null], '2-armchair-4': [.05, .12, null],
+  '2-armchair-5': [.05, .12, null], '2-armchair-6': [.05, .09, null], '2-armchair-7': [.05, .09, null], '2-armchair-8': [.05, -.09, null],
+  '2-comms-3': [.08, 0, null], '2-comms-4': [.08, 0, null], '2-comms-5': [.11, 0, null], '2-comms-6': [.11, 0, null],
+  '4-common-4': [.08, .09, null], '4-common-6': [.05, -.09, null],
+  '5-office-1': [.14, 0, null], '5-booth-1': [.14, 0, null], '5-tea-1': [.05, .03, null] };
+const CH_FEET = [[/^7-stand-/, .45], [/^7-seat-/, .47]];   // seat ids on a raised step, and the seat's height above that step
+function chSeatSpot(s) {                                   // placeSpot's spot, when CH_SEAT_ON (made once per deck, cached there)
+  const f = CH_SEATS[s.id];
+  if (f) { const fx = Math.sin(s.face), fz = Math.cos(s.face); s.x += fx * f[0] + fz * f[1]; s.z += fz * f[0] - fx * f[1]; if (f[2] !== null) s.y = f[2]; }
+  for (const [re, up] of CH_FEET) if (re.test(s.id)) s.fy = Math.round((s.y - up) * 100) / 100;
+}
+const CH_FY = { gen: -1, k: [] };
+function chFeet(c, x, z, sy, h) {                          // the seated feet's height (in the rig's units) for someone at x, z: their step, or as before
+  if (!c.chFy || c.chFy.x !== x || c.chFy.z !== z || c.chFy.gen !== SEAT_RC.gen) {
+    if (CH_FY.gen !== SEAT_RC.gen) { CH_FY.gen = SEAT_RC.gen; CH_FY.k = []; for (const q of deckDef.places || []) if (CH_FEET.some(([re]) => re.test(q.id))) { const sp = placeSpot(q.id); if (sp && sp.fy !== undefined) CH_FY.k.push(sp.x, sp.z, sp.fy); } }
+    let v = null; for (let i = 0; i < CH_FY.k.length; i += 3) if (Math.abs(CH_FY.k[i] - x) < .05 && Math.abs(CH_FY.k[i + 1] - z) < .05) { v = CH_FY.k[i + 2]; break; }
+    c.chFy = { x, z, gen: SEAT_RC.gen, v };
+  }
+  const v = c.chFy.v; return v !== null ? v / h : sy > .62 ? (sy - .5) / h : 0;
+}
 // ---- end of slot: CH1 characters ----
 
 // =====================================================================
@@ -69587,7 +69619,7 @@ function animateActivity(o, pose, dt, t, sk, y = 0) {
     for (const leg of rig.legs) {
       const t0 = leg.thigh.rotation.x, k0 = leg.knee.rotation.x, a0 = leg.ankle.rotation.x;
       const ang = cu ? legIK(leg, -(LT * Math.sin(th) + LS * .97), LT * Math.cos(th) + .03)
-        : legIK(leg, ANK + (sy > .62 ? (sy - .5) / h : 0) - (hy - HIP_OFF), .3);   // on a high stool the feet rest on its ring (0.27.11)
+        : legIK(leg, ANK + (CH_SEAT_ON && o.pos ? chFeet(o, o.pos.x, o.pos.z, sy, h) : sy > .62 ? (sy - .5) / h : 0) - (hy - HIP_OFF), .3);   // on a high stool the feet rest on its ring (0.27.11)
       leg.thigh.rotation.x = L(t0, leg.thigh.rotation.x, s); leg.knee.rotation.x = L(k0, leg.knee.rotation.x, s);
       leg.ankle.rotation.x = L(a0, -ang, s); leg.thigh.rotation.z = L(leg.thigh.rotation.z, leg.side * .05, s);
     }
@@ -71120,6 +71152,7 @@ function placeSpot(id) {
     s = { id, walk, x, z, y, face: typeof pl.face === 'number' ? pl.face * Math.PI / 180 : FACE_ANGLE[pl.face] || 0,
       pose: pl.type === 'bed' ? 'lie' : pl.pose, anim: placeAnim(pl), room: pl.room, onTile: free(...pl.at), mv: pl.move || null };   // mv: 8c's crew moves (0.84.6)
   }
+  if (CH_SEAT_ON && s && pl) chSeatSpot(s);              // CH1 note 4: spots moved out of armrests and chair backs, heights, feet on a step
   SPOT_OF.set(id, s); return s;
 }
 // the pose at a place: its activity (run, lift, call, play...) once the crowd can show it (section 8b lists those in
@@ -71832,7 +71865,7 @@ const REC_ACTS = {
     if (b !== 'sit') return;                             // a seat with anim: 'slump' (poseOf gives 'sit:slump'); standing, nothing
     const hy = r.hips.position.y - .03; r.hips.position.y = L(r.hips.position.y, hy, s); r.hips.position.z = L(r.hips.position.z, .06, s);
     for (const leg of r.legs) {                          // the feet well out in front on the floor (a high seat: on the step half a metre down), knees a little apart
-      const t0 = leg.thigh.rotation.x, k0 = leg.knee.rotation.x, a0 = leg.ankle.rotation.x, ang = legIK(leg, ANK + (sy > .62 ? (sy - .5) / h : 0) - (hy - HIP_OFF), sy > .62 ? .4 : .5);
+      const t0 = leg.thigh.rotation.x, k0 = leg.knee.rotation.x, a0 = leg.ankle.rotation.x, ang = legIK(leg, ANK + (CH_SEAT_ON ? chFeet(r, r.root.position.x, r.root.position.z, sy, h) : sy > .62 ? (sy - .5) / h : 0) - (hy - HIP_OFF), sy > .62 ? .4 : .5);
       leg.thigh.rotation.x = L(t0, leg.thigh.rotation.x, s); leg.knee.rotation.x = L(k0, leg.knee.rotation.x, s);
       leg.ankle.rotation.x = L(a0, -ang - .35, s); leg.thigh.rotation.z = L(leg.thigh.rotation.z, leg.side * .12, s);
     }
