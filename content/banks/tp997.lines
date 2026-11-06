@@ -206,3 +206,9 @@
 - 13:00 Friday tea with Halloran: the tea corner
 == tp997.beat.d6-sowing
 - 11:45 Sowing morning with Tomas: the garden
+
+// after 0.99.7 (TP998_BOOTH_ON, R4's find): the low-social warnings once your call home's had today (no booth marker)
+== tp998.social.1
+- A bit lonely. You've had your call home today: chat with someone, or eat with company.
+== tp998.social.2
+- Really missing people. Your call home's done today: the mess and the bow lounge are rarely empty.
