@@ -2393,3 +2393,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~14:15 UTC: **I is NEW, SC1's P997_SOCIAL_ON** (controller_check OK with only it off); SC1 tracing why the D-pad can't reach 'About the transfer' (cause within ~20 min).
 - ~14:17 UTC: JB3 bisected G orange tree to EV997_LIGHT_ON (Last Light closes the bow lounge, Elif goes to the tree): folded into EV1's C fix; EV1 runs FB1 too; R6 may stop its search.
 - ~14:18 UTC: Orange tree -> EV1 (C fix first; if Elif still there, check picks a free moment). BM26 R5 share complete (OK but B, F fixing); BM26 cadet matches R2, all differences explained. BM26 to explain R6's camera-turn swap that persists with all switches off (un-switched code).
+- ~14:23 UTC: CL1 G-store closed. **J** R3 controller_check G2 tiles (pad can't step through How to play / pick a tile) -> GM1 (note 41 tutorial); R3 OLD runs going. G1 12/12, G4 6/6 OK.
