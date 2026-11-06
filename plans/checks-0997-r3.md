@@ -53,3 +53,11 @@ controller_check: 55 of 57 parts OK; ending and tiles FAIL.
 
 **R3: FAIL.** Four NEW FAILs: devmode_check (EV1 + CR1), arrows_d_check (CR1), controller ending (SC1?), controller
 tiles (GM1). Everything else in the share OK, sound_check included.
+
+## After the round
+
+- Controller tiles is check-side (GM1): with controller_check.py from claude/p997-games 3966a4a (one line: one A per
+  How to play step; the new tutorial has 15 steps, the old check pressed at most 12), the tiles part on the candidate game
+  b14421f8...cf7d passes (exit 0, CONTROLLER CHECK OK). Run from a copy of the candidate's folder (the check finds
+  cadet_test.py by its own file name, so it must be called controller_check.py).
+- devmode trad: EV1 reports a fix in claude/p997-events ecc5236 (not re-run here yet).
