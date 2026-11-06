@@ -55772,7 +55772,7 @@ function storyDoorOpen(now = shipNow()) {
 // always agree), whatever line the card opened with and after Say hello too; it replaces "Sit with them", and Ask
 // about is gone (parked, design-doc.md: cut 2026-11-06), its "Do you know...?" moving to the card's own row when
 // there's someone to introduce. Note 32: the "wants a word" arrow shows once a ship day a person: it ends for the day
-// when you open their card, or when the beat stops being ready (P997_WORD, not saved: a reload may show it once more).
+// when you open their card; till then it follows the beat being ready (P997_WORD, not saved: a reload may show it again).
 // Note 39: going to a tradition its host runs (the simNote('tradition') bus's host, if you joined) is worth
 // P997_HOST_PTS with the host, about a full Talk a while, once a ship day a host; an invitation you kept already gives the host its own.
 // Note 38 is section 22's (talkPackFill: the listen2 replies). Nothing here calls R().
@@ -55792,7 +55792,7 @@ function p997WordOk(id, mid, now, peek) {                 // may the "wants a wo
   if (!P997_SOCIAL_ON) return true;
   const day = Math.floor(now / 1440) + 1, w = P997_WORD.get(id);
   if (peek) return !(w && w.day === day && w.shut);
-  if (w && w.day === day) { if (!mid) w.shut = true; return !w.shut; }
+  if (w && w.day === day) return !w.shut;                 // RV33: only opening their card shuts it (the beat flickers off while they walk)
   if (mid) P997_WORD.set(id, { day, shut: false });
   return true;
 }

@@ -16,7 +16,7 @@ Branch: claude/p997-social, from claude/integration d7ad4c58 (0.99.6, game f6ff5
   replaced the line so the button vanished.
 - **Ask about: cut and parked** (design-doc.md "Social life", 2026-11-06). Code kept; off with the switch on.
 - **32, the arrow once a day.** `p997WordOk(id, mid, now, peek)` in storyArrows and its done; `p997WordSeen(p)` from
-  chatOpen. `P997_WORD` (crew id -> { day, shut }) is in memory, not saved. Say hello skips the 'hint' line with the
+  chatOpen; only opening their card shuts it for the day (RV33: not the beat flickering off as they walk). `P997_WORD` (crew id -> { day, shut }) is in memory, not saved. Say hello skips the 'hint' line with the
   switch on (chatDo 'chat' loop).
 - **38, the curious reply.** The words were the cause: 572 of 575 `listen:` replies asked about their story instead of
   answering the ask. Every talk in content/talkpack has a `listen2:` line (answer first, then the same question; the old
