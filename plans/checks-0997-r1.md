@@ -69,3 +69,13 @@ On the candidate b14421f8, nothing else running, arrows_check.py from 7fd8f6b, C
 So H needs another way run before it in the same run: all ways share one browser context (run_s6, line 883, a new
 page per way), so something kept in the browser outside the save carries from the earlier way into the next. On
 0.99.6 the four-way command passes. Check-side, or a second new game on the same device: TP1 to judge.
+
+## H cleared (check-side, TP1 042949a, merged as staging-0997 b498071)
+
+TP1 found the cause: the ways shared one browser context, so each later way loaded the previous way's Dev save
+(localStorage never cleared). The fix gives each step6 way its own browser context; game unchanged (b14421f8...cf7d,
+checked). The exact four-way command on the candidate, alone, with arrows_check.py from b498071 (the same as 042949a):
+`step6 asis teachoff track skiptea`: **OK** (337 s), no FAIL lines: step6 due 709, missed 0, stuck 0;step6:teachoff due 709, missed 0, stuck 0;step6:track due 709, missed 0, stuck 0;step6:skiptea due 704, missed 0, stuck 0.
+
+**R1, updated: OK on 0.99.7 candidate 1 (game b14421f8...cf7d) with the checks from claude/staging-0997 b498071.**
+Both FAILs (A clockin, H step6) were in arrows_check, both fixed check-side by TP1; every other check passed first time.
