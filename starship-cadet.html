@@ -15789,7 +15789,7 @@ function jobEnd(A) {
     if (madeHere(mw.j) && got.length && !rest.length) jobStopMark(mw.j, 'fetch');   // the job's fetch stop (0.28.24)
     if (got.length && typeof padBuzz === 'function') padBuzz('pick');   // a light buzz beside this message (section 26, P4: only when turned on)
     toast('Main storage', (got.length ? 'You take ' + partList(got) + '.' : 'Nothing you need is on the shelves.')
-      + (none.length ? ' None left: ' + none.join(', ') + '. ' + (none.some(p => typeof NO_MAKE !== 'undefined' && !NO_MAKE.has(p)) ? 'The machine shop next door can make one (about an hour at the lathe).' : 'It can\'t be made aboard; the next delivery is on Wednesday.') : '')
+      + (none.length ? ' None left: ' + none.join(', ') + '. ' + (none.some(p => typeof NO_MAKE !== 'undefined' && !NO_MAKE.has(p)) ? (JB3_SHELF_ON ? 'The machine shop next door can make one (about ' + makeMins(mw.j) + ' minutes at the lathe).' : 'The machine shop next door can make one (about an hour at the lathe).') : 'It can\'t be made aboard; the next delivery is on Wednesday.') : '')
       + (rest.length && !none.length ? ' Your hands are full; you\'ll need another trip for ' + partList(rest) + '.' : '')
       + (got.length ? toMake && !rest.length ? ' Now make the ' + mw.j.make + ' in the machine shop next door.' : ' Now to the ' + machineName(machineById(mw.j.machine)) + ' on ' + deckIn(mw.j.deck) + '.' : ''));
   } else if (A.kind === 'job' && mw) {
@@ -20521,7 +20521,7 @@ function jobsHour(h) {
   for (const j of todo) if (j.machine && !j.unclaimed && !j.released && forYou(j) && leaveEnd(j) > j.found) { j.unclaimed = true; simLater('jobUnclaimed', { machine: j.machine, dept: null, id: j.id }); }
   for (const j of todo) {
     const missing = [], have = { ...SHIP.stores };
-    for (const p of j.parts) { if (have[p] > 0) have[p]--; else missing.push(p); }
+    for (const p of j.parts) { if (have[p] > jb3Keep(p)) have[p]--; else missing.push(p); }   // JB3 (note 3): the crew leave the shelf's reserve for you
     if (missing.some(p => NO_MAKE.has(p)) && jobByStops(j)) { j.status = 'done'; j.doneAt = t; j.doneBy = null; continue; }   // a chore isn't worth the wait
     if (missing.some(p => NO_MAKE.has(p))) { j.status = 'waiting'; j.why = 'needs ' + missing.find(p => NO_MAKE.has(p)); continue; }
     const engine = j.machine && ENGINE_KINDS.has(machineById(j.machine).kind), tier = jobTier(j);
@@ -20531,7 +20531,7 @@ function jobsHour(h) {
       if ((busy.get(p.id) || 0) > t || jobCrew(p) !== (engine ? 'engine' : 'works') || (!engine && (CREW_TIER[p.rank] || 0) < tier) || !rankOk(p, j)) continue;   // a job kept for a rank waits for one (0.33.45)
       const run = jobRun(p, j, t, missing.length * JOB_MAKE);
       if (!run || teamClash(p.id, t, run.end)) continue;   // not into a team job they're in (0.33.58)
-      for (const k of j.parts) if (SHIP.stores[k] > 0) SHIP.stores[k]--;
+      for (const k of j.parts) if (SHIP.stores[k] > jb3Keep(k)) SHIP.stores[k]--;
       if (SHIP.misplaced && j.parts.includes(SHIP.misplaced.part)) SHIP.misplaced = null;   // a fetch finds it on the wrong shelf and puts it right
       Object.assign(j, { claimedBy: p.id, status: 'claimed', start: t, segs: run.segs, done: run.done, end: run.end, made: missing.length });
       delete j.why; busy.set(p.id, run.end);
@@ -21363,6 +21363,7 @@ let SHELF_FLASH = 0;
 function shelfWrong(it) {
   const part = shelfNeed(), want = part && shelfOf(part), at = shelfTapped(it);
   if (!want || at === want) return false;
+  if (JB3_SHELF_ON && jb3PinTap(want)) return false;     // JB3 (note 3): the tap passed over the arrow's pin for the right shelf (the slot below)
   SHELF_FLASH = performance.now() + 2500;
   const Ps = plural(part), name = SHELF_NAME[want];
   toast(it.t, (at ? 'No ' + Ps + ' on the ' + SHELF_NAME[at] + ' shelf. ' : '') + Ps.charAt(0).toUpperCase() + Ps.slice(1) + ' are on the ' + name + ' shelf: it\'s lit up for you.');
@@ -22037,6 +22038,7 @@ function boardTopUp(h, jobs) {
   if (!BOARD_ON || h < 0 || (nw ? nw.left < BOARD_FROM : !playerShiftOn(d) || m < DAY_SHIFT[0] || end - m < BOARD_FROM)) return;
   if (jobs.some(j => j.reserved && j.status === 'open' && !j.claimedBy && j.found >= (d - 1) * 1440 && j.found <= t + 60)) return;   // a job reserved for you today (Day 1's two with Zeke, a training job) comes first: none while it's due within the hour or untaken
   if (BOARD_TRADE_ON) try { boardTradePost(h, jobs, t, m, end); } catch (e) { /* 24a's rounds not loaded yet */ }   // FX19 (0.92.6 #11): a job of your trade, beside the simple ones
+  if (JB3_SCI_ON || JB3_REC_ON) jb3Post(h, jobs, t, m, end);   // JB3 (notes 21, 22): a science job each shift, two rec-deck jobs in the first week (the slot below)
   let n = jobs.filter(j => boardForYou(j, t) && !j.trade).length; if (n >= boardMin()) return;
   const busy = new Set(jobs.filter(j => j.status !== 'done').map(j => j.machine ? 'm:' + j.machine : j.chore + ':' + j.target)), tier = playerTier(), seed = machSeed('board:extra');
   const cands = [];
@@ -22217,6 +22219,71 @@ function roundMixRoute(n, day, key, keep) {
   const R = SPREAD_ON && typeof SHIP !== 'undefined' && SHIP.jobs ? jobRoomsRecent(shipNow()) : new Set();   // SPREAD_ON: a room you've had a job in lately comes last
   const want = 4 + Math.floor(schedU(day, 0, 860) * 3), rank = s => schedU(s.seed, day, key) + (R.has(s.deck + ':' + s.room) ? 1 : 0);
   return roundMix(n, Math.max(2, want - 2), 2, rank, keep);
+}
+// ---- JB3 (patch 0.99.7, the user's notes 3, 21 and 22, lead 49). Three switches; each off, the game is as 0.99.6.
+// JB3_SHELF_ON (note 3, "the player doesn't get lights from the light shelf"): the crew's own repairs emptied the Lights
+// shelf between Wednesday deliveries (relays at 0 most of Days 5-10, lamps on Days 13-14), so your job's fetch found none:
+// a chore that needs a lamp has no lathe to fall back on, and the arrow still said "Fetch a lamp: the Lights shelf". Now
+// the crew leave SHELF_KEEP of those parts on the shelf for your jobs and make their own at the lathe instead, as they
+// already did when the shelf was empty (jobsHour asks jb3Keep). Parts that can't be made aboard (NO_MAKE) keep nothing.
+var JB3_SHELF_ON = false, JB3_SCI_ON = false, JB3_REC_ON = false;   // off till the build master switches them on (lead 49); var: section 17's jobsHour and boardTopUp ask before this line has run
+const SHELF_KEEP = { relay: 2, lamp: 2, breaker: 1, cable: 1 };   // the light relays' fault parts (FAULT_CAUSES.lights), all on the Lights shelf
+function jb3Keep(p) { return JB3_SHELF_ON && !NO_MAKE.has(p) && SHELF_KEEP[p] || 0; }
+// The arrow's pin for a shelf is the place in front of its aisle (5-parts-1..4), as near the shelf before it as its own:
+// a real tap at the pin met the neighbouring shelf at two of four camera turns for Filters, Plumbing and Galley parts ("No
+// filters on the Lights shelf", again and again). shelfWrong asks jb3PinTap: a tap whose line passes within JOB_RAY of
+// the wanted shelf's spot (section 15's jobRayDist, as a machine's pin) is that shelf, whatever caught it first
+function jb3PinTap(id) { return typeof ray !== 'undefined' && typeof jobRayDist === 'function' && PLACE_OF.has(id) && jobRayDist(placeSpot(id)) < JOB_RAY; }
+// JB3_SCI_ON (note 21, "more jobs in the science area, especially early on"): FX10's science stream was only asked when the
+// board ran short, so the labs came up about once in two shifts. Now boardTopUp asks jb3Post each hour of your shift: while
+// no science-area job is up for you, one is posted from that stream's rows in the science rooms (SCI_ROOMS: the survey and
+// sample labs, the observatory, the chart room, the science corridor), up to SCI_PER[0] a shift in your first week (one from
+// 09:00, the next from 13:00: SCI_AT) and SCI_PER[1] after it (from 10:00). A room you've had a job in over the last two
+// days is passed over while another will do (JB2's jobRoomsRecent), so the place varies. Held for you to the shift's end
+// like the other top-ups (extra, xp 0), and counted toward the board's minimum, so the board isn't longer, just more science.
+// Only while the ship's upkeep has SCI_UPKEEP or more left in all (jb3Upkeep): once a steady player has the ship in order
+// (late in week 2), a small job would show nothing on the ship's board (machine_check 5v's "your jobs")
+// JB3_REC_ON (note 22, "some jobs on the bottom deck in the first week; not many, it's rare to go down there"): REC_N small
+// jobs on the rec deck in Days 2-7, one a shift day from 10:00, at least REC_GAP days apart (the days posted are kept in
+// flag 'jb3.rec', so a day the board is held for a training job just moves it on), from the rec deck's small-repair and
+// odd-job rows, in a room the first one wasn't in (flag 'jb3.recRoom'). After the first week nothing extra.
+// Each job is FX10's shape (chore 'fix', its stream's fixS) with j.jb3 = 's' or 'r'; fixOk's rules hold (a part under half
+// stock, the rec deck shut, your tier). All 10-20 minutes at the stop (the 40-minute rule).
+const SCI_ROOMS = new Set(['L', 'M', 'J', 'K', '=']), SCI_PER = [2, 1], SCI_AT = [540, 780, 600], REC_FROM = 600, REC_GAP = 2, REC_N = 2, REC_DAYS = [2, 7];
+const SCI_UPKEEP = 10;                                   // the ship's upkeep left (all systems) for a science job to be worth posting
+const jb3Upkeep = () => SYSTEMS.reduce((a, k) => a + (SHIP.upkeep && SHIP.upkeep[k] || 0), 0);
+const jb3Sci = j => { const k = j && jobRoomKey(j); return !!k && k.startsWith('2:') && SCI_ROOMS.has(k.slice(2)); };
+function jb3Fix(h, jobs, t, leave, rows, at, avoid, tag) {   // the first row from 'at' on that fixOk allows, a room in 'avoid' only if nothing else will do
+  const B = (Math.floor(h / 24)) * 1440;
+  for (const pass of [0, 1]) for (let i = 0; i < rows.length; i++) {
+    const [st, r] = rows[(at + i) % rows.length], pl = fixOk(r, jobs, B); if (!pl || (!pass && avoid.has(pl.deck + ':' + pl.room))) continue;
+    const j = { id: 'fix-' + r.id + '@' + h, machine: null, deck: pl.deck, room: pl.room, kind: 'chore', chore: 'fix', target: r.id, title: '', bring: null, tier: 1,
+                stops: [{ deck: pl.deck, placeId: r.place, mins: r.mins, tag: 'fix' }], urgency: 0, leave, posted: t, found: t, claimedBy: null, parts: r.part ? [r.part] : [],
+                status: 'open', extra: true, xp: 0, fix: r.id, fixS: st, sys: SYSTEMS.includes(r.sys) ? r.sys : null, tool: r.tool, jb3: tag };
+    if (jobs.some(x => x.id === j.id)) continue;
+    j.title = fixWord(j, 'title'); jobs.push(j); return j;
+  }
+  return null;
+}
+function jb3Post(h, jobs, t, m, end) {
+  if (!FIX_ON) return null;
+  const d = Math.floor(h / 24) + 1, B = (d - 1) * 1440, T = fixTable(), today = jobs.filter(j => j.jb3 && j.found >= B), leave = end - m;
+  const recent = () => jobRoomsRecent(t);
+  if (JB3_SCI_ON) {
+    const first = d <= 7, want = first ? (m >= SCI_AT[1] ? 2 : m >= SCI_AT[0] ? 1 : 0) : (m >= SCI_AT[2] ? 1 : 0), have = today.filter(j => j.jb3 === 's').length;
+    if (have < Math.min(want, SCI_PER[first ? 0 : 1]) && jb3Upkeep() >= SCI_UPKEEP && !jobs.some(j => boardForYou(j, t) && jb3Sci(j))) {
+      const rows = T.s.filter(r => { const pl = placeById(r.place); return pl && SCI_ROOMS.has(pl.room); }).map(r => ['s', r]);
+      if (rows.length && jb3Fix(h, jobs, t, leave, rows, (d * 7 + have * 3) % rows.length, recent(), 's')) return 's';
+    }
+  }
+  const rd = flag('jb3.rec') || [];
+  if (JB3_REC_ON && REC_DECK && d >= REC_DAYS[0] && d <= REC_DAYS[1] && m >= REC_FROM && rd.length < REC_N && !rd.some(x => d - x < REC_GAP)) {
+    const rows = [...T.p.map(r => ['p', r]), ...(T.o || []).map(r => ['o', r])].filter(x => x[1].place.startsWith('7-'));
+    const avoid = recent(), was = flag('jb3.recRoom'); if (was) avoid.add(was);
+    const j = rows.length ? jb3Fix(h, jobs, t, leave, rows, (d * 5) % rows.length, avoid, 'r') : null;
+    if (j) { flagSet('jb3.rec', rd.concat(d)); flagSet('jb3.recRoom', j.deck + ':' + j.room); return 'r'; }
+  }
+  return null;
 }
 // ---- end of slot: Systems engineer ----
 
