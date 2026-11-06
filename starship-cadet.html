@@ -49617,14 +49617,23 @@ function labStand997(e, a, notice) {
 // the island (the lab's own room first) say one of the tradition's `here` lines, never the same twice running; near the
 // end her close, once
 const LAB997_SATO = ['This is dust from the Pale Shoals. Every grain has a number. I named about four hundred of them.', 'Under the scope, ice has rings, like a tree. Count them and you know how long it travelled.',
-  'Hold it to your ear. Hear that? Nor can Mori. I hear it every time.', 'We write down what we see, not what we hope. That is the whole of science, really.', 'This one came off the hull. It hitched a ride for a week before we noticed.', 'Label first, then look. A sample without a label is just a rock.'];
+  'Hold it to your ear. Hear that? Nor can Mori. I hear it every time.', 'We write down what we see, not what we hope. That is the whole of science, really.', 'This one came off the hull. It hitched a ride for a week before we noticed.', 'Label first, then look. A sample without a label is just a rock.',
+  'The green one is from a moon nobody has named yet. I keep a list of names. Mori vetoes them all.', 'Gloves on. Not because it\'s dangerous. Because your fingers are greasy, and it\'s old.',
+  'That jar is a whole afternoon of the Shoals. It looks like nothing. It is not nothing.', 'If you hold your breath, you can see it sparkle under the lamp. Go on.'];
+// (RV33's note) the crowd's own lines beside the tradition's three `here` ones, so half an hour doesn't go round them four times;
+// a writer's t997.open-lab.crowd lines replace these
+const LAB997_CROWD = ['Sato let me label one last time. I spelt it wrong. It\'s still in there, spelt wrong.', 'I never know what to ask. I just like looking.', 'Is that the humming one? I thought it\'d be bigger.',
+  'Mori says the stripes are years. That\'s a lot of years.', 'I touched the comet ice. Through glass. Still counts.', 'Survey get the best rocks. Works get the best spanners. Fair.',
+  'Every time I come I learn one word. Tonight\'s is "regolith".', 'Don\'t breathe on the dust. I did once. Sato looked at me for a week.', 'I\'d work in here if it wasn\'t so quiet. I\'d talk to the rocks.'];
 function lab997Say(at, n, e, m) {
   const d = e.day, R = TR_TALK[e.id], s = at.find(a => a.p.id === 'sato') || tjAgent('sato');
   if (s && s.h && e.to - m <= 6) { if (R.wrap === d) return null; R.wrap = d; return [s, trLine('t997.open-lab.wrap', d, {}, ['That\'s the lab for tonight. Gloves back in the box. Thank you for asking things.'])]; }
   if (s && s.h && n % 3 === 0) return [s, trLine('t997.open-lab.show', Math.floor(n / 3) + d, {}, LAB997_SATO)];
   const lab = at.filter(a => a !== s && a.spot.room === 'L'), ring = lab.length ? lab : at.filter(a => a !== s); if (!ring.length) return null;
-  const a = ring[n % ring.length], H = ((e.ev.text || {}).here || []).map(x => x.t).filter(t => typeof t === 'string' && !/\{/.test(t)); if (!H.length) return null;
-  let k = (n + idHash(a.p.id)) % H.length; if (H.length > 1 && H[k] === R.last) k = (k + 1) % H.length;
+  R.hush = !R.hush; if (R.hush) return null;          // (RV33) every other crowd turn quiet: about half as many crowd bubbles
+  const W = typeof LINES !== 'undefined' && Array.isArray(LINES['t997.open-lab.crowd']) && LINES['t997.open-lab.crowd'].length ? LINES['t997.open-lab.crowd'].map(x => x.text) : LAB997_CROWD;
+  const a = ring[n % ring.length], H = ((e.ev.text || {}).here || []).map(x => x.t).concat(W).filter(t => typeof t === 'string' && !/\{/.test(t)); if (!H.length) return null;
+  R.ci = (R.ci || 0) + 1; const st = H.length % 5 ? 5 : H.length % 7 ? 7 : 1, k = (R.ci * st + d) % H.length;   // (RV33) round all of them before any comes again
   R.last = H[k]; return [a, H[k]];
 }
 // Sato at her island spot through the open lab (as Brennan at the shelf: again after a deck change)
