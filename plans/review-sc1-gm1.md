@@ -1,4 +1,4 @@
-# Review: GM1 (claude/p997-games 9175156), by SC1 for lead 49
+# Review: GM1 (claude/p997-games 9175156), by SC1 for lead 49 (2026-11-06 ~09:50 UTC)
 
 Game sha256 f8936885533aa382d80a180a459a0798cc8d07352605fef30eec2fa5f2b2e441 (matches). Switch GAMES997_ON. Notes 12, 40,
 41, 44 (plans/patch-0997.md on claude/lead-49). Probes in /tmp (tn.py, tut.py, wso.py, wsolead.py), run at 390x844
@@ -7,8 +7,8 @@ from a fresh game (?nosave&debug; skipTo, then playing frames as a player would)
 ## Checks
 - cadet_test, switch off, vs 0.99.6 (f6ff5ec1): ALL IDENTICAL (one shot, j_steer1, 6 px 1 level off, run under load: the
   test's own renderer-noise rule; RV33 had it clean).
-- Switch on (a copy): tiles_check ALL OK, join_check OK, disc_check ALL OK, events_check OK, interactions_check: see
-  verdict message; check_fast on the build and on the switched-on copy: see verdict message.
+- Switch on (a copy): tiles_check ALL OK, join_check OK, disc_check ALL OK, events_check OK, interactions_check OK.
+- check_fast: QUICK CHECK OK on the build (342 s) and on the switched-on copy (336 s).
 
 ## Probes (switch on)
 - **12 + 40 Tiles night, Day 2.** Before 20:00 a tap on Rina does nothing (it starts at 20:00, fine). At 20:01, tap
