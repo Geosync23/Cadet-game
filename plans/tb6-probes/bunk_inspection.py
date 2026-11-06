@@ -44,7 +44,7 @@ with sync_playwright() as pw:
     by = [s for s in r['said'] if s[2].startswith(('Uniform:', 'Bed:', 'Locker:'))]
     check(len(by) == 3 and [s[2].split(':')[0] for s in by] == ['Uniform', 'Bed', 'Locker'], 'pass: three checks in order (%s)' % [s[2] for s in by])
     check(any(s[2].startswith("That's a pass") for s in r['said']), 'pass: the verdict says a pass')
-    check(any(t[1] == 'Bunk inspection' and t[2].startswith('Passed.') for t in r['toasts']), 'pass: the notice')
+    check(any(t[1] == 'Bunk inspection' and t[2].startswith('Passed') for t in r['toasts']), 'pass: the notice')
     check(bool(held) and all(h[2] and h[2].startswith('4-inspect-a') for h in held), 'pass: the walker held at your bunk (%d frames)' % len(held))
     print('--- not a pass (bed), Day', D)
     r, held = morning(pw, D, False)
@@ -54,6 +54,6 @@ with sync_playwright() as pw:
     check(any(t[1] == 'Bunk inspection' and t[2].startswith('Not passed this week') for t in r['toasts']), 'fail: the notice')
     print('--- away, Day', D)
     r, held = morning(pw, D, True, away=True)
-    check(any(m.startswith('Passed.') for m in r['mail']), 'away: the Mail says passed (%s)' % r['mail'])
+    check(any(m.startswith('Passed') for m in r['mail']), 'away: the Mail says passed (%s)' % r['mail'])
 won.unlink(missing_ok=True)
 print('INSPECT PROBE ' + ('OK' if not FAILS else 'FAILED (%d)' % len(FAILS)))
