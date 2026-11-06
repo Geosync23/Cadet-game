@@ -50,3 +50,8 @@ CAREER CHECK OK, no FAIL lines.
 |---|---|---|
 | fresh_walk BUILD 3 (RV32) | 4 of 5 points PASS, 1 for BM26/TP1 to judge | (1) Day 1 briefing walked to at 08:20, its scene played 08:50-08:53 to "Ready when you are.", then the clock (no d1-briefing:met flag in the json itself); (2) Works bay arrow before 08:50, then "Clock in at the time clock" 08:53; (3) Day 2 08:45 solo meeting: arrow 08:31, scene 08:45-08:46, "Your first solo job" toast; 18:00 booths: arrow 17:46 "Leila shows you how", Booth 1 used 17:45 and 18:08, calls 18:08 and 18:29, but no Leila line in the record (the player had called home at 12:32); (4) errors []; (5) stuck [], long []. Record: plans/fw-0997b-r4.json |
 | p926_check | **FAIL, NEW** | item 15 only: "Brennan at the spice shelf by 18:40 (None)", "she opens, names three jars and says whose (0 lines)", "the mess guesses out loud (0 bubbles)", "joined, your guess card ([])", "the guess card is still open 3 ship minutes later (None)". OLD d7ad4c58: P926 CHECK OK, item 15 all ok (Brennan at the shelf 18:20, 7 lines, 7 bubbles, spice.guess). Likely TB6's note 51 (TRAD997_ON moves the supper after dinner); for TB6 to judge. |
+
+Update (SC1, 16:50): fresh_walk point 3's 18:00 booths: SC1's traced rerun of the same walk on candidate 2 shows the
+d2-booths beat fires (intro flag 'd2-booths:said' at Day 2 18:13; Leila's lines as speech bubbles while you're in
+Booth 1). fresh_walk's JSON keeps no bubbles or intro flags, so it could not show it
+(`FW_TRACE="SHIP.intro.done['d2-booths:said']"` logs it). So fresh_walk: all five points PASS.
