@@ -10,4 +10,23 @@ exit 1, `DIFFERENCES FOUND`; `DIFF state ['mem', 'calls', 'tris']` only; errors 
 px counts as 0.99.7 and 0.99.8 candidate 1, and every NEW picture pixel-identical to candidate 1's (0 px in all 15): all
 explained (hair caps, soles, tracker ring, Fonseca's bunk, the Day 2 crew from ~07:45: TRAD997's Spice supper move).
 
-## Result: running
+## Result: OK so far; perf from R6 pending
+
+| Check | Ran by | Result | Minutes | Key lines |
+|---|---|---|---|---|
+| cadet_test OLD BUILD (alone) | R2 | exit 1, all explained (above) | 1 | `DIFFERENCES FOUND`, errors none, taps the same |
+| intro_check (whole) | R2 | exit 0 | 43 | `OK` |
+| intro_check --dinner | R2 | exit 0 | 2 | `OK` |
+| intro_check --firsts | R2 | exit 0 | 0 | `OK` |
+| path_check | R2 | exit 0 | 1 | `PATH CHECK OK` |
+| arc_check | R2 | exit 0 | 0 | `ARC CHECK OK` |
+| lines_check | R2 | exit 0 | 0 | `lines_check: PASS (0 errors, 116 warnings)` |
+| lines_check --day | R2 | exit 0 | 4 | `lines_check --day: PASS (0 errors)` |
+| day_check 0, 1, 5, 7, 21, 22 | R2 | exit 0 each | 5 | `DAY CHECK OK` |
+| arrows_check endgo | R2 | exit 0 | 10 | `ARROWS CHECK OK` |
+| pf_f1_same OLD BUILD 10 | R2 | F1 OK; fingerprints differ by design | 0 | `F1 checks 23674 mismatches 0 None`, `page errors [] []`, fingerprints 30/30 differ (prints FAILED) |
+| pf_f1_same proof: OLD vs 0.99.8 c2 with every 0.99.7 switch and TP998 false | R2 | exit 0 | 0 | `fingerprints 30 differ 0 []`, `F1 checks 23674 mismatches 0`, `PF F1 SAME OK` |
+| fresh_walk BUILD 3 | R4 | exit 0, all five points pass | | briefing to "Ready when you are." 08:52, then the clock 08:53; Day 2 solo meeting (arrow 08:31); booths arrow from 18:00 at the floor pin, never Booth 1, 'd2-booths:said' 18:16; errors []; **stuck [], long [] (P fixed)**: the 21:38 toast "Really missing people. Find some company: the mess or the bow lounge." JSON plans/fw-0998b-r4.json on claude/checks-0996-r4 |
+| p926_check | R4 | exit 0 | | `P926 CHECK OK` |
+| perf_check BUILD OLD (alone) | R6 | running (started 22:07) | | |
+
