@@ -503,7 +503,8 @@ def part_set(b):
     # the tab draws at phone size
     pg.ev('devmodeOpen(true); DM_UI.tab = "set"; devmodeDraw()')
     txt = pg.ev("document.querySelector('#dmSheet .dmBody').textContent")
-    check('What\'s set: Day 10, Day 10: the promotion' in txt and 'approximate' in txt and 'Trained' in txt, f'set: the tab: {txt[:200]}')
+    pd = 9 if pg.ev("typeof CR_DAY8_ON !== 'undefined' && CR_DAY8_ON") else 10   # CR1 (0.99.7 note 55): the promotion beat on Day 9 with CR_DAY8_ON
+    check(f'What\'s set: Day {pd}, Day {pd}: the promotion' in txt and 'approximate' in txt and 'Trained' in txt, f'set: the tab: {txt[:200]}')
     small = pg.ev("[...document.querySelectorAll('#dmSheet button')].filter(b => b.offsetParent && b.getBoundingClientRect().height < 44).map(b => b.textContent)")
     check(not small, f'set: buttons under 44px: {small}')
     check(not pg.errors, f'set: errors {pg.errors[:3]}')
@@ -540,6 +541,7 @@ def part_career(b):
     pg.ev("devmodeRun('Clock', () => devmodeSkipTo(7 * 1440 + 9 * 60 + 30))")
     N = pg.ev("devmodeTestNeeds(SHIP.works).map(x => x[1])")
     check(N == ([True, True, False, True, True] if d8 else [False, True, True, True, True]), f'career: Day 8 09:30 test needs ({"only Making it safe missing" if d8 else "only the day missing"}): {N}')
+    if d8: pg.ev("devmodeRun('Making it safe', () => { if (SHIP.works.cur && SHIP.works.cur.id === 'm6') worksTrained('m6'); return null; })")   # CR1: the Day 8 lesson the day opened, finished first (the test follows it)
     pg.ev("DM_HOLD = false; devmodeTestOpen()"); pg.page.wait_for_timeout(700); pg.step(5)
     T = pg.ev("({ msg: DM_UI.msg, cur: SHIP.works.cur && SHIP.works.cur.id, j: SHIP.works.cur && SHIP.works.cur.j, test: SHIP.works.test })")
     check(T['cur'] == 't2' and T['j'] and T['test']['day'] == 8, f'career: Open the test now: {T}')

@@ -67026,7 +67026,7 @@ function crTestDay(d, m) {                               // promoAnnounce's test
 function crTestOpen(now) {                               // the same-day test opened that afternoon (the ladder's own rule waits for tomorrow)
   const W = SHIP.works; if (!crSameDay() || W.test.passed || W.cur || typeof ladderOpen !== 'function') return;
   const d = worksDay(now), m = now - (d - 1) * 1440, row = ladderRow('t2');
-  if (W.test.day !== d || !row || !WORK_MECH.t2 || !playerShiftOn(d) || m < CR_SAME.jobAt - 30 || m >= CR_SAME.until - 60 || worksOpened(W).has('t2')) return;
+  if (W.test.day !== d || !row || !WORK_MECH.t2 || m < CR_SAME.jobAt - 60 || m >= CR_SAME.until - 60 || worksOpened(W).has('t2')) return;   // (no playerShiftOn: the test's day is a workday already, crTestDay; Dev mode's landing day reads as excused)   // from 12:00 (Dev mode's hourly run reaches 12:00, not 12:30); its word at 13:00 (promoBeatsTick)
   ladderOpen(row, d, now);
 }
 function crReady(now, by, here) {                        // promoReady with the test today: Calder's word wherever you are, the Mail, the notice
@@ -75396,7 +75396,8 @@ function devmodeWake() {                                 // into your bed's room
 // day `by`, then the clock to `at` on `day` and you in the room, with `set` for what the beat waits on
 const DM_BEATS = [
   { id: 't2', get label() { return devmodeD8() ? 'Day 8: the test job' : 'Day 9: the test job'; }, get day() { return devmodeD8() ? 8 : 9; }, get by() { return devmodeD8() ? 7 : 8; }, get at() { return devmodeD8() ? CR_SAME.jobAt - 10 : 530; }, where: { deck: 5, room: 'w' },
-    set: W => { const d = devmodeD8() ? 8 : 9; if (d === 8) W.tr.m6 = 8; W.test = { tier: 2, day: d, tries: 0, passed: false }; } },   // 08:50 in the Works bay: Calder's test, held from 09:00 (CR1, CR_DAY8_ON: Day 8 12:50, Making it safe that morning, the test from 13:00)
+    set: W => { const d = devmodeD8() ? 8 : 9; if (d === 8) { W.tr.m6 = 8; if (W.cur && W.cur.id === 'm6') { W.cur = null; if (typeof incTrainClear === 'function') try { incTrainClear(shipNow()); } catch (e) { /* no incident */ } } }   // Making it safe done that morning (the lesson the day opened is over)
+      W.test = { tier: 2, day: d, tries: 0, passed: false }; if (d === 8 && typeof crTestOpen === 'function') crTestOpen(shipNow()); } },   // 08:50 in the Works bay: Calder's test, held from 09:00 (CR1, CR_DAY8_ON: Day 8 12:50, Making it safe that morning, the test from 13:00)
   { id: 'promo', get label() { return devmodeD8() ? 'Day 9: the promotion' : 'Day 10: the promotion'; }, get day() { return devmodeD8() ? 9 : 10; }, get by() { return devmodeD8() ? 8 : 9; }, get at() { return promoBeatsOn() ? PB_TIMES.summonsAt - 10 : 650; }, where: { deck: 5, room: 'w' } },   // 10:50 in the Works bay: her summons at 11:00 (08:05 for 08:15 with FX28's PROMO_BEATS_ON)
 ];
 if (P5_PROMO4) DM_BEATS.push(                           // Pillar 5 Step 6 (S6-3, W7): the Engine Specialist's beats
