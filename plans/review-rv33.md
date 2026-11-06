@@ -160,3 +160,21 @@ names_check OK, content_gen --check up to date.
 - Merged checks (all on; CL1 46259ef in the merge): EVENTS, BIGEVENTS OK; DAY CHECK OK Days 2, 3, 4, 6, 7; **JOIN CHECK
   FAILED: "saturday-run: not on in 400 days"** (CL1's: the cut run is still in TRAD_JOIN, and join_check tries every
   TRAD_JOIN id; events_check was taught the cut, join_check wasn't). FIXES NEEDED sent to CL1 (check-side). fridays, check_fast running.
+
+### Switched-on quick check, merged and alone (11:10-11:40 UTC)
+Each builder ran check_fast with switches OFF. On the week-1 merge with ALL on, check_fast FAILED two lines; isolated
+with machine_check / device_check on each branch alone, switch on:
+| build (on) | machine_check | device_check |
+|---|---|---|
+| 0.99.6 base f6ff5ec1 | OK (under load 18) | (base, round OK) |
+| CL1 46259ef | FAIL food runs; FAIL ship meters: your jobs (fix-sm-freezer@275 without meters) | running |
+| EV1 286ed5e | FAIL food runs | OK |
+| TB6 7b8a061 | FAIL food runs | - |
+| GM1 9175156 | OK | - |
+| merge (all on) | FAIL food runs | FAIL Schedule lists Day 6 07:00 Paddle club (1) |
+- food runs: identical each time: a 6th meals run, restock-meals@160 open 19:10-19:40 on the check's day 7 (a Sunday,
+  Sunday table 18:00-19:45), over the 2 h limit; coldMin 103. A near-miss in the existing game that any change of who
+  goes where tips: sent to the lead to find an owner (galley).
+- ship meters (CL1 alone): a small-repair kind with no meter mapping; a gap in the existing game exposed. Sent to the lead.
+- Paddle club: EV1's Day 6 07:00 showing has 2 planned alone, 1 in the merge: on the Schedule but doesn't happen. Fix asked of EV1.
+- CL1 ba61507 (join_check skips the cut run; Day 2 booths window 18:00-18:30): join rerunning on CL1 alone and the merge.
