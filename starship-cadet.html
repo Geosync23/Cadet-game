@@ -9754,7 +9754,7 @@ const SLOT_NEW = SAVE_SLOTS_ON && !NOSAVE ? (v => v === 'arrive' || v === 'monda
 var SLOT_HOLD = false;
 const SAVE_KEY = slotKey(SAVE_SLOT), SAVE_V = 2;
 const TRAD995_ON = true || URL_FLAGS.has('trad995');   // 0.99.5 (TB3; plans/patch-0995.md notes 8, 10, 19): Spice shelf supper tap to join, Name on the beam's spots, the tea corner's doorway (section 18's Traditions slot); off: 0.99.4. `?trad995` previews
-const GAMES997_ON = false || URL_FLAGS.has('games997');   // 0.99.7 (GM1; plans/patch-0997.md notes 12, 40, 41, 44): Tiles night in rounds, the Tiles tutorial step by step, Winner Stays On to watch and join, the music kept on in Lightdisc (sections 23 and 23b, the Games slot). off: the game as 0.99.6
+const GAMES997_ON = false || URL_FLAGS.has('games997');   // 0.99.7 (GM1; plans/patch-0997.md notes 12, 40, 41, 44): Tiles night in rounds, the Tiles tutorial step by step, Winner Stays On to watch and join (sections 23 and 23b, the Games slot; the Lightdisc music is AV1's SND_DISC). off: the game as 0.99.6
 // the traditions variety (0.93.2, FX24 for lead 37; CS1's pitch pages plans/trad-variety-pitch.html and -2.html on claude/crew-stories-pitch):
 // six weekly ones take turns from week 2 (TRAD_0932_WHEN: their rhythm with it on; week 1 unchanged), the user's fourteen new ones
 // (TRAD_0932_NEW, loaded only with it) and Brennan's tasting table after dinner in the galley (tasting-table-late, loaded as
@@ -78043,7 +78043,7 @@ const clock = new THREE.Clock(); let scrT = 0;
 function loop() {
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
   const run = !freezeSync();                             // section 15's pause (0.28.48) and a game of Tiles (0.28.50): nothing moves and ship time stands still; the view still draws
-  SND.frame(run || GAMES997_ON && !!(DISC.view && !PAUSE.on));   // section 27: sound suspends with pause, Tiles and a hidden tab; its loops tick. 0.99.7 note 44 (GM1): not in a Lightdisc game (the track playing goes on)
+  SND.frame(run);                                        // section 27: sound suspends with pause, Tiles and a hidden tab; its loops tick
   if (PAD.live) padTick(dt);                             // section 26: a game controller, once one has said hello (frozen or not: the panels)
   if (!run) clock.elapsedTime -= dt;                     // the frame clock too, so poses and blinks carry on where they stopped (0.28.50)
   if (run) {
