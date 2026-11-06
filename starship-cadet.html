@@ -9698,7 +9698,7 @@ function simTimers() {                                   // main loop, when not 
 function tickShip(dt) {
   if (document.hidden) return;                           // time never runs while the tab is hidden
   const m = Math.floor(SHIP.time.min), h = Math.floor(shipNow() / 60);
-  SHIP.time.min += dt * SHIP_RATE;
+  SHIP.time.min += dt * SHIP_RATE * (CAL997_ON && CL997_RATE ? CL997_RATE : 1);   // CL997_RATE: the Captain's address, slower while you're there (slot 'Calendar builder')
   if (SHIP.time.min >= 1440) { SHIP.time.min -= 1440; SHIP.time.day++; }
   if (Math.floor(SHIP.time.min) !== m) { updateClock(); if (typeof pausePlace === 'function') pausePlace(); if (typeof apptTick === 'function') apptTick(); if (typeof shiftTick === 'function') shiftTick(); if (typeof careerTick === 'function') careerTick(); }   // section 14: appointments kept or missed; your shift's start
   if (Math.floor(shipNow() / 60) !== h) saveGame();
@@ -9753,7 +9753,8 @@ const SAVE_SLOT = SAVE_SLOTS_ON && !NOSAVE ? (n => n >= 1 && n <= SLOT_N && n % 
 const SLOT_NEW = SAVE_SLOTS_ON && !NOSAVE ? (v => v === 'arrive' || v === 'monday' ? v : null)(slotRead(SAVE_BASE + '-new', true)) : null;
 var SLOT_HOLD = false;
 const SAVE_KEY = slotKey(SAVE_SLOT), SAVE_V = 2;
-const TRAD995_ON = true || URL_FLAGS.has('trad995');   // 0.99.5 (TB3; plans/patch-0995.md notes 8, 10, 19): Spice shelf supper tap to join, Name on the beam's spots, the tea corner's doorway (section 18's Traditions slot); off: 0.99.4. `?trad995` previews
+const TRAD995_ON = true || URL_FLAGS.has('trad995');
+const CAL997_ON = URL_FLAGS.has('cal997');   // 0.99.7 (CL1; plans/patch-0997.md notes 14 15 16 20 23 26 27 30 31 47): the traditions calendar's rules, the arrows to Pick-your-own, Harvest morning and the Captain's address, the address's pace (section 18's slot 'Calendar builder'); off: 0.99.6. `?cal997` previews   // 0.99.5 (TB3; plans/patch-0995.md notes 8, 10, 19): Spice shelf supper tap to join, Name on the beam's spots, the tea corner's doorway (section 18's Traditions slot); off: 0.99.4. `?trad995` previews
 // the traditions variety (0.93.2, FX24 for lead 37; CS1's pitch pages plans/trad-variety-pitch.html and -2.html on claude/crew-stories-pitch):
 // six weekly ones take turns from week 2 (TRAD_0932_WHEN: their rhythm with it on; week 1 unchanged), the user's fourteen new ones
 // (TRAD_0932_NEW, loaded only with it) and Brennan's tasting table after dinner in the galley (tasting-table-late, loaded as
@@ -10557,6 +10558,7 @@ function schedFrame(p, d) {
   const next = shiftBlocks(p, d + 1);                      // an early galley start tomorrow means an early night
   if (gp && gp.bedBy != null) bed = Math.min(bed, gp.bedBy);
   if (next && next.blocks) bed = Math.min(bed, (next.wake != null ? next.wake : next.blocks[0][0] - 35) - 410 + 1440);
+  if (CAL997_ON) { const he = cl997HostEarly(p, d + 1, false); if (he != null) bed = Math.min(bed, he - 410 + 1440); }   // CL1 (note 14): an early tradition's host to bed in time for it (the night's sleep held Tove to 06:40)
   if (INSPECT_ON && d >= 0 && WEEK_SHAPE[weekday(d + 1)].inspect && p.id === inspectWalker(d + 1)) bed = Math.min(bed, INSPECT_T0 - 60 - 410 + 1440);   // FX20b (RV19's M3): the walker in bed by 22:40 the night before, so the night's sleep doesn't hold them past 05:30
   if (EV_COMET_ON && COMET) bed = cometLate(p, d, bed);   // the comet's hosts stay up to its end (section 18's slot 'Comet builder'; COMET is undefined while it's off)
   bed = Math.round(Math.min(1430, bed));
@@ -10645,7 +10647,7 @@ const REC_DO = {
 function recHostEarly(p, d, shiftAt) {                  // shiftAt: their shift's start today (false on a day off): no use waking for one that clashes
   if (typeof EV_READY === 'undefined' || !EV_READY || !REC_TRAD_ON) return null;   // section 18 not run yet (EV_READY is a var: safe to ask before)
   for (const ev of REC_TRADS) if (ev.host === p.id && ev.at[0] < 600 && !(shiftAt && ev.at[1] > shiftAt - 15) && evDue(ev.when, d)) return ev.at[0] - (ev.wake != null ? ev.wake : 60) - 25;   // time for the toilet and a wash first
-  return null;
+  return CAL997_ON ? cl997HostEarly(p, d, shiftAt) : null;   // CL1 (note 14): the ship's early ones' hosts too (Tove at Pick-your-own; slot 'Calendar builder')
 }
 const REC_ROUND = { who: 'volkov-maeve', at: [600, 690], stops: 5, mins: 6 };   // her round: from 10:00-11:30, five machines, six minutes each
 const REC_CAP = { busy: 15, quiet: 6 }, REC_Q = 10, REC_TURN = [20, 40];
@@ -12064,7 +12066,7 @@ function devDay(d) {
   // the intro runs, so the heads-ups, the Schedule and the Tracked list have them. Beats that come to you (Zeke walking
   // up, a wash call at your bunk), the shift's own, meals, tea and traditions are listed already or need no heads-up.
   try { if (typeof introOn === 'function' && introOn() && typeof INTRO_WEEK !== 'undefined') for (const b of INTRO_WEEK)
-    if (b.day === d && DEV_BEATS[b.id] && b.where && Number.isInteger(b.where.deck))
+    if (b.day === d && DEV_BEATS[b.id] && b.where && Number.isInteger(b.where.deck) && !(CAL997_ON && b.id === 'd3-store'))   // CL1 (note 15, "the crew store should not be a tradition"): Day 3's store visit off the Schedule, its heads-up and arrow (Orla's first-visit lines still come when you go)
       out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckIn(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room, ...(b.stand ? { place: b.stand } : {}) }); } catch (e) { /* not yet */ }   // place: where you stand for it (item 81: the room's middle was the Chief's own seat, under her)
   try { if (P5_NIGHT && typeof p5nItems === 'function') p5nItems(d, out); } catch (e) { /* not yet */ }   // 28a (S6-1): your night shift, and Day 22's short day
   try { if (typeof puItems === 'function') out.push(...puItems(d)); } catch (e) { /* not yet */ }   // 24u (S5-2): the Senior Officer promotion's steps, with P5_PROMO3
@@ -18587,7 +18589,7 @@ function produceTake(S, n) {
 const galleyBirthdays = d => {
   const yd = typeof shipYearDay === 'function' ? shipYearDay(d) : ((d - 1) % 364 + 364) % 364 + 1, bday = p => typeof birthdayOf === 'function' ? birthdayOf(p) : p.birthday;
   const here = p => typeof aboard !== 'function' || (aboard(p, d) && (typeof guestStay !== 'function' || guestStay(p, d) !== 'leave'));
-  return schedPeople().filter(p => p.rank !== 'guest' && bday(p) === yd && here(p)).concat(typeof ROSTER_PLAYER !== 'undefined' && ROSTER_PLAYER && ROSTER_PLAYER.birthday === yd ? [ROSTER_PLAYER] : []);
+  return schedPeople().filter(p => p.rank !== 'guest' && bday(p) === yd && here(p) && !(CAL997_ON && !cl997Party(d))).concat(typeof ROSTER_PLAYER !== 'undefined' && ROSTER_PLAYER && ROSTER_PLAYER.birthday === yd ? [ROSTER_PLAYER] : []);
 };
 const galleyNames = ps => ps.map(p => p.player ? 'you' : galleyFirst(p)).join(' and ');
 // the day's cake, if any: { who: [people], name, gather }. A birthday (ours, above), or any of section 18's events
@@ -33019,8 +33021,20 @@ const LINES = JSON.parse([
   '{"text":"Down it goes. The floor feels like yours now.","id":"p4i6eo"}]',
   ',"cabin.spot.shelf":[',
   '{"text":"On the shelf, where you\'ll see it. It looks like yours now.","id":"376v8h"}]',
+  ',"cal.address.call":[',
+  '{"text":"The whole ship meets in the auditorium on the Rec deck at four. Follow the arrow and find a seat.","id":"1aipjdw"}]',
+  ',"cal.address.title":[',
+  '{"text":"The Captain\'s address","id":"1szzp77"}]',
   ',"cal.count":[',
   '{"text":"{n} traditions today","id":"1nnik25"}]',
+  ',"cal.lead.captains-address":[',
+  '{"text":"The Captain\'s address, {time}: {place}","id":"k2yjr9"}]',
+  ',"cal.lead.harvest":[',
+  '{"text":"Harvest morning, {time}: {place}","id":"v1thba"}]',
+  ',"cal.lead.lastLightGlass":[',
+  '{"text":"The Last Light, {time}: {place}","id":"pcibft"}]',
+  ',"cal.lead.pick-your-own":[',
+  '{"text":"Pick-your-own breakfast, {time}: {place}","id":"lh1skh"}]',
   ',"cal.member":[',
   '{"text":"You\'re a member","id":"1x53efu"}]',
   ',"cal.none":[',
@@ -45953,19 +45967,20 @@ function eventsOn(d) {
   for (const ev0 of evTable()) {
     const dd = EV_DAY_DRESS.size ? EV_DAY_DRESS.get(ev0.id + '@' + d) : null; if (dd && dd.drop) continue;   // a ship-wide event's day dress: not today, or today as changed (S6)
     const ev = dd ? dd.ev || (dd.ev = evDressed(ev0, dd.o)) : ev0, w = ev.when; let honorees = [];
-    if (w.birthday) { honorees = schedPeople().filter(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && (typeof guestStay !== 'function' || guestStay(p, d) !== 'leave')))); if (!honorees.length) continue; }   // only crew aboard that evening (reserve crew aren't yet; a leaver's gone by 15:00)
+    if (w.birthday) { honorees = schedPeople().filter(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && (typeof guestStay !== 'function' || guestStay(p, d) !== 'leave')))); if (!honorees.length || CAL997_ON && !cl997Party(d)) continue; }   // only crew aboard that evening (CL1: and a party day, slot 'Calendar builder') (reserve crew aren't yet; a leaver's gone by 15:00)
     else if (w.rotation != null) { const ids = evRotation(w, d) || []; honorees = schedPeople().filter(p => ids.includes(p.id) && (!w.dept || p.dept === w.dept) && (typeof aboard !== 'function' || aboard(p, d))); if (!honorees.length) continue; }   // a rotation's leavers or arrivals
     else if (w.ship) { const o = typeof eventOn === 'function' ? eventOn(d) : null; if (!o || o.id !== w.ship || o.day !== w.day) continue; }
     else if (w.date) { if (d !== w.date) continue; }
     else if (!(dd && dd.add) && !evDue(w, d)) continue;   // a day-dress 'add': a one-off copy on a day it doesn't fall
     if (ev.flag && !(typeof flag === 'function' && flag(ev.flag))) continue;   // waits for a story beat (bridge hour: 'bridge.invited')
     if (ev.unflag && typeof flag === 'function' && flag(ev.unflag)) continue;
+    if (CAL997_ON && ev.id === 'late-piano' && !w.ship && evDue(w, d - 1)) continue;   // CL1 (note 20): never two nights in a row
     if (ev.skip && ev.skip(d)) continue;                   // 0.83.2 (RA): a day it stands down (the rec talent night near the yearly one)   // 0.83 (RA): until a flag (film night in the junior common room, until it moves)
     if (!w.ship && typeof eventPauses === 'function' && eventPauses(ev, d)) continue;   // a ship-wide event's quiet days
     const names = honorees.map(p => p.name).join(', ').replace(/, ([^,]*)$/, ' and $1');   // 'A and B', 'A, B and C'
     out.push({ id: ev.id, name: ev.name, ev, day: d, from: ev.at[0], to: ev.at[1], honorees, names, first: honorees.length ? honorees[0].name.split(' ').slice(-2)[0] : '' });
   }
-  const drop0 = evBudget(out); for (const e of drop0) out.splice(out.indexOf(e), 1);
+  const drop0 = (b => CAL997_ON ? b.concat(cl997Clash(out.filter(e => !b.includes(e)), d)) : b)(evBudget(out)); for (const e of drop0) out.splice(out.indexOf(e), 1);
   EV_DAYS.set(d, out);                                   // (the birthday's time looks at its people's duty, and the galley rota's day asks for this day's events: it gets this list, the same array, as it is so far)
   const drop = drop0.concat(evBdaySlot(out)); for (const e of drop) if (out.includes(e)) out.splice(out.indexOf(e), 1);
   if (drop.length) EV_DROPPED.set(d, drop.map(e => e.id));
@@ -46017,6 +46032,7 @@ function evBudget(list) {
 // The ship's evenings are full from 17:00 to 22:30, so most birthdays cost one or two. After evBudget, so only the
 // day's kept ones count; a ship-wide event's gatherings and one-offs aren't traditions. Pure
 const EV_BDAY = { from: 1020, to: 1290, step: 15, at: 1215, gap: 60 };
+const EV_BDAY_997 = { from: 1140, to: 1200, step: 15, at: 1140, gap: 60 };   // CL1 (note 23): 19:00 to 21:00, after dinner (55 minutes: starts 19:00-20:00 on the quarter hour), nearest 19:00
 function evBdayBusy(p, d, a, b) {
   const gp = shiftBlocks(p, d), over = (x, y) => a < y + 15 && x - 15 < b;
   if (gp && gp.blocks) return gp.blocks.some(([x, y]) => over(x, y));
@@ -46024,14 +46040,15 @@ function evBdayBusy(p, d, a, b) {
   return p.shift === 'night' ? over(1260, 1440) : over(SHIFTS.day[0], SHIFTS.day[1] + 30);   // a day hand can be kept on to about 17:30
 }
 function evBdaySlot(list) {
+  const EB = CAL997_ON ? EV_BDAY_997 : EV_BDAY;            // CL1 (note 23): the after-dinner window
   const b = list.find(e => e.ev.when && e.ev.when.birthday); if (!b) return [];
   const len = b.to - b.from, kept = list.filter(e => e !== b && (evIsTrad(e.ev) || EV_COMET_ON && e.ev.when.ship === 'comet' || EV_VESSEL_ON && e.ev.when.ship === 'veyliVessel') && !evNewWk(e)), fresh = list.filter(e => e !== b && evIsTrad(e.ev) && evNewWk(e));   // evBudget's left out are out of the list already
-  const near = (o, s) => o.from < s + len + EV_BDAY.gap && s - EV_BDAY.gap < o.to, fixed = o => (o.ev.prio || 0) >= 2 || !!o.ev.meal || evRare(o.ev.when) >= 1 || !!o.ev.when.ship;   // the comet counts as a tradition for the birthday's hour, one that never gives way (FX25, EP1's A5)   // only a weekly one gives way (it's on again next week)
+  const near = (o, s) => o.from < s + len + EB.gap && s - EB.gap < o.to, fixed = o => (o.ev.prio || 0) >= 2 || !!o.ev.meal || evRare(o.ev.when) >= 1 || !!o.ev.when.ship || CAL997_ON && b.day <= 7 && o.id === 'quiz';   // CL1: your first week's quiz night (Day 4: Pell takes you, section 21's d4-quiz) never gives way   // the comet counts as a tradition for the birthday's hour, one that never gives way (FX25, EP1's A5)   // only a weekly one gives way (it's on again next week)
   let best = null;
-  for (let s = EV_BDAY.from; s <= EV_BDAY.to; s += EV_BDAY.step) {
+  for (let s = EB.from; s <= EB.to; s += EB.step) {
     const hit = kept.filter(o => near(o, s)), stay = hit.filter(fixed).length;   // one that never gives way: kept, and a time near it last
     const away = b.honorees.filter(p => evBdayBusy(p, b.day, s, s + len)).length;   // their own party: all of them there, first
-    const k = away * 1e6 + stay * 1e4 + hit.length * 1000 + Math.abs(s - EV_BDAY.at); if (!best || k < best.k) best = { s, hit, k };
+    const k = away * 1e6 + stay * 1e4 + hit.length * 1000 + Math.abs(s - EB.at); if (!best || k < best.k) best = { s, hit, k };
   }
   b.from = best.s; b.to = best.s + len;
   return best.hit.filter(o => !fixed(o)).concat(fresh.filter(o => near(o, best.s)));   // (a new weekend one near it gives way: evNewWk)
@@ -46125,6 +46142,7 @@ function eventFree(p, d, a, b, wake = 60) {
   if (F.night) { if (P.works && (over(0, P.workEnd) || a < 900)) return false; if (F.works && over(F.workStart - 10, 1440)) return false; }
   else {
     if (a < F.wake + wake) return false;
+    if (CAL997_ON && a < 600 && a < P.bed + 410 - 1440 + wake) return false;   // CL1 (note 14): really up by then (the night's sleep holds them to their bedtime + 6:50, as section 14's plans do)
     const gp = shiftBlocks(p, d);
     if (gp && gp.blocks) { if (gp.blocks.some(([x, y]) => over(x - 15, y + 15))) return false; }
     else if (F.works && over(F.workStart - 15, F.workEnd + 15)) return false;
@@ -46315,7 +46333,7 @@ function weekMail(d) {                                   // d: a Sunday; -> { at
     const on = eventsOn(x), lines = [];
     for (const e of on) {
       if (!evIsTrad(e.ev)) continue;
-      if (e.ev.when.birthday) { const l = fill(pick('birthday'), { names: e.names }); if (l) lines.push([e.from, l]); continue; }
+      if (e.ev.when.birthday) { const l0 = fill(pick('birthday'), { names: e.names }), l = l0 && CAL997_ON ? l0.replace('20:15', hhmm(e.from)) : l0; if (l) lines.push([e.from, l]); continue; }   // CL1: the party's real time (the words say 20:15: backlog CL1-1)
       if (evWeekly(e.ev.when) && !first) continue;
       const l = fill(pick('item'), { trad: e.name, time: hhmm(e.from), place: evPlaceName(e.ev), weekday: WEEKDAYS[weekday(x)] }); if (l) lines.push([e.from, l]);
     }
@@ -46857,6 +46875,7 @@ let EV_MIN = -1;
 function eventsTick() {
   tradJoinFrame(); tradWalkFrame(TJ_DT()); tradBeamFrame();               // 0.70.0: the leader's marker; a walk in one line
   bdayFrame();                                           // 0.92.5: the birthday's bubbles and your slice (slot 'Traditions engineer')
+  if (CAL997_ON) cl997RateFrame();                         // CL1 (note 27): the clock slows while you're at the address (slot 'Calendar builder')
   if (SHORT_FRIDAY) friAddressTick();                    // the Captain's Friday address, line by line (section 18f)
   if (WEEKEND_ON) sundayStoryTick();                     // the Sunday story, Holt's chapter of the week (FX9, weekend slot)
   if (P926_TRADS) talkTick();                            // 0.92.6 item 13: the Wren talks spoken from the stool (FX17, Traditions slot)
@@ -46874,6 +46893,7 @@ function eventsTick() {
   EV_MIN = m; eventTags();
   if (EV_LAST === null) EV_LAST = now; else if (now > EV_LAST) { eventsMail(EV_LAST, now); weekMailSend(EV_LAST, now); eventsNoted(EV_LAST, now); EV_LAST = now; } else EV_LAST = now;
   eventsDecor(now); eventsPlayer(now); tradJoinMinute(now); beamTraces(now); if (typeof tladMinute === 'function') tladMinute(now);   // 0.70.0: the tradition you could tap to join (marker, arrow, tip)
+  if (CAL997_ON) cl997LeadMinute(now);                     // CL1 (notes 14, 26, 31): the arrow to Pick-your-own, Harvest morning, the Captain's address (slot 'Calendar builder')
   pyoMinute(now);                                        // Pick-your-own: what you picked, on a tray (FX12, slot 'Traditions engineer')
   eventAdvance(now);                                     // a ship-wide event's phases (inert while none is due)
   eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play
@@ -48349,9 +48369,10 @@ function upcomingTraditions(fromMin, toMin) {
   for (let d = Math.floor(fromMin / 1440) + 1; d <= Math.floor(toMin / 1440) + 1; d++) for (const e of eventsOn(d)) {
     const at = (d - 1) * 1440 + e.from; if (at < fromMin || at > toMin) continue;
     const w = e.ev.where[0], pool = S.shared.get(w.deck + '|' + (w.room ? 'ev:' + e.id + ':0' : w.pool)) || [], pl = pool[0];
-    const room = pl && DECKS[pl.deck].rooms && DECKS[pl.deck].rooms[pl.room], one = !!pl && pool.every(q => q.room === pl.room);
+    const room0 = pl && DECKS[pl.deck].rooms && DECKS[pl.deck].rooms[pl.room], one = !!pl && pool.every(q => q.room === pl.room);
+    const cr = CAL997_ON && !one ? cl997Room(e) : null, room = cr ? DECKS[cr[0]].rooms && DECKS[cr[0]].rooms[cr[1]] : room0;   // CL1 (notes 14, 31): its places over several rooms (or its first pool empty: Pick-your-own's garden-tend): the room of its first deck's places, so the heads-up has an arrow
     out.push({ id: e.id, title: e.name + (e.names ? ' (' + e.names + ')' : ''), at, to: (d - 1) * 1440 + e.to, where: (room ? room.name + ', ' : '') + deckWord(w.deck),
-      deck: pl ? pl.deck : w.deck, room: one ? pl.room : null });   // for the device's Go there (deck, room key; null: a pool over several rooms)
+      deck: cr ? cr[0] : pl ? pl.deck : w.deck, room: cr ? cr[1] : one ? pl.room : null });   // for the device's Go there (deck, room key; null: a pool over several rooms)
   }
   return out.sort((a, b) => a.at - b.at);
 }
@@ -51808,6 +51829,124 @@ function vesselLooksInit() {
 }
 vesselLooksInit();
 // ---- end of slot: Vessel sky ----
+// ---- slot: Calendar builder (section 18; CL1 for lead 49, plans/patch-0997.md notes 14 15 16 20 23 26 27 30 31 47). New code of this seat's goes here ----
+// Behind CAL997_ON (section 13; ?cal997 previews). Off: nothing here runs, and the hooks elsewhere ask the switch first.
+// Pure parts (asked by the planner: the roster, the day and the tables only, never what the game built while running):
+// cl997Party, cl997Clash, cl997HostEarly, the jam's Captain and the Saturday run's cut. Live parts (the arrow, the clock
+// at the address) read where you are and are never asked by the planner. Only vars and function declarations here, as
+// eventsOn may run before this slot does at load.
+var CL997_PARTY = null, CL997_RATE = null, CL997_TOLD = 0;
+// birthdays (note 47, the user: "one in the first week, then slower; another in the 3rd week maybe"): a party at most
+// once every 14 days, in order from Day 1: a day with someone's birthday (aboard, as eventsOn's honorees) has one when
+// the last was 14 or more days before, never on a Friday (the Captain's address, the Works tea and the jam fill it: a
+// party at 19:00 left your first Works tea to Day 33). The others' birthdays still are (their own lines, "It's X's
+// birthday"), with no party, Mail or crew cake. From the roster: Days 4, 22, 41 and so on (plans/handover-cl1.md has the year)
+function cl997Hon(d) { const yd = shipYearDay(d); return schedPeople().filter(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && (typeof guestStay !== 'function' || guestStay(p, d) !== 'leave')))); }
+function cl997Party(d) {
+  if (!CAL997_ON) return true;
+  if (d < 1) return false;
+  const C = CL997_PARTY || (CL997_PARTY = { upto: 0, last: -1e9, on: new Set() });
+  for (let x = C.upto + 1; x <= d; x++) { if (x - C.last >= 14 && weekday(x) !== 4 && cl997Hon(x).length) { C.on.add(x); C.last = x; } C.upto = x; }
+  return C.on.has(d);
+}
+// your fixed items (note 16: Dawn swim and the bunk inspection, Day 4): a tradition you could go to (not a meal, not
+// prio 2 or more, not a birthday, not a ship-wide event's gathering or a one-off) that overlaps one of them that day is
+// left out that day (eventsOn adds it to EV_DROPPED, so the Mail, the Calendar and the Schedule agree). Your Thursday bunk
+// inspection, 06:20-06:50 round the walk from 06:30 (INSPECT_T0). Two traditions at once stay a choice (the voice
+// budget's). EV1's first-Thursday event joins this list when it's built. Pure
+// the first week's beats you go to at a set time (section 21's INTRO_WEEK, copied here as numbers: it's made after this
+// runs, and eventsOn may be asked before; plans/handover-cl1.md's probe checks they still match): d2-booths (calling
+// home, Day 2 18:00-19:00) and d3-store (Orla's store visit, Day 3 16:30-17:30), as [day, from, to] (RV33's week-1 probe).
+// Inside the function, as eventsOn may ask before this slot has run
+function cl997Beats() { return [[2, 1080, 1140], [3, 990, 1050]]; }
+function cl997Fixed(d) {
+  const out = [], sh = WEEK_SHAPE[weekday(d)];
+  if (INSPECT_ON && d >= 1 && sh && sh.inspect) out.push([INSPECT_T0 - 10, INSPECT_T0 + 20]);
+  for (const [x, a, b] of cl997Beats()) if (x === d) out.push([a, b]);
+  return out;
+}
+// a ship-wide event's gatherings that are fixed items too, by id, with the minutes kept clear round them: EV1's The Last
+// Light (the first Thursday, 14:00-14:30, the bow lounge; EV997_LIGHT_ON on claude/p997-events): 13:50-14:40; the comet
+// (Day 22, 21:30-22:40): from 21:10, as its people set off 18-28 minutes early (the department cup, 20:15-21:15, took two
+// of the telescope's once the birthday moved off it: on 0.99.6 a 19:30 party happened to block the cup)
+function cl997FixedIds() { return { lastLightGlass: [10, 10], cometLounge: [20, 0], cometScope: [20, 0], cometStern: [20, 0], cometCaptain: [20, 0] }; }
+function cl997Clash(list, d) {
+  const fx = cl997Fixed(d), ids = cl997FixedIds();
+  for (const e of list) if (ids[e.id] && e.ev.when && e.ev.when.ship) fx.push([e.from - ids[e.id][0], e.to + ids[e.id][1]]);
+  if (!fx.length) return [];
+  return list.filter(e => evIsTrad(e.ev) && !e.ev.meal && (e.ev.prio || 0) < 2 && !e.ev.when.birthday && fx.some(([a, b]) => e.from < b && a < e.to));
+}
+// an early tradition's host (Tove at Pick-your-own, 06:15) is up for it, as the rec deck's hosts are (section 14's
+// recHostEarly asks this with the switch on; the rec deck's own stay recHostEarly's): the latest wake that lets them
+// go, or null; schedFrame puts them to bed in time the night before. Pure
+function cl997HostEarly(p, d, shiftAt) {
+  for (const ev of SHIP_TRADITIONS) if (ev.host === p.id && ev.wake != null && ev.at[0] < 600 && ev.when && !ev.when.ship && !/^rec-/.test(ev.id) && !(shiftAt && ev.at[1] > shiftAt - 15) && evDue(ev.when, d)) return ev.at[0] - ev.wake - 25;
+  return null;
+}
+// late piano (note 20, "shouldn't happen two nights in a row"): eventsOn never has it on a day after it was due; and the
+// Captain doesn't take the piano at the jam on a night next to it (Thursday's piano, Friday's jam: the same bench two
+// nights running). Pure
+function cl997PianoNear(d) { const lp = SHIP_TRADITIONS.find(x => x.id === 'late-piano'); return !!lp && (evDue(lp.when, d - 1) || evDue(lp.when, d + 1)); }
+if (CAL997_ON) {
+  // Pick-your-own (note 14, "no one else shows up"): twice the odds of going (its .trad's who), so with only those really up
+  // by 06:30 (eventFree) the garden still has company
+  const pyo = SHIP_TRADITIONS.find(x => x.id === 'pick-your-own');
+  if (pyo && typeof pyo.who === 'function') { const w0 = pyo.who; pyo.who = (p, d, c) => Math.min(1, 2 * w0(p, d, c)); }
+  const jam = SHIP_TRADITIONS.find(x => x.id === 'jam');
+  if (jam && typeof jam.who === 'function') { const w0 = jam.who; jam.who = (p, d, c) => p.id === 'marrow' && cl997PianoNear(d) ? 0 : w0(p, d, c); }
+  // the Saturday run (note 30, cut 2026-11-06, the user: "doesn't work, and it's too much like Lap of the Wren. Get rid
+  // of it"): taken out of the table at load. Its file (content/traditions/saturday-run.trad), k 458 and its id stay
+  // parked and retired (design-doc.md); off, it's back as before
+  const i = SHIP_TRADITIONS.findIndex(x => x.id === 'saturday-run'); if (i >= 0) SHIP_TRADITIONS.splice(i, 1);
+  // the crew store isn't a tradition (note 15): the swap meet's Mail was signed "The crew store"; Oona Zielinski, who
+  // runs a stall at it (her card), signs it instead
+  const mk = SHIP_TRADITIONS.find(x => x.id === 'market'); if (mk && mk.from === 'The crew store') mk.from = 'Oona Zielinski';
+  if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // anything planned before now is planned again
+}
+// the room an arrow points at for tradition e: [deck, room key] of its rooms on its first place's deck, or null
+function cl997Room(e) {
+  if (!e.rooms) e.rooms = eventRooms(e.ev);
+  const all = [...e.rooms].map(r => r.split('|')), n0 = e.ev.where[0].deck, r = all.find(([n]) => +n === n0) || all[0];
+  return r ? [+r[0], r[1]] : null;
+}
+function cl997Text(kind, o) {
+  const L = typeof LINES !== 'undefined' && LINES[kind], e = Array.isArray(L) && L.length ? L[0] : null;
+  return e && typeof e.text === 'string' ? e.text.replace(/\{(\w+)\}/g, (_, k) => o && o[k] != null ? o[k] : '') : null;
+}
+// the arrow to it (notes 14, 26, 31; the user: "has no arrow", "an automatic arrow leading to it. Really encourage
+// attendance"): for the traditions here, from [0] minutes before its start to [1] minutes after (never past its end),
+// the goal arrow points at its room from anywhere aboard while you're awake, off shift, not riding, free of any other
+// arrow (a job's, one you chose), not joined and not in its rooms yet. In its rooms Tap to join's star and arrow take
+// over (tradJoinMinute); the address has none, so the arrow just goes once you're in the auditorium. On a short Friday
+// the address's notice comes with the arrow at 15:30, once. Once a ship minute (eventsTick). Live only
+var CL997_LEADS = { 'pick-your-own': [10, 20], harvest: [15, 30], 'captains-address': [30, 20], lastLightGlass: [15, 15, 'shift'] };   // [before, after, 'shift': on shift too] (The Last Light, EV1's: the day shift stands easy for it)
+function cl997LeadMinute(now) {
+  const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, g = IX_GOAL;
+  let e = null;
+  for (const x of eventsOn(d)) { const w = CL997_LEADS[x.id]; if (w && m >= x.from - w[0] && m < Math.min(x.from + w[1], x.to) && !SHIP.events.joined.includes(x.id + '@' + d)) { e = x; break; } }
+  const busy = (typeof sleeping !== 'undefined' && sleeping) || (typeof ride !== 'undefined' && ride) || (!(e && CL997_LEADS[e.id][2] === 'shift') && typeof devOnShift === 'function' && devOnShift());
+  const r = e && cl997Room(e), here = deckDef.num + '|' + roomAt(...player.here());
+  if (!e || busy || !r || e.rooms.has(here)) { if (g && g.cl997) clearGoal(); return; }
+  const key = e.id + '@' + d;
+  if (g && g.cl997 === key) return;
+  if (g && !g.cl997 && !g.tj) return;                   // another arrow (a job, a heads-up you tapped): left be
+  const rm = DECKS[r[0]].rooms && DECKS[r[0]].rooms[r[1]], place = (rm && rm.name ? rm.name + ', ' : '') + deckWord(r[0]);
+  setGoal({ deck: r[0], room: r[1], label: cl997Text('cal.lead.' + e.id, { time: hhmm(e.from), place }) || e.name + ', ' + hhmm(e.from) + ': ' + place, cl997: key });
+  if (e.id === 'captains-address' && CL997_TOLD !== d) { CL997_TOLD = d; toast(cl997Text('cal.address.title') || e.name, cl997Text('cal.address.call') || 'The whole ship meets in the auditorium at four. Follow the arrow.'); }
+}
+// the address's pace (note 27, "the Captain speaks a little too fast"): her lines are spread over 16:04-16:48 by the
+// ship clock (18f's FRI_TALK: Day 5's 22 lines, about 3.3 real seconds each); while you're in the auditorium for it the
+// clock runs at 0.6 (section 13's tickShip reads CL997_RATE), so each line has about 5.5 seconds and still lands on its
+// minute (a reload, a late arrival). Every frame (eventsTick), before 18f's friAddressTick. Live only
+function cl997RateFrame() {
+  CL997_RATE = null;
+  if (!SHORT_FRIDAY || typeof deckDef === 'undefined' || !deckDef) return;
+  const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  if (!friShort(d) || m < FRI_TALK[0] - 1 || m >= FRI_TALK[1]) return;
+  const e = eventsOn(d).find(x => x.id === FRI_ADDRESS.id);
+  if (e && friHere(e)) CL997_RATE = .6;
+}
+// ---- end of slot: Calendar builder ----
 
 // =====================================================================
 // 18f SHORT FRIDAYS AND THE CAPTAIN'S ADDRESS (the Fridays builder FR1; plans/fridays-plan.md rev 4, plans/fridays-build-brief.md)
@@ -52136,7 +52275,7 @@ function friAddressTick() {
     const l = L[i], a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(c => c.h && c.p && c.p.id === l.who);
     if (!a || typeof bubbleSay !== 'function') return;     // not here yet: tried again next frame, while it's still this line's turn
     FRI_SAID = [d, i];
-    bubbleSay(friSpeaker(a), l.text, Math.max(3.5, (a1 - a0) / L.length / SHIP_RATE - .4));
+    bubbleSay(friSpeaker(a), l.text, Math.max(3.5, (a1 - a0) / L.length / (SHIP_RATE * (CAL997_ON && CL997_RATE ? CL997_RATE : 1)) - .4));   // CL1 (note 27): at the slower clock, each line's longer
     return;
   }
   if (old) { FRI.mailed = d; return; }                   // an old save loaded after 16:50 (its first frame): over before the save knew of it

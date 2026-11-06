@@ -1,0 +1,24 @@
+@bank all
+// CL1 (0.99.7, plans/patch-0997.md notes 14, 26, 31; stand-in words for the writers to reword). Read only with
+// CAL997_ON (section 18's slot 'Calendar builder'). TEXTS: shown by the game, said by nobody.
+//   cal.lead.<id>     the arrow's label while it leads you to that tradition ({time} its start, {place} its room)
+//   cal.address.call  the notice at 15:30 on a short Friday: the Captain's address, and the arrow to it
+//   cal.address.title its title
+
+== cal.lead.pick-your-own
+- Pick-your-own breakfast, {time}: {place}
+
+== cal.lead.harvest
+- Harvest morning, {time}: {place}
+
+== cal.lead.captains-address
+- The Captain's address, {time}: {place}
+
+== cal.lead.lastLightGlass
+- The Last Light, {time}: {place}
+
+== cal.address.title
+- The Captain's address
+
+== cal.address.call
+- The whole ship meets in the auditorium on the Rec deck at four. Follow the arrow and find a seat.
