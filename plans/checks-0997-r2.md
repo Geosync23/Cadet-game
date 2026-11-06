@@ -36,4 +36,8 @@ Bisect (copies of NEW with switch lines set false; DECK_CREW compared at every v
 - every 0.99.7 switch off: the crew as OLD exactly;
 - CAL997_ON off alone: the Day 2 drift stays (not the calendar);
 - CH1's five off: only the Day 1 night 0.1 m goes (CH_SEAT etc., by design);
-- TP997, TRAD997, GAMES997 and EV997_* off together: the whole Day 2 drift goes. Split into the four: running.
+- TP997, TRAD997, GAMES997 and EV997_* off together: the whole Day 2 drift goes;
+- split, each off alone: **TRAD997_ON (TB6) off puts every Day 2 crew position back as OLD**; TP997_ON, GAMES997_ON,
+  EV997_* off alone: the drift stays exactly as NEW.
+So TB6's hosted traditions change the crew's plan from Day 2 ~07:45 (not the bunk inspection, which is Wednesdays; which TB6
+part not traced). Sent to BM26 and lead 50 (13:5x); BM26's disc_check #25 (Day 2 17:22, one of the pair on court) likely the same cause, not proven by me.
