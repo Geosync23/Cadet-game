@@ -123,4 +123,32 @@ Merge note: GM1 and TB6 both add their switch line after TRAD995_ON (section 13,
 - Reading corner (EV1's readprobe, Days 7, 21, 35): Esme hands the book round Day 7; Day 21 chapters 1-6 talked through
   in bubbles, your question card, the answer flagged; Day 35 your answer recalled ("{me} said someone's on the island")
   and chapters 7-12. (The probe's "cadet" for {me} is the game's no-name fallback; a real save has your name.)
-- Switched-on checks queued: bigevents, events, join, weekend, day 4 and 6, check_fast.
+- **dad2b9b, game 3920ea00...8ace (sha256 matched)**: the jigsaw 10:35-11:40 (my find), its Mail word 10:35; nothing else in the game.
+- Switched-on checks (on dad2b9b): bigevents, events, join, weekend, day 4 and 6, check_fast running.
+
+### CL1 traditions calendar (claude/p997-calendar), switch CAL997_ON (URL_FLAGS cal997, off)
+**5c93e8c, game eaf052ee...733b (sha256 matched).** Sections 13, 14, 16, 18 (+136, slot 'Calendar builder'), 18f, 19, 22.
+- Off: cadet_test vs 0.99.6 ALL IDENTICAL.
+- Alone, on: week-1 listing: Day 2 rec wall night out; Day 3 open door out; Day 4 dawn swim out, birthday 19:00; Day 6
+  Saturday run out; Day 8 birthday out. (The spice supper still at 18:15 here: TB6 moves it.)
+- 70-day sweep (cl1_sweep.py): birthdays off 13 at all hours -> on 4 (Days 4, 22, 41, 62), all 19:00, none on a
+  Friday, 14+ days apart; late piano never two nights running (also true off over 70 days; CL1 also keeps Marrow off the
+  jam next to it); Pick-your-own Days 3/10/17/24: off 1-3 people, on 4-9 with Cruz; Saturday run: off Days 6, 34, 62, on none.
+- Note 27 (cl1_pace.py): ship minutes per 10 real s during the address: auditorium 6.0 -> 3.6, elsewhere 6.0 both.
+- Note 15: Day 3's store visit off the Schedule, its heads-up and arrow only with the switch (devDay line 12070).
+- CL1's own checks queued: arrows_check, day 5, check_fast.
+
+### Week 1 merged: CL1 5c93e8c + EV1 dad2b9b + TB6 687838e8 + GM1 9175156 on d7ad4c58 (lead 49's ask)
+Local test branch rv33-testmerge 114fddb5 (not pushed), game e9173eb3...91fb8 off. Game conflicts: three one-line
+neighbours (section 13 switch lines; tradJoin: GM1's tiles lines then TB6's t997Join; eventsTick: GM1's line then CL1's).
+names_check OK, content_gen --check up to date.
+- All six switches on, week-1 listing (cal_merge_week1_on.json): Day 2 booths 18:00-19:00 then spice 19:15-20:00; Day 4
+  Last Light 14:00, birthday 19:00, no dawn swim; late piano Days 2 and 4; Day 6: no run, no garden hour, jigsaw
+  10:35-11:40 before sowing 11:45. Remaining overlaps are parallel optional evenings or the same item twice.
+- Arrow trace, fresh save, intro on, clocking in (merge_week1_arrows.py): Pick-your-own 06:05 Day 3; Last Light 13:45 Day 4;
+  the address 15:30 Day 5 (to 16:20); Harvest 09:15 Day 6. (The rest of each day is the job my probe took and never did.)
+- Should (CL1 + EV1): CL1's lead arrow for lastLightGlass names and targets the Promenade (cl997Room takes the event's
+  first room: Promenade, Lift plaza, Bow lounge) while Sato and the gathering are in the bow lounge; from the Promenade the
+  tap arrow takes over at 14:00 and leads to her (merge_lastlight_promenade.py), so it works, but 13:45-14:00 ends at the
+  Promenade with no arrow for a few minutes. Prefer the host's room.
+- Merged checks queued: events, bigevents, join, fridays, day 2/3/4/6/7, check_fast (all on).

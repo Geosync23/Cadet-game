@@ -1,0 +1,702 @@
+{
+ "0": {
+  "weekday": 6,
+  "items": [
+   {
+    "kind": "trad",
+    "id": "market",
+    "name": "Sunday swap meet",
+    "from": 630,
+    "to": 750,
+    "who": "ishikawa-orla",
+    "names": "",
+    "span": "10:30-12:30"
+   },
+   {
+    "kind": "trad",
+    "id": "rec-cup",
+    "name": "Lightdisc Cup",
+    "from": 690,
+    "to": 990,
+    "who": "pell",
+    "names": "",
+    "span": "11:30-16:30"
+   },
+   {
+    "kind": "trad",
+    "id": "sunday-table",
+    "name": "Sunday long table",
+    "from": 1080,
+    "to": 1140,
+    "who": "brennan",
+    "names": "",
+    "span": "18:00-19:00"
+   }
+  ]
+ },
+ "1": {
+  "weekday": 0,
+  "items": [
+   {
+    "kind": "intro",
+    "id": "d1-wash",
+    "from": 360,
+    "to": 390,
+    "who": "tomas",
+    "span": "06:00-06:30"
+   },
+   {
+    "kind": "trad",
+    "id": "sunrise-stretch",
+    "name": "Sunrise stretch",
+    "from": 390,
+    "to": 420,
+    "who": "rina",
+    "names": "",
+    "span": "06:30-07:00"
+   },
+   {
+    "kind": "intro",
+    "id": "d1-briefing",
+    "from": 530,
+    "to": 545,
+    "who": "calder",
+    "span": "08:50-09:05"
+   },
+   {
+    "kind": "intro",
+    "id": "d1-shadow",
+    "from": 545,
+    "to": 780,
+    "who": "torres-zeke",
+    "span": "09:05-13:00"
+   },
+   {
+    "kind": "intro",
+    "id": "d1-lead",
+    "from": 780,
+    "to": 990,
+    "who": "torres-zeke",
+    "span": "13:00-16:30"
+   },
+   {
+    "kind": "intro",
+    "id": "d1-end",
+    "from": 1004,
+    "to": 1025,
+    "who": "torres-zeke",
+    "span": "16:44-17:05"
+   },
+   {
+    "kind": "trad",
+    "id": "name-on-the-beam",
+    "name": "Name on the beam",
+    "from": 1025,
+    "to": 1060,
+    "who": "torres-zeke",
+    "names": "",
+    "span": "17:05-17:40"
+   },
+   {
+    "kind": "intro",
+    "id": "d1-dinner",
+    "from": 1080,
+    "to": 1140,
+    "who": "brennan",
+    "span": "18:00-19:00"
+   },
+   {
+    "kind": "intro",
+    "id": "d1-zeke-dinner",
+    "from": 1080,
+    "to": 1140,
+    "who": "torres-zeke",
+    "span": "18:00-19:00"
+   },
+   {
+    "kind": "trad",
+    "id": "running",
+    "name": "Gym club",
+    "from": 1155,
+    "to": 1200,
+    "who": "",
+    "names": "",
+    "span": "19:15-20:00"
+   },
+   {
+    "kind": "trad",
+    "id": "first-light",
+    "name": "First Light Cocoa",
+    "from": 1200,
+    "to": 1245,
+    "who": "raman",
+    "names": "",
+    "span": "20:00-20:45"
+   }
+  ]
+ },
+ "2": {
+  "weekday": 1,
+  "items": [
+   {
+    "kind": "trad",
+    "id": "rec-dawn-swim",
+    "name": "Dawn swim",
+    "from": 375,
+    "to": 405,
+    "who": "rina",
+    "names": "",
+    "span": "06:15-06:45"
+   },
+   {
+    "kind": "intro",
+    "id": "d2-solo",
+    "from": 525,
+    "to": 600,
+    "who": "calder",
+    "span": "08:45-10:00"
+   },
+   {
+    "kind": "intro",
+    "id": "d2-tea",
+    "from": 780,
+    "to": 825,
+    "who": "torres-zeke",
+    "span": "13:00-13:45"
+   },
+   {
+    "kind": "intro",
+    "id": "d2-health",
+    "from": 840,
+    "to": 870,
+    "who": "rina",
+    "span": "14:00-14:30"
+   },
+   {
+    "kind": "intro",
+    "id": "d2-booths",
+    "from": 1080,
+    "to": 1140,
+    "who": "eklund-leila",
+    "span": "18:00-19:00"
+   },
+   {
+    "kind": "trad",
+    "id": "spice-shelf-supper",
+    "name": "Spice shelf supper",
+    "from": 1155,
+    "to": 1200,
+    "who": "brennan",
+    "names": "",
+    "span": "19:15-20:00"
+   },
+   {
+    "kind": "trad",
+    "id": "knit-and-natter",
+    "name": "Knit and natter",
+    "from": 1200,
+    "to": 1290,
+    "who": "torres-zeke",
+    "names": "",
+    "span": "20:00-21:30"
+   },
+   {
+    "kind": "trad",
+    "id": "tiles-night",
+    "name": "Tiles night",
+    "from": 1200,
+    "to": 1290,
+    "who": "rina",
+    "names": "",
+    "span": "20:00-21:30"
+   },
+   {
+    "kind": "trad",
+    "id": "late-piano",
+    "name": "Late piano",
+    "from": 1300,
+    "to": 1345,
+    "who": "marrow",
+    "names": "",
+    "span": "21:40-22:25"
+   }
+  ]
+ },
+ "3": {
+  "weekday": 2,
+  "items": [
+   {
+    "kind": "trad",
+    "id": "pick-your-own",
+    "name": "Pick-your-own breakfast",
+    "from": 375,
+    "to": 415,
+    "who": "cruz-tove",
+    "names": "",
+    "span": "06:15-06:55"
+   },
+   {
+    "kind": "intro",
+    "id": "d3-pick",
+    "from": 540,
+    "to": 555,
+    "who": "torres-zeke",
+    "span": "09:00-09:15"
+   },
+   {
+    "kind": "intro",
+    "id": "d3-store",
+    "from": 990,
+    "to": 1050,
+    "who": "ishikawa-orla",
+    "span": "16:30-17:30"
+   },
+   {
+    "kind": "trad",
+    "id": "rec-paddle-club",
+    "name": "Paddle club",
+    "from": 1110,
+    "to": 1170,
+    "who": "holt",
+    "names": "",
+    "span": "18:30-19:30"
+   },
+   {
+    "kind": "intro",
+    "id": "d3-pell",
+    "from": 1110,
+    "to": 1200,
+    "who": "pell",
+    "span": "18:30-20:00"
+   },
+   {
+    "kind": "trad",
+    "id": "tasting-table",
+    "name": "Brennan's tasting table",
+    "from": 1200,
+    "to": 1245,
+    "who": "brennan",
+    "names": "",
+    "span": "20:00-20:45"
+   },
+   {
+    "kind": "trad",
+    "id": "rec-float-hour",
+    "name": "Float hour",
+    "from": 1290,
+    "to": 1335,
+    "who": "oduya",
+    "names": "",
+    "span": "21:30-22:15"
+   }
+  ]
+ },
+ "4": {
+  "weekday": 3,
+  "items": [
+   {
+    "kind": "trad",
+    "id": "lastLightGlass",
+    "name": "The Last Light",
+    "from": 840,
+    "to": 870,
+    "who": "sato",
+    "names": "",
+    "span": "14:00-14:30"
+   },
+   {
+    "kind": "intro",
+    "id": "d4-favour",
+    "from": 960,
+    "to": 1170,
+    "who": "kovac-zainab",
+    "span": "16:00-19:30"
+   },
+   {
+    "kind": "trad",
+    "id": "birthday",
+    "name": "Birthday",
+    "from": 1140,
+    "to": 1195,
+    "who": "",
+    "names": "Tamsin Haddad",
+    "span": "19:00-19:55"
+   },
+   {
+    "kind": "trad",
+    "id": "quiz",
+    "name": "Quiz night",
+    "from": 1200,
+    "to": 1290,
+    "who": "tomas",
+    "names": "",
+    "span": "20:00-21:30"
+   },
+   {
+    "kind": "intro",
+    "id": "d4-quiz",
+    "from": 1200,
+    "to": 1290,
+    "who": "pell",
+    "span": "20:00-21:30"
+   },
+   {
+    "kind": "trad",
+    "id": "late-piano",
+    "name": "Late piano",
+    "from": 1300,
+    "to": 1345,
+    "who": "marrow",
+    "names": "",
+    "span": "21:40-22:25"
+   }
+  ]
+ },
+ "5": {
+  "weekday": 4,
+  "items": [
+   {
+    "kind": "trad",
+    "id": "sunrise-stretch",
+    "name": "Sunrise stretch",
+    "from": 390,
+    "to": 420,
+    "who": "rina",
+    "names": "",
+    "span": "06:30-07:00"
+   },
+   {
+    "kind": "intro",
+    "id": "d5-mug",
+    "from": 780,
+    "to": 825,
+    "who": "halloran-emeka",
+    "span": "13:00-13:45"
+   },
+   {
+    "kind": "beat",
+    "id": "fridayAddress",
+    "from": 930,
+    "to": 1020,
+    "span": "15:30-17:00"
+   },
+   {
+    "kind": "trad",
+    "id": "captains-address",
+    "name": "The Captain's Friday address",
+    "from": 960,
+    "to": 1010,
+    "who": "marrow",
+    "names": "",
+    "span": "16:00-16:50"
+   },
+   {
+    "kind": "trad",
+    "id": "new-hands-tea",
+    "name": "New hand's tea",
+    "from": 1120,
+    "to": 1170,
+    "who": "calder",
+    "names": "",
+    "span": "18:40-19:30"
+   },
+   {
+    "kind": "trad",
+    "id": "jam",
+    "name": "Music jam",
+    "from": 1185,
+    "to": 1275,
+    "who": "",
+    "names": "",
+    "span": "19:45-21:15"
+   },
+   {
+    "kind": "trad",
+    "id": "tap-night",
+    "name": "Tap night",
+    "from": 1200,
+    "to": 1320,
+    "who": "",
+    "names": "",
+    "span": "20:00-22:00"
+   }
+  ]
+ },
+ "6": {
+  "weekday": 5,
+  "items": [
+   {
+    "kind": "trad",
+    "id": "rec-paddle-club",
+    "name": "Paddle club",
+    "from": 420,
+    "to": 465,
+    "who": "holt",
+    "names": "",
+    "span": "07:00-07:45"
+   },
+   {
+    "kind": "trad",
+    "id": "long-breakfast",
+    "name": "Long breakfast",
+    "from": 480,
+    "to": 570,
+    "who": "",
+    "names": "",
+    "span": "08:00-09:30"
+   },
+   {
+    "kind": "trad",
+    "id": "harvest",
+    "name": "Harvest morning",
+    "from": 570,
+    "to": 690,
+    "who": "",
+    "names": "",
+    "span": "09:30-11:30"
+   },
+   {
+    "kind": "trad",
+    "id": "window-sketch",
+    "name": "Window sketching",
+    "from": 585,
+    "to": 630,
+    "who": "alvarez-luca",
+    "names": "",
+    "span": "09:45-10:30"
+   },
+   {
+    "kind": "trad",
+    "id": "big-jigsaw",
+    "name": "The big jigsaw",
+    "from": 635,
+    "to": 700,
+    "who": "raman",
+    "names": "",
+    "span": "10:35-11:40"
+   },
+   {
+    "kind": "trad",
+    "id": "sowing",
+    "name": "Sowing morning",
+    "from": 705,
+    "to": 760,
+    "who": "cruz-tove",
+    "names": "",
+    "span": "11:45-12:40"
+   },
+   {
+    "kind": "intro",
+    "id": "d6-sowing",
+    "from": 705,
+    "to": 760,
+    "who": "tomas",
+    "span": "11:45-12:40"
+   },
+   {
+    "kind": "trad",
+    "id": "tiles-ladder",
+    "name": "Tiles ladder",
+    "from": 900,
+    "to": 990,
+    "who": "farouk-olu",
+    "names": "",
+    "span": "15:00-16:30"
+   },
+   {
+    "kind": "trad",
+    "id": "cook-along",
+    "name": "Cook-along",
+    "from": 930,
+    "to": 990,
+    "who": "dlamini-lukas",
+    "names": "",
+    "span": "15:30-16:30"
+   },
+   {
+    "kind": "trad",
+    "id": "every-song",
+    "name": "Every song",
+    "from": 1035,
+    "to": 1085,
+    "who": "torres-zeke",
+    "names": "",
+    "span": "17:15-18:05"
+   },
+   {
+    "kind": "trad",
+    "id": "film",
+    "name": "Film night",
+    "from": 1200,
+    "to": 1320,
+    "who": "",
+    "names": "",
+    "span": "20:00-22:00"
+   },
+   {
+    "kind": "trad",
+    "id": "observatory-night",
+    "name": "Observatory night",
+    "from": 1275,
+    "to": 1355,
+    "who": "",
+    "names": "",
+    "span": "21:15-22:35"
+   }
+  ]
+ },
+ "7": {
+  "weekday": 6,
+  "items": [
+   {
+    "kind": "trad",
+    "id": "bread-day",
+    "name": "Bread day",
+    "from": 420,
+    "to": 470,
+    "who": "brennan",
+    "names": "",
+    "span": "07:00-07:50"
+   },
+   {
+    "kind": "trad",
+    "id": "rec-slow-stretch",
+    "name": "Slow stretch",
+    "from": 480,
+    "to": 525,
+    "who": "nandakumar",
+    "names": "",
+    "span": "08:00-08:45"
+   },
+   {
+    "kind": "trad",
+    "id": "market",
+    "name": "Sunday swap meet",
+    "from": 630,
+    "to": 750,
+    "who": "ishikawa-orla",
+    "names": "",
+    "span": "10:30-12:30"
+   },
+   {
+    "kind": "trad",
+    "id": "rec-wso",
+    "name": "Winner Stays On",
+    "from": 690,
+    "to": 990,
+    "who": "pell",
+    "names": "",
+    "span": "11:30-16:30"
+   },
+   {
+    "kind": "trad",
+    "id": "lineCeremony",
+    "name": "Crossing the Line",
+    "from": 870,
+    "to": 915,
+    "who": "",
+    "names": "",
+    "span": "14:30-15:15"
+   },
+   {
+    "kind": "beat",
+    "id": "lineCeremony",
+    "from": 870,
+    "to": 915,
+    "span": "14:30-15:15"
+   },
+   {
+    "kind": "meet",
+    "id": "crossingLine:crossingCeremony",
+    "from": 880,
+    "to": 915,
+    "span": "14:40-15:15"
+   },
+   {
+    "kind": "trad",
+    "id": "reading-corner",
+    "name": "Reading corner",
+    "from": 960,
+    "to": 1020,
+    "who": "walsh-esme",
+    "names": "",
+    "span": "16:00-17:00"
+   },
+   {
+    "kind": "trad",
+    "id": "one-week-aboard",
+    "name": "One week aboard",
+    "from": 1035,
+    "to": 1075,
+    "who": "torres-zeke",
+    "names": "",
+    "span": "17:15-17:55"
+   },
+   {
+    "kind": "trad",
+    "id": "sunday-table",
+    "name": "The Line supper",
+    "from": 1080,
+    "to": 1185,
+    "who": "brennan",
+    "names": "",
+    "span": "18:00-19:45"
+   },
+   {
+    "kind": "trad",
+    "id": "lap-of-the-wren",
+    "name": "Lap of the Wren",
+    "from": 1230,
+    "to": 1275,
+    "who": "tomas",
+    "names": "",
+    "span": "20:30-21:15"
+   }
+  ]
+ },
+ "8": {
+  "weekday": 0,
+  "items": [
+   {
+    "kind": "trad",
+    "id": "sunrise-stretch",
+    "name": "Sunrise stretch",
+    "from": 390,
+    "to": 420,
+    "who": "rina",
+    "names": "",
+    "span": "06:30-07:00"
+   },
+   {
+    "kind": "trad",
+    "id": "five-minute-skills",
+    "name": "Five-minute skills",
+    "from": 1095,
+    "to": 1125,
+    "who": "nakamura-bilal",
+    "names": "",
+    "span": "18:15-18:45"
+   },
+   {
+    "kind": "trad",
+    "id": "rec-chiefs-talk",
+    "name": "Chief's talk",
+    "from": 1140,
+    "to": 1185,
+    "who": "",
+    "names": "",
+    "span": "19:00-19:45"
+   },
+   {
+    "kind": "trad",
+    "id": "running",
+    "name": "Gym club",
+    "from": 1155,
+    "to": 1200,
+    "who": "",
+    "names": "",
+    "span": "19:15-20:00"
+   }
+  ]
+ }
+}
