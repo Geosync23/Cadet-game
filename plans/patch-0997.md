@@ -129,3 +129,4 @@ CL1 owns the rules (no clashes, piano spacing, birthday times and spacing, arrow
 | 47 (CL1, later) | No birthday parties on Fridays (they knocked out the Friday Works tea): parties Days 4, 22, 41, 62, 77, 94 (about 19 a year) |
 | (CL1) | Day 22: the comet's gathering is a fixed item, so the department cup steps aside that day (back Day 50) |
 | 4 (CH1) | Sofas lose their throw cushion (it sat where the end sitter sits); mess / bow lounge sofas still touch the back by a few cm |
+| 13/29 (AV1, later) | Beside the piano or jam the live music is louder than the ship's own music (still under the engine hum); one number each if you want it softer |
