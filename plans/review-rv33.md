@@ -188,3 +188,21 @@ with machine_check / device_check on each branch alone, switch on:
   19:00 party, the words). Found via JB3's report to me; my run confirms it on CL1 alone.
 - EV1 af18afd (game 72de6c46...c953, matched; paddle club to 14:00-15:00 Day 6): cadet_test off ALL IDENTICAL; device_check OK on EV1 alone (on) and on the merge (all on). **EV1 PASS carried.**
 - Sunday food runs (machine_check): JB3 has a fix behind JB3_FOOD_ON (claude/p997-jobs 35ab083; RV32's to review).
+
+### CL1 bb26552 (game b2ab09ae...8e69, unchanged since ba61507): PASS (12:10 UTC)
+- bb26552 changes only food_check: with CAL997_ON the cake's 'out' sample moves after the party (bdayTableOut keeps the
+  cake on the party's table from 30 min before to 15 after: existing design; the Mail's "out from 18:45" for a 19:00 party
+  follows the same rule as 0.99.6's "from 17:45" for 18:00). Game check: at 19:20 Day 4 bdayTableOut true, 29 crew at the
+  birthday. FOOD CHECK OK on CL1 alone (on). Sent PASS to CL1, lead 49, BM25.
+- arrows_check: my run on 46259ef reached Day 27 with no FAIL before my script's 3 h limit stopped it; CL1's own: OK.
+
+### SC1 words for TB6 (claude/p997-words ab0e13e, game 0a100c8e...8344): PASS
+Only LINES changed; words baked, names OK, lines_check PASS, cadet_test off ALL IDENTICAL. TB6's probes (on): teach,
+bread, open lab show the new words; bunk_inspection's "the notice" FAIL is the probe matching "Passed." exactly (the new
+notice reads "Passed: uniform, bed and locker all in order."): not a fault.
+
+### JB3 35ab083 + 1bbed58 (game 352656bf...4c54), taken over from RV32 (lead 49's go, 11:50 UTC)
+Test build: BM25's staging aef7c14 + JB3 1bbed58 + CL1 ba61507 + EV1 af18afd (local /tmp/rv33/wt-all; 31 switches;
+flipper /tmp/rv33/jb3/flip.py, copied to plans/rv33-probes/jb3_flip.py). Runs: machine_check all-on with and without
+JB3_FOOD_ON, JB3_FOOD + each of CL1/EV1/TB6/MV1 alone, JB3's own five, a planted 5v fault (fix-* jobs lose their meters
+while upkeep remains: must FAIL); food 1 7 and day 7 all-on; cadet_test off; check_fast on the commit. Results below when in.
