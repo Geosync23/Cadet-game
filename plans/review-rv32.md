@@ -76,3 +76,19 @@ Sections: 15b (doable, boardLessonName, ixJobStep label, ixHold), 17 (gardenCarr
   was missed (m1 'ask', no arrow to it the rest of the day). The ladder then ran a day late: m1 Day 3, m4 Day 4, m5 Day 5,
   m7 over the weekend to Day 8; m6 needs m7 used once, so Day 9 at the earliest. tr at Day 8 17:00: m1 3, m3d 3, m3i 4, m4 4,
   m5 5, m2 8, m7 8. Note 55's Day 8 test holds only when week 1 has no slip; CR1's Day 8 runs start from a Dev-set career.
+- arrows_check promo on 2f2b93e (a Dev-set career, the planned week): ARROWS CHECK OK; test Day 8 passed first try, officer Day 9.
+- CR1's fix 5d5acbf (game 7130166dd7655ca499425c8881d5802ff4ab1c034002de167b88d7aba98bc876; switches now false on the branch;
+  with CR_DAY8_ON Making it safe needs only its day, goes first among big rows from Day 8, a carried lesson is parked):
+  the same fresh-save walk, four switches on (results/fresh_walk-cr1-5d5acbf.txt, trace only: the machine restarted at
+  Day 9 06:00, so no JSON): the same Day 2 slip (m1 missed at 10:42, a day late after), and still: Day 8 06:10 m6:meet,
+  10:32 m6:do, test set Day 8 by 11:33, 12:33 t2:do, passed by 14:14; Day 9 the scanner (m7). Note 55 holds in a slipped week.
+  The needs arrow over a lesson meeting and 'ask' with no arrow: backlog CR1-3 (TP1 is on it for lead 49).
+
+### 4. JB3 (claude/p997-jobs 43a96ae, then e96ec5a): notes 3, 21, 22 (+ CR1-2 tea tap): in progress
+43a96ae game dd9696ca644ea673bf41a1c5829dc422177c4c74f237cfc8825b98c695ea958a; e96ec5a game bae8e769c64c57620bdbd3ec954c7d14c47c8b18a2d145248e2f05f32dd9456d.
+Sections: 15 (fetch toast 1 line; e96ec5a: choreThingTap), 17 (jobsHour crew claim 2 lines, shelfWrong, boardTopUp hook, slot).
+- Off 43a96ae: cadet_test vs 0.99.6 ALL IDENTICAL.
+- Fresh save, intro ON, follower, 3 switches on, Days 0-6 (results/fresh_walk-jb3-43a96ae.txt, trace of jb3 jobs; the machine
+  restarted at Day 7): science jobs posted and done Day 1 x2 (sample lab balance 10:02, science corridor light 14:04), Day 2 x1
+  (+1 more posted 13:04, not taken), Day 3 x2, Day 4 x1, none Days 5-6; rec deck: Day 2 a shower job (posted 11:02, not taken,
+  lapsed at shift end), Day 4 the pool drain (taken and done). As the notes ask.
