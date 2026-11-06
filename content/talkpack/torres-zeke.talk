@@ -11,6 +11,7 @@ them: Reyes leaves me notes. Today's said "She's not sulking. She's shy." Shy.  
 ask: Go on, then. Which machine aboard do you think has the most personality?
 listen: Do you really talk to the coils?
   them: Course. Properly, too. They don't answer. Well. They hum differently.   #funny
+listen2: The lift. Do you really talk to the coils?
 share: The washer on Deck 4. It hates Tuesdays.
   them: Ha! It does. You've been listening to it. That's the whole job, that.   #warm
 cheer: The coffee machine. Pure drama.
@@ -24,6 +25,7 @@ them: Kovac says my tension's "brave". I think that's a compliment.
 ask: Have you got a colour you'd wear every day, if you could?
 listen: Who taught you to knit?
   them: Kovac, mostly. Dahl tried first. Dahl gave up. Kovac doesn't give up.   #funny
+listen2: Green, I think. Who taught you to knit?
 share: Something warm. Orange, maybe.
   them: Orange! Works orange. Good. Because that's what it is. Too late now.   #funny
 cheer: Whatever hides the gravy.
@@ -37,6 +39,7 @@ them: I say "the light came home". Takahashi: "the night came home". A year, we'
 ask: Is there a song that takes you right back somewhere?
 listen: Who's right, honestly?
   them: Me. Probably. Farouk says it's both. Farouk's a diplomat.   #funny
+listen2: Yes, a lullaby. Who's right, honestly?
 share: One from home. I'd know it anywhere.
   them: Hum it at the jam on Friday. Someone'll pick it up. Someone always does.   #warm
 cheer: I'll just sing "came home" and mumble.
@@ -50,6 +53,7 @@ them: And look at you now. You know where the good spanners are.   #warm
 ask: What do you remember most, from that first day?
 listen: What was your first day like, here?
   them: Calder had me on scrubbers for a month. Best month. Don't tell her.   #funny
+listen2: The noise. What was your first day like?
 share: You meeting me. It helped.
   them: Ah. Well. That's, er. Right. That's lovely. Right, onward.   #warm
 cheer: The lift. I said "Four, please" to a wall.
@@ -66,6 +70,7 @@ them: I eat lunch there sometimes. Me, a sandwich, and three coils humming along
 ask: Have you been down to see the engines yet?
 listen: What's it like down there?
   them: Warm. Loud, then not loud, once you're used to it. Like standing inside a song.   #warm
+listen2: Just a peek. What's it like down there?
 share: Not yet. I'd like to.
   them: Come with me one day. I'll introduce you. Formally. They like manners.   #funny
 cheer: Once. Wrong lift button.
@@ -78,6 +83,7 @@ them: The silly ones are usually the ones nobody else dared to ask.
 ask: What's something you've wanted to ask, but haven't?
 listen: Were you a question-asker, back then?
   them: Constantly. Calder once answered three in a row without looking up. A record.   #funny
+listen2: Loads, honestly. Were you a question-asker?
 share: Why the bay's painted orange.
   them: Good question. Annoying, but good. I don't know. I'll find out. Properly.   #funny
 cheer: Where the good biscuits are kept.
@@ -91,6 +97,7 @@ them: She keeps one back for me. I've never asked. I'm too scared to ask.   #fun
 ask: Are you a first-in person or a last-in person?
 listen: Why are you always last?
   them: I say good morning to the coils. Then I check they heard. It adds up.   #funny
+listen2: Middle, mostly. Why are you always last?
 share: First in. I like a quiet mess.
   them: Oh, that's lovely. The mess before anyone's in it. Like a held breath.   #warm
 cheer: Whenever my legs agree.
@@ -102,6 +109,7 @@ them: I hum when I think. Something about a lighthouse. I've never known the res
 ask: Do you hum or sing, when nobody's listening?
 listen: How does the lighthouse bit go?
   them: Mm-hm, lighthouse, mm-hm. That's the whole of it. It's very moving.   #funny
+listen2: Hum, mostly. How does the lighthouse bit go?
 share: In the washroom. Badly.
   them: Best echo aboard. Till ten. Then the water's cold and you sing faster.   #funny
 cheer: Only when you've started it.
@@ -115,6 +123,7 @@ them: Mostly coils. Sometimes just "Tired. Good night." That's coils too, really
 ask: Notes and letters. Keeper, or thrower-out?
 listen: What's the best note so far?
   them: "She sang tonight. Thought you'd want to know." Coil three. I nearly cried.   #warm
+listen2: Thrower-out, sadly. What's the best note?
 share: Keeper. I can't throw a note away.
   them: Same. Paper's light. You can carry a lot of it before it gets heavy.   #warm
 cheer: Only the ones with biscuits.
@@ -128,6 +137,7 @@ them: Calder did that with me. I hated it. Then I loved it. Then I pinched it.  
 ask: Do you learn better by watching, or by doing?
 listen: What if I get it wrong?
   them: Then we find out why. That's the best bit. Right first time teaches you half as much.   #warm
+listen2: Watching first. What if I get it wrong?
 share: Doing. Watching makes me fidgety.
   them: Me too. I'm hopeless at watching. My hands keep reaching for things.
 cheer: Wrong first, then watching.
@@ -141,6 +151,7 @@ them: Nobody has to knit. I just like a room full of people making things.   #wa
 ask: What would you bring, if you came?
 listen: What actually happens there?
   them: Tea. Talking. Kovac fixing my dropped stitches without a word. That's the main event.   #funny
+listen2: Some mending. What actually happens there?
 share: Just myself. Is that allowed?
   them: More than allowed. Half the circle comes to sit. The other half talks. Both count.
 cheer: Something to eat. Is that making?
@@ -154,6 +165,7 @@ them: We all stood up and clapped. Dahl sat down. It was very moving.   #funny
 ask: What's the best thing you've finished lately?
 listen: Have yours ever matched?
   them: Never. My things have a long sleeve and a hopeful sleeve. It's a style.   #funny
+listen2: A tidy bunk. Have yours ever matched?
 share: A long job off the board.
   them: That's a good finish. The panel going back on. Click. Lovely sound.   #warm
 cheer: A whole dinner. And seconds.
@@ -167,6 +179,7 @@ them: She knows every fan aboard by its sound. That's not cold. That's caring, i
 ask: What do you make of the Chief, honestly?
 listen: How long have you worked for her?
   them: Long enough to tell her "Hm"s apart. There are six. I'm learning a seventh.   #funny
+listen2: Kind, I think. How long have you known her?
 share: Strict, but fair.
   them: That's her. Fair first. She'd be pleased you said fair. She'd never show it.
 cheer: Terrifying. The good kind.
@@ -179,6 +192,7 @@ them: Steady as anything. Never sulks. I'll say hello to her later. She's earned
 ask: Is there someone aboard who does loads and never gets noticed?
 listen: What's coil one like, then?
   them: The eldest. Bit grumpy in the mornings. Fine by lunch. Like me, really.   #funny
+listen2: The cleaners. What's coil one like, then?
 share: The night shift. All of them.
   them: Yes. Reyes. Keane. They keep her going while we sleep. Nobody thanks the night.   #warm
 cheer: The tea urn. Never a day off.
@@ -192,6 +206,7 @@ them: Takahashi says I'll never do it. Takahashi will eat those words. The right
 ask: Got something you want to get properly good at?
 listen: Which song are you learning?
   them: Not the lighthouse one. Too risky. A short one with a chorus. Choruses forgive you.   #funny
+listen2: Knots, maybe. Which song are you learning?
 share: My work. I want to be really good.
   them: You will be. You already ask the right things. The rest is just time.   #warm
 cheer: Sleeping through the night.
@@ -204,6 +219,7 @@ them: Good day. I've been singing all shift. Halloran's asked me to sing quieter
 ask: What's put a song in you lately?
 listen: Go on. Tell me the good things.
   them: Coil three settled first try. And there was pie. Two good things. A great day.   #warm
+listen2: Good lunch. Go on. Tell me the good things.
 share: Getting one thing properly done.
   them: Yes. One thing, properly. Then you can sing about it. I do.   #funny
 cheer: Nobody asking me to sing quieter.
@@ -216,6 +232,7 @@ them: Day off. I meant to sit still. I've sat still for eleven minutes. A person
 ask: Are you good at days off? Properly good?
 listen: What did you do after minute eleven?
   them: Went to see the coils. Just to say hello. Came back. Went again.   #funny
+listen2: Not really. What came after minute eleven?
 share: Very. I could teach a class.
   them: Please do. I'll sit at the front. I'll fidget, but I'll sit at the front.   #funny
 cheer: Worse than you, probably.
@@ -227,6 +244,7 @@ them: The Friday jam. Someone always starts a song nobody knows the end of. It's
 ask: What would you play, if you played something?
 listen: What do you play?
   them: Nothing, really. I sing. Loudly. Someone hands me a tambourine to keep me busy.   #funny
+listen2: Drums, maybe. What do you play?
 share: I'd like to learn something. Anything.
   them: Come on Friday. Someone'll lend you something. Farouk lends everyone everything.
 cheer: The tambourine. Low risk.
@@ -239,6 +257,7 @@ them: She checked once. I'd done thirty-eight. She didn't say a word. She didn't
 ask: How do you take your tea? Or don't you?
 listen: Does forty really matter?
   them: To Kovac. So to me. And honestly? It's better at forty. Don't tell her I said so.   #funny
+listen2: Milky, please. Does forty really matter?
 share: Strong. Stand-a-spoon-in strong.
   them: A Works brew. Halloran would approve. The whole mug rack would approve.   #funny
 cheer: However the machine does it.
@@ -251,6 +270,7 @@ them: Something always on. A ship's too quiet for me without it.
 ask: Do you like quiet, or a bit of noise?
 listen: What do you play most?
   them: Whatever's on top of the pile. Then I sing over it with the wrong words. Every night.   #funny
+listen2: Quiet, mostly. What do you play most?
 share: A bit of noise. Like home.
   them: Yes. Home's never silent, is it. Someone's always clattering. Comforting, that.   #warm
 cheer: Quiet. I'll avoid your corridor.
@@ -264,6 +284,7 @@ them: He says he'll take up fishing. He's never fished. He'll fish near an engin
 ask: What would you do with your days, if you stopped working?
 listen: What's he like, away from engines?
   them: Restless. Like me. Calder would say it runs in the family. She'd be right.   #warm
+listen2: Read a lot. What's your dad like off duty?
 share: Learn to cook. Properly.
   them: Properly! Good. That's the word. I'll come and eat it. Properly.   #funny
 cheer: Sleep. For about a year.
@@ -277,6 +298,7 @@ them: I've dropped hundreds of stitches. She finds every one. Quietly. Like a me
 ask: Who's the most patient person you know?
 listen: Does she ever knit for herself?
   them: Hardly. Everything she makes walks off on someone else. Usually someone cold.   #warm
+listen2: A teacher. Does Kovac knit for herself?
 share: Someone back home. Never rushed me.
   them: That's a gift, that. Never being rushed. You remember it all your life.   #warm
 cheer: You, with all my questions.
@@ -290,6 +312,7 @@ them: Ran a week. Then Calder opened it, looked at me, and turned it round. Not 
 ask: What's a mistake you're glad you made?
 listen: Did she ever mention it?
   them: Once. At my third-year tea. "Upside down." Two words. Everyone laughed. Me most.   #funny
+listen2: A wrong turn. Did Calder ever mention it?
 share: Getting lost on purpose, my first weeks.
   them: Yes. You learn the ship that way. The quick route's for when you know where you are.   #warm
 cheer: Coming aboard. Kidding. Mostly.
@@ -303,6 +326,7 @@ them: At night she sounds different. Slower. Like she's breathing out.   #warm
 ask: Is there a sound that settles you?
 listen: Can I come down sometime?
   them: Course. Bring a jumper. Don't talk for the first minute. Just listen. You'll see.   #warm
+listen2: The fans at night. Can I come down sometime?
 share: Rain. I miss rain.
   them: Oh. Yes. No rain out here. Stand by the Deck 6 vents. It's nearly rain. Nearly.
 cheer: The kettle. Always the kettle.
@@ -316,6 +340,7 @@ them: Two engine officers, one crumble. We take turns with the corner bit. It's 
 ask: What's the one dish you'd fight someone for? Politely.
 listen: Whose turn is the corner tonight?
   them: Reyes's. Calder initialled the log. There's no arguing with initials.   #funny
+listen2: Roast potatoes. Whose turn is the corner?
 share: Something from home. Nobody else makes it.
   them: Then that's the one. Tell Brennan. She'll try. She'll get close, and that's lovely.   #warm
 cheer: Crumble. I'm joining the rota.
@@ -329,6 +354,7 @@ them: Rossi swears it's a different one. It isn't. We all nod.   #funny
 ask: Do you look up much, out here? Or not really?
 listen: Which star is it?
   them: "The bright one, left a bit." That's as far as anyone's got. It's enough.   #warm
+listen2: Most nights. Which star is it?
 share: Every night. I can't help it.
   them: Same. You'd think you'd get used to it. You don't. That's the good bit.   #warm
 cheer: Only when I trip over something.
@@ -342,6 +368,7 @@ them: I'd keep the kind bit and fix the rest. Turns out the kind bit's most of i
 ask: What's the kindest thing someone did when you were new?
 listen: Who trained you?
   them: An old hand on my first ship. Gone home now. Still writes, every New Year.   #warm
+listen2: Saving me a seat. Who trained you?
 share: You. Remembering my name, day one.
   them: Course I did. I'd been saying it all week. Practising. Out loud. In the lift.   #warm
 cheer: Saving me the last biscuit.
@@ -355,6 +382,7 @@ them: He's started on the street lamps. Someone should stop him. Nobody wants to
 ask: What do you think you'll be like, when you stop?
 listen: Is he happy?
   them: Very. He writes more now. Always one line about engines, right at the end.   #warm
+listen2: Bored, probably. Is he happy?
 share: Busy. I don't think I could stop.
   them: Then you'll be out fixing street lamps too. I'll hold the ladder.   #funny
 cheer: Asleep in a garden. At last.
@@ -368,6 +396,7 @@ them: I'm fine. I've stopped checking every hour. Every two hours. That's progre
 ask: How do you wait for something you really want?
 listen: How do you feel about it, honestly?
   them: Ready. That's new. Not sure I'll get it. Sure I'd be good at it. Funny, that.   #warm
+listen2: Badly. How do you feel about it, honestly?
 share: Keep busy. Pretend I'm not waiting.
   them: That's what I'm doing. Badly. I've knitted a tea cosy. I don't own a teapot.   #funny
 cheer: Biscuits. Many biscuits.
@@ -381,6 +410,7 @@ them: Reyes. Calder. Kovac. And you, now. Coil three agrees. She hummed when I s
 ask: Who would you trust with the thing you care about most?
 listen: And if coil three liked me best?
   them: I'd sulk. Like her. We'd sulk together. It'd be very loud and nobody would sleep.   #funny
+listen2: A good friend. What if coil three liked me?
 share: You. I'd trust you with it.
   them: Then we've a deal. Your thing, my coils. Both looked after. Properly.   #warm
 cheer: Whoever brings the most biscuits.

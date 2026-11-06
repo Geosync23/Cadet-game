@@ -12,6 +12,7 @@ them: People think it's a joke. It's directions. You'd be surprised who needs th
 ask: Where's the infirmary? From here. Without looking.
 listen: Does anyone actually read it?
   them: Everyone reads it. Then they come in anyway, to tell me it's funny. Fine.   #funny
+listen2: Down a deck, I think. Does anyone read it?
 share: Deck 3, past the mess.
   them: Good. Now you'll never need it. That's how it works.
 cheer: Follow the person saying "drink some water".
@@ -25,6 +26,7 @@ them: Brennan calls them a hazard. She's asked for more twice.   #funny
 ask: Is there something you grow, or keep, from home?
 listen: How hot are they, honestly?
   them: Hot. Start with half. Then drink some water. That's medical advice.   #funny
+listen2: Not really. How hot are they, honestly?
 share: A habit. Something my family did.
   them: Habits travel well. Better than seeds, sometimes. Keep it going.   #warm
 cheer: My sense of humour. It's thriving.
@@ -38,6 +40,7 @@ them: It works on everyone. Nearly everyone.
 ask: Do you find a silence easy, or do you fill it?
 listen: Who doesn't it work on?
   them: Chief Holt. He outlasts me. We sit there like two clocks.   #funny
+listen2: Easy, mostly. Who doesn't it work on?
 share: I fill it. Every time.
   them: Most people do. Count to five first. It's a kind thing to give someone.   #warm
 cheer: I fill it with biscuits.
@@ -51,6 +54,7 @@ them: I manage ten minutes. Then I think of something. I'm working on it.   #fun
 ask: When do you get to stop looking after everyone?
 listen: Does anyone look after you?
   them: Oduya asks the right question once a week. And Rina tells me to drink water. Fair.   #funny
+listen2: Rest days. Does anyone look after you?
 share: Not often. I'm working on it.
   them: Then we'll work on it together. Ten minutes. Then eleven.   #warm
 cheer: When I'm asleep. Mostly.
@@ -67,6 +71,7 @@ them: Clinic's eight till five. After five, knock twice. After ten, knock once a
 ask: When did you last see a doctor? Not me. Anyone.
 listen: Why knock once after ten?
   them: Twice wakes Rina. Once wakes me. I'd rather it was me.   #warm
+listen2: A while ago. Why knock once after ten?
 share: Before I came aboard.
   them: Then you're due a check. Not today. This week. Rina will book you.
 cheer: Does Brennan's kitchen count?
@@ -78,6 +83,7 @@ them: The blue trays in the infirmary are sterile. Everyone touches the blue tra
 ask: Are you a toucher? Most people are, in a new room.
 listen: What happens if I touch one?
   them: Rina sighs. Then she sterilises it again. The sigh is the punishment.   #funny
+listen2: A bit, yes. What happens if I touch one?
 share: I keep my hands in my pockets.
   them: Wise. Pockets are underrated. Medically.   #funny
 cheer: Only the ones that look comfy.
@@ -91,6 +97,7 @@ them: It's mostly lying on a mat. That's allowed. That's the point.   #funny
 ask: How do your shoulders feel? Honestly.
 listen: What's the hardest stretch?
   them: Keeping still. People can touch their toes. They can't stop fidgeting.   #warm
+listen2: Not bad. What's the hardest stretch?
 share: Tight. All week.
   them: Then come. Bring nothing. Lie down. That's the first lesson.
 cheer: Like they're carrying the ship.
@@ -102,6 +109,7 @@ them: One tea a day. Ten o'clock. Strong. After that, water.
 ask: What do you drink most, honestly?
 listen: Why only the one?
   them: One is a pleasure. Five is a symptom. Usually of a long board.   #warm
+listen2: Water, mostly. Why only the one?
 share: Tea. Too much tea.
   them: Swap one for water. Just one. I'm not a monster.   #funny
 cheer: Whatever's nearest.
@@ -115,6 +123,7 @@ them: Vance timed me once, without asking. I didn't ask the time. He told me any
 ask: Are you a morning person, or do you only pretend?
 listen: Why start running now?
   them: A patient asked if I took my own advice. I didn't. Now I run.   #warm
+listen2: Getting there. Why start running now?
 share: Pretend, mostly.
   them: Pretending counts if your feet move. Come tomorrow. Six.
 cheer: I run. To breakfast.
@@ -126,6 +135,7 @@ them: The Wren's air is the best I've worked in. Three years, and nobody's had a
 ask: Have you noticed you sleep better aboard?
 listen: Why is the air so good?
   them: Calder. She'd say the scrubbers. It's Calder.   #warm
+listen2: Now you mention it. Why's the air so good?
 share: I do. I didn't expect it.
   them: Most people don't. Steady air, steady hum, dark corridors at night. It adds up.
 cheer: Except Pell.
@@ -137,6 +147,7 @@ them: Three coughs a week, as a rule. This week, nine. Somebody's sharing a mug.
 ask: Do you wash your own mug?
 listen: How do you know it's a mug?
   them: It's always a mug. Twenty years. Always a mug. Never the same mug.   #warm
+listen2: Usually. How do you know it's a mug?
 share: Every time.
   them: Good. Tell your bunk room. Kindly. With the facts.
 cheer: Most weeks.
@@ -148,6 +159,7 @@ them: Brennan and I have terms. I grow chillies. She calls them a hazard. She us
 ask: Who aboard do you argue with, but like?
 listen: Who wins, you or Brennan?
   them: Brennan. Then she feeds me. So do I win? Unclear. I'm not complaining.   #warm
+listen2: Nobody yet. Who wins, you or Brennan?
 share: Someone back home. Every day.
   them: That's a good person to have. Argue well. Eat together.   #warm
 cheer: My alarm clock.
@@ -159,6 +171,7 @@ them: My corner of the garden has one stool. People ask why only one. That's why
 ask: Do you like company when you're thinking, or none?
 listen: Could I see the corner, one day?
   them: Yes. I'll find another stool. Don't tell anyone. They'll all want one.   #warm
+listen2: A little company. Could I see the corner?
 share: None. I think better alone.
   them: Then you understand the stool.
 cheer: Company. And snacks.
@@ -171,6 +184,7 @@ them: I'm from New Aberdeen. Grey stone, a harbour, wind that comes in sideways.
 ask: What's the weather like, where you're from?
 listen: Do you miss the wind?
   them: Every morning. I stand by a vent on Deck 2 some days. It isn't the same. It helps.   #warm
+listen2: Rainy, mostly. Do you miss the wind?
 share: Milder than that, I think.
   them: Most places are. New Aberdeen builds character. And coats.   #funny
 cheer: There isn't any. It's a ship now.
@@ -184,6 +198,7 @@ them: They write every fortnight. Taking turns. They think I don't know it's a r
 ask: Does your family write to you much?
 listen: What does the eldest grow?
   them: Chillies. From my seeds. His are hotter. I haven't told him.   #warm
+listen2: Now and then. What does the eldest grow?
 share: Not as much as I'd like.
   them: Write first. People answer. It's the first one that's hard.
 cheer: Too much. I'm behind.
@@ -197,6 +212,7 @@ them: Rina saw me. She said "Doctor." Just that. I came away.   #funny
 ask: What do you do on a rest day that's actually rest?
 listen: Why look in at all?
   them: Habit. A good habit, gone a bit far. I know. I'm a doctor.   #warm
+listen2: Reading, mostly. Why look in at all?
 share: Sleep late. Then a slow breakfast.
   them: Prescription noted. I'll try it tomorrow. I'm off tomorrow too. No excuse.
 cheer: Hide from the board.
@@ -209,6 +225,7 @@ them: I check the salt pots on the mess tables. Quietly. Brennan knows. We don't
 ask: Do you salt your food before you taste it?
 listen: Do you really check them?
   them: Weekly. Down a third this year. Brennan's cooking's got better. That's why.   #warm
+listen2: Sometimes. Do you really check them?
 share: After. Always taste first.
   them: Good. Taste first. That's a rule for most things.
 cheer: Before, during and after.
@@ -222,6 +239,7 @@ them: Someone always takes the plasters and leaves the box. Every week. The same
 ask: Do you know where your nearest kit is?
 listen: Who takes the plasters?
   them: I don't say. Someone with very tidy cuts and a very tidy conscience.   #funny
+listen2: Not really. Who takes the plasters?
 share: By the lift, I think.
   them: Close. Left of the lift. Go and look. Then you'll never forget it.
 cheer: Rina's pocket.
@@ -234,6 +252,7 @@ them: Oduya's office is next to mine. He listens to people's heads. I listen to 
 ask: Who do you go to when something's on your mind?
 listen: Do you two ever disagree?
   them: About sleep. He says eight hours. I say eight and a half. We're both right. It's annoying.   #funny
+listen2: Whoever's about. Do you two ever disagree?
 share: A friend. Usually over food.
   them: That's good medicine. Better than most of mine.   #warm
 cheer: My pillow. It never argues.
@@ -247,6 +266,7 @@ them: I haven't told her. She'd argue. Then she'd work harder, and she doesn't n
 ask: Is there someone you think the world of, and haven't said?
 listen: When will you tell her?
   them: When it helps her most. Not before. Timing's half of medicine.   #warm
+listen2: Maybe. When will you tell her?
 share: Yes. I should say it.
   them: Then say it. This week. Don't wait for a good moment. There isn't one.
 cheer: Possibly you. Don't tell anyone.
@@ -260,6 +280,7 @@ them: I make tea either way.
 ask: What helps you, after a bad day?
 listen: What tea do you make?
   them: Mint. From the garden. Everyone thinks it's medicine. It's mint. It helps anyway.   #warm
+listen2: A cup of tea. What tea do you make?
 share: Talking it through with someone.
   them: Yes. Oduya's door is next to mine. That isn't an accident.
 cheer: Sleep, and pretending it didn't happen.
@@ -272,6 +293,7 @@ them: I rate my chillies one to ten. Brennan's never gone above a four. She says
 ask: How much heat can you take, honestly?
 listen: What's a ten like?
   them: Nobody knows. I've grown one. I'm waiting for a very brave volunteer.   #funny
+listen2: A five, maybe. What's a ten like?
 share: Not much. I'm a two.
   them: Two is honest. Most people say five and cry at three.   #funny
 cheer: Ten. Probably.
@@ -284,6 +306,7 @@ them: Six beds in the infirmary. In three years they've never all been full. I l
 ask: Is there a record you'd like to keep?
 listen: What's the most you've had in?
   them: Four. One storm night. Everyone up and about by breakfast.   #warm
+listen2: Not yet. What's the most you've had in?
 share: Never missing a shift.
   them: Keep it, but not at any cost. If you're unwell, you're unwell. Come and see me.
 cheer: Most helpings at dinner.
@@ -297,6 +320,7 @@ them: Ten minutes to learn. It's the sign on my door, really. Before the door.
 ask: Would you come, if I ran a session?
 listen: Is it hard to learn?
   them: No. That's the good news. It's hard to remember when it matters. So we practise.   #warm
+listen2: I'd like to. Is it hard to learn?
 share: Yes. I'd feel better knowing.
   them: Good. I'll put it on the board. Bring a friend. Bring two.
 cheer: Only if there are biscuits.
@@ -310,6 +334,7 @@ them: Here I know all of them. Seventy-five names. I chose that.   #warm
 ask: Would you rather know everyone a little, or a few people well?
 listen: Do you miss the city?
   them: The noise, sometimes. Never the speed. Here I get to finish a conversation.   #warm
+listen2: Both, if I can. Do you miss the city?
 share: A few, well.
   them: A good answer. A ship gives you both, if you let it.
 cheer: Everyone a little. I'm nosy.
@@ -323,6 +348,7 @@ them: Most people look ahead. I like the distance. It's proof we came a long way
 ask: Do you look back much, or only ahead?
 listen: What can you see from there?
   them: Nothing much. A few stars we've passed. That's enough. That's the whole view.   #warm
+listen2: Bit of both. What can you see from there?
 share: Back, more than I'd like.
   them: Looking back is fine. Just don't stay there. Come and have tea after.   #warm
 cheer: Ahead. Mostly to dinner.
@@ -335,6 +361,7 @@ them: My first plant aboard took a year to fruit. One chilli. I dried it. It han
 ask: Have you kept something small, from a first time?
 listen: Why dry it?
   them: So it keeps. Some things you want to keep looking at. That's one.   #warm
+listen2: A ticket stub. Why dry it?
 share: The first job I finished here.
   them: Good. Remember it on a bad day. That's what first things are for.
 cheer: My first burnt toast. In spirit.
@@ -348,6 +375,7 @@ them: Extra clinic. A late knock. One more run. I say yes. Then I'm tired, and I
 ask: Is there something you say yes to, that you should say no to?
 listen: What would help, right now?
   them: Someone noticing. You have. That's a start. I'll take it from there.   #warm
+listen2: Extra shifts. What would help you, now?
 share: Staying up late. Every night.
   them: Then we'll both practise. One no a week. I'll report back. So will you.
 cheer: Second helpings. Never once said no.
@@ -361,6 +389,7 @@ them: I taught her to notice. She noticed me. That's fair.   #warm
 ask: Who do you let look after you, when you won't ask?
 listen: Does the tea help?
   them: Yes. Don't tell her. She'd make it stronger.   #warm
+listen2: My friends, I think. Does the tea help?
 share: My bunk room. They just do.
   them: Good. Let them. It's the hardest thing I teach, and I'm poor at it myself.
 cheer: Nobody. I'm very independent.
@@ -374,6 +403,7 @@ them: I always come back. Seventy-five names. They're mine now.   #warm
 ask: Where would you go first, on your first day home?
 listen: Will your sons mind you coming back?
   them: They'll grumble. Then they'll ask for chilli seeds. They always ask for seeds.   #warm
+listen2: A beach. Will your sons mind you coming?
 share: Our kitchen. Straight there.
   them: Good. Kitchens first. Everything else can wait.   #warm
 cheer: Somewhere that does good chips.

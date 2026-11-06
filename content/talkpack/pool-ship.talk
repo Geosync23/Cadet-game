@@ -8,6 +8,7 @@ them: You stop hearing it after a week. Then you miss it on leave.
 ask: What do you think of her so far? The Wren?
 listen: Does she ever go quiet?
   them: Almost never. If she does, Works is already running.   #funny
+listen2: She's growing on me. Does she ever go quiet?
 share: I like her. She feels lived in.
   them: Lived in. That's it exactly. She's a home.   #warm
 cheer: She's lovely. Bit far from the shops.
@@ -19,6 +20,7 @@ them: Mine changes. Right now it's a seat by a window.
 ask: Where do you go when you want a bit of quiet?
 listen: Which window?
   them: I'm not telling. Then it wouldn't be quiet.   #funny
+listen2: Still looking. Which window?
 share: My bunk, with a book.
   them: A bunk and a book. The smallest holiday aboard. Perfect.
 cheer: The mess. Right by the toast.
@@ -31,6 +33,7 @@ them: Five is oil. Three is toast. The garden's rain.
 ask: Which deck's your favourite smell?
 listen: What does Deck 2 smell of?
   them: Paper and polish. And whatever Sato's brewing.   #funny
+listen2: The garden. What does Deck 2 smell of?
 share: Three. Toast, every time.
   them: Correct answer. Brennan would be proud.
 cheer: Five. I like oil. Is that odd?
@@ -43,6 +46,7 @@ them: Last week, a little seat behind a pipe. Someone had left a cushion.
 ask: What's the oddest place you've found aboard?
 listen: Whose cushion was it?
   them: No idea. I left it there. It's someone's secret.   #warm
+listen2: A cupboard full of mops. Whose cushion?
 share: I'm still finding the normal places.
   them: That's fine. The odd ones find you later.
 cheer: The way back to my bunk. Daily.
@@ -55,6 +59,7 @@ them: "Four, please." I say it in my sleep.   #funny
 ask: Who's the best person you've shared the lift with?
 listen: Who do you meet in it most?
   them: The same five people. We nod. It's a club now.   #funny
+listen2: Too many to pick. Who do you meet most?
 share: Someone who told me where everything was.
   them: Lift guides. The best kind. Pass it on.
 cheer: Myself. Reflected in the door.
@@ -67,6 +72,7 @@ them: Old ships talk. She's just telling us she's fine.
 ask: Do the night noises bother you?
 listen: How old is she?
   them: Old enough to have stories. Young enough to keep going.
+listen2: A little, at first. How old is she?
 share: Not any more. I like them now.
   them: Me too. It's like rain on a roof. Nearly.   #warm
 cheer: Only when they sound like footsteps.
@@ -79,6 +85,7 @@ them: Every captain the Wren's had. All very serious.
 ask: Do you ever wonder about the people who were here before us?
 listen: Which captain do you like best?
   them: Varga. Started the gallery. Looks like they're about to laugh.
+listen2: Sometimes. Which captain do you like best?
 share: Yes. Who sat in my bunk before me.
   them: Somebody who left it fine for you. That's the deal, really.   #warm
 cheer: Only whether they had better biscuits.
@@ -91,6 +98,7 @@ them: I stood there twenty minutes once. Forgot I was going somewhere.
 ask: What do you think about, looking out there?
 listen: Where were you going?
   them: Dinner. I was late. Totally worth it.   #funny
+listen2: How small we are. Where were you going?
 share: Home, mostly. How far it is.
   them: Far. But the stars are the same ones. Some of them.   #warm
 cheer: Whether anyone's looking back at us.
@@ -103,6 +111,7 @@ them: She's had seventy-odd people at a time in her for years. You feel it.
 ask: What makes a ship good, do you think? Not the engines.
 listen: Has she always been like this?
   them: Longer than anyone aboard can say. Ask the portraits.
+listen2: Kindness, I think. Was she always like this?
 share: The people. Always the people.
   them: Right answer. The engines are just how we get about.   #warm
 cheer: A good mess. Everything else follows.
@@ -115,6 +124,7 @@ them: Not soon. Not planning to. Just, one day. Everyone does.
 ask: Do you think you'll stay on the Wren a long time?
 listen: What would you miss most?
   them: The people. Then the hum. Then the toast, honestly.   #warm
+listen2: I think so. What would you miss most?
 share: I hope so. I'd like to.
   them: Good. I'd like that too. Selfishly.   #warm
 cheer: They'll have to carry me off.

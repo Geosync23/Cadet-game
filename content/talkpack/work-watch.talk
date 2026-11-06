@@ -14,6 +14,7 @@ them: I report the tanks. Then someone from Works turns up with a spanner.   #fu
 ask: Is there a sound on this ship you'd know anywhere?
 listen: What happens to the tired doors?
   them: Works gets a note. Then someone like you fixes it. That's the circle.   #warm
+listen2: Mess chatter. What happens to tired doors?
 share: The lift chime. It means nearly home.
   them: Good one. That's on my list too.
 cheer: The kettle at the tea corner.
@@ -26,6 +27,7 @@ them: He's not wrong. You learn who's late, who's early, who holds the lift for 
 ask: What do you notice first about someone new?
 listen: Who's always late?
   them: I couldn't possibly say. Torres. Breakfast. Every day. Ten more minutes with the coils.   #funny
+listen2: If they look lost. Who's always late?
 share: Whether they say hello first.
   them: Good test. The Wren passes it, mostly. You did, first day.   #warm
 cheer: Their shoes. Very telling.
@@ -38,6 +40,7 @@ them: You can be anyone's friend in a corridor. At an airlock, you check every s
 ask: Is there a place where you're stricter than usual?
 listen: Has anyone ever argued at an airlock?
   them: Once. Then they saw my face. It's a very patient face. They stopped.   #funny
+listen2: Tool tidying. Anyone argued at an airlock?
 share: My toolkit. Nobody borrows it unasked.
   them: Good. Everyone needs one airlock. Yours is a toolbox.   #funny
 cheer: My bunk ladder. Nobody climbs it.
@@ -50,6 +53,7 @@ them: I could find my way blindfold now. I'm not allowed to try. I've asked.   #
 ask: Do you know the ship by heart yet, or still learning?
 listen: How long does a full round take?
   them: An hour if it's quiet. Two if people want to chat. They always want to chat.   #warm
+listen2: Getting there. How long is a full round?
 share: Still learning. Deck 2 beats me every time.
   them: Deck 2 beats everyone. The corridor's a loop. It's a trick.   #funny
 cheer: By smell. Three's toast, five's oil.
@@ -62,6 +66,7 @@ them: Somebody always leaves a cup in the mess. I wash it. Nobody knows. That's 
 ask: What would you hear, if you walked the ship at night?
 listen: Is it ever spooky?
   them: Only the garden. The leaves rustle in the fans. Gets me every time.   #funny
+listen2: The fans, I bet. Is it ever spooky?
 share: The hum. And my own footsteps.
   them: That's it exactly. Mind you, the hum gets louder at three. I've noticed.
 cheer: Someone snoring through a wall.
@@ -74,6 +79,7 @@ them: Calm in a crisis, fussy about paperwork. That's what they say about us. Fa
 ask: Do you keep any kind of log? Notes, a diary, lists?
 listen: What's the oddest thing in the log?
   them: "02:14. Cactus in the corridor. Returned to owner. Owner asleep." It was a Gerald.   #funny
+listen2: Just lists. What's the oddest log entry?
 share: A few notes on my device. Mostly jobs.
   them: Good. Notes are a kindness to tomorrow's you. Tomorrow's you is grateful.
 cheer: Only a list of who owes me a favour.
@@ -88,6 +94,7 @@ them: Some people count stars. I count heads. Seventy-five, every shift. All pre
 ask: What made you pick the job you do? The real reason.
 listen: What if a head's missing?
   them: Then I find them. Usually asleep in the observatory. Once, the garden.   #funny
+listen2: Still deciding. What if someone's missing?
 share: I like fixing things. Simple as that.
   them: Not so different. We both make sure the ship's all right. Different spanners.   #warm
 cheer: The orange was taken. Works got it.
@@ -100,6 +107,7 @@ them: "Name every door between here and the mess." Every day. For a month.   #fu
 ask: Who's the strictest teacher you've ever had?
 listen: Was it worth it?
   them: Every word. I'd find you in the dark on any deck. That's Holt, in me.   #warm
+listen2: An old maths teacher. Was it worth it?
 share: Someone at home. Hard, but fair.
   them: Those are the ones you end up thanking. Years later. Silently.   #warm
 cheer: A very stern swimming teacher.
@@ -112,6 +120,7 @@ them: The day you do it in three is the day you miss something. I've never misse
 ask: What's the thing you never rush, however busy you are?
 listen: Has a seal ever failed a check?
   them: Twice. Little things. Works came. Nobody was near it. That's the point of four minutes.
+listen2: My tea. Has a seal ever failed a check?
 share: Anything live. I always isolate first.
   them: Good. Same idea. Rush the tea, not the seal.
 cheer: Breakfast. I savour it.
@@ -124,6 +133,7 @@ them: Half our rounds end with a chat. Holt calls it "patrolling". We don't argu
 ask: Who looks out for the people who look out for everyone?
 listen: Do people mind being noticed?
   them: Some do. So we're subtle. A cup left outside a door is very subtle.   #funny
+listen2: We all do. Do people mind being noticed?
 share: Each other. That's how it should work.
   them: That's exactly how it works. On a good ship. This is a good ship.   #warm
 cheer: The Captain. She notices everything.
@@ -136,6 +146,7 @@ them: Two others aboard have the same story. We look at the portrait gallery and
 ask: Is there anyone in your family who did a job like yours?
 listen: Did they serve together, do you think?
   them: Maybe. Nobody's checked. It's nicer not knowing, a bit. More possible.   #warm
+listen2: I don't think so. Did they serve together?
 share: Not really. I'm the first.
   them: Then you're starting something. Somebody's going to find your name one day.   #warm
 cheer: My gran grows prize marrows. Very strict.
@@ -148,6 +159,7 @@ them: I used to mind. Now it's my favourite bit. You get to know everyone that w
 ask: What do people ask you most, about your job?
 listen: Have you found many mugs?
   them: Seven this month. Four were in the garden. People drink tea with plants, apparently.   #funny
+listen2: Where things are. Have you found many mugs?
 share: "Can you fix this?" Every time.
   them: Ha. The Works curse. Everyone's got a kettle that "makes a noise".   #funny
 cheer: Where the toilets are.
@@ -160,6 +172,7 @@ them: It sounds like a small storm. We love it. Holt pretends not to.   #funny
 ask: Is there something old aboard you'd hate to see replaced?
 listen: Will you ever get a new one?
   them: Over our dead kettle. Sorry. Over its dead element. Same thing.   #funny
+listen2: Your kettle! Will you ever get a new one?
 share: The old washer on Deck 4.
   them: The loud one? Ha. Every Works tech has a soft spot for that washer.
 cheer: Me. I'm vintage now.
@@ -174,6 +187,7 @@ them: I check my own bunk ladder before I climb it. Every night. My bunkmates la
 ask: How do you leave the day behind, at the end of it?
 listen: Does it ever switch off?
   them: On rest days, by midday. Well. Teatime. Nearly.   #funny
+listen2: A long walk. Do you ever switch off?
 share: A shower, and somebody to talk to.
   them: Somebody to talk to. Yes. That's most of it, I think.   #warm
 cheer: I don't. I bring it to dinner.
@@ -186,6 +200,7 @@ them: Two words. Some nights they're the best two words I know.   #warm
 ask: What's the best thing your work lets you say, at the end of the day?
 listen: Was there ever a night you couldn't?
   them: Not a real one. A late lift, a lost bunkmate. Found. Always found. That's the Wren.   #warm
+listen2: "Goodnight." Was there a night you couldn't?
 share: "It's fixed." I love saying that.
   them: Good words, those. We're in the same business, really. "It's fine now."   #warm
 cheer: "All done. Bed."
@@ -198,6 +213,7 @@ them: I walked them back the long way, naming every door. They were laughing by 
 ask: What's a small kindness you're proud of?
 listen: Do they still remember?
   them: They say hello every morning. That's how I know.   #warm
+listen2: Sharing my pudding. Do they still remember?
 share: Helping someone find their way.
   them: Then it got passed on. That's the best a kindness can do.   #warm
 cheer: Holding the lift for a stranger.
@@ -210,6 +226,7 @@ them: Whatever happens, at any hour, there's a face in the Watch office. Today, 
 ask: What's the hour you'd least like to give up?
 listen: Doesn't that get tiring?
   them: Sometimes. Then I see the bunk rooms dark and quiet, and it's worth it.   #warm
+listen2: Lunch. Doesn't the night get tiring?
 share: The hour before breakfast, when it's quiet.
   them: Same. That's when the ship tells you how she slept.   #warm
 cheer: My future self. With a pension.
@@ -222,6 +239,7 @@ them: At home on leave, my family thinks I'm planning to run. I'm not. Probably.
 ask: Has your job given you a habit that's followed you home?
 listen: How many exits has the mess got?
   them: Three. Four if you count the galley hatch. Brennan says I may not count it.   #funny
+listen2: Not yet. How many exits has the mess got?
 share: I listen to every machine I pass.
   them: That's the Works one. We all have one. Nobody's normal by year two.   #funny
 cheer: I tidy other people's spanners.
@@ -234,6 +252,7 @@ them: No rush, no queue, just her and us. I wouldn't swap it now.   #warm
 ask: What's a time of day that feels like yours?
 listen: Do you ever see the sunrise?
   them: No sun out here. But the lights warm up at six. Close enough. I watch it every day.   #warm
+listen2: Late evening. Do you ever see the sunrise?
 share: Early morning, before anyone's up.
   them: Then we'd overlap. Say hello at six. I'll be just finishing.   #warm
 cheer: The walk back from the gym.
@@ -246,6 +265,7 @@ them: It's not about tidy. It's a chance to see everyone's all right. A bunk tel
 ask: What would your bunk tell someone about you?
 listen: What does a bunk tell you?
   them: Who's homesick. Who's sleeping badly. Who's got a new Gerald. All good to know.   #warm
+listen2: That I'm untidy. What does a bunk tell you?
 share: That I'm settling in. Bit by bit.
   them: Then it's saying the right thing. I'll be glad to read it.   #warm
 cheer: That I fold nothing. Ever.
