@@ -34915,7 +34915,7 @@ const LINES = JSON.parse([
   '{"text":"Raman\'s got a jigsaw on the observation room table. It\'s a chart of the reach. Mostly sky.","id":"1arnq5s","tone":"funny"},',
   '{"text":"Jigsaw on Deck 1 this morning. A thousand pieces of stars. Come and find an edge.","id":"eelny8"}]',
   ',"event.crossingLine.trad.big-jigsaw.mail":[',
-  '{"text":"The big jigsaw tomorrow, 10:45, in the observation room on Deck 1. A thousand pieces, and the picture is the Veyli reach. Fitting, Raman says.","id":"zz8wak"}]',
+  '{"text":"The big jigsaw tomorrow, 10:35, in the observation room on Deck 1. A thousand pieces, and the picture is the Veyli reach. Fitting, Raman says.","id":"1ryiqdz"}]',
   ',"event.crossingLine.trad.big-jigsaw.thanks":[',
   '{"text":"You find a seat at the jigsaw table and fit a few pieces of the reach together. Most of them are sky.","id":"1uos8vt","tone":"funny"}]',
   ',"event.crossingLine.trad.every-song.ask":[',
@@ -52166,7 +52166,7 @@ const EV997_SAT_ON = false;                              // note 36: the first S
 const EV997_SAT = [{ trad: 'garden-hour', day: 0, drop: true },
   { trad: 'rec-paddle-club', day: 0, add: { at: [420, 465], who: [['holt', 1], ['everyone', .2]], words: 'event.crossingLine.trad.rec-paddle-club' } },   // an early hour: a little pull, or it's two paddlers
   { trad: 'window-sketch', day: 0, add: { at: [585, 630], words: 'event.crossingLine.trad.window-sketch' } },
-  { trad: 'big-jigsaw', day: 0, add: { at: [645, 750], words: 'event.crossingLine.trad.big-jigsaw' } },
+  { trad: 'big-jigsaw', day: 0, add: { at: [635, 700], words: 'event.crossingLine.trad.big-jigsaw' } },   // 10:35-11:40: over before Tomas's sowing invite at 11:45 (RV33)
   { trad: 'every-song', day: 0, add: { at: [1035, 1085], words: 'event.crossingLine.trad.every-song' } }];   // its own hour: Zeke works Saturdays to 17:00
 if (EV997_SAT_ON && SHIP_EVENTS.crossingLine) {
   SHIP_EVENTS.crossingLine.dayDress = (SHIP_EVENTS.crossingLine.dayDress || []).concat(EV997_SAT);

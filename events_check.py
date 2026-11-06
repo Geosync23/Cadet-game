@@ -739,7 +739,7 @@ with sync_playwright() as pw:
       deckCrewFill(); EV_MIN = -1; eventsTick(); if (TJ_NOW && TJ_NOW.e.id === 'sowing') tradJoinTap(TJ_NOW.agent);   // 0.70.0: tap to join
       const tr = SHIP.traces.filter(x => x.id === 'seedlingYours'); SHIP.traces.length = 0; SHIP.traces.push(...t0);
       const ties = e.ev.ties; e.ev.ties = { ...ties, decor: 'testDecor' };
-      const dec = [e.from - 40, e.from - 20, e.to + 10, e.to + 20].map(m => tradDecor(5 * 1440 + m).map(x => x.id).filter(i => i === 'testDecor').join());   // only the planted decor (0.99.7, EV1: the first Saturday's big jigsaw has its own, 10:45-12:30)
+      const dec = [e.from - 40, e.from - 20, e.to + 10, e.to + 20].map(m => tradDecor(5 * 1440 + m).map(x => x.id).filter(i => i === 'testDecor').join());   // only the planted decor (0.99.7, EV1: the first Saturday's big jigsaw has its own, 10:35-11:40)
       e.ev.ties = ties;
       return { room: roomAt(...player.here()), joined: SHIP.events.joined.slice(), tr, dec };
     })()""")
