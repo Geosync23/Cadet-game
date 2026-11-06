@@ -11,5 +11,10 @@ identical (cadet_test.py vs 0.99.6); switch on: the area's checks plus check_fas
 Kit ready 2026-11-06: playwright, numpy, pillow; three r128 and acorn 8.12.1 in /tmp/cadet-work; CADET_CHROME=/opt/pw-browsers/chromium.
 Smoke test: cadet_test 0.99.6 vs itself ALL IDENTICAL (64 s).
 
+## Lead 49's rule for this round
+For every week-1 note (tips 6/9/11, the Day 1 briefing, the Day 8 promotion, week-1 jobs): probe from a fresh save with
+the intro ON, following the arrows like a player (a 0.99.5 fix passed with the intro off and failed on a fresh save).
+Tool for it: arrows_check.py's Follower walker (see plans/rv30-probes/arrow_walk.py on claude/review-rv30).
+
 ## Verdicts
 (none yet)
