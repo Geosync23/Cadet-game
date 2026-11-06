@@ -10,16 +10,19 @@ CH1 session_01GKuymjRkyieJLWiov9xvyp (claude/p997-chars), MV1 session_01GKuymmL8
 TP1 session_01GKuymneLr9U5MnEvACLMvS (claude/p997-tips), CR1 session_01GKuymizPyyNVZeZ2xUhGm6 (claude/p997-career),
 JB3 session_01GKuymmiCEm3CMMrMTdWMEo (claude/p997-jobs).
 
-## State (see review-rv32.md for detail)
-- PASS sent: CH1 A 3d07e66; TP1 9c7a288 and a0e5dd5.
-- CH1 B 8436ff6 (note 4): off identical, on check_fast/day_check OK, pictures fine; interactions_check (on) to finish.
-- CR1: 2f2b93e no Day 8 test in a slipped week; fix 5d5acbf proven in the walk (Day 8 test passed 14:14). Still: off
-  cadet_test + check_fast on for 5d5acbf, then PASS.
-- JB3 43a96ae/e96ec5a: walk shows notes 21/22; to do: shelf fetch (note 3) probe, tea tap (JB3_TEA_ON), off identical e96ec5a, check_fast on.
-- MV1 f2462cd: to do all: off identical (run twice: MV1 saw one differing run under load), briefing (with TP1's nd1 arrow),
-  WASD at 390x844, rec toilets, clock tap.
-- TP1 565a0da (nd1: Day 1 briefing/clock arrows, Day 2 meetings): to do: fresh walk WITHOUT FW_TRACK; off identical.
-- Lead's open find: fresh save Day 1 08:45 had no arrow (0.99.6 too): TP1's 565a0da answers it.
+## State (2026-11-06 ~09:55 UTC; see review-rv32.md)
+- PASS sent: CH1 A 3d07e66; TP1 9c7a288, a0e5dd5; JB3 e96ec5a (to JB3, lead, BM24).
+- CH1 B 8436ff6 (note 4): off identical, on check_fast/day_check OK, pictures fine; interactions_check (on) rerunning
+  (/tmp/rv32/ch1b_ix_full.txt; it timed out once under load, then the machine restarted).
+- CR1 3e1b0dc (game c61bda34...180791; switches false; catch-up + m6 needs only m1 from Day 8): off identical; walk to Day 9
+  (/tmp/rv32/fw_cr1c.txt) and check_fast on (/tmp/rv32/cr1c.txt) running. 5d5acbf's walk passed the test Day 8 in a slipped week.
+- MV1 2e268ba (game 4558720e...b55af): f2462cd failed machine_check (food runs) with MV_RECWC_ON; 2e268ba makes the rec
+  toilets yours only (schedData skips p.you: Sim engineer to look). /tmp/rv32/mv1c.sh: off cadet_test, MV1's probes, check_fast on.
+  Still mine: a briefing check in a fresh walk (MV_BRIEF_ON: the Chief stays to the end), WASD at 390x844 by real keys.
+- TP1 c920acb (game c9a2a32e...47bda4; TP997.nd1 arrows + needs yield in week 1): fresh walk with NO tracker tap
+  (/tmp/rv32/fw_tp1d.txt): Day 1 briefing met via its arrow, Day 2 office meeting and Zeke's 10:45 met. Still: off
+  identical, check_fast on, then PASS.
+- Next idea (lead's call): MV1's briefing fix and TP1's briefing arrow together in BM24's staging build.
 
 ## Kit and gotchas
 - pip install playwright numpy pillow; three r128 + acorn 8.12.1 in /tmp/cadet-work (npm pack); CADET_CHROME=/opt/pw-browsers/chromium.
