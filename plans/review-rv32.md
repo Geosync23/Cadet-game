@@ -17,4 +17,20 @@ the intro ON, following the arrows like a player (a 0.99.5 fix passed with the i
 Tool for it: arrows_check.py's Follower walker (see plans/rv30-probes/arrow_walk.py on claude/review-rv30).
 
 ## Verdicts
-(none yet)
+
+### 1. CH1 batch A (claude/p997-chars 3d07e66): notes 37, 35, 10, 1
+Game sha256 180e78d4f891df4362c33aa050a071dfa24eecf8965a00e385a0da41f3b86179 (matches). Switches CH_SOLE_ON, CH_POSE_ON,
+CH_RELAY_ON, CH_HAIR_ON (CH_SEAT_ON declared, note 4 not built: batch B). Sections: 4d (1 line), 8 (slot), 8b (1 line), 8c (1 line).
+- Off: cadet_test 0.99.6 vs 3d07e66 ALL IDENTICAL.
+- On (all four): cadet_test vs 0.99.6: only triangles and the pictures differ; paths, collisions, crew walks and taps the same; no page errors.
+- Note 1 hair (plans/rv32-probes/ch1_look.py, magenta skin, close crew and crowd, 5 views; results/hair_sheet-3d07e66.jpg):
+  skin showing through hair (magenta pixels) in 0.99.6: short/buzz/curls/bun/ponytail/long, worst on crowd buzz (5400 px
+  from the game's angle) and curls (3286). On: 0 for every crowd view; close crew at most 19 px (buzz and bun, from straight above).
+  The crowd's near caps come out about 8% fuller than before (the cos correction plus the pad); looks fine to me.
+- Note 37 soles (results/feet_sheet-3d07e66.jpg): the flat plate is gone, the rounded boot still meets the floor (no float).
+- Note 35 pose (ch1_seats.py, the rec deck's auditorium seats and beanbags filled with 'sit:slump'; results/seat_sheet-3d07e66.jpg):
+  0.99.6 forearms held out in front (the bike handles); on: arms down, hands on the seat by the hips. The hands-behind-head
+  variant unchanged. Nothing seen through the seat or beanbag.
+- Note 10 relay cabinet (ch1_relay.py; results/relay_sheet-3d07e66.jpg): 0.99.6 the cabinet's back (z 9.87) pokes over the
+  hull rim from outside; on (z 9.08-9.52) it stands inside. Fault lamp: lamp z moves with the cabinet (in front of its face by
+  0.06 both builds). Junior wing cabinet (closet k) checked too: already inside, unchanged.
