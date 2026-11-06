@@ -331,8 +331,15 @@ def s5_bands(ev, SUM, PD=10):
     check((st['trained'].get('ps') or 99) <= 12, f"s5: a steady Officer has Power safety on Day 12, for the Tier 3 offer on Day 14 ({st['trained'].get('ps')})")
     check(day(st, 14).get('band') == 'relied', f"s5: a steady Officer is \"Relied on\" by the end of Day 14 (Day 13 {day(st, 13).get('xp')} {day(st, 13).get('band')}, Day 14 {day(st, 14).get('xp')} {day(st, 14).get('band')})")
     check(day(bz, PD).get('band') != 'relied', f"s5: a very busy Officer is \"Relied on\" on the promotion day (Day {PD} {day(bz, PD).get('xp')})")   # the spec's "not before Day 12" can't hold with the steady target (busy 52 by the end of Day 11, steady 45 by Day 13): EP2 and lead 39 asked
-    check(day(st, 21).get('band') in ('trusted', 'relied'), f"s5: a steady Senior is \"Trusted\" by Day 21 ({day(st, 21).get('xp')} {day(st, 21).get('band')})")
-    check(day(st, 19).get('band') in ('trusted', 'relied'), f"s5: a steady Senior is \"Trusted\" by the end of Day 19 ({day(st, 19).get('xp')} {day(st, 19).get('band')})")
+    # A margin for the run's ripple (EV1, the 0.99.7 round's item M; lead 50's call): this paper career takes board jobs hour by
+    # hour, and the board's mix follows the crew's plans, so any small calendar change earlier in the run (the Last Light's
+    # bow lounge on Day 4 left open or closed) moves the steady Senior's xp at Day 19 by several points (54-63 on candidate 2's
+    # variants, with the same 10 jobs a day) around the 55 line. So "Trusted" by the end of Day 19 counts within 5 xp of
+    # Trusted's floor; Days 20-21 are the run's days off (no xp), so Day 21 has the same margin. 0.99.6 reads 59-63: unchanged
+    TR3 = next((x[0] for x in (B.get('3') or B.get(3) or []) if x[1] == 'trusted'), 55); NEAR = TR3 - 5
+    near = lambda x: x.get('band') in ('trusted', 'relied') or (x.get('xp') or 0) >= NEAR
+    check(near(day(st, 21)), f"s5: a steady Senior is \"Trusted\" by Day 21, within 5 xp ({day(st, 21).get('xp')} {day(st, 21).get('band')}, Trusted from {TR3})")
+    check(near(day(st, 19)), f"s5: a steady Senior is \"Trusted\" by the end of Day 19, within 5 xp ({day(st, 19).get('xp')} {day(st, 19).get('band')}, Trusted from {TR3})")
     check(day(bz, 16).get('band') not in ('trusted', 'relied'), f"s5: a very busy Senior is \"Trusted\" on the promotion day ({day(bz, 16).get('xp')})")
     check(day(st, 18).get('band') not in ('trusted', 'relied'), f"s5: a steady Senior is \"Trusted\" before Friday Day 19 ({day(st, 18).get('xp')})")
 
