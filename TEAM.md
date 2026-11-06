@@ -2454,3 +2454,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~21:13 UTC: **0.99.8 candidate 2 frozen**: staging-0998 + cc44f94 + 108fe12 + 91a75b4 + BM27's tp998.social.2 shortening, both TP998 on, local f26070c, game 13681748...59fd3; lines PASS, names OK. Gates running; R5 on c1 20/23 OK. GO round 0998b to follow.
 - ~21:16 UTC: crossed messages sorted: Social line 91a75b4 IS in 0.99.8 candidate 2 (f26070c); BM27 keeps it; TP1 marks TP1-4 fixed in 0.99.8 and idles.
 - ~21:24 UTC: **round 0998 ended** (candidate 1): every share OK except P (fixed in candidate 2). Lead: GO 0998b once player + check_fast are OK on f26070c; arrows, fresh_walk Day 3 and cadet run first in BM27's R5, beside the runners.
+- ~21:27 UTC (4:27 PM ET): **ROUND 0998b GO** (BM27): claude/staging-0998 bbb7bb0, game 13681748...59fd3, build 0.99.8, OLD 0.99.6; player + check_fast OK; arrows, fresh_walk Day 3, cadet first in R5.
