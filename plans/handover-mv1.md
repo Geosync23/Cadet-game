@@ -44,3 +44,6 @@ Switches off: cadet_test ALL IDENTICAL, check_fast OK.
 - Note 19: about 32 a day is the lead's default; the user may want a different number.
 - Backlog MV1-2: fixed under MV_BRIEF_ON (her spot), at the lead's ask.
 - Backlog MV1-1: the Monday briefing (28b): Day 22's full one probed, fine; the short later one (20 minutes) not probed.
+
+## Status
+RV32 PASS on 2e268ba (game 4558720e...b55af), 2026-11-06: off identical to 0.99.6, all six on check_fast OK, every probe confirmed. Waiting for the merge (BM25) and the switch-on decision (lead 49 / the user). One owner look outstanding: section 14's `schedData` line (`!p.you`) is the Sim engineer's.
