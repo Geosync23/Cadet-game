@@ -51910,6 +51910,8 @@ if (CAL997_ON) {
 // the room an arrow points at for tradition e: [deck, room key] of its rooms on its first place's deck, or null
 function cl997Room(e) {
   if (!e.rooms) e.rooms = eventRooms(e.ev);
+  const hid = e.ev.host || (TRAD_JOIN[e.id] && TRAD_JOIN[e.id].host), hp = hid && schedPeople().find(q => q.id === hid);   // RV33: the room the host is planned in at the start (The Last Light's Sato at the bow lounge glass, not its first room, the Promenade)
+  if (hp) { const w = planWhere(hp, (e.day - 1) * 1440 + e.from + 5), pl = w && w.placeId && evTagId(w.tag || '') === e.id && schedData().byId.get(w.placeId); if (pl && pl.room && e.rooms.has(pl.deck + '|' + pl.room)) return [pl.deck, pl.room]; }
   const all = [...e.rooms].map(r => r.split('|')), n0 = e.ev.where[0].deck, r = all.find(([n]) => +n === n0) || all[0];
   return r ? [+r[0], r[1]] : null;
 }
