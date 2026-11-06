@@ -65,3 +65,14 @@ Note for the lead (not TP1's, there in 0.99.6 too): from a fresh save with the i
 at all (goalNow null, IX_GOAL null, GUIDE_ON true): not to the 08:50 briefing, not to the clock. The tracker lists "Morning
 briefing with the Chief 08:50" and "Clock in 09:00". The follower, with no arrow, ate and wandered; "Still not clocked in"
 at 10:15 (results/fresh_walk-0996-day1-0845.json). Worth a look by whoever owns the week-1 arrows (MV1's note 2 is the briefing).
+
+### 3. CR1 (claude/p997-career 2f2b93e): notes 25, 48, 49, 55, 56: interim, FIXES NEEDED likely
+Game sha256 3c293c568e4c45af48bb9a240e334acb81201001cae4569df11f65e0c6a5f590 (matches). Switches CR_DAY8_ON, INC_REDO_ON, CART_FIRST_ON,
+BOARD_NEW_ON (vars in 24p's slot) are committed TRUE on the branch (the round's rule: off on the branch).
+Sections: 15b (doable, boardLessonName, ixJobStep label, ixHold), 17 (gardenCarry, jobRun stop loop, boardTopUp), 22 (words), 24d (1 line), 24p.
+- Off (the four set false in a copy): cadet_test vs 0.99.6 ALL IDENTICAL. cr1_check: CR1 CHECK OK.
+- Fresh save, intro ON, 390x844, follower with real sleep, Day 0 to Day 8 (results/fresh_walk-cr1-2f2b93e.json): no Day 8 test.
+  Day 2 10:32 the arrow "10:45 meet Zeke: Works bay"; 10:42 a needs arrow "Somewhere to sit and unwind" took over; the meeting
+  was missed (m1 'ask', no arrow to it the rest of the day). The ladder then ran a day late: m1 Day 3, m4 Day 4, m5 Day 5,
+  m7 over the weekend to Day 8; m6 needs m7 used once, so Day 9 at the earliest. tr at Day 8 17:00: m1 3, m3d 3, m3i 4, m4 4,
+  m5 5, m2 8, m7 8. Note 55's Day 8 test holds only when week 1 has no slip; CR1's Day 8 runs start from a Dev-set career.
