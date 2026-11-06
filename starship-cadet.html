@@ -65212,10 +65212,11 @@ function crCheckRows(W, d, row, no) {                    // promoCheck's day row
 }
 // (RV32's find on CR_DAY8_ON: one lesson missed in week 1 slid the scanner past the weekend, so Making it safe, which needed
 // the scanner used once, couldn't open before Day 9 and nor could the test.) With the switch on, the user's "lower the first
-// phase's bar if needed": Making it safe needs nothing but its day (Day 8), goes first among the big rows from Day 8 while
+// phase's bar if needed": Making it safe needs only Rounds learned and its day (Day 8), goes first among the big rows from Day 8 while
 // you're Tier 1 (crBigFirst), and a lesson carried over from an earlier day waits for it (crCarryPark: back to unopened, as
 // 24 core does for a test row; it comes again the next workday). The scanner and the rest follow after.
-{ const r = ladderRow('m6'); if (r) { const n0 = r.needs; Object.defineProperty(r, 'needs', { get: () => CR_DAY8_ON ? null : n0, enumerable: true, configurable: true }); } }
+const CR_M6_NEEDS = { trained: 'm1' };                   // Rounds learned: you've started the ladder (an old save or a late starter gets Rounds first)
+{ const r = ladderRow('m6'); if (r) { const n0 = r.needs; Object.defineProperty(r, 'needs', { get: () => CR_DAY8_ON ? CR_M6_NEEDS : n0, enumerable: true, configurable: true }); } }
 function crBigFirst(ok, d, W) {                          // ladderTick's big row: Making it safe first, from Day 8, until it's learned
   if (!CR_DAY8_ON || !W || W.tier !== 1 || d < CR_SAME.from || W.tr.m6 !== undefined) return null;
   const r = ladderRow('m6'); return r && ok(r) ? r : null;
