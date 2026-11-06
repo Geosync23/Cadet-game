@@ -1,7 +1,7 @@
 # Handover: CR1 (career and the first promotion, the 0.99.7 playtest patch)
 
 **Role:** builder for lead 49 (session_01GKuymjjreuZtZeDMBX79xn); reviewer RV32 (session_01GKuymkDX3gviqiGJcKLWuS); build master BM25 (session_01GKuymnYTNkfxgLvtfFRg7w); JB3 (job places, session_01GKuymmiCEm3CMMrMTdWMEo) shares boardTopUp.
-**Branch:** claude/p997-career, from claude/integration d7ad4c58 (0.99.6). Latest pushed: 3e1b0dc, game sha256 c61bda34...80791.
+**Branch:** claude/p997-career, from claude/integration d7ad4c58 (0.99.6). Latest game commit: 93eb0e4, game sha256 310416c6...d261 (after the 0.99.7 round's fixes; BM26 merges it on top of 2e034d2). Lead now: lead 50 (session_01GKuymmoEriV3ugms2s3hsn); build master BM26 (session_01GKuymkyzjd6auLTCEZK5CN).
 **Notes (plans/patch-0997.md on claude/lead-49):** 25, 48, 49, 55, 56. All built.
 
 ## What's built (24p's slot, "CR1 (lead 49 ...)" down to the end line)
@@ -22,6 +22,8 @@ Words: content/works/career-0997.lines. Docs: design-doc (first promotion; job l
 - Many checks in parallel on 4 cores give Page.goto 30 s timeouts: not the game. Run at most three at once; check_fast alone.
 - career_check and promo_sight read the switch; on the branch (off) they check 0.99.6's timeline.
 
+## The round's fixes (after RV32's PASS)
+- crCarryPark checks Making it safe can open that day (mech_check #15). Dev mode's table and beats follow CR_DAY8_ON (DM_CAREER, devmodeCareerFor, DM_BEATS). crTestOpen without the playerShiftOn re-ask. mech_check, devmode_check, arrows_d_check follow the switches (lead 50: test the build as it ships; never switch CR_DAY8_ON off inside a check). CL1 shortened cr.ready and cr.ready.mail for lines_check's 90 characters (keep theirs).
+
 ## Loose ends / open for the user
 - 25's mix amount (design-doc Open questions).
-- Results still to come at handover time: arrows week, intro_check whole, interactions on 3e1b0dc's on-copy.
