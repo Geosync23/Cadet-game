@@ -186,5 +186,5 @@ with machine_check / device_check on each branch alone, switch on:
   counter, but never shown (14:00/18:00/19:45/21:45 all False, candles 0); the sign still "Cake at 18:45", the Mail mixes
   18:45 and 19:00. Passes on 0.99.6 and on TB6's build (birthday 18:00). Fix asked of CL1 (cake time and showing to the
   19:00 party, the words). Found via JB3's report to me; my run confirms it on CL1 alone.
-- EV1 af18afd (paddle club to 14:00 Day 6): device_check on EV1 alone and on the merge queued.
+- EV1 af18afd (game 72de6c46...c953, matched; paddle club to 14:00-15:00 Day 6): cadet_test off ALL IDENTICAL; device_check OK on EV1 alone (on) and on the merge (all on). **EV1 PASS carried.**
 - Sunday food runs (machine_check): JB3 has a fix behind JB3_FOOD_ON (claude/p997-jobs 35ab083; RV32's to review).
