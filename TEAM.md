@@ -2366,3 +2366,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~12:59 UTC (7:59 AM ET): **ROUND 0997 GO** (BM25): staging-0997 7fd8f6b (build turn 363107d), game b14421f8...cf7d. R1-R4, R6 running; R5 = BM25 after its early gates.
 - ~13:00 UTC: BM25 at ~55-60% memory -> **hired BM26** session_01GKuymkyzjd6auLTCEZK5CN (R5 share, cadet vs 0.99.6, round record, final GO), from plans/handover-bm25.md.
 - ~13:25 UTC (8:25 AM ET) hourly check-in: round 0997 running (R1-R4, R6; BM26 as R5). R2 bisecting crew-route differences from Day 2. Lead 49 memory ~55%: plans/handover-lead49.md written now; will hand over to lead 50 by ~60% (likely after the round result, before the publish step).
+- ~13:25 UTC: **R1 NEW FAIL** arrows_check clockin Day 1 (no clock-in tip/track; likely TP1 tp997BriefPending vs the check's old Day 1 setup); R1 running OLD. -> TP1 to judge game vs check.
