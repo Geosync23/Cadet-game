@@ -21,6 +21,21 @@ Read first: CLAUDE.md, plans/patch-0997.md (the user's 56 notes, seats, ALL defa
   bisecting by switch; expected if one of the switches explains it.
 - **Publish 0.99.7 only on the user's OK.** Then: same two pages (v4), phone test, ff integration + main.
 
+## Round 0997 NEW FAILs being fixed (as of ~13:40 UTC; BM26 keeps the list A-H)
+- A R1 arrows_check clockin Day 1: CHECK-side, fixed by TP1 6050082 (on staging 3a98019); R1 re-running.
+- B BM26 mech_check m4 / #22 / #15: CR1 (m4, #22 check-side by design; #15 lapsed lesson job back on board: check or game).
+- C R4 appt_check (Brennan's book Day 4 14:30, scope after-line): GAME, EV997_LIGHT_ON closes the bow lounge 13:40-14:40 so
+  Brennan's break moves to the garden and she's 17 min late. EV1 fixing (don't close the whole lounge; avoid bookings in window).
+- D R3 devmode_check: trad lines (Last Light day) -> EV1; Dev table t2 Day 9 vs 8 + Day 8 test expectation -> CR1.
+- E R3 arrows_d_check S3/pass-over (Tier 2 test label on the check's day) -> CR1 (also 09:00 vs 13:00 label).
+- F BM26 disc_check #25 Day 2 17:22 one crew on court -> GM1 judging (GAMES997 crew game timing); R2 bisecting crew routes
+  from Day 2 (narrowed to TP997+TRAD997+GAMES997+EV997).
+- G R6 interactions_check: store missing from arrival Schedule (CL1 note 15 by design, check update) + orange tree tapped off
+  the pin gives None (pending OLD; JB3 asked whether JB3_SHELF_ON's marker-tap rule catches it).
+- H R1 arrows_check step6 (teachoff/track/skiptea): Day 23 20:45 night-shift arrow led by the shutdown arrow ~84 min; OLD pending.
+Game-side fixes (C, maybe B#15, F, G orange tree) mean a NEW candidate: BM26 merges, re-gates, runners re-run what each touches.
+Done: R4 share all OK except C. R3 ~40 min left (controller, ending). sound_check alone OK.
+
 ## Seats (all idle unless noted)
 Builders: CH1 ..jRkyieJLWiov9xvyp, MV1 ..mmL8h3gYY1Td9gxV3n, TP1 ..mneLr9U5MnEvACLMvS, CR1 ..mizPyyNVZeZ2xUhGm6,
 JB3 ..mmiCEm3CMMrMTdWMEo, SC1 ..mk1xmJCgzW4Ee8Drz8 (also reviewed GM1, wrote TB6's words), CL1 ..mjnwwEESL9W6V7kQFK,
