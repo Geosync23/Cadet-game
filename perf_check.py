@@ -53,6 +53,8 @@ SCENES = [
     # Short Fridays (section 18f, claude/fridays; FR3): the Captain's address (about 51), filing out, the Friday dinner
     {'name': "Captain's address, auditorium Fri 16:10", 'day': 5, 'time': '16:10', 'deck': 7, 'room': r'^Auditorium$', 'cells': True, 'on': ['SHORT_FRIDAY'], 'busy': True},
     {'name': 'after the address, rec lift lobby 16:52', 'day': 5, 'time': '16:52', 'deck': 7, 'room': r'^Lift lobby$', 'cells': True, 'on': ['SHORT_FRIDAY'], 'busy': True},
+    # film night's film on the auditorium screen (AV1, 0.99.7, note 42; REC_FILM): the screen's picture redrawn while it plays, no new draw call
+    {'name': 'film night, auditorium Sat 20:40', 'day': 6, 'time': '20:40', 'deck': 7, 'room': r'^Auditorium$', 'cells': True, 'on': ['REC_FILM'], 'busy': True, 'setup': "flagSet('rec.filmMoved'); recShow('film')", 'needs': "typeof recFilmTick === 'function' && REC_FILM"},
     {'name': 'Friday dinner, the mess 17:20', 'day': 5, 'time': '17:20', 'deck': 3, 'room': r'^Mess', 'cells': True, 'on': ['SHORT_FRIDAY'], 'busy': True},
     # the ion storm (claude/storm-update): the lantern supper (51 in seated sittings, at most about 41 at once), the all-clear party (at most about 27)
     # (EVENTS_ON is in the base since 0.64.8, so these wait for the storm update itself: OR1's F1)

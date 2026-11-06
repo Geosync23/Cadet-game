@@ -709,6 +709,7 @@ const REC_SHOWS = {
   allhands: { dim: .28, scr: 0, pools: [1, .5, 0] }, talent: { dim: .5, scr: 0, pools: [.45, 1, .8] },
 };
 const REC_SHOW = { state: null, dim: 0, scr: 0, piv: null, pools: null, ring: null, mic: null, piano: null };
+const REC_FILM = false;   // 0.99.7 (AV1, the user's note 42): a little film plays on the auditorium screen at film night (section 4e's slot, recFilmTick); off: the screen's light drifts through four colours, as 0.99.6
 const deckLabel = n => +n === 7 ? 'R' : String(n);
 const deckWord = n => +n === 7 ? 'Rec deck' : 'Deck ' + n;
 const deckIn = n => +n === 7 ? 'the rec deck' : 'Deck ' + n;   // 0.84.2 (lead 18): a deck's name mid-sentence ("on the rec deck"); deckWord for labels and signs
@@ -8737,6 +8738,7 @@ Object.assign(KIT, {
     box(.24, .24, o.len, RK.black, 0, H - .3, 0, g); box(.04, .05, o.len - .2, RK.screen, .09, H - .45, 0, g);
     const piv = new THREE.Group(), sh = H - 1.45; piv.position.set(.06, H - .45, 0); piv.userData.noMerge = true; g.add(piv);   // it moves: kept out of the deck's merge
     RK.film = new THREE.MeshBasicMaterial({ color: col('#e8e6df'), toneMapped: false });
+    if (REC_FILM) RK.film.map = recFilmTex();   // 0.99.7 (AV1, note 42): the film's picture (4e's slot)
     box(.02, sh, o.len - .3, RK.film, 0, -sh / 2, 0, piv); box(.05, .05, o.len - .25, RK.black, 0, -sh, 0, piv);   // the cloth and its weighted bottom bar
     for (const c of piv.children) { c.userData.noMerge = true; c.castShadow = false; }   // the merge looks at each mesh, not its group
     REC_SHOW.piv = piv; piv.scale.y = Math.max(.001, REC_SHOW.scr); piv.visible = REC_SHOW.scr > .002;
@@ -9519,6 +9521,88 @@ function simRunAt(k) {
   if (A && A.kind === 'recSim' && A.phase === 'do' && A.placeId === SIM_POD_IDS[k]) return Math.min(1, A.done / A.def.mins);
   const a = typeof heldBy === 'function' ? heldBy(SIM_POD_IDS[k]) : null;   // someone of the crew settled in it (S5): a run every 15 minutes
   return a && a.settled ? (shipNow() / 15 + k * .37) % 1 : -1;
+}
+// 0.99.7 (AV1, the user's note 42; REC_FILM, section 4): film night's film on the auditorium screen. A small picture
+// (128 x 64) drawn here is the cloth's own texture (recScreen), so no new mesh, no new draw call and nothing coplanar;
+// redrawn about 12 times a second only while the film is on, the screen down and you're in the auditorium (recShowTick).
+// A short film of simple scenes, round again: a lighthouse at night, its beam sweeping (the film opens on one, as the
+// Mail says), space whales gliding past the stars, a little ship crossing a ringed planet, a sunset over the hills,
+// and the credits rolling up (bars, no words). Looks only: nothing random (a hash for the stars), nothing saved.
+const REC_FILM_CV = { cv: null, x: null, tex: null, t: -1, t0: null, blank: false, n: 0 };
+const REC_FILM_LEN = 14, REC_FILM_SCENES = 5;               // seconds a scene; scenes in the film
+function recFilmTex() {                                  // recScreen, at the deck's build: the cloth's texture
+  const F = REC_FILM_CV;
+  if (!F.cv) { F.cv = document.createElement('canvas'); F.cv.width = 128; F.cv.height = 64; F.x = F.cv.getContext('2d'); }
+  const tx = new THREE.CanvasTexture(F.cv); tx.encoding = THREE.sRGBEncoding; tx.minFilter = THREE.LinearFilter; tx.generateMipmaps = false;
+  F.tex = tx; F.blank = false; recFilmBlank(); return tx;
+}
+function recFilmBlank() { const F = REC_FILM_CV; F.x.fillStyle = '#ffffff'; F.x.fillRect(0, 0, 128, 64); F.tex.needsUpdate = true; F.blank = true; F.t0 = null; }
+const recFilmH = k => { const s = Math.sin(k * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };   // a fixed scatter (stars), never R()
+function recFilmStars(x, n, drift, t, a) {
+  for (let k = 0; k < n; k++) { const px = ((recFilmH(k) * 128 - t * drift * (0.4 + recFilmH(k + 50))) % 128 + 128) % 128, py = recFilmH(k + 100) * 64, b = 0.5 + 0.5 * Math.sin(t * 2 + k);
+    x.fillStyle = `rgba(255,255,240,${(a * (0.4 + 0.6 * b)).toFixed(2)})`; x.fillRect(px | 0, py | 0, 1, 1); }
+}
+function recFilmScene(x, sc, u, t) {                     // u: 0..1 through the scene; t: seconds into the film
+  if (sc === 0) {                                        // the lighthouse at night
+    const g = x.createLinearGradient(0, 0, 0, 44); g.addColorStop(0, '#0b1430'); g.addColorStop(1, '#2a3f6e'); x.fillStyle = g; x.fillRect(0, 0, 128, 44);
+    recFilmStars(x, 26, 0, t, 0.8);
+    x.fillStyle = '#e8eef8'; x.beginPath(); x.arc(104, 12, 5, 0, 7); x.fill();    // the moon
+    x.fillStyle = '#122544'; x.fillRect(0, 44, 128, 20);                          // the sea
+    x.fillStyle = 'rgba(160,190,230,0.35)'; for (let k = 0; k < 9; k++) { const wx = ((k * 17 + t * 6) % 140) - 8, wy = 47 + (k * 5) % 15; x.fillRect(wx | 0, wy, 7, 1); }
+    x.fillStyle = '#1b1f26'; x.beginPath(); x.moveTo(14, 46); x.lineTo(24, 40); x.lineTo(44, 41); x.lineTo(52, 46); x.fill();   // the rock
+    x.fillStyle = '#e9e4da'; x.fillRect(29, 18, 8, 23); x.fillStyle = '#b8483e'; x.fillRect(29, 24, 8, 3); x.fillRect(29, 32, 8, 3);   // the tower, red bands
+    x.fillStyle = '#2b2b2b'; x.fillRect(28, 14, 10, 4); x.fillRect(31, 11, 4, 3);
+    const a = t * 1.2, s = Math.cos(a), on = 0.55 + 0.45 * Math.max(0, s);
+    x.fillStyle = `rgba(255,236,150,${on.toFixed(2)})`; x.fillRect(30, 14, 6, 4);   // the lamp
+    const len = 90 * s, w = 5 + 3 * Math.abs(Math.sin(a));
+    x.fillStyle = 'rgba(255,240,170,0.22)'; x.beginPath(); x.moveTo(33, 16); x.lineTo(33 + len, 16 - w); x.lineTo(33 + len, 16 + w); x.fill();   // the beam, sweeping
+  } else if (sc === 1) {                                 // space whales
+    x.fillStyle = '#060a1c'; x.fillRect(0, 0, 128, 64); recFilmStars(x, 40, 10, t, 0.9);
+    x.fillStyle = 'rgba(90,70,150,0.25)'; x.beginPath(); x.ellipse(40, 50, 50, 14, 0.2, 0, 7); x.fill();   // a nebula
+    for (const [k, sz, y0, sp] of [[0, 1, 26, 1], [1, 0.6, 42, 0.8]]) {
+      const cx = 150 - ((u * 190 * sp) + k * 40) % 190, cy = y0 + 3 * Math.sin(t * 0.9 + k * 2), L = 22 * sz, Hh = 7 * sz, f = Math.sin(t * 2 + k);
+      x.fillStyle = k ? '#7c94c9' : '#9fb4e0'; x.beginPath(); x.ellipse(cx, cy, L, Hh, 0, 0, 7); x.fill();
+      x.beginPath(); x.moveTo(cx + L * 0.9, cy); x.lineTo(cx + L * 1.45, cy - Hh * (0.9 + 0.5 * f)); x.lineTo(cx + L * 1.45, cy + Hh * (0.9 - 0.5 * f)); x.fill();   // the tail
+      x.fillStyle = '#dfe8ff'; x.beginPath(); x.ellipse(cx - L * 0.1, cy + Hh * 0.45, L * 0.7, Hh * 0.35, 0, 0, 7); x.fill();   // the pale belly
+      x.fillStyle = '#1a2240'; x.fillRect((cx - L * 0.65) | 0, (cy - Hh * 0.2) | 0, 2, 2);   // an eye
+      x.fillStyle = 'rgba(180,230,255,0.8)'; for (let j = 0; j < 4; j++) x.fillRect((cx - L * 0.3 + j * L * 0.25) | 0, (cy - Hh * 0.55) | 0, 1, 1);   // little lights along its back
+    }
+  } else if (sc === 2) {                                 // the little ship and the ringed planet
+    x.fillStyle = '#03050d'; x.fillRect(0, 0, 128, 64); recFilmStars(x, 34, 4, t, 0.9);
+    const g = x.createRadialGradient(92, 60, 4, 96, 66, 40); g.addColorStop(0, '#e0a868'); g.addColorStop(1, '#7a4a2c'); x.fillStyle = g; x.beginPath(); x.arc(96, 66, 36, 0, 7); x.fill();
+    x.strokeStyle = 'rgba(230,210,170,0.7)'; x.lineWidth = 1.5; x.beginPath(); x.ellipse(96, 62, 54, 8, -0.15, Math.PI * 1.05, Math.PI * 1.95); x.stroke();   // the ring
+    const sx = -10 + u * 150, sy = 30 - 10 * Math.sin(u * 3.1);
+    x.fillStyle = 'rgba(120,200,255,0.5)'; x.fillRect((sx - 18) | 0, (sy + 0.5) | 0, 16, 1);   // its trail
+    x.fillStyle = '#d8dde6'; x.beginPath(); x.moveTo(sx + 7, sy + 1); x.lineTo(sx - 4, sy - 3); x.lineTo(sx - 4, sy + 5); x.fill();
+    x.fillStyle = `rgba(140,220,255,${(0.7 + 0.3 * Math.sin(t * 20)).toFixed(2)})`; x.fillRect((sx - 6) | 0, sy | 0, 2, 2);   // the engine
+  } else if (sc === 3) {                                 // a sunset over the hills, two people on a bench
+    const g = x.createLinearGradient(0, 0, 0, 64); g.addColorStop(0, '#3b2a5c'); g.addColorStop(0.55, '#e0785a'); g.addColorStop(1, '#f6c46a'); x.fillStyle = g; x.fillRect(0, 0, 128, 64);
+    x.fillStyle = '#ffe3a0'; x.beginPath(); x.arc(70, 30 + u * 18, 9, 0, 7); x.fill();   // the sun going down
+    x.fillStyle = '#5a3550'; x.beginPath(); x.moveTo(0, 46); for (let k = 0; k <= 128; k += 8) x.lineTo(k, 44 - 6 * Math.sin(k * 0.05 + 1)); x.lineTo(128, 64); x.lineTo(0, 64); x.fill();
+    x.fillStyle = '#2c1c30'; x.beginPath(); x.moveTo(0, 54); for (let k = 0; k <= 128; k += 8) x.lineTo(k, 52 - 4 * Math.sin(k * 0.08)); x.lineTo(128, 64); x.lineTo(0, 64); x.fill();
+    x.fillRect(30, 49, 12, 1); x.fillRect(31, 50, 1, 3); x.fillRect(40, 50, 1, 3);   // the bench
+    x.fillRect(33, 44, 3, 5); x.fillRect(38, 45, 3, 4); x.beginPath(); x.arc(34.5, 43, 1.6, 0, 7); x.arc(39.5, 44, 1.6, 0, 7); x.fill();   // two people
+    x.fillStyle = 'rgba(40,20,40,0.8)'; for (let k = 0; k < 3; k++) { const bx = ((u * 60 + k * 14) % 128), by = 16 + k * 4 + Math.sin(t * 3 + k); x.fillRect(bx | 0, by | 0, 3, 1); }   // birds
+  } else {                                               // the credits: rows rolling up (no words)
+    x.fillStyle = '#050505'; x.fillRect(0, 0, 128, 64);
+    for (let k = 0; k < 30; k++) { const y = 70 + k * 7 - u * 260; if (y < -4 || y > 66) continue;
+      const big = k % 6 === 0, w = big ? 40 : 18 + 16 * recFilmH(k + 7); x.fillStyle = big ? '#e8e2c8' : '#a8a498';
+      if (big) x.fillRect((64 - w / 2) | 0, y | 0, w | 0, 2); else { x.fillRect((60 - w) | 0, y | 0, w | 0, 1); x.fillRect(68, y | 0, (w * 0.8) | 0, 1); } }
+  }
+}
+function recFilmTick(lit, t) {                           // recShowTick, each frame while the screen is down: true while the film plays
+  const F = REC_FILM_CV; if (!F.tex) return false;
+  if (!lit) { if (!F.blank) recFilmBlank(); return false; }
+  if (F.t0 == null || t < F.t0) F.t0 = t;
+  if (typeof lastRoom !== 'undefined' && lastRoom !== 'A') return true;   // not in the auditorium: the picture stays as it was, no redraw (lead 49)
+  if (t - F.t >= 1 / 12 || t < F.t) {
+    F.t = t; F.n++;
+    const e = t - F.t0, k = e / REC_FILM_LEN, sc = Math.floor(k) % REC_FILM_SCENES, u = k - Math.floor(k), x = F.x;
+    x.save(); try { recFilmScene(x, sc, u, e); } finally { x.restore(); }
+    const fade = Math.min(1, Math.min(u, 1 - u) * REC_FILM_LEN / 0.8); if (fade < 1) { x.fillStyle = `rgba(0,0,0,${(1 - fade).toFixed(2)})`; x.fillRect(0, 0, 128, 64); }   // a short fade between scenes
+    F.tex.needsUpdate = true; F.blank = false;
+  }
+  return true;
 }
 // ---- end of slot: Rec engineer ----
 
@@ -72118,7 +72202,8 @@ function recShowTick(dt, t) {
   p.scale.y = Math.max(.001, REC_SHOW.scr); p.visible = REC_SHOW.scr > .002;
   if (p.visible && RK && RK.film) {
     const lit = REC_SHOW.state === 'film' && REC_SHOW.scr > .98, k = (t * .05) % _recFilm.length, i = Math.floor(k), f = k - i;
-    if (lit) RK.film.color.copy(_recFilm[i]).lerp(_recFilm[(i + 1) % _recFilm.length], f * f * (3 - 2 * f)).multiplyScalar(.75 + .1 * Math.sin(t * 2.3)); else RK.film.color.copy(_recCloth);
+    if (REC_FILM && recFilmTick(lit, t)) RK.film.color.setRGB(.9, .9, .9);   // 0.99.7 (AV1, note 42): the film itself (4e's slot)
+    else if (lit) RK.film.color.copy(_recFilm[i]).lerp(_recFilm[(i + 1) % _recFilm.length], f * f * (3 - 2 * f)).multiplyScalar(.75 + .1 * Math.sin(t * 2.3)); else RK.film.color.copy(_recCloth);
   }
 }
 function crewDetail() {                                  // who gets a full rig: the nearest story crew to you
@@ -75021,6 +75106,8 @@ const SND_R3_ON = true;   // switched on in 0.96.0 (the user: the sound update i
 const SND_LONG = true;   // 0.99.5 (SD5, the user's note 17): after a stall (a long frame) no sound is scheduled in the past, where it starts late and bunched (pops): the loops skip to now, the music drops bars already begun (a short gap instead); off: as 0.99.4
 const SND_BUF_ON = true;   // 0.99.5 (SD5, note 17, lead 47's option for the user): a bigger output buffer (latencyHint 'playback'), more slack for a busy phone against dropouts (crackle); taps, doors and footsteps sound about 0.1-0.2 s later; off: as 0.99.4
 const MESS_SCALE = true;   // 0.99.5 (SD5, the user's note 4): the mess hall's murmur follows how many are there, its level too; none for one crew member alone; off: as 0.99.4
+const SND_DISC = false;   // 0.99.7 (AV1, the user's note 44): a game of Lightdisc keeps the sound running (it froze the ship, and the sound with it): the track already playing carries on; off: as 0.99.6
+const SND_LIVE = false;   // 0.99.7 (AV1, the user's notes 13 and 29): the late piano's piece and the music jam's band, made here and heard from where they play, fading with distance; the ship's music fades down near them; off: as 0.99.6
 const SND = (() => {
   const S = { ctx: null, bus: {}, onFrame: [], log: URL_FLAGS.has('soundlog') ? [] : null };
   const ALLOWED = URL_FLAGS.has('sound') || !(navigator.webdriver || URL_FLAGS.has('mute') || NOSAVE);
@@ -75058,6 +75145,7 @@ const SND = (() => {
     // fixed trims set by measuring each layer against the hum (plans/sound, the mockups' __measure)
     const TRIM = { hum: 0.4, steps: 0.5, ui: 1, music: 1 };   // music: the music module applies its own level; steps 0.5: the player's footsteps half as loud (the user, 2026-10-26)
     for (const k of ['hum', 'steps', 'ui', 'music']) { g[k] = c.createGain(); const tr = c.createGain(); tr.gain.value = TRIM[k]; g[k].connect(tr); tr.connect(master); }
+    if (SND_LIVE) { g.duck = c.createGain(); g.music.disconnect(); g.music.connect(g.duck); g.duck.connect(master); }   // 0.99.7 (AV1): the ship's music fades down near the live music (its own gain: R3's duck keeps BUS.music; TRIM.music is 1)
     return { buf, comp, master, verb, ...g };
   }
 
@@ -75886,6 +75974,148 @@ const SND = (() => {
     return { W, watch: r3Watch, tick: r3Tick, actPick: r3ActPick, homeDoor };
   })() : null;
   if (R3) S.onFrame.push(() => { try { R3.watch(); } catch (e) {} });
+  // 0.99.7 (AV1, the user's notes 13 and 29; SND_LIVE): music played aboard, heard from where it's played. The late piano
+  // (the Captain at the music room's piano, Deck 4) plays a few slow piano pieces in turn, the same every week, the last
+  // always her own; the Friday jam plays a small band, one more part for each crew member playing (guitar, bass, a hand
+  // drum, a tambourine, a tune on top: three parts with one player, the full band with three). Only while the tradition is on and someone sits there playing; full in the room,
+  // fading with distance, quieter and muffled through the walls; the ship's music fades down while it's loud. It reads the
+  // ship only (DECK_CREW, eventsOn) and changes nothing; Math.random for the human touch (timing, loudness), never R().
+  const LIVE = SND_LIVE ? (() => {
+    const mtof = m => 440 * Math.pow(2, (m - 69) / 12), clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+    const NOTE = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+    const nm = s => { const m = /^([A-G])([#b]?)(-?\d)$/.exec(s); return m ? 12 * (+m[3] + 1) + NOTE[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0) : null; };
+    const CH = { '': [0, 4, 7], m: [0, 3, 7], 7: [0, 4, 7, 10], m7: [0, 3, 7, 10] };
+    const chord = s => { const m = /^([A-G][#b]?)(m7|m|7|)$/.exec(s), r = nm(m[1] + '2'); return { root: r, notes: CH[m[2]].map(x => r + x) }; };
+    // a piece: chords one a bar, the tune as "note:beats" (R a rest), its left hand's style
+    const piece = (name, bpm, beats, lh, chords, tune) => {
+      const bars = chords.split(' ').map(chord), mel = []; let b = 0;
+      for (const w of tune.split(/\s+/).filter(x => x && x !== '|')) { const [n, l] = w.split(':'); if (n !== 'R') mel.push([b, nm(n), +l]); b += +l; }
+      return { name, bpm, beats, lh, bars, mel, len: bars.length * beats };
+    };
+    const PIECES = [   // the Captain's: in this order, round again (the last, the A minor one, is the piece she plays last)
+      piece('Waltz for the Wren', 84, 3, 'waltz', 'F C Dm Bb F Gm C C F A7 Dm Bb F C F F',
+        'A4:1 C5:1 F5:1 | E5:2 D5:1 | D5:1 F5:1 A5:1 | G5:2 F5:1 | F5:1 A5:1 C6:1 | Bb5:2 G5:1 | A5:1 G5:1 E5:1 | C5:3 | A4:1 C5:1 F5:1 | E5:2 C#5:1 | D5:1 F5:1 A5:1 | D6:2 Bb5:1 | A5:1 F5:1 C5:1 | G5:1.5 E5:.5 C5:1 | F5:3 | R:3'),
+      piece('Slow stars', 56, 4, 'block', 'D A Bm G D G A A Bm F#m G D Em A D D',
+        'F#5:3 E5:1 | E5:2 C#5:2 | D5:3 B4:1 | B4:4 | A4:1 D5:1 F#5:2 | G5:3 F#5:1 | E5:4 | E5:2 A5:2 | F#5:2 D5:2 | C#5:4 | D5:2 B4:1 G4:1 | A4:4 | G5:2 E5:2 | C#5:2 E5:2 | D5:4 | R:4'),
+      piece('Thursday', 63, 3, 'arp', 'Am F C G Am Dm E Am F G Em Am Dm E Am Am',
+        'E5:2 C5:1 | A4:1.5 C5:.5 F5:1 | E5:2 G4:1 | D5:2 B4:1 | C5:1 E5:1 A5:1 | F5:2 E5:.5 D5:.5 | B4:2 G#4:1 | A4:3 | C5:1 F5:1 A5:1 | G5:2 F5:.5 E5:.5 | E5:1.5 D5:.5 B4:1 | C5:2 E5:1 | D5:1 F5:1 A5:1 | G#5:2 E5:1 | A5:1 E5:1 C5:1 | A4:3'),
+    ];
+    const JAM = piece('The Friday jam', 100, 4, 'band', 'G D Em C G D C G C G D Em C G D D',
+      'B4:1 D5:1 G5:1.5 F#5:.5 | A5:2 F#5:1 D5:1 | E5:1 G5:1 B5:1.5 A5:.5 | G5:2 E5:2 | D5:1 G5:1 B5:1 G5:1 | A5:1.5 G5:.5 F#5:2 | E5:1 G5:1 E5:1 C5:1 | D5:4 | E5:1 G5:1 C6:2 | B5:1 G5:1 D5:2 | A5:1 F#5:1 D5:1 A5:1 | B5:2 G5:2 | C6:1 B5:1 A5:1 G5:1 | B5:1 A5:1 G5:2 | A5:1 B5:1 A5:1 F#5:1 | D5:2 R:2');
+    // the piano: one oscillator with a piano-like wave, its brightness falling as the note dies (3 nodes a note)
+    let PW = null;
+    const pwave = () => PW || (PW = ctx.createPeriodicWave(new Float32Array(10), new Float32Array([0, 1, 0.42, 0.3, 0.16, 0.1, 0.07, 0.04, 0.025, 0.015])));
+    function piano(t, m, vel, dur, out) {
+      const f = mtof(m), o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain(), dec = clamp(2.6 - (m - 48) * 0.045, 0.7, 3.2);
+      o.setPeriodicWave(pwave()); o.frequency.value = f; o.detune.value = (Math.random() - 0.5) * 4;
+      lp.type = 'lowpass'; lp.Q.value = 0.4; lp.frequency.setValueAtTime(clamp(f * (3 + 7 * vel), 300, 9000), t); lp.frequency.setTargetAtTime(clamp(f * 1.6, 200, 4000), t + 0.02, dec * 0.35);
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.11 * vel, t + 0.006); g.gain.setTargetAtTime(0.0001, t + 0.006, dec * 0.45);
+      const end = t + Math.min(dur, dec * 2.5); g.gain.setTargetAtTime(0.0001, end, 0.12);
+      o.connect(lp); lp.connect(g); g.connect(out); o.start(t); o.stop(end + 0.7);
+    }
+    function pluck(t, ms, vel, out, dn) {   // a strummed chord: the strings one after another, through one filter
+      const lp = ctx.createBiquadFilter(), g = ctx.createGain(); lp.type = 'lowpass'; lp.Q.value = 1.2;
+      lp.frequency.setValueAtTime(3200, t); lp.frequency.setTargetAtTime(700, t, 0.12);
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.05 * vel, t + 0.01); g.gain.setTargetAtTime(0.0001, t + 0.03, 0.22);
+      lp.connect(g); g.connect(out);
+      (dn ? ms : ms.slice().reverse()).forEach((m, k) => { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m); o.detune.value = (Math.random() - 0.5) * 8; o.connect(lp); o.start(t + k * 0.012); o.stop(t + 1.3); });
+    }
+    function bass(t, m, d, vel, out) {
+      const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'triangle'; o.frequency.value = mtof(m);
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.16 * vel, t + 0.015); g.gain.setTargetAtTime(0.0001, t + 0.05, d * 0.5);
+      o.connect(g); g.connect(out); o.start(t); o.stop(t + d * 2.5 + 0.2);
+    }
+    function drum(t, low, vel, out) {   // a hand drum: a low thump, or a slap
+      if (low) { const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(58, t + 0.12);
+        g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.3 * vel, t + 0.004); g.gain.setTargetAtTime(0.0001, t + 0.01, 0.07); o.connect(g); g.connect(out); o.start(t); o.stop(t + 0.5); }
+      else noise(t, 0.09, { f: 1900, q: 0.9, gain: 0.09 * vel, bus: out });
+    }
+    function lead(t, m, d, vel, out) {   // a tune on top: a soft reed, a little vibrato
+      const o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain(), v = ctx.createOscillator(), vg = ctx.createGain();
+      o.type = 'sawtooth'; o.frequency.value = mtof(m); lp.type = 'lowpass'; lp.frequency.value = 1800; lp.Q.value = 0.7;
+      v.frequency.value = 5.2; vg.gain.value = 6; v.connect(vg); vg.connect(o.detune);
+      const e = t + Math.max(0.12, d - 0.05); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.03 * vel, t + 0.05); g.gain.setValueAtTime(0.03 * vel, e); g.gain.linearRampToValueAtTime(0.0001, e + 0.12);
+      o.connect(lp); lp.connect(g); g.connect(out); o.start(t); v.start(t); o.stop(e + 0.2); v.stop(e + 0.2);
+    }
+    // one bar of a piece: its left hand (or the band) and the tune's notes that start in it
+    function bar(P, i, t, n, out) {
+      const s = 60 / P.bpm, c = P.bars[i % P.bars.length], hum = () => (Math.random() - 0.5) * 0.02, v = () => 0.8 + Math.random() * 0.25;
+      const notesIn = P.mel.filter(x => x[0] >= i * P.beats && x[0] < (i + 1) * P.beats);
+      if (P.lh === 'band') {
+        const ns = c.notes.map(x => x + 12).concat([c.root + 24]);
+        if (n >= 1) [[0, 1], [1, 1], [1.5, 0], [2.5, 0], [3, 1], [3.5, 0]].forEach(([b, dn]) => pluck(t + b * s + hum(), ns, v() * (b % 1 ? 0.7 : 1), out, dn));
+        if (n >= 2) [[0, 0, 1.5], [1.5, 7, 0.5], [2, 0, 1], [3, 7, 1]].forEach(([b, k, l]) => bass(t + b * s, c.root + k, l * s, v(), out));
+        if (n >= 3) [[0, 1], [1, 0], [1.75, 1], [2, 1], [3, 0]].forEach(([b, lo]) => drum(t + b * s + hum(), lo, v(), out));
+        if (n >= 4) for (let k = 0; k < 8; k++) noise(t + k * s / 2 + hum(), 0.06, { ft: 'highpass', f: 6500, q: 0.7, gain: (k % 4 === 2 ? 0.05 : 0.022) * v(), bus: out });
+        if (n >= 5) for (const [b, m, l] of notesIn) lead(t + (b - i * P.beats) * s, m, l * s, v(), out);
+        return;
+      }
+      const L = c.notes.map(x => x + 12), r = c.root;
+      if (P.lh === 'arp') [r, r + 7, L[1], L[2], L[1], r + 7].forEach((m, k) => piano(t + k * s / 2 + hum(), m, 0.5 * v(), s * 1.6, out));
+      else if (P.lh === 'waltz') { piano(t + hum(), r, 0.65 * v(), s * 1.5, out); for (const b of [1, 2]) L.slice(0, 3).forEach(m => piano(t + b * s + hum(), m, 0.32 * v(), s * 0.8, out)); }
+      else { piano(t, r, 0.6 * v(), s * 4, out); L.slice(0, 3).forEach((m, k) => piano(t + 0.04 * (k + 1) + hum(), m, 0.42 * v(), s * 3.8, out)); }
+      for (const [b, m, l] of notesIn) piano(t + (b - i * P.beats) * s + hum(), m, (0.75 + 0.2 * Math.random()), l * s, out);
+    }
+    const M = { kind: null, n: 0, x: 0, z: 0, g: 0, near: 0, duck: 1, piece: null, bar: 0, pieceN: 0, at: -1, out: null, L: null, forced: null };
+    function startLoop() {
+      const t0 = ctx.currentTime, out = ctx.createGain(), muff = ctx.createBiquadFilter(), pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null, send = ctx.createGain();
+      out.gain.value = 0; muff.type = 'lowpass'; muff.frequency.value = 12000; send.gain.value = 0.35;
+      out.connect(muff); if (pan) { muff.connect(pan); pan.connect(BUS.ui); } else muff.connect(BUS.ui); muff.connect(send); send.connect(BUS.verb);
+      const play = ctx.createGain(); play.gain.value = 1; play.connect(out);
+      M.out = { out, muff, pan, send, play }; M.next = t0 + 0.6; M.bar = 0; M.rest = 0;
+      const L = M.L = { label: 'live', tick(u) {
+        if (!M.kind) return;
+        if (M.next < ctx.currentTime - 0.05) { const P = M.piece, len = P ? P.beats * 60 / P.bpm : 1; while (M.next < ctx.currentTime - 0.05) { M.next += len; M.bar++; } }   // after a stall: skip the bars already begun (no late notes, as SND_LONG)
+        while (M.next < u) {
+          if (!M.piece) M.piece = M.kind === 'jam' ? JAM : PIECES[M.pieceN % PIECES.length];
+          const P = M.piece, len = P.beats * 60 / P.bpm;
+          if (M.bar >= P.bars.length) { M.piece = null; M.bar = 0; if (M.kind === 'piano') { M.pieceN++; M.next += 5; } continue; }   // between the Captain's pieces, a few seconds' quiet; the band goes round again
+          try { bar(P, M.bar, M.next, M.n, play); } catch (e) {}
+          M.bar++; M.next += len;
+        }
+      }, stop(f = 2) { const t = ctx.currentTime, o = M.out; LOOPS.delete(L); M.L = null; M.out = null; M.piece = null; M.bar = 0;
+        if (o) { o.out.gain.cancelScheduledValues(t); o.out.gain.setValueAtTime(o.out.gain.value, t); o.out.gain.linearRampToValueAtTime(0, t + f); setTimeout(() => { try { o.out.disconnect(); o.muff.disconnect(); o.send.disconnect(); if (o.pan) o.pan.disconnect(); } catch (e) {} }, (f + 4) * 1000); } } };
+      LOOPS.add(L); if (S.log) S.log.push({ name: 'live:' + M.kind, loop: true });
+    }
+    // what's playing on this deck now: { kind: 'piano' | 'jam', n (players), x, z, room } or null. Twice a second
+    function what() {
+      if (M.forced) return M.forced;   // sound_check only
+      if (typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 4 || typeof eventsOn !== 'function' || typeof DECK_CREW === 'undefined') return null;
+      const t = shipNow(), d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440;
+      const on = eventsOn(d).filter(e => (e.id === 'late-piano' || e.id === 'jam') && m >= e.from && m < e.to); if (!on.length) return null;
+      const bench = PLACE_OF.get('4-music-1'), room = bench ? bench.room : 'n';
+      const pl = DECK_CREW.filter(a => a.settled && a.spot && a.spot.id !== '4-music-records' && /play/.test(String(a.pose || '')) && (PLACE_OF.get(a.spot.id) || {}).room === room);   // (the record cabinet's 'play' is putting a record on)
+      if (on.some(e => e.id === 'late-piano')) { const a = pl.find(x => x.spot.id === '4-music-1'); return a ? { kind: 'piano', n: 1, x: a.x + 0.9, z: a.z, room } : null; }   // the piano itself, a step east of its bench
+      if (!pl.length) return null;
+      return { kind: 'jam', n: Math.min(5, 2 + pl.length), x: pl.reduce((s, a) => s + a.x, 0) / pl.length, z: pl.reduce((s, a) => s + a.z, 0) / pl.length, room };
+    }
+    function frame() {
+      if (!ctx || ctx.state !== 'running') return;
+      const now = ctx.currentTime;
+      if (now - M.at >= 0.5 || now < M.at) {
+        M.at = now; let w = null; try { w = S.prefs.on ? what() : null; } catch (e) { w = null; }
+        const kind = w ? w.kind : null;
+        if (kind !== M.kind) { if (M.L) M.L.stop(2); M.kind = kind; if (kind) startLoop(); }
+        if (w) { M.n = w.n; M.x = w.x; M.z = w.z; M.room = w.room; }
+      }
+      // how near: full in the room within about 3 tiles, to nothing at about 12; through the walls a third as loud and muffled
+      let g = 0, pan = 0, inRoom = false;
+      if (M.kind && typeof player !== 'undefined' && player.obj) {
+        const p = player.obj.position, dx = M.x - p.x, dz = M.z - p.z, d = Math.hypot(dx, dz);
+        try { inRoom = roomAt(...player.here()) === M.room; } catch (e) { inRoom = false; }
+        g = inRoom ? Math.pow(clamp(1 - Math.max(0, d - 3) / 9, 0, 1), 1.3) : 0.35 * Math.pow(clamp(1 - Math.max(0, d - 2) / 9, 0, 1), 1.5);
+        const a = typeof az === 'number' ? az : 0; pan = clamp((dx * Math.cos(a) - dz * Math.sin(a)) / 8, -0.5, 0.5);
+      }
+      M.near = g; M.inRoom = inRoom;
+      const o = M.out, lvl = (M.kind === 'jam' ? 0.75 : 0.8) * g;   // levels measured against the ship's music (the piano about 2 dB over it in the room, the full band about 3)
+      if (o && Math.abs(lvl - (o.lv ?? -1)) > 0.01) { o.lv = lvl; o.out.gain.setTargetAtTime(lvl, now, 0.25); o.muff.frequency.setTargetAtTime(inRoom ? 12000 : 900, now, 0.3); }
+      if (o && o.pan && Math.abs(pan - (o.pv ?? 9)) > 0.03) { o.pv = pan; o.pan.pan.setTargetAtTime(pan, now, 0.2); }
+      const duck = M.kind ? clamp(1 - g * 1.6, 0, 1) : 1;   // the ship's music: out while you're in the room, back as you leave
+      if (BUS.duck && Math.abs(duck - M.duck) > 0.02) { M.duck = duck; BUS.duck.gain.setTargetAtTime(duck, now, duck < 0.5 ? 0.6 : 1.2); }
+    }
+    return { M, frame, PIECES, JAM, what };
+  })() : null;
+  if (LIVE) { S.live = LIVE.M; S.onFrame.push(() => { try { LIVE.frame(); } catch (e) {} }); }   // for sound_check: S.live (forced: a stand-in for the tradition)
   function ambTick() {
     let cook = false, wash = false;
     try {
@@ -76741,7 +76971,8 @@ const SND = (() => {
   S.actTick = null; S.musicTick = null;   // the slots set these: called once a second while sound runs
   S.frame = run => {
     if (!ctx) return;
-    const want = (run || !!(SND_TITLE && S.titleOn)) && !document.hidden && S.prefs.on;   // the title's track plays while the ship is held under it
+    const disc = SND_DISC && !run && typeof PAUSE !== 'undefined' && !PAUSE.on && !!(PAUSE.disc && PAUSE.disc());   // 0.99.7 (AV1, note 44): a game of Lightdisc, not a pause on top of it
+    const want = (run || !!(SND_TITLE && S.titleOn) || disc) && !document.hidden && S.prefs.on;   // the title's track plays while the ship is held under it
     if (!busy && want && ctx.state === 'suspended') { busy = true; ctx.resume().then(() => busy = false, () => busy = false); }
     else if (!busy && !want && ctx.state === 'running') { busy = true; ctx.suspend().then(() => busy = false, () => busy = false); }
     if (ctx.state !== 'running') return;
