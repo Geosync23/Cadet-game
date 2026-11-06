@@ -86,3 +86,41 @@ off no change. cadet_test off vs 0.99.6 ALL IDENTICAL. (SC1's check_fast on 77e5
 Before the move: 9175156, game f8936885...e441 matched; cadet_test off vs 0.99.6 ALL IDENTICAL; every edit in 18 and 23
 gated by GAMES997_ON; the ACT read in wsoWhere is in whereIs's live layer (tradWhere), not planDay. Handed to SC1.
 Merge note: GM1 and TB6 both add their switch line after TRAD995_ON (section 13, line 9757).
+
+### TB6 hosted traditions (claude/p997-traditions), switch TRAD997_ON (section 13)
+**53bf2ce (tip 687838e8 adds probes only), game 84d3f8f1...4447 (sha256 matched).** Sections 13 (switch), 15 (2 hooks),
+18 (+223, TB6's block), 24c (3 lines), 8b (+11: the loaf prop). With the switch off nothing runs (const).
+- Off: cadet_test vs 0.99.6 ALL IDENTICAL.
+- TB6's five probes, run here with the switch on (all OK): spice_fresh (fresh save, intro on, Day 2): Brennan at the
+  shelf from 19:05, 28 crew there at 19:15, her card, a seat, three tasting plates, eaten by 19:41; clear of the call-home
+  meeting (18:00-19:00). Open lab Day 9: card, you at the island, Sato held at 2-open-lab-2, her lines every third bubble.
+  Bread day: kneading, loaf in hand, eaten at a mess seat, the loaf (not the tray) on the table; a short knead: no loaf.
+  Bunk inspection: Calder stops, "Uniform: clean. Good." / "Bed: not made." / "Locker: tidy.", then "That's a pass" or
+  "Not a pass this week. Make the bed before you go, please.", the notice, the Mail when away. Teach x4: each its own
+  pose, four coaching lines, the result notice and flag.
+- Close-ups (crop of the phone shot): the loaf on its board in your hand, and on the table while you eat: reads well.
+- Should (not blocking): Open lab's crowd uses three `here` lines, so in half an hour each comes round about four times
+  ("This one's older than the sun. Probably." etc.); Sato's six lines start over after six. More lines, or fewer crowd bubbles.
+- Not a fault: the inspection notice logged twice 2 ship minutes apart is the toast queue (guideToast re-calls toast
+  when the one on screen clears); the probe's hook sees both calls. Same pattern on other toasts.
+- Switched-on checks: DAY CHECK OK Days 2, 4, 7; EVENTS CHECK OK; join, food (1 7), player, check_fast running.
+
+### EV1 new events (claude/p997-events), switches EV997_LIGHT_ON, EV997_SAT_ON, EV997_READ_ON
+**8632e57, game 400346af...9451 (sha256 matched).** Sections 18 (+55), 18f range (+105, EV1's slot), 22 (generated words).
+- Off: cadet_test vs 0.99.6 ALL IDENTICAL.
+- Week-1 listing, all three on (cal_ev1_8632e57_on.json): Day 4 lastLightGlass 14:00-14:30, clear of everything; Day 6
+  garden-hour gone; new rec-paddle-club 07:00, window-sketch 09:45, big-jigsaw 10:45, every-song 17:15. To weigh in the
+  CL1 merge: big-jigsaw 10:45-12:30 runs into Tomas's sowing invite (11:45, an intro step); paddle-club x Saturday run
+  (CL1 cuts the run).
+- Saturday Day 6 planned goers (ev1_saturday.py, all on): 12 traditions (9 before): paddle 2, sketch 6, jigsaw 6,
+  every-song 8; sowing 13, harvest 4.
+- The Last Light from a fresh save, intro on (ev1_light_fresh.py): Vance's Mail "The Last Light tomorrow" Day 3 18:00;
+  you clock in, work; at 13:55 to the bow lounge (no arrow leads there from work: only the Mail and the 14:00 address);
+  at 14:00 the arrow "Tap Dr. Sato to watch the Last Light with her"; tap: joined, the notice, you at the glass 14:03-14:31;
+  14 bubbles (Sato's 8 with the crowd between), setting up the Line ("Sunday at half two. The bow lounge. Don't be
+  late.", "That's what the oath is for."); the Captain's address at 14:00 (banner and All hands Mail); no page errors.
+  Should: through the gathering the arrow says "Take a job at the board" while the crew stand easy around you.
+- Reading corner (EV1's readprobe, Days 7, 21, 35): Esme hands the book round Day 7; Day 21 chapters 1-6 talked through
+  in bubbles, your question card, the answer flagged; Day 35 your answer recalled ("{me} said someone's on the island")
+  and chapters 7-12. (The probe's "cadet" for {me} is the game's no-name fallback; a real save has your name.)
+- Switched-on checks queued: bigevents, events, join, weekend, day 4 and 6, check_fast.
