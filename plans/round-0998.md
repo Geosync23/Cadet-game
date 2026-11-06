@@ -103,5 +103,13 @@ app name company; no booth tips). Expected vs 0.99.6: as round 0998.
 | R2 | OK (own checks): intro whole/--dinner/--firsts, path, arc, lines (0 errors) and --day, day 0 1 5 7 21 22, arrows endgo, pf_f1_same (F1 0 mismatches; all-off proof 30 same), cadet vs 0.99.6 (pictures identical to c1); by R4: fresh_walk all five points (long [], P fixed), p926 OK; perf by R6 | plans/checks-0998b-r2.md, claude/checks-0998-r2 345966ac |
 | R3 | OK, every check: sound (alone), devmode (all parts), dev_arrow, promo_sight, arrows_d, arrows_f, ending, controller 57 of 57 | plans/checks-0998b-r3.md, claude/checks-0998-r3 a7daa75 |
 | R4 | OK, every check (day 6 8 23 24 16, career, cr1, appt, saves, title, device, fixtap_probe, fixtap_reach, fixtap_click); from R2: fresh_walk all five points (long [], P fixed), p926 OK; from R5: tiles, join, weekend, day 27 18 19 OK | plans/checks-0998b-r4.md, claude/checks-0996-r4 |
-| R5 (BM27) | | |
-| R6 | OK: interactions_check whole (21:29-22:06 UTC, no FAIL lines, draw-call peak 220, booths row as 0998); perf_check from R2 running | plans/checks-0998b-r6.md, claude/checks-0998-r6 405c7f0 |
+| R5 (BM27, with R1, R3, R4 after two container restarts) | OK, all 24: gates player, check_fast, arrows default, fresh_walk Day 3 (long []), cadet vs c1 and vs 0.99.7 ALL IDENTICAL; BM27: events, machine x2, mech, fridays, clothes, promo_beats, cadet vs 0.99.6 (15 views, pixel counts identical to candidate 1's); R1: food 1 7, food 11 4, day 13 3 12 17, p5retry_break; R4: tiles, join, weekend, day 27 18 19; R3: bigevents, disc, stories 36 | checks-0998b-r1/r3/r4.md; /tmp logs |
+| R6 | OK: interactions_check whole (21:29-22:06 UTC, no FAIL lines, draw-call peak 220, booths row as 0998); perf_check from R2 OK (no spike; draw calls as 0998, within 1 of OLD, none over budget, memory flat) | plans/checks-0998b-r6.md, claude/checks-0998-r6 8e6e50d |
+
+**Result: round 0998b OK, every share, no new finds. FINAL GO: claude/staging-0998 at the commit of this record, game sha256
+13681748513f9b7cb51fc299c4789085d0636829d8297b9f0d29d00683259fd3, build 0.99.8** (the game last changed at f26070c).
+
+For the user (not faults): SC1's note, a booth tapped from across the room after your call shows its screen without walking
+over; after today's call a lonely player is pointed to company (the mess, the bow lounge), never the booths; backlog TP1-1
+(old: a shutdown booked into your night shift's clock-in). Container notes: BM27's machine restarted twice (~21:35 and ~22:44
+UTC); R1, R3 and R4 took over R5 checks so each ran once (listed in the R5 row).
