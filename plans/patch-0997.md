@@ -87,3 +87,42 @@ Lead's defaults (overnight; the user can change them): every change behind its o
 0.99.7 build; cut things (30 Saturday run; 15 the store as a tradition; 17 "Ask about") parked switched off with
 the record in design-doc.md. Clash rules: EV1 owns the first-week calendar shape (Thu Day 4? Day 5?, first Saturday);
 CL1 owns the rules (no clashes, piano spacing, birthday times and spacing, arrows); they agree through the lead.
+
+## Step-1 reports (all in by ~06:30 UTC / 1:30 AM ET). Defaults the lead accepted, for the user to change
+| # | Default |
+|---|---|
+| 17 | "Get to know" button on the talk card whenever that person has a story beat ready (same test as the arrow); "Ask about" parked; "Do you know...?" moves to the main row |
+| 32 | "Wants a word" arrow at most once a ship day per person, and it ends when you open their card |
+| 38 | Talk a while: the first answer was always written as a question back. Rewritten to answer first, then ask back (~575 lines) |
+| 39 | Going to a hosted tradition: +4 friendship with the host (about one Talk a while), once per host a day |
+| 13/29 | Piano and jam music heard in the room, louder nearer; follows Sound, not the Music app; ship music fades while you're near |
+| 44 | Lightdisc keeps the current track playing (AV1); Winner Stays On joinable from the stands, Pell offers you the next game after you've watched one; crew games 20 ship min (was 15) |
+| 42 | Film night: a short silent film on the screen (lighthouse, space whales, a ship crossing a planet, sunset, credits); no score yet (could add one) |
+| 12/40 | Tiles night: 3 rounds, crew paired at the boards, winners meet winners; you play full games; night's winner = most wins |
+| 41 | Tiles tutorial rewritten as 11 one-idea steps, every word explained |
+| 55 | Test the same day at 13:00 when Making it safe is learned by 12:30 on Day 8; if the bar isn't met by then, the test needs Steady instead of Reliable |
+| 25 | For 5 workdays after you learn a job type, at least one of it is on the board |
+| 48 | Garden crates: get your own cart at the Cart bay first, return it at the end |
+| 8/34 | "The Last Light": Day 4 ~14:00, the Captain's short address + a gathering at the bow lounge glass (Dr. Sato hosts), day shift stands easy 30 min; Mail the evening before; Line sign-up sheet goes up |
+| 36 | First Saturday: garden hour cut that day (harvest + sowing stay); added early paddle club 07:00, window sketching, the big jigsaw, Every song (sing-along) |
+| 46 | Reading corner reads "The Lighthouse at Coriel" over Days 7, 21, 35, 49, 63; your answers come up next time |
+| 33 | "Pockets" device app; store snacks and drinks go in your pocket (up to 4) instead of being eaten at the till |
+| 6/9/11 | Call-home tip Day 2 evening; tracker tip Day 1 before the briefing; device-at-work tip at your first 5-minute work step |
+| 53 | Join tip rewritten as a sentence; 50 traditions that had no words of their own get them |
+| 27 | The ship clock runs at 0.6 in the auditorium during the Captain's address (each line ~5.5 s) rather than cutting the speech |
+| 15 | "The crew store" Day 3 item off the Schedule/Calendar (the store stays usable) |
+| 16 | Dawn swim Tuesdays only; a tradition that overlaps your fixed duties that day is left out |
+| 20 | Late piano never on paper twice running; what looked like it was the Friday jam and crew sitting at the piano late: both stopped |
+| 23/47 | Birthdays start 19:00-20:05, end by 21:00; a party at most every 14 days (Days 4, 19, 41, 57...) |
+| 14/31/26 | Lead arrow from anywhere for Pick-your-own, Harvest morning, the Captain's address (and The Last Light) |
+| 5 | WASD and the arrow keys both walk |
+| 19 | Fitness 1.8 an hour awake, 0.4 asleep (about 32 a day; full to low in ~2.3 days, was ~4.5) |
+| 2 | Day 1 briefing: the Chief stays until the briefing ends |
+| 3 | The crew leave 2 relays and 2 lamps on the Lights shelf for your jobs |
+| 21/22 | Science-area jobs held for you: 2 a shift in week 1, then 1; 2 rec-deck jobs in week 1 |
+| 35/37 | Only the "hands on the belly" seat pose changes (to hands at the sides; beanbags too); shoe soles removed everywhere |
+| 51 | Spice shelf supper moves to 19:15-20:00 after dinner, not a meal; Brennan hosts with a card |
+| 50 | Open lab: Dr. Sato hosts at the lab island, talks about lab work, one question |
+| 52 | Teach me your thing: each teacher their own place and a small result (Zeke knitting, Tove a mint cutting, Rina a practice Tiles game, Ravi a comic) |
+| 18 | Bunk inspection: Calder walks to your bunk, three checks, then "That's a pass" / "Not a pass this week", no penalty |
+| 43 | Bread day: you get a warm loaf, carry it, sit and eat it (counts as breakfast) |
