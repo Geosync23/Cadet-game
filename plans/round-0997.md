@@ -49,3 +49,26 @@ Sessions: lead 49 session_01GKuymjjreuZtZeDMBX79xn; BM25 session_01GKuymnYTNkfxg
 R2 session_01GKuymmnJnzWMxP769P9Edd, R3 session_01GKuymo7sJwyufjkoEsCacB, R4 session_01GKuymmvXPrmsnyaH858XoJ,
 R6 session_01GKuymjS1cBK12RvWv7L5ka.
 GO (BM25, 2026-11-06 ~13:00 UTC): claude/staging-0997 at the GO commit named in the message (build turn 363107d; later docs-only commits do not change the game), game sha256 b14421f82e04602cd608505756ddb8fb05bea4571af813d8e345424ebcd1cf7d. Expected cadet: differences by design (BM25 lists each in the round record); a difference you cannot explain from the 0.99.7 notes, or a page error, is NEW.
+
+## Round 0997b: candidate 2 (BM26 for lead 50, 2026-11-06 ~15:40 UTC)
+
+Candidate 1 (b14421f8) found new FAILs A-L (the list and each cause: the round record below). The game fixes made candidate 2,
+so lead 50 (the user's rule: every game change runs the full round) asked for the full round again on it: the same six
+shares as above, with the fixed check files. Record each share in plans/checks-0997b-rN.md on your own branch.
+
+Candidate 2 = claude/staging-0997 at the GO commit BM26 names: candidate 1 + the check-only fixes (TP1 6050082 and 042949a
+arrows_check: A, H; CL1 adf96c5 interactions_check: G-store; GM1 3966a4a disc_check, controller_check: F, J; CL1 cce2169
+weekend_check: L; CR1 mech_check, devmode_check, arrows_d_check, cr1_check: B, D, E) + the game fixes (EV1 b374343: the
+Last Light no longer closes the bow lounge, appointments never book over its hour, Dev mode's tradition start on its day:
+C, D, G-orange; CR1 93eb0e4: 24p crCarryPark, Dev mode's career table and Day 8 test beat, crTestOpen without the second
+playerShiftOn: B #15, D; CL1 4bd36a1: 17 lines shortened, lines_check knows {item}: K). The build stays 0.99.7.
+Your file's sha256 must match the GO's.
+
+Same commands, notes and known-old list as above, with these changes:
+- arrows_check step6: the four ways in one run are fine now (each way its own browser context, TP1 042949a).
+- pf_f1_same OLD BUILD: F1's own test must pass (0 mismatches); the 30 fingerprints differ by design (the 0.99.7
+  switches); the proof is OLD vs the candidate with every 0.99.7 switch line set false: 30 same.
+- R2's long ones (fresh_walk, p926, pf_f1 proof) go to whoever finishes first (agree it between you, copy BM26 and lead
+  50); perf_check alone, last of everything.
+- Still to come: SC1's controller_check.py for I (the pad's way to a full-width button). R3 runs the controller ending
+  part again with it when it lands; until then the ending part's Day 34 lines are I, known and owned.
