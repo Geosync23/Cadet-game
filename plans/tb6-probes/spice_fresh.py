@@ -17,6 +17,9 @@ with sync_playwright() as pw:
     g = Game(pw, build, 390, 844)
     if os.environ.get('INTRO'):   # (lead 49) a fresh save with the intro on: the arrival, then on to the day
         g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
+        g.ev("""(() => { const t0 = introAbs(INTRO_START.day, INTRO_START.min); socInit(); SHIP.intro = introBlank(); introBegin('Sam');
+          for (let t = t0; t <= %d; t++) { setShipNow(t); const st = SHIP.intro.step && introStepById(SHIP.intro.step);
+            introAdvance(t, st && st.checkpoint ? { deck: st.checkpoint.deck, tile: st.checkpoint.tile } : { deck: 4, tile: [8, 3] }); } })()""" % ((D - 1) * 1440 + 1015))   # intro_check's paper run, always on time ('happy')
         print('intro', g.ev("JSON.stringify([introOn(), SHIP.intro.step, SHIP.time.day, Math.round(SHIP.time.min)])"))
     print('day', g.ev("[SHIP.time.day, SHIP.time.min]"), 'weekday', g.ev("weekday(%d)" % D))
     print('event', g.ev("JSON.stringify(eventsOn(%d).filter(x => /spice|dinner|supper/.test(x.id)).map(x => [x.id, x.from, x.to]))" % D))
