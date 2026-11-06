@@ -102,3 +102,15 @@ Sections: 15 (fetch toast 1 line; e96ec5a: choreThingTap), 17 (jobsHour crew cla
 - JB3_TEA_ON read: only while your round's next stop is a check point that CHECK_THING names (c5-water: Hot water, Mug rack),
   within 3 m; tea as before otherwise.
 - Verdict: PASS e96ec5a (four switches).
+
+### 5. TP1 follow-ups 565a0da -> c920acb (TP997.nd1): PASS c920acb
+Game sha256 c9a2a32ec575be67362c0bd8d723998638991039be461b382b3bc2fd5347bda4. Day 1: an arrow to the Works bay from 08:20 until
+the briefing's met, then the clock's arrow from anywhere (clockFirstTick waits for the briefing); Day 2: level-2 queue
+entries for the Chief's office (d2-solo) and the booths; week 1: needs arrows yield to live level 1-2 entries (needGoal,
+needGoalTick, introArrowTick); arrows for d3-store, d4-quiz, d5-mug, d6-sowing. Lines outside TP1's slots: section 15
+(needGoal, needGoalTick), 15b (clockFirstTick), 21 (introArrowTick, introArrowWant), guideShift: owners to look.
+- Off: cadet_test vs 0.99.6 ALL IDENTICAL (renderer noise only). On: check_fast QUICK CHECK OK in 291 s.
+- Fresh save, intro ON, 390x844, follower with real sleep, NO tracker tap (results/fresh_walk-tp1-c920acb.txt), Days 0-3:
+  Day 1: briefing met (d1-briefing:met) by its arrow, 09:01 the clock's arrow, the shadow job; Day 2: 08:31 "The Chief's
+  office, 08:45: your first solo job", met; 10:32 "10:45 meet Zeke", met (m1:do 10:52: no slip, the case my CR1 walk hit);
+  11:43 the leisure arrow only after. No stuck, no page errors.
