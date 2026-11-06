@@ -206,3 +206,9 @@
 
 == join.vesselLights.tip
 - Tap Saruth to watch the little ship from the glass
+
+// EV1 for lead 49 (0.99.7, notes 8 and 34): the Last Light at the bow glass, Thursday Day 4 14:00-14:30, Dr. Sato hosts
+== join.lastLightGlass.tip
+- Tap {name} to watch the Last Light with her
+== join.lastLightGlass.notice
+- The Last Light: stand at the bow glass with Dr. Sato and watch the Concord's last beacon go by. Leisure and social up.

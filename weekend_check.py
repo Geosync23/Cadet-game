@@ -35,7 +35,7 @@ EVS = "JSON.stringify(%s.map(d => [d, eventsOn(d).map(e => e.id)]))" % json.dump
 # (DS1, the user 2026-10-25: "spread the new ones across weeks, and keep some that were already there") every Saturday and
 # Sunday of Days 6-84: the traditions that were already there, with their times, and the new ones on it
 WKND = """JSON.stringify((() => { const out = []; for (let d = 6; d <= 84; d++) { if (weekday(d) < 5) continue;
-  const L = eventsOn(d); out.push([d, weekday(d), L.filter(e => !WEEKEND_TRADS.has(e.id)).map(e => e.id + ' ' + e.from + '-' + e.to).sort(), L.filter(e => WEEKEND_TRADS.has(e.id)).map(e => e.id)]); } return out; })())"""
+  const L = eventsOn(d); out.push([d, weekday(d), L.filter(e => !WEEKEND_TRADS.has(e.id)).map(e => e.id + ' ' + e.from + '-' + e.to).sort(), L.filter(e => WEEKEND_TRADS.has(e.id) && !(e.ev.base && typeof EV_DAY_DRESS !== 'undefined' && (EV_DAY_DRESS.get(e.id + '@' + d) || {}).add)).map(e => e.id)]); } return out; })())"""   # an event's one-off showing (a day-dress add: 0.99.7's first Saturday, EV1) isn't the rotation's
 # lead 35's rule (RV14's rv14-old_trads.py folded in): with the switch on, every tradition that was already there keeps its days,
 # times, places and host (Days 1-56, the switch off as the base: the same build), loses at most 2 people on any day, and never
 # goes below its fewest on any day with the switch off (the format has no attendance minimum: its own worst day is the floor)

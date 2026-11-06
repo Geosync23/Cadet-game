@@ -1,0 +1,29 @@
+@meeting readStory4
+// EV1 (note 46): part 4 of 4, Sunday Day 63, the end. Chapters twenty to the end: the storm of the century; the
+// lamp's motor dies; Ada and Quill turn the lens by hand all night and a ship finds the harbour. At dawn Quill gives
+// her the log and goes with the boatman. Ada writes the first entry: "To whoever comes after". Esme says the next
+// showing is everyone's own books again. Your answer flags read.s4.<k> (nothing reads it yet).
+title: Reading corner: The Lighthouse at Coriel
+from: Esme Walsh
+gist: Reading corner finished The Lighthouse at Coriel together.
+== lines
+walsh-esme: The end. Everyone finished? Everyone?
+ibarra-rafael: Finished. First book I've finished all tour.
+soto-marta: The motor dies in the storm. Course it does.
+soto-marta: Turning the lens by hand, all night. Proper work.
+strand-erik: And the ship sees the light, and finds the harbour.
+kowalczyk: I read that bit first. Years ago. Still got me.   [sigh]
+strand-erik: Then he just hands her the log and gets in the boat.
+ibarra-rafael: I may have cried. Briefly. On shift.
+soto-marta: Fine. It was good. Don't tell anyone I said so.
+walsh-esme: Her first entry. "To whoever comes after."
+kowalczyk: Every ship's a bit like that light. Someone's always on.
+walsh-esme > you: What did you think of the ending?
+? choice
+* It's the right ending.   rel:walsh-esme+1 flag:read.s4.1
+  walsh-esme: I think so too. It ends the way it started.
+* I wish he'd stayed.   rel:walsh-esme+1 flag:read.s4.2
+  walsh-esme: So did half this sofa. Someone's written a poem.
+* I want to know about the ship he saved.   rel:walsh-esme+1 flag:read.s4.3
+  walsh-esme: Ha. The book won't tell you. Make one up.
+walsh-esme: Next time, your own books again. Thank you. That was good.

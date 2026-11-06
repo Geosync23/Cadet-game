@@ -1,3 +1,45 @@
+# Handover: EV1 (0.99.7 playtest patch: new events and the first week's shape)
+
+Role: EV1, builder for lead 49 (session_01GKuymjjreuZtZeDMBX79xn). Reviewer RV33 (session_01GKuymoAK9gACR31MRd1CMX).
+Branch `claude/p997-events`, from claude/integration d7ad4c58 (0.99.6, game f6ff5ec1...db8a8). The user's notes 8, 34,
+36 and 46 (their words: plans/patch-0997.md on claude/lead-49). CL1 (session_01GKuymjnwwEESL9W6V7kQFK,
+claude/p997-calendar) owns the calendar rules; we agreed times directly (below).
+
+## What I built (all switched off; off = cadet_test ALL IDENTICAL against 0.99.6)
+
+| Switch | Note | What it does |
+|---|---|---|
+| `EV997_LIGHT_ON` | 8, 34 | **The Last Light**, a short ship-wide event (calendar row Day 3, before the Line). Wed Day 3 18:00 Vance's Mail; Thu Day 4 chatter from 07:00; 14:00 the Captain's address; 14:00-14:30 Dr. Sato's gathering at the bow glass (`lastLightGlass`, k 369, tap Sato to join, the day shift standing easy, the bow lounge theirs 13:40-14:40), her talk and the crowd's in bubbles (`lightSay`). Phases warning/passing/afterglow (never onset: eventDay(4) stays false). |
+| `EV997_SAT_ON` | 36 | **The first Saturday (Day 6):** Line day-0 dress rows: garden hour dropped that day; added early Paddle club 07:00 (rec deck, Holt, a small pull), Window sketching 09:45 (Deck 2), the big jigsaw 10:35-11:40 (Deck 1), Every song 17:15 (Deck 4). Day 7 untouched. |
+| `EV997_READ_ON` | 46 | **Reading corner reads The Lighthouse at Coriel:** Day 7 Esme hands it round (her wrap line); Days 21, 35, 49, 63 four parts in bubbles (content/meetings/readStory1-4.meet), your question card when joined (flags read.s<N>.<k>), your answer recalled next part (readStory<N>.recall.meet). Four regulars pulled on those days. |
+
+Where: data block for the Last Light just before the EV_SHIPWIDE loop (section 18); everything else in the slot
+`// ---- slot: Events 0.99.7` after 'Visit dinner'; one-line hooks in readSay, p926Frame and tradJoinable. Words:
+content/banks/event-lastLight.lines, ev997-saturday.lines, reading-corner.lines (read.story.*), join.lines
+(join.lastLightGlass.*). DEV_NOTES "The first week's shape and the reading corner's book"; design-doc (events
+calendar, weekend traditions, reading corner, open questions with my defaults).
+
+## Agreed with CL1
+Day 6: harvest and sowing untouched; my 07:00 paddle takes the cut Saturday run's slot. CL1 adds the Last Light as a
+fixed item (13:50-14:40, a guard) and a lead arrow 13:45-14:15 to the bow lounge, let through on shift.
+
+## Check edits (check-side, for their owners to see)
+- bigevents_check: `LIGHT` list: a late save passes over the Last Light with the Line (only when the switch is on).
+- events_check: the Sowing decor test looks only at its planted decor; a New game on Day 4 may have the Last Light running.
+
+## Loose ends
+- Backlog EV1-1: a tap to join stands the person up for the rest of it (lead gave it to TB6). My reading talk works round it.
+- lines_check warns on the book's names (Ada, Quill): fictional, expected. "The Last Light" is a new name for facts.md (head writer).
+- The regulars don't always come (rota, other plans); their lines are read by whoever's there.
+
+## How to test
+Copy with the switches on: `sed -e 's/^const EV997_READ_ON = false;/const EV997_READ_ON = true;/' -e 's/^const EV997_SAT_ON = false;/const EV997_SAT_ON = true;/' -e 's/^const EV997_LIGHT_ON = false; /const EV997_LIGHT_ON = true; /'`.
+Then bigevents_check, events_check, day_check 1-14, stories_check 36, fridays, weekend, join; probes in plans/ev1-probes/.
+
+---
+
+# The earlier EV1 notes (kept as they were)
+
 # Handover: EV1, events engineer (the Diplomatic visit switched on)
 
 For a fresh session taking over the events seat. Written 2026-10-28 by EV1 (for lead 43, then lead 44).

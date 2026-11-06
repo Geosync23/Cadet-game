@@ -1,0 +1,42 @@
+@bank all
+// EV1 for lead 49 (0.99.7 playtest patch, the user's note 36): the first Saturday (Day 6) busier, top to bottom. Four
+// existing traditions get a one-off showing that day (the Line's day dress, EV997_SAT in section 18's slot 'Events
+// 0.99.7'). Keys: event.crossingLine.trad.<tradition id>.<mail|ask|thanks>; a key not here keeps the tradition's own words. It's
+// the Line's warning day: the crew talk about the crossing from 08:00, Vance's Mail comes at 18:00. Tavessa is the
+// Veyli-named cluster dead ahead past the Line (facts.md); the Pale Shoals are behind us.
+
+// ---- rec deck, 07:00-07:45: an early Paddle club, Chief Holt (the Saturday run's freed hour)
+== event.crossingLine.trad.rec-paddle-club.mail
+- An early paddle tomorrow, 07:00 on the rec deck's water. Chief Holt has the kayaks out. Half asleep is fine.
+== event.crossingLine.trad.rec-paddle-club.ask
+- Early paddle on the rec deck. Seven o'clock. Holt says the water's flat before breakfast.
+- Kayaks at seven. Then the long breakfast. That's my Saturday sorted.   #funny
+== event.crossingLine.trad.rec-paddle-club.thanks
+- You take a kayak out with Holt's early paddlers. The rec deck is quiet, and the water is flat as glass.   #warm
+
+// ---- Deck 2, 09:45-10:30: Window sketching at the observatory, Luca Alvarez (the last Concord sky before the Line)
+== event.crossingLine.trad.window-sketch.mail
+- Window sketching tomorrow, 09:45, at the observatory. One last drawing of our own sky before we cross the Line. Pencils provided.
+== event.crossingLine.trad.window-sketch.ask
+- Sketching at the observatory this morning. Last chance to draw a Concord sky.
+- Luca wants everyone to draw Tavessa before we're in it. I can't draw. I'm going anyway.   #funny
+== event.crossingLine.trad.window-sketch.thanks
+- You take a pencil and draw the stars ahead. Tomorrow they'll all have Veyli names.   #warm
+
+// ---- Deck 1, 10:35-11:40: the big jigsaw in the observation room, Dev Raman (a chart of the reach)
+== event.crossingLine.trad.big-jigsaw.mail
+- The big jigsaw tomorrow, 10:35, in the observation room on Deck 1. A thousand pieces, and the picture is the Veyli reach. Fitting, Raman says.
+== event.crossingLine.trad.big-jigsaw.ask
+- Raman's got a jigsaw on the observation room table. It's a chart of the reach. Mostly sky.   #funny
+- Jigsaw on Deck 1 this morning. A thousand pieces of stars. Come and find an edge.
+== event.crossingLine.trad.big-jigsaw.thanks
+- You find a seat at the jigsaw table and fit a few pieces of the reach together. Most of them are sky.   #funny
+
+// ---- Deck 4, 17:15-18:05: Every song in the music room, Zeke Torres (after his Saturday shift)
+== event.crossingLine.trad.every-song.mail
+- Every song tomorrow at 17:15 in the music room. Zeke and the five who know every song. You only need to know the chorus.
+== event.crossingLine.trad.every-song.ask
+- Every song in the music room after shift. Zeke's warming up. We can hear him from here.   #funny
+- Singalong at quarter past five, music room. Zeke says the Line songs are in there too.
+== event.crossingLine.trad.every-song.thanks
+- You squeeze into the music room and sing along. Nobody knows all the words. Zeke does.   #funny

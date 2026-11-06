@@ -1,0 +1,91 @@
+@bank all
+// EV1 for lead 49 (0.99.7 playtest patch, the user's notes 8 and 34): the Last Light, a mini ship-wide event on the
+// first Thursday (Day 4) that sets up Crossing the Line (Sunday Day 7). The Wren passes the Concord's last relay
+// beacon this way. Past it the charts thin (facts.md, "What the Line means": never danger, only distance; the Wren goes
+// "as guests"). Wednesday 18:00 Vance's Mail; Thursday from 07:00 crew chatter; 14:00 the Captain's short address;
+// 14:00-14:30 Dr. Imra Sato at the bow glass with whoever's free, the day shift standing easy. Keys as the events
+// base's: event.lastLight.<what>. Mail is "Subject | body" (the game adds the sender). Status lines 60 or fewer.
+// The beacon is a new name (the Last Light): for the head writer to confirm.
+
+== event.lastLight.title
+- The Last Light
+
+// ---- Wednesday Day 3, 18:00: Commander Vance
+== event.lastLight.mail.warning
+- The Last Light tomorrow | Tomorrow at about two we pass the Last Light, the Concord's last beacon this way. On Sunday we cross the Line. Dr. Sato will be at the bow glass. The day shift may stand easy for half an hour to see it go by, bridge and galley excepted.
+
+== event.lastLight.status.warning
+- The Last Light tomorrow, about 14:00
+== event.lastLight.status.passing
+- Passing the Last Light
+== event.lastLight.status.afterglow
+- Past the Last Light. The Line on Sunday
+
+// ---- Thursday Day 4, 14:00: the Captain's address (a banner on every deck)
+== event.lastLight.address.passing.1
+- This is the Captain. In a few minutes we pass the Last Light, the Concord's last beacon.
+== event.lastLight.address.passing.2
+- On Sunday afternoon we cross the Line. If there's a window near you, take a look.
+== event.lastLight.address.passing.3
+- First-timers: the old hands will tell you all about the Line. Believe about half of it.
+
+// ---- the chatter: from breakfast, by lunch, and after
+== event.lastLight.news.coming.1
+- We pass the Last Light today. Two o'clock. After that, the charts get thin.
+== event.lastLight.news.coming.2
+- Last Concord beacon this way. Then the Line on Sunday.
+== event.lastLight.news.coming.3
+- Sato says the Last Light blinks once every eleven seconds. She's counted.
+== event.lastLight.news.prep.1
+- Brennan's testing the Line punch. She won't say what's in it.
+== event.lastLight.news.prep.2
+- Somebody counted the gold ribbons in Main storage. Forty. Enough, apparently.
+== event.lastLight.news.prep.3
+- The old hands are telling Line stories at lunch. Half of them are true.
+== event.lastLight.news.after.1
+- Did you see the Last Light go by? One blink, then nothing behind us.
+== event.lastLight.news.after.2
+- Past the last beacon. The Line on Sunday. The first-timers are nervous. Good.
+
+// ---- the gathering at the bow glass, 14:00-14:30 (tradition-shaped: its ask before, here during, thanks on joining)
+== event.lastLight.gather.glass.name
+- The Last Light
+== event.lastLight.gather.glass.ask
+- The Last Light goes by at two. Sato's at the bow glass. Coming?
+- Half the day shift's going up to the bow glass at two. The Last Light.
+== event.lastLight.gather.glass.here
+- There. That blink. The last Concord light this way.
+- Watch the left of the strut. Any second now.
+== event.lastLight.gather.glass.thanks
+- You find a space at the bow glass beside Dr. Sato. Far ahead a small light blinks, slides past, and is gone.   #warm
+
+// ---- Dr. Sato at the glass, in order (one bubble in two, while you're in the bow lounge)
+== event.lastLight.sato.1
+- Gather in. Mind the glass. It's very clean and I'd like it to stay that way.
+== event.lastLight.sato.2
+- There. Low on the left. One blink every eleven seconds.
+== event.lastLight.sato.3
+- That's the Last Light. The Concord's last beacon this way.
+== event.lastLight.sato.4
+- Past it the charts get thin. A few runs. Nobody's ever done a full survey.
+== event.lastLight.sato.5
+- Every star out there already has a Veyli name. We'll be learning them.
+== event.lastLight.sato.6
+- On Sunday we cross the Line. We go in as guests. Remember that.
+== event.lastLight.sato.7
+- And help's a long way back now. That's what the oath is for.
+== event.lastLight.sato.8
+- There it goes. Wave if you like. Nobody's looking.   #funny
+
+// ---- the crowd, between Sato's lines (old hands' Line stories, first-timers' nerves)
+== event.lastLight.crowd
+- My first Line, they made me sing. Badly.   #funny
+- Is it true about the dunking? Tell me it isn't true.
+- One blink, then nothing behind us. Strange.
+- Every star past here has a Veyli name. Imagine.
+- Two years since we were last out this way. Quiet run, that.
+- Brennan's punch. That's all I remember of my first Line.   #funny
+- Do first-timers have to say something? Out loud?
+- The oath's short. You'll manage.   #warm
+- I've crossed three times. Still get goosebumps.
+- Sunday at half two. The bow lounge. Don't be late.

@@ -1,0 +1,37 @@
+@meeting readStory1
+// EV1 for lead 49 (0.99.7, the user's note 46): Reading corner reads one book together. Part 1 of 4, Sunday Day 21,
+// 16:00-17:00 in the bow lounge's window seats; Esme Walsh hosts. Spoken in bubbles, in order, by those at it (a
+// regular who isn't there has their lines read by another reader, so no line names its own speaker). The line to you
+// and the choice are your card, only if you've joined; the flag is read by readStory2.recall. Bubbles: 60 or fewer.
+// The book: "The Lighthouse at Coriel". Ada, the new keeper, takes the light on a rock where it hasn't failed in two
+// hundred years. The boatman won't step ashore. The last keeper left a log "to whoever comes after".
+// The regulars' takes: Marta Soto (Works, blunt) the sceptic, and a lamp expert; Erik Strand (helm, poet) the
+// romantic; Anja Kowalczyk (night bridge) reads endings first ("risk management") and won't tell; Rafael Ibarra
+// (Survey, nights) loses his place.
+title: Reading corner: The Lighthouse at Coriel
+from: Esme Walsh
+gist: Reading corner started The Lighthouse at Coriel together: chapters one to six.
+== lines
+walsh-esme: Chapters one to six. Everyone there? Good.
+strand-erik: The boatman won't even step on the rock. I love him.
+soto-marta: Sensible man. Wet rock, angry sea. I'd stay in the boat.
+ibarra-rafael: Wait. Is Ada the keeper or the boat? I lost my place.
+walsh-esme: Ada is the keeper. Page twelve.
+soto-marta: Two hundred years and the lamp never failed? Rubbish.
+soto-marta: Every lamp fails. Ask anyone in Works.
+strand-erik: That's the point. Somebody kept it going. Every night.
+kowalczyk: Mm.
+walsh-esme: And the log. "To whoever comes after."
+strand-erik: The last entry is dated the day she arrives.
+ibarra-rafael: Oh. Oh, that's horrible. I'll sleep with the light on.
+soto-marta: A typo. Somebody wrote the wrong date.
+kowalczyk: I'm saying nothing. Watch the kettle, that's all.
+walsh-esme > you: What do you make of the date in the log?
+? choice
+* Someone's still on the island.   rel:walsh-esme+1 flag:read.s1.1
+  walsh-esme: Possible. It's a small island. Not that small.
+* It's a ghost. Obviously.   rel:walsh-esme+1 flag:read.s1.2
+  walsh-esme: Somebody on this sofa is delighted. Look.   [laugh]
+* A mistake. It's just a date.   rel:walsh-esme+1 flag:read.s1.3
+  walsh-esme: Sensible. Somebody here will be very smug now.   [laugh]
+walsh-esme: To chapter twelve for next time. Quietly, now. Read.
