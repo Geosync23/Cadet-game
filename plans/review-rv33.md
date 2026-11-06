@@ -205,4 +205,8 @@ notice reads "Passed: uniform, bed and locker all in order."): not a fault.
 Test build: BM25's staging aef7c14 + JB3 1bbed58 + CL1 ba61507 + EV1 af18afd (local /tmp/rv33/wt-all; 31 switches;
 flipper /tmp/rv33/jb3/flip.py, copied to plans/rv33-probes/jb3_flip.py). Runs: machine_check all-on with and without
 JB3_FOOD_ON, JB3_FOOD + each of CL1/EV1/TB6/MV1 alone, JB3's own five, a planted 5v fault (fix-* jobs lose their meters
-while upkeep remains: must FAIL); food 1 7 and day 7 all-on; cadet_test off; check_fast on the commit. Results below when in.
+while upkeep remains: must FAIL); food 1 7 and day 7 all-on; cadet_test off; check_fast on the commit.
+**PASS** (sent to JB3, lead 49, BM25): all on but JB3_FOOD_ON: FAIL food runs; all on: MACHINE CHECK OK; JB3_FOOD with
+CL1 / EV1 / TB6 / MV1 alone: OK each; JB3's five: OK; planted: FAIL "the ship meters: your jobs" (as it should); day 7 all
+on OK; cadet_test off ALL IDENTICAL; check_fast OK (247 s). food_check all on: FAIL cake only (CL1's older sample, fixed
+in CL1 bb26552).

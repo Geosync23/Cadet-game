@@ -11,9 +11,11 @@ plans/review-rv33.md, probes plans/rv33-probes/). Never edit the game on this br
 - EV1 new events: PASS dad2b9b, carried to 286ed5e and af18afd (72de6c46...c953).
 - CL1 calendar: PASS bb26552 (b2ab09ae...8e69).
 - SC1 words for TB6: PASS ab0e13e (0a100c8e...8344).
+- JB3 jobs (taken over from RV32): PASS 1bbed58 with 35ab083 (352656bf...4c54).
 - GM1 moved to SC1 by the lead.
 ## In progress
-- JB3 35ab083 (JB3_FOOD_ON) + 1bbed58 (machine_check 5v), game 352656bf...4c54, taken over from RV32 (stopped). Plan and
+- Nothing. JB3 PASS sent (1bbed58 with 35ab083, game 352656bf...4c54). Idle.
+- (was:) - JB3 35ab083 (JB3_FOOD_ON) + 1bbed58 (machine_check 5v), game 352656bf...4c54, taken over from RV32 (stopped). Plan and
   test build in review-rv33.md ("JB3 ..."): /tmp/rv33/jb3/run.sh (results m_*.txt, f_all_on.txt, d7_all_on.txt,
   cadet.txt, fast_off.txt). Verdict to JB3 (session_01GKuymmiCEm3CMMrMTdWMEo), BM25 and the lead.
   Expect: m_all_nofood FAIL food runs; m_all_on OK; m_food_* OK; m_planted FAIL "the ship meters: your jobs".
