@@ -99,9 +99,9 @@ app name company; no booth tips). Expected vs 0.99.6: as round 0998.
 
 | Share | Result | Notes |
 |---|---|---|
-| R1 | | |
-| R2 | | |
-| R3 | | |
-| R4 | | |
+| R1 | OK, all 17 (step6 four-way missed 0 stuck 0; player alone); from R5: food 1 7, food 11 4, day 13, day 3, p5retry_break OK | plans/checks-0998b-r1.md, claude/checks-0998-r1 6cfcf42 |
+| R2 | OK (own checks): intro whole/--dinner/--firsts, path, arc, lines (0 errors) and --day, day 0 1 5 7 21 22, arrows endgo, pf_f1_same (F1 0 mismatches; all-off proof 30 same), cadet vs 0.99.6 (pictures identical to c1); by R4: fresh_walk all five points (long [], P fixed), p926 OK; perf by R6 | plans/checks-0998b-r2.md, claude/checks-0998-r2 345966ac |
+| R3 | OK, every check: sound (alone), devmode (all parts), dev_arrow, promo_sight, arrows_d, arrows_f, ending, controller 57 of 57 | plans/checks-0998b-r3.md, claude/checks-0998-r3 a7daa75 |
+| R4 | OK, every check (day 6 8 23 24 16, career, cr1, appt, saves, title, device, fixtap_probe, fixtap_reach, fixtap_click); from R2: fresh_walk all five points (long [], P fixed), p926 OK; from R5: tiles, join, weekend, day 27 18 19 OK | plans/checks-0998b-r4.md, claude/checks-0996-r4 |
 | R5 (BM27) | | |
-| R6 | | |
+| R6 | OK: interactions_check whole (21:29-22:06 UTC, no FAIL lines, draw-call peak 220, booths row as 0998); perf_check from R2 running | plans/checks-0998b-r6.md, claude/checks-0998-r6 405c7f0 |
