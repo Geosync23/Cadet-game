@@ -58,3 +58,15 @@ switched-on copy said STORIES CHECK OK. SC1 standing by.
 - Round FAIL O (Leila's Day 2 booths scene "missing"): check-side. It plays at 18:13 as bubbles (traced:
   intro done 'd2-booths:said'); fresh_walk's record doesn't log bubbles. A should for TP1: the TP997 arrow points at
   Booth 1 from 17:45, so you're mid-call when Leila "shows you how"; at Leila from 18:00 would be better.
+- 0.99.8 review (lead 50): TP1's claude/p997-tips 913ba6c (TP998_ARROW_ON, TP998_BOOTH_ON): PASS, sent to BM27, lead 50
+  and TP1. Off identical (cadet vs 0.99.7 ALL IDENTICAL); both on: player_check OK (alone; beside three other checks
+  it failed 5 save lines from load, 0.99.7 alone also OK), arrows default and week OK, check_fast OK on build and
+  copy, fresh_walk Day 2: arrow at 18:00 to the room, no booth call, Leila's beat at 18:11. Small note to TP1: the
+  booth guard at the top of actStart shows the screen without walking over.
+
+## Standing down (2026-11-06 ~19:45 UTC, about 55% memory, at lead 50's request)
+Nothing open. Branches: claude/p997-social (notes 17, 32, 38, 39; merged into 0.99.7), claude/p997-words (TB6's
+words, RV33 PASS), claude/p997-padsteer (controller_check fix for FAIL I). Gotchas for a successor: run heavy browser
+checks two or three at a time at most (six at once timed out page loads; four at once made player_check's save part
+fail); controller_check's 'reach' part runs over two hours beside other runs; fresh_walk's record has no speech
+bubbles (use FW_TRACE with SHIP.intro.done for beats).
