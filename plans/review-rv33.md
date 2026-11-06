@@ -48,9 +48,9 @@ opening their card (p997WordSeen) shuts the day's arrow.
 - sc1_arrow2.py on: arrow minutes = ready minutes, every person every day, Days 9-22 (= off; sc1_arrow2_on_6c39f3b.txt).
 - sc1_arrow_open.py on: after opening the card, 0 arrow samples the rest of the day (kovac Day 11: off 22, on 0).
 - On copy: BUBBLE CHECK OK, DAY CHECK OK, INTERACTIONS CHECK OK. check_fast on the commit: QUICK CHECK OK (239 s).
-- stories_check FAILED (14) on the on copy, but the same 14 FAIL lines on the off copy, on 85442de-on, and on the
-  unchanged 0.99.6 build (base f6ff5ec1) in my setup: not SC1's. The 0.99.6 round (CR6) passed it, so it is my setup or
-  something that changed since (date?): rerunning runner-style (repo root, default CADET_WORK) to settle it.
+- stories_check FAILED (14) in my first runs, the same 14 lines on the off copy, on 85442de-on and on unchanged 0.99.6:
+  **my mistake: run with the default 30 days; the round runs 36 (backlog BM22-1).** The stalled beats are the ones due
+  Days 24-36. Not date- or machine-dependent (cadet_test's INIT fakes Date.now; the check is on paper). Rerun with 36 below.
 
 
 **77e573f, game 6df22594...1705 (sha256 matched): PASS** (sent to SC1 and the lead). The one change: p997HostNote skips an
@@ -70,3 +70,10 @@ off no change. cadet_test off vs 0.99.6 ALL IDENTICAL. (SC1's check_fast on 77e5
 - Note 42 (av1_film.py): the film canvas over a minute: lighthouse with sweeping beam, whales, the little ship and the
   ringed planet, sunset with two on a bench, credits; on the auditorium screen it reads the right way round from the
   seats; 133 draw calls; no page errors.
+
+## Gotchas (for a fresh reviewer)
+- stories_check needs `36` as its DAYS argument (backlog BM22-1); with the default 30 it fails 14 on any build.
+- The chat card is position:fixed: don't filter its buttons by offsetParent. A card opened away from the person (not on
+  your deck, out of reach) closes on the next frame: goToDeck to their deck and stand beside them first.
+- A fresh save via newGameStart(true) needs the manifest signed (fill form input[maxlength="24"], click the form button).
+- Copy BM24 (session_01GKuymnYTNkfxgLvtfFRg7w) on every PASS (lead 49). RV32 is session_01GKuymkDX3gviqiGJcKLWuS.
