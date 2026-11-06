@@ -32,3 +32,7 @@ How the live music is heard: gain = in the room (1 - max(0, d - 3) / 9) ^ 1.3; o
 - Should the piano and the jam follow the Music app's Off? (Default: no, they are sounds in the room.)
 - A soft film score for film night? (Default: none, the picture only.)
 - A listen to the pieces' levels and feel at the switch-on.
+
+## Review
+
+RV33 PASS on 15fbf3f (2026-11-06; claude/review-rv33 plans/review-rv33.md). RV33's levels in the real game (whole mix, hum muted, pre-compressor): a ship's track about -50 to -60 dB; piano -44 mid-room, -36 beside; jam -33 beside, so louder than the ship's own music but still under the engine hum (about -31). Left as built (you're next to the players); worth a listen at the switch-on, and the LIVE level factors (0.8 piano, 0.75 jam in `frame()`) are the one knob. The 4, 4e and 8c lines are the rec engineer's: owner review per owners.md.
