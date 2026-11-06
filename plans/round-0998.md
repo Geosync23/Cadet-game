@@ -45,6 +45,15 @@ R6 session_01GKuymjS1cBK12RvWv7L5ka.
 | fresh_walk to Day 2 19:10 (FW_UNTIL=19:10) | no errors, nothing stuck; the d2-booths arrow from 18:00 ("Calling home, the booths on Deck 3: Leila shows you how"), no booth tapped; a trace run: d2-booths met 18:00, Leila's lines said 18:11; the walker had called home at 12:33, so no second call |
 | cadet_test vs 0.99.7 (1b17203d) | ALL IDENTICAL (0 px in every view, no page errors, same taps): no view reaches Day 2's 18:00 or a second booth use |
 
+SC1's review (2026-11-06 ~19:22 UTC): **PASS** on claude/p997-tips 913ba6c (off identical by reading and by cadet vs
+0.99.7; edge cases: a day's first call untouched, save/load mid-day holds, Dev clock, mid-call). SC1's small note, not a
+fix (for the user): the booth guard is at the top of actStart, so a booth tapped from across the room shows its "had your
+call" screen without walking over.
+
+**GO round 0998 (BM27, ~19:25 UTC):** claude/staging-0998 at this commit; the game last changed at the build turn 3616cd4;
+game sha256 298291963584a62fbf0f7953afaa402924cdd22e474d526353494ec02d22c462, build 0.99.8. OLD = 0.99.6 d7ad4c58
+(f6ff5ec1...db8a8). Check files: this commit's.
+
 ### Round 0998, every share
 
 | Share | Result | Notes |
