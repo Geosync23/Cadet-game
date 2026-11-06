@@ -9754,6 +9754,8 @@ const SLOT_NEW = SAVE_SLOTS_ON && !NOSAVE ? (v => v === 'arrive' || v === 'monda
 var SLOT_HOLD = false;
 const SAVE_KEY = slotKey(SAVE_SLOT), SAVE_V = 2;
 const TRAD995_ON = true || URL_FLAGS.has('trad995');   // 0.99.5 (TB3; plans/patch-0995.md notes 8, 10, 19): Spice shelf supper tap to join, Name on the beam's spots, the tea corner's doorway (section 18's Traditions slot); off: 0.99.4. `?trad995` previews
+var TP997_ON = false || URL_FLAGS.has('tp997');   // 0.99.7 (TP1 for lead 49; plans/patch-0997.md notes 6, 7, 9, 11, 28, 33, 53, 54): tips, the device, HUD words; off: 0.99.6. `?tp997` previews
+var TP997 = { n6: TP997_ON, n7: TP997_ON, n9: TP997_ON, n11: TP997_ON, n28: TP997_ON, n33: TP997_ON, n53: TP997_ON, n54: TP997_ON };   // each note alone: 6 Day 2's call-home tip, 7 nearest bathroom, 9 the tracker tip, 11 the device-at-work tip early, 28 the rec deck's blurb, 33 Pockets, 53 the join words, 54 Mark all as read
 // the traditions variety (0.93.2, FX24 for lead 37; CS1's pitch pages plans/trad-variety-pitch.html and -2.html on claude/crew-stories-pitch):
 // six weekly ones take turns from week 2 (TRAD_0932_WHEN: their rhythm with it on; week 1 unchanged), the user's fourteen new ones
 // (TRAD_0932_NEW, loaded only with it) and Brennan's tasting table after dinner in the galley (tasting-table-late, loaded as
@@ -12345,7 +12347,7 @@ function deviceRefresh() {
 const DEVICE_SKIN = (() => {
   const $ = id => document.getElementById(id);
   const el = $('device'), body = $('devBody'), btn = $('devBtn'), badge = $('devMail'), head = $('devT'), backB = $('devBack'), led = $('devLed');
-  const GLYPH = { hobby: '✿', home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', news: '☰', record: '★', crew: '☺', people: '♡', gear: '✲', saves: '▤', dot: '•', track: '◎', music: '\u266A\uFE0E' };   // ♪ as text (U+FE0E), never a colour emoji (the user: no emojis)
+  const GLYPH = { hobby: '✿', home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', pocket: '▣', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', news: '☰', record: '★', crew: '☺', people: '♡', gear: '✲', saves: '▤', dot: '•', track: '◎', music: '\u266A\uFE0E' };   // ♪ as text (U+FE0E), never a colour emoji (the user: no emojis)
   const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   const acts = new WeakMap();                  // each button's action, for the panel pointer's buttonFor (the arrows plan, piece C)
   const act = (b, action) => { b.type = 'button'; b.onclick = e => { e.stopPropagation(); deviceDo(action); }; acts.set(b, action); return b; };
@@ -13700,6 +13702,14 @@ function tipClear() {
   if (c && c.style.pointerEvents !== through) c.style.pointerEvents = through;
 }
 requestAnimationFrame(tipClear);
+// 0.99.7 note 54 (TP1 for lead 49; TP997.n54): "Mark all as read" at the top of Mail while any is unread (one tap marks
+// them all read; the badge and the LED follow mailUnread). Wraps the Mail app's view and act; off: Mail as it was
+if (TP997.n54) (() => {
+  const app = DEVICE_APPS.get('mail'); if (!app) return;
+  const view = app.view, act = app.act;
+  app.view = o => { const v = view(o); if (v && Array.isArray(v.blocks) && mailUnread() > 0) v.blocks.unshift({ kind: 'buttons', items: [{ label: careerText('tp997.mail.all') || 'Mark all as read', action: { app: 'mail', do: 'readall' } }] }); return v; };
+  app.act = function (verb, id) { if (verb === 'readall') { for (const m of SHIP.mail) m.read = true; delete DEV.notes.mail; return; } return act.call(this, verb, id); };
+})();
 // ---- end of slot: Device engineer ----
 
 // =====================================================================
@@ -14048,6 +14058,7 @@ const teachHeld = () => typeof introOn === 'function' && introOn() && (!!SHIP.in
 function teachTick(now) {
   if (now - TEACH_CK < 1000) return null; TEACH_CK = now;
   const S = teachWatch(now), D = SHIP.device;
+  if (TP997.n11 && D && tp997DevWork(now)) return 't:devwork';   // 0.99.7 note 11 (TP1): the device-at-work tip as your first long work step starts (Player engineer slot)
   if (!D || !D.settings.tips || teachHeld() || devLocked() || POP.busy || POP.toast > now - TEACH_TOAST) return null;
   const paced = now - POP.tip >= TEACH_GAP && Math.max(POP.card, POP.warn) <= now - TEACH_QUIET;
   const d = SHIP.time.day, min = SHIP.time.min, deck = deckDef.num;
@@ -14661,6 +14672,7 @@ function actEnd(abort) {
     if (b.kind === 'hobby') {                          // a hobby's supplies (0.28.63): yours for good
       hobbyGive(b.hobby); toast('Paid', 'You pay ' + b.price + ' credits for ' + b.name + '. Sit down anywhere and tap Hobby for some ' + HOBBIES[b.hobby].name.toLowerCase() + '. ' + P.credits + ' credits left.'); basket = null; return;
     }
+    if (TP997.n33 && tp997PackPay(b, P)) { basket = null; return; }   // 0.99.7 note 33 (TP1): a snack or drink into your pocket, for later (Player engineer slot)
     if (b.kind === 'comfort') { P.locker.push(b.name); while (P.locker.length > LOCKER_MAX) P.locker.shift(); P.needs.social = needClamp(P.needs.social + b.gain); }   // a full locker: the oldest goes home, never the new one (0.28.39)
     else P.needs.hunger = needClamp(P.needs.hunger + b.gain);
     toast('Paid', 'You pay ' + b.price + ' credits for ' + b.name + (b.kind === 'comfort' ? '. It goes in your locker; it\'s nice to have something of your own.' : ' and have it on the way out.')
@@ -15194,6 +15206,7 @@ SIM_ADVANCE.push((from, to) => {
 });
 // New game (section 13): fresh needs, nothing in hand
 function playerNew() {
+  if (TP997.n33) SHIP.player.pack = [];                 // 0.99.7 note 33 (TP1): empty pockets
   actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.wsteps = []; SHIP.player.wash = washLoad(null); SHIP.player.bedMade = null; SHIP.player.untidy = false; SHIP.player.teaDay = null; NEED_GOAL = null; PUSH = null; SHIP.player.tray = null; SHIP.player.crate = null; needsT = null; slowWas = {}; WARN_SAID = {}; TEACH_ST = null; POP.tip = -1e9; Object.assign(SHIP, { news: [], newsUsed: [], newsAt: null, newsRows: {} });
   Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.player.name = null; SHIP.mail = []; mailWelcome(); device.refresh();
   DINNER_SAT = false; DINNER_TRY = -1;                   // a new arrival dinner seats you again (reviewer 1, 0.28.37)
@@ -16639,6 +16652,72 @@ function talkPlanEnd(C) {
   }
   return TALK_MINS;
 }
+// 0.99.7 (TP1 for lead 49, plans/patch-0997.md; TP997 in section 13). Note 11: the "use your device while you work" tip
+// ('t:devwork') as soon as your first work step of TP997_WORK minutes or more is under way, from Day 1 (it waited for a
+// step of 10 minutes already running, and for a quiet moment, so it came well into the job): in front of any tip
+// waiting (15b's tipFront), never over a dialogue, a choice, the arrival or sleep. Its words are TEACH's own.
+const TP997_WORK = 5;
+function tp997DevWork(now) {
+  const D = SHIP.device, d = SHIP.time.day;
+  if (D.tipsSeen['t:devwork'] || !D.settings.tips || d < 1 || d > 7 || DEV.open || sleeping || ride || DEV.choose || teachHeld() || devLocked()) return false;
+  if (document.body.classList.contains('dlgon') || typeof DIALOGUE !== 'undefined' && DIALOGUE) return false;
+  if (!ACT || ACT.phase !== 'do' || !WORK_ACTS.has(ACT.kind) || !(ACT.def.mins >= TP997_WORK) || !(ACT.done < ACT.def.mins - 1)) return false;
+  const row = TEACH.find(x => x[0] === 't:devwork'); let tx = row && row[2]; if (typeof tx === 'function') { try { tx = tx(); } catch (e) { tx = null; } }
+  if (!tx || !tipFront('t:devwork', bedText(tx))) return false;
+  POP.tip = POP.card = now; return true;
+}
+// Note 6: Day 2, once Leila's evening at the booths is over (19:00) or your own call that day has ended, until 22:00:
+// one call home a day (the relay's rule, 20c's homeCalledToday). Day 4's evening tip says the same, so it's marked seen.
+// Note 9: the Schedule tracker (the HUD's target button, 15b), from 06:00 on Day 1, any quiet moment of Days 1-3.
+// Both TEACH rows ('sure': when due, whatever the pacing), put at the front of TEACH so nothing passes them by.
+if (TP997.n9) TEACH.unshift(['t:tp997-trk', c => c.d >= 1 && c.d <= 3 && c.min >= 360 && !sleeping && !!trkBtn && !trkBtn.hidden && !!trkBtn.offsetWidth,
+  () => careerText('tip.tp997.tracker') || 'The Schedule tracker, the target button under your needs, lists what\'s on now and next, and a few places. Tap one for an arrow; tap it again to stop.', { sure: true }]);
+if (TP997.n6) TEACH.unshift(['t:tp997-call', c => c.d === 2 && c.min < 22 * 60 && !sleeping && (c.min >= 19 * 60 || typeof homeCalledToday === 'function' && homeCalledToday() && !(ACT && ACT.kind === 'call')),
+  () => { SHIP.device.tipsSeen['t:eve-call'] = true; return careerText('tip.tp997.call') || 'One call home a day: the relay gives everyone aboard one call each ship day. The booths are yours again tomorrow.'; }, { sure: true }]);
+// 0.99.7 note 33 (TP1 for lead 49; TP997.n33; the user: "nowhere on the device to get at food you bought at the store and
+// eat it"). A snack or a drink you buy at the crew store goes in your pocket (SHIP.player.pack, at most TP997_PACK, names
+// only, saved) instead of being eaten at the till; with your pocket full you have it on the way out, as before. Gifts
+// still go into your hands. The device's Pockets app lists what you carry: your pocket's food and drinks (Eat / Drink:
+// hunger up by the store's own amount for it), the things in your hands (a sweet gift or a tomato can be eaten too; a
+// part is for its job), and your hobby supplies. Not while you're asleep. A snack is not a meal (the galley's records
+// don't count it), as at the till.
+const TP997_PACK = 4, TP997_EATS = { 'bar of chocolate': 8, biscuits: 6, tomato: 4 };
+const tp997Words = (k, fb, o) => { let t = careerText('tp997.pockets.' + k) || fb; for (const x in o || {}) t = t.split('{' + x + '}').join(o[x]); return t; };
+const tp997Store = name => { for (const k of ['snack', 'drink']) { const r = STORE[k].find(x => x[0] === name); if (r) return { kind: k, name, gain: r[2] }; } return null; };
+if (TP997.n33) SHIP.player.pack = (() => { const a = SAVED && SAVED.player && SAVED.player.pack; return Array.isArray(a) ? a.filter(n => typeof n === 'string' && n.length < 80 && tp997Store(n)).slice(0, TP997_PACK) : []; })();
+if (TP997.n33) SAVE_EXTRA.push(s => { if (SHIP.player.pack.length) (s.player || (s.player = {})).pack = SHIP.player.pack.slice(); });
+function tp997PackPay(b, P) {                           // the till's pay step (section 15's actEnd): true when it went in your pocket
+  if (b.kind !== 'snack' && b.kind !== 'drink') return false;
+  if (P.pack.length >= TP997_PACK) { P.needs.hunger = needClamp(P.needs.hunger + b.gain); toast('Paid', tp997Words('full', 'Your pockets are full, so you have {item} on the way out.', { item: b.name }) + ' ' + P.credits + ' credits left.'); return true; }
+  P.pack.push(b.name); toast('Paid', tp997Words('paid', 'You pay {n} credits for {item}. It goes in your pocket: open Pockets on your device to have it when you like.', { n: b.price, item: b.name }) + ' ' + P.credits + ' credits left.');
+  return true;
+}
+function tp997Eat(what) {                                // 'p<k>': your pocket's k-th; 'h<k>': the k-th thing in your hands
+  const P = SHIP.player, k = +String(what).slice(1);
+  if (sleeping || typeof DIALOGUE !== 'undefined' && DIALOGUE) { toast(tp997Words('title', 'Pockets'), tp997Words('busy', 'Not now: finish what you\'re doing first.')); return false; }
+  let name = null, gain = 0, drink = false;
+  if (what[0] === 'p' && P.pack[k]) { const it = tp997Store(P.pack[k]); if (!it) return false; name = it.name; gain = it.gain; drink = it.kind === 'drink'; P.pack.splice(k, 1); }
+  else if (what[0] === 'h' && TP997_EATS[P.carry[k]] !== undefined) { name = P.carry[k]; gain = TP997_EATS[name]; P.carry.splice(k, 1); name = (/^[aeiou]/.test(name) ? 'an ' : /s$/.test(name) ? 'the ' : 'a ') + name; }
+  else return false;
+  P.needs.hunger = needClamp(P.needs.hunger + gain);
+  toast(tp997Words('title', 'Pockets'), tp997Words(drink ? 'drank' : 'ate', drink ? 'You drink {item}.' : 'You eat {item}.', { item: name }) + ' ' + NEED_LABEL.hunger + ' ' + Math.round(P.needs.hunger) + '.');
+  return true;
+}
+const tp997Cap = t => t.replace(/^an? /i, '').replace(/^./, c => c.toUpperCase());
+if (TP997.n33) deviceApp({ id: 'pockets', title: 'Pockets', icon: 'pocket', order: 21,
+  act(verb, arg) { if (verb === 'eat') tp997Eat(String(arg)); },
+  view: () => {
+    const P = SHIP.player, B = [], T = tp997Words('title', 'Pockets');
+    if (P.pack.length) B.push({ kind: 'text', text: tp997Words('food', 'Snacks and drinks'), mark: 'head' }, { kind: 'list', rows: P.pack.map((n, k) => { const it = tp997Store(n);
+      return { text: tp997Cap(n), button: it && it.kind === 'drink' ? tp997Words('drink', 'Drink') : tp997Words('eat', 'Eat'), action: { app: 'pockets', do: 'eat', arg: 'p' + k } }; }) });
+    if (P.carry.length) B.push({ kind: 'text', text: tp997Words('hands', 'In your hands'), mark: 'head' }, { kind: 'list', rows: P.carry.map((n, k) => {
+      const eat = TP997_EATS[n] !== undefined, gift = typeof giftOf === 'function' && !!giftOf(n);
+      return { text: tp997Cap(typeof partList === 'function' && !gift ? partList([n]) : n), sub: gift ? tp997Words('gift', 'Tap a crewmate to give it.') : undefined, ...(eat ? { button: tp997Words('eat', 'Eat'), action: { app: 'pockets', do: 'eat', arg: 'h' + k } } : {}) }; }) });
+    const hb = typeof HOBBIES !== 'undefined' ? Object.keys(HOBBIES).filter(id => HOBBIES[id].price && hobbyHas(id)) : [];
+    if (hb.length) B.push({ kind: 'text', text: tp997Words('hobby', 'Hobby supplies'), mark: 'head' }, { kind: 'list', rows: hb.map(id => ({ text: tp997Cap(HOBBIES[id].prop || HOBBIES[id].name) })) });
+    if (!B.length) B.push({ kind: 'text', text: tp997Words('empty', 'Your pockets are empty. Snacks and drinks from the crew store on Deck 3 go in here, to have when you like.') });
+    return { title: T, blocks: B };
+  } });
 // ---- end of slot: Player engineer ----
 
 // =====================================================================
@@ -18007,6 +18086,43 @@ function fixThingTap(it, at) {
   return false;
 }
 PLAYER_TAPS.unshift(fixThingTap);
+// 0.99.7 note 7 (TP1 for lead 49; TP997.n7): "Nearest bathroom" in the Schedule tracker's Places. On this deck, the
+// public toilet you can walk to soonest (findPath for you: locked doors count; a cabin's own is never offered, as
+// privatePlace says); none here, the nearest deck in the lift's order that has one, its washroom nearest that deck's
+// lift (DECKS[n].places, the same private rule; the Bridge's only from the Bridge, behind its doors). Worked out when
+// the panel draws and on the tap; nothing saved. Who's in it isn't asked: the toilet's red light and its line do that there.
+function tp997LooHere() {
+  if (typeof deckDef === 'undefined' || !deckDef || typeof player === 'undefined') return null;
+  const here = player.here(); let best = null;
+  for (const pl of PLACE_OF.values()) {
+    if (pl.type !== 'toilet' || privatePlace(pl)) continue;
+    const sp = placeSpot(pl.id), w = sp && sp.walk; if (!w) continue;
+    const path = K(w) === K(here) ? [] : findPath(here, w, null, player); if (!path) continue;
+    if (!best || path.length < best.n) best = { id: pl.id, room: pl.room, n: path.length };
+  }
+  return best && { deck: deckDef.num, place: best.id, room: best.room };
+}
+function tp997LooAway(from) {
+  const at = DECK_ORDER.indexOf(from), order = DECK_ORDER.filter(n => n !== from && n !== 1 && DECKS[n]).sort((a, b) => Math.abs(DECK_ORDER.indexOf(a) - at) - Math.abs(DECK_ORDER.indexOf(b) - at) || DECK_ORDER.indexOf(a) - DECK_ORDER.indexOf(b));
+  for (const n of order) {
+    const D = DECKS[n], P = Array.isArray(D.places) ? D.places : [], mine = playerBed();
+    const beds = P.filter(q => q.type === 'bed' && q.id !== mine), loos = P.filter(q => q.type === 'toilet' && q.at && !beds.some(b => b.room === q.room || q.id.startsWith(b.id + '-')));
+    if (!loos.length) continue;
+    const lift = []; (D.map || []).forEach((row, j) => [...row].forEach((ch, i) => { if (ch === '@') lift.push([i, j]); }));
+    const li = lift.length ? lift.reduce((s, c) => s + c[0], 0) / lift.length : 0, lj = lift.length ? lift.reduce((s, c) => s + c[1], 0) / lift.length : 0;
+    const q = loos.slice().sort((a, b) => Math.hypot(a.at[0] - li, a.at[1] - lj) - Math.hypot(b.at[0] - li, b.at[1] - lj) || (a.id < b.id ? -1 : 1))[0];
+    return { deck: n, place: q.id, room: q.room };
+  }
+  return null;
+}
+function tp997Loo() {
+  const t = careerText('tp997.loo.title') || 'Nearest bathroom', n = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : null;
+  const g = n === null ? null : tp997LooHere() || tp997LooAway(n);
+  if (!g) return { sub: careerText('tp997.loo.none') || 'No public washroom you can reach', goal: null };
+  const room = ((DECKS[g.deck].rooms || {})[g.room] || {}).name || 'Washroom', deck = g.deck === n ? 'this deck' : deckWord(g.deck);
+  return { sub: (careerText('tp997.loo.sub') || '{room}, {deck}').replace('{room}', room).replace('{deck}', deck), goal: { deck: g.deck, place: g.place, room: g.room, label: t } };
+}
+if (TP997.n7) TRK_PLACES.push({ key: 'place:loo', get title() { return careerText('tp997.loo.title') || 'Nearest bathroom'; }, get sub() { return tp997Loo().sub; }, goal: () => tp997Loo().goal });
 // ---- end of slot: Interactions engineer ----
 
 // =====================================================================
@@ -38470,6 +38586,134 @@ const LINES = JSON.parse([
   '{"text":"Works Friday tea: tea, biscuits and the week\'s news with Works. Social up, and a little food.","id":"6qvotp"}]',
   ',"join.works-tea.tip":[',
   '{"text":"Tap {name} to join Friday tea","id":"195evvq"}]',
+  ',"join997.beginners-guitar.notice":[',
+  '{"text":"Beginners\' guitar: listen to the beginners, then play your one chord. Leisure and social up.","id":"vm2c6k"}]',
+  ',"join997.beginners-guitar.tip":[',
+  '{"text":"Tap {name} to play a chord","id":"bmitkn"}]',
+  ',"join997.card-night.notice":[',
+  '{"text":"Card night: make a card for a birthday coming up. Leisure and social up.","id":"1nxn8vp"}]',
+  ',"join997.card-night.tip":[',
+  '{"text":"Tap {name} to make a card","id":"1p8ef2o"}]',
+  ',"join997.coffee-trials.notice":[',
+  '{"text":"The coffee machine trials: taste three cups blind, then vote. Leisure and social up.","id":"g5rqvj"}]',
+  ',"join997.coffee-trials.tip":[',
+  '{"text":"Tap {name} to taste the coffees","id":"nwipqb"}]',
+  ',"join997.first-light.notice":[',
+  '{"text":"First Light Cocoa: a cocoa at the big windows as the ship\'s day begins. Leisure and social up.","id":"1692e3m"}]',
+  ',"join997.first-light.tip":[',
+  '{"text":"Tap {name} to join First Light","id":"ayyzsn"}]',
+  ',"join997.five-minute-skills.notice":[',
+  '{"text":"Five-minute skills: learn one small thing in five minutes, then have a go. Leisure and social up.","id":"19ulpos"}]',
+  ',"join997.five-minute-skills.tip":[',
+  '{"text":"Tap {name} to learn this week\'s skill","id":"1ky76n5"}]',
+  ',"join997.four-weeks-aboard.notice":[',
+  '{"text":"Four weeks aboard: a slice of the four-weeks cake with the Works crew. Social up.","id":"adsl1v"}]',
+  ',"join997.four-weeks-aboard.tip":[',
+  '{"text":"Tap {name} for a slice of cake","id":"1x0mfrc"}]',
+  ',"join997.garden-walk.notice":[',
+  '{"text":"Garden walk: walk the beds slowly with Cruz and taste one leaf. Leisure and social up.","id":"xvfn89"}]',
+  ',"join997.garden-walk.tip":[',
+  '{"text":"Tap {name} to walk the garden","id":"n1zx12"}]',
+  ',"join997.jar-day.notice":[',
+  '{"text":"Jar day: fill a jar for the spice shelf and write its label. Leisure and social up.","id":"1r7wj24"}]',
+  ',"join997.jar-day.tip":[',
+  '{"text":"Tap {name} to fill a jar","id":"1c9yjjt"}]',
+  ',"join997.midnight-toast.notice":[',
+  '{"text":"Midnight toast: toast and tea with the night owls. Food, leisure and social up.","id":"gfhp49"}]',
+  ',"join997.midnight-toast.tip":[',
+  '{"text":"Tap {name} for toast","id":"bpq4d1"}]',
+  ',"join997.new-hands-tea.notice":[',
+  '{"text":"New hand\'s tea: your first Friday tea with the Works crew. Social up.","id":"15ernt7"}]',
+  ',"join997.new-hands-tea.tip":[',
+  '{"text":"Tap {name} for your tea","id":"18bzawz"}]',
+  ',"join997.off-the-tern.notice":[',
+  '{"text":"Off the Tern: stand at the foot of the ramp and welcome the new crew aboard. Social up.","id":"1xj8ee6"}]',
+  ',"join997.off-the-tern.tip":[',
+  '{"text":"Tap {name} to welcome the new crew","id":"17rt2ll"}]',
+  ',"join997.open-door.notice":[',
+  '{"text":"Open door: an end-of-shift tea with the Chief. Social up.","id":"1bqc1oq"}]',
+  ',"join997.open-door.tip":[',
+  '{"text":"Tap {name} for tea with the Chief","id":"2ra17f"}]',
+  ',"join997.open-house.notice":[',
+  '{"text":"Open house: a look round Comms and the Watch office. Leisure and social up.","id":"ew8dg3"}]',
+  ',"join997.open-house.tip":[',
+  '{"text":"Tap {name} to look round","id":"pzevbo"}]',
+  ',"join997.playlist-duel.notice":[',
+  '{"text":"Playlist duel: listen to both playlists, then pick a winner. Leisure and social up.","id":"gbt5ix"}]',
+  ',"join997.playlist-duel.tip":[',
+  '{"text":"Tap {name} to judge the duel","id":"mp0iaf"}]',
+  ',"join997.rec-lamplight-paddle.notice":[',
+  '{"text":"Lamplight paddle: take a kayak and drift down the slow channel by lamplight. Leisure and social up.","id":"y3m4gt"}]',
+  ',"join997.rec-lamplight-paddle.tip":[',
+  '{"text":"Tap {name} to paddle","id":"1dssb20"}]',
+  ',"join997.rec-ring-the-bell.notice":[',
+  '{"text":"Ring the bell: climb the wall and try for the bell at the top. Fitness and social up.","id":"dzuy7i"}]',
+  ',"join997.rec-ring-the-bell.tip":[',
+  '{"text":"Tap {name} to climb for the bell","id":"1uqodjp"}]',
+  ',"join997.route-night.notice":[',
+  '{"text":"Route night: put a pin where you think the Wren will be in seven days. Leisure and social up.","id":"1fsfe2j"}]',
+  ',"join997.route-night.tip":[',
+  '{"text":"Tap {name} to place your pin","id":"888qhr"}]',
+  ',"join997.row-for-the-board.notice":[',
+  '{"text":"Row for the board: take a rower and race the clock with the others. Fitness and social up.","id":"1o2ltny"}]',
+  ',"join997.row-for-the-board.tip":[',
+  '{"text":"Tap {name} to row for the board","id":"125gssp"}]',
+  ',"join997.scone-morning.notice":[',
+  '{"text":"Scone morning: a warm scone, and a joke to go with it. Food, leisure and social up.","id":"1afrlcy"}]',
+  ',"join997.scone-morning.tip":[',
+  '{"text":"Tap {name} for a scone","id":"1vp4lpg"}]',
+  ',"join997.seed-packet-day.notice":[',
+  '{"text":"Seed packet day: fold a packet, fill it, and draw on it for next season. Leisure and social up.","id":"5ldcxi"}]',
+  ',"join997.seed-packet-day.tip":[',
+  '{"text":"Tap {name} to fill a seed packet","id":"127d2ag"}]',
+  ',"join997.six-weeks-aboard.notice":[',
+  '{"text":"Six weeks aboard: a tea with Zeke in the bow lounge. Social up.","id":"1h5gzte"}]',
+  ',"join997.six-weeks-aboard.tip":[',
+  '{"text":"Tap {name} to sit down for tea","id":"z4e98b"}]',
+  ',"join997.sounds-from-home.notice":[',
+  '{"text":"Sounds from home: sit back with the lights low and listen to sounds from home. Leisure and social up.","id":"lxfuq7"}]',
+  ',"join997.sounds-from-home.tip":[',
+  '{"text":"Tap {name} to listen","id":"ds9hlc"}]',
+  ',"join997.spice-shelf-supper.notice":[',
+  '{"text":"Spice shelf supper: sit down to supper and guess whose spice is whose. Food and social up.","id":"73meyh"}]',
+  ',"join997.spice-shelf-supper.tip":[',
+  '{"text":"Tap {name} to join the supper","id":"oxxu2v"}]',
+  ',"join997.spoon-band.notice":[',
+  '{"text":"The spoon band: grab anything that makes a noise and play along. Leisure and social up.","id":"1y545yd"}]',
+  ',"join997.spoon-band.tip":[',
+  '{"text":"Tap {name} to join the spoon band","id":"1qa7gm6"}]',
+  ',"join997.tasting-table.notice":[',
+  '{"text":"Brennan\'s tasting table: try the two new dishes, then pick your jar. Food, leisure and social up.","id":"1d2ls07"}]',
+  ',"join997.tasting-table.tip":[',
+  '{"text":"Tap {name} to join the tasting","id":"5wacf0"}]',
+  ',"join997.tool-night.notice":[',
+  '{"text":"Tool night: shut your eyes and name each tool by touch. Leisure and social up.","id":"1p09djf"}]',
+  ',"join997.tool-night.tip":[',
+  '{"text":"Tap {name} to join tool night","id":"czdnb5"}]',
+  ',"join997.twelve-weeks-aboard.notice":[',
+  '{"text":"Twelve weeks aboard: sit down for Calder\'s toast in the mess. Social up.","id":"vak885"}]',
+  ',"join997.twelve-weeks-aboard.tip":[',
+  '{"text":"Tap {name} to raise a cup","id":"o0uzcm"}]',
+  ',"join997.whodunnit-club.notice":[',
+  '{"text":"Whodunnit club: listen to the mystery, then write down who you think did it. Leisure and social up.","id":"15p4ute"}]',
+  ',"join997.whodunnit-club.tip":[',
+  '{"text":"Tap {name} to join the whodunnit","id":"1t22xcy"}]',
+  ',"join997.window-sketch-2.notice":[',
+  '{"text":"Window sketching: take a pencil and sketch what you see out of the window. Leisure and social up.","id":"td3t46"}]',
+  ',"join997.window-sketch-2.tip":[',
+  '{"text":"Tap {name} to sketch","id":"1g5rb68"}]',
+  ',"join997.window-sketch.notice":[',
+  '{"text":"Window sketching: take a pencil and sketch what you see out of the window. Leisure and social up.","id":"1lv2z7v"}]',
+  ',"join997.window-sketch.tip":[',
+  '{"text":"Tap {name} to sketch","id":"uffng1"}]',
+  ',"join997.windowsill-herbs.notice":[',
+  '{"text":"Windowsill herbs: compare everyone\'s herbs and swap a cutting. Leisure and social up.","id":"xp7mno"}]',
+  ',"join997.windowsill-herbs.tip":[',
+  '{"text":"Tap {name} to compare herbs","id":"16ybfwm"}]',
+  ',"join997.worst-joke.notice":[',
+  '{"text":"Worst joke night: tell your worst joke, then groan at everyone else\'s. Leisure and social up.","id":"4enu2"}]',
+  ',"join997.worst-joke.tip":[',
+  '{"text":"Tap {name} to tell a joke","id":"1jmt1yq"}]',
   ',"laundry.away":[',
   '{"text":"All put away. Five clean outfits.","id":"ds9qh6"}]',
   ',"laundry.busy":[',
@@ -42604,12 +42848,54 @@ const LINES = JSON.parse([
   '{"text":"On to the next check. Follow the arrow.","id":"1e1xchg"}]',
   ',"tip.tour.take":[',
   '{"text":"Your first rounds are on the job board: five quick checks. Take the job, then follow the arrow.","id":"1jz3a0l"}]',
+  ',"tip.tp997.call":[',
+  '{"text":"One call home a day: the relay gives everyone aboard one call each ship day. The booths are yours again tomorrow.","id":"zsavrf"}]',
+  ',"tip.tp997.tracker":[',
+  '{"text":"The Schedule tracker, the target button under your needs, lists what\'s on now and next, and a few places. Tap one for an arrow; tap it again to stop.","id":"16jdnvn"}]',
   ',"tool.due.logger":[',
   '{"text":"Your logger\'s due a check. Bench, when you can.","id":"osomse"}]',
   ',"tool.due.pipekit":[',
   '{"text":"Your pipe kit wants cleaning and a new seal. Bench, when you can.","id":"1dwfk6k"}]',
   ',"tool.due.scanner":[',
   '{"text":"Your scanner\'s charge is low. The bench will sort it.","id":"1t2yb7w"}]',
+  ',"tp997.join.more":[',
+  '{"text":"Anyone already taking part can bring you in, too.","id":"1g4qrvu"}]',
+  ',"tp997.loo.none":[',
+  '{"text":"No public washroom you can reach","id":"1xdss3k"}]',
+  ',"tp997.loo.sub":[',
+  '{"text":"{room}, {deck}","id":"1cedv04"}]',
+  ',"tp997.loo.title":[',
+  '{"text":"Nearest bathroom","id":"1r3hia2"}]',
+  ',"tp997.mail.all":[',
+  '{"text":"Mark all as read","id":"13k7q9k"}]',
+  ',"tp997.pockets.ate":[',
+  '{"text":"You eat {item}.","id":"rewc85"}]',
+  ',"tp997.pockets.busy":[',
+  '{"text":"Not now: finish what you\'re doing first.","id":"1vbhwla"}]',
+  ',"tp997.pockets.drank":[',
+  '{"text":"You drink {item}.","id":"166wz1b"}]',
+  ',"tp997.pockets.drink":[',
+  '{"text":"Drink","id":"1hpoqv5"}]',
+  ',"tp997.pockets.eat":[',
+  '{"text":"Eat","id":"1lixf0t"}]',
+  ',"tp997.pockets.empty":[',
+  '{"text":"Your pockets are empty. Snacks and drinks from the crew store on Deck 3 go in here, to have when you like.","id":"2vsij2"}]',
+  ',"tp997.pockets.food":[',
+  '{"text":"Snacks and drinks","id":"1gw1c2i"}]',
+  ',"tp997.pockets.full":[',
+  '{"text":"Your pockets are full, so you have {item} on the way out.","id":"u2zkgq"}]',
+  ',"tp997.pockets.gift":[',
+  '{"text":"Tap a crewmate to give it.","id":"gjmmj2"}]',
+  ',"tp997.pockets.hands":[',
+  '{"text":"In your hands","id":"qeipln"}]',
+  ',"tp997.pockets.hobby":[',
+  '{"text":"Hobby supplies","id":"8dlhkc"}]',
+  ',"tp997.pockets.locker":[',
+  '{"text":"In your locker","id":"za06d7"}]',
+  ',"tp997.pockets.paid":[',
+  '{"text":"You pay {n} credits for {item}. It goes in your pocket: open Pockets on your device to have it when you like.","id":"glozw6"}]',
+  ',"tp997.pockets.title":[',
+  '{"text":"Pockets","id":"1e7y5lc"}]',
   ',"trace.after":[',
   '{"text":"After: {word}","id":"5a9fih"}]',
   ',"trace.before":[',
@@ -46370,7 +46656,7 @@ function eventJoin(e, d, now, notice) {
   const n = SHIP.player && SHIP.player.needs; if (n && typeof n.social === 'number') n.social = Math.min(100, n.social + Math.min(20, 12 * bb));   // at most +20 even among close friends (0.28.49, the lead)
   if (typeof leisureAdd === 'function') leisureAdd(25, 'tradition');   // 0.34.51: going to a tradition fills leisure (PE6's 7th need, +15 in the plan); +25 in the 0.99 balance pass (BAL1's finding 6, the user's go)
   toast(e.name, notice || evText(e.ev.thanks, e), { keep: true });   // the join notice: never dropped from the pop-up queue (LEAD31-3)
-  if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
+  if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + (TP997.n53 ? e.name.replace(/^The /, 'the ') : e.name.toLowerCase()) + '. Same time next one?', quiet: true });   // the join toast says it already
   if (e.id === 'quiz') quizStart(d, now);
   if (e.id === 'first-light' && typeof flcJoin === 'function') flcJoin(e, d, now);   // patch #26: a free cocoa, then the meeting (section 15's slot)
   if (e.id === 'one-week-aboard' && P926_TRADS) week1Card(e, d, now);
@@ -46469,7 +46755,7 @@ function tjActs() { for (const [id, s] of Object.entries(TRAD_JOIN)) if (!s.act 
 } }
 tjActs();
 const tradJoinable = e => !!(e && TRAD_JOIN[e.id] && (evIsTrad(e.ev) || P926_APPT && e.ev.appt || EV_COMET_ON && !!e.ev.when && e.ev.when.ship === 'comet' || EV_VESSEL_ON && !!e.ev.when && e.ev.when.ship === 'veyliVessel' || !!e.ev.when && e.ev.when.ship === 'diplomatic'));   /* the visit's farewell (EV1, visit-pointer) */   // the comet's four gatherings too (FX25); the Veyli vessel's engine lights (VB1)   // an appointment's one-off too (0.92.6 item 9, FX22)
-const tradWords = (e, k, ctx) => { const t = quizText('join.' + e.id + '.' + k, e.day, ctx); return t; };
+const tradWords = (e, k, ctx) => { const t = quizText('join.' + e.id + '.' + k, e.day, ctx); return t || (TP997.n53 && (k === 'tip' || k === 'notice') ? quizText('join997.' + e.id + '.' + k, e.day, ctx) : t); };   // 0.99.7 note 53 (TP1): the words written for the traditions that had none (content/banks/tp997.lines)
 // the people going (their plan has them there today), and the leader: the tradition's host, else the spec's, when going;
 // else the spec's pick or the first of the goers by a hash of the day. Cached per day
 const TJ_LEAD = new Map();
@@ -46511,7 +46797,7 @@ function tradJoinMinute(now) {
   const beam = s.act === 'beam', label = tradWords(TJ_NOW.e, 'tip', { name }) || (beam ? 'Tap the beam to paint your name' : 'Tap ' + name + ' to ' + s.verb);
   if (beam && !beamReady()) return;                      // 0.92.3 item 13: not till they've gathered and said their piece (beamGather)
   if (!g || g.tj === TJ_NOW.key || tradGoalHere(g, TJ_NOW.e)) { if (!g || g.tj !== TJ_NOW.key) setGoal(beam ? { deck: 5, item: /^The beam$/, beam: true, label, tj: TJ_NOW.key } : { deck: deckDef.num, crew: TJ_NOW.lead, label, tj: TJ_NOW.key }); }
-  ixTip('t:join:' + TJ_NOW.e.id, label + (beam ? '. The Works crew are waiting to see it go up.' : '. Anyone taking part will do: you join in with them.'));
+  ixTip('t:join:' + TJ_NOW.e.id, label + (beam ? '. The Works crew are waiting to see it go up.' : TP997.n53 ? tp997More(label) : '. Anyone taking part will do: you join in with them.'));   // 0.99.7 note 53: tp997More (Traditions slot)
 }
 // a goal arrow pointing at this tradition's room (the device's heads-up, the Tracked list): { deck, room (key or name) }
 function tradGoalHere(g, e) {
@@ -46563,7 +46849,7 @@ function tradJoinTap(a) {
 }
 function tradJoin(e, a) {
   const s = TRAD_JOIN[e.id], now = shipNow(), d = e.day, lead = TJ_NOW && TJ_NOW.e === e ? TJ_NOW.lead : tradLeader(e), name = tjFirst(lead || a.p.id);
-  const notice = tradWords(e, 'notice', { name }) || e.name + ': ' + s.what + '. Social and leisure up.';
+  const notice = tradWords(e, 'notice', { name }) || (TP997.n53 ? tp997Notice(e, s) : e.name + ': ' + s.what + '. Social and leisure up.');   // 0.99.7 note 53: no words written, a sentence anyway (Traditions slot)
   player.stop(); a.talking = 2; player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
   if (e.id === 'tiles-ladder' && typeof tladJoin === 'function') return tladJoin(e, a, notice, lead);   // 0.92.5 item 20: play the next game, or watch
   if (TRAD995_ON && e.id === 'spice-shelf-supper') return spiceJoin(e, a, notice);   // 0.99.5 note 19 (TB3): a mess seat with your dinner
@@ -49523,6 +49809,16 @@ if (TRAD995_ON) {
   });
   tjActs();
 }
+// 0.99.7 note 53 (TP1 for lead 49; TP997.n53, the user: "the tip that comes up has terrible grammar"). The words for a
+// tradition with none written: tradWords reads content/banks/tp997.lines' join997.<id>.tip / .notice after join.lines;
+// with neither (an appointment, a new one), tp997Notice makes one sentence: its name, then what it is up to the first
+// colon (no "Six weeks aboard: have a tea with Zeke: six weeks aboard."), then what it gives (eventJoin's social and
+// leisure). tp997More: the tip's second sentence, in place of "Anyone taking part will do: you join in with them."
+function tp997Notice(e, s) {
+  const w = s && s.what ? String(s.what).split(':')[0].trim() : '';
+  return e.name + (w ? ': ' + w : '') + '. Social and leisure up.';
+}
+function tp997More(label) { const t = careerText('tp997.join.more') || 'Anyone already taking part can bring you in, too.'; return (/[.!?]$/.test(label) ? ' ' : '. ') + t; }
 // ---- end of slot: Traditions engineer ----
 // ---- slot: Events engineer 2 (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----
 // ---- the events base, F0b (EV2; plans/events-base-brief.md): called in on a day off, and an event meeting's cast in
@@ -72648,6 +72944,7 @@ function liftHold(on, until) { LIFT_HOLD = on ? { from: shipNow(), until: Number
 function liftHeld(t) { if (!LIFT_HOLD) return false; if (!Number.isFinite(t)) t = shipNow(); return t >= LIFT_HOLD.from && t < LIFT_HOLD.until; }
 
 // ---- slot: HUD seat (section 11). New code of this seat's goes here, above the end line (plans/owners.md) ----
+if (TP997.n28 && DECKS[7] && SIM_BAY) DECKS[7].blurb = 'Auditorium, court, pool, rivers, flight sim';   // 0.99.7 note 28 (TP1): the lift panel's line for the rec deck names the sim bay (SIM_BAY, on since 0.92.5)
 // ---- end of slot: HUD seat ----
 
 // =====================================================================
