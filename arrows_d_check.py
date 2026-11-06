@@ -60,6 +60,11 @@ class Page:
     def step(self, n, dt=1000 / 30): self.page.evaluate(f'window.__step({n}, {dt})')
     def day9(self, guide):                            # the career to the end of Day 8, Day 9 07:50, as in a real game
         self.ev("devmodeRun('Set career', () => devmodeSetCareerTo(8))"); self.step(20)
+        # CR1 (0.99.7 note 55; lead 50: test the build as it ships): with CR_DAY8_ON a career set to Day 8 has the test passed on
+        # Day 8 and Day 9 is the promotion morning. Here Making it safe was learned on Day 8 too late for that afternoon's test (after
+        # 12:30), so the test is Day 9 at 09:00, as in 0.99.6: a Tier 1 workday with the test on the board, the day this check was made for
+        self.ev("""(() => { if (typeof CR_DAY8_ON === 'undefined' || !CR_DAY8_ON) return; const W = SHIP.works; if (!W || !W.test || W.tier !== 1) return;
+          W.test = null; delete W.tr.t2; for (const k in W.op) W.op[k] = W.op[k].filter(id => id !== 't2'); W.ms = W.ms.filter(x => x[0] !== 'officer' && x[0] !== 'commissioned'); })()""")
         if guide: self.ev("GUIDE_ON = true; guideStart()")
         self.ev("devmodeSkipTo(8 * 1440 + 470); clearGoal(); SHIP.player.track = undefined; for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 85); while (typeof TIP_Q !== 'undefined' && TIP_Q.length) tipDone()")
         self.step(10)

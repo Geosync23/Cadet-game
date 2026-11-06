@@ -103,6 +103,10 @@ def part_slip(g):
     check('m6' in on['plain'], f"slip: the scanner never learned, Making it safe still opens on Day 8 ({on['plain']})")
     check('m6' in on['carried'] and on['cur'] and on['cur'].startswith('m6') and 'm7' not in on['op5'], f"slip: a scanner lesson carried from Friday waits; Making it safe opens on Day 8 ({on})")
     check('m6' not in off['plain'] and 'm6' not in off['carried'], f"slip off: as before, no Making it safe without the scanner used ({off})")
+    n = g.ev("""(() => { __sw(true); const W = __w(8, 360, { xp: 20, tr: { m4: 3, m5: 4 } }); W.op = { 5: ['m7'] }; W.cur = { id: 'm7', st: 'again', d: 5, by: 'torres-zeke', occ: null, j: null, w: 0 };
+      const r = ladderTick(7 * 24 + 6), c = W.cur; __sw(false); return { r, cur: c ? c.id + ':' + c.st : null }; })()""")
+    print('  (slip, Rounds not learned)', n)
+    check(n['cur'] and n['cur'].startswith('m7') and 'm6' not in n['r'], f"slip: Making it safe can't open (no Rounds): the lapsed lesson comes again, not parked (mech_check #15) ({n})")
 
 def part_catch(g):
     r = g.ev("""(() => { const out = {}; for (const on of [true, false]) { __sw(on); const o = {};

@@ -317,7 +317,8 @@ P925_LAPSE = r"""((took) => {
   const j2 = SHIP.jobs.find(x => x.id === c.j), st = W.cur && W.cur.st, after = (e => e && e.mode)(worksEscort(p, t + 1)), lapse = simNotes('trainLapse').length;
   let d2 = c.d + 1; while (!playerShiftOn(d2)) d2++;
   setShipNow((d2 - 1) * 1440 + WORKS_ASK[0]); machinesNow(); ladderTick(Math.floor(((d2 - 1) * 1440 + WORKS_ASK[0]) / 60));   // the next workday's ask
-  return { st0, st, before: before && before.mode, after, mine: !!j2 && j2.claimedBy === 'you', lapse, next: W.cur && W.cur.id === c.id ? W.cur.st + ' Day ' + W.cur.d : null };
+  return { st0, st, before: before && before.mode, after, mine: !!j2 && j2.claimedBy === 'you', lapse, next: W.cur && W.cur.id === c.id ? W.cur.st + ' Day ' + W.cur.d : null,
+    other: W.cur && W.cur.id !== c.id ? W.cur.id + ':' + W.cur.st + ' Day ' + W.cur.d : null, waits: !worksOpened(W).has(c.id) && W.tr[c.id] === undefined, d8: typeof CR_DAY8_ON !== 'undefined' && CR_DAY8_ON };   // CR1 (0.99.7 note 55): on Day 8 Making it safe goes first; the lapsed lesson waits, unopened
 })"""
 # (FX15, the user, patch 0.92.5 #22: "all training and lessons need it") every training job held for you on the board: the
 # row marked and named, the pointer on its Take it, the arrow naming it. A look at the board for one job: its row, the
@@ -359,7 +360,10 @@ def part_p925l(g):
     m6 = g.ev(f"(() => {{ ({M7_SETUP})('m6'); const c = SHIP.works.cur, j = c && SHIP.jobs.find(x => x.id === c.j); if (j && j.found > shipNow()) setShipNow(j.found); if (j && j.claimedBy) {{ j.claimedBy = null; j.status = 'open'; }} return c && c.st === 'do' ? c.j : null; }})()")
     c6 = g.ev(f"({P925L_LOOK})({json.dumps(m6)}, null)") if m6 else None
     print(f'  Making it safe\'s job left on the board (taken at the pipe, not here): {c6}')
-    check(bool(c6) and not c6['lesson'] and not c6['marked'] and 'take this one' not in (c6['row'] or '') and not c6['pointer'], f'#22: a lesson job you can\'t take at the board isn\'t marked "take this one" ({c6})')
+    if g.ev("typeof INC_REDO_ON !== 'undefined' && INC_REDO_ON"):   # CR1 (0.99.7 notes 55, 56): Making it safe's job on the board can be taken there, named and marked
+        check(bool(c6) and c6['lesson'] and c6['marked'] and 'Your Make it safe training job: take this one' in (c6['row'] or ''), f'#22 (INC_REDO_ON): Making it safe\'s job on the board is taken there, marked "Your Make it safe training job: take this one" ({c6})')
+    else:
+        check(bool(c6) and not c6['lesson'] and not c6['marked'] and 'take this one' not in (c6['row'] or '') and not c6['pointer'], f'#22: a lesson job you can\'t take at the board isn\'t marked "take this one" ({c6})')
     for slot, name in ((1, 'shadow job'), (2, 'job to lead')):
         jid = g.ev(f"({P925L_DAY1})({slot})")
         d1 = g.ev(f"({P925L_LOOK})({json.dumps(jid)}, null)") if jid else None
@@ -389,7 +393,9 @@ def part_p925(g):
     check(bool(bd['pointer']) and 'scanner lesson' in bd['pointer'] and not bd['clocked'], f'#12: the pointer rings the lesson\'s Take it again, before you\'ve clocked in, naming the lesson ({bd})')
     do = g.ev(f"(() => {{ ({M7_SETUP})('m7'); return ({P925_LAPSE})(true); }})()")
     print(f'  your turn (the scanner), its job in your hands at 17:01: {do}')
-    check(bool(do) and do['st0'] == 'do' and do['before'] and do['st'] == 'again' and not do['after'] and not do['mine'] and do['lapse'] >= 1 and (do['next'] or '').split(' ')[0] in ('watch', 'meet', 'do'),
+    again = (do['next'] or '').split(' ')[0] in ('watch', 'meet', 'do') if do else False
+    if do and do.get('d8') and not again: again = (do['other'] or '').startswith('m6:') and do['waits']   # CR_DAY8_ON: the next workday is Day 8, Making it safe first; the scanner lesson waits (unopened) for the next
+    check(bool(do) and do['st0'] == 'do' and do['before'] and do['st'] == 'again' and not do['after'] and not do['mine'] and do['lapse'] >= 1 and again,
           f'#15: an unfinished lesson ends at the shift\'s end: offered again, the teacher stops following, the job back on the board ({do})')
     hd = g.ev(f"""(() => {{ ({M7_SETUP})('m7'); const W = SHIP.works, c = W.cur, j = SHIP.jobs.find(x => x.id === c.j); if (!c || !j) return null;
       j.status = 'done'; j.doneBy = 'you'; c.st = 'held'; c.hold = true; const open = worksCaseOpen(c.j), p = ROSTER.find(x => x.id === c.by), t = (c.d - 1) * 1440 + dayShiftEnd(c.d) + 1;
@@ -536,7 +542,8 @@ def m4_part(g):
     check(a['held'] and a['junior'] and a['claimed'], f"m4: held for you to 16:00, a junior job, taken ({a['held']}, {a['junior']}, {a['claimed']})")
     st = [s[0] for s in a['stops']]
     check(st[0] == 'cart' and st[-1] == 'return' and st.count('load') == st.count('deliver') == a['crates'] and all(s[1] for s in a['stops']), f"m4: stops {a['stops']}")
-    check(a['holds'][0] == 'cart' and 'cartfull' in a['holds'], f"m4: the cart in hand {a['holds']}")
+    cf = g.ev("typeof CART_FIRST_ON !== 'undefined' && CART_FIRST_ON")   # CR1 (0.99.7 note 48): with CART_FIRST_ON no cart in hand till you've taken one from its dock
+    check((a['holds'][0] == 'cart' or cf and a['holds'][0] is None and 'cart' in a['holds']) and 'cartfull' in a['holds'], f"m4: the cart in hand {a['holds']}" + (' (CART_FIRST_ON: none before the dock)' if cf else ''))
     check(a['workDone'] and a['turnin'] and a['left'] == 0 and len(a['got']) == a['crates'] == len(set(a['got'])) and len(a['notes']) == a['crates'] and a['use'] == 2, f"m4: every crate once ({a['got']}, left {a['left']}, notes {a['notes']}, use {a['use']})")
     check(a['five'] == 5 and a['runs'] == [4, 1] and a['leftFive'] == 0, f"m4: five crates in two runs {a['runs']} (left {a['leftFive']})")
     check(a['crew'][0] > 0 and a['crew'][1] and all(x[0] == 'done' and x[1] not in (None, 'you') for x in a['crew'][1]) and a['crew'][2] == 0, f"m4: the crew's run when you don't {a['crew']}")
