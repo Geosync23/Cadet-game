@@ -76,3 +76,32 @@ restarted 19:54 UTC (plans/build-master/bm27/r5rest.sh). R2 gave fresh_walk and 
 
 **Result of round 0998 (candidate 1, d7f5bd6, game 29829196...c462): every share OK except P (NEW, game, TP998_BOOTH_ON).**
 By lead 50's call the round ran to the end, then the fixes went into candidate 2 and a full round again (0998b).
+
+## Round 0998b: candidate 2 (BM27 for lead 50)
+
+Candidate 2 = candidate 1 + TP1 cc44f94 + 108fe12 (docs) + 91a75b4 (both MV1 PASS) + tp998.social.2 shortened; frozen at
+f26070c (lead 50). Game sha256 13681748513f9b7cb51fc299c4789085d0636829d8297b9f0d29d00683259fd3, build 0.99.8. Same six
+shares, commands and notes as round 0998 (round-0997.md's). Record each share in plans/checks-0998b-rN.md. OLD = 0.99.6
+d7ad4c58. By lead 50's call the GO goes after player_check and check_fast; arrows default, fresh_walk to Day 3 22:30
+(long [] needed: P) and cadet vs candidate 1 and vs 0.99.7 are the first items of R5, beside the runners; any FAIL there
+stops the round.
+
+Expected vs candidate 1: only P's fix (after today's call, a low Social: no marker to the booths, the toasts and the Needs
+app name company; no booth tips). Expected vs 0.99.6: as round 0998.
+
+| Gate (candidate 2) | Result |
+|---|---|
+| player_check | PLAYER CHECK OK (622 s) |
+| check_fast | QUICK CHECK OK in 271 s |
+
+**GO round 0998b (BM27, 21:27 UTC):** claude/staging-0998 at this commit (game last changed at f26070c); game sha256
+13681748513f9b7cb51fc299c4789085d0636829d8297b9f0d29d00683259fd3, build 0.99.8.
+
+| Share | Result | Notes |
+|---|---|---|
+| R1 | | |
+| R2 | | |
+| R3 | | |
+| R4 | | |
+| R5 (BM27) | | |
+| R6 | | |
