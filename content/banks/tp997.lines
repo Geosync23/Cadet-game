@@ -1,0 +1,188 @@
+@bank all
+// TP1's words for the 0.99.7 playtest patch (plans/patch-0997.md notes 6, 7, 9, 11, 33, 53, 54; lead 49). Read only
+// with TP997_ON (section 13's switch); with it off nothing reads these keys. Tips are one or two short sentences.
+
+// note 6: Day 2, after Leila's evening at the call-home booths (19:00, or once your own call that day ends)
+== tip.tp997.call
+- One call home a day: the relay gives everyone aboard one call each ship day. The booths are yours again tomorrow.
+
+// note 9: the Schedule tracker, early on Day 1 (the target button under your needs)
+== tip.tp997.tracker
+- The Schedule tracker, the target button under your needs, lists what's on now and next, and a few places. Tap one for an arrow; tap it again to stop.
+
+// note 7: the tracker's Places row (title, then the line under it: {room} the washroom, {deck} its deck)
+== tp997.loo.title
+- Nearest bathroom
+== tp997.loo.sub
+- {room}, {deck}
+== tp997.loo.none
+- No public washroom you can reach
+
+// note 54: the button at the top of Mail
+== tp997.mail.all
+- Mark all as read
+
+// note 33: Pockets, the device app for what you carry ({item} the thing, {n} a number)
+== tp997.pockets.title
+- Pockets
+== tp997.pockets.empty
+- Your pockets are empty. Snacks and drinks from the crew store on Deck 3 go in here, to have when you like.
+== tp997.pockets.food
+- Snacks and drinks
+== tp997.pockets.hands
+- In your hands
+== tp997.pockets.locker
+- In your locker
+== tp997.pockets.hobby
+- Hobby supplies
+== tp997.pockets.eat
+- Eat
+== tp997.pockets.drink
+- Drink
+== tp997.pockets.gift
+- Tap a crewmate to give it.
+== tp997.pockets.ate
+- You eat {item}.
+== tp997.pockets.drank
+- You drink {item}.
+== tp997.pockets.full
+- Your pockets are full, so you have {item} on the way out.
+== tp997.pockets.paid
+- You pay {n} credits for {item}. It goes in your pocket: open Pockets on your device to have it when you like.
+== tp997.pockets.busy
+- Not now: finish what you're doing first.
+
+// note 53: the tip once you're at a tradition, after its first sentence ("Tap Tomas to join the lap.")
+== tp997.join.more
+- Anyone already taking part can bring you in, too.
+
+// note 53: the join words for the traditions that had none (tip: the arrow's label, {name} the leader's first name;
+// notice: the toast when you join). Same shape as join.lines: what it is, what you do, what it gives.
+== join997.first-light.tip
+- Tap {name} to join First Light
+== join997.first-light.notice
+- First Light Cocoa: a cocoa at the big windows as the ship's day begins. Leisure and social up.
+== join997.tasting-table.tip
+- Tap {name} to join the tasting
+== join997.tasting-table.notice
+- Brennan's tasting table: try the two new dishes, then pick your jar. Food, leisure and social up.
+== join997.scone-morning.tip
+- Tap {name} for a scone
+== join997.scone-morning.notice
+- Scone morning: a warm scone, and a joke to go with it. Food, leisure and social up.
+== join997.five-minute-skills.tip
+- Tap {name} to learn this week's skill
+== join997.five-minute-skills.notice
+- Five-minute skills: learn one small thing in five minutes, then have a go. Leisure and social up.
+== join997.coffee-trials.tip
+- Tap {name} to taste the coffees
+== join997.coffee-trials.notice
+- The coffee machine trials: taste three cups blind, then vote. Leisure and social up.
+== join997.jar-day.tip
+- Tap {name} to fill a jar
+== join997.jar-day.notice
+- Jar day: fill a jar for the spice shelf and write its label. Leisure and social up.
+== join997.beginners-guitar.tip
+- Tap {name} to play a chord
+== join997.beginners-guitar.notice
+- Beginners' guitar: listen to the beginners, then play your one chord. Leisure and social up.
+== join997.midnight-toast.tip
+- Tap {name} for toast
+== join997.midnight-toast.notice
+- Midnight toast: toast and tea with the night owls. Food, leisure and social up.
+== join997.whodunnit-club.tip
+- Tap {name} to join the whodunnit
+== join997.whodunnit-club.notice
+- Whodunnit club: listen to the mystery, then write down who you think did it. Leisure and social up.
+== join997.windowsill-herbs.tip
+- Tap {name} to compare herbs
+== join997.windowsill-herbs.notice
+- Windowsill herbs: compare everyone's herbs and swap a cutting. Leisure and social up.
+== join997.sounds-from-home.tip
+- Tap {name} to listen
+== join997.sounds-from-home.notice
+- Sounds from home: sit back with the lights low and listen to sounds from home. Leisure and social up.
+== join997.row-for-the-board.tip
+- Tap {name} to row for the board
+== join997.row-for-the-board.notice
+- Row for the board: take a rower and race the clock with the others. Fitness and social up.
+== join997.playlist-duel.tip
+- Tap {name} to judge the duel
+== join997.playlist-duel.notice
+- Playlist duel: listen to both playlists, then pick a winner. Leisure and social up.
+== join997.rec-lamplight-paddle.tip
+- Tap {name} to paddle
+== join997.rec-lamplight-paddle.notice
+- Lamplight paddle: take a kayak and drift down the slow channel by lamplight. Leisure and social up.
+== join997.rec-ring-the-bell.tip
+- Tap {name} to climb for the bell
+== join997.rec-ring-the-bell.notice
+- Ring the bell: climb the wall and try for the bell at the top. Fitness and social up.
+== join997.seed-packet-day.tip
+- Tap {name} to fill a seed packet
+== join997.seed-packet-day.notice
+- Seed packet day: fold a packet, fill it, and draw on it for next season. Leisure and social up.
+== join997.tool-night.tip
+- Tap {name} to join tool night
+== join997.tool-night.notice
+- Tool night: shut your eyes and name each tool by touch. Leisure and social up.
+== join997.route-night.tip
+- Tap {name} to place your pin
+== join997.route-night.notice
+- Route night: put a pin where you think the Wren will be in seven days. Leisure and social up.
+== join997.card-night.tip
+- Tap {name} to make a card
+== join997.card-night.notice
+- Card night: make a card for a birthday coming up. Leisure and social up.
+== join997.garden-walk.tip
+- Tap {name} to walk the garden
+== join997.garden-walk.notice
+- Garden walk: walk the beds slowly with Cruz and taste one leaf. Leisure and social up.
+== join997.window-sketch.tip
+- Tap {name} to sketch
+== join997.window-sketch.notice
+- Window sketching: take a pencil and sketch what you see out of the window. Leisure and social up.
+== join997.window-sketch-2.tip
+- Tap {name} to sketch
+== join997.window-sketch-2.notice
+- Window sketching: take a pencil and sketch what you see out of the window. Leisure and social up.
+== join997.open-house.tip
+- Tap {name} to look round
+== join997.open-house.notice
+- Open house: a look round Comms and the Watch office. Leisure and social up.
+== join997.spoon-band.tip
+- Tap {name} to join the spoon band
+== join997.spoon-band.notice
+- The spoon band: grab anything that makes a noise and play along. Leisure and social up.
+== join997.worst-joke.tip
+- Tap {name} to tell a joke
+== join997.worst-joke.notice
+- Worst joke night: tell your worst joke, then groan at everyone else's. Leisure and social up.
+== join997.spice-shelf-supper.tip
+- Tap {name} to join the supper
+== join997.spice-shelf-supper.notice
+- Spice shelf supper: sit down to supper and guess whose spice is whose. Food and social up.
+== join997.off-the-tern.tip
+- Tap {name} to welcome the new crew
+== join997.off-the-tern.notice
+- Off the Tern: stand at the foot of the ramp and welcome the new crew aboard. Social up.
+== join997.new-hands-tea.tip
+- Tap {name} for your tea
+== join997.new-hands-tea.notice
+- New hand's tea: your first Friday tea with the Works crew. Social up.
+== join997.four-weeks-aboard.tip
+- Tap {name} for a slice of cake
+== join997.four-weeks-aboard.notice
+- Four weeks aboard: a slice of the four-weeks cake with the Works crew. Social up.
+== join997.six-weeks-aboard.tip
+- Tap {name} to sit down for tea
+== join997.six-weeks-aboard.notice
+- Six weeks aboard: a tea with Zeke in the bow lounge. Social up.
+== join997.twelve-weeks-aboard.tip
+- Tap {name} to raise a cup
+== join997.twelve-weeks-aboard.notice
+- Twelve weeks aboard: sit down for Calder's toast in the mess. Social up.
+== join997.open-door.tip
+- Tap {name} for tea with the Chief
+== join997.open-door.notice
+- Open door: an end-of-shift tea with the Chief. Social up.
