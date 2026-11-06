@@ -1264,7 +1264,8 @@ with sync_playwright() as pw:
               const hu = HU_Q.filter(h => /^beat\|/.test(h.key)).map(h => h.title + ' ' + h.stage + (h.goal ? '+goal' : '')); HU_Q.length = 0; R.on = on;
               I.on = false; const off = devDay(2).filter(x => x.kind === 'beat').length; [I.on, I.ended] = was; return { out, hu, off }; })()""")
             print('  the arrival week\'s beats [day, time, title, where, goal found]:', r['out'], '| heads-up:', r['hu'], '| intro over:', r['off'])
-            check(len(r['out']) == 4 and all(x[4] for x in r['out']) and r['off'] == 0, f'the briefing, the Chief\'s office, the booths and the store on the Schedule with a goal, only during the intro ({r})')
+            cal = g.ev("typeof CAL997_ON !== 'undefined' && CAL997_ON")   # 0.99.7 (CL1, note 15): the crew store isn't a tradition: Day 3's store visit is off the Schedule (the store itself still usable)
+            check(len(r['out']) == (3 if cal else 4) and all(x[4] for x in r['out']) and r['off'] == 0 and (not cal or not any(x[2] == 'The crew store' for x in r['out'])), f'the briefing, the Chief\'s office, the booths' + ('' if cal else ' and the store') + f' on the Schedule with a goal, only during the intro ({r})')
             check(r['hu'] == ['Calling home soon+goal'], f'a beat gets its 15-minute heads-up with the arrow, even with heads-ups off ({r["hu"]})')
         if g.ev("typeof roundGuide === 'function'"):   # 0.73.0 (U2, item 1): the first round's arrow and tips, on E1's roundTrainStep (a stand-in when it's missing)
             r = g.ev("""(() => { const D = SHIP.device, real = typeof roundTrainStep === 'function' ? roundTrainStep : null; D.settings.tips = true; careerInit(); const ci0 = SHIP.career.ci; SHIP.career.ci = Math.max(1, Math.floor(shipNow()));   /* clocked in (FX1: a round's arrow waits for that) */ TIP_Q.length = 0; DEVICE_SKIN.tip(null); clearGoal(); RG_LAST = ''; RG_N = 0;
