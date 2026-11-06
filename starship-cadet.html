@@ -67026,7 +67026,7 @@ function crTestDay(d, m) {                               // promoAnnounce's test
 function crTestOpen(now) {                               // the same-day test opened that afternoon (the ladder's own rule waits for tomorrow)
   const W = SHIP.works; if (!crSameDay() || W.test.passed || W.cur || typeof ladderOpen !== 'function') return;
   const d = worksDay(now), m = now - (d - 1) * 1440, row = ladderRow('t2');
-  if (W.test.day !== d || !row || !WORK_MECH.t2 || m < CR_SAME.jobAt - 60 || m >= CR_SAME.until - 60 || worksOpened(W).has('t2')) return;   // (no playerShiftOn: the test's day is a workday already, crTestDay; Dev mode's landing day reads as excused)   // from 12:00 (Dev mode's hourly run reaches 12:00, not 12:30); its word at 13:00 (promoBeatsTick)
+  if (W.test.day !== d || !row || !WORK_MECH.t2 || m < CR_SAME.jobAt - 30 || m >= CR_SAME.until - 60 || worksOpened(W).has('t2')) return;   // (no playerShiftOn: the test's day is a workday already, crTestDay; Dev mode's landing day reads as excused)
   ladderOpen(row, d, now);
 }
 function crReady(now, by, here) {                        // promoReady with the test today: Calder's word wherever you are, the Mail, the notice
