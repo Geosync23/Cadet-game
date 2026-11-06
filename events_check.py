@@ -739,7 +739,7 @@ with sync_playwright() as pw:
       deckCrewFill(); EV_MIN = -1; eventsTick(); if (TJ_NOW && TJ_NOW.e.id === 'sowing') tradJoinTap(TJ_NOW.agent);   // 0.70.0: tap to join
       const tr = SHIP.traces.filter(x => x.id === 'seedlingYours'); SHIP.traces.length = 0; SHIP.traces.push(...t0);
       const ties = e.ev.ties; e.ev.ties = { ...ties, decor: 'testDecor' };
-      const dec = [e.from - 40, e.from - 20, e.to + 10, e.to + 20].map(m => tradDecor(5 * 1440 + m).map(x => x.id).join());
+      const dec = [e.from - 40, e.from - 20, e.to + 10, e.to + 20].map(m => tradDecor(5 * 1440 + m).map(x => x.id).filter(i => i === 'testDecor').join());   // only the planted decor (0.99.7, EV1: the first Saturday's big jigsaw has its own, 10:45-12:30)
       e.ev.ties = ties;
       return { room: roomAt(...player.here()), joined: SHIP.events.joined.slice(), tr, dec };
     })()""")
@@ -1021,7 +1021,7 @@ with sync_playwright() as pw:
         sent: SHIP.events.sent.filter(k => !/@[1-5]$/.test(k)), votes: Object.keys(SHIP.events.votes), meet: MEETINGS.filter(m => m.event === 'occasion').map(m => m.id), flag: !!flag('bridge.invited'), day: Math.floor(shipNow() / 1440) + 1 };
     })()""")
     print('New game: before', NG['before'], '| after: occasions', NG['occ'], 'commendations', NG['com'], 'traces', NG['tr'], 'old Mail keys', NG['sent'], 'votes', NG['votes'], 'occasion meetings', NG['meet'], 'flag', NG['flag'], 'day', NG['day'])
-    if not NG['before']['occ'] or NG['occ'] or NG['com'] or NG['ev'] or NG['log'] or NG['tr'] or NG['sent'] or NG['votes'] or NG['meet'] or NG['flag']: fail(f"a New game kept section 18's state: {NG}")
+    if not NG['before']['occ'] or NG['occ'] or NG['com'] or (NG['ev'] and not (NG['ev']['id'] == 'lastLight' and NG['ev']['startDay'] == 3)) or NG['log'] or NG['tr'] or NG['sent'] or NG['votes'] or NG['meet'] or NG['flag']: fail(f"a New game kept section 18's state: {NG}")
 
     if g.errors: fail(f"console: {g.errors[:4]}")
     g.b.close()

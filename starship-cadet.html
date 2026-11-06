@@ -34919,10 +34919,10 @@ const LINES = JSON.parse([
   ',"event.crossingLine.trad.big-jigsaw.thanks":[',
   '{"text":"You find a seat at the jigsaw table and fit a few pieces of the reach together. Most of them are sky.","id":"1uos8vt","tone":"funny"}]',
   ',"event.crossingLine.trad.every-song.ask":[',
-  '{"text":"Every song in the music room this afternoon. Zeke\'s warming up. We can hear him from here.","id":"1ng90q","tone":"funny"},',
-  '{"text":"Singalong at two in the music room. Zeke says the Line songs are in the cabinet too.","id":"19209os"}]',
+  '{"text":"Every song in the music room after shift. Zeke\'s warming up. We can hear him from here.","id":"3onmqi","tone":"funny"},',
+  '{"text":"Singalong at quarter past five, music room. Zeke says the Line songs are in there too.","id":"1sig8fd"}]',
   ',"event.crossingLine.trad.every-song.mail":[',
-  '{"text":"Every song tomorrow at 14:00 in the music room. Zeke and the five who know every song. You only need to know the chorus.","id":"1qhcc6q"}]',
+  '{"text":"Every song tomorrow at 17:15 in the music room. Zeke and the five who know every song. You only need to know the chorus.","id":"b3oh07"}]',
   ',"event.crossingLine.trad.every-song.thanks":[',
   '{"text":"You squeeze into the music room and sing along. Nobody knows all the words. Zeke does.","id":"92xkvw","tone":"funny"}]',
   ',"event.crossingLine.trad.rec-paddle-club.ask":[',
@@ -52161,13 +52161,13 @@ const EV997_SAT_ON = false;                              // note 36: the first S
 // harvest morning (the dinner's salad) and sowing (the season's first) stay. In: one existing tradition on each of four
 // other decks, within the two-at-once rule beside the long breakfast, the harvest and the sowing: an early Paddle club on
 // the rec deck in the Saturday run's freed hour, Window sketching in Deck 2's observatory, the big jigsaw in Deck 1's
-// observation room, and Every song in Deck 4's music room in garden hour's place (its week-2 showings fall to the storm,
-// Day 13, and a birthday, Day 41). Their own hosts, places and joining; the first Saturday's words (content/banks/ev997-saturday.lines, event.crossingLine.trad.*)
+// observation room, and Every song in Deck 4's music room at its own 17:15 (Zeke, its host, works Saturdays to 17:00;
+// its week-2 showings fall to the storm, Day 13, and a birthday, Day 41). Their own hosts, places and joining; the first Saturday's words (content/banks/ev997-saturday.lines, event.crossingLine.trad.*)
 const EV997_SAT = [{ trad: 'garden-hour', day: 0, drop: true },
-  { trad: 'rec-paddle-club', day: 0, add: { at: [420, 465], words: 'event.crossingLine.trad.rec-paddle-club' } },
+  { trad: 'rec-paddle-club', day: 0, add: { at: [420, 465], who: [['holt', 1], ['everyone', .2]], words: 'event.crossingLine.trad.rec-paddle-club' } },   // an early hour: a little pull, or it's two paddlers
   { trad: 'window-sketch', day: 0, add: { at: [585, 630], words: 'event.crossingLine.trad.window-sketch' } },
   { trad: 'big-jigsaw', day: 0, add: { at: [645, 750], words: 'event.crossingLine.trad.big-jigsaw' } },
-  { trad: 'every-song', day: 0, add: { at: [840, 890], words: 'event.crossingLine.trad.every-song' } }];
+  { trad: 'every-song', day: 0, add: { at: [1035, 1085], words: 'event.crossingLine.trad.every-song' } }];   // its own hour: Zeke works Saturdays to 17:00
 if (EV997_SAT_ON && SHIP_EVENTS.crossingLine) {
   SHIP_EVENTS.crossingLine.dayDress = (SHIP_EVENTS.crossingLine.dayDress || []).concat(EV997_SAT);
   evDressMake();                                         // made again with the new rows (it's pure: the calendar's plan and the events' data)
@@ -52242,6 +52242,7 @@ if (EV997_READ_ON) {
   if (rc) { const who = rc.who; rc.who = (p, d, c) => READ_STORY_DAYS.includes(d) && READ_REGULARS.includes(p.id) ? 1 : who(p, d, c); }   // the four regulars come for the book
   if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); EV_GOERS.clear(); }
 }
+if (EV997_LIGHT_ON && SHIP_EVENTS.lastLight) for (const t of ['ev-lastLightGlass', 'ev-lastLightGlass-talk']) EV_MEET_TAGS.add(t);   // standing easy at the glass is part of the shift (dayReport), as the Line's ceremony
 // ---- notes 8 and 34, the Last Light at the bow glass (its data: the block before EV_SHIPWIDE, `EV997_LIGHT_ON`): while
 // it's on and you're in the bow lounge, Dr. Sato says her lines in order (event.lastLight.sato.1-8: the beacon, what
 // the charts are like past it, the Line on Sunday), one bubble in two, the crowd's lines between (event.lastLight.crowd:
