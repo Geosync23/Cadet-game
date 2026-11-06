@@ -14,3 +14,14 @@ Booths row: "in the room {'trk': 'place:calls', 'place': '3-callhome-1', 'room':
 ['3-callhome-1', '3-callhome-2'] | the call begun {'act': 'call', 'trk': None}", the same as rounds 0997b and 0998.
 
 R6: OK.
+
+## Taken from R2 (handed over by R2, 22:06 UTC): perf_check BUILD OLD
+
+`python3 perf_check.py bbb7bb0 d7ad4c58`, strictly alone, 22:07-23:14 UTC: **PERF CHECK OK** (2 skipped: P5_STEP6), exit 0.
+No frame-time spike flagged, so no re-measure needed.
+- Draw calls: all 26 measured scenes identical to round 0998 (d7f5bd6) in every view, so P's fix changes none. Against OLD
+  within 1 call (-1 to +1), none over budget; highest 311 calls (storm all-clear party, portrait-wide).
+- Memory: week of play 470/41/93 -> 472/41/93, deck round trips 470/41/93 flat, as OLD.
+- File 8.84 MB, load 7.6-8.1 s.
+
+R6 total for round 0998b: OK.
