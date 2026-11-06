@@ -126,3 +126,6 @@ CL1 owns the rules (no clashes, piano spacing, birthday times and spacing, arrow
 | 52 | Teach me your thing: each teacher their own place and a small result (Zeke knitting, Tove a mint cutting, Rina a practice Tiles game, Ravi a comic) |
 | 18 | Bunk inspection: Calder walks to your bunk, three checks, then "That's a pass" / "Not a pass this week", no penalty |
 | 43 | Bread day: you get a warm loaf, carry it, sit and eat it (counts as breakfast) |
+| 47 (CL1, later) | No birthday parties on Fridays (they knocked out the Friday Works tea): parties Days 4, 22, 41, 62, 77, 94 (about 19 a year) |
+| (CL1) | Day 22: the comet's gathering is a fixed item, so the department cup steps aside that day (back Day 50) |
+| 4 (CH1) | Sofas lose their throw cushion (it sat where the end sitter sits); mess / bow lounge sofas still touch the back by a few cm |
