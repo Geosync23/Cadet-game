@@ -78,3 +78,8 @@ off no change. cadet_test off vs 0.99.6 ALL IDENTICAL. (SC1's check_fast on 77e5
   your deck, out of reach) closes on the next frame: goToDeck to their deck and stand beside them first.
 - A fresh save via newGameStart(true) needs the manifest signed (fill form input[maxlength="24"], click the form button).
 - Copy BM24 (session_01GKuymnYTNkfxgLvtfFRg7w) on every PASS (lead 49). RV32 is session_01GKuymkDX3gviqiGJcKLWuS.
+
+### GM1 games (claude/p997-games) - moved to SC1 by lead 49 (08:26 UTC)
+Before the move: 9175156, game f8936885...e441 matched; cadet_test off vs 0.99.6 ALL IDENTICAL; every edit in 18 and 23
+gated by GAMES997_ON; the ACT read in wsoWhere is in whereIs's live layer (tradWhere), not planDay. Handed to SC1.
+Merge note: GM1 and TB6 both add their switch line after TRAD995_ON (section 13, line 9757).
