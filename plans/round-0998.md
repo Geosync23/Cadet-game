@@ -58,12 +58,12 @@ game sha256 298291963584a62fbf0f7953afaa402924cdd22e474d526353494ec02d22c462, bu
 
 | Share | Result | Notes |
 |---|---|---|
-| R1 | | |
-| R2 | | |
-| R3 | | |
-| R4 | | |
+| R1 | OK, all 17 (player alone, bubble, puzzle, social, talk, arrows default parts, step5, step6 four-way missed 0 stuck 0, arrows_pointer, endstay, day 4 11 25 26 2 9, p5retry_probe) | plans/checks-0998-r1.md, claude/checks-0998-r1 e34d198 |
+| R2 | OK, own checks: intro whole/--dinner/--firsts, path, arc, lines (0 errors) and --day, day 0 1 5 7 21 22, arrows endgo, pf_f1_same (F1 0 mismatches; all-off proof: 0.99.7 switches + TP998 false, 30 of 30 same), cadet vs 0.99.6 (same 15 views, pictures identical to 0.99.7's). fresh_walk and p926 by R4 (P), perf by R6 | plans/checks-0998-r2.md, claude/checks-0998-r2 59206328 |
+| R3 | OK, every check: sound (alone), devmode (all parts), dev_arrow, promo_sight, arrows_d, arrows_f, ending, controller 57 of 57 | plans/checks-0998-r3.md, claude/checks-0998-r3 a24d034 |
+| R4 | OK, every check (day 6 8 23 24 16, career, cr1, appt, saves, title, device, fixtap_probe, fixtap_reach, fixtap_click); also R2's p926 OK; R2's fresh_walk: FAIL point 5 = P (NEW) | plans/checks-0998-r4.md, claude/checks-0996-r4 |
 | R5 (BM27) | | |
-| R6 | | |
+| R6 | OK: interactions_check whole (19:24-20:02 UTC, exit 0, no FAIL lines, draw-call peak 220; booths row as 0.99.7) | plans/checks-0998-r6.md, claude/checks-0998-r6 c63e349 |
 
 ### Finds
 
