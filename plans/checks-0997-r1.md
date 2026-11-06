@@ -56,3 +56,16 @@ the fixer.
 
 **R1: FAIL on 0.99.7 (game b14421f8...cf7d): arrows_check step6 (teachoff/track/skiptea), NEW.** Everything else in
 the share passes, arrows_check default parts with TP1's clockin check fix.
+
+## H reruns (lead 50 asked, ~14:40 UTC; R4 and TP1 could not reproduce with one way)
+
+On the candidate b14421f8, nothing else running, arrows_check.py from 7fd8f6b, CADET_WORK=/tmp/work-r1:
+
+| Command | Result |
+|---|---|
+| `step6 teachoff` (one way) | OK (91 s): teachoff due 709, missed 0, stuck 0 |
+| `step6 asis teachoff track skiptea` (the failing command) | FAIL again, the same: asis 709/0/0; teachoff 796/84/1, track 796/84/1, skiptea 791/84/1 (354 s) |
+
+So H needs another way run before it in the same run: all ways share one browser context (run_s6, line 883, a new
+page per way), so something kept in the browser outside the save carries from the earlier way into the next. On
+0.99.6 the four-way command passes. Check-side, or a second new game on the same device: TP1 to judge.
