@@ -83,6 +83,11 @@ Sections: 15b (doable, boardLessonName, ixJobStep label, ixHold), 17 (gardenCarr
   Day 9 06:00, so no JSON): the same Day 2 slip (m1 missed at 10:42, a day late after), and still: Day 8 06:10 m6:meet,
   10:32 m6:do, test set Day 8 by 11:33, 12:33 t2:do, passed by 14:14; Day 9 the scanner (m7). Note 55 holds in a slipped week.
   The needs arrow over a lesson meeting and 'ask' with no arrow: backlog CR1-3 (TP1 is on it for lead 49).
+- CR1 3e1b0dc (game c61bda3424ac8ddad6e94ba65f5a4be60e17b7ad6cf45d326d31a08b31180791; adds catch-up Days 2-7 and m6 needing only
+  m1 from Day 8; switches false): off cadet_test vs 0.99.6 ALL IDENTICAL; four on: check_fast QUICK CHECK OK in 288 s.
+  My own walk on 3e1b0dc was killed by a container restart (Day 1); CR1 ran fresh_walk.py on it (as is: Rounds caught up
+  Day 3, test Day 8 passed; and with the walker ignoring every arrow Friday morning: test Day 8 passed). With my 5d5acbf walk
+  (the last guard alone holds Day 8), PASS 3e1b0dc.
 
 ### 4. JB3 (claude/p997-jobs 43a96ae, then e96ec5a): notes 3, 21, 22 (+ CR1-2 tea tap): in progress
 43a96ae game dd9696ca644ea673bf41a1c5829dc422177c4c74f237cfc8825b98c695ea958a; e96ec5a game bae8e769c64c57620bdbd3ec954c7d14c47c8b18a2d145248e2f05f32dd9456d.
