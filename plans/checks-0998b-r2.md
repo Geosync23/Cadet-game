@@ -10,7 +10,10 @@ exit 1, `DIFFERENCES FOUND`; `DIFF state ['mem', 'calls', 'tris']` only; errors 
 px counts as 0.99.7 and 0.99.8 candidate 1, and every NEW picture pixel-identical to candidate 1's (0 px in all 15): all
 explained (hair caps, soles, tracker ring, Fonseca's bunk, the Day 2 crew from ~07:45: TRAD997's Spice supper move).
 
-## Result: OK so far; perf from R6 pending
+## Result: OK
+
+Every check in R2 passes on 0.99.8 candidate 2; P (fresh_walk point 5) is fixed. Ran by R2, except fresh_walk and p926
+(R4) and perf_check (R6).
 
 | Check | Ran by | Result | Minutes | Key lines |
 |---|---|---|---|---|
@@ -28,5 +31,5 @@ explained (hair caps, soles, tracker ring, Fonseca's bunk, the Day 2 crew from ~
 | pf_f1_same proof: OLD vs 0.99.8 c2 with every 0.99.7 switch and TP998 false | R2 | exit 0 | 0 | `fingerprints 30 differ 0 []`, `F1 checks 23674 mismatches 0`, `PF F1 SAME OK` |
 | fresh_walk BUILD 3 | R4 | exit 0, all five points pass | | briefing to "Ready when you are." 08:52, then the clock 08:53; Day 2 solo meeting (arrow 08:31); booths arrow from 18:00 at the floor pin, never Booth 1, 'd2-booths:said' 18:16; errors []; **stuck [], long [] (P fixed)**: the 21:38 toast "Really missing people. Find some company: the mess or the bow lounge." JSON plans/fw-0998b-r4.json on claude/checks-0996-r4 |
 | p926_check | R4 | exit 0 | | `P926 CHECK OK` |
-| perf_check BUILD OLD (alone) | R6 | running (started 22:07) | | |
+| perf_check BUILD OLD (alone) | R6 | exit 0 | 67 | `PERF CHECK OK (2 skipped: switch not in this build; 0 waiting: not built yet)`; no spike; draw calls in all 26 scenes identical to 0998 c1 in every view, vs OLD within 1, none over budget (highest 311); memory flat 470/41/93 (a week 472/41/93) as OLD; file 8.84 MB, load 7.6-8.1 s. plans/checks-0998b-r6.md on claude/checks-0998-r6 (8e6e50d) |
 
