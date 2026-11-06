@@ -47,10 +47,15 @@ opening their card (p997WordSeen) shuts the day's arrow.
 - Off: cadet_test vs 0.99.6 ALL IDENTICAL.
 - sc1_arrow2.py on: arrow minutes = ready minutes, every person every day, Days 9-22 (= off; sc1_arrow2_on_6c39f3b.txt).
 - sc1_arrow_open.py on: after opening the card, 0 arrow samples the rest of the day (kovac Day 11: off 22, on 0).
-- On copy: BUBBLE CHECK OK, DAY CHECK OK. interactions_check (and check_fast on the commit) in progress.
+- On copy: BUBBLE CHECK OK, DAY CHECK OK, INTERACTIONS CHECK OK. check_fast on the commit: QUICK CHECK OK (239 s).
 - stories_check FAILED (14) on the on copy, but the same 14 FAIL lines on the off copy, on 85442de-on, and on the
   unchanged 0.99.6 build (base f6ff5ec1) in my setup: not SC1's. The 0.99.6 round (CR6) passed it, so it is my setup or
   something that changed since (date?): rerunning runner-style (repo root, default CADET_WORK) to settle it.
+
+
+**77e573f, game 6df22594...1705 (sha256 matched): PASS** (sent to SC1 and the lead). The one change: p997HostNote skips an
+appointment's event (TB6: apptKeep gives the host its own). Probe: appt-teach-me (sato) 0 -> 0, first-light (raman) 0 -> 4;
+off no change. cadet_test off vs 0.99.6 ALL IDENTICAL. (SC1's check_fast on 77e573f: OK, 246 s.)
 
 ### AV1 sound and screens (claude/p997-av), switches SND_LIVE, SND_DISC (27), REC_FILM (4)
 **15fbf3f, game 4f081164...d5b2 (sha256 matched).** Sections 4 (one line), 4e (+83, the film, rec engineer's), 8c
