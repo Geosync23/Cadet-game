@@ -72,3 +72,46 @@ Same commands, notes and known-old list as above, with these changes:
   50); perf_check alone, last of everything.
 - Still to come: SC1's controller_check.py for I (the pad's way to a full-width button). R3 runs the controller ending
   part again with it when it lands; until then the ending part's Day 34 lines are I, known and owned.
+
+## Round record (BM26, build master from ~13:00 UTC; BM25 before)
+
+### Candidate 1: claude/staging-0997 7fd8f6b, game b14421f82e04602cd608505756ddb8fb05bea4571af813d8e345424ebcd1cf7d
+Gated before the GO by BM25: check_fast, machine, events OK. Round 0997 found new FAILs A-L (each passed on 0.99.6, or
+a check expected the 0.99.6 game). Each one, its cause and how it was closed:
+
+| Item | Check (share) | Cause | Fixed by |
+|---|---|---|---|
+| A | arrows_check clockin, Day 1 (R1) | TP1's clock-in waits for the 08:50 briefing; the check set it at 08:30 | check: TP1 6050082 |
+| B | mech_check m4, #22, #15 (R5) | CR1's own cart (m4) and Make it safe again (#22): by design; #15: a lapsed lesson waited for Making it safe on a day it couldn't open | game (#15, crCarryPark) and check: CR1 9dfbb70 |
+| C | appt_check, Brennan's book (R4) | EV1's Last Light closed the bow lounge 13:40-14:40, so Brennan's break took her far off, late for the 14:30 booking | game: EV1 b374343 (lounge open; no booking over the Last Light's hour) |
+| D | devmode_check (R3) | trad: Dev mode refused a tradition on the Last Light's day; set/career: Dev mode's table and Day 8 test beat still on Day 9 | game (section 25): EV1 b374343, CR1 9dfbb70 + 93eb0e4; check: CR1 |
+| E | arrows_d_check S3, pass-over (R3) | the check's day became the Day 8 test day | check: CR1 9dfbb70 (an ordinary Tier 1 Day 9) |
+| F | disc_check #25 (R5) | TB6's Spice supper move (note 51) sends Erik to the gym at 17:22 on Day 2; the pair plays at 21:30 | check: GM1 3966a4a (the moment read from the plans) |
+| G | interactions_check (R6) | store row: CL1's note 15 (not a tradition); Orange tree: Elif at the tree in the Last Light's lead-up | check: CL1 adf96c5; game: EV1 b374343 |
+| H | arrows_check step6, three ways (R1) | each way loaded the previous way's Dev save from the shared browser | check: TP1 042949a (a browser per way); the old shutdown/night-shift clash: backlog TP1-1 |
+| I | controller_check ending by pad (R3) | the check's pad steering bounced around a full-width button (SC1's two-button row); DOWN reaches it in the game | check: SC1 2ce2a48 |
+| J | controller_check tiles by pad (R3) | GM1's tutorial has 15 steps; the check pressed A 12 times | check: GM1 3966a4a |
+| K | lines_check (R2) | 17 new lines over 90 characters; {item} unknown to the check | words: CL1 4bd36a1 (+ two tweaks c72cff9); check knows {item} |
+| L | weekend_check (BM25's gate) | the Saturday run is parked (CL1, note 30) | check: CL1 cce2169 |
+
+Explained, not faults: pf_f1_same's fingerprints differ by design (F1's own test 0 mismatches; with every 0.99.7 switch
+off, 30 of 30 fingerprints equal 0.99.6). interactions_check's garden camera turns vary run to run on 0.99.6 itself
+(R6). EV1's own events and machine FAILs came from its branch's stale check files.
+
+cadet_test vs 0.99.6 (R2 and BM26, alone, pixel counts identical): all 15 views differ; no page errors, taps the same,
+state differs only in memory, draw calls and triangles. Every difference explained: hair caps and boots without the
+flat sole on every person (CH1); the Schedule tracker's ring (TP1); Fonseca 0.1 m over in a bunk on Day 1 night (CH1);
+from Day 2 ~07:45 the scheduled crew elsewhere with other bubbles (TRAD997_ON alone: TB6's Spice supper move to 19:15,
+note 51; with only that move undone 0 of 75 Day 2 plans differ; the mornings' basins and seats shared out differently,
+same activities). The player's path the same in every view.
+
+### Candidate 2 (round 0997b): claude/staging-0997 c052cc8, game 1b17203d4281afa28485d7ba05f5afe829931169888d392d97ef5e4f61a0bff9
+Gates: check_fast OK, devmode_check OK, events_check OK. Full round again (lead 50). New in 0997b:
+
+| Item | Check (share) | Cause | Closed by |
+|---|---|---|---|
+| M | career_check s5 (R4) | EV1's lounge change ripples through the board's job mix: a steady Senior has 54 xp at Day 19, Trusted needs 55 (0.99.6: 59-63) | check: EV1 2325c5e (within 5 xp), lead 50's call; a career-pace note for the user |
+| N | p926_check item 15 (R2's, run by R4) | the Spice supper's fixed old times, and Brennan's new host card unanswered (TB6, note 51) | check: TB6 ba33d0c |
+| O | fresh_walk Day 2 booths (R2's, run by R4) | Leila's 18:00 scene does play (18:13, SC1's trace); fresh_walk's record doesn't log bubbles | explained; TP1's arrow improvements go to the next build |
+
+cadet_test on candidate 2: every NEW picture pixel-identical to candidate 1's (R2), same counts in BM26's own run.
