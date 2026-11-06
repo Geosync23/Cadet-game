@@ -1,0 +1,34 @@
+@bank all
+// CR1 (lead 49, the 0.99.7 playtest patch, notes 49, 55 and 56; plans/patch-0997.md): the first promotion's test on
+// Monday, Day 8, the same afternoon as Making it safe; the Training tab's checklist ticks only what has happened; the
+// training job named on the board. Calder speaks unless noted: exact, numbers not adjectives, never "well done" and no
+// "!". Mails are "Subject | body", unsigned (the game adds the sender). Used only with the switch CR_DAY8_ON (24p's slot).
+
+// Calder, the moment Making it safe is done and you're Reliable: the test is this afternoon ({time})
+== cr.ready
+- That's Making it safe, and that's all of it. Tier 2 test today, {time}, at the board.
+== cr.ready.mail
+- Your Tier 2 test: today | Today at {time}, the Works job board. Pass to make Officer.
+// the device's urgent notice
+== cr.ready.notice
+- Your Tier 2 test: today, {time}, the job board in the Works bay.
+
+// the Works app's Training tab, "Your promotion" checklist ({day}: the first day a test can be; {time}: its hour)
+== cr.promo.check.from
+- The test from Day {day}
+== cr.promo.check.reached
+- Reached
+== cr.promo.check.set
+- Test job: {day}, {time}
+== cr.promo.check.today
+- today
+== cr.promo.check.tomorrow
+- tomorrow
+
+// the job board: the row of your training job (only that one, never later jobs of its kind), "Your ...: take this one"
+== cr.board.m6
+- Make it safe training job
+
+// the job board (note 25, BOARD_NEW_ON): a round of a kind you learned lately, posted before the afternoon ({deck})
+== cr.round.title
+- Extra round, Deck {deck}

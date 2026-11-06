@@ -61,3 +61,17 @@
 - The ending. Oh, the ending.   #warm
 - Is it good? It looks good.
 - Read me the first line?
+
+// ---- EV1 for lead 49 (0.99.7, the user's note 46): one book read together, The Lighthouse at Coriel. Day 7 Esme
+// hands it round as she closes (read.story.0.wrap); her close at each of the four parts (read.story.<N>.wrap). The
+// talk itself is content/meetings/readStory<N>.meet.
+== read.story.0.wrap
+- Next time, one book for all of us. The Lighthouse at Coriel. Copies on the shelf.
+== read.story.1.wrap
+- Time. Chapter twelve by next time. Not thirteen. You know who you are.   #funny
+== read.story.2.wrap
+- Time. Nineteen by next time. Spines out on the shelf, please.
+== read.story.3.wrap
+- Time. The end, by next time. Bring a handkerchief. One is enough.   #warm
+== read.story.4.wrap
+- That's the book. Thank you, all of you. Same chairs in a fortnight.   #warm

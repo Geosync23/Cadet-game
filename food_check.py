@@ -222,7 +222,8 @@ with sync_playwright() as pw:
       const mail = []; window.__keepMail = window.mailSend; window.__sc("mailSend = x => window.__mailBox.push(x)"); window.__mailBox = mail;
       for (const E of GALLEY_EV.values()) E.k = 0; out.cakes = galleyReport(d, 1)[0].cakes;
       SHIP.galley = null; goToDeck(3);
-      for (const [t, k] of [[14 * 60, 'before'], [18 * 60, 'dinner'], [19 * 60 + 45, 'out'], [21 * 60 + 45, 'gone']]) {{
+      const bp = typeof CAL997_ON !== 'undefined' && CAL997_ON ? eventsOn(d).find(e => e.id === 'birthday') : null, tOut = bp ? Math.max(19 * 60 + 45, bp.to + 20) : 19 * 60 + 45;   // 0.99.7 (CL1, note 23): the party is 19:00-19:55, its cake on the party's table till 15 minutes after (bdayTableOut): the servery's after that
+      for (const [t, k] of [[14 * 60, 'before'], [18 * 60, 'dinner'], [tOut, 'out'], [21 * 60 + 45, 'gone']]) {{
         setShipNow(B + t); galleyTick(); out[k] = {{ cake: !!(SHIP.galley.cake && SHIP.galley.cake.out), shown: !!(GV && GV.cake && GV.cake.visible), candles: GV && GV.candles ? GV.candles.count : -1, text: galleyText('servery') }}; }}
       out.board = galleyBoard(d); out.mail = mail.map(x => x.subject + ': ' + x.body); out.name = p.name; out.real = real;
       window.__sc("mailSend = window.__keepMail"); if (had === undefined) delete p.birthday; else p.birthday = had; GALLEY_EV.clear(); SHIP.galley = null; return out; }})()""")

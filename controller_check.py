@@ -1285,7 +1285,9 @@ FOCUS_ON = r"""((sel) => { const t = document.querySelector(sel), f = document.a
   if (f === t || t.contains(f)) return { on: true };
   const a = t.getBoundingClientRect(), b = f && f !== document.body ? f.getBoundingClientRect() : null;
   if (!b) return { none: true };
-  const dx = (a.left + a.width / 2) - (b.left + b.width / 2), dy = (a.top + a.height / 2) - (b.top + b.height / 2);
+  let dx = (a.left + a.width / 2) - (b.left + b.width / 2), dy = (a.top + a.height / 2) - (b.top + b.height / 2);
+  const bx = b.left + b.width / 2, by = b.top + b.height / 2;   // (SC1 for lead 50, round FAIL I) a target that spans the highlight across the way is straight that way: press it, as a player would (a full-width button under a row of two bounced the steering between them)
+  if (a.left <= bx && bx <= a.right && Math.abs(dy) > 1) dx = 0; else if (a.top <= by && by <= a.bottom && Math.abs(dx) > 1) dy = 0;
   return { dx, dy }; })"""
 def pad_to(r, sel, tries=40):
     """move the highlight onto sel with the D-pad (the bigger gap first); True once it's there"""
@@ -2187,7 +2189,7 @@ def legacy_parts(GAME, ON, fails):
         p.plug(); p.press('x'); p.log()
         p.ev("SHIP.device.tipsSeen.device = true; tilesPlay('tomas', null, 'full'); if (TL_GAME.timer) { clearTimeout(TL_GAME.timer); TL_GAME.timer = 0; }"); p.step(3)
         check(p.ev(TL_FOCUS) == 'etnext', f'tiles: your first game should land on How to play\'s Next, not {p.ev(TL_FOCUS)}')
-        for _ in range(12):
+        for _ in range(p.ev('TL_TUT.length') + 4):   # as many As as How to play has steps (8; 15 with 0.99.7's GAMES997_ON, GM1)
             if p.ev('TL_GAME.tut') < 0: break
             p.press('a'); p.step(1)
         check(p.ev('TL_GAME.tut') < 0, 'tiles: A on Next should go through How to play')

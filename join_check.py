@@ -28,7 +28,9 @@ EACH = r"""(id => {
   if (!e) return { id, err: 'not on in 400 days' };
   goToDeck(e.ev.where[0].deck); actEnd(true); clearGoal(); setShipNow((d - 1) * 1440 + e.from + 10); deckCrewFill();
   SHIP.events.joined = SHIP.events.joined.filter(k => k !== id + '@' + d); EV_MIN = -1; eventsTick();
-  const lead = tradLeader(e), a = tjAgent(lead);
+  let lead = tradLeader(e), a = tjAgent(lead);
+  if (!a && e.ev.stay) { const B = (d - 1) * 1440, p = schedPeople().find(q => q.id === lead), sg = p && planDay(p, d).find(x => evTagId(x.tag) === e.id);   // a long one (Winner Stays On, GAMES997_ON): goers come and go; be there when its leader is
+    if (sg) { setShipNow(Math.max(sg.from, B + e.from) + 10); deckCrewFill(); EV_MIN = -1; eventsTick(); a = tjAgent(lead); } }
   if (!a) return { id, d, err: 'leader ' + lead + ' not on the deck' };
   const rk = [...(e.rooms || (e.rooms = eventRooms(e.ev)))].map(r => r.split('|')).find(r => +r[0] === deckDef.num)[1], tl = ROOM_TILES[rk], c = cellPos(...tl[Math.floor(tl.length / 2)]);   // you arrive in its room
   player.obj.position.copy(cellPos(...nearestOpen(c.x, c.z, player))); player.stop();
@@ -37,7 +39,7 @@ EACH = r"""(id => {
   const goal = IX_GOAL && IX_GOAL.tj === id + '@' + d ? IX_GOAL.label : null; tradJoinFrame();
   const mark = document.getElementById('tjMark'), marked = !!mark && /★/.test(mark.textContent);
   const s0 = SHIP.player.needs.social = 40, ok = tradJoinTap(TJ_NOW ? TJ_NOW.agent : a);
-  if (typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.id === 'tiles.ladder') { dialogueNext(); dialogueChoose(1); dialogueEnd(true); }   // the ladder asks play or watch (0.92.5 item 20): watch
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE && (DIALOGUE.id === 'tiles.ladder' || DIALOGUE.id === 'tiles.night')) { dialogueNext(); dialogueChoose(1); dialogueEnd(true); }   // Tiles night asks the same with GAMES997_ON (0.99.7, GM1)   // the ladder asks play or watch (0.92.5 item 20): watch
   if (typeof DIALOGUE !== 'undefined' && DIALOGUE && /^(t932\.join|tasting\.table)$/.test(DIALOGUE.id)) { let n = 0; while (DIALOGUE && n++ < 20) { const v = dialogueView(); dialogueStep(v && v.choices ? 0 : undefined); } }   // 0.93.2 (FX24): the host's join line (the tasting table: its dishes and the jar), then the activity
   // (DS1, RV14's (a) on Bread day) the leader shown is TJ_NOW's (the host on duty near the spots leads: Brennan), not only
   // the planner's pick (tradLeader): the marker's name, the arrow's person and the tap must all be that one
@@ -53,7 +55,7 @@ with sync_playwright() as pw:
     # behind one just shown; each part here runs in one frozen moment of the test's clock, so the join notice would
     # still be waiting. Every pop-up shows at once, as in interactions_check (AC3's line; the queue is arrows_check's)
     g.ev("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")
-    ids = g.ev("Object.keys(TRAD_JOIN).filter(id => TRAD_JOIN[id].act !== 'beam' && !/^appt-/.test(id))")   # appointments (appt-*): only on the calendar once booked (below)
+    ids = g.ev("Object.keys(TRAD_JOIN).filter(id => TRAD_JOIN[id].act !== 'beam' && !/^appt-/.test(id) && !(typeof CAL997_ON !== 'undefined' && CAL997_ON && id === 'saturday-run'))")   # appointments (appt-*): only on the calendar once booked (below); 0.99.7 (CL1, note 30): the Saturday run is cut (parked) with CAL997_ON
     print(f"{len(ids)} joinable traditions (plus the beam): {', '.join(ids)}")
     for i in ids:
         officer = i == 'cometCaptain'   # the comet's tea with the Captain is for Officers and up (FX25): joined as an Officer here; a Cadet's turn-away is interactions_check's

@@ -757,6 +757,89 @@ def check_buf(pw, path):
     if len(lat) == 2: check(lat[1][0] + lat[1][1] > lat[0][0] + lat[0][1], f'buf: switched on, a bigger output buffer ({lat})')
 CHECKS += [check_buf]   # 0.99.5 (SD5, lead 47): note 17's bigger-buffer option
 
+# ---- 0.99.7 (AV1): the user's notes 13, 29 (SND_LIVE) and 44 (SND_DISC) ----
+LIVE_ST = "JSON.stringify((({kind, n, near, duck, inRoom, bar}) => ({kind, n, near: Math.round(near * 100) / 100, duck: Math.round(duck * 100) / 100, inRoom, bar, loop: [...SND._.LOOPS].some(l => l.label === 'live')}))(SND.live))"
+def live_wait(g, sec):
+    for _ in range(int(sec * 4)): g.page.wait_for_timeout(250); g.step(2)
+def check_live(pw, path):
+    """notes 13 and 29 (SND_LIVE, on a copy): the late piano and the Friday jam play from the music room (Deck 4) while the
+    tradition is on and someone plays; full in the room, quieter further away, muffled outside it, nothing on another deck;
+    the ship's music fades down near it and back after; off: nothing of it"""
+    on = switch_copy(path, 'const SND_LIVE = false;', 'const SND_LIVE = true;')
+    if not on: print('  live: no SND_LIVE in this build (nothing to check)'); return
+    g = Game(pw, on)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000)
+        check(g.ev("!!SND.live && !!SND.bus.master"), 'live: the switch is on in the copy')
+        days = g.ev("[...Array(14)].map((_, i) => i + 1).map(d => [d, eventsOn(d).filter(e => e.id === 'late-piano' || e.id === 'jam').map(e => [e.id, e.from, e.to])]).filter(x => x[1].length)")
+        piano = next((d, e[1]) for d, es in days for e in es if e[0] == 'late-piano'); jam = next((d, e[1]) for d, es in days for e in es if e[0] == 'jam')
+        print(f'  live: late piano day {piano[0]} from {piano[1]}, jam day {jam[0]} from {jam[1]}')
+        for name, (d, m) in [('piano', piano), ('jam', jam)]:
+            g.ev(f"({R3_AT})({json.dumps([(d - 1) * 1440 + m + 18, 4, 'n'])})"); g.step(40); live_wait(g, 4)   # the Captain sits down at the piano a little after it starts on some nights
+            st = json.loads(g.ev(LIVE_ST)); print(f'  live {name} in the music room: {st}')
+            check(st['kind'] == name and st['loop'] and st['inRoom'] and st['near'] >= 0.5 and st['bar'] >= 2, f'live: {name}: plays in the music room while it is on ({st})')
+            check(st['duck'] <= 0.2, f'live: {name}: the ship\'s music fades down in the room ({st})')
+            # long sessions (0.99.5 note 17): after a stall nothing starts or moves in the past (a late start is a pop); the band is the heaviest
+            if name == 'jam':
+                g.ev(LATE); r = []
+                for _ in range(4):
+                    g.ev("window.__late.n = 0; window.__late.p = 0"); g.ev(f"({STALL})(1.2)"); g.step(2); g.page.wait_for_timeout(600); g.step(2)
+                    r.append(g.ev("window.__late.n + window.__late.p"))
+                lp = g.ev("[SND.live.kind, SND.live.bar, SND._.LOOPS.size]"); print(f'  live: late starts and moves after each of 4 stalls {r}, then {lp}')
+                check(sum(r) <= 2 and lp[0] == 'jam', f'live: after a stall the band plays nothing late, and plays on ({r}, {lp})')
+            if name == 'jam': check(st['n'] >= 3, f'live: jam: at least guitar, bass and drum ({st})')
+        # nearer is louder; outside the room quieter and muffled (a stand-in place for the music, the same room)
+        g.ev("(() => { const p = player.obj.position; SND.live.forced = { kind: 'jam', n: 5, x: p.x + 1, z: p.z, room: roomAt(...player.here()) }; })()"); live_wait(g, 2)
+        a = g.ev("SND.live.near")
+        g.ev("SND.live.forced.x += 7"); live_wait(g, 1); b = g.ev("SND.live.near")
+        g.ev("SND.live.forced.room = 'nowhere'; SND.live.forced.x -= 7"); live_wait(g, 1); c = g.ev("[SND.live.near, SND.live.inRoom]")
+        print(f'  live: near {a}, 8 tiles {b}, through a wall {c}')
+        check(a > b > 0 and c[0] < a * 0.5 and not c[1], f'live: louder near, quieter far, quieter through the walls ({a}, {b}, {c})')
+        g.ev("SND.live.forced = null")
+        # another deck: it stops, the ship's music comes back
+        g.ev("goToDeck(3)"); g.step(20); live_wait(g, 4)
+        st = json.loads(g.ev(LIVE_ST)); print(f'  live on Deck 3: {st}')
+        check(st['kind'] is None and not st['loop'] and st['duck'] >= 0.95, f'live: on another deck nothing plays and the music is back ({st})')
+        # after the jam: nothing
+        g.ev(f"({R3_AT})({json.dumps([(jam[0] - 1) * 1440 + 1290, 4, 'n'])})"); g.step(40); live_wait(g, 3)
+        st = json.loads(g.ev(LIVE_ST)); check(st['kind'] is None, f'live: after the jam, quiet ({st})')
+        pe = [e for e in g.errors if e.startswith('pageerror')]
+        if pe: check(False, 'live: page errors: ' + ' | '.join(pe[:3]))
+    finally: g.close()
+    if on != path:   # off: nothing of it
+        g = Game(pw, path)
+        try:
+            open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+            check(g.ev("SND.live === undefined"), 'live: off, nothing of it')
+        finally: g.close()
+def check_disc(pw, path):
+    """note 44 (SND_DISC, on a copy): a game of Lightdisc (stood in for: PAUSE.disc on) keeps the sound running and the
+    track playing; a pause on top of it still stops it; off: as 0.99.6 (the sound stops)"""
+    on = switch_copy(path, 'const SND_DISC = false;', 'const SND_DISC = true;')
+    if not on: print('  disc: no SND_DISC in this build (nothing to check)'); return
+    for p, want in ([(on, 'running')] + ([(path, 'suspended')] if on != path else [])):
+        g = Game(pw, p)
+        try:
+            open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+            g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000)
+            g.ev(f"({R3_AT})({json.dumps([1440 + 600, 7, 'Lightdisc court'])})"); g.step(20)
+            g.ev("SND.music.setEnabled(true); SND.music.next()"); live_wait(g, 5)
+            tr = g.ev("SND.music.state().name")
+            g.ev("window.__d0 = PAUSE.disc; PAUSE.disc = () => true"); live_wait(g, 3)
+            st = g.ev("[SND._.state(), SND.music.state().name, freezeSync()]"); print(f'  disc ({"on" if p == on else "off"}): before {tr}, in the game {st}')
+            check(st[0] == want and st[2] is True, f'disc: in a game of Lightdisc the sound is {want} ({st})')
+            if want == 'running':
+                check(tr and st[1] == tr, f'disc: the same track carries on ({tr}, {st[1]})')
+                g.ev("pauseSet(true)"); live_wait(g, 2)
+                check(g.ev("SND._.state()") == 'suspended', 'disc: a pause on top of the game still stops the sound')
+                g.ev("pauseSet(false)")
+            g.ev("PAUSE.disc = window.__d0"); live_wait(g, 2)
+            pe = [e for e in g.errors if e.startswith('pageerror')]
+            if pe: check(False, 'disc: page errors: ' + ' | '.join(pe[:3]))
+        finally: g.close()
+CHECKS += [check_live, check_disc]   # 0.99.7 (AV1): notes 13, 29 and 44
+
 if os.environ.get('SOUND_ONLY'): CHECKS = [c for c in CHECKS if re.search(os.environ['SOUND_ONLY'], c.__name__)]   # run only the named checks (a regex), while building
 with sync_playwright() as pw:
     for c in CHECKS:

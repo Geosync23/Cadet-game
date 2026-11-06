@@ -150,19 +150,32 @@ with sync_playwright() as pw:
         r = json.loads(h.ev("JSON.stringify({ ph: ACT && ACT.phase, k: ACT && ACT.kind, ax: ACT && ACT.x, az: ACT && ACT.z, tx: target.x, tz: target.z })"))
         if r['k'] == 'recSwim' and r['ph'] == 'do' and r['ax'] is not None: gaps.append(((r['ax'] - r['tx']) ** 2 + (r['az'] - r['tz']) ** 2) ** .5)
     check(len(gaps) > 20 and max(gaps) < .5, '#17 the camera swims with you: %d frames in the pool, the camera at most %.2f m from you' % (len(gaps), max(gaps) if gaps else -1))
-    h.ev("(() => { actEnd(true); playerKit(null); skipTo(1440 + 1040); goToDeck(7, null); const c = placeSpot('7-disc-1'); player.obj.position.set(c.x - 5.6, 0, c.z + 2.6); return 1; })()")
-    h.step(150)
+    # the moment (lead 50: from the plans, Day 2 first): the first time from Day 2 when two crew are planned on the baselines, there 15 minutes already and
+    # 6 more to go (was Day 2 17:22 fixed; with 0.99.7's TRAD997_ON Erik's Day 2 evening changed and Marrow practised
+    # alone then: GM1 for lead 49, the 0.99.7 round's R5). Read off the plans, so the same moment every run
+    h2 = Game(pw, build, 390, 844)                     # its own page: the moment may be days on, and the solo look below is Day 2
+    cands = h2.ev("""(() => { actEnd(true); playerKit(null); skipTo(1440 + 960); const out = []; for (let d = 2; d < 15 && out.length < 6; d++) for (let m = 6 * 60; m < 22 * 60; m += 2) { const t = (d - 1) * 1440 + m;   // read once the ship has got to Day 2 16:00
+      const w = schedPeople().map(p => whereIs(p, t)).filter(x => x && /^7-disc-[12]$/.test(x.placeId || ''));
+      if (w.length === 2 && w[0].placeId !== w[1].placeId && w.every(x => t - x.from >= 15 && x.until - t >= 6) && !out.some(u => Math.abs(u - t) < 30)) out.push(t); } return out.length ? out : [1440 + 1040]; })()""")
+    at25 = cands[0]
+    for t in cands:                                    # the first of them where the two really are there (a plan read ahead can differ with TRAD997_ON)
+        at25 = t
+        h2.ev("(() => { actEnd(true); playerKit(null); skipTo(%d); goToDeck(7, null); const c = placeSpot('7-disc-1'); player.obj.position.set(c.x - 5.6, 0, c.z + 2.6); return 1; })()" % t)
+        h2.step(150)
+        if h2.ev("DECK_CREW.filter(a => a.settled && a.spot && /^7-disc-[12]$/.test(a.spot.id)).length") == 2: break
     SEE = "JSON.stringify({ crew: DECK_CREW.filter(a => a.settled && a.spot && /^7-disc/.test(a.spot.id)).map(a => [a.spot.id, +a.h.pos.x.toFixed(3), +a.h.pos.z.toFixed(3)]).sort(), disc: typeof LD_CV !== 'undefined' && LD_CV.m && LD_CV.m.visible ? [+LD_CV.m.position.x.toFixed(3), +LD_CV.m.position.z.toFixed(3)] : null })"
-    pair = [json.loads(h.ev(SEE)) for k in range(8) if h.step(9) is None]
-    long = [json.loads(h.ev(SEE)) for k in range(16) if h.step(30) is None]   # 8 s: a look at 1.2 s can land on a serve, where the server stands in the middle
+    pair = [json.loads(h2.ev(SEE)) for k in range(8) if h2.step(9) is None]
+    long = [json.loads(h2.ev(SEE)) for k in range(16) if h2.step(30) is None]   # 8 s: a look at 1.2 s can land on a serve, where the server stands in the middle
     both = all(len(x['crew']) == 2 for x in pair)
-    check(both, '#25 Day 2 17:22: two crew on the court\'s baselines (%s)' % pair[0]['crew'])
+    check(both, '#25 Day %d %02d:%02d: two crew on the court\'s baselines (%s)' % (at25 // 1440 + 1, at25 % 1440 // 60, at25 % 60, pair[0]['crew']))
     discs = [tuple(x['disc']) for x in pair if x['disc']]
     moves = [len(set(tuple(x['crew'][i][1:]) for x in long if len(x['crew']) == 2)) for i in (0, 1)]
     check(len(discs) >= 6 and len(set(discs)) >= 5, '#25 their game: the disc in the air and moving (%d of 8 looks, %d places)' % (len(discs), len(set(discs))))
     check(both and min(moves) >= 3, '#25 their game: both players move to meet it (%s places each in 8 s)' % moves)
-    same = h.ev("typeof ldCrewRally === 'function' && [3.1, 9.7, 14.2, 22.5].every(t => JSON.stringify(ldCrewRally(12345, t, false)) === JSON.stringify(ldCrewRally(12345, t, false)))")
+    same = h2.ev("typeof ldCrewRally === 'function' && [3.1, 9.7, 14.2, 22.5].every(t => JSON.stringify(ldCrewRally(12345, t, false)) === JSON.stringify(ldCrewRally(12345, t, false)))")
     check(same, '#25 a pair at a moment plays the same rally twice')
+    check(not h2.errors, '#25 the pair\'s page: no errors: ' + ' | '.join(h2.errors[:5]))
+    h2.close()
     h.ev("(() => { skipTo(1440 + 1210); goToDeck(7, null); const c = placeSpot('7-disc-1'); player.obj.position.set(c.x - 5.6, 0, c.z + 2.6); return 1; })()")   # 20:10 (0.92.5: late piano on Tuesdays moves the Captain's practice from 19:06 to 19:59-20:33)
     h.step(150)
     solo = [json.loads(h.ev(SEE)) for k in range(8) if h.step(9) is None]

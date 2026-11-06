@@ -35,7 +35,7 @@ EVS = "JSON.stringify(%s.map(d => [d, eventsOn(d).map(e => e.id)]))" % json.dump
 # (DS1, the user 2026-10-25: "spread the new ones across weeks, and keep some that were already there") every Saturday and
 # Sunday of Days 6-84: the traditions that were already there, with their times, and the new ones on it
 WKND = """JSON.stringify((() => { const out = []; for (let d = 6; d <= 84; d++) { if (weekday(d) < 5) continue;
-  const L = eventsOn(d); out.push([d, weekday(d), L.filter(e => !WEEKEND_TRADS.has(e.id)).map(e => e.id + ' ' + e.from + '-' + e.to).sort(), L.filter(e => WEEKEND_TRADS.has(e.id)).map(e => e.id)]); } return out; })())"""
+  const L = eventsOn(d); out.push([d, weekday(d), L.filter(e => !WEEKEND_TRADS.has(e.id)).map(e => e.id + ' ' + e.from + '-' + e.to).sort(), L.filter(e => WEEKEND_TRADS.has(e.id) && !(e.ev.base && typeof EV_DAY_DRESS !== 'undefined' && (EV_DAY_DRESS.get(e.id + '@' + d) || {}).add)).map(e => e.id)]); } return out; })())"""   # an event's one-off showing (a day-dress add: 0.99.7's first Saturday, EV1) isn't the rotation's
 # lead 35's rule (RV14's rv14-old_trads.py folded in): with the switch on, every tradition that was already there keeps its days,
 # times, places and host (Days 1-56, the switch off as the base: the same build), loses at most 2 people on any day, and never
 # goes below its fewest on any day with the switch off (the format has no attendance minimum: its own worst day is the floor)
@@ -71,6 +71,8 @@ with sync_playwright() as pw:
     off_w = json.loads(g.ev(WKND)); off_t = json.loads(g.ev(OLDT))
     g.close()
     g = Game(pw, won, 900, 760)
+    CUT = g.ev("typeof CAL997_ON !== 'undefined' && CAL997_ON ? ['saturday-run'] : []")   # 0.99.7 (CL1, note 30): the Saturday run is cut (parked) with CAL997_ON: seven new ones, not eight
+    for i in CUT: TRADS.pop(i, None)
     evs = dict(json.loads(g.ev(EVS)))
     for i, d in TRADS.items(): check(i in evs[d], 'switch on: %s on Day %d' % (i, d))
     acts = json.loads(g.ev("JSON.stringify(Object.keys(TRAD_JOIN).filter(id => WEEKEND_TRADS.has(id) && !TRAD_JOIN[id].act).map(id => [id, !!PLAYER_ACTS['tj:' + id] && typeof PLAYER_ACTS['tj:' + id].until === 'function']))"))
@@ -102,10 +104,10 @@ with sync_playwright() as pw:
     ROT = [['saturday-run', 'bread-day'], ['every-song', 'gerald-clinic'], ['garden-picnic', 'big-jigsaw'], ['night-owls-cocoa', 'sunday-story']]   # lead 35's table
     want = {b[0]: ROT[((b[0] - 1) // 7) % 4][0 if b[1] == 5 else 1] for b in on_w}
     wrong = [(b[0], b[3]) for b in on_w if b[3] not in ([], [want[b[0]]])]
-    gave = [(b[0], want[b[0]], 'storm day' if not b[2] else 'gave way') for b in on_w if not b[3]]
+    gave = [(b[0], want[b[0]], 'storm day' if not b[2] else 'gave way') for b in on_w if not b[3] and want[b[0]] not in CUT]   # a cut one's days are empty by design
     print('  the rotation: none that day (the new one gave way to an old one, or a ship-wide event took the day):', gave)
     check(not wrong, 'the rotation: each weekend day has its own new one from the lead\'s table and no other (%s)' % wrong)
-    check(all(any(b[3] == [i] for b in on_w) for i in TRADS) and len(gave) <= 6, 'the rotation: each of the eight on at least once in Days 6-84, and few giving way (%s)' % gave)
+    check(all(any(b[3] == [i] for b in on_w) for i in TRADS) and len(gave) <= 6, 'the rotation: each of the %s on at least once in Days 6-84, and few giving way (%s)' % ('seven' if CUT else 'eight', gave))
     hs = json.loads(g.ev(HOSTS))
     print('  hosts and goers (id, day, host, host there, going):', hs)
     check(all(h[3] for h in hs if h[2]), 'RV14: each weekend tradition\'s host is planned at it (%s)' % [h for h in hs if h[2] and not h[3]])

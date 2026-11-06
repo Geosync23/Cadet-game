@@ -1,0 +1,28 @@
+@meeting readStory3
+// EV1 (note 46): part 3 of 4, Sunday Day 49. Chapters thirteen to nineteen: the sealed room under the lamp. Inside,
+// Quill, the old keeper, alive: sixty years on the light, he couldn't bear to leave it, so he hid when the relief
+// came and kept the lamp himself. Your answer flags read.s3.<k>.
+title: Reading corner: The Lighthouse at Coriel
+from: Esme Walsh
+gist: Reading corner read on in The Lighthouse at Coriel: chapters thirteen to nineteen.
+== lines
+walsh-esme: Chapters thirteen to nineteen. The room under the lamp.
+soto-marta: Told you. Somebody hiding. Ha.
+strand-erik: An old man. Sixty years on the light.
+strand-erik: I wanted a ghost. This is sadder. It's better.
+ibarra-rafael: Is he the boatman's brother? No? I'll go back.
+kowalczyk: He couldn't leave it. That's all. Some people can't.
+soto-marta: Sixty years with one lamp. I'd have words with it.
+walsh-esme: He polished the lens every night. While she slept.
+strand-erik: He's been looking after her. Since chapter one.
+ibarra-rafael: Oh. Oh no. I like him now. That's worse.
+kowalczyk: Watch the weather from here on. That's all I'll say.
+walsh-esme > you: What should Ada do about Quill?
+? choice
+* Tell the boatman. He needs looking after.   rel:walsh-esme+1 flag:read.s3.1
+  walsh-esme: Sensible. Somebody here would sign that.
+* Let him stay. It's his light.   rel:walsh-esme+1 flag:read.s3.2
+  walsh-esme: Someone's writing that down. Don't ask.   [laugh]
+* Ask him to teach her everything.   rel:walsh-esme+1 flag:read.s3.3
+  walsh-esme: Yes. That's what I'd do. Measure twice.
+walsh-esme: To the end, for next time. All of it. Tissues are allowed.

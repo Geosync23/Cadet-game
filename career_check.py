@@ -132,13 +132,15 @@ def opened_on(r):
             out.setdefault(i, x['d'])
     return out
 
+D8 = False
 def pacing(r, name):
     from collections import Counter
     for x in r['days']:
         sizes = Counter()
         for i in dict.fromkeys(x['op']):
             sizes[next(s for s in (('big' if i in ('m1', 'm4', 'm5', 'm7', 'm6', 't2', 'm8', 'm9') else 'small'),))] += 1
-        check(sizes['big'] <= 1 and sizes['small'] <= 1, f"{name}: Day {x['d']} opened {x['op']} (more than one big or one small)")
+        two = D8 and 'm6' in x['op'] and 't2' in x['op']   # CR1 (note 55): the test opens the afternoon Making it safe is learned
+        check(sizes['big'] <= (2 if two else 1) and sizes['small'] <= 1, f"{name}: Day {x['d']} opened {x['op']} (more than one big or one small)")
         check(x['work'] or not x['op'], f"{name}: Day {x['d']} is a day off and opened {x['op']}")
 
 # (p) FX1 (patch-p5-fix1): the guidance in the real game, a fresh page with the real sub-blocks. Bug 1: a job taken and
@@ -304,7 +306,7 @@ def s5_src(SUM):                                      # (s5)'s run, with Step 5'
     S5 = S5.replace("const work = playerShiftOn(d), wd = weekday(d);", "const work = typeof playerOnDuty === 'function' ? playerOnDuty(d) : playerShiftOn(d), wd = weekday(d);   /* the storm's Saturday is a workday (0.93.2, STORM_SAT_ON) */", 1)
     return S5
 
-def s5_bands(ev, SUM):
+def s5_bands(ev, SUM, PD=10):
     print('(s5) Step 5\'s bands (P5_STEP5):')
     if not ev("typeof P5_STEP5 !== 'undefined' && P5_STEP5") or SUM is None:
         print('  not yet (P5_STEP5 off, or no first promotion in this build)'); return
@@ -328,9 +330,16 @@ def s5_bands(ev, SUM):
     check(op.get('m17') is None, f"s5: the lift roof (a lower tier's big row) waits for a clear day, not by Day 21 ({op.get('m17')})")
     check((st['trained'].get('ps') or 99) <= 12, f"s5: a steady Officer has Power safety on Day 12, for the Tier 3 offer on Day 14 ({st['trained'].get('ps')})")
     check(day(st, 14).get('band') == 'relied', f"s5: a steady Officer is \"Relied on\" by the end of Day 14 (Day 13 {day(st, 13).get('xp')} {day(st, 13).get('band')}, Day 14 {day(st, 14).get('xp')} {day(st, 14).get('band')})")
-    check(day(bz, 10).get('band') != 'relied', f"s5: a very busy Officer is \"Relied on\" on the promotion day (Day 10 {day(bz, 10).get('xp')})")   # the spec's "not before Day 12" can't hold with the steady target (busy 52 by the end of Day 11, steady 45 by Day 13): EP2 and lead 39 asked
-    check(day(st, 21).get('band') in ('trusted', 'relied'), f"s5: a steady Senior is \"Trusted\" by Day 21 ({day(st, 21).get('xp')} {day(st, 21).get('band')})")
-    check(day(st, 19).get('band') in ('trusted', 'relied'), f"s5: a steady Senior is \"Trusted\" by the end of Day 19 ({day(st, 19).get('xp')} {day(st, 19).get('band')})")
+    check(day(bz, PD).get('band') != 'relied', f"s5: a very busy Officer is \"Relied on\" on the promotion day (Day {PD} {day(bz, PD).get('xp')})")   # the spec's "not before Day 12" can't hold with the steady target (busy 52 by the end of Day 11, steady 45 by Day 13): EP2 and lead 39 asked
+    # A margin for the run's ripple (EV1, the 0.99.7 round's item M; lead 50's call): this paper career takes board jobs hour by
+    # hour, and the board's mix follows the crew's plans, so any small calendar change earlier in the run (the Last Light's
+    # bow lounge on Day 4 left open or closed) moves the steady Senior's xp at Day 19 by several points (54-63 on candidate 2's
+    # variants, with the same 10 jobs a day) around the 55 line. So "Trusted" by the end of Day 19 counts within 5 xp of
+    # Trusted's floor; Days 20-21 are the run's days off (no xp), so Day 21 has the same margin. 0.99.6 reads 59-63: unchanged
+    TR3 = next((x[0] for x in (B.get('3') or B.get(3) or []) if x[1] == 'trusted'), 55); NEAR = TR3 - 5
+    near = lambda x: x.get('band') in ('trusted', 'relied') or (x.get('xp') or 0) >= NEAR
+    check(near(day(st, 21)), f"s5: a steady Senior is \"Trusted\" by Day 21, within 5 xp ({day(st, 21).get('xp')} {day(st, 21).get('band')}, Trusted from {TR3})")
+    check(near(day(st, 19)), f"s5: a steady Senior is \"Trusted\" by the end of Day 19, within 5 xp ({day(st, 19).get('xp')} {day(st, 19).get('band')}, Trusted from {TR3})")
     check(day(bz, 16).get('band') not in ('trusted', 'relied'), f"s5: a very busy Senior is \"Trusted\" on the promotion day ({day(bz, 16).get('xp')})")
     check(day(st, 18).get('band') not in ('trusted', 'relied'), f"s5: a steady Senior is \"Trusted\" before Friday Day 19 ({day(st, 18).get('xp')})")
 
@@ -397,6 +406,9 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     errors = g.errors
     ev = g.ev
+    D8 = ev("typeof CR_DAY8_ON !== 'undefined' && CR_DAY8_ON")   # CR1 (0.99.7 note 55): the Tier 2 test on Day 8, the same afternoon as Making it safe; the result and promotion Day 9
+    TD, PD = (8, 9) if D8 else (9, 10)                           # the test's day, the promotion's
+    if D8: LADDER['t2'] = 8
     ev("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")   # The teaching arrows are on from 0.92.0: here every pop-up shows at once (the pop-up queue is arrows_check's)
 
     print('(a) Step 1 as built: no sub-blocks, nothing opens:')
@@ -569,17 +581,17 @@ with sync_playwright() as pw:
     print('(i) The Tier 2 test job (24p, Step 3):')
     if not ev("typeof promoPassed === 'function'"): print('  not in this build')
     else:
-        tr = ev(f"({PAPER})({{ plan: 'steady', days: 9, t2: 'real' }})")
+        tr = ev(f"({PAPER})({{ plan: 'steady', days: {TD}, t2: 'real' }})")
         print('   steady:', tr['promo'], tr['test'], tr['testJob'], 'Mail', [m for m in tr['mail'] if 'test' in m.lower()])
-        check(tr['test'] and tr['test']['passed'] and tr['test']['day'] == 9 and tr['test']['tries'] == 1, f"steady: the test job passed on Day 9, first try: {tr['test']}")
+        check(tr['test'] and tr['test']['passed'] and tr['test']['day'] == TD and tr['test']['tries'] == 1, f"steady: the test job passed on Day {TD}, first try: {tr['test']}")
         check(any(p[0] == 'set' and p[1] == 8 for p in tr['promo']), f"steady: told \"tomorrow, your test job\" on Day 8: {tr['promo']}")
-        check(tr['testJob'] and tr['testJob'][0][0].startswith('4-scrubber') and tr['testJob'][0][3] == '09:00' and tr['testJob'][0][4] == '15:00' and tr['testJob'][0][2] == 'you', f"steady: the test job, a Deck 4 scrubber held 09:00-15:00, done by you: {tr['testJob']}")
-        check(tr['works']['tr'].get('t2') == 9 and tr['works']['cur'] is None and tr['works']['tier'] == 1, f"steady: t2 done, nothing under way, still Tier 1 until the summons: {tr['works']['tr'].get('t2')}, {tr['works']['cur']}")
+        check(tr['testJob'] and tr['testJob'][0][0].startswith('4-scrubber') and tr['testJob'][0][3] == ('13:00' if D8 else '09:00') and tr['testJob'][0][4] == ('16:00' if D8 else '15:00') and tr['testJob'][0][2] == 'you', f"steady: the test job, a Deck 4 scrubber held {'13:00-16:00' if D8 else '09:00-15:00'}, done by you: {tr['testJob']}")
+        check(tr['works']['tr'].get('t2') == TD and tr['works']['cur'] is None and tr['works']['tier'] == 1, f"steady: t2 done, nothing under way, still Tier 1 until the summons: {tr['works']['tr'].get('t2')}, {tr['works']['cur']}")
         lt = ev(f"({PAPER})({{ plan: 'steady', days: 14, t2: 'late' }})")
         print('   late:', lt['promo'], lt['test'])
         dl = [p for p in lt['promo'] if p[0] == 'delayed']
-        check(dl and dl[0][1] == 9 and dl[0][2] == 11 and lt['test']['passed'] and lt['test']['tries'] == 2 and lt['test']['day'] == 11, f"late: the test left on Day 9 is set again two workdays on (Day 11) and passed then: {lt['promo']}, {lt['test']}")
-        check(all(p[1] >= 9 for p in lt['promo'] if p[0] == 'start'), 'a test job before Day 9')
+        check(dl and dl[0][1] == TD and dl[0][2] == TD + 2 and lt['test']['passed'] and lt['test']['tries'] == 2 and lt['test']['day'] == TD + 2, f"late: the test left on Day {TD} is set again two workdays on (Day {TD + 2}) and passed then: {lt['promo']}, {lt['test']}")
+        check(all(p[1] >= TD for p in lt['promo'] if p[0] == 'start'), f'a test job before Day {TD}')
 
     print('(j) The summons and the promotion (24p):')
     if not ev("typeof promoPromote === 'function'"): print('  not in this build')
@@ -600,17 +612,17 @@ with sync_playwright() as pw:
               out.xpAt = window.__xpAt; st(); sts.forEach(f => f()); return out; }})()""")
         sm = run('real', 12)
         PB = ev("typeof promoBeatsOn === 'function' && promoBeatsOn()")   # FX28 (PROMO_BEATS_ON): the result at 08:15, the pip the same day at 16:30
-        S_AT, S_SEEK, C_DAY, C_AT, C_SEEK = ('08:15', '08:30', 10, '16:30', '16:45') if PB else ('11:00', '11:15', 11, '17:15', '17:30')
+        S_AT, S_SEEK, C_DAY, C_AT, C_SEEK = ('08:15', '08:30', PD, '16:30', '16:45') if PB else ('11:00', '11:15', PD + 1, '17:15', '17:30')
         print('   there:', sm['summ'], sm['promoted'], sm['rank'], 'reply', sm['reply'], sm['plan'])
-        check(sm['summ'] and sm['summ'][0][:2] == [10, S_AT] and sm['summ'][0][3], f"the summons: Day 10 at {S_AT} in Calder's office, warned before: {sm['summ']}")
-        check(sm['promoted'] and sm['promoted'][0][0] == 10 and sm['promoted'][0][2] == 'met' and len(sm['promoted']) == 1, f"promoted once, on Day 10 at the scene: {sm['promoted']}")
+        check(sm['summ'] and sm['summ'][0][:2] == [PD, S_AT] and sm['summ'][0][3], f"the summons: Day {PD} at {S_AT} in Calder's office, warned before: {sm['summ']}")
+        check(sm['promoted'] and sm['promoted'][0][0] == PD and sm['promoted'][0][2] == 'met' and len(sm['promoted']) == 1, f"promoted once, on Day {PD} at the scene: {sm['promoted']}")
         check(sm['rank'][:2] == [2, 'officer'] and sm['xpAt'] == [0, 'New officer'] and sm['rank'][4] == 2 and sm['rank'][5] == 'officer' and sm['reply'] == 3, f"Tier 2 officer, xp from 0 (New officer), the reply remembered: {sm['rank']}, {sm['xpAt']}, {sm['reply']}")
-        check(sm['works']['done'][:1] == ['summons2'] and ['officer', 10] in sm['works']['ms'] and sm['plan']['move']['day'] == 10 and sm['plan']['ceremony']['day'] == C_DAY, f"done and milestones, the plan: {sm['works']['done']}, {sm['works']['ms']}, {sm['plan']}")
+        check(sm['works']['done'][:1] == ['summons2'] and ['officer', PD] in sm['works']['ms'] and sm['plan']['move']['day'] == PD and sm['plan']['ceremony']['day'] == C_DAY, f"done and milestones, the plan: {sm['works']['done']}, {sm['works']['ms']}, {sm['plan']}")
         check(not sm['juniorHeld'], 'a junior job is still held for you as an officer')
         print('   the move:', sm['moved'], sm['home'])
         check(sm['home'][0] == '4-23' and 'move2' in sm['home'][1] and sm['home'][2] and sm['home'][3] and not sm['home'][4], f"the move: 4-23 is yours (home, done, its door opens for you, not the other spare's): {sm['home']}")
         by = '22:00' if ev("typeof PROMO_SIGHT_ON !== 'undefined' && PROMO_SIGHT_ON") else '17:30'   # FX19 (0.92.6, the user: the walk can't be missed): open till 22:00 with the switch on
-        check(sm['moved'] and sm['moved'][0][0] == 10 and sm['moved'][0][1] <= by and len(sm['moved']) == 1, f"moved once, on Day 10 by {by}: {sm['moved']}")
+        check(sm['moved'] and sm['moved'][0][0] == PD and sm['moved'][0][1] <= by and len(sm['moved']) == 1, f"moved once, on Day {PD} by {by}: {sm['moved']}")
         print('   the ceremony:', sm['cer'], sm['com'], 'pip', sm['pip'], sm['keep'], sm['guests'], sm['mailCer'])
         check(sm['cer'] and sm['cer'][0][:3] == [C_DAY, C_AT, '1/O'] and sm['com'] == [[C_DAY, 'met']], f"the ceremony on Day {C_DAY} at {C_AT} in the observation room, commissioned once: {sm['cer']}, {sm['com']}")
         check(sm['pip'] == [1, 1] and sm['keep'] and f'commissioned officer, day {C_DAY}' in (sm['head'] or '').lower() and 'ceremony2' in sm['works']['done'] and ['commissioned', C_DAY] in sm['works']['ms'], f"the pip, the framed commission, the Record: {sm['pip']}, {sm['keep']}, {sm['head']}")
@@ -623,9 +635,9 @@ with sync_playwright() as pw:
         print('   away, the ceremony:', aw['cer'], aw['com'])
         check(aw['cer'] and aw['cer'][0][3] == C_SEEK and aw['com'] == [[C_DAY, 'mail']], f"away: Calder sets off to walk you up at {C_SEEK}; commissioned by Mail anyway: {aw['cer']}, {aw['com']}")
         ev("promoPip()")
-        check(aw['summ'] and aw['summ'][0][4] == S_SEEK and aw['promoted'] and aw['promoted'][0][0] == 10 and aw['promoted'][0][2] == 'mail' and aw['rank'][1] == 'officer', f"away: Calder sets off to find you at {S_SEEK}; promoted by Mail the same day anyway: {aw['summ']}, {aw['promoted']}")
+        check(aw['summ'] and aw['summ'][0][4] == S_SEEK and aw['promoted'] and aw['promoted'][0][0] == PD and aw['promoted'][0][2] == 'mail' and aw['rank'][1] == 'officer', f"away: Calder sets off to find you at {S_SEEK}; promoted by Mail the same day anyway: {aw['summ']}, {aw['promoted']}")
 
-    s5_bands(ev, SUM if ev("typeof promoPromote === 'function'") else None)
+    s5_bands(ev, SUM if ev("typeof promoPromote === 'function'") else None, PD)
 
     print('(k) The turn-in card\'s gains (Step 3, for the HUD engineer):')
     tg = ev("""(() => { const j = { id: 'gaintest@1', kind: 'chore', machine: null, title: 'Test', stops: [], parts: [], status: 'claimed', claimedBy: 'you', workDone: true, meters: [{ key: 'air', name: 'Air', gain: 2.5 }, { key: 'power', name: 'Power', gain: 0 }] };

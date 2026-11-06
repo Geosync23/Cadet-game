@@ -21,7 +21,7 @@ import content_gen as cg
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 TOKENS = {'hi', 'bye', 'yes', 'thanks', 'wow', 'sigh', 'nick'}
-PLACEHOLDERS = {'jobs', 'spice', 'me', 'name', 'first', 'friend', 'best', 'rival', 'partner', 'mentor', 'mentee', 'boss', 'thing', 'trad',
+PLACEHOLDERS = {'item', 'jobs', 'spice', 'me', 'name', 'first', 'friend', 'best', 'rival', 'partner', 'mentor', 'mentee', 'boss', 'thing', 'trad',
                 'machine', 'room', 'deck', 'dish', 'weekday', 'home', 'family', 'hobby', 'since', 'other',
                 'kin', 'lost', 'hobbyNoun', 'missed',
                 'time', 'hours', 'n', 'max', 'part', 'shelf', 'drink', 'answer',
@@ -265,7 +265,7 @@ def main(argv):
         if t.get('when'):
             allx.append((where, 'talk', dict(t['when'], text='', id=t['id']), None, 'talk'))
         earned = {k: v for k, v in (t.get('when') or {}).items() if k in ('tier', 'beat', 'beatIs', 'mem', 'leaving')}   # for #serious
-        for x in t['lines'] + [t['ask']] + [r['ans'] for r in t['replies'].values()]:
+        for x in t['lines'] + [t['ask']] + [r['ans'] for r in t['replies'].values() if 'ans' in r]:   # listen2 (SC1, 0.99.7 note 38): its answer is optional
             allx.append((where, 'talk', dict(x, id=t['id'], **earned), None, 'talk'))
         for r in t['replies'].values():
             allx.append((where, 'talk.reply', {'text': r['text'], 'id': t['id']}, None, 'talk'))

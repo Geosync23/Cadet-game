@@ -42,6 +42,7 @@ SWAP = bool(re.search(r"^const EV_SWAP_ON = true", SRC, flags=re.M))   # the eve
 COMET_ON = bool(re.search(r"^const EV_COMET_ON = true", SRC, flags=re.M))   # the comet (FX25, 0.93.2): on Monday Day 22, after a Day 20 load (so not passed over); a Day 23 load passes it over
 PASSED = 'diplomatic' if SWAP else None if COMET_ON else 'comet'
 PAST = [PASSED] if PASSED else []
+LIGHT = ['lastLight'] if re.search(r"^const EV997_LIGHT_ON = true", SRC, flags=re.M) else []   # 0.99.7 (EV1, notes 8 and 34): the Last Light (Day 3-4) is passed over with the Line by any later first load
 VESSEL_ON = bool(re.search(r"^const EV_VESSEL_ON = true", SRC, flags=re.M))   # A Veyli vessel needs help (VB1, Days 27-30): due on Day 27 after a Day 23 load; a save first loaded with it on from Day 28 passes it over (SHIP.vesselFrom)
 OFF_BUILD = sys.argv[1]          # the build switched off, for part 1
 ON_ALREADY = 'const EVENTS_ON = true;' in SRC
@@ -701,7 +702,7 @@ with sync_playwright() as pw:
             print(f"  evSkippedFor({c['f']}, log {c['l']}, running {c['c']}) = {c['got']}")
             if c['got'] != c['want']: fail(f"evSkippedFor({c['f']}, {c['l']}, {c['c']}) = {c['got']}, want {c['want']}")
         if P5['late'] == 'skip':
-            named = {(20, ()): ['crossingLine', 'ionStorm'] + PAST, (9, ()): ['crossingLine'], (20, ('ionStorm',)): ['crossingLine'] + PAST, (0, ()): [], (1, ()): []}
+            named = {(20, ()): LIGHT + ['crossingLine', 'ionStorm'] + PAST, (9, ()): LIGHT + ['crossingLine'], (20, ('ionStorm',)): LIGHT + ['crossingLine'] + PAST, (0, ()): [], (1, ()): []}
             for c in P5['cases']:
                 k = (c['f'], tuple(c['l']))
                 if k in named and not c['c'] and c['got'] != named[k]: fail(f"evSkippedFor({c['f']}, {c['l']}): {c['got']}, the brief says {named[k]}")
@@ -741,10 +742,10 @@ with sync_playwright() as pw:
         later = next(({'id': r['id'], 'day': r['day']} for r in P5['plan'] if r['day'] > 22), None)   # a row after the comet (the ending's crossing back, Day 31, EN2): due once the comet's passed
         slog = [f"{r['id']}:{r['day']}-{r['day'] + n}" for r, n in zip(P5['plan'], P5['days']) if r['day'] + n <= 20]
         for title, save, want in [
-            ('a Day 20 save, events first on at Day 20', mk(20, frm=20), {'evFrom': 20, 'sk': sorted(PAST + ['crossingLine', 'ionStorm']), 'ed': big_but('crossingLine', 'ionStorm', *PAST), 'due': {'id': 'comet', 'day': 22} if COMET_ON else None, 'log': []}),
+            ('a Day 20 save, events first on at Day 20', mk(20, frm=20), {'evFrom': 20, 'sk': sorted(PAST + LIGHT + ['crossingLine', 'ionStorm']), 'ed': big_but('crossingLine', 'ionStorm', *PAST), 'due': {'id': 'comet', 'day': 22} if COMET_ON else None, 'log': []}),
             ('a Day 20 save, events on from the start (evFrom 0)', mk(20, frm=0), {'evFrom': 0, 'sk': [], 'ed': big_but(), 'due': {'id': 'comet', 'day': 22} if COMET_ON else None, 'log': slog}),   # every event it missed is run on load, as an unbroken game ran them
-            ('a Day 9 save, events first on at Day 9', mk(9, frm=9), {'evFrom': 9, 'sk': ['crossingLine'], 'ed': big_but('crossingLine'), 'due': {'id': 'ionStorm', 'day': 11} if storm else None, 'log': []}),
-            ('a Day 20 save, evFrom 20, the storm logged', mk(20, [{'id': 'ionStorm', 'startDay': 11, 'endDay': 17}], 20), {'evFrom': 20, 'sk': sorted(PAST + ['crossingLine']), 'ed': big_but('crossingLine', *PAST), 'due': {'id': 'comet', 'day': 22} if COMET_ON else None})] + ([('a Day 23 save, events first on at Day 23 (the comet passed over)', mk(23, frm=23), {'evFrom': 23, 'sk': sorted(['comet', 'crossingLine', 'ionStorm'] + (['diplomatic'] if SWAP else [])), 'due': later})] if COMET_ON else []) + ([
+            ('a Day 9 save, events first on at Day 9', mk(9, frm=9), {'evFrom': 9, 'sk': sorted(['crossingLine'] + LIGHT), 'ed': big_but('crossingLine'), 'due': {'id': 'ionStorm', 'day': 11} if storm else None, 'log': []}),
+            ('a Day 20 save, evFrom 20, the storm logged', mk(20, [{'id': 'ionStorm', 'startDay': 11, 'endDay': 17}], 20), {'evFrom': 20, 'sk': sorted(PAST + LIGHT + ['crossingLine']), 'ed': big_but('crossingLine', *PAST), 'due': {'id': 'comet', 'day': 22} if COMET_ON else None})] + ([('a Day 23 save, events first on at Day 23 (the comet passed over)', mk(23, frm=23), {'evFrom': 23, 'sk': sorted(['comet', 'crossingLine', 'ionStorm'] + (['diplomatic'] if SWAP else []) + LIGHT), 'due': later})] if COMET_ON else []) + ([
             ('a Day 27 save, events on from the start, the vessel first on at Day 27', mk(27, frm=0), {'evFrom': 0, 'sk': [], 'due': {'id': 'veyliVessel', 'day': 27}}),
             ('a Day 28 save, events on from the start, the vessel first on at Day 28 (passed over)', mk(28, frm=0), {'evFrom': 0, 'sk': ['veyliVessel'], 'due': next(({'id': r['id'], 'day': r['day']} for r in P5['plan'] if r['day'] > 28), None)})] if VESSEL_ON else []):   # the next row after the vessel (the ending's crossing back, Day 31, with EV_ENDING_ON)
             pg = load(b, on_html, save, errs=errs); r = state(pg); pg.close()

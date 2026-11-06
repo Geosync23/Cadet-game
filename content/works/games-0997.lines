@@ -1,0 +1,99 @@
+@bank all
+// 0.99.7 (GM1, plans/patch-0997.md notes 12, 40, 41, 44): texts said by nobody for the games. Read with careerText in
+// section 23b's Games slot, only with GAMES997_ON. {name} a person's first name, {n} {max} {a} {b} numbers, {time} a ship time.
+
+// ---- How to play Tiles, step by step (note 41): one idea a step, every word explained the first time it comes up
+== tip.tiles.tut.1
+- Tiles is for two, on a 6 by 6 board. Yours are the solid tiles along the bottom.
+== tip.tiles.tut.2
+- {name}'s tiles are the outlined ones along the top.
+== tip.tiles.tut.3
+- Every tile carries a mark: a planet ●, a ship ▲ or a star ★.
+== tip.tiles.tut.4
+- You score by docking: 3 or more of your tiles with one mark, side by side.
+== tip.tiles.tut.5
+- Corners don't count. Docked tiles leave the board, and you get a point for each one.
+== tip.tiles.tut.6
+- Each turn you make one move: a step, a jump or a launch. Then it's {name}'s turn.
+== tip.tiles.tut.7
+- Tap one of your tiles. Glowing rings show the squares it can move to.
+== tip.tiles.tut.8
+- A step: one square diagonally, forward towards {name}'s side. Tap a ring to step there.
+== tip.tiles.tut.9
+- A jump: hop diagonally over one of {name}'s tiles onto the empty square just past it.
+== tip.tiles.tut.10
+- Jumping takes their tile. Can't jump yet? Press Next.
+== tip.tiles.tut.11
+- Tiles you take go into your hold, the row under the board. They're yours now.
+== tip.tiles.tut.12
+- Your home rows are your two bottom rows. A launch puts a held tile back there.
+== tip.tiles.tut.13
+- To launch, tap a tile in your hold, then an empty home square. Can't yet? Press Next.
+== tip.tiles.tut.14
+- A spark inside a ring means moving there makes a dock. Go for it when you see one.
+== tip.tiles.tut.15
+- The game ends at {n} points, or after {max} turns each. More points wins. Good luck!
+== tip.tiles.card
+- Step: one square diagonally forward. Jump: hop over their tile to take it. Launch: from your hold onto your bottom two rows. Dock: 3 or more of a mark touching side by side. First to {n}.
+
+// ---- Tiles night in rounds (notes 12 and 40)
+== tiles.night.ask
+- Tiles night: three rounds, winners play winners. Play at a board, or watch first?
+== tiles.night.play
+- Play in the rounds
+== tiles.night.watch
+- Watch
+== tiles.night.playReply
+- Good. Next round you're at a board. Win, and you meet the winners.
+== tiles.night.watchReply
+- Pull up a chair. Tap me if you want a game.
+== tiles.night.next
+- You're in the next round of Tiles night. It starts at {time}; stay in the lounge.
+== tiles.night.seat
+- Round {n} of Tiles night. You sit down at a board across from {name}.
+== tiles.night.round
+- Round {n} of Tiles night is over. The next one starts at {time}.
+== tiles.night.out
+- You're out of tonight's rounds. You can still watch, or tap Rina to play again.
+== tiles.night.endYou
+- Tiles night's over. {name} won it with {n} wins. You won {a} of {b}.
+== tiles.night.end
+- Tiles night's over. {name} won it with {n} wins.
+== tiles.night.head
+- Tiles night, round {n} of {max}
+== tiles.night.next.app
+- Next round at {time}.
+== tiles.night.board
+- {a} and {b} at a board.
+== tiles.night.beat
+- {a} beat {b}.
+== tiles.night.draw
+- {a} and {b}: a draw.
+== tiles.night.you
+- You're in. Stay in the lounge: your next game comes with the next round.
+
+// ---- Winner Stays On: watch from the stands, then a game (note 44)
+== join.rec-wso.tip
+- Tap {name} to watch from the stands
+== join.rec-wso.notice
+- Winner Stays On: find a seat in the stands and watch the games. You'll be offered a turn. Leisure and social up.
+== wso.ask
+- Fancy a go? You'd be next on court, after this game.
+== wso.play
+- Play the next game
+== wso.watch
+- Keep watching
+== wso.playReply
+- You're next. When the bell goes, it's you against whoever's on.
+== wso.watchReply
+- Fair enough. Tap me when you fancy a game.
+== wso.up
+- The bell rings. You're up against {name}.
+== wso.stay
+- You stay on! The next one up is {name}.
+== wso.stayOn
+- Stay on
+== wso.back
+- Back to the stands
+== wso.lost
+- Back to the stands. Tap anyone watching when you want another go.

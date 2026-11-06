@@ -1,0 +1,29 @@
+@meeting readStory2
+// EV1 (note 46): part 2 of 4, Sunday Day 35. Chapters seven to twelve: Ada writes back in the log; next morning
+// there's an answer in different ink. Footprints in the salt, the kettle warm, the lens polished while she slept.
+// Ibarra has read ahead by accident. Your answer flags read.s2.<k>. The line after Esme's first is your answer from
+// part 1, from readStory2.recall (in code, only if you answered).
+title: Reading corner: The Lighthouse at Coriel
+from: Esme Walsh
+gist: Reading corner read on in The Lighthouse at Coriel: chapters seven to twelve.
+== lines
+walsh-esme: Chapters seven to twelve. Who's caught up?
+ibarra-rafael: Me. And chapter thirteen. By accident. Saying nothing.
+soto-marta: Don't you dare.
+strand-erik: She writes back in the log. And the log answers!
+strand-erik: Different ink. Next morning. I had to put it down.
+soto-marta: Footprints in the salt. A warm kettle. Somebody's there.
+soto-marta: Ghosts don't boil kettles.
+strand-erik: A lonely one might. To feel at home.   [laugh]
+kowalczyk: Look at who polishes the lens. Every night.
+walsh-esme: Ada sleeps through it. Chapter ten, page one forty.
+ibarra-rafael: Chapter thirteen is very... no. Nothing. Biscuit?
+walsh-esme > you: Should Ada keep writing back?
+? choice
+* Yes. Carefully.   rel:walsh-esme+1 flag:read.s2.1
+  walsh-esme: Carefully. Like hot oil. Yes.
+* No. Get on the boat and go.   rel:walsh-esme+1 flag:read.s2.2
+  walsh-esme: Half this sofa is nodding. Don't encourage them.   [laugh]
+* Ask it something only a keeper would know.   rel:walsh-esme+1 flag:read.s2.3
+  walsh-esme: That's clever. Somebody here has gone very quiet.
+walsh-esme: To chapter nineteen. Quietly. And stop at nineteen.
