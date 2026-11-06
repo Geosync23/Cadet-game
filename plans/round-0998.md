@@ -62,14 +62,17 @@ game sha256 298291963584a62fbf0f7953afaa402924cdd22e474d526353494ec02d22c462, bu
 | R2 | OK, own checks: intro whole/--dinner/--firsts, path, arc, lines (0 errors) and --day, day 0 1 5 7 21 22, arrows endgo, pf_f1_same (F1 0 mismatches; all-off proof: 0.99.7 switches + TP998 false, 30 of 30 same), cadet vs 0.99.6 (same 15 views, pictures identical to 0.99.7's). fresh_walk and p926 by R4 (P), perf by R6 | plans/checks-0998-r2.md, claude/checks-0998-r2 59206328 |
 | R3 | OK, every check: sound (alone), devmode (all parts), dev_arrow, promo_sight, arrows_d, arrows_f, ending, controller 57 of 57 | plans/checks-0998-r3.md, claude/checks-0998-r3 a24d034 |
 | R4 | OK, every check (day 6 8 23 24 16, career, cr1, appt, saves, title, device, fixtap_probe, fixtap_reach, fixtap_click); also R2's p926 OK; R2's fresh_walk: FAIL point 5 = P (NEW) | plans/checks-0998-r4.md, claude/checks-0996-r4 |
-| R5 (BM27) | | |
-| R6 | OK: interactions_check whole (19:24-20:02 UTC, exit 0, no FAIL lines, draw-call peak 220; booths row as 0.99.7) | plans/checks-0998-r6.md, claude/checks-0998-r6 c63e349 |
+| R5 (BM27) | OK, all 24: check_fast (gate), machine x2, mech, bigevents, disc, events, fridays, clothes, promo_beats, food 1 7 and 11 4, tiles, join, weekend, stories 36, day 12 17 13 3 27 18 19, p5retry_break; cadet vs 0.99.6: the same 15 views as R2, no page errors, same taps (explained) | /tmp logs; plans/build-master/bm27/r5.sh, r5rest.sh |
+| R6 | OK: interactions_check whole (19:24-20:02 UTC, exit 0, no FAIL lines, draw-call peak 220; booths row as 0.99.7); also R2's perf_check OK (one frame spike in the full run, not on two alone re-measures: known-old backlog 32; draw calls as 0997b, within 1 of OLD, memory flat) | plans/checks-0998-r6.md, claude/checks-0998-r6 4a60f7b |
 
 ### Finds
 
 | Item | Check (share) | Cause | Closed by |
 |---|---|---|---|
-| P | fresh_walk point 5 (R2's, run by R4): two arrows up over 3 ship hours, 'The call booths', Day 2 21:38-22:30 and Day 3 17:29-22:30 (0997b: none) | NEW, game, TP998_BOOTH_ON: section 15's needs marker for Social only knows the booths (NEED_FIX.social = ['callhome']); after the day's call a repeat booth now gives nothing, so a lonely player is sent to a booth that won't call, again and again (in 0.99.7 the repeat still gave +40 social) | open: sent to lead 50 + TP1 ~19:58 UTC (suggested: behind TP998_BOOTH_ON, no booth marker once today's call is used) |
+| P | fresh_walk point 5 (R2's, run by R4): two arrows up over 3 ship hours, 'The call booths', Day 2 21:38-22:30 and Day 3 17:29-22:30 (0997b: none) | NEW, game, TP998_BOOTH_ON: section 15's needs marker for Social only knows the booths (NEED_FIX.social = ['callhome']); after the day's call a repeat booth now gives nothing, so a lonely player is sent to a booth that won't call, again and again (in 0.99.7 the repeat still gave +40 social) | game: TP1 cc44f94 (MV1 PASS): behind TP998_BOOTH_ON, no booth marker or booth tips once today's call is had, new lonely words; + 91a75b4 (MV1 PASS, backlog TP1-4): the Needs app's Social line names company; tp998.social.2 shortened by BM27 (lead 50's wording, 97 -> 70 chars, lines_check max 90). Candidate 2. |
 
 Round notes: BM27's first R5 run hit the 30-minute background limit after machine, mech and bigevents (all OK); the rest
 restarted 19:54 UTC (plans/build-master/bm27/r5rest.sh). R2 gave fresh_walk and p926 to R4 (agreed, lead copied).
+
+**Result of round 0998 (candidate 1, d7f5bd6, game 29829196...c462): every share OK except P (NEW, game, TP998_BOOTH_ON).**
+By lead 50's call the round ran to the end, then the fixes went into candidate 2 and a full round again (0998b).
