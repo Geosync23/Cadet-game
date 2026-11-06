@@ -71,6 +71,9 @@ off no change. cadet_test off vs 0.99.6 ALL IDENTICAL. (SC1's check_fast on 77e5
 - Note 42 (av1_film.py): the film canvas over a minute: lighthouse with sweeping beam, whales, the little ship and the
   ringed planet, sunset with two on a bench, credits; on the auditorium screen it reads the right way round from the
   seats; 133 draw calls; no page errors.
+- check_fast on the commit: QUICK CHECK OK (263 s). sound_check (off build; it makes its own switched copies): SOUND CHECK
+  OK, live and disc parts included. All three on: EVENTS CHECK OK; PERF CHECK OK (heap flat over a week, deck round trips).
+- **PASS** (sent to AV1, lead 49, BM24). Owner note: 4e and 8c are the rec engineer's.
 
 ## Gotchas (for a fresh reviewer)
 - stories_check needs `36` as its DAYS argument (backlog BM22-1); with the default 30 it fails 14 on any build.
