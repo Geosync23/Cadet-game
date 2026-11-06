@@ -24,3 +24,11 @@
 controller_check: 57 of 57 parts OK, no FAIL lines anywhere in the share.
 
 **R3: OK.** No FAILs.
+
+## Extra runs for BM27 (R5; its container restarted; agreed, lead 50 copied)
+
+| Check | Result | Key lines |
+|---|---|---|
+| bigevents_check (bbb7bb0) | OK, exit 0 (208 s) | BIGEVENTS CHECK OK |
+| disc_check (bbb7bb0) | OK, exit 0 (305 s) | ALL OK |
+| stories_check BUILD 36 (bbb7bb0) | OK, exit 0 (283 s) | STORIES CHECK OK |
