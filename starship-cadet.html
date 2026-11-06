@@ -55905,7 +55905,7 @@ const INTRO_WEEK = [
   // the arrival itself: a new game's clock jumps back to Day 0 and the machines start afresh after it)
   { id: 'd1-wash', day: 1, at: 6 * 60, until: 6 * 60 + 30, who: 'tomas', where: { deck: 4, room: 'Bunk 1' }, settle: 'washed' },
   { id: 'd1-briefing', day: 1, at: 8 * 60 + 50, until: 9 * 60 + 5, who: 'calder', also: [INTRO_ESCORT], where: { deck: 5, room: 'Works bay' }, meeting: 'introBriefing', settle: 'team',
-    flags: ['intro.device', 'met.calder'], ...(MV_BRIEF_ON ? { release: true, keep: 70 } : {}) },   // keep: 0.99.7 note 2 (introKeep, 21b)   // if you missed them on Sunday, Torres hands you the device here
+    flags: ['intro.device', 'met.calder'], ...(MV_BRIEF_ON ? { release: true, keep: 70, spot: '5-works-bay-lead-1' } : {}) },   // keep, spot: 0.99.7 note 2 and backlog MV1-2 (introKeep, 21b)   // if you missed them on Sunday, Torres hands you the device here
   { id: 'd1-shadow', day: 1, at: 9 * 60 + 5, until: 13 * 60, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow', job: 'reserved:1', settle: 'shadow' },   // he stays at your side and talks you through it (introJobLines); the arrow shows the way
   { id: 'd1-lead', day: 1, at: 13 * 60, until: 16 * 60 + 30, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow', job: 'reserved:2', settle: 'lead' },
   { id: 'd1-end', day: 1, at: 16 * 60 + 44, until: 17 * 60 + 5, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow' },   // the patch (#18/#19): he comes to find you (by 16:50): good job, clock out, the beam (introDayEndTick)
@@ -57610,10 +57610,13 @@ function introQuiet(id) { return introOn() && SHIP.time.day === 1 && id === SHIP
 // speaker's block (only the speaker's: the others keep their own times) runs up to `keep` minutes past `until`, and
 // ends when the meeting's panel closes (introMeetEnded's '<id>:end', as Day 2's), or at `until` when it was missed
 // ('<id>:met' -1; introReleased changes, so the day is planned again). The meeting's own start window is unchanged.
+// `spot` (backlog MV1-2): the speaker stands at that place, not the room's first free one (Day 1: the Works bay's lead
+// spot by the job board, 5-works-bay-lead-1, not the time clock, which you're told to tap straight after).
 // Reads only the intro's saved state (the arrival's one exception, DEV_NOTES), so the plan comes out the same.
 function introKeep(b, id, o) {
   const I = SHIP.intro, m = I.done[b.id + ':met'], e = I.done[b.id + ':end'], d0 = introAbs(b.day, 0);
   if (id !== b.who) { o.until = b.until; return; }
+  if (b.spot) { o.where = { ...b.where, placeId: b.spot }; o.early = 0; }   // MV1-2: her own spot, not the first free place in the room (the time clock, so a tap on the clock was a tap on her); from `at`, as before
   o.until = m === -1 ? b.until : e >= 0 ? Math.min(b.until + b.keep, Math.max(b.at + 1, e - d0)) : b.until + b.keep;
 }
 // ---- end of slot: Onboarding engineer ----

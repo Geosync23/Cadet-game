@@ -11,7 +11,7 @@ Switching one on is changing its `false` to `true` there.
 
 | Switch | Note | Where | What it does |
 |---|---|---|---|
-| `MV_BRIEF_ON` | 2 Chief walks away during the morning briefing | 21 (`INTRO_WEEK` 'd1-briefing' gets `release`, `keep: 70`), 21b slot (`introKeep`), `introWeekBeat(b, id)`, `introReleased` | Day 1's briefing: the Chief's block runs until the meeting's panel closes (cap 10:15), 09:05 as before if you missed it |
+| `MV_BRIEF_ON` | 2 Chief walks away during the morning briefing | 21 (`INTRO_WEEK` 'd1-briefing' gets `release`, `keep: 70`), 21b slot (`introKeep`), `introWeekBeat(b, id)`, `introReleased` | Day 1's briefing: the Chief's block runs until the meeting's panel closes (cap 10:15), 09:05 as before if you missed it; she stands at 5-works-bay-lead-1 [16,0], not on the time clock (backlog MV1-2) |
 | `MV_WASD_ON` | 5 WASD walks | 11 (`updateSteer` calls `keyWalkStep`; code in the HUD seat slot) | W, A, S, D and the arrow keys steer you like the controller's stick; not with a panel open, paused, riding, typing, or with Ctrl/Alt/Cmd |
 | `MV_FIT_ON` | 19 fitness drops faster | 15 `NEED_DRAIN.fitness` | 0.9/0.3 an hour to 1.8/0.4 (about 17 to about 32 a day) |
 | `MV_RIG_ON` | 24 crew flash far from the lift | 10 `crewDetail` | a new full rig (story crew within 4.5 tiles) is posed at once; it was drawn one frame at the deck's origin |
@@ -32,6 +32,7 @@ Checks changed: player_check expects about 32 a day with `MV_FIT_ON`, 17 without
 - `wasd_probe.py BUILD`: real key presses at 390x844: direction against the screen, release, device open, text field, Ctrl, pause.
 - `sofa_probe.py BUILD`: Vance held on 3-lounge-25, you sit on 3-lounge-26 (same walk tile): off he's sent aside as you set off; on he stays seated.
 - `m21_probe.py BUILD`: 28b's Day 22 briefing at about 3 s a line (fine: ends 08:56 of 09:15).
+- `clock_probe.py BUILD [during]`: Day 1, taps on the time clock during and after the briefing: off they open her chat; on, the clock.
 - `wc_use.py BUILD`: the rec deck's places, stall lights, a toilet and a basin used by tap.
 
 ## Test results (switches on, in a copy)
@@ -41,4 +42,5 @@ Switches off: cadet_test ALL IDENTICAL, check_fast OK.
 ## Loose ends, questions for the user
 - Note 5: arrow keys walk too (default yes). The walk tip still says "Tap where you want to go, or press and hold"; a keyboard line could be added by TP1 if wanted.
 - Note 19: about 32 a day is the lead's default; the user may want a different number.
+- Backlog MV1-2: fixed under MV_BRIEF_ON (her spot), at the lead's ask.
 - Backlog MV1-1: the Monday briefing (28b): Day 22's full one probed, fine; the short later one (20 minutes) not probed.
