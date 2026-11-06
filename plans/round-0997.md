@@ -115,3 +115,21 @@ Gates: check_fast OK, devmode_check OK, events_check OK. Full round again (lead 
 | O | fresh_walk Day 2 booths (R2's, run by R4) | Leila's 18:00 scene does play (18:13, SC1's trace); fresh_walk's record doesn't log bubbles | explained; TP1's arrow improvements go to the next build |
 
 cadet_test on candidate 2: every NEW picture pixel-identical to candidate 1's (R2), same counts in BM26's own run.
+
+Round 0997b, every share on candidate 2 (check files at claude/staging-0997 after each check fix; the game unchanged at 1b17203d...bff9):
+
+| Share | Result | Notes |
+|---|---|---|
+| R1 | OK, every check (step6 four-way: missed 0, stuck 0) | plans/checks-0997b-r1.md, claude/checks-0997-r1 60f32da |
+| R2 | OK: intro whole/--dinner/--firsts, path, arc, lines and lines --day (0 errors), day 0 1 5 7 21 22, arrows endgo, pf_f1_same (F1 0 mismatches; switches-off proof 30 same), cadet explained | plans/checks-0997b-r2.md, claude/checks-0997-r2 e2472ba |
+| R3 | OK, every check; controller_check 57 of 57 | plans/checks-0997b-r3.md, claude/checks-0997-r3 1f3099b |
+| R4 | OK, every check (career with 2325c5e); also R2's fresh_walk (five points) and p926 (with ba33d0c) | plans/checks-0997b-r4.md, claude/checks-0996-r4 57bcc3d |
+| R5 (BM26) | OK: check_fast, machine x2, mech, bigevents, fridays, events, disc, tiles, join, food 1 7 and 11 4, clothes, stories 36, promo_beats, day 12 13 17 18 19 27 3, p5retry_break, weekend; cadet alone | this record |
+| R6 | OK: interactions_check whole; also R2's perf_check (draw calls within 1 of 0.99.6, none over budget, memory flat) | plans/checks-0997b-r6.md, claude/checks-0997-r6 456a627 |
+
+**Result: round 0997b OK. FINAL GO: claude/staging-0997 at the commit of this record, game sha256
+1b17203d4281afa28485d7ba05f5afe829931169888d392d97ef5e4f61a0bff9, build 0.99.7.**
+
+For the user's notes (not faults): a steady Senior can be a point short of Trusted on Day 19 (M); Lightdisc's Day 2 pair
+plays at 21:30, not 17:18 (F); the Saturday run is parked (L, note 30); backlog TP1-1 (a shutdown booked into your night
+shift's clock-in, old, in 0.99.6 too).
