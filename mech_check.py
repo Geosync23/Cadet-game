@@ -317,7 +317,8 @@ P925_LAPSE = r"""((took) => {
   const j2 = SHIP.jobs.find(x => x.id === c.j), st = W.cur && W.cur.st, after = (e => e && e.mode)(worksEscort(p, t + 1)), lapse = simNotes('trainLapse').length;
   let d2 = c.d + 1; while (!playerShiftOn(d2)) d2++;
   setShipNow((d2 - 1) * 1440 + WORKS_ASK[0]); machinesNow(); ladderTick(Math.floor(((d2 - 1) * 1440 + WORKS_ASK[0]) / 60));   // the next workday's ask
-  return { st0, st, before: before && before.mode, after, mine: !!j2 && j2.claimedBy === 'you', lapse, next: W.cur && W.cur.id === c.id ? W.cur.st + ' Day ' + W.cur.d : null };
+  return { st0, st, before: before && before.mode, after, mine: !!j2 && j2.claimedBy === 'you', lapse, next: W.cur && W.cur.id === c.id ? W.cur.st + ' Day ' + W.cur.d : null,
+    other: W.cur && W.cur.id !== c.id ? W.cur.id + ':' + W.cur.st + ' Day ' + W.cur.d : null, waits: !worksOpened(W).has(c.id) && W.tr[c.id] === undefined, d8: typeof CR_DAY8_ON !== 'undefined' && CR_DAY8_ON };   // CR1 (0.99.7 note 55): on Day 8 Making it safe goes first; the lapsed lesson waits, unopened
 })"""
 # (FX15, the user, patch 0.92.5 #22: "all training and lessons need it") every training job held for you on the board: the
 # row marked and named, the pointer on its Take it, the arrow naming it. A look at the board for one job: its row, the
@@ -392,7 +393,9 @@ def part_p925(g):
     check(bool(bd['pointer']) and 'scanner lesson' in bd['pointer'] and not bd['clocked'], f'#12: the pointer rings the lesson\'s Take it again, before you\'ve clocked in, naming the lesson ({bd})')
     do = g.ev(f"(() => {{ ({M7_SETUP})('m7'); return ({P925_LAPSE})(true); }})()")
     print(f'  your turn (the scanner), its job in your hands at 17:01: {do}')
-    check(bool(do) and do['st0'] == 'do' and do['before'] and do['st'] == 'again' and not do['after'] and not do['mine'] and do['lapse'] >= 1 and (do['next'] or '').split(' ')[0] in ('watch', 'meet', 'do'),
+    again = (do['next'] or '').split(' ')[0] in ('watch', 'meet', 'do') if do else False
+    if do and do.get('d8') and not again: again = (do['other'] or '').startswith('m6:') and do['waits']   # CR_DAY8_ON: the next workday is Day 8, Making it safe first; the scanner lesson waits (unopened) for the next
+    check(bool(do) and do['st0'] == 'do' and do['before'] and do['st'] == 'again' and not do['after'] and not do['mine'] and do['lapse'] >= 1 and again,
           f'#15: an unfinished lesson ends at the shift\'s end: offered again, the teacher stops following, the job back on the board ({do})')
     hd = g.ev(f"""(() => {{ ({M7_SETUP})('m7'); const W = SHIP.works, c = W.cur, j = SHIP.jobs.find(x => x.id === c.j); if (!c || !j) return null;
       j.status = 'done'; j.doneBy = 'you'; c.st = 'held'; c.hold = true; const open = worksCaseOpen(c.j), p = ROSTER.find(x => x.id === c.by), t = (c.d - 1) * 1440 + dayShiftEnd(c.d) + 1;

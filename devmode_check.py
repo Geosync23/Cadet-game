@@ -482,12 +482,13 @@ def part_set(b):
     beat = lambda id: pg.ev(f"devmodeRun('Set career: beat', () => devmodeSetCareerTo(DM_BEATS.find(b => b.id === '{id}').day, DM_BEATS.find(b => b.id === '{id}')))")
     beat('t2'); pg.step(20)
     T = pg.ev("({ clock: clockText(), room: ROOMS[roomAt(...player.here())].name, rank: SHIP.works.rank, test: SHIP.works.test, cur: SHIP.works.cur && SHIP.works.cur.id, tr: 't2' in SHIP.works.tr, m6: 'm6' in SHIP.works.tr })")
-    check(T['clock'] == 'Day 9, Tuesday 08:50' and T['room'] == 'Works bay' and T['rank'] == 'junior' and T['test'] and not T['test']['passed'] and T['cur'] == 't2' and not T['tr'] and T['m6'], f'set: the Day 9 test beat: {T}')
+    d8 = pg.ev("typeof CR_DAY8_ON !== 'undefined' && CR_DAY8_ON")   # CR1 (0.99.7 note 55): the test on Day 8 (13:00), the promotion on Day 9
+    check(T['clock'] == ('Day 8, Monday 12:50' if d8 else 'Day 9, Tuesday 08:50') and T['room'] == 'Works bay' and T['rank'] == 'junior' and T['test'] and not T['test']['passed'] and T['cur'] == 't2' and not T['tr'] and T['m6'], f'set: the Day {8 if d8 else 9} test beat: {T}')
     beat('promo'); pg.step(20)
     PB = pg.ev("typeof promoBeatsOn === 'function' && promoBeatsOn()")   # FX28 (PROMO_BEATS_ON): the result at 08:15, not 11:00
-    pg.ev(f"devmodeRun('Clock', () => devmodeSkipTo(9 * 1440 + {8 * 60 + 7 if PB else 11 * 60 + 2}))")
+    pg.ev(f"devmodeRun('Clock', () => devmodeSkipTo({8 if d8 else 9} * 1440 + {8 * 60 + 7 if PB else 11 * 60 + 2}))")
     P = pg.ev("({ clock: clockText(), rank: SHIP.works.rank, passed: SHIP.works.test && SHIP.works.test.passed, summons: SHIP.occasions.some(o => o.id === 'promoSummons') })")
-    check(P['rank'] == 'junior' and P['passed'] and P['summons'], f'set: the Day 10 promotion beat (at {"08:07" if PB else "11:02"} the summons is booked, still a junior): {P}')
+    check(P['rank'] == 'junior' and P['passed'] and P['summons'], f'set: the Day {9 if d8 else 10} promotion beat (at {"08:07" if PB else "11:02"} the summons is booked, still a junior): {P}')
     # the panel's way: a day at a time under the fade, the progress on the panel, then one save
     pg.ev('devmodeOpen(true); DM_UI.tab = "set"; DM_UI.day = 5; devmodeDraw()')
     pg.page.click('#dmSheet button:has-text("Set career to Day 5")'); pg.page.click('#dmSheet button:has-text("Tap again")')
@@ -534,10 +535,11 @@ def part_career(b):
     R = pg.ev("({ rank: SHIP.works.rank, tier: SHIP.works.tier, pip: PLAYER_SPEC.rank || 0, bed: playerBed() })")
     check(R['rank'] == 'junior' and R['tier'] == 1 and R['pip'] == 0 and R['bed'] != '4-23', f'career: rank Junior by hand: {R}')
     # the promotion opened from Day 8 (only the day missing) runs to the ceremony
-    pg.ev("devmodeRun('Set', () => devmodeSetCareerTo(8))"); pg.step(10)
+    d8 = pg.ev("typeof CR_DAY8_ON !== 'undefined' && CR_DAY8_ON")   # CR1 (0.99.7 note 55): the test from Day 8, so a career set to Day 8 has it passed: set to Day 7, Making it safe the one need missing
+    pg.ev(f"devmodeRun('Set', () => devmodeSetCareerTo({7 if d8 else 8}))"); pg.step(10)
     pg.ev("devmodeRun('Clock', () => devmodeSkipTo(7 * 1440 + 9 * 60 + 30))")
     N = pg.ev("devmodeTestNeeds(SHIP.works).map(x => x[1])")
-    check(N == [False, True, True, True, True], f'career: Day 8 09:30 test needs (only the day missing): {N}')
+    check(N == ([True, True, False, True, True] if d8 else [False, True, True, True, True]), f'career: Day 8 09:30 test needs ({"only Making it safe missing" if d8 else "only the day missing"}): {N}')
     pg.ev("DM_HOLD = false; devmodeTestOpen()"); pg.page.wait_for_timeout(700); pg.step(5)
     T = pg.ev("({ msg: DM_UI.msg, cur: SHIP.works.cur && SHIP.works.cur.id, j: SHIP.works.cur && SHIP.works.cur.j, test: SHIP.works.test })")
     check(T['cur'] == 't2' and T['j'] and T['test']['day'] == 8, f'career: Open the test now: {T}')

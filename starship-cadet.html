@@ -73365,6 +73365,7 @@ function devmodeTradWho(body, ev) {                      // whose birthday, or w
 // seed (SHIP.career.gs) is DM_SEED, so two Set careers to the same day give the same save, and no sick day comes. Nothing here calls R().
 // DM_CAREER: what a steady player has by the end of day N (plan 4.2; the ladder's days, Pillar 5's dates). Days not
 // listed carry on from the row before; devmode_check keeps every training's day equal to CAREER_LADDER's.
+function devmodeD8() { return typeof CR_DAY8_ON !== 'undefined' && !!CR_DAY8_ON; }   // CR1: 24p's switch (the first test a day earlier)
 const DM_CAREER = [
   { day: 1, band: 'new' },
   { day: 2, train: ['m1'], band: 'steady' },
@@ -73372,8 +73373,8 @@ const DM_CAREER = [
   { day: 4, train: ['m5', 'm3i'], band: 'trusted' },
   { day: 5, train: ['m7', 'p3'], band: 'trusted' },
   { day: 8, train: ['m6', 'm2'], band: 'relied' },
-  { day: 9, train: ['t2'], band: 'relied', test: true },
-  { day: 10, rank: 'officer', band: 'new', promo: true },
+  { get day() { return devmodeD8() ? 8 : 9; }, train: ['t2'], band: 'relied', test: true },   // CR1 (0.99.7 note 55): with CR_DAY8_ON the test on Day 8, the promotion on Day 9
+  { get day() { return devmodeD8() ? 9 : 10; }, rank: 'officer', band: 'new', promo: true },
   { day: 11, train: ['m8'], band: 'new' },
   { day: 12, train: ['m9', 'p1', 'm10', 'm11', 'm12', 'm13'], band: 'steady' },
   { day: 13, train: ['m14'], band: 'steady' },
@@ -73413,8 +73414,9 @@ function devmodeCareerFor(n, s = 0) {
     out.use[id] = Math.min(9, 1 + Math.floor((m - r.day) / 2));   // about a use every other day (approximate)
     if (row.tool && WORK_TOOLS[row.tool]) out.tools[row.tool] = [D(r.day), 0];   // fresh: no wear
   }
-  if (rows.some(r => r.test)) out.test = { tier: 2, day: D(9), tries: 1, passed: true };
-  if (promo) { out.done = ['summons2', 'cake2', 'move2', 'ceremony2']; out.ms = [['officer', D(10)], ['commissioned', Math.min(n, D(11))]]; }
+  const k8 = devmodeD8() ? 1 : 0;                        // CR1: a day earlier with CR_DAY8_ON
+  if (rows.some(r => r.test)) out.test = { tier: 2, day: D(9 - k8), tries: 1, passed: true };
+  if (promo) { out.done = ['summons2', 'cake2', 'move2', 'ceremony2']; out.ms = [['officer', D(10 - k8)], ['commissioned', Math.min(n, D(11 - k8))]]; }
   if (rows.some(r => r.test3)) { out.pu = { t3: { day: D(15), tries: 1, passed: true, res: promo3 ? D(16) : null, bar: promo3 ? D(16) : null, toast: m >= 17 ? D(17) : null } }; if (promo3) out.ms.push(['senior', D(16)]); }   // S5-2's record (24u)
   if (promo4 && out.pu) { out.pu.t4 = { day: D(22), tries: 1, passed: true, res: D(22), badge: m >= 23 ? D(23) : null, move: m >= 23 ? { ready: D(25), walked: m >= 25 ? D(25) : null, refit: false } : null };   // S6-3's record (24u)
     out.ms.push(['specialist', D(22)]); if (m >= 23) out.ms.push(['specialist.badge', D(23)]); if (m >= 25) out.home = '2-B'; }
@@ -73462,8 +73464,9 @@ function devmodeWake() {                                 // into your bed's room
 // the story's beats as shortcuts (the user's q3: they go on to the beat's time and place): the career by the end of
 // day `by`, then the clock to `at` on `day` and you in the room, with `set` for what the beat waits on
 const DM_BEATS = [
-  { id: 't2', label: 'Day 9: the test job', day: 9, by: 8, at: 530, where: { deck: 5, room: 'w' }, set: W => { W.test = { tier: 2, day: 9, tries: 0, passed: false }; } },   // 08:50 in the Works bay: Calder's test, held from 09:00
-  { id: 'promo', label: 'Day 10: the promotion', day: 10, by: 9, get at() { return promoBeatsOn() ? PB_TIMES.summonsAt - 10 : 650; }, where: { deck: 5, room: 'w' } },   // 10:50 in the Works bay: her summons at 11:00 (08:05 for 08:15 with FX28's PROMO_BEATS_ON)
+  { id: 't2', get label() { return devmodeD8() ? 'Day 8: the test job' : 'Day 9: the test job'; }, get day() { return devmodeD8() ? 8 : 9; }, get by() { return devmodeD8() ? 7 : 8; }, get at() { return devmodeD8() ? CR_SAME.jobAt - 10 : 530; }, where: { deck: 5, room: 'w' },
+    set: W => { const d = devmodeD8() ? 8 : 9; if (d === 8) W.tr.m6 = 8; W.test = { tier: 2, day: d, tries: 0, passed: false }; } },   // 08:50 in the Works bay: Calder's test, held from 09:00 (CR1, CR_DAY8_ON: Day 8 12:50, Making it safe that morning, the test from 13:00)
+  { id: 'promo', get label() { return devmodeD8() ? 'Day 9: the promotion' : 'Day 10: the promotion'; }, get day() { return devmodeD8() ? 9 : 10; }, get by() { return devmodeD8() ? 8 : 9; }, get at() { return promoBeatsOn() ? PB_TIMES.summonsAt - 10 : 650; }, where: { deck: 5, room: 'w' } },   // 10:50 in the Works bay: her summons at 11:00 (08:05 for 08:15 with FX28's PROMO_BEATS_ON)
 ];
 if (P5_PROMO4) DM_BEATS.push(                           // Pillar 5 Step 6 (S6-3, W7): the Engine Specialist's beats
   { id: 't4', label: 'Day 22: the Tier 4 test', day: 22, by: 21, at: 560, where: { deck: 5, room: 'w' }, set: () => { if (!puT4()) pu4Set(22); flagSet('pu4.told', 21); flagSet('pu4.notice', 21); } },   // 09:20 in the Works bay: the test on the board at 09:30
