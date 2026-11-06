@@ -147,7 +147,8 @@ names_check OK, content_gen --check up to date.
   10:35-11:40 before sowing 11:45. Remaining overlaps are parallel optional evenings or the same item twice.
 - Arrow trace, fresh save, intro on, clocking in (merge_week1_arrows.py): Pick-your-own 06:05 Day 3; Last Light 13:45 Day 4;
   the address 15:30 Day 5 (to 16:20); Harvest 09:15 Day 6. (The rest of each day is the job my probe took and never did.)
-- Should (CL1 + EV1): CL1's lead arrow for lastLightGlass names and targets the Promenade (cl997Room takes the event's
+- FIXED by CL1 46259ef (the arrow now reads "The Last Light, 14:00: Bow lounge, Deck 3", room L, in the merge).
+- Was a should (CL1 + EV1): CL1's lead arrow for lastLightGlass names and targets the Promenade (cl997Room takes the event's
   first room: Promenade, Lift plaza, Bow lounge) while Sato and the gathering are in the bow lounge; from the Promenade the
   tap arrow takes over at 14:00 and leads to her (merge_lastlight_promenade.py), so it works, but 13:45-14:00 ends at the
   Promenade with no arrow for a few minutes. Prefer the host's room.
