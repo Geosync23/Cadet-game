@@ -65255,10 +65255,17 @@ if (CART_FIRST_ON && typeof IX_STOP === 'object') Object.assign(IX_STOP, { cart:
 // The other kinds (repairs for the scanner, hauling's delivery days, the later tiers) come from their own sims as before.
 var BOARD_NEW_ON = true;                                 // var: section 17's boardTopUp asks before this line has run
 const BOARD_NEW = { days: 5, max: 4 };
+// Other seats' kinds join the mix here (JB3's science and bottom-deck jobs, later tiers): boardNewAdd({ mech: a ladder id (the
+// kind counts as learned once SHIP.works.tr[mech] is set), kind: the job's kind or chore (how "one already up" is told: j.chore
+// || j.kind), make(c) -> a job object or null }), c = { h, d, m, t, end, jobs, seed, free(machineId), o, fresh }: give the job
+// c.o's fields (held to the shift's end, extra, trade, no reputation); no R() (seed with schedU(c.seed, c.h, k)); a job the board
+// can take (a machine job or a chore). boardNewPost pushes it. Registered at load, in the file's order; nothing saved.
+const BOARD_NEW_MAKE = [];
+function boardNewAdd(e) { if (e && typeof e.mech === 'string' && typeof e.kind === 'string' && typeof e.make === 'function' && !BOARD_NEW_MAKE.some(x => x.mech === e.mech && x.kind === e.kind)) BOARD_NEW_MAKE.push(e); return BOARD_NEW_MAKE.length; }
 function boardNewKinds(d) {                              // the kinds the board can be given, trained, newest learned first: [{ id, kind, fresh }]
   const W = SHIP.works; if (!W || !W.tr) return [];
   const workdays = from => { let n = 0; for (let k = from + 1; k <= d; k++) if (playerShiftOn(k)) n++; return n; };
-  return [['m5', 'tune'], ['m1', 'rounds']].filter(([id]) => W.tr[id] !== undefined && W.tr[id] < d)
+  return [['m5', 'tune'], ['m1', 'rounds']].concat(BOARD_NEW_MAKE.map(e => [e.mech, e.kind])).filter(([id]) => W.tr[id] !== undefined && W.tr[id] < d)
     .map(([id, kind]) => ({ id, kind, at: W.tr[id], fresh: workdays(W.tr[id]) <= BOARD_NEW.days })).sort((a, b) => b.at - a.at || (a.id < b.id ? -1 : 1));
 }
 function boardNewPost(h, jobs, t, m, end) {              // boardTopUp's trade post with the switch on: the job posted, or null (undefined: not ours)
@@ -65266,7 +65273,7 @@ function boardNewPost(h, jobs, t, m, end) {              // boardTopUp's trade p
   if (!W || m < BOARD_TRADE_FROM || end - m < BOARD_TRADE_LEFT) return null;
   const mine = jobs.filter(j => j.trade && j.found >= B); if (mine.length >= BOARD_NEW.max || mine.some(j => j.found > t - 60)) return null;
   const seed = machSeed('board:trade'), free = id => !jobs.some(x => x.machine === id && x.status !== 'done') && !JOB_FOR[(SHIP.machines[id] || {}).state];
-  const o = { leave: end - m, extra: true, trade: true, xp: 0 }, up = kind => jobs.some(j => j.kind === kind && boardTrade(j) && boardForYou(j, t));
+  const o = { leave: end - m, extra: true, trade: true, xp: 0 }, up = kind => jobs.some(j => (kind === 'tune' || kind === 'rounds' ? j.kind === kind && boardTrade(j) : (j.chore || j.kind) === kind) && boardForYou(j, t));
   for (const k of boardNewKinds(d)) {
     if (up(k.kind)) continue;
     let j = null;
@@ -65283,6 +65290,7 @@ function boardNewPost(h, jobs, t, m, end) {              // boardTopUp's trade p
       if (mix ? mix.length >= 4 : pool.length >= 4) { const route = mix || roundWalk(pool.slice(0, 4), DECKS[n]), m0 = roundSpot(route[0]);
         j = jobMake('rounds', { id: 'round-pm-d' + n + '@' + h, deck: n, room: m0.room, h, title: m >= BOARD_TRADE_ROUND[0] ? roundText('round.title.pm', 'Afternoon round, Deck {deck}', { deck: n }) : worksText('cr.round.title', 'Extra round, Deck {deck}', { deck: n }), route, marks: {}, ...o }); }
     }
+    { const X = !j && BOARD_NEW_MAKE.find(e => e.mech === k.id && e.kind === k.kind); if (X) try { j = X.make({ h, d, m, t, end, jobs, seed, free, o: { ...o }, fresh: k.fresh }) || null; } catch (e) { j = null; } }   // another seat's kind
     if (j && forYou(j)) { j.shareSeen = true; jobs.push(j); return j; }
   }
   return null;

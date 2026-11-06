@@ -112,6 +112,13 @@ def part_mix(g):
     check(all(len(p[1]) <= 1 for p in fresh['per']) and len(fresh['kinds']) <= 4 and all(10 <= hr(k) <= 15 for k in fresh['kinds']), f"mix: one an hour, 4 a shift, 10:00 to 15:00 ({fresh['per']})")
     check(old['order'] == ['tune', 'rounds'] and all(not k.startswith('rounds') or 13 <= hr(k) < 15 for k in old['kinds']), f"mix: learned long ago, a round 13:00-15:00 as before ({old['order']}, {old['kinds']})")
     check(not off['kinds'], f"mix off: FX19, none while a repair of your trade is up ({off['kinds']})")
+    hook = g.ev("""(() => { __sw(true); boardNewAdd({ mech: 'm9', kind: 'crtest', make: c => ({ id: 'crtest@' + c.h, machine: null, deck: 5, room: 'w', kind: 'chore', chore: 'crtest', target: 'x', title: 'A test chore', tier: 1,
+        stops: [{ deck: 5, placeId: '5-timeclock-1', mins: 5, tag: 'x' }], urgency: 0, posted: c.t, found: c.t, claimedBy: null, parts: [], status: 'open', ...c.o }) });
+      const W = __w(9, 360, { xp: 20, tr: { m1: 2, m5: 4, m9: 8 } }); const out = { order: boardNewKinds(9).map(k => k.kind) };
+      setShipNow(8 * 1440 + 600); boardNewPost(8 * 24 + 10, SHIP.jobs, shipNow(), 600, 1020); out.first = SHIP.jobs.filter(j => j.trade).map(j => j.chore || j.kind);
+      BOARD_NEW_MAKE.splice(BOARD_NEW_MAKE.findIndex(e => e.kind === 'crtest'), 1); return out; })()""")
+    print('  (mix, another seat\'s kind)', hook)
+    check(hook['order'][:1] == ['crtest'] and hook['first'] == ['crtest'], f"mix: another seat's kind (boardNewAdd), newest learned, posted first ({hook})")
 
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
