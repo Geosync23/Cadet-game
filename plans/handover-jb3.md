@@ -52,3 +52,8 @@ stock over 14 days); `tools/jobs_measure.py BUILD 14 --json OUT` gives the mix (
 ## Open questions for the user (defaults built)
 - The Works keeps two relays and two lamps (one breaker, one cable) on the Lights shelf for your jobs: yes.
 - Science-room jobs: two a shift in the first week, one after: yes. Rec deck: two in the first week, none extra after: yes.
+
+## Review
+- **RV32: PASS on e96ec5a** (game bae8e769...456d, includes 43a96ae), 2026-11-06 ~09:35 UTC. Off: cadet_test ALL IDENTICAL;
+  all four on: check_fast OK; a fresh save with the intro at 390x844, Days 0-6, showed science jobs Days 1-4 and rec deck
+  jobs Days 2 and 4. Owners to review: section 15's two lines (Player engineer). Next: BM24 merges and switches on.
