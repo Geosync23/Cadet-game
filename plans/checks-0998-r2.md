@@ -13,7 +13,11 @@ j_steer1 32167, j_steer2 13637), and every NEW picture is pixel-identical to 0.9
 So all explained as in 0.99.7: hair caps and soles (CH1), the tracker ring (TP1), Fonseca's bunk (CH1), the Day 2 crew from
 ~07:45 (TRAD997, the Spice supper move). TP998's two changes don't show in cadet's views (Day 2 18:00 and later).
 
-## Result: FAIL: fresh_walk point 5 (NEW, BM27's P; run by R4); perf from R6 pending
+## Result: FAIL: fresh_walk point 5 only (NEW, BM27's P; run by R4)
+
+Every other check in R2 passes on 0.99.8 (perf after re-measuring a one-off spike, backlog 32). The one NEW FAIL: fresh_walk's
+follower is long at the call booths twice after the day's one call home (the Social marker leads to booths that, with
+TP998_BOOTH_ON, give nothing more that day). Ran by R2, except fresh_walk and p926 (R4) and perf_check (R6).
 
 | Check | Ran by | Result | Minutes | Key lines |
 |---|---|---|---|---|
@@ -31,5 +35,5 @@ So all explained as in 0.99.7: hair caps and soles (CH1), the tracker ring (TP1)
 | pf_f1_same proof: OLD vs 0.99.8 with every 0.99.7 switch and TP998 false | R2 | exit 0 | 0 | `fingerprints 30 differ 0 []`, `F1 checks 23674 mismatches 0`, `PF F1 SAME OK` |
 | p926_check | R4 | exit 0 | | `P926 CHECK OK`; item 15: Brennan at the shelf 19:20, 7 lines, 7 bubbles, guess card held 3 min |
 | fresh_walk BUILD 3 | R4 | **point 5 FAIL, NEW (BM27's P)** | | points 1-4 pass: briefing, Works bay arrow, 08:45 solo meeting, Day 2 booths arrow from 18:00 at the floor pin (never Booth 1), 'd2-booths:said' traced 18:16, errors []. Point 5: `long = [[2738, 'The call booths'], [3929, 'The call booths, Deck 3']]`: the Social marker keeps leading to booths that give nothing after the day's call (TP998_BOOTH_ON). In 0997b the same walk had long []. JSON plans/fw-0998-r4.json on claude/checks-0996-r4 |
-| perf_check BUILD OLD (alone) | R6 | running (started 20:03) | | |
+| perf_check BUILD OLD (alone) | R6 | exit 1, then re-measured alone twice: OK (one-off spike, backlog 32) | 67 | `PERF CHECK: 1 problem(s)`: `the Line supper, the mess Sun 18:30 trifold-open-turned: js 1.74 -> 2.88 ms a frame`; re-measured alone twice (`PERF_SCENES='the Line supper'`), both `PERF CHECK OK` (OLD 2.05 / NEW 2.08 ms; OLD 2.23 / NEW 2.91 ms). Draw calls identical to 0997b in every scene (TP998 changes none); vs OLD within 1, none over budget; memory flat 470/41/93 (a week 472/41/93) as OLD; file 8.84 MB, load 7.3-7.5 s. plans/checks-0998-r6.md on claude/checks-0998-r6 (4a60f7b) |
 
