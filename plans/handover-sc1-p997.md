@@ -47,3 +47,14 @@ RV33 PASS on 77e573f (game 6df22594...1705), including RV33's note 32 fix (6c39f
 (77e573f). Ready for the build master. RV33's stories_check runs showed 14 FAIL lines that are identical on the
 unchanged 0.99.6 build (not this branch; RV33 and the lead are settling it); my own stories_check 36 on the
 switched-on copy said STORIES CHECK OK. SC1 standing by.
+
+## Later work (2026-11-06, for leads 49 and 50)
+- Reviewed GM1 (claude/p997-games): FIXES NEEDED on 9175156, PASS on 98e612e (plans/review-sc1-gm1.md).
+- TB6's words: claude/p997-words ab0e13e (content/works/trad-0997.lines), RV33 PASS.
+- Round FAIL I (controller, Day 34 "About the transfer"): check-side. With Ask about gone the card's row 2 has two
+  buttons over a full-width one, and controller_check's pad_to bounced between them (bigger-gap steering). Fix:
+  claude/p997-padsteer 2ce2a48 (FOCUS_ON: an axis counts as 0 when the target spans the highlight across the way).
+  'ending' passes with it; 'tiles' needs GM1's 3966a4a (J) as well.
+- Round FAIL O (Leila's Day 2 booths scene "missing"): check-side. It plays at 18:13 as bubbles (traced:
+  intro done 'd2-booths:said'); fresh_walk's record doesn't log bubbles. A should for TP1: the TP997 arrow points at
+  Booth 1 from 17:45, so you're mid-call when Leila "shows you how"; at Leila from 18:00 would be better.
