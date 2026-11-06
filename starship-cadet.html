@@ -9754,6 +9754,7 @@ const SLOT_NEW = SAVE_SLOTS_ON && !NOSAVE ? (v => v === 'arrive' || v === 'monda
 var SLOT_HOLD = false;
 const SAVE_KEY = slotKey(SAVE_SLOT), SAVE_V = 2;
 const TRAD995_ON = true || URL_FLAGS.has('trad995');   // 0.99.5 (TB3; plans/patch-0995.md notes 8, 10, 19): Spice shelf supper tap to join, Name on the beam's spots, the tea corner's doorway (section 18's Traditions slot); off: 0.99.4. `?trad995` previews
+const GAMES997_ON = false || URL_FLAGS.has('games997');   // 0.99.7 (GM1; plans/patch-0997.md notes 12, 40, 41, 44): Tiles night in rounds, the Tiles tutorial step by step, Winner Stays On to watch and join, the music kept on in Lightdisc (sections 23 and 23b, the Games slot). off: the game as 0.99.6
 // the traditions variety (0.93.2, FX24 for lead 37; CS1's pitch pages plans/trad-variety-pitch.html and -2.html on claude/crew-stories-pitch):
 // six weekly ones take turns from week 2 (TRAD_0932_WHEN: their rhythm with it on; week 1 unchanged), the user's fourteen new ones
 // (TRAD_0932_NEW, loaded only with it) and Brennan's tasting table after dinner in the galley (tasting-table-late, loaded as
@@ -38426,6 +38427,10 @@ const LINES = JSON.parse([
   '{"text":"Reading corner: sit close in the bow lounge with a book and talk about what you\'re reading. Leisure and social up.","id":"d35vei"}]',
   ',"join.reading-corner.tip":[',
   '{"text":"Tap {name} to join the reading corner","id":"b9gad4"}]',
+  ',"join.rec-wso.notice":[',
+  '{"text":"Winner Stays On: find a seat in the stands and watch the games. Pell will offer you a turn. Leisure and social up.","id":"1sg5rhe"}]',
+  ',"join.rec-wso.tip":[',
+  '{"text":"Tap {name} to watch from the stands","id":"vei1pj"}]',
   ',"join.running.notice":[',
   '{"text":"Gym club: pick a machine and work out with everyone. Fitness and social up. Soup after.","id":"h2l5kw"}]',
   ',"join.running.tip":[',
@@ -42518,6 +42523,40 @@ const LINES = JSON.parse([
   '{"text":"Oh, you nearly had one! Just there! Never mind.","id":"1q62cni","trait":"chatty"},',
   '{"text":"Um. There was a three. Sorry. Just there.","id":"exiga1","trait":"shy"},',
   '{"text":"So close! You\'ll have it next go.","id":"1pu612x","trait":"cheerful"}]',
+  ',"tiles.night.ask":[',
+  '{"text":"Tiles night: three rounds, winners play winners. Play at a board, or watch first?","id":"18lx1nd"}]',
+  ',"tiles.night.beat":[',
+  '{"text":"{a} beat {b}.","id":"6i2sfe"}]',
+  ',"tiles.night.board":[',
+  '{"text":"{a} and {b} at a board.","id":"iu7fcv"}]',
+  ',"tiles.night.draw":[',
+  '{"text":"{a} and {b}: a draw.","id":"5jvw3w"}]',
+  ',"tiles.night.end":[',
+  '{"text":"Tiles night\'s over. {name} won it with {n} wins.","id":"1mjeo0m"}]',
+  ',"tiles.night.endYou":[',
+  '{"text":"Tiles night\'s over. {name} won it with {n} wins. You won {a} of {b}.","id":"10jrai"}]',
+  ',"tiles.night.head":[',
+  '{"text":"Tiles night, round {n} of {max}","id":"1di4dh7"}]',
+  ',"tiles.night.next":[',
+  '{"text":"You\'re in the next round of Tiles night. It starts at {time}; stay in the lounge.","id":"xwoory"}]',
+  ',"tiles.night.next.app":[',
+  '{"text":"Next round at {time}.","id":"162f86e"}]',
+  ',"tiles.night.out":[',
+  '{"text":"You\'re out of tonight\'s rounds. You can still watch, or tap Rina to play again.","id":"14yjbmk"}]',
+  ',"tiles.night.play":[',
+  '{"text":"Play in the rounds","id":"bs5asw"}]',
+  ',"tiles.night.playReply":[',
+  '{"text":"Good. Next round you\'re at a board. Win, and you meet the winners.","id":"1q8clrq"}]',
+  ',"tiles.night.round":[',
+  '{"text":"Round {n} of Tiles night is over. The next one starts at {time}.","id":"duxlgk"}]',
+  ',"tiles.night.seat":[',
+  '{"text":"Round {n} of Tiles night. You sit down at a board across from {name}.","id":"jmtv2t"}]',
+  ',"tiles.night.watch":[',
+  '{"text":"Watch","id":"1bm6acp"}]',
+  ',"tiles.night.watchReply":[',
+  '{"text":"Pull up a chair. Tap me if you want a game.","id":"1buvlo2"}]',
+  ',"tiles.night.you":[',
+  '{"text":"You\'re in. Stay in the lounge: your next game comes with the next round.","id":"eqht24"}]',
   ',"tiles.paused":[',
   '{"text":"The ship\'s clock is paused while you play","id":"1mseuog"}]',
   ',"tiles.start":[',
@@ -42592,6 +42631,32 @@ const LINES = JSON.parse([
   '{"text":"Next one. Follow the arrow.","id":"19gh8gx"}]',
   ',"tip.round.take":[',
   '{"text":"Your first round is on the job board. Take it, and follow the arrow.","id":"14nn6ln"}]',
+  ',"tip.tiles.card":[',
+  '{"text":"Step: one square diagonally forward. Jump: hop over their tile to take it. Launch: from your hold onto your bottom two rows. Dock: 3 or more of a mark touching side by side. First to {n}.","id":"2fai12"}]',
+  ',"tip.tiles.tut.1":[',
+  '{"text":"Tiles is for two, on a 6 by 6 board. Yours are the solid tiles along the bottom; {name}\'s are the outlined ones at the top.","id":"13ezzri"}]',
+  ',"tip.tiles.tut.10":[',
+  '{"text":"A launch puts a tile from your hold back: tap it in your hold, then an empty square in your home rows, your two bottom rows.","id":"gw7ecs"}]',
+  ',"tip.tiles.tut.11":[',
+  '{"text":"A spark inside a ring means moving there makes a dock. Go for it when you see one.","id":"1oyxjlx"}]',
+  ',"tip.tiles.tut.12":[',
+  '{"text":"The game ends when someone reaches {n} points, or after {max} turns each. Then more points wins. Good luck!","id":"1aqpsvm"}]',
+  ',"tip.tiles.tut.2":[',
+  '{"text":"Every tile carries a mark: a planet ●, a ship ▲ or a star ★. The marks are how you score.","id":"13grwbi"}]',
+  ',"tip.tiles.tut.3":[',
+  '{"text":"You score by docking: get three or more of your tiles with the same mark touching side by side. Corners don\'t count.","id":"cfzbcl"}]',
+  ',"tip.tiles.tut.4":[',
+  '{"text":"When tiles dock, they leave the board and you get a point for each one.","id":"lnsnf2"}]',
+  ',"tip.tiles.tut.5":[',
+  '{"text":"Each turn you make one move: a step, a jump or a launch. Then it\'s {name}\'s turn.","id":"2qijcz"}]',
+  ',"tip.tiles.tut.6":[',
+  '{"text":"Tap one of your tiles. Glowing rings show the squares it can move to.","id":"k16gcy"}]',
+  ',"tip.tiles.tut.7":[',
+  '{"text":"A step moves a tile one square diagonally, forward towards {name}\'s side. Tap a glowing ring to step there.","id":"1ri9ylc"}]',
+  ',"tip.tiles.tut.8":[',
+  '{"text":"A jump: if one of {name}\'s tiles is diagonally next to yours with an empty square just past it, hop over it to take it. Can\'t yet? Press Next.","id":"16v8xmd"}]',
+  ',"tip.tiles.tut.9":[',
+  '{"text":"Tiles you take go into your hold, the row under the board. They\'re yours now, waiting to come back on.","id":"z02gqb"}]',
   ',"tip.tour.done":[',
   '{"text":"That\'s the tour. Hand it in at the job board.","id":"1tt9o1y"}]',
   ',"tip.tour.go":[',
@@ -43061,6 +43126,10 @@ const LINES = JSON.parse([
   '{"text":"Calder only says it once, plainly. That\'s a kindness, believe it or not.","id":"1vau7o1","tier":[2,4]}]',
   ',"worried.last":[',
   '{"text":"People are saying they\'ll send you home if this goes on. Please don\'t let them.","id":"q4k9qw","tone":"warm","tier":[2,4]}]',
+  ',"wso.ask":[',
+  '{"text":"Fancy a go? You\'d be next on court, after this game.","id":"142aflf"}]',
+  ',"wso.back":[',
+  '{"text":"Back to the stands","id":"18bds9a"}]',
   ',"wso.cheer":[',
   '{"text":"Go on! Stand in its way!","id":"2cbrxg"},',
   '{"text":"Three in a row! It\'s charged now!","id":"1bjdx7o"},',
@@ -43068,6 +43137,22 @@ const LINES = JSON.parse([
   '{"text":"Long rally! Nobody breathe.","id":"vfdja8","tone":"funny"},',
   '{"text":"Somebody chalk that up!","id":"1r87okl"},',
   '{"text":"Winner stays on! Who\'s next?","id":"3qphfa"}]',
+  ',"wso.lost":[',
+  '{"text":"Back to the stands. Tap Pell when you want another go.","id":"pasrmj"}]',
+  ',"wso.play":[',
+  '{"text":"Play the next game","id":"xwekel"}]',
+  ',"wso.playReply":[',
+  '{"text":"You\'re next. When the bell goes, it\'s you against whoever\'s on.","id":"1k9lq8r"}]',
+  ',"wso.stay":[',
+  '{"text":"You stay on! The next one up is {name}.","id":"16b8266"}]',
+  ',"wso.stayOn":[',
+  '{"text":"Stay on","id":"19qrzxz"}]',
+  ',"wso.up":[',
+  '{"text":"Pell rings the bell. You\'re up against {name}.","id":"1o7g8ce"}]',
+  ',"wso.watch":[',
+  '{"text":"Keep watching","id":"t5atla"}]',
+  ',"wso.watchReply":[',
+  '{"text":"Fair enough. Tap me when you fancy a game.","id":"zcccq6"}]',
   '}',
 ].join(''));
 const CONVOS = [
@@ -45754,7 +45839,7 @@ if (REC_TRAD_ON) for (const ev of REC_TRADS) SHIP_TRADITIONS.push(ev);
 // seeded by the day and the game (key 1037). Three wins in a row put a name on the foyer's board (recBoard('wso')).
 // wsoCourt(d) -> { games: [{ a, b, from, to, w }], three: [ids] } (minutes from midnight), pure and kept per day; tradWhere
 // puts the two on court at their baselines (7-disc-1 bow, 7-disc-2 stern) while their game is on. A day with no WSO: null
-const WSO_GAME = 15, WSO_COURT = new Map();               // a game with the walk on and off (0.83.2: 8 was shorter than the walk from the stands)
+const WSO_GAME = GAMES997_ON ? 20 : 15, WSO_COURT = new Map();   // 0.99.7 note 44 (GM1): 20 with GAMES997_ON, so each game is mostly rally; a game with the walk on and off (0.83.2: 8 was shorter than the walk from the stands)
 function wsoCourt(d) {
   if (WSO_COURT.has(d)) return WSO_COURT.get(d);
   const e = REC_DECK && eventsOn(d).find(x => x.id === 'rec-wso' || x.id === 'rec-cup'), out = e && e.id === 'rec-wso' ? { games: [], three: [] } : null;
@@ -45886,7 +45971,10 @@ function recPickups(d) {
 function wsoWhere(p, t) {                                // the two on court now (null for anyone else)
   const d = Math.floor(t / 1440) + 1; if (!REC_DECK || weekday(d) !== 6 || (typeof DISC !== 'undefined' && DISC.g)) return null;   // while you play, the pair waits in the stands
   const c = wsoCourt(d); if (!c) return null;
-  const m = t - (d - 1) * 1440, g = c.games.find(x => x.from <= m && m < x.to && (x.a === p.id || x.b === p.id)); if (!g) return null;
+  if (GAMES997_ON && typeof ACT !== 'undefined' && ACT && ACT.kind === 'disc') return null;   // 0.99.7 (GM1): walking to court for your game, the court's yours too
+  const m = t - (d - 1) * 1440, g = c.games.find(x => x.from <= m && m < x.to && (x.a === p.id || x.b === p.id));
+  if (!g && GAMES997_ON) { const n = c.games.find(x => x.from > m && x.from - m <= WSO_GAME && x.b === p.id); if (n) return { deck: 7, act: 'leisure', type: 'rec:seat', placeId: '7-stand-28', moving: false, from: (d - 1) * 1440 + n.from - WSO_GAME, until: (d - 1) * 1440 + n.from, tag: 'ev-rec-wso-next', anim: null }; }   // 0.99.7 note 44 (GM1): the next challenger waits on the gate bench
+  if (!g) return null;
   return { deck: 7, act: 'leisure', type: 'rec:disc', placeId: g.at1 === p.id ? '7-disc-1' : '7-disc-2', moving: false, from: (d - 1) * 1440 + g.from, until: (d - 1) * 1440 + g.to, tag: 'ev-rec-wso-disc', anim: null };
 }
 const TRAD_SRC = (() => { try { if (typeof TRADITIONS !== 'undefined') return TRADITIONS; } catch (e) { /* not baked */ } TRAD_ERRORS.push('no TRADITIONS block in the build (section 22)'); return []; })();
@@ -46556,7 +46644,9 @@ function tradJoinTap(a) {
   if (EV_VESSEL_ON && VESSEL && vesselTap(a)) return true;  // the Veyli vessel: Calder's sheet, Taavek at the ramp or the bench (slot 'Vessel builder')
   const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   const o = eventOf(a.p, now), tl = TJ_NOW && TJ_NOW.lead === a.p.id ? TJ_NOW : TRAD995_ON ? TJ_ALL.find(c => c.lead === a.p.id) : null, e = (o && o.now ? o.e : tl ? tl.e : null) || (P926_APPT ? apptHostEvent(a, d) : null);   // 0.92.6 item 9: an appointment joined already, its host at work for it (RV17 R1)
-  if (e && e.id === 'tiles-ladder' && SHIP.events.joined.includes(e.id + '@' + d) && typeof tladAgain === 'function' && tladAgain(a)) return true;   // 0.92.5 item 20: watching, a tap asks for the next game
+  if (e && e.id === 'tiles-ladder' && SHIP.events.joined.includes(e.id + '@' + d) && typeof tladAgain === 'function' && tladAgain(a)) return true;
+  if (GAMES997_ON && e && e.id === 'tiles-night' && SHIP.events.joined.includes(e.id + '@' + d) && typeof tnAgain === 'function' && tnAgain(a)) return true;
+  if (GAMES997_ON && e && e.id === 'rec-wso' && typeof w997Tap === 'function' && w997Tap(a)) return true;   // 0.99.7 note 44 (GM1): watching, a tap on Pell asks for a game   // 0.99.7 (GM1): watching, a tap puts you in the rounds   // 0.92.5 item 20: watching, a tap asks for the next game
   if (!e || !tradJoinable(e) || m < e.from || m >= e.to) return false;
   if (SHIP.events.joined.includes(e.id + '@' + d)) return P926_APPT && !!e.ev.appt && apptRejoin(e, d, a);   // 0.92.6 item 9: an appointment's scene again after a reload (FX22b, Appointments builder slot)
   return tradJoin(e, a);
@@ -46565,7 +46655,8 @@ function tradJoin(e, a) {
   const s = TRAD_JOIN[e.id], now = shipNow(), d = e.day, lead = TJ_NOW && TJ_NOW.e === e ? TJ_NOW.lead : tradLeader(e), name = tjFirst(lead || a.p.id);
   const notice = tradWords(e, 'notice', { name }) || e.name + ': ' + s.what + '. Social and leisure up.';
   player.stop(); a.talking = 2; player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
-  if (e.id === 'tiles-ladder' && typeof tladJoin === 'function') return tladJoin(e, a, notice, lead);   // 0.92.5 item 20: play the next game, or watch
+  if (e.id === 'tiles-ladder' && typeof tladJoin === 'function') return tladJoin(e, a, notice, lead);
+  if (GAMES997_ON && e.id === 'tiles-night' && typeof tnJoin === 'function') return tnJoin(e, a, notice, lead);   // 0.99.7 notes 12, 40 (GM1): play in the rounds, or watch   // 0.92.5 item 20: play the next game, or watch
   if (TRAD995_ON && e.id === 'spice-shelf-supper') return spiceJoin(e, a, notice);   // 0.99.5 note 19 (TB3): a mess seat with your dinner
   if (TRAD_0932_ON && typeof t932Join === 'function' && t932Join(e, a, notice, lead)) return true;   // 0.93.2: the host's own words first, then the activity (FX24, Traditions slot)
   if (s.act === 'beam') { if (beamWaitTap()) return true; toast(a.p.name, '"' + (tradWords(e, 'tell', { name }) || 'Go on, tap the beam. Your name goes up there, with ours.') + '"'); return true; }
@@ -46873,7 +46964,7 @@ function eventsTick() {
   const prev = EV_MIN;
   EV_MIN = m; eventTags();
   if (EV_LAST === null) EV_LAST = now; else if (now > EV_LAST) { eventsMail(EV_LAST, now); weekMailSend(EV_LAST, now); eventsNoted(EV_LAST, now); EV_LAST = now; } else EV_LAST = now;
-  eventsDecor(now); eventsPlayer(now); tradJoinMinute(now); beamTraces(now); if (typeof tladMinute === 'function') tladMinute(now);   // 0.70.0: the tradition you could tap to join (marker, arrow, tip)
+  eventsDecor(now); eventsPlayer(now); tradJoinMinute(now); beamTraces(now); if (typeof tladMinute === 'function') tladMinute(now); if (GAMES997_ON && typeof tnMinute === 'function') { tnMinute(now); w997Minute(now); }   // 0.99.7 notes 12, 40, 44 (GM1): Tiles night's rounds; Winner Stays On's turn for you   // 0.70.0: the tradition you could tap to join (marker, arrow, tip)
   pyoMinute(now);                                        // Pick-your-own: what you picked, on a tray (FX12, slot 'Traditions engineer')
   eventAdvance(now);                                     // a ship-wide event's phases (inert while none is due)
   eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play
@@ -57985,6 +58076,8 @@ function tilesDraw() {   // draw the game into its persistent element (the devic
   for (const l of (tutOn ? lines : lines.slice(0, -1)).reverse()) lg.appendChild(Object.assign(document.createElement('p'), { textContent: l }));
   root.querySelector('.tl-card').hidden = SHIP.tiles.played >= 3 && !G.teach;
   root.querySelector('.tl-card span').textContent = R.target;
+  if (GAMES997_ON) { const ct = g997T('tip.tiles.card', { n: R.target }); const c = root.querySelector('.tl-card'); if (ct && c.dataset.g !== ct) { c.dataset.g = ct; c.textContent = ct; c.appendChild(Object.assign(document.createElement('span'), { hidden: true })); } }
+  if (GAMES997_ON && s.over && !G.topped) { G.topped = true; requestAnimationFrame(() => { try { const t = root.querySelector('.tl-sc'); if (t && t.isConnected) t.scrollIntoView({ block: 'nearest' }); } catch (e) { /* old browser */ } }); }   // 0.99.7 (GM1): the result and its buttons in view (the longer How to play steps scroll the board down)   // 0.99.7 note 41 (GM1): the reminder in plain words
   const end = root.querySelector('.tl-end'); end.textContent = '';
   const btn = (box, k, label) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'act'; b.dataset.end = k; b.textContent = label; box.appendChild(b); };
   if (s.over) for (const [k, label] of [['full', 'Again'], ['quick', 'Quick game (to 5)'], ['done', 'Done']]) btn(end, k, label);
@@ -58012,7 +58105,8 @@ deviceApp({ id: 'tiles', title: 'Tiles', short: 'Tiles', icon: 'dot', order: 75,
     tilesLeft();
     if (TL_GAME) return { title: 'Tiles with ' + TL_GAME.name, blocks: [{ kind: 'dom', render: box => { const r = tilesDraw(); if (r) box.appendChild(r); } }] };
     const T = SHIP.tiles, blocks = [{ kind: 'text', text: 'Sit at the Tiles station in the bow lounge (or a Tiles table on Tiles night) and whoever’s free comes over to play. While you play, the ship waits.' }];
-    blocks.push({ kind: 'buttons', items: [{ label: TL_UI.teachNext ? 'How to play: next game' : 'How to play', action: { app: 'tiles', do: 'teach' } }] });   // 0.28.51: the steps again, at your next game
+    blocks.push({ kind: 'buttons', items: [{ label: TL_UI.teachNext ? 'How to play: next game' : 'How to play', action: { app: 'tiles', do: 'teach' } }] });
+    if (GAMES997_ON && typeof tnAppBlocks === 'function') try { blocks.push(...tnAppBlocks()); } catch (e) { /* not loaded yet */ }   // 0.99.7 (GM1): Tiles night's rounds   // 0.28.51: the steps again, at your next game
     blocks.push({ kind: 'text', text: T.played ? 'Played ' + T.played + ', won ' + T.won + ', lost ' + T.lost + '.' : 'You haven’t played yet.' });
     const vs = Object.keys(T.vs).filter(k => T.vs[k][0] + T.vs[k][1]).map(k => { let p = null; try { p = ROSTER.find(x => x.id === k); } catch (e) { /* before section 9 loads */ } return (p ? p.name.split(' ')[0] : k) + ' ' + T.vs[k][0] + '-' + T.vs[k][1]; });
     if (vs.length) blocks.push({ kind: 'text', text: 'Against: ' + vs.join(', ') + '.' });
@@ -58121,6 +58215,7 @@ function tilesWorldTap(it, at, point) {
   if (!it || !TL_ITEM.test(it.t || '')) return false;
   const jcr = /^Tiles table\b/i.test(it.t) && roomAt(...cellAt(at.x, at.z)) === 'j' && deckDef.num === 4;   // the junior common room's table: any time (0.28.62, the 0.60.7 plan)
   if (!/^Tiles station\b/i.test(it.t) && !jcr && !tilesNightNow()) return false;
+  if (GAMES997_ON && /^Tiles board\b/i.test(it.t) && typeof tnBoardTap === 'function' && tnBoardTap()) return true;   // 0.99.7 (GM1): Tiles night's boards are its rounds
   if (TL_GAME && tilesSeated()) { deviceShow('tiles'); return true; }
   const room = roomAt(...cellAt(at.x, at.z)), own = tilesBoardSeats(it);
   const seats = [...PLACE_OF.values()].map(pl => [pl, placeSpot(pl.id)])
@@ -58213,7 +58308,7 @@ function tilesNightNews(r, you) {   // the night's results into the save and the
   if (you) lines.push('The new hand turned up to Tiles night.');
   newsAdd({ id: 'tiles-night:' + r.day, kind: 'gossip', weight: .6, life: 3, seed: r.games.flatMap(g => [g.a, g.b]).slice(0, 6), lines });
 }
-onSim('tradition', d => { if (!d || !/^tiles/i.test(d.id || '')) return; tilesNightNews(tilesNight(d.day, d.came || []), !!d.you); });
+onSim('tradition', d => { if (!d || !/^tiles/i.test(d.id || '')) return; tilesNightNews(GAMES997_ON && d.id === 'tiles-night' && typeof tnPaper === 'function' && tnPaper(d) || tilesNight(d.day, d.came || []), !!d.you); });   // 0.99.7 (GM1): the rounds as played
 const tilesTrophy = () => SHIP.tiles.beatRina !== null;   // for the deck architect: the trophy on your bunk shelf once you've beaten Rina
 
 // =====================================================================
@@ -58828,6 +58923,264 @@ function ldCrewDisc() {                                  // after the crowd is p
   if (V.m) V.m.visible = on;
   if (on) { const w = ldWorld(V.d.x, V.d.z); V.m.position.set(w.x, V.d.y, w.z); V.m.rotation.y = clock.elapsedTime * 12; V.halo.material.color.copy(V.c[V.d.by]); }
   V.n = 0; V.d = null;
+}
+// ---- 0.99.7 (GM1, plans/patch-0997.md; GAMES997_ON, off = the game as 0.99.6) ----
+// g997T(key, vars): a text from content/works/games-0997.lines with {name} {n} {max} {a} {b} {time} filled, or null
+function g997T(key, v = {}) {
+  const t = typeof careerText === 'function' ? careerText(key) : null; if (!t) return null;
+  return t.replace(/\{(\w+)\}/g, (m, k) => v[k] !== undefined && v[k] !== null ? String(v[k]) : m);
+}
+// note 41 (the user: "the tiles tutorial makes no sense: it uses terms it never explains"): How to play, step by step, one
+// idea a step, every word (mark, dock, step, jump, hold, launch, home rows, the glowing rings and the spark) explained the
+// first time it comes up. The same TL_TUT shape (t(name, R), wait), so Next, Skip and moving on by itself work as before
+if (GAMES997_ON) {
+  const W = { 6: 'sel', 7: 's', 8: 'j', 10: 'l', 11: 'dock' }, steps = [];
+  for (let k = 1; k <= 12; k++) { const old = TL_TUT[Math.min(k - 1, TL_TUT.length - 1)];
+    steps.push(Object.assign({ t: (n, R) => g997T('tip.tiles.tut.' + k, { name: n, n: R && R.target, max: R && R.turns }) || old.t(n, R) }, W[k] ? { wait: W[k] } : {})); }
+  if (careerText('tip.tiles.tut.12')) TL_TUT.splice(0, TL_TUT.length, ...steps);
+}
+// notes 12 and 40 (the user: "Tiles night doesn't work"; "it should work like the smaller tiles ladder"): before, joining
+// was only a seat in the lounge and nobody played anybody. Now the night runs in rounds (TN_ROUNDS of TN_GAME ship minutes,
+// from TN_START after the start). Each round the crew there are paired (round 1: Rina first, the champion always gets a
+// game; then winners meet winners, no rematch where it can be helped; an odd one out watches), and each pair is sent
+// (section 14's crewComeTo, as the ladder's tladSend) to the two facing seats of a Tiles board, where they sit and play.
+// Who wins a crew game: TL_ODDS by their levels (schedU k 809), and Rina's story rule (she wins every crew game until
+// you've beaten her). tnNight is pure (plans and hashes), so a reload plays the same night, and the news and the Tiles app
+// tell the night you saw. A tap on Rina, anyone at it or a board joins you (as the ladder's card: play in the rounds or
+// watch); in, you're given an opponent each round (the odd one out, else whoever's nearest you on wins) at a board and
+// play the real game (time stops, as at any board). Your games are only in TN (nothing saved but the night's record)
+const TN_ID = 'tiles-night', TN_GAME = 25, TN_GAP = 2, TN_START = 5, TN_ROUNDS = 3;
+const TN = { key: null, k: -1, seat: {}, rel: {}, by: {}, done: {} };   // by[key]: { you: null | 'in' | 'playing', mine: { k: { opp, w } }, seat, opp, yk }
+function tnEvent(now) { const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440; return eventsOn(d).find(e => e.id === TN_ID && m >= e.from && m < e.to) || null; }
+function tnTimes(e) {                                    // the rounds' [from, to], minutes from midnight
+  const out = [], g = Math.min(TN_GAME, Math.max(10, e.to - e.from - TN_START));
+  for (let k = 0; k < TN_ROUNDS; k++) { const a = e.from + TN_START + k * (g + TN_GAP); if (a + g > e.to && k) break; out.push([a, Math.min(e.to, a + g)]); }
+  return out;
+}
+const tnP = id => { try { return ROSTER.find(x => x.id === id) || { id, seed: idHash(id) }; } catch (e) { return { id, seed: 0 }; } };
+// the whole night on paper: mine = your games ({ k: { opp, w: 'you' | opp | 'draw' | null } }); { T, rounds: [[{ a, b, w }]],
+// wins, out: [id | null], present: [[ids]] }. Rina's rule round by round: beaten on an earlier day, or by you in an earlier round
+function tnNight(e, mine = {}) {
+  const d = e.day, B = (d - 1) * 1440, T = tnTimes(e), seg = new Map();
+  for (const p of schedPeople()) { const s = planDay(p, d).find(x => evTagId(x.tag) === e.id); if (s) seg.set(p.id, [s.from - B, s.to - B]); }
+  const wins = {}, met = new Set(), rounds = [], out = [], present = [], R = SHIP.tiles.beatRina;
+  let beaten = R !== null && R < d;
+  T.forEach(([a, b], k) => {
+    const my = mine[k], here = [...seg.keys()].filter(id => seg.get(id)[0] <= a + 2 && seg.get(id)[1] >= b - 2);
+    present.push(here.slice());
+    const pool = here.filter(id => !(my && id === my.opp)).sort((x, y) => (wins[y] | 0) - (wins[x] | 0) || (k ? 0 : (y === 'rina') - (x === 'rina'))
+      || schedU(tnP(x).seed | 0, d * 8 + k, 808) - schedU(tnP(y).seed | 0, d * 8 + k, 808) || (x < y ? -1 : 1));
+    const games = [], used = new Set();
+    for (let i = 0; i < pool.length; i++) {
+      const x = pool[i]; if (used.has(x)) continue;
+      const rest = pool.slice(i + 1).filter(y => !used.has(y)), y = rest.find(z => !met.has(x + '|' + z)) || rest[0]; if (!y) break;
+      used.add(x); used.add(y); met.add(x + '|' + y); met.add(y + '|' + x);
+      const pa = tnP(x), pb = tnP(y);
+      const w = (x === 'rina' || y === 'rina') && !beaten ? 'rina' : schedU((pa.seed | 0) ^ (pb.seed | 0), d * 8 + k, 809) < TL_ODDS[tilesStyle(pa).level][tilesStyle(pb).level] ? x : y;
+      wins[w] = (wins[w] | 0) + 1; games.push({ a: x, b: y, w });
+    }
+    if (my) { met.add('you|' + my.opp); met.add(my.opp + '|you'); if (my.w === 'you' || my.w === my.opp) wins[my.w] = (wins[my.w] | 0) + 1; if (my.w === 'you' && my.opp === 'rina') beaten = true; games.push({ a: 'you', b: my.opp, w: my.w }); }
+    rounds.push(games); out.push(pool.find(id => !used.has(id)) || null);
+  });
+  return { T, rounds, wins, out, present };
+}
+// your opponent in round k: the odd one out, else whoever's nearest you on wins (from the bottom of the order), no rematch
+// where it can be helped, not Rina in the first round when there's anyone else
+function tnOpp(e, mine, k) {
+  const N = tnNight(e, Object.fromEntries(Object.entries(mine).filter(([j]) => +j < k))), here = N.present[k] || []; if (!here.length) return null;
+  if (N.out[k]) return N.out[k];
+  const yw = N.wins.you | 0, played = new Set(Object.values(mine).map(x => x.opp));
+  const c = here.filter(id => !(k === 0 && id === 'rina' && here.length > 1)).map((id, i) => [id, Math.abs((N.wins[id] | 0) - yw) + (played.has(id) ? 10 : 0), i]);
+  c.sort((x, y) => x[1] - y[1] || y[2] - x[2]); return c.length ? c[0][0] : here[0];
+}
+// the boards: each Tiles board's two seats that face each other across it (DECKS[3].tiles.boards' seat lists)
+function tnBoards() {
+  const T = DECKS[3] && DECKS[3].tiles; if (!T || !T.boards) return [];
+  return T.boards.map(b => { let best = null, bs = 1e9; const l = b[5] || [];
+    for (let i = 0; i < l.length; i++) for (let j = i + 1; j < l.length; j++) { const p = placeSpot(l[i]), q = placeSpot(l[j]); if (!p || !q) continue;
+      const s = Math.cos((p.face || 0) - (q.face || 0)) + .1 * Math.hypot(p.x - q.x, p.z - q.z); if (s < bs) { bs = s; best = [l[i], l[j]]; } }
+    return best; }).filter(Boolean);
+}
+function tnSend(id, seat, until) {
+  const p = schedPeople().find(q => q.id === id); if (!p) return;
+  if (TN.rel[id]) TN.rel[id]();
+  TN.rel[id] = crewComeTo(p, seat, null, { until }); TN.seat[seat] = id;
+}
+function tnFreeAll() { for (const id of Object.keys(TN.rel)) TN.rel[id](); TN.rel = {}; TN.seat = {}; }
+const tnName = id => id === 'you' ? 'You' : tjFirst(id);
+function tnChamp(N) { const w = Object.entries(N.wins).sort((x, y) => y[1] - x[1] || (y[0] === 'rina') - (x[0] === 'rina') || (x[0] < y[0] ? -1 : 1))[0]; return w ? { id: w[0], n: w[1] } : null; }
+function tnMinute(now) {
+  const e = typeof deckDef !== 'undefined' && deckDef.num === 3 ? tnEvent(now) : null;
+  if (!e) { if (TN.key) { tnFreeAll(); TN.key = null; TN.k = -1; } return; }
+  const key = e.id + '@' + e.day, Y = TN.by[key] || (TN.by[key] = { you: null, mine: {}, seat: null, opp: null, yk: -1 }), m = now - (e.day - 1) * 1440, B = (e.day - 1) * 1440;
+  if (TN.key !== key) { tnFreeAll(); TN.key = key; TN.k = -1; }
+  const T = tnTimes(e), k = T.findIndex(([a, b]) => m >= a && m < b);
+  if (Y.you === 'playing') {                             // your game: the one across stays; once you're up, the result is in (onSim 'tiles') or you left
+    if (typeof ACT !== 'undefined' && ACT && ACT.kind === 'tiles' && ACT.placeId === Y.seat) { if (Y.opp) tnSend(Y.opp, Y.oseat, Math.max(now + 30, B + (T[Y.yk] || [0, m])[1] + 3)); return; }
+    const my = Y.mine[Y.yk]; if (TN.rel[Y.opp]) { TN.rel[Y.opp](); delete TN.rel[Y.opp]; }
+    if (!my || !my.w) { delete Y.mine[Y.yk]; Y.you = null; toast(e.name, g997T('tiles.night.out') || 'You\'re out of tonight\'s rounds.'); } else Y.you = 'in';
+  }
+  if (k !== TN.k) {
+    const was = TN.k; tnFreeAll(); TN.k = k;
+    if (was >= 0 && k < 0 && SHIP.events.joined.includes(key) && T[was + 1]) toast(e.name, g997T('tiles.night.round', { n: was + 1, time: hhmm(T[was + 1][0]) }) || 'Round ' + (was + 1) + ' is over.');
+    if (k >= 0) {
+      if (Y.you === 'in' && !Y.mine[k]) { const o = tnOpp(e, Y.mine, k); if (o) Y.mine[k] = { opp: o, w: null }; }
+      const N = tnNight(e, Y.mine), boards = tnBoards(), until = B + T[k][1] + 3, players = new Set(N.rounds[k].flatMap(g => [g.a, g.b]));
+      const ok = s => { const h = heldBy(s); return !h || !h.p || players.has(h.p.id); }, mine = N.rounds[k].find(g => g.a === 'you');
+      const free = (s, o) => { const h = heldBy(s); return !h || !h.p || h.p.id === o; };
+      if (mine) {                                        // yours first, at a board nobody's at (or else one the players are leaving)
+        const bi = Math.max(0, boards.findIndex(bd => bd.every(s => free(s, mine.b)))), bd = boards.length ? boards.splice(bi, 1)[0] : null;
+        if (bd) { Object.assign(Y, { seat: bd[0], oseat: bd[1], opp: mine.b, yk: k, you: 'seat', by: now + 6 }); tnSend(mine.b, bd[1], until); }
+      }
+      for (const g of N.rounds[k]) {
+        if (g.a === 'you') continue;
+        const bi = boards.findIndex(bd => bd.every(ok)); if (bi < 0) continue;   // no board clear for them: they watch this one
+        const [s1, s2] = boards.splice(bi, 1)[0]; tnSend(g.a, s1, until); tnSend(g.b, s2, until);
+      }
+    }
+  }
+  if (Y.you === 'seat') {                                // you sit down as soon as your seat's clear (someone who played there last round may still be getting up)
+    const h = heldBy(Y.seat);
+    if (!h || !h.p) {
+      Y.you = 'playing';
+      actStart('tiles', Y.seat, { pose: 'sit:play', title: e.name, flavour: g997T('tiles.night.seat', { n: Y.yk + 1, name: tjFirst(Y.opp) }) || 'Round ' + (Y.yk + 1) + '. You sit down across from ' + tjFirst(Y.opp) + '.',
+        board: [Y.seat, Y.oseat], mode: 'full', st: 'wait', opp: Y.opp, seat: Y.oseat, since: now, here: false });   // waits for them (tilesSeatTick), not whoever's free
+    } else if (now > Y.by || k !== Y.yk) { delete Y.mine[Y.yk]; Y.you = 'in'; if (TN.rel[Y.opp]) { TN.rel[Y.opp](); delete TN.rel[Y.opp]; } }   // never cleared: you sit this round out, still in for the next
+  }
+  if (!TN.done[key] && m >= T[T.length - 1][1]) {      // the night's result
+    TN.done[key] = true; const N = tnNight(e, Y.mine), c = tnChamp(N), yours = Object.values(Y.mine).filter(x => x.w);
+    if (c && SHIP.events.joined.includes(key)) toast(e.name, (yours.length ? g997T('tiles.night.endYou', { name: tnName(c.id), n: c.n, a: yours.filter(x => x.w === 'you').length, b: yours.length }) : g997T('tiles.night.end', { name: tnName(c.id), n: c.n })) || 'Tiles night is over.');
+  }
+}
+if (GAMES997_ON) onSim('tiles', n => {                   // the end of a game of yours at Tiles night: its result into your rounds
+  const Y = TN.key && TN.by[TN.key]; if (!Y || Y.you !== 'playing' || !n || n.opp !== Y.opp || !Y.mine[Y.yk]) return;
+  const w = TL_GAME && TL_GAME.s ? TL_GAME.s.win : (n.win ? 0 : 1); Y.mine[Y.yk].w = w === 0 ? 'you' : w === 1 ? Y.opp : 'draw';
+});
+// the join (tradJoin asks this for Tiles night): it counts as joining, then the card: play in the rounds, or watch
+function tnJoin(e, a, notice, lead) {
+  const d = e.day, now = shipNow(), q = schedPeople().find(p => p.id === (lead || a.p.id)) || a.p, key = e.id + '@' + d;
+  eventJoin(e, d, now, notice);
+  const watch = () => { const s = TRAD_JOIN[e.id], near = tjAgent(lead) || a, sp = tradSpot(e, near.x, near.z); if (!sp) return;
+    const [pl, spot] = sp; actStart('tj:' + e.id, pl.id, { title: e.name, after: notice, end: (d - 1) * 1440 + e.to, tj: key, pose: tradPose(s, pl, spot), company: typeof ixBond === 'function' ? ixBond(spot) : 1 }); };
+  if (typeof dialogueShow !== 'function') { watch(); return true; }
+  let picked = false;
+  MEETING_SCRIPTS['tiles.night'] = { title: e.name, gist: 'Tiles night in the bow lounge.', noCount: true,
+    onEnd: () => { if (!picked) watch(); },
+    onPick: k => { picked = true; watch(); if (k === 0) tnIn(e); },
+    lines: [{ who: q.id, text: g997T('tiles.night.ask') || 'Tiles night: three rounds. Play, or watch first?' },
+      { choice: [{ text: g997T('tiles.night.play') || 'Play in the rounds', rel: { [q.id]: 1 }, reply: { who: q.id, text: g997T('tiles.night.playReply') || 'Good. Next round you\'re at a board.' } },
+        { text: g997T('tiles.night.watch') || 'Watch', reply: { who: q.id, text: g997T('tiles.night.watchReply') || 'Pull up a chair. Tap me if you want a game.' } }] }] };
+  dialogueShow('tiles.night', { id: 'tiles.night@' + d, who: [q.id], at: now, where: { deck: 3, room: /^Bow lounge$/ } });   // where: open while you're in the lounge (meetingsTick closes a card whose place you've left)
+  return true;
+}
+function tnIn(e) {                                        // you're in from the next round (the one on now if it has only just begun)
+  const key = e.id + '@' + e.day, Y = TN.by[key] || (TN.by[key] = { you: null, mine: {}, seat: null, opp: null, yk: -1 }), m = shipNow() - (e.day - 1) * 1440;
+  if (Y.you) { toast(e.name, g997T('tiles.night.you') || 'You\'re in.'); return true; }
+  Y.you = 'in'; const T = tnTimes(e), k = T.findIndex(([a, b]) => m >= a && m < b);
+  if (k >= 0 && m - T[k][0] <= 3 && TN.key === key && !Y.mine[k]) TN.k = -2;   // the round's just begun: you're in it (tnMinute sets it up again, with you)
+  const nx = T.find(([a]) => a > m); toast(e.name, k >= 0 && TN.k === -2 || !nx ? g997T('tiles.night.you') || 'You\'re in.' : g997T('tiles.night.next', { time: hhmm(nx[0]) }) || 'You\'re in the next round.');
+  return true;
+}
+// already joined: a tap on Rina or anyone at it, or a board, puts you in the rounds
+function tnAgain(a) {
+  if (typeof deckDef === 'undefined' || deckDef.num !== 3) return false;
+  const now = shipNow(), e = tnEvent(now); if (!e || !SHIP.events.joined.includes(e.id + '@' + e.day)) return false;
+  if (a) { const o = eventOf(a.p, now); if (!(o && o.now && o.e.id === TN_ID) && !Object.values(TN.seat).includes(a.p.id)) return false; }
+  return tnIn(e);
+}
+function tnBoardTap() {                                   // a Tiles board tapped on Tiles night: join (the card), or in the rounds
+  const now = shipNow(), e = typeof deckDef !== 'undefined' && deckDef.num === 3 ? tnEvent(now) : null; if (!e) return false;
+  if (SHIP.events.joined.includes(e.id + '@' + e.day)) return tnAgain(null);
+  const lead = typeof tradLeader === 'function' ? tradLeader(e) : null, a = (lead && tjAgent(lead)) || DECK_CREW.find(c => c.p && c.settled && (eventOf(c.p, now) || {}).e === e);
+  if (!a) return false;
+  return tradJoin(e, a);
+}
+// the Tiles app while it's on (section 23's view asks): the round, who's at a board, the results so far
+function tnAppBlocks() {
+  const now = shipNow(), e = tnEvent(now); if (!e) return [];
+  const key = e.id + '@' + e.day, Y = TN.by[key] || { mine: {} }, N = tnNight(e, Y.mine), m = now - (e.day - 1) * 1440, k = N.T.findIndex(([a, b]) => m >= a && m < b);
+  const done = N.T.filter(([, b]) => b <= m).length, out = [{ kind: 'text', mark: 'head', text: g997T('tiles.night.head', { n: Math.max(1, k >= 0 ? k + 1 : done), max: N.T.length }) || 'Tiles night' }];
+  if (k >= 0) for (const g of N.rounds[k]) out.push({ kind: 'text', text: g997T('tiles.night.board', { a: tnName(g.a), b: tnName(g.b) }) || g.a + ' and ' + g.b });
+  else { const nx = N.T.find(([a]) => a > m); if (nx) out.push({ kind: 'text', text: g997T('tiles.night.next.app', { time: hhmm(nx[0]) }) || 'Next round at ' + hhmm(nx[0]) + '.' }); }
+  for (let j = 0; j < done; j++) for (const g of N.rounds[j]) if (g.w) out.push({ kind: 'text', text: g.w === 'draw' ? g997T('tiles.night.draw', { a: tnName(g.a), b: tnName(g.b) }) || 'A draw.'
+    : g997T('tiles.night.beat', { a: tnName(g.w), b: g.w === g.a ? (g.b === 'you' ? 'you' : tnName(g.b)) : (g.a === 'you' ? 'you' : tnName(g.a)) }) || g.w + ' won.' });
+  return out;
+}
+// the night's record for the news and the Tiles app (section 23's tilesNightNews), from the rounds: tilesNight's shape; the crew's games (yours were live)
+function tnPaper(d) {
+  const e = d && eventsOn(d.day).find(x => x.id === TN_ID); if (!e) return null;
+  const Y = TN.by[e.id + '@' + e.day] || { mine: {} }, N = tnNight(e, Y.mine), games = [];
+  for (const r of N.rounds) for (const g of r) if (g.w && g.w !== 'draw' && g.a !== 'you') games.push({ a: g.a, b: g.b, win: g.w });
+  return { day: e.day, games, out: null };
+}
+if (GAMES997_ON) { TRAD_JOIN[TN_ID] = Object.assign({}, TRAD_JOIN[TN_ID], { pose: 'sit:talk', what: 'play Tiles in the rounds, or watch' }); }
+// note 44 (the user: Winner Stays On "you should see people playing more"; "you get a chance to play too after watching: the
+// event arrow points to the stands, and a menu there offers you a slot to play"). With GAMES997_ON: the crew's games are
+// WSO_GAME 20 ship minutes (section 18, was 15), and the next challenger waits on the gate bench by the court during the
+// game before theirs (wsoWhere), so the change-over is a short walk and most of each game is a rally you can watch. It's
+// joinable like any tradition (TRAD_JOIN below: the marker, the arrow and the tip once you're in the stands; a tap on the
+// one leading it sits you in the stands to watch). Once you've watched a game end, Pell's card offers you the next game; in,
+// when the game on now ends you play whoever stays on (section 23b's discAsk, as a tap on the gate did). Win and you stay
+// on: the card offers the next challenger; lose and you're back in the stands. Nothing saved (REC.wso keeps your run)
+const W997 = { key: null, since: null, asked: false, next: false, at: null, play: null };
+if (GAMES997_ON) { TRAD_JOIN['rec-wso'] = { host: 'pell', pose: 'sit:talk', need: 'leisure', gain: 12, also: { social: 6 }, verb: 'watch from the stands', what: 'watch the games from the stands' }; tjActs(); }
+function w997Card(e, lines, onPick) {                    // Pell's card (or whoever's leading it, when he isn't on the deck)
+  const lead = (tjAgent('pell') && 'pell') || (typeof tradLeader === 'function' && tradLeader(e)) || 'pell';
+  if (typeof dialogueShow !== 'function') return false;
+  let picked = false;
+  MEETING_SCRIPTS['wso.ask'] = { title: e.name, gist: 'Winner Stays On at the Lightdisc court.', noCount: true, onEnd: () => { if (!picked) onPick(1); },
+    onPick: k => { picked = true; onPick(k); }, lines: [{ who: lead, text: lines[0] }, { choice: [{ text: lines[1], reply: { who: lead, text: lines[2] } }, { text: lines[3], reply: { who: lead, text: lines[4] } }] }] };
+  dialogueShow('wso.ask', { id: 'wso.ask@' + e.day + ':' + shipNow(), who: [lead], at: shipNow(), where: { deck: 7, room: /^(Stands|Lightdisc court)$/ } });
+  return true;
+}
+function w997Ask(e) {
+  W997.asked = true;
+  return w997Card(e, [g997T('wso.ask') || 'Fancy a go? You\'d be next on court.', g997T('wso.play') || 'Play the next game', g997T('wso.playReply') || 'You\'re next.',
+    g997T('wso.watch') || 'Keep watching', g997T('wso.watchReply') || 'Tap me when you fancy a game.'], k => { if (k === 0) { W997.next = true; W997.at = shipNow(); } });
+}
+function w997Watch(e) {                                   // back to a seat in the stands
+  const s = TRAD_JOIN['rec-wso'], near = tjAgent('pell') || { x: player.obj.position.x, z: player.obj.position.z }, sp = tradSpot(e, near.x, near.z); if (!sp) return;
+  const [pl, spot] = sp; actStart('tj:rec-wso', pl.id, { title: e.name, end: (e.day - 1) * 1440 + e.to, tj: e.id + '@' + e.day, pose: tradPose(s, pl, spot), company: typeof ixBond === 'function' ? ixBond(spot) : 1, quiet: true });
+}
+function w997Go(id) {                                     // on court against id
+  const d = SHIP.time.day, p = schedPeople().find(q => q.id === id); if (!p) return false;
+  if (!REC.wso || REC.wso.day !== d) REC.wso = { day: d, run: 0, won: SHIP.disc.won, played: SHIP.disc.played };
+  W997.play = { opp: id, won: SHIP.disc.won, played: SHIP.disc.played };
+  toast('Winner Stays On', g997T('wso.up', { name: tjFirst(id) }) || 'You\'re up against ' + tjFirst(id) + '.');
+  discAsk(p); return true;
+}
+function w997Minute(now) {
+  const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, e = REC_DECK && typeof deckDef !== 'undefined' && deckDef.num === 7 ? eventsOn(d).find(x => x.id === 'rec-wso' && m >= x.from && m < x.to) : null;
+  if (!e) { W997.key = null; W997.next = false; return; }
+  const key = e.id + '@' + d; if (W997.key !== key) Object.assign(W997, { key, since: null, asked: false, next: false, at: null, play: null });
+  if (!SHIP.events.joined.includes(key)) return;
+  const c = wsoCourt(d); if (!c) return;
+  if (W997.play) {                                        // your game: once it's over, stay on or back to the stands
+    if (DISC.g || typeof ACT !== 'undefined' && ACT && ACT.kind === 'disc') return;
+    const P = W997.play; W997.play = null; if (SHIP.disc.played === P.played) { w997Watch(e); return; }   // walked off before it began
+    if (SHIP.disc.won > P.won) {
+      const g = c.games.find(x => x.from <= m && m < x.to) || c.games.find(x => x.from > m), nx = g && (g.b !== P.opp ? g.b : g.a);
+      if (nx) { w997Card(e, [g997T('wso.stay', { name: tjFirst(nx) }) || 'You stay on!', g997T('wso.stayOn') || 'Stay on', g997T('wso.playReply') || 'You\'re next.', g997T('wso.back') || 'Back to the stands', g997T('wso.watchReply') || 'Fair enough.'],
+        k => { if (k === 0) w997Go(nx); else w997Watch(e); }); return; }
+    }
+    toast('Winner Stays On', g997T('wso.lost') || 'Back to the stands.'); w997Watch(e); W997.asked = true; return;
+  }
+  const watching = typeof ACT !== 'undefined' && ACT && ACT.kind === 'tj:rec-wso';
+  if (W997.since === null && watching) W997.since = m;
+  if (W997.next) {                                        // your name's down: when the game on now ends, you're on
+    const g = c.games.find(x => x.from <= m && m < x.to);
+    if (g && g.from <= W997.at - (d - 1) * 1440) return;  // that game's still on
+    W997.next = false; const n = c.games.find(x => x.from <= m && m < x.to) || c.games.find(x => x.from > m);
+    if (n) { if (ACT) actEnd(true); w997Go(n.a); }
+    return;
+  }
+  if (!W997.asked && watching && W997.since !== null && c.games.some(x => x.to > W997.since && x.to <= m)) w997Ask(e);   // you've watched a game end
+}
+function w997Tap(a) {                                     // joined and watching: a tap on Pell (or whoever's leading) asks again
+  const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, e = REC_DECK && eventsOn(d).find(x => x.id === 'rec-wso' && m >= x.from && m < x.to);
+  if (!e || !SHIP.events.joined.includes(e.id + '@' + d) || W997.play || W997.next) return false;
+  if (a && a.p && a.p.id !== 'pell' && a.p.id !== tradLeader(e)) return false;
+  return w997Ask(e);
 }
 // ---- end of slot: Games engineer ----
 
@@ -77690,7 +78043,7 @@ const clock = new THREE.Clock(); let scrT = 0;
 function loop() {
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
   const run = !freezeSync();                             // section 15's pause (0.28.48) and a game of Tiles (0.28.50): nothing moves and ship time stands still; the view still draws
-  SND.frame(run);                                        // section 27: sound suspends with pause, Tiles and a hidden tab; its loops tick
+  SND.frame(run || GAMES997_ON && !!(DISC.view && !PAUSE.on));   // section 27: sound suspends with pause, Tiles and a hidden tab; its loops tick. 0.99.7 note 44 (GM1): not in a Lightdisc game (the track playing goes on)
   if (PAD.live) padTick(dt);                             // section 26: a game controller, once one has said hello (frozen or not: the panels)
   if (!run) clock.elapsedTime -= dt;                     // the frame clock too, so poses and blinks carry on where they stopped (0.28.50)
   if (run) {
