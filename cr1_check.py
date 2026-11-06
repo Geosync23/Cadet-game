@@ -91,7 +91,7 @@ def part_cart(g):
     check(on['haul0'] is None and off['haul0'] == 'cart', f"cart: hauling, no cart before the dock (off: as before) ({on['haul0']}, {off['haul0']})")
     check(off['tags'] == ['pickup', 'drop'] and off['bring'].startswith('a hover cart'), f"cart off: as before ({off})")
 
-MIX = """(() => { __sw(%s); const W = __w(%d, 360, { xp: 20, tr: %s }); SHIP.jobs.length = 0;
+MIX = """(() => { __sw(%s); const W = __w(%d, 360, { xp: 20, tr: %s, test: { tier: 2, day: 8, tries: 1, passed: true } }); SHIP.jobs.length = 0;
   const ms = machineList().filter(m => TUNABLE.has(m.kind) && !ENGINE_KINDS.has(m.kind) && jobTier({ machine: m.id }) <= 1 && m.deck !== 1 && !JOB_FOR[(SHIP.machines[m.id] || {}).state]);
   for (const m of ms) SHIP.machines[m.id].drift = 0; if (ms[0]) SHIP.machines[ms[0].id].drift = 1; if (ms[1]) SHIP.machines[ms[1].id].drift = -1;
   const rm = machineList().find(m => !ms.slice(0, 2).includes(m) && !ENGINE_KINDS.has(m.kind) && !m.stub && jobTier({ machine: m.id }) <= 1 && panelPlace(m.id));
@@ -113,11 +113,11 @@ def part_mix(g):
     check(old['order'] == ['tune', 'rounds'] and all(not k.startswith('rounds') or 13 <= hr(k) < 15 for k in old['kinds']), f"mix: learned long ago, a round 13:00-15:00 as before ({old['order']}, {old['kinds']})")
     check(not off['kinds'], f"mix off: FX19, none while a repair of your trade is up ({off['kinds']})")
     td = g.ev("""(() => { __sw(true); const W = __w(8, 600, { xp: 20, tr: { m1: 2, m5: 4 }, test: { tier: 2, day: 8, tries: 0, passed: false } }); W.tr.m6 = 8;
-      return boardNewPost(8 * 24 + 10 - 24, SHIP.jobs, shipNow(), 600, 1020); })()""")
-    check(td is None, f"mix: nothing extra on the Tier 2 test's day ({td})")
+      const r = boardNewPost(8 * 24 + 10 - 24, SHIP.jobs, shipNow(), 600, 1020); return r === undefined ? null : 'posted'; })()""")
+    check(td is None, f"mix: from Day 8 until the test is passed, FX19's post as before ({td})")
     hook = g.ev("""(() => { __sw(true); boardNewAdd({ mech: 'm9', kind: 'crtest', make: c => ({ id: 'crtest@' + c.h, machine: null, deck: 5, room: 'w', kind: 'chore', chore: 'crtest', target: 'x', title: 'A test chore', tier: 1,
         stops: [{ deck: 5, placeId: '5-timeclock-1', mins: 5, tag: 'x' }], urgency: 0, posted: c.t, found: c.t, claimedBy: null, parts: [], status: 'open', ...c.o }) });
-      const W = __w(9, 360, { xp: 20, tr: { m1: 2, m5: 4, m9: 8 } }); const out = { order: boardNewKinds(9).map(k => k.kind) };
+      const W = __w(9, 360, { xp: 20, tr: { m1: 2, m5: 4, m9: 8 }, test: { tier: 2, day: 8, tries: 1, passed: true } }); const out = { order: boardNewKinds(9).map(k => k.kind) };
       setShipNow(8 * 1440 + 600); boardNewPost(8 * 24 + 10, SHIP.jobs, shipNow(), 600, 1020); out.first = SHIP.jobs.filter(j => j.trade).map(j => j.chore || j.kind);
       BOARD_NEW_MAKE.splice(BOARD_NEW_MAKE.findIndex(e => e.kind === 'crtest'), 1); return out; })()""")
     print('  (mix, another seat\'s kind)', hook)

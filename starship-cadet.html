@@ -65271,7 +65271,7 @@ function boardNewKinds(d) {                              // the kinds the board 
 function boardNewPost(h, jobs, t, m, end) {              // boardTopUp's trade post with the switch on: the job posted, or null (undefined: not ours)
   const W = SHIP.works, d = Math.floor(h / 24) + 1, B = (d - 1) * 1440; if (!BOARD_NEW_ON) return undefined;
   if (!W || m < BOARD_TRADE_FROM || end - m < BOARD_TRADE_LEFT) return null;
-  if (W.tier === 1 && W.test && !W.test.passed && W.test.day === d) return null;   // the Tier 2 test's day: nothing extra to tie your hands before it (an extra round taken at 11:00 held the arrow-follower past 16:00)
+  if (W.tier === 1 && d >= CR_SAME.from && !(W.test && W.test.passed)) return undefined;   // from Day 8 until the Tier 2 test is passed: FX19's post as before (an extra round taken at 10:00 held the arrow-follower past the test's hours; backlog CR1-2)
   const mine = jobs.filter(j => j.trade && j.found >= B); if (mine.length >= BOARD_NEW.max || mine.some(j => j.found > t - 60)) return null;
   const seed = machSeed('board:trade'), free = id => !jobs.some(x => x.machine === id && x.status !== 'done') && !JOB_FOR[(SHIP.machines[id] || {}).state];
   const o = { leave: end - m, extra: true, trade: true, xp: 0 }, up = kind => jobs.some(j => (kind === 'tune' || kind === 'rounds' ? j.kind === kind && boardTrade(j) : (j.chore || j.kind) === kind) && boardForYou(j, t));
