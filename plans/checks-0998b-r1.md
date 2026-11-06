@@ -40,3 +40,12 @@ what points you after a call home). p5retry_probe ran on an off copy (P5_RETRY_O
 
 **R1: OK on 0.99.8 candidate 2 (game 13681748...59fd3).** Every check in the share passes, and the five R5 checks
 run for BM27 pass; no OLD runs needed.
+
+## Two more R5 checks for BM27 (its container restarted again; asked ~22:45 UTC, run only here)
+
+| Check | Result | Key lines |
+|---|---|---|
+| R5_day_12 (day_check 12) | OK | DAY CHECK OK (416s) |
+| R5_day_17 (day_check 17) | OK | DAY CHECK OK (426s) |
+
+Same candidate bbb7bb0 and check files; side by side, each its own CADET_WORK.
