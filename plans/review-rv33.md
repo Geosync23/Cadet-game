@@ -38,5 +38,6 @@ EV1 and CL1 also checked merged together for first-week clashes.
   story to appear consistently. Suggested: shut only on opening their card.
 - Note 38: 575 talks have listen2 (the 4 without are smalltalk fillers); sample of 12 all answer the ask, then ask back;
   commonest opener "Not yet." 10 of 575. content_gen and lines_check changes are small and right.
+- Area checks on the switched-on copy of 85442de: TALK CHECK OK, SOCIAL CHECK OK, lines_check PASS (0 errors, 112 warnings, as before).
 - Note 39: joined hosted tradition rec-all-hands (marrow): 0 -> 3.2 (her relGain on +4); again same day: no change; not
   joined: no change; off: no change.
