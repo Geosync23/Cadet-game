@@ -13967,6 +13967,7 @@ const NEED_SAY = {
 };
 function needsLine() {
   const n = SHIP.player.needs, k = NEED_KEYS.slice().sort((a, b) => n[a] - n[b])[0];
+  if (TP998_BOOTH_ON && k === 'social' && n[k] < SLOW_BELOW && typeof homeCalledToday === 'function' && homeCalledToday()) return careerText('tp998.social.say') || 'You miss home. Your call\'s done today: find some company.';   // (TP1, after 0.99.7) the booths give nothing more today (backlog TP1-4)
   return bedText(n[k] < SLOW_BELOW ? NEED_SAY[k][0] : n[k] < 50 ? NEED_SAY[k][1] : 'You feel fine.');
 }
 // your bed's room by name for the texts that say "Bunk 1" (0.45.7, Step 4's loose end): after the move to your cabin
@@ -43493,6 +43494,8 @@ const LINES = JSON.parse([
   '{"text":"A bit lonely. You\'ve had your call home today: chat with someone, or eat with company.","id":"1x6p7zh"}]',
   ',"tp998.social.2":[',
   '{"text":"Really missing people. Find some company: the mess or the bow lounge.","id":"1272up"}]',
+  ',"tp998.social.say":[',
+  '{"text":"You miss home. Your call\'s done today: find some company.","id":"1t4umyd"}]',
   ',"trace.after":[',
   '{"text":"After: {word}","id":"5a9fih"}]',
   ',"trace.before":[',
