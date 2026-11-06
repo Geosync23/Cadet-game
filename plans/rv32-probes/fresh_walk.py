@@ -3,6 +3,7 @@
 # to the end of a day you name. Logs every tip as it is shown (tipShow), every arrow change and every action.
 # Usage (from a worktree of the build, so arrows_check.py and cadet_test.py are beside it):
 #   python3 /path/fresh_walk.py BUILD.html LAST_DAY [OUT.json] [--sleep HH:MM]   (to bed at HH:MM each night, default 22:30)
+# FW_UNTIL=HH:MM ends the last day early; FW_TRACE=js logs a value whenever it changes
 import sys, os, json
 args = sys.argv[1:]; BUILD, LAST = args[0], int(args[1]); OUT = args[2] if len(args) > 2 and not args[2].startswith('--') else None
 SLEEP = args[args.index('--sleep') + 1] if '--sleep' in args else '22:30'
@@ -22,11 +23,14 @@ with sync_playwright() as pw:
     print('start', pg.ev('clockText()'), 'intro on:', pg.ev("typeof introOn === 'function' && introOn()"), flush=True)
     f = Follower(pg); last_arrow = None
     for day in range(0, LAST + 1):
-        end = day * 1440 + hm(SLEEP)
+        end = day * 1440 + hm(SLEEP if not (day == LAST and os.environ.get('FW_UNTIL')) else os.environ['FW_UNTIL'])
         while pg.ev('shipNow()') < end:
             f.run(min(end, pg.ev('shipNow()') + 20))
             a = pg.ev("(() => { const g = goalNow(); return g ? g.label : null; })()")
             if a != last_arrow: log['arrows'].append((pg.ev('clockText()'), a)); last_arrow = a
+            if os.environ.get('FW_TRACE'):                 # FW_TRACE: a JS expression, logged whenever its value changes
+                v = pg.ev(os.environ['FW_TRACE'])
+                if v != log.get('_tr'): log.setdefault('trace', []).append((pg.ev('clockText()'), v)); log['_tr'] = v; print('  TRACE', pg.ev('clockText()'), v, flush=True)
             for x in f.acts: log['acts'].append(x)
             f.acts.clear()
         t = pg.ev('window.__tips.splice(0)'); log['tips'] += t; log['toasts'] += pg.ev('window.__toasts.splice(0)')
