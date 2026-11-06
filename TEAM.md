@@ -2395,3 +2395,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~14:18 UTC: Orange tree -> EV1 (C fix first; if Elif still there, check picks a free moment). BM26 R5 share complete (OK but B, F fixing); BM26 cadet matches R2, all differences explained. BM26 to explain R6's camera-turn swap that persists with all switches off (un-switched code).
 - ~14:23 UTC: CL1 G-store closed. **J** R3 controller_check G2 tiles (pad can't step through How to play / pick a tile) -> GM1 (note 41 tutorial); R3 OLD runs going. G1 12/12, G4 6/6 OK.
 - ~14:28 UTC: R3 final: FAIL 4 NEW (devmode D, arrows_d E, controller ending I, controller tiles J); rest OK (claude/checks-0997-r3 3a6b0f4). R1, R3, R4, R5 shares done; R2, R6 running.
+- ~14:35 UTC: **F fixed** check-side GM1 claude/p997-games 74dfedd (disc_check picks a real pair from the plans; OK on candidate + 0.99.6) -> BM26. R6 confirmed orange tree = EV1 (EV1-off PASS, others FAIL).
