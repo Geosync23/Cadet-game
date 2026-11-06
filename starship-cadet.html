@@ -16670,9 +16670,9 @@ function tp997DevWork(now) {
 // one call home a day (the relay's rule, 20c's homeCalledToday). Day 4's evening tip says the same, so it's marked seen.
 // Note 9: the Schedule tracker (the HUD's target button, 15b), from 06:00 on Day 1, any quiet moment of Days 1-3.
 // Both TEACH rows ('sure': when due, whatever the pacing), put at the front of TEACH so nothing passes them by.
-if (TP997.n9) TEACH.unshift(['t:tp997-trk', c => c.d >= 1 && c.d <= 3 && c.min >= 360 && !sleeping && !!trkBtn && !trkBtn.hidden && !!trkBtn.offsetWidth,
+if (TP997.n9) TEACH.unshift(['t:997trk', c => c.d >= 1 && c.d <= 3 && c.min >= 360 && !sleeping && !!trkBtn && !trkBtn.hidden && !!trkBtn.offsetWidth,
   () => careerText('tip.tp997.tracker') || 'The Schedule tracker, the target button under your needs, lists what\'s on now and next, and a few places. Tap one for an arrow; tap it again to stop.', { sure: true }]);
-if (TP997.n6) TEACH.unshift(['t:tp997-call', c => c.d === 2 && c.min < 22 * 60 && !sleeping && (c.min >= 19 * 60 || typeof homeCalledToday === 'function' && homeCalledToday() && !(ACT && ACT.kind === 'call')),
+if (TP997.n6) TEACH.unshift(['t:997call', c => c.d === 2 && c.min < 22 * 60 && !sleeping && (c.min >= 19 * 60 || typeof homeCalledToday === 'function' && homeCalledToday() && !(ACT && ACT.kind === 'call')),
   () => { SHIP.device.tipsSeen['t:eve-call'] = true; return careerText('tip.tp997.call') || 'One call home a day: the relay gives everyone aboard one call each ship day. The booths are yours again tomorrow.'; }, { sure: true }]);
 // 0.99.7 note 33 (TP1 for lead 49; TP997.n33; the user: "nowhere on the device to get at food you bought at the store and
 // eat it"). A snack or a drink you buy at the crew store goes in your pocket (SHIP.player.pack, at most TP997_PACK, names

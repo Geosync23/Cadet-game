@@ -91,8 +91,8 @@ def run_on(path, shots):
         g = Game(pw, path, 390, 844); g.step(3); new_game(g); g.ev(TIPS)
         g.ev("skipTo(introAbs(1, 6 * 60 + 10))")
         for i in range(60):                                # a tip card closes on a real-time timer: close the ones waiting, as a reader would
-            g.step(30); g.ev("while (TIP_Q.length && !/^t:tp997/.test(TIP_Q[0].id)) tipDone()")
-            if g.ev("!!SHIP.device.tipsSeen['t:tp997-trk']"): break
+            g.step(30); g.ev("while (TIP_Q.length && !/^t:997/.test(TIP_Q[0].id)) tipDone()")
+            if g.ev("!!SHIP.device.tipsSeen['t:997trk']"): break
         out['d1tips'] = g.ev("window.__tips.map(x => x.slice(0, 2))")
         g.ev("skipTo(introAbs(1, 9 * 60 + 20))"); g.step(10); dialogue_through(g)
         g.ev("(() => { const j = SHIP.jobs.find(x => x.reserved === 1); if (j.claimedBy !== 'you') claimJob(j.id); goToDeck(5); })()"); g.step(30)
@@ -108,8 +108,8 @@ def run_on(path, shots):
         g.ev("skipTo(introAbs(2, 19 * 60 + 2))"); g.step(10); dialogue_through(g)
         for i in range(20):
             g.step(60)
-            if any(t[1] == 't:tp997-call' for t in g.ev('window.__tips')): break
-        out['call'] = [t for t in g.ev('window.__tips') if t[1] == 't:tp997-call']; out['eveSeen'] = g.ev("!!SHIP.device.tipsSeen['t:eve-call']")
+            if any(t[1] == 't:997call' for t in g.ev('window.__tips')): break
+        out['call'] = [t for t in g.ev('window.__tips') if t[1] == 't:997call']; out['eveSeen'] = g.ev("!!SHIP.device.tipsSeen['t:eve-call']")
         g.page.screenshot(path=shots + '_call.png')
         out['errors2'] = [e for e in g.errors if e.startswith('pageerror')]
         g.close()
@@ -137,7 +137,7 @@ try:
     check(A['pack'] == ['a honey flapjack'] and A['save'] == ['a honey flapjack'] and A['hunger0'] == 40, f"33: a bought flapjack goes in your pocket, not eaten (hunger {A['hunger0']}), and into the save: {A['pack']} {A['save']} {A['payToast']!r}")
     check(A['eatBtn'] >= 1 and A['pack1'] == [] and A['hunger1'] == 47, f"33: Eat in Pockets: pocket {A['pack1']}, hunger 40 -> {A['hunger1']}: {A['eatToast']!r}")
     check('empty' in A['emptyText'], f"33: an empty Pockets says so: {A['emptyText']!r}")
-    check(any(t[1] == 't:tp997-trk' for t in A['d1tips']), f"9: the Schedule tracker tip on Day 1's morning: {A['d1tips']}")
+    check(any(t[1] == 't:997trk' for t in A['d1tips']), f"9: the Schedule tracker tip on Day 1's morning: {A['d1tips']}")
     check(len(A['devwork']) == 1 and A['devworkUp'] == 't:devwork', f"11: the device-at-work tip as the make step starts ({A['makeAt']}): {A['devwork']}, on screen {A['devworkUp']}")
     check(len(A['call']) == 1 and A['eveSeen'], f"6: Day 2's one-call-a-day tip after the booths' evening: {[c[:2] for c in A['call']]}, Day 4's marked seen {A['eveSeen']}")
     check(not A['errors'] and not A['errors2'], f"no page errors: {A['errors']} {A['errors2']}")

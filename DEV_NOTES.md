@@ -1455,8 +1455,8 @@ Section `// 19. DEVICE` sits **before** section 15 (after 14), so sections 15 an
 
 ### Tips, the device and HUD words for 0.99.7 (TP1 for lead 49, claude/p997-tips; switched off: `TP997_ON`)
 `var TP997_ON = false || URL_FLAGS.has('tp997')` (section 13, after TRAD995_ON) and `TP997 = { n6, n7, n9, n11, n28, n33, n53, n54 }`: each of the user's notes (plans/patch-0997.md) can be turned off alone. Off = 0.99.6 (cadet_test ALL IDENTICAL). Words: content/banks/tp997.lines (keys `tip.tp997.*`, `tp997.*`, `join997.<id>.tip/.notice`), read only with it on. Probe: `python3 plans/tp1-probes/tp997_probe.py BUILD.html` (makes its own switched-on copy; phone size; screenshots to $CADET_WORK/test/tp997_*.png).
-- **6** (Player engineer slot): TEACH row `t:tp997-call`, Day 2 from 19:00 (or once your Day 2 call has ended) to 22:00; marks Day 4's `t:eve-call` seen.
-- **9** (Player engineer slot): TEACH row `t:tp997-trk`, the Schedule tracker button, Days 1-3 from 06:00. Both rows are unshifted to the front of TEACH, `sure`.
+- **6** (Player engineer slot): TEACH row `t:997call`, Day 2 from 19:00 (or once your Day 2 call has ended) to 22:00; marks Day 4's `t:eve-call` seen.
+- **9** (Player engineer slot): TEACH row `t:997trk`, the Schedule tracker button, Days 1-3 from 06:00. Both rows are unshifted to the front of TEACH, `sure`.
 - **11** (one line at the top of teachTick, then `tp997DevWork` in the Player engineer slot): `t:devwork` as soon as a work step of 5+ minutes is under way (Days 1-7), via 15b's `tipFront`; never over a dialogue, a choice, sleep or the arrival.
 - **7** (Interactions engineer slot): a 4th TRK_PLACES row `place:loo` (title and sub are getters: LINES is not there yet at 15b's load). `tp997LooHere` (this deck: findPath for you, privatePlace) else `tp997LooAway` (DECKS[n].places, the lift order, nearest the lift; never Deck 1 from elsewhere, the Bridge's washroom is behind its doors).
 - **28** (HUD seat slot): `DECKS[7].blurb` gets ", flight sim".

@@ -518,7 +518,7 @@ with sync_playwright() as pw:
       const quiet = () => { clear(); Object.assign(POP, { toast: -1e9, card: -1e9, warn: -1e9, tip: -1e9, busy: false, panels: false }); document.getElementById('toast').classList.remove('show'); TOAST_AT = -1e9; };
       const tick = () => { t += 1000; POP.busy = false; return teachTick(t); };
       if (SHIP.intro) SHIP.intro.ended = true; deviceClose(); D.settings.tips = true;
-      for (const id of ids) delete D.tipsSeen[id]; for (const id of ['t:offshift', 't:eve-talk', 't:eve-hobby', 't:eve-trad', 't:eve-call']) D.tipsSeen[id] = true;   // the free-time tips (0.28.63) have their own timing
+      for (const id of ids) delete D.tipsSeen[id]; for (const id of ['t:offshift', 't:eve-talk', 't:eve-hobby', 't:eve-trad', 't:eve-call', ...(ids.includes('t:997call') ? ['t:997call', 't:997trk'] : [])]) D.tipsSeen[id] = true;   // the free-time tips (0.28.63) have their own timing; 0.99.7's Day 1-3 ones too (TP997_ON)
       Object.assign(SHIP.player.needs, { hunger: 40, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 });
       quiet(); const a = tick(); out.first = [a, !!D.tipsSeen[a], TIP_Q.length && TIP_Q[0].id, document.getElementById('devTip') && !document.getElementById('devTip').hidden];
       quiet(); POP.tip = t; out.gap = [tick()];                              // 3 minutes between tips
@@ -529,7 +529,7 @@ with sync_playwright() as pw:
       if (SHIP.intro) { SHIP.intro.on = true; SHIP.intro.ended = false; SHIP.intro.step = 'chief'; quiet(); out.intro = tick(); SHIP.intro.step = null; SHIP.intro.ended = true; }
       for (const id of ids) D.tipsSeen[id] = true; delete D.tipsSeen['t:rep']; quiet(); POP.tip = t; TEACH_ST.turnin = undefined; const m0 = SHIP.time.min, d0 = SHIP.time.day; SHIP.time.day = 1; SHIP.time.min = 600;
       out.rep = [SHIP.time.day, tick()]; TEACH_ST.turnin = shipNow() - 10; out.rep.push(tick() || 'not yet'); TEACH_ST.turnin = shipNow() - 40; out.rep.push(tick()); delete D.tipsSeen['t:rep']; TEACH_ST.turnin = undefined; SHIP.time.min = 1030; quiet(); POP.tip = t; out.rep.push(tick()); SHIP.time.min = m0; SHIP.time.day = d0;
-      for (const id of ids) delete D.tipsSeen[id]; for (const id of ['t:offshift', 't:eve-talk', 't:eve-hobby', 't:eve-trad', 't:eve-call']) D.tipsSeen[id] = true;   // the free-time tips (0.28.63) have their own timing
+      for (const id of ids) delete D.tipsSeen[id]; for (const id of ['t:offshift', 't:eve-talk', 't:eve-hobby', 't:eve-trad', 't:eve-call', ...(ids.includes('t:997call') ? ['t:997call', 't:997trk'] : [])]) D.tipsSeen[id] = true;   // the free-time tips (0.28.63) have their own timing; 0.99.7's Day 1-3 ones too (TP997_ON)
       quiet(); DEV.open = true; DEV.app = 'home'; out.dev = [tick()]; DEV.app = 'needs'; quiet(); out.dev.push(tick()); DEV.open = false; DEV.app = 'home';
       for (const id of ids) D.tipsSeen[id] = true; delete D.tipsSeen['t:queue']; delete D.tipsSeen['t:needs'];
       const was = ACT; ACT = { kind: 'queue', o: {}, def: {} }; quiet(); out.prio = [tick()]; ACT = was; quiet(); out.prio.push(tick());
@@ -776,6 +776,7 @@ with sync_playwright() as pw:
     cr1 = g.ev("SHIP.player.credits"); print('  credits', cr0, '->', cr1, '|', e['toast'][:100])
     check(cr1 == cr0 - b['basket']['price'] and e['toast'].startswith('Paid'), f"paying should cost {b['basket']['price']} credits: {cr0} -> {cr1}")
     if b['basket']['kind'] == 'comfort': check(g.ev("SHIP.player.locker.includes(%s)" % json.dumps(b['basket']['name'])), 'a comfort goes in your locker')
+    elif g.ev("typeof TP997 !== 'undefined' && TP997.n33"): check(g.ev("SHIP.player.pack.includes(%s)" % json.dumps(b['basket']['name'])), 'a snack goes in your pocket (0.99.7 note 33, TP997_ON)')
     else: check(e['needs']['hunger'] > hu0, 'a snack should feed you a little')
     g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 17 * 60 + 40); needsT = null"); g.step(5)   # dinner
     tp, b, seen, e, pk = servery_seat(g, 'Servery, then a seat'); peak = max(peak, pk)
@@ -877,7 +878,8 @@ with sync_playwright() as pw:
     print('The store (credits, snacks, comforts):')
     sh = g.ev(r"""(() => { const P = SHIP.player, n = P.needs; P.credits = 20; P.locker = []; n.social = 50; n.hunger = 50; for (const h of ['draw', 'puzzle', 'knit']) hobbyGive(h);   // the display offers hobby supplies first (0.28.63)
       basket = { ...storePick('comfort'), gift: null }; ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false); const a = [P.credits, P.locker.slice(), Math.round(n.social), basket];   // not a gift (0.28.25)
-      basket = { ...storePick('snack'), gift: null }; ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false); const b = [P.credits, P.locker.length, Math.round(n.hunger)];
+      const pk = typeof TP997 !== 'undefined' && TP997.n33; if (pk) P.pack = Array(TP997_PACK).fill('a honey flapjack');   // 0.99.7 note 33 (TP997_ON): pockets full, so it's eaten at the till as before
+      basket = { ...storePick('snack'), gift: null }; ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false); const b = [P.credits, P.locker.length, Math.round(n.hunger)]; if (pk) P.pack = [];
       P.credits = 1; basket = storePick('comfort'); const it = ITEMS.find(i => i.t === 'Counter'); it.hit.getWorldPosition(_wp); const r = playerTap(it, _wp.clone(), _wp.clone());
       const c = [r, !!ACT, basket, document.getElementById('tx').textContent];
       actEnd(true); P.credits = 1; P.locker = []; basket = { ...storePick('comfort'), gift: null }; ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false);   // too little at the till (0.28.39)
