@@ -1924,6 +1924,16 @@ with
 
 The four picture/speed switches (`PF_CAP_ON` `#pfcap`, `PF_PR_ON` `#pfpr`, `PF_SH_ON` `#pfsh`, `PF_NOAA` `#pfaa`) are built and off; the user parked them on 2026-11-01. Full record and how to switch one on: `plans/perf-options.md`. PF1's measurements: `plans/perf-0996.md`.
 
+## The 0.99.7 playtest patch: movement, crew walking, needs (MV1 for lead 49, claude/p997-move; six switches, all off)
+
+plans/patch-0997.md notes 2, 5, 19, 24, 45, and backlog EV1-1. The switches sit together in section 13 just above `saveGame` (var: 4e and 15 read them at load).
+- `MV_BRIEF_ON` (note 2): Day 1's briefing beat ('d1-briefing', section 21) gets `release` and `keep: 70`. 21b's `introKeep` keeps the speaker's own block (not Torres's) up to 70 minutes past 09:05 and ends it when the meeting's panel closes ('d1-briefing:end', introMeetEnded), at 09:05 when it was missed ('d1-briefing:met' -1, which `introReleased` adds to `introSig`, so the day is planned again). The cause: her block ended at 09:05 while the script runs about 80 real seconds (about 50 ship minutes). Intro only (the arrival's exception to the planner rule). Also (backlog MV1-2) the beat's `spot: '5-works-bay-lead-1'`: she stands at the bay's lead spot by the job board, not the room's first free place (the time clock, so a tap on the clock opened her chat).
+- `MV_WASD_ON` (note 5): section 11's slot, `keyWalkStep()` from `updateSteer`: W, A, S, D and the arrow keys set `player.steer` as the controller's stick does (up the screen whatever `az`), only with nothing open (26's `padPanel`), not frozen, not riding; keys in a text field or with Ctrl, Alt or Cmd are left alone.
+- `MV_FIT_ON` (note 19): section 15's `NEED_DRAIN.fitness` 0.9/0.3 to 1.8/0.4 (about 32 a day). player_check expects 32 with it on, 17 with it off.
+- `MV_RIG_ON` (note 24): section 10's `crewDetail` poses a new FullPerson at once. Without it the rig was drawn for one frame at the deck's origin (scene.add at 0,0, placed by the next frame's update): the "flash far from the lift". day_check's `bornFar` reads `Human.set`'s pos, not the drawn root, so it never saw it; the probe that did is in plans/handover-mv1.md.
+- `MV_RECWC_ON` (note 45): 4e's `recWcPlaces()` (called from section 13 after the switches) adds 7-toilet-1..4 and 7-basin-1..2 in room 'u'; the stalls get a Toilet card. They're yours only (`you: true`, which section 14's `schedData` leaves out): with the crew using them too, their toilet breaks moved the ship's meals enough for a Sunday food run to sit open past two hours (machine_check 5f, RV32's find).
+- `MV_SOFA_ON` (backlog EV1-1, lead 49's add): two sofa seats share one walk-to tile (3-lounge-25/-26 on [48,11]), so walking to the one or sitting in it sent whoever sat in the other '@aside' (tapping a seated host to join stood them up). In section 10: `crewWayOn` no longer keeps your seat's walk tile clear while you sit, and a crew member settled in their own seat moves aside only for the seat's own tile, not its walk tile. Stations (stand, work) are unchanged. Probe: tools/mv1/sofa_probe.py.
+
 ## Rules that keep it working
 
 Phones:
