@@ -66,21 +66,21 @@ in CLAUDE.md = not now.
 | 56 | If you take the Make it safe job and put it back, you can't get it again like other jobs, which kills the progression. | CR1 |
 
 ## Seats (lead 49, 2026-11-06 ~06:20 UTC / 1:20 AM ET), all from claude/integration d7ad4c58
-| Seat | Notes | Branch |
-|---|---|---|
-| CH1 characters and seats (art, poses, clipping) | 1, 4, 10, 35, 37 | claude/p997-chars |
-| MV1 movement, crew walking, needs | 2, 5, 19, 24, 45 | claude/p997-move |
-| TP1 tips, device, HUD words | 6, 7, 9, 11, 28, 33, 53, 54 | claude/p997-tips |
-| CR1 career and the first promotion | 25, 48, 49, 55, 56 | claude/p997-career |
-| JB3 jobs and places | 3, 21, 22 | claude/p997-jobs |
-| SC1 social and crew stories | 17, 32, 38, 39 | claude/p997-social |
-| CL1 traditions calendar, arrows, address | 14, 15, 16, 20, 23, 26, 27, 30, 31, 47 | claude/p997-calendar |
-| EV1 new events and the first week's shape | 8, 34, 36, 46 | claude/p997-events |
-| GM1 games (tiles, Lightdisc) | 12, 40, 41, 44 | claude/p997-games |
-| TB6 hosted traditions | 18, 43, 50, 51, 52 | claude/p997-traditions |
-| AV1 sound and screens | 13, 29, 42, 44 (music) | claude/p997-av |
-| RV32 reviewer | CH1, MV1, TP1, CR1, JB3 | claude/review-rv32 |
-| RV33 reviewer | SC1, CL1, EV1, GM1, TB6, AV1 | claude/review-rv33 |
+| Seat | Notes | Branch | Session |
+|---|---|---|---|
+| CH1 characters and seats (art, poses, clipping) | 1, 4, 10, 35, 37 | claude/p997-chars | session_01GKuymjRkyieJLWiov9xvyp |
+| MV1 movement, crew walking, needs | 2, 5, 19, 24, 45 | claude/p997-move | session_01GKuymmL8h3gYY1Td9gxV3n |
+| TP1 tips, device, HUD words | 6, 7, 9, 11, 28, 33, 53, 54 | claude/p997-tips | session_01GKuymneLr9U5MnEvACLMvS |
+| CR1 career and the first promotion | 25, 48, 49, 55, 56 | claude/p997-career | session_01GKuymizPyyNVZeZ2xUhGm6 |
+| JB3 jobs and places | 3, 21, 22 | claude/p997-jobs | session_01GKuymmiCEm3CMMrMTdWMEo |
+| SC1 social and crew stories | 17, 32, 38, 39 | claude/p997-social | session_01GKuymk1xmJCgzW4Ee8Drz8 |
+| CL1 traditions calendar, arrows, address | 14, 15, 16, 20, 23, 26, 27, 30, 31, 47 | claude/p997-calendar | session_01GKuymjnwwEESL9W6V7kQFK |
+| EV1 new events and the first week's shape | 8, 34, 36, 46 | claude/p997-events | session_01GKuymkhvqRE7N1Rj4VMtWD |
+| GM1 games (tiles, Lightdisc) | 12, 40, 41, 44 | claude/p997-games | session_01GKuymmzSJiWGVamRuV5nSG |
+| TB6 hosted traditions | 18, 43, 50, 51, 52 | claude/p997-traditions | session_01GKuymj43WbsuRbKgL2mYc2 |
+| AV1 sound and screens | 13, 29, 42, 44 (music) | claude/p997-av | session_01GKuymmkjHutWouc88NdLkn |
+| RV32 reviewer | CH1, MV1, TP1, CR1, JB3 | claude/review-rv32 | session_01GKuymkDX3gviqiGJcKLWuS |
+| RV33 reviewer | SC1, CL1, EV1, GM1, TB6, AV1 | claude/review-rv33 | session_01GKuymoAK9gACR31MRd1CMX |
 Build master (BM25, claude/staging-0997) and six runners are hired when the first PASSes arrive / builders finish (13 active at most).
 
 Lead's defaults (overnight; the user can change them): every change behind its own switch (off = identical); one
