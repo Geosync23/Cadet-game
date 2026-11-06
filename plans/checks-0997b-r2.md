@@ -28,7 +28,11 @@ causes are exactly candidate 1's (plans/checks-0997-r2.md, pictures in plans/che
 | j_steer1 | 32167 | the same |
 | j_steer2 | 13637 | the same |
 
-## Result: p926 item 15 was the check (fixed in TB6's ba33d0c, passes); perf from R6 pending
+## Result: OK, with one NEW find that was the check, not the game
+
+Every check in R2 passes on candidate 2, apart from p926_check's item 15 on the candidate's own check file (NEW: the check
+still expected the Spice shelf supper at the old time; TB6 moved it after dinner). With TB6's check fix ba33d0c, p926 passes
+on candidate 2. The game needed no change for R2. Ran by R2, except fresh_walk and p926 (R4) and perf_check (R6).
 
 | Check | Ran by | Result | Minutes | Key lines |
 |---|---|---|---|---|
@@ -46,5 +50,5 @@ causes are exactly candidate 1's (plans/checks-0997-r2.md, pictures in plans/che
 | pf_f1_same proof: OLD vs candidate 2 with every 0.99.7 switch false | R2 | exit 0 | 0 | `fingerprints 30 differ 0 []`, `F1 checks 23674 mismatches 0`, `PF F1 SAME OK` |
 | fresh_walk BUILD 3 | R4 | exit 0; all five points pass | | Day 1: arrow to the Works bay 08:20, briefing 08:50-08:53 to its end, then the clock 08:53; Day 2: solo meeting arrow 08:31, scene 08:45; booths arrow 17:46, booth used 17:45 and 18:08, Leila's beat fired ('d2-booths:said' 18:13, her lines as bubbles in Booth 1; SC1's traced rerun, the json keeps no bubbles or flags); page errors none; stuck none. json: plans/fw-0997b-r4.json (R4's notes) |
 | p926_check | R4 | **exit 1, NEW** | | item 15 (Spice shelf supper): "Brennan at the spice shelf by 18:40 (None)", 0 lines, 0 bubbles, no guess card; OLD d7ad4c58 `P926 CHECK OK` (Brennan 18:20, 7 lines). TB6 moved the supper after dinner (TRAD997_ON): the check expected the old time. **With TB6's check fix (ba33d0c), on candidate 2: `P926 CHECK OK`, exit 0** (item 15: shelf 19:20, 7 lines, 7 bubbles, spice.guess held 3 min; R4) |
-| perf_check BUILD OLD (alone) | R6 | running (started 16:26) | | |
+| perf_check BUILD OLD (alone) | R6 | exit 0 | 65 | `PERF CHECK OK (2 skipped: switch not in this build; 0 waiting: not built yet)`; no spike; draw calls within 1 of OLD in every scene, none over budget (highest 311, storm all-clear party portrait-wide; OLD 312); new film night scene (REC_FILM) portrait 100 calls, portrait-wide 135, landscape 103; crew the same except Sowing/harvest morning 10:00 33 -> 29 (the 0.99.7 calendar/events, by design as far as I can tell; BM26 to place); memory flat (a week 470/41/93 -> 472/41/93, round trips 470/41/93); file 8.58 -> 8.84 MB, load 7.3-7.8 s (OLD 7.1-7.8). plans/checks-0997b-r6.md on claude/checks-0997-r6 (456a627) |
 
