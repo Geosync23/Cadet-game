@@ -6,9 +6,9 @@
 
 // Calder, the moment Making it safe is done and you're Reliable: the test is this afternoon ({time})
 == cr.ready
-- That's Making it safe. And that's all of it: Reliable, and this. Your Tier 2 test is today, {time}, at the board.
+- That's Making it safe: all of it done. Your Tier 2 test is today, {time}, at the board.
 == cr.ready.mail
-- Your Tier 2 test: today | Test job today, {time}, on the job board in the Works bay. Pass it and you're an Officer.
+- Your Tier 2 test: today | Today at {time}, the Works job board. Pass to make Officer.
 // the device's urgent notice
 == cr.ready.notice
 - Your Tier 2 test: today, {time}, the job board in the Works bay.
