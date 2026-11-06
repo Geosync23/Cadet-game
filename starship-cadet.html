@@ -59050,6 +59050,7 @@ function ladderTick(h) {
   const t = h * 60, d = worksDay(t), m = t - (d - 1) * 1440, W = worksInit(t), out = [];
   if (!W || m < WORKS_ASK[0] || m > WORKS_SMALL || !playerShiftOn(d) || d < worksDay(shipNow())) return out;   // never for a day already past (section 17's catch-up after a load runs jobsHour from long ago)
   const today = W.op[d] || [], has = size => today.some(id => (ladderRow(id) || {}).size === size), opened = worksOpened(W);
+  if (typeof crCarryPark === 'function') crCarryPark(d, m, W, opened);   // CR1 (note 55): from Day 8 a slipped lesson waits for Making it safe (24p's slot)
   const c = W.cur;
   if (c && c.st === 'held' && c.d < d) worksEscortEnd(c.id);   // a hold left from an earlier day: trained now (the ladder never stalls)
   if (c && c.d < d && (c.st === 'ask' || c.st === 'again') && !has('big') && m <= WORKS_ASK[1] && P5_PROMO4 && ladderTestDue(c, d, W, opened)) {   // (W8, MA6-2) a lesson carried over never holds a test row on its day (Day 22's Tier 4 test): it goes back to unopened and comes again on a later day
@@ -59059,7 +59060,7 @@ function ladderTick(h) {
   for (const size of ['big', 'small']) {
     if ((W.op[d] || []).some(id => (ladderRow(id) || {}).size === size) || (size === 'big' && (W.cur || m > WORKS_ASK[1]))) continue;
     const ok = r => r.size === size && !opened.has(r.id) && WORK_MECH[r.id] && !WORK_MECH[r.id].own && d >= r.day && r.tier <= W.tier && (!r.fixed || weekday(d) + 1 === r.fixed.wd) && ladderNeeds(r.needs, W);
-    const row = size === 'big' && P5_STEP5 && typeof ladderBigP5 === 'function' ? ladderBigP5(ok, d, W) : CAREER_LADDER.find(ok);   // Pillar 5 Step 5 (24u): higher tier first (off: the table's order)
+    const row = (size === 'big' && typeof crBigFirst === 'function' && crBigFirst(ok, d, W)) || (size === 'big' && P5_STEP5 && typeof ladderBigP5 === 'function' ? ladderBigP5(ok, d, W) : CAREER_LADDER.find(ok));   // CR1 (note 55): Making it safe first from Day 8   // Pillar 5 Step 5 (24u): higher tier first (off: the table's order)
     if (row && ladderOpen(row, d, t)) out.push(row.id);
   }
   return out;
@@ -65176,7 +65177,7 @@ onSim('job', n => {                                      // B: Torres comes by a
 // INC_REDO_ON (note 56): Making it safe's job (yours at the pipe) put back on the board had no Take it (15b's ixBoard.doable
 // never takes an incident at the board), so the training sat till the shift ended. Now an incident job held for you, or one
 // you put back, has a Take it like other jobs (incRetake), and the board's arrow leads to it. Nothing saved; off: as before.
-var CR_DAY8_ON = true, INC_REDO_ON = true;               // var: 15b's boardLessonName and ixBoard ask before this line has run
+var CR_DAY8_ON = false, INC_REDO_ON = false;   // off on the branch; the build master switches them on (lead 49's rule)               // var: 15b's boardLessonName and ixBoard ask before this line has run
 const CR_SAME = { by: 750, jobAt: 780, until: 960, from: 8 };
 function crSameDay() {                                   // the test is the same day Making it safe was learned (from the save)
   const W = SHIP.works; return !!(CR_DAY8_ON && W && W.tier === 1 && W.test && W.tr && W.tr.m6 !== undefined && W.test.day === W.tr.m6);
@@ -65209,6 +65210,23 @@ function crCheckRows(W, d, row, no) {                    // promoCheck's day row
   if (W.test) out.push({ text: worksText('cr.promo.check.set', 'Test job: {day}, {time}', { day: W.test.day === d ? worksText('cr.promo.check.today', 'today') : W.test.day === d + 1 ? worksText('cr.promo.check.tomorrow', 'tomorrow') : dayName(W.test.day), time: hhmm(PROMO.jobAt) }) });
   return out;
 }
+// (RV32's find on CR_DAY8_ON: one lesson missed in week 1 slid the scanner past the weekend, so Making it safe, which needed
+// the scanner used once, couldn't open before Day 9 and nor could the test.) With the switch on, the user's "lower the first
+// phase's bar if needed": Making it safe needs nothing but its day (Day 8), goes first among the big rows from Day 8 while
+// you're Tier 1 (crBigFirst), and a lesson carried over from an earlier day waits for it (crCarryPark: back to unopened, as
+// 24 core does for a test row; it comes again the next workday). The scanner and the rest follow after.
+{ const r = ladderRow('m6'); if (r) { const n0 = r.needs; Object.defineProperty(r, 'needs', { get: () => CR_DAY8_ON ? null : n0, enumerable: true, configurable: true }); } }
+function crBigFirst(ok, d, W) {                          // ladderTick's big row: Making it safe first, from Day 8, until it's learned
+  if (!CR_DAY8_ON || !W || W.tier !== 1 || d < CR_SAME.from || W.tr.m6 !== undefined) return null;
+  const r = ladderRow('m6'); return r && ok(r) ? r : null;
+}
+function crCarryPark(d, m, W, opened) {                  // a lesson carried over to a day Making it safe could open: it waits
+  const c = W && W.cur, r = ladderRow('m6');
+  if (!CR_DAY8_ON || !c || !r || W.tier !== 1 || d < CR_SAME.from || W.tr.m6 !== undefined || c.id === 'm6' || c.d >= d || !(c.st === 'ask' || c.st === 'again') || m > WORKS_ASK[1] || opened.has('m6')) return;
+  if ((W.op[d] || []).some(id => (ladderRow(id) || {}).size === 'big') || !WORK_MECH.m6 || !ladderTeacher(r, d)) return;
+  const k = (W.op[c.d] || []).indexOf(c.id); if (k >= 0) W.op[c.d].splice(k, 1); opened.delete(c.id); W.cur = null;
+  simNote('ladder', { mech: c.id, size: 'big', day: d, parked: true });
+}
 const CR_PUT = new Set();                                // incidents of yours you put back (not saved: after a reload they're the crew's as before)
 onSim('job', n => { if (INC_REDO_ON && n && n.step === 'drop' && n.job === 'incident') CR_PUT.add(n.id); });
 function incRetake(j) {                                  // 15b's Take it rule: Making it safe's training job, or an incident of yours you put back (note 56)
@@ -65232,7 +65250,7 @@ WORK_TICKS.push((now, skip) => { crTestOpen(now); if (!skip) crBoardArrow(now); 
 // dock on Deck 5 ("Take a hover cart from the Cart bay") and ends there ("Dock the cart in the Cart bay"); you push the cart
 // from the dock on (cartFirstHold, full once the crates are on). Hauling (24d) drew the cart from the moment you took the
 // job: now only once you've taken it from the dock. Only jobs made with the switch on; off: as before.
-var CART_FIRST_ON = true;                                // var: section 17's gardenCarry and 15b's ixJobStep and ixHold ask before this line has run
+var CART_FIRST_ON = false;                                // var: section 17's gardenCarry and 15b's ixJobStep and ixHold ask before this line has run
 function cartFirstStops(st) {                            // gardenCarry's stops: the dock first and last, when there's a dock
   const dock = CART_FIRST_ON && typeof CART_AT !== 'undefined' ? CART_AT.find(id => placeById(id)) : null; if (!dock) return st;
   return [{ deck: 5, placeId: dock, mins: 2, tag: 'cart' }].concat(st, [{ deck: 5, placeId: dock, mins: 2, tag: 'return' }]);
@@ -65253,7 +65271,7 @@ if (CART_FIRST_ON && typeof IX_STOP === 'object') Object.assign(IX_STOP, { cart:
 // shift from 10:00 (a round too, not only 13:00-15:00), and the shift's cap is BOARD_NEW_MAX (FX19's was 3); still one an
 // hour, never with under two hours left, held to the shift's end then lapsed, no reputation, seeded by the hour (no R()).
 // The other kinds (repairs for the scanner, hauling's delivery days, the later tiers) come from their own sims as before.
-var BOARD_NEW_ON = true;                                 // var: section 17's boardTopUp asks before this line has run
+var BOARD_NEW_ON = false;                                 // var: section 17's boardTopUp asks before this line has run
 const BOARD_NEW = { days: 5, max: 4 };
 // Other seats' kinds join the mix here (JB3's science and bottom-deck jobs, later tiers): boardNewAdd({ mech: a ladder id (the
 // kind counts as learned once SHIP.works.tr[mech] is set), kind: the job's kind or chore (how "one already up" is told: j.chore

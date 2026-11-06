@@ -54,7 +54,7 @@ def part_day8(g):
       out.day = W.test && W.test.day; out.at = PROMO.jobAt; out.until = PROMO.until; out.mail = SHIP.mail.map(m => m.subject + ' | ' + m.body); out.say = __toasts.map(t => t[1]);
       setShipNow(7 * 1440 + 750); __tick(); const c = W.cur, j = c && SHIP.jobs.find(x => x.id === c.j); out.cur = c ? c.id + ':' + c.st : null; out.job = j ? [j.machine, j.found % 1440, j.until % 1440] : null;
       const V = __w(8, 760, { xp: 20, tr: { m6: 8 } }); __tick(); out.late = V.test && V.test.day; out.lateAt = PROMO.jobAt;
-      __sw(false); const X = __w(8, 650, { xp: 20, tr: { m6: 8 } }); __tick(); out.off = X.test && X.test.day; out.offAt = PROMO.jobAt; __sw(true); return out; })()""")
+      __sw(false); const X = __w(8, 650, { xp: 20, tr: { m6: 8 } }); __tick(); out.off = X.test && X.test.day; out.offAt = PROMO.jobAt; __sw(false); return out; })()""")
     print('  (day8)', r)
     check(r['day'] == 8 and r['at'] == 780 and r['until'] == 960, f"day8: Making it safe by 12:30, the test that day 13:00-16:00 ({r['day']}, {r['at']}, {r['until']})")
     check(any('today' in m and '13:00' in m for m in r['mail']), f"day8: the Mail says today, 13:00 ({r['mail']})")
@@ -69,7 +69,7 @@ def part_redo(g):
         const j = incJob('burst', 4, t, { slot: 16, train: 'm6' }); SHIP.jobs.push(j); W.cur = { id: 'm6', st: 'do', d: 8, by: 'calder', occ: null, j: j.id, w: 0 };
         const k = incJob('alarm', 3, t, { held: true }); SHIP.jobs.push(k); W.tr.m6 = 8;
         const o = { train: ixBoard.doable(j), lesson: boardLesson() === j.id, name: boardLessonName(j.id), other: ixBoard.doable(k) };
-        CR_PUT.add(k.id); o.put = ixBoard.doable(k); CR_PUT.delete(k.id); out[on ? 'on' : 'off'] = o; } __sw(true); return out; })()""")
+        CR_PUT.add(k.id); o.put = ixBoard.doable(k); CR_PUT.delete(k.id); out[on ? 'on' : 'off'] = o; } __sw(false); return out; })()""")
     print('  (redo)', r)
     on, off = r['on'], r['off']
     check(on['train'] and on['lesson'] and on['name'] == 'Make it safe training job', f"redo: the training job has a Take it, is the board's lesson, named ({on})")
@@ -82,7 +82,7 @@ def part_cart(g):
         j.claimedBy = 'you'; j.status = 'claimed'; o.hold0 = ixHold(); o.goal0 = (ixJobStep() || {}).label || null;
         if (on) { jobStepDone(j.id, 0); o.hold1 = ixHold(); o.goal1 = (ixJobStep() || {}).label || null; jobStepDone(j.id, 1); o.hold2 = ixHold(); }
         const hj = haulJob(shipNow(), [{ id: 'linen', dest: '4-linen-1' }]); o.haul0 = JOB_KINDS.haul.hold(hj);
-        j.claimedBy = null; j.status = 'done'; out[on ? 'on' : 'off'] = o; } __sw(true); return out; })()""")
+        j.claimedBy = null; j.status = 'done'; out[on ? 'on' : 'off'] = o; } __sw(false); return out; })()""")
     print('  (cart)', r)
     on, off = r['on'], r['off']
     check(on['tags'] == ['cart', 'pickup', 'drop', 'return'] and 'hover cart' not in (on['bring'] or ''), f"cart: the dock first and last ({on['tags']}, {on['bring']})")
@@ -90,6 +90,19 @@ def part_cart(g):
     check(on['hold1'] == 'cart' and (on['goal1'] or '').startswith('Pick up') and on['hold2'] == 'cartfull', f"cart: your cart after the dock, full after the pick-up ({on})")
     check(on['haul0'] is None and off['haul0'] == 'cart', f"cart: hauling, no cart before the dock (off: as before) ({on['haul0']}, {off['haul0']})")
     check(off['tags'] == ['pickup', 'drop'] and off['bring'].startswith('a hover cart'), f"cart off: as before ({off})")
+
+def part_slip(g):
+    r = g.ev("""(() => { const out = {}; for (const on of [true, false]) { __sw(on); const o = {};
+        let W = __w(8, 360, { xp: 20, tr: { m1: 2, m4: 3, m3d: 3, m5: 4, m3i: 4 } }); W.op = { 2: ['m1'], 3: ['m4', 'm3d'], 4: ['m3i', 'm5'], 5: ['m7'] };
+        o.plain = ladderTick(7 * 24 + 6);
+        W = __w(8, 360, { xp: 20, tr: { m1: 2, m4: 3, m3d: 3, m5: 4, m3i: 4 } }); W.op = { 2: ['m1'], 3: ['m4', 'm3d'], 4: ['m3i', 'm5'], 5: ['m7'] }; W.cur = { id: 'm7', st: 'ask', d: 5, by: 'torres-zeke', occ: null, j: null, w: 0 };
+        o.carried = ladderTick(7 * 24 + 6); o.cur = W.cur ? W.cur.id + ':' + W.cur.st : null; o.op5 = (W.op[5] || []).slice();
+        out[on ? 'on' : 'off'] = o; } __sw(false); return out; })()""")
+    print('  (slip)', r)
+    on, off = r['on'], r['off']
+    check('m6' in on['plain'], f"slip: the scanner never learned, Making it safe still opens on Day 8 ({on['plain']})")
+    check('m6' in on['carried'] and on['cur'] and on['cur'].startswith('m6') and 'm7' not in on['op5'], f"slip: a scanner lesson carried from Friday waits; Making it safe opens on Day 8 ({on})")
+    check('m6' not in off['plain'] and 'm6' not in off['carried'], f"slip off: as before, no Making it safe without the scanner used ({off})")
 
 MIX = """(() => { __sw(%s); const W = __w(%d, 360, { xp: 20, tr: %s, test: { tier: 2, day: 8, tries: 1, passed: true } }); SHIP.jobs.length = 0;
   const ms = machineList().filter(m => TUNABLE.has(m.kind) && !ENGINE_KINDS.has(m.kind) && jobTier({ machine: m.id }) <= 1 && m.deck !== 1 && !JOB_FOR[(SHIP.machines[m.id] || {}).state]);
@@ -127,7 +140,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('check', part_check), ('day8', part_day8), ('redo', part_redo), ('cart', part_cart), ('mix', part_mix)]:
+    for name, fn in [('check', part_check), ('day8', part_day8), ('slip', part_slip), ('redo', part_redo), ('cart', part_cart), ('mix', part_mix)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {str(e)[:400]}')
