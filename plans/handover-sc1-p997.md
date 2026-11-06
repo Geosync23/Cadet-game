@@ -41,3 +41,9 @@ Branch: claude/p997-social, from claude/integration d7ad4c58 (0.99.6, game f6ff5
   Saving them would change section 20's save shape: ask the lead first if wanted.
 - 4 talks don't fill listen2 in the probe's context (the probe fills every talk for one speaker; likely
   placeholders that need the right speaker). Not checked further.
+
+## Status (2026-11-06 ~07:55 UTC)
+RV33 PASS on 77e573f (game 6df22594...1705), including RV33's note 32 fix (6c39f3b) and TB6's appointment rule
+(77e573f). Ready for the build master. RV33's stories_check runs showed 14 FAIL lines that are identical on the
+unchanged 0.99.6 build (not this branch; RV33 and the lead are settling it); my own stories_check 36 on the
+switched-on copy said STORIES CHECK OK. SC1 standing by.
