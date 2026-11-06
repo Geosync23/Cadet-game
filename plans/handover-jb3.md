@@ -68,3 +68,7 @@ stock over 14 days); `tools/jobs_measure.py BUILD 14 --json OUT` gives the mix (
   small job had nothing to show. Lead 49 chose the check: machine_check 5v now also leaves out a job finished when the
   ship's upkeep was already all done (sum < 1), its own "nothing left to show" rule. A check change, not a game change.
 - **food_check "cake"** fails on that staging copy with and without JB3_FOOD_ON (Day 4 birthday cake): not mine, told the lead.
+- **RV33: PASS on 1bbed58 (with 35ab083)**, 2026-11-06 ~12:06 UTC: off ALL IDENTICAL; on BM25's staging aef7c14 + this +
+  CL1 + EV1 (31 switches) machine_check fails food runs without JB3_FOOD_ON and passes with it; a planted missing mapping
+  still fails 5v, so the new exemption hides nothing real; food_check's cake is CL1's (fixed in CL1 bb26552). All five
+  JB3 switches reviewed; BM25 switches them on.
