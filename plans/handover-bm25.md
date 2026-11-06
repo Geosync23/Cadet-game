@@ -3,18 +3,16 @@
 For lead 49 (session_01GKuymjjreuZtZeDMBX79xn, branch claude/lead-49). Read plans/handover-bm24.md, -bm23.md and -bm22.md
 (on claude/handover-bm23) first: their steps, tools and gotchas still hold. 0.99.6 is published (integration = main = d7ad4c58).
 
-## State: 0.99.7 merges, all switches off, waiting for JB3's fix
-- `claude/staging-0997` from d7ad4c58. Every merge, its clashes and its gate (check_fast, cadet vs 0.99.6 ALL IDENTICAL) are
-  in the build-table row "0.99.7 merges (BM25 ...)", items (1)-(17). Pieces in, at their PASS commits: CH1 A 3d07e66 and B
-  8436ff6, TP1 c920acb, SC1 77e573f, AV1 15fbf3f, JB3 e96ec5a, TB6 687838e (game 53bf2ce) and B 7b8a061, CR1 3e1b0dc,
-  MV1 2e268ba, EV1 dad2b9b and af18afd, GM1 98e612e, CL1 bb26552, SC1's words for TB6 ab0e13e.
-- Left: JB3 1bbed58 (35ab083: JB3_FOOD_ON, the galley rule; 1bbed58: machine_check 5v), with RV33. It was the fix for the
-  switched-on machine_check FAIL (Day 7 restock; a job without meters), lead 49's call: fix in the game.
-- Then: switch-on commit (every switch: `python3 plans/build-master/bm25/switchon.py IN OUT` turns each piece's lines on;
-  copy OUT over the game, check the diff is only switch lines), build turn 0.99.7 (setbuild.py), gates on the candidate,
-  then plans/round-0997.md's GO line and the GO to R1-R4, R6 (they're set up and waiting) and the lead. I'm R5.
-- Trial (scratch branch bm25-trial, not pushed): staging + CL1 + EV1 + JB3 1bbed58, all on: check_fast OK, food 1 7 and
-  11 4 OK.
+## State: 0.99.7 built, GO sent ~13:00 UTC; BM26 (session_01GKuymkyzjd6auLTCEZK5CN) takes over R5 and the record
+- `claude/staging-0997`: every piece merged (build-table row "0.99.7 merges", items 1-17), JB3 1bbed58 at 4e2f5fb,
+  switch-on 3a0dbe6 (21 switch lines), build turn 363107d, docs to 7fd8f6b (GO line in round-0997.md). Candidate game
+  sha256 b14421f82e04602cd608505756ddb8fb05bea4571af813d8e345424ebcd1cf7d. Lead verified. GO sent to R1-R4, R6.
+- My early gates on that exact file (/tmp/bm24/wt-t2 in my container, summary /tmp/bm24/t2/summary.md): check_fast OK,
+  machine OK, events OK; interactions whole, bigevents, join, tiles, weekend, fridays, cr1, career, player, day 1-7,
+  fresh_walk were running at handover: results are in the 0.99.7 build-table row once in.
+- R5 left (script /tmp/bm24/r5b.sh, also in this note): machine (2nd), mech, disc, clothes, promo_beats, food 1 7 and
+  11 4, stories 36, day 3, 12, 13, 17, 18, 19, 27, p5retry_break (off copy: P5_RETRY_ON and FIXTAP_ON false), then cadet vs
+  0.99.6 alone: list every difference in the round record (soles, hair, seat poses and seats, sofas, tracker/tips, film...).
 
 ## Gates planned for the switched-on candidate
 check_fast; cadet vs 0.99.6 (many differences by design: explain each from the A_/B_ PNGs in the build table); the whole
