@@ -787,7 +787,8 @@ def part_clockin(ctx, path):                              # patch 0.92.3 item 6 
     IN_BAY = """(() => { if (DIALOGUE) dialogueEnd(); goToDeck(5); SHIP.device.settings.tips = true; const s = placeSpot('5-timeclock-1'),
       t = (ROOM_TILES.w || []).map(c => cellPos(...c)).filter(w => Math.hypot(w.x - s.x, w.z - s.z) > 5)[0]; player.obj.position.copy(t); player.stop(); })()"""
     LOOK = "(() => ({ tip: TIP_Q[0] ? TIP_Q[0].id : null, clockTips: TIP_Q.filter(t => /^career\\.clock/.test(t.id)).map(t => t.id), trk: IX_GOAL ? IX_GOAL.trk || null : null }))()"
-    pg.ev("skipTo(introAbs(1, 8 * 60 + 30))"); pg.ev(IN_BAY); pg.step(10); a = pg.ev(LOOK)
+    d1 = '9 * 60 + 6' if pg.ev("typeof TP997 !== 'undefined' && !!TP997.nd1") else '8 * 60 + 30'   # 0.99.7 (TP997.nd1): the clock-in waits for the Chief's 08:50 briefing; Zeke's line comes at its end (09:05), so in after it, the briefing missed
+    pg.ev(f"skipTo(introAbs(1, {d1}))"); pg.ev(IN_BAY); pg.step(10); a = pg.ev(LOOK)
     check(a['trk'] == 'clock:in' and not a['clockTips'], f'clockin: Day 1 into the Works bay: Clock in tracked, and no clock-in tip before Zeke says it ({a})')
     pg.ev("SHIP.intro.done['d1-opener'] = Math.floor(shipNow())"); pg.step(5); b = pg.ev(LOOK)
     check(b['tip'] == 'career.clock.1', f'clockin: Day 1 after Zeke\'s line: the clock-in tip on screen at once ({b})')
