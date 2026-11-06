@@ -13,4 +13,23 @@ j_steer1 32167, j_steer2 13637), and every NEW picture is pixel-identical to 0.9
 So all explained as in 0.99.7: hair caps and soles (CH1), the tracker ring (TP1), Fonseca's bunk (CH1), the Day 2 crew from
 ~07:45 (TRAD997, the Spice supper move). TP998's two changes don't show in cadet's views (Day 2 18:00 and later).
 
-## Result: running
+## Result: FAIL: fresh_walk point 5 (NEW, BM27's P; run by R4); perf from R6 pending
+
+| Check | Ran by | Result | Minutes | Key lines |
+|---|---|---|---|---|
+| cadet_test OLD BUILD (alone) | R2 | exit 1, all explained (above) | 1 | `DIFFERENCES FOUND`, errors none, taps the same |
+| intro_check (whole) | R2 | exit 0 | 47 | `OK` |
+| intro_check --dinner | R2 | exit 0 | 2 | `OK` |
+| intro_check --firsts | R2 | exit 0 | 0 | `OK` |
+| path_check | R2 | exit 0 | 1 | `PATH CHECK OK` |
+| arc_check | R2 | exit 0 | 0 | `ARC CHECK OK` |
+| lines_check | R2 | exit 0 | 0 | `lines_check: PASS (0 errors, 116 warnings)` |
+| lines_check --day | R2 | exit 0 | 4 | `lines_check --day: PASS (0 errors)` |
+| day_check 0, 1, 5, 7, 21, 22 | R2 | exit 0 each | 5 | `DAY CHECK OK` |
+| arrows_check endgo | R2 | exit 0 | 12 | `ARROWS CHECK OK` |
+| pf_f1_same OLD BUILD 10 | R2 | F1 OK; fingerprints differ by design | 0 | `F1 checks 23674 mismatches 0 None`, `page errors [] []`, `fingerprints 30 differ 30` (prints FAILED) |
+| pf_f1_same proof: OLD vs 0.99.8 with every 0.99.7 switch and TP998 false | R2 | exit 0 | 0 | `fingerprints 30 differ 0 []`, `F1 checks 23674 mismatches 0`, `PF F1 SAME OK` |
+| p926_check | R4 | exit 0 | | `P926 CHECK OK`; item 15: Brennan at the shelf 19:20, 7 lines, 7 bubbles, guess card held 3 min |
+| fresh_walk BUILD 3 | R4 | **point 5 FAIL, NEW (BM27's P)** | | points 1-4 pass: briefing, Works bay arrow, 08:45 solo meeting, Day 2 booths arrow from 18:00 at the floor pin (never Booth 1), 'd2-booths:said' traced 18:16, errors []. Point 5: `long = [[2738, 'The call booths'], [3929, 'The call booths, Deck 3']]`: the Social marker keeps leading to booths that give nothing after the day's call (TP998_BOOTH_ON). In 0997b the same walk had long []. JSON plans/fw-0998-r4.json on claude/checks-0996-r4 |
+| perf_check BUILD OLD (alone) | R6 | running (started 20:03) | | |
+
