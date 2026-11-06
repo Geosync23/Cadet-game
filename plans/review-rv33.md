@@ -127,6 +127,9 @@ Merge note: GM1 and TB6 both add their switch line after TRAD995_ON (section 13,
 - Switched-on checks (on dad2b9b): BIGEVENTS, EVENTS, JOIN, WEEKEND CHECK OK; DAY CHECK OK Days 4 and 6. check_fast on the
   commit OK (240 s). cadet_test off on dad2b9b: ALL IDENTICAL (renderer noise only, run beside other browsers).
 - **PASS** on dad2b9b (sent to EV1, lead 49, BM25). Should left: the shift arrow says "Take a job" while you're at the glass.
+- **286ed5e, game 22af83d6...04e1 (matched): PASS carried, should closed.** lightEasyNow() (switch-gated) holds the shift's
+  board arrow while the gathering is on and you've joined or are in the lounge. Off: cadet_test ALL IDENTICAL. Fresh-save
+  probe: no arrow at the glass 14:03-14:29, "Take a job" back at 14:30.
 
 ### CL1 traditions calendar (claude/p997-calendar), switch CAL997_ON (URL_FLAGS cal997, off)
 **5c93e8c, game eaf052ee...733b (sha256 matched).** Sections 13, 14, 16, 18 (+136, slot 'Calendar builder'), 18f, 19, 22.
@@ -154,4 +157,6 @@ names_check OK, content_gen --check up to date.
   first room: Promenade, Lift plaza, Bow lounge) while Sato and the gathering are in the bow lounge; from the Promenade the
   tap arrow takes over at 14:00 and leads to her (merge_lastlight_promenade.py), so it works, but 13:45-14:00 ends at the
   Promenade with no arrow for a few minutes. Prefer the host's room.
-- Merged checks queued: events, bigevents, join, fridays, day 2/3/4/6/7, check_fast (all on).
+- Merged checks (all on; CL1 46259ef in the merge): EVENTS, BIGEVENTS OK; DAY CHECK OK Days 2, 3, 4, 6, 7; **JOIN CHECK
+  FAILED: "saturday-run: not on in 400 days"** (CL1's: the cut run is still in TRAD_JOIN, and join_check tries every
+  TRAD_JOIN id; events_check was taught the cut, join_check wasn't). FIXES NEEDED sent to CL1 (check-side). fridays, check_fast running.
