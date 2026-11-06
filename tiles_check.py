@@ -229,21 +229,23 @@ def seat(pw, path):
     pz = gg.ev("(() => { const e = document.querySelector('#devBody .tl-pz'); return e ? (e.hidden ? 'hidden' : e.textContent) : null; })()")
     check(bool(pz) and 'paused while you play' in pz, f'the board says the ship\'s clock is paused while you play (0.72.2): {pz}')
     # How to play: your first game runs it; steps move on with Next, and by themselves when you do the thing
-    tu = gg.ev("""(() => { const G = TL_GAME, txt = () => { const e = document.querySelector('#devBody .tl-tut'); return e && !e.hidden ? e.textContent : ''; }, out = [G.tut, txt()];
+    tu = gg.ev("""(() => { const G = TL_GAME, txt = () => { const e = document.querySelector('#devBody .tl-tut'); return e && !e.hidden ? (e.querySelector('p') || e).textContent : ''; }, out = [G.tut, txt()];
       document.querySelector('#devBody .tl-tut button[data-end="tnext"]').click(); out.push(G.tut);
       document.querySelector('#devBody .tl-tut button[data-end="tnext"]').click(); out.push(G.tut, txt());
+      const selI = TL_TUT.findIndex(x => x.wait === 'sel'); while (G.tut >= 0 && G.tut < selI) document.querySelector('#devBody .tl-tut button[data-end="tnext"]').click();   // 0.99.7 (GM1, GAMES997_ON): the select step comes later in the twelve
       const c = G.s.b.findIndex((t, i) => t && tlO(t) === 0 && tilesMoves(G.s, 0).some(m => m.from === i)); tilesTap(c); out.push(G.tut);
       const mv = tilesMoves(G.s, 0).find(m => m.from === c && m.k === 's'); tilesTap(mv.to); out.push(G.tut);
       if (G.timer) { clearTimeout(G.timer); G.timer = 0; } tilesCrewMove(); if (G.timer) { clearTimeout(G.timer); G.timer = 0; }
       document.querySelector('#devBody .tl-tut button[data-end="tskip"]').click(); out.push(G.tut, txt(), !!document.querySelector('#devBody .tl-play button[data-end="teach"]'));
       document.querySelector('#devBody .tl-play button[data-end="teach"]').click(); out.push(G.tut, txt().slice(0, 4));
-      const long = TL_TUT.map(x => x.t('Olu', TL_MODES.full)).filter(t => t.length > 62); out.push(long, SHIP.tiles.taught);
+      const long = TL_TUT.map(x => x.t('Olu', TL_MODES.full)).filter(t => t.length > (GAMES997_ON ? 140 : 62)); out.push(long, SHIP.tiles.taught, TL_TUT.length, selI);
       G.tut = -1; tilesDraw(); return out; })()""")
     print('  How to play:', tu)
-    check(tu[0] == 0 and tu[1].startswith('1/8') and tu[2] == 1 and tu[3] == 2 and tu[4].startswith('3/8'), f'the first game opens How to play at step 1; Next moves on: {tu[:5]}')
-    check(tu[5] == 3 and tu[6] == 4, f'selecting a tile and stepping it move the walkthrough on by themselves: {tu[5:7]}')
-    check(tu[7] == -1 and tu[8] == '' and tu[9] and tu[10] == 0 and tu[11].startswith('1/8'), f'Skip ends it; How to play on the board runs it again: {tu[7:12]}')
-    check(not tu[12] and tu[13] is True, f'every step fits in about two lines on a phone (62 characters), and the save knows you were taught: {tu[12:]}')
+    nt, si = tu[14], tu[15]                           # 8 steps, select at 3 (12 and 6 with GAMES997_ON: 0.99.7 note 41, GM1, every term explained, three lines at most)
+    check(tu[0] == 0 and tu[1].startswith(f'1/{nt}') and tu[2] == 1 and tu[3] == 2 and tu[4].startswith(f'3/{nt}'), f'the first game opens How to play at step 1; Next moves on: {tu[:5]}')
+    check(tu[5] == si + 1 and tu[6] == si + 2, f'selecting a tile and stepping it move the walkthrough on by themselves: {tu[5:7]}')
+    check(tu[7] == -1 and tu[8] == '' and tu[9] and tu[10] == 0 and tu[11].startswith(f'1/{nt}'), f'Skip ends it; How to play on the board runs it again: {tu[7:12]}')
+    check(not tu[12] and tu[13] is True, f'every step fits on a phone (62 characters, 140 with GAMES997_ON), and the save knows you were taught: {tu[12:14]}')
     gg.ev(FINISH)
     res = gg.ev("[TL_GAME.s.win, SHIP.tiles.played, SHIP.tiles.won, SHIP.tiles.firstWin !== null, (SHIP.rel[TL_GAME.opp] || {}).pts || 0, (SHIP.mem[TL_GAME.opp] || []).map(m => m[0]), SHIP.player.needs.social, TL_GAME.opp]")
     gg.ev(f"window.__opp = {json.dumps(res[7])}")
