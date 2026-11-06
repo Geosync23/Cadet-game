@@ -32,3 +32,12 @@ from a fresh game (?nosave&debug; skipTo, then playing frames as a player would)
 
 ## Verdict
 FIXES NEEDED: 1 must (the WSO card's speaker and tap), 1 should (the tutorial's phone layout), 2 small notes.
+
+## Re-review: 98e612e (game b939eb9, sha256 866743ed...13260): PASS (2026-11-06 ~11:20 UTC)
+- MUST fixed: Day 7, the "Fancy a go?" card now from Raman (at the court; tradLeader still Bo, not there yet); after a
+  lost game, tapping a watcher (Erik) offers another go. Words no longer name Pell.
+- SHOULD fixed: 15 short steps; at 390x844 the whole board (both of Ravi's rows) in view on every step, the step box
+  630-771 inside the device body (358-776); better than 0.99.6 (which hid half a row).
+- Small: the launch step says "Can't yet? Press Next."; round 1's walk left as is (GM1's call).
+- cadet_test off vs 0.99.6 ALL IDENTICAL; switched on: tiles_check ALL OK, join_check OK, disc_check ALL OK,
+  events_check OK, interactions_check OK; check_fast QUICK CHECK OK on the build (412 s) and on the switched-on copy (414 s).
