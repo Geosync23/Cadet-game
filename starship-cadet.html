@@ -9851,6 +9851,7 @@ const SAVE_KEY = slotKey(SAVE_SLOT), SAVE_V = 2;
 const TRAD995_ON = true || URL_FLAGS.has('trad995');
 const CAL997_ON = true || URL_FLAGS.has('cal997');   // 0.99.7 (CL1; plans/patch-0997.md notes 14 15 16 20 23 26 27 30 31 47): the traditions calendar's rules, the arrows to Pick-your-own, Harvest morning and the Captain's address, the address's pace (section 18's slot 'Calendar builder'); off: 0.99.6. `?cal997` previews   // 0.99.5 (TB3; plans/patch-0995.md notes 8, 10, 19): Spice shelf supper tap to join, Name on the beam's spots, the tea corner's doorway (section 18's Traditions slot); off: 0.99.4. `?trad995` previews
 var TP997_ON = true || URL_FLAGS.has('tp997');   // 0.99.7 (TP1 for lead 49; plans/patch-0997.md notes 6, 7, 9, 11, 28, 33, 53, 54): tips, the device, HUD words; off: 0.99.6. `?tp997` previews
+var TP998_ARROW_ON = false || URL_FLAGS.has('tp998arrow'), TP998_BOOTH_ON = false || URL_FLAGS.has('tp998booth');   // after 0.99.7 (TP1 for lead 50, the round's O; backlog TP1-2, TP1-3): Day 2's booths arrow from 18:00 at Leila, not a booth (Onboarding engineer slot); a booth used again the same day ends with its screen (section 15's actBegin). off: as 0.99.7
 var TP997 = { nd1: TP997_ON, n6: TP997_ON, n7: TP997_ON, n9: TP997_ON, n11: TP997_ON, n28: TP997_ON, n33: TP997_ON, n53: TP997_ON, n54: TP997_ON };   // each note alone: d1 Day 1's arrows to the briefing and the clock (RV32's find), 6 Day 2's call-home tip, 7 nearest bathroom, 9 the tracker tip, 11 the device-at-work tip early, 28 the rec deck's blurb, 33 Pockets, 53 the join words, 54 Mark all as read
 const TRAD997_ON = true || URL_FLAGS.has('trad997');   // 0.99.7 (TB6; plans/patch-0997.md notes 18, 43, 50, 51, 52): hosted traditions: the Spice shelf supper after dinner with Brennan's card, Open lab's host, Teach me your thing per teacher, Calder at your bunk, your loaf from Bread day (section 18's Traditions slot, 24c's inspection); off: 0.99.6. `?trad997` previews
 const GAMES997_ON = true || URL_FLAGS.has('games997');   // 0.99.7 (GM1; plans/patch-0997.md notes 12, 40, 41, 44): Tiles night in rounds, the Tiles tutorial step by step, Winner Stays On to watch and join (sections 23 and 23b, the Games slot; the Lightdisc music is AV1's SND_DISC). off: the game as 0.99.6
@@ -14679,6 +14680,7 @@ function stubTap(it, at) {
 }
 // head for a place (or, with no place, do it where you stand) and do the activity there
 function actStart(kind, placeId, o = {}) {
+  if (TP998_BOOTH_ON && kind === 'call' && typeof homeCalledToday === 'function' && homeCalledToday() && typeof homeBooth === 'function') { if (ACT) actEnd(true); homeBooth(); return; }   // (TP1, lead 50's O, backlog TP1-3) your call home's had today: the booth's screen says so, and that's all (no 15 minutes, no social, no goodbye)
   const sp0 = placeId && ACT && ACT.spot && placeSpot(placeId);
   if (ACT && ACT.kind === 'eat' && ACT.o.fed && (ACT.phase === 'in' || ACT.phase === 'do') && (kind === 'eat' || kind === 'sit')
       && (placeId === ACT.placeId || sp0 && Math.hypot(sp0.x - ACT.spot.x, sp0.z - ACT.spot.z) < 1.6)) {   // a tap on your seat or table mid-meal keeps the meal (LEAD31-9: it ended it, the tray already eaten into, and sat you down with nothing)
@@ -59110,7 +59112,8 @@ function tp997D1Want(m, brief) {
 // already is) and its crew store hour (16:30, on shift) are left as they were.
 const TP997_LEAD = 15, TP997_BEATS = {
   'd2-solo': { goal: () => ({ deck: 5, place: '5-office-visit-1', room: 'o', label: careerText('tp997.d2.solo') || 'The Chief\'s office, 08:45: your first solo job' }), key: 'met', till: b => b.hold ? b.hold.till : b.until },
-  'd2-booths': { goal: () => ({ deck: 3, room: 'B', place: '3-callhome-1', label: careerText('tp997.d2.booths') || 'Calling home, the booths on Deck 3: Leila shows you how' }), key: 'said', till: b => b.until },
+  'd2-booths': { goal: () => TP998_ARROW_ON ? { deck: 3, room: 'B', ...(guideTeacherIn('eklund-leila', 3, 'B') ? { crew: 'eklund-leila' } : {}), label: careerText('tp997.d2.booths') || 'Calling home, the booths on Deck 3: Leila shows you how' }
+      : { deck: 3, room: 'B', place: '3-callhome-1', label: careerText('tp997.d2.booths') || 'Calling home, the booths on Deck 3: Leila shows you how' }, key: 'said', till: b => b.until, from: () => TP998_ARROW_ON ? INTRO_WEEK.find(x => x.id === 'd2-booths').at : 0 },   // (TP998_ARROW_ON, lead 50's O, SC1's trace) from 18:00 and at Leila or the room, never a booth: a booth tapped early starts a call of your own and Leila's scene waits
   'd3-store': { goal: () => tp997BeatGoal('d3-store', 'The crew store: Orla shows you round, till 17:30'), key: 'said', till: b => b.until, from: () => DAY_SHIFT[1] },   // on shift till 17:00: from then
   'd4-quiz': { goal: () => tp997BeatGoal('d4-quiz', '20:00 quiz night with Pell: the bow lounge'), key: 'said', till: b => b.until },
   'd5-mug': { goal: () => tp997BeatGoal('d5-mug', '13:00 Friday tea with Halloran: the tea corner'), key: 'met', till: b => b.until },
