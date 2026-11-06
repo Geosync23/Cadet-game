@@ -26,7 +26,7 @@
 == tp997.pockets.title
 - Pockets
 == tp997.pockets.empty
-- Your pockets are empty. Snacks and drinks from the crew store on Deck 3 go in here, to have when you like.
+- Your pockets are empty. Snacks and drinks from the crew store on Deck 3 wait here.
 == tp997.pockets.food
 - Snacks and drinks
 == tp997.pockets.hands
@@ -48,7 +48,7 @@
 == tp997.pockets.full
 - Your pockets are full, so you have {item} on the way out.
 == tp997.pockets.paid
-- You pay {n} credits for {item}. It goes in your pocket: open Pockets on your device to have it when you like.
+- You pay {n} credits for {item}. It's in your Pockets, on your device, for later.
 == tp997.pockets.busy
 - Not now: finish what you're doing first.
 
@@ -61,11 +61,11 @@
 == join997.first-light.tip
 - Tap {name} to join First Light
 == join997.first-light.notice
-- First Light Cocoa: a cocoa at the big windows as the ship's day begins. Leisure and social up.
+- First Light Cocoa: a cocoa at the big windows as the day begins. Leisure and social up.
 == join997.tasting-table.tip
 - Tap {name} to join the tasting
 == join997.tasting-table.notice
-- Brennan's tasting table: try the two new dishes, then pick your jar. Food, leisure and social up.
+- Brennan's tasting table: try two new dishes, pick your jar. Food, leisure and social up.
 == join997.scone-morning.tip
 - Tap {name} for a scone
 == join997.scone-morning.notice
@@ -73,7 +73,7 @@
 == join997.five-minute-skills.tip
 - Tap {name} to learn this week's skill
 == join997.five-minute-skills.notice
-- Five-minute skills: learn one small thing in five minutes, then have a go. Leisure and social up.
+- Five-minute skills: learn one small thing, then have a go. Leisure and social up.
 == join997.coffee-trials.tip
 - Tap {name} to taste the coffees
 == join997.coffee-trials.notice
@@ -85,7 +85,7 @@
 == join997.beginners-guitar.tip
 - Tap {name} to play a chord
 == join997.beginners-guitar.notice
-- Beginners' guitar: listen to the beginners, then play your one chord. Leisure and social up.
+- Beginners' guitar: listen, then play your one chord. Leisure and social up.
 == join997.midnight-toast.tip
 - Tap {name} for toast
 == join997.midnight-toast.notice
@@ -93,7 +93,7 @@
 == join997.whodunnit-club.tip
 - Tap {name} to join the whodunnit
 == join997.whodunnit-club.notice
-- Whodunnit club: listen to the mystery, then write down who you think did it. Leisure and social up.
+- Whodunnit club: hear the mystery, then write down who did it. Leisure and social up.
 == join997.windowsill-herbs.tip
 - Tap {name} to compare herbs
 == join997.windowsill-herbs.notice
@@ -101,7 +101,7 @@
 == join997.sounds-from-home.tip
 - Tap {name} to listen
 == join997.sounds-from-home.notice
-- Sounds from home: sit back with the lights low and listen to sounds from home. Leisure and social up.
+- Sounds from home: sit back, lights low, and listen. Leisure and social up.
 == join997.row-for-the-board.tip
 - Tap {name} to row for the board
 == join997.row-for-the-board.notice
@@ -113,7 +113,7 @@
 == join997.rec-lamplight-paddle.tip
 - Tap {name} to paddle
 == join997.rec-lamplight-paddle.notice
-- Lamplight paddle: take a kayak and drift down the slow channel by lamplight. Leisure and social up.
+- Lamplight paddle: take a kayak and drift the slow channel. Leisure and social up.
 == join997.rec-ring-the-bell.tip
 - Tap {name} to climb for the bell
 == join997.rec-ring-the-bell.notice
@@ -121,7 +121,7 @@
 == join997.seed-packet-day.tip
 - Tap {name} to fill a seed packet
 == join997.seed-packet-day.notice
-- Seed packet day: fold a packet, fill it, and draw on it for next season. Leisure and social up.
+- Seed packet day: fold a packet, fill it and draw on it. Leisure and social up.
 == join997.tool-night.tip
 - Tap {name} to join tool night
 == join997.tool-night.notice
@@ -129,7 +129,7 @@
 == join997.route-night.tip
 - Tap {name} to place your pin
 == join997.route-night.notice
-- Route night: put a pin where you think the Wren will be in seven days. Leisure and social up.
+- Route night: pin where the Wren will be in seven days. Leisure and social up.
 == join997.card-night.tip
 - Tap {name} to make a card
 == join997.card-night.notice
@@ -141,11 +141,11 @@
 == join997.window-sketch.tip
 - Tap {name} to sketch
 == join997.window-sketch.notice
-- Window sketching: take a pencil and sketch what you see out of the window. Leisure and social up.
+- Window sketching: take a pencil and sketch the view. Leisure and social up.
 == join997.window-sketch-2.tip
 - Tap {name} to sketch
 == join997.window-sketch-2.notice
-- Window sketching: take a pencil and sketch what you see out of the window. Leisure and social up.
+- Window sketching: take a pencil and sketch the view. Leisure and social up.
 == join997.open-house.tip
 - Tap {name} to look round
 == join997.open-house.notice
@@ -157,7 +157,7 @@
 == join997.worst-joke.tip
 - Tap {name} to tell a joke
 == join997.worst-joke.notice
-- Worst joke night: tell your worst joke, then groan at everyone else's. Leisure and social up.
+- Worst joke night: tell your worst joke, groan at the rest. Leisure and social up.
 == join997.spice-shelf-supper.tip
 - Tap {name} to join the supper
 == join997.spice-shelf-supper.notice
