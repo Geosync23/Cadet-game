@@ -17453,6 +17453,7 @@ function ixWorkStep() {
   if (d <= 1 && typeof introOn === 'function' && introOn() || !playerOnDuty(d) || m < CAREER.clockIn || m >= dayShiftEnd(d)) return null;
   if (!careerClockedIn(d)) return { deck: 5, place: '5-timeclock-1', label: 'Clock in at the time clock' };
   const open = typeof openJobs === 'function' && (GUIDE_ON ? guideTakeable() : openJobs('you')).length; if (typeof boardEmptySay === 'function') boardEmptySay(!open, now);   // FX1: the empty board says so, not just no arrow; the queue on: only a job with a Take it counts (piece D's S6)
+  if (open && lightEasyNow()) return null;                // 0.99.7 (EV1): standing easy at the Last Light, the board can wait (slot 'Events 0.99.7')
   return open ? { deck: 5, item: /job board/i, room: 'w', label: 'Take a job at the job board' } : null;
 }
 // a tap at the arrow's pin (the floor under it: the thing itself may be on a wall the camera has cut away, or off to one side
@@ -18108,10 +18109,10 @@ function guideShift() {
   let mine = null; try { mine = myJob(); } catch (e) { mine = null; }
   if (m < E) {                                           // S3 (S6, the empty board's word: FX1's boardEmptySay, from ixWorkStep)
     guideAsk({ id: 'shift:job:' + d, level: 4, owner, until: base + E, done: () => careerClockedOut(d),
-      goal: () => { let j = null; try { j = myJob(); } catch (e) { j = null; } return j || !guideTakeable().length ? null : { deck: 5, item: /job board/i, room: 'w', label: boardLesson() ? 'Your ' + boardLessonName() : 'Take a job at the board' }; } });
+      goal: () => { let j = null; try { j = myJob(); } catch (e) { j = null; } return j || !guideTakeable().length || lightEasyNow() ? null : { deck: 5, item: /job board/i, room: 'w', label: boardLesson() ? 'Your ' + boardLessonName() : 'Take a job at the board' }; } });   // (0.99.7, EV1: not while you stand easy at the Last Light)
     const L = mine ? [] : guideTakeable(), les = !mine && boardLesson(), cur = SHIP.works && SHIP.works.cur;
     const ids = L.map(o => o.id), take = () => { for (const id of ids) { const b = boardButton(id); if (b) return b; } return null; };   // the first row of these with its Take it
-    if (P && L.length && !les) pointAsk({ id: 'p:board:take', once: 3, path: [pointBoard(null)[0], { el: take, label: 'Take it' }], until: now + 60, done: () => { try { return !!myJob(); } catch (e) { return true; } } });
+    if (P && L.length && !les && !lightEasyNow()) pointAsk({ id: 'p:board:take', once: 3, path: [pointBoard(null)[0], { el: take, label: 'Take it' }], until: now + 60, done: () => { try { return !!myJob(); } catch (e) { return true; } } });
   }
   if (P && mine && mine.workDone) pointAsk({ id: 'p:board:turnin', once: 3, path: pointBoard(mine.id, 'Turn it in'), until: now + 240, done: () => { let j = null; try { j = myJob(); } catch (e) { j = null; } return !j || j.id !== mine.id; } });   // S5
   const T = Math.min(E + 60, typeof friAutoOut === 'function' ? friAutoOut(d) : E + 60);
@@ -35267,12 +35268,12 @@ const LINES = JSON.parse([
   ',"event.crossingLine.trad.every-song.thanks":[',
   '{"text":"You squeeze into the music room and sing along. Nobody knows all the words. Zeke does.","id":"92xkvw","tone":"funny"}]',
   ',"event.crossingLine.trad.rec-paddle-club.ask":[',
-  '{"text":"Early paddle on the rec deck. Seven o\'clock. Holt says the water\'s flat before breakfast.","id":"1tq7ihv"},',
-  '{"text":"Kayaks at seven. Then the long breakfast. That\'s my Saturday sorted.","id":"135q1hy","tone":"funny"}]',
+  '{"text":"Paddle on the rec deck at two. Holt says the water\'s flat all afternoon.","id":"zwh4x3"},',
+  '{"text":"Kayaks at two, then the Tiles ladder. That\'s my Saturday sorted.","id":"1yky4zl","tone":"funny"}]',
   ',"event.crossingLine.trad.rec-paddle-club.mail":[',
-  '{"text":"An early paddle tomorrow, 07:00 on the rec deck\'s water. Chief Holt has the kayaks out. Half asleep is fine.","id":"1hgcq44"}]',
+  '{"text":"A Saturday paddle tomorrow, 14:00 on the rec deck\'s water. Chief Holt has the kayaks out. Beginners welcome.","id":"5swz7c"}]',
   ',"event.crossingLine.trad.rec-paddle-club.thanks":[',
-  '{"text":"You take a kayak out with Holt\'s early paddlers. The rec deck is quiet, and the water is flat as glass.","id":"o7thh1","tone":"warm"}]',
+  '{"text":"You take a kayak out with Holt\'s paddlers. The rec deck is quiet, and the water is flat as glass.","id":"exr1t0","tone":"warm"}]',
   ',"event.crossingLine.trad.window-sketch.ask":[',
   '{"text":"Sketching at the observatory this morning. Last chance to draw a Concord sky.","id":"1fdrffi"},',
   '{"text":"Luca wants everyone to draw Tavessa before we\'re in it. I can\'t draw. I\'m going anyway.","id":"1e7dvg3","tone":"funny"}]',
@@ -53154,12 +53155,12 @@ const EV997_SAT_ON = false;                              // note 36: the first S
 // paced (leave it)"). Rows in the Line's dayDress for its day 0 (Saturday Day 6 in a new game; the storm's drop/add shape),
 // so only the first Saturday changes and a save past the Line has none of it. Garden hour (weekly, 14:00) goes that day:
 // harvest morning (the dinner's salad) and sowing (the season's first) stay. In: one existing tradition on each of four
-// other decks, within the two-at-once rule beside the long breakfast, the harvest and the sowing: an early Paddle club on
-// the rec deck in the Saturday run's freed hour, Window sketching in Deck 2's observatory, the big jigsaw in Deck 1's
+// other decks, within the two-at-once rule beside the long breakfast, the harvest and the sowing: a Paddle club on
+// the rec deck in garden hour's freed hour (14:00), Window sketching in Deck 2's observatory, the big jigsaw in Deck 1's
 // observation room, and Every song in Deck 4's music room at its own 17:15 (Zeke, its host, works Saturdays to 17:00;
 // its week-2 showings fall to the storm, Day 13, and a birthday, Day 41). Their own hosts, places and joining; the first Saturday's words (content/banks/ev997-saturday.lines, event.crossingLine.trad.*)
 const EV997_SAT = [{ trad: 'garden-hour', day: 0, drop: true },
-  { trad: 'rec-paddle-club', day: 0, add: { at: [420, 465], who: [['holt', 1], ['everyone', .2]], words: 'event.crossingLine.trad.rec-paddle-club' } },   // an early hour: a little pull, or it's two paddlers
+  { trad: 'rec-paddle-club', day: 0, add: { at: [840, 900], who: [['holt', 1], ['everyone', .2]], words: 'event.crossingLine.trad.rec-paddle-club' } },   // garden hour's freed hour, everyone up (at 07:00 only Holt came once merged: RV33's device_check find); a little pull
   { trad: 'window-sketch', day: 0, add: { at: [585, 630], words: 'event.crossingLine.trad.window-sketch' } },
   { trad: 'big-jigsaw', day: 0, add: { at: [635, 700], words: 'event.crossingLine.trad.big-jigsaw' } },   // 10:35-11:40: over before Tomas's sowing invite at 11:45 (RV33)
   { trad: 'every-song', day: 0, add: { at: [1035, 1085], words: 'event.crossingLine.trad.every-song' } }];   // its own hour: Zeke works Saturdays to 17:00
@@ -53248,6 +53249,15 @@ function lightSay(at, n, e, m) {
   const others = at.filter(a => a !== host && a.p.rank !== 'guest'); if (!others.length || n % 2 === 0 && host && n / 2 >= 8 && n % 4 === 0) return null;   // her talk done: the crowd now and then (crew only: a guest has no Line stories)
   const a = others[(n * 7 + d) % others.length];
   return [a, trLine('event.lastLight.crowd', Math.floor(n / 2) + d, {}, ['My first Line, they made me sing. Badly.', 'Is it true you get dunked? Tell me it isn\'t true.', 'One blink, then nothing behind us. Strange.', 'Every star past here has a Veyli name. Imagine.'])];
+}
+// ---- RV33's should (lead 49): while the day shift stands easy for the Last Light (its gathering on, Thursday Day 4
+// 14:00-14:30) and you've joined it or are in the bow lounge, your shift's "Take a job at the board" arrow, its board
+// pointer and ixWorkStep's arrow wait (read by 15b's ixWorkStep and the guide's shift:job goal). False while off
+function lightEasyNow() {
+  if (!EV997_LIGHT_ON || typeof SHIP_EVENTS === 'undefined' || !SHIP_EVENTS.lastLight) return false;
+  const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  const e = eventsOn(d).find(x => x.id === 'lastLightGlass' && m >= x.from && m < x.to); if (!e) return false;
+  return SHIP.events.joined.includes('lastLightGlass@' + d) || (typeof deckDef !== 'undefined' && !!deckDef && deckDef.num === 3 && roomAt(...player.here()) === 'L');
 }
 // ---- end of slot: Events 0.99.7 ----
 

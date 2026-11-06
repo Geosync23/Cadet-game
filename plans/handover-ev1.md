@@ -10,7 +10,7 @@ claude/p997-calendar) owns the calendar rules; we agreed times directly (below).
 | Switch | Note | What it does |
 |---|---|---|
 | `EV997_LIGHT_ON` | 8, 34 | **The Last Light**, a short ship-wide event (calendar row Day 3, before the Line). Wed Day 3 18:00 Vance's Mail; Thu Day 4 chatter from 07:00; 14:00 the Captain's address; 14:00-14:30 Dr. Sato's gathering at the bow glass (`lastLightGlass`, k 369, tap Sato to join, the day shift standing easy, the bow lounge theirs 13:40-14:40), her talk and the crowd's in bubbles (`lightSay`). Phases warning/passing/afterglow (never onset: eventDay(4) stays false). |
-| `EV997_SAT_ON` | 36 | **The first Saturday (Day 6):** Line day-0 dress rows: garden hour dropped that day; added early Paddle club 07:00 (rec deck, Holt, a small pull), Window sketching 09:45 (Deck 2), the big jigsaw 10:35-11:40 (Deck 1), Every song 17:15 (Deck 4). Day 7 untouched. |
+| `EV997_SAT_ON` | 36 | **The first Saturday (Day 6):** Line day-0 dress rows: garden hour dropped that day; added Paddle club 14:00-15:00 (rec deck, Holt, a small pull), Window sketching 09:45 (Deck 2), the big jigsaw 10:35-11:40 (Deck 1), Every song 17:15 (Deck 4). Day 7 untouched. |
 | `EV997_READ_ON` | 46 | **Reading corner reads The Lighthouse at Coriel:** Day 7 Esme hands it round (her wrap line); Days 21, 35, 49, 63 four parts in bubbles (content/meetings/readStory1-4.meet), your question card when joined (flags read.s<N>.<k>), your answer recalled next part (readStory<N>.recall.meet). Four regulars pulled on those days. |
 
 Where: data block for the Last Light just before the EV_SHIPWIDE loop (section 18); everything else in the slot
@@ -20,7 +20,7 @@ content/banks/event-lastLight.lines, ev997-saturday.lines, reading-corner.lines 
 calendar, weekend traditions, reading corner, open questions with my defaults).
 
 ## Agreed with CL1
-Day 6: harvest and sowing untouched; my 07:00 paddle takes the cut Saturday run's slot. CL1 adds the Last Light as a
+Day 6: harvest and sowing untouched; the paddle moved to 14:00-15:00 (garden hour's freed hour; at 07:00 only Holt came once merged). CL1 adds the Last Light as a
 fixed item (13:50-14:40, a guard) and a lead arrow 13:45-14:15 to the bow lounge, let through on shift.
 
 ## Check edits (check-side, for their owners to see)
