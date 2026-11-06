@@ -25,7 +25,7 @@ Branch: claude/p997-social, from claude/integration d7ad4c58 (0.99.6, game f6ff5
   with the switch on.
 - **39, hosts.** Section 20's socApply calls `p997HostNote(d, t)` on the 'tradition' note (section 18's eventsNoted
   passes host = e.ev.host, you = joined): +4 (`P997_HOST_PTS`) to the host, once a ship day a host (`P997_HOSTED`,
-  in memory), not when their kept invitation for that tradition (apptList, kind 'invite', trad) already gave +5.
+  in memory), not when their kept invitation for that tradition (apptList, kind 'invite', trad) already gave +5, nor for an appointment's event (ev.appt or an appt- id: apptKeep gives its own; TB6 confirmed 07:25, hosts are ev.host).
   TB6 asked whether their hosts are ev.host; if a hosted thing of theirs bypasses the bus they can call
   p997HostNote({ id, you: true, host }, shipNow()).
 

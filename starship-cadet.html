@@ -55803,7 +55803,8 @@ function p997WordSeen(p) {
 function p997HostNote(d, t) {                             // a tradition's end (section 20's socApply): you joined it, so its host warms to you
   if (!P997_SOCIAL_ON || !d || !d.you || typeof d.host !== 'string' || !SOC.idx.has(d.host)) return;
   const day = Math.floor(t / 1440) + 1, asked = typeof apptList === 'function' && apptList().some(a => a.kind === 'invite' && a.trad === d.id && a.status === 'kept' && Array.isArray(a.with) && a.with.includes(d.host) && Math.floor(a.at / 1440) + 1 === day);
-  if (asked || P997_HOSTED.get(d.host) === day) return;  // their invitation, kept: it gave its own; once a ship day a host
+  let ap = /^appt-/.test(String(d.id)); if (!ap && typeof eventsOn === 'function') { try { const e = eventsOn(d.day || day).find(x => x.id === d.id); ap = !!(e && e.ev && e.ev.appt); } catch (e) { /* as a tradition */ } }   // an appointment's event (Teach me your thing, TB6): apptKeep gives the host its own
+  if (ap || asked || P997_HOSTED.get(d.host) === day) return;   // their invitation, kept: it gave its own; once a ship day a host
   P997_HOSTED.set(d.host, day); relAdd(d.host, 'hosted', P997_HOST_PTS);
 }
 // ---- end of slot: Social engineer ----
