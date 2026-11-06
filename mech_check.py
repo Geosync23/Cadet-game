@@ -359,7 +359,10 @@ def part_p925l(g):
     m6 = g.ev(f"(() => {{ ({M7_SETUP})('m6'); const c = SHIP.works.cur, j = c && SHIP.jobs.find(x => x.id === c.j); if (j && j.found > shipNow()) setShipNow(j.found); if (j && j.claimedBy) {{ j.claimedBy = null; j.status = 'open'; }} return c && c.st === 'do' ? c.j : null; }})()")
     c6 = g.ev(f"({P925L_LOOK})({json.dumps(m6)}, null)") if m6 else None
     print(f'  Making it safe\'s job left on the board (taken at the pipe, not here): {c6}')
-    check(bool(c6) and not c6['lesson'] and not c6['marked'] and 'take this one' not in (c6['row'] or '') and not c6['pointer'], f'#22: a lesson job you can\'t take at the board isn\'t marked "take this one" ({c6})')
+    if g.ev("typeof INC_REDO_ON !== 'undefined' && INC_REDO_ON"):   # CR1 (0.99.7 notes 55, 56): Making it safe's job on the board can be taken there, named and marked
+        check(bool(c6) and c6['lesson'] and c6['marked'] and 'Your Make it safe training job: take this one' in (c6['row'] or ''), f'#22 (INC_REDO_ON): Making it safe\'s job on the board is taken there, marked "Your Make it safe training job: take this one" ({c6})')
+    else:
+        check(bool(c6) and not c6['lesson'] and not c6['marked'] and 'take this one' not in (c6['row'] or '') and not c6['pointer'], f'#22: a lesson job you can\'t take at the board isn\'t marked "take this one" ({c6})')
     for slot, name in ((1, 'shadow job'), (2, 'job to lead')):
         jid = g.ev(f"({P925L_DAY1})({slot})")
         d1 = g.ev(f"({P925L_LOOK})({json.dumps(jid)}, null)") if jid else None
@@ -536,7 +539,8 @@ def m4_part(g):
     check(a['held'] and a['junior'] and a['claimed'], f"m4: held for you to 16:00, a junior job, taken ({a['held']}, {a['junior']}, {a['claimed']})")
     st = [s[0] for s in a['stops']]
     check(st[0] == 'cart' and st[-1] == 'return' and st.count('load') == st.count('deliver') == a['crates'] and all(s[1] for s in a['stops']), f"m4: stops {a['stops']}")
-    check(a['holds'][0] == 'cart' and 'cartfull' in a['holds'], f"m4: the cart in hand {a['holds']}")
+    cf = g.ev("typeof CART_FIRST_ON !== 'undefined' && CART_FIRST_ON")   # CR1 (0.99.7 note 48): with CART_FIRST_ON no cart in hand till you've taken one from its dock
+    check((a['holds'][0] == 'cart' or cf and a['holds'][0] is None and 'cart' in a['holds']) and 'cartfull' in a['holds'], f"m4: the cart in hand {a['holds']}" + (' (CART_FIRST_ON: none before the dock)' if cf else ''))
     check(a['workDone'] and a['turnin'] and a['left'] == 0 and len(a['got']) == a['crates'] == len(set(a['got'])) and len(a['notes']) == a['crates'] and a['use'] == 2, f"m4: every crate once ({a['got']}, left {a['left']}, notes {a['notes']}, use {a['use']})")
     check(a['five'] == 5 and a['runs'] == [4, 1] and a['leftFive'] == 0, f"m4: five crates in two runs {a['runs']} (left {a['leftFive']})")
     check(a['crew'][0] > 0 and a['crew'][1] and all(x[0] == 'done' and x[1] not in (None, 'you') for x in a['crew'][1]) and a['crew'][2] == 0, f"m4: the crew's run when you don't {a['crew']}")

@@ -65224,7 +65224,7 @@ function crBigFirst(ok, d, W) {                          // ladderTick's big row
 function crCarryPark(d, m, W, opened) {                  // a lesson carried over to a day Making it safe could open: it waits
   const c = W && W.cur, r = ladderRow('m6');
   if (!CR_DAY8_ON || !c || !r || W.tier !== 1 || d < CR_SAME.from || W.tr.m6 !== undefined || c.id === 'm6' || c.d >= d || !(c.st === 'ask' || c.st === 'again') || m > WORKS_ASK[1] || opened.has('m6')) return;
-  if ((W.op[d] || []).some(id => (ladderRow(id) || {}).size === 'big') || !WORK_MECH.m6 || !ladderTeacher(r, d)) return;
+  if ((W.op[d] || []).some(id => (ladderRow(id) || {}).size === 'big') || !WORK_MECH.m6 || WORK_MECH.m6.own || d < r.day || r.tier > W.tier || !ladderNeeds(r.needs, W) || !ladderTeacher(r, d)) return;   // only when Making it safe can open today (mech_check #15: a lapsed scanner lesson waited for nothing)
   const k = (W.op[c.d] || []).indexOf(c.id); if (k >= 0) W.op[c.d].splice(k, 1); opened.delete(c.id); W.cur = null;
   simNote('ladder', { mech: c.id, size: 'big', day: d, parked: true });
 }
