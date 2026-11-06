@@ -65,6 +65,6 @@ stock over 14 days); `tools/jobs_measure.py BUILD 14 --json OUT` gives the mix (
   Tested on staging-0997 8ed0635 + CL1 ba61507 + EV1 286ed5e, all 27 0.99.7 switches on: the food part passes.
 - **"the ship meters: your jobs"** with the calendar on: not a missing mapping (the lead's guess). The job (in my run
   fix-oj-d3lounge-sofa@230, FX20's) maps fine; the ship's upkeep was 0 everywhere and the board 96 (machines 95.7), so a
-  small job had nothing to show. Options sent to the lead (check's exemption for upkeep all done; or game-side gates).
-  Waiting for the lead's choice.
+  small job had nothing to show. Lead 49 chose the check: machine_check 5v now also leaves out a job finished when the
+  ship's upkeep was already all done (sum < 1), its own "nothing left to show" rule. A check change, not a game change.
 - **food_check "cake"** fails on that staging copy with and without JB3_FOOD_ON (Day 4 birthday cake): not mine, told the lead.
