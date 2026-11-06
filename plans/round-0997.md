@@ -48,4 +48,4 @@ Whoever finishes early offers to take a check from the slowest share (agree it, 
 Sessions: lead 49 session_01GKuymjjreuZtZeDMBX79xn; BM25 session_01GKuymnYTNkfxgLvtfFRg7w; R1 session_01GKuymnpcUSBmpZYiDK67GH,
 R2 session_01GKuymmnJnzWMxP769P9Edd, R3 session_01GKuymo7sJwyufjkoEsCacB, R4 session_01GKuymmvXPrmsnyaH858XoJ,
 R6 session_01GKuymjS1cBK12RvWv7L5ka.
-GO: (BM25 fills in the commit and the sha256.)
+GO (BM25, 2026-11-06 ~13:00 UTC): claude/staging-0997 at the GO commit named in the message (build turn 363107d; later docs-only commits do not change the game), game sha256 b14421f82e04602cd608505756ddb8fb05bea4571af813d8e345424ebcd1cf7d. Expected cadet: differences by design (BM25 lists each in the round record); a difference you cannot explain from the 0.99.7 notes, or a page error, is NEW.
