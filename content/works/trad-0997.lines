@@ -1,0 +1,187 @@
+@bank all
+// 0.99.7 (SC1 for lead 49): the words for TB6's hosted traditions (claude/p997-traditions, TRAD997_ON), in the crew's
+// voices. They replace TB6's stand-ins (same keys and placeholders; the game falls back to the stand-ins when a key
+// isn't here). Open lab: Dr. Imra Sato (fast and clever, in bursts, drifts off mid-thought; terrible tea). Spice shelf
+// supper: Chef Auda Brennan ("love", warm, in charge, asks if you've eaten). Teach me your thing: Zeke (knitting),
+// Tove (shy, knows plants by the week they were sown), Rina (dry, deadpan, undefeated at Tiles), Ravi (gentle, draws
+// the comics wall). Bunk inspection: whichever officer walks it (plain, brisk, fair). Bread day: Brennan.
+// (t997.spice-shelf-supper.notice keeps TB6's words: its {till} isn't a token lines_check knows.)
+// A card line is said in the host's card (90 characters at most); coaching lines and the crowd are speech bubbles.
+
+// ---- Open lab, Sato's card (in order: four lines, the question, your three replies and her answers, the close)
+== t997.open-lab.line.1
+- You came. Good. Gloves are in the box by the door. Touch only what I hand you.
+== t997.open-lab.line.2
+- This is where Survey lives between scans. Cold light, long benches, a label on everything.
+== t997.open-lab.line.3
+- Most of the job is waiting. Hours under the scope, then one small true thing. Worth it.
+== t997.open-lab.line.4
+- That's comet ice. Older than the sun, probably. And that one hums. Nobody knows why. Yet.
+== t997.open-lab.ask
+- Go on. Ask me something. Everyone gets one question. Make it a good one.
+== t997.open-lab.pick.1
+- What's the best part of the job?
+== t997.open-lab.answer.1
+- The first look. Nobody in all of history has seen that rock up close. Then you have.
+== t997.open-lab.pick.2
+- Why does the rock hum?
+== t997.open-lab.answer.2
+- Mori says it's the ship. I say it's the rock. Loser does the labels for a month.
+== t997.open-lab.pick.3
+- Could I work in here one day?
+== t997.open-lab.answer.3
+- If you like waiting, and writing small numbers neatly. Help at the next one. I mean it.
+== t997.open-lab.close
+- Right. Look round the island. Gently. They've been waiting a very long time.
+
+// ---- Open lab: Sato, now and then, at her island (bubbles)
+== t997.open-lab.show
+- Dust from the Pale Shoals. Every grain has a number. I named about four hundred.
+- Ice has rings, like a tree. Count them and you know how far it came.
+- Hold it to your ear. Hear that? Mori can't. I hear it every time.
+- We write down what we see, not what we hope. That's science, really.
+- This one came off the hull. Hitched a ride for a week before we noticed.
+- Label first, then look. Without a label it's just a rock.
+- The green one's from a moon with no name yet. Mori vetoes all of mine.
+- Gloves on. Not because it's dangerous. Because your fingers are greasy.
+- That jar is a whole afternoon of the Shoals. It looks like nothing. It isn't.
+- Hold your breath and it sparkles under the lamp. Go on. See?
+== t997.open-lab.wrap
+- That's the lab for tonight. Gloves back in the box. Thank you for asking things.
+
+// ---- Open lab: the crowd round the island (bubbles)
+== t997.open-lab.crowd
+- Sato let me label one. I spelt it wrong. It's still in there, wrong.
+- I never know what to ask. I just like looking.
+- Is that the humming one? I thought it'd be bigger.
+- Mori says the stripes are years. That's a lot of years.
+- I touched the comet ice. Through glass. Still counts.
+- Survey get the best rocks. Works get the best spanners. Fair.
+- I learn one new word every time. Tonight's is "regolith".
+- Don't breathe on the dust. I did once. Sato looked at me for a week.
+- I'd work in here if it wasn't so quiet. I'd talk to the rocks.
+
+// ---- Spice shelf supper, Brennan's card
+== t997.spice-shelf-supper.line.1
+- There you are, love. Dinner's done, so this is the fun bit. Sit, sit.
+== t997.spice-shelf-supper.line.2
+- That shelf's the crew's. Everyone brings a jar from home, name on the bottom.
+== t997.spice-shelf-supper.line.3
+- Once a week I take three down, eyes shut. A pinch of each. You taste, you guess whose.
+== t997.spice-shelf-supper.ask
+- Ever had a spice that tasted like home?
+== t997.spice-shelf-supper.pick.1
+- My gran's kitchen. Always.
+== t997.spice-shelf-supper.answer.1
+- Then bring a jar back from your next leave, love. It goes next to Kovac's paprika.
+== t997.spice-shelf-supper.pick.2
+- I'm not sure I'd know.
+== t997.spice-shelf-supper.answer.2
+- You will after tonight. Taste slowly. Your tongue knows more than you do.
+== t997.spice-shelf-supper.pick.3
+- Can I see the shelf?
+== t997.spice-shelf-supper.answer.3
+- After. Hands off the jars, mind. I know where every one of them lives.
+== t997.spice-shelf-supper.dish
+- three little tasting plates
+
+// ---- Teach me your thing: each teacher's four coaching lines (bubbles, in order), the result's title and words
+== teach997.torres-zeke.coach
+- Needle in. Wool round. Pull it through. That's one.
+- Not so tight. It's wool, not a mooring line.
+- Look at that. A whole row. Wonky, but whole.
+- Count them. Twelve? Twelve. Well done, you.
+== teach997.torres-zeke.title
+- Your first row
+== teach997.torres-zeke.result
+- You knitted your first row with Zeke. Wonky, he says, like his. Hobby: knitting, any seat.
+
+== teach997.cruz-tove.coach
+- Just under the joint. There. A clean cut. Good hands.
+- Bottom leaves off. Gently. It needs its strength.
+- Into the water. Mm. Now say hello to it. I mean it.
+- That's yours now. Week-six mint. Don't drown it.
+== teach997.cruz-tove.title
+- Your mint cutting
+== teach997.cruz-tove.result
+- You took your first cutting with Tove: mint, in water. Tap a garden bed to grow more.
+
+== teach997.rina.coach
+- Your tiles at the bottom. Mine at the top. Don't touch mine.
+- Three of a mark, side by side. That's a dock. That's points.
+- Jump my tile and it's yours. Go on. Ha. Too slow.
+- Seven. I win. You made me work for it, though.
+== teach997.rina.title
+- Your first game of Tiles
+== teach997.rina.result
+- You played your first game of Tiles with Rina. She won. She'd like you to know she won.
+
+== teach997.hart-ravi.coach
+- Box one. Someone wants something. Draw them.
+- Box two. It goes wrong. Bigger. More wrong.
+- Box three. Worse. Yes. That's properly worse.
+- Box four. The duck. There it is. Perfect.
+== teach997.hart-ravi.title
+- Your first comic
+== teach997.hart-ravi.result
+- You drew your first four-box comic with Ravi. The duck's in box four. Hobby: drawing.
+
+// ---- Bunk inspection: what the officer says at each check (by week), the result card, the verdict, the Mail's first words
+== inspect997.uniform.ok
+- Uniform: clean. Good.
+- Uniform: pressed, even. Noted.
+== inspect997.uniform.no
+- Uniform: that's yesterday's, cadet.
+- Uniform: I can see last night's dinner on it.
+== inspect997.bed.ok
+- Bed: made. Corners and all.
+- Bed: tight enough to bounce a coin. Good.
+== inspect997.bed.no
+- Bed: not made.
+- Bed: that's a nest, not a bunk.
+== inspect997.locker.ok
+- Locker: tidy.
+- Locker: everything in, nothing on top. Good.
+== inspect997.locker.no
+- Locker: things on it, not in it.
+- Locker: if it's on top, it isn't stowed.
+== inspect997.title
+- Bunk inspection
+== inspect997.note.nod
+- Passed: uniform, bed and locker all in order. Works reputation up.
+== inspect997.note.uniform
+- Not passed this week: your uniform wasn't clean. Next inspection: Thursday.
+== inspect997.note.bed
+- Not passed this week: your bed wasn't made. Next inspection: Thursday.
+== inspect997.note.locker
+- Not passed this week: your locker wasn't tidy. Next inspection: Thursday.
+== inspect997.note.two
+- Not passed this week: two of the three weren't right. Next inspection: Thursday.
+== inspect997.note.none
+- Not passed this week: uniform, bed and locker. Next inspection: Thursday.
+== inspect997.verdict.nod
+- That's a pass. Well done. Carry on.
+== inspect997.verdict.uniform
+- Not a pass this week. A clean uniform next Thursday, please.
+== inspect997.verdict.bed
+- Not a pass this week. Make the bed before you go, please.
+== inspect997.verdict.locker
+- Not a pass this week. In the locker, not on it.
+== inspect997.verdict.two
+- Not a pass this week. Two out of three. Let's get to three.
+== inspect997.verdict.none
+- Not a pass this week. Uniform, bed and locker. All three, next Thursday.
+== inspect997.mail.pass
+- Passed.
+== inspect997.mail.fail
+- Not passed this week.
+
+// ---- Bread day: Brennan swaps your dough for a warm loaf
+== t997.bread.title
+- Your loaf
+== t997.bread.give
+- Here, love. First tins, still warm. Fair trade: yours feeds Monday.
+== t997.bread.notice
+- Brennan swaps your dough for a warm loaf. Tap any seat to sit down and eat it.
+== t997.bread.later
+- Your loaf's in Monday's basket, with your name on it. Your hands were full.
