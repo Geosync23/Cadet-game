@@ -9780,7 +9780,7 @@ const TRAD_0932_WHEN = {                 // any: due when either rhythm is (sect
 // briefing (21b); MV_WASD_ON: W, A, S, D and the arrow keys walk you (11); MV_FIT_ON: fitness drains faster (15);
 // MV_RIG_ON: a story crew member's full rig is never drawn at the deck's origin for a frame (10); MV_RECWC_ON: the rec
 // deck's toilets and basins can be used (4e)
-var MV_BRIEF_ON = false, MV_WASD_ON = false, MV_FIT_ON = false, MV_RIG_ON = false, MV_RECWC_ON = false;
+var MV_BRIEF_ON = false, MV_WASD_ON = false, MV_FIT_ON = false, MV_RIG_ON = false, MV_RECWC_ON = false, MV_SOFA_ON = false;   // MV_SOFA_ON: backlog EV1-1, a seated neighbour on a sofa isn't stood up when you sit or tap to join (10's crewWayOn)
 if (MV_RECWC_ON && REC_DECK) recWcPlaces();
 function saveGame() {
   if (NOSAVE || SLOT_HOLD || typeof devmodeHold === 'function' && devmodeHold()) return;   // Dev mode (section 25): not while a Dev action works, nor over a save it's reloading into
@@ -71394,7 +71394,7 @@ function sharedTile(t) {
 function crewWayOn(now) {
   for (const [k, u] of CREW_WAY) if (u <= now) CREW_WAY.delete(k);
   const ps = PLAYER_PLACE && placeSpot(PLAYER_PLACE);   // your place's walk-to tile only while you stand on it (a station): sat in a mess seat you're off it, and the diner next to you needs it to sit down (0.71.0)
-  const you = [player.path.length && player.goal, ps && ps.onTile && ps.walk].filter(t => t && sharedTile(t));
+  const you = [player.path.length && player.goal, ps && ps.onTile && !(MV_SOFA_ON && ps.pose === 'sit') && ps.walk].filter(t => t && sharedTile(t));   // MV_SOFA_ON (0.99.7, backlog EV1-1): sat on a seat on its own open tile (a sofa), you're off the walk tile too: the neighbour sharing it stays seated
   if (!you.length) return CREW_WAY.size ? CREW_WAY : null;
   const out = new Map(CREW_WAY); for (const t of you) out.set(K(t), now + 1); return out;
 }
@@ -71469,7 +71469,7 @@ class CrewAgent {
     const way = crewWayOn(now);                          // crewMakeWay: off a tile you're heading for, waiting beside it
     if (way && goalId !== '@lift') {
       const sp = goalId && placeSpot(goalId), here = this.here();
-      if (sp && (sp.onTile || CREW_WAY.has(K(sp.walk))) && (way.has(K(sp.walk)) || way.has(K(cellAt(sp.x, sp.z)))) || !this.settled && way.has(K(here))) {   // standing at their place (the cook), not a diner whose seat shares a walk-to tile with yours (0.26.37)
+      if (sp && (sp.onTile || CREW_WAY.has(K(sp.walk))) && (way.has(K(sp.walk)) && !(MV_SOFA_ON && this.settled && sp.pose === 'sit' && this.spot && this.spot.id === goalId) || way.has(K(cellAt(sp.x, sp.z)))) || !this.settled && way.has(K(here))) {   // MV_SOFA_ON (backlog EV1-1): sat in their seat, only their seat's own tile moves them, not the walk-to tile it shares   // standing at their place (the cook), not a diner whose seat shares a walk-to tile with yours (0.26.37)
         if (this.goalId !== '@aside') {
           const to = asideTile(here, way); this.retarget(null); this.goalId = '@aside';
           const pth = to && crewPath(this.here(), to, new Set([...this.rooms, roomAt(...this.here())]), this); if (pth) this.path = pth;
