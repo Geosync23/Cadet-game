@@ -295,6 +295,27 @@ The user's: "tap the leader or anyone taking part to join; you then do the activ
 - **Lines** (the head writer's, placeholders until then): `LINES['join.<id>.tip' | '.notice' | '.done' | '.left' | '.tell' | '.paint']` ({name} = the leader's first name), crew kind `beam.congrats`.
 - **Testing:** `join_check.py BUILD.html` (about 3 minutes): each joinable one (not joined by being there; arrow, marker, the tap joins and starts the activity, the arrow gone), the birthday still turn-up, Lap of the Wren on Sundays with Tomas, the line goes round and finishes, dropping out, the beam, the newcomers. Ends "JOIN CHECK OK".
 
+### Hosted traditions (0.99.7, TB6 for lead 49; switched off: `TRAD997_ON`, `?trad997` previews; plans/patch-0997.md notes 18, 43, 50, 51, 52)
+
+All in the Traditions slot (section 18), in TB6's block above the slot's end line, plus one-line hooks; design-doc has each.
+- **Hooks outside the block:** `tradJoin` (`t997Join` first: the host's card, a teacher's activity), `eventsTick` (`t997Frame`),
+  24c's `inspectWalkDo` (`insp997Moment` instead of the 2.6 s timeout) and `inspectRun` (the verdict line, "Passed." on the Mail),
+  section 15's hold line (`'loaf'` for Bread day's loaf) and `trayOnTable` (`loaf997Table`), 8b after `HOLDS.slice` (`PROP_KIT.loaf`, `HOLDS.loaf`).
+- **Host cards** (`t997Card`, script id `t932.join` like 0.93.2's and TB4's): lines, one question, three answers and the host's
+  reply, then the activity. No friendship in the card: SC1's join (note 39) gives the host's. Words `t997.<id>.*`, stand-ins in `T997_CARD`.
+- **Open lab:** `TRAD_JOIN['open-lab'].host = 'sato'`; Sato held at `2-open-lab-2` (`lab997Frame`); you at a free lab spot or
+  beside her; talk `lab997Say` (every third bubble hers, `LAB997_SATO`; the island's crew between; her wrap line).
+- **Spice shelf supper:** at load `at = [1155, 1200]`, no `meal`, no galley tie (planner re-planned: SCHED_DATA reset). Card,
+  then `spiceSit997`: a mess seat and three tasting plates (an eat act). TB3/TB5's `spiceFrame995` runs unchanged.
+- **Teach me your thing:** `teach997Join` swaps the join's pose per teacher (`TEACH997`: sit:read, water, sit:play, sit:fold),
+  `teach997Frame` the four coaching bubbles (5 real s apart, paused under a card) and the result toast + `flag('teach997.<hobby>')`.
+- **Inspection:** `insp997Moment(d, room)` once a day: the walker held at `4-inspect-<room>`, three checks 2.6 s apart, then
+  `inspectRun` (verdict) and the result notice; the hold freed 2.5 s later. Words `inspect997.*` via worksText.
+- **Bread day's loaf:** `bread997Frame` notes when your kneading (`tj:bread-day`) starts; when it ends after 8+ ship minutes,
+  `SHIP.player.tray = LOAF997_DISH`, `trayGo`; the seat tap eats it (section 15's tray path); `LOAF997_ON` (board, loaf, two
+  slashes: 4 meshes, shown only while you eat it). Hands full: no loaf, a toast. Not saved.
+- **Probes** (`plans/tb6-probes/`, each switches a copy on): `spice_fresh.py` (ON=1), `hosted.py`, `teach.py`, `bunk_inspection.py`, `bread.py`.
+
 ### The traditions variety (0.93.2, FX24 for lead 37; switched off: `TRAD_0932_ON`)
 
 CS1's pitch pages (`plans/trad-variety-pitch.html`, `-2.html` on claude/crew-stories-pitch) and the user's answers; design-doc "Ship traditions", "Every week a little different". Off is the game as 0.93.1.
