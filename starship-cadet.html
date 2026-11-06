@@ -20560,7 +20560,7 @@ let SHARE_ON = true;                                    // machine_check turns i
 const forYou = j => j.urgency < 2 && jobTier(j) <= playerTier() && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind) && !(P5_PROMO4 && pu4EngineByDay())) && rankOk('you', j) && (!j.junior || playerRank() === 'junior') && !bridgeBars(j);
 function leaveEnd(j) {
   if (!forYou(j) || j.released) return j.found;
-  if (j.cargo === 'meals') return j.found + 60;
+  if (j.cargo === 'meals') return JB3_FOOD_ON && !jb3MealsHeld(j) ? j.found : j.found + 60;   // JB3: not held on your day off or past your shift (the slot below)
   if (j.cargo === 'stores') { const d0 = Math.floor(j.found / 1440) * 1440; return playerShiftOn(d0 / 1440 + 1) && j.found < d0 + DELIVERY_KEEP ? d0 + DELIVERY_KEEP : j.found; }   // the delivery (0.33.42)
   if (P5_NIGHT && typeof p5nBoardWin === 'function') { const w = p5nBoardWin(j.found); if (w) return j.found + Math.min(w.left, j.leave || (realRepair(j) ? FAULT_LEAVE : CREW_LEAVE)); }   // found in your night's hours: held for you in them (28a, S6-1)
   let t = j.found, left = j.leave || (realRepair(j) ? FAULT_LEAVE : CREW_LEAVE);
@@ -20946,7 +20946,7 @@ function cartPost() {
     // books: it's history, never a job for anyone now (0.33.20: three stale runs once took both carts at once)
     if (r.arriveAt <= shipNow()) { j.status = 'done'; j.doneAt = r.arriveAt; j.doneBy = null; MACH_REV++; continue; }
     const md = t % 1440;
-    if (!r.urgent && md >= DAY_SHIFT[0] && md < dayShiftEnd(Math.floor(t / 1440) + 1)) { MACH_REV++; continue; }   // left for you first
+    if (!r.urgent && md >= DAY_SHIFT[0] && md < dayShiftEnd(Math.floor(t / 1440) + 1) && !(JB3_FOOD_ON && !jb3MealsHeld(j))) { MACH_REV++; continue; }   // left for you first
     const busy = new Map(); for (const x of SHIP.jobs) if (x.status === 'claimed' && x.claimedBy !== 'you') busy.set(x.claimedBy, Math.max(busy.get(x.claimedBy) || 0, x.end));
     const crew = schedPeople().filter(p => jobCrew(p) === 'works').sort((a, b) => (CREW_TIER[a.rank] || 0) - (CREW_TIER[b.rank] || 0) || (a.id < b.id ? -1 : 1));
     for (const p of crew) {
@@ -22459,7 +22459,7 @@ function roundMixRoute(n, day, key, keep) {
 // a chore that needs a lamp has no lathe to fall back on, and the arrow still said "Fetch a lamp: the Lights shelf". Now
 // the crew leave SHELF_KEEP of those parts on the shelf for your jobs and make their own at the lathe instead, as they
 // already did when the shelf was empty (jobsHour asks jb3Keep). Parts that can't be made aboard (NO_MAKE) keep nothing.
-var JB3_SHELF_ON = false, JB3_SCI_ON = false, JB3_REC_ON = false, JB3_TEA_ON = false;   // off till the build master switches them on (lead 49); var: section 17's jobsHour and boardTopUp ask before this line has run
+var JB3_SHELF_ON = false, JB3_SCI_ON = false, JB3_REC_ON = false, JB3_TEA_ON = false, JB3_FOOD_ON = false;   // off till the build master switches them on (lead 49); var: section 17's jobsHour and boardTopUp ask before this line has run
 const SHELF_KEEP = { relay: 2, lamp: 2, breaker: 1, cable: 1 };   // the light relays' fault parts (FAULT_CAUSES.lights), all on the Lights shelf
 function jb3Keep(p) { return JB3_SHELF_ON && !NO_MAKE.has(p) && SHELF_KEEP[p] || 0; }
 // The arrow's pin for a shelf is the place in front of its aisle (5-parts-1..4), as near the shelf before it as its own:
@@ -22467,6 +22467,12 @@ function jb3Keep(p) { return JB3_SHELF_ON && !NO_MAKE.has(p) && SHELF_KEEP[p] ||
 // filters on the Lights shelf", again and again). shelfWrong asks jb3PinTap: a tap whose line passes within JOB_RAY of
 // the wanted shelf's spot (section 15's jobRayDist, as a machine's pin) is that shelf, whatever caught it first
 function jb3PinTap(id) { return typeof ray !== 'undefined' && typeof jobRayDist === 'function' && PLACE_OF.has(id) && jobRayDist(placeSpot(id)) < JOB_RAY; }
+// JB3_FOOD_ON (lead 49, RV33's machine_check "food runs in live play" with the 0.99.7 calendar on): a food run set off in
+// day-shift hours waited an hour on the board for you (leaveEnd) even on your day off, so Sunday's 16:00 run waited to 17:00,
+// when the Works crew's shift ends, and sat open through Sunday table till it went unseen at 20:00 (the cold store never ran
+// short). Now a run is held for you only on a day you're on shift and when its hour ends by your shift's end
+// (jb3MealsHeld); otherwise the crew on shift take it at once (cartPost) or at the next hour (jobsHour)
+function jb3MealsHeld(j) { const d = Math.floor(j.found / 1440) + 1; return playerShiftOn(d) && j.found + 60 <= (d - 1) * 1440 + dayShiftEnd(d); }
 // JB3_TEA_ON (backlog CR1-2, lead 49): a round's check point "the tea corner's water tap" (c5-water, at 5-tea-3) is the Hot
 // water dispenser, but a tap on it (or the Mug rack beside it) made you tea, and the armchair and table sat you down: the
 // check was never done (CR1's arrow-follower stood there 11:58-16:00). section 15's choreThingTap asks jb3CheckThing: while

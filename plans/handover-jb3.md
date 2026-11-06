@@ -3,7 +3,7 @@
 - **Role:** jobs builder for lead 49 (session_01GKuymjjreuZtZeDMBX79xn). Reviewer **RV32** (session_01GKuymkDX3gviqiGJcKLWuS).
   My session: session_01GKuymmiCEm3CMMrMTdWMEo (JB3).
 - **Branch:** `claude/p997-jobs` from claude/integration d7ad4c58 (0.99.6, game f6ff5ec1...db8a8). Build number lines untouched.
-- **Switches:** `var JB3_SHELF_ON, JB3_SCI_ON, JB3_REC_ON, JB3_TEA_ON` in section 17's Systems slot (the JB3 block after JB2's), all
+- **Switches:** `var JB3_SHELF_ON, JB3_SCI_ON, JB3_REC_ON, JB3_TEA_ON, JB3_FOOD_ON` in section 17's Systems slot (the JB3 block after JB2's), all
   **false** on the branch (cadet_test vs 0.99.6: ALL IDENTICAL). The build master switches them on. Every test of the
   features ran on a copy with all three true.
 
@@ -52,3 +52,19 @@ stock over 14 days); `tools/jobs_measure.py BUILD 14 --json OUT` gives the mix (
 ## Open questions for the user (defaults built)
 - The Works keeps two relays and two lamps (one breaker, one cable) on the Lights shelf for your jobs: yes.
 - Science-room jobs: two a shift in the first week, one after: yes. Rec deck: two in the first week, none extra after: yes.
+
+## Review
+- **RV32: PASS on e96ec5a** (game bae8e769...456d, includes 43a96ae), 2026-11-06 ~09:35 UTC. Off: cadet_test ALL IDENTICAL;
+  all four on: check_fast OK; a fresh save with the intro at 390x844, Days 0-6, showed science jobs Days 1-4 and rec deck
+  jobs Days 2 and 4. Owners to review: section 15's two lines (Player engineer). Next: BM24 merges and switches on.
+
+## Round items (lead 49, from RV33, after the PASS)
+- **machine_check "food runs in live play"** (fails with CL1, EV1 or TB6 on): `JB3_FOOD_ON`. `leaveEnd` (meals) and `cartPost`
+  ask `jb3MealsHeld(j)`: a food run is held for you only on your shift day and when its hour ends by your shift's end.
+  Cause: Sunday's 16:00 run held to 17:00, the Works crew's shift ended then, nobody on 'work' till it lapsed at 20:00.
+  Tested on staging-0997 8ed0635 + CL1 ba61507 + EV1 286ed5e, all 27 0.99.7 switches on: the food part passes.
+- **"the ship meters: your jobs"** with the calendar on: not a missing mapping (the lead's guess). The job (in my run
+  fix-oj-d3lounge-sofa@230, FX20's) maps fine; the ship's upkeep was 0 everywhere and the board 96 (machines 95.7), so a
+  small job had nothing to show. Lead 49 chose the check: machine_check 5v now also leaves out a job finished when the
+  ship's upkeep was already all done (sum < 1), its own "nothing left to show" rule. A check change, not a game change.
+- **food_check "cake"** fails on that staging copy with and without JB3_FOOD_ON (Day 4 birthday cake): not mine, told the lead.

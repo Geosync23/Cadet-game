@@ -1171,7 +1171,7 @@ with sync_playwright() as pw:
     # 5v. the ship meters and the bridge room (Step 3, 0.33.57; the user's "starts a little lower, so you can see your impact"):
     # a fresh ship's board reads about 75 (72-79), none failing, one or more fine, while the machines' own health (what the
     # effects read) is 90+; untended, every meter only falls a little each day; a steady player (5o's) gets j.meters on every
-    # job they finish, biggest first, the biggest a visible step (1+), while the board reads under 97 (from patch 1's note 13 the
+    # job they finish, biggest first, the biggest a visible step (1+), while the board reads under 97 and the ship's upkeep isn't all done (0.99.7, lead 49) (from patch 1's note 13 the
     # board keeps up, and a steady player tops the ship's upkeep out around Day 11: JB1), and the board rises well above its start (85+ by the
     # end); the same twice. A job in the bridge room (Deck 1, B) isn't offered to you or yours to take till SHIP.bridgeInvited,
     # then it is; the crew can take it; the Wednesday manifest has no bridge crate till then. The save keeps the upkeep, and a
@@ -1190,9 +1190,9 @@ with sync_playwright() as pw:
           let mine = null, until = 0;
           for (let t = t0; t <= end; t += 30) {
             setShipNow(t); machinesNow();
-            if (mine && t >= until) { const j = SHIP.jobs.find(x => x.id === mine); if (j && j.claimedBy === 'you' && j.status === 'claimed') { const bf = shipHealthRows()[0].value; jobStops(j).forEach((x, k) => jobStepDone(j.id, k)); finishJob(j.id);
-                out.jobs++; const ms = j.meters || [], main = jobMeterSys(j)[0]; if (bf >= 97) out.topped++;
-                if (!ms.length) { if (bf < 97) out.noMeters.push(j.id); } else { if (!SYSTEMS.includes(main)) out.notMain.push(j.id + ' ' + main); if (ms[0].gain < 1 && bf < 97) out.small.push(j.id + ' ' + ms[0].gain); } } mine = null; }
+            if (mine && t >= until) { const j = SHIP.jobs.find(x => x.id === mine); if (j && j.claimedBy === 'you' && j.status === 'claimed') { const bf = shipHealthRows()[0].value, upLeft = SYSTEMS.reduce((a, k) => a + (SHIP.upkeep[k] || 0), 0); jobStops(j).forEach((x, k) => jobStepDone(j.id, k)); finishJob(j.id);
+                out.jobs++; const ms = j.meters || [], main = jobMeterSys(j)[0], none = bf >= 97 || upLeft < 1; if (none) out.topped++;   // nothing left to show: the board at 97+, or the ship's upkeep already all done (JB3 for lead 49: the 0.99.7 calendar keeps the machines at ~95.7, so the board can sit at 96 with no upkeep left)
+                if (!ms.length) { if (!none) out.noMeters.push(j.id); } else { if (!SYSTEMS.includes(main)) out.notMain.push(j.id + ' ' + main); if (ms[0].gain < 1 && !none) out.small.push(j.id + ' ' + ms[0].gain); } } mine = null; }
             const d = SHIP.time.day, md = t % 1440;
             if (md === 1080) out.byDay.push(Math.round(shipHealthRows()[0].value));
             if (!mine && d >= 2 && playerShiftOn(d) && md >= DAY_SHIFT[0] && md < DAY_SHIFT[1]) { const o = openJobs('you')[0]; if (o && claimJob(o.id)) { mine = o.id; until = t + Math.max(30, o.mins + 20); } }
@@ -1204,7 +1204,7 @@ with sync_playwright() as pw:
         })()""".replace('DAYS', str(DAYS))
         mv = g.ev(MV); mv2 = g.ev(MV)
         print(f"Ship meters (0.33.57): a fresh ship reads {mv['start']} (machines {mv['machine0']}), failing {mv['failing']}, fine {mv['fine']}: {mv['startRows']}")
-        print(f"  untended a day: upkeep out of step {mv['creep']}, the board down {mv['creepDrop']}; a steady player: {mv['jobs']} jobs, without meters {mv['noMeters'][:4]}, main system unknown {mv['notMain'][:4]}, a step under 1 {mv['small'][:4]}, done with the board at 97 or more (nothing much left to show: not counted) {mv['topped']}")
+        print(f"  untended a day: upkeep out of step {mv['creep']}, the board down {mv['creepDrop']}; a steady player: {mv['jobs']} jobs, without meters {mv['noMeters'][:4]}, main system unknown {mv['notMain'][:4]}, a step under 1 {mv['small'][:4]}, done with the board at 97 or more or the ship's upkeep all done (nothing much left to show: not counted) {mv['topped']}")
         print(f"  the board by day {mv['byDay']}, at the end {mv['end']}; the same twice {mv['sig'] == mv2['sig']}")
         if not (72 <= mv['start'] <= 79) or mv['failing'] or not mv['fine'] or mv['machine0'] < 90 or mv['creep'] or not (0 < mv['creepDrop'] < 4):
             fail('the ship meters at the start')
