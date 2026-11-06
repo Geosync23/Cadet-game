@@ -186,3 +186,23 @@
 - Tap {name} for tea with the Chief
 == join997.open-door.notice
 - Open door: an end-of-shift tea with the Chief. Social up.
+
+// RV32's find (lead 49): Day 1's arrow to the Chief's briefing (the arrow's label)
+== tp997.d1.brief
+- Morning briefing with the Chief, 08:50: the Works bay
+
+// the same: Tuesday's arrows (the Chief's meeting, then the evening at the booths)
+== tp997.d2.solo
+- The Chief's office, 08:45: your first solo job
+== tp997.d2.booths
+- Calling home, the booths on Deck 3: Leila shows you how
+
+// lead 49 (RV32's walk): every timed beat of the first week has an arrow (its label)
+== tp997.beat.d3-store
+- The crew store: Orla shows you round, till 17:30
+== tp997.beat.d4-quiz
+- 20:00 quiz night with Pell: the bow lounge
+== tp997.beat.d5-mug
+- 13:00 Friday tea with Halloran: the tea corner
+== tp997.beat.d6-sowing
+- 11:45 Sowing morning with Tomas: the garden

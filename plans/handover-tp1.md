@@ -30,6 +30,19 @@ DEV_NOTES "Tips, the device and HUD words for 0.99.7" lists where every piece li
   (tp997Notice), the tip's second sentence (tp997More), the thanks Mail keeps capitals.
 - 54: "Mark all as read" at the top of Mail while any is unread.
 
+## Then: the first week's missing arrows (lead 49, RV32's find; TP997.nd1)
+Day 1: the arrow to the Works bay from 08:20 for the 08:50 briefing, the time clock's from anywhere after it; 15b's
+clockFirstTick holds its early clock arrow until the briefing (it led to a job and a missed briefing). Day 2: queue
+entries for the Chief's 08:45 meeting and the 18:00 booths (tp997GuideWeek). Lines touched: introArrowWant (1),
+clockFirstTick (1), guideShift (1). MV1 told (it changes the same briefing). Seen with RV32's fresh_walk.py: briefing
+08:50, clocked in 09:06, shadow job; Day 2 meeting 08:45, booths 18:08. MV1 may want to know: in the walk, taps on the
+time clock just after the briefing opened the Chief's chat a few times before the clock took it.
+
+Then (lead 49, RV32's Day 2 walk: a leisure arrow took over before Zeke's 10:45 meeting): in week 1 the needs arrow
+stands aside while a level 1-2 queue entry is live and comes back after (needGoal and needGoalTick, one line each;
+introArrowTick may replace a needs arrow); beats with arrows for Days 3-6 too (crew store from 17:00, quiz, Friday tea,
+Sowing). fresh_walk to Day 6: every timed beat had its arrow, no errors, nothing stuck.
+
 ## Shared lines touched (owners review)
 Section 15: teachTick (1 line), actEnd's pay step (1), playerNew (1); section 19: the skin's GLYPH (`pocket`);
 section 18: tradWords, tradJoin's notice, tradJoinMinute's ixTip, eventJoin's thanks Mail. The rest is in the
