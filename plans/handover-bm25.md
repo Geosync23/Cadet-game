@@ -40,3 +40,9 @@ MV1's briefing keep + TP1's nd1 arrow). Two browsers at most; cadet alone at the
 ## Open for the user
 The builders' defaults in design-doc's Open questions (Pockets, bunk inspection's "not a pass", Spice supper's time, the
 board mix, EV1's proposals): switched on by lead 49's overnight rule; the user can change them.
+
+## Early gate results on b14421f8 (final, 2026-11-06 ~15:00 UTC; sent to BM26 and lead 49)
+OK: check_fast, machine, events, bigevents, join, tiles, fridays, cr1, career, player, day_check 1-7, fresh_walk Days 0-3
+(0 errors, 0 stuck). NEW FAILs: weekend_check (still expects the Saturday run, cut by CL1's CAL997_ON: check-side, likely);
+interactions_check whole: (a) the crew store not on the week-1 Schedule (CL1 note 15: check-side, likely), (b) "the Orange
+tree tapped off the pin is the garden, not the vent (None)": unplaced, needs a bisect. BM26 owns the round from here.
