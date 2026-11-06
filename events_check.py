@@ -522,6 +522,7 @@ with sync_playwright() as pw:
         if (typeof TRAD_0932_NEW !== 'undefined' && TRAD_0932_NEW.has(t.id) && !TRAD_0932_ON) continue;
         if (typeof TRAD_0932_ON !== 'undefined' && TRAD_0932_ON && t.id === 'crew-welcome-tea') { if (SHIP_TRADITIONS.some(e => e.id === t.id)) out.bad.push('crew-welcome-tea loaded with TRAD_0932_ON (retired)'); continue; }   // 0.93.2: retired   // 0.93.2's new traditions (FX24): loaded only with TRAD_0932_ON
         if (typeof TRAD_0932_ON !== 'undefined' && TRAD_0932_ON && (t.id === 'tasting-table' || t.id === 'tasting-table-late')) { if (!SHIP_TRADITIONS.some(e => e.id === 'tasting-table' && e.k === 1314)) out.bad.push('tasting-table-late not loaded as tasting-table'); continue; }   // 0.93.2: the reworked one in the old one's place
+        if (t.id === 'saturday-run' && typeof CAL997_ON !== 'undefined' && CAL997_ON) continue;   // 0.99.7 (CL1, note 30): cut, parked, with CAL997_ON
         if (typeof WEEKEND_TRADS !== 'undefined' && WEEKEND_TRADS.has(t.id) && !WEEKEND_ON) continue;   // the weekend traditions (0.92.5 item 16): loaded only with WEEKEND_ON   // Short Fridays: loaded only with its switch on (section 13's SHORT_FRIDAY; 18f) and the rec deck's traditions
         const ev = SHIP_TRADITIONS.find(e => e.id === t.id); if (!ev || !ev.baked) { out.bad.push('baked ' + t.id + ' not loaded'); continue; }
         let n = 0; for (let d = 0; d <= 364; d++) if (eventsOn(d).some(e => e.id === t.id)) n++;
