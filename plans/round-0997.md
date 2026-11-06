@@ -26,7 +26,7 @@ stories_check always with 36 days (`python3 stories_check.py BUILD 36`, backlog 
 
 | Share | Seat | Checks |
 |---|---|---|
-| R1 | fresh | player_check, bubble, puzzle (whole), social, talk, arrows_check (default parts), arrows step5, arrows step6 asis/teachoff/track/skiptea, arrows_pointer, day_check 4, 11, 25, 26, 2, 9, arrows endstay, p5retry_probe (on an off copy, as 0.99.6), **arrows_check week** |
+| R1 | fresh | player_check, bubble, puzzle (whole), social, talk, arrows_check (default parts), arrows step5, arrows step6 asis/teachoff/track/skiptea, arrows_pointer, day_check 4, 11, 25, 26, 2, 9, arrows endstay, p5retry_probe (on an off copy, as 0.99.6) |
 | R2 | fresh | intro_check (whole), intro_check --dinner, --firsts, perf_check BUILD OLD, cadet_test OLD BUILD, path, arc, lines, lines --day, p926, day_check 0, 1, 5, 7, 21, 22, arrows endgo, pf_f1_same OLD BUILD 10, **fresh_walk BUILD (RV32)** |
 | R3 | fresh | controller_check (every part but reach; long: split into background scripts under 90 min), sound_check, promo_sight, arrows_d, arrows_f, ending_check; devmode_check (all parts), dev_arrow_check |
 | R4 | fresh | career, appt, saves, title_check, device_check (whole), day_check 6, 8, 23, 24, 16, fixtap_probe (on an off copy), fixtap_reach BUILD, fixtap_click OFF BUILD, **cr1_check BUILD** |
@@ -34,9 +34,11 @@ stories_check always with 36 days (`python3 stories_check.py BUILD 36`, backlog 
 | R5 | BM25 | check_fast.sh, machine x2, mech, bigevents, fridays, events, disc, tiles, join, food (1 7, 11 4), clothes, stories (36), promo_beats, day_check 12, 13, 17, 18, 19, 27, 3, p5retry_break OFF BUILD, **weekend** |
 
 
-Added for 0.99.7 (bold): arrows_check week (R1: TP1's week-1 arrows, CR1's Day 8 test, JB3's science and rec-deck jobs);
+Added for 0.99.7 (bold) (arrows_check week, already in R1's default parts, covers TP1's week-1 arrows, CR1's Day 8 test, JB3's jobs);
 fresh_walk (R2, from `git show origin/claude/review-rv32:plans/rv32-probes/fresh_walk.py`, run from the repo root:
-MV1's briefing and TP1's Day 1 arrows meet on Day 1); cr1_check (R4, new check: it flips its own switches); weekend
+`python3 plans/rv32-probes/fresh_walk.py BUILD 3 $CADET_WORK/fw.json`; no OK line: pass = Day 1's briefing meets and the Chief
+stays to its end, the Day 1 arrow leads to the Works bay before 08:50 then to the clock, Day 2's 08:45 solo meeting and 18:00
+booths each get an arrow and happen, no page errors, the follower never stuck an hour); cr1_check (R4, new check: it flips its own switches); weekend
 (moved to R5 beside events and bigevents: EV1's first Saturday, CL1's cut Saturday run). Already in a share and touched
 this time: player (MV1 fitness, TP1), career and promo_sight (CR1), events, bigevents, fridays, join, tiles (CL1, EV1,
 GM1, TB6), sound (AV1), lines, talk, social, stories (SC1), perf (AV1's film, CH1), interactions (MV1's rec washroom,
