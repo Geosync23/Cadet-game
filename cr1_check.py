@@ -104,6 +104,19 @@ def part_slip(g):
     check('m6' in on['carried'] and on['cur'] and on['cur'].startswith('m6') and 'm7' not in on['op5'], f"slip: a scanner lesson carried from Friday waits; Making it safe opens on Day 8 ({on})")
     check('m6' not in off['plain'] and 'm6' not in off['carried'], f"slip off: as before, no Making it safe without the scanner used ({off})")
 
+def part_catch(g):
+    r = g.ev("""(() => { const out = {}; for (const on of [true, false]) { __sw(on); const o = {};
+        const W = __w(3, 660, { xp: 10, tr: { m1: 3 } }); W.use.m1 = 1; W.op = { 2: ['m1'], 3: ['m1'] };
+        o.late = ladderTick(2 * 24 + 11); o.cur = W.cur ? W.cur.id + ':' + W.cur.st : null;
+        const V = __w(4, 660, { xp: 10, tr: { m1: 2, m4: 3, m3d: 3 } }); V.use.m1 = 1; V.use.m4 = 1; V.op = { 2: ['m1'], 3: ['m4', 'm3d'], 4: ['m5'] }; V.tr.m5 = 4;
+        o.ontime = ladderTick(3 * 24 + 11);
+        out[on ? 'on' : 'off'] = o; } __sw(false); return out; })()""")
+    print('  (catch)', r)
+    on, off = r['on'], r['off']
+    check('m4' in on['late'] and (on['cur'] or '').startswith('m4'), f"catch: Day 2's lesson carried to Day 3 and learned by 11:00, Day 3's own (Hauling) opens the same day ({on})")
+    check(not [x for x in on['ontime'] if x in ('m7', 'm6', 'm4', 'm5', 'm1')], f"catch: on time, no second lesson ({on['ontime']})")
+    check('m4' not in off['late'], f"catch off: as before, no second big lesson ({off})")
+
 MIX = """(() => { __sw(%s); const W = __w(%d, 360, { xp: 20, tr: %s, test: { tier: 2, day: 8, tries: 1, passed: true } }); SHIP.jobs.length = 0;
   const ms = machineList().filter(m => TUNABLE.has(m.kind) && !ENGINE_KINDS.has(m.kind) && jobTier({ machine: m.id }) <= 1 && m.deck !== 1 && !JOB_FOR[(SHIP.machines[m.id] || {}).state]);
   for (const m of ms) SHIP.machines[m.id].drift = 0; if (ms[0]) SHIP.machines[ms[0].id].drift = 1; if (ms[1]) SHIP.machines[ms[1].id].drift = -1;
@@ -140,7 +153,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('check', part_check), ('day8', part_day8), ('slip', part_slip), ('redo', part_redo), ('cart', part_cart), ('mix', part_mix)]:
+    for name, fn in [('check', part_check), ('day8', part_day8), ('slip', part_slip), ('catch', part_catch), ('redo', part_redo), ('cart', part_cart), ('mix', part_mix)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {str(e)[:400]}')

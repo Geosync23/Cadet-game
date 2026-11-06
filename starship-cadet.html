@@ -59058,7 +59058,7 @@ function ladderTick(h) {
     const tr = ladderTestDue(c, d, W, opened); if (tr && ladderOpen(tr, d, t)) out.push(tr.id); }   // the test first (the table has the lesson ahead of it)
   else if (c && c.d < d && (c.st === 'ask' || c.st === 'again') && !has('big') && m <= WORKS_ASK[1]) { const row = ladderRow(c.id); if (row && trainOffer(row, c, d, t)) { (W.op[d] = W.op[d] || []).push(row.id); out.push(row.id); } }
   for (const size of ['big', 'small']) {
-    if ((W.op[d] || []).some(id => (ladderRow(id) || {}).size === size) || (size === 'big' && (W.cur || m > WORKS_ASK[1]))) continue;
+    if (size === 'big' && W.cur || ((W.op[d] || []).some(id => (ladderRow(id) || {}).size === size) || size === 'big' && m > WORKS_ASK[1]) && !(size === 'big' && typeof crCatchUp === 'function' && crCatchUp(d, m, W, opened))) continue;   // CR1 (note 55): behind in week 1, a second lesson the same day (24p's slot)
     const ok = r => r.size === size && !opened.has(r.id) && WORK_MECH[r.id] && !WORK_MECH[r.id].own && d >= r.day && r.tier <= W.tier && (!r.fixed || weekday(d) + 1 === r.fixed.wd) && ladderNeeds(r.needs, W);
     const row = (size === 'big' && typeof crBigFirst === 'function' && crBigFirst(ok, d, W)) || (size === 'big' && P5_STEP5 && typeof ladderBigP5 === 'function' ? ladderBigP5(ok, d, W) : CAREER_LADDER.find(ok));   // CR1 (note 55): Making it safe first from Day 8   // Pillar 5 Step 5 (24u): higher tier first (off: the table's order)
     if (row && ladderOpen(row, d, t)) out.push(row.id);
@@ -65226,6 +65226,17 @@ function crCarryPark(d, m, W, opened) {                  // a lesson carried ove
   if ((W.op[d] || []).some(id => (ladderRow(id) || {}).size === 'big') || !WORK_MECH.m6 || !ladderTeacher(r, d)) return;
   const k = (W.op[c.d] || []).indexOf(c.id); if (k >= 0) W.op[c.d].splice(k, 1); opened.delete(c.id); W.cur = null;
   simNote('ladder', { mech: c.id, size: 'big', day: d, parked: true });
+}
+// The lead's rule on RV32's find (lead 49): while you're behind the week's plan, the ladder catches up. With the switch on, on a
+// workday from Day 2 to Day 7 (Tier 1), a big lesson whose day is already past and still unopened may open as a second big row
+// that day, once the first is done (nothing under way), until CR_CATCH.until (14:00); at most two big rows a day. Day 8 is
+// crBigFirst's (Making it safe first) and the test's.
+const CR_CATCH = { until: 840, max: 2 };
+function crCatchUp(d, m, W, opened) {
+  if (!CR_DAY8_ON || !W || W.tier !== 1 || W.cur || d < 2 || d >= CR_SAME.from || m > CR_CATCH.until || !playerShiftOn(d)) return false;
+  const big = (W.op[d] || []).filter(id => (ladderRow(id) || {}).size === 'big'); if (big.length >= CR_CATCH.max) return false;
+  const late = big.some(id => (ladderRow(id) || { day: d }).day < d);   // today's first was a lesson carried from an earlier day
+  return CAREER_LADDER.some(r => r.size === 'big' && (r.day < d || late && r.day <= d) && r.tier <= W.tier && !opened.has(r.id) && W.tr[r.id] === undefined && WORK_MECH[r.id] && !WORK_MECH[r.id].own && !r.fixed && ladderNeeds(r.needs, W) && ladderTeacher(r, d));
 }
 const CR_PUT = new Set();                                // incidents of yours you put back (not saved: after a reload they're the crew's as before)
 onSim('job', n => { if (INC_REDO_ON && n && n.step === 'drop' && n.job === 'incident') CR_PUT.add(n.id); });
