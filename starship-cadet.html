@@ -15925,6 +15925,7 @@ const TRAY_SEAT_SAY = 'A seat for your tray';
 function needGoal(k) {
   if (k === 'hygiene' && typeof washCooling === 'function' && washCooling()) return false;   // a shower would give nothing yet (FX6)
   if (!NEED_FIX[k] || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || IX_GOAL && !(NEED_GOAL && IX_GOAL.label === NEED_GOAL.label)) return false;   // never over someone else's arrow
+  if (TP997.nd1 && tp997NeedYield()) return false;        // 0.99.7 (TP1): in week 1, never over a timed meeting's arrow (Onboarding engineer slot)
   if (k === 'energy' && P5_NIGHT && (p5nIn() || p5nSoon())) return false;   // 28a (S6-1): not on (or just before) your night shift
   if (k === 'energy' && !(typeof bedtime === 'function' && bedtime()) && !(typeof sickNow === 'function' && sickNow()) && !(P5_NIGHT && p5nDayBed())) return false;   // your bunk only when you can sleep there (FX3: a Day 8 "Your bunk" arrow stood all afternoon)
   const bed = typeof playerBed === 'function' ? playerBed() : null, here = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 4, pos = player.obj.position;
@@ -15947,6 +15948,7 @@ function needGoal(k) {
 }
 function needGoalClear() { if (NEED_GOAL && typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === NEED_GOAL.label) clearGoal(); NEED_GOAL = null; }
 function needGoalTick() {
+  if (TP997.nd1 && tp997NeedHold()) return;              // 0.99.7 (TP1): stood aside for a timed meeting's arrow, back after it (Onboarding engineer slot)
   if (NEED_GOAL && (SHIP.player.needs[NEED_GOAL.need] >= WARN_REARM || NEED_GOAL.need === 'energy' && ACT && ACT.kind === 'lie')) { needGoalClear(); return; }   // (FX3) lying in your bunk is the fix for energy (no need on the act)
   if (NEED_GOAL && NEED_GOAL.need === 'hunger' && !!SHIP.player.tray !== !!NEED_GOAL.tray) { needGoalClear(); needGoal('hunger'); }   // a tray taken (a seat next) or left behind (food again): LEAD31-14
   else if (NEED_GOAL && NEED_GOAL.tray && typeof deckDef !== 'undefined' && deckDef && NEED_GOAL.deck !== deckDef.num) { needGoalClear(); needGoal('hunger'); }   // your tray on another deck (TRAY_TRAVELS): a seat there (FX12)
@@ -42859,6 +42861,14 @@ const LINES = JSON.parse([
   '{"text":"Your pipe kit wants cleaning and a new seal. Bench, when you can.","id":"1dwfk6k"}]',
   ',"tool.due.scanner":[',
   '{"text":"Your scanner\'s charge is low. The bench will sort it.","id":"1t2yb7w"}]',
+  ',"tp997.beat.d3-store":[',
+  '{"text":"The crew store: Orla shows you round, till 17:30","id":"cqy0mb"}]',
+  ',"tp997.beat.d4-quiz":[',
+  '{"text":"20:00 quiz night with Pell: the bow lounge","id":"17dys2l"}]',
+  ',"tp997.beat.d5-mug":[',
+  '{"text":"13:00 Friday tea with Halloran: the tea corner","id":"1j2ej6z"}]',
+  ',"tp997.beat.d6-sowing":[',
+  '{"text":"11:45 Sowing morning with Tomas: the garden","id":"1n3cq5g"}]',
   ',"tp997.d1.brief":[',
   '{"text":"Morning briefing with the Chief, 08:50: the Works bay","id":"vbp74x"}]',
   ',"tp997.d2.booths":[',
@@ -57079,7 +57089,7 @@ function introArrowTick() {
   const id = introArrowWant(Math.floor(shipNow())), les = id === 'board' && typeof boardLesson === 'function' && boardLesson();
   const g = les ? { ...INTRO_ARROWS.board, label: 'Your ' + boardLessonName(les) + ': take it at the board' } : id && INTRO_ARROWS[id];   // (FX15, patch 0.92.5 #22) named: "Your shadow job: take it at the board"
   if (les) INTRO_ARROW_LABELS.add(g.label);              // ours, to clear
-  const cur = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null, ours = cur && (INTRO_ARROW_LABELS.has(cur.label) && !cur.trk || cur.label === INTRO_BED_GOAL && id === 'call' || cur.label === 'Zeke Torres');   // (playtest patch 1: a first-time arrow over his own, the wardrobe's while he waits)   // 0.72.5 (playtest 2, item 3): the call-home arrow takes over from the first night's bunk arrow (up since the goodnight), which comes back once you're at the booths
+  const cur = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null, ours = cur && (INTRO_ARROW_LABELS.has(cur.label) && !cur.trk || cur.label === INTRO_BED_GOAL && id === 'call' || cur.label === 'Zeke Torres' || TP997.nd1 && !!NEED_GOAL && cur.label === NEED_GOAL.label && SHIP.time.day <= 7);   // (playtest patch 1: a first-time arrow over his own, the wardrobe's while he waits)   // 0.72.5 (playtest 2, item 3): the call-home arrow takes over from the first night's bunk arrow (up since the goodnight), which comes back once you're at the booths
   if (!g) { if (INTRO_UI.arrow) introArrowClear(); return; }
   if (cur && !ours && !((id === 'clockout' || id === 'beam') && introHoldNudges())) return;   // someone else's arrow is up: ours waits for it (not the end of training day's: the beam wins, the patch #19)
   if (!cur || cur.label !== g.label || g.place && cur.place !== g.place) setGoal(g);   // (FX5: the call's booth, if another's taken it)
@@ -57914,14 +57924,44 @@ function tp997D1Want(m, brief) {
 const TP997_LEAD = 15, TP997_BEATS = {
   'd2-solo': { goal: () => ({ deck: 5, place: '5-office-visit-1', room: 'o', label: careerText('tp997.d2.solo') || 'The Chief\'s office, 08:45: your first solo job' }), key: 'met', till: b => b.hold ? b.hold.till : b.until },
   'd2-booths': { goal: () => ({ deck: 3, room: 'B', place: '3-callhome-1', label: careerText('tp997.d2.booths') || 'Calling home, the booths on Deck 3: Leila shows you how' }), key: 'said', till: b => b.until },
+  'd3-store': { goal: () => tp997BeatGoal('d3-store', 'The crew store: Orla shows you round, till 17:30'), key: 'said', till: b => b.until, from: () => DAY_SHIFT[1] },   // on shift till 17:00: from then
+  'd4-quiz': { goal: () => tp997BeatGoal('d4-quiz', '20:00 quiz night with Pell: the bow lounge'), key: 'said', till: b => b.until },
+  'd5-mug': { goal: () => tp997BeatGoal('d5-mug', '13:00 Friday tea with Halloran: the tea corner'), key: 'met', till: b => b.until },
+  'd6-sowing': { goal: () => tp997BeatGoal('d6-sowing', '11:45 Sowing morning with Tomas: the garden'), key: 'said', till: b => b.until },
 };
+// The needs arrow (section 15's needGoal: Food, Your bunk, Somewhere to sit and unwind ...) is set directly, and a
+// direct arrow stays over the arrow queue's levels 2-6, so in RV32's walk a leisure arrow took over three minutes
+// before Zeke's Day 2 meeting (a level 2 'meet' entry) and the meeting was missed. In week 1 (Days 0-7): while a level
+// 1-2 entry is live (its from to its until, not done, with a goal), the needs arrow isn't set, and one already up stands
+// aside (tp997NeedHold: cleared, kept in NEED_GOAL.g, put back once nothing timed is live). The intro's own arrows
+// (introArrowTick) may replace a needs arrow too (the 'brief' arrow at 08:20 waited behind "Food" before).
+function tp997NeedYield() {
+  if (SHIP.time.day > 7 || typeof GUIDE === 'undefined' || !GUIDE_ON) return false;
+  const now = Math.floor(shipNow());
+  return GUIDE.list.some(e => { if (!(e.level <= 2) || Number.isFinite(e.from) && now < e.from || Number.isFinite(e.until) && now >= e.until) return false;
+    try { return !(typeof e.done === 'function' && e.done()) && !!e.goal(); } catch (err) { return false; } });
+}
+function tp997NeedHold() {
+  if (!NEED_GOAL) return false;
+  const mine = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === NEED_GOAL.label;
+  if (mine) NEED_GOAL.g = { ...IX_GOAL };
+  if (tp997NeedYield()) { if (mine) clearGoal(); NEED_GOAL.held = true; return false; }   // the rest of needGoalTick still runs (the need back up: gone)
+  if (NEED_GOAL.held && NEED_GOAL.g && !(typeof IX_GOAL !== 'undefined' && IX_GOAL) && SHIP.player.needs[NEED_GOAL.need] < WARN_REARM) { NEED_GOAL.held = false; setGoal(NEED_GOAL.g); }
+  return false;
+}
+function tp997BeatGoal(id, fb) {                        // a beat's room on its deck (INTRO_WEEK's where), labelled
+  const b = INTRO_WEEK.find(x => x.id === id), w = b && b.where; if (!w || !w.deck || !DECKS[w.deck]) return null;
+  const R = DECKS[w.deck].rooms || {}, key = Object.keys(R).find(k => R[k].name === w.room); if (!key) return null;
+  return { deck: w.deck, room: key, label: careerText('tp997.beat.' + id) || fb };
+}
 function tp997GuideWeek(now, d, m, base) {
   if (!(typeof introOn === 'function' && introOn()) || typeof guideAsk !== 'function') return;
   for (const id in TP997_BEATS) {
     const b = INTRO_WEEK.find(x => x.id === id), T = TP997_BEATS[id]; if (!b || b.day !== d) continue;
     const till = T.till(b), done = () => SHIP.intro.done[id + ':' + T.key] !== undefined || SHIP.intro.done[id + ':met'] !== undefined;
-    if (m < b.at - TP997_LEAD || m >= till || done()) continue;
-    guideAsk({ id: 'tp997:' + id, level: 2, owner: '21b (TP1, 0.99.7)', from: base + b.at - TP997_LEAD, until: base + till, goal: T.goal, done });
+    const from = Math.max(b.at - TP997_LEAD, T.from ? T.from() : 0);
+    if (m < from || m >= till || done()) continue;
+    guideAsk({ id: 'tp997:' + id, level: 2, owner: '21b (TP1, 0.99.7)', from: base + from, until: base + till, goal: T.goal, done });
   }
 }
 if (TP997.nd1) { INTRO_ARROWS.brief = { deck: 5, room: 'w', label: careerText('tp997.d1.brief') || 'Morning briefing with the Chief, 08:50: the Works bay' }; INTRO_ARROW_LABELS.add(INTRO_ARROWS.brief.label); }
