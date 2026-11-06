@@ -49,7 +49,7 @@ PLANS = r"""(days => {
     const on = eventsOn(d), wd = weekday(d), yd = shipYearDay(d), row = { d, wd: WEEKDAYS[wd].slice(0, 3), ev: [] };
     // due exactly when the table says
     for (const ev of SHIP_TRADITIONS) {
-      const w = ev.when, due = !(ev.flag && !(typeof flag === 'function' && flag(ev.flag))) && !(ev.unflag && typeof flag === 'function' && flag(ev.unflag)) && (w.rota ? TRAD_ROTA[w.rota](d) : w.birthday ? schedPeople().some(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && (typeof guestStay !== 'function' || guestStay(p, d) !== 'leave')))) : w.rotation != null ? ROSTER_ROTATIONS.some(r => (w.rotation === 'after' ? d > r.day && d <= r.day + 7 && weekday(d) === w.weekday : d === r.day + w.rotation) && (w.rotation !== 'after' && w.rotation < 0 ? r.out : r.in).some(id => { const p = schedPeople().find(q => q.id === id); return p && (!w.dept || p.dept === w.dept) && (typeof aboard !== 'function' || aboard(p, d)); })) : DUE.has(ev.id) ? DUE.get(ev.id).has(d) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id) && !(ev.skip && ev.skip(d));   // a ship-wide event's quiet days; the voice budget
+      const w = ev.when, due = !(ev.flag && !(typeof flag === 'function' && flag(ev.flag))) && !(ev.unflag && typeof flag === 'function' && flag(ev.unflag)) && (w.rota ? TRAD_ROTA[w.rota](d) : w.birthday ? (typeof CAL997_ON === 'undefined' || !CAL997_ON || cl997Party(d)) && schedPeople().some(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && (typeof guestStay !== 'function' || guestStay(p, d) !== 'leave')))) : w.rotation != null ? ROSTER_ROTATIONS.some(r => (w.rotation === 'after' ? d > r.day && d <= r.day + 7 && weekday(d) === w.weekday : d === r.day + w.rotation) && (w.rotation !== 'after' && w.rotation < 0 ? r.out : r.in).some(id => { const p = schedPeople().find(q => q.id === id); return p && (!w.dept || p.dept === w.dept) && (typeof aboard !== 'function' || aboard(p, d)); })) : DUE.has(ev.id) ? DUE.get(ev.id).has(d) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id) && !(ev.skip && ev.skip(d));   // a ship-wide event's quiet days; the voice budget
       const dd = typeof EV_DAY_DRESS !== 'undefined' ? EV_DAY_DRESS.get(ev.id + '@' + d) : null;   // a ship-wide event's day dress (the storm update): dropped that day, or added on a day it doesn't fall
       const want = dd ? !dd.drop && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id) : due;
       if (want !== on.some(e => e.id === ev.id)) out.bad.push(d + ' ' + ev.id + (want ? ' due but not on' : ' on but not due'));
@@ -60,7 +60,7 @@ PLANS = r"""(days => {
       { const m = /^ev-(\w+)-/.exec(s.tag); if (m && SHIP_EVENTS[m[1]] && !SHIP_TRADITIONS.some(e => e.id === s.tag.slice(3))) continue; }   // an event guest's own steps (Taavek's ev-veyliVessel-ramp...), not a tradition (EV1: the guests' days are on paper from Day 1 now)
       const id = tagId(s.tag), e = on.find(x => x.id === id), B = (d - 1) * 1440;
       if (!e) { out.bad.push(d + ' ' + p.id + ' at ' + id + ', which is not on'); continue; }
-      if (s.from + (s.walk || 0) < B + e.from - Math.max(e.ev.early || 0, p.id === e.ev.host || typeof P926_TRADS !== 'undefined' && P926_TRADS && /^rec-(wren|chiefs)-talk$/.test(e.id) && recSpeaker(p, d) ? 5 : 0, e.ev.meal && typeof TRAD_LINE !== 'undefined' ? TRAD_LINE[1] : 0, e.ev.lead ? 35 : 0) ||   // the sim plans a host 5 minutes early; a meal tradition's diners sit as the line serves them, up to TRAD_LINE[1] early (sim 0.26.41); the Captain's address seats them up to 30 minutes early (18f's friLead), its host 5 more
+      if (s.from + (s.walk || 0) < B + e.from - Math.max(e.ev.early || 0, typeof CAL997_ON !== 'undefined' && CAL997_ON && e.id === 'late-piano' && p.id === e.ev.host ? 20 : 0, p.id === e.ev.host || typeof P926_TRADS !== 'undefined' && P926_TRADS && /^rec-(wren|chiefs)-talk$/.test(e.id) && recSpeaker(p, d) ? 5 : 0, e.ev.meal && typeof TRAD_LINE !== 'undefined' ? TRAD_LINE[1] : 0, e.ev.lead ? 35 : 0) ||   // the sim plans a host 5 minutes early; a meal tradition's diners sit as the line serves them, up to TRAD_LINE[1] early (sim 0.26.41); the Captain's address seats them up to 30 minutes early (18f's friLead), its host 5 more
          s.to > B + e.to + LINGER) out.bad.push(d + ' ' + p.id + ' at ' + id + ' ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ' outside ' + hhmm(e.from) + '-' + hhmm(e.to));
       const pools = (e.ev.whereFor ? e.ev.whereFor(p, d, eventOpts(e.ev, p)) : eventOpts(e.ev, p)).map(([n, k]) => S.shared.get(n + '|' + k) || []).flat().map(pl => pl.id);   // a place by person too (whereFor: the comet's hosts at their own spots, FX25)
       if (!pools.includes(s.placeId) && !(s.act === 'commute' && !s.placeId)) out.bad.push(d + ' ' + p.id + ' at ' + id + ' in ' + s.placeId + ', not one of its places');
@@ -522,6 +522,7 @@ with sync_playwright() as pw:
         if (typeof TRAD_0932_NEW !== 'undefined' && TRAD_0932_NEW.has(t.id) && !TRAD_0932_ON) continue;
         if (typeof TRAD_0932_ON !== 'undefined' && TRAD_0932_ON && t.id === 'crew-welcome-tea') { if (SHIP_TRADITIONS.some(e => e.id === t.id)) out.bad.push('crew-welcome-tea loaded with TRAD_0932_ON (retired)'); continue; }   // 0.93.2: retired   // 0.93.2's new traditions (FX24): loaded only with TRAD_0932_ON
         if (typeof TRAD_0932_ON !== 'undefined' && TRAD_0932_ON && (t.id === 'tasting-table' || t.id === 'tasting-table-late')) { if (!SHIP_TRADITIONS.some(e => e.id === 'tasting-table' && e.k === 1314)) out.bad.push('tasting-table-late not loaded as tasting-table'); continue; }   // 0.93.2: the reworked one in the old one's place
+        if (t.id === 'saturday-run' && typeof CAL997_ON !== 'undefined' && CAL997_ON) continue;   // 0.99.7 (CL1, note 30): cut, parked, with CAL997_ON
         if (typeof WEEKEND_TRADS !== 'undefined' && WEEKEND_TRADS.has(t.id) && !WEEKEND_ON) continue;   // the weekend traditions (0.92.5 item 16): loaded only with WEEKEND_ON   // Short Fridays: loaded only with its switch on (section 13's SHORT_FRIDAY; 18f) and the rec deck's traditions
         const ev = SHIP_TRADITIONS.find(e => e.id === t.id); if (!ev || !ev.baked) { out.bad.push('baked ' + t.id + ' not loaded'); continue; }
         let n = 0; for (let d = 0; d <= 364; d++) if (eventsOn(d).some(e => e.id === t.id)) n++;
@@ -571,6 +572,7 @@ with sync_playwright() as pw:
     wk_off = g.ev("typeof WEEKEND_TRADS !== 'undefined' && !WEEKEND_ON ? [...WEEKEND_TRADS] : []")
     wk_off += g.ev("typeof P926_NEW !== 'undefined' && !P926_TRADS ? [...P926_NEW] : []")   # 0.92.6's (FX17): only with P926_TRADS
     wk_off += g.ev("typeof EV_SWAP_ON !== 'undefined' && EV_SWAP_ON ? ['crew-welcome-tea'] : []")   # the new hand's tea after a rotation, gone with the event swap (0.93.2)
+    wk_off += g.ev("typeof CAL997_ON !== 'undefined' && CAL997_ON ? ['saturday-run'] : []")   # 0.99.7 (CL1, note 30): the Saturday run is cut (parked) with CAL997_ON
     wk_off += g.ev("typeof TRAD_0932_NEW !== 'undefined' ? (TRAD_0932_ON ? ['tasting-table-late', 'crew-welcome-tea'] : [...TRAD_0932_NEW]) : []")   # 0.93.2's (FX24): only with TRAD_0932_ON; the reworked tasting table loads as tasting-table
     for i in want_ids:
         if i.startswith('rec-') and not rec_on: continue    # the rec deck's own load only with the deck switched on (0.83)
@@ -613,8 +615,10 @@ with sync_playwright() as pw:
             const t = /^rec-(wren|chiefs)-talk$/.test(e.id) && recTalk(d); if (t) out.talks.push([d, t.size, t.by, went.includes(t.by)]);
           }
           return out; })()""")
+        cal = g.ev("typeof CAL997_ON !== 'undefined' && CAL997_ON ? (() => { const o = {}; for (const ev of SHIP_TRADITIONS) if (/^rec-/.test(ev.id) && !ev.meal && (ev.prio || 0) < 2) for (let d = 1; d <= 42; d++) if (cl997Fixed(d).some(([a, b]) => ev.at[0] < b && a < ev.at[1])) (o[ev.id] = o[ev.id] || []).push(d); return o; })() : {}")   # 0.99.7 (CL1, note 16): never over your fixed items (Thursday's bunk inspection: Dawn swim; Day 2's booths: wall night)
         for k, want in PLAN.items():
             got = rc['on'].get(k, [])
+            want = [d for d in want if d not in cal.get(k, [])]
             if k == 'rec-wso': want = [d for d in want if d != 28]
             if k == 'rec-slow-stretch' and storm_cal: want = [d for d in want if d != 14]   # Sunday Day 14 08:00: the calendar's storm (escalation) pauses it
             want = sorted((set(want) - set(dress.get(k, {}).get('drop', []))) | set(d for d in dress.get(k, {}).get('add', []) if d <= 42))   # a ship-wide event's day dress (the storm update: talent night a week on)
@@ -1132,7 +1136,7 @@ with sync_playwright() as pw:
     if not LP or any(b - a == 1 for a, b in zip(days, days[1:])): fail(f"late piano two nights running ({days})")
     if any(x[2] < 4 for x in LP) or sum(1 for x in LP if x[3]) < len(LP) - 1: fail(f"late piano: fewer than 4 going, or the Captain missing more than once ({LP})")
     BD = g.ev("""(() => { const out = []; for (let d = 1; d <= 120; d++) { const l = eventsOn(d), b = l.find(e => e.id === 'birthday'); if (!b) continue;
-      out.push([d, b.from, b.to, l.filter(e => e !== b && evIsTrad(e.ev) && !evRare(e.ev.when) && (e.ev.prio || 0) < 2 && !e.ev.meal && e.from < b.to + 60 && b.from - 60 < e.to).map(e => e.id)]); } return out; })()""")   # a weekly one (the rest never give way: their time is taken last)
+      out.push([d, b.from, b.to, l.filter(e => e !== b && evIsTrad(e.ev) && !evRare(e.ev.when) && (e.ev.prio || 0) < 2 && !e.ev.meal && e.from < b.to + 60 && b.from - 60 < e.to && !(typeof CAL997_ON !== 'undefined' && CAL997_ON && d <= 7 && e.id === 'quiz')).map(e => e.id)]); } return out; })()""")   # 0.99.7 (CL1): your first week's quiz (Day 4, Pell's) never gives way   # a weekly one (the rest never give way: their time is taken last)
     print('  birthdays (day, from, to, a weekly tradition within the hour):', BD[:6], '...', len(BD))
     if not BD or any(x[3] for x in BD): fail(f"a birthday within an hour of a weekly tradition: {[x for x in BD if x[3]]}")
     d, fr = BD[0][0], BD[0][1]

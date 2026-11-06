@@ -55,7 +55,7 @@ with sync_playwright() as pw:
     # behind one just shown; each part here runs in one frozen moment of the test's clock, so the join notice would
     # still be waiting. Every pop-up shows at once, as in interactions_check (AC3's line; the queue is arrows_check's)
     g.ev("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")
-    ids = g.ev("Object.keys(TRAD_JOIN).filter(id => TRAD_JOIN[id].act !== 'beam' && !/^appt-/.test(id))")   # appointments (appt-*): only on the calendar once booked (below)
+    ids = g.ev("Object.keys(TRAD_JOIN).filter(id => TRAD_JOIN[id].act !== 'beam' && !/^appt-/.test(id) && !(typeof CAL997_ON !== 'undefined' && CAL997_ON && id === 'saturday-run'))")   # appointments (appt-*): only on the calendar once booked (below); 0.99.7 (CL1, note 30): the Saturday run is cut (parked) with CAL997_ON
     print(f"{len(ids)} joinable traditions (plus the beam): {', '.join(ids)}")
     for i in ids:
         officer = i == 'cometCaptain'   # the comet's tea with the Captain is for Officers and up (FX25): joined as an Officer here; a Cadet's turn-away is interactions_check's
