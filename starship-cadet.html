@@ -10475,7 +10475,7 @@ const TRAD_LINE = [8, 30];
 function gatherings(p, d, F) {
   const U = k => schedU(p.seed, d, k), out = [];
   if (typeof eventPlan === 'function') for (const e of eventPlan(p, d) || []) {   // a host (host: true) is there 5 minutes early
-    const early = e.host ? 5 : 0;
+    const early = e.host ? (CAL997_ON && e.id === 'late-piano' ? 20 : 5) : 0;   // CL1 (AV1's find): the Captain sets off for her piano 20 minutes early (from the rec deck she was 15 minutes late)
     const q = e.meal ? TRAD_LINE[0] + Math.round((TRAD_LINE[1] - TRAD_LINE[0]) * U(530)) : 0;   // a meal tradition: through the line first, set off q minutes early (0.26.41)
     out.push({ at: e.from - early - q, dur: e.to - e.from + early + q, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20, host: !!e.host, meal: e.meal || null, act: e.meal || undefined, q: e.meal ? q : 0, ...(e.meet ? { meet: true, act: 'work' } : {}), ...(e.seated ? { seated: true } : {}) });   // a meal tradition (meal: 'dinner' | 'breakfast') is that meal; meet (the storm update's S2: a break in a double shift; Crossing the Line's standing easy: a break in the shift)
   }
@@ -10558,7 +10558,8 @@ function schedFrame(p, d) {
   const next = shiftBlocks(p, d + 1);                      // an early galley start tomorrow means an early night
   if (gp && gp.bedBy != null) bed = Math.min(bed, gp.bedBy);
   if (next && next.blocks) bed = Math.min(bed, (next.wake != null ? next.wake : next.blocks[0][0] - 35) - 410 + 1440);
-  if (CAL997_ON) { const he = cl997HostEarly(p, d + 1, false); if (he != null) bed = Math.min(bed, he - 410 + 1440); }   // CL1 (note 14): an early tradition's host to bed in time for it (the night's sleep held Tove to 06:40)
+  if (CAL997_ON) { const he = cl997HostEarly(p, d + 1, false); if (he != null) bed = Math.min(bed, he - 410 + 1440); }
+  if (CAL997_ON) { const pe = cl997PianoHost(p, d); if (pe != null) bed = Math.max(bed, pe + 25); }   // CL1: the Captain up till her late piano's over (Day 2: in bed by 22:36, she left it at 22:18)   // CL1 (note 14): an early tradition's host to bed in time for it (the night's sleep held Tove to 06:40)
   if (INSPECT_ON && d >= 0 && WEEK_SHAPE[weekday(d + 1)].inspect && p.id === inspectWalker(d + 1)) bed = Math.min(bed, INSPECT_T0 - 60 - 410 + 1440);   // FX20b (RV19's M3): the walker in bed by 22:40 the night before, so the night's sleep doesn't hold them past 05:30
   if (EV_COMET_ON && COMET) bed = cometLate(p, d, bed);   // the comet's hosts stay up to its end (section 18's slot 'Comet builder'; COMET is undefined while it's off)
   bed = Math.round(Math.min(1430, bed));
@@ -51886,6 +51887,9 @@ function cl997HostEarly(p, d, shiftAt) {
 // late piano (note 20, "shouldn't happen two nights in a row"): eventsOn never has it on a day after it was due; and the
 // Captain doesn't take the piano at the jam on a night next to it (Thursday's piano, Friday's jam: the same bench two
 // nights running). Pure
+// the late piano's host on a day it's due (the Captain): its end, or null. schedFrame keeps her up till it's over, and
+// section 14's gatherings sets her off 20 minutes early (AV1, lead 49: she reached the piano about 15 minutes in). Pure
+function cl997PianoHost(p, d) { const lp = SHIP_TRADITIONS.find(x => x.id === 'late-piano'); return lp && lp.host === p.id && evDue(lp.when, d) && !evDue(lp.when, d - 1) ? lp.at[1] : null; }
 function cl997PianoNear(d) { const lp = SHIP_TRADITIONS.find(x => x.id === 'late-piano'); return !!lp && (evDue(lp.when, d - 1) || evDue(lp.when, d + 1)); }
 if (CAL997_ON) {
   // Pick-your-own (note 14, "no one else shows up"): twice the odds of going (its .trad's who), so with only those really up
