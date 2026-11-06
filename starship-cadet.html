@@ -16804,6 +16804,7 @@ function ixHold() {
     const st = jobStops(j), pick = st.findIndex(x => x.step === 'pickup'), drop = st.findIndex(x => x.step === 'drop');
     return pick >= 0 && st[pick].done && !(drop >= 0 && st[drop].done) && !crateDown(j) ? 'carry' : null;   // not while it's set down (Put down, 0.28.60)
   }
+  { const g = typeof cartFirstHold === 'function' ? cartFirstHold(j) : undefined; if (g !== undefined) return g; }   // CR1 (note 48): the garden's cart, once taken (24p's slot)
   const kd = typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind];   // a registered kind's own (17's jobKindAdd def.hold: 'datapad' for a round, Pillar 5)
   let h = null; try { h = kd ? typeof kd.hold === 'function' ? kd.hold(j) : kd.hold : null; } catch (e) { h = null; }   // or of the job (a haul: 'cart', then 'cartfull')
   return typeof h === 'string' && typeof HOLDS !== 'undefined' && HOLDS[h] ? h : h === null && kd && 'hold' in kd ? null : 'toolbox';
@@ -17111,6 +17112,7 @@ function boardLesson() {
 function boardLessonName(id = boardLesson()) {
   const c = SHIP.works && SHIP.works.cur, j = id && (SHIP.jobs || []).find(x => x.id === id);
   if (j && !(c && c.j === id)) return j.case ? 'head-scratcher lesson' : ({ 1: 'shadow job', 2: 'job to lead', 3: 'first solo job' })[j.reserved] || 'lesson';   // (FX15, patch 0.92.5 #22)
+  { const x = typeof crLessonName === 'function' ? crLessonName(c, id) : null; if (x) return x; }   // CR1 (note 55): the training job named (24p's slot)
   if (c && /^t[234]$/.test(c.id)) return 'Tier ' + c.id.slice(1) + ' test job';     // (FX15) 24p's test, not a lesson (24u's Tier 3 test too, S5-2)
   let n = ''; try { n = c && typeof mechName === 'function' ? mechName(c.id) : ''; } catch (e) { n = ''; }
   n = String(n || '').replace(/^the /i, '').toLowerCase(); return n ? n + ' lesson' : 'lesson';
@@ -17128,7 +17130,7 @@ const ixBoard = (() => {
   const PRI = ['routine', 'soon', 'urgent', 'urgent'];
   // what section 15 can walk you through today: machine jobs (and chores on a machine), and cart runs (cartTap)
   const BOARD_KINDS = new Set(['rounds', 'haul', 'tier3', 'tier4']);   // the registered kinds taken at the board (lead 29: only these; never an incident, a leak, nozzles or the trace demo; 24u's Tier 3 test, S5-2)
-  const doable = j => !!(j && (j.machine || j.kind === 'restock' || (j.kind === 'chore' || BOARD_KINDS.has(j.kind) && typeof JOB_KINDS === 'object' && JOB_KINDS[j.kind]) && typeof jobStepDone === 'function'));   // a round and a haul too (run by their stops; AC2, FX2's find): they said "coming soon", so Rounds and Hauling could never be taken
+  const doable = j => !!(j && (j.machine || j.kind === 'restock' || (j.kind === 'chore' || BOARD_KINDS.has(j.kind) && typeof JOB_KINDS === 'object' && JOB_KINDS[j.kind]) && typeof jobStepDone === 'function')) || typeof incRetake === 'function' && incRetake(j);   // CR1 (note 56): Making it safe's job put back, taken again (24p's slot)   // a round and a haul too (run by their stops; AC2, FX2's find): they said "coming soon", so Rounds and Hauling could never be taken
   const button = (txt, fn) => { const x = document.createElement('button'); x.type = 'button'; x.textContent = txt; x.onclick = fn; return x; };
   const LESSON = () => 'Your ' + boardLessonName() + ': take this one';   // FX10 (patch 0.92.3 item 29): the job a lesson's "your turn" put up for you (named: patch 0.92.5 #12)
   const api = {
@@ -17225,7 +17227,7 @@ function ixJobStep() {
     if (st && rm) return { deck: st.deck, place: st.places[0] || null, label: 'Look at ' + (typeof machineLabel === 'function' ? machineLabel(rm).split(',')[0] : machineName(rm)) };
     const K = typeof jobKindOf === 'function' && jobKindOf(j), kk = st && nx ? (st === nx.s ? nx.k : nx.k + 1) - (j.parts.length ? 1 : 0) : -1;   // a registered kind's own words for the stop (FX3: hauling's), else as before
     let kl = null; if (K && typeof K.goal === 'function' && kk >= 0) try { kl = K.goal(j, kk); } catch (e) { kl = null; }
-    return st ? { deck: st.deck, place: st.places[0] || null, label: kl || (st.step === 'pickup' ? 'Pick up ' + (j.bring || 'the delivery') : st.step === 'inspect' ? j.title + ': the next stop' : j.title) } : null;
+    return st ? { deck: st.deck, place: st.places[0] || null, label: kl || (CART_FIRST_ON && st.step === 'cart' ? 'Take a hover cart from the Cart bay' : CART_FIRST_ON && st.step === 'return' ? 'Dock the cart in the Cart bay' : st.step === 'pickup' ? 'Pick up ' + (j.bring || 'the delivery') : st.step === 'inspect' ? j.title + ': the next stop' : j.title) } : null;
   }
   if (typeof traceHidden === 'function' && traceHidden(j)) return typeof traceGoal === 'function' ? traceGoal(j) : null;   // a traced fault not yet found: the line, never the machine (24i)
   const m = machineById(j.machine); if (!m) return null;
@@ -20402,7 +20404,7 @@ function jobRun(p, j, t, makeMin) {
     // anywhere else (someone's desk, a seat, a lobby) they work where they are, so they never take a person's place
     const crewAt = (id, a, b) => { const pl = placeById(id); return !pl ? null : pl.machine ? id : pl.type === 'storage' ? storagePlace([id], a, b) : placeFreeFor(id, a, b) ? id : null; };
     const s0 = segs.length;
-    for (const st of j.stops) { go(st.deck); at(st.mins, st.tag, crewAt(st.placeId, c, c + st.mins)); }
+    for (const st of j.stops) { if (j.chore === 'garden' && (st.tag === 'cart' || st.tag === 'return')) continue; go(st.deck); at(st.mins, st.tag, crewAt(st.placeId, c, c + st.mins)); }   // CR1 (note 48): the dock stops are yours; the crew's run as before
     if (j.chore === 'trays' || j.chore === 'garden') { const p0 = segs.findIndex((sg, i) => i >= s0 && sg.tag === 'pickup'); if (p0 >= 0) segs.forEach((sg, i) => { if (i > p0) sg.hold = 'cartfull'; }); }   // a cart of trays in hand
     if (j.chore === 'delivery') { const p0 = segs.findIndex((sg, i) => i >= s0 && sg.tag === 'pickup'), d0 = segs.findIndex((sg, i) => i > p0 && sg.tag === 'drop'); if (p0 >= 0) segs.forEach((sg, i) => { if (i > p0 && (d0 < 0 || i <= d0)) sg.hold = 'carry'; }); }   // the box in their arms from the pickup till it's set down at the drop (0.33.40; they walk there in the drop's own minutes)
   } else {
@@ -20976,8 +20978,8 @@ function gardenCarry(o = {}) {
   if (!from || !to) return null;
   const n = Math.max(1, Math.round(o.crates || 1));
   SHIP.jobs.push({ id: key, machine: null, deck: 3, room: placeById(to).room, kind: 'chore', chore: 'garden', target: 'cold', crates: n,
-                   title: o.title || 'Carry ' + n + ' crate' + (n > 1 ? 's' : '') + ' from the garden to the cold store', bring: 'a hover cart for ' + n + ' crate' + (n > 1 ? 's' : ''),
-                   tier: 1, stops: [{ deck: 3, placeId: from.id, mins: 5, tag: 'pickup' }, { deck: 3, placeId: to, mins: 8, tag: 'drop' }],
+                   title: o.title || 'Carry ' + n + ' crate' + (n > 1 ? 's' : '') + ' from the garden to the cold store', bring: (CART_FIRST_ON ? '' : 'a hover cart for ') + n + ' crate' + (n > 1 ? 's' : ''),
+                   tier: 1, stops: cartFirstStops([{ deck: 3, placeId: from.id, mins: 5, tag: 'pickup' }, { deck: 3, placeId: to, mins: 8, tag: 'drop' }]),   // CR1 (note 48): a hover cart from the Cart bay first, and back (24p's slot)
                    urgency: 0, leave: 60, posted: at, found: at, claimedBy: null, parts: [], status: 'open' });
   MACH_REV++; return key;
 }
@@ -22036,7 +22038,7 @@ function boardTopUp(h, jobs) {
   for (let k = jobs.length - 1; k >= 0; k--) if (jobs[k].status === 'gone') jobs.splice(k, 1);
   if (!BOARD_ON || h < 0 || (nw ? nw.left < BOARD_FROM : !playerShiftOn(d) || m < DAY_SHIFT[0] || end - m < BOARD_FROM)) return;
   if (jobs.some(j => j.reserved && j.status === 'open' && !j.claimedBy && j.found >= (d - 1) * 1440 && j.found <= t + 60)) return;   // a job reserved for you today (Day 1's two with Zeke, a training job) comes first: none while it's due within the hour or untaken
-  if (BOARD_TRADE_ON) try { boardTradePost(h, jobs, t, m, end); } catch (e) { /* 24a's rounds not loaded yet */ }   // FX19 (0.92.6 #11): a job of your trade, beside the simple ones
+  if (BOARD_TRADE_ON) try { if (!(typeof BOARD_NEW_ON !== 'undefined' && BOARD_NEW_ON && boardNewPost(h, jobs, t, m, end) !== undefined)) boardTradePost(h, jobs, t, m, end); } catch (e) { /* 24a's rounds not loaded yet */ }   // CR1 (note 25): BOARD_NEW_ON's mix (24p's slot)   // FX19 (0.92.6 #11): a job of your trade, beside the simple ones
   let n = jobs.filter(j => boardForYou(j, t) && !j.trade).length; if (n >= boardMin()) return;
   const busy = new Set(jobs.filter(j => j.status !== 'done').map(j => j.machine ? 'm:' + j.machine : j.chore + ':' + j.target)), tier = playerTier(), seed = machSeed('board:extra');
   const cands = [];
@@ -33691,6 +33693,26 @@ const LINES = JSON.parse([
   '{"text":"You\'re in yesterday\'s clothes, and people notice. Change at your wardrobe in Bunk 1.","id":"iab6cr"}]',
   ',"clothes.tip.yesterday2":[',
   '{"text":"Yesterday\'s clothes again. A fresh set\'s waiting in your wardrobe in Bunk 1.","id":"5jm40j"}]',
+  ',"cr.board.m6":[',
+  '{"text":"Make it safe training job","id":"16v7lt0"}]',
+  ',"cr.promo.check.from":[',
+  '{"text":"The test from Day {day}","id":"nwqjkw"}]',
+  ',"cr.promo.check.reached":[',
+  '{"text":"Reached","id":"xfh6iv"}]',
+  ',"cr.promo.check.set":[',
+  '{"text":"Test job: {day}, {time}","id":"1w0aurv"}]',
+  ',"cr.promo.check.today":[',
+  '{"text":"today","id":"tjzn0v"}]',
+  ',"cr.promo.check.tomorrow":[',
+  '{"text":"tomorrow","id":"1q3is4d"}]',
+  ',"cr.ready":[',
+  '{"text":"That\'s Making it safe. And that\'s all of it: Reliable, and this. Your Tier 2 test is today, {time}, at the board.","id":"wrz4gg"}]',
+  ',"cr.ready.mail":[',
+  '{"text":"Your Tier 2 test: today | Test job today, {time}, on the job board in the Works bay. Pass it and you\'re an Officer.","id":"16qhrzd"}]',
+  ',"cr.ready.notice":[',
+  '{"text":"Your Tier 2 test: today, {time}, the job board in the Works bay.","id":"16nesuk"}]',
+  ',"cr.round.title":[',
+  '{"text":"Extra round, Deck {deck}","id":"1kz2n7a"}]',
   ',"crewjob.carry":[',
   '{"text":"Coming through! Box with legs.","id":"f1bug9","tone":"funny","dept":"works"},',
   '{"text":"Mind your toes. Heavy one.","id":"o2xg2t","dept":"works"},',
@@ -60014,6 +60036,7 @@ function haulTake(j, id) {                               // a crate off the hold
 }
 if (typeof jobKindAdd === 'function' && typeof haulOn === 'function') jobKindAdd('haul', { tier: 1, junior: true, work: 0, text: 'Manifest run',
   hold: j => { const st = jobStops(j), last = st.reduce((a, s, k) => s.step === 'deliver' ? k : a, -1), first = st.findIndex(s => s.step === 'load');
+    if (CART_FIRST_ON) { const c0 = st.findIndex(s => s.step === 'cart'); if (c0 >= 0 && !st[c0].done) return null; }   // CR1 (note 48): no cart in your hands till you've taken one from its dock
     return first >= 0 && st[first].done && !(last >= 0 && st[last].done) ? 'cartfull' : 'cart'; },
   post(h, jobs) {                                        // delivery days: once the unload's done (or from 13:00), the manifest's run
     const d = Math.floor(h / 24) + 1, m = (h % 24 + 24) % 24 * 60, W = SHIP.works;
@@ -64438,7 +64461,7 @@ function promoAnnounce(now) {                            // Day 8 on: "Tomorrow,
   if (!W || W.tier !== 1 || W.test || !row || !WORK_MECH.t2 || d < PROMO.from || !any && (!playerShiftOn(d) || m < PROMO.at || m >= DAY_SHIFT[1]) || !ladderNeeds(row.needs, W)) return;
   const by = ladderTeacher(row, d) || 'calder', here = promoInBay();
   if (!here && !any && m < PROMO.mailAt) return;
-  W.test = { tier: 2, day: Math.max(row.day, promoWorkday(d)), tries: 0, passed: false };
+  W.test = { tier: 2, day: (typeof crTestDay === 'function' && crTestDay(d, m)) || Math.max(row.day, promoWorkday(d)), tries: 0, passed: false };   // CR1 (note 55): today, after Making it safe (the slot)
   if (typeof promoSightOn === 'function' && promoSightOn()) promoReady(now, by, here);   // FX19 (patch 0.92.6 #18): the big beat
   else if (here) promoSay(by, 'announce', 'Tomorrow, your test job. Tier 2, with me watching. Nothing you haven\'t done.');
   else if (typeof mailSend === 'function') { const t = worksText('promo.announce.mail', 'Your test job | Tomorrow: your Tier 2 test job, with me watching. Be in the bay at nine. — C.'), i = t.indexOf(' | ');
@@ -64877,10 +64900,12 @@ function promoCheck() {                                  // the Training tab's "
   const yes = worksText('works.promo.check.done', 'Done'), no = worksText('works.promo.check.not', 'Not yet'), row = (text, ok) => ({ text, sub: ok ? yes : no });
   const rows = [row(worksText('works.promo.check.rep', 'Reliable (you\'re {band})', { band: worksBandWord() }), ladderNeeds({ rep: 'reliable' }, W)),
     row(worksText('works.promo.check.m6', 'Making it safe'), W.tr.m6 !== undefined), row(worksText('works.promo.check.day', 'The test from Day 9'), !!W.test || d >= PROMO.from)];
-  if (W.test) rows.push({ text: worksText('works.promo.check.set', 'Test job: {day}, 09:00', { day: W.test.day === d ? 'today' : W.test.day === d + 1 ? 'tomorrow' : dayName(W.test.day) }) });
+  if (CR_DAY8_ON) rows.splice(2, 1, ...crCheckRows(W, d, row, no));   // CR1 (note 49): the day row ticked only once the day has come; the test's time (the slot)
+  else if (W.test) rows.push({ text: worksText('works.promo.check.set', 'Test job: {day}, 09:00', { day: W.test.day === d ? 'today' : W.test.day === d + 1 ? 'tomorrow' : dayName(W.test.day) }) });
   return [{ kind: 'text', text: worksText('works.promo.check.title', 'Your promotion: the Tier 2 test'), mark: 'head' }, { kind: 'list', rows }];
 }
 function promoReady(now, by, here) {                     // promoAnnounce's beat with the switch on: the test is set
+  if (typeof crReady === 'function' && crReady(now, by, here)) return;   // CR1 (note 55): the test this afternoon
   const W = SHIP.works, d = worksDay(now), day = W.test.day === d + 1 ? 'tomorrow' : dayName(W.test.day);
   flagSet('promo.sight.ready', d); if (!flag('promo.sight')) flagSet('promo.sight', d);
   if (here) worksSayAll(by, [worksText('promo.ready', 'Reliable, and Making it safe done. That\'s all of it. Your Tier 2 test.')].concat(day === 'tomorrow' ? [worksText('promo.announce', 'Tomorrow, your test job. Tier 2, with me watching. Nothing you haven\'t done.')] : []));   // "Tomorrow" only when it is (RV15: a Friday offer's test is Monday)
@@ -64909,7 +64934,7 @@ function promoTestDay(now) {                             // the test morning: an
   const d = worksDay(now), B = (d - 1) * 1440; if (d !== W.test.day || now < B + PROMO.jobAt - 30 || now >= B + PROMO.until) return;
   const c = W.cur, open = () => !!(c && c.id === 't2' && c.st === 'do' && c.j && (SHIP.jobs || []).some(x => x.id === c.j && !(x.found > shipNow())));   // (RV16, 0.93.1) on the board: it's made earlier but found at 09:00
   if (!open()) guideAsk({ id: 'promo:testday:' + d, level: 2, owner: '24p (FX19)', from: B + PROMO.jobAt - 30, until: B + PROMO.jobAt + 15,
-    goal: () => ({ deck: 5, room: 'w', label: 'Your Tier 2 test, 09:00: the Works bay' }), done: () => open() || promoInBay() || !!(SHIP.works.test && SHIP.works.test.passed) });
+    goal: () => ({ deck: 5, room: 'w', label: 'Your Tier 2 test, ' + (CR_DAY8_ON ? hhmm(PROMO.jobAt) : '09:00') + ': the Works bay' }), done: () => open() || promoInBay() || !!(SHIP.works.test && SHIP.works.test.passed) });
 }
 WORK_TICKS.push((now, skip) => { promoSightTick(now, skip); promoDependTick(now); if (!skip) promoTestDay(now); });
 // FX19 (the user, 05:20 UTC: "Make sure getting taken to your new quarters can't be missed"), on the same switch. The walk
@@ -65096,9 +65121,9 @@ function promoBeatsTick(now, skip) {                     // once a ship minute (
       promoGuests(W.test.day).slice(PROMO.guests.length, PROMO.guests.length + 2).forEach((id, k) => {
         const t = worksText('mail.pb.luck', 'Good luck | Tomorrow\'s the big one, then. You\'ll be fine. Eat a proper breakfast.', null, k), i = t.indexOf(' | ');
         mailSend({ at: Math.max(now, B + 1200) + 10 * k, from: worksName(id), subject: i > 0 ? t.slice(0, i) : 'Good luck', body: i > 0 ? t.slice(i + 3) : t, quiet: true }); }); }
-    if (W.test.day === d && m >= 360 && m < PROMO.jobAt && live && flag('pb.morning') !== d) {   // A: the test morning, once you're up
+    if (W.test.day === d && m >= 360 && m < PROMO.jobAt && live && flag('pb.morning') !== d && !(typeof crSameDay === 'function' && crSameDay())) {   // A: the test morning, once you're up (CR1: not the same-day test, said at once by crReady)
       flagSet('pb.morning', d); promoNotice(worksText('pb.morning.notice', 'Today: your Tier 2 test, 09:00. It goes up on the job board in the Works bay.')); }
-    if (W.test.day === d && m < PROMO.jobAt + 30 && live && promoInBay() && flag('pb.morning.calder') !== d) {   // her word as you come into the bay
+    if (W.test.day === d && m < PROMO.jobAt + 30 && live && promoInBay() && flag('pb.morning.calder') !== d && !(typeof crSameDay === 'function' && crSameDay())) {   // her word as you come into the bay (CR1: not the same-day test)
       flagSet('pb.morning.calder', d); worksSayAll('calder', worksVoice('calder', 'pb.promo.morning') || [worksText('pb.morning.say', 'Morning. Nine o\'clock, it goes on the board. Take it when you\'re ready.')]); }
     { const c = W.cur; if (W.test.day === d && m >= PROMO.jobAt && m < PROMO.until && live && c && c.id === 't2' && c.st === 'do' && c.j && flag('pb.tell') !== d) { flagSet('pb.tell', d); promoTestTell(c); } }   // her word as it goes on the board (RV19 S1)
     const c = W.cur, tj = c && c.id === 't2' && c.st === 'do' && c.j && SHIP.jobs.find(x => x.id === c.j);   // B: holding another job while the test waits on the board: said once an hour
@@ -65136,6 +65161,132 @@ onSim('job', n => {                                      // B: Torres comes by a
   try { const a = DECK_CREW.find(x => x.p && x.p.id === 'torres-zeke'), P = player.obj.position;
     if (a && a.h && Math.hypot(a.x - P.x, a.z - P.z) <= CHATTER_NEAR) { const l = worksVoice('torres-zeke', 'train.t2.torres'); if (l) simTimeout(() => worksSayAll('torres-zeke', l), 5600); } } catch (e) { /* not in play */ }
 });
+// ---- CR1 (lead 49, the 0.99.7 playtest patch, plans/patch-0997.md notes 49, 55, 56; words content/works/career-0997.lines).
+// CR_DAY8_ON (notes 55 and 49), the user: "the promotion (or its test) comes Monday of week 2, Day 8 ... the test more
+// obvious, on Monday". The Tier 2 test row opens from Day 8 (was 9). Making it safe learned on a workday by CR_SAME.by
+// (12:30), the test is that same afternoon: the job held from CR_SAME.jobAt (13:00) to CR_SAME.until (16:00), not the next
+// workday's 09:00-15:00. "Same day" is read from the save alone (the test's day is the day Making it safe was learned), so
+// PROMO.jobAt and PROMO.until (getters below; every reader of them follows) give the afternoon's times only then. Learned
+// later, or a test put off: the next workday at 09:00 as before. crTestOpen opens the test that afternoon (the ladder opens one
+// big row a day, by 10:30: Making it safe had Day 8's). Calder says it where you are, a Mail, an urgent notice; the bay arrow
+// from half an hour before (promoTestDay), the board's forced pointer (PROMO_BEATS). The checklist (note 49: it said "The
+// test from Day 9: Done" from Day 8 with no test taken: the day row was ticked when Day 8 came) ticks the day row only once
+// the first test day has come, and says "Reached", not "Done". The board names the training job (note 55): "Your Make it
+// safe training job: take this one", only on that job (crLessonName, 15b's boardLessonName asks).
+// INC_REDO_ON (note 56): Making it safe's job (yours at the pipe) put back on the board had no Take it (15b's ixBoard.doable
+// never takes an incident at the board), so the training sat till the shift ended. Now an incident job held for you, or one
+// you put back, has a Take it like other jobs (incRetake), and the board's arrow leads to it. Nothing saved; off: as before.
+var CR_DAY8_ON = true, INC_REDO_ON = true;               // var: 15b's boardLessonName and ixBoard ask before this line has run
+const CR_SAME = { by: 750, jobAt: 780, until: 960, from: 8 };
+function crSameDay() {                                   // the test is the same day Making it safe was learned (from the save)
+  const W = SHIP.works; return !!(CR_DAY8_ON && W && W.tier === 1 && W.test && W.tr && W.tr.m6 !== undefined && W.test.day === W.tr.m6);
+}
+{ const base = { jobAt: PROMO.jobAt, until: PROMO.until };   // PROMO's test hours follow crSameDay (a setter keeps any later assignment)
+  for (const k of ['jobAt', 'until']) Object.defineProperty(PROMO, k, { get: () => crSameDay() ? CR_SAME[k] : base[k], set: v => { base[k] = v; }, enumerable: true, configurable: true }); }
+{ const r = ladderRow('t2'); if (r) { const d0 = r.day; Object.defineProperty(r, 'day', { get: () => CR_DAY8_ON ? CR_SAME.from : d0, enumerable: true, configurable: true }); } }
+function crTestDay(d, m) {                               // promoAnnounce's test day: today, when Making it safe was learned today in time (else null: as before)
+  const W = SHIP.works; if (!CR_DAY8_ON || !W || !W.tr || W.tr.m6 !== d || !playerShiftOn(d) || m >= CR_SAME.by) return null;
+  return d >= CR_SAME.from ? d : null;
+}
+function crTestOpen(now) {                               // the same-day test opened that afternoon (the ladder's own rule waits for tomorrow)
+  const W = SHIP.works; if (!crSameDay() || W.test.passed || W.cur || typeof ladderOpen !== 'function') return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, row = ladderRow('t2');
+  if (W.test.day !== d || !row || !WORK_MECH.t2 || !playerShiftOn(d) || m < CR_SAME.jobAt - 30 || m >= CR_SAME.until - 60 || worksOpened(W).has('t2')) return;
+  ladderOpen(row, d, now);
+}
+function crReady(now, by, here) {                        // promoReady with the test today: Calder's word wherever you are, the Mail, the notice
+  const W = SHIP.works, d = worksDay(now); if (!crSameDay() || W.test.day !== d) return false;
+  const time = hhmm(CR_SAME.jobAt);
+  flagSet('promo.sight.ready', d); if (!flag('promo.sight')) flagSet('promo.sight', d);
+  worksSayAll(by, [worksText('cr.ready', 'That\'s Making it safe. And that\'s all of it: Reliable, and this. Your Tier 2 test is today, {time}, at the board.', { time })]);   // her bubble, or a toast when she isn't near
+  promoMail('cr.ready.mail', 'Your Tier 2 test: today | Test job today, {time}, on the job board in the Works bay. Pass it and you\'re an Officer.', { time }, now);
+  if (now >= shipNow() - 1) { const text = worksText('cr.ready.notice', 'Your Tier 2 test: today, {time}, the job board in the Works bay.', { time });
+    if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'works', text, urgent: true }); } catch (e) { /* no device */ } }
+  return true;
+}
+function crCheckRows(W, d, row, no) {                    // promoCheck's day row and the test's row (note 49)
+  const from = (ladderRow('t2') || { day: CR_SAME.from }).day, out = [{ text: worksText('cr.promo.check.from', 'The test from Day {day}', { day: from }), sub: d >= from ? worksText('cr.promo.check.reached', 'Reached') : no }];
+  if (W.test) out.push({ text: worksText('cr.promo.check.set', 'Test job: {day}, {time}', { day: W.test.day === d ? worksText('cr.promo.check.today', 'today') : W.test.day === d + 1 ? worksText('cr.promo.check.tomorrow', 'tomorrow') : dayName(W.test.day), time: hhmm(PROMO.jobAt) }) });
+  return out;
+}
+const CR_PUT = new Set();                                // incidents of yours you put back (not saved: after a reload they're the crew's as before)
+onSim('job', n => { if (INC_REDO_ON && n && n.step === 'drop' && n.job === 'incident') CR_PUT.add(n.id); });
+function incRetake(j) {                                  // 15b's Take it rule: Making it safe's training job, or an incident of yours you put back (note 56)
+  if (!INC_REDO_ON || !j || j.kind !== 'incident' || j.walk || j.status !== 'open' || j.claimedBy) return false;
+  return j.train === 'm6' ? heldForYou(j) : CR_PUT.has(j.id);
+}
+function crLessonName(c, id) {                           // the board's name for the training job (note 55), only on that job
+  return (CR_DAY8_ON || INC_REDO_ON) && c && c.id === 'm6' && c.st === 'do' && c.j === id ? worksText('cr.board.m6', 'Make it safe training job') : null;
+}
+function crBoardArrow(now) {                             // Making it safe's job back on the board: the arrow to it, level 2 (the queue on)
+  const c = SHIP.works && SHIP.works.cur; if (!INC_REDO_ON || !c || c.id !== 'm6' || c.st !== 'do' || !c.j || !promoQueue()) return;
+  const j = SHIP.jobs.find(x => x.id === c.j); if (!j || !incRetake(j)) return;
+  let mj = null; try { mj = myJob(); } catch (e) { mj = null; } if (mj) return;
+  guideAsk({ id: 'cr:m6:board:' + c.d, level: 2, owner: '24p (CR1)', until: j.until || now + 120,
+    goal: () => ({ deck: 5, item: /job board/i, room: 'w', label: 'Your ' + worksText('cr.board.m6', 'Make it safe training job') + ': take it at the board' }), done: () => guideTaken(c.j) || guideStage('m6', 'do') });
+}
+WORK_TICKS.push((now, skip) => { crTestOpen(now); if (!skip) crBoardArrow(now); });
+// CART_FIRST_ON (note 48, the user: "some jobs tell you to get a hover cart but point to the pick-up place; you go there and
+// are given a hover cart automatically"): the garden crates chore (section 17's gardenCarry) said "pick up a hover cart for 2
+// crates" at the garden, with no cart stop, and the crew's run drew a full cart after the pick-up. Now it starts at a Cart bay
+// dock on Deck 5 ("Take a hover cart from the Cart bay") and ends there ("Dock the cart in the Cart bay"); you push the cart
+// from the dock on (cartFirstHold, full once the crates are on). Hauling (24d) drew the cart from the moment you took the
+// job: now only once you've taken it from the dock. Only jobs made with the switch on; off: as before.
+var CART_FIRST_ON = true;                                // var: section 17's gardenCarry and 15b's ixJobStep and ixHold ask before this line has run
+function cartFirstStops(st) {                            // gardenCarry's stops: the dock first and last, when there's a dock
+  const dock = CART_FIRST_ON && typeof CART_AT !== 'undefined' ? CART_AT.find(id => placeById(id)) : null; if (!dock) return st;
+  return [{ deck: 5, placeId: dock, mins: 2, tag: 'cart' }].concat(st, [{ deck: 5, placeId: dock, mins: 2, tag: 'return' }]);
+}
+function cartFirstHold(j) {                              // ixHold for a garden run with a cart stop: nothing, the cart, the full cart (undefined: not ours)
+  if (!CART_FIRST_ON || !j || j.chore !== 'garden' || !(j.stops || []).some(s => s.tag === 'cart') || typeof jobStops !== 'function') return undefined;
+  const st = jobStops(j), c0 = st.findIndex(s => s.step === 'cart'), p0 = st.findIndex(s => s.step === 'pickup'), d0 = st.findIndex(s => s.step === 'drop');
+  if (c0 < 0 || !st[c0].done) return null;
+  return p0 >= 0 && st[p0].done && !(d0 >= 0 && st[d0].done) ? 'cartfull' : 'cart';
+}
+if (CART_FIRST_ON && typeof IX_STOP === 'object') Object.assign(IX_STOP, { cart: ['Taking a hover cart', 'work'], return: ['Docking the cart', 'work'] });
+// BOARD_NEW_ON (note 25, the user: "as you learn new jobs they don't appear on the job board enough. New job types should
+// fill the list along with the types you've been doing"). FX19's boardTradePost posted one job of your trade only when
+// none of ANY trade kind was up for you, so an old kind on the board (a repair, a haul) kept a newly learned one off it.
+// Now (boardTopUp asks boardNewPost instead): each kind you're trained in that the board can be given (Tuning: a tune on
+// a machine drifted by one; Rounds: an afternoon round) is looked at in turn, the newest learned first, and one is posted for
+// the first that has none up for you. A kind learned in your last NEW_DAYS workdays may have its own all through the
+// shift from 10:00 (a round too, not only 13:00-15:00), and the shift's cap is BOARD_NEW_MAX (FX19's was 3); still one an
+// hour, never with under two hours left, held to the shift's end then lapsed, no reputation, seeded by the hour (no R()).
+// The other kinds (repairs for the scanner, hauling's delivery days, the later tiers) come from their own sims as before.
+var BOARD_NEW_ON = true;                                 // var: section 17's boardTopUp asks before this line has run
+const BOARD_NEW = { days: 5, max: 4 };
+function boardNewKinds(d) {                              // the kinds the board can be given, trained, newest learned first: [{ id, kind, fresh }]
+  const W = SHIP.works; if (!W || !W.tr) return [];
+  const workdays = from => { let n = 0; for (let k = from + 1; k <= d; k++) if (playerShiftOn(k)) n++; return n; };
+  return [['m5', 'tune'], ['m1', 'rounds']].filter(([id]) => W.tr[id] !== undefined && W.tr[id] < d)
+    .map(([id, kind]) => ({ id, kind, at: W.tr[id], fresh: workdays(W.tr[id]) <= BOARD_NEW.days })).sort((a, b) => b.at - a.at || (a.id < b.id ? -1 : 1));
+}
+function boardNewPost(h, jobs, t, m, end) {              // boardTopUp's trade post with the switch on: the job posted, or null (undefined: not ours)
+  const W = SHIP.works, d = Math.floor(h / 24) + 1, B = (d - 1) * 1440; if (!BOARD_NEW_ON) return undefined;
+  if (!W || m < BOARD_TRADE_FROM || end - m < BOARD_TRADE_LEFT) return null;
+  const mine = jobs.filter(j => j.trade && j.found >= B); if (mine.length >= BOARD_NEW.max || mine.some(j => j.found > t - 60)) return null;
+  const seed = machSeed('board:trade'), free = id => !jobs.some(x => x.machine === id && x.status !== 'done') && !JOB_FOR[(SHIP.machines[id] || {}).state];
+  const o = { leave: end - m, extra: true, trade: true, xp: 0 }, up = kind => jobs.some(j => j.kind === kind && boardTrade(j) && boardForYou(j, t));
+  for (const k of boardNewKinds(d)) {
+    if (up(k.kind)) continue;
+    let j = null;
+    if (k.kind === 'tune' && driftOn()) {
+      const ms = machineList().filter(x => Math.abs(machineDrift(x.id)) === 1 && free(x.id)).sort((a, b) => a.id < b.id ? -1 : 1);
+      const x = ms[Math.floor(ms.length * schedU(seed, h, 1))];
+      if (x) { const dc = (FAULT_CAUSES[x.kind] || []).find(c => c.setting), w = dc ? dc.shows.split('|') : [], word = machineDrift(x.id) > 0 ? w[0] : w[w.length - 1];
+        j = jobMake('tune', { id: 'tune:' + x.id + '@' + h, machine: x.id, deck: x.deck, room: x.room, h, tier: jobTier({ machine: x.id }), title: 'Tune: ' + machineTitle(x.id) + (word ? ' (' + word + ')' : ''), ...o }); }
+    }
+    if (k.kind === 'rounds' && (k.fresh || m >= BOARD_TRADE_ROUND[0] && m < BOARD_TRADE_ROUND[1]) && !jobs.some(x => x.kind === 'rounds' && x.trade && x.found >= B)) {
+      const n0 = roundDeck(d, false), ds = ROUND_DECKS.filter(x => x !== n0), n = ds[Math.floor(ds.length * schedU(seed, h, 2))];
+      const pool = n ? roundPool(n).filter(x => free(x.id)).sort((a, b) => schedU(seed ^ a.seed, h, 3) - schedU(seed ^ b.seed, h, 3) || (a.id < b.id ? -1 : 1)) : [];
+      const mix = n && CHECKS_ON ? roundMix(n, 2, 2, s => schedU(seed ^ s.seed, h, 3), free) : null;
+      if (mix ? mix.length >= 4 : pool.length >= 4) { const route = mix || roundWalk(pool.slice(0, 4), DECKS[n]), m0 = roundSpot(route[0]);
+        j = jobMake('rounds', { id: 'round-pm-d' + n + '@' + h, deck: n, room: m0.room, h, title: m >= BOARD_TRADE_ROUND[0] ? roundText('round.title.pm', 'Afternoon round, Deck {deck}', { deck: n }) : worksText('cr.round.title', 'Extra round, Deck {deck}', { deck: n }), route, marks: {}, ...o }); }
+    }
+    if (j && forYou(j)) { j.shareSeen = true; jobs.push(j); return j; }
+  }
+  return null;
+}
 // ---- end of slot: Works career engineer ----
 
 // ---------------------------------------------------------------------

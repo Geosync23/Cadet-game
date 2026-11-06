@@ -118,7 +118,8 @@ def part_trade(g):
     check(len(hours) == len(set(hours)) and all(len(p[1]) <= 1 for p in r['per']), f"trade: at most one an hour ({r['per']})")
     check(any(k.startswith('tune') for k in r['kinds']), f"trade: a tune on the machine drifted by one ({r['kinds']})")
     hr = lambda k: int(k.split('@')[1].split()[0])
-    check(all(not k.startswith('rounds') or 13 <= hr(k) < 15 for k in r['kinds']), f"trade: rounds only 13:00-15:00 ({r['kinds']})")
+    fresh = g.ev("typeof BOARD_NEW_ON !== 'undefined' && BOARD_NEW_ON && boardNewKinds(9).some(k => k.kind === 'rounds' && k.fresh)")   # CR1 (note 25): a round learned in your last 5 workdays may come from 10:00
+    check(all(not k.startswith('rounds') or (10 if fresh else 13) <= hr(k) < 15 for k in r['kinds']), f"trade: rounds only {'10' if fresh else '13'}:00-15:00 ({r['kinds']})")
     check(all(hr(k) <= 15 for k in r['kinds']), f"trade: none with under two hours of the shift left ({r['kinds']})")
     check(all(' xp0 ' in k for k in r['kinds']), f"trade: no Works reputation ({r['kinds']})")
     check(all(p[2] >= 2 for p in r['per'] if p[0] >= 9 and p[0] <= 15), f"trade: the simple ones still come ({r['per']})")
