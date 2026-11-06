@@ -883,8 +883,10 @@ with sync_playwright() as pw:
         sp = WORK / 'test' / ('_step6_' + RUN_ID + pathlib.Path(path).name); sp.write_text(step6_on(src))
         for way in [w for w in WAYS if w != 'change']:
             print(f'== step6 ({way}; following only the arrow, Days 19-26)')
-            try: part_step6(ctx, str(sp), way)
+            wctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)   # (TP1 for lead 50, H in the 0.99.7 round) each way in its own browser context: in one, the next way's page loaded the last way's Dev-mode save (Day 19 on, its Undo)
+            try: part_step6(wctx, str(sp), way)
             except Exception as e: fail(f'step6 {way}: stopped: {str(e)[:300]}')
+            finally: wctx.close()
     if PARTS & {'endstay', 'endgo'}:
         ep = WORK / 'test' / ('_ending_' + RUN_ID + pathlib.Path(path).name); ep.write_text(end_on(src))   # the ending on (EV_ENDING_ON), the arrows as shipped
         for want in ('stay', 'go'):
