@@ -17259,6 +17259,7 @@ function ixWorkStep() {
   if (d <= 1 && typeof introOn === 'function' && introOn() || !playerOnDuty(d) || m < CAREER.clockIn || m >= dayShiftEnd(d)) return null;
   if (!careerClockedIn(d)) return { deck: 5, place: '5-timeclock-1', label: 'Clock in at the time clock' };
   const open = typeof openJobs === 'function' && (GUIDE_ON ? guideTakeable() : openJobs('you')).length; if (typeof boardEmptySay === 'function') boardEmptySay(!open, now);   // FX1: the empty board says so, not just no arrow; the queue on: only a job with a Take it counts (piece D's S6)
+  if (open && lightEasyNow()) return null;                // 0.99.7 (EV1): standing easy at the Last Light, the board can wait (slot 'Events 0.99.7')
   return open ? { deck: 5, item: /job board/i, room: 'w', label: 'Take a job at the job board' } : null;
 }
 // a tap at the arrow's pin (the floor under it: the thing itself may be on a wall the camera has cut away, or off to one side
@@ -17913,10 +17914,10 @@ function guideShift() {
   let mine = null; try { mine = myJob(); } catch (e) { mine = null; }
   if (m < E) {                                           // S3 (S6, the empty board's word: FX1's boardEmptySay, from ixWorkStep)
     guideAsk({ id: 'shift:job:' + d, level: 4, owner, until: base + E, done: () => careerClockedOut(d),
-      goal: () => { let j = null; try { j = myJob(); } catch (e) { j = null; } return j || !guideTakeable().length ? null : { deck: 5, item: /job board/i, room: 'w', label: boardLesson() ? 'Your ' + boardLessonName() : 'Take a job at the board' }; } });
+      goal: () => { let j = null; try { j = myJob(); } catch (e) { j = null; } return j || !guideTakeable().length || lightEasyNow() ? null : { deck: 5, item: /job board/i, room: 'w', label: boardLesson() ? 'Your ' + boardLessonName() : 'Take a job at the board' }; } });   // (0.99.7, EV1: not while you stand easy at the Last Light)
     const L = mine ? [] : guideTakeable(), les = !mine && boardLesson(), cur = SHIP.works && SHIP.works.cur;
     const ids = L.map(o => o.id), take = () => { for (const id of ids) { const b = boardButton(id); if (b) return b; } return null; };   // the first row of these with its Take it
-    if (P && L.length && !les) pointAsk({ id: 'p:board:take', once: 3, path: [pointBoard(null)[0], { el: take, label: 'Take it' }], until: now + 60, done: () => { try { return !!myJob(); } catch (e) { return true; } } });
+    if (P && L.length && !les && !lightEasyNow()) pointAsk({ id: 'p:board:take', once: 3, path: [pointBoard(null)[0], { el: take, label: 'Take it' }], until: now + 60, done: () => { try { return !!myJob(); } catch (e) { return true; } } });
   }
   if (P && mine && mine.workDone) pointAsk({ id: 'p:board:turnin', once: 3, path: pointBoard(mine.id, 'Turn it in'), until: now + 240, done: () => { let j = null; try { j = myJob(); } catch (e) { j = null; } return !j || j.id !== mine.id; } });   // S5
   const T = Math.min(E + 60, typeof friAutoOut === 'function' ? friAutoOut(d) : E + 60);
@@ -52253,6 +52254,15 @@ function lightSay(at, n, e, m) {
   const others = at.filter(a => a !== host && a.p.rank !== 'guest'); if (!others.length || n % 2 === 0 && host && n / 2 >= 8 && n % 4 === 0) return null;   // her talk done: the crowd now and then (crew only: a guest has no Line stories)
   const a = others[(n * 7 + d) % others.length];
   return [a, trLine('event.lastLight.crowd', Math.floor(n / 2) + d, {}, ['My first Line, they made me sing. Badly.', 'Is it true you get dunked? Tell me it isn\'t true.', 'One blink, then nothing behind us. Strange.', 'Every star past here has a Veyli name. Imagine.'])];
+}
+// ---- RV33's should (lead 49): while the day shift stands easy for the Last Light (its gathering on, Thursday Day 4
+// 14:00-14:30) and you've joined it or are in the bow lounge, your shift's "Take a job at the board" arrow, its board
+// pointer and ixWorkStep's arrow wait (read by 15b's ixWorkStep and the guide's shift:job goal). False while off
+function lightEasyNow() {
+  if (!EV997_LIGHT_ON || typeof SHIP_EVENTS === 'undefined' || !SHIP_EVENTS.lastLight) return false;
+  const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  const e = eventsOn(d).find(x => x.id === 'lastLightGlass' && m >= x.from && m < x.to); if (!e) return false;
+  return SHIP.events.joined.includes('lastLightGlass@' + d) || (typeof deckDef !== 'undefined' && !!deckDef && deckDef.num === 3 && roomAt(...player.here()) === 'L');
 }
 // ---- end of slot: Events 0.99.7 ----
 
