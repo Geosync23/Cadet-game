@@ -22,4 +22,21 @@ EV1 and CL1 also checked merged together for first-week clashes.
   anything the intro or an arrow asks the player to be at landing on top of something else asked of them.
 
 ## Results
-(none yet: waiting for the first build)
+
+### SC1 social and crew stories (claude/p997-social), switch P997_SOCIAL_ON
+**85442de, game e19f1d10...41db (sha256 matched): FIXES NEEDED (one item).** Sections 20, 20c, 22 (generated words).
+- Off: cadet_test vs 0.99.6 ALL IDENTICAL. check_fast on the commit: OK (257 s); on a switched-on copy: OK (275 s).
+- Note 17 (sc1_card.py: fresh save, manifest signed, introSkip, core crew warmed, Day 9, beside them on their deck, 390x844):
+  off: Say hello, Sit with them, Talk a while, Ask about, Help?, Meet up; Sit with them gone after Say hello.
+  on: Say hello, Get to know, Talk a while, Help?, Meet up, Do you know...?; Get to know stays after Say hello and opens
+  the beat (moment:brennan:1, moment:halloran-emeka:1). Good.
+- Note 32 after talking: arrow later that day: off 2 samples (kovac Day 11: 22), on 0. Good.
+- **FIX: note 32 shuts the arrow on any flicker.** p997WordOk sets shut when the beat stops being ready, so a person
+  walking off a calm spot ends the arrow for the day though you never talked. sc1_arrow2.py (Days 9-22, every 5 ship
+  min, never opening a card): off the arrow covers every ready minute; on, kovac Day 9 ready 580 / arrow 35, Day 16
+  555/15, Day 18 305/10; torres-zeke Day 10 625/75, Day 13 695/125 (files sc1_arrow2_*_85442de.txt). Note 17 asks the
+  story to appear consistently. Suggested: shut only on opening their card.
+- Note 38: 575 talks have listen2 (the 4 without are smalltalk fillers); sample of 12 all answer the ask, then ask back;
+  commonest opener "Not yet." 10 of 575. content_gen and lines_check changes are small and right.
+- Note 39: joined hosted tradition rec-all-hands (marrow): 0 -> 3.2 (her relGain on +4); again same day: no change; not
+  joined: no change; off: no change.
