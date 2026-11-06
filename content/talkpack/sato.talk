@@ -13,6 +13,7 @@ them: Nobody else drinks it. I offer it to everyone. It's a test. Mostly of them
 ask: Will you try it? Honestly. I'll know if you're being polite.
 listen: Why kelp, of all things?
   them: Salt, body, and it reminds me of a shore I've never been to. Interesting, no?
+listen2: Maybe. Why kelp, of all things?
 share: Go on. One sip.
   them: Good. Brave. Your face is doing something very honest. Write that down. No, I will.   #funny
 cheer: Only if I can add a biscuit.
@@ -26,6 +27,7 @@ them: Why not? Because it was small. And late. And. Never mind. It doesn't count
 ask: What would you name a comet, if you found one?
 listen: Why doesn't the third count?
   them: It. Hm. It just doesn't. Next question. Better question.   #funny
+listen2: Hope, maybe. Why doesn't the third count?
 share: After someone at home.
   them: Good. That's what most people do. That's what I. Never mind. Good choice.
 cheer: Gerald. Obviously.
@@ -39,6 +41,7 @@ them: I've re-labelled it. And the twelve beside it. My store, my handwriting.  
 ask: Is there something you're particular about? Very particular?
 listen: Does Mori mind?
   them: Mori runs the labs while I run everyone. It works. Don't tell Mori I said "runs".   #funny
+listen2: My bunk, a bit. Does Mori mind?
 share: My toolbelt. Everything in its place.
   them: Good. Order is how you notice the odd thing. The odd thing is the science.
 cheer: My place in the dinner queue.
@@ -52,6 +55,7 @@ them: Some days I still think they were right. Then I look out of the observator
 ask: What made you choose this, out of everything?
 listen: Do you ever regret it?
   them: No. Not yet. I say "yet" about most things. It keeps me honest.
+listen2: Curiosity. Do you ever regret it?
 share: I wanted to see what's out there.
   them: Good. Same. Now you're in it. Keep looking. Don't stop looking.   #warm
 cheer: The tea, clearly. Yours, specifically.
@@ -66,6 +70,7 @@ them: Mori says I'll catch a chill. I've been thinking there for seven years. No
 ask: Where do you do your best thinking? Everyone has a place.
 listen: Why does cold help?
   them: Warm rooms want you to sit still. Cold ones want you to do something. Simple.
+listen2: Somewhere quiet. Why does cold help?
 share: Walking. Anywhere. Corridors.
   them: Good. Moving feet, moving thoughts. Don't walk into Holt. He doesn't move.   #funny
 cheer: In the lift, between decks.
@@ -78,6 +83,7 @@ them: The grey one, with the stripe. I never forget a sample. Names, yes. Sample
 ask: Are you good with names? Or are you like me, and good with something else?
 listen: What's special about four four seven one?
   them: It's the most ordinary rock we've ever found. Perfectly ordinary. That's very rare.   #funny
+listen2: Places, I think. Why four four seven one?
 share: Names, mostly. Faces too.
   them: Useful. You can stand next to me at dinner and whisper. I'll pay you in tea.   #funny
 cheer: I'm good with biscuits.
@@ -90,6 +96,7 @@ them: It was a cloud of dust. Very ordinary dust. I watched it for an hour anywa
 ask: What would get you out of bed at three in the morning?
 listen: Do you ever turn the alert off?
   them: No. The one night I do, the sky will do something wonderful. It's waiting for me.
+listen2: A friend. Do you ever turn the alert off?
 share: Someone at home, calling.
   them: Yes. Good. People first, then dust. I have the order wrong. I know.
 cheer: A fire alarm. And even then, slowly.
@@ -103,6 +110,7 @@ them: So I read about them. Then I came to look. They were better than the books
 ask: What did you look at, as a child? When you looked up?
 listen: Do you miss the milk sky?
   them: No. Yes. On grey days here I find it in the cold store window. Brennan doesn't know.   #funny
+listen2: Birds, mostly. Do you miss the milk sky?
 share: Clouds. I made up shapes.
   them: Good. That's survey, that is. Shapes first. Then names. Then data. You're halfway.
 cheer: The ceiling. I wasn't a dreamy child.
@@ -115,6 +123,7 @@ them: Week three tasted of a boot. So this is progress. I think. Yes. Progress. 
 ask: What does your favourite drink taste of? Not "nice". Actual words.
 listen: What's in it this week?
   them: Smoked leaf, a bark from the garden, and something Cruz gave me without labelling it.   #funny
+listen2: Ginger. Sharp. What's in yours this week?
 share: Warm milk. Like being little.
   them: Oh. That's a very good answer. I can't brew that. I'll try anyway. Week five.
 cheer: Like a library. Apparently.
@@ -127,6 +136,7 @@ them: Thirty-one in it. "Why is the dark dark?" is my favourite. A cadet asked i
 ask: What's a question you've always wanted answered? Any size.
 listen: Have you answered any?
   them: Four. I took them out and framed them. No. I labelled them. Same thing, for me.   #funny
+listen2: Why we yawn. Have you answered any?
 share: Why the stars twinkle and planets don't.
   them: Oh, that's not jar material. I can tell you. Sit. This takes twenty minutes. Fine, ten.
 cheer: Where my left sock goes.
@@ -139,6 +149,7 @@ them: Mori finds them four times a day. She doesn't say anything. She just point
 ask: What do you lose the most? Everyone loses one thing over and over.
 listen: Have you tried a string?
   them: Yes. I lost the string. Then I found it on my head. With the glasses. No help at all.   #funny
+listen2: Pens. Ever tried a string on your glasses?
 share: My mug. Every day.
   them: Same, after the glasses. Mugs walk. I've written "SATO" on the bottom. They walk anyway.
 cheer: Track of time, mostly.
@@ -151,6 +162,7 @@ them: The best things are small and dull. A faint star, slightly the wrong colou
 ask: Which do you like more? Big and dramatic, or small and quiet?
 listen: Why the wrong colour?
   them: Wrong means something's happening. Something we don't know yet. That's the fun part.
+listen2: Bit of both. Why the wrong colour?
 share: Small and quiet. Always.
   them: Good. You'd do well up there. Bring tea. Bring patience. The tea's optional.
 cheer: Big and dramatic. With snacks.
@@ -163,6 +175,7 @@ them: I was very excited for an hour. It was the galley's mixer, two decks down.
 ask: Have you ever got very excited over something that turned out to be nothing?
 listen: Did you tell anyone?
   them: Only Mori. And the Captain. And half the bridge. Brennan sent up a roll. Very kind.   #funny
+listen2: Once or twice. Did you tell anyone?
 share: A message from home. It was a mistake.
   them: Oh, the worst kind. Still, being excited is practice. You'll be ready for a real one.
 cheer: Every time the lift door opens.
@@ -176,6 +189,7 @@ them: Which notebooks come up with me. It's a very serious decision. The most se
 ask: Are you an early packer, or a night-before one? For anything.
 listen: Which notebooks win?
   them: The empty ones. Always the empty ones. The full ones already know what they think.
+listen2: Early. Too early. Which notebooks win?
 share: Night before. Then I forget something.
   them: Good. Forgetting something means you'll find out what you need. That's research.
 cheer: I don't pack. I just wear everything.
@@ -189,6 +203,7 @@ them: Six years we've argued it. Every Monday. I think we both enjoy it. Don't t
 ask: Is there someone you argue with, and secretly like it?
 listen: Who's winning?
   them: Nobody. That's the point. If anyone won, we'd stop. Then what would Mondays be for?
+listen2: A friend at home. Who's winning?
 share: Someone back home. Every time we talk.
   them: Good. That's love, of a sort. Arguing means you're still listening. Keep at it.
 cheer: You, now. The tea's terrible.
@@ -201,6 +216,7 @@ them: Brennan sends a plate up at two if I'm not in the mess. Every day. Seven y
 ask: Do you forget to eat when you're busy? Or are you sensible?
 listen: Who brings the plate up?
   them: Someone different every time. I think she sends whoever looks like they need a walk.   #warm
+listen2: I'm sensible. Mostly. Who brings the plate?
 share: Sometimes. Then I get grumpy.
   them: Same. Mori says I get "pointy". I don't know what that means. I suspect I know.   #funny
 cheer: Never. I'm always thinking about lunch.
@@ -214,6 +230,7 @@ them: "Day forty. Nothing. Day forty-one. Nothing. Day forty-two. Oh." I love th
 ask: What do you read, or do, before you go to sleep?
 listen: What came after the "oh"?
   them: A new moon. Small. Grey. The person who found it wrote "oh" and then a whole page.   #warm
+listen2: A few pages. What came after the "oh"?
 share: Messages from home, again.
   them: Good. Read them twice. The second time you hear the voice. That's the useful part.
 cheer: The back of my eyelids. Quickly.
@@ -227,6 +244,7 @@ them: I'm not on shift. I'm just looking. Mori says that's the same thing, for m
 ask: Are you a night person or a day person, really?
 listen: Is it really different at night?
   them: Only a little. Fewer lights, fewer people. It feels more different than it is. Fine.
+listen2: Day. Is it really different at night?
 share: Night. Everything's quieter.
   them: Good. Then you know. Come up one night. Don't talk. I won't either. Mostly.
 cheer: Whichever one has breakfast in it.
@@ -242,6 +260,7 @@ them: Without it, you stop. With it, you're halfway there. It's one word. It's t
 ask: What's something you don't know yet? Something you'd like to?
 listen: Did someone teach you that?
   them: My first supervisor. It was on her mug. I stole the mug. Well. Borrowed it. For years.   #funny
+listen2: Star charts. Who taught you to say yet?
 share: How to fix the drive coils.
   them: Good. Ask Zeke. He'll explain for an hour. You'll be very nearly there after.
 cheer: What's in your tea, exactly.
@@ -255,6 +274,7 @@ them: Nothing else. A depth, a count, a temperature. We guess what it means. It'
 ask: How do you keep in touch with someone far away? What works?
 listen: What was this week's number?
   them: Nine. I've no idea. I've guessed eleven things. I think it's the number of biscuits left.   #funny
+listen2: Letters. What was this week's number?
 share: Short messages. Often.
   them: Good. Short and often beats long and rare. That's survey too. Small data, every day.
 cheer: Very long messages. Very rarely.
@@ -268,6 +288,7 @@ them: If I went missing, she'd find a spare me in there too. Labelled in her han
 ask: Who keeps you on track, aboard? Everyone's got someone.
 listen: Have you looked in the drawer?
   them: Once. There was a biscuit labelled "for emergencies, not Tuesdays". I didn't ask.   #funny
+listen2: Not sure yet. Have you looked in the drawer?
 share: My chief. Calder notices everything.
   them: Yes. Calder would label a drawer. Calder would label the label. Good. You're safe.
 cheer: Nobody. I'm a free spirit.
@@ -281,6 +302,7 @@ them: Best Tuesday I've had this year. I've put them on the next sweep. They're 
 ask: When were you last glad to be wrong about something?
 listen: What were you wrong about?
   them: A decimal point. Small. Important. The sort of thing that moves a moon. They caught it.
+listen2: Last week. What were you wrong about?
 share: About the Wren. I thought I'd be lonely.
   them: Good. That's the best kind of wrong. Mine was the same, seven years ago. Still wrong.   #warm
 cheer: I'm never wrong. Ask anyone.
@@ -294,6 +316,7 @@ them: "Sato. Survey. Mostly tea." On a shelf, between the ordinary rocks. Very p
 ask: What's one thing you never want to stop doing?
 listen: Is it the work, or the looking?
   them: The looking. The work is how I'm allowed to look. Clever trick, no?
+listen2: Exploring. Is it the work, or the looking?
 share: Learning. Something new, every week.
   them: Good. Then you'll never retire either. We'll be on the same shelf. Neighbours.   #warm
 cheer: Eating. I'll never stop eating.
@@ -307,6 +330,7 @@ them: She tasted it. "Well, that's a choice." The kindest thing a cook's ever sa
 ask: What's the kindest thing anyone's said about something you made?
 listen: Did anyone else try it?
   them: Holt. One sip. He said nothing at all, for a long time. I'm counting it as a yes.   #funny
+listen2: "Very tidy." Did anyone else try your tea?
 share: "I'll keep this." About a card.
   them: That's very kind. That's better than mine. A thing kept is a thing that worked.
 cheer: "It's mostly edible."
@@ -322,6 +346,7 @@ them: Cruz says I talk to it too much. I'm not talking. I'm taking notes out lou
 ask: Is there something you're bad at, and keep doing anyway, because you like it?
 listen: What happened to the fifth leaf?
   them: I don't know. Yet. I've a theory involving Pell. I'm keeping it to myself, for now.   #funny
+listen2: Drawing. What happened to the fifth leaf?
 share: Singing. Very badly. In the washroom.
   them: Good. Badly and gladly. That's the best way to do anything. My plant agrees.
 cheer: Your tea. I'm bad at drinking it.
@@ -335,6 +360,7 @@ them: My mother never had time to explain. Always busy. So I promised I always w
 ask: Who explained the world to you, when you were small?
 listen: Did she ever have time, later?
   them: Later, yes. Now she asks me. I explain the tea. She says "Imra, that's enough." It isn't.   #funny
+listen2: Teachers. Did your mum have time, later?
 share: My family. One question at a time.
   them: Good. That's how it should be done. One question, all the time in the world. Lucky.
 cheer: Books. And very patient librarians.
@@ -348,6 +374,7 @@ them: Mori sent me to bed. I came here instead. Don't tell her. Well. Mori alway
 ask: How do you know when you're tired? Before you've said it out loud?
 listen: Why do you smile when you're tired?
   them: Everything gets funny. The labels look so serious. Little serious labels. Very sweet.   #funny
+listen2: I yawn. Why do you smile when you're tired?
 share: I stop finishing my sentences.
   them: Same. I'm doing it now. I've been doing it for. Hm. Never mind. Yes. Same.   #funny
 cheer: I start agreeing with Pell.
@@ -363,6 +390,7 @@ them: On a rock. Small, grey, very steady. It suits it. I've left it. It's yours
 ask: What do you think you'd be, if you were a sample? Be honest.
 listen: What did I say that made you think?
   them: That you didn't know yet. You said "yet". I've taught you something. Don't tell anyone.   #warm
+listen2: Not sure yet. What did I say that day?
 share: Something ordinary. Useful, though.
   them: Yes. Exactly that rock. Ordinary is very rare, I've told you. I don't say it lightly.   #warm
 cheer: Something shiny, obviously.
@@ -376,6 +404,7 @@ them: You ask the right wrong questions. Then I hear the answer. Mori's started 
 ask: Who do you imagine talking to, when you're stuck?
 listen: What do I usually ask?
   them: "But why?" Every time. It's maddening. It's exactly right. Never stop asking it.   #warm
+listen2: My old teacher. What do I usually ask?
 share: You, sometimes. You'd make it a story.
   them: Mm. I'd make it an hour. With tea. Fine. We help each other, then. Good. Data.
 cheer: Pell. He just says "Sounds broken."
@@ -389,6 +418,7 @@ them: Name the tea. "Sato's Blend". And put a warning on the tin. Small print. K
 ask: If something were named after you, what would you want it to be?
 listen: What would the warning say?
   them: "Mostly safe. Acquired taste. Acquire slowly." And then the recipe. I'm not hiding it.   #funny
+listen2: A biscuit. What would the tea's warning say?
 share: A bench somewhere. A good one.
   them: Oh, that's lovely. A bench is the kindest thing to be. People sit on you. They stay.   #warm
 cheer: A pudding. A big one.

@@ -13,6 +13,7 @@ them: That's a good week, in the infirmary. Empty beds and a tidy cupboard.   #w
 ask: What does a good week look like in your job?
 listen: Do you ever wish it was busier?
   them: Never. Bored is good, in here. Bored means everyone's well.
+listen2: Learning something. Ever wish it was busier?
 share: A quiet board. Nothing breaking.
   them: Same as us, then. A quiet week's a kind week.   #warm
 cheer: A clean bench at the end of it.
@@ -25,6 +26,7 @@ them: Tea, a blanket, ten minutes of talk. Most nights that's the whole treatmen
 ask: What helps you, when you can't sleep?
 listen: Do you mind the night shift?
   them: I like it. People talk more at three. They've taken the day's armour off.   #warm
+listen2: Warm milk. Do you mind the night shift?
 share: Talking to someone. Or a book.
   them: Both good medicine. The book's quieter.   #funny
 cheer: Counting the rungs on my bunk ladder.
@@ -37,6 +39,7 @@ them: Pass someone in the corridor and their type pops up. It's a very odd super
 ask: What's something you know without meaning to?
 listen: Do you know mine?
   them: Of course. Not telling. Medical records are private. Even the fun ones.
+listen2: Who takes sugar. Do you know my blood type?
 share: Which panels stick, all over the ship.
   them: That's a superpower too. More useful at parties.   #funny
 cheer: Everyone's favourite biscuit.
@@ -51,6 +54,7 @@ them: Someone sits on the bench pretending they're fine. You learn to see it fro
 ask: How do you tell, when someone's not all right?
 listen: How do you see it?
   them: They sit very straight. Fine people slouch. Nobody believes me. It's true.   #funny
+listen2: They stop joking. How do you see it?
 share: They go quiet. Or too loud.
   them: That's it exactly. You'd be good in here.   #warm
 cheer: They say "I'm fine" twice.
@@ -63,6 +67,7 @@ them: People leave lighter. Nothing's been fixed. Something's been heard.   #war
 ask: Who's the best listener you know?
 listen: How do you listen properly?
   them: Stop planning what to say back. That's all. It's harder than it sounds.
+listen2: My friend at home. How do you listen well?
 share: Someone at home. They never interrupted.
   them: Rare and precious. I hope you tell them, sometime.   #warm
 cheer: The lift. It never interrupts.
@@ -75,6 +80,7 @@ them: Somebody once said steady hands are a gift you should give away. So I do. 
 ask: What's a gift you have that you give away?
 listen: Are you ever nervous, then?
   them: Inside, yes. My hands don't know. I've never told them.   #funny
+listen2: Making tea. Are you ever nervous?
 share: Patience. I'm good at waiting.
   them: Then you give it away daily. People are grateful. Even when they don't say.   #warm
 cheer: Opening stuck jars.
@@ -89,6 +95,7 @@ them: Any hour, any day, there's always someone here. Today, maybe me.   #warm
 ask: Who do you do the job for, if you had to say?
 listen: Does it ever feel like too much?
   them: Some days. Then someone says thanks with their eyes and it's light again.   #warm
+listen2: The crew. Does it ever feel like too much?
 share: The people who'll never know I did it.
   them: Quiet care. The best kind there is. Keep it up.   #warm
 cheer: For the quiet afternoons.
@@ -101,6 +108,7 @@ them: Fast, slow, a sigh. You can tell a whole day from it. I try not to. I can'
 ask: What do you notice about people that you wish you didn't?
 listen: Do you notice it on yourself?
   them: Never. Doctors are terrible patients. Aides are worse.   #funny
+listen2: Who's hungry. Do you notice it on yourself?
 share: When someone's tired before they say it.
   them: Then you've got it too. Careful. It doesn't switch off.   #warm
 cheer: Who's skipped the washroom queue.

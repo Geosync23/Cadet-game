@@ -12,6 +12,7 @@ them: Not to show off. Because one night someone will need to know, and I'll be 
 ask: What do you check before you sleep? Everybody checks something.
 listen: Do you really know every door?
   them: Every one. Ask me one. Go on. Thought not.   #funny
+listen2: My alarm. Do you really know every door?
 share: That my boots are where I can find them.
   them: Boots by the bunk, facing out. Adequate.
 cheer: Under the bunk. Just in case.
@@ -25,6 +26,7 @@ them: Five in the morning, the ship's honest. Nobody's pretending to be busy.
 ask: When's the ship at her best, in your view?
 listen: Every deck? Every morning?
   them: Every one. Somebody should. I'd rather it was me.
+listen2: Mornings. Every deck? Every morning?
 share: Evenings. When people stop to talk.
   them: Softer answer than mine. Fair one, though.
 cheer: Breakfast. Obviously breakfast.
@@ -38,6 +40,7 @@ them: Too much pressure. I laughed. Don't spread it about. He keeps a count.   #
 ask: Who on this ship makes you laugh?
 listen: What's his count up to?
   them: He won't say. Higher than I'd like. Lower than he'd like.   #funny
+listen2: My bunkmate. What's his count up to?
 share: My bunk room. Most nights.
   them: Good. A bunk room that laughs is a bunk room that looks out for itself.
 cheer: You, Chief. Right now.
@@ -51,6 +54,7 @@ them: I don't trust the Veyli. Told them so. They thanked me. Don't know what to
 ask: You talk to the Envoy. What do you make of them?
 listen: Did you go in?
   them: No. Stood at the door a while. Walked on. Another time, maybe.
+listen2: Polite, I think. Did you go in?
 share: Courteous. Kind, under the formal bit.
   them: Maybe. You see more of them than I let myself. That's fair to say.
 cheer: Exhausting and very kind. Like you.
@@ -68,6 +72,7 @@ them: I like that door. Honest door. Tells you straight.
 ask: Do you trust machines more than people, or the other way round?
 listen: Should we fix the whistle?
   them: No. Leave it. A door that tells you it's wrong is worth ten that don't.   #warm
+listen2: People, mostly. Should we fix the whistle?
 share: People. Machines don't care if I'm there.
   them: Hm. Fair. Machines don't miss you. People do. That's worth something.
 cheer: Machines. They don't tell jokes.
@@ -80,6 +85,7 @@ them: Mensah writes paragraphs. With feelings in. I read them. Every word.   #fu
 ask: Short reports or long ones: which do you trust?
 listen: Ever written a long one?
   them: Seven words. A storm. "Every door held. Every person accounted for." Best seven I wrote.   #warm
+listen2: Short, I think. Ever written a long one?
 share: Long ones. I like knowing why.
   them: Hm. Then read Mensah's. You'll know why about everything. Including his lunch.   #funny
 cheer: Short. I lose interest by word four.
@@ -92,6 +98,7 @@ them: Three tired faces on Deck 3 this morning. Sent Mensah. He's better at that
 ask: What do you clock first, meeting someone?
 listen: What does Mensah do for them?
   them: Sits with them. Tells a joke. Bad one. They laugh at how bad it is. Works every time.   #warm
+listen2: Their smile. What does Mensah do for them?
 share: Whether they look happy to be here.
   them: Good thing to notice. Most aren't looking. You were.
 cheer: Their shoes. I don't know why.
@@ -105,6 +112,7 @@ them: I walk past slow. They get their page. Then I walk past again.
 ask: One more page, one more song, or one more biscuit?
 listen: Do you ever stop and tell them?
   them: Once, my first year. Never again. A junior with a book is a junior who's all right.   #warm
+listen2: One more song. Do you ever stop them?
 share: One more page. Always.
   them: Then I've walked past you. Probably twice. Finish the chapter. Then sleep.
 cheer: One more biscuit. Then a page.
@@ -117,6 +125,7 @@ them: Plate's there when we come off. Hot. She doesn't stay to be thanked.
 ask: Who looks after you without being asked?
 listen: Does she know you notice?
   them: Once. She told me to sit down and eat it before it went cold. So. Yes.   #warm
+listen2: A few people. Does she know you notice?
 share: My bunkmates. In small ways.
   them: Small ways are the ones that count. Watch for them. Do some back.
 cheer: The grab shelf. It never lets me down.
@@ -129,6 +138,7 @@ them: Learn all three. Then you're not guessing, when it counts.
 ask: Can you name them all, without your device?
 listen: Will you test me on them?
   them: Hm. Tomorrow. Before breakfast. On the long way round. Bring your ears.   #warm
+listen2: Not yet. Will you test me on them?
 share: One. Honestly, just the fire one.
   them: Honest. Better than a guess. The device has the other two. Learn them tonight.
 cheer: The loud one, the louder one...
@@ -142,6 +152,7 @@ them: If someone wanted to know how much I lift. Hypothetically. More than Vance
 ask: Is there something you do that you'd rather nobody watched?
 listen: Is it more than Vance, though?
   them: Yes. Don't tell him. He'd start a board. I'd have to beat it. Weekly.   #funny
+listen2: My stretches. Is it more than Vance, though?
 share: Singing. In the washroom. Badly.
   them: The whole wing knows. The whole wing doesn't mind. That's a good wing.   #warm
 cheer: Dancing. Even badly is generous.
@@ -155,6 +166,7 @@ them: Handover. Doors, people, anything odd. Then he tells me a joke. Always.
 ask: Who do you hand your day over to, in a way?
 listen: Do you ever tell him one back?
   them: Never. It would break something. Four minutes, one joke, his. That's the rule.   #warm
+listen2: My diary. Do you ever tell him one back?
 share: My bunkmate, just before lights out.
   them: Good. Say it out loud and it's lighter. Mensah taught me that. Don't tell him.
 cheer: My pillow. It listens very well.
@@ -167,6 +179,7 @@ them: Last season it was a junior in the cargo hold. Looking for the gym. Very l
 ask: Where did you get lost, your first week?
 listen: How do you always find them?
   them: Most people walk downhill when they're lost. I start at the bottom. Works.   #warm
+listen2: Deck 6. How do you always find them?
 share: The officers' corridor. Twice.
   them: Hm. Everyone does. It loops. I've asked for signs. I'm still asking.
 cheer: I'm lost right now, Chief.
@@ -180,6 +193,7 @@ them: Mensah says I could look kinder. I've tried. This is the result.   #funny
 ask: Do people get you wrong at first?
 listen: Do you mind it, Chief?
   them: Not much. They learn. Usually by the second drill. It's the moustache, I think.   #funny
+listen2: Sometimes. Do you mind it, Chief?
 share: Yes. They think I'm shy.
   them: Shy and quiet aren't the same. Quiet notices more. Keep it.
 cheer: They think I'm sensible. Fools.
@@ -193,6 +207,7 @@ them: Brennan knows. She's never served me a bean. Not once. Never asked why.
 ask: Is there a food you can't face any more?
 listen: Did Brennan just notice?
   them: She notices everything about food. She looked at my plate once. That was that.   #warm
+listen2: Lumpy porridge. Did Brennan just notice?
 share: Something I ate too much as a kid.
   them: Hm. Everyone's got one. Keep it off your plate. Nobody needs to know why.
 cheer: Cold toast. It's a crime.
@@ -206,6 +221,7 @@ them: It is. Every week. Then I stay for a biscuit. Purely to be polite.   #funn
 ask: What would you add to the ship's calendar, if it were yours?
 listen: Ever missed a Wednesday?
   them: Never. Doors are my job. An open one's the best kind to check.   #warm
+listen2: A games night. Ever missed a Wednesday?
 share: A morning walk, everyone welcome.
   them: Hm. Already exists. Five in the morning. The long way. Attendance: low.   #funny
 cheer: Biscuit Thursday. And Friday.
@@ -218,6 +234,7 @@ them: She makes me practise on Mensah. He enjoys it far too much.   #funny
 ask: Could you help someone who's hurt, right now, if you had to?
 listen: Can I sit in on the next one?
   them: Yes. Infirmary, next month. Tell Nandakumar I sent you. She'll find you a sling.   #warm
+listen2: Not well. Can I sit in on the next one?
 share: A little. I'd want a refresher.
   them: Honest. Most people say yes and mean "I'd panic". You'd be fine. Learn more anyway.
 cheer: I'd shout for you, Chief.
@@ -230,6 +247,7 @@ them: Most days the answer's no. That's the job done. That's a good morning.
 ask: What do you ask yourself first thing?
 listen: What if the answer's yes?
   them: Then I tell her straight, and short, and what I've already done. In that order.   #warm
+listen2: What day it is. What if the answer's yes?
 share: "Did I sleep?" Usually no.
   them: Hm. Then sleep. That's an order. A rare one, from me. Mean it.
 cheer: "Where are my socks?"
@@ -243,6 +261,7 @@ them: I walk through slower than I need to. Don't put that about.
 ask: What's the best noise on the ship, for you?
 listen: Why walk slower?
   them: It's the sound of people who feel safe. I'd stand there all night if I could.   #warm
+listen2: Tea being poured. Why walk slower?
 share: The mess at breakfast. Everyone at once.
   them: Hm. Good one. Fifty people and one queue. Never a fight. That's a ship that works.
 cheer: Pell snoring. It's soothing.
@@ -255,6 +274,7 @@ them: Three checks before anything opens. Every time. They never get bored of it
 ask: What's something that looks frightening but isn't?
 listen: Can you show me the three checks?
   them: Hm. Yes. Watch office, any morning. Bring a pencil. You'll want notes.   #warm
+listen2: The lifts. Can you show me the three checks?
 share: The deep ship. Deck 6. It's just loud.
   them: Loud and honest. Like a good Chief. Not me. Calder.
 cheer: You, Chief. A bit.
@@ -270,6 +290,7 @@ them: Took me a week. Got it wrong. Did it again. Got it right. Never forgot it.
 ask: What's the first thing you'd teach a new hand?
 listen: How many doors were there?
   them: Four hundred and six. I can still name the odd ones. Don't make me.   #funny
+listen2: The board. How many doors were there?
 share: Where the kettle is. And who to ask.
   them: Hm. Fair. In that order, probably. The rest follows from tea and a name.   #warm
 cheer: How to look busy near Calder.
@@ -283,6 +304,7 @@ them: Mensah says it's a talent. He means it as a joke. It is a talent.   #funny
 ask: What are you surprisingly bad at?
 listen: Have you tried singing?
   them: Once. The jam. Mensah stopped the music to ask if I was all right. Never again.   #funny
+listen2: Whistling. Have you tried singing?
 share: Keeping track of time.
   them: Hm. That one I can help with. Set two alarms. Trust the second.
 cheer: Standing still. Hopeless.
@@ -296,6 +318,7 @@ them: I'll walk an extra deck. It'll pass. It always does.
 ask: What gets you through a grey day?
 listen: Want company for the extra deck?
   them: Hm. Yes. Don't talk. Just walk. That's the best kind of company there is.   #warm
+listen2: Hot tea. Want company for the extra deck?
 share: Someone to sit with for a bit.
   them: Then sit. I'm here. I'll not say much. That's how I sit with people.
 cheer: Pudding. Two, if it's very grey.
@@ -309,6 +332,7 @@ them: Don't look at me like that. It's a good day. That's what it sounds like.  
 ask: Tell me a proper good day, then. What's in it?
 listen: What made it adequate?
   them: A junior did the right thing before I'd said a word. That's the whole of it.   #warm
+listen2: Tea and a chat. What made yours adequate?
 share: Good work, then good company.
   them: Hm. Same as mine. In the same order. You'll do.
 cheer: You saying "more than adequate".
@@ -322,6 +346,7 @@ them: I'd stand in front of any one of them. Without a word. They don't need to 
 ask: Who would you stand up for, without being asked?
 listen: Do they know, really?
   them: Some do. Tomas does. He pretends not to. That's how I know he knows.   #warm
+listen2: My friends. Do they know, really?
 share: Anyone in my bunk room. No question.
   them: Good. Then you're Watch already, in the way that counts. The rest is drills.
 cheer: Anyone Brennan's cross with.
@@ -335,6 +360,7 @@ them: I'm decent company. Quiet. Doesn't interrupt. Agrees with me mostly.   #fu
 ask: Are you good company for yourself?
 listen: Did you ever get lonely out there?
   them: Some nights. You learn to keep a list of people to tell things to later. Helped.   #warm
+listen2: Mostly. Did you ever get lonely out there?
 share: Some days. Not every day.
   them: Hm. Honest. Start with a book and a quiet corner. Builds up from there.
 cheer: Terrible company. I talk too much.
@@ -348,6 +374,7 @@ them: Pen's for after. When it happened. Pencil's honest about before.
 ask: Do you plan in pen or in pencil?
 listen: What's in next month's plan?
   them: Can't say. Spoils the drill. You'll know when the tone goes. Be at your post.   #funny
+listen2: Pen, sadly. What's in next month's plan?
 share: Pencil. I change my mind a lot.
   them: Good. A plan that can't change isn't a plan. It's a hope.
 cheer: I plan on a napkin. Then lose it.
@@ -363,6 +390,7 @@ them: One means yes. The other means also yes, but I'm not saying so.   #funny
 ask: Is there something you say that only friends understand?
 listen: Which one was that, just now?
   them: Hm. The second one. You're learning. Don't tell Mensah. He'll want a twelfth.   #funny
+listen2: A nickname. Which one was that, just now?
 share: A word from home. Means everything's fine.
   them: Keep it. Out here, a word from home is worth a deck of anything.   #warm
 cheer: "Hm." I've caught it off you.
@@ -376,6 +404,7 @@ them: Never the same corridor two years running. You learnt the doors or you got
 ask: What did you grow up looking at?
 listen: Is that where the doors started?
   them: Hm. Yes. Counted every one, every rebuild. Never stopped. Now you know why.   #warm
+listen2: Lots of sky. Is that where the doors began?
 share: Rooftops. Lots of them. And rain.
   them: Then you had weather. Marra had pipes and the old maps. I'd swap, some days.
 cheer: A wall. Very good wall, though.
@@ -389,6 +418,7 @@ them: That was badly done. By me. I told her so. Then I fixed the door myself.
 ask: How do you put things right, after?
 listen: Did she mind?
   them: She said "Adequate, Chief." Mensah's been teaching them. I'll have words. Fond ones.   #funny
+listen2: A cup of tea. Did she mind?
 share: Say it plainly. Then do better.
   them: Hm. Yes. The doing better's the part that counts. Words are the start.   #warm
 cheer: Biscuits. Biscuits fix most things.
@@ -402,6 +432,7 @@ them: I've retired from jokes. Undefeated. One for one. He's still recovering.  
 ask: Whose laugh is the best on the ship?
 listen: Will you tell me the joke?
   them: Not telling. He'd want it back. It's mine. I'll keep it for an emergency.   #funny
+listen2: My bunkmate's. Will you tell me the joke?
 share: Yours, Chief. It's rare. That's why.
   them: Hm. Don't spread it about. Rare's how I like it.   #warm
 cheer: Pell's. It sounds like a kettle.
@@ -417,6 +448,7 @@ them: I'm considering "kid". Not soft. Just right. Hm. Object now or it sticks.
 ask: What do your friends call you, when it's just them?
 listen: Why "kid"?
   them: My first Chief called me it. Took me ten years to see he meant it kindly.   #warm
+listen2: Something silly. Why "kid"?
 share: Just my name. Said nicely.
   them: Then I'll say it nicely. When I remember. "Kid" when I don't.   #warm
 cheer: "Trouble". They're not wrong.
@@ -430,6 +462,7 @@ them: He walks past my door at night. Twice. Thinks I don't hear. I hear.
 ask: Who checks on you, when you've had a long day?
 listen: Could I be one, too?
   them: Hm. You already are. That's why I said it. Don't make a thing of it.   #warm
+listen2: My bunkmate. Could I be one, too?
 share: My family, by message. And you, lately.
   them: Hm. Good. Both of those. Keep them both. I'll walk past your door as well.   #warm
 cheer: Nobody. I'm famously fine.
@@ -443,6 +476,7 @@ them: My back. The doctor's orders. Weights, after shift. It's working. Hm. Ther
 ask: Is there something you started for one reason and kept for another?
 listen: Is your back better?
   them: Much. Walked the long way twice yesterday. No twinge. Nandakumar was insufferable.   #funny
+listen2: Walking, I think. Is your back better?
 share: The Wren. A job first, then the people.
   them: Hm. Same. For a posting. Then for the people. You're one of them. That's all.   #warm
 cheer: Biscuits. For energy. Now for joy.

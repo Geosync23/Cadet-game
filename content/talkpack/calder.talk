@@ -12,6 +12,7 @@ them: Not loud. A quarter-tone. You'll hear it now I've said it.
 ask: What's the first thing you notice when you walk into the bay?
 listen: How do you remember every serial?
   them: I don't. I remember the ones that have let me down. That's most of them.
+listen2: The smell. How do you remember every serial?
 share: The noise. It's still a lot of noise.
   them: Give it a month. Then it's twelve noises. Then one of them's wrong.
 cheer: The tea corner. Every time.
@@ -25,6 +26,7 @@ them: People want things to mean something. Sometimes a thing's just for tea.
 ask: Do you keep things for what they mean, or what they do?
 listen: Has anyone ever given you a mug?
   them: Once. It had a slogan. It's in the machine shop. Holds screws. Useful now.
+listen2: What they do. Has anyone given you a mug?
 share: What they mean. I've kept odd things.
   them: Keep them. Small, though. Ships don't have much shelf.
 cheer: Both. My mug holds tea and means tea.
@@ -38,6 +40,7 @@ them: I'd rather that than the other kind of day. Prevention beats heroics. Ever
 ask: Would you rather fix the big failure, or stop it happening?
 listen: Did you always think that way?
   them: No. I learnt it. Slowly. Most useful things I know, I learnt slowly.
+listen2: Still learning. Did you always think so?
 share: Stop it. Nobody notices, but I'd know.
   them: Good. That's the job. Keep thinking like that.
 cheer: Fix it. Then stop the next one.
@@ -51,6 +54,7 @@ them: Halloran's started leaving a cup on my desk at one. I haven't said anythin
 ask: What do you do when the board's never empty?
 listen: Do you ever miss the break?
   them: Yes. Don't tell Halloran. He'll make a rota for it.
+listen2: Make a list. Do you ever miss the break?
 share: Pick the right next job. Not every job.
   them: Good. That's the answer most people take years to find.
 cheer: Hide behind the parts racks with a biscuit.
@@ -68,6 +72,7 @@ them: When it shifts, something's wrong. Usually a fan. Sometimes Torres singing
 ask: Have you noticed the decks sound different?
 listen: Which deck do you like to hear most?
   them: Deck 2 at night. Everything balanced. Nobody needs me there. I go anyway.   #warm
+listen2: A little. Which deck do you like best?
 share: Not yet. I'll listen now.
   them: Good. Start at the lift. Stand still. Ten seconds. Then tell me what you heard.
 cheer: Deck 3. It sounds like dinner.
@@ -79,6 +84,7 @@ them: Read the job card twice. Once for the job. Once for what it doesn't say.
 ask: What do you look for first, on a job card?
 listen: What doesn't it say?
   them: Who did it last. How long it's been coming. The card's honest. It isn't complete.
+listen2: The date. What doesn't the card say?
 share: The part number. Then the deck.
   them: Fine. Add the last date. If it's recent, the fault isn't where the card says.
 cheer: The word "easy". It's never there.
@@ -92,6 +98,7 @@ them: Some read novels. Same thing. Someone gets into trouble. Someone gets out.
 ask: What do you read, when you read?
 listen: Which one stayed with you?
   them: A freighter manual. Forty years of notes in the margins. Four different hands.   #warm
+listen2: Old manuals, lately. Which one stayed?
 share: Whatever's lying about the common room.
   them: That's how most good books get found. Leave one there when you're done.
 cheer: The menu board. Daily.
@@ -104,6 +111,7 @@ them: Board at six. Tea at five past. Walk the decks at ten past. Every day.
 ask: Have you got a routine yet?
 listen: Why walk the decks?
   them: You hear what changed overnight. A machine tells you before the board does.
+listen2: Sort of. Why walk the decks first?
 share: Still finding one.
   them: Find it soon. A routine leaves your head free for the hard parts.
 cheer: Alarm. Snooze. Alarm. Toast.
@@ -117,6 +125,7 @@ them: His work's good. Better than he thinks. I don't say. He'd stop checking it
 ask: Which are you? Early to bed, or one more job?
 listen: Do you mind the napping?
   them: No. A rested tech makes fewer mistakes. And the shelf's clean. I check.   #warm
+listen2: Bit of both. Do you mind the napping?
 share: Early to bed. I'm no use tired.
   them: Then sleep. That's an instruction. The board will be there in the morning.
 cheer: One more job. Then a nap on a shelf.
@@ -130,6 +139,7 @@ them: I'll measure every one. Somebody has to.
 ask: Do you trust a new thing straight away, or check it?
 listen: Have new parts let you down before?
   them: Once. Eight years ago. Seals two millimetres thin. I remember the date.
+listen2: Depends. Have new parts let you down?
 share: Check it. Then trust it.
   them: Good. In that order. Never the other way round.
 cheer: Trust it. Then blame the maker.
@@ -143,6 +153,7 @@ them: He says the Chief doesn't pour. I say the Chief can pour. He hasn't moved.
 ask: Do you like a rota, or would you rather just pitch in?
 listen: Why won't he put you on it?
   them: He says it's my one break. I say I don't take breaks. We disagree, politely.   #warm
+listen2: Either, really. Why won't he put you on?
 share: A rota. I like knowing where I am.
   them: So do I. That's why I want to be on it.   #funny
 cheer: Just pitch in. Before anyone notices.
@@ -156,6 +167,7 @@ them: Last week Kovac asked why the bay floor's grey. I answered for twenty minu
 ask: Go on. One question. What would it be?
 listen: Why is the floor grey?
   them: It shows oil and hides dust. You want to see a leak. You don't need to see a crumb.   #warm
+listen2: This one. Why is the floor grey?
 share: How you came to be Chief.
   them: Slowly. One job at a time. Ask me at the tea. It's a longer answer than this.
 cheer: Whether you ever take a break.
@@ -167,6 +179,7 @@ them: A half-done job's worse than one not started. Not started, you know where 
 ask: Do you finish things, or start lots of things?
 listen: What's the worst half-done job you've found?
   them: A pump with three bolts in and a note. "Back in five." No date. No name.   #warm
+listen2: Finish, mostly. Worst half-done job?
 share: Finish. It nags me otherwise.
   them: Good. Let it nag. That's the job talking.
 cheer: Start lots. Finish the fun ones.
@@ -180,6 +193,7 @@ them: I've timed her. Twice. Nine twenty-eight, the second time.   #funny
 ask: Is there something you're quietly very good at?
 listen: Have you told her you timed her?
   them: No. She'd start timing herself. She already does. She'd do it more.   #warm
+listen2: Not really. Have you told her you timed her?
 share: Listening. People tell me things.
   them: Useful. Keep it. Most people listen to answer. You listen to hear.   #warm
 cheer: Eating fast. Ask Pell.
@@ -193,6 +207,7 @@ them: Nobody visits it. I do. Fridays, after tea. Five minutes.
 ask: Is there a machine aboard you'd like to know better?
 listen: What do you do for five minutes?
   them: Listen. Check the log. Say nothing. It doesn't need anything. That's the point.   #warm
+listen2: The scrubbers. What do you do for five?
 share: The coils. Zeke makes them sound alive.
   them: Torres makes everything sound alive. The coils happen to be. In a way.
 cheer: The ovens. Brennan talks to them.
@@ -205,6 +220,7 @@ them: The spoon's in my drawer. It works. It isn't pretty. Most good things aren
 ask: Do you make anything, off shift?
 listen: Why a spoon?
   them: I'd never made a curve. You learn most from the thing you're worst at.   #warm
+listen2: Not yet. Why a spoon?
 share: Never tried. I'd give it a go.
   them: Book an hour on the lathe. Saturday. I'll be there anyway. Bring scrap.
 cheer: A mess, mostly.
@@ -218,6 +234,7 @@ them: The washer and I have an understanding. It breaks. I fix it. Neither of us
 ask: How do you start a week? Head down, or a look round first?
 listen: What's wrong with the washer?
   them: A drum bearing, in about a month. It's telling me early. I appreciate that.   #warm
+listen2: Head down. What's wrong with the washer?
 share: A look round. Then the board.
   them: Good. The board's what broke. The look round's what's about to.
 cheer: Coffee first. Then decide.
@@ -230,6 +247,7 @@ them: She said "I count." I respect that more than she knows.   #warm
 ask: Do you think about where your food comes from, aboard?
 listen: Does she really count?
   them: Every tray. Every egg. She has a ledger. I've seen it. It's tidier than my log.   #warm
+listen2: More than I did. Does she really count?
 share: When I'm in the garden, yes.
   them: Cruz's garden. Two hundred litres a day through those pumps. I watch them.
 cheer: Only when the grab shelf's empty.
@@ -242,6 +260,7 @@ them: Next year: Deck 4 air at ninety-eight. It's ninety-six now. Two points. Tw
 ask: Have you got a number you're aiming for?
 listen: Why ninety-eight, not a hundred?
   them: A hundred's a lie. Nothing's a hundred. Ninety-eight is true, and hard.   #warm
+listen2: Not yet. Why ninety-eight, not a hundred?
 share: Not a number. Being sure.
   them: Harder to measure. Measure it anyway. Write down the days you feel sure.
 cheer: Three biscuits at tea. Up from two.
@@ -254,6 +273,7 @@ them: Mostly. Sometimes I watch how someone holds a spanner. It tells me a lot.
 ask: Does it bother you, being watched while you work?
 listen: What can you tell from a grip?
   them: Whether you trust it. Too tight, you don't. Too loose, you don't care. Yours is right.   #warm
+listen2: Not much. What can you tell from a grip?
 share: A bit. Less every week.
   them: Good. In a month you won't notice. That's when I stop watching.
 cheer: I try not to look up.
@@ -267,6 +287,7 @@ them: Quiet still keeps me awake. The Wren's never quiet. That suits me.
 ask: What did you fall asleep to, growing up?
 listen: Do you miss the cranes?
   them: Some nights. I listen to the lift instead. Same rhythm. Up, pause, down.   #warm
+listen2: Rain, mostly. Do you miss the cranes?
 share: Someone talking in the next room.
   them: That's a good one. It means someone's still up. Looking after things.   #warm
 cheer: Nothing. I was asleep.
@@ -280,6 +301,7 @@ them: The ones who hide them worry me. Not the ones who make them.
 ask: Is it hard for you to own up to a mistake?
 listen: Did someone thank you, once?
   them: Once. I'd broken something costly. "Thank you for telling me." I've never forgotten.   #warm
+listen2: A little. Did someone thank you, once?
 share: Yes. But I do it anyway.
   them: That's the whole of it. Hard, and anyway. Good.
 cheer: Easy. I blame the coils.
@@ -293,6 +315,7 @@ them: He was right. I don't tell him that. I'm telling you.
 ask: Who taught you the way you'd want to teach?
 listen: Why not tell him?
   them: He'd glow for a week. The coils can't take that much singing.   #funny
+listen2: An old teacher. Why not tell him?
 share: Zeke. He never talked down.
   them: No. He doesn't. It's his best thing. He doesn't know it's his best thing.   #warm
 cheer: You. Terrifying, but you.
@@ -306,6 +329,7 @@ them: That's the appeal. A clock can be wrong for a week and nobody suffers.
 ask: Is there something you'd do just because you liked it?
 listen: Can you mend clocks now?
   them: Two. Both slow. One's four minutes slow a week, exactly. I've left it. It's consistent.   #funny
+listen2: Drawing, maybe. Can you mend clocks now?
 share: Make things. No hurry.
   them: Slowly's the luxury. Out here, slowly's the one thing nobody gets.
 cheer: Nap. Professionally.
@@ -319,6 +343,7 @@ them: Halloran made it with sugar once. By mistake. He apologised for a week.   
 ask: Is there something you've never changed, and won't?
 listen: And you drank it anyway?
   them: All of it. You don't waste tea. Or an apology.   #warm
+listen2: My breakfast. And you drank it anyway?
 share: How I take my tea, too.
   them: Good. Some things should stay put. Tea's one. Torque settings are another.
 cheer: My jumper. It's older than my bunk.
@@ -332,6 +357,7 @@ them: I don't go for the speeches. I go to check the lettering's straight.   #fu
 ask: What would you want next to your name, if anything?
 listen: Is any of it crooked?
   them: One. Third row. I've never said whose. I never will. It's straight enough.   #warm
+listen2: Not sure yet. Is any of it crooked?
 share: Just my name. That's enough.
   them: Good. Names are enough. The work's the rest of it.
 cheer: "Ate all the biscuits."
@@ -345,6 +371,7 @@ them: That's when I knew. Not the jobs. The spanner.   #warm
 ask: When did you know you'd fit in here?
 listen: Knew what, Chief?
   them: That you'd last. People who put spanners back last. It isn't complicated.   #warm
+listen2: I'm not sure I do yet. Knew what, Chief?
 share: A small thing. Someone saved me a seat.
   them: Small things are the true ones. Big things are easy to fake.
 cheer: When Pell shared his late plate.
@@ -358,6 +385,7 @@ them: It's about a bearing. Nobody laughs. Halloran laughs. He's kind.   #funny
 ask: Have you got a joke you always tell?
 listen: Go on. Tell me the joke.
   them: No. Last week of Lanterns. You'll be there. Plan to look amused.   #funny
+listen2: Not really. Go on. Tell me the joke.
 share: One. It's terrible. I love it.
   them: Then tell it. Terrible's allowed. Halloran proves it every morning.   #funny
 cheer: Your mug. "It's a mug."
@@ -371,6 +399,7 @@ them: Not yet. The scrubbers still want me at quarter past six. Every morning.  
 ask: What would you want to leave behind, somewhere you worked?
 listen: Would you miss being needed?
   them: For a day. Then I'd find a clock to mend.   #warm
+listen2: A tidy bench. Would you miss being needed?
 share: People who know what they're doing.
   them: Yes. That's it exactly. Machines break. People who know how stay.   #warm
 cheer: My mug. For whoever comes next.
@@ -384,6 +413,7 @@ them: Eleven minutes a loaf. Brennan says eight. Brennan's wrong. Brennan's loav
 ask: Do you have something you do just for you?
 listen: Why bread?
   them: You push it, it pushes back. Then it gives. Honest stuff, dough.   #warm
+listen2: A bit of drawing. Why bread?
 share: Yes. I don't tell many people.
   them: Good. Keep one thing quiet. It stays yours that way.   #warm
 cheer: Eating Brennan's bread. Counts.

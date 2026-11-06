@@ -333,7 +333,7 @@ def parse_talk_file(path, rel, out):
             cur = {'slug': slug, 'where': where, 'last': None,
                    't': {'topic': ftopic, 'when': None, 'first': None, 'lines': [], 'ask': None, 'replies': {}}}
             continue
-        m = re.fullmatch(r'([a-z]+):\s*(.*)', s)
+        m = re.fullmatch(r'([a-z]+2?):\s*(.*)', s)
         if not m:
             raise GenError(f'{where}: not understood (topic:, when:, them:, ask:, listen:, share:, cheer:, or "== slug")')
         key, val = m.groups()
@@ -380,7 +380,7 @@ def parse_talk_file(path, rel, out):
         if key == 'them' and l.startswith(' '):            # an answer: indented under its reply
             r = cur['last']
             if not r or 'ans' in t['replies'][r]:
-                raise GenError(f'{where}: an indented answer goes once, under listen:, share: or cheer:')
+                raise GenError(f'{where}: an indented answer goes once, under listen:, share: or cheer: (or listen2:)')
             t['replies'][r]['ans'] = said(val, where)
             continue
         if l.startswith(' '):
@@ -393,7 +393,9 @@ def parse_talk_file(path, rel, out):
             if t['ask']:
                 raise GenError(f'{where}: one ask: a talk')
             t['ask'] = said(val, where)
-        elif key in TALK_REPLY_KEYS:
+        elif key in TALK_REPLY_KEYS or key == 'listen2':  # SC1 (0.99.7 note 38): listen2: the listen reply that answers the ask first (its own answer optional: else listen's)
+            if key == 'listen2' and 'listen' not in t['replies']:
+                raise GenError(f'{where}: listen2: comes after listen: and its answer')
             if not t['ask']:
                 raise GenError(f'{where}: the replies come after the ask:')
             if key in t['replies']:
@@ -405,7 +407,7 @@ def parse_talk_file(path, rel, out):
             t['replies'][key] = {'text': val.strip()}
             cur['last'] = key
         else:
-            raise GenError(f'{where}: unknown "{key}:" (topic, when, them, ask, listen, share, cheer)')
+            raise GenError(f'{where}: unknown "{key}:" (topic, when, them, ask, listen, share, cheer, listen2)')
     close()
     if not talks:
         raise GenError(f'{path}: no talks')

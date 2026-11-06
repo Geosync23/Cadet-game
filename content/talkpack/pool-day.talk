@@ -8,6 +8,7 @@ them: Then it got better. It usually does after cold tea.
 ask: How's your day been, honestly?
 listen: What made it better?
   them: Someone said thank you, out of nowhere. Kept me going for hours.   #warm
+listen2: Not bad. What made yours better?
 share: Busy. I learned a lot, though.
   them: Busy and learning. That's a good day, that is.
 cheer: Better now. I'm sitting down.
@@ -19,6 +20,7 @@ them: Strangely tiring, that. You keep waiting for it.   #funny
 ask: Do you like the quiet days, or the busy ones?
 listen: What do you do on a quiet day?
   them: Tidy things that don't need it. Then tidy them again.   #funny
+listen2: Both. What do you do on a quiet day?
 share: Busy. The time goes faster.
   them: It does. Then you look up and it's dinner.
 cheer: Quiet. Quiet with biscuits.
@@ -30,6 +32,7 @@ them: I want to write it down so I remember it on a bad one.
 ask: What makes a good day, for you?
 listen: What went right?
   them: All of it. Small things, one after another. Like dominoes, but nice.
+listen2: Things working. What went right today?
 share: A job done properly. No re-checks.
   them: That's a proper answer. That's a Works answer.
 cheer: Nobody asking me where anything is.
@@ -42,6 +45,7 @@ them: My feet are telling me all about it.   #funny
 ask: Are you sleeping all right? You look like you're keeping up.
 listen: What kept you so busy?
   them: Everything at once, then nothing, then everything. Ship life.
+listen2: Like a stone. What kept you so busy?
 share: Mostly. The bunk's comfier than it looks.
   them: Good. Sleep's the whole trick out here. Ask the infirmary.
 cheer: I'm sleeping now. With my eyes open.
@@ -54,6 +58,7 @@ them: It's not going well. I'm told it takes years.   #funny
 ask: When do you feel most awake?
 listen: Why try to become one?
   them: Breakfast's best early. Fresh everything. Worth the pain.
+listen2: Mornings, sort of. Why try to become one?
 share: Evenings. I come alive after dinner.
   them: Me too, secretly. Don't tell the morning lot.   #funny
 cheer: Never. I'm a lifelong half-awake person.
@@ -66,6 +71,7 @@ them: The ship goes soft round the edges in the evening.
 ask: What do you do with your evenings?
 listen: Soft how?
   them: The lights go warm. People sit longer. Voices go down a notch.
+listen2: Read, mostly. Soft how?
 share: Still working that out. A bit of everything.
   them: Good. There's a lot on. Find the ones you like.
 cheer: This. Talking. Apparently.
@@ -78,6 +84,7 @@ them: Not my fault, any of them. Probably.
 ask: Have you had a day like that yet?
 listen: What broke?
   them: A drawer, a lamp and my patience. In that order.   #funny
+listen2: Once or twice. What broke?
 share: Yes. Fixed one, found two.
   them: Welcome aboard. That's the Wren in one sentence.   #funny
 cheer: Every day. I just call it Tuesday.
@@ -90,6 +97,7 @@ them: I'd forgotten it. They hadn't.   #warm
 ask: Who's been kind to you lately?
 listen: What did you do for them?
   them: Took the other end of a crate. Tiny thing.
+listen2: My bunkmates. What did you do for them?
 share: Lots of people. Everyone's been kind.
   them: Good. Pass it on, that's how it works here.   #warm
 cheer: Whoever saved me a seat at dinner.
@@ -102,6 +110,7 @@ them: I said sorry at tea. They said they'd forgotten. They hadn't.
 ask: How do you fix a day that starts wrong?
 listen: Are you two all right now?
   them: We are. Sitting together at dinner. That's how you know.   #warm
+listen2: A cup of tea. Are you two all right now?
 share: I talk to someone. Usually that does it.
   them: Like now? Good. It's working, a bit.   #warm
 cheer: Start it again after tea.
@@ -114,6 +123,7 @@ them: This. A proper chat with a friend. Honestly.   #warm
 ask: What was the best bit of yours?
 listen: Really? Not dinner?
   them: Dinner's a close second. Don't tell Brennan.   #funny
+listen2: Lunch, honestly. Really? Not dinner?
 share: This, as well. Truly.
   them: Then we're agreed. Same again tomorrow.   #warm
 cheer: Finding out I'm better than dinner.

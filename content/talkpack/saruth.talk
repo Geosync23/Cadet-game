@@ -10,6 +10,7 @@ them: I have counted. Not one human aboard knocks three times. It is very consis
 ask: Why twice? I would like the true answer, if there is one.
 listen: How do the Veyli ask to come in?
   them: A cord on the door. Tied loose, you are expected. Otherwise, by invitation only.
+listen2: Not sure. How do the Veyli ask to come in?
 share: Once is an accident. Twice is a person.
   them: Ah. That is a good answer. I will write it down. Thank you.   #warm
 cheer: Three is showing off.
@@ -23,6 +24,7 @@ them: To me, the strange thing is your tea queue. Everyone, at once, standing, i
 ask: Is there something you do at the same hour every day?
 listen: What does the hour mean, for you?
   them: That the day has a still place in it. However the rest goes. It is not a small thing.
+listen2: Morning tea. What does the hour mean to you?
 share: Breakfast. Same seat, most days.
   them: Then you understand. A fixed point is a kindness you give yourself.   #warm
 cheer: Get lost on Deck 2. Reliably.
@@ -36,6 +38,7 @@ them: I never forget. Cruz waters them anyway. I have decided this is affection.
 ask: What do your people do, when they want to show someone they care?
 listen: Do the seedlings like it here?
   them: They lean towards the lamps. All of them, the same way. Like juniors at dinner.   #funny
+listen2: We make tea. Do the seedlings like it here?
 share: Feed them. Or sit with them.
   them: We sit. Often without speaking. Your people find the silence hard. You do not, I notice.   #warm
 cheer: Bring biscuits. Always biscuits.
@@ -49,6 +52,7 @@ them: And very kind. Often at once. I did not expect both. I am still deciding w
 ask: And the Veyli? What do you find hardest about my people? Be honest.
 listen: What's hardest about us, for you?
   them: The noise. Everyone speaks, all the time, kindly. I have learned to listen faster.
+listen2: The quiet, maybe. What's hardest about us?
 share: I don't know you well enough yet.
   them: An honest answer. Then we are both still learning. I find that a comfort.   #warm
 cheer: Knowing when you've made a joke.

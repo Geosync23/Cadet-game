@@ -12,6 +12,7 @@ them: Right. There's a covered plate on the grab shelf. It's yours. Go after.
 ask: What did your family cook when someone was poorly?
 listen: Do you ask everyone that?
   them: Everyone. The Captain. The Envoy. The cold store, if it'd answer.   #funny
+listen2: Rice, mostly. Do you ask everyone that?
 share: Soup. Always soup, at ours.
   them: Course it was. Soup's a hug you can eat. I'll remember that.   #warm
 cheer: Toast. Lots of toast. Endless toast.
@@ -25,6 +26,7 @@ them: I was very polite to it this morning. Very polite. It knows what that mean
 ask: What's the one thing that gets under your skin, every time?
 listen: Has Works looked at it?
   them: Calder's lot are on it. Lovely people. I'll still be watching it.   #funny
+listen2: Being late. Has Works looked at it?
 share: Things left half done.
   them: Oh, you'd do well in a kitchen. Finish it or don't start it. That's my rule.
 cheer: Cold tea. Like you and warm stores.
@@ -38,6 +40,7 @@ them: My mum used to sing to her pans, every night. I hum. Close enough.   #warm
 ask: Is there something you just know how to do, without thinking?
 listen: What does "done" sound like?
   them: Quieter. Like a crowd settling. You'll hear it if you stand with me a while.   #warm
+listen2: Not much yet. What does "done" sound like?
 share: Fixing small things. My hands know.
   them: That's the best kind of knowing. Don't let anyone talk you out of it.
 cheer: Finding food. Wherever it is.
@@ -51,6 +54,7 @@ them: Some weeks it's the best hour I have. Floury hands, everyone talking.   #w
 ask: When do you feel most at home aboard, love?
 listen: Why bread, out of everything?
   them: It takes its time. You can't hurry it. Good for me, that. I'm a hurrier.   #funny
+listen2: In the mess, mostly. Why bread?
 share: Right now, honestly. Here.
   them: Oh, love. Well. Then stay as long as you like.   #warm
 cheer: Sunday mornings. Apparently.
@@ -65,6 +69,7 @@ them: Lukas offered to buy me a cloth on a string. Round my neck. Like a gran. C
 ask: What's the first thing you do when you start work? Before anything else?
 listen: How do you cook blind?
   them: By ear, love. And by nose. My eyes are just for finding the spoon.   #funny
+listen2: Tea first. How do you cook blind?
 share: Wash my hands. Then the board.
   them: Good. Tea first would be better. I'll have a word with the board.   #warm
 cheer: Look for the biscuits.
@@ -77,6 +82,7 @@ them: Trays, voices, the queue round the corner. My favourite ten minutes of the
 ask: What's the busiest bit of your day? The bit you brace for?
 listen: How do you hear it coming?
   them: The lift goes three times in a minute. Then the doors. Then Pell. Always Pell first.   #funny
+listen2: Lunch, I think. How do you hear it coming?
 share: The morning. Everyone wants Works at once.
   them: Course they do. Have a proper breakfast, then. You can't ride a wave hungry.   #warm
 cheer: Getting to the front of your queue.
@@ -89,6 +95,7 @@ them: Rice pudding's lost four weeks running. I keep making it. Someone's got to
 ask: What's your favourite pudding? I'm taking a count.
 listen: Who actually eats the rice pudding?
   them: Holt. Every time. Never says a word about it. I put the jam on the side for him.   #warm
+listen2: Crumble. Who eats the rice pudding?
 share: Anything warm with custard.
   them: Oh, love. That's a proper answer. Custard's on Thursday. I'll make extra. Just for you.   #warm
 cheer: Whichever one Pell hasn't seen yet.
@@ -102,6 +109,7 @@ them: I've never set it. Not once. It holds the galley door open. It's very good
 ask: Have you got a present you've never used, but you'd never give away?
 listen: Why don't you use timers?
   them: The pans tell me. A timer only tells you what the clock thinks. The pans know.
+listen2: A notebook. Why don't you use timers?
 share: A scarf from home. Far too warm here.
   them: Keep it, love. You'll want it one day. Things from home come round again.   #warm
 cheer: Pell's gift. A sock. Just the one.
@@ -114,6 +122,7 @@ them: Nobody picks them but me. I know how many leaves are on each one. Near eno
 ask: If you had a windowsill and one pot, what would you grow?
 listen: Do you really count the leaves?
   them: Not all of them, love. Just the basil. The basil knows I'm counting. It behaves.   #funny
+listen2: Tomatoes. Do you really count the leaves?
 share: Something that smells like home.
   them: Oh, that's the best answer there is. Tell me what. I'll ask Tove for a cutting.   #warm
 cheer: Biscuits. A biscuit tree.
@@ -126,6 +135,7 @@ them: Everybody thinks they're late, so nobody is. Works a treat. Even on Comman
 ask: Are you an early person or a late one? Honestly, now.
 listen: Does Commander Vance know?
   them: I think he does. He's never said. He sets his watch by it anyway. Lovely man.   #funny
+listen2: In between. Does Commander Vance know?
 share: Early. Being late makes me itch.
   them: Same here, love. I'm up before the ovens. We'll get on, you and me.   #warm
 cheer: Two minutes late, apparently.
@@ -138,6 +148,7 @@ them: I don't know what it means, love. But I've never been so pleased by a bow 
 ask: Is there something polite you do at meals that came from home?
 listen: Have you asked the Envoy what it means?
   them: Not yet. I'd hate to get it wrong. I just bow back. To the plate. Seems fair.   #funny
+listen2: We wait for everyone. Asked the Envoy yet?
 share: We always said thank you to the cook.
   them: Oh, bless your family. You've done it here every night. I noticed. I always notice.   #warm
 cheer: Clear my plate before anyone sees.
@@ -150,6 +161,7 @@ them: Twenty people, twenty bowls, one recipe. Twenty different pancakes. I don'
 ask: Do you cook at all? Even a little? Toast counts. Nearly.
 listen: Do you really not say anything?
   them: Not a word. I nod. Lukas says my nodding's louder than shouting. He's not wrong.   #funny
+listen2: Toast, yes. Do you really not say a word?
 share: A bit. Simple things. Nothing fancy.
   them: Simple's the hardest, love. Anyone can do fancy. Come on Saturday. I'll sit by you.   #warm
 cheer: A decent sandwich, on a good day.
@@ -163,6 +175,7 @@ them: Then they stand there pretending they haven't asked. I bake. I never say a
 ask: Are you good at keeping a surprise? Or does it show on your face?
 listen: Has anyone ever guessed?
   them: Only the Captain. She guessed her own cake from the smell in the lift. Can't fool her.   #funny
+listen2: I'm not bad. Has anyone ever guessed?
 share: It shows. I start smiling.
   them: Ha! Same. I have to hide in the cold store. Good place for it. Nobody follows.   #warm
 cheer: Very good. You'll never know.
@@ -175,6 +188,7 @@ them: I'll be very polite about it. I'll only go in the galley twice. Maybe thre
 ask: What would you do with a whole week off, love? No jobs. Nothing.
 listen: Whose cooking would you eat?
   them: Lukas's. All week. And I'd say "lovely" every time, and mean it. Mostly.   #funny
+listen2: Read a lot. Whose cooking would you eat?
 share: Sleep, mostly. Then call home.
   them: That's a good week. Sleep first. The people at home can wait one morning.   #warm
 cheer: Eat your cooking. Every meal.
@@ -187,6 +201,7 @@ them: I've pointed it at captains. I've pointed it at Pell. It's done more than 
 ask: Have you got a tool you'd never let anyone replace?
 listen: Who gave it to you?
   them: Mum. My first day in a proper kitchen. "Point it, don't wave it." Best advice I've had.   #warm
+listen2: A pencil, maybe. Who gave you the spoon?
 share: My first spanner. It's bent. I keep it.
   them: Course you do. Bent's how you know it's yours. Never let anyone straighten it.   #warm
 cheer: My fork. Specifically my fork.
@@ -200,6 +215,7 @@ them: I draw in it sometimes. A little cat. Esme drew a hat on it once. I've kep
 ask: What weather do you miss most, now you're out here?
 listen: Do you miss the rain?
   them: Some mornings. Mostly the sound. The pans and the rain, both talking at once.   #warm
+listen2: Snow, I think. Do you miss the rain?
 share: Wind. A proper windy day.
   them: Oh, I know. Out here everything's so still. Open the cold store. That's a breeze.   #funny
 cheer: None. I've got the cold store.
@@ -213,6 +229,7 @@ them: Everything's risen, nothing's caught and the cold store's behaving. Three 
 ask: What do you do when a day's going well? Some people whistle.
 listen: What do you hum?
   them: Whatever Mum sang to her pans. I don't know the words. I've never known the words.   #warm
+listen2: I whistle, badly. What do you hum?
 share: Tell someone. Usually my family.
   them: Good. Good days want telling. Go and call them. Then come back and tell me.   #warm
 cheer: Worry. It can't last.
@@ -225,6 +242,7 @@ them: Tomorrow it's crumbs on top of a pie. By Friday it's had a whole career.  
 ask: Are you a waste-not person? Or does it go in the bin?
 listen: What happens to the last crumbs?
   them: The garden. Tove takes them for the compost. Then they grow the tomatoes. Round it goes.   #warm
+listen2: I try to be. Where do the last crumbs go?
 share: Waste-not. My family saved everything.
   them: Good families do. I could tell. You scrape your plate. You don't leave a pea.   #warm
 cheer: It goes in Pell. Same thing.
@@ -240,6 +258,7 @@ them: "Too sharp." "Needs salt." "Tastes like Sunday." That's what I want. Tell 
 ask: Go on, then. Describe your favourite food. No "nice" allowed.
 listen: Who's given you the best answer?
   them: Tomas, about a stew. "It tastes like being picked up from school." I nearly cried.   #warm
+listen2: Buttery and warm. Who gave the best answer?
 share: Warm and salty. Like a kitchen at home.
   them: Oh, love. That's a real answer. That's the best kind. I'll cook to that.   #warm
 cheer: Crunchy. Then soft. Then gone.
@@ -253,6 +272,7 @@ them: She ate every bit. Said "Lovely, Auda." Then picked shell out of her teeth
 ask: What's the first thing you ever made? Anything at all.
 listen: Did you ever tell her you knew?
   them: Years later. She said "I know you knew." That's mothers for you, love.   #warm
+listen2: A paper boat. Did you tell her you knew?
 share: A birthday card. Covered in glue.
   them: Oh, the glue ones are the best. Somebody kept it, I bet. Somebody always keeps those.   #warm
 cheer: A mess. A big one.
@@ -266,6 +286,7 @@ them: She just knows. I make it before she asks now. She's never said a word. Sh
 ask: Is there someone aboard whose habits you know by heart now?
 listen: How do you know she's noticed?
   them: She nods at the cup. Once. From Calder, love, that's a whole conversation.   #funny
+listen2: Some, yes. How do you know she's noticed?
 share: My bunk. I know every snore.
   them: Oh, love! That's love, that is. Knowing every snore. Bunks make families.   #warm
 cheer: Pell's. All of them involve food.
@@ -279,6 +300,7 @@ them: In the morning there's a note on a napkin. Dr. Yoon writes a joke. Always 
 ask: Who looks after the people who work while we sleep, do you think?
 listen: Was the last one any good?
   them: Something about a sleepy egg. I didn't get it. I laughed anyway. That's manners.   #funny
+listen2: Everyone, a bit. Was the last joke good?
 share: Each other. And whoever's awake.
   them: That's right, love. And me, with a plate. That's my bit. Everyone's got a bit.   #warm
 cheer: The coffee machine.
@@ -292,6 +314,7 @@ them: Every step takes as long as it takes. No hurrying it. I'm a hurrier, love.
 ask: Is there something you'd like to learn from someone very different from you?
 listen: How's it going?
   them: The Envoy says it's "very nearly tea". I've decided that's a compliment. I'm keeping it.   #funny
+listen2: A new language. How's the tea going?
 share: How to slow down. Like the Envoy.
   them: Oh, love. Me too. Sit with me one morning. We'll try it together. Very slowly.   #warm
 cheer: How to win at quiz night.
@@ -305,6 +328,7 @@ them: Half the mess sat waiting till ten. Nobody wanted to be the first to leave
 ask: What's the smallest thing you do that would be missed if you stopped?
 listen: Did anyone say anything?
   them: Holt rang it himself in the end. Very gently. Then went to bed. Kindest thing he's done.   #warm
+listen2: Tidying up. Did anyone say anything?
 share: Saying good morning to everyone.
   them: Oh, that'd be missed, love. It's the little bells that hold a place together.   #warm
 cheer: Eating the last biscuit.
@@ -320,6 +344,7 @@ them: She wrote: "Nobody on this street can hear a pan, Auda." I laughed all shi
 ask: Who are you most like, in your family? Honestly.
 listen: Is she really bossier than you?
   them: Oh, much. I learnt it all from her. I'm the gentle one, love. Ask anyone. Don't ask Pell.   #funny
+listen2: My gran, maybe. Is she really bossier?
 share: My mum, I think. More every year.
   them: Oh, that's a lovely thing. You'll hear her in your own voice one day. I do. Every pan.   #warm
 cheer: Nobody. I'm the odd one out.
@@ -333,6 +358,7 @@ them: I tried to stop once, my first year. Lasted a day. Then I called the Capta
 ask: Is there a word you picked up from someone, that you can't stop saying?
 listen: What did the Captain say?
   them: "Good morning, Chef." Not a flicker. Then she asked for seconds. I've loved her since.   #warm
+listen2: Not really. What did the Captain say?
 share: "Sorted." Everything's sorted, at home.
   them: That's a good one. It sounds like a hug. Keep saying it, love. It suits you.   #warm
 cheer: "Love", now. Thanks to you.
@@ -346,6 +372,7 @@ them: Just sit. Feet up on the next chair. Nobody's allowed to ask me anything. 
 ask: What do you do with ten minutes to yourself, if you get them?
 listen: Why table four?
   them: You can see the whole mess. All the chairs pushed in a bit wrong. It's a good sight.   #warm
+listen2: Read a bit. Why table four?
 share: Sit by a window. Same as you.
   them: Then come and sit at four. Bring a tea. We'll not say a word. Lovely.   #warm
 cheer: Eat something. Every time.
@@ -361,6 +388,7 @@ them: First week, you ate like the tray might leave. Now you sit and talk. That'
 ask: When did this ship start to feel like yours, love? Do you know?
 listen: Can you really tell from how people eat?
   them: Always. Fast is new. Slow is home. Seconds is happy. You're on slow and seconds.   #warm
+listen2: Not sure. Can you tell from how we eat?
 share: When I stopped counting the days.
   them: Oh, love. That's the moment. I stopped counting too, once. Never started again.   #warm
 cheer: When I found the grab shelf.
@@ -374,6 +402,7 @@ them: Not for you. Because one day someone will be sad, and you'll know what to 
 ask: If you could make one dish perfectly, love, what would it be?
 listen: What dish will you teach me?
   them: Eggs. Proper ones. No shell. You'd be amazed what eggs can do for a sad person.   #warm
+listen2: A good stew. What dish will you teach me?
 share: Something from home. For my family.
   them: Then that's the one. Bring me how it goes. We'll get it right between us. Every bit.   #warm
 cheer: Pudding. Lots of pudding.
@@ -387,6 +416,7 @@ them: You laughed at something Pell said last night. Every pan in the galley set
 ask: What makes a place feel like home, do you think? Really?
 listen: Do the pans really change?
   them: They do. Don't tell Calder. She'd want it measured. Some things you just hear.   #warm
+listen2: Familiar faces. Do the pans really change?
 share: People who notice when you're not there.
   them: Yes. That's it exactly. And I notice, love. Every dinner. You know I do.   #warm
 cheer: A full plate. And a fuller one after.
