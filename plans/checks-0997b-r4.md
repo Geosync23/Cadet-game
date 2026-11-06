@@ -37,3 +37,16 @@ So it came in with candidate 2's game changes: EV1 b374343 (appointments never b
 
 Result: **R4: FAIL: career_check (s5: a steady Senior not "Trusted" by Day 19/21, 54 reliable), NEW.** Everything
 else OK.
+
+## Update: career_check cleared check-side
+
+BM26: M's cause is EV1 b374343 (the steady Senior at 54 by Day 19, Trusted needs 55); EV1's career_check.py fix
+2325c5e on claude/staging-0997. Re-run with that file on candidate 2 (game unchanged, 1b17203d...bff9): exit 0,
+CAREER CHECK OK, no FAIL lines.
+
+## Checks taken from R2 (agreed with R2, copied to BM26 and lead 50)
+
+| Check | Result | Key lines |
+|---|---|---|
+| fresh_walk BUILD 3 (RV32) | 4 of 5 points PASS, 1 for BM26/TP1 to judge | (1) Day 1 briefing walked to at 08:20, its scene played 08:50-08:53 to "Ready when you are.", then the clock (no d1-briefing:met flag in the json itself); (2) Works bay arrow before 08:50, then "Clock in at the time clock" 08:53; (3) Day 2 08:45 solo meeting: arrow 08:31, scene 08:45-08:46, "Your first solo job" toast; 18:00 booths: arrow 17:46 "Leila shows you how", Booth 1 used 17:45 and 18:08, calls 18:08 and 18:29, but no Leila line in the record (the player had called home at 12:32); (4) errors []; (5) stuck [], long []. Record: plans/fw-0997b-r4.json |
+| p926_check | **FAIL, NEW** | item 15 only: "Brennan at the spice shelf by 18:40 (None)", "she opens, names three jars and says whose (0 lines)", "the mess guesses out loud (0 bubbles)", "joined, your guess card ([])", "the guess card is still open 3 ship minutes later (None)". OLD d7ad4c58: P926 CHECK OK, item 15 all ok (Brennan at the shelf 18:20, 7 lines, 7 bubbles, spice.guess). Likely TB6's note 51 (TRAD997_ON moves the supper after dinner); for TB6 to judge. |
