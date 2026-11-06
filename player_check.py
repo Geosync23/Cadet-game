@@ -878,6 +878,13 @@ with sync_playwright() as pw:
         check(left == [29, False], 'queue: one portion taken, and the join cleared')
         g.ev("delete window.takePortion; delete window.galleyText; delete window.galleyJoin; delete window.galleyTurn; delete window.joined; delete window.portions")
 
+    if g.ev("typeof TP998_BOOTH_ON !== 'undefined' && TP998_BOOTH_ON && typeof homeState === 'function'"):   # (TP1, backlog TP1-3) a booth again the same day: only its screen
+        bt = g.ev("""(() => { actEnd(true); if (typeof DIALOGUE !== 'undefined' && DIALOGUE) dialogueEnd(); if (deckDef.num !== 3) goToDeck(3); const H = homeState(), was = H.call, s0 = SHIP.player.needs.social; H.call = Math.floor(shipNow() / 1440) + 1;
+          const sp = placeSpot('3-callhome-1'); player.obj.position.copy(cellPos(...sp.walk)); player.stop(); actStart('call', '3-callhome-1', { title: 'Calling home' }); return { was, s0 }; })()""")
+        g.step(60)
+        bt2 = g.ev("(() => { const r = { act: ACT ? ACT.kind : null, dlg: typeof DIALOGUE !== 'undefined' && DIALOGUE ? DIALOGUE.id : null, social: SHIP.player.needs.social }; if (DIALOGUE) dialogueEnd(); return r; })()")
+        g.ev(f"homeState().call = {json.dumps(bt['was'])}")
+        check(bt2['act'] != 'call' and bt2['dlg'] == 'home:booth' and abs(bt2['social'] - bt['s0']) < 1, f"a booth again the same day (TP998_BOOTH_ON): the booth's screen only, no call, no social: {bt2} from {bt['s0']}")
     print('The store (credits, snacks, comforts):')
     sh = g.ev(r"""(() => { const P = SHIP.player, n = P.needs; P.credits = 20; P.locker = []; n.social = 50; n.hunger = 50; for (const h of ['draw', 'puzzle', 'knit']) hobbyGive(h);   // the display offers hobby supplies first (0.28.63)
       basket = { ...storePick('comfort'), gift: null }; ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false); const a = [P.credits, P.locker.slice(), Math.round(n.social), basket];   // not a gift (0.28.25)

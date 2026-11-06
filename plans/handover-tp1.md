@@ -43,6 +43,10 @@ stands aside while a level 1-2 queue entry is live and comes back after (needGoa
 introArrowTick may replace a needs arrow); beats with arrows for Days 3-6 too (crew store from 17:00, quiz, Friday tea,
 Sowing). fresh_walk to Day 6: every timed beat had its arrow, no errors, nothing stuck.
 
+After 0.99.7 (lead 50's O; backlog TP1-2, TP1-3; next build, both off): `TP998_ARROW_ON` (the booths arrow from 18:00
+at Leila or the room, never a booth) and `TP998_BOOTH_ON` (a booth used again the same day: only its screen; one line at
+the top of section 15's actStart; player_check's case). Lead 50: not for the 0.99.7 candidate.
+
 ## Shared lines touched (owners review)
 Section 15: teachTick (1 line), actEnd's pay step (1), playerNew (1); section 19: the skin's GLYPH (`pocket`);
 section 18: tradWords, tradJoin's notice, tradJoinMinute's ixTip, eventJoin's thanks Mail. The rest is in the
