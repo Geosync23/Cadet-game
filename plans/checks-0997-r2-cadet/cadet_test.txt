@@ -1,0 +1,19 @@
+DIFF state ['mem', 'calls', 'tris']
+a_start        differing px   8424  max 225
+b_wander10s    differing px   7273  max 228
+c_rotated      differing px   6133  max 235
+d_wallslow     differing px   7085  max 235
+e_night        differing px   2600  max 196
+f_noshadow     differing px   5760  max 231
+g_nocrew       differing px    665  max 143
+h_crewback     differing px  10617  max 231
+i_tap0         differing px   9027  max 241
+i_tap1         differing px  23361  max 244
+i_tap2         differing px  20920  max 233
+i_tap3         differing px  57102  max 251
+i_tap4         differing px   8679  max 223
+j_steer1       differing px  32167  max 249
+j_steer2       differing px  13637  max 240
+errors A [] errors B []
+taps ['Very hungry', 'Missing people', 'Missing people', 'Your bunk', 'Your bunk']
+DIFFERENCES FOUND
