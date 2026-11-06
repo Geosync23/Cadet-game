@@ -2383,3 +2383,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~13:46 UTC: EV1 ecc5236 (game 0ef0978b...7fad0) fixes D trad game-side; lead 50: EV1 stacks C on top, BM26 merges once and batches other game-side fixes into one new candidate. A cleared (R1 clockin OK on candidate). H OLD run ~8 min. CL1: G store line check-side, interactions_check running ~1 h.
 - ~13:47 UTC: **I** R3 controller_check G3 ending Day 34 (pad: 'About the transfer' never highlighted on Marrow/friends' cards; mouse ending_check OK) -> SC1 (note 17 talk card rework?); R3 OLD run ~20 min.
 - ~13:48 UTC: R4: devmode + arrows_d PASS on OLD -> D, E confirmed NEW (EV1 trad fixed; CR1 the rest). R4 free, waiting for the new candidate.
+- ~13:52 UTC: B confirmed NEW (mech OLD OK). **R2 bisect: Day 2 crew drift = TRAD997_ON (TB6) alone**; F likely same -> TB6 traces (intended or not), GM1 shares with TB6.
