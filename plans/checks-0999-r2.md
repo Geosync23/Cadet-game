@@ -30,3 +30,14 @@ blink is Day 4 14:08 only).
 Also for R3 (its share, taken over at R3's and lead 51's ask): sound_check proof runs, each alone: OLD 0.99.8 once, the
 candidate twice (below).
 
+
+## R3's sound_check proof runs (each alone, at R3's and lead 51's ask)
+
+| Run | Build | Result | Key lines |
+|---|---|---|---|
+| 1 | OLD 0.99.8 (33c737b worktree) | exit 1 | `SOUND CHECK FAILED`; `hide while resuming: suspended` (hide OK); the FAIL: `live: after a stall the band plays nothing late, and plays on ([0, 14, 0, 0], ['jam', 8, 1])` |
+| 2 | candidate 8d8073a9 | exit 0 | `SOUND CHECK OK`; `hide while resuming: suspended` |
+| 3 | candidate 8d8073a9 | exit 0 | `SOUND CHECK OK`; `hide while resuming: suspended` |
+
+R3's candidate FAIL (hide while resuming: running) didn't repeat in two alone runs; OLD fails a different timing line once.
+One-off timing races in the check, not the build. Sent to R3, BM27 and lead 51.
