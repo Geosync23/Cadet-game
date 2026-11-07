@@ -14,7 +14,7 @@ Build master BM27 (session_01GKuymjy5t3QwM8whGj2QFE). Branch claude/review-rv34 
 
 ### Results
 - Switch off: cadet_test vs 0.99.8 ALL IDENTICAL. check_fast off: QUICK CHECK OK (485 s). check_fast on: OK (497 s).
-- events_check on: see below; off: see below.
+- events_check on: EVENTS CHECK OK; off: EVENTS CHECK OK.
 - blink_trace.py (every deck 1-7, fresh page each, Day 4 14:07 -> 14:09:30, every frame), analysed by blink_analyse.py
   against the off build frame for frame:
   - on: fires at 14:08 on all 7 decks; only 47 frames differ (se 0.03-1.77 s); 2 pulses (peaks 0.4 s and 1.4 s, about
@@ -33,3 +33,5 @@ Build master BM27 (session_01GKuymjy5t3QwM8whGj2QFE). Branch claude/review-rv34 
   it shows about 3 s after the blink (seen behind "Your device: 2 new messages"). Not a fix; a note.
 - Seen by chance: at 14:07 a crew bubble "The light's fixed. No more blinking. Lovely." (a machine-repair chatter line)
   just before the blink. Coincidence, for the lead's eye only.
+
+### Verdict: PASS (5378fa0, tip e3202a0, game 592cd2d8...28bb71), sent to EV1, lead 51 and BM27.
