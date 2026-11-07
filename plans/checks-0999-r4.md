@@ -44,4 +44,18 @@ its reload probe, not normal play. Record: plans/fw4-0999-r4.json.
 
 ## Taken from R6 (R2's perf_check; R6's container restarted; agreed with R6, BM27 and lead 51 copied)
 
-Running (started 05:37 UTC, alone, BUILD vs OLD); result to follow.
+`python3 perf_check.py starship-cadet.html /tmp/old-0998/starship-cadet.html` (8d8073a vs 0.99.8 33c737b), strictly alone,
+05:37-06:50 UTC (4395s): exit 1, "PERF CHECK: 2 problem(s) (2 skipped: switch not in this build)", both frame time only:
+"the Line supper, the mess Sun 18:30 portrait: js 1.95 -> 3.41 ms" and "Veyli vessel: the parts chain, Works bay Sun 13:30
+trifold-folded-turned: js 1.34 -> 2.38 ms". Skipped: the blink scene on OLD (no EV999_BLINK_ON there) and P5_STEP6 x2 (as 0998b).
+- Draw calls, gl calls and triangles identical to OLD in all 20 shared scenes and every view; the one new scene, "the Last
+  Light blink, bow lounge Thu 14:08": portrait 217c/325gl (EV1's 217), none over budget. Memory flat (470/41/93 -> 472/41/93
+  over a week, as OLD; deck round trips flat), file 8.84 MB, load as OLD.
+- Re-measured each alone twice (`PERF_SCENES='Line supper'` / `'Veyli vessel'`): neither spike repeats (Line supper portrait
+  2.91 -> 2.25 and 2.82 -> 2.58 ms; Veyli Works bay trifold-folded-turned 1.09 -> 1.32 and 1.14 -> 1.14 ms). The spikes
+  jump to other views each run (run 1: Line supper trifold-folded-turned 2.61 -> 3.89, Veyli shuttle bay landscape and
+  trifold-open-turned; run 2: none, and OLD itself spiked 2.71 ms in one view); runs 2 both PERF CHECK OK.
+  **Known-old backlog 32 noise: PASS.**
+
+Result: **R4: OK** (own share, R2's fresh_walk, p926 and perf_check, BM27's Day 4 fresh_walk; no FAIL lines apart from
+appt's planted ones and perf's frame-time noise).
