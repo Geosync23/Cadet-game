@@ -26,3 +26,24 @@ Hourly check-in trig_01AaVWouC3y6e8wSuSepXfoB paused.
 - Fixers' branches carry stale check files: always run the staging tree's checks on the merged file.
 - A game change after a GO means a full round (user's rule): batch fixes, let the running round finish first.
 - Check-only fixes ride along without a new round; freeze the candidate before the GO.
+
+## NEW JOB for lead 51 (the user, 2026-11-07 ~03:20 UTC / Nov 6 ~10:20 PM ET)
+The user's words: "Keep the name, add a pale blink as the beacon passes. Finish all work."
+- Name: **The Last Light** stays (was EV1's proposal, open in design-doc ~line 1035: move it to Answered).
+- **Pale blink as the beacon passes** on Day 4 (Thursday). Needs a new effect (design-doc says "a pale blink as the
+  beacon passes would need a new effect in section 8b"). Owner: EV1 (session_01GKuymkhvqRE7N1Rj4VMtWD, built the Last
+  Light, EV997_LIGHT_ON) with section 8b's effects; its own switch (e.g. EV999_BLINK_ON), off = identical; phones first
+  (no new draw calls if avoidable, every colour through col(), deterministic: no R() in shared kit). Suggest: a soft pale
+  flash through the windows/hull lights at ~14:00 as the Captain says "we pass the Last Light", seen ship-wide.
+- "Finish all work": lead 50's reading = take it all the way to a published 0.99.9 (review, build, full round, FINAL GO).
+  CLAUDE.md says never publish without the user's OK: ask the user for a one-word OK at FINAL GO unless they've
+  already said "publish" for it. Also consider folding in backlog TP1-1 (shutdown 'quiet' booking vs your night shift;
+  TP1 session_01GKuymneLr9U5MnEvACLMvS has the fix written in plans/backlog.md) if the user agrees "all work" covers it:
+  ask the user in the same first message.
+- Base: main = claude/integration = 33c737b (0.99.8 live). Build master BM27 session_01GKuymjy5t3QwM8whGj2QFE is fresh
+  and knows the routine (plans/round-0998.md); runners R1-R4, R6 ready (ids above). OLD for the round = 0.99.8 33c737b.
+- Publish recipe: tools/publish/build.py + phone.js on claude/publish-pub3 (phone.js needs the __sc hook injected in a
+  test copy, three@0.128 build/three.min.js via npm pack; tag not starting "play" for the Playtest page); publish_files
+  needs files inside the working folder (copy in, publish, delete); same two pages (slugs above, v5); then ff
+  claude/integration + main.
+- Lead 50's hourly check-in trig_01AaVWouC3y6e8wSuSepXfoB is paused: delete or reuse it, make your own.

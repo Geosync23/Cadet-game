@@ -2464,3 +2464,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~23:40 UTC (6:40 PM ET) lead 50 hourly check-in: 0.99.8 FINAL GO in; waiting for the user's OK to publish. All seats idle.
 - ~00:40 UTC Nov 7 (7:40 PM ET Nov 6): still waiting for the user's OK to publish 0.99.8; nothing in flight, so lead 50's hourly check-in trig_01AaVWouC3y6e8wSuSepXfoB paused until the user replies.
 - ~03:10 UTC Nov 7 (10:10 PM ET Nov 6): **0.99.8 PUBLISHED** on the user's OK: Playtest v4 1794017247-ce65, Dev v4 1794020745-9bb9 (files match the tested build); phone test OK both; claude/integration = main = 33c737b. Team told; plans/handover-lead50.md written.
+- ~03:22 UTC Nov 7: the user: keep the name The Last Light, add a pale blink as the beacon passes, finish all work. Lead 50 at ~58% memory -> handing over to lead 51 (plans/handover-lead50.md 'NEW JOB').
