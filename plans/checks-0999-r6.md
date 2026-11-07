@@ -8,9 +8,10 @@
 
 | Check | Result | Key lines |
 |---|---|---|
-| interactions_check (whole) | OK, 05:08-05:38 UTC (about 30 min) | `INTERACTIONS CHECK OK`; no FAIL lines; draw-call peak while doing things 220 (as before) |
+| interactions_check (whole), first run | OK line, 05:08-05:38 UTC (exit code not captured, see below) | `INTERACTIONS CHECK OK`; no FAIL lines; draw-call peak while doing things 220 (as before) |
+| interactions_check (whole), rerun for BM27 (the result) | **OK, exit 0**, 05:39-06:10 UTC (about 31 min) | `INTERACTIONS CHECK OK`; no FAIL lines; draw-call peak 220 |
 
-Notes on the run:
+Notes on the first run:
 - The container restarted at about 05:05 UTC and killed the first run (started 04:43) before it gave a result. Set up again
   (three r128 and acorn re-installed; both game files' sha256 re-checked) and restarted from scratch at 05:08.
 - The wrapper shell of the second run was stopped by mistake at about 05:10 (a guard meant to cancel the queued perf_check
