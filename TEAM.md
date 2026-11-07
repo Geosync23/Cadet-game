@@ -2466,3 +2466,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~03:10 UTC Nov 7 (10:10 PM ET Nov 6): **0.99.8 PUBLISHED** on the user's OK: Playtest v4 1794017247-ce65, Dev v4 1794020745-9bb9 (files match the tested build); phone test OK both; claude/integration = main = 33c737b. Team told; plans/handover-lead50.md written.
 - ~03:22 UTC Nov 7: the user: keep the name The Last Light, add a pale blink as the beacon passes, finish all work. Lead 50 at ~58% memory -> handing over to lead 51 (plans/handover-lead50.md 'NEW JOB').
 - ~03:23 UTC Nov 7: **Lead 50 handed over to LEAD 51** session_01GKuymjp49y3M5hgRLecobm (claude/lead-51 from claude/lead-50; brief: plans/handover-lead50.md). Lead 50 idle.
+- ~03:25 UTC Nov 7 (10:25 PM ET): the user: "Hire as many workers as you need until 3 am eastern" (= 08:00 UTC Nov 7). Passed to lead 51.
