@@ -10,7 +10,7 @@ def reopen(g):
     g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(3); g.ev(HOOKT)
 def show_toast(g): g.ev("document.getElementById('toast').style.setProperty('opacity', '1', 'important')")
 with sync_playwright() as pw:
-    for case in ['mid', 'before']:
+    for case in (sys.argv[3:] or ['mid', 'before']):
         g = Game(pw, build, 390, 844); reopen(g)
         g.ev("localStorage.clear(); newGameStart(false)"); g.step(5)
         g.ev("(() => { skipTo(3 * 1440 + 14 * 60 + 7); goToDeck(3, null); const b = ROOM_BOX.L; if (b) { player.obj.position.copy(cellPos(Math.floor((b.i0 + b.i1) / 2), Math.floor((b.j0 + b.j1) / 2))); target.copy(player.obj.position).setY(.7); } if (typeof GUIDE !== 'undefined') GUIDE.tq.length = 0; })()"); g.step(10)
