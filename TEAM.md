@@ -2462,3 +2462,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~23:15 UTC: 0998b all shares OK: R1 (+5 R5 +day 12/17), R2, R3 (+bigevents, disc, stories), R4 (+fresh_walk, p926, 6 R5), R6 (interactions + perf, no spike), BM27 R5 rest + cadet vs 0.99.6. Waiting BM27 FINAL GO.
 - ~23:16 UTC (6:16 PM ET): **BM27 FINAL GO for 0.99.8**: claude/staging-0998 33c737b, game 13681748...59fd3; round 0998b all six shares OK, no new finds. Lead asking the user for OK to publish (Playtest + Dev pages, v4).
 - ~23:40 UTC (6:40 PM ET) lead 50 hourly check-in: 0.99.8 FINAL GO in; waiting for the user's OK to publish. All seats idle.
+- ~00:40 UTC Nov 7 (7:40 PM ET Nov 6): still waiting for the user's OK to publish 0.99.8; nothing in flight, so lead 50's hourly check-in trig_01AaVWouC3y6e8wSuSepXfoB paused until the user replies.
