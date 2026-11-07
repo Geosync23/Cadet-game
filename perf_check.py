@@ -61,6 +61,10 @@ SCENES = [
     {'name': 'lantern supper, the mess Sat 18:30', 'day': 13, 'time': '18:30', 'deck': 3, 'room': r'^Mess', 'on': ['EVENTS_ON'], 'busy': True, 'needs': "typeof EV_STORM_ON !== 'undefined' && EV_STORM_ON"},
     {'name': 'storm all-clear party, bow lounge Sun 19:30', 'day': 14, 'time': '19:30', 'deck': 3, 'room': r'^Bow lounge$', 'on': ['EVENTS_ON'], 'busy': True, 'needs': "typeof EV_STORM_ON !== 'undefined' && EV_STORM_ON"},
     # Crossing the Line (claude/line-update): the oath (about 43 and you) and the Line supper (up to about 60)
+    # the Last Light (EV997_LIGHT_ON, on since 0.99.7): Sato's crowd at the bow glass, and its pale blink as the beacon passes
+    # (0.99.9, EV999_BLINK_ON; lead 51): the blink is light only (8b's 'beacon': hemisphere and sun colour), so no new draw
+    # call; the setup starts the feel again so the drawn frame is lit by it (its two pulses run about 2 s from the setup)
+    {'name': 'the Last Light blink, bow lounge Thu 14:08', 'day': 4, 'time': '14:08', 'deck': 3, 'room': r'^Bow lounge$', 'on': ['EV999_BLINK_ON'], 'busy': True, 'setup': "shipFeel(['beacon'], 3)", 'needs': "typeof EV997_LIGHT_ON !== 'undefined' && EV997_LIGHT_ON"},
     {'name': 'the Line ceremony, bow lounge Sun 14:45', 'day': 7, 'time': '14:45', 'deck': 3, 'room': r'^Bow lounge$', 'on': ['EVENTS_ON', 'EV_LINE_ON'], 'busy': True},
     {'name': 'the Line supper, the mess Sun 18:30', 'day': 7, 'time': '18:30', 'deck': 3, 'room': r'^Mess', 'on': ['EVENTS_ON', 'EV_LINE_ON'], 'busy': True},
     # the first new crew down the Tern's ramp (Day 21, Pillar 5): not built yet (ROSTER_ROTATIONS starts at Day 35)
