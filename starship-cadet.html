@@ -48693,7 +48693,7 @@ if (EV_ENDING_ON && EVENTS_ON) {
 // calls home and story moments go on. Thursday's lesson (09:00), the 13:00 tea break and Zainab's favour (16:00) are
 // clear of it. The words: content/banks/event-lastLight.lines. Off: no entry, no calendar row (the game as 0.99.6)
 const EV997_LIGHT_ON = true;                            // notes 8 and 34: the Last Light, Thursday Day 4
-const EV999_BLINK_ON = false;                            // 0.99.9 (EV1 for lead 51; the user: "Keep the name, add a pale blink as the beacon passes"): the Last Light's pale blink, Day 4 14:08 (8b's feel 'beacon')
+const EV999_BLINK_ON = true;                             // 0.99.9 (EV1 for lead 51; the user: "Keep the name, add a pale blink as the beacon passes"): the Last Light's pale blink, Day 4 14:08 (8b's feel 'beacon')
 if (EV997_LIGHT_ON && EV_LINE_ON && SHIP_EVENTS.crossingLine) {
   const w = k => evWord('event.lastLight.' + k), say = (k, alt) => (c, p) => evWordAt('event.lastLight.gather.glass.' + k, p ? p.seed + c.day : 0, c) || alt;
   const ln = (k, n, alt) => { const o = []; for (let i = 1; i <= n; i++) { const x = w(k + '.' + i); if (x) o.push(x); } return o.length ? o : alt; };
