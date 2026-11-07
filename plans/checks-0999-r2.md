@@ -9,7 +9,9 @@
 exit 0, `ALL IDENTICAL`: every view `differing px 0 max 0`, `errors A [] errors B []`, taps the same (as expected: the
 blink is Day 4 14:08 only).
 
-## Result: my own checks all OK; fresh_walk, p926 and perf with R4
+## Result: OK
+
+Every check in R2 passes on 0.99.9. Ran by R2, except fresh_walk, p926 and perf_check (R4; perf via R6 after R6's restart).
 
 | Check | Ran by | Result | Minutes | Key lines |
 |---|---|---|---|---|
@@ -25,7 +27,9 @@ blink is Day 4 14:08 only).
 | arrows_check endgo | R2 | exit 0 | 12 | `ARROWS CHECK OK` |
 | pf_f1_same OLD (0.99.8) BUILD 10 | R2 | exit 0 | 0 | `fingerprints 30 differ 0 []`, `F1 checks 23674 mismatches 0`, `page errors [] []`, `PF F1 SAME OK` (OLD is 0.99.8 now: the fingerprints match outright) |
 | pf_f1_same proof: 0.99.6 vs the candidate with every 0.99.7 switch, TP998 and EV999_BLINK_ON false | R2 | exit 0 | 0 | `fingerprints 30 differ 0 []`, `PF F1 SAME OK` |
-| fresh_walk BUILD 3, p926_check, perf_check | R4 | pending | | |
+| fresh_walk BUILD 3 | R4 | exit 0, all five points pass | | long [], stuck [] |
+| p926_check | R4 | exit 0 | | `P926 CHECK OK` |
+| perf_check BUILD OLD (alone) | R4 | exit 1, then re-measured alone twice each: OK (backlog 32) | | two one-off frame-time spikes (the Line supper portrait js 1.95 -> 3.41 ms; Veyli parts chain trifold-folded-turned 1.34 -> 2.38 ms), neither repeated (both re-measures `PERF CHECK OK`); draw calls, gl and triangles identical to 0.99.8 in all 20 shared scenes; the blink scene 217 calls portrait; memory flat; load as OLD. plans/checks-0999-r4.md on claude/checks-0999-r4 (29d897b) |
 
 Also for R3 (its share, taken over at R3's and lead 51's ask): sound_check proof runs, each alone: OLD 0.99.8 once, the
 candidate twice (below).
