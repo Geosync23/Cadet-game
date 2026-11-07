@@ -50,17 +50,17 @@ events_check OK off and on. Notes: plans/review-rv34.md on claude/review-rv34 (1
 | Share | Result | Notes |
 |---|---|---|
 | R1 | OK, all 17 (day 4, the blink's day, among them; step6 four-way missed 0 stuck 0; player alone) | plans/checks-0999-r1.md, claude/checks-0999-r1 b983855 |
-| R2 | | |
+| R2 | OK, own checks (intro whole/--dinner/--firsts, path, arc, lines and --day, day 0 1 5 7 21 22, endgo, pf_f1_same + all-off proof, cadet vs 0.99.8 ALL IDENTICAL); fresh_walk, p926 and perf by R4; Q's sound proofs | plans/checks-0999-r2.md, claude/checks-0999-r2 |
 | R3 | | |
 | R4 | | |
 | R5 (BM27, with R1) | OK, all 25: gates check_fast, events, cadet vs 0.99.8 (ALL IDENTICAL), blinkprobe; BM27: machine x2, mech, bigevents, disc, fridays, clothes, promo_beats, stories 36, tiles, day 12 17 13 3; R1: food 1 7, food 11 4, join, weekend, day 27 18 19, p5retry_break | plans/build-master/bm27/r5-0999.sh (re-runnable after BM27's container restart); R1's in checks-0999-r1.md 1774e13 |
-| R6 | interactions_check whole 05:08-05:38 UTC: log ends INTERACTIONS CHECK OK, no FAIL lines, peak 220 draw calls; exit code not captured (R6's wrapper stopped by mistake), so a rerun with the exit code is asked (testing guide: exit 0 and the OK line). perf_check moved to R4 | plans/checks-0999-r6.md, claude/checks-0999-r6 44d58ae |
+| R6 | OK: interactions_check whole, rerun alone 05:39-06:10 UTC with exit 0 captured, INTERACTIONS CHECK OK, no FAIL lines, draw-call peak 220 (the first run 05:08-05:38 also ended OK, exit code not captured); perf_check moved to R4 | plans/checks-0999-r6.md, claude/checks-0999-r6 a4d9ce0 |
 
 ### Finds
 
 | Item | Check (share) | Cause | Closed by |
 |---|---|---|---|
-| Q | sound_check, run alone (R3): "hide: hidden while a resume is on its way, the sound ends stopped (running)"; every other sound part OK | not yet known; 0.99.9's diff has no audio, sound, resume or visibility lines, so likely the check's timing (it hides the page while the audio's resume is pending) | open: R3 runs sound_check alone on OLD once and on the candidate twice after its lanes |
+| Q | sound_check, run alone (R3): "hide: hidden while a resume is on its way, the sound ends stopped (running)"; every other sound part OK | check-side timing race, not 0.99.9 (no audio, sound, resume or visibility lines in its diff). R2's proof, each alone: the candidate twice SOUND CHECK OK (hide: suspended); OLD 0.99.8 once FAILS a different timing line (`live: after a stall the band plays nothing late`, [0, 14, 0, 0]) | closed: check-side flake; backlog BM27-1 for the sound seat |
 
 Lead 51's question (RV34's d6_pair.png shows the first-morning "You wake in Bunk 1" card at Day 4 14:08): answered by R4's
 fresh_walk to Day 4 14:30 on the candidate (real play, no reload): no first-morning card or "You wake" anywhere; the blink's
