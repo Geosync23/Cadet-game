@@ -55,3 +55,9 @@ events_check OK off and on. Notes: plans/review-rv34.md on claude/review-rv34 (1
 | R4 | | |
 | R5 (BM27) | | |
 | R6 | | |
+
+### Finds
+
+| Item | Check (share) | Cause | Closed by |
+|---|---|---|---|
+| Q | sound_check, run alone (R3): "hide: hidden while a resume is on its way, the sound ends stopped (running)"; every other sound part OK | not yet known; 0.99.9's diff has no audio, sound, resume or visibility lines, so likely the check's timing (it hides the page while the audio's resume is pending) | open: R3 runs sound_check alone on OLD once and on the candidate twice after its lanes |
