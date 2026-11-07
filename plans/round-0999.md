@@ -51,8 +51,8 @@ events_check OK off and on. Notes: plans/review-rv34.md on claude/review-rv34 (1
 |---|---|---|
 | R1 | OK, all 17 (day 4, the blink's day, among them; step6 four-way missed 0 stuck 0; player alone) | plans/checks-0999-r1.md, claude/checks-0999-r1 b983855 |
 | R2 | OK, own checks (intro whole/--dinner/--firsts, path, arc, lines and --day, day 0 1 5 7 21 22, endgo, pf_f1_same + all-off proof, cadet vs 0.99.8 ALL IDENTICAL); fresh_walk, p926 and perf by R4; Q's sound proofs | plans/checks-0999-r2.md, claude/checks-0999-r2 |
-| R3 | | |
-| R4 | | |
+| R3 | OK: devmode (all parts), dev_arrow, promo_sight, arrows_d, arrows_f, ending, controller 57 of 57 (re-run from the start after R3's container restart); sound_check: Q (check-side, closed; R2's alone runs on the candidate both OK) | plans/checks-0999-r3.md, claude/checks-0999-r3 7979a1f |
+| R4 | OK, every check: day 6 8 23 24 16, career, cr1, appt, saves, title, device, fixtap_probe, fixtap_reach, fixtap_click; R2's fresh_walk (BUILD 3: five points, long [], record identical to 0.99.8's) and p926; perf_check (draw calls, gl calls, triangles identical to 0.99.8 in all 20 shared scenes; the blink scene 217 draw calls portrait; memory flat; two frame-time spikes, the Line supper and the Veyli parts chain, not repeated on two alone re-measures each: backlog 32); lead 51's extra fresh_walk to Day 4 14:30 | plans/checks-0999-r4.md, claude/checks-0999-r4 29d897b |
 | R5 (BM27, with R1) | OK, all 25: gates check_fast, events, cadet vs 0.99.8 (ALL IDENTICAL), blinkprobe; BM27: machine x2, mech, bigevents, disc, fridays, clothes, promo_beats, stories 36, tiles, day 12 17 13 3; R1: food 1 7, food 11 4, join, weekend, day 27 18 19, p5retry_break | plans/build-master/bm27/r5-0999.sh (re-runnable after BM27's container restart); R1's in checks-0999-r1.md 1774e13 |
 | R6 | OK: interactions_check whole, rerun alone 05:39-06:10 UTC with exit 0 captured, INTERACTIONS CHECK OK, no FAIL lines, draw-call peak 220 (the first run 05:08-05:38 also ended OK, exit code not captured); perf_check moved to R4 | plans/checks-0999-r6.md, claude/checks-0999-r6 a4d9ce0 |
 
@@ -65,3 +65,10 @@ events_check OK off and on. Notes: plans/review-rv34.md on claude/review-rv34 (1
 Lead 51's question (RV34's d6_pair.png shows the first-morning "You wake in Bunk 1" card at Day 4 14:08): answered by R4's
 fresh_walk to Day 4 14:30 on the candidate (real play, no reload): no first-morning card or "You wake" anywhere; the blink's
 notice once at 14:08; errors, stuck and long empty. The card in RV34's picture came from its reload probe, not play.
+
+**Result: round 0999 OK, every share; one find (Q, sound_check timing, check-side, backlog BM27-1). FINAL GO: claude/staging-0999
+at the commit of this record, game sha256 583d99ba12d299a70cb431ca41dfa2cdb86a3a03e12e646cbf0e861aa741bd16, build 0.99.9**
+(the game last changed at the build turn a58e7881).
+
+Round notes: four machines restarted during the round (R6 ~05:05, BM27 ~05:08, R3 ~05:20, R4 ~05:25 UTC); each re-checked
+both files' sha256 and re-ran only what was lost; R1 took 8 of R5's checks; R2 ran R3's sound proofs; R4 took perf from R6.
