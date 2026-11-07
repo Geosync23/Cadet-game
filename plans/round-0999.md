@@ -53,7 +53,7 @@ events_check OK off and on. Notes: plans/review-rv34.md on claude/review-rv34 (1
 | R2 | | |
 | R3 | | |
 | R4 | | |
-| R5 (BM27) | | |
+| R5 (BM27, with R1) | OK, all 25: gates check_fast, events, cadet vs 0.99.8 (ALL IDENTICAL), blinkprobe; BM27: machine x2, mech, bigevents, disc, fridays, clothes, promo_beats, stories 36, tiles, day 12 17 13 3; R1: food 1 7, food 11 4, join, weekend, day 27 18 19, p5retry_break | plans/build-master/bm27/r5-0999.sh (re-runnable after BM27's container restart); R1's in checks-0999-r1.md 1774e13 |
 | R6 | interactions_check whole 05:08-05:38 UTC: log ends INTERACTIONS CHECK OK, no FAIL lines, peak 220 draw calls; exit code not captured (R6's wrapper stopped by mistake), so a rerun with the exit code is asked (testing guide: exit 0 and the OK line). perf_check moved to R4 | plans/checks-0999-r6.md, claude/checks-0999-r6 44d58ae |
 
 ### Finds
