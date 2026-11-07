@@ -30,3 +30,20 @@ step6 four ways in one run: asis 709/0/0, teachoff 720/0/0, track 720/0/0, skipt
 p5retry_probe ran on an off copy (P5_RETRY_ON false, 1 line). day_check 4 covers Day 4 (the blink's day). No FAIL lines in any log.
 
 **R1: OK on 0.99.9 (game 583d99ba...bd16).** Every check in the share passes; no OLD runs needed.
+
+## Eight R5 checks for BM27 (asked ~05:35 UTC; BM27 took them out of its queue, run only here)
+
+Same candidate 8d8073a9 and check files; two browsers, each its own CADET_WORK. p5retry_break's OFF copy: FIXTAP_ON and
+P5_RETRY_ON set false (2 lines). day_check 18's exit code wasn't recorded (its driver was stopped to move day 19 to the
+free browser; the check ran to the end), its log ends DAY CHECK OK with no FAIL lines.
+
+| Check | Result | Key lines |
+|---|---|---|
+| R5_food_1_7 | OK | FOOD CHECK OK (70s) |
+| R5_p5retry_break | OK | RV31 P5 BREAK OK (78s) |
+| R5_food_11_4 | OK | FOOD CHECK OK (79s) |
+| R5_join | OK | JOIN CHECK OK (338s) |
+| R5_weekend | OK | WEEKEND CHECK OK (570s) |
+| R5_day_27 | OK | DAY CHECK OK (296s) |
+| R5_day_19 | OK | DAY CHECK OK (229s) |
+| R5_day_18 | OK | DAY CHECK OK |
