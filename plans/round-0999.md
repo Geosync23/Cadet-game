@@ -37,3 +37,21 @@ R3 session_01GKuymo7sJwyufjkoEsCacB, R4 session_01GKuymmzABL4xHF9xBhM9fE, R6 ses
 | events_check | EVENTS CHECK OK (747 s) |
 | cadet_test vs 0.99.8 (33c737b) | ALL IDENTICAL apart from renderer noise (a few pixels 1 level off, max 1); no view reaches Day 4 14:08 |
 | EV1's blinkprobe (bow lounge, Day 4 14:06 -> 14:08) | two pulses at 14:08 (ship light b8c8d7/0.82 -> b1c9f7/1.45 at each peak, 0-0.8 s and 1.0-1.8 s), then back to normal; the notice "A pale light blinks past the windows: the Last Light." |
+
+RV34's review (~04:41 UTC): **PASS** on EV1's claude/ev999-blink 5378fa0 (tip e3202a0: the perf_check scene and screenshots,
+game unchanged; game 592cd2d8...28bb71 with the switch off): off, cadet_test ALL IDENTICAL vs 0.99.8; check_fast and
+events_check OK off and on. Notes: plans/review-rv34.md on claude/review-rv34 (1f7bc14). e3202a0 merged (screenshots only).
+
+**GO round 0999 (BM27):** claude/staging-0999 at this commit; game sha256
+583d99ba12d299a70cb431ca41dfa2cdb86a3a03e12e646cbf0e861aa741bd16, build 0.99.9. OLD = 0.99.8 33c737b. Check files: this commit's.
+
+### Round 0999, every share
+
+| Share | Result | Notes |
+|---|---|---|
+| R1 | | |
+| R2 | | |
+| R3 | | |
+| R4 | | |
+| R5 (BM27) | | |
+| R6 | | |
