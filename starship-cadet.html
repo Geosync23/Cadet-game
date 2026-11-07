@@ -35436,6 +35436,8 @@ const LINES = JSON.parse([
   '{"text":"Somebody counted the gold ribbons in Main storage. Forty. Enough, apparently.","id":"1dgfkjy"}]',
   ',"event.lastLight.news.prep.3":[',
   '{"text":"The old hands are telling Line stories at lunch. Half of them are true.","id":"1kofh55"}]',
+  ',"event.lastLight.notice.blink":[',
+  '{"text":"A pale light blinks past the windows: the Last Light.","id":"1gjk0y0"}]',
   ',"event.lastLight.sato.1":[',
   '{"text":"Gather in. Mind the glass. It\'s very clean and I\'d like it to stay that way.","id":"endftb"}]',
   ',"event.lastLight.sato.2":[',
@@ -48691,6 +48693,7 @@ if (EV_ENDING_ON && EVENTS_ON) {
 // calls home and story moments go on. Thursday's lesson (09:00), the 13:00 tea break and Zainab's favour (16:00) are
 // clear of it. The words: content/banks/event-lastLight.lines. Off: no entry, no calendar row (the game as 0.99.6)
 const EV997_LIGHT_ON = true;                            // notes 8 and 34: the Last Light, Thursday Day 4
+const EV999_BLINK_ON = false;                            // 0.99.9 (EV1 for lead 51; the user: "Keep the name, add a pale blink as the beacon passes"): the Last Light's pale blink, Day 4 14:08 (8b's feel 'beacon')
 if (EV997_LIGHT_ON && EV_LINE_ON && SHIP_EVENTS.crossingLine) {
   const w = k => evWord('event.lastLight.' + k), say = (k, alt) => (c, p) => evWordAt('event.lastLight.gather.glass.' + k, p ? p.seed + c.day : 0, c) || alt;
   const ln = (k, n, alt) => { const o = []; for (let i = 1; i <= n; i++) { const x = w(k + '.' + i); if (x) o.push(x); } return o.length ? o : alt; };
@@ -48725,6 +48728,8 @@ if (EV997_LIGHT_ON && EV_LINE_ON && SHIP_EVENTS.crossingLine) {
         thanks: c => evWordAt('event.lastLight.gather.glass.thanks', 0, c) || 'You find a space at the bow glass beside Dr. Sato. Far ahead a small light blinks, slides past, and is gone.' }],
     meetings: [],
   };
+  if (EV999_BLINK_ON) SHIP_EVENTS.lastLight.moments.push({ id: 'lastLightBlink', phase: 'passing', at: [1, 848], where: 'shipwide', feel: ['beacon'], len: 3,
+    notice: w('notice.blink') || 'A pale light blinks past the windows: the Last Light.' });   // 0.99.9: the beacon passes (14:08), felt on every deck; 8b's 'beacon'
   // tap to join (the user's rule: a host you tap, a simple pose, her own words): Sato at the bow glass; read by
   // tradJoinMinute (the marker over her, the arrow once you're in the lounge, the tip) and tradJoin
   TRAD_JOIN.lastLightGlass = { host: 'sato', pose: 'talk', need: 'leisure', gain: 12, also: { social: 6 }, verb: w('join.verb') || 'stand with her at the bow glass', what: w('join.what') || 'stand at the bow glass beside Sato and watch the Last Light go by' };
@@ -49080,7 +49085,7 @@ function eventMomentsTick(from, to) {
   for (const mo of def.moments || []) {
     if (!mo.feel) continue;
     const at = evBeatAt(e.startDay, mo.at), key = mo.id + '@' + e.startDay;
-    if (at > from && at <= to && to - at < 3 && !FEEL_DONE.has(key) && !(EV_REPLAY_ON && e.mine['felt:' + mo.id])) { FEEL_DONE.add(key); if (EV_REPLAY_ON) e.mine['felt:' + mo.id] = 1; eventFeel(mo.feel, mo.len);   // F4b: felt once, kept with the event (a reload doesn't jolt again)
+    if (at > from && at <= to && to - at < 3 && !FEEL_DONE.has(key) && !(EV_REPLAY_ON && e.mine['felt:' + mo.id])) { FEEL_DONE.add(key); if (EV_REPLAY_ON) e.mine['felt:' + mo.id] = 1; eventFeel(mo.feel, mo.len); if (mo.notice && typeof toast === 'function') toast(def.title, mo.notice);   // (0.99.9: a moment's own one-line notice, the Last Light's blink; none had one before)   // F4b: felt once, kept with the event (a reload doesn't jolt again)
       if (EV_NOTES_ON && typeof simNote === 'function') simNote('eventMoment', { id: e.id, moment: mo.id, day: e.startDay, t: at }); }   // F2b: the cue event.<id>.<moment> (the jolt, the horn)
   }
 }
@@ -72081,6 +72086,7 @@ const FEEL_MOODS = {                                     // by event id: its moo
 };
 if (EV_LINE_ON) FEEL_MOODS.crossingLine = { phases: { onset: .5, resolution: .5 }, a: col('#ffd36a'), b: col('#ffae42'), light: col('#ffe2a8'), bg: col('#4a3512') };   // Crossing the Line (EV5, L3): the hull lights gold from the horn to the end of the Line supper (the afterglow fades it), a warm gold through the windows and a slightly warmer light indoors (the user's line-q2 a)
 const FEEL_EMERG = col('#ff7a3c'), FEEL_WHITE = new THREE.Color(1, 1, 1), FEEL_GOLD = col('#ffd36a');
+const FEEL_PALE = col('#d6e4ff');                       // 0.99.9 (EV1): the Last Light's beacon, a cool pale blue-white
 const FEEL_S = { t0: -1, until: -1, kinds: [], mood: 0, moodT: 0, def: null, flick: false, dark: false, darkT: -99, check: -1, deck: undefined, first: true, gather: false, lamp: 0, lampT: 0 };
 function shipFeel(kinds, len = 4) { const s = FEEL_S; s.t0 = simNow() / 1000; s.until = s.t0 + len; s.kinds = kinds.slice(); }
 // ---- the garden view (0.27.23, with the galley's working garden, section 16): the crops on Deck 3's raised beds and
@@ -72227,6 +72233,8 @@ function shipFeelFrame(t, dt) {
   if (has('jolt') && se < .9) flash = 1 - se / .9;
   const horn = has('horn') && se < 1.8 ? Math.sin(Math.PI * se / 1.8) : 0;   // Crossing the Line's horn (no sound): one soft gold pulse, no shake; reduced motion: a soft dip
   if (horn && !FEEL_CALM) flash = Math.max(flash, .7 * horn);
+  // 0.99.9 (EV1, EV999_BLINK_ON): the Last Light's beacon passing: two soft pale pulses (0-0.8 s, 1.0-1.8 s); reduced motion: one slow swell
+  const beacon = has('beacon') && se < 1.8 ? (FEEL_CALM ? Math.sin(Math.PI * se / 1.8) : se < .8 ? Math.sin(Math.PI * se / .8) : se > 1 ? Math.sin(Math.PI * (se - 1) / .8) : 0) : 0;
   if (has('lightsDip')) k = se < .25 ? 1 - se / .25 * .65 : se < 1.4 ? .35 : Math.min(1, .35 + (se - 1.4) * .45);
   if (has('flicker') && se > 1.4) k *= FEEL_CALM ? .9 + .1 * Math.cos(se * 2) : feelHash(Math.floor(se * 8), 3) < .3 ? .55 : 1;
   // the odd flicker while the event's 'flicker' effect is on (about one in 30 tenths of a second)
@@ -72248,6 +72256,7 @@ function shipFeelFrame(t, dt) {
     const e = emerg; hemi.color.lerp(FEEL_EMERG, .62 * e); hemi.intensity *= 1 - .58 * e; sun.color.lerp(FEEL_EMERG, .6 * e); sun.intensity *= 1 - .85 * e;
     for (const L of LAMPS) L.l.intensity *= 1 - .75 * e;
   }
+  if (beacon) { hemi.color.lerp(FEEL_PALE, (FEEL_CALM ? .3 : .75) * beacon); sun.color.lerp(FEEL_PALE, (FEEL_CALM ? .25 : .6) * beacon); if (!FEEL_CALM) { hemi.intensity *= 1 + .7 * beacon; sun.intensity *= 1 + .4 * beacon; } }
   if (horn) { if (FEEL_CALM) k *= 1 - .15 * horn; else { hemi.color.lerp(FEEL_GOLD, .35 * horn); sun.color.lerp(FEEL_GOLD, .3 * horn); hemi.intensity *= 1 + .25 * horn; } }
   if (k < 1) { hemi.intensity *= k; sun.intensity *= k; for (const L of LAMPS) L.l.intensity *= k; }
 }

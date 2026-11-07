@@ -89,3 +89,8 @@
 - The oath's short. You'll manage.   #warm
 - I've crossed three times. Still get goosebumps.
 - Sunday at half two. The bow lounge. Don't be late.
+
+// ---- 0.99.9 (the user: "Keep the name, add a pale blink as the beacon passes"): the one-line notice as the beacon
+// passes, Thursday 14:08, felt on every deck (a pale pulse through the ship's light). Only with EV999_BLINK_ON
+== event.lastLight.notice.blink
+- A pale light blinks past the windows: the Last Light.
