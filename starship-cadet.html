@@ -69823,7 +69823,7 @@ function m21Raise(k, now = shipNow()) {
   S.pick = k; S.last = d;
   if (k === 0) {                                          // a shutdown: a job of yours waiting for one, booked for tomorrow
     const j = P5_M18 && typeof sdBook === 'function' ? SHIP.jobs.find(x => x.shut && x.status === 'waiting' && !x.sdDay && heldForYou(x)) : null;
-    if (j) { const day = sdTarget(now), at = typeof p5NightOf === 'function' && p5NightOf(day) ? 1200 : 600, br = sdBranchesFor(j.machine)[0], b = br && sdBook(j.id, at, br, [], {});   // on a night day, 20:00, before the night (Day 23)
+    if (j) { const day = sdTarget(now), at = typeof p5NightOf === 'function' && p5NightOf(day) ? (TP9991_SD_ON ? sdHourNear(day, 1200, -1) : 1200) : 600, br = sdBranchesFor(j.machine)[0], b = br && sdBook(j.id, at, br, [], {});   // on a night day, 20:00, before the night (Day 23); TP9991: 19:00, clear of the night's check-in
       if (b) { S.sd = b.day; simNote('m21', { pick: 'sd', day: d, job: j.id, at: b.at, branch: b.branch });
         return [{ who: 'marrow', text: worksText('m21.raise.sd', 'Approved. Tomorrow at {time}: {where}. Chief Calder, see it\'s on the rota.', { time: hhmm(b.at), where: sdBranches()[b.branch].name }) }]; } }
     simNote('m21', { pick: 'sd', day: d, job: null });

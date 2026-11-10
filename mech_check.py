@@ -1631,8 +1631,10 @@ def part_m21(g):
     check(a['effect'] is None and a['reply'] and a['reply'][0][0] == 'marrow', f"m21: a shutdown with no job waiting: approved, nothing booked ({a['effect']})")
     s = g.ev(f"({M21})(0, {{ shut: true }})")
     nt = g.ev("typeof P5_NIGHT !== 'undefined' && P5_NIGHT")
+    sdk = g.ev("typeof TP9991_SD_ON !== 'undefined' && TP9991_SD_ON")   # (TP2, 0.99.91) with TP9991_SD_ON a night day's booking is 19:00, clear of the night's check-in arrow
+    want = (1140 if sdk else 1200) if nt else 600
     print(f"  m21 shutdown with a job waiting: {s['effect']} {s['reply'][:1]}")
-    check(s['effect'] and s['effect'][0] == 23 and s['effect'][1] == (1200 if nt else 600) and s['effect'][3] == 'shut:x', f"m21: the job waiting for a shutdown booked for tomorrow ({'20:00, before the night' if nt else '10:00'}) ({s['effect']})")
+    check(s['effect'] and s['effect'][0] == 23 and s['effect'][1] == want and s['effect'][3] == 'shut:x', f"m21: the job waiting for a shutdown booked for tomorrow ({('19:00' if sdk else '20:00') + ', before the night' if nt else '10:00'}) ({s['effect']})")
     w = r[1]['effect']
     check(w and w[0] == 22 and w[1] and w[3] == 3 and w[4] and r[1]['worst'], f"m21: the worry: an inspection job on your worst machine, held for you three days ({w}, worst {r[1]['worst']})")
     p = r[2]['effect']
