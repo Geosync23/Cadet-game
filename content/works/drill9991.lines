@@ -1,0 +1,93 @@
+@bank all
+// 0.99.91 piece C (TB7 for lead 51): the Wednesday drill as Chief Calder's talk at the Works bay muster line
+// (TB9991_DRILL_ON, section 24c's drill9991). Stand-ins, the same as the game's fallbacks; a writer replaces them (same
+// keys). Calder: plain, brisk, fair. A card line is 90 characters at most. Per kind (fire, pressure, power): the card's
+// title, six lines in order, the crew line (Zeke for fire, Halloran for pressure; none for power), Calder's version of it (crew.calder, if he isn't on
+// the line) and her close.
+
+== drill9991.toast.fire
+- Drill at 15:00: the fire drill. Muster at the Works bay.
+== drill9991.toast.pressure
+- Drill at 15:00: the pressure drill. Muster at the Works bay.
+== drill9991.toast.power
+- Drill at 15:00: the power drill. Muster at the Works bay.
+
+// the fire drill
+== drill9991.goal.fire
+- Fire drill, 15:00: Chief Calder at the Works bay
+== drill9991.fire.title
+- Fire drill
+== drill9991.fire.line.1
+- Right. Fire drill. In close, everyone.
+== drill9991.fire.line.2
+- Fire hurts us fastest out here. No window to open. Nowhere to go but the next deck.
+== drill9991.fire.line.3
+- Smoke is worse than flames. It fills a room in a minute and takes the air with it.
+== drill9991.fire.line.4
+- Extinguishers: red, by every hatch. Pin out, aim at the base of it, short sweeps.
+== drill9991.fire.line.5
+- Bigger than you? Don't fight it. Shut the hatch on it, call the bridge, get people out.
+== drill9991.fire.line.6
+- And nobody goes back in for their things. Things we can replace.
+== drill9991.fire.crew
+- Three real ones in twenty years. Every one of them started as somebody's toaster.
+== drill9991.fire.crew.calder
+- Zeke's seen three real ones. Every one started as somebody's toaster.
+== drill9991.fire.close
+- That's the drill. On the line with us till the all-clear.
+
+// the pressure drill
+== drill9991.goal.pressure
+- Pressure drill, 15:00: Chief Calder at the Works bay
+== drill9991.pressure.title
+- Pressure drill
+== drill9991.pressure.line.1
+- Pressure drill. Listen up.
+== drill9991.pressure.line.2
+- A breach is quiet at first. A whistle. Your ears pop. Paper starts sliding toward a wall.
+== drill9991.pressure.line.3
+- It isn't the cold. It's the air leaving. You get seconds of good sense, then less.
+== drill9991.pressure.line.4
+- Bulkhead doors close a leak off. The wheel on the door: four turns, dogged tight.
+== drill9991.pressure.line.5
+- Don't wait to see who's on the other side. Close it. The bridge counts heads after.
+== drill9991.pressure.line.6
+- Ears pop and you're on your own? Nearest door, shut it behind you, then call.
+== drill9991.pressure.crew
+- Dog it, then shout. Never the other way round. Shouting doesn't hold air.
+== drill9991.pressure.crew.calder
+- Halloran's rule: dog it, then shout. Shouting doesn't hold air.
+== drill9991.pressure.close
+- That's the drill. On the line with us till the all-clear.
+
+// the power drill
+== drill9991.goal.power
+- Power drill, 15:00: Chief Calder at the Works bay
+== drill9991.power.title
+- Power drill
+== drill9991.power.line.1
+- Power drill. This one's ours more than anyone's.
+== drill9991.power.line.2
+- Main bus drops: the lights go, the air scrubbers slow, the lifts stop where they are.
+== drill9991.power.line.3
+- The danger is people hurrying in the dark. Stairs and panic hurt more than the dark.
+== drill9991.power.line.4
+- The breaker cabinet puts the junior wing on reserve. Air and strip lights. Not much else.
+== drill9991.power.line.5
+- Never open a live panel to have a look. Reserve bites as hard as main.
+== drill9991.power.line.6
+- Stand still. Let your eyes adjust. Follow the floor strips to your muster point.
+== drill9991.power.close
+- That's the drill. On the line with us till the all-clear.
+
+// the tip at the line, a tap before three, the notice after her talk, a missed drill, the Friday tea (the turnout)
+== drill9991.tip
+- Tap Chief Calder to join the drill
+== drill9991.early
+- Three o'clock, on the muster line. Not yet.
+== drill9991.notice
+- You stand on the muster line with the Works team till the all-clear at 15:15.
+== drill9991.missed
+- We ran the drill without you. Next Wednesday, three o'clock, Works bay.
+== drill9991.tea
+- Good turnout at Wednesday's drill. Thank you, all of you.

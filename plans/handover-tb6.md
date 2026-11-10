@@ -49,3 +49,51 @@ stop; check the logs end with the check's OK line.
 - Should not passing the inspection cost anything (default: no)?
 - The supper's new time, Tuesday 19:15-20:00 (default).
 - Words are stand-ins under t997.*, teach997.*, inspect997.* for a writer.
+
+---
+
+# Handover, part 2: piece C of 0.99.91, drills as traditions (TB6, 2026-11-10, for lead 51)
+
+TB6 is near its memory limit (about 55-60%), so this is the plan for a fresh builder. Lead 51:
+session_01GKuymjp49y3M5hgRLecobm; patch page plans/patch-09991.md on claude/lead-51. Branch claude/p9991-drills from main
+bfbcbdf (0.99.9, game 583d99ba...bd16). Switch to add: `TB9991_DRILL_ON` (section 13, next to TRAD997_ON;
+`false || URL_FLAGS.has('drill9991')`), off = cadet_test ALL IDENTICAL vs 0.99.9.
+
+The user's words: "All the drills at work dont make sense. let's make them like ship traditions. just click on the cheif
+and the event starts. the event is just the cheif talking about the relevant drill and danger. simple."
+
+## What exists (section 24c, after the inspection; and 24-m19)
+- Junior drill, row m3d: `drillDue(d)` (junior, Wednesday, on shift, row open), `drillKind(d)` (fire / pressure / power
+  by week from Day 3). The 'drill' side job (`jobKindAdd('drill', ...)`, posted at 14:00's hour, found 14:50, claimed
+  for you): `drillStops(kind)` on DECKS[5].drill places (5-drill-ext, -hatch, -door, -breaker); the extinguisher prop
+  (`drillExtShow`, HOLDS extinguisher); `drillGoal` arrows; the WORK_TICK at 14:50 (toast, arrow, first-time worksBrief)
+  and 15:15 (`drillClose`: all-clear toast, Calder's fast/ok/slow line, `worksUse('m3d')`, `simNote('drill')`).
+  `drillCalendar` (Calendar line), the Friday tea line after a fast drill (DRILL_TEA tick).
+- Senior drill, m19 'pwrdrill' (Senior Officer and up): `pdrillDue`, `pdrillCalls` (pick three calls in order),
+  PDRILL_ANS (Zeke, Halloran, Calder answer), `pdrillClose` (worksSideXp).
+- The crew: section 14's shape.drill (900): off-duty crew muster 15 min at their lift lobby. Leave it.
+- Muster places already there: 5-muster-1..6 (Works bay, room w, row 4, facing north).
+
+## The plan sent to lead 51 (build on it unless the lead says otherwise)
+- Switch on: neither side job is posted (an early return in both `post` functions), so no stops, no stopwatch.
+- 14:50: the toast stays ("Drill at 15:00: the fire drill. Muster at the Works bay."), arrow to Calder (a crew goal).
+- 15:00-15:15: Calder held at 5-muster-3 (crewHold, runtime only, as TB6's lab997Frame / spiceFrame995 hold), the
+  tradition star over her and "Tap Chief Calder to join the drill"; Zeke and Halloran held at 5-muster-2 and -4.
+  Easiest: a small one-off joinable entry, or a direct tap hook (tapCrew -> a `drill9991Tap(a)` before tradJoinTap)
+  plus the marker; reuse TB6's `t997Card(e, hid, M, go)` shape (script id 't932.join' so join_check's card handling knows it).
+- The card: ~6 Calder lines for the week's kind (what the drill is, the danger, what you do), one question with three
+  answers and her replies, a closing line; one line from Zeke (fire) or Halloran (pressure). Then you stand at the
+  muster line to 15:15. Stand-in words under drill9991.<kind>.* (a writer replaces).
+- Kept (you tapped): `worksUse('m3d')` as before (senior: `worksSideXp(1, 'pwrdrill')`), `simNote('drill', { kind, you: true, mins: 0 })`
+  so the Friday tea line still fires (it reads `drillTimeWord(mins)`: mins 0 = 'fast'; say "good turnout" if you reword).
+  15:15: the all-clear toast; holds released.
+- Checks: mech_check's m3d / m19 drill parts and fx3 (briefing) expect the side jobs: make them follow the switch.
+  Run day_check on a Wednesday (Day 3), interactions, career/promo checks, devmode/dev_arrow, check_fast; probe the
+  three kinds (Days 3, 10, 17) at phone size.
+
+## Gotchas from TB6's work
+- A probe file named inspect.py shadows Python's module: don't.
+- Harness probes run with the intro off; for Day 3 (the first drill, in week 1) also run once with the intro on
+  (plans/tb6-probes/spice_fresh.py shows how: intro_check's paper run to the day).
+- Moving or adding a planned thing reshuffles the planner's shared places for that whole day (cadet_test crew drift on
+  that day is expected; prove it by undoing just that change). Holds (crewHold) don't touch the planner.

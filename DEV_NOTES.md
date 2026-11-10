@@ -301,6 +301,18 @@ The user's: "tap the leader or anyone taking part to join; you then do the activ
 - **Lines** (the head writer's, placeholders until then): `LINES['join.<id>.tip' | '.notice' | '.done' | '.left' | '.tell' | '.paint']` ({name} = the leader's first name), crew kind `beam.congrats`.
 - **Testing:** `join_check.py BUILD.html` (about 3 minutes): each joinable one (not joined by being there; arrow, marker, the tap joins and starts the activity, the arrow gone), the birthday still turn-up, Lap of the Wren on Sundays with Tomas, the line goes round and finishes, dropping out, the beam, the newcomers. Ends "JOIN CHECK OK".
 
+### The drill as a tradition (0.99.91 piece C, TB7 for lead 51; switched off: `TB9991_DRILL_ON`, `?drill9991` previews; plans/patch-09991.md)
+
+In section 24c, TB7's block below the drill tea (`drill9991*`), plus one-line hooks: the two drill `post` functions return
+early (24c's 'drill', 24v's 'pwrdrill'), `tradJoinTap` asks `drill9991Tap` first, `eventsTick` calls `drill9991Frame`, the
+Friday tea line reads `drill9991.tea`. Who: `drill9991Who(d)` = 'junior' (drillDue) | 'senior' (pdrillDue) | null. The record
+is the notes (no save field): `simNote('drill', { kind, mins, you, day })` for a Junior, `simNote('pwrDrill', { day, you })`
+for a Senior, written at the tap (you: true) or at 15:15 (you: false; also after a jump past it). Holds (14:55-15:15, Deck 5):
+Calder 5-muster-3, Zeke -2, Halloran -4 (crewHold: runtime only, the planner untouched; Zeke and Halloran walk in by lift from their work deck with crewComeTo, until 15:15). Her card's script id
+`drill9991.talk` (no gist, no question). The star is its own DOM badge (as 0.99.5's tjMark2). Words: content/works/drill9991.lines,
+stand-ins in `DRILL9991_TALK`. Zeke is on Deck 6 or 1 at 15:00 on those Wednesdays: crewComeTo walks him over; not there when the card
+opens, Calder says his line (crew.calder). Test: plans/tb7-probes/drill.py BUILD [days] (MISS=1, SHOT=1); mech_check's m3d, m19, fx3 follow the switch.
+
 ### Hosted traditions (0.99.7, TB6 for lead 49; switched off: `TRAD997_ON`, `?trad997` previews; plans/patch-0997.md notes 18, 43, 50, 51, 52)
 
 All in the Traditions slot (section 18), in TB6's block above the slot's end line, plus one-line hooks; design-doc has each.

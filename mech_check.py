@@ -270,7 +270,44 @@ def m3d_taps(g):
     check(seen[1][1][2] and seen[2][1][2] and seen[3][1][2] is None, f"m3d taps: the arrow on to each stop, off after the last ({[x[1][2] for x in seen[1:]]})")
     check(end[:4] == ['done', 'you', True, None] and end[4] == [True], f"m3d taps: done by you, trained, no arrow left ({end})")
     g.ev(f"(() => {{ const k = {keep}; setShipNow(k.t); if (deckDef.num !== k.deck) goToDeck(k.deck); player.obj.position.x = k.pos[0]; player.obj.position.z = k.pos[1]; Object.assign(SHIP.player.needs, k.needs); SHIP.player.carry = k.carry; clearGoal(); }})()")   # as it was, for the parts after
+# 0.99.91 piece C (TB7, TB9991_DRILL_ON): the drill is Calder's talk, tap her to join. On paper for each kind's day: no drill
+# job, the 14:50 toast and a level 1 arrow; missed: the note (you: false), no reputation, her word; then Day 3 again with a
+# tap on her at 15:01: her card (about six lines, no question), the note (mins 0, you: true) and the row's use, then the all-clear
+M3D_ON = r"""((kindDay, tap) => {
+  SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = []; if (DIALOGUE) dialogueEnd(true);
+  MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; DRILL9991.told = DRILL9991.clear = 0;
+  const said = [], ks = worksSay, ts = toast; worksSay = (who, x) => said.push(who + ': ' + x); toast = (a, x) => said.push('toast: ' + x);
+  const run = (from, to) => { for (let m = from; m <= to; m++) { setShipNow(m); machinesNow(); worksCareerTick(m); } };
+  try {
+    setShipNow(1440 + 300); machinesNow(); const W = worksInit(); W.tr.m1 = 2; W.use.m1 = 1; W.use.m4 = 1; W.op[1] = ['m1'];
+    const d = kindDay, t0 = (d - 1) * 1440, out = { kind: drillKind(d) };
+    run(t0 + 360, t0 + 892);
+    out.who = drill9991Who(d); out.jobs = SHIP.jobs.filter(x => /drill/.test(x.kind)).length;
+    const e = GUIDE.list.find(x => x.id === 'drill9991:' + d); let gg = null; try { gg = e && e.goal(); } catch (x) { gg = null; } out.arrow = e ? [e.level, gg && gg.place, gg && gg.label] : null;
+    out.toast = said.filter(x => /Drill at 15:00/.test(x)).length;
+    if (tap) { run(t0 + 893, t0 + 901); if (deckDef.num !== 5) goToDeck(5);
+      out.tap = drill9991Tap({ p: { id: 'calder' }, x: player.obj.position.x + 1, z: player.obj.position.z });
+      out.card = DIALOGUE ? [DIALOGUE.id, DIALOGUE.queue.length, DIALOGUE.queue.some(l => l.choice)] : null; if (DIALOGUE) dialogueEnd(true); }
+    run(t0 + 893, t0 + 920);
+    out.note = simNotes('drill', t0).map(n => [n.mins, n.you, n.day]); out.use = W.use.m3d || 0; out.tr = W.tr.m3d !== undefined; out.jobsAfter = SHIP.jobs.filter(x => /drill/.test(x.kind)).length;
+    out.said = said.filter(x => !/Drill at three/.test(x)).slice(-3);
+    return out;
+  } finally { worksSay = ks; toast = ts; }
+})"""
+def m3d_on(g):
+    for d, kind in {3: 'fire', 10: 'pressure', 17: 'power'}.items():
+        a = g.ev(f"({M3D_ON})({d}, false)")
+        print(f'  24c drill (talk) Day {d}, missed:', json.dumps(a))
+        check(a['kind'] == kind and a['who'] == 'junior' and a['jobs'] == 0 and a['jobsAfter'] == 0, f"m3d on Day {d}: {a['kind']} for you, no drill job ({a['jobs']}, {a['jobsAfter']})")
+        check(a['toast'] == 1 and a['arrow'] and a['arrow'][0] == 1 and a['arrow'][1] == '5-muster-3' and 'Calder' in a['arrow'][2], f"m3d on Day {d}: the 14:50 toast and a level 1 arrow to the muster line ({a['arrow']})")
+        check(a['note'] == [[None, False, d]] and a['use'] == 0 and any('without you' in x for x in a['said']), f"m3d on Day {d}: missed: the note, no reputation, her word ({a['note']}, {a['use']})")
+    a = g.ev(f"({M3D_ON})(3, true)")
+    print('  24c drill (talk) Day 3, tapped:', json.dumps(a))
+    check(a['tap'] and a['card'] and a['card'][0] == 'drill9991.talk' and 6 <= a['card'][1] <= 9 and not a['card'][2], f"m3d on: a tap on Calder at 15:01 opens her talk, no question ({a.get('card')})")
+    check(a['note'] == [[0, True, 3]] and a['use'] == 1 and a['tr'] and any('All clear' in x for x in a['said']) and not any('without you' in x for x in a['said']), f"m3d on: the turnout counted (the note, the row's use, trained), the all-clear ({a['note']}, {a['use']}, {a['said']})")
+    g.ev("(() => { SHIP.works = null; SHIP.jobs = []; SHIP.notes = []; clearGoal(); })()")
 def m3d_both(g):
+    if g.ev("typeof TB9991_DRILL_ON !== 'undefined' && TB9991_DRILL_ON"): m3d_on(g); return
     m3d_part(g); m3d_jump(g); m3d_taps(g)
 PARTS['m3d'] = m3d_both
 
@@ -1481,10 +1518,11 @@ M19B = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
  if (j) { out.drillEarly = !!jobStepDone(j.id, 1, { pick: 'c1' }).retry; out.drillWrong = !!jobStepDone(j.id, 0, { pick: 'c2' }).retry; [0, 1, 2].forEach(k => jobStepDone(j.id, k, { pick: 'c' + k })); out.drillDone = !!j.workDone; }
  for (let t = (wed - 1) * 1440 + 893; t <= (wed - 1) * 1440 + 920; t += 1) { setShipNow(t); machinesNow(); worksCareerTick(t); }
  out.drillEnd = j ? [j.status, j.doneBy, j.wrongs] : null; out.said = said.slice(); worksSay = ks;
+ out.on9991 = typeof TB9991_DRILL_ON !== 'undefined' && TB9991_DRILL_ON; out.who9991 = out.on9991 ? drill9991Who(wed) : null;   // 0.99.91 (TB7): the talk instead, for Seniors too
  // an Officer gets none (24c's drill is the juniors'; an Officer has no part yet)
  W = reset((wed + 6) * 1440 + 800); W.rank = 'officer'; W.tier = 2; delete W.tr.m19; const w2 = wed + 7;
  for (let t = (w2 - 1) * 1440 + 840; t <= (w2 - 1) * 1440 + 900; t += 10) { setShipNow(t); machinesNow(); worksCareerTick(t); }
- out.officer = !!pdrillJobOf(w2);
+ out.officer = !!pdrillJobOf(w2); out.officer9991 = out.on9991 ? drill9991Who(w2) : null;
  SHIP.works = JSON.parse(W0); SHIP.jobs = []; return out; })()"""
 def part_m19b(g):
     a, b = g.ev(M19B), g.ev(M19B)
@@ -1498,11 +1536,15 @@ def part_m19b(g):
     check(a['runWrong'] and a['runRight'] and a['runTurnin'] and a['runAfter'][0] and a['runAfter'][1] == 1 and a['runAfter'][2] in (1, 2, 3), f"m19: a wrong feed opens it again; done, the conduit right, a use, the note names the deck ({a['runAfter']})")
     check('conduitrun' in a['weeks'] and a['stage2'], f"m19: from 3 uses the conduit runs join the weeks, Calder says so once ({a['weeks']}, {a['stage2']})")
     d = a['drill']
-    check(d and d[0] == 'you' and d[1] == 890 and d[3] == 3 and d[4] == 'choose', f"m19: the Senior's drill, yours at 14:50, three calls ({d})")
-    check(a['drillArrow'] and a['drillArrow'][0] == 1 and a['drillArrow'][1] == 'Run the Works part of the drill', f"m19: a level 1 arrow with its ring line ({a['drillArrow']})")
-    check(a.get('drillEarly') and a.get('drillWrong') and a.get('drillDone'), "m19: the calls in order; a wrong call opens it again")
-    check(a['drillEnd'] == ['done', 'you', 1] and any(s.startswith('torres-zeke:') for s in a['said']) and any(s.startswith('halloran-emeka:') for s in a['said']), f"m19: the crew answer; the all-clear ends it ({a['drillEnd']})")
-    check(a['officer'] is False, "m19: no Senior's drill for an Officer")
+    if a.get('on9991'):   # 0.99.91 piece C (TB7, TB9991_DRILL_ON): no Senior drill job; the drill is Calder's talk for a Senior too, none for an Officer
+        check(d is None and a['drillArrow'] is None and a['who9991'] == 'senior', f"m19 (drill talk on): no Senior drill job or its arrow; the talk is yours as a Senior ({d}, {a['drillArrow']}, {a['who9991']})")
+        check(a['officer'] is False and a['officer9991'] is None, f"m19 (drill talk on): no drill for an Officer ({a['officer9991']})")
+    else:
+        check(d and d[0] == 'you' and d[1] == 890 and d[3] == 3 and d[4] == 'choose', f"m19: the Senior's drill, yours at 14:50, three calls ({d})")
+        check(a['drillArrow'] and a['drillArrow'][0] == 1 and a['drillArrow'][1] == 'Run the Works part of the drill', f"m19: a level 1 arrow with its ring line ({a['drillArrow']})")
+        check(a.get('drillEarly') and a.get('drillWrong') and a.get('drillDone'), "m19: the calls in order; a wrong call opens it again")
+        check(a['drillEnd'] == ['done', 'you', 1] and any(s.startswith('torres-zeke:') for s in a['said']) and any(s.startswith('halloran-emeka:') for s in a['said']), f"m19: the crew answer; the all-clear ends it ({a['drillEnd']})")
+        check(a['officer'] is False, "m19: no Senior's drill for an Officer")
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm19 (turn 2): differs the second time: ' + str([(k, a[k], b.get(k)) for k in a if a[k] != b.get(k)][:3]))
 def part_m19_all(g):
     part_m19(g); part_m19b(g)
@@ -2401,7 +2443,8 @@ def part_fx3(g):
           and A[5] == 'Inspection at 06:30: your berth' and A[6] == 'someone else' and A[7] is None and b.get('queued') is None,
           f'fx3: the inspection morning\'s arrows lead through wardrobe, bed and locker to your berth, never over another arrow, none with the arrow queue on, gone at 06:30 ({A}, queue on: {b.get("queued")})')
     check(b['m3dOpen'] and b['drillAsk'] == 1, f"m3d: Calder's ask the morning of your first drill ({b})")
-    check(b['brief'] and b['briefStays'], f"m3d: her briefing before the drill, and it stays to be read ({b})")
+    if g.ev("typeof TB9991_DRILL_ON !== 'undefined' && TB9991_DRILL_ON"): check(not b['brief'], f"m3d (drill talk on, TB7): no briefing card before it: her talk at 15:00 is the drill ({b})")
+    else: check(b['brief'] and b['briefStays'], f"m3d: her briefing before the drill, and it stays to be read ({b})")
     check(b['inspectEarly'] == 0 and b['inspectAsk'] == 1, f"m3i: Tomas's ask the evening before your first inspection (in person in your bunk room, else Mail at 21:30) ({b})")
     check(b['m3iOpen'] and b['tomas'] and b['tomasStays'] and not b['again'], f"m3i: his talk before the walk, readable, and not again after it ({b})")
     check(b['m2'] and b['m2Stays'], f"m2: Torres's word stays to be read ({b})")
