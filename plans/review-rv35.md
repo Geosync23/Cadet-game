@@ -27,3 +27,17 @@ OLD = main bfbcbdf (0.99.9, game 583d99ba...bd16).
 - Off: cadet_test vs 0.99.9 ALL IDENTICAL; mech_check m21 OK (20:00); check_fast QUICK CHECK OK in 260 s.
 - Still open for the lead to mention (in TP2's build-table row): an old save's 20:00 booking is kept. 28b's line
   needs mechanics seat A's owner review.
+
+## D. CR2 claude/p9991-results 01cc325 + 373c8ee (game off 09d52840...8c62, on copy 28077815...509b), CR9991_RESULTS_ON: PASS
+Also the Dev mode (section 25) owner check on devmodeCareerSet's condition (lead 51's ask): OK.
+- Reading: only devmodeCareerSet ever sets an occasion to 'done' (normal play ends one as kept or missed), so the
+  reopen in promoSummonsTick (status 'done', not met, its own day, before 08:45, a junior who passed) can only act on a
+  summons Dev mode closed. A later day already ends in the noon promotion by Mail, as before.
+- cr2_check OK: on, the jump, a stuck save, normal play by Dev clock, sleep and Next step, and the late case all give
+  Calder's scene at 08:15 and promote; off, the jump still shows the 0.99.9 bug (the off proof holds).
+- devprobe.py (plans/rv35-probes): Dev jumps t2 and promo and Set career to Days 8, 9, 10, 12, 22, on against off:
+  the only difference anywhere (works, occasions, appointments, flags, Mail) is promoSummons@9 'asked' instead of
+  'done' on the promotion jump. No errors.
+- On copy: devmode_check OK, dev_arrow_check OK. Off: cadet_test vs 0.99.9 ALL IDENTICAL, check_fast OK (232 s).
+- Note, not a fix: with the switch on, a Dev promotion jump landed after 08:45 lets the summons run out as 'missed'
+  (normal play's path, promotion by Mail at noon) where 0.99.9 left it 'done' (also promotion by Mail).
