@@ -308,10 +308,10 @@ early (24c's 'drill', 24v's 'pwrdrill'), `tradJoinTap` asks `drill9991Tap` first
 Friday tea line reads `drill9991.tea`. Who: `drill9991Who(d)` = 'junior' (drillDue) | 'senior' (pdrillDue) | null. The record
 is the notes (no save field): `simNote('drill', { kind, mins, you, day })` for a Junior, `simNote('pwrDrill', { day, you })`
 for a Senior, written at the tap (you: true) or at 15:15 (you: false; also after a jump past it). Holds (14:55-15:15, Deck 5):
-Calder 5-muster-3, Zeke -2, Halloran -4 (crewHold: runtime only, the planner untouched). Her card's script id
+Calder 5-muster-3, Zeke -2, Halloran -4 (crewHold: runtime only, the planner untouched; Zeke and Halloran walk in by lift from their work deck with crewComeTo, until 15:15). Her card's script id
 `drill9991.talk` (no gist, no question). The star is its own DOM badge (as 0.99.5's tjMark2). Words: content/works/drill9991.lines,
-stand-ins in `DRILL9991_TALK`. On Wednesdays at 15:00 Zeke is not on Deck 5 in the runs so far (Days 3, 10, 17): his line
-is in the card anyway. Test: plans/tb7-probes/drill.py BUILD [days] (MISS=1, SHOT=1); mech_check's m3d, m19, fx3 follow the switch.
+stand-ins in `DRILL9991_TALK`. Zeke is on Deck 6 or 1 at 15:00 on those Wednesdays: crewComeTo walks him over; not there when the card
+opens, Calder says his line (crew.calder). Test: plans/tb7-probes/drill.py BUILD [days] (MISS=1, SHOT=1); mech_check's m3d, m19, fx3 follow the switch.
 
 ### Hosted traditions (0.99.7, TB6 for lead 49; switched off: `TRAD997_ON`, `?trad997` previews; plans/patch-0997.md notes 18, 43, 50, 51, 52)
 

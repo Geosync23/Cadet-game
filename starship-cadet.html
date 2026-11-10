@@ -61923,7 +61923,7 @@ if (typeof jobKindAdd === 'function' && drillPlace('ext') && drillPlace('hatch')
 // starts. the event is just the cheif talking about the relevant drill and danger. simple." On: neither drill side job is posted
 // (the junior's above, 24v's Senior calls), so no stops and no stopwatch. 14:50 Calder's toast and a level 1 arrow to the muster
 // line; 15:00-15:15 she stands at the Works bay muster line (5-muster-3, a crewHold from 14:55: runtime only, never the planner) with Zeke
-// and Halloran beside her (-2, -4; brought from their work deck by crewScene), a star over her; a tap on her (or them) is your turnout and opens
+// and Halloran beside her (-2, -4; they walk over, by lift from their work deck: crewComeTo), a star over her; a tap on her (or them) is your turnout and opens
 // her card: the week's drill (fire, pressure, power), what it is and its danger, Zeke's (fire) or Halloran's (pressure) line, her
 // close; then you stand on the line to the all-clear. The turnout: a junior's worksUse('m3d') (the row's reputation; the first
 // trains it) and simNote('drill', { mins: 0, you: true }) (the Friday tea's line, now the turnout); a Senior's
@@ -61956,7 +61956,7 @@ const DRILL9991_TALK = {
     crewLine: null, close: 'That\'s the drill. On the line with us till the all-clear.' },
 };
 const DRILL9991_LINE = [['calder', '5-muster-3'], ['torres-zeke', '5-muster-2'], ['halloran-emeka', '5-muster-4']];
-const DRILL9991 = { holds: [], told: 0, clear: 0, el: null, v: null, mk: '', who: null };
+const DRILL9991 = { holds: [], come: {}, told: 0, clear: 0, el: null, v: null, mk: '', who: null };
 // whose drill day d is: 'junior' (24c's drillDue), 'senior' (24v's pdrillDue: Senior Officer and up, trained in M19), or null
 function drill9991Who(d) {
   if (!TB9991_DRILL_ON || weekday(d) !== 2) return null;
@@ -61994,10 +61994,9 @@ function drill9991Frame() {
   const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, key = d + '|' + Math.floor(m) + '|' + deckDef.num;
   if (DRILL9991.mk !== key) { DRILL9991.mk = key; DRILL9991.who = deckDef.num === 5 && m >= DRILL_AT - 5 && m < DRILL_END ? drill9991Who(d) : null; }   // they walk to the line from 14:55, there for 15:00
   const who = DRILL9991.who;
-  if (!who) { if (DRILL9991.holds.length) { DRILL9991.holds.forEach(f => f()); DRILL9991.holds = []; } if (DRILL9991.el) DRILL9991.el.style.display = 'none'; return; }
-  const till = Math.min(now + 3, (d - 1) * 1440 + DRILL_END);
+  if (!who) { if (DRILL9991.holds.length) { DRILL9991.holds.forEach(f => f()); DRILL9991.holds = []; } for (const k in DRILL9991.come) { DRILL9991.come[k](); delete DRILL9991.come[k]; } if (DRILL9991.el) DRILL9991.el.style.display = 'none'; return; }
   for (const [id, pl] of DRILL9991_LINE) { if (!placeById(pl)) continue;
-    if (id !== 'calder' && typeof crewScene === 'function') crewScene(id, { mode: 'wait', to: pl, until: till });   // (lead 51) Zeke and Halloran come from their work deck to the line (stage directions, live only; renewed each frame, so they go back after)
+    if (id !== 'calder' && typeof crewComeTo === 'function' && !DRILL9991.come[id]) DRILL9991.come[id] = crewComeTo(id, pl, null, { until: (d - 1) * 1440 + DRILL_END });   // (lead 51, RV36) Zeke and Halloran walk to the line, by lift from their work deck (section 14's visit walk, live only); back to their plans at 15:15
     const a = tjAgent(id); if (a && CREW_HELD.get(id) !== pl) DRILL9991.holds.push(crewHold(a.p, pl)); }
   const c = tjAgent('calder'), show = !!c && m >= DRILL_AT && !drill9991Came(d, who) && !(typeof DIALOGUE !== 'undefined' && DIALOGUE);
   if (!DRILL9991.el && show) { const el = document.createElement('div'); el.style.cssText = 'position:fixed;left:0;top:0;z-index:2;pointer-events:none;font:600 12px system-ui,sans-serif;color:#0b2a26;background:#5fd6c6;border-radius:999px;padding:2px 8px;box-shadow:0 1px 6px rgba(0,0,0,.4);white-space:nowrap';
