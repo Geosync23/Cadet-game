@@ -10,6 +10,19 @@ Branch claude/p9991-flightsim from main bfbcbdf, switch EV9991_SIM_ON (off = ide
 - First-time words for that showing (content/ and content_gen.py): Raman's opener and the Mail ("the approach Dev flew you in on").
 - Joining: check TRAD_JOIN['rec-sim-night'] (a rec 'sim' act through recStart, like kayak/climb); add one if missing.
 - Checks: events_check, day_check 3, devmode_check trad, bigevents, check_fast, cadet_test off vs 0.99.9; a phone shot of the sim bay at 19:45 on Day 3.
+- Plan approved by lead 51 (2026-11-10) as written; EV2 builds it.
+
+### Gotchas (learned the hard way on 0.99.7-0.99.9)
+- **check_fast tests starship-cadet.html only.** To check with a switch on, run its parts (deck, machine, leave, device, names) on a switched-on copy yourself.
+- **A sed that flips a switch must match the line exactly:** some switch lines have spaces before their comment (`const EV997_LIGHT_ON = false; `), so test with grep -c that the copy really changed.
+- **Use the candidate's own check files** when testing a candidate (git show origin/claude/staging-xxxx:events_check.py etc.): a branch's older copy can lack another seat's check edits and report false FAILs.
+- **Ripples:** any change to who's where on an early day ripples through later days' plans, jobs and the galley (machine_check's food runs, career_check's s5 xp). Before calling a FAIL yours, test with your switch off on the same build; a knife-edge check gets a fair margin (lead's call), not a game tweak.
+- **Don't close a whole room for a short gathering** (the Last Light's bow lounge closure pushed breaks away: Brennan late for an appointment, Elif at the orange tree). Held places are enough.
+- **Dev mode refuses tradition starts on any eventOn(d) day**; a short event that pauses nothing should be let through (devmodeTradAt).
+- **\*.png is ignored:** add screenshots with git add -f.
+- **Send commit ids only after the push has finished** (check with git fetch + git log origin/<branch>).
+- **perf_check writes perf_check.json** in the repo folder: don't commit it.
+- **Tapping someone sat at a tradition stands them up for the rest of it** (backlog EV1-1); a scripted talk should treat its host as there when near.
 
 # Handover: EV1 (0.99.7 playtest patch: new events and the first week's shape)
 
