@@ -54,3 +54,17 @@ Notes (not fixes):
    change when it lands.
 
 Verdict: PASS on 40569965, with the Zeke change to re-check (2026-11-10).
+
+### C re-check: ff9f1e42 (game 8e1e86b4...18c7, last game change 5b86d4fa)
+
+- Off: cadet_test vs 0.99.9 ALL IDENTICAL. On (a copy): full mech_check OK; TB7's probe OK on Days 3, 10, 17 (Calder,
+  Zeke and Halloran all on their spots); drill_more.py all six cases sane, no errors.
+- Header: "FIRE DRILL · Calder" clears the X (shots/c2-card-fire.png). Fixed.
+- Zeke at the line: he's there, and after 15:15 he walks back to the lift and his own plan; Halloran (already on Deck 5)
+  walks over and back. But with you on Deck 5, Zeke (on Deck 6 at 14:54) appears on his spot out of nowhere at 14:55
+  (drill_zeke.py: off-deck one frame, standing at 5-muster-2 the next). crewScene's 'wait' places someone from another
+  deck straight on their spot. The game already has a walk-in by lift for this: crewComeTo (section 14, Pillar 4's
+  visits: "a crew member walks to a place on the deck you're on (by lift if they're elsewhere)").
+
+Verdict: FIXES NEEDED (one, small): Zeke should walk in from the lift, not appear on the line (crewComeTo, or another way
+TB7 prefers), checked with plans/rv36-probes/drill_zeke.py (`drill_zeke.py ON.html 893 15:01`). Everything else passes.
