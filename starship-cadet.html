@@ -68896,7 +68896,7 @@ function sdTarget(t = shipNow()) { const d = worksDay(t); return t - (d - 1) * 1
 function sdBook(jobId, at, branch, keep = [], o = {}) {
   const S = sdData(), j = SHIP.jobs.find(x => x.id === jobId); if (!S || !j || !j.shut || j.status === 'done') return null;
   const day = o.day || sdTarget(), br = sdBranches()[branch];
-  if (day !== sdTarget() || !br || !sdBranchesFor(j.machine).includes(branch) || !Number.isInteger(at) || at < SD_HOURS[0] || at > SD_HOURS[1] || at % 60) return null;
+  if (day !== sdTarget() || !br || !sdBranchesFor(j.machine).includes(branch) || !Number.isInteger(at) || at < SD_HOURS[0] || at > SD_HOURS[1] || at % 60 || TP9991_SD_ON && !sdHourOk(day, at)) return null;
   S.book = S.book.filter(b => b.job !== jobId);
   const b = { day, at, branch, keep: keep.filter(k => br.keep.some(r => sdRoomKey(r) === k)), warned: (o.warned || []).slice(0, 8), inPerson: (o.inPerson || []).slice(0, 8), job: jobId, ...(o.all ? { all: true } : {}), ...(o.askB ? { askB: true } : {}) };   // askB: the screen asked you to tell Brennan in person
   S.book.push(b); j.sdDay = day; if (Number.isFinite(j.until)) j.until = Math.max(j.until, day * 1440 + dayShiftEnd(day + 1));   // held at least till the day after
@@ -68960,6 +68960,7 @@ function sdDraft() {                                     // the draft kept in st
   const brs = sdBranchesFor(j.machine); if (!brs.includes(SD_UI.branch)) { SD_UI.branch = brs[0]; SD_UI.keep = []; }
   if (!Number.isInteger(SD_UI.at)) SD_UI.at = 600;
   SD_UI.at = Math.max(SD_HOURS[0], Math.min(SD_HOURS[1], SD_UI.at));
+  if (TP9991_SD_ON) SD_UI.at = sdHourNear(sdTarget(), SD_UI.at, -1);   // TP9991: not into your night shift's check-in
   return j;
 }
 const sdBooked = jobId => { const S = SHIP.works && SHIP.works.sd; if (!S) return null; const b = S.book.find(x => x.job === jobId); if (b) return { b, set: false };
@@ -69011,8 +69012,9 @@ function sdAct(verb, arg) {
   if (v === 'job') { if (sdJobs().some(x => x.id === arg)) { SD_UI.job = null; Object.assign(SD_UI, { job: arg, branch: null, at: null, keep: [], warned: [], inPerson: [], all: false }); const b = sdBooked(arg); if (b && !b.set) Object.assign(SD_UI, { branch: b.b.branch, at: b.b.at, keep: b.b.keep.slice(), warned: b.b.warned.slice(), inPerson: b.b.inPerson.slice(), all: !!b.b.all }); } }
   else if (v === 'branch') { if (sdBranchesFor(j.machine).includes(arg)) { SD_UI.branch = arg; SD_UI.keep = []; } }
   else if (v === 'keep') { const i = SD_UI.keep.indexOf(arg); if (i >= 0) SD_UI.keep.splice(i, 1); else if (sdBranches()[SD_UI.branch].keep.some(r => sdRoomKey(r) === arg)) SD_UI.keep.push(arg); }
+  else if (v === 'hour' && TP9991_SD_ON) SD_UI.at = sdHourNear(sdTarget(), SD_UI.at, arg < 0 ? -1 : 1, true);   // TP9991: past hours that run into your night shift
   else if (v === 'hour') SD_UI.at = Math.max(SD_HOURS[0], Math.min(SD_HOURS[1], SD_UI.at + 60 * (arg < 0 ? -1 : 1)));
-  else if (v === 'quiet') { let best = null; for (let at = SD_HOURS[0]; at <= SD_HOURS[1]; at += 60) { const a = sdAffected(sdTarget(), SD_UI.branch, at, SD_UI.keep), n = a.length + (sdHourMarks(a).length ? 100 : 0); if (!best || n < best[1]) best = [at, n]; } if (best) SD_UI.at = best[0]; }
+  else if (v === 'quiet') { let best = null; for (let at = SD_HOURS[0]; at <= SD_HOURS[1]; at += 60) { if (TP9991_SD_ON && !sdHourOk(sdTarget(), at)) continue; const a = sdAffected(sdTarget(), SD_UI.branch, at, SD_UI.keep), n = a.length + (sdHourMarks(a).length ? 100 : 0); if (!best || n < best[1]) best = [at, n]; } if (best) SD_UI.at = best[0]; }
   else if (v === 'warn') sdWarn(arg);
   else if (v === 'warnall') { const aff = sdAffected(sdTarget(), SD_UI.branch, SD_UI.at, SD_UI.keep); for (const e of aff) if (e.id !== 'brennan' && !SD_UI.warned.includes(e.id)) sdWarn(e.id, true); SD_UI.all = true; { const b = sdPeek().book.find(x => x.job === SD_UI.job); if (b) b.all = true; }
     try { toast(worksText('sd.notice.title', 'Ship notice'), worksText('sd.notice.posted', 'Posted: power off in {text}, {time}. {n} people warned.', { text: sdBranches()[SD_UI.branch].rooms.map(r => sdRoomName(sdRoomKey(r))).join(' and '), time: hhmm(SD_UI.at), n: aff.length })); } catch (e) { /* no UI */ } }
@@ -69184,6 +69186,20 @@ function sdItems(d) {
   const all = (S.set[d] || []).concat(S.book.filter(b => b.day === d));
   return all.filter(b => !b.st || b.st === 'off').map(b => { const j = SHIP.jobs.find(x => x.id === b.job), m = j && machineById(j.machine);
     return { from: b.at, to: b.at + SD_LEN, title: worksText('sd.row', 'Your shutdown: {where}', { where: sdBranches()[b.branch].name }), where: m ? (DECKS[m.deck].rooms[m.room] || { name: 'the junction' }).name + ', ' + deckWord(m.deck) : 'the junction', kind: 'beat', deck: m ? m.deck : 6, room: m ? m.room : 'j' }; });
+}
+// TP9991 (backlog TP1-1, TP2 for lead 51; the user: "Build it now."): a shutdown hour keeps clear of your night shift.
+// The night shift's check-in arrow (28a, p5n:in) is level 1 from N.from - 15; an hour booked to run past that covered it.
+// sdHourOk: an hour (minute from midnight) on day `day` is fine unless that day has your night shift (p5nOf, 28a) and the
+// hour ends after N.from - 15. Read in sdDraft's clamp, the hour stepper, the quiet pick and sdBook. Off: as 0.99.9.
+const TP9991_SD_ON = false;
+function sdHourOk(day, at) { const N = p5nOf(day); return !N || (day - 1) * 1440 + at + SD_LEN <= N.from - 15; }
+// the hour from `at` in direction dir (-1 or 1) that's fine: at itself if fine (unless step), else the next one that way,
+// else the other way (not when stepping: then it stays put); hours stay in SD_HOURS
+function sdHourNear(day, at, dir, step) {
+  for (let h = at + (step ? 60 * dir : 0); h >= SD_HOURS[0] && h <= SD_HOURS[1]; h += 60 * dir) if (sdHourOk(day, h)) return h;
+  if (step) return at;
+  for (let h = at - 60 * dir; h >= SD_HOURS[0] && h <= SD_HOURS[1]; h -= 60 * dir) if (sdHourOk(day, h)) return h;
+  return at;
 }
 // ---- end of slot: Shutdowns ----
 
