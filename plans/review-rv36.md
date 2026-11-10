@@ -30,11 +30,27 @@ Notes (not fixes):
 
 Verdict: PASS (2026-11-10). Notes 1-2 are optional polish for EV2; nothing blocks.
 
-## C. The Wednesday drill as Calder's talk (TB7, claude/p9991-drills, TB9991_DRILL_ON) - in progress
+## C. The Wednesday drill as Calder's talk (TB7, claude/p9991-drills 40569965, game 258ad821...2920, TB9991_DRILL_ON)
 
-Early look at 9ebb418 (game 258ad821...2920), before TB7's word that it's ready:
+Checked:
 - Off: cadet_test vs 0.99.9 ALL IDENTICAL.
-- TB7's drill probe (on a copy, phone size, Days 3 fire, 10 pressure, 17 power): DRILL PROBE OK on my side.
-- Seen on the phone shot: the card's header "FIRE DRILL · Chief Ines Calder" runs under the close X.
-To do once ready: MISS=1, a Senior's drill, a tap before 15:00, save and reload mid-talk, mech_check, day_check 3 and
-devmode_check on a switched-on copy, and the "simple" read of the whole thing.
+- On (a copy): mech_check (TB7's version, all rows) OK; day_check 3 OK; devmode_check (all parts) OK; TB7's drill probe OK
+  (Days 3 fire, 10 pressure, 17 power, at phone size).
+- RV36's drill_more.py (Day 3): a tap on Calder at 14:52 gets "Three o'clock, on the muster line. Not yet." and nothing counts;
+  at 15:02 it opens her talk and counts the turnout (note, reputation, the first trains it). A tap on Halloran joins the same.
+  Closing her card with the X: still counted, you're sent to the line, a second tap does nothing. Save with the card open and
+  reload with real saving: the card is gone, the turnout kept, no star, nothing stuck, holds let go at 15:15. Off the deck at
+  15:00: the missed note, no reputation, her "We ran the drill without you". No errors in any case.
+- Simple? Yes: a toast at 14:50 and an arrow, a star over Calder from 15:00, tap her, her card (six lines on the drill and its
+  danger, one crew line, her close; no question), then you walk to the line and it ends at 15:15. No side job, no stopwatch.
+
+Notes (not fixes):
+1. On the phone the card's header "FIRE DRILL · Chief Ines Calder" runs up against the close X (shots/c-card-header-fire.png);
+   "PRESSURE DRILL · ..." wraps to two lines and is fine. It's the shared meeting card (section 13's skin, its header has no
+   room kept for the X), so any long title does it: a backlog row, not TB7's.
+2. mech_check run with only some rows (e.g. `m19 fx3`) fails promo, m6 and fx3 on 0.99.9 as well: m19 leaves state the later
+   rows trip on. The full run is fine. Worth knowing when re-running single rows; a backlog row for the check's owner.
+3. Lead 51 asked TB7 to bring Zeke to the line or drop his line from the card (he's not on Deck 5 at 15:00). Re-check that
+   change when it lands.
+
+Verdict: PASS on 40569965, with the Zeke change to re-check (2026-11-10).
