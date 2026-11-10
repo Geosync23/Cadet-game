@@ -62033,6 +62033,9 @@ function drill9991Card(d, kind, go) {
   lines.push({ who: 'calder', text: W('close', M.close) });
   MEETING_SCRIPTS['drill9991.talk'] = { title: W('title', M.title), noCount: true, onEnd: go, lines };   // no gist: no notes Mail
   dialogueShow('drill9991.talk', { id: 'drill9991.talk@' + d, who: ['calder'].concat(M.crew && tjAgent(M.crew) ? [M.crew] : []), at: shipNow(), ...cardWhere({ rooms: new Set(['5|w']) }) });   // the Works bay, and the room you tapped from
+  if (DIALOGUE && DIALOGUE.id === 'drill9991.talk') {   // (RV36, lead 51) short names in the card's header, so "FIRE DRILL · Calder" clears its X on a phone (this card's cast only)
+    for (const [id, nm] of [['calder', 'Calder'], ['torres-zeke', 'Zeke'], ['halloran-emeka', 'Halloran']]) { const p = DIALOGUE.cast[id] || evPerson(id); if (p) DIALOGUE.cast[id] = { ...p, name: nm }; }
+    dialogueDraw(); }
 }
 // after her talk: you stand on the muster line (a free spot of 5-muster-1..6, nearest Calder) facing north, to the all-clear
 function drill9991Stand(d, kind) {
