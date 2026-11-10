@@ -64,3 +64,21 @@ Device engineer, Player engineer, Interactions engineer, Traditions engineer and
 
 ## Open for the user (via the lead)
 - Pockets: snacks into your pocket (built) or still eaten at the till (design-doc Open questions).
+
+## Next job, handed on (lead 51, 2026-11-10): backlog TP1-1 for 0.99.91
+TP1's session is past ~55% memory, so a fresh session builds this. Branch claude/p9991-tips from main bfbcbdf (0.99.9),
+switch `TP9991_SD_ON` (off = cadet_test ALL IDENTICAL vs 0.99.9). Patch page: plans/patch-09991.md on claude/lead-51.
+Plan (3 lines):
+1. One helper in 24w's slot, `sdHourOk(day, at)`: true unless p5nOf(day) (28a's night for that day) exists and
+   at + SD_LEN > N.from - 15. That is the night shift's own arrow `from` (p5n:in, 28a ~69622 in the 0.99.7 candidate).
+2. With TP9991_SD_ON, use it in the three places 24w picks an hour (line numbers as on claude/p997-tips 0d8b3e20):
+   sdDraft's clamp (~68957), the hour stepper `v === 'hour'` (~69009: step past hours that aren't ok, stay put if none),
+   and the quiet pick `v === 'quiet'` (~69010: skip hours that aren't ok). Also the booking's own validity check
+   (~68894), so an old draft can't book a clashing hour.
+3. Proof: a probe that books Day 23 (a nights day in arrows_check step6) with SD_UI.at = 1200 and shows that with the
+   switch on the hour is moved or refused and no 'sd:day:23:1200' entry is asked; arrows_check step6 (all four ways),
+   machine_check (24w's), check_fast, cadet_test off vs 0.99.9.
+Estimate: about 2-3 hours with the runs (step6's four ways is the long one, about an hour). Owner of 24w: mechanics
+seat B / S5-4, not active (lead 50 let TP1 build in it).
+Background: H in the 0.99.7 round (build-table rows p997-tips 6, backlog TP1-1). The night shift's check-in arrow is
+level 1 from N.from - 15; a shutdown booked so its hour runs past that covers it (same level, earlier `from` wins).
