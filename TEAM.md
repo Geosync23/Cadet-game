@@ -2519,3 +2519,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~22:14 UTC: **TB7 C final** claude/p9991-drills ff9f1e42, game 8e1e86b4...18c7 (Zeke/Halloran brought; short headers; full checks off/on OK). RV36 re-checking. Drill shots sent to the user.
 - ~22:24 UTC (5:24 PM ET) lead 51 hourly check-in: waiting RV36's re-check of C ff9f1e42 (sent ~22:13); then BM28 merges C, switch-on, 0.99.91 build, gates, GO. Runners ready.
 - ~22:29 UTC: RV36 C re-check FIXES NEEDED (one visual): Zeke pops onto his muster spot at 14:55 instead of walking in from the lift; TB7 to use crewComeTo. Rest passes.
+- ~23:22 UTC (6:22 PM ET) lead 51 hourly check-in: TB7 pushed d7b3ec27 (Zeke/Halloran lift walk-in) ~22:30, quiet since -> nudged (checks possibly lost to restart). Then RV36 re-check, BM28 merge C + switch-on + GO.
