@@ -34924,6 +34924,14 @@ const LINES = JSON.parse([
   '{"text":"The last page","id":"1ul92q7"}]',
   ',"ending.works.next":[',
   '{"text":"The Wren is home. Live in it.","id":"qz9f9w"}]',
+  ',"ev9991.sim.ask":[',
+  '{"text":"Sim night tonight. Dev\'s flying the new hands in on the approach they came aboard on.","id":"s7dokw"}]',
+  ',"ev9991.sim.give":[',
+  '{"text":"{name} climbs out of a pod: \\"Your go. I\'ve had mine.\\"","id":"gtc3qi"}]',
+  ',"ev9991.sim.here":[',
+  '{"text":"Same approach you came in on. Gentle on the stick.","id":"v900d3"}]',
+  ',"ev9991.sim.thanks":[',
+  '{"text":"You fly the approach you came in on, Dev calling it, and set her down.","id":"1knzlvq"}]',
   ',"event.comet.captain.senior":[',
   '{"text":"Senior Officers get the good window. And the tea from the tin. Don\'t tell the juniors.","id":"as9z6e"}]',
   ',"event.comet.gather.cometCaptain.ask":[',
@@ -38931,6 +38939,12 @@ const LINES = JSON.parse([
   '{"text":"Reading corner: sit close in the bow lounge with a book and talk about what you\'re reading. Leisure and social up.","id":"d35vei"}]',
   ',"join.reading-corner.tip":[',
   '{"text":"Tap {name} to join the reading corner","id":"b9gad4"}]',
+  ',"join.rec-sim-night.notice":[',
+  '{"text":"Sim night: take a pod, or the bench for the next turn, and fly an approach with Dev calling it. Leisure up.","id":"1k04nib"}]',
+  ',"join.rec-sim-night.open":[',
+  '{"text":"First time in the pod? Good. Hands light, eyes on the pad. You\'ve seen this approach once already, from the back seat.","id":"in2al9"}]',
+  ',"join.rec-sim-night.tip":[',
+  '{"text":"Tap {name} to fly an approach on sim night","id":"woorfq"}]',
   ',"join.rec-wso.notice":[',
   '{"text":"Winner Stays On: find a seat in the stands and watch the games. You\'ll be offered a turn. Leisure and social up.","id":"m9j8j0"}]',
   ',"join.rec-wso.tip":[',
@@ -39540,6 +39554,8 @@ const LINES = JSON.parse([
   '{"text":"A word from the Captain | Concord headquarters asked for one of ours this week, and {me} has said yes. The Tern takes them on Monday at 10:00. The day shift is released from 09:30 to see them off. Captain Odile Marrow","id":"1dr0heo"}]',
   ',"mail.ending.settled.slow.stay":[',
   '{"text":"A word from the Captain | Concord headquarters asked for one of ours this week, and I passed it on. {me} has said no, politely. We\'re keeping them. Carry on. Captain Odile Marrow","id":"1gtzo0r"}]',
+  ',"mail.ev9991.sim":[',
+  '{"text":"Sim night tomorrow, 19:30 in the rec deck sim bay. The first of your posting: Dev Raman calls you in on the same approach the Tern flew you aboard. Two pods, a queue, nobody graded.","id":"f2q9bz"}]',
   ',"mail.favour.clock":[',
   '{"text":"My clock | My clock loses a few minutes every day. I\'ve been late twice. Could you take a look?","id":"8uk2v5"}]',
   ',"mail.favour.cold":[',
@@ -47493,6 +47509,7 @@ function tradJoin(e, a) {
   player.stop(); a.talking = 2; player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
   if (e.id === 'tiles-ladder' && typeof tladJoin === 'function') return tladJoin(e, a, notice, lead);
   if (GAMES997_ON && e.id === 'tiles-night' && typeof tnJoin === 'function') return tnJoin(e, a, notice, lead);   // 0.99.7 notes 12, 40 (GM1): play in the rounds, or watch   // 0.92.5 item 20: play the next game, or watch
+  if (EV9991_SIM_ON && e.id === 'rec-sim-night') return ev9991SimJoin(e, a, notice);   // 0.99.91 (EV2): a pod on sim night, Dev's opener first on Day 3 (Events engineer 2 slot)
   if (TRAD997_ON && t997Join(e, a, notice, lead)) return true;   // 0.99.7 (TB6): the host's card first (Open lab, the spice supper), a teacher's own activity (Traditions slot)
   if (TRAD995_ON && e.id === 'spice-shelf-supper') return spiceJoin(e, a, notice);   // 0.99.5 note 19 (TB3): a mess seat with your dinner
   if (TRAD_0932_ON && typeof t932Join === 'function' && t932Join(e, a, notice, lead)) return true;   // 0.93.2: the host's own words first, then the activity (FX24, Traditions slot)
@@ -47687,6 +47704,7 @@ function tradWalkFrame(dt) {
 // section 14's whereIs, first after a visit: the walk's roles (escort-shaped, so section 10 walks them), else null
 function tradWhere(p, t) {
   if (EV_VESSEL_ON && VESSEL) { const vw = vesselWhere(p, t); if (vw) return vw; }   // the Veyli vessel: Taavek and Calder to the bench once you've met (slot 'Vessel builder')
+  if (EV9991_SIM_ON && EV9991_GIVE) { const sw = ev9991SimWhere(p, t); if (sw) return sw; }   // 0.99.91 (EV2): a sim pilot who gave you their pod watches (Events engineer 2 slot)
   const ws = REC_DECK ? wsoWhere(p, t) : null; if (ws) return ws;   // Winner Stays On: the two on court (0.83.1, RA)
   if (TJ_FREE && t >= TJ_FREE.at) {                      // the beam's crowd breaks up: on to what comes after it
     if (t >= TJ_FREE.until) TJ_FREE = null;
@@ -50880,6 +50898,48 @@ function addrBelowHud(c) {
   if (!EV_STORM_ON || typeof window === 'undefined' || window.innerWidth >= 600) return;
   let y = 0; for (const id of ADDR_HUD) { const e = document.getElementById(id); if (e && e.offsetWidth > 0) y = Math.max(y, e.getBoundingClientRect().bottom); }
   c.style.top = y ? Math.round(y + 8) + 'px' : '';
+}
+// ---- 0.99.91 (EV2 for lead 51; the user: "Need a flight sim ship tradition week 1 sometime"): Sim night's first showing,
+// Wednesday Day 3 19:30-20:30, before its every-other-Thursday run from Day 8 (SIM_NIGHT, Traditions slot). That showing
+// has its own first-time words (content/banks/ev9991-sim.lines: Dev Raman's Mail the evening before, the ask and here
+// lines, his opener card when you join); later ones keep SIM_NIGHT's. Every sim night can be joined now: tap Dev or
+// anyone at it (TRAD_JOIN, rec 'sim': a free pod, else the bench for the next turn, recStart). Off: none of this ----
+var EV9991_SIM_ON = false;                               // var: tradWhere (above) may ask before this line runs
+const EV9991_SIM_DAY = 3;                                // a Wednesday (weekday 2); Day 4 is the Last Light, quiz, birthday, late piano
+if (EV9991_SIM_ON && SIM_BAY && REC_TRAD_ON) {
+  const S = SIM_NIGHT, first = e => !!e && e.day === EV9991_SIM_DAY;
+  S.when = { any: [S.when, { weekday: 2, from: EV9991_SIM_DAY, until: EV9991_SIM_DAY }] };   // either rhythm (evDue's any, 0.93.2)
+  for (const k of ['mail', 'ask', 'here', 'thanks']) { const was = S[k], key = k === 'mail' ? 'mail.ev9991.sim' : 'ev9991.sim.' + k; S[k] = (e, p) => first(e) && quizText(key, e.day) || evText(was, e, p); }
+  TRAD_JOIN['rec-sim-night'] = { host: 'raman', rec: 'sim', verb: 'fly an approach', what: 'take a pod, or the bench for the next turn, and fly an approach' };
+  tjActs();
+  if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // anything planned before now is planned again
+}
+// the join (tradJoin's hook): on the first showing Dev's opener card first, then the pod (or the bench); joined only once
+// you're at it, not when both pods are tagged out (as the rec deck's kayak and climb joins, t932Join)
+// Both pods taken (the night's pilots keep theirs the whole hour): the pilot nearest Dev climbs out, gives you their
+// turn and goes on to the rest of their evening, as the beam's crowd does (EV9991_GIVE, read by tradWhere; the bench,
+// the aisle's three watch spots and the coach's are full on a busy night, so there's nowhere to stand)
+var EV9991_GIVE = null;                                  // { id, from, until: the end of their sim night segment, or your run's } (not saved: a reload sends them back)
+function ev9991SimWhere(p, t) {
+  const G = EV9991_GIVE; if (!G) return null;
+  if (t >= G.until || t > G.from + 2 && !(typeof ACT !== 'undefined' && ACT && /^rec(Sim|Wait)$/.test(ACT.kind))) { EV9991_GIVE = null; return null; }   // your run's over: their pod back
+  return G.id === p.id ? planWhere(p, G.until) : null;
+}
+function ev9991SimGive(e) {
+  if (!simPodsUsable() || simPodsFree().length) return;
+  const sh = simPodsShut(), R = tjAgent('raman') || { x: 30, z: 14 }, pods = SIM_POD_IDS.filter((id, k) => !sh[k] && heldBy(id)).map(id => heldBy(id)).filter(c => c.p && c.p.id !== 'raman');
+  const c = pods.sort((a, b) => Math.hypot(a.x - R.x, a.z - R.z) - Math.hypot(b.x - R.x, b.z - R.z))[0]; if (!c) return;
+  const now = shipNow(), sg = planDay(c.p, e.day).find(x => evTagId(x.tag) === e.id && x.from <= now && now < x.to);   // to what comes after their sim night (its end and the stay after it), as TJ_FREE
+  EV9991_GIVE = { id: c.p.id, from: now, until: sg ? sg.to : (e.day - 1) * 1440 + e.to + 30 };
+  toast(c.p.name, quizText('ev9991.sim.give', e.day, { name: tjFirst(c.p.id) }) || tjFirst(c.p.id) + ' climbs out of a pod: "Your go. I\'ve had mine."');
+}
+function ev9991SimJoin(e, a, notice) {
+  const d = e.day, go = () => { const was = typeof ACT !== 'undefined' ? ACT : null; ev9991SimGive(e); recStart('sim', e.name, null, null); if (typeof ACT !== 'undefined' && ACT && ACT !== was) eventJoin(e, d, shipNow(), notice); };
+  const line = d === EV9991_SIM_DAY && tjAgent('raman') ? quizText('join.rec-sim-night.open', d) : null;
+  if (!line || typeof dialogueShow !== 'function') { go(); return true; }
+  MEETING_SCRIPTS['ev9991.sim'] = { title: e.name, noCount: true, onEnd: go, lines: [{ who: 'raman', text: line }] };
+  dialogueShow('ev9991.sim', { id: 'ev9991.sim@' + d, who: ['raman'], at: shipNow(), ...cardWhere(e) });
+  return true;
 }
 // ---- end of slot: Events engineer 2 ----
 // ---- slot: Storm builder (section 18; EV3, the ion storm update S1-S9, plans/event-storm-plan.md v1.2). New code of this seat's goes here ----

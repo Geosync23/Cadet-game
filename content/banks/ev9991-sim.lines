@@ -1,0 +1,32 @@
+@bank all
+// EV2 for lead 51 (0.99.91; the user: "Need a flight sim ship tradition week 1 sometime"). Sim night (rec-sim-night,
+// Dev Raman calling approaches in the rec deck sim bay) gets a first showing in week 1: Wednesday Day 3, 19:30-20:30,
+// before its every-other-Thursday run from Day 8. These are that first showing's words; the later ones keep
+// SIM_NIGHT's own. The Mail is its body only (the game makes the subject). The join words (tip, notice) are for
+// every sim night, now you can tap Dev or anyone there to join. Switch EV9991_SIM_ON (Events engineer 2 slot).
+
+// ---- Tuesday Day 2 evening: the Mail for the first showing (it goes in the Wren's 'Ship traditions tomorrow', so no 'I')
+== mail.ev9991.sim
+- Sim night tomorrow, 19:30 in the rec deck sim bay. The first of your posting: Dev Raman calls you in on the same approach the Tern flew you aboard. Two pods, a queue, nobody graded.
+
+// ---- Day 3: asked about it during the day, and at it
+== ev9991.sim.ask
+- Sim night tonight. Dev's flying the new hands in on the approach they came aboard on.
+== ev9991.sim.here
+- Same approach you came in on. Gentle on the stick.
+== ev9991.sim.thanks
+- You fly the approach you came in on, Dev calling it, and set her down.
+
+// ---- Day 3: Dev's opener when you join (a card, then the pod)
+== join.rec-sim-night.open
+- First time in the pod? Good. Hands light, eyes on the pad. You've seen this approach once already, from the back seat.
+
+// ---- any sim night with both pods taken: the pilot nearest Dev gives you their turn (a toast; {name} is theirs)
+== ev9991.sim.give
+- {name} climbs out of a pod: "Your go. I've had mine."
+
+// ---- every sim night: tap Dev, or anyone at it, to join (a pod if one's free, else the bench for the next turn)
+== join.rec-sim-night.tip
+- Tap {name} to fly an approach on sim night
+== join.rec-sim-night.notice
+- Sim night: take a pod, or the bench for the next turn, and fly an approach with Dev calling it. Leisure up.
