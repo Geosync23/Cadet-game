@@ -9854,7 +9854,7 @@ var TP997_ON = true || URL_FLAGS.has('tp997');   // 0.99.7 (TP1 for lead 49; pla
 var TP998_ARROW_ON = true || URL_FLAGS.has('tp998arrow'), TP998_BOOTH_ON = true || URL_FLAGS.has('tp998booth');   // after 0.99.7 (TP1 for lead 50, the round's O; backlog TP1-2, TP1-3): Day 2's booths arrow from 18:00 at Leila, not a booth (Onboarding engineer slot); a booth used again the same day ends with its screen (section 15's actBegin). off: as 0.99.7
 var TP997 = { nd1: TP997_ON, n6: TP997_ON, n7: TP997_ON, n9: TP997_ON, n11: TP997_ON, n28: TP997_ON, n33: TP997_ON, n53: TP997_ON, n54: TP997_ON };   // each note alone: d1 Day 1's arrows to the briefing and the clock (RV32's find), 6 Day 2's call-home tip, 7 nearest bathroom, 9 the tracker tip, 11 the device-at-work tip early, 28 the rec deck's blurb, 33 Pockets, 53 the join words, 54 Mark all as read
 const TRAD997_ON = true || URL_FLAGS.has('trad997');   // 0.99.7 (TB6; plans/patch-0997.md notes 18, 43, 50, 51, 52): hosted traditions: the Spice shelf supper after dinner with Brennan's card, Open lab's host, Teach me your thing per teacher, Calder at your bunk, your loaf from Bread day (section 18's Traditions slot, 24c's inspection); off: 0.99.6. `?trad997` previews
-const TB9991_DRILL_ON = false || URL_FLAGS.has('drill9991');   // 0.99.91 piece C (TB7 for lead 51; plans/patch-09991.md, the user: "make them like ship traditions. just click on the cheif and the event starts"): the Wednesday drill is Calder's talk at the Works bay muster line, tap her to join; no drill side jobs, no stops, no stopwatch (section 24c, its slot below the drill tea); off: 0.99.9. `?drill9991` previews
+const TB9991_DRILL_ON = true || URL_FLAGS.has('drill9991');   // 0.99.91 piece C (TB7 for lead 51; plans/patch-09991.md, the user: "make them like ship traditions. just click on the cheif and the event starts"): the Wednesday drill is Calder's talk at the Works bay muster line, tap her to join; no drill side jobs, no stops, no stopwatch (section 24c, its slot below the drill tea); off: 0.99.9. `?drill9991` previews
 const GAMES997_ON = true || URL_FLAGS.has('games997');   // 0.99.7 (GM1; plans/patch-0997.md notes 12, 40, 41, 44): Tiles night in rounds, the Tiles tutorial step by step, Winner Stays On to watch and join (sections 23 and 23b, the Games slot; the Lightdisc music is AV1's SND_DISC). off: the game as 0.99.6
 // the traditions variety (0.93.2, FX24 for lead 37; CS1's pitch pages plans/trad-variety-pitch.html and -2.html on claude/crew-stories-pitch):
 // six weekly ones take turns from week 2 (TRAD_0932_WHEN: their rhythm with it on; week 1 unchanged), the user's fourteen new ones
@@ -50985,7 +50985,7 @@ function addrBelowHud(c) {
 // has its own first-time words (content/banks/ev9991-sim.lines: Dev Raman's Mail the evening before, the ask and here
 // lines, his opener card when you join); later ones keep SIM_NIGHT's. Every sim night can be joined now: tap Dev or
 // anyone at it (TRAD_JOIN, rec 'sim': a free pod, else the bench for the next turn, recStart). Off: none of this ----
-var EV9991_SIM_ON = false;                               // var: tradWhere (above) may ask before this line runs
+var EV9991_SIM_ON = true;                                // var: tradWhere (above) may ask before this line runs
 const EV9991_SIM_DAY = 3;                                // a Wednesday (weekday 2); Day 4 is the Last Light, quiz, birthday, late piano
 if (EV9991_SIM_ON && SIM_BAY && REC_TRAD_ON) {
   const S = SIM_NIGHT, first = e => !!e && e.day === EV9991_SIM_DAY;
@@ -67455,7 +67455,7 @@ function boardNewPost(h, jobs, t, m, end) {              // boardTopUp's trade p
 // included, and a 'done' summons is never put back on the meetings list. With the switch on, section 25 leaves it open
 // while you're a junior who has passed the test (crResultWaiting), and promoSummonsTick opens again one Dev mode closed
 // (a Dev save already stuck that way) on its own day before it ends. Off: 0.99.9 exactly.
-var CR9991_RESULTS_ON = false;                           // var: section 25's devmodeCareerSet asks
+var CR9991_RESULTS_ON = true;                            // var: section 25's devmodeCareerSet asks
 const crResultWaiting = W => !!W && W.tier === 1 && !!W.test && !!W.test.passed;   // the test passed, the result still to come
 function crResultReopen(r, d, sd, now) {                 // promoSummonsTick's: a summons Dev mode closed, open again
   if (!CR9991_RESULTS_ON || !r || r.status !== 'done' || r.met || d !== sd || r.key !== 'promoSummons@' + sd || now >= r.at + r.len || !crResultWaiting(SHIP.works)) return;
@@ -69475,7 +69475,7 @@ function sdItems(d) {
 // The night shift's check-in arrow (28a, p5n:in) is level 1 from N.from - 15; an hour booked to run past that covered it.
 // sdHourOk: an hour (minute from midnight) on day `day` is fine unless that day has your night shift (p5nOf, 28a) and the
 // hour ends after N.from - 15. Read in sdDraft's clamp, the hour stepper, the quiet pick and sdBook. Off: as 0.99.9.
-const TP9991_SD_ON = false;
+const TP9991_SD_ON = true;
 function sdHourOk(day, at) { const N = p5nOf(day); return !N || (day - 1) * 1440 + at + SD_LEN <= N.from - 15; }
 // the hour from `at` in direction dir (-1 or 1) that's fine: at itself if fine (unless step), else the next one that way,
 // else the other way (not when stepping: then it stays put); hours stay in SD_HOURS
