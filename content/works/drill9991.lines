@@ -2,7 +2,8 @@
 // 0.99.91 piece C (TB7 for lead 51): the Wednesday drill as Chief Calder's talk at the Works bay muster line
 // (TB9991_DRILL_ON, section 24c's drill9991). Stand-ins, the same as the game's fallbacks; a writer replaces them (same
 // keys). Calder: plain, brisk, fair. A card line is 90 characters at most. Per kind (fire, pressure, power): the card's
-// title, six lines in order, the crew line (Zeke for fire, Halloran for pressure; none for power) and her close.
+// title, six lines in order, the crew line (Zeke for fire, Halloran for pressure; none for power), Calder's version of it (crew.calder, if he isn't on
+// the line) and her close.
 
 == drill9991.toast.fire
 - Drill at 15:00: the fire drill. Muster at the Works bay.
@@ -30,6 +31,8 @@
 - And nobody goes back in for their things. Things we can replace.
 == drill9991.fire.crew
 - Three real ones in twenty years. Every one of them started as somebody's toaster.
+== drill9991.fire.crew.calder
+- Zeke's seen three real ones. Every one started as somebody's toaster.
 == drill9991.fire.close
 - That's the drill. On the line with us till the all-clear.
 
@@ -52,6 +55,8 @@
 - Ears pop and you're on your own? Nearest door, shut it behind you, then call.
 == drill9991.pressure.crew
 - Dog it, then shout. Never the other way round. Shouting doesn't hold air.
+== drill9991.pressure.crew.calder
+- Halloran's rule: dog it, then shout. Shouting doesn't hold air.
 == drill9991.pressure.close
 - That's the drill. On the line with us till the all-clear.
 

@@ -34555,6 +34555,8 @@ const LINES = JSON.parse([
   '{"text":"That\'s the drill. On the line with us till the all-clear.","id":"6stenr"}]',
   ',"drill9991.fire.crew":[',
   '{"text":"Three real ones in twenty years. Every one of them started as somebody\'s toaster.","id":"ookxlu"}]',
+  ',"drill9991.fire.crew.calder":[',
+  '{"text":"Zeke\'s seen three real ones. Every one started as somebody\'s toaster.","id":"aecz1o"}]',
   ',"drill9991.fire.line.1":[',
   '{"text":"Right. Fire drill. In close, everyone.","id":"1g3pq9h"}]',
   ',"drill9991.fire.line.2":[',
@@ -34599,6 +34601,8 @@ const LINES = JSON.parse([
   '{"text":"That\'s the drill. On the line with us till the all-clear.","id":"18v1ky4"}]',
   ',"drill9991.pressure.crew":[',
   '{"text":"Dog it, then shout. Never the other way round. Shouting doesn\'t hold air.","id":"zhvrvc"}]',
+  ',"drill9991.pressure.crew.calder":[',
+  '{"text":"Halloran\'s rule: dog it, then shout. Shouting doesn\'t hold air.","id":"1iocho6"}]',
   ',"drill9991.pressure.line.1":[',
   '{"text":"Pressure drill. Listen up.","id":"88ed9l"}]',
   ',"drill9991.pressure.line.2":[',
@@ -61919,7 +61923,7 @@ if (typeof jobKindAdd === 'function' && drillPlace('ext') && drillPlace('hatch')
 // starts. the event is just the cheif talking about the relevant drill and danger. simple." On: neither drill side job is posted
 // (the junior's above, 24v's Senior calls), so no stops and no stopwatch. 14:50 Calder's toast and a level 1 arrow to the muster
 // line; 15:00-15:15 she stands at the Works bay muster line (5-muster-3, a crewHold from 14:55: runtime only, never the planner) with Zeke
-// and Halloran beside her (-2, -4) when they're on the deck, a star over her; a tap on her (or them) is your turnout and opens
+// and Halloran beside her (-2, -4; brought from their work deck by crewScene), a star over her; a tap on her (or them) is your turnout and opens
 // her card: the week's drill (fire, pressure, power), what it is and its danger, Zeke's (fire) or Halloran's (pressure) line, her
 // close; then you stand on the line to the all-clear. The turnout: a junior's worksUse('m3d') (the row's reputation; the first
 // trains it) and simNote('drill', { mins: 0, you: true }) (the Friday tea's line, now the turnout); a Senior's
@@ -61933,7 +61937,7 @@ const DRILL9991_TALK = {
       ['Extinguishers: red, by every hatch. Pin out, aim at the base of it, short sweeps.', 'nod'],
       ['Bigger than you? Don\'t fight it. Shut the hatch on it, call the bridge, get people out.'],
       ['And nobody goes back in for their things. Things we can replace.']],
-    crewLine: 'Three real ones in twenty years. Every one of them started as somebody\'s toaster.', close: 'That\'s the drill. On the line with us till the all-clear.' },
+    crewLine: 'Three real ones in twenty years. Every one of them started as somebody\'s toaster.', crewCalder: 'Zeke\'s seen three real ones. Every one started as somebody\'s toaster.', close: 'That\'s the drill. On the line with us till the all-clear.' },
   pressure: { crew: 'halloran-emeka', title: 'Pressure drill', lines: [
       ['Pressure drill. Listen up.', 'gesture'],
       ['A breach is quiet at first. A whistle. Your ears pop. Paper starts sliding toward a wall.'],
@@ -61941,7 +61945,7 @@ const DRILL9991_TALK = {
       ['Bulkhead doors close a leak off. The wheel on the door: four turns, dogged tight.', 'nod'],
       ['Don\'t wait to see who\'s on the other side. Close it. The bridge counts heads after.'],
       ['Ears pop and you\'re on your own? Nearest door, shut it behind you, then call.']],
-    crewLine: 'Dog it, then shout. Never the other way round. Shouting doesn\'t hold air.', close: 'That\'s the drill. On the line with us till the all-clear.' },
+    crewLine: 'Dog it, then shout. Never the other way round. Shouting doesn\'t hold air.', crewCalder: 'Halloran\'s rule: dog it, then shout. Shouting doesn\'t hold air.', close: 'That\'s the drill. On the line with us till the all-clear.' },
   power: { crew: null, title: 'Power drill', lines: [
       ['Power drill. This one\'s ours more than anyone\'s.', 'gesture'],
       ['Main bus drops: the lights go, the air scrubbers slow, the lifts stop where they are.'],
@@ -61991,7 +61995,10 @@ function drill9991Frame() {
   if (DRILL9991.mk !== key) { DRILL9991.mk = key; DRILL9991.who = deckDef.num === 5 && m >= DRILL_AT - 5 && m < DRILL_END ? drill9991Who(d) : null; }   // they walk to the line from 14:55, there for 15:00
   const who = DRILL9991.who;
   if (!who) { if (DRILL9991.holds.length) { DRILL9991.holds.forEach(f => f()); DRILL9991.holds = []; } if (DRILL9991.el) DRILL9991.el.style.display = 'none'; return; }
-  for (const [id, pl] of DRILL9991_LINE) { const a = tjAgent(id); if (a && CREW_HELD.get(id) !== pl && placeById(pl)) DRILL9991.holds.push(crewHold(a.p, pl)); }
+  const till = Math.min(now + 3, (d - 1) * 1440 + DRILL_END);
+  for (const [id, pl] of DRILL9991_LINE) { if (!placeById(pl)) continue;
+    if (id !== 'calder' && typeof crewScene === 'function') crewScene(id, { mode: 'wait', to: pl, until: till });   // (lead 51) Zeke and Halloran come from their work deck to the line (stage directions, live only; renewed each frame, so they go back after)
+    const a = tjAgent(id); if (a && CREW_HELD.get(id) !== pl) DRILL9991.holds.push(crewHold(a.p, pl)); }
   const c = tjAgent('calder'), show = !!c && m >= DRILL_AT && !drill9991Came(d, who) && !(typeof DIALOGUE !== 'undefined' && DIALOGUE);
   if (!DRILL9991.el && show) { const el = document.createElement('div'); el.style.cssText = 'position:fixed;left:0;top:0;z-index:2;pointer-events:none;font:600 12px system-ui,sans-serif;color:#0b2a26;background:#5fd6c6;border-radius:999px;padding:2px 8px;box-shadow:0 1px 6px rgba(0,0,0,.4);white-space:nowrap';
     el.textContent = '★ ' + tjFirst('calder'); document.body.appendChild(el); DRILL9991.el = el; DRILL9991.v = new THREE.Vector3(); }
@@ -62022,10 +62029,10 @@ function drill9991Tap(a) {
 function drill9991Card(d, kind, go) {
   const M = DRILL9991_TALK[kind], W = (k, fb) => worksText('drill9991.' + kind + '.' + k, fb);
   const lines = M.lines.map(([t, pose], k) => ({ who: 'calder', text: W('line.' + (k + 1), t), ...(pose ? { pose } : {}) }));
-  if (M.crew && M.crewLine && evPerson(M.crew)) lines.push({ who: M.crew, text: W('crew', M.crewLine) });
+  if (M.crew && M.crewLine) lines.push(tjAgent(M.crew) ? { who: M.crew, text: W('crew', M.crewLine) } : { who: 'calder', text: W('crew.calder', M.crewCalder) });   // (lead 51) not on the line: Calder says it for him
   lines.push({ who: 'calder', text: W('close', M.close) });
   MEETING_SCRIPTS['drill9991.talk'] = { title: W('title', M.title), noCount: true, onEnd: go, lines };   // no gist: no notes Mail
-  dialogueShow('drill9991.talk', { id: 'drill9991.talk@' + d, who: ['calder'].concat(M.crew && evPerson(M.crew) ? [M.crew] : []), at: shipNow(), ...cardWhere({ rooms: new Set(['5|w']) }) });   // the Works bay, and the room you tapped from
+  dialogueShow('drill9991.talk', { id: 'drill9991.talk@' + d, who: ['calder'].concat(M.crew && tjAgent(M.crew) ? [M.crew] : []), at: shipNow(), ...cardWhere({ rooms: new Set(['5|w']) }) });   // the Works bay, and the room you tapped from
 }
 // after her talk: you stand on the muster line (a free spot of 5-muster-1..6, nearest Calder) facing north, to the all-clear
 function drill9991Stand(d, kind) {

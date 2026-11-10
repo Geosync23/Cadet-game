@@ -48,12 +48,12 @@ with sync_playwright() as pw:
         until(g, (D - 1) * 1440 + 901)
         for _ in range(30):
             a = json.loads(g.ev(LINE))
-            if a['calder'] != 'off-deck' and a['calder'][1] is not None and a['calder'][1] < .3: break
+            if all(a[k] != 'off-deck' and a[k][1] is not None and a[k][1] < .3 for k in ('calder', 'zeke', 'hall')): break
             g.step(25)
         print('  15:0x', a)
         check(a['calder'] != 'off-deck' and a['calder'][0] == '5-muster-3' and a['calder'][1] < .3, 'Day %d: Calder on the muster line (%s)' % (D, a['calder']))
-        check(a['zeke'] == 'off-deck' or a['zeke'][0] == '5-muster-2', 'Day %d: Zeke held beside her (%s)' % (D, a['zeke']))
-        check(a['hall'] == 'off-deck' or a['hall'][0] == '5-muster-4', 'Day %d: Halloran held beside her (%s)' % (D, a['hall']))
+        check(a['zeke'] != 'off-deck' and a['zeke'][0] == '5-muster-2' and a['zeke'][1] < 1.2, 'Day %d: Zeke held beside her (%s)' % (D, a['zeke']))
+        check(a['hall'] != 'off-deck' and a['hall'][0] == '5-muster-4' and a['hall'][1] < 1.2, 'Day %d: Halloran held beside her (%s)' % (D, a['hall']))
         check(bool(a['star']) and a['star'].startswith('block'), 'Day %d: the star over her (%s)' % (D, a['star']))
         use0 = g.ev("SHIP.works.use.m3d || 0")
         if MISS:
