@@ -1,3 +1,16 @@
+# EV1, latest state (2026-11-10, for lead 51)
+
+- Built and live: 0.99.7's Last Light, first Saturday and reading corner (claude/p997-events), 0.99.9's pale blink (claude/ev999-blink, live 2026-11-08). Open offers, only if the user asks: Deck 6's blink softer (scale the tint by the deck's own light); the blink's notice as a direct toast so it lands with the blink.
+- Memory: this session ran from 2026-11-06 through four rounds and is near its limit, so the next job goes to a fresh session.
+
+## Next job, not started: a flight-sim tradition in week 1 (0.99.91; the user: "Need a flight sim ship tradition week 1 sometime")
+Branch claude/p9991-flightsim from main bfbcbdf, switch EV9991_SIM_ON (off = identical vs 0.99.9). Patch page: plans/patch-09991.md on claude/lead-51. Lead 51 OKs the plan before building.
+- Sim night already exists: `SIM_NIGHT` (rec-sim-night, k 457) in section 18's Traditions slot, behind SIM_BAY && REC_TRAD_ON: the rec deck sim bay, Dev Raman at rec:simcoach calling approaches, sim pilots in rec:sim, a queue (rec:simq), watchers (rec:simwatch); every other Thursday from Day 8, 19:30-20:30; skips recBigDay.
+- Proposed: a week-1 showing on Wednesday Day 3, 19:30-20:30 (Day 4 is the Last Light, quiz, birthday, late piano). Under the switch, SIM_NIGHT.when becomes { any: [its own rhythm, { weekday: 2, from: 3, until: 3 }] } (the 0.93.2 any-rhythm shape evDue reads). Clear plans after (SCHED_DATA/SHIP_DAYS/EV_DAYS), as other slot changes do.
+- First-time words for that showing (content/ and content_gen.py): Raman's opener and the Mail ("the approach Dev flew you in on").
+- Joining: check TRAD_JOIN['rec-sim-night'] (a rec 'sim' act through recStart, like kayak/climb); add one if missing.
+- Checks: events_check, day_check 3, devmode_check trad, bigevents, check_fast, cadet_test off vs 0.99.9; a phone shot of the sim bay at 19:45 on Day 3.
+
 # Handover: EV1 (0.99.7 playtest patch: new events and the first week's shape)
 
 Role: EV1, builder for lead 49 (session_01GKuymjjreuZtZeDMBX79xn). Reviewer RV33 (session_01GKuymoAK9gACR31MRd1CMX).
