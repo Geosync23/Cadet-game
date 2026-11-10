@@ -68,3 +68,15 @@ Verdict: PASS on 40569965, with the Zeke change to re-check (2026-11-10).
 
 Verdict: FIXES NEEDED (one, small): Zeke should walk in from the lift, not appear on the line (crewComeTo, or another way
 TB7 prefers), checked with plans/rv36-probes/drill_zeke.py (`drill_zeke.py ON.html 893 15:01`). Everything else passes.
+
+### C final: 1c4a7ce4 (game f5a72fea...6743, last game change d7b3ec27)
+
+- Off: cadet_test vs 0.99.9 ALL IDENTICAL on my run, every shot 0 px (TB7's run saw i_tap3 236 px one level off; not
+  repeated here, so renderer noise on their side).
+- On (a copy): full mech_check OK; TB7's drill probe OK (Days 3, 10, 17); drill_more.py all six cases sane, no errors.
+- The fix: drill_zeke.py (893, 15:06): Zeke off the deck at 14:53, steps out of the Main lift at 14:55 (-4.5, 0.5) and walks
+  tile by tile to 5-muster-2, there at 14:57. After 15:15 he walks back to the lift. Fixed.
+- Note: Halloran, already on Deck 5, takes a while to cross the Works bay in my run (on his spot about 15:12, not 15:05).
+  He gets there, nothing is stuck; the talk doesn't wait on him.
+
+Verdict: PASS (2026-11-10).
