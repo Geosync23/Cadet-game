@@ -9854,6 +9854,7 @@ var TP997_ON = true || URL_FLAGS.has('tp997');   // 0.99.7 (TP1 for lead 49; pla
 var TP998_ARROW_ON = true || URL_FLAGS.has('tp998arrow'), TP998_BOOTH_ON = true || URL_FLAGS.has('tp998booth');   // after 0.99.7 (TP1 for lead 50, the round's O; backlog TP1-2, TP1-3): Day 2's booths arrow from 18:00 at Leila, not a booth (Onboarding engineer slot); a booth used again the same day ends with its screen (section 15's actBegin). off: as 0.99.7
 var TP997 = { nd1: TP997_ON, n6: TP997_ON, n7: TP997_ON, n9: TP997_ON, n11: TP997_ON, n28: TP997_ON, n33: TP997_ON, n53: TP997_ON, n54: TP997_ON };   // each note alone: d1 Day 1's arrows to the briefing and the clock (RV32's find), 6 Day 2's call-home tip, 7 nearest bathroom, 9 the tracker tip, 11 the device-at-work tip early, 28 the rec deck's blurb, 33 Pockets, 53 the join words, 54 Mark all as read
 const TRAD997_ON = true || URL_FLAGS.has('trad997');   // 0.99.7 (TB6; plans/patch-0997.md notes 18, 43, 50, 51, 52): hosted traditions: the Spice shelf supper after dinner with Brennan's card, Open lab's host, Teach me your thing per teacher, Calder at your bunk, your loaf from Bread day (section 18's Traditions slot, 24c's inspection); off: 0.99.6. `?trad997` previews
+const TB9991_DRILL_ON = false || URL_FLAGS.has('drill9991');   // 0.99.91 piece C (TB7 for lead 51; plans/patch-09991.md, the user: "make them like ship traditions. just click on the cheif and the event starts"): the Wednesday drill is Calder's talk at the Works bay muster line, tap her to join; no drill side jobs, no stops, no stopwatch (section 24c, its slot below the drill tea); off: 0.99.9. `?drill9991` previews
 const GAMES997_ON = true || URL_FLAGS.has('games997');   // 0.99.7 (GM1; plans/patch-0997.md notes 12, 40, 41, 44): Tiles night in rounds, the Tiles tutorial step by step, Winner Stays On to watch and join (sections 23 and 23b, the Games slot; the Lightdisc music is AV1's SND_DISC). off: the game as 0.99.6
 // the traditions variety (0.93.2, FX24 for lead 37; CS1's pitch pages plans/trad-variety-pitch.html and -2.html on claude/crew-stories-pitch):
 // six weekly ones take turns from week 2 (TRAD_0932_WHEN: their rhythm with it on; week 1 unchanged), the user's fourteen new ones
@@ -34548,6 +34549,80 @@ const LINES = JSON.parse([
   '{"text":"You call Works\' part. Three calls, in order. The crew answer on their devices.","id":"vsskm5"}]',
   ',"drill.works.title":[',
   '{"text":"The drill: Works","id":"xe3z37"}]',
+  ',"drill9991.early":[',
+  '{"text":"Three o\'clock, on the muster line. Not yet.","id":"1053w81"}]',
+  ',"drill9991.fire.close":[',
+  '{"text":"That\'s the drill. On the line with us till the all-clear.","id":"6stenr"}]',
+  ',"drill9991.fire.crew":[',
+  '{"text":"Three real ones in twenty years. Every one of them started as somebody\'s toaster.","id":"ookxlu"}]',
+  ',"drill9991.fire.line.1":[',
+  '{"text":"Right. Fire drill. In close, everyone.","id":"1g3pq9h"}]',
+  ',"drill9991.fire.line.2":[',
+  '{"text":"Fire hurts us fastest out here. No window to open. Nowhere to go but the next deck.","id":"1nloxy8"}]',
+  ',"drill9991.fire.line.3":[',
+  '{"text":"Smoke is worse than flames. It fills a room in a minute and takes the air with it.","id":"15zro94"}]',
+  ',"drill9991.fire.line.4":[',
+  '{"text":"Extinguishers: red, by every hatch. Pin out, aim at the base of it, short sweeps.","id":"1hu8nau"}]',
+  ',"drill9991.fire.line.5":[',
+  '{"text":"Bigger than you? Don\'t fight it. Shut the hatch on it, call the bridge, get people out.","id":"3pa28u"}]',
+  ',"drill9991.fire.line.6":[',
+  '{"text":"And nobody goes back in for their things. Things we can replace.","id":"1b17c60"}]',
+  ',"drill9991.fire.title":[',
+  '{"text":"Fire drill","id":"1pbyzo0"}]',
+  ',"drill9991.goal.fire":[',
+  '{"text":"Fire drill, 15:00: Chief Calder at the Works bay","id":"b4uc71"}]',
+  ',"drill9991.goal.power":[',
+  '{"text":"Power drill, 15:00: Chief Calder at the Works bay","id":"469hep"}]',
+  ',"drill9991.goal.pressure":[',
+  '{"text":"Pressure drill, 15:00: Chief Calder at the Works bay","id":"rm1zin"}]',
+  ',"drill9991.missed":[',
+  '{"text":"We ran the drill without you. Next Wednesday, three o\'clock, Works bay.","id":"1e6tf1j"}]',
+  ',"drill9991.notice":[',
+  '{"text":"You stand on the muster line with the Works team till the all-clear at 15:15.","id":"1ox01pc"}]',
+  ',"drill9991.power.close":[',
+  '{"text":"That\'s the drill. On the line with us till the all-clear.","id":"128f9pk"}]',
+  ',"drill9991.power.line.1":[',
+  '{"text":"Power drill. This one\'s ours more than anyone\'s.","id":"7czt1u"}]',
+  ',"drill9991.power.line.2":[',
+  '{"text":"Main bus drops: the lights go, the air scrubbers slow, the lifts stop where they are.","id":"z21x0e"}]',
+  ',"drill9991.power.line.3":[',
+  '{"text":"The danger is people hurrying in the dark. Stairs and panic hurt more than the dark.","id":"5yw90o"}]',
+  ',"drill9991.power.line.4":[',
+  '{"text":"The breaker cabinet puts the junior wing on reserve. Air and strip lights. Not much else.","id":"dkx8zw"}]',
+  ',"drill9991.power.line.5":[',
+  '{"text":"Never open a live panel to have a look. Reserve bites as hard as main.","id":"1c54qau"}]',
+  ',"drill9991.power.line.6":[',
+  '{"text":"Stand still. Let your eyes adjust. Follow the floor strips to your muster point.","id":"dkzans"}]',
+  ',"drill9991.power.title":[',
+  '{"text":"Power drill","id":"1btj7uk"}]',
+  ',"drill9991.pressure.close":[',
+  '{"text":"That\'s the drill. On the line with us till the all-clear.","id":"18v1ky4"}]',
+  ',"drill9991.pressure.crew":[',
+  '{"text":"Dog it, then shout. Never the other way round. Shouting doesn\'t hold air.","id":"zhvrvc"}]',
+  ',"drill9991.pressure.line.1":[',
+  '{"text":"Pressure drill. Listen up.","id":"88ed9l"}]',
+  ',"drill9991.pressure.line.2":[',
+  '{"text":"A breach is quiet at first. A whistle. Your ears pop. Paper starts sliding toward a wall.","id":"mr5ky6"}]',
+  ',"drill9991.pressure.line.3":[',
+  '{"text":"It isn\'t the cold. It\'s the air leaving. You get seconds of good sense, then less.","id":"1g57yrk"}]',
+  ',"drill9991.pressure.line.4":[',
+  '{"text":"Bulkhead doors close a leak off. The wheel on the door: four turns, dogged tight.","id":"1d2trhy"}]',
+  ',"drill9991.pressure.line.5":[',
+  '{"text":"Don\'t wait to see who\'s on the other side. Close it. The bridge counts heads after.","id":"1yrzqxj"}]',
+  ',"drill9991.pressure.line.6":[',
+  '{"text":"Ears pop and you\'re on your own? Nearest door, shut it behind you, then call.","id":"aj9kcq"}]',
+  ',"drill9991.pressure.title":[',
+  '{"text":"Pressure drill","id":"pgxq5i"}]',
+  ',"drill9991.tea":[',
+  '{"text":"Good turnout at Wednesday\'s drill. Thank you, all of you.","id":"mzzkvd"}]',
+  ',"drill9991.tip":[',
+  '{"text":"Tap Chief Calder to join the drill","id":"1d5jmya"}]',
+  ',"drill9991.toast.fire":[',
+  '{"text":"Drill at 15:00: the fire drill. Muster at the Works bay.","id":"fgj9au"}]',
+  ',"drill9991.toast.power":[',
+  '{"text":"Drill at 15:00: the power drill. Muster at the Works bay.","id":"1xqeklg"}]',
+  ',"drill9991.toast.pressure":[',
+  '{"text":"Drill at 15:00: the pressure drill. Muster at the Works bay.","id":"nqxnrc"}]',
   ',"ending.bay.fetch":[',
   '{"text":"There you are. Half the ship\'s in the bay. With me.","id":"1um36en","tone":"warm"}]',
   ',"ending.breakfast.fetch":[',
@@ -47476,6 +47551,7 @@ function tradPose(s, pl, sp) {
 // the tap (section 10's tapCrew asks first): someone at a joinable tradition now (or its leader) joins you. True when it did
 function tradJoinTap(a) {
   if (!a || !a.p || typeof deckDef === 'undefined') return false;
+  if (TB9991_DRILL_ON && drill9991Tap(a)) return true;     // 0.99.91 (TB7): Calder at the Wednesday drill: her talk (24c)
   if (EV_COMET_ON && COMET && cometTap(a)) return true;     // the comet: Saruth's knot; a Cadet at the Captain's tea sent to the bow lounge (slot 'Comet builder')
   if (EV_VESSEL_ON && VESSEL && vesselTap(a)) return true;  // the Veyli vessel: Calder's sheet, Taavek at the ramp or the bench (slot 'Vessel builder')
   const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
@@ -47794,6 +47870,7 @@ function eventsTick() {
   if (P926_APPT) apptFrame();                            // 0.92.6 item 9: appointments (FX22, Appointments builder slot)
   if (EV_VESSEL_ON && VESSEL) vesselChainHands();        // the Veyli vessel's parts chain: each crate through your hands (slot 'Vessel builder')
   if (TRAD997_ON) t997Frame();                           // 0.99.7 (TB6): Sato at the lab island, a teacher's coaching (Traditions slot)
+  if (TB9991_DRILL_ON) drill9991Frame();                 // 0.99.91 (TB7): the drill's muster line and Calder's star (24c)
   if (TRAD_0932_ON) t932Frame();                         // 0.93.2: the new traditions' talk and their hosts' closing lines (FX24, Traditions slot)
   if (EV_COMET_ON && COMET) cometFrame();                // the comet in the sky, the turn, the dimming, the crowd looking up (slot 'Comet builder')
   if (vesselOn()) vesselSkyFrame();                      // the little Veyli ship off the bow (slot 'Vessel sky', VB2; EV_VESSEL_ON)
@@ -61755,6 +61832,7 @@ const drillJobOf = d => SHIP.jobs.find(x => x.kind === 'drill' && Math.floor(x.p
 if (typeof jobKindAdd === 'function') jobKindAdd('drill', { tier: 1, work: 0, side: true, text: 'The drill',
   hold: j => { if (j.drill !== 'fire') return null; const st = jobStops(j), a = st.find(x => x.step === 'take'), b = st.find(x => x.step === 'putback'); return a && a.done && !(b && b.done) ? 'extinguisher' : null; },   // the extinguisher in your hand (8b's prop, this block's)
   post(h, jobs) {                                        // Wednesdays at 14:00's hour, found at 14:50
+    if (TB9991_DRILL_ON) return;                         // 0.99.91 (TB7): the drill is Calder's talk, no job (drill9991, below the drill tea)
     const d = Math.floor(h / 24) + 1; if ((h % 24 + 24) % 24 !== 14 || !drillDue(d) || jobs.some(x => x.kind === 'drill' && Math.floor(x.posted / 1440) + 1 === d)) return;
     const kind = drillKind(d), t = (d - 1) * 1440 + DRILL_TOAST, j = jobMake('drill', { id: 'drill-' + kind + '@' + d, deck: 5, room: 'w', h, title: worksText('drill.kind.' + kind, kind.charAt(0).toUpperCase() + kind.slice(1) + ' drill'),
       drill: kind, reserved: true, until: (d - 1) * 1440 + DRILL_END });
@@ -61833,9 +61911,132 @@ WORK_TICKS.push((now, skip) => {
   const tea = typeof eventsOn === 'function' && eventsOn(d).find(e => DRILL_TEA.test(e.id)); if (!tea || typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 5) return;
   if (simNotes('drillTea', now - 2880).some(n => n.day === d)) return;
   const dr = simNotes('drill', now - 3 * 1440).filter(n => n.you).pop(); if (!dr || drillTimeWord(dr.mins) !== 'fast') return;
-  simNote('drillTea', { day: d }); drillSay('drill.tea', 'Wednesday\'s drill was quick. Well done, all of you.');
+  simNote('drillTea', { day: d }); if (TB9991_DRILL_ON) worksSay('calder', worksText('drill9991.tea', 'Good turnout at Wednesday\'s drill. Thank you, all of you.')); else drillSay('drill.tea', 'Wednesday\'s drill was quick. Well done, all of you.');   // 0.99.91 (TB7): no stopwatch, so the turnout
 });
 if (typeof jobKindAdd === 'function' && drillPlace('ext') && drillPlace('hatch') && drillPlace('door') && drillPlace('breaker')) { WORK_MECH.m3d = { open(row, d) { worksAskSend('m3d', 'calder', shipNow()); } }; drillCalendar(); }   // a small row: opens on Wednesday, trained by the first drill; only with the drill's places in the build
+// ---- 0.99.91 piece C, drills as traditions (TB7 for lead 51; TB6's plan, plans/handover-tb6.md part 2; behind TB9991_DRILL_ON).
+// The user: "All the drills at work dont make sense. let's make them like ship traditions. just click on the cheif and the event
+// starts. the event is just the cheif talking about the relevant drill and danger. simple." On: neither drill side job is posted
+// (the junior's above, 24v's Senior calls), so no stops and no stopwatch. 14:50 Calder's toast and a level 1 arrow to the muster
+// line; 15:00-15:15 she stands at the Works bay muster line (5-muster-3, a crewHold from 14:55: runtime only, never the planner) with Zeke
+// and Halloran beside her (-2, -4) when they're on the deck, a star over her; a tap on her (or them) is your turnout and opens
+// her card: the week's drill (fire, pressure, power), what it is and its danger, Zeke's (fire) or Halloran's (pressure) line, her
+// close; then you stand on the line to the all-clear. The turnout: a junior's worksUse('m3d') (the row's reputation; the first
+// trains it) and simNote('drill', { mins: 0, you: true }) (the Friday tea's line, now the turnout); a Senior's
+// worksSideXp(1, 'pwrdrill') and simNote('pwrDrill'). Missed: as before (the note with you: false, nothing else). Words:
+// content/works/drill9991.lines (drill9991.*; these are the stand-ins). No R(), no save field of its own (the notes are the record)
+const DRILL9991_TALK = {
+  fire: { crew: 'torres-zeke', title: 'Fire drill', lines: [
+      ['Right. Fire drill. In close, everyone.', 'gesture'],
+      ['Fire hurts us fastest out here. No window to open. Nowhere to go but the next deck.'],
+      ['Smoke is worse than flames. It fills a room in a minute and takes the air with it.'],
+      ['Extinguishers: red, by every hatch. Pin out, aim at the base of it, short sweeps.', 'nod'],
+      ['Bigger than you? Don\'t fight it. Shut the hatch on it, call the bridge, get people out.'],
+      ['And nobody goes back in for their things. Things we can replace.']],
+    crewLine: 'Three real ones in twenty years. Every one of them started as somebody\'s toaster.', close: 'That\'s the drill. On the line with us till the all-clear.' },
+  pressure: { crew: 'halloran-emeka', title: 'Pressure drill', lines: [
+      ['Pressure drill. Listen up.', 'gesture'],
+      ['A breach is quiet at first. A whistle. Your ears pop. Paper starts sliding toward a wall.'],
+      ['It isn\'t the cold. It\'s the air leaving. You get seconds of good sense, then less.'],
+      ['Bulkhead doors close a leak off. The wheel on the door: four turns, dogged tight.', 'nod'],
+      ['Don\'t wait to see who\'s on the other side. Close it. The bridge counts heads after.'],
+      ['Ears pop and you\'re on your own? Nearest door, shut it behind you, then call.']],
+    crewLine: 'Dog it, then shout. Never the other way round. Shouting doesn\'t hold air.', close: 'That\'s the drill. On the line with us till the all-clear.' },
+  power: { crew: null, title: 'Power drill', lines: [
+      ['Power drill. This one\'s ours more than anyone\'s.', 'gesture'],
+      ['Main bus drops: the lights go, the air scrubbers slow, the lifts stop where they are.'],
+      ['The danger is people hurrying in the dark. Stairs and panic hurt more than the dark.'],
+      ['The breaker cabinet puts the junior wing on reserve. Air and strip lights. Not much else.', 'nod'],
+      ['Never open a live panel to have a look. Reserve bites as hard as main.'],
+      ['Stand still. Let your eyes adjust. Follow the floor strips to your muster point.']],
+    crewLine: null, close: 'That\'s the drill. On the line with us till the all-clear.' },
+};
+const DRILL9991_LINE = [['calder', '5-muster-3'], ['torres-zeke', '5-muster-2'], ['halloran-emeka', '5-muster-4']];
+const DRILL9991 = { holds: [], told: 0, clear: 0, el: null, v: null, mk: '', who: null };
+// whose drill day d is: 'junior' (24c's drillDue), 'senior' (24v's pdrillDue: Senior Officer and up, trained in M19), or null
+function drill9991Who(d) {
+  if (!TB9991_DRILL_ON || weekday(d) !== 2) return null;
+  if (drillDue(d)) return 'junior';
+  return P5_M19 && typeof pdrillDue === 'function' && pdrillDue(d) ? 'senior' : null;
+}
+const drill9991Done = (d, who) => simNotes(who === 'senior' ? 'pwrDrill' : 'drill', (d - 1) * 1440 - 1).some(n => n.day === d);
+const drill9991Came = (d, who) => simNotes(who === 'senior' ? 'pwrDrill' : 'drill', (d - 1) * 1440 - 1).some(n => n.day === d && n.you);
+const drill9991Kind = (d, k) => worksText('drill9991.' + drillKind(d) + '.' + k, (DRILL9991_TALK[drillKind(d)] || {})[k] || '');
+// 14:50 the toast and the arrow; 15:15 the all-clear (missed: the note, as before; a jump past it: the note, quietly)
+WORK_TICKS.push((now, skip) => {
+  if (!TB9991_DRILL_ON) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440; if (weekday(d) !== 2 || m < DRILL_TOAST) return;
+  const who = drill9991Who(d); if (!who) return;
+  const kind = drillKind(d), t0 = (d - 1) * 1440;
+  if (m < DRILL_END) {
+    if (skip || DRILL9991.told === d || drill9991Done(d, who)) return;
+    DRILL9991.told = d;
+    try { toast(worksName('calder'), worksText('drill9991.toast.' + kind, 'Drill at 15:00: the ' + kind + ' drill. Muster at the Works bay.')); } catch (e) { /* no UI */ }
+    if (typeof guideAsk === 'function') guideAsk({ id: 'drill9991:' + d, level: 1, owner: '24c', from: t0 + DRILL_TOAST, until: t0 + DRILL_END,
+      goal: () => ({ deck: 5, room: 'w', place: '5-muster-3', label: worksText('drill9991.goal.' + kind, (DRILL9991_TALK[kind] || {}).title + ', 15:00: Chief Calder at the Works bay') }), done: () => drill9991Done(d, who) });
+    return;
+  }
+  if (DRILL9991.clear === d) return;
+  DRILL9991.clear = d;
+  const came = drill9991Came(d, who);
+  if (!drill9991Done(d, who)) { if (who === 'senior') simNote('pwrDrill', { day: d, you: false, wrongs: 0 }); else simNote('drill', { kind, mins: null, you: false, day: d }); }
+  if (skip || m >= DRILL_END + 5) return;
+  try { toast(worksName('calder'), worksText('drill.allclear', 'All clear. Drill over.')); } catch (e) { /* no UI */ }
+  if (!came) worksSay('calder', worksText('drill9991.missed', 'We ran the drill without you. Next Wednesday, three o\'clock, Works bay.'));
+});
+// once a frame on Deck 5 (section 18's eventsTick): Calder, Zeke and Halloran on the muster line 14:55-15:15, the star over her from 15:00
+function drill9991Frame() {
+  if (typeof deckDef === 'undefined' || !deckDef || typeof DECK_CREW === 'undefined') return;
+  const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, key = d + '|' + Math.floor(m) + '|' + deckDef.num;
+  if (DRILL9991.mk !== key) { DRILL9991.mk = key; DRILL9991.who = deckDef.num === 5 && m >= DRILL_AT - 5 && m < DRILL_END ? drill9991Who(d) : null; }   // they walk to the line from 14:55, there for 15:00
+  const who = DRILL9991.who;
+  if (!who) { if (DRILL9991.holds.length) { DRILL9991.holds.forEach(f => f()); DRILL9991.holds = []; } if (DRILL9991.el) DRILL9991.el.style.display = 'none'; return; }
+  for (const [id, pl] of DRILL9991_LINE) { const a = tjAgent(id); if (a && CREW_HELD.get(id) !== pl && placeById(pl)) DRILL9991.holds.push(crewHold(a.p, pl)); }
+  const c = tjAgent('calder'), show = !!c && m >= DRILL_AT && !drill9991Came(d, who) && !(typeof DIALOGUE !== 'undefined' && DIALOGUE);
+  if (!DRILL9991.el && show) { const el = document.createElement('div'); el.style.cssText = 'position:fixed;left:0;top:0;z-index:2;pointer-events:none;font:600 12px system-ui,sans-serif;color:#0b2a26;background:#5fd6c6;border-radius:999px;padding:2px 8px;box-shadow:0 1px 6px rgba(0,0,0,.4);white-space:nowrap';
+    el.textContent = '★ ' + tjFirst('calder'); document.body.appendChild(el); DRILL9991.el = el; DRILL9991.v = new THREE.Vector3(); }
+  if (!DRILL9991.el) return;
+  if (!show) { DRILL9991.el.style.display = 'none'; return; }
+  const V = DRILL9991.v; V.set(c.x, (c.y || 0) + 2.1, c.z).project(camera);
+  const vis = V.z < 1 && Math.abs(V.x) < 1.05 && Math.abs(V.y) < 1.05;
+  DRILL9991.el.style.display = vis ? 'block' : 'none';
+  if (vis) DRILL9991.el.style.transform = 'translate(' + Math.round((V.x + 1) * innerWidth / 2) + 'px,' + Math.round((1 - V.y) * innerHeight / 2 - 6) + 'px) translate(-50%,-100%)';
+  if (typeof ixTip === 'function' && roomAt(...player.here()) === 'w') ixTip('drill9991:join', worksText('drill9991.tip', 'Tap Chief Calder to join the drill') + '. She talks the Works team through this week\'s drill.');
+}
+// the tap (section 18's tradJoinTap asks first): Calder, Zeke or Halloran at the drill on Deck 5. True when it did something
+function drill9991Tap(a) {
+  if (!TB9991_DRILL_ON || !a || !a.p || !DRILL9991_LINE.some(([id]) => id === a.p.id) || typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 5) return false;
+  const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, who = drill9991Who(d);
+  if (!who || m < DRILL_TOAST || m >= DRILL_END || drill9991Came(d, who)) return false;   // (after your turnout: their chat card, as any day)
+  if (m < DRILL_AT) { if (a.p.id !== 'calder') return false; worksSay('calder', worksText('drill9991.early', 'Three o\'clock, on the muster line. Not yet.')); return true; }
+  player.stop(); a.talking = 2; player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
+  const kind = drillKind(d);
+  if (who === 'senior') { simNote('pwrDrill', { day: d, you: true, wrongs: 0 }); if (typeof worksSideXp === 'function') worksSideXp(1, 'pwrdrill'); }
+  else { simNote('drill', { kind, mins: 0, you: true, day: d }); worksUse('m3d'); }
+  if (typeof guideDrop === 'function') guideDrop('drill9991:' + d);
+  const go = () => drill9991Stand(d, kind);
+  if (typeof dialogueShow !== 'function') { go(); return true; }
+  drill9991Card(d, kind, go);
+  return true;
+}
+function drill9991Card(d, kind, go) {
+  const M = DRILL9991_TALK[kind], W = (k, fb) => worksText('drill9991.' + kind + '.' + k, fb);
+  const lines = M.lines.map(([t, pose], k) => ({ who: 'calder', text: W('line.' + (k + 1), t), ...(pose ? { pose } : {}) }));
+  if (M.crew && M.crewLine && evPerson(M.crew)) lines.push({ who: M.crew, text: W('crew', M.crewLine) });
+  lines.push({ who: 'calder', text: W('close', M.close) });
+  MEETING_SCRIPTS['drill9991.talk'] = { title: W('title', M.title), noCount: true, onEnd: go, lines };   // no gist: no notes Mail
+  dialogueShow('drill9991.talk', { id: 'drill9991.talk@' + d, who: ['calder'].concat(M.crew && evPerson(M.crew) ? [M.crew] : []), at: shipNow(), ...cardWhere({ rooms: new Set(['5|w']) }) });   // the Works bay, and the room you tapped from
+}
+// after her talk: you stand on the muster line (a free spot of 5-muster-1..6, nearest Calder) facing north, to the all-clear
+function drill9991Stand(d, kind) {
+  const now = shipNow(); if (Math.floor(now / 1440) + 1 !== d || now - (d - 1) * 1440 >= DRILL_END || !deckDef || deckDef.num !== 5) return;
+  const c = tjAgent('calder'), ids = (DECKS[5].drill && DECKS[5].drill.muster) || [];
+  const free = ids.filter(id => placeById(id) && ![...CREW_HELD.values()].includes(id) && !heldBy(id) && !BUSY.has(id)).map(id => [id, placeSpot(id)]).filter(([, s]) => s)
+    .sort((x, y) => (c ? Math.hypot(x[1].x - c.x, x[1].z - c.z) - Math.hypot(y[1].x - c.x, y[1].z - c.z) : 0) || (x[0] < y[0] ? -1 : 1))[0];
+  try { toast(worksText('drill9991.' + kind + '.title', (DRILL9991_TALK[kind] || {}).title || 'Drill'), worksText('drill9991.notice', 'You stand on the muster line with the Works team till the all-clear at 15:15.')); } catch (e) { /* no UI */ }
+  if (!free) return;
+  const sp = free[1]; if (sp.walk) playerGo(sp.walk, () => { if (Number.isFinite(sp.face)) player.face = sp.face; });
+}
 
 // ---------------------------------------------------------------------
 // 24d HAULING (M4, seat M1, 0.45.x; plans/mechanics/m4-hauling.html). The Wednesday delivery has a few crates for the
@@ -68773,6 +68974,7 @@ if (P5_M19 && typeof jobKindAdd === 'function') {
   if (typeof WORKS_SIDE_KINDS !== 'undefined' && WORKS_SIDE_KINDS.add) WORKS_SIDE_KINDS.add('conduitrun');
   jobKindAdd('pwrdrill', { tier: 3, work: 0, side: true, text: 'The drill: the Works calls', stops: pdrillStops, stepDone: pdrillStepDone, veto: true,
     post(h, jobs) {                                      // Wednesdays at 14:00's hour, found at 14:50, yours from the start
+      if (TB9991_DRILL_ON) return;                       // 0.99.91 (TB7): the drill is Calder's talk for Seniors too (24c's drill9991)
       const d = Math.floor(h / 24) + 1; if ((h % 24 + 24) % 24 !== 14 || !pdrillDue(d) || jobs.some(x => x.kind === 'pwrdrill' && Math.floor(x.posted / 1440) + 1 === d)) return;
       const kind = drillKind(d), t = (d - 1) * 1440 + DRILL_TOAST, j = jobMake('pwrdrill', { id: 'pwrdrill-' + kind + '@' + d, deck: 5, room: 'w', h, title: worksText('m19.drill.card', 'The drill: run the Works calls'), drill: kind, day: d, wrongs: 0, reserved: true, until: (d - 1) * 1440 + DRILL_END });
       j.posted = j.found = t; j.claimedBy = 'you'; j.status = 'claimed'; j.start = t; jobs.push(j);
@@ -75873,7 +76075,7 @@ function dvFixed(W, id) {                                // the drill (m3d) and 
     if (weekday(d) + 1 !== row.fixed.wd || !playerShiftOn(d) || d === d0 && now >= dvAbs(d, end)) continue;
     if (id === 'm3d') {
       const j = d === d0 && typeof drillJobOf === 'function' ? drillJobOf(d) : null, nx = j && j.status !== 'done' ? jobStops(j).find(x => !x.done) : null;
-      const ext = drillPlace('ext') || drillPlace('door') || drillPlace('breaker'), p = nx && nx.places[0] || ext;
+      const ext = drillPlace('ext') || drillPlace('door') || drillPlace('breaker'), p = TB9991_DRILL_ON && placeById('5-muster-3') ? '5-muster-3' : nx && nx.places[0] || ext;   // 0.99.91 (TB7): the drill is Calder's talk on the muster line
       return { when: dvAbs(d, at), soon: 15, g: { deck: 5, place: p, room: (placeById(p) || { room: 'w' }).room, label: 'The drill, with Calder' } };
     }
     const g = d === d0 && now >= dvAbs(d, 360) && typeof inspectGoal === 'function' ? inspectGoal(d) : null, bed = playerBed();
