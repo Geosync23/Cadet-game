@@ -1,0 +1,28 @@
+import sys
+exec(open("/home/user/Cadet-game/cadet_test.py").read().split("a, shots = run(")[0])
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1], 390, 844); g.step(3)
+    if g.ev("typeof GUIDE_ON !== 'undefined' && GUIDE_ON"): g.ev("GUIDE.tq.length = 0; guideToast = () => false")
+    print('days', g.ev("(() => { const o = []; for (let d = 1; d <= 42; d++) for (const e of eventsOn(d)) if (e.id === 'rec-sim-night') o.push([d, e.from, e.to]); return o; })()"))
+    print('join', g.ev("JSON.stringify(TRAD_JOIN['rec-sim-night'] || null)"))
+    g.ev("skipTo(1 * 1440 + 18 * 60 + 30)"); g.step(30*4)
+    print('mail', g.ev("SHIP.mail.filter(m => /Sim night/.test(m.subject)).map(m => [m.from, m.subject, m.body])"))
+    g.ev("skipTo(2 * 1440 + 12 * 60)"); g.step(10)
+    print('ask', g.ev("evText(SIM_NIGHT.ask, eventsOn(3).find(e => e.id === 'rec-sim-night')), evText(SIM_NIGHT.here, eventsOn(3).find(e => e.id === 'rec-sim-night'))"))
+    g.ev("skipTo(2 * 1440 + 19 * 60 + 40); goToDeck(7); const b = ROOM_BOX.S; player.obj.position.copy(cellPos(Math.floor((b.i0 + b.i1) / 2), Math.floor((b.j0 + b.j1) / 2))); target.copy(player.obj.position).setY(.7)")
+    g.step(30*8)
+    print('at', g.ev("DECK_CREW.filter(c => c.p && c.spot && c.spot.room === 'S').map(c => c.p.id + ':' + (c.spot.id || ''))"))
+    print('tj', g.ev("tradJoinMinute(shipNow()), [TJ_NOW && TJ_NOW.e.id, TJ_NOW && TJ_NOW.lead, IX_GOAL && IX_GOAL.label, document.getElementById('tjMark') && document.getElementById('tjMark').textContent]"))
+    if len(sys.argv) > 2: g.page.screenshot(path=sys.argv[2] + '-before.png')
+    print('tap', g.ev("(() => { const a = DECK_CREW.find(c => c.p && c.p.id === 'raman'); return a ? tradJoinTap(a) : 'noraman'; })()"))
+    g.step(10)
+    print('card', g.ev("DIALOGUE ? [DIALOGUE.scriptId || DIALOGUE.id, document.body.innerText.includes('First time in the pod')] : null"))
+    if len(sys.argv) > 2: g.page.screenshot(path=sys.argv[2] + '-card.png')
+    for i in range(3):
+        if g.ev("!!DIALOGUE"): g.ev("dialogueNext()"); g.step(3)
+    g.step(30*6)
+    print('act', g.ev("[ACT && ACT.kind, ACT && ACT.placeId, SHIP.events.joined.filter(k => /sim/.test(k)), document.getElementById('toast') && document.getElementById('toast').textContent.slice(0, 200)]"))
+    if len(sys.argv) > 2: g.page.screenshot(path=sys.argv[2] + '-pod.png')
+    for i in range(10):
+        g.step(30*5); print('t', g.ev("[hhmm(SHIP.time.min % 1440), ACT && ACT.kind, ACT && ACT.placeId, SIM_POD_IDS.map(id => { const c = heldBy(id); return c ? c.p.id : '-'; }), EV9991_GIVE && EV9991_GIVE.id, (DECK_CREW.find(c => c.p && EV9991_GIVE && c.p.id === EV9991_GIVE.id) || {}).goalId, EV9991_GIVE && hhmm(EV9991_GIVE.until % 1440), EV9991_GIVE && JSON.stringify(whereIs(schedPeople().find(p => p.id === EV9991_GIVE.id), shipNow())).slice(0, 120)]"))
+    print(g.errors[:3]); g.close()
