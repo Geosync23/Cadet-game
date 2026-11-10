@@ -18,3 +18,12 @@ OLD = main bfbcbdf (0.99.9, game 583d99ba...bd16).
 - Notes, not fixes: a save that already holds a 20:00 Day 23/24 booking (made before the switch, or by the briefing
   with it off) keeps it; opening that job on the Shutdown screen shows the draft at 19:00 (the clamp) while the booking
   says 20:00, until you press Book again.
+
+### A re-check: f9ff643 (game 082c1d86...0665): PASS
+- The fix: m21Raise books sdHourNear(day, 1200, -1) on a night day with the switch on (19:00 on Day 23; "Tomorrow at
+  19:00: the galley circuit"); off 20:00 as before. The only other sdBook caller is the Book button (already guarded).
+- On copy: m21probe books Day 23 19:00; branch's mech_check m21 OK; tp9991_probe OK; machine_check OK; arrows_check
+  step6 asis, teachoff, track, skiptea all ARROWS CHECK OK.
+- Off: cadet_test vs 0.99.9 ALL IDENTICAL; mech_check m21 OK (20:00); check_fast QUICK CHECK OK in 260 s.
+- Still open for the lead to mention (in TP2's build-table row): an old save's 20:00 booking is kept. 28b's line
+  needs mechanics seat A's owner review.
