@@ -66436,6 +66436,7 @@ function promoSummonsTick(now) {                         // book it, warn at 10:
   const W = SHIP.works; if (!W || W.tier !== 1 || !W.test || !W.test.passed) return;
   const sd = promoSummonsDay(), d = worksDay(now), m = now - (d - 1) * 1440; if (!sd || d < sd) return;
   let r = SHIP.occasions.find(x => x.id === 'promoSummons');
+  crResultReopen(r, d, sd, now);   // CR2 (CR9991_RESULTS_ON): one Dev mode closed, open again
   if (!r && d === sd && m < PROMO.latest) { promoScript(); r = occasionAdd('promoSummons', (d - 1) * 1440 + PROMO.summonsAt, true, 30); }
   if (d > sd || m >= PROMO.latest || (r && r.status === 'missed')) { promoPromote(now, 'mail'); return; }   // never missed: by noon it's done
   if (!r) return;
@@ -67177,6 +67178,18 @@ function boardNewPost(h, jobs, t, m, end) {              // boardTopUp's trade p
     if (j && forYou(j)) { j.shareSeen = true; jobs.push(j); return j; }
   }
   return null;
+}
+// ---- CR2 (lead 51, the 0.99.9 bug "I walk into Calder's office on time and nothing happens"; switch CR9991_RESULTS_ON).
+// Dev mode's promotion jump rebuilds the career a day at a time: on the landing day the game books the 08:15 summons at
+// 05:00, then devmodeCareerSet (section 25) marks every open promotion appointment 'done', the summons you still wait for
+// included, and a 'done' summons is never put back on the meetings list. With the switch on, section 25 leaves it open
+// while you're a junior who has passed the test (crResultWaiting), and promoSummonsTick opens again one Dev mode closed
+// (a Dev save already stuck that way) on its own day before it ends. Off: 0.99.9 exactly.
+var CR9991_RESULTS_ON = false;                           // var: section 25's devmodeCareerSet asks
+const crResultWaiting = W => !!W && W.tier === 1 && !!W.test && !!W.test.passed;   // the test passed, the result still to come
+function crResultReopen(r, d, sd, now) {                 // promoSummonsTick's: a summons Dev mode closed, open again
+  if (!CR9991_RESULTS_ON || !r || r.status !== 'done' || r.met || d !== sd || r.key !== 'promoSummons@' + sd || now >= r.at + r.len || !crResultWaiting(SHIP.works)) return;
+  r.status = 'asked';
 }
 // ---- end of slot: Works career engineer ----
 
@@ -75404,7 +75417,7 @@ function devmodeCareerSet(n, now, s = 0) {
   Object.assign(W, c, own, { cur: null }); W.op = op;
   if (n >= 8 && typeof flagSet === 'function') flagSet('works.oily', true);   // your work uniform's row needs it
   if (c.done.includes('ceremony2') && typeof giftKeepsake === 'function') try { giftKeepsake({ id: 'marrow' }, worksText('works.keepsake.commission', worksText('promo.keepsake', 'your framed commission'))); } catch (e) { /* no social */ }
-  for (const r of SHIP.occasions || []) if (/^(works\.|promo)/.test(r.id) && r.status === 'asked') r.status = 'done';   // nothing left asking for what's now set
+  for (const r of SHIP.occasions || []) if (/^(works\.|promo)/.test(r.id) && r.status === 'asked' && !(typeof CR9991_RESULTS_ON !== 'undefined' && CR9991_RESULTS_ON && r.id === 'promoSummons' && crResultWaiting(W))) r.status = 'done';   // nothing left asking for what's now set   // CR2 (CR9991_RESULTS_ON, 24p): but the summons you still wait for stays open
   if (P5_NIGHT && typeof P5N_WORD !== 'undefined' && c.tr.m22 !== undefined) for (const k of ['on', 'off']) if (n > P5N_WORD[k].day && flag('p5n.' + k) === undefined) flagSet('p5n.' + k, 'dev');   // (W8) 28a's words (night.on, night.off) already said for days passed: no 'Your nights' on a later day
   if (P5_CASES6 && typeof flagSet === 'function') for (const id of ['p6', 'p7', 'p8']) if (c.tr[id] !== undefined && flag('case.' + id + '.first') === undefined) flagSet('case.' + id + '.first', c.tr[id]);   // (S6-8) the first head-scratcher of each: had
   if (typeof MACH_REV !== 'undefined') MACH_REV++;       // the board: the tier's jobs
