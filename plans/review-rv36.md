@@ -29,3 +29,12 @@ Notes (not fixes):
    drill's toast caught up by the jump). Piece C replaces that toast behind its own switch.
 
 Verdict: PASS (2026-11-10). Notes 1-2 are optional polish for EV2; nothing blocks.
+
+## C. The Wednesday drill as Calder's talk (TB7, claude/p9991-drills, TB9991_DRILL_ON) - in progress
+
+Early look at 9ebb418 (game 258ad821...2920), before TB7's word that it's ready:
+- Off: cadet_test vs 0.99.9 ALL IDENTICAL.
+- TB7's drill probe (on a copy, phone size, Days 3 fire, 10 pressure, 17 power): DRILL PROBE OK on my side.
+- Seen on the phone shot: the card's header "FIRE DRILL · Chief Ines Calder" runs under the close X.
+To do once ready: MISS=1, a Senior's drill, a tap before 15:00, save and reload mid-talk, mech_check, day_check 3 and
+devmode_check on a switched-on copy, and the "simple" read of the whole thing.
