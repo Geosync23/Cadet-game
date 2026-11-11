@@ -66361,7 +66361,12 @@ const REW_FROM = 17, REW_POST = 480, REW_CREW = 45, REW_FADE = 3, REW_KEEP = 90;
 const REW_TRAIN = ['4-junction-2', '4-junction-1'];      // Calder's, then yours (the officers' corridor's closet first)
 const REW_COLS = ['red', 'blue', 'yellow', 'green', 'white', 'black'];
 const rewSeed = () => machSeed('rewire');
-const rewBoxes = () => machineList().filter(m => /junction/.test(m.id) && panelPlace(m.id) && !SHIP.jobs.some(j => j.machine === m.id && j.status !== 'done'));   // not one with a job open
+// MC9991 (BM28's find E, TP2 for lead 51; for 0.99.91): the week's rewire is Tier 2 (rewJob), but jobTier also takes the
+// tier of the rooms it takes you into, so a junction in a Tier 3 room (6-junction-1, Deck 6) made a Tier 3 rewire for a
+// Tier 2 Officer. With the switch on, rewBoxes skips a junction whose rewire would be above Tier 2. Off: as 0.99.9.
+const MC9991_REW_ON = false;
+const rewBoxes = () => machineList().filter(m => /junction/.test(m.id) && panelPlace(m.id) && !SHIP.jobs.some(j => j.machine === m.id && j.status !== 'done')   // not one with a job open
+  && !(MC9991_REW_ON && jobTier({ machine: m.id, tier: 2, stops: [{ placeId: panelPlace(m.id) }] }) > 2));   // (MC9991) nor one above the rewire's Tier 2 (its room, its panel)
 function rewState() {                                    // side.rewire, cleaned (a save may hold junk)
   const s = typeof worksSide === 'function' ? worksSide() : null; if (!s) return null;
   const R = s.rewire;
