@@ -9,4 +9,22 @@
 exit 0, `ALL IDENTICAL (apart from renderer noise: some pixels 1 level off)`: i_tap3 236 px max 1 (the software
 renderer's one-level rounding, which the check allows), every other view 0 px; errors none; taps the same.
 
-## Result: running
+## The rest (two lanes)
+
+| Check | Result | Minutes |
+|---|---|---|
+| day_check 0, 1, 5, 7, 21, 22 | all DAY CHECK OK | 7 to 8 each |
+| arrows_check endgo | ARROWS CHECK OK | 10 |
+| intro_check (whole) | OK | 60 |
+| intro_check --dinner | OK | 3 |
+| intro_check --firsts | OK | 1 |
+| path_check | PATH CHECK OK | 1 |
+| arc_check | ARC CHECK OK | 0 |
+| lines_check | PASS (0 errors, 116 warnings) | 0 |
+| lines_check --day | PASS (0 errors) | 5 |
+| pf_f1_same 0.99.9 vs candidate | F1 23674 checks, 0 mismatches; no page errors; fingerprints 30 differ (OLD has none of the four new switches, so by design; prints FAILED for that reason only) | 0 |
+| pf_f1_same 0.99.6 vs all-off copy | F1 23674 checks, 0 mismatches; fingerprints 30 same; PF F1 SAME OK | 0 |
+
+fresh_walk, p926 and perf_check: R4's (handed over, not run here).
+
+## Result: OK (my share). No NEW FAIL.
