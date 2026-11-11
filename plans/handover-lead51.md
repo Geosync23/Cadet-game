@@ -5,7 +5,7 @@
   (slug 0c01401d-1612-4e1c-a69a-5df090589360, v5 1794159823-18ea), Dev https://claude.ai/artifact/JftiS793gzEPhKRekatcon
   (slug 8f197d97-106b-4f75-83f3-37b6695372ad, v5 1794159830-59af). main = claude/integration = bfbcbdf (game 583d99ba...bd16).
   The user's "current save" Dev link (6daNCLCJ...) is untouched; never publish over it.
-- **0.99.91 in progress** (plans/patch-09991.md): A TP1-1 shutdown vs night shift (TP2, TP9991_SD_ON), B week-1 Sim night
+- **0.99.91 PUBLISHED 2026-11-11 ~14:49 UTC** (Playtest v6 1794408527-c375, Dev v6 1794408531-b0f2; main = integration = cdd9efd). Was: (plans/patch-09991.md): A TP1-1 shutdown vs night shift (TP2, TP9991_SD_ON), B week-1 Sim night
   Wed Day 3 19:30 (EV2, EV9991_SIM_ON), C drills as Calder's talk (TB7, TB9991_DRILL_ON), D Calder results meeting after a
   Dev jump (CR2, CR9991_RESULTS_ON), E (added) rewire Tier fix in 24q (TP2, MC9991_REW_ON, old bug).
 - Round 09991 on candidate 1 (staging-09991 4d8869ec, game 475bac86) ended: finds Q1/Q2/Q4 (drill arrows, TB7 fixing:
