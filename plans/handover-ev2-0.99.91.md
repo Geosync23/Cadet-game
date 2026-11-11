@@ -17,6 +17,11 @@ Role: EV2, events builder for lead 51 (session_01GKuymjp49y3M5hgRLecobm). Review
 Off: cadet_test vs 0.99.9 ALL IDENTICAL; check_fast OK. On (a copy): events_check, day_check 3, weekend_check, devmode_check trad, bigevents_check, and check_fast's parts (deck, machine, leave, device, names) all OK. Probe: `python3 plans/ev2-probes/simprobe.py ON.html [SHOT-PREFIX]`. Shots: plans/ev2-probes/shots/.
 Switch-on copy: `sed 's/^var EV9991_SIM_ON = false;/var EV9991_SIM_ON = true; /'` (check with grep -c that it changed).
 
+## Round 09991 fixes (RV36 PASS on 6ad4050, also the section 14 owner check)
+- Find C (R6, interactions_check): with the switch on, the Day 3 sim night put a pilot in a pod tagged out the evening before. Section 14's seat picker never applied simPlanShut to a tradition's rec:sim seats. Fix 5f9aa4a: one line in that loop behind EV9991_SIM_ON.
+- Find F (BM28, join_check): Dev's Day 3 card holds the join until it ends, and join_check never stepped it. Fix 6ad4050, check-side: line 43's regex also matches ev9991.sim. The game side is fine: the card's onEnd joins you whether you read it to the end or close it.
+- Game sha256 off 24af9479...411f (ALL IDENTICAL vs 0.99.9), on d830f5ab...9005.
+
 ## Loose ends
 - Backlog EV2-2 (four toasts in a row at the hand-over) and EV2-3 (the yielding pilot stands by the full bench): RV36's polish notes, parked by lead 51. (EV2-1 was already an older row, so these start at 2.)
 
