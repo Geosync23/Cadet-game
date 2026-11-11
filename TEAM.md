@@ -2544,3 +2544,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~03:22 UTC (10:22 PM ET) lead 51 hourly check-in: c2 staging 051eedb has A-E + sim fix + rewire fix; waiting RV35 on TB7 drill fix 3cef60e9 (since ~02:54). Then c2 switch-on, gates, GO 09991b (~90 min). Lead ~55%.
 - ~03:29 UTC: **RV35 PASS drill fix** 3cef60e9 (s18 owner check; arrow line 14:50 -> Calder 15:00 -> spot to 15:15, queue on/off, no Food pull; round's failing checks pass). All c2 pieces passed; BM28: merge, switch-on, gates, GO 09991b.
 - ~03:53 UTC (10:53 PM ET): **ROUND 09991b GO** (BM28): staging-09991 844f3c23, game b321a4ec...95f3, build 0.99.91 (A-E + drill/sim/rewire fixes, all switches on incl. MC9991_REW_ON); gates check_fast, events, cadet ALL IDENTICAL. Perf on R4. ~90-120 min.
+- ~04:22 UTC (11:22 PM ET) lead 51 hourly check-in: round 09991b running (R1 9 OK incl. arrows m3d fixed; R2, R3, R4, R6, BM28 R5 running; R4 ETA ~06:10). No FAILs. Lead ~57%.
