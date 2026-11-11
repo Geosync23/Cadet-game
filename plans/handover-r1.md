@@ -27,7 +27,7 @@ Open questions for the user: none.
 - Branch claude/checks-09991-r1. Candidate 1 (4d8869ec, game 475bac86...b453e): one NEW FAIL, arrows_check week Day 3
   "m3d" not learned (piece C, the drill arrow pointed at the spot, not Calder); proofs: OLD OK, drill-switch-off copy OK.
   Notes plans/checks-09991-r1.md. Candidate 2 (844f3c23, game b321a4ec...95f3): all 17 OK, notes plans/checks-09991b-r1.md.
-  BM28 sent the FINAL GO (claude/staging-09991 cdd9efd) 2026-11-11 ~05:43.
+  BM28 sent the FINAL GO (claude/staging-09991 cdd9efd) 2026-11-11 ~05:43; 0.99.91 published ~14:49 UTC (main = cdd9efd). R1 stood down.
 - Setup gotcha: npm pack tarballs must be extracted WITHOUT --strip-components (checks read three/package/build/three.min.js).
 - Run scripts were /tmp/r1/laneA.sh, laneB.sh, player.sh (lost with the container): lane A arrows default, step5,
   step6 asis teachoff track skiptea, endstay; lane B p5retry_probe (off copy: sed 's/^var P5_RETRY_ON = true;/var P5_RETRY_ON = false;/'),
