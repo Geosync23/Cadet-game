@@ -10869,6 +10869,7 @@ function schedBuild(p, d, occ, S) {
           if (pref && (pass === 0 ? !pref.has(pl.id) || avoid.has(pl.id) : pass === 1 ? pref.has(pl.id) || avoid.has(pl.id) : !avoid.has(pl.id))) continue;
           if (!mine && !isFree(pl.id, s, end, o.tag)) continue;
           if (shut && evClosed(pl, B + s, o.event, B + end)) continue;   // closed for the event
+          if (EV9991_SIM_ON && type === 'rec:sim' && simPlanShut(d)[SIM_POD_IDS.indexOf(pl.id)]) continue;   // 0.99.91 (EV2): a sim night's pilots, like the everyday ones, never in a pod tagged out the evening before (simPlanShut; round 09991, R6)
           if (P5_STEP5 && sdPlanShut(d, occ, pl, B + s, B + end, p)) continue;   // Step 5's settled records (24w): a shutdown booked for that hour, a routine moved (24k's P9); read only from records settled at 22:00 the evening before
           if (act === 'leisure' && type.startsWith('work:') && (S.deskOf(pl.id) || (occ.rotIds && occ.rotIds.has(pl.id)))) continue;   // a guest at a work type: never someone's desk, nor today's stand-in's
           const ahead = (w, hops) => {                   // set off w minutes earlier, out of the end of what they were doing (at most half of it; never an event meeting, F0b)
