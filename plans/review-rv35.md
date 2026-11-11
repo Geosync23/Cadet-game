@@ -52,3 +52,21 @@ Also the Dev mode (section 25) owner check on devmodeCareerSet's condition (lead
   noise only); check_fast OK (433 s).
 - Section 24q, no owner listed (header says seat E2): small, my review as the owner check if the lead agrees.
 - The branch's docs diff against staging's tip (round-09991.md, r5-09991b.sh) is only staging having moved on; BM's merge.
+
+## C fixes (round finds A/B/D = lead's Q1, Q2, Q4). TB7 claude/p9991-drills 3cef60e9 (game 387d3541; off 436562fb...0da2,
+## on copy 5ff03c1a...dcf, both matched): PASS. Also the section 18 owner check on tradJoinMinute's `&& !g.drill`: OK.
+- Reading: the drill's arrows are direct (setGoal, `drill: 'drill9991:<day>'`) at 14:50, onto Calder (crew + tj) from
+  15:00 in drill9991Frame, your free muster spot after her talk, cleared at the tap and at the all-clear by
+  drill9991GoalOff (only its own arrow). tradJoinMinute would have cleared the Calder arrow each minute (its tj isn't a
+  tradition's key); `!g.drill` leaves it, and no tradition arrow carries `drill`, so nothing else changes there.
+  The 14:50 setGoal replaces whatever arrow is up: the old drill (0.99.9, 24c's drill job) did the same.
+  Other code that treats a `tj` arrow as replaceable (eventJoin, the comet knot 21:30+, cl997's lead-ins, off shift
+  except the Last Light, Thursday) runs at other times, so nothing takes the drill arrow during 14:50-15:15.
+- drillprobe.py (on copy, arrow queue off and on, hungry or not): 14:51 the muster line, 15:01 Calder, after the talk
+  your spot (5-muster-6) to 15:14, none at 15:16; you end in the Works bay; no errors.
+- RV32's fresh_walk (e81c74d6) to Day 3 16:30 on the on copy: stuck [], errors []; followed the arrow to Calder at
+  15:00, read her talk, stood on the line to the all-clear, then a job at 15:24 (find D gone).
+- On copy: arrows_d_check OK, arrows_check week OK, join_check OK, mech_check full OK (a part-only run of m3d m19 fx3
+  fails promo, m6, fx3: RV36's note, m19 leaves state; the same on 0.99.9).
+- Off: cadet_test vs 0.99.9 ALL IDENTICAL, check_fast OK (402 s).
+- Seen, not a fix: the follower taps the kit lockers beside your muster spot while it waits (the walker's habit).
