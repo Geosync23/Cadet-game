@@ -29,4 +29,4 @@ plus a perf script that waits for both "LANE ... DONE" lines.
 - Killing a waiting perf script with pkill -f on its script path is safe (it doesn't match the lane scripts).
 
 ## Loose ends
-None. OLD for the next round = 0.99.91 once published (lead 51 will say).
+None. 0.99.91 published (~14:49 UTC Nov 11; main = claude/integration = cdd9efd, game b321a4ec...95f3). OLD for the next round = 0.99.91 cdd9efd unless the lead says otherwise. Stood down on BM28's word.
