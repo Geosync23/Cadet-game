@@ -2,6 +2,8 @@
 
 Role: EV2, events builder for lead 51 (session_01GKuymjp49y3M5hgRLecobm). Reviewer RV36 (session_01GKuymoG8txh1cPvipXz8BW): **PASS** on game 46abc462e68794e0edb15645b3d02251452e45c1dfac6a1e1bed986872779fdd. BM28 merges 6f15a1f. The earlier EV2 notes (events base, storm, visit dinner) are in their own handovers.
 
+**Published:** 0.99.91 went out 2026-11-11 about 14:49 UTC (lead 51; Playtest v6, Dev v6; game b321a4ec...95f3; main = claude/integration = cdd9efd). EV2 stood down.
+
 ## Branch and builds
 - `claude/p9991-flightsim` from main bfbcbdf (0.99.9, game 583d99ba...bd16). Commits: 1c46077 (game + words), 6625e41 (records, probe), 23a1085 (phone shots), 6f15a1f (build-table row), f83a19b (DEV_NOTES wording from RV36), then the backlog rows and this note (docs only).
 - Switch `EV9991_SIM_ON` (a `var`, Events engineer 2 slot), off on the branch. The build master switches it on. Build-number lines untouched.
