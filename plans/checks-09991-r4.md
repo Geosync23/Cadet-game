@@ -20,7 +20,7 @@ OLD: 0.99.9 main bfbcbdf, game 583d99ba...bd16. Both sha256 checked. Started 00:
 | fixtap_reach BUILD | PASS | 38s | only oj-d3gym-locker 3-gym-1 Treadmills (ixStop) takes a job; page errors [] |
 | fixtap_click OFF BUILD | PASS | 95s | all 10 cases the same off and on; errors [] |
 | fresh_walk BUILD 3 | **FAIL: stuck not empty** | 348s | stuck [[3785, 'Food', 3]]; errors [], long [], trace d2-booths:said Day 2 18:16 |
-| p926 | running | | |
+| p926 | PASS | 679s | P926 CHECK OK |
 | perf_check BUILD OLD | queued (alone) | | |
 
 ## fresh_walk (NEW vs 0.99.9's record plans/fw-0999-r4.json, which had stuck [])
