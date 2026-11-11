@@ -2538,3 +2538,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~02:07 UTC: **TP2 E fix pushed** claude/p9991-rewire dc0ae57, game 42aa4a09...561b, MC9991_REW_ON (24q only): full mech + m15 pass on; off identical, check_fast OK. -> RV35. Waiting: TB7 drill fix final, EV2 sim fix final.
 - ~02:18 UTC: **EV2 Q3 fix** claude/p9991-flightsim 6ad4050 (5f9aa4a game line in s14; join_check regex F check-side), on d830f5ab; interactions/join/events/day3/food/simprobe/check_fast OK. -> RV36 (also owner check for s14). TB7 drill fix final pending; TP2 E fix with RV35.
 - ~02:22 UTC (9:22 PM ET) lead 51 hourly check-in: waiting TB7 drill fix final; EV2 sim fix with RV36; TP2 rewire fix with RV35. Wrote plans/handover-lead51.md early (lead ~52%).
+- ~02:27 UTC: **RV35 PASS E** dc0ae57 (24q owner check; only Deck 6's two junctions skipped). BM28 merging into c2. Waiting RV36 on EV2 6ad4050 and TB7's drill fix.
