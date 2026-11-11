@@ -34618,6 +34618,8 @@ const LINES = JSON.parse([
   '{"text":"Ears pop and you\'re on your own? Nearest door, shut it behind you, then call.","id":"aj9kcq"}]',
   ',"drill9991.pressure.title":[',
   '{"text":"Pressure drill","id":"pgxq5i"}]',
+  ',"drill9991.stand":[',
+  '{"text":"On the muster line till the all-clear, 15:15","id":"wtf1mi"}]',
   ',"drill9991.tea":[',
   '{"text":"Good turnout at Wednesday\'s drill. Thank you, all of you.","id":"mzzkvd"}]',
   ',"drill9991.tip":[',
@@ -47524,7 +47526,7 @@ function tradJoinMinute(now) {
   }
   if (TRAD995_ON && TJ_ALL.length) { const at = deckDef.num + '|' + roomAt(...player.here()); TJ_NOW = TJ_ALL.find(c => c.e.rooms.has(at)) || TJ_ALL[0]; }   // the arrow and the tip: the one whose rooms you're in, else the first
   const g = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null;
-  if (g && g.tj && (!TJ_NOW || g.tj !== TJ_NOW.key)) clearGoal();   // it ended, or you joined: the arrow at the leader goes
+  if (g && g.tj && (!TJ_NOW || g.tj !== TJ_NOW.key) && !g.drill) clearGoal();   // it ended, or you joined: the arrow at the leader goes (0.99.91, TB7: not the drill's join arrow at Calder, which 24c's drill9991 clears itself)
   if (!TJ_NOW) return;
   const here = deckDef.num + '|' + roomAt(...player.here()), name = tjFirst(TJ_NOW.lead), s = TRAD_JOIN[TJ_NOW.e.id];
   if (!TJ_NOW.e.rooms.has(here)) return;
@@ -62027,28 +62029,29 @@ function drill9991Who(d) {
 const drill9991Done = (d, who) => simNotes(who === 'senior' ? 'pwrDrill' : 'drill', (d - 1) * 1440 - 1).some(n => n.day === d);
 const drill9991Came = (d, who) => simNotes(who === 'senior' ? 'pwrDrill' : 'drill', (d - 1) * 1440 - 1).some(n => n.day === d && n.you);
 const drill9991Kind = (d, k) => worksText('drill9991.' + drillKind(d) + '.' + k, (DRILL9991_TALK[drillKind(d)] || {})[k] || '');
-// 14:50 the toast and the arrow; 15:15 the all-clear (missed: the note, as before; a jump past it: the note, quietly)
+// 14:50 the toast and a direct arrow (as the old drill's); 15:15 the all-clear (missed: the note, as before; a jump past it: the note, quietly)
 WORK_TICKS.push((now, skip) => {
   if (!TB9991_DRILL_ON) return;
   const d = worksDay(now), m = now - (d - 1) * 1440; if (weekday(d) !== 2 || m < DRILL_TOAST) return;
   const who = drill9991Who(d); if (!who) return;
-  const kind = drillKind(d), t0 = (d - 1) * 1440;
+  const kind = drillKind(d);
   if (m < DRILL_END) {
     if (skip || DRILL9991.told === d || drill9991Done(d, who)) return;
     DRILL9991.told = d;
     try { toast(worksName('calder'), worksText('drill9991.toast.' + kind, 'Drill at 15:00: the ' + kind + ' drill. Muster at the Works bay.')); } catch (e) { /* no UI */ }
-    if (typeof guideAsk === 'function') guideAsk({ id: 'drill9991:' + d, level: 1, owner: '24c', from: t0 + DRILL_TOAST, until: t0 + DRILL_END,
-      goal: () => ({ deck: 5, room: 'w', place: '5-muster-3', label: worksText('drill9991.goal.' + kind, (DRILL9991_TALK[kind] || {}).title + ', 15:00: Chief Calder at the Works bay') }), done: () => drill9991Done(d, who) });
+    if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'w', place: '5-muster-3', label: worksText('drill9991.goal.' + kind, (DRILL9991_TALK[kind] || {}).title + ', 15:00: Chief Calder at the Works bay'), drill: 'drill9991:' + d });   // a direct arrow, as the old drill's (round 09991: R3's arrows_d_check, R4's fresh_walk: with only a queue entry the needs arrow took the free direct slot mid-drill); drill9991Frame moves it onto Calder at 15:00, your spot after her talk, off at the all-clear
     return;
   }
   if (DRILL9991.clear === d) return;
-  DRILL9991.clear = d;
+  DRILL9991.clear = d; drill9991GoalOff(d);
   const came = drill9991Came(d, who);
   if (!drill9991Done(d, who)) { if (who === 'senior') simNote('pwrDrill', { day: d, you: false, wrongs: 0 }); else simNote('drill', { kind, mins: null, you: false, day: d }); }
   if (skip || m >= DRILL_END + 5) return;
   try { toast(worksName('calder'), worksText('drill.allclear', 'All clear. Drill over.')); } catch (e) { /* no UI */ }
   if (!came) worksSay('calder', worksText('drill9991.missed', 'We ran the drill without you. Next Wednesday, three o\'clock, Works bay.'));
 });
+// the direct arrow (the queue off) goes at your turnout or the all-clear; another section's arrow is left alone
+function drill9991GoalOff(d) { if (typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.drill === 'drill9991:' + d) clearGoal(); }
 // once a frame on Deck 5 (section 18's eventsTick): Calder, Zeke and Halloran on the muster line 14:55-15:15, the star over her from 15:00
 function drill9991Frame() {
   if (typeof deckDef === 'undefined' || !deckDef || typeof DECK_CREW === 'undefined') return;
@@ -62062,6 +62065,7 @@ function drill9991Frame() {
   const c = tjAgent('calder'), show = !!c && m >= DRILL_AT && !drill9991Came(d, who) && !(typeof DIALOGUE !== 'undefined' && DIALOGUE);
   if (!DRILL9991.el && show) { const el = document.createElement('div'); el.style.cssText = 'position:fixed;left:0;top:0;z-index:2;pointer-events:none;font:600 12px system-ui,sans-serif;color:#0b2a26;background:#5fd6c6;border-radius:999px;padding:2px 8px;box-shadow:0 1px 6px rgba(0,0,0,.4);white-space:nowrap';
     el.textContent = '★ ' + tjFirst('calder'); document.body.appendChild(el); DRILL9991.el = el; DRILL9991.v = new THREE.Vector3(); }
+  if (show && typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.drill === 'drill9991:' + d && !IX_GOAL.crew) setGoal({ deck: 5, crew: 'calder', tj: 'drill9991:' + d, label: worksText('drill9991.tip', 'Tap Chief Calder to join the drill'), drill: 'drill9991:' + d });   // the direct arrow (the queue off) on to Calder from 15:00
   if (!DRILL9991.el) return;
   if (!show) { DRILL9991.el.style.display = 'none'; return; }
   const V = DRILL9991.v; V.set(c.x, (c.y || 0) + 2.1, c.z).project(camera);
@@ -62080,7 +62084,7 @@ function drill9991Tap(a) {
   const kind = drillKind(d);
   if (who === 'senior') { simNote('pwrDrill', { day: d, you: true, wrongs: 0 }); if (typeof worksSideXp === 'function') worksSideXp(1, 'pwrdrill'); }
   else { simNote('drill', { kind, mins: 0, you: true, day: d }); worksUse('m3d'); }
-  if (typeof guideDrop === 'function') guideDrop('drill9991:' + d);
+  if (typeof guideDrop === 'function') guideDrop('drill9991:' + d); drill9991GoalOff(d);
   const go = () => drill9991Stand(d, kind);
   if (typeof dialogueShow !== 'function') { go(); return true; }
   drill9991Card(d, kind, go);
@@ -62104,6 +62108,9 @@ function drill9991Stand(d, kind) {
   const free = ids.filter(id => placeById(id) && ![...CREW_HELD.values()].includes(id) && !heldBy(id) && !BUSY.has(id)).map(id => [id, placeSpot(id)]).filter(([, s]) => s)
     .sort((x, y) => (c ? Math.hypot(x[1].x - c.x, x[1].z - c.z) - Math.hypot(y[1].x - c.x, y[1].z - c.z) : 0) || (x[0] < y[0] ? -1 : 1))[0];
   try { toast(worksText('drill9991.' + kind + '.title', (DRILL9991_TALK[kind] || {}).title || 'Drill'), worksText('drill9991.notice', 'You stand on the muster line with the Works team till the all-clear at 15:15.')); } catch (e) { /* no UI */ }
+  const at = free ? free[0] : '5-muster-1', key = 'drill9991:' + d;
+  const g = { deck: 5, room: 'w', place: at, label: worksText('drill9991.stand', 'On the muster line till the all-clear, 15:15'), drill: key };   // (round 09991, R4's fresh_walk) the arrow stays on your spot to the all-clear, as the toast says
+  if (typeof setGoal === 'function' && !(IX_GOAL && !IX_GOAL.drill)) setGoal(g);   // direct, as the arrow before it (never over another section's arrow; drill9991GoalOff clears it at the all-clear)
   if (!free) return;
   const sp = free[1]; if (sp.walk) playerGo(sp.walk, () => { if (Number.isFinite(sp.face)) player.face = sp.face; });
 }

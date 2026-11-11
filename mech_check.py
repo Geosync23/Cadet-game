@@ -275,7 +275,7 @@ def m3d_taps(g):
 # tap on her at 15:01: her card (about six lines, no question), the note (mins 0, you: true) and the row's use, then the all-clear
 M3D_ON = r"""((kindDay, tap) => {
   SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = []; if (DIALOGUE) dialogueEnd(true);
-  MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; DRILL9991.told = DRILL9991.clear = 0;
+  MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; DRILL9991.told = DRILL9991.clear = 0; clearGoal();
   const said = [], ks = worksSay, ts = toast; worksSay = (who, x) => said.push(who + ': ' + x); toast = (a, x) => said.push('toast: ' + x);
   const run = (from, to) => { for (let m = from; m <= to; m++) { setShipNow(m); machinesNow(); worksCareerTick(m); } };
   try {
@@ -283,7 +283,7 @@ M3D_ON = r"""((kindDay, tap) => {
     const d = kindDay, t0 = (d - 1) * 1440, out = { kind: drillKind(d) };
     run(t0 + 360, t0 + 892);
     out.who = drill9991Who(d); out.jobs = SHIP.jobs.filter(x => /drill/.test(x.kind)).length;
-    const e = GUIDE.list.find(x => x.id === 'drill9991:' + d); let gg = null; try { gg = e && e.goal(); } catch (x) { gg = null; } out.arrow = e ? [e.level, gg && gg.place, gg && gg.label] : null;
+    const gg = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.drill === 'drill9991:' + d ? IX_GOAL : null; out.arrow = gg ? [1, gg.place, gg.label] : null;   // a direct arrow, as the old drill's (round 09991)
     out.toast = said.filter(x => /Drill at 15:00/.test(x)).length;
     if (tap) { run(t0 + 893, t0 + 901); if (deckDef.num !== 5) goToDeck(5);
       out.tap = drill9991Tap({ p: { id: 'calder' }, x: player.obj.position.x + 1, z: player.obj.position.z });
@@ -299,7 +299,7 @@ def m3d_on(g):
         a = g.ev(f"({M3D_ON})({d}, false)")
         print(f'  24c drill (talk) Day {d}, missed:', json.dumps(a))
         check(a['kind'] == kind and a['who'] == 'junior' and a['jobs'] == 0 and a['jobsAfter'] == 0, f"m3d on Day {d}: {a['kind']} for you, no drill job ({a['jobs']}, {a['jobsAfter']})")
-        check(a['toast'] == 1 and a['arrow'] and a['arrow'][0] == 1 and a['arrow'][1] == '5-muster-3' and 'Calder' in a['arrow'][2], f"m3d on Day {d}: the 14:50 toast and a level 1 arrow to the muster line ({a['arrow']})")
+        check(a['toast'] == 1 and a['arrow'] and a['arrow'][0] == 1 and a['arrow'][1] == '5-muster-3' and 'Calder' in a['arrow'][2], f"m3d on Day {d}: the 14:50 toast and a direct arrow to the muster line ({a['arrow']})")
         check(a['note'] == [[None, False, d]] and a['use'] == 0 and any('without you' in x for x in a['said']), f"m3d on Day {d}: missed: the note, no reputation, her word ({a['note']}, {a['use']})")
     a = g.ev(f"({M3D_ON})(3, true)")
     print('  24c drill (talk) Day 3, tapped:', json.dumps(a))
