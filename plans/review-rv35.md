@@ -41,3 +41,14 @@ Also the Dev mode (section 25) owner check on devmodeCareerSet's condition (lead
 - On copy: devmode_check OK, dev_arrow_check OK. Off: cadet_test vs 0.99.9 ALL IDENTICAL, check_fast OK (232 s).
 - Note, not a fix: with the switch on, a Dev promotion jump landed after 08:45 lets the summons run out as 'missed'
   (normal play's path, promotion by Mail at noon) where 0.99.9 left it 'done' (also promotion by Mail).
+
+## E. TP2 claude/p9991-rewire dc0ae57 (from staging-09991 4d8869ec; game 42aa4a09...561b), MC9991_REW_ON: PASS
+- rewBoxes, switch on, also leaves out a junction whose rewire would be above Tier 2. jprobe.py: the stand-in tier it
+  asks equals jobTier of a real rewJob for every junction (rewStops are all at the panel); only 6-junction-1 and
+  6-junction-2 (Tier 3) drop out; 1-, 2-, 4- (both) and 5-junction stay, so the week is never empty. The training
+  (REW_TRAIN, Deck 4) doesn't read rewBoxes.
+- On copy: full mech_check OK (m15 weeks Day 29 1-junction-1, 39 1-junction-1, 46 2-junction-1, all Tier 2).
+- Off: mech_check m15 OK (46 5-junction-1, as TP2 says by luck); cadet_test vs 4d8869ec ALL IDENTICAL (renderer
+  noise only); check_fast OK (433 s).
+- Section 24q, no owner listed (header says seat E2): small, my review as the owner check if the lead agrees.
+- The branch's docs diff against staging's tip (round-09991.md, r5-09991b.sh) is only staging having moved on; BM's merge.
