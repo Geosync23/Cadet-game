@@ -80,3 +80,17 @@ TB7 prefers), checked with plans/rv36-probes/drill_zeke.py (`drill_zeke.py ON.ht
   He gets there, nothing is stuck; the talk doesn't wait on him.
 
 Verdict: PASS (2026-11-10).
+
+## B round fixes: claude/p9991-flightsim 6ad4050 (game off 24af9479...411f, on d830f5ab...9005), owner check for section 14
+
+- Find C, 5f9aa4a: one line in section 14's seat picker (schedBuild), behind EV9991_SIM_ON: a 'rec:sim' seat is skipped when
+  simPlanShut(d) has that pod tagged out. simPlanShut is the pure, settled 22:00-the-evening-before record the everyday sim
+  turns already read in the planner, so the planner rule holds; `d` is schedBuild's own day. Sound.
+- Find F, 6ad4050: join_check steps the ev9991.sim card like the other join cards. Check-side only.
+- Off: cadet_test vs 0.99.9 ALL IDENTICAL. On (a copy): interactions_check OK (R6's find; the sim bay part: pod 1 tagged
+  out, you wait on the bench, pod 2 in use by the crew), join_check OK, day_check 3 OK, events_check OK; sim_more.py all
+  five cases as before (no overlaps, no seat held twice, no errors).
+
+Verdict: PASS (2026-11-11).
+
+(Piece C's round fixes, 387d3541 on: reviewed by RV35 at lead 51's word; my notes passed on.)
