@@ -21,6 +21,7 @@ perf_check handed over to R6 at ~04:30 UTC (not started here; lead 51's suggesti
 | fixtap_probe | exit 0, 54s | FIX TAP PROBE OK |
 | fixtap_reach | exit 0, 37s | page errors [] |
 | fixtap_click | exit 0, 98s | on errors [] |
+| p926 | exit 0, 684s | P926 CHECK OK |
 | perf_check | handed over to R6 | see R6's notes |
 
 Notes on reading: appt prints only its 4 planted FAIL lines. fixtap_reach: only oj-d3gym-locker 3-gym-1 Treadmills (ixStop)
@@ -37,4 +38,4 @@ is gone. The walk ends Day 3 22:05.
 
 ## Result
 
-**R4: OK so far** (p926 still running; perf_check by R6).
+**R4: OK** (own share, all exit 0 with their OK lines; perf_check by R6).
