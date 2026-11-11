@@ -34617,6 +34617,8 @@ const LINES = JSON.parse([
   '{"text":"Ears pop and you\'re on your own? Nearest door, shut it behind you, then call.","id":"aj9kcq"}]',
   ',"drill9991.pressure.title":[',
   '{"text":"Pressure drill","id":"pgxq5i"}]',
+  ',"drill9991.stand":[',
+  '{"text":"On the muster line till the all-clear, 15:15","id":"wtf1mi"}]',
   ',"drill9991.tea":[',
   '{"text":"Good turnout at Wednesday\'s drill. Thank you, all of you.","id":"mzzkvd"}]',
   ',"drill9991.tip":[',
@@ -62049,6 +62051,10 @@ function drill9991Stand(d, kind) {
   const free = ids.filter(id => placeById(id) && ![...CREW_HELD.values()].includes(id) && !heldBy(id) && !BUSY.has(id)).map(id => [id, placeSpot(id)]).filter(([, s]) => s)
     .sort((x, y) => (c ? Math.hypot(x[1].x - c.x, x[1].z - c.z) - Math.hypot(y[1].x - c.x, y[1].z - c.z) : 0) || (x[0] < y[0] ? -1 : 1))[0];
   try { toast(worksText('drill9991.' + kind + '.title', (DRILL9991_TALK[kind] || {}).title || 'Drill'), worksText('drill9991.notice', 'You stand on the muster line with the Works team till the all-clear at 15:15.')); } catch (e) { /* no UI */ }
+  const at = free ? free[0] : '5-muster-1', t0 = (d - 1) * 1440, key = 'drill9991:' + d;
+  const g = { deck: 5, room: 'w', place: at, label: worksText('drill9991.stand', 'On the muster line till the all-clear, 15:15'), drill: key };   // (round 09991, R4's fresh_walk) the arrow stays on your spot to the all-clear, as the toast says
+  if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON && typeof guideAsk === 'function') guideAsk({ id: 'drill9991:stand:' + d, level: 1, owner: '24c', from: t0 + DRILL_AT, until: t0 + DRILL_END, goal: () => g });
+  else if (typeof setGoal === 'function') setGoal(g);   // the queue off: a direct one (drill9991GoalOff clears it at the all-clear)
   if (!free) return;
   const sp = free[1]; if (sp.walk) playerGo(sp.walk, () => { if (Number.isFinite(sp.face)) player.face = sp.face; });
 }
