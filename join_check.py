@@ -40,7 +40,7 @@ EACH = r"""(id => {
   const mark = document.getElementById('tjMark'), marked = !!mark && /★/.test(mark.textContent);
   const s0 = SHIP.player.needs.social = 40, ok = tradJoinTap(TJ_NOW ? TJ_NOW.agent : a);
   if (typeof DIALOGUE !== 'undefined' && DIALOGUE && (DIALOGUE.id === 'tiles.ladder' || DIALOGUE.id === 'tiles.night')) { dialogueNext(); dialogueChoose(1); dialogueEnd(true); }   // Tiles night asks the same with GAMES997_ON (0.99.7, GM1)   // the ladder asks play or watch (0.92.5 item 20): watch
-  if (typeof DIALOGUE !== 'undefined' && DIALOGUE && /^(t932\.join|tasting\.table)$/.test(DIALOGUE.id)) { let n = 0; while (DIALOGUE && n++ < 20) { const v = dialogueView(); dialogueStep(v && v.choices ? 0 : undefined); } }   // 0.93.2 (FX24): the host's join line (the tasting table: its dishes and the jar), then the activity
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE && /^(t932\.join|tasting\.table|ev9991\.sim)$/.test(DIALOGUE.id)) { let n = 0; while (DIALOGUE && n++ < 20) { const v = dialogueView(); dialogueStep(v && v.choices ? 0 : undefined); } }   // 0.99.91 (EV2, round 09991's find F): Sim night's Day 3 opener card (ev9991.sim) holds the join till it ends too   // 0.93.2 (FX24): the host's join line (the tasting table: its dishes and the jar), then the activity
   // (DS1, RV14's (a) on Bread day) the leader shown is TJ_NOW's (the host on duty near the spots leads: Brennan), not only
   // the planner's pick (tradLeader): the marker's name, the arrow's person and the tap must all be that one
   const shown = TJ_NOW ? TJ_NOW.lead : null, markName = mark ? mark.textContent : '', goalCrew = IX_GOAL && IX_GOAL.tj === id + '@' + d ? IX_GOAL.crew || null : null;
