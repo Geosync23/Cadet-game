@@ -21,7 +21,7 @@ OLD: 0.99.9 main bfbcbdf, game 583d99ba...bd16. Both sha256 checked. Started 00:
 | fixtap_click OFF BUILD | PASS | 95s | all 10 cases the same off and on; errors [] |
 | fresh_walk BUILD 3 | **FAIL: stuck not empty** | 348s | stuck [[3785, 'Food', 3]]; errors [], long [], trace d2-booths:said Day 2 18:16 |
 | p926 | PASS | 679s | P926 CHECK OK |
-| perf_check BUILD OLD | queued (alone) | | |
+| perf_check BUILD OLD | not run, superseded | | started twice (cut by a container restart ~01:30 UTC, rerun 01:34), stopped on lead 51's word: candidate 2 gets a full round 09991b with perf |
 
 ## fresh_walk (NEW vs 0.99.9's record plans/fw-0999-r4.json, which had stuck [])
 
@@ -32,3 +32,8 @@ then the Day 3 drill (expected: Calder's talk). Then, Day 3:
   toast "Servery: Closed. Dinner from 17:00 ... The grab-and-go shelf usuall[y]..."; 15:15 "All clear" while at the servery.
 - 16:09 "Food (working)", 16:10 queue, 16:11 Grab and go true; the lamp job resumes 16:17.
 In 0.99.9 the drill held the player (extinguisher, hatch, extinguisher back) till 15:15. Sent to BM28 and lead 51 at ~00:50 UTC.
+
+## Result (candidate 1)
+
+**R4: FAIL on candidate 1: fresh_walk stuck at Food on Day 3 (NEW).** Every other check OK; perf_check not run (superseded
+by candidate 2, lead 51). Lead 51: the find is in TB7's fix for candidate 2 (the arrow stays on the muster line until 15:15).
