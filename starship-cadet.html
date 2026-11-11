@@ -61977,7 +61977,9 @@ WORK_TICKS.push((now, skip) => {
     DRILL9991.told = d;
     try { toast(worksName('calder'), worksText('drill9991.toast.' + kind, 'Drill at 15:00: the ' + kind + ' drill. Muster at the Works bay.')); } catch (e) { /* no UI */ }
     if (typeof guideAsk === 'function') guideAsk({ id: 'drill9991:' + d, level: 1, owner: '24c', from: t0 + DRILL_TOAST, until: t0 + DRILL_END,
-      goal: () => ({ deck: 5, room: 'w', place: '5-muster-3', label: worksText('drill9991.goal.' + kind, (DRILL9991_TALK[kind] || {}).title + ', 15:00: Chief Calder at the Works bay') }), done: () => drill9991Done(d, who) });
+      goal: () => shipNow() >= t0 + DRILL_AT && typeof deckDef !== 'undefined' && deckDef && deckDef.num === 5 && tjAgent('calder')   // (round 09991, R1's arrows_check) from 15:00 the arrow is on Calder herself, a join arrow like a tradition's: following it leads to her talk
+        ? { deck: 5, crew: 'calder', tj: 'drill9991:' + d, label: worksText('drill9991.tip', 'Tap Chief Calder to join the drill') }
+        : { deck: 5, room: 'w', place: '5-muster-3', label: worksText('drill9991.goal.' + kind, (DRILL9991_TALK[kind] || {}).title + ', 15:00: Chief Calder at the Works bay') }, done: () => drill9991Done(d, who) });
     return;
   }
   if (DRILL9991.clear === d) return;
