@@ -22,7 +22,7 @@ perf_check handed over to R6 at ~04:30 UTC (not started here; lead 51's suggesti
 | fixtap_reach | exit 0, 37s | page errors [] |
 | fixtap_click | exit 0, 98s | on errors [] |
 | p926 | exit 0, 684s | P926 CHECK OK |
-| perf_check | handed over to R6 | see R6's notes |
+| perf_check | by R6: OK | after the backlog-32 re-measure (one Tiles night landscape spike, not repeated twice); draw calls identical to OLD everywhere; plans/checks-09991b-r6.md on claude/checks-09991-r6 e8bc892 |
 
 Notes on reading: appt prints only its 4 planted FAIL lines. fixtap_reach: only oj-d3gym-locker 3-gym-1 Treadmills (ixStop)
 takes a job. fixtap_click: all 10 cases the same off (off copy, FIXTAP_ON false) and on.
