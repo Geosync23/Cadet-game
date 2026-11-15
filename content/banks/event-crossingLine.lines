@@ -96,6 +96,11 @@
 - The ship's horn: the Wren has crossed the Line.
 == event.crossingLine.notice.ceremony
 - Crossing the Line: the ceremony in the bow lounge at 14:30. First-timers to the front.
+// FR2 (the Fable review, F1; switch FRP_LINE_ON): the oath's own arrow, and the Captain's Mail when you were not there
+== event.crossingLine.frp.arrow
+- The Line oath, 14:40: the bow lounge
+== event.crossingLine.frp.missed
+- We read the oath without you. One of the other first-timers answered for the lot. Your certificate is on your shelf all the same. Ask the old hands what you missed, and believe about half of it.
 // the two volunteer jobs (the mess sign-up sheet; Brennan offers them too)
 == event.crossingLine.job.punch
 - Crossing the Line: carry the punch up from the galley

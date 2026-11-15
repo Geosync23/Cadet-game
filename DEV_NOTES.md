@@ -1072,6 +1072,31 @@ gives way to clock-out at the shift's end. Test: `python3 arrows_d_check.py BUIL
 - **How:** with the switch on, devmodeCareerSet leaves `promoSummons` open while you're a junior who has passed the test (`crResultWaiting`, 24p); promoSummonsTick calls `crResultReopen`, which opens again a summons Dev mode closed (a Dev save already stuck) on its own day before it ends. Nothing new saved.
 - **Test:** `python3 cr2_check.py BUILD [jump stuck test late]` (about 2 minutes, flips the switch at run time; off it proves the bug is still there). Off = 0.99.9: cadet_test ALL IDENTICAL.
 
+## The Fable review's playability fixes (FR2 for lead 52, 2026-11-15; claude/fable-review-play from main cdd9efd; twelve switches, all off)
+
+Review: `plans/review-fable-play.md` (16 findings from playing 0.99.91 at phone size; screenshots in `plans/review-fable-shots/`, before/after pictures of the fixes in its `fixes/` folder). The bug and polish items are built here, each behind its own `var FRP_..._ON = false;` line in the slot of the section it changes; with all of them off the game is 0.99.91 (cadet_test ALL IDENTICAL). The build master switches them on for the separate review version; main does not move. The nine design questions at the end of the review are the user's and none is built.
+
+| Switch | Slot | What it does when on |
+|---|---|---|
+| `FRP_LINE_ON` (F1) | Line builder (18) | A level-1 arrow to the Line oath from 14:15 (Day 7); the Mail for an oath you missed says so; an invitation's heads-up names its tradition |
+| `FRP_FOOD_ON` (F2) | Player engineer (15) | Food under 10: the firm warning is armed again as each meal opens, and the Food marker is asked for again when no arrow is showing |
+| `FRP_TRAY_ON` (F3) | Player engineer (15) | A tray in hand in the mess: the arrow points at the nearest free seat |
+| `FRP_PINTAP_ON` (F4) | HUD seat (11) | A tap that would be a bystander's, within 34 px of the arrow's pin, label or floor spot, goes to the arrow's target |
+| `FRP_LEAD_ON` (F5) | Onboarding engineer (21b) | While someone leads you (the arrival), a tap on them or on their arrow walks you to them |
+| `FRP_PANELS_ON` (F6) | HUD seat (11) | Solid job board and alarm card; a tip waits while a card, panel or the device is open |
+| `FRP_LABEL_ON` (F7) | HUD seat (11) | The arrow's label wraps to two lines |
+| `FRP_BLINK_ON` (F8) | Performance engineer (8b) | The Last Light blinks again every 11 s of play till 14:30, at half strength |
+| `FRP_THANKS_ON` (F9) | Traditions engineer (18) | The form thank-you Mail only after plain weekly traditions, never the Captain's address |
+| `FRP_TIPS_ON` (F10) | Player engineer (15) | The view, needs and pause tips on the arrival evening; "Slept well?" only before 09:00 |
+| `FRP_SAY_ON` (F11) | Player engineer (15) | Three clearer messages: a job gone back to the board, the board's heading over a finished job, the clock after 09:00 |
+| `FRP_WORDS_ON` (F12) | Player engineer (15) | Wording slips: plural machines, "Calibrate oven 2", the deck once, a small job's title once, "Cargo hold", "a covered plate", "No reminder" |
+
+- **The check:** `python3 frp_check.py [BUILD.html] [part ...]` (parts: line food tray pin lead thanks words say panels label blink tips; about 25 minutes for all). Each part loads the build as it is (off) and a copy with that fix's switch line set to true (on), in Dev mode's own save, and proves both. `FRP_SHOTS=folder` saves the before/after pictures. It reuses arrows_check.py's page and follower.
+- **Shared functions touched** (for their owners): `tapCrew(cx, cy, who)` takes an optional third argument (section 11); the pin's pointerdown listener in section 15b now covers the edge arrow and needs class `tap` or `lead`; `meetingGist` asks `frpLineGist` first (section 18); section 19's tip card asks `frpTipHold`, and its invitation heads-up asks `frpInviteWhat`; needWarnTick calls `frpFoodTick` and `frpTrayTick`; teachTick calls `frpTipsArrival`; shipFeelFrame calls `frpBlinkTick`.
+- **Words:** three new bank keys (`event.crossingLine.frp.arrow`, `event.crossingLine.frp.missed`, `clock.screen.frpLate`), read only with their switch on; and the one change with no switch, the quiz's "rec dec" to "rec deck" (its line id changes with its text).
+- **Not built, and why:** meals in the day's arrow, Day 1's board, pay, reputation pace, the device's apps (the user's questions); thank-yous in each host's voice (the writer's); a panel closing an open person's card (section 20's owner); Mum's "Second time's easier" out of order, Theo's "Pip suits you" before the pip, Tomas's evening greeting at dawn (the dialogue owner's line conditions).
+- **Gotcha:** on the arrival, nothing outside the Tern can be walked to for a ship minute or two (the ramp is still coming down), so `frpLeadGo` can fail then; the tap is simply not taken.
+
 ## Pillar 5 Step 5, Senior Officer (S5-1 skeleton, B1 for lead 39, 2026-10-26; switch `P5_STEP5`, switched on in 0.94.0)
 - **The spec:** `plans/p5-step5-spec.html` on claude/p5-specs (EP2), from plan v3.1 (`plans/pillar5-steps56-plan.html` on claude/events-plan-2). Pieces S5-1 to S5-7; this is S5-1's first turn.
 - **Switches (section 13, beside EV_COMET_ON):** `P5_STEP5 = true` (the master; **switched on in 0.94.0**, BM19 on lead 41's word; it was `URL_FLAGS.has('p5s5')`, and putting that back gives the game without Step 5), then `P5_PROMO3`, `P5_M19`, `P5_M18`, `P5_M20`, `P5_CASES5`, each `P5_STEP5 && true`.

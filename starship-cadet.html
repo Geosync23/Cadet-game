@@ -12279,7 +12279,7 @@ function devHeadsTick(t) {
     for (let i = HU_Q.length - 1; i >= 0; i--) if (HU_Q[i].key === key) HU_Q.splice(i, 1);
     let who = a.by; try { who = apptName(a.by); } catch (e) { /* the id */ }
     let where = ''; try { where = apptWhereName(a.where); } catch (e) { where = ''; }
-    HU_Q.push({ key, stage, at, title: 'Invitation from ' + who, where, goal: devPlaceGoal(a.where) });
+    HU_Q.push({ key, stage, at, title: 'Invitation from ' + who + (typeof frpInviteWhat === 'function' ? frpInviteWhat(a) : ''), where, goal: devPlaceGoal(a.where) });   // FR2 (F1): and what to
   }
   for (let i = HU_Q.length - 1; i >= 0; i--) { const h = HU_Q[i]; if (h.stage === 'soon' ? t >= h.at : t >= h.at + 10) { if (i === 0 && DEV.hu) { DEV.hu = null; DEVICE_SKIN.heads(null); } HU_Q.splice(i, 1); } }
   if (HU_Q.length > 4) HU_Q.splice(DEV.hu ? 1 : 0, HU_Q.length - 4);   // never a backlog: the newest four
@@ -12631,6 +12631,7 @@ const DEVICE_SKIN = (() => {
       let c = $('devTip');
       if (!c) { c = mk('div', 'devtip'); c.id = 'devTip'; c.setAttribute('role', 'status'); c.hidden = true; document.body.appendChild(c); c.onclick = () => tipDone(); }
       simClear(c._t); c.hidden = !t; if (!t || document.body.classList.contains('dlgon')) return;   // no tips over a meeting
+      if (typeof frpTipHold === 'function' && frpTipHold(t)) { c.hidden = true; return; }   // FR2 (F6): nor over a card, a panel or the device; it comes back when they close
       devHeadsBack(); c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = ''; c.append(mk('b', '', 'TIP'), mk('span', '', tipWords(t.text)));
       c._t = simTimeout(() => tipDone(), 9000);   // section 13's frozen clock (0.28.50): a pause holds it
     },
@@ -12860,7 +12861,7 @@ deviceApp({ id: 'calendar', title: 'Calendar', icon: 'calendar', order: 15,
       for (const x of trad) {
         const p = R.per[x.kind], same = calClash(x, all);
         rows.push({ m: x.at - B0, text: devWhen(x.at) + '  ' + x.title + (x.at < shipNow() ? ' (on now, until ' + devWhen(x.to) + ')' : ''), sub: x.where + (same.length ? ' · same time as ' + same.map(y => y.title).join(' and ') : '') + (R.on ? p === false ? ' · no reminder' : p === true ? ' · remind me, even on shift' : ' · reminder' : ''),
-          button: R.on ? p === false ? 'Remind me' : 'Don\'t' : null, action: R.on ? { app: 'calendar', do: 'remind', arg: x.kind } : null });
+          button: R.on ? p === false ? 'Remind me' : frpWords() ? 'No reminder' : 'Don\'t' : null, action: R.on ? { app: 'calendar', do: 'remind', arg: x.kind } : null });
       }
       rows.push(...apptCalRows(d, B0, rows));                    // your booked appointments, what they are (0.99.5 #11, the device slot)
       if (STORIES_ON && typeof storyCalRows === 'function') rows.push(...storyCalRows(d, B0));   // a crew story's crescendo, booked (FX21, section 20c's slot)
@@ -14051,6 +14052,8 @@ function leisureAdd(n, why) {
 let WARN_SAID = {};                                      // need -> 0 armed, 1 the gentle one said, 2 the firm one said
 function needWarnTick(now) {
   needGoalTick();                                        // a very low need's marker goes once it's back up (playtest 1)
+  if (FRP_FOOD_ON) frpFoodTick();                        // FR2 (F2): Food very low and staying there
+  if (FRP_TRAY_ON) frpTrayTick();                        // FR2 (F3): a tray in hand: a free seat
   const n = SHIP.player.needs; let pick = null, lvl = 0;
   for (const k of NEED_KEYS) {
     if (n[k] >= WARN_REARM) { WARN_SAID[k] = 0; continue; }
@@ -14140,7 +14143,7 @@ const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown wh
   ['t:mail', c => mailUnread() > 0, 'New mail. Read it in Mail on your device. Ship traditions are announced the evening before.'],
   ['t:trad', c => c.trad, 'There\'s a ship tradition today. Turn up and join in. It\'s how the crew makes a long voyage feel like home.'],
   ['t:hu', c => c.S.hu, 'Heads-ups tell you what\'s coming. Set how early, or turn them off, in your device\'s Settings.'],
-  ['t:sleep', c => c.S.woke, 'Slept well? Your bunk takes you from 20:00 through to 06:00. By day, lie on it to rest.'],
+  ['t:sleep', c => c.S.woke && (!frpTips() || c.min < 540), 'Slept well? Your bunk takes you from 20:00 through to 06:00. By day, lie on it to rest.'],
   ['t:late', c => c.min >= 1320 && !(P5_NIGHT && (p5nIn() || p5nSoon())), 'Getting late. Your bunk\'s in Bunk 1 on Deck 4. Stay up if you like. You\'ll feel it tomorrow.'],
   ['t:needs', c => NEED_KEYS.some(k => c.n[k] < 50), 'Your needs sit in the strip at the top. Keep them up and the day goes well. Let them drop and you slow down.'],
   ['t:loo', c => c.n.bathroom < 50, 'Public washrooms are in the junior wing on Deck 4, and on Deck 3. Cabin bathrooms are private.'],
@@ -14172,6 +14175,7 @@ function teachTick(now) {
   if (now - TEACH_CK < 1000) return null; TEACH_CK = now;
   const S = teachWatch(now), D = SHIP.device;
   if (TP997.n11 && D && tp997DevWork(now)) return 't:devwork';   // 0.99.7 note 11 (TP1): the device-at-work tip as your first long work step starts (Player engineer slot)
+  if (frpTips()) { const fr = frpTipsArrival(now); if (fr) return fr; }   // FR2 (F10): the view, needs and pause tips on the arrival evening
   if (!D || !D.settings.tips || teachHeld() || devLocked() || POP.busy || POP.toast > now - TEACH_TOAST) return null;
   const paced = now - POP.tip >= TEACH_GAP && Math.max(POP.card, POP.warn) <= now - TEACH_QUIET;
   const d = SHIP.time.day, min = SHIP.time.min, deck = deckDef.num;
@@ -14481,7 +14485,7 @@ function foodFrom(where, peek) {
       return { ok: true };
     }
     if (!takePortion('player')) return { ok: false, why: 'Nothing to eat just now. ' + sv + ' ' + gr };
-    return { ok: true, dish: hot ? (where === 'grab' ? 'a hot plate of ' : '') + hot[2] : 'something from the grab shelf' };
+    return { ok: true, dish: hot ? (where === 'grab' ? (frpWords() ? 'a covered plate of ' : 'a hot plate of ') : '') + hot[2] : 'something from the grab shelf' };
   }
   if (where === 'grab') return { ok: true, dish: 'a roll and an apple' };
   const m = SHIP.time.min;
@@ -15925,8 +15929,8 @@ function jobEnd(A) {
     const name = machineName(machineById(mw.j.machine));
     if (A.o.repair) {
       if (!mw.j.workDone && typeof caseFitted === 'function' && caseFitted(mw.j)) { P.work = null; MACH_REV++; }   // 24k / 24g: no call yet, or the wrong part: still faulty (caseFitted says so and puts the part back), as jobStepDone asks (p5-fix2)
-      else if (finishJob(mw.j.id)) { P.work = null; P.credits += JOB_PAY; toast('Job done', 'The ' + name + ' is running sweetly again. That\'s one off the board. +' + JOB_PAY + ' credits.'); if (typeof padBuzz === 'function') padBuzz('done'); }   // a light buzz beside it (section 26, P4: only when turned on)
-      else toast('Your job', 'The job isn\'t yours any more.');
+      else if (finishJob(mw.j.id)) { P.work = null; P.credits += JOB_PAY; toast('Job done', 'The ' + name + (frpWords() && frpPlural(name) ? ' are' : ' is') + ' running sweetly again. That\'s one off the board. +' + JOB_PAY + ' credits.'); if (typeof padBuzz === 'function') padBuzz('done'); }   // a light buzz beside it (section 26, P4: only when turned on)
+      else toast('Your job', frpJobGone());
     } else if (!(typeof scanOpen === 'function' && scanOpen(mw.j.id))) toast('Inspecting', 'The ' + name + ' needs ' + partList(A.o.need) + '. ' + (P.carry.length && !A.o.need.includes(madeHere(mw.j)) ? '' : whereFrom(mw.j, A.o.need)));
   }
   device.refresh();
@@ -16014,7 +16018,7 @@ function workStepEnd(A, abort) {
 function wsFinish(j, k, res, title, said) {
   const P = SHIP.player; P.wsteps = P.wsteps.filter(w => !(w.job === j.id && w.k === k));
   const r = jobStepDone(j.id, k, res); if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
-  if (!r || !r.ok) { toast('Your job', 'The job isn\'t yours any more.'); return; }
+  if (!r || !r.ok) { toast('Your job', frpJobGone()); return; }
   if (r.wrong) { device.refresh(); return; }               // a wrong part: 24k's caseFitted has said so
   if (r.retry) { toast(title, typeof r.say === 'string' && r.say ? r.say : 'Not quite. Try again.'); device.refresh(); return; }   // the kind said no (17's def.veto): the stop stays to do
   if (r.done) sndFx('panelOn');                          // the work's done: the panel back on (section 27, 0.93.0)
@@ -16166,7 +16170,7 @@ function cartTap(it, at) {
 // load in the hold, unload where it's going: from a tap there, or on its own when you stop in that room with the cart
 function cartStep(j, c, d, rm, title) {
   if (c.stage === 'empty' && d === 5 && rm === placeRoom('5-hold-1')) {
-    actStart('cartLoad', cartFree(cartStops(j, 'load', ['5-hold-1', '5-hold-2'])), { title: title || 'Cargo hold', after: 'You load the cart: ' + (j.cargo === 'meals' ? 'crates of meals for the cold store.' : 'the delivery for the shelves.') });
+    actStart('cartLoad', cartFree(cartStops(j, 'load', ['5-hold-1', '5-hold-2'])), { title: (frpWords() && j.cargo === 'meals' ? null : title) || 'Cargo hold', after: 'You load the cart: ' + (j.cargo === 'meals' ? 'crates of meals for the cold store.' : 'the delivery for the shelves.') });
     return true;
   }
   const dest = cartDest(j);
@@ -16839,6 +16843,69 @@ if (TP997.n33) deviceApp({ id: 'pockets', title: 'Pockets', icon: 'pocket', orde
     if (!B.length) B.push({ kind: 'text', text: tp997Words('empty', 'Your pockets are empty. Snacks and drinks from the crew store on Deck 3 go in here, to have when you like.') });
     return { title: T, blocks: B };
   } });
+// ---- FR2 (the Fable review, plans/review-fable-play.md finding 2; switch FRP_FOOD_ON, off) ----
+// Food under 10 was warned of once, and never again while it stayed there (WARN_SAID only re-arms above WARN_REARM): an
+// arrow-following player sat at Food 0 for days. On, while Food is under 10 and the firm warning has been said: it is
+// armed again as each meal opens (breakfast, dinner), so needWarnTick says it once more with its usual pacing; and when
+// no arrow at all is showing, the Food marker is asked for again (every 5 ship minutes at most). Awake only; nothing saved
+var FRP_FOOD_ON = false;                                 // var: needWarnTick (above) asks
+const FRP_FOOD = { slot: '', tried: -1e9 };
+function frpFoodTick() {
+  const n = SHIP.player.needs.hunger, t = shipNow(), m = SHIP.time.min, key = SHIP.time.day + (m >= MEALS.dinner[0] ? 'd' : m >= MEALS.breakfast[0] ? 'b' : 'n');
+  if (!(n < WARN_AT[1]) || (WARN_SAID.hunger || 0) < 2) { FRP_FOOD.slot = key; return; }
+  if (typeof sleeping !== 'undefined' && sleeping) return;
+  if (key !== FRP_FOOD.slot) { FRP_FOOD.slot = key; if (!key.endsWith('n')) WARN_SAID.hunger = 1; }
+  if (t - FRP_FOOD.tried >= 5 && !NEED_GOAL && !DIALOGUE && !(ACT && ACT.phase === 'do') && typeof goalNow === 'function' && !goalNow()) { FRP_FOOD.tried = t; needGoal('hunger'); }
+}
+// ---- FR2 (the Fable review, finding 4; switch FRP_TRAY_ON, off) ----
+// "Find a seat and tap it to eat", in a full mess with no pointer (needGoal's seat marker only comes once Food is very
+// low). On: with a tray in hand in the mess (Deck 3), nothing in progress and no arrow of anyone's showing, the arrow
+// points at the nearest free mess seat (needGoal's own pick and words), moves on if someone takes it, and goes when you
+// sit, put the tray down or leave the deck. Section 21's first-night bunk arrow waits behind it (it only sets with no goal)
+var FRP_TRAY_ON = false;                                 // var: needWarnTick (above) asks
+function frpTrayTick() {
+  const P = SHIP.player, mine = !!IX_GOAL && IX_GOAL.frpTray === true, here = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 0;
+  const want = !!P.tray && here === 3 && !ACT && !DIALOGUE;
+  if (!want) { if (mine) clearGoal(); return; }
+  if (!mine && (NEED_GOAL || goalNow())) return;          // never over another arrow
+  const pos = player.obj.position, d2 = pl => { const c = cellPos(...pl.at); return Math.hypot(c.x - pos.x, c.z - pos.z); };
+  const seats = (DECKS[3].places || []).filter(pl => pl.type === 'mess-seat').sort((a, b) => d2(a) - d2(b) || (a.id < b.id ? -1 : 1));
+  const seat = seats.find(pl => !heldBy(pl.id)) || seats[0]; if (!seat) { if (mine) clearGoal(); return; }
+  if (!mine || IX_GOAL.place !== seat.id) setGoal({ deck: 3, place: seat.id, label: TRAY_SEAT_SAY, frpTray: true });
+}
+// ---- FR2 (the Fable review, plans/review-fable-play.md findings 11 and 15; switch FRP_WORDS_ON, off) ----
+// Small wording slips, each read where the words are made: "The light relays is running" (are), "Calibrate the oven 2"
+// (Calibrate oven 2), the deck named twice in Job taken ("..., Deck 3, Deck 3 · infirmary"), a small job's name said in
+// its pop-up's title and again in its text, the daily meals run loaded under the title "Wednesday delivery" (Cargo
+// hold), "a hot plate" from the chilled grab shelf (a covered plate), and the Calendar's "Don't" button (No reminder)
+var FRP_WORDS_ON = false;                                // var: asked from sections 15, 15b, 16, 17 and 19
+function frpWords() { return typeof FRP_WORDS_ON !== 'undefined' && !!FRP_WORDS_ON; }
+function frpPlural(name) { return /[^s]s$/i.test(String(name || '').replace(/\s+\d+$/, '')); }   // "light relays", "grow lights 2"; not "compass", not "oven"
+function frpTitleWhere(title, where) {                   // the job's title without a deck its place is about to say
+  if (!frpWords()) return title;
+  const m = /,\s*(Deck \d|the rec deck|Rec deck)\s*$/i.exec(String(title || '')); return m && String(where || '').toLowerCase().startsWith(m[1].toLowerCase()) ? title.slice(0, m.index) : title;
+}
+// ---- FR2 (the Fable review, plans/review-fable-play.md finding 14; switch FRP_SAY_ON, off) ----
+// Three messages that explained nothing: "The job isn't yours any more." (said mid-lesson when Calder's call took your
+// job back to the board), the board's heading "You have a job. Finish it or drop it" over a finished job waiting to be
+// turned in, and the time clock's "Shift starts at 09:00" at half past nine. On: each says what happened or what to do
+var FRP_SAY_ON = false;                                  // var: asked from sections 15, 15b and 20
+function frpSay() { return typeof FRP_SAY_ON !== 'undefined' && !!FRP_SAY_ON; }
+function frpJobGone() { return frpSay() ? 'That job has gone back to the board: something more urgent came first, or someone else has taken it. Nothing is held against you.' : 'The job isn\'t yours any more.'; }
+function frpJobDone() { const j = typeof myJob === 'function' ? myJob() : null; return !!(j && j.workDone); }
+// ---- FR2 (the Fable review, plans/review-fable-play.md finding 10; switch FRP_TIPS_ON, off) ----
+// The tips for looking around (Rotate, Walls, zoom), your needs and Pause came on Days 3-4, because no teaching tip
+// shows during the arrival (teachHeld) and later ones queue behind the day's own. "Slept well?" came at 15:02. On: once
+// the arrival's walk is over and the evening is yours (the intro's 'free', 'tomas' and 'night' steps, Day 0), those three show, a minute
+// apart, never over anything (POP.busy, a recent toast, card or warning); and "Slept well?" only shows before 09:00
+var FRP_TIPS_ON = false;                                 // var: TEACH and teachTick (above) ask
+function frpTips() { return typeof FRP_TIPS_ON !== 'undefined' && !!FRP_TIPS_ON; }
+function frpTipsArrival(now) {
+  const D = SHIP.device; if (!D || !D.settings.tips || typeof introOn !== 'function' || !introOn() || SHIP.time.day >= 1 || !SHIP.intro || !['free', 'tomas', 'night'].includes(SHIP.intro.step)) return null;   // dinner is over: the evening is yours
+  if (devLocked() || POP.busy || POP.toast > now - TEACH_TOAST || now - POP.tip < 60000 || Math.max(POP.card, POP.warn) > now - 20000) return null;
+  for (const id of ['t:view', 't:needs', 't:pause']) { if (D.tipsSeen[id]) continue; const row = TEACH.find(r => r[0] === id); if (row && tipShow(id, bedText(row[2]))) { POP.tip = POP.card = now; return id; } }
+  return null;
+}
 // ---- end of slot: Player engineer ----
 
 // =====================================================================
@@ -16986,7 +17053,7 @@ function ixChoreTap(it, at, side) {
   const [title, pose] = IX_STOP[st.step] || ['Your job', 'work'];
   // the stop's spot, not the place: a lamp over the lift queue is yours to change even with someone waiting there
   const sign = j.fix && typeof fixWord === 'function' ? fixWord(j, 'sign') : '', tool = j.fix && j.tool ? ', with ' + j.tool : '';   // a small repair: what you see, and the tool (FX10)
-  actStart('ixStop', null, { ...o, pose, spot: { ...spot, id: null, pose: 'stand' }, after: (sign ? sign + ' ' : '') + j.title + tool + ': about ' + Math.ceil(st.mins || 10) + ' minutes. Walk away to pause.' });
+  actStart('ixStop', null, { ...o, pose, spot: { ...spot, id: null, pose: 'stand' }, after: (sign ? sign + ' ' : '') + (frpWords() && o.title === j.title ? (tool ? tool.replace(/^,?\s*/, '').replace(/^w/, 'W') + ': about ' : 'About ') : j.title + tool + ': about ') + Math.ceil(st.mins || 10) + ' minutes. Walk away to pause.' });
   if (ACT && ACT.kind === 'ixStop') { ACT.def.mins = st.mins || 10; ACT.def.title = title; }
   return true;
 }
@@ -17021,7 +17088,7 @@ function ixStopDone(A) {
     toast('Main storage', 'You take ' + partList(got) + '. Now ' + j.title.charAt(0).toLowerCase() + j.title.slice(1) + '.'); return;
   }
   const r = jobStepDone(j.id, A.o.ixStep); ixGoalAt = -1;
-  if (!r.ok) { toast('Your job', 'The job isn\'t yours any more.'); return; }
+  if (!r.ok) { toast('Your job', frpJobGone()); return; }
   if (r.wrong) { device.refresh(); return; }               // a wrong part: 24k's caseFitted has said so
   if (r.retry) { toast(A.def.title, typeof r.say === 'string' && r.say ? r.say : 'Not quite. Try again.'); device.refresh(); return; }   // the kind said no (17's def.veto)
   const say = typeof r.say === 'string' && r.say ? r.say + ' ' : '';   // the kind's own words (its stepDone, through 17)
@@ -17215,6 +17282,7 @@ function putFrame() {
     + '.ixnote{margin:0 2px 6px;font-size:12.5px;color:#cfd9dc;line-height:1.4}.ixnote.head{margin-top:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-size:11.5px}'
     + '#ixGoal{position:fixed;left:0;top:0;z-index:2;pointer-events:none;width:0;height:0}#ixGoal[hidden]{display:none}'
     + '#ixGoal.tap .ixpin,#ixGoal.tap .ixlab{pointer-events:auto;cursor:pointer}#ixGoal.tap .ixpin::before{content:"";position:absolute;left:-11px;top:-11px;width:44px;height:44px}'   // fresh-eyes 38: the pin over an item takes a tap
+    + '#ixGoal.lead .ixarr,#ixGoal.lead .ixpin,#ixGoal.lead .ixlab{pointer-events:auto;cursor:pointer}'   // FR2 (F5)
     + '#ixGoal .ixarr{position:absolute;left:-19px;top:-19px;width:38px;height:38px;border-radius:50%;background:rgba(13,21,33,.82);border:2px solid #e8c06a;box-shadow:0 2px 10px rgba(0,0,0,.45)}'
     + '#ixGoal .ixarr::after{content:"";position:absolute;left:13px;top:10px;border-style:solid;border-width:8px 0 8px 14px;border-color:transparent transparent transparent #e8c06a}'
     + '#ixGoal .ixpin{position:absolute;left:-11px;top:-30px;width:22px;height:22px;animation:ixbob 1.4s ease-in-out infinite}'
@@ -17227,7 +17295,8 @@ function putFrame() {
   // a tap on the pin is read as the deck reads one (section 11): pressed on the pin, released near the same spot soon after,
   // wherever the pin has bobbed to by then (RV8: acting on 'click' lost a tap when the bobbing pin moved between press and release)
   let pinDown = null;
-  for (const e of [g.children[1], g.children[2]]) e.addEventListener('pointerdown', ev => { if (!g.classList.contains('tap')) return; ev.stopPropagation(); pinDown = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, t: performance.now() }; });
+  for (const e of [g.children[0], g.children[1], g.children[2]]) e.addEventListener('pointerdown', ev => { if (!g.classList.contains('tap') && !g.classList.contains('lead')) return; ev.stopPropagation();   // children[0] and 'lead': FR2 (F5), the arrow of whoever is leading you (never set with FRP_LEAD_ON off)
+    pinDown = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, t: performance.now() }; });
   addEventListener('pointerup', ev => { const d = pinDown; if (!d || ev.pointerId !== d.id) return; pinDown = null;
     if (Math.hypot(ev.clientX - d.x, ev.clientY - d.y) < HOLD_PX && performance.now() - d.t <= HOLD_MS) { tapUpAt = ev.timeStamp; ixGoalTap(); } }, true);   // tapUpAt: the browser's own click after it is swallowed, as after a deck tap
   addEventListener('pointercancel', ev => { if (pinDown && ev.pointerId === pinDown.id) pinDown = null; }, true);
@@ -17347,7 +17416,7 @@ const ixBoard = (() => {
       const ids = new Set(yours.map(o => o.id)), les = boardLesson();
       if (les && ids.has(les)) yours.sort((a, b) => (b.id === les) - (a.id === les));   // your lesson's job first (FX10)
       const crew = jobs.filter(j => j.claimedBy && j.claimedBy !== 'you');   // the crew's, as the board on the wall shows them (0.37.6)
-      sub.textContent = mine ? 'You have a job. Finish it or drop it to take another.' : les && ids.has(les) ? 'Your ' + boardLessonName() + ' is on the board: take the marked one.' : yours.length ? 'Pick a job and take it. Tier ' + playerTier() + ' work is yours to take.'
+      sub.textContent = mine ? (frpSay() && frpJobDone() ? 'Your job is done. Turn it in here.' : 'You have a job. Finish it or drop it to take another.') : les && ids.has(les) ? 'Your ' + boardLessonName() + ' is on the board: take the marked one.' : yours.length ? 'Pick a job and take it. Tier ' + playerTier() + ' work is yours to take.'
         : 'Nothing open for you just now. New jobs come in through the day shift, and the crew take the urgent ones first: check back in an hour or two.';
       if (mine) {                                        // yours: Turn it in once the work's done (section 17's turnInJob), else Drop it
         const [title, where, state, pri] = jobCard(mine), done = mine.workDone && typeof turnInJob === 'function';
@@ -17370,7 +17439,7 @@ const ixBoard = (() => {
       const j = myJob(), [title, where] = jobCard(j), clash = lessonClash(j, est ? est.mins : 0);
       SHIP.player.track = j.id; clearGoal();             // a job taken is tracked (the device's Track switch: null = off), over any older arrow (playtest 1)
       api.close(); device.refresh(); ixGoalAt = -1;
-      toast('Job taken', (j.title || title) + ', ' + where + '. Follow the marker' + (j.parts && j.parts.length ? ': parts first, ' + partsFrom(j) + '.' : '.') + (clash ? ' ' + clash : ''));
+      toast('Job taken', frpTitleWhere(j.title || title, where) + ', ' + where + '. Follow the marker' + (j.parts && j.parts.length ? ': parts first, ' + partsFrom(j) + '.' : '.') + (clash ? ' ' + clash : ''));
       ixTip('taken', 'Track it on your device; the marker shows the way.');
       return true;
     },
@@ -17480,6 +17549,7 @@ function ixPinTap(point) {
 const ixGoalItem = g => ITEMS.find(i => g.item instanceof RegExp ? g.item.test(i.t) : i.t === g.item) || null;
 // fresh-eyes 38 (2026-10-22): the pin over an item takes a tap, which does what tapping the item does (the job board: walk up and open it)
 function ixGoalTap() {
+  if (FRP_LEAD_ON && frpLeadArrowTap()) return true;     // FR2 (F5): the arrow of whoever is leading you: toward them
   const g = goalNow(), it = g && g.item && typeof deckDef !== 'undefined' && deckDef && deckDef.num === g.deck ? ixGoalItem(g) : null; if (!it) return false;
   const p = it.hit.getWorldPosition(new THREE.Vector3());
   if (typeof playerTap === 'function' && playerTap(it, p.clone(), p)) return true;
@@ -17597,6 +17667,7 @@ function ixFrame() {
   el.hidden = false; el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
   if (on && here) { IX_PIN.x = x; IX_PIN.y = y; IX_PIN.t = performance.now(); }   // where the pin is drawn, for section 11's tap (FX3)
   arr.style.display = on ? 'none' : ''; pin.style.display = on ? '' : 'none';
+  if (FRP_LEAD_ON) { const ld = frpLeadGoalIs(g) && (!here || Math.hypot(w.x - player.obj.position.x, w.z - player.obj.position.z) > FRP_LEAD_NEAR); if (el.classList.contains('lead') !== ld) el.classList.toggle('lead', ld); }   // FR2 (F5): beside them the pin lets the tap through to them
   const tp = on && here && !!w.it; if (el.classList.contains('tap') !== tp) el.classList.toggle('tap', tp);   // the pin over an item takes a tap (fresh-eyes 38)
   if (!on) arr.style.transform = 'rotate(' + Math.atan2(dy, dx).toFixed(3) + 'rad)';
   lab.style.top = on ? '6px' : y > H2 ? '-50px' : '24px';
@@ -20816,7 +20887,7 @@ const CHORES = {
                where: () => lobbyish().concat(placesOf(['garden']).slice(0, 1)).map(p => ({ key: p.id, title: 'Clean a vent: ' + roomName(p.deck, p.room), deck: p.deck, room: p.room, stops: [{ deck: p.deck, placeId: p.id, mins: 20, tag: 'vent' }] })) },
   calibrate: { tier: 1, per: .8, parts: [], text: 'Calibrate', helps: { self: 6 },
                where: () => choreMachines(choreNoWasher(['oven', 'range', 'chiller', 'galleyplant', 'extractor', 'washer', 'cartdock', 'relay', 'databus', 'array', 'gasplant']))
-                 .map(m => ({ key: m.id, title: 'Calibrate the ' + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, tier: MACHINE_KINDS[m.kind].tier, stops: [panelStop(m, 15, 'calibrate')] })) },
+                 .map(m => ({ key: m.id, title: 'Calibrate ' + (frpWords() && /\d$/.test(machineLabel(m).split(',')[0]) ? '' : 'the ') + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, tier: MACHINE_KINDS[m.kind].tier, stops: [panelStop(m, 15, 'calibrate')] })) },
   delivery:  { tier: 1, per: .6, parts: [], text: 'Delivery',
                where: () => DELIVERIES.filter(r => placeById(r.from) && placeById(r.to)).map(r => { const a = placeById(r.from), b = placeById(r.to);
                  return { key: r.key, title: r.title + ', ' + deckIn(b.deck), deck: b.deck, room: b.room, bring: r.bring, stops: [{ deck: a.deck, placeId: a.id, mins: 5, tag: 'pickup' }, { deck: b.deck, placeId: b.id, mins: 10, tag: 'drop' }] }; }) },
@@ -33955,6 +34026,8 @@ const LINES = JSON.parse([
   '{"text":"Clock out early? It\'ll be noted.","id":"skklk3"}]',
   ',"clock.screen.earlyyes":[',
   '{"text":"Clock out early","id":"1j69f55"}]',
+  ',"clock.screen.frpLate":[',
+  '{"text":"Your shift began at {time}. Tap to clock in.","id":"had17x"}]',
   ',"clock.screen.hours":[',
   '{"text":"YOUR HOURS","id":"hqtumr"}]',
   ',"clock.screen.in":[',
@@ -35277,6 +35350,10 @@ const LINES = JSON.parse([
   '{"text":"First-timers, to the bow lounge. The rest of you, be kind. Marrow out.","id":"pp8v7w"}]',
   ',"event.crossingLine.answer.missed":[',
   '{"text":"We\'re new, and we\'re nervous, and we came anyway.","id":"zmbzi1"}]',
+  ',"event.crossingLine.frp.arrow":[',
+  '{"text":"The Line oath, 14:40: the bow lounge","id":"shkjct"}]',
+  ',"event.crossingLine.frp.missed":[',
+  '{"text":"We read the oath without you. One of the other first-timers answered for the lot. Your certificate is on your shelf all the same. Ask the old hands what you missed, and believe about half of it.","id":"1nihtyt"}]',
   ',"event.crossingLine.gather.ceremony.ask":[',
   '{"text":"Bow lounge at half two. First-timers stand at the front. That\'s you.","id":"146f80v","tone":"funny"},',
   '{"text":"Coming to the Line? Half two, the bow lounge. Bring a brave face.","id":"gfr69z"},',
@@ -41156,7 +41233,7 @@ const LINES = JSON.parse([
   ',"quiz.q34.a4":[',
   '{"text":"Wheee","id":"s21jbv"}]',
   ',"quiz.q34.text":[',
-  '{"text":"What does the lift say for the rec dec?","id":"12737s8"}]',
+  '{"text":"What does the lift say for the rec deck?","id":"1l7gfkx"}]',
   ',"quiz.q35.a1":[',
   '{"text":"Four","id":"dse8bn"}]',
   ',"quiz.q35.a2":[',
@@ -47392,7 +47469,7 @@ function eventJoin(e, d, now, notice) {
   const n = SHIP.player && SHIP.player.needs; if (n && typeof n.social === 'number') n.social = Math.min(100, n.social + Math.min(20, 12 * bb));   // at most +20 even among close friends (0.28.49, the lead)
   if (typeof leisureAdd === 'function') leisureAdd(25, 'tradition');   // 0.34.51: going to a tradition fills leisure (PE6's 7th need, +15 in the plan); +25 in the 0.99 balance pass (BAL1's finding 6, the user's go)
   toast(e.name, notice || evText(e.ev.thanks, e), { keep: true });   // the join notice: never dropped from the pop-up queue (LEAD31-3)
-  if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + (TP997.n53 ? e.name.replace(/^The /, 'the ') : e.name.toLowerCase()) + '. Same time next one?', quiet: true });   // the join toast says it already
+  if (typeof mailSend === 'function' && !(FRP_THANKS_ON && !frpThanksOk(e))) mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + (TP997.n53 ? e.name.replace(/^The /, 'the ') : e.name.toLowerCase()) + '. Same time next one?', quiet: true });   // the join toast says it already
   if (e.id === 'quiz') quizStart(d, now);
   if (e.id === 'first-light' && typeof flcJoin === 'function') flcJoin(e, d, now);   // patch #26: a free cocoa, then the meeting (section 15's slot)
   if (e.id === 'one-week-aboard' && P926_TRADS) week1Card(e, d, now);
@@ -49140,7 +49217,7 @@ function dialogueEnd(finished) {
 const dialogueClose = () => dialogueEnd(false);          // walking away: the gist arrives in Mail
 function meetingGist(scriptId) {
   const sc = MEETING_SCRIPTS[scriptId]; if (!sc || !sc.gist || typeof mailSend !== 'function') return;
-  mailSend({ at: shipNow(), from: sc.from || 'Works', subject: sc.title + ' (notes)', body: evText(sc.gist, SHIP.event ? evCtx(SHIP.event) : { band: 'smooth', mine: {}, you: 'Cadet' }), quiet: true });
+  mailSend({ at: shipNow(), from: sc.from || 'Works', subject: sc.title + ' (notes)', body: (typeof frpLineGist === 'function' && frpLineGist(scriptId)) || evText(sc.gist, SHIP.event ? evCtx(SHIP.event) : { band: 'smooth', mine: {}, you: 'Cadet' }), quiet: true });   // FR2 (F1): the oath you missed
 }
 function inMeeting(m) {
   const w = m.where || {}; if (w.any) return true;      // anywhere (0.62.6, social: a recorded message on your device plays on through doorways and the lift)
@@ -50853,6 +50930,17 @@ function t997Frame() {                                 // once a frame (eventsTi
   if (typeof deckDef === 'undefined' || !deckDef || typeof DECK_CREW === 'undefined') return;
   lab997Frame(); teach997Frame(); bread997Frame();
 }
+// ---- FR2 (the Fable review, plans/review-fable-play.md finding 9; switch FRP_THANKS_ON, off) ----
+// "Thanks for coming: Good to see you at X. Same time next one?" came after everything you joined: your own Name on
+// the beam, the Last Light (once a voyage), a birthday, the Captain's address (from the Captain). On: only after a
+// tradition with a plain weekly rhythm (a `when` with weekdays and nothing else: no arrival, rotation, season, year
+// or birthday rule), and never the Captain's Friday address. An event's gathering (no `when`) gets none
+var FRP_THANKS_ON = false;                               // var: tradJoin (above) asks
+function frpThanksOk(e) {
+  const ev = e && e.ev, w = ev && ev.when; if (!w || typeof w !== 'object' || w.weekday === undefined) return false;
+  if (w.after || w.rotation !== undefined || w.year !== undefined || w.quarter !== undefined || w.season !== undefined || w.birthday || w.until !== undefined) return false;
+  return ev.id !== 'captains-address';
+}
 // ---- end of slot: Traditions engineer ----
 // ---- slot: Events engineer 2 (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----
 // ---- the events base, F0b (EV2; plans/events-base-brief.md): called in on a day off, and an event meeting's cast in
@@ -51353,6 +51441,7 @@ function lineStoryTick(now) {
   const M = e.mine, at = (day, m) => (e.startDay - 1 + day) * 1440 + m, c = evCtx(e), P = player.obj.position, dn = deckDef.num;
   const note = t => { if (t && typeof toast === 'function') toast('Crossing the Line', t); };
   if (!M['notice:horn'] && now >= at(1, 870) && now < at(1, 875)) { M['notice:horn'] = 1; note(evWord('event.crossingLine.notice.horn', c)); }
+  if (FRP_LINE_ON) frpLineArrow(e, now);                  // FR2 (F1): the oath's own arrow
   const near = (id, r) => DECK_CREW.find(a => a.p && a.p.id === id && a.h && Math.hypot(a.x - P.x, a.z - P.z) < r) || null;
   const say = (id, key, r = 6) => { const a = near(id, r), text = evWord(key, c); return !!(a && text && typeof bubbleSay === 'function' && bubbleSay(a.h, text, 5)); };
   const tomas = schedPeople().find(x => x.id === 'tomas'), tw = tomas && typeof whereIs === 'function' ? whereIs(tomas, now) : null;
@@ -51398,6 +51487,24 @@ function lineStoryTick(now) {
       lineMoment('lineLap', ['torres-zeke', 'pell', 'tomas'], { after: 'pell', line: { who: 'tomas', to: 'you', text: x => evWord('event.crossingLine.lap.tomas.' + v, x) || '' } }, ['story:lap', v]);
     }
   }
+}
+// ---- FR2 (the Fable review, plans/review-fable-play.md finding 1; switch FRP_LINE_ON, off) ----
+// The Line oath (Day 7 14:40, the bow lounge) had no gold arrow, and a player who never went got the meeting's gist by
+// Mail: "you answered for the first-timers". On: a level-1 arrow from 14:15 until the oath ends or you are in it; the
+// Mail for an oath you missed says so (event.crossingLine.frp.missed); an invitation's heads-up names its tradition
+var FRP_LINE_ON = false;                                 // var: section 19's heads-ups and meetingGist (above) ask
+function frpLineArrow(e, now) {
+  const M = e.mine, t0 = e.startDay * 1440 + 880; if (M['met:crossingCeremony'] || now < t0 - 25 || now >= t0 + 15 || typeof guideAsk !== 'function') return;
+  guideAsk({ id: 'frp:line:oath', level: 1, owner: '18 (FR2)', from: t0 - 25, until: t0 + 15, goal: () => ({ deck: 3, room: 'L', label: evWord('event.crossingLine.frp.arrow') || 'The Line oath, 14:40: the bow lounge' }),
+    done: () => !!(SHIP.event && SHIP.event.mine && SHIP.event.mine['met:crossingCeremony']) });
+}
+function frpLineGist(scriptId) {                         // the missed oath's Mail body, or null (the gist as written)
+  const e = SHIP.event; if (!FRP_LINE_ON || scriptId !== 'crossingCeremony' || !e || e.id !== 'crossingLine' || !e.mine || e.mine['met:crossingCeremony']) return null;
+  return evWord('event.crossingLine.frp.missed', evCtx(e)) || null;
+}
+function frpInviteWhat(a) {                              // ": Tiles night" after "Invitation from Zeke Torres", or ''
+  if (!FRP_LINE_ON || !a || !a.trad || typeof TRADITIONS === 'undefined') return '';
+  const t = TRADITIONS.find(x => x.id === a.trad); return t && typeof t.name === 'string' && t.name ? ': ' + t.name : '';
 }
 // ---- end of slot: Line builder ----
 // ---- slot: Comet builder (section 18; FX25, the comet viewing, plans/events-plan-2.html Part A). New code of this seat's goes here ----
@@ -54945,7 +55052,7 @@ function clockScreen(said, ask, after) {                // after (patch #6): 'un
   const on = playerOnDuty(d), inn = careerClockedIn(d), out = careerClockedOut(d), wd = weekday(d);
   const st = said || (!on ? (careerOn(d) ? csText('leave', 'On leave today. Enjoy it.') : sickToday(d) ? csText('sick', 'Off sick. Get well.') : csText('offday', 'Day off. No clocking today.'))
     : out ? (wd === 4 ? csText('weekend', 'Shift done. See you Monday.') : csText('done', 'Shift done. See you tomorrow.')) : inn ? friClock('onshift', C.ci % 1440) || csText('onshift', 'On shift since {time}.', { time: hhmm(C.ci % 1440) })
-    : m >= yourDayEnd(d) ? csText('done', 'Shift done. See you tomorrow.') : csText('ready', 'Shift starts at {time}. Tap to clock in.', { time: hhmm(DAY_SHIFT[0]) }));
+    : m >= yourDayEnd(d) ? csText('done', 'Shift done. See you tomorrow.') : frpSay() && m > DAY_SHIFT[0] ? csText('frpLate', 'Your shift began at {time}. Tap to clock in.', { time: hhmm(DAY_SHIFT[0]) }) : csText('ready', 'Shift starts at {time}. Tap to clock in.', { time: hhmm(DAY_SHIFT[0]) }));   // FR2 (F11): after the start it says so
   el.dataset.ph = SHIP.device.settings.phosphor; el.textContent = ''; el.hidden = false;
   if (CLOCK_UNDO_ON) CLOCK_DRAWN = performance.now();   // patch #6: the tap guard's start
   const x = mk('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', csText('close', 'Close')); x.onclick = e => { e.stopPropagation(); el.hidden = true; };
@@ -58237,6 +58344,7 @@ function introTap(p) {
   if (introMeetGo(p)) return true;                      // item 81: the speaker of a first-week meeting that's on takes you in
   if (!introOn() || !p || p.id !== SHIP.intro.escort || !introEscorting(introStep())) return false;
   if (typeof DIALOGUE !== 'undefined' && DIALOGUE) return false;
+  if (FRP_LEAD_ON && frpLeadWalk(p)) return true;         // FR2 (F5): tapped from across the room: you walk over to them
   const h = INTRO_UI.tour[0];   // at a tour place with extras left: the next one, now
   const next = !!(h && !h.core.length && h.extra.length && typeof player !== 'undefined' && introAtTour(h.t, player.here())); if (next) INTRO_UI.next = 0;
   // parked (#31): never the chat card; (DS1, lead 31 on FE2's 0.92.0 playtest) his usual card, as for anyone, and the tour goes on
@@ -59328,6 +59436,31 @@ function introKeep(b, id, o) {
   if (id !== b.who) { o.until = b.until; return; }
   if (b.spot) { o.where = { ...b.where, placeId: b.spot }; o.early = 0; }   // MV1-2: her own spot, not the first free place in the room (the time clock, so a tap on the clock was a tap on her); from `at`, as before
   o.until = m === -1 ? b.until : e >= 0 ? Math.min(b.until + b.keep, Math.max(b.at + 1, e - d0)) : b.until + b.keep;
+}
+// ---- FR2 (the Fable review, plans/review-fable-play.md finding 5; switch FRP_LEAD_ON, off) ----
+// The first minute aboard: the arrow points at Zeke, and a tap on him (or on the arrow at the screen's edge) gave his
+// description and no step. On, and only while someone is leading you (the arrival's escort, introEscorting): a tap on
+// them from more than FRP_LEAD_NEAR away walks you to them (nearer, their usual card), and their own arrow (the edge
+// arrow, the pin, its label) takes a tap and walks you toward it, or to the lift panel when they are on another deck
+var FRP_LEAD_ON = false;                                 // var: introTap, ixGoalTap and ixFrame (above) ask
+const FRP_LEAD_NEAR = 3;
+function frpLeadGoalIs(g) { return !!g && introOn() && !!INTRO_UI.goal && g === IX_GOAL && g.label === 'Zeke Torres' && introEscorting(introStep()); }
+function frpLeadGo(x, z) {                               // beside that spot, or the nearest tile to it you can reach (from the shuttle, the tile beside him is not)
+  const to = nearestOpen(x, z, player); if (!to) return false;
+  if (playerGo(typeof tapBeside === 'function' ? tapBeside(to) : to)) return true;
+  const q = player.here(), ring = []; for (let di = -2; di <= 2; di++) for (let dj = -2; dj <= 2; dj++) if (di || dj) ring.push([to[0] + di, to[1] + dj]);
+  const d = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]); ring.sort((a, b) => d(a, to) - d(b, to) || d(a, q) - d(b, q));
+  for (const c of ring) if (free(c[0], c[1]) && playerGo(c)) return true;
+  return false;
+}
+function frpLeadWalk(p) {
+  const a = typeof DECK_CREW !== 'undefined' ? DECK_CREW.find(x => x.p && x.p.id === p.id) : null, q = player.obj.position;
+  return !!a && Math.hypot(a.x - q.x, a.z - q.z) > FRP_LEAD_NEAR && frpLeadGo(a.x, a.z);
+}
+function frpLeadArrowTap() {
+  const g = goalNow(); if (!frpLeadGoalIs(g) || typeof deckDef === 'undefined' || !deckDef) return false;
+  const w = deckDef.num === g.deck ? ixGoalWorld(g) : ixLiftPanel() || { x: LIFT_AT[0], z: LIFT_AT[1] };
+  return !!w && frpLeadGo(w.x, w.z);
 }
 // ---- end of slot: Onboarding engineer ----
 
@@ -72530,6 +72663,7 @@ function shipFeelFrame(t, dt) {
     const e = ev && SHIP.event, sd = e && SHIP_EVENTS[e.id], tn = shipNow();   // one of the event's gatherings on this deck, now (for 8b's crowd)
     s.gather = !!sd && (sd.moments || []).some(mo => mo.gathering && mo.where && mo.where.deck === dn && (at => tn >= at - 30 && tn < at + (mo.len || 60) + 30)((e.startDay - 1 + mo.at[0]) * 1440 + mo.at[1]));
     s.lampT = typeof stormSupperDim === 'function' ? stormSupperDim(dn) : 0;   // the storm update's lantern supper: the mess on emergency light (0 while off)
+    if (FRP_BLINK_ON) frpBlinkTick(now);                 // FR2 (F8): the Last Light blinks again, softly, while it passes
     if (s.first) { s.mood = s.moodT; s.first = false; }
   }
   if (s.lamp !== s.lampT) { s.lamp += (s.lampT - s.lamp) * Math.min(1, dt * .8); if (Math.abs(s.lamp - s.lampT) < .002) s.lamp = s.lampT; }
@@ -72547,7 +72681,7 @@ function shipFeelFrame(t, dt) {
   const horn = has('horn') && se < 1.8 ? Math.sin(Math.PI * se / 1.8) : 0;   // Crossing the Line's horn (no sound): one soft gold pulse, no shake; reduced motion: a soft dip
   if (horn && !FEEL_CALM) flash = Math.max(flash, .7 * horn);
   // 0.99.9 (EV1, EV999_BLINK_ON): the Last Light's beacon passing: two soft pale pulses (0-0.8 s, 1.0-1.8 s); reduced motion: one slow swell
-  const beacon = has('beacon') && se < 1.8 ? (FEEL_CALM ? Math.sin(Math.PI * se / 1.8) : se < .8 ? Math.sin(Math.PI * se / .8) : se > 1 ? Math.sin(Math.PI * (se - 1) / .8) : 0) : 0;
+  const beacon = (has('beacon') && se < 1.8 ? (FEEL_CALM ? Math.sin(Math.PI * se / 1.8) : se < .8 ? Math.sin(Math.PI * se / .8) : se > 1 ? Math.sin(Math.PI * (se - 1) / .8) : 0) : 0) * (FRP_BLINK_ON && FRP_BLINK.t0 === s.t0 ? FRP_BLINK.soft : 1);   // FR2 (F8): its own repeats at half strength
   if (has('lightsDip')) k = se < .25 ? 1 - se / .25 * .65 : se < 1.4 ? .35 : Math.min(1, .35 + (se - 1.4) * .45);
   if (has('flicker') && se > 1.4) k *= FEEL_CALM ? .9 + .1 * Math.cos(se * 2) : feelHash(Math.floor(se * 8), 3) < .3 ? .55 : 1;
   // the odd flicker while the event's 'flicker' effect is on (about one in 30 tenths of a second)
@@ -73103,6 +73237,20 @@ if (PF_SH_ON) sun.shadow.mapSize.set(1024, 1024);
 if (PF_CAP_ON) {                                         // the main loop's frames only: one comes when at least 1/PF_CAP s has passed (less 3 ms, so 60 on a 60 Hz screen keeps every frame)
   const raf = window.requestAnimationFrame.bind(window), gap = 1000 / PF_CAP - 3; let last = -1e9;
   window.requestAnimationFrame = cb => cb !== loop ? raf(cb) : raf(function pfGo(t) { if (t - last < gap) return raf(pfGo); last = t; cb(t); });
+}
+// ---- FR2 (the Fable review, plans/review-fable-play.md finding 8; switch FRP_BLINK_ON, off) ----
+// The Last Light was one blink at 14:08 (EV999_BLINK_ON's moment, about two seconds) while Dr. Sato says "one blink
+// every eleven seconds": arrive a ship minute late and there was nothing to see. On: from that first blink until the
+// gathering at the bow glass ends (14:30), the same 'beacon' feel again every FRP_BLINK.every seconds of play, at half
+// strength (softer, EV1's backlog note about Deck 6), never over another felt moment. Asked from shipFeelFrame's
+// twice-a-second look; simNow's clock (a pause holds it); nothing saved, no R()
+var FRP_BLINK_ON = false;                                // var: shipFeelFrame (above) asks
+const FRP_BLINK = { every: 11, soft: .5, t0: -1, last: -1e9 };
+function frpBlinkTick(now) {
+  const e = SHIP.event; if (!e || e.id !== 'lastLight') return;
+  const t = shipNow(), t0 = e.startDay * 1440 + 848; if (t < t0 + 3 || t >= t0 + 22) return;   // after the first blink's own minutes, to 14:30
+  const s = FEEL_S; if (now < s.until || now - s.t0 < FRP_BLINK.every || now - FRP_BLINK.last < FRP_BLINK.every) return;
+  FRP_BLINK.last = now; shipFeel(['beacon'], 3); FRP_BLINK.t0 = s.t0;
 }
 // ---- end of slot: Performance engineer ----
 
@@ -74691,8 +74839,8 @@ function crewAtScreen(cx, cy) {
   }
   return best;
 }
-function tapCrew(cx, cy) {
-  const a = crewAtScreen(cx, cy); if (!a) return false;
+function tapCrew(cx, cy, who) {                          // who (FR2, F4/F5): this one of DECK_CREW, whoever is nearest the tap
+  const a = who || crewAtScreen(cx, cy); if (!a) return false;
   sndFx('hello');                                        // a friendly bloop (section 27, 0.93.0)
   if (typeof introTap === 'function' && introTap(a.p)) return true;   // section 21: the arrival evening's tap-to-ask (0.26.31)
   if (typeof tradJoinTap === 'function' && tradJoinTap(a)) return true;   // section 18: tap someone at a tradition to join in (0.70.0)
@@ -74780,6 +74928,7 @@ function tap(cx, cy) {
     if (it1 && /^servery$/i.test(it1.t) && it1.hit) { it1.hit.getWorldPosition(_wp); if (playerTap(it1, _wp.clone(), h1.point)) return; }
   }
   if (near && atPin && typeof ixPinBooth === 'function' && ixPinBooth()) return;   // FX5: the call booth's pin, over someone in the next booth
+  if (FRP_PINTAP_ON && frpPinTap(cx, cy)) return;        // FR2 (F4): beside the arrow's pin, the arrow's target before a bystander
   if (tapCrew(cx, cy)) return;                           // a crew member (section 10)
   if (typeof shelfGlowTap === 'function' && shelfGlowTap(cx, cy)) return;   // the shelf lit up for the part you need (section 17, FX3): after the crew, so a tap on someone in front of it is still theirs (RV11)
   const h = pick(cx, cy), meDoor = () => !atPin && adoorOnMe(cx, cy) && (h && typeof jobSpotTap === 'function' && jobSpotTap(h.point) || adoorTapSelf());   // a tap on yourself right by a door shut to you is a tap on the door (RV18: low cut-away walls), where it would only walk you over the floor: anyone, anything, a job's stop or the arrow's pin there first (FX29: pick() never returns you)
@@ -75083,6 +75232,58 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => { KEY_WALK.held.delete(String(e.key || '').toLowerCase()); });
 addEventListener('blur', () => KEY_WALK.held.clear());   // a key let go in another window
+// ---- FR2 (the Fable review, plans/review-fable-play.md finding 4; switch FRP_PINTAP_ON, off) ----
+// In a crowd a tap meant for the arrow's target opened a bystander's card (the lathe's stop under four people, a seat
+// in a full mess, your wardrobe with a bunkmate beside it, the host of a tradition). FX3's rule above only covers a tap
+// within CREW_PIN_PX of the pin's point with something that isn't a person under it. On, and ONLY for a tap that would
+// otherwise be someone's (crewAtScreen): within a thumb's width (FRP_PIN_PX) of the pin as drawn, its label, or the floor
+// under it, the arrow's own target takes the tap: the person it names (tapCrew for them), else your job's stop there,
+// else the thing the pin points at (15b's ixPinTap, the ray set through the pin). A tap on anyone away from the pin,
+// and a tap on the person the arrow names, are as before
+var FRP_PINTAP_ON = false;                               // var: tap() (above) asks
+const FRP_PIN_PX = 34;
+function frpPinTap(cx, cy) {
+  const a = crewAtScreen(cx, cy); if (!a || typeof IX_PIN === 'undefined' || performance.now() - IX_PIN.t >= 500) return false;
+  const g = typeof goalNow === 'function' ? goalNow() : null; if (!g || !deckDef || g.deck !== deckDef.num || g.xz) return false;
+  const w = ixGoalWorld(g); if (!w) return false;
+  _cp.set(w.x, .05, w.z).project(camera);
+  const dx = cx - IX_PIN.x, dy = cy - IX_PIN.y, onPin = Math.abs(dx) < FRP_PIN_PX && dy > -FRP_PIN_PX - 8 && dy < FRP_PIN_PX + 8;   // the triangle above the point, the label under it
+  if (!onPin && Math.hypot((_cp.x + 1) / 2 * innerWidth - cx, (1 - _cp.y) / 2 * innerHeight - cy) >= FRP_PIN_PX) return false;
+  if (g.crew) { const t = DECK_CREW.find(x => x.p && x.p.id === g.crew); return !!t && t !== a && tapCrew(cx, cy, t); }
+  ndc.set(IX_PIN.x / innerWidth * 2 - 1, -(IX_PIN.y / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera);   // the tap's line through the pin (jobRayDist reads it)
+  const p = new THREE.Vector3(w.x, 0, w.z);
+  if (typeof jobSpotTap === 'function' && jobSpotTap(p)) return true;
+  return typeof ixPinTap === 'function' && ixPinTap(p);
+}
+// ---- FR2 (the Fable review, plans/review-fable-play.md finding 6; switches FRP_PANELS_ON and FRP_LABEL_ON, off) ----
+// FRP_PANELS_ON: the job board and the alarm card were see-through (the needs strip and speech bubbles showed through
+// their text): a solid background for both. And a tip card no longer opens over a person's card, the job board, the
+// alarm card, the time clock, Ship health or the open device (an app's own tip, 't:a-...', still shows over its app):
+// it waits at the head of the queue (section 19's skin asks frpTipHold) and shows when they close.
+// FRP_LABEL_ON: the arrow's label was cut at one line ("Fire drill, 15:00: Chief Calder at the Wo..."): it wraps to
+// two lines, centred, the same width limit. CSS only, added at load when a switch is on (nothing added when off)
+var FRP_PANELS_ON = false;                               // var: section 19's tip card (above) asks
+var FRP_LABEL_ON = false;
+(() => {
+  let css = '';
+  if (FRP_PANELS_ON) css += '#ixBoard,#sleepAsk{background:rgb(13,21,33)}';
+  if (FRP_LABEL_ON) css += '#ixGoal .ixlab{white-space:normal;width:max-content;max-width:min(260px,70vw);text-align:center;line-height:1.25;border-radius:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}';
+  if (css) { const st = document.createElement('style'); st.id = 'frpCss'; st.textContent = css; document.head.appendChild(st); }
+})();
+let FRP_TIP_T = 0;
+function frpTipBusy(t) {
+  if (typeof DEV !== 'undefined' && DEV.open && !/^t:a-/.test(t && t.id || '')) return true;
+  for (const id of ['chat', 'ixBoard', 'sleepAsk', 'clockScreen', 'ixHealth']) { const e = document.getElementById(id); if (e && !e.hidden) return true; }
+  return false;
+}
+function frpTipHold(t) {
+  if (!FRP_PANELS_ON || !t || !frpTipBusy(t)) return false;
+  if (!FRP_TIP_T) FRP_TIP_T = setInterval(() => {
+    if (TIP_Q.length && (frpTipBusy(TIP_Q[0]) || document.body.classList.contains('dlgon'))) return;
+    clearInterval(FRP_TIP_T); FRP_TIP_T = 0; if (TIP_Q.length) DEVICE_SKIN.tip(TIP_Q[0]);
+  }, 300);
+  return true;
+}
 // ---- end of slot: HUD seat ----
 
 // =====================================================================
