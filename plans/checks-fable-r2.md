@@ -38,6 +38,12 @@ No check had a "skipped" line.
   depends on the run (it counts real seconds in which a passing remark and a conversation are both on screen). It looks
   like a check that flickers, to be reported either way rather than waved through. I did not rerun it (the rule: once).
 
+- **Rerun alone (asked by lead 52):** lines_check --day on the candidate again, with nothing else running on the machine
+  (no other browser, no other check): `lines_check --day: PASS (0 errors)`, exit 0, 0 "skipped" lines. So OLD was not
+  run a second time. The first run (FAIL, 1 second) was beside lane 2's last checks finishing; OLD's run (FAIL, 3
+  seconds) was alone but straight after. The check flickers with the machine's load: it wants a backlog row.
+
 ## Result
 
-R2: every check OK except lines_check --day, which FAILs the same way on OLD (0.99.91). No failure new to the candidate.
+R2: every check OK. lines_check --day FAILed in the lane (and the same way on OLD 0.99.91), then PASSed when rerun alone
+on the candidate. No failure new to the candidate.
