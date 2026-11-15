@@ -30,11 +30,11 @@ Every check: exit 0 AND its OK line. Start long runs detached (`setsid nohup`), 
 | Share | Seat | Checks, in order |
 |---|---|---|
 | R1 | runner | player_check; bubble; puzzle (whole); social; talk; arrows_check (default parts), arrows step5, arrows step6 asis/teachoff/track/skiptea (one run), arrows endstay; arrows_pointer; day_check 4, 11, 25, 26, 2, 9; p5retry_probe (on a copy with P5_RETRY_ON false); **frp_check (whole; new)** |
-| R2 | runner | cadet_test OLD BUILD (first, alone); intro_check whole, --dinner, --firsts; path; arc; lines_check and lines_check --day; day_check 0, 1, 5, 7, 21, 22; arrows endgo; plans/rv31-probes/pf_f1_same.py OLD BUILD 10 and its all-off proof (below) |
+| R2 | runner | intro_check whole, --dinner, --firsts; path; arc; lines_check and lines_check --day; day_check 0, 1, 5, 7, 21, 22; arrows endgo; plans/rv31-probes/pf_f1_same.py OLD BUILD 10 and its all-off proof (below) |
 | R3 | runner | controller_check (every part but reach; background scripts under 90 min); sound_check; promo_sight; arrows_d; arrows_f; ending_check; devmode_check (all parts); dev_arrow_check |
 | R4 | runner | career; appt; saves; title_check; device_check (whole); day_check 6, 8, 23, 24, 16; fixtap_probe (on a copy with FIXTAP_ON false); plans/rv31-probes/fixtap_reach.py BUILD; fixtap_click.py OFF BUILD; cr1_check; p926_check; plans/rv32-probes/fresh_walk.py BUILD 3 (five points, "long []" needed); **robust_check (whole; new)** |
-| R5 | BM29 | check_fast.sh; machine x2; mech (judge by the full run); bigevents; fridays; events; disc; tiles; join; food 1 7 and 11 4; clothes; stories 36; promo_beats; day_check 12, 13, 17, 18, 19, 27, 3; weekend; plans/rv31-probes/p5retry_break.py OFF BUILD; cr2_check; plans/tb7-probes/drill.py; plans/tp2-probes/tp9991_probe.py (on a copy with TP9991_SD_ON false); plans/ev2-probes/simprobe.py (read by eye); **tools/one_byte.py --check BUILD (0 to change); cadet_test before-one_byte vs after (ALL IDENTICAL)** |
-| R6 | runner | interactions_check (whole, alone, no time limit, about an hour); then perf_check BUILD OLD alone, last of everything; **day_check 10, 14, 15, 20 (new this round, see "The list" below; run them on OLD first)** |
+| R5 | BM29 | **as gates, counted as the round's runs (wave 1):** check_fast.sh, events, cadet_test OLD BUILD; **then:** machine (once; it also runs inside check_fast); mech (judge by the full run); bigevents; fridays; disc; tiles; join; food 1 7 and 11 4; clothes; stories 36; promo_beats; day_check 12, 13, 17, 18, 19, 27, 3; weekend; plans/rv31-probes/p5retry_break.py OFF BUILD; cr2_check; plans/tb7-probes/drill.py; plans/tp2-probes/tp9991_probe.py (on a copy with TP9991_SD_ON false); plans/ev2-probes/simprobe.py (read by eye); **tools/one_byte.py --check BUILD (0 to change); cadet_test before-one_byte vs after (ALL IDENTICAL)** |
+| R6 | runner | interactions_check (whole, alone, no time limit, about an hour); then perf_check BUILD OLD alone, last of everything; **day_check 10, 14, 15, 20 (new this round, see "The list" below; on the candidate only, OLD only for a day that fails)** |
 
 Notes that still hold:
 - **pf_f1_same** prints FAILED when OLD lacks NEW's switches only if fingerprints differ; the pass is F1 mismatches 0, no
@@ -60,6 +60,20 @@ Notes that still hold:
   `Check | Result | Key lines`, each FAIL with its proof. Report "Rn: OK" or "Rn: FAIL ..." to BM29 and lead 52.
 - Whoever finishes early offers to take a check from the slowest share (agree it, copy the lead, never twice).
 
+## Keeping the round's cost down (agreed with lead 52, 2026-11-15; no check dropped, six runners kept)
+a. **Runners do not read DEV_NOTES.md** (about 190,000 tokens). A runner reads this page and its own handover note.
+b. **No check twice.** BM29's gates (check_fast, events_check, cadet_test vs 0.99.91) are the round's runs of those
+   checks; R2 does not repeat cadet_test. machine_check runs once outside check_fast. The condition: every check of the
+   round runs once on the final candidate's exact sha256, and the record names the seat that ran it.
+c. **OLD only on a FAIL.**
+d. **Two waves.** Wave 1 is BM29 alone on the candidate: the gates, then lines_check, frp_check, robust_check and
+   device_check as an early look (about 35 minutes; R1, R2 and R4 still run these in their shares only if wave 1's
+   run was not on the final sha256: otherwise wave 1's run is the round's run and the record says so). Only when wave
+   1 passes are the five runners hired. Wave 2: R6 and R3 start first, R1, R2, R4 about ten minutes later.
+e. **Runners stay silent** between the start and the final report unless there is a FAIL or a sha256 mismatch, and
+   look at their background lanes rarely.
+f. A second candidate means the full round again (the user's rule), so wave 1 exists to get candidate 1 right.
+
 ## The list, and what this round does about FR1's finding B10
 FR1 found that the round is bigger than the notes say and is not written in one place. For this round:
 1. **This page is the one list.** The table above names every check of the round; nothing is "as last time".
@@ -72,7 +86,7 @@ FR1 found that the round is bigger than the notes say and is not written in one 
    p926_check, promo_sight_check, stories_check, title_check, and now frp_check. All twelve are in the round above. The
    picker is not the gate, so it is not changed in this round (backlog BM29-1: bring the picker's list and the guide's
    table in step with this page, or retire the map).
-4. **Days never run by day_check in a round:** 10, 14, 15, 20 (the picker lists 15). Added to R6 this round, OLD first:
+4. **Days never run by day_check in a round:** 10, 14, 15, 20 (the picker lists 15). Added to R6 this round, on the candidate only; OLD is run for a day that fails:
    a day that fails the same way on OLD is recorded as old and new to the backlog, not held against the candidate.
 5. **"Skipped" guards** (a check that passes while testing nothing): each runner counts the lines containing "skipped"
    in each NEW log (`grep -c skipped`) and puts the count in the notes; a check whose count is not 0 is named in the
