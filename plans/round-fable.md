@@ -101,6 +101,21 @@ R1, R2, R3, R4, R6: to be hired by lead 52 (handover notes plans/handover-rN.md 
      content_gen.py --check says up to date. lines_check does not know the one-byte mark. To FR1 (check-side).
   3. LIB_SAY_ON's switch line is indented (`  const LIB_SAY_ON = false;`), unlike the rest: the switch-on and all-off
      scripts must match it on purpose.
+- Rehearsal results on the all-on file (scratch, FR1 1155555 + FR2 f038d8d, escaped, labelled; game 2c3c691e...79dd):
+  - events_check OK (884 s). robust_check OK (448 s). The label 0.99.92-review broke nothing.
+  - **check_fast FAILED: device_check**, 2 lines, each twice: "tips: once each, a tap closes, the switch" and "tipSeen:
+    marks without showing, drops a waiting tip, leaves the one on screen". Still fails with FRP_TIPS_ON alone off;
+    FRP_PANELS_ON (a tip card waits while a panel is open) is the likely cause. To FR2: a game fault or the check's
+    expectation, and the fix. Blocks the switch-on (never push when check_fast says FAILED).
+  - **frp_check cannot run on a switched-on build**: its "off" half fails and then it stops (assert: it looks for
+    `var FRP_LINE_ON = false;`). robust_check uses a switch that is already on; frp_check must make its own off copy.
+    To FR2.
+  - **cadet_test vs 0.99.91: DIFFERENCES FOUND, as expected with FR2's switches on.** No page errors. Views a to d
+    identical (0 px). Views e_night to i_tap0: about 584 px, all inside the arrow's label box at the left edge (FRP_LABEL_ON:
+    the label's new shape, two lines allowed). Views i_tap1 on: 2,268 to 11,903 px: the needs cards come in a different
+    order ("Very hungry" first, was "Missing people": FRP_FOOD_ON), so the arrow and its label differ ("the call
+    booths" where 0.99.91 said "A toilet"). FR2's own all-off file is ALL IDENTICAL. To be confirmed at the real build
+    with one run with FRP_LABEL_ON and FRP_FOOD_ON off (expected ALL IDENTICAL).
 - The label 0.99.92-review: the only check that reads the number is intro_check (major and minor only). See the gates.
 
 ### Build
