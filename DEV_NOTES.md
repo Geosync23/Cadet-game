@@ -1967,6 +1967,19 @@ with
 
 The four picture/speed switches (`PF_CAP_ON` `#pfcap`, `PF_PR_ON` `#pfpr`, `PF_SH_ON` `#pfsh`, `PF_NOAA` `#pfaa`) are built and off; the user parked them on 2026-11-01. Full record and how to switch one on: `plans/perf-options.md`. PF1's measurements: `plans/perf-0996.md`.
 
+## The review fixes: safety nets and two speed fixes (FR1 for lead 52, claude/fable-review-code; all switches off)
+
+From the independent review of 0.99.91 (`plans/review-fable-code.md`, section A; the measurements' scripts are in `plans/review-fable-probes/`). Each fix has its own switch, declared together at the end of section 1 (before anything that reads them; `LIB_SAY_ON` is in the page's first script). Off, the game is 0.99.91: cadet_test ALL IDENTICAL. The build master switches them on. Rows: plans/build-table.md, "The review fixes". Check: `robust_check.py` (each part plants its fault on a copy with the switch on, and with it off first where that shows the fault bites).
+
+- `LOOP_GUARD_ON` (A1, section 12): `loopGuard` wraps `loop()`; an error costs one frame, not the game; `LOOP_BAD_MAX` (20) bad frames in a row bring `loopCard`, once. **A per-frame function may still throw; it must not rely on that to stop anything.**
+- `SAVE_KEEP_ON` (A2, section 13 and the Saves app): `loadGameSafe` keeps an unreadable save under `SAVE_BAD_KEY` (`SAVE_KEY + '-bad'`, one per slot, never replaced by a later one) and the player is told; the Saves app offers it. A new key in storage: retire it, never reuse it.
+- `SAVE_TELL_ON` (A3) and `SAVE_TAB_ON` (A12): `saveGame` hands to `saveGameSafe`, which answers true or false. `SAVE_ST` holds what the page knows about its save (`last`, `bad`, `fail`, `text`, `other`, `say`, `parts`, `kept`); `SAVE_WORDS` holds the four messages; `saveSay` shows the waiting one from `tickShip`, so only once the game is running. With `SAVE_TELL_ON` each `SAVE_EXTRA` handler runs in its own try: **a handler that throws no longer stops saving, and its part of the save is the last good one**, so a handler must not half-fill the save before it can fail (anything it added before failing is taken out again).
+- `LIB_SAY_ON` (A4, tiEarly): `window.tiLibFail`, called by the three.js tag's onerror.
+- `SLEEP_SAFE_ON` (A5, `sleepGo`), `LOAD_SAFE_ON` (A6: `endOffDay`, `storyCS`, `galleySafe`, `memNote`).
+- `EVON_MEMO_ON` (A7, section 18's `evonFlagged`), `WALLS_STILL_ON` (A8, 4b's `instChanged`: **anything that writes an instanced mesh's matrices and wants them drawn sets needsUpdate itself, or goes through writeWalls / doorLeavesSync, which now upload only what changed**).
+- `TEX_READ_ON` (A9): built, measured (grain()'s reads 560 ms to 7 ms at load) and **not identical** (the kit's textures come out up to 13 levels different): stays off; a question for the user.
+- names_check's `WAITING` list (A11) and cadet_test's `flip()` (A13) are in "Testing" terms: a new "does it exist" test on a name made nowhere fails names_check; a check that makes an on or off copy uses `flip()`.
+
 ## The 0.99.7 playtest patch: movement, crew walking, needs (MV1 for lead 49, claude/p997-move; six switches, all off)
 
 plans/patch-0997.md notes 2, 5, 19, 24, 45, and backlog EV1-1. The switches sit together in section 13 just above `saveGame` (var: 4e and 15 read them at load).

@@ -151,10 +151,10 @@ Ranked by what it saves the player.
   fail on a new one. The words on screen don't change.
 - **Risk and effort:** low, small. No switch is possible (it is the text of the file); proof is cadet_test identical.
 
-### A11. Twelve hooks wait for code that was never built
+### A11. Eleven hooks wait for code that was never built
 - **What:** `typeof X === 'function'` tests on names that exist nowhere in the file: `galleyShift`, `galleyServe`,
   `bridgeInvitedNow`, `eventModAt`, `traceStops`, `introGuide`, `introGuideEnd`, `scanParts`, `faultWords`,
-  `crossBackAddressAt`, `endLineDates`, `DEBUG`. The code behind each never runs.
+  `crossBackAddressAt`, `endLineDates`. The code behind each never runs. (This list first had a twelfth, `DEBUG`; it is made in section 13. Corrected in phase 2.)
 - **Why it matters:** nobody can tell a planned hook from a typo. A renamed function turns its callers off silently
   the same way.
 - **Fix (a check, not a game change):** names_check lists every guarded name that doesn't exist; the list of meant

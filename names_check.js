@@ -74,6 +74,40 @@ for (const t of acorn.tokenizer(src, { ecmaVersion: 2022 })) {
   texts++;
   if (/\bDeck 7\b/.test(String(t.value))) bad.push(`"Deck 7" in text that can reach the screen: ${at(t.start)}`);
 }
+// "does it exist" tests on a name that is made nowhere (FR1's review, A11): `typeof X === 'function'` (or 'undefined') lets
+// one section call another's function only if it's there. When X is declared nowhere in the script the code behind the
+// test can never run, and nobody can tell a hook that waits for a later build from a misspelt or renamed name. Every
+// name bound anywhere counts (functions, const/let/var, parameters, catch names, classes). A hook that waits on purpose
+// is listed in WAITING with what it waits for; a WAITING name that has since been made is reported too, to be taken off
+{
+  const made = new Set(), put = p => { for (const x of ids(p)) made.add(x.name); };
+  (function all(n) {
+    if (!n || typeof n.type !== 'string') return;
+    if (n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' || n.type === 'ArrowFunctionExpression') { if (n.id) made.add(n.id.name); n.params.forEach(put); }
+    else if (n.type === 'VariableDeclarator') put(n.id);
+    else if (n.type === 'ClassDeclaration' && n.id) made.add(n.id.name);
+    else if (n.type === 'CatchClause' && n.param) put(n.param);
+    for (const k in n) { const v = n[k]; if (Array.isArray(v)) v.forEach(all); else if (v && typeof v.type === 'string') all(v); }
+  })(ast);
+  const BROWSER = new Set(['window', 'document', 'performance', 'matchMedia', 'ResizeObserver', 'navigator', 'localStorage', 'sessionStorage', 'AudioContext', 'webkitAudioContext', 'OfflineAudioContext', 'requestAnimationFrame', 'structuredClone', 'THREE', 'Blob', 'URL', 'FileReader', 'PointerEvent', 'TouchEvent', 'IntersectionObserver', 'queueMicrotask', 'globalThis', 'visualViewport', 'screen', 'location', 'history', 'crypto', 'Intl', 'WeakRef', 'requestIdleCallback', 'AbortController', 'fetch', 'Image', 'OffscreenCanvas', 'createImageBitmap', 'speechSynthesis', 'DeviceOrientationEvent']);
+  const WAITING = new Map([   // hooks to code that isn't in the game (each found by FR1's review on 0.99.91; the owner decides: build it, or take the hook out)
+    ['galleyShift', "section 14's galley shifts: an earlier name beside galleyDay"],
+    ['galleyServe', "section 15's meal from the galley: section 16 never made it"],
+    ['bridgeInvitedNow', "the bridge door's first rule, before section 20's bridgeBarred"],
+    ['eventModAt', "section 16's galley settings of an event at a minute"],
+    ['traceStops', "24i's reading stops of a traced fault"],
+    ['introGuide', "section 20's walk-up handing over to an arrival guide"],
+    ['introGuideEnd', 'as introGuide'],
+    ['scanParts', "24g's own table of a machine kind's parts"],
+    ['faultWords', "24k's words for a fault still there"],
+    ['crossBackAddressAt', "the ending: the crossing back's address time from section 18"],
+    ['endLineDates', "the ending: the Line certificate's dates from section 18"],
+  ]);
+  const gone = new Map();
+  for (const m of src.matchAll(/typeof ([A-Za-z_$][\w$]*) (?:===|!==|==|!=) '(?:function|undefined)'/g)) if (!made.has(m[1]) && !BROWSER.has(m[1]) && !gone.has(m[1])) gone.set(m[1], m.index);
+  for (const [n, i] of gone) if (!WAITING.has(n)) bad.push(`a "does it exist" test on ${n}, which is made nowhere in the script (a renamed or misspelt name? If it waits for a later build, add it to WAITING in names_check.js): ${at(i)}`);
+  for (const n of WAITING.keys()) if (made.has(n)) bad.push(`${n} is in names_check.js's WAITING list but is made in the script now: take it off the list`);
+}
 // the title screen's two switches (section 30's TITLE_ON and the page's first script's TITLE_EARLY) must agree
 { const on = /const TITLE_ON = (true|false);/.exec(html), early = /const TITLE_EARLY = (true|false);/.exec(html);
   if (!on !== !early) bad.push(`the title screen's switch ${on ? 'TITLE_ON' : 'TITLE_EARLY'} is there without ${on ? 'TITLE_EARLY (the page)' : 'TITLE_ON (section 30)'}`);

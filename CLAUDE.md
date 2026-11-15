@@ -22,6 +22,7 @@ A cozy starship-life sim: a single-file three.js game (`starship-cadet.html`) se
 - `machine_check.py`: runs the ship's machines on paper and checks wear, faults, repairs, the jobs left for the player and ship health.
 - `clothes_check.py`: checks changing at your wardrobe, yesterday's clothes, the laundry hamper, the washers and saving mid-wash.
 - `saves_check.py`: the save slots and the Saves app: the old save as Slot 1, switching, New game in an empty slot, Delete's guard, Download my save (a file, or the claude.ai downloads capability), Load a save file (good and bad files), nothing with ?nosave or the switch off.
+- `robust_check.py`: the safety nets (FR1's review fixes, each on a copy with its switch on and a planted fault): one bad frame doesn't stop the game and a run of them brings a card; an unreadable save is kept and offered in the Saves app; refused storage is said; no three.js is said on the title; four damaged saves load; eventsOn's answers and the walls' uploads; two tabs (about 8 minutes).
 - `title_check.py`: the title screen (section 30, the crew terminal) on a switched-on copy: the early paint, the hold, Continue, New game's question, Settings and Saves, the controller, reduced motion, landscape; none of it with the switch off.
 - `interactions_check.py`: checks the places you can use, the job board and the goal pointer.
 - `bubble_check.py`: speech bubbles at phone size with uneven frames: they follow their speaker without shaking, jumping or swapping sides.
