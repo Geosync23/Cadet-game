@@ -91,6 +91,7 @@ def part_loop(pw):
     check(none and t.page.evaluate("!!document.getElementById('loopCard')"), 'loop, on: every other frame bad: no card after 15 bad frames, the card once 20 of the last 120 were bad'); t.close()
     key, good = good_save(pw, build('loop_on', on=['LOOP_GUARD_ON']))
     t = Tab(pw, build('loop_on', on=['LOOP_GUARD_ON']), plant={key: good, **ARRIVED}); t.step(30); t.ev(PLANT_ALL); t.step(30)
+    check(t.page.evaluate("document.activeElement && document.activeElement.textContent") == 'Reload', 'loop, on: the card\'s Reload button has the focus')
     card = t.page.evaluate("(document.getElementById('loopCard') || {}).textContent || ''"); check('saved up to Day 10, 10:00' in card, f'loop, on, a game with a save: the card names the save that is really in storage ({card!r})')
     t.page.evaluate("k => localStorage.removeItem(k)", key); check('no save yet' in t.ev('loopCardLine()'), 'loop, on, nothing in storage: the card says there is no save'); t.close()
 
@@ -106,7 +107,9 @@ def part_keep(pw):
         view = json.dumps(t.ev('slotsView()'))
         check('Download the old save' in view and "couldn't be opened" in view, f'keep, {name}: the Saves app offers the old save')
         if name == 'cut short':
-            t.ev("slotsAct('baddel')"); check(t.store(bad_key) is None and 'Download the old save' not in json.dumps(t.ev('slotsView()')), 'keep: Throw it away removes the copy and the offer')
+            t.ev("slotsAct('baddel')"); check(t.store(bad_key) == bad and "can't be brought back" in json.dumps(t.ev('slotsView()')), 'keep: Throw it away asks first, and nothing is gone yet')
+            t.ev("slotsAct('keep')"); check(t.store(bad_key) == bad and "can't be brought back" not in json.dumps(t.ev('slotsView()')), 'keep: Keep it changes nothing')
+            t.ev("slotsAct('baddel')"); t.ev("slotsAct('baddelgo')"); check(t.store(bad_key) is None and 'Download the old save' not in json.dumps(t.ev('slotsView()')), 'keep: asked and answered, Throw it away removes the copy and the offer')
         t.close()
     t = Tab(pw, p, plant={key: good, **ARRIVED}); t.step(30)
     check(t.ev('SHIP.time.day') == 10 and t.store(bad_key) is None and 'Welcome back' in t.toast(), 'keep: a good save loads as always, nothing kept aside'); t.close()
@@ -115,7 +118,7 @@ def part_keep(pw):
     t = Tab(pw, p, plant={key: second, bad_key: first, **ARRIVED}); t.step(60); view = json.dumps(t.ev('slotsView()'))
     check(t.store(bad_key) == first and t.store(bad_key + '-2') == second, 'keep, a second unreadable save: the first copy stays and the later one is kept beside it (-bad-2)')
     check("couldn't be opened" in t.toast() and 'Download the later one' in view and 'Download the old save' in view, 'keep, a second one: the player is told, and the Saves app offers both')
-    t.ev("slotsAct('baddel')"); check(t.store(bad_key) is None and t.store(bad_key + '-2') is None, 'keep: Throw it away removes both'); t.close()
+    t.ev("slotsAct('baddel')"); t.ev("slotsAct('baddelgo')"); check(t.store(bad_key) is None and t.store(bad_key + '-2') is None, 'keep: Throw it away (asked and answered) removes both'); t.close()
     t = Tab(pw, p, plant={key: first, **ARRIVED}, before=REFUSE + ' window.__refuse = true;'); t.step(60)
     check(t.store(bad_key) is None and 'no room' in t.toast() and 'is kept' not in t.toast(), f'keep, no room in storage for the copy: the player is not told it was kept ({t.toast()[:90]!r})'); t.close()
     t = Tab(pw, build('keep_off', off=['SAVE_KEEP_ON']), plant={key: good[:len(good) // 2], **ARRIVED}); t.step(30)
@@ -135,25 +138,17 @@ def part_tell(pw):
     check(isinstance(live, str) and abs(json.loads(live)['time']['min'] - now) < 1 and json.loads(t.store(key))['time']['min'] != json.loads(live)['time']['min'], 'tell: Download my save hands over the game as it is now, not the old one in storage')
     t.page.evaluate('window.__refuse = false'); check(t.ev('saveGame()') is True, 'tell: storage back: the save is written'); t.step(5)
     check('Saving again' in t.toast() and "isn't being saved" not in json.dumps(t.ev('slotsView()')), 'tell: and the player is told it is saving again')
-    # one failing handler: the rest of the save is fresh, its own part is the last good one
-    n = t.ev('SAVE_EXTRA.length'); parts = t.ev('SAVE_ST.parts'); i = next((k for k in range(n) if parts[k] and ['social'] in parts[k]), None)
-    if i is None: i = next(k for k in range(n) if parts[k] and any(len(p) == 1 for p in parts[k]))
-    keys = [p[0] for p in parts[i] if len(p) == 1]; t.ev(f"SAVE_EXTRA[{i}] = () => {{ throw new Error('robust_check: a save handler fails'); }}"); t.ev('skipTo(shipNow() + 61)'); t.step(5)
-    r = t.ev('saveGame()'); s = json.loads(t.store(key))
-    check(r is True and abs(s['time']['min'] - t.ev('SHIP.time.min')) < 1 and all(k in s for k in keys), f'tell: one failing handler (its part: {keys}): the save is still written, with that part kept from the last good save')
-    # a handler that writes inside a part that is already there (save.player) and then fails (RV37): nothing half made is
-    # written, and what it added last time comes from the last save written
-    parts = t.ev('SAVE_ST.parts'); j = next((k for k in range(n) if k != i and parts[k] and any(len(p) == 2 for p in parts[k])), None)
-    if check(j is not None, 'tell: a save handler that adds inside save.player or save.ship is there to test with'):
-        path = next(p for p in parts[j] if len(p) == 2); t.ev('saveGame()'); was = json.loads(t.store(key))[path[0]][path[1]]
-        t.ev(f"SAVE_EXTRA[{j}] = s => {{ s.{path[0]}.halfMade = 1; s.alsoHalf = 2; throw new Error('robust_check: fails after writing inside the save'); }}"); t.ev('skipTo(shipNow() + 61)'); t.step(5)
-        r = t.ev('saveGame()'); s = json.loads(t.store(key))
-        check(r is True and 'halfMade' not in s[path[0]] and 'alsoHalf' not in s and s[path[0]].get(path[1]) == was and abs(s['time']['min'] - t.ev('SHIP.time.min')) < 1, f'tell: a handler that fails after writing inside save.{path[0]}: nothing half made is saved, and its {path[0]}.{path[1]} is the last good one')
-    # a handler that has never worked on this page: no whole save can be made, so nothing is written over the last one
-    before = t.store(key); t.ev("SAVE_EXTRA.push(s => { s.player.half = 1; throw new Error('robust_check: a new handler fails at once'); })"); t.clear(); t.ev('skipTo(shipNow() + 61)'); t.step(5)   # (the skip saves, and fails)
-    r = t.ev('saveGame()')
-    check(r is False and t.store(key) == before and 'Not saving' in t.toast(), f"tell: a handler that has never worked fails: nothing is written over the last whole save, and the player is told (answer {r}, storage {'the same' if t.store(key) == before else 'changed'}, {t.toast()[:40]!r})")
+    # a save handler fails (RV37, lead 52): a failed save. Nothing is written over the last whole save, the player is told
+    before = t.store(key); t.clear(); t.ev("window.__h = SAVE_EXTRA[6]; SAVE_EXTRA[6] = s => { s.player.halfMade = 1; s.alsoHalf = 2; throw new Error('robust_check: a save handler fails after writing inside the save'); }")
+    t.ev('skipTo(shipNow() + 61)'); t.step(5); r = t.ev('saveGame()')
+    check(r is False and t.store(key) == before, 'tell: a save handler fails: saveGame answers false and the last whole save stays in storage, untouched')
+    check('Not saving' in t.toast() and "isn't being saved" in json.dumps(t.ev('slotsView()')), 'tell: and the player is told, on screen and in the Saves app')
+    t.clear(); t.ev('SAVE_EXTRA[6] = window.__h'); r = t.ev('saveGame()'); t.step(5); s2 = json.loads(t.store(key))
+    check(r is True and 'halfMade' not in s2['player'] and 'alsoHalf' not in s2 and 'Saving again' in t.toast(), 'tell: the handler works again: a whole save is written (nothing half made in it) and the player is told')
     t.close()
+    # the same at the first save of a sitting (RV37's probe: a Day 10 save loaded, a handler fails at once)
+    t = Tab(pw, p, plant={key: good, **ARRIVED}); t.step(30); t.ev("SAVE_EXTRA[0] = () => { throw new Error('robust_check: fails at the first save'); }"); t.ev('skipTo(shipNow() + 61)'); t.step(5)
+    check(t.ev('saveGame()') is False and t.store(key) == good and 'Not saving' in t.toast(), 'tell: a handler failing at the first save after a load: the loaded save stays whole in storage, the player is told'); t.close()
     t = Tab(pw, build('tell_off', off=['SAVE_TELL_ON', 'SAVE_TAB_ON']), plant={key: good, **ARRIVED}, before=REFUSE); t.step(30); t.page.evaluate('window.__refuse = true'); t.ev('skipTo(shipNow() + 61)'); t.step(5)
     check(t.ev('saveGame()') is None and 'Not saving' not in t.toast(), 'tell, switch off: nothing is said (the game as before)'); t.close()
 

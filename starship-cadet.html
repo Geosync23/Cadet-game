@@ -9933,7 +9933,7 @@ function saveGame() {
 // not looked yet). bad: the save found at load couldn't be opened (A2). fail: saves that failed in a row; text: the save
 // as last made, written or not (the Saves app downloads it when storage refuses, A3). other: another tab has taken this
 // game further, so this one has stopped saving (A12). say: a message waiting for the game to be on screen (tickShip)
-const SAVE_ST = { last: undefined, bad: false, fail: 0, text: null, other: false, say: null, parts: [], kept: null };
+const SAVE_ST = { last: undefined, bad: false, fail: 0, text: null, other: false, say: null };
 const SAVE_BAD_KEY = SAVE_KEY + '-bad';
 const SAVE_WORDS = {
   bad: ['Your save couldn\'t be opened', 'A new game has started instead. The old save is kept: open your device, then Saves, to download it.'],
@@ -9968,56 +9968,30 @@ function loadGameSafe() {
 }
 const saveTimeOf = s => s && s.time && isFinite(s.time.day) && isFinite(s.time.min) ? s.time.day * 1440 + s.time.min : null;
 function saveFailed() { if (!SAVE_TELL_ON) return false; if (SAVE_ST.fail++ === 0) SAVE_ST.say = 'fail'; return false; }
-// A3 and A12: saveGame's work with its failures noticed. The save is made as saveGame makes it. A3: a handler that
-// fails no longer costs the whole save: its part is taken from the last save that held it (an hour old at most), the
-// error is logged, and every other part is fresh; a save that can't be written is counted, and the player is told at the
-// first one (and again when saving works). A12: before writing, if storage holds a save this page didn't put there and
+// A3 and A12: saveGame's work with its failures noticed. The save is made as saveGame makes it (saveMake). A3: a save
+// that can't be made (a handler fails) or can't be written (storage full or switched off) is counted, and the player is
+// told at the first one (and again when saving works). A12: before writing, if storage holds a save this page didn't put there and
 // that game is further on, another tab is playing it: this tab stops saving and says so, rather than wind it back
-const savePlain = v => !!v && typeof v === 'object' && !Array.isArray(v);
-function saveShape(save) { const m = new Map(); for (const k of Object.keys(save)) m.set(k, savePlain(save[k]) ? new Set(Object.keys(save[k])) : null); return m; }
-function saveAdded(save, was) {                          // what a handler added: [key], or [key, key2] inside a part that was already there (save.player, save.ship)
-  const out = [];
-  for (const k of Object.keys(save)) { const w = was.get(k); if (w === undefined) out.push([k]); else if (w && savePlain(save[k])) for (const k2 of Object.keys(save[k])) if (!w.has(k2)) out.push([k, k2]); }
-  return out;
-}
-// the save, made whole or not at all (RV37's find on A3: a handler that had written inside save.player before it failed
-// left a save with a piece missing, and that went over the last whole one). When a handler fails the save is made again
-// from the start without it, so nothing half made stays, and what that handler added the last time it worked (noted as
-// it ran: saveAdded) is put in from the last save written. A handler that has never worked on this page has no such
-// note: then there is no whole save to make, nothing is written, and the player is told the game isn't saving
+// the save, made whole or not at all (RV37's find on A3, lead 52's rule): about half of the save handlers write inside
+// save.player or save.ship, so a save with one handler's part left out, or carried over from an older save, can lose
+// part of a game where the old code lost nothing (it wrote nothing). So: a handler that fails is a failed save. Nothing
+// is written, the last whole save stays in storage, the error is logged and the player is told the game isn't saving
 function saveMake() {
-  const skip = new Set(), K = SAVE_ST.kept;
-  for (let round = 0; round < 4; round++) {
-    const decks = {};
-    for (const n in SHIP.decks) if (SHIP.decks[n].open.size) decks[n] = { open: [...SHIP.decks[n].open] };
-    const save = {
-      v: SAVE_V, build: GAME_BUILD, time: { day: SHIP.time.day, min: SHIP.time.min },
-      player: { deck: player.deck, tile: player.here(), facing: player.face }, ship: { decks }, crew: {},
-      flags: SHIP.flags || {}, notes: SHIP.notes || [],
-    };
-    if (typeof crewState === 'function') save.crew = crewState(SHIP.time.day);
-    let again = false;
-    for (let i = 0; i < SAVE_EXTRA.length && !again; i++) {
-      if (!SAVE_TELL_ON) { SAVE_EXTRA[i](save); continue; }
-      if (skip.has(i)) {
-        for (const p of SAVE_ST.parts[i]) {
-          if (p.length === 1) { if (p[0] in K) save[p[0]] = K[p[0]]; }
-          else if (savePlain(K[p[0]]) && p[1] in K[p[0]] && savePlain(save[p[0]])) save[p[0]][p[1]] = K[p[0]][p[1]];
-        }
-        continue;
-      }
-      const was = saveShape(save);
-      try { SAVE_EXTRA[i](save); SAVE_ST.parts[i] = saveAdded(save, was); }
-      catch (e) { console.error(e); if (!SAVE_ST.parts[i] || !K) return null; skip.add(i); again = true; }
-    }
-    if (!again) return save;
-  }
-  return null;
+  const decks = {};
+  for (const n in SHIP.decks) if (SHIP.decks[n].open.size) decks[n] = { open: [...SHIP.decks[n].open] };
+  const save = {
+    v: SAVE_V, build: GAME_BUILD, time: { day: SHIP.time.day, min: SHIP.time.min },
+    player: { deck: player.deck, tile: player.here(), facing: player.face }, ship: { decks }, crew: {},
+    flags: SHIP.flags || {}, notes: SHIP.notes || [],
+  };
+  if (typeof crewState === 'function') save.crew = crewState(SHIP.time.day);
+  for (const f of SAVE_EXTRA) f(save);
+  return save;
 }
 function saveGameSafe() {
   let text = null, mine = null;
-  try { const save = saveMake(); if (!save) return saveFailed(); text = JSON.stringify(save); mine = saveTimeOf(save); }
-  catch (e) { return saveFailed(); }
+  try { const save = saveMake(); text = JSON.stringify(save); mine = saveTimeOf(save); }
+  catch (e) { if (SAVE_TELL_ON && !SAVE_ST.fail) console.error(e); return saveFailed(); }   // (logged at the first of a run of failures)
   SAVE_ST.text = text;                                   // the game as it is now, written or not: what the Saves app downloads when this tab can't save (A3, A12)
   if (SAVE_ST.other) return false;                       // A12: this tab has stopped saving
   try {
@@ -10032,7 +10006,7 @@ function saveGameSafe() {
     localStorage.setItem(SAVE_KEY, text);
   } catch (e) { return saveFailed(); }
   SAVE_ST.last = text;
-  if (SAVE_TELL_ON) { try { SAVE_ST.kept = JSON.parse(text); } catch (e) { /* kept as it was */ } if (SAVE_ST.fail) { SAVE_ST.fail = 0; SAVE_ST.say = 'back'; } }
+  if (SAVE_TELL_ON && SAVE_ST.fail) { SAVE_ST.fail = 0; SAVE_ST.say = 'back'; }
   return true;
 }
 function loadGame() {
@@ -13754,7 +13728,9 @@ function slotsAct(verb, arg) {
   else if (verb === 'load') { SLOT_UI.msg = ''; slotPick(); }
   else if (verb === 'baddl' && SAVE_KEEP_ON) slotDownload(slotRead(SAVE_BAD_KEY), 'starship-cadet-unopened-save.json');   // A2 (FR1)
   else if (verb === 'baddl2' && SAVE_KEEP_ON) slotDownload(slotRead(SAVE_BAD_KEY + '-2'), 'starship-cadet-unopened-save-2.json');
-  else if (verb === 'baddel' && SAVE_KEEP_ON) { try { localStorage.removeItem(SAVE_BAD_KEY); localStorage.removeItem(SAVE_BAD_KEY + '-2'); SLOT_UI.msg = 'Thrown away.'; } catch (e) { SLOT_UI.msg = 'The browser wouldn\'t delete it.'; } }
+  else if (verb === 'baddel' && SAVE_KEEP_ON) { SLOT_UI.badSure = true; SLOT_UI.msg = ''; }   // asks first, as Delete does (RV37)
+  else if (verb === 'baddelgo' && SAVE_KEEP_ON) { try { localStorage.removeItem(SAVE_BAD_KEY); localStorage.removeItem(SAVE_BAD_KEY + '-2'); SLOT_UI.msg = 'Thrown away.'; } catch (e) { SLOT_UI.msg = 'The browser wouldn\'t delete it.'; } }
+  if (verb !== 'baddel') SLOT_UI.badSure = false;
   slotFresh();
 }
 function slotsView() {
@@ -13770,7 +13746,8 @@ function slotsView() {
       : [{ label: 'New game', action: { app: 'saves', do: 'new', arg: x.n } }] });
   }
   if (SAVE_KEEP_ON && (slotRead(SAVE_BAD_KEY) !== null || slotRead(SAVE_BAD_KEY + '-2') !== null)) B.push({ kind: 'text', text: 'A save in this slot couldn\'t be opened, so a new game started. The old save is kept here.', mark: 'urgent' },   // A2 (FR1)
-    { kind: 'buttons', items: [{ label: 'Download the old save', action: { app: 'saves', do: 'baddl' } }, ...(slotRead(SAVE_BAD_KEY + '-2') !== null ? [{ label: 'Download the later one', action: { app: 'saves', do: 'baddl2' } }] : []), { label: 'Throw it away', action: { app: 'saves', do: 'baddel' } }] });
+    { kind: 'buttons', items: [{ label: 'Download the old save', action: { app: 'saves', do: 'baddl' } }, ...(slotRead(SAVE_BAD_KEY + '-2') !== null ? [{ label: 'Download the later one', action: { app: 'saves', do: 'baddl2' } }] : []), ...(SLOT_UI.badSure ? [] : [{ label: 'Throw it away', action: { app: 'saves', do: 'baddel' } }])] },
+    ...(SLOT_UI.badSure ? [{ kind: 'text', text: 'Throw the old save away? It can\'t be brought back.', mark: 'urgent' }, { kind: 'buttons', items: [{ label: 'Throw it away', action: { app: 'saves', do: 'baddelgo' } }, { label: 'Keep it', action: { app: 'saves', do: 'keep' } }] }] : []));
   if (SAVE_ST.other) B.push({ kind: 'text', text: SAVE_WORDS.other[1], mark: 'urgent' });   // A12 (FR1)
   else if (SAVE_ST.fail) B.push({ kind: 'text', text: 'This game isn\'t being saved: the browser\'s storage is full or switched off. Download my save keeps a copy.', mark: 'urgent' });   // A3 (FR1)
   if (SLOT_UI.msg) B.push({ kind: 'text', text: SLOT_UI.msg, mark: 'urgent' });
@@ -80504,10 +80481,10 @@ function loopCardLine() {
 function loopCard() {
   try {
     const d = document.createElement('div'), h = document.createElement('h2'), p = document.createElement('p'), b = document.createElement('button');
-    d.className = 'lift'; d.id = 'loopCard'; d.style.zIndex = 9999; d.setAttribute('role', 'alertdialog');
+    d.className = 'lift'; d.id = 'loopCard'; d.style.zIndex = 9999; d.style.background = '#0d1521'; d.setAttribute('role', 'alertdialog');   // solid: nothing under it shows through (RV37)
     h.textContent = 'Something went wrong'; p.textContent = loopCardLine();
     b.className = 'stay'; b.textContent = 'Reload'; b.onclick = () => { try { location.reload(); } catch (e) { /* the card stays */ } };
-    d.append(h, p, b); document.body.appendChild(d);
+    d.append(h, p, b); document.body.appendChild(d); b.focus();   // the keyboard's Enter (and a controller's press, section 26) reach Reload
   } catch (e) { /* no page to say it on */ }
 }
 function loop() {

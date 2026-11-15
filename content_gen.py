@@ -1099,6 +1099,13 @@ def one_byte(t):
     return re.sub(r'[^\x00-\xff]', lambda m: ''.join('\\u%04x' % u for u in struct.unpack('<%dH' % (len(m.group(0).encode('utf-16-le')) // 2), m.group(0).encode('utf-16-le'))), t)
 
 
+def baked_body(html, body):
+    # a baked block as it goes into this game file: in one-byte form when the file carries the mark (main, and
+    # lines_check.py's "the baked blocks are up to date", which must bake the same way)
+    if ONE_BYTE_MARK not in html: return body
+    return [one_byte(x) for x in body] if isinstance(body, list) else one_byte(body)
+
+
 def js(v):
     return json.dumps(v, ensure_ascii=False, separators=(', ', ': '))
 
@@ -1246,8 +1253,7 @@ def main(argv):
             html = f.read()
         new = html
         for name, body in blocks(out).items():
-            if ONE_BYTE_MARK in html: body = [one_byte(x) for x in body] if isinstance(body, list) else one_byte(body)
-            new = splice(new, name, body)
+            new = splice(new, name, baked_body(html, body))
     except GenError as e:
         print('content_gen: ' + str(e))
         return 2

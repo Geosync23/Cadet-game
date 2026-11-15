@@ -416,7 +416,7 @@ def main(argv):
     new = html
     for name, body in cg.blocks(out).items():
         try:
-            new = cg.splice(new, name, body)
+            new = cg.splice(new, name, cg.baked_body(html, body))   # (in one-byte form when the game file is: tools/one_byte.py, BM29's find)
         except cg.GenError as e:
             errors.append(str(e))
     if new != html:
