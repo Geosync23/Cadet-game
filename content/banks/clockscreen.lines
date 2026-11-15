@@ -20,6 +20,9 @@
 
 == clock.screen.ready
 - Shift starts at {time}. Tap to clock in.
+// FR2 (the Fable review, F11; switch FRP_SAY_ON): the same screen once the shift has begun
+== clock.screen.frpLate
+- Your shift began at {time}. Tap to clock in.
 
 == clock.screen.onshift
 - On shift since {time}.
