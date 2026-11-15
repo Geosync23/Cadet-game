@@ -62,3 +62,21 @@ rule: robust_check and device_check (BM29's wave 1 runs on this exact file are t
 ## Kit (this container)
 Candidate in /home/user/Cadet-game; OLD worktree /tmp/old-fable; CADET_WORKs /tmp/work-r4, /tmp/work-r4b; three r128 and
 acorn in /tmp/cadet-work. fresh_walk on OLD: run from the OLD worktree with the candidate's copy of the probe.
+
+## Follow-up for lead 52: is the Day 2 difference FR1's switches or run-to-run variation? (fresh_walk Days 0-2, alone, one after the other)
+Runs: (1) the candidate again (plans/fw-fable-r4-run2.json); (2) a copy with only FR1's nine switches false, 9 lines
+changed, LIB_SAY_ON's indented line included (plans/fw-fable-r4-fr1off.json). Both exit 0, long [], stuck [], errors [].
+Compared over Days 0-2 on actions, arrows, toasts and tips:
+- **(1) against (2): identical in all four lists.** FR1's nine switches do not change the walk.
+- **(1) against my first candidate run:** arrows identical; actions, toasts and tips first differ on Day 1 evening only in
+  time: "Really need a shower" and the lift to Deck 4 at 19:43 in the rerun, 19:57 in the first run (which ran beside
+  lane B's checks); the t:pay tip at 20:36 against 20:43. So there is some run-to-run variation in minutes under load.
+- **Day 2 18:00 is the same in all three** (first run, rerun, FR1 off): each of the five pin taps, 18:00 to 18:12, is
+  followed by "close the chat with Davi Keane"; no lunchtime call home; "Missing people" at 18:10. It repeats, so it
+  is neither variation nor FR1.
+- **Candidate (and FR1 off) against OLD:** the first difference is on Day 0, 18:26: the candidate walks to "A seat for your
+  tray" and sits down to eat at 18:27 (FRP_TRAY_ON, expected); OLD takes the tray and goes to Deck 4 at 18:34. The arrows
+  list first differs at the same point ("Head to your bunk when you're done looking around" at 18:35 on the candidate).
+  From there the two days are not the same walk.
+- So the copy with FR1 off, which is FR2's twelve switches on (plus the one_byte escapes and the label), still gives the
+  Davi Keane taps at 18:00. It does not match OLD's 18:00, unlike FR2's own walk as lead 52 described it.
