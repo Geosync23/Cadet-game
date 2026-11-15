@@ -33,6 +33,16 @@ atexit.register(lambda: [f.unlink(missing_ok=True) for f in _RUN_FILES])
 # draw only the last frame of each step (installed once per page; Game.step puts it back after a reload)
 SKIP_SWITCH = "(() => { const rr = renderer.render.bind(renderer); window.__skip = false; renderer.render = (s, c) => { if (!window.__skip) rr(s, c); }; })()"
 
+def flip(src, name, value=True):
+    # a build's text with one switch set: `const NAME = true;` or `= false;` made the other. It fails, loudly, unless
+    # exactly one line changed, so a check never tests the wrong game because a switch line was reworded or already
+    # had that value (FR1's review, A13: several checks' own replaces had come to change nothing)
+    want = 'true' if value else 'false'
+    out, n = re.subn(r'\bconst ' + re.escape(name) + r' = (?:true|false);', 'const ' + name + ' = ' + want + ';', src)
+    if n != 1: raise SystemExit(f'flip: {n} lines read "const {name} = true/false;" in the build (one is needed)')
+    if out == src: raise SystemExit(f'flip: {name} is already {want} in the build: nothing to flip')
+    return out
+
 def instrument(html):
     # expose the game's scope to tests: direct eval inside the IIFE, added just before the closing of it
     i = html.rfind('})();')

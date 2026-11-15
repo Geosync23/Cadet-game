@@ -1,0 +1,26 @@
+intro on: True NOSAVE False day 0
+day   1: js 0.99 ms/frame  save 33 KB in 2.1 ms (all storage 33 KB, 2 keys)  heap 77 MB  skip 1s  {"occ": 0, "jobs": 32, "notes": 27, "mail": null, "simT": 1, "shipDays": 3, "evDays": 8, "people": 11, "day": 1}
+      save by key (chars): [['ship', 17708], ['social', 6505], ['notes', 3287], ['mail', 1276], ['news', 1028], ['crew', 1016], ['player', 574], ['galley', 411], ['intro', 375]]
+day   2: js 0.85 ms/frame  save 61 KB in 1.7 ms (all storage 61 KB, 2 keys)  heap 79 MB  skip 1s  {"occ": 0, "jobs": 60, "notes": 57, "mail": null, "simT": 1, "shipDays": 5, "evDays": 10, "people": 12, "day": 2}
+      save by key (chars): [['ship', 36828], ['social', 9939], ['notes', 7396], ['mail', 2270], ['news', 1700], ['crew', 1016], ['player', 508], ['galley', 419], ['intro', 375]]
+day   4: js 0.74 ms/frame  save 66 KB in 3.1 ms (all storage 66 KB, 2 keys)  heap 79 MB  skip 2s  {"occ": 0, "jobs": 55, "notes": 49, "mail": null, "simT": 1, "shipDays": 4, "evDays": 11, "people": 13, "day": 4}
+      save by key (chars): [['ship', 36313], ['social', 12702], ['notes', 6989], ['mail', 4640], ['news', 2428], ['crew', 1016], ['tiles', 834], ['player', 475], ['galley', 440]]
+day   7: js 0.45 ms/frame  save 87 KB in 2.3 ms (all storage 87 KB, 2 keys)  heap 79 MB  skip 3s  {"occ": 0, "jobs": 64, "notes": 71, "mail": null, "simT": 0, "shipDays": 5, "evDays": 9, "people": 8, "day": 7}
+      save by key (chars): [['ship', 45282], ['social', 13797], ['notes', 10861], ['mail', 9952], ['news', 4693], ['crew', 1016], ['device', 519], ['galley', 508], ['player', 475]]
+day  10: js 0.47 ms/frame  save 80 KB in 2.1 ms (all storage 80 KB, 2 keys)  heap 80 MB  skip 2s  {"occ": 0, "jobs": 50, "notes": 52, "mail": null, "simT": 1, "shipDays": 3, "evDays": 20, "people": 12, "day": 10}
+      save by key (chars): [['ship', 35113], ['mail', 15274], ['social', 13671], ['notes', 7529], ['news', 4963], ['crew', 1016], ['device', 666], ['tiles', 626], ['newsUsed', 582]]
+day  14: js 0.39 ms/frame  save 107 KB in 2.7 ms (all storage 107 KB, 2 keys)  heap 80 MB  skip 4s  {"occ": 2, "jobs": 77, "notes": 68, "mail": null, "simT": 1, "shipDays": 5, "evDays": 10, "people": 7, "day": 14}
+      save by key (chars): [['ship', 53667], ['mail', 21614], ['social', 14226], ['notes', 9223], ['news', 4995], ['device', 1205], ['crew', 1016], ['newsUsed', 758], ['tiles', 626]]
+day  21: js 0.70 ms/frame  save 110 KB in 2.2 ms (all storage 110 KB, 2 keys)  heap 83 MB  skip 6s  {"occ": 5, "jobs": 71, "notes": 81, "mail": null, "simT": 1, "shipDays": 10, "evDays": 20, "people": 7, "day": 21}
+      save by key (chars): [['ship', 52685], ['mail', 20255], ['social', 15183], ['notes', 11752], ['news', 5049], ['device', 2215], ['newsUsed', 1210], ['crew', 1065], ['galley', 611]]
+day  28: js 0.99 ms/frame  save 101 KB in 82.2 ms (all storage 101 KB, 2 keys)  heap 85 MB  skip 5s  {"occ": 6, "jobs": 53, "notes": 57, "mail": null, "simT": 0, "shipDays": 4, "evDays": 8, "people": 13, "day": 28}
+      save by key (chars): [['ship', 38841], ['mail', 26116], ['social', 15878], ['notes', 8932], ['news', 4998], ['device', 2421], ['newsUsed', 1644], ['crew', 1080], ['tiles', 578]]
+day  35: js 1.02 ms/frame  save 109 KB in 5.9 ms (all storage 109 KB, 2 keys)  heap 82 MB  skip 3s  {"occ": 6, "jobs": 56, "notes": 53, "mail": null, "simT": 0, "shipDays": 6, "evDays": 18, "people": 8, "day": 35}
+      save by key (chars): [['ship', 43382], ['mail', 29293], ['social', 16587], ['notes', 8391], ['news', 5146], ['device', 2658], ['newsUsed', 1729], ['crew', 1080], ['habitLog', 585]]
+day  50: js 0.44 ms/frame  save 113 KB in 2.4 ms (all storage 113 KB, 2 keys)  heap 86 MB  skip 5s  {"occ": 6, "jobs": 48, "notes": 56, "mail": null, "simT": 0, "shipDays": 10, "evDays": 24, "people": 12, "day": 50}
+      save by key (chars): [['ship', 40355], ['mail', 35883], ['social', 15503], ['notes', 9398], ['news', 5187], ['device', 3093], ['newsUsed', 1735], ['crew', 1080], ['habitLog', 683]]
+day  70: js 0.42 ms/frame  save 114 KB in 3.0 ms (all storage 114 KB, 2 keys)  heap 85 MB  skip 6s  {"occ": 6, "jobs": 45, "notes": 45, "mail": null, "simT": 0, "shipDays": 10, "evDays": 2, "people": 11, "day": 70}
+      save by key (chars): [['ship', 38214], ['mail', 38019], ['social', 16891], ['notes', 7838], ['news', 5157], ['device', 3707], ['newsUsed', 1737], ['crew', 1080], ['habitLog', 776]]
+day 100: js 0.38 ms/frame  save 122 KB in 3.1 ms (all storage 122 KB, 2 keys)  heap 86 MB  skip 11s  {"occ": 6, "jobs": 56, "notes": 55, "mail": null, "simT": 0, "shipDays": 10, "evDays": 3, "people": 9, "day": 100}
+      save by key (chars): [['ship', 43397], ['mail', 38838], ['social', 17129], ['notes', 8486], ['news', 5124], ['device', 3877], ['newsUsed', 1736], ['habitLog', 1277], ['crew', 1200]]
+reload from the save: 8.1 s; day 100 errors []
