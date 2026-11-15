@@ -35,9 +35,11 @@ None of the FIXES NEEDED items can hurt a player while the switches stay off. Th
 
 - `python3 cadet_test.py OLD(0.99.91) ON`: **ALL IDENTICAL**, errors A [] B [].
 - `python3 robust_check.py starship-cadet.html`: ROBUST CHECK OK (722 s here, three other runs beside it).
-- On a copy with the nine switches on: `bash check_fast.sh`: QUICK CHECK OK in 534 s (words, names, deck, machine, leave, device);
-  `saves_check.py`: SAVES CHECK OK. Still running when this was first pushed: events, day, food, fridays, devmode,
-  title, dev_arrow (results added below when they finish).
+- On a copy of 05adee4 with the nine switches on: `bash check_fast.sh`: QUICK CHECK OK in 534 s; SAVES CHECK OK;
+  EVENTS CHECK OK; DEVMODE CHECK OK; day_check: no FAIL line (the run was cut off by the account's usage stop before
+  its last line). title_check: four controller lines failed twice while six other runs shared the machine; with the
+  machine quiet the same switches pass (TITLE CHECK OK on the second pass, below), so I put it down to load.
+  food, fridays and dev_arrow were not run (cut off; usage is tight).
 
 ## 3. Fix by fix
 
@@ -161,3 +163,53 @@ saving (5). Words: plain.
 `python3 plans/rv37-probes/rv37_probe.py starship-cadet.html [loop keep tell tab memo walls load lib]` from the
 repository's folder, set up as for cadet_test (CADET_WORK, CADET_CHROME). It prints what happens and judges nothing.
 `RV_TELL1=none` runs only `tell 1` with both builds off (to see the run-to-run difference).
+
+## 6. Second pass: FR1's repairs, commit 1155555 (game off 0a9f7e3d...c118)
+
+Read the second diff line by line (166 lines), then reran my probes on a copy with the nine switches on.
+
+| Fix | Verdict on 1155555 |
+|---|---|
+| A1 | PASS |
+| A2 | FIXES NEEDED, one small thing left: "Throw it away" still deletes at one tap (now both copies) |
+| A3 | PASS on the rule "whole or none"; one thing for the lead to decide (a part can stay old without a word) |
+| A12 | PASS |
+| tools/one_byte.py (A10) | PASS |
+
+- **A1.** Bad frames are counted over the last 120: every other frame bad: card; 19 of 20: card; one in five: card;
+  one in eight: no card (fair: the game runs). At most three errors are logged. The card now says what is true:
+  under `?nosave` "Reload the page to start again."; storage refusing and nothing stored: "This game has no save yet.
+  Reload the page to start again."; otherwise "Your game is saved up to Day N, hh:mm. Reload the page to carry on from
+  there." To know: pressing Reload saves on the way out when saving works, so you usually come back at the moment of
+  the fault, a little later than the card says; harmless.
+- **A2.** A second, different unreadable save now goes under `<key>-bad-2` and the Saves app offers "Download the
+  later one"; no room for a copy: the player is told so, not "kept". Still open: probe `keep 2`: one tap on "Throw it
+  away" removes both copies with no "sure?" (deleting a slot asks first). Lead 52 asked for this.
+- **A3.** A failing handler now makes the save again from the start without it and puts in what that handler added
+  the last time it worked (also inside `player` and `ship`); a handler that has never worked this sitting: nothing is
+  written and the player is told. Probes: `tell 2` (credits handler fails after a good save): the stored save has
+  credits, locker and chats; `tell 2b` (it fails half way, having written junk): the junk never reaches storage;
+  `tell 3` (the social handler fails at the first save after loading): saveGame false, "Not saving" said, the loaded
+  save untouched, 5 people met after a reload. So the last whole save is never replaced by one with a piece missing.
+  **For the lead:** in `tell 2b` the player had earned 500 credits; the save is written every hour with the old 40,
+  nothing is said and the Saves app shows nothing, for the rest of the sitting; after a reload the same fault turns
+  into "Not saving". My judgement: the rebuild is safe and better than not saving at all (everything else stays
+  fresh, and Download my save works), but it should say so once ("Part of your game isn't saving ..."). If that
+  word is not wanted, the simple cure (any failure = no write, told) is the more honest of the two.
+- **A12.** Probe `tab 3`: a stopped tab's Download my save hands over minute 726 with the tab at 726.
+- **tools/one_byte.py.** Ran it on a copy of 1155555: 161 characters (132 in code, 29 in comments), "1430563 tokens
+  read the same", a second run "already in one-byte form", `--check` exit 0, names_check OK, content_gen "up to
+  date", no character outside Latin-1 left. My own proof, apart from the tool's: both scripts parsed whole and the
+  two syntax trees compared (positions aside): equal except one regular expression's own text (`/^[pause sign]/`
+  written with its escape: the same match); all 425 template pieces have the same raw text; the script has no tagged
+  templates and no `String.raw`, the only places an escape could read differently. No check searches the game's text
+  for one of the rewritten characters. To know: the mark line moves every script line down by one.
+- Whole game on 1155555: cadet_test 0.99.91 vs 1155555 all off: ALL IDENTICAL; vs the nine on: ALL IDENTICAL (run alone;
+  a first run beside another showed a few pixels one level off, the software renderer's known noise); title_check on the all-on copy: TITLE CHECK OK.
+
+## 7. Backlog line suggested (lead 52 carries it)
+
+"Load a save file" into the slot being played: in RV37's test rig, under load, the page sometimes came back with the
+game from before the file (on 0.99.91 too: 1 of 2 tries; branch: 2 of 6). Probably the rig (headless browser, file://
+pages, a start-up script that plants a save), saves_check passes; not ruled out as a real race between the write and
+the reload. To check: the same on a served page with nothing else running.

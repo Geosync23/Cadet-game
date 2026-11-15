@@ -19,7 +19,7 @@ def part_loop(pw):
     t = Tab(pw, p, '?nosave&debug'); logs = []; t.page.on('console', lambda m: logs.append(m.text[:60]) if m.type == 'error' else None)
     t.step(30); m0 = t.ev('shipNow()')
     t.ev("(() => { const u = crowd.update.bind(crowd); let n = 0; crowd.update = (a, b) => { if (n++ % 2 === 0) throw new Error('rv37: every other frame'); return u(a, b); }; })()")
-    t.step(600); say(f"loop 1, every other frame bad, 600 frames: card {t.page.evaluate('!!document.getElementById(\"loopCard\")')}, LOOP_BAD {t.ev('LOOP_BAD')}, ship minutes passed {t.ev('shipNow()') - m0:.1f}, errors logged {len(logs)}")
+    t.step(600); say(f"loop 1, every other frame bad, 600 frames: card {t.page.evaluate('!!document.getElementById(\"loopCard\")')}, bad frames counted {t.ev('typeof LOOP_SUM !== "undefined" ? LOOP_SUM : LOOP_BAD')}, ship minutes passed {t.ev('shipNow()') - m0:.1f}, errors logged {len(logs)}")
     t.close()
     # 2. 19 bad frames then one good, over and over
     t = Tab(pw, p, '?nosave&debug'); logs = []; t.page.on('console', lambda m: logs.append(m.text[:60]) if m.type == 'error' else None)
@@ -27,6 +27,11 @@ def part_loop(pw):
     t.ev("(() => { const u = crowd.update.bind(crowd); let n = 0; crowd.update = (a, b) => { if (n++ % 20 !== 19) throw new Error('rv37: 19 of 20'); return u(a, b); }; })()")
     t.step(600); say(f"loop 2, 19 of every 20 frames bad, 600 frames: card {t.page.evaluate('!!document.getElementById(\"loopCard\")')}, ship minutes passed {t.ev('shipNow()') - m0:.1f} (a healthy 600 frames: about {600 / 30 * t.ev('SHIP_RATE'):.1f}), errors logged {len(logs)}")
     t.close()
+    # 2b. one bad frame in five; one in eight
+    for every in (5, 8):
+        t = Tab(pw, p, '?nosave&debug'); t.step(30)
+        t.ev("(() => { const u = crowd.update.bind(crowd); let n = 0; crowd.update = (a, b) => { if (n++ % EVERY === 0) throw new Error('rv37: one in EVERY'); return u(a, b); }; })()".replace('EVERY', str(every)))
+        t.step(600); say(f"loop 2b, one bad frame in {every}, 600 frames: card {t.page.evaluate('!!document.getElementById(\"loopCard\")')}"); t.close()
     # 3. the card under ?nosave (nothing is ever saved there), its look, what is under it
     t = Tab(pw, p, '?nosave&debug'); t.step(30); t.ev("crowd.update = () => { throw new Error('rv37: all bad'); }"); t.step(25)
     say('loop 3, ?nosave, every frame bad: card text:', t.page.evaluate("document.getElementById('loopCard').textContent"), '|', top_at_card(t), '| focus on', t.page.evaluate("document.activeElement && (document.activeElement.id || document.activeElement.tagName)"))
@@ -60,6 +65,9 @@ def part_keep(pw):
     say('keep 2, a second unreadable save (unknown version) while the first copy is still there: kept copy is A:', t.store(bad) == A, ', is B:', t.store(bad) == B, '| told:', t.toast()[:110])
     say('   Saves app:', re.findall(r'"text": "([^"]*)", "mark": "urgent"', json.dumps(t.ev('slotsView()'))))
     t.ev("if (typeof introOn === 'function' && introOn()) introSkip()"); t.ev('skipTo(shipNow() + 61)'); t.step(5)
+    say('   Saves app buttons:', re.findall(r'"label": "([^"]*)"', json.dumps(t.ev('slotsView()'))))
+    if t.ev("typeof SAVE_BAD_KEY") == 'string':
+        before = t.store(bad) is not None; t.ev("slotsAct('baddel')"); say('   Throw it away, one tap: the first copy was there:', before, '| after one tap it is there:', t.store(bad) is not None, '| the Saves app then says:', re.findall(r'"text": "([^"]*)", "mark": "urgent"', json.dumps(t.ev('slotsView()'))))
     say('   an hour on: B still anywhere in storage:', t.page.evaluate('v => Object.keys(localStorage).some(k => localStorage.getItem(k) === v)', B)); t.close()
     # slot 2
     t = Tab(pw, p, plant={key + '-slot': '2', key + '-2': A, **ARRIVED}); t.step(60)
@@ -90,6 +98,9 @@ def part_tell(pw):
     say(f"tell 2, the handler for credits (number {i}, parts {t.ev('SAVE_ST.parts[%d]' % i)}) fails: saveGame answers {r}; saved player has credits: {'credits' in s['player']}, locker: {'locker' in s['player']}, chats: {'chats' in s['player']}; told: {t.toast()[:40]!r}; SAVE_ST.fail {t.ev('SAVE_ST.fail')}")
     t.ev('SLOT_HOLD = true'); t.page.reload(); t.page.wait_for_function('window.__sc !== undefined', timeout=120000); t.ev(SKIP_SWITCH); t.step(30)
     say(f"   after a reload: credits {t.ev('SHIP.player.credits')}, locker {t.ev('SHIP.player.locker.length')} (before the fault: {before}; then 500 were earned); errors {t.errors[:1]}"); t.close()
+    t = Tab(pw, p, plant={key: good, **ARRIVED}); t.step(30); t.ev('saveGame()'); i = t.ev("SAVE_EXTRA.findIndex(f => /p\\.credits = /.test(String(f)))"); c0 = t.ev('SHIP.player.credits'); t.ev('SHIP.player.credits += 500')
+    t.ev(f"(() => {{ const f = SAVE_EXTRA[{i}]; SAVE_EXTRA[{i}] = s => {{ s.player.credits = 1; s.player.locker = 'half'; throw new Error('rv37: fails half way'); }}; }})()"); t.ev('skipTo(shipNow() + 61)'); t.ev("toast('x', 'y')"); t.step(5); r = t.ev('saveGame()'); t.step(5); s = json.loads(t.store(key))
+    say(f"tell 2b, the credits handler fails half way after a good save this sitting: saveGame {r}; stored credits {s['player'].get('credits')} (were {c0}, now {c0 + 500} in play), locker {s['player'].get('locker')!r}, stored minute {s['time']['min']:.0f} against {t.ev('SHIP.time.min'):.0f} now; told {t.toast()[:30]!r}; Saves app: {re.findall(r'\"text\": \"([^\"]*)\", \"mark\": \"urgent\"', json.dumps(t.ev('slotsView()')))}"); t.close()
     # 3. a top-level handler fails at the first save after loading (nothing kept yet this sitting)
     t = Tab(pw, p, plant={key: good, **ARRIVED}); t.step(30)
     i = t.ev("SAVE_EXTRA.findIndex(f => /s\\.social = socSave/.test(String(f)))"); met = t.ev("Object.values(SHIP.rel).filter(r => r.met !== null).length")
