@@ -143,7 +143,11 @@ def part_lead(ctx, src):                                # F5: the arrival: a tap
         ok(pg.ev("document.getElementById('ixGoal').classList.contains('lead')") == on, tag + f'his arrow {"takes" if on else "does not take"} taps')
         P = "(() => { const a = DECK_CREW.find(x => x.p && x.p.id === SHIP.intro.escort), q = player.obj.position; _cp.set(a.x, a.y + 1, a.z).project(camera); return [(_cp.x + 1) / 2 * innerWidth, (1 - _cp.y) / 2 * innerHeight, Math.hypot(a.x - q.x, a.z - q.z), q.x, q.z]; })()"
         pg.ev('window.__draw = true'); pg.step(3, 30); pg.ev('window.__draw = false')
-        z = pg.ev(P); shot(pg, 'f5-lead-' + ('after' if on else 'before'))
+        z = pg.ev(P)
+        for k in range(80):                              # he paces while he waits: tap him when he is on screen and across the bay
+            if 20 < z[0] < 370 and 215 < z[1] < 700 and z[2] > 3: break
+            pg.step(10, 40); z = pg.ev(P)
+        shot(pg, 'f5-lead-' + ('after' if on else 'before'))
         if not (20 < z[0] < 370 and 215 < z[1] < 700): ok(False, tag + f'Zeke is on screen to tap ({z})')
         else:
             pg.page.mouse.click(z[0], z[1]); pg.step(90, 40); z2 = pg.ev(P); moved = math.hypot(z2[3] - z[3], z2[4] - z[4])
