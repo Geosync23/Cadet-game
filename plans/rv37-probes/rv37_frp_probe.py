@@ -73,7 +73,48 @@ def part_words(ctx, src):
     cal = pg.ev("(() => { const out = new Set(); for (const k in CHORES) { try { for (const j of CHORES[k].where()) if (/^Calibrate/.test(j.title)) out.add(j.title); } catch (e) {} } return [...out]; })()")
     say('words: Calibrate jobs:', sorted(cal)[:30]); say('   errors', pg.errors[:2])
 
-ALLP = [('pin', part_pin), ('words', part_words), ('food', part_food)]
+PADJS = r"""(() => {
+  const tc = tapCrew, pt = playerTap, pg = playerGo; let cur = null;
+  tapCrew = function (cx, cy, who) { const a = who || crewAtScreen(cx, cy); if (!a) return false; cur.push('crew:' + a.p.id); return true; };
+  playerTap = function (it) { cur.push('thing:' + (it && it.t)); return true; };
+  playerGo = function () { cur.push('walk'); return true; };
+  const out = { people: 0, off: 0, on: 0, sample: [] };
+  try { for (const t of padTargets()) { if (!t.key.startsWith('crew:')) continue; out.people++;
+    const run = on => { FRP_PINTAP_ON = on; cur = []; IX_PIN.t = performance.now(); tap(t.s[0], t.s[1]); return cur[0] || 'nothing'; };
+    const a = run(false), b = run(true); if (a !== t.key) out.off++; if (b !== t.key) { out.on++; if (out.sample.length < 5) out.sample.push([t.key, b, Math.round(Math.hypot(t.s[0] - IX_PIN.x, t.s[1] - IX_PIN.y))]); } } }
+  finally { tapCrew = tc; playerTap = pt; playerGo = pg; FRP_PINTAP_ON = true; }
+  return out; })()"""
+def part_pad(ctx, src):
+    # the controller: each person it can choose, pressed (the game taps at the point the controller holds for them)
+    pg = page(ctx, switched(src, 'FRP_PINTAP_ON'), 'rvpad')
+    jump(pg, 2, 18 * 60 + 12); pg.ev("goToDeck(3); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; needGoalClear(); clearGoal(); SHIP.player.track = null"); pg.step(60)
+    seat = pg.ev("(() => { let best = null; for (const pl of DECKS[3].places.filter(p => p.type === 'mess-seat')) { const c = cellPos(...pl.at); const n = DECK_CREW.filter(a => a.p && Math.hypot(a.x - c.x, a.z - c.z) < 1.6).length; if (!best || n > best[1]) best = [pl.id, n, c.x, c.z]; } return best; })()")
+    for off in ((2.5, 2.5), (-2, 1.5), (1.5, -2.5)):
+        pg.ev(f"(() => {{ clearGoal(); const gl = nearestOpen({seat[2]} + {off[0]}, {seat[3]} + {off[1]}, player); player.obj.position.copy(cellPos(...gl)); player.stop(); setGoal({{ deck: 3, place: {json.dumps(seat[0])}, label: 'A test seat' }}); }})()")
+        pg.ev('window.__draw = true'); pg.step(12, 30); pg.ev('window.__draw = false')
+        r = pg.ev(PADJS); say(f"pad, standing {off} from a seat with {seat[1]} people round it: {r['people']} people the controller can choose; pressing A reaches someone or something else: {r['off']} with the switch off, {r['on']} on {r['sample']}")
+    say('   errors', pg.errors[:2])
+
+def part_needs(ctx, src):
+    # which need wins the pop-up and the arrow, off against on, Day 2 06:01 to 18:00 at the game's pace
+    scenes = [('Food fine (50), toilet and company very low (5)', {'hunger': 50, 'bathroom': 5, 'social': 5}), ('Food, toilet and company all very low (5)', {'hunger': 5, 'bathroom': 5, 'social': 5})]
+    for name, low in scenes:
+        got = []
+        for on in (False, True):
+            pg = page(ctx, switched(src, 'FRP_FOOD_ON') if on else src, 'rvneeds' + str(int(on)))
+            jump(pg, 2, 6 * 60 + 1); pg.ev("window.__t = []; (() => { const t0 = toast; toast = function (a, b) { window.__t.push(a + ' @' + hhmm(SHIP.time.min)); return t0.apply(this, arguments); }; })()")
+            pin = "for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; " + ' '.join(f"SHIP.player.needs.{k} = {v};" for k, v in low.items())
+            arrows = []
+            while pg.ev('shipNow()') < 1440 + 18 * 60:
+                pg.ev(pin); pg.step(200, 50)
+                a = pg.ev("(() => { const g = goalNow(); return (NEED_GOAL ? 'need: ' + NEED_GOAL.label : g ? g.label : 'none'); })()")
+                if not arrows or arrows[-1][1] != a: arrows.append((pg.ev('hhmm(SHIP.time.min)'), a))
+            t = [x for x in pg.ev('window.__t') if re.match(r'(Very hungry|Missing people|Really|Desperate|Bursting|Need)', x) or 'hungry' in x.lower() or 'people' in x.lower() or 'loo' in x.lower() or 'toilet' in x.lower()]
+            got.append((t, arrows, pg.ev('window.__t')))
+            say(f"needs, {name}, switch {'on' if on else 'off'}: need pop-ups {t}"); say(f"      arrow over the day {arrows[:14]}")
+        say(f"   {name}: pop-ups the same off and on: {got[0][2] == got[1][2]}; arrows the same: {got[0][1] == got[1][1]}")
+
+ALLP = [('pin', part_pin), ('pad', part_pad), ('words', part_words), ('food', part_food), ('needs', part_needs)]
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     ctx = b.new_context(viewport={'width': 390, 'height': 844})

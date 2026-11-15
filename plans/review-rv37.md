@@ -286,3 +286,31 @@ missed-oath Mail: plain and short.
 Not run by me: controller_check, interactions_check, bubble_check and the arrows checks on a switched-on copy
 (FR2 reports them OK, except controller_check, which timed out twice on a loaded machine with no FAIL line: it still
 needs one clean run), and the full six-runner round.
+
+## 9. Third pass on FR1 (a077808) and FR2's later commits (8094ac2)
+
+**FR1 at a077808 (game off 923b6c64...1c5d): the whole piece PASS** (A1-A8, A12, tools/one_byte.py). Delta from
+1155555 read line by line, all inside switched code. Probes on a copy with the nine on: A3: the credits handler
+fails after 500 credits are earned: saveGame false, "Not saving" said, the Saves app says so, the stored save stays
+the last whole one (minute 601, the game at 662); the social handler failing at the first save after loading: not
+written, told, 5 people met after a reload. A2: one tap on "Throw it away" only asks; both copies are still there.
+cadet_test and robust_check were not rerun by me on a077808 (FR1 reports them; my last full runs were on 1155555).
+To know: with a failing handler the words still blame the browser's storage, and Download my save then hands over
+the last stored save, not the game as it is; the "Throw it away?" question stays open if the device is closed.
+
+**FR2 at 8094ac2 (game off 085256a4...4fdd).** Delta from 7fe1398: tips show over the open device as before, the
+label's CSS is simpler (a label that fits one line is drawn as before), check changes. Verdicts as in section 8:
+F1-F11 PASS, **F12 still FIXES NEEDED** ("Bridge data bus are", still there on 8094ac2).
+- **Does FRP_FOOD_ON change which need wins in ordinary play?** No: everything it does sits behind "Food under 10
+  and the firm Food warning already said" (read), and probe `needs` agrees. Day 2, 06:00-18:00 at the game's pace.
+  Food fine (50) with toilet and company very low: the same pop-ups in the same order and the same arrows off and on
+  (Bursting, then Missing people; a toilet, then the call booths). Food, toilet and company all very low: the same
+  three pop-ups and arrows, plus "Very hungry" again at 07:00 and 17:00 with the switch on. So it does reshuffle
+  the needs, but only while Food is under 10: each re-said Food warning goes ahead of the other needs' firm
+  warnings, and the arrow follows whichever was said last. cadet_test's scene has Food under 10 (its first tap
+  reads "Very hungry") and jumps across meal times, which is why its cards and arrow came out in a new order.
+- **The controller with FRP_PINTAP_ON.** Probe `pad`: in the mess at dinner with the pin on a seat with six people
+  round it, from three standing spots, every person the controller can choose (5, 5 and 7) was pressed: 0 reached
+  anyone or anything else, switch off or on. The controller's A is a tap at the point it holds for that person,
+  which is on their body, so F4's rule leaves it alone. With FRP_LEAD_ON the controller's press on the arrow goes
+  through the same `ixGoalTap` as a finger (read only).
