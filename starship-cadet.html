@@ -348,7 +348,7 @@ body.tiDev .device,body.tiDev .devdlg,body.tiDev .devtip{z-index:71}
   // A4 (FR1; plans/review-fable-code.md): if three.js can't be fetched the game never starts, and this screen said
   // "LOADING ... 10%" for ever. With LIB_SAY_ON the library's script tag (below, its onerror) calls tiLibFail: the title
   // comes up, awake, with one plain line and no menu. Off: no tiLibFail, so the tag's onerror does nothing
-  const LIB_SAY_ON = false;
+  const LIB_SAY_ON = true;
   if (LIB_SAY_ON) window.tiLibFail = () => {
     const t = document.getElementById('title'), l = document.getElementById('tiLine'), m = document.getElementById('tiMenu'), f = document.getElementById('tiFound');
     if (!t || !l) return;
@@ -458,15 +458,15 @@ const R = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
 // fix, all off here: off is the game as 0.99.91, and the build master switches them on. They are declared here, before
 // anything that reads them (tex() below is called while the file loads). The title's own one, LIB_SAY_ON (A4), is in the
 // page's first script (tiEarly). A10 (the script's text in plain characters) has no switch: it changes no behaviour
-const LOOP_GUARD_ON = false;                              // A1: an error in one frame no longer stops the game for good (section 12's loopGuard); a card after LOOP_BAD_MAX bad frames in a row
-const SAVE_KEEP_ON = false;                               // A2: a save that can't be opened is kept as SAVE_KEY + '-bad' and the player is told (section 13's loadGameSafe; the Saves app)
-const SAVE_TELL_ON = false;                               // A3: the player is told when the game can't save; one failing save handler no longer stops every save (section 13's saveGameSafe)
-const SLEEP_SAFE_ON = false;                              // A5: an error in the night's catch-up no longer leaves the screen black (section 13's sleepGo)
-const LOAD_SAFE_ON = false;                               // A6: four places where a damaged save stopped the game starting (29b's endOffDay, 20c's storyCS, 16's galleyLoad, 20's memNote)
-const EVON_MEMO_ON = false;                               // A7: eventsOn (section 18) keeps its list of flagged traditions instead of filtering the whole table on every call
-const WALLS_STILL_ON = false;                             // A8: walls, posts, sills, panes and door leaves are sent to the graphics chip again only when one has changed (4b's instChanged)
+const LOOP_GUARD_ON = true;                              // A1: an error in one frame no longer stops the game for good (section 12's loopGuard); a card after LOOP_BAD_MAX bad frames in a row
+const SAVE_KEEP_ON = true;                               // A2: a save that can't be opened is kept as SAVE_KEY + '-bad' and the player is told (section 13's loadGameSafe; the Saves app)
+const SAVE_TELL_ON = true;                               // A3: the player is told when the game can't save; one failing save handler no longer stops every save (section 13's saveGameSafe)
+const SLEEP_SAFE_ON = true;                              // A5: an error in the night's catch-up no longer leaves the screen black (section 13's sleepGo)
+const LOAD_SAFE_ON = true;                               // A6: four places where a damaged save stopped the game starting (29b's endOffDay, 20c's storyCS, 16's galleyLoad, 20's memNote)
+const EVON_MEMO_ON = true;                               // A7: eventsOn (section 18) keeps its list of flagged traditions instead of filtering the whole table on every call
+const WALLS_STILL_ON = true;                             // A8: walls, posts, sills, panes and door leaves are sent to the graphics chip again only when one has changed (4b's instChanged)
 const TEX_READ_ON = false;                                // A9: kit textures' canvases are made for reading back (grain() reads 17 of them at load); only if the pictures stay identical
-const SAVE_TAB_ON = false;                                // A12: a tab doesn't save over a game that another tab has taken further (section 13's saveGameSafe)
+const SAVE_TAB_ON = true;                                // A12: a tab doesn't save over a game that another tab has taken further (section 13's saveGameSafe)
 
 // =====================================================================
 // 2. TEXTURES (procedural)
@@ -16982,7 +16982,7 @@ if (TP997.n33) deviceApp({ id: 'pockets', title: 'Pockets', icon: 'pocket', orde
 // arrow-following player sat at Food 0 for days. On, while Food is under 10 and the firm warning has been said: it is
 // armed again as each meal opens (breakfast, dinner), so needWarnTick says it once more with its usual pacing; and when
 // no arrow at all is showing, the Food marker is asked for again (every 5 ship minutes at most). Awake only; nothing saved
-var FRP_FOOD_ON = false;                                 // var: needWarnTick (above) asks
+var FRP_FOOD_ON = true;                                 // var: needWarnTick (above) asks
 const FRP_FOOD = { slot: '', tried: -1e9 };
 function frpFoodTick() {
   const n = SHIP.player.needs.hunger, t = shipNow(), m = SHIP.time.min, key = SHIP.time.day + (m >= MEALS.dinner[0] ? 'd' : m >= MEALS.breakfast[0] ? 'b' : 'n');
@@ -16996,7 +16996,7 @@ function frpFoodTick() {
 // low). On: with a tray in hand in the mess (Deck 3), nothing in progress and no arrow of anyone's showing, the arrow
 // points at the nearest free mess seat (needGoal's own pick and words), moves on if someone takes it, and goes when you
 // sit, put the tray down or leave the deck. Section 21's first-night bunk arrow waits behind it (it only sets with no goal)
-var FRP_TRAY_ON = false;                                 // var: needWarnTick (above) asks
+var FRP_TRAY_ON = true;                                 // var: needWarnTick (above) asks
 function frpTrayTick() {
   const P = SHIP.player, mine = !!IX_GOAL && IX_GOAL.frpTray === true, here = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 0;
   const want = !!P.tray && here === 3 && !ACT && !DIALOGUE;
@@ -17012,7 +17012,7 @@ function frpTrayTick() {
 // (Calibrate oven 2), the deck named twice in Job taken ("..., Deck 3, Deck 3 · infirmary"), a small job's name said in
 // its pop-up's title and again in its text, the daily meals run loaded under the title "Wednesday delivery" (Cargo
 // hold), "a hot plate" from the chilled grab shelf (a covered plate), and the Calendar's "Don't" button (Don't remind me)
-var FRP_WORDS_ON = false;                                // var: asked from sections 15, 15b, 16, 17 and 19
+var FRP_WORDS_ON = true;                                // var: asked from sections 15, 15b, 16, 17 and 19
 function frpWords() { return typeof FRP_WORDS_ON !== 'undefined' && !!FRP_WORDS_ON; }
 function frpPlural(name) { return /[^sui]s$/i.test(String(name || '').replace(/\s+\d+$/, '')); }   // "light relays", "grow lights 2"; not "compass", "oven", "bridge data bus" (RV37) or "chassis"
 function frpTitleWhere(title, where) {                   // the job's title without a deck its place is about to say
@@ -17023,7 +17023,7 @@ function frpTitleWhere(title, where) {                   // the job's title with
 // Three messages that explained nothing: "The job isn't yours any more." (said mid-lesson when Calder's call took your
 // job back to the board), the board's heading "You have a job. Finish it or drop it" over a finished job waiting to be
 // turned in, and the time clock's "Shift starts at 09:00" at half past nine. On: each says what happened or what to do
-var FRP_SAY_ON = false;                                  // var: asked from sections 15, 15b and 20
+var FRP_SAY_ON = true;                                  // var: asked from sections 15, 15b and 20
 function frpSay() { return typeof FRP_SAY_ON !== 'undefined' && !!FRP_SAY_ON; }
 function frpJobGone() { return frpSay() ? 'That job has gone back to the board: something more urgent came first, or someone else has taken it. Nothing is held against you.' : 'The job isn\'t yours any more.'; }
 function frpJobDone() { const j = typeof myJob === 'function' ? myJob() : null; return !!(j && j.workDone); }
@@ -17032,7 +17032,7 @@ function frpJobDone() { const j = typeof myJob === 'function' ? myJob() : null; 
 // shows during the arrival (teachHeld) and later ones queue behind the day's own. "Slept well?" came at 15:02. On: once
 // the arrival's walk is over and the evening is yours (the intro's 'free', 'tomas' and 'night' steps, Day 0), those three show, a minute
 // apart, never over anything (POP.busy, a recent toast, card or warning); and "Slept well?" only shows before 09:00
-var FRP_TIPS_ON = false;                                 // var: TEACH and teachTick (above) ask
+var FRP_TIPS_ON = true;                                 // var: TEACH and teachTick (above) ask
 function frpTips() { return typeof FRP_TIPS_ON !== 'undefined' && !!FRP_TIPS_ON; }
 function frpTipsArrival(now) {
   const D = SHIP.device; if (!D || !D.settings.tips || typeof introOn !== 'function' || !introOn() || SHIP.time.day >= 1 || !SHIP.intro || !['free', 'tomas', 'night'].includes(SHIP.intro.step)) return null;   // dinner is over: the evening is yours
@@ -51098,7 +51098,7 @@ function t997Frame() {                                 // once a frame (eventsTi
 // the beam, the Last Light (once a voyage), a birthday, the Captain's address (from the Captain). On: only after a
 // tradition with a plain weekly rhythm (a `when` with weekdays and nothing else: no arrival, rotation, season, year
 // or birthday rule), and never the Captain's Friday address. An event's gathering (no `when`) gets none
-var FRP_THANKS_ON = false;                               // var: tradJoin (above) asks
+var FRP_THANKS_ON = true;                               // var: tradJoin (above) asks
 function frpThanksOk(e) {
   const ev = e && e.ev, w = ev && ev.when; if (!w || typeof w !== 'object' || w.weekday === undefined) return false;
   if (w.after || w.rotation !== undefined || w.year !== undefined || w.quarter !== undefined || w.season !== undefined || w.birthday || w.until !== undefined) return false;
@@ -51655,7 +51655,7 @@ function lineStoryTick(now) {
 // The Line oath (Day 7 14:40, the bow lounge) had no gold arrow, and a player who never went got the meeting's gist by
 // Mail: "you answered for the first-timers". On: a level-1 arrow from 14:15 until the oath ends or you are in it; the
 // Mail for an oath you missed says so (event.crossingLine.frp.missed); an invitation's heads-up names its tradition
-var FRP_LINE_ON = false;                                 // var: section 19's heads-ups and meetingGist (above) ask
+var FRP_LINE_ON = true;                                 // var: section 19's heads-ups and meetingGist (above) ask
 function frpLineArrow(e, now) {
   const M = e.mine, t0 = e.startDay * 1440 + 880; if (M['met:crossingCeremony'] || now < t0 - 25 || now >= t0 + 15 || typeof guideAsk !== 'function') return;
   guideAsk({ id: 'frp:line:oath', level: 1, owner: '18 (FR2)', from: t0 - 25, until: t0 + 15, goal: () => ({ deck: 3, room: 'L', label: evWord('event.crossingLine.frp.arrow') || 'The Line oath, 14:40: the bow lounge' }),
@@ -59606,7 +59606,7 @@ function introKeep(b, id, o) {
 // description and no step. On, and only while someone is leading you (the arrival's escort, introEscorting): a tap on
 // them from more than FRP_LEAD_NEAR away walks you to them (nearer, their usual card), and their own arrow (the edge
 // arrow, the pin, its label) takes a tap and walks you toward it, or to the lift panel when they are on another deck
-var FRP_LEAD_ON = false;                                 // var: introTap, ixGoalTap and ixFrame (above) ask
+var FRP_LEAD_ON = true;                                 // var: introTap, ixGoalTap and ixFrame (above) ask
 const FRP_LEAD_NEAR = 3;
 function frpLeadGoalIs(g) { return !!g && introOn() && !!INTRO_UI.goal && g === IX_GOAL && g.label === 'Zeke Torres' && introEscorting(introStep()); }
 function frpLeadGo(x, z) {                               // beside that spot, or the nearest tile to it you can reach (from the shuttle, the tile beside him is not)
@@ -73408,7 +73408,7 @@ if (PF_CAP_ON) {                                         // the main loop's fram
 // gathering at the bow glass ends (14:30), the same 'beacon' feel again every FRP_BLINK.every seconds of play, at half
 // strength (softer, EV1's backlog note about Deck 6), never over another felt moment. Asked from shipFeelFrame's
 // twice-a-second look; simNow's clock (a pause holds it); nothing saved, no R()
-var FRP_BLINK_ON = false;                                // var: shipFeelFrame (above) asks
+var FRP_BLINK_ON = true;                                // var: shipFeelFrame (above) asks
 const FRP_BLINK = { every: 11, soft: .5, t0: -1, last: -1e9 };
 function frpBlinkTick(now) {
   const e = SHIP.event; if (!e || e.id !== 'lastLight') return;
@@ -75404,7 +75404,7 @@ addEventListener('blur', () => KEY_WALK.held.clear());   // a key let go in anot
 // under it, and not on that person's own body away from the pin's point (FX3's rule), the arrow's own target takes the tap: the person it names (tapCrew for them), else your job's stop there,
 // else the thing the pin points at (15b's ixPinTap, the ray set through the pin). A tap on anyone away from the pin,
 // and a tap on the person the arrow names, are as before
-var FRP_PINTAP_ON = false;                               // var: tap() (above) asks
+var FRP_PINTAP_ON = true;                               // var: tap() (above) asks
 const FRP_PIN_PX = 34;
 function frpPinTap(cx, cy) {
   const a = crewAtScreen(cx, cy); if (!a || typeof IX_PIN === 'undefined' || performance.now() - IX_PIN.t >= 500) return false;
@@ -75428,8 +75428,8 @@ function frpPinTap(cx, cy) {
 // shows when they close. Over the open device a tip shows as before (device_check's tips; BM29's rehearsal).
 // FRP_LABEL_ON: the arrow's label was cut at one line ("Fire drill, 15:00: Chief Calder at the Wo..."): it wraps to
 // two lines, centred, the same width limit. CSS only, added at load when a switch is on (nothing added when off)
-var FRP_PANELS_ON = false;                               // var: section 19's tip card (above) asks
-var FRP_LABEL_ON = false;
+var FRP_PANELS_ON = true;                               // var: section 19's tip card (above) asks
+var FRP_LABEL_ON = true;
 (() => {
   let css = '';
   if (FRP_PANELS_ON) css += '#ixBoard,#sleepAsk{background:rgb(13,21,33)}';
