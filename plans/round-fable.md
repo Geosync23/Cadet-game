@@ -199,6 +199,24 @@ frp_check (was R1's; R5 runs it with the final check file), check_fast and event
 | R5 (BM29) | OK, 28 of 28 exit 0 with the OK line: frp_check (ab130f2's file), one_byte --check, cr2, drill, tp9991, simprobe (by eye: Days 3, 25, 39 19:30-20:30; tap, card ev9991.sim, a pod), machine, mech (full), bigevents, fridays, disc, clothes, promo_beats, food 1 7 and 11 4, join, weekend, stories 36, tiles, day 12 17 13 3 27 18 19, p5retry_break. Plus wave 1 (table above). "skipped" lines: day 12 and 13 one each (the rec deck's evening comparison on the storm days, by design); food_check one each ("Schedules: not using the rota yet ... skipped": a part of food_check that tests nothing, old, for the B10 list); stories 78 that are only the word in its own printout | logs /home/user/bm29/logs (scratch) |
 | R2 | OK: intro whole/--dinner/--firsts, path, arc, day 0 1 5 7 21 22, arrows endgo, pf_f1_same (F1 0 mismatches; all-off proof with 60 switches false: 30 same). lines_check --day: FAIL once beside another browser (1 s of overlap), the same on OLD (3 s), PASS alone: check-side, backlog R2-1 | plans/checks-fable-r2.md, claude/checks-fable-r2 |
 | R4 | OK: career, appt, saves, title, day 6 8 23 24 16, fixtap_probe, fixtap_reach, fixtap_click, cr1, p926, fresh_walk (long [], stuck [], errors []). title_check stopped once on timing under load, then OK three times and on OLD (backlog R4-1). fresh_walk's Day 2 booths observation: old-equivalent (RV37's probe, FR2's probe agree; backlog RV37-2) | plans/checks-fable-r4.md, claude/checks-fable-r4 bda8520a |
-| R6 | (running) interactions_check OK (2205 s); day 10, 15, 20 OK; day 14 FAIL, the same line on OLD: old, backlog R6-1; perf_check running | |
-| R3 | (running) controller_check OK, 57 parts, first time, with the switches on | |
-| R1 | (running) | |
+| R6 | OK: interactions_check (2205 s); day 10, 15, 20; perf_check BUILD OLD alone, last: PERF CHECK OK (4281 s, no PROBLEM line, deck round trips 470 -> 470 -> 470; 2 scenes skipped, both Step 6, the same 2 as round 09991b). Day 14 FAIL, the same line word for word on OLD: old, backlog R6-1, not held against the candidate | plans/checks-fable-r6.md, claude/checks-fable-r6 000d68f |
+| R3 | OK, every check once, no reruns: controller_check (57 parts, all but reach, first time with the switches on), sound, promo_sight, arrows_d, arrows_f, ending, devmode (all parts), dev_arrow | plans/checks-fable-r3.md, claude/checks-fable-r3 7965b01 |
+| R1 | OK, 17 of 17 once: player, bubble, puzzle, social, talk, arrows default, step5, step6 four ways (692 minutes due, 0 missed, 0 stuck), endstay, arrows_pointer, day 4 11 25 26 2 9, p5retry_probe | plans/checks-fable-r1.md, claude/checks-fable-r1 |
+
+Closed along the way (none is a NEW fault of the candidate):
+- R4's fresh_walk, Day 2 18:00 at the call booths (five taps open Davi Keane's card): old-equivalent (RV37's probe; FR2's
+  three-build probe). R4's three extra walks: the candidate repeats itself; with only FR1's nine switches off the walk
+  is identical, so FR1's switches do not change a player's day; candidate and 0.99.91 first differ at Day 0 18:26, "A
+  seat for your tray" (FRP_TRAY_ON), then the Food arrow (FRP_FOOD_ON): intended. Backlog RV37-2.
+- Check-side timing, each passing alone and the same on OLD: title_check (R4-1), lines_check --day (R2-1).
+- Old game bug found by the new day: Day 14, Theo stuck 20 minutes (R6-1).
+- food_check holds a part that tests nothing ("Schedules: not using the rota yet ... skipped"), for the B10 list.
+
+**Result: round fable OK, all six shares. FINAL GO (BM29, 2026-11-15 ~11:25 UTC): claude/staging-fable-review, game
+commit c4999dae (later commits are docs only), game sha256
+d6b9ce81a5254ab089f07afad01ed20edbd05e38d12a6043092f0578f9efa1c0, build 0.99.92-review. Every check of the round ran
+once on this exact file; the tables above name the seat. main and claude/integration are untouched (cdd9efd).**
+
+For the user's notes (not faults): a player who follows the arrows has a different first three days than in 0.99.91
+(the tray seat, the Food marker); TEX_READ_ON (A9) is built but off, a question for the user; quiz question 34's
+"rec deck" has no switch; backlog R6-1, RV37-2, FR1-3, FR1-4, R4-1, R2-1, BM29-1.
