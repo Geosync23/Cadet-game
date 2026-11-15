@@ -12861,7 +12861,7 @@ deviceApp({ id: 'calendar', title: 'Calendar', icon: 'calendar', order: 15,
       for (const x of trad) {
         const p = R.per[x.kind], same = calClash(x, all);
         rows.push({ m: x.at - B0, text: devWhen(x.at) + '  ' + x.title + (x.at < shipNow() ? ' (on now, until ' + devWhen(x.to) + ')' : ''), sub: x.where + (same.length ? ' · same time as ' + same.map(y => y.title).join(' and ') : '') + (R.on ? p === false ? ' · no reminder' : p === true ? ' · remind me, even on shift' : ' · reminder' : ''),
-          button: R.on ? p === false ? 'Remind me' : frpWords() ? 'No reminder' : 'Don\'t' : null, action: R.on ? { app: 'calendar', do: 'remind', arg: x.kind } : null });
+          button: R.on ? p === false ? 'Remind me' : frpWords() ? 'Don\'t remind me' : 'Don\'t' : null, action: R.on ? { app: 'calendar', do: 'remind', arg: x.kind } : null });
       }
       rows.push(...apptCalRows(d, B0, rows));                    // your booked appointments, what they are (0.99.5 #11, the device slot)
       if (STORIES_ON && typeof storyCalRows === 'function') rows.push(...storyCalRows(d, B0));   // a crew story's crescendo, booked (FX21, section 20c's slot)
@@ -16877,10 +16877,10 @@ function frpTrayTick() {
 // Small wording slips, each read where the words are made: "The light relays is running" (are), "Calibrate the oven 2"
 // (Calibrate oven 2), the deck named twice in Job taken ("..., Deck 3, Deck 3 · infirmary"), a small job's name said in
 // its pop-up's title and again in its text, the daily meals run loaded under the title "Wednesday delivery" (Cargo
-// hold), "a hot plate" from the chilled grab shelf (a covered plate), and the Calendar's "Don't" button (No reminder)
+// hold), "a hot plate" from the chilled grab shelf (a covered plate), and the Calendar's "Don't" button (Don't remind me)
 var FRP_WORDS_ON = false;                                // var: asked from sections 15, 15b, 16, 17 and 19
 function frpWords() { return typeof FRP_WORDS_ON !== 'undefined' && !!FRP_WORDS_ON; }
-function frpPlural(name) { return /[^s]s$/i.test(String(name || '').replace(/\s+\d+$/, '')); }   // "light relays", "grow lights 2"; not "compass", not "oven"
+function frpPlural(name) { return /[^sui]s$/i.test(String(name || '').replace(/\s+\d+$/, '')); }   // "light relays", "grow lights 2"; not "compass", "oven", "bridge data bus" (RV37) or "chassis"
 function frpTitleWhere(title, where) {                   // the job's title without a deck its place is about to say
   if (!frpWords()) return title;
   const m = /,\s*(Deck \d|the rec deck|Rec deck)\s*$/i.exec(String(title || '')); return m && String(where || '').toLowerCase().startsWith(m[1].toLowerCase()) ? title.slice(0, m.index) : title;

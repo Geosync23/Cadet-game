@@ -193,14 +193,14 @@ def part_words(ctx, src):                               # F12: the wording slips
         pg = page(ctx, switched(src, 'FRP_WORDS_ON', on=on), 'words' + str(int(on))); tag = 'on: ' if on else 'off: '
         jump(pg, 2, 9 * 60 + 5)
         ok(pg.ev("frpWords()") == on, tag + 'the switch reads ' + str(on))
-        ok(pg.ev("[frpPlural('light relays'), frpPlural('grow lights 2'), frpPlural('oven'), frpPlural('compass'), frpPlural('air scrubber')].join()") == 'true,true,false,false,false', tag + 'plural machines told from singular')
+        ok(pg.ev("[frpPlural('light relays'), frpPlural('grow lights 2'), frpPlural('oven'), frpPlural('compass'), frpPlural('air scrubber'), frpPlural('Bridge data bus')].join()") == 'true,true,false,false,false,false', tag + 'plural machines told from singular')
         w = pg.ev("frpTitleWhere('Take medical supplies to the infirmary, Deck 3', 'Deck 3 · infirmary')")
         ok(w.endswith('Deck 3') != on, tag + f'Job taken names the deck {"once" if on else "twice, as before"} ({w!r})')
         ok(pg.ev("frpTitleWhere('Oil the sim bay door', 'Rec deck · sim bay')") == 'Oil the sim bay door', tag + 'a title with no deck is left alone')
         # the Calendar's button
         pg.ev("deviceShow('calendar')"); pg.step(10)
         bt = pg.ev("[...document.querySelectorAll('#devBody button')].map(b => b.textContent.trim())")
-        ok(('No reminder' in bt) == on and ("Don't" in bt) == (not on), tag + f'the Calendar button says {"No reminder" if on else "Don" + chr(39) + "t"} ({sorted(set(bt))[:6]})')
+        ok(("Don't remind me" in bt) == on and ("Don't" in bt) == (not on), tag + f'the Calendar button says {"Don" + chr(39) + "t remind me" if on else "Don" + chr(39) + "t"} ({sorted(set(bt))[:6]})')
         shot(pg, 'f12-calendar-' + ('after' if on else 'before')); pg.ev('deviceClose()')
         # a calibrate chore's title, the grab shelf's plate, and a small job's pop-up (read from the game's own makers)
         cal = pg.ev("(SHIP.jobs || []).map(j => j.title).filter(t => /^Calibrate/.test(t))")
