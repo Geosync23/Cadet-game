@@ -108,10 +108,12 @@ for (const t of acorn.tokenizer(src, { ecmaVersion: 2022 })) {
   for (const [n, i] of gone) if (!WAITING.has(n)) bad.push(`a "does it exist" test on ${n}, which is made nowhere in the script (a renamed or misspelt name? If it waits for a later build, add it to WAITING in names_check.js): ${at(i)}`);
   for (const n of WAITING.keys()) if (made.has(n)) bad.push(`${n} is in names_check.js's WAITING list but is made in the script now: take it off the list`);
 }
-// one byte a character (FR1's review, A10): a single character outside Latin-1 (an arrow, a long dash, a star) anywhere in
-// the script makes the browser keep all of its text at two bytes a character, 8.8 MB more memory. In a string write it
-// as its \uXXXX escape (the same string); in a comment use plain words. content_gen.py does it for the baked words
-{ let n = 0; for (const m of src.matchAll(/[^\x00-\xff]/g)) { if (n++ < 5) bad.push(`a character outside Latin-1 in the script (U+${m[0].codePointAt(0).toString(16).toUpperCase().padStart(4, '0')}; write it as \\u${m[0].charCodeAt(0).toString(16).padStart(4, '0')} in a string, plain words in a comment): ${at(m.index)}`); } if (n > 5) bad.push(`... and ${n - 5} more characters outside Latin-1`); }
+// one byte a character (FR1's review, A10; tools/one_byte.py): once the script has been put in one-byte form it carries
+// the mark below, and from then on a single character outside Latin-1 (an arrow, a long dash, a star) anywhere in it
+// fails here: one makes the browser keep all of the script's text at two bytes a character, 8.8 MB more memory. In a
+// string write it as its \uXXXX escape (the same string); in a comment use plain words. content_gen.py does it for the
+// baked words. Before the mark is there (the script not yet converted): not checked
+if (src.includes('[one-byte script]')) { let n = 0; for (const m of src.matchAll(/[^\x00-\xff]/g)) { if (n++ < 5) bad.push(`a character outside Latin-1 in the script (U+${m[0].codePointAt(0).toString(16).toUpperCase().padStart(4, '0')}; write it as \\u${m[0].charCodeAt(0).toString(16).padStart(4, '0')} in a string, plain words in a comment): ${at(m.index)}`); } if (n > 5) bad.push(`... and ${n - 5} more characters outside Latin-1`); }
 // the title screen's two switches (section 30's TITLE_ON and the page's first script's TITLE_EARLY) must agree
 { const on = /const TITLE_ON = (true|false);/.exec(html), early = /const TITLE_EARLY = (true|false);/.exec(html);
   if (!on !== !early) bad.push(`the title screen's switch ${on ? 'TITLE_ON' : 'TITLE_EARLY'} is there without ${on ? 'TITLE_EARLY (the page)' : 'TITLE_ON (section 30)'}`);

@@ -1086,11 +1086,15 @@ def bake():
     return out
 
 
-# The baked text keeps to one byte a character (FR1's review, A10): a character outside Latin-1 (an arrow, a long
-# dash, a star) is written as its \uXXXX escape, which is the same string to the game. One such character anywhere in
-# the game's script makes the browser hold all 8.8 million of its characters at two bytes each (8.8 MB of memory);
-# names_check fails on one. Accented letters and the like (up to U+00FF) stay as they are. Done once, on each baked
-# block as it goes into the game (main), not inside js() or cj(): their text can itself sit inside a baked string.
+# One byte a character (FR1's review, A10; tools/one_byte.py): once the game's script has been put in one-byte form (it
+# then carries ONE_BYTE_MARK), the baked text keeps to it: a character outside Latin-1 (an arrow, a long dash, a star)
+# is written as its \uXXXX escape, which is the same string to the game. One such character anywhere in the script makes
+# the browser hold all 8.8 million of its characters at two bytes each (8.8 MB of memory); names_check then fails on
+# one. Accented letters and the like (up to U+00FF) stay as they are. Done once, on each baked block as it goes into
+# the game (main), not inside js() or cj(): their text can itself sit inside a baked string. Without the mark: as before.
+ONE_BYTE_MARK = '[one-byte script]'
+
+
 def one_byte(t):
     return re.sub(r'[^\x00-\xff]', lambda m: ''.join('\\u%04x' % u for u in struct.unpack('<%dH' % (len(m.group(0).encode('utf-16-le')) // 2), m.group(0).encode('utf-16-le'))), t)
 
@@ -1242,7 +1246,8 @@ def main(argv):
             html = f.read()
         new = html
         for name, body in blocks(out).items():
-            new = splice(new, name, [one_byte(x) for x in body] if isinstance(body, list) else one_byte(body))   # (the whole baked block, once: a baked table that holds JSON text inside a string keeps that text as it was)
+            if ONE_BYTE_MARK in html: body = [one_byte(x) for x in body] if isinstance(body, list) else one_byte(body)
+            new = splice(new, name, body)
     except GenError as e:
         print('content_gen: ' + str(e))
         return 2

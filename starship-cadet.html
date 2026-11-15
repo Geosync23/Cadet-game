@@ -9055,7 +9055,7 @@ Object.assign(KIT, {
   },
   recSignpost(g) {
     box(.08, 2.3, .08, RK.black, 0, 1.15, 0, g);
-    [['POOL  ·  AUDITORIUM  \u2192', '#50e6ff'], ['\u2190  RIVERS  ·  WALL  ·  COURT', '#ff9a3c'], ['FLOAT ROOM  \u2193', '#ff6fe0']].forEach(([txt, c_], k) => {
+    [['POOL  ·  AUDITORIUM  →', '#50e6ff'], ['←  RIVERS  ·  WALL  ·  COURT', '#ff9a3c'], ['FLOAT ROOM  ↓', '#ff6fe0']].forEach(([txt, c_], k) => {
       const t = tex(512, 80, (c, w, h) => { c.fillStyle = '#16181c'; c.fillRect(0, 0, w, h); c.fillStyle = c_; c.fillRect(0, 0, 10, h); c.fillStyle = '#f4f4f0'; c.font = '700 34px system-ui,sans-serif'; c.textBaseline = 'middle'; c.fillText(txt, 28, h / 2 + 2); });
       const p = new THREE.Mesh(new THREE.BoxGeometry(1.25, .2, .04), [RK.black, RK.black, RK.black, RK.black, new THREE.MeshBasicMaterial({ map: t, toneMapped: false }), RK.black]); p.position.set(.1, 2.0 - k * .28, .07); g.add(p);
     });
@@ -10087,7 +10087,7 @@ function offerSleep(at) {                                // at: where the tapped
   if (!bedtime()) sleepGo(null); else alarmOpen();       // the nap (unwell by day) at once; at night the alarm clock (0.73.0)
   return true;
 }
-// the alarm clock (0.73.0, playtest 2, the user's): pick the wake time with - / + (ALARM_STEP minutes, ALARM_FROM to
+// the alarm clock (0.73.0, playtest 2, the user's): pick the wake time with − / + (ALARM_STEP minutes, ALARM_FROM to
 // ALARM_TO and at least ALARM_SOON ahead), see the energy you'll wake with (alarmEnergy: the overnight skip's own
 // needsDrain on a copy of your needs, so later gives more) and a warning when it's at or after your shift's start that
 // morning (alarmLate). Set alarm sleeps until then; Not yet closes it (lying in your bunk you stay lying). The time is
@@ -12182,7 +12182,7 @@ function tradWalkMin() { return 6; }
 //   [{ text, sub, mark, action, button }] }, { kind: 'bars', items: [{ label,
 //   value, mark, note, level }] }, { kind: 'buttons', items: [{ label, action }] },
 //   { kind: 'chips', items: [{ label, on, action }] } ] } (chips: big toggles, crossed out while on is false;
-//   build one with devChips(items), which falls back to buttons marked "U+2715 " on a skin without them),
+//   build one with devChips(items), which falls back to buttons marked "✕ " on a skin without them),
 //   { kind: 'strip', rows: [{ label, hours: [24 × 0-1], pins: [hour] }] } (a day strip: a bar per hour, 12 px wide,
 //   scrolling sideways on a phone; build one with devStrip(rows, fallback), a list on a skin without it)
 // action: { app, do, arg }. mark: 'up' | 'down' | 'new' | 'urgent' | 'hot' | 'big'.
@@ -12433,7 +12433,7 @@ function deviceDo(action) {
   if (!action) return;
   const a = DEVICE_APPS.get(action.app);
   if (action.do === 'open' || action.do === undefined) {   // open an app; one with no verb (e.g. { app, with }) hands the app the action
-    let to = action.do === 'open' ? action.arg || action.app : action.app;   // an app's act may name another app to show (Maps -> Roster)
+    let to = action.do === 'open' ? action.arg || action.app : action.app;   // an app's act may name another app to show (Maps → Roster)
     if (action.do === undefined && a && a.act) try { const r = a.act('open', action); if (typeof r === 'string' && DEVICE_APPS.has(r)) to = r; } catch (e) { DEV.errors.push(String(e && e.message || e)); }
     deviceShow(to); return;
   }
@@ -12575,7 +12575,7 @@ function deviceRefresh() {
 const DEVICE_SKIN = (() => {
   const $ = id => document.getElementById(id);
   const el = $('device'), body = $('devBody'), btn = $('devBtn'), badge = $('devMail'), head = $('devT'), backB = $('devBack'), led = $('devLed');
-  const GLYPH = { hobby: '\u273f', home: '\u2302', needs: '\u2665', wrench: '\u2692', mail: '\u2709', wallet: '¤', pocket: '\u25a3', schedule: '\u25f7', calendar: '\u25a6', memo: '\u270e', map: '\u2316', ship: '\u25c8', news: '\u2630', record: '\u2605', crew: '\u263a', people: '\u2661', gear: '\u2732', saves: '\u25a4', dot: '\u2022', track: '\u25ce', music: '\u266A\uFE0E' };   // U+266A as text (U+FE0E), never a colour emoji (the user: no emojis)
+  const GLYPH = { hobby: '✿', home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', pocket: '▣', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', news: '☰', record: '★', crew: '☺', people: '♡', gear: '✲', saves: '▤', dot: '•', track: '◎', music: '\u266A\uFE0E' };   // ♪ as text (U+FE0E), never a colour emoji (the user: no emojis)
   const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   const acts = new WeakMap();                  // each button's action, for the panel pointer's buttonFor (the arrows plan, piece C)
   const act = (b, action) => { b.type = 'button'; b.onclick = e => { e.stopPropagation(); deviceDo(action); }; acts.set(b, action); return b; };
@@ -12607,7 +12607,7 @@ const DEVICE_SKIN = (() => {
         if (it.color) row.style.setProperty('--nc', it.color);   // 0.35.28: a need's own colour (section 15's NEED_COL), as on the strip
         if (it.icon) { const NS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(NS, 'svg'), path = document.createElementNS(NS, 'path');
           svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('aria-hidden', 'true'); path.setAttribute('d', it.icon); svg.appendChild(path); row.appendChild(svg); }
-        if (it.mark) { const em = mk('em', it.mark, it.mark === 'up' ? '\u25b2' : '\u25bc'); if (it.note) em.title = it.note; em.setAttribute('aria-label', it.mark === 'up' ? 'bonus' : 'penalty'); lab.appendChild(em); }
+        if (it.mark) { const em = mk('em', it.mark, it.mark === 'up' ? '▲' : '▼'); if (it.note) em.title = it.note; em.setAttribute('aria-label', it.mark === 'up' ? 'bonus' : 'penalty'); lab.appendChild(em); }
         row.setAttribute('role', 'meter'); row.setAttribute('aria-label', it.label); row.setAttribute('aria-valuenow', Math.round(v));
         row.setAttribute('aria-valuemin', 0); row.setAttribute('aria-valuemax', 100);
         bar.appendChild(fill); row.append(lab, bar, mk('span', '', Math.round(v))); box.appendChild(row);
@@ -12736,7 +12736,7 @@ const DEVICE_SKIN = (() => {
         const grid = mk('div', 'apps');
         for (const a of deviceApps()) {
           const t = act(mk('button', 'app'), { app: a.id, do: 'open' }), n = deviceBadge(a);
-          t.dataset.app = a.id; t.append(mk('i', '', (GLYPH[a.icon] || GLYPH.dot) + '\ufe0e'), mk('span', '', a.short || a.title));
+          t.dataset.app = a.id; t.append(mk('i', '', (GLYPH[a.icon] || GLYPH.dot) + '︎'), mk('span', '', a.short || a.title));
           if (n) t.appendChild(mk('b', '', n));
           t.setAttribute('aria-label', a.title + (n ? ', ' + n + ' new' : ''));
           grid.appendChild(t);
@@ -12768,7 +12768,7 @@ const DEVICE_SKIN = (() => {
         const box = mk('div', 'btns');
         v.choices.forEach((ch, k) => { const b = mk('button', 'act', ch); b.type = 'button'; b.onclick = e => { e.stopPropagation(); devDialogueDo('choose', k); }; box.appendChild(b); });
         c.appendChild(box);
-      } else { const n = mk('button', 'act next', 'Go on \u25b8'); n.type = 'button'; n.onclick = e => { e.stopPropagation(); devDialogueDo('next'); }; c.appendChild(n); }
+      } else { const n = mk('button', 'act next', 'Go on ▸'); n.type = 'button'; n.onclick = e => { e.stopPropagation(); devDialogueDo('next'); }; c.appendChild(n); }
     },
     address(a) {
       let c = $('devAddr');
@@ -12831,10 +12831,10 @@ const DEVICE_SKIN = (() => {
   return skin;
 })();
 
-// a chips block for an app's view (0.55.0); a skin without chips gets the same toggles as buttons, "U+2715 " on the crossed ones
+// a chips block for an app's view (0.55.0); a skin without chips gets the same toggles as buttons, "✕ " on the crossed ones
 function devChips(items) {
   if (DEVICE_SKIN.has && DEVICE_SKIN.has('chips')) return { kind: 'chips', items };
-  return { kind: 'buttons', items: items.map(it => ({ label: (it.on === false ? '\u2715 ' : '') + it.label, action: it.action })) };
+  return { kind: 'buttons', items: items.map(it => ({ label: (it.on === false ? '✕ ' : '') + it.label, action: it.action })) };
 }
 
 // a day strip for an app's view (0.55.14); a skin without strips gets a list: each row's label and its words (fallback(row))
@@ -12892,7 +12892,7 @@ deviceApp({ id: 'settle', title: 'Settling in', short: 'Settling', icon: 'record
     const L = settleList() || [], done = L.filter(x => settleDone(x.id)).length, B = [];
     B.push({ kind: 'text', text: done + ' of ' + L.length + ' done. Nothing here is required: people will show you as the week goes on.', mark: 'hot' });
     const rows = L.map(it => { const d = settleDone(it.id), p = it.teacher && apptPerson(it.teacher), g = !d && settleGoal(it);
-      return { text: (d ? '\u2713 ' : '') + it.title, sub: d ? 'Done' : (p ? 'Ask ' + p.name : '') + (it.place ? (p ? ' · ' : '') + it.place.room + ', ' + deckIn(it.place.deck) : ''),
+      return { text: (d ? '✓ ' : '') + it.title, sub: d ? 'Done' : (p ? 'Ask ' + p.name : '') + (it.place ? (p ? ' · ' : '') + it.place.room + ', ' + deckIn(it.place.deck) : ''),
         mark: d ? 'past' : null, button: g ? 'Go there' : null, action: g ? { app: 'settle', do: 'go', arg: it.id } : null }; });
     B.push({ kind: 'list', rows });
     if (devTry(() => typeof introOn === 'function' && introOn()))
@@ -12918,9 +12918,9 @@ deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
   const sl = settleList(), sa = DEVICE_APPS.get('settle');
   if (sl && sa && !devTry(sa.hidden)) say('Settling in: ' + sl.filter(x => settleDone(x.id)).length + ' of ' + sl.length + ' done.');
   const pin = SHIP.device.memos.find(x => x.pinned);
-  if (pin) say('\u25aa ' + pin.title + (pin.text ? ': ' + pin.text.slice(0, 120) : ''));
+  if (pin) say('▪ ' + pin.title + (pin.text ? ': ' + pin.text.slice(0, 120) : ''));
   const idea = typeof ideasTonight === 'function' ? devTry(ideasTonight) : null;   // "Ideas for tonight" (0.28.63, section 15)
-  if (idea && idea.length) { B.push({ kind: 'text', text: idea[0], mark: 'head' }); for (const x of idea.slice(1)) say('\u25aa ' + x); }
+  if (idea && idea.length) { B.push({ kind: 'text', text: idea[0], mark: 'head' }); for (const x of idea.slice(1)) say('▪ ' + x); }
   return { title: 'Home', blocks: B };
 } });
 
@@ -12937,7 +12937,7 @@ deviceApp({ id: 'schedule', title: 'Schedule', icon: 'schedule', order: 10,
   if (schedDay) B.push({ kind: 'buttons', items: [{ label: 'Back to today', action: { app: 'schedule', do: 'today' } }] });
   for (const day of schedDay ? [schedDay] : [d, d + 1]) {
     B.push({ kind: 'text', text: devDayName(day) + ' · ' + WEEKDAYS[weekday(day)] + (typeof careerOn === 'function' && careerOn(day) ? ' · Leave' : typeof sickToday === 'function' && sickToday(day) ? ' · Sick' + (SHIP.career.sh === 1 ? ', seen by Rina' : SHIP.career.sh === 2 ? ', seen in the infirmary' : '') : devShiftOn(day) ? '' : ' · Day off'), mark: 'head' });
-    B.push({ kind: 'list', rows: devDay(day).map(x => ({ text: hhmm(x.from) + (x.kind === 'tradition' ? '' : '\u2013' + hhmm(x.to)) + '  ' + x.title, sub: x.where,
+    B.push({ kind: 'list', rows: devDay(day).map(x => ({ text: hhmm(x.from) + (x.kind === 'tradition' ? '' : '–' + hhmm(x.to)) + '  ' + x.title, sub: x.where,
       mark: day === d && x.from <= m && m < x.to ? 'hot' : day === d && x.to <= m ? 'past' : null })) });
     if (day === d && typeof careerClockedIn === 'function' && careerClockedIn(d)) B.push({ kind: 'text', text: 'Clocked in ' + hhmm(SHIP.career.ci % 1440) + (careerClockedOut(d) ? ' · out ' + hhmm(SHIP.career.co % 1440) : '') });   // your hours (0.61.13)
     const lv = typeof careerCanBook === 'function' ? careerCanBook(day) : null;   // leave (0.61.0): a workday you can still book, or cancel, until 07:30 that day
@@ -13194,7 +13194,7 @@ deviceApp({ id: 'memos', title: 'Memos', icon: 'memo', order: 45,
     B.push({ kind: 'buttons', items: [{ label: 'New memo', action: { app: 'memos', do: 'new' } }] });
     if (!M.length) B.push({ kind: 'text', text: 'No memos yet. Write one, or tap "Remember this" on a message.' });
     for (const m of M) {
-      B.push({ kind: 'list', rows: [{ text: (m.pinned ? '\u25aa ' : '') + m.title, sub: 'Day ' + (Math.floor(m.at / 1440) + 1) + ' ' + devWhen(m.at), action: { app: 'memos', do: 'open', arg: m.id }, mark: m.id === memoOpen ? 'hot' : null }] });
+      B.push({ kind: 'list', rows: [{ text: (m.pinned ? '▪ ' : '') + m.title, sub: 'Day ' + (Math.floor(m.at / 1440) + 1) + ' ' + devWhen(m.at), action: { app: 'memos', do: 'open', arg: m.id }, mark: m.id === memoOpen ? 'hot' : null }] });
       if (m.id === memoOpen) {
         if (m.text) B.push({ kind: 'text', text: m.text });
         B.push({ kind: 'buttons', items: [{ label: m.pinned ? 'Unpin' : 'Pin to Home', action: { app: 'memos', do: 'pin', arg: m.id } }, { label: 'Delete', action: { app: 'memos', do: 'delete', arg: m.id } }] });
@@ -13419,7 +13419,7 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
           { kind: 'buttons', items: [0, 1, 2].map(k => ({ label: k ? k === 1 ? 'Tomorrow' : WEEKDAYS[weekday(SHIP.time.day + 2)].slice(0, 3) : 'Today', on: d.day === SHIP.time.day + k, action: { app: 'appointments', do: 'day', arg: SHIP.time.day + k } }))
             .concat(d.day > SHIP.time.day + 2 ? [{ label: WEEKDAYS[weekday(d.day)].slice(0, 3) + ' ' + d.day, on: true, action: { app: 'appointments', do: 'day', arg: d.day } }] : []) },
           { kind: 'text', text: hhmm(d.min), mark: 'big' },
-          { kind: 'buttons', items: [[-60, '\u22121h'], [-15, '\u221215'], [15, '+15'], [60, '+1h']].map(([v, l]) => ({ label: l, action: { app: 'appointments', do: 'time', arg: v } })) },
+          { kind: 'buttons', items: [[-60, '−1h'], [-15, '−15'], [15, '+15'], [60, '+1h']].map(([v, l]) => ({ label: l, action: { app: 'appointments', do: 'time', arg: v } })) },
           { kind: 'text', text: 'Where', mark: 'head' },
           { kind: 'buttons', items: [{ label: 'Pick on the map', action: { app: 'appointments', do: 'map' } }] },
           { kind: 'list', rows: (d.where && !apptPlaces().some(x => x.id === d.where) ? [{ text: apptWhereName(d.where), mark: 'hot', action: { app: 'appointments', do: 'where', arg: d.where } }] : [])
@@ -13456,13 +13456,13 @@ function devPulseStep() {
   const k = NEED_KEYS.map(devPulse).join(); if (k !== devPulseKey) { devPulseKey = k; deviceRefresh(); }
 }
 // Needs (0.35.28, the user's needs-display redesign): the six needs with section 15's icons and colours (NEED_ICON,
-// NEED_COL; amber, NEED_AMBER, under NEED_LOW, as on the HUD strip), then short effect lines ("Hungry: tasks -15%")
+// NEED_COL; amber, NEED_AMBER, under NEED_LOW, as on the HUD strip), then short effect lines ("Hungry: tasks −15%")
 // built from section 15's NEED_FX numbers, and your walking speed. Without the icons and colours: the plain bars.
 const DEV_FX_WORD = { energy: ['Well rested', 'Tired'], fitness: ['Fit', 'Out of shape'], hunger: ['Well fed', 'Hungry'], hygiene: ['Fresh', 'Unwashed'],
   social: ['Good spirits', 'Lonely'], bathroom: ['Comfortable', 'Need the toilet'] };
 const DEV_FX_WHAT = { task: 'tasks', walk: 'walking', drain: 'tiring', socialGain: 'chats' };
-const devPct = m => { const p = Math.round((m - 1) * 100); return (p > 0 ? '+' : '\u2212') + Math.abs(p) + '%'; };
-function devFxLine(k, side) {                            // 'Hungry: tasks -15%'; null when section 15 has no such effect
+const devPct = m => { const p = Math.round((m - 1) * 100); return (p > 0 ? '+' : '−') + Math.abs(p) + '%'; };
+function devFxLine(k, side) {                            // 'Hungry: tasks −15%'; null when section 15 has no such effect
   let fx = null; try { fx = typeof NEED_FX !== 'undefined' && NEED_FX[k] && NEED_FX[k][side === 'up' ? 'hi' : 'lo']; } catch (e) { fx = null; }
   if (!fx || !fx[0]) return null;
   const parts = Object.keys(DEV_FX_WHAT).filter(f => typeof fx[0][f] === 'number' && fx[0][f] !== 1).map(f => DEV_FX_WHAT[f] + ' ' + devPct(fx[0][f]));
@@ -13481,7 +13481,7 @@ deviceApp({ id: 'needs', title: 'Needs', icon: 'needs', order: 20, view: () => {
   B.push({ kind: 'bars', items: NEED_KEYS.map(k => ({ label: NEED_LABEL[k], value: n[k], level: n[k] < SLOW_BELOW ? 'low' : n[k] < 50 ? 'mid' : '', pulse: devPulse(k),
     mark: fx.marks[k] ? fx.marks[k][0] : null, note: fx.marks[k] ? fx.marks[k][1] : null, ...devNeedLook(k, n[k]) })) });
   const up = [], down = [];
-  for (const k of NEED_KEYS) if (fx.marks[k]) { const side = fx.marks[k][0], t = devFxLine(k, side) || fx.marks[k][1]; (side === 'up' ? up : down).push({ kind: 'text', text: (side === 'up' ? '\u25b2 ' : '\u25bc ') + t, mark: side }); }
+  for (const k of NEED_KEYS) if (fx.marks[k]) { const side = fx.marks[k][0], t = devFxLine(k, side) || fx.marks[k][1]; (side === 'up' ? up : down).push({ kind: 'text', text: (side === 'up' ? '▲ ' : '▼ ') + t, mark: side }); }
   B.push(...down, ...up);                                // what's holding you back first
   const sp = playerSpeed();
   if (sp !== 1) B.push({ kind: 'text', text: 'Walking at ' + Math.round(sp * 100) + '% speed.' });
@@ -13508,7 +13508,7 @@ deviceApp({ id: 'mail', title: 'Mail', icon: 'mail', order: 40, badge: () => mai
     const B = [], home = devHomeFolks(), fromHome = SHIP.mail.filter(m => home.includes(m.from)), rest = SHIP.mail.filter(m => !home.includes(m.from));
     for (const m of fromHome.concat(rest)) {
       if (fromHome.length && (m === fromHome[0] || m === rest[0])) B.push({ kind: 'text', text: m === fromHome[0] ? 'From home' : 'Ship mail', mark: 'head' });
-      B.push({ kind: 'list', rows: [{ text: (m.read ? '' : '\u25cf ') + m.subject, sub: m.from + ', Day ' + (Math.floor(m.at / 1440) + 1) + ' ' + hhmm(((m.at % 1440) + 1440) % 1440),
+      B.push({ kind: 'list', rows: [{ text: (m.read ? '' : '● ') + m.subject, sub: m.from + ', Day ' + (Math.floor(m.at / 1440) + 1) + ' ' + hhmm(((m.at % 1440) + 1440) % 1440),
         mark: m.read ? null : 'new', action: { app: 'mail', do: 'read', arg: m.id } }] });
       if (mailOpen === m.id) B.push({ kind: 'text', text: m.body }, { kind: 'buttons', items: [
         ...(devPlayable(m) ? [{ label: 'Play', action: { app: 'mail', do: 'play', arg: m.id } }] : []),
@@ -13614,7 +13614,7 @@ function slotGo(n, pend, why) {                          // play slot n: this ga
   saveGame();
   try { localStorage.setItem(SAVE_BASE + '-slot', String(n)); if (pend) localStorage.setItem(SAVE_BASE + '-new', pend); }
   catch (e) { try { localStorage.removeItem(SAVE_BASE + '-new'); } catch (e2) { /* nothing more to do */ } return slotSay('The browser wouldn\'t store it, so nothing changed.'); }
-  SLOT_HOLD = true; slotSay(why + ': loading\u2026'); deviceClose();
+  SLOT_HOLD = true; slotSay(why + ': loading…'); deviceClose();
   try { location.reload(); } catch (e) { /* the message stays */ }
   return true;
 }
@@ -13644,7 +13644,7 @@ async function slotDownload(given, named) {             // (A2, FR1: given and n
   const text = given || slotText(); if (!text) return slotSay('Nothing is saved yet to download.');
   const name = named || slotFileName(), inClaude = !!(window.claude && typeof window.claude.use === 'function');
   if (inClaude) {
-    slotSay('Getting the download ready\u2026');
+    slotSay('Getting the download ready…');
     let dl = null; try { dl = await window.claude.use('downloads'); } catch (e) { dl = null; }
     if (dl && typeof dl.save === 'function') {
       try { await dl.save({ filename: name, data: text }); SLOT_UI.copy = false; return slotSay('Downloaded ' + name + '.'); }
@@ -13903,7 +13903,7 @@ function pointLiftStep() {                               // a watcher: ask when 
 }
 // watchers (pieces F3, F4): small functions run each frame while POINT_ON, each asking its pointer when its panel shows
 // (the Scanner, Fault notes, the valve card). POINT_WATCH.push(fn) from any section; a watcher that throws is dropped
-const POINT_WATCH = [];   // pointLiftStep (p:lift) parked, not watched: the deck row's own "-> Tracked" (openLiftPanel) is the one marker (the user, 2026-10-23, via lead 31); its id stays retired
+const POINT_WATCH = [];   // pointLiftStep (p:lift) parked, not watched: the deck row's own "→ Tracked" (openLiftPanel) is the one marker (the user, 2026-10-23, via lead 31); its id stays retired
 function pointWatchStep() {
   requestAnimationFrame(pointWatchStep);
   for (let i = 0; i < POINT_WATCH.length; i++) try { POINT_WATCH[i](); } catch (e) { DEV.errors.push('pointer watcher: ' + (e && e.message || e)); console.warn('pointer watcher dropped:', e); POINT_WATCH.splice(i--, 1); }
@@ -14144,7 +14144,7 @@ const NEED_WARN = {   // need: [[title, text] under 25, [title, text] under 10] 
 // work wears leisure down (0.73.0, playtest 2 item 23, the user's "work needs to hit leisure a good bit harder"; the
 // lead's tuning: a full shift takes 40-50 off; 5 an hour in all, 40 a shift; 0.92.3: 2.4 + 3.0, 5.4 an hour, about 43 a shift): WORK_LEISURE an hour on top of NEED_DRAIN's while you're at work
 // (workingNow: clocked in at the time clock and not out yet, or doing a job's activity), not while something is
-// filling leisure. Shown like a gain, a "-5 Leisure" note each time WORK_LS_NOTE has gone (WORK_LS: what's gone since
+// filling leisure. Shown like a gain, a "−5 Leisure" note each time WORK_LS_NOTE has gone (WORK_LS: what's gone since
 // the last note; nothing saved). No R().
 const WORK_LEISURE = 3, WORK_LS_NOTE = 5, WORK_ACTS = new Set(['job', 'fetch', 'make', 'workStep', 'ixStop', 'cartTake', 'cartLoad', 'cartUnload', 'cartBack']);
 let WORK_LS = 0;
@@ -14246,7 +14246,7 @@ const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown wh
   ['t:a-maps', c => c.app === 'maps', 'Every deck, room by room. Tap a room to put the marker on it.'],
   ['t:a-jobs', c => c.app === 'jobs', 'Your job and its steps. The board in the Works bay has the rest.'],
   ['t:a-crew', c => c.app === 'crew', 'Everyone you\'ve met, and how well you know them.'],
-  ['t:a-needs', c => c.app === 'needs', 'What each need is doing for you right now: \u25b2 helping, \u25bc holding you back.'],
+  ['t:a-needs', c => c.app === 'needs', 'What each need is doing for you right now: ▲ helping, ▼ holding you back.'],
   ['t:queue', c => ACT && ACT.kind === 'queue', 'The line moves on its own. You\'ll get a tray at the front. Tap anywhere to leave the queue.'],
   ['t:tray', c => !!SHIP.player.tray && !(ACT && ACT.kind === 'eat'), 'Take your tray to any free seat and tap it to eat. Company at the table lifts your spirits too.'],
   ['t:lift', c => teachRecent(c.S.arrived, c), 'Seven decks, one lift. Maps on your device shows where you are and what\'s on every deck.'],
@@ -14883,7 +14883,7 @@ function actEnd(abort) {
   if (A.kind === 'queue' && !A.o.dish && typeof galleyLeave === 'function') try { galleyLeave('player'); } catch (e) { /* not ours to mend */ }   // out of the galley's queue and the real line (galley 0.29.32; the owner's ruling: only section 16 joins or leaves you)
   if (A.body) { A.body.dispose(); player.obj.visible = true; }
   if (A.kind === 'toilet' && typeof washToilet === 'function') washToilet(A);   // what the toilet took, for the basin to put back (FX6)
-  if (A.o.cost) for (const k in A.o.cost) if (A.o.cost[k] >= .5) needFloat('\u2212' + Math.round(A.o.cost[k]) + ' ' + NEED_LABEL[k], k, -A.o.cost[k]);   // what it cost, like a gain's note: the toilet's "-3 Hygiene" (playtest 2, 0.73.0)
+  if (A.o.cost) for (const k in A.o.cost) if (A.o.cost[k] >= .5) needFloat('\u2212' + Math.round(A.o.cost[k]) + ' ' + NEED_LABEL[k], k, -A.o.cost[k]);   // what it cost, like a gain's note: the toilet's "−3 Hygiene" (playtest 2, 0.73.0)
   if ((A.phase === 'do' || A.phase === 'out') && A.done > 0) {   // the note bus (0.28.22): done, or walked away part way
     const act = { shower: 'wash', eat: 'eat', grab: 'eat', call: 'call' }[A.kind];
     if (A.kind === 'call' && A.done >= A.def.mins) leisureAdd(5, 'call');   // a whole call home: +5 leisure (0.28.64)
@@ -15186,7 +15186,7 @@ function needStrip() {
   document.head.appendChild(st);
   el = document.createElement('div'); el.id = 'needStrip'; el.setAttribute('role', 'button'); el.setAttribute('aria-label', 'Your needs: tap for names and numbers');
   el.innerHTML = '<b class="nsT" aria-hidden="true">Needs</b>' + NEED_KEYS.map(k => '<div class="ns" data-k="' + k + '" style="color:' + NEED_COL[k] + '"><svg viewBox="0 0 24 24"><path d="' + NEED_ICON[k] + '"/></svg><span>' + NEED_LABEL[k] + '</span><i><b></b></i><u></u><em></em></div>').join('')
-    + '<button class="nsFold" aria-label="Fold your needs away">\u2039</button><div class="nsMini"><svg viewBox="0 0 24 24"><path d="' + STRIP_HEART + '"/></svg></div>';
+    + '<button class="nsFold" aria-label="Fold your needs away">‹</button><div class="nsMini"><svg viewBox="0 0 24 24"><path d="' + STRIP_HEART + '"/></svg></div>';
   el.onclick = e => { e.stopPropagation(); if (SHIP.player.stripFold) stripFold(false); else { el.classList.toggle('open'); STRIP_SIG = ''; } };
   el.querySelector('.nsFold').onclick = e => { e.stopPropagation(); stripFold(true); };
   document.body.appendChild(el);
@@ -16109,7 +16109,7 @@ function wsCard(A) {
     const by = Number.isFinite(o.by) && o.by > 0 ? o.by : 1, lo = Number.isFinite(o.min) ? o.min : -Infinity, hi = Number.isFinite(o.max) ? o.max : Infinity;
     const ask = said => {
       const g = typeof o.gauge === 'function' ? o.gauge(w.v) : null;
-      A.o.open = deviceChoose({ title: o.label || 'The setting', text: [said, g].filter(Boolean).join(' ') || 'A step at a time; watch the machine.', choices: ['\u2212', '+'], cancel: 'Step back' }, i => {
+      A.o.open = deviceChoose({ title: o.label || 'The setting', text: [said, g].filter(Boolean).join(' ') || 'A step at a time; watch the machine.', choices: ['−', '+'], cancel: 'Step back' }, i => {
         A.o.open = false; if (i < 0 || ACT !== A) { close(); return; }
         w.v = Math.max(lo, Math.min(hi, w.v + (i ? by : -by)));
         const t = typeof o.onTurn === 'function' ? o.onTurn(w.v) : null;
@@ -16385,7 +16385,7 @@ function washGain(A, v0) {                               // each minute it runs:
 function washToilet(A) { const t = A.o.cost && A.o.cost.hygiene; if (t > 0) SHIP.player.wash.owed = Math.min(100, SHIP.player.wash.owed + t); }
 // patch #21 (plans/patch-plan.html, the user's "Junior Officer"): the rank before the title on a crew card and in the device's
 // crew lists ("Junior Officer · Storekeeper · stranger"). Left out where the title already says it (Captain, Executive Officer,
-// Head of ...) and for guests. The words live in content/banks/talk.lines (card.rank.*). Off = identical; ?rankcard turns it on.
+// Head of …) and for guests. The words live in content/banks/talk.lines (card.rank.*). Off = identical; ?rankcard turns it on.
 let RANK_CARD_ON = true;   // switched on in 0.95.0 (the user, via lead 42; it was URL_FLAGS.has('rankcard'))
 const RANK_CARD_WORDS = { captain: 'Captain', xo: 'Commander', chief: 'Department Chief', senior: 'Senior Officer', officer: 'Officer', junior: 'Junior Officer' };
 function rankCardWord(p) {
@@ -16589,7 +16589,7 @@ function ladderPanel() {
     const built = !!DECKS[n], me = n === here, b = mk('button', 'deckbtn' + (me ? ' here' : '')); b.type = 'button'; b.disabled = me || !built;
     const sp = mk('span'); sp.append(mk('b', '', DECK_NAMES[n]), mk('small', '', me ? 'You are here' : !built ? 'Not built yet' : k + (k > 1 ? ' decks ' : ' deck ') + (DECK_ORDER.indexOf(n) < at ? 'up' : 'down') + ' · ' + DECKS[n].blurb));
     b.append(mk('i', '', deckLabel(n)), sp);
-    if (gl && gl.deck === n && !me && built) { b.classList.add('goal'); b.appendChild(mk('em', '', '\u2192 Schedule tracker')); }   // the deck of what you're tracking (playtest 1, the user's word; renamed 0.92.3 #14)
+    if (gl && gl.deck === n && !me && built) { b.classList.add('goal'); b.appendChild(mk('em', '', '→ Schedule tracker')); }   // the deck of what you're tracking (playtest 1, the user's word; renamed 0.92.3 #14)
     if (!me && built) b.onclick = () => { el.hidden = true; ladderClimb(n, k); };
     return b;
   };
@@ -16622,7 +16622,7 @@ function ladderStep(r, dt) {                             // section 11's updateR
   fadeEl.style.opacity = THREE.MathUtils.clamp(1 - (T_ - LADDER.fade) / LADDER.fade, 0, 1);
   if (T_ < 2 * LADDER.fade) return;
   fadeEl.style.opacity = 0; ride = null;
-  toast(deckWord(deckDef.num) + ', ' + deckDef.name, (DECK_ORDER.indexOf(deckDef.num) < DECK_ORDER.indexOf(L.from) ? 'Up' : 'Down') + ' the spine ladder, ' + L.k + (L.k > 1 ? ' decks' : ' deck') + '. Energy \u2212' + LADDER.energy * L.k + ', fitness +' + LADDER.fitness * L.k + '.');
+  toast(deckWord(deckDef.num) + ', ' + deckDef.name, (DECK_ORDER.indexOf(deckDef.num) < DECK_ORDER.indexOf(L.from) ? 'Up' : 'Down') + ' the spine ladder, ' + L.k + (L.k > 1 ? ' decks' : ' deck') + '. Energy −' + LADDER.energy * L.k + ', fitness +' + LADDER.fitness * L.k + '.');
 }
 // ---- the mug in your hands (patch plan #30; patch builder DB1 for the player engineer): a cocoa or tea from the bar
 // (barTap's SHIP.player.drink) is a mug in your hand, held one-handed at the chest (8b's HOLDS.mug) while you walk or
@@ -40731,7 +40731,7 @@ const LINES = JSON.parse([
   ',"pb.pip.say":[',
   '{"text":"It\'s nearly time. Up to Deck 1. Don\'t keep the Captain waiting.","id":"8vxcx0"}]',
   ',"pb.promo.summons":[',
-  '{"text":"Chief Calder: My office, 08:15. Your result. \u2014 C.","id":"1rsw8ni"}]',
+  '{"text":"Chief Calder: My office, 08:15. Your result. — C.","id":"1rsw8ni"}]',
   ',"pb.ptr.test":[',
   '{"text":"Your Tier 2 test: take it","id":"1kv7bct"}]',
   ',"pb.result.notice":[',
@@ -40816,7 +40816,7 @@ const LINES = JSON.parse([
   ',"promo.sight.mail":[',
   '{"text":"Next step | Reliable. One thing left: Making it safe, with me, from Day 8. Then Tier 2.","id":"4owcxx"}]',
   ',"promo.summons":[',
-  '{"text":"Chief Calder: My office, 11:00. \u2014 C.","id":"1214vha"}]',
+  '{"text":"Chief Calder: My office, 11:00. — C.","id":"1214vha"}]',
   ',"promo.summons.torres":[',
   '{"text":"Go on. She doesn\'t bite. Usually.","id":"1dbzkcg"}]',
   ',"promo.test.again":[',
@@ -43646,7 +43646,7 @@ const LINES = JSON.parse([
   ',"tip.tiles.tut.2":[',
   '{"text":"{name}\'s tiles are the outlined ones along the top.","id":"1suwwhu"}]',
   ',"tip.tiles.tut.3":[',
-  '{"text":"Every tile carries a mark: a planet \u25cf, a ship \u25b2 or a star \u2605.","id":"18k5e5h"}]',
+  '{"text":"Every tile carries a mark: a planet ●, a ship ▲ or a star ★.","id":"18k5e5h"}]',
   ',"tip.tiles.tut.4":[',
   '{"text":"You score by docking: 3 or more of your tiles with one mark, side by side.","id":"1vgclhw"}]',
   ',"tip.tiles.tut.5":[',
@@ -43784,7 +43784,7 @@ const LINES = JSON.parse([
   ',"tune.hot":[',
   '{"text":"running hot","id":"fvgc8e"}]',
   ',"tune.minus":[',
-  '{"text":"\u2212","id":"1mqnte9"}]',
+  '{"text":"−","id":"1mqnte9"}]',
   ',"tune.plus":[',
   '{"text":"+","id":"8vaygi"}]',
   ',"tune.steady":[',
@@ -43890,7 +43890,7 @@ const LINES = JSON.parse([
   ',"works.ask.m7":[',
   '{"text":"Board, when you\'re in | Board, when you\'re in. Torres left you something.","id":"13k2bnd"}]',
   ',"works.ask.m8":[',
-  '{"text":"Recycler, 09:30 | Recycler\'s membrane bank, 09:30, Deck 3. Need four. You\'re the fourth. \u2014 E.H.","id":"1xw6b1q"}]',
+  '{"text":"Recycler, 09:30 | Recycler\'s membrane bank, 09:30, Deck 3. Need four. You\'re the fourth. — E.H.","id":"1xw6b1q"}]',
   ',"works.ask.m9":[',
   '{"text":"The pipe kit | Board, first thing. Showers on Four are weak. You\'ll find out why.","id":"149ewu9"}]',
   ',"works.ask.p3":[',
@@ -47777,7 +47777,7 @@ function tradJoinFrame() {
       + '#tjMark:after{content:"";position:absolute;left:50%;bottom:-5px;margin-left:-5px;border:5px solid transparent;border-bottom:0;border-top-color:#5fd6c6}';
     document.head.appendChild(st); TJ_MARK = document.createElement('div'); TJ_MARK.id = 'tjMark'; document.body.appendChild(TJ_MARK);
   }
-  const txt = '\u2605 ' + tjFirst(TJ_NOW.lead); if (TJ_MARK.textContent !== txt) TJ_MARK.textContent = txt;
+  const txt = '★ ' + tjFirst(TJ_NOW.lead); if (TJ_MARK.textContent !== txt) TJ_MARK.textContent = txt;
   tjV.set(A.x, (A.y || 0) + (A.pose === 'sit' || /^sit/.test(A.pose || '') ? 1.55 : 2.1), A.z).project(camera);
   const vis = tjV.z < 1 && Math.abs(tjV.x) < 1.05 && Math.abs(tjV.y) < 1.05;
   TJ_MARK.style.display = vis ? 'block' : 'none';
@@ -50713,7 +50713,7 @@ function tjMarks995() {
   }
   TJ_MARKS.forEach((el, k) => {
     const c = others[k]; if (!c) { el.style.display = 'none'; return; }
-    const A = c.agent, txt = '\u2605 ' + tjFirst(c.lead); if (el.textContent !== txt) el.textContent = txt;
+    const A = c.agent, txt = '★ ' + tjFirst(c.lead); if (el.textContent !== txt) el.textContent = txt;
     tjV.set(A.x, (A.y || 0) + (A.pose === 'sit' || /^sit/.test(A.pose || '') ? 1.55 : 2.1), A.z).project(camera);
     const vis = tjV.z < 1 && Math.abs(tjV.x) < 1.05 && Math.abs(tjV.y) < 1.05;
     el.style.display = vis ? 'block' : 'none';
@@ -55847,8 +55847,8 @@ if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Relationshi
 SIM_ADVANCE.push((from, to) => { socialTo(to); });
 // ---- chat cards (0.36.1): tap a crew member ----
 // chatLine(p, t) -> { text, kind, news?, say }: one line, picked in order of what matters: news they know that you
-// haven't heard -> how they feel (crewFeeling, told as what you notice) -> something about where they are -> a life
-// detail (acquaintances and up) -> a greeting by how well they know you. say: false when it's what you notice, not
+// haven't heard → how they feel (crewFeeling, told as what you notice) → something about where they are → a life
+// detail (acquaintances and up) → a greeting by how well they know you. say: false when it's what you notice, not
 // what they say. Lines are templates filled from the simulation, picked with schedU per person, day and hour, so a
 // second tap in the same hour says the same and the next hour moves on.
 // chatOpen(p) shows the card (section 10's crew tap): their name, role and tier, the line, and the buttons Chat
@@ -56050,17 +56050,17 @@ function chatShow() {
   if (C.far) {                                          // too far to talk: who they are, what they're doing, and the walk over (talk choices once you're there)
     const el = chatEl(); el.hidden = false;
     (CHAT_SKIN.draw || chatDraw)(el, { who: p.name, role: typeof rankCardRole === 'function' ? rankCardRole(p) : p.role, tier: REL_NAMES[relTier(p.id)], line: C.line.text, say: false,
-      buttons: [{ id: 'walk-over', label: C.walking ? 'Walking over\u2026' : 'Walk over', off: !!C.walking }] });
+      buttons: [{ id: 'walk-over', label: C.walking ? 'Walking over…' : 'Walk over', off: !!C.walking }] });
     return;
   }
   const f = C.fav, ready = f && !f.idea && f.status === 'claimed' && f.claimedBy === 'you' && (f.workDone || !f.stops.length);
   const intro = C.ask === 'intro' && typeof introOptions === 'function' ? introOptions(p) : [];   // "Do you know...?" (20c's introductions)
   const buttons = C.ask === 'intro' ? intro.slice(0, 3).map(x => ({ id: 'intro:' + x.id, label: x.name })).concat([{ id: 'back', label: 'Back' }])
-    : C.ask ? [{ id: 'ask-news', label: 'News' }, { id: 'ask-work', label: 'Their work' }, { id: 'ask-home', label: 'Home' }].concat(typeof introOptions === 'function' && introOptions(p).length ? [{ id: 'ask-intro', label: 'Do you know\u2026?' }] : [], [{ id: 'back', label: 'Back' }])
+    : C.ask ? [{ id: 'ask-news', label: 'News' }, { id: 'ask-work', label: 'Their work' }, { id: 'ask-home', label: 'Home' }].concat(typeof introOptions === 'function' && introOptions(p).length ? [{ id: 'ask-intro', label: 'Do you know…?' }] : [], [{ id: 'back', label: 'Back' }])
     : C.offer ? [{ id: 'fav-yes', label: 'I\'ll do it' }, { id: 'fav-no', label: 'Not now' }]
     : C.talk && !C.talk.end ? (C.talk.ask ? TALK_REPLIES.map(k => ({ id: 'reply:' + k, label: talkReply(C, k) })) : [{ id: 'talk-stop', label: talkText('talk.button.stop', 'Stop') }])   // Talk a while (0.36.82): the replies, else Stop
     : [{ id: 'chat', label: r.chatDay === today ? talkText('talk.done.hello', 'Said hello today') : talkText('talk.button.hello', 'Say hello'), off: r.chatDay === today },
-       { id: 'talk', label: r.talkDay === today ? talkText('talk.done.talk', 'Talked today') : talkText('talk.button.talk', 'Talk a while'), off: r.talkDay === today || !!C.going }, { id: 'ask', label: 'Ask about\u2026' },
+       { id: 'talk', label: r.talkDay === today ? talkText('talk.done.talk', 'Talked today') : talkText('talk.button.talk', 'Talk a while'), off: r.talkDay === today || !!C.going }, { id: 'ask', label: 'Ask about…' },
        { id: 'help', label: ready ? 'Done: here you go' : 'Help?' }, { id: 'meet', label: 'Meet up' }];
   const talking = C.talk && !C.talk.end;   // while you talk, only the talk's own buttons
   if (!C.ask && !C.offer && !talking && C.line.kind === 'newcomer' && Array.isArray(C.line.answers)) buttons.splice(0, buttons.length, ...C.line.answers.slice(0, 3).map((a, k) => ({ id: 'nq:' + k, label: a })));   // A10: helpful, funny, honest
@@ -56658,7 +56658,7 @@ function affPlanWeek(i, j, d) {
   socInit(); const a = affWeeks().get(Math.floor((d - 1) / 7) - 1);
   return a ? a.P.get(pairIdx(i, j)) ?? 0 : undefined;
 }
-// you as the connector (0.39.1): "Do you know ...?" on the chat card's Ask about. introOptions(p) -> up to three people
+// you as the connector (0.39.1): "Do you know …?" on the chat card's Ask about. introOptions(p) -> up to three people
 // you know at colleague or better (as well as p) whom p hardly knows (affinity under INTRO_UNDER, not rivals),
 // your closest first. introDo(p, otherId) -> what p says: if they'd get on, their affinity rises by INTRO_PTS (to at
 // least INTRO_UNDER, so they aren't offered again), both remember it (memAdd 'introduced.<other>'), and it's news;
@@ -56672,7 +56672,7 @@ function introOptions(p) {
 function introDo(p, otherId) {
   if (!introOptions(p).some(x => x.id === otherId)) return null;
   const q = SOC.crew[SOC.idx.get(otherId)], i = SOC.idx.get(p.id), j = SOC.idx.get(otherId), n = shortName(q), t = Math.floor(shipNow());
-  if (socClash(p, q)) return 'We\'ve met. We\'re\u2026 different. But thanks.';
+  if (socClash(p, q)) return 'We\'ve met. We\'re… different. But thanks.';
   SHIP.aff[pairIdx(i, j)] = Math.min(100, Math.max(INTRO_UNDER, SHIP.aff[pairIdx(i, j)] + INTRO_PTS));
   if (typeof memAdd === 'function') { memAdd(p.id, 'introduced.' + q.id); memAdd(q.id, 'introduced.' + p.id); }
   newsAdd({ id: 'intro:' + p.id + ':' + q.id + ':' + t, about: p.id + ',' + q.id, kind: 'introduced', weight: .4, life: 3, born: t, seed: [p.id, q.id],
@@ -57553,7 +57553,7 @@ function p997Buttons(C, buttons) {                        // the main row only (
   if (!P997_SOCIAL_ON || !buttons.some(b => b.id === 'chat')) return;
   for (let i = buttons.length - 1; i >= 0; i--) if (buttons[i].id === 'ask' || buttons[i].id === 'sit') buttons.splice(i, 1);
   if (p997Beat(C)) buttons.splice(1, 0, { id: 'getknow', label: 'Get to know' });
-  if (typeof introOptions === 'function' && introOptions(C.p).length) buttons.push({ id: 'ask-intro', label: 'Do you know\u2026?' });
+  if (typeof introOptions === 'function' && introOptions(C.p).length) buttons.push({ id: 'ask-intro', label: 'Do you know…?' });
 }
 function p997WordOk(id, mid, now, peek) {                 // may the "wants a word" arrow (still) show for them? peek: only asking (its done)
   if (!P997_SOCIAL_ON) return true;
@@ -57655,7 +57655,7 @@ const INTRO_STEPS = [
     checkpoint: { deck: 4, tile: [12, 4], room: 'Junior corridor' }, fallback: { wait: 20, later: 'bunk' }, ...INTRO_BESIDE('wing') },
   { id: 'bunk', day: 0, at: 17 * 60 + 28, who: INTRO_ESCORT, mode: 'meet', where: 'Bunk 1', meeting: 'introBunk',
     checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, rel: { [INTRO_ESCORT]: 3, tomas: 10 }, ...INTRO_BESIDE(),
-    fallback: { wait: 30, later: 'toMess', laterNear: 'stow', mail: { from: 'Zeke Torres', subject: 'Your bunk', body: 'Couldn\'t find you. Your bunk\'s in Bunk 1, Deck 4: drop your bag in your wardrobe when you can. Your device I\'ll hand you myself. Dinner\'s on Three. \u2014 Z.' } } },   // (OR2, the Zeke patch) missed with you near him: on to 'stow' (the bag goes in, he still brings you your device); away: as before
+    fallback: { wait: 30, later: 'toMess', laterNear: 'stow', mail: { from: 'Zeke Torres', subject: 'Your bunk', body: 'Couldn\'t find you. Your bunk\'s in Bunk 1, Deck 4: drop your bag in your wardrobe when you can. Your device I\'ll hand you myself. Dinner\'s on Three. — Z.' } } },   // (OR2, the Zeke patch) missed with you near him: on to 'stow' (the bag goes in, he still brings you your device); away: as before
   // (playtest patch 1, #2-#4) your things into your wardrobe (you tap it; the arrow shows it; he waits), then he hands you your
   // device in person (its meeting's first line: introDeviceGive). reach: in the room is enough; ready(t): the step's own gate
   // (0.64.15's playtest: "Zeke just stands in the bunk room") neither waits on you being in Bunk 1 for good: noHold, their
@@ -57714,15 +57714,15 @@ const INTRO_WEEK = [
   { id: 'd3-pick', day: 3, at: 9 * 60, until: 9 * 60 + 15, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, settle: 'take' },
   { id: 'd3-store', day: 3, at: 16 * 60 + 30, until: 17 * 60 + 30, who: 'ishikawa-orla', where: { deck: 3, room: 'Crew store' }, settle: 'buy' },
   { id: 'd3-pell', day: 3, at: 18 * 60 + 30, until: 20 * 60, who: 'pell', where: 'seek', seek: true, settle: 'friend' },
-  { id: 'd4-mail', day: 4, at: 7 * 60, who: null, mail: { from: 'Zeke Torres', subject: 'On your own', body: 'Day off for me. Don\'t break anything big. \u2014 Z.' } },
+  { id: 'd4-mail', day: 4, at: 7 * 60, who: null, mail: { from: 'Zeke Torres', subject: 'On your own', body: 'Day off for me. Don\'t break anything big. — Z.' } },
   { id: 'd4-favour', day: 4, at: 16 * 60, until: 19 * 60 + 30, who: 'kovac-zainab', where: 'seek', seek: true, settle: 'favour' },
   { id: 'd4-quiz', day: 4, at: 20 * 60, until: 21 * 60 + 30, who: 'pell', where: { deck: 3, room: 'Bow lounge' }, settle: 'tradition' },
   { id: 'd5-mug', day: 5, at: 13 * 60, until: 13 * 60 + 45, who: 'halloran-emeka', where: { deck: 5, room: 'Tea corner' }, flags: ['mug'],
     moment: { title: 'Friday tea', here: 'Halloran hands you a mug with your name on it. "New hand\'s mug. It lives on the rack now. So do you."',
-      mail: { from: 'Emeka Halloran', subject: 'Your mug', body: 'Missed you at tea. Your mug\'s on the rack in the tea corner, name and all. \u2014 E.H.' } } },
+      mail: { from: 'Emeka Halloran', subject: 'Your mug', body: 'Missed you at tea. Your mug\'s on the rack in the tea corner, name and all. — E.H.' } } },
   { id: 'd5-invite', day: 5, at: 18 * 60, who: 'tomas', invite: { trad: 'sowing', day: 6, from: 'tomas' } },
   { id: 'd6-sowing', day: 6, at: 11 * 60 + 45, until: 12 * 60 + 40, who: 'tomas', where: { deck: 3, room: 'Hydroponics garden' }, settle: 'dayoff', flags: ['seedling'] },
-  { id: 'd7-calder', day: 7, at: 18 * 60, who: null, mail: { from: 'I. Calder', subject: 'One week', body: 'One week. You\'ll do. \u2014 I. Calder' } },
+  { id: 'd7-calder', day: 7, at: 18 * 60, who: null, mail: { from: 'I. Calder', subject: 'One week', body: 'One week. You\'ll do. — I. Calder' } },
   { id: 'd8-done', day: 8, at: 0, who: null, flags: ['week1.done'], end: true },
 ];
 // the week's flags open social features one by one (the social plan, Part 7): favours from week1.d2, friends waving you
@@ -57843,7 +57843,7 @@ function settleNote(kind, data) {
   for (const s of SETTLE) if (!I.settle[s.id] && s.done(kind, data || {})) I.settle[s.id] = Math.floor(shipNow());
   if (!I.settle.all && SETTLE.every(s => I.settle[s.id])) {
     I.settle.all = Math.floor(shipNow());
-    introMail({ from: 'I. Calder', subject: 'Settled in', body: 'Everything on your list, done. Noted on your Record. \u2014 I. Calder' });
+    introMail({ from: 'I. Calder', subject: 'Settled in', body: 'Everything on your list, done. Noted on your Record. — I. Calder' });
   }
 }
 
@@ -58863,7 +58863,7 @@ PLAYER_TAPS.push((it, at) => {
 });
 // (playtest patch 1, #8, the user: "Hygiene goes down wearing dirty clothes. And gets a tick up changing into clean clothes")
 // a change gives CLOTHES_FRESH hygiene at once (section 15's needsSeen shows its "+8 Hygiene"); yesterday's clothes and a
-// grubby uniform drain it faster (clothesFx), and clothesDirtyTick shows that extra as "-2 Hygiene" each time it adds up to 2
+// grubby uniform drain it faster (clothesFx), and clothesDirtyTick shows that extra as "−2 Hygiene" each time it adds up to 2
 const CLOTHES_FRESH = 8, CLOTHES_DIRTY_NOTE = 2;
 function clothesFresh() {
   const P = SHIP.player; if (!P || !P.needs || typeof needClamp !== 'function') return;
@@ -59332,7 +59332,7 @@ function introNightOwedTick() {
   const now = Math.floor(shipNow());
   if (now >= introAbs(0, INTRO_NIGHT_BED) || (typeof sleeping !== 'undefined' && sleeping)) {
     I.done['goodnight:owed'] = 3; U.owedQ = null;
-    introMail({ from: 'Zeke Torres', subject: 'How a day runs', body: introNightLines().join(' ') + ' \u2014 Z.' }, now); return;
+    introMail({ from: 'Zeke Torres', subject: 'How a day runs', body: introNightLines().join(' ') + ' — Z.' }, now); return;
   }
   const a = introWalker(), p = player.obj.position;
   if (!U.owedQ) { if (!a || DIALOGUE || Math.hypot(a.x - p.x, a.z - p.z) > 6) return; U.owedQ = introNightLines(); }
@@ -59499,7 +59499,7 @@ function introKeep(b, id, o) {
 // ---- rules (pure: no DOM, no three.js, no Math.random) ----
 // Board: 36 cells, i = y*6 + x; y 0 is the player's home row (seat 0, bottom), y 5 the opponent's.
 // A tile is o*3 + m + 1 (o: seat 0|1, m: 0 Planet, 1 Ship, 2 Star); 0 is empty.
-const TL_N = 6, TL_MARKS = ['Planet', 'Ship', 'Star'], TL_SYM = ['\u25cf', '\u25b2', '\u2605'];
+const TL_N = 6, TL_MARKS = ['Planet', 'Ship', 'Star'], TL_SYM = ['●', '▲', '★'];
 const TL_MODES = { full: { target: 7, turns: 14, finish: false }, quick: { target: 5, turns: 12, finish: true } };
 const TL_TEACH = [1, 0, 2, 1, 2, 0, 0, 2, 1, 0, 1, 2];   // the teaching layout's marks, rows 1 then 2, a to f
 const tlO = t => (t - 1) / 3 | 0, tlM = t => (t - 1) % 3, tlT = (o, m) => o * 3 + m + 1;
@@ -59665,11 +59665,11 @@ const TL_TALK = {   // stand-ins until the writers' lines (lineFor(who, 'tiles.<
 // it (select a tile, step, jump, launch, dock); every step has Next and Skip, so it never holds you up.
 // t(name, mode) -> its text, a line or two on a phone.
 const TL_TUT = [
-  { t: n => 'Yours are the solid tiles. ' + n + '\u2019s are dashed.' },
-  { t: () => 'Marks: \u25cf \u25b2 \u2605. Three of one touching DOCK: a point each.' },
+  { t: n => 'Yours are the solid tiles. ' + n + '’s are dashed.' },
+  { t: () => 'Marks: ● ▲ ★. Three of one touching DOCK: a point each.' },
   { t: () => 'Tap one of your tiles to see where it can go.', wait: 'sel' },
   { t: () => 'STEP: tap a lit square, one diagonal forward.', wait: 's' },
-  { t: n => 'JUMP over ' + n + '\u2019s tile to take it into your hold.', wait: 'j' },
+  { t: n => 'JUMP over ' + n + '’s tile to take it into your hold.', wait: 'j' },
   { t: () => 'LAUNCH: tap your hold, then a free home square.', wait: 'l' },
   { t: () => 'A spark on a square means it docks. Go for it!', wait: 'dock' },
   { t: (n, R) => 'First to ' + R.target + ' wins, or most after ' + R.turns + ' turns. Have fun!' },
@@ -59829,7 +59829,7 @@ function tilesDraw() {   // draw the game into its persistent element (the devic
   if (!TL_UI.root) {
     const st = document.createElement('style'); st.textContent = TL_CSS; document.head.appendChild(st);
     const root = document.createElement('div'); root.className = 'tlx';
-    root.innerHTML = '<p class="tl-sc"></p><p class="tl-pz" hidden>\u23f8 The ship\'s clock is paused while you play</p><p class="tl-now hot" aria-live="polite"></p><div class="btns tl-end"></div><div class="tl-bd" role="grid" aria-label="Tiles board"></div><div class="tl-tut" role="status" aria-live="polite" aria-label="How to play" hidden></div><div class="tl-hd"></div><div class="tl-log"></div><div class="btns tl-play"></div><p class="tl-card">STEP diagonally forward · JUMP to take a tile · LAUNCH from your hold · 3 of a mark touching = DOCK. First to <span></span>.</p>';
+    root.innerHTML = '<p class="tl-sc"></p><p class="tl-pz" hidden>⏸ The ship\'s clock is paused while you play</p><p class="tl-now hot" aria-live="polite"></p><div class="btns tl-end"></div><div class="tl-bd" role="grid" aria-label="Tiles board"></div><div class="tl-tut" role="status" aria-live="polite" aria-label="How to play" hidden></div><div class="tl-hd"></div><div class="tl-log"></div><div class="btns tl-play"></div><p class="tl-card">STEP diagonally forward · JUMP to take a tile · LAUNCH from your hold · 3 of a mark touching = DOCK. First to <span></span>.</p>';
     const bd = root.querySelector('.tl-bd');
     for (let y = 5; y >= 0; y--) for (let x = 0; x < 6; x++) {
       const c = y * 6 + x, b = document.createElement('button'); b.type = 'button'; b.className = 'tl-c' + ((x + y) % 2 ? '' : ' dk') + (y < 2 ? ' home' : '');
@@ -59847,11 +59847,11 @@ function tilesDraw() {   // draw the game into its persistent element (the devic
   const sel = G.sel, tos = sel ? ms.filter(m => sel.h !== undefined ? m.k === 'l' && m.m === sel.h : m.from === sel.c) : [];
   const hintC = G.hint ? (ms.find(m => m.k === 'j') || {}).from : undefined;
   const sc = root.querySelector('.tl-sc'); sc.textContent = '';
-  const turnTxt = s.over ? 'Game over' : s.p === 0 ? 'Your turn' : G.name + '\u2019s turn';
+  const turnTxt = s.over ? 'Game over' : s.p === 0 ? 'Your turn' : G.name + '’s turn';
   const pts = document.createElement('span'), B = n => Object.assign(document.createElement('b'), { textContent: n });
   pts.append('You ', B(s.sc[0]), ' · ' + G.name + ' ', B(s.sc[1]));
   const clk = Object.assign(document.createElement('span'), { textContent: 'Ship time ' + hhmm(SHIP.time.min) });   // held while you play (PAUSE.tiles, below); it runs again on the result screen
-  { let pz = false; try { pz = !!(PAUSE.tiles && PAUSE.tiles()); } catch (e) { pz = false; } const pe = root.querySelector('.tl-pz'); pe.hidden = !pz; if (pz && !pe.dataset.t) { let t = null; try { t = careerText('tiles.paused'); } catch (e) { t = null; } pe.dataset.t = 1; if (t) pe.textContent = (/^\u23f8/.test(t) ? '' : '\u23f8 ') + t; } }   // 0.72.2 (HUD U, the user's Step 3 ask): say so under the score, exactly while it's held
+  { let pz = false; try { pz = !!(PAUSE.tiles && PAUSE.tiles()); } catch (e) { pz = false; } const pe = root.querySelector('.tl-pz'); pe.hidden = !pz; if (pz && !pe.dataset.t) { let t = null; try { t = careerText('tiles.paused'); } catch (e) { t = null; } pe.dataset.t = 1; if (t) pe.textContent = (/^⏸/.test(t) ? '' : '⏸ ') + t; } }   // 0.72.2 (HUD U, the user's Step 3 ask): say so under the score, exactly while it's held
   sc.append(pts,
             Object.assign(document.createElement('span'), { textContent: turnTxt + ' · ' + Math.min(R.turns, Math.floor(s.plies / 2) + 1) + '/' + R.turns }), clk);
   for (const b of root.querySelectorAll('.tl-c')) {
@@ -59878,7 +59878,7 @@ function tilesDraw() {   // draw the game into its persistent element (the devic
   });
   if (s.hold[1].length) hd.appendChild(Object.assign(document.createElement('span'), { textContent: '· ' + G.name + ' holds ' + s.hold[1].length }));
   const lg = root.querySelector('.tl-log'); lg.textContent = '';   // the latest line above the board, the two before it below
-  const lines = G.hint && hintC !== undefined ? G.log.concat(['Jump their tile to take it. It\u2019s yours now.']) : G.log;
+  const lines = G.hint && hintC !== undefined ? G.log.concat(['Jump their tile to take it. It’s yours now.']) : G.log;
   root.querySelector('.tl-now').textContent = lines[lines.length - 1] || '';
   const tutOn = G.tut >= 0 && !s.over; root.querySelector('.tl-now').hidden = tutOn; root.classList.toggle('tut', tutOn);   // a How to play step stands in for it (the line shows below)
   for (const l of (tutOn ? lines : lines.slice(0, -1)).reverse()) lg.appendChild(Object.assign(document.createElement('p'), { textContent: l }));
@@ -59897,7 +59897,7 @@ function tilesDraw() {   // draw the game into its persistent element (the devic
   tu.hidden = !st || s.over; tu.textContent = '';
   if (st && !s.over) {
     const tp = document.createElement('p'); tp.append(Object.assign(document.createElement('b'), { textContent: (G.tut + 1) + '/' + TL_TUT.length }), st.t(G.name, R)); tu.appendChild(tp);
-    const bx = document.createElement('div'); bx.className = 'btns'; btn(bx, 'tnext', G.tut + 1 < TL_TUT.length ? 'Next \u25b8' : 'Got it'); if (G.tut + 1 < TL_TUT.length) btn(bx, 'tskip', 'Skip'); tu.appendChild(bx); if (GAMES997_ON) tu.insertBefore(bx, tp);   // 0.99.7 (GM1): the buttons first, floated right, the text wrapping round them
+    const bx = document.createElement('div'); bx.className = 'btns'; btn(bx, 'tnext', G.tut + 1 < TL_TUT.length ? 'Next ▸' : 'Got it'); if (G.tut + 1 < TL_TUT.length) btn(bx, 'tskip', 'Skip'); tu.appendChild(bx); if (GAMES997_ON) tu.insertBefore(bx, tp);   // 0.99.7 (GM1): the buttons first, floated right, the text wrapping round them
     if (G.tutSeen !== G.tut) { G.tutSeen = G.tut; requestAnimationFrame(() => { try { if (!tu.hidden && tu.isConnected) (GAMES997_ON ? root.querySelector('.tl-bd') : tu).scrollIntoView({ block: GAMES997_ON ? 'start' : 'nearest' }); } catch (e) { /* old browser */ } }); }   // the step, with your rows above it
   }
   return root;
@@ -59914,10 +59914,10 @@ deviceApp({ id: 'tiles', title: 'Tiles', short: 'Tiles', icon: 'dot', order: 75,
   view: () => {
     tilesLeft();
     if (TL_GAME) return { title: 'Tiles with ' + TL_GAME.name, blocks: [{ kind: 'dom', render: box => { const r = tilesDraw(); if (r) box.appendChild(r); } }] };
-    const T = SHIP.tiles, blocks = [{ kind: 'text', text: 'Sit at the Tiles station in the bow lounge (or a Tiles table on Tiles night) and whoever\u2019s free comes over to play. While you play, the ship waits.' }];
+    const T = SHIP.tiles, blocks = [{ kind: 'text', text: 'Sit at the Tiles station in the bow lounge (or a Tiles table on Tiles night) and whoever’s free comes over to play. While you play, the ship waits.' }];
     blocks.push({ kind: 'buttons', items: [{ label: TL_UI.teachNext ? 'How to play: next game' : 'How to play', action: { app: 'tiles', do: 'teach' } }] });
     if (GAMES997_ON && typeof tnAppBlocks === 'function') try { blocks.push(...tnAppBlocks()); } catch (e) { /* not loaded yet */ }   // 0.99.7 (GM1): Tiles night's rounds   // 0.28.51: the steps again, at your next game
-    blocks.push({ kind: 'text', text: T.played ? 'Played ' + T.played + ', won ' + T.won + ', lost ' + T.lost + '.' : 'You haven\u2019t played yet.' });
+    blocks.push({ kind: 'text', text: T.played ? 'Played ' + T.played + ', won ' + T.won + ', lost ' + T.lost + '.' : 'You haven’t played yet.' });
     const vs = Object.keys(T.vs).filter(k => T.vs[k][0] + T.vs[k][1]).map(k => { let p = null; try { p = ROSTER.find(x => x.id === k); } catch (e) { /* before section 9 loads */ } return (p ? p.name.split(' ')[0] : k) + ' ' + T.vs[k][0] + '-' + T.vs[k][1]; });
     if (vs.length) blocks.push({ kind: 'text', text: 'Against: ' + vs.join(', ') + '.' });
     if (T.firstWin !== null) blocks.push({ kind: 'text', text: 'Your first win: day ' + T.firstWin + '.' });
@@ -59926,7 +59926,7 @@ deviceApp({ id: 'tiles', title: 'Tiles', short: 'Tiles', icon: 'dot', order: 75,
       const nm = id => { try { const p = ROSTER.find(x => x.id === id); return p ? p.name.split(' ')[0] : id; } catch (e) { return id; } };
       blocks.push({ kind: 'text', mark: 'head', text: 'Last Tiles night, day ' + T.night.last });
       for (const [a, b, w] of T.night.games) blocks.push({ kind: 'text', text: nm(w) + ' beat ' + nm(w === a ? b : a) + '.' });
-      if (T.beatRina === null && T.night.rina > 1) blocks.push({ kind: 'text', text: 'Rina hasn\u2019t lost in ' + T.night.rina + ' Tuesdays.' });
+      if (T.beatRina === null && T.night.rina > 1) blocks.push({ kind: 'text', text: 'Rina hasn’t lost in ' + T.night.rina + ' Tuesdays.' });
     }
     return { title: 'Tiles', blocks };
   },
@@ -59968,13 +59968,13 @@ function tilesSeatTick(A) {   // the 'tiles' activity while you sit: find someon
     const a = DECK_CREW.find(x => x.p && x.p.id === o.opp), sp = placeSpot(o.seat);
     const there = a && a.settled && (o.here || sp && Math.hypot(a.x - sp.x, a.z - sp.z) < .6);
     if (there) return tilesBegin(A, o.opp);
-    if (!a || shipNow() - o.since > TL_WAIT) { if (A.release) A.release(); A.release = null; tilesNobody(A, tlSecond(o.opp) + ' couldn\u2019t make it after all.'); }
+    if (!a || shipNow() - o.since > TL_WAIT) { if (A.release) A.release(); A.release = null; tilesNobody(A, tlSecond(o.opp) + ' couldn’t make it after all.'); }
   }
   return false;
 }
 function tilesBegin(A, id) { A.o.st = 'play'; A.o.opp = id; tilesPlay(id, A.placeId, A.o.mode); return false; }
 function tilesNobody(A, why) {   // nobody to play: you stay sat, as on any seat
-  toast('Tiles', (why ? why + ' ' : '') + 'Nobody\u2019s around to play right now. Try in the evening, or on a day off.');
+  toast('Tiles', (why ? why + ' ' : '') + 'Nobody’s around to play right now. Try in the evening, or on a day off.');
   A.kind = 'sit'; A.def = { ...PLAYER_ACTS.sit }; A.o.st = 'none';
 }
 // who'd come and play: free now (whereIs), on this deck, not already wanted elsewhere; quiet hours (21:45-06:00) nobody
@@ -60108,7 +60108,7 @@ function tilesNightNews(r, you) {   // the night's results into the save and the
   if (typeof newsAdd !== 'function' || !r.games.length) return;
   const name = id => { try { const p = ROSTER.find(x => x.id === id); return p ? shortName(p) : id; } catch (e) { return id; } };
   const lines = [];
-  if (rg && rg.win === 'rina') lines.push(N.rina > 1 ? 'Rina won again at Tiles. That\u2019s ' + N.rina + ' Tuesdays running.' : 'Rina won at Tiles night, of course.');
+  if (rg && rg.win === 'rina') lines.push(N.rina > 1 ? 'Rina won again at Tiles. That’s ' + N.rina + ' Tuesdays running.' : 'Rina won at Tiles night, of course.');
   else if (rg) lines.push(name(rg.win) + ' beat Rina at Tiles night!');
   const lvl = id => { let p = null; try { p = ROSTER.find(x => x.id === id); } catch (e) { /* before section 9 */ } return tilesStyle(p || { id, seed: 0 }).level; };
   const up = r.games.find(g => g !== rg && TL_ODDS[lvl(g.win)][lvl(g.win === g.a ? g.b : g.a)] < .5);   // an upset: the weaker player won
@@ -60467,7 +60467,7 @@ function discViewOn() {
   // the overlay
   if (!document.getElementById('ld-css')) { const s = ldEl('style', null, document.head, LD_CSS); s.id = 'ld-css'; }
   const R = V.root = ldEl('div', null, document.body); R.id = 'ld'; document.body.classList.add('ld-on');   // the game view owns the screen: nothing else on it
-  const top = ldEl('div', 'top', R); V.sc = ldEl('div', 'sc', top); ldEl('div', 'pz', top, '\u23f8 The ship\'s clock is paused while you play');
+  const top = ldEl('div', 'top', R); V.sc = ldEl('div', 'sc', top); ldEl('div', 'pz', top, '⏸ The ship\'s clock is paused while you play');
   V.call = ldEl('div', 'call hide', R);
   V.tags = [ldEl('div', 'tag', R, 'You'), ldEl('div', 'tag', R, DISC.short)]; V.tags[0].style.color = '#9fe3ff'; V.tags[1].style.color = '#ffd2a0';
   V.sayEl = ldEl('div', 'say hide', R);
@@ -60556,8 +60556,8 @@ function discResult() {
   const V = DISC.view, G = DISC.g; if (!V) return;
   const won = G.winner === 0, hi = Math.max(...G.score), lo = Math.min(...G.score), v = SHIP.disc.vs[DISC.opp] || [0, 0];
   V.res.innerHTML = ''; const card = ldEl('div', 'card', V.res);
-  ldEl('h2', null, card, won ? 'You win ' + hi + '\u2013' + lo : DISC.name + ' wins ' + hi + '\u2013' + lo);
-  ldEl('div', 's', card, 'Your record against ' + DISC.name + ': ' + v[0] + '\u2013' + v[1] + '. Longest rally: ' + Math.max(0, ...G.log.map(l => l.rally)) + '.');
+  ldEl('h2', null, card, won ? 'You win ' + hi + '–' + lo : DISC.name + ' wins ' + hi + '–' + lo);
+  ldEl('div', 's', card, 'Your record against ' + DISC.name + ': ' + v[0] + '–' + v[1] + '. Longest rally: ' + Math.max(0, ...G.log.map(l => l.rally)) + '.');
   const b = ldEl('div', 'b', card);
   const btn = (t, f, go) => { const e = ldEl('button', go ? 'go' : null, b, t); e.onclick = ev => { ev.stopPropagation(); f(); }; };
   btn('Again', () => discEnd('full'), true); btn('Done', () => discEnd(false));   // 0.92.5 #3: no Quick game now a game is first to 3 (discEnd('quick') kept, unused)
@@ -62218,7 +62218,7 @@ function drill9991Frame() {
     const a = tjAgent(id); if (a && CREW_HELD.get(id) !== pl) DRILL9991.holds.push(crewHold(a.p, pl)); }
   const c = tjAgent('calder'), show = !!c && m >= DRILL_AT && !drill9991Came(d, who) && !(typeof DIALOGUE !== 'undefined' && DIALOGUE);
   if (!DRILL9991.el && show) { const el = document.createElement('div'); el.style.cssText = 'position:fixed;left:0;top:0;z-index:2;pointer-events:none;font:600 12px system-ui,sans-serif;color:#0b2a26;background:#5fd6c6;border-radius:999px;padding:2px 8px;box-shadow:0 1px 6px rgba(0,0,0,.4);white-space:nowrap';
-    el.textContent = '\u2605 ' + tjFirst('calder'); document.body.appendChild(el); DRILL9991.el = el; DRILL9991.v = new THREE.Vector3(); }
+    el.textContent = '★ ' + tjFirst('calder'); document.body.appendChild(el); DRILL9991.el = el; DRILL9991.v = new THREE.Vector3(); }
   if (show && typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.drill === 'drill9991:' + d && !IX_GOAL.crew) setGoal({ deck: 5, crew: 'calder', tj: 'drill9991:' + d, label: worksText('drill9991.tip', 'Tap Chief Calder to join the drill'), drill: 'drill9991:' + d });   // the direct arrow (the queue off) on to Calder from 15:00
   if (!DRILL9991.el) return;
   if (!show) { DRILL9991.el.style.display = 'none'; return; }
@@ -63829,7 +63829,7 @@ function caseAsk(caseId, who) { const c = caseById(caseId), k = c && c.clues.fin
 function caseClueText(c, k) {
   const K = CASE_KINDS[c.kind]; try { const t = K.text && K.text(c, k); if (t) return t; } catch (e) { /* the plain words */ }
   const p = k.src && k.src.by && schedPeople().find(x => x.id === k.src.by), s = k.src && k.src.tried && caseSus(c, k.src.tried);
-  if (k.type === 'note' && s) return (s.part ? 'New ' + s.part + ' in.' : 'Tried the ' + s.label + '.') + ' No change.' + (p ? ' \u2014 ' + p.name.split(' ').slice(-1)[0] : '');
+  if (k.type === 'note' && s) return (s.part ? 'New ' + s.part + ' in.' : 'Tried the ' + s.label + '.') + ' No change.' + (p ? ' — ' + p.name.split(' ').slice(-1)[0] : '');
   return k.type === 'log' ? 'The machine\'s log.' : 'A clue.';
 }
 const CASE_MARK = { note: 'note', log: 'clock', person: 'person', gauge: 'gauge', calendar: 'calendar' };
@@ -64018,7 +64018,7 @@ else deviceApp({ id: 'faultnotes', title: 'Fault notes', short: 'Faults', icon: 
 
 // ---- 24k P3. What's been tried? (Day 5; plans/mechanics/p3-whats-been-tried.html). The crew have had a go already:
 // one try per decoy, by a Works crew member really on shift, 2-12 ship hours after the fault is posted (keys 890 the
-// times, 891 who), each using the decoy's part off the shelf and leaving a note ("New door seal in. Still leaks. -
+// times, 891 who), each using the decoy's part off the shelf and leaving a note ("New door seal in. Still leaks. —
 // Kovac"). Each note rules out what was tried. The case shows when the last try is done, during your shift. The
 // first (Day 5's training case) is fixed: Washer 2 in the junior wing's laundry leaking from 18:00 on Day 4 (the
 // pump), a door seal and a drain valve tried overnight, shown once the ladder's p3 row opens, the teacher with you.
@@ -64030,7 +64030,7 @@ const P3_NOTE = (c, k) => {
   const fb = odd ? 'Put in ' + (s.part ? 'a ' + s.part : 'a new ' + s.label) + ' from the old stock: the wrong size, it never seated. Still ' + shows + '.'
     : (s.part ? 'New ' + s.part + ' in.' : 'Tried the ' + s.label + '.') + ' Still ' + shows + '.';
   const t = (typeof worksText === 'function' && m ? (odd ? worksText('fault.tried.odd', fb, { part: s.part || s.label, shows }) : worksText('fault.tried.' + m.kind + '.' + k.src.tried, fb)) : fb) || fb;
-  return t + (p ? ' \u2014 ' + p.name.split(' ').slice(-1)[0] : '');
+  return t + (p ? ' — ' + p.name.split(' ').slice(-1)[0] : '');
 };
 // who tries, and when: the times from 2 to 12 hours after `t`, in order; whoever of the Works crew is at work then
 // (key 891 if several); none on shift: the first Works hand at work the next morning, 06:00-08:00
@@ -64591,7 +64591,7 @@ function p4Text(c, k) {
   const g = p4Gauge(k.src.part), G = g.replace(/^./, x => x.toUpperCase()), p = k.src.by && schedPeople().find(x => x.id === k.src.by);
   const read = caseText('case.p4.gauge', '{thing} reads {word}', { thing: G, word: 'normal' }).replace(/\.?$/, '.');   // SW3's words
   if (k.src.stuck) return read + ' ' + caseText('case.p4.flat', 'It hasn\'t moved a hair all day.');
-  return read + ' ' + caseText('case.p4.moving', 'It moves with the load.') + (p ? ' \u2014 ' + p.name.split(' ').slice(-1)[0] : '');
+  return read + ' ' + caseText('case.p4.moving', 'It moves with the load.') + (p ? ' — ' + p.name.split(' ').slice(-1)[0] : '');
 }
 function p4Title(c, j) {
   const m = machineById(j.machine), f = caseCauses(m).find(x => x.id === c.cause), d = c.sus.map(s => caseCauses(m).find(x => x.id === s)).find(x => x && x.id !== 'sensor');
@@ -65263,8 +65263,8 @@ function p7View(c) {
   const G = p7Grid(c); if (!G || !c.got.includes(G.k.id)) return [];
   const { L } = G, B = [{ kind: 'text', text: caseText('case.p7.head', 'Which relay feeds which room? Tap a cell: yes, no, blank.') },
     { kind: 'list', rows: L.rooms.map((x, i) => ({ text: (i + 1) + '. ' + x[1], ...(i === G.k.src.flick ? { mark: 'hot', sub: caseText('case.p7.flicker', 'flickers') } : {}) })) }];
-  for (let r = 0; r < L.n; r++) B.push({ kind: 'text', text: caseText('case.p7.relay', 'Relay {a}', { a: P7_LET[r] }) },   // a row of big chips (44 px): a room's number, U+2713 yes, crossed out no
-    devChips(L.rooms.map((x, i) => { const v = G.at(r, i); return { label: (i + 1) + (v === 'y' ? ' \u2713' : ''), on: v !== 'n', action: { app: caseApp(), do: 'case:p7', arg: c.id + '|' + r + '.' + i } }; })));
+  for (let r = 0; r < L.n; r++) B.push({ kind: 'text', text: caseText('case.p7.relay', 'Relay {a}', { a: P7_LET[r] }) },   // a row of big chips (44 px): a room's number, ✓ yes, crossed out no
+    devChips(L.rooms.map((x, i) => { const v = G.at(r, i); return { label: (i + 1) + (v === 'y' ? ' ✓' : ''), on: v !== 'n', action: { app: caseApp(), do: 'case:p7', arg: c.id + '|' + r + '.' + i } }; })));
   return B;
 }
 function p7Act(c, v, s) {                                 // case:p7, arg 'row.col': blank, yes, no, blank ('row.-1' clears the row)
@@ -65362,7 +65362,7 @@ function p8View(c) {
   const R = p8Of(c), g = c.clues.find(k => k.src && k.src.rig); if (!R || !c.got.includes(g.id)) return c.got.length ? [] : [{ kind: 'text', text: caseText('case.p8.go', 'Take them to the test rig in the machine shop, Deck 5.') }];
   const used = p8Runs(c).filter(k => !k.src.plan).length, left = P8_RUNS - used, pend = p8Pending(c), w = p8Word(c), A = arg => ({ app: caseApp(), do: 'case:p8', arg: c.id + '|' + arg });
   const B = [{ kind: 'text', text: caseText('case.p8.head', 'The test rig: pick a group, run it. {n} runs left.', { n: left }), mark: 'hot' }, { kind: 'text', text: caseText('case.p8.pick', 'Which go on the rig? Tap to pick.') }];
-  B.push({ kind: 'buttons', items: [...Array(P8_N).keys()].map(i => ({ label: (i + 1) + (R.sel >> i & 1 ? ' \u2713' : ''), on: !!(R.sel >> i & 1), action: A('sel.' + i) })) });
+  B.push({ kind: 'buttons', items: [...Array(P8_N).keys()].map(i => ({ label: (i + 1) + (R.sel >> i & 1 ? ' ✓' : ''), on: !!(R.sel >> i & 1), action: A('sel.' + i) })) });
   if (pend) B.push({ kind: 'text', text: caseText('case.p8.wait', 'Running: ready at {time}.', { time: hhmm(pend.src.t % 1440) }) });
   else if (left > 0) B.push({ kind: 'buttons', items: [{ label: caseNear(P8_RIG) ? caseText('case.p8.runit', 'Run the test') : caseText('case.p8.gorig', 'To the rig'), action: A('run') }] });
   else if (c.sus.filter(s => !c.known.includes(s) && !p8Runs(c).some(k => c.got.includes(k.id) && k.kills.includes(s))).length > 1)
@@ -65497,7 +65497,7 @@ function p5Unstick(W, C) {
 // 24e TUNING (M5, seat M2, 0.51.x; plans/mechanics/m5-tuning.html). Some faults are a machine out of adjustment: an
 // oven running hot, a light relay chattering, a cart dock charging slow. Section 17 (seat S) keeps the drift
 // (SHIP.machines[id].drift, -3..+3, 0 settled; machineDrift(id), tuneSet(id, v)) and posts a 'tune' job for a drift of
-// 2+; this block is the job: at the machine's panel a `turn` step (section 15) with - and +, each press moving the real
+// 2+; this block is the job: at the machine's panel a `turn` step (section 15) with − and +, each press moving the real
 // setting one step so the machine's look answers on the deck (flicker, dim, blink); settled (0) and it's done. The card
 // shows words only. Taught on Day 4 (ladder row m5): the row's opening drifts both ovens two steps hot; the teacher
 // tunes Oven 1 while you watch, then Oven 2 is yours. The crew tune what you leave (section 17's crew walk, 15 minutes).
@@ -65981,7 +65981,7 @@ function teamPost(P, w, t) {                             // a plan entry posted 
   if (pr && typeof mailSend === 'function') { const m = teamText('mail.team.parts', 'Bring the parts | {job} tomorrow at {time}. {name} asks you to bring the parts from stores: {parts}.', { job: teamLabel(j), time: hhmm(at), name: worksFirst(j.lead), parts: TEAM_PARTS[kind].join(', ') }), i = m.indexOf(' | ');
     mailSend({ at: t, from: worksName(j.lead), subject: i > 0 ? m.slice(0, i) : teamLabel(j), body: i > 0 ? m.slice(i + 3) : m }); }
   else if (j.claimedBy === 'you' && typeof mailSend === 'function') mailSend({ at: t, from: worksName(j.lead), subject: teamText('team.name.' + kind, TEAM_NAME[kind]),
-    body: teamText('mail.team', '{job}, {time} tomorrow, Deck {deck}. You\'re one of the team. \u2014 {name}', { job: teamText('team.name.' + kind, TEAM_NAME[kind]), time: hhmm(at), deck: j.deck, name: worksFirst(j.lead) }) });
+    body: teamText('mail.team', '{job}, {time} tomorrow, Deck {deck}. You\'re one of the team. — {name}', { job: teamText('team.name.' + kind, TEAM_NAME[kind]), time: hhmm(at), deck: j.deck, name: worksFirst(j.lead) }) });
   return j;
 }
 // ---- the run: the sequence in order; a crew step its minutes on paper, yours waits for you ----
@@ -66087,7 +66087,7 @@ function teamOffer(row, c, d, t) {
   const r = occasionAdd('works.' + row.id, (d - 1) * 1440 + TEAM_FIRST.at - 10, true, 15); if (!r) return false;
   c.by = by; c.d = d; c.w = 0; c.st = 'meet'; c.occ = r.key;
   if (typeof mailSend === 'function') mailSend({ at: Math.max(t, (d - 1) * 1440 + 485), from: worksName(by), subject: mechName('m8'),
-    body: worksText('works.ask.m8', 'Recycler\'s membrane bank, 09:30, Deck 3. Need four. You\'re the fourth. \u2014 {name}', { name: worksFirst(by) }) });
+    body: worksText('works.ask.m8', 'Recycler\'s membrane bank, 09:30, Deck 3. Need four. You\'re the fourth. — {name}', { name: worksFirst(by) }) });
   return true;
 }
 if (typeof teamJobPost === 'function') WORK_MECH.m8 = {
@@ -66299,7 +66299,7 @@ if (typeof caseMake === 'function') WORK_TICKS.push((now, skip) => {
   const d = worksDay(now), m = now - (d - 1) * 1440, C = caseState();
   if (!F.mail && d >= FF_FROM && m >= FF_MAIL && m < 1260) {
     F.mail = 1;
-    const mail = worksText('mail.ticket.first', 'A ticket | A ticket case, when you\'re ready. On the Works board, any shift. \u2014 Calder'), cut = mail.indexOf(' | ');
+    const mail = worksText('mail.ticket.first', 'A ticket | A ticket case, when you\'re ready. On the Works board, any shift. — Calder'), cut = mail.indexOf(' | ');
     if (typeof mailSend === 'function') mailSend({ at: now, from: worksName('calder'), subject: cut > 0 ? mail.slice(0, cut) : 'A ticket', body: cut > 0 ? mail.slice(cut + 3) : mail });
   }
   const j = F.job && SHIP.jobs.find(x => x.id === F.job), c = j && C && (C.open.find(x => x.job === j.id) || null);
@@ -66754,7 +66754,7 @@ function promoAnnounce(now) {                            // Day 8 on: "Tomorrow,
   W.test = { tier: 2, day: (typeof crTestDay === 'function' && crTestDay(d, m)) || Math.max(row.day, promoWorkday(d)), tries: 0, passed: false };   // CR1 (note 55): today, after Making it safe (the slot)
   if (typeof promoSightOn === 'function' && promoSightOn()) promoReady(now, by, here);   // FX19 (patch 0.92.6 #18): the big beat
   else if (here) promoSay(by, 'announce', 'Tomorrow, your test job. Tier 2, with me watching. Nothing you haven\'t done.');
-  else if (typeof mailSend === 'function') { const t = worksText('promo.announce.mail', 'Your test job | Tomorrow: your Tier 2 test job, with me watching. Be in the bay at nine. \u2014 C.'), i = t.indexOf(' | ');
+  else if (typeof mailSend === 'function') { const t = worksText('promo.announce.mail', 'Your test job | Tomorrow: your Tier 2 test job, with me watching. Be in the bay at nine. — C.'), i = t.indexOf(' | ');
     mailSend({ at: now, from: worksName(by), subject: i > 0 ? t.slice(0, i) : 'Your test job', body: i > 0 ? t.slice(i + 3) : t }); }
   simNote('promoTest', { step: 'set', day: W.test.day });
 }
@@ -66853,10 +66853,10 @@ function promoPromote(now, how) {                        // you're an officer
   const d = worksDay(now), r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked'); if (r) r.met = true;
   W.tier = 2; W.rank = 'officer'; W.xp = 0;
   if (!W.done.includes('summons2')) W.done.push('summons2'); if (!W.ms.some(x => x[0] === 'officer')) W.ms.push(['officer', d]);
-  if (how === 'mail' && typeof mailSend === 'function') { const t = worksText(promoBK('promo.mail'), 'You\'re an officer | You passed your test job: you\'re a Works Officer now, Technician, Tier 2. Your badge and pip are waiting in my office. Well done. \u2014 C.'), i = t.indexOf(' | ');
+  if (how === 'mail' && typeof mailSend === 'function') { const t = worksText(promoBK('promo.mail'), 'You\'re an officer | You passed your test job: you\'re a Works Officer now, Technician, Tier 2. Your badge and pip are waiting in my office. Well done. — C.'), i = t.indexOf(' | ');
     mailSend({ at: now, from: 'Chief Ines Calder', subject: i > 0 ? t.slice(0, i) : 'You\'re an officer', body: i > 0 ? t.slice(i + 3) : t }); }
   if (typeof newsAdd === 'function') try { newsAdd({ id: 'promo.officer', about: 'you', lines: [worksText('promo.news', '{me}\'s been made a Works Officer. Calder says it was about time.')], seed: ['dept:works'], kind: 'gossip' }); } catch (e) { /* no social */ }
-  if (typeof mailSend === 'function') { const t = worksText(promoBK('promo.captain'), 'Congratulations | Chief Calder tells me you\'ve passed your Tier 2 test. Congratulations, Officer. I look forward to the ceremony. \u2014 O. Marrow'), i = t.indexOf(' | ');
+  if (typeof mailSend === 'function') { const t = worksText(promoBK('promo.captain'), 'Congratulations | Chief Calder tells me you\'ve passed your Tier 2 test. Congratulations, Officer. I look forward to the ceremony. — O. Marrow'), i = t.indexOf(' | ');
     mailSend({ at: now + 30, from: 'Captain Odile Marrow', subject: i > 0 ? t.slice(0, i) : 'Congratulations', body: i > 0 ? t.slice(i + 3) : t, quiet: true }); }
   promoFriendMail(now);
   if (typeof MACH_REV !== 'undefined') MACH_REV++;       // the board: Tier 2 jobs for you now, junior ones no longer held (forYou)
@@ -66879,7 +66879,7 @@ function promoSummonsTick(now) {                         // book it, warn at 10:
   if (!r) return;
   const f = r.f || (r.f = {});
   if (m >= PROMO.warnAt && !f.warn && now >= shipNow() - 1) { f.warn = 1;
-    const text = worksText(promoBK('promo.summons'), 'Chief Calder: My office, 11:00. \u2014 C.');
+    const text = worksText(promoBK('promo.summons'), 'Chief Calder: My office, 11:00. — C.');
     if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'calendar', text, urgent: true }); } catch (e) { /* no device */ }
     try { toast('Chief Calder', text); } catch (e) { /* no UI */ }
     if (typeof setGoal === 'function' && !promoQueue()) setGoal({ deck: 5, room: 'o', label: 'The Chief\'s office, 11:00', trk: 'career:summons', trkFrom: r.at, trkTo: r.at + (r.len || 30) });   // FX1: gone once it's begun with you there, or it's over
@@ -66960,7 +66960,7 @@ function promoWalkSay(flagKey, fallback) {               // each of her walk lin
 function promoMoved(now, how) {                          // 4-23 is yours
   const W = SHIP.works; if (!W || promoDone('move2')) return false;
   W.home = PROMO.home; W.done.push('move2'); const by = (W.mv && W.mv.by) || promoMoveBy(); delete W.mv;
-  if (how !== 'walked' && typeof mailSend === 'function') { const t = worksText('mail.promo.move', worksText('promo.move.mail', 'Your cabin | Cabin 4-23 is yours from tonight: your things are in, your name\'s on the door. Officers\' corridor, the quiet end. \u2014 C.')), i = t.indexOf(' | ');
+  if (how !== 'walked' && typeof mailSend === 'function') { const t = worksText('mail.promo.move', worksText('promo.move.mail', 'Your cabin | Cabin 4-23 is yours from tonight: your things are in, your name\'s on the door. Officers\' corridor, the quiet end. — C.')), i = t.indexOf(' | ');
     mailSend({ at: now, from: worksName(by), subject: i > 0 ? t.slice(0, i) : 'Your cabin', body: i > 0 ? t.slice(i + 3) : t }); }
   if (typeof PROMO_SIGHT_ON !== 'undefined' && PROMO_SIGHT_ON && how !== 'walked' && typeof flagSet === 'function') flagSet('promo.sight.walk', worksDay(now));   // FX19: she walks you there another day
   simNote('moved', { home: W.home, how, t: now });
@@ -67015,7 +67015,7 @@ function promoCommission(now, how) {                     // commissioned: once
   const d = worksDay(now), r = SHIP.occasions.find(x => x.id === 'promoCeremony' && x.status === 'asked'); if (r) r.met = true;
   W.done.push('ceremony2'); if (!W.ms.some(x => x[0] === 'commissioned')) W.ms.push(['commissioned', d]);
   if (typeof giftKeepsake === 'function') try { giftKeepsake({ id: 'marrow' }, worksText('works.keepsake.commission', worksText('promo.keepsake', 'your framed commission'))); } catch (e) { /* no social */ }
-  if (how === 'mail' && typeof mailSend === 'function') { const t = worksText(promoBK('mail.promo.ceremony'), worksText('promo.ceremony.mail', 'Your commission | We missed you in the observation room. Your commission is signed all the same, and framed on your shelf. Congratulations, Officer. \u2014 O. Marrow')), i = t.indexOf(' | ');
+  if (how === 'mail' && typeof mailSend === 'function') { const t = worksText(promoBK('mail.promo.ceremony'), worksText('promo.ceremony.mail', 'Your commission | We missed you in the observation room. Your commission is signed all the same, and framed on your shelf. Congratulations, Officer. — O. Marrow')), i = t.indexOf(' | ');
     mailSend({ at: now, from: 'Captain Odile Marrow', subject: i > 0 ? t.slice(0, i) : 'Your commission', body: i > 0 ? t.slice(i + 3) : t }); }
   promoPip();
   simNote('commissioned', { day: d, how });
@@ -67042,7 +67042,7 @@ function promoCerTick(now) {
   if (!r && m >= T.mail - 60) { promoCerScript(); OCCASIONS.promoCeremony.with = promoGuests(d).filter(id => id !== 'marrow'); r = occasionAdd('promoCeremony', (d - 1) * 1440 + T.at, true, PROMO.cerLen); }
   if (!r) return;
   const f = r.f || (r.f = {});
-  if (m >= T.mail && !f.mail && typeof mailSend === 'function') { f.mail = 1; const t = worksText(promoBK('promo.ceremony.invite'), 'Your commissioning | This evening at 17:15, the observation room, Deck 1. A clean uniform, please. \u2014 The Captain\'s office', { time: hhmm(T.at) }), i = t.indexOf(' | ');
+  if (m >= T.mail && !f.mail && typeof mailSend === 'function') { f.mail = 1; const t = worksText(promoBK('promo.ceremony.invite'), 'Your commissioning | This evening at 17:15, the observation room, Deck 1. A clean uniform, please. — The Captain\'s office', { time: hhmm(T.at) }), i = t.indexOf(' | ');
     mailSend({ at: Math.max(now, (d - 1) * 1440 + T.mail), from: 'The Captain\'s office', subject: i > 0 ? t.slice(0, i) : 'Your commissioning', body: i > 0 ? t.slice(i + 3) : t }); }
   try { if (!f.gr && r.status === 'asked' && now >= r.at - 10 && deckDef.num === r.deck && roomAt(...player.here()) === r.room && typeof uniformState === 'function' && uniformState() === 'grubby') {
     f.gr = 1; worksSayAll('calder', worksVoice('calder', 'promo.grubby') || ['(Calder looks at your uniform, then at you, and says nothing.)']); } } catch (e) { /* not in play */ }   // a clean uniform matters (M2): her look, nothing else
@@ -75159,7 +75159,7 @@ function openLiftPanel() {
     i.textContent = deckLabel(n); t.textContent = DECK_NAMES[n]; sm.textContent = here ? 'You are here' : built ? DECKS[n].blurb : 'Not built yet';
     sp.append(t, sm); b.append(i, sp);
     const gl = typeof goalNow === 'function' ? goalNow() : null, goal = !!(gl && gl.deck === n && !here && built);   // 0.28.58 (0.60.6a, the user's): the deck your goal arrow wants
-    if (goal) { b.classList.add('goal'); const g = document.createElement('em'); g.textContent = '\u2192 Tracked'; b.appendChild(g); }   // playtest 1: the user's word (0.92.6 #12, the user's: "just say Tracked"; was "-> Schedule tracker")
+    if (goal) { b.classList.add('goal'); const g = document.createElement('em'); g.textContent = '→ Tracked'; b.appendChild(g); }   // playtest 1: the user's word (0.92.6 #12, the user's: "just say Tracked"; was "→ Schedule tracker")
     b.setAttribute('aria-label', `${deckWord(n)}, ${DECK_NAMES[n]}: ${sm.textContent}` + (goal ? '. What you\'re tracking is here' + (gl.label ? ': ' + gl.label : '') : ''));
       b.onclick = () => { closeLiftPanel(); pressPanel(n); };
     liftList.appendChild(b);
@@ -75340,7 +75340,7 @@ function devmodeDraw() {
   for (const b of DM_UI.el.querySelectorAll('.dmTabs button')) { const on = b.dataset.tab === DM_UI.tab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); }
   body.textContent = '';
   if (DM_UI.msg) devmodeText(body, DM_UI.msg, 'dmNote');
-  if (DM_UI.run) devmodeRow(body, [['Stop', () => { if (DM_UI.run) DM_UI.run.stop = true; devmodeSay('Stopping after this day\u2026'); }, { ask: true, aria: 'Stop the run where it has got to' }]]);   // a Set career or jump under way (J0)
+  if (DM_UI.run) devmodeRow(body, [['Stop', () => { if (DM_UI.run) DM_UI.run.stop = true; devmodeSay('Stopping after this day…'); }, { ask: true, aria: 'Stop the run where it has got to' }]]);   // a Set career or jump under way (J0)
   if (st.note) devmodeText(body, st.note, 'dmNote');
   if (DM_LATER[DM_UI.tab]) devmodeText(body, DM_LATER[DM_UI.tab]);
   else if (DM_UI.tab === 'quick') devmodeQuick(body);
@@ -75396,7 +75396,7 @@ function devmodeCopy(label) {                             // the Dev game as it 
 }
 function devmodeKeep(label) { return devmodeWrite(DM_KEY.undo, devmodeCopy(label)); }   // the Undo, before a Dev action: null, or why not
 function devmodeReload(why) {                             // reload. The hold stays on however long it takes (DR1: a slow reload on a
-  devmodeSay(why + ': reloading\u2026'); location.reload();     // phone keeps this page running, and letting go would save over the kept save)
+  devmodeSay(why + ': reloading…'); location.reload();     // phone keeps this page running, and letting go would save over the kept save)
   setTimeout(() => devmodeSay(why + ': still reloading. If the page doesn\'t come back, reload it yourself: nothing is lost.'), 4000);
 }
 // (no space check here on purpose: the kept save replaces one of about the same size)
@@ -75530,10 +75530,10 @@ function devmodeClock(body) {
   devmodeHead(body, 'Now');
   devmodeText(body, clockText() + ' · ' + now);
   devmodeRow(body, [['Next morning', () => devmodeGo('next morning', () => devmodeNext(WAKE_AT))],
-    ['+1 hour', () => devmodeGo('+1 hour', () => shipNow() + 60)], ['To a time\u2026', () => { DM_UI.pick = DM_UI.pick == null ? Math.ceil(SHIP.time.min / 30) * 30 % 1440 : null; devmodeDraw(); }]]);
+    ['+1 hour', () => devmodeGo('+1 hour', () => shipNow() + 60)], ['To a time…', () => { DM_UI.pick = DM_UI.pick == null ? Math.ceil(SHIP.time.min / 30) * 30 % 1440 : null; devmodeDraw(); }]]);
   if (DM_UI.pick != null) {
     const p = DM_UI.pick;
-    devmodeRow(body, [['\u2212 30 min', () => { DM_UI.pick = (p + 1410) % 1440; devmodeDraw(); }, { aria: 'Earlier' }],
+    devmodeRow(body, [['− 30 min', () => { DM_UI.pick = (p + 1410) % 1440; devmodeDraw(); }, { aria: 'Earlier' }],
       ['Go to ' + hhmm(p), () => { DM_UI.pick = null; devmodeGo('to ' + hhmm(p), () => devmodeNext(p)); }, { ask: true }],
       ['+ 30 min', () => { DM_UI.pick = (p + 30) % 1440; devmodeDraw(); }, { aria: 'Later' }]]);
   }
@@ -75541,7 +75541,7 @@ function devmodeClock(body) {
   devmodeRow(body, [['+1 day', () => devmodeGo('+1 day', () => shipNow() + 1440)], ['+7 days', () => devmodeGo('+7 days', () => shipNow() + 7 * 1440)], ['+3 hours', () => devmodeGo('+3 hours', () => shipNow() + 180)]]);
   devmodeText(body, 'A workday you skip past 12:30 without clocking in is excused, not missed. Needs kept as a normal day. Undo my last Dev action (Quick) puts the clock back.');
 }
-// ---- D4: Take me to... (refused during the arrival evening and inside a meeting), Mark here / Back to mark ----
+// ---- D4: Take me to… (refused during the arrival evening and inside a meeting), Mark here / Back to mark ----
 // Take me to moves you as the lift does (goToDeck when it's another deck), to a free tile you could walk to from the
 // lift, nearest the spot: in the room asked for, or the spot's own room; the clock doesn't move. The spots: your next
 // appointment (the first thing on or coming up in Tracked, 15b's trkItems, but meals), any room of any deck, and the
@@ -75597,7 +75597,7 @@ function devmodeLadder() {                                // the spine ladder's 
     return ixGoalWorld({ room: 'Z' });
   }, r => !!r && !devmodeSpine(n, r));
 }
-function devmodeRooms(body) {                             // A room...: the deck first, then its rooms
+function devmodeRooms(body) {                             // A room…: the deck first, then its rooms
   const n = DM_UI.rooms;
   devmodeRow(body, DECK_ORDER.slice(0, 3).map(d => [deckWord(d), () => { DM_UI.rooms = d; DM_UI.scroll = '.dmRoom'; devmodeDraw(); }, { ask: d === n }])).classList.add('dmDecks');
   devmodeRow(body, DECK_ORDER.slice(3, 6).map(d => [deckWord(d), () => { DM_UI.rooms = d; DM_UI.scroll = '.dmRoom'; devmodeDraw(); }, { ask: d === n }]));
@@ -75621,8 +75621,8 @@ function devmodeBack() {
 }
 function devmodeQuick(body) {
   const u = devmodeRead(DM_KEY.undo), m = devmodeRead(DM_KEY.mark);
-  devmodeHead(body, 'Take me to\u2026');
-  devmodeRow(body, [['Next appointment', devmodeAppt], ['A room\u2026', () => { DM_UI.rooms = DM_UI.rooms ? null : deckDef.num; DM_UI.scroll = DM_UI.rooms ? '.dmDecks' : null; devmodeDraw(); }, { ask: !!DM_UI.rooms }], ['The ladder', devmodeLadder]]);
+  devmodeHead(body, 'Take me to…');
+  devmodeRow(body, [['Next appointment', devmodeAppt], ['A room…', () => { DM_UI.rooms = DM_UI.rooms ? null : deckDef.num; DM_UI.scroll = DM_UI.rooms ? '.dmDecks' : null; devmodeDraw(); }, { ask: !!DM_UI.rooms }], ['The ladder', devmodeLadder]]);
   devmodeRow(body, DM_SPOTS.map(([l, g]) => [l, () => devmodeGoal(l.toLowerCase(), g())]));
   if (DM_UI.rooms) devmodeRooms(body);
   devmodeHead(body, 'This moment');
@@ -75983,9 +75983,9 @@ function devmodeSetCareer(n, beat, o) {
       return end('Stopped: ' + clockText() + '. This Dev game is where the run got to, not at its landing (approximate). Undo my last Dev action (Quick) brings back the game before.'); }
     let r; try { r = g.next(); } catch (e) { console.error(e); return end('Something went wrong (' + e.message + '). Undo my last Dev action puts it back.'); }
     if (r.done) return end(r.value);
-    devmodeProgress('Setting career: Day ' + r.value + ' of ' + n + '\u2026'); setTimeout(step, 0);
+    devmodeProgress('Setting career: Day ' + r.value + ' of ' + n + '…'); setTimeout(step, 0);
   };
-  devmodeSay('Setting career: a new Dev game\u2026'); setTimeout(step, 280);
+  devmodeSay('Setting career: a new Dev game…'); setTimeout(step, 280);
 }
 function devmodeProgress(text) {                         // (J0) the run's progress line, changed in place: the panel isn't redrawn each day, so a tap on Stop always lands
   DM_UI.msg = text; const p = DM_UI.open && DM_UI.el && DM_UI.el.querySelector('.dmBody > p.dmNote');
@@ -76012,7 +76012,7 @@ function devmodeSet(body) {
   const st = devmodeState(), p = DM_UI.day == null ? Math.max(1, Math.min(DM_MAXDAY, (st.set && st.set.day) || SHIP.time.day || 1)) : DM_UI.day;
   devmodeHead(body, 'Set career to a day');
   devmodeText(body, 'A new Dev game, moved to that day at 06:00 with what a steady player has by then: approximate. Undo my last Dev action (Quick) brings this game back.');
-  devmodeRow(body, [['\u2212 1 day', () => { DM_UI.day = Math.max(0, p - 1); devmodeDraw(); }, { aria: 'A day earlier' }],
+  devmodeRow(body, [['− 1 day', () => { DM_UI.day = Math.max(0, p - 1); devmodeDraw(); }, { aria: 'A day earlier' }],
     ['Set career to Day ' + p, b => devmodeTwice(b, 'Tap again: a new Dev game', () => { DM_UI.day = null; devmodeSetCareer(p); }), { ask: true }],
     ['+ 1 day', () => { DM_UI.day = Math.min(DM_MAXDAY, p + 1); devmodeDraw(); }, { aria: 'A day later' }]]);
   const days = [1, 2, 5, 8, 10, 12, 16, 21, 26, 30, 33, 38];
@@ -76079,7 +76079,7 @@ function devmodeJumpTab(body) {
 }
 // ---- D7 (Stop 2): the Career tab: your career as it is, set by hand (the user's q8), and the promotion test's needs ----
 // Shows the rank, tier, Works reputation (the band, and the xp to the next), each training by name with its code,
-// the tools, missed shifts and the ship's view of your work. By hand, each a Dev action (undoable): xp - / +, to the
+// the tools, missed shifts and the ship's view of your work. By hand, each a Dev action (undoable): xp − / +, to the
 // next band, the next training (the game's own worksTrained: its tool and toast), a tool, and the rank (approximate:
 // Officer gets the first promotion's beats done, Junior takes them away). The promotion test's needs have ticks: Day 9 or
 // later, Relied on, Making it safe, a teacher on shift, before 14:00; "Open the test now" sets the test for today and
@@ -76165,7 +76165,7 @@ function devmodeCareer(body) {
   devmodeText(body, 'Works reputation: ' + BAND_WORD[worksBand()] + ' (xp ' + W.xp + (nb ? '; ' + BAND_WORD[nb[1]] + ' at ' + nb[0] : '') + '). Missed shifts in a row: ' + (C ? C.ms : 0)
     + (C && C.st ? ', the Chief\'s talk step ' + C.st : '') + '. The ship on your work: ' + Math.round(careerWork()) + ' of 100.'
     + (devmodeState().set ? ' Career set to Day ' + devmodeState().set.day + ': approximate.' : ''));
-  devmodeRow(body, [['\u2212 ' + DM_XP + ' xp', () => devmodeXp(-DM_XP, 'xp \u2212' + DM_XP)], [nb ? 'To ' + BAND_WORD[nb[1]] : 'Top band', () => devmodeXp(w => (devmodeBandNext(w) || [w.xp])[0], 'next band'), { off: !nb }], ['+ ' + DM_XP + ' xp', () => devmodeXp(DM_XP, 'xp +' + DM_XP)]]);
+  devmodeRow(body, [['− ' + DM_XP + ' xp', () => devmodeXp(-DM_XP, 'xp −' + DM_XP)], [nb ? 'To ' + BAND_WORD[nb[1]] : 'Top band', () => devmodeXp(w => (devmodeBandNext(w) || [w.xp])[0], 'next band'), { off: !nb }], ['+ ' + DM_XP + ' xp', () => devmodeXp(DM_XP, 'xp +' + DM_XP)]]);
   const next = CAREER_LADDER.find(r => W.tr[r.id] === undefined && r.tier <= W.tier && r.id !== 't2');
   devmodeRow(body, [[next ? 'Train: ' + mechName(next.id) : 'All trained', devmodeNextTraining, { off: !next }], ['Rank: Junior', () => devmodeRank('junior'), { off: W.rank === 'junior', ask: W.rank === 'junior' }], ['Rank: Officer', () => devmodeRank('officer'), { off: W.rank === 'officer', ask: W.rank === 'officer' }]]);
   const hi = [P5_PROMO3 ? ['Rank: Senior Officer', () => devmodeRank('senior'), { off: W.rank === 'senior', ask: W.rank === 'senior' }] : null, P5_PROMO4 ? ['Rank: Engine Specialist', () => devmodeRank('specialist'), { off: W.rank === 'specialist', ask: W.rank === 'specialist' }] : null].filter(Boolean);
@@ -76174,11 +76174,11 @@ function devmodeCareer(body) {
   if (W.tier === 1) {
     devmodeHead(body, 'The promotion test');
     const needs = devmodeTestNeeds(W);
-    devmodeText(body, needs.map(([l, ok]) => (ok ? '\u2713 ' : '\u2717 ') + l).join('   ') + (W.test ? '. Set for Day ' + W.test.day + (W.test.passed ? ', passed' : '') + '.' : '.'));
-    devmodeRow(body, [['Open the test now', devmodeTestOpen, { off: !!(W.test && W.test.passed) || !!W.cur || !needs.slice(1).every(x => x[1]), ask: needs.every(x => x[1]) || needs.slice(1).every(x => x[1]) }], ['Next step \u203a', devmodePromoNext]]);
-  } else if (devmodePromoSteps().some(x => !x.done)) devmodeRow(body, [['Next step \u203a', devmodePromoNext]]);
+    devmodeText(body, needs.map(([l, ok]) => (ok ? '✓ ' : '✗ ') + l).join('   ') + (W.test ? '. Set for Day ' + W.test.day + (W.test.passed ? ', passed' : '') + '.' : '.'));
+    devmodeRow(body, [['Open the test now', devmodeTestOpen, { off: !!(W.test && W.test.passed) || !!W.cur || !needs.slice(1).every(x => x[1]), ask: needs.every(x => x[1]) || needs.slice(1).every(x => x[1]) }], ['Next step ›', devmodePromoNext]]);
+  } else if (devmodePromoSteps().some(x => !x.done)) devmodeRow(body, [['Next step ›', devmodePromoNext]]);
   const steps = devmodePromoSteps();
-  if (steps.length) devmodeText(body, 'The promotion: ' + steps.map(s => (s.done ? '\u2713 ' : '') + s.label + ' (Day ' + (Math.floor(s.at / 1440) + 1) + ' ' + hhmm(s.at % 1440) + ')').join(', ') + '.');
+  if (steps.length) devmodeText(body, 'The promotion: ' + steps.map(s => (s.done ? '✓ ' : '') + s.label + ' (Day ' + (Math.floor(s.at / 1440) + 1) + ' ' + hhmm(s.at % 1440) + ')').join(', ') + '.');
   devmodeHead(body, 'Trainings');
   const opened = worksOpened(W);
   devmodeText(body, CAREER_LADDER.filter(r => r.day <= Math.max(DM_MAXDAY, d)).map(r => mechName(r.id) + ' (' + r.id + '): ' + (W.tr[r.id] !== undefined ? 'trained Day ' + W.tr[r.id] : W.cur && W.cur.id === r.id ? 'under way' : opened.has(r.id) ? 'open' : 'from Day ' + r.day)).join('; ') + '.');
@@ -76236,7 +76236,7 @@ function devmodeSpeedLines() {
   L.push('Draw calls: ' + S.calls + ' (the budget is 450), triangles ' + Math.round(S.tris / 1000) + ' thousand');
   const m = renderer.info.memory, hp = performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) + ' MB' : 'not shown by this browser';
   L.push('Memory: ' + m.geometries + ' shapes, ' + m.textures + ' textures, ' + renderer.info.programs.length + ' shaders, game memory ' + hp);
-  const d = S.deck; L.push(d ? 'Last deck change: ' + deckWord(d.n) + ' built in ' + Math.round(d.ms) + ' ms, the first picture ' + (d.first ? Math.round(d.first) + ' ms' : '\u2026') + ' after it' : 'Last deck change: none yet (take the lift to time one)');
+  const d = S.deck; L.push(d ? 'Last deck change: ' + deckWord(d.n) + ' built in ' + Math.round(d.ms) + ' ms, the first picture ' + (d.first ? Math.round(d.first) + ' ms' : '…') + ' after it' : 'Last deck change: none yet (take the lift to time one)');
   L.push('Build ' + GAME_BUILD + ', ' + (deckDef ? deckWord(deckDef.num) : '') + ', ' + clockText());
   return L;
 }
@@ -76484,7 +76484,7 @@ devmodeJump({ id: 'n3', group: 'nights', label: 'Night 3: the coil swap, your te
 // with it; a row whose event isn't in the plan (switched off, a draft) isn't listed. The one copied minute is Saruth at
 // the bow on the crossing back's Saturday (10:00, inline in crossingBackTick). Not events but ship-wide: the first Short
 // Friday, the Captain's Friday address and the first crew rotation off the Tern. The Running now card (DM_JUMP_HEAD, at
-// the top of Jump to while an event runs): its phase, the threads with - and + (eventScore: greyed once its result is
+// the top of Jump to while an event runs): its phase, the threads with − and + (eventScore: greyed once its result is
 // settled, when the game ignores them), Next phase, Its meeting (Take me to), and End and keep (the game's own
 // eventFinish: the debrief, the log, the traces; then the days' plans made again, as a Dev tradition start does). End and
 // undo is cut (the user's q8): Undo my last Dev action puts the event back, running. Nothing here calls R().
@@ -76556,7 +76556,7 @@ function devmodeEventEnd() {                               // End and keep: the 
   }, () => SHIP.event ? null : 'No ship-wide event is running.');
 }
 function devmodeEventScore(th, n) {
-  devmodeDo('Event: ' + th.label + ' ' + (n > 0 ? '+' : '\u2212') + Math.abs(n), () => {
+  devmodeDo('Event: ' + th.label + ' ' + (n > 0 ? '+' : '−') + Math.abs(n), () => {
     const e = SHIP.event; if (!e || e.mine.settled) return 'Settled: the result is final.';
     eventScore(th.id, Math.max(n, -(e.threads[th.id] || 0)));
     return th.label + ': ' + (e.threads[th.id] || 0) + ' (' + threadBand(th, e.threads[th.id] || 0) + '). The event: ' + eventBand(e.id, e.threads) + '.';
@@ -76569,10 +76569,10 @@ DM_JUMP_HEAD.push(body => {
   devmodeText(body, (e.phase ? DM_PHASE[e.phase] || e.phase : 'before its first phase') + ' (' + (i + 1) + ' of ' + def.phases.length + '), its Day ' + (SHIP.time.day - e.startDay) + ' (Day ' + SHIP.time.day + '); ends Day ' + (e.startDay + def.days - 1) + '.');
   if (def.threads.length) {
     devmodeText(body, def.threads.map(th => th.label + ' ' + (e.threads[th.id] || 0) + ': ' + threadBand(th, e.threads[th.id] || 0)).join(' · ') + '. Overall ' + eventBand(e.id, e.threads) + (settled ? ' (settled: final)' : '') + '.');
-    for (const th of def.threads) { const k = dmEvStep(th), v = e.threads[th.id] || 0; devmodeRow(body, [[th.label + ' \u2212 ' + k, () => devmodeEventScore(th, -k), { off: settled || v <= 0, aria: th.label + ': less ' + k }], [th.label + ' + ' + k, () => devmodeEventScore(th, k), { off: settled, aria: th.label + ': more ' + k }]]); }
+    for (const th of def.threads) { const k = dmEvStep(th), v = e.threads[th.id] || 0; devmodeRow(body, [[th.label + ' − ' + k, () => devmodeEventScore(th, -k), { off: settled || v <= 0, aria: th.label + ': less ' + k }], [th.label + ' + ' + k, () => devmodeEventScore(th, k), { off: settled, aria: th.label + ': more ' + k }]]); }
   } else devmodeText(body, 'No threads: it has no score.');
   const g = dmEvMeet(e, def, now), to = next ? evBeatAt(e.startDay, next.at) : end;
-  devmodeRow(body, [[next ? 'Next phase \u203a' : 'To its end \u203a', () => devmodeGo(next ? 'to ' + def.title + ', ' + (DM_PHASE[next.id] || next.id) : 'to the end of ' + def.title, () => to), { off: !(to > now), aria: next ? 'Next phase: ' + (DM_PHASE[next.id] || next.id) + ', Day ' + (Math.floor(to / 1440) + 1) + ' ' + hhmm(to % 1440) : 'To its end' }],
+  devmodeRow(body, [[next ? 'Next phase ›' : 'To its end ›', () => devmodeGo(next ? 'to ' + def.title + ', ' + (DM_PHASE[next.id] || next.id) : 'to the end of ' + def.title, () => to), { off: !(to > now), aria: next ? 'Next phase: ' + (DM_PHASE[next.id] || next.id) + ', Day ' + (Math.floor(to / 1440) + 1) + ' ' + hhmm(to % 1440) : 'To its end' }],
     ['Its meeting', () => g && g.room ? devmodeTake(g.label, g.deck, () => ixGoalWorld({ room: g.room }), r => r === g.room) : devmodeSay('Nothing of ' + def.title + ' left for you to go to.'), { off: !(g && g.room) }],
     ['End and keep', b => devmodeTwice(b, 'Tap again: end it', devmodeEventEnd)]]);
   devmodeText(body, (g ? 'Its meeting: ' + g.label + ', Day ' + (Math.floor(g.at / 1440) + 1) + ' ' + hhmm(g.at % 1440) + '. ' : '') + 'Next phase moves the clock to ' + (next ? DM_PHASE[next.id] || next.id : 'its end') + ' (Day ' + (Math.floor(to / 1440) + 1) + ' ' + hhmm(to % 1440) + '). End and keep ends it now, as the game would at its end: the debrief, the log, its traces.');
@@ -76990,7 +76990,7 @@ function padPickShow(on) {                                 // the ring and the l
   const text = t ? padLabel(t.key) : '', more = t && P.list.length > 1;
   if (P.hint.dataset.t !== text + more + padFam() + padBtnOf('a')) {
     P.hint.dataset.t = text + more + padFam() + padBtnOf('a'); P.hint.textContent = '';
-    if (t) { const k = padMark('a'); const m = document.createElement('span'); m.className = 'm'; m.textContent = more ? '\u25c0 \u25b6' : '';
+    if (t) { const k = padMark('a'); const m = document.createElement('span'); m.className = 'm'; m.textContent = more ? '◀ ▶' : '';
       P.hint.append(k, document.createTextNode(text), m); }
   }
   P.hint.hidden = !t || toastEl.classList.contains('show');
@@ -77266,10 +77266,10 @@ padOn('frame', () => {                                     // off those screens 
 });
 // Work steps and the device's questions (deviceChoose: a choose or turn card, a look's marks, the arrival's "skip it?"):
 // the highlight lands on the first answer, not the × (Walk away); B is the ×, as tapping it is (Not now, Step back). The
-// place is kept when a turn card asks again (- + -) by the helper's own keeping after a redraw (P1 part 3). A
+// place is kept when a turn card asks again (− + −) by the helper's own keeping after a redraw (P1 part 3). A
 // conversation's card is the helper's (B: nothing).
 PAD_FIRST.devDlg = '#devDlg .act';
-PAD_FIRST.sleepAsk = '#sleepYes';                         // the alarm: Set alarm first (- and + a press away), as the lift lands on your goal deck
+PAD_FIRST.sleepAsk = '#sleepYes';                         // the alarm: Set alarm first (− and + a press away), as the lift lands on your goal deck
 padOwn(L => !!(L && L.id === 'devDlg' && DEV.choose), {
   b: () => { const x = document.querySelector('#devDlg button.x'); if (x) x.click(); return true; },
 });
@@ -77309,7 +77309,7 @@ const PAD_GLYPH = {                                       // [what the mark show
     x: [PAD_SVG('<rect x="3.8" y="3.8" width="8.4" height="8.4"/>'), '#e3a1d6', 'Square'], y: [PAD_SVG('<path d="M8 3.2l5 8.6H3z"/>'), '#6fd6b8', 'Triangle'],
     view: [PAD_SVG('<path d="M5 4v8M8 3v10M11 4v8"/>'), '#e6f0f1', 'Create'], menu: [PAD_SVG('<path d="M3.5 4.5h9M3.5 8h9M3.5 11.5h9"/>'), '#e6f0f1', 'Options'] },
   nin: { a: ['B', '#e6f0f1', 'B'], b: ['A', '#e6f0f1', 'A'], x: ['Y', '#e6f0f1', 'Y'], y: ['X', '#e6f0f1', 'X'],   // Nintendo's places: bottom B, right A, left Y, top X
-    view: ['\u2212', '#e6f0f1', 'Minus'], menu: ['+', '#e6f0f1', 'Plus'] },
+    view: ['−', '#e6f0f1', 'Minus'], menu: ['+', '#e6f0f1', 'Plus'] },
 };
 const padFam = () => { const f = typeof padMarkFamily === 'function' ? padMarkFamily() : PAD.fam; return f === null ? '' : PAD_GLYPH[f] ? f : 'xbox'; };   // '': Off
 const padBtnOf = act => typeof padButtonFor === 'function' && padButtonFor(act) || act;   // the pad button an action is on (P4's rebinding)
@@ -77535,7 +77535,7 @@ function padSaid(el) {                                     // what a screen read
   const by = el.getAttribute('aria-labelledby');
   if (by) { const t = tidy(by.split(/\s+/).map(id => { const e = document.getElementById(id); return e ? e.textContent : ''; }).join(' ')); if (t) return t; }
   if (el.labels && el.labels.length) { const t = tidy([...el.labels].map(x => x.textContent).join(' ')); if (t) return t; }
-  const t = tidy(el.textContent) || tidy([...el.querySelectorAll('img[alt]')].map(i => i.alt).join(' ')); if (/\p{L}/u.test(t)) return t;   // a mark alone ("U+2715", "+") says nothing
+  const t = tidy(el.textContent) || tidy([...el.querySelectorAll('img[alt]')].map(i => i.alt).join(' ')); if (/\p{L}/u.test(t)) return t;   // a mark alone ("✕", "+") says nothing
   return tidy(el.getAttribute('title') || el.getAttribute('placeholder') || (el.tagName === 'INPUT' && /^(button|submit)$/.test(el.type) ? el.value : ''));
 }
 // [selector, name or (el) => name]: for a button that shows only a picture (the check's 'a11y' part lists any it finds)
@@ -80180,7 +80180,7 @@ function endByeTick(now, skip) {
   if (d < W.leave) return;
   const dlg = typeof DIALOGUE !== 'undefined' && DIALOGUE;
   if (!E.f.last && now >= B + END_T.lastAt) { E.f.last = now;
-    if (typeof mailSend === 'function') mailSend({ at: Math.max(now, B + END_T.lastAt), from: 'Chief Ines Calder', subject: endText('mail.end.last.s', 'Your last morning'), body: endText('mail.end.last', 'The Tern leaves at 10:00 from the shuttle bay. Breakfast first. Half the ship will be in that bay by half past nine, so don\'t be late. \u2014 C.'), quiet: true });
+    if (typeof mailSend === 'function') mailSend({ at: Math.max(now, B + END_T.lastAt), from: 'Chief Ines Calder', subject: endText('mail.end.last.s', 'Your last morning'), body: endText('mail.end.last', 'The Tern leaves at 10:00 from the shuttle bay. Breakfast first. Half the ship will be in that bay by half past nine, so don\'t be late. — C.'), quiet: true });
     if (live) endNotice(endText('ending.notice.lastMorning', 'Your last morning: the Tern leaves at 10:00.'), 'Chief Ines Calder'); }
   if (!E.f.bf && now >= B + END_T.bfFrom && now < B + (E.f.bfSeek ? END_T.bfLate : END_T.bfTo)) {   // breakfast: the Captain and your friends in the mess; from 08:30 Pell comes to get you
     if (live && !E.f.bfSeek && now >= B + END_T.bfFetch && !(deckDef.num === 3 && roomAt(...player.here()) === 'M')) E.f.bfSeek = now;
