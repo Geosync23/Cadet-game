@@ -468,6 +468,9 @@ const EVON_MEMO_ON = true;                               // A7: eventsOn (sectio
 const WALLS_STILL_ON = true;                             // A8: walls, posts, sills, panes and door leaves are sent to the graphics chip again only when one has changed (4b's instChanged)
 const TEX_READ_ON = false;                                // A9: kit textures' canvases are made for reading back (grain() reads 17 of them at load); only if the pictures stay identical
 const SAVE_TAB_ON = true;                                // A12: a tab doesn't save over a game that another tab has taken further (section 13's saveGameSafe)
+// ---- review update 2 (lead 52; plans/patch-review2.md). One switch a piece, off here: off is the game as 0.99.92-review
+const R2_THEO_ON = false;                                // piece A (W1; backlog R6-1): Winner Stays On's next challenger takes the gate bench only when no one's plan has them sat on it then (section 18's wsoCourt, wsoWhere); off: Day 14, Theo stands 20 ship minutes by a bench the Captain is on
+const R2_QUIET_ON = false;                               // piece F (W1; the user's answer 13): with LOOP_GUARD_ON, a frame that fails is logged once per kind and the game carries on with no card; the card only for a true freeze (section 12's r2Quiet, R2_FREEZE_CARD)
 
 // =====================================================================
 // 2. TEXTURES (procedural)
@@ -47000,6 +47003,7 @@ if (REC_TRAD_ON) for (const ev of REC_TRADS) SHIP_TRADITIONS.push(ev);
 // seeded by the day and the game (key 1037). Three wins in a row put a name on the foyer's board (recBoard('wso')).
 // wsoCourt(d) -> { games: [{ a, b, from, to, w }], three: [ids] } (minutes from midnight), pure and kept per day; tradWhere
 // puts the two on court at their baselines (7-disc-1 bow, 7-disc-2 stern) while their game is on. A day with no WSO: null
+const WSO_BENCH = '7-stand-28';   // the gate bench the next challenger waits on (review update 2, piece A)
 const WSO_GAME = GAMES997_ON ? 20 : 15, WSO_COURT = new Map();   // 0.99.7 note 44 (GM1): 20 with GAMES997_ON, so each game is mostly rally; a game with the walk on and off (0.83.2: 8 was shorter than the walk from the stands)
 function wsoCourt(d) {
   if (WSO_COURT.has(d)) return WSO_COURT.get(d);
@@ -47007,6 +47011,7 @@ function wsoCourt(d) {
   if (out) {
     const B = (d - 1) * 1440, seg = new Map();
     for (const p of schedPeople()) { const s = planDay(p, d).find(x => x.tag && x.tag.startsWith('ev-rec-wso')); if (s) seg.set(p.id, [s.from - B, s.to - B]); }
+    if (R2_THEO_ON) { out.bench = []; for (const p of schedPeople()) for (const x of planDay(p, d)) if (x.placeId === WSO_BENCH) out.bench.push([p.id, x.from - B, x.to - B]); }   // review update 2, piece A (W1): who the day's plans seat on the gate bench, and when (the plans only: the same whenever it is asked)
     const here = (id, a, b) => { const x = seg.get(id); return !!x && x[0] <= a && x[1] >= b; };
     const since = new Map(); let champ = null, run = 0, side = 1;   // side: the champion's end (1 = 7-disc-1 by the gate, 2 = the stern); the winner stays where they are
     for (let T = e.from; T + WSO_GAME <= e.to; T += WSO_GAME) {
@@ -47134,7 +47139,7 @@ function wsoWhere(p, t) {                                // the two on court now
   const c = wsoCourt(d); if (!c) return null;
   if (GAMES997_ON && typeof ACT !== 'undefined' && ACT && ACT.kind === 'disc') return null;   // 0.99.7 (GM1): walking to court for your game, the court's yours too
   const m = t - (d - 1) * 1440, g = c.games.find(x => x.from <= m && m < x.to && (x.a === p.id || x.b === p.id));
-  if (!g && GAMES997_ON) { const n = c.games.find(x => x.from > m && x.from - m <= WSO_GAME && x.b === p.id); if (n) return { deck: 7, act: 'leisure', type: 'rec:seat', placeId: '7-stand-28', moving: false, from: (d - 1) * 1440 + n.from - WSO_GAME, until: (d - 1) * 1440 + n.from, tag: 'ev-rec-wso-next', anim: null }; }   // 0.99.7 note 44 (GM1): the next challenger waits on the gate bench
+  if (!g && GAMES997_ON) { const n = c.games.find(x => x.from > m && x.from - m <= WSO_GAME && x.b === p.id); if (n && !(R2_THEO_ON && (c.bench || []).some(([id, x, y]) => id !== p.id && x < n.from && y > n.from - WSO_GAME))) return { deck: 7, act: 'leisure', type: 'rec:seat', placeId: '7-stand-28', moving: false, from: (d - 1) * 1440 + n.from - WSO_GAME, until: (d - 1) * 1440 + n.from, tag: 'ev-rec-wso-next', anim: null }; }   // 0.99.7 note 44 (GM1): the next challenger waits on the gate bench
   if (!g) return null;
   return { deck: 7, act: 'leisure', type: 'rec:disc', placeId: g.at1 === p.id ? '7-disc-1' : '7-disc-2', moving: false, from: (d - 1) * 1440 + g.from, until: (d - 1) * 1440 + g.to, tag: 'ev-rec-wso-disc', anim: null };
 }
@@ -80669,8 +80674,9 @@ const clock = new THREE.Clock(); let scrT = 0;
 const LOOP_BAD_MAX = 20, LOOP_WIN = new Uint8Array(120); let LOOP_AT = 0, LOOP_SUM = 0, LOOP_LOGS = 0, LOOP_SAID = false;
 function loopMark(bad) { LOOP_SUM += bad - LOOP_WIN[LOOP_AT]; LOOP_WIN[LOOP_AT] = bad; LOOP_AT = (LOOP_AT + 1) % LOOP_WIN.length; }
 function loopGuard() {
-  try { loop(); loopMark(0); }
+  try { loop(); loopMark(0); if (R2_QUIET_ON) r2Good(); }
   catch (e) {
+    if (R2_QUIET_ON) { r2Quiet(e); requestAnimationFrame(loopGuard); return; }
     loopMark(1); if (LOOP_LOGS++ < 3) console.error(e);
     if (LOOP_SUM >= LOOP_BAD_MAX && !LOOP_SAID) { LOOP_SAID = true; loopCard(); }
     requestAnimationFrame(loopGuard);
@@ -80690,6 +80696,37 @@ function loopCard() {
     d.append(h, p, b); document.body.appendChild(d); b.focus();   // the keyboard's Enter (and a controller's press, section 26) reach Reload
   } catch (e) { /* no page to say it on */ }
 }
+// ---- review update 2, piece F (W1 for lead 52; R2_QUIET_ON, with LOOP_GUARD_ON; off: FR1's A1 as it was) ----
+// The user's answer 13: when something goes wrong, "try to carry on quietly and only log it". A frame that fails is
+// noted and the game carries on with no card. Each kind of error (its name and message) is written to the console
+// once and kept in R2_ERRS with a count (at most R2_KINDS kinds, the rest under one last row), for a Dev panel or the
+// Saves app to show later: r2Errors() gives the list. The card is kept for a true freeze only: every frame failing,
+// with no good frame between, for R2_FREEZE_MS of real time (a gap between two frames counts R2_GAP_MS at most, so a
+// tab left hidden is not ten seconds of freeze). R2_FREEZE_CARD = false: no card at all, the log only. If frames come
+// good again while the card is up (R2_BACK good frames in a row) the card goes, and the game is carrying on
+const R2_FREEZE_CARD = true, R2_FREEZE_MS = 10000, R2_GAP_MS = 250, R2_KINDS = 12, R2_BACK = 60, R2_ERRS = [];
+let R2_BAD_MS = 0, R2_BAD_AT = 0, R2_GOOD = 0;
+function r2Kind(e) { try { return String(e && typeof e === 'object' && 'message' in e ? (e.name || 'Error') + ': ' + e.message : e).slice(0, 160); } catch (x) { return 'An error with no words'; } }
+function r2Errors() { return R2_ERRS.map(r => ({ kind: r.kind, where: r.where, n: r.n, day: r.day, min: r.min })); }
+function r2Quiet(e) {
+  const now = performance.now(); let k = r2Kind(e), r = R2_ERRS.find(x => x.kind === k);
+  if (!r && R2_ERRS.length >= R2_KINDS) { k = 'Other errors'; r = R2_ERRS.find(x => x.kind === k); }
+  if (r) r.n++;
+  else {
+    let where = '', day = null, min = null;
+    try { where = (String(e && e.stack || '').split('\n').find(l => /:\d+:\d+/.test(l)) || '').trim().slice(0, 160); } catch (x) { /* no stack */ }
+    try { day = SHIP.time.day; min = Math.floor(SHIP.time.min); } catch (x) { /* before the ship's clock */ }
+    R2_ERRS.push({ kind: k, where, n: 1, day, min });
+    try { console.error(e); } catch (x) { /* no console */ }
+  }
+  R2_GOOD = 0; if (R2_BAD_AT) R2_BAD_MS += Math.min(Math.max(now - R2_BAD_AT, 0), R2_GAP_MS); R2_BAD_AT = now;
+  if (R2_FREEZE_CARD && R2_BAD_MS >= R2_FREEZE_MS && !LOOP_SAID) { LOOP_SAID = true; loopCard(); }
+}
+function r2Good() {
+  R2_BAD_MS = 0; R2_BAD_AT = 0;
+  if (LOOP_SAID && ++R2_GOOD >= R2_BACK) { LOOP_SAID = false; R2_GOOD = 0; try { const c = document.getElementById('loopCard'); if (c) c.remove(); } catch (x) { /* the card stays */ } }
+}
+// ---- end of review update 2, piece F ----
 function loop() {
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
   const run = !freezeSync();                             // section 15's pause (0.28.48) and a game of Tiles (0.28.50): nothing moves and ship time stands still; the view still draws

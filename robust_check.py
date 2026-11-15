@@ -14,6 +14,9 @@
 #   walls   A8 WALLS_STILL_ON  standing still nothing is sent again; a wall that moves is sent
 #   tab     A12 SAVE_TAB_ON    another tab further on: this one stops saving and says so; one that is behind: saved over
 #   hint    A9 TEX_READ_ON     the game loads with it (its pictures are cadet_test's to judge, with the switch on)
+#   quiet   R2_QUIET_ON        (review update 2, piece F) errors that come and go: no card, each kind logged once and
+#                              kept in a list; every frame bad for 10 real seconds: the card, once; it goes when frames
+#                              come good; a hidden tab's gap is not a freeze; R2_FREEZE_CARD false: never a card
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 robust_check.py BUILD.html [part ...]   Good is ROBUST CHECK OK (exit 0); a failure exits 1. About 4 minutes.
 import sys, os, re, json, pathlib, time
@@ -73,24 +76,25 @@ def good_save(pw, path):                                 # a real Day 10 save fr
     key = t.ev('SAVE_KEY'); s = t.store(key); t.close(); return key, s
 ARRIVED = {'starship-cadet-arrived': '1'}
 
+QUIET_OFF = ['R2_QUIET_ON'] if 'const R2_QUIET_ON = ' in SRC else []   # piece F changes when the card comes: the loop part is A1 without it
 def part_loop(pw):
     PLANT_ONE = "(() => { const u = crowd.update.bind(crowd); let n = 0; crowd.update = (a, b) => { if (n++ === 0) throw new Error('robust_check: one bad frame'); return u(a, b); }; })()"
     PLANT_ALL = "crowd.update = () => { throw new Error('robust_check: every frame bad'); }"
     off = Tab(pw, build('loop_off', off=['LOOP_GUARD_ON']), '?nosave&debug'); off.step(30); off.ev(PLANT_ONE); m0 = off.ev('shipNow()'); off.step(1, safe=True); off.step(60, safe=True)
     check(off.ev('shipNow()') == m0, 'loop, switch off: one bad frame stops the game (the fault bites)'); off.close()
-    t = Tab(pw, build('loop_on', on=['LOOP_GUARD_ON']), '?nosave&debug'); t.step(30); t.ev(PLANT_ONE); m0 = t.ev('shipNow()'); t.step(61)
+    t = Tab(pw, build('loop_on', on=['LOOP_GUARD_ON'], off=QUIET_OFF), '?nosave&debug'); t.step(30); t.ev(PLANT_ONE); m0 = t.ev('shipNow()'); t.step(61)
     check(t.ev('shipNow()') > m0 + .5, f"loop, on: after one bad frame the game carries on (ship minute {m0:.2f} -> {t.ev('shipNow()'):.2f})")
     check(t.page.evaluate("!document.getElementById('loopCard')"), 'loop, on: no card for one bad frame')
     t.ev(PLANT_ALL); t.step(18); check(t.page.evaluate("!document.getElementById('loopCard')"), 'loop, on: 19 bad frames among the last 120 (the one, then 18 in a row): no card yet')
     t.step(30); card = t.page.evaluate("(() => { const c = document.querySelectorAll('#loopCard'); return c.length + ' | ' + (c[0] ? c[0].textContent : ''); })()")
     check(card.startswith('1 | ') and 'Something went wrong' in card and 'Reload' in card and 'saved' not in card, f'loop, on: every frame bad: one card, in plain words, and with saving off it does not say "saved" ({card!r})')
     t.close()
-    t = Tab(pw, build('loop_on', on=['LOOP_GUARD_ON']), '?nosave&debug'); t.step(30)
+    t = Tab(pw, build('loop_on', on=['LOOP_GUARD_ON'], off=QUIET_OFF), '?nosave&debug'); t.step(30)
     t.ev("(() => { const u = crowd.update.bind(crowd); let n = 0; crowd.update = (a, b) => { if (n++ % 2 === 0) throw new Error('robust_check: every other frame bad'); return u(a, b); }; })()")
     t.step(30); none = t.page.evaluate("!document.getElementById('loopCard')"); t.step(40)
     check(none and t.page.evaluate("!!document.getElementById('loopCard')"), 'loop, on: every other frame bad: no card after 15 bad frames, the card once 20 of the last 120 were bad'); t.close()
-    key, good = good_save(pw, build('loop_on', on=['LOOP_GUARD_ON']))
-    t = Tab(pw, build('loop_on', on=['LOOP_GUARD_ON']), plant={key: good, **ARRIVED}); t.step(30); t.ev(PLANT_ALL); t.step(30)
+    key, good = good_save(pw, build('loop_on', on=['LOOP_GUARD_ON'], off=QUIET_OFF))
+    t = Tab(pw, build('loop_on', on=['LOOP_GUARD_ON'], off=QUIET_OFF), plant={key: good, **ARRIVED}); t.step(30); t.ev(PLANT_ALL); t.step(30)
     check(t.page.evaluate("document.activeElement && document.activeElement.textContent") == 'Reload', 'loop, on: the card\'s Reload button has the focus')
     card = t.page.evaluate("(document.getElementById('loopCard') || {}).textContent || ''"); check('saved up to Day 10, 10:00' in card, f'loop, on, a game with a save: the card names the save that is really in storage ({card!r})')
     t.page.evaluate("k => localStorage.removeItem(k)", key); check('no save yet' in t.ev('loopCardLine()'), 'loop, on, nothing in storage: the card says there is no save'); t.close()
@@ -251,7 +255,56 @@ def part_hint(pw):
     t = Tab(pw, build('hint_on', on=['TEX_READ_ON']), '?nosave&debug'); t.step(30)
     check(t.up and not t.errors and t.ev('renderer.info.memory.textures') > 0, f'hint, on: the game loads and draws (errors {t.errors[:1]})'); t.close()
 
-PARTS = [('loop', part_loop), ('keep', part_keep), ('tell', part_tell), ('lib', part_lib), ('sleep', part_sleep), ('load', part_load), ('memo', part_memo), ('walls', part_walls), ('tab', part_tab), ('hint', part_hint)]
+def part_quiet(pw):
+    if 'const R2_QUIET_ON = ' not in SRC: print('skipped: R2_QUIET_ON is not in this build'); return
+    ODD = "(() => { const u = crowd.update.bind(crowd); let n = 0; crowd.update = (a, b) => { if (n++ % 2 === 0) throw new Error('robust_check: every other frame bad'); return u(a, b); }; })()"
+    ALL = "(() => { window.__u = crowd.update; crowd.update = () => { throw new Error('robust_check: every frame bad'); }; })()"
+    BACK = "crowd.update = window.__u"
+    card = lambda t: t.page.evaluate("document.querySelectorAll('#loopCard').length")
+    def tab(path):                                       # Tab.step's frame is 1/30 of a (virtual) real second: 300 frames are ten seconds
+        t = Tab(pw, path, '?nosave&debug'); t.cons = []
+        t.page.on('console', lambda m: m.type == 'error' and t.cons.append(m.text[:200])); t.step(30); return t
+    on = build('quiet_on', on=['LOOP_GUARD_ON', 'R2_QUIET_ON'])
+    # 1. an error that comes and goes (every other frame, for 20 real seconds: A1's rule would show its card after 40 frames)
+    t = tab(on); t.ev(ODD); m0 = t.ev('shipNow()'); t.step(600); log = t.ev('r2Errors()')
+    check(card(t) == 0, 'quiet: every other frame bad for 20 real seconds: no card')
+    check(t.ev('shipNow()') > m0 + 2, f"quiet: the game carries on meanwhile (ship minute {m0:.2f} -> {t.ev('shipNow()'):.2f})")
+    check(len(log) == 1 and log[0]['n'] == 300 and 'every other frame bad' in log[0]['kind'] and log[0]['day'] is not None, f'quiet: the list holds the one kind, counted 300 times, with its ship day ({log})')
+    check(len([c for c in t.cons if 'every other frame bad' in c]) == 1, f'quiet: that kind is written to the console once, not 300 times ({len(t.cons)} console errors)')
+    # 2. a second kind is its own row and its own one console line; many kinds: R2_KINDS rows and one row for the rest
+    t.ev("(() => { const u = crowd.update; let n = 0; crowd.update = (a, b) => { if (n++ < 4) throw new TypeError('robust_check: a second kind'); return u(a, b); }; })()"); t.step(10); log = t.ev('r2Errors()')
+    check(len(log) == 2 and log[1]['n'] == 4 and log[1]['kind'].startswith('TypeError') and len([c for c in t.cons if 'a second kind' in c]) == 1, f'quiet: a second kind has its own row and one console line ({[(r["kind"][:40], r["n"]) for r in log]})')
+    t.ev("(() => { const u = crowd.update; let n = 0; crowd.update = (a, b) => { if (n < 20) throw new Error('robust_check: kind number ' + n++); return u(a, b); }; })()"); t.step(30); log = t.ev('r2Errors()'); kinds = t.ev('R2_KINDS')
+    check(len(log) == kinds + 1 and log[-1]['kind'] == 'Other errors' and sum(r['n'] for r in log if 'kind number' in r['kind'] or r['kind'] == 'Other errors') == 20, f'quiet: 20 more kinds: the list stops at {kinds} kinds and one row for the rest ({len(log)} rows)')
+    check(card(t) == 0 and not t.errors, f'quiet: still no card, and nothing reached the page as an uncaught error ({t.errors[:1]})'); t.close()
+    # 3. a true freeze: every frame bad. No card at 9 real seconds, one card after 10; it names no save with saving off
+    t = tab(on); t.ev(ALL); t.step(270); check(card(t) == 0, 'quiet: every frame bad for 9 real seconds: no card yet')
+    t.step(40); txt = t.page.evaluate("(document.getElementById('loopCard') || {}).textContent || ''")
+    check(card(t) == 1 and 'Something went wrong' in txt and 'Reload' in txt and 'saved' not in txt, f'quiet: every frame bad for 10 real seconds: the card, in plain words ({txt!r})')
+    t.step(300); check(card(t) == 1 and len(t.ev('r2Errors()')) == 1 and len(t.cons) == 1, 'quiet: ten seconds more of it: still one card, one row, one console line')
+    # the frames come good again: the card goes and the game carries on; a second freeze brings it back
+    t.ev(BACK); m0 = t.ev('shipNow()'); t.step(30); still = card(t); t.step(60)
+    check(still == 1 and card(t) == 0 and t.ev('shipNow()') > m0 + .5, 'quiet: frames good again: the card stays a second, then goes, and the game carries on')
+    t.ev(ALL); t.step(320); check(card(t) == 1, 'quiet: a second freeze brings the card again'); t.close()
+    # 4. bad frames with good ones between never add up to a freeze; nor does the gap of a hidden tab
+    t = tab(on); t.ev("(() => { const u = crowd.update.bind(crowd); let n = 0; crowd.update = (a, b) => { if (n++ % 100 !== 99) throw new Error('robust_check: 99 bad, one good'); return u(a, b); }; })()"); t.step(900)
+    check(card(t) == 0, 'quiet: 99 bad frames then one good, for 30 real seconds: no card (not every frame)'); t.close()
+    t = tab(on); t.ev(ALL); t.step(150); t.page.evaluate('window.__step(1, 60000)'); t.step(30)
+    check(card(t) == 0, 'quiet: five seconds of bad frames, a minute hidden, a second more: no card (the gap is not a freeze)')
+    t.step(150); check(card(t) == 1, 'quiet: and the card once the bad frames themselves reach ten seconds'); t.close()
+    # 5. the freeze card switched off (R2_FREEZE_CARD): never a card, the log only
+    src = SRC.replace('const R2_FREEZE_CARD = true,', 'const R2_FREEZE_CARD = false,')
+    if check(src != SRC and src.count('const R2_FREEZE_CARD = false,') == 1, 'quiet: R2_FREEZE_CARD is one constant in the build'):
+        for n in ('LOOP_GUARD_ON', 'R2_QUIET_ON'):
+            if not re.search(r'\bconst ' + n + r' = true;', src): src = flip(src, n, True)
+        p = WORK / 'test' / (RUN + 'quiet_nocard.html'); p.write_text(instrument(src))
+        t = tab(p); t.ev(ALL); t.step(600); log = t.ev('r2Errors()')
+        check(card(t) == 0 and len(log) == 1 and log[0]['n'] == 600, f'quiet, R2_FREEZE_CARD false: every frame bad for 20 real seconds: no card, the list has it ({log[0]["n"] if log else None} times)')
+        t.ev(BACK); m0 = t.ev('shipNow()'); t.step(60); check(t.ev('shipNow()') > m0 + .5, 'quiet, R2_FREEZE_CARD false: and the game carries on when the frames come good'); t.close()
+    # 6. with no fault nothing is logged (piece F off, LOOP_GUARD_ON alone, is A1 as before: the loop part)
+    t = tab(on); t.step(120); check(t.ev('r2Errors()') == [] and card(t) == 0 and not t.cons, f'quiet: a healthy game: nothing logged, no card ({t.cons[:1]})'); t.close()
+
+PARTS = [('loop', part_loop), ('keep', part_keep), ('tell', part_tell), ('lib', part_lib), ('sleep', part_sleep), ('load', part_load), ('memo', part_memo), ('walls', part_walls), ('tab', part_tab), ('hint', part_hint), ('quiet', part_quiet)]
 if __name__ == '__main__':
     t0 = time.time()
     with sync_playwright() as pw:
