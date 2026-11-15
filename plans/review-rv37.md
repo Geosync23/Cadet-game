@@ -322,3 +322,18 @@ lines, all behind FRP_WORDS_ON (the plural test now treats names ending -us or -
 reads "Don't remind me"). Probe `words` on fe156c8: 15 machine names read as plural, all rightly; "Bridge data bus"
 is singular. cadet_test was not rerun by me on fe156c8 (FR2 reports off ALL IDENTICAL; the delta cannot run with the
 switch off). Left for the round: controller_check with the switches on.
+
+## 11. A question from the round: the Day 2 call-booths arrow (candidate c4999dae, game d6b9ce81...a1c0)
+
+R4's fresh_walk: Day 2 18:00-18:12, the follower's taps at the pin of "Calling home, the booths on Deck 3: Leila
+shows you how" open Davi Keane's card on the candidate; on OLD the first tap sat you in a booth.
+**Verdict: old-equivalent. Not a fault of F4.** That arrow points at a room (the booths, room B; at Leila only once
+she is in the room), not at a thing or a place. Probe `plans/rv37-probes/rv37_booth_probe.py` on the candidate, Day
+2 18:01, that room arrow, the same state with FRP_PINTAP_ON flipped: nobody on the pin: every tap (the pin, the floor
+under it, its head, its label) walks you, off and on; with a person moved onto the pin's point: every one of those
+taps is that person's, off and on. F4 only hands a tap to the arrow's own target (a person it names, your job's stop,
+the thing at its place); a room arrow has none, so the tap stays the bystander's, as on OLD with the same person
+there. The walks differ because Davi stands on that spot in the candidate's walk and nobody did in OLD's (the days
+had already parted: FRP_FOOD_ON's arrows, no lunchtime call).
+If wanted later (not asked for now): for a room arrow, a tap at the pin with someone on it could walk you to the
+spot instead of opening their card. It would be a new behaviour, so its own small reviewed change.
