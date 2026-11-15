@@ -17526,9 +17526,10 @@ const ixBoard = (() => {
   let back = null;
   const canTake = (j, mine) => !mine && !j.claimedBy && (typeof jobTier !== 'function' || jobTier(j) <= playerTier())
     && !(j.machine && typeof ENGINE_KINDS !== 'undefined' && ENGINE_KINDS.has((machineById(j.machine) || {}).kind));
-  function row(title, line, pri, btn, job) {           // job: the job's id, on the row (data-job), for section 19's panel pointer
+  function row(title, line, pri, btn, job, tag) {      // job: the job's id, on the row (data-job), for section 19's panel pointer; tag (R2_SHADOW_ON): a banner over the title
     const r = document.createElement('div'), d = document.createElement('div'), h = document.createElement('b'), s = document.createElement('small');
     r.className = 'ixjob ' + (pri || ''); if (job) r.dataset.job = job; h.textContent = title; s.textContent = line; d.append(h, s); r.append(document.createElement('i'), d);
+    if (tag) { const t = document.createElement('em'); t.className = 'r2tag'; t.textContent = tag; t.style.cssText = R2_TAG_CSS; d.prepend(t); }
     if (btn) r.appendChild(btn); list.appendChild(r);
   }
   const PRI = ['routine', 'soon', 'urgent', 'urgent'];
@@ -17538,7 +17539,7 @@ const ixBoard = (() => {
   const button = (txt, fn) => { const x = document.createElement('button'); x.type = 'button'; x.textContent = txt; x.onclick = fn; return x; };
   const LESSON = () => 'Your ' + boardLessonName() + ': take this one';   // FX10 (patch 0.92.3 item 29): the job a lesson's "your turn" put up for you (named: patch 0.92.5 #12)
   const api = {
-    open() { back = document.activeElement; el.hidden = false; api.draw(); document.getElementById('ixBoardC').focus(); },
+    open() { back = document.activeElement; el.hidden = false; api.draw(); document.getElementById('ixBoardC').focus(); { const w = r2ClockWords(); if (w) ixTip('r2clock', w); } },   // R2_CLOCK_ON: opened before you've clocked in, why and when (once)
     close() { el.hidden = true; if (back && back.focus) back.focus(); },
     get isOpen() { return !el.hidden; },
     doable,                                              // the Take it rule (piece D's guideTakeable reads it)
@@ -17551,16 +17552,20 @@ const ixBoard = (() => {
       const ids = new Set(yours.map(o => o.id)), les = boardLesson();
       if (les && ids.has(les)) yours.sort((a, b) => (b.id === les) - (a.id === les));   // your lesson's job first (FX10)
       const crew = jobs.filter(j => j.claimedBy && j.claimedBy !== 'you');   // the crew's, as the board on the wall shows them (0.37.6)
-      sub.textContent = mine ? (frpSay() && frpJobDone() ? 'Your job is done. Turn it in here.' : 'You have a job. Finish it or drop it to take another.') : les && ids.has(les) ? 'Your ' + boardLessonName() + ' is on the board: take the marked one.' : yours.length ? 'Pick a job and take it. Tier ' + playerTier() + ' work is yours to take.'
+      const r2s = r2ShadowSub(les && ids.has(les) ? les : null, mine);   // R2_SHADOW_ON: the Chief's job named in the heading (null when off)
+      sub.textContent = r2s ? r2s : mine ? (frpSay() && frpJobDone() ? 'Your job is done. Turn it in here.' : 'You have a job. Finish it or drop it to take another.') : les && ids.has(les) ? 'Your ' + boardLessonName() + ' is on the board: take the marked one.' : yours.length ? 'Pick a job and take it. Tier ' + playerTier() + ' work is yours to take.'
         : 'Nothing open for you just now. New jobs come in through the day shift, and the crew take the urgent ones first: check back in an hour or two.';
+      if (!r2s) sub.textContent += r2ShadowNote(mine);   // R2_SHADOW_ON: her job not up yet ('' when off)
+      const r2b = !mine && r2ClockBar() ? r2ClockWords() : null;   // R2_CLOCK_ON: not clocked in yet (null when off)
+      if (r2b && yours.some(o => !r2ClockFree(o.id))) sub.textContent = r2b + (les && ids.has(les) ? ' ' + sub.textContent : '');
       if (mine) {                                        // yours: Turn it in once the work's done (section 17's turnInJob), else Drop it
         const [title, where, state, pri] = jobCard(mine), done = mine.workDone && typeof turnInJob === 'function';
         row(mine.title || title, where + ' · ' + (done ? 'done: turn it in' : state), pri, done ? button('Turn it in', () => api.turnIn(mine.id))
           : button('Drop it', () => { dropJob(mine.id); api.draw(); device.refresh(); toast('Job board', 'You put the job back on the board.'); }), mine.id);
       }
       for (const o of yours) {
-        const raw = SHIP.jobs.find(j => j.id === o.id), ok = !mine && doable(raw);
-        row(o.title, o.where + ' · ' + (o.id === les ? LESSON() : o.state) + (doable(raw) ? '' : ' · not yet: coming soon'), PRI[o.urgency] + (o.id === les ? ' lesson' : ''), ok ? button('Take it', () => api.take(o.id)) : null, o.id);
+        const raw = SHIP.jobs.find(j => j.id === o.id), shut = !!r2b && !r2ClockFree(o.id), ok = !mine && doable(raw) && !shut;
+        row(o.title, o.where + ' · ' + (o.id === les ? (r2Calder(les) ? R2_CALDER + ': take this one first' : LESSON()) : o.state) + (doable(raw) ? (shut ? ' · after you clock in' : '') : ' · not yet: coming soon'), PRI[o.urgency] + (o.id === les ? ' lesson' : ''), ok ? button('Take it', () => api.take(o.id)) : null, o.id, o.id === les && r2Calder(les) ? R2_CALDER.toUpperCase() : null);
       }
       for (const j of open.filter(j => !ids.has(j.id))) {   // on the board, but not yours to take: say why
         const [title, where, state, pri] = jobCard(j), why = jobTier(j) > playerTier() ? 'tier ' + jobTier(j) : j.status === 'waiting' ? '' : 'crew only';
@@ -17569,6 +17574,7 @@ const ixBoard = (() => {
       for (const j of crew) { const [title, where, state, pri] = jobCard(j); row(j.title || title, where + ' · ' + state, pri + ' taken', null); }
     },
     take(id) {
+      if (r2ClockBar() && !r2ClockFree(id)) { toast('Job board', r2ClockWords()); api.draw(); return false; }   // R2_CLOCK_ON: no board jobs before you clock in
       const est = (typeof openJobs === 'function' ? openJobs('you') : []).find(o => o.id === id);   // its minutes, before it's yours (lessonClash)
       if (!claimJob(id)) { toast('Job board', 'Someone got there first.'); api.draw(); return false; }
       const j = myJob(), [title, where] = jobCard(j), clash = lessonClash(j, est ? est.mins : 0);
@@ -17613,6 +17619,7 @@ function ixJobStep() {
   if (typeof myJob !== 'function') return null;
   { const co = typeof clockRmDue === 'function' ? clockRmDue() : null; if (co && co.want === 'out' && co.late && !(typeof introOn === 'function' && introOn() && SHIP.time.day === 1)) return { deck: 5, place: '5-timeclock-1', label: 'Shift over: clock out at the time clock' }; }   // FX1: at the shift's end, over your job (it waits for tomorrow)
   const j = myJob(), lo = ixLoose(j); if (lo) return lo;
+  if (j && r2ClockBar() && !r2ClockFree(j.id)) return null;   // R2_CLOCK_ON: a job in hand before you've clocked in today waits in Tracked; nothing leads to the board before the shift
   if (typeof careerClockedOut === 'function' && careerClockedOut(SHIP.time.day)) return null;   // clocked out: off shift you're free, no arrow to turn in or take more (lead 29; a job you hold stays in Tracked)
   if (!j) return ixWorkStep();
   if (j.workDone) return { deck: 5, item: /job board/i, room: 'w', label: 'Turn it in at the job board' };   // Pillar 3: back to the board
@@ -18216,7 +18223,8 @@ function guideTick() {
   requestAnimationFrame(guideTick);
   try { clockFirstTick(); } catch (e) { if (!GUIDE.clockWarned) { GUIDE.clockWarned = true; console.warn('clockFirstTick:', e); } }   // patch 0.92.3 item 6 (AC3)
   { const m = Math.floor(shipNow()); if (m !== GUIDE.tm) { GUIDE.tm = m; try { guideTrain(); } catch (e) { if (!GUIDE.trainWarned) { GUIDE.trainWarned = true; console.warn('guideTrain:', e); } }
-    try { guideShift(); } catch (e) { if (!GUIDE.shiftWarned) { GUIDE.shiftWarned = true; console.warn('guideShift:', e); } } } }   // once a ship minute; a break is said once (RV6)
+    try { guideShift(); } catch (e) { if (!GUIDE.shiftWarned) { GUIDE.shiftWarned = true; console.warn('guideShift:', e); } }
+    if (R2_MEALS_ON) try { r2MealsTick(); } catch (e) { if (!GUIDE.r2Warned) { GUIDE.r2Warned = true; console.warn('r2MealsTick:', e); } } } }   // once a ship minute; a break is said once (RV6)
   if (GUIDE.tq.length && performance.now() - TOAST_AT >= TQ_MIN) { const [t, x] = GUIDE.tq.shift(); GUIDE.pass = true; try { toast(t, x); } finally { GUIDE.pass = false; } }
 }
 function guideStart() { if (GUIDE_ON && !GUIDE.loop) { GUIDE.loop = true; requestAnimationFrame(guideTick); } }
@@ -18241,7 +18249,7 @@ function guideTrain() {
   { const les = boardLesson(), c0 = SHIP.works && SHIP.works.cur, now0 = Math.floor(shipNow());   // (FX15, patch 0.92.5 #22) a training job no lesson's "your turn" put up (a head-scratcher's first case, Day 2's solo job waiting): T3 at the board, by its name (Day 1's: the intro's own arrow)
     if (les && !(c0 && c0.j === les) && !(SHIP.time.day <= 1 && typeof introOn === 'function' && introOn()))
       guideAsk({ id: 'train:board:' + les.slice(0, 40), level: 3, once: true, owner: '15b (FX15)', until: now0 + 480,
-        goal: () => { let m = null; try { m = myJob(); } catch (e) { m = null; } return m || guideShiftOver() || boardLesson() !== les ? null : { deck: 5, item: /job board/i, room: 'w', label: 'Your ' + boardLessonName(les) }; },
+        goal: () => { let m = null; try { m = myJob(); } catch (e) { m = null; } return m || guideShiftOver() || boardLesson() !== les ? null : { deck: 5, item: /job board/i, room: 'w', label: r2Calder(les) ? R2_CALDER + ': the job board' : 'Your ' + boardLessonName(les) }; },
         done: () => guideTaken(les) }); }
   const W = SHIP.works, c = W && W.cur; if (!c || typeof ladderRow !== 'function') return;
   const row = ladderRow(c.id); if (!row) return;
@@ -18318,12 +18326,12 @@ function guideShift() {
   }
   { let mn = null; try { mn = myJob(); } catch (e) { mn = null; }   // (DS1, patch 0.92.5 #12) your lesson's job on the board: the pointer rings its Take it each time it waits, clocked in or not (FX10's, once)
     const les = !mn && m < E && boardLesson(), cur = SHIP.works && SHIP.works.cur, lj = les && SHIP.jobs.find(x => x.id === les), key = lj && (cur && cur.j === les ? cur.id : lj.train || 'intro' + lj.reserved);   // (FX15: a training job no lesson put up, by its own name)
-    if (P && les && guideTakeable().some(o => o.id === les)) pointAsk({ id: 'p:board:lesson:' + key, once: 99, ...promoBeatsPtr(key), path: pointBoard(les, promoBeatsPtr(key).label || 'Take this one: your ' + boardLessonName(les)), until: now + 120, done: () => { try { return !!myJob() || boardLesson() !== les; } catch (e) { return true; } } }); }
+    if (P && les && guideTakeable().some(o => o.id === les)) pointAsk({ id: 'p:board:lesson:' + key, once: 99, ...promoBeatsPtr(key), path: pointBoard(les, promoBeatsPtr(key).label || (r2Calder(les) ? 'Chief Calder\'s job: take it' : 'Take this one: your ' + boardLessonName(les))), until: now + 120, done: () => { try { return !!myJob() || boardLesson() !== les; } catch (e) { return true; } } }); }
   if (intro || !inn || out) return;
   let mine = null; try { mine = myJob(); } catch (e) { mine = null; }
   if (m < E) {                                           // S3 (S6, the empty board's word: FX1's boardEmptySay, from ixWorkStep)
     guideAsk({ id: 'shift:job:' + d, level: 4, owner, until: base + E, done: () => careerClockedOut(d),
-      goal: () => { let j = null; try { j = myJob(); } catch (e) { j = null; } return j || !guideTakeable().length || lightEasyNow() ? null : { deck: 5, item: /job board/i, room: 'w', label: boardLesson() ? 'Your ' + boardLessonName() : 'Take a job at the board' }; } });   // (0.99.7, EV1: not while you stand easy at the Last Light)
+      goal: () => { let j = null; try { j = myJob(); } catch (e) { j = null; } return j || !guideTakeable().length || lightEasyNow() ? null : { deck: 5, item: /job board/i, room: 'w', label: r2Calder(boardLesson()) ? R2_CALDER + ': the job board' : boardLesson() ? 'Your ' + boardLessonName() : 'Take a job at the board' }; } });   // (0.99.7, EV1: not while you stand easy at the Last Light)
     const L = mine ? [] : guideTakeable(), les = !mine && boardLesson(), cur = SHIP.works && SHIP.works.cur;
     const ids = L.map(o => o.id), take = () => { for (const id of ids) { const b = boardButton(id); if (b) return b; } return null; };   // the first row of these with its Take it
     if (P && L.length && !les && !lightEasyNow()) pointAsk({ id: 'p:board:take', once: 3, path: [pointBoard(null)[0], { el: take, label: 'Take it' }], until: now + 60, done: () => { try { return !!myJob(); } catch (e) { return true; } } });
@@ -18454,6 +18462,80 @@ function tp997Loo() {
   return { sub: (careerText('tp997.loo.sub') || '{room}, {deck}').replace('{room}', room).replace('{deck}', deck), goal: { deck: g.deck, place: g.place, room: g.room, label: t } };
 }
 if (TP997.n7) TRK_PLACES.push({ key: 'place:loo', get title() { return careerText('tp997.loo.title') || 'Nearest bathroom'; }, get sub() { return tp997Loo().sub; }, goal: () => tp997Loo().goal });
+// ---- Review update 2 (W2 for lead 52, plans/patch-review2.md; three switches, all off: off is 0.99.92-review) ----
+// Piece B, R2_SHADOW_ON (the user: "Leave the board as it is. Just make sure it's obvious which is the mission Calder
+// wants done"). The board offers what it offers; Chief Calder's job for the day (Day 1's shadow job, section 17's
+// reserved slot 1, and Day 2's first solo job, slot 3, while the arrival week runs) is named as hers everywhere it is
+// named: a gold banner over its row (already listed first, FX10), its line, the board's heading (also while you hold
+// another job, and before hers is up), the arrow and the panel pointer; and on Day 1 the board's arrow comes back for
+// it after another job taken first (section 21's introArrowWant). Words only: no job is hidden or held back
+var R2_SHADOW_ON = false;                               // var: the board (above) and section 21 ask
+const R2_CALDER = 'Chief Calder\'s job for today';
+const R2_TAG_CSS = 'display:block;width:fit-content;font-style:normal;font-weight:800;font-size:11px;letter-spacing:.06em;color:#1a1408;background:#e8c06a;padding:2px 6px;border-radius:4px;margin:0 0 4px';
+const r2CalderJob = j => !!j && (j.reserved === 1 || j.reserved === 3) && typeof introOn === 'function' && introOn();
+function r2Calder(id) { return !!R2_SHADOW_ON && !!id && r2CalderJob((SHIP.jobs || []).find(x => x.id === id)); }
+function r2ShadowSub(les, mine) {                        // the board's heading while her job is on the board: -> words | null
+  if (!r2Calder(les) || mine && mine.workDone) return null;
+  return mine ? R2_CALDER + ' is waiting. Finish or drop this one, then take hers.' : R2_CALDER + ' is at the top, marked in gold. Take that one first.';
+}
+function r2ShadowNote(mine) {                            // her job made but not on the board yet: a sentence after the heading, or ''
+  if (!R2_SHADOW_ON || mine) return '';
+  const now = shipNow(), j = (SHIP.jobs || []).find(x => r2CalderJob(x) && x.status === 'open' && !x.claimedBy && heldForYou(x)); if (!j || boardLesson() === j.id) return '';
+  if (j.reserved === 3 && typeof introSoloHold === 'function' && introSoloHold(now)) return ' Chief Calder has a job for you today: she gives it to you in her office at 08:45.';
+  return j.found > now ? ' ' + R2_CALDER + ' goes up at ' + hhmm(Math.floor(j.found) % 1440) + '.' : '';
+}
+// Piece C, R2_MEALS_ON (the user: yes, week 1 only). Days 1 to R2_MEAL.days, the day's own arrow includes the meals:
+// breakfast from the servery's opening (07:00) until R2_MEAL.bfTill (08:30; it sorts ahead of Clock in, which starts at
+// 08:00, and then gives way so nobody is late), and dinner once you've clocked out (a day off, or a shift never
+// clocked into: from 17:00) until R2_MEAL.dinLast minutes before serving ends. Two level-4 entries in the arrow queue,
+// asked once a ship minute by guideTick, only inside the serving window (FOOD.open to galleyServeEnd: never a closed
+// servery, backlog TB7-1). Nothing shows while you queue, hold a tray, eat or sleep (FRP_TRAY_ON's seat arrow has the
+// tray), and an entry ends once you've had that meal (a tray taken in its window) or Food is R2_MEAL.full or more. Any
+// direct arrow (the needs marker and FRP_FOOD_ON's, the arrival week's, a tradition's, the drill's) and every level 1-2
+// entry (a summons, a meeting) stays over it by the queue's own rules. Nothing saved
+var R2_MEALS_ON = false;                                // var: guideTick (above) asks
+const R2_MEAL = { days: 7, bfTill: 510, dinLast: 15, full: 75, got: '' };
+const r2MealBusy = () => !!SHIP.player.tray || !!(ACT && (ACT.kind === 'queue' || ACT.kind === 'eat'));
+function r2MealsTick() {
+  if (!R2_MEALS_ON || typeof FOOD === 'undefined' || typeof galleyServeEnd !== 'function' || typeof careerClockedIn !== 'function') return;
+  const now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, base = (d - 1) * 1440;
+  if (d < 1 || d > R2_MEAL.days) return;
+  for (const meal of ['breakfast', 'dinner']) {
+    const from = FOOD.open[meal], end = galleyServeEnd(d, meal), key = d + ':' + meal;
+    if (m >= from && m < end && r2MealBusy()) R2_MEAL.got = key;
+    const till = meal === 'breakfast' ? Math.min(end, R2_MEAL.bfTill) : end - R2_MEAL.dinLast;
+    if (m < from || m >= till || R2_MEAL.got === key) continue;
+    if (meal === 'dinner' && careerClockedIn(d) && !careerClockedOut(d)) continue;   // still on the clock: Clock out first (piece D's S7)
+    guideAsk({ id: 'r2:meal:' + key, level: 4, owner: '15b (R2_MEALS_ON)', from: base + from, until: base + till,
+      goal: () => r2MealBusy() || typeof sleeping !== 'undefined' && sleeping ? null : { deck: 3, item: /^servery$/i, label: meal === 'breakfast' ? 'Breakfast first: the servery, Deck 3' : 'Dinner: the servery, Deck 3' },
+      done: () => R2_MEAL.got === key || SHIP.player.needs.hunger >= R2_MEAL.full });
+  }
+}
+// Piece D, R2_CLOCK_ON (the user: "No paid jobs before clocking in. With a tool tip"). On a day you're on duty, until
+// you've clocked in (and until the day shift's end, after which the clock can't be punched), the board's jobs can't be
+// taken: no Take it at the board or in the device's Jobs list, each of your rows says "after you clock in", the
+// board's heading says why and when, and the same words come once as a tip the first time you open it early. Left
+// alone: days off and weekends (no clock to punch), a night shift you're clocked in for (28a; the shutdown nights too),
+// and a training or test job held for you (the shadow job, the first solo job, a lesson's "your turn", a tier test), so
+// no career step can jam. A job already in hand (an old save, or yesterday's) is kept, finished and turned in as ever;
+// only its arrow waits until you've clocked in. claimJob itself is unchanged (the crew, the events and the checks use it)
+var R2_CLOCK_ON = false;                                // var: the board, ixJobStep (above) and section 17's Jobs list ask
+function r2ClockBar(now = shipNow()) {                   // -> null | 'early' (the clock not open yet) | 'open' (it is: clock in)
+  if (!R2_CLOCK_ON || typeof careerClockedIn !== 'function' || typeof playerOnDuty !== 'function' || typeof CAREER === 'undefined') return null;
+  const t = Math.floor(now), d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440;
+  if (SHIP.career && SHIP.career.end || P5_NIGHT && typeof p5nIn === 'function' && p5nIn(t)) return null;
+  if (!playerOnDuty(d) || careerClockedIn(d) || m >= yourDayEnd(d)) return null;
+  return m < CAREER.clockIn ? 'early' : 'open';
+}
+function r2ClockFree(id) {                               // a job the rule leaves alone: one held for you to learn or be tested on
+  const j = (SHIP.jobs || []).find(x => x.id === id), c = SHIP.works && SHIP.works.cur; if (!j) return false;
+  return heldForYou(j) || !!(c && c.j === id) || boardLesson() === id;
+}
+function r2ClockWords() {
+  const b = r2ClockBar(); if (!b) return null;
+  return b === 'early' ? 'Jobs open once you\'ve clocked in. The time clock opens at ' + hhmm(CAREER.clockIn) + '; your shift starts at ' + hhmm(DAY_SHIFT[0]) + '.'
+    : 'Clock in first: the time clock is by the tea corner. Then the board is yours.';
+}
 // ---- end of slot: Interactions engineer ----
 
 // =====================================================================
@@ -21770,7 +21852,7 @@ function jobsSection(el) {
   const open = boardSpread(board.filter(j => !j.claimedBy));   // JB2 (note 15): as openJobs
   if (!open.length && !mine) line('Nothing on the board. Enjoy it while it lasts.');
   for (const j of open.slice(0, 5)) {
-    const [title, where, state, pri] = jobCard(j), canTake = !mine && jobTier(j) <= playerTier() && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind));
+    const [title, where, state, pri] = jobCard(j), canTake = !mine && jobTier(j) <= playerTier() && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && !(typeof r2ClockBar === 'function' && r2ClockBar() && !r2ClockFree(j.id));   // (R2_CLOCK_ON: not before you clock in)
     const p = line((pri === 'urgent' ? '! ' : '') + title + ' · ' + where + ' · ' + state + (canTake ? '' : jobTier(j) > playerTier() ? ' (tier ' + jobTier(j) + ')' : ''));
     if (canTake) button('Take it', () => claimJob(j.id));
   }
@@ -58699,14 +58781,14 @@ function introArrowWant(now) {
     if (out || typeof myJob === 'function' && myJob() || I.done['d1-end:start'] !== undefined) fin('board');   // (the patch, #19: or Zeke's begun his end of the day)
     else return 'board';
   }
-  else if (careerClockedIn(1) && !out && I.done['d1-end:start'] === undefined && !introTeaLead() && !(typeof myJob === 'function' && myJob()) && typeof boardLesson === 'function' && (SHIP.jobs.find(x => x.id === boardLesson()) || {}).reserved === 2) return 'board';   // (FX15, patch 0.92.5 #22) the 13:00 job you lead, waiting on the board: the board's arrow again, once Zeke's tea is over
+  else if (careerClockedIn(1) && !out && I.done['d1-end:start'] === undefined && !introTeaLead() && !(typeof myJob === 'function' && myJob()) && typeof boardLesson === 'function' && [2, typeof R2_SHADOW_ON !== 'undefined' && R2_SHADOW_ON ? 1 : 2].includes((SHIP.jobs.find(x => x.id === boardLesson()) || {}).reserved)) return 'board';   // (R2_SHADOW_ON: the shadow job too, after another job taken first)   // (FX15, patch 0.92.5 #22) the 13:00 job you lead, waiting on the board: the board's arrow again, once Zeke's tea is over
   return introDayEndWant(now, m);                         // the patch (#19): after Zeke's end-of-day word, the clock, then the beam
 }
 function introArrowTick() {
   const t = simNow(); if (t < (INTRO_UI.arrowAt || 0)) return; INTRO_UI.arrowAt = t + 250;   // four times a second
   introTeaTick(Math.floor(shipNow())); introCallTick(Math.floor(shipNow()));
   const id = introArrowWant(Math.floor(shipNow())), les = id === 'board' && typeof boardLesson === 'function' && boardLesson();
-  const g = les ? { ...INTRO_ARROWS.board, label: 'Your ' + boardLessonName(les) + ': take it at the board' } : id && INTRO_ARROWS[id];   // (FX15, patch 0.92.5 #22) named: "Your shadow job: take it at the board"
+  const g = les ? { ...INTRO_ARROWS.board, label: typeof r2Calder === 'function' && r2Calder(les) ? R2_CALDER + ': the job board' : 'Your ' + boardLessonName(les) + ': take it at the board' } : id && INTRO_ARROWS[id];   // (FX15, patch 0.92.5 #22) named: "Your shadow job: take it at the board"
   if (les) INTRO_ARROW_LABELS.add(g.label);              // ours, to clear
   const cur = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null, ours = cur && (INTRO_ARROW_LABELS.has(cur.label) && !cur.trk || cur.label === INTRO_BED_GOAL && id === 'call' || cur.label === 'Zeke Torres' || TP997.nd1 && !!NEED_GOAL && cur.label === NEED_GOAL.label && SHIP.time.day <= 7);   // (playtest patch 1: a first-time arrow over his own, the wardrobe's while he waits)   // 0.72.5 (playtest 2, item 3): the call-home arrow takes over from the first night's bunk arrow (up since the goodnight), which comes back once you're at the booths
   if (!g) { if (INTRO_UI.arrow) introArrowClear(); return; }
