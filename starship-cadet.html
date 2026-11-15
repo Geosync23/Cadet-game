@@ -9937,6 +9937,7 @@ const SAVE_ST = { last: undefined, bad: false, fail: 0, text: null, other: false
 const SAVE_BAD_KEY = SAVE_KEY + '-bad';
 const SAVE_WORDS = {
   bad: ['Your save couldn\'t be opened', 'A new game has started instead. The old save is kept: open your device, then Saves, to download it.'],
+  lost: ['Your save couldn\'t be opened', 'A new game has started instead. The browser had no room to keep the old save.'],
   fail: ['Not saving', 'The game can\'t save in this browser right now (its storage is full or switched off). To keep your game, open your device, then Saves, then Download my save.'],
   back: ['Saving again', 'The game is saving again.'],
   other: ['Open in another tab', 'This game is further on in another tab, so this tab has stopped saving. Close this tab, or reload it to carry on from there.'],
@@ -9944,7 +9945,7 @@ const SAVE_WORDS = {
 function saveSay() { const k = SAVE_ST.say; SAVE_ST.say = null; if (k && SAVE_WORDS[k] && typeof toast === 'function') toast(SAVE_WORDS[k][0], SAVE_WORDS[k][1]); }   // from tickShip: once the game is running and on screen
 // A2: the save as found. One that is there but can't be opened (cut short, damaged, or from a build this one doesn't
 // know) used to be dropped without a word and overwritten within a ship hour. Now its text is first kept under
-// SAVE_BAD_KEY (an earlier kept copy isn't replaced: the oldest is the one with the most to lose), and the player is told
+// SAVE_BAD_KEY (an earlier kept copy isn't replaced: the oldest is the one with the most to lose; see below), and the player is told
 function loadGameSafe() {
   let raw = null, s = null;
   try { raw = localStorage.getItem(SAVE_KEY); } catch (e) { raw = null; }
@@ -9952,7 +9953,16 @@ function loadGameSafe() {
   try { s = JSON.parse(raw); } catch (e) { s = null; }
   if (saveOk(s)) return s;
   if (SAVE_KEEP_ON && typeof raw === 'string' && raw.length) {
-    try { if (localStorage.getItem(SAVE_BAD_KEY) === null) localStorage.setItem(SAVE_BAD_KEY, raw); SAVE_ST.bad = true; SAVE_ST.say = 'bad'; } catch (e) { /* no room for the copy: nothing more to do */ }
+    // (RV37's find: with a copy already kept, a second unreadable save was not kept, yet the player was told it was.) The
+    // first copy is never replaced; a later, different one goes under SAVE_BAD_KEY + '-2' (the newest of those); and the
+    // player is told "kept" only when it was (no room: told it couldn't be)
+    let kept = false;
+    try {
+      const first = localStorage.getItem(SAVE_BAD_KEY);
+      if (first === null) localStorage.setItem(SAVE_BAD_KEY, raw); else if (first !== raw) localStorage.setItem(SAVE_BAD_KEY + '-2', raw);
+      kept = true;
+    } catch (e) { kept = false; }
+    SAVE_ST.bad = kept; SAVE_ST.say = kept ? 'bad' : 'lost';
   }
   return null;
 }
@@ -9963,10 +9973,21 @@ function saveFailed() { if (!SAVE_TELL_ON) return false; if (SAVE_ST.fail++ === 
 // error is logged, and every other part is fresh; a save that can't be written is counted, and the player is told at the
 // first one (and again when saving works). A12: before writing, if storage holds a save this page didn't put there and
 // that game is further on, another tab is playing it: this tab stops saving and says so, rather than wind it back
-function saveGameSafe() {
-  if (SAVE_ST.other) return false;
-  let text = null, mine = null;
-  try {
+const savePlain = v => !!v && typeof v === 'object' && !Array.isArray(v);
+function saveShape(save) { const m = new Map(); for (const k of Object.keys(save)) m.set(k, savePlain(save[k]) ? new Set(Object.keys(save[k])) : null); return m; }
+function saveAdded(save, was) {                          // what a handler added: [key], or [key, key2] inside a part that was already there (save.player, save.ship)
+  const out = [];
+  for (const k of Object.keys(save)) { const w = was.get(k); if (w === undefined) out.push([k]); else if (w && savePlain(save[k])) for (const k2 of Object.keys(save[k])) if (!w.has(k2)) out.push([k, k2]); }
+  return out;
+}
+// the save, made whole or not at all (RV37's find on A3: a handler that had written inside save.player before it failed
+// left a save with a piece missing, and that went over the last whole one). When a handler fails the save is made again
+// from the start without it, so nothing half made stays, and what that handler added the last time it worked (noted as
+// it ran: saveAdded) is put in from the last save written. A handler that has never worked on this page has no such
+// note: then there is no whole save to make, nothing is written, and the player is told the game isn't saving
+function saveMake() {
+  const skip = new Set(), K = SAVE_ST.kept;
+  for (let round = 0; round < 4; round++) {
     const decks = {};
     for (const n in SHIP.decks) if (SHIP.decks[n].open.size) decks[n] = { open: [...SHIP.decks[n].open] };
     const save = {
@@ -9975,19 +9996,30 @@ function saveGameSafe() {
       flags: SHIP.flags || {}, notes: SHIP.notes || [],
     };
     if (typeof crewState === 'function') save.crew = crewState(SHIP.time.day);
-    if (!SAVE_TELL_ON) for (const f of SAVE_EXTRA) f(save);
-    else for (let i = 0; i < SAVE_EXTRA.length; i++) {
-      const before = new Set(Object.keys(save));
-      try { SAVE_EXTRA[i](save); SAVE_ST.parts[i] = Object.keys(save).filter(k => !before.has(k)); }
-      catch (e) {
-        console.error(e);
-        for (const k of Object.keys(save)) if (!before.has(k)) delete save[k];             // nothing half made
-        for (const k of SAVE_ST.parts[i] || []) if (SAVE_ST.kept && k in SAVE_ST.kept) save[k] = SAVE_ST.kept[k];
+    let again = false;
+    for (let i = 0; i < SAVE_EXTRA.length && !again; i++) {
+      if (!SAVE_TELL_ON) { SAVE_EXTRA[i](save); continue; }
+      if (skip.has(i)) {
+        for (const p of SAVE_ST.parts[i]) {
+          if (p.length === 1) { if (p[0] in K) save[p[0]] = K[p[0]]; }
+          else if (savePlain(K[p[0]]) && p[1] in K[p[0]] && savePlain(save[p[0]])) save[p[0]][p[1]] = K[p[0]][p[1]];
+        }
+        continue;
       }
+      const was = saveShape(save);
+      try { SAVE_EXTRA[i](save); SAVE_ST.parts[i] = saveAdded(save, was); }
+      catch (e) { console.error(e); if (!SAVE_ST.parts[i] || !K) return null; skip.add(i); again = true; }
     }
-    text = JSON.stringify(save); mine = saveTimeOf(save);
-  } catch (e) { return saveFailed(); }
-  SAVE_ST.text = text;
+    if (!again) return save;
+  }
+  return null;
+}
+function saveGameSafe() {
+  let text = null, mine = null;
+  try { const save = saveMake(); if (!save) return saveFailed(); text = JSON.stringify(save); mine = saveTimeOf(save); }
+  catch (e) { return saveFailed(); }
+  SAVE_ST.text = text;                                   // the game as it is now, written or not: what the Saves app downloads when this tab can't save (A3, A12)
+  if (SAVE_ST.other) return false;                       // A12: this tab has stopped saving
   try {
     if (SAVE_TAB_ON && !DEVMODE && SAVE_ST.last !== undefined) {
       const cur = localStorage.getItem(SAVE_KEY);
@@ -13721,7 +13753,8 @@ function slotsAct(verb, arg) {
   else if (verb === 'copy') slotCopy();
   else if (verb === 'load') { SLOT_UI.msg = ''; slotPick(); }
   else if (verb === 'baddl' && SAVE_KEEP_ON) slotDownload(slotRead(SAVE_BAD_KEY), 'starship-cadet-unopened-save.json');   // A2 (FR1)
-  else if (verb === 'baddel' && SAVE_KEEP_ON) { try { localStorage.removeItem(SAVE_BAD_KEY); SLOT_UI.msg = 'Thrown away.'; } catch (e) { SLOT_UI.msg = 'The browser wouldn\'t delete it.'; } }
+  else if (verb === 'baddl2' && SAVE_KEEP_ON) slotDownload(slotRead(SAVE_BAD_KEY + '-2'), 'starship-cadet-unopened-save-2.json');
+  else if (verb === 'baddel' && SAVE_KEEP_ON) { try { localStorage.removeItem(SAVE_BAD_KEY); localStorage.removeItem(SAVE_BAD_KEY + '-2'); SLOT_UI.msg = 'Thrown away.'; } catch (e) { SLOT_UI.msg = 'The browser wouldn\'t delete it.'; } }
   slotFresh();
 }
 function slotsView() {
@@ -13736,8 +13769,8 @@ function slotsView() {
     else B.push({ kind: 'buttons', items: x.used ? [...(x.ok ? [{ label: 'Play', action: { app: 'saves', do: 'play', arg: x.n } }] : []), { label: 'Delete', action: { app: 'saves', do: 'del', arg: x.n } }]
       : [{ label: 'New game', action: { app: 'saves', do: 'new', arg: x.n } }] });
   }
-  if (SAVE_KEEP_ON && slotRead(SAVE_BAD_KEY) !== null) B.push({ kind: 'text', text: 'A save in this slot couldn\'t be opened, so a new game started. The old save is kept here.', mark: 'urgent' },   // A2 (FR1)
-    { kind: 'buttons', items: [{ label: 'Download the old save', action: { app: 'saves', do: 'baddl' } }, { label: 'Throw it away', action: { app: 'saves', do: 'baddel' } }] });
+  if (SAVE_KEEP_ON && (slotRead(SAVE_BAD_KEY) !== null || slotRead(SAVE_BAD_KEY + '-2') !== null)) B.push({ kind: 'text', text: 'A save in this slot couldn\'t be opened, so a new game started. The old save is kept here.', mark: 'urgent' },   // A2 (FR1)
+    { kind: 'buttons', items: [{ label: 'Download the old save', action: { app: 'saves', do: 'baddl' } }, ...(slotRead(SAVE_BAD_KEY + '-2') !== null ? [{ label: 'Download the later one', action: { app: 'saves', do: 'baddl2' } }] : []), { label: 'Throw it away', action: { app: 'saves', do: 'baddel' } }] });
   if (SAVE_ST.other) B.push({ kind: 'text', text: SAVE_WORDS.other[1], mark: 'urgent' });   // A12 (FR1)
   else if (SAVE_ST.fail) B.push({ kind: 'text', text: 'This game isn\'t being saved: the browser\'s storage is full or switched off. Download my save keeps a copy.', mark: 'urgent' });   // A3 (FR1)
   if (SLOT_UI.msg) B.push({ kind: 'text', text: SLOT_UI.msg, mark: 'urgent' });
@@ -80449,22 +80482,30 @@ const HRUN_EDGES = { of: null, n: -1, list: [] };          // 0.27.31: see the w
 const clock = new THREE.Clock(); let scrT = 0;
 // A1 (FR1, LOOP_GUARD_ON): loop() asks for its next frame on its last line, so an error anywhere in a frame meant no
 // frame ever again: a frozen picture and no word. loopGuard runs each frame inside a try: after an error it logs it (once
-// per run of bad frames) and asks for the next frame itself, so one bad frame is only a skipped frame. LOOP_BAD_MAX bad
-// frames in a row means it isn't passing: the card says so, once, and offers a reload (the last save is in storage)
-const LOOP_BAD_MAX = 20; let LOOP_BAD = 0, LOOP_SAID = false;
+// (the first three) and asks for the next frame itself, so one bad frame is only a skipped frame. LOOP_BAD_MAX bad
+// frames among the last LOOP_WIN.length (in a row, every other frame, one in five: lead 52) means it isn't passing: the
+// card says so, once, and offers a reload. The card says what is true of the save: it reads the one in storage and
+// names its day and time, or says there is none (lead 52: never "Your game is saved" unless it is)
+const LOOP_BAD_MAX = 20, LOOP_WIN = new Uint8Array(120); let LOOP_AT = 0, LOOP_SUM = 0, LOOP_LOGS = 0, LOOP_SAID = false;
+function loopMark(bad) { LOOP_SUM += bad - LOOP_WIN[LOOP_AT]; LOOP_WIN[LOOP_AT] = bad; LOOP_AT = (LOOP_AT + 1) % LOOP_WIN.length; }
 function loopGuard() {
-  try { loop(); LOOP_BAD = 0; }
+  try { loop(); loopMark(0); }
   catch (e) {
-    if (LOOP_BAD++ === 0) console.error(e);
-    if (LOOP_BAD >= LOOP_BAD_MAX && !LOOP_SAID) { LOOP_SAID = true; loopCard(); }
+    loopMark(1); if (LOOP_LOGS++ < 3) console.error(e);
+    if (LOOP_SUM >= LOOP_BAD_MAX && !LOOP_SAID) { LOOP_SAID = true; loopCard(); }
     requestAnimationFrame(loopGuard);
   }
+}
+function loopCardLine() {
+  if (NOSAVE) return 'Reload the page to start again.';
+  try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (saveOk(s)) return 'Your game is saved up to Day ' + s.time.day + ', ' + hhmm(Math.floor(s.time.min)) + '. Reload the page to carry on from there.'; } catch (e) { /* below */ }
+  return 'This game has no save yet. Reload the page to start again.';
 }
 function loopCard() {
   try {
     const d = document.createElement('div'), h = document.createElement('h2'), p = document.createElement('p'), b = document.createElement('button');
     d.className = 'lift'; d.id = 'loopCard'; d.style.zIndex = 9999; d.setAttribute('role', 'alertdialog');
-    h.textContent = 'Something went wrong'; p.textContent = 'Your game is saved. Reload the page to carry on.';
+    h.textContent = 'Something went wrong'; p.textContent = loopCardLine();
     b.className = 'stay'; b.textContent = 'Reload'; b.onclick = () => { try { location.reload(); } catch (e) { /* the card stays */ } };
     d.append(h, p, b); document.body.appendChild(d);
   } catch (e) { /* no page to say it on */ }
