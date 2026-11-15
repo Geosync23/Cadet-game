@@ -192,5 +192,13 @@ d6b9ce81a5254ab089f07afad01ed20edbd05e38d12a6043092f0578f9efa1c0. Check files: t
 lines_check without --day (R2 runs only `lines_check --day`), robust_check (was R4's), device_check whole (was R4's),
 frp_check (was R1's; R5 runs it with the final check file), check_fast and events (R5's).
 
-### Every share
-(to come)
+### Every share (candidate 1, c4999dae, game d6b9ce81...a1c0)
+
+| Share | Result | Notes |
+|---|---|---|
+| R5 (BM29) | OK, 28 of 28 exit 0 with the OK line: frp_check (ab130f2's file), one_byte --check, cr2, drill, tp9991, simprobe (by eye: Days 3, 25, 39 19:30-20:30; tap, card ev9991.sim, a pod), machine, mech (full), bigevents, fridays, disc, clothes, promo_beats, food 1 7 and 11 4, join, weekend, stories 36, tiles, day 12 17 13 3 27 18 19, p5retry_break. Plus wave 1 (table above). "skipped" lines: day 12 and 13 one each (the rec deck's evening comparison on the storm days, by design); food_check one each ("Schedules: not using the rota yet ... skipped": a part of food_check that tests nothing, old, for the B10 list); stories 78 that are only the word in its own printout | logs /home/user/bm29/logs (scratch) |
+| R2 | OK: intro whole/--dinner/--firsts, path, arc, day 0 1 5 7 21 22, arrows endgo, pf_f1_same (F1 0 mismatches; all-off proof with 60 switches false: 30 same). lines_check --day: FAIL once beside another browser (1 s of overlap), the same on OLD (3 s), PASS alone: check-side, backlog R2-1 | plans/checks-fable-r2.md, claude/checks-fable-r2 |
+| R4 | OK: career, appt, saves, title, day 6 8 23 24 16, fixtap_probe, fixtap_reach, fixtap_click, cr1, p926, fresh_walk (long [], stuck [], errors []). title_check stopped once on timing under load, then OK three times and on OLD (backlog R4-1). fresh_walk's Day 2 booths observation: old-equivalent (RV37's probe, FR2's probe agree; backlog RV37-2) | plans/checks-fable-r4.md, claude/checks-fable-r4 bda8520a |
+| R6 | (running) interactions_check OK (2205 s); day 10, 15, 20 OK; day 14 FAIL, the same line on OLD: old, backlog R6-1; perf_check running | |
+| R3 | (running) controller_check OK, 57 parts, first time, with the switches on | |
+| R1 | (running) | |
