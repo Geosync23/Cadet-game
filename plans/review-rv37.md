@@ -213,3 +213,76 @@ Read the second diff line by line (166 lines), then reran my probes on a copy wi
 game from before the file (on 0.99.91 too: 1 of 2 tries; branch: 2 of 6). Probably the rig (headless browser, file://
 pages, a start-up script that plants a save), saves_check passes; not ruled out as a real race between the write and
 the reload. To check: the same on a served page with nothing else running.
+
+## 8. FR2's playability fixes F1-F12 (branch claude/fable-review-play, head 7fe1398, game off 77a3fc96...63b8)
+
+Reviewed the branch's head (748eec0 plus the shortened Mail line of 3f73b6b). Read the whole game diff (508 lines).
+Usage was tight, so I leaned on FR2's own frp_check for the parts I only read, and probed where lead 52 asked for
+suspicion. Probe: `plans/rv37-probes/rv37_frp_probe.py` (run from a checkout of FR2's branch; parts pin, words, food).
+
+| Fix | Switch | Verdict |
+|---|---|---|
+| F1 the Line oath's arrow, honest Mail, invitation's name | FRP_LINE_ON | PASS |
+| F2 Food said again, marker again | FRP_FOOD_ON | PASS (not nagging: twice a day at most) |
+| F3 a seat for your tray | FRP_TRAY_ON | PASS |
+| F4 a tap beside the pin | FRP_PINTAP_ON | PASS |
+| F5 tap whoever is leading you | FRP_LEAD_ON | PASS (read and FR2's check; two things to know) |
+| F6 solid panels, tips wait | FRP_PANELS_ON | PASS (read and FR2's check only) |
+| F7 the label wraps | FRP_LABEL_ON | PASS (read and FR2's check only) |
+| F8 the Last Light blinks on | FRP_BLINK_ON | PASS (read only) |
+| F9 fewer form thank-you Mails | FRP_THANKS_ON | PASS; the list is for the lead to look at |
+| F10 tips on the arrival evening | FRP_TIPS_ON | PASS |
+| F11 three clearer messages | FRP_SAY_ON | PASS |
+| F12 the words list | FRP_WORDS_ON | FIXES NEEDED (one wrong plural; one line changed with no switch) |
+
+**Off = today.** `cadet_test 0.99.91 vs head, all off`: ALL IDENTICAL. The diff is behind its switches except:
+- **Quiz question 34's text is changed outright** ("rec dec" to "rec deck", line id 12737s8 to 1l7gfkx): no switch, so
+  with everything off that one line is not 0.99.91. A harmless typo fix, but the rule is "off = identical" and
+  cadet_test cannot see it; the lead should accept it knowingly or have it held back.
+- Three new lines in the words bank (unused when off), one CSS rule for a class that is never set when off, one more
+  listener on the arrow that returns at once when off, and `tapCrew` gaining a third input nobody passes when off.
+  All without effect.
+
+**All on.** cadet_test against 0.99.91 says DIFFERENCES FOUND, as it must: the Food warning is said again and its
+marker is on the pictures. To know from that run: the re-armed Food warning goes ahead of another need's firm
+warning ("Very hungry" twice where "Missing people" used to follow), which then comes later.
+`frp_check.py lead pin tips line` here: frp_check: OK.
+
+**F4 FRP_PINTAP_ON.** Read: it only acts on a tap that would otherwise be a person's, on this deck, with the pin
+drawn in the last half second; the goal's own person is left alone; a goal on another deck (the lift) and a spot
+goal are untouched; cards and panels are above the deck and never reach it; the controller's choose goes through
+the same `tap()`. Probe `pin`, the mess at dinner (66 people), 195 taps on a 10 px grid in a 120 x 140 box round
+the pin, each tap read with the switch off and on:
+- a seat with 6 people within reach: 63 taps change, all from a bystander to the Long table; **on a person's own
+  body, 22 px or more from the pin's point: 0 change**;
+- a person as the target (4 others close): 29 taps change, all from a neighbour to the target; 0 on a body;
+- a room as the target: 0 change.
+**F5 FRP_LEAD_ON.** Only while the arrival's escort leads you. To know: (1) it knows the escort's arrow by its label
+`'Zeke Torres'`, so a change to that label would quietly switch the fix off; (2) at a tour stop with extras left, a
+tap on Zeke from more than 3 away now walks you to him first (a second tap gives the next extra); (3) while that
+arrow is up its label and circle take taps, so something under them can't be tapped for those minutes.
+**F2 FRP_FOOD_ON.** Probe `food`: nine days never eating (Food held at 5, other needs at 90, awake 06:00-22:00 at
+the game's own pace). Off: "Very hungry" once in nine days (FR2's finding). On: 18 times: 07:00 and 17:00 each
+day, and the marker set again each time. (My run shows none on Day 4: a pop-up of that morning never closes under
+the stepped clock and holds every warning back, off or on; the rig, not the game.) Twice a day while starving is
+fair.
+**F10.** Three tips on the arrival evening, 18:40, 19:16, 19:52 in FR2's check; "Slept well?" only before 09:00.
+**F9.** Still thanked: 66 weekly traditions. No Mail any more: 30 (birthday, captains-address, cook-along,
+farewell-supper, first-fruits, first-light, founding, four/six/twelve-weeks-aboard, harvest, harvest-supper,
+hull-lights, lantern-walk, late-piano, midtour, name-on-the-beam (both), new-hands-tea, off-the-tern,
+one-week-aboard, postcard-night, quiet-watch, rec-chiefs-talk, rec-sim-night, rec-wren-talk, storm-stories,
+talent-night, window-sketch, years-end). The rule is by the tradition's calendar rule, so a few regular ones fall
+out with their twins kept (window-sketch out, window-sketch-2 in; talent-night out, rec-talent-night in). No harm
+(the join pop-up thanks you); for the lead to glance at.
+**F12 FIXES NEEDED.**
+1. `frpPlural` reads any name ending in one s as plural. Probe `words`: of 52 machine names it calls 16 plural; 15
+   are right, **"Bridge data bus" is wrong: "The bridge data bus are running sweetly again."** Ask: an exception for
+   "bus" (or test the name's last word against a short list).
+2. The quiz line above (no switch).
+3. To taste: the Calendar button "No reminder" reads like a state, not something to press ("Stop reminders"?).
+Other words read: the job-gone message, the board's "Your job is done. Turn it in here.", the late clock line, the
+missed-oath Mail: plain and short.
+
+Not run by me: controller_check, interactions_check, bubble_check and the arrows checks on a switched-on copy
+(FR2 reports them OK, except controller_check, which timed out twice on a loaded machine with no FAIL line: it still
+needs one clean run), and the full six-runner round.
