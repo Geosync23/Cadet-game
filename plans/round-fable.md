@@ -117,7 +117,9 @@ FR1 found that the round is bigger than the notes say and is not written in one 
 ## Sessions
 Lead 52 session_01GKuymmPLvgySfNEhDYyACj; BM29 (R5) session_01GKuymivPt7VEMWm4jUuY4G; FR1
 session_01GKuymmYzraWXg9ELUMmqri; FR2 session_01GKuymj5amgjHqQCKPsVnFs; RV37 session_01GKuymo8n7x4hGZtoPmWXqX.
-R1, R2, R3, R4, R6: to be hired by lead 52 (handover notes plans/handover-rN.md on claude/checks-09991-rN).
+Hired by lead 52 at 09:11 UTC: R1 session_01GKuymidX8V6F2KKDcoZ5LE, R2 session_01GKuymigbASLB86pjcbY5LY, R3
+session_01GKuymjwGjfNXnjezjs87rS, R4 session_01GKuymnZfZ6qmpeytQExvGQ, R6 session_01GKuymjzQWrtt6PCGyfmQUB. Results on
+claude/checks-fable-rN, plans/checks-fable-rN.md.
 
 ## Round record (BM29)
 
