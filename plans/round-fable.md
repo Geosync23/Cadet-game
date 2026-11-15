@@ -167,8 +167,28 @@ R1, R2, R3, R4, R6: to be hired by lead 52 (handover notes plans/handover-rN.md 
 - **Candidate 1: claude/staging-fable-review 75d1b8339dba9e30f0179f685c1a8082a9ed8888, game sha256
   d6b9ce81a5254ab089f07afad01ed20edbd05e38d12a6043092f0578f9efa1c0.** Later docs-only commits do not change the game.
 
-### Gates
-(to come)
+### Gates and wave 1 (BM29, on candidate 1's exact file d6b9ce81...a1c0; these are the round's runs of these checks)
+
+| Check | Result |
+|---|---|
+| check_fast | QUICK CHECK OK in 254 s (words, names, deck, device, machine, leave) |
+| lines_check | PASS (0 errors) |
+| tools/one_byte.py --check | 0 characters outside Latin-1; the mark is there |
+| events_check | EVENTS CHECK OK (812 s) |
+| cadet_test vs 0.99.91 | DIFFERENCES FOUND, as expected, no page errors. Views a_start to i_tap0 (nine pictures): 0 px. i_tap1 to j_steer1: 1,760 px; j_steer2: 11,693 px; taps 1 and 2 show "Very hungry" where 0.99.91 showed "Missing people". Cause: FRP_FOOD_ON (Food is under 10 in that scene, so the warning is said again and the Food marker takes the free arrow) |
+| cadet_test vs 0.99.91, with only FRP_LABEL_ON and FRP_FOOD_ON off | ALL IDENTICAL: the other 19 switches and the escape step change no picture |
+| cadet_test, before the escape step vs after | ALL IDENTICAL |
+| robust_check (whole) | ROBUST CHECK OK (560 s) |
+| frp_check (whole, fe156c8's file) | OK (486 s); run again with ab130f2's file (the words part walks every machine name) as R5's first item |
+| device_check (whole, alone) | OK (124 s) |
+
+After the build commit: FR2's ab130f2 merged on lead 52's word (frp_check.py, a DEV_NOTES line, FR2's handover note; the
+game is unchanged, checked). **GO commit: claude/staging-fable-review c4999dae, game sha256
+d6b9ce81a5254ab089f07afad01ed20edbd05e38d12a6043092f0578f9efa1c0. Check files: this commit's.**
+
+**Because wave 1 ran on the final file, these are done and are NOT run again** (cost rule b): cadet_test (was R2's),
+lines_check without --day (R2 runs only `lines_check --day`), robust_check (was R4's), device_check whole (was R4's),
+frp_check (was R1's; R5 runs it with the final check file), check_fast and events (R5's).
 
 ### Every share
 (to come)
