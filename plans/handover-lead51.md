@@ -37,3 +37,32 @@ EV1 offers (Deck 6 blink softer; notice with the blink).
 ## Gotchas
 Containers restart often (runners resume). *.png is gitignored: git add -f. Messages cross: confirm commits on origin.
 A game change after a GO = full round; let the running round finish to batch finds.
+
+## NEW JOB for lead 52 (the user, 2026-11-14 ~9:45 PM ET / Nov 15 02:45 UTC)
+The user's words: "Hire 2 Fable 5.2 workers and review the game. Codebase, efficiency, design, playability, performance
+and anything else needed thorough review. Create a seperate version with a seperate link for their/ your work."
+(The user switched the lead's model to claude-fable-5-2 first; lead 52 and both workers run on claude-fable-5-2.)
+Lead 51 was at 61% memory, so by the user's rule it hands this big job to lead 52 before starting.
+
+State: 0.99.91 LIVE (Playtest v6 1794408527-c375, Dev v6 1794408531-b0f2), main = claude/integration = cdd9efd,
+game b321a4ec...95f3. All 0.99.91 seats stood down with handover notes on their branches.
+
+Plan (lead 51's reading):
+1. Two reviewers, both claude-fable-5-2, from main cdd9efd, hired by lead 51 (ids in TEAM.md):
+   - FR1 code, efficiency, performance -> report plans/review-fable-code.md, fixes on claude/fable-review-code.
+   - FR2 design, playability, phone feel -> report plans/review-fable-play.md, fixes on claude/fable-review-play.
+   Phase 1: review only, ranked findings with evidence, sent to the lead (aim ~3 h). Phase 2: fix what is safe and clearly
+   right (bugs, polish, performance), each behind its own switch (off = cadet_test ALL IDENTICAL vs 0.99.91). Changes to
+   what the game IS (design decisions) are not built: they go to the user as plain questions.
+2. The lead reads both reports, tells the user the main findings in plain words, picks the fix list with the workers,
+   and asks the user the design questions.
+3. A SEPARATE version: branch claude/staging-fable-review from main, both fix branches merged, switches on, its own
+   build label (e.g. 0.99.92-review). Per CLAUDE.md every game change gets the full round of six runners before it is
+   published (fresh runners from the handover-rN notes; a fresh BM from plans/handover-bm28.md on claude/handover-bm28;
+   each worker's fixes reviewed by the other worker or a reviewer).
+4. Publish it as a NEW artifact with its own link (title e.g. "Starship Cadet Review"), NEVER over Playtest, Dev or the
+   user's current-save link. The user asked for this link, so no further OK is needed, but the publish step still needs
+   their approval tap in the app: ask them to be present. main/integration do NOT move: this version stays separate
+   until the user says to adopt it.
+5. Also give the user the review itself in plain language (a short report page or message): what's good, what's
+   wrong, what was fixed in the review version, what needs their decision.
