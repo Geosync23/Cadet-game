@@ -21,7 +21,7 @@ Nobody hand-edits a generated block. Running it again with no changes to content
 (plans/social-deep-plan.md); the condition words are the frozen vocabulary in COND_KEYS below (and the README).
 Syntax errors stop the bake with the file and line; style (lengths, names, tone, coverage) is lines_check.py's job.
 """
-import json, os, re, sys
+import json, os, re, struct, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plans'))
 try:
     import trad_parse    # the traditions engineer's .trad field grammar (plans/trad_parse.py, plans/trad-format.md)
@@ -1086,6 +1086,15 @@ def bake():
     return out
 
 
+# The baked text keeps to one byte a character (FR1's review, A10): a character outside Latin-1 (an arrow, a long
+# dash, a star) is written as its \uXXXX escape, which is the same string to the game. One such character anywhere in
+# the game's script makes the browser hold all 8.8 million of its characters at two bytes each (8.8 MB of memory);
+# names_check fails on one. Accented letters and the like (up to U+00FF) stay as they are. Done once, on each baked
+# block as it goes into the game (main), not inside js() or cj(): their text can itself sit inside a baked string.
+def one_byte(t):
+    return re.sub(r'[^\x00-\xff]', lambda m: ''.join('\\u%04x' % u for u in struct.unpack('<%dH' % (len(m.group(0).encode('utf-16-le')) // 2), m.group(0).encode('utf-16-le'))), t)
+
+
 def js(v):
     return json.dumps(v, ensure_ascii=False, separators=(', ', ': '))
 
@@ -1233,7 +1242,7 @@ def main(argv):
             html = f.read()
         new = html
         for name, body in blocks(out).items():
-            new = splice(new, name, body)
+            new = splice(new, name, [one_byte(x) for x in body] if isinstance(body, list) else one_byte(body))   # (the whole baked block, once: a baked table that holds JSON text inside a string keeps that text as it was)
     except GenError as e:
         print('content_gen: ' + str(e))
         return 2
