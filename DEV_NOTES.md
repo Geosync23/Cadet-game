@@ -1083,7 +1083,7 @@ Review: `plans/review-fable-play.md` (16 findings from playing 0.99.91 at phone 
 | `FRP_TRAY_ON` (F3) | Player engineer (15) | A tray in hand in the mess: the arrow points at the nearest free seat |
 | `FRP_PINTAP_ON` (F4) | HUD seat (11) | A tap that would be a bystander's, within 34 px of the arrow's pin, label or floor spot, goes to the arrow's target |
 | `FRP_LEAD_ON` (F5) | Onboarding engineer (21b) | While someone leads you (the arrival), a tap on them or on their arrow walks you to them |
-| `FRP_PANELS_ON` (F6) | HUD seat (11) | Solid job board and alarm card; a tip waits while a card, panel or the device is open |
+| `FRP_PANELS_ON` (F6) | HUD seat (11) | Solid job board and alarm card; a tip waits while a person's card or a panel is open (over the open device it shows as before: device_check relies on it) |
 | `FRP_LABEL_ON` (F7) | HUD seat (11) | The arrow's label wraps to two lines |
 | `FRP_BLINK_ON` (F8) | Performance engineer (8b) | The Last Light blinks again every 11 s of play till 14:30, at half strength |
 | `FRP_THANKS_ON` (F9) | Traditions engineer (18) | The form thank-you Mail only after plain weekly traditions, never the Captain's address |
@@ -1091,11 +1091,12 @@ Review: `plans/review-fable-play.md` (16 findings from playing 0.99.91 at phone 
 | `FRP_SAY_ON` (F11) | Player engineer (15) | Three clearer messages: a job gone back to the board, the board's heading over a finished job, the clock after 09:00 |
 | `FRP_WORDS_ON` (F12) | Player engineer (15) | Wording slips: plural machines, "Calibrate oven 2", the deck once, a small job's title once, "Cargo hold", "a covered plate", "No reminder" |
 
-- **The check:** `python3 frp_check.py [BUILD.html] [part ...]` (parts: line food tray pin lead thanks words say panels label blink tips; about 25 minutes for all). Each part loads the build as it is (off) and a copy with that fix's switch line set to true (on), in Dev mode's own save, and proves both. `FRP_SHOTS=folder` saves the before/after pictures. It reuses arrows_check.py's page and follower.
+- **The check:** `python3 frp_check.py [BUILD.html] [part ...]` (parts: line food tray pin lead thanks words say panels label blink tips; about 25 minutes for all). Each part makes two copies of the build, that fix's switch line set to false and to true (whichever way the build has it, so a switched-on candidate is checked as it is), in Dev mode's own save, and proves both. `FRP_SHOTS=folder` saves the before/after pictures. It reuses arrows_check.py's page and follower.
 - **Shared functions touched** (for their owners): `tapCrew(cx, cy, who)` takes an optional third argument (section 11); the pin's pointerdown listener in section 15b now covers the edge arrow and needs class `tap` or `lead`; `meetingGist` asks `frpLineGist` first (section 18); section 19's tip card asks `frpTipHold`, and its invitation heads-up asks `frpInviteWhat`; needWarnTick calls `frpFoodTick` and `frpTrayTick`; teachTick calls `frpTipsArrival`; shipFeelFrame calls `frpBlinkTick`.
 - **Words:** three new bank keys (`event.crossingLine.frp.arrow`, `event.crossingLine.frp.missed`, `clock.screen.frpLate`), read only with their switch on; and the one change with no switch, the quiz's "rec dec" to "rec deck" (its line id changes with its text).
 - **Not built, and why:** meals in the day's arrow, Day 1's board, pay, reputation pace, the device's apps (the user's questions); thank-yous in each host's voice (the writer's); a panel closing an open person's card (section 20's owner); Mum's "Second time's easier" out of order, Theo's "Pip suits you" before the pip, Tomas's evening greeting at dawn (the dialogue owner's line conditions).
 - **F4 keeps FX3's rule** (interactions_check): a tap on a person's own body away from the pin's point is still theirs, even when they stand on your job's stop; frpPinTap only takes taps at the pin's point, on its label or on the floor beside it.
+- **With the switches on, cadet_test is not identical, and that is expected:** in its scene Food is under 10, so `FRP_FOOD_ON` says 'Very hungry' again as breakfast opens and the Food marker takes the free arrow (later pop-ups and the arrow's target differ). `FRP_LABEL_ON` changes only labels too long for one line.
 - **Gotcha:** on the arrival, nothing outside the Tern can be walked to for a ship minute or two (the ramp is still coming down), so `frpLeadGo` can fail then; the tap is simply not taken.
 
 ## Pillar 5 Step 5, Senior Officer (S5-1 skeleton, B1 for lead 39, 2026-10-26; switch `P5_STEP5`, switched on in 0.94.0)

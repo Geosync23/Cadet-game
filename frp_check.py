@@ -1,6 +1,7 @@
 # Starship Cadet: the Fable review's fixes (FR2, plans/review-fable-play.md), each with its switch off and on.
 #   python3 frp_check.py [BUILD.html] [part ...]      (parts: line food tray pin lead thanks words say panels label blink tips; no part = all)
-# A switched-on copy is the build with that fix's `var FRP_..._ON = false;` line set to true. Dev mode's own save (the
+# Each part makes two copies of the build, that fix's `var FRP_..._ON = ...;` line set to false and to true, whichever
+# way the build has it (so a candidate with the switches on is checked as it is). Dev mode's own save (the
 # real save is never touched). Setup as cadet_test.py (three r128 under $CADET_WORK); CADET_CHROME names the browser.
 import sys, os, json, pathlib, math, re
 args = [a for a in sys.argv[1:]]; BUILD = args[0] if args and args[0].endswith('.html') else 'starship-cadet.html'
@@ -11,9 +12,10 @@ FAILS = []
 def ok(cond, msg):
     print(('  ok   ' if cond else '  FAIL ') + msg, flush=True)
     if not cond: FAILS.append(msg)
-def switched(src, *names):
+def switched(src, *names, on=True):                     # the build with these switches on (or off), whichever way the file has them
     for n in names:
-        old = f'var {n} = false;'; assert src.count(old) == 1, n; src = src.replace(old, f'var {n} = true;')
+        hits = re.findall(r'var ' + n + r' = (?:false|true);', src); assert len(hits) == 1, n
+        src = src.replace(hits[0], f'var {n} = {"true" if on else "false"};')
     return src
 def page(ctx, src, tag):
     p = WORK / 'test' / f'_frp_{os.getpid()}_{tag}.html'; p.write_text(src); return Page(ctx, str(p))
@@ -24,7 +26,7 @@ ARROW = "(() => { const g = goalNow(); return g ? g.label : null; })()"
 
 def part_line(ctx, src):                                # F1: the Line oath's arrow, the honest Mail, the invitation's name
     for on in (False, True):
-        pg = page(ctx, switched(src, 'FRP_LINE_ON') if on else src, 'line' + str(int(on))); tag = 'on: ' if on else 'off: '
+        pg = page(ctx, switched(src, 'FRP_LINE_ON', on=on), 'line' + str(int(on))); tag = 'on: ' if on else 'off: '
         jump(pg, 7, 14 * 60 + 20); pg.step(120)
         a = pg.ev(ARROW)
         ok((a is not None and 'Line oath' in a) == on, tag + f'the arrow at 14:2x {"is" if on else "is not"} the oath ({a!r})')
@@ -56,7 +58,7 @@ TOASTS = "(() => { window.__t = []; const ts = toast; toast = function (a, b) { 
 def part_food(ctx, src):                                # F2: Food under 10 and staying there
     res = {}
     for on in (False, True):
-        pg = page(ctx, switched(src, 'FRP_FOOD_ON') if on else src, 'food' + str(int(on))); tag = 'on: ' if on else 'off: '
+        pg = page(ctx, switched(src, 'FRP_FOOD_ON', on=on), 'food' + str(int(on))); tag = 'on: ' if on else 'off: '
         jump(pg, 2, 6 * 60 + 5); pg.ev(TOASTS)
         pin = "SHIP.player.needs.hunger = 5; for (const k of NEED_KEYS) if (k !== 'hunger') SHIP.player.needs[k] = 90;"
         def run(until):
@@ -81,7 +83,7 @@ def shot(pg, name):
     pg.ev('window.__draw = true'); pg.step(1, 20); pg.page.screenshot(path=os.path.join(SHOTS, name + '.png')); pg.ev('window.__draw = false')
 def part_tray(ctx, src):                                # F3: a tray in hand: the arrow at a free seat
     for on in (False, True):
-        pg = page(ctx, switched(src, 'FRP_TRAY_ON') if on else src, 'tray' + str(int(on))); tag = 'on: ' if on else 'off: '
+        pg = page(ctx, switched(src, 'FRP_TRAY_ON', on=on), 'tray' + str(int(on))); tag = 'on: ' if on else 'off: '
         jump(pg, 2, 17 * 60 + 40)
         pg.ev("(() => { for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; needGoalClear(); clearGoal(); goToDeck(3); })()"); pg.step(10)
         pg.ev("(() => { const it = ITEMS.find(i => /^servery$/i.test(i.t)); it.hit.getWorldPosition(_wp); const gl = nearestOpen(_wp.x, _wp.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); SHIP.player.tray = 'curry'; SHIP.player.trayLeft = 0; })()")
@@ -107,7 +109,7 @@ FIND_SPOT = r"""(() => { const out = []; for (const a of DECK_CREW) { if (!a.p |
     if (it) out.push([a.p.id, pl.id, it.t, c.x, c.z]); } } return out.slice(0, 12); })()"""
 def part_pin(ctx, src):                                 # F4: beside the arrow's pin, the arrow's target before a bystander
     for on in (False, True):
-        pg = page(ctx, switched(src, 'FRP_PINTAP_ON') if on else src, 'pin' + str(int(on))); tag = 'on: ' if on else 'off: '
+        pg = page(ctx, switched(src, 'FRP_PINTAP_ON', on=on), 'pin' + str(int(on))); tag = 'on: ' if on else 'off: '
         jump(pg, 2, 10 * 60 + 30); pg.ev("goToDeck(5); for (const k of NEED_KEYS) SHIP.player.needs[k] = 90; needGoalClear(); clearGoal(); SHIP.player.track = null"); pg.step(40); pg.ev(HOOKS)
         done = False
         for who, place, thing, x, z in pg.ev(FIND_SPOT):
@@ -128,7 +130,7 @@ def part_pin(ctx, src):                                 # F4: beside the arrow's
 
 def part_lead(ctx, src):                                # F5: the arrival: a tap on Zeke, or on his arrow, walks you to him
     for on in (False, True):
-        pg = page(ctx, switched(src, 'FRP_LEAD_ON') if on else src, 'lead' + str(int(on))); tag = 'on: ' if on else 'off: '
+        pg = page(ctx, switched(src, 'FRP_LEAD_ON', on=on), 'lead' + str(int(on))); tag = 'on: ' if on else 'off: '
         pg.ev('localStorage.clear()'); pg.ev('newGameStart(true)'); pg.step(5)
         pg.page.fill('form input[maxlength="24"]', 'Sam'); pg.page.click('form button'); pg.step(5)
         for k in range(60):                              # Zeke comes to the ramp and waits; his arrow goes up
@@ -171,7 +173,7 @@ def part_thanks(ctx, src):                              # F9: no form thank-you 
     for i in ('sunrise-stretch', 'tiles-night', 'knit-and-natter', 'late-piano', 'sunday-table'): ok(i in yes, f'on: still one after {i}')
     ok(pg.ev("frpThanksOk({ ev: { id: 'birthday', when: { birthday: true } } }) === false && frpThanksOk({ ev: { id: 'lastLightGlass' } }) === false"), 'on: none after a birthday or an event\'s gathering')
     for on in (False, True):                             # live: the Last Light with Dr. Sato
-        pg = page(ctx, switched(src, 'FRP_THANKS_ON') if on else src, 'thanks' + str(int(on))); tag = 'on: ' if on else 'off: '
+        pg = page(ctx, switched(src, 'FRP_THANKS_ON', on=on), 'thanks' + str(int(on))); tag = 'on: ' if on else 'off: '
         jump(pg, 4, 14 * 60 + 9); pg.ev("goToDeck(3)"); pg.step(20)
         for k in range(20):
             r = pg.ev("(() => { const a = DECK_CREW.find(x => x.p && /Sato/.test(x.p.name)); if (!a) return null; const gl = nearestOpen(a.x, a.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return tradJoinTap(a); })()")
@@ -184,7 +186,7 @@ def part_thanks(ctx, src):                              # F9: no form thank-you 
 
 def part_words(ctx, src):                               # F12: the wording slips
     for on in (False, True):
-        pg = page(ctx, switched(src, 'FRP_WORDS_ON') if on else src, 'words' + str(int(on))); tag = 'on: ' if on else 'off: '
+        pg = page(ctx, switched(src, 'FRP_WORDS_ON', on=on), 'words' + str(int(on))); tag = 'on: ' if on else 'off: '
         jump(pg, 2, 9 * 60 + 5)
         ok(pg.ev("frpWords()") == on, tag + 'the switch reads ' + str(on))
         ok(pg.ev("[frpPlural('light relays'), frpPlural('grow lights 2'), frpPlural('oven'), frpPlural('compass'), frpPlural('air scrubber')].join()") == 'true,true,false,false,false', tag + 'plural machines told from singular')
@@ -203,7 +205,7 @@ def part_words(ctx, src):                               # F12: the wording slips
 
 def part_say(ctx, src):                                 # F11: three messages that explained nothing
     for on in (False, True):
-        pg = page(ctx, switched(src, 'FRP_SAY_ON') if on else src, 'say' + str(int(on))); tag = 'on: ' if on else 'off: '
+        pg = page(ctx, switched(src, 'FRP_SAY_ON', on=on), 'say' + str(int(on))); tag = 'on: ' if on else 'off: '
         jump(pg, 2, 9 * 60 + 30); pg.ev("goToDeck(5)"); pg.step(20)
         ok(('board' in pg.ev("frpJobGone()")) == on, tag + 'the job-gone message ' + ('says where it went' if on else 'is as before'))
         r = pg.ev("(() => { const it = ITEMS.find(i => /time clock/i.test(i.t)); it.hit.getWorldPosition(_wp); const gl = nearestOpen(_wp.x, _wp.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return playerTap(it, _wp.clone(), _wp.clone()); })()")
@@ -217,7 +219,7 @@ def part_say(ctx, src):                                 # F11: three messages th
 
 def part_panels(ctx, src):                              # F6: solid panels, and a tip waits for a card or panel to close
     for on in (False, True):
-        pg = page(ctx, switched(src, 'FRP_PANELS_ON') if on else src, 'panels' + str(int(on))); tag = 'on: ' if on else 'off: '
+        pg = page(ctx, switched(src, 'FRP_PANELS_ON', on=on), 'panels' + str(int(on))); tag = 'on: ' if on else 'off: '
         jump(pg, 2, 9 * 60 + 10); pg.ev("goToDeck(5); SHIP.device.settings.tips = true"); pg.step(20)
         pg.ev("(() => { const it = ITEMS.find(i => /^job board$/i.test(i.t)); it.hit.getWorldPosition(_wp); const gl = nearestOpen(_wp.x, _wp.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); playerTap(it, _wp.clone(), _wp.clone()); })()")
         for k in range(20):
@@ -234,19 +236,18 @@ def part_panels(ctx, src):                              # F6: solid panels, and 
             pg.page.click('#ixBoardC'); pg.page.wait_for_timeout(700); pg.step(3)
             ok(pg.ev("(() => { const c = document.getElementById('devTip'); return !!c && !c.hidden && /A test tip/.test(c.textContent); })()"), 'on: it shows once the board is closed')
             pg.ev("while (TIP_Q.length) tipDone()"); pg.ev("deviceShow('mail')"); pg.step(5)
-            ok(pg.ev("TIP_Q.length === 0 || document.getElementById('devTip').hidden"), 'on: the first-time "Your device" tip does not open over the device (it waits for you to close it)')
             pg.ev("while (TIP_Q.length) tipDone()"); pg.ev("tipShow('t:a-frptest', 'An app tip.')"); pg.step(3)
             d = pg.ev("(() => { const c = document.getElementById('devTip'); return [!!c && !c.hidden, DEV.open, DEV.app, TIP_Q.map(x => x.id).join(), frpTipBusy({ id: 't:a-frptest' }), ['chat', 'ixBoard', 'sleepAsk', 'clockScreen', 'ixHealth'].filter(i => { const e = document.getElementById(i); return e && !e.hidden; }).join()]; })()")
             ok(d[0], f'on: an app\'s own tip still shows over the open device ({d})')
             pg.ev("while (TIP_Q.length) tipDone(); deviceClose()")
-        pg2 = page(ctx, switched(src, 'FRP_PANELS_ON') if on else src, 'alarm' + str(int(on))); jump(pg2, 2, 20 * 60 + 30)
+        pg2 = page(ctx, switched(src, 'FRP_PANELS_ON', on=on), 'alarm' + str(int(on))); jump(pg2, 2, 20 * 60 + 30)
         bg = pg2.ev("getComputedStyle(document.getElementById('sleepAsk')).backgroundColor")
         ok((bg == 'rgb(13, 21, 33)') == on, tag + f'the alarm card\'s background is {"solid" if on else "as before"} ({bg})')
         ok(not pg.errors and not pg2.errors, tag + f'no page errors {(pg.errors + pg2.errors)[:2]}')
 
 def part_label(ctx, src):                               # F7: the arrow's label wraps instead of being cut
     for on in (False, True):
-        pg = page(ctx, switched(src, 'FRP_LABEL_ON') if on else src, 'label' + str(int(on))); tag = 'on: ' if on else 'off: '
+        pg = page(ctx, switched(src, 'FRP_LABEL_ON', on=on), 'label' + str(int(on))); tag = 'on: ' if on else 'off: '
         jump(pg, 2, 9 * 60 + 10); pg.ev("goToDeck(5); needGoalClear(); SHIP.player.track = null"); pg.step(20)
         L = "(() => { const e = document.querySelector('#ixGoal .ixlab'), r = e.getBoundingClientRect(); return [Math.round(r.height), e.scrollWidth > e.clientWidth + 1, Math.round(r.width), e.textContent]; })()"
         pg.ev("setGoal({ deck: 5, room: 'w', label: 'Fire drill, 15:00: Chief Calder at the Works bay' })"); pg.ev('window.__draw = true'); pg.step(8, 30); pg.ev('window.__draw = false')
@@ -254,12 +255,12 @@ def part_label(ctx, src):                               # F7: the arrow's label 
         ok(a[1] == (not on), tag + f'a long label is {"shown whole" if on else "cut off, as before"} ({a})')
         ok((a[0] >= 34) == on and a[2] <= 262, tag + f'{"two lines" if on else "one line"}, no wider than before ({a[0]} px high, {a[2]} wide)')
         pg.ev("setGoal({ deck: 5, room: 'w', label: 'The job board' })"); pg.step(8, 30); b = pg.ev(L)
-        ok(b[0] < 30 and not b[1], tag + f'a short label is one line ({b})')
+        ok(b[0] == 23 and not b[1], tag + f'a short label is one line, the height it always was ({b})')
         ok(not pg.errors, tag + f'no page errors {pg.errors[:2]}')
 
 def part_blink(ctx, src):                               # F8: the Last Light blinks again while it passes, softly
     for on in (False, True):
-        pg = page(ctx, switched(src, 'FRP_BLINK_ON') if on else src, 'blink' + str(int(on))); tag = 'on: ' if on else 'off: '
+        pg = page(ctx, switched(src, 'FRP_BLINK_ON', on=on), 'blink' + str(int(on))); tag = 'on: ' if on else 'off: '
         jump(pg, 4, 14 * 60 + 12); pg.ev("goToDeck(3)"); pg.step(10)
         pg.ev("window.__b = []; const sf = shipFeel; shipFeel = function (k) { if (k.includes('beacon')) window.__b.push(Math.floor(shipNow()) % 1440); return sf.apply(this, arguments); }")
         got = False
@@ -277,7 +278,7 @@ def part_blink(ctx, src):                               # F8: the Last Light bli
 
 def part_tips(ctx, src):                                # F10: the view, needs and pause tips on the arrival evening
     for on in (False, True):
-        pg = page(ctx, switched(src, 'FRP_TIPS_ON') if on else src, 'tips' + str(int(on))); tag = 'on: ' if on else 'off: '
+        pg = page(ctx, switched(src, 'FRP_TIPS_ON', on=on), 'tips' + str(int(on))); tag = 'on: ' if on else 'off: '
         pg.ev('localStorage.clear()'); pg.ev('newGameStart(true)'); pg.step(5)
         pg.page.fill('form input[maxlength="24"]', 'Sam'); pg.page.click('form button'); pg.step(5)
         pg.ev("window.__tips = []; const o = tipShow; tipShow = function (id) { const r = o.apply(this, arguments); if (r) window.__tips.push([clockText().slice(-5), id]); return r; }")

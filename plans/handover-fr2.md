@@ -19,7 +19,7 @@ Written 2026-11-15 by FR2 (session_01GKuymj5amgjHqQCKPsVnFs) at about 55 to 60 p
 
 ## Loose ends
 1. RV37's review of the diff: answer its questions; small fixes go on this branch with a build-table row and frp_check.
-2. Once BM29 switches the lines on in staging, frp_check's "off" halves fail by design. If asked, give it an `--on` mode that skips them.
+2. frp_check runs on a switched-on build too (it sets each part's switch off and on itself). BM29's all-on rehearsal finds (lines_check, device_check under FRP_PANELS_ON, the label's restyle) are fixed: see the build table's last fable-review row.
 3. Not built on purpose (say so if asked): a panel closing an already-open person's card (section 20's owner); Mum's "Second time's easier" on a later call, Theo's "Pip suits you" before the pip, Tomas's evening greeting at dawn (the dialogue owner's line conditions); thank-you Mails in each host's voice (the writer's); the Last Light's last pop-up ending on a need read-out.
 4. The nine design questions are the user's. If answered, record the answers in the review file and in design-doc.md with the work that follows.
 5. The review did not cover Sim night, the stories, the storm, the later promotions, the ending, sound or the controller. A second play pass after week 2 would be worth doing.

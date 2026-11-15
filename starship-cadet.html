@@ -12631,7 +12631,7 @@ const DEVICE_SKIN = (() => {
       let c = $('devTip');
       if (!c) { c = mk('div', 'devtip'); c.id = 'devTip'; c.setAttribute('role', 'status'); c.hidden = true; document.body.appendChild(c); c.onclick = () => tipDone(); }
       simClear(c._t); c.hidden = !t; if (!t || document.body.classList.contains('dlgon')) return;   // no tips over a meeting
-      if (typeof frpTipHold === 'function' && frpTipHold(t)) { c.hidden = true; return; }   // FR2 (F6): nor over a card, a panel or the device; it comes back when they close
+      if (typeof frpTipHold === 'function' && frpTipHold(t)) { c.hidden = true; return; }   // FR2 (F6): nor over a person's card or a panel; it comes back when they close
       devHeadsBack(); c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = ''; c.append(mk('b', '', 'TIP'), mk('span', '', tipWords(t.text)));
       c._t = simTimeout(() => tipDone(), 9000);   // section 13's frozen clock (0.28.50): a pause holds it
     },
@@ -75260,8 +75260,8 @@ function frpPinTap(cx, cy) {
 // ---- FR2 (the Fable review, plans/review-fable-play.md finding 6; switches FRP_PANELS_ON and FRP_LABEL_ON, off) ----
 // FRP_PANELS_ON: the job board and the alarm card were see-through (the needs strip and speech bubbles showed through
 // their text): a solid background for both. And a tip card no longer opens over a person's card, the job board, the
-// alarm card, the time clock, Ship health or the open device (an app's own tip, 't:a-...', still shows over its app):
-// it waits at the head of the queue (section 19's skin asks frpTipHold) and shows when they close.
+// alarm card, the time clock or Ship health: it waits at the head of the queue (section 19's skin asks frpTipHold) and
+// shows when they close. Over the open device a tip shows as before (device_check's tips; BM29's rehearsal).
 // FRP_LABEL_ON: the arrow's label was cut at one line ("Fire drill, 15:00: Chief Calder at the Wo..."): it wraps to
 // two lines, centred, the same width limit. CSS only, added at load when a switch is on (nothing added when off)
 var FRP_PANELS_ON = false;                               // var: section 19's tip card (above) asks
@@ -75269,12 +75269,11 @@ var FRP_LABEL_ON = false;
 (() => {
   let css = '';
   if (FRP_PANELS_ON) css += '#ixBoard,#sleepAsk{background:rgb(13,21,33)}';
-  if (FRP_LABEL_ON) css += '#ixGoal .ixlab{white-space:normal;width:max-content;max-width:min(260px,70vw);text-align:center;line-height:1.25;border-radius:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}';
+  if (FRP_LABEL_ON) css += '#ixGoal .ixlab{white-space:normal;width:max-content;max-width:min(260px,70vw);text-align:center}';   // nothing else: a label that fits one line is drawn exactly as before (BM29: cadet_test's pictures)
   if (css) { const st = document.createElement('style'); st.id = 'frpCss'; st.textContent = css; document.head.appendChild(st); }
 })();
 let FRP_TIP_T = 0;
 function frpTipBusy(t) {
-  if (typeof DEV !== 'undefined' && DEV.open && !/^t:a-/.test(t && t.id || '')) return true;
   for (const id of ['chat', 'ixBoard', 'sleepAsk', 'clockScreen', 'ixHealth']) { const e = document.getElementById(id); if (e && !e.hidden) return true; }
   return false;
 }
