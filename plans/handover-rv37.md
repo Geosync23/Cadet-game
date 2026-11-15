@@ -7,7 +7,7 @@ probes plans/rv37-probes/. Never edits the game. Written 2026-11-15 at about hal
 - FR1 (claude/fable-review-code): **PASS at a077808** (game off 923b6c64...1c5d): A1-A8, A12, A4 and tools/one_byte.py.
   History: 05adee4 A1 A2 A3 FIXES NEEDED; 1155555 A2 (Throw it away) and A3 (a quiet old part) open; a077808 all closed.
   A9 TEX_READ_ON was not reviewed on (briefed: stays off).
-- FR2 (claude/fable-review-play): F1-F11 PASS at 8094ac2 (game off 085256a4...4fdd). **F12 open**: "The bridge data
+- FR2 (claude/fable-review-play): **PASS at fe156c8** (game off 2ccfd4a1...b3b4): F1-F12. History: F12 FIXES NEEDED at 8094ac2 ("data bus are"), fixed in fe156c8.
   bus are running" (frpPlural), and the Calendar button becomes "Don't remind me" (lead 52). The unswitched quiz
   line ("rec dec" to "rec deck") is accepted by lead 52. Waiting for FR2's fix commit.
 

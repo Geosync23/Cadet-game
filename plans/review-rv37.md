@@ -314,3 +314,11 @@ F1-F11 PASS, **F12 still FIXES NEEDED** ("Bridge data bus are", still there on 8
   anyone or anything else, switch off or on. The controller's A is a tap at the point it holds for that person,
   which is on their body, so F4's rule leaves it alone. With FRP_LEAD_ON the controller's press on the arrow goes
   through the same `ixGoalTap` as a finger (read only).
+
+## 10. FR2's F12 fix: final verdict
+
+**FR2's whole piece F1-F12: PASS at fe156c8** (game off 2ccfd4a1...b3b4, hash checked). Delta from 8094ac2: three
+lines, all behind FRP_WORDS_ON (the plural test now treats names ending -us or -is as singular; the Calendar button
+reads "Don't remind me"). Probe `words` on fe156c8: 15 machine names read as plural, all rightly; "Bridge data bus"
+is singular. cadet_test was not rerun by me on fe156c8 (FR2 reports off ALL IDENTICAL; the delta cannot run with the
+switch off). Left for the round: controller_check with the switches on.
