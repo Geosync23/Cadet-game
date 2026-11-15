@@ -31,6 +31,7 @@ Written 2026-11-15 by FR2 (session_01GKuymj5amgjHqQCKPsVnFs) at about 55 to 60 p
 - Setup in a fresh container: `pip install playwright numpy pillow`; three r128 and acorn 8.12.1 by `npm pack` into /tmp/cadet-work; `CADET_CHROME=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome`. Four cores only: more than two browser checks at once makes page loads and clicks time out (that is what happened to cadet_test once and controller_check twice).
 - Tips, toasts and heads-ups close on real-time timers; under a stepped clock they stay up, so judge overlap, not duration.
 - On the arrival nothing outside the Tern can be walked to for a ship minute or two (the ramp).
+- F5 knows the escort's arrow by its label 'Zeke Torres' (as section 21 itself does): reword the label and F5 stops; frp_check part lead catches it. At a tour stop a tap on Zeke from more than 3 away walks you over first (RV37's note).
 - F4 keeps FX3's rule: a tap on a person's own body away from the pin's point is theirs.
 
 ## How to test
