@@ -18,8 +18,28 @@ check, who runs it and how, with no "same as the round before" (FR1's review, B1
   FRP_TRAY_ON, FRP_PINTAP_ON, FRP_LEAD_ON, FRP_PANELS_ON, FRP_LABEL_ON, FRP_BLINK_ON, FRP_THANKS_ON, FRP_TIPS_ON,
   FRP_SAY_ON, FRP_WORDS_ON. New check frp_check.py.
 - Reviewer RV37. Each piece is merged only on lead 52's word, at the commit lead 52 names.
-- **Expected differences vs 0.99.91:** written here by BM29 at the GO (from the two pieces' build-table rows and the
-  reviewer's notes). Anything not on that list is NEW.
+- **Expected differences vs 0.99.91** (FR2's list, RV37's review). Anything not on this list is NEW.
+  - FR1's nine: nothing in ordinary play. Only when something goes wrong: an error card instead of a frozen game, an
+    unreadable save kept and offered in the Saves app, a notice when saving fails, the title saying the 3D library
+    could not be fetched, damaged saves loading. A tab in the background does not save over a newer one.
+  - LINE: Day 7 from 14:15 a gold arrow "The Line oath, 14:40: the bow lounge"; a missed oath's Mail says "We read the
+    oath without you..."; an invitation heads-up adds the tradition's name.
+  - FOOD: with Food under 10, "Very hungry" again at 07:00 and 17:00; the Food arrow returns whenever no other arrow
+    shows. (This is what changes cadet_test's later pictures and its taps list.)
+  - TRAY: tray in hand in the mess, no other arrow: "A seat for your tray" on the nearest free seat.
+  - PINTAP: a tap at the arrow's pin, its label or the floor beside it, with someone standing there, does the arrow's
+    thing, not their card.
+  - LEAD: on the arrival a tap on Zeke from afar, or on his arrow, walks you to him.
+  - PANELS: solid job board and alarm card; tips wait for a person's card, the job board, the alarm card, the time
+    clock and Ship health to close (not for the device).
+  - LABEL: arrow labels too long for one line wrap to two; short labels are drawn exactly as before.
+  - BLINK: Day 4 14:11-14:30, a softer Last Light blink about every 11 s of play.
+  - THANKS: no form thank-you Mail after one-offs, birthdays, event gatherings or the Captain's address.
+  - TIPS: view, needs and pause tips on the arrival evening after dinner; "Slept well?" only before 09:00.
+  - SAY: three reworded messages (job gone back to the board; board heading over a finished job; clock after 09:00).
+  - WORDS: "is/are running" by the machine's name, "Calibrate oven 2", the deck once in Job taken, small-job pop-ups
+    without the repeated title, "Cargo hold", "a covered plate", the Calendar button "Don't remind me".
+  - No switch: quiz question 34 says "rec deck" (lead 52 accepted).
 
 ## The six shares (every check of the round)
 
@@ -137,7 +157,15 @@ R1, R2, R3, R4, R6: to be hired by lead 52 (handover notes plans/handover-rN.md 
   the owner check). Only plans/backlog.md clashed (every row kept; RV37's FR1-3 and FR1-4 added). verify_merge 0
   problems; the game file is exactly FR1's (all off, sha256 923b6c64eb73e510cf9396f6ea74fa654b6a30eef3c8f9255db69a8e944a1c5d).
   content_gen up to date, names_check OK, lines_check PASS (0 errors), check_fast QUICK CHECK OK in 262 s.
-- FR2's piece: waiting for lead 52's word.
+- FR2's piece merged on lead 52's word: claude/fable-review-play fe156c8 (RV37 PASS F1-F12). Only plans/build-table.md
+  clashed (all 14 of FR2's rows kept). verify_merge 0 problems on the game, DEV_NOTES, design-doc and CLAUDE.md. All
+  off: game 9eda598866aa30a33dd54174f7c2e8a2f54a7fe2988d42c03ca735a0fd6dc8f1; content_gen, names_check, lines_check OK.
+- Switch-on: the 21 switch lines only (plans/build-master/bm29/switchon.sh; TEX_READ_ON checked off).
+- tools/one_byte.py last: 1,433,183 tokens read the same; 132 characters escaped in code, 29 in comments; --check: 0 left.
+- Build turn: label 0.99.92-review (setbuild.py), DEV_NOTES paragraph, build-table row. content_gen up to date,
+  names_check OK, lines_check PASS (0 errors).
+- **Candidate 1: claude/staging-fable-review 75d1b8339dba9e30f0179f685c1a8082a9ed8888, game sha256
+  d6b9ce81a5254ab089f07afad01ed20edbd05e38d12a6043092f0578f9efa1c0.** Later docs-only commits do not change the game.
 
 ### Gates
 (to come)
