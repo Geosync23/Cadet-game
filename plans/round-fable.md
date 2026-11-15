@@ -133,7 +133,11 @@ R1, R2, R3, R4, R6: to be hired by lead 52 (handover notes plans/handover-rN.md 
 - The label 0.99.92-review: the only check that reads the number is intro_check (major and minor only). See the gates.
 
 ### Build
-(to come)
+- FR1's piece merged on lead 52's word: claude/fable-review-code a077808 (RV37 PASS A1-A8, A12 and tools/one_byte.py; also
+  the owner check). Only plans/backlog.md clashed (every row kept; RV37's FR1-3 and FR1-4 added). verify_merge 0
+  problems; the game file is exactly FR1's (all off, sha256 923b6c64eb73e510cf9396f6ea74fa654b6a30eef3c8f9255db69a8e944a1c5d).
+  content_gen up to date, names_check OK, lines_check PASS (0 errors), check_fast QUICK CHECK OK in 262 s.
+- FR2's piece: waiting for lead 52's word.
 
 ### Gates
 (to come)
