@@ -75237,7 +75237,7 @@ addEventListener('blur', () => KEY_WALK.held.clear());   // a key let go in anot
 // in a full mess, your wardrobe with a bunkmate beside it, the host of a tradition). FX3's rule above only covers a tap
 // within CREW_PIN_PX of the pin's point with something that isn't a person under it. On, and ONLY for a tap that would
 // otherwise be someone's (crewAtScreen): within a thumb's width (FRP_PIN_PX) of the pin as drawn, its label, or the floor
-// under it, the arrow's own target takes the tap: the person it names (tapCrew for them), else your job's stop there,
+// under it, and not on that person's own body away from the pin's point (FX3's rule), the arrow's own target takes the tap: the person it names (tapCrew for them), else your job's stop there,
 // else the thing the pin points at (15b's ixPinTap, the ray set through the pin). A tap on anyone away from the pin,
 // and a tap on the person the arrow names, are as before
 var FRP_PINTAP_ON = false;                               // var: tap() (above) asks
@@ -75249,6 +75249,8 @@ function frpPinTap(cx, cy) {
   _cp.set(w.x, .05, w.z).project(camera);
   const dx = cx - IX_PIN.x, dy = cy - IX_PIN.y, onPin = Math.abs(dx) < FRP_PIN_PX && dy > -FRP_PIN_PX - 8 && dy < FRP_PIN_PX + 8;   // the triangle above the point, the label under it
   if (!onPin && Math.hypot((_cp.x + 1) / 2 * innerWidth - cx, (1 - _cp.y) / 2 * innerHeight - cy) >= FRP_PIN_PX) return false;
+  // FX3's rule stands (interactions_check): a tap on the person themselves, away from the pin's point, is theirs
+  if (Math.hypot(dx, dy) >= CREW_PIN_PX && [.5, 1, 1.4].some(hy => { _cp.set(a.x, a.y + hy, a.z).project(camera); return Math.hypot((_cp.x + 1) / 2 * innerWidth - cx, (1 - _cp.y) / 2 * innerHeight - cy) < CREW_ON_PX; })) return false;
   if (g.crew) { const t = DECK_CREW.find(x => x.p && x.p.id === g.crew); return !!t && t !== a && tapCrew(cx, cy, t); }
   ndc.set(IX_PIN.x / innerWidth * 2 - 1, -(IX_PIN.y / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera);   // the tap's line through the pin (jobRayDist reads it)
   const p = new THREE.Vector3(w.x, 0, w.z);

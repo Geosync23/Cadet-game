@@ -113,10 +113,10 @@ def part_pin(ctx, src):                                 # F4: beside the arrow's
         for who, place, thing, x, z in pg.ev(FIND_SPOT):
             pg.ev(f"(() => {{ const gl = nearestOpen({x} + 1.5, {z} + 1.5, player); player.obj.position.copy(cellPos(...gl)); player.stop(); setGoal({{ deck: deckDef.num, place: {json.dumps(place)}, label: 'A test stop' }}); }})()")
             pg.ev('window.__draw = true'); pg.step(12, 30); pg.ev('window.__draw = false')
-            pt = pg.ev("(() => { if (performance.now() - IX_PIN.t >= 500) return null; const x = IX_PIN.x, y = IX_PIN.y + 22, a = crewAtScreen(x, y); return a ? [x, y, a.p.id] : null; })()")
-            if not pt or pt[1] < 215 or pt[1] > 700: continue   # the pin's label must be someone's tap, and clear of the HUD
+            pt = pg.ev("(() => { if (performance.now() - IX_PIN.t >= 500) return null; const x = IX_PIN.x, y = IX_PIN.y + 12, a = crewAtScreen(x, y); return a ? [x, y, a.p.id] : null; })()")
+            if not pt or pt[1] < 215 or pt[1] > 700: continue   # the pin must be someone's tap, and clear of the HUD
             pg.ev('window.__h.length = 0; if (typeof CHAT !== "undefined" && CHAT) chatClose()'); pg.page.mouse.click(pt[0], pt[1]); pg.step(6, 30); h = pg.ev('window.__h')
-            ok(any(x.startswith('thing:') for x in h) == on and any(x.startswith('chat:') for x in h) == (not on), tag + f'a tap on the pin\'s label with {pt[2]} standing there goes to {"the thing it points at" if on else "them, as before"} ({h}; {thing})')
+            ok(any(x.startswith('thing:') for x in h) == on and any(x.startswith('chat:') for x in h) == (not on), tag + f'a tap on the pin with {pt[2]} standing there goes to {"the thing it points at" if on else "them, as before"} ({h}; {thing})')
             # away from the pin, on the person: theirs either way
             far = pg.ev(f"(() => {{ const a = DECK_CREW.find(x => x.p && x.p.id === {json.dumps(pt[2])}); _cp.set(a.x, a.y + 1, a.z).project(camera); const x = (_cp.x + 1) / 2 * innerWidth, y = (1 - _cp.y) / 2 * innerHeight; clearGoal(); return [x, y]; }})()")
             pg.ev('if (ACT) actEnd(true); if (DEV.open) deviceClose(); if (typeof CHAT !== "undefined" && CHAT) chatClose(); window.__h.length = 0'); pg.step(8, 30)
